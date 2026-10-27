@@ -836,7 +836,8 @@
   .kal-fp-c.wh{ position:relative; box-shadow:0 0 0 2px var(--paper); z-index:1; } .kal-fp-c.wh::after{ content:'\25C6'; position:absolute; top:-7px; right:-4px; font-size:9px; line-height:1; color:var(--paper); }
   .kal-fp.dense .kal-fp-k b{ display:none; } .kal-fp.dense .kal-fp-h{ font-size:10px; overflow:visible; }
   #kalSfFold > summary{ cursor:pointer; list-style:none; } #kalSfFold > summary::-webkit-details-marker{ display:none; }
-  .kal-sf-cv{ display:block; width:100%; height:420px; margin:0 0 12px; cursor:grab; touch-action:pan-y; } .kal-sf-cv:active{ cursor:grabbing; }
+  .kal-sf-tools{ display:flex; gap:6px; flex-wrap:wrap; margin:0 0 8px; } .kal-sf-tools .kal-pill{ background:none; cursor:pointer; min-height:40px; padding:0 14px; font-family:inherit; }
+  .kal-sf-cv{ display:block; width:100%; height:420px; margin:0 0 12px; cursor:grab; touch-action:none; outline-offset:2px; } .kal-sf-cv:active{ cursor:grabbing; }
   .kal-fp-n{ font-size:11px; color:var(--muted); text-align:center; }
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
@@ -1537,6 +1538,7 @@
                 <ul class="changelog-list">
                   <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a surface you can turn; thin cells are left as holes (#590)</li>
                   <li>Order flow can be drawn as a landscape you can turn: price and time, height is contracts traded or net buying (#592)</li>
+                  <li>The surface charts turn like a CAD model: orbit a full 360 degrees and over or under, zoom, pan, and jump to Iso, Top, Front or Side (#593)</li>
                   <li>Where the edge is: wide cells by default, so a few hundred trades are enough to draw a surface, and trades bought just outside 88c to 97c are kept (#591)</li>
                   <li>Brief charts: the line no longer runs straight across a weekend gap, and the hover dot sits on the line on a big monitor (also fixed on the Account result line) (#589)</li>
                   <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
@@ -2438,7 +2440,7 @@
     if(fmode !== 'grid'){
       var lm = kalFpLandscapeModel(model, fmode === 'net' ? 'net' : 'vol');
       if(lm && lm.maxAbs > 0){
-        body.innerHTML = '<canvas class="kal-sf-cv" id="kalFpCv" role="img" aria-label="Order flow as a surface: price and time, height is the contracts traded or the net buying"></canvas><div class="kal-sf-read" id="kalFpRead">Drag sideways to turn it. Touch or hover a point to read it. ' + (fmode === 'net' ? 'White is net buying, grey is net selling.' : 'Height is contracts traded.') + ' The shape is lightly smoothed; the readout is the real count.' + '</div>';
+        body.innerHTML = '<canvas class="kal-sf-cv" id="kalFpCv" role="img" aria-label="Order flow as a surface: price and time, height is the contracts traded or the net buying"></canvas><div class="kal-sf-read" id="kalFpRead">Drag to orbit, scroll or pinch to zoom, shift drag to pan. Touch or hover a point to read it. ' + (fmode === 'net' ? 'White is net buying, grey is net selling.' : 'Height is contracts traded.') + ' The shape is lightly smoothed; the readout is the real count.' + '</div>';
         kalSurfAttach(document.getElementById('kalFpCv'), document.getElementById('kalFpRead'), lm);
         return;
       }
@@ -2553,27 +2555,70 @@
     }); });
     return { cols: bins.map(function(b){ return b[2]; }), rows: det.labels, cells: cells, n: used, outside: outside, maxAbs: maxAbs, okCells: okCells };
   }
-  var kalSurf = { view: 'heat', yaw: -0.55, pitch: 0.95, drag: null };
+  var kalSurf = { yaw: -0.55, pitch: 0.95, zoom: 1, panX: 0, panY: 0 };
   function kalSurfCellTitle(m, r, c){
     var x = m.cells[r][c], when = m.rows[r] + ' to ' + m.rows[(r + 1) % m.rows.length];
     return m.cols[c] + ', ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
   }
-  // Turning and reading a mesh: drag sideways to turn, touch or hover a point to read it, double click to reset. A model may carry its own `title(r, c)` for the readout.
+  // Turning and reading a mesh, the way a CAD viewer does (the owner, Oct 27, 2026: "like a 3d CAD design, so have 360 rotation"): drag to orbit all the way round and over or under (sideways turns, up and down tilts), scroll or pinch to zoom,
+  // right drag, shift drag or two fingers to pan, arrow keys when the chart has focus, double click or Reset to come back. Iso, Top, Front and Side jump to the standard views. A touch or a hover on a point reads it. A model may carry its own
+  // `title(r, c)` for the readout. Nothing moves by itself: it turns only while the pointer is down.
+  var KAL_SURF_VIEWS = [['Iso', -0.55, 0.95], ['Top', 0, 1.5708], ['Front', 0, 0.03], ['Side', 1.5708, 0.03]];
   function kalSurfAttach(cv, rd, m){
     if(!cv){ return; }
-    var start = null, hov = null, hint = 'Drag sideways to turn it. Touch or hover a point to read it.';
-    kalSurfMeshDraw(cv, m, null);
-    cv.addEventListener('pointerdown', function(e){ start = { x: e.clientX, yaw: kalSurf.yaw }; try { cv.setPointerCapture(e.pointerId); } catch(err){} });
+    var hov = null, hint = 'Drag to orbit, scroll or pinch to zoom, shift drag to pan. Touch or hover a point to read it.', ptrs = {}, mode = '', lastX = 0, lastY = 0, pinch = 0;
+    function redraw(){ kalSurfMeshDraw(cv, m, hov); }
+    function setView(y, pt){ kalSurf.yaw = y; kalSurf.pitch = pt; redraw(); }
+    function reset(){ kalSurf.yaw = -0.55; kalSurf.pitch = 0.95; kalSurf.zoom = 1; kalSurf.panX = 0; kalSurf.panY = 0; redraw(); }
+    var bar = document.createElement('div'); bar.className = 'kal-sf-tools';
+    KAL_SURF_VIEWS.concat([['Reset']]).forEach(function(v){
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'kal-pill'; b.textContent = v[0];
+      b.addEventListener('click', function(){ if(v.length === 1){ reset(); } else { setView(v[1], v[2]); } });
+      bar.appendChild(b);
+    });
+    cv.parentNode.insertBefore(bar, cv); cv.tabIndex = 0;
+    redraw();
+    function zz(){ return zoomOf(cv); }
+    cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
+    cv.addEventListener('pointerdown', function(e){
+      ptrs[e.pointerId] = { x: e.clientX, y: e.clientY }; lastX = e.clientX; lastY = e.clientY;
+      var ids = Object.keys(ptrs);
+      if(ids.length === 2){ var a = ptrs[ids[0]], b = ptrs[ids[1]]; pinch = Math.hypot(a.x - b.x, a.y - b.y); mode = 'pinch'; }
+      else { mode = (e.button === 2 || e.shiftKey || e.ctrlKey) ? 'pan' : 'orbit'; }
+      try { cv.setPointerCapture(e.pointerId); } catch(err){}
+    });
     cv.addEventListener('pointermove', function(e){
-      if(start){ kalSurf.yaw = start.yaw + (e.clientX - start.x) * 0.01; kalSurfMeshDraw(cv, m, hov); return; }
-      var rc = cv.getBoundingClientRect(), z = rc.width / (cv.clientWidth || rc.width), px = (e.clientX - rc.left) / z, py = (e.clientY - rc.top) / z, best = null, bd = 20 * 20;
+      var z = zz();
+      if(ptrs[e.pointerId]){
+        var ids = Object.keys(ptrs);
+        if(mode === 'pinch' && ids.length === 2){
+          ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+          var a = ptrs[ids[0]], b = ptrs[ids[1]], d = Math.hypot(a.x - b.x, a.y - b.y), mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+          if(pinch > 0){ kalSurf.zoom = Math.max(0.4, Math.min(5, kalSurf.zoom * d / pinch)); }
+          kalSurf.panX += (mx - lastX) / z; kalSurf.panY += (my - lastY) / z; pinch = d; lastX = mx; lastY = my; redraw(); return;
+        }
+        var dx = (e.clientX - lastX) / z, dy = (e.clientY - lastY) / z; lastX = e.clientX; lastY = e.clientY; ptrs[e.pointerId] = { x: e.clientX, y: e.clientY };
+        if(mode === 'pan'){ kalSurf.panX += dx; kalSurf.panY += dy; }
+        else { kalSurf.yaw += dx * 0.01; kalSurf.pitch = Math.max(-1.5708, Math.min(1.5708, kalSurf.pitch + dy * 0.01)); }
+        redraw(); return;
+      }
+      var rc = cv.getBoundingClientRect(), px = (e.clientX - rc.left) / z, py = (e.clientY - rc.top) / z, best = null, bd = 20 * 20;
       (cv.kalHit || []).forEach(function(h){ var d = (h.x - px) * (h.x - px) + (h.y - py) * (h.y - py); if(d < bd){ bd = d; best = h; } });
-      hov = best; kalSurfMeshDraw(cv, m, hov);
+      hov = best; redraw();
       if(rd){ rd.textContent = best ? (m.title ? m.title(best.r, best.c) : kalSurfCellTitle(m, best.r, best.c)) : hint; }
     });
-    cv.addEventListener('pointerup', function(){ start = null; });
-    cv.addEventListener('pointercancel', function(){ start = null; });
-    cv.addEventListener('dblclick', function(){ kalSurf.yaw = -0.55; kalSurfMeshDraw(cv, m, hov); });
+    function up(e){ delete ptrs[e.pointerId]; if(Object.keys(ptrs).length < 2){ pinch = 0; } if(!Object.keys(ptrs).length){ mode = ''; } else { mode = 'orbit'; var k = Object.keys(ptrs)[0]; lastX = ptrs[k].x; lastY = ptrs[k].y; } }
+    cv.addEventListener('pointerup', up); cv.addEventListener('pointercancel', up);
+    cv.addEventListener('wheel', function(e){ e.preventDefault(); kalSurf.zoom = Math.max(0.4, Math.min(5, kalSurf.zoom * Math.exp(-e.deltaY * 0.0015))); redraw(); }, { passive: false });
+    cv.addEventListener('dblclick', reset);
+    cv.addEventListener('keydown', function(e){
+      var k = e.key, step = 0.12, used = true;
+      if(k === 'ArrowLeft'){ kalSurf.yaw -= step; } else if(k === 'ArrowRight'){ kalSurf.yaw += step; }
+      else if(k === 'ArrowUp'){ kalSurf.pitch = Math.min(1.5708, kalSurf.pitch + step); } else if(k === 'ArrowDown'){ kalSurf.pitch = Math.max(-1.5708, kalSurf.pitch - step); }
+      else if(k === '+' || k === '='){ kalSurf.zoom = Math.min(5, kalSurf.zoom * 1.15); } else if(k === '-'){ kalSurf.zoom = Math.max(0.4, kalSurf.zoom / 1.15); }
+      else if(k === '0'){ kalSurf.yaw = -0.55; kalSurf.pitch = 0.95; kalSurf.zoom = 1; kalSurf.panX = 0; kalSurf.panY = 0; } else { used = false; }
+      if(used){ e.preventDefault(); redraw(); }
+    });
   }
   var KAL_SURF_MARKETS = ['Gold', 'XRP', 'Bitcoin', 'Dogecoin', 'Ethereum'];
   // The wireframe mesh (closest to the surface in the mock-up): points at the centre of every readable cell, joined to the neighbours that are also readable, so a thin cell leaves a hole in the sheet and the sheet never claims
@@ -2593,7 +2638,7 @@
     var minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
     all.forEach(function(p){ minX = Math.min(minX, p.x); maxX = Math.max(maxX, p.x); minY = Math.min(minY, p.y); maxY = Math.max(maxY, p.y); });
     var pad = 30, k = Math.min((W - 2 * pad) / Math.max(maxX - minX, 1e-6), (H - 2 * pad) / Math.max(maxY - minY, 1e-6)), offX = (W - (maxX - minX) * k) / 2 - minX * k, offY = (H - (maxY - minY) * k) / 2 - minY * k;
-    function T(p){ return [p.x * k + offX, p.y * k + offY]; }
+    function T(p){ return [(p.x * k + offX - W / 2) * kalSurf.zoom + W / 2 + kalSurf.panX, (p.y * k + offY - H / 2) * kalSurf.zoom + H / 2 + kalSurf.panY]; }
     // the zero floor
     cx.lineWidth = 1; cx.strokeStyle = muted; cx.globalAlpha = 0.3;
     for(r = 0; r < nr; r++){ var a = T(P(-(nc - 1) / 2 - 0.5, r - (nr - 1) / 2, 0)), b = T(P((nc - 1) / 2 + 0.5, r - (nr - 1) / 2, 0)); cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0], b[1]); cx.stroke(); }
@@ -2629,7 +2674,11 @@
     var dt = document.getElementById('kalSfDetail'), m = kalshiEdgeModel(kalshiLiveOrders, { market: mk ? mk.value : 'all', lead: ld ? ld.value : 'all', detail: dt ? dt.value : 'coarse' });
     if(st){ st.textContent = m.n + ' settled trades read. ' + m.okCells + ' of ' + (m.cols.length * m.rows.length) + ' cells have ' + KAL_SURF_MIN + ' or more.' + (m.outside ? ' ' + m.outside + ' bought below 80c are left out.' : ''); }
     if(!m.okCells){ body.innerHTML = '<div class="kal-empty">No cell has ' + escapeHtml(String(KAL_SURF_MIN)) + ' trades yet, so there is nothing honest to draw. Pick all markets or all entry times.</div>'; return; }
-    body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a surface you can turn"></canvas><div class="kal-sf-read" id="kalSfRead">Drag sideways to turn it. Touch or hover a point for its trades.</div>';
+    // The Bot page redraws on every feed update; rebuilding the chart then would drop a drag in progress, so an unchanged chart is left alone.
+    var sigNow = [m.n, m.okCells, mk ? mk.value : '', ld ? ld.value : '', dt ? dt.value : ''].join('|');
+    if(body.getAttribute('data-sig') === sigNow && document.getElementById('kalSfCv')){ return; }
+    body.setAttribute('data-sig', sigNow);
+    body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a surface you can turn"></canvas><div class="kal-sf-read" id="kalSfRead">Drag to orbit, scroll or pinch to zoom, shift drag to pan. Touch or hover a point for its trades.</div>';
     kalSurfAttach(document.getElementById('kalSfCv'), document.getElementById('kalSfRead'), m);
   }
   (function(){
