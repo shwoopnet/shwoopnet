@@ -19,7 +19,7 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const page = new Function('var KAL_FP_MAX_ROWS = 30;\n' + ['kalshiFpModel'].map(fnSource).join('\n') + '; return { kalshiFpModel };')();
+const page = new Function('var KAL_FP_MAX_ROWS = 30; var KAL_TZ = "America/Chicago";\nfunction kalTime(ms){ return new Date(ms).toLocaleTimeString("en-US", { timeZone: KAL_TZ, hour: "numeric", minute: "2-digit" }); }\n' + ['kalshiFpModel', 'kalshiFpNum', 'kalFpLandscapeModel'].map(fnSource).join('\n') + '; return { kalshiFpModel, kalFpLandscapeModel };')();
 
 const T0 = Date.parse('2026-10-26T14:00:00Z');
 const MIN = 60000;
@@ -187,6 +187,21 @@ gates.F17 = () => {
   assert.strictEqual(m.prints.length, 1, 'a print before the first shown minute is left out');
   const fn = server.slice(server.indexOf('exports.kalshiTape'), server.indexOf('// ---- Kalshi market reads'));
   assert.ok(/footprint\.bigPrints\(/.test(fn));
+};
+gates.F18 = () => {
+  // The landscape draws the same trades as the grid: a minute and price where nothing traded is a real zero, the readout keeps the RAW counts even though the height is lightly smoothed, and net buying signs by who was heavier.
+  const bars = [0, 1, 2].map((i) => ({ t: T0 / 1000 + i * 60, l: i === 1 ? [[90, 30, 10], [93, 0, 60]] : [], buy: 0, sell: 0, delta: 0, cum: 0, poc: 93 }));
+  const model = page.kalshiFpModel({ bars }, 60);
+  const net = page.kalFpLandscapeModel(model, 'net'), vol = page.kalFpLandscapeModel(model, 'vol');
+  assert.strictEqual(net.cells.length, 4, 'one row per price from 90c to 93c');
+  const c90 = net.cells[0][0], c93 = net.cells[3][0];   // the first shown minute is the first with a trade
+  assert.deepStrictEqual([c90.sell, c90.buy, c93.buy, c93.sell], [30, 10, 60, 0], 'raw counts survive the smoothing');
+  assert.ok(net.cells[1][0].ok && net.cells[1][0].n === 0, 'a price that did not trade is a zero, not a hole');
+  assert.strictEqual(vol.cells[0][0].n, 40);
+  assert.ok(c93.edge > 0 && c90.edge < 0 || c90.edge <= 0, 'net buying is positive where buyers were heavier');
+  assert.strictEqual(net.neg, 'muted', 'selling is grey, never red: a whale or a seller must not look like a loss');
+  assert.ok(/ 40 traded, 10 bought, 30 sold/.test(net.title(0, 0)));
+  assert.strictEqual(page.kalFpLandscapeModel(page.kalshiFpModel({ bars: [] }, 60), 'net'), null, 'no trades, no landscape');
 };
 
 let failed = 0;
