@@ -1387,7 +1387,7 @@
             <span class="kal-note" id="kalSfStatus"></span>
           </div>
           <div id="kalSfBody"><div class="kal-empty">Open this to read the orders.</div></div>
-          <div class="kal-note">Each point is the bot's settled trades at that price paid (across, in bands; the end bands take everything beyond them) and Central time of day it was bought (down, three hour blocks); its height is the net result in cents per contract after fees, white above zero and red below. A cell with fewer than 10 trades is a hole in the surface. Touch or hover a point for its trades and win rate. This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
+          <div class="kal-note">Each point is the bot's settled trades at that price paid (across, in bands; the end bands take everything beyond them) and Central time of day it was bought (down, three hour blocks); its height is the net result in cents per contract after fees, white above zero and red below. A cell with fewer than 10 trades is a hole in the surface. Touch or hover a point for its trades, win rate and edge, with how far it could be off (about two standard errors; a number inside that range is noise). This looks back at what already happened: it does not place, size or change any order, and a pattern here is a question for the research session, not a rule.</div>
         </details>
       </div>
       </div>
@@ -1538,6 +1538,7 @@
                 <ul class="changelog-list">
                   <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a surface you can turn; thin cells are left as holes (#590)</li>
                   <li>Order flow can be drawn as a landscape you can turn: price and time, height is contracts traded or net buying (#592)</li>
+                  <li>Where the edge is: the hover says how far each cell could be off, and flags a cell whose edge is inside the noise (#594)</li>
                   <li>The surface charts turn like a CAD model: orbit a full 360 degrees and over or under, zoom, pan, and jump to Iso, Top, Front or Side (#593)</li>
                   <li>Where the edge is: wide cells by default, so a few hundred trades are enough to draw a surface, and trades bought just outside 88c to 97c are kept (#591)</li>
                   <li>Brief charts: the line no longer runs straight across a weekend gap, and the hover dot sits on the line on a big monitor (also fixed on the Account result line) (#589)</li>
@@ -2535,7 +2536,7 @@
   function kalshiEdgeModel(orders, opts){
     opts = opts || {};
     var det = KAL_SURF_DETAIL[opts.detail] || KAL_SURF_DETAIL.coarse, bins = det.px, nc = bins.length, nr = det.labels.length, span = 24 / nr, cells = [], r, c;
-    for(r = 0; r < nr; r++){ cells.push([]); for(c = 0; c < nc; c++){ cells[r].push({ n: 0, c: 0, net: 0, w: 0, ok: false, edge: null, win: null }); } }
+    for(r = 0; r < nr; r++){ cells.push([]); for(c = 0; c < nc; c++){ cells[r].push({ n: 0, c: 0, net: 0, w: 0, s: 0, s2: 0, ok: false, edge: null, win: null, pm: null }); } }
     var used = 0, outside = 0;
     (orders || []).forEach(function(o){
       var pnl = kalshiOrderPnl(o);
@@ -2546,19 +2547,19 @@
       if(cents >= KAL_SURF_MINPX && cents <= KAL_SURF_MAXPX){ bins.forEach(function(b, i){ if(cents >= b[0] && cents <= b[1] && ci < 0){ ci = i; } }); }
       if(ci < 0){ outside++; return; }
       var cell = cells[Math.floor(kalCentralHour(o.ts) / span)][ci], k = Number(o.fillCount) > 0 ? Number(o.fillCount) : Number(o.count);
-      cell.n++; cell.c += k; cell.net += pnl; if(pnl > 0){ cell.w++; }
+      cell.n++; cell.c += k; cell.net += pnl; if(pnl > 0){ cell.w++; } var per = pnl / k * 100; cell.s += per; cell.s2 += per * per;
       used++;
     });
     var maxAbs = 0, okCells = 0;
     cells.forEach(function(row){ row.forEach(function(x){
-      if(x.n >= KAL_SURF_MIN && x.c > 0){ x.ok = true; x.edge = x.net / x.c * 100; x.win = x.w / x.n * 100; okCells++; if(Math.abs(x.edge) > maxAbs){ maxAbs = Math.abs(x.edge); } }
+      if(x.n >= KAL_SURF_MIN && x.c > 0){ x.ok = true; x.edge = x.net / x.c * 100; x.win = x.w / x.n * 100; var mean = x.s / x.n, vr = Math.max(0, x.s2 / x.n - mean * mean) * x.n / Math.max(1, x.n - 1); x.pm = 2 * Math.sqrt(vr / x.n); okCells++; if(Math.abs(x.edge) > maxAbs){ maxAbs = Math.abs(x.edge); } }
     }); });
     return { cols: bins.map(function(b){ return b[2]; }), rows: det.labels, cells: cells, n: used, outside: outside, maxAbs: maxAbs, okCells: okCells };
   }
   var kalSurf = { yaw: -0.55, pitch: 0.95, zoom: 1, panX: 0, panY: 0 };
   function kalSurfCellTitle(m, r, c){
     var x = m.cells[r][c], when = m.rows[r] + ' to ' + m.rows[(r + 1) % m.rows.length];
-    return m.cols[c] + ', ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
+    return m.cols[c] + ', ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract, give or take ' + x.pm.toFixed(1) + 'c' + (Math.abs(x.edge) > x.pm ? '' : ' (inside the noise)') : x.n + ' trades, too few to read');
   }
   // Turning and reading a mesh, the way a CAD viewer does (the owner, Oct 27, 2026: "like a 3d CAD design, so have 360 rotation"): drag to orbit all the way round and over or under (sideways turns, up and down tilts), scroll or pinch to zoom,
   // right drag, shift drag or two fingers to pan, arrow keys when the chart has focus, double click or Reset to come back. Iso, Top, Front and Side jump to the standard views. A touch or a hover on a point reads it. A model may carry its own
