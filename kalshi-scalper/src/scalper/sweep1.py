@@ -5,7 +5,7 @@ Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. Nothing here means
 """
 from __future__ import annotations
 
-import bisect
+import json
 import sqlite3
 import statistics as st
 import sys
@@ -20,7 +20,7 @@ from .paths import DATA_DIR
 
 RESULT = DATA_DIR / "sweep1_result.txt"
 SOURCES = ["book", "l1b", "fresh"]
-DAYS, TAPE_S = 30, 780
+DAYS, TAPE_S = 7, 780
 BIG_MIN, BIG_X, BIG_HIST, SW_LEVELS, SW_MIN = 100.0, 10.0, 50, 3, 100.0
 ASK_LO, ASK_HI, MAX_SPREAD = 0.20, 0.80, 0.03
 SELL_BEFORE, REPS, SEED = 120, 300, 27102707
@@ -44,14 +44,13 @@ def mlist() -> list[tuple]:
 def fetch(shard: int, shards: int) -> None:
     ms = mlist()[shard::shards]
     db = sqlite3.connect(DATA_DIR / f"sweep1_{shard}.sqlite", timeout=120)
-    db.execute("CREATE TABLE IF NOT EXISTS trade(ticker TEXT, ts REAL, price INTEGER, size REAL, side INTEGER)")
-    db.execute("CREATE TABLE IF NOT EXISTS done(ticker TEXT PRIMARY KEY, n INTEGER)")
+    db.execute("CREATE TABLE IF NOT EXISTS done(ticker TEXT PRIMARY KEY, n INTEGER, trig TEXT, dm TEXT)")
     done = {r[0] for r in db.execute("SELECT ticker FROM done")}
     print(len(ms), "markets,", len(done), "done", flush=True)
     for k, (tk, close_ts, res, _) in enumerate(ms):
         if tk in done:
             continue
-        cur, n = None, 0
+        cur, n, rows = None, 0, []
         while True:
             p = {"ticker": tk, "limit": 1000, "min_ts": close_ts - TAPE_S, "max_ts": close_ts}
             if cur:
@@ -61,12 +60,16 @@ def fetch(shard: int, shards: int) -> None:
             except Exception:
                 time.sleep(5); continue
             tr = d.get("trades", [])
-            db.executemany("INSERT INTO trade VALUES(?,?,?,?,?)", [(tk, datetime.fromisoformat(t["created_time"].replace("Z", "+00:00")).timestamp(), round(float(t["yes_price_dollars"]) * 100), float(t["count_fp"]), 1 if t["taker_outcome_side"] == "yes" else -1) for t in tr])
+            rows += [(datetime.fromisoformat(t["created_time"].replace("Z", "+00:00")).timestamp(), round(float(t["yes_price_dollars"]) * 100), float(t["count_fp"]), 1 if t["taker_outcome_side"] == "yes" else -1) for t in tr]
             n += len(tr)
             cur = d.get("cursor")
             if not cur or not tr:
                 break
-        db.execute("INSERT OR REPLACE INTO done VALUES(?,?)", (tk, n)); db.commit()
+        rows.sort()
+        dm = defaultdict(float)
+        for ts, price, size, side in rows:
+            dm[int(ts // 60) + 1] += side * size
+        db.execute("INSERT OR REPLACE INTO done VALUES(?,?,?,?)", (tk, n, json.dumps(triggers(rows, close_ts)), json.dumps({str(k): v for k, v in dm.items()}))); db.commit()
         if k % 25 == 0:
             print(k, "of", len(ms), tk, n, flush=True)
     print("done", flush=True)
@@ -157,25 +160,22 @@ def main(argv: list[str]) -> None:
     ctrl_recs = []
     for f in sorted(DATA_DIR.glob("sweep1_*.sqlite")):
         d = sqlite3.connect(f)
-        for (tk,) in d.execute("select ticker from done"):
+        for (tk, n_tr, trig_s, dm_s) in d.execute("select ticker, n, trig, dm from done"):
             if tk not in meta:
                 continue
             close_ts, res = meta[tk][1], meta[tk][2]
             by = dict(cands.get(tk, {})); by["res"] = res
-            tr = d.execute("select ts, price, size, side from trade where ticker=? order by ts", (tk,)).fetchall()
-            if len(tr) < 100 or len(by) < 20:
+            if n_tr < 100 or len(by) < 20:
                 continue
             day = datetime.fromtimestamp(close_ts, timezone.utc).strftime("%Y-%m-%d")
-            dm = defaultdict(float)
-            for ts, price, size, side in tr:
-                dm[int(ts // 60) + 1] += side * size
+            dm = {int(k): v for k, v in json.loads(dm_s).items()}
             for m, sg in list(dm.items()):
                 left = close_ts - m * 60
                 if sg != 0 and 180 <= left <= 720 and (m + 1) in by:
                     o = [[simulate(by, close_ts, m, (sg > 0) == fol, c) for c in COMBOS] for fol in (True, False)]
                     ctrl_recs.append((day, o))
             seen = set()
-            for m, kind, sg in triggers(tr, close_ts):
+            for m, kind, sg in json.loads(trig_s):
                 if (m, kind) in seen:
                     continue
                 seen.add((m, kind))
