@@ -35,7 +35,7 @@ def fee(p: float, mult: float = 1.0) -> float:
 
 def fetch(shard: int = 0, shards: int = 1) -> None:
     src = sqlite3.connect(SC1)
-    db = sqlite3.connect(DB, timeout=120)
+    db = sqlite3.connect(DATA_DIR / f"fp3_{shard}.sqlite" if shards > 1 else DB, timeout=120)
     db.execute("CREATE TABLE IF NOT EXISTS trade(ticker TEXT, ts REAL, price INTEGER, size REAL, side INTEGER)")
     db.execute("CREATE TABLE IF NOT EXISTS done(ticker TEXT PRIMARY KEY, n INTEGER)")
     rows = src.execute("SELECT m.ticker, m.series, m.close_ts, SUM(c.volume), MIN(c.end_ts) FROM market m JOIN candle c ON c.ticker=m.ticker "
@@ -49,7 +49,12 @@ def fetch(shard: int = 0, shards: int = 1) -> None:
         if len(pick) >= N_MATCHES:
             break
     pick = pick[shard::shards]
-    done = {r[0] for r in db.execute("SELECT ticker FROM done")}
+    done = set()
+    for f in DATA_DIR.glob("fp3*.sqlite"):
+        try:
+            done |= {r[0] for r in sqlite3.connect(f, timeout=60).execute("SELECT ticker FROM done")}
+        except sqlite3.OperationalError:
+            pass
     print(len(pick), "matches;", len(done), "done", flush=True)
     for k, (tk, close_ts, first) in enumerate(pick):
         if tk in done:
@@ -112,12 +117,17 @@ def sim(q, i, sign_yes: bool, T: float, S: float, mult: float = 1.0):
 
 
 def build_events():
-    db = sqlite3.connect(DB); src = sqlite3.connect(SC1)
-    tickers = [r[0] for r in db.execute("SELECT ticker FROM done")]
+    dbs = [sqlite3.connect(f) for f in sorted(DATA_DIR.glob("fp3*.sqlite"))]
+    src = sqlite3.connect(SC1)
+    where = {}
+    for d in dbs:
+        for (t,) in d.execute("SELECT ticker FROM done"):
+            where[t] = d
+    tickers = sorted(where)
     out = []
     for tk in tickers:
         cd = src.execute("SELECT end_ts, bid_c, ask_c, volume FROM candle WHERE ticker=? ORDER BY end_ts", (tk,)).fetchall()
-        tr = db.execute("SELECT ts, price, size, side FROM trade WHERE ticker=? ORDER BY ts", (tk,)).fetchall()
+        tr = where[tk].execute("SELECT ts, price, size, side FROM trade WHERE ticker=? ORDER BY ts", (tk,)).fetchall()
         if len(cd) < 60 or len(tr) < 200:
             continue
         q = {c[0] // 60: (c[1], c[2]) for c in cd if c[1] is not None and c[2] is not None and 0 < c[1] < c[2] < 1}
