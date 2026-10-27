@@ -6679,3 +6679,7 @@ HOURS1 rests on 19 days. This asks the same question on every L1 entry on file (
 **Judging.** `NOT_YET_FALSIFIED` only if at least one cell passes both halves AND the number of real discovery candidates exceeds the 95th percentile of the null count. Otherwise `FALSIFIED` (no cell beats chance) or `NOT_ENOUGH_DATA` (no cell has 60 confirmation entries). Run once.
 
 **Prediction.** Real discovery candidates are about as many as the null produces; none keeps 2.5 on confirmation. Prior of a pass 5%.
+
+## Result: HUNT1 (run once on 2026-10-27): FALSIFIED
+
+523 cells (series x 6-hour bucket x price band x side) over 30,990 L1 entries. **Zero cells with 150 or more discovery entries reach profit factor 2.5**, and the shuffled-outcome null also produced zero (median, 95th percentile and maximum over 200 shuffles are all 0). So there is no subset of the L1 trade at this size with a profit factor of 2.5 in the first half of the days, real or by chance; nothing reached confirmation. Profit factor 2.5 needs a loss rate near 2.6% at about 93c, and no hour, series, price band or side gets there on 150 or more entries. Tries: 576 + 200 shuffles, about 15,211. (The run did not write a result file; this entry is the record.)
