@@ -6811,3 +6811,15 @@ Question: does any series earn on a particular weekday (UTC) at the 6 minute L1 
 ## Result: CAL1 (run once on 2026-10-27): FALSIFIED, with a correction to the null
 
 30,990 L1 entries, 146 series x weekday cells. 22 cells reached +1.5c in the first half and 14 held +0.75c in the second half. **The registered null (outcomes shuffled within series and day) was badly designed for this question**: a weekday cell is a set of whole days, so shuffling inside a day cannot change its mean and the null reproduced the real counts exactly (22 and 14). Replaced by a correct null (weekday labels permuted across days within each series, 200 draws, same counts): candidates median 21 (95th percentile 26), confirmed median 10 (95th percentile 15). Real 22 and 14 are inside it. Verdict `FALSIFIED` either way. All series by weekday (Mon=0): -0.57c Tuesday to +0.66c Sunday, nothing separable from zero. The one-off rerun is a null fix, not a second look at the outcome. Tries: 146 + 200 draws, about 20,913. Code `src/scalper/cal1.py`, result `data/cal1_result.txt`.
+
+## Pre-registration: PM1, does Kalshi's noon Bitcoin ladder follow Polymarket's price for the same strike? (written 2026-10-27 before any Polymarket price was compared with a Kalshi quote; 1 test x 2 thresholds, running count about 20,915)
+
+**Why.** Polymarket lists "Bitcoin above $K on <date>" (noon ET, Binance 1 minute close) and Kalshi lists the 12 PM EDT hourly ladder KXBTCD (the same noon, CF Benchmarks index, strikes at x99.99). Same question, two venues, different settlement sources (a basis of tens of dollars). Polymarket's price needs no account (public API) and is an independent fair value. If the two disagree by more than the fee and spread, does buying the cheaper side on Kalshi earn?
+
+**Data.** Last 20 days (closes at noon ET). For each date: Polymarket's event "bitcoin-above-on-<month>-<day>-2026", each strike's YES token and hourly price history; Kalshi's KXBTCD markets closing at noon ET whose strike equals Polymarket's strike (within $1 of x99.99 + 0.01), with hourly candles. Time points: 8, 9, 10 and 11 AM ET (candle end), Polymarket price = last history point at or before the time (within 90 minutes).
+
+**Rule.** At each time point and strike, if Polymarket's YES price exceeds Kalshi's YES ask by at least 4c, buy YES at the Kalshi ask; if Kalshi's YES bid exceeds Polymarket's price by at least 4c, buy NO at 1 minus the bid. Hold to settlement on Kalshi's result, taker fee. Also reported (not claims): thresholds 2c and 6c.
+
+**Judging.** Mean net per contract, day-clustered z, halves of the days, fees x1.2. `NOT_YET_FALSIFIED` needs at least 150 trades on at least 8 days, mean at least +1.0c, z at least 2.0, both halves positive, positive at fees x1.2. `FALSIFIED` if the mean is under +0.3c. Fewer than 150 trades: `NOT_ENOUGH_DATA`. Run once.
+
+**Prediction.** FALSIFIED or NOT_ENOUGH_DATA: Kalshi's ladder is deep and tight (1c spreads, 20k+ contracts) and tracks the spot, so any Polymarket "lead" is the same spot information, and the settlement bases differ. Prior of a pass 5%.
