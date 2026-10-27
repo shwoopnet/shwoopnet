@@ -1518,6 +1518,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
+                  <li>Brief charts: the line no longer runs straight across a weekend gap, and the hover dot sits on the line on a big monitor (also fixed on the Account result line)</li>
                   <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
                 </ul>
                 <div class="changelog-day">Oct 26</div>
@@ -2955,6 +2956,8 @@
     return Date.UTC(o.year, o.month - 1, o.day, o.hour, o.minute) - Math.floor(ms / 60000) * 60000;
   }
   // Time ticks across [t0, t1] (ms): the smallest round step (1, 2, 3, 6, 12 hours, then 1, 2, 7, 14, 30 days) that gives at most maxTicks, each on a Central-clock boundary. Labels are the time for steps under a day, the date otherwise.
+  // The page scales up on a big monitor with CSS zoom (Oct 27, 2026). A pointer dot is placed in the card's own pixels, but getBoundingClientRect reports the zoomed ones, so the offset is divided by the zoom (1 when there is none) or the dot lands off the line on a big screen.
+  function zoomOf(el){ var w = el && el.offsetWidth; var z = w > 0 ? el.getBoundingClientRect().width / w : 1; return z > 0.2 && z < 8 ? z : 1; }
   function chartTimeTicks(t0, t1, maxTicks){
     if(!(t1 > t0)){ return []; }
     var steps = [1, 2, 3, 6, 12, 24, 48, 168, 336, 720, 1440].map(function(h){ return h * 3600000; }), step = steps[steps.length - 1];
@@ -3119,7 +3122,7 @@
       g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
       var dot = host.querySelector('.kal-pnl-dot');
       if(!dot){ dot = document.createElement('span'); dot.className = 'kal-pnl-dot'; host.appendChild(dot); }
-      dot.style.left = (r.left - c.left + x / geo.W * r.width) + 'px'; dot.style.top = (r.top - c.top + y / geo.H * r.height) + 'px';
+      var z = zoomOf(host); dot.style.left = ((r.left - c.left + x / geo.W * r.width) / z) + 'px'; dot.style.top = ((r.top - c.top + y / geo.H * r.height) / z) + 'px';
       shown = true;
       paint(head, pt.cum, kalshiPnlPct(pt.cum, d.startBal), kalDateTime(pt.t));
     }
@@ -4342,9 +4345,13 @@ kalshiStatusTick();
       var H = 80, T = 4, B = 4, y = function(pc){ return T + (H - T - B) * (1 - (pc - lo) / (hi - lo)); };
       var ticks = chartValueTicks(lo, hi, 4), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
       var grid = ticks.map(function(pc){ return '<line class="' + (pc === 0 ? 'zero' : 'grid') + '" x1="0" x2="200" y1="' + y(pc).toFixed(1) + '" y2="' + y(pc).toFixed(1) + '"></line>'; }).join('');
-      var pts = ser.map(function(v, i){ return (xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1); }).join(' ');
+      // A market that is closed (a weekend, a halt) leaves a hole in the time axis. The line stops there and starts again, instead of a straight stroke across the gap that looks like a move that never happened.
+      var steps = []; for(var gi = 1; gi < xs.length; gi++){ steps.push(xs[gi] - xs[gi - 1]); }
+      var med = steps.slice().sort(function(a, b){ return a - b; })[Math.floor(steps.length / 2)] || 0, runs = [[]];
+      ser.forEach(function(v, i){ if(i > 0 && tms && med > 0 && steps[i - 1] > med * 3.5){ runs.push([]); } runs[runs.length - 1].push((xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1)); });
+      var pts = runs.map(function(r){ return r.length > 1 ? '<polyline points="' + r.join(' ') + '"></polyline>' : ''; }).join('');
       var ylab = ticks.map(function(pc){ return '<span style="top:' + (y(pc) / H * 100).toFixed(1) + '%">' + escapeHtml(chartPctLabel(pc, tstep)) + '</span>'; }).join('');
-      plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + '<polyline points="' + pts + '"></polyline></svg><div class="brief-yaxis">' + ylab + '</div></div>';
+      plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + pts + '</svg><div class="brief-yaxis">' + ylab + '</div></div>';
       if(tms){
         xaxis = '<div class="brief-xaxis">' + chartTimeTicks(tms[0], tms[tms.length - 1], 3).map(function(tk){ var left = (tk.t - tms[0]) / (tms[tms.length - 1] - tms[0]) * 100; return '<span class="' + (left < 8 ? 'l' : (left > 92 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + escapeHtml(tk.label) + '</span>'; }).join('') + '</div>';
       } else {
@@ -4392,7 +4399,7 @@ kalshiStatusTick();
       g.setAttribute('x1', x.toFixed(1)); g.setAttribute('x2', x.toFixed(1));
       var dot = card.querySelector('.brief-chart-dot');
       if(!dot){ dot = document.createElement('span'); dot.className = 'brief-chart-dot'; card.appendChild(dot); }
-      dot.style.left = (r.left - c.left + x / 200 * r.width) + 'px'; dot.style.top = (r.top - c.top + yv / d.H * r.height) + 'px';
+      var z = zoomOf(card); dot.style.left = ((r.left - c.left + x / 200 * r.width) / z) + 'px'; dot.style.top = ((r.top - c.top + yv / d.H * r.height) / z) + 'px';
       paint(card, v, d.prev);
     }
     host.addEventListener('pointermove', move);
