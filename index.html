@@ -1369,6 +1369,7 @@
           <div class="kal-fp-bar">
             <label class="kal-lbl" for="kalFpMarket">Product <select class="kal-input" id="kalFpMarket" style="width:auto"></select></label>
             <label class="kal-lbl" for="kalFpSpan">Time frame <select class="kal-input" id="kalFpSpan" style="width:auto"><option value="15">Last 15 minutes</option><option value="30">Last 30 minutes</option><option value="60">Last hour</option></select></label>
+            <label class="kal-lbl" for="kalFpView">View <select class="kal-input" id="kalFpView" style="width:auto"><option value="grid">Grid</option><option value="vol">Landscape: contracts traded</option><option value="net">Landscape: net buying</option></select></label>
             <span class="kal-note" id="kalFpStatus"></span>
           </div>
           <div id="kalFpBody"><div class="kal-empty">Open a product to read its trades.</div></div>
@@ -1535,6 +1536,7 @@
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
                   <li>Bot page: "Where the edge is", a read only look at what the bot earned by price paid and time of day, as a surface you can turn; thin cells are left as holes (#590)</li>
+                  <li>Order flow can be drawn as a landscape you can turn: price and time, height is contracts traded or net buying (#592)</li>
                   <li>Where the edge is: wide cells by default, so a few hundred trades are enough to draw a surface, and trades bought just outside 88c to 97c are kept (#591)</li>
                   <li>Brief charts: the line no longer runs straight across a weekend gap, and the hover dot sits on the line on a big monitor (also fixed on the Account result line) (#589)</li>
                   <li>On a big monitor the whole page scales up and centres instead of staying a small block in the left corner</li>
@@ -2367,6 +2369,33 @@
     var prints = ((data && data.prints) || []).filter(function(pr){ return pr && Number(pr.t) >= fromT; });
     return { cols: cols, prices: list, cropped: cropped, any: any, maxDelta: maxDelta, maxRows: cap, prints: prints };
   }
+  // The order flow landscape (the owner, Oct 27, 2026: a surface "to make informative decisions" from, after the footprint view): the same trades as the grid, drawn as a surface. Time runs one way and price the other; the height is the
+  // contracts traded at that price in that minute, or the net buying (bought minus sold) with selling drawn in grey. A minute and price where nothing traded is a real zero, so the surface is filled; it is never smoothed.
+  // Public trades only, nothing is placed, and the research session found no tape rule that predicts the 15 minute outcome, so this is for reading where the flow went, not a signal.
+  function kalFpLandscapeModel(model, mode){
+    var cols = model && model.cols ? model.cols : [];
+    if(!cols.length){ return null; }
+    var lo = Infinity, hi = -Infinity;
+    cols.forEach(function(c){ Object.keys(c.levels).forEach(function(k){ var v = Number(k); if(v < lo){ lo = v; } if(v > hi){ hi = v; } }); });
+    if(!(hi >= lo)){ return null; }
+    var bin = Math.max(1, Math.ceil((hi - lo + 1) / 28)), nr = Math.floor((hi - lo) / bin) + 1, cells = [], r, c, maxAbs = 0;
+    for(r = 0; r < nr; r++){ cells.push(cols.map(function(){ return { n: 0, buy: 0, sell: 0, ok: true, edge: 0 }; })); }
+    cols.forEach(function(col, ci){ Object.keys(col.levels).forEach(function(k){
+      var lv = col.levels[k], x = cells[Math.floor((Number(k) - lo) / bin)][ci]; x.buy += lv.buy; x.sell += lv.sell; x.n += lv.buy + lv.sell;
+    }); });
+    // Trades land in a few cells and leave the rest at zero, so the raw heights are a comb of spikes. The height is lightly smoothed (weights 1, 2, 1 across both directions) so the shape of the flow reads; the readout under the chart
+    // always gives the raw counts of the cell.
+    var raw = cells.map(function(row){ return row.map(function(x){ return mode === 'net' ? x.buy - x.sell : x.n; }); }), wts = [1, 2, 1];
+    cells.forEach(function(row, rr){ row.forEach(function(x, cc){
+      var sum = 0, wsum = 0;
+      for(var dr = -1; dr <= 1; dr++){ for(var dc = -1; dc <= 1; dc++){ var v = raw[rr + dr] && raw[rr + dr][cc + dc]; if(v === undefined || v === null){ continue; } var w = wts[dr + 1] * wts[dc + 1]; sum += v * w; wsum += w; } }
+      x.edge = wsum ? sum / wsum : 0; if(Math.abs(x.edge) > maxAbs){ maxAbs = Math.abs(x.edge); }
+    }); });
+    var tl = cols.map(function(col){ return kalTime(col.t).replace(/ ?[AP]M$/, ''); }), pl = [];
+    for(r = 0; r < nr; r++){ pl.push((lo + r * bin) + (bin > 1 ? '-' + Math.min(hi, lo + r * bin + bin - 1) : '') + 'c'); }
+    return { cols: tl, rows: pl, cells: cells, maxAbs: maxAbs, neg: 'muted', colStep: Math.max(1, Math.ceil(cols.length / 8)), rowStep: Math.max(1, Math.ceil(nr / 8)), mode: mode, fade: true,
+      title: function(rr, cc){ var x = cells[rr][cc]; return pl[rr] + ' at ' + tl[cc] + ' CT: ' + kalshiFpNum(x.n) + ' traded, ' + kalshiFpNum(x.buy) + ' bought, ' + kalshiFpNum(x.sell) + ' sold'; } };
+  }
   function kalshiFpNum(n){ n = Number(n) || 0; return n >= 10000 ? Math.round(n / 1000) + 'k' : (n >= 1000 ? (n / 1000).toFixed(1) + 'k' : String(Math.round(n))); }
   var kalshiFpData = null, kalshiFpTicker = '', kalshiFpTimer = null, kalshiFpBusy = false;
   // The five markets the bot trades for real, by series: choosing one shows its last 30 minutes or hour stitched across its 15 minute windows (the owner, Oct 26, 2026: "we work in 15 min increments").
@@ -2405,6 +2434,15 @@
     var model = kalshiFpModel(kalshiFpData, spanSel, marks, series ? 40 : KAL_FP_MAX_ROWS);
     if(st){ st.textContent = (series ? (kalshiFpData.windows || []).length + ' windows. ' : '') + (kalshiFpData.truncated ? 'Busy market: the oldest trades are left out. ' : '') + (model.cropped ? 'Showing the ' + model.maxRows + ' busiest prices. ' : '') + 'Read ' + kalTime(kalshiFpData.fetchedAt) + ' CT'; }
     if(!model.any){ body.innerHTML = '<div class="kal-empty">No trades in this window.</div>'; return; }
+    var fvw = document.getElementById('kalFpView'), fmode = fvw ? fvw.value : 'grid';
+    if(fmode !== 'grid'){
+      var lm = kalFpLandscapeModel(model, fmode === 'net' ? 'net' : 'vol');
+      if(lm && lm.maxAbs > 0){
+        body.innerHTML = '<canvas class="kal-sf-cv" id="kalFpCv" role="img" aria-label="Order flow as a surface: price and time, height is the contracts traded or the net buying"></canvas><div class="kal-sf-read" id="kalFpRead">Drag sideways to turn it. Touch or hover a point to read it. ' + (fmode === 'net' ? 'White is net buying, grey is net selling.' : 'Height is contracts traded.') + ' The shape is lightly smoothed; the readout is the real count.' + '</div>';
+        kalSurfAttach(document.getElementById('kalFpCv'), document.getElementById('kalFpRead'), lm);
+        return;
+      }
+    }
     // More than 24 minutes cannot show two numbers per cell on one screen (the owner, Oct 26, 2026: "a lot to fit on one screen"), so a long view fits the width instead: one number per cell (the contracts traded), shaded by who was the
     // heavier side, with the sold and bought counts in the hover; time labels every 5 minutes.
     var n = model.cols.length, compact = n > 24, cols = '40px repeat(' + n + ', minmax(0, 1fr))';
@@ -2472,6 +2510,7 @@
         if(!document.hidden && fold.offsetParent !== null && (close === null || close > Date.now() - 60000)){ loadKalshiFootprint(); }
       }, 30000);
     });
+    var vwSel = document.getElementById('kalFpView'); if(vwSel){ vwSel.addEventListener('change', renderKalshiFootprint); }
     if(mk){ mk.addEventListener('change', function(){ kalshiFpTicker = mk.value; kalshiFpData = null; kalshiFpFillSpans(); loadKalshiFootprint(); }); }
     // A 15 minute view is the last 15 columns of the 30 minute read, so it needs no new read; only the one hour view does.
     if(sp){ sp.addEventListener('change', function(){ var need = Math.max(30, Number(sp.value) || 30); if(kalshiFpIsSeries(kalshiFpTicker) && (!kalshiFpData || kalshiFpData.spanMin !== need)){ kalshiFpData = null; loadKalshiFootprint(); } else { renderKalshiFootprint(); } }); }
@@ -2519,6 +2558,23 @@
     var x = m.cells[r][c], when = m.rows[r] + ' to ' + m.rows[(r + 1) % m.rows.length];
     return m.cols[c] + ', ' + when + ': ' + (x.ok ? x.n + ' trades, ' + x.win.toFixed(0) + '% won, ' + (x.edge >= 0 ? '+' : '') + x.edge.toFixed(1) + 'c per contract' : x.n + ' trades, too few to read');
   }
+  // Turning and reading a mesh: drag sideways to turn, touch or hover a point to read it, double click to reset. A model may carry its own `title(r, c)` for the readout.
+  function kalSurfAttach(cv, rd, m){
+    if(!cv){ return; }
+    var start = null, hov = null, hint = 'Drag sideways to turn it. Touch or hover a point to read it.';
+    kalSurfMeshDraw(cv, m, null);
+    cv.addEventListener('pointerdown', function(e){ start = { x: e.clientX, yaw: kalSurf.yaw }; try { cv.setPointerCapture(e.pointerId); } catch(err){} });
+    cv.addEventListener('pointermove', function(e){
+      if(start){ kalSurf.yaw = start.yaw + (e.clientX - start.x) * 0.01; kalSurfMeshDraw(cv, m, hov); return; }
+      var rc = cv.getBoundingClientRect(), z = rc.width / (cv.clientWidth || rc.width), px = (e.clientX - rc.left) / z, py = (e.clientY - rc.top) / z, best = null, bd = 20 * 20;
+      (cv.kalHit || []).forEach(function(h){ var d = (h.x - px) * (h.x - px) + (h.y - py) * (h.y - py); if(d < bd){ bd = d; best = h; } });
+      hov = best; kalSurfMeshDraw(cv, m, hov);
+      if(rd){ rd.textContent = best ? (m.title ? m.title(best.r, best.c) : kalSurfCellTitle(m, best.r, best.c)) : hint; }
+    });
+    cv.addEventListener('pointerup', function(){ start = null; });
+    cv.addEventListener('pointercancel', function(){ start = null; });
+    cv.addEventListener('dblclick', function(){ kalSurf.yaw = -0.55; kalSurfMeshDraw(cv, m, hov); });
+  }
   var KAL_SURF_MARKETS = ['Gold', 'XRP', 'Bitcoin', 'Dogecoin', 'Ethereum'];
   // The wireframe mesh (closest to the surface in the mock-up): points at the centre of every readable cell, joined to the neighbours that are also readable, so a thin cell leaves a hole in the sheet and the sheet never claims
   // a value it was not given. White above zero, red below. Drag sideways to turn.
@@ -2528,6 +2584,7 @@
     var cx = cv.getContext('2d'); if(!cx){ return; }
     cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, W, H);
     var cs = window.getComputedStyle(document.documentElement), paper = (cs.getPropertyValue('--paper') || '#fff').trim(), loss = (cs.getPropertyValue('--loss') || '#D93025').trim(), muted = (cs.getPropertyValue('--muted') || '#999').trim();
+    if(m.neg === 'muted'){ loss = muted; }
     var nc = m.cols.length, nr = m.rows.length, zmax = Math.max(nc, nr) * 0.3, cyw = Math.cos(kalSurf.yaw), syw = Math.sin(kalSurf.yaw), cp = Math.cos(kalSurf.pitch), sp = Math.sin(kalSurf.pitch), r, c;
     function P(x, y, z){ var x1 = x * cyw - y * syw, y1 = x * syw + y * cyw; return { x: x1, y: -(y1 * sp + z * cp), d: y1 * cp - z * sp }; }
     var V = [], all = [], hit = [];
@@ -2555,14 +2612,14 @@
     });
     cx.lineWidth = 1.2;
     segs.sort(function(a, b){ return (b[0].p.d + b[1].p.d) - (a[0].p.d + a[1].p.d); });
-    segs.forEach(function(s){ var a = T(s[0].p), b = T(s[1].p); cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0], b[1]); cx.strokeStyle = (s[0].e + s[1].e) / 2 >= 0 ? paper : loss; cx.globalAlpha = 0.85; cx.stroke(); cx.globalAlpha = 1; });
+    segs.forEach(function(s){ var a = T(s[0].p), b = T(s[1].p); cx.beginPath(); cx.moveTo(a[0], a[1]); cx.lineTo(b[0], b[1]); cx.strokeStyle = (s[0].e + s[1].e) / 2 >= 0 ? paper : loss; cx.globalAlpha = m.fade && m.maxAbs > 0 ? 0.12 + 0.8 * Math.min(1, (Math.abs(s[0].e) + Math.abs(s[1].e)) / 2 / m.maxAbs * 2) : 0.85; cx.stroke(); cx.globalAlpha = 1; });
     for(r = 0; r < nr; r++){ for(c = 0; c < nc; c++){ if(V[r][c]){ var tp = T(V[r][c].p); hit.push({ x: tp[0], y: tp[1], r: r, c: c }); } } }
     cv.kalHit = hit;
     if(hov){ var hp = hit.filter(function(h){ return h.r === hov.r && h.c === hov.c; })[0]; if(hp){ cx.beginPath(); cx.arc(hp.x, hp.y, 5, 0, 6.2832); cx.fillStyle = paper; cx.fill(); cx.lineWidth = 2; cx.strokeStyle = 'rgba(0,0,0,.6)'; cx.stroke(); } }
     cx.fillStyle = muted; cx.font = '11px "Public Sans", sans-serif'; cx.textAlign = 'center'; cx.textBaseline = 'middle';
     var nearY = P(0, -(nr - 1) / 2, 0).d > P(0, (nr - 1) / 2, 0).d ? 1 : -1, nearX = P(-(nc - 1) / 2, 0, 0).d > P((nc - 1) / 2, 0, 0).d ? 1 : -1;
-    for(c = 0; c < nc; c += (nc > 6 ? 2 : 1)){ var t1 = T(P(c - (nc - 1) / 2, nearY * ((nr - 1) / 2 + 0.9), 0)); cx.fillText(m.cols[c], t1[0], t1[1]); }
-    for(r = 0; r < nr; r++){ var t2 = T(P(nearX * ((nc - 1) / 2 + 1.1), r - (nr - 1) / 2, 0)); cx.fillText(m.rows[r], t2[0], t2[1]); }
+    for(c = 0; c < nc; c += (m.colStep || (nc > 6 ? 2 : 1))){ var t1 = T(P(c - (nc - 1) / 2, nearY * ((nr - 1) / 2 + 0.9), 0)); cx.fillText(m.cols[c], t1[0], t1[1]); }
+    for(r = 0; r < nr; r += (m.rowStep || 1)){ var t2 = T(P(nearX * ((nc - 1) / 2 + 1.1), r - (nr - 1) / 2, 0)); cx.fillText(m.rows[r], t2[0], t2[1]); }
   }
   function renderKalshiSurface(){
     var fold = document.getElementById('kalSfFold'), body = document.getElementById('kalSfBody'), st = document.getElementById('kalSfStatus');
@@ -2573,19 +2630,7 @@
     if(st){ st.textContent = m.n + ' settled trades read. ' + m.okCells + ' of ' + (m.cols.length * m.rows.length) + ' cells have ' + KAL_SURF_MIN + ' or more.' + (m.outside ? ' ' + m.outside + ' bought below 80c are left out.' : ''); }
     if(!m.okCells){ body.innerHTML = '<div class="kal-empty">No cell has ' + escapeHtml(String(KAL_SURF_MIN)) + ' trades yet, so there is nothing honest to draw. Pick all markets or all entry times.</div>'; return; }
     body.innerHTML = '<canvas class="kal-sf-cv" id="kalSfCv" role="img" aria-label="Edge in cents per contract by price paid and time of day, as a surface you can turn"></canvas><div class="kal-sf-read" id="kalSfRead">Drag sideways to turn it. Touch or hover a point for its trades.</div>';
-    var cv = document.getElementById('kalSfCv'), rd = document.getElementById('kalSfRead'), start = null, hov = null;
-    kalSurfMeshDraw(cv, m, null);
-    cv.addEventListener('pointerdown', function(e){ start = { x: e.clientX, yaw: kalSurf.yaw }; try { cv.setPointerCapture(e.pointerId); } catch(err){} });
-    cv.addEventListener('pointermove', function(e){
-      if(start){ kalSurf.yaw = start.yaw + (e.clientX - start.x) * 0.01; kalSurfMeshDraw(cv, m, hov); return; }
-      var rc = cv.getBoundingClientRect(), z = rc.width / (cv.clientWidth || rc.width), px = (e.clientX - rc.left) / z, py = (e.clientY - rc.top) / z, best = null, bd = 20 * 20;
-      (cv.kalHit || []).forEach(function(h){ var d = (h.x - px) * (h.x - px) + (h.y - py) * (h.y - py); if(d < bd){ bd = d; best = h; } });
-      hov = best; kalSurfMeshDraw(cv, m, hov);
-      if(rd){ rd.textContent = best ? kalSurfCellTitle(m, best.r, best.c) : 'Drag sideways to turn it. Touch or hover a point for its trades.'; }
-    });
-    cv.addEventListener('pointerup', function(){ start = null; });
-    cv.addEventListener('pointercancel', function(){ start = null; });
-    cv.addEventListener('dblclick', function(){ kalSurf.yaw = -0.55; kalSurfMeshDraw(cv, m, hov); });
+    kalSurfAttach(document.getElementById('kalSfCv'), document.getElementById('kalSfRead'), m);
   }
   (function(){
     var fold = document.getElementById('kalSfFold');
