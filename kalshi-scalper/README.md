@@ -6803,3 +6803,7 @@ BOUNCE1 found the cheap side near the strike loses 6c a contract. The flip: sear
 ### SWEEP1 amendment (2026-10-27, before any trigger was scored)
 
 One Bitcoin 15 minute market carries 25,000 to 33,000 trades in the 13 minutes before the close, so 30 days (2,384 markets) would be about 70 million trades and 13 hours of download. Window cut to the **last 7 days (about 670 markets)**, and the triggers and per-minute net delta are computed while downloading (raw trades are not kept). Nothing else changed. A 7 day sample is small (about 12 to 18 days are needed by the bar), so the likeliest verdict is `NOT_ENOUGH_DATA` unless a rule is clearly bad or clearly good.
+
+## Pre-registration: CAL1, weekday and weekend effects on the L1 trade (written 2026-10-27 before the run; 7 weekdays x 16 series cells + 100 shuffles, running count about 20,913)
+
+Question: does any series earn on a particular weekday (UTC) at the 6 minute L1 entry (favourite ask 0.88 to 0.97, hold)? Cells: series x weekday. Discovery = first half of the days, confirmation = second half. Candidate: at least 100 discovery entries and mean net at least +1.5c; confirmed: at least 40 confirmation entries and mean net at least +0.75c. Null: outcomes shuffled within series and day, 100 times, count of candidates and confirmed cells. `NOT_YET_FALSIFIED` only if confirmed cells exceed the null's 95th percentile. Otherwise `FALSIFIED`. Run once. Prediction: FALSIFIED (HUNT1 found no hour effect with 150 or more entries; weekday splits the data into even thinner cells). Prior of a pass 5%.
