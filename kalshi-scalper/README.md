@@ -7185,3 +7185,7 @@ Prediction: cheap contracts lose over 60% (favourite-longshot bias), so large-mu
 ### Result: AUTO1 (2026-10-28)
 
 69,120 trees, 417 train winners (PF 2.5+), 36 passed validation, 31 passed the mutation test, 13 distinct, 2 passed the holdout (Bitcoin, ask 95c+, holdout PF 7.63 n=83 and 7.22 n=138). Both are EXCLUDED by the owner's standing ban: every one of the 13 finalists buys a Bitcoin favourite at 92c to 97c, and with a +5c or +10c target above a 96c ask the target can never fill, so they are the favourite-buy sold at 2 minutes left. That is the banned idea, not a scalp. Counted verdict: no admissible strategy. AUTO2 already caps entries at 80c. Count: about 69,000 trees, 417 rules carried forward.
+
+### Result: AUTO2 (2026-10-28)
+
+`FALSIFIED`. 38,400 trees, 26 train winners (PF 2.5+), 0 passed validation. Best: train PF 2.68 (n=107) fell to validation PF 1.21 (n=57); the rest fell to 0.78 to 1.07. Large percentage targets on contracts at 80c or less found nothing that held past the training days.
