@@ -7153,3 +7153,9 @@ Numeric prediction: profit factor 0.85 after fees (a fail). Kill criteria: fewer
 Numeric prediction: profit factor 0.80 (a fail). Kill criteria: same as SCALP1, per asset and pooled; the pooled read decides, per asset lines are information only.
 
 Data: book, l1b and fresh candle files (one-minute bid and ask, Aug to Oct 2026), spot bars from search5k. Window drift cannot be fitted: every number above is fixed now. One run, then it is closed.
+
+### Result: SCALP1 and SCALP2 (run once, 2026-10-28)
+
+SCALP1 `FALSIFIED`: profit factor 0.59 (halves 0.57/0.61, stressed 0.55), 81 days, n=8,237, loss rate 60%, net -3.86c per contract, z -21.8. Bitcoin 0.58, Ethereum 0.60.
+SCALP2 `FALSIFIED`: profit factor 0.57 (halves 0.58/0.56, stressed 0.53), 83 days, n=12,105, loss rate 66%, net -3.89c per contract, z -26.0. Bitcoin 0.59, Ethereum 0.59, Gold 0.52.
+The $500 account line in the result file (negative) just compounds 11 contracts through thousands of trades with no balance floor; read the profit factor, not that line. Predictions were 0.85 and 0.80; actual results were worse. Cost reading: a +8c target and -6c stop pay about 1.5c of fees plus about 2c of spread on every round trip, so a 60% loss rate at these distances cannot win. Closed as registered; no tuning. Scalp counts as tried: about 20,600 trades.
