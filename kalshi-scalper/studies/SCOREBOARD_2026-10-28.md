@@ -130,3 +130,16 @@ One page: what has been tried, how big the samples were, and what the verdict wa
 | CPI1 | discovery | economic releases (CPI, core CPI) | NOT_ENOUGH_DATA: 7 trades on 2 releases (quotes missing 24h before releases) |
 | MENT1 | discovery | earnings-call words | NOT_ENOUGH_DATA by rule (71 events of 100): PF 0.92 on 268 trades |
 | SWEEP1 | (retired) | BTC 15 minute tape | Not run, excluded by process rule 3 |
+
+## Strategy cards (owner: build a total of 10), status 2026-10-28
+
+| # | Card | Result |
+|---|---|---|
+| 1 | CARRY1 funding carry BTC/ETH | FALSIFIED as a deployable: whole period +5.0% a year, daily PF 5.44, drawdown 0.72%; last 12 months 0% (funding below the entry line); liquidation caveat |
+| 2 | BASIS1 quarterly basis | Closed by arithmetic: 5.3% a year gross, about 3% net |
+| 3 | FUNDX1 Binance vs Deribit funding | NOT_ENOUGH_DATA: 6 entries; 3% to 4% a year difference |
+| 4 | PAIRS1 ETH vs BTC | FALSIFIED: PF 0.62, 72 trades, -8.3% a year, drawdown 52% |
+| 5 | QUOTE1 two-sided quoting BTC/ETH | Registered; tape downloading; about 200 windows against 300 needed |
+| 6 | LOCK2 coincident-close locks | Registered; forward, needs the recorder's ladder data (from 2026-10-28 15:45 UTC) |
+| 7 to 9 | QUOTE2 (hourly ladder), QUOTE3 (gold), LOCK3 (gold) | Wait for recorder data |
+| 10 | DIGI1 Kalshi vs Deribit options | Forward only, not registered |
