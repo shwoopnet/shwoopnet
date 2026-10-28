@@ -6958,3 +6958,7 @@ Same L1 entries and data as before (the 6 minute favourite, ask 0.88 to 0.97, al
 **Judging (profit factor first).** n is independent events (company-quarters), z clustered by event, deflated bar z >= 2.5 (headline of four families). `NOT_ENOUGH_DATA` if fewer than 100 events or 100 trades. `FALSIFIED` if profit factor is under 1.5 after fee or under 1 in either half of the events by date. `NOT_YET_FALSIFIED` additionally needs mean net at least +2.0c, z at least 2.5 and profit factor at least 1.2 at fees x1.2. The word key, threshold and window are not changed after the result. **Numeric prediction:** profit factor 0.9 to 1.2 after fee, 400 to 1,500 trades on 200 to 400 events (2025-10 to 2026-10). The more likely outcome is that the pooled word rate is already known to the market; the one real chance is words where the market is badly anchored (very topical words with a pooled rate under 10%).
 
 **Not L1:** a different market family and information source, held through a call that closes days away from the 15 minute windows.
+
+### SWEEP1 retired (2026-10-28)
+
+SWEEP1 (big prints and sweeps on Bitcoin 15 minute markets) is a flow pattern on the same contracts as L1, which the owner's process rule 3 excludes; its trade download was stopped before any trigger was scored, no result was read, and the scheduled download checks are void. Not counted as a result; the pre-registration stays as the record of what was not run.
