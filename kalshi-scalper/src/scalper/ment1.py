@@ -33,9 +33,13 @@ def fetch():
     D.mkdir(exist_ok=True)
     mp = D / "markets.json"
     ms = json.loads(mp.read_text()) if mp.exists() else {}
-    if not ms:
+    dp = D / "series_done.json"
+    sdone = set(json.loads(dp.read_text())) if dp.exists() else set()
+    if not (D / "listing_complete").exists():
         sers = [x["ticker"] for x in api._get("/series", {"category": "Mentions"})["series"] if x["ticker"].startswith("KXEARNINGSMENTION")]
         for s in sers:
+            if s in sdone:
+                continue
             for path, extra, src in (("/historical/markets", {}, "hist"), ("/markets", {"status": "settled"}, "live")):
                 cur = None
                 while True:
@@ -49,7 +53,8 @@ def fetch():
                     cur = r.get("cursor")
                     if not cur or not r.get("markets"):
                         break
-        mp.write_text(json.dumps(ms)); print(len(ms), "markets", flush=True)
+            sdone.add(s); mp.write_text(json.dumps(ms)); dp.write_text(json.dumps(sorted(sdone)))
+        (D / "listing_complete").write_text("1"); print(len(ms), "markets", flush=True)
     cp = D / "candles.json"
     have = json.loads(cp.read_text()) if cp.exists() else {}
     for i, (tk, m) in enumerate(ms.items()):
