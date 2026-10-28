@@ -29,7 +29,7 @@ def ts(s):
     return int(datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp())
 
 
-def fetch():
+def fetch(shard=0, shards=1):
     D.mkdir(exist_ok=True)
     mp = D / "markets.json"
     ms = json.loads(mp.read_text()) if mp.exists() else {}
@@ -55,32 +55,38 @@ def fetch():
                         break
             sdone.add(s); mp.write_text(json.dumps(ms)); dp.write_text(json.dumps(sorted(sdone)))
         (D / "listing_complete").write_text("1"); print(len(ms), "markets", flush=True)
-    cp = D / "candles.json"
+    cp = D / (f"candles_{shard}.json" if shards > 1 else "candles.json")
     have = json.loads(cp.read_text()) if cp.exists() else {}
-    for i, (tk, m) in enumerate(ms.items()):
+    for f in D.glob("candles*.json"):
+        if f != cp:
+            have.update({k: None for k in json.loads(f.read_text())})
+    mine = {k: v for k, v in have.items() if v is not None}
+    for i, (tk, m) in enumerate(list(ms.items())[shard::shards]):
         if tk in have:
             continue
         close = ts(m["close"])
         try:
             path = f"/historical/markets/{tk}/candlesticks" if m["src"] == "hist" else f"/series/{m['s']}/markets/{tk}/candlesticks"
             d = api._get(path, {"start_ts": close - 4 * 86400, "end_ts": close, "period_interval": 60})
-            have[tk] = [(c["end_period_ts"], api.f((c.get("yes_bid") or {}).get("close_dollars")), api.f((c.get("yes_ask") or {}).get("close_dollars"))) for c in d.get("candlesticks", [])]
+            mine[tk] = have[tk] = [(c["end_period_ts"], api.f((c.get("yes_bid") or {}).get("close_dollars")), api.f((c.get("yes_ask") or {}).get("close_dollars"))) for c in d.get("candlesticks", [])]
         except Exception:
-            have[tk] = []
-        if i % 100 == 0:
-            cp.write_text(json.dumps(have)); print(i, len(ms), flush=True)
-        time.sleep(0.12)
-    cp.write_text(json.dumps(have)); print("done", flush=True)
+            mine[tk] = have[tk] = []
+        if i % 25 == 0:
+            cp.write_text(json.dumps(mine)); print(shard, i, flush=True)
+        time.sleep(0.05)
+    cp.write_text(json.dumps(mine)); print("done", flush=True)
 
 
 def main(argv):
     if len(argv) < 2 or argv[1] not in ("fetch", "run"):
         print(__doc__); return
     if argv[1] == "fetch":
-        fetch(); return
+        fetch(int(argv[2]) if len(argv) > 2 else 0, int(argv[3]) if len(argv) > 3 else 1); return
     if RESULT.exists():
         print(f"Refusing to run again: {RESULT} exists."); return
-    ms = json.loads((D / "markets.json").read_text()); cd = json.loads((D / "candles.json").read_text())
+    ms = json.loads((D / "markets.json").read_text()); cd = {}
+    for f in sorted(D.glob("candles*.json")):
+        cd.update(json.loads(f.read_text()))
     ev_close = defaultdict(list)
     for m in ms.values():
         ev_close[m["ev"]].append(ts(m["close"]))
