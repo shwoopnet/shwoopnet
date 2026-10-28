@@ -48,7 +48,7 @@ gates.Y5 = () => {
   const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
   assert.ok(rail, 'the rail is there and the main column follows it');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'positions', 'footprint'], 'the rail holds the account strip, the bot status (which carries the loss stop and risk meter), the positions and the order flow fold (Oct 26, 2026)');
+  assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'positions'], 'the rail holds the account strip, the bot status (which carries the loss stop and risk meter) and the positions (the order flow and edge surface folds were removed for now, Oct 27, 2026)');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['pnl', 'trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
