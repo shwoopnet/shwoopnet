@@ -1453,7 +1453,7 @@ gates.TS3 = async () => {
 
 // PX1 and PX2: XRP is paused in the bot's code (the owner, Oct 28, 2026): profit factor 0.49 over 65 live fills against 1.32 in the history, read on 2026-11-12. It fails closed: no date resumes it.
 gates.PX1 = async () => {
-  assert.deepStrictEqual(live.PAUSED_SERIES, ['KXXRP15M']);
+  assert.deepStrictEqual(live.PAUSED_SERIES, ['KXXRP15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'XRP and the three probe markets');
   assert.ok(live.L1_SERIES.includes('KXXRP15M'), 'it stays in the list (its name, quotes and alerts keep working)');
   // A perfect XRP setup at its 10 minute look sends NOTHING with the real default, and the other series still trade.
   const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } } });
@@ -1462,10 +1462,9 @@ gates.PX1 = async () => {
   const NG = 'KXNATGAS15M-26OCT071415-10';
   const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [NG]: { close_time: iso(NOW + 600000) } } });
   await tick(w2, { pausedSeries: undefined, quotes: [q10('KXNATGAS15M', NG)] });
-  assert.strictEqual(w2.posts.length, 1, 'natural gas, the other 10 minute market, still trades with the same default');
+  assert.strictEqual(w2.posts.length, 0, 'natural gas is a paused probe too (Oct 28, 2026, the owner)');
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
-  const decl = src.slice(src.indexOf('const PAUSED_SERIES'), src.indexOf('const PAUSED_SERIES') + 60);
-  assert.ok(/^const PAUSED_SERIES = \["KXXRP15M"\];/.test(decl), 'a plain list with no resume date');
+  assert.ok(/^const PAUSED_SERIES = \["KXXRP15M", \.\.\.PROBE_SERIES\];/.test(src.slice(src.indexOf('const PAUSED_SERIES'), src.indexOf('const PAUSED_SERIES') + 70)), 'a plain list with no resume date');
 };
 gates.PX2 = () => {
   // Nothing outside the library can unpause it: index.js never passes pausedSeries.
