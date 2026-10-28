@@ -119,3 +119,14 @@ One page: what has been tried, how big the samples were, and what the verdict wa
 | MAKER3 | 1 | 0 | 0 |  |
 | THROTTLE1 | 2 | 0 | 0 |  |
 | FLOW1 | 1 | 0 | 0 |  |
+
+## Added 2026-10-28 (after the first version)
+
+| Test | Lane | Family | Result |
+|---|---|---|---|
+| GROW1 | L1 upkeep | sizing on L1 | FALSIFIED by 0.01 PF: plain fractional sizing PF 0.99 (loses); walk-forward series choice PF 1.14, 0% of 200 resamples below $500, same signal as P6 |
+| EXIT2 | L1 upkeep | exit line | Hold PF 1.016 beats the 25c line (0.981) on both halves; 15c line 0.988; higher lines worse |
+| THROTTLE1 | L1 upkeep | size throttle | FALSIFIED on total, drawdown -30% |
+| CPI1 | discovery | economic releases (CPI, core CPI) | NOT_ENOUGH_DATA: 7 trades on 2 releases (quotes missing 24h before releases) |
+| MENT1 | discovery | earnings-call words | NOT_ENOUGH_DATA by rule (71 events of 100): PF 0.92 on 268 trades |
+| SWEEP1 | (retired) | BTC 15 minute tape | Not run, excluded by process rule 3 |
