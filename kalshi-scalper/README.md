@@ -7201,3 +7201,23 @@ Disclosure: this is the THIRD read of the same holdout days; a pass is weak evid
 Tally for AUTO1 to AUTO3: 176,640 trees, 827 train winners, 49 passed validation, 0 admissible holdout passes (AUTO1's 2 were favourite buys). The holdout days have now been read three times; reading them again would eventually pass something by luck, so further rounds need unseen days (recorder data from 2026-10-28 on).
 
 Recorder look 2026-10-28 (information only): 105 of 300 trades over 7 of 10 dates, 0% 429, clock_ok still False. Read not yet due.
+
+## Note at the top for the owner (2026-10-28 evening)
+
+Set aside as outcome or direction prediction, not candidates for the "no need to pick the winner" brief: SCALP1, SCALP2, HIST1, AUTO1, AUTO2, AUTO3 (all scored on exit fills, not settlement, but every one bets on the price moving one way). They count toward N tried. Testing next: MAKER4 below (structure: earn the spread with resting orders, flat before the close).
+
+## Pre-registration: MAKER4, mid-window two-sided maker scalp on KXBTC15M, KXETH15M, KXGOLD15M (no-view lane; written 2026-10-28 before any trade tape for these windows was fetched; running count about 199,000 including AUTO1 to AUTO3)
+
+**Why this is not QUOTE1 again.** QUOTE1 quoted only in the last 150 seconds, where the price converges to 0 or 100 and a one-sided fill is very expensive. MAKER4 quotes from 12 minutes to 4 minutes left, where contracts sit nearer the middle, and flattens by 2 minutes left. It adds gold.
+
+**Who pays.** Impatient takers who cross the spread mid-window (hedgers, people closing, retail on a phone). We earn the 1c to 3c spread on a completed buy-then-sell cycle. **The obstacle, stated before the run:** informed takers (watching the spot) hit the side that is about to be wrong, so one-sided fills lose (adverse selection); QUOTE1 lost 12c on such windows near the close.
+
+**Data and fill model.** Quotes: the one-minute candles (closing best bid and ask, no depth) from `fresh.sqlite` (Oct 11 to 27). Fills: the public trade tape of each window (`/markets/trades`, taker side, price, size), fetched for the posting span. Depth and queue position are NOT on file, so two bounds, both reported: **Q1 (conservative, decides the verdict):** our resting buy fills only when a taker SELL prints strictly BELOW our price (the queue at our price is assumed never to clear); likewise sells. **Q0 (optimistic, information):** any taker trade at or through our price fills us. No other fill model is used.
+
+**Rules.** Every minute boundary from 12 to 4 minutes left, if flat and the side's bid and ask are both 20c to 80c: post a 1-contract buy at the best bid and a 1-contract sell at the best ask (net position at most 1). Unfilled orders are cancelled and re-posted at the next minute's quotes. When one side fills, the other keeps resting; if it fills, the cycle is complete. **Stop:** at any minute boundary where the candle mid has moved 5c against the open position, flatten by crossing at that candle's closing bid or ask. **Time limit:** cancel everything and flatten by crossing at the quote of the candle ending 2 minutes before the close. Nothing is held to settlement. **Fees:** maker fills 1.75% x p x (1-p) (Kalshi's maker schedule); crossing fills 7% x p x (1-p); stress: maker fills charged the taker formula; information: zero maker fee. **Size and management:** 1 contract a quote; same account rules as live (window cap 4.5% of base, daily loss stop 5% of base, not reached at this size).
+
+**Unit and metrics.** Window P&L; independent n = close times (the three assets at one close are one observation for the pooled claim), z clustered by day. Profit factor first, with loss rate of windows, cycles per window, fill rates, spread earned, stop and flatten losses, cost.
+
+**Numeric prediction.** Q1: profit factor 0.3 to 0.7. Q0: 0.5 to 0.9. One-sided losses bigger than spread gains.
+
+**Kill criteria.** Fewer than 300 independent close times = `NOT_ENOUGH_DATA`. Under Q1: profit factor under 1.5, under 1 in either half by date, or under 1.2 at the fee stress = `FALSIFIED`. A pass is a forward read on recorder data plus the owner's decision, never a live slot, and the design must not hold a position at the same time as L1 (it is flat by 2 minutes left; L1 buys inside the last minutes, so the design would stop quoting before L1's first entry). Run once; nothing widened after.
