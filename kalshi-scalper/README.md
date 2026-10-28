@@ -7037,3 +7037,22 @@ The owner asked earlier for "NOT RULES. strategies. full built out new strategie
 ### LOCK2 amendment (2026-10-28, before any poll or result; from the main session's status note)
 
 The recorder extension (PR 599) is merged: from the 15:45 UTC job on 2026-10-28, `origin/quote-data` also carries gold's 15 minute market in `quotes.csv` and a new `ladder.csv` (the near-the-money strikes, mid 3c to 97c, at most 40 per series, polled about every 3 seconds in the last 150 seconds before each hourly close) for KXBTCD, KXETHD, KXGOLDD and KXGOLDW (gold closes at 21:00 UTC; gold windows are closed on weekends). **LOCK2's data source changes from a limited poll from this container to the recorder's `ladder.csv` and the coincident 15 minute rows of `quotes.csv`** (no polling from here; nothing earlier than 2026-10-28 15:45 UTC exists). Every other LOCK2 rule is unchanged. Bitcoin and Ethereum only until 25 independent closes per asset have been recorded (about 25 hours of hourly closes); gold (15 minute against KXGOLDD at 21:00 UTC and KXGOLDW) gets its own registration after a day or two of data, as the main session asked. QUOTE1 (Bitcoin and Ethereum two-sided quoting) stays on the existing books.
+
+## Strategy card index (owner, 2026-10-28: "build a total of 10")
+
+Ten full strategy cards (market, entry, size, exit, management, who pays, data, account-level result, profit factor first, numeric prediction, kill criteria; all no-direction or outside-information; none touches L1). Status as of 2026-10-28:
+
+| # | Card | Market and mechanism | Data | Status |
+|---|---|---|---|---|
+| 1 | CARRY1 | Binance spot long and USD-M perpetual short on Bitcoin and Ethereum, collect funding | Binance funding and daily klines 2020 to 2026 | Registered; downloading; runs today |
+| 2 | BASIS1 | Spot long and quarterly future short held to expiry (locked basis) | Binance dated-future klines and spot | To register today |
+| 3 | FUNDX1 | Short the perpetual with the higher funding and long the one with the lower (Binance against Deribit) | Binance funding files, Deribit funding on file (78 days) | To register today |
+| 4 | PAIRS1 | Long ETH and short BTC (or the reverse) at equal notional when the ratio is stretched; market neutral | Binance daily and 1 minute klines | To register today |
+| 5 | QUOTE1 | Two-sided passive quoting on the Bitcoin and Ethereum 15 minute contracts, flat before the close | Recorder books and the trade tape (about 200 windows) | Registered; tape downloading; expected NOT_ENOUGH_DATA until about 100 more windows |
+| 6 | LOCK2 | Locks between the 15 minute contract and the hourly ladder at coincident closes, and their duration | Recorder `ladder.csv` from 2026-10-28 15:45 UTC | Registered; forward, 25 closes |
+| 7 | QUOTE2 | Two-sided quoting on the near-the-money hourly ladder (KXBTCD, KXETHD) in the last 150 seconds | Recorder `ladder.csv` | To register after a day of data |
+| 8 | QUOTE3 | Two-sided quoting on gold's 15 minute contract | Recorder (gold added from 2026-10-28 15:45 UTC; weekends closed) | To register after a day or two of data |
+| 9 | LOCK3 | Locks between gold's 15 minute contract and KXGOLDD and KXGOLDW at the 21:00 UTC closes | Recorder | To register after a day or two of data |
+| 10 | DIGI1 | Kalshi's noon or 5 pm Bitcoin "above K" ladder against Deribit's call-spread-implied probability, hedged with the options or the perpetual | Deribit option chain (public API, forward) | To register; forward only |
+
+Cards 7 to 10 cannot be run on history; 1 to 4 can be run today. Each is registered and read once; a pass is a forward read and the owner's decision, never a live slot.
