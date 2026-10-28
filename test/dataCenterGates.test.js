@@ -28,7 +28,7 @@ gates.D1 = () => {
   const code = ['kalshiPnlSeries', 'kalshiCtMidnight', 'kalshiPnlRangeStart', 'kalshiPnlCardHtml', 'renderKalshiPnl', 'kalshiLineSvg'].map(fnSource).join('\n');
   assert.ok(!/fetch\(|setDoc|updateDoc|addDoc|callable|Fn\(/.test(code.replace(/api\.kalshiOrdersSince/g, '')), 'and its code writes and calls nothing: it draws what the page loaded, plus one read of older orders');
   assert.ok((code.match(/api\.\w+/g) || []).every((c) => c === 'api.kalshiOrdersSince'), 'the only API it touches is the read of older orders');
-  const mod = html.slice(html.indexOf('kalshiOrdersSince: function'), html.indexOf('kalshiBookSnaps: function'));
+  const mod = html.slice(html.indexOf('kalshiOrdersSince: function'), html.indexOf('  });\n</script>', html.indexOf('kalshiOrdersSince: function')));
   assert.ok(/getDocs\(query\(collection\(db, 'kalshiLiveOrders'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'that read is a plain query of the bot orders, admin read only by the rules');
   assert.ok(!/id="kalRecord"|data-card="record"|renderKalshiRecord/.test(html), 'the record card (headline and rules on trial) is gone (removed Oct 24, 2026, the owner)');
 };
