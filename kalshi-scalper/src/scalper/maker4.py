@@ -47,8 +47,11 @@ def sampled(M):
 
 def fetch(shard, shards):
     D.mkdir(exist_ok=True)
-    ms = sorted(sampled(markets()).items())[shard::shards]
-    fp = D / f"tape_{shard}.json"
+    done = set()
+    for f in D.glob("tape_*.json"):
+        done |= set(json.loads(f.read_text()))
+    ms = [x for x in sorted(sampled(markets()).items()) if x[0] not in done][shard::shards]
+    fp = D / f"tape_r{shards}_{shard}.json"
     have = json.loads(fp.read_text()) if fp.exists() else {}
     for i, (tk, (series, close, cs)) in enumerate(ms):
         if tk in have:
@@ -68,7 +71,7 @@ def fetch(shard, shards):
             if not cur or not d.get("trades"):
                 break
         have[tk] = sorted(rows)
-        if i % 25 == 0:
+        if i % 5 == 0:
             fp.write_text(json.dumps(have)); print(shard, i, len(ms), flush=True)
         time.sleep(0.05)
     fp.write_text(json.dumps(have)); print("done", shard, flush=True)
