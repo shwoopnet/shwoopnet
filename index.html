@@ -795,9 +795,9 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat pnl" "pos pos" "trd trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-auto-flow:row dense; gap:18px; }   /* no named areas: a card's place follows its order (set by the layout code), so moving a card actually moves it (it did nothing while each card was pinned to its own area) */
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
-  .kal-console [data-card="account"]{ grid-area:acct; }
+  .kal-console [data-card="account"]{ grid-column:1 / -1; }
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
@@ -815,10 +815,10 @@
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
-  .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
-  .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
-  .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
+  .kal-console [data-card="status"]{ align-self:stretch; }
+  .kal-console [data-card="pnl"]{ align-self:stretch; }
+  .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
+  .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) repeat(3, minmax(0,1fr)); gap:10px 20px; align-items:center; padding:20px 22px; }
@@ -836,7 +836,8 @@
   .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); }
+    .kal-console [data-card]{ grid-column:1 / -1; }
     .kal-console [data-card="account"]{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
     .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; grid-row:auto; }
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
@@ -1464,6 +1465,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
+                  <li>Layout: moving cards on the Bot page works again (each card was pinned to its own spot, so the arrows and dragging changed nothing) (#601)</li>
                   <li>Tools menu: removed the order book snapshot download and its recorder warning (the recorder has been off since Oct 21, so it said it had stopped) (#601)</li>
                   <li>Brief charts: the overnight and weekend gaps in stock, gold and oil weeks are drawn as small breaks instead of blank stretches, and the week has a date label every two days (#600)</li>
                   <li>XRP is paused in the bot until the owner says, after the Nov 12 forward reads (profit factor 0.49 over 65 live fills); the silent-market warning no longer names it (#598)</li>
@@ -3444,10 +3446,18 @@ kalshiStatusTick();
     var DEFAULT_ORDER = Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); });
     function currentOrder(){ return Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); }); }
     // Saved order first (unknown names ignored), then any card the saved list does not mention, in its default place.
+    // The rail and main wrappers dissolve into the grid (display:contents), so what sets a card's place is its CSS order, not its place in the markup. The rail's cards and the main column's cards are dealt into the default slots (account, status, result line, positions, trades) in the order each column holds them.
+    function flow(){
+      var rail = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-rail > [data-card]')), main = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-main > [data-card]')), seq = [], r = 0, m = 0;
+      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
+      rail.slice(r).concat(main.slice(m)).forEach(function(c){ seq.push(c); });
+      seq.forEach(function(c, i){ c.style.order = String(i); });
+    }
     function applyOrder(){
       var want = (layout.order || []).filter(function(k, i, a){ return DEFAULT_ORDER.indexOf(k) > -1 && a.indexOf(k) === i; });
       DEFAULT_ORDER.forEach(function(k){ if(want.indexOf(k) < 0){ want.push(k); } });
       want.forEach(function(k){ var c = grid.querySelector('[data-card="' + k + '"]'); if(c){ c.parentNode.appendChild(c); } });   // each card moves only within its own column
+      flow();
     }
     function apply(){
       applyOrder();
@@ -3471,7 +3481,7 @@ kalshiStatusTick();
     if(presentBtn){ presentBtn.addEventListener('click', function(){ kalshiSetPresent(document.documentElement.getAttribute('data-present') !== 'on'); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
-    function commitOrder(){ layout.order = currentOrder(); save(); }
+    function commitOrder(){ layout.order = currentOrder(); flow(); save(); }
     function setUnlocked(on){
       grid.classList.toggle('kal-unlocked', on);
       Array.prototype.forEach.call(grid.querySelectorAll('[data-card]'), function(c){
@@ -3522,7 +3532,7 @@ kalshiStatusTick();
       var r = over.getBoundingClientRect();
       var after = e.clientY > r.top + r.height / 2;   // the cards of a column are stacked, so above or below the middle
       var want = after ? over.nextSibling : over;
-      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); }
+      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); flow(); }
     });
     grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
     grid.addEventListener('dragend', function(){

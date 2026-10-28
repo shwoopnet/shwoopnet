@@ -366,6 +366,14 @@ gates.Y12 = () => {
   assert.ok(!/kalBookDownload|kalBookHours|kalshiBookCsv|kalshiBookExportNote|kalshiBookSnaps|kalshiBookStatus/.test(html), 'no book snapshot controls, builders or reads on the page');
 };
 
+// Moving a card must change where it sits. While each Bot page card was pinned to a named grid area (acct, stat, pnl, pos, trd) the arrows and dragging reordered the markup and the page did not change at all (Oct 28, 2026, the owner: "layout moving doesnt work anymore").
+gates.Y13 = () => {
+  assert.ok(!/grid-template-areas|grid-area\s*:\s*(acct|stat|pnl|pos|trd)\b/.test(html.slice(html.indexOf('.kal-console{'), html.indexOf('</style>', html.indexOf('.kal-console{')))), 'no card is pinned to a fixed area');
+  assert.ok(/function flow\(\)/.test(html) && /c\.style\.order = String\(i\)/.test(html), 'the layout code sets each card\'s order');
+  const fn = html.slice(html.indexOf('function commitOrder()'), html.indexOf('function commitOrder()') + 120);
+  assert.ok(/flow\(\)/.test(fn), 'a move is followed by a re-flow');
+};
+
 // The tiny chart under each market row: a line across the market's 15 minute window, the strike drawn and kept in range, and nothing drawn from too little data.
 gates.Y16 = () => {
   // The Bot page has no price charts (the owner, Oct 23, 2026: "remove charts from the bot page entirely"). Consequence: no market row draws a line, and the page calls no price feed (Coinbase, gold-api) from the browser.
