@@ -7064,3 +7064,25 @@ Bitcoin and Ethereum 50/50 carry, 2020-01-01 to 2026-09-30 (2,465 days), entry a
 ### BASIS1 (card 2): closed by arithmetic, not a backtest (2026-10-28)
 
 Binance's BTCUSDT December 2026 future against spot (daily closes): **2026-10-26 basis +0.88% for 60 days = 5.33% a year gross; 2026-09-15 +1.32% for 101 days = 4.78% a year.** Entry costs (spot taker 0.10%, future taker 0.05%, slippage about 0.04% on both legs) and the spot sale at expiry (0.10%) are about 0.30% of notional, so a held-to-expiry position nets about 0.55% in 60 days, about **3.3% a year on the notional; with the short future's margin (half the capital) about 1.7% to 3% a year on total capital: $8 to $15 a year on $500, $85 to $150 on $5,000.** No lock above that exists without a leveraged margin that the owner's account size does not support. Not registered as a run; closed as `NOT_ENOUGH_RETURN` (the arithmetic is the finding, and it is not a verdict word because no test was run). The card index status for BASIS1 becomes "closed by arithmetic".
+
+## Strategy card PAIRS1: market-neutral ETH against BTC on the Binance perpetuals (discovery lane; written 2026-10-28 before any ratio was scored; running count about 22,118)
+
+1. **Market:** Binance USD-M ETHUSDT and BTCUSDT perpetuals, daily closes, 2020-01-01 to 2026-09-30.
+2. **Entry:** at the daily close, z = (ln(ETH/BTC) - its 30 day mean) / its 30 day standard deviation. z >= +2: short ETH, long BTC. z <= -2: long ETH, short BTC. Equal notional on both legs.
+3. **Size:** each leg 50% of the capital at entry (1x gross in total), compounding the capital.
+4. **Exit:** |z| <= 0.5 (reverted), or |z| >= 4 (stop, the ratio keeps running), or 30 days in the position.
+5. **Management:** one position at a time; no leverage above 1x gross; actual daily funding on each leg is credited and charged; costs 0.05% taker plus 0.02% slippage per leg per side (0.28% of one leg's notional per round trip over both legs).
+6. **Who pays:** momentum traders chasing the stretched coin and leveraged long holders of the fashionable coin; they keep doing it because the ratio moves in waves; *and it is a view on the ratio, not on the market.* Not a lock, and the honest prior is low.
+**Data:** the Binance daily perpetual closes and funding files already on disk. **Reported (profit factor first):** profit factor of trades, trades, loss rate, annualised net return on capital, maximum drawdown, worst month, year by year, the last 12 months, and $500 / $5,000 / $20,000 results.
+**Numeric prediction:** about 60 to 110 trades; profit factor 1.0 to 1.3; net return 0% to 8% a year; maximum drawdown 15% to 35% (a persistent ratio trend, as ETH in 2021).
+**Kill criteria:** profit factor of trades under 1.5, or net return under 5% a year in the last 12 months, or maximum drawdown over 20% = `FALSIFIED`; fewer than 30 trades = `NOT_ENOUGH_DATA`. The thresholds (2, 0.5, 4, 30 days) are not tuned. Run once.
+
+## Strategy card FUNDX1: Binance against Deribit funding difference, delta neutral (discovery lane; written before any series was joined; running count about 22,119)
+
+1. **Market:** the BTC and ETH perpetuals on Binance (USD-M) and Deribit (inverse), 2026-08-07 to 2026-10-22 (the 78 days of Deribit funding on file).
+2. **Entry:** when the trailing 3 day mean of (Binance daily funding - Deribit daily funding), annualised, is at least +5% (short Binance, long Deribit) or at most -5% (the reverse).
+3. **Size:** each leg 50% of capital (1x gross); one position per coin; the Deribit leg's margin is in the coin (a limitation, ignored).
+4. **Exit:** the trailing 3 day mean difference back inside +-1.5%, or the sign flips.
+5. **Management:** no leverage above 1x gross; daily funding credited and charged on both legs; costs 0.05% taker (Binance), 0.05% taker (Deribit) and 0.02% slippage each, per side.
+6. **Who pays:** perpetual holders on the venue with the higher funding pay it to hold the same exposure that is cheaper elsewhere; they stay because moving capital between exchanges is slow and the venues have different users.
+**Numeric prediction:** average absolute annualised difference 2% to 6%; the 0.28% round trip (two legs, two sides) is worth about 1 to 3 months of a 5% difference; net return under 3% a year; fewer than 8 trades. **Kill:** fewer than 8 trades = `NOT_ENOUGH_DATA`; net return under 3% a year after costs = `FALSIFIED`. Run once.
