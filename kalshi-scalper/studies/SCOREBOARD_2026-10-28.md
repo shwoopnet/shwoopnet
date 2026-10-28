@@ -139,7 +139,7 @@ One page: what has been tried, how big the samples were, and what the verdict wa
 | 2 | BASIS1 quarterly basis | Closed by arithmetic: 5.3% a year gross, about 3% net |
 | 3 | FUNDX1 Binance vs Deribit funding | NOT_ENOUGH_DATA: 6 entries; 3% to 4% a year difference |
 | 4 | PAIRS1 ETH vs BTC | FALSIFIED: PF 0.62, 72 trades, -8.3% a year, drawdown 52% |
-| 5 | QUOTE1 two-sided quoting BTC/ETH | Registered; tape downloading; about 200 windows against 300 needed |
+| 5 | QUOTE1 two-sided quoting BTC/ETH | NOT_ENOUGH_DATA by count (199 independent closes of 300); PF 0.00 (maker fee as taker), 0.09 with zero maker fee; adverse selection and converging price |
 | 6 | LOCK2 coincident-close locks | Registered; forward, needs the recorder's ladder data (from 2026-10-28 15:45 UTC) |
 | 7 to 9 | QUOTE2 (hourly ladder), QUOTE3 (gold), LOCK3 (gold) | Wait for recorder data |
 | 10 | DIGI1 Kalshi vs Deribit options | Forward only, not registered |
