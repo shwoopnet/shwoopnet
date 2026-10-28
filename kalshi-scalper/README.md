@@ -7221,3 +7221,5 @@ Set aside as outcome or direction prediction, not candidates for the "no need to
 **Numeric prediction.** Q1: profit factor 0.3 to 0.7. Q0: 0.5 to 0.9. One-sided losses bigger than spread gains.
 
 **Kill criteria.** Fewer than 300 independent close times = `NOT_ENOUGH_DATA`. Under Q1: profit factor under 1.5, under 1 in either half by date, or under 1.2 at the fee stress = `FALSIFIED`. A pass is a forward read on recorder data plus the owner's decision, never a live slot, and the design must not hold a position at the same time as L1 (it is flat by 2 minutes left; L1 buys inside the last minutes, so the design would stop quoting before L1's first entry). Run once; nothing widened after.
+
+**MAKER4 amendment (2026-10-28, before any fill was computed).** The trade tape runs to about 30,000 trades per window (some 30 API pages), so fetching all 4,169 windows would take about 8 hours. Kept: every 4th close time in time order (386 closes, 1,044 windows, all assets at each close), chosen by clock only. The 300-close minimum is unchanged.
