@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
 // Optional outside watchdog for the live arm. Put KALSHI_WATCHDOG_URL=<ping url> in
@@ -17,6 +17,7 @@ const KALSHI_LIVE_PRIVATE_KEY = defineSecret("KALSHI_LIVE_PRIVATE_KEY");
 const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off" });
 // Phone alerts (Web Push, kalshiPushLib.js): ONE secret, the VAPID private key; the public key is derived from it. Set it with functions/deploy-push.sh, never by pasting it anywhere.
 const KALSHI_PUSH_VAPID_PRIVATE = defineSecret("KALSHI_PUSH_VAPID_PRIVATE");
+const KALSHI_REPORT_TOKEN = defineSecret("KALSHI_REPORT_TOKEN");
 
 // Any signed-in caller passes this first wall; the Kalshi functions then
 // require the owner's email AND the isAdmin flag (assertKalshiAdmin below).
@@ -778,4 +779,16 @@ exports.kalshiBookRecorder = onSchedule(
     });
     console.log("kalshiBookRecorder: snaps=" + r.snaps + " errs=" + r.errs);
   }
+);
+
+// The nightly order report: a read-only summary of the bot's own orders behind one secret token (functions/kalshiReportLib.js, test/kalshiReportGates.test.js).
+// It holds no Kalshi key and sends nothing to Kalshi. Deploy: bash functions/deploy-report.sh.
+const kalshiReport = require("./kalshiReportLib");
+exports.kalshiNightlyReport = onRequest(
+  { secrets: [KALSHI_REPORT_TOKEN], cors: false, maxInstances: 1, timeoutSeconds: 60, memory: "256MiB" },
+  kalshiReport.makeReportHandler({
+    getToken: () => KALSHI_REPORT_TOKEN.value(),
+    now: () => Date.now(),
+    readOrders: async (sinceMs) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()),
+  })
 );

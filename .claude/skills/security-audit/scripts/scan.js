@@ -86,7 +86,11 @@ const SECRET_SHAPES = [
       const body = lines.slice(i, i + 14).join('\n');
       if (!/assertKalshiAdmin|assertSignedIn/.test(body)) add('FAIL', 'functions', 'functions/index.js:' + (i + 1) + ' a callable does not check who is calling in its first lines');
     }
-    if (/onRequest\(/.test(l)) add('FAIL', 'functions', 'functions/index.js:' + (i + 1) + ' an open HTTP endpoint: it needs its own authentication, review it');
+    if (/onRequest\(/.test(l) && /exports\.\w+\s*=\s*onRequest\(/.test(l)) {
+      // The ONE reviewed exception (Oct 28, 2026, the nightly order report): an HTTP endpoint is allowed only when it is the report handler, which is closed without a long secret token (test/kalshiReportGates.test.js R3). Anything else stays a FAIL.
+      const body = lines.slice(i, i + 8).join('\n');
+      if (!(/KALSHI_REPORT_TOKEN/.test(body) && /makeReportHandler\(/.test(body))) add('FAIL', 'functions', 'functions/index.js:' + (i + 1) + ' an open HTTP endpoint: it needs its own authentication, review it');
+    } else if (/onRequest\(/.test(l) && !/require\(/.test(l)) add('FAIL', 'functions', 'functions/index.js:' + (i + 1) + ' an open HTTP endpoint: it needs its own authentication, review it');
     if (/console\.(log|error|warn|info)\([^)]*\.value\(\)/.test(l)) add('FAIL', 'functions', 'functions/index.js:' + (i + 1) + ' prints a secret value');
     if (/process\.env\.[A-Z_]*(KEY|SECRET|TOKEN|PRIVATE)/.test(l)) add('WARN', 'functions', 'functions/index.js:' + (i + 1) + ' reads a secret from process.env: use defineSecret');
   });
