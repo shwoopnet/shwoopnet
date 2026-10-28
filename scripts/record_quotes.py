@@ -25,7 +25,16 @@ import urllib.error
 import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2"
-SERIES = {"KXBTC15M": "BTC", "KXETH15M": "ETH", "KXSOL15M": "SOL", "KXXRP15M": "XRP", "KXDOGE15M": "DOGE"}
+# Oct 28, 2026 (the owner: "extend the recorder", for the research session's no-view brief): gold's 15 minute market is recorded with the others (it has no spot feed here, which is fine: only its quotes are wanted),
+# and the hourly and daily LADDERS are recorded in the last LADDER_LEAD_S seconds before each hourly close (ladder.csv): Bitcoin and Ethereum hourly strikes, gold's daily and weekly strikes (they close at 21:00 UTC).
+# Only the strikes near the money are polled (a ladder has 40 to 200 strikes and most are at 0c or 100c), about every 3 seconds, so the read rate stays well under the limit and the 15 minute windows are not starved.
+SERIES = {"KXBTC15M": "BTC", "KXETH15M": "ETH", "KXSOL15M": "SOL", "KXXRP15M": "XRP", "KXDOGE15M": "DOGE", "KXGOLD15M": "GOLD"}
+LADDER_SERIES = ["KXBTCD", "KXETHD", "KXGOLDD", "KXGOLDW"]
+LADDER_LEAD_S = 150
+LADDER_DISCOVER_LEAD_S = 190
+LADDER_EVERY_S = 3.0
+LADDER_MAX_STRIKES = 40      # per series, the ones closest to 50c at discovery time
+LADDER_CHUNK = 40
 WINDOW_S = 900            # markets close on the quarter hour and the epoch starts on one
 DISCOVER_LEAD_S = 190     # look the open tickers up this long before the close
 QUOTE_LEAD_S = 150
@@ -38,6 +47,7 @@ SPOT_COLS = ["t_recv_ms", "exchange", "asset", "price", "size", "exchange_time"]
 RESULT_COLS = ["ticker", "result", "close_time", "seen_ms"]
 COVER_COLS = ["window_close_utc", "ticker", "polls", "ok_polls", "n429", "rows", "first_recv_ms", "last_recv_ms"]
 CLOCK_COLS = ["t_local_ms", "offset_ms"]
+LADDER_COLS = QUOTE_COLS + ["close_time"]
 
 
 def seconds_to_close(now):
@@ -51,6 +61,24 @@ def next_close(now):
 
 def num(x):
     return x if x not in (None, "") else ""
+
+
+def pick_near_money(markets, close_prefix, limit=LADDER_MAX_STRIKES):
+    """The strikes of one ladder worth polling: those that close at `close_prefix` (an ISO minute, like 2026-10-28T14:00) and whose mid is between 3c and 97c, the ones closest to 50c first, at most `limit`.
+    A strike with no bid or no ask is skipped (it has no mid). Pure: markets in, tickers out."""
+    scored = []
+    for m in markets or []:
+        if not str(m.get("close_time", "")).startswith(close_prefix):
+            continue
+        try:
+            bid, ask = float(m.get("yes_bid_dollars")), float(m.get("yes_ask_dollars"))
+        except (TypeError, ValueError):
+            continue
+        mid = (bid + ask) / 2
+        if 0.03 <= mid <= 0.97 and m.get("ticker"):
+            scored.append((abs(mid - 0.5), m["ticker"]))
+    scored.sort()
+    return [t for _, t in scored[:limit]]
 
 
 def quote_rows(markets, t_send_ms, t_recv_ms):
@@ -124,7 +152,7 @@ class Out:
     def __init__(self, d):
         os.makedirs(d, exist_ok=True)
         self.files, self.writers = [], {}
-        for name, cols in (("quotes", QUOTE_COLS), ("spot", SPOT_COLS), ("results", RESULT_COLS), ("coverage", COVER_COLS), ("clock", CLOCK_COLS)):
+        for name, cols in (("quotes", QUOTE_COLS), ("spot", SPOT_COLS), ("results", RESULT_COLS), ("coverage", COVER_COLS), ("clock", CLOCK_COLS), ("ladder", LADDER_COLS)):
             f = open(os.path.join(d, name + ".csv"), "a", newline="")
             w = csv.writer(f)
             if f.tell() == 0:
@@ -225,6 +253,73 @@ class Recorder:
                 self.out.write("coverage", [[time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(close)), "(none found)", 0, 0, 0, 0, "", ""]])
             await asyncio.sleep(1.0)
 
+    async def ladder_discover(self, close):
+        """For each ladder series, the near the money strikes that close at `close`. A series with nothing closing then (gold's ladders close once a day) is simply absent."""
+        loop = asyncio.get_running_loop()
+        prefix = time.strftime("%Y-%m-%dT%H:%M", time.gmtime(close))
+        found = {}
+        for series in LADDER_SERIES:
+            markets, cursor = [], ""
+            for _page in range(3):
+                url = "%s/markets?series_ticker=%s&status=open&limit=200%s" % (BASE, series, ("&cursor=" + cursor) if cursor else "")
+                st, d = await loop.run_in_executor(None, http_get, url)
+                if st != 200 or not d:
+                    break
+                markets += d.get("markets") or []
+                cursor = d.get("cursor") or ""
+                if not cursor:
+                    break
+                await asyncio.sleep(0.3)
+            picked = pick_near_money(markets, prefix)
+            if picked:
+                found[series] = picked
+            await asyncio.sleep(0.3)
+        return found
+
+    async def poll_ladder(self, close, found):
+        loop = asyncio.get_running_loop()
+        stamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(close))
+        cover = {s: [0, 0, 0, 0, "", ""] for s in found}
+        backoff = 0.0
+        while time.time() < close:
+            for series, tickers in found.items():
+                for i in range(0, len(tickers), LADDER_CHUNK):
+                    t_send = int(time.time() * 1000)
+                    st, d = await loop.run_in_executor(None, http_get, "%s/markets?tickers=%s" % (BASE, ",".join(tickers[i:i + LADDER_CHUNK])))
+                    t_recv = int(time.time() * 1000)
+                    c = cover[series]
+                    c[0] += 1
+                    if st == 200 and d:
+                        rows = quote_rows(d.get("markets"), t_send, t_recv)
+                        self.out.write("ladder", [r + [stamp] for r in rows])
+                        c[1] += 1; c[3] += len(rows); c[4] = c[4] or t_recv; c[5] = t_recv
+                        backoff = 0.0
+                    elif st == 429:
+                        c[2] += 1
+                        backoff = min(6.0, max(2.0, backoff * 2))
+            await asyncio.sleep(LADDER_EVERY_S + backoff)
+        for series, c in cover.items():
+            self.out.write("coverage", [[stamp, "ladder:" + series] + c])
+        self.out.flush()
+
+    async def ladder_loop(self, stop_at):
+        while True:
+            now = time.time()
+            if now >= stop_at:
+                return
+            close = now - (now % 3600) + 3600
+            wait = (close - now) - LADDER_DISCOVER_LEAD_S
+            if wait > 0:
+                await asyncio.sleep(min(wait, 30))
+                continue
+            found = await self.ladder_discover(close)
+            wait = (close - time.time()) - LADDER_LEAD_S
+            if wait > 0:
+                await asyncio.sleep(wait)
+            if found and time.time() < close:
+                await self.poll_ladder(close, found)
+            await asyncio.sleep(2.0)
+
     async def result_loop(self, stop_at):
         loop = asyncio.get_running_loop()
         tries = {}
@@ -313,9 +408,9 @@ async def run(out_dir, minutes, quote_lead, spot_lead, cycle_s=None):
     rec = Recorder(out, quote_lead, spot_lead)
     stop_at = cycle_stop_time(time.time(), cycle_s) if cycle_s else stop_time(minutes, time.time())
     tasks = [asyncio.create_task(ws_loop(n, u, s, p, rec, stop_at)) for n, u, s, p in FEEDS]
-    tasks += [asyncio.create_task(rec.window_loop(stop_at)), asyncio.create_task(rec.result_loop(stop_at)), asyncio.create_task(rec.clock_loop(stop_at))]
+    tasks += [asyncio.create_task(rec.window_loop(stop_at)), asyncio.create_task(rec.result_loop(stop_at)), asyncio.create_task(rec.clock_loop(stop_at)), asyncio.create_task(rec.ladder_loop(stop_at))]
     ticker = asyncio.create_task(flusher(out, stop_at))
-    await asyncio.gather(tasks[3], tasks[4], tasks[5])
+    await asyncio.gather(tasks[3], tasks[4], tasks[5], tasks[6])
     for t in tasks[:3] + [ticker]:
         t.cancel()
     out.close()

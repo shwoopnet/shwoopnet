@@ -83,6 +83,28 @@ print(json.dumps([
   assert.deepStrictEqual(out[7], [['SOL', '103.2', '2', '1792']]);
 };
 
+// Q7 and Q8: the recorder was extended on Oct 28, 2026 (the owner, for the research session's no-view brief): gold's 15 minute market, and the hourly Bitcoin and Ethereum ladders plus gold's daily and weekly ladders in ladder.csv.
+gates.Q7 = () => {
+  const out = JSON.parse(py(`
+mk = lambda t, b, a, c='2026-10-28T14:00:00Z': {'ticker': t, 'yes_bid_dollars': b, 'yes_ask_dollars': a, 'close_time': c}
+ms = [mk('A', '0.00', '0.01'), mk('B', '0.48', '0.50'), mk('C', '0.10', '0.12'), mk('D', '0.90', '0.92'), mk('E', '0.40', '0.42', '2026-10-28T21:00:00Z'), mk('F', None, '0.5'), mk('G', '0.97', '0.99')]
+print(json.dumps([m.pick_near_money(ms, '2026-10-28T14:00'), m.pick_near_money(ms, '2026-10-28T14:00', limit=2), m.pick_near_money(ms, '2026-10-28T21:00'), m.SERIES.get('KXGOLD15M'), m.LADDER_SERIES, m.LADDER_COLS[-1]]))`));
+  assert.deepStrictEqual(out[0], ['B', 'C', 'D'], 'only strikes closing then, mid between 3c and 97c, the ones nearest 50c first; 0c, 99c, no bid and another close are skipped');
+  assert.deepStrictEqual(out[1], ['B', 'C'], 'at most `limit`');
+  assert.deepStrictEqual(out[2], ['E'], 'gold\'s ladder closes at 21:00 UTC and is picked only then');
+  assert.strictEqual(out[3], 'GOLD', 'gold\'s 15 minute market is recorded with the others');
+  assert.deepStrictEqual(out[4], ['KXBTCD', 'KXETHD', 'KXGOLDD', 'KXGOLDW']);
+  assert.strictEqual(out[5], 'close_time');
+};
+gates.Q8 = () => {
+  // The extension reads only the public market list and stays gentle: near the money strikes only, polled every few seconds, ladder rows kept in their own file, still no key and no order.
+  const code = script.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
+  assert.ok(/LADDER_EVERY_S = 3\.0/.test(code) && /LADDER_MAX_STRIKES = 40/.test(code) && /LADDER_CHUNK = 40/.test(code));
+  assert.ok(/"ladder", LADDER_COLS/.test(code), 'ladder rows go to ladder.csv, not into quotes.csv');
+  assert.ok(!/PRIVATE|SECRET|Authorization|\/portfolio|\/orders/i.test(code));
+  assert.ok(/429/.test(code.slice(code.indexOf('async def poll_ladder'), code.indexOf('async def ladder_loop'))), 'a refused read backs off instead of asking harder');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

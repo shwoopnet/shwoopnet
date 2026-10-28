@@ -1,3 +1,4 @@
+# Oct 28, 2026 (the owner: extend the recorder): gold's 15 minute market, and the hourly Bitcoin and Ethereum ladders and gold's daily and weekly ladders (near the money strikes, the last 150 seconds before each hourly close) are recorded too, to ladder.csv. Same schedule, same branch, still public data only.
 # Oct 23, 2026: the hourly pilot caught 5 of 96 windows in about 3.5 hours (late scheduled starts, and a queued run replaced by the next), so this now runs 4 hour jobs that start 15 minutes
 # BEFORE each 4 hour boundary and stop a minute after the next one, so every close is recorded and a late start still catches the first. Same files and columns.
 # PILOT (Oct 22, 2026, research only): records Kalshi's 15 minute crypto quotes next to Coinbase, Kraken and Bitstamp spot prices in the last seconds of each window.
