@@ -65,7 +65,7 @@ function world(opts = {}) {
 }
 const tick = (w, over = {}) => live.runL1Tick({
   session: w.sess, now: NOW, setSession: async (p) => { Object.assign(w.sess, p); }, logEvent: async (e) => { w.events.push(e); },
-  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, ...over,
+  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, pausedSeries: [], ...over,   // XRP is paused for real (PX1); the older gates use it as an example market, so they run with no pause
 });
 
 // The rule is L1 as written: the side whose FRESH price is 88c to 97c, inclusive, either side, nothing else.
@@ -792,7 +792,7 @@ gates.DP4 = async () => {
   assert.ok(w.posts.some((p) => p.ticker === T) && !w.posts.some((p) => p.ticker === AUD), 'Bitcoin trades, the probe waits');
   // and the wiring: a transaction on the fresh document, in the one collection only the server writes.
   assert.ok(/updateProbeRecord: \(apply\) => db\.runTransaction/.test(fnSrc) && /doc\("probeRecord"\)/.test(fnSrc) && /tx\.get\(ref\)/.test(fnSrc), 'applied to the fresh document inside a transaction');
-  assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\)\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
+  assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\) && !paused\.includes\(x\)\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
 };
 // CO1 to CO3: the cost cut (Oct 21, 2026). The 24 hour read keeps its older part in memory; the exit watch reads only unsettled orders; the repair pass runs every 10 minutes. None of it may change what the bot decides.
 const MIN = 60000;
@@ -1449,6 +1449,28 @@ gates.TS3 = async () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.strictEqual((src.match(/twoStageFromCandles\(/g) || []).length, 2, 'it is defined once and called once, in logRise, after the orders: nothing that decides an order reads it');
   assert.ok(!/keyId|pem/.test(src.slice(src.indexOf('function twoStageFromCandles'), src.indexOf('async function logRise'))), 'public candles only, no key');
+};
+
+// PX1 and PX2: XRP is paused in the bot's code (the owner, Oct 28, 2026): profit factor 0.49 over 65 live fills against 1.32 in the history, read on 2026-11-12. It fails closed: no date resumes it.
+gates.PX1 = async () => {
+  assert.deepStrictEqual(live.PAUSED_SERIES, ['KXXRP15M']);
+  assert.ok(live.L1_SERIES.includes('KXXRP15M'), 'it stays in the list (its name, quotes and alerts keep working)');
+  // A perfect XRP setup at its 10 minute look sends NOTHING with the real default, and the other series still trade.
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [XRP10]: { close_time: iso(NOW + 600000) } } });
+  await tick(w, { pausedSeries: undefined, quotes: [q10('KXXRP15M', XRP10)] });
+  assert.strictEqual(w.posts.length, 0, 'a paused market is never a candidate');
+  const NG = 'KXNATGAS15M-26OCT071415-10';
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [NG]: { close_time: iso(NOW + 600000) } } });
+  await tick(w2, { pausedSeries: undefined, quotes: [q10('KXNATGAS15M', NG)] });
+  assert.strictEqual(w2.posts.length, 1, 'natural gas, the other 10 minute market, still trades with the same default');
+  const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  const decl = src.slice(src.indexOf('const PAUSED_SERIES'), src.indexOf('const PAUSED_SERIES') + 60);
+  assert.ok(/^const PAUSED_SERIES = \["KXXRP15M"\];/.test(decl), 'a plain list with no resume date');
+};
+gates.PX2 = () => {
+  // Nothing outside the library can unpause it: index.js never passes pausedSeries.
+  const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
+  assert.ok(!/pausedSeries/.test(idx));
 };
 
 (async () => {
