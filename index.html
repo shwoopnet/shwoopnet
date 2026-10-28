@@ -1477,6 +1477,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 28</div>
+                <ul class="changelog-list">
+                  <li>XRP is paused in the bot until the owner says, after the Nov 12 forward reads (profit factor 0.49 over 65 live fills); the silent-market warning no longer names it (#598)</li>
+                </ul>
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
                   <li>The "Trade less. Live more." background text fills the whole screen again on big monitors (#588)</li>
@@ -3116,7 +3120,7 @@
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true }, { name: 'USD/CAD', weekdays: true }, { name: 'Natural gas', weekdays: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true }, { name: 'USD/CAD', weekdays: true }, { name: 'Natural gas', weekdays: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3130,7 +3134,7 @@
     if(!s || s.active !== true){ return []; }
     var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080, reopen = now - ((wm - 1080 + 10080) % 10080) * 60000, out = [];
     KAL_WATCH.forEach(function(w){
-      if(w.weekdays && closed){ return; }
+      if(w.paused || (w.weekdays && closed)){ return; }   // a market paused in the bot's code (PAUSED_SERIES, XRP since Oct 28, 2026) is silent on purpose
       var ts = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number.isFinite(Number(o.ts)) && kalshiMarketName(o) === w.name; }).map(function(o){ return Number(o.ts); }).sort(function(a, b){ return a - b; });
       var recent = ts.filter(function(x){ return x >= now - 3 * 86400000; });
       if(recent.length < 8){ return; }

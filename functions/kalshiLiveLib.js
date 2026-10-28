@@ -75,6 +75,10 @@ const FIXED_CONTRACTS = { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 };   // XRP 
 // crypto market gets the window when several qualify at once. XRP and Dogecoin trade 3 contracts (FIXED_CONTRACTS) and Bitcoin and Ethereum one, so a 1 contract order no longer takes the slot from a 3 contract one in the same tick. The research session raised it: Bitcoin and XRP are both
 // looked at about 10 minutes before the close, Ethereum and Dogecoin about 6, so the pairs that tie within a tick are exactly these. Nothing else moves: sizes, stops, window limit, entry times and the one crypto order per window rule are unchanged.
 const L1_SERIES = ["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", ...PROBE_SERIES];
+// Markets taken off the tick on purpose (the owner, Oct 28, 2026, on the research session's read). XRP: live since 2026-10-07 it is profit factor 0.49 over 65 fills (8 losses, -$9.51) against 1.32 in the history, which is either bad luck
+// or a live-versus-backtest gap, and the forward reads FLOOR1 and THIN1 settle it on 2026-11-12. It stays in L1_SERIES (its name, quotes and alerts keep working) but is never a candidate. It fails closed: there is NO date after which it
+// resumes by itself; putting it back is a reviewed edit of this list. The exit watch is untouched and still sells any XRP position that is open.
+const PAUSED_SERIES = ["KXXRP15M"];
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -868,7 +872,9 @@ async function runL1Tick(args) {
       for (const sr of newly) await log("probe dropped", sr + " is dropped: its last " + PROBE_DROP_WINDOW + " settled entries net $" + probeNet(rec.rings && rec.rings[sr]) + ". It stays off until the record is reset by hand.");
     } catch (e) { dropped = PROBE_SERIES.slice(); }
   }
-  const tradable = L1_SERIES.filter((x) => !dropped.includes(x));
+  // `args.pausedSeries` exists only so the older gates can keep using XRP as their example market; the real caller (functions/index.js) never passes it, and gate PX2 fails if it ever does.
+  const paused = Array.isArray(args.pausedSeries) ? args.pausedSeries : PAUSED_SERIES;
+  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
     && entryLead(q.series, Date.parse(q.m.close_time) - now) !== null)
@@ -1196,7 +1202,7 @@ const DEFAULT_ACCOUNT_ID = "main";
 module.exports = {
   flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,

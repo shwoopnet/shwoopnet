@@ -58,7 +58,7 @@ function world(opts = {}) {
 }
 const tick = (w, over = {}) => live.runL1Tick({
   session: w.sess, now: NOW, setSession: async (p) => { Object.assign(w.sess, p); }, logEvent: async (e) => { w.events.push(e); },
-  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, ...over,
+  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, pausedSeries: [], ...over,   // XRP is paused for real (PX1 in kalshiL1Gates); these gates use it as an example market
 });
 
 

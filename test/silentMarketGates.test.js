@@ -29,10 +29,10 @@ const T = (iso) => Date.parse(iso);
 const TUE = T('2026-10-20T20:00:00Z');
 
 gates.S1 = () => {
-  const o = [...every('KXXRP15M', TUE - 6 * H, 20 * MIN, 3), ...every('KXGOLD15M', TUE - 10 * MIN, 30 * MIN, 3)];
+  const o = [...every('KXDOGE15M', TUE - 6 * H, 20 * MIN, 3), ...every('KXGOLD15M', TUE - 10 * MIN, 30 * MIN, 3)];
   const out = f.kalshiSilentMarkets(o, live, TUE);
   assert.strictEqual(out.length, 1, 'only the market that went quiet is named: ' + out.join(' | '));
-  assert.ok(/^XRP has sent no order for 6 hours/.test(out[0]) && /about every 20 minutes/.test(out[0]), out[0]);
+  assert.ok(/^Dogecoin has sent no order for 6 hours/.test(out[0]) && /about every 20 minutes/.test(out[0]), out[0]);
 };
 
 gates.S2 = () => {
@@ -46,18 +46,18 @@ gates.S3 = () => {
 };
 
 gates.S4 = () => {
-  const o = every('KXXRP15M', TUE - 30 * MIN, 20 * MIN, 3).slice(0, 6).concat(every('KXGOLD15M', TUE - 12 * H, 30 * MIN, 3).slice(0, 5));
+  const o = every('KXDOGE15M', TUE - 30 * MIN, 20 * MIN, 3).slice(0, 6).concat(every('KXGOLD15M', TUE - 12 * H, 30 * MIN, 3).slice(0, 5));
   assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, TUE), [], 'too few orders to know what usual is: nothing is said');
-  assert.deepStrictEqual(f.kalshiSilentMarkets(every('KXXRP15M', TUE - 9 * H, 20 * MIN, 3), { active: false }, TUE), [], 'a stopped bot is not a silent market: the page already says why it stopped');
+  assert.deepStrictEqual(f.kalshiSilentMarkets(every('KXDOGE15M', TUE - 9 * H, 20 * MIN, 3), { active: false }, TUE), [], 'a stopped bot is not a silent market: the page already says why it stopped');
 };
 
 gates.S5 = () => {
-  // Saturday 2026-10-24 12:00 Central: gold and the forex pairs are closed, XRP is not.
+  // Saturday 2026-10-24 12:00 Central: gold and the forex pairs are closed, Dogecoin is not.
   const SAT = T('2026-10-24T17:00:00Z');
-  const o = [...every('KXGOLD15M', SAT - 20 * H, 30 * MIN, 3), ...every('KXXRP15M', SAT - 7 * H, 20 * MIN, 3), ...every('KXAUDUSD15M', SAT - 20 * H, 60 * MIN, 3)];
+  const o = [...every('KXGOLD15M', SAT - 20 * H, 30 * MIN, 3), ...every('KXDOGE15M', SAT - 7 * H, 20 * MIN, 3), ...every('KXAUDUSD15M', SAT - 20 * H, 60 * MIN, 3)];
   const out = f.kalshiSilentMarkets(o, live, SAT);
-  assert.strictEqual(out.length, 1, 'a closed weekend is not a stop for gold or the forex pairs, but XRP is still named: ' + out.join(' | '));
-  assert.ok(/^XRP /.test(out[0]));
+  assert.strictEqual(out.length, 1, 'a closed weekend is not a stop for gold or the forex pairs, but Dogecoin is still named: ' + out.join(' | '));
+  assert.ok(/^Dogecoin /.test(out[0]));
 };
 
 gates.S6 = () => {
@@ -80,6 +80,12 @@ gates.S7 = () => {
   all.forEach((s) => assert.ok(smooth.includes(s) || (names[s] && new RegExp("name: '" + names[s].replace('/', '\\/') + "'").test(watch)), s + ' is either watched or deliberately left out'));
   assert.ok(/kalshiSilentMarkets\(orders, s, now\)/.test(html) && /Needs a look/.test(html), 'the Bot status card shows the warning');
   assert.ok(/insertAdjacentHTML\('beforeend', '<div class="kal-warn kal-silent">/.test(html), 'it is added without redrawing the heartbeat trace');
+};
+
+gates.S8 = () => {
+  // XRP is paused in the bot's code (Oct 28, 2026), so it sends no orders on purpose: the page must not warn that it went quiet.
+  const o = every('KXXRP15M', TUE - 9 * H, 20 * MIN, 3);
+  assert.deepStrictEqual(f.kalshiSilentMarkets(o, live, TUE), [], 'a paused market is not named as silent');
 };
 
 let failed = 0;
