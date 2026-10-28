@@ -9,6 +9,8 @@
 // --readme      the research ledger of this repo (default kalshi-scalper/README.md next to the repo root)
 // --mechanisms  the cross-session index of crossed-off mechanisms (default ../shwoop-server/research/MECHANISMS.md when it exists)
 // --ledger      the machine ledger of formal runs (runs.jsonl), one JSON object per line (default ../shwoop-server/research/ledger/runs.jsonl when it exists)
+// --readme-branch  a git ref (for example origin/claude/epic-ptolemy-0amjd9): read the research ledger from THAT branch instead of the working tree. The research session pushes its newest
+//               work to its own branch, not main, so the working tree README is days old. Run `git fetch origin` first. Overrides --readme.
 // --events      the research session's recent messages as JSON: an array of strings or of { text }. The director saves list_events output here.
 
 const fs = require('fs');
@@ -131,14 +133,23 @@ function render(s) {
   return L.join('\n');
 }
 
-module.exports = { build, render, registrations, verdicts, FAMILIES, L1_VARIANT };
+module.exports = { build, render, registrations, verdicts, readmeFromRef, FAMILIES, L1_VARIANT };
+
+// The README at a git ref, written to a temp file so build() can read it like any other path. Returns null when the ref or the file is not there (the report then says the input is MISSING).
+function readmeFromRef(root, ref) {
+  try {
+    const text = require('child_process').execFileSync('git', ['-C', root, 'show', ref + ':kalshi-scalper/README.md'], { encoding: 'utf8', maxBuffer: 64 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+    const f = path.join(require('os').tmpdir(), 'rd-readme-' + process.pid + '.md');
+    fs.writeFileSync(f, text); return f;
+  } catch (e) { return null; }
+}
 
 if (require.main === module) {
   const root = path.resolve(__dirname, '..', '..', '..', '..');
   const sib = path.resolve(root, '..', 'shwoop-server', 'research');
   const pick = (p) => (fs.existsSync(p) ? p : null);
   const s = build({
-    readme: arg('readme', path.join(root, 'kalshi-scalper', 'README.md')),
+    readme: (arg('readme-branch', null) && readmeFromRef(root, arg('readme-branch', null))) || arg('readme', path.join(root, 'kalshi-scalper', 'README.md')),
     mechanisms: arg('mechanisms', pick(path.join(sib, 'MECHANISMS.md'))),
     ledger: arg('ledger', pick(path.join(sib, 'ledger', 'runs.jsonl'))),
     events: arg('events', null), days: arg('days', 14), now: arg('now', null),
