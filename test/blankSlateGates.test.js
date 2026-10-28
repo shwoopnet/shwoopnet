@@ -41,7 +41,7 @@ gates.B2 = () => {
   const mod = html.slice(html.indexOf('<script type="module">'), html.indexOf('</script>', html.indexOf('<script type="module">')));
   const methods = [...mod.matchAll(/^    (\w+): function/gm)].map((m) => m[1]).sort();
   assert.deepStrictEqual(methods, [
-    'kalshiBookSnaps', 'kalshiBookStatus', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline', 'kalshiOrdersSince',   // one admin-read query for the account result line's long ranges (Oct 24, 2026)
+    'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline', 'kalshiOrdersSince',   // one admin-read query for the account result line's long ranges (Oct 24, 2026)
    
     'kalshiPushKey', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe',      // the phone alerts (Oct 20, 2026): the owner's own functions, admin only
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
