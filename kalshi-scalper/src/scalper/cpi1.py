@@ -26,7 +26,7 @@ NC_NAME = {"head": "CPI Inflation", "core": "Core CPI Inflation"}
 ACT_NAME = {"head": "Actual CPI Inflation", "core": "Actual Core CPI Inflation"}
 MONTHS = {m: i + 1 for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"])}
 EDGE, MIN_ERR_MONTHS, LEAD_S = 0.05, 36, 86400
-MIN_N, MIN_EVENTS, BAR_PF, BAR_C, BAR_Z, FALS_PF = 100, 15, 1.5, 0.02, 2.0, 1.1
+MIN_N, MIN_EVENTS, BAR_PF, BAR_C, BAR_Z, FALS_PF = 100, 25, 1.5, 0.02, 2.5, 1.1
 
 
 def fee(p: float, m: float = 1.0) -> float:
@@ -160,21 +160,39 @@ def main(argv):
                 net = (0.0 if yes else 1.0) - (1 - bid) - fee(1 - bid); st = (0.0 if yes else 1.0) - (1 - bid) - fee(1 - bid, 1.2)
             else:
                 continue
-            trades[kind].append((close, m["ev"], net, st))
+            trades[kind].append((close, m["ev"].split("-")[-1], net, st))
     def pf(xs):
         w = sum(x for x in xs if x > 0); l = -sum(x for x in xs if x < 0); return w / l if l else float("inf")
+    import hashlib
+    lines.append("nowcast file sha256 " + hashlib.sha256((D / "nowcast.json").read_bytes()).hexdigest()[:16] + " (snapshot taken at download; a later change in the history would show as a different hash)")
+    for kind in SERIES:
+        tbl = nowcast_table(kind)
+        row = []
+        for k in (1, 5, 10, 20):
+            e = [t["actual"] - t["nc"][-k][1] for t in tbl.values() if t["actual"] is not None and len(t["nc"]) >= k]
+            row.append(f"{k} labels before the end: RMSE {np.sqrt(np.mean(np.square(e))):.3f} (n {len(e)})" if e else f"{k}: none")
+        lines.append(f"{kind} nowcast error by vintage age (a back-filled archive would show no growth with age): " + "; ".join(row))
     verdict = "NOT_ENOUGH_DATA"
     for label, tr in (("headline", trades["head"]), ("core", trades["core"]), ("pooled", trades["head"] + trades["core"])):
         if not tr:
             lines.append(f"{label}: no trades"); continue
         tr = sorted(tr); nets = [t[2] for t in tr]; sts = [t[3] for t in tr]
-        evs = sorted({t[1] for t in tr}); half = len(tr) // 2
+        rels = sorted({t[1] for t in tr}, key=lambda r: (int(r[:2]), MONTHS[r[2:5]]))
+        order = {r: i for i, r in enumerate(rels)}
+        h1 = [t[2] for t in tr if order[t[1]] < len(rels) // 2]; h2 = [t[2] for t in tr if order[t[1]] >= len(rels) // 2]
         m, _, z = cluster_mean_z([(t[1], t[2]) for t in tr])
         lr = sum(1 for x in nets if x < 0) / len(nets)
-        ok = len(tr) >= MIN_N and len(evs) >= MIN_EVENTS and pf(nets) >= BAR_PF and m >= BAR_C and z >= BAR_Z and pf(nets[:half]) > 1 and pf(nets[half:]) > 1 and pf(sts) > 1.2
-        lines.append(f"{label:9s} PF {pf(nets):.2f} (fees x1.2 {pf(sts):.2f}), loss rate {100 * lr:.0f}%, {len(tr)} trades on {len(evs)} events, mean {100 * m:+.2f}c, z {z:+.2f}, halves PF {pf(nets[:half]):.2f} / {pf(nets[half:]):.2f} {'PASS' if ok else ''}")
+        avg_fee = sum(fee(0.5) for _ in [0]) if False else None
+        lines.append(f"{label:9s} PF {pf(nets):.2f} (fees x1.2 {pf(sts):.2f}), loss rate {100 * lr:.0f}%, {len(tr)} trades on {len(rels)} independent releases (months), mean {100 * m:+.2f}c, release-clustered z {z:+.2f}, halves PF {pf(h1):.2f} / {pf(h2):.2f}")
         if label == "pooled":
-            verdict = "NOT_YET_FALSIFIED" if ok else ("FALSIFIED" if (len(tr) >= MIN_N and pf(nets) < FALS_PF) else "NOT_ENOUGH_DATA")
+            if len(rels) < MIN_EVENTS:
+                verdict = "NOT_ENOUGH_DATA"
+            elif pf(nets) < BAR_PF or pf(h1) < 1 or pf(h2) < 1:
+                verdict = "FALSIFIED"
+            elif z >= BAR_Z and m >= BAR_C and pf(sts) > 1.2:
+                verdict = "NOT_YET_FALSIFIED"
+            else:
+                verdict = "NOT_ENOUGH_DATA"
     lines.insert(0, f"CPI1 {verdict}")
     RESULT.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
 
