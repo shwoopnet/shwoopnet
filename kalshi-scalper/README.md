@@ -7189,3 +7189,8 @@ Prediction: cheap contracts lose over 60% (favourite-longshot bias), so large-mu
 ### Result: AUTO2 (2026-10-28)
 
 `FALSIFIED`. 38,400 trees, 26 train winners (PF 2.5+), 0 passed validation. Best: train PF 2.68 (n=107) fell to validation PF 1.21 (n=57); the rest fell to 0.78 to 1.07. Large percentage targets on contracts at 80c or less found nothing that held past the training days.
+
+## Pre-registration: AUTO3 (order flow and cross-asset features)
+
+AUTO1's machinery (cent targets {5, 8, 10, 15, 20, 30c} x stops {none, 8, 12, 16, 20, 30c}, trees, seeds, pass ladder, day split) with: entries every minute 840 to 180 seconds left; entry ask 3c to 85c only (excludes the favourite buy); time limit 60 seconds left (never held to settlement). New features, all known at entry: Binance perpetual taker buy imbalance over 1 and 5 minutes and 1 and 10 minute returns (signed toward the side), 5 minute volume against its 60 minute average, the other asset's contract mid change over 2 minutes (Bitcoin for Ethereum and Gold, Ethereum for Bitcoin, signed), the contract's own 3 minute volume and open-interest change. Who pays, if it works: slow quoters who do not watch the perp's order flow.
+Disclosure: this is the THIRD read of the same holdout days; a pass is weak evidence and only earns a forward read. Prediction: zero to two holdout passes.
