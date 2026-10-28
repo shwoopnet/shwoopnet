@@ -554,7 +554,7 @@
      Everything a finger has to hit is at least 40px, the switch gets a larger invisible hit area, and the nav labels are 11px. Nothing changes on a desktop. */
   @media (max-width:700px){
     .kal-mini{ min-height:40px; padding:8px 14px; }
-    .kal-btn, .kal-input, select.kal-input, .tf-btn, #signOutBtn, #resetPrefsBtn, #kalTradeFilter, #kalBookHours{ min-height:40px; }
+    .kal-btn, .kal-input, select.kal-input, .tf-btn, #signOutBtn, #resetPrefsBtn, #kalTradeFilter{ min-height:40px; }
     .kal-pill{ padding:9px 14px; }
     .kal-layout-body label{ min-height:44px; }
     .kal-fold > summary{ min-height:40px; display:flex; align-items:center; }
@@ -795,9 +795,9 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-template-areas:"acct acct" "stat pnl" "pos pos" "trd trd"; gap:18px; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-auto-flow:row dense; gap:18px; }   /* no named areas: a card's place follows its order (set by the layout code), so moving a card actually moves it (it did nothing while each card was pinned to its own area) */
   .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
-  .kal-console [data-card="account"]{ grid-area:acct; }
+  .kal-console [data-card="account"]{ grid-column:1 / -1; }
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
@@ -815,10 +815,10 @@
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
-  .kal-console [data-card="status"]{ grid-area:stat; align-self:stretch; }
-  .kal-console [data-card="pnl"]{ grid-area:pnl; align-self:stretch; }
-  .kal-console [data-card="positions"]{ grid-area:pos; align-self:start; }
-  .kal-console [data-card="trades"]{ grid-area:trd; align-self:start; }
+  .kal-console [data-card="status"]{ align-self:stretch; }
+  .kal-console [data-card="pnl"]{ align-self:stretch; }
+  .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
+  .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) repeat(3, minmax(0,1fr)); gap:10px 20px; align-items:center; padding:20px 22px; }
@@ -836,7 +836,8 @@
   .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
-    .kal-console{ grid-template-columns:minmax(0,1fr); grid-template-areas:"acct" "stat" "pnl" "pos" "trd"; }
+    .kal-console{ grid-template-columns:minmax(0,1fr); }
+    .kal-console [data-card]{ grid-column:1 / -1; }
     .kal-console [data-card="account"]{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
     .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; grid-row:auto; }
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
@@ -1107,19 +1108,9 @@
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
-    // The recorder's stored order-book snapshots (one document per minute, admin read only), oldest first, from a time. At most 1,500 minutes.
-    // The recorder's own heartbeat document (when it last ran and how many snapshots and errors it had).
-    kalshiBookStatus: function(){
-      return getDoc(doc(db, 'kalshiBookMeta', 'status')).then(function(s){ return s.exists() ? s.data() : null; });
-    },
     // Every order the bot sent from a time on (admin read only), for the account result line's longer ranges. Read once per range and kept for ten minutes, never on a timer.
     kalshiOrdersSince: function(sinceMs){
       return getDocs(query(collection(db, 'kalshiLiveOrders'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(20000))).then(function(q){
-        return q.docs.map(function(d){ return d.data(); });
-      });
-    },
-    kalshiBookSnaps: function(sinceMs){
-      return getDocs(query(collection(db, 'kalshiBookSnaps'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(1500))).then(function(q){
         return q.docs.map(function(d){ return d.data(); });
       });
     }
@@ -1273,11 +1264,6 @@
             <div class="kal-actions"><button class="kal-btn kal-btn-ghost" id="kalDiagCopy" type="button">Copy order diagnostics</button> <button class="kal-btn kal-btn-ghost" id="kalOrdersCopy" type="button">Copy all orders</button></div>
             <div class="kal-note" id="kalDiagMsg"></div>
             <textarea id="kalDiagBox" class="kal-input" rows="6" style="display:none;width:100%" readonly></textarea>
-            <div class="kal-actions">
-            <label class="kal-note" style="margin:0">Order book snapshots, last <select class="kal-input" id="kalBookHours" style="width:auto"><option value="1">1 hour</option><option value="3">3 hours</option><option value="6" selected>6 hours</option><option value="12">12 hours</option><option value="24">24 hours</option></select></label>
-            <button class="kal-btn kal-btn-ghost" id="kalBookDownload" type="button">Download book snapshots</button>
-          </div>
-            <div class="kal-note" id="kalBookMsg"></div>
           </div>
         </details>
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
@@ -1479,6 +1465,8 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
+                  <li>Layout: moving cards on the Bot page works again (each card was pinned to its own spot, so the arrows and dragging changed nothing) (#601)</li>
+                  <li>Tools menu: removed the order book snapshot download and its recorder warning (the recorder has been off since Oct 21, so it said it had stopped) (#601)</li>
                   <li>Brief charts: the overnight and weekend gaps in stock, gold and oil weeks are drawn as small breaks instead of blank stretches, and the week has a date label every two days (#600)</li>
                   <li>XRP is paused in the bot until the owner says, after the Nov 12 forward reads (profit factor 0.49 over 65 live fills); the silent-market warning no longer names it (#598)</li>
                 </ul>
@@ -1959,47 +1947,6 @@
     return m[1] + ' ' + (h % 12 === 0 ? 12 : h % 12) + ':' + mi + ' ' + (h < 12 ? 'AM' : 'PM') + ' CT';
   }
 
-  // What to tell the owner when an export has nothing in it, so a silent recorder, a stopped one and one whose Kalshi reads fail are told apart.
-  // docs: the minute documents found; status: the heartbeat document or null; hours: the window asked for; now: ms.
-  function kalshiBookExportNote(docs, status, hours, now){
-    var ago = function(ms){ var m = Math.round((now - ms) / 60000); return m < 90 ? m + ' minutes ago' : Math.round(m / 60) + ' hours ago'; };
-    var d = (docs || []).filter(function(x){ return x && Array.isArray(x.snaps); });
-    if(d.length){
-      var snaps = d.reduce(function(n, x){ return n + x.snaps.length; }, 0);
-      if(snaps){ return ''; }
-      var firstErr = null;
-      d.forEach(function(x){ if(!firstErr && Array.isArray(x.errs) && x.errs[0]){ firstErr = x.errs[0].e || JSON.stringify(x.errs[0]); } });
-      return 'Found ' + d.length + ' minute documents, but none hold a snapshot. The recorder is running and its Kalshi reads are failing.' + (firstErr ? ' First error: ' + String(firstErr).slice(0, 160) : '');
-    }
-    if(!status || !Number.isFinite(status.lastTickMs)){ return 'The recorder has never saved anything (it has no heartbeat). It is not deployed or not running: check the Firebase functions logs for kalshiBookRecorder.'; }
-    if(now - status.lastTickMs > 180000){ return 'The recorder last ran ' + ago(status.lastTickMs) + ' and has stopped (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors that run). Check the Firebase functions logs for kalshiBookRecorder.'; }
-    return 'The recorder ran ' + ago(status.lastTickMs) + ' (' + (status.snaps || 0) + ' snapshots, ' + (status.errs || 0) + ' errors) but no minute documents are in the last ' + hours + ' hours. Check Firestore for kalshiBookSnaps and the functions logs for write errors.';
-  }
-
-  // The recorder's order-book snapshots as CSV, one row per snapshot, for testing the quoting ideas that need real depth. The recorder stores each
-  // side's best three levels with the best LAST; here they are written best first. A side with no book is left empty, never 0 (zero would read
-  // as a free price). Pure: it reads nothing from the page.
-  function kalshiBookCsv(minuteDocs){
-    var cols = ['t', 'series', 'ticker', 'listBid', 'listAsk', 'yesBid', 'yesAsk', 'noBid', 'noAsk', 'yesDepth3', 'noDepth3',
-      'y1p', 'y1q', 'y2p', 'y2q', 'y3p', 'y3q', 'n1p', 'n1q', 'n2p', 'n2q', 'n3p', 'n3q'];
-    var cell = function(v){ return v === undefined || v === null || (typeof v === 'number' && !Number.isFinite(v)) ? '' : String(v).replace(/[",\n]/g, ' '); };
-    var lv = function(arr){
-      var best = (Array.isArray(arr) ? arr : []).slice().reverse(), out = [];
-      // A level is {p, q} (Firestore does not allow arrays inside arrays); the older pair form [p, q] is still read.
-      for(var i = 0; i < 3; i++){ var L = best[i]; out.push(L ? (L.p !== undefined ? L.p : L[0]) : '', L ? (L.q !== undefined ? L.q : L[1]) : ''); }
-      return out;
-    };
-    var rows = [], minutes = 0;
-    (minuteDocs || []).forEach(function(d){
-      if(!d || !Array.isArray(d.snaps)){ return; }
-      minutes++;
-      d.snaps.forEach(function(x){
-        if(!x){ return; }
-        rows.push([x.t, x.s, x.k, x.ly, x.la, x.yb, x.ya, x.nb, x.na, x.yd, x.nd].concat(lv(x.yl), lv(x.nl)).map(cell).join(','));
-      });
-    });
-    return { csv: [cols.join(',')].concat(rows).join('\n'), minutes: minutes, snaps: rows.length };
-  }
 
   // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
   // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
@@ -2666,26 +2613,6 @@
 
     renderKalshiL1();
   }
-  // Downloads the recorder's snapshots as a compressed CSV (plain CSV if the browser cannot compress). Admin only, and reads only.
-  document.getElementById('kalBookDownload').addEventListener('click', function(){
-    var api = window.__shwoopAPI, msg = document.getElementById('kalBookMsg'), btn = document.getElementById('kalBookDownload');
-    if(!api || !api.kalshiBookSnaps || !currentUserIsAdmin){ msg.textContent = 'Not available: sign in as the admin first.'; return; }
-    var hours = Number(document.getElementById('kalBookHours').value) || 6, since = Date.now() - hours * 3600000;
-    btn.disabled = true; msg.textContent = 'Reading the recorder...';
-    Promise.all([api.kalshiBookSnaps(since), api.kalshiBookStatus ? api.kalshiBookStatus().catch(function(){ return null; }) : Promise.resolve(null)]).then(function(both){
-      var docs = both[0], r = kalshiBookCsv(docs);
-      if(!r.snaps){ msg.textContent = kalshiBookExportNote(docs, both[1], hours, Date.now()); return; }
-      var stamp = new Date(since).toISOString().slice(0, 16).replace(/[-:T]/g, '');
-      var save = function(blob, name){
-        var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click();
-        setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
-        msg.textContent = 'Downloaded ' + name + ': ' + r.snaps + ' snapshots from ' + r.minutes + ' minutes (' + Math.round(blob.size / 1024) + ' KB).';
-      };
-      if(typeof CompressionStream === 'function' && typeof Response === 'function'){
-        new Response(new Blob([r.csv]).stream().pipeThrough(new CompressionStream('gzip'))).blob().then(function(b){ save(b, 'kalshi-books-' + stamp + '.csv.gz'); }, function(){ save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); });
-      } else { save(new Blob([r.csv], { type: 'text/csv' }), 'kalshi-books-' + stamp + '.csv'); }
-    }).catch(function(err){ msg.textContent = 'Could not read the snapshots: ' + ((err && err.message) || 'unknown'); }).then(function(){ btn.disabled = false; });
-  });
   // Copies the order records as CSV. If the browser refuses clipboard access the text is shown in a box to copy by hand.
   // Phone alerts (the owner's request, Oct 20, 2026): Web Push to this phone or browser, sent by the owner's own Cloud Functions when the bot enters, sells, stops or has an issue (kalshiPushLib.js).
   // It is a switch in the Tools card: off until the owner taps it, and the browser's own permission prompt appears only from that tap (the one place the page asks for notification permission).
@@ -3519,10 +3446,18 @@ kalshiStatusTick();
     var DEFAULT_ORDER = Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); });
     function currentOrder(){ return Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); }); }
     // Saved order first (unknown names ignored), then any card the saved list does not mention, in its default place.
+    // The rail and main wrappers dissolve into the grid (display:contents), so what sets a card's place is its CSS order, not its place in the markup. The rail's cards and the main column's cards are dealt into the default slots (account, status, result line, positions, trades) in the order each column holds them.
+    function flow(){
+      var rail = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-rail > [data-card]')), main = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-main > [data-card]')), seq = [], r = 0, m = 0;
+      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
+      rail.slice(r).concat(main.slice(m)).forEach(function(c){ seq.push(c); });
+      seq.forEach(function(c, i){ c.style.order = String(i); });
+    }
     function applyOrder(){
       var want = (layout.order || []).filter(function(k, i, a){ return DEFAULT_ORDER.indexOf(k) > -1 && a.indexOf(k) === i; });
       DEFAULT_ORDER.forEach(function(k){ if(want.indexOf(k) < 0){ want.push(k); } });
       want.forEach(function(k){ var c = grid.querySelector('[data-card="' + k + '"]'); if(c){ c.parentNode.appendChild(c); } });   // each card moves only within its own column
+      flow();
     }
     function apply(){
       applyOrder();
@@ -3546,7 +3481,7 @@ kalshiStatusTick();
     if(presentBtn){ presentBtn.addEventListener('click', function(){ kalshiSetPresent(document.documentElement.getAttribute('data-present') !== 'on'); }); }
     var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
     function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
-    function commitOrder(){ layout.order = currentOrder(); save(); }
+    function commitOrder(){ layout.order = currentOrder(); flow(); save(); }
     function setUnlocked(on){
       grid.classList.toggle('kal-unlocked', on);
       Array.prototype.forEach.call(grid.querySelectorAll('[data-card]'), function(c){
@@ -3597,7 +3532,7 @@ kalshiStatusTick();
       var r = over.getBoundingClientRect();
       var after = e.clientY > r.top + r.height / 2;   // the cards of a column are stacked, so above or below the middle
       var want = after ? over.nextSibling : over;
-      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); }
+      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); flow(); }
     });
     grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
     grid.addEventListener('dragend', function(){
