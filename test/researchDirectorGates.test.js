@@ -72,6 +72,17 @@ gates.R7 = () => {
   assert.ok(/RESEARCH SCOREBOARD/.test(out) && /There is no promote verb/.test(out));
 };
 
+gates.R8 = () => {
+  // The ledger is read from the research session's own branch (it does not push to main), and a missing branch is reported as MISSING, not silently replaced by a stale file.
+  const src = fs.readFileSync(path.join(root, '.claude', 'skills', 'research-director', 'scripts', 'scoreboard.js'), 'utf8');
+  assert.ok(/--readme-branch/.test(src) && /git', \['-C', root, 'show'/.test(src));
+  assert.ok(/--readme-branch origin\/claude\/epic-ptolemy-0amjd9/.test(skill), 'the skill tells the director to use it');
+  assert.strictEqual(sb.readmeFromRef(root, 'origin/this-branch-does-not-exist'), null);
+  // A real ref works: HEAD has the README in this repo.
+  const f = sb.readmeFromRef(root, 'HEAD');
+  assert.ok(f && /Pre-registration/.test(fs.readFileSync(f, 'utf8')));
+};
+
 let failed = 0;
 for (const k of Object.keys(gates)) { try { gates[k](); console.log(k + ' PASS'); } catch (e) { failed++; console.log(k + ' FAIL ' + e.message); } }
 process.exit(failed ? 1 : 0);
