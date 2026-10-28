@@ -7131,3 +7131,25 @@ Markets in scope: Kalshi's Bitcoin and gold contracts (15 minute, hourly, daily 
 ### NEWS1 precondition check (2026-10-28), no strategy run
 
 Main session's condition: at least 100 independent events with a real bid and ask 8 hours before each call. Measured on the earnings-call word markets: 457 events, only 76 have any quoted market at that time (1,103 of 6,346 markets). 76 is under 100, so NEWS1 would be `NOT_ENOUGH_DATA` before any GDELT pull. Also out of scope: the owner limited research to Bitcoin and gold on 2026-10-28. NEWS1 and INDEX1 stay parked unless the owner re-opens scope. Nothing was tuned.
+
+## Pre-registration: SCALP1 and SCALP2 (owner, 2026-10-28: full scalping strategies, Bitcoin, Gold, Ethereum 15 minute markets, never hold to settlement)
+
+Two full strategy cards. Both enter and exit inside the window. Neither may be held to settlement: any position still open at 120 seconds left is sold at the bid. Both sit under the owner's rule that a pass needs a forward read and the owner's decision, and neither may overlap L1 (they are flat by 2 minutes left, and the 92c hold is not tested here). Research only.
+
+### SCALP1: spot-lag scalp (Bitcoin and Ethereum)
+1. Market: KXBTC15M and KXETH15M, entries only from 10 minutes left to 5 minutes left in the window.
+2. Entry: fair probability from spot = Phi(ln(S/K) / (sigma1 x sqrt(minutes left))), sigma1 = standard deviation of the previous 60 one-minute spot returns (past only), S = spot bar that closed one minute earlier. Buy the side whose ask is at least 8c BELOW fair, ask between 15c and 70c. Pay the ask of that minute's closing quote. At most one entry per asset per window.
+3. Size: same as live risk: 1 contract per $43 of balance, window cap 4.5% of base, daily loss stop 5% of base. Measured per contract, plus a $500 account line (11 contracts).
+4. Exit: sell at the bid when it reaches entry + 8c (profit target); sell when it falls to entry - 6c (stop); sell at the bid at 120 seconds left (time limit). Checked on each later minute's closing bid only (no intrabar high), so fills are not flattered.
+5. Management: one open position per asset, flat by 120 seconds left, daily loss stop 5% of base, no entry after the stop.
+6. Why it earns: quote makers update on a delay and retail buys the contract on the chart, so the contract trails the spot move by a few cents; we are paid by the slow quote. Honest note: the same spot data is public and makers are fast. Fee 7% x p x (1-p) on BOTH legs, stressed at 1.2x.
+Numeric prediction: profit factor 0.85 after fees (a fail). Kill criteria: fewer than 300 entries or fewer than 40 days = NOT_ENOUGH_DATA; profit factor under 1.20 after fees, under 1.00 in either half of the days, or day-clustered z under 2.0 = FALSIFIED (this one-read test cannot say NOT_YET_FALSIFIED unless all pass, and a pass still needs a forward read).
+
+### SCALP2: overshoot bounce scalp (Gold, Bitcoin, Ethereum)
+1. Market: KXGOLD15M, KXBTC15M, KXETH15M, entries from 10 minutes left to 5 minutes left. Reported per asset; Gold is the main one (no spot data, so this card uses the contract only).
+2. Entry: a side whose bid fell at least 15c over the last 2 minutes and whose ask is now between 15c and 40c. Pay the ask. At most one entry per asset per window.
+3. Size, 4. Exit, 5. Management: exactly as SCALP1 (target +8c, stop -6c, time limit 120 seconds left, one position, same loss stop).
+6. Why it earns: panic sellers cross the spread after a sharp move and price overshoots; we buy from them. Honest note: BOUNCE1 and REV1 found no such edge for Bitcoin, so the prior is low; Gold and Ethereum are the new part.
+Numeric prediction: profit factor 0.80 (a fail). Kill criteria: same as SCALP1, per asset and pooled; the pooled read decides, per asset lines are information only.
+
+Data: book, l1b and fresh candle files (one-minute bid and ask, Aug to Oct 2026), spot bars from search5k. Window drift cannot be fitted: every number above is fixed now. One run, then it is closed.
