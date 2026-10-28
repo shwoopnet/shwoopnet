@@ -7199,3 +7199,5 @@ Disclosure: this is the THIRD read of the same holdout days; a pass is weak evid
 
 `FALSIFIED`. 69,120 trees, 384 train winners, 13 passed validation, 12 passed the mutation test, 1 distinct (the 12 were near copies). That one (Bitcoin, 3.5 minutes left or less, ask 48c or less, spot not far past the strike, open interest rising; target +15c, stop -16c): train PF 3.48 n=111, validation 2.96 n=109, holdout 1.24 n=135, loss rate 71%. (The result file's first line says "AUTO1" because the label was copied; it is AUTO3.)
 Tally for AUTO1 to AUTO3: 176,640 trees, 827 train winners, 49 passed validation, 0 admissible holdout passes (AUTO1's 2 were favourite buys). The holdout days have now been read three times; reading them again would eventually pass something by luck, so further rounds need unseen days (recorder data from 2026-10-28 on).
+
+Recorder look 2026-10-28 (information only): 105 of 300 trades over 7 of 10 dates, 0% 429, clock_ok still False. Read not yet due.
