@@ -62,6 +62,10 @@ gates.R4 = async () => {
   const r = await call(boom, { headers: { authorization: 'Bearer ' + TOKEN } });
   assert.strictEqual(r.code, 500);
   assert.ok(!/SECRET|Firestore/.test(JSON.stringify(r.body)), 'the error text is not echoed');
+  let logged = null;
+  const logging = lib.makeReportHandler({ getToken: () => TOKEN, now: () => NOW, readOrders: async () => { throw new Error('boom detail'); }, logError: (e) => { logged = e.message; } });
+  await call(logging, { headers: { authorization: 'Bearer ' + TOKEN } });
+  assert.strictEqual(logged, 'boom detail', 'the cause reaches the log, not the caller');
   const big = await call(handler([]), { headers: { authorization: 'Bearer ' + TOKEN }, query: { hours: '99999999' } });
   assert.strictEqual(big.body.hours, lib.MAX_HOURS, 'the window is capped');
 };
@@ -73,6 +77,8 @@ gates.R5 = () => {
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
   const fn = idx.slice(idx.indexOf('exports.kalshiNightlyReport'));
   assert.ok(/secrets: \[KALSHI_REPORT_TOKEN\]/.test(fn) && !/KALSHI_LIVE/.test(fn), 'only the report token');
+  assert.ok(/ensureDefaultAdminApp\(\); return \(await getFirestore\(\)/.test(fn), 'the default app is ensured before Firestore is read (the first deploy skipped it and every call answered 500)');
+  assert.ok(/logError: \(e\) => console\.error/.test(fn) && !/KALSHI_REPORT_TOKEN\.value\(\)[^\n]*console/.test(fn), 'a failure is logged without the token');
   assert.ok(/\.collection\("kalshiLiveOrders"\)\.where\("ts", ">=", sinceMs\)\.get\(\)/.test(fn) && !/\.(set|update|add|delete)\(/.test(fn), 'one read of the bot orders');
   assert.ok(idx.indexOf('exports.kalshiBookRecorder') < idx.indexOf('exports.kalshiNightlyReport'), 'after the recorder, so the no-order-code slices still cover everything before it');
   const sh = fs.readFileSync(path.join(root, 'functions', 'deploy-report.sh'), 'utf8');

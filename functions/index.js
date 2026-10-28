@@ -789,6 +789,8 @@ exports.kalshiNightlyReport = onRequest(
   kalshiReport.makeReportHandler({
     getToken: () => KALSHI_REPORT_TOKEN.value(),
     now: () => Date.now(),
-    readOrders: async (sinceMs) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()),
+    logError: (e) => console.error("kalshiNightlyReport: " + String((e && e.name) || "Error") + ": " + String((e && e.message) || e).slice(0, 200)),
+    // The default app must exist before getFirestore() (see ensureDefaultAdminApp above); the first deploy of this endpoint skipped it and answered 500 "could not read orders".
+    readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
   })
 );
