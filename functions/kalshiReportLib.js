@@ -89,6 +89,8 @@ function makeReportHandler(deps) {
       const orders = await deps.readOrders(now - hours * 3600000);
       res.status(200).json(buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1"));
     } catch (e) {
+      // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
+      if (typeof deps.logError === "function") deps.logError(e);
       res.status(500).json({ error: "could not read orders" });   // never echo the error text
     }
   };

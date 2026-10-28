@@ -1465,6 +1465,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
+                  <li>Fixed the nightly order report endpoint answering an error on every call (it did not start its database connection); nothing on the page changes (#604)</li>
                   <li>A nightly order report endpoint (read only, behind a secret token) so the daily results can be fetched without pasting orders; nothing on the page changes (#603)</li>
                   <li>The three probe markets (AUD/USD, USD/CAD, natural gas) are paused in the bot, with no resume date; the silent-market warning skips them (#602)</li>
                   <li>Layout: moving cards on the Bot page works again (each card was pinned to its own spot, so the arrows and dragging changed nothing) (#601)</li>
