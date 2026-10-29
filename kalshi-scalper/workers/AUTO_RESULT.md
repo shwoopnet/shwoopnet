@@ -17,7 +17,7 @@ No new hypothesis, no registration, no try added to N. Nothing here trades, depl
 |---|---|---|
 | LOCK2 | 25 closes per asset (`scalper.lock2 count`) | `scalper.lock2 run` (writes `data/lock2_result.txt`) |
 | MKTTIME1-F | 15 losses in gold's 20:00 to 24:00 CT block, closes after 2026-10-30 00:00 UTC | `scalper.mkttime1f read` (writes `data/mkttime1f_result.txt`) |
-| MM1 | 300 recorded gold 15 minute windows (distinct KXGOLD15M tickers in `quotes/*/quotes.csv.gz` on origin/quote-data) | no scorer exists in `src/scalper` and the registration leaves queue-model choices open, so it logs "MM1 ready, scorer needed" once |
+| MM1 | 300 recorded gold 15 minute windows (distinct KXGOLD15M tickers in `quotes/*/quotes.csv.gz` on origin/quote-data) | built as "log MM1 ready, scorer needed"; the lead then added `scalper.mm1` (MM1S amendment) and wired `scalper.mm1 run` in (commit 8e1edd7; it refuses below 300 usable windows, writes `data/mm1_result.txt`) |
 | RECORD1 | (the daily scheduled task reads it) | logs the count line of `scalper.record1 look` once a day; the look's mean and z are kept out of the log |
 | CONF2 C | 30 kept window C closes (from 2026-10-27) AND `data/conf2_A_done` exists (the lead writes it) | `scalper.conf2 holdout`, output saved to `data/conf2_C_result.txt` |
 
