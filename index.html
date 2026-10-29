@@ -4133,11 +4133,8 @@ kalshiStatusTick();
       var H = 80, T = 4, B = 4, y = function(pc){ return T + (H - T - B) * (1 - (pc - lo) / (hi - lo)); };
       var ticks = chartValueTicks(lo, hi, 4), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
       var grid = ticks.map(function(pc){ return '<line class="' + (pc === 0 ? 'zero' : 'grid') + '" x1="0" x2="200" y1="' + y(pc).toFixed(1) + '" y2="' + y(pc).toFixed(1) + '"></line>'; }).join('');
-      // A market that is closed (a weekend, a halt) leaves a hole in the time axis. The line stops there and starts again, instead of a straight stroke across the gap that looks like a move that never happened.
-      var steps = []; for(var gi = 1; gi < xs.length; gi++){ steps.push(tms ? tms[gi] - tms[gi - 1] : xs[gi] - xs[gi - 1]); }
-      var med = steps.slice().sort(function(a, b){ return a - b; })[Math.floor(steps.length / 2)] || 0, runs = [[]];
-      ser.forEach(function(v, i){ if(i > 0 && tms && med > 0 && steps[i - 1] > med * 3.5){ runs.push([]); } runs[runs.length - 1].push((xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1)); });
-      var pts = runs.map(function(r){ return r.length > 1 ? '<polyline points="' + r.join(' ') + '"></polyline>' : ''; }).join('');
+      // One unbroken line (the owner, Oct 29, 2026: "still broken charts, don't like the gaps"). A closed market (a night for stocks, a weekend for gold and oil) leaves a hole in the data, and the line used to stop and start again there. The hole is already squeezed to a short step on the time axis above, so the line now runs straight across it: the move across a close is a real move (the last close to the next open), not a made-up one.
+      var pts = '<polyline points="' + ser.map(function(v, i){ return (xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1); }).join(' ') + '"></polyline>';
       var ylab = ticks.map(function(pc){ return '<span style="top:' + (y(pc) / H * 100).toFixed(1) + '%">' + escapeHtml(chartPctLabel(pc, tstep)) + '</span>'; }).join('');
       plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + pts + '</svg><div class="brief-yaxis">' + ylab + '</div></div>';
       if(tms){
