@@ -1,0 +1,20 @@
+research-data: public Kalshi market data and research databases for kalshi-scalper (made 2026-10-29 by the first research session).
+Note: the Oct 20 archive (MANIFEST.md, restore.sh, *.xz) is kept alongside; this Oct 29 archive is newer and is the one to use for kalshi-scalper/data.
+Contents: one gzipped tar of kalshi-scalper/data (sources only), split into 45 MiB chunks. FILES.txt lists every file inside.
+
+Reassemble (from an empty folder):
+  git fetch origin research-data && git worktree add rd origin/research-data && cd rd
+  sha256sum -c MANIFEST.txt --ignore-missing
+  cat research-data.tar.gz.part-* > research-data.tar.gz && sha256sum research-data.tar.gz   # compare with the WHOLE line below
+  mkdir -p ../kalshi-scalper/data && tar xzf research-data.tar.gz -C ../kalshi-scalper/data
+
+Not included (rebuild commands in kalshi-scalper/HANDOFF_V2.md section 4): derived numpy arrays, sc1.sqlite, fp3*.sqlite, lag2_*.json, sweep1_*, the owner's live order exports (private, not market data).
+
+sha256:
+4c7a03e445ff187be0e9b56afc54f1474d73fe5e0c0d1e8a4f540a1cc2ca3481  research-data.tar.gz.part-00
+fe533f46a9aa4bf52fde37ff53ce8d002036cbf81e58ec5da1733b937d1680f6  research-data.tar.gz.part-01
+fe82c5c3bda18c41a00252e9322fae084ad01767a356f7dd4bc9256323d760c5  research-data.tar.gz.part-02
+51796c1c27c872f096f179809aaf7c70d49be8650c032c508916c807605ba43f  research-data.tar.gz.part-03
+74366b2112a76f4f27d4b1d72f20c6d1351629ec16ca09f86543062eb2eb5b03  research-data.tar.gz.part-04
+e16cdb5de740fe9c9801cb5a39db0a5243b4c85060107f661e8bed5d6782d999  research-data.tar.gz.part-05
+WHOLE 15788a025e39d4872515a88bcad2eb4666936632b863bd88c6eecc43b2efe227  research-data.tar.gz
