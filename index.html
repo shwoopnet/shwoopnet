@@ -445,6 +445,7 @@
   .kal-hc-fill{ fill:rgba(255,255,255,.06); stroke:none; }
   .kal-hc-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px; } .kal-hc-plot{ position:relative; } .kal-hc-below{ fill:rgba(255,255,255,.04); } .kal-hc-target-line{ stroke:rgba(255,255,255,.45); stroke-width:1; stroke-dasharray:5 4; vector-effect:non-scaling-stroke; }
   .kal-hc-target{ position:absolute; left:6px; top:50%; transform:translateY(-100%); font-size:12px; color:var(--paper); background:var(--panel, transparent); padding:0 4px 1px 0; }
+  #kalWinsByCent{ margin-top:10px; }
   .kal-hc-x{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); height:16px; } .kal-hc-y3{ padding-bottom:20px; }
   .kal-hc-paid{ stroke:rgba(255,255,255,.3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
   .kal-hc-dot{ fill:var(--paper); }
@@ -1469,6 +1470,8 @@
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
                   <li>Dogecoin orders go from 3 to 5 contracts (live record: 131 settled, 125 won, +2.66c a contract, both halves positive)</li>
+                  <li>Research recorder R6: the whole 15 minute order book (best 5 prices a side, every 2 seconds) and every public trade for gold, Bitcoin, Ethereum, Dogecoin and XRP, public data only, stops by itself on Nov 13; it replaces the Bitcoin, Ethereum and gold recorder (#621)</li>
+                  <li>Bot status: win rate by price paid is now five price bands (each against the average price paid in it) with the one-row-per-cent list folded underneath</li>
                   <li>Bot status: win rate by price paid (88c, 89c, up to 97c entries), with the win rate each price needs to break even</li>
                   <li>Open positions: the chance chart now runs the whole 0 to 100% with a target price line across the middle (50%, where it flips), and each position says the price that decides it ("Wins if it closes at or above $4,013.48"), both taken from the market itself</li>
                   <li>Gold places no new orders from 8 PM to midnight Central (history and live both weaker in that block); an open gold position is still sold by the exit watch</li>
@@ -3279,11 +3282,24 @@
     });
     return Object.keys(map).map(function(k){ var g = map[k]; g.winPct = g.wins / g.n * 100; return g; }).sort(function(a, b){ return a.cents - b.cents; });
   }
+  // Grouped for reading (the owner, Oct 29, 2026: the one-row-per-cent list was "a mess"): five bands, each with its win rate against the AVERAGE price paid in it, in points (a positive number means the band beat its own price). The cent rows stay, closed, under it.
+  var KAL_PRICE_BANDS = [[0, 87, 'Under 88c'], [88, 90, '88c to 90c'], [91, 92, '91c to 92c'], [93, 94, '93c to 94c'], [95, 97, '95c to 97c'], [98, 100, '98c and over']];
+  function kalshiWinsByPriceBands(list){
+    return KAL_PRICE_BANDS.map(function(b){
+      var g = { label: b[2], n: 0, wins: 0, losses: 0, paid: 0 };
+      (list || []).forEach(function(x){ if(x.cents >= b[0] && x.cents <= b[1]){ g.n += x.n; g.wins += x.wins; g.losses += x.losses; g.paid += x.cents * x.n; } });
+      if(g.n){ g.winPct = g.wins / g.n * 100; g.avgPaid = g.paid / g.n; g.points = g.winPct - g.avgPaid; }
+      return g;
+    }).filter(function(g){ return g.n > 0; });
+  }
   function kalshiWinsByPriceHtml(list, esc){
     if(!list || !list.length){ return ''; }
-    var total = list.reduce(function(a, g){ return a + g.n; }, 0);
-    return '<div class="kal-rows" id="kalWinsByPrice"><div><span class="kal-k">Win rate by price paid, ' + esc(String(total)) + ' settled</span><b>needs the price to break even</b></div>' +
-      list.map(function(g){ return '<div><span class="kal-k">' + esc(String(g.cents)) + 'c entries</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% (needs ' + g.cents + '%)') + '</b></div>'; }).join('') + '</div>';
+    var total = list.reduce(function(a, g){ return a + g.n; }, 0), pts = function(v){ return (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(1); };
+    var bands = kalshiWinsByPriceBands(list);
+    return '<div class="kal-rows" id="kalWinsByPrice"><div><span class="kal-k">Win rate by price paid, ' + esc(String(total)) + ' settled</span><b>points above or below the price paid</b></div>' +
+      bands.map(function(g){ return '<div><span class="kal-k">' + esc(g.label) + '</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% against ' + g.avgPaid.toFixed(1) + '% paid (' + pts(g.points) + ')') + '</b></div>'; }).join('') + '</div>' +
+      '<details class="kal-fold" id="kalWinsByCent"><summary class="kal-lbl">Each price</summary><div class="kal-rows">' +
+      list.map(function(g){ return '<div><span class="kal-k">' + esc(String(g.cents)) + 'c entries</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% (needs ' + g.cents + '%)') + '</b></div>'; }).join('') + '</div></details>';
   }
   // Today's work on the Bot status card (the owner, Oct 26, 2026: something useful there that does not repeat the rest of the page). Counts the bot's own orders from today's US Central date by what happened to them:
   // sent, filled, sent but not filled (an immediate-or-cancel order can miss, and nothing else shows it) and "needs a look" (the answer was lost or refused). Read only, from orders the page already loads.
