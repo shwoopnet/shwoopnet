@@ -1,0 +1,9 @@
+GEN3 VERDICT so far: 2 survivors frozen for the holdout
+GEN3: generated 13237, distinct 5000 (singles 3298, brackets 1702); N tried 438597, Bonferroni z bar 5.17
+discovery PF over distinct: median 0.51, 95th pct 1.10; best with 150+ trades 3.83
+passed discovery 21; failed in validation: VALIDATION_N 0, VALIDATION_PF 5, VALIDATION_STRESS 0, FILL_OPTIMISM 1, VALIDATION_BOOTSTRAP 0, DEFLATION 13; survivors 2
+  PASSED_ALL_GATES_TO_VALIDATION (holdout not yet read): [single both 3060..2760s | ask<=0.1 & d2>0 | TP 0.03 stop None time 60s book spread3] | disc PF 3.48 n=348 closes 211 days 15 | valid PF 2.77 (1c 2.18, stress 2.62) n=229 days 8 z +5.66
+  PASSED_ALL_GATES_TO_VALIDATION (holdout not yet read): [single both 2700..1980s | d5<=0.06 & z<=-0.39 & d1>0.01 & bid<=0.09 | TP 0.08 stop 0.2 time 600s book spread3] | disc PF 2.07 n=448 closes 254 days 15 | valid PF 2.05 (1c 1.72, stress 1.97) n=237 days 8 z +5.28
+  FAILED_GATE_DEFLATION: [single no 3120..2760s | d5<=0.06 & d2<=0.02 & z<=-1.66 & hour>2 | TP 0.05 stop 0.05 time 120s book none] | disc PF 2.08 n=169 closes 96 days 15 | valid PF 3.07 (1c 2.41, stress 2.93) n=104 days 8 z +2.22
+  FAILED_GATE_DEFLATION: [single yes 3240..1920s | bid<=0.05 & ask<=0.45 | TP 0.05 stop 0.2 time 600s book none] | disc PF 2.81 n=364 closes 200 days 15 | valid PF 2.62 (1c 2.01, stress 2.51) n=194 days 8 z +3.28
+  FAILED_GATE_DEFLATION: [single both 2760..1800s | d5<=0.06 & z<=-1.66 | TP 0.12 stop 0.05 time 300s book none] | disc PF 1.88 n=650 closes 277 days 15 | valid PF 2.52 (1c 2.02, stress 2.44) n=310 days 8 z +4.06
