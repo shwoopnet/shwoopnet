@@ -12,6 +12,8 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
   L1Q1       from 2026-11-06, runs `scalper.r6tests run l1q1` (same refusals; writes data/l1q1_result.txt)
   STAB       once a week, on the first pass on or after Monday 01:00 US Central (week marked in data/stab_last_week by the run itself), runs
              `scalper.stab week` (a stability check of L1 as live trades it; writes workers/STABILITY.md; no read, no verdict)
+  FWDLEDGER  every pass, runs `scalper.fwdledger run` (candidates in workers/candidates/*.json, writes workers/FORWARD_LEDGER.md);
+             it only reports forward results after each candidate's freeze, never promotes; its failure stops nothing else
   RECORD1    the daily scheduled task reads it; this only logs the count line of `scalper.record1 look`, once a day
   CONF2 C    ready at 30 kept window C closes (from 2026-10-27), runs `scalper.conf2 holdout` (output saved to data/conf2_C_result.txt),
              and only if data/conf2_A_done exists (the lead writes it after reading window A)
@@ -284,6 +286,9 @@ def check() -> None:
         rc, o = py("scalper.stab", "week")
         log("STAB", f"week {wk} rc={rc}: {last_line(o, 'STAB done')[:400]}")
     status.append(f"STAB last week {STAB_MARK.read_text().strip() if STAB_MARK.exists() else 'never'}")
+    # FWDLEDGER (forward ledger of candidates, report only): every pass, as its own process so a candidate's crash cannot reach this one
+    rc, o = py("scalper.fwdledger", "run", timeout=1800)
+    status.append((last_line(o, "FWDLEDGER") if rc == 0 else f"FWDLEDGER failed rc={rc}: {last_line(o)[:160]}")[:400])
     # RECORD1: count line once a day only
     today = datetime.now(CT).strftime("%Y-%m-%d")
     if s.get("daily") != today:

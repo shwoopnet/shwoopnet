@@ -262,7 +262,7 @@ def render(cands: list, res: dict, now: int) -> str:
             L.append(f"| {c['id']} | {mk} | {c.get('stage', '?')} | {fz} | | | | | | | | | {stamp} | NOT_RUNNABLE: {(c.get('_error') or r['error'])[:120]} |")
             continue
         s = r["s"]
-        flag = "READY FOR THE FALSIFIER" if s["ready"] else ""
+        flag = ("READY FOR THE FALSIFIER" if s["ready"] else "") + (f" EVALUATOR ERRORS {r['ev']['errors']}" if r["ev"]["errors"] else "")
         L.append(f"| {c['id']} | {mk} | {c['stage']} | {fz} | {s['days']} | {s['n']} | {s['wins']} | {s['losses']} | {fpf(s['pf1'])} | "
                  f"{fpf(s['pf10'])} | {s['mean10'] * 100:+.2f}c | {s['per_week']:.1f} | {stamp} | {flag} |")
     L += ["", "## History per candidate", ""]
