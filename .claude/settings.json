@@ -1,1 +1,16 @@
-{ "permissions": { "allow": ["Edit(functions/index.js)", "Edit(firestore.rules)", "Edit(index.html)"] } }
+{
+  "permissions": {
+    "allow": [
+      "Edit(functions/index.js)",
+      "Edit(firestore.rules)",
+      "Edit(index.html)",
+      "mcp__claude-code-remote__send_message",
+      "mcp__claude-code-remote__send_later",
+      "mcp__claude-code-remote__get_session",
+      "mcp__claude-code-remote__list_events",
+      "mcp__claude-code-remote__list_sessions",
+      "mcp__claude-code-remote__get_trigger",
+      "mcp__claude-code-remote__list_triggers"
+    ]
+  }
+}
