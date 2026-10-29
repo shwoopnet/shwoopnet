@@ -7,6 +7,9 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
   LOCK2      ready at 25 closes per asset (`scalper.lock2 count`), runs `scalper.lock2 run` (writes data/lock2_result.txt)
   MKTTIME1-F ready at 15 losses in gold's 20-24 CT block (`scalper.mkttime1f count`), runs `scalper.mkttime1f read`
   MM1        ready at 300 recorded gold 15 minute windows on origin/quote-data; runs `scalper.mm1 run` (refuses below 300 usable windows; writes data/mm1_result.txt)
+  QUOTE2B    from 2026-11-12, runs `scalper.quote2b run` (refuses below 300 usable closes; writes data/quote2b_result.txt)
+  MAKER5     from 2026-11-06, runs `scalper.r6tests run maker5` (refuses below 300 usable R6 windows; writes data/maker5_result.txt)
+  L1Q1       from 2026-11-06, runs `scalper.r6tests run l1q1` (same refusals; writes data/l1q1_result.txt)
   RECORD1    the daily scheduled task reads it; this only logs the count line of `scalper.record1 look`, once a day
   CONF2 C    ready at 30 kept window C closes (from 2026-10-27), runs `scalper.conf2 holdout` (output saved to data/conf2_C_result.txt),
              and only if data/conf2_A_done exists (the lead writes it after reading window A)
@@ -235,6 +238,23 @@ def check() -> None:
                 log("QUOTE2B", last_line(q2b_out.read_text(), "VERDICT"))
             elif not s.get("q2b_refused_logged"):
                 log("QUOTE2B", f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s["q2b_refused_logged"] = True
+    # MAKER5 and L1Q1 (R6T worker, recorder R6); `r6tests run <id>` refuses before 2026-11-06 and below 300 usable windows, so a refusal just waits
+    r6_due = datetime.now(timezone.utc) >= datetime(2026, 11, 6, tzinfo=timezone.utc)
+    r6_outs = {"MAKER5": DATA_DIR / "maker5_result.txt", "L1Q1": DATA_DIR / "l1q1_result.txt"}
+    if all(o.exists() for o in r6_outs.values()):
+        status.append("MAKER5 done ; L1Q1 done")
+    else:
+        rc, o = py("scalper.r6tests", "count", timeout=900)
+        status.append("R6T readiness: " + last_line(o, "R6 count")[:300])
+        for rid, out in r6_outs.items():
+            if out.exists():
+                status.append(f"{rid} done")
+            elif r6_due:
+                rc, o = py("scalper.r6tests", "run", rid.lower())
+                if out.exists():
+                    log(rid, last_line(out.read_text(), "VERDICT"))
+                elif not s.get(f"{rid.lower()}_refused_logged"):
+                    log(rid, f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s[f"{rid.lower()}_refused_logged"] = True
     # CONF2 window C
     if RESULTS["CONF2C"].exists():
         status.append("CONF2 C done")
