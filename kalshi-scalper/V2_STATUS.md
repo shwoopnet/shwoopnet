@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 4:15 PM CT, live marker: Dogecoin 3 to 5 contracts (#623) deployed (owner).** Live reads of Dogecoin split at the first 5 contract order. Per contract nothing changes but fee rounding (slightly cheaper at 5); dollar wins and losses are 5/3 larger. The AUTO loop has not been restarted yet (still the process from 1:47 PM), so the nightly drift check still waits for that restart.
+
 **2026-10-29 4:15 PM CT, information: who loses together in the same window (no try).** Given one coin lost, another coin in the same window lost 30% to 63% of the time (Bitcoin then Ethereum 52%, Dogecoin then Ethereum 63%), against 5% to 6.5% normally; gold is independent (3% to 10% with any coin). Same-side pairs both lost 25% of the time, opposite-side 1%. The live one-crypto-order-per-window rule targets the real cluster; gold plus one coin adds no shared risk.
 
 **2026-10-29 4:15 PM CT, STAB (weekly re-run of the live rule on public candles), built; no flags.** 7 days (Oct 22 to 28) / previous 4 weeks: gold 118 entries, 5.1% losses, PF 1.25 / 535, 5.2%, PF 1.24 (long run 5.27%); Dogecoin 192, 5.2%, 1.24 / 760, 5.7%, 1.12 (long run 5.06%); Bitcoin 6, 0 losses / 43, 0; Ethereum 3, 1 loss / 18, 0 (the smooth gate leaves too few entries to judge either). Runs itself every Monday after 01:00 CT (inside `autoscore`, which the loop starts fresh each hour, so it is live now). Only DRIFT's nightly hook lives in the shell loop itself and waits for the loop restart noted above.
