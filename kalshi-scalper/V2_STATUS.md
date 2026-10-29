@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 2:00 PM, DAILY2 (Kalshi daily oil, euro and yen markets against Yahoo prices), 3 FALSIFIED, 5 NOT_ENOUGH_DATA.** 41 days, at most 14 closes a window (bar needs 30). Every variant loses over all days (-1.7c to -20.5c a contract); the only survivor of two windows (USD/JPY at 60 min, PF 3.50 / 1.87) fell to 0.54 in the holdout. Kalshi's prices beat the outside-reference model (on oil the model bought tails, 88 of 100 lost). Ten year Treasury not runnable (no settled daily series). N tried about 438,930.
+
 **2026-10-29 1:55 PM, LADL1 (L1's rule on the hourly and daily ladders), Bitcoin and Ethereum hourly FALSIFIED; gold daily and weekly NOT_ENOUGH_DATA.** Bitcoin hourly at 6 min PF 1.38 / 0.95 / 0.53 (171 / 171 / 177 closes); Ethereum hourly at 6 min 0.25 / 1.02 / 0.43. Gold daily: 38 closes in all (5 to 10 a window); at 6 min it won all 15 entries, too few to mean anything. (Script printed FALSIFIED for gold through a verdict slip; the registered word is NOT_ENOUGH_DATA.)
 
 **2026-10-29 1:20 PM CT, AUTO built; first live watch.** Forward reads now check themselves every hour (`autoscore`, log in `workers/AUTO_LOG.md`): LOCK2 at 25 closes per asset, MKTTIME1-F at 15 block losses, CONF2 window C at 30 kept closes (after window A is read), RECORD1 count daily, MM1 count (its scorer is not written: the registration leaves the queue model open). Live watch (`workers/LIVEWATCH.md`, aggregates only, nightly): one flag, XRP last 7 days 9 losses in 62 (14.5%) against a history rate of 5.2%, p 0.0045, PF 0.53. XRP is already paused in code since Oct 28, so nothing to act on. Gold 200 settled PF 1.73; Dogecoin 129, 1.74; Bitcoin 155, 0.72; Ethereum 113, 0.92.
