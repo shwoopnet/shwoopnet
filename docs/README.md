@@ -9,6 +9,7 @@ These files are working notes, not part of the app. They are excluded from the p
 | `CAREER_PORTFOLIO.md` | Résumé bullets, stories, quotable numbers with caveats | Weekly, or after a notable change |
 | `OPENING_STRATEGY.md` | History only: the retired opening window paper test (OW1), synopsis and theory | Never; the recorder was removed on 2026-10-12 |
 | `PROPOSALS.md` | Plain-words proposals for money you oversee while L1 runs: core savings, idle cash, a drawdown rule, L1 itself, a paper-first Kalshi experiment, and what is not proposed | When a research result changes the evidence, and before any new money goes anywhere |
+| `SPREAD1_FORWARD_TEST.md` | Spec only: forward test of a spread filter (skip spread of 2c or more) on live L1 orders, shadow rule, sample, verdict words, kill criteria | Never; read once at its trigger |
 | `mockups/` | Fixture-rendered screenshots of the Kalshi page (wide, menu open, phone) | When the page changes |
 
 ## Weekly refresh checklist
