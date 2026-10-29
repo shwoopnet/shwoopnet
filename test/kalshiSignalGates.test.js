@@ -93,10 +93,13 @@ gates.G21 = () => {
   assert.ok(/var haltUnset = kalshiBotState\.control !== null && kalshiBotState\.control\.halt === undefined;/.test(html) && /if\(haltUnset\)\{ el\.innerHTML \+= '<div class="kal-warn">The halt setting has never been saved, and the live scan treats that as halted/.test(html), 'an unsaved halt setting must not read as "not halted"');
   assert.ok(/if\(halted && !window\.confirm\(/.test(html), 'resuming entries must ask first');
   assert.ok(/function kalshiOnHide\(\)\{ stopKalshiPoll\(\); stopKalshiBot\(\); \}/.test(html), 'leaving the page must stop listening');
+  const feed = block(/function startKalshiFeed\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiFeed/, html);
+  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(feed + ')'), 'only an admin may subscribe');
   const start = block(/function startKalshiBot\(\)\{([\s\S]*?)\n  \}\n  function stopKalshiBot/, html);
-  assert.ok(/!currentUserIsAdmin\)\{ return; \}/.test(start + ')'), 'only an admin may subscribe');
+  const stopFeed = block(/function stopKalshiFeed\(\)\{([\s\S]*?)\n  \}\n/, html);
   const stop = block(/function stopKalshiBot\(\)\{([\s\S]*?)\n  \}\n/, html);
-  assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop) && /kalshiLiveEventsUnsub\(\)/.test(stop), 'leaving the tab stops the account timer and every listener');
+  assert.ok(/kalshiLiveEventsUnsub\(\)/.test(stopFeed) && /stopKalshiFeed\(\)/.test(html.slice(html.indexOf('function applyAdminUI'), html.indexOf('function applyAdminUI') + 900)), 'signing out (a non-admin) stops every listener; the bell feed runs for the admin from sign-in, on any page');
+  assert.ok(/clearInterval\(kalshiAcctTimer\)/.test(stop), 'leaving the Bot tab stops the account timer');
   assert.ok(/setInterval\(function\(\)\{ if\(!document\.hidden\)\{ kalshiAcctRefresh\(\); \} \}, 600000\)/.test(start), 'the account is re-read once every 10 minutes, only while the tab is visible');
 };
 
@@ -176,7 +179,7 @@ gates.G24 = () => {
 // On a phone the page must not scroll sideways: the live books grid may never ask for more than the card is wide, and the Layout menu's
 // controls are big enough to tap.
 gates.G25 = () => {
-  assert.ok(/\.kal-bot-grid \.kal-books\{ grid-template-columns:repeat\(auto-fit,minmax\(min\(380px,100%\),1fr\)\); \}/.test(html), 'books grid is capped at the card width');
+  assert.ok(!/kal-books|kalBooks/.test(html), 'the market list is gone, so there is no books grid to overflow');
   assert.ok(/\.kal-layout-body label\{[^}]*min-height:34px/.test(html) && /\.kal-layout-body input\[type=checkbox\]\{ width:18px; height:18px; \}/.test(html), 'layout controls are tappable');
 };
 
@@ -227,7 +230,9 @@ gates.G27 = () => {
   assert.deepStrictEqual(group([null, { orderId: 'x', count: 'bad', price: 'bad' }, { orderId: 'x', count: 1, price: '0.5' }]).length, 1, 'junk is not turned into a number');
   // The page shows grouped trades everywhere it counts them.
   assert.ok(/var gfills = kalshiGroupFills\(a\.fills\.fills\);/.test(html) && !/a\.fills\.fills\.length/.test(html), 'the list and its counts use the grouped trades');
-  assert.ok(/Bot since ' \+ escapeHtml\(kalDate\(tot\.since\)\)/.test(html) && /kalshiPerfStats\(botOrders, tot\.since\)\.total/.test(html) && !/Deposits and manual trades/.test(html) && !/Manual trades and open orders/.test(html), 'the account area shows only the bot\'s own change; the line for deposits and manual trades is gone');
+  // The account card's line is TODAY's result on the US Central date (the owner, Oct 21, 2026), not the all-time total: yesterday's trades must not count, and it needs no starting line.
+  var code = html.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/.*$/gm, '');
+  assert.ok(/<span class="kal-k">Today<\/span>/.test(html) && /kalDayKey\(o\.ts\) === todayKey/.test(html) && /kalshiPerfStats\(todayOrders, 0\)\.total/.test(html) && !/Bot since/.test(code) && !/Deposits and manual trades/.test(html) && !/Manual trades and open orders/.test(html), 'the account area shows only the bot own result for today; the line for deposits and manual trades is gone');
 };
 
 (async () => {

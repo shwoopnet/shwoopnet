@@ -1,0 +1,3 @@
+# A private dashboard: please do not index it. (This only asks; the sign-in is what keeps it private.)
+User-agent: *
+Disallow: /

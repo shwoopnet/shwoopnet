@@ -14,11 +14,16 @@ const ed = crypto.generateKeyPairSync('ed25519');
 const pem = ed.privateKey.export({ type: 'pkcs8', format: 'pem' });
 const gates = {};
 
-function world({ positions, markets = {}, postStatus = 201, post, posStatus = 200 } = {}) {
-  const posts = [];
+function world({ positions, markets = {}, postStatus = 201, post, posStatus = 200, closing = {}, later } = {}) {
+  const posts = [], reads = [], held = new Map(Object.entries(closing));
   const fetchFn = async (url, o) => {
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
-    if (url.includes('/portfolio/positions')) return reply(posStatus, { market_positions: positions || [] });
+    if (url.includes('/portfolio/positions')) {
+      const tk = new URL(url).searchParams.get('ticker');
+      reads.push(tk);
+      // `later` is what the account holds on the read that follows the claim, after something else may have sold it
+      return reply(posStatus, { market_positions: tk && later ? later : (positions || []) });
+    }
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       return reply(200, { market: { status: 'active', exchange_index: 2, ...(markets[tk] || {}) } });
@@ -29,7 +34,8 @@ function world({ positions, markets = {}, postStatus = 201, post, posStatus = 20
     }
     throw new Error('unexpected ' + o.method + ' ' + url);
   };
-  return { posts, run: () => live.flattenAll({ fetchFn, keyId: 'k', pem, now: NOW }) };
+  const store = { async claimClose(ticker, who, now, ttl) { const c = held.get(ticker); if (c && c.by !== who && now - c.at < ttl) return false; held.set(ticker, { by: who, at: now }); return true; } };
+  return { posts, reads, held, run: () => live.flattenAll({ fetchFn, keyId: 'k', pem, now: NOW, store }) };
 }
 const TA = 'KXBTC15M-26OCT081115-15', TB = 'KXGOLD15M-26OCT081115-15';
 
@@ -89,6 +95,40 @@ gates.F5 = () => {
   assert.ok(/id="kalFlattenConfirm" hidden/.test(html) && /go\.addEventListener\('click', function\(\)\{ ask\(true\); \}\)/.test(html), 'the first click only asks');
   assert.ok(/kalshiFlattenAll\(\)/.test(html.slice(html.indexOf("var yes = document.getElementById('kalFlattenYes')"))), 'only the confirm click sends');
   assert.ok(!/it cannot place or change anything/.test(tools), 'the menu does not claim to be read only');
+};
+
+// F6: if the exit watch is closing a market, Flatten leaves that one alone and still closes the others.
+gates.F6 = async () => {
+  const w = world({ positions: [{ ticker: TA, position_fp: '3.00' }, { ticker: TB, position_fp: '2.00' }], closing: { [TA]: { by: 'exit', at: NOW - 5000 } } });
+  const r = await w.run();
+  assert.deepStrictEqual(r.results.map((x) => x.ticker + ':' + x.status), [TA + ':skipped', TB + ':sold']);
+  assert.deepStrictEqual(w.posts.map((b) => b.ticker), [TB], 'only the market nobody else holds is sold');
+  assert.ok(/exit watch is closing it/.test(r.results[0].detail));
+};
+
+// F7: the count sold is what the account holds AFTER the claim, not what the earlier list said. A position the exit watch sold in between is not sold again (that would open the opposite one),
+// and one that shrank is sold at its new size.
+gates.F7 = async () => {
+  const gone = world({ positions: [{ ticker: TA, position_fp: '3.00' }], later: [{ ticker: TA, position_fp: '0.00' }] });
+  const r = await gone.run();
+  assert.deepStrictEqual([gone.posts.length, r.results[0].status, r.results[0].detail], [0, 'skipped', 'already closed'], 'sold in between: nothing is sent');
+  const shrunk = world({ positions: [{ ticker: TA, position_fp: '3.00' }], later: [{ ticker: TA, position_fp: '1.00' }] });
+  await shrunk.run();
+  assert.deepStrictEqual(shrunk.posts.map((b) => b.count), ['1'], 'sold at the size held now, not the size listed');
+  const flipped = world({ positions: [{ ticker: TA, position_fp: '3.00' }], later: [{ ticker: TA, position_fp: '-2.00' }] });
+  await flipped.run();
+  assert.deepStrictEqual(flipped.posts.map((b) => [b.side, b.count]), [['bid', '2']], 'a position that is now the other side is closed in that direction');
+};
+
+// F8: no claim store (or a claim that fails) means no sell, and the result says so; and the exit watch and Flatten share ONE claim function, so neither can drift from the other.
+gates.F8 = async () => {
+  const w = world({ positions: [{ ticker: TA, position_fp: '3.00' }] });
+  const r = await live.flattenAll({ fetchFn: async () => { throw new Error('should not be reached'); }, keyId: 'k', pem, now: NOW, store: null }).catch((e) => ({ ok: false, thrown: e.message }));
+  assert.ok(r.ok === false || (r.results || []).every((x) => x.status !== 'sold'), 'nothing is sold without a store');
+  const libSrc = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.strictEqual((libSrc.match(/await claimClose\(store, /g) || []).length, 2, 'the exit watch and Flatten each call the one shared claimClose');
+  assert.ok(/store: firestoreLiveStore\(db\)/.test(fnSrc), 'the Flatten callable passes the claim store');
+  assert.ok(/kalshiLiveClosing/.test(fnSrc) && !/kalshiLiveClosing/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'the claim documents have no client rule, so only the server can touch them');
 };
 
 (async () => {

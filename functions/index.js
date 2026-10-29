@@ -1,4 +1,4 @@
-const { onCall, HttpsError } = require("firebase-functions/v2/https");
+const { onCall, onRequest, HttpsError } = require("firebase-functions/v2/https");
 const { defineSecret, defineString } = require("firebase-functions/params");
 
 // Optional outside watchdog for the live arm. Put KALSHI_WATCHDOG_URL=<ping url> in
@@ -15,6 +15,9 @@ const KALSHI_STOP_ALERT_URL = defineString("KALSHI_STOP_ALERT_URL", { default: "
 const KALSHI_LIVE_KEY_ID = defineSecret("KALSHI_LIVE_KEY_ID");
 const KALSHI_LIVE_PRIVATE_KEY = defineSecret("KALSHI_LIVE_PRIVATE_KEY");
 const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off" });
+// Phone alerts (Web Push, kalshiPushLib.js): ONE secret, the VAPID private key; the public key is derived from it. Set it with functions/deploy-push.sh, never by pasting it anywhere.
+const KALSHI_PUSH_VAPID_PRIVATE = defineSecret("KALSHI_PUSH_VAPID_PRIVATE");
+const KALSHI_REPORT_TOKEN = defineSecret("KALSHI_REPORT_TOKEN");
 
 // Any signed-in caller passes this first wall; the Kalshi functions then
 // require the owner's email AND the isAdmin flag (assertKalshiAdmin below).
@@ -44,6 +47,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
+const exitAlarm = require("./kalshiExitAlarmLib");
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
 // deploy, stops all buying and Start with one token. The exit watch is untouched either way (it only closes positions the bot already opened).
@@ -52,6 +56,11 @@ const book = require("./kalshiBookLib");
 const marketTape = require("./marketTapeLib");
 const account = require("./kalshiAccountLib");
 const kalshi = require("./kalshiLib");
+const footprint = require("./kalshiFootprintLib");
+const paper = require("./kalshiPaperLib");
+const push = require("./kalshiPushLib");
+const webpush = require("web-push");
+const { onDocumentWritten } = require("firebase-functions/v2/firestore");
 
 // The first host is the one Kalshi's API documentation gives. api.elections sits
 // behind a CDN that refuses Google Cloud addresses (HTTP 403), so it is only the
@@ -167,6 +176,71 @@ exports.kalshiBooks = onCall(async (request) => {
   }
 });
 
+// The footprint view on the Bot page (the owner, Oct 26, 2026): per minute and per YES price, how much the takers sold and bought, from Kalshi's PUBLIC trade tape. Admin only, GET only, keyless,
+// read only: it never signs a request, touches the account or writes anything. Only a market the bot trades is accepted (see validTicker), and one read is bounded in pages and age.
+const KALSHI_TAPE_CACHE_MS = 15000;
+const kalshiTapeCache = new Map();
+// One market's public trades inside a window, newest first as Kalshi sends them; follows the cursor for at most MAX_PAGES pages. `budget.left` is shared across a whole-series read so one busy day cannot run away.
+async function kalshiReadTrades(ticker, win, budget) {
+  const trades = [];
+  let cursor = "";
+  for (let page = 0; page < footprint.MAX_PAGES; page++) {
+    const q = "/markets/trades?ticker=" + encodeURIComponent(ticker) + "&min_ts=" + Math.floor(win.fromMs / 1000) + "&max_ts=" + Math.ceil(win.toMs / 1000) +
+      "&limit=" + footprint.PAGE_LIMIT + (cursor ? "&cursor=" + encodeURIComponent(cursor) : "");
+    const body = await kalshiGetJson(q);
+    const got = Array.isArray(body && body.trades) ? body.trades : [];
+    got.forEach((t) => trades.push(t));
+    budget.left -= got.length;
+    cursor = body && body.cursor ? String(body.cursor) : "";
+    if (!cursor || !got.length) return { trades, truncated: false };
+    if (budget.left <= 0) return { trades, truncated: true };
+  }
+  return { trades, truncated: true };
+}
+exports.kalshiTape = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const data = request.data || {};
+  const now = Date.now();
+  const wholeSeries = typeof data.series === "string" && data.series !== "";
+  const ticker = String(data.ticker || "");
+  if (wholeSeries ? !footprint.validSeries(data.series, live.L1_SERIES) : !footprint.validTicker(ticker, live.L1_SERIES)) {
+    throw new HttpsError("invalid-argument", "That is not a market the bot trades.");
+  }
+  const win = wholeSeries ? footprint.seriesWindow(data.spanMin, data.toMs, now) : footprint.readWindow(data.toMs, now);
+  const key = (wholeSeries ? "S:" + data.series + ":" + win.spanMin : "T:" + ticker) + "|" + Math.floor(win.toMs / KALSHI_TAPE_CACHE_MS);
+  const hit = kalshiTapeCache.get(key);
+  if (hit && now - hit.at < KALSHI_TAPE_CACHE_MS) return hit.body;
+  try {
+    let trades = [];
+    let truncated = false;
+    let windows = null;
+    if (wholeSeries) {
+      const list = await kalshiGetJson("/markets?series_ticker=" + encodeURIComponent(data.series) + "&min_close_ts=" + Math.floor(win.fromMs / 1000) + "&max_close_ts=" + Math.ceil((win.toMs + 15 * 60000) / 1000) + "&limit=20");
+      windows = footprint.windowsFromMarkets(list && list.markets, data.series, win.fromMs, win.toMs);
+      const budget = { left: footprint.MAX_SERIES_TRADES };
+      for (const w of windows) {
+        if (budget.left <= 0) { truncated = true; break; }
+        const r = await kalshiReadTrades(w.ticker, win, budget);
+        r.trades.forEach((t) => trades.push(t));
+        if (r.truncated) truncated = true;
+      }
+    } else {
+      const r = await kalshiReadTrades(ticker, win, { left: footprint.PAGE_LIMIT * footprint.MAX_PAGES });
+      trades = r.trades;
+      truncated = r.truncated;
+    }
+    const out = { ticker: wholeSeries ? "" : ticker, series: wholeSeries ? data.series : "", spanMin: wholeSeries ? win.spanMin : null, windows, fromMs: win.fromMs, toMs: win.toMs, fetchedAt: now, trades: trades.length, truncated,
+      bars: footprint.buildFootprint(trades, win.fromMs, win.toMs), ...footprint.bigPrints(trades, win.fromMs, win.toMs) };
+    if (kalshiTapeCache.size > 40) kalshiTapeCache.clear();
+    kalshiTapeCache.set(key, { at: now, body: out });
+    return out;
+  } catch (e) {
+    if (e instanceof HttpsError) throw e;
+    console.error("kalshiTape failed:", e);
+    throw new HttpsError("unavailable", "Trade tape error: " + String((e && e.message) || e).slice(0, 120));
+  }
+});
+
 // ---- Kalshi market reads (public, keyless, GET only) ----
 async function kalshiGetJson(pathAndQuery) {
   const failures = [];
@@ -198,6 +272,8 @@ function kalshiMarketApi() {
 // Step 1 of putting a small amount of real money behind this: it proves production signing, a real fill, the
 // real fee and the real duplicate-order behaviour with one contract. All the logic and all the order code are in
 // kalshiLiveLib.js (production host only, $2 cap, never retried, 2 a day and 5 ever). Takes nothing from the page.
+// One reader per function instance, so the older part of the 24 hour list is read once every 15 minutes instead of every minute.
+const l1OrderReader = live.makeRecentOrderReader(async (ts) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })));
 function firestoreLiveStore(db) {
   const col = db.collection("kalshiLiveOrders");
   return {
@@ -223,6 +299,11 @@ function firestoreLiveStore(db) {
       for (const d of [...open.docs, ...recent.docs]) { const x = d.data(); if (x.status === "filled") byId.set(d.id, { id: d.id, ...x }); }
       return [...byId.values()];
     },
+    // Orders marked "hand" (a single-field query, so no index). A handful: the repair pass in settleOpenOrders asks each of them once more with the fixed check and marks it checked.
+    async handOrders() {
+      const s = await col.where("result", "==", "hand").get();
+      return s.docs.map((d) => ({ id: d.id, ...d.data() }));
+    },
     async hasUnresolved() {
       const s = await col.where("status", "in", ["sending", "unknown"]).limit(1).get();
       return !s.empty;
@@ -239,8 +320,23 @@ function firestoreLiveStore(db) {
     async updateTest(id, patch) { await col.doc(id).update(patch); },
     // Every order since a time, with its id. A single-field query, so it needs no composite index; the caller filters.
     async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
+    // The tick's 24 hour read, with the older part kept in memory (see makeRecentOrderReader).
+    sessionTradesCached(since, now) { return l1OrderReader(since, now); },
     // The exit watch's few recent filled orders (a single-field query again), not every filled order ever: it looks several times a minute.
-    async recentFilled(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => o.status === "filled"); },
+    // Cost (Oct 21, 2026): asks for filled AND unsettled orders only (two equalities, so no index) instead of every order of the last 25 minutes, because it runs several times a minute. Every order is written with settled: false,
+    // and the exit watch only ever acts on an unsettled one, so nothing it would sell is left out. The time filter is applied here.
+    async recentFilled(since) { return (await col.where("status", "==", "filled").where("settled", "==", false).get()).docs.map((d) => ({ id: d.id, ...d.data() })).filter((o) => Number(o.ts) >= since); },
+    // One closer per market at a time (the exit watch or Flatten, see kalshiLiveLib.claimClose). False when the OTHER closer took it less than ttl ago; the same closer may take it again.
+    async claimClose(ticker, who, now, ttl) {
+      const ref = db.collection("kalshiLiveClosing").doc(String(ticker));
+      return db.runTransaction(async (tx) => {
+        const snap = await tx.get(ref);
+        const d = snap.exists ? snap.data() : null;
+        if (d && d.by !== who && now - Number(d.at) < ttl) return false;
+        tx.set(ref, { by: who, at: now });
+        return true;
+      });
+    },
     // Atomic: only one instance gets to send each exit sell. False when another has it, when it has already been tried this many times, or when the order has settled.
     async claimExit(id, tries) {
       const ref = col.doc(id);
@@ -335,8 +431,9 @@ exports.kalshiL1Session = onCall(async (request) => {
   await assertKalshiAdmin(request.auth);
   ensureDefaultAdminApp();
   const on = request.data && request.data.on === true;
-  // Size scaling is off unless this is literally true. It is a choice made when starting, kept on the session, and cannot be changed mid-run.
-  const sizing = on && request.data.sizing === true;
+  // Size scaling is decided HERE, never by the page (the owner, Oct 23, 2026): a risk setting that can be chosen from the page can be chosen in a bad hour. Starting always means the
+  // gold size ladder (every other market is capped at one contract in code), which is what the old box did while it was ticked. Nothing in request.data can change it.
+  const sizing = on;
   // The high-point stop is likewise off unless this is literally true, chosen at the start and kept on the session.
   const trailing = on && request.data.trailing === true;
   const db = getFirestore();
@@ -344,7 +441,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   const events = db.collection("kalshiLiveEvents");
   if (!on) {
     await ref.set({ active: false, endedAt: Date.now(), endedBecause: "switched off by the owner" }, { merge: true });
-    await events.add({ ts: Date.now(), kind: "session ended", detail: "switched off by you" });
+    await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "session ended", detail: "switched off by you" });
     return { active: false };
   }
   if (CODE_KILL_SWITCH) {
@@ -368,7 +465,7 @@ exports.kalshiL1Session = onCall(async (request) => {
   await ref.set({ active: true, since: now, until: null, ordersSent: 0, startCash: null, sizing, trailing, endedAt: null, endedBecause: null, lastTickAt: null, lastNote: "Started. Waiting for a market about 6 minutes from its close." });
   // Flag the saved sizing state so the next review raises a collapsed cap to what a fresh start gives (see reviewSizing). Pool, savings and the loss-stop clock are kept.
   if (sizing) await db.collection("kalshiLiveControl").doc("sizing").set({ reseed: true }, { merge: true });
-  await events.add({ ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
+  await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: now, kind: "session started", detail: "L1 until you stop it, at 88c to 97c about 6 minutes before the close, " + (sizing ? "size scales with the account (one contract per $" + live.SCALE_DOLLARS_PER_CONTRACT + ", reviewed every 3 days, up to " + live.L1_SIZE_CEILING + "), stops when the bot is down " + (live.L1_SIZED_STOP_FRACTION * 100) + "% of the balance at the last review" : "one contract, stops when the bot is down $" + live.L1_LOSS_STOP.toFixed(2)) + (trailing ? ", measured from its best result so far" : "") });
   return { active: true };
 });
 
@@ -387,14 +484,14 @@ exports.kalshiFlattenAll = onCall(
     await db.collection("kalshiLiveControl").doc("session").set({ active: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
     await db.collection("kalshiLiveControl").doc("arm").set({ armed: false, endedAt: now, endedBecause: "flattened by the owner" }, { merge: true });
     const events = db.collection("kalshiLiveEvents");
-    await events.add({ ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
+    await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
     let out;
     try {
-      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
+      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now, store: firestoreLiveStore(db) });
     } catch (e) {
       out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
     }
-    try { await events.add({ ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
+    try { await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: Date.now(), kind: "flatten", detail: out.ok ? out.results.map((r) => r.ticker + " " + r.status).join(", ") || "no open positions" : out.reason }); } catch (e) { /* the log is optional */ }
     return { halted: true, ...out };
   }
 );
@@ -405,7 +502,7 @@ exports.kalshiFlattenAll = onCall(
 // Eastern, news behind a paid key). Quotes are merged into the stored document one symbol at a time, so a symbol or feed that fails keeps its older value with its own asOf
 // and the page says how old it is; `errors` names what failed on the last run.
 exports.marketTapeTick = onSchedule(
-  { schedule: "every 5 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },
+  { schedule: "every 15 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },   // every 5 minutes until Oct 26, 2026, when the owner asked for fewer runs to cut cost; the Brief chart is now a week, so a quarter hour is fresh enough
   async () => {
     ensureDefaultAdminApp();
     const db = getFirestore();
@@ -413,6 +510,7 @@ exports.marketTapeTick = onSchedule(
     const patch = { updatedAt: Date.now(), errors: r.errors };
     if (Object.keys(r.quotes).length) patch.quotes = r.quotes;
     if (r.news) patch.news = r.news;
+    if (r.mood) patch.mood = r.mood;
     await db.collection("shared").doc("marketTape").set(patch, { merge: true });
     console.log("marketTapeTick: quotes=" + Object.keys(r.quotes).length + " news=" + (r.news ? r.news.length : 0) + " errors=" + r.errors.length);
   }
@@ -431,6 +529,7 @@ exports.kalshiLiveExit = onSchedule(
     // Nothing open and not a minute L1 can buy in: skip the whole minute rather than sit in the loop below (compute time is the bill). Fails open (see exitWatchIdle).
     if (await live.exitWatchIdle({ store, now: Date.now() })) return;
     const stopAt = Date.now() + 47000;
+    let beat = false;
     for (;;) {
       try {
         const snap = await sessRef.get();
@@ -440,10 +539,13 @@ exports.kalshiLiveExit = onSchedule(
             store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
             enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
             logEvent: async (e) => {
-              await db.collection("kalshiLiveEvents").add(e);
+              await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
               if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
             },
           });
+          // Heartbeat for the exit watch alarm (kalshiExitAlarmLib): one small write per minute's run, only after a pass COMPLETED, so a watch that errors every pass goes quiet too. Its own document, so the session
+          // document (and the alerts that listen to it) is not written six times a minute. A failed write is ignored: the worst case is a false alarm.
+          if (!beat) { try { await db.collection("kalshiLiveControl").doc("exitWatch").set({ at: Date.now() }, { merge: true }); beat = true; } catch (e) { /* see above */ } }
         }
       } catch (e) {
         console.error("kalshiLiveExit: " + String((e && e.message) || e).slice(0, 200));
@@ -472,7 +574,7 @@ exports.kalshiLiveArmed = onSchedule(
         recordLast: (r) => db.collection("kalshiLiveControl").doc("last").set(r),
         // A session that ends by itself (the loss stop, a lost order answer) pushes an alert, if one is configured. The owner's own stops never come through here.
         logEvent: async (e) => {
-          await db.collection("kalshiLiveEvents").add(e);
+          await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
           if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
         },
       };
@@ -504,6 +606,14 @@ exports.kalshiLiveArmed = onSchedule(
         const sizingSnap = await sizingRef.get();
         await live.runL1Tick({
           sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
+          // The probe drop record (kalshiLiveControl/probeRecord): applied to the FRESH document inside a transaction, so two instances during a deploy cannot overwrite each other's entries. Admin read only and no client write (the kalshiLiveControl rule): only this function writes it.
+          updateProbeRecord: (apply) => db.runTransaction(async (tx) => {
+            const ref = db.collection("kalshiLiveControl").doc("probeRecord");
+            const snap = await tx.get(ref);
+            const r = apply(snap.exists ? snap.data() : {});
+            if (r.changed) tx.set(ref, r.record);
+            return r.record;
+          }),
           session, now, setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent,
           quotes: market.quotes, active: market.active, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
@@ -511,8 +621,9 @@ exports.kalshiLiveArmed = onSchedule(
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
+      // The hand-sold repair pass re-reads every order marked hand, which is no longer needed every minute: once every 10 minutes is enough for something that only ever looks back.
       try {
-        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now });
+        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), repair: Math.floor(now / 60000) % 10 === 0 });
       } catch (e) {
         console.error("kalshiLiveArmed: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
       }
@@ -531,6 +642,30 @@ exports.kalshiLiveArmed = onSchedule(
       } catch (e) {
         console.error("kalshiLiveArmed: account snapshot failed: " + String((e && e.message) || e).slice(0, 160));
       }
+      // Exit watch alarm (kalshiExitAlarmLib): this function and the exit watch are separate processes, so this one can notice the other going quiet. Reads only; its one write is a field on the session document that the
+      // existing phone alert trigger turns into an alert. After everything else and fenced off, so it can never fail or delay the tick (runExitAlarm catches its own errors; this try is a second fence).
+      try {
+        const beatRef = db.collection("kalshiLiveControl").doc("exitWatch");
+        const note = await exitAlarm.runExitAlarm({
+          now, session,
+          readBeat: async () => { const b = await beatRef.get(); return b.exists ? b.data() : null; },
+          readOrders: () => firestoreLiveStore(db).recentFilled(now - live.EXIT_LOOKBACK_MS),
+          claim: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef), have = cur.exists ? cur.data().alarmedFor : null;
+            if (have === key) return false;
+            tx.set(beatRef, { alarmedFor: key }, { merge: true });
+            return true;
+          }),
+          release: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef);
+            if (cur.exists && cur.data().alarmedFor === key) tx.set(beatRef, { alarmedFor: null }, { merge: true });
+          }),
+          raise: (a) => sessRef.set({ exitWatchAlert: a }, { merge: true }),
+        });
+        if (note === "alerted" || /^error|failed/.test(note)) console.warn("kalshiLiveArmed: exit watch alarm: " + note);
+      } catch (e) {
+        console.error("kalshiLiveArmed: exit watch alarm failed: " + String((e && e.message) || e).slice(0, 160));
+      }
     } catch (e) {
       failure = e;
     }
@@ -538,6 +673,106 @@ exports.kalshiLiveArmed = onSchedule(
     if (failure) throw failure;
   }
 );
+
+// ---- The paper tracker (PAPER1), keyless ---------------------------------------------------------------------------------------------------
+// Records what L1's rule WOULD have bought on three candidate markets (kalshiPaperLib.js), one contract, no money, and settles each from the public result. It holds NO secret, signs nothing, calls no
+// /portfolio endpoint and sends no order: public market reads and its own Firestore records only. Each entry document is created once (its id is the ticker), so two processes during a deploy cannot
+// record a market twice. It is not imported by, and shares nothing with, the trading code; a failure here is logged and costs a paper row at most.
+async function kalshiFetchMarket(ticker) {
+  for (const base of KALSHI_HOSTS) {
+    try {
+      const res = await fetch(base + "/markets/" + encodeURIComponent(ticker), { signal: AbortSignal.timeout(8000), headers: { "User-Agent": "shwoopnet-monitor/1.0 (read-only market data)", "Accept": "application/json" } });
+      if (res.ok) { const data = await res.json(); return data.market || null; }
+    } catch (e) { /* try the next host */ }
+  }
+  return null;
+}
+// Switched off on Oct 21, 2026 at the owner's request to cut the Firebase bill: its page card is gone and live one-contract probes replaced it, so it recorded for nobody. The function stays exported
+// (the tests and the deploy scripts name it) and returns at once, which costs almost nothing; set this to true to record again. Its collection and its pass bar in the research README are untouched.
+const PAPER_TRACKER_ON = false;
+exports.kalshiPaperTick = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 50, retryCount: 0, memory: "256MiB" },
+  async () => {
+    if (!PAPER_TRACKER_ON) return;
+    try {
+      ensureDefaultAdminApp();
+      const col = getFirestore().collection("kalshiPaperOrders");
+      const r = await paper.runPaperTick({
+        now: Date.now(),
+        store: {
+          async openDocs() { return (await col.where("settled", "==", false).limit(60).get()).docs.map((d) => ({ id: d.id, data: d.data() })); },
+          async create(id, doc) { try { await col.doc(id).create(doc); return true; } catch (e) { if (e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message)))) return false; throw e; } },
+          async update(id, patch) { await col.doc(id).update(patch); },
+        },
+        fetchSeries: (series) => kalshiFetchSeries(series, "open", 6),
+        fetchMarket: kalshiFetchMarket,
+        log: (m) => console.error("kalshiPaperTick: " + m),
+      });
+      if (r.entries || r.settled) console.log("kalshiPaperTick: entries=" + r.entries + " settled=" + r.settled);
+    } catch (e) { console.error("kalshiPaperTick: " + String((e && e.message) || e).slice(0, 200)); }
+  }
+);
+
+// ---- Phone alerts (Web Push), admin only ---------------------------------------------------------------------------------------------
+// The Kalshi page subscribes this phone or browser (a service worker and the owner's tap); the two triggers below read what the bot already wrote and push a short text to every stored
+// subscription. Nothing here places or changes an order, holds a Kalshi key, or is called by the trading code, and each trigger catches every error: an alert that fails costs an alert, never a trade.
+const PUSH_SUBJECT = "https://shwoopnet.github.io";
+async function pushSend(db, kinds, doc, tagBase) {
+  if (!kinds.length) return;
+  const subsSnap = await db.collection("kalshiPushSubs").get();
+  const subs = subsSnap.docs.map((d) => ({ id: d.id, subscription: d.data().subscription })).filter((x) => x.subscription);
+  if (!subs.length) return;
+  // No 24 hour read (Oct 26, 2026, the owner: closes alert, but do not pull a day of orders for every one): a close says what it was and its amount, not how the day is going. dayText(ctx) is blank without it.
+  const ctx = {};
+  const priv = KALSHI_PUSH_VAPID_PRIVATE.value();
+  const details = { subject: PUSH_SUBJECT, publicKey: push.publicKeyFromPrivate(priv), privateKey: priv };
+  for (const kind of kinds) {
+    const m = push.message(kind, doc, ctx);
+    await push.sendAll({
+      subs, payload: { title: m.title, body: m.body, tag: m.tag || tagBase },
+      send: (subscription, body) => webpush.sendNotification(subscription, body, { vapidDetails: details, TTL: 3600, urgency: "high" }),
+      remove: (id) => db.collection("kalshiPushSubs").doc(id).delete(),
+    });
+  }
+}
+exports.kalshiPushKey = onCall({ secrets: [KALSHI_PUSH_VAPID_PRIVATE] }, async (request) => {
+  await assertKalshiAdmin(request.auth);
+  return { key: push.publicKeyFromPrivate(KALSHI_PUSH_VAPID_PRIVATE.value()) };
+});
+exports.kalshiPushSubscribe = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const sub = push.cleanSubscription(request.data && request.data.subscription);
+  if (!sub) throw new HttpsError("invalid-argument", "That is not a push subscription.");
+  const db = getFirestore();
+  const have = await db.collection("kalshiPushSubs").get();
+  if (have.size >= 10 && !have.docs.some((d) => d.id === push.subId(sub.endpoint))) throw new HttpsError("resource-exhausted", "Ten phones or browsers are already subscribed.");
+  await db.collection("kalshiPushSubs").doc(push.subId(sub.endpoint)).set({ subscription: sub, at: Date.now() });
+  return { ok: true, count: have.size + 1 };
+});
+exports.kalshiPushUnsubscribe = onCall(async (request) => {
+  await assertKalshiAdmin(request.auth);
+  const endpoint = request.data && request.data.endpoint;
+  if (typeof endpoint !== "string" || !endpoint) throw new HttpsError("invalid-argument", "No endpoint.");
+  await getFirestore().collection("kalshiPushSubs").doc(push.subId(endpoint)).delete();
+  return { ok: true };
+});
+exports.kalshiPushOrder = onDocumentWritten({ document: "kalshiLiveOrders/{id}", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
+  try {
+    ensureDefaultAdminApp();
+    const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
+    if (!after) return;
+    await pushSend(getFirestore(), push.orderKinds(before, after), after, event.params.id);
+  } catch (e) { console.error("kalshiPushOrder: " + String((e && e.message) || e).slice(0, 200)); }
+});
+exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/session", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
+  try {
+    ensureDefaultAdminApp();
+    const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
+    await pushSend(getFirestore(), push.sessionKinds(before, after), after, "session");
+  } catch (e) { console.error("kalshiPushSession: " + String((e && e.message) || e).slice(0, 200)); }
+});
 
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
@@ -547,7 +782,16 @@ exports.kalshiBookRecorder = onSchedule(
   { schedule: "every 1 minutes", timeoutSeconds: 70, retryCount: 0, memory: "256MiB" },
   async () => {
     // Switched off on Oct 12, 2026 at the owner's request to cut the Firebase bill: it trades nothing and only fed research that has concluded. Remove this line to record again.
-    if (!BOOK_RECORDER_ON) return;
+    if (!BOOK_RECORDER_ON) {
+      // Switched off, it still tidies up (Oct 21, 2026 cost review): the only thing that ever deleted old snapshots was the recorder itself, so the ones written before Oct 12 were never removed and kept
+      // billing as stored data. One small delete-only query a minute until they are gone (an empty result costs one read); it reads no market and places nothing.
+      try {
+        ensureDefaultAdminApp();
+        const old = await getFirestore().collection("kalshiBookSnaps").where("ts", "<", Date.now() - 86400000).limit(200).get();
+        if (!old.empty) await Promise.all(old.docs.map((d) => d.ref.delete()));
+      } catch (e) { console.error("kalshiBookRecorder prune: " + String((e && e.message) || e).slice(0, 160)); }
+      return;
+    }
     ensureDefaultAdminApp();
     const db = getFirestore();
     const snaps = db.collection("kalshiBookSnaps");
@@ -564,4 +808,18 @@ exports.kalshiBookRecorder = onSchedule(
     });
     console.log("kalshiBookRecorder: snaps=" + r.snaps + " errs=" + r.errs);
   }
+);
+
+// The nightly order report: a read-only summary of the bot's own orders behind one secret token (functions/kalshiReportLib.js, test/kalshiReportGates.test.js).
+// It holds no Kalshi key and sends nothing to Kalshi. Deploy: bash functions/deploy-report.sh.
+const kalshiReport = require("./kalshiReportLib");
+exports.kalshiNightlyReport = onRequest(
+  { secrets: [KALSHI_REPORT_TOKEN], cors: false, maxInstances: 1, timeoutSeconds: 60, memory: "256MiB" },
+  kalshiReport.makeReportHandler({
+    getToken: () => KALSHI_REPORT_TOKEN.value(),
+    now: () => Date.now(),
+    logError: (e) => console.error("kalshiNightlyReport: " + String((e && e.name) || "Error") + ": " + String((e && e.message) || e).slice(0, 200)),
+    // The default app must exist before getFirestore() (see ensureDefaultAdminApp above); the first deploy of this endpoint skipped it and answered 500 "could not read orders".
+    readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
+  })
 );

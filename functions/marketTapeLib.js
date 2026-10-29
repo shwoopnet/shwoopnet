@@ -19,28 +19,44 @@ const SYMBOLS = [
   { sym: "^VIX", name: "VIX", kind: "index", tape: true },
   { sym: "GC=F", name: "Gold", kind: "future", tape: true },
   { sym: "BTC-USD", name: "Bitcoin", kind: "crypto", tape: true },
+  { sym: "ETH-USD", name: "Ethereum", kind: "crypto", tape: false },
+  { sym: "CL=F", name: "Crude oil", kind: "future", tape: false },
   { sym: "SPY", name: "S&P 500 (SPY)", kind: "etf", tape: false },
   { sym: "QQQ", name: "Nasdaq 100 (QQQ)", kind: "etf", tape: false },
   { sym: "DIA", name: "Dow (DIA)", kind: "etf", tape: false },
 ];
 
+// Top stories, the economy, world news and two crypto desks (the owner, Oct 23, 2026: crypto and world economy news). BBC, the Guardian and NPR refused a plain request in a live check, so they are not here.
 const NEWS_FEEDS = [
   { source: "CNBC", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=100003114" },
+  { source: "CNBC Economy", url: "https://search.cnbc.com/rs/search/combinedcms/view.xml?partnerId=wrss01&id=20910258" },
+  { source: "WSJ World", url: "https://feeds.content.dowjones.io/public/rss/RSSWorldNews" },
   { source: "MarketWatch", url: "https://feeds.content.dowjones.io/public/rss/mw_topstories" },
+  { source: "CoinDesk", url: "https://www.coindesk.com/arc/outboundfeeds/rss/" },
+  { source: "Cointelegraph", url: "https://cointelegraph.com/rss" },
 ];
-const NEWS_KEEP = 6;
+const NEWS_KEEP = 12;
+// No single desk may fill the list: each feed contributes its newest few, then the lists are merged newest first.
+const NEWS_PER_FEED = 3;
+// The two fear and greed indexes for the Brief's risk mood: CNN's for stocks and alternative.me's for crypto, both public and keyless (unofficial, so each fails on its own and a failure leaves the stored value).
+const FG_STOCKS_URL = "https://production.dataviz.cnn.io/index/fearandgreed/graphdata";
+const FG_CRYPTO_URL = "https://api.alternative.me/fng/?limit=2";
 const FETCH_TIMEOUT_MS = 8000;
 const UA = "Mozilla/5.0 (compatible; shwoopnet-market-tape)";
 
 const num = (v) => { const x = Number(v); return v !== null && v !== undefined && v !== "" && Number.isFinite(x) ? x : null; };
 
-function chartUrl(sym) {
-  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=1d&interval=5m&includePrePost=true";
+// range 1d at 5 minutes is the quote (price, previous close, session state); range 7d at 1 hour is the Brief chart (Oct 26, 2026, the owner: weekly charts, updated less often, to cut cost).
+function chartUrl(sym, range) {
+  const r = range || "1d";
+  return "https://query1.finance.yahoo.com/v8/finance/chart/" + encodeURIComponent(sym) + "?range=" + r + "&interval=" + (r === "7d" ? "1h" : "5m") + "&includePrePost=true";
 }
 
 // One Yahoo chart answer to one quote. null when the answer has no usable price or previous close: a half quote is never stored. `state` is where the trading day stands for
 // that instrument (the chart meta carries the pre, regular and post periods); instruments without periods (crypto, some futures) report "open".
-function parseChart(json, nowMs) {
+function parseChart(json, nowMs, fallbackJson, weeklyJson) {
+  const weeklyResult = weeklyJson && weeklyJson.chart && Array.isArray(weeklyJson.chart.result) ? weeklyJson.chart.result[0] : null;
+  const fallbackResult = fallbackJson && fallbackJson.chart && Array.isArray(fallbackJson.chart.result) ? fallbackJson.chart.result[0] : null;
   const r = json && json.chart && Array.isArray(json.chart.result) ? json.chart.result[0] : null;
   const m = r && r.meta;
   if (!m) return null;
@@ -57,7 +73,64 @@ function parseChart(json, nowMs) {
     else if (p.post && t >= p.regular.end && t < p.post.end) state = "post";
     else state = "closed";
   }
-  return { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state };
+  // The chart is the week when the weekly answer has one; the quote above stays today's, so the header strip keeps its daily move. Otherwise it is today's line, as before.
+  let pts = chartPoints(r), range;
+  const week = weeklyResult ? chartPoints(weeklyResult) : null;
+  if (week && week.series.length >= 2) { pts = week; range = "7d"; }
+  else if (!pts.series.length && fallbackResult) pts = chartPoints(lastSession(fallbackResult));
+  // seriesT (Oct 24, 2026, the owner: charts with a real time axis): the unix second of each point in `series`, same thinning, so the page can label the x axis. [] whenever the answer carried no timestamps.
+  const out = { price, prevClose: prev, asOf: at !== null ? at * 1000 : nowMs, state, series: pts.series, seriesT: pts.times };
+  if (range) out.range = range;
+  return out;
+}
+
+// The day's closes for the Brief's small charts: numbers only, gaps dropped, thinned to at most SERIES_MAX points. [] when the answer has none, so a chart simply does not draw.
+const SERIES_MAX = 96;
+function chartPoints(r) {
+  const q = r && r.indicators && Array.isArray(r.indicators.quote) ? r.indicators.quote[0] : null;
+  const stamps = r && Array.isArray(r.timestamp) ? r.timestamp : [];
+  const raw = q && Array.isArray(q.close) ? q.close : [];
+  const pairs = [];
+  raw.forEach((c, i) => { const v = num(c); if (v !== null && v > 0) pairs.push([v, num(stamps[i])]); });
+  if (pairs.length < 2) return { series: [], times: [] };
+  const step = Math.max(1, Math.ceil(pairs.length / SERIES_MAX));
+  const kept = pairs.filter((_, i) => i % step === 0 || i === pairs.length - 1);
+  const series = kept.map((x) => Number(x[0].toPrecision(7)));
+  // Times only when EVERY kept point has one: a partly labelled axis would be worse than none.
+  const times = kept.every((x) => x[1] !== null) ? kept.map((x) => x[1]) : [];
+  return { series, times };
+}
+function chartSeries(r) { return chartPoints(r).series; }
+
+// Oct 25, 2026 (the owner: "commodities has no charts"): while a futures market is closed (gold and crude on a weekend) Yahoo answers range=1d with a price and NO bars, so the Brief drew a price without a line. A 5 day answer still holds the last session; this keeps only its newest run of bars (a gap of more than 3 hours starts a new session) so the chart shows the last day traded, not a week.
+const SESSION_GAP_S = 3 * 3600;
+function lastSession(r) {
+  const q = r && r.indicators && Array.isArray(r.indicators.quote) ? r.indicators.quote[0] : null;
+  const stamps = r && Array.isArray(r.timestamp) ? r.timestamp : [];
+  const raw = q && Array.isArray(q.close) ? q.close : [];
+  const rows = [];
+  raw.forEach((c, i) => { const t = num(stamps[i]); if (num(c) !== null && t !== null) rows.push([t, c]); });
+  if (rows.length < 2) return r;
+  let from = 0;
+  for (let i = 1; i < rows.length; i++) if (rows[i][0] - rows[i - 1][0] > SESSION_GAP_S) from = i;
+  const kept = rows.slice(from);
+  return { indicators: { quote: [{ close: kept.map((x) => x[1]) }] }, timestamp: kept.map((x) => x[0]) };
+}
+
+// A fear and greed reading to {score 0 to 100, rating, prev}. Only a finite score inside 0 to 100 counts; the rating is cut to a short plain string. null when the answer has no usable score.
+const fgNum = (v) => { const x = num(v); return x !== null && x >= 0 && x <= 100 ? Math.round(x * 10) / 10 : null; };
+const fgText = (v) => String(v || "").replace(/[^A-Za-z ]/g, "").trim().toLowerCase().slice(0, 24);
+function parseFearGreedStocks(json) {
+  const f = json && json.fear_and_greed;
+  const score = fgNum(f && f.score);
+  if (score === null) return null;
+  return { score, rating: fgText(f.rating), prev: fgNum(f.previous_close) };
+}
+function parseFearGreedCrypto(json) {
+  const d = json && Array.isArray(json.data) ? json.data : [];
+  const score = fgNum(d[0] && d[0].value);
+  if (score === null) return null;
+  return { score, rating: fgText(d[0].value_classification), prev: fgNum(d[1] && d[1].value) };
 }
 
 function decodeEntities(s) {
@@ -96,7 +169,8 @@ function parseRss(xml, source) {
 
 function mergeNews(lists) {
   const seen = new Set();
-  return [].concat(...lists).filter((a) => {
+  const capped = lists.map((l) => l.slice().sort((a, b) => b.datetime - a.datetime).slice(0, NEWS_PER_FEED));
+  return [].concat(...capped).filter((a) => {
     const k = a.headline.toLowerCase();
     if (seen.has(k)) return false;
     seen.add(k);
@@ -123,7 +197,11 @@ async function readTape({ fetchFn, now }) {
   const quotes = {}, errors = [];
   await Promise.all(SYMBOLS.map(async (s) => {
     try {
-      const q = parseChart(JSON.parse(await getText(fetchFn, chartUrl(s.sym))), nowMs);
+      const json = JSON.parse(await getText(fetchFn, chartUrl(s.sym)));
+      // The week for the Brief chart. A failure here leaves today's quote and today's line as they were.
+      let week = null;
+      try { week = JSON.parse(await getText(fetchFn, chartUrl(s.sym, "7d"))); } catch (e) { /* today's line */ }
+      const q = parseChart(json, nowMs, week, week);
       if (!q) throw new Error("no usable price");
       quotes[s.sym] = q;
     } catch (e) { errors.push(s.sym + ": " + String((e && e.message) || e).slice(0, 80)); }
@@ -134,7 +212,12 @@ async function readTape({ fetchFn, now }) {
     catch (e) { errors.push(f.source + ": " + String((e && e.message) || e).slice(0, 80)); }
   }));
   const news = lists.length ? mergeNews(lists) : null;
-  return { quotes, news: news && news.length ? news : null, errors };
+  const mood = {};
+  await Promise.all([["stocks", FG_STOCKS_URL, parseFearGreedStocks], ["crypto", FG_CRYPTO_URL, parseFearGreedCrypto]].map(async (x) => {
+    try { const v = x[2](JSON.parse(await getText(fetchFn, x[1]))); if (v) mood[x[0]] = Object.assign(v, { asOf: nowMs }); else throw new Error("no usable score"); }
+    catch (e) { errors.push("fear and greed " + x[0] + ": " + String((e && e.message) || e).slice(0, 80)); }
+  }));
+  return { quotes, news: news && news.length ? news : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, lastSession, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };

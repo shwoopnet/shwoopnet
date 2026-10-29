@@ -68,7 +68,7 @@ gates.T3 = async () => {
 // The scheduled function holds no secret, places nothing, merges quotes one symbol at a time, and only writes what it read.
 gates.T4 = () => {
   const fn = idx.slice(idx.indexOf('exports.marketTapeTick = onSchedule'), idx.indexOf('exports.kalshiLiveExit = onSchedule'));
-  assert.ok(/schedule: "every 5 minutes"/.test(fn), 'every 5 minutes');
+  assert.ok(/schedule: "every 15 minutes"/.test(fn), 'every 15 minutes (it was every 5 until Oct 26, 2026, to cut cost)');
   assert.ok(!/secrets:|KALSHI|signRequest|\/portfolio|createOrder|process\.env/.test(fn), 'no secret, no key, no order code');
   assert.ok(/\.set\(patch, \{ merge: true \}\)/.test(fn) && /if \(Object\.keys\(r\.quotes\)\.length\) patch\.quotes = r\.quotes;/.test(fn) && /if \(r\.news\) patch\.news = r\.news;/.test(fn), 'merged, and quotes and news only when something was read');
   assert.ok(/collection\("shared"\)\.doc\("marketTape"\)/.test(fn), 'the one shared document');
@@ -84,7 +84,7 @@ const lift = () => {
   assert.ok(items, 'TAPE_ITEMS');
   const src = ['tapeStateWord', 'tapeAsOfText', 'tapeItemHtml', 'tapeNews'].map(fnSource).join('\n');
   return new Function('kalTime', 'kalDate', 'pct', 'marketTapeData',
-    'var TAPE_STALE_MS = 20 * 60 * 1000; var TAPE_ITEMS = ' + items[1] + ';\n' + src + '\nreturn { TAPE_ITEMS, tapeAsOfText, tapeItemHtml, tapeStateWord, tapeNews };')(
+    'var TAPE_STALE_MS = 45 * 60 * 1000; var TAPE_ITEMS = ' + items[1] + ';\n' + src + '\nreturn { TAPE_ITEMS, tapeAsOfText, tapeItemHtml, tapeStateWord, tapeNews };')(
     (ms) => 'T' + ms, (ms) => 'D' + ms, (a, b) => (a - b) / b * 100, { news: [{ headline: 'x' }] });
 };
 gates.T5 = () => {
@@ -121,6 +121,99 @@ gates.T7 = () => {
   assert.ok(/id="marketTape"[^>]*hidden/.test(html) && /id="briefAsOf"/.test(html), 'the strip starts hidden until data arrives; the Brief has its as-of line');
   assert.ok(/doc\(db, 'shared', 'marketTape'\)/.test(html), 'reads the one shared document');
   assert.ok(!/finance\.yahoo|query1\.|cnbc\.com|dowjones/.test(html), 'the page itself calls no market-data host');
+};
+
+// The Brief's small charts (Oct 23, 2026, the owner chose concept B; the catalysts calendar was dropped the same day for the news feed): a quote carries a thinned day series of plain numbers.
+gates.T21 = () => {
+  const closes = Array.from({ length: 300 }, (_, i) => 100 + i);
+  closes[5] = null;
+  const ser = lib.chartSeries({ indicators: { quote: [{ close: closes }] } });
+  assert.ok(ser.length >= 2 && ser.length <= 100 && ser.every((v) => typeof v === 'number'), 'a thinned list of numbers');
+  assert.strictEqual(ser[ser.length - 1], 399, 'it always ends on the latest close');
+  assert.deepStrictEqual(lib.chartSeries({}), [], 'no data, no chart');
+  assert.deepStrictEqual(lib.chartSeries({ indicators: { quote: [{ close: [5] }] } }), [], 'one point is not a chart');
+  const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] } }), NOW);
+  assert.deepStrictEqual(q.series, [1, 2, 3], 'the series rides on the quote');
+};
+// The chart times (Oct 24, 2026, the owner: charts with a real x axis): each kept point carries its unix second, thinned the same way, and only when every kept point has one.
+gates.T21b = () => {
+  const r = { indicators: { quote: [{ close: [1, null, 3, 4] }] }, timestamp: [100, 200, 300, 400] };
+  assert.deepStrictEqual(lib.chartPoints(r), { series: [1, 3, 4], times: [100, 300, 400] }, 'a gap drops its time with its price, so they stay paired');
+  assert.deepStrictEqual(lib.chartPoints({ indicators: { quote: [{ close: [1, 2] }] } }).times, [], 'no timestamps: no times, never invented ones');
+  assert.deepStrictEqual(lib.chartPoints({ indicators: { quote: [{ close: [1, 2, 3] }] }, timestamp: [100, null, 300] }).times, [], 'a partly stamped list is dropped whole');
+  const closes = Array.from({ length: 300 }, (_, i) => 100 + i), ts = closes.map((_, i) => 1000 + i * 300);
+  const big = lib.chartPoints({ indicators: { quote: [{ close: closes }] }, timestamp: ts });
+  assert.ok(big.series.length === big.times.length && big.times[big.times.length - 1] === ts[ts.length - 1], 'thinned together, ending on the latest');
+  const q = lib.parseChart(chart({ indicators: { quote: [{ close: [1, 2, 3] }] }, timestamp: [10, 20, 30] }), NOW);
+  assert.deepStrictEqual(q.seriesT, [10, 20, 30], 'the times ride on the quote');
+};
+// Closed futures (Oct 25, 2026, the owner: "commodities has no charts"): a 1d answer with a price and no bars falls back to the last session of a 5d answer, never a week of it.
+gates.T21c = () => {
+  const day = 86400, base = 1700000000;
+  const old = [1, 2, 3].map((v, i) => [base + i * 300, 50 + v]);
+  const last = [1, 2, 3, 4].map((v, i) => [base + day + i * 300, 100 + v]);
+  const five = { chart: { result: [{ indicators: { quote: [{ close: old.concat(last).map((x) => x[1]) }] }, timestamp: old.concat(last).map((x) => x[0]) }] } };
+  const s = lib.lastSession(five.chart.result[0]);
+  assert.deepStrictEqual(s.indicators.quote[0].close, [101, 102, 103, 104], 'only the newest session, not the week');
+  const q = lib.parseChart(chart({}), NOW, five);
+  assert.deepStrictEqual(q.series, [101, 102, 103, 104], 'a quote with no bars today takes the last session');
+  assert.strictEqual(q.seriesT.length, 4, 'with its times');
+  const own = lib.parseChart(chart({ indicators: { quote: [{ close: [7, 8] }] } }), NOW, five);
+  assert.deepStrictEqual(own.series, [7, 8], "today's own bars win over the fallback");
+};
+// The Brief chart is the week (Oct 26, 2026, the owner: weekly charts, updated less often): the quote stays today's, the line comes from the 7 day read, marked range 7d. No weekly answer: today's line, no marker.
+gates.T21d = () => {
+  assert.ok(/range=7d&interval=1h/.test(lib.chartUrl('BTC-USD', '7d')) && /range=1d&interval=5m/.test(lib.chartUrl('BTC-USD')), 'one read for the quote, one for the week');
+  const week = { chart: { result: [{ indicators: { quote: [{ close: [100, 101, 102, 103] }] }, timestamp: [1000, 4600, 8200, 11800] }] } };
+  const today = chart({ indicators: { quote: [{ close: [9, 10] }] }, timestamp: [1, 2] });
+  const q = lib.parseChart(today, NOW, week, week);
+  assert.deepStrictEqual([q.series, q.seriesT, q.range, q.prevClose], [[100, 101, 102, 103], [1000, 4600, 8200, 11800], '7d', q.prevClose], 'the line is the week, marked');
+  const d = lib.parseChart(today, NOW, null, null);
+  assert.ok(d.range === undefined && d.series.length === 2, 'no weekly answer keeps today\'s line and no marker');
+};
+gates.T22 = () => {
+  const syms = lib.SYMBOLS.map((s) => s.sym);
+  for (const need of ['BTC-USD', 'ETH-USD', 'SPY', 'QQQ', 'GC=F', 'CL=F']) assert.ok(syms.includes(need), need + ' is read for the Brief charts');
+  assert.ok(lib.NEWS_FEEDS.some((f) => /coindesk|cointelegraph/.test(f.url)) && lib.NEWS_FEEDS.some((f) => /20910258|RSSWorldNews/.test(f.url)), 'crypto, economy and world headlines are read');
+  const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(!/faireconomy|coindesk|cointelegraph|dowjones/.test(html), 'the page itself calls none of these hosts');
+  assert.ok(/id="marketNewsList"/.test(html) && /id="briefCharts"/.test(html) && /id="briefMood"/.test(html) && !/briefEvents/.test(html), 'the Brief has its news, charts and risk mood, and no calendar');
+};
+
+// No single desk fills the list (Oct 23, 2026): each feed contributes its newest few, so a busy crypto desk cannot push the economy and world headlines off the Brief.
+gates.T23 = () => {
+  const mk = (src, n) => Array.from({ length: n }, (_, i) => ({ headline: src + ' ' + i, source: src, url: '', datetime: 1000 - i }));
+  const merged = lib.mergeNews([mk('Busy', 20), mk('Quiet', 2)].map((l, k) => k === 0 ? l.map((x) => Object.assign({}, x, { datetime: x.datetime + 500 })) : l));
+  assert.strictEqual(merged.filter((x) => x.source === 'Busy').length, 3, 'a busy feed contributes only its newest 3');
+  assert.strictEqual(merged.filter((x) => x.source === 'Quiet').length, 2, 'a quiet feed is still there');
+  assert.ok(merged.length <= 12, 'and the list is capped');
+};
+
+// The risk mood (Oct 23, 2026): two fear and greed indexes, each kept only with a score inside 0 to 100, plain-string ratings, and a failure of one never blanks the other or what is stored.
+gates.T24 = () => {
+  const s = lib.parseFearGreedStocks({ fear_and_greed: { score: 20.94, rating: 'extreme fear', previous_close: 19.81 } });
+  assert.deepStrictEqual([s.score, s.rating, s.prev], [20.9, 'extreme fear', 19.8], 'stocks: score, rating and yesterday');
+  const c = lib.parseFearGreedCrypto({ data: [{ value: '50', value_classification: 'Neutral' }, { value: '68', value_classification: 'Greed' }] });
+  assert.deepStrictEqual([c.score, c.rating, c.prev], [50, 'neutral', 68], 'crypto: score, rating and yesterday');
+  for (const bad of [null, {}, { fear_and_greed: { score: 140 } }, { fear_and_greed: { score: 'x' } }]) assert.strictEqual(lib.parseFearGreedStocks(bad), null, 'no usable score, no reading');
+  assert.strictEqual(lib.parseFearGreedCrypto({ data: [{ value: '-3' }] }), null, 'a score outside 0 to 100 is not stored');
+  assert.strictEqual(lib.parseFearGreedStocks({ fear_and_greed: { score: 40, rating: '<img src=x>' } }).rating, 'img srcx', 'a rating is letters and spaces only');
+  const idx = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8');
+  assert.ok(/if \(r\.mood\) patch\.mood = r\.mood;/.test(idx), 'a failed read leaves the stored mood alone');
+};
+gates.T25 = () => {
+  const f = new Function(fnSource('briefMoodWord') + '\nreturn briefMoodWord;')();
+  assert.deepStrictEqual([f(12), f(16), f(24), f(35), f(0), f(null)], ['Calm', 'Normal', 'Elevated', 'High', null, null], 'the one word comes from the VIX alone and is missing when the VIX is');
+  const g = new Function('escapeHtml', fnSource('briefSentiment') + '\n' + fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x));
+  assert.ok(/&mdash;/.test(g('Stocks', undefined)) && !/mood-track/.test(g('Stocks', undefined)), 'no reading: a dash, no gauge');
+  assert.ok(/left:50\.0%/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })) && /Yesterday 68/.test(g('Crypto', { score: 50, rating: 'neutral', prev: 68 })), 'a reading places its marker and shows yesterday');
+  assert.ok(/left:100\.0%/.test(g('x', { score: 250 })), 'a wild score cannot push the marker off the track');
+  assert.ok(!/mood-(up|down)/.test(g('x', { score: 21 })) && !/mood-(up|down)/.test(g('x', { score: 75 })), 'the mood is white and grey, never red or green: a feeling is not a verdict (the owner: as little panic-y as possible)');
+  const sf = new Function(fnSource('briefSentiment') + '\nreturn briefSentiment;')();
+  assert.deepStrictEqual([sf(10), sf(30), sf(50), sf(65), sf(90)].map((x) => x.word), ['Very cautious', 'Cautious', 'Neutral', 'Optimistic', 'Very optimistic'], 'calm words for the fear and greed score');
+  assert.ok(!/Fear|Greed|Nervous|Stressed|panic/i.test(g('Stocks', { score: 12, rating: 'extreme fear', prev: 30 })), 'no fear word is shown, even on an extreme reading');
+  assert.strictEqual(sf(NaN), null, 'no score, no word');
+  assert.ok(/\.mood-kv > span:first-child/.test(html), 'the row label rule cannot reach the change inside the value, which stays green or red');
 };
 
 (async () => {

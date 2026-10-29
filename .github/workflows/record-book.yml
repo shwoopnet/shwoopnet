@@ -1,0 +1,44 @@
+# Oct 29, 2026 (the owner approved the research session's QUOTE2B spec): records the order book of the Bitcoin hourly ladder (KXBTCD), the 7 strikes nearest the money, the best 5 YES bids and 5 NO bids with sizes every 3 seconds, plus the public trade tape, for 14 days, so a real queue model is possible.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch, never to main. Back to back 4 hour jobs start 10 minutes before each boundary and stop a minute after the next, so every hour is covered.
+name: record-book
+on:
+  schedule:
+    - cron: "50 3,7,11,15,19,23 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-book
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record until a minute past the next 4 hour boundary
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/book/$STAMP"
+          python3 code/scripts/record_book.py "data/book/$STAMP" --cycle-hours 4
+          gzip -9 -f data/book/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always()
+        run: |
+          cd data
+          git config user.name "book-recorder"
+          git config user.email "book-recorder@users.noreply.github.com"
+          git add book
+          git commit -q -m "book $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1

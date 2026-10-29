@@ -27,10 +27,10 @@ gates.B1 = () => {
   const hosts = new Set([...text.matchAll(/https?:\/\/([a-z0-9.-]+)/gi)].map((m) => m[1].toLowerCase()));
   const allowed = new Set([
     'www.gstatic.com',            // the Firebase SDK
-    'fonts.googleapis.com', 'fonts.gstatic.com',
     'api.exchange.coinbase.com',  // Bitcoin spot for the Kalshi charts
     'api.gold-api.com',           // gold spot for the Kalshi charts
     'www.w3.org',                 // the SVG namespace, not a request
+    'shwoopnet.github.io',        // this site's own address in the og:image tag (link previews); the page never fetches it
   ]);
   const extra = [...hosts].filter((h) => !allowed.has(h));
   assert.deepStrictEqual(extra, [], 'the page may only reference the hosts listed here; found ' + extra.join(', '));
@@ -41,7 +41,9 @@ gates.B2 = () => {
   const mod = html.slice(html.indexOf('<script type="module">'), html.indexOf('</script>', html.indexOf('<script type="module">')));
   const methods = [...mod.matchAll(/^    (\w+): function/gm)].map((m) => m[1]).sort();
   assert.deepStrictEqual(methods, [
-    'kalshiBookSnaps', 'kalshiBookStatus', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline',
+    'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline', 'kalshiOrdersSince',   // one admin-read query for the account result line's long ranges (Oct 24, 2026)
+   
+    'kalshiPushKey', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe',      // the phone alerts (Oct 20, 2026): the owner's own functions, admin only
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
     'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');
@@ -53,12 +55,12 @@ gates.B2 = () => {
 gates.B3 = () => {
   const shape = new Function('return {' + /shapeUserSettings: (function[\s\S]*?\n    \}),\n/.exec(html)[1].replace(/^function/, 'shapeUserSettings: function') + '}')().shapeUserSettings;
   const out = shape({ settings: {} });
-  assert.deepStrictEqual(Object.keys(out).sort(), ['clockFormat', 'darkMode', 'kalBotLayout', 'landingPref', 'reduceMotion', 'skin']);
+  assert.deepStrictEqual(Object.keys(out).sort(), ['clockFormat', 'kalBotLayout', 'landingPref']);
   assert.strictEqual(shape({}), null, 'never synced is null, not defaults');
   const hostile = shape({ settings: { tickerEnabled: false, hideAccountDock: true, soundAlerts: false, landingPref: 'trades', alpacaKeyId: 'x' } });
   assert.deepStrictEqual(Object.keys(hostile).sort(), Object.keys(out).sort(), 'old synced fields are ignored, not carried');
   const adopt = fnSource('adoptLocalSettingsIntoAccount');
-  for (const key of ['darkMode', 'reduceMotion', 'kalBotLayout', 'clockFormat', 'landingPref']) assert.ok(adopt.includes(key + ':'), 'the first sync adopts ' + key);
+  for (const key of ['kalBotLayout', 'clockFormat', 'landingPref']) assert.ok(adopt.includes(key + ':'), 'the first sync adopts ' + key);
   assert.ok(!/ticker|dock|notepad|sound|alpaca/i.test(adopt), 'and nothing from the removed pages');
 };
 
@@ -66,7 +68,9 @@ gates.B3 = () => {
 gates.B4 = () => {
   const page = /<main class="page" id="page-settings"[\s\S]*?<\/main>/.exec(code)[0];
   const titles = [...page.matchAll(/<div class="settings-row-title">([^<]*)<\/div>/g)].map((m) => m[1].trim());
-  assert.deepStrictEqual(titles, ['Account', 'Dark mode', 'Theme', 'Default landing page', 'Clock format', 'Reduce motion', 'Reset preferences']);
+  assert.deepStrictEqual(titles, ['Account', 'Default landing page', 'Clock format', 'Reset preferences', 'Phone alerts', 'Sound alerts', 'Privacy view', 'Hide logo', 'Changelog']);
+  // The changelog (the owner, Oct 25, 2026: "i also dont see ... the changelog in the settings page"): static text, newest first, every line naming its pull request. Each merged change adds one line.
+  assert.ok(/<div class="changelog-day">Oct 25<\/div>/.test(page) && (page.match(/<li>[^<]*\(#\d+(, #\d+)*\)<\/li>/g) || []).length >= 20, 'a dated changelog of plain lines, each with its pull request number');
   const landing = [...page.matchAll(/<button class="tf-btn" data-value="(\w+)"( id="landingKalshiBtn")?/g)].map((m) => m[1]);
   assert.ok(['auto', 'brief', 'kalshi'].every((v) => landing.includes(v)) && !landing.includes('trades'), 'the landing page choices are Auto, Brief and Kalshi');
 };
@@ -93,24 +97,18 @@ gates.B6 = () => {
   assert.strictEqual(stored['shwoopnet:landingPref'], 'kalshi');
 };
 
-// The brief describes the indices and only the indices. It never states a number it was not given, and it never claims anything about a screener or a position.
+// The Brief draws only what the market tape gave it. A symbol that has not arrived is a dash, never a number it was not given, and a quote with a day series draws a line.
 gates.B7 = () => {
-  const src = [varSource('INDEX_PROXIES'), ...['indexReads', 'pct', 'findQuote', 'renderBriefHeadline'].map(fnSource)].join('\n');
-  function run(quotes) {
-    const els = { '.brief-headline': { textContent: '' }, '.brief-lede': { textContent: '' } };
-    const doc = { querySelector: (s) => els[s] };
-    const watchlist = Object.keys(quotes).map((sym) => ({ sym, price: quotes[sym][0], prevClose: quotes[sym][1] }));
-    const f = new Function('document', 'watchlist', 'isUsMarketOpen', 'getUsMarketSession', src + '\nreturn renderBriefHeadline;')(doc, watchlist, () => true, () => ({ session: 'regular', label: 'Regular session' }));
-    f();
-    return { head: els['.brief-headline'].textContent, lede: els['.brief-lede'].textContent };
-  }
-  const loading = run({ SPY: [null, null], QQQ: [null, null], DIA: [null, null] });
-  assert.ok(/Loading today's market data/.test(loading.head) && loading.lede === '', 'before the first snapshot it says it is loading and states nothing');
-  const up = run({ SPY: [512.4, 510.1], QQQ: [441.8, 438.9], DIA: [390.2, 391.0] });
-  assert.ok(/The S&P is up 0\.45%, the Nasdaq up 0\.66%\./.test(up.lede), up.lede);
-  assert.ok(!/screener|setup|Trade Overview|option|position|open/i.test(up.lede), 'the lede says nothing about trading: ' + up.lede);
-  const partial = run({ SPY: [512.4, 510.1], QQQ: [441.8, 438.9] });
-  assert.ok(/Loading/.test(partial.head), 'with one index missing it still says it is loading');
+  const src = ['pct', 'kalTime', 'kalDate', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n');
+  const f = new Function('escapeHtml', "var KAL_TZ = 'America/Chicago'; var briefChartQuotes = {};\n" + src + '\nreturn briefChartHtml;')((x) => String(x));
+  const missing = f({ sym: 'BTC-USD', name: 'Bitcoin' }, undefined);
+  assert.ok(/&mdash;/.test(missing) && !/<svg|%/.test(missing), 'no quote: a dash and no line, no percentage');
+  const half = f({ sym: 'BTC-USD', name: 'Bitcoin' }, { price: 68000, prevClose: 0 });
+  assert.ok(/&mdash;/.test(half) && !/%/.test(half), 'a half quote states nothing');
+  const full = f({ sym: 'SPY', name: 'S&P 500 (SPY)' }, { price: 510, prevClose: 500, series: [500, 505, 510] });
+  assert.ok(/2\.00%/.test(full) && /<polyline/.test(full) && /class="brief-chart-chg up"/.test(full), 'a quote shows its change and draws its line');
+  const flat = f({ sym: 'SPY', name: 'SPY' }, { price: 510, prevClose: 500, series: [] });
+  assert.ok(/2\.00%/.test(flat) && !/<polyline/.test(flat), 'no series, no line, the price and change still show');
 };
 
 // A snapshot adds symbols and prices and nothing else; the watchlist never invents a price.
@@ -118,14 +116,30 @@ gates.B8 = () => {
   const src = ['ensureInWatchlist', 'tapeNews', 'handleSharedMarketSnapshotUpdate'].map(fnSource).join('\n');
   const calls = [];
   const watchlist = [{ sym: 'PLTR', price: null, prevClose: null }];
-  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderIndices', 'renderSentiment', 'renderBriefHeadline', 'renderMovers', 'renderMarketNews', 'renderEarningsCalendar', 'marketTapeData',
-    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], () => {}, () => {}, () => {}, () => {}, (n) => calls.push(['news', n]), () => {}, null);
+  const f = new Function('watchlist', 'INDEX_PROXIES', 'renderMarketNews', 'marketTapeData',
+    src + '\nreturn { handle: handleSharedMarketSnapshotUpdate, ensure: ensureInWatchlist };')(watchlist, [], (n) => calls.push(['news', n]), null);
   f.handle(null);
   assert.deepStrictEqual(watchlist, [{ sym: 'PLTR', price: null, prevClose: null }], 'no snapshot yet leaves the page as it was');
   f.handle({ quotes: { PLTR: { price: 24.5, prevClose: 23.1 }, COIN: { price: 190, prevClose: 185 }, BAD: { price: null } }, news: [] });
   assert.deepStrictEqual(watchlist.map((w) => [w.sym, w.price]), [['PLTR', 24.5], ['COIN', 190]], 'priced symbols are added or updated, an unpriced one is skipped');
   f.ensure('PLTR', 1, 1);
   assert.strictEqual(watchlist[0].price, 24.5, 'ensuring a symbol that is already tracked never overwrites its price');
+};
+
+// Hide logo (the owner, Oct 25, 2026, to present the site as project work): a switch in Settings that hides the signed-in header logo, kept in this browser only and restored before first paint.
+gates.B8 = () => {
+  assert.ok(/html\[data-hidelogo="on"\] #brandHomeBtn\{ visibility:hidden; \}/.test(code), 'hidden but keeps its space, so the header does not move');
+  assert.ok(/getItem\('shwoopnet:hideLogo'\) === 'on'[\s\S]{0,120}data-hidelogo/.test(code), 'restored by the head script before anything is drawn');
+  const sw = code.slice(code.indexOf('function hideLogoSet'), code.indexOf('function hideLogoSet') + 500);
+  assert.ok(/localStorage\.setItem\('shwoopnet:hideLogo'/.test(sw) && !/setDoc|updateDoc|fetch\(/.test(sw), 'kept in this browser, never the account');
+};
+
+// Wording (the owner, Oct 26, 2026: "remove this text. do a once over for useless" filler): captions that only restate what is on screen stay out.
+gates.B9 = () => {
+  assert.ok(!/in a row, latest first/.test(code) && !/Display preferences\./.test(code) && !/return later today/.test(code), 'the filler captions are gone');
+  assert.ok(!/Waiting for the market snapshot\s*\u2014/.test(code) && !/Waiting for the market snapshot -/.test(code), 'no long explanation (and no em dash) in the empty news state');
+  assert.ok(!/<i><u><\/u>Data<\/i>/.test(code), 'the sign-in preview does not list the removed Data page');
+  assert.ok(/\(sub \? '<div class="kal-mini-s">'/.test(code), 'a tile with no caption draws no empty line');
 };
 
 (async () => {

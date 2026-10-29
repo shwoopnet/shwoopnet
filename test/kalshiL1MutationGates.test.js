@@ -16,8 +16,10 @@ const pem = ed.privateKey.export({ type: 'pkcs8', format: 'pem' });
 const gates = {};
 
 const T = 'KXBTC15M-26OCT071415-15';
+// Bitcoin, XRP and natural gas decide 10 minutes before the close, the rest 6, so a test about something else lands in the series' own entry window.
+const leftFor = (series) => (live.EARLY_PROBE_SERIES.includes(series) ? 600000 : 360000);
 const quote = (over = {}, series = 'KXBTC15M', ticker = T) => ({ series, m: Object.assign({
-  ticker, status: 'active', close_time: iso(NOW + 360000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
+  ticker, status: 'active', close_time: iso(NOW + leftFor(series)), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, over) });
 
 function world(opts = {}) {
   const calls = [], posts = [], docs = new Map(), events = [];
@@ -32,10 +34,15 @@ function world(opts = {}) {
   const fetchFn = async (url, o) => {
     calls.push({ url, method: o.method, headers: o.headers, body: o.body ? JSON.parse(o.body) : null });
     const reply = (status, body) => ({ status, text: async () => JSON.stringify(body) });
+    if (url.includes('/candlesticks')) {
+      // The default path is a smooth climb of the YES side, so a Bitcoin or Ethereum order passes the smooth-climb gate.
+      const nowS = Math.floor(NOW / 1000);
+      return reply(200, { candlesticks: [0.5, 0.58, 0.66, 0.74, 0.82, 0.91].map((m, i, arr) => ({ end_period_ts: nowS - 60 * (arr.length - 1 - i), yes_bid: { close_dollars: String(m - 0.01) }, yes_ask: { close_dollars: String(m + 0.01) } })) });
+    }
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);
       const over = (opts.fresh && opts.fresh[tk]) || {};
-      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + 360000), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
+      return reply(opts.marketStatus || 200, { market: { status: 'active', close_time: iso(NOW + leftFor(tk.split('-')[0])), exchange_index: tk.includes('KXGOLD') ? 0 : 2, ...(opts.results && opts.results[tk] ? { result: opts.results[tk] } : {}), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100', ...over } });
     }
     if (url.endsWith('/portfolio/balance')) return reply(opts.balStatus || 200, opts.balance || { balance_breakdown: [{ balance: '70.0000', exchange_index: 2 }, { balance: '30.0000', exchange_index: 0 }] });
     if (url.includes('/portfolio/orders')) return reply(200, { orders: opts.existing || [] });
@@ -51,7 +58,7 @@ function world(opts = {}) {
 }
 const tick = (w, over = {}) => live.runL1Tick({
   session: w.sess, now: NOW, setSession: async (p) => { Object.assign(w.sess, p); }, logEvent: async (e) => { w.events.push(e); },
-  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, ...over,
+  quotes: [quote()], active: true, enabled: true, store: w.store, keyId: 'live-key', pem, fetchFn: w.fetchFn, pausedSeries: [], ...over,   // XRP is paused for real (PX1 in kalshiL1Gates); these gates use it as an example market
 });
 
 
@@ -80,20 +87,24 @@ gates.M2 = () => {
 
 // A market 329 s or 401 s out is outside the 330 to 400 s window, on the list and on the fresh read; 331 s and 399 s are inside.
 gates.M3 = async () => {
-  for (const [ms, expect] of [[329000, 0], [331000, 1], [399000, 1], [401000, 0]]) {
-    const close_time = iso(NOW + ms);
-    const w = world({ fresh: { [T]: { close_time } } });
-    await tick(w, { quotes: [quote({ close_time })] });
-    assert.strictEqual(w.posts.length, expect, ms + ' ms before the close');
+  // The edges of the entry windows: XRP decides 10 minutes before the close (570 to 640 s), Bitcoin and Ethereum 6 minutes (330 to 400 s). One second outside either is nothing.
+  for (const [series, ticker, cases] of [['KXXRP15M', 'KXXRP15M-26OCT071415-15', [[569000, 0], [571000, 1], [639000, 1], [641000, 0], [360000, 0]]], ['KXBTC15M', T, [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]], ['KXETH15M', 'KXETH15M-26OCT071415-15', [[329000, 0], [331000, 1], [399000, 1], [401000, 0], [600000, 0]]]]) {
+    for (const [ms, expect] of cases) {
+      const close_time = iso(NOW + ms);
+      const w = world({ fresh: { [ticker]: { close_time } } });
+      await tick(w, { quotes: [quote({ close_time }, series, ticker)] });
+      assert.strictEqual(w.posts.length, expect, series + ' ' + ms + ' ms before the close');
+    }
   }
 };
 
 // With size scaling on, two markets on one shard cannot both take the full share: the second is sized on what is left.
 gates.M4 = async () => {
-  const G = 'KXGOLD15M-26OCT071415-15';
-  const w = world({ session: { sizing: true, startCash: 300 }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 2 }] },
-    fresh: { [G]: { exchange_index: 2, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
-  await tick(w, { quotes: [quote(), quote({}, 'KXGOLD15M', G)] });
+  // Gold first (Oct 21, 2026): only gold keeps the ladder, so the two markets here are two gold windows on one shard.
+  const G = 'KXGOLD15M-26OCT071415-15', G2 = 'KXGOLD15M-26OCT071430-30';
+  const w = world({ session: { sizing: true, startCash: 300 }, balance: { balance_breakdown: [{ balance: '300.0000', exchange_index: 0 }] },
+    fresh: { [G]: { exchange_index: 0, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' }, [G2]: { exchange_index: 0, yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } } });
+  await tick(w, { quotes: [quote({}, 'KXGOLD15M', G), quote({}, 'KXGOLD15M', G2)] });
   assert.deepStrictEqual(w.posts.map((p) => p.count), ['3', '3'], 'both are held to the cap');
   assert.ok(/const cashLeft = cash - Object\.values\(committed\)[\s\S]{0,200}l1Count\(cashLeft/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiLiveLib.js'), 'utf8')), 'and the cash an earlier order in the same tick took is still taken off before sizing the next');
 };

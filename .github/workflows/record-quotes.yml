@@ -1,0 +1,51 @@
+# Oct 28, 2026 (the owner: extend the recorder): gold's 15 minute market, and the hourly Bitcoin and Ethereum ladders and gold's daily and weekly ladders (near the money strikes, the last 150 seconds before each hourly close) are recorded too, to ladder.csv. Same schedule, same branch, still public data only.
+# Oct 23, 2026: the hourly pilot caught 5 of 96 windows in about 3.5 hours (late scheduled starts, and a queued run replaced by the next), so this now runs 4 hour jobs that start 15 minutes
+# BEFORE each 4 hour boundary and stop a minute after the next one, so every close is recorded and a late start still catches the first. Same files and columns.
+# PILOT (Oct 22, 2026, research only): records Kalshi's 15 minute crypto quotes next to Coinbase, Kraken and Bitstamp spot prices in the last seconds of each window.
+# Why: the research session's RECORD1 asks whether Kalshi's quotes lag spot, which one minute candles cannot show. This pilot measures how many windows a free runner catches
+# (scheduled jobs start late, Kalshi's public read limit) before anyone commits to 14 days. No secret is used or needed: only public data is read, and the built-in GITHUB_TOKEN
+# pushes the files to the `quote-data` branch, never to main. It places no order.
+name: record-quotes
+on:
+  schedule:
+    - cron: "45 3,7,11,15,19,23 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-quotes
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Install the websocket library
+        run: pip install --quiet websockets==13.1
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record until a minute past the next 4 hour boundary
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/quotes/$STAMP"
+          python3 code/scripts/record_quotes.py "data/quotes/$STAMP" --cycle-hours 4
+          gzip -9 -f data/quotes/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always()
+        run: |
+          cd data
+          git config user.name "quote-recorder"
+          git config user.email "quote-recorder@users.noreply.github.com"
+          git add quotes
+          git commit -q -m "quotes $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1

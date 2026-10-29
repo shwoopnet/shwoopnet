@@ -19,10 +19,14 @@ const code = src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/\/\/[^\n]*/g, '').rep
 
 const gates = {};
 
-// Nothing may raise an OS-level notification or prompt for the permission.
+// Nothing may raise an OS-level notification from the page. The one exception the owner asked for (Oct 20, 2026): the Kalshi page's "Phone alerts" switch may ask for notification permission, once,
+// from the owner's tap, and only inside kalshiPushToggle. The page still never constructs a Notification itself; the service worker shows pushes the server sent.
 gates.G1 = () => {
   assert.ok(!/new Notification\(/.test(code), 'no code may construct a browser Notification');
-  assert.ok(!/Notification\.requestPermission/.test(code), 'no code may prompt for notification permission');
+  assert.strictEqual((code.match(/Notification\.requestPermission/g) || []).length, 1, 'permission is asked for in exactly one place');
+  const fn = /function kalshiPushToggle\(\)\{[\s\S]*?\n  \}\n/.exec(code);
+  assert.ok(fn && /Notification\.requestPermission/.test(fn[0]), 'and that place is the phone alerts switch, which runs from a tap');
+  assert.ok(!/requestPermission/.test(code.replace(fn[0], '')), 'nothing else asks (no prompt on load)');
 };
 
 // The Labs page and its forward-test record stay gone.
@@ -32,10 +36,10 @@ gates.G2 = () => {
     assert.ok(!code.includes(name), 'removed Labs identifier is back: ' + name));
 };
 
-// The blank slate (Oct 12, 2026, at the owner's request: "an anti-degen proof website ... to prevent myself from full porting"). The site is three pages.
+// The blank slate (Oct 12, 2026, at the owner's request: "an anti-degen proof website ... to prevent myself from full porting"). The site is three pages, and four since the read-only Data page (Oct 21, 2026).
 gates.G3 = () => {
   const pages = [...code.matchAll(/<main class="page" id="(page-[\w-]+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(pages, ['page-brief', 'page-kalshi', 'page-settings'], 'the site is the Brief, Kalshi and Settings and nothing else');
+  assert.deepStrictEqual(pages, ['page-brief', 'page-kalshi', 'page-settings'], 'the site is the Brief, Kalshi and Settings and nothing else (the Data page was added Oct 21, 2026 and removed Oct 24, 2026 at the owner\'s request)');
   const nav = [...code.matchAll(/<button class="side-nav-item nav-item"[^>]*\bdata-page="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(nav, ['brief', 'kalshi', 'settings'], 'and the sidebar says the same');
   assert.ok(!/data-action="(notepad|history)"/.test(code), 'no notepad or history buttons');

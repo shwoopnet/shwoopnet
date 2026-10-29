@@ -209,7 +209,10 @@ gates.L10 = () => {
   assert.deepStrictEqual(Object.keys(body).sort(), ['client_order_id', 'count', 'exchange_index', 'price', 'self_trade_prevention_type', 'side', 'ticker', 'time_in_force']);
   assert.strictEqual(body.count, '1'); assert.strictEqual(body.side, 'ask');
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
-  assert.ok(!/postWithRetry|RETRY|setTimeout|for \(const base of/.test(src.replace(/\/\/[^\n]*/g, '')), 'no retry or failover loop in the live module');
+  // Orders are never retried or failed over. A read (GET) that Kalshi refuses with 429 is asked once more after a short wait (Oct 22, 2026); test RR1 in
+  // kalshiL1Gates.test.js proves a POST is sent once, so the wait (setTimeout) and its constant are allowed here and nothing else about retrying is.
+  assert.ok(!/postWithRetry|for \(const base of/.test(src.replace(/\/\/[^\n]*/g, '')), 'no retry or failover loop in the live module');
+  assert.ok((src.replace(/\/\/[^\n]*/g, '').match(/setTimeout/g) || []).length === 1, 'the only wait in the live module is the single GET retry');
 };
 
 // ---- wiring: who can reach it, what the page can send, who can read the records ----
@@ -344,7 +347,7 @@ gates.L22 = async () => {
   assert.ok((await tick(w9, a9, { logEvent: undefined })).ok);
   // Wiring: the arm function logs armed and disarmed, the scan passes the log in, and only the server can write it.
   assert.ok(!/exports\.kalshiLiveArm\b/.test(fnSrc), 'the arm callable is gone, so nothing can arm a single test order');
-  assert.ok(/logEvent: async \(e\) => \{\s*await db\.collection\("kalshiLiveEvents"\)\.add\(e\);/.test(fnSrc), 'the scheduled scan writes its endings to the log');
+  assert.ok(/logEvent: async \(e\) => \{\s*await db\.collection\("kalshiLiveEvents"\)\.add\((\{ accountId: live\.DEFAULT_ACCOUNT_ID, \.\.\.e \}|e)\);/.test(fnSrc), 'the scheduled scan writes its endings to the log');
   const ev = /match \/kalshiLiveEvents\/\{id\} \{([\s\S]*?)\n    \}/.exec(rules);
   assert.ok(ev && /allow read: if isAdmin\(\);/.test(ev[1]) && /allow write: if false;/.test(ev[1]), 'admin read, no client write');
 };

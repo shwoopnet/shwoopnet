@@ -68,7 +68,7 @@ const defined = new Set();
 // Host and language globals this app legitimately calls.
 const GLOBALS = new Set([
   'if','for','while','switch','catch','return','function','typeof','new','else','do','void','delete','in','of','case','throw','with','yield','await',
-  'Math','Number','String','Array','Date','JSON','Object','Boolean','RegExp','Error','Promise','Set','Map','Symbol','BigInt',
+  'Math','Number','String','Array','Date','JSON','Object','Boolean','RegExp','Error','Promise','Set','Map','Symbol','BigInt','Uint8Array',
   'parseInt','parseFloat','isNaN','isFinite','encodeURIComponent','decodeURIComponent','encodeURI','decodeURI',
   'setTimeout','setInterval','clearTimeout','clearInterval','requestAnimationFrame','cancelAnimationFrame',
   'fetch','alert','confirm','prompt','console','document','window','navigator','location','localStorage','sessionStorage',
@@ -99,7 +99,7 @@ gates.G1 = () => {
 // refactor that legitimately removed them: the Brief's refresh path and the
 // page switch are the two things every signed-in visit goes through.
 gates.G2 = () => {
-  for (const name of ['handleSharedMarketSnapshotUpdate', 'renderBriefHeadline', 'showPage', 'handleUserSettingsDocUpdate']) {
+  for (const name of ['handleSharedMarketSnapshotUpdate', 'renderBriefPage', 'showPage', 'handleUserSettingsDocUpdate']) {
     assert.ok(new RegExp('function\\s+' + name + '\\s*\\(').test(code), name + ' must exist');
     // A callback handed to the API (watchSharedMarketSnapshot(handleSharedMarketSnapshotUpdate)) is a use too, not only a bare call.
     const uses = (code.match(new RegExp('(^|[^\\w$.])' + name + '(?![\\w$])', 'g')) || []).length;

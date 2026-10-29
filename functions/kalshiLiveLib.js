@@ -53,7 +53,44 @@ const LIVE_SERIES = ["KXBTC15M", "KXGOLD15M"];   // gold has real volume on prod
 // The markets the bot's L1 rule trades: Bitcoin, gold and Ethereum, all by the same rule, size and stop (the owner folded Ethereum in on Oct 10, 2026; it was a separate switch before).
 // A hard list in code: adding a series is a deliberate edit and review, never something a stored value can do. Solana is deliberately not on it. Order matters: when a window's room
 // runs short (L1_WINDOW_CAP_FRACTION) the later series goes without, so Ethereum is last. LIVE_SERIES above is the older single-order path and is left alone.
-const L1_SERIES = ["KXBTC15M", "KXGOLD15M", "KXETH15M"];
+// XRP and Dogecoin were appended on 2026-10-20 at the owner's choice, on the strength of kalshi-scalper/README.md (E3, E3B: +1.4c and +1.5c, then +1.8c on 29 older days; forward read E3F due 2026-11-16).
+// They go LAST, so they only take a window's second slot when Bitcoin, gold and Ethereum left room.
+// The PROBE markets (2026-10-21, the owner's choice: "live forward testing", no more paper): L1's own rule on AUD/USD, USD/CAD and natural gas, which history could not settle (12 days of AUD/USD and
+// USD/CAD, a near miss on gas; kalshi-scalper/README.md PAPER1). ALWAYS one contract per order, whatever the size ladder says, so each costs about $0.90 at risk; they are the LAST in the list, so they only
+// take what Bitcoin, gold, Ethereum, XRP and Dogecoin left in a window's combined limit, and they count toward the same loss stop, pool and 25c exit as every other L1 order. Adding to this list is a code edit.
+const PROBE_SERIES = ["KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
+// GOLD FIRST (2026-10-21, the owner's choice after docs/GOLD_FIRST_PROPOSAL.md, option A). The first 302 settled bot trades: gold +$28.35 (2 losses in 98), Bitcoin -$20.55, Ethereum -$4.40, XRP -$3.63,
+// Dogecoin -$2.66; the 68 day backtest agrees on gold and on nothing else; and Ethereum's losses came in the same window as Bitcoin's. So gold is the ONLY market that keeps the size ladder and it goes
+// FIRST in the list (it gets a window's room before anything else); Bitcoin, Ethereum, XRP and Dogecoin are CAPPED at one contract like the probes, so they keep trading and keep their record growing,
+// but a bad run on them costs about $0.90 a trade, not $4. A capped market earns its ladder size back only from its own live record (150 settled trades at one contract, a result above +0.5c a contract in
+// both halves) and a ladder-sized market drops back if its last 100 trades are negative: either is a reviewed edit of THIS list, never a stored value. The 12% stop, the 5.5% window limit and the 25c exit are unchanged.
+const CAPPED_SERIES = ["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
+// FIXED ORDER SIZES (2026-10-23, the owner: "yeah build", on the research session's proposal from kalshi-scalper/README.md "Sizing look at a $500 balance"). With the balance near $500, three markets that
+// the history supports trade a little larger than the one-contract cap: XRP and Dogecoin 3 contracts, natural gas (a probe) 2. Bitcoin, Ethereum and the other probes stay at one contract, and gold keeps
+// the ladder. This is a hard list in code like the lists above: no stored value and no callable can change it. It is leverage on an edge that has to persist, not a new edge, so nothing else moves: the 12% loss
+// stop, the 5.5% window limit, one crypto order per window, the 25c exit and the profit add-on rule (still never used on these markets) are all unchanged. Review point: the owner's 2026-11-17 export; if the
+// Dogecoin or XRP loss rate is above 7% there, step back to 1 or 2 by editing this list.
+const FIXED_CONTRACTS = { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 };   // XRP back to 1 on Oct 25, 2026 (the owner, on the research session's read): 24 fills since Oct 23, 4 losses (16.7% against 7% break-even), -$4.87, all four at 0.903 or lower.
+// ORDER SIZE SANITY (Oct 29, 2026). A Dogecoin order for 12 contracts reached the account with no entryLead tag, while current code only ever sizes Dogecoin at FIXED_CONTRACTS (3) and tags every order. Nothing in code
+// stopped a wrongly sized order, so this is a second lock behind the sizing code: the largest count an L1 order for a series may have under today's rules, from CODE CONSTANTS ONLY. It takes no session, no stored value and
+// nothing from the page (extra arguments are ignored on purpose, test SZ6). Capped and probe series are their fixed size (or 1); gold, the only ladder market, may go up to L1_ORDER_CEILING, the existing hard limit on a
+// single order, so this is never tighter than what the ladder legitimately produces and never looser than the ceiling. A series not in L1_SERIES gets 0: fail closed. It can only SKIP an order, never raise a count.
+// The fixed sizes are copied once when the module loads, so a later change to FIXED_CONTRACTS in memory (a bug, or a test that simulates one) moves the sizing but not this lock.
+const MAX_FIXED_CONTRACTS = Object.freeze({ ...FIXED_CONTRACTS });
+function maxContractsFor(series) {
+  if (!L1_SERIES.includes(series)) return 0;
+  if (MAX_FIXED_CONTRACTS[series]) return MAX_FIXED_CONTRACTS[series];
+  if (PROBE_SERIES.includes(series) || CAPPED_SERIES.includes(series)) return 1;
+  return L1_ORDER_CEILING;
+}
+// SERIES ORDER (2026-10-23, the owner: "reorder so XRP comes before Bitcoin and Dogecoin before Ethereum, gold stays first"). Markets are tried in this order within a tick, and only ONE capped crypto order is placed per 15 minute window, so the order decides which
+// crypto market gets the window when several qualify at once. XRP and Dogecoin trade 3 contracts (FIXED_CONTRACTS) and Bitcoin and Ethereum one, so a 1 contract order no longer takes the slot from a 3 contract one in the same tick. The research session raised it: Bitcoin and XRP are both
+// looked at about 10 minutes before the close, Ethereum and Dogecoin about 6, so the pairs that tie within a tick are exactly these. Nothing else moves: sizes, stops, window limit, entry times and the one crypto order per window rule are unchanged.
+const L1_SERIES = ["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", ...PROBE_SERIES];
+// Markets taken off the tick on purpose (the owner, Oct 28, 2026, on the research session's read). XRP: live since 2026-10-07 it is profit factor 0.49 over 65 fills (8 losses, -$9.51) against 1.32 in the history, which is either bad luck
+// or a live-versus-backtest gap, and the forward reads FLOOR1 and THIN1 settle it on 2026-11-12. It stays in L1_SERIES (its name, quotes and alerts keep working) but is never a candidate. It fails closed: there is NO date after which it
+// resumes by itself; putting it back is a reviewed edit of this list. The exit watch is untouched and still sells any XRP position that is open.
+const PAUSED_SERIES = ["KXXRP15M", ...PROBE_SERIES];   // the three probe markets (AUD/USD, USD/CAD, natural gas) were paused on Oct 28, 2026, the owner: "yeah we can" (a 97c risk for a 3c win on USD/CAD); same rule as XRP, no resume date
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -75,8 +112,17 @@ function assertLive(url) {
   }
 }
 
-// One request. Never retried, never throws on an HTTP status. A network error or timeout comes back as status 0.
-async function liveRequest({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
+// One request. An order (anything but a GET) is never retried, and nothing throws on an HTTP status. A network error or timeout comes back as status 0.
+// A GET that Kalshi answers with 429 (too many requests) is asked once more after a short wait (Oct 22, 2026): the balance and position reads share one key with the
+// exit watch's 10 second loop, and a single refused read made the account card say "could not be read". A read has no effect, so asking twice is safe; a second 429 comes back as is.
+async function liveRequest(args) {
+  const first = await liveRequestOnce(args);
+  if (first.status !== 429 || args.method !== "GET") return first;
+  await new Promise((r) => setTimeout(r, RATE_LIMIT_RETRY_MS));
+  return liveRequestOnce({ ...args, nowMs: args.nowMs === undefined ? undefined : args.nowMs + RATE_LIMIT_RETRY_MS });
+}
+const RATE_LIMIT_RETRY_MS = 1200;
+async function liveRequestOnce({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
   const url = LIVE_BASE + path + (params ? "?" + new URLSearchParams(params).toString() : "");
   assertLive(url);
   const headers = { Accept: "application/json", "User-Agent": "shwoopnet-live/1.0" };
@@ -282,6 +328,17 @@ async function runArmedTick(args) {
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
+// Early entry probes (the research session's FWD7, the owner: "live probes at 10 minutes", Oct 21, 2026). XRP and natural gas are entered about 10 minutes before the close INSTEAD of 6, one contract, to test whether
+// entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
+// order id "L1-" + ticker, and these two series no longer have a 6 minute window at all, so a market is decided once, at 10 minutes. Every order records
+// which lead it was entered at (entryLead) so the two can be read apart afterwards.
+const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M"];   // Bitcoin left this list on Oct 23, 2026: it now decides at the 6 minute look, on a smooth climb only (SMOOTH_SERIES)
+const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
+function entryLead(series, left) {
+  // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
+  if (EARLY_PROBE_SERIES.includes(series)) return left >= EARLY_WINDOW_MS[0] && left <= EARLY_WINDOW_MS[1] ? "10m" : null;
+  return left >= L1_WINDOW_MS[0] && left <= L1_WINDOW_MS[1] ? "6m" : null;
+}
 // Not a trading limit. Bitcoin and gold have 192 markets in a day (96 each), so 200 orders in any rolling 24 hours can never be reached by
 // normal trading; it only stops a runaway loop from sending orders without end. Past it the bot waits (it does not end the session) and carries
 // on by itself once older orders fall out of the window. The loss stop is the real limit.
@@ -289,6 +346,144 @@ const L1_MAX_ORDERS = 200;
 // A session has no end time any more (the owner removed it on Oct 8, 2026): it runs until the owner stops it or a stop below ends it. What stayed
 // is the DAY: the loss stop and the order limit both look at the last 24 hours, so a long run cannot hide a bad day behind old profits.
 const L1_WINDOW_DAY_MS = 24 * 3600 * 1000;
+// Logging only (Oct 22, 2026, the research session's JUMP1 lead, the owner: "log it"). How far the side's mid price rose over the last 3 minutes, written on every new order (10 minute and 6 minute) AFTER the whole minute's orders
+// have been sent, from the public one minute candles. It never decides anything: no order waits for it, it reads no key, and a read that fails or is thin leaves the order exactly as it was. The figure is for the side
+// that was bought (a NO order's side rises when the YES mid falls). The research reads it with the order's own price and result.
+const RISE_LOOKBACK_S = 180;
+function riseFromCandles(candles, side, nowSec) {
+  const mids = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a) && end <= nowSec + 60) mids.set(end, (b + a) / 2);
+  }
+  if (!mids.size) return null;
+  const latest = Math.max(...mids.keys());
+  if (nowSec - latest > 150) return null;          // stale: the latest candle must be from about now
+  const then = mids.get(latest - RISE_LOOKBACK_S);
+  if (!Number.isFinite(then)) return null;
+  const dir = side === "no" ? -1 : 1, now = mids.get(latest);
+  // rng5 (Oct 22, 2026, the research session's FLAT2 lead, the owner: "yes, log rng5"): the max minus the min of the mid over the six minute marks from 5 minutes ago to now, so a quiet market reads small.
+  // A range is the same for either side (a NO mid is one minus the YES mid), so it needs no direction. Any missing mark leaves it out; the order is never held for it.
+  const marks = [0, 60, 120, 180, 240, 300].map((d) => mids.get(latest - d));
+  const rng = marks.every(Number.isFinite) ? Number((Math.max(...marks) - Math.min(...marks)).toFixed(4)) : null;
+  return { rise: Number((dir * (now - then)).toFixed(4)), midNow: Number(now.toFixed(4)), midThen: Number(then.toFixed(4)), candleAt: latest, rng };
+}
+// flips0 (Oct 23, 2026, the research session's FLIPS0 lead, the owner: "go", logging only). The path shape of the side being bought: the side's mid for every 1 minute candle from the market's first candle to the decision candle.
+// `flips` counts direction changes in that path after ignoring minute changes of 0.004 or less; `flips0` is true when there are at least 4 earlier candles and no flip at all (a steady climb). Same rules as rise3: written
+// after the orders are sent, from public candles, never able to change a trade. Parity vectors: test/kalshiL1Gates.test.js FL1 (from the research session's flips0_parity_vectors_2026-10-23.json).
+const FLIP_MIN_STEP = 0.004;
+function flipsOf(mids) {
+  const steps = [];
+  for (let i = 1; i < mids.length; i++) {
+    const d = Number((mids[i] - mids[i - 1]).toFixed(6));
+    if (Math.abs(d) > FLIP_MIN_STEP) steps.push(d);
+  }
+  let flips = 0;
+  for (let i = 1; i < steps.length; i++) if ((steps[i] > 0) !== (steps[i - 1] > 0)) flips++;
+  return flips;
+}
+// The favourite side's mid for every 1 minute candle up to the decision candle, oldest first; null when there is nothing or the latest candle is stale.
+function sideMids(candles, side, nowSec) {
+  const mids = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a) && end <= nowSec + 60) mids.set(end, side === "no" ? 1 - (b + a) / 2 : (b + a) / 2);
+  }
+  if (!mids.size) return null;
+  const ends = [...mids.keys()].sort((x, y) => x - y);
+  if (nowSec - ends[ends.length - 1] > 150) return null;    // stale: the decision candle must be from about now
+  return ends.map((e) => mids.get(e));
+}
+function pathShape(candles, side, nowSec) {
+  const path = sideMids(candles, side, nowSec);
+  if (!path) return null;
+  const flips = flipsOf(path), earlier = path.length - 1;
+  const steps = path.slice(1).map((v, i) => v - path[i]);
+  // minStep and climb are plain float arithmetic on the mids, exactly as the research session's parity vectors were made (a pullback of exactly 0.005 computes to -0.0050000000000000044 and is NOT smooth).
+  const minStep = steps.length ? Math.min(...steps) : null, climb = path[path.length - 1] - path[0];
+  return { flips, flips0: earlier >= 4 && flips === 0, earlierCandles: earlier, minStep: minStep === null ? null : Number(minStep.toFixed(4)), climb: Number(climb.toFixed(4)), smooth: earlier >= 4 && minStep !== null && minStep >= -SMOOTH_MIN_STEP && climb >= SMOOTH_MIN_CLIMB };
+}
+// Smooth climb only (Oct 23, 2026, the research session's SMOOTH2 lead, the owner: "1"): Bitcoin and Ethereum order ONLY when the side being bought has climbed without a real pullback since the market opened: at least 4 earlier
+// candles, no minute change below -0.005, and a total climb of at least 0.10. Anything else, or a path that cannot be read, places no order (fail closed). It only ever removes Bitcoin and Ethereum orders: size, band, stops,
+// caps, the 25c exit and the one crypto order per window are unchanged. Kill rules (registered in the README): 3 or more losses in the first 40 smooth fills, net under $0 after 100 fills, or the 2026-11-12 forward read falsified.
+const SMOOTH_SERIES = ["KXBTC15M", "KXETH15M"];
+const SMOOTH_MIN_STEP = 0.005, SMOOTH_MIN_CLIMB = 0.10;
+async function smoothGate({ fetchFn, series, ticker, side, nowMs }) {
+  try {
+    const nowSec = Math.floor(nowMs / 1000);
+    const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
+      params: { start_ts: String(nowSec - 7200), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
+    if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return { ok: false, reason: "no order: the price path could not be read (HTTP " + res.status + ")" };
+    const shape = pathShape(res.body.candlesticks, side, nowSec);
+    if (!shape) return { ok: false, reason: "no order: the price path is missing or out of date" };
+    if (!shape.smooth) return { ok: false, reason: "no order: not a smooth climb (" + shape.earlierCandles + " earlier candles, worst minute " + shape.minStep + ", climb " + shape.climb + ")" };
+    return { ok: true, shape };
+  } catch (e) { return { ok: false, reason: "no order: the price path could not be read" }; }
+}
+// Two-stage entry, LOGGING ONLY (Oct 24, 2026, the research session's TWOSTAGE log request, the owner said "go" there and "Yes, build it (log only)" here). For one market, at the three looks 600, 480 and 360 seconds before the close, the side
+// whose price is inside the entry band (l1Pick's rule applied to that minute's candle: YES at its ask, NO at 1 minus the YES bid), its price, and whether there was one; and `twoStageLeft`, the earliest of the three looks that was in
+// band. The candle used is the one whose end is EXACTLY that many seconds before the close: a neighbouring candle is never substituted, and a missing candle means no value (null), not "not in band". It decides nothing: it is written
+// on the order record after the orders are sent, from public candles, and no order, size, entry time, cap or series reads it. An XRP or natural gas order (decided at 10 minutes) has no 8 or 6 minute candle yet, so those stay null.
+const TWO_STAGE_LOOKS = [[600, "10"], [480, "8"], [360, "6"]];
+function twoStageFromCandles(candles, closeSec) {
+  if (!Number.isFinite(closeSec)) return null;
+  const byEnd = new Map();
+  for (const c of Array.isArray(candles) ? candles : []) {
+    const end = Number(c && c.end_period_ts), b = num(c && c.yes_bid && c.yes_bid.close_dollars), a = num(c && c.yes_ask && c.yes_ask.close_dollars);
+    if (Number.isFinite(end) && Number.isFinite(b) && Number.isFinite(a)) byEnd.set(end, { bid: b, ask: a });
+  }
+  const out = {}, r4 = (x) => Math.round(x * 10000) / 10000, lo = L1_BAND[0] - 1e-9, hi = L1_BAND[1] + 1e-9;
+  let left = null, any = false;
+  for (const [secs, tag] of TWO_STAGE_LOOKS) {
+    const q = byEnd.get(closeSec - secs);
+    if (!q || !bot.validQuote(q.bid, q.ask)) { out["ask" + tag] = null; out["side" + tag] = null; out["inBand" + tag] = null; continue; }
+    any = true;
+    let side = null, price = null;
+    if (r4(q.ask) >= lo && r4(q.ask) <= hi) { side = "yes"; price = r4(q.ask); }
+    else if (r4(1 - q.bid) >= lo && r4(1 - q.bid) <= hi) { side = "no"; price = r4(1 - q.bid); }
+    out["ask" + tag] = price; out["side" + tag] = side; out["inBand" + tag] = side !== null;
+    if (side !== null && left === null) left = secs;
+  }
+  if (!any) return null;
+  out.twoStageLeft = left;
+  return out;
+}
+async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask, closeSec }) {
+  try {
+    const nowSec = Math.floor(nowMs / 1000);
+    const res = await liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
+      params: { start_ts: String(nowSec - 7200), end_ts: String(nowSec + 60), period_interval: "1" }, nowMs });
+    if (res.status !== 200 || !res.body || !Array.isArray(res.body.candlesticks)) return false;
+    const r = riseFromCandles(res.body.candlesticks, side, nowSec), shape = pathShape(res.body.candlesticks, side, nowSec), two = twoStageFromCandles(res.body.candlesticks, closeSec);
+    if (!r && !shape && !two) return false;
+    await store.updateTest(cid, {
+      ...(r ? { rise3: r.rise, riseMidNow: r.midNow, riseMidThen: r.midThen, ...(r.rng === null ? {} : { rng5: r.rng }) } : {}),
+      ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, minStep: shape.minStep, climb: shape.climb, smooth: shape.smooth, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
+      ...(two || {}),
+    });
+    return true;
+  } catch (e) { return false; }      // logging only: never allowed to affect a trade
+}
+
+// Cost (Oct 21, 2026, the owner: "cut costs"). The bot re-read the whole last 24 hours of orders every minute only to count them and sum their results. Orders older than OLDER_AFTER_MS are final
+// (the exit watch acts within minutes of a buy and the settle sweep within minutes of the close), so they are read once and kept in this instance's memory for REFRESH_MS; only the recent block is read
+// each minute. The recent block starts at a fixed point and grows until the older part is read again, so no order ever falls between the two. This can only make the bot's picture STALER in
+// the cautious direction: a stale copy shows an order as unsettled or unsold, which the loss stop counts as lost, and any new order (from this or another instance) is inside the recent block
+// because it is minutes old. The cache is per instance and never shared, so two instances during a deploy each keep their own. A failed read throws, exactly as the plain read did (the tick then sends nothing).
+const L1_OLDER_AFTER_MS = 30 * 60 * 1000, L1_OLDER_REFRESH_MS = 15 * 60 * 1000;
+function makeRecentOrderReader(readSince) {
+  let older = null, olderAt = 0, olderSince = 0, split = 0;
+  return async function read(since, now) {
+    if (!older || now - olderAt >= L1_OLDER_REFRESH_MS || since < olderSince) {
+      const all = await readSince(since);
+      split = now - L1_OLDER_AFTER_MS;
+      older = all.filter((t) => !(Number(t.ts) >= split)); olderAt = now; olderSince = since;
+      return all;
+    }
+    const recent = await readSince(split);
+    return older.filter((t) => Number(t.ts) >= since).concat(recent);
+  };
+}
 // Size scaling (off unless the owner ticks it when starting a session). Each order risks about 2% of the account's cash, at
 // least one contract and never more than L1_SIZE_MAX, and the loss stop becomes 10% of the starting cash instead of the flat $10. Raised by the owner on
 // Oct 8, 2026 (from 1% and 7%/$7). At 2% a $106 account buys two contracts (two need about $92 to $98 of cash, three about $138 to $146).
@@ -298,7 +493,11 @@ const L1_SIZE_MAX = 3;
 const L1_SIZE_FRACTION = 0.02;
 // 5%, tightened from 10% on Oct 8, 2026 at the owner's choice: 10% of a $344 balance is $34, more than the worst modelled day at 5 contracts (about $20), so it
 // never tripped. 5% is about $17, a real circuit breaker that a bad day at 4 to 5 contracts can reach.
-const L1_SIZED_STOP_FRACTION = 0.05;
+// Raised from 5% to 6% on Oct 20, 2026 at the owner's choice, together with the per-window limit (4.5% to 5.5%), so that one window alone still cannot reach the stop. 6% is about $11.76 of a $196 base.
+// Raised again from 6% to 12% on Oct 20, 2026 (the owner's choice, the same night) after the stop ended the bot with $6.06 SETTLED down and a full window ($8.43) open: an open order is counted as lost, so with the
+// window limit at 5.5% a full open window left only about $0.80 to $2.30 of room for real losses, and one ordinary loss (about $3.70) was enough to stop it. At 12% a full window leaves about $10.60 of room. Open
+// orders are STILL counted as lost, so the true worst case is unchanged in kind: the stop holds the account to 12% of the base (about 10% of the balance) however the open window ends.
+const L1_SIZED_STOP_FRACTION = 0.12;
 function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   if (!Number.isFinite(cash) || !(costPerContract > 0)) return 1;
   // The 2% of cash rule bounds the part funded by the account (the review's cap). The add-on, bought with reinvested PROFIT (the pool), sits outside it: the owner's
@@ -310,7 +509,7 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
 // SCALE_DOLLARS_PER_CONTRACT of balance is the target. The cap FALLS to the target at once when the balance falls, and RISES at most one step
-// per SCALE_REVIEW_MS (3 days), and not at all within a week of a loss stop. The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
+// per SCALE_REVIEW_MS (3 days). A loss stop no longer holds the climb (the owner, Oct 23, 2026: "i asked to have that removed"; the add-on hold went on Oct 13, the cap hold was left in by mistake). The loss stop is a fraction of the balance AT THE LAST REVIEW, so size and
 // stop move together, every review. L1_SIZE_CEILING is a hard limit in code that no balance can pass. The first review starts at L1_SIZE_MAX
 // (3, what the owner was running), or lower if the balance is lower. Pure: the caller keeps the state.
 // Raised from 10 to 25 on Oct 9, 2026 with the 2% base, or the ceiling would hold the base near 1% of a $550 account; then to 40 at the owner's request, which keeps
@@ -324,10 +523,9 @@ const L1_SIZE_CEILING = 40;
 const L1_ORDER_CEILING = 50;
 // $43 (was $85) so the ladder's target is about 2% of balance at a 93c contract, matching L1_SIZE_FRACTION; at $85 it, not the 2% rule, would have set the base.
 const SCALE_DOLLARS_PER_CONTRACT = 43;
-// Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. A loss stop still holds the
-// cap for a full week (it used to hold the profit add-on too; that hold was removed Oct 13, 2026), so a bad run slows the climb more than a good one speeds it.
+// Steps were weekly at first and the owner asked for faster ones (Oct 8, 2026): a review, and at most one step up, every 3 days. Nothing holds the climb after a
+// loss stop any more (the profit add-on hold was removed Oct 13, 2026 and the cap hold Oct 23, 2026, both at the owner's request); the 12% loss stop is what bounds a bad run.
 const SCALE_REVIEW_MS = 3 * 24 * 3600 * 1000;
-const SCALE_STOP_PAUSE_MS = 7 * 24 * 3600 * 1000;
 const SCALE_STEP = 1;
 function scaleTarget(cash) {
   return Number.isFinite(cash) ? Math.max(1, Math.min(L1_SIZE_CEILING, Math.floor(cash / SCALE_DOLLARS_PER_CONTRACT + 1e-9))) : 1;
@@ -338,8 +536,7 @@ function scaleTarget(cash) {
 // the cap is cut only when the target has stayed below it for SCALE_FALL_CONFIRM_MS. Real losses are still bounded in the meantime by the loss stop (which keeps
 // its old base while waiting), and money that was only locked comes back inside the window and clears the wait.
 const SCALE_FALL_CONFIRM_MS = 2 * 3600 * 1000;
-// Starting a session with scaling on sets state.reseed. The next review then raises the cap to the balance's target (never lowers it, never raises it within
-// a week of a loss stop) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
+// Starting a session with scaling on sets state.reseed. The next review then raises the cap to the balance's target (never lowers it) and re-bases the stop on the current balance, so an owner who restarts after a collapse is not stuck waiting out the slow steps.
 function reviewSizing(state, cash, now) {
   const target = scaleTarget(cash);
   if (!state || !Number.isInteger(state.cap) || !Number.isFinite(state.reviewedAt) || !Number.isFinite(state.base)) {
@@ -348,9 +545,8 @@ function reviewSizing(state, cash, now) {
   let { cap, base, reviewedAt } = state;
   let lowSince = Number.isFinite(state.lowSince) ? state.lowSince : null;
   const lastStopAt = Number.isFinite(state.lastStopAt) ? state.lastStopAt : null;
-  const paused = lastStopAt !== null && now - lastStopAt < SCALE_STOP_PAUSE_MS;
   if (state.reseed === true) {
-    if (!paused) cap = Math.max(cap, target);   // Start is the owner's deliberate act, so it goes straight to the target instead of the slow steps
+    cap = Math.max(cap, target);   // Start is the owner's deliberate act, so it goes straight to the target instead of the slow steps
     base = cash; reviewedAt = now; lowSince = null;
     cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
     return { state: { ...state, cap, base, reviewedAt, lastStopAt, reseed: false, lowSince }, changed: true };
@@ -362,7 +558,7 @@ function reviewSizing(state, cash, now) {
     lowSince = null;
     if (now - reviewedAt >= SCALE_REVIEW_MS) {
       base = cash; reviewedAt = now;
-      if (target > cap && !paused) cap = Math.min(cap + SCALE_STEP, target);
+      if (target > cap) cap = Math.min(cap + SCALE_STEP, target);
     }
   }
   cap = Math.max(1, Math.min(cap, L1_SIZE_CEILING));
@@ -420,28 +616,77 @@ function settledFields(t, result) {
   return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - cost * (got0 / want0)).toFixed(4)) };
 }
 
+// A position the owner closed BY HAND (a manual sell, or Flatten) is not a trade the bot held to the end, but the market's result is all settledFields has to go on, so it booked a win or a loss
+// the owner never got: into the stats, the loss stop and the profit pool. This asks the account. The order is "closed by hand" only when the account's sell fills on its market and side, made
+// after the order and NOT by the bot's own exit order, cover everything the bot still held (a partly sold position is left to the old rule, which books the rest as held: counted, not hidden,
+// because hiding the rest of a loss from the loss stop is the unsafe direction). The exit watch's own "skipped" (it found nothing held when the price touched its line) says the same thing
+// without a read. Anything that cannot be read is `unknown`: the order stays open, which the loss stop counts as lost, until the next look. Never places or changes an order.
+async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
+  // Oct 21, 2026: this used to treat the exit watch's "skipped" as proof of a hand sale and to read the bot's OWN entry fill as a sale. Kalshi's order API books everything on the YES side
+  // (a NO buy is sent as side "ask"), so the fill for a NO buy can read as action "sell", side "no": every NO order the bot bought looked like a position the owner sold, and was left out of
+  // the stats, the loss stop and the pool, losses included. Now: without the entry order's id the entry cannot be told from a sale, so the order is NOT called hand (a loss stays counted, the
+  // safe direction); the entry's own fill is never a sale; and "skipped" alone is no evidence (the position can simply have settled before the exit watch looked).
+  if (!t.orderId) return { hand: false, sold: 0 };
+  const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/fills", params: { ticker: t.ticker, limit: "100" }, nowMs });
+  if (r.status !== 200 || !r.body || !Array.isArray(r.body.fills)) return { unknown: true };
+  const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
+  const botSold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got) : 0;
+  let sold = 0;
+  for (const f of r.body.fills) {
+    if (!f || (f.ticker || f.market_ticker) !== t.ticker || f.action !== "sell" || f.side !== t.side) continue;
+    if (t.exitOrderId && f.order_id === t.exitOrderId) continue;
+    if (f.order_id === t.orderId) continue;                // the bot's own entry, whatever Kalshi calls it
+    const at = Date.parse(f.created_time);
+    if (Number.isFinite(at) && Number.isFinite(Number(t.ts)) && at < Number(t.ts) - 5000) continue;
+    const c = num(f.count_fp !== undefined ? f.count_fp : f.count);
+    if (Number.isFinite(c) && c > 0) sold += c;
+  }
+  return sold > 0 && sold + 1e-9 >= got - botSold ? { hand: true, sold } : { hand: false, sold };
+}
+// What the order document records for a position closed by hand: settled (so nothing waits on it or counts it open), no profit figure (so no stat, stop or pool can use one), and a result the
+// page reads as "sold by hand".
+function handFields(h) { return Object.assign({ settled: true, result: "hand" }, Number.isFinite(h.sold) ? { handSold: h.sold } : {}); }
+
 // Settles filled orders whose market has finished, whether or not a session is running. The session's own check stops when the session ends, so a
 // trade that settled after a stop (or just after the 24 hours) stayed "open" in the records for ever and never reached the page's loss and win
 // counts. Called every minute by the scheduled function; reads at most `max` public markets, never places or changes an order, and a failed read
 // leaves the order open for the next minute.
-async function settleOpenOrders({ store, fetchFn, nowMs, max = 12 }) {
+async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, repair = true }) {
   const open = (await store.openFilled()).filter((t) => t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
   let settled = 0;
   for (const t of open.slice(0, max)) {
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
     const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
     if (r !== "yes" && r !== "no") continue;
-    await store.updateTest(t.id, settledFields(t, r));
+    // With the account's key, ask whether the owner closed it by hand first (see closedByHand). Without a key (older callers) the old rule applies.
+    const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+    if (h.unknown) continue;
+    await store.updateTest(t.id, h.hand ? handFields(h) : settledFields(t, r));
     settled += 1;
   }
-  return { settled, looked: Math.min(open.length, max) };
+  // Repair (Oct 21, 2026): orders the old check wrongly marked "hand" (every NO order, see closedByHand) are asked again with the fixed check, and the ones that were never sold by hand are settled as the
+  // win or loss they were, so the stats, the loss stop and the pool see them. A genuine hand sale stays hand and is marked checked so it is not asked again. Reads only, like the rest of this sweep.
+  let repaired = 0;
+  if (repair && keyId && pem && typeof store.handOrders === "function") {
+    const flagged = (await store.handOrders()).filter((t) => t.result === "hand" && t.handChecked !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
+    for (const t of flagged.slice(0, max)) {
+      const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
+      const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
+      if (r !== "yes" && r !== "no") continue;
+      const h = await closedByHand({ fetchFn, keyId, pem, t, nowMs });
+      if (h.unknown) continue;
+      await store.updateTest(t.id, h.hand ? { handChecked: true } : Object.assign(settledFields(t, r), { handChecked: true, handRepaired: true }));
+      if (!h.hand) repaired += 1;
+    }
+  }
+  return { settled, repaired, looked: Math.min(open.length, max) };
 }
 
 // What the bot's own filled trades in this session have done. A settled trade is read once from the public market and
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
 // `orders` is a list the caller has already read (the tick reads the last 24 hours once and shares it, so the same documents are not billed twice a minute); without it the store is asked.
-async function botRisk({ store, since, fetchFn, nowMs, orders }) {
+async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem }) {
   const from = Number.isFinite(since) ? since : 0;
   const read = Array.isArray(orders) ? orders.filter((t) => Number(t.ts) >= from) : await store.sessionTrades(from);
   const trades = read.filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
@@ -453,10 +698,12 @@ async function botRisk({ store, since, fetchFn, nowMs, orders }) {
       const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
       const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
       if (r === "yes" || r === "no") {
-        result = r;
-        await store.updateTest(t.id, settledFields(t, r));
+        const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+        if (h.hand) { await store.updateTest(t.id, handFields(h)); continue; }     // closed by hand: not the bot's result, so not in its net, its stop or its open cost
+        if (!h.unknown) { result = r; await store.updateTest(t.id, settledFields(t, r)); }     // unreadable: stays open and counted as lost until the next look
       }
     }
+    if (t.settled === true && t.result === "hand") continue;
     // A partial fill costs and pays in proportion; orders from before size scaling have count 1.
     const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
     const addonPaid = Number.isFinite(Number(t.addonCost)) && Number(t.addonCost) > 0 ? Number(t.addonCost) * (got / want) : 0;
@@ -498,6 +745,7 @@ function foldSkim(state, orders, opts = {}) {
     .sort((a, b) => a.ts - b.ts || String(a.id).localeCompare(String(b.id)));
   let blocked = null;   // the first order the cursor could not pass (not settled yet), so a pool that does not move can say why
   for (const t of rows) {
+    if (t.settled === true && t.result === "hand") { cursor = t.ts; continue; }     // closed by hand: not the bot's trade, passed without a profit or a loss
     if (t.settled !== true || !Number.isFinite(Number(t.settledPnl))) { blocked = { ticker: t.ticker || null, ts: t.ts }; break; }
     const pnl = Number(t.settledPnl);
     cum += pnl;
@@ -523,8 +771,40 @@ function skimAddon(state, now, perContract = 0.93) {
 // Every refusal before an order leaves the session running; the session ends (and stays ended until the owner starts
 // another) on the loss stop, an unresolved order, and any order whose answer was lost or refused.
 // A window is the 15 minutes a market closes in, shared by every series: the part of the ticker after the series name (KXBTC15M-26OCT101200-00 gives 26OCT101200).
-const L1_WINDOW_CAP_FRACTION = 0.045;
+// Raised from 4.5% to 5.5% at the owner's request (Oct 20, 2026), after Dogecoin, last in the list, got 1 contract while XRP got 4. The loss stop (L1_SIZED_STOP_FRACTION) was raised with it, from 5% to 6%,
+// so the window limit still sits UNDER the stop and one window alone cannot reach it.
+const L1_WINDOW_CAP_FRACTION = 0.055;
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
+
+// The probe drop rule (DL1, the research session, Oct 21, 2026; the owner: "do it"). A probe market (PROBE_SERIES) is dropped when its last PROBE_DROP_WINDOW settled entries net negative.
+// It is an ADMISSION filter for markets that have not earned a place, NOT a short-term brake: on the five live series the same rule would have hurt, because they bounce after a bad stretch, so it is
+// never applied to them. It only ever REMOVES a series from what the tick may trade, never adds one, and a dropped probe stays dropped (no new entries arrive to change its record), so putting one
+// back is a deliberate code edit or deleting the record by hand, never something the page can do. Fails closed: if the record cannot be read or saved, no probe trades that minute.
+// The record is built from the 24 hours of orders the tick already reads (no extra order reads) and holds only settled, finite results of the bot's own entries; orders closed by hand are not the
+// bot's result and are left out, as everywhere else. Entries from before the record existed are not in it, so the rule cannot fire until the record itself holds PROBE_DROP_WINDOW entries.
+const PROBE_DROP_WINDOW = 200;
+function probeRingUpdate(record, orders, now) {
+  const cur = record && typeof record === "object" ? record : {};
+  const rings = {};
+  for (const sr of PROBE_SERIES) rings[sr] = Array.isArray(cur.rings && cur.rings[sr]) ? cur.rings[sr].filter((e) => e && typeof e.id === "string" && Number.isFinite(e.pnl) && Number.isFinite(e.ts)) : [];
+  let changed = false;
+  for (const sr of PROBE_SERIES) {
+    const have = new Set(rings[sr].map((e) => e.id));
+    const seen = new Set();
+    const fresh = (orders || []).filter((t) => t && t.id && t.series === sr && t.strategy === "L1" && t.settled === true && t.result !== "hand" && Number(t.fillCount) > 0
+      && Number.isFinite(Number(t.settledPnl)) && Number.isFinite(Number(t.ts)) && !have.has(t.id) && !seen.has(t.id) && seen.add(t.id));
+    if (!fresh.length) continue;
+    changed = true;
+    rings[sr] = rings[sr].concat(fresh.map((t) => ({ id: t.id, ts: Number(t.ts), pnl: Number(t.settledPnl) }))).sort((a, b) => a.ts - b.ts).slice(-PROBE_DROP_WINDOW);
+  }
+  const droppedAt = Object.assign({}, cur.droppedAt), newlyDropped = [];
+  for (const sr of PROBE_SERIES) if (probeNet(rings[sr]) !== null && probeNet(rings[sr]) < 0 && !Number.isFinite(droppedAt[sr])) { droppedAt[sr] = now; newlyDropped.push(sr); changed = true; }
+  return { record: { rings, droppedAt }, changed, newlyDropped };
+}
+// The net of a probe's record, or null while it holds fewer than PROBE_DROP_WINDOW entries (too few to judge: never dropped on a short record).
+function probeNet(ring) { return Array.isArray(ring) && ring.length >= PROBE_DROP_WINDOW ? Number(ring.reduce((a, e) => a + e.pnl, 0).toFixed(4)) : null; }
+// Dropped once the record said so and it still does (a stored drop alone is enough: the record cannot gain entries without trading).
+function probeDropped(record, series) { return Boolean(record && record.droppedAt && Number.isFinite(record.droppedAt[series])); }
 
 async function runL1Tick(args) {
   const { session, now, setSession, enabled, active, store, keyId, pem, fetchFn, quotes } = args;
@@ -540,7 +820,7 @@ async function runL1Tick(args) {
   // Orders in the last 24 hours, whether or not they filled. Fails closed: if they cannot be counted, nothing is sent this minute.
   const dayStart = now - L1_WINDOW_DAY_MS;
   let recentOrders, recentList;
-  try { recentList = (await store.sessionTrades(dayStart)).filter((t) => t.strategy === "L1"); recentOrders = recentList.length; }
+  try { recentList = (await (typeof store.sessionTradesCached === "function" ? store.sessionTradesCached(dayStart, now) : store.sessionTrades(dayStart))).filter((t) => t.strategy === "L1"); recentOrders = recentList.length; }
   catch (e) { await note("The bot's recent orders could not be counted, so nothing was sent."); return { skipped: "orders unreadable" }; }
   if (recentOrders >= L1_MAX_ORDERS) { await note("The limit of " + L1_MAX_ORDERS + " orders in 24 hours has been reached. It carries on by itself once older orders drop out."); return { skipped: "order limit" }; }
 
@@ -553,7 +833,7 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList }); }
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, keyId, pem }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
@@ -584,7 +864,7 @@ async function runL1Tick(args) {
   }
   // The stop protects the ACCOUNT, not the profit already made: the part of a lost or open order that was bought with reinvested profit (the add-on) does not count
   // toward it. Without this a big enough add-on would make one loss, or even one open order counted as lost, reach the stop on its own and lock the bot out
-  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 5% of the balance at the last review.
+  // (the owner's rule, Oct 9, 2026). The account's own share of the loss is still held to the same 6% of the balance at the last review.
   const allowance = Number.isFinite(risk.addonAtRisk) ? risk.addonAtRisk : 0;
   const floor = peak - (stopAt + allowance);
   if (risk.worst <= floor + 1e-9) {
@@ -594,24 +874,38 @@ async function runL1Tick(args) {
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
   }
 
-  const tradable = L1_SERIES;
+  // Probe drop rule (see PROBE_DROP_WINDOW). Only probes can be removed. A record that cannot be read or saved removes ALL probes this minute; the other series trade as usual.
+  let dropped = [];
+  if (typeof args.updateProbeRecord === "function") {
+    try {
+      let newly = [];
+      const rec = await args.updateProbeRecord((cur) => { const u = probeRingUpdate(cur, recentList, now); newly = u.newlyDropped; return u; });
+      for (const sr of PROBE_SERIES) if (probeDropped(rec, sr)) dropped.push(sr);
+      for (const sr of newly) await log("probe dropped", sr + " is dropped: its last " + PROBE_DROP_WINDOW + " settled entries net $" + probeNet(rec.rings && rec.rings[sr]) + ". It stays off until the record is reset by hand.");
+    } catch (e) { dropped = PROBE_SERIES.slice(); }
+  }
+  // `args.pausedSeries` exists only so the older gates can keep using XRP as their example market; the real caller (functions/index.js) never passes it, and gate PX2 fails if it ever does.
+  const paused = Array.isArray(args.pausedSeries) ? args.pausedSeries : PAUSED_SERIES;
+  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
-    && Date.parse(q.m.close_time) - now >= L1_WINDOW_MS[0] && Date.parse(q.m.close_time) - now <= L1_WINDOW_MS[1])
+    && entryLead(q.series, Date.parse(q.m.close_time) - now) !== null)
     .sort((x, y) => L1_SERIES.indexOf(x.series) - L1_SERIES.indexOf(y.series));
   if (!candidates.length) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
-      .map((q) => Date.parse(q.m.close_time) - L1_WINDOW_MS[1]).filter((t) => t > now);
-    await note("Watching. Orders go in about 6 minutes before a close, and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
+      .map((q) => Date.parse(q.m.close_time) - (EARLY_PROBE_SERIES.includes(q.series) ? EARLY_WINDOW_MS[1] : L1_WINDOW_MS[1])).filter((t) => t > now);
+    await note("Watching. Orders go in about 6 minutes before a close (10 for Bitcoin, XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
   }
 
   const results = [];
+  const riseLog = [];   // every order of this minute, to log the 3 minute rise on after all of them are sent
   let ordersSent = sent;
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
   const committed = {};
+  const cryptoTaken = {};   // windows where a crypto order is already placed THIS tick (the store does not hold it yet)
   const windowSpent = {};   // account money put into each window earlier in THIS tick (the store does not hold it yet)
   for (const c of candidates) {
     if (recentOrders + (ordersSent - sent) >= L1_MAX_ORDERS) { results.push("order limit reached"); break; }   // the limit also holds inside one tick
@@ -620,20 +914,35 @@ async function runL1Tick(args) {
     const m = mk.status === 200 && mk.body && mk.body.market;
     if (!m) { results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
     const left = Date.parse(m.close_time) - now;
-    if (!["active", "open"].includes(m.status) || left < L1_WINDOW_MS[0] || left > L1_WINDOW_MS[1]) { results.push(ticker + ": not open in the 6 minute window"); continue; }
+    const lead = entryLead(c.series, left);
+    if (!["active", "open"].includes(m.status) || !lead) { results.push(ticker + ": not open in its entry window"); continue; }
     const pick = l1Pick(m);
     if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
+    // Bitcoin and Ethereum only on a smooth climb (see SMOOTH_SERIES). Read after the band check so the candles are only fetched for a market that would otherwise be bought.
+    if (SMOOTH_SERIES.includes(c.series)) {
+      const sg = await smoothGate({ fetchFn, series: c.series, ticker, side: pick.side, nowMs: now });
+      if (!sg.ok) { results.push(ticker + ": " + sg.reason); continue; }
+    }
     const cost1 = pick.worst + bot.takerFee(pick.worst, 1);
     if (cost1 > LIVE_CAP + 1e-9) { results.push(ticker + ": would cost $" + cost1.toFixed(2) + ", above the cap"); continue; }
     // The cash the size is judged on is what is left after this tick's earlier orders, so two markets cannot both take the full share.
     const cashLeft = cash - Object.values(committed).reduce((a, x) => a + x, 0);
     let count = sizing ? l1Count(cashLeft, cost1, sizeCap, sizeAddon) : 1;
     // How many of these contracts were bought with reinvested profit (the add-on), kept on the order so the loss stop can tell profit money from account money.
-    const addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
+    // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
+    if (PROBE_SERIES.includes(c.series) || CAPPED_SERIES.includes(c.series)) { count = sizing && FIXED_CONTRACTS[c.series] ? FIXED_CONTRACTS[c.series] : 1; addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
-    // from earlier ticks in the same window count too. The loss stop is 5% of the base; a window may use 4.5%, so one window alone cannot reach it.
+    // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.
     const wkey = windowKey(ticker);
+    // One crypto order per window (Oct 22, 2026, the research session's live diagnosis, the owner's choice): Bitcoin, Ethereum, XRP and Dogecoin
+    // flip together, and 72% of the recent loss dollars came from three windows where two of them lost at once. An order that did not fill
+    // does not count, so a missed first order leaves the window open to the next series. Gold and the probes are not part of this rule.
+    if (CAPPED_SERIES.includes(c.series)) {
+      const held = cryptoTaken[wkey] || recentList.some((t) => windowKey(t.ticker) === wkey && CAPPED_SERIES.includes(t.series) && ["filled", "sending", "unknown"].includes(t.status));
+      if (held) { results.push(ticker + ": another crypto market already holds this window"); continue; }
+    }
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
       .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
     const room = L1_WINDOW_CAP_FRACTION * sizeBase - windowUsed;
@@ -643,6 +952,12 @@ async function runL1Tick(args) {
       if (allowed + addonUsed < 1) { results.push(ticker + ": this window already has $" + windowUsed.toFixed(2) + " at risk, and the combined limit is $" + (L1_WINDOW_CAP_FRACTION * sizeBase).toFixed(2)); continue; }
       count = allowed + addonUsed;
     }
+    // Second lock on the size (see maxContractsFor): checked BEFORE the order is recorded, so a refused count leaves no "sending" document behind and the market is simply tried again next minute.
+    if (!Number.isInteger(count) || count < 1 || count > maxContractsFor(c.series)) {
+      results.push(ticker + ": refused " + count + " contracts, the most " + c.series + " may have is " + maxContractsFor(c.series));
+      await log("order size refused", ticker + ": the size worked out to " + count + " contracts, above the " + maxContractsFor(c.series) + " this market may ever have, so nothing was sent for it.");
+      continue;
+    }
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
@@ -651,7 +966,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
+      accountId: DEFAULT_ACCOUNT_ID, ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // Written false so the settle sweep can ask for "filled and not settled" and read a handful of documents each minute instead of every order ever filled (a Firestore read is billed).
@@ -660,10 +975,17 @@ async function runL1Tick(args) {
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
     };
+    // Depth log (the research session's request, the owner: "2", Oct 25, 2026): how big this order is against what rests at the touch it hits, so a size cap shows before slippage shows in P&L. LOGGING ONLY: it reads two numbers already in hand and nothing that decides an order reads them. Kalshi's market object carries ONLY the top level of the book, so depthAtLimit is the size at the best price on the side being hit (a YES buy meets the YES ask, a NO buy meets the YES bid), not a sum over levels, and depthLevels says so.
+    const depthTop = pick.side === "yes" ? record.seen.askSize : record.seen.bidSize;
+    record.depthAtLimit = Number.isFinite(depthTop) && depthTop > 0 ? depthTop : null;
+    record.shareOfDepth = record.depthAtLimit ? Number((count / record.depthAtLimit).toFixed(4)) : null;
+    record.depthLevels = "top";
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
     if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
+    riseLog.push({ cid, series: c.series, ticker, side: pick.side, ask: pick.price, closeSec: Date.parse(m.close_time) / 1000 });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
+    if (CAPPED_SERIES.includes(c.series)) cryptoTaken[wkey] = true;
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
     const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index, count);
@@ -696,6 +1018,7 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
+  for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask, closeSec: r.closeSec });
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results };
 }
@@ -722,7 +1045,7 @@ const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
 // epoch starts on one), so the minutes either side are covered too. Idle means ALL of: outside those minutes, and no filled L1 order that is not settled. Anything that cannot be
 // read counts as NOT idle: skipping the watch is the unsafe direction, running it for nothing only costs compute.
 const EXIT_BUY_MINUTES = (() => {
-  const first = Math.floor((900000 - L1_WINDOW_MS[1]) / 60000) - 1, last = Math.floor((900000 - L1_WINDOW_MS[0]) / 60000) + 1;
+  const first = Math.floor((900000 - Math.max(L1_WINDOW_MS[1], EARLY_WINDOW_MS[1])) / 60000) - 1, last = Math.floor((900000 - L1_WINDOW_MS[0]) / 60000) + 1;
   const out = []; for (let m = first; m <= last; m++) out.push(m);
   return out;
 })();
@@ -732,6 +1055,16 @@ async function exitWatchIdle({ store, now }) {
     const recent = await store.recentFilled(now - EXIT_LOOKBACK_MS);
     return !recent.some((t) => t.strategy === "L1" && t.settled !== true && Number(t.fillCount) > 0);
   } catch (e) { return false; }
+}
+
+// The exit watch and Flatten both close positions, and each reads the position a moment before it sells. With nothing shared, one could sell between the other's read and its sell, and the second
+// sell then goes out on a position that is gone: a YES sell with nothing held OPENS the opposite position, real exposure nobody intended. So both take a short claim on the MARKET first (a document
+// per ticker, taken in a transaction) and read the position only after holding it. A claim held by the other closer refuses; the same closer may take it again (the exit watch's own instances are
+// kept apart by claimExit on the order). It lapses after CLOSE_CLAIM_MS by itself, so a function that died holding one cannot block the next closer for long. Fails closed: a claim that
+// cannot be made means nothing is sold for that market this time, and the caller says so.
+const CLOSE_CLAIM_MS = 90 * 1000;
+async function claimClose(store, ticker, who, now) {
+  try { return !!store && typeof store.claimClose === "function" && (await store.claimClose(ticker, who, now, CLOSE_CLAIM_MS)) === true; } catch (e) { return false; }
 }
 
 function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
@@ -776,6 +1109,8 @@ async function runExitWatch(args) {
     }
     const tries = Number(t.exitTries) > 0 ? Number(t.exitTries) : 0;
     if (tries >= EXIT_MAX_TRIES) continue;
+    // Flatten may be closing this market right now; if it holds the claim, leave it (the position is about to be, or already is, gone).
+    if (!(await claimClose(store, t.ticker, "exit", now))) { results.push(t.ticker + ": Flatten is closing it (or the claim could not be made), nothing sold"); continue; }
     // The live account must hold the position, or a sell would open the opposite one.
     const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: t.ticker, limit: "20" }, nowMs: now });
     let held = NaN;
@@ -834,7 +1169,7 @@ async function runExitWatch(args) {
 // never flip it. A market that is no longer open cannot be traded and settles on its own, so it is reported and skipped. The client order
 // id carries the minute, so a second press inside the same minute is refused by Kalshi instead of selling twice. Not capped by LIVE_CAP:
 // that cap bounds what a BUY may risk, and this only reduces exposure.
-async function flattenAll({ fetchFn, keyId, pem, now }) {
+async function flattenAll({ fetchFn, keyId, pem, now, store }) {
   const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { limit: "200" }, nowMs: now });
   if (pos.status !== 200 || !pos.body || typeof pos.body !== "object") return { ok: false, reason: "The positions could not be read (HTTP " + pos.status + "). Nothing was sold.", results: [] };
   const list = Array.isArray(pos.body.market_positions) ? pos.body.market_positions : [];
@@ -842,6 +1177,15 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
     .filter((p) => p.ticker && Number.isFinite(p.position) && p.position !== 0);
   const results = [];
   for (const p of held) {
+    // The list above was read before this market's turn came, and the exit watch may have sold it since. Take the claim, THEN read this one position again and sell exactly that: a count from
+    // the older list could be of a position that is already closed, and selling it would open the opposite one.
+    if (!(await claimClose(store, p.ticker, "flatten", now))) { results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "the exit watch is closing it right now (or the claim could not be made), press again in a minute" }); continue; }
+    const fresh = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: p.ticker, limit: "20" }, nowMs: now });
+    if (fresh.status !== 200 || !fresh.body || !Array.isArray(fresh.body.market_positions)) { results.push({ ticker: p.ticker, position: p.position, status: "error", detail: "could not read the position again (HTTP " + fresh.status + "), nothing sent for it" }); continue; }
+    const row = fresh.body.market_positions.find((x) => x.ticker === p.ticker);
+    const nowPos = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
+    if (!Number.isFinite(nowPos) || nowPos === 0) { results.push({ ticker: p.ticker, position: p.position, status: "skipped", detail: "already closed" }); continue; }
+    p.position = nowPos;
     const count = Math.abs(p.position);
     const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(p.ticker), nowMs: now });
     const m = mk.status === 200 && mk.body && mk.body.market;
@@ -869,9 +1213,15 @@ async function flattenAll({ fetchFn, keyId, pem, now }) {
   return { ok: true, results };
 }
 
+// The account every order and event belongs to. There is one account today ("main"), so this changes no behaviour: it only stamps new records so a second account's records can
+// be told apart later (docs: second account design). Nothing reads it yet, and a record without it is "main".
+const DEFAULT_ACCOUNT_ID = "main";
+
 module.exports = {
-  flattenAll, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES,
+  flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
+  DEFAULT_ACCOUNT_ID,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, SCALE_STOP_PAUSE_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, windowKey, L1_WINDOW_CAP_FRACTION,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };

@@ -297,5 +297,15 @@ creating an account from the page were removed at the owner's request. What that
 - **The Twelve Data proxy secret.** It sat in `index.html` in plaintext for months and is in the public history of this repository. The
   page no longer sends it, but treat it as leaked: rotate it on shwoop-server, or remove the `/twelvedata` route there.
 - **Left behind on purpose.** `users/{uid}` documents still carry the old fields (`journalEntries`, `alpacaKeyId`, `alpacaSecretKey` and
-  the rest). The page ignores them. **shwoop-server still reads them and still trades Alpaca for any account that has keys stored**, with no
-  page left to see it or pause it. Stopping that is done on the server or by deleting those fields in the console, not here.
+  the rest). The page ignores them. shwoop-server used to read them and trade Alpaca for any account with keys stored; it was suspended on Oct 26, 2026 and
+  is retired. Delete those fields in the console and revoke the keys in Alpaca to finish the cut (see CLAUDE.md, "Alpaca and the Render server").
+
+## The order flow view (`kalshiTape`)
+
+Added Oct 26, 2026. A keyless, admin only callable that reads one market's PUBLIC trades from Kalshi (GET only) and sums them per minute and per price for the Bot page's Order flow fold. It needs no secret and no `.env` line, and nothing reads it until the owner opens the fold. Deploy it with:
+
+```bash
+npx firebase-tools deploy --only functions:kalshiTape --project shwoopnet
+```
+
+Until it is deployed the fold shows "Could not read the trades" and nothing else changes.

@@ -14,11 +14,12 @@ const idxSrc = fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js
 
 // A fake exchange: markets with a yes bid and ask, a positions endpoint, an order endpoint. Every request is recorded.
 function world(o = {}) {
-  const docs = new Map(), events = [], calls = [], posts = [], sess = { active: true };
+  const docs = new Map(), events = [], calls = [], posts = [], sess = { active: true }, closing = new Map(Object.entries(o.closing || {}));
   const mk = (id, over) => docs.set(id, Object.assign({ strategy: 'L1', ticker: 'KXBTC15M-T1', series: 'KXBTC15M', side: 'yes', count: 20, fillCount: '20', maxCost: 18.7, addonCost: 7.5, price: 0.93, status: 'filled', ts: NOW - 300000, settled: false }, over));
   const store = {
     async recentFilled(since) { return [...docs.entries()].filter(([, d]) => d.status === 'filled' && d.ts >= since).map(([id, d]) => ({ id, ...d })); },
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
+    async claimClose(ticker, who, now, ttl) { const c = closing.get(ticker); if (c && c.by !== who && now - c.at < ttl) return false; closing.set(ticker, { by: who, at: now }); return true; },
     async claimExit(id, tries) { const d = docs.get(id); if (d.exitStatus === 'sending' || (Number(d.exitTries) || 0) !== tries || d.settled === true) return false; d.exitStatus = 'sending'; d.exitTries = tries + 1; return true; },
   };
   const market = Object.assign({ status: 'active', close_time: iso(NOW + 200000), yes_bid_dollars: '0.2400', yes_ask_dollars: '0.2600', exchange_index: 2 }, o.market || {});
@@ -34,7 +35,7 @@ function world(o = {}) {
     }
     throw new Error('unexpected ' + init.method + ' ' + url);
   };
-  return { docs, events, calls, posts, sess, store, fetchFn, mk,
+  return { docs, events, calls, posts, sess, store, fetchFn, mk, closing,
     run: (extra = {}) => live.runExitWatch(Object.assign({ store, fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async (p) => Object.assign(sess, p), logEvent: async (e) => events.push(e) }, extra)) };
 }
 
@@ -186,6 +187,40 @@ gates.E10 = () => {
   const all = idxSrc.replace(/\/\/.*$/gm, '');
   assert.ok(!/kalshiExitMode|kalshiPoolRule/.test(all), 'neither setter callable exists, so nothing can change the exit or the pool rule from the page');
   assert.ok(idxSrc.indexOf('exports.kalshiLiveExit') < idxSrc.indexOf('exports.kalshiBookRecorder'), 'the recorder stays last');
+};
+
+// E11: if Flatten is closing the market, the exit watch sends nothing (a YES sell on a position Flatten just closed would OPEN the opposite one). It does not even read the position.
+gates.E11 = async () => {
+  const w = world({ closing: { 'KXBTC15M-T1': { by: 'flatten', at: NOW - 5000 } } });
+  w.mk('o1');
+  const r = await w.run();
+  assert.strictEqual(w.posts.length, 0, 'nothing is sold while Flatten holds the market');
+  assert.ok(!w.calls.some((c) => c.url.includes('/portfolio/positions')), 'the position is read only after the claim is held');
+  assert.ok(/Flatten is closing it/.test(r.results.join(' ')), 'and the result says why');
+};
+
+// E12: the claim is taken BEFORE the position is read, by the exit watch itself, and a lapsed claim of Flatten's does not block it for ever.
+gates.E12 = async () => {
+  const w = world({ closing: { 'KXBTC15M-T1': { by: 'flatten', at: NOW - 200000 } } });
+  w.mk('o1');
+  await w.run();
+  assert.strictEqual(w.posts.length, 1, 'a claim older than the lease no longer blocks the exit');
+  assert.strictEqual(w.closing.get('KXBTC15M-T1').by, 'exit', 'the exit watch now holds it');
+  const code = libSrc.slice(libSrc.indexOf('async function runExitWatch'), libSrc.indexOf('// ---- Flatten: the owner')).replace(/\/\/.*$/gm, '');
+  assert.ok(code.indexOf('claimClose(') > 0 && code.indexOf('claimClose(') < code.indexOf('/portfolio/positions'), 'in the code the claim comes before the position read');
+};
+
+// E13: a claim that cannot be made means nothing is sold (fails closed), and the exit watch may take its own claim again on the next look.
+gates.E13 = async () => {
+  const w = world();
+  w.mk('o1');
+  w.store.claimClose = async () => { throw new Error('firestore down'); };
+  await w.run();
+  assert.strictEqual(w.posts.length, 0, 'no claim, no sell');
+  const w2 = world({ closing: { 'KXBTC15M-T1': { by: 'exit', at: NOW - 1000 } } });
+  w2.mk('o1');
+  await w2.run();
+  assert.strictEqual(w2.posts.length, 1, 'the exit watch is not locked out by its own earlier claim');
 };
 
 (async () => {

@@ -27,7 +27,7 @@ gates.D2 = () => {
   const dir = scratch();
   const out = run(dir);
   assert.strictEqual(fs.readFileSync(path.join(dir, 'functions', '.env'), 'utf8'), 'KALSHI_LIVE_ENABLED=on\n', 'a fresh clone gets the order switch line, so the deploy cannot turn the bot off');
-  assert.ok(/\[dry run\] .*deploy --only functions:kalshiLiveArmed --project shwoopnet/.test(out), 'it deploys exactly one function to the shwoopnet project');
+  assert.ok(/\[dry run\] .*deploy --only functions:kalshiLiveArmed,functions:kalshiBooks --project shwoopnet/.test(out), 'it deploys exactly the bot and the read-only relay to the shwoopnet project');
   assert.ok(!/--only functions(\s|$)/.test(out), 'never a whole-codebase deploy (that asks to delete functions)');
 };
 

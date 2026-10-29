@@ -44,14 +44,11 @@ gates.X1 = () => {
 };
 
 gates.X2 = () => {
-  const doc = fakeDoc();
-  const src = ['escapeHtml', 'renderEarningsCalendar'].map(fnSource).join('\n');
-  // The filter only lets a tracked symbol through; escaping is the second wall, for the day that filter is relaxed.
-  const render = new Function('document', 'watchlist', src + '\nreturn renderEarningsCalendar;')(doc, [{ sym: EVIL }, { sym: 'AAPL' }]);
-  render({ earningsCalendar: [{ symbol: EVIL, date: '2026-10-14', hour: 'amc' }, { symbol: 'AAPL', date: '2026-10-15', hour: 'bmo' }, { symbol: 'ZZZZ', date: '2026-10-15', hour: 'bmo' }] });
-  const out = doc.els.earningsList.innerHTML;
-  assert.ok(!/<img/i.test(out), 'a symbol with markup is text, not elements');
-  assert.ok(/AAPL/.test(out) && !/ZZZZ/.test(out), 'only tracked symbols are listed');
+  // The fear and greed rating comes from a third party through the shared tape document: it is text, never elements.
+  const g = new Function('escapeHtml', fnSource('briefSentiment') + '\n' + fnSource('briefGaugeHtml') + '\nreturn briefGaugeHtml;')((x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;'));
+  const out = g(EVIL, { score: 40, rating: EVIL, prev: 30 });
+  assert.ok(!/<img/i.test(out) && !out.includes(EVIL), 'a rating or label with markup is text, not elements; the third party rating is not shown at all (the page uses its own words)');
+  assert.ok(/mood-track/.test(out), 'and the gauge still draws');
 };
 
 gates.X3 = () => {

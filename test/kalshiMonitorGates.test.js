@@ -95,6 +95,7 @@ gates.G11 = () => {
 gates.G12 = () => {
   assert.ok(/data-page="kalshi"[^>]*\bhidden\b/.test(src), 'nav button must start hidden');
   assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(src), 'showPage must refuse non-admins');
+  assert.ok(!/data-page="data"/.test(src), 'there is no Data page nav button any more');
   assert.ok(/kalNav\.hidden = !currentUserIsAdmin/.test(src), 'applyAdminUI must toggle the nav button');
 };
 
