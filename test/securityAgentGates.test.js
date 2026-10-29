@@ -59,6 +59,17 @@ gates.SA4 = () => {
   fs.rmSync(d, { recursive: true, force: true });
 };
 
+// The server dependency tree never goes back below the patched versions the Oct 29, 2026 sweep locked in (a lockfile regenerated from an old one would silently undo it). Read from the lockfile so it needs no network.
+gates.SA6 = () => {
+  const lock = JSON.parse(fs.readFileSync(path.join(root, 'functions', 'package-lock.json'), 'utf8'));
+  const atLeast = (v, min) => { const a = v.split('.').map(Number), b = min.split('.').map(Number); for (let i = 0; i < 3; i++) { if (a[i] !== b[i]) return a[i] > b[i]; } return true; };
+  [['body-parser', '1.20.9'], ['qs', '6.16.2']].forEach(([name, min]) => {
+    const entries = Object.entries(lock.packages).filter(([k]) => k === 'node_modules/' + name || k.endsWith('/node_modules/' + name));
+    assert.ok(entries.length > 0, name + ' is in the lockfile');
+    entries.forEach(([k, e]) => assert.ok(atLeast(e.version, min), k + ' is ' + e.version + ', needs ' + min + ' or later'));
+  });
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
