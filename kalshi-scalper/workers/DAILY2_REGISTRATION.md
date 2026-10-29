@@ -121,3 +121,16 @@ Also:
   - Yahoo chart, 2 minute bars, 7 day chunks.
 - Stored in the session scratchpad. Nothing under `kalshi-scalper/data/` is committed.
 - Code: `kalshi-scalper/src/scalper/daily2.py`.
+
+## Amendment 1 (2026-10-29, before any Kalshi candle was downloaded and before any model value, signal or outcome was computed)
+
+Yahoo's 2 minute bars, fetched in 7 day chunks, start only at **2026-09-24** for `CL=F` and `CLZ26.NYM` and at **2026-09-17** for `EURUSD=X` and `JPY=X`. Earlier chunks come back empty or refused, so the "last 60 days" in the check file was wrong. That would leave about 25 WTI days and 30 FX days, about 8 to 10 a window. Sample size is the binding constraint here, so the reference changes to **5 minute bars**: one `range=60d` request, `CL=F` from 2026-08-20, FX from 2026-08-06. The rule's other parts are unchanged in meaning:
+
+- **S:** the close of the latest 5 minute bar that ended at or before D - 60 s. Bars start on 5 minute marks and every look is on a 5 minute mark, so in practice this is the bar ending at D - 300 s. The reference is about 5 minutes old, which counts against the model.
+- **Staleness limit:** 15 minutes.
+- **sigma:** from the last 121 bars (10 hours, as before). A return is skipped if its bars are more than 12 minutes apart, and at least 60 returns are needed.
+- **Time scaling:** s = sigma5 x sqrt(T / 300).
+- **WTI before 2026-10-16** uses `CL=F` as registered. On the December days it uses `CLZ26.NYM`; its 5 minute bars cover every day it is needed, since Kalshi names December only from about 2026-10-16.
+- **Days:** still from 2026-08-31, as registered.
+
+Nothing else changes: variants, N = 8, windows, edge, universe, fill, fees, kill criteria and prediction.
