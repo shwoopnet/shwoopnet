@@ -504,8 +504,14 @@ function l1Count(cash, costPerContract, cap = L1_SIZE_MAX, addon = 0) {
   // choice, Oct 8, 2026, so profit keeps compounding into size instead of waiting for the balance to catch up. Its risk is bounded by the pool, which holds only
   // profit (one extra contract needs one full contract cost of it, and a loss comes out of the pool first). L1_ORDER_CEILING is the only fixed limit left on a single order.
   const base = Math.max(1, Math.min(cap, L1_ORDER_CEILING, Math.floor((cash * L1_SIZE_FRACTION) / costPerContract + 1e-9)));
-  return Math.min(base + Math.max(0, Math.floor(addon || 0)), L1_ORDER_CEILING);
+  // The add-on is clamped to a quarter of the balance-driven count (the owner, Oct 29, 2026: "i'm concerned about us losing more than we're making due to scaling").
+  // Wins are about 6c a contract and losses about 90c, so an uncapped add-on compounds through a win streak and the next loss lands at peak size. The clamp can only
+  // LOWER a count. The pool keeps accumulating beyond what is used on purpose, so it still shows real profit and raising the fraction later is a reviewed edit; the risk
+  // accounting reads the count actually sent (addonUsed in runL1Tick is count minus the zero-add-on count), so the unused part of the pool is never counted as at risk.
+  return Math.min(base + Math.min(Math.max(0, Math.floor(addon || 0)), addonCap(base)), L1_ORDER_CEILING);
 }
+const ADDON_MAX_FRACTION = 0.25;
+function addonCap(base) { return Math.max(0, Math.floor(base * ADDON_MAX_FRACTION + 1e-9)); }
 
 // The cap on contracts per order follows the account, slowly (the owner keeps adding to it like a savings account). One contract per
 // SCALE_DOLLARS_PER_CONTRACT of balance is the target. The cap FALLS to the target at once when the balance falls, and RISES at most one step
@@ -845,7 +851,7 @@ async function runL1Tick(args) {
     // The pool always rebuilds after every win. Nothing stored on the session document can change that (the owner removed the switch, Oct 12, 2026).
     const fs = foldSkim(rv.state, recentList, { everyWin: true });
     sizeState = { ...rv.state, pool: fs.pool, saved: fs.saved, cum: fs.cum, hwm: fs.hwm, appliedTs: fs.appliedTs };
-    sizeCap = sizeState.cap; sizeBase = sizeState.base; sizeAddon = skimAddon(sizeState, now);
+    sizeCap = sizeState.cap; sizeBase = sizeState.base; sizeAddon = Math.min(skimAddon(sizeState, now), addonCap(sizeCap));   // the session shows what can actually be sent; the page reads the pool itself for its progress line
     if ((rv.changed || fs.changed) && args.setSizingState) {
       try { await args.setSizingState(sizeState); } catch (e) { await note("The size review could not be saved, so nothing was sent."); return { skipped: "size review unsaved" }; }
     }
@@ -1223,5 +1229,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };

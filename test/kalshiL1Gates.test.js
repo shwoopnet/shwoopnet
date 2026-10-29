@@ -344,13 +344,13 @@ gates.N25 = async () => {
   const w = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }] } });
   const saved = [];
   await tick(w, { quotes: [gq()], sizingState: { cap: 3, base: 341, reviewedAt: NOW - 1000, pool: 2, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async (x) => { saved.push(x); } });
-  assert.strictEqual(w.posts[0].count, '5', 'cap 3 plus two from a $2 pool');
-  assert.strictEqual(w.sess.sizeAddon, 2);
+  assert.strictEqual(w.posts[0].count, '3', 'cap 3 plus two from a $2 pool, but the add-on is clamped to a quarter of the base (0 at base 3)');
+  assert.strictEqual(w.sess.sizeAddon, 0);
   assert.strictEqual(live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 30, 8 * 86400000).state.cap, 4, 'with $30 saved the sizing balance is $311, which supports seven at $43 but rises one step to four');
   assert.strictEqual((() => { const a = live.reviewSizing({ cap: 3, base: 341, reviewedAt: 0, lastStopAt: null }, 341 - 250, 8 * 86400000); return live.reviewSizing(a.state, 341 - 250, 8 * 86400000 + live.SCALE_FALL_CONFIRM_MS).state.cap; })(), 2, 'savings are not sized on: if the rest of the balance falls to $91 the cap follows it down');
   const ceil = world({ session: { sizing: true }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 0 }] } });
   await tick(ceil, { quotes: [gq()], sizingState: { cap: 10, base: 5000, reviewedAt: NOW - 1000, pool: 99, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
-  assert.strictEqual(ceil.posts[0].count, String(live.L1_ORDER_CEILING), 'a huge pool still stops at the order ceiling, the fat-finger guard');
+  assert.strictEqual(ceil.posts[0].count, '12', 'a huge pool still cannot lift base 10 past base plus a quarter of base (add-on cap, Oct 29, 2026); the order ceiling stays the outer guard');
 };
 
 // Wiring: the session is switched by a server callable with a server-set expiry; the scheduled arm function runs it; nothing
@@ -611,8 +611,8 @@ gates.N30 = () => {
   assert.strictEqual(live.skimAddon({ pool: 4.65 }, 5), 5, 'a pool of five contract costs buys five extras');
   assert.strictEqual(live.l1Count(509, 0.93, 20, 0), 10, 'the account-funded part never risks more than 2% of cash');
   assert.strictEqual(live.l1Count(548, 0.93, 25, 0), 11, 'at $548 the 2% base is 11 contracts, as agreed with the owner on Oct 9');
-  assert.strictEqual(live.l1Count(509, 0.93, 5, 3), 8, 'profit-funded contracts sit outside the 2% rule and are simply added');
-  assert.strictEqual(live.l1Count(509, 0.93, 5, 999), live.L1_ORDER_CEILING, 'the fat-finger guard is the only fixed limit left');
+  assert.strictEqual(live.l1Count(509, 0.93, 5, 3), 6, 'profit-funded contracts sit outside the 2% rule but are clamped to a quarter of the base (1 at base 5)');
+  assert.strictEqual(live.l1Count(509, 0.93, 5, 999), 6, 'a huge pool is clamped to a quarter of the base; the order ceiling is still the outer guard');
 };
 
 // P1 to P5: the pool rule. "highs" is the original (half of each NEW profit high); "wins" refills the pool from half of every win, right after a loss, with savings untouched.
