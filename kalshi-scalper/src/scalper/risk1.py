@@ -184,7 +184,7 @@ def simulate(A, pool_days, start, variant, rng_days, zero_vol_unfilled=False):
             low_since = np.where(low & np.isnan(low_since), T, low_since)
             conf = low & (T - low_since >= FALL_MIN)
             cap = np.where(conf, tgt, cap); base = np.where(conf, c, base); low_since = np.where(conf, np.nan, low_since)
-            hi = active & ~(tgt < cap)
+            hi = active & ~low                         # if / else on the cap BEFORE this review, as reviewSizing
             low_since = np.where(hi, np.nan, low_since)
             due = hi & (T - reviewed >= REVIEW_MIN)
             base = np.where(due, c, base); reviewed = np.where(due, T, reviewed)
