@@ -18,3 +18,7 @@ fe82c5c3bda18c41a00252e9322fae084ad01767a356f7dd4bc9256323d760c5  research-data.
 74366b2112a76f4f27d4b1d72f20c6d1351629ec16ca09f86543062eb2eb5b03  research-data.tar.gz.part-04
 e16cdb5de740fe9c9801cb5a39db0a5243b4c85060107f661e8bed5d6782d999  research-data.tar.gz.part-05
 WHOLE 15788a025e39d4872515a88bcad2eb4666936632b863bd88c6eecc43b2efe227  research-data.tar.gz
+
+LADL1 partial (added 2026-10-29 16:25 UTC): ladl1-partial-2026-10-29.tar.gz.part-00 (one chunk, 276 KB). Contents: ladl1.sqlite (gold daily 38 closes, weekly 9, Bitcoin hourly 138 closes) and the shard files ladl1_KXBTCD_0/1.sqlite (73 / 99 closes) and ladl1_KXETHD_0/1.sqlite (32 / 49 closes).
+Restore: tar xzf ladl1-partial-2026-10-29.tar.gz.part-00 -C <repo>/kalshi-scalper/data   (resume and merge commands: kalshi-scalper/HANDOFF_V2.md section 8)
+396fa50971a9e80e207b3818e6e47ebb1603903613ddcdfeb60c2c3c3f1ba98f  ladl1-partial-2026-10-29.tar.gz.part-00
