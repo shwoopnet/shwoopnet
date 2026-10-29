@@ -2,7 +2,7 @@
 
 Owner request, Oct 29, 2026: a "Got questions?" bubble on the signed-out landing page (graffiti label and arrow, a panel with quick-question chips, then an email form), where visitors write in and the owner answers by email or from the admin side of the site, with ticket statuses, like a small built-in Intercom. Not immediate. Mockups: the published "Landing Chat Bubble" artifact (version E: the owner's drawing with the quick-question panel inside).
 
-**Chosen look (owner, Oct 29, 2026): version A with D's pop-up.** The round bubble with the "Got questions?" pill, opening D's panel (quick-question chips, a fixed answer, then "Something else? Email us"). The graffiti label with an arrow (version E) was the owner's drawing but was not the one picked.
+**Chosen look (owner, Oct 29, 2026, confirmed with screenshots): the owner's drawing with D's pop-up, added to the existing landing page.** The landing page itself is not redesigned: only the bubble, its label and the panel are added on top of it. Closed: "Got questions?" in marker graffiti with "ask us here" under it and a hand-drawn arrow curling down to a round chat bubble in the bottom right. Open (tap the bubble): D's panel, titled in the graffiti font, with quick-question chips, a fixed answer, then "Something else? Email us". The plain pill label (version A) was the first pick and was replaced by the drawing.
 
 ## What it is, in one picture
 
