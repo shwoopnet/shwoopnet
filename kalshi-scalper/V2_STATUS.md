@@ -2,9 +2,18 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running:** LADL1 download resumed from the old chat's partial files (4 shards, Bitcoin and Ethereum hourly); CONF2 ladder download for Aug 15 to Sep 25 (public, no key).
+- **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 (Bitcoin part 0 done; 3 parts running). Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (auto-scorers for LOCK2, MKTTIME1-F, MM1, RECORD1, CONF2 window C, plus a nightly live watcher, `workers/LIVEWATCH.md`); INX1 (Kalshi S&P 500 and Nasdaq daily markets against Yahoo index bars and VIX, a family never tested); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (profit per win levers for L1, listing tested vs new first); FAM2 (Deribit implied volatility on the hourly ladders, and S&P future / yields / dollar leading Kalshi quotes, each checked for newness first).
 - **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
+
+## Ideas for what else could run in the background (owner's question, V2's own list)
+
+- A self-running forward ledger: every registered forward read checks its own readiness hourly and writes its verdict here (AUTO is building it).
+- Kalshi's public trade tape for the five markets, recorded continuously (the R2 book recorder covers only the Bitcoin hourly ladder): needed for any honest maker or queue test on the 15 minute contracts.
+- A drift monitor between live fills and the history rule (same market, same minute): slippage and missed fills per market, nightly (part of the live watcher).
+- Calendar of public scheduled events (CPI, jobs, FOMC, Treasury auctions, crypto exchange maintenance) written once from official sources, so release-window tests stop being NOT_RUNNABLE.
+- Kalshi's other daily families with an outside public reference: index levels (INX1, running), Treasury yields, the dollar, oil (EIA weekly inventories), each one test with its own reference price.
+- A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
 
