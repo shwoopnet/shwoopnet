@@ -7455,3 +7455,15 @@ Data plan: recorder spec R2 (`studies/RECORDER_SPECS_2026-10-29.md`) restricted 
 ### Results: CONF1 TWIN and TAPE (2026-10-29): both FALSIFIED (LADDER waits for the corrected hourly file)
 
 PF of the L1 entries kept (removed) by window, 1 contract, per-order rounded fees. **TWIN** (keep only when the twin series is in band on the same side): discovery kept 1.01 (removed 1.22), validation 1.23 (0.90), holdout **0.76** (1.12); parent where defined 1.11 / 1.04 / 0.92. It halves the trades and flips sign between windows: noise. **TAPE** (keep only when the other series moved toward the side since the window opened): kept 0.97 / 0.93 / 0.92 against the parent 0.96 / 0.93 / 0.90 (removed 0.93 / 0.92 / 0.85). Confluence removes trades without adding edge. N tried +2.
+
+### Result: MM1 (2026-10-29): NOT_ENOUGH_DATA (last 150 seconds), NOT_RUNNABLE (mid-window)
+
+The quote-data recorder holds 48 gold 15 minute windows (2026-10-28 15:45 UTC to 2026-10-29 10:25 UTC files: 11, 18, 12 and 7 windows), against QUOTE1's 300 independent closes minimum: NOT_ENOUGH_DATA; at about 30 gold windows a day (gold trades about 22 hours) the minimum is about 9 days away. Mid-window market making needs depth and queue data that only recorder R2 would provide: NOT_RUNNABLE. Data plan: R2 in `studies/RECORDER_SPECS_2026-10-29.md`, restricted to KXGOLD15M if the owner wants a cheaper first step (about 2 MB a day gzipped).
+
+### The four suggested further families, checked against the sources before calling any untested (2026-10-29)
+
+1. **Calibration across favourites and longshots by time to close, harvested before settlement:** long-dated version run as THETA1 (FALSIFIED, 27 cells); 15 minute version covered by GEN1S's price bands and time windows (5,000 distinct, 0 past discovery); holding to settlement is outside the owner's rule. Not re-run.
+2. **Tennis post-set reversion:** the tennis files (`sc1.sqlite`, 20,286 markets, minute candles) carry no score or set markers, so a set end cannot be identified; the closest observable (a large price jump) was SC1 (FALSIFIED, all four). NOT_RUNNABLE without a score feed.
+3. **Settlement-time quote behaviour (last 2 minutes, exits before the final minute):** T1 to T5 and TAPE20 tested tick-level last-minute rules, QUOTE1 the last 150 s quoting (all FALSIFIED). Not re-run.
+4. **Cross-series lead-lag on 15 minute markets, exited before settlement:** GEN2's partner and market-wide move features with 229 exits cover it (7,500 distinct, 0 past discovery). Not re-run.
+No further family is testable honestly on data on hand beyond what is queued (CORR1, LADL1, CONF1 LADDER).
