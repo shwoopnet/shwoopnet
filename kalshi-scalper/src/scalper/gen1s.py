@@ -81,7 +81,7 @@ def load():
 def draw(rng):
     side = rng.choice(["yes", "no", "favourite"])
     lo_p = 50 if side == "favourite" else 5
-    width = rng.choice(range(5, 41, 5))
+    width = rng.choice(range(5, min(40, 85 - lo_p) + 1, 5))
     pmin = rng.choice([p for p in range(lo_p, 86, 5) if p + width <= 85])
     wsec = rng.choice(range(60, 601, 60))
     lmax = rng.choice([L for L in range(180, 841, 60) if L - wsec >= 120])
