@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 6:00 PM CT, STRUCT1 (exit table and time blocks).** Exit, information only: history PF held / 25c exit: gold 1.22 / 1.23, Bitcoin 0.97 / 0.96, Ethereum 0.96 / 0.95, Dogecoin 1.23 / 1.08 (24% of its exits would have won), XRP 1.14 / 1.12. Live: 50 exits lost -$155.85; holding them would have lost about -$158.49 (exits saved about $2.63). Time blocks (:15/:30/:45 closes, Tokyo/London/New York opens, COMEX settlement, gold's last hour): 0 of 14 hold in two of three windows; best z +1.25. Gold has no Saturday trading and no weekday closures in the history. N tried about 439,155.
+
 **2026-10-29 5:45 PM CT, MKTTIME1-F interim read added (owner: keep the gold quiet hours, review sooner).** At 100 block entries on fresh days (about Nov 24 to 26) the AUTO loop reads PF with and without the block, the block's mean against the rest and the day-clustered z, logs it in AUTO_LOG, and V2 forwards it to the main session. Owner's rule fixed now: z under 0, propose deleting the quiet hours; z 1.5 or more, keep; between, wait for the December read.
 
 **2026-10-29 5:40 PM CT, live note: gold quiet hours 20:00 to 24:00 CT are live on main (QUIET_HOURS_CT, owner's choice).** Told the main session once that the lead behind it was BROKEN by FALS1 (the three-window pass depends on where the windows are cut; corrected z 1.87, not the 0.98 the code comment cites). It stays a weak, unconfirmed test; MKTTIME1-F (low prior) reads it forward. Workers started: RISK1 (block bootstrap of the account under the current live rules, $528 and $1,028, for the deposit decision), STRUCT1 (per-market hold versus 25c exit table, information only; gold and Dogecoin time structure only where the ledger has not tested it).
