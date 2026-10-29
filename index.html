@@ -1514,6 +1514,7 @@
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
                   <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
+                  <li>Bot status: the next look says only what can trade now (gold, Dogecoin and Ethereum at the 6 minute look); the 10 minute look for paused XRP and natural gas is gone</li>
                   <li>Market News keeps only stock, crypto and commodity stories (and the Fed, rates, inflation and dollar news that moves them); personal advice columns and lifestyle pieces are dropped</li>
                   <li>Account result card: the 1M, 3M, YTD and All lines now use the live orders for everything recent (they were a ten minute old copy, so the total could lag), and say so when older trades cannot be read</li>
                   <li>"Got questions?" panel: a fourth question, "Want to work with us?", for future partners, with an email link</li>
@@ -3141,9 +3142,10 @@
     var age = Math.max(0, Math.round((now - s.lastTickAt) / 1000));
     return { state: age <= 150 ? 'ok' : (age <= 300 ? 'quiet' : 'down'), ageSec: age };
   }
-  // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour; Bitcoin, XRP and natural gas are entered about 10 minutes before the close (minute 5 of the quarter), everything else about 6 minutes before (minute 9).
+  // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour. Every market that can place an order now is entered about 6 minutes before the close (minute 9 of the quarter): gold, Dogecoin and Ethereum (on a smooth climb only).
+  // XRP and natural gas, the only 10 minute looks, are paused in the bot's code (Oct 28, 2026), and so are Bitcoin (Oct 29, 2026) and the forex probes, so the page names none of them and shows no 10 minute look (the owner, Oct 29, 2026: "XRP is paused, isn't it").
   function kalshiNextEntry(now){
-    var Q = 900000, base = Math.floor(now / Q) * Q, cands = [[base + 300000, '10 minute look: XRP, natural gas'], [base + 540000, '6 minute look: gold, Dogecoin, AUD/USD, USD/CAD, and Bitcoin and Ethereum on a smooth climb only'], [base + Q + 300000, '10 minute look: XRP, natural gas']];
+    var Q = 900000, base = Math.floor(now / Q) * Q, label = '6 minute look: gold, Dogecoin, and Ethereum on a smooth climb only', cands = [[base + 540000, label], [base + Q + 540000, label]];
     for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
     return null;
   }
