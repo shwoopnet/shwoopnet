@@ -1,0 +1,166 @@
+DCAP1 VERDICT: meets the registered definition (risk tool, not an edge; forward read only): all 18 series $500 SPREAD1 alone; all 18 series $1000 SPREAD1 alone
+DCAP1: success = in all three thirds, worst day or max drawdown cut by >= 20% AND net given up <= 25% (or net not lower if baseline <= 0)
+
+all 18 series, $500 account (11 contracts per entry)
+  third 1 baseline: n=9734 net $+289.76 PF 1.046 worst day $-72.59 worst5 $-278.50 maxDD $191.05
+  third 2 baseline: n=10952 net $+63.02 PF 1.009 worst day $-119.77 worst5 $-443.07 maxDD $296.33
+  third 3 baseline: n=11813 net $-194.17 PF 0.976 worst day $-245.19 worst5 $-607.02 maxDD $309.79
+  profit cap +1%       fails
+      t1: net $+55.97 PF 1.035 worst $-57.76 worst5 $-107.42 DD $89.90 days 26 wins given up $4916.81 losses avoided $4683.02 [risk -]
+      t2: net $+107.12 PF 1.084 worst $-70.91 worst5 $-49.67 DD $70.91 days 27 wins given up $6040.69 losses avoided $6084.80 [risk net]
+      t3: net $+58.40 PF 1.075 worst $-107.86 worst5 $-117.01 DD $107.86 days 26 wins given up $7155.34 losses avoided $7407.90 [risk net]
+  profit cap +2%       fails
+      t1: net $+167.27 PF 1.077 worst $-57.76 worst5 $-117.25 DD $74.39 days 25 wins given up $4207.03 losses avoided $4084.55 [risk -]
+      t2: net $+160.46 PF 1.090 worst $-70.91 worst5 $-120.14 DD $97.73 days 25 wins given up $5480.52 losses avoided $5577.95 [risk net]
+      t3: net $-86.75 PF 0.953 worst $-245.19 worst5 $-359.77 DD $249.48 days 24 wins given up $6233.67 losses avoided $6341.09 [- net]
+  profit cap +3%       fails
+      t1: net $+191.24 PF 1.068 worst $-57.76 worst5 $-180.03 DD $74.39 days 22 wins given up $3556.57 losses avoided $3458.06 [risk -]
+      t2: net $+12.84 PF 1.004 worst $-119.77 worst5 $-352.01 DD $222.63 days 21 wins given up $4541.09 losses avoided $4490.90 [risk -]
+      t3: net $-55.12 PF 0.978 worst $-245.19 worst5 $-437.96 DD $245.19 days 23 wins given up $5502.42 losses avoided $5641.47 [risk net]
+  loss cap -2%         fails
+      t1: net $-55.90 PF 0.976 worst $-43.61 worst5 $-195.22 DD $302.35 days 21 wins given up $4321.34 losses avoided $3975.68 [risk -]
+      t2: net $+24.67 PF 1.010 worst $-59.82 worst5 $-176.80 DD $237.23 days 23 wins given up $4891.60 losses avoided $4853.24 [risk -]
+      t3: net $+219.60 PF 1.068 worst $-47.46 worst5 $-157.45 DD $163.85 days 20 wins given up $4545.09 losses avoided $4958.85 [risk net]
+  loss cap -4%         fails
+      t1: net $+74.35 PF 1.026 worst $-48.55 worst5 $-209.43 DD $151.61 days 18 wins given up $3621.59 losses avoided $3406.18 [risk -]
+      t2: net $-87.98 PF 0.975 worst $-59.82 worst5 $-239.30 DD $248.27 days 20 wins given up $3997.36 losses avoided $3846.37 [risk -]
+      t3: net $-20.44 PF 0.995 worst $-47.46 worst5 $-205.11 DD $239.94 days 20 wins given up $4206.78 losses avoided $4380.51 [risk net]
+  loss cap -6%         fails
+      t1: net $+131.46 PF 1.037 worst $-53.60 worst5 $-230.34 DD $166.33 days 14 wins given up $2821.17 losses avoided $2662.88 [risk -]
+      t2: net $-157.61 PF 0.964 worst $-75.77 worst5 $-296.51 DD $385.17 days 16 wins given up $3214.25 losses avoided $2993.62 [risk -]
+      t3: net $-56.06 PF 0.988 worst $-61.79 worst5 $-259.74 DD $210.96 days 18 wins given up $3418.04 losses avoided $3556.14 [risk net]
+  combined +2% / -4%   fails
+      t1: net $-126.38 PF 0.803 worst $-43.61 worst5 $-173.82 DD $160.64 days 29 wins given up $6035.77 losses avoided $5619.63 [risk -]
+      t2: net $-42.66 PF 0.936 worst $-59.82 worst5 $-239.30 DD $120.70 days 28 wins given up $6798.35 losses avoided $6692.68 [risk -]
+      t3: net $+145.53 PF 1.368 worst $-27.88 worst5 $-121.46 DD $44.52 days 28 wins given up $7446.44 losses avoided $7786.14 [risk net]
+  SPREAD1 alone        MEETS DEFINITION
+      t1: net $+608.54 PF 1.151 worst $-57.17 worst5 $-227.30 DD $94.20 days 0 wins given up $1905.07 losses avoided $2223.86 [risk net]
+      t2: net $+518.77 PF 1.102 worst $-100.80 worst5 $-259.88 DD $162.69 days 0 wins given up $1808.86 losses avoided $2264.62 [risk net]
+      t3: net $+410.23 PF 1.074 worst $-102.43 worst5 $-347.29 DD $165.31 days 0 wins given up $2009.51 losses avoided $2613.91 [risk net]
+  SPREAD1 + combined   fails
+      t1: net $-58.31 PF 0.905 worst $-45.56 worst5 $-184.36 DD $148.40 days 29 wins given up $5993.56 losses avoided $5645.50 [risk -]
+      t2: net $+12.39 PF 1.025 worst $-59.82 worst5 $-192.46 DD $59.82 days 28 wins given up $6926.03 losses avoided $6875.40 [risk -]
+      t3: net $+50.08 PF 1.096 worst $-49.67 worst5 $-181.86 DD $87.36 days 28 wins given up $7416.28 losses avoided $7660.53 [risk net]
+
+all 18 series, $1000 account (23 contracts per entry)
+  third 1 baseline: n=9734 net $+657.08 PF 1.050 worst day $-150.18 worst5 $-573.14 maxDD $392.48
+  third 2 baseline: n=10952 net $+189.95 PF 1.012 worst day $-247.91 worst5 $-916.16 maxDD $592.16
+  third 3 baseline: n=11813 net $-344.47 PF 0.980 worst day $-509.40 worst5 $-1256.42 maxDD $631.06
+  profit cap +1%       fails
+      t1: net $+100.63 PF 1.033 worst $-118.91 worst5 $-219.74 DD $180.29 days 26 wins given up $10578.78 losses avoided $10022.34 [risk -]
+      t2: net $+226.98 PF 1.091 worst $-145.91 worst5 $-102.55 DD $145.91 days 27 wins given up $12853.49 losses avoided $12890.52 [risk net]
+      t3: net $+94.28 PF 1.064 worst $-222.44 worst5 $-242.64 DD $222.44 days 26 wins given up $15195.30 losses avoided $15634.05 [risk net]
+  profit cap +2%       fails
+      t1: net $+324.65 PF 1.072 worst $-118.91 worst5 $-238.50 DD $151.90 days 25 wins given up $8891.59 losses avoided $8559.17 [risk -]
+      t2: net $+355.65 PF 1.116 worst $-145.91 worst5 $-213.96 DD $199.45 days 26 wins given up $12150.18 losses avoided $12315.89 [risk net]
+      t3: net $+364.58 PF 1.146 worst $-222.44 worst5 $-210.97 DD $222.44 days 26 wins given up $13904.64 losses avoided $14613.69 [risk net]
+  profit cap +3%       fails
+      t1: net $+351.03 PF 1.060 worst $-118.91 worst5 $-366.58 DD $151.90 days 22 wins given up $7556.73 losses avoided $7250.68 [risk -]
+      t2: net $+59.44 PF 1.010 worst $-247.91 worst5 $-710.83 DD $400.61 days 22 wins given up $9830.23 losses avoided $9699.72 [risk -]
+      t3: net $-122.13 PF 0.977 worst $-509.40 worst5 $-904.02 DD $509.40 days 23 wins given up $11678.32 losses avoided $11900.65 [- net]
+  loss cap -2%         fails
+      t1: net $-99.05 PF 0.979 worst $-91.12 worst5 $-406.83 DD $624.05 days 21 wins given up $9067.04 losses avoided $8310.91 [risk -]
+      t2: net $+72.01 PF 1.014 worst $-125.02 worst5 $-367.59 DD $490.60 days 23 wins given up $10263.33 losses avoided $10145.39 [risk -]
+      t3: net $+468.27 PF 1.069 worst $-97.30 worst5 $-324.60 DD $337.27 days 20 wins given up $9531.21 losses avoided $10343.94 [risk net]
+  loss cap -4%         fails
+      t1: net $-75.32 PF 0.987 worst $-101.06 worst5 $-436.41 DD $557.83 days 19 wins given up $8104.79 losses avoided $7372.39 [risk -]
+      t2: net $-221.92 PF 0.968 worst $-125.02 worst5 $-499.41 DD $541.91 days 21 wins given up $8833.53 losses avoided $8421.67 [risk -]
+      t3: net $-14.10 PF 0.998 worst $-97.30 worst5 $-423.55 DD $495.44 days 20 wins given up $8826.34 losses avoided $9156.71 [risk net]
+  loss cap -6%         fails
+      t1: net $+307.39 PF 1.041 worst $-111.86 worst5 $-479.93 DD $345.98 days 14 wins given up $6000.12 losses avoided $5650.43 [risk -]
+      t2: net $-235.61 PF 0.973 worst $-156.22 worst5 $-601.73 DD $726.28 days 16 wins given up $7164.63 losses avoided $6739.07 [risk -]
+      t3: net $-46.97 PF 0.995 worst $-128.48 worst5 $-522.66 DD $405.38 days 18 wins given up $7177.31 losses avoided $7474.81 [risk net]
+  combined +2% / -4%   fails
+      t1: net $-357.05 PF 0.729 worst $-91.12 worst5 $-362.91 DD $424.95 days 29 wins given up $12781.98 losses avoided $11767.85 [risk -]
+      t2: net $-43.23 PF 0.957 worst $-125.02 worst5 $-460.49 DD $198.89 days 28 wins given up $14627.26 losses avoided $14394.08 [risk -]
+      t3: net $+375.43 PF 1.535 worst $-58.12 worst5 $-184.74 DD $58.12 days 28 wins given up $15681.45 losses avoided $16401.34 [risk net]
+  SPREAD1 alone        MEETS DEFINITION
+      t1: net $+1309.67 PF 1.155 worst $-118.25 worst5 $-468.48 DD $192.44 days 0 wins given up $3996.24 losses avoided $4648.84 [risk net]
+      t2: net $+1131.13 PF 1.106 worst $-208.73 worst5 $-536.25 DD $336.65 days 0 wins given up $3792.94 losses avoided $4734.13 [risk net]
+      t3: net $+904.31 PF 1.078 worst $-213.08 worst5 $-718.62 DD $343.14 days 0 wins given up $4215.12 losses avoided $5463.90 [risk net]
+  SPREAD1 + combined   fails
+      t1: net $-61.02 PF 0.945 worst $-95.20 worst5 $-384.95 DD $287.37 days 29 wins given up $12691.91 losses avoided $11973.81 [risk -]
+      t2: net $-59.98 PF 0.936 worst $-125.02 worst5 $-402.10 DD $160.02 days 28 wins given up $14709.19 losses avoided $14459.27 [risk -]
+      t3: net $+83.57 PF 1.077 worst $-103.66 worst5 $-378.43 DD $181.79 days 28 wins given up $15585.17 losses avoided $16013.20 [risk net]
+
+live five, $500 account (11 contracts per entry)
+  third 1 baseline: n=4190 net $+663.09 PF 1.296 worst day $-47.52 worst5 $-124.06 maxDD $48.54
+  third 2 baseline: n=3827 net $+453.36 PF 1.206 worst day $-42.35 worst5 $-149.40 maxDD $42.35
+  third 3 baseline: n=3407 net $+125.55 PF 1.056 worst day $-60.07 worst5 $-201.52 maxDD $89.72
+  profit cap +1%       fails
+      t1: net $+111.80 PF 1.172 worst $-29.94 worst5 $-33.13 DD $48.54 days 27 wins given up $2139.44 losses avoided $1588.15 [risk -]
+      t2: net $+99.65 PF 1.210 worst $-42.35 worst5 $-40.33 DD $42.35 days 26 wins given up $2076.72 losses avoided $1723.01 [- -]
+      t3: net $+159.74 PF 4.090 worst $+5.04 worst5 $+25.67 DD $0.00 days 28 wins given up $2144.21 losses avoided $2178.40 [risk net]
+  profit cap +2%       fails
+      t1: net $+184.80 PF 1.197 worst $-47.52 worst5 $-81.14 DD $48.54 days 25 wins given up $1778.79 losses avoided $1300.50 [- -]
+      t2: net $+229.85 PF 1.335 worst $-42.35 worst5 $-24.97 DD $42.35 days 26 wins given up $1734.34 losses avoided $1510.82 [- -]
+      t3: net $+113.89 PF 1.192 worst $-60.07 worst5 $-135.07 DD $60.07 days 23 wins given up $1649.34 losses avoided $1637.68 [risk net]
+  profit cap +3%       fails
+      t1: net $+300.38 PF 1.286 worst $-47.52 worst5 $-82.37 DD $48.54 days 23 wins given up $1549.99 losses avoided $1187.27 [- -]
+      t2: net $+249.72 PF 1.254 worst $-42.35 worst5 $-108.92 DD $42.35 days 22 wins given up $1419.36 losses avoided $1215.73 [- -]
+      t3: net $+191.02 PF 1.216 worst $-60.07 worst5 $-152.85 DD $60.07 days 21 wins given up $1279.77 losses avoided $1345.25 [risk net]
+  loss cap -2%         fails
+      t1: net $+199.06 PF 1.167 worst $-34.46 worst5 $-132.06 DD $134.85 days 16 wins given up $1509.72 losses avoided $1045.69 [risk -]
+      t2: net $+259.00 PF 1.182 worst $-40.36 worst5 $-142.91 DD $91.80 days 14 wins given up $971.60 losses avoided $777.24 [- -]
+      t3: net $+78.01 PF 1.056 worst $-35.00 worst5 $-113.06 DD $112.57 days 15 wins given up $877.85 losses avoided $830.31 [risk -]
+  loss cap -4%         fails
+      t1: net $+456.22 PF 1.273 worst $-34.46 worst5 $-135.46 DD $54.99 days 8 wins given up $771.70 losses avoided $564.82 [risk -]
+      t2: net $+261.04 PF 1.152 worst $-40.68 worst5 $-179.20 DD $99.36 days 11 wins given up $675.07 losses avoided $482.75 [- -]
+      t3: net $+1.25 PF 1.001 worst $-37.22 worst5 $-170.93 DD $166.81 days 11 wins given up $518.21 losses avoided $393.92 [risk -]
+  loss cap -6%         fails
+      t1: net $+645.65 PF 1.319 worst $-41.70 worst5 $-141.51 DD $79.05 days 3 wins given up $229.82 losses avoided $212.38 [- net]
+      t2: net $+299.59 PF 1.160 worst $-40.68 worst5 $-184.69 DD $111.06 days 8 wins given up $475.28 losses avoided $321.51 [- -]
+      t3: net $+65.74 PF 1.033 worst $-37.49 worst5 $-181.71 DD $136.83 days 7 wins given up $322.76 losses avoided $262.95 [risk -]
+  combined +2% / -4%   fails
+      t1: net $+26.16 PF 1.045 worst $-34.46 worst5 $-135.46 DD $82.10 days 28 wins given up $2290.43 losses avoided $1653.50 [risk -]
+      t2: net $+67.70 PF 1.145 worst $-40.68 worst5 $-153.90 DD $47.96 days 28 wins given up $2117.42 losses avoided $1731.76 [- -]
+      t3: net $+104.47 PF 1.249 worst $-34.56 worst5 $-141.44 DD $55.57 days 26 wins given up $1831.33 losses avoided $1810.26 [risk net]
+  SPREAD1 alone        fails
+      t1: net $+544.17 PF 1.280 worst $-32.33 worst5 $-117.21 DD $37.28 days 0 wins given up $411.51 losses avoided $292.58 [risk net]
+      t2: net $+404.19 PF 1.203 worst $-41.22 worst5 $-146.11 DD $41.22 days 0 wins given up $258.32 losses avoided $209.15 [- net]
+      t3: net $+119.93 PF 1.055 worst $-60.07 worst5 $-205.07 DD $82.36 days 0 wins given up $74.71 losses avoided $69.09 [- net]
+  SPREAD1 + combined   fails
+      t1: net $+103.01 PF 1.176 worst $-28.12 worst5 $-127.32 DD $57.72 days 28 wins given up $2212.71 losses avoided $1652.63 [risk -]
+      t2: net $+75.20 PF 1.158 worst $-44.64 worst5 $-146.99 DD $65.19 days 28 wins given up $2098.51 losses avoided $1720.35 [- -]
+      t3: net $+105.66 PF 1.258 worst $-32.91 worst5 $-137.91 DD $45.70 days 27 wins given up $1840.01 losses avoided $1820.12 [risk net]
+
+live five, $1000 account (23 contracts per entry)
+  third 1 baseline: n=4190 net $+1408.43 PF 1.301 worst day $-98.45 worst5 $-255.14 maxDD $99.89
+  third 2 baseline: n=3827 net $+967.59 PF 1.211 worst day $-87.72 worst5 $-309.22 maxDD $87.72
+  third 3 baseline: n=3407 net $+280.70 PF 1.060 worst day $-125.16 worst5 $-418.27 maxDD $182.87
+  profit cap +1%       fails
+      t1: net $+226.43 PF 1.167 worst $-61.88 worst5 $-69.60 DD $99.89 days 27 wins given up $4501.98 losses avoided $3319.98 [risk -]
+      t2: net $+202.00 PF 1.204 worst $-87.72 worst5 $-83.90 DD $87.72 days 26 wins given up $4367.44 losses avoided $3601.85 [- -]
+      t3: net $+327.79 PF 4.033 worst $+10.06 worst5 $+51.52 DD $0.00 days 28 wins given up $4506.64 losses avoided $4553.72 [risk net]
+  profit cap +2%       fails
+      t1: net $+359.00 PF 1.185 worst $-98.45 worst5 $-167.60 DD $99.89 days 25 wins given up $3790.18 losses avoided $2740.75 [- -]
+      t2: net $+451.88 PF 1.315 worst $-87.72 worst5 $-53.50 DD $87.72 days 26 wins given up $3673.98 losses avoided $3158.27 [- -]
+      t3: net $+217.32 PF 1.175 worst $-125.16 worst5 $-279.55 DD $125.16 days 23 wins given up $3486.82 losses avoided $3423.43 [risk net]
+  profit cap +3%       fails
+      t1: net $+610.83 PF 1.287 worst $-98.45 worst5 $-168.65 DD $99.89 days 24 wins given up $3343.67 losses avoided $2546.07 [- -]
+      t2: net $+548.68 PF 1.273 worst $-87.72 worst5 $-196.45 DD $87.72 days 23 wins given up $3003.72 losses avoided $2584.81 [- -]
+      t3: net $+369.09 PF 1.209 worst $-125.16 worst5 $-316.31 DD $125.16 days 21 wins given up $2807.88 losses avoided $2896.27 [risk net]
+  loss cap -2%         fails
+      t1: net $+376.72 PF 1.155 worst $-71.93 worst5 $-275.88 DD $281.23 days 17 wins given up $3282.11 losses avoided $2250.39 [risk -]
+      t2: net $+463.69 PF 1.166 worst $-84.36 worst5 $-292.90 DD $191.01 days 15 wins given up $2298.41 losses avoided $1794.51 [- -]
+      t3: net $+119.66 PF 1.047 worst $-73.02 worst5 $-235.01 DD $254.34 days 17 wins given up $2299.12 losses avoided $2138.07 [risk -]
+  loss cap -4%         fails
+      t1: net $+910.87 PF 1.265 worst $-71.93 worst5 $-282.91 DD $114.83 days 9 wins given up $1742.60 losses avoided $1245.04 [risk -]
+      t2: net $+605.21 PF 1.173 worst $-84.36 worst5 $-348.66 DD $206.18 days 11 wins given up $1456.95 losses avoided $1094.57 [- -]
+      t3: net $+10.40 PF 1.003 worst $-77.47 worst5 $-356.26 DD $352.43 days 12 wins given up $1093.69 losses avoided $823.39 [risk -]
+  loss cap -6%         fails
+      t1: net $+1289.09 PF 1.315 worst $-78.07 worst5 $-332.81 DD $139.56 days 5 wins given up $710.37 losses avoided $591.03 [risk net]
+      t2: net $+650.67 PF 1.167 worst $-84.81 worst5 $-384.56 DD $230.60 days 8 wins given up $1011.13 losses avoided $694.21 [- -]
+      t3: net $+152.94 PF 1.037 worst $-77.98 worst5 $-378.18 DD $282.89 days 7 wins given up $677.38 losses avoided $549.61 [risk -]
+  combined +2% / -4%   fails
+      t1: net $-36.83 PF 0.969 worst $-71.93 worst5 $-282.91 DD $180.22 days 28 wins given up $4923.94 losses avoided $3478.68 [risk -]
+      t2: net $+160.57 PF 1.181 worst $-84.36 worst5 $-278.20 DD $114.37 days 28 wins given up $4512.53 losses avoided $3705.51 [- -]
+      t3: net $+192.61 PF 1.219 worst $-71.92 worst5 $-300.32 DD $115.72 days 27 wins given up $3872.24 losses avoided $3784.14 [risk -]
+  SPREAD1 alone        fails
+      t1: net $+1157.72 PF 1.285 worst $-66.98 worst5 $-241.44 DD $76.50 days 0 wins given up $862.37 losses avoided $611.65 [risk net]
+      t2: net $+863.45 PF 1.208 worst $-85.41 worst5 $-302.32 DD $85.41 days 0 wins given up $541.36 losses avoided $437.22 [- net]
+      t3: net $+268.56 PF 1.059 worst $-125.16 worst5 $-425.78 DD $167.63 days 0 wins given up $156.57 losses avoided $144.43 [- net]
+  SPREAD1 + combined   fails
+      t1: net $+145.70 PF 1.126 worst $-58.78 worst5 $-265.56 DD $123.76 days 29 wins given up $4781.81 losses avoided $3519.08 [risk -]
+      t2: net $+187.74 PF 1.216 worst $-84.36 worst5 $-255.51 DD $85.46 days 28 wins given up $4504.49 losses avoided $3724.64 [- -]
+      t3: net $+194.94 PF 1.227 worst $-68.59 worst5 $-286.80 DD $95.09 days 27 wins given up $3890.54 losses avoided $3804.78 [risk -]

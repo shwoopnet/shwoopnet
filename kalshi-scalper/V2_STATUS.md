@@ -3,10 +3,14 @@
 ## Now running / Next / Waiting on
 
 - **Now running:** LADL1 download resumed from the old chat's partial files (4 shards, Bitcoin and Ethereum hourly); CONF2 ladder download for Aug 15 to Sep 25 (public, no key).
-- **Next:** LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
+- **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
 
 ## Entries
+
+**2026-10-29 12:40 PM, DCAP1 (daily caps), caps FALSIFIED; SPREAD1 note.** L1 history, 32,499 entries, realised P&L only (counted at each order's close), midnight Central days, $500 (11 contracts) and $1,000 (23). No daily profit cap (+1/2/3%), loss cap (-2/4/6%) or combined +2%/-4% meets the registered definition in any third. Live five, $500: loss cap -4% cuts the worst day 28%/4%/38% but gives up 31%/42%/99% of net and RAISES max drawdown (stopping after a bad morning skips the recovery); profit cap +2% gives up 72%/49% of net. **SPREAD1 (skip 2c+ spreads) helps only on the 13 series the bot does not trade:** all 18 series PF 1.05/1.01/0.98 to 1.15/1.10/1.07; live five 1.30/1.21/1.06 to 1.28/1.20/1.06 with net lower in every third. Relevant to the SPREAD1 forward test (PR #611). N tried about 438,728.
+
+**2026-10-29 12:30 PM, TIMEX1 (conditional time exits), FALSIFIED.** 5 new shapes (bid at or below 70c at 2 or 1 minutes left, 15c down with 3 minutes left, a volatility-keyed line, a spread-keyed line) x gold, Dogecoin, Bitcoin, live five. Hold PF per third: gold 1.44/1.03/1.17, Dogecoin 1.29/1.26/1.15, Bitcoin 1.00/1.19/0.78. No rule beats hold in all thirds; Dogecoin is hurt by every exit (z -3.0 to -4.5). Holding to settlement stays best.
 
 **2026-10-29 12:05 PM, round 2 self-guide check, no new test (round 2 of 10 toward NO_CANDIDATE_LEFT).** Checked and rejected: Kalshi open interest and volume (S36, OW7, IDEAS20 OIBUILD and SURGE: tested); scheduled US releases (L10, N4: about 6 to 8 events in the history, underpowered; L1's 6 and 10 minute looks never hold through a release at :00 or :30 because the release lands at the close); gold's London fix (10:30 and 15:00 London, same structure: the auction starts at a close); Deribit's 08:00 UTC Friday expiry (about 48 L1 entries in the history, underpowered); the ladder's interpolated fair value at coincident closes (a reworded XM1; CONF2 covers the usable part). Downloads: CONF2 75 of 772 closes, LADL1 50 of 700 per shard (Kalshi's rate limit is the bottleneck; a few hours each).
 

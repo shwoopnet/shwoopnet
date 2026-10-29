@@ -1,0 +1,26 @@
+TIMEX1 VERDICT: FALSIFIED (no rule beats hold in all thirds, none reaches 1.5)
+TIMEX1: 32499 L1 entries; PF at 1 contract per third (disc / valid / third); better-than-hold needs +0.03 PF in all thirds and z >= 2
+gold: n=1676; hold PF 1.439 / 1.026 / 1.170
+  TX1 late weak 2      PF 1.422 / 1.005 / 1.253 | entries changed 87 | diff z +0.08 | 
+  TX2 late weak 1      PF 1.341 / 1.001 / 1.270 | entries changed 95 | diff z -0.20 | 
+  TX3 late adverse     PF 1.208 / 0.969 / 1.207 | entries changed 178 | diff z -0.96 | 
+  TX4 own volatility   PF 1.208 / 1.022 / 1.188 | entries changed 251 | diff z -0.76 | 
+  TX5 spread keyed     PF 1.355 / 1.023 / 1.170 | entries changed 34 | diff z -0.77 | 
+Dogecoin: n=2481; hold PF 1.294 / 1.263 / 1.147
+  TX1 late weak 2      PF 0.940 / 0.963 / 1.126 | entries changed 173 | diff z -4.01 | 
+  TX2 late weak 1      PF 1.104 / 1.081 / 1.107 | entries changed 158 | diff z -2.96 | 
+  TX3 late adverse     PF 0.880 / 0.891 / 1.062 | entries changed 307 | diff z -4.40 | 
+  TX4 own volatility   PF 0.798 / 0.978 / 0.979 | entries changed 405 | diff z -4.52 | 
+  TX5 spread keyed     PF 1.025 / 1.070 / 1.174 | entries changed 118 | diff z -3.52 | 
+Bitcoin: n=2365; hold PF 1.000 / 1.188 / 0.780
+  TX1 late weak 2      PF 1.015 / 1.157 / 0.802 | entries changed 141 | diff z +0.30 | 
+  TX2 late weak 1      PF 1.010 / 1.157 / 0.836 | entries changed 159 | diff z +0.73 | 
+  TX3 late adverse     PF 1.077 / 1.037 / 0.947 | entries changed 269 | diff z +1.12 | 
+  TX4 own volatility   PF 1.086 / 1.037 / 0.825 | entries changed 350 | diff z +0.27 | 
+  TX5 spread keyed     PF 0.994 / 1.188 / 0.780 | entries changed 1 | diff z +0.00 | 
+live five: n=11424; hold PF 1.194 / 1.112 / 0.975
+  TX1 late weak 2      PF 1.109 / 0.988 / 0.977 | entries changed 710 | diff z -3.19 | 
+  TX2 late weak 1      PF 1.161 / 1.047 / 0.996 | entries changed 720 | diff z -1.55 | 
+  TX3 late adverse     PF 1.087 / 0.971 / 0.995 | entries changed 1313 | diff z -2.64 | 
+  TX4 own volatility   PF 1.028 / 1.033 / 0.910 | entries changed 1764 | diff z -3.54 | 
+  TX5 spread keyed     PF 1.111 / 1.067 / 0.973 | entries changed 226 | diff z -3.62 | 
