@@ -1,0 +1,103 @@
+BAND2 history (6 minute look, 1 contract fee); per third t1 / t2 / t3 and pooled
+gold:
+  88-90c pooled: n 480 losses 37 won 92.3% paid 89.1c gap +3.2 pts z +2.25 PF 1.32
+      t1: n 162 losses 11 won 93.2% paid 89.1c gap +4.1 pts z +1.67 PF 1.51
+      t2: n 174 losses 16 won 90.8% paid 89.1c gap +1.7 pts z +0.71 PF 1.08
+      t3: n 144 losses 10 won 93.1% paid 89.0c gap +4.0 pts z +1.54 PF 1.48
+  91-92c pooled: n 329 losses 25 won 92.4% paid 91.6c gap +0.8 pts z +0.55 PF 0.98
+      t1: n 117 losses 5 won 95.7% paid 91.5c gap +4.3 pts z +1.65 PF 1.83
+      t2: n 112 losses 11 won 90.2% paid 91.6c gap -1.5 pts z -0.56 PF 0.73
+      t3: n 100 losses 9 won 91.0% paid 91.6c gap -0.6 pts z -0.21 PF 0.81
+  93-94c pooled: n 378 losses 15 won 96.0% paid 93.5c gap +2.5 pts z +1.97 PF 1.40
+      t1: n 148 losses 5 won 96.6% paid 93.5c gap +3.1 pts z +1.53 PF 1.66
+      t2: n 115 losses 6 won 94.8% paid 93.6c gap +1.2 pts z +0.52 PF 1.04
+      t3: n 115 losses 4 won 96.5% paid 93.5c gap +3.0 pts z +1.30 PF 1.61
+  95-97c pooled: n 536 losses 14 won 97.4% paid 95.9c gap +1.5 pts z +1.75 PF 1.20
+      t1: n 207 losses 7 won 96.6% paid 95.9c gap +0.7 pts z +0.49 PF 0.90
+      t2: n 172 losses 4 won 97.7% paid 95.8c gap +1.8 pts z +1.21 PF 1.37
+      t3: n 157 losses 3 won 98.1% paid 95.9c gap +2.2 pts z +1.40 PF 1.65
+Dogecoin:
+  88-90c pooled: n 643 losses 50 won 92.2% paid 89.2c gap +3.0 pts z +2.48 PF 1.29
+      t1: n 220 losses 11 won 95.0% paid 89.2c gap +5.8 pts z +2.77 PF 2.06
+      t2: n 217 losses 16 won 92.6% paid 89.2c gap +3.5 pts z +1.64 PF 1.37
+      t3: n 206 losses 23 won 88.8% paid 89.2c gap -0.4 pts z -0.16 PF 0.87
+  91-92c pooled: n 468 losses 31 won 93.4% paid 91.5c gap +1.8 pts z +1.43 PF 1.14
+      t1: n 162 losses 8 won 95.1% paid 91.6c gap +3.5 pts z +1.61 PF 1.55
+      t2: n 165 losses 11 won 93.3% paid 91.4c gap +1.9 pts z +0.87 PF 1.15
+      t3: n 141 losses 12 won 91.5% paid 91.6c gap -0.1 pts z -0.06 PF 0.85
+  93-94c pooled: n 579 losses 21 won 96.4% paid 93.6c gap +2.8 pts z +2.74 PF 1.52
+      t1: n 214 losses 9 won 95.8% paid 93.6c gap +2.2 pts z +1.33 PF 1.31
+      t2: n 193 losses 7 won 96.4% paid 93.6c gap +2.8 pts z +1.59 PF 1.53
+      t3: n 172 losses 5 won 97.1% paid 93.6c gap +3.5 pts z +1.87 PF 1.91
+  95-97c pooled: n 838 losses 26 won 96.9% paid 95.9c gap +1.0 pts z +1.47 PF 1.00
+      t1: n 310 losses 15 won 95.2% paid 95.9c gap -0.7 pts z -0.62 PF 0.64
+      t2: n 297 losses 8 won 97.3% paid 95.9c gap +1.4 pts z +1.22 PF 1.15
+      t3: n 231 losses 3 won 98.7% paid 95.9c gap +2.8 pts z +2.15 PF 2.44
+Ethereum:
+  88-90c pooled: n 676 losses 68 won 89.9% paid 89.2c gap +0.7 pts z +0.62 PF 0.97
+      t1: n 249 losses 23 won 90.8% paid 89.2c gap +1.6 pts z +0.81 PF 1.07
+      t2: n 221 losses 25 won 88.7% paid 89.2c gap -0.5 pts z -0.25 PF 0.85
+      t3: n 206 losses 20 won 90.3% paid 89.2c gap +1.1 pts z +0.49 PF 1.01
+  91-92c pooled: n 449 losses 35 won 92.2% paid 91.6c gap +0.6 pts z +0.47 PF 0.95
+      t1: n 166 losses 10 won 94.0% paid 91.6c gap +2.4 pts z +1.12 PF 1.25
+      t2: n 147 losses 10 won 93.2% paid 91.6c gap +1.6 pts z +0.70 PF 1.09
+      t3: n 136 losses 15 won 89.0% paid 91.6c gap -2.6 pts z -1.10 PF 0.65
+  93-94c pooled: n 545 losses 28 won 94.9% paid 93.6c gap +1.3 pts z +1.23 PF 1.06
+      t1: n 199 losses 8 won 96.0% paid 93.6c gap +2.4 pts z +1.39 PF 1.37
+      t2: n 185 losses 5 won 97.3% paid 93.6c gap +3.7 pts z +2.05 PF 2.05
+      t3: n 161 losses 15 won 90.7% paid 93.5c gap -2.8 pts z -1.47 PF 0.56
+  95-97c pooled: n 795 losses 29 won 96.4% paid 95.9c gap +0.5 pts z +0.67 PF 0.85
+      t1: n 308 losses 10 won 96.8% paid 95.9c gap +0.9 pts z +0.77 PF 0.96
+      t2: n 257 losses 10 won 96.1% paid 95.9c gap +0.3 pts z +0.21 PF 0.80
+      t3: n 230 losses 9 won 96.1% paid 95.9c gap +0.2 pts z +0.13 PF 0.78
+Bitcoin:
+  88-90c pooled: n 680 losses 72 won 89.4% paid 89.2c gap +0.2 pts z +0.15 PF 0.91
+      t1: n 248 losses 28 won 88.7% paid 89.2c gap -0.5 pts z -0.24 PF 0.86
+      t2: n 210 losses 17 won 91.9% paid 89.2c gap +2.7 pts z +1.25 PF 1.23
+      t3: n 222 losses 27 won 87.8% paid 89.3c gap -1.5 pts z -0.71 PF 0.77
+  91-92c pooled: n 475 losses 34 won 92.8% paid 91.6c gap +1.3 pts z +0.99 PF 1.04
+      t1: n 177 losses 12 won 93.2% paid 91.6c gap +1.6 pts z +0.79 PF 1.10
+      t2: n 161 losses 13 won 91.9% paid 91.6c gap +0.3 pts z +0.13 PF 0.91
+      t3: n 137 losses 9 won 93.4% paid 91.5c gap +1.9 pts z +0.80 PF 1.15
+  93-94c pooled: n 531 losses 25 won 95.3% paid 93.5c gap +1.7 pts z +1.64 PF 1.17
+      t1: n 189 losses 6 won 96.8% paid 93.5c gap +3.3 pts z +1.85 PF 1.77
+      t2: n 178 losses 5 won 97.2% paid 93.5c gap +3.7 pts z +2.00 PF 2.01
+      t3: n 164 losses 14 won 91.5% paid 93.6c gap -2.2 pts z -1.14 PF 0.61
+  95-97c pooled: n 731 losses 27 won 96.3% paid 95.8c gap +0.5 pts z +0.65 PF 0.85
+      t1: n 244 losses 11 won 95.5% paid 95.8c gap -0.3 pts z -0.27 PF 0.69
+      t2: n 226 losses 4 won 98.2% paid 95.9c gap +2.3 pts z +1.77 PF 1.78
+      t3: n 261 losses 12 won 95.4% paid 95.8c gap -0.4 pts z -0.28 PF 0.70
+XRP:
+  88-90c pooled: n 699 losses 54 won 92.3% paid 89.2c gap +3.1 pts z +2.63 PF 1.30
+      t1: n 230 losses 15 won 93.5% paid 89.2c gap +4.3 pts z +2.09 PF 1.56
+      t2: n 239 losses 19 won 92.1% paid 89.2c gap +2.9 pts z +1.43 PF 1.26
+      t3: n 230 losses 20 won 91.3% paid 89.2c gap +2.1 pts z +1.04 PF 1.14
+  91-92c pooled: n 511 losses 25 won 95.1% paid 91.6c gap +3.5 pts z +2.88 PF 1.56
+      t1: n 212 losses 11 won 94.8% paid 91.6c gap +3.2 pts z +1.70 PF 1.47
+      t2: n 164 losses 7 won 95.7% paid 91.6c gap +4.2 pts z +1.92 PF 1.80
+      t3: n 135 losses 7 won 94.8% paid 91.6c gap +3.2 pts z +1.35 PF 1.47
+  93-94c pooled: n 557 losses 36 won 93.5% paid 93.6c gap -0.1 pts z -0.05 PF 0.83
+      t1: n 202 losses 14 won 93.1% paid 93.6c gap -0.5 pts z -0.31 PF 0.77
+      t2: n 184 losses 13 won 92.9% paid 93.6c gap -0.6 pts z -0.36 PF 0.75
+      t3: n 171 losses 9 won 94.7% paid 93.6c gap +1.2 pts z +0.62 PF 1.03
+  95-97c pooled: n 902 losses 31 won 96.6% paid 95.9c gap +0.7 pts z +1.05 PF 0.91
+      t1: n 340 losses 9 won 97.4% paid 95.9c gap +1.5 pts z +1.36 PF 1.18
+      t2: n 302 losses 8 won 97.4% paid 95.9c gap +1.5 pts z +1.28 PF 1.18
+      t3: n 260 losses 14 won 94.6% paid 95.8c gap -1.2 pts z -0.98 PF 0.57
+live five:
+  88-90c pooled: n 3178 losses 281 won 91.2% paid 89.2c gap +2.0 pts z +3.58 PF 1.12
+      t1: n 1109 losses 88 won 92.1% paid 89.2c gap +2.9 pts z +3.09 PF 1.26
+      t2: n 1061 losses 93 won 91.2% paid 89.2c gap +2.0 pts z +2.15 PF 1.13
+      t3: n 1008 losses 100 won 90.1% paid 89.2c gap +0.9 pts z +0.90 PF 0.99
+  91-92c pooled: n 2232 losses 150 won 93.3% paid 91.6c gap +1.7 pts z +2.91 PF 1.11
+      t1: n 834 losses 46 won 94.5% paid 91.5c gap +2.9 pts z +3.05 PF 1.38
+      t2: n 749 losses 52 won 93.1% paid 91.6c gap +1.5 pts z +1.46 PF 1.08
+      t3: n 649 losses 52 won 92.0% paid 91.6c gap +0.4 pts z +0.38 PF 0.92
+  93-94c pooled: n 2590 losses 125 won 95.2% paid 93.6c gap +1.6 pts z +3.33 PF 1.13
+      t1: n 952 losses 42 won 95.6% paid 93.6c gap +2.0 pts z +2.56 PF 1.25
+      t2: n 855 losses 36 won 95.8% paid 93.6c gap +2.2 pts z +2.65 PF 1.31
+      t3: n 783 losses 47 won 94.0% paid 93.6c gap +0.4 pts z +0.48 PF 0.90
+  95-97c pooled: n 3802 losses 127 won 96.7% paid 95.9c gap +0.8 pts z +2.45 PF 0.93
+      t1: n 1409 losses 52 won 96.3% paid 95.9c gap +0.4 pts z +0.81 PF 0.84
+      t2: n 1254 losses 34 won 97.3% paid 95.9c gap +1.4 pts z +2.51 PF 1.16
+      t3: n 1139 losses 41 won 96.4% paid 95.8c gap +0.6 pts z +0.93 PF 0.87
