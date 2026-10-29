@@ -2,6 +2,8 @@
 # AUTO loop (research only): `python -m scalper.autoscore check` once an hour, forever, and the live watcher
 # (`python -m scalper.livewatch run`) once a day, on the first hourly pass at or after 00:30 US Central, then the drift
 # monitor (`python -m scalper.drift run`, which reuses the report the live watcher just saved in the scratchpad).
+# The weekly stability check (`python -m scalper.stab week`, workers/STABILITY.md) runs inside `autoscore check`, on the first
+# pass on or after Monday 01:00 US Central.
 # Log: kalshi-scalper/data/autoscore_loop.log (data/ is git-ignored). Start it with:
 #   cd kalshi-scalper && nohup bash workers/autoscore_loop.sh >/dev/null 2>&1 &
 # Stop it with: pkill -f autoscore_loop.sh
