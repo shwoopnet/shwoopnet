@@ -168,6 +168,7 @@ def simulate(A, pool_days, start, variant, rng_days, zero_vol_unfilled=False):
     ar = np.arange(P)
     step = 0
     gold_sz = np.zeros(P)
+    bym = np.zeros((P, 3)); nby = np.zeros((P, 3)); cby = np.zeros((P, 3))
     for d in range(H):
         di = rng_days[:, d]
         for s in range(96):
@@ -258,13 +259,14 @@ def simulate(A, pool_days, start, variant, rng_days, zero_vol_unfilled=False):
                 pool = np.where(o & (x < 0), np.maximum(0, pool + x), pool)
             lost_al = np.where(hasx, np.where(pnl < 0, -pnl * afrac, 0.0), np.where((won == 0) & (C > 0), paid * afrac, 0.0)).sum(1)
             ring[:, pos] = pnl.sum(1); ring_al[:, pos] = lost_al
+            bym += pnl; nby += C > 0; cby += C
             cash = cash + pnl.sum(1)
             peak = np.maximum(peak, cash)
             dd = peak - cash
             maxdd = np.maximum(maxdd, dd); maxdd_pct = np.maximum(maxdd_pct, dd / peak)
             step += 1
         if d + 1 in (30, 60, 90):
-            out[d + 1] = {"net": cash - start, "stops": nstops.copy(), "dd": maxdd.copy(), "ddp": maxdd_pct.copy(), "cap": cap.copy(), "gold": gold_sz.copy()}
+            out[d + 1] = {"net": cash - start, "stops": nstops.copy(), "dd": maxdd.copy(), "ddp": maxdd_pct.copy(), "cap": cap.copy(), "gold": gold_sz.copy(), "bym": bym.copy(), "nby": nby.copy(), "cby": cby.copy()}
     return out
 
 
