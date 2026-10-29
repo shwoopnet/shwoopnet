@@ -439,10 +439,13 @@
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
-  .kal-hold-chart svg{ display:block; width:100%; height:110px; }
+  .kal-hold-chart svg{ display:block; width:100%; height:130px; }
   .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
   .kal-hc-line{ fill:none; stroke:var(--paper); stroke-width:2; stroke-linejoin:round; stroke-linecap:round; vector-effect:non-scaling-stroke; }
   .kal-hc-fill{ fill:rgba(255,255,255,.06); stroke:none; }
+  .kal-hc-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px; } .kal-hc-plot{ position:relative; } .kal-hc-below{ fill:rgba(255,255,255,.04); } .kal-hc-target-line{ stroke:rgba(255,255,255,.45); stroke-width:1; stroke-dasharray:5 4; vector-effect:non-scaling-stroke; }
+  .kal-hc-target{ position:absolute; left:6px; top:50%; transform:translateY(-100%); font-size:12px; color:var(--paper); background:var(--panel, transparent); padding:0 4px 1px 0; }
+  .kal-hc-x{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); height:16px; } .kal-hc-y3{ padding-bottom:20px; }
   .kal-hc-paid{ stroke:rgba(255,255,255,.3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
   .kal-hc-dot{ fill:var(--paper); }
   @media screen and (max-width:700px){ .kal-hold-body{ grid-template-columns:minmax(0,1fr); } .kal-hold-body .kal-hold-stats{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
@@ -1465,6 +1468,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Open positions: the chance chart now runs the whole 0 to 100% with a target price line across the middle (50%, where it flips), and each position says the price that decides it ("Wins if it closes at or above $4,013.48"), both taken from the market itself</li>
                   <li>Gold places no new orders from 8 PM to midnight Central (history and live both weaker in that block); an open gold position is still sold by the exit watch</li>
                   <li>Bitcoin is paused in the bot's code (live profit factor 0.72 over 155 orders); an open Bitcoin position is still sold by the exit watch</li>
                   <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
@@ -2378,27 +2382,42 @@
       if(m && m.closeTime){ left = kalshiSecsLeft(m.closeTime, nowMs); }
       return { ticker: p.ticker, title: kalshiShortTicker(p.ticker), side: side, count: count, entry: entry, cost: cost,
         ifWin: cost === null ? null : Math.round((count - cost) * 100) / 100, ifLose: cost === null ? null : -cost,
-        chance: chance, cashOut: cashOut, left: left, bot: !!order };
+        chance: chance, cashOut: cashOut, left: left, strike: m && Number.isFinite(Number(m.strike)) ? Number(m.strike) : null, bot: !!order };
     });
   }
 
-  // The chance of the side you bought, drawn from the reads this page has made since it was opened (the page makes no price call of its own, so a position opened earlier shows a shorter line). Needs two points. Zoomed to what the
-  // line actually did (at least 6 points of chance tall) so a quiet market is not a flat line at the top. A chance is not a dollar figure, so Privacy view leaves it showing. Every value is a number the page computed.
+  // The chance of the side you bought, drawn from the reads this page has made since it was opened (the page makes no price call of its own, so a position opened earlier shows a shorter line). Needs two points. On the whole 0 to 100%
+  // scale with the target price (the owner's sketch, Oct 29, 2026): the line across the middle is where the market flips to the other side, 50%, labelled with the strike from the market. A chance is not a dollar figure, so Privacy view leaves it
+  // showing. Every value is a number the page computed.
   function kalshiPositionChartHtml(r){
     var p = r && Array.isArray(r.path) ? r.path.filter(function(x){ return Number.isFinite(x); }) : [];
     if(p.length < 2){ return ''; }
-    var W = 600, H = 110;
-    var dmin = Math.min.apply(null, p), dmax = Math.max.apply(null, p), lo = dmin, hi = dmax;
-    if(hi - lo < 0.06){ var mid = (hi + lo) / 2; lo = mid - 0.03; hi = mid + 0.03; }
-    var pad = (hi - lo) * 0.12; lo -= pad; hi += pad;
-    var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }; var Y = function(v){ return ((hi - v) / (hi - lo) * H).toFixed(1); };
+    var W = 600, H = 130;
+    function clamp(v){ return Math.max(0, Math.min(1, v)); }
+    var X = function(i){ return (i / (p.length - 1) * W).toFixed(1); }; var Y = function(v){ return ((1 - clamp(v)) * H).toFixed(1); };
     var d = p.map(function(v, i){ return (i ? 'L' : 'M') + X(i) + ' ' + Y(v); }).join(' ');
-    // A plain chart (the owner, Oct 24, 2026: "just make it a normal chart"): the line, a soft fill, a dot at the latest read and the high and low as percentages down the side. No captions; what was paid is the Cost beside it.
-    var pc = function(v){ return (v >= 0.9995 ? '99.9' : (v * 100).toFixed(v >= 0.995 ? 1 : 0)) + '%'; };
-    return '<div class="kal-hold-chart">' +
-      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Chance of the side you bought since this page was opened">' +
-      '<path class="kal-hc-fill" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/><path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
-      '<div class="kal-hc-y"><span>' + pc(dmax) + '</span><span>' + pc(dmin) + '</span></div></div>';
+    var px = kalshiPriceText(r.strike), label = px ? 'Target price ' + px + ' (50%)' : 'Flips to the other side (50%)';
+    var tt = r && Array.isArray(r.pathT) ? r.pathT : [];
+    function hm(ms){ return Number.isFinite(ms) ? new Date(ms).toLocaleTimeString('en-US', { timeZone: KAL_TZ, hour: 'numeric', minute: '2-digit' }) : ''; }
+    var from = hm(tt.length ? tt[0] : NaN) || 'Earlier';
+    return '<div class="kal-hold-chart"><div class="kal-hc-col"><div class="kal-hc-plot">' +
+      '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Chance of the side you bought from 0 to 100 percent since this page was opened, with the target price line at 50 percent">' +
+      '<rect class="kal-hc-below" x="0" y="' + (H / 2) + '" width="' + W + '" height="' + (H / 2) + '"/><line class="kal-hc-target-line" x1="0" y1="' + (H / 2) + '" x2="' + W + '" y2="' + (H / 2) + '"/>' +
+      '<path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
+      '<div class="kal-hc-target">' + label + '</div></div>' +
+      '<div class="kal-hc-x"><span>' + from + '</span><span>Now</span></div></div>' +
+      '<div class="kal-hc-y kal-hc-y3"><span>100%</span><span>50%</span><span>0%</span></div></div>';
+  }
+  // A price level for display ("$4,013.48"; Dogecoin keeps its decimals). '' when there is none.
+  function kalshiPriceText(strike){
+    if(!Number.isFinite(strike) || !(strike > 0)){ return ''; }
+    return '$' + strike.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+  }
+  // The price that decides the market, from the market itself (Kalshi's floor_strike, which the books already carry; every L1 series is an "at or above" market, checked Oct 29, 2026). A YES position wins if the asset closes at or above it, a NO position if it closes below. It is a price level, not an account figure, so Privacy view leaves it showing. '' when the market carried none.
+  function kalshiStrikeText(side, strike){
+    if(!Number.isFinite(strike) || !(strike > 0)){ return ''; }
+    var px = kalshiPriceText(strike);
+    return 'Wins if it closes ' + (side === 'no' ? 'below ' : 'at or above ') + px;
   }
   function kalshiPositionsHtml(rows, esc, money){
     if(!rows || !rows.length){ return '<div class="kal-empty">No open positions.</div>'; }
@@ -2406,6 +2425,7 @@
     return rows.map(function(r){
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var sub = [];
+      var st = kalshiStrikeText(r.side, r.strike); if(st){ sub.push(st); }
       if(r.chance !== null){ sub.push('Chance now ' + (r.chance >= 0.9995 ? '99.9' : (r.chance * 100).toFixed(1)) + '%'); }
       var stats = '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
         stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>';
@@ -2441,7 +2461,7 @@
       if(!list.length || Date.now() - list[list.length - 1].t >= 4000){ list.push({ t: Date.now(), v: r.chance }); while(list.length > 240){ list.shift(); } }
     });
     Object.keys(kalshiPosPaths).forEach(function(k){ if(!openNow[k]){ delete kalshiPosPaths[k]; } });
-    rows.forEach(function(r){ r.path = (kalshiPosPaths[r.ticker] || []).map(function(x){ return x.v; }); });
+    rows.forEach(function(r){ var L = kalshiPosPaths[r.ticker] || []; r.path = L.map(function(x){ return x.v; }); r.pathT = L.map(function(x){ return x.t; }); });
     posEl.innerHTML = kalshiPositionsHtml(rows, escapeHtml, kalshiMoney);
   }
   var kalshiBooksLast = null;
