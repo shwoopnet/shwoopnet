@@ -4,7 +4,7 @@
 
 - **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 done. Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (built, loop running); INX1 (done: FALSIFIED); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (done: 3 FALSIFIED); FAM2 (done: XMAC1 FALSIFIED).
 - **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
-- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
+- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); owner decision on recorder R6 (asked 2:55 PM).
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 2:55 PM, recorder R6 spec drafted (REC5 worker), owner decision asked.** `studies/RECORDER_SPEC_R6_15MIN_BOOK_2026-10-29.md`: full-window 5 level book every 2 s and every public trade (read once after each close) for the five 15 minute markets, no key, no order, writes only to quote-data, about 45 MB a day gzipped, about 35 public reads a minute (95 at peak), 14 days then stop. It unblocks MM1's mid-window part, a MAKER test on all five, and a "rest L1's entry at the bid" test. Asked the main session for the owner's yes or no; also flagged that the existing recorders' scheduled jobs start hours late.
 
 **2026-10-29 2:40 PM, QUOTE2B registered and scorer built (Q2B worker), not read.** Two-sided resting quotes on the Bitcoin hourly ladder from the book recorder, conservative queue, flat 10 minutes before the close, maker fills at the taker fee. Prediction FALSIFIED. Ready no earlier than Nov 12, likely Nov 18 to 22: **the book recorder's GitHub scheduled jobs start hours late** (the 11:50 UTC job started at 17:33; 1 usable close so far). If the owner wants the earlier date, the recorder's schedule needs a look (an owner decision on a workflow; not asked yet). AUTO loop runs it when ready. N tried about 439,012.
 
