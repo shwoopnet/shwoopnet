@@ -1,7 +1,7 @@
 {
  "generated_at": "2026-10-29T02:15:23.086404+00:00",
  "source": "GEN1S (README)",
- "verdict": "NO_WINNER (nothing passes every validation gate; FALSIFIED before the holdout)",
+ "verdict": "NO_WINNER in GEN1S, GEN1 and GEN2 (17,500 distinct strategies, 0 past discovery)",
  "note": "Ranked best first. Labels are the registered gates; nothing here has passed a FINAL HOLDOUT. No promote verb; the owner decides.",
  "candidates": [
   {
@@ -406,5 +406,128 @@
     "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
    }
   }
- ]
+ ],
+ "gen2_best5": [
+  {
+   "rule": "[single all both 540..420s | hour<=6 & tb1>0 & r3>0 & dow<=0 | TP None stop 0.05 time 240s book cross50]",
+   "label": "FAILED_GATE_DISCOVERY_PF",
+   "discovery": {
+    "n": 364,
+    "days": 8,
+    "pf": 1.1436300448131247,
+    "z": 1.1210861761019122,
+    "mean_c": 1.2252747689811296,
+    "zv": 0.0
+   },
+   "validation": {
+    "n": 138,
+    "days": 3,
+    "pf": 0.546698633535212,
+    "z": -4.124565323430721,
+    "mean_c": -4.248550641990226,
+    "pfs": 0.5160737023167966,
+    "pf1": 0.48564368160681315
+   },
+   "validation_is_information_only": true,
+   "bootstrap5": null,
+   "zBar": 5.17
+  },
+  {
+   "rule": "[single crypto both 600..300s | ask>0.67 & d2>0.02 & rng5<=0.115 & tb1>0 | TP 0.2 stop None time 120s book cross50]",
+   "label": "FAILED_GATE_DISCOVERY_PF",
+   "discovery": {
+    "n": 335,
+    "days": 55,
+    "pf": 0.9799433047624985,
+    "z": -0.17629318625303492,
+    "mean_c": -0.2301490802373477,
+    "zv": 0.0
+   },
+   "validation": {
+    "n": 131,
+    "days": 27,
+    "pf": 1.0947575244417609,
+    "z": 0.4696658979069793,
+    "mean_c": 1.0320613323277172,
+    "pfs": 1.0600663044624727,
+    "pf1": 0.9908219413734789
+   },
+   "validation_is_information_only": true,
+   "bootstrap5": null,
+   "zBar": 5.17
+  },
+  {
+   "rule": "[single BTC+DOGE no 780..180s | d1>0 & prev_last<=0.085 & mkt_d2>0.0534 & tb5>0 | TP None stop None time 240s book none]",
+   "label": "FAILED_GATE_DISCOVERY_PF",
+   "discovery": {
+    "n": 1084,
+    "days": 55,
+    "pf": 0.9790097670354735,
+    "z": -0.2794625216745646,
+    "mean_c": -0.2247232932752061,
+    "zv": 0.0
+   },
+   "validation": {
+    "n": 524,
+    "days": 28,
+    "pf": 0.7917451764683856,
+    "z": -2.1158385624371143,
+    "mean_c": -2.4467557339342534,
+    "pfs": 0.7599126674746952,
+    "pf1": 0.7195905117733788
+   },
+   "validation_is_information_only": true,
+   "bootstrap5": null,
+   "zBar": 5.17
+  },
+  {
+   "rule": "[single BTC no 840..420s | spread>0.01 | scale-out half at +0.05 rest at 120s]",
+   "label": "FAILED_GATE_DISCOVERY_PF",
+   "discovery": {
+    "n": 223,
+    "days": 45,
+    "pf": 0.9754769002434267,
+    "z": -0.1501830796860087,
+    "mean_c": -0.28766805497708303,
+    "zv": 0.0
+   },
+   "validation": {
+    "n": 22,
+    "days": 17,
+    "pf": 1.3357292556693423,
+    "z": 0.6155667111004068,
+    "mean_c": 3.2909097021953606,
+    "pfs": 1.2848692327816784,
+    "pf1": 1.240588165885378
+   },
+   "validation_is_information_only": true,
+   "bootstrap5": null,
+   "zBar": 5.17
+  },
+  {
+   "rule": "[single WTI yes 600..480s | mkt_d2<=-0.0341 & d2>0.16 & part_mid<=0.535 | trail 0.1 time 120s]",
+   "label": "FAILED_GATE_DISCOVERY_PF",
+   "discovery": {
+    "n": 391,
+    "days": 49,
+    "pf": 0.965064787372893,
+    "z": -0.2857578040035592,
+    "mean_c": -0.37314559375996,
+    "zv": 0.0
+   },
+   "validation": {
+    "n": 213,
+    "days": 22,
+    "pf": 0.3747475224647749,
+    "z": -7.943679300492836,
+    "mean_c": -8.283567902767604,
+    "pfs": 0.35588680997772365,
+    "pf1": 0.33711530535648726
+   },
+   "validation_is_information_only": true,
+   "bootstrap5": null,
+   "zBar": 5.17
+  }
+ ],
+ "gen2_note": "GEN2 (README): 14,330 generated, 7,500 distinct, 0 passed discovery. All five FAILED_GATE_DISCOVERY_PF; validation shown as information only. None uses only slot-expressible fields except where noted, so none can be loaded into the second slot as is."
 }

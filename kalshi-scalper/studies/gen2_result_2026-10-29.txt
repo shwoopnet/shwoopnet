@@ -1,0 +1,9 @@
+GEN2 VERDICT so far: NO_WINNER (FALSIFIED before the holdout)
+GEN2: generated 14330 (rejected for using no new block 280), distinct 7500; overlap with GEN1/GEN1S by canonical form: 0 (every strategy uses a new block); N tried 425330, Bonferroni z bar 5.17
+discovery PF over distinct: median 0.49, 95th pct 0.74; best with 150+ trades 1.14
+passed discovery 0; failed in validation: VALIDATION_N 0, VALIDATION_PF 0, VALIDATION_STRESS 0, FILL_OPTIMISM 0, VALIDATION_BOOTSTRAP 0, DEFLATION 0; survivors (all validation gates incl. deflation) 0
+  FAILED_GATE_DISCOVERY_PF: [single all both 540..420s | hour<=6 & tb1>0 & r3>0 & dow<=0 | TP None stop 0.05 time 240s book cross50] | disc PF 1.14 n=364 days 8 | valid PF 0.55 (1c 0.49, stress 0.52) n=138 days 3 z -4.12 (information only)
+  FAILED_GATE_DISCOVERY_PF: [single crypto both 600..300s | ask>0.67 & d2>0.02 & rng5<=0.115 & tb1>0 | TP 0.2 stop None time 120s book cross50] | disc PF 0.98 n=335 days 55 | valid PF 1.09 (1c 0.99, stress 1.06) n=131 days 27 z +0.47 (information only)
+  FAILED_GATE_DISCOVERY_PF: [single BTC+DOGE no 780..180s | d1>0 & prev_last<=0.085 & mkt_d2>0.0534 & tb5>0 | TP None stop None time 240s book none] | disc PF 0.98 n=1084 days 55 | valid PF 0.79 (1c 0.72, stress 0.76) n=524 days 28 z -2.12 (information only)
+  FAILED_GATE_DISCOVERY_PF: [single BTC no 840..420s | spread>0.01 | scale-out half at +0.05 rest at 120s] | disc PF 0.98 n=223 days 45 | valid PF 1.34 (1c 1.24, stress 1.28) n=22 days 17 z +0.62 (information only)
+  FAILED_GATE_DISCOVERY_PF: [single WTI yes 600..480s | mkt_d2<=-0.0341 & d2>0.16 & part_mid<=0.535 | trail 0.1 time 120s] | disc PF 0.97 n=391 days 49 | valid PF 0.37 (1c 0.34, stress 0.36) n=213 days 22 z -7.94 (information only)
