@@ -167,6 +167,38 @@ function parseRss(xml, source) {
   return out;
 }
 
+// Market News relevance (the owner, Oct 29, 2026: "only pull equities, crypto or commodity related articles", after a MarketWatch advice column about an ex-husband and a college fund showed up). A headline is kept only when it is
+// about stocks, crypto or commodities (or the rates, inflation, dollar and tariff news that moves them), and personal advice columns and lifestyle pieces are dropped even when a market word appears in them. The two crypto desks
+// are about crypto by definition, so they pass on the source alone (the advice and lifestyle drop still applies). Applied to every feed BEFORE the per feed cap, so each desk's newest few are its newest RELEVANT few.
+const CRYPTO_DESKS = ["CoinDesk", "Cointelegraph"];
+const NEWS_ALLOW = new RegExp("\\b(" + [
+  // equities
+  "stocks?", "equit(?:y|ies)", "shares", "share price", "wall street", "S&P(?: 500)?", "nasdaq", "dow(?: jones)?", "russell", "nyse", "earnings", "profit warning", "guidance", "ipo", "etfs?", "index funds?", "rally", "rallies", "sell-?off", "bull market", "bear market", "correction",
+  "investors?", "traders?", "buyback", "dividends?", "merger", "takeover", "price target", "upgrades?", "downgrades?", "analysts?", "hedge funds?", "short sellers?", "valuation", "market cap", "markets?", "futures", "options trading", "volatility", "vix", "bubble",
+  // commodities
+  "oil", "crude", "brent", "wti", "opec", "natural gas", "gasoline", "gold", "silver", "copper", "platinum", "palladium", "commodit(?:y|ies)", "wheat", "corn", "soybeans?", "coffee", "cocoa", "sugar", "cotton", "lumber", "uranium", "lithium", "bullion",
+  // crypto
+  "bitcoin", "btc", "ethereum", "ether", "crypto(?:currency|currencies)?", "stablecoins?", "solana", "xrp", "ripple", "dogecoin", "altcoins?", "blockchain", "tokens?", "defi", "coinbase", "binance", "digital assets?", "memecoins?",
+  // what moves them
+  "fed", "federal reserve", "powell", "interest rates?", "rate cuts?", "rate hikes?", "inflation", "cpi", "ppi", "payrolls", "jobs report", "gdp", "treasur(?:y|ies)", "yields?", "bonds?", "dollar", "tariffs?", "recession", "central bank", "ecb", "boj"
+].join("|") + ")\\b", "i");
+// Personal finance advice columns ("My ex-husband promised..."), reader questions, and lifestyle pieces: never market news, whatever words they contain.
+const NEWS_DENY = new RegExp([
+  "^(?:my|i|i['\u2019]m|i['\u2019]ve|dear)\\b",
+  "\\bmy (?:ex|ex-\\w+|husband|wife|spouse|partner|boyfriend|girlfriend|mom|mother|dad|father|parents?|in-laws?|mother-in-law|father-in-law|sister|brother|son|daughter|kids?|children|neighbou?r|boss|landlord|roommate|fianc\u00e9e?)\\b",
+  "\\b(?:moneyist|quentin fottrell)\\b",
+  "\\b(?:should|can|could|do|am|will) I\\b",
+  "\\b(?:is|are) (?:he|she|they) (?:legally|obligated)\\b",
+  "\\b(?:horoscope|recipes?|kardashian|royal family|reality tv)\\b",
+].join("|"), "i");
+// `item` is a parsed feed item ({ headline, source }); a bare headline string is judged with no source.
+function isMarketNews(item) {
+  const headline = String(item && typeof item === "object" ? item.headline : item || "");
+  const source = String(item && typeof item === "object" ? item.source || "" : "");
+  if (!headline || NEWS_DENY.test(headline)) return false;
+  return CRYPTO_DESKS.includes(source) || NEWS_ALLOW.test(headline);
+}
+
 function mergeNews(lists) {
   const seen = new Set();
   const capped = lists.map((l) => l.slice().sort((a, b) => b.datetime - a.datetime).slice(0, NEWS_PER_FEED));
@@ -208,7 +240,7 @@ async function readTape({ fetchFn, now }) {
   }));
   const lists = [];
   await Promise.all(NEWS_FEEDS.map(async (f) => {
-    try { lists.push(parseRss(await getText(fetchFn, f.url), f.source)); }
+    try { lists.push(parseRss(await getText(fetchFn, f.url), f.source).filter(isMarketNews)); }
     catch (e) { errors.push(f.source + ": " + String((e && e.message) || e).slice(0, 80)); }
   }));
   const news = lists.length ? mergeNews(lists) : null;
@@ -220,4 +252,4 @@ async function readTape({ fetchFn, now }) {
   return { quotes, news: news && news.length ? news : null, mood: Object.keys(mood).length ? mood : null, errors };
 }
 
-module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, lastSession, parseChart, parseRss, mergeNews, decodeEntities, readTape, chartUrl };
+module.exports = { SYMBOLS, NEWS_FEEDS, parseFearGreedStocks, parseFearGreedCrypto, chartSeries, chartPoints, lastSession, parseChart, parseRss, mergeNews, isMarketNews, NEWS_ALLOW, NEWS_DENY, CRYPTO_DESKS, decodeEntities, readTape, chartUrl };
