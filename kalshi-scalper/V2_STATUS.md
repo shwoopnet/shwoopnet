@@ -2,7 +2,7 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 (Bitcoin part 0 done; 3 parts running). Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (auto-scorers for LOCK2, MKTTIME1-F, MM1, RECORD1, CONF2 window C, plus a nightly live watcher, `workers/LIVEWATCH.md`); INX1 (Kalshi S&P 500 and Nasdaq daily markets against Yahoo index bars and VIX, a family never tested); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (profit per win levers for L1, listing tested vs new first); FAM2 (done: XMAC1 FALSIFIED).
+- **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 (Bitcoin part 0 done; 3 parts running). Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (auto-scorers for LOCK2, MKTTIME1-F, MM1, RECORD1, CONF2 window C, plus a nightly live watcher, `workers/LIVEWATCH.md`); INX1 (Kalshi S&P 500 and Nasdaq daily markets against Yahoo index bars and VIX, a family never tested); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (done: 3 FALSIFIED); FAM2 (done: XMAC1 FALSIFIED).
 - **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 2:00 PM, PPW1 (the owner's "more profit per win"), 3 tries FALSIFIED.** Cheapest in-band coin instead of list order: PF 1.27 / 1.10 / 0.97 against 1.25 / 1.13 / 1.04 (z -0.27). Silver instead of gold when cheaper: 1.26 / 1.01 / 1.14 against 1.41 / 1.05 / 1.17. Add a contract on a 3c to 6c dip: the add alone 0.94 / 1.05 / 0.80, losing 11% to 14% of the time. Plain answer: every lever raised profit per win by 0.7c to 5c and the loss rate by as much; a cheaper favourite is cheaper because it loses more. 16 other levers were already tested. N tried about 438,922.
 
 **2026-10-29 1:45 PM, XMAC1 (FAM2 worker: S&P future, dollar and 10 year yield leading Kalshi quotes), FALSIFIED.** PF W1 / W2: S&P shock to Bitcoin and Ethereum 0.86 / 0.71 (n 252 / 200); sold 3 minutes later 0.50 / 0.53; dollar to gold 0.81 / 1.08; yield to gold 0.79 / 1.43 (n 30 / 23). They move in the same minute as Kalshi (correlation about 0.35), no lag of a minute or more. Deribit IV on the ladders: a restatement of LAD1, not run. N tried about 438,919.
 
