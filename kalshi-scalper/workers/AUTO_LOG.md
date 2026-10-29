@@ -1,0 +1,4 @@
+# AUTO_LOG: forward reads run by `scalper.autoscore` (newest last; time in US Central)
+
+- 2026-10-29 14:02 CT | RECORD1 | INFORMATION LOOK, NOT THE REGISTERED READ (decides nothing): 29 runs, coverage {'windows': 1277, 'polls': 290994, 'n429': 0}, 429 share 0.0%; qualifying trades 132 on 8 dates (read needs 300 on 10)
+- 2026-10-29 14:02 CT | STATUS | LOCK2 closes with both books recorded: {'BTC': 11, 'ETH': 11} (25 per asset needed) ; MKTTIME1-F readiness: 0 gold entries since 2026-10-30, block 20-24 CT 0 entries with 0 losses (15 needed); no PF computed ; MM1 readiness: 48 recorded gold 15 minute windows (300 needed) ; CONF2 C readiness: 18 window C entries, 0 kept closes (30 needed), 18 without ladder; waiting for data/conf2_A_done (the lead reads window A first) ; INFORMATION LOOK, NOT THE REGISTERED READ (decides nothing): 29 runs, coverage {'windows': 1277, 'polls': 290994, 'n429': 0}, 429 share 0.0%; qualifying trades 132 on 8 dates (read needs 300 on 10)
