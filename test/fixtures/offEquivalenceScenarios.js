@@ -51,9 +51,12 @@ function l1World(opts = {}) {
     async updateTest(id, patch) { Object.assign(docs.get(id), patch); },
     async sessionTrades(since) { if (opts.tradesThrow) throw new Error('down'); return [...docs.entries()].filter(([, d]) => d.ts >= since).map(([id, d]) => ({ id, ...d })); },
   };
+  // Test hooks for the slot wiring gates (never set by the recorded scenarios): extra store methods, built over the same documents.
+  if (opts.extraStore) Object.assign(base, opts.extraStore(docs));
   if (opts.cached) base.sessionTradesCached = async (since, now) => base.sessionTrades(since);
   const store = r.wrapStore(base);
   const fetchFn = r.wrapFetch(async (url, o) => {
+    if (url.includes('/portfolio/positions') && opts.positions) return opts.positions(url);
     if (url.includes('/candlesticks')) return reply(200, { candlesticks: opts.candles || climb() });
     if (url.includes('/markets/')) {
       const tk = decodeURIComponent(url.split('/markets/')[1].split('?')[0]);

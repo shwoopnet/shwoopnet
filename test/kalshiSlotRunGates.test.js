@@ -397,8 +397,13 @@ gates['SW10 the slot sells only its own contracts: L1 and other slot steps are l
   // The account holds fewer than the sum (a hand sale): the slot sells holding - L1.
   w = exitWorld({ l1: [l1Order({ count: 3, fillCount: '3' })], ex: { positions: { [T]: 5 } } });
   await w.runner.runSlotExits(w.args); assert.strictEqual(w.ex.posts[0].count, '2');
-  // The account holds only what L1 holds: the slot sells nothing and marks itself skipped.
+  // The account holds only what L1 holds: the slot sells nothing. That can be a passing state (two reads that are not atomic), so it is NOT written as "skipped" for good: the next pass looks again.
   w = exitWorld({ l1: [l1Order({ count: 3, fillCount: '3' })], ex: { positions: { [T]: 3 } } });
+  await w.runner.runSlotExits(w.args); assert.strictEqual(w.ex.posts.length, 0); assert.notStrictEqual(w.db.slot.get(slotOrder().id).exitStatus, 'skipped');
+  // ...and once the others' sale is booked (the position and the books agree again) it sells its own contracts.
+  w.ex.positions[T] = 7; w.db.l1.set('L1-' + T, l1Order({ count: 3, fillCount: '3' })); await w.runner.runSlotExits(w.args); assert.strictEqual(w.ex.posts.length, 1);
+  // A clean read that shows NONE of this side is permanent: skipped.
+  w = exitWorld({ ex: { positions: { [T]: 0 } } });
   await w.runner.runSlotExits(w.args); assert.strictEqual(w.ex.posts.length, 0); assert.strictEqual(w.db.slot.get(slotOrder().id).exitStatus, 'skipped');
   // Another slot step on the same side counts as someone else's.
   w = exitWorld({ extraSlot: [slotOrder({ id: 'S-TESTA-' + T + '-2', step: 2, fillCount: '4' })], ex: { positions: { [T]: 6 } } });
@@ -456,10 +461,95 @@ gates['a kill rule tripped by an exit latches the strategy in the same write tha
   await R(ON({ killRules: { maxConsecutiveLosses: 1, minNet: { afterFills: 20, net: -3 } } })).runSlotTick(t.args);
   assert.strictEqual(ex.posts.length, 0, 'killed');
 };
-gates['an order whose strategy is no longer registered is not exited by this engine'] = async () => {
-  const w = exitWorld({ order: { slotId: 'GONE' } });
-  const out = await w.runner.runSlotExits(w.args);
-  assert.strictEqual(w.ex.posts.length, 0); assert.ok(out.results.some((r) => /not registered/.test(r)));
+gates['an order whose strategy is no longer registered still gets the fallback exits: a fixed stop and out before the close, and no target'] = async () => {
+  for (const [bid, ask, closeIn, sells] of [[0.20, 0.22, 400, true], [0.60, 0.62, 400, false], [0.99, 0.99, 400, false], [0.60, 0.62, 50, true], [0.60, 0.62, 80, false]]) {
+    const w = exitWorld({ order: { slotId: 'GONE' }, ex: { market: { yes_bid_dollars: bid.toFixed(4), yes_ask_dollars: ask.toFixed(4), close_time: iso(NOW + closeIn * 1000) } } });
+    await w.runner.runSlotExits(w.args);
+    assert.strictEqual(w.ex.posts.length, sells ? 1 : 0, 'bid ' + bid + ' with ' + closeIn + ' s left');
+  }
+};
+gates['SW-ORPHAN turning the slot off, or deleting the strategy, with a live slot position still exits it, settles it and keeps it in the shared stop'] = async () => {
+  // Entries are OFF (enabled false) but a slot order has been used: the registry is still there, and so is an order that is down through its stop.
+  const off = { enabled: false, registry: [GOOD()], everUsed: true };
+  let w = exitWorld({ flags: off });
+  await w.runner.runSlotExits(w.args);
+  assert.strictEqual(w.ex.posts.length, 1, 'the stop still fires with entries switched off');
+  // The strategy was deleted entirely (empty registry): the fallback exit takes over.
+  w = exitWorld({ flags: { enabled: false, registry: [], everUsed: true }, order: { slotId: 'GONE' }, ex: { market: { yes_bid_dollars: '0.2000', yes_ask_dollars: '0.2200' } } });
+  await w.runner.runSlotExits(w.args);
+  assert.strictEqual(w.ex.posts.length, 1, 'the fallback stop still fires with no strategy');
+  // The settle sweep still settles it.
+  w = exitWorld({ flags: { enabled: false, registry: [], everUsed: true }, order: { slotId: 'GONE', side: 'yes' }, ex: { market: { result: 'no' } } });
+  const sw = await w.runner.runSlotSettle({ store: w.store, fetchFn: w.ex.fetchFn, keyId: 'k', pem, now: NOW });
+  assert.strictEqual(sw.settled, 1, JSON.stringify(sw));
+  assert.strictEqual(await R({ enabled: false, registry: [], everUsed: true }).slotExitIdle({ store: exitWorld().store, now: NOW }), false, 'and the exit loop is not idle while the order is open');
+  // Never used and off: nothing is read at all (the shipped state).
+  const trap = new Proxy({}, { get: () => { throw new Error('touched'); } });
+  assert.deepStrictEqual((await R({ enabled: false, registry: [] }).runSlotExits({ store: trap, now: NOW })).skipped, 'no slot strategy');
+  // Entries stay closed while only watching.
+  const db = makeDb(), ex = makeExchange(db), t = tickArgs(db, ex);
+  await R(off).runSlotTick(t.args); assert.strictEqual(ex.posts.length, 0, 'watching is not entering'); assert.strictEqual(db.slot.size, 0);
+};
+gates['SW-HEDGE a hedge made by an old revision (an L1 order that never read the lock) is sold out of by the slot on its next exit pass, and the strategy is latched off'] = async () => {
+  const db = makeDb();
+  // The slot (NO) enters first through the lock...
+  const ex = makeExchange(db, { positions: {}, market: { yes_bid_dollars: '0.2400', yes_ask_dollars: '0.2600' } });   // the favourite is NO at 0.76
+  const t = tickArgs(db, ex);
+  await R(ON()).runSlotTick(t.args);
+  assert.strictEqual(ex.posts.length, 1, 'the slot NO entry went out'); const slotId = [...db.slot.keys()][0]; assert.strictEqual(db.slot.get(slotId).side, 'no');
+  // ...then an old instance creates its L1 YES order with a bare create (what origin/main's createTest does: no lock read, no slot read).
+  db.l1.set('L1-' + T, l1Order({ side: 'yes', ts: NOW - 500 }));
+  const w = { db, ex, store: makeStore(db, 'X'), sess: { active: true }, events: [] };
+  ex.positions[T] = -4;          // the account really is net short here: the slot's NO (the L1 YES is in flight)
+  ex.market.yes_bid_dollars = '0.6500'; ex.market.yes_ask_dollars = '0.6700';     // NO is NOT near its stop: only the hedge can make it sell
+  const runner = R(ON());
+  await runner.runSlotExits({ store: w.store, fetchFn: ex.fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async (p) => Object.assign(w.sess, p), logEvent: async (e) => w.events.push(e) });
+  assert.strictEqual(ex.posts.length, 2, 'the slot sold its contracts: ' + JSON.stringify(ex.posts.slice(1)));
+  assert.strictEqual(db.slot.get(slotId).exitWhy, 'hedge'); assert.ok(db.latches.TESTA, 'the strategy is latched off');
+  // The same trade without the opposite L1 order holds.
+  const db2 = makeDb(), ex2 = makeExchange(db2, { positions: {}, market: { yes_bid_dollars: '0.2400', yes_ask_dollars: '0.2600' } });
+  await R(ON()).runSlotTick(tickArgs(db2, ex2).args);
+  ex2.positions[T] = -4; ex2.market.yes_bid_dollars = '0.3300'; ex2.market.yes_ask_dollars = '0.3500';
+  await R(ON()).runSlotExits({ store: makeStore(db2, 'X'), fetchFn: ex2.fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async () => {} });
+  assert.strictEqual(ex2.posts.length, 1, 'no hedge, no sale');
+  // The same side as L1 is not a hedge.
+  const db3 = makeDb(), ex3 = makeExchange(db3, { positions: {} });
+  await R(ON()).runSlotTick(tickArgs(db3, ex3).args);
+  db3.l1.set('L1-' + T, l1Order({ side: 'yes' })); ex3.positions[T] = 5; ex3.market.yes_bid_dollars = '0.6500'; ex3.market.yes_ask_dollars = '0.6700';
+  await R(ON()).runSlotExits({ store: makeStore(db3, 'X'), fetchFn: ex3.fetchFn, keyId: 'k', pem, now: NOW, enabled: true, setSession: async () => {} });
+  assert.strictEqual(ex3.posts.length, 1, 'same side: nothing sold');
+};
+gates['SW-CLOCK an entry is judged on the clock at commit time: a minute that ran long sends nothing, and a window that closed while it ran is refused'] = async () => {
+  // 20 s into a window that is 305 s from its floor... the strategy needs room: leftMinSec 300 vs exit floor 90.
+  let db = makeDb(), ex = makeExchange(db), t = tickArgs(db, ex);
+  t.args.clock = () => NOW + 25000;        // 25 s after the minute began
+  await R(ON()).runSlotTick(t.args);
+  assert.strictEqual(ex.posts.length, 0, 'too stale'); assert.strictEqual(db.locks.size, 0); assert.strictEqual(db.slot.size, 0);
+  // The market has 305 s left at the start of the minute and 295 s at the commit: outside leftMinSec 300.
+  db = makeDb(); ex = makeExchange(db, { market: { close_time: iso(NOW + 305000) } }); t = tickArgs(db, ex, { args: { quotes: QUOTES({ close_time: iso(NOW + 305000) }) } });
+  t.args.clock = () => NOW + 10000;
+  await R(ON()).runSlotTick(t.args);
+  assert.strictEqual(ex.posts.length, 0, 'the entry window closed while the minute ran'); assert.strictEqual(db.slot.size, 0);
+  // The control: the same market with a prompt clock trades.
+  db = makeDb(); ex = makeExchange(db, { market: { close_time: iso(NOW + 305000) } }); t = tickArgs(db, ex, { args: { quotes: QUOTES({ close_time: iso(NOW + 305000) }) } });
+  t.args.clock = () => NOW + 1000;
+  await R(ON()).runSlotTick(t.args); assert.strictEqual(ex.posts.length, 1);
+  // A strategy whose entry window ends too close to its exit floor never enters.
+  db = makeDb(); ex = makeExchange(db); t = tickArgs(db, ex);
+  const out = await R(ON({ exit: { stopBid: 0.4, targetBid: 0.95, mustExitLeftSec: 290 } })).runSlotTick(t.args);
+  assert.strictEqual(ex.posts.length, 0); assert.ok(/too close to its exit floor/.test(JSON.stringify(out)), JSON.stringify(out));
+};
+gates['SW-LOST-ANSWER a database failure while writing the status of a lost-answer order still latches the strategy off and ends the session (entry and exit)'] = async () => {
+  // Entry: the answer is lost, then the status write throws.
+  let db = makeDb(), ex = makeExchange(db, { post: { status: 503, body: 'x' } }), t = tickArgs(db, ex);
+  t.args.store.updateSlotOrder = async () => { throw new Error('firestore blip'); };
+  let out = await R(ON()).runSlotTick(t.args);
+  assert.strictEqual(out.ended, 'attempted'); assert.strictEqual(t.sess.active, false); assert.ok(db.latches.TESTA, 'latched');
+  // Exit: the sell answer is lost, then the status write throws.
+  const w = exitWorld({ ex: { post: { status: 503, body: 'x' } } });
+  w.store.updateSlotOrder = async (id, p) => { if (p.exitStatus === 'unknown') throw new Error('firestore blip'); Object.assign(w.db.slot.get(id), p); };
+  out = await w.runner.runSlotExits(w.args);
+  assert.strictEqual(out.ended, true); assert.strictEqual(w.sess.active, false); assert.ok(w.db.latches.TESTA);
 };
 gates['the exit loop is idle only when no slot order is open, and an unreadable store is not idle'] = async () => {
   const w = exitWorld({ order: null }); assert.strictEqual(await w.runner.slotExitIdle({ store: w.store, now: NOW }), true);
@@ -490,12 +580,12 @@ gates['the engine file has no environment, randomness, timers or Firestore, requ
   assert.ok(exits.indexOf('live.claimClose(') > 0 && exits.indexOf('live.claimClose(') < exits.indexOf('/portfolio/positions'), 'the lease comes before the position read');
   assert.ok(exits.indexOf('/portfolio/positions') < exits.indexOf('method: "POST"'), 'the position is read before anything is sold');
   assert.ok(!/side: "(bid|ask)"/.test(c), 'no hand-built order side');
-  assert.strictEqual(Object.keys(run).sort().join(), ['EXIT_LOOKBACK_MS', '_testOnly', 'runSlotExits', 'runSlotTick', 'slotExitIdle', 'unsoldOf'].sort().join());
+  assert.strictEqual(Object.keys(run).sort().join(), ['EXIT_LOOKBACK_MS', '_testOnly', 'runSlotExits', 'runSlotSettle', 'runSlotTick', 'slotExitIdle', 'unsoldOf'].sort().join());
   assert.strictEqual(typeof run.runSlotTick, 'function');
 };
-gates['the engine is not wired anywhere: only its own test and the plan mention it'] = () => {
+gates['the engine is wired only into functions/index.js (behind SLOT_ON, step B3): nothing else imports it'] = () => {
   const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (['node_modules', '.git', 'data'].includes(e.name) || e.isSymbolicLink() ? [] : e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
-  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html)$/.test(x) && !/[\\/]test[\\/]|kalshiSlotRunLib\.js$/.test(x))) assert.ok(!/kalshiSlotRunLib/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not import the engine yet');
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html)$/.test(x) && !/[\\/]test[\\/]|kalshiSlotRunLib\.js$|functions[\\/]index\.js$/.test(x))) assert.ok(!/kalshiSlotRunLib/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not import the engine');
 };
 
 (async () => {

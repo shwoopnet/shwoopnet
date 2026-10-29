@@ -47,6 +47,13 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
+// The second strategy slot (docs/SECOND_SLOT_WIRING.md). SLOT_ON comes from the slot library's own constants and nothing else: no stored document, request or page can feed it. It is "watching" (entries are
+// allowed, or a slot order has ever existed), which is wider than "entering", so switching entries off never orphans a live slot position. While it is false
+// (how this ships) nothing below that names the slot runs, and the deployed functions make the same reads, writes and orders they made before the slot existed.
+const slotLib = require("./kalshiSlotLib");
+const slotRun = require("./kalshiSlotRunLib");
+const slotStoreLib = require("./kalshiSlotStoreLib");
+const SLOT_ON = slotLib.slotWatch();
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
 // deploy, stops all buying and Start with one token. The exit watch is untouched either way (it only closes positions the bot already opened).
@@ -316,6 +323,10 @@ function firestoreLiveStore(db) {
         throw e;
       }
     },
+    // Slot only (SLOT_ON): L1's order document and the direction lock in one transaction. Never called while the slot is off.
+    createTestLocked(id, data, o) { return slotStoreLib.createLocked(db, id, data, o); },
+    // Slot only: the exit watch gives its close lease back when its pass ends, so it cannot hold the slot's own stop off a market for 90 seconds. Holder-checked. Never called while the slot is off.
+    releaseClose(ticker, who) { return slotStoreLib.releaseCloseLease(db, ticker, who); },
     async updateTest(id, patch) { await col.doc(id).update(patch); },
     // Every order since a time, with its id. A single-field query, so it needs no composite index; the caller filters.
     async sessionTrades(since) { return (await col.where("ts", ">=", since).get()).docs.map((d) => ({ id: d.id, ...d.data() })); },
@@ -486,7 +497,7 @@ exports.kalshiFlattenAll = onCall(
     await events.add({ accountId: live.DEFAULT_ACCOUNT_ID, ts: now, kind: "session ended", detail: "flatten all and halt pressed by you" });
     let out;
     try {
-      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now, store: firestoreLiveStore(db) });
+      out = await live.flattenAll({ fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now, store: firestoreLiveStore(db), ...(SLOT_ON ? { slot: slotStoreLib.slotHooks(db) } : {}) });
     } catch (e) {
       out = { ok: false, reason: "The sells failed: " + String((e && e.message) || e).slice(0, 120), results: [] };
     }
@@ -526,7 +537,8 @@ exports.kalshiLiveExit = onSchedule(
     const sessRef = db.collection("kalshiLiveControl").doc("session");
     const store = firestoreLiveStore(db);
     // Nothing open and not a minute L1 can buy in: skip the whole minute rather than sit in the loop below (compute time is the bill). Fails open (see exitWatchIdle).
-    if (await live.exitWatchIdle({ store, now: Date.now() })) return;
+    // With the slot on, a minute is idle only when the slot has nothing open to watch either (its read is made only after the L1 check says idle).
+    if ((await live.exitWatchIdle({ store, now: Date.now() })) && (!SLOT_ON || (await slotRun.slotExitIdle({ store: slotStoreLib.slotStore(db, store), now: Date.now() })))) return;
     const stopAt = Date.now() + 47000;
     for (;;) {
       try {
@@ -536,11 +548,25 @@ exports.kalshiLiveExit = onSchedule(
           await live.runExitWatch({
             store, fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
             enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
+            ...(SLOT_ON ? { slot: slotStoreLib.slotHooks(db) } : {}),
             logEvent: async (e) => {
               await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
               if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
             },
           });
+          // Slot only: the slot's own exits, in a pass of their own after L1's, so a failure here can never stop L1's 25c line. Each engine sells only its own contracts under the shared close lease.
+          if (SLOT_ON) {
+            try {
+              await slotRun.runSlotExits({
+                store: slotStoreLib.slotStore(db, store), fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now: Date.now(),
+                enabled: KALSHI_LIVE_ENABLED.value() === "on", setSession: (patch) => sessRef.set(patch, { merge: true }),
+                logEvent: async (e) => {
+                  await db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e });
+                  if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
+                },
+              });
+            } catch (e) { console.error("kalshiLiveExit: slot exits failed: " + String((e && e.message) || e).slice(0, 200)); }
+          }
         }
       } catch (e) {
         console.error("kalshiLiveExit: " + String((e && e.message) || e).slice(0, 200));
@@ -599,7 +625,9 @@ exports.kalshiLiveArmed = onSchedule(
       // other is on, and if both documents say "on" anyway, the session does nothing this minute.
       if (sessionOn && !armedOn) {
         const sizingSnap = await sizingRef.get();
-        await live.runL1Tick({
+        const shareOut = SLOT_ON ? {} : undefined;       // the figures runL1Tick hands to the slot tick (slot only)
+        const l1Result = await live.runL1Tick({
+          ...(SLOT_ON ? { slot: slotStoreLib.slotHooks(db), shareOut } : {}),
           sizingState: sizingSnap.exists ? sizingSnap.data() : null, setSizingState: (st) => sizingRef.set(st),
           // The probe drop record (kalshiLiveControl/probeRecord): applied to the FRESH document inside a transaction, so two instances during a deploy cannot overwrite each other's entries. Admin read only and no client write (the kalshiLiveControl rule): only this function writes it.
           updateProbeRecord: (apply) => db.runTransaction(async (tx) => {
@@ -613,12 +641,26 @@ exports.kalshiLiveArmed = onSchedule(
           quotes: market.quotes, active: market.active, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
+        // Slot only: right after L1, in the same minute function, on the figures L1 just worked out. It cannot fail the tick (the error is logged) and does nothing if L1 ended the session.
+        if (SLOT_ON) {
+          try {
+            const slotResult = await slotRun.runSlotTick({
+              session, now, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", active: market.active, store: slotStoreLib.slotStore(db, firestoreLiveStore(db)),
+              keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch, quotes: market.quotes, clock: Date.now,
+              setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent, shared: shareOut, l1Result,
+              sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
+            });
+            console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
+          } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
+        }
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
       // The hand-sold repair pass re-reads every order marked hand, which is no longer needed every minute: once every 10 minutes is enough for something that only ever looks back.
+      // Slot only (the spread): L1's sweep must not read a slot fill as a sale by hand, so it is told the slot's order ids. If they cannot be read this throws and L1's sweep waits a minute (orders stay open, counted as lost).
       try {
-        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), repair: Math.floor(now / 60000) % 10 === 0 });
+        await live.settleOpenOrders({ store: firestoreLiveStore(db), fetchFn: fetch, nowMs: now, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), repair: Math.floor(now / 60000) % 10 === 0, ...(SLOT_ON ? { ignoreOrderIds: await slotStoreLib.slotIgnoreSet(db) } : {}) });
+        if (SLOT_ON) await slotRun.runSlotSettle({ store: slotStoreLib.slotStore(db, firestoreLiveStore(db)), fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), now });
       } catch (e) {
         console.error("kalshiLiveArmed: settle sweep failed: " + String((e && e.message) || e).slice(0, 160));
       }
