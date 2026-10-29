@@ -2,11 +2,13 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running:** a background wait for the merged `ladl1.sqlite` on branch `research-data` (the old chat pushes it about 12:30 PM).
-- **Next:** LADL1 (L1's rule on the gold daily and weekly ladders and the Bitcoin and Ethereum hourly ladders), run once when that file lands; then 1 or 2 new mechanisms for this round, each registered before scoring.
+- **Now running:** LADL1 download resumed from the old chat's partial files (4 shards, Bitcoin and Ethereum hourly); CONF2 ladder download for Aug 15 to Sep 25 (public, no key).
+- **Next:** LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
 
 ## Entries
+
+**2026-10-29 11:35 AM, CONF2 registered (owner approved).** CONF1's ladder filter on Bitcoin L1 entries at top-of-hour closes, with the 15 minute market's own strike. Window A (Aug to Sep 25) is new data; window B (Sep 26 to Oct 26) was seen by CONF1, reported but not a pass window; window C (from Oct 27) is a frozen forward holdout. Prediction: A kept PF under 1.5, FALSIFIED. N tried about 438,672.
 
 **2026-10-29 11:20 AM, self-guide check, no new test (round 1 of 10 toward NO_CANDIDATE_LEFT).** Candidates checked against the ledger, none new: gold's first window after the daily COMEX break (S14 and O39, 11 trades, NOT_ENOUGH_DATA); Dogecoin and XRP following Bitcoin within a window (GEN2, LAG2, SCALP1); the previous window's outcome carrying into the next (S06); Ethereum coincident-close locks in history (same structure as LOCK2H, which was rare and unconfirmable; the recorder's LOCK2 covers Ethereum). One lead needs the owner: CONF2, CONF1's ladder filter (holdout PF 1.79 on 116 closes) on the full L1 history, which is L1 research. Not registered without the owner's yes.
 
