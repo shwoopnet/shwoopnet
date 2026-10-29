@@ -1,0 +1,18 @@
+{
+ "id": "GEN4_REF_FAV150",
+ "market": "KXBTC15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T00:00:00Z",
+ "source": "quotes",
+ "evaluator": "scalper.gen4:evaluate",
+ "params": {
+  "side": "FAV",
+  "hi": 150,
+  "lo": 120,
+  "conds": [],
+  "exit": 0,
+  "market": "bitcoin"
+ },
+ "generator": "GEN4 (reference, not a candidate; 1 try)",
+ "description": "The unconditional core of 41 of the 51 GEN4 validation passes: buy the favourite (side ask 0.50 to 0.85) at the first poll 150 to 120 s before the close, hold. Discovery PF1 1.61 n 50; validation PF1 1.57 n 35. Shows whether the conditions add anything forward."
+}

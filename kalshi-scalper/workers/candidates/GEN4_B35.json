@@ -1,0 +1,49 @@
+{
+ "id": "GEN4_B35",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T00:00:00Z",
+ "source": "quotes",
+ "evaluator": "scalper.gen4:evaluate",
+ "params": {
+  "conds": [
+   [
+    "dm5",
+    ">=",
+    0.0
+   ],
+   [
+    "sp15",
+    ">=",
+    1.5836284511723924
+   ],
+   [
+    "spread",
+    "<=",
+    0.010000000000000009
+   ]
+  ],
+  "exit": 0,
+  "hi": 150,
+  "lo": 20,
+  "side": "DOG",
+  "market": "bitcoin"
+ },
+ "generator": "GEN4 (workers/GEN4_REGISTRATION.md; frozen list sha256 1bddf5ff...)",
+ "family": "spot momentum toward the side",
+ "disc": {
+  "pf1": 2.3831308077197995,
+  "n": 41,
+  "dates": 4
+ },
+ "val": {
+  "pf1": 1.522834645669291,
+  "pf10": 1.636787026905704,
+  "pf1_x12": 1.5083333333333333,
+  "n": 32,
+  "dates": 3,
+  "z": 0.8534346881039785,
+  "lat_pf1": 1.4505
+ },
+ "description": "Bitcoin 15 minute, recorder quotes. Side DOG; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 >= 0 and sp15 >= 1.584 and spread <= 0.01; bought at that ask; held to settlement. Discovery PF1 2.38 n 41; validation PF1 1.52 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense."
+}

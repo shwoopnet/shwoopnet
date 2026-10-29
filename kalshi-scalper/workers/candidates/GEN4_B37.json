@@ -1,0 +1,49 @@
+{
+ "id": "GEN4_B37",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T00:00:00Z",
+ "source": "quotes",
+ "evaluator": "scalper.gen4:evaluate",
+ "params": {
+  "conds": [
+   [
+    "dm30",
+    "<=",
+    0.17000000000000004
+   ],
+   [
+    "sp5",
+    ">=",
+    0.35299700988613375
+   ],
+   [
+    "spread",
+    ">=",
+    0.0010000000000000009
+   ]
+  ],
+  "exit": 30,
+  "hi": 150,
+  "lo": 60,
+  "side": "NO",
+  "market": "bitcoin"
+ },
+ "generator": "GEN4 (workers/GEN4_REGISTRATION.md; frozen list sha256 1bddf5ff...)",
+ "family": "spot momentum toward the side",
+ "disc": {
+  "pf1": 1.5238915195867415,
+  "n": 43,
+  "dates": 5
+ },
+ "val": {
+  "pf1": 1.4908328968046096,
+  "pf10": 1.6188203017832645,
+  "pf1_x12": 1.452047693105236,
+  "n": 39,
+  "dates": 3,
+  "z": 0.963228389450116,
+  "lat_pf1": 1.4527820316488003
+ },
+ "description": "Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 60 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm30 <= 0.17 and sp5 >= 0.353 and spread >= 0.001; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.52 n 43; validation PF1 1.49 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense."
+}

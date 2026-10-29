@@ -1,0 +1,44 @@
+{
+ "id": "GEN4_B41",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T00:00:00Z",
+ "source": "quotes",
+ "evaluator": "scalper.gen4:evaluate",
+ "params": {
+  "conds": [
+   [
+    "lsz_bid",
+    ">=",
+    7.733420839242227
+   ],
+   [
+    "spread",
+    ">=",
+    0.010000000000000009
+   ]
+  ],
+  "exit": 0,
+  "hi": 150,
+  "lo": 20,
+  "side": "FAV",
+  "market": "bitcoin"
+ },
+ "generator": "GEN4 (workers/GEN4_REGISTRATION.md; frozen list sha256 1bddf5ff...)",
+ "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+ "disc": {
+  "pf1": 1.52442996742671,
+  "n": 43,
+  "dates": 5
+ },
+ "val": {
+  "pf1": 1.4301552106430155,
+  "pf10": 1.4341430800089146,
+  "pf1_x12": 1.4030837004405285,
+  "n": 32,
+  "dates": 3,
+  "z": 0.8795104720445751,
+  "lat_pf1": 1.4301552106430155
+ },
+ "description": "Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_bid >= 7.733 and spread >= 0.01; bought at that ask; held to settlement. Discovery PF1 1.52 n 43; validation PF1 1.43 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense."
+}
