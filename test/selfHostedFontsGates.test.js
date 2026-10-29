@@ -11,7 +11,7 @@ gates.FN1 = () => {
   assert.ok(!/fonts\.googleapis\.com|fonts\.gstatic\.com/.test(html), 'no call to a font service');
   const css = html.slice(html.indexOf('<style>'), html.indexOf('</style>'));
   const rules = [...css.matchAll(/@font-face\{[^}]*\}/g)].map((m) => m[0]);
-  assert.deepStrictEqual(rules.map((r) => r.match(/font-family:'([^']+)'/)[1] + ' ' + r.match(/font-weight:([\d ]+);/)[1].trim()), ['Public Sans 400 700', 'IBM Plex Mono 400', 'IBM Plex Mono 500', 'Titan One 400'], 'every family and weight the page uses has a local rule');
+  assert.deepStrictEqual(rules.map((r) => r.match(/font-family:'([^']+)'/)[1] + ' ' + r.match(/font-weight:([\d ]+);/)[1].trim()), ['Public Sans 400 700', 'IBM Plex Mono 400', 'IBM Plex Mono 500', 'Titan One 400', 'Permanent Marker 400'], 'every family and weight the page uses has a local rule');
   rules.forEach((r) => {
     const file = r.match(/url\(([^)]+)\)/)[1];
     assert.ok(!/^https?:/.test(file) && /^fonts\/[\w-]+\.woff2$/.test(file), file + ' is a local file');
@@ -28,7 +28,7 @@ gates.FN2 = () => {
   assert.ok(!/- fonts/.test(cfg), 'the font files are published with the site');
   const readme = fs.readFileSync(path.join(root, 'fonts', 'README.md'), 'utf8');
   assert.ok(/SIL Open Font License/.test(readme), 'the licence is recorded next to the files');
-  ['PublicSans-latin.woff2', 'IBMPlexMono-400-latin.woff2', 'IBMPlexMono-500-latin.woff2', 'TitanOne-latin.woff2'].forEach((f) => assert.ok(readme.includes(f), f + ' is listed'));
+  ['PublicSans-latin.woff2', 'IBMPlexMono-400-latin.woff2', 'IBMPlexMono-500-latin.woff2', 'TitanOne-latin.woff2', 'PermanentMarker-latin.woff2'].forEach((f) => assert.ok(readme.includes(f), f + ' is listed'));
 };
 
 let failed = 0;
