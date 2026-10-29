@@ -75,7 +75,7 @@ gates['validation rejects anything out of bounds'] = () => {
     (s) => { s.entry.priceMax = 0.99; }, (s) => { s.entry.priceMin = 0.01; }, (s) => { s.entry.leftMaxSec = 899; }, (s) => { s.entry.leftMinSec = 60; },
     (s) => { s.exit.mustExitLeftSec = 10; }, (s) => { s.exit.mustExitLeftSec = 400; }, (s) => { s.exit.stopBid = 0.7; }, (s) => { s.exit.targetBid = 0.8; },
     (s) => { s.scaleIn.maxSteps = 4; }, (s) => { s.scaleIn.sameSideOnly = false; }, (s) => { s.scaleIn.minGapSec = 5; }, (s) => { s.scaleIn.maxSteps = 3; s.contractsPerOrder = 5; },
-    (s) => { s.killRules.maxConsecutiveLosses = 6; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -50; }, (s) => { delete s.killRules; },
+    (s) => { s.killRules.maxConsecutiveLosses = 6; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -61; }, (s) => { delete s.killRules; },
     (s) => { s.id = 'bad-id'; }, (s) => { s.readme = 'notes.txt'; }, (s) => { s.forwardReadDate = 'soon'; }, (s) => { s.extra = 1; }, (s) => { delete s.reviewedAt; },
   ];
   rejects.forEach((f, i) => assert.strictEqual(mut(f).ok, false, 'mutation ' + i + ' should be rejected'));
@@ -143,28 +143,42 @@ gates['slot and L1 share one window limit: L1 spend in a window shrinks what the
 gates['hard caps hold: contracts per order, open per market, depth share, dollars per order, window and total'] = () => {
   const big = Object.assign(GOOD(), { contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } });
   const F = { enabled: true, registry: [big] };
-  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 5000 })).count, 7, 'cut by the $5 per-order cap: 7 contracts at about $0.65');
-  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 20, sizingBase: 5000 })).count, 5, 'depth share 25% of 20');
-  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 3, sizingBase: 5000 })).allowed, false, '25% of 3 is under one contract');
+  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 500 })).count, 7, 'cut by the $5 per-order cap (base 500, 1%): 7 contracts at about $0.65');
+  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 20, sizingBase: 500 })).count, 5, 'depth share 25% of 20');
+  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 3, sizingBase: 500 })).allowed, false, '25% of 3 is under one contract');
   assert.strictEqual(W(F, input({ depthAtTouch: null })).allowed, false, 'unknown depth refuses');
   const held = [slotOrder({ count: 6, fillCount: '6', maxCost: 4.0, step: 1 })];
-  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 1000, sizingBase: 5000, slotOrders: held, step: 1 })).allowed, false, 'step 1 already attempted');
+  assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 1000, sizingBase: 500, slotOrders: held, step: 1 })).allowed, false, 'step 1 already attempted');
   const two = Object.assign(GOOD(), { contractsPerOrder: 5 });
-  const r = W({ enabled: true, registry: [two] }, input({ step: 2, limit: 0.62, depthAtTouch: 1000, sizingBase: 5000, slotOrders: [slotOrder({ count: 6, fillCount: '6', maxCost: 1.0 })] }));
+  const r = W({ enabled: true, registry: [two] }, input({ step: 2, limit: 0.62, depthAtTouch: 1000, sizingBase: 500, slotOrders: [slotOrder({ count: 6, fillCount: '6', maxCost: 1.0 })] }));
   assert.strictEqual(r.allowed, true); assert.strictEqual(r.count, 4, 'open per market is 10: six held leaves four');
   const tot = [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', series: 'KXETH15M', maxCost: 11.5, count: 1, fillCount: '1', side: 'yes' })];
-  assert.strictEqual(W(ON(), input({ slotOrders: tot, sizingBase: 5000 })).allowed, false, 'total open cap $12 leaves $0.50, under one contract at 75c');
+  assert.strictEqual(W(ON(), input({ slotOrders: tot, sizingBase: 400 })).allowed, false, 'total open cap $12 (base 400) leaves $0.50, under one contract at 75c');
 };
 gates['the slot has its own daily and lifetime loss caps on top of the shared stop'] = () => {
   // A list of settled pnls in time order, each on its own market, ending `endAgo` ms ago. Wins are interleaved so the consecutive-loss kill rule is not what stops the order.
   const seq = (pnls, endAgo) => pnls.map((p, k) => slotOrder({ ticker: 'KXETH15M-26NOV02' + (1000 + k) + '-15', settled: true, result: p > 0 ? 'yes' : 'no', settledPnl: p, ts: NOW - endAgo - (pnls.length - k) * 1000 }));
-  const wide = Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -15 } } });
+  const wide = Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -60 } } });
   const F = { enabled: true, registry: [wide] };
-  assert.strictEqual(W(F, input({ slotOrders: seq([-3, 0.1, -3], 3600000) })).allowed, false, 'daily: settled losses reach the $5 cap');
-  assert.strictEqual(W(F, input({ slotOrders: seq([-1, 0.1, -1], 3600000) })).allowed, true);
-  assert.strictEqual(W(F, input({ slotOrders: [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', maxCost: 5.5, count: 8, fillCount: '8' })] })).allowed, false, 'daily: an open order counts as lost');
-  assert.strictEqual(W(F, input({ slotOrders: seq([-4, 0.1, -4, 0.1, -4, 0.1, -4, 0.1], 5 * 86400000) })).allowed, false, 'lifetime cap holds when the daily window is clean');
-  assert.strictEqual(W(F, input({ slotOrders: [], slotOrdersComplete: false })).allowed, false, 'a partial read cannot prove the lifetime figure');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-3, 0.1, -3], 3600000) })).allowed, false, 'daily: settled losses reach the $5 cap');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-1, 0.1, -1], 3600000) })).allowed, true);
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', maxCost: 5.5, count: 8, fillCount: '8' })] })).allowed, false, 'daily: an open order counts as lost');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-4, 0.1, -4, 0.1, -4, 0.1, -4, 0.1], 5 * 86400000) })).allowed, false, 'lifetime cap holds when the daily window is clean');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: [], slotOrdersComplete: false })).allowed, false, 'a partial read cannot prove the lifetime figure');
+};
+gates['caps scale with the sizing base, never pass their ceilings, and an unusable base gives no caps and no order'] = () => {
+  const keys = Object.keys(slot.SLOT_CAP_FRACTIONS);
+  const a = slot.slotCaps(250), d = slot.slotCaps(500);
+  for (const k of keys) assert.ok(Math.abs(d[k] - 2 * a[k]) < 1e-9, k + ' doubles when the base doubles (below its ceiling)');
+  assert.deepStrictEqual([a.daily, a.lifetime, a.perOrder], [5, 15, 2.5], 'base 250');
+  assert.deepStrictEqual([slot.slotCaps(400).perWindow, slot.slotCaps(400).openTotal], [8, 12], 'base 400');
+  for (const b of [1e3, 1e4, 1e6, 1e12, Number.MAX_VALUE]) for (const k of keys) assert.ok(slot.slotCaps(b)[k] <= slot.SLOT_CAP_CEILINGS[k] + 1e-9, k + ' stays under its ceiling at base ' + b);
+  for (const k of keys) assert.strictEqual(slot.slotCaps(1e9)[k], slot.SLOT_CAP_CEILINGS[k], k + ' sits at its ceiling for a huge base');
+  for (const bad of [0, -500, NaN, Infinity, '500', null, undefined, {}]) {
+    for (const k of keys) assert.strictEqual(slot.slotCaps(bad)[k], 0, 'zero ' + k + ' for base ' + String(bad));
+    assert.strictEqual(W(ON(), input({ sizingBase: bad })).allowed, false, 'no order for base ' + String(bad));
+  }
+  assert.strictEqual(W(ON(), input({ sizingBase: 500 })).allowed, true, 'a usable base still trades');
 };
 gates['kill rules fail closed and only a reviewed edit (a later reviewedAt) re-arms'] = () => {
   const S = GOOD();
@@ -244,22 +258,29 @@ gates['the named entry points: only one entry gate exists, losses stop at the li
 
 
 // ---- Review round: one gate per blocker or high finding (each fails against the earlier library) ----------------------------------------------------
-const WIDE = () => Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -15 } } });
+const WIDE = () => Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -60 } } });
 const WF = { enabled: true, get registry() { return [WIDE()]; } };
 const lossAt = (ago, pnl, k) => slotOrder({ ticker: 'KXETH15M-26NOV02' + (1000 + (k || 0)) + '-15', series: 'KXETH15M', settled: true, result: 'no', settledPnl: pnl, ts: NOW - ago });
 
 gates['H1 one order can never overshoot the daily or lifetime loss cap: its own cost must fit in what is left'] = () => {
-  assert.ok(slot.SLOT_MAX_RISK_PER_ORDER <= slot.SLOT_DAILY_LOSS_CAP, 'a single order may not be bigger than the daily cap');
+  assert.ok(slot.SLOT_CAP_FRACTIONS.perOrder <= slot.SLOT_CAP_FRACTIONS.daily, 'a single order may not be bigger than the daily cap, at any base');
+  for (const b of [50, 250, 1000, 1e4]) assert.ok(slot.slotCaps(b).perOrder <= slot.slotCaps(b).daily + 1e-9 || slot.slotCaps(b).daily === slot.SLOT_CAP_CEILINGS.daily, 'per order never above daily at base ' + b);
   const prior = (p, ago) => [lossAt(ago, p, 1)];
-  assert.strictEqual(W(WF, input({ slotOrders: prior(-4.9, 3600000) })).allowed, false, 'a 4.90 loss leaves 0.10 of daily room: no whole contract');
-  const r = W(WF, input({ slotOrders: prior(-4.0, 3600000), limit: 0.75 }));
+  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-4.9, 3600000) })).allowed, false, 'a 4.90 loss leaves 0.10 of daily room: no whole contract');
+  const r = W(WF, input({ sizingBase: 250, slotOrders: prior(-4.0, 3600000), limit: 0.75 }));
   assert.ok(r.allowed && r.cost <= 1.0 + 1e-9, 'only what fits in the last $1.00: cost ' + r.cost);
-  assert.strictEqual(W(WF, input({ slotOrders: prior(-14.9, 5 * 86400000) })).allowed, false, 'lifetime: 0.10 left');
-  const l = W(WF, input({ slotOrders: prior(-14.0, 5 * 86400000) }));
+  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-14.9, 5 * 86400000) })).allowed, false, 'lifetime: 0.10 left');
+  const l = W(WF, input({ sizingBase: 250, slotOrders: prior(-14.0, 5 * 86400000) }));
   assert.ok(l.allowed && l.cost <= 1.0 + 1e-9, 'lifetime room is $1.00');
   // worst case afterwards never passes the caps
-  const worstAfter = (orders) => slot.slotRiskContract(orders, NOW).day.worst - W(WF, input({ slotOrders: orders })).cost;
-  assert.ok(worstAfter(prior(-4.0, 3600000)) >= -slot.SLOT_DAILY_LOSS_CAP - 1e-9);
+  const worstAfter = (orders) => slot.slotRiskContract(orders, NOW).day.worst - W(WF, input({ sizingBase: 250, slotOrders: orders })).cost;
+  assert.ok(worstAfter(prior(-4.0, 3600000)) >= -slot.slotCaps(250).daily - 1e-9);
+};
+
+gates['H16 the per-order ceiling is never above the daily ceiling, so one order cannot break the daily cap alone at any base'] = () => {
+  assert.ok(slot.SLOT_CAP_CEILINGS.perOrder <= slot.SLOT_CAP_CEILINGS.daily);
+  assert.ok(slot.SLOT_CAP_FRACTIONS.perOrder <= slot.SLOT_CAP_FRACTIONS.daily);
+  assert.ok(slot.SLOT_CAP_CEILINGS.daily <= slot.SLOT_CAP_CEILINGS.lifetime && slot.SLOT_CAP_CEILINGS.perWindow <= slot.SLOT_CAP_CEILINGS.openTotal);
 };
 
 gates['H2 scale-in is refused after the previous step was stopped out or sold, after any earlier exit, and a failed step is not retried'] = () => {
@@ -375,7 +396,7 @@ gates['H10 any order with fills counts as money whatever its status, and an exit
   const lossNull = slotOrder({ settled: true, result: 'no', settledPnl: null, maxCost: 5, count: 4, fillCount: '4' });
   assert.ok(Math.abs(slot.slotRiskForBotRisk([lossNull], 0).net + 5) < 1e-9, 'a settled loss with a null pnl is derived from its result, not zero');
   assert.strictEqual(slot.directionDecision({ ticker: T, side: 'no', l1Orders: [], slotOrders: [odd], lock: null, position: 0 }).allow, false, 'an errored order with fills still holds its side');
-  assert.strictEqual(W(ON(), input({ slotOrders: [slotOrder({ status: 'error', fillCount: '4', maxCost: 5.0, step: 7 })], limit: 0.75 })).allowed, false, 'and its dollars are in the caps');
+  assert.strictEqual(W(ON(), input({ sizingBase: 250, slotOrders: [slotOrder({ status: 'error', fillCount: '4', maxCost: 5.0, step: 7 })], limit: 0.75 })).allowed, false, 'and its dollars are in the caps');
 };
 
 gates['H11 parity: the same fixture orders give the same net, open cost, worst and trades through botRisk and slotRiskForBotRisk'] = async () => {

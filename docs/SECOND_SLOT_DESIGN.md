@@ -63,7 +63,7 @@ An entry has exactly these fields (any other field is rejected, any missing fiel
 | `exit` | `stopBid` (at least 0.01, below `priceMin`), `targetBid` (above `priceMax`, at most 0.99), `mustExitLeftSec` (at least 45 and below `entry.leftMinSec`). Every exit is before settlement. |
 | `contractsPerOrder` | Whole number, 1 to 10. |
 | `scaleIn` | `maxSteps` 1 to 3, `minGapSec` at least 30, `sameSideOnly: true`, `requirePriorFilled: true`. `maxSteps * contractsPerOrder` may not exceed 10. |
-| `killRules` | `maxConsecutiveLosses` 1 to 5, and `minNet: { afterFills 5 to 100, net zero or a loss no bigger than the lifetime cap }`. |
+| `killRules` | `maxConsecutiveLosses` 1 to 5, and `minNet: { afterFills 5 to 100, net zero or a loss no bigger than the lifetime ceiling }`. |
 | `forwardReadDate` | `YYYY-MM-DD`: when the forward test is read. |
 | `reviewedAt` | `YYYY-MM-DD`: the date a human last re-armed it (section 3). Never later than `SLOT_LAST_REVIEWED_ON` (the module has no clock, so the edit that admits or re-arms a strategy moves that constant to its own date). |
 
@@ -77,16 +77,16 @@ An entry has exactly these fields (any other field is rejected, any missing fiel
 | `SLOT_MAX_CONTRACTS_PER_ORDER` | 10 |
 | `SLOT_MAX_OPEN_CONTRACTS_PER_MARKET` | 10 (the slot's own unsold contracts in a ticker, all strategies together) |
 | `SLOT_MAX_SCALE_STEPS` | 3 |
-| `SLOT_MAX_RISK_PER_ORDER` | $5.00 worst case, fee included (never above the daily cap) |
-| `SLOT_MAX_RISK_PER_WINDOW` | $8.00 gross spend in one window |
-| `SLOT_MAX_RISK_TOTAL` | $12.00 open at once, counted as lost |
 | `SLOT_DEPTH_SHARE` | 0.25 of the size resting at the touch |
 | `SLOT_WINDOW_SHARE` | 0.5 of the shared window cap, at most |
 | `SLOT_L1_RESERVE` | $1.05 of window room always left for one more L1 contract |
-| `SLOT_DAILY_LOSS_CAP` | $5.00, slot only, last 24 hours, open counted as lost |
-| `SLOT_LIFETIME_LOSS_CAP` | $15.00, slot only, open counted as lost |
+| `SLOT_CAP_FRACTIONS` | shares of the sizing base: `perOrder` 1%, `perWindow` 2%, `openTotal` 3%, `daily` 2%, `lifetime` 6% |
+| `SLOT_CAP_CEILINGS` | hard dollar ceilings: `perOrder` $20, `perWindow` $40, `openTotal` $60, `daily` $20, `lifetime` $60 |
+| `slotCaps(sizingBase)` | `min(fraction * base, ceiling)` for each cap; all zero for a base that is not a positive finite number, which refuses every order |
 
-The daily and lifetime caps are checked against the NEW order's cost: the count is cut until `cost <= cap + worst` (worst is zero or negative), so one order can never overshoot either cap. These are in addition to the shared 12% L1 stop (section 4), not instead of it. They are set conservatively on purpose: research showed size does not change profit factor except through fee rounding, so there is no reason to start near a ceiling.
+**The dollar caps scale with the sizing base (the owner, Oct 29, 2026).** The gold ladder makes L1 bigger as the account grows, so a fixed dollar cap would leave the slot a shrinking share of the risk budget. Each cap is a fixed share of the same sizing base L1 uses, with a hard dollar ceiling that no base, however large, can pass. Examples: base 250 gives daily $5, lifetime $15, per order $2.50; base 400 gives per window $8 and open total $12; base 500 gives per order $5. A zero, negative, infinite or non-numeric base gives zero caps and no order. The per-order share stays below the daily share, so one order can never be bigger than the daily cap. The kill rule `minNet.net` may not be a loss larger than the lifetime ceiling (-$60).
+
+The daily and lifetime caps are checked against the NEW order's cost: the count is cut until `cost <= cap + worst` (worst is zero or negative), so one order can never overshoot either cap. These are in addition to the shared 12% L1 stop (section 4), not instead of it. They are set conservatively on purpose: research showed size does not change profit factor except through fee rounding, so there is no reason to start near a ceiling. The count is cut against the caps for the sizing base passed in `input.sizingBase`.
 
 **Depth.** Kalshi's market object carries only the top level of the book (same limit as the L1 depth log, `depthLevels: "top"`). The depth rule is therefore "at most 25% of the size at the touch you hit". Unknown depth refuses.
 

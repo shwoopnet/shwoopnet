@@ -23,7 +23,7 @@ const SLOT_MAX_SCALE_STEPS = 3;
 // Dollar caps SCALE WITH THE SIZING BASE, like L1's own window cap and loss stop (the owner, Oct 29, 2026: the gold ladder makes L1 positions bigger as the account grows, so fixed dollars would be too small
 // for a bigger account and too big for a smaller one). Each cap is a share of the sizing base, never above a hard dollar ceiling, so a wrong base can never lift a cap past the ceiling. Per order is below the daily cap.
 const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.01, perWindow: 0.02, openTotal: 0.03, daily: 0.02, lifetime: 0.06 });
-const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 25, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
+const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 20, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
 function slotCaps(sizingBase) {
   const base = isNum(sizingBase) && sizingBase > 0 ? sizingBase : 0;   // an unusable base means every cap is zero: nothing can be sent
   const out = {};
