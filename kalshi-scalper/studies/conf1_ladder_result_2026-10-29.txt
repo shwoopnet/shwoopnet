@@ -1,0 +1,5 @@
+CONF1: 32499 L1 entries, 7525 closes; Bonferroni z bar 5.17
+  LADDER FALSIFIED
+    discovery: parent (where defined) PF 0.00 n=0 | kept PF 0.00 n=0 closes 0 stress 0.00 z +0.00 | removed PF 0.00 n=0 net +0.00c
+    validation: parent (where defined) PF 0.67 n=32 | kept PF 0.57 n=21 closes 21 stress 0.57 z -0.45 | removed PF 0.89 n=11 net -0.96c
+    holdout: parent (where defined) PF 1.41 n=152 | kept PF 1.79 n=116 closes 116 stress 1.79 z +1.35 | removed PF 0.88 n=36 net -0.88c
