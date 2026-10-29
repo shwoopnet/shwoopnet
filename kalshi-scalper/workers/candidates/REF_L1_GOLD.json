@@ -1,0 +1,11 @@
+{
+ "id": "REF_L1_GOLD",
+ "market": "KXGOLD15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T00:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.fwdeval:l1_like",
+ "params": {"look_s": 360, "lo": 0.88, "hi": 0.97, "sides": ["yes", "no"]},
+ "generator": "FWDLEDGER (reference, not a candidate)",
+ "description": "The live L1 gold rule as a known baseline: the side whose ask is 0.88 to 0.97 at the candle ending 6 minutes before the close, bought at that ask, held to settlement. Candles only, so it ignores the live 25c exit and the window limit."
+}
