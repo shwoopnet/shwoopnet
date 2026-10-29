@@ -71,6 +71,18 @@ const CAPPED_SERIES = ["KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M"];
 // stop, the 5.5% window limit, one crypto order per window, the 25c exit and the profit add-on rule (still never used on these markets) are all unchanged. Review point: the owner's 2026-11-17 export; if the
 // Dogecoin or XRP loss rate is above 7% there, step back to 1 or 2 by editing this list.
 const FIXED_CONTRACTS = { KXXRP15M: 1, KXDOGE15M: 3, KXNATGAS15M: 2 };   // XRP back to 1 on Oct 25, 2026 (the owner, on the research session's read): 24 fills since Oct 23, 4 losses (16.7% against 7% break-even), -$4.87, all four at 0.903 or lower.
+// ORDER SIZE SANITY (Oct 29, 2026). A Dogecoin order for 12 contracts reached the account with no entryLead tag, while current code only ever sizes Dogecoin at FIXED_CONTRACTS (3) and tags every order. Nothing in code
+// stopped a wrongly sized order, so this is a second lock behind the sizing code: the largest count an L1 order for a series may have under today's rules, from CODE CONSTANTS ONLY. It takes no session, no stored value and
+// nothing from the page (extra arguments are ignored on purpose, test SZ6). Capped and probe series are their fixed size (or 1); gold, the only ladder market, may go up to L1_ORDER_CEILING, the existing hard limit on a
+// single order, so this is never tighter than what the ladder legitimately produces and never looser than the ceiling. A series not in L1_SERIES gets 0: fail closed. It can only SKIP an order, never raise a count.
+// The fixed sizes are copied once when the module loads, so a later change to FIXED_CONTRACTS in memory (a bug, or a test that simulates one) moves the sizing but not this lock.
+const MAX_FIXED_CONTRACTS = Object.freeze({ ...FIXED_CONTRACTS });
+function maxContractsFor(series) {
+  if (!L1_SERIES.includes(series)) return 0;
+  if (MAX_FIXED_CONTRACTS[series]) return MAX_FIXED_CONTRACTS[series];
+  if (PROBE_SERIES.includes(series) || CAPPED_SERIES.includes(series)) return 1;
+  return L1_ORDER_CEILING;
+}
 // SERIES ORDER (2026-10-23, the owner: "reorder so XRP comes before Bitcoin and Dogecoin before Ethereum, gold stays first"). Markets are tried in this order within a tick, and only ONE capped crypto order is placed per 15 minute window, so the order decides which
 // crypto market gets the window when several qualify at once. XRP and Dogecoin trade 3 contracts (FIXED_CONTRACTS) and Bitcoin and Ethereum one, so a 1 contract order no longer takes the slot from a 3 contract one in the same tick. The research session raised it: Bitcoin and XRP are both
 // looked at about 10 minutes before the close, Ethereum and Dogecoin about 6, so the pairs that tie within a tick are exactly these. Nothing else moves: sizes, stops, window limit, entry times and the one crypto order per window rule are unchanged.
@@ -940,6 +952,12 @@ async function runL1Tick(args) {
       if (allowed + addonUsed < 1) { results.push(ticker + ": this window already has $" + windowUsed.toFixed(2) + " at risk, and the combined limit is $" + (L1_WINDOW_CAP_FRACTION * sizeBase).toFixed(2)); continue; }
       count = allowed + addonUsed;
     }
+    // Second lock on the size (see maxContractsFor): checked BEFORE the order is recorded, so a refused count leaves no "sending" document behind and the market is simply tried again next minute.
+    if (!Number.isInteger(count) || count < 1 || count > maxContractsFor(c.series)) {
+      results.push(ticker + ": refused " + count + " contracts, the most " + c.series + " may have is " + maxContractsFor(c.series));
+      await log("order size refused", ticker + ": the size worked out to " + count + " contracts, above the " + maxContractsFor(c.series) + " this market may ever have, so nothing was sent for it.");
+      continue;
+    }
     const cost = pick.worst * count + bot.takerFee(pick.worst, count);
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
@@ -1202,8 +1220,8 @@ const DEFAULT_ACCOUNT_ID = "main";
 module.exports = {
   flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
