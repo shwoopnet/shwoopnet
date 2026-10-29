@@ -133,7 +133,9 @@ def fetch(qdir: str | None = None) -> None:
         for w in qrec_windows(Path(qdir)):
             jobs.append(("qrec_tape.json", w["ticker"], w["close"] - 155, w["close"] - 25))
     stores = {n: _load(n) for n in {j[0] for j in jobs}}
+    # recorder windows first, then history newest first: the rate limit is shared, so the most recent windows are fetched first
     todo = [j for j in jobs if j[1] not in stores[j[0]]]
+    todo.sort(key=lambda j: (j[0] != "qrec_tape.json", -j[2]))
     print(f"goldfill fetch: {len(jobs)} windows, {len(todo)} to fetch", flush=True)
     for i, (name, tk, lo, hi) in enumerate(todo):
         stores[name][tk] = _trades(tk, lo, hi)

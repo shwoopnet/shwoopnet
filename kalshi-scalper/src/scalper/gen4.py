@@ -75,11 +75,13 @@ def proxy(spot):
     return out
 
 
-def load_windows(market, commit, t_from, t_to):
+def load_windows(market, commit, t_from, t_to, days=None):
     """Windows (close time in [t_from, t_to)) with polls, strike, result; first folder holding a window wins."""
     pre = PREFIX[market]
     names = git("ls-tree", "-r", "--name-only", commit, "quotes/").decode().split()
     folders = sorted({"/".join(n.split("/")[:3]) for n in names if n.count("/") == 3 and n.endswith("quotes.csv.gz")})
+    if days is not None:
+        folders = [f for f in folders if f.split("/")[1] in days]
     W, X = {}, {}
     for f in folders:
         try:
@@ -374,8 +376,53 @@ def validation(commit):
     print(txt)
 
 
-def evaluate(spec, since="2026-10-30", commit="origin/quote-data", until=None):
-    """Forward ledger hook. Trades of one frozen GEN4 rule on Bitcoin windows closing at or after `since` (UTC date).
+_EV = {}
+
+
+def evaluate(window, params):
+    """Forward ledger evaluator (`scalper.fwdledger`, source "quotes"): one frozen GEN4 rule (params = its spec) on one window.
+    GEN4 needs the strike and the spot proxy, which the ledger's window dict does not carry, so the window is rebuilt from the
+    recorder folders of its close date and the day before (cached per folder set). The fill is the same-poll ask (1 contract);
+    exit is the side bid at the exit poll, or None when held. A window the recorder does not hold raises NoData."""
+    from .fwdeval import NoData
+    spec, tk = params, window["ticker"]
+    market = spec.get("market", "bitcoin")
+    if not tk.startswith(PREFIX[market] + "-"):
+        return None
+    if "commit" not in _EV:
+        _EV["commit"] = git("rev-parse", "origin/quote-data").decode().strip()
+    d0 = datetime.fromtimestamp(window["close_ts"], timezone.utc)
+    days = (d0.strftime("%Y-%m-%d"), datetime.fromtimestamp(window["close_ts"] - 86400, timezone.utc).strftime("%Y-%m-%d"))
+    key = (market, days)
+    if key not in _EV:
+        _EV[key] = load_windows(market, _EV["commit"], 0, 4e9, days=set(days))
+    W, X = _EV[key]
+    if tk not in W:
+        raise NoData("window not in the recorder folders")
+    if (market, tk) not in _EV:
+        _EV[(market, tk)] = build(market, {tk: W[tk]}, X)
+    A, keys, _ = _EV[(market, tk)]
+    if not len(A.get("w", [])):
+        return None
+    idx = entries(A, spec)
+    if not len(idx):
+        return None
+    i, e = int(idx[0]), spec["exit"]
+    side = "yes" if A["side"][i] == 0 else "no"
+    ask = float(A["ask"][i])
+    ex = None
+    if e:
+        w = W[tk]
+        t = w["t"]
+        j = int(np.searchsorted(t, w["C"] - e, side="left"))
+        if j < len(t) and t[j] <= w["C"] - e + 5 and t[j] > A["t"][i]:
+            _, _, eb, ebs = side_q(w, j, 0 if side == "yes" else 1)
+            ex = float(eb) if eb > 0 and ebs >= 1 else None
+    return {"side": side, "entry": ask, "exit": ex, "t": int(A["t"][i]), "zero_volume": False, "note": f"{A['left'][i]:.1f}s left"}
+
+
+def forward_trades(spec, since="2026-10-30", commit="origin/quote-data", until=None):
+    """Standalone forward read. Trades of one frozen GEN4 rule on Bitcoin windows closing at or after `since` (UTC date).
     Returns a list of dicts: ticker, close, side, price, pnl1, pnl10, pnl1_x12, latency pnl1. Reads only `commit`."""
     commit = git("rev-parse", commit).decode().strip()
     t0 = datetime.strptime(since, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp()
