@@ -4,7 +4,7 @@
 
 - **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 done. Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (built, loop running); INX1 (done: FALSIFIED); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (done: 3 FALSIFIED); FAM2 (done: XMAC1 FALSIFIED).
 - **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
-- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
+- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 2:25 PM, MM1 scorer built (MM1S worker), not run.** Queue rules fixed and pushed before any fill was computed (`workers/MM1S_AMENDMENT.md`): join behind all displayed size, cancels never move the order forward, fills only from trades that use up the size ahead or trade through, flatten 20 s before the close at the taker fee, maker fills charged the taker fee for the verdict. 48 usable gold windows of 300; at the current recorder rate ready about Nov 5 to Nov 10. The AUTO loop now runs `mm1 run` by itself when ready. Registered prediction FALSIFIED. N tried about 439,006 (6 MM1 cells).
 
 **2026-10-29 2:10 PM, INX1 (S&P 500 and Nasdaq daily markets against the index and VIX), FALSIFIED.** 6 tries, 47 days, PF A / B: S&P 0.29 / 0.80, 1.00 / 0.98, 0.67 / 1.55; Nasdaq 1.45 / 0.88, 3.18 / 1.30, 0.90 / 1.07. The model bought cheap tails (354 of 360 orders, 85% lost); Kalshi's own price is the better forecast at every look. **Pattern across today's five outside-reference tests (GOLDFV1, XMAC1, DAILY2, INX1, LADL1): Kalshi's quotes already price the outside market within the minute; no lag to harvest.** N tried about 438,936.
 

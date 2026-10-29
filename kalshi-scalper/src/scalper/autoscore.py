@@ -6,7 +6,7 @@ Each read is run by its OWN registered command, as a subprocess, exactly once: a
 Readiness is a count only (closes, losses in a block, windows); nothing here computes a PF, a net or a mean before a read is due.
   LOCK2      ready at 25 closes per asset (`scalper.lock2 count`), runs `scalper.lock2 run` (writes data/lock2_result.txt)
   MKTTIME1-F ready at 15 losses in gold's 20-24 CT block (`scalper.mkttime1f count`), runs `scalper.mkttime1f read`
-  MM1        ready at 300 recorded gold 15 minute windows on origin/quote-data; no scorer exists, so it logs "MM1 ready, scorer needed" once
+  MM1        ready at 300 recorded gold 15 minute windows on origin/quote-data; runs `scalper.mm1 run` (refuses below 300 usable windows; writes data/mm1_result.txt)
   RECORD1    the daily scheduled task reads it; this only logs the count line of `scalper.record1 look`, once a day
   CONF2 C    ready at 30 kept window C closes (from 2026-10-27), runs `scalper.conf2 holdout` (output saved to data/conf2_C_result.txt),
              and only if data/conf2_A_done exists (the lead writes it after reading window A)
@@ -210,9 +210,18 @@ def check() -> None:
             rc, o = py("scalper.mkttime1f", "read")
             log("MKTTIME1-F", last_line(RESULTS["MKTTIME1-F"].read_text(), "VERDICT") if RESULTS["MKTTIME1-F"].exists() else f"read rc={rc}: {last_line(o)[:200]}")
     # MM1
-    ready, line = guarded("MM1", mm1_count); status.append(line)
-    if ready and not s.get("mm1_logged"):
-        log("MM1", "MM1 ready, scorer needed (" + line + ")"); s["mm1_logged"] = True
+    # scorer from the MM1S amendment; `mm1 run` itself refuses below 300 usable windows, so a refusal just waits for the next pass
+    mm1_out = DATA_DIR / "mm1_result.txt"
+    if mm1_out.exists():
+        status.append("MM1 done")
+    else:
+        ready, line = guarded("MM1", mm1_count); status.append(line)
+        if ready:
+            rc, o = py("scalper.mm1", "run")
+            if mm1_out.exists():
+                log("MM1", last_line(mm1_out.read_text(), "VERDICT"))
+            elif not s.get("mm1_refused_logged"):
+                log("MM1", f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s["mm1_refused_logged"] = True
     # CONF2 window C
     if RESULTS["CONF2C"].exists():
         status.append("CONF2 C done")
