@@ -19,15 +19,16 @@ gates.LC1 = () => {
   assert.ok(/id="gqPanel" role="dialog" aria-label="Got questions\?" hidden/.test(widget[0]), 'the panel starts closed');
   assert.ok(/Got questions\?<small>ask us here<\/small>/.test(widget[0]) && /d="M6 6 C 30 4, 62 14, 70 48"/.test(widget[0]), 'the marker label and the hand-drawn arrow from the drawing');
   assert.ok(/href="mailto:shwoopadvisor@gmail\.com"/.test(widget[0]), 'Something else opens mail to the address the footer already shows');
+  assert.ok(/id="gqPartner" href="mailto:shwoopadvisor@gmail\.com\?subject=Working%20with%20Shwoop%20Financials"[^>]* hidden>/.test(widget[0]), 'the partner link goes to the same address with a subject and stays hidden until that question is tapped');
   const q = [...widget[0].matchAll(/data-q="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(q, ['what', 'who', 'access'], 'three quick questions');
+  assert.deepStrictEqual(q, ['what', 'who', 'access', 'join'], 'four quick questions, the last for future partners');
 };
 gates.LC2 = () => {
   assert.ok(js.length > 500, 'the script block is found');
   assert.ok(!/fetch\(|XMLHttpRequest|sendBeacon|WebSocket|localStorage|sessionStorage|indexedDB|innerHTML|insertAdjacentHTML|outerHTML|document\.write|firebase|\.send\(/.test(js), 'no network, no storage, no HTML injection: answers are set with textContent');
   assert.ok(/d\.textContent = text/.test(js), 'text is set as text');
-  const answers = [...js.matchAll(/(what|who|access): \['([^']+)', '([^']+)'\]/g)];
-  assert.strictEqual(answers.length, 3, 'three fixed answers');
+  const answers = [...js.matchAll(/(what|who|access|join): \['([^']+)', '([^']+)'\]/g)];
+  assert.strictEqual(answers.length, 4, 'four fixed answers');
   const said = answers.map((m) => m[3]).join(' ');
   assert.ok(!/\$\s?\d|\d\s?%|\bwin rate\b|\bprofit\b|\breturns?\b|\bperformance\b|Bitcoin|gold|Kalshi|\bguarantee|\badvice\b.*\bwill\b/i.test(said.replace(/not offering advice/g, '')), 'no figures, markets or performance claim in an answer (the public page makes none)');
   assert.ok(/e\.key === 'Escape'/.test(js) && /aria-expanded/.test(js), 'Escape closes it and the expanded state follows');
