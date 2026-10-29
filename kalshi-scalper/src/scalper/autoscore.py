@@ -10,6 +10,8 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
   QUOTE2B    from 2026-11-12, runs `scalper.quote2b run` (refuses below 300 usable closes; writes data/quote2b_result.txt)
   MAKER5     from 2026-11-06, runs `scalper.r6tests run maker5` (refuses below 300 usable R6 windows; writes data/maker5_result.txt)
   L1Q1       from 2026-11-06, runs `scalper.r6tests run l1q1` (same refusals; writes data/l1q1_result.txt)
+  STAB       once a week, on the first pass on or after Monday 01:00 US Central (week marked in data/stab_last_week by the run itself), runs
+             `scalper.stab week` (a stability check of L1 as live trades it; writes workers/STABILITY.md; no read, no verdict)
   RECORD1    the daily scheduled task reads it; this only logs the count line of `scalper.record1 look`, once a day
   CONF2 C    ready at 30 kept window C closes (from 2026-10-27), runs `scalper.conf2 holdout` (output saved to data/conf2_C_result.txt),
              and only if data/conf2_A_done exists (the lead writes it after reading window A)
@@ -265,6 +267,13 @@ def check() -> None:
             if rc == 0:
                 RESULTS["CONF2C"].write_text(f"# conf2 holdout, run once by scalper.autoscore at {now_ct()}\n{o}\n")
             log("CONF2C", (last_line(o, "C forward holdout") if rc == 0 else f"holdout rc={rc}: {last_line(o)[:200]}")[:400])
+    # STAB (weekly stability check, no read): due when data/stab_last_week is not this week's Monday 01:00 CT boundary
+    from .stab import MARK as STAB_MARK, week_key
+    wk = week_key(datetime.now(timezone.utc))
+    if (STAB_MARK.read_text().strip() if STAB_MARK.exists() else "") != wk:
+        rc, o = py("scalper.stab", "week")
+        log("STAB", f"week {wk} rc={rc}: {last_line(o, 'STAB done')[:400]}")
+    status.append(f"STAB last week {STAB_MARK.read_text().strip() if STAB_MARK.exists() else 'never'}")
     # RECORD1: count line once a day only
     today = datetime.now(CT).strftime("%Y-%m-%d")
     if s.get("daily") != today:
