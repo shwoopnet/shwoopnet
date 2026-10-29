@@ -174,13 +174,15 @@ const CRYPTO_DESKS = ["CoinDesk", "Cointelegraph"];
 const NEWS_ALLOW = new RegExp("\\b(" + [
   // equities
   "stocks?", "equit(?:y|ies)", "shares", "share price", "wall street", "S&P(?: 500)?", "nasdaq", "dow(?: jones)?", "russell", "nyse", "earnings", "profit warning", "guidance", "ipo", "etfs?", "index funds?", "rally", "rallies", "sell-?off", "bull market", "bear market", "correction",
+  "plunges?", "tanks?", "soars?", "surges?", "jumps?", "sinks?", "slides?", "tumbles?", "worst day", "best day", "record high", "free cash flow", "capex", "revenue", "profits?", "quarterly", "in value", "market value", "trillion", "chipmaker", "AI trade", "AI spending",
+  "Amazon", "Alphabet", "Google", "Microsoft", "Apple", "Meta", "Nvidia", "Tesla", "Intel", "AMD", "Broadcom", "Oracle", "Netflix", "Palantir", "Berkshire", "JPMorgan", "Goldman", "Walmart", "Boeing", "Exxon", "Chevron", "Visa", "Mastercard", "Disney", "Pfizer", "Lilly", "Starbucks", "Costco", "Nike", "Ford", "Coca-Cola",
   "investors?", "traders?", "buyback", "dividends?", "merger", "takeover", "price target", "upgrades?", "downgrades?", "analysts?", "hedge funds?", "short sellers?", "valuation", "market cap", "markets?", "futures", "options trading", "volatility", "vix", "bubble",
   // commodities
   "oil", "crude", "brent", "wti", "opec", "natural gas", "gasoline", "gold", "silver", "copper", "platinum", "palladium", "commodit(?:y|ies)", "wheat", "corn", "soybeans?", "coffee", "cocoa", "sugar", "cotton", "lumber", "uranium", "lithium", "bullion",
   // crypto
   "bitcoin", "btc", "ethereum", "ether", "crypto(?:currency|currencies)?", "stablecoins?", "solana", "xrp", "ripple", "dogecoin", "altcoins?", "blockchain", "tokens?", "defi", "coinbase", "binance", "digital assets?", "memecoins?",
   // what moves them
-  "fed", "federal reserve", "powell", "interest rates?", "rate cuts?", "rate hikes?", "inflation", "cpi", "ppi", "payrolls", "jobs report", "gdp", "treasur(?:y|ies)", "yields?", "bonds?", "dollar", "tariffs?", "recession", "central bank", "ecb", "boj"
+  "fed", "federal reserve", "powell", "interest rates?", "rate cuts?", "rate hikes?", "inflation", "cpi", "ppi", "payrolls", "jobs report", "gdp", "treasur(?:y|ies)", "yields?", "bonds?", "dollar", "tariffs?", "recession", "central bank", "ecb", "boj", "jobless claims", "unemployment", "retail sales", "consumer spending", "consumer confidence", "pmi", "capital markets"
 ].join("|") + ")\\b", "i");
 // Personal finance advice columns ("My ex-husband promised..."), reader questions, and lifestyle pieces: never market news, whatever words they contain.
 const NEWS_DENY = new RegExp([
