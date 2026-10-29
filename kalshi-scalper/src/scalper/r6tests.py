@@ -22,7 +22,8 @@ from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 from statistics import median
 
-from .mm1 import central_date, clustered_z, order_fee, pf
+from .mm1 import central_date, order_fee, pf
+from .mm1 import clustered_z as _cz
 from .paths import DATA_DIR
 from .quote2b import Pair, Poll
 
@@ -51,6 +52,11 @@ BAD_NOTES = ("tape incomplete", "tape page cap", "tape out of time")
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "series", "close_time"] \
     + [f"yes_bid_px_{i}" for i in range(1, 6)] + [f"yes_bid_sz_{i}" for i in range(1, 6)] \
     + [f"no_bid_px_{i}" for i in range(1, 6)] + [f"no_bid_sz_{i}" for i in range(1, 6)]
+
+
+def clustered_z(vals, keys):
+    """mm1's date-clustered z; 0 with fewer than 2 dates (one cluster has no between-date variance to measure)."""
+    return _cz(vals, keys) if len(set(keys)) >= 2 else 0.0
 
 
 def _ceil_cent(raw_cents):
