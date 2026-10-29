@@ -14,7 +14,7 @@ from pathlib import Path
 from .fees import taker_fee
 
 START = 1790812800  # 2026-10-01 00:00 UTC
-DBS = ("data/book.sqlite", "data/five.sqlite")
+DBS = ("data/book.sqlite", "data/fresh.sqlite", "data/five.sqlite")
 LOOKS = (10, 6)
 EDGE = 0.05
 
