@@ -1,0 +1,59 @@
+HOUSE1 VERDICT: FALSIFIED (no rule keeps 70% of net and cuts the worst day by a third in all three thirds)
+
+$500 account, 11 contracts
+  third 1 baseline: net $+660.58 PF 1.285 worst $-47.52 negative days 27% mean $+22.02 maxDD $48.54 days 30
+  third 2 baseline: net $+544.72 PF 1.250 worst $-42.35 negative days 28% mean $+18.78 maxDD $42.35 days 29
+  third 3 baseline: net $+29.89 PF 1.012 worst $-66.13 negative days 52% mean $+1.03 maxDD $90.08 days 29
+  (b) T=$10    fails
+      t1: net $+184.79 (28% of base) PF 1.185 worst $-47.52 neg 10% mean $+6.16 DD $48.54 | baseline days reaching T 26: finished below T 6, below 0 5 [- -]
+      t2: net $+285.66 (52% of base) PF 1.376 worst $-42.35 neg 7% mean $+9.85 DD $42.35 | baseline days reaching T 27: finished below T 8, below 0 6 [- -]
+      t3: net $+136.36 (456% of base) PF 1.210 worst $-66.13 neg 14% mean $+4.70 DD $66.13 | baseline days reaching T 24: finished below T 14, below 0 11 [net -]
+  (b) T=$15    fails
+      t1: net $+321.49 (49% of base) PF 1.290 worst $-47.52 neg 10% mean $+10.72 DD $48.54 | baseline days reaching T 24: finished below T 6, below 0 5 [- -]
+      t2: net $+299.62 (55% of base) PF 1.293 worst $-42.35 neg 17% mean $+10.33 DD $42.35 | baseline days reaching T 23: finished below T 7, below 0 3 [- -]
+      t3: net $+192.32 (644% of base) PF 1.207 worst $-66.13 neg 17% mean $+6.63 DD $66.13 | baseline days reaching T 22: finished below T 13, below 0 10 [net -]
+  (b) T=$25    fails
+      t1: net $+435.25 (66% of base) PF 1.282 worst $-47.52 neg 20% mean $+14.51 DD $48.54 | baseline days reaching T 17: finished below T 5, below 0 2 [- -]
+      t2: net $+438.21 (80% of base) PF 1.297 worst $-42.35 neg 21% mean $+15.11 DD $42.35 | baseline days reaching T 18: finished below T 6, below 0 2 [net -]
+      t3: net $+93.05 (311% of base) PF 1.047 worst $-66.13 neg 45% mean $+3.21 DD $66.13 | baseline days reaching T 11: finished below T 6, below 0 2 [net -]
+  (c) T=$10    fails
+      t1: net $+435.53 (66% of base) PF 1.255 worst $-47.52 neg 30% mean $+14.52 DD $52.87 | baseline days reaching T 26: finished below T 6, below 0 5 [- -]
+      t2: net $+399.76 (73% of base) PF 1.301 worst $-42.35 neg 14% mean $+13.78 DD $42.35 | baseline days reaching T 27: finished below T 8, below 0 6 [net -]
+      t3: net $-64.78 (-217% of base) PF 0.946 worst $-66.13 neg 45% mean $-2.23 DD $101.61 | baseline days reaching T 24: finished below T 14, below 0 11 [- -]
+  (c) T=$15    fails
+      t1: net $+524.71 (79% of base) PF 1.303 worst $-47.52 neg 23% mean $+17.49 DD $48.54 | baseline days reaching T 24: finished below T 6, below 0 5 [net -]
+      t2: net $+370.37 (68% of base) PF 1.244 worst $-42.35 neg 21% mean $+12.77 DD $42.35 | baseline days reaching T 23: finished below T 7, below 0 3 [- -]
+      t3: net $+93.02 (311% of base) PF 1.069 worst $-66.13 neg 31% mean $+3.21 DD $75.15 | baseline days reaching T 22: finished below T 13, below 0 10 [net -]
+  (c) T=$25    fails
+      t1: net $+426.66 (65% of base) PF 1.232 worst $-47.52 neg 23% mean $+14.22 DD $48.54 | baseline days reaching T 17: finished below T 5, below 0 2 [- -]
+      t2: net $+557.23 (102% of base) PF 1.317 worst $-42.35 neg 21% mean $+19.21 DD $42.35 | baseline days reaching T 18: finished below T 6, below 0 2 [net -]
+      t3: net $+37.86 (127% of base) PF 1.018 worst $-66.13 neg 45% mean $+1.31 DD $66.13 | baseline days reaching T 11: finished below T 6, below 0 2 [net -]
+
+$1000 account, 23 contracts
+  third 1 baseline: net $+1403.57 PF 1.290 worst $-98.45 negative days 27% mean $+46.79 maxDD $99.89 days 30
+  third 2 baseline: net $+1159.37 PF 1.255 worst $-87.72 negative days 21% mean $+39.98 maxDD $87.72 days 29
+  third 3 baseline: net $+81.59 PF 1.016 worst $-137.53 negative days 48% mean $+2.81 maxDD $183.08 days 29
+  (b) T=$10    fails
+      t1: net $+198.37 (14% of base) PF 1.131 worst $-61.88 neg 7% mean $+6.61 DD $99.89 | baseline days reaching T 28: finished below T 6, below 0 6 [- worst]
+      t2: net $+262.34 (23% of base) PF 1.207 worst $-87.72 neg 7% mean $+9.05 DD $87.72 | baseline days reaching T 27: finished below T 7, below 0 4 [- -]
+      t3: net $+379.99 (466% of base) PF 2.711 worst $+9.99 neg 0% mean $+13.10 DD $0.00 | baseline days reaching T 29: finished below T 16, below 0 14 [net worst]
+  (b) T=$15    fails
+      t1: net $+243.12 (17% of base) PF 1.126 worst $-98.45 neg 10% mean $+8.10 DD $120.68 | baseline days reaching T 27: finished below T 6, below 0 5 [- -]
+      t2: net $+394.64 (34% of base) PF 1.248 worst $-87.72 neg 7% mean $+13.61 DD $87.72 | baseline days reaching T 27: finished below T 8, below 0 4 [- -]
+      t3: net $+446.50 (547% of base) PF 2.702 worst $+14.98 neg 0% mean $+15.40 DD $0.00 | baseline days reaching T 29: finished below T 17, below 0 14 [net worst]
+  (b) T=$25    fails
+      t1: net $+496.79 (35% of base) PF 1.232 worst $-98.45 neg 10% mean $+16.56 DD $99.89 | baseline days reaching T 26: finished below T 6, below 0 5 [- -]
+      t2: net $+607.11 (52% of base) PF 1.362 worst $-87.72 neg 7% mean $+20.93 DD $87.72 | baseline days reaching T 27: finished below T 10, below 0 4 [- -]
+      t3: net $+320.56 (393% of base) PF 1.226 worst $-137.53 neg 14% mean $+11.05 DD $137.53 | baseline days reaching T 24: finished below T 14, below 0 10 [net -]
+  (c) T=$10    fails
+      t1: net $+936.70 (67% of base) PF 1.306 worst $-61.88 neg 47% mean $+31.22 DD $99.89 | baseline days reaching T 28: finished below T 6, below 0 6 [- worst]
+      t2: net $+581.94 (50% of base) PF 1.222 worst $-87.72 neg 52% mean $+20.07 DD $163.07 | baseline days reaching T 27: finished below T 7, below 0 4 [- -]
+      t3: net $-35.34 (-43% of base) PF 0.977 worst $-52.45 neg 59% mean $-1.22 DD $111.24 | baseline days reaching T 29: finished below T 16, below 0 14 [- worst]
+  (c) T=$15    fails
+      t1: net $+825.96 (59% of base) PF 1.256 worst $-98.45 neg 40% mean $+27.53 DD $110.43 | baseline days reaching T 27: finished below T 6, below 0 5 [- -]
+      t2: net $+961.37 (83% of base) PF 1.318 worst $-87.72 neg 21% mean $+33.15 DD $87.72 | baseline days reaching T 27: finished below T 8, below 0 4 [net -]
+      t3: net $-8.82 (-11% of base) PF 0.994 worst $-34.53 neg 55% mean $-0.30 DD $81.13 | baseline days reaching T 29: finished below T 17, below 0 14 [- worst]
+  (c) T=$25    fails
+      t1: net $+933.41 (67% of base) PF 1.263 worst $-98.45 neg 27% mean $+31.11 DD $108.58 | baseline days reaching T 26: finished below T 6, below 0 5 [- -]
+      t2: net $+950.91 (82% of base) PF 1.338 worst $-87.72 neg 14% mean $+32.79 DD $87.72 | baseline days reaching T 27: finished below T 10, below 0 4 [net -]
+      t3: net $-118.14 (-145% of base) PF 0.950 worst $-137.53 neg 45% mean $-4.07 DD $200.32 | baseline days reaching T 24: finished below T 14, below 0 10 [- -]

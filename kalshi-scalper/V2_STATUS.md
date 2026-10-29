@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 3:55 PM, HOUSE1 (owner idea: after a daily target, bet only the profit), FALSIFIED (12 tries).** Live five, $500 and $1,000, T $10 / $15 / $25. The worst day is unchanged in most rules (worst days rarely reach the target before they go wrong). "Bet only the profit above T" cuts negative days from 27% to about 7% to 20% but keeps only 28% to 80% of net in the two good windows; "normal size until back to T" keeps more net but loses money in the weak window. Of days that reached $10 at $500, 5, 6 and 11 per window still finished below zero. A smoother day for most of the profit, and no protection on the worst days. N tried about 439,024.
+
 **2026-10-29 3:30 PM, CONF2 (ladder confluence on Bitcoin L1, owner approved), FALSIFIED; window C not read.** New data (Aug to Sep 25): kept PF 0.91 on 190 closes against the unfiltered 1.11; the entries it removed had PF 3.70. On the seen window (Sep 26 to Oct 26) it shows 1.73 again, which was CONF1's look. The lead was the window, not the filter. N tried about 439,012.
 
 **2026-10-29 2:55 PM, recorder R6 spec drafted (REC5 worker), owner decision asked.** `studies/RECORDER_SPEC_R6_15MIN_BOOK_2026-10-29.md`: full-window 5 level book every 2 s and every public trade (read once after each close) for the five 15 minute markets, no key, no order, writes only to quote-data, about 45 MB a day gzipped, about 35 public reads a minute (95 at peak), 14 days then stop. It unblocks MM1's mid-window part, a MAKER test on all five, and a "rest L1's entry at the bid" test. Asked the main session for the owner's yes or no; also flagged that the existing recorders' scheduled jobs start hours late.
