@@ -4,7 +4,7 @@
 
 - **Now running:** AUTO hourly loop (forward reads run themselves; live watcher nightly). No download or worker running.
 - **Next:** round 4 of the self-guide (new mechanisms only); recorder R6 if the owner approves.
-- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: PR #621 waiting on the owner to merge.
+- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 2:56 PM CT, recorder R6 merged (PR #621).** It starts on its next 30 minute trigger, writes to quote-data under book15r6/, and stops by itself Nov 13. R2 is retired by the same merge (its data stays under book15/). Next on R6: register MM1's mid-window part, a resting-order test on the five, and an L1 resting-entry test BEFORE any recorded row is read; the reads need about a week of data.
 
 **2026-10-29 5:15 PM, BAND2 (owner's live win-rate-by-price table), the 91-92c hole is NOT in history.** History, live five: win rate minus price 88-90c +2.0 pts (n 3,178), 91-92c +1.7 (2,232, z +2.9), 93-94c +1.6, 95-97c +0.8 (the weakest, PF 0.93; live has it best). Live held-to-settlement orders: 91-92c lost 4 of 148 (Bitcoin 2, XRP 2), so most of the owner's 19 losses there are 25c exit sells; the report has no buy price for exits (avgFill empty), so splitting those needs a fresh "Copy all orders" export. Chance plus exits; nothing to build. N tried about 439,106.
 
