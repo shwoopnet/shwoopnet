@@ -4,7 +4,7 @@
 
 - **Now running:** AUTO hourly loop (forward reads run themselves; live watcher nightly). No download or worker running.
 - **Next:** round 4 of the self-guide (new mechanisms only); recorder R6 if the owner approves.
-- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); owner decision on recorder R6 (asked 2:55 PM).
+- **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: PR #621 waiting on the owner to merge.
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 5:05 PM, recorder R6 is PR #621 (owner approved; the owner merges).** Whole 15 minute book (best 5 a side, every 2 s) and every public trade for the five live markets, to quote-data under book15r6/, ends Nov 13. It deletes R2 (#610) as the spec says (same markets, a fifth of the rate); the owner can keep R2 by restoring its three files. Checks: 61 tests pass, FRONTEND clean, security scan no FAIL; dry run matched Kalshi's volume exactly for all five markets. Tests using its data (MM1 mid-window, a resting-order test on the five, an L1 resting-entry test) get registered before any row is read.
 
 **2026-10-29 4:45 PM, HOUSE3 (owner: pause after a loss, then resume), FALSIFIED (40 tries; registration 01dd630).** After a loss, the next entries lose LESS often (4.5% to 5.2% from 30 to 240 minutes later, against 5.79% overall; z about -2), so a pause skips better-than-average trades: a 30 minute pause on all markets skipped 548 / 477 / 439 entries worth +$184 / +$164 / +$83 at $500 and made the worst day worse (-$56 to -$77). **The one real cluster is inside the same 15 minute window:** given a loss, other entries in that window lost 35% of the time against 5.8% (z +34): correlated coins moving together, which the live one-crypto-order-per-window rule already targets. N tried about 439,082.
 
