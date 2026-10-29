@@ -1,0 +1,70 @@
+SIZE3 VERDICT: FALSIFIED (no variant beats flat by 10% with a worst day no worse in all three thirds at the deflated z)
+SIZE3: 11814 entries, live five, base 13 contracts; t1 is the train window (in-sample)
+(a) band by train edge, gold: fails
+    t1: net $+277.45 vs flat $+187.54 (+48%) PF 1.665 vs 1.559 worst $-48.87 vs $-22.00 DD $53.90 vs $27.09 top band 41% top market 100% z +1.86 fees1.2 $+266.88 [net -]
+    t2: net $+3.86 vs flat $+38.64 (-90%) PF 1.006 vs 1.088 worst $-45.23 vs $-25.84 DD $80.76 vs $53.43 top band -1472% top market 100% z -0.73 fees1.2 $-6.37 [- -]
+    t3: net $+124.59 vs flat $+125.43 (-1%) PF 1.270 vs 1.403 worst $-30.77 vs $-18.74 DD $36.59 vs $26.39 top band 77% top market 100% z -0.02 fees1.2 $+115.54 [- -]
+(b) owner's hint 95-97c heavy, gold: fails
+    t1: net $+187.45 vs flat $+187.54 (-0%) PF 1.485 vs 1.559 worst $-20.11 vs $-22.00 DD $22.72 vs $27.09 top band 42% top market 100% z -0.00 fees1.2 $+178.43 [- worst]
+    t2: net $+67.56 vs flat $+38.64 (+75%) PF 1.157 vs 1.088 worst $-25.01 vs $-25.84 DD $63.95 vs $53.43 top band 103% top market 100% z +0.68 fees1.2 $+59.58 [net worst]
+    t3: net $+152.33 vs flat $+125.43 (+21%) PF 1.487 vs 1.403 worst $-30.64 vs $-18.74 DD $38.13 vs $26.39 top band 52% top market 100% z +0.93 fees1.2 $+144.98 [net -]
+(a) band by train edge, Bitcoin: fails
+    t1: net $+141.34 vs flat $+36.24 (+290%) PF 1.216 vs 1.053 worst $-37.45 vs $-36.78 DD $37.45 vs $60.77 top band 101% top market 100% z +1.76 fees1.2 $+128.72 [net -]
+    t2: net $+223.86 vs flat $+181.19 (+24%) PF 1.445 vs 1.389 worst $-22.06 vs $-31.60 DD $39.19 vs $38.55 top band 67% top market 100% z +0.90 fees1.2 $+212.42 [net worst]
+    t3: net $-126.77 vs flat $-117.95 (+7%) PF 0.842 vs 0.841 worst $-62.67 vs $-36.13 DD $159.13 vs $139.13 top band 88% top market 100% z -0.14 fees1.2 $-137.75 [- -]
+(b) owner's hint 95-97c heavy, Bitcoin: fails
+    t1: net $+74.97 vs flat $+36.24 (+107%) PF 1.110 vs 1.053 worst $-52.08 vs $-36.78 DD $90.26 vs $60.77 top band 146% top market 100% z +0.56 fees1.2 $+62.86 [net -]
+    t2: net $+252.51 vs flat $+181.19 (+39%) PF 1.572 vs 1.389 worst $-13.43 vs $-31.60 DD $20.88 vs $38.55 top band 47% top market 100% z +1.62 fees1.2 $+241.57 [net worst]
+    t3: net $-136.07 vs flat $-117.95 (+15%) PF 0.833 vs 0.841 worst $-67.85 vs $-36.13 DD $163.77 vs $139.13 top band 63% top market 100% z -0.25 fees1.2 $-147.14 [- -]
+(a) band by train edge, Ethereum: fails
+    t1: net $+202.56 vs flat $+142.32 (+42%) PF 1.287 vs 1.233 worst $-23.38 vs $-22.66 DD $27.68 vs $33.47 top band 51% top market 100% z +1.79 fees1.2 $+188.33 [net -]
+    t2: net $+149.20 vs flat $+58.86 (+153%) PF 1.227 vs 1.098 worst $-54.47 vs $-33.22 DD $54.47 vs $45.13 top band 105% top market 100% z +1.96 fees1.2 $+136.52 [net -]
+    t3: net $-211.16 vs flat $-116.50 (+81%) PF 0.773 vs 0.836 worst $-95.70 vs $-50.88 DD $236.93 vs $122.86 top band 64% top market 100% z -1.32 fees1.2 $-222.77 [- -]
+(b) owner's hint 95-97c heavy, Ethereum: fails
+    t1: net $+178.29 vs flat $+142.32 (+25%) PF 1.277 vs 1.233 worst $-29.82 vs $-22.66 DD $54.22 vs $33.47 top band 44% top market 100% z +0.65 fees1.2 $+165.23 [net -]
+    t2: net $+118.31 vs flat $+58.86 (+101%) PF 1.198 vs 1.098 worst $-27.63 vs $-33.22 DD $45.03 vs $45.13 top band 101% top market 100% z +1.13 fees1.2 $+106.88 [net worst]
+    t3: net $-162.03 vs flat $-116.50 (+39%) PF 0.796 vs 0.836 worst $-64.80 vs $-50.88 DD $162.03 vs $122.86 top band 64% top market 100% z -1.16 fees1.2 $-172.39 [- -]
+(a) band by train edge, Dogecoin: fails
+    t1: net $+416.66 vs flat $+216.07 (+93%) PF 1.693 vs 1.414 worst $-84.87 vs $-54.11 DD $84.87 vs $54.11 top band 70% top market 100% z +3.03 fees1.2 $+401.16 [net -]
+    t2: net $+278.88 vs flat $+207.02 (+35%) PF 1.394 vs 1.411 worst $-44.28 vs $-36.45 DD $63.83 vs $36.45 top band 57% top market 100% z +1.41 fees1.2 $+263.65 [net -]
+    t3: net $+25.85 vs flat $+102.41 (-75%) PF 1.031 vs 1.200 worst $-54.77 vs $-23.28 DD $65.01 vs $27.24 top band 266% top market 100% z -1.37 fees1.2 $+12.22 [- -]
+(b) owner's hint 95-97c heavy, Dogecoin: fails
+    t1: net $+125.67 vs flat $+216.07 (-42%) PF 1.180 vs 1.414 worst $-50.56 vs $-54.11 DD $76.93 vs $54.11 top band -63% top market 100% z -1.53 fees1.2 $+112.63 [- worst]
+    t2: net $+238.98 vs flat $+207.02 (+15%) PF 1.435 vs 1.411 worst $-45.58 vs $-36.45 DD $45.58 vs $36.45 top band 38% top market 100% z +0.71 fees1.2 $+226.54 [net -]
+    t3: net $+231.61 vs flat $+102.41 (+126%) PF 1.530 vs 1.200 worst $-20.20 vs $-23.28 DD $20.20 vs $27.24 top band 66% top market 100% z +3.58 fees1.2 $+221.00 [net worst]
+(a) band by train edge, XRP: fails
+    t1: net $+366.76 vs flat $+206.13 (+78%) PF 1.494 vs 1.349 worst $-52.41 vs $-34.39 DD $84.69 vs $50.31 top band 58% top market 100% z +2.52 fees1.2 $+349.69 [net -]
+    t2: net $+285.63 vs flat $+161.66 (+77%) PF 1.383 vs 1.286 worst $-39.36 vs $-23.68 DD $41.90 vs $43.53 top band 47% top market 100% z +2.20 fees1.2 $+269.74 [net -]
+    t3: net $+115.90 vs flat $+54.66 (+112%) PF 1.141 vs 1.091 worst $-71.61 vs $-36.45 DD $71.61 vs $42.97 top band 76% top market 100% z +0.92 fees1.2 $+101.35 [net -]
+(b) owner's hint 95-97c heavy, XRP: fails
+    t1: net $+187.88 vs flat $+206.13 (-9%) PF 1.268 vs 1.349 worst $-36.84 vs $-34.39 DD $69.01 vs $50.31 top band 55% top market 100% z -0.32 fees1.2 $+173.81 [- -]
+    t2: net $+157.21 vs flat $+161.66 (-3%) PF 1.249 vs 1.286 worst $-33.73 vs $-23.68 DD $67.16 vs $43.53 top band 59% top market 100% z -0.08 fees1.2 $+144.69 [- -]
+    t3: net $-10.87 vs flat $+54.66 (-120%) PF 0.985 vs 1.091 worst $-50.99 vs $-36.45 DD $93.41 vs $42.97 top band 931% top market 100% z -1.01 fees1.2 $-22.08 [- -]
+(a) band by train edge, live five: fails
+    t1: net $+1204.38 vs flat $+788.30 (+53%) PF 1.345 vs 1.288 worst $-64.21 vs $-55.89 DD $106.67 vs $56.98 top band 43% top market 31% z +3.31 fees1.2 $+1131.83 [net -]
+    t2: net $+744.54 vs flat $+647.38 (+15%) PF 1.210 vs 1.252 worst $-101.22 vs $-49.91 DD $101.22 vs $49.91 top band 39% top market 34% z +0.73 fees1.2 $+677.64 [net -]
+    t3: net $+33.83 vs flat $+48.05 (-30%) PF 1.009 vs 1.017 worst $-91.91 vs $-77.93 DD $127.35 vs $107.66 top band 119% top market -482% z -0.17 fees1.2 $-27.36 [- -]
+(b) owner's hint 95-97c heavy, live five: fails
+    t1: net $+754.26 vs flat $+788.30 (-4%) PF 1.242 vs 1.288 worst $-123.14 vs $-55.89 DD $146.52 vs $56.98 top band 40% top market 25% z -0.26 fees1.2 $+692.96 [- -]
+    t2: net $+834.58 vs flat $+647.38 (+29%) PF 1.315 vs 1.252 worst $-41.32 vs $-49.91 DD $60.79 vs $49.91 top band 43% top market 30% z +2.31 fees1.2 $+779.25 [net worst]
+    t3: net $+74.97 vs flat $+48.05 (+56%) PF 1.024 vs 1.017 worst $-137.57 vs $-77.93 DD $150.03 vs $107.66 top band 104% top market 309% z +0.23 fees1.2 $+24.37 [net -]
+(c) shrunk Kelly k=50: fails
+    t1: net $+1120.32 vs flat $+788.30 (+42%) PF 1.582 vs 1.288 worst $-36.67 vs $-55.89 DD $54.52 vs $56.98 top band 42% top market 34% z +2.97 fees1.2 $+1072.84 [net worst]
+    t2: net $+672.65 vs flat $+647.38 (+4%) PF 1.314 vs 1.252 worst $-59.30 vs $-49.91 DD $59.30 vs $49.91 top band 42% top market 34% z +0.25 fees1.2 $+628.43 [- -]
+    t3: net $-14.39 vs flat $+48.05 (-130%) PF 0.994 vs 1.017 worst $-86.91 vs $-77.93 DD $120.26 vs $107.66 top band -523% top market 861% z -0.60 fees1.2 $-54.41 [- -]
+(c) shrunk Kelly k=200: fails
+    t1: net $+719.83 vs flat $+788.30 (-9%) PF 1.570 vs 1.288 worst $-25.98 vs $-55.89 DD $35.57 vs $56.98 top band 42% top market 33% z -0.57 fees1.2 $+688.02 [- worst]
+    t2: net $+444.92 vs flat $+647.38 (-31%) PF 1.321 vs 1.252 worst $-37.95 vs $-49.91 DD $37.95 vs $49.91 top band 41% top market 35% z -1.86 fees1.2 $+415.25 [- worst]
+    t3: net $-24.43 vs flat $+48.05 (-151%) PF 0.985 vs 1.017 worst $-57.95 vs $-77.93 DD $89.70 vs $107.66 top band -206% top market 336% z -0.74 fees1.2 $-51.23 [- worst]
+(d) rolling last 20: fails
+    t1: net $+641.18 vs flat $+788.30 (-19%) PF 1.227 vs 1.288 worst $-78.63 vs $-55.89 DD $78.63 vs $56.98 top band 44% top market 37% z -1.46 fees1.2 $+585.79 [- -]
+    t2: net $+484.61 vs flat $+647.38 (-25%) PF 1.189 vs 1.252 worst $-72.37 vs $-49.91 DD $98.15 vs $49.91 top band 33% top market 43% z -1.42 fees1.2 $+435.47 [- -]
+    t3: net $-108.05 vs flat $+48.05 (-325%) PF 0.959 vs 1.017 worst $-75.90 vs $-77.93 DD $177.47 vs $107.66 top band 29% top market 109% z -1.97 fees1.2 $-149.35 [- worst]
+(d) rolling last 50: fails
+    t1: net $+648.42 vs flat $+788.30 (-18%) PF 1.213 vs 1.288 worst $-63.53 vs $-55.89 DD $92.88 vs $56.98 top band 55% top market 32% z -1.36 fees1.2 $+589.69 [- -]
+    t2: net $+476.47 vs flat $+647.38 (-26%) PF 1.179 vs 1.252 worst $-66.14 vs $-49.91 DD $66.47 vs $49.91 top band 31% top market 47% z -1.39 fees1.2 $+426.07 [- -]
+    t3: net $-228.19 vs flat $+48.05 (-575%) PF 0.916 vs 1.017 worst $-72.86 vs $-77.93 DD $247.48 vs $107.66 top band 37% top market 85% z -3.39 fees1.2 $-269.34 [- worst]
+(e) spread at entry: fails
+    t1: net $+1041.98 vs flat $+788.30 (+32%) PF 1.275 vs 1.288 worst $-71.96 vs $-55.89 DD $71.96 vs $56.98 top band 37% top market 26% z +2.19 fees1.2 $+966.82 [net -]
+    t2: net $+908.64 vs flat $+647.38 (+40%) PF 1.250 vs 1.252 worst $-66.75 vs $-49.91 DD $66.75 vs $49.91 top band 33% top market 31% z +2.90 fees1.2 $+837.78 [net -]
+    t3: net $+69.85 vs flat $+48.05 (+45%) PF 1.016 vs 1.017 worst $-121.92 vs $-77.93 DD $153.65 vs $107.66 top band 89% top market 271% z +0.23 fees1.2 $+0.92 [net -]

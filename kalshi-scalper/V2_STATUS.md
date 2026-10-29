@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 4:40 PM CT, SIZE3 (owner idea: size by price paid or expected win rate), FALSIFIED (17 tries; registration cfbdf81).** Trained on the first window, tested on the other two, live five, 13 contracts base. Band sizing by train edge: PF 1.35 / 1.21 / 1.01 against flat 1.29 / 1.25 / 1.02, worst day worse every window. The owner's hint (heavier at 95-97c): PF 1.24 / 1.32 / 1.02, worst day -$123 / -$41 / -$138 against -$56 / -$50 / -$78. Shrunk Kelly: PF lift +0.28 in training falls to +0.07 and -0.03; it is the only one that cuts the worst day, but it gives up net. Rolling win rate: worse in every window. Sizing up on 1c spreads raises net 32% to 45% only because it trades bigger (PF unchanged). History says not to size by price band. N tried about 439,141.
+
 **2026-10-29 4:15 PM CT, live marker: Dogecoin 3 to 5 contracts (#623) deployed (owner).** Live reads of Dogecoin split at the first 5 contract order. Per contract nothing changes but fee rounding (slightly cheaper at 5); dollar wins and losses are 5/3 larger. The AUTO loop was restarted at 4:20 PM CT at the owner's request (in the research container, not on the owner's laptop), so the nightly drift check is now live.
 
 **2026-10-29 4:15 PM CT, information: who loses together in the same window (no try).** Given one coin lost, another coin in the same window lost 30% to 63% of the time (Bitcoin then Ethereum 52%, Dogecoin then Ethereum 63%), against 5% to 6.5% normally; gold is independent (3% to 10% with any coin). Same-side pairs both lost 25% of the time, opposite-side 1%. The live one-crypto-order-per-window rule targets the real cluster; gold plus one coin adds no shared risk.
