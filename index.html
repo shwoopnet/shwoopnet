@@ -1513,6 +1513,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Account result card: the 1M, 3M, YTD and All lines now use the live orders for everything recent (they were a ten minute old copy, so the total could lag), and say so when older trades cannot be read</li>
                   <li>"Got questions?" panel: a fourth question, "Want to work with us?", for future partners, with an email link</li>
                   <li>Signed-out page: a "Got questions?" bubble in the bottom right opens a small panel of fixed answers, with an email link for anything else; the page itself is unchanged</li>
                   <li>Dogecoin orders go from 3 to 5 contracts (live record: 131 settled, 125 won, +2.66c a contract, both halves positive)</li>
@@ -2901,6 +2902,15 @@
       '<div class="kal-plot">' + kalshiLineSvg(pts, esc, money, g, yt) + '<div class="kal-yaxis">' + ylab + '</div></div><div class="kal-xaxis">' + xlab + '</div>';
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
+  // The orders behind a long range (1M, 3M, YTD, 1Y, All): the older part read once from Firestore, plus the page's live listener for everything newer, so nothing is a stale copy. An order older than the oldest one the listener holds cannot change, so the
+  // older part is kept; the boundary is strict (older than), so an order is never counted twice. A failed read says the line is partial instead of showing the recent orders as if they were everything.
+  function kalshiPnlSource(live, hit){
+    var list = (live || []).filter(function(o){ return o && Number.isFinite(o.ts); });
+    if(!hit || hit.failed){ return { orders: live || [], partial: !!(hit && hit.failed) }; }
+    var oldest = list.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
+    var older = (hit.orders || []).filter(function(o){ return o && Number.isFinite(o.ts) && o.ts < oldest; });
+    return { orders: older.concat(live || []), partial: false };
+  }
   var kalshiPnlFetched = {}, kalshiPnlFetching = '';
   function renderKalshiPnl(){
     var card = document.getElementById('kalPnl');
@@ -2912,23 +2922,25 @@
     var nowMs = Date.now(), key = kalshiPnlRange, since = kalshiPnlRangeStart(key, nowMs);
     var loaded = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
     var oldest = loaded.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
-    var source = kalshiLiveOrders;
+    var source = kalshiLiveOrders, partial = false;
     if(loaded.length >= 1000 && since < oldest){
       var hit = kalshiPnlFetched[key];
-      if(hit && nowMs - hit.at < 600000){ source = hit.orders; }
+      // The older part is read once and kept for the page's life (an order older than everything the live listener holds does not change); a failed read is retried after a minute. The newer part is ALWAYS the live listener, so the line and
+      // its total never lag the Today figure and the trade list (the owner, Oct 29, 2026: the 1M and 3M result looked wrong; it was a ten minute old copy of every order).
+      if(hit && nowMs - hit.at < (hit.failed ? 60000 : 21600000)){ var pick = kalshiPnlSource(kalshiLiveOrders, hit); source = pick.orders; partial = pick.partial; }
       else {
         var api = window.__shwoopAPI;
         if(!api || !api.kalshiOrdersSince){ set('kalPnlBody', '<div class="kal-empty">Older orders are not available right now.</div>'); return; }
         if(kalshiPnlFetching !== key){
           kalshiPnlFetching = key;
           api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; kalshiPnlFetching = ''; renderKalshiPnl(); },
-            function(){ kalshiPnlFetched[key] = { at: Date.now(), orders: loaded }; kalshiPnlFetching = ''; renderKalshiPnl(); });
+            function(){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true }; kalshiPnlFetching = ''; renderKalshiPnl(); });
         }
         set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
       }
     }
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null));
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders. It tries again in a minute.</div>' : ''));
   }
   // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
   // that trade with its date and time (Central), as dollars (masked in Privacy view) and as a share of the account at the start of the range. It goes back to the range's result when the pointer leaves. Reads only the points drawn.
