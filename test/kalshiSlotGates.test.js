@@ -48,7 +48,7 @@ gates['the module is inert: empty registry, switch off, no order is ever allowed
   assert.deepStrictEqual(slot.activeSlotStrategies(), []);
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
-  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$/.test(x))) {
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$/.test(x))) {
     assert.ok(!/kalshiSlot/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not mention the slot library in phase A (checked recursively, including functions/, scripts/, workflows and package files)');
   }
   const c = code(libSrc);

@@ -123,6 +123,8 @@ function activeSlotStrategiesWith(flags) {
 }
 // The production entry point: no argument, so nothing a caller passes can change the switch or the registry.
 const activeSlotStrategies = () => activeSlotStrategiesWith({});
+// The ONE gate the wiring uses (docs/SECOND_SLOT_WIRING.md section 0): a pure function of this module's own two constants. Nothing stored, requested or typed on the page can feed it.
+const slotActive = () => SLOT_ENABLED === true && SLOT_STRATEGIES.length > 0;
 
 // ---- Order identity --------------------------------------------------------------------------------------------------------------------
 // Deterministic, so two function instances computing the same entry compute the same id and Kalshi's own uniqueness check refuses the second
@@ -401,7 +403,7 @@ module.exports = {
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
-  validateSlotStrategy, activeSlotStrategies, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
+  validateSlotStrategy, activeSlotStrategies, slotActive, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields,
   // Test-only: the flags-taking variants. Production code must call slotOrderCheck and activeSlotStrategies (a gate fails if the wiring references this).
   _testOnly: Object.freeze({ slotOrderCheckWith, activeSlotStrategiesWith }),

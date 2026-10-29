@@ -1,0 +1,343 @@
+"use strict";
+// The second slot, PHASE B step B1: the engine that would place and close slot orders (docs/SECOND_SLOT_WIRING.md section 2).
+// NOT WIRED ANYWHERE. Nothing imports this file yet, and while SLOT_ENABLED is false or SLOT_STRATEGIES is empty every entry point below returns before it makes a single call.
+//
+// All I/O is injected, exactly in the style of runL1Tick and runExitWatch: a `store`, `fetchFn`, the key passed in, `now` passed in. This file has no Firestore, no environment, no clock
+// of its own (the only Date.now is the signing timestamp, which liveRequest takes when no nowMs is given, as for L1's own orders), no randomness and no secret.
+//
+// What it will not do, by construction (each is a test in test/kalshiSlotRunGates.test.js):
+//   - send anything unless a registered, valid strategy exists (slotActive), the server switch is on and the exchange is trading;
+//   - create an order without the direction lock and the order document being written in ONE transaction first (no document, no send), so two instances cannot both send;
+//   - ever buy the opposite side of a market the books, the lock or the account already show on the other side (a hedge);
+//   - send a buy that is not immediate-or-cancel, outside the strategy's price band and time window, or above the module's caps;
+//   - retry anything whose answer was lost: that ends the session and latches the strategy off;
+//   - sell more than its own unsold contracts, more than the account holds beyond the other engines' contracts, or anything that could OPEN the opposite position;
+//   - sell without holding the per-market close lease first (taken BEFORE the position is read), or keep that lease afterwards.
+
+const bot = require("./kalshiSignalLib");
+const slotLib = require("./kalshiSlotLib");
+const live = require("./kalshiLiveLib");
+
+const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
+const EXIT_SLIPPAGE = 0.15;       // how far past the bid the immediate-or-cancel sell may go; it still fills at the book's own prices (the same figure the L1 watch uses)
+const EXIT_MAX_TRIES = 3;
+const BALANCE_MARGIN = 0.5;       // dollars that must remain on the shard after the order (the same figure L1 uses)
+const r4 = (x) => Math.round(x * 10000) / 10000;
+const num = (v) => (v === undefined || v === null || v === "" ? NaN : Number(v));
+const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
+const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
+const OPEN_SHORT = ["active", "open"];
+
+// Contracts of an order the account may still hold (the conservative reading): a settled or hand-closed order holds none; an order still in flight (no answer yet)
+// is assumed to hold everything it asked for, so it can only LOWER what the other engine may sell.
+function unsoldOf(t) {
+  if (!t || t.settled === true) return 0;
+  const want = num(t.count) > 0 ? num(t.count) : 1;
+  const status = String(t.status || "").toLowerCase();
+  if (status === "sending" || status === "unknown") return want;
+  const got = Math.min(num(t.fillCount) > 0 ? num(t.fillCount) : 0, want);
+  const sold = num(t.exitCount) > 0 ? num(t.exitCount) : 0;
+  return Math.max(0, Math.floor(got - sold + 1e-9));
+}
+
+function makeRunners(flags) {
+  const strategiesNow = () => (flags === undefined ? slotLib.activeSlotStrategies() : slotLib._testOnly.activeSlotStrategiesWith(flags));
+  const check = (input) => (flags === undefined ? slotLib.slotOrderCheck(input) : slotLib._testOnly.slotOrderCheckWith(flags, input));
+
+  // ---------------------------------------------------------------------------------------------------------------------------------
+  // Entries
+  // ---------------------------------------------------------------------------------------------------------------------------------
+  // args: { session, now, enabled, active, store, keyId, pem, fetchFn, quotes, setSession, logEvent, shared, l1Result, sessionNow }
+  //   shared  the figures runL1Tick just worked out and handed over (so there is no second balance read): { sizeBase, balanceBody, risk: { worst }, floor, recentList, slotOrders, since }
+  //   store   { halted(), hasUnresolved(), l1HasUnresolved(), killLatches(), allSlotOrders(), l1Recent(since), runSlotEntry({ ticker, side, decide, now }), updateSlotOrder(id, patch), killStrategy(id, info) }
+  async function runSlotTick(args) {
+    const strategies = strategiesNow();
+    if (!strategies.length) return { skipped: "no slot strategy" };           // second line of defence for off-equivalence: not one call is made
+    const { session, now, enabled, active, store, keyId, pem, fetchFn, quotes, setSession } = args;
+    const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
+    if (!session || session.active !== true) return { skipped: "no session" };
+    if (args.l1Result && args.l1Result.ended) return { skipped: "the session ended this minute" };
+    if (enabled !== true) return { skipped: "switch off" };
+    if (!active) return { skipped: "exchange inactive" };
+    // Markets that are open and inside some strategy's entry window. Computed from the quotes already in hand: no call is made if none qualifies.
+    const jobs = [];
+    for (const s of strategies) {
+      for (const q of quotes || []) {
+        if (!q || !q.m || !s.series.includes(q.series) || !OPEN_SHORT.includes(q.m.status)) continue;
+        const left = (Date.parse(q.m.close_time) - now) / 1000;
+        if (Number.isFinite(left) && left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec) jobs.push({ s, ticker: q.m.ticker, series: q.series });
+      }
+    }
+    if (!jobs.length) return { skipped: "no market in a slot entry window" };
+
+    const sh = args.shared;
+    if (!sh || !Number.isFinite(sh.sizeBase) || !(sh.sizeBase > 0) || !sh.risk || !Number.isFinite(sh.risk.worst) || !Number.isFinite(sh.floor)) return { skipped: "no shared risk figures from the L1 tick" };
+    const end = async (why, detail) => { await setSession({ active: false, endedAt: now, endedBecause: why }); await log("session ended", detail); return { ended: why }; };
+
+    // Preconditions, every one failing closed (a skip, never an order).
+    let latches, slotOrders, l1Fresh;
+    try {
+      if (typeof args.sessionNow === "function") { const cur = await args.sessionNow(); if (!cur || cur.active !== true) return { skipped: "the session ended this minute" }; }
+      if (await store.halted()) return { skipped: "halted" };
+      if (await store.hasUnresolved()) return { skipped: "a slot order is unresolved" };
+      if (await store.l1HasUnresolved()) return { skipped: "an L1 order is unresolved" };
+      try { latches = await store.killLatches(); } catch (e) { latches = { unreadable: true }; }   // an unreadable latch document kills every strategy (killCheck)
+      slotOrders = await store.allSlotOrders();
+      const since = Number.isFinite(sh.since) ? sh.since : now - 24 * 3600 * 1000;
+      l1Fresh = await store.l1Recent(since);
+      if (!Array.isArray(slotOrders) || !Array.isArray(l1Fresh)) return { skipped: "orders unreadable" };
+    } catch (e) { return { skipped: "the slot's preconditions could not be read" }; }
+
+    const results = [];
+    const committed = {};                          // dollars this tick has already committed on each shard
+    const sinceMs = Number.isFinite(sh.since) ? sh.since : now - 24 * 3600 * 1000;
+    const seenInShared = new Set((sh.recentList || []).map((t) => t.id || t.clientOrderId));
+    for (const job of jobs) {
+      const { s, ticker, series } = job;
+      const latch = latches && !latches.unreadable && Object.prototype.hasOwnProperty.call(latches, s.id) ? latches[s.id] : (latches && latches.unreadable ? latches : null);
+      const mk = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
+      const m = mk.status === 200 && mk.body && mk.body.market;
+      if (!m) { results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
+      const left = (Date.parse(m.close_time) - now) / 1000;
+      if (!OPEN_SHORT.includes(m.status) || !(left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec)) { results.push(ticker + ": not open in the entry window"); continue; }
+      const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
+      if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { results.push(ticker + ": no two-sided quote"); continue; }
+      // Which side, and the price of that side at the touch (cents).
+      const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
+      const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule;
+      const sidePrice = side === "yes" ? yesPrice : noPrice;
+      const touch = side === "yes" ? yesPrice : Math.round((1 - noPrice) * 100) / 100;       // the YES price the order goes to, which is what Kalshi's body carries
+      if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
+      const depth = num(side === "yes" ? m.yes_ask_size_fp : m.yes_bid_size_fp);
+      // The position is read BEFORE the transaction and may be stale by the time it commits; the direction lock, not this read, is what closes that gap.
+      const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
+      let position = NaN;
+      if (pos.status === 200 && pos.body && Array.isArray(pos.body.market_positions)) {
+        const row = pos.body.market_positions.find((x) => x.ticker === ticker);
+        position = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
+      }
+      if (!Number.isFinite(position)) { results.push(ticker + ": the position could not be read, nothing sent"); continue; }
+      // Lowest step not yet attempted on this market (slotOrderCheck refuses a step that is not allowed yet).
+      const mine = slotOrders.filter((t) => t && t.slotId === s.id && t.ticker === ticker);
+      let step = 1; while (mine.some((t) => t.step === step) && step <= s.scaleIn.maxSteps) step += 1;
+      if (step > s.scaleIn.maxSteps) { results.push(ticker + ": every scale-in step was already used"); continue; }
+      const shardKey = String(m.exchange_index);
+
+      // The authoritative decision, made INSIDE the store's transaction on the lock and the order books as they are at commit time.
+      const decide = (lockDoc, slotNow, l1Docs) => {
+        const l1Merged = new Map();
+        for (const t of l1Fresh) l1Merged.set(t.id || t.clientOrderId, t);
+        for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
+        const l1All = [...l1Merged.values()];
+        const c = check({ strategyId: s.id, ticker, side, limit: sidePrice, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, position, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: left, now });
+        if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
+        // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
+        // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
+        const slotDelta = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst - slotLib.slotRiskForBotRisk(sh.slotOrders || [], sinceMs).worst;
+        let newL1 = 0;
+        for (const t of l1All) { if (!seenInShared.has(t.id || t.clientOrderId) && (num(t.fillCount) > 0 || ["filled", "sending", "unknown"].includes(String(t.status))) && !(t.settled === true)) newL1 += Math.max(0, num(t.maxCost) || 0); }
+        const worstNow = sh.risk.worst + slotDelta - newL1;
+        if (!(worstNow - c.cost > sh.floor + 1e-9)) return { allowed: false, reason: "the shared loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
+        // The shard must hold the money (L1's own check, with this minute's earlier L1 and slot orders taken off).
+        const l1Shard = l1All.filter((t) => !seenInShared.has(t.id || t.clientOrderId) && String(t.exchangeIndex) === shardKey && t.settled !== true).reduce((a, t) => a + Math.max(0, num(t.maxCost) || 0), 0);
+        const avail = live.availableFor(sh.balanceBody, m.exchange_index) - (committed[shardKey] || 0) - l1Shard;
+        if (!Number.isFinite(avail)) return { allowed: false, reason: "the balance came back in a shape this code does not recognise" };
+        if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, reason: "only $" + avail.toFixed(2) + " on its shard" };
+        const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
+        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live",
+          seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
+        return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
+      };
+      // Flatten and Stop can land while this tick was reading (seconds, with timeouts). Read the halt again immediately before the order is recorded and sent.
+      let halted;
+      try { halted = await store.halted(); } catch (e) { halted = true; }
+      if (halted) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
+      let entry;
+      try { entry = await store.runSlotEntry({ ticker, side, decide, now }); } catch (e) { results.push(ticker + ": the order could not be recorded, so nothing was sent"); continue; }
+      if (!entry || entry.created !== true) { results.push(ticker + ": " + ((entry && entry.reason) || "not allowed")); continue; }
+      const rec = entry.record, cid = rec.id;
+      committed[shardKey] = (committed[shardKey] || 0) + rec.maxCost;
+      slotOrders = slotOrders.concat([rec]);
+      if (typeof args.onRecorded === "function") { try { args.onRecorded(rec); } catch (e) { /* observer only */ } }
+
+      const body = live.liveOrderBody(ticker, touch, side, cid, m.exchange_index, rec.count);
+      const res = await live.liveRequest({ fetchFn, keyId, pem, method: "POST", path: live.ORDERS_PATH, body });
+      const d = res.body && typeof res.body === "object" ? res.body : {};
+      if (res.status >= 200 && res.status < 300 && d.order_id) {
+        const filledCount = Number(d.fill_count || 0);
+        const patch = { status: filledCount > 0 ? "filled" : "no fill", orderId: d.order_id, fillCount: String(d.fill_count || "0"), remainingCount: String(d.remaining_count || "0"),
+          averageFillPrice: d.average_fill_price || null, averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price };
+        await store.updateSlotOrder(cid, patch);
+        Object.assign(rec, patch);
+        await log("slot order", s.id + " " + side + " " + rec.count + " at " + (sidePrice * 100).toFixed(0) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
+        results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
+        continue;
+      }
+      // Anything else ends the session and latches this strategy off. Nothing is ever retried.
+      const latchOff = async (reason) => { try { if (typeof store.killStrategy === "function") await store.killStrategy(s.id, { killedAt: now, reason }); } catch (e) { /* the session end below still stops L1 and the slot */ } };
+      if (res.status === 409) {
+        const found = await findOrder({ fetchFn, keyId, pem, ticker, clientOrderId: cid });
+        await store.updateSlotOrder(cid, found
+          ? { status: Number(found.fill_count_fp || 0) > 0 ? "filled" : "no fill", orderId: found.order_id, fillCount: String(found.fill_count_fp || "0"), recovered: true, error409: true }
+          : { status: "unknown", error: "HTTP 409 and the order could not be found: " + short(res.body) });
+        await latchOff("an order with id " + cid + " already existed");
+        return Object.assign(await end("attempted", "Kalshi says a slot order with id " + cid + " already exists. Check the Kalshi account for it"), { results });
+      }
+      if (isAmbiguous(res.status)) {
+        await store.updateSlotOrder(cid, { status: "unknown", error: "HTTP " + res.status + " " + short(res.body) });
+        await latchOff("the answer for " + ticker + " was lost");
+        return Object.assign(await end("attempted", "the answer for the slot order on " + ticker + " was lost (HTTP " + res.status + "). THE ORDER MAY OR MAY NOT EXIST. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried"), { results });
+      }
+      await store.updateSlotOrder(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
+      await latchOff("Kalshi refused the order for " + ticker);
+      return Object.assign(await end("attempted", "Kalshi refused the slot order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80)), { results });
+    }
+    return { ok: true, results };
+  }
+
+  // ---------------------------------------------------------------------------------------------------------------------------------
+  // Exits
+  // ---------------------------------------------------------------------------------------------------------------------------------
+  // args: { store, fetchFn, keyId, pem, now, enabled, setSession, logEvent }
+  //   store  { slotRecentFilled(since), slotOrdersOnTicker(ticker), l1OrdersOnTicker(ticker), claimClose(ticker, who, now, ttl), releaseClose(ticker, who), claimSlotExit(id, tries),
+  //            updateSlotOrder(id, patch), finishSlotOrder(id, patch, killEval), killStrategy(id, info) }
+  async function runSlotExits(args) {
+    const strategies = strategiesNow();
+    if (!strategies.length) return { skipped: "no slot strategy", results: [] };    // not one call is made
+    const { store, fetchFn, keyId, pem, now, enabled, setSession } = args;
+    const log = async (kind, detail) => { if (args.logEvent) { try { await args.logEvent({ ts: now, kind, detail }); } catch (e) { /* the log is optional */ } } };
+    const selling = enabled === true;
+    const results = [];
+    let list;
+    try {
+      list = (await store.slotRecentFilled(now - EXIT_LOOKBACK_MS)).filter((t) => slotLib_isSlot(t) && t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker
+        && (t.side === "yes" || t.side === "no") && !["sold", "unknown", "sending", "skipped"].includes(t.exitStatus));
+    } catch (e) { return { skipped: "slot orders unreadable", results }; }
+    for (const t of list) {
+      const s = strategies.find((x) => x.id === t.slotId);
+      if (!s) { results.push(t.ticker + ": its strategy is not registered, this engine does not exit it"); continue; }
+      const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
+      const sold = Number(t.exitCount) > 0 ? Number(t.exitCount) : 0;
+      const remaining = Math.floor(got - sold + 1e-9);
+      if (remaining < 1) continue;
+      const mk = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs: now });
+      const m = mk.status === 200 && mk.body && mk.body.market;
+      if (!m || !OPEN_SHORT.includes(m.status)) continue;
+      const yb = num(m.yes_bid_dollars), ya = num(m.yes_ask_dollars);
+      if (!bot.validQuote(Number.isFinite(yb) ? yb : null, Number.isFinite(ya) ? ya : null)) continue;
+      const ourBid = t.side === "yes" ? r4(yb) : r4(1 - ya);
+      if (!(ourBid > 0)) continue;
+      const leftSec = (Date.parse(m.close_time) - now) / 1000;
+      if (!Number.isFinite(leftSec) || leftSec <= 0) continue;       // closed: it settles on its own
+      const why = ourBid <= s.exit.stopBid + 1e-9 ? "stop" : ourBid >= s.exit.targetBid - 1e-9 ? "target" : leftSec <= s.exit.mustExitLeftSec + 1e-9 ? "time" : null;
+      if (!why) continue;
+      if (!selling) {
+        if (t.exitShadow) continue;     // logged once per order
+        await store.updateSlotOrder(t.id, { exitShadow: { at: now, bid: ourBid, left: leftSec, why, wouldSell: remaining } });
+        await log("slot exit (log only)", t.ticker + ": " + why + " exit due at a bid of " + (ourBid * 100).toFixed(0) + "c; it would have sold " + remaining + " contracts. Nothing was sent, because the server's order switch is off.");
+        results.push(t.ticker + ": logged");
+        continue;
+      }
+      const tries = Number(t.exitTries) > 0 ? Number(t.exitTries) : 0;
+      if (tries >= EXIT_MAX_TRIES) continue;
+      // The per-market close lease FIRST (shared with Flatten and the L1 watch, which take it with other holders), the position only after holding it.
+      if (!(await live.claimClose(store, t.ticker, "slot", now))) { results.push(t.ticker + ": another closer holds the market (or the claim could not be made), nothing sold"); continue; }
+      const release = async () => { try { if (typeof store.releaseClose === "function") await store.releaseClose(t.ticker, "slot"); } catch (e) { /* the lease lapses by itself after 90 seconds */ } };
+      try {
+        const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: t.ticker, limit: "20" }, nowMs: now });
+        let held = NaN;
+        if (pos.status === 200 && pos.body && Array.isArray(pos.body.market_positions)) {
+          const row = pos.body.market_positions.find((x) => x.ticker === t.ticker);
+          held = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
+        }
+        if (!Number.isFinite(held)) { results.push(t.ticker + ": the position could not be read, nothing sold"); continue; }
+        // What the other engines still hold on this side of this market. Unreadable means nothing is sold.
+        let others;
+        try {
+          const l1 = await store.l1OrdersOnTicker(t.ticker), sl = await store.slotOrdersOnTicker(t.ticker);
+          if (!Array.isArray(l1) || !Array.isArray(sl)) throw new Error("unreadable");
+          others = l1.filter((x) => x && x.ticker === t.ticker && x.side === t.side).reduce((a, x) => a + unsoldOf(x), 0)
+            + sl.filter((x) => x && x.ticker === t.ticker && x.side === t.side && (x.id || x.clientOrderId) !== t.id).reduce((a, x) => a + unsoldOf(x), 0);
+        } catch (e) { results.push(t.ticker + ": the other orders could not be read, nothing sold"); continue; }
+        const count = slotLib.slotSellCount({ order: t, position: held, haveClaim: true, othersUnsold: others });
+        if (count < 1) { await store.updateSlotOrder(t.id, { exitStatus: "skipped", exitNote: "the account holds no " + t.side.toUpperCase() + " position that is this order's (already closed, or the others hold it)" }); results.push(t.ticker + ": nothing of its own to sell"); continue; }
+        if (!(await store.claimSlotExit(t.id, tries))) continue;     // another instance has it
+        const limit = t.side === "yes" ? Math.max(0.01, r4(ourBid - EXIT_SLIPPAGE)) : Math.min(0.99, r4(ya + EXIT_SLIPPAGE));
+        let cid, body;
+        try {
+          cid = slotLib.slotExitClientOrderId(t.id, tries);
+          body = live.exitBody(t.ticker, t.side, count, Math.round(limit * 100) / 100, cid, m.exchange_index);
+        } catch (e) { await store.updateSlotOrder(t.id, { exitStatus: "error", exitNote: "the exit could not be built: " + String(e.message).slice(0, 80), exitTries: tries + 1 }); results.push(t.ticker + ": exit not built"); continue; }
+        const res = await live.liveRequest({ fetchFn, keyId, pem, method: "POST", path: live.ORDERS_PATH, body });
+        const d = res.body && typeof res.body === "object" ? res.body : {};
+        if (res.status >= 200 && res.status < 300 && d.order_id) {
+          const filled = Number(d.fill_count || 0);
+          let p = Number(d.average_fill_price);
+          if (!Number.isFinite(p) || p <= 0 || p >= 1) p = t.side === "yes" ? ourBid : r4(1 - ourBid);
+          const soldPrice = t.side === "yes" ? p : r4(1 - p);
+          const fee = filled > 0 ? bot.takerFee(soldPrice, filled) : 0;
+          const exitCount = sold + filled, exitProceeds = Number(((Number(t.exitProceeds) || 0) + filled * soldPrice - fee).toFixed(4));
+          const patch = { exitStatus: filled >= count - 1e-9 ? "sold" : (filled > 0 ? "partly sold" : "no fill"), exitCount, exitProceeds, exitAvg: filled > 0 ? soldPrice : (t.exitAvg || null), exitAt: now, exitBid: ourBid, exitWhy: why, exitOrderId: d.order_id };
+          const complete = exitCount >= Math.floor(got + 1e-9) - 1e-9 && filled > 0;
+          if (complete) Object.assign(patch, slotLib.slotSettledFields({ ...t, exitCount, exitProceeds }, "exit"), { settledAt: now });
+          if (complete && typeof store.finishSlotOrder === "function") {
+            // The order's last patch and the kill latch go in ONE transaction, so a strategy that just tripped a kill rule cannot send another order in between.
+            await store.finishSlotOrder(t.id, patch, (orders) => {
+              const k = slotLib.slotKillStatus(orders.filter((x) => x && x.slotId === s.id), s);
+              return k.killed && k.latch ? { strategyId: s.id, killedAt: now, reason: k.reason } : null;
+            });
+          } else await store.updateSlotOrder(t.id, patch);
+          await log("slot exit", t.ticker + ": " + why + " at a bid of " + (ourBid * 100).toFixed(0) + "c, " + patch.exitStatus + " " + filled + " of " + count);
+          results.push(t.ticker + ": " + patch.exitStatus);
+          continue;
+        }
+        const latchOff = async (reason) => { try { if (typeof store.killStrategy === "function") await store.killStrategy(s.id, { killedAt: now, reason }); } catch (e) { /* the session end below still stops it */ } };
+        if (res.status === 409) {
+          await store.updateSlotOrder(t.id, { exitStatus: "unknown", exitNote: "HTTP 409: an order with id " + cid + " already exists" });
+          await latchOff("an exit order with id " + cid + " already existed");
+          await log("slot exit", t.ticker + ": Kalshi says the exit order " + cid + " already exists. Check the Kalshi account for it");
+          results.push(t.ticker + ": id already used");
+          continue;
+        }
+        if (isAmbiguous(res.status)) {
+          await store.updateSlotOrder(t.id, { exitStatus: "unknown", exitNote: "HTTP " + res.status + " " + short(res.body) });
+          await latchOff("the answer for the exit on " + t.ticker + " was lost");
+          if (setSession) await setSession({ active: false, endedAt: now, endedBecause: "attempted" });
+          await log("session ended", "the answer for the slot exit sell on " + t.ticker + " was lost (HTTP " + res.status + "). THE SELL MAY OR MAY NOT HAVE HAPPENED. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried");
+          return { ended: true, results };
+        }
+        await store.updateSlotOrder(t.id, { exitStatus: "error", exitNote: "HTTP " + res.status + " " + short(res.body), exitTries: tries + 1 });
+        await log("slot exit", t.ticker + ": Kalshi refused the exit sell: HTTP " + res.status + " " + short(res.body).slice(0, 80));
+        results.push(t.ticker + ": refused");
+      } finally { await release(); }
+    }
+    return { ok: true, results };
+  }
+
+  // Idle means: the slot is off, or there is no filled, unsettled slot order to watch. Anything unreadable counts as NOT idle (running the watch for nothing only costs compute).
+  async function slotExitIdle({ store, now }) {
+    if (!strategiesNow().length) return true;
+    try {
+      const recent = await store.slotRecentFilled(now - EXIT_LOOKBACK_MS);
+      return !recent.some((t) => slotLib_isSlot(t) && t.settled !== true && Number(t.fillCount) > 0);
+    } catch (e) { return false; }
+  }
+
+  return { runSlotTick, runSlotExits, slotExitIdle };
+}
+
+const slotLib_isSlot = (t) => !!t && t.strategy === "SLOT" && typeof t.slotId === "string";
+
+async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId }) {
+  const r = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/orders", params: { ticker, limit: "50" } });
+  const list = r.status === 200 && r.body && Array.isArray(r.body.orders) ? r.body.orders : [];
+  return list.find((o) => o.client_order_id === clientOrderId) || null;
+}
+
+// The production runners take no flags, so nothing a caller passes can turn the switch on or add a strategy. The factory is exposed for tests only.
+const prod = makeRunners(undefined);
+module.exports = {
+  runSlotTick: prod.runSlotTick, runSlotExits: prod.runSlotExits, slotExitIdle: prod.slotExitIdle, unsoldOf, EXIT_LOOKBACK_MS,
+  _testOnly: Object.freeze({ makeRunners }),
+};
