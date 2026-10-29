@@ -29,6 +29,16 @@ const input = (o) => Object.assign({
   lockTxn: true, lock: null, position: 0, sizingBase: 500, windowCapFraction: 0.055, secondsLeft: 500, now: NOW,
 }, o || {});
 const gates = {};
+function walk(dir) {
+  const out = [];
+  for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+    if (e.name === 'node_modules' || e.name === '.git' || e.name === 'data') continue;
+    const f = path.join(dir, e.name);
+    if (e.isSymbolicLink()) continue;
+    if (e.isDirectory()) out.push(...walk(f)); else out.push(f);
+  }
+  return out;
+}
 
 gates['the module is inert: empty registry, switch off, no order is ever allowed, and nothing imports it'] = () => {
   assert.strictEqual(slot.SLOT_ENABLED, false);
@@ -36,12 +46,13 @@ gates['the module is inert: empty registry, switch off, no order is ever allowed
   assert.ok(Object.isFrozen(slot.SLOT_STRATEGIES));
   assert.strictEqual(slot.slotOrderCheck(input()).allowed, false);
   assert.deepStrictEqual(slot.activeSlotStrategies(), []);
-  for (const f of fs.readdirSync(path.join(root, 'functions')).filter((x) => x.endsWith('.js') && x !== 'kalshiSlotLib.js')) {
-    assert.ok(!/kalshiSlotLib/.test(fs.readFileSync(path.join(root, 'functions', f), 'utf8')), f + ' must not import the slot library in phase A');
+  assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
+  assert.strictEqual(slot.slotOrderCheck.length, 1);
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$/.test(x))) {
+    assert.ok(!/kalshiSlot/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not mention the slot library in phase A (checked recursively, including functions/, scripts/, workflows and package files)');
   }
-  assert.ok(!/kalshiSlotLib/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')));
   const c = code(libSrc);
-  assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(/.test(c), 'the library must have no network, store, clock or signing code');
+  assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
   assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"']);
 };
 gates['a switch on alone does nothing: the switch needs a valid registered strategy, and a stored value cannot add one'] = () => {
@@ -76,7 +87,7 @@ gates['an order on the opposite side of an L1 or slot position is blocked; the s
   assert.strictEqual(d({ side: 'yes', slotOrders: [slotOrder({ side: 'no' })] }).allow, false, 'L1 YES against a slot NO is a hedge');
   assert.strictEqual(d({ side: 'no', slotOrders: [slotOrder({ status: 'sending', fillCount: '0' })] }).allow, false, 'an order in flight holds its side');
   assert.strictEqual(d({ side: 'no', slotOrders: [slotOrder({ status: 'unknown' })] }).allow, false, 'an unknown answer holds its side');
-  assert.strictEqual(d({ side: 'no', l1Orders: [l1Order({ status: 'no fill' })] }).allow, true, 'an order that did not fill holds nothing');
+  assert.strictEqual(d({ side: 'no', l1Orders: [l1Order({ status: 'no fill', fillCount: '0' })] }).allow, true, 'an order that did not fill holds nothing');
   assert.strictEqual(d({ side: 'no', l1Orders: [l1Order({ settled: true })] }).allow, true);
   assert.strictEqual(d({ l1Orders: [l1Order(), l1Order({ side: 'no' })] }).allow, false, 'contradictory books refuse everything');
 };
@@ -103,12 +114,12 @@ gates['the slot dollars at risk and its settled pnl come back in the shape botRi
     slotOrder({ ticker: 'KXETH15M-26NOV031015-15', status: 'sending', fillCount: '0', maxCost: 1.5, ts: NOW - 5000 }),          // in flight: counted in full
   ];
   const day = slot.slotRiskForBotRisk(orders, NOW - 24 * 3600000);
-  assert.ok(Math.abs(day.net - (1.2 - 3.0)) < 1e-9);
+  assert.ok(Math.abs(day.net - (1.2 - 3.0 - 1.0)) < 1e-9, 'the sold half of the open order is a realised loss of 1.00 (no proceeds), not invisible until settlement');
   assert.ok(Math.abs(day.openCost - (1.0 + 1.5)) < 1e-9);
   assert.ok(Math.abs(day.worst - (day.net - day.openCost)) < 1e-9);
   assert.deepStrictEqual(Object.keys(day).sort(), ['addonAtRisk', 'net', 'openCost', 'trades', 'worst']);
   const life = slot.slotRiskContract(orders, NOW).lifetime;
-  assert.ok(Math.abs(life.net - (1.2 - 3.0 + 9)) < 1e-9);
+  assert.ok(Math.abs(life.net - (1.2 - 3.0 + 9 - 1.0)) < 1e-9);
   const rc = slot.slotRiskContract(orders, NOW);
   assert.ok(Math.abs(rc.openTotal - 2.5) < 1e-9);
   assert.ok(Math.abs(rc.openByWindow['26NOV031015'] - 2.5) < 1e-9);
@@ -120,10 +131,10 @@ gates['slot and L1 share one window limit: L1 spend in a window shrinks what the
   assert.strictEqual(r0.allowed, true, r0.reasons.join());
   assert.strictEqual(r0.count, 4);
   assert.strictEqual(r0.cid, 'S-TESTA-' + T + '-1');
-  // base 500 * 5.5% = 27.5 window room; L1 already used 26.5 in this window, so only about one contract of $0.79 fits
-  const r1 = W(ON(), input({ l1Orders: [l1Order({ maxCost: 26.5 })] }));
+  // base 500 * 5.5% = 27.5 window cap; L1 used 25.4 and one gold contract of room (1.05) stays reserved for L1, so only about one contract of $0.79 fits
+  const r1 = W(ON(), input({ l1Orders: [l1Order({ maxCost: 25.4 })] }));
   assert.strictEqual(r1.allowed, true); assert.strictEqual(r1.count, 1);
-  const r2 = W(ON(), input({ l1Orders: [l1Order({ maxCost: 27.4 })] }));
+  const r2 = W(ON(), input({ l1Orders: [l1Order({ maxCost: 26.4 })] }));
   assert.strictEqual(r2.allowed, false, 'no whole contract fits the shared window');
   const other = W(ON(), input({ l1Orders: [l1Order({ maxCost: 27.4, ticker: 'KXBTC15M-26NOV031030-30' })] }));
   assert.strictEqual(other.allowed, true, 'another window is not affected');
@@ -132,14 +143,14 @@ gates['slot and L1 share one window limit: L1 spend in a window shrinks what the
 gates['hard caps hold: contracts per order, open per market, depth share, dollars per order, window and total'] = () => {
   const big = Object.assign(GOOD(), { contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } });
   const F = { enabled: true, registry: [big] };
-  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 5000 })).count, 9, 'cut by the $6 per-order cap: 9 contracts at about $0.65');
+  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 5000 })).count, 7, 'cut by the $5 per-order cap: 7 contracts at about $0.65');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 20, sizingBase: 5000 })).count, 5, 'depth share 25% of 20');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 3, sizingBase: 5000 })).allowed, false, '25% of 3 is under one contract');
   assert.strictEqual(W(F, input({ depthAtTouch: null })).allowed, false, 'unknown depth refuses');
   const held = [slotOrder({ count: 6, fillCount: '6', maxCost: 4.0, step: 1 })];
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 1000, sizingBase: 5000, slotOrders: held, step: 1 })).allowed, false, 'step 1 already attempted');
   const two = Object.assign(GOOD(), { contractsPerOrder: 5 });
-  const r = W({ enabled: true, registry: [two] }, input({ step: 2, limit: 0.62, depthAtTouch: 1000, sizingBase: 5000, slotOrders: [slotOrder({ count: 6, fillCount: '6', maxCost: 3.0 })] }));
+  const r = W({ enabled: true, registry: [two] }, input({ step: 2, limit: 0.62, depthAtTouch: 1000, sizingBase: 5000, slotOrders: [slotOrder({ count: 6, fillCount: '6', maxCost: 1.0 })] }));
   assert.strictEqual(r.allowed, true); assert.strictEqual(r.count, 4, 'open per market is 10: six held leaves four');
   const tot = [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', series: 'KXETH15M', maxCost: 11.5, count: 1, fillCount: '1', side: 'yes' })];
   assert.strictEqual(W(ON(), input({ slotOrders: tot, sizingBase: 5000 })).allowed, false, 'total open cap $12 leaves $0.50, under one contract at 75c');
@@ -184,15 +195,15 @@ gates['client order ids are deterministic per strategy, market and step, and nev
 };
 gates['a slot close sells only its own contracts, never more than the account holds, never opens the opposite position'] = () => {
   const o = slotOrder({ count: 5, fillCount: '5', exitCount: 1 });
-  assert.strictEqual(slot.slotSellCount({ order: o, position: 9, haveClaim: true }), 4, 'own unsold, not the whole position (L1 holds the rest)');
-  assert.strictEqual(slot.slotSellCount({ order: o, position: 2, haveClaim: true }), 2, 'capped at what the account holds');
-  assert.strictEqual(slot.slotSellCount({ order: o, position: 0, haveClaim: true }), 0);
-  assert.strictEqual(slot.slotSellCount({ order: o, position: -7, haveClaim: true }), 0, 'a YES order never sells against a NO position');
-  assert.strictEqual(slot.slotSellCount({ order: { ...o, side: 'no' }, position: -7, haveClaim: true }), 4);
-  assert.strictEqual(slot.slotSellCount({ order: { ...o, side: 'no' }, position: 7, haveClaim: true }), 0);
-  assert.strictEqual(slot.slotSellCount({ order: o, position: 9, haveClaim: false }), 0, 'no lease on the market, no sale');
-  assert.strictEqual(slot.slotSellCount({ order: o, position: null, haveClaim: true }), 0, 'unreadable position');
-  assert.strictEqual(slot.slotSellCount({ order: { ...o, strategy: 'L1' }, position: 9, haveClaim: true }), 0, 'an L1 order is never a slot sale');
+  assert.strictEqual(slot.slotSellCount({ order: o, position: 9, haveClaim: true, othersUnsold: 5 }), 4, 'own unsold, not the whole position (L1 holds the rest)');
+  assert.strictEqual(slot.slotSellCount({ order: o, position: 2, haveClaim: true, othersUnsold: 0 }), 2, 'capped at what the account holds');
+  assert.strictEqual(slot.slotSellCount({ order: o, position: 0, haveClaim: true, othersUnsold: 0 }), 0);
+  assert.strictEqual(slot.slotSellCount({ order: o, position: -7, haveClaim: true, othersUnsold: 0 }), 0, 'a YES order never sells against a NO position');
+  assert.strictEqual(slot.slotSellCount({ order: { ...o, side: 'no' }, position: -7, haveClaim: true, othersUnsold: 0 }), 4);
+  assert.strictEqual(slot.slotSellCount({ order: { ...o, side: 'no' }, position: 7, haveClaim: true, othersUnsold: 0 }), 0);
+  assert.strictEqual(slot.slotSellCount({ order: o, position: 9, haveClaim: false, othersUnsold: 0 }), 0, 'no lease on the market, no sale');
+  assert.strictEqual(slot.slotSellCount({ order: o, position: null, haveClaim: true, othersUnsold: 0 }), 0, 'unreadable position');
+  assert.strictEqual(slot.slotSellCount({ order: { ...o, strategy: 'L1' }, position: 9, haveClaim: true, othersUnsold: 0 }), 0, 'an L1 order is never a slot sale');
 };
 gates['the mirrored constants and the settlement rule stay equal to the live ones'] = () => {
   assert.strictEqual(slot.L1_WINDOW_CAP_FRACTION_MIRROR, live.L1_WINDOW_CAP_FRACTION);
@@ -210,30 +221,18 @@ gates['the L1 exit watch and settle sweep still read only L1 orders, and the liv
   assert.ok(!/kalshiSlot/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'no rule opens the new collection yet; with no rule it is closed to every client');
 };
 
-gates['the named entry points: same side may enter, the opposite is blocked both ways, caps only cut, losses stop exactly at the limit, kills stay tripped'] = () => {
-  const wk = slot.windowKey(T), base = { strategy: GOOD(), ticker: T, windowKey: wk, side: 'yes', contracts: 4, step: 1, l1Orders: [], slotOrders: [], restingSize: 100, spentToday: 0, spentTotal: 0, sizingBase: 500, now: NOW };
-  assert.strictEqual(slot.slotMayEnter(base).ok, false, 'production: switch off, nothing may enter');
-  const may = (o) => slot.slotMayEnterWith({ enabled: true }, Object.assign({}, base, o || {}));
-  assert.deepStrictEqual([may().ok, may().contracts], [true, 4]);
-  assert.strictEqual(may({ l1Orders: [l1Order()] }).ok, true, 'same side as L1 in the same market and window is not a hedge');
-  assert.strictEqual(may({ l1Orders: [l1Order({ side: 'no' })] }).ok, false, 'a slot order against an L1 position would hedge');
-  assert.strictEqual(may({ slotOrders: [slotOrder({ side: 'no' })] }).ok, false);
-  assert.strictEqual(slot.slotSideRule({ side: 'yes', ticker: T, windowKey: wk, l1Orders: [], slotOrders: [slotOrder({ side: 'no' })] }).ok, false);
-  assert.strictEqual(slot.slotSideRule({ side: 'no', ticker: T, windowKey: wk, l1Orders: [l1Order()], slotOrders: [] }).ok, false, 'an L1 order against a slot position is blocked too');
-  assert.strictEqual(slot.slotSideRule({ side: 'yes', ticker: T, windowKey: wk, l1Orders: [l1Order()], slotOrders: [slotOrder()] }).ok, true);
-  for (const bad of [{ l1Orders: null }, { slotOrders: undefined }, { side: 'up' }, { windowKey: 'X' }, { restingSize: undefined }, { now: NaN }])
-    assert.strictEqual(may(bad).ok, false, 'malformed input blocks: ' + JSON.stringify(bad));
-  const cut = may({ contracts: 10, restingSize: 12 });
-  assert.ok(cut.ok && cut.contracts <= 3 && cut.contracts <= 10, 'depth share cuts, never raises');
-  assert.ok(may({ contracts: 2 }).contracts <= 2, 'never more than asked');
-  assert.strictEqual(may({ spentToday: slot.SLOT_DAILY_LOSS_CAP - 0.01 }).ok, true);
-  assert.strictEqual(may({ spentToday: 5 }).ok, false);
-  assert.strictEqual(may({ spentToday: 0.1 + 0.2 + 4.7 }).ok, false, 'a float sum that lands on the cap is blocked');
-  assert.strictEqual(may({ spentTotal: 15 }).ok, false);
-  const r = slot.slotRiskForL1({ slotOrders: [slotOrder({ maxCost: 2 }), slotOrder({ ticker: 'KXBTC15M-26NOV031030-30', maxCost: 1.5 }), slotOrder({ settled: true, settledPnl: -1.25, ts: NOW - 1000 })], windowKey: wk, now: NOW });
-  assert.strictEqual(r.windowAtRisk, 2, 'only open slot orders in that window are at risk');
+gates['the named entry points: only one entry gate exists, losses stop at the limit, kills stay tripped'] = () => {
+  const wk = slot.windowKey(T);
+  assert.strictEqual(slot.slotMayEnter, undefined, 'slotMayEnter is gone: it accepted a caller-built strategy');
+  assert.strictEqual(slot.slotSideRule, undefined, 'slotSideRule is gone: it hard-coded position 0 and no lock');
+  assert.strictEqual(slot.slotOrderCheckWith, undefined, 'the flag-taking gate is test-only, not a production export');
+  assert.strictEqual(slot.slotMayEnterWith, undefined);
+  const r = slot.slotRiskForL1({ slotOrders: [slotOrder({ maxCost: 2 }), slotOrder({ ticker: 'KXBTC15M-26NOV031030-30', maxCost: 1.5 }), slotOrder({ settled: true, result: 'no', settledPnl: -1.25, ts: NOW - 1000 })], windowKey: wk, now: NOW });
+  assert.strictEqual(r.windowSpent, 5, 'gross spend in that window: 2 open plus 3 for the settled one');
+  assert.strictEqual(r.openAtRisk, 2);
+  assert.strictEqual(r.windowAtRisk, undefined, 'the ambiguous windowAtRisk name is gone');
   assert.strictEqual(r.settledPnl24h, -1.25);
-  const losing = (n) => Array.from({ length: n }, (_, i) => slotOrder({ settled: true, settledPnl: -1, fillCount: '4', ts: NOW - 100000 + i, step: 1 }));
+  const losing = (n) => Array.from({ length: n }, (_, i) => slotOrder({ settled: true, result: 'no', settledPnl: -1, fillCount: '4', ts: NOW - 100000 + i, step: 1 }));
   assert.strictEqual(slot.slotKillStatus(losing(3), GOOD()).killed, true, 'three losses in a row trip the kill');
   assert.strictEqual(slot.slotKillStatus(losing(2), GOOD()).killed, false);
   const rec = slot.slotOrderRecord({ strategyId: 'TESTA', ticker: T, side: 'yes', step: 1, count: 4, limit: 0.75, maxCost: 3.1, ts: NOW });
@@ -241,6 +240,199 @@ gates['the named entry points: same side may enter, the opposite is blocked both
   assert.strictEqual(rec.strategy, 'SLOT');
   assert.strictEqual(slot.validateStrategy(GOOD()).ok, true);
   assert.strictEqual(slot.validateStrategy(Object.assign(GOOD(), { contractsPerOrder: 11 })).ok, false);
+};
+
+
+// ---- Review round: one gate per blocker or high finding (each fails against the earlier library) ----------------------------------------------------
+const WIDE = () => Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -15 } } });
+const WF = { enabled: true, get registry() { return [WIDE()]; } };
+const lossAt = (ago, pnl, k) => slotOrder({ ticker: 'KXETH15M-26NOV02' + (1000 + (k || 0)) + '-15', series: 'KXETH15M', settled: true, result: 'no', settledPnl: pnl, ts: NOW - ago });
+
+gates['H1 one order can never overshoot the daily or lifetime loss cap: its own cost must fit in what is left'] = () => {
+  assert.ok(slot.SLOT_MAX_RISK_PER_ORDER <= slot.SLOT_DAILY_LOSS_CAP, 'a single order may not be bigger than the daily cap');
+  const prior = (p, ago) => [lossAt(ago, p, 1)];
+  assert.strictEqual(W(WF, input({ slotOrders: prior(-4.9, 3600000) })).allowed, false, 'a 4.90 loss leaves 0.10 of daily room: no whole contract');
+  const r = W(WF, input({ slotOrders: prior(-4.0, 3600000), limit: 0.75 }));
+  assert.ok(r.allowed && r.cost <= 1.0 + 1e-9, 'only what fits in the last $1.00: cost ' + r.cost);
+  assert.strictEqual(W(WF, input({ slotOrders: prior(-14.9, 5 * 86400000) })).allowed, false, 'lifetime: 0.10 left');
+  const l = W(WF, input({ slotOrders: prior(-14.0, 5 * 86400000) }));
+  assert.ok(l.allowed && l.cost <= 1.0 + 1e-9, 'lifetime room is $1.00');
+  // worst case afterwards never passes the caps
+  const worstAfter = (orders) => slot.slotRiskContract(orders, NOW).day.worst - W(WF, input({ slotOrders: orders })).cost;
+  assert.ok(worstAfter(prior(-4.0, 3600000)) >= -slot.SLOT_DAILY_LOSS_CAP - 1e-9);
+};
+
+gates['H2 scale-in is refused after the previous step was stopped out or sold, after any earlier exit, and a failed step is not retried'] = () => {
+  const step1 = (o) => slotOrder(Object.assign({ step: 1, ts: NOW - 120000, maxCost: 3 }, o));
+  const at2 = (orders) => W(ON(), input({ step: 2, slotOrders: orders, limit: 0.62, depthAtTouch: 1000, sizingBase: 5000 }));
+  assert.strictEqual(at2([step1()]).allowed, true, 'a step 1 still fully open may be scaled into');
+  assert.strictEqual(at2([step1({ exitCount: 4, exitProceeds: 1.2 })]).allowed, false, 'step 1 stopped out: no averaging down');
+  assert.strictEqual(at2([step1({ exitCount: 1, exitProceeds: 0.3 })]).allowed, false, 'any earlier exit on the ticker blocks scaling');
+  assert.strictEqual(at2([step1({ settled: true, result: 'exit', settledPnl: -1.8, exitCount: 4 })]).allowed, false);
+  const retry = W(ON(), input({ slotOrders: [slotOrder({ status: 'error', fillCount: '0', settled: false })] }));
+  assert.strictEqual(retry.allowed, false, 'a failed step is not retried under the same client order id');
+  assert.strictEqual(W(ON(), input({ slotOrders: [slotOrder({ status: 'no fill', fillCount: '0' })] })).allowed, false);
+};
+
+gates['H3 a slot close sells nothing for settled, hand-closed, errored or unfilled orders, and never L1\'s contracts'] = () => {
+  const s = (o, extra) => slot.slotSellCount(Object.assign({ order: slotOrder(o), position: 5, haveClaim: true, othersUnsold: 0 }, extra || {}));
+  assert.strictEqual(s({}), 4);
+  assert.strictEqual(s({ settled: true, result: 'hand', exitCount: 0 }), 0, 'already closed by hand or Flatten');
+  assert.strictEqual(s({ settled: true, result: 'exit', exitCount: 4 }), 0);
+  assert.strictEqual(s({ status: 'error' }), 0);
+  assert.strictEqual(s({ status: 'no fill', fillCount: '0' }), 0);
+  assert.strictEqual(s({ status: 'sending', fillCount: '0' }), 0);
+  assert.strictEqual(s({ exitCount: 4 }), 0, 'everything already sold');
+  assert.strictEqual(s({}, { othersUnsold: 3 }), 2, 'position 5 minus L1\'s 3 leaves 2, not the raw position');
+  assert.strictEqual(s({}, { othersUnsold: 5 }), 0);
+  assert.strictEqual(s({}, { othersUnsold: undefined }), 0, 'the other engines\' holding must be known');
+  assert.strictEqual(s({}, { othersUnsold: -1 }), 0);
+};
+
+gates['H4 the production gate looks the strategy up in the registry; a hand-built strategy, a flags override or a missing lock proof cannot enter'] = () => {
+  assert.strictEqual(slot.slotOrderCheck(input({ strategyId: 'EVIL' })).allowed, false);
+  assert.strictEqual(slot.slotOrderCheck(Object.assign(input(), { strategy: GOOD(), registry: [GOOD()], enabled: true })).allowed, false, 'extra fields are ignored; the registry is code');
+  assert.strictEqual(W({ enabled: true, registry: [GOOD()] }, input({ strategyId: 'EVIL' })).allowed, false, 'an id that is not in the registry');
+  assert.strictEqual(W(ON(), input({ lockTxn: undefined })).allowed, false, 'no proof the lock was taken in the order transaction');
+  assert.strictEqual(W(ON(), input({ lockTxn: 'yes' })).allowed, false);
+  assert.strictEqual(W(ON(), input()).allowed, true, 'and with the proof it passes');
+  assert.ok(!/slotMayEnter|slotSideRule/.test(code(libSrc)), 'the weaker wrappers are gone');
+};
+
+gates['H5 a realised stop-out is a loss in the shared stop at once, not only after a settle sweep'] = () => {
+  const sold = slotOrder({ count: 4, fillCount: '4', maxCost: 3, exitCount: 4, exitProceeds: 2.5, settled: false });
+  const r = slot.slotRiskForBotRisk([sold], 0);
+  assert.ok(Math.abs(r.net - (-0.5)) < 1e-9 && r.openCost === 0 && Math.abs(r.worst + 0.5) < 1e-9, JSON.stringify(r));
+  const f = slot.slotSettledFields(sold, 'exit');
+  assert.deepStrictEqual(f, { settled: true, result: 'exit', settledPnl: -0.5 }, 'the exit engine records an early sale with slotSettledFields(order, "exit")');
+  assert.deepStrictEqual(slot.slotSettledFields(sold, 'exit'), live.settledFields(sold, 'exit'));
+  const done = Object.assign({}, sold, f);
+  assert.ok(Math.abs(slot.slotRiskForBotRisk([done], 0).net + 0.5) < 1e-9, 'and it counts exactly once after the record is settled');
+  const half = slot.slotRiskForBotRisk([slotOrder({ count: 4, fillCount: '4', maxCost: 3, exitCount: 2, exitProceeds: 0.5 })], 0);
+  assert.ok(Math.abs(half.net - (0.5 - 1.5)) < 1e-9 && Math.abs(half.openCost - 1.5) < 1e-9, 'a partial exit realises its share');
+};
+
+gates['H6 the window figure for L1 is the gross spend and a sold or settled slot order still occupies its window'] = () => {
+  const sold = slotOrder({ count: 4, fillCount: '4', maxCost: 3, exitCount: 4, exitProceeds: 2.5 });
+  const r = slot.slotRiskForL1({ slotOrders: [sold], windowKey: slot.windowKey(T), now: NOW });
+  assert.strictEqual(r.windowSpent, 3, 'sold, but still spent in the window');
+  assert.strictEqual(r.openAtRisk, 0);
+  assert.strictEqual(slot.slotWindowSpent([sold], T), 3);
+  const settledOne = slotOrder({ settled: true, result: 'exit', settledPnl: -0.5, exitCount: 4, maxCost: 2.7 });
+  assert.strictEqual(slot.slotWindowSpent([settledOne], T), 2.7);
+  // wired the obvious way, the window cap stays shared: L1 sees the slot's spend even after the slot sold
+  const afterSale = W(ON(), input({ slotOrders: [slotOrder({ ticker: T, maxCost: 26, exitCount: 4, exitProceeds: 20, fillCount: '4', step: 9 })], l1Orders: [] }));
+  assert.strictEqual(afterSale.allowed, false, 'the slot itself also sees its sold spend as used window room');
+};
+
+gates['H7 kill rules are sticky, ordered by settlement time, and a reviewed edit re-arms only results settled after reviewedAt'] = () => {
+  const S = GOOD();
+  const mk = (k, pnl, at) => slotOrder({ ticker: 'KXBTC15M-26NOV02' + (1000 + k) + '-15', settled: true, result: pnl < 0 ? 'no' : 'yes', settledPnl: pnl, ts: NOW - 1e6 + k, settledAt: at });
+  const T0 = NOW - 5e5;
+  const three = [mk(1, -1, T0 + 1), mk(2, -1, T0 + 2), mk(3, -1, T0 + 3)];
+  assert.strictEqual(slot.killCheck(S, three, null).killed, true);
+  const lateWin = mk(0, 2, T0 + 10);           // placed first, settled last
+  assert.strictEqual(slot.killCheck(S, [...three, lateWin], null).killed, true, 'a late-settling win cannot un-kill the three-loss streak');
+  const earlyWin = mk(0, 2, T0 + 2.5);          // settled between loss 2 and 3
+  assert.strictEqual(slot.killCheck(S, [three[0], three[1], earlyWin, three[2]], null).killed, false, 'a win that settled in between really did break the streak');
+  const old = [-1, -1, -1].map((p, k) => Object.assign(mk(k + 10, p, Date.parse('2026-10-20T00:00:00Z') + k), { ts: Date.parse('2026-10-20T00:00:00Z') + k }));
+  assert.strictEqual(slot.killCheck(Object.assign(GOOD(), { reviewedAt: '2026-10-01' }), old, null).killed, true, 'old losses count while reviewedAt is older');
+  assert.strictEqual(slot.killCheck(GOOD(), old, null).killed, false, 'a reviewed edit with a later reviewedAt re-arms a streak kill: only newer results count');
+  const net = Array.from({ length: 20 }, (_, k) => mk(30 + k, k % 2 ? 1 : -3, T0 + k * 10));
+  assert.strictEqual(slot.killCheck(Object.assign(GOOD(), { reviewedAt: '2026-10-01' }), net, null).killed, true);
+  assert.strictEqual(slot.validateSlotStrategy(Object.assign(GOOD(), { reviewedAt: '2099-01-01' })).ok, false, 'a reviewedAt in the future would blind the kill rules and is rejected');
+  assert.strictEqual(slot.validateSlotStrategy(Object.assign(GOOD(), { reviewedAt: slot.SLOT_LAST_REVIEWED_ON })).ok, true);
+  assert.strictEqual(slot.killCheck(Object.assign(GOOD(), { reviewedAt: '2026-10-29' }), [], { killedAt: NOW }).killed, true, 'a latch newer than reviewedAt blocks, and a future reviewedAt cannot hide it');
+};
+
+gates['H8 an order with a missing or odd ts still counts in the day and lifetime loss figures, and the gate refuses on it'] = () => {
+  const noTs = slotOrder({ ts: undefined, settled: true, result: 'no', settledPnl: -9 });
+  const stamp = slotOrder({ ts: { seconds: 1 }, settled: true, result: 'no', settledPnl: -9 });
+  for (const o of [noTs, stamp]) {
+    assert.strictEqual(slot.slotRiskForBotRisk([o], NOW - 86400000).net, -9);
+    assert.strictEqual(slot.slotRiskContract([o], NOW).day.net, -9);
+  }
+  assert.strictEqual(slot.slotRiskForBotRisk([slotOrder({ ts: undefined, status: 'sending', fillCount: '0' })], 0).openCost, 3);
+  assert.strictEqual(W(ON(), input({ slotOrders: [noTs] })).allowed, false, 'the gate will not trade on books it cannot date');
+};
+
+gates['H9 a malformed ticker is refused, never thrown on, and a failed-step id cannot be built twice'] = () => {
+  for (const t of ['KXBTC15M-26NOV031015', 'KXGOLD15M-26OCT291015-T4012.99', 'KXBTC15M-26NOV031015-B1-X', 'kxbtc15m-26nov031015-15', '', null, undefined, 42, 'KXXRP15M-26NOV031015-15'])
+    assert.doesNotThrow(() => assert.strictEqual(W(ON(), input({ ticker: t })).allowed, false), 'ticker ' + t);
+  assert.strictEqual(W(ON(), input({ ticker: 'KXGOLD15M-26NOV031015-00', slotOrders: [], l1Orders: [] })).allowed, true);
+};
+
+gates['H10 any order with fills counts as money whatever its status, and an exit or loss with no readable pnl is booked as lost'] = () => {
+  const odd = slotOrder({ count: 3, fillCount: '3', maxCost: 2.7, status: 'error', settled: false });
+  const rc = slot.slotRiskContract([odd], NOW);
+  assert.ok(Math.abs(rc.openTotal - 2.7) < 1e-9);
+  assert.strictEqual(rc.openContractsByTicker[T], 3);
+  assert.strictEqual(slot.slotRiskForBotRisk([odd], 0).trades, 1);
+  assert.ok(Math.abs(slot.slotRiskForBotRisk([odd], 0).worst + 2.7) < 1e-9);
+  assert.strictEqual(slot.slotWindowSpent([odd], T), 2.7);
+  const exitNull = slotOrder({ count: 3, fillCount: '3', maxCost: 2.7, settled: true, result: 'exit', settledPnl: null, exitCount: 3 });
+  assert.ok(Math.abs(slot.slotRiskForBotRisk([exitNull], 0).net + 2.7) < 1e-9, 'an exit with no pnl books the whole amount paid');
+  const lossNull = slotOrder({ settled: true, result: 'no', settledPnl: null, maxCost: 5, count: 4, fillCount: '4' });
+  assert.ok(Math.abs(slot.slotRiskForBotRisk([lossNull], 0).net + 5) < 1e-9, 'a settled loss with a null pnl is derived from its result, not zero');
+  assert.strictEqual(slot.directionDecision({ ticker: T, side: 'no', l1Orders: [], slotOrders: [odd], lock: null, position: 0 }).allow, false, 'an errored order with fills still holds its side');
+  assert.strictEqual(W(ON(), input({ slotOrders: [slotOrder({ status: 'error', fillCount: '4', maxCost: 5.0, step: 7 })], limit: 0.75 })).allowed, false, 'and its dollars are in the caps');
+};
+
+gates['H11 parity: the same fixture orders give the same net, open cost, worst and trades through botRisk and slotRiskForBotRisk'] = async () => {
+  const mk = (o) => Object.assign({ ticker: T, side: 'yes', count: 4, fillCount: '4', maxCost: 3, status: 'filled', ts: NOW - 60000, settled: false }, o);
+  const base = [
+    mk({}), mk({ exitCount: 2, exitProceeds: 0.5 }), mk({ exitCount: 4, exitProceeds: 2.5 }), mk({ fillCount: '3' }),
+    mk({ side: 'no', ...live.settledFields(mk({ side: 'no' }), 'yes'), }), mk({ ...live.settledFields(mk({}), 'yes') }), mk({ ...live.settledFields(mk({ exitCount: 4, exitProceeds: 2.5 }), 'exit') }),
+    mk({ ...live.settledFields(mk({ exitCount: 4, exitProceeds: 1.0 }), 'exit'), exitCount: 4, exitProceeds: 1.0 }), mk({ settled: true, result: 'hand', settledPnl: null }),
+    mk({ status: 'error', fillCount: '2' }), mk({ count: 2, fillCount: '1', maxCost: 1.5 }),
+  ];
+  const l1 = base.map((o, i) => Object.assign({ id: 'a' + i, strategy: 'L1', ticker: 'KXBTC15M-26NOV03' + (1000 + i) + '-15' }, o));
+  const sl = base.map((o, i) => Object.assign({ id: 'a' + i, strategy: 'SLOT', slotId: 'TESTA' }, o, { ticker: 'KXBTC15M-26NOV03' + (1000 + i) + '-15' }));
+  const fetchFn = async () => ({ status: 200, text: async () => JSON.stringify({ market: { result: '' } }) });
+  const a = await live.botRisk({ store: { updateTest: async () => {} }, since: 0, fetchFn, nowMs: NOW, orders: l1 });
+  const b = slot.slotRiskForBotRisk(sl, 0);
+  for (const k of ['net', 'openCost', 'worst', 'trades']) assert.ok(Math.abs(a[k] - b[k]) < 1e-9, k + ': botRisk ' + a[k] + ' vs slot ' + b[k]);
+  assert.strictEqual(b.addonAtRisk, 0);
+};
+
+gates['H12 direction normalises ticker and status case and treats any fills as holding, so it does not rely only on the lock and the position'] = () => {
+  const d = (o) => slot.directionDecision(Object.assign({ ticker: T, side: 'no', l1Orders: [], slotOrders: [], lock: null, position: 0 }, o));
+  assert.strictEqual(d({ l1Orders: [l1Order({ ticker: T.toLowerCase(), status: 'sending', fillCount: '0' })] }).allow, false, 'lower-cased ticker');
+  assert.strictEqual(d({ l1Orders: [l1Order({ ticker: ' ' + T + ' ' })] }).allow, false, 'spaces');
+  assert.strictEqual(d({ l1Orders: [l1Order({ status: 'Filled' })] }).allow, false, 'status case');
+  assert.strictEqual(d({ l1Orders: [l1Order({ status: 'error', fillCount: '2' })] }).allow, false, 'errored with fills still holds');
+  assert.strictEqual(d({ l1Orders: [l1Order({ status: 'error', fillCount: '0' })] }).allow, true);
+  for (const bad of ['YES', ' yes', 'bid', 'ask', undefined, null]) assert.strictEqual(d({ l1Orders: [l1Order({ side: bad })] }).allow, false, 'side ' + bad);
+};
+
+gates['H13 the slot cannot take the whole window: half the shared cap at most, and one L1 contract of room always stays'] = () => {
+  const fav = Object.assign(GOOD(), { entry: { sideRule: 'favourite', priceMin: 0.5, priceMax: 0.9, leftMaxSec: 700, leftMinSec: 300 }, contractsPerOrder: 5 });
+  const r = W({ enabled: true, registry: [fav] }, input({ sizingBase: 100, limit: 0.8 }));
+  assert.ok(r.allowed, r.reasons.join());
+  assert.ok(r.cost <= 0.055 * 100 * slot.SLOT_WINDOW_SHARE + 1e-9, 'at most half the window: ' + r.cost);
+  assert.ok(0.055 * 100 - r.cost >= slot.SLOT_L1_RESERVE, 'a gold contract of room is left for L1');
+  assert.ok(slot.SLOT_L1_RESERVE >= 0.97, 'the reserve covers a 97c contract');
+  const tiny = W({ enabled: true, registry: [fav] }, input({ sizingBase: 20, limit: 0.8 }));
+  assert.strictEqual(tiny.allowed, false, 'a small base leaves no room for the slot at all');
+};
+
+gates['H14 the inertness gate itself catches env reads, randomness, timers and nested imports'] = () => {
+  const banned = /process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b/;
+  for (const bad of ['process.env.X', 'Math.random()', 'setTimeout(f,1)', 'setInterval(f,1)', 'import("x")', 'globalThis.x', 'eval("1")', 'performance.now()']) assert.ok(banned.test(bad), bad);
+  const os = require('os');
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'slotwalk-'));
+  fs.mkdirSync(path.join(dir, 'functions', 'sub'), { recursive: true });
+  fs.writeFileSync(path.join(dir, 'functions', 'sub', 'x.js'), "require('../kalshiSlotLib')");
+  const hits = walk(dir).filter((f) => /kalshiSlot/.test(fs.readFileSync(f, 'utf8')));
+  assert.strictEqual(hits.length, 1, 'a nested import is found by the recursive scan');
+  fs.rmSync(dir, { recursive: true, force: true });
+};
+
+gates['H15 the wiring checklist and the contract names are in the design doc'] = () => {
+  const doc = fs.readFileSync(path.join(root, 'docs', 'SECOND_SLOT_DESIGN.md'), 'utf8');
+  for (const w of ['windowSpent', 'slotRiskForBotRisk', 'lockTxn', 'settledAt', 'othersUnsold', 'Wiring checklist', 'kalshiHandSoldGates', 'closedByHand', 'two-instance'])
+    assert.ok(doc.includes(w), 'the design doc must mention ' + w);
+  assert.ok(!/slotMayEnter|slotSideRule|windowAtRisk/.test(doc.split('\n').filter((l) => !/removed/i.test(l)).join('\n')), 'the doc no longer advertises the removed names');
 };
 
 (async () => {

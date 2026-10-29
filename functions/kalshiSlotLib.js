@@ -142,7 +142,8 @@ function windowKey(ticker) { const p = String(ticker || "").split("-"); return p
 // ---- 1. Direction: same side only ------------------------------------------------------------------------------------------------------
 const normTicker = (x) => String(x === undefined || x === null ? "" : x).trim().toUpperCase();
 const normStatus = (x) => String(x === undefined || x === null ? "" : x).trim().toLowerCase();
-const num = (x) => { const n = Number(x); return Number.isFinite(n) ? n : NaN; };
+// null, undefined and "" are NOT zero here (Number(null) is 0, which would turn a missing settledPnl into a free loss): they are unreadable.
+const num = (x) => { if (x === null || x === undefined || x === "") return NaN; const n = Number(x); return Number.isFinite(n) ? n : NaN; };
 // Decides whether `side` may be bought on `ticker`, from every source that could disagree:
 //   l1Orders / slotOrders  the order documents of both collections (money in flight counts; so does ANY order with fills, whatever its status)
 //   lock                   the kalshiLiveDirection/{ticker} document { side } read in the same transaction that creates the order (see the design doc)
