@@ -1463,6 +1463,17 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 29</div>
+                <ul class="changelog-list">
+                  <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
+                  <li>The profit add-on (extra contracts bought with reinvested profit) is capped at a quarter of the base size, so a long win streak cannot push a gold order far above its base and the next loss lands at a smaller size (#615)</li>
+                  <li>Settings: chats can run safe tools without asking; deploys, merging pull requests and the live env file stay blocked (#614)</li>
+                  <li>The bot refuses any order larger than its market's maximum size (the nightly report shows any that got through), and sends a phone alert if the exit watch goes silent for 4 minutes while a position is open (#613)</li>
+                  <li>Research recorder: the 15 minute Bitcoin, Ethereum and gold order book and trade tape, public data only, for testing resting orders on gold (#610)</li>
+                  <li>Second strategy slot wiring (switched off; no strategy can use it, and the bot behaves exactly as before) (#608)</li>
+                  <li>Security: patched two server dependencies, with a gate that fails if they fall back (#609)</li>
+                  <li>Research notes: the spread filter forward test spec (#611) and the day's research outcomes (#612)</li>
+                </ul>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
                   <li>Groundwork for a second live strategy (switched off, nothing wired in): hard caps that scale with the account, one shared risk budget with L1, same direction allowed and opposite blocked; nothing on the page or the bot changes (#607)</li>
