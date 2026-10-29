@@ -1466,6 +1466,7 @@
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
                   <li>Groundwork for a second live strategy (switched off, nothing wired in): hard caps that scale with the account, one shared risk budget with L1, same direction allowed and opposite blocked; nothing on the page or the bot changes (#607)</li>
+                  <li>Research recorder: the Bitcoin hourly ladder order book (best 5 bids and asks with sizes, every 3 seconds) and trade tape go to the data branch for 14 days, public data only, so a real queue model can be tested; nothing on the page or the bot changes (#606)</li>
                   <li>Brief charts: weekly date labels no longer pile on top of each other where a weekend or night is squeezed (#606)</li>
                   <li>Fixed the nightly order report endpoint answering an error on every call (it did not start its database connection); nothing on the page changes (#604)</li>
                   <li>A nightly order report endpoint (read only, behind a secret token) so the daily results can be fetched without pasting orders; nothing on the page changes (#603)</li>
