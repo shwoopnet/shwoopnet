@@ -49,6 +49,10 @@ def fee(p, c, m=1.0):
     return math.ceil(m * 0.07 * c * p * (1 - p) * 100 - 1e-9) / 100 / c
 
 
+def vfee(p, c, m=1.0):
+    return np.ceil(m * 0.07 * c * np.asarray(p) * (1 - np.asarray(p)) * 100 - 1e-9) / 100 / c
+
+
 def load_markets(holdout: bool):
     M = {}
     for name in ("book", "l1b", "fresh"):
@@ -140,11 +144,16 @@ def build_chunk(items):
                 xb = bids[idx]
                 rows.append((wid, day, ASSET[series], yes, L, ask, bid, ask - bid, ds[0], ds[1], ds[2], ds[3], rng5, vol, doi,
                              datetime.fromtimestamp(t, timezone.utc).hour, sgn * xs[0], xs[1], sgn * xs[2], xs[3], sgn * z0, sgn * r30, fl[0], fl[1]))
-                n10.append([b - ask - fee(ask, 10) - fee(b, 10) for b in xb])
-                n1.append([b - ask - fee(ask, 1) - fee(b, 1) for b in xb])
-                ns.append([b - ask - fee(ask, 10, 1.2) - fee(b, 10, 1.2) for b in xb])
-                zv.append(list(vz[idx] | (vol <= 0)))
-    return rows, n10, n1, ns, zv
+                n10.append((xb - ask - vfee(ask, 10) - vfee(xb, 10)).astype(np.float32))
+                n1.append((xb - ask - vfee(ask, 1) - vfee(xb, 1)).astype(np.float16))
+                ns.append((xb - ask - vfee(ask, 10, 1.2) - vfee(xb, 10, 1.2)).astype(np.float16))
+                zv.append(vz[idx] | (vol <= 0))
+    out = DATA_DIR / "gen1_chunks" / f"{items[0][0]}.npz"
+    out.parent.mkdir(exist_ok=True)
+    np.savez(out, X=np.array([list(r[2:]) for r in rows], dtype=np.float32).reshape(-1, len(FEATS)), wid=np.array([r[0] for r in rows], dtype=np.int64),
+             day=np.array([r[1] for r in rows]), N10=np.array(n10).reshape(-1, len(COMBOS)), N1=np.array(n1).reshape(-1, len(COMBOS)),
+             NS=np.array(ns).reshape(-1, len(COMBOS)), ZV=np.array(zv).reshape(-1, len(COMBOS)))
+    return str(out)
 
 
 def build(holdout=False):
@@ -158,15 +167,14 @@ def build(holdout=False):
     items = list(enumerate(sorted(M)))
     chunks = [items[i::64] for i in range(64)]
     with Pool(4) as p:
-        res = p.map(build_chunk, chunks)
-    rows = [r for a in res for r in a[0]]
-    days = sorted({r[1] for r in rows}); didx = {d: i for i, d in enumerate(days)}
-    X = np.array([list(r[2:]) for r in rows], dtype=np.float32)
-    wid = np.array([r[0] for r in rows]); day = np.array([didx[r[1]] for r in rows])
-    N10 = np.array([x for a in res for x in a[1]], dtype=np.float32)
-    N1 = np.array([x for a in res for x in a[2]], dtype=np.float16)
-    NS = np.array([x for a in res for x in a[3]], dtype=np.float16)
-    ZV = np.array([x for a in res for x in a[4]], dtype=np.bool_)
+        files = p.map(build_chunk, chunks)
+    parts = [dict(np.load(f)) for f in files]
+    X = np.concatenate([q["X"] for q in parts]); wid = np.concatenate([q["wid"] for q in parts])
+    dstr = np.concatenate([q["day"] for q in parts]); days = sorted(set(dstr.tolist())); didx = {d: i for i, d in enumerate(days)}
+    day = np.array([didx[d] for d in dstr.tolist()])
+    N10 = np.concatenate([q["N10"] for q in parts]); N1 = np.concatenate([q["N1"] for q in parts])
+    NS = np.concatenate([q["NS"] for q in parts]); ZV = np.concatenate([q["ZV"] for q in parts])
+    rows = X
     order = np.lexsort((-X[:, 1], -X[:, 2], wid))
     np.savez(HOLD_NPZ if holdout else NPZ, X=X[order], N10=N10[order], N1=N1[order], NS=NS[order], ZV=ZV[order], wid=wid[order], day=day[order], days=np.array(days))
     print("rows", len(rows), "days", len(days), "windows", len(M), flush=True)
