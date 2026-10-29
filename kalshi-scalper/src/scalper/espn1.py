@@ -489,10 +489,7 @@ if __name__ == "__main__":
         score(int(sys.argv[2]), sys.argv[3])
     elif sys.argv[1] == "calib":
         calib()
-
-    cmd = sys.argv[1]
-    if cmd == "fetch":
+    elif sys.argv[1] == "fetch":
         fetch()
-    elif cmd == "match":
-        db = sqlite3.connect(DB)
-        match_games(db)
+    elif sys.argv[1] == "match":
+        match_games(sqlite3.connect(DB))
