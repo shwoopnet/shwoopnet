@@ -1,0 +1,34 @@
+SELF1: series BTC, ETH, GOLD, DOGE, XRP; Bonferroni z bar 5.17
+LOOK1 (look time per series chosen on discovery):
+  KXBTC15M: chosen 10 min (discovery PFs 10m 1.70, 8m 0.96, 6m 1.00, 4m 0.96, 3m 0.74) | disc PF 1.70 stress 1.70 n=206 closes 206 z +1.81 | valid PF 1.34 stress 1.34 n=212 closes 212 z +1.22 | HOLD PF 1.15 stress 1.15 n=353 closes 353 z +0.68 => FALSIFIED
+  KXETH15M: chosen 10 min (discovery PFs 10m 1.44, 8m 1.21, 6m 1.16, 4m 0.80, 3m 0.80) | disc PF 1.44 stress 1.44 n=312 closes 312 z +1.90 | valid PF 0.82 stress 0.82 n=322 closes 322 z -0.91 | HOLD PF 0.85 stress 0.85 n=409 closes 409 z -0.85 => FALSIFIED
+  KXGOLD15M: chosen 6 min (discovery PFs 10m 0.92, 8m 1.10, 6m 1.43, 4m 0.96, 3m 0.78) | disc PF 1.43 stress 1.43 n=613 closes 613 z +2.14 | valid PF 1.02 stress 1.02 n=551 closes 551 z +0.16 | HOLD PF 1.18 stress 1.18 n=512 closes 512 z +1.06 => FALSIFIED
+  KXDOGE15M: chosen 8 min (discovery PFs 10m 1.01, 8m 1.54, 6m 1.29, 4m 0.77, 3m 0.65) | disc PF 1.54 stress 1.54 n=631 closes 631 z +3.24 | valid PF 1.18 stress 1.18 n=726 closes 726 z +1.09 | HOLD PF 1.18 stress 1.18 n=692 closes 692 z +1.30 => FALSIFIED
+  KXXRP15M: chosen 8 min (discovery PFs 10m 1.25, 8m 1.54, 6m 1.24, 4m 1.04, 3m 0.68) | disc PF 1.54 stress 1.54 n=640 closes 640 z +2.56 | valid PF 1.17 stress 1.17 n=699 closes 699 z +0.74 | HOLD PF 0.92 stress 0.92 n=585 closes 585 z -0.69 => FALSIFIED
+BAND1 (price sub-band per series at 6 min, chosen on discovery):
+  KXBTC15M: chosen 91c-94c (discovery PFs 88-91 0.87, 91-94 1.56, 94-97 0.82, 88-97 1.00) | disc PF 1.56 stress 1.56 n=282 closes 282 | valid PF 1.10 stress 1.10 n=268 closes 268 | HOLD PF 0.82 stress 0.82 n=219 closes 219 => FALSIFIED
+  KXETH15M: chosen 91c-94c (discovery PFs 88-91 1.18, 91-94 1.39, 94-97 0.94, 88-97 1.16) | disc PF 1.39 stress 1.39 n=275 closes 275 | valid PF 1.27 stress 1.27 n=254 closes 254 | HOLD PF 0.67 stress 0.67 n=247 closes 247 => FALSIFIED
+  KXGOLD15M: chosen 91c-94c (discovery PFs 88-91 1.53, 91-94 1.53, 94-97 1.12, 88-97 1.43) | disc PF 1.53 stress 1.53 n=232 closes 232 | valid PF 0.91 stress 0.91 n=172 closes 172 | HOLD PF 0.84 stress 0.84 n=173 closes 173 => FALSIFIED
+  KXDOGE15M: chosen 88c-91c (discovery PFs 88-91 2.14, 91-94 1.51, 94-97 0.59, 88-97 1.29) | disc PF 2.14 stress 2.14 n=256 closes 256 | valid PF 1.19 stress 1.19 n=259 closes 259 | HOLD PF 0.79 stress 0.79 n=235 closes 235 => FALSIFIED
+  KXXRP15M: chosen 88c-91c (discovery PFs 88-91 1.66, 91-94 1.00, 94-97 0.86, 88-97 1.24) | disc PF 1.66 stress 1.66 n=267 closes 267 | valid PF 1.26 stress 1.26 n=283 closes 283 | HOLD PF 1.30 stress 1.30 n=213 closes 213 => FALSIFIED
+ROUND1 (size chosen per entry to minimise the rounded fee per contract, vs fixed 6 contracts), 6 minute look, 5 series:
+  disc: fixed 6 PF 1.293 mean +1.418c | chosen size PF 1.304 mean +1.472c | n=4144
+  valid: fixed 6 PF 1.187 mean +0.983c | chosen size PF 1.197 mean +1.038c | n=3850
+  HOLD: fixed 6 PF 1.058 mean +0.340c | chosen size PF 1.067 mean +0.394c | n=3430
+  ROUND1 => FALSIFIED on the 1.5 bar (see the saving above for the upkeep lane)
+LIVELOSS (information): live export, filled orders with a result, by group: net $, PF, n
+  depth   <= 139         net $  +0.25 PF  1.11 n=18
+  depth   > 139          net $  -1.96 PF  0.81 n=18
+  lead    10m            net $  -3.81 PF  0.64 n=63
+  lead    6m             net $  +8.48 PF  1.34 n=145
+  lead    ?              net $  -4.43 PF  0.97 n=357
+  price   88-91          net $  -0.90 PF  0.99 n=157
+  price   91-94          net $ -36.80 PF  0.61 n=178
+  price   94-97          net $ +37.95 PF  6.11 n=230
+  series  KXBTC15M       net $ -22.46 PF  0.71 n=153
+  series  KXDOGE15M      net $  +2.62 PF  1.32 n=80
+  series  KXETH15M       net $  -2.44 PF  0.92 n=112
+  series  KXGOLD15M      net $ +33.83 PF  2.17 n=155
+  series  KXXRP15M       net $ -11.31 PF  0.40 n=65
+  spread  1c             net $  +1.03 PF  1.01 n=544
+  spread  2c+            net $  -1.15 PF  0.50 n=8
