@@ -96,7 +96,7 @@ const L1_SERIES = ["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M",
 // Markets taken off the tick on purpose (the owner, Oct 28, 2026, on the research session's read). XRP: live since 2026-10-07 it is profit factor 0.49 over 65 fills (8 losses, -$9.51) against 1.32 in the history, which is either bad luck
 // or a live-versus-backtest gap, and the forward reads FLOOR1 and THIN1 settle it on 2026-11-12. It stays in L1_SERIES (its name, quotes and alerts keep working) but is never a candidate. It fails closed: there is NO date after which it
 // resumes by itself; putting it back is a reviewed edit of this list. The exit watch is untouched and still sells any XRP position that is open.
-const PAUSED_SERIES = ["KXXRP15M", ...PROBE_SERIES];   // the three probe markets (AUD/USD, USD/CAD, natural gas) were paused on Oct 28, 2026, the owner: "yeah we can" (a 97c risk for a 3c win on USD/CAD); same rule as XRP, no resume date
+const PAUSED_SERIES = ["KXXRP15M", "KXBTC15M", ...PROBE_SERIES];   // the three probe markets (AUD/USD, USD/CAD, natural gas) were paused on Oct 28, 2026, the owner: "yeah we can" (a 97c risk for a 3c win on USD/CAD); same rule as XRP, no resume date; Bitcoin was paused on Oct 29, 2026, the owner: "we can kill bitcoin i guess" (live profit factor 0.72 over 155 orders, -$22.39, 3 of its 11 losses came with an Ethereum loss in the same window)
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
@@ -340,6 +340,15 @@ const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eli
 // which lead it was entered at (entryLead) so the two can be read apart afterwards.
 const EARLY_PROBE_SERIES = ["KXXRP15M", "KXNATGAS15M"];   // Bitcoin left this list on Oct 23, 2026: it now decides at the 6 minute look, on a smooth climb only (SMOOTH_SERIES)
 const EARLY_WINDOW_MS = [570000, 640000];   // about 10 minutes left
+// Quiet hours (Oct 29, 2026, the owner: "gold skip can go live"). Gold places no NEW order while the US Central clock reads 20:00 to 23:59, the block MKTTIME1 found gold weaker in (skipping it lifted gold's profit factor in all three history windows and the live block is net negative), by the time the bot looks, not the close. Only gold, only new orders: an open position is still sold by the exit watch. It is a small block and a test, not a finding (z +0.98), so it is a reviewed edit of this table, never a stored value.
+const QUIET_HOURS_CT = { KXGOLD15M: [20, 24] };
+const chicagoHourFmt = new Intl.DateTimeFormat("en-US", { timeZone: "America/Chicago", hour: "numeric", hourCycle: "h23" });
+function inQuietHours(series, nowMs) {
+  const w = QUIET_HOURS_CT[series];
+  if (!w || !Number.isFinite(nowMs)) return false;
+  const h = Number(chicagoHourFmt.format(new Date(nowMs)));
+  return h >= w[0] && h < w[1];
+}
 function entryLead(series, left) {
   // XRP and natural gas decide ONLY at 10 minutes (the owner's choice, Oct 21, 2026): a market not in the band then is skipped, not tried again at 6, so the 10 minute claim is tested on its own.
   if (EARLY_PROBE_SERIES.includes(series)) return left >= EARLY_WINDOW_MS[0] && left <= EARLY_WINDOW_MS[1] ? "10m" : null;
@@ -928,7 +937,7 @@ async function runL1Tick(args) {
   }
   // `args.pausedSeries` exists only so the older gates can keep using XRP as their example market; the real caller (functions/index.js) never passes it, and gate PX2 fails if it ever does.
   const paused = Array.isArray(args.pausedSeries) ? args.pausedSeries : PAUSED_SERIES;
-  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x));
+  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x) && !inQuietHours(x, now));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
     && entryLead(q.series, Date.parse(q.m.close_time) - now) !== null)
@@ -1300,7 +1309,7 @@ const DEFAULT_ACCOUNT_ID = "main";
 module.exports = {
   flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
-  flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
