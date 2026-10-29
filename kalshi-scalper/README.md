@@ -7331,3 +7331,18 @@ Fee per contract in cents at C = 1 / 3 / 5 / 10 / 25 / 50 (exact 7% x p x (1-p) 
 ### Result: GEN1 (2026-10-29): NO_WINNER, FALSIFIED before the holdout
 
 12,056 strategies generated from the full grammar (entry conjunctions of 1 to 4 conditions on price, path, volume, open interest, cross-asset, spot and perpetual flow; 216 exits, all before settlement), 5,000 distinct. **None passed discovery** (profit factor 1.5 at 10 contracts with per-order rounded fees, at least 150 trades on 25 days, at most 20% zero-volume fills). Discovery profit factor over all 5,000: median 0.62, 95th percentile 0.87; among the 4,469 with at least 150 trades the maximum is 1.25 (a 7.27 exists only on a 30-trade strategy). N tried 211,074 (GEN1 alone, with prior work); Bonferroni z bar 5.04. The holdout was not read and nothing was frozen. **Information only** (none reached validation as a gate), the five best with 150+ discovery trades, validation profit factor at 10 contracts (1 contract, stress), n: Ethereum both sides at 9 to 8 min left 1.25 -> 0.56 (0.51, 0.54), 48; Bitcoin YES 0.90 (0.77, 0.86), 171; Bitcoin both sides, flow and path conditions, out at 1 min or mid crossing 50c 1.14 -> 1.05 (0.94, 1.02), 212; Bitcoin YES 0.77, 144; Bitcoin YES after a 16c+ two-minute rise, target +12c 1.10 -> 1.32 (1.20, 1.26), 99 trades on 25 days. None is expressible in the second slot's registry (it has no feature conditions), so `forward_candidates.json` stays on GEN1S's slot-shaped list. A build bug cost two hours (results passed between processes as Python lists exhausted memory); fixed by writing numpy chunks; nothing was scored before the fix. Code `src/scalper/gen1.py`, results `data/gen1_result.txt`, `data/gen1_top_info.txt`.
+
+### Results: ARB2, ARB3, ARB4 (12 scans each, 2026-10-28 23:51 to 2026-10-29 03:40 UTC): all FALSIFIED
+
+- **ARB2** (every open event, 15,555 to 16,024 per scan): 121 to 125 exhaustive range events per scan; full-set lock median -20.5c, **best -1.5c, zero opportunities**. 7,393 to 8,624 ladders per scan; ladder lock median -15.0c, best +1.4c: the single USCLIMATE pair, seen in 11 of 12 scans, capacity 15, value $0.21, which RULES1 shows is not a lock (different thresholds). Verdict FALSIFIED (1 persistent event against a bar of 3 and $1 a day).
+- **ARB3** (3,277 to 3,287 deadline pairs per scan): lock median -26.3c, **best +0.6c, zero opportunities**. FALSIFIED.
+- **ARB4** (Bitcoin and Ethereum range brackets against the above ladder, 6 coincident closes per scan, 60 to 200 combinations): lock median -8.1c, **best +0.1c, zero opportunities**. FALSIFIED.
+Prediction (zero persistent) held. Kalshi keeps every event's arithmetic, deadline ladders and the range-against-ladder identity inside the fees at the top of book.
+
+### RULES1, closed (2026-10-29)
+
+Every event flagged in any counted scan of ARB2 to ARB4: one, USCLIMATE-2025 / USCLIMATE-2030, classified TRAP (above). Nothing REAL.
+
+### FEE1, closed (2026-10-29): size reveals no edge (answer: NO)
+
+Going from the gates' 10 contracts to the exact fee (the limit at large size) lowers the fee by at most 0.1c a leg. Best locks seen: full set -1.5c (6+ legs: at most +0.6c, still negative), deadline pair +0.6c (2 legs: at most +0.8c, under the 1c bar, and no capacity test needed), range-against-ladder +0.1c (3+ legs: at most +0.4c). L1 history: PF 0.927 / 0.989 / 0.997 / 1.006 / 1.011 / 1.013 at 1 / 3 / 5 / 10 / 25 / 50 contracts (at most +0.08c a contract above 10). The registered kill bar (net positive by at least 1c a contract at some size of 3 or more) is not met by any structure. Rounding only matters below 3 contracts, where it costs up to 1c a contract.
