@@ -1463,6 +1463,17 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 29</div>
+                <ul class="changelog-list">
+                  <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
+                  <li>The profit add-on (extra contracts bought with reinvested profit) is capped at a quarter of the base size, so a long win streak cannot push a gold order far above its base and the next loss lands at a smaller size (#615)</li>
+                  <li>Settings: chats can run safe tools without asking; deploys, merging pull requests and the live env file stay blocked (#614)</li>
+                  <li>The bot refuses any order larger than its market's maximum size (the nightly report shows any that got through), and sends a phone alert if the exit watch goes silent for 4 minutes while a position is open (#613)</li>
+                  <li>Research recorder: the 15 minute Bitcoin, Ethereum and gold order book and trade tape, public data only, for testing resting orders on gold (#610)</li>
+                  <li>Second strategy slot wiring (switched off; no strategy can use it, and the bot behaves exactly as before) (#608)</li>
+                  <li>Security: patched two server dependencies, with a gate that fails if they fall back (#609)</li>
+                  <li>Research notes: the spread filter forward test spec (#611) and the day's research outcomes (#612)</li>
+                </ul>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
                   <li>Groundwork for a second live strategy (switched off, nothing wired in): hard caps that scale with the account, one shared risk budget with L1, same direction allowed and opposite blocked; nothing on the page or the bot changes (#607)</li>
@@ -4133,11 +4144,8 @@ kalshiStatusTick();
       var H = 80, T = 4, B = 4, y = function(pc){ return T + (H - T - B) * (1 - (pc - lo) / (hi - lo)); };
       var ticks = chartValueTicks(lo, hi, 4), tstep = ticks.length > 1 ? ticks[1] - ticks[0] : 1;
       var grid = ticks.map(function(pc){ return '<line class="' + (pc === 0 ? 'zero' : 'grid') + '" x1="0" x2="200" y1="' + y(pc).toFixed(1) + '" y2="' + y(pc).toFixed(1) + '"></line>'; }).join('');
-      // A market that is closed (a weekend, a halt) leaves a hole in the time axis. The line stops there and starts again, instead of a straight stroke across the gap that looks like a move that never happened.
-      var steps = []; for(var gi = 1; gi < xs.length; gi++){ steps.push(tms ? tms[gi] - tms[gi - 1] : xs[gi] - xs[gi - 1]); }
-      var med = steps.slice().sort(function(a, b){ return a - b; })[Math.floor(steps.length / 2)] || 0, runs = [[]];
-      ser.forEach(function(v, i){ if(i > 0 && tms && med > 0 && steps[i - 1] > med * 3.5){ runs.push([]); } runs[runs.length - 1].push((xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1)); });
-      var pts = runs.map(function(r){ return r.length > 1 ? '<polyline points="' + r.join(' ') + '"></polyline>' : ''; }).join('');
+      // One unbroken line (the owner, Oct 29, 2026: "still broken charts, don't like the gaps"). A closed market (a night for stocks, a weekend for gold and oil) leaves a hole in the data, and the line used to stop and start again there. The hole is already squeezed to a short step on the time axis above, so the line now runs straight across it: the move across a close is a real move (the last close to the next open), not a made-up one.
+      var pts = '<polyline points="' + ser.map(function(v, i){ return (xs[i] * 200).toFixed(1) + ',' + y(pcs[i]).toFixed(1); }).join(' ') + '"></polyline>';
       var ylab = ticks.map(function(pc){ return '<span style="top:' + (y(pc) / H * 100).toFixed(1) + '%">' + escapeHtml(chartPctLabel(pc, tstep)) + '</span>'; }).join('');
       plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + pts + '</svg><div class="brief-yaxis">' + ylab + '</div></div>';
       if(tms){
