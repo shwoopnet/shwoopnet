@@ -87,7 +87,7 @@ from scalper.fees import taker_fee
 ROOT = Path(__file__).resolve().parents[2]
 DATA = ROOT / "data"
 GC_FILE = DATA / "gc1m.json"
-DB_FILES = [DATA / "book.sqlite", DATA / "five.sqlite"]
+DB_FILES = [DATA / "book.sqlite", DATA / "fresh.sqlite", DATA / "five.sqlite"]
 SERIES = "KXGOLD15M"
 
 UNIVERSE_START = int(datetime(2026, 10, 1, tzinfo=timezone.utc).timestamp())
