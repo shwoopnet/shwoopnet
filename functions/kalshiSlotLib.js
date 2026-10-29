@@ -20,12 +20,17 @@ const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"])
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
 const SLOT_MAX_SCALE_STEPS = 3;
-const SLOT_MAX_RISK_PER_ORDER = 5.0;                   // dollars, worst case, fee included; never above SLOT_DAILY_LOSS_CAP, or one order could break the daily cap alone
-const SLOT_MAX_RISK_PER_WINDOW = 8.0;                  // slot dollars put into one window (gross, like L1's own window sum)
-const SLOT_MAX_RISK_TOTAL = 12.0;                      // slot dollars open at once across all markets (unsold, unsettled, counted as lost)
+// Dollar caps SCALE WITH THE SIZING BASE, like L1's own window cap and loss stop (the owner, Oct 29, 2026: the gold ladder makes L1 positions bigger as the account grows, so fixed dollars would be too small
+// for a bigger account and too big for a smaller one). Each cap is a share of the sizing base, never above a hard dollar ceiling, so a wrong base can never lift a cap past the ceiling. Per order is below the daily cap.
+const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.01, perWindow: 0.02, openTotal: 0.03, daily: 0.02, lifetime: 0.06 });
+const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 25, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
+function slotCaps(sizingBase) {
+  const base = isNum(sizingBase) && sizingBase > 0 ? sizingBase : 0;   // an unusable base means every cap is zero: nothing can be sent
+  const out = {};
+  for (const k of Object.keys(SLOT_CAP_FRACTIONS)) out[k] = Math.min(SLOT_CAP_FRACTIONS[k] * base, SLOT_CAP_CEILINGS[k]);
+  return out;
+}
 const SLOT_DEPTH_SHARE = 0.25;                         // never more than this share of the size resting at the touch (Kalshi gives the top level only)
-const SLOT_DAILY_LOSS_CAP = 5.0;                       // slot-only: last 24 hours, open counted as lost
-const SLOT_LIFETIME_LOSS_CAP = 15.0;                   // slot-only: since the first slot order, open counted as lost
 const SLOT_MIN_PRICE = 0.05, SLOT_MAX_PRICE = 0.97;    // entry limit price bounds (YES price for a yes buy, the NO price for a no buy)
 const SLOT_ENTRY_LEFT_MIN_SEC = 120, SLOT_ENTRY_LEFT_MAX_SEC = 840;
 const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before settlement: a strategy must be fully out by this long before the close
@@ -96,7 +101,7 @@ function validateSlotStrategy(s) {
     if (!exactKeys(k.minNet, ["afterFills", "net"])) e.push("killRules.minNet needs afterFills and net");
     else {
       if (!Number.isInteger(k.minNet.afterFills) || k.minNet.afterFills < 5 || k.minNet.afterFills > 100) e.push("killRules.minNet.afterFills must be 5 to 100");
-      if (!isNum(k.minNet.net) || k.minNet.net > 0 || k.minNet.net < -SLOT_LIFETIME_LOSS_CAP) e.push("killRules.minNet.net must be zero or a loss no bigger than the lifetime cap");
+      if (!isNum(k.minNet.net) || k.minNet.net > 0 || k.minNet.net < -SLOT_CAP_CEILINGS.lifetime) e.push("killRules.minNet.net must be zero or a loss no bigger than the lifetime ceiling");
     }
   }
   if (!isDate(s.forwardReadDate)) e.push("forwardReadDate must be YYYY-MM-DD");
@@ -186,7 +191,7 @@ function isSlotOrder(t) { return !!t && t.strategy === "SLOT" && typeof t.slotId
 function accountOrder(t) {
   const z = { counted: false, net: 0, openCost: 0, openContracts: 0, final: false, spend: 0 };
   if (!isSlotOrder(t)) return z;
-  const rawCost = num(t.maxCost), cost = rawCost >= 0 ? rawCost : SLOT_MAX_RISK_PER_ORDER;
+  const rawCost = num(t.maxCost), cost = rawCost >= 0 ? rawCost : SLOT_CAP_CEILINGS.perOrder;
   const want = num(t.count) > 0 ? num(t.count) : 1, filled = num(t.fillCount) > 0, got = Math.min(filled ? num(t.fillCount) : 0, want);
   const inFlight = !filled && t.settled !== true && ["sending", "unknown"].includes(normStatus(t.status));
   if (!filled && !inFlight) return z;
@@ -309,8 +314,9 @@ function slotOrderCheckWith(flags, input) {
   if (!(isNum(i.sizingBase) && i.sizingBase > 0) || !(isNum(i.windowCapFraction) && i.windowCapFraction > 0 && i.windowCapFraction <= L1_WINDOW_CAP_FRACTION_MIRROR + 1e-9)) return no("the sizing base or the window cap is not usable");
   if (!isNum(i.now)) return no("no clock");
   const risk = slotRiskContract(i.slotOrders, i.now);
-  if (risk.day.worst <= -SLOT_DAILY_LOSS_CAP + 1e-9) return no("the slot's own daily loss cap is reached");
-  if (risk.lifetime.worst <= -SLOT_LIFETIME_LOSS_CAP + 1e-9) return no("the slot's own lifetime loss cap is reached");
+  const caps = slotCaps(i.sizingBase);
+  if (risk.day.worst <= -caps.daily + 1e-9) return no("the slot's own daily loss cap is reached");
+  if (risk.lifetime.worst <= -caps.lifetime + 1e-9) return no("the slot's own lifetime loss cap is reached");
   // How many contracts every cap allows. Depth is the top of the book only, so unknown depth refuses rather than guesses.
   if (!isNum(i.depthAtTouch) || !(i.depthAtTouch > 0)) return no("the size resting at the touch is unknown");
   const wanted = Number.isInteger(i.wanted) ? i.wanted : strategy.contractsPerOrder;
@@ -326,10 +332,10 @@ function slotOrderCheckWith(flags, input) {
   // The slot takes at most half of the shared window cap and always leaves one L1 contract of room, so L1's first order in a window is never starved.
   const windowRoom = Math.min(windowCap - l1Used - slotUsed - SLOT_L1_RESERVE, windowCap * SLOT_WINDOW_SHARE - slotUsed);
   // The new order's own cost must fit under what is left of the daily and lifetime loss caps (worst is zero or negative), so one order can never overshoot them.
-  const dailyRoom = SLOT_DAILY_LOSS_CAP + risk.day.worst, lifeRoom = SLOT_LIFETIME_LOSS_CAP + risk.lifetime.worst;
+  const dailyRoom = caps.daily + risk.day.worst, lifeRoom = caps.lifetime + risk.lifetime.worst;
   while (n >= 1) {
     const c = costOf(n);
-    if (c <= SLOT_MAX_RISK_PER_ORDER + 1e-9 && c <= SLOT_MAX_RISK_PER_WINDOW - slotUsed + 1e-9 && c <= SLOT_MAX_RISK_TOTAL - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
+    if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
     n -= 1;
   }
   if (n < 1) return no("no whole contract fits the caps (per order, per market, depth share, window, total, the shared window limit, or what is left of the daily and lifetime loss caps)");
@@ -392,8 +398,8 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
-  SLOT_ENABLED, SLOT_STRATEGIES, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_MAX_RISK_PER_ORDER,
-  SLOT_MAX_RISK_PER_WINDOW, SLOT_MAX_RISK_TOTAL, SLOT_DEPTH_SHARE, SLOT_DAILY_LOSS_CAP, SLOT_LIFETIME_LOSS_CAP, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
+  SLOT_ENABLED, SLOT_STRATEGIES, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
+  SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields,
