@@ -1469,6 +1469,8 @@
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
                   <li>Open positions: the chance chart now runs the whole 0 to 100% with a target price line across the middle (50%, where it flips), and each position says the price that decides it ("Wins if it closes at or above $4,013.48"), both taken from the market itself</li>
+                  <li>Gold places no new orders from 8 PM to midnight Central (history and live both weaker in that block); an open gold position is still sold by the exit watch</li>
+                  <li>Bitcoin is paused in the bot's code (live profit factor 0.72 over 155 orders); an open Bitcoin position is still sold by the exit watch</li>
                   <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
                   <li>The profit add-on (extra contracts bought with reinvested profit) is capped at a quarter of the base size, so a long win streak cannot push a gold order far above its base and the next loss lands at a smaller size (#615)</li>
                   <li>Settings: chats can run safe tools without asking; deploys, merging pull requests and the live env file stay blocked (#614)</li>
@@ -3085,7 +3087,7 @@
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true, quiet: [20, 24] }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3107,6 +3109,8 @@
       gaps.sort(function(a, b){ return a - b; });
       var usual = gaps[Math.floor(gaps.length / 2)], line = Math.max(3 * 3600000, 8 * usual);
       var from = ts[ts.length - 1]; if(w.weekdays && from < reopen){ from = reopen; }
+      // A market with quiet hours (gold, 20:00 to 24:00 Central, from Oct 29, 2026) sends nothing in them on purpose: say nothing during the block, and restart the clock at its end when the last order came just before it.
+      if(w.quiet){ var md = wm % 1440; if(md >= w.quiet[0] * 60 && md < w.quiet[1] * 60){ return; } var blockEnd = now - md * 60000; if(from < blockEnd && from >= blockEnd - 5 * 3600000){ from = blockEnd; } }
       if(now - from > line){ out.push(w.name + ' has sent no order for ' + kalshiDurationText(now - from) + ' (it usually sends one about every ' + kalshiDurationText(usual) + ').'); }
     });
     return out;
