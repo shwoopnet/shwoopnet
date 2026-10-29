@@ -1,0 +1,57 @@
+# Oct 29, 2026 (the owner approved the research session's recorder R6, kalshi-scalper/studies/RECORDER_SPEC_R6_15MIN_BOOK_2026-10-29.md on the research branch): records the whole
+# 15 minute window of the five markets the bot trades (KXGOLD15M, KXBTC15M, KXETH15M, KXDOGE15M, KXXRP15M): the best 5 YES and 5 NO bids with sizes every 2 seconds in one
+# batched public read, every public trade of each window after its close (de-duplicated, ids not stored), a coverage row per window and an hourly clock check. Research data only.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under book15r6/), never to main. It replaces R2 (record-book15).
+# Scheduled starts run hours late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running
+# waits, so jobs never overlap, and a dropped trigger costs at most 30 minutes instead of 4 hours. Each job records up to the next 4 hour boundary (about 4 hours) and stops.
+# It stops by itself after 14 days: from 2026-11-13 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+name: record-15m-book
+on:
+  schedule:
+    - cron: "5,35 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-15m-book
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop for good after the end date (2026-11-13 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2026-11-13T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record every window up to the next 4 hour boundary
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/book15r6/$STAMP"
+          python3 code/scripts/record_15m_book.py "data/book15r6/$STAMP" --cycle-hours 4
+          gzip -9 -f data/book15r6/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "book15-recorder"
+          git config user.email "book15-recorder@users.noreply.github.com"
+          gzip -9 -f book15r6/*/*/*.csv 2>/dev/null || true
+          git add book15r6
+          git commit -q -m "book15r6 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
