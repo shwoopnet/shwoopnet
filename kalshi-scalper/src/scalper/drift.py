@@ -256,5 +256,15 @@ def run():
     return flags
 
 
+def run_all():
+    flags = run()
+    try:   # Dogecoin fill rate around the 3 to 5 contract deploy (owner, 2026-10-29); one failure never stops drift
+        from .dogefill import run as dogefill
+        dogefill()
+    except Exception as ex:
+        print(f"dogefill failed: {type(ex).__name__}: {str(ex)[:160]}")
+    return flags
+
+
 if __name__ == "__main__":
-    {"run": run}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    {"run": run_all}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()

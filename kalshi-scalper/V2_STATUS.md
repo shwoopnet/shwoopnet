@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 6:05 PM CT, DOGEFILL added (owner: Dogecoin fill rate at 5 contracts), information only.** Before the 3 to 5 deploy (21:05 UTC): 178 attempts, 47 no fill (26%), longest streak 5. After: 4 attempts, 4 no fill (100%); at the old rate four misses in a row happen about 0.5% of the time, but 4 is far under the 20 attempt flag rule (60% or worse over 20). Kalshi's immediate-or-cancel orders can fill in part, so a zero fill usually means the price left the band, not missing depth; the report has no depth fields, so the touch size will be read from recorder R6's Dogecoin book once it pushes. Runs nightly inside `drift run` (`workers/DOGEFILL.md`); a flag goes to the main session.
+
 **2026-10-29 6:00 PM CT, STRUCT1 (exit table and time blocks).** Exit, information only: history PF held / 25c exit: gold 1.22 / 1.23, Bitcoin 0.97 / 0.96, Ethereum 0.96 / 0.95, Dogecoin 1.23 / 1.08 (24% of its exits would have won), XRP 1.14 / 1.12. Live: 50 exits lost -$155.85; holding them would have lost about -$158.49 (exits saved about $2.63). Time blocks (:15/:30/:45 closes, Tokyo/London/New York opens, COMEX settlement, gold's last hour): 0 of 14 hold in two of three windows; best z +1.25. Gold has no Saturday trading and no weekday closures in the history. N tried about 439,155.
 
 **2026-10-29 5:45 PM CT, MKTTIME1-F interim read added (owner: keep the gold quiet hours, review sooner).** At 100 block entries on fresh days (about Nov 24 to 26) the AUTO loop reads PF with and without the block, the block's mean against the rest and the day-clustered z, logs it in AUTO_LOG, and V2 forwards it to the main session. Owner's rule fixed now: z under 0, propose deleting the quiet hours; z 1.5 or more, keep; between, wait for the December read.
