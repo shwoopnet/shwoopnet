@@ -55,3 +55,8 @@ FALSIFIED. Near-the-money hourly strikes in this span probably quote a 1c to 3c 
 **Tries (N).** 2 sizes x 3 fee assumptions = 6 (the 2 verdict-fee rows decide; stress is a gate, not a try). Running count about 439,012.
 
 **Code.** `kalshi-scalper/src/scalper/quote2b.py`: `count` (counts files and usable hours from coverage only, prints the ready date), `run` (refuses before 2026-11-12 00:00 UTC, below 300 usable hours, or a second time; writes `data/quote2b_result.txt`). Tested only on a synthetic fixture (`tests/test_quote2b.py`).
+
+## Amendment (2026-10-29, written with the scorer, still before any recorded book or trade row was read)
+
+1. **Re-fetch threshold 500 rows, not 990.** The recorder de-duplicates trade ids before writing, so a truncated 1000-row read can land in the file with fewer than 990 rows. A strike-hour's tape is re-fetched from the public API if any one recorded read holds 500 or more rows. Re-fetching only replaces recorded rows with the complete tape, so it cannot favour the result.
+2. **Scorer readings where the rules were silent:** minute boundaries T-50 to T-11 manage resting orders (cancel when flat, convert to a closing order when not); new pairs only at T-50 to T-15. A posting poll must fall within 30 s after its boundary, else that strike is not posted at that boundary. A stop executes at the strike's next recorded poll after the one that triggered it. If no poll exists at or after T-10 min, the flatten is priced at the worst case (0 for a sale, 1 for a purchase). Markouts use the first poll at or after the horizon and are skipped (counted) if that poll is more than 60 s late.
