@@ -46,3 +46,11 @@ echo "Deploying $ONLY to $PROJECT."
 run "${FB[@]}" deploy --only "$ONLY" --project "$PROJECT"
 echo
 echo "Done. Open the Kalshi page: it should say Running. If it says 'Order switch: OFF', the .env line did not reach the deploy, so run this script again."
+
+# After a deploy: do the words on the page still match what the bot now does? (the owner, Oct 29, 2026: stale lines like "XRP is entered 10 minutes out" after XRP was paused). Never blocks; it only warns.
+REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if command -v node >/dev/null 2>&1 && [ -f "$REPO_ROOT/test/siteFreshnessGates.test.js" ]; then
+  echo
+  echo "Checking that the page's words still match the bot's code..."
+  node "$REPO_ROOT/test/siteFreshnessGates.test.js" || echo "WARNING: some page text is out of date with the bot. Tell Claude, it will fix the lines."
+fi

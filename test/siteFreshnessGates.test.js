@@ -11,7 +11,7 @@ const gates = {};
 const NAMES = { KXGOLD15M: 'gold', KXXRP15M: 'XRP', KXBTC15M: 'Bitcoin', KXDOGE15M: 'Dogecoin', KXETH15M: 'Ethereum', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'natural gas' };
 const nameOf = (s) => { assert.ok(NAMES[s], s + ' is a new series: give it a name in this test and check every line of page text that lists markets'); return NAMES[s]; };
 const pausedNames = live.PAUSED_SERIES.map(nameOf), liveNames = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s)).map(nameOf);
-const menu = (() => { const i = html.indexOf('id="kalBotMenu"'); return html.slice(i, html.indexOf('</details>\n          </details>', i) + 20); })();
+const menu = (() => { const i = html.indexOf('id="kalBotMenu"'); return html.slice(i, html.indexOf('L1 failed its own test', i) + 80); })();
 const text = (h) => h.replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ');
 const list = (s) => s.split(/,\s*|\s+and\s+/).map((x) => x.trim()).filter(Boolean);
 
@@ -48,7 +48,7 @@ gates.SF4 = () => {
   assert.ok(!/10 minute look/.test(html.slice(html.indexOf('function kalshiNextEntry'), html.indexOf('function kalshiNextEntry') + 600)) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
 };
 gates.SF5 = () => {
-  const watch = /var KAL_WATCH = \[([^\]]+)\];/.exec(html);
+  const watch = /var KAL_WATCH = (\[[\s\S]*?\]);\s*\n/.exec(html);
   assert.ok(watch, 'KAL_WATCH is found');
   const entries = [...watch[1].matchAll(/\{ name: '([^']+)'([^}]*)\}/g)].map((m) => ({ name: m[1], paused: /paused: true/.test(m[2]) }));
   const byName = { Gold: 'KXGOLD15M', XRP: 'KXXRP15M', Dogecoin: 'KXDOGE15M', 'AUD/USD': 'KXAUDUSD15M', 'USD/CAD': 'KXUSDCAD15M', 'Natural gas': 'KXNATGAS15M' };
