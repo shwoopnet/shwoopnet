@@ -7491,3 +7491,5 @@ Checked against the ledger first: B4 tested one lower band (84c to 88c), P6 pick
 ### Result: CONF1 LADDER (run once, 2026-10-29): NOT_ENOUGH_DATA
 
 The look-ahead-free hourly Bitcoin ladder (`lad2`, 2026-09-26 to 10-26) covers only the later two thirds of L1's history: discovery 0 Bitcoin top-of-hour closes, validation 21 (kept PF 0.57 against the parent's 0.67), holdout 116 (kept **PF 1.79** against the parent's 1.41, removed 0.88; z +1.35). The registration set NOT_ENOUGH_DATA for the ladder form below 30 closes a window; the script printed "FALSIFIED" because of a verdict-logic slip, corrected here to the registered word. The holdout lift is information from one window of 116 closes, not a result. A proper test needs the ladder for the whole L1 history (Aug to Oct), fetched with the before-entry universe; it can be registered as CONF2 if the owner wants it.
+
+Recorder look 2026-10-29 (information only): 132 of 300 trades over 8 of 10 dates, 0% 429, clock_ok still False. Read not yet due.
