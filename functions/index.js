@@ -47,6 +47,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
+const exitAlarm = require("./kalshiExitAlarmLib");
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
 // deploy, stops all buying and Start with one token. The exit watch is untouched either way (it only closes positions the bot already opened).
@@ -528,6 +529,7 @@ exports.kalshiLiveExit = onSchedule(
     // Nothing open and not a minute L1 can buy in: skip the whole minute rather than sit in the loop below (compute time is the bill). Fails open (see exitWatchIdle).
     if (await live.exitWatchIdle({ store, now: Date.now() })) return;
     const stopAt = Date.now() + 47000;
+    let beat = false;
     for (;;) {
       try {
         const snap = await sessRef.get();
@@ -541,6 +543,9 @@ exports.kalshiLiveExit = onSchedule(
               if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
             },
           });
+          // Heartbeat for the exit watch alarm (kalshiExitAlarmLib): one small write per minute's run, only after a pass COMPLETED, so a watch that errors every pass goes quiet too. Its own document, so the session
+          // document (and the alerts that listen to it) is not written six times a minute. A failed write is ignored: the worst case is a false alarm.
+          if (!beat) { try { await db.collection("kalshiLiveControl").doc("exitWatch").set({ at: Date.now() }, { merge: true }); beat = true; } catch (e) { /* see above */ } }
         }
       } catch (e) {
         console.error("kalshiLiveExit: " + String((e && e.message) || e).slice(0, 200));
@@ -636,6 +641,30 @@ exports.kalshiLiveArmed = onSchedule(
         }
       } catch (e) {
         console.error("kalshiLiveArmed: account snapshot failed: " + String((e && e.message) || e).slice(0, 160));
+      }
+      // Exit watch alarm (kalshiExitAlarmLib): this function and the exit watch are separate processes, so this one can notice the other going quiet. Reads only; its one write is a field on the session document that the
+      // existing phone alert trigger turns into an alert. After everything else and fenced off, so it can never fail or delay the tick (runExitAlarm catches its own errors; this try is a second fence).
+      try {
+        const beatRef = db.collection("kalshiLiveControl").doc("exitWatch");
+        const note = await exitAlarm.runExitAlarm({
+          now, session,
+          readBeat: async () => { const b = await beatRef.get(); return b.exists ? b.data() : null; },
+          readOrders: () => firestoreLiveStore(db).recentFilled(now - live.EXIT_LOOKBACK_MS),
+          claim: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef), have = cur.exists ? cur.data().alarmedFor : null;
+            if (have === key) return false;
+            tx.set(beatRef, { alarmedFor: key }, { merge: true });
+            return true;
+          }),
+          release: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef);
+            if (cur.exists && cur.data().alarmedFor === key) tx.set(beatRef, { alarmedFor: null }, { merge: true });
+          }),
+          raise: (a) => sessRef.set({ exitWatchAlert: a }, { merge: true }),
+        });
+        if (note === "alerted" || /^error|failed/.test(note)) console.warn("kalshiLiveArmed: exit watch alarm: " + note);
+      } catch (e) {
+        console.error("kalshiLiveArmed: exit watch alarm failed: " + String((e && e.message) || e).slice(0, 160));
       }
     } catch (e) {
       failure = e;
