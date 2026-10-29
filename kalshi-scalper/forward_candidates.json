@@ -1,7 +1,7 @@
 {
  "generated_at": "2026-10-29T02:15:23.086404+00:00",
  "source": "GEN1S (README)",
- "verdict": "One strategy (G3H1) passed every registered gate including the final holdout; forward paper read pending. GEN1S, GEN1, GEN2: NO_WINNER.",
+ "verdict": "No valid winner: G3H1's pass is void (universe look-ahead); corrected read pending. GEN1S, GEN1, GEN2: NO_WINNER.",
  "note": "Ranked best first. Labels are the registered gates; nothing here has passed a FINAL HOLDOUT. No promote verb; the owner decides.",
  "candidates": [
   {
@@ -533,7 +533,7 @@
  "gen3_passed": [
   {
    "id": "G3H1",
-   "label": "PASSED_ALL_GATES (discovery, validation incl. deflation, FINAL HOLDOUT)",
+   "label": "AUDIT_VOID: universe look-ahead in the source file (strikes chosen from quotes 30 minutes before the close, after the 51 to 46 minute entry). Corrected read CORR1 pending.",
    "rule": "[single both 3060..2760s | ask<=0.10 & d2>0 | TP 0.03 stop None time 60s book spread3]",
    "series": [
     "KXBTCD (hourly ladder, 6 strikes nearest the money)"
