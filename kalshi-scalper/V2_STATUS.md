@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 1:35 PM, FALS1 (falsifier on the gold 20:00 to 24:00 Central lead), BROKEN.** Reproduced exactly, but the pass depends on where the thirds fall: on gold's own close-date thirds window B lifts only +0.085 (gate 0.10). Permutation over 6 blocks p 0.025 (0.06 on gold's thirds; about 0.12 to 0.30 counting all 5 markets). Correction: MKTTIME1's z +0.98 tested the wrong thing; block versus rest is z 1.87, about 3c per entry worse. MKTTIME1 stays FALSIFIED; MKTTIME1-F stays registered but is underpowered. N tried about 438,915.
+
 **2026-10-29 12:55 PM, two pieces registered while the downloads run.** MKTTIME1-F: forward read of gold's 20:00 to 24:00 Central block on fresh days, read once when the block holds 15 losses (about mid to late December). LOCK2 scorer built on the recorder's simultaneous quotes with sizes (`count` scores nothing; `run` refuses below 25 closes per asset); today Bitcoin 11, Ethereum 11 closes.
 
 **2026-10-29 12:35 PM, MKTTIME1 (per-market time and weekday stand-downs), FALSIFIED (registered one-market kill).** 70 rules (6 four-hour Central blocks, 7 weekdays, weekend, x 5 markets), PF lift needed +0.10 with 70% of net kept in all three windows. One survivor of A and B, **gold skip 20:00 to 24:00 Central**: PF 1.44 to 1.63 / 1.03 to 1.16 / 1.17 to 1.28 (C read once and it held), net up in every window, 24 losses skipped in 315 entries; z of the gain +0.98 against a deflated bar of 5.17, and only one market, so FALSIFIED as registered. The live hints do not hold in history (Bitcoin 20-24 CT +0.02 then -0.01; Ethereum 12-16 CT +0.07 then -0.07; gold 16-20 CT +0.05 then -0.02). Gold 20-24 CT is worth a forward look on fresh days, not a rule. N tried about 438,904.
