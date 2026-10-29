@@ -45,7 +45,7 @@ gates.B2 = () => {
    
     'kalshiPushKey', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe',      // the phone alerts (Oct 20, 2026): the owner's own functions, admin only
     'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
-    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
+    'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchKalshiSlot', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');
   // No exit, pool or size setter: the exit is fixed at 50c and the pool rebuilds after every win, in the server code.
   assert.ok(!/setExit|setPool|exitMode|poolRule/i.test(mod), 'no setter for a risk setting');

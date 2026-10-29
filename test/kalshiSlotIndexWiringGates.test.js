@@ -322,7 +322,9 @@ gates['SI13 the rules open the two collections to the admin for reading only, an
 
 gates['SI14 the Bot page and the alerts do not read the slot collections, so slot orders are never shown or alerted as L1 orders'] = () => {
   const page = read('index.html');
-  assert.ok(!/kalshiSlot|kalshiLiveDirection/.test(page) || slotLib.SLOT_ENABLED === true, 'the page names neither collection (a page card for the slot is a later phase)');
+  assert.ok(!/kalshiLiveDirection/.test(page), 'the page never reads the direction lock');
+  // The page card (strategy switch, Oct 29, 2026) reads kalshiSlotOrders and nothing else of the slot; it writes nothing.
+  assert.ok(!/kalshiSlot(Lib|Run|Store|Control)/.test(page), 'the page names only the slot orders');
   // HARD PREREQUISITE of the pull request that flips SLOT_ENABLED (docs/SECOND_SLOT_WIRING.md, "Before the first admission"): without it the slot's fills show as manual trades on the page, its
   // dollars are missing from the Stop Loss and Risk meter, and a slot close sends no phone alert. This gate keeps SI14's absence check from locking the gap in: it must be REWRITTEN then, not deleted.
   if (slotLib.SLOT_ENABLED === true || slotLib.SLOT_STRATEGIES.length > 0) {

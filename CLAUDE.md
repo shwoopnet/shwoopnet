@@ -613,3 +613,7 @@ The owner wants more than one live strategy, but only through a reviewed, fail-c
 - Never ask for, or accept, credentials, keys or sign-in codes in chat.
 - Stats to the owner in the short form (orders filled, won/lost, profit factor) unless they ask for more. Times are always US Central.
 - Merge a pull request only when the owner says so. Keep the current look: no new design system (see Conventions).
+
+## The strategy switch (Oct 29, 2026, the owner: "i like 1")
+
+The Bot page reads `kalshiSlotOrders` (admin read, a listener with no write) next to L1's orders. With no slot order there is no switch, table or panel and every card draws what it drew before (`kalshiViewOrders` returns L1's own array). Once a probe has orders, a switch above the cards chooses Overall (a Strategies table, the Account result line summed), L1, or one probe (a probe panel replaces Open positions and Recent trades; the result line follows the choice). It reads only and cannot change a strategy; slot ids are escaped where drawn; dollars go through `kalshiMoney`. The kill-rule meters of the mock-up are not built (the latch is not browser readable). Page only, nothing to deploy. Tests ST1 to ST4 in `test/kalshiStrategiesGates.test.js`.

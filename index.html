@@ -439,6 +439,17 @@
   /* With a price path the row is two columns (the owner, Oct 23, 2026: "a lot of dead space", "fit a chart in here"): the three figures stack on the left and the chart fills the rest. */
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
+  /* Strategy switch (the owner, Oct 29, 2026: "i like 1"): one control above the Bot cards, shown only once a second strategy has orders; with only L1 it does not exist and the page is exactly what it was. */
+  .kal-strat{ display:flex; gap:4px; background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:3px; width:max-content; max-width:100%; flex-wrap:wrap; margin:0 0 12px; }
+  .kal-strat[hidden], .kal-strats[hidden]{ display:none; }
+  .kal-strat button{ font:inherit; font-size:13px; font-weight:600; padding:8px 16px; min-height:40px; border:0; border-radius:999px; background:none; color:var(--muted); cursor:pointer; }
+  .kal-strat button[aria-pressed="true"]{ background:var(--paper); color:var(--ink); }
+  .kal-strat button:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
+  .kal-strats{ margin:0 0 12px; }
+  .kal-strat-tbl{ width:100%; border-collapse:collapse; font-size:13px; } .kal-strat-tbl th{ font-weight:600; color:var(--muted); font-size:12px; text-align:left; padding:6px 8px; } .kal-strat-tbl td{ padding:9px 8px; border-top:1px solid var(--border); }
+  .kal-strat-tbl th:not(:first-child), .kal-strat-tbl td:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
+  .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; }
+  #page-kalshi[data-strategy="probe"] [data-card="positions"], #page-kalshi[data-strategy="probe"] [data-card="trades"]{ display:none; }
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
   .kal-hold-chart svg{ display:block; width:100%; height:130px; }
   .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
@@ -1127,6 +1138,10 @@
         cb(q.docs.map(function(d){ return d.data(); }));
       }, function(err){ console.error('Kalshi live sync error:', err); if(errCb){ errCb(err); } });
     },
+    // The second strategy slot's orders (admin read only, written only by the server). A read, never a write: the page has no control that can change a probe.
+    watchKalshiSlot: function(cb, errCb){
+      return onSnapshot(query(collection(db, 'kalshiSlotOrders'), orderBy('ts', 'desc'), limit(500)), function(q){ cb(q.docs.map(function(d){ return d.data(); })); }, function(err){ if(errCb){ errCb(err); } });
+    },
     // No exit or pool-rule setter exists on purpose (Oct 12, 2026): the exit is fixed at 25c and always sells, the pool always rebuilds after every win, both in the server code.
     // Phone alerts: the owner's own Cloud Functions (admin only). The key is the public half of the server's push key; a subscription is the phone's address for pushes, stored by the server.
     kalshiPushKey: function(){ return kalshiPushKeyFn({}).then(function(res){ return res.data; }); },
@@ -1325,6 +1340,9 @@
 
 
     <div class="kal-alert" id="kalAlert" role="alert" hidden><b id="kalAlertTitle"></b><span id="kalAlertText"></span> <button type="button" class="kal-alert-open" id="kalAlertOpen">See notifications</button></div>
+    <div class="kal-strat" id="kalStrat" role="group" aria-label="Strategy" hidden></div>
+    <div class="kal-card kal-strats" id="kalStrategies" hidden></div>
+    <div class="kal-card kal-strats" id="kalProbe" hidden></div>
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
       <div class="kal-card" data-card="account">
@@ -1512,6 +1530,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot page: a strategy switch (Overall, L1, and any second-slot probe) with a Strategies table and a probe panel; it appears only once a probe has orders, and the page is unchanged until then</li>
                   <li>Bot status: the win rate by price paid table is removed again (the owner's call)</li>
                   <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
                   <li>Bot status: the next look says only what can trade now (gold, Dogecoin and Ethereum at the 6 minute look); the 10 minute look for paused XRP and natural gas is gone</li>
@@ -2574,6 +2593,7 @@
   }
   function renderKalshiBot(){
     renderKalshiStatus();
+    renderKalshiStrategies();
     renderKalshiPnl();
     renderKalshiNotifications();
     kalshiSoundCheck();
@@ -2925,8 +2945,9 @@
     var nowMs = Date.now(), key = kalshiPnlRange, since = kalshiPnlRangeStart(key, nowMs);
     var loaded = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
     var oldest = loaded.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
-    var source = kalshiLiveOrders, partial = false;
-    if(loaded.length >= 1000 && since < oldest){
+    var source = kalshiLiveOrders, partial = false, slotIds = kalshiSlotIds(kalshiSlotOrders), sel = kalshiViewSelection(kalshiStrategy, slotIds), probeOnly = slotIds.length > 0 && sel !== 'L1' && sel !== 'ALL';
+    if(probeOnly){ source = kalshiViewOrders(sel, kalshiLiveOrders, kalshiSlotOrders); }
+    else if(loaded.length >= 1000 && since < oldest){
       var hit = kalshiPnlFetched[key];
       // The older part is read once and kept for the page's life (an order older than everything the live listener holds does not change); a failed read is retried after a minute. The newer part is ALWAYS the live listener, so the line and
       // its total never lag the Today figure and the trade list (the owner, Oct 29, 2026: the 1M and 3M result looked wrong; it was a ten minute old copy of every order).
@@ -2942,6 +2963,7 @@
         set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
       }
     }
+    if(!probeOnly && slotIds.length && sel === 'ALL'){ source = source.concat(kalshiSlotOrders); }
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders. It tries again in a minute.</div>' : ''));
   }
@@ -3439,8 +3461,82 @@ kalshiStatusTick();
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiStatus();
   }
+  // ---------- Strategies: L1 and the second slot's probes (the owner, Oct 29, 2026) ----------
+  // The page reads the slot's orders (kalshiSlotOrders, admin read) next to L1's. With no slot order there is no switch, no table and no panel, and every card draws exactly what it drew before. A slot order carries slotId (the strategy's name);
+  // every name is escaped where it is drawn. Nothing here can change a strategy: no button writes anything.
+  var kalshiSlotOrders = [], kalshiStrategy = 'ALL';
+  try{ var savedStrategy = window.localStorage.getItem('shwoopnet:kalStrategy'); if(savedStrategy){ kalshiStrategy = savedStrategy.slice(0, 40); } }catch(e){}
+  function kalshiSlotIds(slot){
+    var seen = {}, out = [];
+    (slot || []).filter(function(o){ return o && typeof o.slotId === 'string' && o.slotId && Number.isFinite(Number(o.ts)); }).sort(function(a, b){ return Number(a.ts) - Number(b.ts); })
+      .forEach(function(o){ var id = o.slotId.slice(0, 40); if(!seen[id]){ seen[id] = true; out.push(id); } });
+    return out;
+  }
+  // What the switch is on: L1, a probe that exists, or Overall. A name that no longer exists falls back to Overall; with no probe at all the view is L1.
+  function kalshiViewSelection(sel, ids){ return !ids || !ids.length ? 'L1' : (sel === 'L1' || ids.indexOf(sel) >= 0 ? sel : 'ALL'); }
+  // The orders a card draws. With no probe it is the very same array L1 always had (so nothing can change); L1 never includes a probe's orders and a probe never includes L1's.
+  function kalshiViewOrders(sel, live, slot){
+    var ids = kalshiSlotIds(slot), s = kalshiViewSelection(sel, ids);
+    if(!ids.length || s === 'L1'){ return live; }
+    if(s === 'ALL'){ return (live || []).concat(slot || []); }
+    return (slot || []).filter(function(o){ return o && o.slotId === s; });
+  }
+  function kalshiOrdersSummary(orders, nowMs){
+    var out = { n: 0, won: 0, lost: 0, net: 0, gw: 0, gl: 0, today: 0, open: [], last: [], pf: null, firstTs: null, lastTs: null }, day = kalDayKey(nowMs);
+    (orders || []).filter(function(o){ return o && Number(o.fillCount) > 0 && Number.isFinite(Number(o.ts)); }).sort(function(a, b){ return Number(a.ts) - Number(b.ts); }).forEach(function(o){
+      var p = kalshiOrderPnl(o);
+      if(out.firstTs === null){ out.firstTs = Number(o.ts); } out.lastTs = Number(o.ts);
+      if(p === null){ if(o.settled !== true){ out.open.push(o); } return; }
+      out.n++; out.net += p; if(p > 0){ out.won++; out.gw += p; } else { out.lost++; out.gl += -p; } if(kalDayKey(Number(o.ts)) === day){ out.today += p; }
+      out.last.push(o);
+    });
+    out.net = Math.round(out.net * 10000) / 10000; out.today = Math.round(out.today * 10000) / 10000; out.pf = out.gl > 0 ? out.gw / out.gl : null; out.last = out.last.slice(-6).reverse();
+    return out;
+  }
+  function kalshiStrategySwitchHtml(sel, ids, esc){
+    var all = [['ALL', 'Overall'], ['L1', 'L1']].concat(ids.map(function(i){ return [i, i]; }));
+    return all.map(function(b){ return '<button type="button" data-strat="' + esc(b[0]) + '" aria-pressed="' + (b[0] === sel) + '">' + esc(b[1]) + '</button>'; }).join('');
+  }
+  function kalshiStrategiesTableHtml(rows, esc, money){
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    return '<div class="kal-card-title">Strategies</div><table class="kal-strat-tbl"><thead><tr><th>Name</th><th>Today</th><th>Result</th><th>Settled</th><th>Open</th></tr></thead><tbody>' +
+      rows.map(function(r){ return '<tr><td>' + (r.chip ? '<span class="kal-chip">' + esc(r.chip) + '</span>' : '') + esc(r.name) + '</td><td>' + esc(sg(r.sum.today)) + '</td><td>' + esc(sg(r.sum.net)) + '</td><td>' + esc(String(r.sum.n)) + '</td><td>' + esc(String(r.sum.open.length)) + '</td></tr>'; }).join('') + '</tbody></table>';
+  }
+  function kalshiProbeHtml(id, sum, nowMs, esc, money){
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
+    var age = sum.lastTs === null ? 'no order yet' : kalshiAgeText(Math.max(0, Math.round((nowMs - sum.lastTs) / 1000)));
+    var rows = function(list, openRows){ return list.map(function(o){ var p = kalshiOrderPnl(o);
+      return '<div class="kal-tr"><span>' + esc(kalTime(Number(o.ts))) + '</span><span>' + esc(kalshiShortTicker(o.ticker || '')) + '</span><span>' + esc(String(o.side || '').toUpperCase() + ' x ' + (Number(o.fillCount) || Number(o.count) || 0) + (openRows ? ' open' : '')) + '</span><span class="kal-tr-p ' + (p === null ? '' : (p >= 0 ? 'kal-pos' : 'kal-neg')) + '">' + esc(p === null ? '' : sg(p)) + '</span></div>'; }).join(''); };
+    return '<div class="kal-card-head" style="padding:0 0 10px"><div class="kal-card-title" style="margin:0">' + esc(id) + '</div><span class="kal-pill">Last order ' + esc(age) + '</span></div>' +
+      '<div class="kal-hold-stats">' + stat('Result', sg(sum.net), sum.net >= 0 ? 'kal-pos' : 'kal-neg') + stat('Today', sg(sum.today)) + stat('Settled', String(sum.n)) + stat('Won / lost', sum.won + ' / ' + sum.lost) + stat('Profit factor', sum.pf === null ? 'n/a' : sum.pf.toFixed(2)) + '</div>' +
+      (sum.open.length ? '<div class="kal-lbl" style="margin-top:10px">Open</div>' + rows(sum.open, true) : '') +
+      (sum.last.length ? '<div class="kal-lbl" style="margin-top:10px">Last trades</div>' + rows(sum.last, false) : '<div class="kal-empty">No settled trade yet.</div>');
+  }
+  function renderKalshiStrategies(){
+    var sw = document.getElementById('kalStrat'), tbl = document.getElementById('kalStrategies'), pr = document.getElementById('kalProbe'), pg = document.getElementById('page-kalshi');
+    if(!sw || !tbl || !pr){ return; }
+    var ids = kalshiSlotIds(kalshiSlotOrders), sel = kalshiViewSelection(kalshiStrategy, ids);
+    if(!ids.length){ sw.hidden = true; tbl.hidden = true; pr.hidden = true; if(pg){ pg.removeAttribute('data-strategy'); } return; }
+    var now = Date.now();
+    sw.hidden = false; sw.innerHTML = kalshiStrategySwitchHtml(sel, ids, escapeHtml);
+    if(pg){ pg.setAttribute('data-strategy', sel === 'ALL' ? 'all' : (sel === 'L1' ? 'l1' : 'probe')); }
+    if(sel === 'ALL'){
+      var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), now), rows = [{ name: 'L1', chip: 'L1', sum: l1 }], tot = { n: l1.n, net: l1.net, today: l1.today, open: l1.open.slice() };
+      ids.forEach(function(i){ var s = kalshiOrdersSummary(kalshiSlotOrders.filter(function(o){ return o.slotId === i; }), now); rows.push({ name: i, chip: i, sum: s }); tot.n += s.n; tot.net += s.net; tot.today += s.today; tot.open = tot.open.concat(s.open); });
+      tot.net = Math.round(tot.net * 10000) / 10000; tot.today = Math.round(tot.today * 10000) / 10000;
+      rows.unshift({ name: 'Overall', chip: '', sum: tot });
+      tbl.hidden = false; tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney); pr.hidden = true;
+    } else if(sel === 'L1'){ tbl.hidden = true; pr.hidden = true; }
+    else { tbl.hidden = true; pr.hidden = false; pr.innerHTML = kalshiProbeHtml(sel, kalshiOrdersSummary(kalshiSlotOrders.filter(function(o){ return o.slotId === sel; }), now), now, escapeHtml, kalshiMoney); }
+  }
+  (function(){
+    var sw = document.getElementById('kalStrat');
+    if(sw){ sw.addEventListener('click', function(e){ var b = e.target && e.target.closest ? e.target.closest('[data-strat]') : null; if(!b){ return; } kalshiStrategy = String(b.getAttribute('data-strat')).slice(0, 40); try{ window.localStorage.setItem('shwoopnet:kalStrategy', kalshiStrategy); }catch(err){} renderKalshiStrategies(); renderKalshiPnl(); }); }
+  })();
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
+  var kalshiSlotUnsub = null;
 
   // There is no switch for the exit (fixed at 25c, always selling) or the pool rule (always after every win): both live in the server code, on purpose (Oct 12, 2026).
 
@@ -3459,6 +3555,7 @@ kalshiStatusTick();
       error: function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; kalshiFeedRender(); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; kalshiFeedRender(); }, function(err){ kalshiSyncError = (err && (err.code || err.message)) || 'unknown'; kalshiFeedRender(); }); }
+    if(api.watchKalshiSlot){ kalshiSlotUnsub = api.watchKalshiSlot(function(o){ kalshiSlotOrders = o; kalshiFeedRender(); }, function(){ kalshiSlotOrders = []; }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; kalshiFeedRender(); }); }
   }
@@ -3468,6 +3565,7 @@ kalshiStatusTick();
     if(kalshiBotUnsub){ kalshiBotUnsub(); kalshiBotUnsub = null; }
     if(kalshiLiveUnsub){ kalshiLiveUnsub(); kalshiLiveUnsub = null; }
     if(kalshiLiveCtlUnsub){ kalshiLiveCtlUnsub(); kalshiLiveCtlUnsub = null; }
+    if(kalshiSlotUnsub){ kalshiSlotUnsub(); kalshiSlotUnsub = null; } kalshiSlotOrders = [];
     if(kalshiLiveEventsUnsub){ kalshiLiveEventsUnsub(); kalshiLiveEventsUnsub = null; }
   }
   function startKalshiBot(){
