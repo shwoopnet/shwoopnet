@@ -1,0 +1,4 @@
+GEN1 VERDICT so far: NO_WINNER before the holdout (FALSIFIED)
+GEN1: generated 12056, distinct (Jaccard <= 0.5 or exits apart, >= 30 discovery trades) 5000; rows 421658; days discovery 55, validation 28; N tried for deflation 211074, Bonferroni z bar 5.04
+passed discovery (PF >= 1.5 at 10 contracts, n >= 150, 25 days, zero-volume share <= 20%): 0
+passed validation gates (PF >= 1.5, n >= 60, 15 days, stressed PF >= 1.2): 0; and bootstrap 5th pct PF > 1: 0; and deflation (z >= bar): 0

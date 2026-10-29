@@ -1,0 +1,7 @@
+generated 12056 distinct 5000
+discovery PF over all distinct: median 0.62, 95th pct 0.87, max 7.27; with n>=150: 4469, max 1.25
+[ETH both 540..480s left | doi<=8.13e+04 & xb_mid<=0.165 & d2>0 & vol<=3.51e+03 | TP 20 stop 20 time 120s book spread3] | disc PF 1.25 n=253 days 47 | valid PF 0.56 (1c 0.51, stress 0.54) n=48 days 15
+[BTC yes 840..240s left | bid>0.74 & xb_mid>0.845 & ask>0.4 | TP none stop 5 time 120s book spread3] | disc PF 1.22 n=381 days 50 | valid PF 0.90 (1c 0.77, stress 0.86) n=171 days 23
+[BTC both 540..300s left | tb5<=0.13 & d2<=0.08 & hour>12 & ask>0.76 | TP none stop none time 60s book cross50] | disc PF 1.14 n=376 days 55 | valid PF 1.05 (1c 0.94, stress 1.02) n=212 days 28
+[BTC yes 720..240s left | d2<=0 & d5>0 & xa_mid>0.845 | TP 12 stop 20 time 120s book cross50] | disc PF 1.14 n=299 days 55 | valid PF 0.77 (1c 0.70, stress 0.74) n=144 days 28
+[BTC yes 780..240s left | rng5>0 & doi<=2.12e+03 & d3>0.17 & d2>0.16 | TP 12 stop none time 120s book spread3] | disc PF 1.10 n=232 days 54 | valid PF 1.32 (1c 1.20, stress 1.26) n=99 days 25
