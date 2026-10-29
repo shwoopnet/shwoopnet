@@ -2,7 +2,7 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 (Bitcoin part 0 done; 3 parts running). Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (built, loop running); INX1 (Kalshi S&P 500 and Nasdaq daily markets against Yahoo index bars and VIX, a family never tested); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (done: 3 FALSIFIED); FAM2 (done: XMAC1 FALSIFIED).
+- **Now running (fleet, started 1:20 PM):** downloads CONF2 ladder (300 of 772 closes) and LADL1 done. Workers, each registering in `workers/<ID>_REGISTRATION.md` before scoring (rules: `workers/RULES.md`): AUTO (built, loop running); INX1 (Kalshi S&P 500 and Nasdaq daily markets against Yahoo index bars and VIX, a family never tested); FALS1 (falsifier on the gold 20:00 to 24:00 Central lead: independent re-implementation, edges, next-candle fills, permutation over the 6 blocks); PPW1 (done: 3 FALSIFIED); FAM2 (done: XMAC1 FALSIFIED).
 - **Next:** (TIMEX1 and DCAP1 done) LADL1 run once when its shards finish and merge; CONF2 window A read once when its download finishes (window C, from Oct 27, read once later when it holds 30 kept closes).
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (about 48 of 300 gold windows, about Nov 7); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner).
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 1:55 PM, LADL1 (L1's rule on the hourly and daily ladders), Bitcoin and Ethereum hourly FALSIFIED; gold daily and weekly NOT_ENOUGH_DATA.** Bitcoin hourly at 6 min PF 1.38 / 0.95 / 0.53 (171 / 171 / 177 closes); Ethereum hourly at 6 min 0.25 / 1.02 / 0.43. Gold daily: 38 closes in all (5 to 10 a window); at 6 min it won all 15 entries, too few to mean anything. (Script printed FALSIFIED for gold through a verdict slip; the registered word is NOT_ENOUGH_DATA.)
 
 **2026-10-29 1:20 PM CT, AUTO built; first live watch.** Forward reads now check themselves every hour (`autoscore`, log in `workers/AUTO_LOG.md`): LOCK2 at 25 closes per asset, MKTTIME1-F at 15 block losses, CONF2 window C at 30 kept closes (after window A is read), RECORD1 count daily, MM1 count (its scorer is not written: the registration leaves the queue model open). Live watch (`workers/LIVEWATCH.md`, aggregates only, nightly): one flag, XRP last 7 days 9 losses in 62 (14.5%) against a history rate of 5.2%, p 0.0045, PF 0.53. XRP is already paused in code since Oct 28, so nothing to act on. Gold 200 settled PF 1.73; Dogecoin 129, 1.74; Bitcoin 155, 0.72; Ethereum 113, 0.92.
 
