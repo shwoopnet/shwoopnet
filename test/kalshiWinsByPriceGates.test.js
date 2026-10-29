@@ -6,8 +6,8 @@ const path = require('path');
 const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const gates = {};
 const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-const names = ['kalshiOrderPnl', 'kalshiPricePaid', 'kalshiWinsByPrice', 'kalshiWinsByPriceHtml'];
-const f = new Function(names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
+const names = ['kalshiOrderPnl', 'kalshiPricePaid', 'kalshiWinsByPrice', 'kalshiWinsByPriceBands', 'kalshiWinsByPriceHtml'];
+const f = new Function('var ' + /(KAL_PRICE_BANDS = [^\n]*);\n/.exec(html)[1] + ';\n' + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
 const o = (side, avg, pnl, over) => Object.assign({ strategy: 'L1', side, count: 5, fillCount: 5, averageFillPrice: avg, maxCost: 4.6, settled: true, settledPnl: pnl }, over);
 gates.WP1 = () => {
   const list = f.kalshiWinsByPrice([
@@ -22,7 +22,14 @@ gates.WP1 = () => {
   assert.strictEqual(list[1].winPct, 75, 'win rate is wins over orders');
   assert.deepStrictEqual(f.kalshiWinsByPrice([]), [], 'no orders, no rows');
   const h = f.kalshiWinsByPriceHtml(list, (x) => String(x));
-  assert.ok(/92c entries/.test(h) && /4 orders, won 3 lost 1, 75\.0% \(needs 92%\)/.test(h), 'each row names the price, the counts, the win rate and the break-even: ' + h);
+  assert.ok(/92c entries/.test(h) && /4 orders, won 3 lost 1, 75\.0% \(needs 92%\)/.test(h), 'the cent rows stay, each with the counts, the win rate and the break-even: ' + h);
+  assert.ok(/<details class="kal-fold" id="kalWinsByCent">/.test(h), 'the one-row-per-cent list is closed under the bands, not the first thing read');
+  const bands = f.kalshiWinsByPriceBands(list);
+  assert.deepStrictEqual(bands.map((g) => [g.label, g.n, g.wins]), [['88c to 90c', 2, 1], ['91c to 92c', 4, 3]], 'bands hold the cents inside them and an empty band is left out');
+  assert.ok(Math.abs(bands[1].avgPaid - 92) < 1e-9 && Math.abs(bands[1].points - (75 - 92)) < 1e-9, 'a band is judged against the AVERAGE price paid in it, in points');
+  assert.ok(/88c to 90c/.test(h) && /50\.0% against 90\.0% paid \(-40\.0\)/.test(h), 'the band row says the win rate, the average price and the points: ' + h);
+  const wide = f.kalshiWinsByPriceBands(f.kalshiWinsByPrice([o('yes', 0.54, -2.7), o('yes', 0.96, 0.2), o('yes', 0.99, 0.05)]));
+  assert.deepStrictEqual(wide.map((g) => g.label), ['Under 88c', '95c to 97c', '98c and over'], 'prices outside the band are kept in their own groups, never merged into the band');
   assert.ok(/1 order,/.test(f.kalshiWinsByPriceHtml(f.kalshiWinsByPrice([o('yes', 0.9, 0.5)]), (x) => String(x))), 'singular for one order');
   assert.strictEqual(f.kalshiWinsByPriceHtml([], (x) => x), '', 'nothing to show, nothing drawn');
   assert.ok(!/\$|\*\*\*\*/.test(h), 'percentages only, so Privacy view has nothing to mask');
