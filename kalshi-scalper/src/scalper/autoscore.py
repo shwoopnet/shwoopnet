@@ -26,7 +26,7 @@ import os
 import subprocess
 import sys
 import time
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
@@ -222,6 +222,19 @@ def check() -> None:
                 log("MM1", last_line(mm1_out.read_text(), "VERDICT"))
             elif not s.get("mm1_refused_logged"):
                 log("MM1", f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s["mm1_refused_logged"] = True
+    # QUOTE2B (Q2B worker); `quote2b run` refuses before 2026-11-12 and below 300 usable closes, so a refusal just waits
+    q2b_out = DATA_DIR / "quote2b_result.txt"
+    if q2b_out.exists():
+        status.append("QUOTE2B done")
+    else:
+        rc, o = py("scalper.quote2b", "count", timeout=900)
+        status.append("QUOTE2B readiness: " + last_line(o)[:160])
+        if datetime.now(timezone.utc) >= datetime(2026, 11, 12, tzinfo=timezone.utc):
+            rc, o = py("scalper.quote2b", "run")
+            if q2b_out.exists():
+                log("QUOTE2B", last_line(q2b_out.read_text(), "VERDICT"))
+            elif not s.get("q2b_refused_logged"):
+                log("QUOTE2B", f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s["q2b_refused_logged"] = True
     # CONF2 window C
     if RESULTS["CONF2C"].exists():
         status.append("CONF2 C done")
