@@ -55,7 +55,7 @@ gates.T3 = async () => {
     if (/%5EGSPC/.test(url)) return { ok: false, status: 429, text: async () => '' };
     if (/query1\.finance\.yahoo\.com/.test(url)) return ok(JSON.stringify(chart()));
     if (/cnbc/.test(url)) throw new Error('timeout');
-    return ok('<rss><channel><item><title>Only MarketWatch</title><link>https://mw.test/a</link><pubDate>Mon, 12 Oct 2026 18:00:00 GMT</pubDate></item></channel></rss>');
+    return ok('<rss><channel><item><title>Stocks edge higher</title><link>https://mw.test/a</link><pubDate>Mon, 12 Oct 2026 18:00:00 GMT</pubDate></item></channel></rss>');
   };
   const r = await lib.readTape({ fetchFn, now: NOW });
   assert.ok(!('^GSPC' in r.quotes) && 'SPY' in r.quotes && Object.keys(r.quotes).length === lib.SYMBOLS.length - 1, 'one symbol failed, the others answered');
@@ -214,6 +214,38 @@ gates.T25 = () => {
   assert.ok(!/Fear|Greed|Nervous|Stressed|panic/i.test(g('Stocks', { score: 12, rating: 'extreme fear', prev: 30 })), 'no fear word is shown, even on an extreme reading');
   assert.strictEqual(sf(NaN), null, 'no score, no word');
   assert.ok(/\.mood-kv > span:first-child/.test(html), 'the row label rule cannot reach the change inside the value, which stays green or red');
+};
+
+// NF1 and NF2: Market News keeps only equities, crypto and commodity stories (the owner, Oct 29, 2026, after an advice column about an ex-husband and a college fund appeared). Consequence: a personal advice or lifestyle piece must never reach
+// the Brief even when it names a stock, and the per feed cap must pick each desk's newest RELEVANT stories, not the newest stories (three irrelevant ones would otherwise empty a desk).
+gates.NF1 = () => {
+  const keep = [['Stocks fall as Fed signals fewer rate cuts', 'CNBC'], ['Gold hits record high on tariff fears', 'MarketWatch'], ['Nvidia earnings beat forecasts, shares jump', 'CNBC'], ['Oil prices slide as OPEC+ weighs output', 'WSJ World'],
+    ['Solana ETF filing delayed', 'CoinDesk'], ['Dogecoin whales accumulate', 'Cointelegraph'], ['Bond yields fall as the dollar slips', 'CNBC Economy'], ['S&P 500 closes at a record', 'MarketWatch']];
+  const drop = [['My abusive ex-husband promised $20,000 for our kids\u2019 education. Now he refuses to pay. Is he legally obligated?', 'MarketWatch'], ['Trump signs defense bill after weeks of delay', 'WSJ World'], ['10 best fall road trips in America', 'CNBC'],
+    ['Moneyist: I am 62 and my wife wants to retire. Should I sell stocks?', 'MarketWatch'], ['Earthquake hits coastal city', 'WSJ World'], ['My husband wants to buy gold with our savings. Is that smart?', 'MarketWatch'], ['', 'CNBC']];
+  keep.forEach(([h, s]) => assert.strictEqual(lib.isMarketNews({ headline: h, source: s }), true, 'kept: ' + h));
+  drop.forEach(([h, s]) => assert.strictEqual(lib.isMarketNews({ headline: h, source: s }), false, 'dropped: ' + h));
+  assert.strictEqual(lib.isMarketNews({ headline: 'My ex-husband and his bitcoin', source: 'CoinDesk' }), false, 'a crypto desk is not exempt from the advice and lifestyle drop');
+  assert.strictEqual(lib.isMarketNews({ headline: 'Anything at all about a new token', source: 'CoinDesk' }), true, 'a crypto desk passes on its source');
+  assert.strictEqual(lib.isMarketNews('Stocks edge higher'), true, 'a bare headline string works too');
+};
+gates.NF2 = async () => {
+  const ok = (body) => ({ ok: true, status: 200, text: async () => body });
+  const item = (title, when) => '<item><title>' + title + '</title><link>https://x.test/' + encodeURIComponent(title) + '</link><pubDate>' + when + '</pubDate></item>';
+  const fetchFn = async (url) => {
+    if (/query1\.finance\.yahoo\.com/.test(url)) return ok(JSON.stringify(chart()));
+    if (/mw_topstories/.test(url)) {
+      return ok('<rss><channel>' + item('My husband refuses to pay for college. Is he obligated?', 'Mon, 12 Oct 2026 18:50:00 GMT') + item('Moneyist: my mother-in-law wants a loan', 'Mon, 12 Oct 2026 18:40:00 GMT') +
+        item('Dear Moneyist, should I buy stocks?', 'Mon, 12 Oct 2026 18:30:00 GMT') + item('Stocks slide as yields climb', 'Mon, 12 Oct 2026 17:00:00 GMT') + item('Gold steadies near a record', 'Mon, 12 Oct 2026 16:00:00 GMT') + '</channel></rss>');
+    }
+    return ok('<rss><channel></channel></rss>');
+  };
+  const r = await lib.readTape({ fetchFn, now: NOW });
+  assert.deepStrictEqual(r.news.map((n) => n.headline), ['Stocks slide as yields climb', 'Gold steadies near a record'], 'the three newest MarketWatch stories were advice columns; the cap picked the newest relevant ones instead');
+  const none = await lib.readTape({ fetchFn: async (url) => /query1\.finance\.yahoo\.com/.test(url) ? ok(JSON.stringify(chart())) : /coindesk|cointelegraph/.test(url) ? ok('<rss><channel></channel></rss>') : ok('<rss><channel>' + item('A celebrity wedding, and what to wear', 'Mon, 12 Oct 2026 18:00:00 GMT') + '</channel></rss>'), now: NOW });
+  assert.strictEqual(none.news, null, 'nothing relevant: no news to write, so the page keeps its last headlines or says there are none');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'marketTapeLib.js'), 'utf8');
+  assert.ok(/parseRss\(await getText\(fetchFn, f\.url\), f\.source\)\.filter\(isMarketNews\)/.test(src), 'the filter runs on each feed before the per feed cap');
 };
 
 (async () => {
