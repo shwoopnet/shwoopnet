@@ -1465,6 +1465,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 28</div>
                 <ul class="changelog-list">
+                  <li>Brief charts: weekly date labels no longer pile on top of each other where a weekend or night is squeezed (#606)</li>
                   <li>Fixed the nightly order report endpoint answering an error on every call (it did not start its database connection); nothing on the page changes (#604)</li>
                   <li>A nightly order report endpoint (read only, behind a secret token) so the daily results can be fetched without pasting orders; nothing on the page changes (#603)</li>
                   <li>The three probe markets (AUD/USD, USD/CAD, natural gas) are paused in the bot, with no resume date; the silent-market warning skips them (#602)</li>
@@ -4138,7 +4139,9 @@ kalshiStatusTick();
       var ylab = ticks.map(function(pc){ return '<span style="top:' + (y(pc) / H * 100).toFixed(1) + '%">' + escapeHtml(chartPctLabel(pc, tstep)) + '</span>'; }).join('');
       plot = '<div class="brief-plot"><svg viewBox="0 0 200 ' + H + '" preserveAspectRatio="none" aria-hidden="true">' + grid + pts + '</svg><div class="brief-yaxis">' + ylab + '</div></div>';
       if(tms){
-        xaxis = '<div class="brief-xaxis">' + chartTimeTicks(tms[0], tms[tms.length - 1], q.range === '7d' ? 5 : 3).map(function(tk){ var left = (squeeze ? squeeze(tk.t) : (tk.t - tms[0]) / (tms[tms.length - 1] - tms[0])) * 100; return '<span class="' + (left < 8 ? 'l' : (left > 92 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + escapeHtml(tk.label) + '</span>'; }).join('') + '</div>';
+        // On the squeezed scale a weekend or a night is a short step, so two dates can land almost on top of each other (the owner saw "Oct 24" over "Oct 26"). A label is kept only if it is at least 24% of the width from the one before it.
+        var lastLeft = -100;
+        xaxis = '<div class="brief-xaxis">' + chartTimeTicks(tms[0], tms[tms.length - 1], q.range === '7d' ? 5 : 3).map(function(tk){ return { tk: tk, left: (squeeze ? squeeze(tk.t) : (tk.t - tms[0]) / (tms[tms.length - 1] - tms[0])) * 100 }; }).filter(function(x){ if(x.left - lastLeft < 24){ return false; } lastLeft = x.left; return true; }).map(function(x){ var left = x.left; return '<span class="' + (left < 8 ? 'l' : (left > 92 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + escapeHtml(x.tk.label) + '</span>'; }).join('') + '</div>';
       } else {
         xaxis = '<div class="brief-xaxis"><span class="l" style="left:0">' + (q.range === '7d' ? 'Week start' : 'Day start') + '</span><span class="r" style="left:100%">Now</span></div>';
       }
