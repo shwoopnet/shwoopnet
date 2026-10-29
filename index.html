@@ -1465,6 +1465,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Open positions say the price that decides each one ("Wins if it closes at or above $4,013.48"), taken from the market itself</li>
                   <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
                   <li>The profit add-on (extra contracts bought with reinvested profit) is capped at a quarter of the base size, so a long win streak cannot push a gold order far above its base and the next loss lands at a smaller size (#615)</li>
                   <li>Settings: chats can run safe tools without asking; deploys, merging pull requests and the live env file stay blocked (#614)</li>
@@ -2376,7 +2377,7 @@
       if(m && m.closeTime){ left = kalshiSecsLeft(m.closeTime, nowMs); }
       return { ticker: p.ticker, title: kalshiShortTicker(p.ticker), side: side, count: count, entry: entry, cost: cost,
         ifWin: cost === null ? null : Math.round((count - cost) * 100) / 100, ifLose: cost === null ? null : -cost,
-        chance: chance, cashOut: cashOut, left: left, bot: !!order };
+        chance: chance, cashOut: cashOut, left: left, strike: m && Number.isFinite(Number(m.strike)) ? Number(m.strike) : null, bot: !!order };
     });
   }
 
@@ -2398,12 +2399,19 @@
       '<path class="kal-hc-fill" d="' + d + ' L' + W + ' ' + H + ' L0 ' + H + ' Z"/><path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
       '<div class="kal-hc-y"><span>' + pc(dmax) + '</span><span>' + pc(dmin) + '</span></div></div>';
   }
+  // The price that decides the market, from the market itself (Kalshi's floor_strike, which the books already carry; every L1 series is an "at or above" market, checked Oct 29, 2026). A YES position wins if the asset closes at or above it, a NO position if it closes below. It is a price level, not an account figure, so Privacy view leaves it showing. '' when the market carried none.
+  function kalshiStrikeText(side, strike){
+    if(!Number.isFinite(strike) || !(strike > 0)){ return ''; }
+    var px = '$' + strike.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 6 });
+    return 'Wins if it closes ' + (side === 'no' ? 'below ' : 'at or above ') + px;
+  }
   function kalshiPositionsHtml(rows, esc, money){
     if(!rows || !rows.length){ return '<div class="kal-empty">No open positions.</div>'; }
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     return rows.map(function(r){
       var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
       var sub = [];
+      var st = kalshiStrikeText(r.side, r.strike); if(st){ sub.push(st); }
       if(r.chance !== null){ sub.push('Chance now ' + (r.chance >= 0.9995 ? '99.9' : (r.chance * 100).toFixed(1)) + '%'); }
       var stats = '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
         stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>';
