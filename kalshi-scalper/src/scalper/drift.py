@@ -263,6 +263,11 @@ def run_all():
         dogefill()
     except Exception as ex:
         print(f"dogefill failed: {type(ex).__name__}: {str(ex)[:160]}")
+    try:   # gold slippage by order size (owner, 2026-10-29: the second deposit hinges on it)
+        from .goldslip import run as goldslip
+        goldslip()
+    except Exception as ex:
+        print(f"goldslip failed: {type(ex).__name__}: {str(ex)[:160]}")
     return flags
 
 
