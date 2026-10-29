@@ -49,7 +49,10 @@ gates['the module is inert: empty registry, switch off, no order is ever allowed
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
   for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$/.test(x))) {
-    assert.ok(!/kalshiSlot/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not mention the slot library (phase B3: only the slot libraries, functions/kalshiLiveLib.js behind slotOn and functions/index.js behind SLOT_ON may; checked recursively, including functions/, scripts/, workflows and package files)');
+    const txt = fs.readFileSync(f, 'utf8');
+    // The Bot page may READ the slot's orders (the strategy switch, Oct 29, 2026) and nothing else of the slot: no library, no run or store code, no control latch, no direction lock.
+    if (/index\.html$/.test(f)) { assert.ok(!/kalshiSlot(Lib|Run|Store|Control)|kalshiLiveDirection/.test(txt) && !/(setDoc|addDoc|updateDoc|deleteDoc|runTransaction)\([^)]*kalshiSlot/.test(txt), 'the page only reads kalshiSlotOrders'); continue; }
+    assert.ok(!/kalshiSlot/.test(txt), path.relative(root, f) + ' must not mention the slot library (phase B3: only the slot libraries, functions/kalshiLiveLib.js behind slotOn and functions/index.js behind SLOT_ON may; checked recursively, including functions/, scripts/, workflows and package files)');
   }
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
