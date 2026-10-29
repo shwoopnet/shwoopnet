@@ -1,0 +1,4 @@
+C= 1 volume>0 both=False: closes 704 (with a pairable minute 704); closes with a lock >= 1.0c: 3; largest lock 16.00c; median best -5.70c; longest run (minutes) 1
+C= 1 volume>0 both=True: closes 704 (with a pairable minute 704); closes with a lock >= 1.0c: 3; largest lock 16.00c; median best -5.70c; longest run (minutes) 1
+C=10 volume>0 both=False: closes 704 (with a pairable minute 704); closes with a lock >= 1.0c: 4; largest lock 16.80c; median best -4.40c; longest run (minutes) 2
+C=10 volume>0 both=True: closes 704 (with a pairable minute 704); closes with a lock >= 1.0c: 4; largest lock 16.80c; median best -4.40c; longest run (minutes) 2
