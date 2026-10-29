@@ -1335,7 +1335,7 @@
               <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one contract at a time (up to $2.00 each) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one order at a time (up to $2.00 a contract) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review), and Dogecoin, which is always 5 contracts.</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1344,11 +1344,11 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes (XRP and natural gas are entered about 10 minutes out instead, as a test), then holds to settlement. Bitcoin and Ethereum buy only on a smooth climb. Markets, in order: gold, XRP, Bitcoin, Dogecoin, Ethereum, then three tests (AUD/USD, USD/CAD, natural gas). At most one crypto order per 15 minute window.</div>
-                <div class="kal-note"><b>Size.</b> Only gold grows with the account (one contract per $43 of balance, plus a contract from profit). Dogecoin is always 5 contracts, natural gas 2, everything else 1 (XRP, natural gas and the other probes are paused). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold, Dogecoin, Ethereum.</span> Ethereum buys only on a smooth climb. <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, AUD/USD, USD/CAD, natural gas.</span> At most one crypto order per 15 minute window. Gold places no new orders from 8 PM to midnight Central.</div>
+                <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, plus extra contracts from profit, at most a quarter of the base size). Dogecoin is always 5 contracts, Ethereum 1. At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
-                <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool.</div>
+                <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool, and the extra contracts it buys are capped at a quarter of the base size.</div>
                 <div class="kal-note">L1 failed its own test. Nothing here is proof it works.</div>
               </details>
             </div>
@@ -1513,6 +1513,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
                   <li>Market News keeps only stock, crypto and commodity stories (and the Fed, rates, inflation and dollar news that moves them); personal advice columns and lifestyle pieces are dropped</li>
                   <li>Account result card: the 1M, 3M, YTD and All lines now use the live orders for everything recent (they were a ten minute old copy, so the total could lag), and say so when older trades cannot be read</li>
                   <li>"Got questions?" panel: a fourth question, "Want to work with us?", for future partners, with an email link</li>
