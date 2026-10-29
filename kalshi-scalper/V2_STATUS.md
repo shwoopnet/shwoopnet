@@ -17,7 +17,7 @@
 
 ## Entries
 
-**2026-10-29 4:15 PM CT, live marker: Dogecoin 3 to 5 contracts (#623) deployed (owner).** Live reads of Dogecoin split at the first 5 contract order. Per contract nothing changes but fee rounding (slightly cheaper at 5); dollar wins and losses are 5/3 larger. The AUTO loop has not been restarted yet (still the process from 1:47 PM), so the nightly drift check still waits for that restart.
+**2026-10-29 4:15 PM CT, live marker: Dogecoin 3 to 5 contracts (#623) deployed (owner).** Live reads of Dogecoin split at the first 5 contract order. Per contract nothing changes but fee rounding (slightly cheaper at 5); dollar wins and losses are 5/3 larger. The AUTO loop was restarted at 4:20 PM CT at the owner's request (in the research container, not on the owner's laptop), so the nightly drift check is now live.
 
 **2026-10-29 4:15 PM CT, information: who loses together in the same window (no try).** Given one coin lost, another coin in the same window lost 30% to 63% of the time (Bitcoin then Ethereum 52%, Dogecoin then Ethereum 63%), against 5% to 6.5% normally; gold is independent (3% to 10% with any coin). Same-side pairs both lost 25% of the time, opposite-side 1%. The live one-crypto-order-per-window rule targets the real cluster; gold plus one coin adds no shared risk.
 
