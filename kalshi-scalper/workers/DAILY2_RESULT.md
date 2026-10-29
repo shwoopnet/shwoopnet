@@ -32,7 +32,7 @@ Per variant at C = 1 contract, fill at the candle after the signal; PF10 is the 
   - The reference level matches Kalshi's centre; a check of `S` against the strikes priced near 50c showed no basis error.
   - The model's trailing 10 hour volatility gives a wider distribution 30 to 60 minutes before the 2:30 PM settlement than Kalshi prices. So it buys cheap tails: 63 of 72 WTI orders were priced under 0.5, and 55 of those 63 lost.
   - Kalshi's tight pricing was right. WTI at 60 minutes lost on 23 of 24 orders, but it traded on only 13 days, so the registered day minimum makes it `NOT_ENOUGH_DATA`, not `FALSIFIED`. Recorded as registered.
-- **EUR/USD and USD/JPY: almost every fill is on a candle with no traded volume.** EUR/USD 74 of 85 orders; USD/JPY 30 of 31. WTI's fills are almost all on traded candles (2 of 72 are not).
+- **EUR/USD and USD/JPY: almost every fill is on a candle with no traded volume.** EUR/USD 74 of 85 orders; USD/JPY 30 of 31. WTI's fills are almost all on traded candles (5 of 72 are not).
   - So the "fill" is a resting quote nobody traded, and the 10 contract figure is especially optimistic.
   - With zero-volume fills dropped, USD/JPY 60 has no orders at all, EUR/USD keeps 0 to 3 orders per window, and USD/JPY 30 keeps one.
   - The A windows look good for EUR/USD at every look and turn into large losses in B. That is the sign of noise on 5 to 13 days, not an edge.
@@ -40,3 +40,32 @@ Per variant at C = 1 contract, fill at the candle after the signal; PF10 is the 
   - It rests on 16 orders on 12 days, all on zero-volume candles: no order was printed against a trade.
   - It is under the 15 day minimum, so `NOT_ENOUGH_DATA`.
   - Its C is read once below with every other variant's.
+
+## Part 2: holdout window C (Oct 8 to Oct 28, 14 days), read once after Part 1 was pushed
+
+| Variant | C: orders / days / PF1 / PF10 / PF x1.2 / zv | A+B+C mean per order, day-clustered z | Final verdict |
+|---|---|---|---|
+| WTI 60 min | 16 / 11 / **0.12** / 0.12 / 0.11 / 0 | -20.5c, z **-6.29** | `NOT_ENOUGH_DATA` by the registered day minimum (A+B 13 days); in substance a large, consistent loss |
+| WTI 30 min | 20 / 12 / 0.91 / 0.93 / 0.89 / 2 | -1.7c, z -0.23 | `NOT_ENOUGH_DATA` |
+| WTI 10 min | 13 / 9 / 1.56 / 1.60 / 1.54 / 1 | -2.7c, z -0.40 | **`FALSIFIED`** (A+B PF 0.54) |
+| EUR/USD 60 min | 17 / 12 / 0.73 / 0.75 / 0.72 / 11 | -6.1c, z -0.75 | **`FALSIFIED`** |
+| EUR/USD 30 min | 20 / 13 / 0.54 / 0.55 / 0.53 / 18 | -9.7c, z -1.30 | **`FALSIFIED`** |
+| EUR/USD 10 min | 7 / 7 / 0.20 / 0.20 / 0.20 / 6 | -7.5c, z -0.68 | `NOT_ENOUGH_DATA` |
+| USD/JPY 60 min | 16 / 12 / **0.54** / 0.55 / 0.53 / 11 | -3.1c, z -0.32 | `NOT_ENOUGH_DATA`; the only A and B survivor failed its holdout |
+| USD/JPY 30 min | 12 / 9 / 1.04 / 1.06 / 1.02 / 9 | -5.6c, z -0.45 | `NOT_ENOUGH_DATA` |
+
+## Verdict
+
+**Family: `FALSIFIED` in substance, with 3 of 8 variants `FALSIFIED` and 5 `NOT_ENOUGH_DATA` by the registered day minimum.**
+
+- **No variant has PF >= 1.5 in all three windows.** The best on all three is USD/JPY 60 (3.50 / 1.87 / **0.54**), and every pooled mean over A+B+C is negative (-1.7c to -20.5c a contract).
+- **No window reaches 30 independent closes** (13, 14 and 14 days), so nothing could have passed. N tried = 8; running count about 438,918.
+- **Prediction against the result.**
+  - Right on the verdict: no variant at PF >= 1.5 in both A and B except one thin zero-volume case, which then failed C. Most variant-windows fell in or under the predicted 0.4 to 1.1.
+  - Wrong on the direction of the model error for WTI: the trailing 10 hour volatility made the model too wide, not too narrow.
+- **Counterparty:** not found. The honest alternative holds: Kalshi's WTI ladder is priced tighter than a realised volatility model, and correctly. 100 of 121 WTI orders were cheap tails, and 88 of those lost.
+  - **Information only, not a try:** the mirror image (selling those tails) is not registered here. It would be a new try and a favourite-band rule, which is L1's family.
+- **EUR/USD and USD/JPY daily ranges trade so thinly in the last hour before the 10 AM print** that 84% of EUR/USD fills (109 of 129 orders) and 85% of USD/JPY fills (50 of 59) sit on candles with no trade. Any edge found there would be on quotes nobody hit.
+- **Not run:** gold daily and weekly (covered by GOLD2 and CMD1); the 10 year Treasury (no daily series with settled markets, weekly 3 to 8 events, hourly Pyth from Oct 9 only); weekly WTI and FX (9 to 10 events).
+
+Raw printouts: `run_AB.txt` and `run_ABC.txt` in the session scratchpad (`.../scratchpad/daily2/data/`).
