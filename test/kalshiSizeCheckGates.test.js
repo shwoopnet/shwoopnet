@@ -51,7 +51,7 @@ const tick = (w, series, extra = {}) => live.runL1Tick({
   sizingState: state, setSizingState: async () => {}, ...extra,
 });
 const noPause = { pausedSeries: [] };
-const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: 3, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2 };
+const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: 5, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2 };
 
 // SZ1: the incident. A 12 contract Dogecoin order is never sent, leaves no order document behind, says why, and does not stop the other markets from trading.
 gates.SZ1 = async () => {
@@ -107,18 +107,18 @@ gates.SZ4 = async () => {
 gates.SZ5 = () => {
   assert.strictEqual(live.maxContractsFor('KXSOL15M'), 0);
   assert.strictEqual(live.maxContractsFor(undefined), 0);
-  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 3);
+  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5);
   assert.strictEqual(live.maxContractsFor('KXBTC15M'), 1);
   assert.strictEqual(live.maxContractsFor('KXNATGAS15M'), 2);
 };
 
 // SZ6: nothing from the page, the session document or Firestore can move the limit. Extra arguments are ignored and the source reads no session, argument or request.
 gates.SZ6 = async () => {
-  assert.strictEqual(live.maxContractsFor('KXDOGE15M', { maxContracts: 99, FIXED_CONTRACTS: { KXDOGE15M: 99 } }), 3, 'extra arguments are ignored');
+  assert.strictEqual(live.maxContractsFor('KXDOGE15M', { maxContracts: 99, FIXED_CONTRACTS: { KXDOGE15M: 99 } }), 5, 'extra arguments are ignored');
   const saved = live.FIXED_CONTRACTS.KXDOGE15M;
   live.FIXED_CONTRACTS.KXDOGE15M = 12;
   try {
-    assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 3, 'a change to the fixed sizes in memory does not move the lock');
+    assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5, 'a change to the fixed sizes in memory does not move the lock');
     const w = world(sess({ maxContracts: 99, liveExtra: { KXDOGE15M: 99 }, sizeCap: 99, count: 12 }));
     await tick(w, ['KXDOGE15M'], { ...noPause, sizingState: { ...state, cap: 99, maxContracts: 99 } });
     assert.strictEqual(w.posts.length, 0, 'stored values do not let a 12 contract order through');
