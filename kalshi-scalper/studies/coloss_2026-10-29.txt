@@ -1,0 +1,8 @@
+unconditional loss rate: {'gold': '5.3%', 'BTC': '6.5%', 'ETH': '6.5%', 'DOGE': '5.1%', 'XRP': '5.5%'}
+P(B lost | A lost, same window, both entered)  [n pairs]
+gold  gold:   -    BTC:   6%(34) ETH:  10%(31) DOGE:   9%(33) XRP:   3%(29)
+BTC   gold:   5%(37) BTC:   -    ETH:  52%(91) DOGE:  30%(69) XRP:  36%(75)
+ETH   gold:   8%(39) BTC:  52%(90) ETH:   -    DOGE:  47%(72) XRP:  39%(76)
+DOGE  gold:   8%(36) BTC:  38%(56) ETH:  63%(54) DOGE:   -    XRP:  46%(63)
+XRP   gold:   3%(30) BTC:  43%(63) ETH:  48%(62) DOGE:  40%(72) XRP:   -   
+pairs with at least one loss: same side 797, both lost 25% | opposite side 118, both lost 1%
