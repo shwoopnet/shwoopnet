@@ -37,6 +37,7 @@
   @font-face{ font-family:'IBM Plex Mono'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/IBMPlexMono-400-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
   @font-face{ font-family:'IBM Plex Mono'; font-style:normal; font-weight:500; font-display:swap; src:url(fonts/IBMPlexMono-500-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
   @font-face{ font-family:'Titan One'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/TitanOne-latin.woff2) format('woff2'); unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face{ font-family:'Permanent Marker'; font-style:normal; font-weight:400; font-display:swap; src:url(fonts/PermanentMarker-latin.woff2) format('woff2'); unicode-range:U+0020-007E, U+2019, U+201C, U+201D; }
   :root{
     /* Ledger -- one fixed palette, modeled on a consumer brokerage's own
        actual design principles (warm off-white ground, a single blue
@@ -651,6 +652,29 @@
     background:radial-gradient(1000px 620px at 78% 40%, var(--front-g2), transparent 70%), linear-gradient(var(--ink), var(--front-g1));
   }
   .auth-gate[hidden]{ display:none; }
+  /* "Got questions?" bubble on the signed-out screen (the owner's drawing, Oct 29, 2026): a round bubble in the bottom right with a marker-style label and a hand-drawn arrow, opening a small panel of fixed answers. It is a layer ON the existing page, which is unchanged. No network call, no stored text: the panel only shows fixed answers, and "Something else" opens the owner's mail app at the address the footer already shows. */
+  .gq-bubble{ position:fixed; right:max(20px, env(safe-area-inset-right, 0px)); bottom:max(20px, env(safe-area-inset-bottom, 0px)); width:56px; height:56px; border-radius:50%; border:0; background:var(--paper); color:var(--ink); display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:20; box-shadow:0 8px 28px rgba(0,0,0,.45); }
+  .gq-bubble:focus-visible{ outline:2px solid var(--paper); outline-offset:3px; }
+  .gq-label{ position:fixed; right:calc(max(20px, env(safe-area-inset-right, 0px)) + 72px); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 84px); z-index:19; pointer-events:none; font-family:'Permanent Marker','Public Sans',cursive; font-size:28px; line-height:1; color:var(--paper); transform:rotate(-7deg); transform-origin:right bottom; white-space:nowrap; transition:opacity .2s; }
+  .gq-label small{ display:block; font-size:15px; color:var(--muted); margin-top:4px; text-align:right; transform:rotate(2deg); }
+  .gq-arrow{ position:fixed; right:calc(max(20px, env(safe-area-inset-right, 0px)) + 12px); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 62px); width:90px; height:70px; z-index:19; pointer-events:none; overflow:visible; transition:opacity .2s; }
+  .gq-open .gq-label, .gq-open .gq-arrow{ opacity:0; }
+  .gq-panel{ position:fixed; right:max(20px, env(safe-area-inset-right, 0px)); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 68px); width:min(340px, 100vw - 32px); max-height:min(520px, 100vh - 120px); display:flex; flex-direction:column; background:var(--panel, #141414); border:1px solid var(--border); border-radius:16px; box-shadow:0 16px 48px rgba(0,0,0,.55); z-index:21; overflow:hidden; }
+  .gq-panel[hidden]{ display:none; }
+  .gq-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); }
+  .gq-title{ font-family:'Permanent Marker','Public Sans',cursive; font-size:20px; }
+  .gq-close{ background:none; border:0; color:var(--muted); font-size:22px; line-height:1; cursor:pointer; min-width:44px; min-height:44px; margin:-8px -8px -8px 0; }
+  .gq-body{ padding:14px; display:flex; flex-direction:column; gap:10px; overflow-y:auto; }
+  .gq-msg{ background:rgba(255,255,255,.08); border-radius:12px 12px 12px 4px; padding:10px 12px; font-size:13px; line-height:1.45; max-width:260px; }
+  .gq-msg.me{ align-self:flex-end; background:var(--paper); color:var(--ink); border-radius:12px 12px 4px 12px; }
+  .gq-chips{ display:flex; flex-wrap:wrap; gap:6px; }
+  .gq-chip{ border:1px solid var(--border); background:none; color:var(--paper); font:inherit; font-size:12.5px; border-radius:999px; padding:8px 13px; min-height:40px; cursor:pointer; text-decoration:none; display:inline-flex; align-items:center; }
+  .gq-chip:hover{ background:rgba(255,255,255,.08); }
+  .gq-chip:focus-visible, .gq-close:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
+  @media (max-width:640px){ .gq-label{ font-size:21px; right:calc(max(16px, env(safe-area-inset-right, 0px)) + 66px); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 76px); } .gq-label small{ font-size:12px; } .gq-bubble{ right:max(16px, env(safe-area-inset-right, 0px)); bottom:max(16px, env(safe-area-inset-bottom, 0px)); } .gq-arrow{ width:70px; height:54px; right:calc(max(16px, env(safe-area-inset-right, 0px)) + 8px); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 58px); } .gq-panel{ right:max(16px, env(safe-area-inset-right, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 64px); } }
+  [data-reduce-motion="true"] .gq-label, [data-reduce-motion="true"] .gq-arrow{ transition:none; }
+  /* room so the bubble and its label never sit on the footer text */
+  .auth-gate .front-foot{ padding-right:84px; } @media (max-width:640px){ .auth-gate .front{ padding-bottom:116px; } .auth-gate .front-foot{ padding-right:0; } }
   /* The sign-in screen is a fixed layer over the whole window, but the signed-in app is still laid out underneath it, so the document grew a scroll bar that scrolled nothing you could see (the owner, Oct 24, 2026: "it builds a scroll bar a lot of the time and it doesnt actually scroll anything"). While the gate is up the document itself does not scroll; the gate scrolls itself when its own content is taller than the window. */
   html:has(#authGate:not([hidden])), html:has(#authGate:not([hidden])) body{ overflow:hidden; }
   .front{ position:relative; width:min(1160px, 100% - 40px); margin:0 auto; min-height:100%; display:flex; flex-direction:column; padding:0 0 22px; }
@@ -1171,6 +1195,24 @@
     <p class="front-note"><b>Important.</b> Shwoop Financials is not a broker, investment adviser or fund, and nothing on this site is an offer, advice or a solicitation to buy or sell any security or contract. Trading involves risk, including the loss of all capital invested. Past results do not predict future results.</p>
     <div class="front-foot"><span>&copy; 2026 Shwoop Financials, LLC</span><span>Contact: <a href="mailto:shwoopadvisor@gmail.com">shwoopadvisor@gmail.com</a></span></div>
   </div>
+  <div class="gq" id="gqRoot">
+    <div class="gq-label" aria-hidden="true">Got questions?<small>ask us here</small></div>
+    <svg class="gq-arrow" viewBox="0 0 90 70" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="color:var(--paper)"><path d="M6 6 C 30 4, 62 14, 70 48"/><path d="M58 40 L 70 52 L 80 36"/></svg>
+    <button type="button" class="gq-bubble" id="gqBubble" aria-label="Got questions? Open the question panel" aria-expanded="false" aria-controls="gqPanel"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/></svg></button>
+    <div class="gq-panel" id="gqPanel" role="dialog" aria-label="Got questions?" hidden>
+      <div class="gq-head"><span class="gq-title">Got questions?</span><button type="button" class="gq-close" id="gqClose" aria-label="Close">&times;</button></div>
+      <div class="gq-body" id="gqBody">
+        <div class="gq-msg">Hi. Pick a question, or write to us.</div>
+        <div class="gq-chips" id="gqChips">
+          <button type="button" class="gq-chip" data-q="what">What is Shwoop Financials?</button>
+          <button type="button" class="gq-chip" data-q="who">Who is it for?</button>
+          <button type="button" class="gq-chip" data-q="access">How do I get access?</button>
+        </div>
+        <div id="gqThread" style="display:flex;flex-direction:column;gap:10px" aria-live="polite"></div>
+        <a class="gq-chip" id="gqMail" href="mailto:shwoopadvisor@gmail.com" style="align-self:flex-start">Something else? Email us</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <div class="app">
@@ -1469,6 +1511,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Signed-out page: a "Got questions?" bubble in the bottom right opens a small panel of fixed answers, with an email link for anything else; the page itself is unchanged</li>
                   <li>Dogecoin orders go from 3 to 5 contracts (live record: 131 settled, 125 won, +2.66c a contract, both halves positive)</li>
                   <li>Research recorder R6: the whole 15 minute order book (best 5 prices a side, every 2 seconds) and every public trade for gold, Bitcoin, Ethereum, Dogecoin and XRP, public data only, stops by itself on Nov 13; it replaces the Bitcoin, Ethereum and gold recorder (#621)</li>
                   <li>Bot status: win rate by price paid is now five price bands (each against the average price paid in it) with the one-row-per-cent list folded underneath</li>
@@ -3895,6 +3938,30 @@ kalshiStatusTick();
     rememberEl.checked = saved !== 'false';
   })();
   var authSubmitBtn = document.getElementById('authSubmitBtn');
+  // "Got questions?" bubble on the signed-out screen. Fixed answers only (text set with textContent, never HTML), no network call, nothing stored. "Something else" is a plain mailto link to the address the footer already shows.
+  (function(){
+    var root = document.getElementById('gqRoot'), bubble = document.getElementById('gqBubble'), panel = document.getElementById('gqPanel'), closeBtn = document.getElementById('gqClose'), chips = document.getElementById('gqChips'), thread = document.getElementById('gqThread');
+    if(!root || !bubble || !panel){ return; }
+    var ANSWERS = {
+      what: ['What is Shwoop Financials?', 'We build systematic trading tools: rules written in advance, run by software, reviewed by people.'],
+      who: ['Who is it for?', 'Right now it is a private tool we use ourselves. We are not offering advice or managing money for anyone.'],
+      access: ['How do I get access?', 'There is no sign-up yet. If you have been given an account, sign in at the top right.']
+    };
+    function setOpen(open){
+      if(open){ panel.removeAttribute('hidden'); root.classList.add('gq-open'); } else { panel.setAttribute('hidden', ''); root.classList.remove('gq-open'); }
+      bubble.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    function say(text, mine){ var d = document.createElement('div'); d.className = 'gq-msg' + (mine ? ' me' : ''); d.textContent = text; thread.appendChild(d); }
+    bubble.addEventListener('click', function(){ var open = panel.hasAttribute('hidden'); setOpen(open); if(open){ closeBtn.focus(); } });
+    closeBtn.addEventListener('click', function(){ setOpen(false); bubble.focus(); });
+    chips.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('[data-q]') : null; var a = b ? ANSWERS[b.getAttribute('data-q')] : null;
+      if(!a){ return; }
+      say(a[0], true); say(a[1], false);
+      var body = document.getElementById('gqBody'); if(body){ body.scrollTop = body.scrollHeight; }
+    });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hasAttribute('hidden')){ setOpen(false); bubble.focus(); } });
+  })();
   var authGateEl = document.getElementById('authGate');
   function setupPasswordToggle(toggleBtnId, inputId){
     var btn = document.getElementById(toggleBtnId);

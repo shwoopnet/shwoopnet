@@ -13,7 +13,9 @@ assert.ok(!/\$\s?\d|\d\s?%|\bwin rate\b|\bprofit\b|\breturns?\b|\bperformance\b|
   'no figures, markets, venue or performance claim on a public page');
 assert.ok(/not a broker, investment adviser or fund/.test(gate) && /loss of all capital/.test(gate), 'the risk notice is there');
 assert.ok(/href="mailto:shwoopadvisor@gmail\.com"/.test(gate), 'the footer has the contact address the owner chose');
-assert.ok(!/<svg|<script|<img|href="http/.test(gate), 'no image, script or outside link in the front page');
+const gateNoChat = gate.replace(/<div class="gq" id="gqRoot">[\s\S]*?\n  <\/div>\n/, '');
+assert.ok(gateNoChat.length < gate.length, 'the Got questions widget is found and measured on its own (test/landingChatGates.test.js)');
+assert.ok(!/<svg|<script|<img|href="http/.test(gateNoChat), 'no image, script or outside link in the front page (the Got questions widget has its own gate)');
 // The front page (Oct 23, 2026): the slogan, a small sign-in and two window snapshots (the Account page and the Market Brief) with every figure blurred to bars. Consequence: the page has its OWN palette in two colours on the gate (the dashboard theme is untouched), three layouts picked in Settings, and every animation stops when motion is not wanted.
 assert.ok(/<h1 class="front-h1">Trade less\.<br><span>Live more\.<\/span><\/h1>/.test(gate) && /Systematic trading/.test(gate), 'the slogan and the Systematic trading label are on the front page');
 assert.ok(/Shwoop Financials builds systematic trading tools:<\/b> rules written in advance, run by software, reviewed by people\./.test(gate) && /Shwoop Financials, LLC/.test(gate), 'the line under the slogan and the LLC footer');
