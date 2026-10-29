@@ -1,0 +1,78 @@
+MKTTIME1 A and B: 70 rules tried; 1 pass A and B: gold skip 20-24 CT
+gold: n=1676; baseline PF A 1.439, B 1.026
+           skip 00-04 CT  A: PF 1.439->1.353 (-0.086) net +1100c->+817c skip 82 (2 losses) | B: PF 1.026->0.901 (-0.125) net +83c->-310c skip 80 (1 losses) [under 15 losses]
+           skip 04-08 CT  A: PF 1.439->1.317 (-0.122) net +1100c->+705c skip 108 (3 losses) | B: PF 1.026->0.960 (-0.066) net +83c->-115c skip 92 (4 losses) [under 15 losses]
+           skip 08-12 CT  A: PF 1.439->1.354 (-0.085) net +1100c->+790c skip 99 (3 losses) | B: PF 1.026->1.118 (+0.092) net +83c->+292c skip 93 (8 losses) [under 15 losses]
+           skip 12-16 CT  A: PF 1.439->1.548 (+0.109) net +1100c->+1073c skip 104 (6 losses) | B: PF 1.026->1.062 (+0.036) net +83c->+165c skip 79 (6 losses) [under 15 losses]
+           skip 16-20 CT  A: PF 1.439->1.491 (+0.052) net +1100c->+952c skip 119 (6 losses) | B: PF 1.026->1.003 (-0.022) net +83c->+9c skip 97 (6 losses) [under 15 losses]
+  A+B PASS skip 20-24 CT  A: PF 1.439->1.626 (+0.187) net +1100c->+1162c skip 105 (7 losses) | B: PF 1.026->1.163 (+0.137) net +83c->+374c skip 112 (10 losses)
+           skip Mon       A: PF 1.439->1.530 (+0.091) net +1100c->+992c skip 128 (7 losses) | B: PF 1.026->1.100 (+0.074) net +83c->+240c skip 119 (9 losses)
+           skip Tue       A: PF 1.439->1.761 (+0.322) net +1100c->+1277c skip 116 (9 losses) | B: PF 1.026->0.859 (-0.167) net +83c->-428c skip 114 (2 losses) [under 15 losses]
+           skip Wed       A: PF 1.439->1.258 (-0.181) net +1100c->+623c skip 94 (1 losses) | B: PF 1.026->1.163 (+0.137) net +83c->+387c skip 86 (9 losses) [under 15 losses]
+           skip Thu       A: PF 1.439->1.324 (-0.116) net +1100c->+688c skip 126 (4 losses) | B: PF 1.026->1.011 (-0.015) net +83c->+29c skip 88 (5 losses) [under 15 losses]
+           skip Fri       A: PF 1.439->1.327 (-0.112) net +1100c->+725c skip 116 (3 losses) | B: PF 1.026->1.066 (+0.040) net +83c->+169c skip 87 (7 losses) [under 15 losses]
+           skip Sat       A: PF 1.439->1.439 (+0.000) net +1100c->+1100c skip 0 (0 losses) | B: PF 1.026->1.026 (+0.000) net +83c->+83c skip 0 (0 losses) [under 15 losses]
+           skip Sun       A: PF 1.439->1.539 (+0.099) net +1100c->+1194c skip 37 (3 losses) | B: PF 1.026->1.006 (-0.020) net +83c->+17c skip 59 (3 losses) [under 15 losses]
+           skip Sat+Sun   A: PF 1.439->1.539 (+0.099) net +1100c->+1194c skip 37 (3 losses) | B: PF 1.026->1.006 (-0.020) net +83c->+17c skip 59 (3 losses) [under 15 losses]
+Bitcoin: n=2365; baseline PF A 1.000, B 1.188
+           skip 00-04 CT  A: PF 1.000->0.998 (-0.003) net +2c->-10c skip 152 (10 losses) | B: PF 1.188->1.244 (+0.056) net +711c->+740c skip 121 (8 losses)
+           skip 04-08 CT  A: PF 1.000->0.998 (-0.002) net +2c->-8c skip 145 (9 losses) | B: PF 1.188->1.230 (+0.042) net +711c->+720c skip 111 (7 losses)
+           skip 08-12 CT  A: PF 1.000->0.876 (-0.124) net +2c->-571c skip 150 (4 losses) | B: PF 1.188->1.082 (-0.106) net +711c->+280c skip 129 (4 losses) [under 15 losses]
+           skip 12-16 CT  A: PF 1.000->0.940 (-0.060) net +2c->-266c skip 134 (6 losses) | B: PF 1.188->1.200 (+0.012) net +711c->+613c skip 140 (8 losses) [under 15 losses]
+           skip 16-20 CT  A: PF 1.000->1.220 (+0.220) net +2c->+791c skip 116 (15 losses) | B: PF 1.188->1.209 (+0.021) net +711c->+637c skip 136 (8 losses)
+           skip 20-24 CT  A: PF 1.000->1.019 (+0.018) net +2c->+75c skip 138 (10 losses) | B: PF 1.188->1.175 (-0.013) net +711c->+563c skip 120 (6 losses)
+           skip Mon       A: PF 1.000->0.993 (-0.007) net +2c->-30c skip 127 (8 losses) | B: PF 1.188->1.201 (+0.013) net +711c->+647c skip 117 (6 losses) [under 15 losses]
+           skip Tue       A: PF 1.000->1.052 (+0.052) net +2c->+211c skip 132 (10 losses) | B: PF 1.188->1.324 (+0.136) net +711c->+926c skip 128 (10 losses)
+           skip Wed       A: PF 1.000->0.948 (-0.053) net +2c->-236c skip 113 (5 losses) | B: PF 1.188->1.162 (-0.026) net +711c->+538c skip 103 (5 losses) [under 15 losses]
+           skip Thu       A: PF 1.000->1.087 (+0.086) net +2c->+350c skip 105 (10 losses) | B: PF 1.188->1.126 (-0.062) net +711c->+441c skip 90 (3 losses) [under 15 losses]
+           skip Fri       A: PF 1.000->0.965 (-0.036) net +2c->-156c skip 117 (6 losses) | B: PF 1.188->1.120 (-0.068) net +711c->+411c skip 106 (4 losses) [under 15 losses]
+           skip Sat       A: PF 1.000->1.066 (+0.066) net +2c->+262c skip 119 (11 losses) | B: PF 1.188->1.325 (+0.137) net +711c->+961c skip 89 (9 losses)
+           skip Sun       A: PF 1.000->0.916 (-0.085) net +2c->-388c skip 122 (4 losses) | B: PF 1.188->1.100 (-0.087) net +711c->+343c skip 124 (4 losses) [under 15 losses]
+           skip Sat+Sun   A: PF 1.000->0.964 (-0.036) net +2c->-128c skip 241 (15 losses) | B: PF 1.188->1.229 (+0.041) net +711c->+592c skip 213 (13 losses)
+Dogecoin: n=2481; baseline PF A 1.294, B 1.263
+           skip 00-04 CT  A: PF 1.294->1.368 (+0.074) net +1160c->+1140c skip 148 (9 losses) | B: PF 1.263->1.328 (+0.065) net +1024c->+1036c skip 129 (8 losses)
+           skip 04-08 CT  A: PF 1.294->1.493 (+0.199) net +1160c->+1393c skip 156 (12 losses) | B: PF 1.263->1.220 (-0.043) net +1024c->+753c skip 123 (5 losses)
+           skip 08-12 CT  A: PF 1.294->1.171 (-0.123) net +1160c->+628c skip 140 (3 losses) | B: PF 1.263->1.216 (-0.047) net +1024c->+741c skip 130 (5 losses) [under 15 losses]
+           skip 12-16 CT  A: PF 1.294->1.276 (-0.018) net +1160c->+908c skip 154 (7 losses) | B: PF 1.263->1.321 (+0.058) net +1024c->+982c skip 158 (9 losses)
+           skip 16-20 CT  A: PF 1.294->1.207 (-0.087) net +1160c->+737c skip 137 (4 losses) | B: PF 1.263->1.222 (-0.042) net +1024c->+720c skip 156 (7 losses) [under 15 losses]
+           skip 20-24 CT  A: PF 1.294->1.303 (+0.009) net +1160c->+996c skip 148 (7 losses) | B: PF 1.263->1.282 (+0.019) net +1024c->+890c skip 158 (8 losses)
+           skip Mon       A: PF 1.294->1.282 (-0.012) net +1160c->+953c skip 127 (6 losses) | B: PF 1.263->1.287 (+0.024) net +1024c->+957c skip 109 (6 losses) [under 15 losses]
+           skip Tue       A: PF 1.294->1.258 (-0.036) net +1160c->+873c skip 150 (6 losses) | B: PF 1.263->1.402 (+0.139) net +1024c->+1190c skip 136 (10 losses)
+           skip Wed       A: PF 1.294->1.429 (+0.135) net +1160c->+1339c skip 118 (9 losses) | B: PF 1.263->1.239 (-0.024) net +1024c->+822c skip 116 (5 losses) [under 15 losses]
+           skip Thu       A: PF 1.294->1.371 (+0.077) net +1160c->+1222c skip 112 (7 losses) | B: PF 1.263->1.203 (-0.060) net +1024c->+716c skip 111 (4 losses) [under 15 losses]
+           skip Fri       A: PF 1.294->1.157 (-0.137) net +1160c->+607c skip 104 (1 losses) | B: PF 1.263->1.380 (+0.117) net +1024c->+1164c skip 128 (9 losses) [under 15 losses]
+           skip Sat       A: PF 1.294->1.284 (-0.010) net +1160c->+956c skip 139 (6 losses) | B: PF 1.263->1.243 (-0.020) net +1024c->+811c skip 128 (6 losses) [under 15 losses]
+           skip Sun       A: PF 1.294->1.308 (+0.014) net +1160c->+1013c skip 133 (7 losses) | B: PF 1.263->1.131 (-0.132) net +1024c->+487c skip 126 (2 losses) [under 15 losses]
+           skip Sat+Sun   A: PF 1.294->1.299 (+0.005) net +1160c->+809c skip 272 (13 losses) | B: PF 1.263->1.087 (-0.176) net +1024c->+273c skip 254 (8 losses)
+Ethereum: n=2423; baseline PF A 1.151, B 0.959
+           skip 00-04 CT  A: PF 1.151->1.375 (+0.224) net +686c->+1213c skip 155 (14 losses) | B: PF 0.959->0.982 (+0.023) net -193c->-71c skip 99 (7 losses)
+           skip 04-08 CT  A: PF 1.151->1.115 (-0.036) net +686c->+458c skip 137 (6 losses) | B: PF 0.959->0.994 (+0.035) net -193c->-25c skip 117 (9 losses)
+           skip 08-12 CT  A: PF 1.151->1.016 (-0.136) net +686c->+67c skip 144 (3 losses) | B: PF 0.959->0.906 (-0.054) net -193c->-393c skip 134 (6 losses) [under 15 losses]
+           skip 12-16 CT  A: PF 1.151->1.224 (+0.073) net +686c->+809c skip 139 (10 losses) | B: PF 0.959->0.887 (-0.072) net -193c->-457c skip 148 (7 losses)
+           skip 16-20 CT  A: PF 1.151->1.025 (-0.126) net +686c->+105c skip 153 (4 losses) | B: PF 0.959->0.956 (-0.003) net -193c->-172c skip 141 (9 losses) [under 15 losses]
+           skip 20-24 CT  A: PF 1.151->1.226 (+0.075) net +686c->+779c skip 170 (12 losses) | B: PF 0.959->1.044 (+0.085) net -193c->+154c skip 153 (13 losses)
+           skip Mon       A: PF 1.151->1.160 (+0.008) net +686c->+607c skip 132 (8 losses) | B: PF 0.959->0.989 (+0.030) net -193c->-44c skip 102 (8 losses)
+           skip Tue       A: PF 1.151->1.262 (+0.111) net +686c->+921c skip 143 (11 losses) | B: PF 0.959->0.966 (+0.007) net -193c->-136c skip 115 (8 losses)
+           skip Wed       A: PF 1.151->1.142 (-0.010) net +686c->+563c skip 124 (6 losses) | B: PF 0.959->0.970 (+0.011) net -193c->-121c skip 105 (7 losses) [under 15 losses]
+           skip Thu       A: PF 1.151->1.187 (+0.036) net +686c->+724c skip 115 (7 losses) | B: PF 0.959->0.955 (-0.004) net -193c->-179c skip 129 (8 losses)
+           skip Fri       A: PF 1.151->1.125 (-0.026) net +686c->+487c skip 140 (7 losses) | B: PF 0.959->0.932 (-0.027) net -193c->-283c skip 112 (6 losses) [under 15 losses]
+           skip Sat       A: PF 1.151->1.067 (-0.084) net +686c->+279c skip 122 (4 losses) | B: PF 0.959->0.972 (+0.013) net -193c->-112c skip 113 (8 losses) [under 15 losses]
+           skip Sun       A: PF 1.151->1.134 (-0.017) net +686c->+536c skip 122 (6 losses) | B: PF 0.959->0.932 (-0.027) net -193c->-282c skip 116 (6 losses) [under 15 losses]
+           skip Sat+Sun   A: PF 1.151->1.036 (-0.116) net +686c->+129c skip 244 (10 losses) | B: PF 0.959->0.941 (-0.018) net -193c->-202c skip 229 (14 losses)
+XRP: n=2479; baseline PF A 1.228, B 1.140
+           skip 00-04 CT  A: PF 1.228->1.255 (+0.027) net +1018c->+924c skip 170 (9 losses) | B: PF 1.140->1.095 (-0.045) net +624c->+373c skip 133 (6 losses)
+           skip 04-08 CT  A: PF 1.228->1.287 (+0.059) net +1018c->+1039c skip 148 (9 losses) | B: PF 1.140->1.169 (+0.029) net +624c->+624c skip 124 (8 losses)
+           skip 08-12 CT  A: PF 1.228->1.237 (+0.009) net +1018c->+880c skip 159 (8 losses) | B: PF 1.140->1.128 (-0.012) net +624c->+486c skip 142 (7 losses)
+           skip 12-16 CT  A: PF 1.228->1.219 (-0.009) net +1018c->+817c skip 159 (8 losses) | B: PF 1.140->1.154 (+0.014) net +624c->+556c skip 157 (9 losses)
+           skip 16-20 CT  A: PF 1.228->1.148 (-0.080) net +1018c->+592c skip 147 (5 losses) | B: PF 1.140->1.133 (-0.007) net +624c->+493c skip 151 (8 losses) [under 15 losses]
+           skip 20-24 CT  A: PF 1.228->1.230 (+0.002) net +1018c->+838c skip 174 (9 losses) | B: PF 1.140->1.166 (+0.026) net +624c->+587c skip 164 (10 losses)
+           skip Mon       A: PF 1.228->1.558 (+0.330) net +1018c->+1714c skip 130 (15 losses) | B: PF 1.140->1.168 (+0.028) net +624c->+620c skip 132 (8 losses)
+           skip Tue       A: PF 1.228->1.249 (+0.022) net +1018c->+931c skip 152 (8 losses) | B: PF 1.140->1.094 (-0.046) net +624c->+374c skip 127 (5 losses) [under 15 losses]
+           skip Wed       A: PF 1.228->1.094 (-0.134) net +1018c->+401c skip 131 (2 losses) | B: PF 1.140->1.216 (+0.076) net +624c->+784c skip 127 (9 losses) [under 15 losses]
+           skip Thu       A: PF 1.228->1.206 (-0.022) net +1018c->+803c skip 135 (6 losses) | B: PF 1.140->1.030 (-0.110) net +624c->+125c skip 126 (3 losses) [under 15 losses]
+           skip Fri       A: PF 1.228->1.151 (-0.077) net +1018c->+617c skip 134 (4 losses) | B: PF 1.140->1.246 (+0.106) net +624c->+866c skip 119 (10 losses) [under 15 losses]
+           skip Sat       A: PF 1.228->1.371 (+0.143) net +1018c->+1275c skip 136 (11 losses) | B: PF 1.140->1.191 (+0.051) net +624c->+708c skip 112 (8 losses)
+           skip Sun       A: PF 1.228->1.085 (-0.142) net +1018c->+366c skip 139 (2 losses) | B: PF 1.140->1.067 (-0.073) net +624c->+265c skip 128 (5 losses) [under 15 losses]
+           skip Sat+Sun   A: PF 1.228->1.191 (-0.036) net +1018c->+623c skip 275 (13 losses) | B: PF 1.140->1.108 (-0.032) net +624c->+350c skip 240 (13 losses)
+MKTTIME1 C VERDICT: FALSIFIED; markets with a C pass: ['gold']
+  C PASS gold skip 20-24 CT: PF 1.170->1.282 (+0.112) net +441c->+547c skip 98 (7 losses); day-clustered z of the gain, all windows +0.98 (deflated bar about 5.17)
