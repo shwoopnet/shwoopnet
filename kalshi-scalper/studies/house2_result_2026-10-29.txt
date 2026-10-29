@@ -1,0 +1,83 @@
+HOUSE2 VERDICT: FALSIFIED (no rule keeps 70% of net and cuts the worst day by a third in all three thirds)
+
+$500 account, base 13, cap 16
+  third 1 baseline: net $+785.39 PF 1.287 mean $+26.18 worst $-55.89 negative days 27% maxDD $56.98; days with no loss 7%, median trades before the first loss 10.5
+  third 2 baseline: net $+647.94 PF 1.252 mean $+22.34 worst $-49.91 negative days 28% maxDD $49.91; days with no loss 3%, median trades before the first loss 11.0
+  third 3 baseline: net $+39.47 PF 1.014 mean $+1.36 worst $-77.93 negative days 48% maxDD $105.31; days with no loss 0%, median trades before the first loss 20
+  S1 K1 fails
+      t1: net $+18.46 (2% kept) PF 1.032 mean $+0.62 worst $-40.23 neg 60% DD $141.14; losses at the top rung 32 of 41; fees x1.2 net $+8.87 [- -]
+      t2: net $-2.59 (-0% kept) PF 0.995 mean $-0.09 worst $-47.69 neg 62% DD $107.10; losses at the top rung 27 of 38; fees x1.2 net $-11.05 [- -]
+      t3: net $+78.54 (199% kept) PF 1.127 mean $+2.71 worst $-17.20 neg 48% DD $55.84; losses at the top rung 41 of 42; fees x1.2 net $+67.58 [net worst]
+  S1 K2 fails
+      t1: net $-82.70 (-11% kept) PF 0.912 mean $-2.76 worst $-50.33 neg 60% DD $292.57; losses at the top rung 55 of 65; fees x1.2 net $-96.44 [- -]
+      t2: net $+326.85 (50% kept) PF 1.376 mean $+11.27 worst $-47.69 neg 41% DD $103.23; losses at the top rung 48 of 61; fees x1.2 net $+308.23 [- -]
+      t3: net $+0.65 (2% kept) PF 1.001 mean $+0.02 worst $-37.23 neg 59% DD $79.46; losses at the top rung 64 of 65; fees x1.2 net $-14.58 [- worst]
+  S1 K3 fails
+      t1: net $+193.05 (25% kept) PF 1.180 mean $+6.44 worst $-40.23 neg 73% DD $163.89; losses at the top rung 65 of 74; fees x1.2 net $+183.69 [- -]
+      t2: net $+94.77 (15% kept) PF 1.091 mean $+3.27 worst $-47.69 neg 83% DD $113.44; losses at the top rung 62 of 73; fees x1.2 net $+36.64 [- -]
+      t3: net $-29.11 (-74% kept) PF 0.977 mean $-1.00 worst $-37.23 neg 83% DD $93.41; losses at the top rung 85 of 86; fees x1.2 net $-28.84 [- worst]
+  S2 K1 fails
+      t1: net $+19.10 (2% kept) PF 1.032 mean $+0.64 worst $-39.84 neg 60% DD $141.73; losses at the top rung 34 of 41; fees x1.2 net $+9.47 [- -]
+      t2: net $+0.52 (0% kept) PF 1.001 mean $+0.02 worst $-47.69 neg 62% DD $105.96; losses at the top rung 29 of 38; fees x1.2 net $-8.00 [- -]
+      t3: net $+83.43 (211% kept) PF 1.135 mean $+2.88 worst $-16.76 neg 48% DD $54.37; losses at the top rung 41 of 42; fees x1.2 net $+72.40 [net worst]
+  S2 K2 fails
+      t1: net $-82.51 (-11% kept) PF 0.913 mean $-2.75 worst $-50.21 neg 60% DD $293.53; losses at the top rung 58 of 65; fees x1.2 net $-96.31 [- -]
+      t2: net $+328.82 (51% kept) PF 1.377 mean $+11.34 worst $-47.69 neg 41% DD $104.10; losses at the top rung 51 of 61; fees x1.2 net $+310.11 [- -]
+      t3: net $+5.84 (15% kept) PF 1.006 mean $+0.20 worst $-37.23 neg 59% DD $76.88; losses at the top rung 64 of 65; fees x1.2 net $-9.46 [- worst]
+  S2 K3 fails
+      t1: net $+193.70 (25% kept) PF 1.180 mean $+6.46 worst $-39.84 neg 73% DD $164.48; losses at the top rung 67 of 74; fees x1.2 net $+184.29 [- -]
+      t2: net $+97.88 (15% kept) PF 1.093 mean $+3.38 worst $-47.69 neg 83% DD $113.02; losses at the top rung 64 of 73; fees x1.2 net $+79.72 [- -]
+      t3: net $-24.23 (-61% kept) PF 0.981 mean $-0.84 worst $-37.23 neg 83% DD $92.21; losses at the top rung 85 of 86; fees x1.2 net $-41.42 [- worst]
+  S3 K1 fails
+      t1: net $+16.80 (2% kept) PF 1.029 mean $+0.56 worst $-40.23 neg 60% DD $141.87; losses at the top rung 32 of 41; fees x1.2 net $+8.07 [- -]
+      t2: net $-1.85 (-0% kept) PF 0.997 mean $-0.06 worst $-47.69 neg 62% DD $105.77; losses at the top rung 25 of 38; fees x1.2 net $-9.53 [- -]
+      t3: net $+78.23 (198% kept) PF 1.127 mean $+2.70 worst $-17.20 neg 48% DD $56.19; losses at the top rung 39 of 42; fees x1.2 net $+67.26 [net worst]
+  S3 K2 fails
+      t1: net $-64.14 (-8% kept) PF 0.929 mean $-2.14 worst $-42.12 neg 63% DD $273.00; losses at the top rung 43 of 65; fees x1.2 net $-76.86 [- -]
+      t2: net $+312.38 (48% kept) PF 1.363 mean $+10.77 worst $-47.69 neg 45% DD $102.22; losses at the top rung 44 of 61; fees x1.2 net $+294.53 [- -]
+      t3: net $-3.70 (-9% kept) PF 0.996 mean $-0.13 worst $-37.23 neg 59% DD $83.89; losses at the top rung 59 of 65; fees x1.2 net $-19.39 [- worst]
+  S3 K3 fails
+      t1: net $+191.58 (24% kept) PF 1.179 mean $+6.39 worst $-40.23 neg 73% DD $164.61; losses at the top rung 64 of 74; fees x1.2 net $+182.62 [- -]
+      t2: net $+95.38 (15% kept) PF 1.091 mean $+3.29 worst $-47.69 neg 83% DD $111.93; losses at the top rung 60 of 73; fees x1.2 net $+38.16 [- -]
+      t3: net $-31.09 (-79% kept) PF 0.975 mean $-1.07 worst $-37.23 neg 83% DD $94.28; losses at the top rung 83 of 86; fees x1.2 net $-29.99 [- worst]
+
+$1000 account, base 23, cap 28
+  third 1 baseline: net $+1403.57 PF 1.290 mean $+46.79 worst $-98.45 negative days 27% maxDD $99.89; days with no loss 7%, median trades before the first loss 10.5
+  third 2 baseline: net $+1159.37 PF 1.255 mean $+39.98 worst $-87.72 negative days 21% maxDD $87.72; days with no loss 3%, median trades before the first loss 11.0
+  third 3 baseline: net $+81.59 PF 1.016 mean $+2.81 worst $-137.53 negative days 48% maxDD $183.08; days with no loss 0%, median trades before the first loss 20
+  S1 K1 fails
+      t1: net $+34.31 (2% kept) PF 1.034 mean $+1.14 worst $-67.68 neg 60% DD $243.60; losses at the top rung 26 of 41; fees x1.2 net $+18.05 [- -]
+      t2: net $-1.10 (-0% kept) PF 0.999 mean $-0.04 worst $-84.36 neg 62% DD $183.61; losses at the top rung 23 of 38; fees x1.2 net $-15.47 [- -]
+      t3: net $+136.31 (167% kept) PF 1.127 mean $+4.70 worst $-30.28 neg 48% DD $98.65; losses at the top rung 39 of 42; fees x1.2 net $+117.64 [net worst]
+  S1 K2 fails
+      t1: net $-141.98 (-10% kept) PF 0.914 mean $-4.73 worst $-88.23 neg 60% DD $508.91; losses at the top rung 49 of 65; fees x1.2 net $-165.31 [- -]
+      t2: net $+577.83 (50% kept) PF 1.382 mean $+19.93 worst $-84.36 neg 41% DD $181.18; losses at the top rung 43 of 61; fees x1.2 net $+546.09 [- -]
+      t3: net $+0.27 (0% kept) PF 1.000 mean $+0.01 worst $-65.03 neg 59% DD $137.75; losses at the top rung 62 of 65; fees x1.2 net $-25.69 [- worst]
+  S1 K3 fails
+      t1: net $+342.03 (24% kept) PF 1.183 mean $+11.40 worst $-67.68 neg 73% DD $283.37; losses at the top rung 59 of 74; fees x1.2 net $+326.59 [- -]
+      t2: net $+171.18 (15% kept) PF 1.094 mean $+5.90 worst $-84.36 neg 83% DD $191.51; losses at the top rung 58 of 73; fees x1.2 net $+70.19 [- -]
+      t3: net $-50.15 (-61% kept) PF 0.977 mean $-1.73 worst $-65.03 neg 83% DD $165.34; losses at the top rung 83 of 86; fees x1.2 net $-48.88 [- worst]
+  S2 K1 fails
+      t1: net $+34.91 (2% kept) PF 1.034 mean $+1.16 worst $-69.66 neg 60% DD $247.57; losses at the top rung 34 of 41; fees x1.2 net $+18.45 [- -]
+      t2: net $+1.69 (0% kept) PF 1.002 mean $+0.06 worst $-84.36 neg 62% DD $185.27; losses at the top rung 29 of 38; fees x1.2 net $-12.89 [- -]
+      t3: net $+148.83 (182% kept) PF 1.138 mean $+5.13 worst $-29.28 neg 48% DD $94.92; losses at the top rung 41 of 42; fees x1.2 net $+129.93 [net worst]
+  S2 K2 fails
+      t1: net $-142.02 (-10% kept) PF 0.914 mean $-4.73 worst $-87.79 neg 60% DD $512.53; losses at the top rung 58 of 65; fees x1.2 net $-165.59 [- -]
+      t2: net $+578.07 (50% kept) PF 1.378 mean $+19.93 worst $-84.36 neg 41% DD $182.50; losses at the top rung 51 of 61; fees x1.2 net $+546.08 [- -]
+      t3: net $+13.94 (17% kept) PF 1.008 mean $+0.48 worst $-64.99 neg 59% DD $133.50; losses at the top rung 64 of 65; fees x1.2 net $-12.25 [- worst]
+  S2 K3 fails
+      t1: net $+342.63 (24% kept) PF 1.182 mean $+11.42 worst $-69.66 neg 73% DD $287.34; losses at the top rung 67 of 74; fees x1.2 net $+308.55 [- -]
+      t2: net $+173.97 (15% kept) PF 1.095 mean $+6.00 worst $-84.36 neg 83% DD $196.55; losses at the top rung 64 of 73; fees x1.2 net $+142.90 [- -]
+      t3: net $-37.64 (-46% kept) PF 0.983 mean $-1.30 worst $-64.99 neg 83% DD $160.33; losses at the top rung 85 of 86; fees x1.2 net $-66.98 [- worst]
+  S3 K1 fails
+      t1: net $+31.60 (2% kept) PF 1.031 mean $+1.05 worst $-70.26 neg 60% DD $247.50; losses at the top rung 32 of 41; fees x1.2 net $+14.92 [- -]
+      t2: net $-1.85 (-0% kept) PF 0.998 mean $-0.06 worst $-84.36 neg 62% DD $184.66; losses at the top rung 25 of 38; fees x1.2 net $-16.61 [- -]
+      t3: net $+140.95 (173% kept) PF 1.131 mean $+4.86 worst $-30.17 neg 48% DD $98.01; losses at the top rung 39 of 42; fees x1.2 net $+121.99 [net worst]
+  S3 K2 fails
+      t1: net $-113.76 (-8% kept) PF 0.929 mean $-3.79 worst $-74.25 neg 63% DD $481.88; losses at the top rung 44 of 65; fees x1.2 net $-136.27 [- -]
+      t2: net $+551.95 (48% kept) PF 1.365 mean $+19.03 worst $-84.36 neg 45% DD $178.85; losses at the top rung 44 of 61; fees x1.2 net $+519.56 [- -]
+      t3: net $-0.65 (-1% kept) PF 1.000 mean $-0.02 worst $-64.99 neg 59% DD $145.86; losses at the top rung 59 of 65; fees x1.2 net $-27.26 [- worst]
+  S3 K3 fails
+      t1: net $+338.37 (24% kept) PF 1.180 mean $+11.28 worst $-70.26 neg 73% DD $287.27; losses at the top rung 65 of 74; fees x1.2 net $+323.03 [- -]
+      t2: net $+170.31 (15% kept) PF 1.093 mean $+5.87 worst $-84.36 neg 83% DD $194.83; losses at the top rung 60 of 73; fees x1.2 net $+69.05 [- -]
+      t3: net $-47.96 (-59% kept) PF 0.978 mean $-1.65 worst $-64.99 neg 83% DD $163.01; losses at the top rung 83 of 86; fees x1.2 net $-76.71 [- worst]
