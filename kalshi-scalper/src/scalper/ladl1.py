@@ -27,13 +27,15 @@ BAND = (0.88, 0.97)
 N_PRIOR = 438_605
 
 
-def fetch():
-    db = sqlite3.connect(DB)
+def fetch(only=None, shard=0, shards=1):
+    db = sqlite3.connect(DB if only is None else DATA_DIR / f"ladl1_{only}_{shard}.sqlite")
     db.executescript("""CREATE TABLE IF NOT EXISTS mk(ticker TEXT PRIMARY KEY, series TEXT, close_ts INTEGER, result TEXT);
 CREATE TABLE IF NOT EXISTS q(ticker TEXT, look INTEGER, bid REAL, ask REAL, PRIMARY KEY(ticker, look));
 CREATE TABLE IF NOT EXISTS done(series TEXT, close_ts INTEGER, PRIMARY KEY(series, close_ts));""")
     now = int(time.time())
     for series, days in GROUPS.items():
+        if only is not None and series != only:
+            continue
         done = {r[0] for r in db.execute("SELECT close_ts FROM done WHERE series=?", (series,))}
         listed = list(api.settled_markets(series, now - days * 86400, now))
         by = defaultdict(list)
@@ -42,7 +44,7 @@ CREATE TABLE IF NOT EXISTS done(series TEXT, close_ts INTEGER, PRIMARY KEY(serie
             if c and m.get("result") in ("yes", "no"):
                 by[c].append(m)
         print(series, len(listed), "markets", len(by), "closes", flush=True)
-        for n, close in enumerate(sorted(by)):
+        for n, close in enumerate(sorted(by)[shard::shards]):
             if close in done:
                 continue
             keep = []
@@ -68,6 +70,16 @@ CREATE TABLE IF NOT EXISTS done(series TEXT, close_ts INTEGER, PRIMARY KEY(serie
             if n % 50 == 0:
                 print(f"  {series} {n}/{len(by)}", flush=True)
     print("done", flush=True)
+
+
+def merge():
+    db = sqlite3.connect(DB)
+    for f in sorted(DATA_DIR.glob("ladl1_KX*_*.sqlite")):
+        db.execute(f"ATTACH DATABASE '{f}' AS s")
+        for t in ("mk", "q", "done"):
+            db.execute(f"INSERT OR REPLACE INTO {t} SELECT * FROM s.{t}")
+        db.commit(); db.execute("DETACH DATABASE s")
+    print("merged", db.execute("SELECT series, COUNT(DISTINCT close_ts) FROM mk GROUP BY series").fetchall(), flush=True)
 
 
 def fee(p, c=1, m=1.0):
@@ -124,4 +136,7 @@ def run():
 
 
 if __name__ == "__main__":
-    {"fetch": fetch, "run": run}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    if len(sys.argv) >= 5 and sys.argv[1] == "fetch":
+        fetch(sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
+    else:
+        {"fetch": fetch, "run": run, "merge": merge}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()

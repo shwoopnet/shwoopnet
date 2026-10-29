@@ -86,3 +86,23 @@ Not pushed (rebuild commands, from `kalshi-scalper/` with `PYTHONPATH=src`):
 | MM1 | 300 gold windows in quotes.csv (48 now) | about 2026-11-07 |
 | Recorder data check | trigger `trig_01S8xWT6V35hZu6gmf7TZYJy` (record1 look, 300 trades over 10 dates) | 2026-10-29 15:11 UTC, then daily |
 | L1 forward reads (REV1, P6F, FLOOR1, THIN1, FLIP1, GAS1-F, ABSORB-F) | scheduled triggers; owner said not to run L1 research unless asked | 2026-11-05, 11-12, 11-17 |
+
+## 7. Dated reads that move to V2 (state on 2026-10-29 16:00 UTC)
+
+**Important:** every trigger below fires into the OLD research session (`session_01YBtv2XtdXEa2LKpXpstiAU`). A trigger's target session cannot be changed, so once that session is archived these will fire into nothing. The main session (or the owner) should create a matching trigger for V2 for each, and disable the old one. I did not create or change any (the owner gets a permission prompt each time).
+
+| Trigger | Fires (UTC) | What to run (from `kalshi-scalper/`, `PYTHONPATH=src`) | State |
+|---|---|---|---|
+| Recorder data check `trig_01S8xWT6V35hZu6gmf7TZYJy` | 2026-10-30 15:11, then re-armed daily | `python3 -m scalper.record1 look`; log one line in the README (note `clock_ok`); run `read` ONCE only when it reports 300 qualifying trades over 10 dates; report early only if coverage is unusable (under 30% of windows, or 429 share above 30%) | last look 2026-10-29: **132 of 300 trades, 8 of 10 dates, 0% 429, clock_ok False** |
+| REV1 forward read `trig_017bKH2FaegXfaKzuE9wkK2n` | 2026-11-05 15:00 | `python3 -m scalper.fresh_update` then `python3 -m scalper.rev1 run` (once) | not read; Bitcoin late cheap NO forward claim |
+| Dated reads 2026-11-12 `trig_01Jod5FaSKPN19myfFEajNKL` | 2026-11-12 16:00 | follow `studies/RUNBOOK_2026-11-12.md`: `fresh_update`; when fresh days >= 30, `python3 -m scalper.fwd_reads read` ONCE, then `hour3 forward`, `entry2 forward`, `flips0x forward`, `prog1 p6f`, `prog1 p6rf`, each once | not read; P6F and P6R are the ones that change a decision |
+| FLIP1 read `trig_01NbhdVhhrFeh8SzDZd1XNsY` | 2026-11-14 16:00 | needs a fresh "Copy all orders" export from the owner; convert to `studies/live_fills_with_quotes_2026-10-22.csv` columns, fills from 2026-10-22T17:00Z only; `python3 -m scalper.live_improve NEWFILE.csv`; at least 40 fills more than 3c under the seen book, else NOT_ENOUGH_DATA and re-check in 2 weeks | not read |
+| GAS1-F read `trig_01D9PVkjrKMESmK2pWEZDZSo` | 2026-11-22 16:00 | `python3 -m scalper.gas1 read` (once; refused before 2026-11-22) | not read |
+| ABSORB-F read `trig_01WEAnmq4mCD7XMab6wbiZ9S` | 2026-12-01 12:00 | `fresh_update`, then `python3 -m scalper.ideas20c absorb_forward` once; confirm HOUR3-F was read on 2026-11-12 | not read |
+| (main session's) FWD2 spread read `trig_01USRMUWaukA1Rwo1jdMbc4U`, E3F/FWD1 `trig_019atfFV5KqHEmxd7a2seAAJ` | 2026-11-17, 2026-11-16 | as in their prompts | owned by the main session, not moved |
+
+Owner's standing note on these: L1 forward reads are run when due; the owner asked not to start NEW L1 research unless asked.
+
+## 8. LADL1 at handoff
+
+`data/ladl1.sqlite` holds gold daily (38 closes) and weekly (9 closes); Bitcoin and Ethereum hourly are downloading in 4 shards (`python3 -m scalper.ladl1 fetch KXBTCD 0 2` etc., then `python3 -m scalper.ladl1 merge`), about 1.5 hours from 16:00 UTC. The merged file is pushed to `research-data` when done (see the next commit there). Then `python3 -m scalper.ladl1 run` once.
