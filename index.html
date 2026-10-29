@@ -1468,6 +1468,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot status: win rate by price paid (88c, 89c, up to 97c entries), with the win rate each price needs to break even</li>
                   <li>Open positions: the chance chart now runs the whole 0 to 100% with a target price line across the middle (50%, where it flips), and each position says the price that decides it ("Wins if it closes at or above $4,013.48"), both taken from the market itself</li>
                   <li>Gold places no new orders from 8 PM to midnight Central (history and live both weaker in that block); an open gold position is still sold by the exit watch</li>
                   <li>Bitcoin is paused in the bot's code (live profit factor 0.72 over 155 orders); an open Bitcoin position is still sold by the exit watch</li>
@@ -3265,6 +3266,24 @@
     }
     return out;
   }
+  // Win rate by the price paid (the owner, Oct 29, 2026: "92c entries win% etc"). Every settled order the page holds, grouped by the price paid for the side bought rounded to the cent. Each group says how many orders, how many won and lost
+  // (an early sell counts by its result) and the win rate, against the win rate that price needs to break even (the price itself, before fees). Percentages only, so Privacy view leaves it showing. Read only.
+  function kalshiWinsByPrice(orders){
+    var map = {};
+    (orders || []).forEach(function(o){
+      if(!o || o.strategy !== 'L1' || kalshiOrderPnl(o) === null || !(Number(o.count) > 0)){ return; }
+      var px = kalshiPricePaid(o); if(!Number.isFinite(px) || !(px > 0) || !(px < 1)){ return; }
+      var c = Math.round(px * 100 + 1e-9), g = map[c] || (map[c] = { cents: c, n: 0, wins: 0, losses: 0 });
+      g.n++; if(kalshiOrderPnl(o) > 0){ g.wins++; } else { g.losses++; }
+    });
+    return Object.keys(map).map(function(k){ var g = map[k]; g.winPct = g.wins / g.n * 100; return g; }).sort(function(a, b){ return a.cents - b.cents; });
+  }
+  function kalshiWinsByPriceHtml(list, esc){
+    if(!list || !list.length){ return ''; }
+    var total = list.reduce(function(a, g){ return a + g.n; }, 0);
+    return '<div class="kal-rows" id="kalWinsByPrice"><div><span class="kal-k">Win rate by price paid, ' + esc(String(total)) + ' settled</span><b>needs the price to break even</b></div>' +
+      list.map(function(g){ return '<div><span class="kal-k">' + esc(String(g.cents)) + 'c entries</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% (needs ' + g.cents + '%)') + '</b></div>'; }).join('') + '</div>';
+  }
   // Today's work on the Bot status card (the owner, Oct 26, 2026: something useful there that does not repeat the rest of the page). Counts the bot's own orders from today's US Central date by what happened to them:
   // sent, filled, sent but not filled (an immediate-or-cancel order can miss, and nothing else shows it) and "needs a look" (the answer was lost or refused). Read only, from orders the page already loads.
   function kalshiTodayWork(orders, nowMs){
@@ -3309,6 +3328,7 @@
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalEdge"><div><span class="kal-k">Win rate, last ' + escapeHtml(String(edge.n)) + '</span><b>' + escapeHtml(edgeText) + '</b></div>' +
         (centsText ? '<div><span class="kal-k">Edge</span><b>' + escapeHtml(centsText) + '</b></div>' : '') +
         (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');
+      sEl.insertAdjacentHTML('beforeend', kalshiWinsByPriceHtml(kalshiWinsByPrice(kalshiResolveOrders(kalshiLiveOrders, edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : [])), escapeHtml));
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
