@@ -103,6 +103,16 @@ Not pushed (rebuild commands, from `kalshi-scalper/` with `PYTHONPATH=src`):
 
 Owner's standing note on these: L1 forward reads are run when due; the owner asked not to start NEW L1 research unless asked.
 
-## 8. LADL1 at handoff
+## 8. LADL1 at handoff (wrapped up 2026-10-29 16:25 UTC, PARTIAL)
 
-`data/ladl1.sqlite` holds gold daily (38 closes) and weekly (9 closes); Bitcoin and Ethereum hourly are downloading in 4 shards (`python3 -m scalper.ladl1 fetch KXBTCD 0 2` etc., then `python3 -m scalper.ladl1 merge`), about 1.5 hours from 16:00 UTC. The merged file is pushed to `research-data` when done (see the next commit there). Then `python3 -m scalper.ladl1 run` once.
+Pushed to `research-data`: `ladl1-partial-2026-10-29.tar.gz.part-00` (one chunk; sha256 in MANIFEST.txt). Restore into `kalshi-scalper/data` with `tar xzf ladl1-partial-2026-10-29.tar.gz.part-00 -C kalshi-scalper/data`. Contents and progress at the snapshot:
+- `ladl1.sqlite`: gold daily KXGOLDD 38 closes (complete for the 200 day listing), gold weekly KXGOLDW 9 closes (complete), Bitcoin hourly KXBTCD 138 closes from the first, single-process run.
+- `ladl1_KXBTCD_0.sqlite` (73 closes), `ladl1_KXBTCD_1.sqlite` (99), `ladl1_KXETHD_0.sqlite` (32), `ladl1_KXETHD_1.sqlite` (49): the sharded run. About 700 closes per series exist, so Bitcoin is roughly a third done and Ethereum about a tenth.
+
+**Resume (from `kalshi-scalper/`, `PYTHONPATH=src`):**
+```
+for s in KXBTCD KXETHD; do for k in 0 1; do python3 -m scalper.ladl1 fetch $s $k 2 > data/ladl1_fetch_${s}_$k.log 2>&1 & done; done; wait
+python3 -m scalper.ladl1 merge
+python3 -m scalper.ladl1 run        # once
+```
+How it works: `fetch SERIES K N` lists the series' settled markets over the last 30 days, takes every Nth close starting at K, and writes to `data/ladl1_SERIES_K.sqlite`; it skips any close already in that file's `done` table, so it resumes where it stopped (keep the same K and N). The shard closes are chosen by position in the sorted close list, which shifts by one each hour as new closes settle; that only causes a few re-fetches, never a gap, because `merge` unions every shard file into `ladl1.sqlite` (`INSERT OR REPLACE` on `mk`, `q` and `done`). Strike universe: YES mid 1c to 99c in the candles 30 to 27 minutes before the close (before the 10 and 6 minute looks). Time to finish: about 1.5 to 2 hours with 4 shards. Expect NOT_ENOUGH_DATA for gold (under 30 closes per window).
