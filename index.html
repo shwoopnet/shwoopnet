@@ -1207,8 +1207,10 @@
           <button type="button" class="gq-chip" data-q="what">What is Shwoop Financials?</button>
           <button type="button" class="gq-chip" data-q="who">Who is it for?</button>
           <button type="button" class="gq-chip" data-q="access">How do I get access?</button>
+          <button type="button" class="gq-chip" data-q="join">Want to work with us?</button>
         </div>
         <div id="gqThread" style="display:flex;flex-direction:column;gap:10px" aria-live="polite"></div>
+        <a class="gq-chip" id="gqPartner" href="mailto:shwoopadvisor@gmail.com?subject=Working%20with%20Shwoop%20Financials" style="align-self:flex-start" hidden>Email us about working together</a>
         <a class="gq-chip" id="gqMail" href="mailto:shwoopadvisor@gmail.com" style="align-self:flex-start">Something else? Email us</a>
       </div>
     </div>
@@ -1511,6 +1513,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>"Got questions?" panel: a fourth question, "Want to work with us?", for future partners, with an email link</li>
                   <li>Signed-out page: a "Got questions?" bubble in the bottom right opens a small panel of fixed answers, with an email link for anything else; the page itself is unchanged</li>
                   <li>Dogecoin orders go from 3 to 5 contracts (live record: 131 settled, 125 won, +2.66c a contract, both halves positive)</li>
                   <li>Research recorder R6: the whole 15 minute order book (best 5 prices a side, every 2 seconds) and every public trade for gold, Bitcoin, Ethereum, Dogecoin and XRP, public data only, stops by itself on Nov 13; it replaces the Bitcoin, Ethereum and gold recorder (#621)</li>
@@ -3945,7 +3948,8 @@ kalshiStatusTick();
     var ANSWERS = {
       what: ['What is Shwoop Financials?', 'We build systematic trading tools: rules written in advance, run by software, reviewed by people.'],
       who: ['Who is it for?', 'Right now it is a private tool we use ourselves. We are not offering advice or managing money for anyone.'],
-      access: ['How do I get access?', 'There is no sign-up yet. If you have been given an account, sign in at the top right.']
+      access: ['How do I get access?', 'There is no sign-up yet. If you have been given an account, sign in at the top right.'],
+      join: ['Want to work with us?', 'We are open to hearing from future partners. Send us a short note about who you are and what you have in mind.']
     };
     function setOpen(open){
       if(open){ panel.removeAttribute('hidden'); root.classList.add('gq-open'); } else { panel.setAttribute('hidden', ''); root.classList.remove('gq-open'); }
@@ -3958,6 +3962,7 @@ kalshiStatusTick();
       var b = e.target && e.target.closest ? e.target.closest('[data-q]') : null; var a = b ? ANSWERS[b.getAttribute('data-q')] : null;
       if(!a){ return; }
       say(a[0], true); say(a[1], false);
+      var pm = document.getElementById('gqPartner'); if(pm){ if(b.getAttribute('data-q') === 'join'){ pm.removeAttribute('hidden'); } else { pm.setAttribute('hidden', ''); } }
       var body = document.getElementById('gqBody'); if(body){ body.scrollTop = body.scrollHeight; }
     });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hasAttribute('hidden')){ setOpen(false); bubble.focus(); } });
