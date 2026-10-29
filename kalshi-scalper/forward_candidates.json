@@ -1,7 +1,7 @@
 {
  "generated_at": "2026-10-29T02:15:23.086404+00:00",
  "source": "GEN1S (README)",
- "verdict": "NO_WINNER in GEN1S, GEN1 and GEN2 (17,500 distinct strategies, 0 past discovery)",
+ "verdict": "One strategy (G3H1) passed every registered gate including the final holdout; forward paper read pending. GEN1S, GEN1, GEN2: NO_WINNER.",
  "note": "Ranked best first. Labels are the registered gates; nothing here has passed a FINAL HOLDOUT. No promote verb; the owner decides.",
  "candidates": [
   {
@@ -529,5 +529,84 @@
    "zBar": 5.17
   }
  ],
- "gen2_note": "GEN2 (README): 14,330 generated, 7,500 distinct, 0 passed discovery. All five FAILED_GATE_DISCOVERY_PF; validation shown as information only. None uses only slot-expressible fields except where noted, so none can be loaded into the second slot as is."
+ "gen2_note": "GEN2 (README): 14,330 generated, 7,500 distinct, 0 passed discovery. All five FAILED_GATE_DISCOVERY_PF; validation shown as information only. None uses only slot-expressible fields except where noted, so none can be loaded into the second slot as is.",
+ "gen3_passed": [
+  {
+   "id": "G3H1",
+   "label": "PASSED_ALL_GATES (discovery, validation incl. deflation, FINAL HOLDOUT)",
+   "rule": "[single both 3060..2760s | ask<=0.10 & d2>0 | TP 0.03 stop None time 60s book spread3]",
+   "series": [
+    "KXBTCD (hourly ladder, 6 strikes nearest the money)"
+   ],
+   "entry": {
+    "sideRule": "cheap side, YES or NO",
+    "priceMin": 0.03,
+    "priceMax": 0.1,
+    "leftMaxSec": 3060,
+    "leftMinSec": 2760,
+    "extra": "side bid rose over the last 2 minutes"
+   },
+   "exit": {
+    "targetBid": "entry + 0.03",
+    "stopBid": null,
+    "mustExitLeftSec": 60,
+    "extra": "also exit when the spread reaches 3c"
+   },
+   "contractsPerOrder": 10,
+   "research": {
+    "discovery": {
+     "pf": 3.48,
+     "n": 348,
+     "closes": 211,
+     "days": 15
+    },
+    "validation": {
+     "pf": 2.77,
+     "pf1": 2.18,
+     "pfs": 2.62,
+     "n": 229,
+     "days": 8,
+     "z": 5.66,
+     "zBar": 5.17
+    },
+    "holdout": {
+     "pf": 2.57,
+     "pf1": 2.04,
+     "pfs": 2.42,
+     "n": 178,
+     "closes": 109,
+     "days": 8,
+     "mean_c": 2.54,
+     "z": 5.33,
+     "zeroVolumeShare": 0.16
+    },
+    "nTried": 438597,
+    "counterparty": "sellers of cheap far strikes early in the hour who underprice the remaining hour's volatility",
+    "risks": [
+     "depth at 3c to 13c bids unknown (no sizes in candles)",
+     "16% zero-volume candles (limit 20%)",
+     "one month, one regime",
+     "not expressible in the second slot: KXBTCD is not an allowed series and 3,060 s exceeds leftMaxSec 840; would need an owner-approved slot change"
+    ],
+    "l1Overlap": "none: a different market (hourly ladder, not 15 minute)",
+    "forwardReadDate": "2026-11-12",
+    "next": "forward paper read on the QUOTE2B recorder (KXBTCD book every 3 s from 55 min before each close), registered as GEN3-F1"
+   }
+  },
+  {
+   "id": "G3H2",
+   "label": "FAILED_GATE_HOLDOUT_PF (1.45 against 1.5)",
+   "rule": "[single both 2700..1980s | d5<=0.06 & z<=-0.39 & d1>0.01 & bid<=0.09 | TP 0.08 stop 0.2 time 600s book spread3]",
+   "research": {
+    "validation": {
+     "pf": 2.05
+    },
+    "holdout": {
+     "pf": 1.45,
+     "n": 192,
+     "days": 7
+    }
+   }
+  }
+ ]
 }

@@ -1,0 +1,4 @@
+GEN3 holdout verdict: 1 of 2 pass
+GEN3 HOLDOUT (days 24 onward, read once): 8 days, 165 hourly closes, 2 frozen survivors
+  holdout-fail [single both 2700..1980s | d5<=0.06 & z<=-0.39 & d1>0.01 & bid<=0.09 | TP 0.08 stop 0.2 time 600s book spread3]: PF 1.45 (1 contract 1.21, stress 1.40) n=192 closes 117 days 7 mean +1.77c z +2.91 zero-volume 20%
+  HOLDOUT-PASS [single both 3060..2760s | ask<=0.1 & d2>0 | TP 0.03 stop None time 60s book spread3]: PF 2.57 (1 contract 2.04, stress 2.42) n=178 closes 109 days 8 mean +2.54c z +5.33 zero-volume 16%
