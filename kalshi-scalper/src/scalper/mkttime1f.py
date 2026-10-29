@@ -2,6 +2,7 @@
 Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA. A pass is a question for the owner, never a live change.
 Usage: python -m scalper.mkttime1f count   readiness only: entries and LOSSES in the block (the registered trigger); computes no PF, no net, no mean
        python -m scalper.mkttime1f read    the registered read, once; refused until the block holds 15 losses, and refused a second time
+       python -m scalper.mkttime1f interim the owner's interim INFORMATION read (Oct 29, 2026), once, at 100 block entries; decides nothing by itself
 Data: data/fresh.sqlite (run `python -m scalper.fresh_update` first; public candles). Population: settled KXGOLD15M markets closing after
 2026-10-30 00:00 UTC. Rule: L1 (the candle ending exactly 6 minutes before the close, favourite with ask 0.88 to 0.97, held to settlement,
 1 contract, fee 7% x p x (1-p) rounded up to the cent per order). Entry time = close - 360 s, in US Central; block = hour 20 to 23.
@@ -95,5 +96,36 @@ def read():
     print("\n".join(lines))
 
 
+INTERIM_ENTRIES = 100
+INTERIM = DATA_DIR / "mkttime1f_interim.txt"
+
+
+def interim_count():
+    E = entries()
+    nb = sum(1 for e in E if e["block"])
+    return nb, f"MKTTIME1-F interim readiness: {nb} block entries since 2026-10-30 ({INTERIM_ENTRIES} needed); no PF computed"
+
+
+def interim():
+    """The owner's interim information read (main session, 2026-10-29): same population and statistic as the registered read,
+    at 100 block entries. The owner's rule, stated before the read: block mean NOT below the rest (z under 0) -> the main
+    session proposes deleting the quiet hours; below by z 1.5 or more -> keep; between -> wait for the registered read."""
+    if INTERIM.exists():
+        print(f"Refusing to run again: {INTERIM} exists"); return
+    nb, line = interim_count()
+    if nb < INTERIM_ENTRIES:
+        print("Refused: " + line); return
+    E = entries()
+    v = lambda e: e["gross"] - fee(e["price"], 1)
+    rest = [e for e in E if not e["block"]]; blk = [e for e in E if e["block"]]
+    d, z = diff_z([(e["cday"], v(e)) for e in rest], [(e["cday"], v(e)) for e in blk])
+    rule = "PROPOSE DELETING the quiet hours (block not below the rest)" if z < 0 else ("KEEP (block below the rest by z 1.5 or more)" if z >= 1.5 else "WAIT for the registered read (z between 0 and 1.5)")
+    lines = [f"MKTTIME1-F INTERIM (information, owner's rule): {rule}",
+             f"  entries {len(E)} (block {len(blk)}, {sum(1 for e in blk if e['lost'])} block losses)",
+             f"  gold PF with the block {pf([v(e) for e in E]):.3f}, without {pf([v(e) for e in rest]):.3f}",
+             f"  mean per entry: rest {100 * sum(v(e) for e in rest) / max(1, len(rest)):+.2f}c, block {100 * sum(v(e) for e in blk) / max(1, len(blk)):+.2f}c; rest minus block {100 * d:+.2f}c, day-clustered z {z:+.2f}"]
+    INTERIM.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
+
+
 if __name__ == "__main__":
-    {"count": count, "read": read}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    {"count": count, "read": read, "interim": interim}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()

@@ -214,6 +214,16 @@ def check() -> None:
         if ready:
             rc, o = py("scalper.mkttime1f", "read")
             log("MKTTIME1-F", last_line(RESULTS["MKTTIME1-F"].read_text(), "VERDICT") if RESULTS["MKTTIME1-F"].exists() else f"read rc={rc}: {last_line(o)[:200]}")
+    # MKTTIME1-F interim (owner, 2026-10-29): information read at 100 block entries; its line goes to AUTO_LOG for V2 to forward
+    interim_out = DATA_DIR / "mkttime1f_interim.txt"
+    if interim_out.exists():
+        status.append("MKTTIME1-F interim done")
+    else:
+        from .mkttime1f import INTERIM_ENTRIES, interim_count
+        ready, line = guarded("MKTTIME1-F interim", lambda: (lambda n, l: (n >= INTERIM_ENTRIES, l))(*interim_count())); status.append(line)
+        if ready:
+            rc, o = py("scalper.mkttime1f", "interim")
+            log("MKTTIME1-F interim", last_line(interim_out.read_text(), "INTERIM") if interim_out.exists() else f"interim rc={rc}: {last_line(o)[:200]}")
     # MM1
     # scorer from the MM1S amendment; `mm1 run` itself refuses below 300 usable windows, so a refusal just waits for the next pass
     mm1_out = DATA_DIR / "mm1_result.txt"
