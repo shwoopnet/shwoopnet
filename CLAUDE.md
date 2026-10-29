@@ -517,7 +517,22 @@ Only `L1_SERIES` in `functions/kalshiLiveLib.js` (Bitcoin, gold, Ethereum, XRP, 
 
 ## The nightly order report (Oct 28, 2026, the owner: "reports at midnight (00:00 UTC)")
 
-`kalshiNightlyReport` (`functions/kalshiReportLib.js`, `functions/deploy-report.sh`, `test/kalshiReportGates.test.js` R1 to R5) is a READ-ONLY HTTPS endpoint behind one secret token (`KALSHI_REPORT_TOKEN`, Secret Manager, at least 24 characters, compared in constant time; no token configured means closed). It returns a summary of the bot's own orders for the last N hours (default 24, at most 90 days): filled, settled, won, lost, exits, open, net, profit factor, worst loss, split by market and by entry lead, and with `?orders=1` one compact row per order. It never returns an order id, a client order id or a credential. It holds no Kalshi key, sends nothing to Kalshi, writes nothing, and only reads `kalshiLiveOrders`. It is the ONE reviewed exception to the security scan's "no open HTTP endpoint" rule (`scan.js` allows it only with `makeReportHandler` and the report token). The token goes into the Claude environment's secrets, never into a chat; a scheduled task at 00:00 UTC calls it with `Authorization: Bearer <token>`. Needs `bash functions/deploy-report.sh` (it prints a new token once, in the owner's terminal, and keeps an existing one).
+`kalshiNightlyReport` (`functions/kalshiReportLib.js`, `functions/deploy-report.sh`, `test/kalshiReportGates.test.js` R1 to R5) is a READ-ONLY HTTPS endpoint behind one secret token (`KALSHI_REPORT_TOKEN`, Secret Manager, at least 24 characters, compared in constant time; no token configured means closed). It returns a summary of the bot's own orders for the last N hours (default 24, at most 90 days): filled, settled, won, lost, exits, open, net, profit factor, worst loss, split by market and by entry lead, and with `?orders=1` one compact row per order. It never returns an order id, a client order id or a credential. It holds no Kalshi key, sends nothing to Kalshi, writes nothing, and only reads `kalshiLiveOrders`. It is the ONE reviewed exception to the security scan's "no open HTTP endpoint" rule (`scan.js` allows it only with `makeReportHandler` and the report token). The token goes into the Claude environment's secrets, never into a chat; a scheduled task calls it with `Authorization: Bearer <token>`. **Schedule and dates (Oct 29, 2026):** the scheduled fetch now runs at 12:04 AM US Central and the relay at 12:13 AM US Central (they were 00:00 UTC). Report days are US Central days, and every time shown to the owner is US Central. The 7 day figures still include the paused markets (XRP and the probes) until their orders age out of the window. Needs `bash functions/deploy-report.sh` (it prints a new token once, in the owner's terminal, and keeps an existing one).
+
+## Research outcomes, Oct 29, 2026 (facts only, nothing promoted)
+
+From `kalshi-scalper/README.md` on the research branch. No trading rule changed because of any of it.
+
+- **GEN1, GEN1S, GEN2:** generators of full scalp strategies on the 18 fifteen minute series. 17,500 distinct strategies in all (5,000 + 5,000 + 7,500), 0 passed discovery (profit factor 1.5 at 10 contracts, per-order rounded fees). The best discovery profit factor was 1.25 (GEN1, GEN1S) and 1.14 (GEN2, at least 150 trades). N tried for deflation is about 425,000 (425,330 after GEN2), Bonferroni z bar about 5.2. Holdouts not read, nothing frozen.
+- **ARB2 to ARB5:** full-set, deadline, bracket and sports totals lock scans. 0 opportunities of 1c or more that were real locks (ARB2 to ARB4 best +1.4c, +0.6c, +0.1c; the +1.4c pair was not a lock; ARB5 zero crossed ladders in 691 games). All FALSIFIED.
+- **THETA1:** favourite drift sold before settlement in long-dated markets. 0 of 27 cells survived discovery (profit factor 0.03 to 0.34).
+- **EXIT1: FALSIFIED.** Holding to settlement beats every exit shape. Profit factor per contract in three windows: hold 0.961 / 0.928 / 0.898, live 25c line 0.921 / 0.897 / 0.869.
+- **REGIME1:** all five stand-down filters FALSIFIED. One information-only effect: entries with a spread of 2c or more do worse (removed entries 0.798 / 0.753 / 0.716). Not a pass.
+- **GOLD1D:** the gold stability claim fails. Gold at the 6 minute look 1.20, at the 10 minute look 0.89.
+- **G3H1 (hourly ladder) pass is VOID.** An audit found a universe look-ahead: the ladder file kept only strikes whose YES mid was between 3c and 97c 35 to 25 minutes before the close, but the rule enters 51 to 46 minutes before, so cheap strikes that later collapsed were dropped from the source file. CORR1 re-reads it on a file with strikes chosen before entry.
+- **Queued, not run as of this note:** CORR1, LADL1, CONF1, MM1.
+
+**Standing lesson:** a universe or file built after the entry time can hide the losers. Choose the strikes (or markets) from information available before entry, and say how the file was built before trusting a result from it.
 
 ## Order size lock and exit watch alarm (Oct 29, 2026)
 
@@ -569,4 +584,5 @@ The owner wants more than one live strategy, but only through a reviewed, fail-c
 - **Offer choices with the pop-up menu (the AskUserQuestion tool), not a numbered list typed into the reply** (the owner, 2026-10-21: "from now on in this project"). Put the recommended option first and mark it "(Recommended)". A closing line of text is still fine for what happens next, but the choices themselves go in the pop-up.
 - Never use em dashes. Use they/them for anyone whose pronouns are not stated.
 - Never ask for, or accept, credentials, keys or sign-in codes in chat.
+- Stats to the owner in the short form (orders filled, won/lost, profit factor) unless they ask for more. Times are always US Central.
 - Merge a pull request only when the owner says so. Keep the current look: no new design system (see Conventions).
