@@ -22,8 +22,8 @@ WINDOW_S = (3300, 60)
 RESULT = DATA_DIR / "corr1_result.txt"
 
 
-def fetch():
-    db = sqlite3.connect(DB)
+def fetch(shard=0, shards=1):
+    db = sqlite3.connect(DB if shards == 1 else DATA_DIR / f"lad2_{shard}.sqlite")
     db.executescript(backfill.SCHEMA)
     done = {r[0] for r in db.execute("SELECT DISTINCT close_ts FROM market")}
     lad1_closes = sorted({r[0] for r in sqlite3.connect(DATA_DIR / "lad1.sqlite").execute("SELECT DISTINCT close_ts FROM market")})
@@ -35,7 +35,7 @@ def fetch():
         if c is not None and lo <= c <= hi and m.get("result") in ("yes", "no"):
             by_close[c].append(m)
     print(f"{len(listed)} markets, {len(by_close)} closes ({len(lad1_closes)} in lad1); {len(by_close) - len(done)} to fetch", flush=True)
-    for n, close_ts in enumerate(sorted(by_close)):
+    for n, close_ts in enumerate(sorted(by_close)[shard::shards]):
         if close_ts in done:
             continue
         keep = []
@@ -59,6 +59,17 @@ def fetch():
         if n % 25 == 0:
             print(f"  {n}/{len(by_close)} closes, {len(keep)} strikes kept", flush=True)
     print("done", db.execute("SELECT COUNT(*) FROM market").fetchone()[0], "markets", flush=True)
+
+
+def merge():
+    db = sqlite3.connect(DB)
+    db.executescript(backfill.SCHEMA)
+    for f in sorted(DATA_DIR.glob("lad2_*.sqlite")):
+        db.execute(f"ATTACH DATABASE '{f}' AS s")
+        db.execute("INSERT OR REPLACE INTO market SELECT * FROM s.market")
+        db.execute("INSERT OR REPLACE INTO candle SELECT * FROM s.candle")
+        db.commit(); db.execute("DETACH DATABASE s")
+    print("merged", db.execute("SELECT COUNT(DISTINCT close_ts), COUNT(*) FROM market").fetchone(), flush=True)
 
 
 def run():
@@ -94,4 +105,7 @@ def run():
 
 
 if __name__ == "__main__":
-    {"fetch": fetch, "run": run}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    if len(sys.argv) > 1 and sys.argv[1] == "fetch":
+        fetch(*(int(x) for x in sys.argv[2:4])) if len(sys.argv) >= 4 else fetch()
+    else:
+        {"run": run, "merge": merge}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
