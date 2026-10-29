@@ -1,0 +1,11 @@
+{
+ "id": "REF_LATECAL_BTC",
+ "market": "KXBTC15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T01:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.fwdeval:l1_like",
+ "params": {"look_s": 60, "lo": 0.95, "hi": 0.98, "sides": ["yes", "no"]},
+ "generator": "LATECAL (reference, not a candidate)",
+ "description": "LATECAL's one chosen cell (Bitcoin, 90 to 60 s left, ask 0.95 to 0.98: 61 of 61 won on the recorder, NOT_ENOUGH_DATA; needs about 800 windows to clear the 97.7% break-even) tracked forward. Candles only: the nearest candle is the one ending 60 s before the close, so this approximates the recorder's 90 to 60 s cell. L1-family, held to settlement."
+}
