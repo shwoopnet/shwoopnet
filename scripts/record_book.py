@@ -74,9 +74,19 @@ def book_row(ts_ms, date_header, market, resp):
         + pad(yes, 0) + pad(yes, 1) + pad(no, 0) + pad(no, 1)
 
 
-def trade_rows(ts_ms, trades):
-    return [[ts_ms, t.get("ticker"), t.get("created_time"), t.get("yes_price_dollars"), t.get("count_fp"), t.get("taker_outcome_side"), t.get("trade_id")]
-            for t in (trades or []) if isinstance(t, dict)]
+def trade_rows(ts_ms, trades, seen=None):
+    """One row per trade. The tape is read with a few seconds of overlap so nothing is missed, so a trade id already written (in `seen`) is skipped."""
+    rows = []
+    for t in (trades or []):
+        if not isinstance(t, dict):
+            continue
+        tid = t.get("trade_id")
+        if seen is not None and tid is not None:
+            if tid in seen:
+                continue
+            seen.add(tid)
+        rows.append([ts_ms, t.get("ticker"), t.get("created_time"), t.get("yes_price_dollars"), t.get("count_fp"), t.get("taker_outcome_side"), tid])
+    return rows
 
 
 def pick_near_money(markets, close_time, limit=STRIKES):
@@ -161,8 +171,9 @@ def record_hour(out, close_epoch, stop_at):
     polls = ok = n429 = 0
     first_ms = last_ms = 0
     last_trade_ts = {m["ticker"]: iso(time.time() - 60) for m in picks}
+    seen_trades = set()
     next_trades = 0.0
-    while time.time() < min(close_epoch, stop_at + 1e9):
+    while time.time() < min(close_epoch, stop_at):
         loop_start = time.time()
         for m in picks:
             ts = int(time.time() * 1000)
@@ -183,7 +194,7 @@ def record_hour(out, close_epoch, stop_at):
             for m in picks:
                 st, body, _d = http_get("%s/markets/trades?ticker=%s&min_ts=%d&limit=1000" % (BASE, m["ticker"], int(time.mktime(time.strptime(last_trade_ts[m["ticker"]], "%Y-%m-%dT%H:%M:%SZ"))) - time.timezone))
                 if st == 200 and isinstance(body, dict):
-                    rows = trade_rows(int(time.time() * 1000), body.get("trades"))
+                    rows = trade_rows(int(time.time() * 1000), body.get("trades"), seen_trades)
                     out.write("trades", rows)
                     last_trade_ts[m["ticker"]] = iso(time.time() - 5)
         out.flush()
