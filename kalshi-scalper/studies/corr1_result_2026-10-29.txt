@@ -1,0 +1,8 @@
+CORR1: G3H1 and G3H2 on the look-ahead-free file (strikes chosen 55 to 52 minutes before the close)
+VERDICTS: [single both 2700..1980s | d5<=0.06 & z<=-0.39 & d1>0.01 & bid<=0.09 | TP 0.08 stop 0.2 time 600s book spread3]: FALSIFIED | [single both 3060..2760s | ask<=0.1 & d2>0 | TP 0.03 stop None time 60s book spread3]: FALSIFIED
+  G3H2 (TP +8c) discovery: PF 0.77 (1 contract 0.65, stress 0.74) n=834 closes 318 days 15 mean -1.12c z -3.11 zero-volume 41%
+  G3H1 (TP +3c) discovery: PF 0.43 (1 contract 0.32, stress 0.41) n=1212 closes 337 days 15 mean -2.14c z -8.72 zero-volume 61%
+  G3H2 (TP +8c) validation: PF 0.83 (1 contract 0.70, stress 0.80) n=428 closes 166 days 8 mean -0.82c z -2.11 zero-volume 39%
+  G3H1 (TP +3c) validation: PF 0.60 (1 contract 0.45, stress 0.57) n=660 closes 184 days 8 mean -1.34c z -5.52 zero-volume 55%
+  G3H2 (TP +8c) holdout: PF 0.59 (1 contract 0.49, stress 0.56) n=372 closes 141 days 7 mean -2.17c z -4.20 zero-volume 47%
+  G3H1 (TP +3c) holdout: PF 0.60 (1 contract 0.45, stress 0.57) n=543 closes 160 days 8 mean -1.34c z -5.37 zero-volume 53%

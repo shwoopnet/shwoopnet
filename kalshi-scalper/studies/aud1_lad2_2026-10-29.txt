@@ -1,0 +1,13 @@
+AUD1 on lad2.sqlite: 704 closes
+  same-candle fill (registered)  discovery : PF 0.43 n=1212 closes 337 mean -2.14c
+  same-candle fill (registered)  validation: PF 0.60 n=660 closes 184 mean -1.34c
+  same-candle fill (registered)  holdout   : PF 0.60 n=543 closes 160 mean -1.34c
+  next-candle fill               discovery : PF 0.45 n=1114 closes 335 mean -2.07c, unfilled 98
+  next-candle fill               validation: PF 0.61 n=621 closes 184 mean -1.33c, unfilled 39
+  next-candle fill               holdout   : PF 0.66 n=517 closes 160 mean -1.12c, unfilled 26
+  zero-volume dropped            discovery : PF 0.43 n=1136 closes 335 mean -2.19c
+  zero-volume dropped            validation: PF 0.62 n=625 closes 184 mean -1.28c
+  zero-volume dropped            holdout   : PF 0.61 n=519 closes 160 mean -1.33c
+  zero-volume unfillable         discovery : PF 0.43 n=1136 closes 335 mean -2.19c, unfilled 76
+  zero-volume unfillable         validation: PF 0.62 n=625 closes 184 mean -1.28c, unfilled 35
+  zero-volume unfillable         holdout   : PF 0.61 n=519 closes 160 mean -1.33c, unfilled 24
