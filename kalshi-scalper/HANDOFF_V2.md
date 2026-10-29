@@ -50,7 +50,7 @@ About **438,666 things tried** (every pre-registered variant, generator strategy
 
 ## 4. Rebuilding `kalshi-scalper/data`
 
-Pushed to branch `research-data` as one gzipped tar split into 45 MB chunks, with `MANIFEST.txt` (sha256 per chunk and the reassembly command): every source database except the very large or quick-to-rebuild ones. Reassemble: `git fetch origin research-data && git checkout origin/research-data -- . ` into an empty folder, then `cat research-data.tar.gz.part-* | tar xzf - -C kalshi-scalper/data`.
+Pushed to branch `research-data` (commit after d35cbcf; the older 2026-10-20 archive with `restore.sh` and `*.xz` files is kept beside it) as one gzipped tar, 278 MB, split into six 45 MiB chunks, with `MANIFEST.txt` (sha256 per chunk and the reassembly command): every source database except the very large or quick-to-rebuild ones. Reassemble: `git fetch origin research-data && git worktree add ../rd origin/research-data && cd ../rd && sha256sum -c MANIFEST.txt --ignore-missing && cat research-data.tar.gz.part-* | tar xzf - -C <repo>/kalshi-scalper/data` (whole-archive sha256 15788a02... in MANIFEST.txt). Contents: 161 files listed in FILES.txt (every source sqlite except sc1, fp3*, sweep1_*; the binance, binance_carry, cpi1, ment1, quote1 and maker4 folders; small json bar files; result files). `ladl1.sqlite` was still downloading and is not in it.
 
 Not pushed (rebuild commands, from `kalshi-scalper/` with `PYTHONPATH=src`):
 - Derived arrays (minutes each, from the pushed sqlite files): `python -m scalper.gen1 build` (40 s), `gen1s build` (5 min), `gen2 build` (about 1 h, 2 GB), `gen3 build` (5 min), `auto1/2/3 build` (10 to 20 min each).
