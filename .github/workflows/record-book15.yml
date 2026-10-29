@@ -1,0 +1,45 @@
+# Oct 29, 2026 (the research session's R2, for MM1 market making on gold, which needs a real queue model): records the whole 15 minute window of the Bitcoin, Ethereum and gold markets (KXBTC15M, KXETH15M, KXGOLD15M): the best 5 YES bids and 5 NO bids with sizes every 3 seconds, plus the public trade tape every 30 seconds.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under book15/), never to main. Back to back 4 hour jobs start 16 minutes before each boundary (minute 44, so it never starts at the same minute as record-book, which starts at :50) and stop a minute after the next, so every window is covered.
+# Size estimate (not measured): about 3 series x 96 windows x 300 polls = 86,000 book rows a day, about 13 MB raw and roughly 3 to 6 MB gzipped with the trade tape. Actions minutes: six jobs of about 4 hours 20 minutes, about 1,550 minutes a day, about 47,000 a month; free on a public repository, and it would be about 47,000 billable minutes on a private one.
+name: record-book15
+on:
+  schedule:
+    - cron: "44 3,7,11,15,19,23 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-book15
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record until a minute past the next 4 hour boundary
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/book15/$STAMP"
+          python3 code/scripts/record_book15.py "data/book15/$STAMP" --cycle-hours 4
+          gzip -9 -f data/book15/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always()
+        run: |
+          cd data
+          git config user.name "book-recorder"
+          git config user.email "book-recorder@users.noreply.github.com"
+          git add book15
+          git commit -q -m "book15 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
