@@ -41,6 +41,9 @@ function orderKinds(before, after) {
 function sessionKinds(before, after) {
   if (!before || !after) return [];
   if (before.active === true && after.active !== true && !/by the owner/i.test(String(after.endedBecause || ""))) return ["issue"];
+  // The exit watch went silent while a position is open (kalshiExitAlarmLib): a new alert only when the stamp CHANGES, so rewriting the document for any other reason never repeats it.
+  const was = before.exitWatchAlert && before.exitWatchAlert.at, nowAt = after.exitWatchAlert && after.exitWatchAlert.at;
+  if (after.active === true && Number.isFinite(Number(nowAt)) && Number(nowAt) !== Number(was)) return ["exitwatch"];
   return [];
 }
 
@@ -83,6 +86,10 @@ function message(kind, o, ctx) {
     const pnl = Number(o.settledPnl);
     const title = !Number.isFinite(pnl) || pnl === 0 ? "Closed " + name : (pnl > 0 ? "Won " : "Lost ") + name + " " + money(pnl);
     return { title, body: joinParts(size, dayText(ctx)), tag: trade };
+  }
+  if (kind === "exitwatch") {
+    const a = (o && o.exitWatchAlert) || {}, mins = Number(a.silentMin);
+    return { title: "Check the bot: the exit watch is silent" + (Number.isFinite(mins) && mins > 0 ? " (" + mins + " min)" : ""), body: "A position is open and nothing has checked it for the 25c exit. Open the Kalshi page and look at it", tag: "issue-exitwatch" };
   }
   if (o && o.series) return { title: "Check the bot: " + name + " exit " + String(o.exitStatus || o.status || "needs a look"), body: "Open the Kalshi page and look at the order", tag: "issue-" + (o.clientOrderId || o.ticker) };
   return { title: "Bot stopped: " + String((o && o.endedBecause) || "see the page").slice(0, 60), body: "It stays off until you restart it on the Kalshi page", tag: "issue-" + ((o && o.endedAt) || "stop") };

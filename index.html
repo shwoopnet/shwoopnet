@@ -2517,8 +2517,8 @@
         // Reinvest pool progress: pool dollars over what the NEXT extra contract needs. The server counts extras at a flat $0.93 per contract (skimAddon), NOT the live price, so the target must use the same figure or the pool can read as past the line while no extra is added.
         var poolCell = '';
         if(ses.sizing === true && Number.isFinite(ses.sizePool)){
-          var ex = Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0;
-          poolCell = '<div class="kal-tile"><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, with no fixed limit.">' + kalshiMoney(ses.sizePool) + '</b><span class="kal-sub">of ' + kalshiMoney((ex + 1) * 0.93) + ' to the next contract</span></div>';
+          var ex = Math.max(0, Math.floor(ses.sizePool / 0.93 + 1e-9));   // the pool's own count; sizeAddon is the clamped number actually sent (profit add-on cap)
+          poolCell = '<div class="kal-tile"><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, up to a quarter of the base size.">' + kalshiMoney(ses.sizePool) + '</b><span class="kal-sub">of ' + kalshiMoney((ex + 1) * 0.93) + ' to the next contract</span></div>';
         }
         if(!sizeKnown) stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
         else stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + '</b><span class="kal-sub">' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '% of the account)' : '') + '</span></div>' + poolCell + '</div>';

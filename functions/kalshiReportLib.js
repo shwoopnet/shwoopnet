@@ -2,6 +2,7 @@
 // A READ-ONLY summary of the bot's own orders, behind one secret token, so a scheduled task can fetch it. It holds no Kalshi key, sends nothing to Kalshi,
 // writes nothing, and never returns an order id, a client order id or any credential: only what the owner already pastes into the research chat.
 const crypto = require("crypto");
+const { maxContractsFor } = require("./kalshiLiveLib");
 
 const MAX_HOURS = 24 * 90;
 const MAX_ORDER_ROWS = 2000;
@@ -38,6 +39,15 @@ function finish(t) {
   };
 }
 
+// Orders bigger than today's code could ever size them (Oct 29, 2026: a 12 contract Dogecoin order appeared where the code only sends 3). Zero is the normal value. Series, count, the most that series may have and the
+// time only, never an id. The limit comes from maxContractsFor, a code constant, so nothing stored can move it.
+function oversizeRows(rows) {
+  return rows.map((o) => {
+    const series = seriesOf(o), n = Math.max(num(o.count) || 0, num(o.fillCount) || 0), max = maxContractsFor(series);
+    return n > max ? { ts: new Date(Number(o.ts)).toISOString(), series, count: n, max } : null;
+  }).filter(Boolean).sort((a, b) => a.ts < b.ts ? -1 : 1);
+}
+
 function buildReport(orders, nowMs, hours, withOrders) {
   const since = nowMs - hours * 3600000;
   const rows = (Array.isArray(orders) ? orders : []).filter((o) => o && Number(o.ts) >= since);
@@ -53,6 +63,7 @@ function buildReport(orders, nowMs, hours, withOrders) {
     total: finish(all),
     byMarket: Object.fromEntries(Object.keys(byMarket).sort().map((k) => [k, finish(byMarket[k])])),
     byEntryLead: Object.fromEntries(Object.keys(byLead).sort().map((k) => [k, finish(byLead[k])])),
+    oversize: (() => { const r = oversizeRows(rows); return { count: r.length, orders: r.slice(0, 50) }; })(),
   };
   if (withOrders) {
     // One compact row per order. No order id, no client order id, nothing that identifies the account.

@@ -47,6 +47,7 @@ const { getFirestore } = require("firebase-admin/firestore");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
+const exitAlarm = require("./kalshiExitAlarmLib");
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). SLOT_ON comes from the slot library's own constants and nothing else: no stored document, request or page can feed it. It is "watching" (entries are
 // allowed, or a slot order has ever existed), which is wider than "entering", so switching entries off never orphans a live slot position. While it is false
 // (how this ships) nothing below that names the slot runs, and the deployed functions make the same reads, writes and orders they made before the slot existed.
@@ -540,6 +541,7 @@ exports.kalshiLiveExit = onSchedule(
     // With the slot on, a minute is idle only when the slot has nothing open to watch either (its read is made only after the L1 check says idle).
     if ((await live.exitWatchIdle({ store, now: Date.now() })) && (!SLOT_ON || (await slotRun.slotExitIdle({ store: slotStoreLib.slotStore(db, store), now: Date.now() })))) return;
     const stopAt = Date.now() + 47000;
+    let beat = false;
     for (;;) {
       try {
         const snap = await sessRef.get();
@@ -554,6 +556,9 @@ exports.kalshiLiveExit = onSchedule(
               if (e && e.kind === "session ended") await watchdog.sendAll(fetch, watchdog.stopAlertPings({ base: KALSHI_STOP_ALERT_URL.value(), detail: e.detail }));
             },
           });
+          // Heartbeat for the exit watch alarm (kalshiExitAlarmLib): one small write per minute's run, only after a pass COMPLETED, so a watch that errors every pass goes quiet too. Its own document, so the session
+          // document (and the alerts that listen to it) is not written six times a minute. A failed write is ignored: the worst case is a false alarm.
+          if (!beat) { try { await db.collection("kalshiLiveControl").doc("exitWatch").set({ at: Date.now() }, { merge: true }); beat = true; } catch (e) { /* see above */ } }
           // Slot only: the slot's own exits, in a pass of their own after L1's, so a failure here can never stop L1's 25c line. Each engine sells only its own contracts under the shared close lease.
           if (SLOT_ON) {
             try {
@@ -678,6 +683,30 @@ exports.kalshiLiveArmed = onSchedule(
         }
       } catch (e) {
         console.error("kalshiLiveArmed: account snapshot failed: " + String((e && e.message) || e).slice(0, 160));
+      }
+      // Exit watch alarm (kalshiExitAlarmLib): this function and the exit watch are separate processes, so this one can notice the other going quiet. Reads only; its one write is a field on the session document that the
+      // existing phone alert trigger turns into an alert. After everything else and fenced off, so it can never fail or delay the tick (runExitAlarm catches its own errors; this try is a second fence).
+      try {
+        const beatRef = db.collection("kalshiLiveControl").doc("exitWatch");
+        const note = await exitAlarm.runExitAlarm({
+          now, session,
+          readBeat: async () => { const b = await beatRef.get(); return b.exists ? b.data() : null; },
+          readOrders: () => firestoreLiveStore(db).recentFilled(now - live.EXIT_LOOKBACK_MS),
+          claim: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef), have = cur.exists ? cur.data().alarmedFor : null;
+            if (have === key) return false;
+            tx.set(beatRef, { alarmedFor: key }, { merge: true });
+            return true;
+          }),
+          release: (key) => db.runTransaction(async (tx) => {
+            const cur = await tx.get(beatRef);
+            if (cur.exists && cur.data().alarmedFor === key) tx.set(beatRef, { alarmedFor: null }, { merge: true });
+          }),
+          raise: (a) => sessRef.set({ exitWatchAlert: a }, { merge: true }),
+        });
+        if (note === "alerted" || /^error|failed/.test(note)) console.warn("kalshiLiveArmed: exit watch alarm: " + note);
+      } catch (e) {
+        console.error("kalshiLiveArmed: exit watch alarm failed: " + String((e && e.message) || e).slice(0, 160));
       }
     } catch (e) {
       failure = e;

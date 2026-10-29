@@ -343,6 +343,28 @@
      "liveSwitch": true
     },
     null
+   ],
+   [
+    "get",
+    "kalshiLiveControl/exitWatch"
+   ],
+   [
+    "query",
+    "kalshiLiveOrders",
+    [
+     [
+      "status",
+      "==",
+      "filled"
+     ],
+     [
+      "settled",
+      "==",
+      false
+     ]
+    ],
+    null,
+    null
    ]
   ],
   "ret": null,
@@ -494,6 +516,16 @@
     ],
     null,
     null
+   ],
+   [
+    "set",
+    "kalshiLiveControl/exitWatch",
+    {
+     "at": 1791381780000
+    },
+    {
+     "merge": true
+    }
    ],
    [
     "get",
@@ -687,6 +719,16 @@
      "ts": 1791381780000,
      "kind": "exit",
      "detail": "KXBTC15M-26OCT071415-15: Kalshi refused the exit sell: HTTP 200 {}"
+    }
+   ],
+   [
+    "set",
+    "kalshiLiveControl/exitWatch",
+    {
+     "at": 1791381780000
+    },
+    {
+     "merge": true
     }
    ],
    [
