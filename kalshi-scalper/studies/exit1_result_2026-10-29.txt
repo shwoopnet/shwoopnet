@@ -1,0 +1,9 @@
+EXIT1 VERDICT: FALSIFIED (no new exit shape reaches PF 1.5 in every window)
+EXIT1: 32499 L1 entries (6 minute look, 88c to 97c), windows by close-date thirds; PF per contract at 1 contract (10 contracts in brackets for hold)
+  hold to settlement     disc PF 0.961 n=9734 mean -0.23c | valid PF 0.928 n=10952 mean -0.44c | HOLD PF 0.898 n=11813 mean -0.64c
+  live 25c line          disc PF 0.921 n=9734 mean -0.48c | valid PF 0.897 n=10952 mean -0.65c | HOLD PF 0.869 n=11813 mean -0.85c
+  DROP10                 disc PF 0.818 n=9734 mean -1.03c | valid PF 0.795 n=10952 mean -1.20c | HOLD PF 0.714 n=11813 mean -1.81c
+  DROP20                 disc PF 0.877 n=9734 mean -0.72c | valid PF 0.838 n=10952 mean -1.00c | HOLD PF 0.768 n=11813 mean -1.54c
+  HALF25                 disc PF 0.941 n=9734 mean -0.35c | valid PF 0.912 n=10952 mean -0.54c | HOLD PF 0.883 n=11813 mean -0.75c
+  TIME1                  disc PF 0.890 n=9734 mean -0.65c | valid PF 0.841 n=10952 mean -1.00c | HOLD PF 0.806 n=11813 mean -1.26c
+  hold, 10 contracts     disc PF 1.045 n=9734 mean +0.26c | valid PF 1.007 n=10952 mean +0.04c | HOLD PF 0.975 n=11813 mean -0.16c

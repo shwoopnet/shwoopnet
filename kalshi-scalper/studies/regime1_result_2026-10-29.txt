@@ -1,0 +1,7 @@
+REGIME1 VERDICTS: (a) 22-02 UTC FALSIFIED; (b) weekend FALSIFIED; (c) spread >= 2c FALSIFIED; (d) high recent vol FALSIFIED; (e) loss in series < 2h FALSIFIED
+REGIME1: 32499 entries; stand-down filters, kept vs removed; (d) threshold 0.5975
+  (a) 22-02 UTC: disc kept PF 0.962 n=8075 | removed PF 0.957 n=1659 net -0.26c || valid kept PF 0.936 n=9005 | removed PF 0.894 n=1947 net -0.68c || HOLD kept PF 0.910 n=9890 | removed PF 0.841 n=1923 net -1.07c
+  (b) weekend: disc kept PF 0.946 n=7481 | removed PF 1.014 n=2253 net +0.08c || valid kept PF 0.915 n=8625 | removed PF 0.981 n=2327 net -0.11c || HOLD kept PF 0.883 n=9945 | removed PF 0.983 n=1868 net -0.10c
+  (c) spread >= 2c: disc kept PF 1.051 n=7098 | removed PF 0.798 n=2636 net -1.56c || valid kept PF 1.006 n=8622 | removed PF 0.753 n=2330 net -2.20c || HOLD kept PF 0.984 n=9008 | removed PF 0.716 n=2805 net -2.42c
+  (d) high recent vol: disc kept PF 0.970 n=7854 | removed PF 0.926 n=1880 net -0.45c || valid kept PF 0.941 n=8651 | removed PF 0.884 n=2301 net -0.75c || HOLD kept PF 0.875 n=9507 | removed PF 1.010 n=2306 net +0.05c
+  (e) loss in series < 2h: disc kept PF 0.955 n=8186 | removed PF 0.996 n=1548 net -0.02c || valid kept PF 0.905 n=9249 | removed PF 1.078 n=1703 net +0.42c || HOLD kept PF 0.923 n=10175 | removed PF 0.770 n=1638 net -1.69c
