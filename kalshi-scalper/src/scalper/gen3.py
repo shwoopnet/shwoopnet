@@ -56,7 +56,7 @@ def exit_idx(val, spr, ks, e, close_ts):
     return hit.argmax(axis=1)
 
 
-def build():
+def build(holdout=False):
     db = sqlite3.connect(DB)
     mk = defaultdict(list)
     for tk, close, strike, res in db.execute("select ticker, close_ts, strike, result from market"):
@@ -73,8 +73,8 @@ def build():
     wid = 0
     for close in sorted(mk):
         day = didx[datetime.fromtimestamp(close, timezone.utc).strftime("%Y-%m-%d")]
-        if day >= VAL_D:
-            continue  # holdout days are not built during the search
+        if (day >= VAL_D) != holdout:
+            continue  # holdout days are built only by `holdout`, after the survivors are frozen
         ladder = sorted(mk[close])
         legs = [(i, None) for i in range(len(ladder))] + [(i, i + 1) for i in range(len(ladder) - 1)]
         for lo, hi in legs:
@@ -128,7 +128,7 @@ def build():
                     EL.append((qa[1], 1 - qb[0]) if yes == 2 else (ask, np.nan))
     X = np.array(X, dtype=np.float32); W = np.array(W); DY = np.array(DY)
     order = np.lexsort((-X[:, 2], W))
-    np.savez(NPZ, X=X[order], W=W[order], day=DY[order], close=np.array(CL)[order], XB1=np.array(XB1, dtype=np.float32)[order],
+    np.savez(DATA_DIR / "gen3_hold_rows.npz" if holdout else NPZ, X=X[order], W=W[order], day=DY[order], close=np.array(CL)[order], XB1=np.array(XB1, dtype=np.float32)[order],
              XB2=np.array(XB2, dtype=np.float32)[order], ZV=np.array(ZV, dtype=bool)[order], EL=np.array(EL, dtype=np.float64)[order])
     print("rows", len(X), "windows", wid, "days built", len(set(DY.tolist())), flush=True)
 
@@ -262,5 +262,26 @@ def search():
     RESULT.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
 
 
+def holdout():
+    out = DATA_DIR / "gen3_holdout_result.txt"
+    if out.exists():
+        print("Refusing to run again"); return
+    fz = json.loads((DATA_DIR.parent / "studies" / "gen3_survivors_FROZEN_2026-10-29.json").read_text())["survivors"]
+    build(holdout=True)
+    z = np.load(DATA_DIR / "gen3_hold_rows.npz"); D = {k: z[k] for k in z.files}
+    alls = np.ones(len(D["X"]), bool)
+    lines = [f"GEN3 HOLDOUT (days 24 onward, read once): {len(set(D['day'].tolist()))} days, {len(set(D['close'].tolist()))} hourly closes, {len(fz)} frozen survivors"]
+    npass = 0
+    for s in fz:
+        s["conds"] = [tuple(c) for c in s["conds"]]
+        net, days, _, cl, zv = evaluate(D, s, alls); h = stats(net, days, cl)
+        h["pfs"] = pf(evaluate(D, s, alls, m=1.2)[0]); h["pf1"] = pf(evaluate(D, s, alls, c=1)[0])
+        ok = h["n"] >= 40 and h["days"] >= 5 and h["pf"] >= 1.5 and h["pfs"] >= 1.2 and zv <= 0.2
+        npass += ok
+        lines.append(f"  {'HOLDOUT-PASS' if ok else 'holdout-fail'} {desc(s)}: PF {h['pf']:.2f} (1 contract {h['pf1']:.2f}, stress {h['pfs']:.2f}) n={h['n']} closes {h['closes']} days {h['days']} mean {h['mean_c']:+.2f}c z {h['z']:+.2f} zero-volume {zv:.0%}")
+    lines.insert(0, f"GEN3 holdout verdict: {npass} of {len(fz)} pass")
+    out.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
+
+
 if __name__ == "__main__":
-    {"build": build, "search": search}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
+    {"build": build, "search": search, "holdout": holdout}.get(sys.argv[1] if len(sys.argv) > 1 else "", lambda: print(__doc__))()
