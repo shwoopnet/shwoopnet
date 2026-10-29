@@ -7512,3 +7512,19 @@ The look-ahead-free hourly Bitcoin ladder (`lad2`, 2026-09-26 to 10-26) covers o
 
 **Prediction.** Kalshi gold tracks the future: S10 and S6 trade rarely and lose (PF under 1.0, the gaps are model error); F10 and F6 move gold's PF by under 0.1. **FALSIFIED** expected. Kill: any try under PF 1.0 in discovery is FALSIFIED without reading the holdout. Thin by construction: about 28 days, so NOT_ENOUGH_DATA if any window has under 30 trades.
 Recorder look 2026-10-29 (information only): 132 of 300 trades over 8 of 10 dates, 0% 429, clock_ok still False. Read not yet due.
+
+
+### Result: GOLDFV1 (run once, 2026-10-29, Strategy Research V2): all four tries FALSIFIED; holdout not read
+
+Universe: settled KXGOLD15M markets closing 2026-10-01 to 10-29 (about 1,000 scored per look; discovery Oct 1 to about Oct 10, validation to about Oct 20). Two implementations: the first (`goldfv1.py`, reads the future bar that ENDS at the decision minute) and an independent one built from this registration without seeing the first (`goldfv1_aud.py`, conservative reading: only bars that ended a minute earlier). PF at 1 contract, discovery / validation (n):
+
+| Try | First implementation | Independent | Verdict |
+|---|---|---|---|
+| S10 standalone, 10 min | 1.55 (118) / **0.69** (127) | 0.95 (330) / **0.70** (310) | FALSIFIED |
+| S6 standalone, 6 min | **0.88** (134) / 1.11 (130) | **0.91** (258) / 0.80 (269) | FALSIFIED (kill: discovery under 1.0) |
+| F10 kept (L1 gold at 10 min, model agrees) | 1.52 (41) / **0.76** (30) | **0.77** (20) / 1.79 (22) | FALSIFIED |
+| F6 kept (L1 gold at 6 min, model agrees) | **1.04** (93) / 2.64 (82) | **1.00** (71) / 3.71 (52) | FALSIFIED |
+
+Parents on the same days: L1 gold 6 min PF 1.25 / 1.11 (183 / 168), 10 min 1.26 / 0.87. At 10 contracts every PF moves up by 0.02 to 0.12 and no verdict changes; fees x1.2 changes none; no fill candle had zero volume. Next-candle fills (first implementation, both windows together): S10 0.94 (661), S6 0.76 (488).
+
+**Reading.** No try clears PF 1.5 in both windows in either implementation, and the two disagree on which window looks good (F6 kept: validation 2.64 to 3.71 but discovery 1.00 to 1.04), which is what noise on 30 to 90 trades looks like. The counterparty did not show up: the staler the future price, the more often the model disagrees with Kalshi and the more those trades lose (the independent version trades 2.7 times as often with the same validation PF 0.70). Kalshi gold already prices the latest minute of COMEX. Holdout (about Oct 20 to 29) left unread: every try failed before it, so reading it would decide nothing. Tries +4 (running count about 438,670). Data: `data/gc1m.json` (Yahoo GC=F 1 minute, public). Result files: `studies/goldfv1_result_2026-10-29.txt`, `studies/goldfv1_aud_result_2026-10-29.txt`. Known slip, decides nothing: the first implementation's next-candle line pools discovery and validation and re-selects the side at the next candle.
