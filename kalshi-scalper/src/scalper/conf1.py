@@ -13,6 +13,7 @@ from .gen1 import _norm_ppf
 from .paths import DATA_DIR
 
 RESULT = DATA_DIR / "conf1_result.txt"
+ONLY = None
 TWIN = {"KXBTC15M": "KXETH15M", "KXETH15M": "KXBTC15M", "KXGOLD15M": "KXSILVER15M", "KXSILVER15M": "KXGOLD15M"}
 LEFT, BAND = 360, (0.88, 0.97)
 N_PRIOR = 438_613
@@ -45,7 +46,7 @@ def quotes_at():
     M = load_all()
     Q = {}
     for tk, (series, strike, close, cs, res) in M.items():
-        for t in (close - LEFT, close - LEFT - 900):
+        for t in (close - LEFT, close - 840):
             q = cs.get(t)
             if q:
                 Q[(series, close, t)] = (q[0], q[1])
@@ -67,9 +68,10 @@ def ladder_quotes():
 
 
 def main():
-    if RESULT.exists():
+    out = DATA_DIR / f"conf1_{'_'.join(ONLY).lower()}_result.txt" if ONLY else RESULT
+    if out.exists():
         print("Refusing to run again"); return
-    E = entries(); Q = quotes_at(); LQ = ladder_quotes()
+    E = entries(); Q = quotes_at(); LQ = ladder_quotes() if (not ONLY or "LADDER" in ONLY) else {}
     spot_strike = {}
     db5 = sqlite3.connect(DATA_DIR / "search5k.sqlite")
     btc = {ts // 1000: c for c, ts in db5.execute("select c, ts from bar where cur='BTC'")}
@@ -87,8 +89,8 @@ def main():
     # market-wide move: precompute per close the YES-mid change over the previous 15 minutes for every series
     move = defaultdict(dict)
     for (s, c, t), q in Q.items():
-        if t == c - LEFT and (s, c, t - 900) in Q:
-            a, b = q, Q[(s, c, t - 900)]
+        if t == c - LEFT and (s, c, c - 840) in Q:
+            a, b = q, Q[(s, c, c - 840)]
             move[c][s] = (a[0] + a[1]) / 2 - (b[0] + b[1]) / 2
 
     def keep_tape2(e):
@@ -111,7 +113,7 @@ def main():
     pfv = lambda xs: (sum(x for x in xs if x > 0) / -sum(x for x in xs if x < 0)) if any(x < 0 for x in xs) else 99.0
     net = lambda e, m=1.0: e["won"] - e["p"] - fee(e["p"], m=m)
     lines = [f"CONF1: {len(E)} L1 entries, {len(closes)} closes; Bonferroni z bar {zbar:.2f}"]
-    for name, fn in (("LADDER", keep_ladder), ("TWIN", keep_twin), ("TAPE", keep_tape2)):
+    for name, fn in [x for x in (("LADDER", keep_ladder), ("TWIN", keep_twin), ("TAPE", keep_tape2)) if not ONLY or x[0] in ONLY]:
         ok_all = True; parts = []
         for w in range(3):
             ew = [e for e in E if win(e["close"]) == w]
@@ -129,8 +131,12 @@ def main():
         v = "NOT_YET_FALSIFIED" if ok_all else ("NOT_ENOUGH_DATA" if ok_all is None else "FALSIFIED")
         lines.append(f"  {name} {v}")
         lines += ["    " + p for p in parts]
-    RESULT.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
+    out.write_text("\n".join(lines) + "\n"); print("\n".join(lines))
 
 
 if __name__ == "__main__":
-    main() if len(sys.argv) > 1 and sys.argv[1] == "run" else print(__doc__)
+    if len(sys.argv) > 1 and sys.argv[1] == "run":
+        ONLY = tuple(sys.argv[2:]) or None
+        main()
+    else:
+        print(__doc__)
