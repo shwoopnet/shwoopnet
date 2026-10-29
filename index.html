@@ -446,7 +446,6 @@
   .kal-hc-fill{ fill:rgba(255,255,255,.06); stroke:none; }
   .kal-hc-col{ flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:4px; } .kal-hc-plot{ position:relative; } .kal-hc-below{ fill:rgba(255,255,255,.04); } .kal-hc-target-line{ stroke:rgba(255,255,255,.45); stroke-width:1; stroke-dasharray:5 4; vector-effect:non-scaling-stroke; }
   .kal-hc-target{ position:absolute; left:6px; top:50%; transform:translateY(-100%); font-size:12px; color:var(--paper); background:var(--panel, transparent); padding:0 4px 1px 0; }
-  #kalWinsByCent{ margin-top:10px; }
   .kal-hc-x{ display:flex; justify-content:space-between; font-size:12px; color:var(--muted); height:16px; } .kal-hc-y3{ padding-bottom:20px; }
   .kal-hc-paid{ stroke:rgba(255,255,255,.3); stroke-width:1; stroke-dasharray:4 4; vector-effect:non-scaling-stroke; }
   .kal-hc-dot{ fill:var(--paper); }
@@ -1513,6 +1512,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot status: the win rate by price paid table is removed again (the owner's call)</li>
                   <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
                   <li>Bot status: the next look says only what can trade now (gold, Dogecoin and Ethereum at the 6 minute look); the 10 minute look for paused XRP and natural gas is gone</li>
                   <li>Market News keeps only stock, crypto and commodity stories (and the Fed, rates, inflation and dollar news that moves them); personal advice columns and lifestyle pieces are dropped</li>
@@ -3332,37 +3332,6 @@
     }
     return out;
   }
-  // Win rate by the price paid (the owner, Oct 29, 2026: "92c entries win% etc"). Every settled order the page holds, grouped by the price paid for the side bought rounded to the cent. Each group says how many orders, how many won and lost
-  // (an early sell counts by its result) and the win rate, against the win rate that price needs to break even (the price itself, before fees). Percentages only, so Privacy view leaves it showing. Read only.
-  function kalshiWinsByPrice(orders){
-    var map = {};
-    (orders || []).forEach(function(o){
-      if(!o || o.strategy !== 'L1' || kalshiOrderPnl(o) === null || !(Number(o.count) > 0)){ return; }
-      var px = kalshiPricePaid(o); if(!Number.isFinite(px) || !(px > 0) || !(px < 1)){ return; }
-      var c = Math.round(px * 100 + 1e-9), g = map[c] || (map[c] = { cents: c, n: 0, wins: 0, losses: 0 });
-      g.n++; if(kalshiOrderPnl(o) > 0){ g.wins++; } else { g.losses++; }
-    });
-    return Object.keys(map).map(function(k){ var g = map[k]; g.winPct = g.wins / g.n * 100; return g; }).sort(function(a, b){ return a.cents - b.cents; });
-  }
-  // Grouped for reading (the owner, Oct 29, 2026: the one-row-per-cent list was "a mess"): five bands, each with its win rate against the AVERAGE price paid in it, in points (a positive number means the band beat its own price). The cent rows stay, closed, under it.
-  var KAL_PRICE_BANDS = [[0, 87, 'Under 88c'], [88, 90, '88c to 90c'], [91, 92, '91c to 92c'], [93, 94, '93c to 94c'], [95, 97, '95c to 97c'], [98, 100, '98c and over']];
-  function kalshiWinsByPriceBands(list){
-    return KAL_PRICE_BANDS.map(function(b){
-      var g = { label: b[2], n: 0, wins: 0, losses: 0, paid: 0 };
-      (list || []).forEach(function(x){ if(x.cents >= b[0] && x.cents <= b[1]){ g.n += x.n; g.wins += x.wins; g.losses += x.losses; g.paid += x.cents * x.n; } });
-      if(g.n){ g.winPct = g.wins / g.n * 100; g.avgPaid = g.paid / g.n; g.points = g.winPct - g.avgPaid; }
-      return g;
-    }).filter(function(g){ return g.n > 0; });
-  }
-  function kalshiWinsByPriceHtml(list, esc){
-    if(!list || !list.length){ return ''; }
-    var total = list.reduce(function(a, g){ return a + g.n; }, 0), pts = function(v){ return (v >= 0 ? '+' : '-') + Math.abs(v).toFixed(1); };
-    var bands = kalshiWinsByPriceBands(list);
-    return '<div class="kal-rows" id="kalWinsByPrice"><div><span class="kal-k">Win rate by price paid, ' + esc(String(total)) + ' settled</span><b>points above or below the price paid</b></div>' +
-      bands.map(function(g){ return '<div><span class="kal-k">' + esc(g.label) + '</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% against ' + g.avgPaid.toFixed(1) + '% paid (' + pts(g.points) + ')') + '</b></div>'; }).join('') + '</div>' +
-      '<details class="kal-fold" id="kalWinsByCent"><summary class="kal-lbl">Each price</summary><div class="kal-rows">' +
-      list.map(function(g){ return '<div><span class="kal-k">' + esc(String(g.cents)) + 'c entries</span><b>' + esc(g.n + (g.n === 1 ? ' order' : ' orders') + ', won ' + g.wins + ' lost ' + g.losses + ', ' + g.winPct.toFixed(1) + '% (needs ' + g.cents + '%)') + '</b></div>'; }).join('') + '</div></details>';
-  }
   // Today's work on the Bot status card (the owner, Oct 26, 2026: something useful there that does not repeat the rest of the page). Counts the bot's own orders from today's US Central date by what happened to them:
   // sent, filled, sent but not filled (an immediate-or-cancel order can miss, and nothing else shows it) and "needs a look" (the answer was lost or refused). Read only, from orders the page already loads.
   function kalshiTodayWork(orders, nowMs){
@@ -3407,7 +3376,6 @@
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalEdge"><div><span class="kal-k">Win rate, last ' + escapeHtml(String(edge.n)) + '</span><b>' + escapeHtml(edgeText) + '</b></div>' +
         (centsText ? '<div><span class="kal-k">Edge</span><b>' + escapeHtml(centsText) + '</b></div>' : '') +
         (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');
-      sEl.insertAdjacentHTML('beforeend', kalshiWinsByPriceHtml(kalshiWinsByPrice(kalshiResolveOrders(kalshiLiveOrders, edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : [])), escapeHtml));
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
