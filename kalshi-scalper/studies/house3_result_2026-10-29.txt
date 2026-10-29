@@ -1,0 +1,130 @@
+HOUSE3 VERDICT: FALSIFIED
+Part 1, loss timing, live five pooled:
+  unconditional loss rate 5.79% (n 11802)
+  any market  within  15 min after a loss: loss rate 6.21% (n 1015), z +0.55
+  any market  within  30 min after a loss: loss rate 4.54% (n 2093), z -2.29
+  any market  within  60 min after a loss: loss rate 4.86% (n 4112), z -2.23
+  any market  within 120 min after a loss: loss rate 4.98% (n 8156), z -2.47
+  any market  within 240 min after a loss: loss rate 5.23% (n 16136), z -2.02
+  same market within  15 min after a loss: loss rate 5.56% (n 216), z -0.14
+  same market within  30 min after a loss: loss rate 4.51% (n 443), z -1.13
+  same market within  60 min after a loss: loss rate 4.51% (n 865), z -1.57
+  same market within 120 min after a loss: loss rate 4.34% (n 1730), z -2.45
+  same market within 240 min after a loss: loss rate 5.23% (n 3368), z -1.24
+  same window (entered before the loss was known): others lost 35.43% (n 1112) against 5.79%, z +34.18
+ gold:
+  unconditional loss rate 5.28% (n 1723)
+  any market  within  15 min after a loss: loss rate 7.69% (n 26), z +0.54
+  any market  within  30 min after a loss: loss rate 6.67% (n 60), z +0.47
+  any market  within  60 min after a loss: loss rate 4.20% (n 119), z -0.51
+  any market  within 120 min after a loss: loss rate 2.35% (n 213), z -1.86
+  any market  within 240 min after a loss: loss rate 4.75% (n 400), z -0.43
+  same market within  15 min after a loss: loss rate 7.69% (n 26), z +0.54
+  same market within  30 min after a loss: loss rate 6.67% (n 60), z +0.47
+  same market within  60 min after a loss: loss rate 4.20% (n 119), z -0.51
+  same market within 120 min after a loss: loss rate 2.35% (n 213), z -1.86
+  same market within 240 min after a loss: loss rate 4.75% (n 400), z -0.43
+  same window (entered before the loss was known): others lost 0.00% (n 0) against 5.28%, z +0.00
+ Bitcoin:
+  unconditional loss rate 6.54% (n 2417)
+  any market  within  15 min after a loss: loss rate 2.17% (n 46), z -1.19
+  any market  within  30 min after a loss: loss rate 3.30% (n 91), z -1.24
+  any market  within  60 min after a loss: loss rate 3.85% (n 182), z -1.44
+  any market  within 120 min after a loss: loss rate 6.35% (n 378), z -0.14
+  any market  within 240 min after a loss: loss rate 5.87% (n 750), z -0.66
+  same market within  15 min after a loss: loss rate 2.17% (n 46), z -1.19
+  same market within  30 min after a loss: loss rate 3.30% (n 91), z -1.24
+  same market within  60 min after a loss: loss rate 3.85% (n 182), z -1.44
+  same market within 120 min after a loss: loss rate 6.35% (n 378), z -0.14
+  same market within 240 min after a loss: loss rate 5.87% (n 750), z -0.66
+  same window (entered before the loss was known): others lost 0.00% (n 0) against 6.54%, z +0.00
+ Ethereum:
+  unconditional loss rate 6.49% (n 2465)
+  any market  within  15 min after a loss: loss rate 5.56% (n 54), z -0.28
+  any market  within  30 min after a loss: loss rate 3.88% (n 103), z -1.06
+  any market  within  60 min after a loss: loss rate 5.13% (n 195), z -0.75
+  any market  within 120 min after a loss: loss rate 4.66% (n 408), z -1.42
+  any market  within 240 min after a loss: loss rate 5.01% (n 799), z -1.52
+  same market within  15 min after a loss: loss rate 5.56% (n 54), z -0.28
+  same market within  30 min after a loss: loss rate 3.88% (n 103), z -1.06
+  same market within  60 min after a loss: loss rate 5.13% (n 195), z -0.75
+  same market within 120 min after a loss: loss rate 4.66% (n 408), z -1.42
+  same market within 240 min after a loss: loss rate 5.01% (n 799), z -1.52
+  same window (entered before the loss was known): others lost 0.00% (n 0) against 6.49%, z +0.00
+ Dogecoin:
+  unconditional loss rate 5.06% (n 2528)
+  any market  within  15 min after a loss: loss rate 5.26% (n 38), z +0.06
+  any market  within  30 min after a loss: loss rate 3.57% (n 84), z -0.62
+  any market  within  60 min after a loss: loss rate 3.59% (n 167), z -0.85
+  any market  within 120 min after a loss: loss rate 2.78% (n 324), z -1.81
+  any market  within 240 min after a loss: loss rate 4.32% (n 648), z -0.78
+  same market within  15 min after a loss: loss rate 5.26% (n 38), z +0.06
+  same market within  30 min after a loss: loss rate 3.57% (n 84), z -0.62
+  same market within  60 min after a loss: loss rate 3.59% (n 167), z -0.85
+  same market within 120 min after a loss: loss rate 2.78% (n 324), z -1.81
+  same market within 240 min after a loss: loss rate 4.32% (n 648), z -0.78
+  same window (entered before the loss was known): others lost 0.00% (n 0) against 5.06%, z +0.00
+ XRP:
+  unconditional loss rate 5.47% (n 2669)
+  any market  within  15 min after a loss: loss rate 7.69% (n 52), z +0.70
+  any market  within  30 min after a loss: loss rate 5.71% (n 105), z +0.11
+  any market  within  60 min after a loss: loss rate 5.45% (n 202), z -0.01
+  any market  within 120 min after a loss: loss rate 4.42% (n 407), z -0.88
+  any market  within 240 min after a loss: loss rate 5.84% (n 771), z +0.39
+  same market within  15 min after a loss: loss rate 7.69% (n 52), z +0.70
+  same market within  30 min after a loss: loss rate 5.71% (n 105), z +0.11
+  same market within  60 min after a loss: loss rate 5.45% (n 202), z -0.01
+  same market within 120 min after a loss: loss rate 4.42% (n 407), z -0.88
+  same market within 240 min after a loss: loss rate 5.84% (n 771), z +0.39
+  same window (entered before the loss was known): others lost 0.00% (n 0) against 5.47%, z +0.00
+GATE: max pooled any-market z +0.55: no conditional loss rate above the unconditional one by z 2: every cooldown is FALSIFIED by the registered gate
+
+$500, base 13
+  third 1 baseline net $+785.39 worst $-55.89 neg 27% DD $56.98
+  third 2 baseline net $+647.94 worst $-49.91 neg 28% DD $49.91
+  third 3 baseline net $+39.47 worst $-77.93 neg 48% DD $105.31
+  scope a base  15 min: fails | t1 kept 96% worst $-52.06 neg 20% DD $71.60 skipped 272 worth $+33.66 | t2 kept 91% worst $-44.53 neg 28% DD $46.70 skipped 255 worth $+61.13 | t3 kept 159% worst $-71.67 neg 48% DD $120.41 skipped 214 worth $-23.37
+  scope a base  30 min: fails | t1 kept 77% worst $-76.76 neg 30% DD $76.76 skipped 548 worth $+184.02 | t2 kept 75% worst $-46.47 neg 38% DD $62.06 skipped 477 worth $+163.84 | t3 kept -110% worst $-84.33 neg 55% DD $152.85 skipped 439 worth $+82.70
+  scope a base  60 min: fails | t1 kept 81% worst $-39.27 neg 30% DD $54.63 skipped 902 worth $+151.10 | t2 kept 59% worst $-50.89 neg 38% DD $83.25 skipped 803 worth $+265.80 | t3 kept -138% worst $-67.27 neg 52% DD $149.85 skipped 767 worth $+93.80
+  scope a base 120 min: fails | t1 kept 62% worst $-51.79 neg 27% DD $85.93 skipped 1500 worth $+301.23 | t2 kept 53% worst $-74.75 neg 31% DD $74.89 skipped 1314 worth $+304.19 | t3 kept 52% worst $-71.22 neg 38% DD $126.12 skipped 1232 worth $+19.13
+  scope a base 240 min: fails | t1 kept 58% worst $-36.32 neg 33% DD $40.68 skipped 2063 worth $+329.19 | t2 kept 45% worst $-48.11 neg 45% DD $78.38 skipped 1922 worth $+354.75 | t3 kept -102% worst $-61.99 neg 48% DD $112.45 skipped 1818 worth $+79.72
+  scope a ladder  15 min: fails | t1 kept 114% worst $-62.26 neg 20% DD $89.43 skipped 272 worth $+33.66 | t2 kept 108% worst $-53.43 neg 31% DD $53.43 skipped 255 worth $+61.13 | t3 kept 69% worst $-88.10 neg 52% DD $158.46 skipped 214 worth $-23.37
+  scope a ladder  30 min: fails | t1 kept 93% worst $-76.30 neg 33% DD $91.39 skipped 548 worth $+184.02 | t2 kept 90% worst $-52.59 neg 41% DD $72.39 skipped 477 worth $+163.84 | t3 kept -197% worst $-98.43 neg 55% DD $196.26 skipped 439 worth $+82.70
+  scope a ladder  60 min: fails | t1 kept 96% worst $-49.83 neg 30% DD $74.01 skipped 902 worth $+151.10 | t2 kept 76% worst $-65.64 neg 34% DD $96.63 skipped 803 worth $+265.80 | t3 kept -165% worst $-78.84 neg 52% DD $180.27 skipped 767 worth $+93.80
+  scope a ladder 120 min: fails | t1 kept 75% worst $-61.95 neg 30% DD $101.33 skipped 1500 worth $+301.23 | t2 kept 66% worst $-81.88 neg 31% DD $97.78 skipped 1314 worth $+304.19 | t3 kept 34% worst $-79.89 neg 38% DD $139.18 skipped 1232 worth $+19.13
+  scope a ladder 240 min: fails | t1 kept 71% worst $-41.41 neg 37% DD $43.47 skipped 2063 worth $+329.19 | t2 kept 56% worst $-51.11 neg 41% DD $93.47 skipped 1922 worth $+354.75 | t3 kept -178% worst $-73.80 neg 45% DD $147.20 skipped 1818 worth $+79.72
+  scope b base  15 min: fails | t1 kept 98% worst $-60.03 neg 27% DD $60.03 skipped 77 worth $+15.83 | t2 kept 100% worst $-55.24 neg 24% DD $55.24 skipped 70 worth $+2.60 | t3 kept 50% worst $-65.80 neg 45% DD $114.67 skipped 65 worth $+19.76
+  scope b base  30 min: fails | t1 kept 93% worst $-66.45 neg 27% DD $66.45 skipped 163 worth $+56.56 | t2 kept 95% worst $-60.53 neg 28% DD $60.53 skipped 135 worth $+33.11 | t3 kept 2% worst $-68.50 neg 45% DD $126.71 skipped 131 worth $+38.67
+  scope b base  60 min: fails | t1 kept 89% worst $-51.82 neg 30% DD $52.82 skipped 305 worth $+88.39 | t2 kept 88% worst $-70.01 neg 28% DD $70.01 skipped 249 worth $+75.14 | t3 kept -99% worst $-73.53 neg 45% DD $135.42 skipped 250 worth $+78.54
+  scope b base 120 min: fails | t1 kept 78% worst $-63.08 neg 27% DD $73.93 skipped 547 worth $+172.94 | t2 kept 64% worst $-74.80 neg 34% DD $77.37 skipped 491 worth $+230.88 | t3 kept -44% worst $-72.98 neg 41% DD $113.55 skipped 462 worth $+56.82
+  scope b base 240 min: fails | t1 kept 63% worst $-51.41 neg 37% DD $63.87 skipped 934 worth $+287.39 | t2 kept 68% worst $-59.60 neg 38% DD $60.50 skipped 813 worth $+204.65 | t3 kept -185% worst $-59.40 neg 48% DD $151.61 skipped 786 worth $+112.30
+  scope b ladder  15 min: fails | t1 kept 116% worst $-61.28 neg 23% DD $68.34 skipped 77 worth $+15.83 | t2 kept 117% worst $-64.00 neg 24% DD $64.00 skipped 70 worth $+2.60 | t3 kept -46% worst $-82.23 neg 48% DD $152.50 skipped 65 worth $+19.76
+  scope b ladder  30 min: fails | t1 kept 109% worst $-65.98 neg 27% DD $67.45 skipped 163 worth $+56.56 | t2 kept 109% worst $-69.98 neg 28% DD $69.98 skipped 135 worth $+33.11 | t3 kept -96% worst $-82.60 neg 48% DD $157.94 skipped 131 worth $+38.67
+  scope b ladder  60 min: fails | t1 kept 102% worst $-65.35 neg 27% DD $75.59 skipped 305 worth $+88.39 | t2 kept 103% worst $-81.28 neg 28% DD $81.28 skipped 249 worth $+75.14 | t3 kept -165% worst $-87.51 neg 48% DD $151.29 skipped 250 worth $+78.54
+  scope b ladder 120 min: fails | t1 kept 90% worst $-67.29 neg 27% DD $91.62 skipped 547 worth $+172.94 | t2 kept 75% worst $-87.10 neg 38% DD $88.74 skipped 491 worth $+230.88 | t3 kept -159% worst $-83.99 neg 45% DD $135.66 skipped 462 worth $+56.82
+  scope b ladder 240 min: fails | t1 kept 68% worst $-59.55 neg 33% DD $85.52 skipped 934 worth $+287.39 | t2 kept 77% worst $-62.84 neg 38% DD $67.84 skipped 813 worth $+204.65 | t3 kept -259% worst $-65.42 neg 59% DD $163.61 skipped 786 worth $+112.30
+
+$1000, base 23
+  third 1 baseline net $+1403.57 worst $-98.45 neg 27% DD $99.89
+  third 2 baseline net $+1159.37 worst $-87.72 neg 21% DD $87.72
+  third 3 baseline net $+81.59 worst $-137.53 neg 48% DD $183.08
+  scope a base  15 min: fails | t1 kept 96% worst $-91.82 neg 20% DD $125.89 skipped 272 worth $+60.41 | t2 kept 91% worst $-78.27 neg 28% DD $81.88 skipped 255 worth $+109.12 | t3 kept 150% worst $-126.48 neg 48% DD $210.42 skipped 214 worth $-40.64
+  scope a base  30 min: fails | t1 kept 77% worst $-135.51 neg 30% DD $135.51 skipped 548 worth $+327.39 | t2 kept 75% worst $-81.97 neg 38% DD $109.15 skipped 477 worth $+291.79 | t3 kept -81% worst $-148.90 neg 55% DD $265.39 skipped 439 worth $+147.83
+  scope a base  60 min: fails | t1 kept 81% worst $-69.05 neg 30% DD $96.06 skipped 902 worth $+270.42 | t2 kept 59% worst $-89.80 neg 38% DD $146.68 skipped 803 worth $+473.21 | t3 kept -107% worst $-118.75 neg 52% DD $263.83 skipped 767 worth $+168.59
+  scope a base 120 min: fails | t1 kept 62% worst $-91.32 neg 27% DD $151.63 skipped 1500 worth $+538.10 | t2 kept 53% worst $-132.10 neg 31% DD $132.10 skipped 1314 worth $+542.59 | t3 kept 53% worst $-125.86 neg 38% DD $221.16 skipped 1232 worth $+38.10
+  scope a base 240 min: fails | t1 kept 58% worst $-64.02 neg 33% DD $71.39 skipped 2063 worth $+589.23 | t2 kept 45% worst $-85.00 neg 45% DD $138.16 skipped 1922 worth $+633.93 | t3 kept -80% worst $-109.53 neg 45% DD $196.90 skipped 1818 worth $+146.94
+  scope a ladder  15 min: fails | t1 kept 111% worst $-110.59 neg 23% DD $157.12 skipped 272 worth $+60.41 | t2 kept 106% worst $-90.13 neg 31% DD $96.35 skipped 255 worth $+109.12 | t3 kept 79% worst $-150.51 neg 48% DD $260.25 skipped 214 worth $-40.64
+  scope a ladder  30 min: fails | t1 kept 91% worst $-136.15 neg 33% DD $154.32 skipped 548 worth $+327.39 | t2 kept 89% worst $-93.50 neg 38% DD $129.08 skipped 477 worth $+291.79 | t3 kept -151% worst $-170.75 neg 55% DD $332.75 skipped 439 worth $+147.83
+  scope a ladder  60 min: fails | t1 kept 94% worst $-86.75 neg 30% DD $127.14 skipped 902 worth $+270.42 | t2 kept 74% worst $-112.98 neg 34% DD $169.43 skipped 803 worth $+473.21 | t3 kept -148% worst $-136.03 neg 52% DD $313.75 skipped 767 worth $+168.59
+  scope a ladder 120 min: fails | t1 kept 73% worst $-108.82 neg 30% DD $174.93 skipped 1500 worth $+538.10 | t2 kept 65% worst $-142.85 neg 31% DD $168.79 skipped 1314 worth $+542.59 | t3 kept 32% worst $-139.77 neg 38% DD $238.99 skipped 1232 worth $+38.10
+  scope a ladder 240 min: fails | t1 kept 69% worst $-73.00 neg 37% DD $77.49 skipped 2063 worth $+589.23 | t2 kept 55% worst $-89.42 neg 41% DD $163.89 skipped 1922 worth $+633.93 | t3 kept -147% worst $-122.32 neg 48% DD $255.33 skipped 1818 worth $+146.94
+  scope b base  15 min: fails | t1 kept 98% worst $-105.78 neg 27% DD $105.78 skipped 77 worth $+28.24 | t2 kept 100% worst $-97.18 neg 24% DD $97.18 skipped 70 worth $+4.91 | t3 kept 57% worst $-116.08 neg 45% DD $199.75 skipped 65 worth $+35.23
+  scope b base  30 min: fails | t1 kept 93% worst $-117.17 neg 27% DD $117.17 skipped 163 worth $+100.67 | t2 kept 95% worst $-106.56 neg 28% DD $106.56 skipped 135 worth $+59.18 | t3 kept 16% worst $-120.87 neg 45% DD $221.50 skipped 131 worth $+68.94
+  scope b base  60 min: fails | t1 kept 89% worst $-91.42 neg 30% DD $92.67 skipped 305 worth $+157.49 | t2 kept 88% worst $-123.38 neg 28% DD $123.38 skipped 249 worth $+133.86 | t3 kept -72% worst $-129.77 neg 45% DD $237.04 skipped 250 worth $+139.93
+  scope b base 120 min: fails | t1 kept 78% worst $-111.30 neg 27% DD $130.10 skipped 547 worth $+307.98 | t2 kept 65% worst $-131.93 neg 34% DD $136.01 skipped 491 worth $+410.12 | t3 kept -25% worst $-128.85 neg 41% DD $198.26 skipped 462 worth $+102.18
+  scope b base 240 min: fails | t1 kept 64% worst $-90.74 neg 37% DD $112.36 skipped 934 worth $+511.46 | t2 kept 69% worst $-105.10 neg 38% DD $106.24 skipped 813 worth $+364.79 | t3 kept -147% worst $-104.81 neg 48% DD $264.06 skipped 786 worth $+201.14
+  scope b ladder  15 min: fails | t1 kept 114% worst $-106.80 neg 23% DD $119.72 skipped 77 worth $+28.24 | t2 kept 115% worst $-109.83 neg 24% DD $109.83 skipped 70 worth $+4.91 | t3 kept -18% worst $-140.11 neg 48% DD $249.30 skipped 65 worth $+35.23
+  scope b ladder  30 min: fails | t1 kept 107% worst $-117.81 neg 27% DD $117.81 skipped 163 worth $+100.67 | t2 kept 108% worst $-120.50 neg 28% DD $120.50 skipped 135 worth $+59.18 | t3 kept -63% worst $-142.72 neg 48% DD $267.64 skipped 131 worth $+68.94
+  scope b ladder  60 min: fails | t1 kept 101% worst $-114.60 neg 27% DD $130.12 skipped 305 worth $+157.49 | t2 kept 101% worst $-140.99 neg 28% DD $140.99 skipped 249 worth $+133.86 | t3 kept -137% worst $-151.23 neg 48% DD $269.56 skipped 250 worth $+139.93
+  scope b ladder 120 min: fails | t1 kept 88% worst $-119.28 neg 27% DD $156.96 skipped 547 worth $+307.98 | t2 kept 74% worst $-148.57 neg 38% DD $152.67 skipped 491 worth $+410.12 | t3 kept -123% worst $-146.57 neg 41% DD $231.38 skipped 462 worth $+102.18
+  scope b ladder 240 min: fails | t1 kept 68% worst $-102.89 neg 33% DD $141.26 skipped 934 worth $+511.46 | t2 kept 76% worst $-108.34 neg 38% DD $117.00 skipped 813 worth $+364.79 | t3 kept -205% worst $-115.64 neg 59% DD $276.42 skipped 786 worth $+201.14
