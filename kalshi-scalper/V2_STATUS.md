@@ -2,7 +2,7 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running:** AUTO hourly loop (forward reads run themselves; live watcher nightly). No download or worker running.
+- **Now running (4:45 PM):** workers ESPN1 (ESPN in-play win probability vs Kalshi game markets), CAL (official calendar of scheduled releases, FOMC, Treasury auctions, exchange maintenance, plus a power count for a release-window test), DRIFT (nightly live fills vs the history rule: coverage, slippage, result drift), STAB (weekly re-run of the live rule on the newest fresh days, no new tries); recorder R6 (merged); AUTO hourly loop. Owner items already done: INX1 (FALSIFIED); dollar dailies (DAILY2: euro and yen); 10 year Treasury daily: no settled daily series (NOT_RUNNABLE).
 - **Next:** round 4 of the self-guide (new mechanisms only); recorder R6 if the owner approves.
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
