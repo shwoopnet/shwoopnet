@@ -63,6 +63,15 @@ def level_at(b: dict[int, float], D: int) -> float | None:
     return None
 
 
+START_DAY = "2026-08-24"
+
+
+def event_day(ev: str) -> str:
+    """'KXINXU-26OCT29H1400' -> '2026-10-29'."""
+    code = ev.split("-")[1]
+    return time.strftime("%Y-%m-%d", time.strptime(code[:7], "%y%b%d"))
+
+
 def four_pm_markets(series: str) -> list[dict]:
     """Settled markets of the series' 4 pm events in the date range, found through the event list (listing every hourly market is slow)."""
     evs, cursor = [], None
@@ -71,10 +80,11 @@ def four_pm_markets(series: str) -> list[dict]:
         if cursor:
             p["cursor"] = cursor
         d = api._get("/events", p)
-        evs += [e["event_ticker"] for e in d.get("events", []) if e["event_ticker"].endswith("H1600")]
+        page = [e["event_ticker"] for e in d.get("events", [])]
+        evs += [e for e in page if e.endswith("H1600") and event_day(e) >= START_DAY]
         cursor = d.get("cursor")
-        if not cursor or not d.get("events"):
-            break
+        if not cursor or not page or min(event_day(e) for e in page) < START_DAY:
+            break   # events come newest first, so a page older than the range ends the listing
         time.sleep(0.6)
     out = []
     for e in sorted(set(evs)):
