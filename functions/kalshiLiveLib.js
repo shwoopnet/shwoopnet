@@ -96,7 +96,7 @@ const L1_SERIES = ["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M",
 // Markets taken off the tick on purpose (the owner, Oct 28, 2026, on the research session's read). XRP: live since 2026-10-07 it is profit factor 0.49 over 65 fills (8 losses, -$9.51) against 1.32 in the history, which is either bad luck
 // or a live-versus-backtest gap, and the forward reads FLOOR1 and THIN1 settle it on 2026-11-12. It stays in L1_SERIES (its name, quotes and alerts keep working) but is never a candidate. It fails closed: there is NO date after which it
 // resumes by itself; putting it back is a reviewed edit of this list. The exit watch is untouched and still sells any XRP position that is open.
-const PAUSED_SERIES = ["KXXRP15M", ...PROBE_SERIES];   // the three probe markets (AUD/USD, USD/CAD, natural gas) were paused on Oct 28, 2026, the owner: "yeah we can" (a 97c risk for a 3c win on USD/CAD); same rule as XRP, no resume date
+const PAUSED_SERIES = ["KXXRP15M", "KXBTC15M", ...PROBE_SERIES];   // the three probe markets (AUD/USD, USD/CAD, natural gas) were paused on Oct 28, 2026, the owner: "yeah we can" (a 97c risk for a 3c win on USD/CAD); same rule as XRP, no resume date; Bitcoin was paused on Oct 29, 2026, the owner: "we can kill bitcoin i guess" (live profit factor 0.72 over 155 orders, -$22.39, 3 of its 11 losses came with an Ethereum loss in the same window)
 const MAX_PER_DAY = 2;
 const MAX_EVER = 5;
 const COOLDOWN_MS = 60000;
