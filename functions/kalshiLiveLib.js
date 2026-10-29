@@ -20,7 +20,13 @@
 
 const crypto = require("crypto");
 const bot = require("./kalshiSignalLib");
+const slotLib = require("./kalshiSlotLib");
 
+// The second strategy slot (docs/SECOND_SLOT_WIRING.md). Every line below that mentions it sits behind slotOn(...). Two locks on one door: a caller must pass a `slot` hook bag AND the slot library's own
+// constants must say the slot is being WATCHED (slotWatch: entries are allowed, or a slot order has ever existed, so turning entries off never orphans a live position). Nothing stored, requested
+// or typed on the page feeds either. While either is false this file makes exactly the reads, writes and orders it made before the slot existed (test/kalshiSlotWiringGates.test.js, SW0, replays
+// recorded call logs). There is no test backdoor here: the gates replace slotLib.slotWatch on the module object instead.
+function slotOn(args) { return Boolean(args && args.slot && typeof args.slot === "object" && slotLib.slotWatch()); }
 // Kalshi's scheme: sign timestamp + METHOD + the full path from the API root, query left out.
 // RSA keys use PSS with SHA-256 and a salt as long as the digest; Ed25519 signs the message.
 function signRequest(pem, timestamp, method, path) {
@@ -627,12 +633,14 @@ function settledFields(t, result) {
 // after the order and NOT by the bot's own exit order, cover everything the bot still held (a partly sold position is left to the old rule, which books the rest as held: counted, not hidden,
 // because hiding the rest of a loss from the loss stop is the unsafe direction). The exit watch's own "skipped" (it found nothing held when the price touched its line) says the same thing
 // without a read. Anything that cannot be read is `unknown`: the order stays open, which the loss stop counts as lost, until the next look. Never places or changes an order.
-async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
+async function closedByHand({ fetchFn, keyId, pem, t, nowMs, ignoreOrderIds }) {
   // Oct 21, 2026: this used to treat the exit watch's "skipped" as proof of a hand sale and to read the bot's OWN entry fill as a sale. Kalshi's order API books everything on the YES side
   // (a NO buy is sent as side "ask"), so the fill for a NO buy can read as action "sell", side "no": every NO order the bot bought looked like a position the owner sold, and was left out of
   // the stats, the loss stop and the pool, losses included. Now: without the entry order's id the entry cannot be told from a sale, so the order is NOT called hand (a loss stays counted, the
   // safe direction); the entry's own fill is never a sale; and "skipped" alone is no evidence (the position can simply have settled before the exit watch looked).
   if (!t.orderId) return { hand: false, sold: 0 };
+  // Slot only: a slot entry or exit on this market with no clear answer has no order id to ignore, so its fill could read as a sale by hand. Say "unknown" and leave the order open and counted as lost.
+  if (ignoreOrderIds && ignoreOrderIds.has("ticker:" + t.ticker)) return { unknown: true };
   const r = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/fills", params: { ticker: t.ticker, limit: "100" }, nowMs });
   if (r.status !== 200 || !r.body || !Array.isArray(r.body.fills)) return { unknown: true };
   const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
@@ -642,6 +650,7 @@ async function closedByHand({ fetchFn, keyId, pem, t, nowMs }) {
     if (!f || (f.ticker || f.market_ticker) !== t.ticker || f.action !== "sell" || f.side !== t.side) continue;
     if (t.exitOrderId && f.order_id === t.exitOrderId) continue;
     if (f.order_id === t.orderId) continue;                // the bot's own entry, whatever Kalshi calls it
+    if (ignoreOrderIds && ignoreOrderIds.has(f.order_id)) continue;     // another engine's order (the second slot's): its fills are not a sale by hand
     const at = Date.parse(f.created_time);
     if (Number.isFinite(at) && Number.isFinite(Number(t.ts)) && at < Number(t.ts) - 5000) continue;
     const c = num(f.count_fp !== undefined ? f.count_fp : f.count);
@@ -657,7 +666,7 @@ function handFields(h) { return Object.assign({ settled: true, result: "hand" },
 // trade that settled after a stop (or just after the 24 hours) stayed "open" in the records for ever and never reached the page's loss and win
 // counts. Called every minute by the scheduled function; reads at most `max` public markets, never places or changes an order, and a failed read
 // leaves the order open for the next minute.
-async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, repair = true }) {
+async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, repair = true, ignoreOrderIds }) {
   const open = (await store.openFilled()).filter((t) => t.settled !== true && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no"));
   let settled = 0;
   for (const t of open.slice(0, max)) {
@@ -665,7 +674,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, r
     const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
     if (r !== "yes" && r !== "no") continue;
     // With the account's key, ask whether the owner closed it by hand first (see closedByHand). Without a key (older callers) the old rule applies.
-    const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+    const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs, ignoreOrderIds }) : { hand: false };
     if (h.unknown) continue;
     await store.updateTest(t.id, h.hand ? handFields(h) : settledFields(t, r));
     settled += 1;
@@ -679,7 +688,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, r
       const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
       const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
       if (r !== "yes" && r !== "no") continue;
-      const h = await closedByHand({ fetchFn, keyId, pem, t, nowMs });
+      const h = await closedByHand({ fetchFn, keyId, pem, t, nowMs, ignoreOrderIds });
       if (h.unknown) continue;
       await store.updateTest(t.id, h.hand ? { handChecked: true } : Object.assign(settledFields(t, r), { handChecked: true, handRepaired: true }));
       if (!h.hand) repaired += 1;
@@ -692,7 +701,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, r
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
 // `orders` is a list the caller has already read (the tick reads the last 24 hours once and shares it, so the same documents are not billed twice a minute); without it the store is asked.
-async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem }) {
+async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem, slotOrders, ignoreOrderIds }) {
   const from = Number.isFinite(since) ? since : 0;
   const read = Array.isArray(orders) ? orders.filter((t) => Number(t.ts) >= from) : await store.sessionTrades(from);
   const trades = read.filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
@@ -704,7 +713,7 @@ async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem }) {
       const mk = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(t.ticker), nowMs });
       const r = mk.status === 200 && mk.body && mk.body.market ? mk.body.market.result : null;
       if (r === "yes" || r === "no") {
-        const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs }) : { hand: false };
+        const h = keyId && pem ? await closedByHand({ fetchFn, keyId, pem, t, nowMs, ignoreOrderIds }) : { hand: false };
         if (h.hand) { await store.updateTest(t.id, handFields(h)); continue; }     // closed by hand: not the bot's result, so not in its net, its stop or its open cost
         if (!h.unknown) { result = r; await store.updateTest(t.id, settledFields(t, r)); }     // unreadable: stays open and counted as lost until the next look
       }
@@ -726,6 +735,12 @@ async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem }) {
       net += (result === t.side ? got - sold : 0) + proceeds - paid;
       if (result !== t.side) addonAtRisk += addonPaid;   // only a LOST order burned the profit that bought its add-on
     } else { net += proceeds - paid * soldShare; openCost += paid * (1 - soldShare); addonAtRisk += addonPaid * (1 - soldShare); }   // an open order is counted as lost, so its add-on is too
+  }
+  // The second slot shares this budget (one loss stop for both engines). `slotOrders` is passed only by a caller that has the slot on; without it the return below is exactly what it always was.
+  if (Array.isArray(slotOrders)) {
+    const s = slotLib.slotRiskForBotRisk(slotOrders, from);
+    net += s.net; openCost += s.openCost;
+    return { net, openCost, worst: net - openCost, addonAtRisk, trades: trades.length + s.trades };
   }
   return { net, openCost, worst: net - openCost, addonAtRisk, trades: trades.length };
 }
@@ -822,12 +837,28 @@ async function runL1Tick(args) {
   if (!active) { await note("The exchange is not trading right now."); return { skipped: "exchange inactive" }; }
   if (await store.halted()) { await note("The bot is halted, so nothing is sent."); return { skipped: "halted" }; }
   if (await store.hasUnresolved()) return end("attempted", "an earlier order is unresolved (sent, or its answer was lost). Check the Kalshi account before starting again");
+  const slotLive = slotOn(args);
+  // Slot only: a slot order whose answer was lost ends the whole session, as for L1. Fails closed: an unreadable answer is treated as unresolved.
+  if (slotLive) {
+    let un = true;
+    try { un = (await args.slot.hasUnresolved(now)) !== false; } catch (e) { un = true; }
+    if (un) return end("attempted", "a second-slot order is unresolved (sent, or its answer was lost), or could not be checked. Check the Kalshi account before starting again");
+  }
   const sent = session.ordersSent || 0;
   // Orders in the last 24 hours, whether or not they filled. Fails closed: if they cannot be counted, nothing is sent this minute.
   const dayStart = now - L1_WINDOW_DAY_MS;
   let recentOrders, recentList;
   try { recentList = (await (typeof store.sessionTradesCached === "function" ? store.sessionTradesCached(dayStart, now) : store.sessionTrades(dayStart))).filter((t) => t.strategy === "L1"); recentOrders = recentList.length; }
   catch (e) { await note("The bot's recent orders could not be counted, so nothing was sent."); return { skipped: "orders unreadable" }; }
+  // Slot only: the whole slot collection is read (its lifetime cap needs every order), and its last 24 hours count toward the same 200 order limit. Fails closed like the read above.
+  let slotOrders = null;
+  if (slotLive) {
+    try {
+      slotOrders = await args.slot.allOrders();
+      if (!Array.isArray(slotOrders)) throw new Error("not a list");
+      recentOrders += slotOrders.filter((t) => t && !(Number(t.ts) < dayStart)).length;   // an unreadable ts counts as inside (fail closed)
+    } catch (e) { await note("The second slot's orders could not be read, so nothing was sent."); return { skipped: "slot orders unreadable" }; }
+  }
   if (recentOrders >= L1_MAX_ORDERS) { await note("The limit of " + L1_MAX_ORDERS + " orders in 24 hours has been reached. It carries on by itself once older orders drop out."); return { skipped: "order limit" }; }
 
   const bal = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/balance", nowMs: now });
@@ -839,7 +870,7 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, keyId, pem }); }
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, slotOrders: slotLive ? slotOrders : undefined, ignoreOrderIds: slotLive ? slotLib.slotIgnoreSet(slotOrders) : undefined, keyId, pem }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
@@ -878,6 +909,11 @@ async function runL1Tick(args) {
     return end("loss stop", trailing
       ? "the bot's trades are down $" + (peak - risk.worst).toFixed(2) + " from their best (+$" + peak.toFixed(2) + ", now " + (risk.net >= 0 ? "+" : "-") + "$" + Math.abs(risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " open counted as lost), which reaches the $" + stopAt.toFixed(2) + " give-back stop"
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
+  }
+
+  // Slot only: hand the figures just worked out to the slot tick that runs right after this one (it makes no second balance read and judges its order against the SAME floor).
+  if (slotLive && args.shareOut && typeof args.shareOut === "object") {
+    Object.assign(args.shareOut, { sizeBase, balanceBody: bal.body, risk, floor, stopAt, cash, peak, allowance, recentList, slotOrders, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart });
   }
 
   // Probe drop rule (see PROBE_DROP_WINDOW). Only probes can be removed. A record that cannot be read or saved removes ALL probes this minute; the other series trade as usual.
@@ -949,8 +985,10 @@ async function runL1Tick(args) {
       const held = cryptoTaken[wkey] || recentList.some((t) => windowKey(t.ticker) === wkey && CAPPED_SERIES.includes(t.series) && ["filled", "sending", "unknown"].includes(t.status));
       if (held) { results.push(ticker + ": another crypto market already holds this window"); continue; }
     }
+    // Slot only: the slot's gross spend in this window (the maxCost of every slot order that is or was money here, sold or not) shares the same 5.5% limit.
+    const slotUsed = slotLive ? slotLib.slotWindowSpent(slotOrders, ticker) : 0;
     const windowUsed = recentList.filter((t) => windowKey(t.ticker) === wkey && ["filled", "sending", "unknown"].includes(t.status))
-      .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0);
+      .reduce((a, t) => a + Math.max(0, (Number(t.maxCost) || 0) - (Number(t.addonCost) || 0)), 0) + (windowSpent[wkey] || 0) + slotUsed;
     const room = L1_WINDOW_CAP_FRACTION * sizeBase - windowUsed;
     // The first order in a window is never cut to nothing by a tiny base (the single-order size rules already bound it); the cap is for the second and third.
     const allowed = Math.max(windowUsed <= 0 ? 1 : 0, Math.floor(room / cost1 + 1e-9));
@@ -987,8 +1025,24 @@ async function runL1Tick(args) {
     record.shareOfDepth = record.depthAtLimit ? Number((count / record.depthAtLimit).toFixed(4)) : null;
     record.depthLevels = "top";
     // Flatten and Stop can land while this tick was reading the balance and the markets (seconds, with timeouts), after the halt was first read. Read it again immediately before the order is recorded and sent.
+    // Slot only: the account's position in this market must be readable and must not be on the other side, and the direction lock is taken in the SAME transaction that creates the order document (so
+    // an L1 order and a slot order on opposite sides of one market cannot both be created, even from two instances). Anything unreadable skips this market: a missed entry, never a hedge.
+    if (slotLive) {
+      if (typeof store.createTestLocked !== "function") { results.push(ticker + ": the direction lock is not available, nothing sent"); continue; }
+      const pr = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
+      let position = NaN;
+      if (pr.status === 200 && pr.body && Array.isArray(pr.body.market_positions)) {
+        const row = pr.body.market_positions.find((x) => x && x.ticker === ticker);
+        position = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
+      }
+      if (!Number.isFinite(position)) { results.push(ticker + ": the position could not be read, nothing sent"); continue; }
+      const dd = slotLib.directionDecision({ ticker, side: pick.side, l1Orders: recentList, slotOrders, lock: null, position });
+      if (!dd.allow) { results.push(ticker + ": a slot order holds the other side (" + dd.reason + "), nothing sent"); continue; }
+    }
     if (await store.halted()) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
-    if (!(await store.createTest(cid, record))) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
+    const created = slotLive ? await store.createTestLocked(cid, record, { ticker, side: pick.side }) : await store.createTest(cid, record);
+    if (created === "direction") { results.push(ticker + ": the direction lock holds the other side, nothing sent"); continue; }
+    if (!created) { results.push(ticker + ": already attempted"); continue; }   // never a second order on a market
     riseLog.push({ cid, series: c.series, ticker, side: pick.side, ask: pick.price, closeSec: Date.parse(m.close_time) / 1000 });
     committed[shardKey] = (committed[shardKey] || 0) + cost;
     if (CAPPED_SERIES.includes(c.series)) cryptoTaken[wkey] = true;
@@ -1073,6 +1127,9 @@ async function claimClose(store, ticker, who, now) {
   try { return !!store && typeof store.claimClose === "function" && (await store.claimClose(ticker, who, now, CLOSE_CLAIM_MS)) === true; } catch (e) { return false; }
 }
 
+// The one endpoint orders go to, defined here with the rest of the order code so another module (the second slot's engine) can use it without repeating the path.
+const ORDERS_PATH = "/portfolio/events/orders";
+
 function exitBody(ticker, side, count, limit, cid, exchangeIndex) {
   if (!Number.isInteger(count) || count < 1 || count > L1_ORDER_CEILING) throw new Error("refusing to build an exit for " + count + " contracts");
   if (!(limit >= 0.01 && limit <= 0.99)) throw new Error("refusing to build an exit at " + limit);
@@ -1093,6 +1150,9 @@ async function runExitWatch(args) {
   const list = (await store.recentFilled(now - EXIT_LOOKBACK_MS)).filter((t) => t.strategy === "L1" && t.settled !== true && Number(t.fillCount) > 0
     && Number.isFinite(Number(t.maxCost)) && t.ticker && (t.side === "yes" || t.side === "no") && t.exitStatus !== "sold" && t.exitStatus !== "unknown" && t.exitStatus !== "sending" && t.exitStatus !== "skipped");
   const results = [];
+  // Slot only: the close leases this pass took, released when it ends (a lease nobody released would hold the slot's own stop off the market for up to 90 seconds).
+  const leased = [];
+  try {
   for (const t of list) {
     const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
     const sold = Number(t.exitCount) > 0 ? Number(t.exitCount) : 0;
@@ -1117,6 +1177,7 @@ async function runExitWatch(args) {
     if (tries >= EXIT_MAX_TRIES) continue;
     // Flatten may be closing this market right now; if it holds the claim, leave it (the position is about to be, or already is, gone).
     if (!(await claimClose(store, t.ticker, "exit", now))) { results.push(t.ticker + ": Flatten is closing it (or the claim could not be made), nothing sold"); continue; }
+    if (slotOn(args)) leased.push(t.ticker);
     // The live account must hold the position, or a sell would open the opposite one.
     const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker: t.ticker, limit: "20" }, nowMs: now });
     let held = NaN;
@@ -1126,7 +1187,15 @@ async function runExitWatch(args) {
     }
     if (!Number.isFinite(held)) { results.push(t.ticker + ": the position could not be read, nothing sold"); continue; }
     const holding = t.side === "yes" ? Math.max(0, held) : Math.max(0, -held);     // YES is a positive position, NO a negative one
-    const count = Math.min(remaining, Math.floor(holding + 1e-9));
+    // Slot only: the account's position is the sum of both engines' contracts, so this sell is clamped to what is NOT the slot's (in-flight slot orders count as held). Unreadable means nothing is sold.
+    let slotHeld = 0;
+    if (slotOn(args)) {
+      try { slotHeld = await args.slot.unsoldOn(t.ticker, t.side); if (!Number.isFinite(slotHeld) || slotHeld < 0) throw new Error("bad figure"); }
+      catch (e) { results.push(t.ticker + ": the second slot's contracts could not be read, nothing sold"); continue; }
+    }
+    const count = Math.min(remaining, Math.floor(holding - slotHeld + 1e-9));
+    // With slot contracts on the same side a count below 1 can be a passing state (the slot has not booked a sale yet), so it is retried next pass and never written as "skipped" for good.
+    if (count < 1 && slotHeld > 0 && holding >= 1) { results.push(t.ticker + ": the rest of the position is the second slot's, nothing sold"); continue; }
     if (count < 1) { await store.updateTest(t.id, { exitStatus: "skipped", exitNote: "the account holds no " + t.side.toUpperCase() + " position in it (already closed?)" }); results.push(t.ticker + ": no position held, nothing sold"); continue; }
     if (!(await store.claimExit(t.id, tries))) continue;     // another instance has it
     const limit = t.side === "yes" ? Math.max(0.01, r4(ourBid - EXIT_SLIPPAGE)) : Math.min(0.99, r4(ya + EXIT_SLIPPAGE));
@@ -1165,6 +1234,9 @@ async function runExitWatch(args) {
     results.push(t.ticker + ": refused");
   }
   return { ok: true, results };
+  } finally {
+    if (leased.length && typeof store.releaseClose === "function") { for (const tk of leased) { try { await store.releaseClose(tk, "exit"); } catch (e) { /* the lease lapses by itself after 90 seconds */ } } }
+  }
 }
 
 // ---- Flatten: the owner's emergency exit -----------------------------------------------------------------------------------------
@@ -1175,7 +1247,7 @@ async function runExitWatch(args) {
 // never flip it. A market that is no longer open cannot be traded and settles on its own, so it is reported and skipped. The client order
 // id carries the minute, so a second press inside the same minute is refused by Kalshi instead of selling twice. Not capped by LIVE_CAP:
 // that cap bounds what a BUY may risk, and this only reduces exposure.
-async function flattenAll({ fetchFn, keyId, pem, now, store }) {
+async function flattenAll({ fetchFn, keyId, pem, now, store, slot }) {
   const pos = await liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { limit: "200" }, nowMs: now });
   if (pos.status !== 200 || !pos.body || typeof pos.body !== "object") return { ok: false, reason: "The positions could not be read (HTTP " + pos.status + "). Nothing was sold.", results: [] };
   const list = Array.isArray(pos.body.market_positions) ? pos.body.market_positions : [];
@@ -1216,6 +1288,8 @@ async function flattenAll({ fetchFn, keyId, pem, now, store }) {
       results.push({ ticker: p.ticker, position: p.position, status: "error", detail: isAmbiguous(res.status) ? "no clear answer (HTTP " + res.status + "), check the Kalshi account before pressing again" : "refused: " + short(res.body) });
     }
   }
+  // Slot only: bookkeeping for the second slot's orders on the markets this run closed, and the kill latch. Its failure never changes what Flatten returns to the owner.
+  if (slotOn({ slot })) { try { await slot.afterFlatten({ results, now }); } catch (e) { /* the sale already happened; the settle sweep corrects the books */ } }
   return { ok: true, results };
 }
 
@@ -1226,7 +1300,7 @@ const DEFAULT_ACCOUNT_ID = "main";
 module.exports = {
   flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
-  flattenAll, claimClose, CLOSE_CLAIM_MS, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
+  flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
   botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,

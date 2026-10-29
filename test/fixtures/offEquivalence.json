@@ -1,0 +1,2751 @@
+[
+ {
+  "name": "l1 bitcoin happy",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXBTC15M-26OCT071415-15: filled"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 1
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 1 at 91.0c on KXBTC15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "KXBTC15M-26OCT071415-15: filled",
+     "cash": 100,
+     "botNet": 0,
+     "botOpen": 0
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 bitcoin happy cached reads",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXBTC15M-26OCT071415-15: filled"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTradesCached",
+    "args": [
+     1791295200000,
+     1791381600000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 1
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 1 at 91.0c on KXBTC15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "KXBTC15M-26OCT071415-15: filled",
+     "cash": 100,
+     "botNet": 0,
+     "botOpen": 0
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 halted",
+  "ret": {
+   "skipped": "halted"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": true
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "The bot is halted, so nothing is sent."
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 unresolved",
+  "ret": {
+   "ended": "attempted"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": true
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "active": false,
+     "endedAt": 1791381600000,
+     "endedBecause": "attempted"
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "session ended",
+     "detail": "an earlier order is unresolved (sent, or its answer was lost). Check the Kalshi account before starting again"
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 orders unreadable",
+  "ret": {
+   "skipped": "orders unreadable"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "threw": "down"
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "The bot's recent orders could not be counted, so nothing was sent."
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 no session",
+  "ret": {
+   "skipped": "no session"
+  },
+  "threw": null,
+  "log": []
+ },
+ {
+  "name": "l1 loss stop",
+  "ret": {
+   "ended": "loss stop"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": [
+     {
+      "id": "a",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "b",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "c",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "d",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "e",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "f",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "g",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "h",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "i",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "j",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "k",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "l",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "m",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "n",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "active": false,
+     "endedAt": 1791381600000,
+     "endedBecause": "loss stop"
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "session ended",
+     "detail": "the bot's trades are down $13.16 settled with $0.00 still open, counted as lost, which reaches the $10.00 stop"
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 unsettled order resolved by market",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXBTC15M-26OCT071415-15: filled"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": [
+     {
+      "id": "L1-X",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071400-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071400-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-X",
+     {
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 1
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 1 at 91.0c on KXBTC15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "KXBTC15M-26OCT071415-15: filled",
+     "cash": 100,
+     "botNet": -0.94,
+     "botOpen": 0
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 post 409",
+  "ret": {
+   "ended": "attempted"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/orders?ticker=KXBTC15M-26OCT071415-15&limit=50",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "unknown",
+      "error": "HTTP 409 and the order could not be found: {\"error\":\"exists\"}"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "active": false,
+     "endedAt": 1791381600000,
+     "endedBecause": "attempted"
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "session ended",
+     "detail": "Kalshi says an order with id L1-KXBTC15M-26OCT071415-15 already exists. Check the Kalshi account for it"
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 post 500",
+  "ret": {
+   "ended": "attempted"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "unknown",
+      "error": "HTTP 500 {\"error\":\"down\"}"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "active": false,
+     "endedAt": 1791381600000,
+     "endedBecause": "attempted"
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "session ended",
+     "detail": "the answer for KXBTC15M-26OCT071415-15 was lost (HTTP 500). THE ORDER MAY OR MAY NOT EXIST. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried"
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 post 400",
+  "ret": {
+   "ended": "attempted"
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "error",
+      "error": "HTTP 400 {\"error\":\"bad\"}"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "active": false,
+     "endedAt": 1791381600000,
+     "endedBecause": "attempted"
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "session ended",
+     "detail": "Kalshi refused the order for KXBTC15M-26OCT071415-15: HTTP 400 {\"error\":\"bad\"}"
+    }
+   }
+  ]
+ },
+ {
+  "name": "setSizingState (gold sizing)",
+  "ret": {
+   "cap": 5,
+   "base": 100,
+   "saved": 0,
+   "pool": 0,
+   "cum": 0,
+   "hwm": 0,
+   "reviewedAt": 1791381599000,
+   "appliedTs": 1791381595000,
+   "lastStopAt": null,
+   "lowSince": 1791381600000
+  },
+  "threw": null,
+  "log": []
+ },
+ {
+  "name": "l1 gold sizing with window usage",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXGOLD15M-26OCT071415-15: filled"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": [
+     {
+      "id": "L1-KXBTC15M-26OCT071415-15",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791381480000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "sizeCap": 5,
+     "sizeAddon": 0,
+     "sizePool": 0,
+     "sizePoolRule": "wins",
+     "sizePoolThrough": 1791381595000,
+     "sizePoolBlocked": null,
+     "sizeSaved": 0,
+     "sizeBase": 100,
+     "sizeNextReview": 1791640799000
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXGOLD15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXGOLD15M-26OCT071415-15",
+      "series": "KXGOLD15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 2,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 0,
+      "clientOrderId": "L1-KXGOLD15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 1.84,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "side": "bid",
+     "count": "2",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXGOLD15M-26OCT071415-15",
+     "exchange_index": 0
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 1
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 2 at 91.0c on KXGOLD15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXGOLD15M/markets/KXGOLD15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "KXGOLD15M-26OCT071415-15: filled",
+     "cash": 100,
+     "botNet": 0,
+     "botOpen": 0.94
+    }
+   }
+  ]
+ },
+ {
+  "name": "l1 two markets one window",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXGOLD15M-26OCT071415-15: filled",
+    "KXBTC15M-26OCT071415-15: filled"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "hasUnresolved",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791295200000
+    ],
+    "ret": []
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/balance",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXGOLD15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXGOLD15M-26OCT071415-15",
+      "series": "KXGOLD15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 0,
+      "clientOrderId": "L1-KXGOLD15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXGOLD15M-26OCT071415-15",
+     "exchange_index": 0
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 1
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 1 at 91.0c on KXGOLD15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "halted",
+    "args": [],
+    "ret": false
+   },
+   {
+    "kind": "store",
+    "call": "createTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "accountId": "main",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "band": "88-97c",
+      "strategy": "L1",
+      "entryLead": "6m",
+      "count": 1,
+      "addon": 0,
+      "addonCost": 0,
+      "price": 0.91,
+      "limit": 0.91,
+      "exchangeIndex": 2,
+      "clientOrderId": "L1-KXBTC15M-26OCT071415-15",
+      "status": "sending",
+      "ts": 1791381600000,
+      "mode": "live",
+      "maxCost": 0.92,
+      "settled": false,
+      "seen": {
+       "bid": 0.9,
+       "ask": 0.91,
+       "bidSize": null,
+       "askSize": null,
+       "at": "<wall clock>"
+      },
+      "depthAtLimit": null,
+      "shareOfDepth": null,
+      "depthLevels": "top"
+     }
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "bid",
+     "count": "1",
+     "price": "0.91",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "L1-KXBTC15M-26OCT071415-15",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "status": "filled",
+      "orderId": "ord-1",
+      "fillCount": "1.00",
+      "remainingCount": "0.00",
+      "averageFillPrice": "0.9100",
+      "averageFeePaid": "0.0057",
+      "sentSide": "bid",
+      "sentPrice": "0.91"
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "ordersSent": 2
+    }
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "order",
+     "detail": "yes 1 at 91.0c on KXBTC15M-26OCT071415-15: filled"
+    }
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXGOLD15M/markets/KXGOLD15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXGOLD15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/series/KXBTC15M/markets/KXBTC15M-26OCT071415-15/candlesticks?start_ts=1791374400&end_ts=1791381660&period_interval=1",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "rise3": 0.25,
+      "riseMidNow": 0.91,
+      "riseMidThen": 0.66,
+      "rng5": 0.41,
+      "flips": 0,
+      "flips0": true,
+      "earlierCandles": 5,
+      "minStep": 0.08,
+      "climb": 0.41,
+      "smooth": true,
+      "askAtDecision": 0.91,
+      "ask10": null,
+      "side10": null,
+      "inBand10": false,
+      "ask8": null,
+      "side8": null,
+      "inBand8": false,
+      "ask6": 0.92,
+      "side6": "yes",
+      "inBand6": true,
+      "twoStageLeft": 360
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "session",
+    "patch": {
+     "lastTickAt": 1791381600000,
+     "lastNote": "KXGOLD15M-26OCT071415-15: filled; KXBTC15M-26OCT071415-15: filled",
+     "cash": 100,
+     "botNet": 0,
+     "botOpen": 0
+    }
+   }
+  ]
+ },
+ {
+  "name": "botRisk store read",
+  "ret": {
+   "net": -1.38,
+   "openCost": 0,
+   "worst": -1.38,
+   "addonAtRisk": 0,
+   "trades": 3
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "sessionTrades",
+    "args": [
+     1791374400000
+    ],
+    "ret": [
+     {
+      "id": "a",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     },
+     {
+      "id": "L1-open",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071300-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": false
+     },
+     {
+      "id": "x",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071345-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "price": 0.91,
+      "status": "filled",
+      "ts": 1791378000000,
+      "settled": true,
+      "result": "exit",
+      "settledPnl": -0.5
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071300-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-open",
+     {
+      "settled": true,
+      "result": "yes",
+      "settledPnl": 0.06
+     }
+    ],
+    "ret": null
+   }
+  ]
+ },
+ {
+  "name": "botRisk shared list",
+  "ret": {
+   "net": -1.88,
+   "openCost": 0,
+   "worst": -1.88,
+   "addonAtRisk": 0,
+   "trades": 2
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071300-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-o",
+     {
+      "settled": true,
+      "result": "no",
+      "settledPnl": -0.94
+     }
+    ],
+    "ret": null
+   }
+  ]
+ },
+ {
+  "name": "closedByHand",
+  "ret": {
+   "hand": true,
+   "sold": 1
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/fills?ticker=KXBTC15M-26OCT071415-15&limit=100",
+    "body": null
+   }
+  ]
+ },
+ {
+  "name": "settleOpenOrders",
+  "ret": {
+   "settled": 1,
+   "repaired": 1,
+   "looked": 1
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "openFilled",
+    "args": [],
+    "ret": [
+     {
+      "id": "L1-a",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "orderId": "o1",
+      "status": "filled",
+      "ts": 1791381540000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/fills?ticker=KXBTC15M-26OCT071415-15&limit=100",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-a",
+     {
+      "settled": true,
+      "result": "hand",
+      "handSold": 1
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "store",
+    "call": "handOrders",
+    "args": [],
+    "ret": [
+     {
+      "id": "L1-a",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "orderId": "o1",
+      "status": "filled",
+      "ts": 1791381540000,
+      "settled": true,
+      "result": "hand",
+      "handSold": 1
+     },
+     {
+      "id": "L1-h",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "side": "no",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "orderId": "o9",
+      "status": "filled",
+      "ts": 1791381540000,
+      "settled": true,
+      "result": "hand"
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/fills?ticker=KXBTC15M-26OCT071415-15&limit=100",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-a",
+     {
+      "handChecked": true
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/fills?ticker=KXBTC15M-26OCT071415-15&limit=100",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-h",
+     {
+      "settled": true,
+      "result": "yes",
+      "settledPnl": -0.94,
+      "handChecked": true,
+      "handRepaired": true
+     }
+    ],
+    "ret": null
+   }
+  ]
+ },
+ {
+  "name": "settleOpenOrders no key",
+  "ret": {
+   "settled": 1,
+   "repaired": 0,
+   "looked": 1
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "openFilled",
+    "args": [],
+    "ret": [
+     {
+      "id": "L1-a",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "side": "yes",
+      "count": 1,
+      "fillCount": "1",
+      "maxCost": 0.94,
+      "orderId": "o1",
+      "status": "filled",
+      "ts": 1791381540000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-a",
+     {
+      "settled": true,
+      "result": "yes",
+      "settledPnl": 0.06
+     }
+    ],
+    "ret": null
+   }
+  ]
+ },
+ {
+  "name": "exit watch sells at 24c",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXBTC15M-26OCT071415-15: sold"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "recentFilled",
+    "args": [
+     1791380100000
+    ],
+    "ret": [
+     {
+      "id": "L1-KXBTC15M-26OCT071415-15",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 20,
+      "fillCount": "20",
+      "maxCost": 18.7,
+      "addonCost": 7.5,
+      "price": 0.93,
+      "status": "filled",
+      "ts": 1791381300000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "claimClose",
+    "args": [
+     "KXBTC15M-26OCT071415-15",
+     "exit",
+     1791381600000,
+     90000
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?ticker=KXBTC15M-26OCT071415-15&limit=20",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "claimExit",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     0
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "ask",
+     "count": "20",
+     "price": "0.09",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "X-KXBTC15M-26OCT071415-15-1",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "exitStatus": "sold",
+      "exitCount": 20,
+      "exitProceeds": 4.54,
+      "exitAvg": 0.24,
+      "exitAt": 1791381600000,
+      "exitBid": 0.24,
+      "exitOrderId": "x-1",
+      "settled": true,
+      "result": "exit",
+      "settledPnl": -14.16
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "exit",
+     "detail": "KXBTC15M-26OCT071415-15: YES bid at 24c, sold 20 of 20 at about 24c"
+    }
+   }
+  ]
+ },
+ {
+  "name": "exit watch holds at 80c",
+  "ret": {
+   "ok": true,
+   "results": []
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "recentFilled",
+    "args": [
+     1791380100000
+    ],
+    "ret": [
+     {
+      "id": "L1-KXBTC15M-26OCT071415-15",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 20,
+      "fillCount": "20",
+      "maxCost": 18.7,
+      "addonCost": 7.5,
+      "price": 0.93,
+      "status": "filled",
+      "ts": 1791381300000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   }
+  ]
+ },
+ {
+  "name": "exit watch switch off",
+  "ret": {
+   "ok": true,
+   "results": [
+    "KXBTC15M-26OCT071415-15: logged"
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "recentFilled",
+    "args": [
+     1791380100000
+    ],
+    "ret": [
+     {
+      "id": "L1-KXBTC15M-26OCT071415-15",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 20,
+      "fillCount": "20",
+      "maxCost": 18.7,
+      "addonCost": 7.5,
+      "price": 0.93,
+      "status": "filled",
+      "ts": 1791381300000,
+      "settled": false
+     }
+    ]
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "updateTest",
+    "args": [
+     "L1-KXBTC15M-26OCT071415-15",
+     {
+      "exitShadow": {
+       "at": 1791381600000,
+       "bid": 0.24,
+       "left": 200000,
+       "wouldSell": 20
+      }
+     }
+    ],
+    "ret": null
+   },
+   {
+    "kind": "event",
+    "e": {
+     "ts": 1791381600000,
+     "kind": "exit (log only)",
+     "detail": "KXBTC15M-26OCT071415-15: the YES side's bid fell to 24c with 200 s left; it would have sold 20 contracts. Nothing was sent, because the server's order switch is off."
+    }
+   }
+  ]
+ },
+ {
+  "name": "exit idle outside buy minutes",
+  "ret": false,
+  "threw": null,
+  "log": [
+   {
+    "kind": "store",
+    "call": "recentFilled",
+    "args": [
+     1791380160000
+    ],
+    "ret": [
+     {
+      "id": "L1-KXBTC15M-26OCT071415-15",
+      "strategy": "L1",
+      "ticker": "KXBTC15M-26OCT071415-15",
+      "series": "KXBTC15M",
+      "side": "yes",
+      "count": 20,
+      "fillCount": "20",
+      "maxCost": 18.7,
+      "addonCost": 7.5,
+      "price": 0.93,
+      "status": "filled",
+      "ts": 1791381300000,
+      "settled": false
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "name": "exit idle inside buy minutes",
+  "ret": false,
+  "threw": null,
+  "log": []
+ },
+ {
+  "name": "flatten two positions",
+  "ret": {
+   "ok": true,
+   "results": [
+    {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "position": 3,
+     "status": "sold",
+     "filled": 3,
+     "wanted": 3,
+     "averageFillPrice": "0.5000",
+     "detail": ""
+    },
+    {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "position": -2,
+     "status": "sold",
+     "filled": 2,
+     "wanted": 2,
+     "averageFillPrice": "0.5000",
+     "detail": ""
+    }
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?limit=200",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "claimClose",
+    "args": [
+     "KXBTC15M-26OCT071415-15",
+     "flatten",
+     1791381600000,
+     90000
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?ticker=KXBTC15M-26OCT071415-15&limit=20",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "ask",
+     "count": "3",
+     "price": "0.01",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "FLAT-KXBTC15M-26OCT071415-15-29856360",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "claimClose",
+    "args": [
+     "KXGOLD15M-26OCT071415-15",
+     "flatten",
+     1791381600000,
+     90000
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?ticker=KXGOLD15M-26OCT071415-15&limit=20",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXGOLD15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "side": "bid",
+     "count": "2",
+     "price": "0.99",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "FLAT-KXGOLD15M-26OCT071415-15-29856360",
+     "exchange_index": 2
+    }
+   }
+  ]
+ },
+ {
+  "name": "flatten ambiguous answer",
+  "ret": {
+   "ok": true,
+   "results": [
+    {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "position": 3,
+     "status": "error",
+     "detail": "no clear answer (HTTP 500), check the Kalshi account before pressing again"
+    },
+    {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "position": -2,
+     "status": "error",
+     "detail": "no clear answer (HTTP 500), check the Kalshi account before pressing again"
+    }
+   ]
+  },
+  "threw": null,
+  "log": [
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?limit=200",
+    "body": null
+   },
+   {
+    "kind": "store",
+    "call": "claimClose",
+    "args": [
+     "KXBTC15M-26OCT071415-15",
+     "flatten",
+     1791381600000,
+     90000
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?ticker=KXBTC15M-26OCT071415-15&limit=20",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXBTC15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXBTC15M-26OCT071415-15",
+     "side": "ask",
+     "count": "3",
+     "price": "0.01",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "FLAT-KXBTC15M-26OCT071415-15-29856360",
+     "exchange_index": 2
+    }
+   },
+   {
+    "kind": "store",
+    "call": "claimClose",
+    "args": [
+     "KXGOLD15M-26OCT071415-15",
+     "flatten",
+     1791381600000,
+     90000
+    ],
+    "ret": true
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/positions?ticker=KXGOLD15M-26OCT071415-15&limit=20",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "GET",
+    "url": "https://external-api.kalshi.com/trade-api/v2/markets/KXGOLD15M-26OCT071415-15",
+    "body": null
+   },
+   {
+    "kind": "fetch",
+    "method": "POST",
+    "url": "https://external-api.kalshi.com/trade-api/v2/portfolio/events/orders",
+    "body": {
+     "ticker": "KXGOLD15M-26OCT071415-15",
+     "side": "bid",
+     "count": "2",
+     "price": "0.99",
+     "time_in_force": "immediate_or_cancel",
+     "self_trade_prevention_type": "taker_at_cross",
+     "client_order_id": "FLAT-KXGOLD15M-26OCT071415-15-29856360",
+     "exchange_index": 2
+    }
+   }
+  ]
+ }
+]

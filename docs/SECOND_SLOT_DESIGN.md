@@ -35,7 +35,7 @@ Reading the orders is not enough: instance A (L1, YES) and instance B (slot, NO)
 - The lock is never released inside the window. A ticker belongs to one 15 minute window, so the lock dies of age. A strategy that exits early therefore cannot re-enter on the other side in the same market, which is intentionally conservative.
 - The lock only ever narrows what is allowed. Nobody else may delete it. A stale one-way lock can only cost a missed trade, never a hedge.
 - **The pure function cannot stop the race; only the transaction can.** So `slotOrderCheck` refuses unless the caller passes `lockTxn: true`, meaning it read and wrote the lock inside the same `runTransaction` that creates the order document. The wiring PR must do the same for L1, and must include a two-instance test with a fake store that serialises transactions. Nothing in phase A takes the lock; this is the contract.
-- Rules: no client rule for `kalshiLiveDirection` (a collection with no rule is closed to every browser).
+- Rules (changed in Phase B3, Oct 29, 2026, see `docs/SECOND_SLOT_WIRING.md` section 7): `kalshiLiveDirection` and `kalshiSlotOrders` are admin read and no client write; `kalshiSlotControl` (the kill latch) has no rule and stays closed to every browser. Admin read of a lock leaks nothing and helps debugging; delete the `kalshiLiveDirection` block in `firestore.rules` to close it.
 
 ### What the later wiring PR must change in `runL1Tick` (do not edit it now)
 
@@ -118,7 +118,9 @@ The contract the later wiring must honour, with exact names:
 
 **Flatten.** `flattenAll` sells the whole account position per ticker, which includes slot contracts, and today never touches an order document. After the wiring, Flatten must (a) still sell the account's whole position, (b) then mark every slot order on those tickers as closed by Flatten (like a hand close: settled, no pnl, so it leaves the loss stop untouched but the realised loss is visible in the account), and (c) set the slot's kill latch so nothing re-enters afterwards. Flatten already takes `claimClose(..., "flatten", ...)` first, so a slot close cannot run at the same moment.
 
-## Wiring checklist (for phases B to D; found in review, not yet done)
+## Wiring checklist (for phases B to D; found in review; **wired in Phase B1 to B3, Oct 29, 2026, still switched off**)
+
+Status: every item below is done and tested behind the one gate `slotActive`: `runL1Tick`, `botRisk`, `closedByHand`, `settleOpenOrders` and `flattenAll` in `functions/kalshiLiveLib.js` (B2); the engine and its settle sweep in `functions/kalshiSlotRunLib.js` (B1, `runSlotSettle` added in B3); the Firestore store, the direction lock transaction and the Flatten bookkeeping in `functions/kalshiSlotStoreLib.js`, called from `functions/index.js` only when `SLOT_ON` (B3); the rules (B3). The tests that were listed as having to move did not move: the golden call logs prove the deployed functions are unchanged while the slot is off. Not done: the page card, the alerts and any admission (phases F to H).
 
 - `runL1Tick`: add `slotWindowSpent` (the gross figure, not `openAtRisk`) to `windowUsed` near `kalshiLiveLib.js` line ~934; read the slot collection, the position and the lock in ONE transaction with `createTest`; leave the `held` crypto check unchanged; run the slot AFTER L1's decision in the same tick and count the slot's spend only then (the slot already leaves `SLOT_L1_RESERVE` and takes at most half the cap, but order of evaluation still matters). Wrap every slot call in try/catch so a thrown error cannot abort L1's minute.
 - `botRisk` (line ~677) filters `t.strategy === "L1"` and takes an `orders` argument: add a slot-orders argument or add `slotRiskForBotRisk` field by field. Slot orders need their own settle sweep (market result, `slotSettledFields`, `settledAt`, the kill latch in the same transaction).
@@ -135,7 +137,7 @@ Each later phase is its own reviewed pull request with the owner's deploy, in th
 - **B. Slot exit engine** (`runSlotExitWatch`, using `slotSellCount`, `SX-` ids, the shared lease, its own wake rule), tested with fake exchanges like `kalshiExitGates.test.js`.
 - **C. Wiring into `runL1Tick` and `botRisk`**: the direction lock transaction, `windowUsed` plus `slotWindowSpent`, `slotRiskForBotRisk` added to the loss stop, `closedByHand` ignoring the other engine's sells, Flatten's slot bookkeeping. Gates: opposite side blocked in both directions, a slot loss trips the shared stop, the window cap is shared.
 - **D. Wiring into `functions/index.js`**: the scheduled entry function, the store (`kalshiSlotOrders`, `kalshiLiveDirection`, `kalshiSlotControl`), deploy script, the security scan's allowance if any new endpoint is needed (none is planned).
-- **E. Firestore rules** for the new collections (admin read only, no client write; `kalshiLiveDirection` and `kalshiSlotControl` closed), with the rules gate.
+- **E. Firestore rules** for the new collections (admin read only, no client write; `kalshiSlotControl` closed), with the rules gate. Done in B3.
 - **F. Page card** (read only, Privacy-masked through `kalshiMoney`, no control that can change a slot) and its changelog line.
 - **G. Alerts** (closes and stops only, like the existing push rules; a slot entry never buzzes).
 - **H. The first admission**: one entry in `SLOT_STRATEGIES`, with its README pre-registration, forward read date and kill rules, and `SLOT_ENABLED` set to `true`, in its own pull request after a research survivor passes the bar (profit factor 1.5 or better in each of three windows after fees and deflation, with a named counterparty). That pull request is where the owner decides, not this document.

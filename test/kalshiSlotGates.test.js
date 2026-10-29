@@ -48,8 +48,8 @@ gates['the module is inert: empty registry, switch off, no order is ever allowed
   assert.deepStrictEqual(slot.activeSlotStrategies(), []);
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
-  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$/.test(x))) {
-    assert.ok(!/kalshiSlot/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not mention the slot library in phase A (checked recursively, including functions/, scripts/, workflows and package files)');
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$/.test(x))) {
+    assert.ok(!/kalshiSlot/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not mention the slot library (phase B3: only the slot libraries, functions/kalshiLiveLib.js behind slotOn and functions/index.js behind SLOT_ON may; checked recursively, including functions/, scripts/, workflows and package files)');
   }
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
@@ -230,9 +230,20 @@ gates['the mirrored constants and the settlement rule stay equal to the live one
 gates['the L1 exit watch and settle sweep still read only L1 orders, and the live library has not been edited to know about the slot'] = () => {
   const live_src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/t\.strategy === "L1" && t\.settled !== true && Number\(t\.fillCount\) > 0\s*\n?\s*&& Number\.isFinite\(Number\(t\.maxCost\)\)/.test(live_src));
-  assert.ok(!/SLOT_|kalshiSlot/.test(live_src), 'phase A does not touch runL1Tick, botRisk, the exit watch or Flatten');
-  assert.ok(!/kalshiSlotOrders/.test(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8')));
-  assert.ok(!/kalshiSlot/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'no rule opens the new collection yet; with no rule it is closed to every client');
+  // Phase B2 rewrite (docs/SECOND_SLOT_WIRING.md section 7): the live library may now know the slot, but only through the one module and the one gate; the exit watch is still untouched.
+  assert.deepStrictEqual([...live_src.matchAll(/require\("(\.\/kalshiSlot[A-Za-z]*)"\)/g)].map((m) => m[1]), ['./kalshiSlotLib'], 'the live library requires only the pure slot library');
+  assert.ok(!/SLOT_|kalshiSlotRun/.test(live_src.replace(/\/\/.*$/gm, '')), 'no slot constant and no run library in code');
+  const exitBody = live_src.slice(live_src.indexOf('async function runExitWatch'), live_src.indexOf('// ---- Flatten: the owner'));
+  // Review round 2: the L1 exit watch now knows the slot in exactly two places, both behind slotOn(args): it subtracts the slot's contracts from the shared account position before selling,
+  // and it gives its close lease back. Every other line of it, and the order list it iterates, is unchanged and still L1 only.
+  const slotLines = exitBody.replace(/\/\/.*$/gm, '').split('\n').filter((l) => /slot/i.test(l)).map((l) => l.trim());
+  assert.ok(slotLines.length > 0 && slotLines.every((l) => /slotOn\(args\)|slotHeld|args\.slot|slot contracts|second slot|the slot|slot's|Slot only/i.test(l)), 'every slot line in the L1 exit watch is a guarded one: ' + slotLines.join(' | '));
+  assert.ok(/if \(slotOn\(args\)\) leased\.push/.test(exitBody) && /if \(slotOn\(args\)\) \{\s*\n\s*try \{ slotHeld = await args\.slot\.unsoldOn/.test(exitBody));
+  // Phase B3 rewrite (docs/SECOND_SLOT_WIRING.md section 7): the collections now have rules, each admin read and no client write; the latch and the leases still have none. Each stays a gate on a smaller surface.
+  const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
+  for (const c of ['kalshiSlotOrders', 'kalshiLiveDirection']) assert.ok(new RegExp('match /' + c + '/\\{id\\} \\{\\s*allow read: if isAdmin\\(\\);\\s*allow write: if false;\\s*\\}').test(rules), c + ' is admin read and no client write');
+  assert.ok(!/kalshiSlotControl|kalshiLiveClosing/.test(rules.replace(/\/\/.*$/gm, '')), 'the kill latch and the close leases have no rule: closed to every browser');
+  assert.ok(!/kalshiSlot/.test(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8').replace(/\/\/.*$/gm, '').replace(/require\("\.\/kalshiSlot[A-Za-z]*"\)/g, '')), 'index.js names the slot only through the three requires; the collection names live in the store library');
 };
 
 gates['the named entry points: only one entry gate exists, losses stop at the limit, kills stay tripped'] = () => {

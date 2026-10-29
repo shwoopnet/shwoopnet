@@ -123,6 +123,37 @@ function activeSlotStrategiesWith(flags) {
 }
 // The production entry point: no argument, so nothing a caller passes can change the switch or the registry.
 const activeSlotStrategies = () => activeSlotStrategiesWith({});
+// The ONE gate the wiring uses (docs/SECOND_SLOT_WIRING.md section 0): a pure function of this module's own two constants. Nothing stored, requested or typed on the page can feed it.
+const slotActive = () => SLOT_ENABLED === true && SLOT_STRATEGIES.length > 0;
+// WATCHING is wider than ENTERING. Entering needs slotActive(). But once any slot order has ever existed, turning the slot off (SLOT_ENABLED=false) or deleting a strategy must NOT orphan a live
+// position: its exits, its settle sweep, its dollars in the shared loss stop and window cap, the direction lock and L1's contract clamp all keep running. A constant, not stored data, so nothing
+// outside a reviewed edit can move it. The pull request that first admits a strategy MUST set it to true (a gate fails if slotActive() is true while it is false), and it is never set back.
+const SLOT_EVER_USED = false;
+const slotWatch = () => slotActive() || SLOT_EVER_USED === true;
+// Contracts of an order the account may still hold (the conservative reading): a settled or hand-closed order holds none; an order still in flight (no answer yet) is assumed to hold everything
+// it asked for, so it can only LOWER what the other engine may sell.
+function slotUnsoldOf(t) {
+  if (!t || t.settled === true) return 0;
+  const want = num(t.count) > 0 ? num(t.count) : 1;
+  const status = String(t.status || "").toLowerCase();
+  if (status === "sending" || status === "unknown") return want;
+  const got = Math.min(num(t.fillCount) > 0 ? num(t.fillCount) : 0, want);
+  const sold = num(t.exitCount) > 0 ? num(t.exitCount) : 0;
+  return Math.max(0, Math.floor(got - sold + 1e-9));
+}
+// What L1's hand-sold check must not trust: every entry and exit order id of the slot's orders (their fills are not a sale by hand), plus a marker "ticker:<T>" for every market where a slot
+// entry or exit has no clear answer (status or exitStatus sending or unknown). Such an order has NO order id to ignore, so its fill could be read as a hand sale of an L1 order; the marker makes
+// closedByHand answer "unknown" for that market, which leaves the L1 order open and counted as lost (the safe direction).
+function slotIgnoreSet(orders) {
+  const ids = new Set();
+  for (const o of orders || []) {
+    if (!o) continue;
+    if (o.orderId) ids.add(o.orderId);
+    if (o.exitOrderId) ids.add(o.exitOrderId);
+    if (o.strategy === "SLOT" && o.ticker && (["sending", "unknown"].includes(String(o.status || "").toLowerCase()) || ["sending", "unknown"].includes(String(o.exitStatus || "").toLowerCase()))) ids.add("ticker:" + o.ticker);
+  }
+  return ids;
+}
 
 // ---- Order identity --------------------------------------------------------------------------------------------------------------------
 // Deterministic, so two function instances computing the same entry compute the same id and Kalshi's own uniqueness check refuses the second
@@ -401,7 +432,7 @@ module.exports = {
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
-  validateSlotStrategy, activeSlotStrategies, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
+  validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields,
   // Test-only: the flags-taking variants. Production code must call slotOrderCheck and activeSlotStrategies (a gate fails if the wiring references this).
   _testOnly: Object.freeze({ slotOrderCheckWith, activeSlotStrategiesWith }),

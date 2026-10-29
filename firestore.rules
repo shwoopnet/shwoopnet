@@ -103,6 +103,17 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // The second strategy slot's orders and the direction lock that stops a hedge (docs/SECOND_SLOT_WIRING.md section 3). Written only by the server (the lock inside the transaction that creates an
+    // order), readable only by the admin. The slot kill latch (kalshiSlotControl) and the per-market close leases have NO rule on purpose: closed to every browser.
+    match /kalshiSlotOrders/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+    match /kalshiLiveDirection/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // The paper tracker's records (what L1's rule WOULD have bought on candidate markets, no money). Written only by the keyless scheduled function, readable only by the admin.
     match /kalshiPaperOrders/{id} {
       allow read: if isAdmin();
