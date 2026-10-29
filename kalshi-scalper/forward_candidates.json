@@ -1,0 +1,410 @@
+{
+ "generated_at": "2026-10-29T02:15:23.086404+00:00",
+ "source": "GEN1S (README)",
+ "verdict": "NO_WINNER (nothing passes every validation gate; FALSIFIED before the holdout)",
+ "note": "Ranked best first. Labels are the registered gates; nothing here has passed a FINAL HOLDOUT. No promote verb; the owner decides.",
+ "candidates": [
+  {
+   "id": "G1S01",
+   "readme": "kalshi-scalper/README.md#pre-registration-gen1s-the-same-generator-restricted-to-the-second-slots-registry-shape",
+   "series": [
+    "KXBTC15M"
+   ],
+   "entry": {
+    "sideRule": "no",
+    "priceMin": 0.05,
+    "priceMax": 0.1,
+    "leftMaxSec": 180,
+    "leftMinSec": 120
+   },
+   "exit": {
+    "stopBid": 0.01,
+    "targetBid": 0.15,
+    "mustExitLeftSec": 60
+   },
+   "contractsPerOrder": 10,
+   "scaleIn": {
+    "maxSteps": 1,
+    "minGapSec": 30,
+    "sameSideOnly": true,
+    "requirePriorFilled": true
+   },
+   "killRules": {
+    "maxConsecutiveLosses": 4,
+    "minNet": {
+     "afterFills": 30,
+     "net": -2.0
+    }
+   },
+   "forwardReadDate": "2026-11-19",
+   "research": {
+    "rank": 1,
+    "label": "FAILED_GATE_DISCOVERY_PF",
+    "stageReached": "discovery",
+    "window": {
+     "discovery": "2026-08-05 to day 55",
+     "validation": "days 56 to 83, to 2026-10-27 23:45 UTC"
+    },
+    "discovery": {
+     "n": 581,
+     "days": 55,
+     "pf": 1.248542249983655,
+     "pf1": 1.027809586293501,
+     "pfs": 1.2159469487899113,
+     "zv": 0.0,
+     "mean_c": 1.327882961966353,
+     "loss": 0.7831325301204819,
+     "z": 1.721966068219952
+    },
+    "validation": {
+     "n": 275,
+     "days": 28,
+     "pf": 0.7786456641458054,
+     "pf1": 0.6373503551539028,
+     "pfs": 0.75778245810189,
+     "zv": 0.0,
+     "mean_c": -1.277818215520545,
+     "loss": 0.8436363636363636,
+     "z": -2.0418466211595123
+    },
+    "bootstrap5thPctPF": null,
+    "deflation": {
+     "nTried": 800780,
+     "zBar": 5.29,
+     "z": null
+    },
+    "positiveAtFeesX1_2": false,
+    "counterparty": "takers who cross the spread mid-window in this price band (impatient or late traders); unproven unless it passes the holdout",
+    "l1OverlapValidation": {
+     "windows": 275,
+     "l1SameSide": 4,
+     "l1OppositeSide": 48,
+     "note": "opposite side would be refused by the slot's direction rule"
+    },
+    "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
+   }
+  },
+  {
+   "id": "G1S02",
+   "readme": "kalshi-scalper/README.md#pre-registration-gen1s-the-same-generator-restricted-to-the-second-slots-registry-shape",
+   "series": [
+    "KXBTC15M",
+    "KXETH15M"
+   ],
+   "entry": {
+    "sideRule": "no",
+    "priceMin": 0.05,
+    "priceMax": 0.1,
+    "leftMaxSec": 180,
+    "leftMinSec": 120
+   },
+   "exit": {
+    "stopBid": 0.01,
+    "targetBid": 0.3,
+    "mustExitLeftSec": 60
+   },
+   "contractsPerOrder": 10,
+   "scaleIn": {
+    "maxSteps": 1,
+    "minGapSec": 30,
+    "sameSideOnly": true,
+    "requirePriorFilled": true
+   },
+   "killRules": {
+    "maxConsecutiveLosses": 4,
+    "minNet": {
+     "afterFills": 30,
+     "net": -2.0
+    }
+   },
+   "forwardReadDate": "2026-11-19",
+   "research": {
+    "rank": 2,
+    "label": "FAILED_GATE_DISCOVERY_PF",
+    "stageReached": "discovery",
+    "window": {
+     "discovery": "2026-08-05 to day 55",
+     "validation": "days 56 to 83, to 2026-10-27 23:45 UTC"
+    },
+    "discovery": {
+     "n": 1168,
+     "days": 55,
+     "pf": 1.2416640057308546,
+     "pf1": 1.0277549094932612,
+     "pfs": 1.212122566888197,
+     "zv": 0.0,
+     "mean_c": 1.3632705247740107,
+     "loss": 0.8056506849315068,
+     "z": 2.017791797214738
+    },
+    "validation": {
+     "n": 514,
+     "days": 28,
+     "pf": 0.6283355700508367,
+     "pf1": 0.5183489944079668,
+     "pfs": 0.6123259155748015,
+     "zv": 0.0,
+     "mean_c": -2.2599222068888674,
+     "loss": 0.877431906614786,
+     "z": -3.3073102711230327
+    },
+    "bootstrap5thPctPF": null,
+    "deflation": {
+     "nTried": 800780,
+     "zBar": 5.29,
+     "z": null
+    },
+    "positiveAtFeesX1_2": false,
+    "counterparty": "takers who cross the spread mid-window in this price band (impatient or late traders); unproven unless it passes the holdout",
+    "l1OverlapValidation": {
+     "windows": 514,
+     "l1SameSide": 7,
+     "l1OppositeSide": 93,
+     "note": "opposite side would be refused by the slot's direction rule"
+    },
+    "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
+   }
+  },
+  {
+   "id": "G1S03",
+   "readme": "kalshi-scalper/README.md#pre-registration-gen1s-the-same-generator-restricted-to-the-second-slots-registry-shape",
+   "series": [
+    "KXBTC15M"
+   ],
+   "entry": {
+    "sideRule": "yes",
+    "priceMin": 0.8,
+    "priceMax": 0.85,
+    "leftMaxSec": 720,
+    "leftMinSec": 540
+   },
+   "exit": {
+    "stopBid": 0.6,
+    "targetBid": 0.99,
+    "mustExitLeftSec": 120
+   },
+   "contractsPerOrder": 10,
+   "scaleIn": {
+    "maxSteps": 1,
+    "minGapSec": 30,
+    "sameSideOnly": true,
+    "requirePriorFilled": true
+   },
+   "killRules": {
+    "maxConsecutiveLosses": 4,
+    "minNet": {
+     "afterFills": 30,
+     "net": -2.0
+    }
+   },
+   "forwardReadDate": "2026-11-19",
+   "research": {
+    "rank": 3,
+    "label": "FAILED_GATE_DISCOVERY_PF",
+    "stageReached": "discovery",
+    "window": {
+     "discovery": "2026-08-05 to day 55",
+     "validation": "days 56 to 83, to 2026-10-27 23:45 UTC"
+    },
+    "discovery": {
+     "n": 822,
+     "days": 55,
+     "pf": 1.1831703535558307,
+     "pf1": 1.0523751947584683,
+     "pfs": 1.1490165174147762,
+     "zv": 0.0,
+     "mean_c": 1.6749391262911226,
+     "loss": 0.26520681265206814,
+     "z": 2.035966859744913
+    },
+    "validation": {
+     "n": 470,
+     "days": 28,
+     "pf": 0.8782000691648367,
+     "pf1": 0.7799812970643546,
+     "pfs": 0.8520479444632771,
+     "zv": 0.0,
+     "mean_c": -1.3493618272847332,
+     "loss": 0.3425531914893617,
+     "z": -1.358193082482445
+    },
+    "bootstrap5thPctPF": null,
+    "deflation": {
+     "nTried": 800780,
+     "zBar": 5.29,
+     "z": null
+    },
+    "positiveAtFeesX1_2": false,
+    "counterparty": "takers who cross the spread mid-window in this price band (impatient or late traders); unproven unless it passes the holdout",
+    "l1OverlapValidation": {
+     "windows": 470,
+     "l1SameSide": 202,
+     "l1OppositeSide": 4,
+     "note": "opposite side would be refused by the slot's direction rule"
+    },
+    "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
+   }
+  },
+  {
+   "id": "G1S04",
+   "readme": "kalshi-scalper/README.md#pre-registration-gen1s-the-same-generator-restricted-to-the-second-slots-registry-shape",
+   "series": [
+    "KXBTC15M"
+   ],
+   "entry": {
+    "sideRule": "no",
+    "priceMin": 0.15,
+    "priceMax": 0.25,
+    "leftMaxSec": 180,
+    "leftMinSec": 120
+   },
+   "exit": {
+    "stopBid": 0.01,
+    "targetBid": 0.45,
+    "mustExitLeftSec": 60
+   },
+   "contractsPerOrder": 10,
+   "scaleIn": {
+    "maxSteps": 1,
+    "minGapSec": 30,
+    "sameSideOnly": true,
+    "requirePriorFilled": true
+   },
+   "killRules": {
+    "maxConsecutiveLosses": 4,
+    "minNet": {
+     "afterFills": 30,
+     "net": -2.0
+    }
+   },
+   "forwardReadDate": "2026-11-19",
+   "research": {
+    "rank": 4,
+    "label": "FAILED_GATE_DISCOVERY_PF",
+    "stageReached": "discovery",
+    "window": {
+     "discovery": "2026-08-05 to day 55",
+     "validation": "days 56 to 83, to 2026-10-27 23:45 UTC"
+    },
+    "discovery": {
+     "n": 468,
+     "days": 55,
+     "pf": 1.1422292423597256,
+     "pf1": 1.0432332036956997,
+     "pfs": 1.1132953963410974,
+     "zv": 0.0,
+     "mean_c": 1.6525640014640606,
+     "loss": 0.6901709401709402,
+     "z": 1.154078503371809
+    },
+    "validation": {
+     "n": 245,
+     "days": 28,
+     "pf": 1.0966097055865787,
+     "pf1": 1.0037235667069642,
+     "pfs": 1.0707935074567239,
+     "zv": 0.0,
+     "mean_c": 1.167755032380927,
+     "loss": 0.6938775510204082,
+     "z": 0.6541208142467507
+    },
+    "bootstrap5thPctPF": null,
+    "deflation": {
+     "nTried": 800780,
+     "zBar": 5.29,
+     "z": null
+    },
+    "positiveAtFeesX1_2": true,
+    "counterparty": "takers who cross the spread mid-window in this price band (impatient or late traders); unproven unless it passes the holdout",
+    "l1OverlapValidation": {
+     "windows": 245,
+     "l1SameSide": 3,
+     "l1OppositeSide": 22,
+     "note": "opposite side would be refused by the slot's direction rule"
+    },
+    "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
+   }
+  },
+  {
+   "id": "G1S05",
+   "readme": "kalshi-scalper/README.md#pre-registration-gen1s-the-same-generator-restricted-to-the-second-slots-registry-shape",
+   "series": [
+    "KXBTC15M",
+    "KXETH15M"
+   ],
+   "entry": {
+    "sideRule": "yes",
+    "priceMin": 0.8,
+    "priceMax": 0.85,
+    "leftMaxSec": 600,
+    "leftMinSec": 540
+   },
+   "exit": {
+    "stopBid": 0.5,
+    "targetBid": 0.99,
+    "mustExitLeftSec": 180
+   },
+   "contractsPerOrder": 10,
+   "scaleIn": {
+    "maxSteps": 1,
+    "minGapSec": 30,
+    "sameSideOnly": true,
+    "requirePriorFilled": true
+   },
+   "killRules": {
+    "maxConsecutiveLosses": 4,
+    "minNet": {
+     "afterFills": 30,
+     "net": -2.0
+    }
+   },
+   "forwardReadDate": "2026-11-19",
+   "research": {
+    "rank": 5,
+    "label": "FAILED_GATE_DISCOVERY_PF",
+    "stageReached": "discovery",
+    "window": {
+     "discovery": "2026-08-05 to day 55",
+     "validation": "days 56 to 83, to 2026-10-27 23:45 UTC"
+    },
+    "discovery": {
+     "n": 1243,
+     "days": 55,
+     "pf": 1.1312977084054907,
+     "pf1": 1.004878061012149,
+     "pfs": 1.0951869030709043,
+     "zv": 0.0,
+     "mean_c": 1.1336284267115946,
+     "loss": 0.24376508447304907,
+     "z": 1.6027643902488122
+    },
+    "validation": {
+     "n": 589,
+     "days": 28,
+     "pf": 0.870863466136622,
+     "pf1": 0.7716127992312691,
+     "pfs": 0.8430068726977679,
+     "zv": 0.0,
+     "mean_c": -1.3429541814509407,
+     "loss": 0.29541595925297115,
+     "z": -1.1273704098405617
+    },
+    "bootstrap5thPctPF": null,
+    "deflation": {
+     "nTried": 800780,
+     "zBar": 5.29,
+     "z": null
+    },
+    "positiveAtFeesX1_2": false,
+    "counterparty": "takers who cross the spread mid-window in this price band (impatient or late traders); unproven unless it passes the holdout",
+    "l1OverlapValidation": {
+     "windows": 589,
+     "l1SameSide": 258,
+     "l1OppositeSide": 3,
+     "note": "opposite side would be refused by the slot's direction rule"
+    },
+    "validationNote": "information only: this strategy failed the discovery gate, so validation is not a gate it reached; numbers shown so the owner can see whether discovery held"
+   }
+  }
+ ]
+}
