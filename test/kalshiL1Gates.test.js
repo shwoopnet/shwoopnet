@@ -792,7 +792,7 @@ gates.DP4 = async () => {
   assert.ok(w.posts.some((p) => p.ticker === T) && !w.posts.some((p) => p.ticker === AUD), 'Bitcoin trades, the probe waits');
   // and the wiring: a transaction on the fresh document, in the one collection only the server writes.
   assert.ok(/updateProbeRecord: \(apply\) => db\.runTransaction/.test(fnSrc) && /doc\("probeRecord"\)/.test(fnSrc) && /tx\.get\(ref\)/.test(fnSrc), 'applied to the fresh document inside a transaction');
-  assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\) && !paused\.includes\(x\)\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
+  assert.ok(/series_filter_not_used|const tradable = L1_SERIES\.filter\(\(x\) => !dropped\.includes\(x\) && !paused\.includes\(x\)( && !inQuietHours\(x, now\))?\)/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8')), 'the rule only removes series from the tradable list');
 };
 // CO1 to CO3: the cost cut (Oct 21, 2026). The 24 hour read keeps its older part in memory; the exit watch reads only unsettled orders; the repair pass runs every 10 minutes. None of it may change what the bot decides.
 const MIN = 60000;
@@ -1470,6 +1470,34 @@ gates.PX2 = () => {
   // Nothing outside the library can unpause it: index.js never passes pausedSeries.
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
   assert.ok(!/pausedSeries/.test(idx));
+};
+
+
+// QH1 and QH2: gold's quiet hours (the owner, Oct 29, 2026): no NEW gold order from 20:00 to 23:59 US Central. Only gold, only by the clock when the bot looks, and it follows daylight saving.
+gates.QH1 = () => {
+  assert.deepStrictEqual(live.QUIET_HOURS_CT, { KXGOLD15M: [20, 24] }, 'gold only');
+  const at = (z) => Date.parse(z);
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T01:00:00Z')), true, '8:00 PM CDT');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T04:59:00Z')), true, '11:59 PM CDT');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T05:00:00Z')), false, 'midnight CDT');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T00:59:00Z')), false, '7:59 PM CDT');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-11-02T02:00:00Z')), true, '8:00 PM CST, after the clocks change');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-11-02T01:00:00Z')), false, '7:00 PM CST');
+  assert.strictEqual(live.inQuietHours('KXDOGE15M', at('2026-10-30T02:00:00Z')), false, 'no other market has quiet hours');
+  assert.strictEqual(live.inQuietHours('KXGOLD15M', NaN), false, 'an unreadable clock never blocks');
+};
+gates.QH2 = async () => {
+  const quietNow = Date.parse('2026-10-30T02:00:00Z');   // 9:00 PM CDT
+  const q = (series, ticker) => quote({ close_time: iso(quietNow + leftFor(series)) }, series, ticker);
+  const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [GT]: { close_time: iso(quietNow + 360000) } } });
+  await tick(w, { now: quietNow, quotes: [q('KXGOLD15M', GT)] });
+  assert.strictEqual(w.posts.length, 0, 'gold sends nothing in its quiet hours');
+  const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [GT]: { close_time: iso(NOW + 360000) } } });
+  await tick(w2, { quotes: [gq()] });
+  assert.strictEqual(w2.posts.length, 1, 'the same gold market outside the block still trades (9:00 AM CDT)');
+  const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
+  assert.ok(/!inQuietHours\(x, now\)/.test(src), 'it filters candidates only: the exit watch is untouched');
+  assert.ok(!/inQuietHours/.test(src.slice(src.indexOf('async function runExitWatch'), src.indexOf('async function runExitWatch') + 6000)), 'an open gold position is still sold in the block');
 };
 
 (async () => {
