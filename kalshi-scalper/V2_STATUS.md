@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-30 2:40 AM CT, GOLDPYTH-H NOT_RUNNABLE: Pyth gold needs a key (history and live).** Brief A corrected to the main session: it needs a Pyth API key in the environment's secrets. Main session relayed the standing owner rule: the search never stops, generators run in parallel on approval-free work, not the cheap-side-late trade. GEN8 (mid-price round trips, never held) running.
+
 **2026-10-30 2:10 AM CT, LIQ1 information check: no reverting impact, so brief B is dropped (0 tries).** Nightly watchers ran: DOGEFILL after the 5 contract deploy 6 of 13 no fill (46%; flag needs 60% over 20); GOLDSLIP after the deposit 2 orders, no flag; DRIFT flag XRP slippage +1.76c (paused market); OIFILL 0 forward signals. Waiting on the owner for brief A (GOLDPYTH) or C; no cheap-side-late rounds meanwhile.
 
 **2026-10-30 1:10 AM CT, research director: V2 is circling one trade shape; owner decision sent to the main session.** Briefs A (GOLDPYTH recorder), B (LIQ1 liquidations), C (SPOTDEPTH, after RECORD1) in `workers/DIRECTOR_2026-10-30.md`. Until the owner answers, V2 runs only LIQ1's no-outcome information check and no more cheap-side-late tests.

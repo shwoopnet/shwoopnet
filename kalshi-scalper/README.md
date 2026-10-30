@@ -7800,3 +7800,7 @@ Registered first (`workers/NEWH8_REGISTRATION.md`), result `workers/NEWH8_RESULT
 ## Result: LIQ1-INFO (does a Deribit liquidation move Kalshi's Bitcoin quote and revert; no outcomes), 2026-10-30
 
 Brief B's information check (`workers/LIQ1_INFO_REGISTRATION.md`, `workers/LIQ1_INFO_RESULT.md`). Deribit BTC-PERPETUAL liquidations Aug 6 to Oct 27 are rare (3,291 trades, $26.6M; 1.2% of eligible minutes), so the 99th percentile threshold is $400 ("any liquidation"). Kalshi's mid moves well over 2c with them, but under half reverts within 3 minutes in either stage (discovery keeps going; validation 40% reverts). Registered decision: **no reverting impact, LIQ1 not worth an outcome test.** 0 tries.
+
+## Result: GOLDPYTH-H (Pyth gold history against Kalshi's gold quotes), 2026-10-30: NOT_RUNNABLE
+
+`workers/GOLDPYTH_H_RESULT.md`. Pyth's Benchmarks history and Hermes latest-price routes answer 401 without a key for 1OZGOLD/USD (Kalshi's gold settlement feed) and XAU/USD; only feed metadata is keyless. Kalshi's settled gold markets give Pyth only at each window's open and close. No registration, 0 tries. Brief A's forward recorder would also need a Pyth key (owner decision; the key goes in the environment's secrets, never in chat).
