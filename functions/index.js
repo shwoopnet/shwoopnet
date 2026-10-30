@@ -807,6 +807,16 @@ exports.kalshiPushOrder = onDocumentWritten({ document: "kalshiLiveOrders/{id}",
     await pushSend(getFirestore(), push.orderKinds(before, after), after, event.params.id);
   } catch (e) { console.error("kalshiPushOrder: " + String((e && e.message) || e).slice(0, 200)); }
 });
+// A second-slot order closing sounds like an L1 one (Oct 30, 2026; docs/SECOND_SLOT_WIRING.md, "Before the first admission", item 2). Same rules: only a CHANGE sounds, a buy never does, and it only reads.
+exports.kalshiPushSlotOrder = onDocumentWritten({ document: "kalshiSlotOrders/{id}", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
+  try {
+    ensureDefaultAdminApp();
+    const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
+    const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
+    if (!after) return;
+    await pushSend(getFirestore(), push.orderKinds(before, after), after, event.params.id);
+  } catch (e) { console.error("kalshiPushSlotOrder: " + String((e && e.message) || e).slice(0, 200)); }
+});
 exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/session", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {
   try {
     ensureDefaultAdminApp();

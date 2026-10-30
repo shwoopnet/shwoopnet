@@ -1530,6 +1530,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Second strategy slot, step 1 (still off, nothing trades): slot fills and positions are recognised as the bot's own and counted in Stop Loss and Risk; the slot can read an open interest signal and buy the cheaper side, and one reviewed strategy may hold to settlement; a closing slot order sends a phone alert</li>
                   <li>Bot page: a strategy switch (Overall, L1, and any second-slot probe) with a Strategies table and a probe panel; it appears only once a probe has orders, and the page is unchanged until then</li>
                   <li>Bot status: the win rate by price paid table is removed again (the owner's call)</li>
                   <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
