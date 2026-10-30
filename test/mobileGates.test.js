@@ -42,6 +42,16 @@ gates.M4 = () => {
   assert.ok(/\.trades-header-right \.kal-status\{ flex:1 0 100%; \}/.test(all), 'the status takes its own line, so Privacy, Tools, Layout and the bell fit on one');
 };
 
+// The owner's iPhone Home Screen app (Oct 30, 2026): the bottom bar floated into the middle of the screen while scrolling. On phones and tablets it is not a scroll container and has its own layer; on a wide screen it is left alone, because the notification panel inside the rail is positioned against it.
+gates.M4 = () => {
+  const m = /@media \(max-width: 900px\)\{\s*\.side-nav\{([\s\S]*?)\n    \}/.exec(html);
+  assert.ok(m, 'the phone rule for the bar is found');
+  assert.ok(/overflow:visible/.test(m[1]) && !/overflow-x:auto/.test(m[1]), 'the bar is not a scroll container on a phone');
+  assert.ok(/translate3d\(0,0,0\)/.test(m[1]), 'the bar has its own compositing layer on a phone');
+  const base = /\n  \.side-nav\{([\s\S]*?)\n  \}/.exec(html)[1];
+  assert.ok(!/transform/.test(base), 'the wide screen rail has no transform of its own');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
