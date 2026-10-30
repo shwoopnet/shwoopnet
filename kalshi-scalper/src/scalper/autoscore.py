@@ -20,6 +20,7 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
              `scalper.stab week` (a stability check of L1 as live trades it; writes workers/STABILITY.md; no read, no verdict)
   FWDLEDGER  every pass, runs `scalper.fwdledger run` (candidates in workers/candidates/*.json, writes workers/FORWARD_LEDGER.md);
              it only reports forward results after each candidate's freeze, never promotes; its failure stops nothing else
+  SERIES     once a week, `scalper.seriescensus` (public /series: fifteen_min series count, those with a settled market, NEW SERIES line); no outcome
   RECORD1    the daily scheduled task reads it; this only logs the count line of `scalper.record1 look`, once a day
   CONF2 C    ready at 30 kept window C closes (from 2026-10-27), runs `scalper.conf2 holdout` (output saved to data/conf2_C_result.txt),
              and only if data/conf2_A_done exists (the lead writes it after reading window A)
@@ -356,6 +357,15 @@ def check() -> None:
             log("RECFEED", rec[:400]); s["recfeed_stale_logged"] = time.time()
     except Exception as ex:
         status.append(f"RECORDERS: status failed: {type(ex).__name__}")
+    # SERIESCENSUS (NEWH17, 2026-10-30): once every 7 days, count Kalshi's fifteen_min series and those with a settled market (public /series, no outcome);
+    # a series going from none to some starts the line with NEW SERIES. State in this same file; every error is caught inside.
+    try:
+        from .seriescensus import census as series_census
+        sc = series_census(s)
+        if sc:
+            log("SERIES", sc[:400]); status.append(sc[:200])
+    except Exception as ex:
+        status.append(f"SERIES CENSUS: failed {type(ex).__name__}")
     # RECORD1: count line once a day only
     today = datetime.now(CT).strftime("%Y-%m-%d")
     if s.get("daily") != today:
