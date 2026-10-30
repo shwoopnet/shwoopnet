@@ -8,7 +8,7 @@ const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
 const gates = {};
 const block = (n) => { const m = new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html); assert.ok(m, 'not found: ' + n); return m[1]; };
 const names = ['kalshiSlotIds', 'kalshiViewSelection', 'kalshiViewOrders', 'kalshiOrdersSummary', 'kalshiStrategySwitchHtml', 'kalshiProbeHtml'];
-const stubs = 'function kalDayKey(ms){ return new Date(ms).toISOString().slice(0,10); }\nfunction kalshiOrderPnl(o){ return typeof o.settledPnl === "number" ? o.settledPnl : null; }\nfunction kalshiAgeText(s){ return s + "s"; }\nfunction kalTime(ms){ return "t" + ms; }\nfunction kalshiShortTicker(t){ return t; }\n';
+const stubs = 'var KAL_SLOT_REGISTERED = [];\nfunction kalDayKey(ms){ return new Date(ms).toISOString().slice(0,10); }\nfunction kalshiOrderPnl(o){ return typeof o.settledPnl === "number" ? o.settledPnl : null; }\nfunction kalshiAgeText(s){ return s + "s"; }\nfunction kalTime(ms){ return "t" + ms; }\nfunction kalshiShortTicker(t){ return t; }\n';
 let f;
 try { f = new Function(stubs + names.map(block).join('\n') + '; return { ' + names.join(', ') + ' };')(); } catch (e) { console.log('FAIL setup: ' + e.message); process.exit(1); }
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -43,6 +43,17 @@ gates.ST5 = () => {
   assert.ok(/kalshiPositionRows\(a\.positions\.positions, kalshiAllOrders\(\),/.test(html), 'open positions know the slot orders');
   assert.ok(/t\.strategy !== 'L1' && t\.strategy !== 'SLOT'/.test(html) && /kalshiRiskMeter\(kalshiResolveOrders\(kalshiAllOrders\(\)/.test(html), 'the risk meter counts slot orders');
   assert.ok(!/kalshiIsExitFill\(x, kalshiLiveOrders\)/.test(html), 'a slot exit fill is not shown as a trade either');
+};
+gates.ST6 = () => {
+  // The switch is there from the start: the page's list of registered second-slot strategies must equal the registry in the bot's code, and the Rules text must describe each one.
+  const slotLib = require('../functions/kalshiSlotLib');
+  const m = /var KAL_SLOT_REGISTERED = \[([^\]]*)\];/.exec(html); assert.ok(m, 'the page lists the registered strategies');
+  const pageIds = m[1].split(',').map((x) => x.trim().replace(/'/g, '')).filter(Boolean);
+  assert.deepStrictEqual(pageIds, slotLib.SLOT_STRATEGIES.map((x) => x.id), 'the page names exactly the strategies the code registers');
+  for (const id of pageIds) assert.ok(new RegExp('<span id="kalRulesSlot">' + id + ',').test(html), 'Rules and limits describes ' + id);
+  const withReg = new Function('var KAL_SLOT_REGISTERED = ["OICORE"];\n' + block('kalshiSlotIds') + '; return kalshiSlotIds;')();
+  assert.deepStrictEqual(withReg([]), ['OICORE'], 'with no slot order the registered strategy is still on the switch');
+  assert.deepStrictEqual(withReg([{ ts: 1, slotId: 'OICORE' }, { ts: 2, slotId: 'OLD' }]), ['OICORE', 'OLD'], 'registered first, then any other id seen in the orders, once each');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
