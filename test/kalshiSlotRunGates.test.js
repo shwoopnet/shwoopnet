@@ -177,7 +177,7 @@ gates['SW4b admitted state: with the real constants and no qualifying market in 
   assert.strictEqual(ex.calls.length, 0, 'no request with nothing open'); assert.strictEqual(ex.posts.length, 0);
   assert.ok(out && !out.error, 'no error');
 };
-gates['OICORE end to end through the engine: a rise of 86,300 or more buys the strategy's contracts of the cheaper side held to settlement; a smaller rise, a missing candle or the dear side buys nothing'] = async () => {
+gates['OICORE end to end through the engine: a rise of 86,300 or more buys the registered number of contracts of the cheaper side held to settlement; a smaller rise, a missing candle or the dear side buys nothing'] = async () => {
   const OI = () => R({ enabled: true, registry: [slot.SLOT_STRATEGIES[0]], everUsed: true });
   const closeMs = NOW + 150000, closeSec = Math.round(closeMs / 1000);
   const world = async (rise, o = {}) => {
