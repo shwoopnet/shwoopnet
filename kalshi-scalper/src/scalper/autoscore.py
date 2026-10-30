@@ -327,6 +327,16 @@ def check() -> None:
             log("OIFEED", feed[:400]); s["oifeed_stale_logged"] = time.time()
     except Exception as ex:
         status.append(f"OICORE feed: status failed: {type(ex).__name__}")
+    # RECFEED (FWD-AUDIT, 2026-10-30): last push of each GitHub Actions recorder (commit times on the data branches, no row read), every pass;
+    # a STALE line also goes to AUTO_LOG, at most once per 6 hours, so a dropped schedule never reads as a slow rule.
+    try:
+        from .recfeed import status_line as rec_status
+        rec = rec_status()
+        status.append(rec)
+        if "STALE" in rec and time.time() - s.get("recfeed_stale_logged", 0) >= 6 * 3600:
+            log("RECFEED", rec[:400]); s["recfeed_stale_logged"] = time.time()
+    except Exception as ex:
+        status.append(f"RECORDERS: status failed: {type(ex).__name__}")
     # RECORD1: count line once a day only
     today = datetime.now(CT).strftime("%Y-%m-%d")
     if s.get("daily") != today:

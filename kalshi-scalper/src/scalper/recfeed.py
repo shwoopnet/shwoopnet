@@ -46,7 +46,7 @@ def fetch() -> str:
 
 def last_push(ref: str, folder: str) -> int | None:
     """Unix time of the newest commit on `ref` that touched `folder`, or None when there is none."""
-    out = _git("log", "-1", "--format=%ct", ref, "--", folder).decode().strip()
+    out = _git("log", "-1", "--format=%ct", ref, "--", ":(top)" + folder).decode()   # the folders are at the repo root; cwd is kalshi-scalper/.strip()
     return int(out) if out else None
 
 
