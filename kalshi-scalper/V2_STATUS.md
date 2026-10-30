@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 8:30 PM CT, ESPN1 FALSIFIED (Kalshi's game prices beat ESPN's model); NEWH1 (basis, round levels, stale quotes, gold ties, flip reversal) FALSIFIED or NOT_ENOUGH_DATA.** Still running: MECH1 (who drives the open interest jump), GOLDFILL. N about 592,043.
+
 **2026-10-29 8:10 PM CT, EVT1 (scheduled events) FALSIFIED where testable; macro releases NOT_ENOUGH_DATA. SLOTEX-ETH: the open interest core does not carry to Ethereum (FALSIFIED); sent to the main session.** N about 592,030.
 
 **2026-10-29 7:55 PM CT, SLOTEX sent to the main session.** The core sold at 60 s (slot-legal) keeps about half the held edge: validation PF 1.52 at 10 contracts, 1.50 at 5, 1.32 at 1 (fees). Take profits and stops add nothing or lose. EVT1 launched (scheduled-event windows on gold and Bitcoin: macro releases, COMEX settlement, CME Bitcoin close, Deribit expiry, funding times).

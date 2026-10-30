@@ -7752,3 +7752,7 @@ Registered first (`workers/EVT1_REGISTRATION.md`), scored once (`workers/EVT1_RE
 ## Result: ESPN1 (ESPN in-play win probability vs Kalshi game-winner asks), 2026-10-30
 
 Registered first (`workers/ESPN1_REGISTRATION.md`, delay D = 180 s fixed from a measured live lag, median 45 s, p90 77 s). 1,613 games (NFL, college football, NBA, MLB), date thirds, holdout C read once after A and B were pushed. Buy the side ESPN rates at least 8c (or 15c) above its ask, held: PF 0.76 to 1.20 across windows, below 1.0 in B and C for all four variants, pooled z -2.54 to +0.53. **FALSIFIED, 4 of 4.** Kalshi's mid has a better Brier score than ESPN's probability in NFL, college football and NBA and ties it in MLB: when they disagree, ESPN is the one that is wrong. N +4; running count about 592,034 (the worker's own figure came from a stale base).
+
+## Result: NEWH1 (five new mechanisms on gold and Bitcoin), 2026-10-30
+
+Registered first (`workers/NEWH1_REGISTRATION.md`), result `workers/NEWH1_RESULT.md`. Perpetual basis (followed and reversed), round-number barriers ($500, $1,000), stale zero-volume quotes, gold tie rule, last-minute flip reversal at the next open. Best discovery PF 0.99. **FALSIFIED** 6 (basis both ways, both round levels, flip reversal gold and Bitcoin); **NOT_ENOUGH_DATA** 3 (stale quotes never occur on minute candles; gold ties 0.27% of pairs). The result commit message says 7 falsified; the correct count is 6. N +9; running count about 592,043.
