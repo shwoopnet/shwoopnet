@@ -10,6 +10,10 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
   QUOTE2B    from 2026-11-12, runs `scalper.quote2b run` (refuses below 300 usable closes; writes data/quote2b_result.txt)
   MAKER5     from 2026-11-06, runs `scalper.r6tests run maker5` (refuses below 300 usable R6 windows; writes data/maker5_result.txt)
   L1Q1       from 2026-11-06, runs `scalper.r6tests run l1q1` (same refusals; writes data/l1q1_result.txt)
+  GF1, GF2   readiness `scalper.gf12 count` (R6 book files only: windows and L1 signals, no coverage or result); from 2026-11-14 02:00 UTC
+             (the read date plus 2 hours for the recorder's last push) and at 300 signals, or from 2026-11-15 00:00 UTC whatever
+             the count (the data can no longer grow; the run then reports NOT_ENOUGH_DATA), runs `scalper.gf12 run gf1` / `run gf2`
+             (each refuses before 2026-11-14 00:00 UTC or a second time; writes data/gf1_result.txt / data/gf2_result.txt)
   STAB       once a week, on the first pass on or after Monday 01:00 US Central (week marked in data/stab_last_week by the run itself), runs
              `scalper.stab week` (a stability check of L1 as live trades it; writes workers/STABILITY.md; no read, no verdict)
   FWDLEDGER  every pass, runs `scalper.fwdledger run` (candidates in workers/candidates/*.json, writes workers/FORWARD_LEDGER.md);
@@ -30,6 +34,7 @@ import gzip
 import io
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -265,6 +270,29 @@ def check() -> None:
                 status.append(f"{rid} done")
             elif r6_due:
                 rc, o = py("scalper.r6tests", "run", rid.lower())
+                if out.exists():
+                    log(rid, last_line(out.read_text(), "VERDICT"))
+                elif not s.get(f"{rid.lower()}_refused_logged"):
+                    log(rid, f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s[f"{rid.lower()}_refused_logged"] = True
+    # GF1 and GF2 (GF12 worker, recorder R6); `gf12 run <id>` refuses before 2026-11-14 00:00 UTC and a second time, and below
+    # 300 scored windows it writes NOT_ENOUGH_DATA, so it is fired only once the data is complete (workers/GF12_NOTES.md)
+    gf_outs = {"GF1": DATA_DIR / "gf1_result.txt", "GF2": DATA_DIR / "gf2_result.txt"}
+    if all(o.exists() for o in gf_outs.values()):
+        status.append("GF1 done ; GF2 done")
+    else:
+        rc, o = py("scalper.gf12", "count", timeout=1800)
+        line = last_line(o, "GF12 count")
+        status.append("GF12 readiness: " + line[:300])
+        m = re.search(r"L1 signals (\d+)", line)
+        n_sig = int(m.group(1)) if rc == 0 and m else 0
+        now_utc = datetime.now(timezone.utc)
+        gf_due = (now_utc >= datetime(2026, 11, 14, 2, tzinfo=timezone.utc) and n_sig >= 300) \
+            or now_utc >= datetime(2026, 11, 15, tzinfo=timezone.utc)
+        for rid, out in gf_outs.items():
+            if out.exists():
+                status.append(f"{rid} done")
+            elif gf_due:
+                rc, o = py("scalper.gf12", "run", rid.lower())
                 if out.exists():
                     log(rid, last_line(out.read_text(), "VERDICT"))
                 elif not s.get(f"{rid.lower()}_refused_logged"):
