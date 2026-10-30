@@ -7903,3 +7903,27 @@ at the bar, below the deflated bar, not better than the core (its discovery-only
 row `REF_GEN6_OIREL` (freeze 2026-10-30T15:00Z, `scalper.oirel`, parity 584 trades exact), to be read WITH `REF_GEN6_OICORE` and
 `REF_GEN6_OIDRIFT`, never as a third confirmation. The core stays NOT_YET_FALSIFIED; its counterparty is still unnamed. One unintended
 information look (the ledger's status line) is counted. N +12; running count about 700,166 (z bar 5.26).
+
+## Result: NEWH13 (cross-market consistency and arbitrage: the same event priced twice, gold and Bitcoin), 2026-10-30
+
+Registered first (`workers/NEWH13_REGISTRATION.md`, commit 4377c22), scorer `src/scalper/newh13.py` (commit 2088ad2, before the
+score), result `workers/NEWH13_RESULT.md`; local candles plus the public book recorder; discovery to Sep 21, validation to Oct 18,
+holdout to Oct 30 NOT read because nothing passed. Family check first: the 15 minute against hourly ladder cross is XM1 and BLADX
+(Bitcoin both legs, Ethereum one) and GLADH (gold, the 15 minute leg); coincident-close locks are LOCK2H (Bitcoin history) and the
+unread LOCK2 forward; one-ladder locks are LADLOCK; cross-event locks ARB1 to ARB5; the Dutch book inside one market is
+**NOT_RUNNABLE** by construction (one book, the YES ask is 1 minus the best NO bid, so the two asks sum to 1 plus the spread) and
+got no try; Deribit's public API keeps nothing of an expired option, so a model-free options cross for the 08:00 UTC KXBTCD market
+(**BTCDIGI-F**) is registered forward only, **NOT_ENOUGH_DATA** now. The two untested cells: **GLOCKH** (a lock between gold's 15
+minute contract and the bracketing KXGOLDH strike at the shared close, 1c+ after fees at the signal, both legs filled at the next
+candle, minutes 1 to 7): 7 signal locks in 873 closes, 5 fills, 3 of them costing more than $1 a set, PF 0.22 on 3 then 0.28 on 2,
+**NOT_ENOUGH_DATA**; **GLADX-L** (the gold LADDER leg bought toward the 15 minute book on a 3c monotonicity violation at the mids,
+minutes 4 to 7, 5c to 85c): 10 then 11 trades, PF 1.17 then 0.64, filled 6c worse than the signal, 636 of 873 closes with no
+bracketing strike quoted within 6c, **NOT_ENOUGH_DATA**. Information: the recorded 5 level KXBTCD book (16 events, 92,849
+adjacent-strike reads at 3 s) shows zero crosses and 0.056% mark inversions, none in the last 15 minutes (I1); Bitcoin's
+minute-candle lock rate on LOCK2H's unread days (Aug 24 to Sep 25) was 17 of 772 closes against 4 of 704 later (I2); gold's is 7
+of 442 and 8 of 429 (I3); the gold ladder's near strikes carry no drift (I4, the lower strike's YES won 51% to 53% at 57c).
+Arithmetic arbitrage on Kalshi's crypto and gold books is closed at every resolution the public data reaches; the family's
+remaining questions are forward only (LOCK2 on simultaneous quotes; BTCDIGI-F with a recorder). N +7; running count about
+700,161 (z bar 5.26).
+
+Lead's count correction: FALS5 (+12) landed before this section, so the running count after NEWH13 is about 700,173, not 700,161.
