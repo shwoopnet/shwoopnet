@@ -7772,3 +7772,7 @@ Registered first (`workers/NEWH2_REGISTRATION.md`), result `workers/NEWH2_RESULT
 ## Result: NEWH3 (four Bitcoin mechanisms), 2026-10-30
 
 Registered first (`workers/NEWH3_REGISTRATION.md`), result `workers/NEWH3_RESULT.md`, local caches only. BLADX (15 minute book vs the hourly ladder KXBTCD at the shared close, either leg): PF 1.08 / 0.76 and 0.78 / 0.92, **FALSIFIED** (neither book is the stale one; with NEWH2, closed on gold and Bitcoin). WIDEN (spread widening in the last 5 minutes): 3 and 0 trades, **NOT_ENOUGH_DATA**. EXITOI (L1 exit at the 120 s bid after open interest fell 5% between 360 s and 180 s): beat holding in both windows (+$9, +$30 at 10 contracts; triggered entries lose 62% vs 5%) but only 26 and 29 triggers against 50 registered, day z +1.51: **NOT_ENOUGH_DATA**; a forward read on live L1 entries is the only way to settle it. N +4; running count about 592,061.
+
+## Result: EXITOI-G (NEWH3's open interest exit on gold, Dogecoin, Ethereum L1 entries), 2026-10-30
+
+Registered first (`workers/EXITOI_G_REGISTRATION.md`), result `workers/EXITOI_G_RESULT.md`. Same rule, no tuning; Bitcoin reproduced exactly. Pooled (with Bitcoin): 80 / 85 triggers, rule PF 1.120 vs hold 1.158 in discovery, 1.059 vs 1.040 in validation, z -1.24: **FALSIFIED**. Gold, Dogecoin, Ethereum alone: **NOT_ENOUGH_DATA** (gold and Dogecoin worse than holding). Triggered entries lose more often (pooled 35% to 46% vs 5%), but selling gives up more on the ones that recover, as TIMEX1 found. No forward check. N +4; running count about 592,065.

@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 11:20 PM CT, EXITOI-G: the open interest exit does not carry to gold, Dogecoin or Ethereum (pooled FALSIFIED).** Selling L1 favourites late again gives back more on recoveries than it saves. N about 592,065.
+
 **2026-10-29 11:05 PM CT, NEWH3 (Bitcoin: ladder vs 15 minute book, spread widening, open interest exit for L1): FALSIFIED or NOT_ENOUGH_DATA.** One small lead: on L1 entries, falling open interest 3 to 6 minutes before the close marks failing favourites (62% lose); selling at 120 s beat holding in both windows but on too few triggers. N about 592,061.
 
 **2026-10-29 10:30 PM CT, NEWH2 (gold: CME break, COMEX reopen, silver lead, hourly ladder): FALSIFIED or NOT_ENOUGH_DATA.** Kalshi's 15 minute gold book beats its own hourly ladder when they disagree. N about 592,057.
