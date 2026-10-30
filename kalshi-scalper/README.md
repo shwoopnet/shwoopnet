@@ -7816,3 +7816,17 @@ Registered first (`workers/NEWH9_REGISTRATION.md`, commit 1b679e1), result `work
 ## Result: LADFADE (fade the Bitcoin 15 minute first-minute overshoot past the hourly ladder), 2026-10-30
 
 Post hoc from NEWH9's I1, so discovery and validation were spent; registered first (`workers/LADFADE_REGISTRATION.md`, commit a197b9e), result `workers/LADFADE_RESULT.md`, code `src/scalper/ladfade.py`. Rule: KXBTC15M windows opening :15 and :30, ladder lean 5c+ at the first minute, buy the side the 15 minute book overshot away from when its ask is 3c+ under the ladder's chance, at the next candle's ask (30c to 70c), held. NEWH9's frozen holdout read once: 105 trades on 12 days, win 41.9%, PF 1.01 at C = 10, 0.99 at fees x1.2, net x1.2 -$1.75: **FALSIFIED**. The ladder was right (chance 0.405, won 41.9%) but the overshoot closes in a minute (signal ask 0.341, fill ask 0.401). Forward candidate `LADFADE_BTC` stays registered as a dead candidate. N +1; running count about 627,846 (z bar 5.24).
+
+## Result: NEWH10 (does the hourly ladders' width follow the clock? weekends, US hours, Asian hours, macro releases), 2026-10-30
+
+Registered first (`workers/NEWH10_REGISTRATION.md`, commit 30f37b1), result `workers/NEWH10_RESULT.md`, code `src/scalper/newh10.py`,
+local ladder candles only; discovery to Sep 21, validation to Oct 18, holdout to Oct 30 NOT read because nothing passed. One rule,
+four clocks: the strike whose cheap side sits nearest 30c (20c to 40c, spread at most 3c), filled at the next candle's ask, held.
+**WKNDWIDE** (Bitcoin KXBTCD at weekends, 45 minutes left, buy the 58c to 82c side): PF 1.23 / 1.26 on 147 / 109 (day z 1.24 / 1.16,
+8 and 7 weekend days), **FALSIFIED** (under 1.5); its weekday twin (information) 0.81 / 0.92, so weekend wings are a little rich but
+nowhere near the bar. **USNARROW-BTC** (buy the wing in US cash hours): 0.97 / 1.00, **FALSIFIED**. **ASIAWIDE-GOLD** and
+**USNARROW-GOLD** (KXGOLDH, 14 minutes left): 44 and 37 discovery trades, PF 0.70 and 0.65, mostly on zero-volume candles,
+**NOT_ENOUGH_DATA**. Macro releases: the 15 minute version is EVT1; on the Bitcoin ladder the 8:30 ET release hour (information I2,
+15 events) showed the ladder only about 7% wider before a release and the 30c wing winning 53% (PF 2.56) against 18% on other
+weekdays: 15 events cannot carry a claim and history has no more; a forward read would take about a year. KXGOLDD and KXGOLDW width:
+NOT_RUNNABLE (about 60 daily and 9 weekly closes in all history). N +6; running count about 627,852 (z bar 5.24).
