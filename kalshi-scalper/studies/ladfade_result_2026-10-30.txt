@@ -1,0 +1,8 @@
+LADFADE holdout (read once). running N 627,846; deflated one-sided z bar 5.24
+funnel {'clock': 568, 'flat': 231, 'nogap': 83, 'band': 71, 'trade': 105, 'gap': 78}
+n 105 (12 d) PF10 1.01 PF1 0.99 PFx1.2 0.99 net10 $1.56 netx1.2 $-1.75 win 41.9% cost/set 0.401 day z 0.02 | zero-vol 0, PF10 without 1.01
+mean ladder chance of the faded side 0.405, mean signal ask 0.341, mean fill ask 0.401, win rate 0.419
+  bought yes: n 55 (11 d) PF10 1.07 PF1 1.05 PFx1.2 1.05 net10 $8.83 netx1.2 $7.11 win 41.8% cost/set 0.385 day z 0.19 | zero-vol 0, PF10 without 1.07
+  bought no: n 50 (12 d) PF10 0.94 PF1 0.93 PFx1.2 0.93 net10 $-7.27 netx1.2 $-8.86 win 42.0% cost/set 0.418 day z -0.30 | zero-vol 0, PF10 without 0.94
+without zero-volume trades: n 105 (12 d) PF10 1.01 PF1 0.99 PFx1.2 0.99 net10 $1.56 netx1.2 $-1.75 win 41.9% cost/set 0.401 day z 0.02 | zero-vol 0, PF10 without 1.01
+VERDICT: FALSIFIED
