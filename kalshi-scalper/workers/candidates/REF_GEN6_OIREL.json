@@ -1,0 +1,11 @@
+{
+ "id": "REF_GEN6_OIREL",
+ "market": "KXBTC15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T15:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.oirel:forward_eval",
+ "params": {"series": "KXBTC15M", "rthr": 0.26764675317954373},
+ "generator": "FALS5 check 2 (relative jump version of GEN6's open interest core)",
+ "description": "Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) when open interest over the 3 minutes before rose by more than 26.76% of its level at 360 s (the discovery quantile matched to the core's 86,300 count), fill at the next candle's ask, held. History: discovery n 298 PF 1.73, validation n 286 PF 1.71 at 10 contracts (FALS5 check 2, one try). Not independent of REF_GEN6_OICORE (59% to 80% shared trades). workers/FALS5_REGISTRATION.md, workers/FALS5_RESULT.md."
+}
