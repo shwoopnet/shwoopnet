@@ -1,0 +1,64 @@
+{
+ "id": "GEN7_B01",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T01:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.gen7:forward_eval",
+ "params": {
+  "strategy": {
+   "L_hi": 240,
+   "L_lo": 240,
+   "cls": "cheap",
+   "side": "both",
+   "conds": [
+    [
+     "npv1",
+     "gt",
+     0.28078466079411274
+    ],
+    [
+     "vol",
+     "gt",
+     131527.569
+    ]
+   ],
+   "e": 6
+  },
+  "series": "KXBTC15M"
+ },
+ "generator": "GEN7 (workers/GEN7_REGISTRATION.md; frozen list sha256 b8f09a9a...)",
+ "family": "open interest flow, cheap side 300 to 240 s; about half its validation entries are REF_GEN6_OICORE windows",
+ "disc": {
+  "n": 101,
+  "days": 38,
+  "pf": 3.2826,
+  "pf1": 2.8356,
+  "pfs": 3.2168,
+  "pf_sig": 2.8143,
+  "zv": 0.0,
+  "mean": 0.1287,
+  "win": 0.3168,
+  "ask": 0.145,
+  "pf_nozv": 3.2826,
+  "z": 3.4221
+ },
+ "valid": {
+  "n": 126,
+  "days": 34,
+  "pf": 1.7991,
+  "pf1": 1.5978,
+  "pfs": 1.7558,
+  "pf_sig": 1.919,
+  "zv": 0.0,
+  "mean": 0.0604,
+  "win": 0.3095,
+  "ask": 0.198,
+  "pf_nozv": 1.7991,
+  "z": 2.2845,
+  "jac_oicore": 0.1953,
+  "in_oicore": 75,
+  "jac_l1": 0.0253
+ },
+ "description": "Bitcoin cheap side (ask 5c to 50c at the signal), [cheap both 240..240s | npv1>0.281 & vol>1.32e+05 | sell at 60s]; npv1 = open interest change over the last minute divided by that minute's volume; fill at the next candle's ask. Discovery PF 3.28 (n 101), validation PF 1.80 (n 126), C=10."
+}
