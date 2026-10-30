@@ -7804,3 +7804,7 @@ Brief B's information check (`workers/LIQ1_INFO_REGISTRATION.md`, `workers/LIQ1_
 ## Result: GOLDPYTH-H (Pyth gold history against Kalshi's gold quotes), 2026-10-30: NOT_RUNNABLE
 
 `workers/GOLDPYTH_H_RESULT.md`. Pyth's Benchmarks history and Hermes latest-price routes answer 401 without a key for 1OZGOLD/USD (Kalshi's gold settlement feed) and XAU/USD; only feed metadata is keyless. Kalshi's settled gold markets give Pyth only at each window's open and close. No registration, 0 tries. Brief A's forward recorder would also need a Pyth key (owner decision; the key goes in the environment's secrets, never in chat).
+
+## Result: GEN8 (mid-price round trips, never held, gold and Bitcoin), 2026-10-30
+
+Registered first (`workers/GEN8_REGISTRATION.md`), frozen lists empty (`workers/GEN8_FROZEN.md`), result `workers/GEN8_RESULT.md`. 5,000 distinct per market; median discovery PF 0.55 (Bitcoin) and 0.52 (gold); best 1.14 and 1.09; 0 passed discovery: **FALSIFIED** on both. A round trip costs about 4c (two fees plus the spread) and nothing on 1 minute candles predicts the mid over 1 to 5 minutes. With GEN1, this trade shape is closed on 1 minute data; only a sub-minute source could reopen it. N +35,738; running count about 627,838 (z bar about 5.24).
