@@ -440,16 +440,14 @@
   .kal-hold-body{ display:grid; grid-template-columns:minmax(120px,170px) minmax(0,1fr); gap:10px 28px; align-items:stretch; }
   .kal-hold-body .kal-hold-stats{ grid-template-columns:1fr; gap:10px; align-content:start; }
   /* Strategy switch (the owner, Oct 29, 2026: "i like 1"): one control above the Bot cards, shown only once a second strategy has orders; with only L1 it does not exist and the page is exactly what it was. */
-  .kal-strat{ display:flex; gap:4px; background:var(--panel); border:1px solid var(--border); border-radius:999px; padding:3px; width:max-content; max-width:100%; flex-wrap:wrap; margin:0 0 12px; }
-  .kal-strat[hidden], .kal-strats[hidden]{ display:none; }
-  .kal-strat button{ font:inherit; font-size:13px; font-weight:600; padding:8px 16px; min-height:40px; border:0; border-radius:999px; background:none; color:var(--muted); cursor:pointer; }
-  .kal-strat button[aria-pressed="true"]{ background:var(--paper); color:var(--ink); }
-  .kal-strat button:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
   .kal-strats{ margin:0 0 12px; }
   .kal-strat-tbl{ width:100%; border-collapse:collapse; font-size:13px; } .kal-strat-tbl th{ font-weight:600; color:var(--muted); font-size:12px; text-align:left; padding:6px 8px; } .kal-strat-tbl td{ padding:9px 8px; border-top:1px solid var(--border); }
   .kal-strat-tbl th:not(:first-child), .kal-strat-tbl td:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
+  .kal-pill.kal-pill-run{ color:var(--gain); border-color:var(--gain); }
+  .kal-tbl-wrap{ overflow-x:auto; }
+  .kal-strat-tbl td:first-child, .kal-strat-tbl th:first-child{ white-space:nowrap; }
+  .kal-chip.kal-chip-slot{ background:var(--paper); color:var(--ink); border-color:var(--paper); }
   .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; }
-  #page-kalshi[data-strategy="probe"] [data-card="positions"], #page-kalshi[data-strategy="probe"] [data-card="trades"]{ display:none; }
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
   .kal-hold-chart svg{ display:block; width:100%; height:130px; }
   .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
@@ -1351,9 +1349,7 @@
 
 
     <div class="kal-alert" id="kalAlert" role="alert" hidden><b id="kalAlertTitle"></b><span id="kalAlertText"></span> <button type="button" class="kal-alert-open" id="kalAlertOpen">See notifications</button></div>
-    <div class="kal-strat" id="kalStrat" role="group" aria-label="Strategy" hidden></div>
     <div class="kal-card kal-strats" id="kalStrategies" hidden></div>
-    <div class="kal-card kal-strats" id="kalProbe" hidden></div>
     <div id="kalTabBot" class="kal-bot-grid kal-console">
       <div class="kal-rail">
       <div class="kal-card" data-card="account">
@@ -1541,6 +1537,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot page: one Overall page. The strategy switch and the OICORE panel are gone; a Strategies module lists L1 and OICORE (status, today, result, settled, win rate, open, last order) and a small chip on every open position and trade says which strategy it came from</li>
                   <li>Account result: the older trades are read in pages of 5,000 (one big read was refused), so the 1M, 3M, YTD and All totals include every order; the OICORE panel says "No order yet" plainly</li>
                   <li>Bot page: the strategy switch (Overall, L1, OICORE) is there from the start, not only after the second strategy's first order; Rules and limits now describe OICORE</li>
                   <li>Account result: when the older trades cannot be read, the note now says why (the error code), so the cause can be found</li>
@@ -2471,7 +2468,7 @@
       if(m && m.closeTime){ left = kalshiSecsLeft(m.closeTime, nowMs); }
       return { ticker: p.ticker, title: kalshiShortTicker(p.ticker), side: side, count: count, entry: entry, cost: cost,
         ifWin: cost === null ? null : Math.round((count - cost) * 100) / 100, ifLose: cost === null ? null : -cost,
-        chance: chance, cashOut: cashOut, left: left, strike: m && Number.isFinite(Number(m.strike)) ? Number(m.strike) : null, bot: !!order };
+        chance: chance, cashOut: cashOut, left: left, strike: m && Number.isFinite(Number(m.strike)) ? Number(m.strike) : null, bot: !!order, strategy: order ? kalshiStrategyOf(order) : '' };
     });
   }
 
@@ -2519,7 +2516,7 @@
       var stats = '<div class="kal-hold-stats">' + stat('Cost', r.cost === null ? 'n/a' : money(r.cost)) + stat('If it wins', r.ifWin === null ? 'n/a' : sg(r.ifWin), r.ifWin === null ? '' : 'kal-pos') +
         stat('If it loses', r.ifLose === null ? 'n/a' : sg(r.ifLose), r.ifLose === null ? '' : 'kal-neg') + '</div>';
       var chart = kalshiPositionChartHtml(r);
-      return '<div class="kal-hold"><div class="kal-hold-head"><div class="kal-name">' + esc(r.title) + '</div><span class="kal-side kal-side-' + r.side + '">' + esc(r.side.toUpperCase()) + ' x ' + esc(String(r.count)) + '</span></div>' +
+      return '<div class="kal-hold"><div class="kal-hold-head"><div class="kal-name">' + (r.strategy ? kalshiChipHtml(r.strategy, esc) : '') + esc(r.title) + '</div><span class="kal-side kal-side-' + r.side + '">' + esc(r.side.toUpperCase()) + ' x ' + esc(String(r.count)) + '</span></div>' +
         (chart ? '<div class="kal-hold-body">' + stats + chart + '</div>' : stats) +
         (sub.length ? '<div class="kal-hold-sub">' + esc(sub.join(' · ')) + '</div>' : '') +
         (r.bot ? '' : '<div class="kal-hold-sub">Not one of the bot\'s trades.</div>') + '</div>';
@@ -2706,7 +2703,7 @@
           var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
           var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + kalshiPctText(pnl, paid * cnt) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
           return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(o.ts, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
-            '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">bot</span></div>';
+            '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">' + kalshiChipHtml(kalshiStrategyOf(o), escapeHtml) + '</span></div>';
         }
         var x = item.fill;
         var bot = kalshiFillIsBot(x, kalshiAllOrders());
@@ -2728,7 +2725,7 @@
         else if(ord){ open++; plCell = '<span style="color:var(--muted)">open</span>'; }
         else { plCell = '<span style="color:var(--muted)">n/a</span>'; }
         return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(x.time ? Date.parse(x.time) : NaN, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(x.ticker)) + '</span>' +
-          '<span class="kal-tr-f">' + fillText + '</span><span class="kal-tr-p">' + plCell + '</span><span class="kal-tr-s">' + (bot ? 'bot' : 'manual') + '</span></div>';
+          '<span class="kal-tr-f">' + fillText + '</span><span class="kal-tr-p">' + plCell + '</span><span class="kal-tr-s">' + (bot ? kalshiChipHtml(kalshiStrategyOf(ord), escapeHtml) : 'manual') + '</span></div>';
       }).join('');
       var foot = [];
       if(pages > 1){
@@ -2960,9 +2957,8 @@
     var nowMs = Date.now(), key = kalshiPnlRange, since = kalshiPnlRangeStart(key, nowMs);
     var loaded = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
     var oldest = loaded.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
-    var source = kalshiLiveOrders, partial = false, slotIds = kalshiSlotIds(kalshiSlotOrders), sel = kalshiViewSelection(kalshiStrategy, slotIds), probeOnly = slotIds.length > 0 && sel !== 'L1' && sel !== 'ALL';
-    if(probeOnly){ source = kalshiViewOrders(sel, kalshiLiveOrders, kalshiSlotOrders); }
-    else if(loaded.length >= 1000 && since < oldest){
+    var source = kalshiLiveOrders, partial = false;
+    if(loaded.length >= 1000 && since < oldest){
       var hit = kalshiPnlFetched[key];
       // The older part is read once and kept for the page's life (an order older than everything the live listener holds does not change); a failed read is retried after a minute. The newer part is ALWAYS the live listener, so the line and
       // its total never lag the Today figure and the trade list (the owner, Oct 29, 2026: the 1M and 3M result looked wrong; it was a ten minute old copy of every order).
@@ -2978,7 +2974,7 @@
         set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
       }
     }
-    if(!probeOnly && slotIds.length && sel === 'ALL'){ source = source.concat(kalshiSlotOrders); }
+    source = source.concat(kalshiSlotOrders || []);     // the second strategy's orders are part of the account's result
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
   }
@@ -3478,16 +3474,19 @@ kalshiStatusTick();
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiStatus();
   }
-  // ---------- Strategies: L1 and the second slot's probes (the owner, Oct 29, 2026) ----------
-  // The page reads the slot's orders (kalshiSlotOrders, admin read) next to L1's. With no slot order there is no switch, no table and no panel, and every card draws exactly what it drew before. A slot order carries slotId (the strategy's name);
-  // every name is escaped where it is drawn. Nothing here can change a strategy: no button writes anything.
-  var kalshiSlotOrders = [], kalshiStrategy = 'ALL';
-  try{ var savedStrategy = window.localStorage.getItem('shwoopnet:kalStrategy'); if(savedStrategy){ kalshiStrategy = savedStrategy.slice(0, 40); } }catch(e){}
+  // ---------- Strategies (the owner, Oct 29 to 30, 2026: "build the entire page to be 'overall' with maybe some identifiers & ... one module that displays the unique strategies") ----------
+  // One Overall page, no switch: every card shows every order the bot placed, L1's and the second slot's, and a small chip on a row says which strategy it came from. The slot's orders come from kalshiSlotOrders (admin read,
+  // written only by the server). A slot order carries slotId; every name is escaped where it is drawn. Nothing here can change a strategy: nothing on the page writes anything.
+  var kalshiSlotOrders = [];
   // Every order the bot placed, L1's and the second slot's: used to RECOGNISE the bot's fills, so a slot fill is never shown as a manual trade or an unmatched position.
   function kalshiAllOrders(){ return (kalshiLiveOrders || []).concat(kalshiSlotOrders || []); }
-  // The second-slot strategies registered in the bot's code (SLOT_STRATEGIES in the bot's slot library), so the switch is there from the start and not only after a first order (the owner, Oct 29, 2026: "i dont see the toggle").
-  // A test compares this list with the registry. It is only labels: it cannot add or enable anything.
+  // The second-slot strategies registered in the bot's code (SLOT_STRATEGIES in the bot's slot library), so the Strategies module lists them before a first order. A test compares this list with the registry. Labels only.
   var KAL_SLOT_REGISTERED = ['OICORE'];
+  // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
+  var KAL_STRATEGY_INFO = {
+    L1: { name: 'Closing buy', markets: 'Gold, Dogecoin, Ethereum', note: '' },
+    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: 'OICORE: 5 contracts, held to settlement. Kill rule: net under -$6 after 40 fills.' }
+  };
   function kalshiSlotIds(slot){
     var seen = {}, out = [];
     KAL_SLOT_REGISTERED.forEach(function(id){ seen[id] = true; out.push(id); });
@@ -3495,15 +3494,9 @@ kalshiStatusTick();
       .forEach(function(o){ var id = o.slotId.slice(0, 40); if(!seen[id]){ seen[id] = true; out.push(id); } });
     return out;
   }
-  // What the switch is on: L1, a second-slot strategy that exists, or Overall. A name that no longer exists falls back to Overall; with no second-slot order at all the view is L1.
-  function kalshiViewSelection(sel, ids){ return !ids || !ids.length ? 'L1' : (sel === 'L1' || ids.indexOf(sel) >= 0 ? sel : 'ALL'); }
-  // The orders a card draws. With no second-slot order it is the very same array L1 always had (so nothing can change); L1 never includes the slot's orders and the slot never includes L1's.
-  function kalshiViewOrders(sel, live, slot){
-    var ids = kalshiSlotIds(slot), s = kalshiViewSelection(sel, ids);
-    if(!ids.length || s === 'L1'){ return live; }
-    if(s === 'ALL'){ return (live || []).concat(slot || []); }
-    return (slot || []).filter(function(o){ return o && o.slotId === s; });
-  }
+  // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
+  function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
+  function kalshiChipHtml(label, esc){ return '<span class="kal-chip' + (label === 'L1' ? '' : ' kal-chip-slot') + '">' + esc(label) + '</span>'; }
   function kalshiOrdersSummary(orders, nowMs){
     var out = { n: 0, won: 0, lost: 0, net: 0, gw: 0, gl: 0, today: 0, open: [], last: [], pf: null, firstTs: null, lastTs: null }, day = kalDayKey(nowMs);
     (orders || []).filter(function(o){ return o && Number(o.fillCount) > 0 && Number.isFinite(Number(o.ts)); }).sort(function(a, b){ return Number(a.ts) - Number(b.ts); }).forEach(function(o){
@@ -3516,47 +3509,34 @@ kalshiStatusTick();
     out.net = Math.round(out.net * 10000) / 10000; out.today = Math.round(out.today * 10000) / 10000; out.pf = out.gl > 0 ? out.gw / out.gl : null; out.last = out.last.slice(-6).reverse();
     return out;
   }
-  function kalshiStrategySwitchHtml(sel, ids, esc){
-    var all = [['ALL', 'Overall'], ['L1', 'L1']].concat(ids.map(function(i){ return [i, i]; }));
-    return all.map(function(b){ return '<button type="button" data-strat="' + esc(b[0]) + '" aria-pressed="' + (b[0] === sel) + '">' + esc(b[1]) + '</button>'; }).join('');
-  }
+  // The Strategies module: one row per strategy. rows: [{ id, info, sum, status, ageText }]. Dollar figures go through money (Privacy view masks them); a percentage is never masked.
   function kalshiStrategiesTableHtml(rows, esc, money){
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var cls = function(v){ return v > 0 ? ' kal-pos' : (v < 0 ? ' kal-neg' : ''); };
+    var body = rows.map(function(r){
+      var dec = r.sum.won + r.sum.lost, wr = dec > 0 ? (r.sum.won / dec * 100).toFixed(1) + '%' : 'n/a';
+      return '<tr><td>' + kalshiChipHtml(r.id, esc) + esc(r.info.name) + '</td><td>' + esc(r.info.markets) + '</td><td><span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span></td>' +
+        '<td class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td>' + esc(String(r.sum.n)) + '</td><td>' + esc(wr) + '</td><td>' + esc(String(r.sum.open.length)) + '</td><td>' + esc(r.ageText) + '</td></tr>';
+    }).join('');
+    var notes = rows.filter(function(r){ return r.info.note; }).map(function(r){ return '<div class="kal-note">' + esc(r.info.note) + '</div>'; }).join('');
+    return '<div class="kal-card-title">Strategies</div><div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
+      '<div class="kal-note">Result, settled and win rate cover each strategy\'s latest orders the page holds (about two weeks for L1).</div>';
     return '<div class="kal-card-title">Strategies</div><table class="kal-strat-tbl"><thead><tr><th>Name</th><th>Today</th><th>Result</th><th>Settled</th><th>Open</th></tr></thead><tbody>' +
       rows.map(function(r){ return '<tr><td>' + (r.chip ? '<span class="kal-chip">' + esc(r.chip) + '</span>' : '') + esc(r.name) + '</td><td>' + esc(sg(r.sum.today)) + '</td><td>' + esc(sg(r.sum.net)) + '</td><td>' + esc(String(r.sum.n)) + '</td><td>' + esc(String(r.sum.open.length)) + '</td></tr>'; }).join('') + '</tbody></table>';
   }
-  function kalshiProbeHtml(id, sum, nowMs, esc, money){
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
-    var age = sum.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((nowMs - sum.lastTs) / 1000)));
-    var rows = function(list, openRows){ return list.map(function(o){ var p = kalshiOrderPnl(o);
-      return '<div class="kal-tr"><span>' + esc(kalTime(Number(o.ts))) + '</span><span>' + esc(kalshiShortTicker(o.ticker || '')) + '</span><span>' + esc(String(o.side || '').toUpperCase() + ' x ' + (Number(o.fillCount) || Number(o.count) || 0) + (openRows ? ' open' : '')) + '</span><span class="kal-tr-p ' + (p === null ? '' : (p >= 0 ? 'kal-pos' : 'kal-neg')) + '">' + esc(p === null ? '' : sg(p)) + '</span></div>'; }).join(''); };
-    return '<div class="kal-card-head" style="padding:0 0 10px"><div class="kal-card-title" style="margin:0">' + esc(id) + '</div><span class="kal-pill">' + (age === '' ? 'No order yet' : 'Last order ' + esc(age)) + '</span></div>' +
-      '<div class="kal-hold-stats">' + stat('Result', sg(sum.net), sum.net >= 0 ? 'kal-pos' : 'kal-neg') + stat('Today', sg(sum.today)) + stat('Settled', String(sum.n)) + stat('Won / lost', sum.won + ' / ' + sum.lost) + stat('Profit factor', sum.pf === null ? 'n/a' : sum.pf.toFixed(2)) + '</div>' +
-      (sum.open.length ? '<div class="kal-lbl" style="margin-top:10px">Open</div>' + rows(sum.open, true) : '') +
-      (sum.last.length ? '<div class="kal-lbl" style="margin-top:10px">Last trades</div>' + rows(sum.last, false) : '<div class="kal-empty">No settled trade yet.</div>');
-  }
   function renderKalshiStrategies(){
-    var sw = document.getElementById('kalStrat'), tbl = document.getElementById('kalStrategies'), pr = document.getElementById('kalProbe'), pg = document.getElementById('page-kalshi');
-    if(!sw || !tbl || !pr){ return; }
-    var ids = kalshiSlotIds(kalshiSlotOrders), sel = kalshiViewSelection(kalshiStrategy, ids);
-    if(!ids.length){ sw.hidden = true; tbl.hidden = true; pr.hidden = true; if(pg){ pg.removeAttribute('data-strategy'); } return; }
-    var now = Date.now();
-    sw.hidden = false; sw.innerHTML = kalshiStrategySwitchHtml(sel, ids, escapeHtml);
-    if(pg){ pg.setAttribute('data-strategy', sel === 'ALL' ? 'all' : (sel === 'L1' ? 'l1' : 'probe')); }
-    if(sel === 'ALL'){
-      var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), now), rows = [{ name: 'L1', chip: 'L1', sum: l1 }], tot = { n: l1.n, net: l1.net, today: l1.today, open: l1.open.slice() };
-      ids.forEach(function(i){ var s = kalshiOrdersSummary(kalshiSlotOrders.filter(function(o){ return o.slotId === i; }), now); rows.push({ name: i, chip: i, sum: s }); tot.n += s.n; tot.net += s.net; tot.today += s.today; tot.open = tot.open.concat(s.open); });
-      tot.net = Math.round(tot.net * 10000) / 10000; tot.today = Math.round(tot.today * 10000) / 10000;
-      rows.unshift({ name: 'Overall', chip: '', sum: tot });
-      tbl.hidden = false; tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney); pr.hidden = true;
-    } else if(sel === 'L1'){ tbl.hidden = true; pr.hidden = true; }
-    else { tbl.hidden = true; pr.hidden = false; pr.innerHTML = kalshiProbeHtml(sel, kalshiOrdersSummary(kalshiSlotOrders.filter(function(o){ return o.slotId === sel; }), now), now, escapeHtml, kalshiMoney); }
+    var tbl = document.getElementById('kalStrategies');
+    if(!tbl){ return; }
+    var now = Date.now(), ses = kalshiLiveCtl && kalshiLiveCtl.session, on = !!(ses && ses.active === true);
+    var age = function(sum){ return sum.lastTs === null ? 'No order yet' : kalshiAgeText(Math.max(0, Math.round((now - sum.lastTs) / 1000))) + ' ago'; };
+    var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), now);
+    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
+    kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
+      var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), kalshiLiveAcct && kalshiLiveAcct.results), now);
+      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
+    });
+    tbl.hidden = false; tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney);
   }
-  (function(){
-    var sw = document.getElementById('kalStrat');
-    if(sw){ sw.addEventListener('click', function(e){ var b = e.target && e.target.closest ? e.target.closest('[data-strat]') : null; if(!b){ return; } kalshiStrategy = String(b.getAttribute('data-strat')).slice(0, 40); try{ window.localStorage.setItem('shwoopnet:kalStrategy', kalshiStrategy); }catch(err){} renderKalshiStrategies(); renderKalshiPnl(); }); }
-  })();
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
   var kalshiSlotUnsub = null;
