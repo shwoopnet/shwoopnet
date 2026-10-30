@@ -40,15 +40,21 @@ fi
 # The phone alert key: made once.
 if [ "${DRY_RUN:-}" = "1" ]; then
   echo "[dry run] create KALSHI_PUSH_VAPID_PRIVATE if it does not exist"
-elif "${FB[@]}" functions:secrets:access KALSHI_PUSH_VAPID_PRIVATE --project "$PROJECT" >/dev/null 2>&1; then
+elif ACCESS_OUT="$("${FB[@]}" functions:secrets:access KALSHI_PUSH_VAPID_PRIVATE --project "$PROJECT" 2>&1)"; then
   echo "The phone alert key already exists, keeping it."
-else
+elif printf '%s' "$ACCESS_OUT" | grep -qiE 'not found|NOT_FOUND|does not exist|could not find|404'; then
+  # Only a key that is truly missing is made. Any other failure (a network blip, a sign-in problem) used to fall through to here and made a NEW key, which orphans every phone already subscribed, so alerts stopped silently (the owner, Oct 30, 2026).
   KEYFILE="$(mktemp)"
   chmod 600 "$KEYFILE"
   node -e "process.stdout.write(require('./functions/node_modules/web-push').generateVAPIDKeys().privateKey)" > "$KEYFILE"
   "${FB[@]}" functions:secrets:set KALSHI_PUSH_VAPID_PRIVATE --data-file "$KEYFILE" --project "$PROJECT" --force
   rm -f "$KEYFILE"
   echo "The phone alert key was created and stored in Firebase."
+else
+  echo "STOP: could not read the phone alert key, and the reason is not 'it does not exist'. Not making a new one: that would break every phone already subscribed. The error was:"
+  printf '%s\n' "$ACCESS_OUT" | head -3
+  echo "Sign in again (firebase login) or check the network, then run this script again."
+  exit 1
 fi
 
 # The bot buys about 6 minutes before each 15 minute close (minutes 8 to 10 of each quarter hour). A deploy restarts the exit watch for a moment, so wait those out.
