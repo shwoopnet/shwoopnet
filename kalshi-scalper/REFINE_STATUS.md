@@ -2,7 +2,23 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## Standing queue (ranked; refill when under 5; each item needs a registration here BEFORE scoring and adds its tries to N)
+
+Counts as of 2026-10-30 2:00 PM CT: N 728,652. Status: R = registered, Q = queued.
+1. R1 band edges 86 to 88c and 97 to 98c (gold, Dogecoin). R, waiting on counts-only history.
+2. R2 no-fill share, limit +1c simulated on R6. R, waiting on R6 days and an order export.
+3. R3 Dogecoin 20:00 to 23:59 CT block vs rest. R, waiting on counts.
+4. R4 size effects by order size from the nightly report. R, running now (report already carries `allStrategies` and `secondSlot`).
+5. Q: OICORE entry timing inside the 180 to 120 s window (which second inside the window fills best, from R6 Bitcoin book). Information first.
+6. Q: OICORE fill rate and slippage at 5 and 10 contracts (R6 Bitcoin book depth vs the orders in `slotOrders`).
+7. Q: OICORE and L1 in the same window (correlated-window risk): how often a Bitcoin slot order shares a window with a gold or Dogecoin loss. Counts only.
+8. Q: L1 exit alternatives as information only (the 25c line vs hold, per market, live record). STRUCT1 and EXIT1 already say the line is neutral, so low priority.
+9. Q: L1 gold ladder cap by order size once R4 has 20 orders at 16+ contracts.
+Refill rule: if this list falls under 5 open items, add from: Dogecoin entry timing (6 vs 8 minute look), gold quiet hours review (due Nov 24 to 26, V2 owns the read), spread filter at 2c or more as a frequency cost count, OICORE open interest threshold sensitivity (threshold 86,300 vs the trailing percentile), OICORE side rule sensitivity.
+
 ## Entries
+
+**2026-10-30 2:00 PM CT, report extension is already live; first OICORE and size read. No threshold hit.** The nightly report now carries `secondSlot`, `allStrategies` and `slotOrders` (the extension is deployed, earlier than the main session's last note). OICORE: 2 fills, both lost (Oct 30 7:42 AM CT, 5 contracts, -$0.32; Oct 30 9:42 AM CT, 10 contracts, -$0.75), net -$1.07. Expected win rate is about 28% (price 5c to 50c), so two losses in a row is about a 52% chance by luck; the streak kill is 18, the first read is Nov 13. Nothing to act on. Dogecoin counts above 5: none since Oct 28 (the 12 contract order flagged earlier). The Dogecoin ladder change has not shown in the orders yet. L1 plus slot, last 48 hours: 56 settled, 5 lost, net +$16.01, profit factor 2.0 (all strategies, paused markets quiet).
 
 **2026-10-30 2:00 PM CT, REGISTRATIONS R1 to R4 (owner direction Oct 30 "more research going in both chats"). Written BEFORE any outcome, candle or result row is opened for these tests. Nothing run yet.**
 
