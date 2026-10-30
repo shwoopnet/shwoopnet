@@ -18,6 +18,8 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:05 PM CT, queue item 7 (OICORE and L1 in the same window), first count: 0 of 2.** Both OICORE orders (Oct 30 8:45 and 10:45 AM CT windows) had no L1 fill in the same 15 minute window, so no shared loss yet. Sample is 2; the count will be re-run nightly from `slotOrders` against `orders` and reported when it reaches 20 slot orders. V2 will push counts-only R1 and R3 outputs to `claude/epic-ptolemy-0amjd9`; I read them when they land. Items 5 and 6 (OICORE entry timing, fill and slippage) need Bitcoin open interest candles or an order export with `avgFill`; the report's slot orders carry no `avgFill`, so they wait for either.
+
 **2026-10-30 2:00 PM CT, report extension is already live; first OICORE and size read. No threshold hit.** The nightly report now carries `secondSlot`, `allStrategies` and `slotOrders` (the extension is deployed, earlier than the main session's last note). OICORE: 2 fills, both lost (Oct 30 7:42 AM CT, 5 contracts, -$0.32; Oct 30 9:42 AM CT, 10 contracts, -$0.75), net -$1.07. Expected win rate is about 28% (price 5c to 50c), so two losses in a row is about a 52% chance by luck; the streak kill is 18, the first read is Nov 13. Nothing to act on. Dogecoin counts above 5: none since Oct 28 (the 12 contract order flagged earlier). The Dogecoin ladder change has not shown in the orders yet. L1 plus slot, last 48 hours: 56 settled, 5 lost, net +$16.01, profit factor 2.0 (all strategies, paused markets quiet).
 
 **2026-10-30 2:00 PM CT, REGISTRATIONS R1 to R4 (owner direction Oct 30 "more research going in both chats"). Written BEFORE any outcome, candle or result row is opened for these tests. Nothing run yet.**
