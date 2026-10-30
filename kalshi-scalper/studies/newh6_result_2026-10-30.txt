@@ -1,0 +1,46 @@
+
+=== KXGOLD15M: 5645 windows (3192 discovery, 2453 validation)
+-- STOPRUN (gaps disc 0, val 0)
+  disc STOPRUN          n   25 days  18 fill 0.227 sale 0.256 up 0.400 nosale   0 PF10 1.07 PF1 0.95 PFx1.2 1.01 net10    +1.35 netx    +0.26 z +0.14 | vol>0 n 25 PF10 1.07 | info hold PF 1.00
+  val  STOPRUN          n   11 days   9 fill 0.217 sale 0.334 up 0.545 nosale   0 PF10 3.05 PF1 2.61 PFx1.2 2.88 net10   +10.22 netx    +9.77 z +0.90 | vol>0 n 11 PF10 3.05 | info hold PF 1.94
+  verdict NOT_ENOUGH_DATA
+-- CLOCK_F (gaps disc 2, val 0)
+  disc CLOCK_F          n  410 days  41 fill 0.925 sale 0.921 up 0.617 nosale   0 PF10 0.51 PF1 0.27 PFx1.2 0.47 net10   -59.36 netx   -66.83 z -4.57 | vol>0 n 410 PF10 0.51 | info hold PF 1.15
+  val  CLOCK_F          n  261 days  31 fill 0.926 sale 0.915 up 0.678 nosale   0 PF10 0.46 PF1 0.26 PFx1.2 0.43 net10   -54.66 netx   -59.58 z -3.09 | vol>0 n 261 PF10 0.46 | info hold PF 1.86
+  verdict FALSIFIED
+-- CLOCK_R (gaps disc 2, val 0)
+  disc CLOCK_R          n  806 days  44 fill 0.068 sale 0.051 up 0.153 nosale   4 PF10 0.30 PF1 0.21 PFx1.2 0.28 net10  -200.19 netx  -211.32 z -7.00 | vol>0 n 806 PF10 0.30 | info hold PF 0.66
+  val  CLOCK_R          n  453 days  32 fill 0.068 sale 0.060 up 0.232 nosale   0 PF10 0.47 PF1 0.32 PFx1.2 0.44 net10   -76.87 netx   -83.84 z -5.62 | vol>0 n 453 PF10 0.47 | info hold PF 0.77
+  verdict FALSIFIED
+-- OPENLEAN (gaps disc 3192, val 2453)
+  disc OPENLEAN         n    0
+  val  OPENLEAN         n    0
+  verdict NOT_ENOUGH_DATA
+
+=== KXBTC15M: 7869 windows (4357 discovery, 3512 validation)
+-- STOPRUN (gaps disc 0, val 0)
+  disc STOPRUN          n   35 days  24 fill 0.222 sale 0.219 up 0.286 nosale   0 PF10 0.79 PF1 0.73 PFx1.2 0.76 net10    -7.88 netx    -9.18 z -0.52 | vol>0 n 35 PF10 0.79 | info hold PF 1.14
+  val  STOPRUN          n   22 days  16 fill 0.227 sale 0.237 up 0.318 nosale   0 PF10 0.87 PF1 0.78 PFx1.2 0.83 net10    -2.45 netx    -3.30 z -0.26 | vol>0 n 22 PF10 0.87 | info hold PF 0.70
+  verdict NOT_ENOUGH_DATA
+-- CLOCK_F (gaps disc 0, val 0)
+  disc CLOCK_F          n  499 days  46 fill 0.926 sale 0.936 up 0.754 nosale   0 PF10 1.00 PF1 0.55 PFx1.2 0.92 net10    -0.06 netx    -8.55 z -0.00 | vol>0 n 499 PF10 1.00 | info hold PF 1.34
+  val  CLOCK_F          n  453 days  37 fill 0.928 sale 0.933 up 0.728 nosale   0 PF10 0.82 PF1 0.47 PFx1.2 0.77 net10   -21.53 netx   -29.10 z -1.26 | vol>0 n 453 PF10 0.82 | info hold PF 0.94
+  verdict FALSIFIED
+-- CLOCK_R (gaps disc 0, val 0)
+  disc CLOCK_R          n  958 days  46 fill 0.066 sale 0.055 up 0.205 nosale   0 PF10 0.40 PF1 0.27 PFx1.2 0.38 net10  -189.85 netx  -203.71 z -10.00 | vol>0 n 958 PF10 0.40 | info hold PF 0.82
+  val  CLOCK_R          n  579 days  37 fill 0.068 sale 0.069 up 0.257 nosale   0 PF10 0.73 PF1 0.52 PFx1.2 0.69 net10   -50.79 netx   -59.87 z -1.76 | vol>0 n 579 PF10 0.73 | info hold PF 0.96
+  verdict FALSIFIED
+-- OPENLEAN (gaps disc 4357, val 3512)
+  disc OPENLEAN         n    0
+  val  OPENLEAN         n    0
+  verdict NOT_ENOUGH_DATA
+
+Summary:
+  KXGOLD15M  STOPRUN   disc n   25 PF10 1.07 | val n   11 PF10 3.05 | NOT_ENOUGH_DATA
+  KXGOLD15M  CLOCK_F   disc n  410 PF10 0.51 | val n  261 PF10 0.46 | FALSIFIED
+  KXGOLD15M  CLOCK_R   disc n  806 PF10 0.30 | val n  453 PF10 0.47 | FALSIFIED
+  KXGOLD15M  OPENLEAN  disc n    0 PF10 nan | val n    0 PF10 nan | NOT_ENOUGH_DATA
+  KXBTC15M   STOPRUN   disc n   35 PF10 0.79 | val n   22 PF10 0.87 | NOT_ENOUGH_DATA
+  KXBTC15M   CLOCK_F   disc n  499 PF10 1.00 | val n  453 PF10 0.82 | FALSIFIED
+  KXBTC15M   CLOCK_R   disc n  958 PF10 0.40 | val n  579 PF10 0.73 | FALSIFIED
+  KXBTC15M   OPENLEAN  disc n    0 PF10 nan | val n    0 PF10 nan | NOT_ENOUGH_DATA

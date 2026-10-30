@@ -1,0 +1,22 @@
+
+=== KXGOLD15M: 5645 windows (3192 discovery, 2453 validation)
+descriptive disc: opening lean toward the previous leader, n 3173, mean +0.0027, share >= +0.05 0.333, share <= -0.05 0.323
+descriptive val: opening lean toward the previous leader, n 2428, mean +0.0014, share >= +0.05 0.335, share <= -0.05 0.320
+registered OPENLEAN (opening quote bid_o/ask_o) runnable windows: disc 0, val 0 (NOT_RUNNABLE)
+-- OPENLEAN (gaps disc 19, val 25)
+  disc OPENLEAN         n  894 days  45 fill 0.379 sale 0.365 up 0.402 nosale   1 PF10 0.60 PF1 0.55 PFx1.2 0.57 net10  -392.84 netx  -441.91 z -5.63 | vol>0 n 893 PF10 0.61 | info hold PF 0.86
+  val  OPENLEAN         n  693 days  31 fill 0.372 sale 0.361 up 0.413 nosale   0 PF10 0.62 PF1 0.56 PFx1.2 0.58 net10  -283.99 netx  -321.51 z -5.40 | vol>0 n 693 PF10 0.62 | info hold PF 0.96
+  verdict FALSIFIED
+
+=== KXBTC15M: 7869 windows (4357 discovery, 3512 validation)
+descriptive disc: opening lean toward the previous leader, n 4349, mean -0.0084, share >= +0.05 0.302, share <= -0.05 0.355
+descriptive val: opening lean toward the previous leader, n 3507, mean -0.0078, share >= +0.05 0.325, share <= -0.05 0.363
+registered OPENLEAN (opening quote bid_o/ask_o) runnable windows: disc 0, val 0 (NOT_RUNNABLE)
+-- OPENLEAN (gaps disc 8, val 5)
+  disc OPENLEAN         n 1170 days  46 fill 0.377 sale 0.361 up 0.385 nosale   0 PF10 0.57 PF1 0.52 PFx1.2 0.53 net10  -537.54 netx  -601.77 z -7.48 | vol>0 n 1170 PF10 0.57 | info hold PF 0.84
+  val  OPENLEAN         n  967 days  37 fill 0.370 sale 0.352 up 0.394 nosale   0 PF10 0.57 PF1 0.52 PFx1.2 0.53 net10  -464.74 netx  -517.01 z -8.07 | vol>0 n 967 PF10 0.57 | info hold PF 0.95
+  verdict FALSIFIED
+
+Summary:
+  KXGOLD15M  OPENLEAN  disc n  894 PF10 0.60 | val n  693 PF10 0.62 | FALSIFIED
+  KXBTC15M   OPENLEAN  disc n 1170 PF10 0.57 | val n  967 PF10 0.57 | FALSIFIED
