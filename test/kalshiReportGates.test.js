@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['avgFill', 'count', 'entryLead', 'result', 'settledPnl', 'side', 'status', 'ticker', 'ts']);
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'avgFill', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'bidSize', 'askSize', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'status', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
@@ -88,6 +88,16 @@ gates.R6 = async () => {
   const res = { set() {}, status(c) { status = c; return this; }, json(b) { body = b; } };
   await lib.makeReportHandler({ getToken: () => 'x'.repeat(30), now: () => NOW, readOrders: async () => l1, readSlotOrders: async () => { throw new Error('boom'); } })({ method: 'GET', headers: { authorization: 'Bearer ' + 'x'.repeat(30) }, query: {} }, res);
   assert.ok(status === 200 && body.total.net === 0.05 && body.secondSlot.total.filled === 0, 'L1 report survives a slot read failure');
+};
+// R7: no-fill rows carry the depth and quote context (the refinement chat's R2), still with no id.
+gates.R7 = () => {
+  const o = ord({ status: 'no fill', fillCount: 0, count: 9, price: 0.93, limit: 0.94, seen: { bid: 0.92, ask: 0.93, bidSize: 5, askSize: 12, at: 'x' }, depthAtLimit: 12, shareOfDepth: 0.75, depthLevels: 'top', rise3: 0.1, smooth: false, settled: false, settledPnl: null });
+  const r = lib.buildReport([o], NOW, 24, true).orders[0];
+  assert.deepStrictEqual([r.orderedCount, r.price, r.limit, r.seenBid, r.seenAsk, r.bidSize, r.askSize, r.depthAtLimit, r.shareOfDepth, r.depthLevels, r.rise3, r.smooth], [9, 0.93, 0.94, 0.92, 0.93, 5, 12, 12, 0.75, 'top', 0.1, false]);
+  assert.strictEqual(r.count, 0, 'the filled count stays 0 for a no-fill row');
+  assert.ok(!/SECRET|orderId|clientOrderId|"at"/.test(JSON.stringify(r)), 'no id and no raw seen object');
+  const bare = lib.buildReport([ord({})], NOW, 24, true).orders[0];
+  assert.ok(bare.seenBid === null && bare.depthAtLimit === null && bare.smooth === null, 'a field the order lacks is null');
 };
 gates.R5 = () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiReportLib.js'), 'utf8');
