@@ -37,6 +37,14 @@ gates.PS2 = () => {
   assert.ok(/where\('ts', '>=', cursor\)/.test(m[0]), 'each page starts at the last time seen, without skipping orders that share it');
   assert.ok(/seen\[k\]/.test(m[0]), 'repeats are dropped');
 };
+gates.PS3 = () => {
+  // Review finding: one shared "fetching" string let a second range start the same older-orders read again. It is one entry per range now, cleared only by its own read.
+  assert.ok(/kalshiPnlFetching = \{\};/.test(html) && /if\(!kalshiPnlFetching\[key\]\)\{\n          kalshiPnlFetching\[key\] = true;/.test(html), 'one in-flight flag per range');
+  assert.ok((html.match(/delete kalshiPnlFetching\[key\]; renderKalshiPnl\(\);/g) || []).length === 2, 'cleared by both the success and the failure of its own read');
+  // Coming back to the page: the account is read again and every card redrawn, and the site is asked whether the page was updated.
+  assert.ok(/document\.addEventListener\('visibilitychange'/.test(html) && /window\.addEventListener\('pageshow'/.test(html) && /method: 'HEAD', cache: 'no-store'/.test(html), 'resume handlers and the update check');
+  assert.ok(/@media screen and \(min-width:701px\) and \(max-width:900px\) and \(pointer:coarse\)/.test(html), 'tablets get the touch sizes');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
