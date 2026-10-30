@@ -1,0 +1,141 @@
+NEWH5 run. Gold windows 5645 (disc 3192, val 2453); L1 entries 1673 (disc 976, val 697); gaps {'no fill': 9}; 25c exits 41
+Thresholds from discovery features only: V 20th pct 31709.5 contracts; |M| 80th pct $6.73
+Coverage: {'F1 ladder defined (top-of-hour)': 266, 'F3 oi missing': 0, 'F4 prior missing': 13} 
+
+== F1 GLADF
+  DISC 25c exit (headline):
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 934 PF 1.182 | SKIPPED n 42 net $+21.10 (x1.2 $+20.72) PF 3.755 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.055c/ct kept +0.839c/ct | worst day base $-15.86 kept $-15.86 | kept-minus-skipped $-0.415/entry day z -2.99 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 934 PF 1.186 | SKIPPED n 42 net $+33.91 (x1.2 $+33.28) PF 3.770 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.071c/ct kept +0.854c/ct | worst day base $-25.31 kept $-25.31 | kept-minus-skipped $-0.665/entry day z -3.00 | [- day -]
+  DISC hold:
+    C=10: base n 976 net $+108.21 PF 1.237 | kept n 934 PF 1.199 | SKIPPED n 42 net $+19.22 (x1.2 $+18.86) PF 3.015 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.109c/ct kept +0.912c/ct | worst day base $-16.06 kept $-16.06 | kept-minus-skipped $-0.362/entry day z -2.11 | [- day -]
+    C=16: base n 976 net $+175.57 PF 1.241 | kept n 934 PF 1.203 | SKIPPED n 42 net $+30.89 (x1.2 $+30.30) PF 3.024 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.124c/ct kept +0.927c/ct | worst day base $-25.62 kept $-25.62 | kept-minus-skipped $-0.581/entry day z -2.11 | [- day -]
+  DISC 25c exit, zero-volume fills removed:
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 934 PF 1.182 | SKIPPED n 42 net $+21.10 (x1.2 $+20.72) PF 3.755 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.055c/ct kept +0.839c/ct | worst day base $-15.86 kept $-15.86 | kept-minus-skipped $-0.415/entry day z -2.99 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 934 PF 1.186 | SKIPPED n 42 net $+33.91 (x1.2 $+33.28) PF 3.770 loss rate 0.024 vs kept 0.054
+           net/opportunity base +1.071c/ct kept +0.854c/ct | worst day base $-25.31 kept $-25.31 | kept-minus-skipped $-0.665/entry day z -3.00 | [- day -]
+  VAL 25c exit (headline):
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 678 PF 1.233 | SKIPPED n 19 net $+12.66 (x1.2 $+12.50) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +1.274c/ct kept +1.093c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.554/entry day z -3.87 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 678 PF 1.237 | SKIPPED n 19 net $+20.36 (x1.2 $+20.05) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +1.292c/ct kept +1.109c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.889/entry day z -3.89 | [- day -]
+  VAL hold:
+    C=10: base n 697 net $+68.39 PF 1.197 | kept n 678 PF 1.161 | SKIPPED n 19 net $+12.66 (x1.2 $+12.50) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +0.981c/ct kept +0.800c/ct | worst day base $-17.57 kept $-17.57 | kept-minus-skipped $-0.584/entry day z -4.00 | [- day -]
+    C=16: base n 697 net $+111.33 PF 1.201 | kept n 678 PF 1.164 | SKIPPED n 19 net $+20.36 (x1.2 $+20.05) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +0.998c/ct kept +0.816c/ct | worst day base $-28.03 kept $-28.03 | kept-minus-skipped $-0.937/entry day z -4.01 | [- day -]
+  VAL 25c exit, zero-volume fills removed:
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 678 PF 1.233 | SKIPPED n 19 net $+12.66 (x1.2 $+12.50) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +1.274c/ct kept +1.093c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.554/entry day z -3.87 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 678 PF 1.237 | SKIPPED n 19 net $+20.36 (x1.2 $+20.05) PF inf loss rate 0.000 vs kept 0.058
+           net/opportunity base +1.292c/ct kept +1.109c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.889/entry day z -3.89 | [- day -]
+  -> NOT_ENOUGH_DATA (skipped disc 42, val 19)
+
+== F2 GTHIN
+  DISC 25c exit (headline):
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 781 PF 1.203 | SKIPPED n 195 net $+27.13 (x1.2 $+25.49) PF 1.326 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.055c/ct kept +0.777c/ct | worst day base $-15.86 kept $-18.08 | kept-minus-skipped $-0.042/entry day z -0.30 | [- - -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 781 PF 1.207 | SKIPPED n 195 net $+43.72 (x1.2 $+41.16) PF 1.328 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.071c/ct kept +0.791c/ct | worst day base $-25.31 kept $-28.86 | kept-minus-skipped $-0.066/entry day z -0.30 | [- - -]
+  DISC hold:
+    C=10: base n 976 net $+108.21 PF 1.237 | kept n 781 PF 1.242 | SKIPPED n 195 net $+19.71 (x1.2 $+18.14) PF 1.217 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.109c/ct kept +0.907c/ct | worst day base $-16.06 kept $-18.08 | kept-minus-skipped $+0.012/entry day z +0.09 | [- - -]
+    C=16: base n 976 net $+175.57 PF 1.241 | kept n 781 PF 1.246 | SKIPPED n 195 net $+31.82 (x1.2 $+29.39) PF 1.219 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.124c/ct kept +0.921c/ct | worst day base $-25.62 kept $-28.86 | kept-minus-skipped $+0.021/entry day z +0.09 | [- - -]
+  DISC 25c exit, zero-volume fills removed:
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 781 PF 1.203 | SKIPPED n 195 net $+27.13 (x1.2 $+25.49) PF 1.326 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.055c/ct kept +0.777c/ct | worst day base $-15.86 kept $-18.08 | kept-minus-skipped $-0.042/entry day z -0.30 | [- - -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 781 PF 1.207 | SKIPPED n 195 net $+43.72 (x1.2 $+41.16) PF 1.328 loss rate 0.051 vs kept 0.052
+           net/opportunity base +1.071c/ct kept +0.791c/ct | worst day base $-25.31 kept $-28.86 | kept-minus-skipped $-0.066/entry day z -0.30 | [- - -]
+  VAL 25c exit (headline):
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 695 PF 1.269 | SKIPPED n 2 net $+1.05 (x1.2 $+1.04) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +1.274c/ct kept +1.259c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.399/entry day z -4.43 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 695 PF 1.273 | SKIPPED n 2 net $+1.69 (x1.2 $+1.66) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +1.292c/ct kept +1.277c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.642/entry day z -4.43 | [- day -]
+  VAL hold:
+    C=10: base n 697 net $+68.39 PF 1.197 | kept n 695 PF 1.194 | SKIPPED n 2 net $+1.05 (x1.2 $+1.04) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +0.981c/ct kept +0.966c/ct | worst day base $-17.57 kept $-17.57 | kept-minus-skipped $-0.428/entry day z -4.68 | [- day -]
+    C=16: base n 697 net $+111.33 PF 1.201 | kept n 695 PF 1.198 | SKIPPED n 2 net $+1.69 (x1.2 $+1.66) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +0.998c/ct kept +0.983c/ct | worst day base $-28.03 kept $-28.03 | kept-minus-skipped $-0.689/entry day z -4.67 | [- day -]
+  VAL 25c exit, zero-volume fills removed:
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 695 PF 1.269 | SKIPPED n 2 net $+1.05 (x1.2 $+1.04) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +1.274c/ct kept +1.259c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.399/entry day z -4.43 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 695 PF 1.273 | SKIPPED n 2 net $+1.69 (x1.2 $+1.66) PF inf loss rate 0.000 vs kept 0.056
+           net/opportunity base +1.292c/ct kept +1.277c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.642/entry day z -4.43 | [- day -]
+  -> NOT_ENOUGH_DATA (skipped disc 195, val 2)
+
+== F3 GOIDROP
+  DISC 25c exit (headline):
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 969 PF 1.211 | SKIPPED n 7 net $+6.81 (x1.2 $+6.75) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.055c/ct kept +0.985c/ct | worst day base $-15.86 kept $-15.86 | kept-minus-skipped $-0.874/entry day z -3.57 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 969 PF 1.214 | SKIPPED n 7 net $+10.94 (x1.2 $+10.78) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.071c/ct kept +1.001c/ct | worst day base $-25.31 kept $-25.31 | kept-minus-skipped $-1.402/entry day z -3.57 | [- day -]
+  DISC hold:
+    C=10: base n 976 net $+108.21 PF 1.237 | kept n 969 PF 1.222 | SKIPPED n 7 net $+6.81 (x1.2 $+6.75) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.109c/ct kept +1.039c/ct | worst day base $-16.06 kept $-16.06 | kept-minus-skipped $-0.868/entry day z -3.52 | [- day -]
+    C=16: base n 976 net $+175.57 PF 1.241 | kept n 969 PF 1.226 | SKIPPED n 7 net $+10.94 (x1.2 $+10.78) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.124c/ct kept +1.054c/ct | worst day base $-25.62 kept $-25.62 | kept-minus-skipped $-1.394/entry day z -3.52 | [- day -]
+  DISC 25c exit, zero-volume fills removed:
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 969 PF 1.211 | SKIPPED n 7 net $+6.81 (x1.2 $+6.75) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.055c/ct kept +0.985c/ct | worst day base $-15.86 kept $-15.86 | kept-minus-skipped $-0.874/entry day z -3.57 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 969 PF 1.214 | SKIPPED n 7 net $+10.94 (x1.2 $+10.78) PF inf loss rate 0.000 vs kept 0.053
+           net/opportunity base +1.071c/ct kept +1.001c/ct | worst day base $-25.31 kept $-25.31 | kept-minus-skipped $-1.402/entry day z -3.57 | [- day -]
+  VAL 25c exit (headline):
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 686 PF 1.248 | SKIPPED n 11 net $+7.78 (x1.2 $+7.65) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +1.274c/ct kept +1.163c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.589/entry day z -5.19 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 686 PF 1.252 | SKIPPED n 11 net $+12.46 (x1.2 $+12.28) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +1.292c/ct kept +1.180c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.941/entry day z -5.17 | [- day -]
+  VAL hold:
+    C=10: base n 697 net $+68.39 PF 1.197 | kept n 686 PF 1.175 | SKIPPED n 11 net $+7.78 (x1.2 $+7.65) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +0.981c/ct kept +0.870c/ct | worst day base $-17.57 kept $-17.57 | kept-minus-skipped $-0.619/entry day z -5.33 | [- day -]
+    C=16: base n 697 net $+111.33 PF 1.201 | kept n 686 PF 1.178 | SKIPPED n 11 net $+12.46 (x1.2 $+12.28) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +0.998c/ct kept +0.887c/ct | worst day base $-28.03 kept $-28.03 | kept-minus-skipped $-0.989/entry day z -5.30 | [- day -]
+  VAL 25c exit, zero-volume fills removed:
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 686 PF 1.248 | SKIPPED n 11 net $+7.78 (x1.2 $+7.65) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +1.274c/ct kept +1.163c/ct | worst day base $-15.76 kept $-15.76 | kept-minus-skipped $-0.589/entry day z -5.19 | [- day -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 686 PF 1.252 | SKIPPED n 11 net $+12.46 (x1.2 $+12.28) PF inf loss rate 0.000 vs kept 0.057
+           net/opportunity base +1.292c/ct kept +1.180c/ct | worst day base $-25.12 kept $-25.12 | kept-minus-skipped $-0.941/entry day z -5.17 | [- day -]
+  -> NOT_ENOUGH_DATA (skipped disc 7, val 11)
+
+== F4 GPRIOR
+  DISC 25c exit (headline):
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 880 PF 1.209 | SKIPPED n 96 net $+16.73 (x1.2 $+15.91) PF 1.385 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.055c/ct kept +0.883c/ct | worst day base $-15.86 kept $-15.00 | kept-minus-skipped $-0.076/entry day z -0.32 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 880 PF 1.212 | SKIPPED n 96 net $+27.01 (x1.2 $+25.63) PF 1.388 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.071c/ct kept +0.898c/ct | worst day base $-25.31 kept $-23.93 | kept-minus-skipped $-0.122/entry day z -0.32 | [- day -]
+  DISC hold:
+    C=10: base n 976 net $+108.21 PF 1.237 | kept n 880 PF 1.198 | SKIPPED n 96 net $+24.86 (x1.2 $+24.06) PF 1.689 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.109c/ct kept +0.854c/ct | worst day base $-16.06 kept $-17.44 | kept-minus-skipped $-0.164/entry day z -0.74 | [- - -]
+    C=16: base n 976 net $+175.57 PF 1.241 | kept n 880 PF 1.202 | SKIPPED n 96 net $+40.02 (x1.2 $+38.68) PF 1.693 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.124c/ct kept +0.868c/ct | worst day base $-25.62 kept $-27.84 | kept-minus-skipped $-0.263/entry day z -0.74 | [- - -]
+  DISC 25c exit, zero-volume fills removed:
+    C=10: base n 976 net $+102.94 PF 1.226 | kept n 880 PF 1.209 | SKIPPED n 96 net $+16.73 (x1.2 $+15.91) PF 1.385 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.055c/ct kept +0.883c/ct | worst day base $-15.86 kept $-15.00 | kept-minus-skipped $-0.076/entry day z -0.32 | [- day -]
+    C=16: base n 976 net $+167.25 PF 1.229 | kept n 880 PF 1.212 | SKIPPED n 96 net $+27.01 (x1.2 $+25.63) PF 1.388 loss rate 0.042 vs kept 0.053
+           net/opportunity base +1.071c/ct kept +0.898c/ct | worst day base $-25.31 kept $-23.93 | kept-minus-skipped $-0.122/entry day z -0.32 | [- day -]
+  VAL 25c exit (headline):
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 640 PF 1.272 | SKIPPED n 57 net $+7.02 (x1.2 $+6.56) PF 1.272 loss rate 0.053 vs kept 0.056
+           net/opportunity base +1.274c/ct kept +1.174c/ct | worst day base $-15.76 kept $-15.94 | kept-minus-skipped $+0.005/entry day z +0.02 | [- - -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 640 PF 1.276 | SKIPPED n 57 net $+11.40 (x1.2 $+10.55) PF 1.276 loss rate 0.053 vs kept 0.056
+           net/opportunity base +1.292c/ct kept +1.190c/ct | worst day base $-25.12 kept $-25.41 | kept-minus-skipped $+0.007/entry day z +0.01 | [- - -]
+  VAL hold:
+    C=10: base n 697 net $+68.39 PF 1.197 | kept n 640 PF 1.196 | SKIPPED n 57 net $+5.60 (x1.2 $+5.16) PF 1.206 loss rate 0.053 vs kept 0.056
+           net/opportunity base +0.981c/ct kept +0.901c/ct | worst day base $-17.57 kept $-15.94 | kept-minus-skipped $-0.000/entry day z -0.00 | [- day -]
+    C=16: base n 697 net $+111.33 PF 1.201 | kept n 640 PF 1.200 | SKIPPED n 57 net $+9.13 (x1.2 $+8.31) PF 1.209 loss rate 0.053 vs kept 0.056
+           net/opportunity base +0.998c/ct kept +0.916c/ct | worst day base $-28.03 kept $-25.41 | kept-minus-skipped $-0.000/entry day z -0.00 | [- day -]
+  VAL 25c exit, zero-volume fills removed:
+    C=10: base n 697 net $+88.82 PF 1.272 | kept n 640 PF 1.272 | SKIPPED n 57 net $+7.02 (x1.2 $+6.56) PF 1.272 loss rate 0.053 vs kept 0.056
+           net/opportunity base +1.274c/ct kept +1.174c/ct | worst day base $-15.76 kept $-15.94 | kept-minus-skipped $+0.005/entry day z +0.02 | [- - -]
+    C=16: base n 697 net $+144.07 PF 1.276 | kept n 640 PF 1.276 | SKIPPED n 57 net $+11.40 (x1.2 $+10.55) PF 1.276 loss rate 0.053 vs kept 0.056
+           net/opportunity base +1.292c/ct kept +1.190c/ct | worst day base $-25.12 kept $-25.41 | kept-minus-skipped $+0.007/entry day z +0.01 | [- - -]
+  -> FALSIFIED (skipped disc 96, val 57)
+
+Verdicts (N = 4):
+  F1 GLADF: NOT_ENOUGH_DATA (skipped 42 / 19)
+  F2 GTHIN: NOT_ENOUGH_DATA (skipped 195 / 2)
+  F3 GOIDROP: NOT_ENOUGH_DATA (skipped 7 / 11)
+  F4 GPRIOR: FALSIFIED (skipped 96 / 57)
