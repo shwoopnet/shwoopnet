@@ -298,7 +298,7 @@ gates.Y9 = () => {
 // Fit on a small screen: the account card lists only what the bot can spend (shard 2) and folds the rest into one line that appears only when it
 // matters, the order switch only speaks up when it is off, the Layout menu sits in the header, and the session card keeps four facts.
 gates.Y10 = () => {
-  const acct = html.slice(html.indexOf('// What one order risks right now:'), html.indexOf("    el.innerHTML = h;"));
+  const acct = html.slice(html.indexOf('// No stake or reinvest pool tiles'), html.indexOf("    el.innerHTML = h;"));
   assert.ok(!/BOT_SHARDS|shardLow|DATA_SHARD_LOW/.test(html) && !/Shard '|shardRows/.test(acct), 'no shard balances or low-shard warning on the page (removed Oct 24, 2026, the owner: the shard stuff can go)');
   assert.ok(/a\.liveSwitch \? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch<\/span><b class="kal-neg">OFF/.test(acct), 'the order switch is a line only when it is off');
   const head = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
@@ -426,9 +426,7 @@ gates.Y17 = () => {
 
 // The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.
 gates.Y18 = () => {
-  assert.ok(/Stake per trade/.test(html) && /var nC = ses\.sizing === true \? baseC \+ \(Number\.isFinite\(ses\.sizeAddon\) \? ses\.sizeAddon : 0\) : 1/.test(html) && /Math\.floor\(cashNow \* 0\.02 \/ perC/.test(html), 'the stake is the account-funded part (held to 2% of cash) plus the profit add-on outside it, or 1 when scaling is off');
-  assert.ok(/Number\(lastO\.maxCost\) \/ Number\(lastO\.count\) : 0\.93/.test(html) && /stake \/ tb \* 100/.test(html), 'priced at the latest order\'s cost per contract, with its share of the balance');
-  assert.ok(/if\(ses && ses\.active === true\)/.test(html), 'shown only while the bot is running');
+  assert.ok(!/kal-k">Stake per trade|kal-k">Reinvest pool/.test(html) && !/stakeRow|poolCell|var nC = /.test(html), 'the Account card shows no stake or reinvest pool tile (the owner, Oct 30, 2026: the size lives in the bot code, Recent trades shows what was bought)');
   assert.ok(!/tile\('Per trade'/.test(html), 'no tile reuses the stake row name (the expectancy tile itself left with the duplicate tiles in the fold, Oct 23, 2026; Average trade is on the Data page)');
   assert.ok(/kalshiMoney\(0\.12 \* base\)/.test(html), 'the status line quotes the 12% stop (through the money formatter, so presentation view masks it)');
 };
@@ -462,12 +460,12 @@ gates.Y24 = () => {
 
 // Y20: no guessed size before the session's first look.
 gates.Y20 = () => {
-  assert.ok(/var sizeKnown = ses\.sizing !== true \|\| Number\.isFinite\(ses\.sizeCap\)/.test(html) && /sized at the first look/.test(html) && !/ses\.sizeCap : 3\)/.test(html), 'a new session shows no made-up stake');
+  assert.ok(!/sized at the first look/.test(html) && !/ses\.sizeCap : 3\)/.test(html), 'a new session shows no made-up stake (there is no stake tile at all since Oct 30, 2026)');
 };
 
 // Y19: the reinvest pool shows as pool / cost of the next extra contract, so progress is readable at a glance.
 {
-  assert.ok(/Reinvest pool/.test(html) && /\(ex \+ 1\) \* 0\.93/.test(html) && !/max extra/.test(html), 'the stake row shows the pool against the next extra contract, with no cap branch');
+  assert.ok(!/\(ex \+ 1\) \* 0\.93/.test(html), 'the page no longer draws the pool against the next extra contract');
   // The server counts extras at a flat 0.93 (skimAddon's default). A target priced on the live fill showed 7.32 / 7.18 while the server still needed 7.44 for the 8th extra.
   const live = require('../functions/kalshiLiveLib.js');
   assert.strictEqual(live.skimAddon({ pool: 7.43 }, 5), 7, 'server: 7.43 buys 7 extras');
@@ -616,7 +614,6 @@ gates.Y41 = () => {
   assert.ok(!/id="kalLens"|data-lens=|kalshiLens|kal-lens|kalPaperNote|kal-paper-note/.test(html), 'no strategy switch, no paper note, no view state');
   assert.ok(!/kalshiOpening|watchKalshiOpening|kalshiLane|kalChartsO|kalBotOpenO|kalBotClosedO|kalBotTotalsO|kalPerfWrapO|kalPerfO|kalChartLineO|kalChartPieO|kalChartBarsO/.test(html), 'no opening records, lane table, opening paper rows or paper charts (the PAPER1 candidates card, Oct 20, 2026, is a different thing: kalshiPaperOrders, kalPaperCard)');
   assert.ok(!/Opening strategy|early favourite|early underdog|paper F|paper U/.test(html), 'no opening wording is left on the page');
-  assert.ok(/if\(ses && ses\.active === true\)\{/.test(html), 'the live stake row follows the live session alone');
 };
 
 // The runner is LAST on purpose: a gate defined after it is never run (Y20 and the simulation gates were once silently skipped that way).
