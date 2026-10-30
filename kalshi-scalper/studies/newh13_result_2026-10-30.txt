@@ -1,0 +1,50 @@
+gold: 5819 settled 15 minute windows, 1026 KXGOLDH events, 1026 paired top-of-hour closes (disc 444, val 429, hold 153)
+
+== H1 GLOCKH (gold 15 minute against KXGOLDH, lock >= 1c after fees at the signal, both legs filled next candle)
+  funnel (disc+val): {'closes': 873, 'candles read': 6052, 'signals': 7, 'trades': 5, 'no fill': 2}
+  signal locks (c): [1.1, 16.7, 51.6, 1.6, 1.2]
+  fill locks (c)  : [-30.7, -18.0, 10.8, 2.2, -8.0]
+  payoffs         : [1, 1, 1, 1, 1] closes: ['2026-08-27', '2026-09-02', '2026-09-20', '2026-09-22', '2026-10-08']
+  discovery  : n 3 (3 d) PF10 0.22 PF1 0.20 PFx1.2 0.21 net10 $-3.79 netx1.2 $-3.92 win 33.3% cost/set 1.103 day z -1.03 | zero-vol 1, PF10 without 0.00
+  validation : n 2 (2 d) PF10 0.28 PF1 0.16 PFx1.2 0.23 net10 $-0.58 netx1.2 $-0.64 win 50.0% cost/set 1.018 day z nan | zero-vol 2, PF10 without inf
+  verdict: NOT_ENOUGH_DATA (discovery under 100)
+
+== I3 gold lock count, signal candles only, minutes 14 to 1 (no fill, no trade):
+  disc: {'closes': 444, 'pairable': 442, 'closes with lock': 7, 'lock minutes': 17, 'largest c': 51.6, 'median best c': -2.7, 'longest run': 5}
+  val: {'closes': 429, 'pairable': 429, 'closes with lock': 8, 'lock minutes': 9, 'largest c': 14.7, 'median best c': -3.1, 'longest run': 2}
+  minutes 1 to 7 only (H1's signal minutes), disc+val: {'closes': 873, 'pairable': 871, 'closes with lock': 7, 'lock minutes': 11, 'largest c': 51.6, 'median best c': -7.3, 'longest run': 4}
+
+== H2 GLADX-L (the gold LADDER leg bought toward the 15 minute book on a 3c monotonicity violation at the mids)
+  funnel (disc+val): {'closes': 873, 'no readable bracket': 636, 'candles read': 2789, 'triggers': 24, 'trades': 21, '15m unreadable or wide': 21, 'band': 3}
+  discovery  : n 10 (7 d) PF10 1.17 PF1 1.14 PFx1.2 1.15 net10 $3.06 netx1.2 $2.82 win 40.0% cost/set 0.356 day z 0.21 | zero-vol 4, PF10 without 0.94 | yes share 0.50; mean violation 0.036; signal ask 0.298 vs fill 0.356; by candle {-600: 4, -660: 4, -540: 2}
+  validation : n 11 (10 d) PF10 0.64 PF1 0.63 PFx1.2 0.63 net10 $-8.34 netx1.2 $-8.62 win 27.3% cost/set 0.335 day z -0.56 | zero-vol 2, PF10 without 0.52 | yes share 0.18; mean violation 0.035; signal ask 0.276 vs fill 0.335; by candle {-600: 2, -540: 5, -480: 1, -660: 3}
+  verdict: NOT_ENOUGH_DATA (discovery under 100)
+  I4 base rate (same legs, first readable candle, no violation by 3c on either side; information):
+    disc ladder NO at k_hi: n 212 (21 d) PF10 0.96 PF1 0.95 PFx1.2 0.95 net10 $-15.33 netx1.2 $-21.31 win 55.2% cost/set 0.544 day z -0.25 | zero-vol 155, PF10 without 0.56
+    disc ladder YES at k_lo: n 210 (19 d) PF10 0.79 PF1 0.77 PFx1.2 0.78 net10 $-107.51 netx1.2 $-113.41 win 53.3% cost/set 0.569 day z -1.57 | zero-vol 138, PF10 without 0.75
+    val ladder NO at k_hi: n 261 (21 d) PF10 1.07 PF1 1.05 PFx1.2 1.06 net10 $36.20 netx1.2 $29.01 win 62.1% cost/set 0.592 day z 0.52 | zero-vol 175, PF10 without 1.23
+    val ladder YES at k_lo: n 271 (21 d) PF10 0.71 PF1 0.70 PFx1.2 0.70 net10 $-204.36 netx1.2 $-211.97 win 50.6% cost/set 0.566 day z -2.14 | zero-vol 162, PF10 without 0.74
+
+== I2 Bitcoin lock count (KXBTC15M against KXBTCD), closes Aug 24 to Sep 25 only (LOCK2H read Sep 26 to Oct 26):
+  minutes 14 to 1: {'closes': 772, 'pairable': 772, 'closes with lock': 17, 'lock minutes': 25, 'largest c': 14.7, 'median best c': -2.2, 'longest run': 3}
+  minutes 1 to 7 : {'closes': 772, 'pairable': 772, 'closes with lock': 12, 'lock minutes': 15, 'largest c': 4.5, 'median best c': -9.5, 'longest run': 2}
+
+N running before 700,154; this round 7; after about 700,161; one-sided z bar 5.26
+I1: 108318 book rows from /tmp/claude-0/-home-user-shwoopnet/026f6e8f-6dc4-5e3b-8c3b-e0089b12fb94/scratchpad/bookdata
+  events 16; adjacent-pair evaluations 92,849 (both strikes polled within 1.5 s)
+  (a) top-of-book cross before fees: 0 (0.000% of evaluations), in 0 events
+  (b) lock >= 1c after C = 10 fees : 0 (0.000%)
+  (c) mark inversion YES bid(k2) > YES bid(k1): 52 (0.056%)
+  by minutes to the close:
+    50-54 min: {'evals': 7200}
+    45-49 min: {'evals': 7195}
+    40-44 min: {'evals': 7180, 'mark inversion': 3}
+    35-39 min: {'evals': 7199, 'mark inversion': 13}
+    30-34 min: {'evals': 7770, 'mark inversion': 2}
+    25-29 min: {'evals': 8581, 'mark inversion': 13}
+    20-24 min: {'evals': 9338}
+    15-19 min: {'evals': 9593, 'mark inversion': 21}
+    10-14 min: {'evals': 9594}
+    05-09 min: {'evals': 9600}
+    00-04 min: {'evals': 9593}
+    -5--1 min: {'evals': 6}
