@@ -1,0 +1,30 @@
+NEWH3 run. BTC 15 minute windows 7869 (disc 4357, val 3512); ladder closes 1500; nothing on or after 2026-10-28 loaded.
+
+H1 BLADX gaps: {'closes': 1965, 'no ladder': 465, 'no signal': 709, 'signals': 763, 'b no fill': 227, 'a no fill': 113, 'no bracket': 28}
+H1a BLADX_15M disc     n  282 days  28 win 0.447 fill 0.416 gap  +3.05pt PF10 1.08 PF1 1.06 PFx1.2 1.06 net10 $+44.23 netx $+36.44 z +0.73 | vol>0 n 282 PF10 1.08
+H1a BLADX_15M val      n  368 days  36 win 0.340 fill 0.381 gap  -4.18pt PF10 0.76 PF1 0.74 PFx1.2 0.75 net10 $-207.79 netx $-217.79 z -2.10 | vol>0 n 368 PF10 0.76
+H1b BLADX_LAD disc     n  233 days  28 win 0.378 fill 0.409 gap  -3.16pt PF10 0.78 PF1 0.76 PFx1.2 0.77 net10 $-106.36 netx $-112.45 z -1.51 | vol>0 n 233 PF10 0.78
+H1b BLADX_LAD val      n  303 days  36 win 0.429 fill 0.431 gap  -0.15pt PF10 0.92 PF1 0.91 PFx1.2 0.91 net10 $-48.46 netx $-56.53 z -0.63 | vol>0 n 303 PF10 0.92
+
+H2 WIDEN gaps: {'ctrl no fill': 963, 'sig no fill': 3, 'signals': 6}
+H2 WIDEN disc          n    3 days   3 win 0.000 fill 0.160 gap -16.00pt PF10 0.00 PF1 0.00 PFx1.2 0.00 net10 $-5.09 netx $-5.15 z -15.91 | vol>0 n 3 PF10 0.00
+H2 WIDEN val           n 0
+H2 control disc        n 1954 days  46 win 0.253 fill 0.242 gap  +1.09pt PF10 0.99 PF1 0.97 PFx1.2 0.98 net10 $-24.74 netx $-69.58 z -0.13 | vol>0 n 1954 PF10 0.99
+H2 control val         n 1555 days  37 win 0.255 fill 0.247 gap  +0.78pt PF10 0.97 PF1 0.95 PFx1.2 0.96 net10 $-72.89 netx $-109.37 z -0.45 | vol>0 n 1555 PF10 0.97
+
+H3 EXITOI gaps: {'no fill': 14}
+H3 disc: entries 1331 triggered 26 sold 26 | hold PF10 0.988 rule PF10 1.001 (x1.2 0.974 / 0.985; C1 0.888 / 0.897) | rule-hold net10 $+9.47 day z +0.46
+    loss rate triggered 0.615 untriggered 0.054; mean fill trig 0.868
+    sag (side bid 60 s minus 120 s): triggered -0.0039 (n 26) untriggered -0.0067
+    triggered only: hold net10 $-127.77 sold net10 $-118.30
+H3 val: entries 1028 triggered 29 sold 29 | hold PF10 0.955 rule PF10 1.006 (x1.2 0.942 / 0.991; C1 0.854 / 0.894) | rule-hold net10 $+30.07 day z +1.89
+    loss rate triggered 0.621 untriggered 0.051; mean fill trig 0.797
+    sag (side bid 60 s minus 120 s): triggered -0.0978 (n 24) untriggered +0.0022
+    triggered only: hold net10 $-124.11 sold net10 $-94.04
+    pooled day z of rule minus hold +1.51
+
+Verdicts:
+  H1a BLADX_15M: FALSIFIED
+  H1b BLADX_LAD: FALSIFIED
+  H2 WIDEN: NOT_ENOUGH_DATA
+  H3 EXITOI: NOT_ENOUGH_DATA
