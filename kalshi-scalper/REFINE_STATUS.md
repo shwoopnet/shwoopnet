@@ -18,6 +18,15 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:20 PM CT, R2 descriptive step (why attempts get no fill), from the new depth columns; 0 tries.** Rows with depth context since the columns exist: gold 111, Dogecoin 116 (the older rows have none). Outcome columns not used.
+
+- **Gold: size against depth is NOT the cause.** 100 of 111 gold orders were under 5% of the depth at the touch, and 38% of those still got no fill. Gold depth is in the thousands (mean about 2,100 contracts), orders about 9.
+- **Gold: lower price, more no-fills.** No fill share by the price the bot saw: 88c to 91c 50% (38 orders), 91c to 94c 35% (34), 94c to 97c 29% (37). Fits ask creep: a cheaper favourite is still moving up and leaves the limit behind; a 95c favourite is already priced.
+- **Dogecoin: depth matters for large shares.** Order share of depth under 30%: 20% to 28% no fill (91 orders); 30% or more: 47% to 66% (25 orders). Depth is thin (mean about 100 contracts at the touch against orders of 3 to 5), so the 5 contract size and any ladder step above 5 are the places a no-fill will rise.
+- **No partial fills at all:** 0 partial fills of 148 fills. Orders are all-or-nothing in practice, so a no-fill is a whole order lost, never half.
+- **Prediction for the R2 registered proposal (limit +1c):** unchanged, FALSIFIED on dollars. The gold pattern (cheap, still rising favourites fail to fill) is exactly the set of orders that a +1c limit would fill, and no-fills have scored worse than fills (LIVE3, -0.82c vs +0.92c). For Dogecoin, depth is the other lever: ordering fewer contracts when share of depth would exceed 30% raises fills without raising price; that is a sizing rule and is not proposed because it cuts size.
+- **Next for R2:** the simulation on R6 (fill if the ask 1 to 2 s later is within limit +1c) once R6 holds enough windows; needs V2's R6 clock rule. Nothing to the main session: no threshold.
+
 **2026-10-30 2:15 PM CT, R4 first read (size effects, settled orders since Oct 20, information only, 0 tries). No flag.**
 
 | Market | Contracts | Settled | Lost | Net | Cents per contract |
