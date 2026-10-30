@@ -683,7 +683,7 @@
   .gq-label{ position:fixed; right:calc(max(20px, env(safe-area-inset-right, 0px)) + 72px); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 84px); z-index:19; pointer-events:none; font-family:'Permanent Marker','Public Sans',cursive; font-size:28px; line-height:1; color:var(--paper); transform:rotate(-7deg); transform-origin:right bottom; white-space:nowrap; transition:opacity .2s; }
   .gq-label small{ display:block; font-size:15px; color:var(--muted); margin-top:4px; text-align:right; transform:rotate(2deg); }
   .gq-arrow{ position:fixed; right:calc(max(20px, env(safe-area-inset-right, 0px)) + 12px); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 62px); width:90px; height:70px; z-index:19; pointer-events:none; overflow:visible; transition:opacity .2s; }
-  .gq-open .gq-label, .gq-open .gq-arrow{ opacity:0; }
+  .gq-open .gq-label, .gq-open .gq-arrow, .gq-crowded .gq-label, .gq-crowded .gq-arrow{ opacity:0; }   /* gq-crowded: the label and arrow would sit on page text (a short phone, landscape, or text scrolled under them), so only the bubble shows (the owner, Oct 30, 2026: the landing page overlaps text) */
   .gq-panel{ position:fixed; right:max(20px, env(safe-area-inset-right, 0px)); bottom:calc(max(20px, env(safe-area-inset-bottom, 0px)) + 68px); width:min(340px, 100vw - 32px); max-height:min(520px, 100vh - 120px); display:flex; flex-direction:column; background:var(--panel, #141414); border:1px solid var(--border); border-radius:16px; box-shadow:0 16px 48px rgba(0,0,0,.55); z-index:21; overflow:hidden; }
   .gq-panel[hidden]{ display:none; }
   .gq-head{ display:flex; align-items:center; justify-content:space-between; padding:12px 14px; border-bottom:1px solid var(--border); }
@@ -699,7 +699,7 @@
   @media (max-width:640px){ .gq-label{ font-size:21px; right:calc(max(16px, env(safe-area-inset-right, 0px)) + 66px); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 76px); } .gq-label small{ font-size:12px; } .gq-bubble{ right:max(16px, env(safe-area-inset-right, 0px)); bottom:max(16px, env(safe-area-inset-bottom, 0px)); } .gq-arrow{ width:70px; height:54px; right:calc(max(16px, env(safe-area-inset-right, 0px)) + 8px); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 58px); } .gq-panel{ right:max(16px, env(safe-area-inset-right, 0px)); bottom:calc(max(16px, env(safe-area-inset-bottom, 0px)) + 64px); } }
   [data-reduce-motion="true"] .gq-label, [data-reduce-motion="true"] .gq-arrow{ transition:none; }
   /* room so the bubble and its label never sit on the footer text */
-  .auth-gate .front-foot{ padding-right:84px; } @media (max-width:640px){ .auth-gate .front{ padding-bottom:116px; } .auth-gate .front-foot{ padding-right:0; } }
+  .auth-gate .front-foot, .auth-gate .front-note{ padding-right:84px; } @media (max-width:640px){ .auth-gate .front{ padding-bottom:116px; } .auth-gate .front-foot, .auth-gate .front-note{ padding-right:0; } }
   /* The sign-in screen is a fixed layer over the whole window, but the signed-in app is still laid out underneath it, so the document grew a scroll bar that scrolled nothing you could see (the owner, Oct 24, 2026: "it builds a scroll bar a lot of the time and it doesnt actually scroll anything"). While the gate is up the document itself does not scroll; the gate scrolls itself when its own content is taller than the window. */
   html:has(#authGate:not([hidden])), html:has(#authGate:not([hidden])) body{ overflow:hidden; }
   .front{ position:relative; width:min(1160px, 100% - 40px); margin:0 auto; min-height:100%; display:flex; flex-direction:column; padding:0 0 22px; }
@@ -1557,6 +1557,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Sign-in page: the "Got questions?" label and arrow now hide when they would sit on text (short phones, landscape), and the bubble no longer covers the disclaimer</li>
                   <li>Strategy chips (L1, OICORE) are one quiet muted style; the bright white chip for OICORE is gone</li>
                   <li>Account card: the Stake per trade and Reinvest pool tiles are gone; the size and the pool rule live in the bot's code and Recent trades shows what was bought</li>
                   <li>Bot page: if the second strategy's orders cannot be read the Strategies card now says so instead of showing zero; the Recent trades tiles say they cover the last 24 hours; a longer Account result range keeps the old chart dimmed while it loads</li>
@@ -4121,6 +4122,31 @@ kalshiStatusTick();
       var body = document.getElementById('gqBody'); if(body){ body.scrollTop = body.scrollHeight; }
     });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !panel.hasAttribute('hidden')){ setOpen(false); bubble.focus(); } });
+    // The marker label and its arrow are fixed over the screen, so on a short phone, in landscape, or while the page scrolls under them they land on the text. They hide whenever they would touch any text and come back when there is room; the bubble stays. Layout only: reads rectangles, changes one class.
+    var gqLabel = root.querySelector('.gq-label'), gqArrow = root.querySelector('.gq-arrow'), gqGate = document.getElementById('authGate'), gqQueued = false;
+    function gqTouch(a, b){ return Math.min(a.right, b.right) - Math.max(a.left, b.left) > 2 && Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 2; }
+    function gqFit(){
+      gqQueued = false;
+      if(!gqGate || gqGate.hidden || !gqLabel){ return; }
+      var boxes = [gqLabel.getBoundingClientRect()]; if(gqArrow){ boxes.push(gqArrow.getBoundingClientRect()); }
+      var crowded = false, walker = document.createTreeWalker(gqGate, NodeFilter.SHOW_TEXT);
+      while(!crowded && walker.nextNode()){
+        var t = walker.currentNode, el = t.parentElement;
+        if(!el || !t.textContent.trim() || el.closest('.gq, [aria-hidden="true"], .gate-slogan, [hidden], script, style')){ continue; }
+        var rg = document.createRange(); rg.selectNodeContents(t);
+        var rects = rg.getClientRects();
+        for(var i = 0; i < rects.length && !crowded; i++){
+          var rc = rects[i]; if(rc.width < 2 || rc.height < 2 || rc.bottom < 0 || rc.top > window.innerHeight){ continue; }
+          for(var j = 0; j < boxes.length; j++){ if(gqTouch(rc, boxes[j])){ crowded = true; break; } }
+        }
+      }
+      root.classList.toggle('gq-crowded', crowded);
+    }
+    function gqSchedule(){ if(!gqQueued){ gqQueued = true; window.requestAnimationFrame(gqFit); } }
+    window.addEventListener('resize', gqSchedule); window.addEventListener('scroll', gqSchedule, { passive: true }); window.addEventListener('orientationchange', gqSchedule);
+    if(gqGate){ gqGate.addEventListener('scroll', gqSchedule, { passive: true }); }
+    if(document.fonts && document.fonts.ready){ document.fonts.ready.then(gqSchedule); }
+    window.setTimeout(gqSchedule, 400); gqSchedule();
   })();
   var authGateEl = document.getElementById('authGate');
   function setupPasswordToggle(toggleBtnId, inputId){
