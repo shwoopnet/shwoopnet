@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-30 12:10 AM CT, first ranked shortlist sent to the main session.** 1: Bitcoin open interest core (forward rows running, 0 settled forward trades). 2: GEN6/GEN7 relatives. 3: underdog at 180 s references. 4 (owner question only): ladder longshots overpriced, its mirror is closed by the Oct 28 instruction. Scope correction on L1 tests noted. Next shortlist about 6:10 AM CT.
+
 **2026-10-29 11:55 PM CT, NEWH6 (round trips, never held): FALSIFIED or NOT_ENOUGH_DATA.** Kalshi's 15 minute books open empty; no lean toward the previous winner; the 6 minute favourite wave is about 1c on Bitcoin and two fees eat it. N about 592,082.
 
 **2026-10-29 11:15 PM CT, NEWH5 (gold L1 skip filters): none helps; recorded as information only.** It fell under the owner's Oct 28 instruction (no new L1 filter tests); V2 briefed it by mistake from the hourly self-guide. No more L1 filter, exit or sizing tests unless the owner asks; the search stays on new strategies for gold and Bitcoin.
