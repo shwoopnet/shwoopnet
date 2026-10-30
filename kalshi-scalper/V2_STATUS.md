@@ -4,7 +4,7 @@
 
 - **Now running (7:25 PM):** workers GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
 - **Next:** first ranked shortlist to the main session about 12:30 AM CT; gold GEN4-style run after Nov 6 on R6 data; more generator families on gold and Bitcoin.
-- **Waiting on:** GF1 and GF2 on R6 (from Nov 14; write `gf12.py` first); LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F interim (about Nov 24 to 26; forward to the main session) and formal read (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
+- **Waiting on:** GF1 and GF2 on R6 (run themselves from Nov 14); LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F interim (about Nov 24 to 26; forward to the main session) and formal read (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 9:20 PM CT, GF12 scorer built for GF1 and GF2 (no outcome read).** Runs itself from 2026-11-14 02:00 UTC (or Nov 15 whatever the count), refuses a second run, readiness line in AUTO. 13 readings of open points written and pushed before any run (`workers/GF12_NOTES.md`); the GF2 gate uses net per contract on its entries minus plain L1 on all signals (the gate's first clause), with the same-window difference reported beside it. Readiness: 1 R6 file, 18 L1 signals (gold 3).
 
 **2026-10-29 9:05 PM CT, GOLDFILL fill model done (no outcome read).** Gold's spread at the decision is tiny; resting below the ask only fills on dips and misses the risers, worth about half of crossing. Live gold slippage at 16 to 20 contracts (+1.8c) is not explained by depth; the bot's own minute-tick delay is the leading guess, testable on R6. GF1 and GF2 registered for R6 (read from Nov 14); their scorer is still to be written.
 
