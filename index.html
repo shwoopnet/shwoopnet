@@ -429,6 +429,10 @@
   .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
   .kal-rail .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
   .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
+  /* The Running pill opens a SMALL pop-over right under the pill (the owner, Oct 30, 2026: "dont care for this running pop up style - placement"), not a card spanning the whole Account card and covering Bot status. It holds only the controls and Rules and limits; the status lines live in Bot status. */
+  .kal-console .kal-card[data-card="account"] .kal-botmenu{ position:relative; }
+  .kal-console .kal-card[data-card="account"] .kal-botmenu .kal-botmenu-body{ position:absolute; left:auto; right:0; top:calc(100% + 8px); width:340px; min-width:0; max-height:min(70vh, 560px); overflow-y:auto; margin:0; z-index:80; box-shadow:0 18px 44px rgba(0,0,0,.5); }
+  @media (max-width:900px){ .kal-console .kal-card[data-card="account"] .kal-botmenu .kal-botmenu-body{ width:min(300px, calc(100vw - 72px)); } }   /* narrower than the screen so it never touches the edge */
   .kal-card-head{ display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap; padding:18px 22px 12px 22px; }
   .kal-link{ background:none; border:0; padding:0 2px; margin-left:4px; font:inherit; font-size:13px; font-weight:600; color:var(--amber); cursor:pointer; border-radius:4px; }
   .kal-link:hover{ text-decoration:underline; } .kal-link:focus-visible{ outline:2px solid var(--amber); outline-offset:2px; }
@@ -1567,6 +1571,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Account card: the Running pill now opens a small pop-over right under it (Pause bot, Flatten all, Rules and limits) instead of a card covering Bot status; the status lines are in Bot status only; tap elsewhere or press Escape to close it</li>
                   <li>Deploy: the phone alerts deploy script no longer makes a new alert key when it merely fails to read the old one (that broke every subscribed phone); it only makes one if the key truly does not exist</li>
                   <li>Updates: a browser running an out-of-date copy of the site now gets a pop-up that blocks the page until it reloads (it keeps you signed in; it checks every 5 minutes and when the app comes back, for every visitor, and never while something is being typed)</li>
                   <li>Bot status: the whole card (orders today, last order, win rate, edge, best and worst market) now counts every strategy but only the markets actively in the Strategies list, so paused XRP and Bitcoin's old L1 orders no longer show</li>
@@ -3504,6 +3509,7 @@ kalshiStatusTick();
     var whyEl = document.getElementById('kalL1Why');
     if(whyEl){ var why = kalshiStopReason(s, endedEv, halted, switchOff, function(ms){ return kalshiWhen(ms, now); }); whyEl.textContent = why; whyEl.hidden = !why; }
     document.getElementById('kalL1Status').textContent = running ? kalshiSkipNote(s.lastNote, s.lastTickAt, now).replace(/^Watching\. Orders go in about 6 minutes before a close(?: \(10 for (?:Bitcoin, )?XRP and natural gas\))?, and no market is at that point right now\./, 'Watching.') + (doneLine ? ' ' + doneLine : '') + (sizeText ? ' ' + sizeText : '') : 'Not running.' + (s && s.endedBecause ? ' Last ended: ' + s.endedBecause + (s.ordersSent ? ' after ' + s.ordersSent + ' orders.' : '.') : '') + (endedEv && endedEv.detail ? ' ' + String(endedEv.detail) : '');
+    document.getElementById('kalL1Status').hidden = running;      // the running status lines are in Bot status; the pop-over keeps only the controls
     document.getElementById('kalL1Start').hidden = running;
         if(running){ document.getElementById('kalL1Confirm').hidden = true; }
     renderKalshiStatus();
@@ -3656,6 +3662,9 @@ kalshiStatusTick();
     kalshiBuildCheck();
   }
   kalshiBuildCheck(); setInterval(function(){ if(document.visibilityState === 'visible'){ kalshiBuildCheck(); } }, 300000);   // the baseline is taken at load for everyone, then a header only check every 5 minutes
+  // The Running pop-over closes when you tap anywhere else or press Escape.
+  document.addEventListener('click', function(e){ var m = document.getElementById('kalBotMenu'); if(m && m.open && !m.contains(e.target)){ m.open = false; } });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape'){ var m = document.getElementById('kalBotMenu'); if(m && m.open){ m.open = false; } } });
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ kalshiResume(); } });
   window.addEventListener('pageshow', function(e){ if(e && e.persisted){ kalshiResume(); } });
   function startKalshiFeed(){
