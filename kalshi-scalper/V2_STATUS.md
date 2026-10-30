@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 9:35 PM CT, MECH1: the open interest core's counterparty is not 'late favourite takers'.** On 6.4 million tape trades the taker split is about 52/48 as in controls and the edge does not concentrate where favourite taking is high. Counterparty still unnamed. Told the main session.
+
 **2026-10-29 9:20 PM CT, GF12 scorer built for GF1 and GF2 (no outcome read).** Runs itself from 2026-11-14 02:00 UTC (or Nov 15 whatever the count), refuses a second run, readiness line in AUTO. 13 readings of open points written and pushed before any run (`workers/GF12_NOTES.md`); the GF2 gate uses net per contract on its entries minus plain L1 on all signals (the gate's first clause), with the same-window difference reported beside it. Readiness: 1 R6 file, 18 L1 signals (gold 3).
 
 **2026-10-29 9:05 PM CT, GOLDFILL fill model done (no outcome read).** Gold's spread at the decision is tiny; resting below the ask only fills on dips and misses the risers, worth about half of crossing. Live gold slippage at 16 to 20 contracts (+1.8c) is not explained by depth; the bot's own minute-tick delay is the leading guess, testable on R6. GF1 and GF2 registered for R6 (read from Nov 14); their scorer is still to be written.
