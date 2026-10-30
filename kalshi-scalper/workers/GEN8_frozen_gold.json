@@ -1,0 +1,33 @@
+{
+ "info": {
+  "series": "KXGOLD15M",
+  "generated": 17365,
+  "distinct": 5000,
+  "rejected": {
+   "exit_not_allowed": 3626,
+   "under_30_trades": 3075,
+   "duplicate": 5664
+  },
+  "disc_windows": 3192,
+  "disc_rows": 34024,
+  "disc_days": 45,
+  "pf_median": 0.5204130120679377,
+  "pf_p95": 0.7500198809707044,
+  "at_size": 4145,
+  "best_at_size": 1.092772692601068,
+  "survivors_n": 0,
+  "controls_n": 4145,
+  "booked0_share_all_distinct_trades": 9.091937773591972e-05,
+  "late_share": 0.0,
+  "base_info": {
+   "sell 60s": 0.327,
+   "sell 120s": 0.474,
+   "sell 180s": 0.563,
+   "sell 240s": 0.633,
+   "sell 300s": 0.646,
+   "n": 3063
+  },
+  "frozen_at": "2026-10-30T07:27:08.313724+00:00"
+ },
+ "survivors": []
+}

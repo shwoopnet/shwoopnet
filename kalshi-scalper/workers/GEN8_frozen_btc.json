@@ -1,0 +1,33 @@
+{
+ "info": {
+  "series": "KXBTC15M",
+  "generated": 18363,
+  "distinct": 5000,
+  "rejected": {
+   "exit_not_allowed": 3693,
+   "under_30_trades": 3631,
+   "duplicate": 6039
+  },
+  "disc_windows": 4357,
+  "disc_rows": 47651,
+  "disc_days": 46,
+  "pf_median": 0.5542368145808749,
+  "pf_p95": 0.8001272843857836,
+  "at_size": 4204,
+  "best_at_size": 1.1435840895598337,
+  "survivors_n": 0,
+  "controls_n": 4204,
+  "booked0_share_all_distinct_trades": 4.580446264172885e-05,
+  "late_share": 0.0,
+  "base_info": {
+   "sell 60s": 0.365,
+   "sell 120s": 0.495,
+   "sell 180s": 0.57,
+   "sell 240s": 0.627,
+   "sell 300s": 0.663,
+   "n": 4245
+  },
+  "frozen_at": "2026-10-30T07:27:19.375760+00:00"
+ },
+ "survivors": []
+}
