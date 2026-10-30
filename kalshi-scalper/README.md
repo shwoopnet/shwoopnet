@@ -7877,3 +7877,11 @@ terms. Information: the coins settle the same way in 76% to 83% of windows (I1),
 every cell; after a trigger the lagging book drifts 0c to 1.7c toward the leader over 3 minutes (I2), the largest drift being
 Bitcoin's after Ethereum, below one fee and absent from the outcome. The mid-window cross-asset family among these markets is
 closed on 1 minute candles. N +6; running count about 678,929 (z bar 5.26).
+
+## Result: GEN10 (gold trade-tape generator, mid-window entries held to settlement), 2026-10-30
+
+Registered first (`workers/GEN10_REGISTRATION.md`, commit b8e3a42), frozen and hashed before validation (`workers/GEN10_FROZEN.md`, commit 13c3e84), validation read once; result `workers/GEN10_RESULT.md`, code `src/scalper/gen10.py`, bars from GEN9's public-tape file (gold, 3,072 markets, 10 s bars). Signal bar 840 to 420 s before the close (nothing in the last 6 minutes), side 15c to 85c chosen by at least one signed tape condition (GEN9's 16 features plus signed flow since the open, its share, the move since the open and the time since a big print), fill at the next 10 s bar's last trade + half spread + 1c (from trades, not a book), one fee at C = 10, held to settlement. 21,219 draws to 5,000 distinct; median discovery PF 0.86 (base 0.85 to 0.88: the side wins its price and pays about 3c); 3 of 4,274 at size passed discovery (1.97, 1.88, 1.50, all the 73c to 80c side after a 17c to 25c move toward it at 10 to 11 minutes left); **0 of 3 passed validation** (1.20, 0.72, 0.70), 0 of 3 beat the side-shuffle control (200 shuffles of the side per trade), family control 0.8%: **FALSIFIED**. No holdout exists in the file (ends Oct 27), so nothing here could meet the three-window bar; no candidate, no R6 evaluator. Tape-feature taker entries on gold's 15 minute market are closed for round trips (GEN9) and held (GEN10). N +21,225; running count about 700,154 (z bar 5.26).
+
+## Files
+
+`src/scalper/gen10.py`, `workers/GEN10_REGISTRATION.md`, `workers/GEN10_FROZEN.md`, `workers/GEN10_frozen.json`, this file. Distinct, control, validation and log files in `data/gen10/` (not committed).
