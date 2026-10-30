@@ -7960,3 +7960,14 @@ are NOT_RUNNABLE for this shape (KXGOLDH candles start 900 s before the close, m
 sample). What could change the arithmetic is a maker fill on both legs, which is QUOTE2B's lane on the book recorder, not registered
 here. The taker version of a two-leg volatility structure on Kalshi's Bitcoin ladder is closed on 1 minute candles. N +5; running
 count about 728,628 (z bar 5.27).
+
+## Result: LOCK2 (locks between the 15 minute contract and the hourly ladder at coincident closes, forward, read once), 2026-10-30
+
+Read by `src/scalper/lock2.py run` at 9:22 AM CT on the recorder's `quotes.csv` and `ladder.csv` (the last 150 s before each top-of-hour close, ladder polls paired with the 15 minute quote nearest in send time, at most 1 s apart, lock size the smaller displayed size), 25 closes per asset as registered, locks at 1.0c or more after fees at 10 or more contracts.
+
+| | Closes | Closes with a lock | Median / max duration | Max size | Best pair value |
+|---|---|---|---|---|---|
+| Bitcoin | 25 | 1 | 0.0 s / 0.0 s | 860 | +5.50c |
+| Ethereum | 25 | 0 | 0.0 s / 0.0 s | 0 | -1.10c |
+
+**Verdict by the registered kill criteria: FALSIFIED on both assets.** The registration allowed NOT_YET_FALSIFIED only with locks in at least 5 of the 25 closes lasting at least 5 seconds each at 10 or more contracts; Bitcoin had one close with a lock that lasted less than one poll (0.0 s), Ethereum none. The prediction (zero locks, any lock under 10 seconds) held in spirit: one lock, gone before the next poll. Ethereum's leg was already dropped from scope on 2026-10-28, so the result closes LOCK2 on both legs. With ARB1 (no cross-event locks in 5,000 events), the 2026-10-26 snapshot (0 of 4,064 pairs), LADLOCK, LOCK2H and NEWH13 (0 top-of-book crosses in 92,849 adjacent reads of the 5 level book), coincident-close and cross-strike locks on Kalshi's Bitcoin and Ethereum books are closed at every public resolution. The recorder keeps running for QUOTE2B and MM1; nothing here changes it. No new try (the read was registered); the scorer line is in `data/lock2_result.txt` (not committed) and the AUTO_LOG entry of 9:22 AM CT.
