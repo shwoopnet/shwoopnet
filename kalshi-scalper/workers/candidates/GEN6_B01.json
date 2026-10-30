@@ -1,0 +1,60 @@
+{
+ "id": "GEN6_B01",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T02:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.gen6:forward_eval",
+ "params": {
+  "strategy": {
+   "L_hi": 180,
+   "L_lo": 180,
+   "side": "yes",
+   "conds": [
+    [
+     "doi",
+     "gt",
+     86299.56000000001
+    ],
+    [
+     "m3",
+     "gt",
+     -0.25
+    ]
+   ],
+   "e": 35
+  },
+  "series": "KXBTC15M"
+ },
+ "generator": "GEN6 (workers/GEN6_REGISTRATION.md; frozen list sha256 0b0b8e4b...)",
+ "family": "doi: underdog after a 3 minute open interest jump above the discovery 90th percentile",
+ "disc": {
+  "n": 104,
+  "days": 39,
+  "pf": 2.8074,
+  "pf1": 2.591,
+  "pfs": 2.7636,
+  "pf_sig": 2.4525,
+  "zv": 0.0,
+  "mean": 0.1174,
+  "win": 0.3269,
+  "ask": 0.1685,
+  "pf_nozv": 2.8074,
+  "z": 4.4075
+ },
+ "valid": {
+  "n": 164,
+  "days": 36,
+  "pf": 1.899,
+  "pf1": 1.7719,
+  "pfs": 1.8698,
+  "pf_sig": 1.611,
+  "zv": 0.0,
+  "mean": 0.0709,
+  "win": 0.2805,
+  "ask": 0.1825,
+  "pf_nozv": 1.899,
+  "z": 3.3077
+ },
+ "description": "Bitcoin underdog (ask 5c to 50c at the signal), [yes 180..180s | doi>8.63e+04 & m3>-0.25 | TP +20c stop none else hold]; fill at the next candle's ask. Discovery PF 2.81 (n 104), validation PF 1.90 (n 164), C=10."
+}
