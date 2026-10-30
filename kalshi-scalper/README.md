@@ -7998,3 +7998,7 @@ percent) previous window (Bitcoin, gold), T3 Polymarket price 6c or more above K
 validation to Oct 18, holdout Oct 18 on (never read, nothing passed). 7 FALSIFIED (discovery PF 0.71 to 1.14, best win rate 56.6 percent against
 a 53.5 percent break even), 1 NOT_ENOUGH_DATA (T2 gold, discovery n 94 of 100). Gold fade of the four hour trend kept its sign in both windows
 (PF 1.14 and 1.18, z about +1.1 each) and is not a lead. Looks 2. Running count about 728,658. Nothing to build; two data proposals in the result file.
+
+## Result: XVENUE1, Kalshi against Polymarket 15 minute Bitcoin and Ethereum resolutions (run 2026-10-30, measurement only)
+
+Polymarket's rule is a Chainlink point comparison (end price at or above start price), not an average. Public APIs reachable, no allowlist change. 16,222 windows joined (8,111 each, 2026-08-06 to 2026-10-30): 234 disagree = 1.44% (Bitcoin 126, 1.55%; Ethereum 108, 1.33%), evenly split by direction; 99% are within 10 bp of the strike (median 1.2 bp Bitcoin, 1.4 bp Ethereum, against 7.8 and 10.1 for all windows). Both venues 80c or higher on the same side 6 minutes before the close: 6,936 windows, 37 resolved differently = 0.53% (Bitcoin 16, Ethereum 21), under the 2% gate, so no cross-venue structure is described and no recorder is requested. 0 tries, N unchanged. Details: `workers/XVENUE1_RESULT.md`.
