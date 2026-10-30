@@ -4,6 +4,39 @@ Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). Ne
 
 ## Entries
 
+**2026-10-30 2:00 PM CT, four band and frequency briefs for the owner to approve (owner request via the main session). Nothing has been run on any data.**
+
+Baseline I am measuring against (live, Oct 16 to Oct 30, two weeks, from the nightly report): gold 122 fills, about 61 a week (35% of attempts got no fill); Dogecoin 143 fills, about 71 a week (28% no fill). So L1 today is about 130 fills a week on the two markets, 6 minute entry only. Net per contract live: gold +2.34c, Dogecoin +2.09c (30 days).
+
+Fixed rules for all four: gold and Dogecoin only, both with identical rules; public recorders only (R6 15 minute books from Oct 29, and the quote recorder on `quote-data`); only markets that close AFTER the freeze timestamp I write into the registration commit before any row is read; the 69 days of history cannot count toward a band variant (README P1), so history is used only for the count of entries, never for the verdict. Deflation: README N is about 627,838 (V2, Oct 30); these four add 4 tries, plus 1 for the 86c to 88c sub-split if it is read as two cells. Bar is the research bar already in CLAUDE.md: profit factor 1.5 or better after fees in each of three windows, deflated for N; I do not expect any of these to reach it in the first read, and they are not promotable on that alone (nothing here has a promote verb). Information needed from the owner for a live probe is a separate, later decision.
+
+**Brief 1: lower edge 88c to 86c (add the 86c to 88c cell).**
+- Hypothesis: the 86c to 88c cell is a continuation of the band's cheap end and adds fills.
+- Counterparty: none named. This is the weakest part of the case.
+- Prediction (written before any read): the added cell nets under 0c a contract after fees, FALSIFIED. Reason: the known history already has 88c to 90c at gross +0.35c and net -0.36c (n 518), and the trend into cheaper prices is down, with break-even needing a win rate above the price paid plus fee.
+- Kill: after 150 fresh settled entries in 86c to 88c, net per contract under +0.5c or a loss rate above (price paid + fee); stop at 150, no extension.
+- Orders per week: unknown until counted. Cost-free step I propose first, with owner approval: COUNT entries with outcomes hidden from the first look on the 69 day candles and the R6 files (a count, not a result). Expect roughly 15% to 25% more entries (my guess from the 88c to 90c cell being the thinnest-priced cell; stated as a guess, to be replaced by the count).
+- Plain statement: widening adds orders but the nearest evidence says the added orders lose. Frequency is bought with expected dollars here.
+
+**Brief 2: a second look at 8 or 10 minutes for entries missed at 6.**
+- Hypothesis: a market inside the band at 8 or 10 minutes left that has left the band by 6 minutes (or never fills) can be taken earlier, adding fills without changing the rule.
+- Counterparty: none named. Earlier evidence is mixed: natural gas +3.19c at 10 minutes vs +0.52c at 6, XRP +2.91c vs +1.47c, but pooled over 18 series 10 minutes missed its bar (z 1.71), and XRP's live 10 minute entries lost 12 of 75 (-$7.20). Gold at the 10 minute look was 0.89 profit factor (GOLD1D).
+- Prediction: gold FALSIFIED (net per contract under 0 at 10 minutes, consistent with GOLD1D); Dogecoin not-passing (below the 6 minute look, PF within 0.1 of 1.0). I expect the cleanest result to be "adds fills, loses cents".
+- Kill: any look must show net per contract at least +0.5c on 100 fresh entries, and the loss rate must stay under 8%.
+- Orders per week: from the TWOSTAGE log already on every live order (`ask10`, `inBand10`, `ask8`, `inBand8`, `twoStageLeft`), the count of markets in band at 8 or 10 minutes but with no L1 fill can be read from the order export with no new live data. Needs the owner to paste a fresh Copy all orders export; not available to me.
+- Plain statement: V2 owns the earlier-entry family (Oct 28 closure of L1 filter, exit and sizing tests); this brief stays only because the owner asked, and I lean toward not running it.
+
+**Brief 3: either side vs favourite-only.**
+- Hypothesis: L1 already takes whichever side is in the band, so this is about the market where both sides are out of band at the same time. I could not find a rule to extend, so this is a clarification question for the owner and the main session: is the live rule "the side whose price is in the 88c to 97c band" (so both sides is impossible, one side is always at most 12c) or "the favourite only"? If the former, there is nothing to add and this brief is withdrawn. I am not spending a try on it until that is answered.
+- Orders per week: zero change under either reading unless the band is also widened.
+
+**Brief 4: a filter that adds orders without adding losers.**
+- I could not name one. Every filter tested so far REMOVES entries (REGIME1, NEWH5, MKTTIME1, the smooth climb gate) and the only information-only effect found is that entries with a spread of 2c or more do worse (removed entries 0.798 / 0.753 / 0.716 in REGIME1), which cuts count. The honest answer to "adds orders without adding losers" is that fills come from the other end: the 35% (gold) and 28% (Dogecoin) of attempts that got no fill.
+- Alternative I propose instead (counts as 1 try): L1Q1 and MAKER5 are already registered by V2 on R6 (resting entry instead of paying the ask, read from Nov 6). If resting entries raise the fill rate without worse losers, that is the one live frequency lever with a mechanism (the no-fill share is order count thrown away). I recommend waiting for L1Q1 rather than registering a duplicate.
+- Kill and prediction belong to L1Q1's registration; I will quote its read when it runs.
+
+**My recommendation:** approve only the count-only step of Brief 1 (no outcomes, 0 tries) and the question in Brief 3; skip Brief 2 and Brief 4 as written because V2's L1Q1/MAKER5 already cover the only frequency lever with a mechanism. If the owner values frequency above expected cents, Brief 1 is the only one that adds orders, and its predicted result is negative, so it would be a deliberate cost.
+
 **2026-10-30 1:45 PM CT, first read of the live record (nightly report, 30 days, 855 settled). No kill rule has triggered. No flag for the main session.**
 
 Live, per market (dollars after fees, settled only):
