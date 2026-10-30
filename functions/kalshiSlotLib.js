@@ -58,6 +58,10 @@ const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSe
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
 const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
+// The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
+// the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
+// the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE"]);
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -81,7 +85,10 @@ function validateSlotStrategy(s) {
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMaxSec > SLOT_ENTRY_LEFT_MAX_SEC || x.leftMinSec < SLOT_ENTRY_LEFT_MIN_SEC || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside " + SLOT_ENTRY_LEFT_MIN_SEC + " to " + SLOT_ENTRY_LEFT_MAX_SEC + " seconds");
   }
-  if (!exactKeys(s.exit, EXIT_KEYS)) e.push("exit has the wrong fields");
+  if (isObj(s.exit) && Object.prototype.hasOwnProperty.call(s.exit, "holdToSettle")) {
+    if (!(exactKeys(s.exit, ["holdToSettle"]) && s.exit.holdToSettle === true)) e.push("exit.holdToSettle must be the only exit field, and true");
+    if (!SLOT_HOLD_ALLOWED.includes(s.id)) e.push("this strategy is not on the reviewed list that may hold to settlement");
+  } else if (!exactKeys(s.exit, EXIT_KEYS)) e.push("exit has the wrong fields");
   else if (isObj(s.entry) && isNum(s.entry.priceMin)) {
     const x = s.exit;
     if (!isNum(x.stopBid) || x.stopBid < 0.01 || x.stopBid >= s.entry.priceMin) e.push("exit.stopBid must be at least 0.01 and below entry.priceMin (a stop is a loss line)");
@@ -434,7 +441,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
-  SLOT_ENABLED, SLOT_STRATEGIES, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
+  SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,

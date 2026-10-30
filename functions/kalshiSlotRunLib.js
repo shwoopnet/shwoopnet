@@ -69,7 +69,7 @@ function makeRunners(flags) {
     const early = [];
     for (const s of strategies) {
       // The entry window must open well before the exit floor: an order sent a few seconds late must still be sellable by the time rule. A strategy that does not leave that room never enters.
-      if (!(s.entry.leftMinSec - s.exit.mustExitLeftSec >= MAX_STALE_MS / 1000)) { early.push(s.id + ": its entry window ends too close to its exit floor, no entry"); continue; }
+      if (s.exit.holdToSettle !== true && !(s.entry.leftMinSec - s.exit.mustExitLeftSec >= MAX_STALE_MS / 1000)) { early.push(s.id + ": its entry window ends too close to its exit floor, no entry"); continue; }
       for (const q of quotes || []) {
         if (!q || !q.m || !s.series.includes(q.series) || !OPEN_SHORT.includes(q.m.status)) continue;
         const left = (Date.parse(q.m.close_time) - now) / 1000;
@@ -277,7 +277,7 @@ function makeRunners(flags) {
       const opposite = (x) => x && x.ticker === t.ticker && (x.side === "yes" || x.side === "no") && x.side !== t.side && unsoldOf(x) > 0;
       const later = (x) => !(Number(x.ts) > Number(t.ts)) && !(Number(x.ts) === Number(t.ts) && String(x.id || x.clientOrderId) > String(t.id));
       const hedge = l1.some(opposite) || sl.some((x) => opposite(x) && later(x));
-      const why = hedge ? "hedge" : ourBid <= rules.stopBid + 1e-9 ? "stop" : ourBid >= rules.targetBid - 1e-9 ? "target" : leftSec <= rules.mustExitLeftSec + 1e-9 ? "time" : null;
+      const why = hedge ? "hedge" : rules.holdToSettle === true ? null : ourBid <= rules.stopBid + 1e-9 ? "stop" : ourBid >= rules.targetBid - 1e-9 ? "target" : leftSec <= rules.mustExitLeftSec + 1e-9 ? "time" : null;
       if (!why) continue;
       const latchOff = async (reason) => { try { if (s && typeof store.killStrategy === "function") await store.killStrategy(s.id, { killedAt: now, reason }); } catch (e) { /* the session end below still stops it */ } };
       if (!selling) {
