@@ -67,6 +67,12 @@ gates.ST7 = () => {
   assert.ok(/source = source\.concat\(kalshiSlotOrders \|\| \[\]\);/.test(html), 'the Account result line counts the second strategy too');
   assert.ok(/renderKalshiStrategies\(\);\n    renderKalshiPnl\(\);/.test(html), 'the module is drawn with the rest of the page');
 };
+gates.ST8 = () => {
+  // The owner (Oct 30, 2026): "pnl doesnt match". The Strategies rows and the Account card's Today must be worked out from the same orders and the same fills, so the rows add up to Today.
+  assert.ok(/var l1 = kalshiOrdersSummary\(kalshiResolveOrders\(kalshiLiveOrders, acct && acct\.results, fills\), now\);/.test(html), 'the L1 row uses the account fills');
+  assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\)/.test(html), 'and so does every second-strategy row');
+  assert.ok(/var botOrders = kalshiResolveOrders\(kalshiAllOrders\(\), a\.results, a\.fills && a\.fills\.ok \? kalshiGroupFills\(a\.fills\.fills\) : \[\]\);/.test(html), 'the Account card counts L1 and the second strategy, with the same fills');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);

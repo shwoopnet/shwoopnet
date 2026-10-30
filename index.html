@@ -1543,7 +1543,9 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Strategies rows and the Account card's Today now come from the same orders and fills, so they match to the cent; Today counts the second strategy too</li>
                   <li>Bot page: the Strategies card is part of the movable layout now (unlock under Layout to drag it or use its arrows, or hide it), second under Account by default</li>
+                  <li>Bot: AUD/USD, USD/CAD and natural gas are off the bot's list for good (paused since Oct 28, no orders since), which also cuts three market reads from every minute; they stay paused in code and any order for them is refused outright</li>
                   <li>Bot page: a lost connection no longer leaves "Loading..." on screen for good (it says what failed and tries again after 15 seconds); coming back to the page redraws it and reads the account at once, and a page left open offers a reload when the site was updated; switching ranges no longer repeats the same read; tablets get the 40 pixel touch sizes</li>
                   <li>Bot page: one Overall page. The strategy switch and the OICORE panel are gone; a Strategies module lists L1 and OICORE (status, today, result, settled, win rate, open, last order) and a small chip on every open position and trade says which strategy it came from</li>
                   <li>Account result: the older trades are read in pages of 5,000 (one big read was refused), so the 1M, 3M, YTD and All totals include every order; the OICORE panel says "No order yet" plainly</li>
@@ -2674,7 +2676,7 @@
       // Today's result (the owner, Oct 21, 2026: this line used to be "Bot since <date>", the all-time total). Only the BOT's settled trades whose
       // order time falls on today's US Central date, the same clock as the rest of the page, so it starts again at midnight CT. Deposits,
       // withdrawals, your own trades and orders you closed by hand are left out, as before. The all-time total still lives on the Data page.
-      var botOrders = kalshiResolveOrders(kalshiLiveOrders, a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
+      var botOrders = kalshiResolveOrders(kalshiAllOrders(), a.results, a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);     // L1 and the second strategy: Today is the sum of the Strategies rows
       var todayKey = kalDayKey(Date.now());
       var todayOrders = botOrders.filter(function(o){ return Number.isFinite(o.ts) && kalDayKey(o.ts) === todayKey; });
       var botNet = kalshiPerfStats(todayOrders, 0).total;
@@ -3537,10 +3539,11 @@ kalshiStatusTick();
     if(!tbl){ return; }
     var now = Date.now(), ses = kalshiLiveCtl && kalshiLiveCtl.session, on = !!(ses && ses.active === true);
     var age = function(sum){ return sum.lastTs === null ? 'No order yet' : kalshiAgeText(Math.max(0, Math.round((now - sum.lastTs) / 1000))) + ' ago'; };
-    var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), now);
+    var acct = kalshiLiveAcct, fills = acct && acct.fills && acct.fills.ok ? kalshiGroupFills(acct.fills.fills) : [];      // the same inputs as the Account card, so Today and Result agree to the cent (the owner, Oct 30, 2026: "pnl doesnt match")
+    var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, acct && acct.results, fills), now);
     var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
-      var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), kalshiLiveAcct && kalshiLiveAcct.results), now);
+      var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now);
       rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
     });
     tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney);     // hidden is the Layout menu's to set, never this render's
