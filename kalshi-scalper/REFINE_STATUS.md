@@ -4,6 +4,19 @@ Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). Ne
 
 ## Entries
 
+**2026-10-30 2:20 PM CT, Brief 1 count-only step done: the 86c to 88c cell adds about 8% (Dogecoin) to 17% (gold) more entries, from a very small R6 sample. No outcome column was read (book prices only; trades and results files untouched). 0 tries.**
+
+Method: for each gold and Dogecoin 15 minute window in R6 (`book15r6`, Oct 29 22:03Z to Oct 30 about 12:43Z files on `quote-data`), take the book poll nearest 360 seconds before the close (within 30 seconds); a side's ask is 1 minus the other side's best bid; a window counts as L1 (88c to 97c inclusive, either side) or as the added cell (86c up to but not including 88c, neither side in 88c to 97c).
+
+| Market | Windows with a 6 minute poll | L1 band (88c to 97c) | Added by 86c to 88c | Increase |
+|---|---|---|---|---|
+| Gold | 41 | 12 | 2 | +17% |
+| Dogecoin | 45 | 12 | 1 | +8% |
+
+Applied to the live fill rate (about 61 gold and 71 Dogecoin fills a week over Oct 16 to 30): roughly +10 gold and +6 Dogecoin fills a week, about +16 a week in total, of about 132. That range is wide: the counts are 1 and 2 added windows, so the true increase could be anywhere from near 0% to 40%. Also not allowed for: the live no-fill share (35% gold, 28% Dogecoin) would apply to the added orders too, and the live rule uses the fresh quote at the bot's look, not the poll nearest 360 seconds.
+
+Not done: the 69 day candle history is not in this container (`kalshi-scalper/data` is not committed), so I could not give the longer count. If the owner wants it, the research session or main session can run the same count there; it is still a count with outcomes hidden. Read plainly: even on the upper figure, the cell adds under 20 fills a week and the evidence nearest to it (88c to 90c net -0.36c) says those fills lose cents, so the case for widening on frequency alone is weak.
+
 **2026-10-30 2:05 PM CT, Brief 3 CLOSED as already live; Brief 1 on hold.** Main session answer from code and README: L1 buys whichever side's fresh price is 88c to 97c inclusive, so either side already qualifies and there is nothing to add. 0 tries spent. Brief 1's count-only step waits for the owner. OICORE: an export (Copy all orders) from the owner is the way to watch it until a reviewed report extension exists.
 
 **2026-10-30 2:00 PM CT, four band and frequency briefs for the owner to approve (owner request via the main session). Nothing has been run on any data.**
