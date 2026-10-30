@@ -446,8 +446,13 @@
   .kal-strat-tbl{ width:100%; border-collapse:collapse; font-size:13px; } .kal-strat-tbl th{ font-weight:600; color:var(--muted); font-size:12px; text-align:left; padding:6px 8px; } .kal-strat-tbl td{ padding:9px 8px; border-top:1px solid var(--border); }
   .kal-strat-tbl th:not(:first-child), .kal-strat-tbl td:not(:first-child){ text-align:right; font-variant-numeric:tabular-nums; }
   @media screen and (min-width:701px) and (max-width:900px) and (pointer:coarse){ #kalL1Pill, .kal-mini, #kalTradeFilter, .kal-fold > summary, .kal-btn{ min-height:40px; } }   /* tablets get the phone's touch sizes (the audit, Oct 30, 2026) */
-  .upd-bar{ position:fixed; left:50%; transform:translateX(-50%); bottom:calc(76px + env(safe-area-inset-bottom, 0px)); z-index:60; display:flex; gap:12px; align-items:center; background:var(--paper); color:var(--ink); border-radius:999px; padding:8px 8px 8px 18px; font-size:14px; font-weight:600; box-shadow:0 6px 24px rgba(0,0,0,.45); max-width:calc(100vw - 32px); }
-  .upd-bar button{ font:inherit; font-weight:700; border:0; border-radius:999px; background:var(--ink); color:var(--paper); min-height:40px; padding:0 18px; cursor:pointer; }
+  /* "A new version is ready": a blocking pop-up (the owner, Oct 30, 2026), shown only to a browser whose loaded copy is older than the site. One Reload button, no close; Reload keeps the user signed in. */
+  .upd-modal{ position:fixed; inset:0; z-index:2000; display:flex; align-items:center; justify-content:center; padding:16px; background:rgba(0,0,0,.74); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+  .upd-card{ width:min(380px, 100%); background:var(--panel, #141414); color:var(--paper); border:1px solid var(--border); border-radius:16px; padding:24px 22px 20px; box-shadow:0 30px 80px rgba(0,0,0,.6); text-align:left; }
+  .upd-card h2{ margin:0 0 8px; font:700 20px/1.2 'Public Sans', sans-serif; }
+  .upd-card p{ margin:0 0 18px; font-size:14px; line-height:1.5; color:var(--muted); }
+  .upd-card button{ font:inherit; font-weight:700; border:0; border-radius:999px; background:var(--paper); color:var(--ink); min-height:44px; width:100%; cursor:pointer; }
+  .upd-card button:focus-visible{ outline:2px solid var(--paper); outline-offset:3px; }
   .kal-pill.kal-pill-run{ color:var(--gain); border-color:var(--gain); }
   .kal-tbl-wrap{ overflow-x:auto; }
   /* Phones and tablets (up to 900px, where the page switches to its bottom bar): the table has nine columns, so each strategy becomes a card (the owner, Oct 30, 2026: "mobile ui isnt great"; on a phone Status, Today and Result were hidden behind a sideways scroll). Name and markets on top, then label over value in two columns. */
@@ -1562,6 +1567,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Updates: a browser running an out-of-date copy of the site now gets a pop-up that blocks the page until it reloads (it keeps you signed in; it checks every 5 minutes and when the app comes back, for every visitor, and never while something is being typed)</li>
                   <li>Phones: the bottom navigation bar is no longer a scroll container and has its own layer, to stop it floating into the middle of the screen while scrolling in the iPhone Home Screen app (a best fix, tell us if it still happens)</li>
                   <li>Account card, Strategies table: the Status column and the explanatory text under the table are gone (an error note still shows if the second strategy's orders cannot be read)</li>
                   <li>Account card: the Strategies table now sits inside it, beside the balance and the Loss stop, with All strategies as the first row (it is the account figure) and each strategy's markets under its name; the separate Strategies card is gone</li>
@@ -3606,18 +3612,32 @@ kalshiStatusTick();
   // right immediately and not after the next ten minute read. It also asks the site, with a header only request, whether the page was updated since this one loaded, and offers a reload if so (a Home Screen app can
   // otherwise run an old copy for days). Nothing is sent but a HEAD for this page; nothing is stored.
   var kalshiBuildTag = null;
+  // The update check is for EVERY visitor now, not only the admin (the owner, Oct 30, 2026): each browser compares its own loaded copy with the site, so it is per user and per device with nothing stored on a server.
+  // An out-of-date copy gets a blocking pop-up with one Reload button (it does NOT sign anyone out). Loop guard: if a reload was just made and the tags still differ (a cache serving two versions), it does not block again.
+  function siteUpdateModal(){
+    if(document.querySelector('.upd-modal')){ return; }
+    var ov = document.createElement('div'); ov.className = 'upd-modal'; ov.id = 'updModal';
+    var card = document.createElement('div'); card.className = 'upd-card'; card.setAttribute('role', 'alertdialog'); card.setAttribute('aria-modal', 'true'); card.setAttribute('aria-labelledby', 'updTitle'); card.setAttribute('aria-describedby', 'updText');
+    var h = document.createElement('h2'); h.id = 'updTitle'; h.textContent = 'A new version is ready';
+    var t = document.createElement('p'); t.id = 'updText'; t.textContent = 'This page is out of date. Reload to continue; you stay signed in.';
+    var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reload';
+    btn.addEventListener('click', function(){ try{ sessionStorage.setItem('shwoopnet:updReload', String(Date.now())); }catch(e){} location.reload(); });
+    card.appendChild(h); card.appendChild(t); card.appendChild(btn); ov.appendChild(card);
+    ov.addEventListener('keydown', function(e){ if(e.key === 'Tab'){ e.preventDefault(); btn.focus(); } });   // one control: focus stays on it
+    document.body.appendChild(ov); btn.focus();
+  }
   function kalshiBuildCheck(){
     try{
       fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function(r){
         var tag = (r.headers.get('etag') || r.headers.get('last-modified') || '');
         if(!tag){ return; }
         if(kalshiBuildTag === null){ kalshiBuildTag = tag; return; }
-        if(tag !== kalshiBuildTag && !document.querySelector('.upd-bar')){
-          var b = document.createElement('div'); b.className = 'upd-bar'; b.setAttribute('role', 'status');
-          var t = document.createElement('span'); t.textContent = 'A new version of this page is ready.';
-          var btn = document.createElement('button'); btn.type = 'button'; btn.textContent = 'Reload'; btn.addEventListener('click', function(){ location.reload(); });
-          b.appendChild(t); b.appendChild(btn); document.body.appendChild(b);
-        }
+        if(tag === kalshiBuildTag || document.querySelector('.upd-modal')){ return; }
+        var ae = document.activeElement;
+        if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA') && ae.value){ return; }      // never throw away something being typed; the next check tries again
+        var last = 0; try{ last = Number(sessionStorage.getItem('shwoopnet:updReload')) || 0; }catch(e){}
+        if(last && Date.now() - last < 120000){ kalshiBuildTag = tag; return; }                       // just reloaded and still different: accept this copy, do not trap the user
+        siteUpdateModal();
       }).catch(function(){});
     }catch(e){}
   }
@@ -3625,6 +3645,7 @@ kalshiStatusTick();
     if(kalshiFeedOn){ try{ kalshiAcctRefresh(); }catch(e){} try{ kalshiFeedRender(); }catch(e){} }
     kalshiBuildCheck();
   }
+  kalshiBuildCheck(); setInterval(function(){ if(document.visibilityState === 'visible'){ kalshiBuildCheck(); } }, 300000);   // the baseline is taken at load for everyone, then a header only check every 5 minutes
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible'){ kalshiResume(); } });
   window.addEventListener('pageshow', function(e){ if(e && e.persisted){ kalshiResume(); } });
   function startKalshiFeed(){
