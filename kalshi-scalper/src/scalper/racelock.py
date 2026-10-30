@@ -206,7 +206,7 @@ def t2():
         gp = sum(p for p in pnl if p > 0)
         gl = -sum(p for p in pnl if p < 0)
         return gp / gl if gl else float("inf"), sum(pnl), pnl
-    for w in ("discovery", "validation", "holdout"):
+    for w in ("discovery", "validation") + (("holdout",) if "--holdout" in sys.argv else ()):
         trs = rows[w]
         print("==", w, dict(funnel[w]))
         if not trs:

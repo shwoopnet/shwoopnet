@@ -75,3 +75,12 @@ because makers pad every leg, so I expect T1 to find no fillable lock.
 Median and quartiles of the sum of YES asks and of YES bids at the look and fill candles, median spread per leg, the share of candles
 with all five legs quoted, the share of events with each number of missing legs, and for the counted locks the distribution of
 (sum of asks - 1). Reported per window.
+
+## Amendment A1 (written after T1 was scored, before any settled result was read)
+
+T1 (no result read) found a few tiny locks, not zero: at the fill candle with all five legs quoted, discovery 2,278 windows had 5 YES
+locks (3 with volume above 0 on every leg) and 4 NO locks (2 with volume); validation 1,668 windows had 1 YES lock and 0 NO locks;
+holdout was not looked at for a verdict (counts only, 0 locks). The largest lock is $0.37 on 10 sets (3.7 cents a set). The T2 gate said
+"only if T1 shows locks do not exist". Strictly the locks exist, so I record that T2 is run on a judgement and not on the letter: the locks
+are 1 window in about 700, worth cents, and they cannot carry a trade, so the over-round side test is the only question left. The holdout
+is not printed by `racelock.py t2` unless `--holdout` is passed, and will be passed only if both earlier windows pass. N is unchanged.
