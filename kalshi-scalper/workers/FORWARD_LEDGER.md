@@ -1,83 +1,95 @@
 # FORWARD LEDGER (automatic; research only)
 
-Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-10-30 00:17 UTC.
+Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-10-30 01:16 UTC.
 Forward evidence counts only windows that CLOSED after a candidate's freeze time, had the data its rule needs and have settled.
 Fees 7% x C x p x (1-p) rounded up to the cent per order, at 1 and 10 contracts; held to settlement pays the entry fee only. Win = net at 10 contracts above zero. Net per contract is at 10 contracts. Trades per week: forward trades over the time from the freeze to the last evaluated close.
 This ledger never promotes anything. READY FOR THE FALSIFIER means only: forward PF 1.5+ at 1 and at 10 contracts on 30+ trades over 10+ trade days. It earns a falsifier read, nothing more. How a generator adds a candidate: `workers/candidates/README.md`.
 
 | id | market | stage | freeze | fwd days | trades | wins | losses | PF 1c | PF 10c | net/contract | trades/week | updated | flag |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
-| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 00:17 UTC |  |
+| REF_GEN6_OICORE | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN7_B01 | KXBTC15M | validation | 2026-10-30 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN7_B02 | KXBTC15M | validation | 2026-10-30 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| REF_GEN6_OIDRIFT | KXBTC15M | reference | 2026-10-30 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 1 | 1 | 1 | 0 | inf | inf | +4.50c | 7.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-10-30 01:16 UTC |  |
+| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 1 | 1 | 1 | 0 | inf | inf | +4.90c | 7.0 | 2026-10-30 01:16 UTC |  |
 
 ## History per candidate
+
+### REF_GEN6_OICORE
+
+Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T03:00:00Z. Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest rose more than 86,300 contracts over the 3 minutes before, held to settlement, fill at the next candle's ask. History: discovery PF 2.28 (n 222), validation 1.85 (n 333, z 4.53). Forward days only; 1 try. Falsifier FALS4 running.
+Windows evaluated 0 on 0 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+
+No forward trades yet.
 
 ### GEN6_B01
 
@@ -191,10 +203,34 @@ PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00
 
 No forward trades yet.
 
+### GEN7_B01
+
+Evaluator `scalper.gen7:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin cheap side (ask 5c to 50c at the signal), [cheap both 240..240s | npv1>0.281 & vol>1.32e+05 | sell at 60s]; npv1 = open interest change over the last minute divided by that minute's volume; fill at the next candle's ask. Discovery PF 3.28 (n 101), validation PF 1.80 (n 126), C=10.
+Windows evaluated 1 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+
+No forward trades yet.
+
+### GEN7_B02
+
+Evaluator `scalper.gen7:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin cheap side (ask 5c to 50c at the signal), [cheap both 300..240s | npv1>0.393 & doi5>9.78e+04 | TP +20c stop -20c else sell 60s]; npv1 = open interest change over the last minute divided by that minute's volume; fill at the next candle's ask. Discovery PF 1.75 (n 135), validation PF 1.71 (n 101), C=10.
+Windows evaluated 1 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+
+No forward trades yet.
+
+### REF_GEN6_OIDRIFT
+
+Evaluator `scalper.oidrift:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest over the 3 minutes before rose above the 90th percentile of that change over the 30 UTC days before (earlier days only, 20+ days needed), fill at the next candle's ask, held. History validation n 67, PF 2.65 (FALS4 check 5, reproduced). Not independent of REF_GEN6_OICORE. 1 try; workers/OIDRIFT_REGISTRATION.md.
+Windows evaluated 1 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+
+No forward trades yet.
+
 ### REF_GOLD_UNDERDOG_180
 
 Evaluator `scalper.fwdeval:l1_like`, source `candles`, frozen 2026-10-30T01:00:00Z. Gold version of REF_BTC_UNDERDOG_180: FALS3 found gold favourites at 50c to 85c, 2 to 3 minutes before the close, also below break-even (PF 0.85). Buy the cheap side whose ask is 15c to 49c at the candle ending 180 s before the close, held. Forward days only. 1 try.
-Windows evaluated 0 on 0 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
+Windows evaluated 1 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
 PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
 
 No forward trades yet.
@@ -202,10 +238,12 @@ No forward trades yet.
 ### REF_LATECAL_BTC
 
 Evaluator `scalper.fwdeval:l1_like`, source `candles`, frozen 2026-10-30T01:00:00Z. LATECAL's one chosen cell (Bitcoin, 90 to 60 s left, ask 0.95 to 0.98: 61 of 61 won on the recorder, NOT_ENOUGH_DATA; needs about 800 windows to clear the 97.7% break-even) tracked forward. Candles only: the nearest candle is the one ending 60 s before the close, so this approximates the recorder's 90 to 60 s cell. L1-family, held to settlement.
-Windows evaluated 0 on 0 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
-PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+Windows evaluated 1 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
+PF at 1 contract inf, at 10 contracts inf, at 10 contracts with fees x1.2 inf; net per contract +3.90c at 1, +4.50c at 10.
 
-No forward trades yet.
+| date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
+|---|---|---|---|---|---|---|
+| 2026-10-30 | 1 | 1 | 0 | +4.5c | +4.5c | inf |
 
 ### GEN4_B01
 
@@ -626,8 +664,10 @@ No forward trades yet.
 ### REF_L1_GOLD
 
 Evaluator `scalper.fwdeval:l1_like`, source `candles`, frozen 2026-10-30T00:00:00Z. The live L1 gold rule as a known baseline: the side whose ask is 0.88 to 0.97 at the candle ending 6 minutes before the close, bought at that ask, held to settlement. Candles only, so it ignores the live 25c exit and the window limit.
-Windows evaluated 0 on 0 days; without the data the rule needs 0; evaluator errors 0. Trades 0 on 0 days; zero-volume trades 0.
-PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract +0.00c at 1, +0.00c at 10.
+Windows evaluated 5 on 1 days; without the data the rule needs 0; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
+PF at 1 contract inf, at 10 contracts inf, at 10 contracts with fees x1.2 inf; net per contract +4.30c at 1, +4.90c at 10.
 
-No forward trades yet.
+| date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
+|---|---|---|---|---|---|---|
+| 2026-10-30 | 1 | 1 | 0 | +4.9c | +4.9c | inf |
 
