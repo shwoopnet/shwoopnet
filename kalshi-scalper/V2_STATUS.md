@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 7:55 PM CT, SLOTEX sent to the main session.** The core sold at 60 s (slot-legal) keeps about half the held edge: validation PF 1.52 at 10 contracts, 1.50 at 5, 1.32 at 1 (fees). Take profits and stops add nothing or lose. EVT1 launched (scheduled-event windows on gold and Bitcoin: macro releases, COMEX settlement, CME Bitcoin close, Deribit expiry, funding times).
+
 **2026-10-29 7:45 PM CT, GEN7 (open interest flow, earlier entries, gold and Bitcoin): gold FALSIFIED; Bitcoin 2 rules to forward, both the GEN6 core seen a minute earlier.** Open interest before 5 minutes left carries nothing. SLOTEX running for the main session (the core with slot-legal exits before settlement, at 1, 5 and 10 contracts). N about 590,982.
 
 **2026-10-29 7:35 PM CT, OIDRIFT built.** Second forward row REF_GEN6_OIDRIFT (threshold = trailing 30 day 90th percentile of the 3 minute open interest jump, about 223,800 for Oct 30; freeze 2026-10-30 01:00 UTC; kill: PF under 1.0 after 40 trades or under 1.3 after 80). Parity with FALS4 exact (n 67, PF 2.65). Not independent of REF_GEN6_OICORE. Nightly OIFILL (inside drift) reads R6's ask size at each forward signal; R6 rows land about 1.3 s after the signal with sizes in the thousands on a dry check. N about 563,361.
