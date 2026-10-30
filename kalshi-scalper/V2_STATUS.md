@@ -2,8 +2,8 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running (4:45 PM):** workers ESPN1 (ESPN in-play win probability vs Kalshi game markets), CAL (official calendar of scheduled releases, FOMC, Treasury auctions, exchange maintenance, plus a power count for a release-window test), DRIFT (nightly live fills vs the history rule: coverage, slippage, result drift), STAB (weekly re-run of the live rule on the newest fresh days, no new tries); recorder R6 (merged); AUTO hourly loop. Owner items already done: INX1 (FALSIFIED); dollar dailies (DAILY2: euro and yen); 10 year Treasury daily: no settled daily series (NOT_RUNNABLE).
-- **Next:** round 4 of the self-guide (new mechanisms only); recorder R6 if the owner approves.
+- **Now running (7:20 PM):** workers GEN6 (late-window underdog generator, gold and Bitcoin, entries 240 to 60 s before the close, registered before scoring), GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
+- **Next:** first ranked shortlist to the main session about 12:30 AM CT; gold GEN4-style run after Nov 6 on R6 data; more generator families on gold and Bitcoin.
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F interim (about Nov 24 to 26; forward to the main session) and formal read (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 7:20 PM CT, underdog follow-up to FALS3.** Gold underdog at 180 s added to the forward ledger beside the Bitcoin one (forward days only, 1 try each). GEN6 launched: late-window underdog generator on gold and Bitcoin with a discovery, validation, forward split fixed in its registration before any outcome is read; it does not touch REV1's window or rule.
 
 **2026-10-29 7:05 PM CT, R6's first run pushed (book15r6/2026-10-29/2203).** 40 coverage rows (8 windows x 5 markets); on the Bitcoin window checked, 330 of 330 polls ok, no 429, recorded trade size equal to Kalshi's volume exactly; gold had no open market at its daily break. About 3.8 MB gzipped for the run, in line with the spec's 45 MB a day. R6-based reads (MAKER5, L1Q1, MM1 mid-window) run themselves from Nov 6.
 
