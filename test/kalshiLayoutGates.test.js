@@ -549,9 +549,11 @@ gates.Y36 = () => {
 gates.Y38 = () => {
   assert.ok(/var kalshiBotState = \{ control: null \};/.test(html), 'control starts as not loaded (null), not as an empty saved setting');
   assert.ok(/var haltUnset = kalshiBotState\.control !== null && kalshiBotState\.control\.halt === undefined;/.test(html), 'the never-saved warning needs a loaded document');
-  assert.ok(/function stopKalshiFeed\(\)\{\n    kalshiFeedOn = false;\n    kalshiBotState\.control = null; kalshiOrdersLoaded = false;/.test(html), 'signing out resets it, so the next sign-in is loading again');
-  assert.ok(/kalshiOrdersLoaded = true; kalshiFeedRender\(\)/.test(html) && /<b>loading\.\.\.<\/b>/.test(html) && /Loading the bot\\'s trades\.\.\./.test(html), 'figures say loading until the orders arrive, never +$0.00');
-  assert.ok(/error: function\(err\)\{ kalshiSyncError/.test(html) && /Reload the page; if it keeps happening/.test(html), 'a listener that fails is shown, not left as an endless loading state');
+  assert.ok(/function stopKalshiFeed\(\)\{\n    kalshiFeedOn = false;\n    if\(kalshiFeedRetry\)\{ clearTimeout\(kalshiFeedRetry\); kalshiFeedRetry = null; \}\n    kalshiBotState\.control = null; kalshiOrdersLoaded = false;/.test(html), 'signing out resets it, so the next sign-in is loading again');
+  assert.ok(/kalshiOrdersLoaded = true; kalshiSyncError = ''; kalshiFeedRender\(\)/.test(html) && /<b>loading\.\.\.<\/b>/.test(html) && /Loading the bot\\'s trades\.\.\./.test(html), 'figures say loading until the orders arrive, never +$0.00');
+  assert.ok(/error: function\(err\)\{ kalshiFeedFailed\(err\)/.test(html) && /Reload the page; if it keeps happening/.test(html), 'a listener that fails is shown, not left as an endless loading state');
+  assert.ok(/kalshiSyncError = String\(\(err && \(err\.code \|\| err\.message\)\) \|\| 'unknown'\)/.test(html) && /kalshiFeedRetry = setTimeout\(function\(\)\{ kalshiFeedRetry = null; if\(kalshiFeedOn\)\{ stopKalshiFeed\(\); startKalshiFeed\(\); \} \}, 15000\)/.test(html), 'and the feed starts again after 15 seconds');
+  assert.ok(/kalshiSyncError \? '<div class="kal-empty">The bot\\'s trades could not be read/.test(html) && /could not be read \(' \+ escapeHtml\(kalshiSyncError\)/.test(html), 'a failed read says so instead of Loading');
 };
 
 // Y39: a market the page does not know is never shown. The deployed relay can lag the page by a deploy, and Solana once appeared as a bare "KXSOL15M" card after it was removed.
