@@ -7830,3 +7830,15 @@ nowhere near the bar. **USNARROW-BTC** (buy the wing in US cash hours): 0.97 / 1
 15 events) showed the ladder only about 7% wider before a release and the 30c wing winning 53% (PF 2.56) against 18% on other
 weekdays: 15 events cannot carry a claim and history has no more; a forward read would take about a year. KXGOLDD and KXGOLDW width:
 NOT_RUNNABLE (about 60 daily and 9 weekly closes in all history). N +6; running count about 627,852 (z bar 5.24).
+
+## Result: NEWH11 (gold's opening quote against COMEX; the CME weekend gap on Bitcoin), 2026-10-30
+
+Registered first (`workers/NEWH11_REGISTRATION.md`, commit cb427dd), result `workers/NEWH11_RESULT.md`, code `src/scalper/newh11.py`,
+public data only (Yahoo GC=F 1 minute, Binance spot BTCUSDT 1 minute, local Kalshi candles); holdouts NOT read because nothing passed.
+Family check first: the partly locked BRTI average is BTCAVG, window-to-window persistence is S06, BTC1, BK2 and OPENLEAN, and strike
+placement does not apply to the 15 minute markets (strikes are full-cent settlement values, no grid; round levels are NEWH1), so no
+try was spent there. **GOLDOPEN** (first minute of each gold window against the GC=F move since the strike minute, side with a 5c
+model edge, next-candle fill): PF 1.51 on 54 then 0.79 on 66, **NOT_ENOUGH_DATA** (with GOLDFV1, gold against COMEX is closed on the
+free 30 days of minutes). **CMEGAP-W** (weekend Bitcoin at least 0.5% from the CME Friday close, buy toward it): 0.98 / 0.81 on 270 /
+234, **FALSIFIED**. **CMEGAP-R** (after the Sunday reopen while the gap is unfilled): 1.82 on 18 then 0.85 on 111, **NOT_ENOUGH_DATA**.
+N +4; running count about 627,856 (z bar 5.24).
