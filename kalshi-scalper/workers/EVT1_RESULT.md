@@ -34,7 +34,7 @@ Registration: `workers/EVT1_REGISTRATION.md` (pushed before the score, commit 77
 | BTC SETTLE_BTC after CHEAP180 | 83 | 1.68 | +4.8 (+0.91) | 79 | 2.21 | +6.7 (+1.08) |
 | BTC SETTLE_BTC after FAVMID180 | 50 | 0.33 | -15.9 (-1.69) | 45 | 0.35 | -15.4 (-1.59) |
 
-(The other 17 powered cells: |diff z| < 1.7 in both splits; see the full table.) **Reading.** The only cells with PF above the bar in
+(The other 16 powered cells: |diff z| < 1.7 in both splits; see the full table.) **Reading.** The only cells with PF above the bar in
 both splits (Bitcoin cheap side at 180 s around funding times and SETTLE_BTC, PF 1.6 to 2.2) are not event effects: the same rule's
 matched control has PF 1.15 (discovery) and 0.97 (validation), and the event-minus-control diff is +1c to +7c at z 0.2 to 1.1. That is
 the general Bitcoin cheap-side-at-180 s pattern already on the forward ledger as `REF_BTC_UNDERDOG_180`, not something the funding
