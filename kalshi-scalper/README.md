@@ -8017,3 +8017,15 @@ Tries +3 (running count about 728,662, z bar 5.27). `workers/NEWH15_INVENTORY.md
 ## Result: FXUSD (pooled US dollar calendar moments, five Kalshi FX 15 minute series), 2026-10-30
 
 Registered first (`workers/FXUSD_REGISTRATION.md`, commit 2221343), scored once (`workers/FXUSD_RESULT.md`, `src/scalper/fxusd.py`). The five FX series (EUR/USD, GBP/USD, USD/JPY 2,525 windows each from 2026-09-23; AUD/USD, USD/CAD 1,586 each from 2026-10-07) pooled by USD direction: 10,747 windows, 33 days. USD up is the NO side on the three USD-quote pairs and the YES side on USD/JPY and USD/CAD (ties settle YES, 1.1% to 2.7%), which the brief had reversed. Moments chosen from the calendar before any data: the window closing at the 4 PM London fix (A, buy USD up; the UK/US mismatch week 10-26 to 10-30 is computed from London time and sits wholly in the holdout), windows starting 07:30 and 08:00 Central on weekdays (B, count only), the first window after the Sunday open (C, count only). A: discovery 59 trades PF 1.44, validation 23 trades PF 0.61 (hit 62.7% then 47.8%), holdout unread: NOT_ENOUGH_DATA (trades short of 100 / 50 / 30, PF below 1.5; a one-window-a-day rule has at most 115 pooled windows in 33 days). B and C looks: USD-up shares 0.565, 0.459 and 0.562 with intervals 18 points wide or more: NOT_ENOUGH_DATA. Baseline USD-up share of the other windows 0.488. N +4; running count about 728,666.
+
+## Result: RACELOCK (Coin Race Dutch book and over-round), 2026-10-30
+
+**RACELOCK (2026-10-30, Coin Race `KXCRYPTOLEAD15M`, 6,343 events, Dutch-book and over-round structure, no direction view).** Five
+mutually exclusive YES markets; at 9 minutes left the five asks sum to a median 1.23 to 1.25 and the five bids to 0.85 (spreads 8c a
+leg), so the structure is over-round, not exploitable. T1 (buy all five YES, or all five NO, at the next candle, after fees, 10 contracts a leg
+modelled): 6 YES and 4 NO locks in 3,946 windows with all five legs quoted (1 in about 400), 0.1c to 3.7c a set, under $1.50 in total,
+one of them in validation; NOT_YET_FALSIFIED on the registered words, with no economic content. T2 (NO on the leg with the largest ask
+above its normalised mid share, held): PF 0.77 discovery (n 1,662) and 0.775 validation (n 1,379), win rate 4 points below fill,
+FALSIFIED. N about 728,666.
+
+Lead's notes: (1) NOT_YET_FALSIFIED for T1 is a registered-words artefact, not a lead: about 1 lock in 400 windows, under $1.50 in total over 10 weeks, no economic content. (2) The validation lock time cited as '10-15 05:15 CT region' is UTC. (3) Running N after FXUSD (+4) and RACELOCK (+4): about 728,670, z bar 5.27.
