@@ -317,6 +317,16 @@ def check() -> None:
     # FWDLEDGER (forward ledger of candidates, report only): every pass, as its own process so a candidate's crash cannot reach this one
     rc, o = py("scalper.fwdledger", "run", timeout=1800)
     status.append((last_line(o, "FWDLEDGER") if rc == 0 else f"FWDLEDGER failed rc={rc}: {last_line(o)[:160]}")[:400])
+    # OIFEED (OIFWD-AUDIT, 2026-10-30): the feed behind REF_GEN6_OICORE, every pass, so a stalled fresh.sqlite never reads as a quiet rule;
+    # a STALE line also goes to AUTO_LOG, at most once per 6 hours. Counts only (candles, windows, max doi), never an outcome.
+    try:
+        from .oifeed import status_line
+        feed = status_line()
+        status.append(feed)
+        if "STALE" in feed and time.time() - s.get("oifeed_stale_logged", 0) >= 6 * 3600:
+            log("OIFEED", feed[:400]); s["oifeed_stale_logged"] = time.time()
+    except Exception as ex:
+        status.append(f"OICORE feed: status failed: {type(ex).__name__}")
     # RECORD1: count line once a day only
     today = datetime.now(CT).strftime("%Y-%m-%d")
     if s.get("daily") != today:
