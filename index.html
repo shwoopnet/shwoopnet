@@ -459,7 +459,6 @@
     .kal-strat-tbl td:nth-child(1), .kal-strat-tbl td:nth-child(2){ grid-column:1 / -1; }
     .kal-strat-tbl td:nth-child(1){ font-size:17px; font-weight:700; }
     .kal-strat-tbl td:nth-child(1)::before{ display:none; }
-    .kal-strat-tbl td:nth-child(3){ grid-column:1 / -1; }
     .kal-strat-tbl td .kal-pill{ white-space:nowrap; display:inline-block; }
     .kal-strat-tbl td:not(:first-child), .kal-strat-tbl th:not(:first-child){ text-align:left; }
   }
@@ -1561,6 +1560,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Account card, Strategies table: the Status column and the explanatory text under the table are gone (an error note still shows if the second strategy's orders cannot be read)</li>
                   <li>Account card: the Strategies table now sits inside it, beside the balance and the Loss stop, with All strategies as the first row (it is the account figure) and each strategy's markets under its name; the separate Strategies card is gone</li>
                   <li>Bot page: Recent trades tiles, Orders today, the notification bell, the sound alerts, the order exports and the needs-checking banner now count every strategy, not only L1 (the OICORE trade was missing from them); a test keeps a new card from reading L1 alone</li>
                   <li>Deploy: the sizing deploy script now works on a Mac (it stopped on a macOS-only difference in sed before it deployed anything)</li>
@@ -3508,7 +3508,7 @@ kalshiStatusTick();
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
     L1: { name: 'Closing buy', markets: 'Gold, Dogecoin, Ethereum', note: '' },
-    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: 'OICORE: 5 contracts, held to settlement. Kill rule: net under -$6 after 40 fills.' }
+    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){
     var seen = {}, out = [];
@@ -3543,7 +3543,7 @@ kalshiStatusTick();
     var cls = function(v){ return v > 0 ? ' kal-pos' : (v < 0 ? ' kal-neg' : ''); };
     var cell = function(r, name, chip){
       var dec = r.sum.won + r.sum.lost, wr = dec > 0 ? (r.sum.won / dec * 100).toFixed(1) + '%' : 'n/a';
-      return '<tr' + (chip ? '' : ' class="kal-strat-total"') + '><td data-label="Strategy">' + (chip ? kalshiChipHtml(r.id, esc) : '') + esc(name) + (r.info.markets ? '<span class="kal-strat-mk">' + esc(r.info.markets) + '</span>' : '') + '</td><td data-label="Markets"' + (r.info.markets ? '' : ' class="kal-nil"') + '>' + esc(r.info.markets) + '</td><td data-label="Status"' + (r.status ? '' : ' class="kal-nil"') + '>' + (r.status ? '<span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span>' : '') + '</td>' +
+      return '<tr' + (chip ? '' : ' class="kal-strat-total"') + '><td data-label="Strategy">' + (chip ? kalshiChipHtml(r.id, esc) : '') + esc(name) + (r.info.markets ? '<span class="kal-strat-mk">' + esc(r.info.markets) + '</span>' : '') + '</td><td data-label="Markets"' + (r.info.markets ? '' : ' class="kal-nil"') + '>' + esc(r.info.markets) + '</td>' +
         '<td data-label="Today" class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td data-label="Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '" class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td data-label="Settled">' + esc(String(r.sum.n)) + '</td><td data-label="Win rate">' + esc(wr) + '</td><td data-label="Open">' + esc(String(r.sum.open.length)) + '</td><td data-label="Last order">' + esc(r.ageText) + '</td></tr>';
     };
     var body = '', totalRow = '';
@@ -3554,10 +3554,10 @@ kalshiStatusTick();
       totalRow = cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
     }
     body = totalRow + rows.map(function(r){ return cell(r, r.info.name, true); }).join('');   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
-    var notes = rows.filter(function(r){ return r.info.note; }).map(function(r){ return '<div class="kal-note">' + esc(r.info.note) + '</div>'; }).join('');
+    var notes = '';   // no explanatory text under the table (the owner, Oct 30, 2026); only a real problem is said
     if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
-    return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
-      '<div class="kal-note">Result, settled and win rate follow the range chosen under Account result, so the first row matches that figure.' + (opts.partial ? ' Older trades are still loading or could not be read, so this covers the latest orders only.' : '') + '</div>';
+    return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
+      (opts.partial ? '<div class="kal-note">Older trades are still loading or could not be read, so this covers the latest orders only.</div>' : '');
   }
   function renderKalshiStrategies(){
     var tbl = document.getElementById('kalStrategies');
