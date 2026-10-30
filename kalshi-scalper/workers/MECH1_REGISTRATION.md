@@ -41,3 +41,7 @@ The descriptive tables cost 0. The scored look is 1 split with 2 halves, counted
 ## Kill / honesty
 
 If more than 10% of firing windows return empty tape, P1 and P5 are reported as NOT_ENOUGH_DATA rather than read. The tape counts trades, not openings: a favourite taker can be closing a NO position; the open ratio is the only opening measure available and is per window, not per trade. This limit is stated in the result whatever it shows.
+
+## Amendment 1 (2026-10-30, before any tape is joined to an outcome)
+
+The public tape runs to about 9,000 to 13,000 trades in each 3 minute interval (9 to 13 pages), and the shared rate limit gives about 3 windows a minute. So the download takes ALL 555 firing windows first, then the 555 matched controls in a seeded random order (seed 30102602); if the controls are not all in when the firing windows finish plus about 90 minutes, the controls used are the random prefix that is in (still matched per window on stage and 5c bucket), and the result states how many. P1 to P4 compare against that prefix. The scored look (P5) uses firing windows only and needs all 555 (or the empty-tape rule above). No change to predictions or tries.

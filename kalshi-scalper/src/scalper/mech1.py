@@ -148,8 +148,25 @@ def _maker4_cache():
     return out
 
 
-def _fetch_one(tk, lo, hi):
+def _get(path, params):
+    """Polite GET: a 429 waits 3 s and asks again (no escalation, which stalled the shared limit)."""
+    import urllib.error
+    import urllib.parse
+    import urllib.request
     from . import api
+    url = api.BASES[0] + path + "?" + urllib.parse.urlencode(params)
+    for i in range(40):
+        try:
+            with urllib.request.urlopen(url, timeout=20) as r:
+                return json.load(r)
+        except urllib.error.HTTPError as e:
+            time.sleep(3.0 if e.code == 429 else 5.0)
+        except Exception:
+            time.sleep(5.0)
+    raise RuntimeError("GET failed " + path)
+
+
+def _fetch_one(tk, lo, hi):
     for path in ("/historical/trades", "/markets/trades"):
         cur, rows = None, []
         while True:
@@ -157,16 +174,16 @@ def _fetch_one(tk, lo, hi):
             if cur:
                 p["cursor"] = cur
             try:
-                d = api._get(path, p)
+                d = _get(path, p)
             except Exception:
-                time.sleep(10)
+                time.sleep(30)
                 continue
             for t in d.get("trades", []):
                 ts = datetime.fromisoformat(t["created_time"].replace("Z", "+00:00")).timestamp()
                 rows.append((ts, round(float(t["yes_price_dollars"]) * 100, 2), float(t["count_fp"]),
                              t["taker_outcome_side"]))
             cur = d.get("cursor")
-            time.sleep(0.6)
+            time.sleep(0.5)
             if not cur or not d.get("trades"):
                 break
         if rows:
@@ -176,11 +193,16 @@ def _fetch_one(tk, lo, hi):
 
 def fetch(shard, shards):
     _, fire, ctrl = windows()
-    jobs = sorted({(t, c) for t, c, _ in fire} | {(t, c) for t, c, _ in ctrl}, key=lambda x: -x[1])
+    # firing windows first (newest first), then controls
+    jobs = sorted({(t, c) for t, c, _ in fire}, key=lambda x: -x[1])
+    fset = {t for t, _ in jobs}
+    cj = sorted({(t, c) for t, c, _ in ctrl if t not in fset})
+    random.Random(SEED + 1).shuffle(cj)  # any prefix of the controls is a random matched sample
+    jobs += cj
     jobs = jobs[shard::shards]
     db = _db()
     done = {r[0] for r in db.execute("select ticker from done")}
-    cache = _maker4_cache() if shard == 0 else {}
+    cache = _maker4_cache()
     print(len(jobs), "jobs,", len(done), "done (all shards)", flush=True)
     for i, (tk, close) in enumerate(jobs):
         if tk in done:
