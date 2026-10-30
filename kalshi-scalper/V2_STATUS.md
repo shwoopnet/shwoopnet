@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 8:10 PM CT, EVT1 (scheduled events) FALSIFIED where testable; macro releases NOT_ENOUGH_DATA. SLOTEX-ETH: the open interest core does not carry to Ethereum (FALSIFIED); sent to the main session.** N about 592,030.
+
 **2026-10-29 7:55 PM CT, SLOTEX sent to the main session.** The core sold at 60 s (slot-legal) keeps about half the held edge: validation PF 1.52 at 10 contracts, 1.50 at 5, 1.32 at 1 (fees). Take profits and stops add nothing or lose. EVT1 launched (scheduled-event windows on gold and Bitcoin: macro releases, COMEX settlement, CME Bitcoin close, Deribit expiry, funding times).
 
 **2026-10-29 7:45 PM CT, GEN7 (open interest flow, earlier entries, gold and Bitcoin): gold FALSIFIED; Bitcoin 2 rules to forward, both the GEN6 core seen a minute earlier.** Open interest before 5 minutes left carries nothing. SLOTEX running for the main session (the core with slot-legal exits before settlement, at 1, 5 and 10 contracts). N about 590,982.

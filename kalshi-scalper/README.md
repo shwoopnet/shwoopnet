@@ -7744,3 +7744,7 @@ Main session request (owner wants a small live probe in the slot, which must exi
 ## Result: SLOTEX-ETH (the Bitcoin open interest core on Ethereum, no tuning), 2026-10-29
 
 Main session request. Registered first (`workers/SLOTEX_ETH_REGISTRATION.md`). At the absolute 86,300 it never fires on Ethereum: **NOT_ENOUGH_DATA**. At Ethereum's own discovery 90th percentile (8,799): hold PF 1.08 / 0.84, sell at 60 s 0.81 / 0.84 at C = 10 (538 validation entries): **FALSIFIED**. Co-loss with Bitcoin where both fire: 1.07x to 1.23x independence (ceiling about 1.3 to 1.4 at these loss rates). N +64; running count about 591,550.
+
+## Result: EVT1 (scheduled-event windows, gold and Bitcoin), 2026-10-29
+
+Registered first (`workers/EVT1_REGISTRATION.md`), scored once (`workers/EVT1_RESULT.md`). 384 side cells plus 96 L1 cells against matched controls. Cells with enough trades (32): **FALSIFIED** (none with a control difference at z 2 in both splits; every one-split z 2 reversed). Macro releases (CPI, PPI, jobs, retail, GDP, FOMC, claims, EIA): **NOT_ENOUGH_DATA** (1 to 7 windows each). The Bitcoin cheap side at 180 s around funding and the CME close clears PF but not its control: the general REF_BTC_UNDERDOG_180 pattern, not an event effect. L1 in event windows: no loss-rate difference at z 2 (max +1.54), so no evidence for an event skip rule. N +480; running count about 592,030.
