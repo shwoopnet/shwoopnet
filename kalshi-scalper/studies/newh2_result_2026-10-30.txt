@@ -1,0 +1,16 @@
+gold windows 5645 (disc 3192, val 2453); silver 4714; ladder closes 1025
+H1 GBREAK disc         n   73 days  31 win 0.767 fill 0.757 gap  +0.98pt PF10 0.98 PF1 0.96 PFx1.2 0.97 net10 $-1.96 netx $-3.74 z -0.06 | vol>0 n 73 PF10 0.98
+H1 GBREAK val          n   18 days   7 win 0.611 fill 0.738 gap -12.68pt PF10 0.51 PF1 0.50 PFx1.2 0.51 net10 $-25.24 netx $-25.70 z -1.03 | vol>0 n 18 PF10 0.51
+                       data gaps 0  VERDICT NOT_ENOUGH_DATA
+H2 GREOPEN disc        n  140 days  31 win 0.200 fill 0.238 gap  -3.81pt PF10 0.73 PF1 0.72 PFx1.2 0.72 net10 $-70.50 netx $-73.66 z -1.44 | vol>0 n 140 PF10 0.73
+H2 GREOPEN val         n  100 days  27 win 0.220 fill 0.235 gap  -1.48pt PF10 0.85 PF1 0.83 PFx1.2 0.84 net10 $-26.91 netx $-29.17 z -1.15 | vol>0 n 100 PF10 0.85
+                       data gaps 0  VERDICT FALSIFIED
+H3 GSILV disc          n   39 days  21 win 0.487 fill 0.452 gap  +3.56pt PF10 1.09 PF1 1.08 PFx1.2 1.08 net10 $+7.49 netx $+6.35 z +0.26 | vol>0 n 39 PF10 1.09
+H3 GSILV val           n   17 days  10 win 0.353 fill 0.468 gap -11.53pt PF10 0.59 PF1 0.58 PFx1.2 0.58 net10 $-22.35 netx $-22.84 z -0.98 | vol>0 n 17 PF10 0.59
+                       data gaps 1  VERDICT NOT_ENOUGH_DATA
+H4 GLADH disc          n   52 days  22 win 0.231 fill 0.286 gap  -5.51pt PF10 0.63 PF1 0.61 PFx1.2 0.62 net10 $-34.49 netx $-35.59 z -1.13 | vol>0 n 52 PF10 0.63
+H4 GLADH val           n   40 days  17 win 0.225 fill 0.274 gap  -4.94pt PF10 0.66 PF1 0.65 PFx1.2 0.65 net10 $-24.31 netx $-25.15 z -0.98 | vol>0 n 40 PF10 0.66
+                       data gaps 39  VERDICT NOT_ENOUGH_DATA
+H2 control (info) disc n 2173 days  44 win 0.220 fill 0.236 gap  -1.58pt PF10 0.84 PF1 0.82 PFx1.2 0.83 net10 $-606.08 netx $-655.30 z -3.33 | vol>0 n 2173 PF10 0.84
+H2 control (info) val  n 1644 days  32 win 0.237 fill 0.240 gap  -0.24pt PF10 0.92 PF1 0.89 PFx1.2 0.90 net10 $-241.30 netx $-279.11 z -1.70 | vol>0 n 1644 PF10 0.92
+                       data gaps 2
