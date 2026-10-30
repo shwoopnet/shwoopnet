@@ -48,6 +48,16 @@ function oversizeRows(rows) {
   }).filter(Boolean).sort((a, b) => a.ts < b.ts ? -1 : 1);
 }
 
+// Per-order market context for the tests that need it (the refinement chat's R2, the no-fill share, Oct 30, 2026): what was ordered against what rested at the touch, and the quote the bot saw. Numbers and short labels only, never an id. A field the order does not carry is null.
+function context(o) {
+  const seen = o && typeof o.seen === "object" && o.seen ? o.seen : {};
+  return {
+    orderedCount: num(o.count), price: num(o.price), limit: num(o.limit), seenBid: num(seen.bid), seenAsk: num(seen.ask), bidSize: num(seen.bidSize), askSize: num(seen.askSize),
+    depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
+    addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
+  };
+}
+
 function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
   const since = nowMs - hours * 3600000;
   const rows = (Array.isArray(orders) ? orders : []).filter((o) => o && Number(o.ts) >= since);
@@ -85,13 +95,13 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
     // One compact row per order. No order id, no client order id, nothing that identifies the account.
     out.orders = rows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
       ts: new Date(Number(o.ts)).toISOString(), ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.avgFill),
-      entryLead: o.entryLead || null, status: o.status || null, result: o.result || null, settledPnl: settledPnl(o),
+      entryLead: o.entryLead || null, status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), ...context(o),
     }));
     out.ordersTruncated = rows.length > MAX_ORDER_ROWS;
     // Slot rows are listed apart from L1's so the L1 row shape does not change; the strategy id replaces any order id.
     out.slotOrders = slotRows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
       ts: new Date(Number(o.ts)).toISOString(), strategy: typeof o.slotId === "string" ? o.slotId.slice(0, 40) : null, ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.avgFill),
-      status: o.status || null, result: o.result || null, settledPnl: settledPnl(o),
+      status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), ...context(o),
     }));
   }
   return out;

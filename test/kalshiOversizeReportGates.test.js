@@ -20,6 +20,6 @@ gates.OV2 = () => {
 gates.OV3 = () => {
   const a = lib.buildReport([ord({})], NOW, 24, true), b = lib.buildReport([ord({})], NOW, 24, false);
   for (const k of Object.keys(b)) if (k !== 'oversize') assert.ok(k in a, k + ' unchanged');
-  assert.deepStrictEqual(Object.keys(a.orders[0]).sort(), ['avgFill', 'count', 'entryLead', 'result', 'settledPnl', 'side', 'status', 'ticker', 'ts'], 'per-order rows unchanged');
+  assert.deepStrictEqual(Object.keys(a.orders[0]).sort(), ['addon', 'avgFill', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'bidSize', 'askSize', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'status', 'ticker', 'ts'].sort(), 'per-order rows unchanged');
 };
 for (const [n, f] of Object.entries(gates)) { f(); console.log('ok   ' + n); }
