@@ -157,24 +157,6 @@
     null
    ],
    [
-    "fetch",
-    "GET",
-    "/trade-api/v2/markets?series_ticker=KXAUDUSD15M&status=open&limit=5",
-    null
-   ],
-   [
-    "fetch",
-    "GET",
-    "/trade-api/v2/markets?series_ticker=KXUSDCAD15M&status=open&limit=5",
-    null
-   ],
-   [
-    "fetch",
-    "GET",
-    "/trade-api/v2/markets?series_ticker=KXNATGAS15M&status=open&limit=5",
-    null
-   ],
-   [
     "get",
     "kalshiLiveControl/sizing"
    ],

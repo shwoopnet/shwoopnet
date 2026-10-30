@@ -109,7 +109,9 @@ gates.SZ5 = () => {
   assert.strictEqual(live.maxContractsFor(undefined), 0);
   assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5);
   assert.strictEqual(live.maxContractsFor('KXBTC15M'), 1);
-  assert.strictEqual(live.maxContractsFor('KXNATGAS15M'), 2);
+  assert.strictEqual(live.maxContractsFor('KXNATGAS15M'), 0, 'natural gas left the list on Oct 30, 2026: an order for it is refused outright, whatever its size');
+  assert.strictEqual(live.maxContractsFor('KXAUDUSD15M'), 0);
+  assert.strictEqual(live.maxContractsFor('KXUSDCAD15M'), 0);
 };
 
 // SZ6: nothing from the page, the session document or Firestore can move the limit. Extra arguments are ignored and the source reads no session, argument or request.
