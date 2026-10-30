@@ -204,7 +204,7 @@ gates.TS1 = () => {
 };
 gates.PC1 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];
+  const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiStrategyOf', 'kalshiChipHtml', 'kalshiPositionsHtml'];
   const f = new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
   const base = { ticker: 'KXGOLD15M-26OCT231215-15', title: 'GOLD 12:15 PM CT', side: 'no', count: 15, entry: 0.906, cost: 13.59, ifWin: 1.41, ifLose: -13.59, chance: 0.943, cashOut: 14.12, left: 145, bot: true };
   assert.strictEqual(f.kalshiPositionChartHtml(Object.assign({}, base, { path: [] })), '', 'no reads yet: no chart');
@@ -230,7 +230,7 @@ gates.PC1 = () => {
 // PC2: an open position names the price that decides it, from the market. Consequence: a YES position wins at or above the strike and a NO position below it (said the wrong way round, the owner would read a winning position as losing); no strike in the market means no sentence, never a made-up number.
 gates.PC2 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
-  const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiPositionsHtml'];
+  const names = ['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiStrategyOf', 'kalshiChipHtml', 'kalshiPositionsHtml'];
   const f = new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
   assert.strictEqual(f.kalshiStrikeText('yes', 4013.48), 'Wins if it closes at or above $4,013.48');
   assert.strictEqual(f.kalshiStrikeText('no', 80814.77), 'Wins if it closes below $80,814.77');
@@ -246,7 +246,7 @@ gates.PC2 = () => {
 gates.Y15 = () => {
   const block = (re) => { const m = re.exec(html); assert.ok(m, 'not found: ' + re); return m[1]; };
   const lift = (names) => new Function("var KAL_TZ = 'America/Chicago';\n" + names.map((n) => block(new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n'))).join('\n') + '; return {' + names.join(',') + '};')();
-  const f = lift(['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiGroupFills', 'kalshiOrderFor', 'kalshiPositionRows', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiPositionsHtml']);
+  const f = lift(['kalshiShortTicker', 'kalshiSecsLeft', 'kalshiFmtLeft', 'kalshiGroupFills', 'kalshiOrderFor', 'kalshiPositionRows', 'kalshiPriceText', 'kalshiStrikeText', 'kalshiPositionChartHtml', 'kalshiStrategyOf', 'kalshiChipHtml', 'kalshiPositionsHtml']);
   const esc = (x) => String(x).replace(/&/g, '&amp;').replace(/</g, '&lt;');
   const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   const NOW = Date.parse('2026-10-08T14:40:00Z');
