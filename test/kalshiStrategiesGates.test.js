@@ -28,9 +28,8 @@ gates.ST2 = () => {
   assert.strictEqual(s.n, 2); assert.strictEqual(s.lost, 1); assert.strictEqual(s.won, 1); assert.strictEqual(s.open.length, 1); assert.strictEqual(s.net, 0.3);
   const rows = [{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: s, status: 'Running', ageText: '1m ago' }, { id: '<b>X</b>', info: { name: 'N<i>', markets: 'M', note: 'a note' }, sum: f.kalshiOrdersSummary([], 5), status: 'Waiting for a signal', ageText: 'No order yet' }];
   const h = f.kalshiStrategiesTableHtml(rows, esc, money);
-  assert.ok(/Strategy/.test(h) && /50\.0%/.test(h) && /No order yet/.test(h) && /Waiting for a signal/.test(h) && /a note/.test(h), 'the module shows status, win rate, last order and the strategy note');
+  assert.ok(/Strategy/.test(h) && /50\.0%/.test(h) && /No order yet/.test(h) && !/Waiting for a signal/.test(h) && !/a note/.test(h) && !/kal-note/.test(h), 'the module shows win rate and last order, with no status pill and no text under the table');
   assert.ok(!/<b>X<\/b>|<i>/.test(h), 'names are escaped');
-  assert.ok(/kal-pill-run/.test(h), 'a running strategy is marked');
 };
 gates.ST3 = () => {
   assert.ok(!/id="kalStrat"|id="kalProbe"|data-strat=|shwoopnet:kalStrategy|kalshiViewSelection|kalshiViewOrders|kalshiProbeHtml|kalshiStrategySwitchHtml|data-strategy/.test(html), 'there is no strategy switch: the page is one Overall view');
@@ -77,7 +76,8 @@ gates.ST8 = () => {
 gates.ST9 = () => {
   // The owner (Oct 30, 2026): "mobile ui isnt great". On a phone each strategy is a card with every figure visible, not a nine column table behind a sideways scroll.
   const h = f.kalshiStrategiesTableHtml([{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: f.kalshiOrdersSummary([], 5), status: 'Running', ageText: 'No order yet' }], esc, money);
-  for (const label of ['Strategy', 'Markets', 'Status', 'Today', 'Result', 'Settled', 'Win rate', 'Open', 'Last order']) assert.ok(h.includes('data-label="' + label + '"'), label + ' has its label for the phone card');
+  for (const label of ['Strategy', 'Markets', 'Today', 'Result', 'Settled', 'Win rate', 'Open', 'Last order']) assert.ok(h.includes('data-label="' + label + '"'), label + ' has its label for the phone card');
+  assert.ok(!h.includes('data-label="Status"'), 'no Status column (the owner, Oct 30, 2026: it did not look good there)');
   const css = html.slice(html.indexOf('.kal-strat-tbl, .kal-strat-tbl tbody'), html.indexOf('.kal-strat-tbl, .kal-strat-tbl tbody') + 1400);
   assert.ok(/display:none/.test(css) && /attr\(data-label\)/.test(css) && /grid-template-columns:repeat\(2/.test(css), 'the phone layout hides the header row and shows label over value in two columns');
   assert.ok(/@media screen and \(max-width:900px\)\{\n    \.kal-strat-tbl, /.test(html), 'on phones and tablets (a nine column table is cramped at 768 too)');
@@ -85,7 +85,7 @@ gates.ST9 = () => {
 gates.ST10 = () => {
   const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r);
   assert.ok(!/kalshiAgeText\([^;]*\) \+ ' ago'/.test(r[0]), 'the age text already ends in "ago": it must not be added twice ("2 hours ago ago" showed on the owner\'s phone render, Oct 30, 2026)');
-  assert.ok(/td:nth-child\(3\)\{ grid-column:1 \/ -1; \}/.test(html) && /\.kal-strat-tbl td \.kal-pill\{ white-space:nowrap/.test(html), 'the status pill gets a whole row on a phone and never wraps');
+  assert.ok(!/td:nth-child\(3\)\{ grid-column:1 \/ -1; \}/.test(html), 'no leftover full-row rule for the removed Status column: Today now sits in a half column on a phone');
 };
 gates.ST11 = () => {
   // The owner (Oct 30, 2026): "i dont think the strategies card matches our pnl results". Result follows the same range as the Account result card, with a total row that equals it.
