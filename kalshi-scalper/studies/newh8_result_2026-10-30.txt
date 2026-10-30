@@ -1,0 +1,161 @@
+NEWH8 describe: features at the 180 s signal candle only; no result and no later quote is read.
+
+KXBTC15M disc: firing 222  rest 2209
+  feature          fire p25        p50        p75 |   rest p25        p50        p75  fire n/a
+  ask                 0.077      0.120      0.230 |      0.096      0.190      0.340  0
+  spread              0.001      0.010      0.010 |      0.003      0.010      0.010  0
+  vol1              135,639    175,864    225,670 |     93,985    136,586    186,143  0
+  vol3              397,490    492,922    609,942 |    276,055    368,606    481,297  0
+  oi                396,254    455,135    555,016 |    258,372    331,468    397,462  0
+  doi                95,053    109,848    137,735 |     10,432     29,358     49,411  0
+  flips               1.000      1.000      3.000 |      1.000      2.000      3.000  0
+  since_lead            240        360        540 |        120        240        420  53
+  max_mid             0.505      0.575      0.655 |      0.510      0.615      0.725  0
+  drop3               0.030      0.101      0.200 |      0.011      0.130      0.279  0
+  n_candles          12.000     12.000     12.000 |     12.000     12.000     12.000  0
+  loc_cheap           0.000      0.333      1.000 |      0.000      1.000      1.000  0
+  ah_al               0.094      0.143      0.210 |      0.118      0.198      0.300  0
+  hour                3.000     13.000     18.000 |      5.000     11.000     18.000  0
+  side_yes            0.000      1.000      1.000 |      0.000      1.000      1.000  0
+  doi_KXETH15M        2,917      4,652      6,683 |      1,899      3,345      5,102  0
+  doi_KXGOLD15M       2,789      4,963      9,545 |      2,212      5,405      9,472  51
+  share cheap led within 3 min (since_lead <= 180)    fire  11.7%  rest  34.7%
+  share cheap ever led                                fire  76.1%  rest  77.4%
+  share 2+ flips                                      fire  48.6%  rest  53.0%
+  share spread >= 2c                                  fire   0.5%  rest   1.6%
+  share cheap mid fell >= 10c in 3 min                fire  51.4%  rest  55.5%
+
+KXBTC15M val: firing 333  rest 1530
+  feature          fire p25        p50        p75 |   rest p25        p50        p75  fire n/a
+  ask                 0.080      0.140      0.280 |      0.120      0.220      0.350  0
+  spread              0.001      0.010      0.010 |      0.010      0.010      0.010  0
+  vol1              175,252    225,462    283,158 |    125,710    172,440    234,007  0
+  vol3              521,422    615,386    725,803 |    348,344    461,680    592,622  0
+  oi                449,921    519,529    601,373 |    297,240    380,192    456,956  0
+  doi                98,000    116,419    147,611 |     12,121     32,850     53,826  0
+  flips               0.000      1.000      3.000 |      1.000      2.000      3.000  0
+  since_lead            240        360        540 |        120        240        420  92
+  max_mid             0.495      0.585      0.675 |      0.505      0.615      0.735  0
+  drop3              -0.005      0.090      0.178 |      0.010      0.130      0.280  0
+  n_candles          12.000     12.000     12.000 |     12.000     12.000     12.000  0
+  loc_cheap           0.000      0.000      1.000 |      0.000      1.000      1.000  0
+  ah_al               0.093      0.150      0.233 |      0.133      0.200      0.290  0
+  hour                3.000     14.000     19.000 |      6.000     11.000     17.000  0
+  side_yes            0.000      1.000      1.000 |      0.000      0.000      1.000  0
+  doi_KXETH15M        6,127      9,211     14,366 |      2,926      5,759      9,598  0
+  doi_KXGOLD15M       6,589     12,879     23,055 |      3,982     10,051     18,927  105
+  share cheap led within 3 min (since_lead <= 180)    fire  14.4%  rest  37.8%
+  share cheap ever led                                fire  72.4%  rest  75.9%
+  share 2+ flips                                      fire  45.0%  rest  51.6%
+  share spread >= 2c                                  fire   1.5%  rest   0.2%
+  share cheap mid fell >= 10c in 3 min                fire  48.3%  rest  56.1%
+
+KXGOLD15M disc: gold's own doi 90th pct 12,412
+KXGOLD15M disc: firing 202  rest 1817
+  feature          fire p25        p50        p75 |   rest p25        p50        p75  fire n/a
+  ask                 0.082      0.130      0.240 |      0.093      0.180      0.330  0
+  spread              0.005      0.010      0.010 |      0.010      0.010      0.015  0
+  vol1               13,145     18,174     25,512 |      4,724      8,413     14,165  0
+  vol3               40,110     49,944     65,673 |     13,796     23,605     36,509  0
+  oi                 42,385     51,049     59,592 |     17,062     26,603     36,632  0
+  doi                13,985     16,478     20,122 |      1,746      4,267      7,069  0
+  flips               1.000      1.000      3.000 |      0.000      1.000      3.000  0
+  since_lead            180        360        540 |        120        240        480  47
+  max_mid             0.510      0.590      0.685 |      0.490      0.590      0.705  0
+  drop3               0.025      0.115      0.230 |      0.010      0.107      0.235  0
+  n_candles          12.000     12.000     12.000 |     12.000     12.000     12.000  0
+  loc_cheap           0.000      0.500      1.000 |      0.000      0.250      1.000  0
+  ah_al               0.086      0.140      0.220 |      0.095      0.160      0.240  0
+  hour                5.000     15.000     19.000 |      5.000     11.000     18.000  0
+  side_yes            0.000      0.000      1.000 |      0.000      0.000      1.000  0
+  doi_KXBTC15M       48,485     74,894    106,675 |     22,339     46,584     77,037  1
+  doi_KXETH15M        3,183      5,289      7,228 |      2,341      4,068      5,939  1
+  share cheap led within 3 min (since_lead <= 180)    fire  21.8%  rest  29.5%
+  share cheap ever led                                fire  76.7%  rest  71.8%
+  share 2+ flips                                      fire  49.0%  rest  45.7%
+  share spread >= 2c                                  fire  10.4%  rest  24.2%
+  share cheap mid fell >= 10c in 3 min                fire  55.4%  rest  51.7%
+
+KXGOLD15M val: gold's own doi 90th pct 20,535
+KXGOLD15M val: firing 151  rest 1357
+  feature          fire p25        p50        p75 |   rest p25        p50        p75  fire n/a
+  ask                 0.078      0.120      0.220 |      0.120      0.210      0.350  0
+  spread              0.002      0.010      0.010 |      0.010      0.010      0.010  0
+  vol1               23,229     31,658     41,740 |     15,372     22,173     31,081  0
+  vol3               71,987     87,183    111,108 |     44,528     59,257     78,380  0
+  oi                 65,466     77,739     91,479 |     37,925     49,491     61,620  0
+  doi                22,766     25,334     29,098 |      2,775      7,209     11,860  0
+  flips               1.000      1.000      3.000 |      1.000      2.000      3.000  0
+  since_lead            180        360        540 |        120        240        480  37
+  max_mid             0.505      0.575      0.675 |      0.505      0.605      0.715  0
+  drop3               0.018      0.126      0.260 |     -0.008      0.110      0.260  0
+  n_candles          12.000     12.000     12.000 |     12.000     12.000     12.000  0
+  loc_cheap           0.000      0.000      1.000 |      0.000      0.750      1.000  0
+  ah_al               0.080      0.131      0.210 |      0.131      0.200      0.280  0
+  hour                4.000     15.000     18.000 |      6.000     11.000     17.000  0
+  side_yes            0.000      1.000      1.000 |      0.000      1.000      1.000  0
+  doi_KXBTC15M       80,452    139,415    210,233 |     33,936     67,233    124,566  0
+  doi_KXETH15M        7,094     11,237     19,588 |      4,322      7,889     12,873  0
+  share cheap led within 3 min (since_lead <= 180)    fire  23.2%  rest  34.6%
+  share cheap ever led                                fire  75.5%  rest  76.5%
+  share 2+ flips                                      fire  49.7%  rest  50.3%
+  share spread >= 2c                                  fire   3.3%  rest   7.1%
+  share cheap mid fell >= 10c in 3 min                fire  55.6%  rest  51.9%
+
+
+NEWH8 run (once). windows: {'KXBTC15M': 7869, 'KXETH15M': 7869, 'KXGOLD15M': 5645}
+cut points (discovery features only): V90 = 610,392.0 (from 2431 windows), E90 = 8,800.1 (from 4357 windows), OICORE 86,299.56
+
+REF OICORE (reproduction):
+  disc: n 222 (42 d) PF10 2.28 PF1 2.16 PFx1.2 2.26 netx1.2 $234.47 win 29.3% fill 0.178 z 4.09 | zero-vol 0, PF10 without 2.28
+  val: n 333 (37 d) PF10 1.85 PF1 1.75 PFx1.2 1.82 netx1.2 $250.14 win 27.6% fill 0.192 z 4.42 | zero-vol 0, PF10 without 1.85
+  gaps 0, no fill 0
+
+R1 BUSYCALM [KXBTC15M]  gaps 0, no fill 0
+  disc: n 48 (26 d) PF10 2.42 PF1 2.32 PFx1.2 2.39 netx1.2 $62.78 win 35.4% fill 0.213 z 1.77 | zero-vol 0, PF10 without 2.42
+  val : n 148 (34 d) PF10 1.71 PF1 1.64 PFx1.2 1.69 netx1.2 $110.51 win 33.1% fill 0.245 z 2.49 | zero-vol 0, PF10 without 1.71
+  overlap with OICORE disc: Jaccard 0.071, share of OICORE entries 0.081, share of this rule's entries 0.375
+  overlap with OICORE val: Jaccard 0.179, share of OICORE entries 0.219, share of this rule's entries 0.493
+  VERDICT NOT_ENOUGH_DATA
+
+R2 PEEROI-X [KXBTC15M]  gaps 0, no fill 0
+  disc: n 113 (38 d) PF10 1.13 PF1 1.07 PFx1.2 1.12 netx1.2 $13.29 win 17.7% fill 0.157 z 0.48 | zero-vol 0, PF10 without 1.13
+  val : n 432 (37 d) PF10 0.86 PF1 0.82 PFx1.2 0.85 netx1.2 $-77.87 win 20.8% fill 0.216 z -0.99 | zero-vol 0, PF10 without 0.86
+  overlap with OICORE disc: Jaccard 0.000, share of OICORE entries 0.000, share of this rule's entries 0.000
+  overlap with OICORE val: Jaccard 0.000, share of OICORE entries 0.000, share of this rule's entries 0.000
+  VERDICT FALSIFIED
+
+R3 GOLDX [KXGOLD15M]  gaps 4, no fill 0
+  disc: n 452 (43 d) PF10 1.09 PF1 1.05 PFx1.2 1.08 netx1.2 $44.23 win 23.5% fill 0.214 z 0.70 | zero-vol 0, PF10 without 1.09
+  val : n 659 (32 d) PF10 1.08 PF1 1.04 PFx1.2 1.06 netx1.2 $51.70 win 23.5% fill 0.216 z 0.65 | zero-vol 0, PF10 without 1.08
+  overlap with OICORE disc: Jaccard 0.201, share of OICORE entries 0.509, share of this rule's entries 0.250
+  overlap with OICORE val: Jaccard 0.155, share of OICORE entries 0.399, share of this rule's entries 0.202
+  VERDICT FALSIFIED  (not independent of OICORE: overlap over 0.5)
+
+R4 SETTLED btc [KXBTC15M]  gaps 0, no fill 0
+  disc: n 237 (45 d) PF10 0.88 PF1 0.84 PFx1.2 0.87 netx1.2 $-33.91 win 15.2% fill 0.158 z -0.59 | zero-vol 0, PF10 without 0.88
+  val : n 147 (37 d) PF10 0.37 PF1 0.35 PFx1.2 0.37 netx1.2 $-121.59 win 9.5% fill 0.169 z -3.58 | zero-vol 0, PF10 without 0.37
+  overlap with OICORE disc: Jaccard 0.055, share of OICORE entries 0.108, share of this rule's entries 0.101
+  overlap with OICORE val: Jaccard 0.096, share of OICORE entries 0.126, share of this rule's entries 0.286
+  VERDICT FALSIFIED
+
+R4 SETTLED gold [KXGOLD15M]  gaps 2, no fill 0
+  disc: n 233 (41 d) PF10 0.69 PF1 0.65 PFx1.2 0.68 netx1.2 $-86.20 win 12.9% fill 0.157 z -2.02 | zero-vol 0, PF10 without 0.69
+  val : n 162 (28 d) PF10 0.98 PF1 0.93 PFx1.2 0.97 netx1.2 $-4.88 win 16.0% fill 0.155 z -0.06 | zero-vol 0, PF10 without 0.98
+  overlap with OICORE disc: Jaccard 0.025, share of OICORE entries 0.050, share of this rule's entries 0.047
+  overlap with OICORE val: Jaccard 0.038, share of OICORE entries 0.054, share of this rule's entries 0.111
+  VERDICT FALSIFIED
+
+Information (counted in N, not screened): OICORE entries split
+  I1 calm (|cheap mid change -360..-180| < 0.03) disc: TRUE n 27 (19 d) PF10 1.28 PF1 1.21 PFx1.2 1.26 netx1.2 $7.40 win 25.9% fill 0.224 z 0.39 | zero-vol 0, PF10 without 1.28
+                                                 disc: FALSE n 195 (40 d) PF10 2.46 PF1 2.32 PFx1.2 2.43 netx1.2 $227.07 win 29.7% fill 0.172 z 4.42 | zero-vol 0, PF10 without 2.46
+  I1 calm (|cheap mid change -360..-180| < 0.03) val: TRUE n 47 (29 d) PF10 1.47 PF1 1.35 PFx1.2 1.45 netx1.2 $14.42 win 17.0% fill 0.132 z 0.67 | zero-vol 0, PF10 without 1.47
+                                                 val: FALSE n 286 (37 d) PF10 1.89 PF1 1.80 PFx1.2 1.87 netx1.2 $235.72 win 29.4% fill 0.201 z 3.87 | zero-vol 0, PF10 without 1.89
+  I2 not led in last 3 min disc: TRUE n 196 (42 d) PF10 2.32 PF1 2.17 PFx1.2 2.29 netx1.2 $195.67 win 26.5% fill 0.158 z 3.65 | zero-vol 0, PF10 without 2.32
+                           disc: FALSE n 26 (18 d) PF10 2.14 PF1 2.09 PFx1.2 2.12 netx1.2 $38.80 win 50.0% fill 0.335 z 1.86 | zero-vol 0, PF10 without 2.14
+  I2 not led in last 3 min val: TRUE n 285 (37 d) PF10 2.10 PF1 1.97 PFx1.2 2.07 netx1.2 $238.29 win 25.3% fill 0.160 z 4.30 | zero-vol 0, PF10 without 2.10
+                           val: FALSE n 48 (24 d) PF10 1.16 PF1 1.13 PFx1.2 1.15 netx1.2 $11.85 win 41.7% fill 0.377 z 0.49 | zero-vol 0, PF10 without 1.16
+  I3 BUSYCALM outside OICORE disc: n 30 (17 d) PF10 2.21 PF1 2.08 PFx1.2 2.18 netx1.2 $24.17 win 30.0% fill 0.210 z 1.37 | zero-vol 0, PF10 without 2.21
+  I3 BUSYCALM inside OICORE  disc: n 18 (14 d) PF10 2.60 PF1 2.53 PFx1.2 2.58 netx1.2 $38.61 win 44.4% fill 0.219 z 1.51 | zero-vol 0, PF10 without 2.60
+  I3 BUSYCALM outside OICORE val: n 75 (28 d) PF10 0.91 PF1 0.88 PFx1.2 0.90 netx1.2 $-10.87 win 28.0% fill 0.283 z -0.35 | zero-vol 0, PF10 without 0.91
+  I3 BUSYCALM inside OICORE  val: n 73 (32 d) PF10 3.19 PF1 3.03 PFx1.2 3.15 netx1.2 $121.38 win 38.4% fill 0.207 z 3.71 | zero-vol 0, PF10 without 3.19
