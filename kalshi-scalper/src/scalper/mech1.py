@@ -241,7 +241,16 @@ def measures(win, tk):
     # favourite price paid by favourite takers (VWAP, in the favourite's own cents)
     fp = [((x[1] if f["fav"] == "yes" else 100 - x[1]), x[2]) for x in tr if x[3] == f["fav"]]
     fvwap = sum(p * s for p, s in fp) / sum(s for _, s in fp) / 100 if fp else None
-    return {"t": tk, "close": w["close"], "stage": stage(w["close"]), **f,
+    def share(sel):
+        v = sum(x[2] for x in sel)
+        return sum(x[2] for x in sel if x[3] == f["fav"]) / v if v else None
+
+    close = w["close"]
+    extra = {"fav_share_big": share([x for x in tr if x[2] >= BIG]),
+             "fav_share_small": share([x for x in tr if x[2] < 100]),
+             "fav_share_last": share([x for x in tr if x[0] > close - 240]),
+             "fav_share_first": share([x for x in tr if x[0] <= close - 300])}
+    return {"t": tk, "close": w["close"], "stage": stage(w["close"]), **f, **extra,
             "n": len(tr), "vol": tot, "fav_share": favb / tot if tot else None,
             "fav_net": favb - (tot - favb), "med_size": st.median(sizes) if sizes else None,
             "top10": top10 / tot if tot else None, "big_share": big / tot if tot else None,
@@ -285,6 +294,16 @@ def describe():
     for s in ("disc", "val"):
         table([r for r in F if r["stage"] == s], f"FIRE {s}")
         table([r for r in C if r["stage"] == s], f"CTRL {s}")
+    print("\nfavourite taker share by print size and by minute (added after registration; descriptive, no outcome)")
+    for s in ("disc", "val"):
+        for lab, R in (("FIRE", F), ("CTRL", C)):
+            x = [r for r in R if r["stage"] == s]
+            if x:
+                print(f"  {lab} {s}: prints >=1000 {q([r['fav_share_big'] for r in x],.5):.3f} | prints <100 "
+                      f"{q([r['fav_share_small'] for r in x],.5):.3f} | first minute (-360,-300] "
+                      f"{q([r['fav_share_first'] for r in x],.5):.3f} | last minute (-240,-180] "
+                      f"{q([r['fav_share_last'] for r in x],.5):.3f} | volume-weighted share "
+                      f"{sum(r['vol']*r['fav_share'] for r in x if r['fav_share'] is not None)/sum(r['vol'] for r in x):.3f}")
     print("\nby cheap-ask bucket (fire / ctrl median fav taker share)")
     for b in range(9):
         fb = [r["fav_share"] for r in F if min(8, int((r["cheap_ask"] - LO) / 0.05 + 1e-9)) == b and r["fav_share"] is not None]
