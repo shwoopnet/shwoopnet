@@ -52,7 +52,7 @@ Histogram (Run A / Run B): below -0.10: 680 / 47; -0.10 to -0.05: 736 / 49; -0.0
 
 - History pass share about 1.4% of windows (about 1.3 a day): **held**. Stage 6 is 1.38% and 1.31 a day.
 - The worst-minute step removes the most in-band windows: **held**. It removes 95.5% of stage 2; the other two stages remove 0% and 1.0%.
-- Live days give at least 3 qualifying windows: **held** (4 at stage 6, 3 at stage 7). "In which case contention with Dogecoin explains most of the gap": **did not hold**. Contention accounts for 1 of the 4 live-day windows. Live days expected about 4.5 stage 6 windows by the history rate over 6.82 days (1.31 a day gives about 8.9); the replay found 4, so the live days were already thin before any contention (0.59 a day against 1.31). Against the actual order records the replay's Ethereum windows match (below), so the live-day shortfall is mostly the gate meeting a quieter stretch than history (151 in-band windows in 647, 23% against 31%), not contention.
+- Live days give at least 3 qualifying windows: **held** (4 at stage 6, 3 at stage 7). "In which case contention with Dogecoin explains most of the gap": **did not hold**. Contention accounts for 1 of the 4 live-day windows. The history rate (1.31 a day) would give about 9 stage 6 windows over 6.82 days; the replay found 4 (0.59 a day), so the live days were already thin before any contention. Against the actual order records the replay's Ethereum windows match (below), so the live-day shortfall is mostly the gate meeting a quieter stretch than history (151 in-band windows in 647, 23% against 31%), not contention.
 
 ## Parity statement
 
