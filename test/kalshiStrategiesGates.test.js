@@ -59,10 +59,10 @@ gates.ST6 = () => {
     assert.ok(new RegExp(id + ': \\{ name: ').test(html), 'the Strategies module describes ' + id);
   }
   const l1m = /L1: \{ name: 'Closing buy', markets: '([^']+)'/.exec(html); assert.ok(l1m, 'L1 markets are listed');
-  const l1em = /L1E: \{ name: 'Smooth climb', markets: '([^']+)'/.exec(html); assert.ok(l1em, 'L1E (Ethereum, split off from L1 for tracking) is listed');
+  assert.ok(!/L1E:/.test(html), 'L1E is gone (the owner, Oct 30, 2026: "remove L1E altogether"; Ethereum is paused)');
   const NAMES = { KXGOLD15M: 'Gold', KXDOGE15M: 'Dogecoin', KXETH15M: 'Ethereum', KXBTC15M: 'Bitcoin', KXXRP15M: 'XRP', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas' };
   const tradingNow = live.L1_SERIES.filter((x) => !live.PAUSED_SERIES.includes(x)).map((x) => NAMES[x]);
-  assert.deepStrictEqual(l1m[1].split(', ').concat(l1em[1].split(', ')).sort(), tradingNow.sort(), 'L1 and L1E together are the markets the code trades under the L1 rule (not paused)');
+  assert.deepStrictEqual(l1m[1].split(', ').sort(), tradingNow.sort(), 'L1 lists the markets the code trades under the L1 rule (not paused)');
 };
 gates.ST7 = () => {
   assert.ok(/source = source\.concat\(kalshiSlotOrders \|\| \[\]\);/.test(html), 'the Account result line counts the second strategy too');
@@ -70,7 +70,7 @@ gates.ST7 = () => {
 };
 gates.ST8 = () => {
   // The owner (Oct 30, 2026): "pnl doesnt match". The Strategies rows and the Account card's Today must be worked out from the same orders and the same fills, so the rows add up to Today.
-  assert.ok(/var l1Orders = kalshiResolveOrders\(l1src, acct && acct\.results, fills\);/.test(html) && /kalshiStrategyOf\(o\) === 'L1'; \}\), now, since\)/.test(html) && /kalshiStrategyOf\(o\) === 'L1E'; \}\), now, since\)/.test(html), 'the L1 and L1E rows use the account fills and split the same orders');
+  assert.ok(/var l1Orders = kalshiResolveOrders\(l1src, acct && acct\.results, fills\);/.test(html) && /kalshiStrategyOf\(o\) === 'L1'; \}\), now, since\)/.test(html) , 'the L1 row uses the account fills');
   assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\), now, since\)/.test(html), 'and so does every second-strategy row');
   assert.ok(/var botOrders = kalshiResolveOrders\(kalshiAllOrders\(\), a\.results, a\.fills && a\.fills\.ok \? kalshiGroupFills\(a\.fills\.fills\) : \[\]\);/.test(html), 'the Account card counts L1 and the second strategy, with the same fills');
 };
@@ -157,8 +157,9 @@ gates.ST15 = () => {
   const isa = /  function kalshiIsActive\(o\)\{[^\n]*\n/.exec(html)[0];
   const g = new Function(info + '\n' + kmn + '\n' + sof + '\n' + act + '\n' + isa + '; return { kalshiIsActive, kalshiActivePairs };')();
   const o = (strategy, series, slotId) => ({ strategy, series, slotId });
-  assert.ok(g.kalshiIsActive(o('L1', 'KXGOLD15M')) && g.kalshiIsActive(o('L1', 'KXDOGE15M')) && g.kalshiIsActive(o('L1', 'KXETH15M')), 'L1 counts on its three markets');
+  assert.ok(g.kalshiIsActive(o('L1', 'KXGOLD15M')) && g.kalshiIsActive(o('L1', 'KXDOGE15M')), 'L1 counts on gold and Dogecoin');
   assert.ok(g.kalshiIsActive(o('SLOT', 'KXBTC15M', 'OICORE')), 'the second strategy counts on Bitcoin');
+  assert.ok(!g.kalshiIsActive(o('L1', 'KXETH15M')), 'Ethereum is paused and not on the list');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXXRP15M')), 'XRP is paused and not on the list');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXBTC15M')), "Bitcoin's old L1 orders are not active: L1 no longer trades it");
   assert.ok(/kalshiEdgeCheck\(kalshiResolveOrders\(kalshiAllOrders\(\)[^;]*\.filter\(kalshiIsActive\)/.test(html), 'the win rate, edge, best and worst read every strategy, active markets only');
@@ -166,10 +167,10 @@ gates.ST15 = () => {
   assert.ok(/kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)|!kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)/.test(html), 'Orders today and Last order count both strategies on active markets');
 };
 gates.ST16 = () => {
-  // The owner, Oct 30, 2026: Ethereum split off from L1 as "L1E" so it can be tracked and researched on its own. Display only: the order is still an L1 order in the bot and nothing about how it trades changes.
+  // The owner, Oct 30, 2026: L1E was removed again the same day; the label is gone and every L1 order is L1. Display only: the order is still an L1 order in the bot and nothing about how it trades changes.
   const sof = /  function kalshiStrategyOf\(o\)\{[^\n]*\n/.exec(html)[0];
   const g = new Function(sof + '; return kalshiStrategyOf;')();
-  assert.strictEqual(g({ strategy: 'L1', series: 'KXETH15M' }), 'L1E', 'an Ethereum L1 order is L1E');
+  assert.strictEqual(g({ strategy: 'L1', series: 'KXETH15M' }), 'L1', 'no L1E any more: an Ethereum order is plain L1');
   assert.strictEqual(g({ strategy: 'L1', series: 'KXGOLD15M' }), 'L1', 'gold stays L1');
   assert.strictEqual(g({ strategy: 'L1', ticker: 'KXDOGE15M-26OCT30' }), 'L1', 'Dogecoin stays L1');
   assert.strictEqual(g({ strategy: 'SLOT', slotId: 'OICORE', series: 'KXBTC15M' }), 'OICORE', 'the second strategy keeps its own id');
