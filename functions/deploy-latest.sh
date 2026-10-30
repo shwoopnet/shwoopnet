@@ -59,7 +59,7 @@ CHANGED="$(git diff --name-only "$OLD" "$NEW")"
 want() { echo "$CHANGED" | grep -Eq "$1"; }
 DO_PUSH=0; DO_SIZING=0; DO_REPORT=0
 want '^functions/(kalshiPushLib|kalshiExitAlarmLib|deploy-push)\.' && DO_PUSH=1
-want '^functions/(kalshiLiveLib|kalshiSlot[A-Za-z]*Lib|deploy-sizing)\.' && DO_SIZING=1
+want '^functions/(kalshiLiveLib|kalshiS[l]ot[A-Za-z]*Lib|deploy-sizing)\.' && DO_SIZING=1
 want '^functions/(kalshiReportLib|deploy-report)\.' && DO_REPORT=1
 want '^functions/index\.js$' && { DO_SIZING=1; DO_REPORT=1; }
 want '^functions/(kalshiLiveLib)\.' && DO_PUSH=1   # the exit watch lives in kalshiLiveLib, so its changes also need the exit watch deployed
