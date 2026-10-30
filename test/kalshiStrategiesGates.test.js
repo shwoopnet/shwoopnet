@@ -124,7 +124,6 @@ gates.ST13 = () => {
     /function kalshiAllOrders\(\)/,                                      // the union
     /var loaded = \(kalshiLiveOrders/, /var source = kalshiLiveOrders, partial/, /kalshiPnlSource\(kalshiLiveOrders, hit\)/, /l1src = kalshiLiveOrders/,   // the older-orders read pages L1's own collection
     /KAL_ECG\.SPAN/,                                                     // the heartbeat strip is L1's
-    /kalshiEdgeCheck\(/,                                                 // win rate against the break even of L1's price band
     /var orders = kalshiResolveOrders\(kalshiLiveOrders, a && a\.results/   // the silent market warning: L1's markets
   ];
   const stray = lines.filter((l) => !allowed.some((re) => re.test(l)));
@@ -145,6 +144,25 @@ gates.ST14 = () => {
   assert.ok(!/kal-card-title/.test(h), 'no card title of its own inside the Account card');
   assert.ok(/<span class="kal-strat-mk">Gold<\/span>/.test(h), 'the markets sit under the strategy name');
   assert.ok(/\[data-card="account"\] \.kal-strat-tbl th:nth-child\(2\)/.test(html), 'the separate Markets column is hidden beside the balance (and kept on a phone, where each strategy is a stacked card)');
+};
+gates.ST15 = () => {
+  // The owner, Oct 30, 2026: Worst market comes back, but the WHOLE Bot status card counts only the markets actively in the Strategies list, for every strategy. XRP is paused and Bitcoin's old L1 orders are not active (the second strategy trades Bitcoin now).
+  const info = /var KAL_STRATEGY_INFO = \{[\s\S]*?\n  \};/.exec(html)[0];
+  const lift = (n) => block(n);
+  const pick = (name) => new RegExp('  function ' + name + '\\(\\)\\{[\\s\\S]*?\\n  \\}\\n').exec(html)[0];
+  const kmn = /  function kalshiMarketName\(o\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
+  const sof = /  function kalshiStrategyOf\(o\)\{[^\n]*\n/.exec(html)[0];
+  const act = /  function kalshiActivePairs\(\)\{[\s\S]*?\n  \}\n/.exec(html)[0];
+  const isa = /  function kalshiIsActive\(o\)\{[^\n]*\n/.exec(html)[0];
+  const g = new Function(info + '\n' + kmn + '\n' + sof + '\n' + act + '\n' + isa + '; return { kalshiIsActive, kalshiActivePairs };')();
+  const o = (strategy, series, slotId) => ({ strategy, series, slotId });
+  assert.ok(g.kalshiIsActive(o('L1', 'KXGOLD15M')) && g.kalshiIsActive(o('L1', 'KXDOGE15M')) && g.kalshiIsActive(o('L1', 'KXETH15M')), 'L1 counts on its three markets');
+  assert.ok(g.kalshiIsActive(o('SLOT', 'KXBTC15M', 'OICORE')), 'the second strategy counts on Bitcoin');
+  assert.ok(!g.kalshiIsActive(o('L1', 'KXXRP15M')), 'XRP is paused and not on the list');
+  assert.ok(!g.kalshiIsActive(o('L1', 'KXBTC15M')), "Bitcoin's old L1 orders are not active: L1 no longer trades it");
+  assert.ok(/kalshiEdgeCheck\(kalshiResolveOrders\(kalshiAllOrders\(\)[^;]*\.filter\(kalshiIsActive\)/.test(html), 'the win rate, edge, best and worst read every strategy, active markets only');
+  assert.ok(/Worst market, 7 days/.test(html), 'Worst market is back');
+  assert.ok(/kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)|!kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)/.test(html), 'Orders today and Last order count both strategies on active markets');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
