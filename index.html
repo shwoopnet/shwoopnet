@@ -1530,6 +1530,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Account result: when the older trades cannot be read, the note now says why (the error code), so the cause can be found</li>
                   <li>Second strategy slot, step 1 (still off, nothing trades): slot fills and positions are recognised as the bot's own and counted in Stop Loss and Risk; the slot can read an open interest signal and buy the cheaper side, and one reviewed strategy may hold to settlement; a closing slot order sends a phone alert</li>
                   <li>Bot page: a strategy switch (Overall, L1, and any second-slot strategy) with a Strategies table and a panel for that strategy; it appears only once the second slot has orders, and the page is unchanged until then</li>
                   <li>Bot status: the win rate by price paid table is removed again (the owner's call)</li>
@@ -2959,14 +2960,14 @@
         if(kalshiPnlFetching !== key){
           kalshiPnlFetching = key;
           api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; kalshiPnlFetching = ''; renderKalshiPnl(); },
-            function(){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true }; kalshiPnlFetching = ''; renderKalshiPnl(); });
+            function(err){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true, code: String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60) }; kalshiPnlFetching = ''; renderKalshiPnl(); });   // the reason is kept so the note can say it (a permission, quota or timeout problem look the same otherwise)
         }
         set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
       }
     }
     if(!probeOnly && slotIds.length && sel === 'ALL'){ source = source.concat(kalshiSlotOrders); }
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
-    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders. It tries again in a minute.</div>' : ''));
+    set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
   }
   // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
   // that trade with its date and time (Central), as dollars (masked in Privacy view) and as a share of the account at the start of the range. It goes back to the range's result when the pointer leaves. Reads only the points drawn.
