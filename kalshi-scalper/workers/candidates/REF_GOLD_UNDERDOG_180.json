@@ -1,0 +1,11 @@
+{
+ "id": "REF_GOLD_UNDERDOG_180",
+ "market": "KXGOLD15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T01:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.fwdeval:l1_like",
+ "params": {"look_s": 180, "lo": 0.15, "hi": 0.49, "sides": ["yes", "no"]},
+ "generator": "FALS3 mirror (reference, not a candidate)",
+ "description": "Gold version of REF_BTC_UNDERDOG_180: FALS3 found gold favourites at 50c to 85c, 2 to 3 minutes before the close, also below break-even (PF 0.85). Buy the cheap side whose ask is 15c to 49c at the candle ending 180 s before the close, held. Forward days only. 1 try."
+}
