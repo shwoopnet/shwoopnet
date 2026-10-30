@@ -1,0 +1,14 @@
+{
+ "id": "REF_GEN6_OICORE",
+ "market": "KXBTC15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T03:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.gen6:forward_eval",
+ "params": {
+  "strategy": {"L_hi": 180, "L_lo": 180, "side": "both", "conds": [["doi", "gt", 86299.56000000001]], "e": 0},
+  "series": "KXBTC15M"
+ },
+ "generator": "GEN6 information look (not drawn by the grammar; shared core of 7 of GEN6's 13 Bitcoin survivors)",
+ "description": "Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest rose more than 86,300 contracts over the 3 minutes before, held to settlement, fill at the next candle's ask. History: discovery PF 2.28 (n 222), validation 1.85 (n 333, z 4.53). Forward days only; 1 try. Falsifier FALS4 running."
+}
