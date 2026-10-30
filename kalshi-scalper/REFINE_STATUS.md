@@ -18,6 +18,19 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:15 PM CT, R4 first read (size effects, settled orders since Oct 20, information only, 0 tries). No flag.**
+
+| Market | Contracts | Settled | Lost | Net | Cents per contract |
+|---|---|---|---|---|---|
+| Gold | 1 to 5 | 30 | 3 | -$2.17 | -1.66 |
+| Gold | 6 to 10 | 35 | 1 | +$5.65 | +1.93 |
+| Gold | 11 to 15 | 47 | 4 | -$0.99 | -0.17 |
+| Gold | 16 to 20 | 6 | 0 | +$8.35 | +7.88 |
+| Gold | 21 to 30 | 3 | 0 | +$4.62 | +6.08 |
+| Dogecoin | 1 to 5 | 142 | 7 | +$7.38 | +1.85 |
+
+Reading: no size bucket shows a slippage or loss pattern that is more than noise at these counts (gold 16+ has only 9 orders and no losses; the 1 to 5 bucket is mostly older, smaller orders at different prices). The report has no fill price for held orders, so slippage by size still comes only from V2's GOLDSLIP (+1.82c at 16 to 20 contracts on 6 orders). The R4 flag needs 20 orders at 16+ contracts. Dogecoin has no order above 5 contracts yet, so the ladder change is not in the record. Re-run nightly.
+
 **2026-10-30 2:05 PM CT, R1 and R3 counts received from V2 (counts only, candle replay Aug 5 to Oct 30, about 87 days). My reading, no outcomes seen. 0 tries.**
 
 Candidate entries a week at the 6 minute look (full weeks; V2 file `workers/REFINE_COUNTS_R1_R3.md` and CSVs on `claude/epic-ptolemy-0amjd9`). Last four full weeks in brackets:
