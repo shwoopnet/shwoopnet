@@ -1,5 +1,5 @@
 """NEWH15 fetcher: 1 minute candles for every settled 15 minute market of a series, in batches
-of up to 20 tickers (100 draws a 429) through Kalshi's public batch candlestick endpoint (no key).
+of up to 50 tickers (100 is refused) through Kalshi's public batch candlestick endpoint (no key).
 
 Reads data/newh15/mk_<SERIES>.json (market listing, written by the inventory step) and writes
 data/newh15/candles.sqlite (same candle columns as the other data/*.sqlite files).
@@ -46,7 +46,7 @@ def run(series: str):
     print(series, "markets", len(rows), "todo", len(todo), flush=True)
     i = 0
     while i < len(todo):
-        chunk = todo[i:i + 20]
+        chunk = todo[i:i + 50]
         lo = min(ts(m["open_time"]) for m in chunk)
         hi = max(ts(m["close_time"]) for m in chunk)
         d = _get("/markets/candlesticks", {"market_tickers": ",".join(m["ticker"] for m in chunk),
@@ -63,9 +63,9 @@ def run(series: str):
         for m in chunk:
             c.execute("INSERT OR REPLACE INTO done VALUES(?)", (m["ticker"],))
         c.commit()
-        i += 20
+        i += 50
         time.sleep(0.8)
-        if (i // 20) % 50 == 0:
+        if (i // 50) % 20 == 0:
             print(series, i, "of", len(todo), flush=True)
 
 
