@@ -18,6 +18,8 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:10 PM CT, wake check; queue item 6 (OICORE fill and slippage), first two orders. No threshold.** Dogecoin: still no order above 5 contracts since Oct 28 (the ladder change is not in the record). OICORE: both fills complete (5 of 5 and 10 of 10 contracts, no partial). Price against the quote seen at the decision: order 1 YES paid 6.0c against a seen ask of 5.3c (+0.7c, 13% of the price); order 2 NO paid 7.0c against a seen NO ask of 6.7c (1 minus the seen bid 0.933; +0.3c, 4%). On a 5c to 7c contract that slippage is large in relative terms and counts against a rule whose edge was measured at the signal ask +2c stress (FALS4: PF 1.44 at +2c), so +0.3c to +0.7c is inside the tested stress. Two orders only; re-run at 20. `depthAtLimit` and `shareOfDepth` are null for slot orders, so size against depth cannot be read yet (the slot path does not log them; that would be a code change for the main session to decide, not a request I am making now).
+
 **2026-10-30 2:20 PM CT, R2 descriptive step (why attempts get no fill), from the new depth columns; 0 tries.** Rows with depth context since the columns exist: gold 111, Dogecoin 116 (the older rows have none). Outcome columns not used.
 
 - **Gold: size against depth is NOT the cause.** 100 of 111 gold orders were under 5% of the depth at the touch, and 38% of those still got no fill. Gold depth is in the thousands (mean about 2,100 contracts), orders about 9.
