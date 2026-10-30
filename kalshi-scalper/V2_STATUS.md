@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-30 12:15 AM CT, nightly live report received (data only).** Oct 29 Central: 28 settled, 28 won, +$19.30 (gold +$16.93, Dogecoin +$2.37). 7 days: +$17.46, PF 1.25. The report notes second-slot (OICORE) orders exist and are not in it; V2's forward rows REF_GEN6_OICORE and REF_GEN6_OIDRIFT stay the history-rule comparison for them.
+
 **2026-10-30 12:10 AM CT, first ranked shortlist sent to the main session.** 1: Bitcoin open interest core (forward rows running, 0 settled forward trades). 2: GEN6/GEN7 relatives. 3: underdog at 180 s references. 4 (owner question only): ladder longshots overpriced, its mirror is closed by the Oct 28 instruction. Scope correction on L1 tests noted. Next shortlist about 6:10 AM CT.
 
 **2026-10-29 11:55 PM CT, NEWH6 (round trips, never held): FALSIFIED or NOT_ENOUGH_DATA.** Kalshi's 15 minute books open empty; no lean toward the previous winner; the 6 minute favourite wave is about 1c on Bitcoin and two fees eat it. N about 592,082.
