@@ -8043,3 +8043,9 @@ ROLL (about 15 events) and YIELDMAKE (the yields have 12 days, all of it the hol
 AUTO_LOG line with NEW SERIES).
 
 Lead's correction: the break-even arithmetic used in the brief (about 53.5% to break even, 58% for PF 1.5) was for a 50c ticket with a 3-point cost. NEWH17 recomputed it per spread: on a 1c-spread series a coin-flip taker entry breaks even near 52.3% and needs about 62.2% for PF 1.5 (58% gives PF 1.27); 2c spreads 62.7%; 3c spreads 63.1%; Brent 66.4%; yields 72.9%.
+
+## Result: SPORTCONS1 (sports consistency locks, winner complement and game vs first-half totals), 2026-10-30
+
+Registered first (`workers/SPORTCONS1_REGISTRATION.md`), result `workers/SPORTCONS1_RESULT.md`, code `src/scalper/sportcons1.py`. Owner-approved family (KX10 item 9). Not repeated: favourites (SP1, F6), totals ladder locks (ARB5), maker quotes (MAKER1), ESPN lag (ESPN1). On file: winner complement for 1,613 games (MLB, NBA, college football, NFL; 1c spreads) and game against first-half totals for NFL only (NBA has no K_game <= K_1H pair; 16 NFL games trade on both legs). Not on file: first-half winner or spread, spread ladders (NOT_RUNNABLE). Buying both teams' YES or both NO at the asks, both legs trading at least 10 contracts the same minute, after rounded fees at 10 contracts: games with a lock of at least 1c were 0 / 0 / 0 for YES+YES and 1 / 0 / 0 for NO+NO (bar 3 per window); the few positive minutes (up to +1.5c) are single one-minute candles at price tails or fee rounding. R2a and R2b **FALSIFIED**; R3 **NOT_ENOUGH_DATA** (62 to 95 games, no positive lock); T2 not run. Quoters keep the two team markets and the totals pair inside the arithmetic at minute resolution. N +3; running count about 592,085.
+
+Lead's count correction: the worker's running count used a stale base. Running N after SPORTCONS1 (+3): about 728,673 (z bar 5.27).
