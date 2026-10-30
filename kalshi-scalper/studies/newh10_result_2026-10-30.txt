@@ -1,0 +1,37 @@
+NEWH10 dv (once). running N 627,852; deflated one-sided z bar 5.24
+
+WKNDWIDE btc: {'events': 431, 'band': 33, 'ok': 310, 'no wing': 88} (funnel includes holdout events; holdout trades not scored: 54)
+  disc: n 147 (8 d) PF10 1.23 PF1 1.19 PFx1.2 1.21 net10 $54.65 netx1.2 $50.73 win 77.6% cost/set 0.724 day z 1.24 | zero-vol 0, PF10 without 1.23
+  val : n 109 (7 d) PF10 1.26 PF1 1.23 PFx1.2 1.24 net10 $46.18 netx1.2 $43.28 win 77.1% cost/set 0.714 day z 1.16 | zero-vol 0, PF10 without 1.26
+  disc mean price paid 0.724, win rate 0.776
+  val mean price paid 0.714, win rate 0.771
+  VERDICT after discovery and validation: FALSIFIED
+
+USNARROW btc: {'events': 329, 'band': 14, 'ok': 315} (funnel includes holdout events; holdout trades not scored: 56)
+  disc: n 126 (19 d) PF10 0.97 PF1 0.95 PFx1.2 0.96 net10 $-7.15 netx1.2 $-10.71 win 31.0% cost/set 0.300 day z -0.14 | zero-vol 1, PF10 without 0.98
+  val : n 133 (20 d) PF10 1.00 PF1 0.97 PFx1.2 0.98 net10 $-0.54 netx1.2 $-4.40 win 31.6% cost/set 0.301 day z -0.01 | zero-vol 0, PF10 without 1.00
+  disc mean price paid 0.300, win rate 0.310
+  val mean price paid 0.301, win rate 0.316
+  VERDICT after discovery and validation: FALSIFIED
+
+ASIAWIDE gold: {'events': 363, 'ok': 81, 'no wing': 236, 'band': 45, 'gap': 1} (funnel includes holdout events; holdout trades not scored: 14)
+  disc: n 44 (16 d) PF10 0.70 PF1 0.67 PFx1.2 0.69 net10 $-33.49 netx1.2 $-34.66 win 65.9% cost/set 0.721 day z -1.07 | zero-vol 32, PF10 without 0.58
+  val : n 23 (10 d) PF10 0.55 PF1 0.53 PFx1.2 0.54 net10 $-29.87 netx1.2 $-30.47 win 60.9% cost/set 0.724 day z -1.44 | zero-vol 9, PF10 without 0.90
+  disc mean price paid 0.721, win rate 0.659
+  val mean price paid 0.724, win rate 0.609
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+USNARROW gold: {'events': 317, 'no wing': 209, 'ok': 85, 'band': 22, 'gap': 1} (funnel includes holdout events; holdout trades not scored: 17)
+  disc: n 37 (15 d) PF10 0.65 PF1 0.64 PFx1.2 0.64 net10 $-31.50 netx1.2 $-32.59 win 24.3% cost/set 0.313 day z -1.35 | zero-vol 34, PF10 without 1.19
+  val : n 31 (13 d) PF10 0.36 PF1 0.35 PFx1.2 0.36 net10 $-49.00 netx1.2 $-49.79 win 12.9% cost/set 0.273 day z -2.17 | zero-vol 18, PF10 without 0.46
+  disc mean price paid 0.313, win rate 0.243
+  val mean price paid 0.273, win rate 0.129
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+I1 weekday twin of WKNDWIDE (information): {'events': 1113, 'ok': 1029, 'band': 64, 'no wing': 20}
+  disc: n 433 (20 d) PF10 0.81 PF1 0.79 PFx1.2 0.80 net10 $-190.62 netx1.2 $-202.72 win 67.7% cost/set 0.706 day z -2.62 | zero-vol 1, PF10 without 0.81
+  val: n 424 (20 d) PF10 0.92 PF1 0.89 PFx1.2 0.91 net10 $-72.67 netx1.2 $-84.54 win 70.3% cost/set 0.705 day z -0.93 | zero-vol 0, PF10 without 0.92
+
+I2 Bitcoin ladder, 13:00 UTC close, signal 12:25 UTC (before the 12:30 UTC release): width and the cheap wing
+  release days: {'events': 17, 'ok': 16, 'band': 1}; ladder width s median $264 on 15 events; cheap wing disc+val n 15 (15 d) PF10 2.56 PF1 2.50 PFx1.2 2.53 net10 $35.13 netx1.2 $34.70 win 53.3% cost/set 0.285 day z 1.68 | zero-vol 0, PF10 without 2.56; win 0.533 vs price 0.285
+  other weekdays: {'events': 30, 'ok': 27, 'band': 3}; ladder width s median $247 on 24 events; cheap wing disc+val n 22 (22 d) PF10 0.55 PF1 0.53 PFx1.2 0.54 net10 $-24.06 netx1.2 $-24.65 win 18.2% cost/set 0.277 day z -1.27 | zero-vol 0, PF10 without 0.55; win 0.182 vs price 0.277
