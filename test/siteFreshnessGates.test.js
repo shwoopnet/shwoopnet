@@ -31,8 +31,8 @@ gates.SF2 = () => {
   assert.ok(/Gold and Dogecoin grow with the account/.test(t) && /except gold and Dogecoin, whose size scales with the account/.test(t) && !/Dogecoin[^.]*always \d+ contracts/.test(t), 'the page says Dogecoin grows with the account, in the Size note and in the Start confirmation');
   assert.ok(!/Ethereum 1\b/.test(t) && live.PAUSED_SERIES.includes('KXETH15M'), 'Ethereum is paused and no longer listed with a size');
   assert.ok(new RegExp('at most a quarter of the base size').test(t) && live.ADDON_MAX_FRACTION === 0.25, 'the add-on cap is a quarter of the base');
-  const qh = live.QUIET_HOURS_CT.KXGOLD15M;
-  assert.ok(qh && qh[0] === 20 && qh[1] === 24 && JSON.stringify(live.QUIET_HOURS_CT.KXDOGE15M) === JSON.stringify(qh) && /Gold and Dogecoin place no new orders from 8 PM to midnight Central/.test(t), 'gold quiet hours: the page says what QUIET_HOURS_CT says');
+  assert.deepStrictEqual(live.QUIET_HOURS_CT, {}, 'no quiet hours are set in code (lifted Oct 30, 2026), so the page must not promise a pause');
+  assert.ok(!/place no new orders from 8 PM/.test(t) && /around the clock/.test(t), 'the page says gold and Dogecoin trade around the clock');
 };
 gates.SF3 = () => {
   // The one deliberate exception: the sentence about the second strategy, which trades Bitcoin through the slot (not through L1, where Bitcoin stays paused). It must name only the registered strategy's market.
