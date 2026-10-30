@@ -30,4 +30,7 @@ const front = (/\/\* The signed-out screen[\s\S]*?\.auth-title\{/.exec(html) || 
 const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(html.replace(/\/\*[\s\S]*?\*\//g, ''))[1];
 assert.ok(/\.front-eyebrow, \.front-h1, \.front-line, \.front-win, \.front-win-a \.win\{ animation: none; \}/.test(media) && /\[data-reduce-motion="true"\] \.front-win-a \.win/.test(html), 'the rise-in and the float stop under reduced motion and the Settings switch');
 assert.ok(/\.front-win \.win\{[^}]*aspect-ratio:16 \/ 10/.test(html), 'both snapshot windows share one landscape shape, so neither is taller than the other (the owner, Oct 23, 2026)');
+// The "Got questions?" label and arrow are fixed over the screen and used to land on the page text on a short phone, in landscape and on a tablet (the owner, Oct 30, 2026: "the landing page may be overlapping some texts"). They hide when they would touch text, and the bubble never covers the disclaimer.
+assert.ok(/\.gq-crowded \.gq-label, \.gq-crowded \.gq-arrow\{ opacity:0; \}/.test(html) && /function gqFit\(\)/.test(html) && /root\.classList\.toggle\('gq-crowded', crowded\)/.test(html), 'the marker label and arrow hide whenever they would sit on text');
+assert.ok(/\.auth-gate \.front-foot, \.auth-gate \.front-note\{ padding-right:84px; \}/.test(html), 'the disclaimer leaves room for the bubble');
 console.log('frontPageGates: ok');
