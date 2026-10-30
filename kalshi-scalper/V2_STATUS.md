@@ -2,7 +2,7 @@
 
 ## Now running / Next / Waiting on
 
-- **Now running (7:25 PM):** workers FALS4 (falsifier on GEN6's Bitcoin open interest core), GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
+- **Now running (7:25 PM):** workers GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
 - **Next:** first ranked shortlist to the main session about 12:30 AM CT; gold GEN4-style run after Nov 6 on R6 data; more generator families on gold and Bitcoin.
 - **Waiting on:** LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F interim (about Nov 24 to 26; forward to the main session) and formal read (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-29 7:30 PM CT, FALS4: the Bitcoin open interest core SURVIVES the falsifier (NOT_YET_FALSIFIED).** Own re-implementation identical; holds at fees x1.2 (1.82 validation), at signal ask +2c (1.44), without fills under 5c (1.87), in all 11 eight-day blocks; no look-ahead found; simpler proxies do not reproduce it. Needs a fill within about a minute (one minute late: discovery 0.94). Bar not met (z 4.42 vs 5.2). Sent to the main session as the first candidate to clear validation and the falsifier; forward read REF_GEN6_OICORE.
 
 **2026-10-29 7:25 PM CT, GEN6 done: gold FALSIFIED, Bitcoin 13 rules to forward (NOT_ENOUGH_DATA).** Best validation z 4.05 against a bar of about 5.22. Seven of the 13 are one bet: the cheap side 3 minutes before the close after a jump in open interest (core alone: PF 2.28 then 1.85 on 333 trades, z 4.53; about 60 trades a week). Core added as forward reference REF_GEN6_OICORE. Falsifier FALS4 running (own re-implementation, look-ahead audit on open interest timing, fills under 5c, threshold drift, counterparty check). Not a candidate until FALS4 and forward say so. N about 563,337.
 
