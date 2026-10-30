@@ -10,12 +10,12 @@ gates.OV1 = () => {
   assert.deepStrictEqual(ok.oversize, { count: 0, orders: [] }, 'valid sizes, gold ladder included, report zero');
 };
 gates.OV2 = () => {
-  const r = lib.buildReport([ord({ count: 12, fillCount: 12, entryLead: undefined, ts: NOW - 7200000 }), ord({})], NOW, 24, false);
+  const r = lib.buildReport([ord({ ticker: 'KXXRP15M-26OCT28-T1', count: 12, fillCount: 12, entryLead: undefined, ts: NOW - 7200000 }), ord({})], NOW, 24, false);
   assert.strictEqual(r.oversize.count, 1);
-  assert.deepStrictEqual(r.oversize.orders[0], { ts: new Date(NOW - 7200000).toISOString(), series: 'KXDOGE15M', count: 12, max: 5 });
+  assert.deepStrictEqual(r.oversize.orders[0], { ts: new Date(NOW - 7200000).toISOString(), series: 'KXXRP15M', count: 12, max: 1 });
   assert.ok(!/SECRET|orderId|clientOrderId/.test(JSON.stringify(r)), 'no ids, even with the new section');
-  assert.strictEqual(lib.buildReport([ord({ count: undefined, fillCount: 12 })], NOW, 24, false).oversize.count, 1, 'a filled size counts when the intended size is missing');
-  assert.strictEqual(lib.buildReport([ord({ ts: NOW - 99 * 3600000, count: 12, fillCount: 12 })], NOW, 24, false).oversize.count, 0, 'only the window asked for');
+  assert.strictEqual(lib.buildReport([ord({ ticker: 'KXXRP15M-26OCT28-T1', count: undefined, fillCount: 12 })], NOW, 24, false).oversize.count, 1, 'a filled size counts when the intended size is missing');
+  assert.strictEqual(lib.buildReport([ord({ ticker: 'KXXRP15M-26OCT28-T1', ts: NOW - 99 * 3600000, count: 12, fillCount: 12 })], NOW, 24, false).oversize.count, 0, 'only the window asked for');
 };
 gates.OV3 = () => {
   const a = lib.buildReport([ord({})], NOW, 24, true), b = lib.buildReport([ord({})], NOW, 24, false);

@@ -51,22 +51,22 @@ const tick = (w, series, extra = {}) => live.runL1Tick({
   sizingState: state, setSizingState: async () => {}, ...extra,
 });
 const noPause = { pausedSeries: [] };
-const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: 5, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2 };
+const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: null, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2 };
 
 // SZ1: the incident. A 12 contract Dogecoin order is never sent, leaves no order document behind, says why, and does not stop the other markets from trading.
 gates.SZ1 = async () => {
-  const saved = live.FIXED_CONTRACTS.KXDOGE15M;
-  live.FIXED_CONTRACTS.KXDOGE15M = 12;   // simulates the sizing code going wrong
+  const saved = live.FIXED_CONTRACTS.KXXRP15M;
+  live.FIXED_CONTRACTS.KXXRP15M = 12;   // simulates the sizing code going wrong
   try {
     const w = world();
-    await tick(w, ['KXDOGE15M'], noPause);
-    assert.strictEqual(w.posts.filter((p) => p.ticker.includes('KXDOGE')).length, 0, 'no Dogecoin order reached the broker');
+    await tick(w, ['KXXRP15M'], noPause);
+    assert.strictEqual(w.posts.filter((p) => p.ticker.includes('KXXRP')).length, 0, 'no XRP order reached the broker');
     assert.strictEqual(w.docs.size, 0, 'and none is recorded as sending');
-    assert.ok(w.events.some((e) => e.kind === 'order size refused' && /KXDOGE15M/.test(e.detail) && /12/.test(e.detail)), 'the refusal is logged with the series and the count');
+    assert.ok(w.events.some((e) => e.kind === 'order size refused' && /KXXRP15M/.test(e.detail) && /12/.test(e.detail)), 'the refusal is logged with the series and the count');
     const w2 = world();
-    await tick(w2, ['KXDOGE15M', 'KXGOLD15M'], noPause);
+    await tick(w2, ['KXXRP15M', 'KXGOLD15M'], noPause);
     assert.deepStrictEqual(w2.posts.map((p) => p.ticker), [TICKER.KXGOLD15M], 'gold still goes out, only the bad order is skipped');
-  } finally { live.FIXED_CONTRACTS.KXDOGE15M = saved; }
+  } finally { live.FIXED_CONTRACTS.KXXRP15M = saved; }
 };
 
 // SZ2: every valid order of every series is sent exactly as before: same count, one order, client id from the market.
@@ -107,7 +107,8 @@ gates.SZ4 = async () => {
 gates.SZ5 = () => {
   assert.strictEqual(live.maxContractsFor('KXSOL15M'), 0);
   assert.strictEqual(live.maxContractsFor(undefined), 0);
-  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5);
+  assert.strictEqual(live.maxContractsFor('KXXRP15M'), 1);
+  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), live.L1_ORDER_CEILING, 'Dogecoin follows the gold ladder since Oct 30, 2026');
   assert.strictEqual(live.maxContractsFor('KXBTC15M'), 1);
   assert.strictEqual(live.maxContractsFor('KXNATGAS15M'), 0, 'natural gas left the list on Oct 30, 2026: an order for it is refused outright, whatever its size');
   assert.strictEqual(live.maxContractsFor('KXAUDUSD15M'), 0);
@@ -116,15 +117,15 @@ gates.SZ5 = () => {
 
 // SZ6: nothing from the page, the session document or Firestore can move the limit. Extra arguments are ignored and the source reads no session, argument or request.
 gates.SZ6 = async () => {
-  assert.strictEqual(live.maxContractsFor('KXDOGE15M', { maxContracts: 99, FIXED_CONTRACTS: { KXDOGE15M: 99 } }), 5, 'extra arguments are ignored');
-  const saved = live.FIXED_CONTRACTS.KXDOGE15M;
-  live.FIXED_CONTRACTS.KXDOGE15M = 12;
+  assert.strictEqual(live.maxContractsFor('KXXRP15M', { maxContracts: 99, FIXED_CONTRACTS: { KXXRP15M: 99 } }), 1, 'extra arguments are ignored');
+  const saved = live.FIXED_CONTRACTS.KXXRP15M;
+  live.FIXED_CONTRACTS.KXXRP15M = 12;
   try {
-    assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5, 'a change to the fixed sizes in memory does not move the lock');
-    const w = world(sess({ maxContracts: 99, liveExtra: { KXDOGE15M: 99 }, sizeCap: 99, count: 12 }));
-    await tick(w, ['KXDOGE15M'], { ...noPause, sizingState: { ...state, cap: 99, maxContracts: 99 } });
+    assert.strictEqual(live.maxContractsFor('KXXRP15M'), 1, 'a change to the fixed sizes in memory does not move the lock');
+    const w = world(sess({ maxContracts: 99, liveExtra: { KXXRP15M: 99 }, sizeCap: 99, count: 12 }));
+    await tick(w, ['KXXRP15M'], { ...noPause, sizingState: { ...state, cap: 99, maxContracts: 99 } });
     assert.strictEqual(w.posts.length, 0, 'stored values do not let a 12 contract order through');
-  } finally { live.FIXED_CONTRACTS.KXDOGE15M = saved; }
+  } finally { live.FIXED_CONTRACTS.KXXRP15M = saved; }
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
   const body = src.slice(src.indexOf('function maxContractsFor('), src.indexOf('}\n', src.indexOf('function maxContractsFor(')) + 2);
   assert.ok(!/args|session|request|store|process\.env/.test(body), 'the function reads code constants only');
