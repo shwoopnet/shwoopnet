@@ -110,3 +110,15 @@ validation trades: NOT_ENOUGH_DATA. Both passes: NOT_YET_FALSIFIED, candidate fi
 
 N tried: **8** (STOPRUN 2, CLOCKFLOW 4, OPENLEAN 2). Descriptive lines and hold-to-settlement information lines are not counted.
 Running count about 592,074 (after NEWH5) plus other workers' additions, plus 8.
+
+## Amendment (2026-10-30, after a run that scored ZERO OPENLEAN entries; written before any OPENLEAN trade is scored)
+
+The first run printed STOPRUN and CLOCKFLOW (their numbers stand as run) and no OPENLEAN entry at all: in every gold and Bitcoin
+window the first candle's OPENING quote is an empty book (`bid_o` 0 to 0.011 with `ask_o` 0.989 to 1.0; e.g. in `book`, 0.0 / 0.999
+in 2,077 windows and 0.001 / 1.0 in 1,739), so the registered opening mid never exists at minute resolution. As registered,
+**OPENLEAN is NOT_RUNNABLE**: Kalshi's book opens empty and the first quoters arrive inside the first minute. Following the CONF1
+precedent (an amendment after a zero-entry run, to the closest feasible definition), OPENLEAN is re-read ONCE with the lean taken from
+the first candle's CLOSING quote (ending 840 s before the close: mid = (`bid_c` + `ask_c`) / 2, needs `bid_c` > 0 and `ask_c` < 1),
+the first two-sided quote of the window that the candles carry. Everything else (previous leader, lean >= 0.05, buy the other side
+at the 780 s ask in [0.20, 0.55], sell at the 540 s bid, kill criteria, prediction) is unchanged. It stays 2 tries (no variant added);
+the NOT_RUNNABLE original is reported as such. Nothing about STOPRUN or CLOCKFLOW is changed or re-run.
