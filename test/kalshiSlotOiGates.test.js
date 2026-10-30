@@ -52,6 +52,23 @@ gates.OI5 = () => {
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.ok(/rules\.holdToSettle === true \? null/.test(src) && /hedge" : rules\.holdToSettle/.test(src), 'a held order is still sold when it becomes a hedge, and for no other reason');
 };
+gates.OI6 = () => {
+  // Review finding: the slot close alert must actually fire for a slot order record (strategy "SLOT"), not return nothing.
+  const push = require('../functions/kalshiPushLib');
+  const open = { strategy: 'SLOT', slotId: 'OICORE', series: 'KXBTC15M', ticker: 'KXBTC15M-26OCT301200-00', side: 'no', fillCount: '5', count: 5, price: 0.18, status: 'filled', settled: false, clientOrderId: 'SLOT-OICORE-x' };
+  const won = Object.assign({}, open, { settled: true, result: 'no', settledPnl: 0.4 });
+  assert.deepStrictEqual(push.orderKinds(open, won), [], 'the L1 filter alone ignores a slot record (this is why botOrder exists)');
+  assert.deepStrictEqual(push.orderKinds(push.botOrder(open), push.botOrder(won)), ['settled'], 'a slot win alerts as a close');
+  assert.deepStrictEqual(push.orderKinds(push.botOrder(null), push.botOrder(open)), [], 'a slot buy never alerts');
+  assert.deepStrictEqual(push.orderKinds(push.botOrder(open), push.botOrder(Object.assign({}, open, { exitStatus: 'error' }))), ['issue'], 'a stuck slot order alerts');
+  const fs = require('fs'), path = require('path');
+  assert.ok(/push\.orderKinds\(push\.botOrder\(before\), push\.botOrder\(after\)\)/.test(fs.readFileSync(path.join(__dirname, '..', 'functions', 'index.js'), 'utf8')), 'the trigger uses it');
+};
+gates.OI7 = () => {
+  const fs = require('fs'), path = require('path');
+  const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(/t\.strategy === 'SLOT' && !\(Number\(t\.fillCount\) > 0\) && \(t\.status === 'sending' \|\| t\.status === 'unknown'\)/.test(html), 'a sent but unfilled slot order is money at risk in the meter, as on the server');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);

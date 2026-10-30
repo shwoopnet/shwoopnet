@@ -814,7 +814,7 @@ exports.kalshiPushSlotOrder = onDocumentWritten({ document: "kalshiSlotOrders/{i
     const before = event.data && event.data.before && event.data.before.exists ? event.data.before.data() : null;
     const after = event.data && event.data.after && event.data.after.exists ? event.data.after.data() : null;
     if (!after) return;
-    await pushSend(getFirestore(), push.orderKinds(before, after), after, event.params.id);
+    await pushSend(getFirestore(), push.orderKinds(push.botOrder(before), push.botOrder(after)), push.botOrder(after), event.params.id);
   } catch (e) { console.error("kalshiPushSlotOrder: " + String((e && e.message) || e).slice(0, 200)); }
 });
 exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/session", secrets: [KALSHI_PUSH_VAPID_PRIVATE], retry: false, memory: "256MiB" }, async (event) => {

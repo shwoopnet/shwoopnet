@@ -3211,6 +3211,8 @@
   function kalshiRiskMeter(orders, s, now){
     var from = now - 86400000, net = 0, openCost = 0, addonAtRisk = 0, windowUsed = {}, trades = 0;
     (orders || []).forEach(function(t){
+      // The server counts a second-slot order that was sent but has no fill yet (status sending or unknown: the answer may have been lost) as money at risk; so does this meter.
+      if(t && t.strategy === 'SLOT' && !(Number(t.fillCount) > 0) && (t.status === 'sending' || t.status === 'unknown') && Number.isFinite(Number(t.maxCost)) && Number(t.ts) >= from){ openCost += Number(t.maxCost); trades++; return; }
       if(!t || (t.strategy !== 'L1' && t.strategy !== 'SLOT') || !(Number(t.fillCount) > 0) || !Number.isFinite(Number(t.maxCost)) || !(Number(t.ts) >= from)){ return; }   // the second slot's orders count in the same loss stop, as on the server
       if(t.settled === true && t.result === 'hand'){ return; }
       trades++;
