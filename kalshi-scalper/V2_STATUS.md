@@ -3,7 +3,7 @@
 ## Now running / Next / Waiting on
 
 - **Now running (7:25 PM):** workers GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
-- **Next:** first ranked shortlist to the main session about 12:30 AM CT; gold GEN4-style run after Nov 6 on R6 data; more generator families on gold and Bitcoin.
+- **Next:** owner's answer on briefs A, B, C (sent 1:10 AM CT); LIQ1 information check (no outcomes); first ranked shortlist to the main session about 12:30 AM CT; gold GEN4-style run after Nov 6 on R6 data; more generator families on gold and Bitcoin.
 - **Waiting on:** GF1 and GF2 on R6 (run themselves from Nov 14); LOCK2 forward read (11 of 25 recorded hourly closes per asset; scorer ready); MKTTIME1-F interim (about Nov 24 to 26; forward to the main session) and formal read (about December, LOW PRIOR); RECORD1 (132 of 300 qualifying trades, 8 of 10 dates); MM1 (48 of 300 gold windows, scorer ready, runs itself about Nov 5 to 10); QUOTE2B (runs itself, Nov 12 at the earliest, likely Nov 18 to 22); MAKER5 and L1Q1 on R6 (run themselves from Nov 6); dated reads REV1 Nov 5, Nov 12 batch, FLIP1 Nov 14, GAS1-F Nov 22, ABSORB-F Dec 1 (scheduled tasks fire into this session); SPREAD1 (PR #611, owner); recorder R6: merged, recording from Oct 29, ends Nov 13; its tests to be registered before any row is read.
 
 ## Ideas for what else could run in the background (owner's question, V2's own list)
@@ -16,6 +16,8 @@
 - A rolling re-run of L1's history every week on the newest fresh days (no new tries, only a stability check of the live rule's PF per market).
 
 ## Entries
+
+**2026-10-30 1:10 AM CT, research director: V2 is circling one trade shape; owner decision sent to the main session.** Briefs A (GOLDPYTH recorder), B (LIQ1 liquidations), C (SPOTDEPTH, after RECORD1) in `workers/DIRECTOR_2026-10-30.md`. Until the owner answers, V2 runs only LIQ1's no-outcome information check and no more cheap-side-late tests.
 
 **2026-10-30 12:55 AM CT, NEWH8: no independent condition behind the open interest core.** The effect lives in Bitcoin's own open interest count, in windows where the favourite has held for 3+ minutes and a wave of new contracts arrives. Everything else FALSIFIED or the same bet. N about 592,094.
 
