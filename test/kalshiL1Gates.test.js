@@ -1475,7 +1475,7 @@ gates.PX2 = () => {
 
 // QH1 and QH2: gold's quiet hours (the owner, Oct 29, 2026): no NEW gold order from 20:00 to 23:59 US Central. Only gold, only by the clock when the bot looks, and it follows daylight saving.
 gates.QH1 = () => {
-  assert.deepStrictEqual(live.QUIET_HOURS_CT, { KXGOLD15M: [20, 24] }, 'gold only');
+  assert.deepStrictEqual(live.QUIET_HOURS_CT, { KXGOLD15M: [20, 24], KXDOGE15M: [20, 24] }, 'gold and Dogecoin, the same block');
   const at = (z) => Date.parse(z);
   assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T01:00:00Z')), true, '8:00 PM CDT');
   assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T04:59:00Z')), true, '11:59 PM CDT');
@@ -1483,7 +1483,8 @@ gates.QH1 = () => {
   assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-10-30T00:59:00Z')), false, '7:59 PM CDT');
   assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-11-02T02:00:00Z')), true, '8:00 PM CST, after the clocks change');
   assert.strictEqual(live.inQuietHours('KXGOLD15M', at('2026-11-02T01:00:00Z')), false, '7:00 PM CST');
-  assert.strictEqual(live.inQuietHours('KXDOGE15M', at('2026-10-30T02:00:00Z')), false, 'no other market has quiet hours');
+  assert.strictEqual(live.inQuietHours('KXDOGE15M', at('2026-10-30T02:00:00Z')), true, 'Dogecoin has the same block (Oct 30, 2026)');
+  assert.strictEqual(live.inQuietHours('KXBTC15M', at('2026-10-30T02:00:00Z')), false, 'no other market has quiet hours');
   assert.strictEqual(live.inQuietHours('KXGOLD15M', NaN), false, 'an unreadable clock never blocks');
 };
 gates.QH2 = async () => {

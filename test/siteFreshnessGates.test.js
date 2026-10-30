@@ -32,7 +32,7 @@ gates.SF2 = () => {
   assert.ok(!/Ethereum 1\b/.test(t) && live.PAUSED_SERIES.includes('KXETH15M'), 'Ethereum is paused and no longer listed with a size');
   assert.ok(new RegExp('at most a quarter of the base size').test(t) && live.ADDON_MAX_FRACTION === 0.25, 'the add-on cap is a quarter of the base');
   const qh = live.QUIET_HOURS_CT.KXGOLD15M;
-  assert.ok(qh && qh[0] === 20 && qh[1] === 24 && /Gold places no new orders from 8 PM to midnight Central/.test(t), 'gold quiet hours: the page says what QUIET_HOURS_CT says');
+  assert.ok(qh && qh[0] === 20 && qh[1] === 24 && JSON.stringify(live.QUIET_HOURS_CT.KXDOGE15M) === JSON.stringify(qh) && /Gold and Dogecoin place no new orders from 8 PM to midnight Central/.test(t), 'gold quiet hours: the page says what QUIET_HOURS_CT says');
 };
 gates.SF3 = () => {
   // The one deliberate exception: the sentence about the second strategy, which trades Bitcoin through the slot (not through L1, where Bitcoin stays paused). It must name only the registered strategy's market.
