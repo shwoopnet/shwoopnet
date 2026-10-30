@@ -177,7 +177,7 @@ gates['SW4b admitted state: with the real constants and no qualifying market in 
   assert.strictEqual(ex.calls.length, 0, 'no request with nothing open'); assert.strictEqual(ex.posts.length, 0);
   assert.ok(out && !out.error, 'no error');
 };
-gates['OICORE end to end through the engine: a rise of 86,300 or more buys 5 contracts of the cheaper side held to settlement; a smaller rise, a missing candle or the dear side buys nothing'] = async () => {
+gates['OICORE end to end through the engine: a rise of 86,300 or more buys the strategy's contracts of the cheaper side held to settlement; a smaller rise, a missing candle or the dear side buys nothing'] = async () => {
   const OI = () => R({ enabled: true, registry: [slot.SLOT_STRATEGIES[0]], everUsed: true });
   const closeMs = NOW + 150000, closeSec = Math.round(closeMs / 1000);
   const world = async (rise, o = {}) => {
@@ -198,7 +198,7 @@ gates['OICORE end to end through the engine: a rise of 86,300 or more buys 5 con
   const yes = await world(90000);
   assert.strictEqual(yes.ex.posts.length, 1, JSON.stringify(yes.out));
   const b = yes.ex.posts[0];
-  assert.strictEqual(b.side, 'bid', 'the cheaper side here is YES, a YES buy'); assert.strictEqual(Number(b.count), 5, 'five contracts'); assert.strictEqual(b.time_in_force, 'immediate_or_cancel');
+  assert.strictEqual(b.side, 'bid', 'the cheaper side here is YES, a YES buy'); assert.strictEqual(Number(b.count), 10, 'ten contracts (the reviewed step from 5)'); assert.strictEqual(b.time_in_force, 'immediate_or_cancel');
   assert.ok(Math.abs(Number(b.price) - 0.18) < 1e-9, 'limit at the touch');
   const d = [...yes.db.slot.values()][0];
   assert.strictEqual(d.slotId, 'OICORE'); assert.strictEqual(d.oiRise, 90000, 'the rise that triggered it is on the record'); assert.strictEqual(yes.db.locks.get(T).by, 'SLOT:OICORE');
