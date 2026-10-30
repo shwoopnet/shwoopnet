@@ -57,6 +57,56 @@ def fetch():
     json.dump(have, open(OUT, "w"))
 
 
+
+
+def fetch_spot():
+    """Coinbase 1 minute candles (public) for every Kalshi window's last minutes: minute starting at close-60 and the open minute."""
+    w = kalshi_windows()
+    lo, hi = min(c for _, c in w) - 1200, max(c for _, c in w) + 60
+    out = {}
+    for prod, a in (("BTC-USD", "KXBTC15M"), ("ETH-USD", "KXETH15M")):
+        d = {}
+        t = lo
+        while t < hi:
+            e = min(t + 300 * 60, hi)
+            iso = lambda x: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(x))
+            r = g(f"https://api.exchange.coinbase.com/products/{prod}/candles?granularity=60&start={iso(t)}&end={iso(e)}")
+            for ts, lo_, hi_, o, c, v in r:
+                d[ts] = c
+            t = e
+            time.sleep(0.15)
+        out[a] = d
+        print(a, len(d), flush=True)
+    json.dump(out, open(DATA_DIR / "xvenue1_cb.json", "w"))
+
+
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "fetch":
         fetch()
+    if len(sys.argv) > 1 and sys.argv[1] == "spot":
+        fetch_spot()
+
+
+def pm_up(rec):
+    """1 = Up, 0 = Down, None if unresolved or not a clean 1/0."""
+    if not rec or rec.get("uma") != "resolved":
+        return None
+    try:
+        p = [float(x) for x in json.loads(rec["op"])]
+        o = json.loads(rec["outs"])
+    except Exception:
+        return None
+    if o[0] != "Up" or sorted(p) != [0.0, 1.0]:
+        return None
+    return int(p[0] == 1.0)
+
+
+def joined():
+    pm = json.load(open(OUT))
+    rows = []
+    for (s, cl), (t, o, r, k, d) in sorted(kalshi_windows().items()):
+        u = pm_up(pm.get(f"{PFX[s]}-updown-15m-{cl-900}"))
+        if u is None or r not in ("yes", "no"):
+            continue
+        rows.append(dict(series=s, close=cl, ticker=t, strike=k, k_yes=int(r == "yes"), pm_up=u, db=d, rec=pm[f"{PFX[s]}-updown-15m-{cl-900}"]))
+    return rows
