@@ -1,0 +1,43 @@
+NEWH9 dv (once). running N 627,845; deflated one-sided z bar 5.24
+
+LADLOCK btc: {'events': 1544, 'signals': 0, 'no fill': 0}
+  disc: n 0
+  val : n 0
+  holdout entries (count only, not scored): 0
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+LADLOCK gold: {'events': 1026, 'signals': 2, 'no fill': 1}
+  disc: n 0
+  val : n 1 (1 d) PF10 0.00 PF1 0.00 PFx1.2 0.00 net10 $-0.59 netx1.2 $-0.61 win 0.0% cost/set 1.050 day z nan | zero-vol 1, PF10 without inf
+  holdout entries (count only, not scored): 0
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+LADLEAN btc: {'gap': 1077, 'flat': 1422, 'band': 502, 'nofill': 0}
+  disc: n 440 (28 d) PF10 0.89 PF1 0.88 PFx1.2 0.87 net10 $-122.51 netx1.2 $-136.51 win 58.0% cost/set 0.590 day z -1.28 | zero-vol 0, PF10 without 0.89
+  val : n 423 (27 d) PF10 0.95 PF1 0.94 PFx1.2 0.94 net10 $-51.83 netx1.2 $-65.17 win 59.1% cost/set 0.586 day z -0.52 | zero-vol 0, PF10 without 0.95
+  holdout entries (count only, not scored): 164
+  VERDICT after discovery and validation: FALSIFIED
+
+ASIAGOLD: {'gap': 1, 'band': 528, 'nofill': 0, 'kept': 1549}
+  disc: n 543 (32 d) PF10 0.88 PF1 0.87 PFx1.2 0.87 net10 $-172.04 netx1.2 $-189.16 win 48.8% cost/set 0.502 day z -1.53 | zero-vol 0, PF10 without 0.88
+  val : n 327 (20 d) PF10 0.79 PF1 0.78 PFx1.2 0.78 net10 $-190.80 netx1.2 $-201.16 win 46.2% cost/set 0.503 day z -1.83 | zero-vol 0, PF10 without 0.79
+  holdout entries (count only, not scored): 150
+  VERDICT after discovery and validation: FALSIFIED
+
+NYGOLD: {'gap': 0, 'band': 433, 'nofill': 0, 'kept': 1200}
+  disc: n 397 (31 d) PF10 0.90 PF1 0.90 PFx1.2 0.89 net10 $-96.56 netx1.2 $-109.21 win 48.4% cost/set 0.490 day z -1.13 | zero-vol 0, PF10 without 0.90
+  val : n 259 (20 d) PF10 0.88 PF1 0.87 PFx1.2 0.86 net10 $-83.47 netx1.2 $-91.69 win 49.4% cost/set 0.509 day z -1.11 | zero-vol 0, PF10 without 0.88
+  holdout entries (count only, not scored): 111
+  VERDICT after discovery and validation: FALSIFIED
+
+BTC10AM: {'gap': 0, 'band': 107, 'nofill': 0, 'kept': 240}
+  disc: n 74 (30 d) PF10 0.54 PF1 0.54 PFx1.2 0.54 net10 $-105.63 netx1.2 $-108.00 win 37.8% cost/set 0.504 day z -3.19 | zero-vol 0, PF10 without 0.54
+  val : n 43 (19 d) PF10 0.80 PF1 0.80 PFx1.2 0.79 net10 $-23.96 netx1.2 $-25.33 win 46.5% cost/set 0.503 day z -0.67 | zero-vol 0, PF10 without 0.80
+  holdout entries (count only, not scored): 16
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+I1 LADLEAN information: mean ladder p for YES leans and NO leans, the 15 minute YES mid at -840, and the outcome rate
+  disc yes-lean n 218: ladder p 0.589, 15m YES mid 0.626, YES outcome rate 0.569
+  disc no-lean n 222: ladder p 0.408, 15m YES mid 0.371, YES outcome rate 0.410
+  val yes-lean n 250: ladder p 0.590, 15m YES mid 0.623, YES outcome rate 0.568
+  val no-lean n 173: ladder p 0.413, 15m YES mid 0.365, YES outcome rate 0.376
