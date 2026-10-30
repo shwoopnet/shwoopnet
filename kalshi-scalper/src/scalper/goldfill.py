@@ -543,6 +543,7 @@ def model(qdir: str) -> None:
         if Qb == float("inf"):
             out.append(dip_lines(res))
             out.append(mech_lines(res))
+            out.append(mtm_lines(res))
             ex = {k: [r for r in v if not r["notrade"]] for k, v in res.items()}
             out += fmt_table("History, lower bound, windows with no trade after the decision excluded", ex)
     out.append(f"QUOTE RECORDER: {qinfo['windows']} gold windows, {qinfo['signals']} signals at the first poll (about T-150 s), first poll later than T-140 s: {qinfo['late_first_poll']}, no tape: {qinfo['no_tape']}")
@@ -579,6 +580,21 @@ def dip_lines(res: dict) -> str:
     u2 = [100 * (r["bid120"] - r["bid"]) for r in rows2 if r["bid120"] is not None and r[240] < 1 - 1e-9]
     return (f"Dip check (lower bound, C = 1; side bid at T-120 s minus the decision bid): BID filled {g(f)}, BID not filled {g(u)}; "
             f"IN1C filled {g(f2)}, IN1C not filled {g(u2)}\n")
+
+
+def mtm_lines(res: dict) -> str:
+    """Market-implied value at T-120 s (history only; NOT a settled outcome): the bought side's bid at T-120 s minus the
+    price paid, in cents per contract, for orders fully filled by 240 s and for the missed ones had they been bought at
+    the ask at the decision. It says how much the missed signals were worth to the market two minutes before the close."""
+    parts = []
+    for kind in ("IN01", "IN1C", "BID"):
+        rows = [r for r in res[(kind, 1)] if r["bid120"] is not None]
+        f = [100 * (r["bid120"] - r["L"]) for r in rows if r[240] >= 1 - 1e-9]
+        m = [100 * (r["bid120"] - r["ask"]) for r in rows if r[240] < 1 - 1e-9]
+        g = lambda xs: f"{statistics.mean(xs):+.2f}c (n {len(xs)})" if xs else "n/a"
+        allask = [100 * (r["bid120"] - r["ask"]) for r in rows]
+        parts.append(f"{kind}: filled at our price {g(f)}, missed at the ask {g(m)}, every signal at the ask {g(allask)}")
+    return "Market-implied value at T-120 s, side bid minus price, C = 1, before fees: " + "; ".join(parts) + "\n"
 
 
 def mech_lines(res: dict) -> str:
