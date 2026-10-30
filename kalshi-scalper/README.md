@@ -8002,3 +8002,14 @@ a 53.5 percent break even), 1 NOT_ENOUGH_DATA (T2 gold, discovery n 94 of 100). 
 ## Result: XVENUE1, Kalshi against Polymarket 15 minute Bitcoin and Ethereum resolutions (run 2026-10-30, measurement only)
 
 Polymarket's rule is a Chainlink point comparison (end price at or above start price), not an average. Public APIs reachable, no allowlist change. 16,222 windows joined (8,111 each, 2026-08-06 to 2026-10-30): 234 disagree = 1.44% (Bitcoin 126, 1.55%; Ethereum 108, 1.33%), evenly split by direction; 99% are within 10 bp of the strike (median 1.2 bp Bitcoin, 1.4 bp Ethereum, against 7.8 and 10.1 for all windows). Both venues 80c or higher on the same side 6 minutes before the close: 6,936 windows, 37 resolved differently = 0.53% (Bitcoin 16, Ethereum 21), under the 2% gate, so no cross-venue structure is described and no recorder is requested. 0 tries, N unchanged. Details: `workers/XVENUE1_RESULT.md`.
+
+## Result: NEWH15 (all 15 minute series inventoried; the Coin Race), 2026-10-30
+
+Kalshi lists 38 series with 15 minute markets; 27 have settled windows since 2026-08-24, 11 are empty shells (ADA, BCH, TON, S&P 500, Nasdaq 100, Dow,
+USD/MXN, Coffee, Crypto Comparison, KPOW, a GBPUSD test). Every series with 1,500 or more windows already had L1-shape tests except `KXCRYPTOLEAD15M`
+(Coin Race: which of BTC, ETH, SOL, XRP, HYPE has the highest 15 minute return; 6,343 events, 31,715 markets, median 294 contracts a market, 8c
+spread). Three tries, entry at 9 minutes left on a race book after reading the BTC15M price at 10 minutes left (UP >= 0.70, DOWN <= 0.30), held
+to settlement: YES HYPE when UP (discovery n 473 PF 0.80; validation n 308 PF 0.76), YES BTC when DOWN (n 464 PF 0.83; n 323 PF 0.60), NO BTC when UP (n 104
+PF 0.74; n 102 PF 0.87): **all three FALSIFIED**, holdout unread. The mechanism is real (BTC leads 9% of up windows and 27% of down windows, HYPE 30% to 33%)
+but priced: fills cost 0.38 to 0.40 for a 36% win rate. Ties resolve YES but the tie premium (WTI 2.7% of windows, at most 1.3c) is below the fee.
+Tries +3 (running count about 728,662, z bar 5.27). `workers/NEWH15_INVENTORY.md`, `workers/NEWH15_REGISTRATION.md`, `workers/NEWH15_RESULT.md`.
