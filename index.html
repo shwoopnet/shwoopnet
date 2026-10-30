@@ -1557,6 +1557,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Bot page: Recent trades tiles, Orders today, the notification bell, the sound alerts, the order exports and the needs-checking banner now count every strategy, not only L1 (the OICORE trade was missing from them); a test keeps a new card from reading L1 alone</li>
                   <li>Deploy: the sizing deploy script now works on a Mac (it stopped on a macOS-only difference in sed before it deployed anything)</li>
                   <li>Sign-in page: the "Got questions?" label and arrow now hide when they would sit on text (short phones, landscape), and the bubble no longer covers the disclaimer</li>
                   <li>Strategy chips (L1, OICORE) are one quiet muted style; the bright white chip for OICORE is gone</li>
@@ -2245,7 +2246,7 @@
   // Win rate and the current streak are over settled trades, newest first; early sells are positions the exit watch closed; fees are what Kalshi charged on the filled orders. Pure: orders in, numbers out.
   function kalshiTradeStats(orders, now){
     var since = now - 86400000;
-    var mine = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number(o.fillCount) > 0 && Number(o.ts) >= since && !(o.settled === true && o.result === 'hand'); })
+    var mine = (orders || []).filter(function(o){ return o && (o.strategy === 'L1' || o.strategy === 'SLOT') && Number(o.fillCount) > 0 && Number(o.ts) >= since && !(o.settled === true && o.result === 'hand'); })
       .sort(function(a, b){ return Number(b.ts) - Number(a.ts); });
     var done = mine.map(function(o){ return { o: o, p: kalshiOrderPnl(o) }; }).filter(function(r){ return r.p !== null; });
     var wins = done.filter(function(r){ return r.p > 0; }).length, streak = 0, kind = '';
@@ -2617,8 +2618,8 @@
   function kalshiSoundCheck(){
     if(!kalshiOrdersLoaded){ return; }
     var now = {}, fire = {};
-    (kalshiLiveOrders || []).forEach(function(o){
-      if(!o || o.strategy !== 'L1' || !o.clientOrderId){ return; }
+    kalshiAllOrders().forEach(function(o){
+      if(!o || (o.strategy !== 'L1' && o.strategy !== 'SLOT') || !o.clientOrderId){ return; }
       var f = { e: Number(o.fillCount) > 0, s: o.exitStatus === 'sold' || o.exitStatus === 'partly sold', i: o.exitStatus === 'error' || o.exitStatus === 'unknown' || o.exitStatus === 'no fill' || o.status === 'unknown' || o.status === 'error' };
       now[o.clientOrderId] = f;
       if(kalshiSoundSeen === null){ return; }
@@ -2670,7 +2671,7 @@
     btn.hidden = !currentUserIsAdmin;
     btn.textContent = halted ? 'Resume bot' : 'Pause bot';
 
-    var tot = kalshiLiveTotals(a, kalshiLiveOrders);
+    var tot = kalshiLiveTotals(a, kalshiAllOrders());
     var totEl = document.getElementById('kalBotTotals');
     if(!a){
       totEl.innerHTML = '<div class="kal-empty">Reading the account...</div>';
@@ -2701,8 +2702,8 @@
       // Manual trades older than the account's fills are not stored anywhere, so they cannot appear. An order already shown from a fill is not repeated.
       var seenIds = {}, oldestFill = Infinity;
       gfills.forEach(function(x){ if(x.orderId){ seenIds[x.orderId] = true; } var t = x.time ? Date.parse(x.time) : NaN; if(Number.isFinite(t) && t < oldestFill){ oldestFill = t; } });
-      var olderBot = kalshiResolveOrders(kalshiLiveOrders, a.results, gfills).filter(function(o){
-        return o && Number(o.fillCount) > 0 && o.strategy === 'L1' && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
+      var olderBot = kalshiResolveOrders(kalshiAllOrders(), a.results, gfills).filter(function(o){
+        return o && Number(o.fillCount) > 0 && (o.strategy === 'L1' || o.strategy === 'SLOT') && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
       }).sort(function(x, y){ return y.ts - x.ts; });
       // Manual trades are hidden by default (the owner's choice, Oct 9, 2026); the dropdown on the card brings them back.
       var shownFills = (kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiAllOrders()); })).filter(function(x){ return !kalshiIsExitFill(x, kalshiAllOrders()); });
@@ -2746,7 +2747,7 @@
         foot.push('<button type="button" class="kal-link" data-trstep="newer" aria-label="Newer trades" title="Newer"' + (kalshiLiveShow.page <= 0 ? ' disabled style="opacity:.4"' : '') + '>&#8249;</button> Page ' + (kalshiLiveShow.page + 1) + ' of ' + pages + ' (' + allRows.length + ' trades) <button type="button" class="kal-link" data-trstep="older" aria-label="Older trades" title="Older"' + (kalshiLiveShow.page >= pages - 1 ? ' disabled style="opacity:.4"' : '') + '>&#8250;</button>');
         if(kalshiLiveShow.page >= pages - 1 && kalshiTradeFilter === 'all'){ foot.push('<span style="color:var(--muted)">Older bot trades are kept; manual trades older than the latest fills are not stored.</span>'); }
       }
-      var statsHtml = kalshiTradeStatsHtml(kalshiTradeStats(kalshiResolveOrders(kalshiLiveOrders, a.results, gfills), Date.now()), kalshiMoney);
+      var statsHtml = kalshiTradeStatsHtml(kalshiTradeStats(kalshiResolveOrders(kalshiAllOrders(), a.results, gfills), Date.now()), kalshiMoney);
       var statsEl = document.getElementById('kalBotStats'); if(statsEl){ statsEl.innerHTML = statsHtml; }
       trEl.innerHTML = (allRows.length ? rowsHtml : '<div class="kal-foot">' + (kalshiTradeFilter === 'all' ? 'No trades yet.' : 'No bot trades yet.') + '</div>') + (foot.length ? '<div class="kal-foot">' + foot.join('<br>') + '</div>' : '');
     }
@@ -2800,7 +2801,7 @@
   });
   kalshiSoundLabel();
   document.getElementById('kalOrdersCopy').addEventListener('click', function(){
-    var csv = kalshiAllOrdersCsv(kalshiLiveOrders), n = Math.max(0, csv.split('\n').length - 1);
+    var csv = kalshiAllOrdersCsv(kalshiAllOrders()), n = Math.max(0, csv.split('\n').length - 1);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
     var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -2808,7 +2809,7 @@
     } else { manual(); }
   });
   document.getElementById('kalDiagCopy').addEventListener('click', function(){
-    var csv = kalshiDiagnosticsCsv(kalshiLiveOrders, 150), n = Math.max(0, csv.split('\n').length - 1);
+    var csv = kalshiDiagnosticsCsv(kalshiAllOrders(), 150), n = Math.max(0, csv.split('\n').length - 1);
     var msg = document.getElementById('kalDiagMsg'), box = document.getElementById('kalDiagBox');
     var manual = function(){ box.style.display = ''; box.value = csv; box.focus(); box.select(); msg.textContent = n + ' orders. Select all and copy the text below.'; };
     if(navigator.clipboard && navigator.clipboard.writeText){
@@ -3110,7 +3111,7 @@
     if(s.active !== true && Number.isFinite(Number(s.endedAt)) && s.endedBecause && !/by the owner/i.test(String(s.endedBecause)) && now - Number(s.endedAt) < 14 * 86400000){
       return { title: 'The bot is stopped', text: stopText || 'It stopped by itself. Check the notifications.' };
     }
-    var bad = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && now - Number(o.ts) <= 86400000 && (o.status === 'unknown' || o.status === 'error' || o.exitStatus === 'unknown' || o.exitStatus === 'error'); })[0];
+    var bad = (orders || []).filter(function(o){ return o && (o.strategy === 'L1' || o.strategy === 'SLOT') && now - Number(o.ts) <= 86400000 && (o.status === 'unknown' || o.status === 'error' || o.exitStatus === 'unknown' || o.exitStatus === 'error'); })[0];
     if(bad){ return { title: 'An order needs checking', text: kalshiMarketName(bad) + ': ' + String(bad.error || bad.exitStatus || bad.status).slice(0, 140) + '. Check the Kalshi account under Portfolio, then Orders.' }; }
     if(s.active === true && hbState === 'down'){ return { title: 'The bot has not checked in', text: 'No check for several minutes. If it does not come back, the exit watch may not be running.' }; }
     return null;
@@ -3137,7 +3138,7 @@
     if(!list || !badge || !bannerEl){ return; }
     if(!kalshiOrdersLoaded){ list.innerHTML = kalshiSyncError ? '<div class="kal-notif-empty">What the bot did could not be read (' + escapeHtml(kalshiSyncError) + '). Trying again...</div>' : '<div class="kal-notif-empty">Loading what the bot did...</div>'; return; }
     var now = Date.now(), lastRead = kalshiNotifLoadRead();
-    var orders = kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var orders = kalshiResolveOrders(kalshiAllOrders(), kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
     var clearedAt = kalshiNotifLoadCleared();
     var items = kalshiNotifFeed(kalshiLiveEvents, orders, now, kalshiMoney).filter(function(x){ return x.ts > clearedAt; }), n = kalshiNotifUnread(items, lastRead);
     badge.textContent = n > 99 ? '99+' : String(n); badge.hidden = n === 0;
@@ -3414,7 +3415,7 @@
       (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
       (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
     if(running && kalshiOrdersLoaded){
-      var work = kalshiTodayWork(kalshiLiveOrders, now);
+      var work = kalshiTodayWork(kalshiAllOrders(), now);
       var sentText = work.sent === 0 ? 'none yet' : work.sent + ' sent, ' + work.filled + ' filled' + (work.noFill ? ', ' + work.noFill + ' not filled' : '');
       var problemText = work.problem + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused');
       var lastText = work.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((now - work.lastTs) / 1000)));
@@ -3475,7 +3476,7 @@ kalshiStatusTick();
     var pill = document.getElementById('kalL1Pill');
     pill.className = 'kal-pill' + (switchOff ? ' bad' : (halted ? ' warn' : (running ? ' on' : '')));
     pill.textContent = switchOff ? 'Order switch OFF' : (halted ? 'Paused' : (running ? 'Running' : 'Not running'));
-    var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
+    var oc = kalshiOutcomeCounts(kalshiResolveOrders(kalshiAllOrders(), kalshiLiveAcct && kalshiLiveAcct.results), s && Number.isFinite(s.since) ? s.since : 0);
     var base = s && Number.isFinite(s.sizeBase) ? s.sizeBase : (s ? s.startCash : NaN);   // the balance at the last review, once the server has made one
     var stopAt = s && s.sizing === true && Number.isFinite(base) ? kalshiMoney(0.12 * base) : kalshiMoney(10);
     // One line of what the bot has done (the Account card above holds the money figures): when it looks next, orders sent, filled against no fill.

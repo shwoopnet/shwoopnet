@@ -178,7 +178,7 @@ gates.Y14 = () => {
   const selectRules = css.match(/[^{}]*\bselect\b[^{}]*\{[^}]*\}/g) || [];
   assert.ok(selectRules.length > 0 && selectRules.every((r) => !/--card|color:\s*var\(--ink\)/.test(r)), 'no rule on a select uses the page background as its text colour');
   assert.ok(!/var\(--card\)/.test(html), 'no rule uses a variable that is not defined');
-  assert.ok(/kalshiResolveOrders\(kalshiLiveOrders, kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
+  assert.ok(/kalshiResolveOrders\(kalshiAllOrders\(\), kalshiLiveAcct && kalshiLiveAcct\.results\)/.test(html), 'the charts read orders settled against the account read');
 };
 
 // Open positions, one readable row each: the side from the sign, cost from the bot's own fill, what it can win and lose, the chance now and the time left from
@@ -327,7 +327,7 @@ gates.Y11b = () => {
   assert.strictEqual(col(out[1], 'pnl'), '', 'an open order has none');
   assert.ok(['entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'minStep', 'climb', 'smooth', 'flips', 'flips0', 'earlierCandles', 'askAtDecision', 'depthAtLimit', 'shareOfDepth', 'twoStageLeft', 'ask10', 'inBand6'].every((c) => head.includes(c)), 'the full export carries the entry lead and what the research reads need');
   assert.deepStrictEqual([col(out[3], 'seenBid'), col(out[3], 'seenAsk'), col(out[1], 'seenAsk')], ['0.91', '0.94', ''], 'the quote the bot saw is exported (the spread forward test reads it); an order with none leaves it empty');
-  assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiLiveOrders\)/.test(html), 'a button, built from the bot\'s own orders');
+  assert.ok(/id="kalOrdersCopy"/.test(html) && /kalshiAllOrdersCsv\(kalshiAllOrders\(\)\)/.test(html), 'a button, built from the bot\'s own orders');
 };
 
 // Presentation view (Oct 21, 2026): one Layout-menu switch that only HIDES the balance, the stake and pool rows, the open positions and recent trades cards, the By price paid table and the Tools menu. It is a page

@@ -115,6 +115,27 @@ gates.ST12 = () => {
   assert.ok(/settled, last 24 hours/.test(html) && /'last 24 hours'\)/.test(html), 'the Recent trades tiles name their window');
   assert.ok(/kal-loading-note/.test(html), 'a longer range keeps the old chart, dimmed, while it loads');
 };
+gates.ST13 = () => {
+  // The owner, Oct 30, 2026: the Recent trades tiles ignored the OICORE trade ("this should be including all strategies"). The cause was a card counting only L1's orders. Every tally now reads kalshiAllOrders(); only the readers that are L1 by nature may read L1's list alone, and a new one has to be added here on purpose.
+  const lines = html.split('\n').filter((l) => /kalshiLiveOrders/.test(l) && !/^\s*\/\//.test(l) && !/collection\(db, 'kalshiLiveOrders'\)/.test(l));
+  const allowed = [
+    /^\s*var kalshiLiveOrders = \[\];/,                                  // the state
+    /kalshiLiveOrders = o; kalshiOrdersLoaded/,                          // the listener
+    /function kalshiAllOrders\(\)/,                                      // the union
+    /var loaded = \(kalshiLiveOrders/, /var source = kalshiLiveOrders, partial/, /kalshiPnlSource\(kalshiLiveOrders, hit\)/, /l1src = kalshiLiveOrders/,   // the older-orders read pages L1's own collection
+    /KAL_ECG\.SPAN/,                                                     // the heartbeat strip is L1's
+    /kalshiEdgeCheck\(/,                                                 // win rate against the break even of L1's price band
+    /var orders = kalshiResolveOrders\(kalshiLiveOrders, a && a\.results/   // the silent market warning: L1's markets
+  ];
+  const stray = lines.filter((l) => !allowed.some((re) => re.test(l)));
+  assert.deepStrictEqual(stray.map((l) => l.trim().slice(0, 90)), [], 'every card that tallies orders reads kalshiAllOrders(), so a second strategy is never left out');
+  const tradeStats = new Function('kalshiOrderPnl', block('kalshiTradeStats') + '; return kalshiTradeStats;')(f.kalshiOrderPnl || ((o) => (typeof o.settledPnl === 'number' ? o.settledPnl : null)));
+  const tiles = tradeStats([
+    { strategy: 'L1', fillCount: '5', ts: Date.now() - 3600000, settled: true, result: 'yes', side: 'yes', settledPnl: 0.3 },
+    { strategy: 'SLOT', slotId: 'OICORE', fillCount: '5', ts: Date.now() - 7200000, settled: true, result: 'no', side: 'yes', settledPnl: -0.27 }
+  ], Date.now());
+  assert.strictEqual(tiles.total, 2, 'the tiles count a second strategy order as a trade');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);

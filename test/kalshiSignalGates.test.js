@@ -137,7 +137,7 @@ gates.G23 = () => {
   assert.strictEqual(isBot({ orderId: 'a' }, [{ ts: 1 }]), false, 'an order saved without an id matches nothing');
   assert.strictEqual(isBot(null, orders), false);
   // Wired into the page.
-  assert.ok(/id="kalBotTotals"/.test(html) && /kalshiLiveTotals\(a, kalshiLiveOrders\)/.test(html));
+  assert.ok(/id="kalBotTotals"/.test(html) && /kalshiLiveTotals\(a, kalshiAllOrders\(\)\)/.test(html));
   assert.ok(/kalshiFillIsBot\(x, kalshiAllOrders\(\)\)/.test(html) && /\(bot \? kalshiChipHtml\(kalshiStrategyOf\(ord\), escapeHtml\) : 'manual'\)/.test(html), 'each fill is labelled bot or manual');
 };
 

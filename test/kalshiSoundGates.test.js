@@ -16,6 +16,7 @@ function rig(storedOn) {
   const tones = [];
   const win = { localStorage: { getItem: () => (storedOn ? 'on' : null), setItem() {} } };
   const env = { window: win, kalshiOrdersLoaded: true, kalshiLiveOrders: [], kalshiLiveCtl: { session: null } };
+  env.kalshiAllOrders = function(){ return env.kalshiLiveOrders; };
   const body = block.replace('function kalshiSoundTone(kind){', 'function kalshiSoundTone(kind){ if(kalshiSoundOn){ __tones.push(kind); } return; ')
     + '; return { check: kalshiSoundCheck, setOn: function(v){ kalshiSoundOn = v; } };';
   const api = new Function('window', '__tones', 'env', 'with(env){' + body.replace(/kalshiOrdersLoaded/g, 'env.kalshiOrdersLoaded').replace(/kalshiLiveOrders/g, 'env.kalshiLiveOrders').replace(/kalshiLiveCtl/g, 'env.kalshiLiveCtl') + '}')(win, tones, env);
