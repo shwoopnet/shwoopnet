@@ -14,10 +14,15 @@ Counts as of 2026-10-30 2:00 PM CT: N 728,652. Status: R = registered, Q = queue
 7. Q: OICORE and L1 in the same window (correlated-window risk): how often a Bitcoin slot order shares a window with a gold or Dogecoin loss. Counts only.
 8. DONE by reference: L1 exit alternatives. The report has no price path after entry, so I cannot add to V2's STRUCT1 (live 50 exits -$155.85, holding about -$158.49) and EXIT1 (holding beats every exit shape in history: hold 0.961 / 0.928 / 0.898, 25c line 0.921 / 0.897 / 0.869). Nothing new from here.
 9. Q: L1 gold ladder cap by order size once R4 has 20 orders at 16+ contracts.
-10. Q: no-fill timing: seconds between the decision and the order, by market, from `ts` against the 6 minute mark (does the bot's tick delay line up with no-fill share). Counts from the report only.
-11. Q: gold orders by CT hour, fills and no-fills, live record (frequency map, no outcomes), to see which hours lose fills to the quiet block and to thin books.
-12. Q: Dogecoin shrinking entries (215 to 170 a week): count by day whether the drop is price (fewer in band) or fills (more no-fills). Counts only.
+10. DONE (2:30 PM CT, lead registered forward): no-fill timing: seconds between the decision and the order, by market, from `ts` against the 6 minute mark (does the bot's tick delay line up with no-fill share). Counts from the report only.
+11. DONE (2:35 PM CT): gold orders by CT hour, fills and no-fills, live record (frequency map, no outcomes), to see which hours lose fills to the quiet block and to thin books.
+12. DONE (2:25 PM CT): Dogecoin shrinking entries (215 to 170 a week): count by day whether the drop is price (fewer in band) or fills (more no-fills). Counts only.
 13. Q: OICORE threshold sensitivity (86,300 vs trailing percentile) once V2 pushes counts only.
+14. R5 (forward score of the item 10 lead): Dogecoin no-fill, orders at 355 s or more left vs under 355 s, after Oct 30 19:30Z, 100 per arm. Registered; weekly count.
+15. Q: Dogecoin 6 vs 8 minute look: share of live orders where the earlier look (`ask8`/`inBand8`) was in band while the 6 minute look was not, counts only, needs those fields in the order rows.
+16. Q: OICORE side rule (cheaper side) sensitivity: how often the two sides are within 2c at the decision, counts from R6 Bitcoin book.
+17. Q: weekly L1 loss-size check: largest loss per week and per contract by market against the 12% stop, from the report (risk concern watch).
+18. Q: reconcile report vs Bot page after each deploy (counts of settled orders, net) to catch report drift.
 Refill rule: if this list falls under 5 open items, add from: Dogecoin entry timing (6 vs 8 minute look), gold quiet hours review (due Nov 24 to 26, V2 owns the read), spread filter at 2c or more as a frequency cost count, OICORE open interest threshold sensitivity (threshold 86,300 vs the trailing percentile), OICORE side rule sensitivity.
 
 ## Entries
