@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 7:05 PM CT, R6's first run pushed (book15r6/2026-10-29/2203).** 40 coverage rows (8 windows x 5 markets); on the Bitcoin window checked, 330 of 330 polls ok, no 429, recorded trade size equal to Kalshi's volume exactly; gold had no open market at its daily break. About 3.8 MB gzipped for the run, in line with the spec's 45 MB a day. R6-based reads (MAKER5, L1Q1, MM1 mid-window) run themselves from Nov 6.
+
 **2026-10-29 8:05 PM CT, FALS3 broke GEN4's Bitcoin favourite rule.** On 85 days of candles the same buy (favourite at 50c to 85c, 2 to 3 minutes left) loses: PF 0.77 at 3 minutes (n 2,576, z -4.97), 0.83 at 2 minutes, never above 1.05 in any 8-day block. GEN4's pass came from a lucky recorded subset (PF 1.43 on recorded windows, 0.75 on the missed windows of the same days, p 0.018). The 51 GEN4 rules stay in the forward ledger as LOW PRIOR. Two takeaways: recorder-only results need R6's full coverage or a long-history check; and the history shows Bitcoin favourites OVERPRICED at 2 to 3 minutes, which is the mirror of REV1's registered forward claim (cheap NO at 2 to 3 minutes, read Nov 5). N tried about 501,174.
 
 **2026-10-29 7:50 PM CT, GEN5 (1 minute generator with outside prices: COMEX gold future, dollar, 10 year yield; Coinbase for Bitcoin), FALSIFIED.** 5,000 distinct per market (N +25,592; running count about 501,169 with GEN4's). Median discovery PF 0.63 (gold) and 0.65 (Bitcoin); 3 gold and 1 Bitcoin strategy passed discovery; 0 passed validation (best survivor G1, gold NO 13 to 11 minutes left with the yield rising, PF 1.51 then 1.25; the Bitcoin one 1.55 then 0.88). Nothing goes to the forward ledger. Consistent with GOLDFV1 and XMAC1: at minute resolution the outside states are already in Kalshi's price.
