@@ -103,6 +103,17 @@ gates.ST11 = () => {
   assert.ok(/Result \(1M\)/.test(h), 'the Result column names its range');
   assert.ok(/renderKalshiPnl\(\); renderKalshiStrategies\(\);/.test(html), 'changing the range redraws the Strategies card');
 };
+gates.ST12 = () => {
+  // The owner, Oct 30, 2026: OICORE showed "No order yet" after it bought, because the page could not read the second strategy's orders and said nothing.
+  const esc = (x) => String(x), money = (x) => '$' + Number(x).toFixed(2);
+  const row = { id: 'OICORE', info: { name: 'x', markets: 'M', note: '' }, sum: f.kalshiOrdersSummary([], Date.now()), status: 'Waiting for a signal', ageText: 'No order yet' };
+  const bad = f.kalshiStrategiesTableHtml([row], esc, money, { slotError: 'permission-denied' });
+  assert.ok(/cannot be read \(permission-denied\)/.test(bad), 'an unreadable slot feed is said on the card');
+  assert.ok(!/cannot be read/.test(f.kalshiStrategiesTableHtml([row], esc, money, {})), 'no warning when the feed is fine');
+  assert.ok(/kalshiSlotError = ''/.test(html) && /kalshiSlotError = String\(/.test(html), 'the page sets and clears the error');
+  assert.ok(/settled, last 24 hours/.test(html) && /'last 24 hours'\)/.test(html), 'the Recent trades tiles name their window');
+  assert.ok(/kal-loading-note/.test(html), 'a longer range keeps the old chart, dimmed, while it loads');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);
