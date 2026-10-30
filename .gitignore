@@ -21,3 +21,6 @@ kalshi-scalper/data/
 
 __pycache__/
 *.pyc
+
+# deploy-latest.sh records the last commit it deployed here (per machine, never committed)
+functions/.last-deployed
