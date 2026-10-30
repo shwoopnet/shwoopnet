@@ -138,7 +138,7 @@ gates.G23 = () => {
   assert.strictEqual(isBot(null, orders), false);
   // Wired into the page.
   assert.ok(/id="kalBotTotals"/.test(html) && /kalshiLiveTotals\(a, kalshiLiveOrders\)/.test(html));
-  assert.ok(/kalshiFillIsBot\(x, kalshiLiveOrders\)/.test(html) && /\(bot \? 'bot' : 'manual'\)/.test(html), 'each fill is labelled bot or manual');
+  assert.ok(/kalshiFillIsBot\(x, kalshiAllOrders\(\)\)/.test(html) && /\(bot \? 'bot' : 'manual'\)/.test(html), 'each fill is labelled bot or manual');
 };
 
 // A NO entry at exactly 42c or 52c must be planned. NO price is 1 - yes bid, and in

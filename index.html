@@ -2525,7 +2525,7 @@
     if(!posEl){ return; }
     if(!a){ posEl.innerHTML = ''; return; }
     if(!a.positions || !a.positions.ok){ posEl.innerHTML = '<div class="kal-note">Could not read positions: ' + escapeHtml(a.positions ? 'HTTP ' + a.positions.status + ' ' + (a.positions.error || '') : '') + '</div>'; return; }
-    var rows = kalshiPositionRows(a.positions.positions, kalshiLiveOrders, a.fills && a.fills.ok ? a.fills.fills : [], kalshiBooksLast && kalshiBooksLast.markets, Date.now());
+    var rows = kalshiPositionRows(a.positions.positions, kalshiAllOrders(), a.fills && a.fills.ok ? a.fills.fills : [], kalshiBooksLast && kalshiBooksLast.markets, Date.now());
     // One point per read (every 5 seconds while the Bot page is showing) for each open position, kept only while it is open.
     var openNow = {};
     rows.forEach(function(r){
@@ -2679,7 +2679,7 @@
         return o && Number(o.fillCount) > 0 && o.strategy === 'L1' && !(o.orderId && seenIds[o.orderId]) && o.ts < oldestFill;
       }).sort(function(x, y){ return y.ts - x.ts; });
       // Manual trades are hidden by default (the owner's choice, Oct 9, 2026); the dropdown on the card brings them back.
-      var shownFills = (kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiLiveOrders); })).filter(function(x){ return !kalshiIsExitFill(x, kalshiLiveOrders); });
+      var shownFills = (kalshiTradeFilter === 'all' ? gfills : gfills.filter(function(x){ return kalshiFillIsBot(x, kalshiAllOrders()); })).filter(function(x){ return !kalshiIsExitFill(x, kalshiAllOrders()); });
       var allRows = shownFills.map(function(x){ return { fill: x }; }).concat(olderBot.map(function(o){ return { order: o }; }));
       var pageSize = kalshiLiveShow.pageSize, pages = Math.max(1, Math.ceil(allRows.length / pageSize));
       if(kalshiLiveShow.page > pages - 1){ kalshiLiveShow.page = pages - 1; }
@@ -2694,8 +2694,8 @@
             '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">bot</span></div>';
         }
         var x = item.fill;
-        var bot = kalshiFillIsBot(x, kalshiLiveOrders);
-        var ord = kalshiOrderFor(x, kalshiLiveOrders);
+        var bot = kalshiFillIsBot(x, kalshiAllOrders());
+        var ord = kalshiOrderFor(x, kalshiAllOrders());
         var tp = kalshiTradePnl(x, ord, a.results ? a.results[x.ticker] : null);
         var fillText, plCell;
         if(ord && (ord.side === 'yes' || ord.side === 'no')){
@@ -3210,7 +3210,7 @@
   function kalshiRiskMeter(orders, s, now){
     var from = now - 86400000, net = 0, openCost = 0, addonAtRisk = 0, windowUsed = {}, trades = 0;
     (orders || []).forEach(function(t){
-      if(!t || t.strategy !== 'L1' || !(Number(t.fillCount) > 0) || !Number.isFinite(Number(t.maxCost)) || !(Number(t.ts) >= from)){ return; }
+      if(!t || (t.strategy !== 'L1' && t.strategy !== 'SLOT') || !(Number(t.fillCount) > 0) || !Number.isFinite(Number(t.maxCost)) || !(Number(t.ts) >= from)){ return; }   // the second slot's orders count in the same loss stop, as on the server
       if(t.settled === true && t.result === 'hand'){ return; }
       trades++;
       var cost = Number(t.maxCost), want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want), paid = cost * (got / want);
@@ -3408,7 +3408,7 @@
       var silentEscaped = silent.map(function(x){ return escapeHtml(x); }).join('</div><div class="kal-note">');
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + silentEscaped + '</div><div class="kal-note">Check the bot note above and the money on each Kalshi shard.</div></div>');
     }
-    var m = kalshiRiskMeter(orders, s, now);
+    var m = kalshiRiskMeter(kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []), s, now);
     rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
@@ -3466,6 +3466,8 @@ kalshiStatusTick();
   // every name is escaped where it is drawn. Nothing here can change a strategy: no button writes anything.
   var kalshiSlotOrders = [], kalshiStrategy = 'ALL';
   try{ var savedStrategy = window.localStorage.getItem('shwoopnet:kalStrategy'); if(savedStrategy){ kalshiStrategy = savedStrategy.slice(0, 40); } }catch(e){}
+  // Every order the bot placed, L1's and the second slot's: used to RECOGNISE the bot's fills, so a slot fill is never shown as a manual trade or an unmatched position.
+  function kalshiAllOrders(){ return (kalshiLiveOrders || []).concat(kalshiSlotOrders || []); }
   function kalshiSlotIds(slot){
     var seen = {}, out = [];
     (slot || []).filter(function(o){ return o && typeof o.slotId === 'string' && o.slotId && Number.isFinite(Number(o.ts)); }).sort(function(a, b){ return Number(a.ts) - Number(b.ts); })

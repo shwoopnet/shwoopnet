@@ -37,6 +37,13 @@ gates.ST4 = () => {
   assert.ok(!/(setDoc|addDoc|updateDoc|deleteDoc)\([^)]*kalshiSlot/.test(html), 'and never writes them');
   assert.ok(/id="kalStrat"[^>]*hidden/.test(html), 'the switch starts hidden');
 };
+gates.ST5 = () => {
+  // A second-slot fill must be recognised as the bot's (never a manual trade or an unmatched position), and its dollars must be in the Stop Loss and Risk meter, as they are in the server's loss stop.
+  assert.ok(/function kalshiAllOrders\(\)\{ return \(kalshiLiveOrders \|\| \[\]\)\.concat\(kalshiSlotOrders \|\| \[\]\); \}/.test(html));
+  assert.ok(/kalshiPositionRows\(a\.positions\.positions, kalshiAllOrders\(\),/.test(html), 'open positions know the slot orders');
+  assert.ok(/t\.strategy !== 'L1' && t\.strategy !== 'SLOT'/.test(html) && /kalshiRiskMeter\(kalshiResolveOrders\(kalshiAllOrders\(\)/.test(html), 'the risk meter counts slot orders');
+  assert.ok(!/kalshiIsExitFill\(x, kalshiLiveOrders\)/.test(html), 'a slot exit fill is not shown as a trade either');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);
