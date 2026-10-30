@@ -544,6 +544,10 @@ def model(qdir: str) -> None:
             out.append(dip_lines(res))
             out.append(mech_lines(res))
             out.append(mtm_lines(res))
+            cut = 1790812800                                # 2026-10-01 00:00 UTC: a date split to see whether the shape holds
+            for lab, keep in (("September", lambda r: r["close"] < cut), ("October", lambda r: r["close"] >= cut)):
+                part = {k: [r for r in v if keep(r)] for k, v in res.items() if k[1] == 1}
+                out += fmt_table(f"History, lower bound, C = 1, {lab} closes only", part)
             ex = {k: [r for r in v if not r["notrade"]] for k, v in res.items()}
             out += fmt_table("History, lower bound, windows with no trade after the decision excluded", ex)
     out.append(f"QUOTE RECORDER: {qinfo['windows']} gold windows, {qinfo['signals']} signals at the first poll (about T-150 s), first poll later than T-140 s: {qinfo['late_first_poll']}, no tape: {qinfo['no_tape']}")
