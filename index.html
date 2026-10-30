@@ -1151,10 +1151,21 @@
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
     // Every order the bot sent from a time on (admin read only), for the account result line's longer ranges. Read once per range and kept for ten minutes, never on a timer.
+    // Read in pages of 5,000 (the owner's screen, Oct 29, 2026: the single 20,000 read was refused with invalid-argument, so every range past the live 1,000 orders showed a partial total). Each page starts at the last
+    // time seen (>=, so orders sharing a millisecond are never skipped) and repeats are dropped by order id; at most 5 pages, 25,000 orders.
     kalshiOrdersSince: function(sinceMs){
-      return getDocs(query(collection(db, 'kalshiLiveOrders'), where('ts', '>=', sinceMs), orderBy('ts', 'asc'), limit(20000))).then(function(q){
-        return q.docs.map(function(d){ return d.data(); });
-      });
+      var all = [], seen = {}, cursor = sinceMs, pages = 0;
+      function next(){
+        return getDocs(query(collection(db, 'kalshiLiveOrders'), where('ts', '>=', cursor), orderBy('ts', 'asc'), limit(5000))).then(function(q){
+          var rows = q.docs.map(function(d){ return d.data(); }), fresh = 0;
+          rows.forEach(function(o){ var k = o.clientOrderId || o.id || (String(o.ticker) + ':' + String(o.ts)); if(!seen[k]){ seen[k] = true; all.push(o); fresh++; } });
+          pages++;
+          if(rows.length < 5000 || fresh === 0 || pages >= 5 || !Number.isFinite(Number(rows[rows.length - 1].ts))){ return all; }
+          cursor = Number(rows[rows.length - 1].ts);
+          return next();
+        });
+      }
+      return next();
     }
   });
 </script>
@@ -1530,6 +1541,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Account result: the older trades are read in pages of 5,000 (one big read was refused), so the 1M, 3M, YTD and All totals include every order; the OICORE panel says "No order yet" plainly</li>
                   <li>Bot page: the strategy switch (Overall, L1, OICORE) is there from the start, not only after the second strategy's first order; Rules and limits now describe OICORE</li>
                   <li>Account result: when the older trades cannot be read, the note now says why (the error code), so the cause can be found</li>
                   <li>Second strategy slot, step 1 (still off, nothing trades): slot fills and positions are recognised as the bot's own and counted in Stop Loss and Risk; the slot can read an open interest signal and buy the cheaper side, and one reviewed strategy may hold to settlement; a closing slot order sends a phone alert</li>
@@ -3516,10 +3528,10 @@ kalshiStatusTick();
   function kalshiProbeHtml(id, sum, nowMs, esc, money){
     var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
     var stat = function(k, v, cls){ return '<div><span class="kal-lbl">' + esc(k) + '</span><b class="' + (cls || '') + '">' + esc(v) + '</b></div>'; };
-    var age = sum.lastTs === null ? 'no order yet' : kalshiAgeText(Math.max(0, Math.round((nowMs - sum.lastTs) / 1000)));
+    var age = sum.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((nowMs - sum.lastTs) / 1000)));
     var rows = function(list, openRows){ return list.map(function(o){ var p = kalshiOrderPnl(o);
       return '<div class="kal-tr"><span>' + esc(kalTime(Number(o.ts))) + '</span><span>' + esc(kalshiShortTicker(o.ticker || '')) + '</span><span>' + esc(String(o.side || '').toUpperCase() + ' x ' + (Number(o.fillCount) || Number(o.count) || 0) + (openRows ? ' open' : '')) + '</span><span class="kal-tr-p ' + (p === null ? '' : (p >= 0 ? 'kal-pos' : 'kal-neg')) + '">' + esc(p === null ? '' : sg(p)) + '</span></div>'; }).join(''); };
-    return '<div class="kal-card-head" style="padding:0 0 10px"><div class="kal-card-title" style="margin:0">' + esc(id) + '</div><span class="kal-pill">Last order ' + esc(age) + '</span></div>' +
+    return '<div class="kal-card-head" style="padding:0 0 10px"><div class="kal-card-title" style="margin:0">' + esc(id) + '</div><span class="kal-pill">' + (age === '' ? 'No order yet' : 'Last order ' + esc(age)) + '</span></div>' +
       '<div class="kal-hold-stats">' + stat('Result', sg(sum.net), sum.net >= 0 ? 'kal-pos' : 'kal-neg') + stat('Today', sg(sum.today)) + stat('Settled', String(sum.n)) + stat('Won / lost', sum.won + ' / ' + sum.lost) + stat('Profit factor', sum.pf === null ? 'n/a' : sum.pf.toFixed(2)) + '</div>' +
       (sum.open.length ? '<div class="kal-lbl" style="margin-top:10px">Open</div>' + rows(sum.open, true) : '') +
       (sum.last.length ? '<div class="kal-lbl" style="margin-top:10px">Last trades</div>' + rows(sum.last, false) : '<div class="kal-empty">No settled trade yet.</div>');
