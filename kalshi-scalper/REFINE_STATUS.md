@@ -22,6 +22,13 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:30 PM CT, queue item 10 (no-fill share by how late the order went out), 6 minute entries, report rows to Oct 30. Descriptive, 0 tries, a LEAD to register, not a finding.**
+Seconds left at the order time (ticker close, Eastern time) against no-fill share:
+- Dogecoin: 355 to 360 s left 104 orders, 21% no fill; 345 to 355 s 73 orders (25 at 345, 48 at 350), 43% no fill. Difference 21 points, z about 3.0 (a rough two-proportion test, not corrected for the tries I have looked at today).
+- Gold: 36% at 345, 350 and 355 alike (160 orders). No timing effect.
+- Reading: for Dogecoin an order that goes out 5 to 15 seconds after the 6 minute mark fills much less often, which fits ask creep (the ask drifts up inside the seconds after the read) and the README's tick-delay explanation. Dogecoin fills 1 to 5 contracts at a time against thin books (about 100 contracts at the touch), so a few seconds of delay matter. Gold's books are 20 times deeper, so they do not.
+- Why it is only a lead: the split was chosen after seeing the data (I tried 5 second buckets); order time is not random, so late orders may be late for a reason (a slow quote read, a busy minute) that also changes the market. I do not propose anything on it. Registration to score it forward: Dogecoin no-fill share, orders sent at 355 s or more left against under 355 s, on orders after Oct 30 19:30Z, read at 100 orders per arm; prediction: the gap persists (at least 10 points). Counts as 1 try (N 728,653). Nothing to change in code from my side; if it holds, what would help is the bot's own tick timing, which is a main-session design question for the owner, not mine to propose now.
+
 **2026-10-30 2:25 PM CT, queue item 12 (is Dogecoin's entry count shrinking in live?), counts only, 0 tries.** Live attempts (orders sent) and fills by week (Monday start; the Oct 26 week is five days):
 - Dogecoin: week of Oct 19 87 attempts, 65 fills (25% no fill); week of Oct 26 113 attempts, 78 fills (31% no fill).
 - Gold: Oct 12 85 attempts, 57 fills (33%); Oct 19 79, 53 (33%); Oct 26 109, 68 (38%).
