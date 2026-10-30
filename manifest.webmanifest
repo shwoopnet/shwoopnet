@@ -1,6 +1,6 @@
 {
   "name": "Shwoop Financials",
-  "short_name": "Shwoop",
+  "short_name": "Shwoop Financials",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
