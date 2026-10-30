@@ -1571,6 +1571,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Strategies: Ethereum is split off from Closing buy as its own row, L1E (Smooth climb), so its results can be tracked and researched on their own; it trades exactly as before (label and numbers only)</li>
                   <li>Account card: the Running pill now opens a small pop-over right under it (Pause bot, Flatten all, Rules and limits) instead of a card covering Bot status; the status lines are in Bot status only; tap elsewhere or press Escape to close it</li>
                   <li>Deploy: the phone alerts deploy script no longer makes a new alert key when it merely fails to read the old one (that broke every subscribed phone); it only makes one if the key truly does not exist</li>
                   <li>Updates: a browser running an out-of-date copy of the site now gets a pop-up that blocks the page until it reloads (it keeps you signed in; it checks every 5 minutes and when the app comes back, for every visitor, and never while something is being typed)</li>
@@ -3524,7 +3525,8 @@ kalshiStatusTick();
   var KAL_SLOT_REGISTERED = ['OICORE'];
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
-    L1: { name: 'Closing buy', markets: 'Gold, Dogecoin, Ethereum', note: '' },
+    L1: { name: 'Closing buy', markets: 'Gold, Dogecoin', note: '' },
+    L1E: { name: 'Smooth climb', markets: 'Ethereum', note: '' },   // Ethereum split off from L1 for tracking (the owner, Oct 30, 2026); it still trades by L1's code, only the label and the numbers are separate
     OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){
@@ -3535,7 +3537,7 @@ kalshiStatusTick();
     return out;
   }
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
-  function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
+  function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : (o && /ETH/.test(String(o.series || o.ticker || '')) ? 'L1E' : 'L1'); }
   // The markets ACTIVELY in the Strategies list (the owner, Oct 30, 2026: the Bot status card should count only those): a strategy and a market it trades, read from the same labels the Strategies table shows (KAL_STRATEGY_INFO).
   // An order counts when its strategy and its market are a pair on that list, so a paused market (XRP) and Bitcoin's old L1 orders (L1 no longer trades it; the second strategy does) are left out.
   function kalshiActivePairs(){
@@ -3596,8 +3598,11 @@ kalshiStatusTick();
     var needsOlder = loaded.length >= 1000 && since < oldest, l1src = kalshiLiveOrders, partial = false;
     if(needsOlder){ var pick = hit ? kalshiPnlSource(kalshiLiveOrders, hit) : null; if(pick && !hit.failed){ l1src = pick.orders; } else { partial = true; } }
     var rangeLabel = (KAL_PNL_RANGES.filter(function(r){ return r.key === key; })[0] || { label: key }).label;
-    var l1 = kalshiOrdersSummary(kalshiResolveOrders(l1src, acct && acct.results, fills), now, since);
-    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
+    var l1Orders = kalshiResolveOrders(l1src, acct && acct.results, fills);
+    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1'; }), now, since);
+    var l1e = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1E'; }), now, since);
+    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) },
+      { id: 'L1E', info: KAL_STRATEGY_INFO.L1E, sum: l1e, status: on ? 'Running' : 'Stopped', ageText: age(l1e) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
       rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
