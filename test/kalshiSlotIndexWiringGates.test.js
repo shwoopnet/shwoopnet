@@ -20,11 +20,26 @@ const indexPath = path.join(root, 'functions', 'index.js');
 const gates = {};
 const { NOW, T } = harness;
 
+// The shipped constants are ADMITTED (SLOT_ENABLED true, SLOT_EVER_USED true, one strategy OICORE). The gates that prove what the deployed code does while the slot is OFF (or on with an empty registry)
+// keep proving it by forcing the switch in memory, on the module object, for the duration of the gate only, and ALWAYS restore it. Nothing in a non-test file is touched.
+async function withSlot(forced, fn) {
+  const keys = ['slotWatch', 'slotActive', 'activeSlotStrategies', 'SLOT_STRATEGIES'];
+  const real = {}; for (const k of keys) real[k] = slotLib[k];
+  const watch = forced.watch === true, reg = forced.registry || [];
+  slotLib.slotWatch = () => watch;
+  slotLib.slotActive = () => false;
+  slotLib.activeSlotStrategies = () => reg.slice();
+  slotLib.SLOT_STRATEGIES = reg;
+  try { return await fn(); } finally { for (const k of keys) slotLib[k] = real[k]; }
+}
+const forcedOff = (fn) => withSlot({ watch: false }, fn);
+
 // ---------------------------------------------------------------- A. OFF-EQUIVALENCE of the deployed functions ----------------------------------------------------------------
 gates['SI0 with the slot off, kalshiLiveArmed, kalshiLiveExit and kalshiFlattenAll make the same database operations, requests and console lines as before the wiring'] = async () => {
-  assert.strictEqual(slotLib.slotActive(), false, 'the shipped constants are off');
+  // The shipped constants are admitted now, so the OFF behaviour is proved with the switch forced off in memory before index.js is loaded (it reads the gate once at load); restored in finally.
   const golden = JSON.parse(read('test', 'fixtures', 'offEquivalenceIndex.json'));
-  const now = await harness.run(indexPath);
+  const now = await forcedOff(async () => { assert.strictEqual(slotLib.slotWatch(), false); assert.strictEqual(slotLib.slotActive(), false); return harness.run(indexPath); });
+  assert.strictEqual(slotLib.slotWatch(), true, 'the forced switch was restored to the shipped, admitted constants');
   assert.strictEqual(now.length, golden.length);
   for (let i = 0; i < golden.length; i++) assert.deepStrictEqual(now[i], golden[i], 'off-equivalence broken in "' + golden[i].name + '": the deployed function now does something different while the slot is off. Fix the code, not the fixture.');
   const touched = JSON.stringify(now).match(/kalshiSlot|kalshiLiveDirection/g);
@@ -74,11 +89,10 @@ gates['SI1 index.js: SLOT_ON comes only from the slot library, every slot call s
 
 gates['SI2 with the gate forced on in memory (no strategy registered) the deployed functions run end to end, read the slot collection, write nothing slot-related and send exactly the orders they sent before'] = async () => {
   const golden = JSON.parse(read('test', 'fixtures', 'offEquivalenceIndex.json'));
-  const real = slotLib.slotWatch;
-  slotLib.slotWatch = () => true;     // test-only: the shipped constants stay off; this flips the gate for this process only
-  let on;
-  try { on = await harness.run(indexPath); } finally { slotLib.slotWatch = real; }
-  assert.strictEqual(slotLib.slotWatch(), false);
+  // Test-only: the watch gate is on, as shipped, but the registry is forced EMPTY for this process only (the shipped registry holds OICORE); everything is restored in finally.
+  const on = await withSlot({ watch: true, registry: [] }, () => harness.run(indexPath));
+  assert.strictEqual(slotLib.slotWatch(), true);
+  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 1, 'the shipped registry was restored');
   const sends = (log) => log.filter((x) => x[0] === 'fetch' && x[1] === 'POST');
   let slotReads = 0;
   for (let i = 0; i < golden.length; i++) {
@@ -218,7 +232,8 @@ gates['SI9 Flatten bookkeeping closes only the slot orders on markets the accoun
   const prev = slotLib.activeSlotStrategies;
   // No strategy is registered in this phase: the latch step then has nothing to write, and the closing step is what is under test here.
   const hooks = storeLib.slotHooks(d);
-  await hooks.afterFlatten({ results: [{ ticker: A, status: 'sold' }, { ticker: B, status: 'skipped', detail: 'already closed' }, { ticker: C, status: 'partly sold' }, { ticker: D, status: 'sold' }], now: NOW });
+  // The closing step is under test here with an empty registry forced (the latch step then has nothing to write); the admitted registry is checked below.
+  await withSlot({ watch: true, registry: [] }, () => hooks.afterFlatten({ results: [{ ticker: A, status: 'sold' }, { ticker: B, status: 'skipped', detail: 'already closed' }, { ticker: C, status: 'partly sold' }, { ticker: D, status: 'sold' }], now: NOW }));
   const rows = await d.rows('kalshiSlotOrders');
   assert.strictEqual(rows['S-' + A].settled, true); assert.strictEqual(rows['S-' + A].result, 'hand'); assert.strictEqual(rows['S-' + A].flattened, true);
   assert.strictEqual(rows['S-' + B].result, 'hand');
@@ -231,6 +246,10 @@ gates['SI9 Flatten bookkeeping closes only the slot orders on markets the accoun
   slotLib.activeSlotStrategies = () => [{ id: 'TESTA' }, { id: 'TESTB' }];
   try { await hooks.afterFlatten({ results: [], now: NOW }); } finally { slotLib.activeSlotStrategies = real; }
   assert.deepStrictEqual((await d.rows('kalshiSlotControl')).killed, { TESTA: { killedAt: NOW, reason: 'flattened by the owner' }, TESTB: { killedAt: NOW, reason: 'flattened by the owner' } });
+  // The admitted registry itself: Flatten latches the one shipped strategy off, and only it.
+  const d3 = db({});
+  await storeLib.slotHooks(d3).afterFlatten({ results: [], now: NOW });
+  assert.deepStrictEqual((await d3.rows('kalshiSlotControl')).killed, { OICORE: { killedAt: NOW, reason: 'flattened by the owner' } }, 'Flatten latches the admitted strategy off');
 };
 
 gates['SI10 the ignore set holds every slot entry and exit order id, so L1\'s sweep never reads a slot fill as a hand sale'] = async () => {
@@ -258,7 +277,7 @@ const sweepArgs = (w, extra) => Object.assign({ store: w.store, fetchFn: w.fetch
 gates['SI11 the slot settle sweep makes no call at all while the slot is off'] = async () => {
   let calls = 0;
   const trap = new Proxy({}, { get: () => { calls += 1; throw new Error('touched'); } });
-  const out = await runLib.runSlotSettle({ store: trap, fetchFn: async () => { calls += 1; throw new Error('touched'); }, keyId: 'k', pem: 'p', now: NOW });
+  const out = await forcedOff(() => runLib.runSlotSettle({ store: trap, fetchFn: async () => { calls += 1; throw new Error('touched'); }, keyId: 'k', pem: 'p', now: NOW }));
   assert.ok(out.skipped && calls === 0);
 };
 
@@ -342,12 +361,38 @@ gates['SI14 the Bot page and the alerts do not read the slot collections, so slo
 };
 
 gates['SI14b the watch constant can never be false while entries are allowed: admitting a strategy forces SLOT_EVER_USED, and nothing turns it back off'] = () => {
-  assert.strictEqual(slotLib.SLOT_EVER_USED, false, 'ships false: nothing has ever been admitted');
+  assert.strictEqual(slotLib.SLOT_EVER_USED, true, 'a strategy has been admitted, so the watch is permanent');
+  assert.strictEqual(slotLib.slotWatch(), true);
   const src = read('functions', 'kalshiSlotLib.js').replace(/\/\/.*$/gm, '');
   assert.strictEqual((src.match(/SLOT_EVER_USED\s*=(?!=)/g) || []).length, 1, 'one definition, a constant');
-  assert.ok(/const SLOT_EVER_USED = (false|true);/.test(src));
-  if (slotLib.slotActive()) assert.strictEqual(slotLib.SLOT_EVER_USED, true, 'a strategy is admitted, so the watch must be permanent');
+  assert.ok(/const SLOT_EVER_USED = true;/.test(src), 'a literal constant, true, never set back');
+  assert.strictEqual(slotLib.slotActive(), true);
+  assert.strictEqual(slotLib.SLOT_EVER_USED, true, 'entries are allowed, so the watch must be permanent');
   assert.ok(/const slotWatch = \(\) => slotActive\(\) \|\| SLOT_EVER_USED === true;/.test(src));
+};
+
+gates['SI14c the admitted state: exactly one strategy OICORE, valid, bounded by the library caps, and nothing stored or requested can enable or enlarge it'] = () => {
+  assert.strictEqual(slotLib.SLOT_ENABLED, true);
+  assert.strictEqual(slotLib.slotActive(), true);
+  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 1);
+  const s = slotLib.SLOT_STRATEGIES[0];
+  assert.strictEqual(s.id, 'OICORE');
+  assert.strictEqual(slotLib.validateSlotStrategy(s).ok, true, JSON.stringify(slotLib.validateSlotStrategy(s)));
+  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE']);
+  assert.strictEqual(s.contractsPerOrder, 5);
+  assert.ok(s.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
+  assert.strictEqual(s.exit.holdToSettle, true);
+  assert.ok(slotLib.SLOT_HOLD_ALLOWED.includes(s.id), 'holding to settlement is allowed for this id');
+  assert.strictEqual(s.scaleIn.maxSteps, 1);
+  assert.ok(s.scaleIn.maxSteps * s.contractsPerOrder <= slotLib.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET);
+  assert.ok(s.reviewedAt <= slotLib.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the library\'s last review date');
+  assert.strictEqual(s.reviewedAt, '2026-10-30');
+  assert.deepStrictEqual(s.series, ['KXBTC15M']);
+  assert.ok(s.killRules.maxConsecutiveLosses <= 20);
+  // No way to add or enlarge it from outside: index.js passes no registry or switch, and the store/run libraries read the library constants only.
+  const idx = code(read('functions', 'index.js'));
+  assert.ok(!/registry\s*:|SLOT_STRATEGIES|SLOT_ENABLED|flags\s*:/.test(idx), 'index.js feeds the slot no registry or switch');
+  assert.ok(!/SLOT_STRATEGIES\s*=|SLOT_ENABLED\s*=/.test(code(read('functions', 'kalshiSlotStoreLib.js') + read('functions', 'kalshiSlotRunLib.js'))), 'no other module assigns the constants');
 };
 
 gates['SI15 the store library imports no firebase package, reads no environment and has no clock or randomness'] = () => {

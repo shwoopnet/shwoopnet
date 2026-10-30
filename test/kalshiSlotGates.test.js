@@ -40,26 +40,58 @@ function walk(dir) {
   return out;
 }
 
-gates['the module is inert: empty registry, switch off, no order is ever allowed, and nothing imports it'] = () => {
-  assert.strictEqual(slot.SLOT_ENABLED, false);
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES, []);
+gates['the module is admitted with exactly one strategy, OICORE, fixed in code, and nothing stored can add or enlarge it; nothing else imports it'] = () => {
+  assert.strictEqual(slot.SLOT_ENABLED, true);
+  assert.strictEqual(slot.SLOT_EVER_USED, true, 'once admitted, watching is never set back');
+  assert.strictEqual(slot.slotActive(), true);
+  assert.strictEqual(slot.slotWatch(), true);
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-10-30');
   assert.ok(Object.isFrozen(slot.SLOT_STRATEGIES));
-  assert.strictEqual(slot.slotOrderCheck(input()).allowed, false);
-  assert.deepStrictEqual(slot.activeSlotStrategies(), []);
+  assert.strictEqual(slot.SLOT_STRATEGIES.length, 1, 'exactly one strategy is admitted');
+  const o = slot.SLOT_STRATEGIES[0];
+  assert.ok(Object.isFrozen(o) && Object.isFrozen(o.entry) && Object.isFrozen(o.exit) && Object.isFrozen(o.killRules) && Object.isFrozen(o.killRules.minNet) && Object.isFrozen(o.scaleIn) && Object.isFrozen(o.series), 'every level is frozen');
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(o)), {
+    id: 'OICORE', readme: 'kalshi-scalper/README.md#SLOT-OICORE', series: ['KXBTC15M'],
+    entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 },
+    exit: { holdToSettle: true }, contractsPerOrder: 5,
+    scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
+    killRules: { maxConsecutiveLosses: 18, minNet: { afterFills: 40, net: -6 } },
+    forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
+  });
+  const v = slot.validateSlotStrategy(o);
+  assert.ok(v.ok, 'the admitted strategy is valid: ' + (v.errors || []).join('; '));
+  assert.strictEqual(o.contractsPerOrder, 5);
+  assert.ok(o.contractsPerOrder <= slot.SLOT_MAX_CONTRACTS_PER_ORDER, 'never above the per-order ceiling');
+  assert.strictEqual(o.exit.holdToSettle, true);
+  assert.ok(slot.SLOT_HOLD_ALLOWED.includes(o.id), 'holding to settlement is only for reviewed ids');
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE']);
+  assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slot.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, 'all steps together fit the open contracts ceiling');
+  assert.ok(o.reviewedAt <= slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the last reviewed date');
+  assert.ok(o.series.every((x) => slot.SLOT_SERIES_ALLOWED.includes(x)));
+  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE'], 'the production lookup returns exactly the registry entry');
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
-  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$/.test(x))) {
+  // A hand-built or unregistered strategy still cannot enter, whatever it claims.
+  assert.strictEqual(slot.slotOrderCheck(input()).allowed, false, 'TESTA is not in the registry');
+  for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html|md)$/.test(x) && !/[\\/]test[\\/]|[\\/]docs[\\/]|CLAUDE\.md$|kalshiSlotLib\.js$|kalshiSlotRunLib\.js$|kalshiSlotStoreLib\.js$|kalshiLiveLib\.js$|functions[\\/]index\.js$|kalshi-scalper[\\/]README\.md$/.test(x))) {
     const txt = fs.readFileSync(f, 'utf8');
     // The Bot page may READ the slot's orders (the strategy switch, Oct 29, 2026) and nothing else of the slot: no library, no run or store code, no control latch, no direction lock.
     if (/index\.html$/.test(f)) { assert.ok(!/kalshiSlot(Lib|Run|Store|Control)|kalshiLiveDirection/.test(txt) && !/(setDoc|addDoc|updateDoc|deleteDoc|runTransaction)\([^)]*kalshiSlot/.test(txt), 'the page only reads kalshiSlotOrders'); continue; }
     assert.ok(!/kalshiSlot/.test(txt), path.relative(root, f) + ' must not mention the slot library (phase B3: only the slot libraries, functions/kalshiLiveLib.js behind slotOn and functions/index.js behind SLOT_ON may; checked recursively, including functions/, scripts/, workflows and package files)');
   }
+  // The one prose exemption: the pre-registration file the strategy's own `readme` field points to. It is Markdown, so it cannot run anything, and it must carry the admitted id.
+  const prereg = fs.readFileSync(path.join(root, 'kalshi-scalper', 'README.md'), 'utf8');
+  assert.ok(prereg.includes('SLOT-OICORE') && /SLOT_STRATEGIES/.test(prereg), 'the registered readme anchor exists in the pre-registration file');
   const c = code(libSrc);
   assert.ok(!/fetch|firebase|getFirestore|liveRequest|\.collection\(|crypto|Date\.now|new Date\(|process\.env|Math\.random|performance|setTimeout|setInterval|import\(|globalThis|\beval\b|https?:|child_process|\bfs\b/.test(c), 'the library must have no network, store, clock, environment, randomness, timer or signing code');
   assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"']);
 };
 gates['a switch on alone does nothing: the switch needs a valid registered strategy, and a stored value cannot add one'] = () => {
-  assert.deepStrictEqual(AS({ enabled: true }), []);
+  // Admitted state: the production switch is on, so the "switch alone" property is proved through the injected-flags path, which is how the gate always proved it.
+  assert.deepStrictEqual(AS({ enabled: true }).map((x) => x.id), ['OICORE'], 'with no registry given the only strategies are the shipped ones');
+  assert.deepStrictEqual(AS({ enabled: true, registry: [] }), []);
+  assert.deepStrictEqual(AS({ enabled: false, registry: [GOOD()] }), [], 'a registry with the switch off is nothing');
+  assert.deepStrictEqual(AS({ enabled: true, registry: slot.SLOT_STRATEGIES }).map((x) => x.id), ['OICORE'], 'the shipped registry passes the same validation');
   assert.strictEqual(W({ enabled: true }, input()).allowed, false);
   assert.strictEqual(W({ enabled: false, registry: [GOOD()] }, input()).allowed, false);
   assert.ok(!/data\(\)|\.get\(|localStorage|request\.data/.test(code(libSrc)));
@@ -78,7 +110,7 @@ gates['validation rejects anything out of bounds'] = () => {
     (s) => { s.entry.priceMax = 0.99; }, (s) => { s.entry.priceMin = 0.01; }, (s) => { s.entry.leftMaxSec = 899; }, (s) => { s.entry.leftMinSec = 60; },
     (s) => { s.exit.mustExitLeftSec = 10; }, (s) => { s.exit.mustExitLeftSec = 400; }, (s) => { s.exit.stopBid = 0.7; }, (s) => { s.exit.targetBid = 0.8; },
     (s) => { s.scaleIn.maxSteps = 4; }, (s) => { s.scaleIn.sameSideOnly = false; }, (s) => { s.scaleIn.minGapSec = 5; }, (s) => { s.scaleIn.maxSteps = 3; s.contractsPerOrder = 5; },
-    (s) => { s.killRules.maxConsecutiveLosses = 6; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -61; }, (s) => { delete s.killRules; },
+    (s) => { s.killRules.maxConsecutiveLosses = 21; }, (s) => { s.killRules.maxConsecutiveLosses = 0; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -61; }, (s) => { delete s.killRules; },
     (s) => { s.id = 'bad-id'; }, (s) => { s.readme = 'notes.txt'; }, (s) => { s.forwardReadDate = 'soon'; }, (s) => { s.extra = 1; }, (s) => { delete s.reviewedAt; },
   ];
   rejects.forEach((f, i) => assert.strictEqual(mut(f).ok, false, 'mutation ' + i + ' should be rejected'));
