@@ -698,7 +698,8 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'GOLD FIRST, then Bitcoin, Ethereum, XRP and Dogecoin, then the three probe markets LAST (the later ones yield when a window is full); Solana is not on it');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'GOLD FIRST, then XRP, Bitcoin, Dogecoin and Ethereum (the later ones yield when a window is full); Solana is not on it; the three probe markets left the list on Oct 30, 2026');
+  assert.ok(live.PROBE_SERIES.every((x) => !live.L1_SERIES.includes(x) && live.PAUSED_SERIES.includes(x)), 'the probe markets are not on the tick and are still paused, so putting one back in the list is not enough to trade it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
 };
@@ -710,19 +711,16 @@ gates.PR1 = async () => {
   await tick(w, { quotes: [gq(), quote({}, 'KXAUDUSD15M', AUD)], sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const gold = w.posts.find((p) => p.ticker === GT), aud = w.posts.find((p) => p.ticker === AUD);
   assert.ok(gold && Number(gold.count) > 1, 'gold is sized by the ladder: ' + (gold && gold.count));
-  assert.ok(aud, 'the probe market trades');
-  assert.strictEqual(Number(aud.count), 1, 'but a probe market is always ONE contract, however high the ladder and the reinvested profit are: ' + aud.count);
-  const rec = w.docs.get('L1-' + AUD);
-  assert.ok(rec.strategy === 'L1' && rec.series === 'KXAUDUSD15M' && !rec.addon && !rec.addonCost, 'it is an ordinary L1 order with no profit money in it, so the loss stop, pool and exit read it like any other');
+  assert.ok(!aud, 'a probe market no longer trades: it left L1_SERIES on Oct 30, 2026 (the owner), even when its quotes are handed to the tick and nothing is paused');
 };
 gates.PR2 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES.slice(0, 5), ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold, then the four capped markets, come first');
-  assert.deepStrictEqual(live.L1_SERIES.slice(5), live.PROBE_SERIES, 'the probe markets come last, so they only take what a window has left');
-  // a window already at its combined limit takes no probe order
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold, then the four capped markets; no probe markets');
+  assert.deepStrictEqual(live.PROBE_SERIES, ['KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the probe list is kept (the drop rule and the alerts name them), but it is not on the tick');
+  // a window already at its combined limit still takes no new order (the probe market used to be the one that showed it; Bitcoin stands in)
   const w = world({ session: wsess({}), balance: rich });
   w.docs.set('L1-earlier', { strategy: 'L1', ticker: BTCW.replace(/-00$/, '-99'), status: 'filled', maxCost: live.L1_WINDOW_CAP_FRACTION * 1000, addonCost: 0, ts: NOW - 60000 });
   await tick(w, { quotes: [quote({}, 'KXAUDUSD15M', AUD.replace(/-00$/, '-98'))], sizingState: wstate, setSizingState: async () => {} });
-  assert.strictEqual(w.posts.length, 0, 'a full window takes no probe order (the first order in a window is the only one never cut to nothing)');
+  assert.strictEqual(w.posts.length, 0, 'a full window takes no order');
 };
 gates.PR3 = () => {
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
@@ -766,10 +764,10 @@ gates.DP2 = async () => {
   await tick(w, { quotes: [quote(), quote({}, 'KXAUDUSD15M', AUD)], updateProbeRecord: rec.update });
   assert.ok(w.posts.some((p) => p.ticker === T), 'Bitcoin still trades');
   assert.ok(!w.posts.some((p) => p.ticker === AUD), 'the dropped probe takes no order');
-  // the same market with no drop does trade (so the test above is about the rule and nothing else)
+  // and the same market with no drop takes none either (it left the tick)
   const w2 = world({ session: { active: true, ordersSent: 0, startCash: 100 } });
   await tick(w2, { quotes: [quote({}, 'KXAUDUSD15M', AUD)], updateProbeRecord: memoryRecord().update });
-  assert.ok(w2.posts.some((p) => p.ticker === AUD), 'an undropped probe trades');
+  assert.ok(!w2.posts.some((p) => p.ticker === AUD), 'an undropped probe does not trade either: it is not on the tick any more (Oct 30, 2026), so the drop record can no longer matter to an order');
 };
 gates.DP3 = async () => {
   // The tick builds the record from the orders it already read, drops the probe in the same minute, and says so once in the log.
@@ -906,7 +904,7 @@ gates.EP3 = async () => {
   assert.ok(!live.EXIT_BUY_MINUTES.includes(1) && !live.EXIT_BUY_MINUTES.includes(13), 'but a quiet minute with nothing open is still idle');
   // and nothing else about the entry changed: no other series gained an early window, the band and the sizing are the same.
   assert.deepStrictEqual(live.L1_WINDOW_MS, [330000, 400000]);
-  assert.ok(live.EARLY_PROBE_SERIES.every((x) => live.L1_SERIES.includes(x)) && live.EARLY_PROBE_SERIES.every((x) => live.CAPPED_SERIES.includes(x) || live.PROBE_SERIES.includes(x)), 'both are already one-contract series, so an early entry can never be larger than a normal one');
+  assert.ok(live.EARLY_PROBE_SERIES.every((x) => live.L1_SERIES.includes(x) || live.PAUSED_SERIES.includes(x)) && live.EARLY_PROBE_SERIES.every((x) => live.CAPPED_SERIES.includes(x) || live.PROBE_SERIES.includes(x)), 'both are already one-contract series, so an early entry can never be larger than a normal one');
 };
 // RL1 and RL2: the 3 minute rise is LOGGED on every new order (the research session's JUMP1 lead, Oct 22, 2026). Logging only: after the order, public candles, never able to change a trade.
 const candle = (endSec, bid, ask) => ({ end_period_ts: endSec, yes_bid: { close_dollars: String(bid) }, yes_ask: { close_dollars: String(ask) } });
@@ -1352,14 +1350,14 @@ gates.FS1 = async () => {
   const xrp = await one('KXXRP15M', XRP10, NOW + 600000);
   assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 1, 'XRP takes 1 contract (back from 3 on Oct 25, 2026)');
   const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
-  assert.strictEqual(gas.posts.length === 1 && Number(gas.posts[0].count), 2, 'natural gas takes 2 contracts');
+  assert.strictEqual(gas.posts.length, 0, 'natural gas (2 contracts) no longer trades: it left the tick on Oct 30, 2026; its size stays in the list so a reviewed re-add needs no second edit');
   const btc = await one('KXBTC15M', 'KXBTC15M-26OCT071415-06', NOW + 360000);
   assert.strictEqual(btc.posts.length === 1 && Number(btc.posts[0].count), 1, 'Bitcoin stays at 1 contract');
   const eth = await one('KXETH15M', 'KXETH15M-26OCT071415-06', NOW + 360000);
   assert.strictEqual(eth.posts.length === 1 && Number(eth.posts[0].count), 1, 'Ethereum stays at 1 contract');
   const aud = await one('KXAUDUSD15M', 'KXAUDUSD15M-26OCT071415-06', NOW + 360000);
-  assert.strictEqual(aud.posts.length === 1 && Number(aud.posts[0].count), 1, 'the other probes stay at 1 contract');
-  for (const w of [doge, xrp, gas]) { const rec = w.docs.get('L1-' + w.posts[0].ticker); assert.ok(!rec.addon && !rec.addonCost, 'no reinvested profit goes into a fixed size, however full the pool is'); }
+  assert.strictEqual(aud.posts.length, 0, 'the other probes no longer trade');
+  for (const w of [doge, xrp]) { const rec = w.docs.get('L1-' + w.posts[0].ticker); assert.ok(!rec.addon && !rec.addonCost, 'no reinvested profit goes into a fixed size, however full the pool is'); }
 };
 gates.FS2 = async () => {
   // The window limit still holds: with a base too small to afford 3 Dogecoin contracts in one window the order is cut, and it is never cut below the first contract.
@@ -1381,7 +1379,7 @@ gates.FS3 = () => {
 
 // OS1: series order (Oct 23, 2026, the owner's reorder after the research session's question). Consequence: when two capped crypto markets qualify in the same tick, the 3 contract market (XRP over Bitcoin, Dogecoin over Ethereum) gets the one crypto order of the window, and nothing else about the order changes.
 gates.OS1 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum, probes last');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum; no probes');
   assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is the same four markets');
   assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXDOGE15M: 5, KXNATGAS15M: 2 }, 'sizes unchanged');
   const run = async (list, lead) => {
@@ -1403,7 +1401,7 @@ gates.OS1 = async () => {
   const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-06']], '6m');
   assert.ok(btc.posts.length === 1 && btc.posts[0].ticker.includes('KXBTC') && Number(btc.posts[0].count) === 1, 'Bitcoin alone still trades, at one contract');
   const src = fnSrcLib();
-  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", \.\.\.PROBE_SERIES\];/.test(src), 'the order is a hard list in code');
+  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M"\];/.test(src), 'the order is a hard list in code');
 };
 
 

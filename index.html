@@ -1540,6 +1540,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot: AUD/USD, USD/CAD and natural gas are off the bot's list for good (paused since Oct 28, no orders since), which also cuts three market reads from every minute; they stay paused in code and any order for them is refused outright</li>
                   <li>Bot page: a lost connection no longer leaves "Loading..." on screen for good (it says what failed and tries again after 15 seconds); coming back to the page redraws it and reads the account at once, and a page left open offers a reload when the site was updated; switching ranges no longer repeats the same read; tablets get the 40 pixel touch sizes</li>
                   <li>Bot page: one Overall page. The strategy switch and the OICORE panel are gone; a Strategies module lists L1 and OICORE (status, today, result, settled, win rate, open, last order) and a small chip on every open position and trade says which strategy it came from</li>
                   <li>Account result: the older trades are read in pages of 5,000 (one big read was refused), so the 1M, 3M, YTD and All totals include every order; the OICORE panel says "No order yet" plainly</li>
