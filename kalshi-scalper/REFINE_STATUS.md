@@ -4,6 +4,8 @@ Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). Ne
 
 ## Entries
 
+**2026-10-30 2:05 PM CT, Brief 3 CLOSED as already live; Brief 1 on hold.** Main session answer from code and README: L1 buys whichever side's fresh price is 88c to 97c inclusive, so either side already qualifies and there is nothing to add. 0 tries spent. Brief 1's count-only step waits for the owner. OICORE: an export (Copy all orders) from the owner is the way to watch it until a reviewed report extension exists.
+
 **2026-10-30 2:00 PM CT, four band and frequency briefs for the owner to approve (owner request via the main session). Nothing has been run on any data.**
 
 Baseline I am measuring against (live, Oct 16 to Oct 30, two weeks, from the nightly report): gold 122 fills, about 61 a week (35% of attempts got no fill); Dogecoin 143 fills, about 71 a week (28% no fill). So L1 today is about 130 fills a week on the two markets, 6 minute entry only. Net per contract live: gold +2.34c, Dogecoin +2.09c (30 days).
