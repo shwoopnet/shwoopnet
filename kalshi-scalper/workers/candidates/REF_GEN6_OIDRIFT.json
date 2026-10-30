@@ -1,0 +1,11 @@
+{
+ "id": "REF_GEN6_OIDRIFT",
+ "market": "KXBTC15M",
+ "stage": "reference",
+ "freeze_utc": "2026-10-30T01:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.oidrift:forward_eval",
+ "params": {"series": "KXBTC15M"},
+ "generator": "OIDRIFT (FALS4 check 5 definition of GEN6's open interest core)",
+ "description": "Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest over the 3 minutes before rose above the 90th percentile of that change over the 30 UTC days before (earlier days only, 20+ days needed), fill at the next candle's ask, held. History validation n 67, PF 2.65 (FALS4 check 5, reproduced). Not independent of REF_GEN6_OICORE. 1 try; workers/OIDRIFT_REGISTRATION.md."
+}

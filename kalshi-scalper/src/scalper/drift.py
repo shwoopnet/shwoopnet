@@ -268,6 +268,11 @@ def run_all():
         goldslip()
     except Exception as ex:
         print(f"goldslip failed: {type(ex).__name__}: {str(ex)[:160]}")
+    try:   # visible size behind the Bitcoin open interest signals, from recorder R6 (OIFILL, 2026-10-30)
+        from .oifill import run as oifill
+        oifill()
+    except Exception as ex:
+        print(f"oifill failed: {type(ex).__name__}: {str(ex)[:160]}")
     return flags
 
 
