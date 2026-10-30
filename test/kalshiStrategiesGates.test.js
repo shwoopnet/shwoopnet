@@ -73,6 +73,19 @@ gates.ST8 = () => {
   assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\)/.test(html), 'and so does every second-strategy row');
   assert.ok(/var botOrders = kalshiResolveOrders\(kalshiAllOrders\(\), a\.results, a\.fills && a\.fills\.ok \? kalshiGroupFills\(a\.fills\.fills\) : \[\]\);/.test(html), 'the Account card counts L1 and the second strategy, with the same fills');
 };
+gates.ST9 = () => {
+  // The owner (Oct 30, 2026): "mobile ui isnt great". On a phone each strategy is a card with every figure visible, not a nine column table behind a sideways scroll.
+  const h = f.kalshiStrategiesTableHtml([{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: f.kalshiOrdersSummary([], 5), status: 'Running', ageText: 'No order yet' }], esc, money);
+  for (const label of ['Strategy', 'Markets', 'Status', 'Today', 'Result', 'Settled', 'Win rate', 'Open', 'Last order']) assert.ok(h.includes('data-label="' + label + '"'), label + ' has its label for the phone card');
+  const css = html.slice(html.indexOf('.kal-strat-tbl, .kal-strat-tbl tbody'), html.indexOf('.kal-strat-tbl, .kal-strat-tbl tbody') + 1400);
+  assert.ok(/display:none/.test(css) && /attr\(data-label\)/.test(css) && /grid-template-columns:repeat\(2/.test(css), 'the phone layout hides the header row and shows label over value in two columns');
+  assert.ok(/@media screen and \(max-width:900px\)\{\n    \.kal-strat-tbl, /.test(html), 'on phones and tablets (a nine column table is cramped at 768 too)');
+};
+gates.ST10 = () => {
+  const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r);
+  assert.ok(!/kalshiAgeText\([^;]*\) \+ ' ago'/.test(r[0]), 'the age text already ends in "ago": it must not be added twice ("2 hours ago ago" showed on the owner\'s phone render, Oct 30, 2026)');
+  assert.ok(/td:nth-child\(3\)\{ grid-column:1 \/ -1; \}/.test(html) && /\.kal-strat-tbl td \.kal-pill\{ white-space:nowrap/.test(html), 'the status pill gets a whole row on a phone and never wraps');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
 process.exit(failed ? 1 : 0);
