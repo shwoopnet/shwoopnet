@@ -12,12 +12,14 @@ EXITS = [("HOLD", None, None, False), ("X60", None, None, True),
          ("TP5/SL4", 0.05, 0.04, True)]
 
 
-def entries(win, fill_mode):
-    """(window, side, raw fill, entry candle offset) for the pure core."""
+def entries(win, fill_mode, thresh=None, cond=True):
+    """(window, side, raw fill, entry candle offset) for the pure core.
+    cond=False drops the OI condition (side choice and fill only)."""
+    thresh = F.THRESH if thresh is None else thresh
     out = []
     for t, w in win.items():
         sg = F.signal(w)
-        if sg is None or not sg["doi"] > F.THRESH:
+        if sg is None or (cond and not sg["doi"] > thresh):
             continue
         side = F.cheap_side(sg["row"])
         if side is None:
@@ -136,6 +138,79 @@ def by_size():
                 print(f"| {fm} | {ex[0]} | {bn} | {ns[0]}/{ns[1]} | " + " | ".join(parts) + " |")
 
 
+def load_series(series):
+    old = F.SERIES
+    F.SERIES = series
+    try:
+        return F.load()
+    finally:
+        F.SERIES = old
+
+
+EXITS2 = [EXITS[0], EXITS[1]]
+
+
+def eth():
+    """SLOTEX-ETH (workers/SLOTEX_ETH_REGISTRATION.md)."""
+    btc, eth_ = load_series("KXBTC15M"), load_series("KXETH15M")
+    dv = sorted(sg["doi"] for w in eth_.values() if F.stage(w["close"]) == "disc"
+                for sg in [F.signal(w)] if sg is not None)
+    p90 = dv[int(0.9 * (len(dv) - 1))]
+    print(f"ETH windows {len(eth_)}; discovery doi values {len(dv)}; ETH-P90 = {p90:.0f} contracts")
+    ths = [("ETH-P90", p90), ("ABS", F.THRESH)]
+    print()
+    print("| threshold | exit | cost | n disc/val | C=5 PF disc | C=5 PF val | C=10 PF disc | C=10 PF val | C=10 net $ disc/val | nonzero bid@60s disc/val |")
+    print("|---|---|---|---|---|---|---|---|---|---|")
+    for tn, th in ths:
+        es = entries(eth_, "N", th)
+        for ex in EXITS2:
+            for cn, add, mult in (("base", 0, 1), ("x1.2", 0, 1.2), ("+2c", 0.02, 1)):
+                c5, c10 = stage_cells(es, ex, add, mult, 5), stage_cells(es, ex, add, mult, 10)
+                nets = {st: sum(score(e, ex, add, mult, 10)[0] for e in es if F.stage(e[0]["close"]) == st) for st in ("disc", "val")}
+                nz = []
+                for st in ("disc", "val"):
+                    sub = [e for e in es if F.stage(e[0]["close"]) == st]
+                    ok = sum(1 for e in sub if e[0]["c"].get(-60) and (F.side_bid(e[0]["c"][-60], e[1]) or 0) > 0)
+                    nz.append(f"{ok / len(sub):.1%}" if sub else "-")
+                print(f"| {tn} | {ex[0]} | {cn} | {c5['disc'][0]}/{c5['val'][0]} | {c5['disc'][1]:.2f} | {c5['val'][1]:.2f} | "
+                      f"{c10['disc'][1]:.2f} | {c10['val'][1]:.2f} | {nets['disc']:.2f}/{nets['val']:.2f} | {nz[0]}/{nz[1]} |")
+    # co-loss
+    bes = {e[0]["close"]: e for e in entries(btc, "N")}
+    eall = {e[0]["close"]: e for e in entries(eth_, "N", cond=False)}
+    print()
+    print("Co-loss, C = 10 base. lost = net < 0. exp = n x pB x pE (rates within the same windows).")
+    print()
+    print("| pair | ETH threshold | exit | stage | n windows | BTC lost | ETH lost | both lost | exp both (indep.) | ratio | one lost | neither |")
+    print("|---|---|---|---|---|---|---|---|---|---|---|---|")
+    for tn, th in ths:
+        efire = {e[0]["close"]: e for e in entries(eth_, "N", th)}
+        for pair in ("both fired", "BTC only, ETH same side choice"):
+            for ex in EXITS2:
+                for st in ("disc", "val"):
+                    if pair == "both fired":
+                        ks = [k for k in bes if k in efire and F.stage(k) == st]
+                        src = efire
+                    else:
+                        ks = [k for k in bes if k not in efire and k in eall and F.stage(k) == st]
+                        src = eall
+                    lb = [score(bes[k], ex)[0] < 0 for k in ks]
+                    le = [score(src[k], ex)[0] < 0 for k in ks]
+                    n = len(ks)
+                    if not n:
+                        print(f"| {pair} | {tn} | {ex[0]} | {st} | 0 | | | | | | | |")
+                        continue
+                    both = sum(a and b for a, b in zip(lb, le))
+                    one = sum(a != b for a, b in zip(lb, le))
+                    exp = n * (sum(lb) / n) * (sum(le) / n)
+                    ratio = f"{both / exp:.2f}" if exp else "-"
+                    print(f"| {pair} | {tn} | {ex[0]} | {st} | {n} | {sum(lb)} | {sum(le)} | {both} | {exp:.1f} | {ratio} | {one} | {n - both - one} |")
+
+
 if __name__ == "__main__":
     import sys
-    by_size() if "--sizes" in sys.argv else main()
+    if "--eth" in sys.argv:
+        eth()
+    elif "--sizes" in sys.argv:
+        by_size()
+    else:
+        main()
