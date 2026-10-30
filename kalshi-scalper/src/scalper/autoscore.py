@@ -14,6 +14,8 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
              (the read date plus 2 hours for the recorder's last push) and at 300 signals, or from 2026-11-15 00:00 UTC whatever
              the count (the data can no longer grow; the run then reports NOT_ENOUGH_DATA), runs `scalper.gf12 run gf1` / `run gf2`
              (each refuses before 2026-11-14 00:00 UTC or a second time; writes data/gf1_result.txt / data/gf2_result.txt)
+  DEPTH1     readiness from R6 file names only (`scalper.depth1 readiness`); from 2026-11-14 02:00 UTC runs `scalper.depth1 read` once
+             (refuses before 00:00 UTC and a second time; below 300 windows per market writes NOT_ENOUGH_DATA; data/depth1_result.txt)
   STAB       once a week, on the first pass on or after Monday 01:00 US Central (week marked in data/stab_last_week by the run itself), runs
              `scalper.stab week` (a stability check of L1 as live trades it; writes workers/STABILITY.md; no read, no verdict)
   FWDLEDGER  every pass, runs `scalper.fwdledger run` (candidates in workers/candidates/*.json, writes workers/FORWARD_LEDGER.md);
@@ -297,6 +299,23 @@ def check() -> None:
                     log(rid, last_line(out.read_text(), "VERDICT"))
                 elif not s.get(f"{rid.lower()}_refused_logged"):
                     log(rid, f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s[f"{rid.lower()}_refused_logged"] = True
+    # DEPTH1 (order-book depth, recorder R6; workers/DEPTH1_REGISTRATION.md): readiness from file NAMES only every pass; `depth1 read` runs once,
+    # from 2026-11-14 02:00 UTC (the read refuses before 00:00 UTC by itself; two hours let the recorder's last job push) or 2026-11-15 whatever the count
+    d1_out = DATA_DIR / "depth1_result.txt"
+    try:
+        if d1_out.exists():
+            status.append("DEPTH1 done")
+        else:
+            rc, o = py("scalper.depth1", "readiness", timeout=300)
+            status.append((last_line(o, "DEPTH1 readiness") if rc == 0 else f"DEPTH1 readiness failed rc={rc}: {last_line(o)[:160]}")[:400])
+            if datetime.now(timezone.utc) >= datetime(2026, 11, 14, 2, tzinfo=timezone.utc):
+                rc, o = py("scalper.depth1", "read", timeout=3600)
+                if d1_out.exists():
+                    log("DEPTH1", last_line(d1_out.read_text(), "VERDICT"))
+                elif not s.get("depth1_refused_logged"):
+                    log("DEPTH1", f"run refused or failed rc={rc}: {last_line(o)[:200]}"); s["depth1_refused_logged"] = True
+    except Exception as ex:
+        status.append(f"DEPTH1 readiness error: {type(ex).__name__}: {str(ex)[:120]}")
     # CONF2 window C
     if RESULTS["CONF2C"].exists():
         status.append("CONF2 C done")
