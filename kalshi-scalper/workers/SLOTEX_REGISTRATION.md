@@ -32,3 +32,13 @@ Any slot-legal variant (2 to 7) with PF < 1.5 in either stage at the base cost, 
 (Of these, the (N) rows of TP5, TP8 and the three stops are identical to X60 by construction; they are counted anyway.)
 
 Code: `src/scalper/slotex.py`. Result: `workers/SLOTEX_RESULT.md`.
+
+## Amendment 1 (2026-10-30, lead's addendum; pushed before any of these cells is scored)
+
+The C = 10 table was already scored (commit eb64780). Added, not yet scored:
+
+- **Contract count:** every one of the 42 variants (7 exits x 2 fills x 3 costs) also at C = 1 and C = 5 (fees rounded up per order, so 1 contract pays at least 1c each way). 42 x 2 new sizes x 2 stages = **168 new cells**.
+- **Entry price buckets:** at base cost, for every exit x fill x C (7 x 2 x 3), entries split by the raw entry fill (under 10c, 10c to 20c, over 20c): n, PF, mean fee per contract (entry plus sell fees, divided by C). 42 x 3 buckets x 2 stages = **252 new cells**.
+- Same stages, same rules, same kill rule (applied to the C = 1 and 5 rows as to C = 10; buckets are descriptive only, no verdict per bucket).
+
+**N added for SLOTEX now = 84 + 168 + 252 = 504.**
