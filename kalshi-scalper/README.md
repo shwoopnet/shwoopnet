@@ -7989,3 +7989,12 @@ Registered 2026-10-30 (`workers/ETHFUNNEL_REGISTRATION.md`), before anything was
 ## Result: ETHFUNNEL (Ethereum smooth climb funnel, measurement, 0 tries), 2026-10-30
 
 Read by `src/scalper/ethfunnel.py run` on the 1 minute candles on file (`workers/ETHFUNNEL_RESULT.md`). Last 78 days: 7,400 windows, 2,273 with a side at 0.88 to 0.97 at the 6 minute look, 102 pass the live gate (1.38%, 1.31 a day), 50 after the one crypto order per window rule (0.68%). The worst one minute step does all the removing (4.5% of in-band windows pass it; the 4 candle rule and the 0.10 climb remove about nothing). Live days since 2026-10-23 1:30 PM CT: 647 windows, 151 in band, 4 pass the gate (0.59 a day), 3 after contention. Predictions: history share and the worst-minute-step stage held; at least 3 live windows held, but Dogecoin contention explaining most of the gap did not (it accounts for 1 of 4). Parity against the private order export (scratchpad `live_report.json`, ids and status only): the Ethereum and Bitcoin replicas disagree on 0.18% of windows each, the Dogecoin replica on 4.68%, over the 2% stop, so the contention counts are unverified against live and nothing was tuned. No outcomes were read. Live-day columns are re-read once on 2026-11-12 with FLIPS0-F. N unchanged, about 728,648.
+
+## Result: NEWH16 (documented short horizon binary market edges, held coin flip entries; run once 2026-10-30; research only)
+
+Registered first (`workers/NEWH16_REGISTRATION.md`, commit 8180dda; digest `workers/NEWH16_DIGEST.md` with the sources, none a tested edge at our cost).
+Eight tries, all held to settlement at 35c to 65c asks: T1 four hour strike trend followed and faded (Bitcoin, gold), T2 fade of an extreme (top 5
+percent) previous window (Bitcoin, gold), T3 Polymarket price 6c or more above Kalshi's ask (Bitcoin, Ethereum). Windows: discovery Aug 6 to Sep 21,
+validation to Oct 18, holdout Oct 18 on (never read, nothing passed). 7 FALSIFIED (discovery PF 0.71 to 1.14, best win rate 56.6 percent against
+a 53.5 percent break even), 1 NOT_ENOUGH_DATA (T2 gold, discovery n 94 of 100). Gold fade of the four hour trend kept its sign in both windows
+(PF 1.14 and 1.18, z about +1.1 each) and is not a lead. Looks 2. Running count about 728,658. Nothing to build; two data proposals in the result file.
