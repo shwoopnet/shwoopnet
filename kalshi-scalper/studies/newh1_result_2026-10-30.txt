@@ -1,0 +1,35 @@
+windows: BTC 7869 gold 5650; spot minutes 126720 perp minutes 126720
+spot range 2026-08-01 00:01:00+00:00 to 2026-10-28 00:00:00+00:00
+  BTC: discovery 4357 validation 3512
+  gold: discovery 3197 validation 2453
+BASIS_F                    DISC n  251 days  46 win 0.490 fill 0.510 PF10 0.84 PF1 0.82 PFx1.2 0.82 net10 $-87.88 netx $-94.67 z -1.19 | vol>0 n 251 PF10 0.84 | sigfill PF 0.80 | late n 251 PF 0.88
+                           VAL  n  201 days  37 win 0.597 fill 0.589 PF10 0.97 PF1 0.95 PFx1.2 0.96 net10 $-12.86 netx $-18.28 z -0.23 | vol>0 n 201 PF10 0.97 | sigfill PF 1.06 | late n 201 PF 0.94
+                           verdict FALSIFIED
+BASIS_R                    DISC n  250 days  46 win 0.508 fill 0.498 PF10 0.98 PF1 0.96 PFx1.2 0.96 net10 $-11.59 netx $-18.37 z -0.16 | vol>0 n 250 PF10 0.98 | sigfill PF 1.02 | late n 250 PF 0.93
+                           VAL  n  203 days  37 win 0.399 fill 0.418 PF10 0.85 PF1 0.83 PFx1.2 0.84 net10 $-67.23 netx $-72.69 z -1.23 | vol>0 n 203 PF10 0.85 | sigfill PF 0.77 | late n 203 PF 0.87
+                           verdict FALSIFIED
+ROUND500                   DISC n  434 days  45 win 0.781 fill 0.771 PF10 0.99 PF1 0.96 PFx1.2 0.97 net10 $-9.90 netx $-19.73 z -0.13 | vol>0 n 434 PF10 0.99 | sigfill PF 1.13 | late n 434 PF 1.02
+                           VAL  n  429 days  37 win 0.772 fill 0.764 PF10 0.97 PF1 0.95 PFx1.2 0.96 net10 $-21.63 netx $-31.55 z -0.30 | vol>0 n 429 PF10 0.97 | sigfill PF 1.11 | late n 429 PF 0.96
+                           verdict FALSIFIED
+ROUND1000                  DISC n  249 days  41 win 0.767 fill 0.766 PF10 0.93 PF1 0.91 PFx1.2 0.92 net10 $-28.03 netx $-33.76 z -0.49 | vol>0 n 249 PF10 0.93 | sigfill PF 1.09 | late n 249 PF 0.98
+                           VAL  n  189 days  36 win 0.720 fill 0.756 PF10 0.77 PF1 0.75 PFx1.2 0.75 net10 $-91.82 netx $-96.30 z -1.87 | vol>0 n 189 PF10 0.77 | sigfill PF 0.85 | late n 189 PF 0.80
+                           verdict FALSIFIED
+STALE0                     DISC n 0
+                           VAL  n 0
+                           verdict NOT_ENOUGH_DATA
+GTIE0                      DISC n    2 days   2 win 0.500 fill 0.510 PF10 0.88 PF1 0.87 PFx1.2 0.87 net10 $-0.56 netx $-0.62 z +nan | vol>0 n 2 PF10 0.88 | sigfill PF 1.12 | late n 2 PF 0.11 | settle=strike 0.000
+                           VAL  n    5 days   5 win 0.200 fill 0.450 PF10 0.31 PF1 0.31 PFx1.2 0.31 net10 $-13.36 netx $-13.52 z -1.18 | vol>0 n 5 PF10 0.31 | sigfill PF 0.30 | late n 5 PF 0.47 | settle=strike 0.000
+                           verdict NOT_ENOUGH_DATA
+GTIE5                      DISC n   36 days  22 win 0.472 fill 0.505 PF10 0.81 PF1 0.80 PFx1.2 0.80 net10 $-18.06 netx $-19.19 z -0.52 | vol>0 n 36 PF10 0.81 | sigfill PF 0.75 | late n 36 PF 0.74 | settle=strike 0.059
+                           VAL  n   20 days  14 win 0.450 fill 0.467 PF10 0.86 PF1 0.85 PFx1.2 0.85 net10 $-6.82 netx $-7.46 z -0.30 | vol>0 n 20 PF10 0.86 | sigfill PF 0.81 | late n 20 PF 1.05 | settle=strike 0.000
+                           verdict NOT_ENOUGH_DATA
+FLIPREV_GOLD               DISC n  143 days  38 win 0.441 fill 0.510 PF10 0.69 PF1 0.68 PFx1.2 0.68 net10 $-124.05 netx $-128.52 z -2.34 | vol>0 n 143 PF10 0.69 | sigfill PF 0.70 | late n 143 PF 0.74
+                           VAL  n  104 days  29 win 0.519 fill 0.522 PF10 0.92 PF1 0.91 PFx1.2 0.90 net10 $-21.32 netx $-24.54 z -0.47 | vol>0 n 104 PF10 0.92 | sigfill PF 0.96 | late n 104 PF 0.91
+                           verdict FALSIFIED
+FLIPREV_BTC                DISC n  148 days  42 win 0.480 fill 0.500 PF10 0.86 PF1 0.85 PFx1.2 0.85 net10 $-54.97 netx $-59.61 z -0.99 | vol>0 n 148 PF10 0.86 | sigfill PF 0.89 | late n 148 PF 0.87
+                           VAL  n   87 days  32 win 0.552 fill 0.501 PF10 1.16 PF1 1.15 PFx1.2 1.15 net10 $+29.46 netx $+26.66 z +0.64 | vol>0 n 87 PF10 1.16 | sigfill PF 1.17 | late n 87 PF 1.15
+                           verdict FALSIFIED
+ctrl ROUND500 (no level)   DISC n 2412 days  46 win 0.755 fill 0.738 PF10 1.02 PF1 1.00 PFx1.2 1.01 net10 $+96.17 netx $+35.57 z +0.39 | vol>0 n 2412 PF10 1.02 | sigfill PF 1.24 | late n 2412 PF 1.00
+                           VAL  n 1639 days  37 win 0.750 fill 0.741 PF10 0.98 PF1 0.96 PFx1.2 0.97 net10 $-57.01 netx $-97.76 z -0.31 | vol>0 n 1639 PF10 0.98 | sigfill PF 1.17 | late n 1639 PF 0.98
+ctrl ROUND1000 (no level)  DISC n 2597 days  46 win 0.758 fill 0.741 PF10 1.03 PF1 1.00 PFx1.2 1.01 net10 $+114.30 netx $+49.60 z +0.47 | vol>0 n 2597 PF10 1.03 | sigfill PF 1.24 | late n 2597 PF 1.00
+                           VAL  n 1879 days  37 win 0.758 fill 0.745 PF10 1.00 PF1 0.98 PFx1.2 0.99 net10 $+13.18 netx $-33.01 z +0.07 | vol>0 n 1879 PF10 1.00 | sigfill PF 1.20 | late n 1879 PF 1.00
