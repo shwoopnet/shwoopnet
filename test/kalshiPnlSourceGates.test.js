@@ -29,6 +29,14 @@ gates.PS1 = () => {
   assert.ok(/nowMs - hit\.at < \(hit\.failed \? 60000 : 21600000\)/.test(html) && !/nowMs - hit\.at < 600000/.test(html), 'the older part is kept for the page life and a failed read retries after a minute');
   assert.ok(/orders: \[\], failed: true/.test(html) && !/orders: loaded \}/.test(html), 'a failed read is no longer disguised as the recent orders');
 };
+gates.PS2 = () => {
+  // The older-orders read was refused (invalid-argument) with one 20,000 row page: it must read in pages of at most 5,000 and never ask for 20,000 at once.
+  const m = /kalshiOrdersSince: function\(sinceMs\)\{[\s\S]*?\n    \}\n  \}\);/.exec(html); assert.ok(m, 'the read is found');
+  assert.ok(/limit\(5000\)/.test(m[0]) && !/limit\(20000\)/.test(m[0]), 'pages of 5,000');
+  assert.ok(/pages >= 5/.test(m[0]) && /rows\.length < 5000/.test(m[0]), 'it stops at a short page or five pages');
+  assert.ok(/where\('ts', '>=', cursor\)/.test(m[0]), 'each page starts at the last time seen, without skipping orders that share it');
+  assert.ok(/seen\[k\]/.test(m[0]), 'repeats are dropped');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
