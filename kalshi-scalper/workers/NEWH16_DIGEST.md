@@ -45,7 +45,7 @@ Claimed size is the source's, not ours.
 
 ### Settlement source mechanics
 - Kalshi help, "Crypto markets" (https://help.kalshi.com/en/articles/13823838-crypto-markets): most crypto markets settle on a CF Benchmarks index; a 15 minute market compares the average of the minute before it closes with the average of the minute before it opened. Official. The page does not state the tie rule. Our own SETTLEMENT_MECHANICS and BTCAVG work uses the same fact.
-- Polymarket's matching windows ("btc-updown-15m-<start>", public gamma API, read 2026-10-30): resolves Up if a Chainlink BTC/USD time weighted average over the whole 15 minutes is at or above the price at the start; Kalshi uses two one minute averages of a different index. So the two venues can disagree on a close window. Evidence (the rule text), no study of the disagreement rate found.
+- Polymarket's matching windows ("btc-updown-15m-<start>", public gamma API, read 2026-10-30): resolves Up if the Chainlink end price is at or above the start price (a point comparison, NOT a time weighted average; corrected 2026-10-30 after XVENUE1 read the rule text); Kalshi uses two one minute averages of a different index. So the two venues can disagree on a close window. XVENUE1 measured the disagreement rate: 1.44% of 16,222 windows, 0.53% when both are priced 80c or higher.
 - Gold settles on a single print (our SETTLEMENT_MECHANICS page): second resolution is NOT_RUNNABLE without the print source.
 
 ### Cross venue differences, Kalshi against Polymarket
