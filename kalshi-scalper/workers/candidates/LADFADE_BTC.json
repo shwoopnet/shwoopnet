@@ -1,0 +1,11 @@
+{
+ "id": "LADFADE_BTC",
+ "market": "KXBTC15M",
+ "stage": "validation",
+ "freeze_utc": "2026-10-30T12:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.ladfade:forward_eval",
+ "params": {"series": "KXBTC15M"},
+ "generator": "LADFADE (post hoc from NEWH9 I1)",
+ "description": "Bitcoin 15 minute windows opening at :15 and :30: when the hourly KXBTCD ladder leans 5c+ from 50/50 at the first minute, buy the side the 15 minute book overshot AWAY from if its ask is 3c+ below the ladder's chance, at the next candle's ask (30c to 70c), held. Ladder from the book recorder. Discovery and validation spent (post hoc); holdout read once in workers/LADFADE_RESULT.md. 1 try; workers/LADFADE_REGISTRATION.md."
+}
