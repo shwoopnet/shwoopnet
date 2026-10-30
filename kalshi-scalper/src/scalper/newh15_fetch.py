@@ -46,11 +46,24 @@ def run(series: str):
     print(series, "markets", len(rows), "todo", len(todo), flush=True)
     i = 0
     while i < len(todo):
-        chunk = todo[i:i + 50]
-        lo = min(ts(m["open_time"]) for m in chunk)
-        hi = max(ts(m["close_time"]) for m in chunk)
-        d = _get("/markets/candlesticks", {"market_tickers": ",".join(m["ticker"] for m in chunk),
-                                           "start_ts": lo, "end_ts": hi + 60, "period_interval": 1})
+        # the endpoint refuses (400) a request whose tickers x minutes exceed its candle budget, so
+        # grow the chunk only while span_minutes x tickers stays under 7,000 (and at most 50 tickers)
+        chunk = [todo[i]]
+        lo, hi = ts(todo[i]["open_time"]), ts(todo[i]["close_time"])
+        while i + len(chunk) < len(todo) and len(chunk) < 50:
+            m = todo[i + len(chunk)]
+            nlo, nhi = min(lo, ts(m["open_time"])), max(hi, ts(m["close_time"]))
+            if ((nhi - nlo) / 60 + 2) * (len(chunk) + 1) > 7000:
+                break
+            chunk.append(m)
+            lo, hi = nlo, nhi
+        try:
+            d = _get("/markets/candlesticks", {"market_tickers": ",".join(m["ticker"] for m in chunk),
+                                               "start_ts": lo, "end_ts": hi + 60, "period_interval": 1})
+        except Exception as e:
+            print("chunk failed", chunk[0]["ticker"], str(e)[:80], flush=True)
+            i += len(chunk)
+            continue
         for mk in d.get("markets", []):
             tk = mk.get("market_ticker") or mk.get("ticker")
             for k in mk.get("candlesticks", []):
@@ -63,8 +76,8 @@ def run(series: str):
         for m in chunk:
             c.execute("INSERT OR REPLACE INTO done VALUES(?)", (m["ticker"],))
         c.commit()
-        i += 50
-        time.sleep(0.8)
+        i += len(chunk)
+        time.sleep(0.5)
         if (i // 50) % 20 == 0:
             print(series, i, "of", len(todo), flush=True)
 
