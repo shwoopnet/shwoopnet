@@ -8029,3 +8029,17 @@ above its normalised mid share, held): PF 0.77 discovery (n 1,662) and 0.775 val
 FALSIFIED. N about 728,666.
 
 Lead's notes: (1) NOT_YET_FALSIFIED for T1 is a registered-words artefact, not a lead: about 1 lock in 400 windows, under $1.50 in total over 10 weeks, no economic content. (2) The validation lock time cited as '10-15 05:15 CT region' is UTC. (3) Running N after FXUSD (+4) and RACELOCK (+4): about 728,670, z bar 5.27.
+
+
+## Result: NEWH17 (feasibility screen of untested 15 minute ideas; 0 tries; 2026-10-30)
+
+Twelve candidates on series the ledger had not covered (alt CF averages, Pyth commodities and FX, the Treasury yields, Brent, ties, the strike chain,
+contract rolls, cross-duration) were priced on the cost arithmetic before any outcome was read (`workers/NEWH17_SCREEN.md`). A coin flip taker entry
+on a 1c spread series breaks even at 52.3% and needs 62.2% for PF 1.5 (the brief's 58% is PF 1.27); effects in the literature are 1 to 3 points, the
+best case for the spot-versus-lagged-average open is 57.9% before the book prices any of it. None reached the bar, so nothing was registered (zero
+tries, N unchanged about 728,670). One counted look: after a tie (stale print) the next window was a tie 0 times in 163 (26 series, discovery).
+ROLL (about 15 events) and YIELDMAKE (the yields have 12 days, all of it the holdout) are NOT_ENOUGH_DATA; YIELDMAKE is a dated re-look about
+2026-11-30. Also built: a weekly series census in autoscore (`scalper.seriescensus`; a series going from no settled market to one starts its
+AUTO_LOG line with NEW SERIES).
+
+Lead's correction: the break-even arithmetic used in the brief (about 53.5% to break even, 58% for PF 1.5) was for a 50c ticket with a 3-point cost. NEWH17 recomputed it per spread: on a 1c-spread series a coin-flip taker entry breaks even near 52.3% and needs about 62.2% for PF 1.5 (58% gives PF 1.27); 2c spreads 62.7%; 3c spreads 63.1%; Brent 66.4%; yields 72.9%.
