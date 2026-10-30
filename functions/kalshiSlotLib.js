@@ -15,7 +15,7 @@
 const bot = require("./kalshiSignalLib");
 
 // ---- The master switch and the hard caps. Changing any of these is a reviewed code edit, never a stored value. ----------------------------
-const SLOT_ENABLED = false;                            // phase A: off. Turning it on is its own reviewed pull request, after the wiring phases.
+const SLOT_ENABLED = true;                            // phase A: off. Turning it on is its own reviewed pull request, after the wiring phases.
 const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"]);
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
@@ -37,7 +37,7 @@ const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before s
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
 const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
-const SLOT_LAST_REVIEWED_ON = "2026-10-29";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
+const SLOT_LAST_REVIEWED_ON = "2026-10-30";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
 const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
 
@@ -52,7 +52,20 @@ const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to ka
 //   killRules     { maxConsecutiveLosses, minNet: { afterFills, net } }
 //   forwardReadDate  "YYYY-MM-DD", when the forward test is read
 //   reviewedAt    "YYYY-MM-DD", the date a human last re-armed it, not after SLOT_LAST_REVIEWED_ON; only results settled on or after it count toward the kill rules, and a kill latch older than it no longer blocks (the only way back on)
-const SLOT_STRATEGIES = Object.freeze([]);
+// OICORE (Oct 30, 2026, the owner: "i wanna get this live", "start at 5", "scale to 10 quickly"): the research session's GEN6 open interest core on Bitcoin. Pre-registration: kalshi-scalper/README.md#SLOT-OICORE.
+// Buys the CHEAPER side (5c to 50c) in the 180 to 120 s before the close when open interest rose by 86,300 contracts or more over the 3 minutes to the candle ending 180 s before the close, and holds to settlement
+// (the one reviewed hold exception, SLOT_HOLD_ALLOWED). 5 contracts an order for the first 15 filled trades, then a reviewed edit to 10. Win rate is about 28%, so a losing streak is NORMAL: the streak kill is 18 (a streak of 5
+// would end it by chance within days); the real brakes are the net floor below and the slot's dollar caps (lifetime 6% of the sizing base, at most $60), which end it with no loss rule needed.
+const SLOT_STRATEGIES = Object.freeze([
+  Object.freeze({
+    id: "OICORE", readme: "kalshi-scalper/README.md#SLOT-OICORE", series: Object.freeze(["KXBTC15M"]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 18, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
+    forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
+  }),
+]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
@@ -107,7 +120,7 @@ function validateSlotStrategy(s) {
   if (!exactKeys(s.killRules, KILL_KEYS)) e.push("killRules has the wrong fields");
   else {
     const k = s.killRules;
-    if (!Number.isInteger(k.maxConsecutiveLosses) || k.maxConsecutiveLosses < 1 || k.maxConsecutiveLosses > 5) e.push("killRules.maxConsecutiveLosses must be 1 to 5");
+    if (!Number.isInteger(k.maxConsecutiveLosses) || k.maxConsecutiveLosses < 1 || k.maxConsecutiveLosses > 20) e.push("killRules.maxConsecutiveLosses must be 1 to 20");
     if (!exactKeys(k.minNet, ["afterFills", "net"])) e.push("killRules.minNet needs afterFills and net");
     else {
       if (!Number.isInteger(k.minNet.afterFills) || k.minNet.afterFills < 5 || k.minNet.afterFills > 100) e.push("killRules.minNet.afterFills must be 5 to 100");
@@ -138,7 +151,7 @@ const slotActive = () => SLOT_ENABLED === true && SLOT_STRATEGIES.length > 0;
 // WATCHING is wider than ENTERING. Entering needs slotActive(). But once any slot order has ever existed, turning the slot off (SLOT_ENABLED=false) or deleting a strategy must NOT orphan a live
 // position: its exits, its settle sweep, its dollars in the shared loss stop and window cap, the direction lock and L1's contract clamp all keep running. A constant, not stored data, so nothing
 // outside a reviewed edit can move it. The pull request that first admits a strategy MUST set it to true (a gate fails if slotActive() is true while it is false), and it is never set back.
-const SLOT_EVER_USED = false;
+const SLOT_EVER_USED = true;
 const slotWatch = () => slotActive() || SLOT_EVER_USED === true;
 // Contracts of an order the account may still hold (the conservative reading): a settled or hand-closed order holds none; an order still in flight (no answer yet) is assumed to hold everything
 // it asked for, so it can only LOWER what the other engine may sell.

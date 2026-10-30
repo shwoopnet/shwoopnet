@@ -2865,3 +2865,26 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **What it establishes.** Another 1,760 combinations of series, entry minute, price band, condition and exit found no rule that survives a split. About 12% of cells looked positive on the training days, which a fair market also produces. The selection picked mostly thin, 150 to 400 entry cells, which is where luck lives.
 - **Nothing is built from it.** L1 is not changed.
 - **Count.** 1,760 variants: **4,576** tried in total.
+
+## SLOT-OICORE: the second slot's first live probe (registered 2026-10-30 before the first order; the owner: "i wanna get this live", "start at 5", "scale to 10 quickly", "we can remove that rule in this specific instance")
+
+**This is a capped live probe chosen by the owner, not a strategy that met the research bar.** The research session (V2) found it in GEN6 and it survived its falsifier FALS4 (exact reproduction, no look-ahead) but reads NOT_YET_FALSIFIED: day z 4.42 against a deflated bar of about 5.2, two history windows only, held to settlement (`workers/GEN6_RESULT.md`, `workers/FALS4_RESULT.md`, `workers/SLOTEX_RESULT.md`, `workers/SLOTEX_ETH_RESULT.md` on the research branch).
+
+**Rule (code: `SLOT_STRATEGIES` in `functions/kalshiSlotLib.js`, id `OICORE`).** Bitcoin 15 minute (KXBTC15M) only. In the 180 to 120 seconds before the close, buy the CHEAPER side if its price is 5c to 50c and the market's open interest at the candle ending 180 s before the close is at least 86,300 contracts above its value at the candle ending 360 s before the close (public candles; a missing candle means no order). One order per market (no scale-in), 5 contracts, limit at the touch, hold to settlement (no stop, no target, no sale; sold only if it ever became a hedge against another order). Ethereum does not carry over (V2: profit factor 0.84 on validation) and is not traded.
+
+**Counterparty (a guess, partly checked).** Late favourite buyers opening new contracts push the cheap side below fair. Volume, large price moves or time of day alone do not reproduce it (validation profit factor 0.82 to 1.01), so it is new contracts.
+
+**Numeric prediction.** From history, held to settlement, 10 contracts, fees rounded up: discovery (Aug 6 to Sep 20) profit factor 2.28 (222 trades), validation (Sep 21 to Oct 27) 1.85 (333 trades); fees x1.2 1.82; entry 2c worse 1.44; at 1 contract 1.75. Win rate about 28%. About 35 to 60 signals a week and rising as open interest grows. Live I expect LESS than the history: the fill must happen within about a minute (one minute late the discovery profit factor was 0.94), the size at the ask is unmeasured, and about 36% to 40% of historical fills were under 5c, which the live price band (5c and up at the time of the order) will not allow.
+
+**Kill rules (fixed now, in code; only a reviewed edit re-arms).**
+1. Net result below -$6 after 40 filled trades (`minNet`).
+2. 18 settled losses in a row (`maxConsecutiveLosses`; a streak of 5 is normal at a 28% win rate and is NOT a signal).
+3. The slot's dollar caps end it without a rule: lifetime loss 6% of the sizing base (at most $60), 3% open, 2% a day, 2% a window, 1% an order.
+4. An order whose answer is lost, or that Kalshi refuses, ends the session and latches the strategy off.
+5. Forward read on 2026-11-13: FALSIFIED if profit factor under 1.0 on at least 100 filled trades, or net under 0 on at least 150. A fill rate under 50% of signals, or a median ask size under 10 contracts, means the history cannot be traded as measured and the probe is stopped.
+
+**Size schedule.** 5 contracts for the first 15 filled trades. Then a reviewed one-line edit to 10 (the slot's hard ceiling), by the owner, if no kill rule has fired and V2's nightly ask-size read (OIFILL on recorder R6) shows the ask can take 10. Nothing stored or typed on the page can change the size.
+
+**What it shares with L1.** The same 12% loss stop (an open slot order counts as lost), the same 5.5% window cap (the slot may take at most half of what is left), the direction lock (never on the opposite side of an L1 order in one market; Bitcoin is paused in L1 anyway), and the phone alerts. Slot orders are in `kalshiSlotOrders` and are shown on the Bot page through the strategy switch.
+
+**Deploy order (the owner runs these; the page change goes live on merge).** (1) `bash functions/deploy-push.sh` first (the exit watch and Flatten know the slot, and the slot close alert), (2) `firebase deploy --only firestore:rules` (already in place), (3) `bash functions/deploy-sizing.sh` in a quiet minute (the armed bot: the first slot order can exist from its next run). To stop it: Stop on the Bot page ends the session for both engines (an order already held then settles on its own). Flatten sells every position the account holds, including a held slot order, and the slot's bookkeeping marks those orders closed and latches every slot strategy off.
