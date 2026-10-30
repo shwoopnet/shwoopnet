@@ -22,6 +22,8 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:40 PM CT, live note: a bad morning, no rule triggered.** Last 6 hours (all strategies): 8 settled, 3 lost, net -$9.27 (profit factor 0.31): Dogecoin 5 contracts lost -$3.93 (10:24 AM CT, an early sell), gold 13 contracts lost -$8.84 (11:09 AM CT, worst loss in the window), the other six small wins. Dogecoin at 5 contracts is now about 15 settled with 2 lost (13%), against the kill rule's 8% over the last 100 (needs 100 orders; not readable) and review at 250. Gold losses at 13 contracts are the size the ladder produces; one loss of $8.84 is about 1.6% of the account, inside the design. Not a drift flag: gold's loss rate is 5% over 30 days and this is one loss. Re-check at the nightly report.
+
 **2026-10-30 2:35 PM CT, queue item 11 (frequency map by Central hour, orders since Oct 20, counts only, 0 tries).**
 - **Gold:** attempts 38 / 49 / 47 / 54 and no-fill share 37% / 37% / 36% / 33% for the blocks 00 to 05, 06 to 11, 12 to 17, 18 to 23. Flat, no hour block loses fills.
 - **Dogecoin:** attempts 42 / 55 / 54 / 49, no-fill share 24% / 25% / 39% / 24%. The 12:00 to 17:59 CT block looks worse (39%, 54 orders); one cell out of four after I looked, so treat it as noise until it repeats (re-check weekly).
