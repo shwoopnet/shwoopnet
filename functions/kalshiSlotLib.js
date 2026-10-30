@@ -46,7 +46,7 @@ const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to ka
 //   id            2 to 10 capitals or digits (it goes into the client order id)
 //   readme        path to the pre-registration, e.g. "kalshi-scalper/README.md#SLOT-XYZ"
 //   series        non-empty subset of SLOT_SERIES_ALLOWED
-//   entry         { sideRule: "yes"|"no"|"favourite", priceMin, priceMax, leftMaxSec, leftMinSec }
+//   entry         { sideRule: "yes"|"no"|"favourite"|"cheap", priceMin, priceMax, leftMaxSec, leftMinSec [, oiRiseMin] }   "cheap" buys the side with the LOWER price
 //   exit          { stopBid, targetBid, mustExitLeftSec }           bids are on the side held; always an immediate-or-cancel close
 //   contractsPerOrder, scaleIn { maxSteps, minGapSec, sameSideOnly: true, requirePriorFilled: true }
 //   killRules     { maxConsecutiveLosses, minNet: { afterFills, net } }
@@ -55,6 +55,8 @@ const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to ka
 const SLOT_STRATEGIES = Object.freeze([]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
+// Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
+const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
@@ -71,10 +73,11 @@ function validateSlotStrategy(s) {
   if (!/^[A-Z0-9]{2,10}$/.test(s.id)) e.push("id must be 2 to 10 capitals or digits");
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
-  if (!exactKeys(s.entry, ENTRY_KEYS)) e.push("entry has the wrong fields");
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
-    if (!["yes", "no", "favourite"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no or favourite");
+    if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
+    if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMaxSec > SLOT_ENTRY_LEFT_MAX_SEC || x.leftMinSec < SLOT_ENTRY_LEFT_MIN_SEC || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside " + SLOT_ENTRY_LEFT_MIN_SEC + " to " + SLOT_ENTRY_LEFT_MAX_SEC + " seconds");
   }
@@ -318,7 +321,9 @@ function slotOrderCheckWith(flags, input) {
   const series = i.ticker.split("-")[0];
   if (!strategy.series.includes(series)) return no(series + " is not one of this strategy's markets");
   if (i.side !== "yes" && i.side !== "no") return no("the side must be yes or no");
-  if (strategy.entry.sideRule !== "favourite" && strategy.entry.sideRule !== i.side) return no("this strategy only buys " + strategy.entry.sideRule);
+  if (strategy.entry.sideRule !== "favourite" && strategy.entry.sideRule !== "cheap" && strategy.entry.sideRule !== i.side) return no("this strategy only buys " + strategy.entry.sideRule);
+  // The open interest condition: no readable rise, or a rise below the line, is no order (fail closed). `oiRise` is the caller's reading of the public candles; the line is the strategy's, in code.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");
   if (i.slotOrders.some((t) => isSlotOrder(t) && !Number.isFinite(num(t.ts)))) return no("a slot order has no readable time, so the loss figures cannot be trusted");
   if (i.lockTxn !== true) return no("no proof that the direction lock was taken in the same transaction as the order");
