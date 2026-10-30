@@ -28,7 +28,7 @@ gates.ST2 = () => {
   assert.strictEqual(s.n, 2); assert.strictEqual(s.lost, 1); assert.strictEqual(s.won, 1); assert.strictEqual(s.open.length, 1); assert.strictEqual(s.net, 0.3);
   const rows = [{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: s, status: 'Running', ageText: '1m ago' }, { id: '<b>X</b>', info: { name: 'N<i>', markets: 'M', note: 'a note' }, sum: f.kalshiOrdersSummary([], 5), status: 'Waiting for a signal', ageText: 'No order yet' }];
   const h = f.kalshiStrategiesTableHtml(rows, esc, money);
-  assert.ok(/Strategies/.test(h) && /50\.0%/.test(h) && /No order yet/.test(h) && /Waiting for a signal/.test(h) && /a note/.test(h), 'the module shows status, win rate, last order and the strategy note');
+  assert.ok(/Strategy/.test(h) && /50\.0%/.test(h) && /No order yet/.test(h) && /Waiting for a signal/.test(h) && /a note/.test(h), 'the module shows status, win rate, last order and the strategy note');
   assert.ok(!/<b>X<\/b>|<i>/.test(h), 'names are escaped');
   assert.ok(/kal-pill-run/.test(h), 'a running strategy is marked');
 };
@@ -135,6 +135,16 @@ gates.ST13 = () => {
     { strategy: 'SLOT', slotId: 'OICORE', fillCount: '5', ts: Date.now() - 7200000, settled: true, result: 'no', side: 'yes', settledPnl: -0.27 }
   ], Date.now());
   assert.strictEqual(tiles.total, 2, 'the tiles count a second strategy order as a trade');
+};
+gates.ST14 = () => {
+  // The owner, Oct 30, 2026: fold Strategies into the Account card, with "All strategies" at the TOP. The first row is the account figure and the strategies are its parts.
+  const s1 = f.kalshiOrdersSummary([{ ts: 2, slotId: 'A', fillCount: 1, settledPnl: 1 }], 5), s2 = f.kalshiOrdersSummary([{ ts: 3, slotId: 'B', fillCount: 1, settledPnl: -0.3 }], 5);
+  const row = (id, sum) => ({ id, info: { name: id + ' name', markets: 'Gold', note: '' }, sum, status: 'Running', ageText: 'x' });
+  const h = f.kalshiStrategiesTableHtml([row('L1', s1), row('OICORE', s2)], esc, money, { rangeLabel: '1M', age: () => 'x' });
+  assert.ok(h.indexOf('All strategies') > -1 && h.indexOf('All strategies') < h.indexOf('L1 name') && h.indexOf('All strategies') < h.indexOf('OICORE name'), 'All strategies is the first row');
+  assert.ok(!/kal-card-title/.test(h), 'no card title of its own inside the Account card');
+  assert.ok(/<span class="kal-strat-mk">Gold<\/span>/.test(h), 'the markets sit under the strategy name');
+  assert.ok(/\[data-card="account"\] \.kal-strat-tbl th:nth-child\(2\)/.test(html), 'the separate Markets column is hidden beside the balance (and kept on a phone, where each strategy is a stacked card)');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
