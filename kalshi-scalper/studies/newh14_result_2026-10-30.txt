@@ -1,0 +1,35 @@
+NEWH14 dv (once). running N 728,628; deflated one-sided z bar 5.27
+
+STRANGLE-RV: {'events': 1544, 'ok': 1032, 'no signal': 426, 'no wings': 43, 'no spot': 43} (funnel includes holdout events; holdout trades not scored: 167)
+  disc: n 434 (28 d) PF10 0.79 PF1 0.75 PFx1.2 0.77 net10 $-255.27 netx1.2 $-276.96 win 47.9% cost/set 0.511 day z -2.60 | zero-vol 0, PF10 without 0.79
+  val : n 431 (27 d) PF10 0.69 PF1 0.66 PFx1.2 0.68 net10 $-384.62 netx1.2 $-406.30 win 45.0% cost/set 0.513 day z -3.82 | zero-vol 1, PF10 without 0.69
+  disc: mean set cost at fill 0.511, mean set cost at signal 0.508, mean payoff 0.479, inside share 0.521, mean model edge at signal 0.137, median lead 2700 s
+  val: mean set cost at fill 0.513, mean set cost at signal 0.510, mean payoff 0.450, inside share 0.550, mean model edge at signal 0.149, median lead 2700 s
+  VERDICT after discovery and validation: FALSIFIED
+
+CONDOR-RV: {'events': 1544, 'no signal': 1120, 'ok': 338, 'no wings': 43, 'no spot': 43} (funnel includes holdout events; holdout trades not scored: 35)
+  disc: n 154 (26 d) PF10 0.83 PF1 0.79 PFx1.2 0.81 net10 $-71.85 netx1.2 $-79.26 win 50.0% cost/set 1.521 day z -1.07 | zero-vol 0, PF10 without 0.83
+  val : n 149 (26 d) PF10 0.80 PF1 0.76 PFx1.2 0.78 net10 $-79.87 netx1.2 $-87.12 win 47.7% cost/set 1.504 day z -1.28 | zero-vol 0, PF10 without 0.80
+  disc: mean set cost at fill 1.521, mean set cost at signal 1.522, mean payoff 1.500, inside share 0.500, mean model edge at signal 0.126, median lead 2700 s
+  val: mean set cost at fill 1.504, mean set cost at signal 1.508, mean payoff 1.477, inside share 0.477, mean model edge at signal 0.117, median lead 2700 s
+  VERDICT after discovery and validation: FALSIFIED
+
+CONDOR-ALWAYS: {'events': 1544, 'ok': 1396, 'no wings': 148} (funnel includes holdout events; holdout trades not scored: 239)
+  disc: n 606 (28 d) PF10 0.98 PF1 0.94 PFx1.2 0.96 net10 $-29.32 netx1.2 $-58.99 win 52.8% cost/set 1.507 day z -0.24 | zero-vol 0, PF10 without 0.98
+  val : n 551 (27 d) PF10 1.07 PF1 1.03 PFx1.2 1.05 net10 $91.54 netx1.2 $64.64 win 54.8% cost/set 1.505 day z 0.73 | zero-vol 1, PF10 without 1.07
+  disc: mean set cost at fill 1.507, mean set cost at signal 1.508, mean payoff 1.528, inside share 0.528, median lead 2700 s
+  val: mean set cost at fill 1.505, mean set cost at signal 1.508, mean payoff 1.548, inside share 0.548, median lead 2700 s
+  VERDICT after discovery and validation: FALSIFIED
+
+I1 STRANGLE-ALWAYS (information): {'events': 1544, 'ok': 1396, 'no wings': 148} (funnel includes holdout events; holdout trades not scored: 239)
+  disc: n 606 (28 d) PF10 0.75 PF1 0.72 PFx1.2 0.74 net10 $-419.78 netx1.2 $-450.22 win 47.2% cost/set 0.514 day z -3.43 | zero-vol 0, PF10 without 0.75
+  val : n 551 (27 d) PF10 0.69 PF1 0.66 PFx1.2 0.67 net10 $-500.60 netx1.2 $-528.43 win 45.2% cost/set 0.516 day z -4.08 | zero-vol 1, PF10 without 0.69
+  disc: mean set cost at fill 0.514, mean set cost at signal 0.512, mean payoff 0.472, inside share 0.528, median lead 2700 s
+  val: mean set cost at fill 0.516, mean set cost at signal 0.512, mean payoff 0.452, inside share 0.548, median lead 2700 s
+
+I2 (information): market P(inside) = mid(K_lo) - mid(K_hi) at the 45 minute candle against the settled frequency, and the realised-vol model's P(inside), discovery and validation events
+  market P(inside) 0.30 to 0.40: n 95, market mean 0.361, settled inside 0.474, model mean 0.276 on 95
+  market P(inside) 0.40 to 0.50: n 437, market mean 0.456, settled inside 0.485, model mean 0.396 on 437
+  market P(inside) 0.50 to 0.60: n 534, market mean 0.539, settled inside 0.569, model mean 0.487 on 534
+  market P(inside) 0.60 to 0.70: n 85, market mean 0.626, settled inside 0.718, model mean 0.432 on 85
+  all 1157 events; model minus market P(inside): mean -0.068, sd 0.138; share with model wider than market by 5c+ 0.60, narrower by 5c+ 0.18
