@@ -1530,7 +1530,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
-                  <li>Bot page: a strategy switch (Overall, L1, and any second-slot probe) with a Strategies table and a probe panel; it appears only once a probe has orders, and the page is unchanged until then</li>
+                  <li>Bot page: a strategy switch (Overall, L1, and any second-slot strategy) with a Strategies table and a panel for that strategy; it appears only once the second slot has orders, and the page is unchanged until then</li>
                   <li>Bot status: the win rate by price paid table is removed again (the owner's call)</li>
                   <li>Bot page Rules and limits: lists the markets that trade now and the ones paused, the real sizes, the gold quiet hours and the add-on cap (it still named XRP, Bitcoin and 3 contracts for Dogecoin); a test now fails if this text drifts from the bot's code</li>
                   <li>Bot status: the next look says only what can trade now (gold, Dogecoin and Ethereum at the 6 minute look); the 10 minute look for paused XRP and natural gas is gone</li>
@@ -3190,7 +3190,7 @@
     if(!s || s.active !== true){ return []; }
     var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080, reopen = now - ((wm - 1080 + 10080) % 10080) * 60000, out = [];
     KAL_WATCH.forEach(function(w){
-      if(w.paused || (w.weekdays && closed)){ return; }   // a market paused in the bot's code (PAUSED_SERIES, XRP since Oct 28, 2026) is silent on purpose
+      if(w.paused || (w.weekdays && closed)){ return; }   // a market paused in the bot's code (PAUSED_SERIES: XRP since Oct 28, 2026, Bitcoin and the probe markets since Oct 28 to 29) is silent on purpose
       var ts = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number.isFinite(Number(o.ts)) && kalshiMarketName(o) === w.name; }).map(function(o){ return Number(o.ts); }).sort(function(a, b){ return a - b; });
       var recent = ts.filter(function(x){ return x >= now - 3 * 86400000; });
       if(recent.length < 8){ return; }
@@ -3472,9 +3472,9 @@ kalshiStatusTick();
       .forEach(function(o){ var id = o.slotId.slice(0, 40); if(!seen[id]){ seen[id] = true; out.push(id); } });
     return out;
   }
-  // What the switch is on: L1, a probe that exists, or Overall. A name that no longer exists falls back to Overall; with no probe at all the view is L1.
+  // What the switch is on: L1, a second-slot strategy that exists, or Overall. A name that no longer exists falls back to Overall; with no second-slot order at all the view is L1.
   function kalshiViewSelection(sel, ids){ return !ids || !ids.length ? 'L1' : (sel === 'L1' || ids.indexOf(sel) >= 0 ? sel : 'ALL'); }
-  // The orders a card draws. With no probe it is the very same array L1 always had (so nothing can change); L1 never includes a probe's orders and a probe never includes L1's.
+  // The orders a card draws. With no second-slot order it is the very same array L1 always had (so nothing can change); L1 never includes the slot's orders and the slot never includes L1's.
   function kalshiViewOrders(sel, live, slot){
     var ids = kalshiSlotIds(slot), s = kalshiViewSelection(sel, ids);
     if(!ids.length || s === 'L1'){ return live; }
