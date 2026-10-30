@@ -69,8 +69,8 @@ gates.ST7 = () => {
 };
 gates.ST8 = () => {
   // The owner (Oct 30, 2026): "pnl doesnt match". The Strategies rows and the Account card's Today must be worked out from the same orders and the same fills, so the rows add up to Today.
-  assert.ok(/var l1 = kalshiOrdersSummary\(kalshiResolveOrders\(kalshiLiveOrders, acct && acct\.results, fills\), now\);/.test(html), 'the L1 row uses the account fills');
-  assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\)/.test(html), 'and so does every second-strategy row');
+  assert.ok(/var l1 = kalshiOrdersSummary\(kalshiResolveOrders\(l1src, acct && acct\.results, fills\), now, since\);/.test(html), 'the L1 row uses the account fills');
+  assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\), now, since\)/.test(html), 'and so does every second-strategy row');
   assert.ok(/var botOrders = kalshiResolveOrders\(kalshiAllOrders\(\), a\.results, a\.fills && a\.fills\.ok \? kalshiGroupFills\(a\.fills\.fills\) : \[\]\);/.test(html), 'the Account card counts L1 and the second strategy, with the same fills');
 };
 gates.ST9 = () => {
@@ -85,6 +85,23 @@ gates.ST10 = () => {
   const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r);
   assert.ok(!/kalshiAgeText\([^;]*\) \+ ' ago'/.test(r[0]), 'the age text already ends in "ago": it must not be added twice ("2 hours ago ago" showed on the owner\'s phone render, Oct 30, 2026)');
   assert.ok(/td:nth-child\(3\)\{ grid-column:1 \/ -1; \}/.test(html) && /\.kal-strat-tbl td \.kal-pill\{ white-space:nowrap/.test(html), 'the status pill gets a whole row on a phone and never wraps');
+};
+gates.ST11 = () => {
+  // The owner (Oct 30, 2026): "i dont think the strategies card matches our pnl results". Result follows the same range as the Account result card, with a total row that equals it.
+  const mk = (ts, pnl) => ({ ts, fillCount: 1, settledPnl: pnl });
+  const day = 86400000, NOW = Date.parse('2026-10-30T20:00:00Z');
+  const orders = [mk(NOW - 40 * day, 5), mk(NOW - 10 * day, -2), mk(NOW - 1000, 1.5)];
+  const since = NOW - 30 * day;
+  const all = f.kalshiOrdersSummary(orders, NOW), ranged = f.kalshiOrdersSummary(orders, NOW, since);
+  assert.strictEqual(all.net, 4.5); assert.strictEqual(ranged.net, -0.5, 'a range leaves out older orders, like the Account result card');
+  assert.strictEqual(ranged.n, 2); assert.strictEqual(ranged.today, 1.5, 'Today always counts today');
+  assert.strictEqual(ranged.lastTs, NOW - 1000, 'the last order is the latest of all, not only of the range');
+  const row = (id, sum) => ({ id, info: { name: id, markets: 'M', note: '' }, sum, status: 'Running', ageText: 'x' });
+  const h = f.kalshiStrategiesTableHtml([row('L1', ranged), row('OICORE', f.kalshiOrdersSummary([mk(NOW - 2000, -0.95)], NOW, since))], esc, money, { rangeLabel: '1M', age: () => 'x', partial: false });
+  assert.ok(/All strategies/.test(h) && /kal-strat-total/.test(h), 'a total row');
+  assert.ok(h.includes('-$1.45') || h.includes('-$1.45'.replace('$', '$')), 'the total row is the sum of the rows: -0.50 and -0.95 make -1.45');
+  assert.ok(/Result \(1M\)/.test(h), 'the Result column names its range');
+  assert.ok(/renderKalshiPnl\(\); renderKalshiStrategies\(\);/.test(html), 'changing the range redraws the Strategies card');
 };
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) { try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } }
