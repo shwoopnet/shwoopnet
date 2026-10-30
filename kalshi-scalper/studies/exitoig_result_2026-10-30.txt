@@ -1,0 +1,71 @@
+EXITOI-G run (NEWH3 H3 rule unchanged). Nothing on or after 2026-10-28 loaded.
+
+== gold KXGOLD15M: windows 5645 (disc 3192, val 2453) gaps {'no fill': 9}
+gold disc: entries 976 triggered 21 (2.2%) sold 21 zero-bid 0 (0% of triggered)
+    PF10 hold 1.237 rule 1.123 (diff -0.115) | PF1 1.114 / 1.006 | x1.2 1.219 / 1.105
+    rule minus hold net10 $-48.50, at x1.2 $-48.93; hold net10 $+108.21
+    loss rate triggered 0.095 untriggered 0.051; triggered-only hold $+4.37 rule $-44.13
+    zero-volume fill removed: n 976 PF10 hold 1.237 rule 1.123
+gold val: entries 697 triggered 30 (4.3%) sold 30 zero-bid 0 (0% of triggered)
+    PF10 hold 1.197 rule 1.236 (diff +0.039) | PF1 1.081 / 1.106 | x1.2 1.180 / 1.215
+    rule minus hold net10 $+7.76, at x1.2 $+7.31; hold net10 $+68.39
+    loss rate triggered 0.367 untriggered 0.042; triggered-only hold $-65.36 rule $-57.60
+    zero-volume fill removed: n 697 PF10 hold 1.197 rule 1.236
+    day z of rule minus hold (both windows) -1.66
+
+== Dogecoin KXDOGE15M: windows 7869 (disc 4357, val 3512) gaps {'no fill': 21, 'oi missing': 1}
+Dogecoin disc: entries 1449 triggered 20 (1.4%) sold 20 zero-bid 0 (0% of triggered)
+    PF10 hold 1.390 rule 1.301 (diff -0.089) | PF1 1.243 / 1.159 | x1.2 1.370 / 1.281
+    rule minus hold net10 $-43.79, at x1.2 $-44.10; hold net10 $+230.46
+    loss rate triggered 0.250 untriggered 0.045; triggered-only hold $-18.30 rule $-62.09
+    zero-volume fill removed: n 1449 PF10 hold 1.390 rule 1.301
+Dogecoin val: entries 1011 triggered 9 (0.9%) sold 9 zero-bid 0 (0% of triggered)
+    PF10 hold 1.287 rule 1.240 (diff -0.047) | PF1 1.156 / 1.109 | x1.2 1.268 / 1.220
+    rule minus hold net10 $-20.02, at x1.2 $-20.19; hold net10 $+132.46
+    loss rate triggered 0.111 untriggered 0.053; triggered-only hold $+11.56 rule $-8.46
+    zero-volume fill removed: n 1011 PF10 hold 1.287 rule 1.240
+    day z of rule minus hold (both windows) -2.89
+
+== Ethereum KXETH15M: windows 7869 (disc 4357, val 3512) gaps {'no fill': 43}
+Ethereum disc: entries 1427 triggered 13 (0.9%) sold 13 zero-bid 0 (0% of triggered)
+    PF10 hold 1.096 rule 1.086 (diff -0.010) | PF1 0.977 / 0.966 | x1.2 1.080 / 1.069
+    rule minus hold net10 $-7.34, at x1.2 $-7.57; hold net10 $+68.64
+    loss rate triggered 0.385 untriggered 0.054; triggered-only hold $-28.61 rule $-35.95
+    zero-volume fill removed: n 1427 PF10 hold 1.096 rule 1.086
+Ethereum val: entries 960 triggered 17 (1.8%) sold 17 zero-bid 0 (0% of triggered)
+    PF10 hold 0.856 rule 0.877 (diff +0.021) | PF1 0.767 / 0.784 | x1.2 0.843 / 0.863
+    rule minus hold net10 $+16.68, at x1.2 $+16.41; hold net10 $-92.25
+    loss rate triggered 0.529 untriggered 0.069; triggered-only hold $-61.30 rule $-44.62
+    zero-volume fill removed: n 960 PF10 hold 0.856 rule 0.877
+    day z of rule minus hold (both windows) +0.47
+
+== Bitcoin KXBTC15M: windows 7869 (disc 4357, val 3512) gaps {'no fill': 14}
+Bitcoin disc: entries 1331 triggered 26 (2.0%) sold 26 zero-bid 0 (0% of triggered)
+    PF10 hold 0.988 rule 1.001 (diff +0.013) | PF1 0.888 / 0.897 | x1.2 0.974 / 0.985
+    rule minus hold net10 $+9.47, at x1.2 $+9.04; hold net10 $-8.75
+    loss rate triggered 0.615 untriggered 0.054; triggered-only hold $-127.77 rule $-118.30
+    zero-volume fill removed: n 1331 PF10 hold 0.988 rule 1.001
+Bitcoin val: entries 1028 triggered 29 (2.8%) sold 29 zero-bid 0 (0% of triggered)
+    PF10 hold 0.955 rule 1.006 (diff +0.051) | PF1 0.854 / 0.894 | x1.2 0.942 / 0.991
+    rule minus hold net10 $+30.07, at x1.2 $+29.62; hold net10 $-26.64
+    loss rate triggered 0.621 untriggered 0.051; triggered-only hold $-124.11 rule $-94.04
+    zero-volume fill removed: n 1028 PF10 hold 0.955 rule 1.006
+    day z of rule minus hold (both windows) +1.51
+
+POOLED disc: entries 5183 triggered 80 (1.5%) sold 80 zero-bid 0 (0% of triggered)
+    PF10 hold 1.158 rule 1.120 (diff -0.038) | PF1 1.038 / 1.000 | x1.2 1.141 / 1.103
+    rule minus hold net10 $-90.16, at x1.2 $-91.56; hold net10 $+398.56
+    loss rate triggered 0.350 untriggered 0.051; triggered-only hold $-170.31 rule $-260.47
+    zero-volume fill removed: n 5183 PF10 hold 1.158 rule 1.120
+POOLED val: entries 3696 triggered 85 (2.3%) sold 85 zero-bid 0 (0% of triggered)
+    PF10 hold 1.040 rule 1.059 (diff +0.019) | PF1 0.934 / 0.946 | x1.2 1.025 / 1.043
+    rule minus hold net10 $+34.49, at x1.2 $+33.15; hold net10 $+81.96
+    loss rate triggered 0.459 untriggered 0.055; triggered-only hold $-239.21 rule $-204.72
+    zero-volume fill removed: n 3696 PF10 hold 1.040 rule 1.059
+    day z of rule minus hold (both windows) -1.24
+
+Verdicts (N = 4):
+  gold: NOT_ENOUGH_DATA
+  Dogecoin: NOT_ENOUGH_DATA
+  Ethereum: NOT_ENOUGH_DATA
+  pooled: FALSIFIED
