@@ -7842,3 +7842,19 @@ model edge, next-candle fill): PF 1.51 on 54 then 0.79 on 66, **NOT_ENOUGH_DATA*
 free 30 days of minutes). **CMEGAP-W** (weekend Bitcoin at least 0.5% from the CME Friday close, buy toward it): 0.98 / 0.81 on 270 /
 234, **FALSIFIED**. **CMEGAP-R** (after the Sunday reopen while the gap is unfilled): 1.82 on 18 then 0.85 on 111, **NOT_ENOUGH_DATA**.
 N +4; running count about 627,856 (z bar 5.24).
+
+## Result: GEN9 (sub-minute tape generator, short round trips on Bitcoin and gold), 2026-10-30
+
+Registered in `workers/GEN9_REGISTRATION.md` before any study-period tape was fetched. Trade: buy at a 10 second bar between 840 s and 240 s before the close, a side priced 20c to 80c by the last trade, sold 30 to 180 s later (time exit, take profit or stop), never held to settlement. Conditions 1 to 3 from 16 tape features (signed taker flow over 10, 30 and 60 s, trade counts, burst ratio, price change, largest print and its side, price). Fill model is an approximation from trade prices (last trade plus half the candle spread plus 1c each way), fees rounded up per order on both legs at C = 10. Gates: discovery Aug 6 to Sep 20 (PF 1.5 on 100+ trades and 15+ days), validation Sep 21 to Oct 27 (PF 1.3 on 50+, fees x1.2 above 1), a family control, 5,000 distinct rules per market. Fetch: a seeded random half of days under a 6 hour budget; every gold market (3,072, 11.1M trades), 1,004 of 3,983 Bitcoin markets (26.9M trades, 558 discovery windows on 23 days, above the registered minimum).
+
+| | Bitcoin | Gold |
+|---|---|---|
+| Draws / distinct rules | 27,783 / 5,000 | 23,272 / 5,000 |
+| Median discovery PF | 0.25 | 0.24 |
+| Best discovery PF among screenable rules | 0.98 | 0.85 |
+| Rules with PF 1.0 or more | 0 | 0 |
+| Discovery survivors | 0 | 0 |
+
+Both markets **FALSIFIED** at discovery. The frozen best 10 per market (`workers/GEN9_FROZEN.md`, hashes pushed before validation was read once) fell further in validation, PF 0.37 to 0.71, every day z negative. The unconditioned base loses about 6.5c a trade at every hold length: about 3c of spread and padding plus about 3.5c of fees against a price move that averages about zero. Dropping the two 1c pads leaves every best-10 rule negative (best about -2.2c). No candidate, no forward entry, no evaluator for R6. Prediction check: median discovery PF predicted about 0.40, came in at 0.25; zero survivors as predicted.
+
+What it closes: the short coin-flip round trip on gold and Bitcoin is closed on candle data (GEN1, GEN8) and now on tape data. Only a cheaper entry, a resting maker order (MAKER5's question, readable from Nov 6), could change the arithmetic. N +51,067 (51,055 draws plus 12 information looks); running count about 678,923 (627,856 before this result), z bar about 5.26.
