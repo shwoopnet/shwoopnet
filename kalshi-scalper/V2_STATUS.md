@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-30 2:10 AM CT, LIQ1 information check: no reverting impact, so brief B is dropped (0 tries).** Nightly watchers ran: DOGEFILL after the 5 contract deploy 6 of 13 no fill (46%; flag needs 60% over 20); GOLDSLIP after the deposit 2 orders, no flag; DRIFT flag XRP slippage +1.76c (paused market); OIFILL 0 forward signals. Waiting on the owner for brief A (GOLDPYTH) or C; no cheap-side-late rounds meanwhile.
+
 **2026-10-30 1:10 AM CT, research director: V2 is circling one trade shape; owner decision sent to the main session.** Briefs A (GOLDPYTH recorder), B (LIQ1 liquidations), C (SPOTDEPTH, after RECORD1) in `workers/DIRECTOR_2026-10-30.md`. Until the owner answers, V2 runs only LIQ1's no-outcome information check and no more cheap-side-late tests.
 
 **2026-10-30 12:55 AM CT, NEWH8: no independent condition behind the open interest core.** The effect lives in Bitcoin's own open interest count, in windows where the favourite has held for 3+ minutes and a wave of new contracts arrives. Everything else FALSIFIED or the same bet. N about 592,094.
