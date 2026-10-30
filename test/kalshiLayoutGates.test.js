@@ -19,7 +19,9 @@ gates.Y2 = () => {
   assert.ok(/e\.target\.closest\(\x27\[data-card\]\x27\)/.test(iife) && /grid\.classList\.contains\('kal-unlocked'\)/.test(iife), 'dragging does nothing while locked');
   assert.ok(/draggable = on/.test(iife) && /data-move/.test(iife), 'cards are draggable only when unlocked, with arrows for touch screens');
   assert.ok(/DEFAULT_ORDER\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
-  assert.ok(/DEFAULT_ORDER\.forEach\(function\(k\)\{ if\(want\.indexOf\(k\) < 0\)/.test(iife), 'a card the saved order does not mention keeps its place');
+  assert.ok(/DEFAULT_ORDER\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(DEFAULT_ORDER\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
+  assert.ok(/OPTIONAL = \[\['strategies', 'Strategies'\]/.test(html), 'the Strategies card can be hidden');
+  assert.ok(/\['r', 'r', 'r', 'm', 'r', 'm'\]/.test(iife), 'account, strategies, status, result line, positions, trades is the default flow');
   assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account and session cards still cannot be hidden, only moved');
 };
 
@@ -42,13 +44,20 @@ gates.Y4 = () => {
 };
 
 // Console layout: a rail (account, positions) beside one main column (books, the bot card with its performance, trades, detail, log), books tiles on top.
+// Y5b: the owner could not move the Strategies card ("it doesnt unlock", Oct 30, 2026) because it sat outside the layout. It is a layout card now, and its render must never override the Layout menu's hide.
+gates.Y5b = () => {
+  assert.ok(/data-card="strategies" id="kalStrategies"/.test(html), 'it is a layout card');
+  const r = /function renderKalshiStrategies\(\)\{[\s\S]*?\n  \}\n/.exec(html); assert.ok(r, 'the render is found');
+  assert.ok(!/\.hidden\s*=/.test(r[0]), 'the render never sets hidden: that is the Layout menu\'s to set');
+  assert.ok(/\[data-card="strategies"\]\{ grid-column:1 \/ -1/.test(html), 'it spans the row like the account strip');
+};
 gates.Y5 = () => {
   const i = html.indexOf('id="kalTabBot"');
   const seg = html.slice(i, html.indexOf('</main>', i));
   const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
   assert.ok(rail, 'the rail is there and the main column follows it');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'positions'], 'the rail holds the account strip, the bot status (which carries the loss stop and risk meter) and the positions (the order flow and edge surface folds were removed for now, Oct 27, 2026)');
+  assert.deepStrictEqual(names(rail[1]), ['account', 'strategies', 'status', 'positions'], 'the rail holds the account strip, the Strategies card (movable like the rest, Oct 30, 2026), the bot status (which carries the loss stop and risk meter) and the positions (the order flow and edge surface folds were removed for now, Oct 27, 2026)');
   const main = seg.slice(seg.indexOf('<div class="kal-main">'));
   assert.deepStrictEqual(names(main), ['pnl', 'trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
