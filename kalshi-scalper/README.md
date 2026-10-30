@@ -7740,3 +7740,7 @@ Registered first (`workers/GEN7_REGISTRATION.md`), survivors frozen and hashed (
 ## Result: SLOTEX (open interest core with exits before settlement, for the second slot), 2026-10-29
 
 Main session request (owner wants a small live probe in the slot, which must exit before settlement). Registered first (`workers/SLOTEX_REGISTRATION.md` plus amendment for C = 1, 5 and price buckets). Hold baseline reproduced exactly. With the next-candle fill, every take profit and stop collapses to "sell at the bid at 60 s". Sell at 60 s, next fill, C = 10: PF 2.72 / 1.52 (fees x1.2 2.65 / 1.48; entry +2c 2.07 / 1.18), about half the held edge; C = 5 validation 1.50; C = 1 1.32 (**FALSIFIED**, rounded fees). Signal-fill exits, take profits and stops: **FALSIFIED**. 10% to 17% of entries have no bid at 60 s (counted as a total loss). Sell at 60 s with next fill: **NOT_YET_FALSIFIED** at C = 10 and 5, below the bar. N +504; running count about 591,486.
+
+## Result: SLOTEX-ETH (the Bitcoin open interest core on Ethereum, no tuning), 2026-10-29
+
+Main session request. Registered first (`workers/SLOTEX_ETH_REGISTRATION.md`). At the absolute 86,300 it never fires on Ethereum: **NOT_ENOUGH_DATA**. At Ethereum's own discovery 90th percentile (8,799): hold PF 1.08 / 0.84, sell at 60 s 0.81 / 0.84 at C = 10 (538 validation entries): **FALSIFIED**. Co-loss with Bitcoin where both fire: 1.07x to 1.23x independence (ceiling about 1.3 to 1.4 at these loss rates). N +64; running count about 591,550.
