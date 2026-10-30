@@ -1,0 +1,34 @@
+NEWH7 run 2026-10-30T05:22:46+00:00 (registration workers/NEWH7_REGISTRATION.md)
+H1 gold: R days 83 (disc 46), 2/3 cut 1.1694; windows 5645
+== H1 IVGAP gold (GVZ / RV20 top third, cheap side 10-40c at 600 s, held)
+  DISC : n 805 days 15 | PF10 0.85 PF1 0.83 PF10x1.2 0.84 | net10 $-234.68 (x1.2 $-254.10) per-trade -2.92c/ct | win 23.7% avg fill 0.253 | day z -1.71 | no-sale 0 | vol>0 only n 805 PF10 0.85
+  VAL  : n 1131 days 24 | PF10 0.81 PF1 0.79 PF10x1.2 0.80 | net10 $-414.44 (x1.2 $-441.68) per-trade -3.66c/ct | win 22.9% avg fill 0.253 | day z -4.56 | no-sale 0 | vol>0 only n 1131 PF10 0.81
+  data gaps: disc 2 val 0
+  VERDICT: FALSIFIED
+  info bottom two thirds: DISC : n 1233 days 30 | PF10 0.79 PF1 0.77 PF10x1.2 0.78 | net10 $-486.54 (x1.2 $-515.89) per-trade -3.95c/ct | win 21.8% avg fill 0.245 | day z -3.49 | no-sale 0 | vol>0 only n 1233 PF10 0.79
+  info bottom two thirds: VAL  : n 418 days 8 | PF10 0.83 PF1 0.81 PF10x1.2 0.81 | net10 $-143.55 (x1.2 $-153.90) per-trade -3.43c/ct | win 23.7% avg fill 0.258 | day z -2.17 | no-sale 0 | vol>0 only n 418 PF10 0.83
+  info all windows: DISC : n 2038 days 45 | PF10 0.81 PF1 0.80 PF10x1.2 0.80 | net10 $-721.22 (x1.2 $-769.99) per-trade -3.54c/ct | win 22.6% avg fill 0.248 | day z -3.74 | no-sale 0 | vol>0 only n 2038 PF10 0.81
+  info all windows: VAL  : n 1549 days 32 | PF10 0.81 PF1 0.79 PF10x1.2 0.80 | net10 $-557.99 (x1.2 $-595.58) per-trade -3.60c/ct | win 23.1% avg fill 0.254 | day z -5.07 | no-sale 0 | vol>0 only n 1549 PF10 0.81
+H1 Bitcoin: windows 7869, R known 7858, 2/3 cut 1.4501
+== H1 IVGAP Bitcoin (DVOL / RV24h top third, cheap side 10-40c at 600 s, held)
+  DISC : n 892 days 25 | PF10 0.84 PF1 0.82 PF10x1.2 0.83 | net10 $-279.51 (x1.2 $-301.65) per-trade -3.13c/ct | win 24.2% avg fill 0.260 | day z -1.75 | no-sale 0 | vol>0 only n 892 PF10 0.84
+  VAL  : n 421 days 14 | PF10 0.81 PF1 0.79 PF10x1.2 0.80 | net10 $-151.37 (x1.2 $-161.19) per-trade -3.60c/ct | win 21.6% avg fill 0.240 | day z -1.19 | no-sale 0 | vol>0 only n 421 PF10 0.81
+  data gaps: disc 9 val 2
+  VERDICT: FALSIFIED
+  info bottom two thirds: DISC : n 1890 days 40 | PF10 0.80 PF1 0.78 PF10x1.2 0.79 | net10 $-709.61 (x1.2 $-754.99) per-trade -3.75c/ct | win 22.5% avg fill 0.250 | day z -3.92 | no-sale 0 | vol>0 only n 1890 PF10 0.80
+  info bottom two thirds: VAL  : n 1787 days 33 | PF10 0.89 PF1 0.87 PF10x1.2 0.88 | net10 $-372.82 (x1.2 $-415.21) per-trade -2.09c/ct | win 23.8% avg fill 0.247 | day z -2.17 | no-sale 0 | vol>0 only n 1787 PF10 0.89
+  info all windows: DISC : n 2782 days 46 | PF10 0.81 PF1 0.80 PF10x1.2 0.80 | net10 $-989.12 (x1.2 $-1056.64) per-trade -3.56c/ct | win 23.0% avg fill 0.253 | day z -4.31 | no-sale 0 | vol>0 only n 2782 PF10 0.81
+  info all windows: VAL  : n 2208 days 37 | PF10 0.87 PF1 0.85 PF10x1.2 0.86 | net10 $-524.19 (x1.2 $-576.40) per-trade -2.37c/ct | win 23.4% avg fill 0.245 | day z -2.42 | no-sale 0 | vol>0 only n 2208 PF10 0.87
+H2: dprem known 7869 of 7869; cuts 10% -1.24 bp, 90% 1.21 bp
+== H2 COINPREM Bitcoin (15 min premium change top/bottom decile, that side at 20-50c, held)
+  DISC : n 257 days 46 | PF10 0.93 PF1 0.91 PF10x1.2 0.91 | net10 $-42.73 (x1.2 $-49.97) per-trade -1.66c/ct | win 33.9% avg fill 0.340 | day z -0.55 | no-sale 0 | vol>0 only n 257 PF10 0.93
+  VAL  : n 180 days 37 | PF10 0.78 PF1 0.77 PF10x1.2 0.77 | net10 $-90.50 (x1.2 $-95.56) per-trade -5.03c/ct | win 30.0% avg fill 0.335 | day z -1.69 | no-sale 0 | vol>0 only n 180 PF10 0.78
+  data gaps: disc 0 val 0
+  VERDICT: FALSIFIED
+H3: discovery minutes 66085, dvol5 0.99 cut 0.212 points
+== H3 VEGALAG Bitcoin (dvol5 >= 99th pct at 780-420 s, cheap side 10-40c, sold 3 min later)
+  DISC : n 43 days 20 | PF10 0.67 PF1 0.60 PF10x1.2 0.64 | net10 $-12.97 (x1.2 $-14.74) per-trade -3.02c/ct | win 30.2% avg fill 0.230 | day z -1.18 | no-sale 0 | vol>0 only n 43 PF10 0.67
+  VAL  : n 49 days 22 | PF10 0.75 PF1 0.67 PF10x1.2 0.71 | net10 $-11.34 (x1.2 $-13.21) per-trade -2.31c/ct | win 24.5% avg fill 0.219 | day z -0.86 | no-sale 0 | vol>0 only n 49 PF10 0.75
+  data gaps: disc 14 val 5
+  VERDICT: NOT_ENOUGH_DATA
+VERDICTS: {"IVGAP gold": "FALSIFIED", "IVGAP Bitcoin": "FALSIFIED", "COINPREM Bitcoin": "FALSIFIED", "VEGALAG Bitcoin": "NOT_ENOUGH_DATA"}
