@@ -48,7 +48,7 @@ function oversizeRows(rows) {
   }).filter(Boolean).sort((a, b) => a.ts < b.ts ? -1 : 1);
 }
 
-function buildReport(orders, nowMs, hours, withOrders) {
+function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
   const since = nowMs - hours * 3600000;
   const rows = (Array.isArray(orders) ? orders : []).filter((o) => o && Number(o.ts) >= since);
   const all = emptyTally(), byMarket = {}, byLead = {};
@@ -65,6 +65,22 @@ function buildReport(orders, nowMs, hours, withOrders) {
     byEntryLead: Object.fromEntries(Object.keys(byLead).sort().map((k) => [k, finish(byLead[k])])),
     oversize: (() => { const r = oversizeRows(rows); return { count: r.length, orders: r.slice(0, 50) }; })(),
   };
+  // The second slot (OICORE and any later strategy; the owner, Oct 30, 2026: "the report should include oicore since it's part of our strategies"). Kept SEPARATE from the L1 figures above, which are unchanged, so a
+  // comparison with earlier reports still holds; allStrategies is the two added together, the figure the Bot page's Account result line shows. Slot orders are not size-checked here (maxContractsFor is L1's lock).
+  const slotRows = (Array.isArray(slotOrders) ? slotOrders : []).filter((o) => o && Number(o.ts) >= since);
+  const slotAll = emptyTally(), both = emptyTally(), bySlot = {}, slotMarket = {};
+  slotRows.forEach((o) => {
+    addTo(slotAll, o); addTo(both, o);
+    const id = typeof o.slotId === "string" && o.slotId ? o.slotId.slice(0, 40) : "unknown"; bySlot[id] = bySlot[id] || emptyTally(); addTo(bySlot[id], o);
+    const m = seriesOf(o); slotMarket[m] = slotMarket[m] || emptyTally(); addTo(slotMarket[m], o);
+  });
+  rows.forEach((o) => addTo(both, o));
+  out.secondSlot = {
+    total: finish(slotAll),
+    byStrategy: Object.fromEntries(Object.keys(bySlot).sort().map((k) => [k, finish(bySlot[k])])),
+    byMarket: Object.fromEntries(Object.keys(slotMarket).sort().map((k) => [k, finish(slotMarket[k])])),
+  };
+  out.allStrategies = finish(both);
   if (withOrders) {
     // One compact row per order. No order id, no client order id, nothing that identifies the account.
     out.orders = rows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
@@ -72,6 +88,11 @@ function buildReport(orders, nowMs, hours, withOrders) {
       entryLead: o.entryLead || null, status: o.status || null, result: o.result || null, settledPnl: settledPnl(o),
     }));
     out.ordersTruncated = rows.length > MAX_ORDER_ROWS;
+    // Slot rows are listed apart from L1's so the L1 row shape does not change; the strategy id replaces any order id.
+    out.slotOrders = slotRows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
+      ts: new Date(Number(o.ts)).toISOString(), strategy: typeof o.slotId === "string" ? o.slotId.slice(0, 40) : null, ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.avgFill),
+      status: o.status || null, result: o.result || null, settledPnl: settledPnl(o),
+    }));
   }
   return out;
 }
@@ -98,7 +119,10 @@ function makeReportHandler(deps) {
     try {
       const now = deps.now();
       const orders = await deps.readOrders(now - hours * 3600000);
-      res.status(200).json(buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1"));
+      // The slot read is optional and its failure never blanks the L1 report: the second slot section is then simply empty.
+      let slotOrders = [];
+      if (typeof deps.readSlotOrders === "function") { try { slotOrders = await deps.readSlotOrders(now - hours * 3600000); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      res.status(200).json(buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders));
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
       if (typeof deps.logError === "function") deps.logError(e);

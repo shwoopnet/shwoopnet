@@ -873,5 +873,7 @@ exports.kalshiNightlyReport = onRequest(
     logError: (e) => console.error("kalshiNightlyReport: " + String((e && e.name) || "Error") + ": " + String((e && e.message) || e).slice(0, 200)),
     // The default app must exist before getFirestore() (see ensureDefaultAdminApp above); the first deploy of this endpoint skipped it and answered 500 "could not read orders".
     readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
+    // The second slot's orders (OICORE), read the same way, so the report covers every strategy.
+    readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
   })
 );

@@ -71,6 +71,24 @@ gates.R4 = async () => {
 };
 
 // R5: the function holds no Kalshi key, sends nothing to Kalshi, writes nothing, and the deploy script keeps an existing token.
+// R6: the second slot (OICORE) is in the report, apart from L1's figures, which do not change, and added up in allStrategies. Consequence: the research chats can watch OICORE from the nightly report.
+gates.R6 = async () => {
+  const slot = (o) => Object.assign({ ticker: 'KXBTC15M-26OCT28-T1', side: 'yes', count: 10, fillCount: 10, avgFill: 0.1, status: 'filled', settled: true, result: 'yes', settledPnl: 5, ts: NOW - 3600000, slotId: 'OICORE', strategy: 'SLOT', orderId: 'SECRET-SLOT-ID', clientOrderId: 'SLOT-SECRET' }, o);
+  const l1 = [ord({ settledPnl: 0.05 })];
+  const r = lib.buildReport(l1, NOW, 24, true, [slot({}), slot({ settledPnl: -1, result: 'no' }), slot({ ts: NOW - 99 * 3600000 })]);
+  assert.strictEqual(r.total.net, 0.05, 'L1 figures unchanged by slot orders');
+  assert.deepStrictEqual([r.secondSlot.total.settled, r.secondSlot.total.net, Object.keys(r.secondSlot.byStrategy)], [2, 4, ['OICORE']]);
+  assert.strictEqual(r.allStrategies.net, 4.05, 'allStrategies adds the two');
+  assert.deepStrictEqual(Object.keys(r.byMarket), ['KXGOLD15M'], 'L1 byMarket does not gain slot markets');
+  assert.strictEqual(r.slotOrders.length, 2);
+  assert.ok(!/SECRET|orderId|clientOrderId/.test(JSON.stringify(r)), 'no ids');
+  assert.deepStrictEqual(lib.buildReport(l1, NOW, 24, false).secondSlot.total.filled, 0, 'no slot orders is an empty section, not an error');
+  // a failing slot read never blanks the L1 report
+  let status = 0, body = null;
+  const res = { set() {}, status(c) { status = c; return this; }, json(b) { body = b; } };
+  await lib.makeReportHandler({ getToken: () => 'x'.repeat(30), now: () => NOW, readOrders: async () => l1, readSlotOrders: async () => { throw new Error('boom'); } })({ method: 'GET', headers: { authorization: 'Bearer ' + 'x'.repeat(30) }, query: {} }, res);
+  assert.ok(status === 200 && body.total.net === 0.05 && body.secondSlot.total.filled === 0, 'L1 report survives a slot read failure');
+};
 gates.R5 = () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiReportLib.js'), 'utf8');
   assert.ok(!/KALSHI_LIVE|liveRequest|fetch\(|https?:\/\/|\.set\(\{|\.add\(|\.delete\(|setDoc|runTransaction|firestore|getFirestore/i.test(src.replace(/res\.set\(/g, '').replace(/createHash\("sha256"\)\.update\(/g, '')), 'no key, no network call, no write, and no database access of its own (the order read is passed in)');
@@ -79,7 +97,7 @@ gates.R5 = () => {
   assert.ok(/secrets: \[KALSHI_REPORT_TOKEN\]/.test(fn) && !/KALSHI_LIVE/.test(fn), 'only the report token');
   assert.ok(/ensureDefaultAdminApp\(\); return \(await getFirestore\(\)/.test(fn), 'the default app is ensured before Firestore is read (the first deploy skipped it and every call answered 500)');
   assert.ok(/logError: \(e\) => console\.error/.test(fn) && !/KALSHI_REPORT_TOKEN\.value\(\)[^\n]*console/.test(fn), 'a failure is logged without the token');
-  assert.ok(/\.collection\("kalshiLiveOrders"\)\.where\("ts", ">=", sinceMs\)\.get\(\)/.test(fn) && !/\.(set|update|add|delete)\(/.test(fn), 'one read of the bot orders');
+  assert.ok(/\.collection\("kalshiLiveOrders"\)\.where\("ts", ">=", sinceMs\)\.get\(\)/.test(fn) && /\.collection\(slotStoreLib\.COLLECTIONS\.SLOT\)\.where\("ts", ">=", sinceMs\)\.get\(\)/.test(fn) && !/\.(set|update|add|delete)\(/.test(fn), 'a read of the bot orders and of the second slot orders, nothing written');
   assert.ok(idx.indexOf('exports.kalshiBookRecorder') < idx.indexOf('exports.kalshiNightlyReport'), 'after the recorder, so the no-order-code slices still cover everything before it');
   const sh = fs.readFileSync(path.join(root, 'functions', 'deploy-report.sh'), 'utf8');
   assert.ok(/functions:secrets:get KALSHI_REPORT_TOKEN/.test(sh) && /keeping it/.test(sh), 'an existing token is kept');
