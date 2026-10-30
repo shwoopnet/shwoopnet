@@ -141,18 +141,77 @@ function exitWorld(o = {}) {
 const gates = {};
 
 // ---- OFF: nothing happens ----------------------------------------------------------------------------------------------------------------
-gates['SW4 with the real constants (switch off) the engine makes no call at all: no read, no write, no order'] = async () => {
+gates['SW4 with the switch forced off the engine makes no call at all: no read, no write, no order'] = async () => {
+  // Admitted state: the real constants are ON, so the off behaviour is proven with the documented forced-off flags (enabled false, empty registry, never used). Fixtures untouched.
+  const off = R({ enabled: false, registry: [], everUsed: false });
   const db = makeDb(), ex = makeExchange(db), t = tickArgs(db, ex);
   const trap = new Proxy({}, { get: (_, k) => { throw new Error('the engine touched the store: ' + String(k)); } });
   t.args.store = trap;
-  const out = await run.runSlotTick(t.args);
+  const out = await off.runSlotTick(t.args);
   assert.ok(out.skipped, 'a skip');
   assert.strictEqual(ex.calls.length, 0, 'no request');
-  const out2 = await run.runSlotExits({ store: trap, fetchFn: ex.fetchFn, keyId: 'k', pem, now: NOW, enabled: true });
+  const out2 = await off.runSlotExits({ store: trap, fetchFn: ex.fetchFn, keyId: 'k', pem, now: NOW, enabled: true });
   assert.ok(out2.skipped); assert.strictEqual(ex.calls.length, 0);
-  assert.strictEqual(await run.slotExitIdle({ store: trap, now: NOW }), true, 'with the slot off the exit loop has nothing to wait for');
+  assert.strictEqual(await off.slotExitIdle({ store: trap, now: NOW }), true, 'with the slot off the exit loop has nothing to wait for');
   assert.strictEqual(run.runSlotTick.length, 1); assert.strictEqual(run.runSlotExits.length, 1);
-  assert.strictEqual(slot.slotActive(), false);
+};
+gates['SW4b admitted state: with the real constants and no qualifying market in the window the engine makes no exchange call, no write and no order'] = async () => {
+  assert.strictEqual(slot.slotActive(), true, 'the slot is admitted');
+  const db = makeDb(), ex = makeExchange(db);
+  // no quote at all, and quotes for a series the strategy does not trade, and a market outside the 180-120 s window: none qualifies
+  const variants = [{ quotes: [] }, { quotes: [{ series: 'KXGOLD15M', m: { ticker: 'KXGOLD15M-X', status: 'active', close_time: iso(NOW + 150000) } }] },
+    { quotes: [{ series: 'KXBTC15M', m: { ticker: T, status: 'active', close_time: iso(NOW + 500000) } }] }];
+  for (const v of variants) {
+    const t = tickArgs(db, ex, { args: v });
+    const writes = ['runSlotEntry', 'updateSlotOrder', 'finishSlotOrder', 'killStrategy'];
+    for (const w of writes) t.args.store[w] = async () => { throw new Error('the engine wrote: ' + w); };
+    await run.runSlotTick(t.args);
+    assert.strictEqual(ex.calls.length, 0, 'no request: ' + JSON.stringify(v).slice(0, 60));
+    assert.strictEqual(ex.posts.length, 0, 'no order');
+    assert.strictEqual(db.slot.size, 0); assert.strictEqual(db.locks.size, 0);
+  }
+  // exit loop with nothing open: reads only, sends nothing, and is idle
+  const store = makeStore(db, 'Z');
+  assert.strictEqual(await run.slotExitIdle({ store, now: NOW }), true, 'nothing open, so nothing to wait for');
+  const out = await run.runSlotExits({ store, fetchFn: ex.fetchFn, keyId: 'k', pem, now: NOW, enabled: true });
+  assert.strictEqual(ex.calls.length, 0, 'no request with nothing open'); assert.strictEqual(ex.posts.length, 0);
+  assert.ok(out && !out.error, 'no error');
+};
+gates['OICORE end to end through the engine: a rise of 86,300 or more buys 5 contracts of the cheaper side held to settlement; a smaller rise, a missing candle or the dear side buys nothing'] = async () => {
+  const OI = () => R({ enabled: true, registry: [slot.SLOT_STRATEGIES[0]], everUsed: true });
+  const closeMs = NOW + 150000, closeSec = Math.round(closeMs / 1000);
+  const world = async (rise, o = {}) => {
+    const db = makeDb(), ex = makeExchange(db, { market: Object.assign({ close_time: iso(closeMs), yes_bid_dollars: '0.1700', yes_ask_dollars: '0.1800', yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00' }, o.market || {}) });
+    const inner = ex.fetchFn;
+    ex.fetchFn = async (url, init) => {
+      if (url.includes('/candlesticks')) {
+        ex.calls.push({ url, method: init.method, body: null });
+        const cs = o.candles !== undefined ? o.candles : [{ end_period_ts: closeSec - 360, open_interest_fp: '1000000.00' }, { end_period_ts: closeSec - 180, open_interest_fp: String(1000000 + rise) }];
+        return { status: 200, text: async () => JSON.stringify({ candlesticks: cs }) };
+      }
+      return inner(url, init);
+    };
+    const t = tickArgs(db, ex, { args: { quotes: QUOTES({ close_time: iso(closeMs) }), fetchFn: ex.fetchFn } });
+    const out = await OI().runSlotTick(t.args);
+    return { db, ex, out };
+  };
+  const yes = await world(90000);
+  assert.strictEqual(yes.ex.posts.length, 1, JSON.stringify(yes.out));
+  const b = yes.ex.posts[0];
+  assert.strictEqual(b.side, 'bid', 'the cheaper side here is YES, a YES buy'); assert.strictEqual(Number(b.count), 5, 'five contracts'); assert.strictEqual(b.time_in_force, 'immediate_or_cancel');
+  assert.ok(Math.abs(Number(b.price) - 0.18) < 1e-9, 'limit at the touch');
+  const d = [...yes.db.slot.values()][0];
+  assert.strictEqual(d.slotId, 'OICORE'); assert.strictEqual(d.oiRise, 90000, 'the rise that triggered it is on the record'); assert.strictEqual(yes.db.locks.get(T).by, 'SLOT:OICORE');
+  assert.strictEqual((await world(86300)).ex.posts.length, 1, 'exactly the line trades');
+  assert.strictEqual((await world(86299)).ex.posts.length, 0, 'one contract under the line buys nothing');
+  assert.strictEqual((await world(0, { candles: [] })).ex.posts.length, 0, 'no candles, no order');
+  assert.strictEqual((await world(0, { candles: [{ end_period_ts: closeSec - 180, open_interest_fp: '2000000' }] })).ex.posts.length, 0, 'one candle missing, no order');
+  const dear = await world(90000, { market: { yes_bid_dollars: '0.8200', yes_ask_dollars: '0.8300' } });
+  assert.strictEqual(dear.ex.posts.length, 1, 'when YES is dear the cheap side is NO');
+  assert.strictEqual(dear.ex.posts[0].side, 'ask', 'a NO buy is sent as a YES-price ask-side order');
+  const tooCheap = await world(90000, { market: { yes_bid_dollars: '0.0100', yes_ask_dollars: '0.0300' } });
+  assert.strictEqual(tooCheap.ex.posts.length, 0, 'a cheap side under 5c is outside the band: no order');
+  assert.strictEqual((await world(90000, { market: { yes_bid_dollars: '0.4900', yes_ask_dollars: '0.5100' } })).ex.posts.length, 0, 'both sides at 51c: the cheaper side is over the 50c band edge, no order');
 };
 gates['SW5 a switch on with no registered strategy, or a registry with one bad entry, sends nothing'] = async () => {
   for (const flags of [{ enabled: true, registry: [] }, { enabled: false, registry: [GOOD()] }, { enabled: true, registry: [GOOD({ contractsPerOrder: 11 })] }, { enabled: true, registry: [GOOD({ exit: { stopBid: 0.4, targetBid: 0.95, mustExitLeftSec: 30 } })] }]) {

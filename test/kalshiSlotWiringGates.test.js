@@ -17,6 +17,18 @@ const code = (s) => s.replace(/\/\*[\s\S]*?\*\//g, '').replace(/^\s*\/\/.*$/gm, 
 const { NOW, T, GT, pem, q, l1World, settledLoss, iso } = fx;
 const gates = {};
 const clone = (x) => JSON.parse(JSON.stringify(x));
+// The slot is ADMITTED (OICORE). Gates that prove OFF behaviour force the switch off on the module object for their length (the live library looks slotWatch up at call time) and ALWAYS restore.
+async function withSlotOff(fn) {
+  const a = slotLib.slotActive, w = slotLib.slotWatch;
+  slotLib.slotActive = () => false; slotLib.slotWatch = () => false;
+  try { return await fn(); } finally { slotLib.slotActive = a; slotLib.slotWatch = w; }
+}
+// The state a watch-only run represents: entries off, positions still watched.
+async function withWatchOnly(fn) {
+  const a = slotLib.slotActive, w = slotLib.slotWatch;
+  slotLib.slotActive = () => false; slotLib.slotWatch = () => true;
+  try { return await fn(); } finally { slotLib.slotActive = a; slotLib.slotWatch = w; }
+}
 
 // A slot order document as the wiring reads it.
 const slotOrder = (o) => Object.assign({ id: 'S-TESTA-' + T + '-1', strategy: 'SLOT', slotId: 'TESTA', ticker: T, series: 'KXBTC15M', side: 'yes', step: 1, count: 4, fillCount: '4', maxCost: 3.1, price: 0.76,
@@ -61,8 +73,8 @@ gates.SW0 = async () => {
   }
   assert.ok(golden.length >= 25 && golden.some((s) => s.name === 'l1 gold sizing with window usage') && golden.some((s) => s.name.startsWith('flatten')) && golden.some((s) => s.name.startsWith('exit watch')), 'the record covers the cycle, the risk, the sweep, the exit watch and Flatten');
 };
-gates['SW0b the real constants are off, and a hook bag handed to the live library does nothing while they are (two locks on one door)'] = async () => {
-  assert.strictEqual(slotLib.slotActive(), false);
+gates['SW0b with the slot forced off (the admitted constants overridden for this gate only), a hook bag handed to the live library does nothing (two locks on one door)'] = () => withSlotOff(async () => {
+  assert.strictEqual(slotLib.slotActive(), false); assert.strictEqual(slotLib.slotWatch(), false);
   const plain = l1World({}), h = hooks({ force: false });
   const withBag = l1World({});
   const a = await live.runL1Tick({ ...plain.common, quotes: [q('KXBTC15M', T)] });
@@ -78,6 +90,34 @@ gates['SW0b the real constants are off, and a hook bag handed to the live librar
   const fetchFn = async (url, o) => { calls.push(o.method + ' ' + url); if (url.includes('/portfolio/positions')) return { status: 200, text: async () => JSON.stringify({ market_positions: [] }) }; throw new Error('unexpected'); };
   const r = await live.flattenAll({ fetchFn, keyId: 'k', pem, now: NOW, store: {}, slot: h.slot });
   assert.strictEqual(r.ok, true); assert.deepStrictEqual(h.calls, [], 'Flatten calls no slot hook while off');
+});
+gates['SW0c the admitted state: exactly OICORE, valid, five contracts, hold to settle, inside every cap, nothing stored or requested can enable or enlarge it'] = () => {
+  assert.strictEqual(slotLib.SLOT_ENABLED, true); assert.strictEqual(slotLib.SLOT_EVER_USED, true);
+  assert.strictEqual(slotLib.slotActive(), true); assert.strictEqual(slotLib.slotWatch(), true);
+  assert.ok(Object.isFrozen(slotLib.SLOT_STRATEGIES));
+  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 1);
+  const o = slotLib.SLOT_STRATEGIES[0];
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(o)), {
+    id: 'OICORE', readme: 'kalshi-scalper/README.md#SLOT-OICORE', series: ['KXBTC15M'],
+    entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 },
+    exit: { holdToSettle: true }, contractsPerOrder: 5,
+    scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
+    killRules: { maxConsecutiveLosses: 18, minNet: { afterFills: 40, net: -6 } },
+    forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
+  });
+  assert.deepStrictEqual(slotLib.validateSlotStrategy(o).ok, true, JSON.stringify(slotLib.validateSlotStrategy(o)));
+  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE']);
+  assert.strictEqual(o.contractsPerOrder, 5); assert.ok(o.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
+  assert.strictEqual(o.exit.holdToSettle, true); assert.ok(slotLib.SLOT_HOLD_ALLOWED.includes(o.id));
+  assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slotLib.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET);
+  assert.ok(o.reviewedAt <= slotLib.SLOT_LAST_REVIEWED_ON);
+  // Nothing stored, requested or typed can enable or enlarge it: the entry point takes no argument and the live and run libraries have no flag.
+  assert.strictEqual(slotLib.activeSlotStrategies.length, 0); assert.strictEqual(slotLib.slotActive.length, 0); assert.strictEqual(slotLib.slotWatch.length, 0);
+  assert.ok(!/SLOT_ENABLED|SLOT_STRATEGIES|_testOnly/.test(code(liveSrc)));
+  // a stored/forged larger size or an off-list hold is refused by the validator
+  const big = JSON.parse(JSON.stringify(o)); big.contractsPerOrder = slotLib.SLOT_MAX_CONTRACTS_PER_ORDER + 1;
+  assert.strictEqual(slotLib.validateSlotStrategy(big).ok, false);
+  const other = JSON.parse(JSON.stringify(o)); other.id = 'OTHER'; assert.strictEqual(slotLib.validateSlotStrategy(other).ok, false, 'hold to settle is only for listed ids');
 };
 gates.SW1 = () => {
   const c = code(liveSrc);
@@ -414,23 +454,25 @@ gates['SW-LOST-ID a slot order whose answer was lost has no order id; its market
   const risk = await live.botRisk({ store: wl.common.store, since: 0, fetchFn: wl.common.fetchFn, nowMs: NOW, keyId: 'k', pem, slotOrders: [lost], ignoreOrderIds: set });
   assert.notStrictEqual(wl.docs.get('L1-x').result, 'hand'); assert.ok(risk.worst <= -0.9, 'the L1 loss stays counted: ' + risk.worst);
 };
-gates['SW-WATCH-ONLY with entries off but a slot order ever used, L1 still reads the slot orders, counts them in the stop and honours the direction lock'] = async () => {
-  // The patched runner makes slotWatch true; slotActive stays false (the real constants): this is exactly the "turned off, still watching" state.
-  assert.strictEqual(slotLib.slotActive(), false);
+gates['SW-WATCH-ONLY with entries off but a slot order ever used, L1 still reads the slot orders, counts them in the stop and honours the direction lock'] = () => withWatchOnly(async () => {
+  // Entries forced off (slotActive false) and watching true: exactly the "turned off, still watching" state, now forced because the shipped constants are on.
+  assert.strictEqual(slotLib.slotActive(), false); assert.strictEqual(slotLib.slotWatch(), true);
   const w = l1World({ session: { sizing: true }, extraStore: lockedStore(new Map()), positions: noPos }), h = hooks({ orders: [slotOrder({ ticker: 'KXETH15M-26OCT071345-15', series: 'KXETH15M', settled: true, result: 'no', settledPnl: -13, maxCost: 13, ts: NOW - 3600000 })] });
   const r = await live.runL1Tick({ ...w.common, ...sizingOver, quotes: [q('KXGOLD15M', GT)], slot: h.slot });
   assert.deepStrictEqual(r, { ended: 'loss stop' }, 'an orphaned slot loss still ends the session through the shared stop');
-};
+});
 
 gates['SW5b with the slot forced on and no registered strategy the engine still sends nothing'] = async () => {
-  assert.deepStrictEqual(slotLib.activeSlotStrategies(), []);
+  // The shipped registry holds OICORE, so the empty-registry engine is built through the documented test flags (enabled, empty registry).
+  const empty = runLib._testOnly.makeRunners({ enabled: true, registry: [], everUsed: false });
+  assert.deepStrictEqual(slotLib._testOnly.activeSlotStrategiesWith({ enabled: true, registry: [] }), []);
   const db = { calls: 0 }, trap = new Proxy({}, { get: () => { db.calls += 1; throw new Error('touched'); } });
-  const out = await runLib.runSlotTick({ session: { active: true }, now: NOW, enabled: true, active: true, store: trap, keyId: 'k', pem, fetchFn: async () => { db.calls += 1; throw new Error('touched'); }, quotes: [q('KXBTC15M', T)], setSession: async () => {} });
+  const out = await empty.runSlotTick({ session: { active: true }, now: NOW, enabled: true, active: true, store: trap, keyId: 'k', pem, fetchFn: async () => { db.calls += 1; throw new Error('touched'); }, quotes: [q('KXBTC15M', T)], setSession: async () => {} });
   assert.ok(out.skipped && db.calls === 0);
 };
 
 // The on path: slotLib.slotWatch is replaced on the module object for the length of the gate (the live library looks it up at call time) and always restored. Gates that prove the OFF state run unpatched.
-const UNPATCHED = /^(SW0|SW0b|SW1|SW1b|SW1c|SW3|SW5b|SW-EXIT-3)\b/;
+const UNPATCHED = /^(SW0|SW0b|SW0c|SW1|SW1b|SW1c|SW3|SW5b|SW-EXIT-3)\b/;
 const realWatch = slotLib.slotWatch;
 (async () => {
   let failed = 0;
