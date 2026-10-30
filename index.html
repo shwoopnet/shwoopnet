@@ -876,7 +876,7 @@
   .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) repeat(3, minmax(0,1fr)); gap:10px 20px; align-items:center; padding:20px 22px; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:10px 20px; align-items:center; padding:20px 22px; }
   .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
   .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
   .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
@@ -1558,6 +1558,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Account card: the Stake per trade and Reinvest pool tiles are gone; the size and the pool rule live in the bot's code and Recent trades shows what was bought</li>
                   <li>Bot page: if the second strategy's orders cannot be read the Strategies card now says so instead of showing zero; the Recent trades tiles say they cover the last 24 hours; a longer Account result range keeps the old chart dimmed while it loads</li>
                 </ul>
                 <div class="changelog-day">Oct 29</div>
@@ -2653,29 +2654,8 @@
     } else {
       // The bot can only spend what is on shard 2 (Bitcoin and gold), so that is the line shown. Funds on the other shards are one muted line and
       // only when there are any worth noting; the account total above already includes them.
-      // What one order risks right now: contracts (the cap plus any profit add-on) at the cost per contract of the latest order, so it follows the real prices.
-      var ses = kalshiLiveCtl && kalshiLiveCtl.session, stakeRow = '';
-      if(ses && ses.active === true){
-        var lastO = (kalshiLiveOrders || []).filter(function(o){ return o && Number(o.count) > 0 && Number.isFinite(Number(o.maxCost)) && o.strategy === 'L1'; }).sort(function(x, y){ return y.ts - x.ts; })[0];
-        var perC = lastO ? Number(lastO.maxCost) / Number(lastO.count) : 0.93;
-        // Until the new session's first look writes sizeCap there is no real size: showing a guess (it used to be 3) put a made-up stake on screen.
-        var sizeKnown = ses.sizing !== true || Number.isFinite(ses.sizeCap);
-        // The account-funded part is held to 2% of cash (as the server does); the profit-funded add-on sits outside that rule and is simply added.
-        var cashNow = a.balance.totalDollars;
-        var baseC = Number.isFinite(ses.sizeCap) ? ses.sizeCap : 1;
-        if(cashNow > 0 && perC > 0){ baseC = Math.max(1, Math.min(baseC, Math.floor(cashNow * 0.02 / perC + 1e-9))); }
-        var nC = ses.sizing === true ? baseC + (Number.isFinite(ses.sizeAddon) ? ses.sizeAddon : 0) : 1;
-        var stake = nC * perC, tb = a.balance.totalDollars;
-        // Reinvest pool progress: pool dollars over what the NEXT extra contract needs. The server counts extras at a flat $0.93 per contract (skimAddon), NOT the live price, so the target must use the same figure or the pool can read as past the line while no extra is added.
-        var poolCell = '';
-        if(ses.sizing === true && Number.isFinite(ses.sizePool)){
-          var ex = Math.max(0, Math.floor(ses.sizePool / 0.93 + 1e-9));   // the pool's own count; sizeAddon is the clamped number actually sent (profit add-on cap)
-          poolCell = '<div class="kal-tile"><span class="kal-k">Reinvest pool</span><b title="Half of each new profit high goes here. Every full contract cost in the pool adds one extra contract, up to a quarter of the base size.">' + kalshiMoney(ses.sizePool) + '</b><span class="kal-sub">of ' + kalshiMoney((ex + 1) * 0.93) + ' to the next contract</span></div>';
-        }
-        if(!sizeKnown) stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b>sized at the first look</b></div></div>';
-        else stakeRow = '<div class="kal-rows"><div class="kal-tile"><span class="kal-k">Stake per trade</span><b title="' + escapeHtml(Number.isFinite(ses.sizeNextReview) ? 'Next size review ' + kalDate(ses.sizeNextReview) : '') + '">' + nC + (nC === 1 ? ' contract' : ' contracts') + '</b><span class="kal-sub">' + kalshiMoney(stake) + (tb > 0 ? ' (' + (stake / tb * 100).toFixed(1) + '% of the account)' : '') + '</span></div>' + poolCell + '</div>';
-      }
-      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') + stakeRow +
+      // No stake or reinvest pool tiles (the owner, Oct 30, 2026: "we don't really NEED visibility on that"): the size and the pool rule live in the bot's code and Recent trades shows what was actually bought.
+      h += '<div class="kal-acct-total">' + (a.balance.totalDollars === null ? 'unknown' : kalshiMoney(a.balance.totalDollars)) + '</div>' + (Number.isFinite(a.busyAt) ? '<div class="kal-note">Kalshi was busy at ' + escapeHtml(kalTime(a.busyAt)) + ' CT, so this is the last read that worked.</div>' : '') +
         (a.liveSwitch ? '' : '<div class="kal-rows"><div><span class="kal-k">Order switch</span><b class="kal-neg">OFF, nothing can be sent</b></div></div>');
     }
     el.innerHTML = h;
