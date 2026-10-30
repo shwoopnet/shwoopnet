@@ -7858,3 +7858,22 @@ Registered in `workers/GEN9_REGISTRATION.md` before any study-period tape was fe
 Both markets **FALSIFIED** at discovery. The frozen best 10 per market (`workers/GEN9_FROZEN.md`, hashes pushed before validation was read once) fell further in validation, PF 0.37 to 0.71, every day z negative. The unconditioned base loses about 6.5c a trade at every hold length: about 3c of spread and padding plus about 3.5c of fees against a price move that averages about zero. Dropping the two 1c pads leaves every best-10 rule negative (best about -2.2c). No candidate, no forward entry, no evaluator for R6. Prediction check: median discovery PF predicted about 0.40, came in at 0.25; zero survivors as predicted.
 
 What it closes: the short coin-flip round trip on gold and Bitcoin is closed on candle data (GEN1, GEN8) and now on tape data. Only a cheaper entry, a resting maker order (MAKER5's question, readable from Nov 6), could change the arithmetic. N +51,067 (51,055 draws plus 12 information looks); running count about 678,923 (627,856 before this result), z bar about 5.26.
+
+## Result: NEWH12 (cross-asset lead and lag among the 15 minute crypto books in the same window), 2026-10-30
+
+Registered first (`workers/NEWH12_REGISTRATION.md`, commit 6aeaa8b), result `workers/NEWH12_RESULT.md`, code
+`src/scalper/newh12.py`, local candles only (Bitcoin, Ethereum and Dogecoin share 8,053 settled closes, Aug 6 to Oct 30);
+discovery to Sep 21, validation to Oct 18, holdout to Oct 30 NOT read because nothing passed. Family check first: gold against
+Bitcoin in one window is S01 to S03, BK4 and NEWH8 R3 (and the co-loss read says the two share no 15 minute factor), pairs and
+divergence at the open are BK3 and BK5, the level extreme is BK7, the ladders at the shared close are XM1 (Bitcoin and Ethereum)
+and BLADX, and an Ethereum copy of LADLEAN was declined (a copy of a falsified rule, XM1 covers it, and local KXETHD candles start
+Sep 29), so no try was spent there. The one untested shape: a lead and lag read from the CHANGE of two books over the same two
+minutes (minutes 3 to 7), one leg on the book that did not move, bought at the next candle's ask 20c to 80c and held.
+**XLAG-ETH** (Bitcoin moved 15c+, Ethereum 5c or less, buy Ethereum Bitcoin's way): PF 0.89 on 312 then 0.95 on 157,
+**FALSIFIED**. **XLAG-DOGE** (Dogecoin lagging Bitcoin): 0.92 on 537 then 0.82 on 239, **FALSIFIED**. **XLAG2-DOGE** (both
+majors moved 10c+ the same way, Dogecoin flat): 0.96 on 633 then 0.84 on 272, **FALSIFIED**. **XLAG-BTC** (the control, Bitcoin
+lagging Ethereum): 0.90 on 453 then 0.84 on 258, **FALSIFIED**, and equal to the hypothesis, so the lag story fails on its own
+terms. Information: the coins settle the same way in 76% to 83% of windows (I1), yet the flat book won at or below its price in
+every cell; after a trigger the lagging book drifts 0c to 1.7c toward the leader over 3 minutes (I2), the largest drift being
+Bitcoin's after Ethereum, below one fee and absent from the outcome. The mid-window cross-asset family among these markets is
+closed on 1 minute candles. N +6; running count about 678,929 (z bar 5.26).
