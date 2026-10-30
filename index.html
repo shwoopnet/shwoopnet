@@ -1567,6 +1567,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Deploy: the phone alerts deploy script no longer makes a new alert key when it merely fails to read the old one (that broke every subscribed phone); it only makes one if the key truly does not exist</li>
                   <li>Updates: a browser running an out-of-date copy of the site now gets a pop-up that blocks the page until it reloads (it keeps you signed in; it checks every 5 minutes and when the app comes back, for every visitor, and never while something is being typed)</li>
                   <li>Bot status: the whole card (orders today, last order, win rate, edge, best and worst market) now counts every strategy but only the markets actively in the Strategies list, so paused XRP and Bitcoin's old L1 orders no longer show</li>
                   <li>Phones: the bottom navigation bar is no longer a scroll container and has its own layer, to stop it floating into the middle of the screen while scrolling in the iPhone Home Screen app (a best fix, tell us if it still happens)</li>
