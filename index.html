@@ -1562,6 +1562,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Bot status: the whole card (orders today, last order, win rate, edge, best and worst market) now counts every strategy but only the markets actively in the Strategies list, so paused XRP and Bitcoin's old L1 orders no longer show</li>
                   <li>Phones: the bottom navigation bar is no longer a scroll container and has its own layer, to stop it floating into the middle of the screen while scrolling in the iPhone Home Screen app (a best fix, tell us if it still happens)</li>
                   <li>Account card, Strategies table: the Status column and the explanatory text under the table are gone (an error note still shows if the second strategy's orders cannot be read)</li>
                   <li>Account card: the Strategies table now sits inside it, beside the balance and the Loss stop, with All strategies as the first row (it is the account figure) and each strategy's markets under its name; the separate Strategies card is gone</li>
@@ -3398,7 +3399,7 @@
   function kalshiTodayWork(orders, nowMs){
     var key = kalDayKey(nowMs), out = { sent: 0, filled: 0, noFill: 0, problem: 0, lastTs: null };
     (orders || []).forEach(function(o){
-      if(!o || o.strategy !== 'L1' || !Number.isFinite(o.ts) || kalDayKey(o.ts) !== key){ return; }
+      if(!o || (o.strategy !== 'L1' && o.strategy !== 'SLOT') || !kalshiIsActive(o) || !Number.isFinite(o.ts) || kalDayKey(o.ts) !== key){ return; }
       out.sent++;
       if(o.status === 'filled'){ out.filled++; } else if(o.status === 'no fill'){ out.noFill++; } else if(o.status === 'unknown' || o.status === 'error'){ out.problem++; }
       if(out.lastTs === null || o.ts > out.lastTs){ out.lastTs = o.ts; }
@@ -3430,13 +3431,13 @@
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Orders today</span><b>' + escapeHtml(sentText) + '</b></div>' +
         (work.problem ? '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>' : '') +
         (lastText ? '<div><span class="kal-k">Last order</span><b>' + escapeHtml(lastText) + '</b></div>' : '') + '</div>');
-      var edgeAcct = kalshiLiveAcct, edge = kalshiEdgeCheck(kalshiResolveOrders(kalshiLiveOrders, edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : []), now), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
+      var edgeAcct = kalshiLiveAcct, edge = kalshiEdgeCheck(kalshiResolveOrders(kalshiAllOrders(), edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : []).filter(kalshiIsActive), now), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
       var edgeText = !edge.enough ? 'too few trades yet' : edge.winRate.toFixed(1) + '% against ' + (edge.breakEven === null ? 'n/a' : edge.breakEven.toFixed(1) + '%') + ' to break even';
       var centsText = !edge.enough || edge.edgeCents === null ? '' : (edge.edgeCents >= 0 ? '+' : '-') + Math.abs(edge.edgeCents).toFixed(1) + 'c a contract';
       var bestText = edge.best ? edge.best.label + ' ' + sg(edge.best.net) : '', worstText = edge.worst ? edge.worst.label + ' ' + sg(edge.worst.net) : '';
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalEdge"><div><span class="kal-k">Win rate, last ' + escapeHtml(String(edge.n)) + '</span><b>' + escapeHtml(edgeText) + '</b></div>' +
         (centsText ? '<div><span class="kal-k">Edge</span><b>' + escapeHtml(centsText) + '</b></div>' : '') +
-        (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');
+        (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');   // best and worst over the markets actively in the Strategies list only (kalshiIsActive): it used to name XRP, which is paused
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
@@ -3522,6 +3523,14 @@ kalshiStatusTick();
   }
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
+  // The markets ACTIVELY in the Strategies list (the owner, Oct 30, 2026: the Bot status card should count only those): a strategy and a market it trades, read from the same labels the Strategies table shows (KAL_STRATEGY_INFO).
+  // An order counts when its strategy and its market are a pair on that list, so a paused market (XRP) and Bitcoin's old L1 orders (L1 no longer trades it; the second strategy does) are left out.
+  function kalshiActivePairs(){
+    var out = {};
+    Object.keys(KAL_STRATEGY_INFO).forEach(function(id){ String(KAL_STRATEGY_INFO[id].markets || '').split(',').forEach(function(m){ m = m.trim(); if(m){ out[id + '|' + m] = true; } }); });
+    return out;
+  }
+  function kalshiIsActive(o){ return !!o && kalshiActivePairs()[kalshiStrategyOf(o) + '|' + kalshiMarketName(o)] === true; }
   function kalshiChipHtml(label, esc){ return '<span class="kal-chip">' + esc(label) + '</span>'; }
   // since (optional): n, won, lost and net count only settled orders from that time on (the range chosen under Account result); today, open and the last order time always look at every order.
   function kalshiOrdersSummary(orders, nowMs, since){

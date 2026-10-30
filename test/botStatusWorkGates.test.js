@@ -17,17 +17,19 @@ function fnSource(name) {
   throw new Error('unbalanced ' + name);
 }
 const KAL_EDGE = /var KAL_EDGE_MIN = [^\n]*\n/.exec(html)[0];
-const f = new Function("var KAL_TZ = 'America/Chicago';\n" + KAL_EDGE + ['kalDayKey', 'kalshiTodayWork', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'kalshiPricePaid', 'kalshiEdgeCheck'].map(fnSource).join('\n') + '; return { kalshiTodayWork, kalshiEdgeCheck };')();
+const KAL_INFO = /var KAL_STRATEGY_INFO = \{[\s\S]*?\n  \};/.exec(html)[0];
+const STRAT_OF = /  function kalshiStrategyOf\(o\)\{[^\n]*\n/.exec(html)[0];
+const f = new Function("var KAL_TZ = 'America/Chicago';\n" + KAL_EDGE + '\n' + KAL_INFO + '\n' + STRAT_OF + '\n' + ['kalDayKey', 'kalshiActivePairs', 'kalshiIsActive', 'kalshiTodayWork', 'kalshiOrderPnl', 'kalshiMarketName', 'kalshiPerfStats', 'kalshiPricePaid', 'kalshiEdgeCheck'].map(fnSource).join('\n') + '; return { kalshiTodayWork, kalshiEdgeCheck };')();
 const NOW = Date.parse('2026-10-26T18:00:00Z');   // 1 PM Central
 const MIN = 60000;
 
 gates.W1 = () => {
   // A miss must be visible: an order that did not fill is not a quiet success.
   const w = f.kalshiTodayWork([
-    { strategy: 'L1', ts: NOW - 5 * MIN, status: 'filled' },
-    { strategy: 'L1', ts: NOW - 20 * MIN, status: 'filled' },
-    { strategy: 'L1', ts: NOW - 40 * MIN, status: 'no fill' },
-    { strategy: 'L1', ts: NOW - 60 * MIN, status: 'unknown' },
+    { strategy: 'L1', series: 'KXGOLD15M', ts: NOW - 5 * MIN, status: 'filled' },
+    { strategy: 'L1', series: 'KXGOLD15M', ts: NOW - 20 * MIN, status: 'filled' },
+    { strategy: 'L1', series: 'KXGOLD15M', ts: NOW - 40 * MIN, status: 'no fill' },
+    { strategy: 'L1', series: 'KXGOLD15M', ts: NOW - 60 * MIN, status: 'unknown' },
   ], NOW);
   assert.deepStrictEqual([w.sent, w.filled, w.noFill, w.problem], [4, 2, 1, 1]);
   assert.strictEqual(w.lastTs, NOW - 5 * MIN);
@@ -35,9 +37,9 @@ gates.W1 = () => {
 gates.W2 = () => {
   // Yesterday's orders and other strategies never count toward today.
   const w = f.kalshiTodayWork([
-    { strategy: 'L1', ts: NOW - 30 * 3600000, status: 'filled' },
+    { strategy: 'L1', series: 'KXGOLD15M', ts: NOW - 30 * 3600000, status: 'filled' },
     { strategy: 'OW1', ts: NOW - 5 * MIN, status: 'filled' },
-    { ts: NaN, strategy: 'L1', status: 'filled' },
+    { ts: NaN, strategy: 'L1', series: 'KXGOLD15M', status: 'filled' },
   ], NOW);
   assert.strictEqual(w.sent, 0);
   assert.strictEqual(w.lastTs, null);
@@ -54,7 +56,7 @@ gates.W3 = () => {
 // Settled orders: 'win' pays (1 - price) a contract, a loss costs the price.
 const settled = (series, n, price, lossEvery, endTs) => Array.from({ length: n }, (_, i) => {
   const loss = lossEvery && i % lossEvery === lossEvery - 1;
-  return { strategy: 'L1', series, ts: endTs - (n - i) * 60000, settled: true, count: 2, fillCount: '2', price, averageFillPrice: String(price), settledPnl: loss ? -price * 2 : (1 - price) * 2 };
+  return { strategy: 'L1', series: 'KXGOLD15M', series, ts: endTs - (n - i) * 60000, settled: true, count: 2, fillCount: '2', price, averageFillPrice: String(price), settledPnl: loss ? -price * 2 : (1 - price) * 2 };
 });
 gates.W4 = () => {
   // The edge is the win rate against the average price paid: 9 wins in 10 at 93c is losing money, and the card must say so.
@@ -77,7 +79,7 @@ gates.W6 = () => {
 
 gates.W7 = () => {
   // A NO order's average fill is written as the YES price (7c for a 93c NO). The break-even is what was PAID for the side bought, so a mixed book of YES and NO buys at 93c breaks even at 93%, not 50%.
-  const mk = (i, side) => ({ strategy: 'L1', series: 'KXGOLD15M', ts: NOW - (40 - i) * 60000, settled: true, side, count: 1, fillCount: '1', maxCost: 0.93, price: 0.93,
+  const mk = (i, side) => ({ strategy: 'L1', series: 'KXGOLD15M', series: 'KXGOLD15M', ts: NOW - (40 - i) * 60000, settled: true, side, count: 1, fillCount: '1', maxCost: 0.93, price: 0.93,
     averageFillPrice: side === 'no' ? '0.07' : '0.93', settledPnl: i % 10 === 9 ? -0.93 : 0.07 });
   const orders = Array.from({ length: 40 }, (_, i) => mk(i, i % 2 ? 'no' : 'yes'));
   const e = f.kalshiEdgeCheck(orders, NOW);
