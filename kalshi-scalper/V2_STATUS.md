@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 11:05 PM CT, NEWH4 (ladders): FALSIFIED.** Strongest finding: longshots on the hourly ladders are overpriced (gold PF 0.39, z -4.9; Bitcoin 0.72, z -3.0). Its mirror, buying the near-certain side and holding, is a favourite-and-hold entry the owner closed on Oct 28, so it was not tried; listed as an owner question in the shortlist.
+
 **2026-10-29 11:20 PM CT, EXITOI-G: the open interest exit does not carry to gold, Dogecoin or Ethereum (pooled FALSIFIED).** Selling L1 favourites late again gives back more on recoveries than it saves. N about 592,065.
 
 **2026-10-29 11:05 PM CT, NEWH3 (Bitcoin: ladder vs 15 minute book, spread widening, open interest exit for L1): FALSIFIED or NOT_ENOUGH_DATA.** One small lead: on L1 entries, falling open interest 3 to 6 minutes before the close marks failing favourites (62% lose); selling at 120 s beat holding in both windows but on too few triggers. N about 592,061.
