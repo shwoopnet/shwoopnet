@@ -12,8 +12,12 @@ Counts as of 2026-10-30 2:00 PM CT: N 728,652. Status: R = registered, Q = queue
 5. Q: OICORE entry timing inside the 180 to 120 s window (which second inside the window fills best, from R6 Bitcoin book). Information first.
 6. Q: OICORE fill rate and slippage at 5 and 10 contracts (R6 Bitcoin book depth vs the orders in `slotOrders`).
 7. Q: OICORE and L1 in the same window (correlated-window risk): how often a Bitcoin slot order shares a window with a gold or Dogecoin loss. Counts only.
-8. Q: L1 exit alternatives as information only (the 25c line vs hold, per market, live record). STRUCT1 and EXIT1 already say the line is neutral, so low priority.
+8. DONE by reference: L1 exit alternatives. The report has no price path after entry, so I cannot add to V2's STRUCT1 (live 50 exits -$155.85, holding about -$158.49) and EXIT1 (holding beats every exit shape in history: hold 0.961 / 0.928 / 0.898, 25c line 0.921 / 0.897 / 0.869). Nothing new from here.
 9. Q: L1 gold ladder cap by order size once R4 has 20 orders at 16+ contracts.
+10. Q: no-fill timing: seconds between the decision and the order, by market, from `ts` against the 6 minute mark (does the bot's tick delay line up with no-fill share). Counts from the report only.
+11. Q: gold orders by CT hour, fills and no-fills, live record (frequency map, no outcomes), to see which hours lose fills to the quiet block and to thin books.
+12. Q: Dogecoin shrinking entries (215 to 170 a week): count by day whether the drop is price (fewer in band) or fills (more no-fills). Counts only.
+13. Q: OICORE threshold sensitivity (86,300 vs trailing percentile) once V2 pushes counts only.
 Refill rule: if this list falls under 5 open items, add from: Dogecoin entry timing (6 vs 8 minute look), gold quiet hours review (due Nov 24 to 26, V2 owns the read), spread filter at 2c or more as a frequency cost count, OICORE open interest threshold sensitivity (threshold 86,300 vs the trailing percentile), OICORE side rule sensitivity.
 
 ## Entries
