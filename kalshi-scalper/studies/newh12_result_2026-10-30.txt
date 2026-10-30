@@ -1,0 +1,47 @@
+windows: KXBTC15M 8053, KXETH15M 8053, KXDOGE15M 8053
+
+== XLAG-ETH: leaders ('KXBTC15M',) lagger KXETH15M threshold 0.15
+  signal funnel: {'paired': 8053, 'candles read': 39071, 'lagger moved too': 10861, 'no trigger': 7405, 'trigger': 648, 'candle unreadable': 11}
+  fill funnel (all stages): {'trade': 512, 'band': 136}
+  discovery  : n 312 (46 d) PF10 0.89 PF1 0.88 PFx1.2 0.88 net10 $-76.35 netx1.2 $-85.50 win 47.1% cost/set 0.480 day z -1.11 | zero-vol 0, PF10 without 0.89
+  validation : n 157 (27 d) PF10 0.95 PF1 0.93 PFx1.2 0.94 net10 $-17.56 netx1.2 $-22.15 win 47.8% cost/set 0.473 day z -0.30 | zero-vol 0, PF10 without 0.95
+  disc: yes share 0.50; mean signal ask 0.473 vs fill 0.480; by candle {-480: 68, -540: 68, -720: 64, -660: 57, -600: 55}
+  val: yes share 0.54; mean signal ask 0.472 vs fill 0.473; by candle {-540: 33, -480: 32, -720: 38, -600: 29, -660: 25}
+  I2 catch-up (disc+val, signed in the leader's direction; n, mean mid change): {'lagger +60s': (595, 0.0054), 'lagger +180s': (595, 0.0095), 'leader +60s': (595, -0.0019), 'leader +180s': (595, 0.0031)}
+  verdict: FALSIFIED (discovery)
+
+== XLAG-DOGE: leaders ('KXBTC15M',) lagger KXDOGE15M threshold 0.15
+  signal funnel: {'paired': 8053, 'candles read': 37905, 'lagger moved too': 9966, 'no trigger': 6874, 'trigger': 1179, 'candle unreadable': 35}
+  fill funnel (all stages): {'trade': 867, 'band': 312}
+  discovery  : n 537 (46 d) PF10 0.92 PF1 0.90 PFx1.2 0.91 net10 $-97.30 netx1.2 $-112.97 win 47.9% cost/set 0.481 day z -0.86 | zero-vol 0, PF10 without 0.92
+  validation : n 239 (27 d) PF10 0.82 PF1 0.80 PFx1.2 0.81 net10 $-107.90 netx1.2 $-114.94 win 44.4% cost/set 0.473 day z -1.51 | zero-vol 0, PF10 without 0.82
+  disc: yes share 0.50; mean signal ask 0.480 vs fill 0.481; by candle {-720: 142, -480: 94, -660: 117, -600: 94, -540: 90}
+  val: yes share 0.48; mean signal ask 0.470 vs fill 0.473; by candle {-600: 50, -540: 41, -660: 47, -480: 42, -720: 59}
+  I2 catch-up (disc+val, signed in the leader's direction; n, mean mid change): {'lagger +60s': (1049, -0.0015), 'lagger +180s': (1048, 0.0007), 'leader +60s': (1050, -0.0054), 'leader +180s': (1050, -0.0024)}
+  verdict: FALSIFIED (discovery)
+
+== XLAG2-DOGE: leaders ('KXBTC15M', 'KXETH15M') lagger KXDOGE15M threshold 0.1
+  signal funnel: {'paired': 8053, 'candles read': 37321, 'lagger moved too': 12119, 'no trigger': 6675, 'trigger': 1378, 'candle unreadable': 44, 'leaders disagree': 73}
+  fill funnel (all stages): {'trade': 1032, 'band': 346}
+  discovery  : n 633 (46 d) PF10 0.96 PF1 0.94 PFx1.2 0.95 net10 $-57.39 netx1.2 $-75.80 win 49.8% cost/set 0.491 day z -0.43 | zero-vol 0, PF10 without 0.96
+  validation : n 272 (27 d) PF10 0.84 PF1 0.83 PFx1.2 0.83 net10 $-101.97 netx1.2 $-109.85 win 46.0% cost/set 0.481 day z -1.05 | zero-vol 0, PF10 without 0.84
+  disc: yes share 0.49; mean signal ask 0.495 vs fill 0.491; by candle {-720: 181, -540: 103, -660: 144, -480: 93, -600: 112}
+  val: yes share 0.48; mean signal ask 0.481 vs fill 0.481; by candle {-600: 61, -540: 44, -660: 62, -720: 71, -480: 34}
+  I2 catch-up (disc+val, signed in the leader's direction; n, mean mid change): {'lagger +60s': (1206, -0.0006), 'lagger +180s': (1203, -0.0017), 'leader +60s': (1206, -0.0037), 'leader +180s': (1206, -0.0029)}
+  verdict: FALSIFIED (discovery)
+
+== XLAG-BTC: leaders ('KXETH15M',) lagger KXBTC15M threshold 0.15
+  signal funnel: {'paired': 8053, 'candles read': 38326, 'lagger moved too': 11320, 'no trigger': 7142, 'trigger': 911, 'candle unreadable': 11}
+  fill funnel (all stages): {'band': 135, 'trade': 776}
+  discovery  : n 453 (46 d) PF10 0.90 PF1 0.88 PFx1.2 0.89 net10 $-106.92 netx1.2 $-120.28 win 48.3% cost/set 0.491 day z -1.08 | zero-vol 0, PF10 without 0.90
+  validation : n 258 (27 d) PF10 0.84 PF1 0.82 PFx1.2 0.83 net10 $-101.54 netx1.2 $-109.18 win 48.8% cost/set 0.512 day z -1.24 | zero-vol 0, PF10 without 0.84
+  disc: yes share 0.54; mean signal ask 0.483 vs fill 0.491; by candle {-540: 78, -660: 116, -600: 81, -720: 120, -480: 58}
+  val: yes share 0.47; mean signal ask 0.494 vs fill 0.512; by candle {-720: 67, -480: 43, -600: 47, -540: 38, -660: 63}
+  I2 catch-up (disc+val, signed in the leader's direction; n, mean mid change): {'lagger +60s': (839, 0.0081), 'lagger +180s': (839, 0.0165), 'leader +60s': (839, -0.0012), 'leader +180s': (839, -0.0047)}
+  verdict: FALSIFIED (discovery)
+
+I1 same-window outcome agreement (n paired windows, share settled the same way):
+  disc: {'KXBTC15M/KXETH15M': (4357, 0.806), 'KXBTC15M/KXDOGE15M': (4357, 0.761), 'KXETH15M/KXDOGE15M': (4357, 0.773)}
+  val: {'KXBTC15M/KXETH15M': (2560, 0.83), 'KXBTC15M/KXDOGE15M': (2560, 0.776), 'KXETH15M/KXDOGE15M': (2560, 0.798)}
+
+N running before 678,923; this round 6; after about 678,929; one-sided z bar 5.26
