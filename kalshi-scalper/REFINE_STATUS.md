@@ -22,6 +22,11 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:35 PM CT, queue item 11 (frequency map by Central hour, orders since Oct 20, counts only, 0 tries).**
+- **Gold:** attempts 38 / 49 / 47 / 54 and no-fill share 37% / 37% / 36% / 33% for the blocks 00 to 05, 06 to 11, 12 to 17, 18 to 23. Flat, no hour block loses fills.
+- **Dogecoin:** attempts 42 / 55 / 54 / 49, no-fill share 24% / 25% / 39% / 24%. The 12:00 to 17:59 CT block looks worse (39%, 54 orders); one cell out of four after I looked, so treat it as noise until it repeats (re-check weekly).
+- **What the 8 PM to midnight block costs in frequency (important for the owner's requirement):** orders sent in 20:00 to 23:59 CT over the 10 days: gold 30 attempts, Dogecoin 33. Per week that is about 21 gold and 23 Dogecoin attempts, so about 14 and 16 fills a week at the usual fill rate, **about 30 fills a week together, roughly 20% to 23% of the 132 a week**. PR #665 gave both markets this block, and the block was chosen for gold on a weak test (corrected z 1.87, 3c a entry worse; Dogecoin's night hours unmeasured). So the block costs more frequency than widening the band could buy back (about +36 fills a week at the very most, and negative expected dollars). Whether that trade is worth it is the owner's call; the evidence for the Dogecoin block is nil so far (R3 will measure it forward). Flag for the main session as a decision input: the block is the largest single frequency cost now in L1.
+
 **2026-10-30 2:30 PM CT, queue item 10 (no-fill share by how late the order went out), 6 minute entries, report rows to Oct 30. Descriptive, 0 tries, a LEAD to register, not a finding.**
 Seconds left at the order time (ticker close, Eastern time) against no-fill share:
 - Dogecoin: 355 to 360 s left 104 orders, 21% no fill; 345 to 355 s 73 orders (25 at 345, 48 at 350), 43% no fill. Difference 21 points, z about 3.0 (a rough two-proportion test, not corrected for the tries I have looked at today).
