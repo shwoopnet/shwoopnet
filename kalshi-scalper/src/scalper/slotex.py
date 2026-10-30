@@ -33,14 +33,15 @@ def entries(win, fill_mode):
     return out
 
 
-def score(e, exit_, add=0.0, mult=1.0):
+def score(e, exit_, add=0.0, mult=1.0, C=C):
+    """(net $, exit kind, sell price, fees $)."""
     w, side, fill, off = e
     name, tp, sl, early = exit_
     fill = min(0.99, round(fill + add, 6))
     cost = C * fill + F.fee(fill, C, mult)
     if not early:
         won = w["result"] == side
-        return C * (1.0 if won else 0.0) - cost, "hold", None
+        return C * (1.0 if won else 0.0) - cost, "hold", None, F.fee(fill, C, mult)
     how, px = None, None
     for o in range(off + 60, -59, 60):
         r = w["c"].get(o)
@@ -58,8 +59,9 @@ def score(e, exit_, add=0.0, mult=1.0):
             how, px = "tp", b
             break
     if px is None or px <= 0:
-        return -cost, how, 0
-    return C * px - F.fee(px, C, mult) - cost, how, px
+        return -cost, how, 0, F.fee(fill, C, mult)
+    return (C * px - F.fee(px, C, mult) - cost, how, px,
+            F.fee(fill, C, mult) + F.fee(px, C, mult))
 
 
 def main():
@@ -86,5 +88,54 @@ def main():
         print(f"| {fm} | {ex} | {cn} | {d[0]} | {d[1]:.2f} | {d[2]:.2f} | {v[0]} | {v[1]:.2f} | {v[2]:.2f} | {mx(d)} | {mx(v)} | {d[4]:.1%}/{v[4]:.1%} |")
 
 
+BUCKETS = [("<10c", 0, 0.10), ("10-20c", 0.10, 0.20), (">20c", 0.20, 1.0)]
+SIZES = (1, 5, 10)
+
+
+def stage_cells(es, ex, add, mult, c):
+    out = {}
+    for st in ("disc", "val"):
+        nets = [score(e, ex, add, mult, c)[0] for e in es if F.stage(e[0]["close"]) == st]
+        out[st] = (len(nets), F.pf(nets))
+    return out
+
+
+def by_size():
+    """Amendment 1: every variant at C = 1, 5, 10."""
+    win = F.load()
+    print("| fill | exit | cost | n disc/val | " + " | ".join(f"C={c} PF disc | C={c} PF val" for c in SIZES) + " |")
+    print("|---|---|---|---|" + "---|---|" * len(SIZES))
+    for fm in ("N", "S"):
+        es = entries(win, fm)
+        for ex in EXITS:
+            for cn, add, mult in (("base", 0, 1), ("x1.2", 0, 1.2), ("+2c", 0.02, 1)):
+                cells = [stage_cells(es, ex, add, mult, c) for c in SIZES]
+                n = cells[0]
+                print(f"| {fm} | {ex[0]} | {cn} | {n['disc'][0]}/{n['val'][0]} | "
+                      + " | ".join(f"{x['disc'][1]:.2f} | {x['val'][1]:.2f}" for x in cells) + " |")
+    print()
+    print("Entry price buckets, base cost (raw entry fill). fee/ct = mean entry+sell fees per contract, cents.")
+    print()
+    print("| fill | exit | bucket | n disc/val | " + " | ".join(f"C={c} PF disc/val | C={c} fee/ct disc/val" for c in SIZES) + " |")
+    print("|---|---|---|---|" + "---|---|" * len(SIZES))
+    for fm in ("N", "S"):
+        es = entries(win, fm)
+        for ex in EXITS:
+            for bn, lo, hi in BUCKETS:
+                sub = [e for e in es if lo <= e[2] < hi]
+                ns, parts = None, []
+                for c in SIZES:
+                    pfs, fees, cnt = [], [], []
+                    for st in ("disc", "val"):
+                        r = [score(e, ex, 0, 1, c) for e in sub if F.stage(e[0]["close"]) == st]
+                        cnt.append(len(r))
+                        pfs.append(f"{F.pf([x[0] for x in r]):.2f}" if r else "-")
+                        fees.append(f"{100 * sum(x[3] for x in r) / c / len(r):.2f}" if r else "-")
+                    ns = cnt
+                    parts.append(f"{pfs[0]}/{pfs[1]} | {fees[0]}/{fees[1]}")
+                print(f"| {fm} | {ex[0]} | {bn} | {ns[0]}/{ns[1]} | " + " | ".join(parts) + " |")
+
+
 if __name__ == "__main__":
-    main()
+    import sys
+    by_size() if "--sizes" in sys.argv else main()
