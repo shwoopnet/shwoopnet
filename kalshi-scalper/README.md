@@ -7927,3 +7927,5 @@ remaining questions are forward only (LOCK2 on simultaneous quotes; BTCDIGI-F wi
 700,161 (z bar 5.26).
 
 Lead's count correction: FALS5 (+12) landed before this section, so the running count after NEWH13 is about 700,173, not 700,161.
+
+- RECORD1 information look, 2026-10-30 9:40 AM CT (daily recorder check, decides nothing): 33 runs, 1,583 windows, 371,498 polls, 429 share 0.0%; 159 of 300 qualifying trades on 9 of 10 dates; clock_ok still False. Coverage usable, the registered read has not run.
