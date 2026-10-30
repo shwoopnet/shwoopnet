@@ -1,0 +1,32 @@
+{
+ "info": {
+  "series": "KXGOLD15M",
+  "generated": 13211,
+  "distinct": 5000,
+  "rejected": {
+   "exit_not_allowed": 786,
+   "under_30_trades": 2742,
+   "reference_overlap": 2,
+   "l1_variant": 3,
+   "duplicate": 4678
+  },
+  "ref_sets": {
+   "rev1": 0,
+   "underdog180": 1133,
+   "oicore": 0,
+   "oidrift": 0,
+   "l1": 1163
+  },
+  "disc_windows": 3192,
+  "disc_rows": 40524,
+  "disc_days": 45,
+  "pf_median": 0.6657746654954961,
+  "pf_p95": 1.0039859467754713,
+  "at_size": 4133,
+  "best_at_size": 1.4701344500771432,
+  "survivors_n": 0,
+  "controls_n": 4133,
+  "frozen_at": "2026-10-30T00:35:05.644708+00:00"
+ },
+ "survivors": []
+}
