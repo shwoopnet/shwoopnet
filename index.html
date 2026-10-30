@@ -1556,6 +1556,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Oct 30</div>
+                <ul class="changelog-list">
+                  <li>Bot page: if the second strategy's orders cannot be read the Strategies card now says so instead of showing zero; the Recent trades tiles say they cover the last 24 hours; a longer Account result range keeps the old chart dimmed while it loads</li>
+                </ul>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
                   <li>Strategies card: Result, settled and win rate now follow the range chosen under Account result (same orders, older read included), with an All strategies row that matches that card's figure</li>
@@ -2256,9 +2260,9 @@
     if(!st || !st.settled){ return ''; }
     var tile = function(k, v, sub){ return '<div class="kal-mini-tile"><div class="kal-mini-k">' + k + '</div><div class="kal-mini-v">' + v + '</div>' + (sub ? '<div class="kal-mini-s">' + sub + '</div>' : '') + '</div>'; };
     return '<div class="kal-tr-stats">' +
-      tile('Win rate', Math.round(st.wins / st.settled * 100) + '%', st.wins + ' of ' + st.settled + ' settled') +
-      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), '') +
-      tile('Early sells', String(st.early), 'of ' + st.total + ' trades') +
+      tile('Win rate', Math.round(st.wins / st.settled * 100) + '%', st.wins + ' of ' + st.settled + ' settled, last 24 hours') +
+      tile('Streak', st.streak + (st.streakKind === 'win' ? (st.streak === 1 ? ' win' : ' wins') : (st.streak === 1 ? ' loss' : ' losses')), 'last 24 hours') +
+      tile('Early sells', String(st.early), 'of ' + st.total + ' trades, last 24 hours') +
       (st.fees !== null ? tile('Fees paid', money(st.fees), 'last 24 hours') : tile('Last 24 hours', String(st.total), '')) + '</div>';
   }
 
@@ -2999,11 +3003,14 @@
           api.kalshiOrdersSince(since).then(function(o){ kalshiPnlFetched[key] = { at: Date.now(), orders: o }; delete kalshiPnlFetching[key]; renderKalshiPnl(); renderKalshiStrategies(); },
             function(err){ kalshiPnlFetched[key] = { at: Date.now(), orders: [], failed: true, code: String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60) }; delete kalshiPnlFetching[key]; renderKalshiPnl(); renderKalshiStrategies(); });   // the reason is kept so the note can say it (a permission, quota or timeout problem look the same otherwise)
         }
-        set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); return;
+        var body = document.getElementById('kalPnlBody');      // keep the last chart on screen, dimmed, so the card does not collapse while the older read runs
+        if(body && body.querySelector('svg')){ body.style.opacity = '0.45'; if(!body.querySelector('.kal-loading-note')){ body.insertAdjacentHTML('beforeend', '<div class="kal-note kal-loading-note">Reading older trades...</div>'); } } else { set('kalPnlBody', '<div class="kal-empty">Reading older trades...</div>'); }
+        return;
       }
     }
     source = source.concat(kalshiSlotOrders || []);     // the second strategy's orders are part of the account's result
     var orders = kalshiResolveOrders(source, kalshiLiveAcct && kalshiLiveAcct.results, kalshiLiveAcct && kalshiLiveAcct.fills && kalshiLiveAcct.fills.ok ? kalshiGroupFills(kalshiLiveAcct.fills.fills) : []);
+    var pb = document.getElementById('kalPnlBody'); if(pb){ pb.style.opacity = ''; }
     set('kalPnlBody', kalshiPnlCardHtml(orders, key, nowMs, escapeHtml, kalshiMoney, kalshiLiveAcct && kalshiLiveAcct.balance && kalshiLiveAcct.balance.ok ? kalshiLiveAcct.balance.totalDollars : null) + (partial ? '<div class="kal-note">Older trades could not be read, so this shows only the most recent 1,000 orders' + (hit && hit.code ? ' (' + escapeHtml(hit.code) + ')' : '') + '. It tries again in a minute.</div>' : ''));
   }
   // Touch or hover on the result line (the owner, Oct 24, 2026: "do that with our account balance chart too"): a guide and a dot follow the pointer to the nearest trade, and the figure at the top shows the running result at
@@ -3559,6 +3566,7 @@ kalshiStatusTick();
       body += cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
     }
     var notes = rows.filter(function(r){ return r.info.note; }).map(function(r){ return '<div class="kal-note">' + esc(r.info.note) + '</div>'; }).join('');
+    if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
     return '<div class="kal-card-title">Strategies</div><div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
       '<div class="kal-note">Result, settled and win rate follow the range chosen under Account result, so the last row matches that figure.' + (opts.partial ? ' Older trades are still loading or could not be read, so this covers the latest orders only.' : '') + '</div>';
   }
@@ -3580,11 +3588,12 @@ kalshiStatusTick();
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
       rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
     });
-    tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial });     // hidden is the Layout menu's to set, never this render's
+    tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial, slotError: kalshiSlotError });     // hidden is the Layout menu's to set, never this render's
   }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
   var kalshiSlotUnsub = null;
+  var kalshiSlotError = '';   // set when the second strategy's orders cannot be read (a rule not published, a lost connection): the Strategies card says so instead of showing a false zero (the owner, Oct 30, 2026: OICORE showed "No order yet" after it bought)
 
   // There is no switch for the exit (fixed at 25c, always selling) or the pool rule (always after every win): both live in the server code, on purpose (Oct 12, 2026).
 
@@ -3637,7 +3646,7 @@ kalshiStatusTick();
       error: function(err){ kalshiFeedFailed(err); }
     });
     if(api.watchKalshiLive){ kalshiLiveUnsub = api.watchKalshiLive(function(o){ kalshiLiveOrders = o; kalshiOrdersLoaded = true; kalshiSyncError = ''; kalshiFeedRender(); }, function(err){ kalshiFeedFailed(err); }); }
-    if(api.watchKalshiSlot){ kalshiSlotUnsub = api.watchKalshiSlot(function(o){ kalshiSlotOrders = o; kalshiFeedRender(); }, function(){ kalshiSlotOrders = []; }); }
+    if(api.watchKalshiSlot){ kalshiSlotUnsub = api.watchKalshiSlot(function(o){ kalshiSlotOrders = o; kalshiSlotError = ''; kalshiFeedRender(); }, function(err){ kalshiSlotOrders = []; kalshiSlotError = String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60); kalshiFeedRender(); }); }
     if(api.watchKalshiLiveControl){ kalshiLiveCtlUnsub = api.watchKalshiLiveControl(function(s){ kalshiLiveCtl = { arm: s.arm, last: s.last, session: s.session }; if(s.account){ kalshiAcctFromServer(s.account); } if(document.getElementById('page-kalshi') && !document.getElementById('page-kalshi').hidden){ renderKalshiL1(); } kalshiFeedRender(); }); }
     if(api.watchKalshiLiveEvents){ kalshiLiveEventsUnsub = api.watchKalshiLiveEvents(function(e){ kalshiLiveEvents = e; kalshiFeedRender(); }); }
   }
