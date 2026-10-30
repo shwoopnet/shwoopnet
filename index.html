@@ -448,6 +448,21 @@
   .upd-bar button{ font:inherit; font-weight:700; border:0; border-radius:999px; background:var(--ink); color:var(--paper); min-height:40px; padding:0 18px; cursor:pointer; }
   .kal-pill.kal-pill-run{ color:var(--gain); border-color:var(--gain); }
   .kal-tbl-wrap{ overflow-x:auto; }
+  /* Phones and tablets (up to 900px, where the page switches to its bottom bar): the table has nine columns, so each strategy becomes a card (the owner, Oct 30, 2026: "mobile ui isnt great"; on a phone Status, Today and Result were hidden behind a sideways scroll). Name and markets on top, then label over value in two columns. */
+  @media screen and (max-width:900px){
+    .kal-strat-tbl, .kal-strat-tbl tbody, .kal-strat-tbl tr, .kal-strat-tbl td{ display:block; }
+    .kal-strat-tbl thead{ display:none; }
+    .kal-strat-tbl tr{ display:grid; grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px 16px; padding:16px 0; border-top:1px solid var(--border); }
+    .kal-strat-tbl tr:first-child{ border-top:0; padding-top:4px; }
+    .kal-strat-tbl td{ border:0; padding:0; text-align:left; min-width:0; overflow-wrap:anywhere; font-size:15px; font-variant-numeric:tabular-nums; }
+    .kal-strat-tbl td::before{ content:attr(data-label); display:block; font-size:12px; font-weight:600; color:var(--muted); margin-bottom:3px; }
+    .kal-strat-tbl td:nth-child(1), .kal-strat-tbl td:nth-child(2){ grid-column:1 / -1; }
+    .kal-strat-tbl td:nth-child(1){ font-size:17px; font-weight:700; }
+    .kal-strat-tbl td:nth-child(1)::before{ display:none; }
+    .kal-strat-tbl td:nth-child(3){ grid-column:1 / -1; }
+    .kal-strat-tbl td .kal-pill{ white-space:nowrap; display:inline-block; }
+    .kal-strat-tbl td:not(:first-child), .kal-strat-tbl th:not(:first-child){ text-align:left; }
+  }
   .kal-strat-tbl td:first-child, .kal-strat-tbl th:first-child{ white-space:nowrap; }
   .kal-chip.kal-chip-slot{ background:var(--paper); color:var(--ink); border-color:var(--paper); }
   .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; }
@@ -1543,6 +1558,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 29</div>
                 <ul class="changelog-list">
+                  <li>Bot page on a phone: each strategy in the Strategies card is a stacked card (status, today, result, settled, win rate, open, last order all visible) instead of a wide table that hid the numbers behind a sideways scroll</li>
                   <li>Bot page: the Strategies rows and the Account card's Today now come from the same orders and fills, so they match to the cent; Today counts the second strategy too</li>
                   <li>Bot page: the Strategies card is part of the movable layout now (unlock under Layout to drag it or use its arrows, or hide it), second under Account by default</li>
                   <li>Bot: AUD/USD, USD/CAD and natural gas are off the bot's list for good (paused since Oct 28, no orders since), which also cuts three market reads from every minute; they stay paused in code and any order for them is refused outright</li>
@@ -3525,8 +3541,8 @@ kalshiStatusTick();
     var cls = function(v){ return v > 0 ? ' kal-pos' : (v < 0 ? ' kal-neg' : ''); };
     var body = rows.map(function(r){
       var dec = r.sum.won + r.sum.lost, wr = dec > 0 ? (r.sum.won / dec * 100).toFixed(1) + '%' : 'n/a';
-      return '<tr><td>' + kalshiChipHtml(r.id, esc) + esc(r.info.name) + '</td><td>' + esc(r.info.markets) + '</td><td><span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span></td>' +
-        '<td class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td>' + esc(String(r.sum.n)) + '</td><td>' + esc(wr) + '</td><td>' + esc(String(r.sum.open.length)) + '</td><td>' + esc(r.ageText) + '</td></tr>';
+      return '<tr><td data-label="Strategy">' + kalshiChipHtml(r.id, esc) + esc(r.info.name) + '</td><td data-label="Markets">' + esc(r.info.markets) + '</td><td data-label="Status"><span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span></td>' +
+        '<td data-label="Today" class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td data-label="Result" class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td data-label="Settled">' + esc(String(r.sum.n)) + '</td><td data-label="Win rate">' + esc(wr) + '</td><td data-label="Open">' + esc(String(r.sum.open.length)) + '</td><td data-label="Last order">' + esc(r.ageText) + '</td></tr>';
     }).join('');
     var notes = rows.filter(function(r){ return r.info.note; }).map(function(r){ return '<div class="kal-note">' + esc(r.info.note) + '</div>'; }).join('');
     return '<div class="kal-card-title">Strategies</div><div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
@@ -3538,7 +3554,7 @@ kalshiStatusTick();
     var tbl = document.getElementById('kalStrategies');
     if(!tbl){ return; }
     var now = Date.now(), ses = kalshiLiveCtl && kalshiLiveCtl.session, on = !!(ses && ses.active === true);
-    var age = function(sum){ return sum.lastTs === null ? 'No order yet' : kalshiAgeText(Math.max(0, Math.round((now - sum.lastTs) / 1000))) + ' ago'; };
+    var age = function(sum){ return sum.lastTs === null ? 'No order yet' : kalshiAgeText(Math.max(0, Math.round((now - sum.lastTs) / 1000))); };     // the text already ends in "ago"
     var acct = kalshiLiveAcct, fills = acct && acct.fills && acct.fills.ok ? kalshiGroupFills(acct.fills.fills) : [];      // the same inputs as the Account card, so Today and Result agree to the cent (the owner, Oct 30, 2026: "pnl doesnt match")
     var l1 = kalshiOrdersSummary(kalshiResolveOrders(kalshiLiveOrders, acct && acct.results, fills), now);
     var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
