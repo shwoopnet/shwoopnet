@@ -7937,3 +7937,26 @@ GEN10's grammar on Bitcoin, nothing changed but the series and seed. Registered 
 ## Files
 
 `src/scalper/gen11.py`, `workers/GEN11_REGISTRATION.md`, `workers/GEN11_FROZEN.md`, `workers/GEN11_frozen.json`, this file. Distinct, control, validation and log files in `data/gen11/` (not committed).
+
+## Result: NEWH14 (volatility structures across the strikes of the hourly Bitcoin ladder; the GOLD2 count), 2026-10-30
+
+Registered first (`workers/NEWH14_REGISTRATION.md`, commit b78a0be), result `workers/NEWH14_RESULT.md`, code `src/scalper/newh14.py`,
+local KXBTCD candles (1,544 hourly closes, Aug 24 to Oct 29) and public Coinbase 1 minute spot; discovery to Sep 21, validation to
+Oct 18, holdout to Oct 30 NOT read because nothing passed. **GOLD2 (KXGOLDD against a GVZ-implied distribution): NOT_RUNNABLE, 0
+tries.** Counted first, as the brief asked: Kalshi's public settled list has **39 KXGOLDD daily closes in all history (first
+2026-08-24)**, 31 in discovery plus validation against the 100 needed; locally 38 closes with two late quote looks and nothing at 14:00
+ET. The card's "108 daily events from April" is not this series and "about 60" was an overestimate. **NOVIEW:** two strikes of one
+hourly event chosen from the market's own prices (YES mid nearest 25c and nearest 75c), no directional view, both legs at the next
+candle's asks, held; the one-minute candles carry no sizes, so a 10 contract fill a leg is modelled, not observed. **STRANGLE-RV**
+(buy both wings when a trailing 24 hour realised-vol model prices the ladder too narrow by 5c a set, 45 to 30 minutes left): PF 0.79
+on 434 then 0.69 on 431 (day z -2.60, -3.82), **FALSIFIED**. **CONDOR-RV** (buy the middle when the model says too wide): 0.83 on 154
+then 0.80 on 149, **FALSIFIED**. **CONDOR-ALWAYS** (buy the middle every hour at 45 minutes, the variance risk premium): 0.98 on 606
+then 1.07 on 551 (x1.2: 0.96, 1.05; day z -0.24, +0.73), **FALSIFIED**. Information: the settlement lands inside the 25c to 75c range
+3 to 9 points more often than the ladder prices (I2, 1,157 events), so the wings are rich on average, the same sign TAIL found at the
+far wings; the gross premium of about 3 to 5 points a set is eaten by two taker fees and two spreads (about 4c to 5c a set), and the
+realised-vol model sits on the wrong side of it (6.8 points too wide on average, "too narrow" on 60% of hours), which is LAD1's
+lesson on a structure instead of a strike. Buying the wings every hour loses about 4c a set (I1, PF 0.75 / 0.69). The gold ladders
+are NOT_RUNNABLE for this shape (KXGOLDH candles start 900 s before the close, mostly zero volume; no public gold spot minutes for the
+sample). What could change the arithmetic is a maker fill on both legs, which is QUOTE2B's lane on the book recorder, not registered
+here. The taker version of a two-leg volatility structure on Kalshi's Bitcoin ladder is closed on 1 minute candles. N +5; running
+count about 728,628 (z bar 5.27).
