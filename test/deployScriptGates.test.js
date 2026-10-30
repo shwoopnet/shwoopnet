@@ -45,6 +45,13 @@ gates.D4 = () => {
   assert.ok(!/(secret|token|private[_ ]?key|password)\s*=/i.test(src), 'the script holds and asks for no credential');
 };
 
+gates.D5 = () => {
+  // The owner's Mac (Oct 30, 2026): "sed: 1: functions/.env: invalid command code f". BSD sed on macOS reads `-i` differently, so the script stopped before it deployed anything, and the bot kept running the code it already had.
+  const src = fs.readFileSync(path.join(root, 'functions', 'deploy-sizing.sh'), 'utf8').replace(/#.*$/gm, '');
+  assert.ok(!/\bsed\b/.test(src), 'macOS safe: no sed in the commands (it behaves differently from Linux sed)');
+  assert.ok(/grep -v '\^KALSHI_LIVE_ENABLED='/.test(src) && /mv "\$ENV_FILE\.tmp" "\$ENV_FILE"/.test(src), 'the old switch line is dropped with grep and mv, which behave the same on both');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
