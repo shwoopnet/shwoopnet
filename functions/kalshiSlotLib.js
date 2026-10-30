@@ -60,7 +60,7 @@ const SLOT_STRATEGIES = Object.freeze([
   Object.freeze({
     id: "OICORE", readme: "kalshi-scalper/README.md#SLOT-OICORE", series: Object.freeze(["KXBTC15M"]),
     entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
-    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 10,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
     killRules: Object.freeze({ maxConsecutiveLosses: 18, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",

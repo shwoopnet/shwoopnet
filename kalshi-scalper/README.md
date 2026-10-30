@@ -2883,7 +2883,7 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 4. An order whose answer is lost, or that Kalshi refuses, ends the session and latches the strategy off.
 5. Forward read on 2026-11-13: FALSIFIED if profit factor under 1.0 on at least 100 filled trades, or net under 0 on at least 150. A fill rate under 50% of signals, or a median ask size under 10 contracts, means the history cannot be traded as measured and the probe is stopped.
 
-**Size schedule.** 5 contracts for the first 15 filled trades. Then a reviewed one-line edit to 10 (the slot's hard ceiling), by the owner, if no kill rule has fired and V2's nightly ask-size read (OIFILL on recorder R6) shows the ask can take 10. Nothing stored or typed on the page can change the size.
+**Size schedule.** 5 contracts for the first 15 filled trades. Then a reviewed one-line edit to 10 (DONE in the step-to-10 pull request, merged by the owner after the 15th fill on DATE: no kill rule fired, ask size read OK) (the slot's hard ceiling), by the owner, if no kill rule has fired and V2's nightly ask-size read (OIFILL on recorder R6) shows the ask can take 10. Nothing stored or typed on the page can change the size.
 
 **What it shares with L1.** The same 12% loss stop (an open slot order counts as lost), the same 5.5% window cap (the slot may take at most half of what is left), the direction lock (never on the opposite side of an L1 order in one market; Bitcoin is paused in L1 anyway), and the phone alerts. Slot orders are in `kalshiSlotOrders` and are shown on the Bot page through the strategy switch.
 

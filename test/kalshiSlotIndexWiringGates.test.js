@@ -379,7 +379,7 @@ gates['SI14c the admitted state: exactly one strategy OICORE, valid, bounded by 
   assert.strictEqual(s.id, 'OICORE');
   assert.strictEqual(slotLib.validateSlotStrategy(s).ok, true, JSON.stringify(slotLib.validateSlotStrategy(s)));
   assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE']);
-  assert.strictEqual(s.contractsPerOrder, 5);
+  assert.strictEqual(s.contractsPerOrder, 10);
   assert.ok(s.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
   assert.strictEqual(s.exit.holdToSettle, true);
   assert.ok(slotLib.SLOT_HOLD_ALLOWED.includes(s.id), 'holding to settlement is allowed for this id');
