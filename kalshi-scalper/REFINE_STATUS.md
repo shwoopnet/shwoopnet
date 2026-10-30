@@ -18,6 +18,21 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:05 PM CT, R1 and R3 counts received from V2 (counts only, candle replay Aug 5 to Oct 30, about 87 days). My reading, no outcomes seen. 0 tries.**
+
+Candidate entries a week at the 6 minute look (full weeks; V2 file `workers/REFINE_COUNTS_R1_R3.md` and CSVs on `claude/epic-ptolemy-0amjd9`). Last four full weeks in brackets:
+
+| Market | 86c to <88c | 88c to 97c (live band) | >97c to 98c |
+|---|---|---|---|
+| Gold | 18.4 [15, 23, 18, 15] | 143 [139, 134, 122, 132] | 16.9 [14, 16, 17, 18] |
+| Dogecoin | 27.6 [26, 27, 28, 32] | 207.7 [199, 204, 177, 170] | 38.2 [46, 49, 25, 29] |
+
+- **R1 relative size:** the 86c to 88c cell is +13% of the live band on both markets over the full span (gold 18.4 / 143, Dogecoin 27.6 / 208) and about +11% (gold) and +16% (Dogecoin) in the last four weeks. The 97c to 98c cell is +12% (gold) and +18% (Dogecoin) over the full span. This is close to the R6 count (+17% gold, +8% Dogecoin) and replaces it, since it is 87 days and not 43 windows.
+- **Translated to live fills:** live fills are about 40% to 45% of the candle ceiling (gold 61 a week live vs 125 to 150 candidates, Dogecoin 71 vs 170 to 200: no fills, the window cap, one-order-per-window, quiet hours). So the 86c to 88c cell adds about +7 gold and +11 Dogecoin fills a week, and 97c to 98c about +7 and +11; both together about +36 a week on about 132 (+27%). Estimate only; V2 warns the counts are a ceiling.
+- **Dogecoin is shrinking:** its live band entries fell from about 215 to 170 a week in the last two weeks, gold from about 150 to about 125 in October. Frequency is falling on its own, which strengthens the owner's frequency concern; worth knowing before any band change.
+- **R3, Dogecoin by hour:** 2,548 band entries over 87 days, roughly flat by hour (81 to 129). The 20:00 to 23:59 CT block holds 468 of them, 18.4%, so about 32 candidate entries a week and about 13 live fills. That is the frequency the Dogecoin night block costs (about 18% of its entries). It is above one sixth (16.7%) because the block hours are slightly busier than the average.
+- **Next for R1 and R3:** the scored tests need fresh days after Oct 30 18:56Z, recorded by R6 (until Nov 13) and scored by V2's forward ledger or by me on the report. I will register the exact scorer for R1 cells and R3 block against the live-rule candle replay with V2, forward days only. Parity caveat: Dogecoin's band parity with live was 26 mismatches in 556 windows (4.7%).
+
 **2026-10-30 2:05 PM CT, queue item 7 (OICORE and L1 in the same window), first count: 0 of 2.** Both OICORE orders (Oct 30 8:45 and 10:45 AM CT windows) had no L1 fill in the same 15 minute window, so no shared loss yet. Sample is 2; the count will be re-run nightly from `slotOrders` against `orders` and reported when it reaches 20 slot orders. V2 will push counts-only R1 and R3 outputs to `claude/epic-ptolemy-0amjd9`; I read them when they land. Items 5 and 6 (OICORE entry timing, fill and slippage) need Bitcoin open interest candles or an order export with `avgFill`; the report's slot orders carry no `avgFill`, so they wait for either.
 
 **2026-10-30 2:00 PM CT, report extension is already live; first OICORE and size read. No threshold hit.** The nightly report now carries `secondSlot`, `allStrategies` and `slotOrders` (the extension is deployed, earlier than the main session's last note). OICORE: 2 fills, both lost (Oct 30 7:42 AM CT, 5 contracts, -$0.32; Oct 30 9:42 AM CT, 10 contracts, -$0.75), net -$1.07. Expected win rate is about 28% (price 5c to 50c), so two losses in a row is about a 52% chance by luck; the streak kill is 18, the first read is Nov 13. Nothing to act on. Dogecoin counts above 5: none since Oct 28 (the 12 contract order flagged earlier). The Dogecoin ladder change has not shown in the orders yet. L1 plus slot, last 48 hours: 56 settled, 5 lost, net +$16.01, profit factor 2.0 (all strategies, paused markets quiet).
