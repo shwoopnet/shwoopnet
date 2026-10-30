@@ -148,7 +148,7 @@ gates.P9 = () => {
   fs.rmSync(path.join(root, 'functions', '.env'), { force: true });
   assert.ok(/KALSHI_LIVE_ENABLED=on/.test(out), 'the order switch line is written before anything deploys');
   const only = /deploy --only (\S+)/.exec(out)[1].split(',');
-  assert.deepStrictEqual(only.sort(), ['functions:kalshiFlattenAll', 'functions:kalshiLiveExit', 'functions:kalshiPushKey', 'functions:kalshiPushOrder', 'functions:kalshiPushSession', 'functions:kalshiPushSubscribe', 'functions:kalshiPushUnsubscribe'], 'exactly the changed functions; not the arm');
+  assert.deepStrictEqual(only.sort(), ['functions:kalshiFlattenAll', 'functions:kalshiLiveExit', 'functions:kalshiPushKey', 'functions:kalshiPushOrder', 'functions:kalshiPushSession', 'functions:kalshiPushSlotOrder', 'functions:kalshiPushSubscribe', 'functions:kalshiPushUnsubscribe'], 'exactly the changed functions; not the arm');
   const sh = fs.readFileSync(path.join(root, 'functions', 'deploy-push.sh'), 'utf8');
   assert.ok(/functions:secrets:access KALSHI_PUSH_VAPID_PRIVATE/.test(sh) && /already exists, keeping it/.test(sh), 'an existing key is kept, so subscribed phones are not orphaned');
   assert.ok(!/echo[^\n]*privateKey|cat "\$KEYFILE"/.test(sh) && /rm -f "\$KEYFILE"/.test(sh), 'the key is never printed and the temporary file is removed');

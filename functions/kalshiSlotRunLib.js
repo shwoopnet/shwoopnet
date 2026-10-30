@@ -31,6 +31,15 @@ const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
 const OPEN_SHORT = ["active", "open"];
 
+// Open interest rise to the signal candle (the one ending 180 s before the close) over the 3 minutes before it. The research read it from the candle that ENDS at those two instants; a
+// missing candle, a missing value or a non-finite number is null, never a guess.
+function oiRiseFromCandles(candles, closeSec) {
+  if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
+  const at = (sec) => { const c = candles.find((x) => x && Number(x.end_period_ts) === sec); const v = c ? num(c.open_interest_fp) : NaN; return Number.isFinite(v) ? v : null; };
+  const a = at(closeSec - 180), b = at(closeSec - 360);
+  return a === null || b === null ? null : Math.round((a - b) * 100) / 100;
+}
+
 const unsoldOf = slotLib.slotUnsoldOf;     // one definition, in the library L1's exit watch hooks also use
 
 function makeRunners(flags) {
@@ -60,7 +69,7 @@ function makeRunners(flags) {
     const early = [];
     for (const s of strategies) {
       // The entry window must open well before the exit floor: an order sent a few seconds late must still be sellable by the time rule. A strategy that does not leave that room never enters.
-      if (!(s.entry.leftMinSec - s.exit.mustExitLeftSec >= MAX_STALE_MS / 1000)) { early.push(s.id + ": its entry window ends too close to its exit floor, no entry"); continue; }
+      if (s.exit.holdToSettle !== true && !(s.entry.leftMinSec - s.exit.mustExitLeftSec >= MAX_STALE_MS / 1000)) { early.push(s.id + ": its entry window ends too close to its exit floor, no entry"); continue; }
       for (const q of quotes || []) {
         if (!q || !q.m || !s.series.includes(q.series) || !OPEN_SHORT.includes(q.m.status)) continue;
         const left = (Date.parse(q.m.close_time) - now) / 1000;
@@ -105,11 +114,21 @@ function makeRunners(flags) {
       if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { results.push(ticker + ": no two-sided quote"); continue; }
       // Which side, and the price of that side at the touch (cents).
       const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
-      const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule;
+      const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
       const sidePrice = side === "yes" ? yesPrice : noPrice;
       const touch = side === "yes" ? yesPrice : Math.round((1 - noPrice) * 100) / 100;       // the YES price the order goes to, which is what Kalshi's body carries
       if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
       const depth = num(side === "yes" ? m.yes_ask_size_fp : m.yes_bid_size_fp);
+      // The open interest condition (public candles, no key): open interest at the candle ending 180 s before the close minus the one ending 360 s before it. Any missing candle is no order.
+      let oiRise = null;
+      if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin")) {
+        const closeSec = Math.round(Date.parse(m.close_time) / 1000);
+        const cr = await live.liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
+          params: { start_ts: String(closeSec - 480), end_ts: String(closeSec - 60), period_interval: "1" }, nowMs: now });
+        oiRise = oiRiseFromCandles(cr.status === 200 && cr.body ? cr.body.candlesticks : null, closeSec);
+        if (oiRise === null) { results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
+        if (oiRise < s.entry.oiRiseMin) { results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+      }
       // The position is read BEFORE the transaction and may be stale by the time it commits; the direction lock, not this read, is what closes that gap.
       const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
       let position = NaN;
@@ -135,7 +154,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: sidePrice, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, position, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, position, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -150,7 +169,7 @@ function makeRunners(flags) {
         if (!Number.isFinite(avail)) return { allowed: false, reason: "the balance came back in a shape this code does not recognise" };
         if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
-        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live",
+        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise,
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };
@@ -258,7 +277,7 @@ function makeRunners(flags) {
       const opposite = (x) => x && x.ticker === t.ticker && (x.side === "yes" || x.side === "no") && x.side !== t.side && unsoldOf(x) > 0;
       const later = (x) => !(Number(x.ts) > Number(t.ts)) && !(Number(x.ts) === Number(t.ts) && String(x.id || x.clientOrderId) > String(t.id));
       const hedge = l1.some(opposite) || sl.some((x) => opposite(x) && later(x));
-      const why = hedge ? "hedge" : ourBid <= rules.stopBid + 1e-9 ? "stop" : ourBid >= rules.targetBid - 1e-9 ? "target" : leftSec <= rules.mustExitLeftSec + 1e-9 ? "time" : null;
+      const why = hedge ? "hedge" : rules.holdToSettle === true ? null : ourBid <= rules.stopBid + 1e-9 ? "stop" : ourBid >= rules.targetBid - 1e-9 ? "target" : leftSec <= rules.mustExitLeftSec + 1e-9 ? "time" : null;
       if (!why) continue;
       const latchOff = async (reason) => { try { if (s && typeof store.killStrategy === "function") await store.killStrategy(s.id, { killedAt: now, reason }); } catch (e) { /* the session end below still stops it */ } };
       if (!selling) {
@@ -409,5 +428,5 @@ async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId }) {
 const prod = makeRunners(undefined);
 module.exports = {
   runSlotTick: prod.runSlotTick, runSlotExits: prod.runSlotExits, slotExitIdle: prod.slotExitIdle, runSlotSettle: prod.runSlotSettle, unsoldOf, EXIT_LOOKBACK_MS,
-  _testOnly: Object.freeze({ makeRunners }),
+  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles }),
 };

@@ -36,7 +36,7 @@ gates['SI1 index.js: SLOT_ON comes only from the slot library, every slot call s
   assert.deepStrictEqual([...c.matchAll(/SLOT_ON\s*=\s*([^;]*);/g)].map((m) => m[1]), ['slotLib.slotWatch()'], 'derived from the slot library\'s constants and nothing else (entries allowed, or a slot order has ever existed)');
   assert.ok(!/slotLib\.slotActive/.test(c), 'index.js never uses the narrower entry gate: watching must not stop when entries do');
   assert.deepStrictEqual([...c.matchAll(/require\("(\.\/kalshiSlot[A-Za-z]*)"\)/g)].map((m) => m[1]), ['./kalshiSlotLib', './kalshiSlotRunLib', './kalshiSlotStoreLib']);
-  assert.ok(!/kalshiSlotOrders|kalshiSlotControl|kalshiLiveDirection/.test(c), 'the collection names live in the store library, not in index.js');
+  assert.ok(!/kalshiSlotOrders|kalshiSlotControl|kalshiLiveDirection/.test(c.replace('document: "kalshiSlotOrders/{id}"', '')), 'the collection names live in the store library, not in index.js (the one phone alert trigger on the slot orders excepted, Oct 30, 2026)');
   // Every use of slotRun / slotStoreLib / slotLib (apart from the definition and the requires) is in a line guarded by SLOT_ON or spread under it.
   const lines = c.split('\n');
   const inGuardedBlock = (i) => {      // is line i inside an `if (SLOT_ON) {` block opened earlier and not yet closed?
@@ -60,7 +60,7 @@ gates['SI1 index.js: SLOT_ON comes only from the slot library, every slot call s
   assert.deepStrictEqual([...c.matchAll(/define(?:Secret|String)\("([A-Z_]+)"/g)].map((m) => m[1]).sort(), before.slice().sort(), 'no new secret or parameter');
   const exported = [...c.matchAll(/^exports\.(\w+)/gm)].map((m) => m[1]).sort();
   assert.deepStrictEqual(exported, ['kalshiBookRecorder', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveArmed', 'kalshiLiveBaseline', 'kalshiLiveExit', 'kalshiNightlyReport', 'kalshiPaperTick',
-    'kalshiPushKey', 'kalshiPushOrder', 'kalshiPushSession', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe', 'kalshiTape', 'marketTapeTick'].sort(), 'no new scheduled function, callable or endpoint');
+    'kalshiPushKey', 'kalshiPushOrder', 'kalshiPushSession', 'kalshiPushSlotOrder', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe', 'kalshiTape', 'marketTapeTick'].sort(), 'no new scheduled function, callable or endpoint');
   assert.ok(!/_testForce/.test(src), 'the real caller never sets the test hook');
   // The slot tick runs after L1 and cannot fail it; the slot exits run after the L1 exit watch and cannot stop it.
   assert.ok(/const l1Result = await live\.runL1Tick/.test(c) && c.indexOf('slotRun.runSlotTick') > c.indexOf('const l1Result = await live.runL1Tick'));
@@ -336,7 +336,7 @@ gates['SI14 the Bot page and the alerts do not read the slot collections, so slo
   assert.ok(!/kalshiSlot|kalshiLiveDirection|SLOT/i.test(push), 'the alert library knows nothing about the slot');
   const idx = code(read('functions', 'index.js'));
   const triggers = [...idx.matchAll(/onDocumentWritten\(\{ document: "([^"]+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(triggers.sort(), ['kalshiLiveControl/session', 'kalshiLiveOrders/{id}'], 'the only document triggers watch L1\'s orders and the session');
+  assert.deepStrictEqual(triggers.sort(), ['kalshiLiveControl/session', 'kalshiLiveOrders/{id}', 'kalshiSlotOrders/{id}'], 'the only document triggers watch L1\'s orders, the slot\'s orders (phone alert) and the session');
   const report = code(read('functions', 'kalshiReportLib.js'));
   assert.ok(!/kalshiSlot/.test(report), 'the nightly report reads only L1 orders');
 };

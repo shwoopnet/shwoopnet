@@ -246,7 +246,7 @@ gates['the L1 exit watch and settle sweep still read only L1 orders, and the liv
   const rules = fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8');
   for (const c of ['kalshiSlotOrders', 'kalshiLiveDirection']) assert.ok(new RegExp('match /' + c + '/\\{id\\} \\{\\s*allow read: if isAdmin\\(\\);\\s*allow write: if false;\\s*\\}').test(rules), c + ' is admin read and no client write');
   assert.ok(!/kalshiSlotControl|kalshiLiveClosing/.test(rules.replace(/\/\/.*$/gm, '')), 'the kill latch and the close leases have no rule: closed to every browser');
-  assert.ok(!/kalshiSlot/.test(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8').replace(/\/\/.*$/gm, '').replace(/require\("\.\/kalshiSlot[A-Za-z]*"\)/g, '')), 'index.js names the slot only through the three requires; the collection names live in the store library');
+  assert.ok(!/kalshiSlot/.test(fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8').replace(/\/\/.*$/gm, '').replace(/require\("\.\/kalshiSlot[A-Za-z]*"\)/g, '').replace('document: "kalshiSlotOrders/{id}"', '')), 'index.js names the slot only through the three requires and the one phone alert trigger on the slot orders (Oct 30, 2026); the collection names live in the store library');
 };
 
 gates['the named entry points: only one entry gate exists, losses stop at the limit, kills stay tripped'] = () => {

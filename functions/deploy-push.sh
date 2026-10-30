@@ -14,7 +14,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
-ONLY=functions:kalshiLiveExit,functions:kalshiFlattenAll,functions:kalshiPushKey,functions:kalshiPushSubscribe,functions:kalshiPushUnsubscribe,functions:kalshiPushOrder,functions:kalshiPushSession
+ONLY=functions:kalshiLiveExit,functions:kalshiFlattenAll,functions:kalshiPushKey,functions:kalshiPushSubscribe,functions:kalshiPushUnsubscribe,functions:kalshiPushOrder,functions:kalshiPushSlotOrder,functions:kalshiPushSession
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 

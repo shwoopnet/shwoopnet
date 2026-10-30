@@ -18,6 +18,8 @@ function publicKeyFromPrivate(privateB64url) {
 // What an L1 order document looks like to the alerts: entered (a fill appeared), sold (an exit sold or partly sold), settled (the market finished and the order was settled by its result, a win or a loss; a
 // position the exit sold is settled with result "exit" and already alerted as a sell), issue (an exit that errored, did not fill or has an unknown answer, or an order left unknown).
 // Entered, sold and issue are the flags the page's sound alerts use, so a sound on the open page and a push on the phone agree for those; settled is phone only.
+// An order document from another of the bot's own collections, as the alerts read it: the same rules, whatever its strategy label (the label only decides which collection it came from).
+const botOrder = (o) => (o && typeof o === "object" ? Object.assign({}, o, { strategy: "L1" }) : o);
 function flags(o) {
   if (!o || o.strategy !== "L1") return { e: false, s: false, d: false, i: false };
   return {
@@ -123,4 +125,4 @@ function cleanSubscription(raw) {
 }
 const subId = (endpoint) => crypto.createHash("sha256").update(String(endpoint)).digest("hex").slice(0, 40);
 
-module.exports = { publicKeyFromPrivate, flags, orderKinds, sessionKinds, message, closesAt, dayNet, sendAll, cleanSubscription, subId, NAMES };
+module.exports = { publicKeyFromPrivate, flags, botOrder, orderKinds, sessionKinds, message, closesAt, dayNet, sendAll, cleanSubscription, subId, NAMES };
