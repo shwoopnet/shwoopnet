@@ -868,14 +868,17 @@
   .kal-meter{ height:10px; border-radius:5px; background:rgba(255,255,255,.1); overflow:hidden; margin:8px 0 6px; }
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
-  .kal-console [data-card="strategies"]{ grid-column:1 / -1; align-self:start; }
   .kal-console [data-card="status"]{ align-self:stretch; }
   .kal-console [data-card="pnl"]{ align-self:stretch; }
   .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
   .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
-  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,1fr); gap:10px 20px; align-items:center; padding:20px 22px; }
+  .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,2fr); gap:10px 28px; align-items:center; padding:20px 22px; }   /* balance and the loss stop on the left, the strategies table on the right (the owner, Oct 30, 2026: fold Strategies into the Account card) */
+  .kal-console .kal-card[data-card="account"] > .kal-acct-risk{ grid-column:1; grid-row:4; align-self:start; }   /* the child selector outranks the older tile rule below, which put it over the balance */
+  .kal-console [data-card="account"] #kalStrategies{ grid-column:2; grid-row:1 / 7; align-self:center; margin:0; min-width:0; }
+  .kal-strat-mk{ display:block; font-size:12px; font-weight:400; color:var(--muted); margin-top:2px; }
+  .kal-console [data-card="account"] .kal-strat-tbl th:nth-child(2), .kal-console [data-card="account"] .kal-strat-tbl td:nth-child(2){ display:none; }
   .kal-console [data-card="account"] .kal-acct-head{ grid-column:1; grid-row:1; padding:0; gap:14px; }
   .kal-console [data-card="account"] #kalBotStatus, .kal-console [data-card="account"] #kalBotStatus .kal-rows, .kal-console [data-card="account"] #kalBotTotals, .kal-console [data-card="account"] #kalBotTotals .kal-rows{ display:contents; }
   .kal-console [data-card="account"] .kal-acct-total{ grid-column:1; grid-row:2; margin:0; font-size:46px; line-height:1; }
@@ -885,15 +888,18 @@
   .kal-console [data-card="account"] .kal-tile, .kal-console [data-card="account"] .kal-acct-risk{ grid-row:1 / 4; align-self:stretch; display:flex; flex-direction:column; justify-content:center; gap:6px; min-width:0; background:rgba(255,255,255,.04); border:1px solid var(--border); border-radius:12px; padding:14px 16px; }
   .kal-console [data-card="account"] .kal-tile b{ font:800 20px/1.15 'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
   .kal-console [data-card="account"] .kal-tile .kal-k, .kal-console [data-card="account"] .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
-  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1 / -1; grid-row:5; }
-  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:4; }
+  .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1; grid-row:5; }
+  .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:7; }
   .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
     .kal-console [data-card]{ grid-column:1 / -1; }
-    .kal-console [data-card="account"]{ grid-template-columns:repeat(2, minmax(0,1fr)); gap:12px; }
-    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk{ grid-column:1 / -1; grid-row:auto; }
+    .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
+    .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk, .kal-console [data-card="account"] #kalStrategies, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
+    .kal-strat-mk{ display:none; }
+    .kal-console [data-card="account"] .kal-strat-tbl th:nth-child(2), .kal-console [data-card="account"] .kal-strat-tbl td:nth-child(2){ display:block; }
+    .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
   .tf-btn{ border-radius:8px; font-weight:700; }
@@ -1399,9 +1405,7 @@
         <div id="kalBotStatus" class="kal-limits"><div class="kal-empty">Reading the account...</div></div>
         <div id="kalBotTotals"><div class="kal-empty">Reading the account...</div></div>
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
-      </div>
-      <div class="kal-card kal-strats" data-card="strategies" id="kalStrategies">
-        <div class="kal-card-title">Strategies</div><div class="kal-empty">Reading the strategies...</div>
+        <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
       <div class="kal-card" data-card="status">
         <div class="kal-card-title">Bot status</div>
@@ -1557,6 +1561,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Account card: the Strategies table now sits inside it, beside the balance and the Loss stop, with All strategies as the first row (it is the account figure) and each strategy's markets under its name; the separate Strategies card is gone</li>
                   <li>Bot page: Recent trades tiles, Orders today, the notification bell, the sound alerts, the order exports and the needs-checking banner now count every strategy, not only L1 (the OICORE trade was missing from them); a test keeps a new card from reading L1 alone</li>
                   <li>Deploy: the sizing deploy script now works on a Mac (it stopped on a macOS-only difference in sed before it deployed anything)</li>
                   <li>Sign-in page: the "Got questions?" label and arrow now hide when they would sit on text (short phones, landscape), and the bubble no longer covers the disclaimer</li>
@@ -3538,20 +3543,21 @@ kalshiStatusTick();
     var cls = function(v){ return v > 0 ? ' kal-pos' : (v < 0 ? ' kal-neg' : ''); };
     var cell = function(r, name, chip){
       var dec = r.sum.won + r.sum.lost, wr = dec > 0 ? (r.sum.won / dec * 100).toFixed(1) + '%' : 'n/a';
-      return '<tr' + (chip ? '' : ' class="kal-strat-total"') + '><td data-label="Strategy">' + (chip ? kalshiChipHtml(r.id, esc) : '') + esc(name) + '</td><td data-label="Markets">' + esc(r.info.markets) + '</td><td data-label="Status">' + (r.status ? '<span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span>' : '') + '</td>' +
+      return '<tr' + (chip ? '' : ' class="kal-strat-total"') + '><td data-label="Strategy">' + (chip ? kalshiChipHtml(r.id, esc) : '') + esc(name) + (r.info.markets ? '<span class="kal-strat-mk">' + esc(r.info.markets) + '</span>' : '') + '</td><td data-label="Markets"' + (r.info.markets ? '' : ' class="kal-nil"') + '>' + esc(r.info.markets) + '</td><td data-label="Status"' + (r.status ? '' : ' class="kal-nil"') + '>' + (r.status ? '<span class="kal-pill' + (r.status === 'Running' || r.status === 'Holding' ? ' kal-pill-run' : '') + '">' + esc(r.status) + '</span>' : '') + '</td>' +
         '<td data-label="Today" class="' + cls(r.sum.today).trim() + '">' + esc(sg(r.sum.today)) + '</td><td data-label="Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '" class="' + cls(r.sum.net).trim() + '">' + esc(sg(r.sum.net)) + '</td><td data-label="Settled">' + esc(String(r.sum.n)) + '</td><td data-label="Win rate">' + esc(wr) + '</td><td data-label="Open">' + esc(String(r.sum.open.length)) + '</td><td data-label="Last order">' + esc(r.ageText) + '</td></tr>';
     };
-    var body = rows.map(function(r){ return cell(r, r.info.name, true); }).join('');
+    var body = '', totalRow = '';
     if(rows.length > 1){
       var t = { today: 0, net: 0, n: 0, won: 0, lost: 0, open: [], lastTs: null };
       rows.forEach(function(r){ t.today += r.sum.today; t.net += r.sum.net; t.n += r.sum.n; t.won += r.sum.won; t.lost += r.sum.lost; t.open = t.open.concat(r.sum.open); if(r.sum.lastTs !== null && (t.lastTs === null || r.sum.lastTs > t.lastTs)){ t.lastTs = r.sum.lastTs; } });
       t.today = Math.round(t.today * 10000) / 10000; t.net = Math.round(t.net * 10000) / 10000;
-      body += cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
+      totalRow = cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
     }
+    body = totalRow + rows.map(function(r){ return cell(r, r.info.name, true); }).join('');   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
     var notes = rows.filter(function(r){ return r.info.note; }).map(function(r){ return '<div class="kal-note">' + esc(r.info.note) + '</div>'; }).join('');
     if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
-    return '<div class="kal-card-title">Strategies</div><div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
-      '<div class="kal-note">Result, settled and win rate follow the range chosen under Account result, so the last row matches that figure.' + (opts.partial ? ' Older trades are still loading or could not be read, so this covers the latest orders only.' : '') + '</div>';
+    return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Status</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
+      '<div class="kal-note">Result, settled and win rate follow the range chosen under Account result, so the first row matches that figure.' + (opts.partial ? ' Older trades are still loading or could not be read, so this covers the latest orders only.' : '') + '</div>';
   }
   function renderKalshiStrategies(){
     var tbl = document.getElementById('kalStrategies');
@@ -3710,7 +3716,7 @@ kalshiStatusTick();
   // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
   // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
   (function(){
-    var OPTIONAL = [['strategies', 'Strategies'], ['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
+    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
     var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
@@ -3730,7 +3736,7 @@ kalshiStatusTick();
     // The rail and main wrappers dissolve into the grid (display:contents), so what sets a card's place is its CSS order, not its place in the markup. The rail's cards and the main column's cards are dealt into the default slots (account, status, result line, positions, trades) in the order each column holds them.
     function flow(){
       var rail = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-rail > [data-card]')), main = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-main > [data-card]')), seq = [], r = 0, m = 0;
-      ['r', 'r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
+      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
       rail.slice(r).concat(main.slice(m)).forEach(function(c){ seq.push(c); });
       seq.forEach(function(c, i){ c.style.order = String(i); });
     }
