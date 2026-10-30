@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 7:45 PM CT, GEN7 (open interest flow, earlier entries, gold and Bitcoin): gold FALSIFIED; Bitcoin 2 rules to forward, both the GEN6 core seen a minute earlier.** Open interest before 5 minutes left carries nothing. SLOTEX running for the main session (the core with slot-legal exits before settlement, at 1, 5 and 10 contracts). N about 590,982.
+
 **2026-10-29 7:35 PM CT, OIDRIFT built.** Second forward row REF_GEN6_OIDRIFT (threshold = trailing 30 day 90th percentile of the 3 minute open interest jump, about 223,800 for Oct 30; freeze 2026-10-30 01:00 UTC; kill: PF under 1.0 after 40 trades or under 1.3 after 80). Parity with FALS4 exact (n 67, PF 2.65). Not independent of REF_GEN6_OICORE. Nightly OIFILL (inside drift) reads R6's ask size at each forward signal; R6 rows land about 1.3 s after the signal with sizes in the thousands on a dry check. N about 563,361.
 
 **2026-10-29 7:30 PM CT, FALS4: the Bitcoin open interest core SURVIVES the falsifier (NOT_YET_FALSIFIED).** Own re-implementation identical; holds at fees x1.2 (1.82 validation), at signal ask +2c (1.44), without fills under 5c (1.87), in all 11 eight-day blocks; no look-ahead found; simpler proxies do not reproduce it. Needs a fill within about a minute (one minute late: discovery 0.94). Bar not met (z 4.42 vs 5.2). Sent to the main session as the first candidate to clear validation and the falsifier; forward read REF_GEN6_OICORE.
