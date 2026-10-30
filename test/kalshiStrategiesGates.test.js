@@ -19,7 +19,8 @@ gates.ST1 = () => {
   assert.strictEqual(f.kalshiStrategyOf({ strategy: 'SLOT' }), 'L1', 'a slot order with no id is not given a made-up label');
   assert.strictEqual(f.kalshiStrategyOf(null), 'L1');
   assert.ok(!/<img/.test(f.kalshiChipHtml('<img src=x>', esc)), 'a chip label is escaped');
-  assert.ok(/kal-chip-slot/.test(f.kalshiChipHtml('OICORE', esc)) && !/kal-chip-slot/.test(f.kalshiChipHtml('L1', esc)), 'the second strategy is marked differently from L1');
+  assert.strictEqual(f.kalshiChipHtml('OICORE', esc).replace('OICORE', 'L1'), f.kalshiChipHtml('L1', esc), 'every strategy chip has the same style (the owner, Oct 30, 2026: match L1)');
+  assert.ok(!/kal-chip-slot/.test(html) && /\.kal-chip\{[^}]*color:var\(--muted\)/.test(html), 'the chip is a quiet muted label: the bright treatment is for figures and urgent items');
   assert.deepStrictEqual(f.kalshiSlotIds([{ ts: 1, slotId: 'A' }, { ts: 2, slotId: 'A' }, { ts: 3 }, { slotId: 'B' }]), ['A'], 'only orders with an id and a time name a strategy');
 };
 gates.ST2 = () => {

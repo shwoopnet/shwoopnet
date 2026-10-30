@@ -464,8 +464,7 @@
     .kal-strat-tbl td:not(:first-child), .kal-strat-tbl th:not(:first-child){ text-align:left; }
   }
   .kal-strat-tbl td:first-child, .kal-strat-tbl th:first-child{ white-space:nowrap; }
-  .kal-chip.kal-chip-slot{ background:var(--paper); color:var(--ink); border-color:var(--paper); }
-  .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; }
+  .kal-chip{ display:inline-block; font-size:10px; font-weight:700; border:1px solid var(--border); border-radius:4px; padding:1px 5px; margin-right:6px; letter-spacing:.03em; color:var(--muted); }   /* quiet on purpose: the bright, high-contrast treatment is kept for figures and urgent items (the owner, Oct 30, 2026); every strategy's chip looks the same */
   .kal-hold-chart{ min-width:0; display:flex; flex-direction:row; align-items:stretch; gap:10px; } .kal-hold-chart svg{ flex:1 1 auto; min-width:0; } .kal-hc-y{ display:flex; flex-direction:column; justify-content:space-between; font-size:12px; color:var(--muted); font-variant-numeric:tabular-nums; text-align:right; min-width:36px; }
   .kal-hold-chart svg{ display:block; width:100%; height:130px; }
   .kal-hold-chart .kal-hc-top, .kal-hold-chart .kal-hc-foot{ display:flex; justify-content:space-between; gap:10px; font-size:12px; color:var(--muted); }
@@ -1558,6 +1557,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Strategy chips (L1, OICORE) are one quiet muted style; the bright white chip for OICORE is gone</li>
                   <li>Account card: the Stake per trade and Reinvest pool tiles are gone; the size and the pool rule live in the bot's code and Recent trades shows what was bought</li>
                   <li>Bot page: if the second strategy's orders cannot be read the Strategies card now says so instead of showing zero; the Recent trades tiles say they cover the last 24 hours; a longer Account result range keeps the old chart dimmed while it loads</li>
                 </ul>
@@ -3511,7 +3511,7 @@ kalshiStatusTick();
   }
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
-  function kalshiChipHtml(label, esc){ return '<span class="kal-chip' + (label === 'L1' ? '' : ' kal-chip-slot') + '">' + esc(label) + '</span>'; }
+  function kalshiChipHtml(label, esc){ return '<span class="kal-chip">' + esc(label) + '</span>'; }
   // since (optional): n, won, lost and net count only settled orders from that time on (the range chosen under Account result); today, open and the last order time always look at every order.
   function kalshiOrdersSummary(orders, nowMs, since){
     var out = { n: 0, won: 0, lost: 0, net: 0, gw: 0, gl: 0, today: 0, open: [], last: [], pf: null, firstTs: null, lastTs: null }, day = kalDayKey(nowMs);
