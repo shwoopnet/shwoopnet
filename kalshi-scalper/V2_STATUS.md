@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-30 12:55 AM CT, NEWH8: no independent condition behind the open interest core.** The effect lives in Bitcoin's own open interest count, in windows where the favourite has held for 3+ minutes and a wave of new contracts arrives. Everything else FALSIFIED or the same bet. N about 592,094.
+
 **2026-10-30 12:35 AM CT, NEWH7 (implied volatility gaps on gold and Bitcoin, Coinbase premium, volatility lag): FALSIFIED or NOT_ENOUGH_DATA.** N about 592,086.
 
 **2026-10-30 12:15 AM CT, nightly live report received (data only).** Oct 29 Central: 28 settled, 28 won, +$19.30 (gold +$16.93, Dogecoin +$2.37). 7 days: +$17.46, PF 1.25. The report notes second-slot (OICORE) orders exist and are not in it; V2's forward rows REF_GEN6_OICORE and REF_GEN6_OIDRIFT stay the history-rule comparison for them.
