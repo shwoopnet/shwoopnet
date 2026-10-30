@@ -7885,3 +7885,21 @@ Registered first (`workers/GEN10_REGISTRATION.md`, commit b8e3a42), frozen and h
 ## Files
 
 `src/scalper/gen10.py`, `workers/GEN10_REGISTRATION.md`, `workers/GEN10_FROZEN.md`, `workers/GEN10_frozen.json`, this file. Distinct, control, validation and log files in `data/gen10/` (not committed).
+
+## Result: FALS5 (the Bitcoin open interest core: jump or level regime), 2026-10-30
+
+Registered first (`workers/FALS5_REGISTRATION.md`), result `workers/FALS5_RESULT.md`, code `src/scalper/fals5.py` (FALS4's loader and
+fills unchanged; 222 / 2.28 and 333 / 1.85 reproduced, every fill the -120 s ask and every fee rounded up per order). Today's audit
+found the fixed 86,300 threshold now sits below the median 3 minute open interest change, so this round asked whether the edge is the
+JUMP or the LEVEL regime. Level terciles within each month: busy windows WITHOUT the jump lose (top tercile, core not firing: PF 1.09 /
+**0.62**), so the level alone is no edge; the jump pays most where open interest is already large (top tercile 2.98 / 2.61, lower two
+pooled 1.73 / 1.38, bottom tercile 0.95 in validation on 51): **MIXED** by the registered rule, read as jump-necessary with a level
+interaction. The drift has the rule firing more in every tercile; the extra low-level fires earned nothing, but weekly PF against the
+weekly share above the threshold is only Spearman -0.43 and every week is above 1.0, so the threshold has not stopped selecting. Signal
+rate: the share of all Bitcoin windows above 86,300 doubled in the week of Sep 21 (about 20% to about 45%) and has been flat since;
+signals went from about 32 to about 60 a week and are still about 55 to 67. Relative jump (doi over the level at 360 s, matched
+discovery quantile 26.8%, 1 try): PF **1.73 / 1.71** on 298 / 286 (C = 1 1.64 / 1.62; x1.2 1.71 / 1.69; z 3.2 / 3.3), **NOT_YET_FALSIFIED**
+at the bar, below the deflated bar, not better than the core (its discovery-only trades PF 0.81) and 59% to 80% the same trades: forward
+row `REF_GEN6_OIREL` (freeze 2026-10-30T15:00Z, `scalper.oirel`, parity 584 trades exact), to be read WITH `REF_GEN6_OICORE` and
+`REF_GEN6_OIDRIFT`, never as a third confirmation. The core stays NOT_YET_FALSIFIED; its counterparty is still unnamed. One unintended
+information look (the ledger's status line) is counted. N +12; running count about 700,166 (z bar 5.26).
