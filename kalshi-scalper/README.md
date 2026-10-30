@@ -7768,3 +7768,7 @@ Registered first (`workers/MECH1_REGISTRATION.md`), result `workers/MECH1_RESULT
 ## Result: NEWH2 (four gold mechanisms), 2026-10-30
 
 Registered first (`workers/NEWH2_REGISTRATION.md`), result `workers/NEWH2_RESULT.md`. GREOPEN (cheap side in the 90 minutes after the COMEX reopen): PF 0.73 / 0.85, **FALSIFIED**. GBREAK (CME daily break), GSILV (Kalshi silver moved, gold did not), GLADH (15 minute gold off the hourly ladder KXGOLDH by 6c): **NOT_ENOUGH_DATA**, every point estimate below 1.0 in validation; on GLADH the ladder is the one that is wrong when they disagree. Two ideas declined without a try (Bitcoin average not locked before 60 s; favourite-and-hold entries closed by the owner's 2026-10-28 instruction). N +4; running count about 592,057.
+
+## Result: NEWH3 (four Bitcoin mechanisms), 2026-10-30
+
+Registered first (`workers/NEWH3_REGISTRATION.md`), result `workers/NEWH3_RESULT.md`, local caches only. BLADX (15 minute book vs the hourly ladder KXBTCD at the shared close, either leg): PF 1.08 / 0.76 and 0.78 / 0.92, **FALSIFIED** (neither book is the stale one; with NEWH2, closed on gold and Bitcoin). WIDEN (spread widening in the last 5 minutes): 3 and 0 trades, **NOT_ENOUGH_DATA**. EXITOI (L1 exit at the 120 s bid after open interest fell 5% between 360 s and 180 s): beat holding in both windows (+$9, +$30 at 10 contracts; triggered entries lose 62% vs 5%) but only 26 and 29 triggers against 50 registered, day z +1.51: **NOT_ENOUGH_DATA**; a forward read on live L1 entries is the only way to settle it. N +4; running count about 592,061.

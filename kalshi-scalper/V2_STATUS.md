@@ -17,6 +17,8 @@
 
 ## Entries
 
+**2026-10-29 11:05 PM CT, NEWH3 (Bitcoin: ladder vs 15 minute book, spread widening, open interest exit for L1): FALSIFIED or NOT_ENOUGH_DATA.** One small lead: on L1 entries, falling open interest 3 to 6 minutes before the close marks failing favourites (62% lose); selling at 120 s beat holding in both windows but on too few triggers. N about 592,061.
+
 **2026-10-29 10:30 PM CT, NEWH2 (gold: CME break, COMEX reopen, silver lead, hourly ladder): FALSIFIED or NOT_ENOUGH_DATA.** Kalshi's 15 minute gold book beats its own hourly ladder when they disagree. N about 592,057.
 
 **2026-10-29 9:35 PM CT, MECH1: the open interest core's counterparty is not 'late favourite takers'.** On 6.4 million tape trades the taker split is about 52/48 as in controls and the edge does not concentrate where favourite taking is high. Counterparty still unnamed. Told the main session.
