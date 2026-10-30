@@ -22,6 +22,11 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 2:25 PM CT, queue item 12 (is Dogecoin's entry count shrinking in live?), counts only, 0 tries.** Live attempts (orders sent) and fills by week (Monday start; the Oct 26 week is five days):
+- Dogecoin: week of Oct 19 87 attempts, 65 fills (25% no fill); week of Oct 26 113 attempts, 78 fills (31% no fill).
+- Gold: Oct 12 85 attempts, 57 fills (33%); Oct 19 79, 53 (33%); Oct 26 109, 68 (38%).
+- So the candle replay's decline (Dogecoin band entries 215 to 170 a week) does NOT show in live attempts, which rose in the partial Oct 26 week. What does rise is the no-fill share (Dogecoin 25% to 31%, gold 33% to 38%). Fills per week are therefore flat to slightly up, but each attempt is less likely to fill. With attempts up and fills flat, the lever for frequency is the fill rate, not the band; this points the same way as R2. Weeks are short, no test; re-run weekly.
+
 **2026-10-30 2:15 PM CT, REGISTRATION R1-S and R3-S: the forward scorers (written before any fresh-day outcome is read; adds 0 tries beyond R1 and R3, which already counted them).**
 - **R1-S scorer.** Universe: gold and Dogecoin 15 minute markets closing after 2026-10-30 18:56Z (the R1 and R3 freeze). Entry: the candle replay used for the counts (`refine_counts.py`: look at 360 s before the close, l1Pick, one contract, taker at the ask, held to settlement, taker fee 7% x p x (1-p) rounded up per order, stress fee x 1.2). Cells: 86c to <88c and >97c to 98c, each per market and pooled over the two markets. Result per cell: entries, loss rate, net per contract at the verdict fee and at x 1.2, profit factor, day-clustered z against 0. Run by V2's scorer or any copy of it; one read per date.
 - **Read dates.** Interim look at 2026-11-14 (after R6 ends), formal read when a cell reaches 150 entries or on 2026-12-31, whichever first. At the counts above a cell collects only about 30 to 50 entries a week across both markets, so 150 is likely about 4 to 6 weeks away: expect NOT_ENOUGH_DATA on Nov 14.
