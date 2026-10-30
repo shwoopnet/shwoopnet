@@ -184,9 +184,11 @@
     .side-nav{
       top:auto; bottom:0; left:0; right:0; width:100%; max-height:none;
       flex-direction:row; justify-content:space-around; align-items:center;
-      padding:8px 4px; overflow-x:auto; overflow-y:hidden;
+      padding:8px 4px; overflow:visible;
       border:0; border-top:1px solid var(--border); border-radius:0; box-shadow:none;
       background: var(--panel);
+      /* iPhone Home Screen app (the owner, Oct 30, 2026: "navigation bar appearing in middle of screen on mobile", while scrolling): a fixed bar that is also a scroll container, with no layer of its own, can float away from the bottom edge during momentum scrolling. Three items never need to scroll sideways, so it is not a scroller, and it gets its own compositing layer. Phones and tablets only: on a wide screen the bar is a rail and the notification panel inside it is positioned against it. */
+      -webkit-transform:translate3d(0,0,0); transform:translate3d(0,0,0); -webkit-backface-visibility:hidden; backface-visibility:hidden;
     }
     .side-nav-divider{ display:none; }
     .side-nav-item{ width:auto; min-width:50px; padding:6px 8px; flex-direction:column; gap:4px; text-align:center; font-size:12px; }
@@ -1561,6 +1563,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Phones: the bottom navigation bar is no longer a scroll container and has its own layer, to stop it floating into the middle of the screen while scrolling in the iPhone Home Screen app (a best fix, tell us if it still happens)</li>
                   <li>Account card: the Strategies table now sits inside it, beside the balance and the Loss stop, with All strategies as the first row (it is the account figure) and each strategy's markets under its name; the separate Strategies card is gone</li>
                   <li>Bot page: Recent trades tiles, Orders today, the notification bell, the sound alerts, the order exports and the needs-checking banner now count every strategy, not only L1 (the OICORE trade was missing from them); a test keeps a new card from reading L1 alone</li>
                   <li>Deploy: the sizing deploy script now works on a Mac (it stopped on a macOS-only difference in sed before it deployed anything)</li>
