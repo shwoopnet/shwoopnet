@@ -1,0 +1,23 @@
+NEWH11 dv (once). running N 627,856; deflated one-sided z bar 5.24
+
+GOLDOPEN: {'windows': 1840, 'ok': 200, 'no edge': 1538, 'gc gap': 29, 'sigma bars': 61, 'jump': 10, 'band': 2} (funnel includes holdout windows; holdout trades not scored: 80)
+  disc: n 54 (8 d) PF10 1.51 PF1 1.48 PFx1.2 1.49 net10 $43.42 netx1.2 $41.88 win 66.7% cost/set 0.571 day z 1.46 | zero-vol 0, PF10 without 1.51
+  val : n 66 (7 d) PF10 0.79 PF1 0.78 PFx1.2 0.78 net10 $-36.04 netx1.2 $-37.93 win 48.5% cost/set 0.523 day z -0.75 | zero-vol 0, PF10 without 0.79
+  disc mean price paid 0.571, win rate 0.667, yes share 0.56
+  val mean price paid 0.523, win rate 0.485, yes share 0.61
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
+CMEGAP-W: {'windows': 2352, 'small gap': 1513, 'ok': 673, 'band': 166} (funnel includes holdout windows; holdout trades not scored: 169)
+  disc: n 270 (9 d) PF10 0.98 PF1 0.97 PFx1.2 0.96 net10 $-14.62 netx1.2 $-23.16 win 51.5% cost/set 0.503 day z -0.20 | zero-vol 0, PF10 without 0.98
+  val : n 234 (7 d) PF10 0.81 PF1 0.80 PFx1.2 0.80 net10 $-113.22 netx1.2 $-120.51 win 46.2% cost/set 0.493 day z -1.30 | zero-vol 0, PF10 without 0.81
+  disc mean price paid 0.503, win rate 0.515, yes share 0.45
+  val mean price paid 0.493, win rate 0.462, yes share 0.02
+  VERDICT after discovery and validation: FALSIFIED
+
+CMEGAP-R: {'windows': 1104, 'small gap': 339, 'ok': 201, 'filled': 490, 'band': 74} (funnel includes holdout windows; holdout trades not scored: 72)
+  disc: n 18 (5 d) PF10 1.82 PF1 1.80 PFx1.2 1.79 net10 $23.97 netx1.2 $23.39 win 66.7% cost/set 0.516 day z 2.74 | zero-vol 0, PF10 without 1.82
+  val : n 111 (6 d) PF10 0.85 PF1 0.84 PFx1.2 0.84 net10 $-42.53 netx1.2 $-46.03 win 49.5% cost/set 0.517 day z -2.12 | zero-vol 0, PF10 without 0.85
+  disc mean price paid 0.516, win rate 0.667, yes share 0.61
+  val mean price paid 0.517, win rate 0.495, yes share 0.00
+  VERDICT after discovery and validation: NOT_ENOUGH_DATA
+
