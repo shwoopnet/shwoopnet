@@ -1602,6 +1602,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
                   <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>
                   <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
@@ -3757,7 +3758,20 @@ kalshiStatusTick();
   // Coming back to the page (a phone resumed from the background, a tab brought forward, the back button restoring it from memory): the account is read again at once and every card redrawn, so the clocks and Today are
   // right immediately and not after the next ten minute read. It also asks the site, with a header only request, whether the page was updated since this one loaded, and offers a reload if so (a Home Screen app can
   // otherwise run an old copy for days). Nothing is sent but a HEAD for this page; nothing is stored.
-  var kalshiBuildTag = null;
+  var kalshiBuildTag = null, kalshiBuildPending = null, kalshiLoadedAt = Date.now();
+  // When to tell a browser its copy is old (the owner, Oct 31, 2026: "constantly getting new version reload on mobile app and desk app"). The check itself was right: every merge changes the site, so a day with ten merges meant ten blocking pop-ups. Now a changed
+  // site is only offered once it has STOPPED changing: the new tag must be seen again at least `quiet` later (4 minutes; 15 if this device was reloaded for an update in the last 30 minutes), so a burst of merges gives one prompt for the final version. A copy
+  // loaded more than 6 hours ago is offered at once (a Home Screen app can run an old copy for days). The loop guard is unchanged: a reload just made and still different is accepted, not trapped. Pure: the tag, the clock and the history in, an action out.
+  function kalshiUpdateDecision(o){
+    if(!o.tag){ return { action: 'none', pending: o.pending }; }
+    if(o.baseline === null){ return { action: 'accept', pending: null }; }
+    if(o.tag === o.baseline){ return { action: 'none', pending: null }; }
+    if(o.reloadedAt && o.now - o.reloadedAt < 120000){ return { action: 'accept', pending: null }; }
+    if(o.now - o.loadedAt >= 6 * 3600000){ return { action: 'prompt', pending: o.pending }; }
+    var quiet = o.reloadedAt && o.now - o.reloadedAt < 1800000 ? 900000 : 240000;
+    if(!o.pending || o.pending.tag !== o.tag){ return { action: 'wait', pending: { tag: o.tag, since: o.now } }; }
+    return o.now - o.pending.since >= quiet ? { action: 'prompt', pending: o.pending } : { action: 'wait', pending: o.pending };
+  }
   // The update check is for EVERY visitor now, not only the admin (the owner, Oct 30, 2026): each browser compares its own loaded copy with the site, so it is per user and per device with nothing stored on a server.
   // An out-of-date copy gets a blocking pop-up with one Reload button (it does NOT sign anyone out). Loop guard: if a reload was just made and the tags still differ (a cache serving two versions), it does not block again.
   function siteUpdateModal(){
@@ -3777,12 +3791,14 @@ kalshiStatusTick();
       fetch(location.pathname, { method: 'HEAD', cache: 'no-store' }).then(function(r){
         var tag = (r.headers.get('etag') || r.headers.get('last-modified') || '');
         if(!tag){ return; }
-        if(kalshiBuildTag === null){ kalshiBuildTag = tag; return; }
-        if(tag === kalshiBuildTag || document.querySelector('.upd-modal')){ return; }
+        if(document.querySelector('.upd-modal')){ return; }
+        var last = 0; try{ last = Number(sessionStorage.getItem('shwoopnet:updReload')) || 0; }catch(e){}
+        var d = kalshiUpdateDecision({ tag: tag, baseline: kalshiBuildTag, pending: kalshiBuildPending, now: Date.now(), loadedAt: kalshiLoadedAt, reloadedAt: last });
+        kalshiBuildPending = d.pending;
+        if(d.action === 'accept'){ kalshiBuildTag = tag; return; }             // the first look at the site, or a reload just made and still different: accept this copy, do not trap the user
+        if(d.action !== 'prompt'){ return; }
         var ae = document.activeElement;
         if(ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA') && ae.value){ return; }      // never throw away something being typed; the next check tries again
-        var last = 0; try{ last = Number(sessionStorage.getItem('shwoopnet:updReload')) || 0; }catch(e){}
-        if(last && Date.now() - last < 120000){ kalshiBuildTag = tag; return; }                       // just reloaded and still different: accept this copy, do not trap the user
         siteUpdateModal();
       }).catch(function(){});
     }catch(e){}
