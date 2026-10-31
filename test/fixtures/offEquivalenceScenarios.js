@@ -83,8 +83,8 @@ const settledLoss = (id, over) => ({ strategy: 'L1', ticker: 'KXBTC15M-26OCT0713
 async function runScenario(name, fn, r) {
   let ret, threw = null;
   try { ret = await fn(); } catch (e) { threw = String(e.message); }
-  // `at` is a wall-clock stamp the library takes itself (logRise); it is the only non-deterministic value, so it is masked.
-  const mask = (k, v) => (k === 'at' && typeof v === 'string' ? '<wall clock>' : v);
+  // `at` is a wall-clock stamp the library takes itself (logRise); it is non-deterministic, so it is masked; sentAtMs and answeredAtMs (Oct 31, 2026, the send-time log) are wall-clock reads around the order POST and are masked the same way.
+  const mask = (k, v) => ((k === 'at' && typeof v === 'string') || ((k === 'sentAtMs' || k === 'answeredAtMs') && typeof v === 'number') ? '<wall clock>' : v);
   return { name, ret: ret === undefined ? null : JSON.parse(JSON.stringify(ret, mask)), threw, log: JSON.parse(JSON.stringify(r.log, mask)) };
 }
 

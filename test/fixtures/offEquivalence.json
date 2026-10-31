@@ -113,6 +113,9 @@
     "args": [
      "L1-KXBTC15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",
@@ -303,6 +306,9 @@
     "args": [
      "L1-KXBTC15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",
@@ -905,6 +911,9 @@
     "args": [
      "L1-KXBTC15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",
@@ -1551,6 +1560,9 @@
     "args": [
      "L1-KXGOLD15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",
@@ -1735,6 +1747,9 @@
     "args": [
      "L1-KXGOLD15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",
@@ -1839,6 +1854,9 @@
     "args": [
      "L1-KXBTC15M-26OCT071415-15",
      {
+      "sentAtMs": "<wall clock>",
+      "answeredAtMs": "<wall clock>",
+      "tickStartMs": 1791381600000,
       "status": "filled",
       "orderId": "ord-1",
       "fillCount": "1.00",

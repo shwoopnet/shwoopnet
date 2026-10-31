@@ -1063,11 +1063,16 @@ async function runL1Tick(args) {
     windowSpent[wkey] = (windowSpent[wkey] || 0) + Math.max(0, cost - (record.addonCost || 0));
 
     const body = liveOrderBody(ticker, pick.limit, pick.side, cid, m.exchange_index, count);
-    const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: Date.now() });
+    // Timing log (Oct 31, 2026, the owner: send Dogecoin orders earlier; the refinement chat found the cause unmeasurable because an order's ts is the minute function's START). Logging only: the clock is read
+    // right before the POST and right after the answer, and the two times ride on the write that already follows the answer (no extra write, nothing here decides an order).
+    const sentAtMs = Date.now();
+    const res = await liveRequest({ fetchFn, keyId, pem, method: "POST", path: "/portfolio/events/orders", body, nowMs: sentAtMs });
+    const answeredAtMs = Date.now();
     const d = res.body && typeof res.body === "object" ? res.body : {};
     if (res.status >= 200 && res.status < 300 && d.order_id) {
       const filledCount = Number(d.fill_count || 0);
       await store.updateTest(cid, {
+        sentAtMs, answeredAtMs, tickStartMs: now,
         status: filledCount > 0 ? "filled" : "no fill", orderId: d.order_id, fillCount: String(d.fill_count || "0"),
         remainingCount: String(d.remaining_count || "0"), averageFillPrice: d.average_fill_price || null,
         averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,
