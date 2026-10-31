@@ -48,6 +48,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
 const exitAlarm = require("./kalshiExitAlarmLib");
+const shardAlertLib = require("./kalshiShardAlertLib");
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). SLOT_ON comes from the slot library's own constants and nothing else: no stored document, request or page can feed it. It is "watching" (entries are
 // allowed, or a slot order has ever existed), which is wider than "entering", so switching entries off never orphans a live slot position. While it is false
 // (how this ships) nothing below that names the slot runs, and the deployed functions make the same reads, writes and orders they made before the slot existed.
@@ -646,6 +647,23 @@ exports.kalshiLiveArmed = onSchedule(
           quotes: market.quotes, active: market.active, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", store: firestoreLiveStore(db),
           keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch,
         });
+        // Low money on an exchange shard (kalshiShardAlertLib): only when L1 reported a market skipped for it this minute, once per six hours; its one write is a field on the session document that the existing phone alert trigger turns into an
+        // issue alert. Fenced off so it can never fail or delay the tick (runShardAlert catches its own errors; this try is a second fence).
+        try {
+          const shardRef = db.collection("kalshiLiveControl").doc("shardAlert");
+          const shardNote = await shardAlertLib.runShardAlert({
+            now, short: l1Result && l1Result.shardShort,
+            claim: (at) => db.runTransaction(async (tx) => {
+              const cur = await tx.get(shardRef), last = cur.exists && Number.isFinite(Number(cur.data().at)) ? Number(cur.data().at) : null;
+              if (!shardAlertLib.claimable(at, last)) return false;
+              tx.set(shardRef, { at }, { merge: true });
+              return last;
+            }),
+            release: (prev) => shardRef.set({ at: prev }, { merge: true }),
+            raise: (a) => sessRef.set({ shardAlert: a }, { merge: true }),
+          });
+          if (shardNote === "alerted" || /^error|failed/.test(shardNote)) console.warn("kalshiLiveArmed: shard alert: " + shardNote);
+        } catch (e) { console.error("kalshiLiveArmed: shard alert failed: " + String((e && e.message) || e).slice(0, 160)); }
         // Slot only: right after L1, in the same minute function, on the figures L1 just worked out. It cannot fail the tick (the error is logged) and does nothing if L1 ended the session.
         if (SLOT_ON) {
           try {
