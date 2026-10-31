@@ -35,7 +35,7 @@ gates.FB1 = () => {
 
 // FB2: the workflow pushes only the data branch, uses only the built-in token, and each job fits inside the 6 hour limit.
 gates.FB2 = () => {
-  assert.ok(/cron: "5,35 \* \* \* \*"/.test(wf) && /--cycle-hours 4/.test(wf), 'triggered every 30 minutes, 4 hour jobs');
+  assert.ok(/cron: "5,35 \* \* \* \*"/.test(wf) && /cron: "20,50 \* \* \* \*"/.test(wf) && /--cycle-hours 4/.test(wf), 'triggered every 15 minutes (:05, :20, :35, :50), 4 hour jobs');
   assert.ok(/timeout-minutes: 330/.test(wf), 'a job fits inside the 6 hour limit');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf), 'the only secret it touches is the built-in token');
   assert.ok(/git push -q origin quote-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes the data branch only, never main');

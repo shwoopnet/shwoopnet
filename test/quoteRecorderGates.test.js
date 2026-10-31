@@ -22,7 +22,7 @@ gates.Q1 = () => {
 };
 
 gates.Q2 = () => {
-  assert.ok(/cron: "45 3,7,11,15,19,23 \* \* \*"/.test(wf) && /--cycle-hours 4/.test(wf), 'six 4 hour jobs a day, each starting 15 minutes before a boundary, so every close is recorded');
+  assert.ok(/cron: "45 3,7,11,15,19,23 \* \* \*"/.test(wf) && /cron: "15 \* \* \* \*"/.test(wf) && /--cycle-hours 4/.test(wf), 'six 4 hour jobs a day, each starting 15 minutes before a boundary, plus an hourly trigger behind them so one dropped start costs about an hour, not four');
   assert.ok(/timeout-minutes: 330/.test(wf), 'a job fits inside the 6 hour limit (at most 4.5 hours of recording)');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf), 'the only secret it touches is the built-in token');
   assert.ok(/git push -q origin quote-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes the data branch only, never main');

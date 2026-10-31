@@ -9,6 +9,7 @@ name: record-quotes
 on:
   schedule:
     - cron: "45 3,7,11,15,19,23 * * *"
+    - cron: "15 * * * *"   # Oct 31, 2026: one dropped trigger cost 4 hours (the 11 PM to 4:57 AM Central gap); an hourly trigger queues behind a running job (one pending at most), starts the moment it ends, and joins late otherwise, so a dropped start costs at most about an hour.
   workflow_dispatch: {}
 permissions:
   contents: write
