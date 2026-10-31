@@ -4,6 +4,7 @@ name: record-book
 on:
   schedule:
     - cron: "50 3,7,11,15,19,23 * * *"
+    - cron: "20 * * * *"   # Oct 31, 2026: same reason as record-quotes; an hourly trigger behind the 4 hour jobs, so a dropped start costs at most about an hour.
   workflow_dispatch: {}
 permissions:
   contents: write

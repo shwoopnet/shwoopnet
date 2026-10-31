@@ -3,12 +3,13 @@
 # batched public read, every public trade of each window after its close (de-duplicated, ids not stored), a coverage row per window and an hourly clock check. Research data only.
 # Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under book15r6/), never to main. It replaces R2 (record-book15).
 # Scheduled starts run hours late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running
-# waits, so jobs never overlap, and a dropped trigger costs at most 30 minutes instead of 4 hours. Each job records up to the next 4 hour boundary (about 4 hours) and stops.
+# waits, so jobs never overlap, and a dropped trigger costs at most 30 minutes instead of 4 hours (15 since Oct 31, 2026: the triggers run at :05, :20, :35 and :50, because GitHub dropped a whole run of them for about 5 hours). Each job records up to the next 4 hour boundary (about 4 hours) and stops.
 # It stops by itself after 14 days: from 2026-11-13 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-15m-book
 on:
   schedule:
     - cron: "5,35 * * * *"
+    - cron: "20,50 * * * *"   # Oct 31, 2026: GitHub dropped every scheduled start for about 5 hours (11 PM to 3:50 AM Central); a second pair of triggers, 15 minutes after the first, gives it twice the chances. Extra triggers queue behind a running job (one pending run at most) and never overlap it.
   workflow_dispatch: {}
 permissions:
   contents: write
