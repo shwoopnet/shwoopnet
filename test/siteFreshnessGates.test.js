@@ -44,11 +44,15 @@ gates.SF3 = () => {
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(open), 'the Start confirmation does not mention paused ' + n));
 };
 gates.SF4 = () => {
-  const label = (/label = '(6 minute look: [^']+)'/.exec(html) || [])[1];
-  assert.ok(label, 'the next look label is found');
-  liveNames.forEach((n) => assert.ok(new RegExp(n, 'i').test(label), 'the next look names ' + n));
-  pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(label), 'the next look does not name paused ' + n));
-  assert.ok(!/10 minute look/.test(html.slice(html.indexOf('function kalshiNextEntry'), html.indexOf('function kalshiNextEntry') + 600)) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
+  // The next look names the markets each strategy looks at (the Bot status card covers every strategy, the owner, Oct 31, 2026): the Closing buy names the live L1 markets, the open interest jump names Bitcoin, and no paused market is named.
+  const looks = /var KAL_LOOKS = \[[\s\S]*?\n  \];\n/.exec(html);
+  assert.ok(looks, 'the next look table is found');
+  const l1 = /name: 'Closing buy', what: function\(goldClosed\)\{ return ([^;]+); \}/.exec(looks[0]);
+  assert.ok(l1, 'the Closing buy look is found');
+  liveNames.filter((n) => n !== 'Bitcoin').forEach((n) => assert.ok(new RegExp(n, 'i').test(l1[1]), 'the Closing buy look names ' + n));
+  pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(looks[0].replace(/Bitcoin/g, '')) || n === 'Bitcoin', 'the next look does not name paused ' + n));
+  assert.ok(/name: 'Open interest jump', what: function\(\)\{ return 'Bitcoin,/.test(looks[0]), 'the open interest jump names Bitcoin (the second strategy trades it through the slot)');
+  assert.ok(!/10 minute look/.test(looks[0]) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
 };
 gates.SF5 = () => {
   const watch = /var KAL_WATCH = (\[[\s\S]*?\]);\s*\n/.exec(html);
