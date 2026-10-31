@@ -865,16 +865,36 @@
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
-  /* Bot status card, redone Oct 31, 2026: two tiles (next look, health line) and three short rows, no folds. */
-  .kal-st-tiles{ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:10px; margin-bottom:12px; }
-  .kal-st-tile{ border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.025); padding:12px; min-width:0; }
-  .kal-st-lbl{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
-  .kal-st-big{ display:block; font-size:23px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  /* Bot status card, redone twice Oct 31, 2026 (the owner: style B, a ring for the countdown beside a tall health line, then only information that appears nowhere else on the page). */
+  #kalStatusBody{ container-type:inline-size; }
+  .kal-st-top{ display:grid; grid-template-columns:minmax(200px,230px) minmax(0,1fr); gap:12px; margin-bottom:12px; }
+  .kal-st-tile{ border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.025); padding:14px; min-width:0; }
+  .kal-st-lbl{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
   .kal-st-sub{ font-size:12px; color:var(--muted); margin-top:4px; white-space:normal; overflow-wrap:anywhere; min-width:0; }
-  #kalStatusBody .kal-rows > div{ gap:12px; } #kalStatusBody .kal-rows b{ text-align:right; min-width:0; white-space:normal; overflow-wrap:anywhere; } #kalStatusBody .kal-rows .kal-k{ flex:none; }
-  .kal-st-tile .kal-ecg-wrap{ margin:0 0 8px; }
-  .kal-st-tile .kal-hb{ margin:0; font-size:12px; align-items:flex-start; } .kal-st-tile .kal-hb span:last-child{ min-width:0; white-space:normal; overflow-wrap:anywhere; } .kal-st-tile .kal-hb-dot{ margin-top:3px; width:8px; height:8px; }
-  @media (max-width:520px){ .kal-st-tiles{ grid-template-columns:1fr; } }
+  .kal-st-ringtile{ display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; text-align:center; }
+  .kal-st-ring{ display:block; max-width:100%; font-family:'Public Sans', sans-serif; font-variant-numeric:tabular-nums; }
+  .kal-st-ringtext b{ font-size:13px; font-weight:800; }
+  .kal-st-healthtile{ display:flex; flex-direction:column; }
+  .kal-st-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px; flex-wrap:wrap; }
+  .kal-st-head .kal-hb{ margin:0; font-size:13px; }
+  .kal-st-healthtile .kal-ecg-wrap{ margin:0; flex:1; display:flex; }
+  .kal-st-healthtile .kal-ecg{ flex:1; height:auto; min-height:150px; }
+  .kal-st-bottom{ display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:12px; }
+  .kal-st-prices{ margin-bottom:0; display:flex; flex-direction:column; } .kal-st-foot{ margin-top:auto; padding-top:10px; }
+  .kal-st-drow{ padding:7px 0; border-top:1px solid var(--border); } .kal-st-drow:first-of-type{ border-top:0; padding-top:10px; }
+  .kal-st-drow .kal-st-pname{ display:inline; margin-right:8px; } .kal-st-drow .kal-st-scale{ height:6px; margin:6px 0 4px; }
+  .kal-st-dbig{ display:inline; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; } .kal-st-dbig .kal-st-dim{ font-size:12px; font-weight:600; }
+  .kal-st-fill{ position:absolute; top:0; bottom:0; left:0; background:rgba(255,255,255,.5); border-radius:999px; }
+  .kal-st-pgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-top:10px; }
+  .kal-st-pcell{ min-width:0; }
+  .kal-st-pname{ font-size:13px; font-weight:800; } .kal-st-dim{ color:var(--muted); font-weight:600; }
+  .kal-st-pbig{ font-size:28px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; margin:6px 0; line-height:1; }
+  .kal-st-scale{ position:relative; height:8px; border-radius:999px; background:rgba(255,255,255,.07); margin:8px 0; }
+  .kal-st-band{ position:absolute; top:0; bottom:0; background:rgba(255,255,255,.35); border-radius:2px; }
+  .kal-st-pt{ position:absolute; top:-3px; width:3px; height:14px; background:var(--paper); border-radius:2px; }
+  @container (max-width:760px){ .kal-st-bottom{ grid-template-columns:1fr; } }
+  @container (max-width:520px){ .kal-st-top{ grid-template-columns:1fr; } }
+  @media (max-width:520px){ .kal-st-top, .kal-st-bottom{ grid-template-columns:1fr; } }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
   .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
   @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
@@ -1583,6 +1603,8 @@
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
+                  <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>
+                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
                   <li>Bot status: redone as two tiles (the countdown to the next look and the health line) with the last order, orders today and which markets are open; win rate, edge and best and worst market are no longer on this card, and Needs a look shows only when something is wrong</li>
                   <li>Settings: the Phone alerts confirmation now says closes, stops and issues (it said entries, but a buy never alerts)</li>
                   <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
@@ -2396,6 +2418,7 @@
     var st = document.getElementById('kalStatus');
     kalshiBooksLast = data || null;
     renderKalshiPositions();
+    kalshiRenderPrices();
     if(data){ kalshiReads.push(Date.now()); while(kalshiReads.length > 20){ kalshiReads.shift(); } }
     st.textContent = data && Number.isFinite(data.fetchedAt) ? 'Updated ' + kalTime(data.fetchedAt) + ' CT' : '';
   }
@@ -3243,10 +3266,21 @@
   }
   // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour. Every market that can place an order now is entered about 6 minutes before the close (minute 9 of the quarter): gold, Dogecoin and Ethereum (on a smooth climb only).
   // XRP and natural gas, the only 10 minute looks, are paused in the bot's code (Oct 28, 2026), and so are Bitcoin (Oct 29, 2026) and the forex probes, so the page names none of them and shows no 10 minute look (the owner, Oct 29, 2026: "XRP is paused, isn't it").
+  // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold and Dogecoin), the open interest jump 3 minutes before it
+  // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
+  var KAL_LOOKS = [
+    { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'Dogecoin' : 'gold and Dogecoin') + ', 6 minutes before the close'; } },
+    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } }
+  ];
   function kalshiNextEntry(now){
-    var Q = 900000, base = Math.floor(now / Q) * Q, label = '6 minute look: gold and Dogecoin', cands = [[base + 540000, label], [base + Q + 540000, label]];
-    for(var i = 0; i < cands.length; i++){ if(cands[i][0] > now){ return { at: cands[i][0], inMs: cands[i][0] - now, label: cands[i][1] }; } }
-    return null;
+    var Q = 900000, base = Math.floor(now / Q) * Q, goldClosed = kalshiGoldClosed(now), events = [];
+    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){ events.push({ at: base + q * Q + l.at, look: l }); }); }
+    events.sort(function(a, b){ return a.at - b.at; });
+    var i = 0; while(i < events.length && events[i].at <= now){ i++; }
+    var next = events[i], prev = events[i - 1], after = events[i + 1];
+    if(!next || !prev){ return null; }
+    var thenText = after ? after.look.name + ' (' + after.look.what(goldClosed).split(',')[0] + ')' : '';
+    return { at: next.at, inMs: next.at - now, name: next.look.name, what: next.look.what(goldClosed), then: thenText ? 'then ' + thenText : '', frac: Math.max(0, Math.min(1, (now - prev.at) / (next.at - prev.at))) };
   }
   // Silent-market warning (Oct 24, 2026, the owner: "make a warning in case a strategy stops running for whatever reason"). The bot as a whole already says when it stops (the Running pill, the reason under it, the heartbeat). This is
   // the other failure: one market quietly stops sending orders while the rest carry on (a shard out of money, a market the bot dropped, a bug). A market is called silent when it has sent no order, filled or not, for far longer than its
@@ -3259,10 +3293,32 @@
     parts.forEach(function(x){ o[x.type] = x.value; });
     return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(o.weekday) * 1440 + Number(o.hour) * 60 + Number(o.minute);
   }
-  // Which markets are open right now, for the Bot status card: gold has no weekend (closed from Friday 17:00 to Sunday 18:00 Central, the same window the silent-market warning uses); Dogecoin trades all week.
-  function kalshiMarketsText(now){
-    var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080;
-    return closed ? 'Gold closed, back Sun 6 PM' : 'Gold and Dogecoin open';
+  // Gold has no weekend: closed from Friday 17:00 to Sunday 18:00 Central (the same window the silent-market warning uses); Dogecoin and Bitcoin trade all week.
+  function kalshiGoldClosed(now){ var wm = kalshiCtWeekMinute(now); return wm >= 7200 + 1020 || wm < 1080; }
+  // Prices right now against what each strategy buys (the owner, Oct 31, 2026: "all unique and helpful"; nothing else on the page shows this, and it answers "why is nothing trading"). From the market relay the page already reads: for the open
+  // 15 minute market of each series, the price to BUY the favourite side (gold and Dogecoin buy 88c to 97c) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
+  // does not carry, so that row says where the price sits and no more. Pure: relay markets and the clock in, rows out.
+  var KAL_PRICE_WATCH = [
+    { name: 'Gold', series: 'KXGOLD15M', kind: 'fav', lo: 0.88, hi: 0.97, gold: true },
+    { name: 'Dogecoin', series: 'KXDOGE15M', kind: 'fav', lo: 0.88, hi: 0.97 },
+    { name: 'Bitcoin', series: 'KXBTC15M', kind: 'cheap', lo: 0.05, hi: 0.50 }
+  ];
+  function kalshiPriceWatch(markets, now){
+    return KAL_PRICE_WATCH.map(function(w){
+      var out = { name: w.name, kind: w.kind, lo: w.lo, hi: w.hi, state: 'none', price: null, depth: null, closeAt: null, pos: 0, bandLeft: 0, bandWidth: 0 };
+      if(w.gold && kalshiGoldClosed(now)){ out.state = 'closed'; return out; }
+      var m = (markets || []).filter(function(x){ return x && x.series === w.series && Date.parse(x.closeTime) > now; }).sort(function(p, q){ return Date.parse(p.closeTime) - Date.parse(q.closeTime); })[0];
+      if(!m || !(m.yesAsk > 0) || !(m.yesBid >= 0)){ return out; }
+      var yes = m.yesAsk, no = 1 - m.yesBid, p = w.kind === 'fav' ? Math.max(yes, no) : Math.min(yes, no);
+      var from = w.kind === 'fav' ? 0.5 : 0, span = w.kind === 'fav' ? 0.5 : 0.5;
+      // Contracts resting at the touch we would hit: buying YES meets the YES ask size, buying NO meets the YES bid size (a YES bid is a NO ask). The relay carries only the top level of the book.
+      var buyYes = w.kind === 'fav' ? yes >= no : yes <= no, sz = buyYes ? m.yesAskSz : m.yesBidSz;
+      out.depth = Number.isFinite(sz) && sz >= 0 ? sz : null;
+      out.price = p; out.closeAt = Date.parse(m.closeTime);
+      out.state = p < w.lo ? 'below' : (p > w.hi ? 'above' : 'in');
+      out.pos = Math.max(0, Math.min(1, (p - from) / span)); out.bandLeft = (w.lo - from) / span; out.bandWidth = (w.hi - w.lo) / span;
+      return out;
+    });
   }
   function kalshiDurationText(ms){
     var m = Math.round(ms / 60000);
@@ -3464,23 +3520,22 @@
     var beatsBefore = kalshiBeats.length;
     kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
     var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
-    // Redone (the owner, Oct 31, 2026, template C with the heartbeat line in place of Today: "too much to read", then "id like to avoid collapsables"): two tiles, the countdown to the next look and the health monitor line, then three short rows (last order, orders today,
-    // which markets are open). No folds. The win rate, edge and best and worst market rows were dropped from this card; "Needs a look" shows only when something is wrong. The ids the one second tick and the ECG use are unchanged.
+    // Redone twice (the owner, Oct 31, 2026): the countdown as a ring beside a tall animated health line (style B), and under them only what appears nowhere else on the page: the prices right now against each strategy's buying band. The latest-order, order-count and the
+    // win rate rows are gone from this card (the Strategies table has them), no folds, and the card covers every strategy. "Needs a look" shows only when something is wrong. The ids the one second tick and the ECG use are kept.
     var hbText = line + (hb.ageSec !== null && running ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
-    sEl.innerHTML = '<div class="kal-st-tiles">' +
-      '<div class="kal-st-tile"><div class="kal-st-lbl">Next look</div>' + (running ? '<b class="kal-st-big" id="kalNextIn">&mdash;</b><div class="kal-st-sub" id="kalNextWhat">&mdash;</div>' : '<b class="kal-st-big">&mdash;</b><div class="kal-st-sub">Not running</div>') + '</div>' +
-      '<div class="kal-st-tile"><div class="kal-st-lbl">Health</div><div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div></div>' +
-      '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Last order</span><b id="kalLastOrder">&mdash;</b></div><div><span class="kal-k">Orders today</span><b id="kalOrdersToday">&mdash;</b></div><div><span class="kal-k">Markets</span><b>' + escapeHtml(kalshiMarketsText(now)) + '</b></div></div>' +
-      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '') +
-      '';
+    var RING = 402;
+    sEl.innerHTML = '<div class="kal-st-top">' +
+      '<div class="kal-st-tile kal-st-ringtile"><div class="kal-st-lbl">Next look</div>' +
+      '<svg class="kal-st-ring" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/><circle id="kalRing" cx="75" cy="75" r="64" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + RING + '" stroke-dashoffset="' + RING + '" transform="rotate(-90 75 75)"/>' +
+      '<text id="kalNextIn" x="75" y="84" text-anchor="middle" fill="#fff" font-weight="800" font-size="32">&mdash;</text></svg>' +
+      (running ? '<div class="kal-st-ringtext"><b id="kalNextName">&mdash;</b><div class="kal-st-sub" id="kalNextWhat"></div><div class="kal-st-sub" id="kalNextThen"></div></div>' : '<div class="kal-st-ringtext"><div class="kal-st-sub">Not running</div></div>') + '</div>' +
+      '<div class="kal-st-tile kal-st-healthtile"><div class="kal-st-head"><div class="kal-st-lbl">Health</div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div><div id="kalEcg" class="kal-ecg-wrap"></div></div></div>' +
+      '<div class="kal-st-bottom"><div class="kal-st-tile kal-st-prices" id="kalPrices"></div><div class="kal-st-tile kal-st-depth" id="kalDepth"></div></div><div id="kalWork"></div>' +
+      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
+    kalshiRenderPrices();
     if(running && kalshiOrdersLoaded){
       var work = kalshiTodayWork(kalshiAllOrders(), now);
-      var sentText = work.sent === 0 ? 'none yet' : work.sent + ' sent, ' + work.filled + ' filled' + (work.noFill ? ', ' + work.noFill + ' not filled' : '');
-      var problemText = work.problem + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused');
-      var lastText = work.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((now - work.lastTs) / 1000)));
-      var lastEl = document.getElementById('kalLastOrder'); if(lastEl){ lastEl.textContent = lastText ? lastText + ' ago' : 'none today'; }
-      if(work.problem){ document.getElementById('kalWork').insertAdjacentHTML('beforeend', '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>'); }
-      var todayEl = document.getElementById('kalOrdersToday'); if(todayEl){ todayEl.textContent = sentText; }
+      if(work.problem){ document.getElementById('kalWork').insertAdjacentHTML('beforeend', '<div class="kal-warn"><b>Needs a look</b><div class="kal-note">' + String(work.problem) + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused') + '</div></div>'); }
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
@@ -3513,9 +3568,52 @@ kalshiStatusTick();
       if(hbEl){ hbEl.className = 'kal-hb ' + (halted ? '' : hb.state); }
     }
     if(nx){
-      var ne = kalshiNextEntry(now);
-      if(ne){ var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60); if(what){ what.textContent = ne.label; } }
+      var ne = kalshiNextEntry(now), ringEl = document.getElementById('kalRing'), nameEl = document.getElementById('kalNextName'), thenEl = document.getElementById('kalNextThen');
+      if(ne){
+        var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
+        if(what){ what.textContent = ne.what; } if(nameEl){ nameEl.textContent = ne.name; } if(thenEl){ thenEl.textContent = ne.then; }
+        if(ringEl){ ringEl.setAttribute('stroke-dashoffset', String(Math.round(402 * (1 - ne.frac)))); }
+      }
     }
+  }
+  // The price tile, redrawn each time the market relay is read (every few seconds) and with the card; it only reads kalshiBooksLast.
+  function kalshiEscapedPriceCell(r){   // one market's cell; every piece of text goes through escapeHtml, the rest is numbers formatted here
+
+      var pc = r.price === null ? '' : Math.round(r.price * 100) + 'c', band = Math.round(r.lo * 100) + 'c to ' + Math.round(r.hi * 100) + 'c';
+      if(r.state === 'closed'){ return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + '</div><div class="kal-st-pbig kal-st-dim">Closed</div><div class="kal-st-sub">Back Sun 6 PM Central</div></div>'; }
+      if(r.state === 'none'){ return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + '</div><div class="kal-st-pbig kal-st-dim">&mdash;</div><div class="kal-st-sub">No quote yet</div></div>'; }
+      var verdict = r.state === 'in' ? 'Inside the ' + band + ' band' : (r.state === 'below' ? 'Below the ' + band + ' band' : 'Above the ' + band + ' band'), side = r.kind === 'fav' ? 'favourite side' : 'cheaper side';
+      return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + ' <span class="kal-st-dim">&middot; ' + side + '</span></div><div class="kal-st-pbig' + (r.state === 'in' ? '' : ' kal-st-dim') + '">' + escapeHtml(pc) + '</div>' +
+        '<div class="kal-st-scale"><i class="kal-st-band" style="left:' + (r.bandLeft * 100).toFixed(1) + '%;width:' + (r.bandWidth * 100).toFixed(1) + '%"></i><i class="kal-st-pt" style="left:calc(' + (r.pos * 100).toFixed(1) + '% - 1px)"></i></div>' +
+        '<div class="kal-st-sub">' + escapeHtml(verdict) + '. Closes ' + escapeHtml(kalTime(r.closeAt)) + '</div></div>';
+  }
+  // The size of the bot's most recent order in each market (ordered contracts, both strategies), for the depth tile.
+  function kalshiLastOrderSizes(orders){
+    var latest = {};
+    (orders || []).forEach(function(o){
+      if(!o || (o.strategy !== 'L1' && o.strategy !== 'SLOT') || !Number.isFinite(Number(o.ts)) || !(Number(o.count) > 0)){ return; }
+      var n = kalshiMarketName(o); if(!latest[n] || Number(o.ts) > latest[n].ts){ latest[n] = { ts: Number(o.ts), count: Number(o.count) }; }
+    });
+    return latest;
+  }
+  // One market's row in the depth tile: how many contracts rest at the price we would hit, and what share of it the last order was. Every piece of text goes through escapeHtml.
+  function kalshiEscapedDepthRow(r, last){
+    var name = '<div class="kal-st-pname">' + escapeHtml(r.name) + '</div>';
+    if(r.state === 'closed'){ return '<div class="kal-st-drow">' + name + '<div class="kal-st-sub">Closed</div></div>'; }
+    if(r.state === 'none' || r.depth === null){ return '<div class="kal-st-drow">' + name + '<div class="kal-st-sub">No book yet</div></div>'; }
+    var big = r.depth >= 1000 ? Math.round(r.depth / 100) / 10 + 'k' : String(Math.round(r.depth)), share = last && r.depth > 0 ? last.count / r.depth : null;
+    var line = share === null ? 'Our last order: none yet' : 'Our last order was ' + Math.round(last.count) + ', ' + Math.round(share * 100) + '% of it';
+    return '<div class="kal-st-drow">' + name + '<div class="kal-st-dbig">' + escapeHtml(big) + ' <span class="kal-st-dim">resting</span></div>' +
+      (share === null ? '' : '<div class="kal-st-scale"><i class="kal-st-fill" style="width:' + Math.min(100, share * 100).toFixed(1) + '%"></i></div>') + '<div class="kal-st-sub">' + escapeHtml(line) + (share !== null && share >= 0.3 ? '. A big share of the book' : '') + '</div></div>';
+  }
+  function kalshiEscapedDepthRows(rows, sizes){ return rows.map(function(r){ return kalshiEscapedDepthRow(r, sizes[r.name]); }).join(''); }
+  function kalshiRenderPrices(){
+    var el = document.getElementById('kalPrices'); if(!el){ return; }
+    var now = Date.now(), data = kalshiBooksLast, rows = kalshiPriceWatch(data && data.markets, now);
+    var depthEl = document.getElementById('kalDepth');
+    if(depthEl){ var sizes = kalshiLastOrderSizes(kalshiAllOrders()); depthEl.innerHTML = '<div class="kal-st-lbl">Depth at the touch, against our order size</div>' + kalshiEscapedDepthRows(rows, sizes) + '<div class="kal-st-sub" style="margin-top:8px">Top of the book only. A big share of it is where orders tend to miss.</div>'; }
+    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + '</div>' +
+      '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + ' ago. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
   }
   var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
 

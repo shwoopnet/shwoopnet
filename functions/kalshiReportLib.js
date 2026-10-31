@@ -3,6 +3,7 @@
 // writes nothing, and never returns an order id, a client order id or any credential: only what the owner already pastes into the research chat.
 const crypto = require("crypto");
 const { maxContractsFor } = require("./kalshiLiveLib");
+const deployStampLib = require("./deployStampLib");
 
 const MAX_HOURS = 24 * 90;
 const MAX_ORDER_ROWS = 2000;
@@ -146,7 +147,12 @@ function makeReportHandler(deps) {
       // The slot read is optional and its failure never blanks the L1 report: the second slot section is then simply empty.
       let slotOrders = [];
       if (typeof deps.readSlotOrders === "function") { try { slotOrders = await deps.readSlotOrders(now - hours * 3600000); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
-      res.status(200).json(buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders));
+      // Which commit each function was deployed from (the deploy stamp). Optional, read only; a failure leaves the field out.
+      let deploys;
+      if (typeof deps.readDeploys === "function") { try { deploys = deployStampLib.summarize(await deps.readDeploys()); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
+      if (deploys !== undefined) report.deploys = deploys;
+      res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
       if (typeof deps.logError === "function") deps.logError(e);
