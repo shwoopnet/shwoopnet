@@ -1,0 +1,164 @@
+{
+ "KXBTC15M": {
+  "threshold": 86299.56000000001,
+  "disc_windows_with_oi": 4357,
+  "disc_rows": 8180,
+  "disc_rows_valid_doi": 8180,
+  "disc": {
+   "windows": 4357,
+   "cand": 2431
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1863
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 143
+  }
+ },
+ "KXDOGE15M": {
+  "threshold": 2993.3320000000003,
+  "disc_windows_with_oi": 4356,
+  "disc_rows": 7750,
+  "disc_rows_valid_doi": 7750,
+  "disc": {
+   "windows": 4356,
+   "cand": 2302
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1720
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 136
+  }
+ },
+ "KXXRP15M": {
+  "threshold": 4666.155,
+  "disc_windows_with_oi": 4357,
+  "disc_rows": 7730,
+  "disc_rows_valid_doi": 7730,
+  "disc": {
+   "windows": 4357,
+   "cand": 2313
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1728
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 128
+  }
+ },
+ "KXNEAR15M": {
+  "threshold": 1139.0439999999996,
+  "disc_windows_with_oi": 4356,
+  "disc_rows": 8829,
+  "disc_rows_valid_doi": 8829,
+  "disc": {
+   "windows": 4356,
+   "cand": 2586
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1775
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 130
+  }
+ },
+ "KXZEC15M": {
+  "threshold": 1531.0119999999995,
+  "disc_windows_with_oi": 4354,
+  "disc_rows": 8344,
+  "disc_rows_valid_doi": 8344,
+  "disc": {
+   "windows": 4354,
+   "cand": 2457
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1687
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 128
+  }
+ },
+ "KXBNB15M": {
+  "threshold": 2980.7850000000003,
+  "disc_windows_with_oi": 4352,
+  "disc_rows": 7606,
+  "disc_rows_valid_doi": 7606,
+  "disc": {
+   "windows": 4352,
+   "cand": 2248
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1722
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 148
+  }
+ },
+ "KXHYPE15M": {
+  "threshold": 3712.44,
+  "disc_windows_with_oi": 4353,
+  "disc_rows": 7068,
+  "disc_rows_valid_doi": 7068,
+  "disc": {
+   "windows": 4353,
+   "cand": 2142
+  },
+  "val": {
+   "windows": 3512,
+   "cand": 1645
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 135
+  }
+ },
+ "KXSILVER15M": {
+  "threshold": 5344.834,
+  "disc_windows_with_oi": 3159,
+  "disc_rows": 7225,
+  "disc_rows_valid_doi": 7225,
+  "disc": {
+   "windows": 3159,
+   "cand": 2053
+  },
+  "val": {
+   "windows": 2453,
+   "cand": 1483
+  },
+  "hold": {
+   "windows": 258,
+   "cand": 141
+  }
+ },
+ "KXWTI15M": {
+  "threshold": 7281.530000000001,
+  "disc_windows_with_oi": 3159,
+  "disc_rows": 7148,
+  "disc_rows_valid_doi": 7148,
+  "disc": {
+   "windows": 3159,
+   "cand": 2022
+  },
+  "val": {
+   "windows": 2672,
+   "cand": 1717
+  },
+  "hold": {
+   "windows": 268,
+   "cand": 163
+  }
+ }
+}
