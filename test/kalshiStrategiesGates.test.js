@@ -162,8 +162,7 @@ gates.ST15 = () => {
   assert.ok(!g.kalshiIsActive(o('L1', 'KXETH15M')), 'Ethereum is paused and not on the list');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXXRP15M')), 'XRP is paused and not on the list');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXBTC15M')), "Bitcoin's old L1 orders are not active: L1 no longer trades it");
-  assert.ok(/kalshiEdgeCheck\(kalshiResolveOrders\(kalshiAllOrders\(\)[^;]*\.filter\(kalshiIsActive\)/.test(html), 'the win rate, edge, best and worst read every strategy, active markets only');
-  assert.ok(/Worst market, 7 days/.test(html), 'Worst market is back');
+  // Oct 31, 2026 (the owner: the Bot status card is redone, "too much to read"): the win rate, edge, best and worst market rows left that card, so they are no longer asserted here. Orders today and Last order below are still on it.
   assert.ok(/kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)|!kalshiIsActive\(o\) \|\| !Number\.isFinite\(o\.ts\)/.test(html), 'Orders today and Last order count both strategies on active markets');
 };
 gates.ST16 = () => {
