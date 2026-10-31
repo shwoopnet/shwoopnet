@@ -1,5 +1,5 @@
 'use strict';
-// SF1 to SF5: the page's own words about the bot must match the bot's code (the owner, Oct 29, 2026: the Bot page still said XRP had a 10 minute look and Dogecoin traded 3 contracts after both had changed).
+// SF1 to SF6: the page's own words about the bot must match the bot's code (the owner, Oct 29, 2026: the Bot page still said XRP had a 10 minute look and Dogecoin traded 3 contracts after both had changed).
 // Consequence: a code change that makes the page's rules, sizes, limits or market lists untrue fails here, in the pull request that changes the code, instead of reaching the owner as a stale line on a real-money control.
 // Add a line here whenever new page text states a number or a market list that the bot's code decides.
 const assert = require('assert');
@@ -56,6 +56,17 @@ gates.SF5 = () => {
   const entries = [...watch[1].matchAll(/\{ name: '([^']+)'([^}]*)\}/g)].map((m) => ({ name: m[1], paused: /paused: true/.test(m[2]) }));
   const byName = { Gold: 'KXGOLD15M', XRP: 'KXXRP15M', Dogecoin: 'KXDOGE15M', 'AUD/USD': 'KXAUDUSD15M', 'USD/CAD': 'KXUSDCAD15M', 'Natural gas': 'KXNATGAS15M' };
   entries.forEach((e) => { assert.ok(byName[e.name], e.name + ' is a new silent-market entry: map it in this test'); assert.strictEqual(e.paused, live.PAUSED_SERIES.includes(byName[e.name]), 'the silent-market warning treats ' + e.name + (e.paused ? ' as paused' : ' as live') + ', like the bot'); });
+};
+
+gates.SF6 = () => {
+  // The Rules text states the second strategy's size and the one-crypto-order rule (the owner, Oct 31, 2026: the page said 5 contracts after the owner ordered 10, and kept a window limit no live market was under).
+  const slot = require('../functions/kalshiSlotLib.js');
+  const strat = (slot.SLOT_STRATEGIES || []).find((x) => x.id === 'OICORE');
+  assert.ok(strat, 'OICORE is registered');
+  const span = text((menu.match(/<span id="kalRulesSlot">[\s\S]*?<\/span>/) || [''])[0]);
+  assert.ok(new RegExp('\\b' + strat.contractsPerOrder + ' contracts').test(span), 'the page says OICORE sends ' + strat.contractsPerOrder + ' contracts, like its registry entry');
+  const live1 = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s));
+  if (!live1.some((s) => live.CAPPED_SERIES.includes(s))) assert.ok(!/At most one crypto order per 15 minute window/.test(text(menu)), 'no live market is under the one-crypto-order rule, so the page must not state it');
 };
 
 let failed = 0;
