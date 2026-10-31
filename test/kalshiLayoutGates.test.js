@@ -634,7 +634,8 @@ gates.AK1 = () => {
 // BS1 to BS3: the Bot page's status and risk cards (Oct 23, 2026, the owner chose "heartbeat and what it's doing" and "loss stop and risk meter"). Pure functions of the session, the orders and the clock.
 const liftBs = (names, pre) => new Function((pre || '') + names.map((n) => (new RegExp('(function ' + n + '\\([^)]*\\)\\{[\\s\\S]*?\\n  \\})\\n').exec(html) || assert.fail(n + ' not found'))[1]).join('\n') + '; return {' + names.join(',') + '};')();
 gates.BS1 = () => {
-  const f = liftBs(['kalshiHeartbeat', 'kalshiNextEntry']);
+  const looks = /  var KAL_LOOKS = \[[\s\S]*?\n  \];\n/.exec(html)[0];
+  const f = liftBs(['kalshiHeartbeat', 'kalshiCtWeekMinute', 'kalshiGoldClosed', 'kalshiNextEntry'], looks);
   const T0 = 10 * 900000;   // a quarter hour boundary
   assert.strictEqual(f.kalshiHeartbeat(null, T0).state, 'off', 'no session: not running');
   assert.strictEqual(f.kalshiHeartbeat({ active: false }, T0).state, 'off');
@@ -643,11 +644,13 @@ gates.BS1 = () => {
   assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 400000 }, T0).state, 'down', 'over 5 minutes means the function is not running');
   assert.strictEqual(f.kalshiHeartbeat({ active: true }, T0).state, 'quiet', 'running with no check recorded yet is waiting, not alive');
   const a = f.kalshiNextEntry(T0 + 60000);
-  assert.deepStrictEqual([a.at, /6 minute/.test(a.label), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.label)], [T0 + 540000, true, false], 'a minute into a quarter the next look is the 6 minute one at minute 9, and it names no paused market (XRP, natural gas, Bitcoin, the forex probes)');
+  assert.deepStrictEqual([a.at, a.name, /gold and Dogecoin/.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
   const b = f.kalshiNextEntry(T0 + 330000);
-  assert.deepStrictEqual([b.at, /gold and Dogecoin/.test(b.label)], [T0 + 540000, true], 'minute 5 no longer has a look of its own: the 10 minute look belonged to paused markets');
+  assert.deepStrictEqual([b.at, b.name], [T0 + 540000, 'Closing buy'], 'minute 5 has no look of its own: the 10 minute look belonged to paused markets');
   const c = f.kalshiNextEntry(T0 + 600000);
-  assert.deepStrictEqual([c.at, /6 minute/.test(c.label)], [T0 + 900000 + 540000, true], 'after minute 9 it rolls to the next quarter');
+  assert.deepStrictEqual([c.at, c.name, /Bitcoin/.test(c.what)], [T0 + 720000, 'Open interest jump', true], 'after minute 9 the next look is the open interest jump at minute 12 (the Bitcoin strategy), the card covers every strategy');
+  const d = f.kalshiNextEntry(T0 + 800000);
+  assert.deepStrictEqual([d.at, d.name], [T0 + 900000 + 540000, 'Closing buy'], 'after minute 12 it rolls to the next quarter');
 };
 gates.BS2 = () => {
   const f = liftBs(['kalshiRiskMeter']);
