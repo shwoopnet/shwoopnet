@@ -20,6 +20,11 @@ gates.ZM1 = () => {
   assert.ok(!/@media\s*\(min-width:\s*\d+px\)\s*\{\s*\.app\{\s*zoom/.test(html), 'no step scales the app from the window width: browser zoom out would switch it on and cancel the zoom');
   assert.ok(/\.app\{\s*zoom:\s*var\(--app-zoom,\s*1\);\s*\}/.test(html), 'the app scale is one variable');
 };
+gates.ZM4 = () => {
+  // the page column is centred whenever the window is wider than it, scaled or not: a laptop zoomed out to 25% is a 5760 pixel window with scale 1, and the page must not sit against the left edge
+  assert.ok(/@media \(min-width: 1921px\)\{ \.app\{ margin-left:auto; margin-right:auto; \} \}/.test(html), 'wide windows centre the app column');
+  assert.ok(!/html\.big-screen \.app\{[^}]*margin/.test(html), 'centring no longer depends on the big-screen scale');
+};
 gates.ZM2 = () => {
   // a 1440 pixel laptop zoomed out to 67, 50, 33 and 25 percent: the window is 2149, 2880, 4320 and 5760 CSS pixels wide, and the page scale must stay 1
   [1440, 2149, 2880, 4320, 5760].forEach((w) => { const r = run(1440, w); assert.strictEqual(r.z, 1, 'laptop at window width ' + w + ' stays at scale 1'); assert.strictEqual(r.big, false); });
