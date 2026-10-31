@@ -43,6 +43,27 @@ def ts(s: str) -> int:
     return calendar.timegm(time.strptime(s[:19], "%Y-%m-%dT%H:%M:%S"))
 
 
+def fetch_obs(cache) -> None:
+    lo = min(ts(m["close_time"]) for ms in cache["markets"].values() for m in ms) - 7200
+    for st in STATIONS:
+        rows = []
+        t0 = lo
+        while t0 < CUT:
+            t1 = min(t0 + 8 * 86400, CUT)
+            fmt = lambda t: time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(t))
+            url = f"https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station={st}&vars=tmpf&sts={fmt(t0)}&ets={fmt(t1)}&sample=1min&what=download&tz=UTC"
+            txt = urllib.request.urlopen(url, timeout=120).read().decode()
+            for r in csv.DictReader(io.StringIO(txt)):
+                v = r.get("tmpf", "")
+                try:
+                    rows.append([ts(r["valid(UTC)"].replace(" ", "T") + ":00"), float(v)])
+                except (ValueError, KeyError):
+                    pass
+            t0 = t1
+        cache["obs"][st] = rows
+        print(st, len(rows), "obs", flush=True)
+
+
 def fetch() -> None:
     cache = {"markets": {}, "candles": {}, "obs": {}}
     mk = DATA_DIR / "wxnew1_markets.json"
@@ -76,32 +97,24 @@ def fetch() -> None:
         for m in d.get("markets", []):
             out[m["market_ticker"]] = [[x["end_period_ts"], api.f((x.get("yes_bid") or {}).get("close_dollars")), api.f((x.get("yes_ask") or {}).get("close_dollars"))] for x in m.get("candlesticks", [])]
         return ev, out, None
-    with ThreadPoolExecutor(1) as ex:
-        for i, (ev, out, err) in enumerate(ex.map(one, sorted(evs))):
-            if out is None:
-                print("skip", ev, err, flush=True)
-                continue
-            cache["candles"].update(out)
-            if i % 100 == 0:
-                print("candles", i, len(evs), flush=True)
-    lo = min(ts(m["close_time"]) for ms in cache["markets"].values() for m in ms) - 7200
-    for st in STATIONS:
-        rows = []
-        t0 = lo
-        while t0 < CUT:
-            t1 = min(t0 + 8 * 86400, CUT)
-            fmt = lambda t: time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(t))
-            url = f"https://mesonet.agron.iastate.edu/cgi-bin/request/asos1min.py?station={st}&vars=tmpf&sts={fmt(t0)}&ets={fmt(t1)}&sample=1min&what=download&tz=UTC"
-            txt = urllib.request.urlopen(url, timeout=120).read().decode()
-            for r in csv.DictReader(io.StringIO(txt)):
-                v = r.get("tmpf", "")
-                try:
-                    rows.append([ts(r["valid(UTC)"].replace(" ", "T") + ":00"), float(v)])
-                except (ValueError, KeyError):
-                    pass
-            t0 = t1
-        cache["obs"][st] = rows
-        print(st, len(rows), "obs", flush=True)
+    DEADLINE = calendar.timegm((2026, 10, 31, 3, 25, 0))   # AMENDMENT 3
+    order = sorted(evs, key=lambda e: ((evclose[e] // 3600) * 7919 % 1009, evclose[e], e))
+    cache["fetched"] = []
+    # observations first (fast), so a stopped candle download still has them
+    fetch_obs(cache)
+    for i, ev in enumerate(order):
+        if time.time() > DEADLINE:
+            print("deadline reached at", i, "of", len(order), flush=True)
+            break
+        ev_, out, err = one(ev)
+        if out is None:
+            print("skip", ev, err, flush=True)
+            continue
+        cache["candles"].update(out)
+        cache["fetched"].append(ev)
+        if i % 100 == 0:
+            print("candles", i, len(order), flush=True)
+            CACHE.write_text(json.dumps(cache))
     CACHE.write_text(json.dumps(cache))
 
 
@@ -148,7 +161,10 @@ def build_events(cache, spec):
             m = dict(m); m["series"] = s
             evs[m["event_ticker"]].append(m)
     out = []
+    fetched = set(cache.get("fetched", []))
     for ev, ms in evs.items():
+        if ev not in fetched:
+            continue
         if len(ms) < 8 or (ts(ms[0]["close_time"]) // 3600) % 24 % 3 != 1:
             continue
         c = ts(ms[0]["close_time"]); L = c - 1800
