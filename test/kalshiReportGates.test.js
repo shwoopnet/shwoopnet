@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'avgFill', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'bidSize', 'askSize', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'status', 'ticker', 'ts'].sort());
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
@@ -98,6 +98,15 @@ gates.R7 = () => {
   assert.ok(!/SECRET|orderId|clientOrderId|"at"/.test(JSON.stringify(r)), 'no id and no raw seen object');
   const bare = lib.buildReport([ord({})], NOW, 24, true).orders[0];
   assert.ok(bare.seenBid === null && bare.depthAtLimit === null && bare.smooth === null, 'a field the order lacks is null');
+};
+// R8: the send timing (the owner, Oct 31, 2026: "log send time only"): the three recorded times and three derived delays, numbers only, null for an order that predates the log.
+gates.R8 = () => {
+  const o = ord({ tickStartMs: 1793400005000, sentAtMs: 1793400007500, answeredAtMs: 1793400008100 });
+  const r = lib.buildReport([o], NOW, 24, true).orders[0];
+  assert.deepStrictEqual([r.tickStartMs, r.sentAtMs, r.answeredAtMs, r.startLateMs, r.startToSendMs, r.answerMs], [1793400005000, 1793400007500, 1793400008100, 5000, 2500, 600], 'the function started 5 s past the minute, sent 2.5 s later, and Kalshi answered in 0.6 s');
+  const bare = lib.buildReport([ord({ tickStartMs: null })], NOW, 24, true).orders[0];
+  assert.ok(bare.tickStartMs === null && bare.sentAtMs === null && bare.startLateMs === null && bare.startToSendMs === null && bare.answerMs === null, 'an order from before the log has no timing, never a made-up zero');
+  assert.ok(!/orderId|clientOrderId/.test(JSON.stringify(r)), 'still no id');
 };
 gates.R5 = () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiReportLib.js'), 'utf8');

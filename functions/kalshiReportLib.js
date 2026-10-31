@@ -49,12 +49,26 @@ function oversizeRows(rows) {
 }
 
 // Per-order market context for the tests that need it (the refinement chat's R2, the no-fill share, Oct 30, 2026): what was ordered against what rested at the touch, and the quote the bot saw. Numbers and short labels only, never an id. A field the order does not carry is null.
+// Send timing (Oct 31, 2026, the owner: "log send time only"; the refinement chat's Dogecoin timing lead). The bot records when the minute function started, when the order left and when Kalshi answered; the three derived figures are
+// how many milliseconds past the clock minute the function started (startLateMs), how long from the function start to the order leaving (startToSendMs) and how long Kalshi took to answer (answerMs). Numbers only, null when the order predates the log.
+function timing(o) {
+  const n = (x) => (x === null || x === undefined ? null : num(x));
+  const t = n(o.tickStartMs), s = n(o.sentAtMs), a = n(o.answeredAtMs);
+  const ok = (x) => x !== null && Number.isFinite(x);
+  return {
+    tickStartMs: t, sentAtMs: s, answeredAtMs: a,
+    startLateMs: ok(t) ? ((t % 60000) + 60000) % 60000 : null,
+    startToSendMs: ok(t) && ok(s) ? s - t : null,
+    answerMs: ok(s) && ok(a) ? a - s : null,
+  };
+}
 function context(o) {
   const seen = o && typeof o.seen === "object" && o.seen ? o.seen : {};
   return {
     orderedCount: num(o.count), price: num(o.price), limit: num(o.limit), seenBid: num(seen.bid), seenAsk: num(seen.ask), bidSize: num(seen.bidSize), askSize: num(seen.askSize),
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
+    ...timing(o),
   };
 }
 
