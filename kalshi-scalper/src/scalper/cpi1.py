@@ -15,11 +15,14 @@ from datetime import datetime, timedelta, timezone
 import numpy as np
 
 from . import api
+from .candlefield import candle_volume, quote_close
 from .calibration import cluster_mean_z
 from .paths import DATA_DIR
 
 D = DATA_DIR / "cpi1"
-RESULT = DATA_DIR / "cpi1_result.txt"
+# CPIMENT-RERUN (owner approval 2026-10-31): the one rerun writes its own file; the run-once guard below stays, now on the
+# rerun file, so this lifts the block for this single run only. Run 1's cpi1_result.txt is VOID (candle parser bug).
+RESULT = DATA_DIR / "cpi1_rerun_result.txt"
 NC_URL = "https://www.clevelandfed.org/-/media/files/webcharts/inflationnowcasting/nowcast_month.json"
 SERIES = {"head": ["CPI", "KXCPI"], "core": ["CPICORE", "KXCPICORE"]}
 NC_NAME = {"head": "CPI Inflation", "core": "Core CPI Inflation"}
@@ -70,7 +73,7 @@ def fetch() -> None:
             try:
                 path = f"/historical/markets/{tk}/candlesticks" if m["src"] == "hist" else f"/series/{tk.split('-')[0]}/markets/{tk}/candlesticks"
                 d = api._get(path, {"start_ts": close - 6 * 86400, "end_ts": close, "period_interval": 60})
-                have[tk] = [(c["end_period_ts"], api.f((c.get("yes_bid") or {}).get("close_dollars")), api.f((c.get("yes_ask") or {}).get("close_dollars")), api.f(c.get("volume_fp"))) for c in d.get("candlesticks", [])]
+                have[tk] = [(c["end_period_ts"], quote_close(c.get("yes_bid")), quote_close(c.get("yes_ask")), candle_volume(c)) for c in d.get("candlesticks", [])]
             except Exception as e:
                 have[tk] = []
             if i % 40 == 0:

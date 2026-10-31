@@ -12,11 +12,14 @@ from collections import defaultdict
 from datetime import datetime
 
 from . import api
+from .candlefield import quote_close
 from .calibration import cluster_mean_z
 from .paths import DATA_DIR
 
 D = DATA_DIR / "ment1"
-RESULT = DATA_DIR / "ment1_result.txt"
+# CPIMENT-RERUN (owner approval 2026-10-31): the one rerun writes its own file; the run-once guard below stays, now on the
+# rerun file, so this lifts the block for this single run only. Run 1's ment1_result.txt is VOID (candle parser bug).
+RESULT = DATA_DIR / "ment1_rerun_result.txt"
 PRIOR_W, MIN_POOL, EDGE, DEC_H = 5, 15, 0.08, 8
 MIN_EVENTS, MIN_TRADES, BAR_PF, BAR_C, BAR_Z = 100, 100, 1.5, 0.02, 2.5
 
@@ -68,7 +71,7 @@ def fetch(shard=0, shards=1):
         try:
             path = f"/historical/markets/{tk}/candlesticks" if m["src"] == "hist" else f"/series/{m['s']}/markets/{tk}/candlesticks"
             d = api._get(path, {"start_ts": close - 4 * 86400, "end_ts": close, "period_interval": 60})
-            mine[tk] = have[tk] = [(c["end_period_ts"], api.f((c.get("yes_bid") or {}).get("close_dollars")), api.f((c.get("yes_ask") or {}).get("close_dollars"))) for c in d.get("candlesticks", [])]
+            mine[tk] = have[tk] = [(c["end_period_ts"], quote_close(c.get("yes_bid")), quote_close(c.get("yes_ask"))) for c in d.get("candlesticks", [])]
         except Exception:
             mine[tk] = have[tk] = []
         if i % 25 == 0:
