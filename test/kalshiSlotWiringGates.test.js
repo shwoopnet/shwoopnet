@@ -80,7 +80,7 @@ gates['SW0b with the slot forced off (the admitted constants overridden for this
   const a = await live.runL1Tick({ ...plain.common, quotes: [q('KXBTC15M', T)] });
   const b = await live.runL1Tick({ ...withBag.common, quotes: [q('KXBTC15M', T)], slot: h.slot, shareOut: {} });
   assert.deepStrictEqual(b, a, 'same return');
-  const mask = (k, v) => (k === 'at' && typeof v === 'string' ? '<wall clock>' : v);   // logRise stamps the wall clock
+  const mask = (k, v) => ((k === 'at' && typeof v === 'string') || ((k === 'sentAtMs' || k === 'answeredAtMs') && typeof v === 'number') ? '<wall clock>' : v);   // logRise and the send-time log stamp the wall clock
   assert.deepStrictEqual(JSON.parse(JSON.stringify(withBag.r.log, mask)), JSON.parse(JSON.stringify(plain.r.log, mask)), 'same reads, writes and orders in the same order');
   assert.deepStrictEqual(h.calls, [], 'no hook was called');
   // botRisk given slot arguments by mistake still ignores them only if they are absent; the live tick never passes them while off (checked by the equal logs above).
