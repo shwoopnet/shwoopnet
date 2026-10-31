@@ -69,6 +69,9 @@ Fill: the quoted ask at the look, no price improvement, no fee waiver. **Fees:**
 ## Window, halves, unit
 The tracking window is about 60 days from the day the recorder is merged and started (the owner merges). Halves: the games of the first and the second 30 days (by ESPN start date, split at whole days). Independent unit: the game; the clustering unit for z is the UTC calendar day of the start (same-day games in one sport are correlated).
 
+## Amendment 1 (2026-10-31, about 3:35 PM CT, still before any recorded row exists)
+A live smoke test of the recorder read a lower division college game (FCS, University of Central Arkansas vs North Alabama): ESPN's core predictor answers HTTP 400 "Predictor is not supported for sport: football, league: college-football" and the summary has no `predictor`. FBS games (for example Florida vs Georgia) have it. **Universe rule added: a game enters the universe only if ESPN published a pre-game probability for it at the look** (games without one, mostly FCS and lower, are counted and dropped, not tried). No threshold, number or try changes.
+
 ## Numeric prediction (before any row)
 Try A: profit factor **0.95** (range 0.80 to 1.10), **400 to 600 trades in 60 days** in season (NFL, college football, NBA; no MLB). Market Brier lower than ESPN's. Try B: PF 0.95 (0.8 to 1.1), more trades.
 
