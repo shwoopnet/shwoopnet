@@ -16,7 +16,7 @@ Registration: `workers/WXNEW1_REGISTRATION.md` (pushed before any fetch; four am
 
 ## 2. Scored results (numbers from the one run)
 
-**WXH-SYN, the Synoptic-index hourly ladders.** Of 4 series only Miami (`KXTEMPMIAH`) had the 100 fetched discovery events its fit needs (542 events fetched of 535 + others; the other three Synoptic series had 50 to 53 fetched events and 17 to 21 usable discovery events each, so by the registered rule they received no trades and are NOT_ENOUGH_DATA). The verdict is therefore **for Miami only**.
+**WXH-SYN, the Synoptic-index hourly ladders.** Of 4 series only Miami (`KXTEMPMIAH`) had the 100 fetched discovery events its fit needs (542 Miami events fetched, its whole thinned set; the other three Synoptic series had 50 to 53 fetched events and 17 to 21 usable discovery events each, so by the registered rule they received no trades and are NOT_ENOUGH_DATA). The verdict is therefore **for Miami only**.
 
 | Window (Miami, close hours 01 / 04 / 07 / 10 / 13 / 16 / 19 / 22 UTC only) | Trades | Needed | Mean net per contract | PF | Event-clustered z | Day-clustered z | Fees x1.2 mean / PF |
 |---|---|---|---|---|---|---|---|
