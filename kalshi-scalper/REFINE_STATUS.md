@@ -27,6 +27,8 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+**2026-10-30 9:55 PM CT, two owner jobs ready (via the main session).** (1) `kalshi-scalper/REFINE_EARLIER_SEND_PLAN.md`: ranked plan for sending Dogecoin earlier: keep warm (index.js line 586, config only), parallel reads (changes call order, so the two off-equivalence fixtures would need a new multiset gate), post-order writes after the loop (smallest gain), not recommended: sending gold and Dogecoin together. Numeric triggers from the new timing fields and honest fill ranges (all three together +3 to +10 Dogecoin fills a week, central +6). (2) `kalshi-scalper/REFINE_SIZE_LADDER_REVIEW.md`: in-sample replay at $30, $43, $60, $80 per contract, 363 orders and 17 losses over 19 days. Key finding: at $779 the 2% rule (16 contracts) already binds, so $30 and $43 give the same size; only $60 (12) and $80 (9) would make orders smaller. Replay net as traded: +$54.09, +$52.96, +$47.86, +$45.09; worst day about -$7 in all four (0.9% to 1.0%); no recommendation. Timing fields check: first L1 order after 9:20 PM CT not yet seen at 9:22 PM CT; checking each wake.
+
 **2026-10-30 8:50 PM CT, item 41 first post-lift Dogecoin order: sent 8:39:03 PM CT, 13 contracts, filled, +$1.21.** This confirms the 8 PM to midnight block is off for Dogecoin in live. Item 41 count: 1 order in the block after the lift, 1 fill (read at 30 orders). Dogecoin at 13 contracts overall: 5 fills (+$0.72, +$0.48, +$0.36, +$0.48, +$1.21), 2 no fills, no loss. Also: one OICORE no-fill around 8:2x PM CT (order sent, did not fill; the second slot is 1 for 4 with one no-fill).
 
 **2026-10-30 8:20 PM CT, two owner tasks via the main session.**
