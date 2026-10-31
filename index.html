@@ -544,7 +544,7 @@
   .kal-rows{ display:flex; flex-direction:column; gap:8px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; }
   .kal-rows > div{ display:flex; justify-content:space-between; gap:12px; } .kal-rows .kal-k{ color:var(--muted); } .kal-rows b{ font-weight:600; }
   /* Trades as a table. */
-  .kal-tr{ display:grid; grid-template-columns:130px 150px minmax(0,1fr) 150px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:14px; }
+  .kal-tr{ display:grid; grid-template-columns:164px 150px minmax(0,1fr) 150px 70px; gap:12px; padding:11px 22px; border-top:1px solid var(--border); align-items:center; font-size:14px; }
   .kal-tr-head{ background:var(--panel-raised); color:var(--muted); font-size:12px; font-weight:600; padding-top:8px; padding-bottom:8px; border-top:0; }
   /* The dollar result and its percentage are the same fact (the owner, Oct 23, 2026), so they share one size, weight and colour; only a quiet dot separates them. */
   .kal-tr-sep{ margin:0 7px; opacity:.5; font-weight:400; }
@@ -610,6 +610,7 @@
       .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
     .kal-tr-head{ display:none; }
     .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:12px; }
+    .kal-tr > .kal-tr-t .kal-tr-sub{ display:inline; margin:0; } .kal-tr > .kal-tr-t .kal-tr-sub::before{ content:'\00B7'; margin:0 6px; opacity:.6; }
     .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
     .kal-tr > .kal-tr-s{ text-align:left; }
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
@@ -621,6 +622,7 @@
     .kal-tr{ grid-template-columns:minmax(0,1fr) auto; row-gap:2px; padding:10px 18px; }
     .kal-tr-head{ display:none; }
     .kal-tr > .kal-tr-t, .kal-tr > .kal-tr-m, .kal-tr > .kal-tr-s{ grid-column:1; font-size:12px; }
+    .kal-tr > .kal-tr-t .kal-tr-sub{ display:inline; margin:0; } .kal-tr > .kal-tr-t .kal-tr-sub::before{ content:'\00B7'; margin:0 6px; opacity:.6; }
     .kal-tr > .kal-tr-f{ grid-column:1; font-weight:600; }
     .kal-tr > .kal-tr-s{ text-align:left; }
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
@@ -1466,7 +1468,7 @@
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div id="kalBotStats"></div>
-        <div class="kal-tr kal-tr-head"><span>Time</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
+        <div class="kal-tr kal-tr-head"><span>Opened and closed</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
       </div>
       </div>
@@ -1603,6 +1605,7 @@
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
+                  <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
                   <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
                   <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>
@@ -2258,6 +2261,29 @@
     var at = Number.isFinite(tickAt) ? kalshiWhen(tickAt, now) : '';
     return 'Skipped a minute' + (at ? ' (' + at + ')' : '') + ': ' + n + (/HTTP 429/.test(n) ? ' Kalshi asked it to slow down; a refused read is now asked once more on its own.' : '') + ' It looks again every minute.';
   }
+  // When a trade opened and when it closed, for the Recent trades card (the owner, Oct 31, 2026: "recent trade timestamps should probably show when opened and when closed"). The opened time is the fill time as before. The closed time is
+  // the 25c early sell's own fill time when the account still lists it (the exit order id matches), otherwise the market's close read from the ticker (a held trade settles at the close); a trade whose market has not closed yet says "Closes".
+  // An early sell whose fill the account no longer lists says "Sold early" with no time, and a trade the owner closed by hand says "Sold by hand": a time is never invented. Pure: the order, the fills and the clock in, a verb and a time out.
+  function kalshiTradeTimes(ord, ticker, gfills, now){
+    if(ord && (ord.exitStatus === 'sold' || ord.exitStatus === 'partly sold')){
+      var fill = ord.exitOrderId ? (gfills || []).filter(function(f){ return f && f.orderId === ord.exitOrderId && f.time; }).map(function(f){ return Date.parse(f.time); }).filter(Number.isFinite).sort(function(p, q){ return p - q; })[0] : undefined;
+      return Number.isFinite(fill) ? { how: 'Sold', closedMs: fill } : { how: 'Sold early', closedMs: null };
+    }
+    if(ord && ord.settled === true && ord.result === 'hand'){ return { how: 'Sold by hand', closedMs: null }; }
+    var c = kalshiCloseFromTicker(ticker);
+    return c === null ? { how: '', closedMs: null } : { how: c <= now ? 'Closed' : 'Closes', closedMs: c };
+  }
+  // The two lines of the time cell. Every piece of text goes through escapeHtml.
+  function kalshiEscapedTradeWhen(openedMs, ord, ticker, gfills, now){
+    var t = kalshiTradeTimes(ord, ticker, gfills, now), line = escapeHtml(kalshiWhen(openedMs, now));
+    if(!Number.isFinite(openedMs)){ line = ''; }
+    var closed = '';
+    if(t.how){
+      var sameDay = Number.isFinite(openedMs) && t.closedMs !== null && kalDayKey(t.closedMs) === kalDayKey(openedMs);
+      closed = '<span class="kal-tr-sub">' + escapeHtml(t.how) + (t.closedMs !== null ? ' ' + escapeHtml(sameDay ? kalTime(t.closedMs) : kalDate(t.closedMs) + ' ' + kalTime(t.closedMs)) : '') + '</span>';
+    }
+    return (line ? '<span>Opened ' + line + '</span>' : '') + closed;
+  }
   function kalshiWhen(ms, nowMs){
     if(!Number.isFinite(ms)){ return ''; }
     var tm = kalTime(ms);
@@ -2790,7 +2816,7 @@
         if(item.order){
           var o = item.order, pnl = kalshiOrderPnl(o), cnt = Number(o.fillCount), paid = Number.isFinite(Number(o.maxCost)) && Number(o.count) > 0 ? Number(o.maxCost) / Number(o.count) : Number(o.price);
           var oPl = pnl !== null ? '<span class="' + (pnl >= 0 ? 'kal-pos' : 'kal-neg') + '">' + (pnl >= 0 ? '+' : '-') + kalshiMoney(Math.abs(pnl)) + kalshiPctText(pnl, paid * cnt) + '</span>' : (o.settled === true && o.result === 'hand' ? '<span style="color:var(--muted)">sold by hand</span>' : '<span style="color:var(--muted)">open</span>');
-          return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(o.ts, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
+          return '<div class="kal-tr"><span class="kal-tr-t">' + kalshiEscapedTradeWhen(o.ts, o, o.ticker, gfills, nowD.getTime()) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(o.ticker)) + '</span>' +
             '<span class="kal-tr-f">Bought ' + escapeHtml(String(o.side || '').toUpperCase()) + ' ' + escapeHtml(String(Math.round(cnt * 100) / 100)) + (Number.isFinite(paid) ? ' at ' + (Math.round(paid * 1000) / 10).toFixed(1) + 'c' : '') + '</span><span class="kal-tr-p">' + oPl + '</span><span class="kal-tr-s">' + kalshiChipHtml(kalshiStrategyOf(o), escapeHtml) + '</span></div>';
         }
         var x = item.fill;
@@ -2812,7 +2838,7 @@
         else if(ord && ord.settled === true && ord.result === 'hand'){ plCell = '<span style="color:var(--muted)">sold by hand</span>'; }
         else if(ord){ open++; plCell = '<span style="color:var(--muted)">open</span>'; }
         else { plCell = '<span style="color:var(--muted)">n/a</span>'; }
-        return '<div class="kal-tr"><span class="kal-tr-t">' + escapeHtml(kalshiWhen(x.time ? Date.parse(x.time) : NaN, nowD.getTime())) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(x.ticker)) + '</span>' +
+        return '<div class="kal-tr"><span class="kal-tr-t">' + kalshiEscapedTradeWhen(x.time ? Date.parse(x.time) : NaN, ord, x.ticker, gfills, nowD.getTime()) + '</span><span class="kal-tr-m">' + escapeHtml(kalshiShortTicker(x.ticker)) + '</span>' +
           '<span class="kal-tr-f">' + fillText + '</span><span class="kal-tr-p">' + plCell + '</span><span class="kal-tr-s">' + (bot ? kalshiChipHtml(kalshiStrategyOf(ord), escapeHtml) : 'manual') + '</span></div>';
       }).join('');
       var foot = [];
