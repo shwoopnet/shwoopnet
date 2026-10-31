@@ -29,6 +29,12 @@ DISC_END, VAL_END = datetime(2026, 4, 1, tzinfo=timezone.utc), datetime(2026, 10
 BAR_PF, BAR_Z, MIN_EVENTS, MIN_TRADES, MIN_MEAN_C, FEE_STRESS_PF = 1.5, 5.27, 25, 100, 2.0, 1.3
 
 
+def pick(o):
+    """Live candles name the field close_dollars, historical candles name it close (run 1 read only close_dollars and so saw no quote in the historical era)."""
+    o = o or {}
+    return api.f(o.get("close_dollars") if o.get("close_dollars") is not None else o.get("close"))
+
+
 def get_text(u):
     return urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "Mozilla/5.0"}), timeout=60).read().decode()
 
@@ -122,7 +128,7 @@ def fetch() -> None:
         try:
             path = f"/historical/markets/{tk}/candlesticks" if m["src"] == "hist" else f"/series/{m['series']}/markets/{tk}/candlesticks"
             d = api._get(path, {"start_ts": close - 8 * 86400, "end_ts": close, "period_interval": 60})
-            have[tk] = [(c["end_period_ts"], api.f((c.get("yes_bid") or {}).get("close_dollars")), api.f((c.get("yes_ask") or {}).get("close_dollars")), api.f(c.get("volume_fp")), api.f((c.get("price") or {}).get("close_dollars"))) for c in d.get("candlesticks", [])]
+            have[tk] = [(c["end_period_ts"], pick(c.get("yes_bid")), pick(c.get("yes_ask")), api.f(c.get("volume_fp") or c.get("volume")), pick(c.get("price"))) for c in d.get("candlesticks", [])]
         except Exception:
             pass
         if i % 20 == 0:
@@ -217,6 +223,17 @@ def main(argv):
     for edge in (0.03, 0.08):
         r, _ = collect(edge)
         out.append(line(f"information only, edge {edge:.2f}, disc+val", stats(r["disc"] + r["val"])))
+    tight = {"disc": [], "val": [], "hold": []}
+    for tk, m in uni.items():
+        cs = cd.get(tk) or []
+        e = entry(m, cs, EDGE)
+        if e is None:
+            continue
+        close = int(datetime.fromisoformat(m["close"].replace("Z", "+00:00")).timestamp())
+        qq = [c for c in cs if c[0] <= close - LEAD_S and c[1] is not None and c[2] is not None and 0 < c[1] < c[2] < 1 and close - LEAD_S - c[0] <= MAX_AGE_QUOTE_S]
+        if e[2] == "quote" and qq and qq[-1][2] - qq[-1][1] <= 0.10:
+            tight[window(m)].append((m["ev"], pnl(e[0], e[1], m["res"])))
+    out.append(line("information only, quoted spread <= 10c, all windows", stats(tight["disc"] + tight["val"] + tight["hold"])))
     q, _ = collect(EDGE, 1.0, "quote")
     out.append(line("information only, quote-mode entries only, all windows", stats(q["disc"] + q["val"] + q["hold"])))
     # information only: model Brier against the market's, and the look-ahead control (FRED value against Kalshi's first print)

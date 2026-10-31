@@ -51,3 +51,12 @@ Not L1: a weekly macro release market held to its Thursday settlement; no 15 min
 
 ## Tries
 One rule (two information thresholds shown, not counted as tries): N +3, running count about 728,680 (z bar 5.27).
+
+## Amendment 1 (2026-10-31, after run 1; the rule is unchanged)
+Run 1 of `econnew1.py run` printed: 24 entries (23 by quote, 1 by trade price), discovery 0 trades, validation 21 trades on 8 releases PF 2.44, holdout 3 trades on 2 releases, verdict NOT_ENOUGH_DATA
+(`data/econnew1_result_run1.txt`, local). Cause, found by reading one raw historical candle (no outcome): the code read `close_dollars` for bid, ask, volume and price, which only LIVE candles use;
+Kalshi's historical candles name the fields `close` and `volume` (price fields are null when nothing traded), so every pre-August entry was dropped for "no price". This is a parser bug, not a rule change.
+The same bug is in `cpi1.py` (it read `close_dollars` on the historical path), so CPI1's "quotes are missing before 2026-08" and the ledger check's statement of it are suspect and are re-checked in the result.
+Run 2 refetches the candles with `pick()` (both field names) and reruns the registered rule unchanged. Run 1 has been seen, so run 2 is not a clean first read; both are reported, the verdict is run 2's,
+and the one try (N +3) is not increased. A stale or very wide historical quote (for example bid 0.08 / ask 0.97 on an empty book) is a valid quote under the registered rule (bid < ask < 1, at most 6 hours old);
+the quoted-spread-at-most-10c result is information only.
