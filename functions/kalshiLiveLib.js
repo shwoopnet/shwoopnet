@@ -957,6 +957,7 @@ async function runL1Tick(args) {
 
   const results = [];
   const riseLog = [];   // every order of this minute, to log the 3 minute rise on after all of them are sent
+  const shardShort = [];   // markets skipped this minute for lack of money on their own exchange shard, for the phone alert (kalshiShardAlertLib); reported only when there is one
   let ordersSent = sent;
   // Bitcoin and gold close together and share a shard, and the balance above is read once. Money already committed to an
   // order earlier in this same tick is taken off what the next market on that shard may use.
@@ -1020,7 +1021,7 @@ async function runL1Tick(args) {
     const shardKey = String(m.exchange_index);
     const avail = availableFor(bal.body, m.exchange_index) - (committed[shardKey] || 0);
     if (!Number.isFinite(avail)) { results.push(ticker + ": the balance came back in a shape this code does not recognise"); continue; }
-    if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard, and money on another shard does not count"); continue; }
+    if (avail < cost + BALANCE_MARGIN) { results.push(ticker + ": only $" + avail.toFixed(2) + " on its shard, and money on another shard does not count"); shardShort.push({ shard: shardKey, avail: Number(avail.toFixed(2)), need: Number((cost + BALANCE_MARGIN).toFixed(2)), ticker }); continue; }
 
     const cid = "L1-" + ticker;
     const record = {
@@ -1099,7 +1100,7 @@ async function runL1Tick(args) {
   }
   for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask, closeSec: r.closeSec });
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
-  return { ok: true, results };
+  return { ok: true, results, ...(shardShort.length ? { shardShort } : {}) };
 }
 
 // ---- The exit watch (the owner's decision, Oct 10, 2026; fixed at 50c and always selling, Oct 12, 2026; moved to 25c the same day at the owner's request) -----------------------------------------

@@ -44,9 +44,13 @@ function sessionKinds(before, after) {
   if (!before || !after) return [];
   if (before.active === true && after.active !== true && !/by the owner/i.test(String(after.endedBecause || ""))) return ["issue"];
   // The exit watch went silent while a position is open (kalshiExitAlarmLib): a new alert only when the stamp CHANGES, so rewriting the document for any other reason never repeats it.
+  const out = [];
   const was = before.exitWatchAlert && before.exitWatchAlert.at, nowAt = after.exitWatchAlert && after.exitWatchAlert.at;
-  if (after.active === true && Number.isFinite(Number(nowAt)) && Number(nowAt) !== Number(was)) return ["exitwatch"];
-  return [];
+  if (after.active === true && Number.isFinite(Number(nowAt)) && Number(nowAt) !== Number(was)) out.push("exitwatch");
+  // A market skipped for low money on its own exchange shard (kalshiShardAlertLib): same rule, only a CHANGED stamp alerts.
+  const wasShard = before.shardAlert && before.shardAlert.at, nowShard = after.shardAlert && after.shardAlert.at;
+  if (after.active === true && Number.isFinite(Number(nowShard)) && Number(nowShard) !== Number(wasShard)) out.push("shard");
+  return out;
 }
 
 // The close time in Central, from the ticker (KXBTC15M-26OCT201330-30: 13:30 Eastern, so 12:30 PM CT; Central is always one hour behind Eastern). null when the ticker is not that shape.
@@ -88,6 +92,10 @@ function message(kind, o, ctx) {
     const pnl = Number(o.settledPnl);
     const title = !Number.isFinite(pnl) || pnl === 0 ? "Closed " + name : (pnl > 0 ? "Won " : "Lost ") + name + " " + money(pnl);
     return { title, body: joinParts(size, dayText(ctx)), tag: trade };
+  }
+  if (kind === "shard") {
+    const a = (o && o.shardAlert) || {}, have = Number(a.avail), need = Number(a.need);
+    return { title: "Check the bot: a market cannot trade, low money on exchange " + String(a.shard || "?").slice(0, 3), body: (Number.isFinite(have) && Number.isFinite(need) ? "Only $" + have.toFixed(2) + " there and an order needs $" + need.toFixed(2) + ". " : "") + "Money on another exchange does not count. Top it up in Kalshi under Transfers.", tag: "issue-shard" };
   }
   if (kind === "exitwatch") {
     const a = (o && o.exitWatchAlert) || {}, mins = Number(a.silentMin);
