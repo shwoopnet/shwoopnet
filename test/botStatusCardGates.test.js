@@ -1,5 +1,5 @@
 'use strict';
-// SC1 to SC7: the redone Bot status card (the owner, Oct 31, 2026: style B with a countdown ring and a tall health line; "bot status should cover all strategies"; "no repeat information on the page, all unique and helpful"; "avoid collapsables").
+// SC1 to SC8: the redone Bot status card (the owner, Oct 31, 2026: style B with a countdown ring and a tall health line; "bot status should cover all strategies"; "no repeat information on the page, all unique and helpful"; "avoid collapsables").
 // Consequence: the card is the ring, the health line and one price tile; never a fold; it covers both strategies (the Closing buy and the open interest jump); the tick ids exist; it repeats nothing the Strategies table shows; and it says plainly when a market is out of its buying band.
 const assert = require('assert');
 const fs = require('fs');
@@ -19,7 +19,7 @@ gates.SC1 = () => {
   // the card's markup: the ring, the health line, the price tile; no fold; the ids the one second tick writes to
   const src = fn('renderKalshiStatus');
   assert.ok(!/<details|<summary|collaps/i.test(src), 'no fold of any kind on the card');
-  for (const id of ['kalRing', 'kalNextIn', 'kalNextName', 'kalNextWhat', 'kalNextThen', 'kalEcg', 'kalHb', 'kalHbText', 'kalPrices']) assert.ok(new RegExp('id="' + id + '"').test(src), id + ' is on the card');
+  for (const id of ['kalRing', 'kalNextIn', 'kalNextName', 'kalNextWhat', 'kalNextThen', 'kalEcg', 'kalHb', 'kalHbText', 'kalPrices', 'kalDepth']) assert.ok(new RegExp('id="' + id + '"').test(src), id + ' is on the card');
   assert.ok(!/Last order|Orders today|Win rate|Best market|Worst market|Fill rate/.test(src), 'nothing the Strategies table shows is repeated on this card');
   assert.ok(!/kal-more|kalMoreBody/.test(html), 'the More numbers fold is gone from the page');
 };
@@ -39,7 +39,7 @@ gates.SC3 = () => {
   assert.strictEqual(lib(TUE).kalshiGoldClosed(TUE), false); assert.strictEqual(l.kalshiGoldClosed(FRI_EVE), true, 'gold closed from Friday 5 PM Central');
   assert.strictEqual(l.kalshiGoldClosed(RealDate.parse('2026-11-02T00:30:00Z')), false, 'gold open again from Sunday 6 PM Central');
 };
-const mk = (series, bid, ask, close) => ({ series, ticker: series + '-X', closeTime: close || '2026-10-27T18:15:00Z', yesBid: bid, yesAsk: ask });
+const mk = (series, bid, ask, close, askSz, bidSz) => ({ series, ticker: series + '-X', closeTime: close || '2026-10-27T18:15:00Z', yesBid: bid, yesAsk: ask, yesAskSz: askSz === undefined ? 100 : askSz, yesBidSz: bidSz === undefined ? 80 : bidSz });
 gates.SC4 = () => {
   const l = lib(TUE);
   const rows = l.kalshiPriceWatch([mk('KXGOLD15M', 0.91, 0.92), mk('KXDOGE15M', 0.05, 0.07), mk('KXBTC15M', 0.88, 0.90)], TUE), by = (n) => rows.find((r) => r.name === n);
@@ -59,18 +59,40 @@ gates.SC5 = () => {
 };
 gates.SC6 = () => {
   // the redraw reads only the relay data and never throws on empty data; the rendered tile names the verdict in words
-  const el = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.83, 0.84), mk('KXDOGE15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };
-  const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEscapedPriceCell') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
-  const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', src)({ getElementById: (id) => (id === 'kalPrices' ? el : null) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + 's', data);
+  const el = { innerHTML: '' }, depth = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.83, 0.84), mk('KXDOGE15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };
+  const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEscapedPriceCell') + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + fn('kalshiEscapedDepthRows') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
+  const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: (id) => (id === 'kalPrices' ? el : (id === 'kalDepth' ? depth : null)) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + 's', data, () => [], () => 'Gold');
   f();
   assert.ok(/Below the 88c to 97c band/.test(el.innerHTML) && /Inside the 88c to 97c band/.test(el.innerHTML) && /Inside the 5c to 50c band/.test(el.innerHTML), 'each market gets a verdict in words');
+  assert.ok(/Depth at the touch/.test(depth.innerHTML) && /No book yet|resting/.test(depth.innerHTML), 'the depth tile is drawn with the prices');
   assert.ok(/Read 14s ago/.test(el.innerHTML) && /open interest jump/i.test(el.innerHTML), 'the age of the read and the open interest caveat are shown');
-  const empty = { innerHTML: '' }; new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', src)({ getElementById: () => empty }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '', (s) => s, null)();
+  const empty = { innerHTML: '' }; new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: () => empty }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '', (s) => s, null, () => [], () => 'Gold')();
   assert.ok(/No quote yet/.test(empty.innerHTML) && /Reading the markets/.test(empty.innerHTML), 'no data yet: says so');
 };
 gates.SC7 = () => {
-  assert.ok(/\.kal-st-top\{[^}]*grid-template-columns/.test(html) && /@container \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \} \}/.test(html) && /@media \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \} \}/.test(html), 'ring and health side by side, stacked when the card or the screen is narrow');
+  assert.ok(/\.kal-st-top\{[^}]*grid-template-columns/.test(html) && /@container \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \} \}/.test(html) && /@media \(max-width:520px\)\{ \.kal-st-top, \.kal-st-bottom\{ grid-template-columns:1fr; \} \}/.test(html) && /@container \(max-width:760px\)\{ \.kal-st-bottom\{ grid-template-columns:1fr; \} \}/.test(html), 'ring and health side by side, stacked when the card or the screen is narrow');
   assert.ok(/#kalStatusBody\{ container-type:inline-size; \}/.test(html), 'the card measures its own width, not the window (it sits in a rail)');
   assert.ok(/relay on every read|kalshiRenderPrices\(\);/.test(html) && /kalshiBooksLast = data \|\| null;\n    renderKalshiPositions\(\);\n    kalshiRenderPrices\(\);/.test(html), 'the price tile is redrawn on every relay read');
+};
+gates.SC8 = () => {
+  // depth at the touch: buying YES meets the YES ask size, buying NO meets the YES bid size; the share is the last order over that
+  const l = lib(TUE);
+  const yesSide = l.kalshiPriceWatch([mk('KXDOGE15M', 0.90, 0.92, null, 120, 45)], TUE).find((x) => x.name === 'Dogecoin');
+  assert.strictEqual(yesSide.depth, 120, 'the favourite is the YES side (92c): the depth is the YES ask size');
+  const noSide = l.kalshiPriceWatch([mk('KXDOGE15M', 0.05, 0.07, null, 120, 45)], TUE).find((x) => x.name === 'Dogecoin');
+  assert.strictEqual(noSide.depth, 45, 'the favourite is the NO side (95c): buying NO meets the YES bid size');
+  const cheap = l.kalshiPriceWatch([mk('KXBTC15M', 0.87, 0.89, null, 300, 70)], TUE).find((x) => x.name === 'Bitcoin');
+  assert.strictEqual(cheap.depth, 70, 'the Bitcoin strategy buys the cheaper NO side (13c): the YES bid size');
+  assert.strictEqual(l.kalshiPriceWatch([mk('KXDOGE15M', 0.9, 0.92, null, null, null)], TUE).find((x) => x.name === 'Dogecoin').depth, null, 'no size in the relay: no depth, never a made-up number');
+  // the rows: the share of the book the last order was, in words, with a warning at 30% or more
+  const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + '; return { kalshiLastOrderSizes, kalshiEscapedDepthRow };';
+  const d = new Function('Math', 'Number', 'String', 'Array', 'escapeHtml', 'kalshiMarketName', src)(Math, Number, String, Array, (x) => String(x), (o) => (/DOGE/.test(o.series) ? 'Dogecoin' : 'Gold'));
+  const sizes = d.kalshiLastOrderSizes([{ strategy: 'L1', series: 'KXDOGE15M', ts: 1, count: 5 }, { strategy: 'L1', series: 'KXDOGE15M', ts: 9, count: 13 }, { strategy: 'L1', series: 'KXDOGE15M', ts: 10, count: 0 }, { strategy: 'MANUAL', series: 'KXDOGE15M', ts: 11, count: 99 }]);
+  assert.deepStrictEqual(sizes.Dogecoin, { ts: 9, count: 13 }, 'the newest order with a size, from the bot only (manual trades and empty orders are ignored)');
+  const row = (r, last) => d.kalshiEscapedDepthRow(Object.assign({ name: 'Dogecoin', state: 'in', depth: 100 }, r), last);
+  assert.ok(/13% of it/.test(row({}, { ts: 1, count: 13 })) && !/big share/i.test(row({}, { ts: 1, count: 13 })), '13 of 100 is 13%, not a big share');
+  assert.ok(/A big share of the book/.test(row({}, { ts: 1, count: 40 })), '40 of 100 is flagged');
+  assert.ok(/Our last order: none yet/.test(row({}, undefined)) && /Closed/.test(row({ state: 'closed' })) && /No book yet/.test(row({ depth: null })), 'no order, closed and no book are said plainly');
+  assert.ok(/1\.2k/.test(row({ depth: 1200 }, undefined)), 'big books are shortened');
 };
 (async () => { let failed = 0; for (const [name, g] of Object.entries(gates)) { try { await g(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); } } process.exit(failed ? 1 : 0); })();
