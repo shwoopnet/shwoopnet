@@ -98,10 +98,16 @@ def fetch() -> None:
             out[m["market_ticker"]] = [[x["end_period_ts"], api.f((x.get("yes_bid") or {}).get("close_dollars")), api.f((x.get("yes_ask") or {}).get("close_dollars"))] for x in m.get("candlesticks", [])]
         return ev, out, None
     DEADLINE = calendar.timegm((2026, 10, 31, 3, 25, 0))   # AMENDMENT 3
-    order = sorted(evs, key=lambda e: ((evclose[e] // 3600) * 7919 % 1009, evclose[e], e))
+    order = sorted(evs, key=lambda e: (0 if e.startswith("KXTEMPMIAH") else 1, (evclose[e] // 3600) * 7919 % 1009, evclose[e], e))   # AMENDMENT 4
     cache["fetched"] = []
-    # observations first (fast), so a stopped candle download still has them
-    fetch_obs(cache)
+    if CACHE.exists():   # resume: keep what is already fetched
+        old = json.loads(CACHE.read_text())
+        if old.get("obs") and old.get("fetched"):
+            cache["candles"], cache["obs"], cache["fetched"] = old["candles"], old["obs"], old["fetched"]
+    if not cache["obs"]:
+        fetch_obs(cache)
+    done = set(cache["fetched"])
+    order = [e for e in order if e not in done]
     for i, ev in enumerate(order):
         if time.time() > DEADLINE:
             print("deadline reached at", i, "of", len(order), flush=True)
