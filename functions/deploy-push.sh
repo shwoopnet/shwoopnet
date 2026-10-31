@@ -66,6 +66,8 @@ if [ "${DRY_RUN:-}" != "1" ]; then
 fi
 
 echo "Deploying to $PROJECT: $ONLY"
+# Deploy stamp (the owner, Oct 31, 2026): record which commit this deploy comes from; the functions copy it to Firestore when they start and the nightly report shows it. Written right before the deploy, never read by any order code.
+if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] write functions/deploy-stamp.json"; else printf '{"commit":"%s","at":"%s"}\n' "$(git rev-parse HEAD 2>/dev/null || echo unknown)" "$(date -u +%Y-%m-%dT%H:%M:%SZ)" > functions/deploy-stamp.json; fi
 run "${FB[@]}" deploy --only "$ONLY" --project "$PROJECT"
 echo
 echo "Done. Open the Kalshi page: it should say Running. Then Tools, Phone alerts, tap it and allow notifications."

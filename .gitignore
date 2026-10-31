@@ -24,3 +24,6 @@ __pycache__/
 
 # deploy-latest.sh records the last commit it deployed here (per machine, never committed)
 functions/.last-deployed
+
+# Written by the deploy scripts right before a deploy (see functions/deployStampLib.js); per machine, never committed
+functions/deploy-stamp.json
