@@ -62,10 +62,12 @@ def fetch() -> None:
     for s, ms in cache["markets"].items():
         for m in ms:
             evclose[m["event_ticker"]] = ts(m["close_time"])
+    evs = {e: t for e, t in evs.items() if (evclose[e] // 3600) % 24 % 3 == 1}   # AMENDMENT 2: hour mod 3 = 1, clock only
+    print("events after thinning", len(evs), flush=True)
 
     def one(ev):
         c = evclose[ev]
-        time.sleep(0.12)
+        time.sleep(0.3)
         try:
             d = api._get("/markets/candlesticks", {"market_tickers": ",".join(evs[ev]), "start_ts": c - 3600, "end_ts": c - 1740, "period_interval": 1})
         except Exception as e:  # noqa: BLE001
@@ -80,7 +82,7 @@ def fetch() -> None:
                 print("skip", ev, err, flush=True)
                 continue
             cache["candles"].update(out)
-            if i % 200 == 0:
+            if i % 100 == 0:
                 print("candles", i, len(evs), flush=True)
     lo = min(ts(m["close_time"]) for ms in cache["markets"].values() for m in ms) - 7200
     for st in STATIONS:
@@ -147,7 +149,7 @@ def build_events(cache, spec):
             evs[m["event_ticker"]].append(m)
     out = []
     for ev, ms in evs.items():
-        if len(ms) < 8:
+        if len(ms) < 8 or (ts(ms[0]["close_time"]) // 3600) % 24 % 3 != 1:
             continue
         c = ts(ms[0]["close_time"]); L = c - 1800
         s = ms[0]["series"]
