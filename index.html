@@ -865,6 +865,16 @@
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
+  /* Bot status card, redone Oct 31, 2026: two tiles (next look, health line) and three short rows, no folds. */
+  .kal-st-tiles{ display:grid; grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr); gap:10px; margin-bottom:12px; }
+  .kal-st-tile{ border:1px solid var(--border); border-radius:12px; background:rgba(255,255,255,.025); padding:12px; min-width:0; }
+  .kal-st-lbl{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:6px; }
+  .kal-st-big{ display:block; font-size:23px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.01em; }
+  .kal-st-sub{ font-size:12px; color:var(--muted); margin-top:4px; white-space:normal; overflow-wrap:anywhere; min-width:0; }
+  #kalStatusBody .kal-rows > div{ gap:12px; } #kalStatusBody .kal-rows b{ text-align:right; min-width:0; white-space:normal; overflow-wrap:anywhere; } #kalStatusBody .kal-rows .kal-k{ flex:none; }
+  .kal-st-tile .kal-ecg-wrap{ margin:0 0 8px; }
+  .kal-st-tile .kal-hb{ margin:0; font-size:12px; align-items:flex-start; } .kal-st-tile .kal-hb span:last-child{ min-width:0; white-space:normal; overflow-wrap:anywhere; } .kal-st-tile .kal-hb-dot{ margin-top:3px; width:8px; height:8px; }
+  @media (max-width:520px){ .kal-st-tiles{ grid-template-columns:1fr; } }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
   .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
   @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
@@ -1572,6 +1582,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Bot status: redone as two tiles (the countdown to the next look and the health line) with the last order, orders today and which markets are open; win rate, edge and best and worst market are no longer on this card, and Needs a look shows only when something is wrong</li>
                   <li>Settings: the Phone alerts confirmation now says closes, stops and issues (it said entries, but a buy never alerts)</li>
                   <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
                   <li>Page: zooming out in the browser now keeps the page centred instead of leaving it against the left edge</li>
@@ -3247,6 +3258,11 @@
     parts.forEach(function(x){ o[x.type] = x.value; });
     return ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(o.weekday) * 1440 + Number(o.hour) * 60 + Number(o.minute);
   }
+  // Which markets are open right now, for the Bot status card: gold has no weekend (closed from Friday 17:00 to Sunday 18:00 Central, the same window the silent-market warning uses); Dogecoin trades all week.
+  function kalshiMarketsText(now){
+    var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080;
+    return closed ? 'Gold closed, back Sun 6 PM' : 'Gold and Dogecoin open';
+  }
   function kalshiDurationText(ms){
     var m = Math.round(ms / 60000);
     return m < 90 ? m + ' minutes' : (m < 2880 ? Math.round(m / 60) + ' hours' : Math.round(m / 1440) + ' days');
@@ -3447,24 +3463,23 @@
     var beatsBefore = kalshiBeats.length;
     kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
     var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
-    sEl.innerHTML = '<div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(line) + (hb.ageSec !== null && running ? '. Last check ' + escapeHtml(kalshiAgeText(hb.ageSec)) : '') + '</span></div>' +
-      (running ? '<div class="kal-rows"><div><span class="kal-k">Next look to buy</span><b id="kalNextIn">&mdash;</b></div><div><span class="kal-k">What it is looking at</span><b id="kalNextWhat">&mdash;</b></div></div>' : '') +
-      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
+    // Redone (the owner, Oct 31, 2026, template C with the heartbeat line in place of Today: "too much to read", then "id like to avoid collapsables"): two tiles, the countdown to the next look and the health monitor line, then three short rows (last order, orders today,
+    // which markets are open). No folds. The win rate, edge and best and worst market rows were dropped from this card; "Needs a look" shows only when something is wrong. The ids the one second tick and the ECG use are unchanged.
+    var hbText = line + (hb.ageSec !== null && running ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
+    sEl.innerHTML = '<div class="kal-st-tiles">' +
+      '<div class="kal-st-tile"><div class="kal-st-lbl">Next look</div>' + (running ? '<b class="kal-st-big" id="kalNextIn">&mdash;</b><div class="kal-st-sub" id="kalNextWhat">&mdash;</div>' : '<b class="kal-st-big">&mdash;</b><div class="kal-st-sub">Not running</div>') + '</div>' +
+      '<div class="kal-st-tile"><div class="kal-st-lbl">Health</div><div id="kalEcg" class="kal-ecg-wrap"></div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div></div>' +
+      '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Last order</span><b id="kalLastOrder">&mdash;</b></div><div><span class="kal-k">Orders today</span><b id="kalOrdersToday">&mdash;</b></div><div><span class="kal-k">Markets</span><b>' + escapeHtml(kalshiMarketsText(now)) + '</b></div></div>' +
+      (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '') +
+      '';
     if(running && kalshiOrdersLoaded){
       var work = kalshiTodayWork(kalshiAllOrders(), now);
       var sentText = work.sent === 0 ? 'none yet' : work.sent + ' sent, ' + work.filled + ' filled' + (work.noFill ? ', ' + work.noFill + ' not filled' : '');
       var problemText = work.problem + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused');
       var lastText = work.lastTs === null ? '' : kalshiAgeText(Math.max(0, Math.round((now - work.lastTs) / 1000)));
-      sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalWork"><div><span class="kal-k">Orders today</span><b>' + escapeHtml(sentText) + '</b></div>' +
-        (work.problem ? '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>' : '') +
-        (lastText ? '<div><span class="kal-k">Last order</span><b>' + escapeHtml(lastText) + '</b></div>' : '') + '</div>');
-      var edgeAcct = kalshiLiveAcct, edge = kalshiEdgeCheck(kalshiResolveOrders(kalshiAllOrders(), edgeAcct && edgeAcct.results, edgeAcct && edgeAcct.fills && edgeAcct.fills.ok ? kalshiGroupFills(edgeAcct.fills.fills) : []).filter(kalshiIsActive), now), sg = function(v){ return (v >= 0 ? '+' : '-') + kalshiMoney(Math.abs(v)); };
-      var edgeText = !edge.enough ? 'too few trades yet' : edge.winRate.toFixed(1) + '% against ' + (edge.breakEven === null ? 'n/a' : edge.breakEven.toFixed(1) + '%') + ' to break even';
-      var centsText = !edge.enough || edge.edgeCents === null ? '' : (edge.edgeCents >= 0 ? '+' : '-') + Math.abs(edge.edgeCents).toFixed(1) + 'c a contract';
-      var bestText = edge.best ? edge.best.label + ' ' + sg(edge.best.net) : '', worstText = edge.worst ? edge.worst.label + ' ' + sg(edge.worst.net) : '';
-      sEl.insertAdjacentHTML('beforeend', '<div class="kal-rows" id="kalEdge"><div><span class="kal-k">Win rate, last ' + escapeHtml(String(edge.n)) + '</span><b>' + escapeHtml(edgeText) + '</b></div>' +
-        (centsText ? '<div><span class="kal-k">Edge</span><b>' + escapeHtml(centsText) + '</b></div>' : '') +
-        (bestText ? '<div><span class="kal-k">Best market, 7 days</span><b>' + escapeHtml(bestText) + '</b></div><div><span class="kal-k">Worst market, 7 days</span><b>' + escapeHtml(worstText) + '</b></div>' : '') + '</div>');   // best and worst over the markets actively in the Strategies list only (kalshiIsActive): it used to name XRP, which is paused
+      var lastEl = document.getElementById('kalLastOrder'); if(lastEl){ lastEl.textContent = lastText ? lastText + ' ago' : 'none today'; }
+      if(work.problem){ document.getElementById('kalWork').insertAdjacentHTML('beforeend', '<div><span class="kal-k">Needs a look</span><b>' + escapeHtml(problemText) + '</b></div>'); }
+      var todayEl = document.getElementById('kalOrdersToday'); if(todayEl){ todayEl.textContent = sentText; }
     }
     var ecgNow = document.getElementById('kalEcg');
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
