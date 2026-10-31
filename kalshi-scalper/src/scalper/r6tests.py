@@ -387,6 +387,60 @@ def ready_date(n_usable, last_close):
     return datetime.fromtimestamp(max(READ_NOT_BEFORE, est), timezone.utc)
 
 
+def posted_flags(polls, close):
+    """(maker5_posted, l1q1_signal) for one market window from POLL PRICES ONLY (no trade, fill, result or outcome).
+    The same two tests simulate_maker5 and simulate_l1q1 apply first (workers/R6T_AMENDMENT_1.md). Pure."""
+    post = first_at(polls, close - M5_POST, M5_POST_GAP)
+    m5 = (post is not None and post.bid is not None and post.ask is not None and post.bid < post.ask - EPS
+          and M5_MID_LO - EPS <= post.mid <= M5_MID_HI + EPS)
+    S = last_at(polls, close - Q_SIGNAL, Q_SIGNAL_GAP)
+    q = False
+    if S is not None:
+        yes_in = S.ask is not None and BAND_LO - EPS <= S.ask <= BAND_HI + EPS
+        no_in = S.bid is not None and BAND_LO - EPS <= 1 - S.bid <= BAND_HI + EPS
+        q = yes_in != no_in
+    return m5, q
+
+
+def gate_message(posted):
+    """None when BOTH posted counts reach NEEDED, else the refusal text naming the short count(s). Pure."""
+    short = [f"{c} {posted.get(c, 0)} of {NEEDED}" for c in ("maker5", "l1q1") if posted.get(c, 0) < NEEDED]
+    return ("Refusing: posted-order gate not met (needs " + str(NEEDED) + " scored windows with an order posted for BOTH cards; short: "
+            + ", ".join(short) + "). The run is not spent; the AUTO loop re-tries.") if short else None
+
+
+def posted_by_window(ws=None):
+    """{(close, series): (maker5_posted, l1q1_signal)} over windows usable for the card, reading book.csv.gz PRICE columns only
+    (the trade file is never opened). A window counts for a card only if it is usable for that card by the registered coverage test."""
+    ws = windows() if ws is None else ws
+    byrun = defaultdict(list)
+    for k, (r, row) in ws.items():
+        if usable("maker5", k[0], row) or usable("l1q1", k[0], row):
+            byrun[r].append((k, row))
+    out = {}
+    for r, ks in sorted(byrun.items()):
+        book = _csv(f"{r}/book.csv.gz")
+        off = _offset(book)
+        if off is None:
+            continue
+        tick = {row["ticker"]: (k, row) for k, row in ks}
+        polls = defaultdict(list)
+        for x in book:
+            if x["ticker"] in tick:
+                polls[x["ticker"]].append(_poll(x, off))
+        del book
+        for tk, ((close, ser), row) in tick.items():
+            ps = sorted(polls.get(tk, []), key=lambda p: p.t)
+            m5, q = posted_flags(ps, close)
+            out[(close, ser)] = (m5 and usable("maker5", close, row), q and usable("l1q1", close, row))
+    return out
+
+
+def posted_counts(ws=None):
+    pw = posted_by_window(ws)
+    return {"maker5": sum(1 for a, _ in pw.values() if a), "l1q1": sum(1 for _, b in pw.values() if b)}
+
+
 def count():
     ws = windows()
     _, nfiles = runs()
@@ -397,6 +451,8 @@ def count():
         last = max((c for c, _ in ws), default=None)
         parts.append(f"{card.upper()} {n} usable of {NEEDED} ({', '.join(f'{s[2:-3]} {v}' for s, v in per.items())}), "
                      f"earliest read {ready_date(n, last):%Y-%m-%d %H:%M} UTC")
+    pc = posted_counts(ws)
+    parts.append(f"POSTED (price rows only) MAKER5 {pc['maker5']} of {NEEDED}, L1Q1 {pc['l1q1']} of {NEEDED}")
     print(f"R6 count: {nfiles} files, {len(ws)} recorded market windows; " + "; ".join(parts))
     return len(ws)
 
@@ -437,6 +493,10 @@ def run(card, now=None):
     use = {k: v for k, v in ws.items() if usable(card, k[0], v[1])}
     if len(use) < NEEDED:
         print(f"Refusing: {len(use)} usable windows, {NEEDED} needed.")
+        return
+    msg = gate_message(posted_counts(ws))     # Amendment 1: price rows only; a refusal here is not the one run
+    if msg:
+        print(msg)
         return
     byrun = defaultdict(list)
     for k, (r, row) in use.items():

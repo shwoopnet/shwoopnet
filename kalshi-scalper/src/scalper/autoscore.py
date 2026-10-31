@@ -8,7 +8,7 @@ Readiness is a count only (closes, losses in a block, windows); nothing here com
   MKTTIME1-F ready at 15 losses in gold's 20-24 CT block (`scalper.mkttime1f count`), runs `scalper.mkttime1f read`
   MM1        ready at 300 recorded gold 15 minute windows on origin/quote-data; runs `scalper.mm1 run` (refuses below 300 usable windows; writes data/mm1_result.txt)
   QUOTE2B    from 2026-11-12, runs `scalper.quote2b run` (refuses below 300 usable closes; writes data/quote2b_result.txt)
-  MAKER5     from 2026-11-06, runs `scalper.r6tests run maker5` (refuses below 300 usable R6 windows; writes data/maker5_result.txt)
+  MAKER5     from 2026-11-06, runs `scalper.r6tests run maker5` (refuses below 300 usable R6 windows or, Amendment 1, below 300 posted windows for BOTH cards; writes data/maker5_result.txt)
   L1Q1       from 2026-11-06, runs `scalper.r6tests run l1q1` (same refusals; writes data/l1q1_result.txt)
   GF1, GF2   readiness `scalper.gf12 count` (R6 book files only: windows and L1 signals, no coverage or result); from 2026-11-14 02:00 UTC
              (the read date plus 2 hours for the recorder's last push) and at 300 signals, or from 2026-11-15 00:00 UTC whatever
