@@ -96,6 +96,11 @@ const KALSHI_OWNER_EMAIL = "heiszcam@gmail.com";
 function ensureDefaultAdminApp() {
   if (!getApps().some((a) => a.name === "[DEFAULT]")) initializeApp();
 }
+// Deploy stamp: once per instance start, record which commit this function was deployed from (see deployStampLib.js). Logging only, never blocks a function, and does nothing outside Cloud Run (no K_SERVICE), so no test or local run writes.
+const deployStamp = require("./deployStampLib");
+if (deployStamp.serviceName()) {
+  try { ensureDefaultAdminApp(); deployStamp.recordBoot({ db: getFirestore() }).catch(() => {}); } catch (e) { /* a stamp that cannot be written is simply missing from the report */ }
+}
 async function assertKalshiAdmin(auth) {
   assertSignedIn(auth);
   if (!auth.token || auth.token.email !== KALSHI_OWNER_EMAIL) {
@@ -874,6 +879,7 @@ exports.kalshiNightlyReport = onRequest(
     // The default app must exist before getFirestore() (see ensureDefaultAdminApp above); the first deploy of this endpoint skipped it and answered 500 "could not read orders".
     readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's orders (OICORE), read the same way, so the report covers every strategy.
+    readDeploys: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(deployStamp.COLLECTION).get()).docs.map((d) => d.data()); },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
   })
 );
