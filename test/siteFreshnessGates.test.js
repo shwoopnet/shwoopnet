@@ -1,5 +1,5 @@
 'use strict';
-// SF1 to SF6: the page's own words about the bot must match the bot's code (the owner, Oct 29, 2026: the Bot page still said XRP had a 10 minute look and Dogecoin traded 3 contracts after both had changed).
+// SF1 to SF7: the page's own words about the bot must match the bot's code (the owner, Oct 29, 2026: the Bot page still said XRP had a 10 minute look and Dogecoin traded 3 contracts after both had changed).
 // Consequence: a code change that makes the page's rules, sizes, limits or market lists untrue fails here, in the pull request that changes the code, instead of reaching the owner as a stale line on a real-money control.
 // Add a line here whenever new page text states a number or a market list that the bot's code decides.
 const assert = require('assert');
@@ -67,6 +67,13 @@ gates.SF6 = () => {
   assert.ok(new RegExp('\\b' + strat.contractsPerOrder + ' contracts').test(span), 'the page says OICORE sends ' + strat.contractsPerOrder + ' contracts, like its registry entry');
   const live1 = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s));
   if (!live1.some((s) => live.CAPPED_SERIES.includes(s))) assert.ok(!/At most one crypto order per 15 minute window/.test(text(menu)), 'no live market is under the one-crypto-order rule, so the page must not state it');
+};
+
+gates.SF7 = () => {
+  // Phone alerts are closes, stops and issues; a buy never alerts (the owner, Oct 26, 2026). The page's own confirmation must not promise entries (the owner's Oct 30 screenshot still said "entries, sells").
+  const m = /kalshiPushSay\('Phone alerts are on for this device: ([^']+)'\)/.exec(html);
+  assert.ok(m, 'the confirmation line is found');
+  assert.ok(!/entr/i.test(m[1]) && /closes/.test(m[1]), 'the confirmation says closes, not entries');
 };
 
 let failed = 0;
