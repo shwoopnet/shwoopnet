@@ -10,6 +10,8 @@
 <script>
   // Privacy view survives a reload (the owner, Oct 23, 2026: "we don't want to accidentally leak anything"). The choice is kept in THIS browser only and applied here, before anything is drawn, so a reload never flashes a dollar amount.
   try { if (window.localStorage.getItem('shwoopnet:privacy') === 'on') { document.documentElement.setAttribute('data-present', 'on'); } } catch (e) { /* storage blocked: the view simply starts off */ }
+  // Page scale for big screens (see the .app rule): from the screen's own width, so browser zoom cannot switch a step on or off. Never more than the window can hold at a 1280 pixel layout.
+  (function () { try { var d = document.documentElement; function apply() { var sw = (window.screen && window.screen.width) || 0, z = sw >= 4500 ? 2.5 : sw >= 3840 ? 2.1 : sw >= 3200 ? 1.8 : sw >= 2560 ? 1.5 : sw >= 1921 ? 1.2 : 1, room = (window.innerWidth || sw) / 1280; if (z > room) { z = Math.max(1, room); } d.style.setProperty('--app-zoom', String(z)); d.classList.toggle('big-screen', z > 1); } apply(); window.addEventListener('resize', apply); } catch (e) { /* no screen size: the page stays at normal scale */ } })();
   // Hide logo (the owner, Oct 25, 2026, to present the site as project work): same idea, kept in this browser only and applied before first paint.
   try { if (window.localStorage.getItem('shwoopnet:hideLogo') === 'on') { document.documentElement.setAttribute('data-hidelogo', 'on'); } } catch (e) { /* storage blocked: the logo simply shows */ }
 </script>
@@ -211,11 +213,9 @@
   .app-pages, .site-footer{ padding-left: 0; }
   @media (max-width: 900px){ .app{ padding-bottom:76px; margin: 0 auto; } .app-pages, .site-footer{ padding-left:0; } }
   /* Big monitors scale the whole page up instead of leaving it a small block in one corner (the owner, Oct 27, 2026: "maybe some scaling would be nice?", a 4K and ultrawide screenshot where the page filled a third of the width with 12px text). The 1800px column and every size inside it grow together by the step, and the column is centred. Phones and ordinary laptops are untouched. */
-  @media (min-width: 1921px){ .app{ zoom:1.2; margin-left:auto; margin-right:auto; } }
-  @media (min-width: 2560px){ .app{ zoom:1.5; } }
-  @media (min-width: 3200px){ .app{ zoom:1.8; } }
-  @media (min-width: 3840px){ .app{ zoom:2.1; } }
-  @media (min-width: 4500px){ .app{ zoom:2.5; } }
+  /* The scale comes from the SCREEN, not the window (the owner, Oct 31, 2026: browser zoom out "doesn't zoom properly" on the desktop). The steps used to be media queries on the window width, but zooming out makes the window wider in CSS pixels, so each step switched on and cancelled the owner's zoom (a 1440 pixel laptop went from 80% to only 62% across 67% down to 25%). A small script in the head sets --app-zoom from screen.width, which browser zoom does not change; the steps and the 4K and ultrawide look are the same as before at 100%. */
+  .app{ zoom:var(--app-zoom, 1); }
+  html.big-screen .app{ margin-left:auto; margin-right:auto; }
   .brand{
     display:flex; align-items:center; gap:12px;
     background:none; border:none; padding:0; margin:0; cursor:pointer; text-align:left; font:inherit; color:inherit;
@@ -1571,6 +1571,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Page: browser zoom (Cmd minus and plus) now zooms the page properly on a desktop; the big-screen scale-up follows the screen instead of the window width, so zooming out no longer switches it on and cancels the zoom</li>
                   <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page: the Rules text now says the Bitcoin probe (OICORE) sends 10 contracts, not 5, and no longer lists a one-crypto-order-per-window limit that no live market is under</li>
                   <li>Notes: corrected the project note about which Kalshi shard each market trades on (every live market is on shard 2; gold was wrongly listed on shard 0)</li>
