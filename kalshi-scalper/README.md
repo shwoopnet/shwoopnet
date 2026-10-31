@@ -8049,3 +8049,24 @@ Lead's correction: the break-even arithmetic used in the brief (about 53.5% to b
 Registered first (`workers/SPORTCONS1_REGISTRATION.md`), result `workers/SPORTCONS1_RESULT.md`, code `src/scalper/sportcons1.py`. Owner-approved family (KX10 item 9). Not repeated: favourites (SP1, F6), totals ladder locks (ARB5), maker quotes (MAKER1), ESPN lag (ESPN1). On file: winner complement for 1,613 games (MLB, NBA, college football, NFL; 1c spreads) and game against first-half totals for NFL only (NBA has no K_game <= K_1H pair; 16 NFL games trade on both legs). Not on file: first-half winner or spread, spread ladders (NOT_RUNNABLE). Buying both teams' YES or both NO at the asks, both legs trading at least 10 contracts the same minute, after rounded fees at 10 contracts: games with a lock of at least 1c were 0 / 0 / 0 for YES+YES and 1 / 0 / 0 for NO+NO (bar 3 per window); the few positive minutes (up to +1.5c) are single one-minute candles at price tails or fee rounding. R2a and R2b **FALSIFIED**; R3 **NOT_ENOUGH_DATA** (62 to 95 games, no positive lock); T2 not run. Quoters keep the two team markets and the totals pair inside the arithmetic at minute resolution. N +3; running count about 592,085.
 
 Lead's count correction: the worker's running count used a stale base. Running N after SPORTCONS1 (+3): about 728,673 (z bar 5.27).
+
+## Result: LADLONG1 (sell the far wings of the hourly Bitcoin ladder by buying the other side, held), 2026-10-31
+
+Reopened by the owner (via the main session, Oct 30 evening) as the mirror of TAIL; a go-ahead to test, not a promotion. Registered
+first (`workers/LADLONG1_REGISTRATION.md`, commit dbf1bf1), result `workers/LADLONG1_RESULT.md`, code `src/scalper/ladlong1.py`,
+printout `studies/ladlong1_result_2026-10-31.txt`. **A reword of tested cells at another clock plus one new cell:** the mirror of
+TAIL / NEWH4 H3 (buying the 2c to 6c longshot: PF 0.64 / 0.72), UPnear and DNnear are LADL1's 88c to 97c cell at the 45 minute clock
+instead of 10 and 6, the 94c to 98c cells are new. KXBTCD 1,544 hourly closes (Aug 24 to Oct 29, 656 discovery / 631 validation /
+257 holdout), strikes chosen from the YES mid 52 to 55 minutes before the close (spread at most 4c; after the G3H1 look-ahead
+lesson, `lad1.sqlite` not used), look at 45 minutes, fill at the next candle's ask (UP bands buy NO at 1 - bid, DN bands buy YES),
+one contract-leg per strike, held, fee 7% x p x (1-p) rounded up per order. **Four bands, four tries, all FALSIFIED:** C = 10
+mean net per contract discovery / validation: UPfar (YES mid 2c to 6c, buy NO) -1.08c / -0.14c, PF 0.72 / 0.95; UPnear (6c to 12c)
++0.15c / +1.37c, PF 1.02 / 1.25; DNnear (88c to 94c, buy YES) +0.13c / -0.99c, PF 1.02 / 0.86; DNfar (94c to 98c) -0.28c / -0.62c,
+PF 0.90 / 0.80. 603 / 593, 550 / 526, 538 / 511, 611 / 595 events; event z -1.09 to +1.35; worst single event -$19 to -$49 and worst
+day -$24 to -$54 at 10 contracts; bootstrap 5th percentile of 30 day net negative everywhere (-$22 to -$322). The far wings are
+not rich enough to sell at the ask: UPfar won 95.85% then 96.99% against 96.66% and 96.88% paid, so TAIL's buyer-side shortfall did
+not carry to the seller after the spread and fee. The holdout was not read. Gold and Ethereum ladders NOT_RUNNABLE (candles start
+900 s and 420 s before the close). N +4; running count about 728,677 (z bar 5.27). A position could coexist with live L1 or OICORE
+Bitcoin exposure at the same close; paper only, nothing to build.
+
+Lead's count note: running N after LADLONG1 (+4): about 728,677 (z bar 5.27).
