@@ -18,6 +18,9 @@ from .drift import live_report
 from .paths import DATA_DIR
 
 DEPLOY = datetime(2026, 10, 29, 21, 5, tzinfo=timezone.utc).timestamp()   # main session: Dogecoin 3 to 5 at about 21:05 UTC
+# main session, 2026-10-31: on Oct 30 the owner moved Dogecoin onto gold's size ladder (#664); first order above 5 contracts was 13
+# contracts at 3:24 PM CT = 2026-10-30 20:24 UTC (no fill), first fill at 13 at 21:24 UTC. Before it Dogecoin was 3, then 5, contracts.
+LADDER = datetime(2026, 10, 30, 20, 24, tzinfo=timezone.utc).timestamp()
 OUT = DATA_DIR.parent / "workers" / "DOGEFILL.md"
 CT = ZoneInfo("America/Chicago")
 FLAG_RATE, FLAG_N = 0.60, 20
@@ -74,11 +77,12 @@ def run():
             continue
         t = ts(x["ts"])
         att.append(dict(key=x["ts"] + x["ticker"], t=t, ticker=x["ticker"], side=x.get("side"), lead=x.get("entryLead") or "untagged",
-                        filled=(x.get("count") or 0) > 0, count=x.get("count") or 0, after=t >= DEPLOY))
+                        filled=(x.get("count") or 0) > 0, count=x.get("count") or 0, after=t >= DEPLOY, ladder=t >= LADDER))
     depth = r6_depth([a for a in att if a["after"]])
-    lines = [f"## {datetime.now(CT):%Y-%m-%d %H:%M} CT (deploy marker 2026-10-29 21:05 UTC, Dogecoin 3 to 5 contracts)", ""]
+    lines = [f"## {datetime.now(CT):%Y-%m-%d %H:%M} CT (markers: 2026-10-29 21:05 UTC Dogecoin 3 to 5 contracts; 2026-10-30 20:24 UTC Dogecoin on gold's size ladder, #664)", ""]
     flags = []
-    for label, grp in (("before", [a for a in att if not a["after"]]), ("after", [a for a in att if a["after"]])):
+    # "before" = 3 contracts (and earlier), "five" = fixed 5 contracts, "ladder" = gold's size ladder (13 at the account's size); the flag reads the ladder period
+    for label, grp in (("before (3)", [a for a in att if not a["after"]]), ("five (5)", [a for a in att if a["after"] and not a["ladder"]]), ("ladder", [a for a in att if a["ladder"]])):
         n = len(grp); nf = sum(1 for a in grp if not a["filled"])
         sizes = defaultdict(int)
         for a in grp:
@@ -92,12 +96,12 @@ def run():
             by_lead[a["lead"]][0] += 1; by_lead[a["lead"]][1] += not a["filled"]
         lines.append(f"- {label}: attempts {n}, no fill {nf} ({100 * nf / max(1, n):.0f}%), longest no-fill streak {streak}, filled sizes {dict(sorted(sizes.items()))}, by lead "
                      + ", ".join(f"{k} {v[1]}/{v[0]} no fill" for k, v in sorted(by_lead.items())))
-        if label == "after" and n >= FLAG_N and nf / n >= FLAG_RATE:
-            flags.append(f"Dogecoin no-fill rate after the deploy {100 * nf / n:.0f}% over {n} attempts (flag at {100 * FLAG_RATE:.0f}% over {FLAG_N}+)")
+        if label == "ladder" and n >= FLAG_N and nf / n >= FLAG_RATE:
+            flags.append(f"Dogecoin no-fill rate on the size ladder {100 * nf / n:.0f}% over {n} attempts (flag at {100 * FLAG_RATE:.0f}% over {FLAG_N}+)")
     if depth:
         vals = [v for v in depth.values() if v is not None]
         under = sum(1 for v in vals if v < 5)
-        lines.append(f"- touch depth from recorder R6 for after-deploy attempts: {len(vals)} matched, size at the touch under 5 contracts in {under} ({100 * under / max(1, len(vals)):.0f}%), median {sorted(vals)[len(vals) // 2] if vals else 0}")
+        lines.append(f"- touch depth from recorder R6 for attempts since the 3-to-5 deploy (ladder-size orders hit more than 5): {len(vals)} matched, size at the touch under 5 contracts in {under} ({100 * under / max(1, len(vals)):.0f}%), median {sorted(vals)[len(vals) // 2] if vals else 0}")
     else:
         lines.append("- touch depth: no R6 book rows for these attempts yet (R6 started 2026-10-29 22:03 UTC; the report carries no depth fields)")
     lines.append(f"- **Flags:** {'; '.join(flags) if flags else 'none'}")
