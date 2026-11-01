@@ -27,6 +27,31 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 1, 2026, 5:55 PM CT (2026-11-01T22:55Z): C1 REGISTERED for forward shadow scoring (skip 90 to 92c entries). Nothing live. Scored ONLY on orders placed after this time.
+
+Owner picked C1 (via main). This entry fixes everything before a single forward order is read. The 391 fills that suggested the idea are NOT part of the test.
+
+**The one cell:** gold and Dogecoin L1 fills whose `price` (the price of the bought side at the 6 minute look, as logged on the order record) is at least 0.90 and under 0.92, pooled across the two markets. No other cell, no other split, no sub-hour or size cut is tested; any other cut I look at is a new try added to N.
+
+**Scored set:** orders with `ts` after 2026-11-01T22:55:00Z, ticker starting KXGOLD or KXDOGE, `count` above 0 (filled) and `settledPnl` present (settled). Unfilled orders and open orders are not counted. An early sell at the 25c line is a loss (negative `settledPnl`), a stop-out is not removed. Comparison group ("the rest"): fills in the same period, same markets, with `price` under 0.90 or 0.92 and over. Net per contract = sum of `settledPnl` over sum of `count`. Nothing in the live bot changes: the cell keeps trading and this is just a counter on its orders.
+
+**Prediction (stated before):** over 80 settled forward fills in the cell, (a) the cell's loss rate is at least 7% (in the 391-fill history it was 9.7%), (b) its net is under +0.5c a contract (history -0.1c pooled), and (c) the rest of the book's loss rate is under 4.5% (history 3.0%), with the one-sided Fisher exact p for cell loss rate above the rest's under 0.05. All three together is a PASS of the shadow test.
+
+**Sample needed:** 80 settled forward fills in the cell. At the last 14 days' rate that is 38 cell fills a week (Dogecoin 23, gold 15), so about 2.1 weeks. Gold is closed until Monday Nov 2 00:00Z (6 PM CST Sunday), so the first hours are Dogecoin only; I count both markets as they come. One read at 80; no peeking for adoption. I will glance at 40 only for the early kill below.
+
+**Power and false alarms (simulated, 3,000 runs each, 80 cell fills against 240 others):** if the true rates are the history's (9.7% cell, 3.0% rest) a PASS has a 60% chance; if the cell is only 6% against 3% it has an 18% chance; if there is no difference (4.5% both) a false PASS has a 2% chance. So a miss does not prove the idea wrong, and I will say so.
+
+**Kill rules (dead = stop scoring, report):**
+- At 80 settled cell fills: net above +1.5c a contract, or cell loss rate under 4%, or the Fisher p for cell loss rate above the rest above 0.30. Any of these = dead.
+- Early kill at 40: zero losses in the cell AND net above +2.0c a contract (chance of that if the true loss rate were 9.7%: 1.7%).
+- If neither kill nor PASS at 80, the result is INCONCLUSIVE and the cell gets one more block of 80 before a verdict (counted as a second look).
+
+**Cost in fills (what skipping would give up):** 38 fills a week of about 148 (26%), Dogecoin 23 of 88, gold 15 of 60. In dollars the history says the cell's net was -$1.01 over 93 fills, so the profit given up is about zero; the cost is frequency and the dollars of fees and risk it would NOT take. Frequency is a hard requirement for L1, so a PASS here still goes to the owner as a trade between a quarter of the fills and about half of the loss events, not as a rule to ship.
+
+**Deflation:** the cell was one of 10 price cells (5 bins by 2 markets) looked at in history, so the history p of 0.012 is about 0.12 after counting them. The forward test is a single pre-registered cell, so its p needs no further count; the shared N across all candidates stays about 728,683 and adds no new cells.
+
+**Scoring recipe each wake (no scratch file needed):** nightly report with `orders=1`, filter as above, count cell fills, losses, net and contracts; log in this file only when the count crosses 40 or 80 or a kill triggers. Forward fills so far (after 5:55 PM CT Nov 1): 0.
+
 ### Nov 1, 2026, 3:55 PM CT: C3 (Dogecoin limit +1c) simulated on R6. Result: FAILS its registered kill rule on the current sample. No live change proposed.
 
 Owner picked C3 (via main, shadow read only). Method, fixed before the numbers: Dogecoin ladder-size orders (ordered 11 or more) that carry send timing (`sentAtMs`, only from Oct 31 about 3:09 AM UTC) joined to the R6 `book15r6` Dogecoin book rows (2 second polls, files through Nov 1 16:27Z). For each order, take the last book snapshot before Kalshi's answer (median 0.5 s before the send), and count the size resting at the bought side's price levels within the order's worst price, then within the worst price plus 1c. Each contract fills at the book level's own price, so the extra cost of +1c is the level actually reached, not a flat cent. Fees: 7% of price times (1 minus price), rounded up per order. Loss size: the 25c line (a loss costs price minus 0.24 a contract, the observed Dogecoin exit average of about 69c).
