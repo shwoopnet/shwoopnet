@@ -15,7 +15,7 @@
 - Main merged RAINCAL #685, DERIBIT-IMPLIED #686, SPORTS-PRE #687 to main (710f9d7, about 3:20 PM CST). Delete the workflow file to stop one early; stop date 2026-12-31.
 - RAINCAL scorer: src/scalper/raincal.py (9ef6885, edbed87). DERIBIT-IMPLIED scorer: src/scalper/deribit_implied.py (cdb95af). Tests pass on synthetic data; count never opens results; read refuses before the registered date (RAINCAL 2027-01-01 18:00 UTC, DERIBIT 2027-01-01 00:00 UTC) and a second run. No real outcome data was looked at.
 - Ambiguities the workers resolved are listed in each module (RAINCAL: ties pass at exactly 8c, PF 1.2 and z 3 pass, midpoint date goes to the second half; DERIBIT: AMBIGUITIES list: tie rule, midpoint, clipping, OICORE skip). N_TRIED is a constant (728,698 / 728,694); update it before the read if the running count changed.
-- SPORTS-PRE scorer still being written.
+- SPORTS-PRE scorer: src/scalper/sportspre.py (ec1b09a), read refuses before 2027-01-01 12:00 UTC. Ambiguities resolved in the code: the 'no later than the look' rule read literally drops every game, so the last Kalshi poll in T-75..T-60 is paired with the nearest earlier core predictor within 5 minutes (looks with ESPN after T-60 are counted); market Brier uses the quote mid normalised to sum to 1; halves split at UTC start date 2026-12-01; the headline is NOT_YET_FALSIFIED if either try is, else NOT_ENOUGH_DATA if no try is FALSIFIED and one is short, else FALSIFIED. Owner or main may want to confirm items 1 and 7 before the read.
 
 ## Now running (AUTO loop restarted 9:33 AM CT Oct 30 after a container restart killed it at 2:08 AM CT; check liveness with: ps -eo args | grep -c '^bash workers/autoscore_loop.sh') / Next / Waiting on
 
