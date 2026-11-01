@@ -1,0 +1,55 @@
+# Oct 31, 2026 (the owner approved the research session's SPORTS-PRE, registration in kalshi-scalper/workers/SPORTSPRE_REGISTRATION.md on the research branch): for every NFL, college football, NBA and MLB game, every 5 minutes from 120 to 30 minutes before the start,
+# records Kalshi's two moneyline markets (yes bid, ask, sizes, the server Date header) and ESPN's pre-game win probability (BPI/FPI, the raw response with this recorder's own receive time, because ESPN removes it once the game starts), and afterwards the results from the public APIs.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under sportspre/), never to main. Games that start on or after 2026-12-31 00:00 UTC are not tracked and nothing runs after 2027-01-01 06:00 UTC (checked in the first step and again in the script); delete this workflow to stop sooner.
+# Same back to back 4 hour job pattern as record-book. Requests at the peak (a college football Saturday): about 2 a minute to Kalshi, about 12 a minute to ESPN; under 2 a minute in total on an ordinary evening.
+name: record-sportspre
+on:
+  schedule:
+    - cron: "50 3,7,11,15,19,23 * * *"
+    - cron: "20 * * * *"   # an hourly trigger behind the 4 hour jobs, so a dropped start costs at most about an hour.
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-sportspre
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop for good after the end date (2027-01-01 06:00 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-01T06:00:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record until a minute past the next 4 hour boundary
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/sportspre/$STAMP"
+          python3 code/scripts/record_sportspre.py "data/sportspre/$STAMP" --root data/sportspre --cycle-hours 4
+          gzip -9 -f data/sportspre/$STAMP/*.csv data/sportspre/$STAMP/*.jsonl
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "sportspre-recorder"
+          git config user.email "sportspre-recorder@users.noreply.github.com"
+          gzip -9 -f sportspre/*/*/*.csv sportspre/*/*/*.jsonl 2>/dev/null || true
+          git add sportspre
+          git commit -q -m "sportspre $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
