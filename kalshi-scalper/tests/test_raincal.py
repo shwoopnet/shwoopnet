@@ -195,6 +195,6 @@ assert R.half_of("2026-11-01", "2026-11-01", "2026-11-03") == 0 and R.half_of("2
 
 # 8. the module has no network, key or order code and no em dash
 src = Path(R.__file__).read_text()
-for bad in ("urllib", "requests", "socket", "api_key", "—"):
+for bad in ("urllib", "requests", "socket", "api_key", "\u2014"):
     assert bad not in src, bad
 print("test_raincal: all passed")
