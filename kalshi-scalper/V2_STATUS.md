@@ -6,6 +6,10 @@
 - RECORD1 information look: 208 trades on 11 dates (needs 300). DEPTH1 gold still tight, no owner answer on the R6 options.
 - Review branches RAINCAL, DERIBIT-IMPLIED, SPORTS-PRE unmerged (96d47fe, a3761a4, bead1f1). N about 728,698, z bar about 5.27. No NEW SERIES line.
 
+## Lane rule confirmed by main (Nov 1, 2:07 PM CST, owner approved)
+
+- V2 discovers NEW strategies only. No new L1 or OICORE variants (filters, exits, sizing, entry timing, thresholds, fill models for live markets); any such idea goes to main, who passes it to the Live Strategy Refinement chat. Already registered OICORE forward rows keep running. RAINCAL, DERIBIT-IMPLIED, SPORTS-PRE, the recorders and the dated forward reads continue.
+
 ## Now running (AUTO loop restarted 9:33 AM CT Oct 30 after a container restart killed it at 2:08 AM CT; check liveness with: ps -eo args | grep -c '^bash workers/autoscore_loop.sh') / Next / Waiting on
 
 - **Now running (7:25 PM):** workers GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
