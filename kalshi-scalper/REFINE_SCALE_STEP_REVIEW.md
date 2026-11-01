@@ -60,7 +60,7 @@ Reading: gold's no-fill share is higher at 11 to 15 than at 6 to 10 (42% against
 **Keep +1.** My reasons, in order:
 1. At today's balance the step pace is not what limits size. Under reading A the cap catches the 2% size (16) in 12 days at +1; under B the cap is already at the target. The extra pace buys about six days of 3 or 4 more contracts under A, and nothing under B.
 2. The record has nothing above 16 contracts to say a larger size is safe, and the only cut that moves (gold's no-fill share at 11 to 15) points the wrong way.
-3. The cost of a mistake is lopsided: one more contract is about 74c to 98c of loss against about 2.5c of win, so each extra step needs about 30 wins to pay for one loss.
+3. The cost of a mistake is lopsided: one more contract is about 74c to 98c of loss against about 3c to 6c of win, so each extra contract needs about 12 to 30 wins to pay for one loss.
 4. A faster ladder matters mainly after a deposit, and the owner can already do that deliberately (a Stop then Start jumps straight to the target).
 
 If the owner still wants a faster ladder: **+2, not +3.** Under A it reaches the same ceiling on the same day, and it halves the largest single-review jump (2 contracts is about 1.5 to 2 dollars of extra loss per order, 3 is about 2.2 to 3).
