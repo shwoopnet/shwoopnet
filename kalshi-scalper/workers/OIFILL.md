@@ -1,5 +1,12 @@
 # OIFILL: visible size behind the Bitcoin open interest signals (newest first; aggregates only; information)
 
+## 2026-11-01 01:09 CT (forward signals of the Bitcoin open interest core; R6 book row nearest after close - 180 s, at most 10 s later; 5 recorded levels)
+
+| candidate | signals | with an R6 row | window not in R6 | median lag | size at the ask (median) | contracts within +2c (median) | 10+ at ask / 10+ within +2c | book ask minus candle fill (median) | smallest sizes at the ask |
+|---|---|---|---|---|---|---|---|---|---|
+| REF_GEN6_OICORE | 9 | 3 | 5 | 1.5s | 611 (p10 207, min 207) | 3959 (p10 877) | 3 / 3 | -9.1c | 207, 611, 2307 |
+| REF_GEN6_OIDRIFT | 1 | 1 | 0 | 1.5s | 2307 (p10 2307, min 2307) | 4919 (p10 4919) | 1 / 1 | -30.0c | 2307 |
+
 ## 2026-10-31 01:09 CT (forward signals of the Bitcoin open interest core; R6 book row nearest after close - 180 s, at most 10 s later; 5 recorded levels)
 
 | candidate | signals | with an R6 row | window not in R6 | median lag | size at the ask (median) | contracts within +2c (median) | 10+ at ask / 10+ within +2c | book ask minus candle fill (median) | smallest sizes at the ask |
