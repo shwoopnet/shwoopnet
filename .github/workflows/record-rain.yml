@@ -1,0 +1,65 @@
+# Oct 31, 2026 (the owner approved the research session's RAINCAL proposal; registration: kalshi-scalper/workers/RAINCAL_REGISTRATION.md on the research branch). Records Kalshi's
+# daily rain markets (series KXRAIN, 35 US cities) next to the National Weather Service's own probability of precipitation, once every few minutes inside each city's 6:00 to
+# 8:00 AM local standard time window, plus the station's latest observation (information only) and, once a day, the last days' settled results. Research data only.
+# Public data only: no key, no secret, no order, no auth header. Kalshi's public market data and api.weather.gov (which requires a descriptive User-Agent; that is an
+# identification header, NOT authentication). The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under raincal/), never to main.
+# Each run is a short job (a few minutes). Scheduled starts run late or are dropped, so it is triggered six times an hour from 11:00 to 15:59 UTC (the hours when some US city
+# is between 6:00 and 8:00 AM local standard time) under one concurrency group that never cancels a running job: jobs never overlap.
+# It stops by itself: from 2026-12-31 23:59 UTC the script records no quotes, and from 2027-01-03 23:59 UTC every run exits at once (checked in the first step and in the script).
+# Stop it sooner by deleting this file.
+name: record-rain
+on:
+  schedule:
+    - cron: "4,24,44 11-15 * * *"
+    - cron: "14,34,54 11-15 * * *"   # a second set ten minutes later: a dropped start costs about ten minutes, not twenty
+    - cron: "50 17 * * *"            # once a day: no city is in its window, so this run only copies the last days' settled results
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-rain
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Stop for good after the results end date (2027-01-03 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-03T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record one pass (and the settled results on the daily run)
+        if: steps.gate.outputs.go == 'true'
+        env:
+          SCHEDULE: ${{ github.event.schedule }}
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/raincal/$STAMP"
+          EXTRA=""
+          if [ "$SCHEDULE" = "50 17 * * *" ]; then EXTRA="--results"; fi
+          python3 code/scripts/record_rain.py "data/raincal/$STAMP" $EXTRA
+          gzip -9 -f data/raincal/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "rain-recorder"
+          git config user.email "rain-recorder@users.noreply.github.com"
+          gzip -9 -f raincal/*/*/*.csv 2>/dev/null || true
+          git add raincal
+          git commit -q -m "raincal $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
