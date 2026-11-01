@@ -27,6 +27,56 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 1, 2026, 3:15 PM CT: five ranked rule candidates for gold and Dogecoin (requested by main at the owner's direction; REGISTERED BEFORE ANY FORWARD SCORING; read only, nothing proposed live yet)
+
+Source for every number: nightly report, `hours=2160&orders=1`, gold and Dogecoin filled and settled orders, 391 fills (gold 215, Dogecoin 176), after fees. In-sample and descriptive: they are where the ideas come from, NOT evidence for them (README P1: history cannot count toward a band or filter variant). Every rule below is scored forward on orders placed after this entry's time, with the old rule's orders as the comparison. N tried for deflation: about 728,654 before, plus about 24 cells looked at to write these (10 price cells, 10 rise3 cells, 4 exit and size cuts) = about 728,680; Bonferroni bar stays about z 5.2, so none of these can pass on a few dozen orders and each is a CHEAP QUESTION, not a finding. Frequency stays a hard requirement for L1: current rate is about 148 fills a week (last 14 days, gold plus Dogecoin).
+
+What the live record says before any rule (so the owner sees the starting point):
+- 391 fills, 18 losses. 16 of the 18 losses are early sells at the 25c line (gold 8, Dogecoin 8), total -$75.34, average -69c a contract. Only 2 settled losses (1 gold, 1 gold at settlement). The loss side of this strategy IS the 25c line.
+- Entry price paid (bought side), c per contract and losses: gold 88-90 +2.36 (4 of 35 lost), 90-92 -0.37 (5 of 47), 92-94 +3.04 (1 of 45), 94-96 +4.23 (0 of 54), 96-97 +2.79 (0 of 34). Dogecoin 88-90 +4.16 (2 of 25), 90-92 +0.33 (4 of 46), 92-94 +6.07 (0 of 33), 94-96 +4.17 (0 of 43), 96-97 -0.54 (2 of 29).
+- Combined 90 to 92c: 93 fills, 9 losses, net -$1.01. Everything else: 298 fills, 9 losses, net +$66.43. One sided Fisher p 0.012 for the loss rate, but 10 price cells were looked at (gold and Dogecoin by 5 bins), so after counting the cells it is about 0.12. A lead.
+- Recent three minute move of the bought side (`rise3`, logged since mid Oct, 259 fills): negative in 30 fills, 4 lost, net -$14.03. Non-negative in 229 fills, 8 lost, net +$55.29. Fisher p 0.038, about 0.2 after the 10 cells. A lead, small.
+
+Ranked candidates (rank by what the live record supports and by frequency cost; the owner decides, one at a time):
+
+**C1 (rank 1). Skip 90 to 92c entries, gold and Dogecoin.**
+- Hypothesis: the 90 to 92c bucket is where the favourite is weakest relative to its price, so it pays about zero while it carries most of the loss events (9 of 18).
+- Numeric prediction (forward): over the first 80 skipped-bucket orders, the bucket's net is under +0.5c a contract (live so far -0.37 gold, +0.33 Dogecoin, pooled about -0.1c) AND its loss rate is at least 7% (so far 9.7%) while the rest of the book stays under 4% (so far 3.0%). If both hold, skipping costs about 0 dollars of profit and removes about half the loss events.
+- Frequency cost: about 24% of fills (76 of 297 in the last 14 days, so about 36 a week). This is the price, and it conflicts with "frequency is a hard requirement", so the owner must weigh it. It is the biggest cost of any candidate here.
+- Kill rule: if the bucket's forward net is above +1.5c a contract at 80 orders, the candidate is dead (the dollars skipped would have been profit). If its loss rate is below 4% at 80 orders, dead.
+- Needs: 80 forward 90 to 92c fills, about 2.2 weeks at 36 a week WITHOUT skipping them (scored on orders as sent, shadow only, no change live). Orders per week before: about 148. After: about 112.
+- Risk: the cell was chosen after looking; a bucket that is bad in 391 can regress. Do not run live; score the existing orders as they arrive.
+
+**C2 (rank 2). Skip an entry when the bought side's three minute move (`rise3`) is negative, gold and Dogecoin.**
+- Hypothesis: a side that was falling into the 6 minute look is more likely to stop out at 25c (the first Dogecoin ladder loss had rise3 -7.6c).
+- Numeric prediction: over the next 40 fills with rise3 below 0, at least 3 lose (live: 4 of 30), net under 0 (live -$14.03). If true, skipping them is worth about +$14 per 30 skipped and costs about 12% of fills (30 of 259; about 15 a week).
+- Kill rule: at 40 forward negative-rise3 fills, if losses are 1 or fewer, or net is above +$2, dead. Also dead if V2's JUMP1 read (which owns rise3 research) comes back FALSIFIED on its own data.
+- Needs: 40 forward fills with negative rise3, about 2.5 weeks at 15 a week. Orders per week before 148, after about 133.
+- Overlap: V2 logged rise3 for JUMP1; coordinate through main so the two chats do not score the same split twice (count it once in N).
+
+**C3 (rank 3). Dogecoin limit +1c (price improvement on no-fills), simulated first.**
+- This is R2, promoted: Dogecoin ladder-size orders have a no-fill share of 35% (18 of 51); by limit price, below 92c 41% (13 of 32), 92 to 95c 29% (2 of 7), 95c and above 29% (4 of 14). A fill that is missed is a missed expectancy of about +2c a contract.
+- Numeric prediction (simulation on R6 book data, no live change): a limit +1c converts at least a third of the no-fills into fills at a worse price by 1c; net change in expectancy per contract stays above +1.0c after the extra cent. Fills gained about +4 to +8 a week at the current rate.
+- Kill rule: if the simulated net per extra fill is under +0.5c a contract after the extra cent, or the cap on price (the 97c band) removes the gain, dead.
+- Needs: R6 Dogecoin days (since Oct 29) and an order export; no live probe yet. Orders per week before about 71 (Dogecoin), after about 75 to 79.
+
+**C4 (rank 4). Lower the early-sell line from 25c to 15c on gold and Dogecoin (a safety setting; owner decision, not a research finding).**
+- Evidence from the live record: 16 of 18 losses are exits, average -69c a contract, -$75.34 total. The research record (EXIT1, FALSIFIED as an improvement) says holding to settlement beats every exit shape in history (profit factor per contract hold 0.961 / 0.928 / 0.898 against live 25c line 0.921 / 0.897 / 0.869). That is HISTORY on all entries, not a live read, and it does not use this strategy's 88c to 97c band.
+- Numeric prediction: with a 15c line, the exits that would have recovered above 25c at the close are at least 20% of the 16 (about 3); lines lower than 25c also raise the worst single loss from about -$9.5 toward -$11 at current size.
+- Why it ranks 4 and not higher: it widens what a loss costs, the owner has called the 25c line the safety feature, and the live record cannot show the counterfactual (an exited position's market outcome is not in the nightly report). It needs V2 to count, for the 16 exited tickers, how many settled in the bought side's favour (R6 has market results only from Oct 29; the public market result can be read per ticker). No live probe until that count exists.
+- Kill rule: if fewer than 3 of 16 exited positions settled in the bought side's favour, dead.
+- Orders per week: unchanged (148). This changes loss size, not frequency.
+
+**C5 (rank 5). Dogecoin upper band edge at 96c instead of 97c.**
+- Dogecoin at 96 to 97c: 29 fills, 2 losses, net -$0.80 (-0.54c a contract) against +4.17c at 94 to 96 and +6.07 at 92 to 94. Gold at 96 to 97c is fine (+2.79c, 0 of 34). A 97c fill pays 3c to win and about 72c to lose when it is stopped, so one loss wipes out 24 wins.
+- Numeric prediction: over the next 30 Dogecoin fills at 96 to 97c, net under +1.0c a contract and at least 1 loss (so far 2 of 29). If true, the cap costs about 8% of Dogecoin's fills (about 6 a week) for about zero dollars.
+- Kill rule: at 30 forward fills, net above +2.5c a contract or 0 losses, dead.
+- Needs 30 forward Dogecoin fills at 96 to 97c, about 5 weeks at 6 a week, so the slowest to read. Orders per week before about 71 (Dogecoin), after about 65.
+
+Not proposed: sizing changes (the replay in `REFINE_SIZE_LADDER_REVIEW.md` shows no size effect I can prove) and the earlier-send plan (config only, waits on its own trigger).
+
+What I need from the main session: the owner's pick of one candidate to score forward as a SHADOW read (no live change); V2 to count the 16 exit outcomes for C4 and to confirm how JUMP1 counts rise3 for C2. Nothing here goes live without the owner.
+
 **2026-10-31 5:50 PM CT, Dogecoin 30-order check at ladder size (orders of 11 to 13 contracts since Oct 30 3:24 PM CT): 30 orders, 19 fills, 11 no-fills (37%), 1 loss, net +$4.19 on 242 contracts = +1.73c a contract.** The 40% warning line I set for this check is not crossed (37%; before the ladder change 26% to 31%). Loss rate 1 in 19 fills (5.3%, under the 8% line); net per contract is above the +0.5c line. Recent orders: 4:24 PM no fill (12), 5:09 PM filled +$0.89 (12, startLate 6.4 s), 5:24 PM filled +$1.23 (12, 3.3 s), 5:39 PM filled, open (13, 5.0 s). Timing: startToSend 0.76 to 1.15 s on all of them. Dogecoin's review rule still needs 100 settled orders at this size (we have 19 fills); at the recent pace of about 25 orders a day that is a week away. All strategies, last 24 hours: 67 filled, 66 settled, 58 won, 8 lost, net +$29.94, profit factor 2.14 (best day so far in this record). OICORE unchanged: 8 filled, 3 won, 5 lost, net +$14.84. Gold reopens Sunday 6 PM CT. Method note: the Dogecoin filter is now "ordered 11 or more", not "exactly 13".
 
 **2026-10-31 4:45 PM CT, CORRECTION to my last four entries on Dogecoin, plus OICORE order 8 (a +$9.36 win).** My Dogecoin tally and my "no Dogecoin order for 3.5 hours" notes (2:38 PM and 3:40 PM CT) were wrong: I filtered on orders of exactly 13 contracts. After the -$8.70 loss the size stepped down (cash fell), and Dogecoin kept trading at 11 and 12 contracts: 12:39 PM no fill (11, startLate 10,586 ms), 12:54 PM filled +$0.92 (11), 2:39 PM filled +$0.56 (12), 4:24 PM no fill (12). Those were in the report all along; I read them out. Correct tally for Dogecoin at ladder size (ordered 11 to 13 contracts, since Oct 30 3:24 PM CT): **27 orders, 16 fills, 11 no-fills (41%), 1 loss (-$8.70), net +$2.07 on 205 contracts = +1.01c a contract**. That is above the +0.5c review line (earlier I wrote +0.32c for 13 contracts only; the figure was right for that subset, but the subset was not the whole). Loss rate 1 in 16 fills (6%). Review rule still needs the last 100 settled at this size (we have 16). OICORE: order 8, 3:42 PM CT, NO 10 contracts at 6c, WON +$9.36. OICORE now 8 filled, 3 won, 5 lost, plus one no-fill; net +$14.84, profit factor 4.1, win rate 37.5%, worst loss -$1.70. Streak kill (18) not near; forward read Nov 13. Sent a short correction to the main session.
