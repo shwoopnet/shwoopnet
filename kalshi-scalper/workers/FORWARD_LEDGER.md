@@ -1,94 +1,94 @@
 # FORWARD LEDGER (automatic; research only)
 
-Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-11-01 06:08 UTC.
+Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-11-01 06:41 UTC.
 Forward evidence counts only windows that CLOSED after a candidate's freeze time, had the data its rule needs and have settled.
 Fees 7% x C x p x (1-p) rounded up to the cent per order, at 1 and 10 contracts; held to settlement pays the entry fee only. Win = net at 10 contracts above zero. Net per contract is at 10 contracts. Trades per week: forward trades over the time from the freeze to the last evaluated close.
 This ledger never promotes anything. READY FOR THE FALSIFIER means only: forward PF 1.5+ at 1 and at 10 contracts on 30+ trades over 10+ trade days. It earns a falsifier read, nothing more. How a generator adds a candidate: `workers/candidates/README.md`.
 
 | id | market | stage | freeze | fwd days | trades | wins | losses | PF 1c | PF 10c | net/contract | trades/week | updated | flag |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| REF_GEN6_OIREL | KXBTC15M | reference | 2026-10-30 | 3 | 4 | 1 | 3 | 1.25 | 1.29 | +4.45c | 20.4 | 2026-11-01 06:08 UTC |  |
-| LADFADE_BTC | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 0 | 5 | 0.00 | 0.00 | -37.84c | 23.3 | 2026-11-01 06:08 UTC |  |
-| REF_GEN6_OICORE | KXBTC15M | reference | 2026-10-30 | 3 | 9 | 3 | 6 | 2.27 | 2.36 | +14.81c | 33.6 | 2026-11-01 06:08 UTC |  |
-| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 3 | 2 | 1 | 3.13 | 3.24 | +25.83c | 11.0 | 2026-11-01 06:08 UTC |  |
-| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 1 | 0 | 1 | 0.00 | 0.00 | -0.50c | 3.7 | 2026-11-01 06:08 UTC |  |
-| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 3 | 9 | 3 | 6 | 1.78 | 1.88 | +9.59c | 32.9 | 2026-11-01 06:08 UTC |  |
-| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 3 | 7 | 1 | 6 | 0.71 | 0.74 | -3.69c | 25.6 | 2026-11-01 06:08 UTC |  |
-| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 1 | 4 | 0.10 | 0.12 | -6.04c | 18.3 | 2026-11-01 06:08 UTC |  |
-| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 2 | 3 | 2.37 | 2.52 | +13.52c | 18.3 | 2026-11-01 06:08 UTC |  |
-| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 1 | 5 | 0.27 | 0.29 | -11.57c | 21.9 | 2026-11-01 06:08 UTC |  |
-| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 3 | 10 | 2 | 8 | 0.89 | 0.94 | -0.83c | 36.5 | 2026-11-01 06:08 UTC |  |
-| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 2 | 4 | 0.77 | 0.94 | -0.37c | 21.9 | 2026-11-01 06:08 UTC |  |
-| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 3 | 19 | 4 | 15 | 1.52 | 1.61 | +5.42c | 69.4 | 2026-11-01 06:08 UTC |  |
-| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 3 | 8 | 2 | 6 | 4.52 | 5.47 | +12.56c | 29.2 | 2026-11-01 06:08 UTC |  |
-| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 1 | 4 | 0.65 | 0.67 | -5.40c | 18.3 | 2026-11-01 06:08 UTC |  |
-| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 3 | 3 | 0.70 | 0.75 | -2.75c | 21.9 | 2026-11-01 06:08 UTC |  |
-| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 3 | 56 | 19 | 37 | 1.03 | 1.05 | +0.99c | 204.5 | 2026-11-01 06:08 UTC |  |
-| GEN7_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 3 | 0 | 3 | 0.00 | 0.00 | -7.20c | 10.7 | 2026-11-01 06:08 UTC |  |
-| GEN7_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 4 | 1 | 3 | 0.17 | 0.19 | -13.70c | 14.3 | 2026-11-01 06:08 UTC |  |
-| REF_GEN6_OIDRIFT | KXBTC15M | reference | 2026-10-30 | 3 | 1 | 0 | 1 | 0.00 | 0.00 | -43.80c | 3.6 | 2026-11-01 06:08 UTC |  |
-| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 1 | 31 | 7 | 24 | 0.60 | 0.61 | -9.10c | 217.0 | 2026-11-01 06:08 UTC |  |
-| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 3 | 11 | 10 | 1 | 0.28 | 0.35 | -5.65c | 39.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 35 | 24 | 11 | 0.85 | 0.91 | -1.99c | 113.1 | 2026-11-01 06:08 UTC |  |
-| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 23 | 11 | 0.80 | 0.86 | -2.92c | 109.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 14 | 17 | 0.79 | 0.82 | -4.36c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.87 | 0.89 | -2.28c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 12 | 19 | 1.05 | 1.11 | +1.69c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 3 | 40 | 14 | 26 | 0.90 | 0.93 | -1.06c | 129.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 3 | 20 | 8 | 12 | 1.08 | 1.12 | +2.26c | 64.6 | 2026-11-01 06:08 UTC |  |
-| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.86 | 0.92 | -1.64c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 14 | 24 | 0.77 | 0.79 | -4.42c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 23 | 13 | 0.63 | 0.67 | -7.96c | 116.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 10 | 24 | 0.81 | 0.83 | -2.54c | 109.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 3 | 35 | 27 | 8 | 1.35 | 1.43 | +6.93c | 113.1 | 2026-11-01 06:08 UTC |  |
-| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 29 | 14 | 0.73 | 0.78 | -4.73c | 138.9 | 2026-11-01 06:08 UTC |  |
-| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 3 | 32 | 24 | 8 | 1.20 | 1.29 | +4.64c | 103.4 | 2026-11-01 06:08 UTC |  |
-| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 13 | 18 | 0.45 | 0.46 | -15.01c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.92 | 0.99 | -0.29c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 23 | 13 | 0.60 | 0.61 | -10.27c | 116.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 23 | 11 | 0.85 | 0.90 | -2.02c | 109.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 26 | 12 | 0.80 | 0.81 | -4.24c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 22 | 9 | 0.89 | 0.95 | -0.99c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 3 | 18 | 11 | 7 | 0.47 | 0.50 | -13.81c | 58.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 3 | 40 | 28 | 12 | 0.85 | 0.88 | -2.65c | 129.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.57 | 0.58 | -12.42c | 71.1 | 2026-11-01 06:08 UTC |  |
-| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 3 | 27 | 19 | 8 | 0.88 | 0.90 | -2.12c | 87.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 3 | 29 | 17 | 12 | 0.53 | 0.57 | -12.90c | 93.7 | 2026-11-01 06:08 UTC |  |
-| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 25 | 14 | 0.58 | 0.62 | -9.74c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.54 | 0.58 | -12.53c | 71.1 | 2026-11-01 06:08 UTC |  |
-| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 3 | 32 | 22 | 10 | 0.81 | 0.86 | -3.16c | 103.4 | 2026-11-01 06:08 UTC |  |
-| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 3 | 37 | 28 | 9 | 1.15 | 1.23 | +3.74c | 119.5 | 2026-11-01 06:08 UTC |  |
-| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 3 | 28 | 18 | 10 | 0.60 | 0.64 | -9.13c | 90.5 | 2026-11-01 06:08 UTC |  |
-| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 30 | 13 | 0.76 | 0.81 | -4.21c | 138.9 | 2026-11-01 06:08 UTC |  |
-| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 20 | 11 | 0.74 | 0.79 | -4.76c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.57 | 0.61 | -10.77c | 71.1 | 2026-11-01 06:08 UTC |  |
-| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 25 | 11 | 0.86 | 0.87 | -2.65c | 116.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 3 | 27 | 8 | 19 | 1.78 | 1.85 | +10.12c | 87.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 20 | 11 | 0.72 | 0.77 | -5.42c | 100.2 | 2026-11-01 06:08 UTC |  |
-| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 11 | 23 | 1.02 | 1.09 | +1.21c | 109.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 25 | 14 | 0.63 | 0.65 | -9.47c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 27 | 12 | 0.82 | 0.87 | -2.77c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 29 | 14 | 0.71 | 0.76 | -5.39c | 138.9 | 2026-11-01 06:08 UTC |  |
-| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 3 | 23 | 17 | 6 | 1.04 | 1.07 | +1.20c | 74.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 3 | 28 | 9 | 19 | 1.99 | 2.09 | +12.45c | 90.5 | 2026-11-01 06:08 UTC |  |
-| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 26 | 13 | 0.70 | 0.75 | -6.12c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 3 | 37 | 28 | 9 | 1.24 | 1.26 | +4.50c | 119.5 | 2026-11-01 06:08 UTC |  |
-| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 3 | 33 | 24 | 9 | 0.96 | 1.02 | +0.42c | 106.6 | 2026-11-01 06:08 UTC |  |
-| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 26 | 10 | 1.01 | 1.03 | +0.69c | 116.3 | 2026-11-01 06:08 UTC |  |
-| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 26 | 13 | 0.74 | 0.76 | -5.99c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 3 | 30 | 18 | 12 | 0.52 | 0.55 | -13.59c | 96.9 | 2026-11-01 06:08 UTC |  |
-| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 27 | 12 | 0.86 | 0.88 | -2.61c | 126.0 | 2026-11-01 06:08 UTC |  |
-| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 3 | 29 | 22 | 7 | 1.21 | 1.23 | +3.93c | 93.7 | 2026-11-01 06:08 UTC |  |
-| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 26 | 12 | 0.72 | 0.77 | -5.40c | 122.8 | 2026-11-01 06:08 UTC |  |
-| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 3 | 40 | 26 | 14 | 0.67 | 0.68 | -8.02c | 129.2 | 2026-11-01 06:08 UTC |  |
-| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 1 | 15 | 14 | 1 | 0.95 | 1.03 | +0.17c | 105.0 | 2026-11-01 06:08 UTC |  |
+| REF_GEN6_OIREL | KXBTC15M | reference | 2026-10-30 | 3 | 4 | 1 | 3 | 1.25 | 1.29 | +4.45c | 17.0 | 2026-11-01 06:41 UTC |  |
+| LADFADE_BTC | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 0 | 6 | 0.00 | 0.00 | -37.13c | 23.9 | 2026-11-01 06:41 UTC |  |
+| REF_GEN6_OICORE | KXBTC15M | reference | 2026-10-30 | 3 | 9 | 3 | 6 | 2.27 | 2.36 | +14.81c | 29.4 | 2026-11-01 06:41 UTC |  |
+| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 3 | 2 | 1 | 3.13 | 3.24 | +25.83c | 9.6 | 2026-11-01 06:41 UTC |  |
+| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 1 | 0 | 1 | 0.00 | 0.00 | -0.50c | 3.2 | 2026-11-01 06:41 UTC |  |
+| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 3 | 9 | 3 | 6 | 1.78 | 1.88 | +9.59c | 28.8 | 2026-11-01 06:41 UTC |  |
+| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 3 | 7 | 1 | 6 | 0.71 | 0.74 | -3.69c | 22.4 | 2026-11-01 06:41 UTC |  |
+| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 1 | 5 | 0.05 | 0.05 | -12.65c | 19.2 | 2026-11-01 06:41 UTC |  |
+| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 2 | 3 | 2.37 | 2.52 | +13.52c | 16.0 | 2026-11-01 06:41 UTC |  |
+| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 3 | 7 | 1 | 6 | 0.23 | 0.25 | -12.04c | 22.4 | 2026-11-01 06:41 UTC |  |
+| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 3 | 10 | 2 | 8 | 0.89 | 0.94 | -0.83c | 32.0 | 2026-11-01 06:41 UTC |  |
+| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 3 | 9 | 3 | 6 | 0.35 | 0.40 | -5.94c | 28.8 | 2026-11-01 06:41 UTC |  |
+| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 3 | 20 | 4 | 16 | 1.50 | 1.60 | +5.06c | 64.0 | 2026-11-01 06:41 UTC |  |
+| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 3 | 9 | 2 | 7 | 4.12 | 5.06 | +10.97c | 28.8 | 2026-11-01 06:41 UTC |  |
+| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 1 | 4 | 0.65 | 0.67 | -5.40c | 16.0 | 2026-11-01 06:41 UTC |  |
+| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 3 | 6 | 3 | 3 | 0.70 | 0.75 | -2.75c | 19.2 | 2026-11-01 06:41 UTC |  |
+| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 3 | 62 | 21 | 41 | 1.04 | 1.06 | +1.20c | 198.4 | 2026-11-01 06:41 UTC |  |
+| GEN7_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 4 | 0 | 4 | 0.00 | 0.00 | -5.82c | 12.6 | 2026-11-01 06:41 UTC |  |
+| GEN7_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 5 | 1 | 4 | 0.16 | 0.18 | -11.54c | 15.7 | 2026-11-01 06:41 UTC |  |
+| REF_GEN6_OIDRIFT | KXBTC15M | reference | 2026-10-30 | 3 | 1 | 0 | 1 | 0.00 | 0.00 | -43.80c | 3.1 | 2026-11-01 06:41 UTC |  |
+| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 1 | 31 | 7 | 24 | 0.60 | 0.61 | -9.10c | 217.0 | 2026-11-01 06:41 UTC |  |
+| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 3 | 11 | 10 | 1 | 0.28 | 0.35 | -5.65c | 34.5 | 2026-11-01 06:41 UTC |  |
+| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 3 | 35 | 24 | 11 | 0.85 | 0.91 | -1.99c | 113.1 | 2026-11-01 06:41 UTC |  |
+| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 23 | 11 | 0.80 | 0.86 | -2.92c | 109.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 14 | 17 | 0.79 | 0.82 | -4.36c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.87 | 0.89 | -2.28c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 12 | 19 | 1.05 | 1.11 | +1.69c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 3 | 40 | 14 | 26 | 0.90 | 0.93 | -1.06c | 129.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 3 | 20 | 8 | 12 | 1.08 | 1.12 | +2.26c | 64.6 | 2026-11-01 06:41 UTC |  |
+| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.86 | 0.92 | -1.64c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 14 | 24 | 0.77 | 0.79 | -4.42c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 23 | 13 | 0.63 | 0.67 | -7.96c | 116.3 | 2026-11-01 06:41 UTC |  |
+| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 10 | 24 | 0.81 | 0.83 | -2.54c | 109.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 3 | 35 | 27 | 8 | 1.35 | 1.43 | +6.93c | 113.1 | 2026-11-01 06:41 UTC |  |
+| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 29 | 14 | 0.73 | 0.78 | -4.73c | 138.9 | 2026-11-01 06:41 UTC |  |
+| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 3 | 32 | 24 | 8 | 1.20 | 1.29 | +4.64c | 103.4 | 2026-11-01 06:41 UTC |  |
+| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 13 | 18 | 0.45 | 0.46 | -15.01c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 27 | 11 | 0.92 | 0.99 | -0.29c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 23 | 13 | 0.60 | 0.61 | -10.27c | 116.3 | 2026-11-01 06:41 UTC |  |
+| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 23 | 11 | 0.85 | 0.90 | -2.02c | 109.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 26 | 12 | 0.80 | 0.81 | -4.24c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 22 | 9 | 0.89 | 0.95 | -0.99c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 3 | 18 | 11 | 7 | 0.47 | 0.50 | -13.81c | 58.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 3 | 40 | 28 | 12 | 0.85 | 0.88 | -2.65c | 129.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.57 | 0.58 | -12.42c | 71.1 | 2026-11-01 06:41 UTC |  |
+| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 3 | 27 | 19 | 8 | 0.88 | 0.90 | -2.12c | 87.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 3 | 29 | 17 | 12 | 0.53 | 0.57 | -12.90c | 93.7 | 2026-11-01 06:41 UTC |  |
+| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 25 | 14 | 0.58 | 0.62 | -9.74c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.54 | 0.58 | -12.53c | 71.1 | 2026-11-01 06:41 UTC |  |
+| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 3 | 32 | 22 | 10 | 0.81 | 0.86 | -3.16c | 103.4 | 2026-11-01 06:41 UTC |  |
+| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 3 | 37 | 28 | 9 | 1.15 | 1.23 | +3.74c | 119.5 | 2026-11-01 06:41 UTC |  |
+| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 3 | 28 | 18 | 10 | 0.60 | 0.64 | -9.13c | 90.5 | 2026-11-01 06:41 UTC |  |
+| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 30 | 13 | 0.76 | 0.81 | -4.21c | 138.9 | 2026-11-01 06:41 UTC |  |
+| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 20 | 11 | 0.74 | 0.79 | -4.76c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 3 | 22 | 13 | 9 | 0.57 | 0.61 | -10.77c | 71.1 | 2026-11-01 06:41 UTC |  |
+| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 25 | 11 | 0.86 | 0.87 | -2.65c | 116.3 | 2026-11-01 06:41 UTC |  |
+| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 3 | 27 | 8 | 19 | 1.78 | 1.85 | +10.12c | 87.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 3 | 31 | 20 | 11 | 0.72 | 0.77 | -5.42c | 100.2 | 2026-11-01 06:41 UTC |  |
+| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 3 | 34 | 11 | 23 | 1.02 | 1.09 | +1.21c | 109.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 25 | 14 | 0.63 | 0.65 | -9.47c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 27 | 12 | 0.82 | 0.87 | -2.77c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 3 | 43 | 29 | 14 | 0.71 | 0.76 | -5.39c | 138.9 | 2026-11-01 06:41 UTC |  |
+| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 3 | 23 | 17 | 6 | 1.04 | 1.07 | +1.20c | 74.3 | 2026-11-01 06:41 UTC |  |
+| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 3 | 28 | 9 | 19 | 1.99 | 2.09 | +12.45c | 90.5 | 2026-11-01 06:41 UTC |  |
+| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 26 | 13 | 0.70 | 0.75 | -6.12c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 3 | 37 | 28 | 9 | 1.24 | 1.26 | +4.50c | 119.5 | 2026-11-01 06:41 UTC |  |
+| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 3 | 33 | 24 | 9 | 0.96 | 1.02 | +0.42c | 106.6 | 2026-11-01 06:41 UTC |  |
+| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 3 | 36 | 26 | 10 | 1.01 | 1.03 | +0.69c | 116.3 | 2026-11-01 06:41 UTC |  |
+| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 26 | 13 | 0.74 | 0.76 | -5.99c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 3 | 30 | 18 | 12 | 0.52 | 0.55 | -13.59c | 96.9 | 2026-11-01 06:41 UTC |  |
+| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 3 | 39 | 27 | 12 | 0.86 | 0.88 | -2.61c | 126.0 | 2026-11-01 06:41 UTC |  |
+| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 3 | 29 | 22 | 7 | 1.21 | 1.23 | +3.93c | 93.7 | 2026-11-01 06:41 UTC |  |
+| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 3 | 38 | 26 | 12 | 0.72 | 0.77 | -5.40c | 122.8 | 2026-11-01 06:41 UTC |  |
+| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 3 | 40 | 26 | 14 | 0.67 | 0.68 | -8.02c | 129.2 | 2026-11-01 06:41 UTC |  |
+| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 1 | 15 | 14 | 1 | 0.95 | 1.03 | +0.17c | 105.0 | 2026-11-01 06:41 UTC |  |
 
 ## History per candidate
 
 ### REF_GEN6_OIREL
 
 Evaluator `scalper.oirel:forward_eval`, source `candles`, frozen 2026-10-30T15:00:00Z. Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) when open interest over the 3 minutes before rose by more than 26.76% of its level at 360 s (the discovery quantile matched to the core's 86,300 count), fill at the next candle's ask, held. History: discovery n 298 PF 1.73, validation n 286 PF 1.71 at 10 contracts (FALS5 check 2, one try). Not independent of REF_GEN6_OICORE (59% to 80% shared trades). workers/FALS5_REGISTRATION.md, workers/FALS5_RESULT.md.
-Windows evaluated 132 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 4 on 2 days; zero-volume trades 0.
+Windows evaluated 158 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 4 on 2 days; zero-volume trades 0.
 PF at 1 contract 1.25, at 10 contracts 1.29, at 10 contracts with fees x1.2 1.27; net per contract +3.98c at 1, +4.45c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -99,18 +99,19 @@ PF at 1 contract 1.25, at 10 contracts 1.29, at 10 contracts with fees x1.2 1.27
 ### LADFADE_BTC
 
 Evaluator `scalper.ladfade:forward_eval`, source `candles`, frozen 2026-10-30T12:00:00Z. Bitcoin 15 minute windows opening at :15 and :30: when the hourly KXBTCD ladder leans 5c+ from 50/50 at the first minute, buy the side the 15 minute book overshot AWAY from if its ask is 3c+ below the ladder's chance, at the next candle's ask (30c to 70c), held. Ladder from the book recorder. Discovery and validation spent (post hoc); holdout read once in workers/LADFADE_RESULT.md. 1 try; workers/LADFADE_REGISTRATION.md.
-Windows evaluated 98 on 3 days; without the data the rule needs 46; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
-PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -38.20c at 1, -37.84c at 10.
+Windows evaluated 119 on 3 days; without the data the rule needs 51; evaluator errors 0. Trades 6 on 3 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -37.50c at 1, -37.13c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 1 | 0 | 1 | -44.8c | -44.8c | 0.00 |
 | 2026-10-31 | 4 | 0 | 4 | -144.4c | -189.2c | 0.00 |
+| 2026-11-01 | 1 | 0 | 1 | -33.6c | -222.8c | 0.00 |
 
 ### REF_GEN6_OICORE
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T03:00:00Z. Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest rose more than 86,300 contracts over the 3 minutes before, held to settlement, fill at the next candle's ask. History: discovery PF 2.28 (n 222), validation 1.85 (n 333, z 4.53). Forward days only; 1 try. Falsifier FALS4 running.
-Windows evaluated 180 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 2 days; zero-volume trades 0.
+Windows evaluated 206 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 2 days; zero-volume trades 0.
 PF at 1 contract 2.27, at 10 contracts 2.36, at 10 contracts with fees x1.2 2.33; net per contract +14.29c at 1, +14.81c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -121,7 +122,7 @@ PF at 1 contract 2.27, at 10 contracts 2.36, at 10 contracts with fees x1.2 2.33
 ### GEN6_B01
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [yes 180..180s | doi>8.63e+04 & m3>-0.25 | TP +20c stop none else hold]; fill at the next candle's ask. Discovery PF 2.81 (n 104), validation PF 1.90 (n 164), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 3 on 1 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 3 on 1 days; zero-volume trades 0.
 PF at 1 contract 3.13, at 10 contracts 3.24, at 10 contracts with fees x1.2 3.18; net per contract +24.87c at 1, +25.83c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -131,7 +132,7 @@ PF at 1 contract 3.13, at 10 contracts 3.24, at 10 contracts with fees x1.2 3.18
 ### GEN6_B02
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [both 180..180s | hour<=21 & xb_d2<=0.046 & doi>8.63e+04 | TP +8c stop none else sell 60s]; fill at the next candle's ask. Discovery PF 2.42 (n 106), validation PF 1.80 (n 133), C=10.
-Windows evaluated 132 on 3 days; without the data the rule needs 52; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
+Windows evaluated 144 on 3 days; without the data the rule needs 66; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
 PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -1.40c at 1, -0.50c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -141,7 +142,7 @@ PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00
 ### GEN6_B03
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [both 180..180s | doi>8.63e+04 | TP +5c stop -20c else hold]; fill at the next candle's ask. Discovery PF 2.41 (n 222), validation PF 1.73 (n 333), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 2 days; zero-volume trades 0.
 PF at 1 contract 1.78, at 10 contracts 1.88, at 10 contracts with fees x1.2 1.85; net per contract +8.81c at 1, +9.59c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -152,7 +153,7 @@ PF at 1 contract 1.78, at 10 contracts 1.88, at 10 contracts with fees x1.2 1.85
 ### GEN6_B04
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [both 180..180s | doi>8.63e+04 & xa_spr<=0.02 & rng5>0.14 | TP +20c stop none else hold]; fill at the next candle's ask. Discovery PF 2.06 (n 175), validation PF 1.68 (n 269), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 7 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 7 on 2 days; zero-volume trades 0.
 PF at 1 contract 0.71, at 10 contracts 0.74, at 10 contracts with fees x1.2 0.73; net per contract -4.20c at 1, -3.69c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -163,17 +164,18 @@ PF at 1 contract 0.71, at 10 contracts 0.74, at 10 contracts with fees x1.2 0.73
 ### GEN6_B05
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [no 180..180s | d3<=-0.08 & m1<=0 & vol<=1.11e+05 | TP +20c stop none else sell 60s]; fill at the next candle's ask. Discovery PF 1.60 (n 172), validation PF 1.66 (n 58), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 1 days; zero-volume trades 0.
-PF at 1 contract 0.10, at 10 contracts 0.12, at 10 contracts with fees x1.2 0.11; net per contract -7.22c at 1, -6.04c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 6 on 2 days; zero-volume trades 0.
+PF at 1 contract 0.05, at 10 contracts 0.05, at 10 contracts with fees x1.2 0.05; net per contract -13.68c at 1, -12.65c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-31 | 5 | 1 | 4 | -30.2c | -30.2c | 0.12 |
+| 2026-11-01 | 1 | 0 | 1 | -45.7c | -75.9c | 0.05 |
 
 ### GEN6_B06
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [yes 180..180s | d1<=0.1 & doi>8.63e+04 | TP +8c stop none else hold]; fill at the next candle's ask. Discovery PF 3.51 (n 111), validation PF 1.57 (n 162), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
 PF at 1 contract 2.37, at 10 contracts 2.52, at 10 contracts with fees x1.2 2.47; net per contract +12.68c at 1, +13.52c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -184,18 +186,19 @@ PF at 1 contract 2.37, at 10 contracts 2.52, at 10 contracts with fees x1.2 2.47
 ### GEN6_B07
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [yes 240..180s | m3>-0.08 & m5<=-0.24 | TP +8c stop none else hold]; fill at the next candle's ask. Discovery PF 1.72 (n 137), validation PF 1.45 (n 90), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 6 on 2 days; zero-volume trades 0.
-PF at 1 contract 0.27, at 10 contracts 0.29, at 10 contracts with fees x1.2 0.28; net per contract -12.18c at 1, -11.57c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 7 on 3 days; zero-volume trades 0.
+PF at 1 contract 0.23, at 10 contracts 0.25, at 10 contracts with fees x1.2 0.24; net per contract -12.59c at 1, -12.04c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 2 | 1 | 1 | +20.1c | +20.1c | 3.64 |
 | 2026-10-31 | 4 | 0 | 4 | -89.5c | -69.4c | 0.29 |
+| 2026-11-01 | 1 | 0 | 1 | -14.9c | -84.3c | 0.25 |
 
 ### GEN6_B08
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [both 240..180s | rng5<=0.273 & doi>8.63e+04 | hold]; fill at the next candle's ask. Discovery PF 2.14 (n 205), validation PF 1.43 (n 316), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 10 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 10 on 2 days; zero-volume trades 0.
 PF at 1 contract 0.89, at 10 contracts 0.94, at 10 contracts with fees x1.2 0.92; net per contract -1.44c at 1, -0.83c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -206,40 +209,42 @@ PF at 1 contract 0.89, at 10 contracts 0.94, at 10 contracts with fees x1.2 0.92
 ### GEN6_B09
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [no 180..180s | vol<=1.28e+05 & m1<=-0.0507 | TP +3c stop -20c else sell 60s]; fill at the next candle's ask. Discovery PF 1.55 (n 192), validation PF 1.42 (n 86), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 6 on 1 days; zero-volume trades 0.
-PF at 1 contract 0.77, at 10 contracts 0.94, at 10 contracts with fees x1.2 0.91; net per contract -1.52c at 1, -0.37c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 2 days; zero-volume trades 0.
+PF at 1 contract 0.35, at 10 contracts 0.40, at 10 contracts with fees x1.2 0.39; net per contract -6.94c at 1, -5.94c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-31 | 6 | 2 | 4 | -2.2c | -2.2c | 0.94 |
+| 2026-11-01 | 3 | 1 | 2 | -51.3c | -53.5c | 0.40 |
 
 ### GEN6_B10
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [both 240..180s | doi>8.63e+04 | hold]; fill at the next candle's ask. Discovery PF 2.19 (n 433), validation PF 1.41 (n 587), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 19 on 3 days; zero-volume trades 0.
-PF at 1 contract 1.52, at 10 contracts 1.61, at 10 contracts with fees x1.2 1.60; net per contract +4.84c at 1, +5.42c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 20 on 3 days; zero-volume trades 0.
+PF at 1 contract 1.50, at 10 contracts 1.60, at 10 contracts with fees x1.2 1.58; net per contract +4.47c at 1, +5.06c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 7 | 1 | 6 | -6.3c | -6.3c | 0.91 |
 | 2026-10-31 | 11 | 3 | 8 | +112.2c | +105.9c | 1.64 |
-| 2026-11-01 | 1 | 0 | 1 | -3.0c | +102.9c | 1.61 |
+| 2026-11-01 | 2 | 0 | 2 | -4.7c | +101.2c | 1.60 |
 
 ### GEN6_B11
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [no 180..180s | ask<=0.19 & xa_spr<=0.003 & d1<=-0.05 | TP +5c stop -5c else hold]; fill at the next candle's ask. Discovery PF 1.82 (n 110), validation PF 1.37 (n 93), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 8 on 2 days; zero-volume trades 0.
-PF at 1 contract 4.52, at 10 contracts 5.47, at 10 contracts with fees x1.2 5.31; net per contract +11.88c at 1, +12.56c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 9 on 3 days; zero-volume trades 0.
+PF at 1 contract 4.12, at 10 contracts 5.06, at 10 contracts with fees x1.2 4.92; net per contract +10.27c at 1, +10.97c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 3 | 1 | 2 | +47.3c | +47.3c | 15.33 |
 | 2026-10-31 | 5 | 1 | 4 | +53.2c | +100.5c | 5.47 |
+| 2026-11-01 | 1 | 0 | 1 | -1.8c | +98.7c | 5.06 |
 
 ### GEN6_B12
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [yes 180..180s | rng5>0.32 & hour>19 | TP +8c stop none else hold]; fill at the next candle's ask. Discovery PF 1.83 (n 102), validation PF 1.32 (n 72), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
 PF at 1 contract 0.65, at 10 contracts 0.67, at 10 contracts with fees x1.2 0.66; net per contract -5.92c at 1, -5.40c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -250,7 +255,7 @@ PF at 1 contract 0.65, at 10 contracts 0.67, at 10 contracts with fees x1.2 0.66
 ### GEN6_B13
 
 Evaluator `scalper.gen6:forward_eval`, source `candles`, frozen 2026-10-30T02:00:00Z. Bitcoin underdog (ask 5c to 50c at the signal), [no 180..180s | m1>-0.2 & hour>19 | TP +8c stop -20c else hold]; fill at the next candle's ask. Discovery PF 1.70 (n 173), validation PF 1.31 (n 129), C=10.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 6 on 2 days; zero-volume trades 0.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 6 on 2 days; zero-volume trades 0.
 PF at 1 contract 0.70, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.72; net per contract -3.37c at 1, -2.75c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -261,40 +266,42 @@ PF at 1 contract 0.70, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.72
 ### REF_BTC_UNDERDOG_180
 
 Evaluator `scalper.fwdeval:l1_like`, source `candles`, frozen 2026-10-30T02:00:00Z. The mirror of FALS3's finding (Bitcoin favourites at 50c to 85c are overpriced 2 to 3 minutes before the close: PF 0.77 on 2,576 windows, z -4.97): buy the cheap side whose ask is 15c to 49c at the candle ending 180 s before the close, held to settlement. History already read (UNDER1 found this side positive), so only forward days count; REV1 is the registered forward read of the related cheap-NO rule (2026-11-05). 1 try.
-Windows evaluated 184 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 56 on 2 days; zero-volume trades 0.
-PF at 1 contract 1.03, at 10 contracts 1.05, at 10 contracts with fees x1.2 1.04; net per contract +0.57c at 1, +0.99c at 10.
+Windows evaluated 210 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 62 on 3 days; zero-volume trades 0.
+PF at 1 contract 1.04, at 10 contracts 1.06, at 10 contracts with fees x1.2 1.05; net per contract +0.79c at 1, +1.20c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 25 | 6 | 19 | -206.1c | -206.1c | 0.65 |
 | 2026-10-31 | 31 | 13 | 18 | +261.8c | +55.7c | 1.05 |
+| 2026-11-01 | 6 | 2 | 4 | +18.5c | +74.2c | 1.06 |
 
 ### GEN7_B01
 
 Evaluator `scalper.gen7:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin cheap side (ask 5c to 50c at the signal), [cheap both 240..240s | npv1>0.281 & vol>1.32e+05 | sell at 60s]; npv1 = open interest change over the last minute divided by that minute's volume; fill at the next candle's ask. Discovery PF 3.28 (n 101), validation PF 1.80 (n 126), C=10.
-Windows evaluated 188 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 3 on 3 days; zero-volume trades 0.
-PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -8.03c at 1, -7.20c at 10.
+Windows evaluated 214 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 4 on 3 days; zero-volume trades 0.
+PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -6.65c at 1, -5.82c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-30 | 1 | 0 | 1 | -12.8c | -12.8c | 0.00 |
 | 2026-10-31 | 1 | 0 | 1 | -5.8c | -18.6c | 0.00 |
-| 2026-11-01 | 1 | 0 | 1 | -3.0c | -21.6c | 0.00 |
+| 2026-11-01 | 2 | 0 | 2 | -4.7c | -23.3c | 0.00 |
 
 ### GEN7_B02
 
 Evaluator `scalper.gen7:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin cheap side (ask 5c to 50c at the signal), [cheap both 300..240s | npv1>0.393 & doi5>9.78e+04 | TP +20c stop -20c else sell 60s]; npv1 = open interest change over the last minute divided by that minute's volume; fill at the next candle's ask. Discovery PF 1.75 (n 135), validation PF 1.71 (n 101), C=10.
-Windows evaluated 188 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 4 on 1 days; zero-volume trades 0.
-PF at 1 contract 0.17, at 10 contracts 0.19, at 10 contracts with fees x1.2 0.18; net per contract -14.55c at 1, -13.70c at 10.
+Windows evaluated 214 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 5 on 2 days; zero-volume trades 0.
+PF at 1 contract 0.16, at 10 contracts 0.18, at 10 contracts with fees x1.2 0.18; net per contract -12.56c at 1, -11.54c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
 | 2026-10-31 | 4 | 1 | 3 | -54.8c | -54.8c | 0.19 |
+| 2026-11-01 | 1 | 0 | 1 | -2.9c | -57.7c | 0.18 |
 
 ### REF_GEN6_OIDRIFT
 
 Evaluator `scalper.oidrift:forward_eval`, source `candles`, frozen 2026-10-30T01:00:00Z. Bitcoin underdog (ask 5c to 50c at the candle ending 180 s before the close) after open interest over the 3 minutes before rose above the 90th percentile of that change over the 30 UTC days before (earlier days only, 20+ days needed), fill at the next candle's ask, held. History validation n 67, PF 2.65 (FALS4 check 5, reproduced). Not independent of REF_GEN6_OICORE. 1 try; workers/OIDRIFT_REGISTRATION.md.
-Windows evaluated 188 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
+Windows evaluated 214 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 1 on 1 days; zero-volume trades 0.
 PF at 1 contract 0.00, at 10 contracts 0.00, at 10 contracts with fees x1.2 0.00; net per contract -44.00c at 1, -43.80c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
@@ -314,7 +321,7 @@ PF at 1 contract 0.60, at 10 contracts 0.61, at 10 contracts with fees x1.2 0.60
 ### REF_LATECAL_BTC
 
 Evaluator `scalper.fwdeval:l1_like`, source `candles`, frozen 2026-10-30T01:00:00Z. LATECAL's one chosen cell (Bitcoin, 90 to 60 s left, ask 0.95 to 0.98: 61 of 61 won on the recorder, NOT_ENOUGH_DATA; needs about 800 windows to clear the 97.7% break-even) tracked forward. Candles only: the nearest candle is the one ending 60 s before the close, so this approximates the recorder's 90 to 60 s cell. L1-family, held to settlement.
-Windows evaluated 188 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 11 on 2 days; zero-volume trades 0.
+Windows evaluated 214 on 3 days; without the data the rule needs 0; evaluator errors 0. Trades 11 on 2 days; zero-volume trades 0.
 PF at 1 contract 0.28, at 10 contracts 0.35, at 10 contracts with fees x1.2 0.35; net per contract -6.34c at 1, -5.65c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
