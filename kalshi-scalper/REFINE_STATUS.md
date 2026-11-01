@@ -27,6 +27,27 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 1, 2026, 3:55 PM CT: C3 (Dogecoin limit +1c) simulated on R6. Result: FAILS its registered kill rule on the current sample. No live change proposed.
+
+Owner picked C3 (via main, shadow read only). Method, fixed before the numbers: Dogecoin ladder-size orders (ordered 11 or more) that carry send timing (`sentAtMs`, only from Oct 31 about 3:09 AM UTC) joined to the R6 `book15r6` Dogecoin book rows (2 second polls, files through Nov 1 16:27Z). For each order, take the last book snapshot before Kalshi's answer (median 0.5 s before the send), and count the size resting at the bought side's price levels within the order's worst price, then within the worst price plus 1c. Each contract fills at the book level's own price, so the extra cost of +1c is the level actually reached, not a flat cent. Fees: 7% of price times (1 minus price), rounded up per order. Loss size: the 25c line (a loss costs price minus 0.24 a contract, the observed Dogecoin exit average of about 69c).
+
+Check that the model is sane before trusting it: of 30 joined orders, the pre-answer snapshot predicted fill or no fill correctly for 28 (19 fills and 9 no-fills right; 2 no-fills where the book showed size at the limit, so the real order was later than the snapshot). The post-answer snapshot is worse (5 fills it called empty), so the pre-answer one is used.
+
+Sample: 30 of 45 ladder-size orders joined (the rest have no send timing, or no R6 row at the time), over 1.69 days; 11 were no-fills.
+
+Result:
+- The +1c limit would have turned **4 of those 11 no-fills into fills** (13 contracts each at 94.5c, 96.3c, 96.5c, 97.9c) and added **2 contracts and 1 contract to two partial fills** (93.1c and 97.1c). Another 7 no-fills stay empty (the book moved more than 1c, or the size was not there; 2 of them the model could not explain). So +1c reaches about 36% of no-fills, close to the "third" I predicted.
+- Extra contracts: 57 in total, at an average price of **96.2c**. Two of the six extra fills are above 97c (97.9c and 97.1c), outside the band the entry rule judges on the seen price.
+- All six extra fills won on this sample, for **+$2.00** in total. That is 6 wins and no losses, which says nothing about the loss rate.
+- Expected value per extra contract, after the extra cent and fees, using the live exit loss size: **+1.21c at a 3.0% loss rate** (Dogecoin since it moved to the ladder size), **+0.07c at 4.5%** (all 176 Dogecoin fills, 8 losses), **-1.83c at 7.0%** (Dogecoin's 96 to 97c cell, 2 of 29). Break-even loss rate for a fill at 96.3c is 4.9%; at 97.9c it is 2.8%. Winning at 96 to 98c pays 2 to 4 cents; one stop-out erases 20 to 30 of them.
+- Fills added: 4 no-fill conversions in 1.69 days. Scaled to a week that is about 17, but the base is 4 events; the count is more safely read as 13% of orders (4 of 30), which at 70 to 100 Dogecoin orders a week is 9 to 13 extra fills a week, plus 1 or 2 contracts on partials.
+
+Against the registered rule ("dead if the simulated net per extra fill is under +0.5c a contract after the extra cent, or the cap on price removes the gain"): **net is +0.07c at the central loss rate, under the +0.5c bar; and the price cap removes the extra fills priced above 97c.** C3 is DEAD on this sample. It would be alive only if Dogecoin's loss rate at 95 to 98c is 3% or lower, which the 96 to 97c cell (7%) argues against. The no-fill share it was meant to fix is not free money: the fills that are missed are mostly the ones where the price ran up past the band's worth.
+
+What this does NOT show: 30 orders is small (6 convertible events), the book is Kalshi's top 5 levels, and R6 files lag by hours so the newest orders are missing. I will re-run it once at 100 joined orders as a confirm (about Nov 8 to 10), not as a new test; if the loss-rate bar stays at 4.9% or above it stays dead. No live probe is needed or proposed. Cost to N: 1 simulation with 3 loss-rate cases, about 3 tries, N about 728,683.
+
+The no-fill share (35%) is therefore mostly price moving away from the band, not a handling problem. C1, C2, C4, C5 stay queued, not scored.
+
 ### Nov 1, 2026, 3:15 PM CT: five ranked rule candidates for gold and Dogecoin (requested by main at the owner's direction; REGISTERED BEFORE ANY FORWARD SCORING; read only, nothing proposed live yet)
 
 Source for every number: nightly report, `hours=2160&orders=1`, gold and Dogecoin filled and settled orders, 391 fills (gold 215, Dogecoin 176), after fees. In-sample and descriptive: they are where the ideas come from, NOT evidence for them (README P1: history cannot count toward a band or filter variant). Every rule below is scored forward on orders placed after this entry's time, with the old rule's orders as the comparison. N tried for deflation: about 728,654 before, plus about 24 cells looked at to write these (10 price cells, 10 rise3 cells, 4 exit and size cuts) = about 728,680; Bonferroni bar stays about z 5.2, so none of these can pass on a few dozen orders and each is a CHEAP QUESTION, not a finding. Frequency stays a hard requirement for L1: current rate is about 148 fills a week (last 14 days, gold plus Dogecoin).
