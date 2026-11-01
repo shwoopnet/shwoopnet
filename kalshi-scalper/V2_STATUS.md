@@ -10,6 +10,13 @@
 
 - V2 discovers NEW strategies only. No new L1 or OICORE variants (filters, exits, sizing, entry timing, thresholds, fill models for live markets); any such idea goes to main, who passes it to the Live Strategy Refinement chat. Already registered OICORE forward rows keep running. RAINCAL, DERIBIT-IMPLIED, SPORTS-PRE, the recorders and the dated forward reads continue.
 
+## Recorders merged; scorers written (Nov 1, 5:00 PM CST)
+
+- Main merged RAINCAL #685, DERIBIT-IMPLIED #686, SPORTS-PRE #687 to main (710f9d7, about 3:20 PM CST). Delete the workflow file to stop one early; stop date 2026-12-31.
+- RAINCAL scorer: src/scalper/raincal.py (9ef6885, edbed87). DERIBIT-IMPLIED scorer: src/scalper/deribit_implied.py (cdb95af). Tests pass on synthetic data; count never opens results; read refuses before the registered date (RAINCAL 2027-01-01 18:00 UTC, DERIBIT 2027-01-01 00:00 UTC) and a second run. No real outcome data was looked at.
+- Ambiguities the workers resolved are listed in each module (RAINCAL: ties pass at exactly 8c, PF 1.2 and z 3 pass, midpoint date goes to the second half; DERIBIT: AMBIGUITIES list: tie rule, midpoint, clipping, OICORE skip). N_TRIED is a constant (728,698 / 728,694); update it before the read if the running count changed.
+- SPORTS-PRE scorer still being written.
+
 ## Now running (AUTO loop restarted 9:33 AM CT Oct 30 after a container restart killed it at 2:08 AM CT; check liveness with: ps -eo args | grep -c '^bash workers/autoscore_loop.sh') / Next / Waiting on
 
 - **Now running (7:25 PM):** workers GOLDFILL (gold resting-entry fill model), ESPN1 (ESPN in-play win probability vs Kalshi game markets); recorder R6 (recording, ends Nov 13); AUTO hourly loop (forward reads, forward ledger, nightly DRIFT, DOGEFILL, GOLDSLIP). Forward ledger now also holds the FALS3 mirrors REF_BTC_UNDERDOG_180 and REF_GOLD_UNDERDOG_180 (forward days only).
