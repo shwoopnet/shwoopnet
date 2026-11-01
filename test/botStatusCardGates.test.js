@@ -13,7 +13,7 @@ const DateStub = (nowMs) => Object.assign(function (...a) { return new RealDate(
 const FRI_EVE = RealDate.parse('2026-10-31T01:30:00Z'), TUE = RealDate.parse('2026-10-27T18:00:00Z');   // Friday 8:30 PM Central, Tuesday 1 PM Central
 const lib = (nowMs) => new Function('Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast',
   fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + block(/  var KAL_LOOKS = \[[\s\S]*?\n  \];\n/) + fn('kalshiNextEntry') + block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiPriceWatch') +
-  '; return { kalshiNextEntry, kalshiPriceWatch, kalshiGoldClosed };')(DateStub(nowMs), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + 's', null);
+  '; return { kalshiNextEntry, kalshiPriceWatch, kalshiGoldClosed };')(DateStub(nowMs), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + ' seconds ago', null);
 
 gates.SC1 = () => {
   // the card's markup: the ring, the health line, the price tile; no fold; the ids the one second tick writes to
@@ -61,11 +61,11 @@ gates.SC6 = () => {
   // the redraw reads only the relay data and never throws on empty data; the rendered tile names the verdict in words
   const el = { innerHTML: '' }, depth = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.83, 0.84), mk('KXDOGE15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };
   const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEscapedPriceCell') + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + fn('kalshiEscapedDepthRows') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
-  const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: (id) => (id === 'kalPrices' ? el : (id === 'kalDepth' ? depth : null)) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + 's', data, () => [], () => 'Gold');
+  const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: (id) => (id === 'kalPrices' ? el : (id === 'kalDepth' ? depth : null)) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + ' seconds ago', data, () => [], () => 'Gold');
   f();
   assert.ok(/Below the 88c to 97c band/.test(el.innerHTML) && /Inside the 88c to 97c band/.test(el.innerHTML) && /Inside the 5c to 50c band/.test(el.innerHTML), 'each market gets a verdict in words');
   assert.ok(/Depth at the touch/.test(depth.innerHTML) && /No book yet|resting/.test(depth.innerHTML), 'the depth tile is drawn with the prices');
-  assert.ok(/Read 14s ago/.test(el.innerHTML) && /open interest jump/i.test(el.innerHTML), 'the age of the read and the open interest caveat are shown');
+  assert.ok(/Read 14 seconds ago\./.test(el.innerHTML) && !/ago ago/.test(el.innerHTML) && /open interest jump/i.test(el.innerHTML), 'the age of the read (said once) and the open interest caveat are shown');
   const empty = { innerHTML: '' }; new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: () => empty }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '', (s) => s, null, () => [], () => 'Gold')();
   assert.ok(/No quote yet/.test(empty.innerHTML) && /Reading the markets/.test(empty.innerHTML), 'no data yet: says so');
 };

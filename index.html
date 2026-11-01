@@ -912,7 +912,10 @@
   .kal-meter > i{ display:block; height:100%; background:var(--paper); border-radius:5px; }
   .kal-meter.hot > i{ background:var(--loss); }
   .kal-console [data-card="status"]{ align-self:stretch; }
-  .kal-console [data-card="pnl"]{ align-self:stretch; }
+  .kal-console [data-card="pnl"]{ align-self:stretch; display:flex; flex-direction:column; }
+  /* The result chart takes the height the Bot status card beside it gives the row (the owner, Nov 1, 2026: "big gap below account results"). The box keeps the chart's own shape as its minimum (aspect-ratio set in the markup) and grows past it; the drawing stretches with it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
+  .kal-console [data-card="pnl"] #kalPnlBody{ flex:1 1 auto; display:flex; flex-direction:column; }
+  .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
   .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
   .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
@@ -1604,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Account result chart now grows to fill its card beside the taller Bot status card (no empty space below it), and the status card no longer says "ago ago"</li>
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
                   <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
                   <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
@@ -3028,7 +3032,7 @@
     for(var i = 1; i < points.length; i++){ path += ' H' + X(points[i].t).toFixed(1) + ' V' + Y(points[i].cum).toFixed(1); }
     path += ' H' + X(g.t1).toFixed(1);
     var grid = (yTicks || []).map(function(tk){ return '<line x1="' + g.L + '" x2="' + (g.W - g.R) + '" y1="' + Y(tk.v).toFixed(1) + '" y2="' + Y(tk.v).toFixed(1) + '" stroke="var(--border)" stroke-width="1" vector-effect="non-scaling-stroke"' + (tk.v === 0 ? ' stroke-dasharray="4 4" stroke-opacity="1"' : ' stroke-opacity=".55"') + '/>'; }).join('');
-    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" style="width:100%;height:auto;display:block">' + grid +
+    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" role="img" aria-label="Bot settled profit and loss over ' + points.length + ' trades, now ' + esc(fmt(last.cum)) + '" preserveAspectRatio="none" style="width:100%;height:100%;display:block">' + grid +
       '<path d="' + path + '" fill="none" stroke="var(--paper)" stroke-opacity="0.9" stroke-width="1.75" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>';
   }
   var kalshiPnlScrub = null;
@@ -3048,7 +3052,7 @@
     var ylab = yt.map(function(tk){ return '<span style="top:' + (g.Y(tk.v) / g.H * 100).toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
     var xlab = chartTimeTicks(t0, t1, 5).map(function(tk){ var left = g.X(tk.t) / g.W * 100; return '<span class="' + (left < 7 ? 'l' : (left > 93 ? 'r' : '')) + '" style="left:' + left.toFixed(1) + '%">' + esc(tk.label) + '</span>'; }).join('');
     return '<div class="kal-pnl-head ' + (net >= 0 ? 'kal-pos' : 'kal-neg') + '"><b>' + esc(sign + money(Math.abs(net))) + '</b>' + (pct ? '<span>' + esc(pct) + '</span>' : '') + '<small class="kal-pnl-when"></small></div>' +
-      '<div class="kal-plot">' + kalshiLineSvg(pts, esc, money, g, yt) + '<div class="kal-yaxis">' + ylab + '</div></div><div class="kal-xaxis">' + xlab + '</div>';
+      '<div class="kal-plot" style="aspect-ratio:' + g.W + ' / ' + g.H + '">' + kalshiLineSvg(pts, esc, money, g, yt) + '<div class="kal-yaxis">' + ylab + '</div></div><div class="kal-xaxis">' + xlab + '</div>';
   }
   // The page listens to the last 1,000 orders. A range that starts before the oldest of them (and the listener is full, so older ones exist) reads the orders from that time once, asking Firestore directly: about 1 read per order, so a year is a fraction of a cent, and it is not repeated for ten minutes.
   // The orders behind a long range (1M, 3M, YTD, 1Y, All): the older part read once from Firestore, plus the page's live listener for everything newer, so nothing is a stale copy. An order older than the oldest one the listener holds cannot change, so the
@@ -3641,7 +3645,7 @@ kalshiStatusTick();
     var depthEl = document.getElementById('kalDepth');
     if(depthEl){ var sizes = kalshiLastOrderSizes(kalshiAllOrders()); depthEl.innerHTML = '<div class="kal-st-lbl">Depth at the touch, against our order size</div>' + kalshiEscapedDepthRows(rows, sizes) + '<div class="kal-st-sub" style="margin-top:8px">Top of the book only. A big share of it is where orders tend to miss.</div>'; }
     el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + '</div>' +
-      '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + ' ago. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
+      '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + '. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
   }
   var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
 
