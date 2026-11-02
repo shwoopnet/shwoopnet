@@ -13,6 +13,8 @@ import math
 import os
 import sys
 import time
+import urllib.error
+import urllib.parse
 import urllib.request
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -208,18 +210,35 @@ def fetch() -> None:
     for tk, m in markets.items():
         if tk not in have:
             by[m["close"]].append(tk)
-    for i, (close, tks) in enumerate(sorted(by.items())):
-        try:
-            d = api._get("/markets/candlesticks", {"market_tickers": ",".join(tks), "start_ts": close - 420, "end_ts": close - LOOK_S, "period_interval": 1})
-            got = {x.get("ticker"): x for x in d.get("markets", [])}
-            for tk in tks:
-                cs = (got.get(tk) or {}).get("candlesticks", [])
-                have[tk] = [(c["end_period_ts"], pick(c.get("yes_bid")), pick(c.get("yes_ask")), api.f(c.get("volume_fp") or c.get("volume"))) for c in cs]
-        except Exception as e:
-            print("skip", close, str(e)[:80])
-        if i % 200 == 0:
-            cp.write_text(json.dumps(have)); print("candles", i, len(by), flush=True)
-        time.sleep(0.08)
+    closes = sorted(by)
+    groups = [closes[i:i + 4] for i in range(0, len(closes), 4)]   # four consecutive windows per request (rate limit)
+    pause = 0.3
+    for i, g in enumerate(groups):
+        tks = [t for c in g for t in by[c]]
+        lo, hi = g[0] - 420, g[-1] - LOOK_S
+        for attempt in range(12):
+            try:
+                req = urllib.request.Request(api.BASES[1] + "/markets/candlesticks?" + urllib.parse.urlencode({"market_tickers": ",".join(tks), "start_ts": lo, "end_ts": hi, "period_interval": 1}))
+                d = json.load(urllib.request.urlopen(req, timeout=30))
+                got = {x.get("market_ticker") or x.get("ticker"): x for x in d.get("markets", [])}
+                for tk in tks:
+                    close = markets[tk]["close"]
+                    cs = (got.get(tk) or {}).get("candlesticks", [])
+                    have[tk] = [(c["end_period_ts"], pick(c.get("yes_bid")), pick(c.get("yes_ask")), api.f(c.get("volume_fp") or c.get("volume"))) for c in cs if close - 900 < c["end_period_ts"] <= close - LOOK_S]
+                pause = max(0.25, pause * 0.9)
+                break
+            except urllib.error.HTTPError as e:
+                if e.code == 429:
+                    pause = min(pause * 1.3, 1.5); time.sleep(1 + attempt)
+                else:
+                    time.sleep(1 + attempt)
+            except Exception:
+                time.sleep(1 + attempt)
+        else:
+            print("skip", g[0], flush=True)
+        if i % 50 == 0:
+            cp.write_text(json.dumps(have)); print("candles", i, len(groups), "pause", round(pause, 2), flush=True)
+        time.sleep(pause)
     cp.write_text(json.dumps(have))
     lo = min(m["close"] for m in markets.values()) - 700
     hi = max(m["close"] for m in markets.values())
