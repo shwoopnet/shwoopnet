@@ -176,15 +176,20 @@ def fetch():
     (D / "catalog.json").write_text(json.dumps(fetch_catalog(first - timedelta(days=TRAIL_DAYS + 5), min(last, datetime.now(UTC)))))
     cf = D / "candles.json"
     cd = json.loads(cf.read_text()) if cf.exists() else {}
-    for s, ms in mk.items():
-        for m in ms:
-            if m["ticker"] in cd:
-                continue
-            t0 = ts(m["open_time"]) if s == "KXEARTHQUAKEM" else day_of(m["ticker"])
-            end = int((t0 + timedelta(hours=7)).timestamp())
-            cd[m["ticker"]] = api.candlesticks(s, m["ticker"], int((t0 - timedelta(minutes=5)).timestamp()), end)
-            if len(cd) % 25 == 0:
-                cf.write_text(json.dumps(cd))
+    # one batch request per quake day (up to 100 tickers share a time range); the monthly markets one by one
+    byday = {}
+    for m in mk["KXBIGGESTQUAKE"]:
+        if m["ticker"] not in cd:
+            byday.setdefault(day_of(m["ticker"]), []).append(m["ticker"])
+    for d, tk in byday.items():
+        got = api.batch_candlesticks(tk, int((d - timedelta(minutes=5)).timestamp()), int((d + timedelta(hours=7)).timestamp()))
+        for t in tk:
+            cd[t] = got.get(t, [])
+        cf.write_text(json.dumps(cd))
+    for m in mk["KXEARTHQUAKEM"]:
+        if m["ticker"] not in cd:
+            t0 = ts(m["open_time"])
+            cd[m["ticker"]] = api.candlesticks("KXEARTHQUAKEM", m["ticker"], int((t0 - timedelta(minutes=5)).timestamp()), int((t0 + timedelta(hours=7)).timestamp()))
     cf.write_text(json.dumps(cd))
     print("fetched", {s: len(v) for s, v in mk.items()}, "candle sets", len(cd))
 

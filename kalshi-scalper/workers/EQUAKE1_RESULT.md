@@ -1,0 +1,13 @@
+# EQUAKE1 result (2026-11-02; registration `workers/EQUAKE1_REGISTRATION.md`, commit 98b39fe, completed in 9acb248; scorer a1f5378 pushed before the run)
+
+Run once on all settled history (`python -m scalper.equake1 run`, raw lines in `data/equake1_result.txt`). Cost: fee 7% x C x p x (1-p) rounded up per order, C = 10, taker at the ask, fees x1.2 shown. N 728,700, deflated z bar 5.27.
+
+**Angle A, KXBIGGESTQUAKE (daily world maximum, 61 days from 2026-09-02): NOT_ENOUGH_DATA.** 469 universe strikes (model fair 0.05 to 0.95), 414 with a valid quote in the entry half hour, **39 trades on 12 days (150 needed)**. Discovery 1 trade (PF 0.00), validation 3 trades (PF 0.92, x1.2 0.91), neither near the 50 trade minimum. Pooled 39 trades, PF 0.60, mean -10.39c, day-clustered z -0.92 (information only, decides nothing). **Brier: model 0.1931 against the market mid 0.1817, so the base rate does NOT beat the market** (the numeric prediction fails on its first half). The PF 1.5 in each of three windows prediction cannot be scored: too few trades.
+**Angle B, KXEARTHQUAKEM (monthly, 16 markets): NOT_ENOUGH_DATA.** 11 universe strikes, 11 quoted, 0 trades. Model Brier 0.0972 against the market's 0.2500 on those 11, a note only (11 markets, one or two months, no trade).
+
+## Disclosure (a flaw in the run, found after it)
+The `pooled` line includes the frozen holdout's trades (the scorer excluded the holdout from the per-window lines but not from the pooled one). So the registered holdout freeze was not kept in the strict sense: its pooled contribution (35 of the 39 trades, most of the days fall in the last third because the early days had few quotes) was printed. This changes no verdict, since NOT_ENOUGH_DATA turns on the trade count (39 under 150) and the holdout PF line itself was not printed. A forward read must use a scorer whose pooled line leaves out the holdout until the earlier windows pass.
+
+## Forward read and recorder
+Rate: 39 trades in 61 days is about 0.64 a day. 150 trades needs about 111 more, about 173 days: **earliest forward read about 2027-04-25 (about 25 weeks)**, rerunning the same scorer on markets settled after 2026-11-02 only. The three windows then hold about 50 trades each only if they accrue evenly. No new recorder is needed: Kalshi keeps candles of settled markets (this run read 414 quotes from them). If candles were ever dropped, a recorder would be: poll KXBIGGESTQUAKE at 00:00 to 00:30 UTC each day for the open markets, store bid, ask, sizes per strike once a minute; the USGS catalog is public and complete. The model's Brier loss to the market suggests a forward test is a low priority (prior of a pass was 3%).
+Not L1, not OICORE; no live code touched. NOT_ENOUGH_DATA is not a pass.
