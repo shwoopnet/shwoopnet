@@ -27,6 +27,14 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 4:45 AM CT (10:45Z): second Dogecoin loss at ladder size, and the largest single loss on record (-$11.47)
+
+Order 2026-11-02T10:09Z, KXDOGE15M-26NOV020515-15, NO side, 15 contracts (base 12 plus add-on 3), price 94.2c, early sell at the 25c line, **-$11.47** (76c a contract). It is the largest single loss in the whole record (the previous worst was -$9.58, gold, 13 contracts), 1.5% of a $779 base or 2.1% of a $540 base. It fits the table in `REFINE_SCALE_STEP_REVIEW.md` (typical early sell 74c a contract, so about $11.1 at 15 contracts), so this is the stated risk showing up, not a surprise. Its three minute move (`rise3`) was -0.9c, so C2 (skip negative rise3) would have skipped it, one observation; C2 is not selected and I am not scoring it. Start lag 4.2 s, depth at the limit was 6 contracts against 15 ordered (share of depth 2.5), a thin book.
+
+Dogecoin at ladder size since Oct 30 8 PM CT: 64 orders, 43 filled, 21 no-fill (33%), **2 losses in 43 fills (4.7%)**, fills net +$11.35 (it was +$21.08 before this loss). Against the Dogecoin review rule (go back to fixed size if the last 100 settled orders lose more than 8% or net under +0.5c a contract): 43 settled, net +$11.35 is about +1.6c a contract, loss rate 4.7%, well inside both lines; the rule reads at 100 settled (about 3 more weeks at the current rate).
+
+12% stop: this loss is about 2% of base and nowhere near the stop. No kill rule hit. Nothing for main to decide; informing only.
+
 ### Nov 1, 2026, 5:55 PM CT (2026-11-01T22:55Z): C1 REGISTERED for forward shadow scoring (skip 90 to 92c entries). Nothing live. Scored ONLY on orders placed after this time.
 
 Owner picked C1 (via main). This entry fixes everything before a single forward order is read. The 391 fills that suggested the idea are NOT part of the test.
