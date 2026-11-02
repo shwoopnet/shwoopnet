@@ -27,6 +27,39 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 15:50 PM CT (21:50Z): C7 RESULT: L1's own rule on 11 untested 15 minute series. NO SERIES MEETS THE PASS BAR. Silver is the only near-miss. History only; nothing live.
+
+Registration: the 16:00Z entry above (fixed before any outcome was read). History: up to 62 days (Sep 1 to Nov 2) of public 1 minute candles; metals Palladium and Platinum and the forex pairs list only 40 to 46 days (Kalshi lists them from later). All losses in this engine are early sells at the 25c line (settle-against is 0.0% everywhere except Palladium 0.1% and Platinum 0.1%), as in the live record.
+
+**Calibration (same code, gold and Dogecoin against their live results):** gold sim +1.42c a contract [+0.15, +2.68] against +2.3c live; Dogecoin +1.10c [+0.09, +2.11] against +2.8c live. Differences of 0.9c and 1.7c, inside the 2c void line: the simulator is usable, a little pessimistic (the candle close proxy catches about 1.5 times more early sells than the live 10 second watcher, 5.9% and 6.2% against 4.1%). Note the pass bar I set (net at least +1.0c in both halves) is stricter than gold's own simulated result (+0.65c in the first half), so a series can miss the bar and still look like gold.
+
+**Per series (ranked by cost, spread ascending then touch size descending):**
+| Series | Cost screen (spread, touch size) | In-band windows (per week) | Lost share | Net per contract [95%] | Halves | Loss at 12 / 16 contracts | Pass bar |
+|---|---|---|---|---|---|---|---|
+| Silver | PASS (1.0c, 173) | 1,104 (125) | 6.5% | +1.09c [-0.25, +2.43] | +0.56c / +1.63c | $9.98 / $13.30 | no |
+| HYPE | fail (1.0c, 88) | 1,862 (210) | 8.1% | -0.59c [-1.71, +0.54] | -0.33 / -0.84 | $9.84 / $13.12 | no |
+| BNB | fail (1.0c, 47) | 1,617 (183) | 7.7% | -0.44c [-1.63, +0.75] | -0.68 / -0.21 | $9.96 / $13.28 | no |
+| Zcash | fail (1.4c, 25) | 1,734 (196) | 8.7% | -1.19c [-2.40, +0.03] | -2.05 / -0.33 | $9.98 / $13.30 | no |
+| NEAR | fail (2.0c, 82) | 1,796 (203) | 8.4% | -1.00c [-2.15, +0.16] | -1.36 / -0.64 | $9.81 / $13.08 | no |
+| Copper | fail (2.0c, 18) | 1,238 (140) | 7.3% | -0.27c [-1.59, +1.06] | +0.22 / -0.75 | $9.98 / $13.30 | no |
+| EURUSD | PASS (2.0c, 562) | 739 (130) | 9.5% | -2.47c [-4.43, -0.50] | -4.04 / -0.89 | $10.20 / $13.60 | no |
+| GBPUSD | PASS (2.0c, 562) | 720 (127) | 10.6% | -3.01c [-5.09, -0.93] | -6.63 / +0.61 | $10.11 / $13.48 | no |
+| USDJPY | PASS (2.0c, 562) | 776 (137) | 12.8% | -5.48c [-7.67, -3.29] | -7.42 / -3.55 | $10.24 / $13.65 | no |
+| Platinum | fail (3.0c, 61) | 717 (110) | 7.1% | -0.08c [-1.83, +1.67] | -1.02 / +0.86 | $10.12 / $13.49 | no |
+| Palladium | fail (3.0c, 44) | 720 (110) | 7.2% | +0.00c [-1.77, +1.77] | -1.49 / +1.49 | $10.17 / $13.56 | no |
+
+Trading around the clock: every series has windows in all 24 UTC hours on weekdays. Crypto series trade 7 days a week; metals and forex trade Monday to Friday plus a short Sunday evening and (metals) Friday evening reopening: metals have 51 to 54 windows on Saturday/Sunday combined against about 800 on a weekday, Palladium and Platinum and the three forex pairs have 0 on Saturday. The forex touch size (562 contracts on all three) is one repeated number in my 16 samples: a market maker quote of the same size on all three, so treat it as 'deep' but not as a measured depth.
+
+**Registered checks:**
+- Cost screen predicted at most 3 passes; **4 passed** (Silver and the three forex pairs). Per the registration the screen is therefore too loose: it let through three pairs that lose 2.5c to 5.5c a contract, because a 2.0c spread sits right at the 2c limit. A tighter screen (spread under 2c) would leave Silver alone.
+- Pass bar: **0 of 11** (none has net at least +1.0c in both halves with the lower bound above zero). Expected passes from noise alone across the 11, under the no-edge-at-quoted-price null: **0.29**. Silver's first half (+0.56c) and its interval lower bound (-0.25c) are what stops it.
+- Forex: all three negative with intervals clear of zero (EURUSD, GBPUSD, USDJPY): 10% to 13% of in-band windows end in an early sell, against 6% for gold and Dogecoin. They are the opposite of a lead.
+- Crypto (HYPE, BNB, Zcash, NEAR): net -0.4c to -1.2c, lost share 8% to 9%: the rule does not work as well on the new altcoins as on Dogecoin; touch sizes 25 to 88 contracts (below 100 on all four) so a 12 to 15 contract order would be 14% to 50% of the touch.
+- Metals: Copper, Palladium and Platinum have thin books (18 to 61 contracts at the touch) and spreads of 2 to 3c; Silver is the exception (1.0c spread, 173 contracts) and is the only series with a result close to gold's.
+
+**What this means:** no series qualifies for a forward shadow read under the registered bar. **Silver** is worth naming: simulated net +1.09c (gold +1.42c), lost share 6.5% (gold 5.9%), 125 in-band windows a week (gold 133), a 1.0c spread and a touch deeper than Dogecoin's. It is a near-twin of gold in this engine, and that is the only reason it is a candidate for a watch, not a finding; its interval includes zero. Two cautions before anyone proposes it: (1) silver and gold move together, so a Silver order in the same window as a gold order adds the same risk once more against the 5.5% window cap and the 12% stop (the 'one window, one limit' rule); (2) it would add about 125 in-band windows a week, about as many as gold itself, so it is a frequency lever, but also a doubling of metals exposure.
+**Tries:** the 36 registered. N about 728,821 after the C6/C8 counts (728,785 + 36).
+
 ### Nov 2, 2026, 3:10 PM CT (21:10Z): third Dogecoin ladder loss; C1's first forward loss; trading resumed after the switch-off
 
 **Trading resumed.** The bot placed no L1 order from 12:54:03Z to 20:09:06Z and no OICORE order from 05:27:03Z to 19:27:03Z Nov 2 (the owner saw "Order switch OFF" on the Bot page after deploying #690, then redeployed). OICORE's first order after the gap was 19:27:03Z (KXBTC15M-26NOV021430-30, 10 contracts, filled), L1's first was 20:09:06Z (Dogecoin, 15 contracts, 91.2c, filled). The report carries no skip reasons, so I could not say why from here; main was told at 13:45Z (wrongly, that orders looked normal: they had already stopped at 12:54Z and I read a 3.6 hour gap as ordinary), again at 16:44Z, 19:03Z and 19:58Z with the evidence, and at 20:14Z when orders came back. Lesson for the watch: an L1 gap past 3 hours on a weekday morning with the market in band is a flag, not a note.
