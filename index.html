@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Deploy scripts: the order switch is now checked in the project env file too (it overrides the main one), and the Bot page's switch reader is deployed with the bot; this fixes the "Order switch OFF" that stopped orders after the Nov 2 deploy</li>
                   <li>Bot page: under the Loss stop, each strategy's own stop used (L1 and OICORE), now that the bot judges each on its own orders; percentages only</li>
                   <li>Bot page: a warning (Bot status and the bell) when Dogecoin's last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract, your written review rule; it only tells you, nothing changes by itself</li>
                   <li>Bot: L1 and OICORE now each have their own loss stop, measured on their own orders (a profitable OICORE can no longer hide an L1 loss, and each strategy is checked on its own record); the account stop over both is unchanged, and no number changed</li>
