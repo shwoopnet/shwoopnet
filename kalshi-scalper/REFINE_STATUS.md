@@ -27,6 +27,27 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 15:53 PM CT (21:53Z): C9 REGISTERED BEFORE COUNTING: forward shadow read of L1's own rule on SILVER (KXSILVER15M). Public candles only, no code, no change to orders. Counts windows that close after 22:00Z Nov 2.
+
+Requested by main at the owner's direction (approved). Silver was the only near-miss in C7 (+1.09c a contract, lost share 6.5%, 125 in-band windows a week, 1.0c spread, 173 contracts at the touch).
+
+**Rule (exactly as used in C7):** at the 1 minute candle that ends 360 s before the close, buy the side priced 0.88 to 0.97 (YES at the YES ask close, NO at 1 minus the YES bid close); hold; early sell at the first later 1 minute candle whose bid close for the bought side is 0.25 or lower, at that bid close; fees 7% x price x (1 minus price) on entry and on an exit. **Tightened cost screen, as I said I would:** spread under 2c AND at least 100 contracts at the touch. Silver passes (1.0c, 173). The screen is fixed for this read; if Silver's spread or touch drifts out of it I say so.
+
+**Overlap with gold and Dogecoin, from the 62 day history (descriptive, computed before counting):**
+- 49% of Silver's in-band windows (546 of 1,104) are also in band for gold, 32% (354) for Dogecoin, 17% (187) for all three. 46% of gold's in-band windows have Silver in band as well.
+- **Losses cluster:** in the 546 shared Silver and gold windows, gold lost 27 and Silver lost 27; **9 of gold's 27 losses (33%) coincided with a Silver loss**, against 3.5% for Silver losing when gold did not. A gold loss would come with a Silver loss a third of the time, so adding Silver adds risk that is NOT independent.
+- **The shared 5.5% window cap (limit = 5.5% of the sizing base):** at 12 or 15 contracts each, gold + Silver cost $22 to $28 in a window, under the cap at either base ($29.7 at a $540 base, $42.8 at $779), so the cap would never have cut Silver alone with gold. With Dogecoin as well (three orders, 187 windows, 17% of Silver's), the cap at $540 is exceeded in all 187 (cost $33 to $42 against $29.7), so at that base Silver would crowd out or shrink the third order in about one Silver window in six; at $779 the cap is exceeded in 0 windows at 12 contracts and 16 at 15 contracts. The 12% stop (about $65 to $93) is more than a typical three-way loss only if more than 4 to 6 orders in a row stop out, but a three-way loss window (gold + Silver + Dogecoin all stopping) would cost $30 to $42, about half of the $540-base stop. In history, in those 187 three-way windows, all three lost together 0 times and any two lost together 5 times.
+
+**Forward sample size:** 400 in-band Silver windows (about 3.2 weeks at 125 a week). A look at 200 (about 1.6 weeks). Read the lost share first; the net per contract is too noisy to confirm anything in weeks: its standard error is about 1.4c at 250 windows, 1.1c at 400, and 0.5c needs about 1,900 windows (15 weeks). So this read can KILL Silver quickly if it is clearly worse than gold, but it can only say "consistent with gold" about profit, not prove it.
+
+**Prediction (stated before):** over 400 forward in-band windows, lost share at most 8% (history 6.5%; the break-even loss share in this engine is near 8%) and net per contract at least +0.5c (history +1.09c; the simulator is about 1 to 1.7c more pessimistic than live). Silver's loss rate in windows shared with a gold in-band window is expected to stay near the history 5% when gold wins and 33% when gold loses.
+
+**Kill rules:** at 200 windows, dead if the lost share is above 12% or the net per contract is below -2.0c. At 400 windows, dead if the lost share is above 10% or the net per contract is below -1.0c. If neither kill nor the prediction, the read is inconclusive and extends by 400 windows (a second look, counted).
+
+**Cost to N:** 1 registered test (1 series, 2 looks) = about 3 tries, N about 728,824. A pass here earns a PROPOSAL to the owner (Silver as a second metals market under the same window cap, size, 12% stop and 25c exit), never anything live from me. If proposed, the correlation above must be weighed: adding Silver raises the number of windows with an order from about 1.0 to about 1.5 a window for gold (46% of gold windows) and doubles the loss in the 33% joint cases.
+
+**Counting:** `c9_fwd.py` (scratchpad) reads each newly settled Silver (and gold, for the overlap) window once from the public candles and prints the read; run each wake. Counting starts with the first window that closes after 22:00:00Z Nov 2. Nothing else changes.
+
 ### Nov 2, 2026, 15:50 PM CT (21:50Z): C7 RESULT: L1's own rule on 11 untested 15 minute series. NO SERIES MEETS THE PASS BAR. Silver is the only near-miss. History only; nothing live.
 
 Registration: the 16:00Z entry above (fixed before any outcome was read). History: up to 62 days (Sep 1 to Nov 2) of public 1 minute candles; metals Palladium and Platinum and the forex pairs list only 40 to 46 days (Kalshi lists them from later). All losses in this engine are early sells at the 25c line (settle-against is 0.0% everywhere except Palladium 0.1% and Platinum 0.1%), as in the live record.
