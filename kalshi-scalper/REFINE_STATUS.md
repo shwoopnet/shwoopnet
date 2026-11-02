@@ -27,7 +27,7 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
-### Nov 2, 2026, 9:55 AM CT (14:55Z): C6 REGISTERED BEFORE ANY SCORING: open interest rise as a SKIP on L1 entries (gold, Dogecoin). History test only; no forward scoring until C1 finishes. Nothing live.
+### Nov 2, 2026, 8:35 AM CT (14:35Z; the first version of this heading said 9:55 AM, a clock slip, fixed): C6 REGISTERED BEFORE ANY SCORING: open interest rise as a SKIP on L1 entries (gold, Dogecoin). History test only; no forward scoring until C1 finishes. Nothing live.
 
 Source of the idea: the owner, via main ("use an open-interest condition like OICORE's, but as a SKIP on L1 entries, to avoid favourites that flip"). Checked against what is known: V2's EXITOI-G (open-interest exit for L1) was falsified pooled; V2's NEWH3 on Bitcoin found FALLING open interest 3 to 6 minutes before the close marked failing favourites (opposite direction, lead only). Neither tested a RISING open interest skip at entry on gold or Dogecoin. 16 of L1's 18 live losses are early sells at the 25c line, so I score the early sell and the settle-against separately and name the combined one.
 
