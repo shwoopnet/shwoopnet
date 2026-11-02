@@ -175,7 +175,7 @@ def okx_klines(inst: str, lo_s: int, hi_s: int) -> dict:
         u = f"https://www.okx.com/api/v5/market/history-candles?instId={inst}&bar=1m&limit=100&after={after}"
         for i in range(8):
             try:
-                d = json.load(urllib.request.urlopen(u, timeout=30))
+                d = json.load(urllib.request.urlopen(urllib.request.Request(u, headers={"User-Agent": "lag15-research/1.0"}), timeout=30))
                 break
             except Exception:
                 time.sleep(1.5 * (i + 1))
