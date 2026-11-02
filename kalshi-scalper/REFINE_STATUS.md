@@ -27,6 +27,14 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 3:10 PM CT (21:10Z): third Dogecoin ladder loss; C1's first forward loss; trading resumed after the switch-off
+
+**Trading resumed.** The bot placed no L1 order from 12:54:03Z to 20:09:06Z and no OICORE order from 05:27:03Z to 19:27:03Z Nov 2 (the owner saw "Order switch OFF" on the Bot page after deploying #690, then redeployed). OICORE's first order after the gap was 19:27:03Z (KXBTC15M-26NOV021430-30, 10 contracts, filled), L1's first was 20:09:06Z (Dogecoin, 15 contracts, 91.2c, filled). The report carries no skip reasons, so I could not say why from here; main was told at 13:45Z (wrongly, that orders looked normal: they had already stopped at 12:54Z and I read a 3.6 hour gap as ordinary), again at 16:44Z, 19:03Z and 19:58Z with the evidence, and at 20:14Z when orders came back. Lesson for the watch: an L1 gap past 3 hours on a weekday morning with the market in band is a flag, not a note.
+
+**Third Dogecoin loss at ladder size:** 20:54:08Z, YES side, 15 contracts at 90.4c, early sell, **-$5.51** (37c a contract: a smaller loss than the earlier two because the sale filled well above the 25c line; the order record carries only the result). Dogecoin at ladder size since Oct 30 8 PM CT (130 hour window): 74 orders, 49 settled fills, **3 losses (6.1%)**, net **+$8.93** (+1.37c a contract). Against the Dogecoin review rule (last 100 settled lose more than 8% or net under +0.5c a contract): at 49 of 100, 6.1% and +1.37c, inside both lines, closer than it was yesterday (4.7% and +1.6c).
+
+**C1 (skip 90 to 92c), forward:** this loss is in the cell (price 0.904). Forward cell fills since 22:55Z Nov 1: 10 settled, **1 loss**, net +$5.27 (it was 9 fills, 0 losses, +$10.78). Early kill at 40 needs zero losses so it can no longer fire; the read stays at 80 settled cell fills. At 10 of 80 the loss rate 1 in 10 says nothing yet. Nothing for main to decide.
+
 ### Nov 2, 2026, 11:15 AM CT (17:15Z): C8 forward count STARTED (main, at the owner's direction, approved)
 
 Counting Dogecoin windows that close after 2026-11-02T17:10Z, from public candles, no code, no change to orders; registration as written in the 17:10Z entry (skip arm = open interest rise under 755.12 contracts). `c8_fwd.py` (scratchpad) reads each newly settled Dogecoin window once, applies the same engine as C6 and prints the low arm against the rest; first run: 0 windows read (none had settled yet). Nothing else changes.
