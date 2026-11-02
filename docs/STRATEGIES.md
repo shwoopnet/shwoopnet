@@ -24,6 +24,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **Risk rules.**
 - Window limit: money at risk in one 15 minute window, across strategies, is at most 5.5% of the sizing base.
+- Each strategy also has its own stop at the same 12%, measured on its own orders only (since Nov 2, 2026), and the combined 12% stop over both backs them up.
 - Loss stop: if the bot's orders over the last 24 hours are down 12% of the sizing base (open orders counted as lost, add-on profit excluded), the bot stops itself and stays off until you restart it.
 - It is blocked from trading the opposite side of a contract another strategy holds (the direction lock).
 
@@ -56,7 +57,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **Risk rules.**
 - Dollar caps scale with the sizing base: one order 1% (at most $20), one window 2% ($40), all open orders 3% ($60), one day 2% ($20), lifetime 6% ($60).
-- Shares the 5.5% window limit and the 12% loss stop with L1 today (separating them is proposed).
+- Shares the 5.5% window limit with L1. Has its own 12% loss stop on its own orders (since Nov 2, 2026), plus the combined account stop at the same 12%.
 - Kill rules (latch off, only a reviewed edit re-arms): 18 losses in a row, or net below -$6 after 40 fills.
 
 **Record.**
@@ -80,5 +81,5 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 | Win rate | about 92% to 95% | about 28% to 30% |
 | Typical win and loss | win about 6c a contract, loss about 66c (early sell) | win about 3 to 4 times cost, loss the whole premium (6c to 50c) |
 | Size | ladder: $43 per contract, +1 per 3 days, add-on, ceiling 40 / 50 | fixed 10 |
-| Own stop | no (shared 12%) | kill rules only (shared 12%) |
+| Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) |

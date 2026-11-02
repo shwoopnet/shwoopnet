@@ -29,9 +29,9 @@ Make money on Kalshi without having to watch it. One bot trades for you. The pla
 | Job | In plain words | Done when |
 |---|---|---|
 | Render and Alpaca (decided 2026-10-26) | The equities server was suspended. It cost nothing on Render but its Firestore reads from outside Google cost about $15 a month in data transfer | Billing, SKU report: data transfer out near zero within two days |
-| Read the 10 minute entry | Bitcoin, XRP and natural gas now enter earlier. Orders are tagged `10m`. Few markets are in the band at 10 minutes, so this fills slowly | FWD8 reads at 60 filled orders per series or 2026-12-01 |
-| Read the probes | AUD/USD, USD/CAD and gas, one contract each, plus the drop rule | FWD5 reads at 100 orders per group or 2026-12-01 |
-| Gold first, forward scoreboard | Gold earns; the others have to earn the ladder back from their own live record (150 settled trades, a result above +0.5c in both halves) | Rules already written, reads as the trades arrive |
+| Read the 10 minute entry | XRP and natural gas were the only 10 minute entries (orders tagged `10m`) and are both paused, so there is nothing new to read unless they are unpaused. Bitcoin returned to the 6 minute look on 2026-10-23 | Only the orders already placed can be read |
+| Read the probes | AUD/USD, USD/CAD and gas are paused (2026-10-28) and off the live list (2026-10-30), with no orders since, so there is nothing to read | Only the orders already placed can be read |
+| Gold first, forward scoreboard | Gold earns. Dogecoin was put on gold's ladder on 2026-10-30; the other markets are paused, so none has to earn the ladder back now | Dogecoin's review rule: back to a fixed size if its last 100 settled orders lose more than 8% or net under +0.5c a contract |
 | Maker (resting) orders | Fees are about half the edge. Test resting orders live at one contract, as their own pull request with a cancel path | Only after real fills come in on the probes |
 | US500 perpetuals (parked) | Different product, high leverage, not a fit for an anti-degen site | Only if you ask. A research recorder already logs Kalshi's perps hourly to a data branch |
 
