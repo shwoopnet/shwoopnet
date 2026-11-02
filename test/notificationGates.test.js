@@ -16,7 +16,8 @@ function fnSource(name) {
   }
   throw new Error('unbalanced ' + name);
 }
-const f = new Function("var KAL_TZ = 'America/Chicago';\n" + ['kalshiMarketName', 'kalshiOrderPnl', 'kalshiCloseFromTicker', 'kalshiNotifFeed', 'kalshiNotifUnread', 'kalshiCriticalNow'].map(fnSource).join('\n') +
+const dogeConsts = /  var KAL_DOGE_LADDER_FROM[^\n]*\n/.exec(html)[0];   // the Dogecoin review's constants, read by kalshiNotifFeed through kalshiDogeReview
+const f = new Function("var KAL_TZ = 'America/Chicago';\n" + dogeConsts + ['kalshiMarketName', 'kalshiOrderPnl', 'kalshiCloseFromTicker', 'kalshiDogeReview', 'kalshiDogeReviewText', 'kalshiNotifFeed', 'kalshiNotifUnread', 'kalshiCriticalNow'].map(fnSource).join('\n') +
   '\nreturn { kalshiCloseFromTicker, kalshiNotifFeed, kalshiNotifUnread, kalshiCriticalNow };')();
 const at = (iso) => Date.parse(iso);
 const NOW = at('2026-10-24T20:00:00Z');
