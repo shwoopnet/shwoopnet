@@ -27,7 +27,7 @@ gates.D2 = () => {
   const dir = scratch();
   const out = run(dir);
   assert.strictEqual(fs.readFileSync(path.join(dir, 'functions', '.env'), 'utf8'), 'KALSHI_LIVE_ENABLED=on\n', 'a fresh clone gets the order switch line, so the deploy cannot turn the bot off');
-  assert.ok(/\[dry run\] .*deploy --only functions:kalshiLiveArmed,functions:kalshiBooks --project shwoopnet/.test(out), 'it deploys exactly the bot and the read-only relay to the shwoopnet project');
+  assert.ok(/\[dry run\] .*deploy --only functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount --project shwoopnet/.test(out), 'it deploys exactly the bot, the read-only relay and the switch reader to the shwoopnet project');
   assert.ok(!/--only functions(\s|$)/.test(out), 'never a whole-codebase deploy (that asks to delete functions)');
 };
 
@@ -38,6 +38,23 @@ gates.D3 = () => {
   const env = fs.readFileSync(path.join(dir, 'functions', '.env'), 'utf8');
   assert.ok(/^KALSHI_LIVE_ENABLED=on$/m.test(env) && !/KALSHI_LIVE_ENABLED=off/.test(env), 'an old off value is replaced, not left beside the on line');
   assert.ok(env.includes('KALSHI_WATCHDOG_URL=https://hc-ping.com/example'), 'other lines (the watchdog URL) are kept, so the deploy does not drop them');
+};
+
+gates.D6 = () => {
+  // Nov 2, 2026: functions/.env.shwoopnet overrides .env, and it held KALSHI_LIVE_ENABLED=KALSHI_LIVE_ENABLED=on (a whole line typed as the value), so the switch read as off after a "successful" deploy.
+  for (const bad of ['KALSHI_LIVE_ENABLED=KALSHI_LIVE_ENABLED=on', 'KALSHI_LIVE_ENABLED=off', 'KALSHI_LIVE_ENABLED=on\nKALSHI_LIVE_ENABLED=off']) {
+    const dir = scratch();
+    fs.writeFileSync(path.join(dir, 'functions', '.env.shwoopnet'), 'OTHER_LINE=keep-me\n' + bad + '\n');
+    const out = run(dir);
+    const env = fs.readFileSync(path.join(dir, 'functions', '.env.shwoopnet'), 'utf8');
+    assert.ok(/^KALSHI_LIVE_ENABLED=on$/m.test(env) && (env.match(/^KALSHI_LIVE_ENABLED=/gm) || []).length === 1, 'the project file ends with exactly one on line for: ' + bad);
+    assert.ok(env.includes('OTHER_LINE=keep-me'), 'other lines in the project file are kept');
+    assert.ok(/Repairing the order switch line/.test(out), 'it says what it repaired');
+  }
+  // an already-correct project file is left alone, and no project file is not created
+  let dir = scratch(); fs.writeFileSync(path.join(dir, 'functions', '.env.shwoopnet'), 'KALSHI_LIVE_ENABLED=on\n'); let out = run(dir);
+  assert.ok(!/Repairing/.test(out)); assert.strictEqual(fs.readFileSync(path.join(dir, 'functions', '.env.shwoopnet'), 'utf8'), 'KALSHI_LIVE_ENABLED=on\n');
+  dir = scratch(); run(dir); assert.ok(!fs.existsSync(path.join(dir, 'functions', '.env.shwoopnet')), 'no project file is created');
 };
 
 gates.D4 = () => {

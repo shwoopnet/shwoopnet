@@ -29,6 +29,19 @@ grep -q '^KALSHI_LIVE_ENABLED=on$' "$ENV_FILE" || { echo "STOP: the order switch
 echo "Order switch line is in place:"
 grep '^KALSHI_LIVE_ENABLED=' "$ENV_FILE"
 
+# The project env file overrides .env (Nov 2, 2026: the owner typed the whole line "KALSHI_LIVE_ENABLED=on" at a deploy prompt, Firebase saved it as the VALUE in functions/.env.$PROJECT, and that file beats
+# .env, so every deploy since read the switch as off while this script reported success). If that file has a switch line, make it exactly "on" too. Other lines (the watchdog and alert URLs) are kept.
+PROJECT_ENV="functions/.env.$PROJECT"
+if [ -f "$PROJECT_ENV" ] && grep -q '^KALSHI_LIVE_ENABLED=' "$PROJECT_ENV"; then
+  if ! grep -qx 'KALSHI_LIVE_ENABLED=on' "$PROJECT_ENV" || [ "$(grep -c '^KALSHI_LIVE_ENABLED=' "$PROJECT_ENV")" != "1" ]; then
+    echo "Repairing the order switch line in $PROJECT_ENV (it overrides $ENV_FILE)."
+    grep -v '^KALSHI_LIVE_ENABLED=' "$PROJECT_ENV" > "$PROJECT_ENV.tmp" || true
+    echo 'KALSHI_LIVE_ENABLED=on' >> "$PROJECT_ENV.tmp"
+    mv "$PROJECT_ENV.tmp" "$PROJECT_ENV"
+  fi
+  grep -qx 'KALSHI_LIVE_ENABLED=on' "$PROJECT_ENV" || { echo "STOP: the order switch line in $PROJECT_ENV is not exactly on, not deploying."; exit 1; }
+fi
+
 if command -v firebase >/dev/null 2>&1; then FB=(firebase); else FB=(npx --yes firebase-tools); fi
 
 run npm --prefix functions install --no-audit --no-fund
