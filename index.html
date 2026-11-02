@@ -936,7 +936,7 @@
   .kal-console [data-card="account"] .kal-tile .kal-k, .kal-console [data-card="account"] .kal-acct-risk .kal-k{ color:var(--muted); font-size:12px; font-weight:600; letter-spacing:.04em; text-transform:none; margin:0; }
   .kal-console [data-card="account"] .kal-rows > div:not(.kal-tile):not(.kal-today), .kal-console [data-card="account"] #kalBotStatus > .kal-note, .kal-console [data-card="account"] #kalBotStatus > .kal-warn{ grid-column:1; grid-row:5; }
   .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:7; }
-  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
+  .kal-acct-risk #kalRiskBody{ display:contents; } .kal-acct-risk .kal-k{ order:1; } .kal-acct-risk .kal-hb{ order:2; margin:0; font:800 20px/1.15 'Public Sans', sans-serif; } .kal-acct-risk .kal-meter{ order:3; height:5px; border-radius:3px; margin:0; } .kal-acct-risk .kal-risk-own{ order:4; margin:2px 0 0; font-size:12px; font-weight:600; color:var(--muted); font-variant-numeric:tabular-nums; } .kal-acct-risk .kal-meter > i{ border-radius:3px; }
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
+                  <li>Bot page: under the Loss stop, each strategy's own stop used (L1 and OICORE), now that the bot judges each on its own orders; percentages only</li>
                   <li>Bot page: a warning (Bot status and the bell) when Dogecoin's last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract, your written review rule; it only tells you, nothing changes by itself</li>
                   <li>Bot: L1 and OICORE now each have their own loss stop, measured on their own orders (a profitable OICORE can no longer hide an L1 loss, and each strategy is checked on its own record); the account stop over both is unchanged, and no number changed</li>
                   <li>Bot page: the Account result chart now grows to fill its card beside the taller Bot status card (no empty space below it), and the status card no longer says "ago ago"</li>
@@ -3605,13 +3606,15 @@
     }
     var dogeRev = kalshiOrdersLoaded ? kalshiDogeReview(orders) : null;
     if(dogeRev && dogeRev.state === 'warn'){ sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + escapeHtml(kalshiDogeReviewText(dogeRev)) + '</div></div>'); }
-    var m = kalshiRiskMeter(kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []), s, now);
+    var allOrders = kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
+    var m = kalshiRiskMeter(allOrders, s, now);
     rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
       (function(){
         // Percentages only (the owner, Oct 23, 2026), so this card can stay readable under Privacy view: no dollar figure is drawn here.
         var pct = function(x){ return Math.round(x * 100) + '%'; };
         return '<div class="kal-meter' + (m.fraction >= 0.75 ? ' hot' : '') + '"><i style="width:' + (m.fraction * 100).toFixed(1) + '%"></i></div>' +
-          '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' used</span></div>';
+          '<div class="kal-hb" style="margin-bottom:0"><span id="kalRiskText">' + pct(m.fraction) + ' used</span></div>' +
+          '<div class="kal-risk-own">Own stops: ' + kalshiOwnStops(allOrders, s, now).map(function(x){ return escapeHtml(x.id) + ' ' + pct(x.fraction); }).join(' &middot; ') + '</div>';
       })();
 kalshiStatusTick();
   }
@@ -3724,6 +3727,13 @@ kalshiStatusTick();
   }
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
+  // Each strategy's OWN loss stop used (Nov 2, 2026, since the bot judges L1 and the second strategy each on its own orders): the same meter as the account's, fed one strategy's orders at a time. Percentages only.
+  function kalshiOwnStops(orders, st, now){
+    return ['L1'].concat(KAL_SLOT_REGISTERED).map(function(id){
+      var sub = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === id; });
+      return { id: id, fraction: kalshiRiskMeter(sub, st, now).fraction };
+    });
+  }
   // The markets ACTIVELY in the Strategies list (the owner, Oct 30, 2026: the Bot status card should count only those): a strategy and a market it trades, read from the same labels the Strategies table shows (KAL_STRATEGY_INFO).
   // An order counts when its strategy and its market are a pair on that list, so a paused market (XRP) and Bitcoin's old L1 orders (L1 no longer trades it; the second strategy does) are left out.
   function kalshiActivePairs(){
