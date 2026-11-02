@@ -715,7 +715,7 @@ async function settleOpenOrders({ store, fetchFn, nowMs, max = 12, keyId, pem, r
 // kept on its record; a trade not yet settled is counted at its full cost, as if it lost. Costs are the order's worst-case
 // price plus fee (maxCost), so a win is booked slightly low and a loss slightly high: the error is on the safe side.
 // `orders` is a list the caller has already read (the tick reads the last 24 hours once and shares it, so the same documents are not billed twice a minute); without it the store is asked.
-async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem, slotOrders, ignoreOrderIds }) {
+async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem, slotOrders, ignoreOrderIds, ownOut }) {
   const from = Number.isFinite(since) ? since : 0;
   const read = Array.isArray(orders) ? orders.filter((t) => Number(t.ts) >= from) : await store.sessionTrades(from);
   const trades = read.filter((t) => t.strategy === "L1" && Number(t.fillCount) > 0 && Number.isFinite(Number(t.maxCost)));
@@ -753,6 +753,7 @@ async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem, slotO
   // The second slot shares this budget (one loss stop for both engines). `slotOrders` is passed only by a caller that has the slot on; without it the return below is exactly what it always was.
   if (Array.isArray(slotOrders)) {
     const s = slotLib.slotRiskForBotRisk(slotOrders, from);
+    if (ownOut && typeof ownOut === "object") Object.assign(ownOut, { net, openCost, worst: net - openCost, addonAtRisk });   // L1's own orders only, taken before the slot is added (L1's own stop reads this); the return shape is unchanged
     net += s.net; openCost += s.openCost;
     return { net, openCost, worst: net - openCost, addonAtRisk, trades: trades.length + s.trades };
   }
@@ -809,6 +810,15 @@ function skimAddon(state, now, perContract = 0.93) {
 // Raised from 4.5% to 5.5% at the owner's request (Oct 20, 2026), after Dogecoin, last in the list, got 1 contract while XRP got 4. The loss stop (L1_SIZED_STOP_FRACTION) was raised with it, from 5% to 6%,
 // so the window limit still sits UNDER the stop and one window alone cannot reach it.
 const L1_WINDOW_CAP_FRACTION = 0.055;
+// Risk profiles (Nov 2, 2026, the owner: "each strategy can have different risk, sizing, and scaling parameters", L1 and OICORE "completely separate"; design in docs/STRATEGY_RISK_SEPARATION.md).
+// Each strategy has its OWN loss stop, measured on its own orders only, in code and never from a stored value or the page. ACCOUNT is the combined backstop over both. THIS STEP CHANGES NO
+// NUMBER: every fraction below equals what the shared 12% stop used, so with the second slot off the decisions are exactly what they were, and with it on the only difference is that a profitable
+// slot can no longer hide an L1 loss from L1's own stop. Tightening OICORE's own stop (the reviewed draft says 4%) is a later, separate edit of one number here.
+const RISK_PROFILES = Object.freeze({
+  L1: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION }),
+  SECOND: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION }),   // the second strategy (OICORE today)
+  ACCOUNT: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION, windowCapFraction: L1_WINDOW_CAP_FRACTION }),
+});
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }
 
 // The probe drop rule (DL1, the research session, Oct 21, 2026; the owner: "do it"). A probe market (PROBE_SERIES) is dropped when its last PROBE_DROP_WINDOW settled entries net negative.
@@ -884,7 +894,8 @@ async function runL1Tick(args) {
   // The stop follows the BOT's trades, not the account: the owner trades the same account by hand, and a manual trade must
   // neither trip the stop nor hide a bot loss. Fails closed: if the bot's trades cannot be read, nothing is sent this minute.
   let risk;
-  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, slotOrders: slotLive ? slotOrders : undefined, ignoreOrderIds: slotLive ? slotLib.slotIgnoreSet(slotOrders) : undefined, keyId, pem }); }
+  const ownL1 = {};   // L1's own orders' figures, filled by botRisk when the second strategy is included
+  try { risk = await botRisk({ store, since: Number.isFinite(session.since) ? Math.max(session.since, dayStart) : dayStart, fetchFn, nowMs: now, orders: recentList, slotOrders: slotLive ? slotOrders : undefined, ownOut: slotLive ? ownL1 : undefined, ignoreOrderIds: slotLive ? slotLib.slotIgnoreSet(slotOrders) : undefined, keyId, pem }); }
   catch (e) { await note("The bot's own trades could not be read, so nothing was sent."); return { skipped: "bot trades unreadable" }; }
   const sizing = session.sizing === true;
   // With scaling on, the cap and the stop's base come from the weekly review. Fails closed: a review that cannot be saved sends nothing this minute.
@@ -923,6 +934,17 @@ async function runL1Tick(args) {
     return end("loss stop", trailing
       ? "the bot's trades are down $" + (peak - risk.worst).toFixed(2) + " from their best (+$" + peak.toFixed(2) + ", now " + (risk.net >= 0 ? "+" : "-") + "$" + Math.abs(risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " open counted as lost), which reaches the $" + stopAt.toFixed(2) + " give-back stop"
       : "the bot's trades are down $" + (-risk.net).toFixed(2) + " settled with $" + risk.openCost.toFixed(2) + " still open, counted as lost, which reaches the $" + (stopAt + allowance).toFixed(2) + " stop" + (allowance > 0 ? " ($" + stopAt.toFixed(2) + " plus $" + allowance.toFixed(2) + " of reinvested profit that was at risk)" : ""));
+  }
+
+  // L1's own stop (RISK_PROFILES): L1's own orders against L1's own fraction, so a profitable second slot cannot hide an L1 loss. Only present when the slot is on (botRisk fills ownL1
+  // then); with the slot off the combined check above IS L1's own, so nothing is added.
+  if (Number.isFinite(ownL1.worst)) {
+    const ownStopAt = sizing ? RISK_PROFILES.L1.stopFraction * sizeBase : L1_LOSS_STOP;
+    const ownAllowance = Number.isFinite(ownL1.addonAtRisk) ? ownL1.addonAtRisk : 0;
+    if (ownL1.worst <= peak - (ownStopAt + ownAllowance) + 1e-9) {
+      if (sizeState && args.setSizingState) { try { await args.setSizingState({ ...sizeState, lastStopAt: now, pool: 0 }); } catch (e) { /* the stop still ends the session */ } }
+      return end("loss stop", "L1's own orders are down $" + (-ownL1.worst).toFixed(2) + " (settled and open, counted as lost), which reaches L1's own $" + (ownStopAt + ownAllowance).toFixed(2) + " stop");
+    }
   }
 
   // Slot only: hand the figures just worked out to the slot tick that runs right after this one (it makes no second balance read and judges its order against the SAME floor).
@@ -1323,5 +1345,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };
