@@ -27,7 +27,7 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
-### Nov 2, 2026, 10:10 AM CT (16:10Z): C7 REGISTERED BEFORE ANY SCORING: L1's own rule on 11 untested 15 minute series (history only). Nothing live.
+### Nov 2, 2026, 10:00 AM CT (16:00Z; first version said 10:10, a clock slip): C7 REGISTERED BEFORE ANY SCORING: L1's own rule on 11 untested 15 minute series (history only). Nothing live.
 
 Request: main, at the owner's direction (V2 found many 15 minute series never tested with L1's rule). Runs after C6's data pull finishes; the cost screen and the book sampler start now because they use no outcomes.
 
