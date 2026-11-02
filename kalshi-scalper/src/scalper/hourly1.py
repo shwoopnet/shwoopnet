@@ -89,6 +89,17 @@ def decide_event(close: int, strikes: list, candles: dict, klines: dict, edge: f
 
 
 # ---------------------------------------------------------------- fetch
+def strike_of(m: dict):
+    """floor_strike; KXDOGED carries it in custom_strike.floor_strike; the cached raw listing keeps only the ticker, whose suffix -T<K> is the same number."""
+    if m.get("floor_strike") is not None:
+        return float(m["floor_strike"])
+    cs = m.get("custom_strike") or {}
+    if cs.get("floor_strike") not in (None, ""):
+        return float(cs["floor_strike"])
+    tail = m["ticker"].rsplit("-T", 1)
+    return float(tail[1]) if len(tail) == 2 else None
+
+
 def fetch() -> None:
     CACHE.mkdir(parents=True, exist_ok=True)
     mp = CACHE / "markets.json"
@@ -96,8 +107,9 @@ def fetch() -> None:
     if not markets:
         for s in ASSETS:
             for m in api.settled_markets(s, 0, 2**31 - 1):
-                if m.get("result") in ("yes", "no") and m.get("floor_strike") is not None and m.get("strike_type") == "greater":
-                    markets[m["ticker"]] = {"s": s, "ev": m["event_ticker"], "close": L.ts(m["close_time"]), "k": float(m["floor_strike"]), "res": m["result"]}
+                k = strike_of(m)
+                if m.get("result") in ("yes", "no") and k is not None and ((m.get("custom_strike") or {}).get("strike_type") or m.get("strike_type")) == "greater":
+                    markets[m["ticker"]] = {"s": s, "ev": m["event_ticker"], "close": L.ts(m["close_time"]), "k": k, "res": m["result"]}
         mp.write_text(json.dumps(markets)); print(len(markets), "markets", flush=True)
     lo = min(m["close"] for m in markets.values()) - LOOK_S - 6000
     hi = max(m["close"] for m in markets.values())
@@ -116,18 +128,13 @@ def fetch() -> None:
         S = klines[m["s"]].get(m["close"] - LOOK_S - 60)
         if S and abs(math.log(m["k"] / S)) <= NEAR and tk not in have:
             by[m["close"]].append(tk)
-    closes = sorted(by)
-    groups, cur = [], []
-    for c in closes:                                   # about 100 tickers per request
-        if cur and sum(len(by[x]) for x in cur) + len(by[c]) > 100:
-            groups.append(cur); cur = []
-        cur.append(c)
-    if cur:
-        groups.append(cur)
+    groups = []                                        # Kalshi allows 10,000 candlesticks per request (tickers x minutes): one event window (8 minutes) and at most 100 tickers each
+    for c in sorted(by):
+        for j in range(0, len(by[c]), 100):
+            groups.append((c, by[c][j:j + 100]))
     pause = 0.3
-    for i, g in enumerate(groups):
-        tks = [t for c in g for t in by[c]]
-        lo2, hi2 = min(g) - LOOK_S - 420, max(g) - LOOK_S
+    for i, (gc, tks) in enumerate(groups):
+        lo2, hi2 = gc - LOOK_S - 420, gc - LOOK_S
         for attempt in range(12):
             try:
                 req = urllib.request.Request(api.BASES[1] + "/markets/candlesticks?" + urllib.parse.urlencode({"market_tickers": ",".join(tks), "start_ts": lo2, "end_ts": hi2, "period_interval": 1}))
@@ -148,7 +155,7 @@ def fetch() -> None:
             except Exception:
                 time.sleep(1 + attempt)
         else:
-            print("skip", g[0], flush=True)
+            print("skip", gc, flush=True)
         if i % 50 == 0:
             cp.write_text(json.dumps(have)); print("candles", i, len(groups), "pause", round(pause, 2), flush=True)
         time.sleep(pause)
