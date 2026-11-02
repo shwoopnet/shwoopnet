@@ -1,5 +1,19 @@
 # LIVEWATCH: live L1 record against its history (newest first; aggregates only; `python -m scalper.livewatch run`)
 
+## 2026-11-02 01:19 CT (report window 2026-10-03 02:19 CT to now; last 7 days = since 2026-10-26 02:19 CT)
+
+| Market | Settled | Losses | Win rate | PF | Net | PF 88-91c (held) | PF 91-94c (held) | PF 94-97c (held) | exits, unpriced | Last 7d: n, losses, PF, net | 23d before: n, losses, PF, net | History loss rate (n) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| gold | 224 | 10 | 95.5% | 1.80 | $+51.28 | 8.04 (41) | no loss (62) | 4.26 (113) | 8, 0 | 74, 4, 1.63, $+22.33 | 150, 6, 2.00, $+28.95 | 5.31% (1243) |
+| Bitcoin | 155 | 11 | 92.9% | 0.72 | $-22.39 | no loss (25) | 0.53 (40) | no loss (81) | 8, 1 | 2, 0, no loss, $+0.07 | 153, 11, 0.71, $-22.46 | 6.23% (1686) |
+| Ethereum | 113 | 9 | 92.0% | 0.92 | $-2.42 | no loss (20) | no loss (25) | no loss (58) | 9, 1 | 1, 0, no loss, $+0.02 | 112, 9, 0.92, $-2.44 | 5.84% (1782) |
+| Dogecoin | 184 | 8 | 95.7% | 2.19 | $+29.50 | no loss (35) | no loss (50) | no loss (90) | 8, 1 | 115, 5, 2.40, $+26.50 | 69, 3, 1.51, $+3.00 | 4.82% (1824) |
+| XRP | 86 | 12 | 86.0% | 0.41 | $-13.10 | 4.13 (26) | 0.36 (22) | no loss (27) | 9, 1 | 24, 4, 0.50, $-1.59 | 62, 8, 0.39, $-11.51 | 5.18% (1929) |
+
+**Flags:** XRP: last 7 days 4 losses in 24 (16.7%) against a history loss rate of 5.18%, one-sided binomial p 0.0334
+
+Dollars at the real sizes, after fees, settled orders only (an exit counts as a loss). PF by price paid covers held-to-settlement orders only (an exit's buy price cannot be solved from its result, so exits, most of the losses, are left out of those three columns and the bands read high); count of orders in brackets. Information only; nothing here changes a live rule.
+
 ## 2026-11-01 01:09 CT (report window 2026-10-02 01:09 CT to now; last 7 days = since 2026-10-25 01:09 CT)
 
 | Market | Settled | Losses | Win rate | PF | Net | PF 88-91c (held) | PF 91-94c (held) | PF 94-97c (held) | exits, unpriced | Last 7d: n, losses, PF, net | 23d before: n, losses, PF, net | History loss rate (n) |
