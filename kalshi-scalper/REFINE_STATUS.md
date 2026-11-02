@@ -27,6 +27,29 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 11:10 AM CT (17:10Z): C6 RESULT (open interest rise as a SKIP on L1): FAILS its registered prediction; Dogecoin points the OPPOSITE way. Plus C8 REGISTERED (Dogecoin: skip LOW open interest rise), forward only.
+
+**C6 as registered (skip the top 20% of OIR):** data complete (gold 4,142 and Dogecoin 5,880 settled windows, Sep 1 to Nov 2, 61.8 days). In-band windows: gold 1,179 (133 a week), Dogecoin 1,776 (201 a week); excluded and counted: out of band 2,957 and 4,102, missing candle 5, no result 1 and 2. Threshold (80th percentile of the discovery half's OIR, fixed blind): gold 16,346 contracts, Dogecoin 2,216.
+Validation half (the later half), skipped (top 20%) against kept:
+| | n skipped / kept | lost share | early sell | settle against | net per contract |
+|---|---|---|---|---|---|
+| Gold | 280 / 310 | 5.7% / 4.5% | 16 / 14 | 0 / 0 | +0.99c / +3.27c |
+| Dogecoin | 450 / 438 | 3.8% / 8.9% | 17 / 39 | 0 / 0 | +2.79c / -0.49c |
+| Pooled | 730 / 748 | 4.5% / 7.1% | 33 / 53 | 0 | +2.10c / +1.07c |
+Registered tests: gold ratio 1.27 (needed at least 1.5), one sided Fisher p 0.317 (needed under 0.05), skipped net +0.99c (needed under +0.5c): **FAIL on all three; not killed by the kill rule but dead in practice** (nothing to forward test). Dogecoin: skipped lost share is LOWER than kept (ratio 0.42, p 0.9995 in the wrong direction) and skipped net is +2.79c, above the +1.5c kill line: **DEAD by the registered kill rule**. Pooled p 0.987, wrong direction. The discovery half agrees with the validation half for Dogecoin (ratio 0.41) and goes the other way for gold (0.46), so gold's top tail is noise. The decile table (pooled, descriptive) for gold has no pattern (3.4% to 10.2% with no order); for Dogecoin it falls from 10.7% (lowest tenth) to 2.8% (highest).
+The idea that a RISE in open interest marks a favourite that flips is not supported on gold or Dogecoin: it is the other way round for Dogecoin, which fits V2's NEWH3 on Bitcoin (low or falling open interest marks failing favourites).
+**Simulator calibration** (all in-band windows, same engine): early sell rate gold 5.9% and Dogecoin 6.2% against 4.1% live, so the candle close proxy catches about 1.5 times more early sells than the live 10 second watcher; net per contract gold +1.42c and Dogecoin +1.10c against +2.3c and +2.8c live. The simulator is a little pessimistic (about 1 to 1.7c a contract), not off by 2c in the wrong way. No settle against losses appeared in 2,955 windows: every history loss in this engine is an early sell, as in the live record (16 of 18).
+**Tries:** the 28 registered, plus 4 here (the bottom 20% by half, gold and Dogecoin). N about 728,785.
+
+**C8 (new, registered before any forward scoring): Dogecoin, skip when the open interest rise is LOW.** The direction was found after C6, in the registered descriptive bottom 20% line, so I count it as selected after the fact and give it no credit from history (README P1).
+- *Evidence, descriptive only:* Dogecoin windows with OIR at or under 755.1 contracts (the discovery half's 20th percentile, fixed blind to outcomes): discovery 178 windows, lost share 9.6%, net -1.10c a contract, against 5.2% and +1.57c for the rest (Fisher p 0.027); validation 97 windows, 14.4% and -5.40c against 5.3% and +1.98c for the rest (p 0.0016). It holds in both halves. Counted against the 28 registered cells that is about p 0.045 for the validation half: a lead, not a finding. Gold shows nothing (bottom 20%: 3.4% / 5.9% lost, no effect).
+- *Rule (fixed now):* Dogecoin only. At the 6 minute look, OIR = open interest of the candle that ENDS 360 s before the close minus that of the candle that ENDS 540 s before. SKIP when OIR is under 755.12 contracts (a number, not refit later). Missing candles: no skip decision (L1 unchanged), counted.
+- *Forward shadow read, no code and no change in live orders:* score every in-band Dogecoin window whose close is after 2026-11-02T17:10Z from the public candles (all windows, not only the bot's fills), with the same engine as C6/C7. Sample: 150 low-OIR windows against the rest (about 600), at about 40 low windows a week, so 3.7 weeks.
+- *Prediction:* low-OIR lost share at least 9% and at least 1.5 times the rest, net per contract under 0 in the low arm, one sided Fisher p under 0.05. Power by simulation (150 against 600): 73% if the true rates are 11.5% against 5.3%, 47% if 9.6% against 5.3%, false pass 2%.
+- *Kill:* at 150 low-OIR windows, dead if the low arm's lost share is not above the rest's, or its net per contract is above +1.0c. Early kill at 75 low windows if zero or one early sells and net above +2.0c.
+- *Cost if it ever went live:* 20% of Dogecoin's in-band entries (about 40 of 200 simulated windows a week, which is about 18 of the bot's roughly 88 Dogecoin fills a week), about 12% of all L1 fills. History says those fills lose money on average (-1.1c and -5.4c), so the cost is frequency, not profit. Frequency stays a hard requirement: a PASS goes to the owner as a trade, not a rule.
+- *Order of scoring:* C1 (90 to 92c) is the forward test already running on the bot's own fills; C8 scores from public candles and does not use the bot's orders, so it can run beside C1 without interfering. Main said one new L1 filter forward at a time: C8 is a second filter, so it waits for the owner's word before I start counting; the registration date above is the earliest date it can count from.
+
 ### Nov 2, 2026, 10:00 AM CT (16:00Z; first version said 10:10, a clock slip): C7 REGISTERED BEFORE ANY SCORING: L1's own rule on 11 untested 15 minute series (history only). Nothing live.
 
 Request: main, at the owner's direction (V2 found many 15 minute series never tested with L1's rule). Runs after C6's data pull finishes; the cost screen and the book sampler start now because they use no outcomes.
