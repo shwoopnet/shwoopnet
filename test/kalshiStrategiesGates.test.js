@@ -43,7 +43,7 @@ gates.ST5 = () => {
   // A second-slot fill must be recognised as the bot's (never a manual trade or an unmatched position), its dollars must be in the Stop Loss and Risk meter, and every row says which strategy it came from.
   assert.ok(/function kalshiAllOrders\(\)\{ return \(kalshiLiveOrders \|\| \[\]\)\.concat\(kalshiSlotOrders \|\| \[\]\); \}/.test(html));
   assert.ok(/kalshiPositionRows\(a\.positions\.positions, kalshiAllOrders\(\),/.test(html), 'open positions know the slot orders');
-  assert.ok(/t\.strategy !== 'L1' && t\.strategy !== 'SLOT'/.test(html) && /kalshiRiskMeter\(kalshiResolveOrders\(kalshiAllOrders\(\)/.test(html), 'the risk meter counts slot orders');
+  assert.ok(/t\.strategy !== 'L1' && t\.strategy !== 'SLOT'/.test(html) && /var allOrders = kalshiResolveOrders\(kalshiAllOrders\(\)/.test(html) && /kalshiRiskMeter\(allOrders, s, now\)/.test(html), 'the risk meter counts slot orders');
   assert.ok(!/kalshiIsExitFill\(x, kalshiLiveOrders\)/.test(html), 'a slot exit fill is not shown as a trade either');
   assert.ok(/strategy: order \? kalshiStrategyOf\(order\) : ''/.test(html) && /r\.strategy \? kalshiChipHtml\(r\.strategy, esc\)/.test(html), 'open positions carry the chip');
   assert.ok(/kalshiChipHtml\(kalshiStrategyOf\(o\), escapeHtml\)/.test(html) && /kalshiChipHtml\(kalshiStrategyOf\(ord\), escapeHtml\)/.test(html), 'recent trades carry the chip');
