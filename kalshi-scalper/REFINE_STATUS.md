@@ -27,6 +27,10 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 11:15 AM CT (17:15Z): C8 forward count STARTED (main, at the owner's direction, approved)
+
+Counting Dogecoin windows that close after 2026-11-02T17:10Z, from public candles, no code, no change to orders; registration as written in the 17:10Z entry (skip arm = open interest rise under 755.12 contracts). `c8_fwd.py` (scratchpad) reads each newly settled Dogecoin window once, applies the same engine as C6 and prints the low arm against the rest; first run: 0 windows read (none had settled yet). Nothing else changes.
+
 ### Nov 2, 2026, 11:10 AM CT (17:10Z): C6 RESULT (open interest rise as a SKIP on L1): FAILS its registered prediction; Dogecoin points the OPPOSITE way. Plus C8 REGISTERED (Dogecoin: skip LOW open interest rise), forward only.
 
 **C6 as registered (skip the top 20% of OIR):** data complete (gold 4,142 and Dogecoin 5,880 settled windows, Sep 1 to Nov 2, 61.8 days). In-band windows: gold 1,179 (133 a week), Dogecoin 1,776 (201 a week); excluded and counted: out of band 2,957 and 4,102, missing candle 5, no result 1 and 2. Threshold (80th percentile of the discovery half's OIR, fixed blind): gold 16,346 contracts, Dogecoin 2,216.
