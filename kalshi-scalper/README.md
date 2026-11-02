@@ -8136,3 +8136,7 @@ Full text: `workers/CHART1_REGISTRATION.md`. Ledger grep for Netflix, Billboard,
 
 ## Result: CHART1 (2026-11-02): NOT_RUNNABLE (no outcome computed)
 Daily top 10 history is not obtainable (Netflix and kworb show only the current day, FlixPatrol 403, Wayback no answer), so no window, 0 trades, cost not applied, N +2 (running about 728,700, z bar 5.27). Forward recorder described in `workers/CHART1_REGISTRATION.md` (not built); earliest information look 2026-12-14, earliest verdict about 2027-05-03. `workers/CHART1_RESULT.md`, `src/scalper/chart1.py`.
+
+## Pre-registration: EQUAKE1, Kalshi earthquake markets (KXBIGGESTQUAKE daily world maximum, KXEARTHQUAKEM monthly) against a Gutenberg-Richter base rate from the USGS catalog (written 2026-11-02, before any outcome, catalog row or price was read; 2 tries, running count about 728,700, z bar about 5.27)
+
+Owner opened new non-L1, non-OICORE families on existing public data. Full text, ledger check (grep for earthquake/USGS found nothing: not a duplicate) and disclosure: `workers/EQUAKE1_REGISTRATION.md`. **Counterparty:** retail traders pricing rare-event tails by feel; honest prior of a pass 3
