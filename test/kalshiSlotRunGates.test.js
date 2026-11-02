@@ -352,6 +352,23 @@ gates['the slot counts against the shared loss stop: no room under the floor mea
   await R(ON()).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({ risk: { worst: -38 }, floor: -60 }) } }).args);
   assert.strictEqual(ex.posts.length, 0, '38 + 20 > the 60 floor, so the new order has no room');
 };
+gates['the slot has its own loss stop on its own orders (RISK_PROFILES.SECOND), whatever L1 is doing (Nov 2, 2026)'] = async () => {
+  const live = require('../functions/kalshiLiveLib'), saved = live.RISK_PROFILES;
+  try {
+    // the real profile is 12% of the base, so the control order goes
+    let db = makeDb(), ex = makeExchange(db);
+    await R(ON()).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({}) } }).args); assert.strictEqual(ex.posts.length, 1, 'control: the real profile leaves room');
+    // a tight own stop (0.1% of a $500 base = $0.50) leaves no room for a $3 order even though L1's shared figures are perfect
+    live.RISK_PROFILES = Object.freeze({ ...saved, SECOND: Object.freeze({ stopFraction: 0.001 }) });
+    db = makeDb(); ex = makeExchange(db);
+    await R(ON()).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({ risk: { worst: 0 }, floor: -60 }) } }).args);
+    assert.strictEqual(ex.posts.length, 0, 'the slot\'s own stop refuses it');
+    // a missing profile (a unit test's stub of the live module) skips the own check and leaves the shared stop in charge
+    live.RISK_PROFILES = undefined;
+    db = makeDb(); ex = makeExchange(db);
+    await R(ON()).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({}) } }).args); assert.strictEqual(ex.posts.length, 1);
+  } finally { live.RISK_PROFILES = saved; }
+};
 gates['SW12 a lost answer on a buy ends the session, latches the strategy off and is never retried; a refusal and an existing id do the same'] = async () => {
   for (const o of [{ post: { status: 502, body: 'bad gateway' } }, { throwPost: true }, { post: { status: 429, body: 'slow down' } }]) {
     const db = makeDb(), ex = makeExchange(db, o), t = tickArgs(db, ex);

@@ -163,6 +163,13 @@ function makeRunners(flags) {
         for (const t of l1All) { if (!seenInShared.has(t.id || t.clientOrderId) && (num(t.fillCount) > 0 || ["filled", "sending", "unknown"].includes(String(t.status))) && !(t.settled === true)) newL1 += Math.max(0, num(t.maxCost) || 0); }
         const worstNow = sh.risk.worst + slotDelta - newL1;
         if (!(worstNow - c.cost > sh.floor + 1e-9)) return { allowed: false, reason: "the shared loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
+        // The slot's OWN loss stop (RISK_PROFILES.SECOND): its own orders against its own fraction of the sizing base, the new order counted as lost, so the slot is bounded on its own record
+        // whatever L1 is doing. Skipped only when the profile is absent (a unit test's stub of the live module).
+        const prof = live.RISK_PROFILES && live.RISK_PROFILES.SECOND;
+        if (prof && Number.isFinite(prof.stopFraction)) {
+          const ownWorst = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst;
+          if (!(ownWorst - c.cost > -(prof.stopFraction * sh.sizeBase) + 1e-9)) return { allowed: false, reason: "the slot's own loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
+        }
         // The shard must hold the money (L1's own check, with this minute's earlier L1 and slot orders taken off).
         const l1Shard = l1All.filter((t) => !seenInShared.has(t.id || t.clientOrderId) && String(t.exchangeIndex) === shardKey && t.settled !== true).reduce((a, t) => a + Math.max(0, num(t.maxCost) || 0), 0);
         const avail = live.availableFor(sh.balanceBody, m.exchange_index) - (committed[shardKey] || 0) - l1Shard;

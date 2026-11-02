@@ -350,6 +350,33 @@ gates['SW9 the other engine\'s fills are never read as a sale by hand: a slot NO
   await live.runL1Tick({ ...w2.common, quotes: [q('KXBTC15M', 'KXBTC15M-26OCT071500-15')], slot: h.slot });
   assert.strictEqual(w2.docs.get('L1-x').result, 'no', 'through runL1Tick the L1 order is settled by the market, not called hand');
 };
+gates['SW7c L1 has its own loss stop on its own orders: a profitable second strategy cannot hide an L1 loss, and nothing else about the stop moved (Nov 2, 2026)'] = async () => {
+  const base = { session: { sizing: true }, extraStore: lockedStore(new Map()), positions: noPos };
+  const quotes = [q('KXGOLD15M', GT)];
+  // the profiles: every number equals the old shared 12% stop and 5.5% window cap, so this step changed no limit
+  assert.deepStrictEqual(Object.keys(live.RISK_PROFILES).sort(), ['ACCOUNT', 'L1', 'SECOND']);
+  assert.strictEqual(live.RISK_PROFILES.L1.stopFraction, live.L1_SIZED_STOP_FRACTION); assert.strictEqual(live.RISK_PROFILES.SECOND.stopFraction, live.L1_SIZED_STOP_FRACTION);
+  assert.strictEqual(live.RISK_PROFILES.ACCOUNT.stopFraction, live.L1_SIZED_STOP_FRACTION); assert.strictEqual(live.RISK_PROFILES.ACCOUNT.windowCapFraction, live.L1_WINDOW_CAP_FRACTION);
+  assert.ok(Object.isFrozen(live.RISK_PROFILES) && Object.isFrozen(live.RISK_PROFILES.L1));
+  // a $13 L1 loss against a $100 base (12% = $12) with a $6 slot WIN: combined -$7 is under the old shared stop, but L1's own orders are down $13
+  let w = l1World({ ...base, docs: { a: settledLoss('a', { maxCost: 13, settledPnl: -13, ts: NOW - 3600000 }) } });
+  let h = hooks({ orders: [slotOrder({ ticker: 'KXETH15M-26OCT071345-15', series: 'KXETH15M', settled: true, result: 'yes', side: 'yes', settledPnl: 6, maxCost: 3, ts: NOW - 3000000 })] });
+  let r = await live.runL1Tick({ ...w.common, ...sizingOver, quotes, slot: h.slot });
+  assert.deepStrictEqual(r, { ended: 'loss stop' }, 'L1\'s own stop sees its own loss'); assert.strictEqual(posts(w).length, 0); assert.strictEqual(w.sess.active, false);
+  // the same L1 loss with the slot OFF ends it too (the combined stop is L1's own then): unchanged
+  w = l1World({ ...base, docs: { a: settledLoss('a', { maxCost: 13, settledPnl: -13, ts: NOW - 3600000 }) } });
+  r = await live.runL1Tick({ ...w.common, ...sizingOver, quotes });
+  assert.deepStrictEqual(r, { ended: 'loss stop' });
+  // a smaller L1 loss with a slot win stays under both stops and trades
+  w = l1World({ ...base, docs: { a: settledLoss('a', { maxCost: 5, settledPnl: -5, ts: NOW - 3600000 }) } });
+  h = hooks({ orders: [slotOrder({ ticker: 'KXETH15M-26OCT071345-15', series: 'KXETH15M', settled: true, result: 'yes', side: 'yes', settledPnl: 6, maxCost: 3, ts: NOW - 3000000 })] });
+  r = await live.runL1Tick({ ...w.common, ...sizingOver, quotes, slot: h.slot });
+  assert.ok(r.ok && posts(w).length === 1, 'under both stops it trades: ' + JSON.stringify(r));
+  // botRisk's return shape is unchanged; the L1-only figures come out through ownOut and exclude the slot
+  const orders = [settledLoss('a', { id: 'a', maxCost: 1, settledPnl: -1 })], ownOut = {};
+  const both = await live.botRisk({ store: w.common.store, since: 0, fetchFn: w.common.fetchFn, nowMs: NOW, orders, slotOrders: [slotOrder({ settled: true, result: 'no', settledPnl: -2, ts: NOW - 1000 })], ownOut });
+  assert.strictEqual(ownOut.net, both.net + 2, 'ownOut holds L1 alone'); assert.strictEqual(ownOut.worst, ownOut.net - ownOut.openCost);
+};
 gates['SW11 Flatten with the slot on tells the slot which markets it closed, and a failure of that bookkeeping never changes what Flatten returns'] = async () => {
   const mk = (postStatus) => {
     const claims = new Map();
