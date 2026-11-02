@@ -27,6 +27,28 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 10:10 AM CT (16:10Z): C7 REGISTERED BEFORE ANY SCORING: L1's own rule on 11 untested 15 minute series (history only). Nothing live.
+
+Request: main, at the owner's direction (V2 found many 15 minute series never tested with L1's rule). Runs after C6's data pull finishes; the cost screen and the book sampler start now because they use no outcomes.
+
+**Series (all 11 named by main, fixed now):** KXSILVER15M, KXCOPPER15M, KXPALLADIUM15M, KXPLATINUM15M (metals), KXHYPE15M, KXBNB15M, KXZEC15M, KXNEAR15M (crypto), KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M (forex). Gold (KXGOLD15M) and Dogecoin (KXDOGE15M) are run through the SAME code as the calibration (the simulated net per contract should land near their live record, +2.3c gold and +2.8c Dogecoin, else the simulator is wrong and I say so). The tickers exist in Kalshi's public series list (checked); I add no other series.
+
+**The rule (L1's own, unchanged):** at the 1 minute candle that ENDS 360 s before the close, buy the side whose price is 0.88 to 0.97 (YES at the YES ask close; NO at 1 minus the YES bid close); hold to settlement; early sell at the first later 1 minute candle whose bid close for the bought side is 0.25 or lower, at that bid close; fees 7% x price x (1 minus price) on entry and on an exit. Same definitions as C6 (`oi_an.py`'s engine without the open interest feature). Windows with a missing candle at 360 s, no result, or out of band are excluded and counted.
+
+**Universe chosen on cost, not returns (fixed before any outcome is read):** the 11 series are screened on two cost numbers measured WITHOUT outcomes: (1) the median spread (YES ask close minus YES bid close) at the 6 minute candle over all windows; (2) the median top-of-book size on the bought side, from live sampling of the open market at about 6 minutes before each close (a background sampler, every 15 minutes for several hours, reads the public market object: `yes_bid_size_fp` and `yes_ask_size_fp`, and the live bid/ask). Screen: **passes cost if median spread is 2c or less AND median top-of-book size is at least 100 contracts** (gold and Dogecoin live orders carry a median 54 to 100; a 12 contract order is then at most about 12% of the touch). A series that fails the screen is still reported but cannot be proposed for a forward shadow read. Ranking in the report: spread ascending, then size descending.
+
+**Reported per series:** windows in the history, windows in band, in-band windows per week, the share of the 24 hours (UTC) covered by windows and the days they trade (round the clock or not), loss share (early sell, settle against, and combined), net per contract after fees (with a 95% interval), the first-half and second-half values, the dollar cost of a loss at 12 and 16 contracts (the ladder sizes now and soon: the mean early-sell loss per contract x 12 and x 16), and the cost numbers above.
+
+**Pass bar (set now):** a series is a **candidate for a forward shadow read** only if ALL hold: passes the cost screen; at least 300 in-band windows; net per contract at least +1.0c in BOTH halves (by close time); combined lost share at most 8% in both halves; and the lower 95% bound of the whole-history net per contract is above zero. It earns a forward shadow read and nothing live (README P1: history cannot count toward a rule). With 11 series the chance that one passes by luck is not small; I will estimate it by permuting the outcome-given-price within each series (the null of no edge at the quoted price) and say how many passes to expect from noise.
+
+**Prediction (stated before, a base rate):** most of the 11 fail. The expected result is net per contract near minus the fees (about -0.3c to +1c) for the thin forex pairs and metals with wide spreads; the screen passes at most 3 of the 11. If more than 3 pass the screen I treat the screen as too loose.
+
+**Kill (study level):** if the calibration on gold and Dogecoin lands more than 2c a contract away from their live results, the study is void until the simulator is fixed.
+
+**Count for deflation:** 11 series x 2 halves, 11 cost cells, 2 calibration cells, 1 permutation null = about 36 tries; N about 728,781 (after the C6 count of about 28). The Bonferroni bar stays about z 5.2: any pass is a lead for a shadow read, never a finding.
+
+**Sampling plan:** history from the public candles (about 60 days where it exists; shorter for newer series), pulled after C6 at one read per window with 0.4 s spacing (about 5,000 windows a series for the 24/7 series, fewer for metals and forex), so several hours of pulling; I will report in stages.
+
 ### Nov 2, 2026, 8:35 AM CT (14:35Z; the first version of this heading said 9:55 AM, a clock slip, fixed): C6 REGISTERED BEFORE ANY SCORING: open interest rise as a SKIP on L1 entries (gold, Dogecoin). History test only; no forward scoring until C1 finishes. Nothing live.
 
 Source of the idea: the owner, via main ("use an open-interest condition like OICORE's, but as a SKIP on L1 entries, to avoid favourites that flip"). Checked against what is known: V2's EXITOI-G (open-interest exit for L1) was falsified pooled; V2's NEWH3 on Bitcoin found FALLING open interest 3 to 6 minutes before the close marked failing favourites (opposite direction, lead only). Neither tested a RISING open interest skip at entry on gold or Dogecoin. 16 of L1's 18 live losses are early sells at the 25c line, so I score the early sell and the settle-against separately and name the combined one.
