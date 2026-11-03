@@ -1,0 +1,20 @@
+{
+ "id": "USWEEP1_KXBRENTD_TAIL_1440",
+ "market": "KXBRENTD",
+ "stage": "watch",
+ "wired": false,
+ "freeze_utc": "2026-11-10T00:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.usweep1:forward_eval",
+ "params": {
+  "series": "KXBRENTD",
+  "rule": "tail",
+  "look_minutes": 1440,
+  "band": [
+   0.05,
+   0.15
+  ]
+ },
+ "generator": "USWEEP1 (ranked by development z; NOT a lead: no cell met the registered lead rule; workers/USWEEP1_REGISTRATION.md)",
+ "description": "Brent Oil Daily: buy the tail side (ask 0.05 to 0.15) 1440 minutes before the anchor, taker at the ask, held. Development n 106 on 15 dates, net -3.10c, z -0.69, halves +0.32c / -4.92c. Capped probe: 1 contract, limit 0.15, worst single loss $0.16, kill at 40 fills with PF under 1.0 or net under -$3. Forward ledger is 15-minute-window only, so this needs a daily-window feed before it can run."
+}

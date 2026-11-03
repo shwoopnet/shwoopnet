@@ -1,0 +1,20 @@
+{
+ "id": "USWEEP1_KXLALIGA2SPREAD_TAIL_360",
+ "market": "KXLALIGA2SPREAD",
+ "stage": "watch",
+ "wired": false,
+ "freeze_utc": "2026-11-10T00:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.usweep1:forward_eval",
+ "params": {
+  "series": "KXLALIGA2SPREAD",
+  "rule": "tail",
+  "look_minutes": 360,
+  "band": [
+   0.05,
+   0.15
+  ]
+ },
+ "generator": "USWEEP1 (ranked by development z; NOT a lead: no cell met the registered lead rule; workers/USWEEP1_REGISTRATION.md)",
+ "description": "Spread: buy the tail side (ask 0.05 to 0.15) 360 minutes before the anchor, taker at the ask, held. Development n 116 on 21 dates, net -0.25c, z -0.11, halves +0.49c / -1.01c. Capped probe: 1 contract, limit 0.15, worst single loss $0.16, kill at 40 fills with PF under 1.0 or net under -$3. Forward ledger is 15-minute-window only, so this needs a daily-window feed before it can run."
+}

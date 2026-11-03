@@ -206,18 +206,6 @@
    "capped": false
   },
   {
-   "n": 618,
-   "dates": 34,
-   "median_life_s": 93600.0,
-   "median_volume": 24.634999999999998,
-   "class": "D",
-   "ticker": "KXAAAGASDKS",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Kansas gas price",
-   "capped": false
-  },
-  {
    "n": 462,
    "dates": 26,
    "median_life_s": 93600.0,
@@ -290,18 +278,6 @@
    "capped": false
   },
   {
-   "n": 1285,
-   "dates": 55,
-   "median_life_s": 93600,
-   "median_volume": 1059.17,
-   "class": "D",
-   "ticker": "KXAAAGASDMI",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Michigan gas price",
-   "capped": false
-  },
-  {
    "n": 856,
    "dates": 48,
    "median_life_s": 93600.0,
@@ -311,30 +287,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Minnesota gas price",
-   "capped": false
-  },
-  {
-   "n": 856,
-   "dates": 48,
-   "median_life_s": 93600.0,
-   "median_volume": 1000.0,
-   "class": "D",
-   "ticker": "KXAAAGASDMN",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Minnesota gas price",
-   "capped": false
-  },
-  {
-   "n": 717,
-   "dates": 41,
-   "median_life_s": 93600,
-   "median_volume": 494.22,
-   "class": "D",
-   "ticker": "KXAAAGASDMO",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Missouri gas price",
    "capped": false
   },
   {
@@ -362,18 +314,6 @@
    "capped": false
   },
   {
-   "n": 442,
-   "dates": 26,
-   "median_life_s": 93600.0,
-   "median_volume": 57.3,
-   "class": "D",
-   "ticker": "KXAAAGASDMS",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Mississippi gas price",
-   "capped": false
-  },
-  {
    "n": 459,
    "dates": 27,
    "median_life_s": 93600,
@@ -383,30 +323,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Montana gas price",
-   "capped": false
-  },
-  {
-   "n": 459,
-   "dates": 27,
-   "median_life_s": 93600,
-   "median_volume": 69.02,
-   "class": "D",
-   "ticker": "KXAAAGASDMT",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Montana gas price",
-   "capped": false
-  },
-  {
-   "n": 1180,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1112.0,
-   "class": "D",
-   "ticker": "KXAAAGASDNC",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "North Carolina gas price",
    "capped": false
   },
   {
@@ -434,18 +350,6 @@
    "capped": false
   },
   {
-   "n": 425,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 45.0,
-   "class": "D",
-   "ticker": "KXAAAGASDND",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "North Dakota gas price",
-   "capped": false
-  },
-  {
    "n": 445,
    "dates": 25,
    "median_life_s": 93600,
@@ -455,30 +359,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Nebraska gas price",
-   "capped": false
-  },
-  {
-   "n": 445,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 100.0,
-   "class": "D",
-   "ticker": "KXAAAGASDNE",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Nebraska gas price",
-   "capped": false
-  },
-  {
-   "n": 459,
-   "dates": 27,
-   "median_life_s": 93600,
-   "median_volume": 101.0,
-   "class": "D",
-   "ticker": "KXAAAGASDNH",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "New Hampshire gas price",
    "capped": false
   },
   {
@@ -506,18 +386,6 @@
    "capped": false
   },
   {
-   "n": 1060,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1175.5900000000001,
-   "class": "D",
-   "ticker": "KXAAAGASDNJ",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "New Jersey gas prices",
-   "capped": false
-  },
-  {
    "n": 628,
    "dates": 34,
    "median_life_s": 93600.0,
@@ -527,30 +395,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "New Mexico gas price",
-   "capped": false
-  },
-  {
-   "n": 628,
-   "dates": 34,
-   "median_life_s": 93600.0,
-   "median_volume": 64.5,
-   "class": "D",
-   "ticker": "KXAAAGASDNM",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "New Mexico gas price",
-   "capped": false
-  },
-  {
-   "n": 717,
-   "dates": 41,
-   "median_life_s": 93600,
-   "median_volume": 414.0,
-   "class": "D",
-   "ticker": "KXAAAGASDNV",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Nevada gas price",
    "capped": false
   },
   {
@@ -578,18 +422,6 @@
    "capped": false
   },
   {
-   "n": 1020,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1009.6949999999999,
-   "class": "D",
-   "ticker": "KXAAAGASDNY",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "New York gas price",
-   "capped": false
-  },
-  {
    "n": 1540,
    "dates": 60,
    "median_life_s": 93600.0,
@@ -599,30 +431,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Ohio gas price",
-   "capped": false
-  },
-  {
-   "n": 1540,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1000.0,
-   "class": "D",
-   "ticker": "KXAAAGASDOH",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Ohio gas price",
-   "capped": false
-  },
-  {
-   "n": 425,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 46.12,
-   "class": "D",
-   "ticker": "KXAAAGASDOK",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Oklahoma gas price",
    "capped": false
   },
   {
@@ -650,18 +458,6 @@
    "capped": false
   },
   {
-   "n": 816,
-   "dates": 48,
-   "median_life_s": 93600.0,
-   "median_volume": 858.365,
-   "class": "D",
-   "ticker": "KXAAAGASDOR",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Oregon gas price",
-   "capped": false
-  },
-  {
    "n": 1080,
    "dates": 60,
    "median_life_s": 93600.0,
@@ -671,30 +467,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Pennsylvania gas price",
-   "capped": false
-  },
-  {
-   "n": 1080,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1050.0,
-   "class": "D",
-   "ticker": "KXAAAGASDPA",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Pennsylvania gas price",
-   "capped": false
-  },
-  {
-   "n": 435,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 73.63,
-   "class": "D",
-   "ticker": "KXAAAGASDRI",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Rhode Island gas price",
    "capped": false
   },
   {
@@ -722,18 +494,6 @@
    "capped": false
   },
   {
-   "n": 886,
-   "dates": 48,
-   "median_life_s": 93600.0,
-   "median_volume": 1100.0,
-   "class": "D",
-   "ticker": "KXAAAGASDSC",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "South Carolina gas price",
-   "capped": false
-  },
-  {
    "n": 435,
    "dates": 25,
    "median_life_s": 93600,
@@ -743,30 +503,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "South Dakota gas price",
-   "capped": false
-  },
-  {
-   "n": 435,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 30.75,
-   "class": "D",
-   "ticker": "KXAAAGASDSD",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "South Dakota gas price",
-   "capped": false
-  },
-  {
-   "n": 985,
-   "dates": 55,
-   "median_life_s": 93600,
-   "median_volume": 1000.0,
-   "class": "D",
-   "ticker": "KXAAAGASDTN",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Tennessee gas price",
    "capped": false
   },
   {
@@ -794,18 +530,6 @@
    "capped": false
   },
   {
-   "n": 1110,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1068.835,
-   "class": "D",
-   "ticker": "KXAAAGASDTX",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "TX gas price",
-   "capped": false
-  },
-  {
    "n": 588,
    "dates": 34,
    "median_life_s": 93600.0,
@@ -815,30 +539,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Utah gas price",
-   "capped": false
-  },
-  {
-   "n": 588,
-   "dates": 34,
-   "median_life_s": 93600.0,
-   "median_volume": 12.0,
-   "class": "D",
-   "ticker": "KXAAAGASDUT",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Utah gas price",
-   "capped": false
-  },
-  {
-   "n": 955,
-   "dates": 55,
-   "median_life_s": 93600,
-   "median_volume": 1009.39,
-   "class": "D",
-   "ticker": "KXAAAGASDVA",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Virginia gas price",
    "capped": false
   },
   {
@@ -866,18 +566,6 @@
    "capped": false
   },
   {
-   "n": 425,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 100.0,
-   "class": "D",
-   "ticker": "KXAAAGASDVT",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Vermont gas price",
-   "capped": false
-  },
-  {
    "n": 1020,
    "dates": 60,
    "median_life_s": 93600.0,
@@ -887,30 +575,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Washington gas price",
-   "capped": false
-  },
-  {
-   "n": 1020,
-   "dates": 60,
-   "median_life_s": 93600.0,
-   "median_volume": 1001.0,
-   "class": "D",
-   "ticker": "KXAAAGASDWA",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Washington gas price",
-   "capped": false
-  },
-  {
-   "n": 867,
-   "dates": 41,
-   "median_life_s": 93600,
-   "median_volume": 262.67,
-   "class": "D",
-   "ticker": "KXAAAGASDWI",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Wisconsin gas price",
    "capped": false
   },
   {
@@ -938,18 +602,6 @@
    "capped": false
   },
   {
-   "n": 425,
-   "dates": 25,
-   "median_life_s": 93600,
-   "median_volume": 100.0,
-   "class": "D",
-   "ticker": "KXAAAGASDWV",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "West Virginia gas price",
-   "capped": false
-  },
-  {
    "n": 469,
    "dates": 27,
    "median_life_s": 93600,
@@ -959,30 +611,6 @@
    "freq": "daily",
    "cat": "Economics",
    "title": "Wyoming gas price",
-   "capped": false
-  },
-  {
-   "n": 469,
-   "dates": 27,
-   "median_life_s": 93600,
-   "median_volume": 46.0,
-   "class": "D",
-   "ticker": "KXAAAGASDWY",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Wyoming gas price",
-   "capped": false
-  },
-  {
-   "n": 620,
-   "dates": 31,
-   "median_life_s": 27000.0,
-   "median_volume": 0.0,
-   "class": "D",
-   "ticker": "KXAUDUSDAD",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "AUDUSD Daily",
    "capped": false
   },
   {
@@ -1010,18 +638,6 @@
    "capped": false
   },
   {
-   "n": 559,
-   "dates": 61,
-   "median_life_s": 100799,
-   "median_volume": 846.73,
-   "class": "D",
-   "ticker": "KXBIGGESTQUAKE",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Biggest earthquake",
-   "capped": false
-  },
-  {
    "n": 670,
    "dates": 31,
    "median_life_s": 129600.0,
@@ -1031,30 +647,6 @@
    "freq": "daily",
    "cat": "Commodities",
    "title": "Brent Oil Daily",
-   "capped": false
-  },
-  {
-   "n": 670,
-   "dates": 31,
-   "median_life_s": 129600.0,
-   "median_volume": 2228.575,
-   "class": "D",
-   "ticker": "KXBRENTD",
-   "freq": "daily",
-   "cat": "Commodities",
-   "title": "Brent Oil Daily",
-   "capped": false
-  },
-  {
-   "n": 1460,
-   "dates": 32,
-   "median_life_s": 129600.0,
-   "median_volume": 45.019999999999996,
-   "class": "D",
-   "ticker": "KXCOPPERD",
-   "freq": "daily",
-   "cat": "Commodities",
-   "title": "Daily Copper",
    "capped": false
   },
   {
@@ -1082,30 +674,6 @@
    "capped": false
   },
   {
-   "n": 1380,
-   "dates": 60,
-   "median_life_s": 675000.0,
-   "median_volume": 1138.895,
-   "class": "W",
-   "ticker": "KXDIESELD",
-   "freq": "daily",
-   "cat": "Economics",
-   "title": "Daily Diesel Price",
-   "capped": false
-  },
-  {
-   "n": 585,
-   "dates": 39,
-   "median_life_s": 86400,
-   "median_volume": 236.08,
-   "class": "D",
-   "ticker": "KXEURUSD",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "EUR/USD daily range",
-   "capped": false
-  },
-  {
    "n": 585,
    "dates": 39,
    "median_life_s": 86400,
@@ -1127,30 +695,6 @@
    "freq": "daily",
    "cat": "Financials",
    "title": "GBPUSD Daily",
-   "capped": false
-  },
-  {
-   "n": 630,
-   "dates": 31,
-   "median_life_s": 27000.0,
-   "median_volume": 0.0,
-   "class": "D",
-   "ticker": "KXGBPUSDAD",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "GBPUSD Daily",
-   "capped": false
-  },
-  {
-   "n": 1280,
-   "dates": 32,
-   "median_life_s": 129600.0,
-   "median_volume": 398.105,
-   "class": "D",
-   "ticker": "KXGOLDD",
-   "freq": "daily",
-   "cat": "Commodities",
-   "title": "Gold Daily",
    "capped": false
   },
   {
@@ -1181,30 +725,6 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 9288.385,
-   "class": "D",
-   "ticker": "KXHIGHAUS",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Austin",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 13331.645,
-   "class": "D",
-   "ticker": "KXHIGHCHI",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Chicago",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 13331.645,
    "class": "D",
    "ticker": "KXHIGHCHI",
@@ -1223,30 +743,6 @@
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Highest temperature in Denver",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 6422.865,
-   "class": "D",
-   "ticker": "KXHIGHDEN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Denver",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 59343.59,
-   "class": "D",
-   "ticker": "KXHIGHLAX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Los Angeles",
    "capped": false
   },
   {
@@ -1277,48 +773,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 23895.894999999997,
-   "class": "D",
-   "ticker": "KXHIGHMIA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Miami",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 23478.06,
    "class": "D",
    "ticker": "KXHIGHNY",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Highest temperature in NYC",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 23478.06,
-   "class": "D",
-   "ticker": "KXHIGHNY",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in NYC",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 5353.360000000001,
-   "class": "D",
-   "ticker": "KXHIGHPHIL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Highest temperature in Philadelphia",
    "capped": false
   },
   {
@@ -1349,48 +809,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 5682.834999999999,
-   "class": "D",
-   "ticker": "KXHIGHTATL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Atlanta Max Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 3637.4049999999997,
    "class": "D",
    "ticker": "KXHIGHTBOS",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Boston Maximum Daily Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 3637.4049999999997,
-   "class": "D",
-   "ticker": "KXHIGHTBOS",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Boston Maximum Daily Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 5009.71,
-   "class": "D",
-   "ticker": "KXHIGHTDAL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Dallas Maximum Temperature",
    "capped": false
   },
   {
@@ -1421,48 +845,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 2885.5,
-   "class": "D",
-   "ticker": "KXHIGHTDC",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Washington DC Daily Max Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 370.62,
    "class": "D",
    "ticker": "KXHIGHTEWR",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Newark, NJ (EWR) Daily Max Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 370.62,
-   "class": "D",
-   "ticker": "KXHIGHTEWR",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Newark, NJ (EWR) Daily Max Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 4016.335,
-   "class": "D",
-   "ticker": "KXHIGHTHOU",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Daily High Temperature Houston",
    "capped": false
   },
   {
@@ -1493,48 +881,12 @@
    "n": 354,
    "dates": 59,
    "median_life_s": 190800.0,
-   "median_volume": 3691.955,
-   "class": "D",
-   "ticker": "KXHIGHTLV",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Las Vegas Max Daily Temperature",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
    "median_volume": 3922.24,
    "class": "D",
    "ticker": "KXHIGHTMIN",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Minneapolis Daily High Temperature",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 3922.24,
-   "class": "D",
-   "ticker": "KXHIGHTMIN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Minneapolis Daily High Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 1757.35,
-   "class": "D",
-   "ticker": "KXHIGHTNOLA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "New Orleans Max temp Daily",
    "capped": false
   },
   {
@@ -1565,48 +917,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 3410.73,
-   "class": "D",
-   "ticker": "KXHIGHTOKC",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Oklahoma City Maximum High Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 7461.719999999999,
    "class": "D",
    "ticker": "KXHIGHTPHX",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Phoenix High Temperature Daily",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 7461.719999999999,
-   "class": "D",
-   "ticker": "KXHIGHTPHX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Phoenix High Temperature Daily",
-   "capped": false
-  },
-  {
-   "n": 348,
-   "dates": 58,
-   "median_life_s": 190800.0,
-   "median_volume": 622.0350000000001,
-   "class": "D",
-   "ticker": "KXHIGHTSAN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "High Temperature San Diego",
    "capped": false
   },
   {
@@ -1637,48 +953,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 1894.0749999999998,
-   "class": "D",
-   "ticker": "KXHIGHTSATX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "San Antonio Daily Maximum Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 250.5,
    "class": "D",
    "ticker": "KXHIGHTSDF",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "HIGHEST Temperature SATX",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 250.5,
-   "class": "D",
-   "ticker": "KXHIGHTSDF",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "HIGHEST Temperature SATX",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 4790.09,
-   "class": "D",
-   "ticker": "KXHIGHTSEA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Seattle Maximum Temperature Daily",
    "capped": false
   },
   {
@@ -1706,18 +986,6 @@
    "capped": false
   },
   {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 7676.48,
-   "class": "D",
-   "ticker": "KXHIGHTSFO",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "San Francisco High Temperature Daily",
-   "capped": false
-  },
-  {
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
@@ -1727,30 +995,6 @@
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Trenton, NJ Daily Max Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 301.03499999999997,
-   "class": "D",
-   "ticker": "KXHIGHTTTN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Trenton, NJ Daily Max Temp",
-   "capped": false
-  },
-  {
-   "n": 1230,
-   "dates": 41,
-   "median_life_s": 73800.0,
-   "median_volume": 0.0,
-   "class": "D",
-   "ticker": "KXINX",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "S&P 500 range",
    "capped": false
   },
   {
@@ -1805,48 +1049,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 654.355,
-   "class": "D",
-   "ticker": "KXLOWTATL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Atlanta",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 1132.12,
    "class": "D",
    "ticker": "KXLOWTAUS",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Lowest temperature in Austin",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 1132.12,
-   "class": "D",
-   "ticker": "KXLOWTAUS",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature in Austin",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 577.27,
-   "class": "D",
-   "ticker": "KXLOWTBOS",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Boston",
    "capped": false
   },
   {
@@ -1877,48 +1085,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 1000.345,
-   "class": "D",
-   "ticker": "KXLOWTCHI",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature Chicago",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 548.67,
    "class": "D",
    "ticker": "KXLOWTDAL",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Lowest temperature Dallas",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 548.67,
-   "class": "D",
-   "ticker": "KXLOWTDAL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature Dallas",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 523.0699999999999,
-   "class": "D",
-   "ticker": "KXLOWTDC",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature DC ",
    "capped": false
   },
   {
@@ -1949,48 +1121,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 1326.295,
-   "class": "D",
-   "ticker": "KXLOWTDEN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature in Denver",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 263.12,
    "class": "D",
    "ticker": "KXLOWTEWR",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Newark, NJ (EWR) Daily Low Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 263.12,
-   "class": "D",
-   "ticker": "KXLOWTEWR",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Newark, NJ (EWR) Daily Low Temp",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 514.485,
-   "class": "D",
-   "ticker": "KXLOWTHOU",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Houston",
    "capped": false
   },
   {
@@ -2021,30 +1157,6 @@
    "n": 354,
    "dates": 59,
    "median_life_s": 190800.0,
-   "median_volume": 999.23,
-   "class": "D",
-   "ticker": "KXLOWTLAX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature in LA",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 588.355,
-   "class": "D",
-   "ticker": "KXLOWTLV",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Las Vegas Daily Low Temperature",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
    "median_volume": 588.355,
    "class": "D",
    "ticker": "KXLOWTLV",
@@ -2063,30 +1175,6 @@
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Lowest temperature in Miami",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 1158.505,
-   "class": "D",
-   "ticker": "KXLOWTMIA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature in Miami",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 739.46,
-   "class": "D",
-   "ticker": "KXLOWTMIN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low  temperature Minnesota",
    "capped": false
   },
   {
@@ -2117,48 +1205,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 432.895,
-   "class": "D",
-   "ticker": "KXLOWTNOLA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "NOLA Low Temperature",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 2563.26,
    "class": "D",
    "ticker": "KXLOWTNYC",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Lowest temperature in NYC",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 2563.26,
-   "class": "D",
-   "ticker": "KXLOWTNYC",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature in NYC",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 668.925,
-   "class": "D",
-   "ticker": "KXLOWTOKC",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Oklahoma City",
    "capped": false
   },
   {
@@ -2189,48 +1241,12 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 577.4649999999999,
-   "class": "D",
-   "ticker": "KXLOWTPHIL",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest temperature in Philadelphia",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 883.895,
    "class": "D",
    "ticker": "KXLOWTPHX",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Low Temperature Phoenix",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 883.895,
-   "class": "D",
-   "ticker": "KXLOWTPHX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Phoenix",
-   "capped": false
-  },
-  {
-   "n": 348,
-   "dates": 58,
-   "median_life_s": 190800.0,
-   "median_volume": 253.9,
-   "class": "D",
-   "ticker": "KXLOWTSAN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature San Diego",
    "capped": false
   },
   {
@@ -2261,30 +1277,6 @@
    "n": 360,
    "dates": 60,
    "median_life_s": 190800.0,
-   "median_volume": 392.355,
-   "class": "D",
-   "ticker": "KXLOWTSATX",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature SATX",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 166.83999999999997,
-   "class": "D",
-   "ticker": "KXLOWTSDF",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature SDX",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
    "median_volume": 166.83999999999997,
    "class": "D",
    "ticker": "KXLOWTSDF",
@@ -2309,48 +1301,12 @@
    "n": 354,
    "dates": 59,
    "median_life_s": 190800.0,
-   "median_volume": 422.985,
-   "class": "D",
-   "ticker": "KXLOWTSEA",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Low Temperature Seattle",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
    "median_volume": 529.005,
    "class": "D",
    "ticker": "KXLOWTSFO",
    "freq": "daily",
    "cat": "Climate and Weather",
    "title": "Lowest Temperature San Francisco",
-   "capped": false
-  },
-  {
-   "n": 354,
-   "dates": 59,
-   "median_life_s": 190800.0,
-   "median_volume": 529.005,
-   "class": "D",
-   "ticker": "KXLOWTSFO",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Lowest Temperature San Francisco",
-   "capped": false
-  },
-  {
-   "n": 360,
-   "dates": 60,
-   "median_life_s": 190800.0,
-   "median_volume": 221.735,
-   "class": "D",
-   "ticker": "KXLOWTTTN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Trenton Daily low temp ",
    "capped": false
   },
   {
@@ -2402,30 +1358,6 @@
    "capped": false
   },
   {
-   "n": 1230,
-   "dates": 41,
-   "median_life_s": 73800.0,
-   "median_volume": 0.0,
-   "class": "D",
-   "ticker": "KXNASDAQ100",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "Nasdaq range",
-   "capped": false
-  },
-  {
-   "n": 2000,
-   "dates": 24,
-   "median_life_s": 129600.0,
-   "median_volume": 30.744999999999997,
-   "class": "D",
-   "ticker": "KXNATGASD",
-   "freq": "daily",
-   "cat": "Commodities",
-   "title": "Natural Gas Daily",
-   "capped": true
-  },
-  {
    "n": 2000,
    "dates": 24,
    "median_life_s": 129600.0,
@@ -2447,30 +1379,6 @@
    "freq": "daily",
    "cat": "Financials",
    "title": "NZDUSD Daily",
-   "capped": false
-  },
-  {
-   "n": 630,
-   "dates": 31,
-   "median_life_s": 27000.0,
-   "median_volume": 0.0,
-   "class": "D",
-   "ticker": "KXNZDUSDAD",
-   "freq": "daily",
-   "cat": "Financials",
-   "title": "NZDUSD Daily",
-   "capped": false
-  },
-  {
-   "n": 1761,
-   "dates": 60,
-   "median_life_s": 240599,
-   "median_volume": 13944.08,
-   "class": "D",
-   "ticker": "KXRAIN",
-   "freq": "daily",
-   "cat": "Climate and Weather",
-   "title": "Where will it rain daily",
    "capped": false
   },
   {

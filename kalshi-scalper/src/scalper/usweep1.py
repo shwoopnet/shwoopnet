@@ -154,6 +154,7 @@ def select() -> None:
         info.append(pr)
         if pr["n"] >= MIN_MARKETS and pr["dates"] >= MIN_DATES and pr["class"]:
             sel.append(pr)
+    sel = list({x["ticker"]: x for x in sel}.values())        # the census file can hold a series twice after a restart; one row per series
     sel.sort(key=lambda x: x["ticker"])
     (WORKERS / "USWEEP1_SERIES.json").write_text(json.dumps({"rule": "n>=300 settled markets in 60 days, >=20 close dates, life class from median anchor-open", "series": sel}, indent=1))
     (CACHE / "census_profile.json").write_text(json.dumps(info))
@@ -333,7 +334,7 @@ def summarise(rows: list) -> dict:
 
 
 def score() -> None:
-    sel = json.loads((WORKERS / "USWEEP1_SERIES.json").read_text())["series"]
+    sel = list({x["ticker"]: x for x in json.loads((WORKERS / "USWEEP1_SERIES.json").read_text())["series"]}.values())
     byt = {r["ticker"]: r for r in load_census()}
     candles = {}
     for line in (CACHE / "candles.jsonl").read_text().splitlines():
