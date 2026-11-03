@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 2:40 PM CT (20:40Z): W15 R6-FINAL BUILT
+
+r6_final.py in the scratchpad: dry mode (default, no network) ran clean on the 24 local book and 24 trade files; `--live` (git fetch of quote-data, copy of new files, candle pull for tickers with tape but no candles) is untested and must be tried once before Nov 12. The gold depth-sum was rebuilt inline (no script of it had been kept): windows in band at close-360, the nearest book poll within 6 s, a buy walks the 5 opposite side levels at 1 minus the bid, extra cents = average walk price minus the touch; today's dry result matches the first run (27 in-band windows, median and p90 extra 0.00c, maximum 0.09c at 125 contracts and 0.25c at 250). Candle files end about 11-02: 65 gold and 68 Dogecoin recorded tickers have tape but no candles until `--live` pulls them. Plan: run `python3 -I r6_final.py --live` on 2026-11-12 and again on 2026-11-14 after the recorder ends.
+
 ## 2026-11-03 2:38 PM CT (20:38Z): W14 DASH BUILT
 
 dash.sh in the scratchpad (`bash dash.sh`, needs KALSHI_REPORT_TOKEN in the environment): one 27 line block with the L1 and OICORE silence flags (L1 last order 1.2 hours ago, OICORE 0.4 hours ago at 20:37Z), the Dogecoin ladder tally and its triggers (net below -20 already reported to main, 76 settled and 8th loss not reached), C1, C9, OICORE cumulative (21 filled, 6 won, 15 lost, +$32.46), the S-LIM1-LIVE tag count (2, +$8.29), the OICORE forward band tables and the gold and Dogecoin summaries. Used on every wake from now.
