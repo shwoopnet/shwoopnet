@@ -59,3 +59,12 @@ Tail orders: 1 to 3 a close (nearest-7 strikes at 25 minutes: the far strikes wi
 Two (PESSIMISTIC and OPTIMISTIC bounds; the middle bound, the taker comparison and the price buckets are information). N +4 (+2 per rule), running count about 730,074 on the coordinator's total, z bar about 5.27.
 
 Code `src/scalper/makertail1.py`, tests `tests/test_makertail1.py` (synthetic book and tape), result `workers/MAKERTAIL1_RESULT.md`.
+
+## Amendment 1 (2026-11-03, after the DEV result, before any forward row was scored; 20 forward orders exist, none scored)
+
+Added at the coordinator's request. The 2026-11-12 forward read (closes from 2026-11-03 16:00Z) must ALSO report YES-side tails and NO-side tails SEPARATELY, under the pessimistic and the optimistic bounds, as pre-registered readouts. N +2 (one side claim, two bounds counted once each as the side rule).
+
+- **Claim:** NO-side tails (crash strikes, strike below spot) beat YES-side tails.
+- **Counting rule:** the side result counts only if the COMBINED forward pessimistic net per resting order and the NO-side forward pessimistic net per resting order are both above 0, with at least 150 forward pessimistic fills on EACH side. Otherwise the side split is information only and the claim is NOT_ENOUGH_DATA or FALSIFIED as the numbers fall.
+- The DEV side split seen in the result (YES PF 0.23 on 81 orders, NO PF 1.25 on 94) is a hypothesis from one 3.5 day sample, NOT evidence, and is not to be re-cut or extended on DEV. No side analysis is run on DEV data here; SKEW1 (taker at the ask, the full KXBTCD history) is a separate card run by the coordinator.
+- Nothing else in the rule, bounds, kill rules or holdout changes.
