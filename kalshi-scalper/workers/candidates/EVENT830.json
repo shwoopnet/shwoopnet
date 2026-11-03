@@ -1,0 +1,11 @@
+{
+ "id": "EVENT830",
+ "market": ["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"],
+ "stage": "discovery",
+ "freeze_utc": "2026-11-03T15:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.event830:forward_eval",
+ "params": {},
+ "generator": "EVENT830 (forward only; slice chosen from EVENT1 after its pooled FALSIFIED verdict; workers/EVENT830_REGISTRATION.md)",
+ "description": "Cheaper side (ask 0.05 to 0.50, hard fill limit 0.50) of 8 L1-free 15 minute series at the 180 s look in the window closing at a listed US 8:30 ET release (CPI, PPI, jobs, retail, GDP and PCE, weekly claims), fill at the next candle ask, held. Calendar frozen to 2026-12-31. 1 try. Kill: PF under 1.0 at 40 trades, or under 1.2 / event minus Eastern-clock control not positive at 150."
+}
