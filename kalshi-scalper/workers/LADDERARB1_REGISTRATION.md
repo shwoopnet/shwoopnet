@@ -1,0 +1,11 @@
+# LADDERARB1 registration (2026-11-03, written before any outcome was joined; census is outcome-free)
+
+**Idea.** Internal consistency inside one strike ladder (no outside price). KINK: a strike whose cheap-side ask (3c to 30c) is at least 3x below the log-linear interpolation of its two neighbouring strikes' asks (same side). ARB: YES ask(K1) <= YES bid(K2) for K1 < K2; buy the leg whose ask is 3c to 30c. Buy at the next candle's ask, held to settlement, at most 2 per event (largest kink gap first, arb pairs first), C = 10 with fee. Looks: 60 and 20 minutes before the close (candle within 10 minutes before the look). Event-level cluster, pooled. Owner rule: cheap side only, no favourite-side result computed or printed, no 15 minute crypto or gold trigger.
+
+**Duplicate check (done first).** KINK on Bitcoin and gold hourly ladders is NEWH4 H1/H2 (strike 5c off a leave-one-out probit curve, 10c to 85c; PF 0.94/0.83 and 0.86/0.67, FALSIFIED); my version differs only in a ratio test on the 3c to 30c band, same mechanism (stale or thin quote vs neighbours), so on those two ladders it is a **partial duplicate and not re-run**. Arb locks: ARB1 to ARB5, LADLOCK, FAMXV (internal consistency DUPLICATE), the 2026-10-26 snapshot (4,064 pairs, 0 locks), NEWH13 GLADX-L. SKEW1 is a different rule (tail side split); XLADDER1 is range brackets against the 4 pm ladder (NOT_ENOUGH_DATA, 20 events). Not covered anywhere: this kink ratio on the S&P 500 and Nasdaq 100 daily "above K" ladders (KXINXU, KXNASDAQ100U); the only family left to run.
+
+**Fixed thresholds.** Band 0.03 to 0.30; ratio 3.0; at least 5 strikes quoted at the look; max 2 per event; frozen last third (closes from 2026-10-03T16:00Z) never joined. No outcome column is read by `src/scalper/ladderarb1.py`.
+
+**Prediction.** The index ladders have too few kinks to trade (under 20 treated trades). If it could be run: win rate at or below the price paid (NEWH4 pattern), PF 0.6 to 1.0.
+
+**Kill rules.** NOT_ENOUGH_DATA under 150 treated trades in the whole sample (stop, forward plan). If run: FALSIFIED unless mean net after fees is above 0 in both halves and PF is at least 1.5; z under the deflated bar 5.27 is NOT_YET_FALSIFIED at best. N: +2 per rule, 2 rules (KINK, ARB) = +4.
