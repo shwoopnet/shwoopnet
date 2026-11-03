@@ -2,7 +2,7 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-03 12:25 PM CT (18:25Z): S-LIM1-LIVE REGISTERED (review of the live OICORE limit +1c rule, replaces the S-LIM1 shadow)
+## 2026-11-03 12:20 PM CT (18:20Z): S-LIM1-LIVE REGISTERED (review of the live OICORE limit +1c rule, replaces the S-LIM1 shadow)
 
 Owner put the limit 1c above the touch live (PR open, never past 50c). Review rule, fixed now: tag every OICORE order whose FILL price is at least 1c above the first-seen ask of its side (YES: seenAsk; NO: 1 minus seenBid); after 20 tagged orders, report their net; REVERT if that net is below zero. Prediction: net above zero and win rate above 20%. Pre-deploy baseline (19 filled, `lim_review.py`): 0 tagged at the 1c threshold (the bot's fills are whole cents against a sub-cent first-seen ask, so a 0.5c threshold would tag 7 rounding cases). Data gap: the report's slot orders carry no `avgFill` (null on all 24), so the fill price is derived from settledPnl with the exact cent-rounded fee; asked main to have the PR record the fill price on slot orders. S-JUMP1 and S-TIM1 unchanged. 1 try.
 
