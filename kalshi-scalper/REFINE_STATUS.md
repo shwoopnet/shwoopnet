@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 10:10 CT (16:10Z): S-LIM1 REGISTERED (OICORE limit +1c shadow), items 6 and 7 answered
+
+S-LIM1: for every OICORE order, record whether a limit 1c and 2c above the placed limit would have filled (R6 book ask path in the 12 s after the order) and the settled outcome; read at 30 unfilled orders. Prediction: unfilled win rate above 20% and net above 0 at +1c. Kill: net under 0 on 20 unfilled. Seed (6 unfilled, history of this record, not evidence): 3 won, about +$12.2 at +1c if all filled; book rows exist for only 3 of the 6. 1 try. OICORE kill rules replayed on 18 live fills: tracking; net -$6 after 40 is not tight (false kill 0.1% at a true 28%), streak-18 is (6.4% within 100 fills at 28%, 27% at 20%). Correlation with gold: 2 shared windows, unmeasurable. Open: BTC candle pull for sub-bands, timing, time of day, jump strength, relative trigger (resumed 15:00Z).
+
 ## 2026-11-03 08:00 CT (13:30Z): owner's six questions answered to main (read only)
 
 Gold 14 ct + OICORE 10 ct bootstrap from live fills: median $276 a month (90% $178 to $369); OICORE rests on 18 trades, so treat it as $0 to $190. 12% stop (about $66 on an assumed $550 base) needs about 7 gold losses in a day; worst realized 24h so far -$10.13. Gold exit: sim PF 1.28 at 25c and 15c, 1.25 with no exit, live 9 exits saved about $8.3 (8 of 9 would have lost anyway). No-fills: gold 121 won of 132 (loss rate 8.3% vs 4.6% filled, so fills are not missed winners); OICORE 3 of 6 won (n too small). OICORE needs a shadow before any limit change. Open: BTC candle pull for the relative trigger (OIREL) restarted 13:00Z after dying under nohup; drift analysis follows.
