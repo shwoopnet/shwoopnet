@@ -186,3 +186,6 @@ are the only things that could change the answer.
 Limits of this audit: parse coverage is 63% for z and 34% for N charged; shape and lane are partly keyword based; first-z-per-unit
 treats a family's first number as its headline; the mirror test cannot detect one real edge among hundreds of losers; and the
 fee-drag null (z centred below zero) is stated, not estimated. Nothing here is a trading result or changes any verdict.
+
+## Correction (2026-11-03, added by the coordinator after APPROVAL1)
+AUDIT1 stated that no approval-rating market had been tested. README APP1 (2026-10-21) already ran the Trump-approval ladder on all sides (97 entries, NOT_ENOUGH_DATA), and APPROVAL1 (2026-11-03) added the cheap-side ratio rule (NOT_ENOUGH_DATA, control PF 0.59). Lane coverage in the politics row is therefore wider than the table shows; the table's keyword assignment missed APP1.
