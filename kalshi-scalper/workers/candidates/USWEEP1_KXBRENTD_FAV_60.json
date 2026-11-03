@@ -1,0 +1,19 @@
+{
+ "id": "USWEEP1_KXBRENTD_FAV_60",
+ "market": "KXBRENTD",
+ "stage": "discovery",
+ "freeze_utc": "2026-11-03T17:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.usweep1:forward_eval",
+ "params": {
+  "series": "KXBRENTD",
+  "look_minutes": 60,
+  "band": [
+   0.85,
+   0.97
+  ],
+  "hard_limit": 0.97
+ },
+ "generator": "USWEEP1 (development cells positive in both halves; frozen last third of each series' dates and all later markets are the forward window; workers/USWEEP1_RESULT.md)",
+ "description": "Brent Oil Daily: favourite (ask 0.85 to 0.97, hard limit 0.97) 60 min before the close, taker, held. Development n 44 on 18 dates, win 97.7% vs 93.0c paid, net +4.22c, z 2.10, halves +2.8c / +6.1c. Probe: 1 contract, kill at 40 fills with PF under 1.0; worst loss 98c per contract (about $9.73 at 10); about 2.4 entries a day in development, so 40 fills in roughly 16 days (strikes on one day are not independent). Not a lead; below the deflated bar."
+}

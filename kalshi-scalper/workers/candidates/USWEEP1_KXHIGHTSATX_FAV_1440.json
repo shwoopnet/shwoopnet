@@ -1,0 +1,19 @@
+{
+ "id": "USWEEP1_KXHIGHTSATX_FAV_1440",
+ "market": "KXHIGHTSATX",
+ "stage": "discovery",
+ "freeze_utc": "2026-11-03T17:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.usweep1:forward_eval",
+ "params": {
+  "series": "KXHIGHTSATX",
+  "look_minutes": 1440,
+  "band": [
+   0.85,
+   0.97
+  ],
+  "hard_limit": 0.97
+ },
+ "generator": "USWEEP1 (development cells positive in both halves; frozen last third of each series' dates and all later markets are the forward window; workers/USWEEP1_RESULT.md)",
+ "description": "San Antonio Daily Maximum Temperature: favourite (ask 0.85 to 0.97, hard limit 0.97) 1440 min before the close, taker, held. Development n 52 on 32 dates, win 96.2% vs 91.1c paid, net +4.49c, z 1.79, halves +4.6c / +4.4c. Probe: 1 contract, kill at 40 fills with PF under 1.0; worst loss 98c per contract (about $9.73 at 10); about 1.6 entries a day in development, so 40 fills in roughly 25 days (strikes on one day are not independent). Not a lead; below the deflated bar."
+}

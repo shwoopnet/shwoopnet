@@ -364,6 +364,29 @@ def score() -> None:
     print(f"{len(cells)} cells scored")
 
 
+# ---- forward watch (workers/USWEEP1_RESULT.md): daily favourites, 1 contract, hard limit 0.97 ----
+FWD_FREEZE = int(datetime(2026, 11, 3, 17, 0, tzinfo=timezone.utc).timestamp())
+FWD = {"KXNATGASD": 360, "KXGOLDD": 360, "KXBRENTD": 60, "KXSILVERD": 360, "KXHIGHTSATX": 1440}   # series -> minutes before the close
+
+
+def forward_eval(window, params=None):
+    """The USWEEP1 favourite (ask 0.85 to 0.97, hard limit 0.97) of one watched daily series at its registered look. None for every other window
+    or a window that closes before the freeze; NoData when the look candle is missing or one sided. Expects window["candles"] = {end_ts: (bid_c, ask_c, volume, ...)}
+    like the other evaluators; the 15 minute ledger feed does not deliver daily windows, so this stays inert until a daily feed exists."""
+    from .fwdeval import NoData
+    ser, look = window.get("series"), FWD.get(window.get("series"))
+    if look is None or window["close_ts"] < FWD_FREEZE:
+        return None
+    q = window["candles"].get(window["close_ts"] - look * 60)
+    if q is None or q[0] is None or q[1] is None or not 0 < q[0] < q[1] < 1:
+        raise NoData("look candle missing or one sided")
+    for side, ask in (("yes", q[1]), ("no", round(1 - q[0], 4))):
+        if RULES["fav"][0] - 1e-9 <= ask <= RULES["fav"][1] + 1e-9:
+            return {"side": side, "entry": float(ask), "exit": None, "t": int(window["close_ts"] - look * 60), "zero_volume": (q[2] or 0) <= 0,
+                    "note": f"USWEEP1 {ser} favourite {look} min before the close"}
+    return None
+
+
 def z_bar(n_total: float, alpha: float = 0.05) -> float:
     """One sided Bonferroni-style bar for n_total tries, as the ledger quotes it (5.27 at 728,702)."""
     from statistics import NormalDist

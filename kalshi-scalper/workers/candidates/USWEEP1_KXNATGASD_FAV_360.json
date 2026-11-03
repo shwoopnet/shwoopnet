@@ -1,0 +1,19 @@
+{
+ "id": "USWEEP1_KXNATGASD_FAV_360",
+ "market": "KXNATGASD",
+ "stage": "discovery",
+ "freeze_utc": "2026-11-03T17:00:00Z",
+ "source": "candles",
+ "evaluator": "scalper.usweep1:forward_eval",
+ "params": {
+  "series": "KXNATGASD",
+  "look_minutes": 360,
+  "band": [
+   0.85,
+   0.97
+  ],
+  "hard_limit": 0.97
+ },
+ "generator": "USWEEP1 (development cells positive in both halves; frozen last third of each series' dates and all later markets are the forward window; workers/USWEEP1_RESULT.md)",
+ "description": "Natural Gas Daily: favourite (ask 0.85 to 0.97, hard limit 0.97) 360 min before the close, taker, held. Development n 67 on 6 dates, win 98.5% vs 92.4c paid, net +5.60c, z 3.71, halves +7.3c / +4.2c. Probe: 1 contract, kill at 40 fills with PF under 1.0; worst loss 98c per contract (about $9.73 at 10); about 11.2 entries a day in development, so 40 fills in roughly 4 days (strikes on one day are not independent). Not a lead; below the deflated bar."
+}

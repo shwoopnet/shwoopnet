@@ -27,4 +27,8 @@ e = u.entries_for(rec, ms, cand, {"M1": "yes"})
 check("fav entry at 6h on yes side", (360, "fav") in e and e[(360, "fav")][0][2] is True)
 check("no look-ahead: market closed at look dropped", u.entries_for(rec, [["M2", 0, 100000 - 7200 * 60, 100000, 1, True]], {"M2": cand["M1"]}, {"M2": "yes"}) == {})
 check("z bar matches the ledger", abs(u.z_bar(728702) - 5.27) < 0.02)
+w = {"series": "KXGOLDD", "close_ts": u.FWD_FREEZE + 86400, "candles": {u.FWD_FREEZE + 86400 - 360 * 60: (0.93, 0.95, 5.0)}}
+check("forward_eval buys the favourite", u.forward_eval(w)["entry"] == 0.95 and u.forward_eval(w)["side"] == "yes")
+check("forward_eval ignores other series and pre-freeze windows", u.forward_eval(dict(w, series="KXFOO")) is None and u.forward_eval(dict(w, close_ts=u.FWD_FREEZE - 1)) is None)
+check("forward_eval hard limit 0.97", u.forward_eval({"series": "KXGOLDD", "close_ts": w["close_ts"], "candles": {w["close_ts"] - 21600: (0.97, 0.985, 1.0)}}) is None)
 sys.exit(1 if fails else 0)
