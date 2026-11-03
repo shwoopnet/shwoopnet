@@ -215,29 +215,44 @@ def fetch() -> None:
         ms, _ = dev_markets(byt[s["ticker"]])
         interval = 1 if s["class"] == "H" else 60
         tmax = max(u1.LOOKS[s["class"]])
+        ms = sorted((m for m in ms if m[0] not in have), key=u1.anchor_of)
+        chunk = []
         for m in ms:
-            if m[0] not in have:
-                jobs.append((s["ticker"], interval, tmax, m))
-    print(f"{len(jobs)} candle requests for {len(sel)} series", flush=True)
+            cand = chunk + [m]
+            span = (u1.anchor_of(cand[-1]) - u1.anchor_of(cand[0]) + tmax * 60 + 4 * interval * 60) / (interval * 60)
+            if chunk and span * len(cand) > 8500:       # keep one request under the 10,000 candle limit
+                jobs.append((s["ticker"], interval, tmax, chunk)); chunk = [m]
+            else:
+                chunk = cand
+        if chunk:
+            jobs.append((s["ticker"], interval, tmax, chunk))
+    print(f"{len(jobs)} candle requests (batched) for {len(sel)} series", flush=True)
     n = [0]
 
     def run(job):
-        t, interval, tmax, m = job
-        anc = u1.anchor_of(m)
+        t, interval, tmax, chunk = job
+        lo = min(u1.anchor_of(m) for m in chunk) - tmax * 60 - 2 * interval * 60
+        hi = max(u1.anchor_of(m) for m in chunk) + 60
         try:
-            d = api._get("/markets/candlesticks", {"market_tickers": m[0], "start_ts": anc - tmax * 60 - 2 * interval * 60, "end_ts": anc + 60, "period_interval": interval})
+            d = api._get("/markets/candlesticks", {"market_tickers": ",".join(m[0] for m in chunk), "start_ts": lo, "end_ts": hi, "period_interval": interval})
             cm = {x.get("market_ticker"): x.get("candlesticks", []) for x in d.get("markets", [])}
         except Exception as e:
             print("  fail", t, str(e)[:80], flush=True); return
-        cs = []
-        for c in cm.get(m[0], []):
-            b, a = c.get("yes_bid") or {}, c.get("yes_ask") or {}
-            cs.append([c.get("end_period_ts"), api.f(b.get("close_dollars")), api.f(a.get("close_dollars")), api.f(c.get("volume_fp"))])
         with lock:
-            cf.write(json.dumps({"t": m[0], "s": t, "iv": interval, "c": cs}) + "\n")
+            for m in chunk:
+                anc = u1.anchor_of(m)
+                cs = []
+                for c in cm.get(m[0], []):
+                    e = c.get("end_period_ts")
+                    if e is None or not (anc - tmax * 60 - 2 * interval * 60 <= e <= anc + 60):
+                        continue                       # keep only this market's own look window
+                    b, a = c.get("yes_bid") or {}, c.get("yes_ask") or {}
+                    cs.append([e, api.f(b.get("close_dollars")), api.f(a.get("close_dollars")), api.f(c.get("volume_fp"))])
+                cf.write(json.dumps({"t": m[0], "s": t, "iv": interval, "c": cs}) + "\n")
             n[0] += 1
-            if n[0] % 100 == 0:
-                cf.flush(); print(f"  {n[0]} / {len(jobs)}", flush=True)
+            cf.flush()
+            if n[0] % 10 == 0:
+                print(f"  {n[0]} / {len(jobs)}", flush=True)
         time.sleep(0.3)
 
     with ThreadPoolExecutor(2) as ex:
