@@ -1,0 +1,47 @@
+VOLGAP1 run 2026-11-03T14:11:05.055842+00:00 N=728740 z bar 5.27 cost: fee 7% x C x p x (1-p) rounded up, C=10, taker at the next minute's ask
+markets near spot 102288, with candles 93384
+--- GROUP CRYPTO (KXBTCD, KXETHD)
+closes with listed near-spot strikes: KXBTCD 1549, KXETHD 1548; with a vol and a fit: 1387
+ratio realised/implied quantiles 5/25/50/75/95: 0.62 0.82 0.98 1.14 1.54
+trigger hours ratio >= 1.5: 82 (5.9%); control hours ratio <= 0.67: 102 (7.4%)
+trades (outcome-free count, all windows): treated 67, treated-alt nearest-0.10 73, control nearest-0.10 85, model rule in control hours 0; treated with a model trade but no fill 15
+TREATED model edge W1: n 16 days 11 PF 0.00 mean -9.88c z -7.54 | fees x1.2 mean -9.97c
+TREATED model edge W2: n 22 days 11 PF 0.00 mean -8.50c z -20.62 | fees x1.2 mean -8.60c
+TREATED model edge W1+W2: win rate 0.0% of 38, mean win 0.0c, mean loss 9.1c, payoff ratio 0.00
+TREATED-ALT nearest 0.10 W1: n 19 days 12 PF 0.00 mean -9.28c z -15.44 | fees x1.2 mean -9.39c
+TREATED-ALT nearest 0.10 W2: n 24 days 12 PF 1.03 mean +0.21c z +0.03 | fees x1.2 mean +0.12c
+TREATED-ALT nearest 0.10 W1+W2: win rate 4.7% of 43, mean win 91.4c, mean loss 8.6c, payoff ratio 10.58
+CONTROL nearest 0.10 W1: n 34 days 13 PF 0.27 mean -7.17c z -2.47 | fees x1.2 mean -7.29c
+CONTROL nearest 0.10 W2: n 34 days 13 PF 0.34 mean -5.40c z -2.24 | fees x1.2 mean -5.50c
+CONTROL nearest 0.10 W1+W2: win rate 2.9% of 68, mean win 90.4c, mean loss 9.2c, payoff ratio 9.81
+model rule in control hours W1: n 0 days 0 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+model rule in control hours W2: n 0 days 0 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+calibration of cheap tails at the look (price 0.03 to 0.30, every strike and side), W1+W2 only: bucket n, mean price, win rate, model(realised) mean prob
+  ratio<=0.67: n 719 price 0.105 win 0.078 model 0.036
+  0.67<ratio<1.5: n 6103 price 0.106 win 0.077 model 0.103
+  ratio>=1.5: n 426 price 0.108 win 0.094 model 0.218
+CRYPTO Try A: NOT_ENOUGH_DATA | trades 67 under 150 (windows read below for information)
+CRYPTO control PF (nearest 0.10, ratio<=0.67, W1+W2) 0.30 mean -6.29c n 68; treated-alt PF 0.52 mean -3.99c n 43
+--- GROUP GOLD (KXGOLDH)
+closes with listed near-spot strikes: KXGOLDH 1038; with a vol and a fit: 713
+ratio realised/implied quantiles 5/25/50/75/95: 0.52 0.71 0.86 1.04 1.32
+trigger hours ratio >= 1.5: 15 (2.1%); control hours ratio <= 0.67: 131 (18.4%)
+trades (outcome-free count, all windows): treated 6, treated-alt nearest-0.10 6, control nearest-0.10 71, model rule in control hours 2; treated with a model trade but no fill 7
+TREATED model edge W1: n 1 days 1 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+TREATED model edge W2: n 1 days 1 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+TREATED model edge W1+W2: win rate 0.0% of 2, mean win 0.0c, mean loss 16.5c, payoff ratio 0.00
+TREATED-ALT nearest 0.10 W1: n 0 days 0 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+TREATED-ALT nearest 0.10 W2: n 1 days 1 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+TREATED-ALT nearest 0.10 W1+W2: win rate 0.0% of 1, mean win 0.0c, mean loss 11.7c, payoff ratio 0.00
+CONTROL nearest 0.10 W1: n 17 days 8 PF 1.58 mean +5.41c z +0.70 | fees x1.2 mean +5.25c
+CONTROL nearest 0.10 W2: n 17 days 11 PF 3.50 mean +17.88c z +1.53 | fees x1.2 mean +17.75c
+CONTROL nearest 0.10 W1+W2: win rate 23.5% of 34, mean win 84.5c, mean loss 10.8c, payoff ratio 7.84
+model rule in control hours W1: n 1 days 1 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+model rule in control hours W2: n 0 days 0 PF 0.00 mean +0.00c z +0.00 | fees x1.2 mean +0.00c
+model rule in control hours W1+W2: win rate 0.0% of 1, mean win 0.0c, mean loss 27.4c, payoff ratio 0.00
+calibration of cheap tails at the look (price 0.03 to 0.30, every strike and side), W1+W2 only: bucket n, mean price, win rate, model(realised) mean prob
+  ratio<=0.67: n 439 price 0.160 win 0.144 model 0.067
+  0.67<ratio<1.5: n 1572 price 0.176 win 0.149 model 0.151
+  ratio>=1.5: n 45 price 0.156 win 0.111 model 0.246
+GOLD Try A: NOT_ENOUGH_DATA | trades 6 under 150 (windows read below for information)
+GOLD control PF (nearest 0.10, ratio<=0.67, W1+W2) 2.41 mean +11.64c n 34; treated-alt PF 0.00 mean +0.00c n 1
