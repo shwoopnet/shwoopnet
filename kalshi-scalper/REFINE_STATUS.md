@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 2:36 PM CT (20:36Z): W13 FORWARD-L1 BUILT, W14 DASH REGISTERED
+
+W13 tool forward_l1.py in the scratchpad. First read: gold whole record 246 fills, 10 early sells (4.1%), 12 losses, net +$47.10 (it was +$52.78 at 12:31Z: the 94 to 97c bucket took a new early sell, -$10.48); since 2026-11-02T22:55Z 19 fills, 2 early sells, net -$6.83. At or below 0.926: 114 fills, 9 early sells (7.9%), net +$20.42; above 0.926: 132 fills, 1 early sell (0.8%), net +$26.68. Dogecoin ladder 61 fills, 7 early sells, net -$23.12; hold counterfactual -$45.14 vs exits -$64.35 (3 of 7 would have won). Gold hold counterfactual, whole record: 10 early sells, 1 would have won, exits -$73.35 vs hold -$82.54 (exits better by about $9).
+W14 DASH REGISTERED (a tool): dash.py, one script that prints the whole wake check in one block: L1 and OICORE last order times with the silence flags (L1 over 3 hours on a weekday, OICORE over 14 hours), Dogecoin ladder tally (triggers 76 settled or 8 losses), C1, C9 and the S-LIM1-LIVE tag count; it calls the existing scripts. Output only, no writes outside the scratchpad.
+
 ## 2026-11-03 2:35 PM CT (20:35Z): W10 R6-BOOK-OICORE RESULT, W13 FORWARD-L1 REGISTERED
 
 W10 (4 testable tries; spread is exactly 1c in every window): pool 146 Bitcoin cheap-side windows on the R6 days (win 27.4%, PF 1.48, +5.01c), halves of 73. No book feature passes: touch size (median 1,639) high cell PF 1.56 vs low 1.38 but the sign of the win rate flips between halves; imbalance (median 0.876) high cell win 32.9% vs 21.9% but PF 1.41 vs 2.20 in half 1. Noise at this size; the Nov 12 to 13 rerun will have about 1.5x the windows.
