@@ -55,7 +55,7 @@ gates.ST6 = () => {
   const pageIds = m[1].split(',').map((x) => x.trim().replace(/'/g, '')).filter(Boolean);
   assert.deepStrictEqual(pageIds, slotLib.SLOT_STRATEGIES.map((x) => x.id), 'the page names exactly the strategies the code registers');
   for (const id of pageIds) {
-    assert.ok(new RegExp('<span id="kalRulesSlot">' + id + ',').test(html), 'Rules and limits describes ' + id);
+    assert.ok(new RegExp('<span id="kalRulesSlot[A-Za-z]*">' + id + ',').test(html), 'Rules and limits describes ' + id);
     assert.ok(new RegExp(id + ': \\{ name: ').test(html), 'the Strategies module describes ' + id);
   }
   const l1m = /L1: \{ name: 'Closing buy', markets: '([^']+)'/.exec(html); assert.ok(l1m, 'L1 markets are listed');

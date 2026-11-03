@@ -73,6 +73,8 @@ function makeRunners(flags) {
       for (const q of quotes || []) {
         if (!q || !q.m || !s.series.includes(q.series) || !OPEN_SHORT.includes(q.m.status)) continue;
         const left = (Date.parse(q.m.close_time) - now) / 1000;
+        // A calendar strategy (EVENT830) skips every market whose window is not a listed release before any read: on other days it makes no call at all.
+        if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, q.m.ticker, Date.parse(q.m.close_time))) continue;
         if (Number.isFinite(left) && left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec) jobs.push({ s, ticker: q.m.ticker, series: q.series });
       }
     }
@@ -112,6 +114,10 @@ function makeRunners(flags) {
       if (!OPEN_SHORT.includes(m.status) || !(left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec)) { results.push(ticker + ": not open in the entry window"); continue; }
       const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
       if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { results.push(ticker + ": no two-sided quote"); continue; }
+      const spread = r4(ask - bid), closeMs = Date.parse(m.close_time);
+      // The fresh market read must still be a listed release window (the gate checks it again at commit time) and, for a spread rule, no wider than the strategy allows.
+      if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, ticker, closeMs)) { results.push(ticker + ": not a listed release window"); continue; }
+      if (Number.isFinite(s.entry.maxSpread) && !(spread <= s.entry.maxSpread + 1e-9)) { results.push(ticker + ": the spread is " + spread.toFixed(2) + ", wider than " + s.entry.maxSpread.toFixed(2)); continue; }
       // Which side, and the price of that side at the touch (cents).
       const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
       const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
@@ -156,7 +162,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, position, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -179,6 +185,7 @@ function makeRunners(flags) {
         if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
         Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise,
+          ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };

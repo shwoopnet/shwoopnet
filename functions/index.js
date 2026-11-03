@@ -671,10 +671,23 @@ exports.kalshiLiveArmed = onSchedule(
         } catch (e) { console.error("kalshiLiveArmed: shard alert failed: " + String((e && e.message) || e).slice(0, 160)); }
         // Slot only: right after L1, in the same minute function, on the figures L1 just worked out. It cannot fail the tick (the error is logged) and does nothing if L1 ended the session.
         if (SLOT_ON) {
+          // A calendar strategy's markets (EVENT830's eight, none of them L1's) are read ONLY in the minute or two before a listed release window can enter (slotCalendarSeriesDue), and only for the slot:
+          // they go into a copy of the list, never into what runL1Tick read. On every other minute this adds no read. One series failing is skipped, never allowed to stop the rest.
+          let slotQuotes = market.quotes;
+          try {
+            const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).filter((x) => !market.quotes.some((q) => q && q.series === x));
+            if (due.length) {
+              slotQuotes = market.quotes.slice();
+              for (const series of due) {
+                try { for (const m of await kalshiMarketApi().markets(series)) slotQuotes.push({ series, m }); }
+                catch (e) { console.error("kalshiLiveArmed: " + series + " slot quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
+              }
+            }
+          } catch (e) { console.error("kalshiLiveArmed: slot calendar quotes failed: " + String((e && e.message) || e).slice(0, 120)); }
           try {
             const slotResult = await slotRun.runSlotTick({
               session, now, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", active: market.active, store: slotStoreLib.slotStore(db, firestoreLiveStore(db)),
-              keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch, quotes: market.quotes, clock: Date.now,
+              keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch, quotes: slotQuotes, clock: Date.now,
               setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent, shared: shareOut, l1Result,
               sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
             });
