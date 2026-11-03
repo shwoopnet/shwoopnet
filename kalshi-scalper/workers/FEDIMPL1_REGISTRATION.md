@@ -78,3 +78,6 @@ Two rules (R1, R2): **N +4** (+2 per rule). Running count about 730,040 -> 730,0
 Meetings after the freeze (2026-11-03): **2026-12-09** (Wed), then 2027-01-28, 2027-03-17, 2027-04-28, 2027-06-16, 2027-07-28 per Kalshi's listed
 events (decision date = close_time date; checked against the live listing, not from memory). For each, the look is the business day before, and `python -m
 scalper.fedimpl1 forward` prints the signal and trade at that look (fetching the candles then) for the ledger. Nothing is placed.
+
+**Amendment 1 (2026-11-03, before any price read; dates only, rule unchanged).** The forward list above had dates from memory in three places. The live listing's
+close_time dates are: 2026-12-09, 2027-01-27, 2027-03-17, 2027-04-28, 2027-06-09, 2027-07-28, 2027-09-15, 2027-10-27, 2027-12-08. These replace the list above (the README line already has them).
