@@ -92,4 +92,23 @@ gates.W6 = () => {
   assert.ok(/Open-Meteo/.test(reg) && /how to turn it off/i.test(reg));
 };
 
+// W7 (WXLOW1): the lows ride in the same ensemble call, every low table is named with a _low suffix beside the highs, the lows watchlist names only KXLOWT series, and WXLOW1 has no order or key.
+gates.W7 = () => {
+  assert.ok(watch.cities.every((c) => /^KXLOWT[A-Z]+$/.test(c.low_series)), 'every city has a KXLOWT series in the watchlist');
+  assert.strictEqual(new Set(watch.cities.map((c) => c.low_series)).size, 14);
+  assert.ok(!/KX[A-Z0-9]{2,}/.test(strip(script)), 'the script still names no ticker');
+  const code = strip(script);
+  assert.ok(/daily=%s/.test(code) && /temperature_2m_max,temperature_2m_min/.test(code), 'one ensemble request carries both variables');
+  assert.strictEqual((code.match(/OPENMETEO,/g) || []).length, 1, 'one ensemble call site');
+  for (const t of ['ens_low', 'nws_low', 'quotes_low', 'events_low', 'results_low', 'obs_low']) assert.ok(code.includes('"' + t + '"'), t);
+  const low = fs.readFileSync(path.join(root, 'kalshi-scalper', 'src', 'scalper', 'wxlow1.py'), 'utf8');
+  const lc = strip(low);
+  assert.ok(!/PRIVATE|SECRET|Authorization|POST|PUT|DELETE|\/portfolio|\/orders\b|order_id|create_order|urllib|requests/i.test(lc), 'WXLOW1 reader: no network, no key, no order');
+  assert.ok(!/SD_F\s*=|MIN_RATIO\s*=|ASK_LO\s*=|ASK_HI\s*=|MAX_PER_DAY\s*=|FULL_TRADES\s*=|STOP_DATE\s*=|PF_BAR\s*=/.test(lc), 'WXLOW1 defines no rule constant of its own: it uses the WXENS1 ones');
+  const count = lc.slice(lc.indexOf('def cmd_count'), lc.indexOf('def _report'));
+  assert.ok(!/results_by_ticker|net_stress|verdict/.test(count), 'the lows count command reads no outcome');
+  const pooled = lc.slice(lc.indexOf('def cmd_pooled'), lc.indexOf('def main'));
+  assert.ok(/wxlow1_pooled_result\.txt/.test(pooled) && /refused: both city sets must be frozen/.test(pooled) && !/print\([^)]*sh\b/.test(pooled), 'pooled read: one shot, both city sets frozen, no split printed');
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }
