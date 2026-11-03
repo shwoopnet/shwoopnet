@@ -1,0 +1,4711 @@
+{
+"cells": [
+{
+"series": "KXAAAGASW",
+"title": "US gas price up",
+"cat": "Economics",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10700000000000001,
+"z": -7.205754817805772,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.030000000000000006
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"stress_net": -0.1084,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+}
+},
+{
+"series": "KXAAAGASW",
+"title": "US gas price up",
+"cat": "Economics",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+}
+},
+{
+"series": "KXAAAGASWNJ",
+"title": "New Jersey gas price this week",
+"cat": "Economics",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXAAAGASWNJ",
+"title": "New Jersey gas price this week",
+"cat": "Economics",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": -0.096,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.065
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": -0.096,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.065
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.0972,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXALBUMEQUIV",
+"title": "How many album equivalent will album sell",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000002
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000002
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000002
+}
+},
+{
+"series": "KXALBUMEQUIV",
+"title": "How many album equivalent will album sell",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.060000000000000005
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.060000000000000005
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXAUDUSDAW",
+"title": "AUDUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -26.098668469248913,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.085
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09000000000000001
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08
+},
+"stress_net": -0.1028,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXAUDUSDAW",
+"title": "AUDUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.07250000000000001,
+"excess": -0.07250000000000001,
+"net": -0.07775000000000001,
+"z": -3.0864590729686494,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.04
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.07250000000000001,
+"excess": -0.07250000000000001,
+"net": -0.07775000000000001,
+"z": -3.0864590729686494,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.04
+},
+"stress_net": -0.07880000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXAUDUSDAW",
+"title": "AUDUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.065,
+"excess": -0.065,
+"net": -0.07,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.035
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.065,
+"excess": -0.065,
+"net": -0.07,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.035
+},
+"stress_net": -0.07100000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXBRENTW",
+"title": "Brent Oil",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.009999999999999995
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.009999999999999995
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.009999999999999995
+}
+},
+{
+"series": "KXBRENTW",
+"title": "Brent Oil",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXBRENTW",
+"title": "Brent Oil",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 6,
+"dates": 3,
+"win": 0.0,
+"price": 0.085,
+"excess": -0.085,
+"net": -0.09066666666666667,
+"z": -5.954380497362594,
+"pf": 0.0,
+"traded": 0.16666666666666666,
+"spread": 0.030000000000000013
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.009999999999999995
+},
+"h2": {
+"n": 5,
+"dates": 2,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": -0.096,
+"z": -5.387480237611792,
+"pf": 0.0,
+"traded": 0.2,
+"spread": 0.030000000000000027
+},
+"stress_net": -0.0918,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.07999999999999999
+}
+},
+{
+"series": "KXCOPPERW",
+"title": "Copper Weekly Price",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.040000000000000036
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.040000000000000036
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.040000000000000036
+}
+},
+{
+"series": "KXCOPPERW",
+"title": "Copper Weekly Price",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 3,
+"win": 0.25,
+"price": 0.0675,
+"excess": 0.1825,
+"net": 0.17775,
+"z": 1.2259470299658057,
+"pf": 4.906593406593407,
+"traded": 0.0,
+"spread": 0.030000000000000013
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.5,
+"price": 0.08,
+"excess": 0.42,
+"net": 0.4145,
+"z": 1.4933936364360564e+16,
+"pf": 13.953125,
+"traded": 0.0,
+"spread": 0.025
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.055,
+"excess": -0.055,
+"net": -0.059000000000000004,
+"z": -16.68772003600253,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.03500000000000003
+},
+"stress_net": 0.1768,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXCOPPERW",
+"title": "Copper Weekly Price",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.25,
+"price": 0.0775,
+"excess": 0.1725,
+"net": 0.167,
+"z": 2.137318234536714,
+"pf": 3.7154471544715446,
+"traded": 0.0,
+"spread": 0.02500000000000001
+},
+"h1": {
+"n": 3,
+"dates": 1,
+"win": 0.3333333333333333,
+"price": 0.08666666666666667,
+"excess": 0.24666666666666665,
+"net": 0.24066666666666667,
+"z": 0.0,
+"pf": 4.760416666666667,
+"traded": 0.0,
+"spread": 0.020000000000000018
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.030000000000000027
+},
+"stress_net": 0.16590000000000002,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXDJI",
+"title": "DJI Hourly",
+"cat": "Financials",
+"freq": "hourly",
+"cls": "H",
+"T": 5,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000004
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000004
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXDJI",
+"title": "DJI Hourly",
+"cat": "Financials",
+"freq": "hourly",
+"cls": "H",
+"T": 15,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+}
+},
+{
+"series": "KXDJI",
+"title": "DJI Hourly",
+"cat": "Financials",
+"freq": "hourly",
+"cls": "H",
+"T": 30,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.0825,
+"excess": -0.0825,
+"net": -0.08825000000000001,
+"z": -13.31246366713873,
+"pf": 0.0,
+"traded": 0.75,
+"spread": 0.015
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+},
+"h2": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.07666666666666666,
+"excess": -0.07666666666666666,
+"net": -0.082,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.010000000000000009
+},
+"stress_net": -0.08940000000000001,
+"traded": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.09333333333333334,
+"excess": -0.09333333333333334,
+"net": -0.09966666666666668,
+"z": -28.830671942015105,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.01999999999999999
+}
+},
+{
+"series": "KXEURUSDAW",
+"title": "EURUSD weekly ",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXEURUSDAW",
+"title": "EURUSD weekly ",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.052000000000000005,
+"excess": -0.052000000000000005,
+"net": -0.05600000000000001,
+"z": -28.577380332470426,
+"pf": 0.0,
+"traded": 0.2,
+"spread": 0.04
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": -0.054000000000000006,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.02500000000000001
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.05333333333333334,
+"excess": -0.05333333333333334,
+"net": -0.05733333333333334,
+"z": -18.243354954612933,
+"pf": 0.0,
+"traded": 0.3333333333333333,
+"spread": 0.04
+},
+"stress_net": -0.0568,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.049999999999999996
+}
+},
+{
+"series": "KXEURUSDAW",
+"title": "EURUSD weekly ",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.12000000000000002,
+"excess": -0.12000000000000002,
+"net": -0.1278,
+"z": -24.61043939683099,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.115,
+"excess": -0.115,
+"net": -0.12250000000000001,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.04999999999999996
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.12333333333333334,
+"excess": -0.12333333333333334,
+"net": -0.13133333333333333,
+"z": -15.769815384198099,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.1
+},
+"stress_net": -0.12936,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXGBPUSDAW",
+"title": "GBPUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.0855,
+"z": -5.62396556199533,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.049999999999999996
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09000000000000001
+},
+"stress_net": -0.08660000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXGBPUSDAW",
+"title": "GBPUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.0854,
+"z": -5.185369655955824,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.04
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.06999999999999995
+},
+"h2": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.0775,
+"excess": -0.0775,
+"net": -0.08275,
+"z": -4.070475557786909,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.035
+},
+"stress_net": -0.08648,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXGBPUSDAW",
+"title": "GBPUSD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.10600000000000001,
+"excess": -0.10600000000000001,
+"net": -0.11280000000000001,
+"z": -14.480400973033154,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": -0.1275,
+"z": -17.17259325738758,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07999999999999999
+},
+"h2": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.09666666666666666,
+"excess": -0.09666666666666666,
+"net": -0.103,
+"z": -1.1132898278859866e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.06999999999999995
+},
+"stress_net": -0.11416,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXGOLDW",
+"title": "Gold Weekly price ",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 1.0,
+"price": 0.14,
+"excess": 0.86,
+"net": 0.0,
+"z": 0.0,
+"pf": null,
+"traded": 1.0,
+"spread": 0.04000000000000001
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 1.0,
+"price": 0.14,
+"excess": 0.86,
+"net": 0.0,
+"z": 0.0,
+"pf": null,
+"traded": 1.0,
+"spread": 0.04000000000000001
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 1.0,
+"price": 0.14,
+"excess": 0.86,
+"net": 0.0,
+"z": 0.0,
+"pf": null,
+"traded": 1.0,
+"spread": 0.04000000000000001
+}
+},
+{
+"series": "KXGOLDW",
+"title": "Gold Weekly price ",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": -0.07500000000000001,
+"z": -9.642365197998375,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000004
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.010000000000000009
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.03
+},
+"stress_net": -0.07600000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXGOLDW",
+"title": "Gold Weekly price ",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.0925,
+"excess": -0.0925,
+"net": -0.09875,
+"z": -7.652251467635242,
+"pf": 0.0,
+"traded": 0.25,
+"spread": 0.025
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.117,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.015000000000000006
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.07500000000000001,
+"excess": -0.07500000000000001,
+"net": -0.08050000000000002,
+"z": -1.16012726401064e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.030000000000000013
+},
+"stress_net": -0.1,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+}
+},
+{
+"series": "KXNATGASW",
+"title": "Natural Gas Weekly",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.04
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.04
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.04
+}
+},
+{
+"series": "KXNATGASW",
+"title": "Natural Gas Weekly",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.029999999999999957
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.029999999999999957
+},
+"stress_net": -0.0922,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXNETFLIXRANKMOVIE",
+"title": "Netflix movie ranking",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXNETFLIXRANKMOVIE",
+"title": "Netflix movie ranking",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.060000000000000005,
+"excess": -0.060000000000000005,
+"net": -0.0645,
+"z": -8.687311883149011,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.00999999999999995
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.060000000000000005,
+"excess": -0.060000000000000005,
+"net": -0.0645,
+"z": -8.687311883149011,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.00999999999999995
+},
+"stress_net": -0.06540000000000001,
+"traded": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.060000000000000005,
+"excess": -0.060000000000000005,
+"net": -0.0645,
+"z": -8.687311883149011,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.00999999999999995
+}
+},
+{
+"series": "KXNETFLIXRANKMOVIEGLOBAL",
+"title": "Netflix movie ranking",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXNETFLIXRANKMOVIERUNNERUP",
+"title": "RUNNER UP NETFLIX MOVIE",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.05
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.05
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.05
+}
+},
+{
+"series": "KXNETFLIXRANKMOVIERUNNERUP",
+"title": "RUNNER UP NETFLIX MOVIE",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000018
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000018
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXNETFLIXRANKSHOWGLOBAL",
+"title": "Netflix TV ranking",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+}
+},
+{
+"series": "KXNETFLIXRANKSHOWGLOBAL2",
+"title": "RUNNER UP SHOW NETFLIX SHOW GLOBAL",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.029999999999999916
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.029999999999999916
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.029999999999999916
+}
+},
+{
+"series": "KXNETFLIXRANKSHOWGLOBAL2",
+"title": "RUNNER UP SHOW NETFLIX SHOW GLOBAL",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.09,
+"excess": -0.09,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXNETFLIXRANKSHOWRUNNERUP",
+"title": "RUNNER UP NETFLIX SHOW",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.050000000000000044
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.050000000000000044
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.050000000000000044
+}
+},
+{
+"series": "KXNETFLIXRANKSHOWRUNNERUP",
+"title": "RUNNER UP NETFLIX SHOW",
+"cat": "Entertainment",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.07333333333333333,
+"excess": -0.07333333333333333,
+"net": -0.07866666666666668,
+"z": -6.765291906487511,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -1.3114482114902884e+16,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.035
+},
+"stress_net": -0.07973333333333334,
+"traded": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.07333333333333333,
+"excess": -0.07333333333333333,
+"net": -0.07866666666666668,
+"z": -6.765291906487511,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+}
+},
+{
+"series": "KXRAINWKND",
+"title": "Where will it rain this weekend?",
+"cat": "Climate and Weather",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.07500000000000001
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.07500000000000001
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.10280000000000002,
+"traded": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.07500000000000001
+}
+},
+{
+"series": "KXRAINWKND",
+"title": "Where will it rain this weekend?",
+"cat": "Climate and Weather",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.092,
+"excess": -0.092,
+"net": -0.09820000000000001,
+"z": -15.541087695152388,
+"pf": 0.0,
+"traded": 0.6,
+"spread": 0.030000000000000006
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.0855,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.02500000000000001
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.10000000000000002,
+"excess": -0.10000000000000002,
+"net": -0.10666666666666669,
+"z": -678.8225099390758,
+"pf": 0.0,
+"traded": 0.3333333333333333,
+"spread": 0.050000000000000044
+},
+"stress_net": -0.09944,
+"traded": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.07666666666666667,
+"excess": -0.07666666666666667,
+"net": -0.082,
+"z": -24.84975259598439,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXTRUMPSAY",
+"title": "What will trump say",
+"cat": "Mentions",
+"freq": "one_off",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 6,
+"dates": 4,
+"win": 0.0,
+"price": 0.075,
+"excess": -0.075,
+"net": -0.08,
+"z": -10.560295692419139,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.02
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.0905,
+"z": -4.829672731877928,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.024999999999999998
+},
+"h2": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": -0.07475000000000001,
+"z": -20.135707388074078,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.019999999999999997
+},
+"stress_net": -0.081,
+"traded": {
+"n": 6,
+"dates": 4,
+"win": 0.0,
+"price": 0.075,
+"excess": -0.075,
+"net": -0.08,
+"z": -10.560295692419139,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.02
+}
+},
+{
+"series": "KXTRUMPSAY",
+"title": "What will trump say",
+"cat": "Mentions",
+"freq": "one_off",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 6,
+"dates": 4,
+"win": 0.16666666666666666,
+"price": 0.09666666666666666,
+"excess": 0.06999999999999999,
+"net": 0.06349999999999999,
+"z": 0.4045081758557321,
+"pf": 1.775967413441955,
+"traded": 0.6666666666666666,
+"spread": 0.019999999999999997
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.0855,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.02
+},
+"h2": {
+"n": 4,
+"dates": 3,
+"win": 0.25,
+"price": 0.105,
+"excess": 0.14500000000000002,
+"net": 0.13799999999999998,
+"z": 0.603034923619371,
+"pf": 2.725,
+"traded": 1.0,
+"spread": 0.019999999999999997
+},
+"stress_net": 0.062199999999999984,
+"traded": {
+"n": 4,
+"dates": 3,
+"win": 0.25,
+"price": 0.105,
+"excess": 0.14500000000000002,
+"net": 0.13799999999999998,
+"z": 0.603034923619371,
+"pf": 2.725,
+"traded": 1.0,
+"spread": 0.019999999999999997
+}
+},
+{
+"series": "KXTRUTHSOCIAL",
+"title": "Number of Trump Truth Social posts this week?",
+"cat": "Politics",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 5,
+"win": 0.2,
+"price": 0.088,
+"excess": 0.11200000000000002,
+"net": 0.10600000000000001,
+"z": 0.6002230363697971,
+"pf": 2.4600550964187327,
+"traded": 0.8,
+"spread": 0.030000000000000002
+},
+"h1": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.09666666666666668,
+"excess": -0.09666666666666668,
+"net": -0.10300000000000002,
+"z": -5.089566743492248,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.019999999999999997
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.5,
+"price": 0.07500000000000001,
+"excess": 0.425,
+"net": 0.4195,
+"z": 1.252930495069722,
+"pf": 16.537037037037035,
+"traded": 1.0,
+"spread": 0.04
+},
+"stress_net": 0.1048,
+"traded": {
+"n": 4,
+"dates": 4,
+"win": 0.25,
+"price": 0.095,
+"excess": 0.155,
+"net": 0.1485,
+"z": 0.6888499625892953,
+"pf": 2.986622073578595,
+"traded": 1.0,
+"spread": 0.030000000000000006
+}
+},
+{
+"series": "KXTRUTHSOCIAL",
+"title": "Number of Trump Truth Social posts this week?",
+"cat": "Politics",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 8,
+"dates": 4,
+"win": 0.25,
+"price": 0.10125,
+"excess": 0.14875,
+"net": 0.14225,
+"z": 1.1229187796792082,
+"pf": 2.621082621082621,
+"traded": 0.75,
+"spread": 0.009999999999999995
+},
+"h1": {
+"n": 5,
+"dates": 2,
+"win": 0.2,
+"price": 0.092,
+"excess": 0.10800000000000001,
+"net": 0.10199999999999998,
+"z": 0.6185668240225373,
+"pf": 2.197183098591549,
+"traded": 1.0,
+"spread": 0.009999999999999995
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.3333333333333333,
+"price": 0.11666666666666665,
+"excess": 0.21666666666666667,
+"net": 0.20933333333333334,
+"z": 1.3607652459197708,
+"pf": 3.2753623188405796,
+"traded": 0.3333333333333333,
+"spread": 0.009999999999999995
+},
+"stress_net": 0.14095,
+"traded": {
+"n": 6,
+"dates": 3,
+"win": 0.16666666666666666,
+"price": 0.09500000000000001,
+"excess": 0.07166666666666664,
+"net": 0.06549999999999999,
+"z": 0.4738571257962696,
+"pf": 1.7237569060773479,
+"traded": 1.0,
+"spread": 0.009999999999999995
+}
+},
+{
+"series": "KXTRUTHSOCIALD",
+"title": "Number of Trump Truth Social posts today?",
+"cat": "Politics",
+"freq": "daily",
+"cls": "D",
+"T": 60,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.1
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.1
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.1
+}
+},
+{
+"series": "KXTRUTHSOCIALD",
+"title": "Number of Trump Truth Social posts today?",
+"cat": "Politics",
+"freq": "daily",
+"cls": "D",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.060000000000000005
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.060000000000000005
+},
+"stress_net": -0.10280000000000002,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000004
+}
+},
+{
+"series": "KXUSDBRLAW",
+"title": "USDBRL Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.105,
+"excess": -0.105,
+"net": -0.112,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09499999999999997
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.105,
+"excess": -0.105,
+"net": -0.112,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09499999999999997
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.1134,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDBRLAW",
+"title": "USDBRL Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDCADAW",
+"title": "USDCAD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.14
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.14
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.14
+}
+},
+{
+"series": "KXUSDCADAW",
+"title": "USDCAD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.072,
+"excess": -0.072,
+"net": -0.0772,
+"z": -6.196345518271975,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.12,
+"excess": -0.12,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.11
+},
+"h2": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": -0.0645,
+"z": -17.374623766298022,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"stress_net": -0.07824,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDCADAW",
+"title": "USDCAD Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 2,
+"win": 0.0,
+"price": 0.094,
+"excess": -0.094,
+"net": -0.1,
+"z": -15.371886547533649,
+"pf": 0.0,
+"traded": 0.2,
+"spread": 0.060000000000000005
+},
+"h1": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.08666666666666667,
+"excess": -0.08666666666666667,
+"net": -0.09233333333333334,
+"z": -1.995995354850604e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.060000000000000005
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.105,
+"excess": -0.105,
+"net": -0.1115,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.06499999999999997
+},
+"stress_net": -0.1012,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.08999999999999997
+}
+},
+{
+"series": "KXUSDJPY",
+"title": "USD/JPY daily range",
+"cat": "Financials",
+"freq": "daily",
+"cls": "D",
+"T": 60,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.06
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.06
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.0922,
+"traded": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.06
+}
+},
+{
+"series": "KXUSDJPY",
+"title": "USD/JPY daily range",
+"cat": "Financials",
+"freq": "daily",
+"cls": "D",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 7,
+"dates": 7,
+"win": 0.14285714285714285,
+"price": 0.10571428571428572,
+"excess": 0.03714285714285713,
+"net": 0.030285714285714277,
+"z": 0.24086626061967353,
+"pf": 1.3370429252782194,
+"traded": 0.0,
+"spread": 0.039999999999999994
+},
+"h1": {
+"n": 4,
+"dates": 4,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.10125,
+"z": -4.624194670613005,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.034999999999999996
+},
+"h2": {
+"n": 3,
+"dates": 3,
+"win": 0.3333333333333333,
+"price": 0.12,
+"excess": 0.21333333333333332,
+"net": 0.20566666666666666,
+"z": 0.7929028184936102,
+"pf": 3.754464285714285,
+"traded": 0.0,
+"spread": 0.039999999999999994
+},
+"stress_net": 0.028914285714285705,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDJPY",
+"title": "USD/JPY daily range",
+"cat": "Financials",
+"freq": "daily",
+"cls": "D",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.117,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.03
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.117,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.03
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.1184,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.04000000000000001
+}
+},
+{
+"series": "KXUSDJPYAW",
+"title": "USDJPY Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "D",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDMXNAW",
+"title": "USDMXN Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.06666666666666667,
+"excess": -0.06666666666666667,
+"net": -0.07133333333333335,
+"z": -1.5420325124116582e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h1": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.06666666666666667,
+"excess": -0.06666666666666667,
+"net": -0.07133333333333335,
+"z": -1.5420325124116582e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.07226666666666667,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDMXNAW",
+"title": "USDMXN Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.0825,
+"excess": -0.0825,
+"net": -0.08825000000000001,
+"z": -7.287845073251131,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.06499999999999995
+},
+"h1": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.09333333333333334,
+"excess": -0.09333333333333334,
+"net": -0.09966666666666668,
+"z": -2.1545220617340456e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07999999999999996
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"stress_net": -0.08940000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDSEKAW",
+"title": "USDSEK Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": -0.064,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.050000000000000044
+},
+"h1": {
+"n": 3,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": -0.064,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.050000000000000044
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.0648,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDSEKAW",
+"title": "USDSEK Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUSDSEKAW",
+"title": "USDSEK Weekly",
+"cat": "Financials",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.4,
+"price": 0.138,
+"excess": 0.262,
+"net": 0.25339999999999996,
+"z": 0.8340942177334221,
+"pf": 3.7724288840262576,
+"traded": 0.2,
+"spread": 0.09999999999999998
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h2": {
+"n": 4,
+"dates": 2,
+"win": 0.5,
+"price": 0.1375,
+"excess": 0.3625,
+"net": 0.354,
+"z": 0.9854952777166843,
+"pf": 5.5974025974025965,
+"traded": 0.25,
+"spread": 0.09999999999999999
+},
+"stress_net": 0.25168,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 1.0,
+"price": 0.13,
+"excess": 0.87,
+"net": 0.0,
+"z": 0.0,
+"pf": null,
+"traded": 1.0,
+"spread": 0.1
+}
+},
+{
+"series": "KXUST10A",
+"title": "UST 10 Year Weekly",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 3,
+"win": 0.0,
+"price": 0.0875,
+"excess": -0.0875,
+"net": -0.0935,
+"z": -6.902883754052024,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.05000000000000002
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.040000000000000036
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.09999999999999999,
+"excess": -0.09999999999999999,
+"net": -0.10666666666666667,
+"z": -21.213203435596416,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.06
+},
+"stress_net": -0.0947,
+"traded": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.10500000000000001,
+"excess": -0.10500000000000001,
+"net": -0.11200000000000002,
+"z": -1.614090106449586e+16,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.04500000000000001
+}
+},
+{
+"series": "KXUST10A",
+"title": "UST 10 Year Weekly",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 7,
+"dates": 4,
+"win": 0.0,
+"price": 0.09142857142857143,
+"excess": -0.09142857142857143,
+"net": -0.09757142857142857,
+"z": -13.44304072710632,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.060000000000000005
+},
+"h1": {
+"n": 5,
+"dates": 2,
+"win": 0.0,
+"price": 0.086,
+"excess": -0.086,
+"net": -0.0918,
+"z": -8.586296628693791,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.10500000000000001,
+"excess": -0.10500000000000001,
+"net": -0.11200000000000002,
+"z": -31.67838379715735,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.06499999999999997
+},
+"stress_net": -0.0988,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST10A",
+"title": "UST 10 Year Weekly",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.3333333333333333,
+"price": 0.11666666666666665,
+"excess": 0.21666666666666667,
+"net": 0.209,
+"z": 0.6789524529922898,
+"pf": 3.6680851063829785,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.11750000000000001,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 1.0,
+"price": 0.13,
+"excess": 0.87,
+"net": 0.0,
+"z": 0.0,
+"pf": null,
+"traded": 0.0,
+"spread": 0.07
+},
+"stress_net": 0.20746666666666666,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST2A",
+"title": "UST 2 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.030000000000000002
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.030000000000000002
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST2A",
+"title": "UST 2 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 5,
+"dates": 4,
+"win": 0.0,
+"price": 0.098,
+"excess": -0.098,
+"net": -0.1046,
+"z": -7.279689933101151,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10650000000000001,
+"z": -3.543852809240814,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05500000000000003
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.09666666666666668,
+"excess": -0.09666666666666668,
+"net": -0.10333333333333335,
+"z": -7.736580076511641,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"stress_net": -0.10592000000000001,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST2A",
+"title": "UST 2 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 3,
+"win": 0.0,
+"price": 0.1075,
+"excess": -0.1075,
+"net": -0.11475,
+"z": -8.345626977545342,
+"pf": 0.0,
+"traded": 0.25,
+"spread": 0.09000000000000001
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.11499999999999999,
+"excess": -0.11499999999999999,
+"net": -0.1225,
+"z": -4.746333188786416,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.09999999999999998
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10700000000000001,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09000000000000001
+},
+"stress_net": -0.11620000000000001,
+"traded": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.06999999999999995
+}
+},
+{
+"series": "KXUST30A",
+"title": "UST 30 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h2": {
+"n": 0
+},
+"stress_net": 0.0,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST30A",
+"title": "UST 30 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.11733333333333335,
+"z": -7.860050115084148,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.11733333333333335,
+"z": -7.860050115084148,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"stress_net": -0.11880000000000002,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST30A",
+"title": "UST 30 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 7,
+"dates": 4,
+"win": 0.14285714285714285,
+"price": 0.12,
+"excess": 0.022857142857142854,
+"net": 0.015142857142857137,
+"z": 0.13057128502345502,
+"pf": 1.1364221364221363,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10700000000000001,
+"z": -1.542032512411658e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07499999999999996
+},
+"h2": {
+"n": 5,
+"dates": 3,
+"win": 0.2,
+"price": 0.128,
+"excess": 0.07200000000000001,
+"net": 0.06399999999999999,
+"z": 0.4275408839600137,
+"pf": 1.5683836589698046,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"stress_net": 0.013600000000000003,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST5A",
+"title": "UST 5 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.10500000000000001,
+"excess": -0.10500000000000001,
+"net": -0.11200000000000002,
+"z": -6.091996884068718,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.12
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"stress_net": -0.1134,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST5A",
+"title": "UST 5 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.08533333333333333,
+"z": -8.485281374238566,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.050000000000000044
+},
+"h1": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.08533333333333333,
+"z": -8.485281374238566,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.050000000000000044
+},
+"h2": {
+"n": 0
+},
+"stress_net": -0.08639999999999999,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST5A",
+"title": "UST 5 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.12000000000000001,
+"excess": -0.12000000000000001,
+"net": -0.128,
+"z": -8.619968380178863,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.10999999999999999
+},
+"stress_net": -0.12960000000000002,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST7A",
+"title": "UST 7 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.117,
+"z": -11.818784771260864,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.09999999999999998
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10650000000000001,
+"z": -1.5348267530078652e+16,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.07999999999999999
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.12
+},
+"stress_net": -0.1184,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST7A",
+"title": "UST 7 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.10666666666666667,
+"excess": -0.10666666666666667,
+"net": -0.114,
+"z": -34.54721702368562,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05999999999999994
+},
+"h1": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08999999999999997
+},
+"h2": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.11,
+"excess": -0.11,
+"net": -0.11750000000000001,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.05499999999999999
+},
+"stress_net": -0.11546666666666668,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXUST7A",
+"title": "UST 7 Year Daily",
+"cat": "Financials",
+"freq": "daily",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 3,
+"win": 0.0,
+"price": 0.13999999999999999,
+"excess": -0.13999999999999999,
+"net": -0.1485,
+"z": -15.119350256760006,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.125
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.15,
+"excess": -0.15,
+"net": -0.159,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.14
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.13,
+"excess": -0.13,
+"net": -0.138,
+"z": -9.29340340988034,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.08499999999999996
+},
+"stress_net": -0.1502,
+"traded": {
+"n": 0
+}
+},
+{
+"series": "KXVHGCB",
+"title": "VoteHub GCB",
+"cat": "Politics",
+"freq": "daily",
+"cls": "D",
+"T": 60,
+"rule": "tail",
+"all": {
+"n": 6,
+"dates": 5,
+"win": 0.0,
+"price": 0.075,
+"excess": -0.075,
+"net": -0.08016666666666668,
+"z": -5.910758306544877,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.055
+},
+"h1": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.09333333333333334,
+"excess": -0.09333333333333334,
+"net": -0.09933333333333334,
+"z": -5.6778215284393445,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.06999999999999999
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.05666666666666667,
+"excess": -0.05666666666666667,
+"net": -0.061000000000000006,
+"z": -9.242895782652727,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.04
+},
+"stress_net": -0.08120000000000001,
+"traded": {
+"n": 4,
+"dates": 3,
+"win": 0.0,
+"price": 0.08,
+"excess": -0.08,
+"net": -0.0855,
+"z": -4.136575565149062,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.05499999999999999
+}
+},
+{
+"series": "KXVHGCB",
+"title": "VoteHub GCB",
+"cat": "Politics",
+"freq": "daily",
+"cls": "D",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 11,
+"dates": 10,
+"win": 0.0,
+"price": 0.07636363636363636,
+"excess": -0.07636363636363636,
+"net": -0.08172727272727273,
+"z": -7.767978736418749,
+"pf": 0.0,
+"traded": 0.5454545454545454,
+"spread": 0.039999999999999994
+},
+"h1": {
+"n": 6,
+"dates": 6,
+"win": 0.0,
+"price": 0.09666666666666666,
+"excess": -0.09666666666666666,
+"net": -0.10316666666666667,
+"z": -8.192509750392517,
+"pf": 0.0,
+"traded": 0.8333333333333334,
+"spread": 0.06999999999999999
+},
+"h2": {
+"n": 5,
+"dates": 4,
+"win": 0.0,
+"price": 0.052000000000000005,
+"excess": -0.052000000000000005,
+"net": -0.05600000000000001,
+"z": -29.848100289785478,
+"pf": 0.0,
+"traded": 0.2,
+"spread": 0.030000000000000002
+},
+"stress_net": -0.0828,
+"traded": {
+"n": 6,
+"dates": 6,
+"win": 0.0,
+"price": 0.085,
+"excess": -0.085,
+"net": -0.09083333333333334,
+"z": -6.710096196807845,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.045
+}
+},
+{
+"series": "KXVHGCB",
+"title": "VoteHub GCB",
+"cat": "Politics",
+"freq": "daily",
+"cls": "D",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 11,
+"dates": 6,
+"win": 0.0,
+"price": 0.10909090909090909,
+"excess": -0.10909090909090909,
+"net": -0.11618181818181818,
+"z": -10.764929095437909,
+"pf": 0.0,
+"traded": 0.7272727272727273,
+"spread": 0.06999999999999999
+},
+"h1": {
+"n": 8,
+"dates": 4,
+"win": 0.0,
+"price": 0.10625,
+"excess": -0.10625,
+"net": -0.113125,
+"z": -10.93234086603495,
+"pf": 0.0,
+"traded": 0.75,
+"spread": 0.05499999999999999
+},
+"h2": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.11666666666666668,
+"excess": -0.11666666666666668,
+"net": -0.12433333333333335,
+"z": -5.346300595592883,
+"pf": 0.0,
+"traded": 0.6666666666666666,
+"spread": 0.1
+},
+"stress_net": -0.11760000000000001,
+"traded": {
+"n": 8,
+"dates": 3,
+"win": 0.0,
+"price": 0.11125,
+"excess": -0.11125,
+"net": -0.11837500000000001,
+"z": -8.371234944892151,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.05499999999999999
+}
+},
+{
+"series": "KXWTI",
+"title": "WTI oil on day",
+"cat": "Commodities",
+"freq": "daily",
+"cls": "D",
+"T": 60,
+"rule": "tail",
+"all": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.07666666666666667,
+"excess": -0.07666666666666667,
+"net": -0.082,
+"z": -5.422660584382088,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"h1": {
+"n": 0
+},
+"h2": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.07666666666666667,
+"excess": -0.07666666666666667,
+"net": -0.082,
+"z": -5.422660584382088,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"stress_net": -0.08306666666666668,
+"traded": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.07666666666666667,
+"excess": -0.07666666666666667,
+"net": -0.082,
+"z": -5.422660584382088,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+}
+},
+{
+"series": "KXWTI",
+"title": "WTI oil on day",
+"cat": "Commodities",
+"freq": "daily",
+"cls": "D",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 4,
+"win": 0.25,
+"price": 0.10500000000000001,
+"excess": 0.145,
+"net": 0.138,
+"z": 0.6148190435415982,
+"pf": 2.5248618784530383,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"h1": {
+"n": 3,
+"dates": 3,
+"win": 0.3333333333333333,
+"price": 0.09333333333333334,
+"excess": 0.24,
+"net": 0.2336666666666667,
+"z": 0.840099719431719,
+"pf": 4.291079812206572,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"h2": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.14,
+"excess": -0.14,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+},
+"stress_net": 0.1366,
+"traded": {
+"n": 4,
+"dates": 4,
+"win": 0.25,
+"price": 0.10500000000000001,
+"excess": 0.145,
+"net": 0.138,
+"z": 0.6148190435415982,
+"pf": 2.5248618784530383,
+"traded": 1.0,
+"spread": 0.010000000000000009
+}
+},
+{
+"series": "KXWTI",
+"title": "WTI oil on day",
+"cat": "Commodities",
+"freq": "daily",
+"cls": "D",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 8,
+"dates": 7,
+"win": 0.0,
+"price": 0.08625,
+"excess": -0.08625,
+"net": -0.09212500000000001,
+"z": -7.363594158289209,
+"pf": 0.0,
+"traded": 0.375,
+"spread": 0.02500000000000001
+},
+"h1": {
+"n": 5,
+"dates": 4,
+"win": 0.0,
+"price": 0.086,
+"excess": -0.086,
+"net": -0.092,
+"z": -6.383964889013742,
+"pf": 0.0,
+"traded": 0.6,
+"spread": 0.03
+},
+"h2": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.08666666666666667,
+"excess": -0.08666666666666667,
+"net": -0.09233333333333334,
+"z": -3.9912274044172955,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.019999999999999997
+},
+"stress_net": -0.09330000000000001,
+"traded": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.08333333333333333,
+"excess": -0.08333333333333333,
+"net": -0.08933333333333333,
+"z": -5.106228757119948,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+},
+{
+"series": "KXWTIW",
+"title": "WTI oil weekly range",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 360,
+"rule": "tail",
+"all": {
+"n": 4,
+"dates": 3,
+"win": 0.0,
+"price": 0.0625,
+"excess": -0.0625,
+"net": -0.06725,
+"z": -8.288210576209746,
+"pf": 0.0,
+"traded": 0.75,
+"spread": 0.025
+},
+"h1": {
+"n": 2,
+"dates": 1,
+"win": 0.0,
+"price": 0.07500000000000001,
+"excess": -0.07500000000000001,
+"net": -0.08050000000000002,
+"z": -1.16012726401064e+16,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.035
+},
+"h2": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.05,
+"excess": -0.05,
+"net": -0.054000000000000006,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.020000000000000004
+},
+"stress_net": -0.06820000000000001,
+"traded": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.06666666666666667,
+"excess": -0.06666666666666667,
+"net": -0.07166666666666667,
+"z": -8.605356110666472,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.030000000000000002
+}
+},
+{
+"series": "KXWTIW",
+"title": "WTI oil weekly range",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 1440,
+"rule": "tail",
+"all": {
+"n": 7,
+"dates": 5,
+"win": 0.0,
+"price": 0.10285714285714286,
+"excess": -0.10285714285714286,
+"net": -0.10957142857142857,
+"z": -6.827595656425837,
+"pf": 0.0,
+"traded": 0.7142857142857143,
+"spread": 0.009999999999999995
+},
+"h1": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.1,
+"excess": -0.1,
+"net": -0.10650000000000001,
+"z": -14.34416613264139,
+"pf": 0.0,
+"traded": 0.5,
+"spread": 0.009999999999999995
+},
+"h2": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.10400000000000001,
+"excess": -0.10400000000000001,
+"net": -0.11080000000000001,
+"z": -4.978649570882536,
+"pf": 0.0,
+"traded": 0.8,
+"spread": 0.009999999999999995
+},
+"stress_net": -0.11091428571428573,
+"traded": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.10400000000000001,
+"excess": -0.10400000000000001,
+"net": -0.11080000000000001,
+"z": -4.978649570882536,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.009999999999999995
+}
+},
+{
+"series": "KXWTIW",
+"title": "WTI oil weekly range",
+"cat": "Commodities",
+"freq": "weekly",
+"cls": "W",
+"T": 4320,
+"rule": "tail",
+"all": {
+"n": 14,
+"dates": 5,
+"win": 0.07142857142857142,
+"price": 0.07857142857142858,
+"excess": -0.007142857142857159,
+"net": -0.012642857142857154,
+"z": -0.19366783407831625,
+"pf": 0.8393829401088928,
+"traded": 0.35714285714285715,
+"spread": 0.03
+},
+"h1": {
+"n": 6,
+"dates": 2,
+"win": 0.16666666666666666,
+"price": 0.085,
+"excess": 0.08166666666666665,
+"net": 0.07583333333333332,
+"z": 0.5876412519449846,
+"pf": 1.9680851063829785,
+"traded": 0.6666666666666666,
+"spread": 0.03
+},
+"h2": {
+"n": 8,
+"dates": 3,
+"win": 0.0,
+"price": 0.07375,
+"excess": -0.07375,
+"net": -0.079,
+"z": -10.040604087363077,
+"pf": 0.0,
+"traded": 0.125,
+"spread": 0.03
+},
+"stress_net": -0.013742857142857156,
+"traded": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.098,
+"excess": -0.098,
+"net": -0.1046,
+"z": -48.11344428171773,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.03
+}
+}
+],
+"pooled": [
+{
+"stratum": "Climate and Weather",
+"cls": "W",
+"T": 1440,
+"series": 1,
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.095,
+"excess": -0.095,
+"net": -0.1015,
+"z": -3.0219510859130345,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.07500000000000001
+}
+},
+{
+"stratum": "Climate and Weather",
+"cls": "W",
+"T": 4320,
+"series": 1,
+"all": {
+"n": 5,
+"dates": 3,
+"win": 0.0,
+"price": 0.092,
+"excess": -0.092,
+"net": -0.09820000000000001,
+"z": -15.541087695152388,
+"pf": 0.0,
+"traded": 0.6,
+"spread": 0.030000000000000006
+}
+},
+{
+"stratum": "Commodities",
+"cls": "D",
+"T": 60,
+"series": 1,
+"all": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.07666666666666667,
+"excess": -0.07666666666666667,
+"net": -0.082,
+"z": -5.422660584382088,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.010000000000000009
+}
+},
+{
+"stratum": "Commodities",
+"cls": "D",
+"T": 360,
+"series": 1,
+"all": {
+"n": 4,
+"dates": 4,
+"win": 0.25,
+"price": 0.10500000000000001,
+"excess": 0.145,
+"net": 0.138,
+"z": 0.6148190435415982,
+"pf": 2.5248618784530383,
+"traded": 1.0,
+"spread": 0.010000000000000009
+}
+},
+{
+"stratum": "Commodities",
+"cls": "D",
+"T": 1440,
+"series": 1,
+"all": {
+"n": 8,
+"dates": 7,
+"win": 0.0,
+"price": 0.08625,
+"excess": -0.08625,
+"net": -0.09212500000000001,
+"z": -7.363594158289209,
+"pf": 0.0,
+"traded": 0.375,
+"spread": 0.02500000000000001
+}
+},
+{
+"stratum": "Commodities",
+"cls": "W",
+"T": 360,
+"series": 4,
+"all": {
+"n": 7,
+"dates": 4,
+"win": 0.14285714285714285,
+"price": 0.08,
+"excess": 0.06285714285714285,
+"net": 0.05714285714285713,
+"z": 0.4356100575478345,
+"pf": 1.8869179600886914,
+"traded": 0.8571428571428571,
+"spread": 0.030000000000000002
+}
+},
+{
+"stratum": "Commodities",
+"cls": "W",
+"T": 1440,
+"series": 5,
+"all": {
+"n": 15,
+"dates": 5,
+"win": 0.06666666666666667,
+"price": 0.08533333333333333,
+"excess": -0.018666666666666665,
+"net": -0.02446666666666667,
+"z": -0.4155082301259107,
+"pf": 0.7087301587301588,
+"traded": 0.4666666666666667,
+"spread": 0.020000000000000004
+}
+},
+{
+"stratum": "Commodities",
+"cls": "W",
+"T": 4320,
+"series": 5,
+"all": {
+"n": 30,
+"dates": 5,
+"win": 0.06666666666666667,
+"price": 0.082,
+"excess": -0.015333333333333338,
+"net": -0.021000000000000008,
+"z": -0.4043305907252596,
+"pf": 0.7448359659781287,
+"traded": 0.23333333333333334,
+"spread": 0.03
+}
+},
+{
+"stratum": "Economics",
+"cls": "W",
+"T": 1440,
+"series": 2,
+"all": {
+"n": 3,
+"dates": 3,
+"win": 0.0,
+"price": 0.09999999999999999,
+"excess": -0.09999999999999999,
+"net": -0.107,
+"z": -10.808632226708655,
+"pf": 0.0,
+"traded": 0.3333333333333333,
+"spread": 0.05
+}
+},
+{
+"stratum": "Economics",
+"cls": "W",
+"T": 4320,
+"series": 2,
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.10333333333333333,
+"excess": -0.10333333333333333,
+"net": -0.11,
+"z": -8.333758492555738,
+"pf": 0.0,
+"traded": 0.3333333333333333,
+"spread": 0.040000000000000036
+}
+},
+{
+"stratum": "Entertainment",
+"cls": "W",
+"T": 1440,
+"series": 6,
+"all": {
+"n": 6,
+"dates": 3,
+"win": 0.0,
+"price": 0.06166666666666667,
+"excess": -0.06166666666666667,
+"net": -0.06616666666666667,
+"z": -20.977219579224766,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.029999999999999957
+}
+},
+{
+"stratum": "Entertainment",
+"cls": "W",
+"T": 4320,
+"series": 6,
+"all": {
+"n": 9,
+"dates": 5,
+"win": 0.0,
+"price": 0.07444444444444445,
+"excess": -0.07444444444444445,
+"net": -0.07977777777777778,
+"z": -36.33434685394196,
+"pf": 0.0,
+"traded": 0.7777777777777778,
+"spread": 0.020000000000000018
+}
+},
+{
+"stratum": "Financials",
+"cls": "D",
+"T": 60,
+"series": 1,
+"all": {
+"n": 2,
+"dates": 2,
+"win": 0.0,
+"price": 0.08499999999999999,
+"excess": -0.08499999999999999,
+"net": -0.091,
+"z": -25.738686835190343,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.06
+}
+},
+{
+"stratum": "Financials",
+"cls": "D",
+"T": 360,
+"series": 1,
+"all": {
+"n": 7,
+"dates": 7,
+"win": 0.14285714285714285,
+"price": 0.10571428571428572,
+"excess": 0.03714285714285713,
+"net": 0.030285714285714277,
+"z": 0.24086626061967353,
+"pf": 1.3370429252782194,
+"traded": 0.0,
+"spread": 0.039999999999999994
+}
+},
+{
+"stratum": "Financials",
+"cls": "D",
+"T": 1440,
+"series": 2,
+"all": {
+"n": 3,
+"dates": 2,
+"win": 0.0,
+"price": 0.09000000000000001,
+"excess": -0.09000000000000001,
+"net": -0.09600000000000002,
+"z": -4.848732213850614,
+"pf": 0.0,
+"traded": 0.3333333333333333,
+"spread": 0.04000000000000001
+}
+},
+{
+"stratum": "Financials",
+"cls": "H",
+"T": 5,
+"series": 1,
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.07,
+"excess": -0.07,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 0.0,
+"spread": 0.020000000000000004
+}
+},
+{
+"stratum": "Financials",
+"cls": "H",
+"T": 15,
+"series": 1,
+"all": {
+"n": 1,
+"dates": 1,
+"win": 0.0,
+"price": 0.06,
+"excess": -0.06,
+"net": 0.0,
+"z": 0.0,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.020000000000000018
+}
+},
+{
+"stratum": "Financials",
+"cls": "H",
+"T": 30,
+"series": 1,
+"all": {
+"n": 4,
+"dates": 2,
+"win": 0.0,
+"price": 0.0825,
+"excess": -0.0825,
+"net": -0.08825000000000001,
+"z": -13.31246366713873,
+"pf": 0.0,
+"traded": 0.75,
+"spread": 0.015
+}
+},
+{
+"stratum": "Financials",
+"cls": "W",
+"T": 360,
+"series": 12,
+"all": {
+"n": 25,
+"dates": 5,
+"win": 0.0,
+"price": 0.0868,
+"excess": -0.0868,
+"net": -0.09264000000000001,
+"z": -16.095882083715086,
+"pf": 0.0,
+"traded": 0.12,
+"spread": 0.05999999999999994
+}
+},
+{
+"stratum": "Financials",
+"cls": "W",
+"T": 1440,
+"series": 11,
+"all": {
+"n": 45,
+"dates": 5,
+"win": 0.0,
+"price": 0.08244444444444445,
+"excess": -0.08244444444444445,
+"net": -0.08815555555555557,
+"z": -37.220848515966516,
+"pf": 0.0,
+"traded": 0.022222222222222223,
+"spread": 0.050000000000000044
+}
+},
+{
+"stratum": "Financials",
+"cls": "W",
+"T": 4320,
+"series": 11,
+"all": {
+"n": 43,
+"dates": 5,
+"win": 0.09302325581395349,
+"price": 0.11604651162790698,
+"excess": -0.023023255813953494,
+"net": -0.030488372093023266,
+"z": -0.3906530895090042,
+"pf": 0.7257322175732217,
+"traded": 0.06976744186046512,
+"spread": 0.09
+}
+},
+{
+"stratum": "Mentions",
+"cls": "W",
+"T": 1440,
+"series": 1,
+"all": {
+"n": 6,
+"dates": 4,
+"win": 0.0,
+"price": 0.075,
+"excess": -0.075,
+"net": -0.08,
+"z": -10.560295692419139,
+"pf": 0.0,
+"traded": 1.0,
+"spread": 0.02
+}
+},
+{
+"stratum": "Mentions",
+"cls": "W",
+"T": 4320,
+"series": 1,
+"all": {
+"n": 6,
+"dates": 4,
+"win": 0.16666666666666666,
+"price": 0.09666666666666666,
+"excess": 0.06999999999999999,
+"net": 0.06349999999999999,
+"z": 0.4045081758557321,
+"pf": 1.775967413441955,
+"traded": 0.6666666666666666,
+"spread": 0.019999999999999997
+}
+},
+{
+"stratum": "Politics",
+"cls": "D",
+"T": 60,
+"series": 2,
+"all": {
+"n": 7,
+"dates": 6,
+"win": 0.0,
+"price": 0.0842857142857143,
+"excess": -0.0842857142857143,
+"net": -0.09000000000000001,
+"z": -5.773745148702323,
+"pf": 0.0,
+"traded": 0.7142857142857143,
+"spread": 0.060000000000000005
+}
+},
+{
+"stratum": "Politics",
+"cls": "D",
+"T": 360,
+"series": 2,
+"all": {
+"n": 13,
+"dates": 12,
+"win": 0.0,
+"price": 0.07923076923076923,
+"excess": -0.07923076923076923,
+"net": -0.08476923076923078,
+"z": -8.01082848388844,
+"pf": 0.0,
+"traded": 0.5384615384615384,
+"spread": 0.039999999999999994
+}
+},
+{
+"stratum": "Politics",
+"cls": "D",
+"T": 1440,
+"series": 1,
+"all": {
+"n": 11,
+"dates": 6,
+"win": 0.0,
+"price": 0.10909090909090909,
+"excess": -0.10909090909090909,
+"net": -0.11618181818181818,
+"z": -10.764929095437909,
+"pf": 0.0,
+"traded": 0.7272727272727273,
+"spread": 0.06999999999999999
+}
+},
+{
+"stratum": "Politics",
+"cls": "W",
+"T": 1440,
+"series": 1,
+"all": {
+"n": 5,
+"dates": 5,
+"win": 0.2,
+"price": 0.088,
+"excess": 0.11200000000000002,
+"net": 0.10600000000000001,
+"z": 0.6002230363697971,
+"pf": 2.4600550964187327,
+"traded": 0.8,
+"spread": 0.030000000000000002
+}
+},
+{
+"stratum": "Politics",
+"cls": "W",
+"T": 4320,
+"series": 1,
+"all": {
+"n": 8,
+"dates": 4,
+"win": 0.25,
+"price": 0.10125,
+"excess": 0.14875,
+"net": 0.14225,
+"z": 1.1229187796792082,
+"pf": 2.621082621082621,
+"traded": 0.75,
+"spread": 0.009999999999999995
+}
+}
+]
+}
