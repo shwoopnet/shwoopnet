@@ -2,7 +2,7 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-03 10:50 AM CT (16:50Z): gold reconcile and OICORE scaling spec sent to main (read only, drafts)
+## 2026-11-03 10:20 AM CT (16:20Z): gold reconcile and OICORE scaling spec sent to main (read only, drafts)
 
 A) Gold alone is +$52.78 over all 237 fills (Oct 7 to Nov 3, after fees, exits at realised loss, no hand closes); all L1 markets together are -$4.22 (937 fills, PF 0.99); plus OICORE +$24.17 the bot is +$19.95. The page's number was not available to me; asked main for card, range and figure. B) OICORE spec: hard constants (10 per order, 10 open per ticker) bind first; depth within 1c of the touch is at least 766 in 12 of 12 sampled windows; daily net cap $16 binds at p5 days at 10 contracts; lifetime cap is net since start, not drawdown; replacement caps scale with contracts (daily 2.5 x c, drawdown from peak 5 x c); ladder 10, 12, 15, 20, 30, 40, 50 with evidence gates; income map (backtest, 76% fill): about $11.9 per contract per month, so $2,000 to $3,000 needs 170 to 250 contracts and a base of $5,000 to $7,000. Nothing live.
 
