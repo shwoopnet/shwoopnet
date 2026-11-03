@@ -6,7 +6,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **What it is.** About 6 minutes before a 15 minute Kalshi market closes, buy the side that is already priced 88c to 97c (the heavy favourite) and hold it to settlement, selling early only if the side's bid falls to 25c. It collects the last few cents of a nearly settled market. Wins are small, a loss is large, so it only works at a high win rate.
 
-**Markets.** Gold (`KXGOLD15M`) and Dogecoin (`KXDOGE15M`). Gold scales on the size ladder; Dogecoin is a fixed 5 contracts again since Nov 3 (it was on the ladder Oct 30 to Nov 3). Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
+**Markets.** Gold (`KXGOLD15M`) and Dogecoin (`KXDOGE15M`). Gold scales on the size ladder. Dogecoin is paused in code since Nov 3 (it was on the ladder Oct 30 to Nov 3; a resume would start at a fixed 5). Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
 
 **Entry rule.**
 1. Look when 5.5 to 6.7 minutes remain (330,000 to 400,000 ms), once per market.

@@ -157,7 +157,7 @@ gates.ST15 = () => {
   const isa = /  function kalshiIsActive\(o\)\{[^\n]*\n/.exec(html)[0];
   const g = new Function(info + '\n' + kmn + '\n' + sof + '\n' + act + '\n' + isa + '; return { kalshiIsActive, kalshiActivePairs };')();
   const o = (strategy, series, slotId) => ({ strategy, series, slotId });
-  assert.ok(g.kalshiIsActive(o('L1', 'KXGOLD15M')) && g.kalshiIsActive(o('L1', 'KXDOGE15M')), 'L1 counts on gold and Dogecoin');
+  assert.ok(g.kalshiIsActive(o('L1', 'KXGOLD15M')) && !g.kalshiIsActive(o('L1', 'KXDOGE15M')), 'L1 counts on gold; Dogecoin is paused (Nov 3, 2026)');
   assert.ok(g.kalshiIsActive(o('SLOT', 'KXBTC15M', 'OICORE')), 'the second strategy counts on Bitcoin');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXETH15M')), 'Ethereum is paused and not on the list');
   assert.ok(!g.kalshiIsActive(o('L1', 'KXXRP15M')), 'XRP is paused and not on the list');

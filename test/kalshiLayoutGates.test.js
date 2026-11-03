@@ -644,7 +644,7 @@ gates.BS1 = () => {
   assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 400000 }, T0).state, 'down', 'over 5 minutes means the function is not running');
   assert.strictEqual(f.kalshiHeartbeat({ active: true }, T0).state, 'quiet', 'running with no check recorded yet is waiting, not alive');
   const a = f.kalshiNextEntry(T0 + 60000);
-  assert.deepStrictEqual([a.at, a.name, /gold and Dogecoin/.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
+  assert.deepStrictEqual([a.at, a.name, /^Gold, /.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
   const b = f.kalshiNextEntry(T0 + 330000);
   assert.deepStrictEqual([b.at, b.name], [T0 + 540000, 'Closing buy'], 'minute 5 has no look of its own: the 10 minute look belonged to paused markets');
   const c = f.kalshiNextEntry(T0 + 600000);

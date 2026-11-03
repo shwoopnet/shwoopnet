@@ -27,8 +27,8 @@ gates.SF2 = () => {
   assert.ok(new RegExp('at most ' + (live.L1_WINDOW_CAP_FRACTION * 100) + '% of the balance in one 15 minute window').test(t), 'the one window limit');
   assert.ok(new RegExp('down ' + (live.L1_SIZED_STOP_FRACTION * 100) + '% of the balance').test(t) && new RegExp('stop at ' + (live.L1_SIZED_STOP_FRACTION * 100) + '% of the balance').test(t), 'the loss stop, in the rules and in the Start confirmation');
   assert.ok(new RegExp('Exit at ' + Math.round(live.EXIT_THRESHOLD * 100) + 'c').test(t) && new RegExp('falls to ' + Math.round(live.EXIT_THRESHOLD * 100) + 'c').test(t), 'the exit line');
-  assert.ok(live.FIXED_CONTRACTS.KXDOGE15M === 5 && live.maxContractsFor('KXDOGE15M') === 5, 'Dogecoin is a fixed 5 in code');
-  assert.ok(/Gold grows with the account/.test(t) && /Dogecoin is always 5 contracts/.test(t) && /except gold, whose size scales with the account/.test(t) && /Dogecoin, which is always 5 contracts/.test(t) && !/Gold and Dogecoin grow with the account/.test(t), 'the page says gold scales and Dogecoin is a fixed 5, in the Size note and in the Start confirmation');
+  assert.ok(live.PAUSED_SERIES.includes('KXDOGE15M') && live.FIXED_CONTRACTS.KXDOGE15M === 5, 'Dogecoin is paused in code (its fixed 5 waits for a reviewed resume)');
+  assert.ok(/Gold grows with the account/.test(t) && /except gold, whose size scales with the account/.test(t) && !/Dogecoin[^.]*(contracts|grow)/.test(t), 'the page says gold scales and does not give Dogecoin a size while it is paused');
   assert.ok(!/Ethereum 1\b/.test(t) && live.PAUSED_SERIES.includes('KXETH15M'), 'Ethereum is paused and no longer listed with a size');
   assert.ok(new RegExp('at most a quarter of the base size').test(t) && live.ADDON_MAX_FRACTION === 0.25, 'the add-on cap is a quarter of the base');
   assert.deepStrictEqual(live.QUIET_HOURS_CT, {}, 'no quiet hours are set in code (lifted Oct 30, 2026), so the page must not promise a pause');

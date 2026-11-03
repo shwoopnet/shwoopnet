@@ -27,7 +27,7 @@ gates.SC2 = () => {
   // every strategy's next look: the Closing buy at 9:00 into each 15 minutes, the open interest jump at 12:00
   const Q = 900000, base = Math.floor(TUE / Q) * Q;
   const at = (offsetMs) => lib(base + offsetMs).kalshiNextEntry(base + offsetMs);
-  let n = at(60000); assert.strictEqual(n.name, 'Closing buy'); assert.strictEqual(n.inMs, 480000); assert.ok(/gold and Dogecoin/.test(n.what) && /then Open interest jump \(Bitcoin\)/.test(n.then));
+  let n = at(60000); assert.strictEqual(n.name, 'Closing buy'); assert.strictEqual(n.inMs, 480000); assert.ok(/^Gold, /.test(n.what) && /then Open interest jump \(Bitcoin\)/.test(n.then));
   n = at(600000); assert.strictEqual(n.name, 'Open interest jump', 'after the 9 minute look the next one is the Bitcoin strategy'); assert.strictEqual(n.inMs, 120000); assert.ok(/Bitcoin/.test(n.what) && /then Closing buy/.test(n.then));
   n = at(800000); assert.strictEqual(n.name, 'Closing buy', 'after the 12 minute look it wraps to the next quarter hour'); assert.strictEqual(n.inMs, 640000);
   assert.ok(n.frac > 0 && n.frac < 1, 'the ring fills between the previous look and the next');
@@ -35,7 +35,7 @@ gates.SC2 = () => {
 };
 gates.SC3 = () => {
   const l = lib(FRI_EVE);
-  assert.ok(/^Dogecoin, /.test(l.kalshiNextEntry(FRI_EVE).what) || l.kalshiNextEntry(FRI_EVE).name === 'Open interest jump', 'with gold closed the Closing buy names only Dogecoin');
+  assert.ok(/^No market is open, /.test(l.kalshiNextEntry(FRI_EVE).what) || l.kalshiNextEntry(FRI_EVE).name === 'Open interest jump', 'with gold closed (Dogecoin is paused since Nov 3, 2026) the Closing buy says no market is open');
   assert.strictEqual(lib(TUE).kalshiGoldClosed(TUE), false); assert.strictEqual(l.kalshiGoldClosed(FRI_EVE), true, 'gold closed from Friday 5 PM Central');
   assert.strictEqual(l.kalshiGoldClosed(RealDate.parse('2026-11-02T00:30:00Z')), false, 'gold open again from Sunday 6 PM Central');
 };
