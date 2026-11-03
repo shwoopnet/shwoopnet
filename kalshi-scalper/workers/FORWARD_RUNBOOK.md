@@ -73,8 +73,11 @@ Do these in order and stop at the first surprise.
 9. **Report.** Tell the coordinator: branch, loop pid, which data was rebuilt, which fetches are running (pid and log), the next five dated reads, and anything
    that ran while you were down.
 
-## Commands that do NOT exist yet (do not guess them)
+## Forward read commands (built 2026-11-03, FWDTOOLS) and what is still missing
 
-`python -m scalper.usweep1` has no forward command (census, select, fetch, score only); `makertail1` has no forward scorer (count and run only, `run` refuses);
-`bookch1` has no pooled verdict command (the forward ledger has per-market rows); `nowcast1`, `count1`, `count2`, `barrier1` have no forward command;
-`scalper.wxens1` does not exist; `recdaily` is on the unmerged branch only. The calendar names each as a worker task.
+Built, each with `python -m scalper.<module> forward [--force-info]` and a synthetic test in `tests/test_fwd_<name>.py`: `makertail1_fwd` (also `makertail1 forward`), `bookch1_fwd`
+(also `bookch1 forward`), `usweep1_fwd` (needs `--owner-asked`), `nowcast1_fwd`, `count1_fwd` (blocked, prints why), `count2_fwd`, `barrier1_fwd`. The table is at the end of
+`workers/FORWARD_CALENDAR.md`. After a real read, paste the printed `FWD-READ <ID> ...` line into README.md yourself; that line (not data/) is what refuses the next attempt.
+Still missing: the `scalper.wxens1` read command lives on `claude/v2-recorder-wxens` (not on this branch, do not duplicate it); `scalper.recdaily` is on the unmerged
+`claude/v2-recorder-daily` branch, so `usweep1_fwd`, `nowcast1_fwd` and `barrier1_fwd` stop with a clear message until it is merged; there is no fetch for COUNT2's forward candles and nothing records the
+nowcast values NOWCAST1 needs at each look (`--nowcast-file`).

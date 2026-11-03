@@ -156,3 +156,16 @@ def forward_eval(window, params):
         return None
     return {"side": d["side"], "entry": float(d["entry"]), "exit": None, "t": int(d["t"]),
             "note": f"{params.get('definition', 'ratio')} {d['value']:.3f} vs cut {d['cut']:.3f}"}
+
+
+def main(argv):
+    """`python -m scalper.bookch1 forward [--force-info]` is the pooled forward verdict (bookch1_fwd.py); there is no other command."""
+    if len(argv) > 1 and argv[1] == "forward":
+        from . import bookch1_fwd
+        raise SystemExit(bookch1_fwd.main(argv))
+    print(__doc__)
+
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv)

@@ -3,6 +3,7 @@ far-tail strikes of the hourly Bitcoin ladder (KXBTCD), 25 minutes before the cl
 recorded queue and tape. Research only; nothing here means trade; there is no promote verb.
     python -m scalper.makertail1 count   (events and orders by coverage and book prices; no outcome is read)
     python -m scalper.makertail1 run     (scores DEV once; the holdout only if DEV passes; writes data/makertail1_result.txt)
+    python -m scalper.makertail1 forward [--force-info]   (forward read of closes from 2026-11-03 16:00Z, see makertail1_fwd.py)
 Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA.
 """
 from __future__ import annotations
@@ -329,6 +330,9 @@ def main(argv):
         count()
     elif len(argv) > 1 and argv[1] == "run":
         run()
+    elif len(argv) > 1 and argv[1] == "forward":
+        from . import makertail1_fwd      # the forward read (Amendment 1 side split); never touches DEV or HOLDOUT, run() above still refuses
+        sys.exit(makertail1_fwd.main(argv))
     else:
         print(__doc__)
 
