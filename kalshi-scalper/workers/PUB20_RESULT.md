@@ -53,3 +53,8 @@ rounded up; control = same series 2 hours before and after (at least 10 control 
 **Decision rule (fixed now):** holds up only if W3 mean net after fees is positive AND W3 PF is at least 1.5 AND pooled W1+W2+W3 PF is at least 1.5.
 Disclosed in advance: W1 PF was 1.18, below the registered per-window 1.5 bar, so under the strict registered kill rule P06 is already
 not a pass; this read decides only whether the owner-authorised probe spec is written. Else FALSIFIED and stop.
+
+### P06 W3 read (run once, 2026-11-03): FALSIFIED
+W3 alone: n 56 on 19 days, win 10.7% vs 12.5% paid, PF 0.78 (x1.2 0.77), mean net -2.43c, z -0.62; excess vs +-2h control +1.8c (z 0.45, 56 diffs).
+Pooled W1+W2+W3: n 97 on 48 days, win 14.4% vs 12.8% paid, PF 1.09, mean +0.93c, z 0.22, excess +4.2c (z 1.08), highest fill 0.48.
+Decision rule: W3 net negative and W3 PF under 1.5, pooled PF under 1.5: **FALSIFIED**. The W2 result (PF 1.81 on 25 trades) was noise. The capped-probe spec above is WITHDRAWN. Stopped; no re-run.

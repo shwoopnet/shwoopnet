@@ -8307,3 +8307,6 @@ Registered first (`workers/USWEEP1_REGISTRATION.md`, commit f73bc8b plus Amendme
 
 ### P06 (PUB20) W3 read authorised by owner 2026-11-03 (note written before the read)
 One read of the frozen W3 (closes 10-05 on) for the fix-window rule, registered rules unchanged. Holds up only if W3 net is positive after fees, W3 PF is at least 1.5 and pooled W1+W2+W3 PF is at least 1.5; else FALSIFIED. See `workers/PUB20_RESULT.md` addendum.
+
+### Result: P06 (PUB20) W3 read, 2026-11-03: FALSIFIED
+W3 alone n 56, win 10.7% vs 12.5% paid, PF 0.78, mean -2.43c, z -0.62, excess +1.8c (z 0.45). Pooled W1+W2+W3 n 97, win 14.4% vs 12.8%, PF 1.09, mean +0.93c, z 0.22, excess +4.2c (z 1.08). Decision rule (W3 net positive, W3 PF and pooled PF at least 1.5) failed; probe spec withdrawn. Read once, not repeated.
