@@ -1,5 +1,19 @@
 # LIVEWATCH: live L1 record against its history (newest first; aggregates only; `python -m scalper.livewatch run`)
 
+## 2026-11-03 07:01 CT (report window 2026-10-04 08:01 CT to now; last 7 days = since 2026-10-27 08:01 CT)
+
+| Market | Settled | Losses | Win rate | PF | Net | PF 88-91c (held) | PF 91-94c (held) | PF 94-97c (held) | exits, unpriced | Last 7d: n, losses, PF, net | 23d before: n, losses, PF, net | History loss rate (n) |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| gold | 237 | 11 | 95.4% | 1.72 | $+52.78 | 8.32 (42) | no loss (69) | 4.54 (117) | 9, 0 | 73, 3, 2.12, $+31.01 | 164, 8, 1.47, $+21.77 | 5.31% (1243) |
+| Bitcoin | 155 | 11 | 92.9% | 0.72 | $-22.39 | no loss (25) | 0.53 (40) | no loss (81) | 8, 1 | 1, 0, no loss, $+0.04 | 154, 11, 0.71, $-22.43 | 6.26% (1725) |
+| Ethereum | 113 | 9 | 92.0% | 0.92 | $-2.42 | no loss (20) | no loss (25) | no loss (58) | 9, 1 | 1, 0, no loss, $+0.02 | 112, 9, 0.92, $-2.44 | 5.92% (1825) |
+| Dogecoin | 203 | 14 | 93.1% | 0.81 | $-15.40 | no loss (36) | no loss (56) | no loss (96) | 14, 1 | 112, 10, 0.72, $-20.42 | 91, 4, 1.61, $+5.02 | 4.83% (1863) |
+| XRP | 86 | 12 | 86.0% | 0.41 | $-13.10 | 4.13 (26) | 0.36 (22) | no loss (27) | 9, 1 | 7, 1, 0.62, $-0.30 | 79, 11, 0.40, $-12.80 | 5.33% (1969) |
+
+**Flags:** Dogecoin: last 7 days 10 losses in 112 (8.9%) against a history loss rate of 4.83%, one-sided binomial p 0.0450; Dogecoin: last 7 days PF 0.72 on 112 settled (under 0.8 with at least 30)
+
+Dollars at the real sizes, after fees, settled orders only (an exit counts as a loss). PF by price paid covers held-to-settlement orders only (an exit's buy price cannot be solved from its result, so exits, most of the losses, are left out of those three columns and the bands read high); count of orders in brackets. Information only; nothing here changes a live rule.
+
 ## 2026-11-02 01:19 CT (report window 2026-10-03 02:19 CT to now; last 7 days = since 2026-10-26 02:19 CT)
 
 | Market | Settled | Losses | Win rate | PF | Net | PF 88-91c (held) | PF 91-94c (held) | PF 94-97c (held) | exits, unpriced | Last 7d: n, losses, PF, net | 23d before: n, losses, PF, net | History loss rate (n) |
