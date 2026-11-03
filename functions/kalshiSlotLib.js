@@ -47,7 +47,8 @@ const SLOT_LADDERS = Object.freeze({
   OICORE: Object.freeze({
     steps: Object.freeze([10, 12, 15, 20, 30]),
     minBase: Object.freeze([0, 825, 900, 1030, 1350]),
-    upFills: 40, upDays: 14, upWinRate: 0.20, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
+    upFills: 20, upDays: 7,   // faster steps (Nov 3, 2026, the owner: "maybe be more aggressive", chose faster steps over lower floors or bigger jumps; was 40 fills and 14 days)
+     upWinRate: 0.20, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
     downDrawdownPerContract: 3, downWindow: 40, downWinRate: 0.15, downNetPerContract: -2,
     dailyPerContract: 2.5, dailyMaxFraction: 0.06, dailyCeiling: 75,
     stopPerContract: 5, stopMaxFraction: 0.12, stopCeiling: 150,

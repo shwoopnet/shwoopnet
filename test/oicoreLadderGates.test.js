@@ -37,30 +37,32 @@ gates.LD2 = () => {
 };
 
 gates.LD3 = () => {
-  // 40 fills over 15 days, 11 wins of +$7 and 29 losses of -$0.90: win 27.5%, net +$50, profit factor about 2.95. That earns the next step.
-  const good = run(40, 15, 11, 7, 0.9);
+  // 20 fills over 8 days, 6 wins of +$7 and 14 losses of -$0.90: win 30%, net +$29, profit factor about 3.3. That earns the next step.
+  const good = run(20, 8, 6, 7, 0.9);
   const big = slot.slotLadderState(OI, good, 900);
-  assert.deepStrictEqual([big.step, big.size], [1, 12], 'a good 40 fill, 15 day record steps up to 12 when the base is $900');
+  assert.deepStrictEqual([big.step, big.size], [1, 12], 'a good 20 fill, 8 day record steps up to 12 when the base is $900');
   const small = slot.slotLadderState(OI, good, 800);
   assert.deepStrictEqual([small.step, small.size], [1, 10], 'with an $800 base the step is earned but the size stays 10 (12 needs $825)');
   assert.deepStrictEqual(slot.slotLadderState(OI, good.slice().reverse(), 900).size, 12, 'the order of the documents does not matter: the replay sorts by settlement');
 };
 
 gates.LD4 = () => {
-  assert.strictEqual(slot.slotLadderState(OI, run(40, 5, 11, 7, 0.9), 2000).size, 10, '40 fills in only 5 days: no step (14 days are required)');
-  assert.strictEqual(slot.slotLadderState(OI, run(39, 20, 11, 7, 0.9), 2000).size, 10, '39 fills: no step (40 are required)');
+  assert.strictEqual(slot.slotLadderState(OI, run(20, 5, 6, 7, 0.9), 2000).size, 10, '20 fills in only 5 days: no step (7 days are required)');
+  assert.strictEqual(slot.slotLadderState(OI, run(19, 10, 6, 7, 0.9), 2000).size, 10, '19 fills: no step (20 are required)');
+  assert.strictEqual(slot.slotLadderState(OI, run(20, 8, 6, 7, 0.9), 2000).size, 12, '20 good fills over 8 days: one step');
+  assert.deepStrictEqual([L.upFills, L.upDays], [20, 7], 'the faster gate the owner chose');
 };
 
 gates.LD5 = () => {
-  assert.strictEqual(slot.slotLadderState(OI, run(40, 15, 7, 7, 0.9), 2000).size, 10, 'win rate 17.5%, under 20%: no step');
-  assert.strictEqual(slot.slotLadderState(OI, run(40, 15, 10, 2, 0.9), 2000).size, 10, 'wins too small (net negative): no step');
-  assert.strictEqual(slot.slotLadderState(OI, run(40, 15, 10, 3.5, 0.9), 2000).size, 10, 'profit factor about 1.34 but net +$9.90, under 1 x 10 contracts: no step');
+  assert.strictEqual(slot.slotLadderState(OI, run(20, 8, 3, 7, 0.9), 2000).size, 10, 'win rate 15%, under 20%: no step');
+  assert.strictEqual(slot.slotLadderState(OI, run(20, 8, 5, 2, 0.9), 2000).size, 10, 'wins too small (net negative): no step');
+  assert.strictEqual(slot.slotLadderState(OI, run(20, 8, 4, 5.9, 0.9), 2000).size, 10, 'profit factor about 1.6 but net +$9.20, under 1 x 10 contracts: no step');
 };
 
 gates.LD6 = () => {
   // Earn the step to 12, then lose 3 x 12 = $36 from the best point: back to 10 at once.
-  const good = run(40, 15, 11, 7, 0.9);
-  const losses = Array.from({ length: 30 }, (_, k) => ord(-1.2, 16 + k * 0.1));
+  const good = run(20, 8, 6, 7, 0.9);
+  const losses = Array.from({ length: 30 }, (_, k) => ord(-1.2, 9 + k * 0.1));
   const s = slot.slotLadderState(OI, good.concat(losses), 2000);
   assert.deepStrictEqual([s.step, s.size], [0, 10], 'a $36 drawdown at 12 contracts steps back down to 10');
   const s2 = slot.slotLadderState(OI, good.concat(losses.slice(0, 29)), 2000);
@@ -88,7 +90,9 @@ const input = (slotOrders, base, extra) => Object.assign({ strategyId: 'OICORE',
 const chk = (o, base, extra) => slot.slotOrderCheck(input(o, base, extra));
 
 gates.LD8 = () => {
-  const good = run(40, 15, 11, 7, 0.9);
+  const two = chk(run(40, 15, 11, 7, 0.9), 900);
+  assert.ok(two.allowed && two.count === 15, 'two good 20 fill stretches earn two steps, and $900 carries 15: ' + JSON.stringify(two));
+  const good = run(20, 8, 6, 7, 0.9);
   const a = chk(good, 900);
   assert.ok(a.allowed && a.count === 12, 'the gate sends 12 once the step is earned and the base is $900: ' + JSON.stringify(a));
   const b = chk(good, 800);
