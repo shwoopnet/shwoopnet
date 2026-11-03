@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 1:40 PM CT (19:40Z): W4 DOGE-EXIT RESULT, W5 PRICE-TILT REGISTERED
+
+W4 (14 tries): 1,776 Dogecoin trades (592 per slice), 110 early sells. Same single pass as gold: entry price at or below 0.932 (early sell rate 7.4% / 9.4% / 10.1% against 3.4% / 3.9% / 2.5%, ratio 2.2 / 2.4 / 4.1), mechanical. The cheaper half nets +1.97c, +0.37c, -0.20c a contract in D1, D2, holdout; skipping it lifts PF in every slice but cuts total dollars in D1, D2 and overall (19.57 to 13.20) and raises them only in the holdout. Spread and low OI change each showed a strong ratio in one slice only. No new predictor.
+W5 PRICE-TILT REGISTERED: size rule for the ladder markets, tested on gold.jsonl and doge.jsonl (62 days) and the live gold and Dogecoin ladder fills: half size when the entry price is at or below the market's D1 median entry price (0.926 gold, 0.932 Dogecoin), full size above, nothing else changed. Measure per slice (D1, D2, holdout): net dollars per contract-unit, loss dollars, worst 3 trade loss run, and P(daily loss over 12% of an $800 base) by bootstrap at 15 contracts. Prediction: net falls by 3% to 15%, loss dollars fall by 25% to 45%, in all slices. Kill: net falls by more than 20% in any slice. A pass is a draft for the owner, not a live change. 8 tries (2 markets x 4 measures counted as 2).
+
 ## 2026-11-03 1:35 PM CT (19:35Z): W1 OICORE-SKIP RESULT, W4 DOGE-EXIT REGISTERED
 
 W1 (11 testable tries of 12; stale-book count was zero on every trade): 453 trades (D1 214, D2 214, holdout 25), baseline PF 2.25 / 1.47 / 2.85. One rule passed the registered bar: keep only trades where the bought side's yes-mid change from -360 s to -180 s (sdir) is at or above its D1 median (-0.09): PF 3.13 / 1.54 / 4.06, net +10.41c a contract against +7.73, removes 51% of trades. Thin: D2 moves 1.47 to 1.54 and the skipped half still has PF 1.38 in D2; one pass in 12 tries is about chance. Near miss: skip spread below 0.01 (3.06 / 1.56 / 2.78, holdout under baseline by noise). Lead only; shadow S-SDIR1 (log sdir on every OICORE order and trigger window, read at 40 fills; the rule keeps cheap sides that have not already run up). No live change.
