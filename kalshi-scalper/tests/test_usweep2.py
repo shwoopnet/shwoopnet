@@ -54,3 +54,24 @@ def test_frozen_third_not_in_dev():
     _, frozen = u1.split_dates([u1.market_date(m) for m in allm])
     assert frozen and all(u1.market_date(m) not in set(frozen) for m in dev)
     assert len(dev) < len(allm)
+
+
+def test_favourite_rule_is_dropped():
+    assert set(u1.RULES) == {"tail", "fav"}      # usweep1 untouched
+    r = {"class": "D"}
+    t = 1_790_000_000 // 3600 * 3600
+    m = ["X-1", t - 200000, t + 86400, None, 1.0, False]
+    anc = u1.anchor_of(m)
+    cs = [[anc - 1440 * 60 - 60, 0.05, 0.92, 1.0]]            # yes ask 0.92 is a favourite, no ask 0.95 is a favourite too: nothing to take
+    out = u2.entries_for(r, [m], {"X-1": cs}, {"X-1": "yes"})
+    assert all(rule == "tail" for (_, rule) in out) and not out
+
+
+def test_tail_taken_and_no_favourite_cell():
+    r = {"class": "D"}
+    t = 1_790_000_000 // 3600 * 3600
+    m = ["X-1", t - 200000, t + 86400, None, 1.0, False]
+    anc = u1.anchor_of(m)
+    cs = [[anc - 1440 * 60 - 60, 0.88, 0.92, 1.0]]            # yes ask 0.92 (favourite, ignored), no ask 0.12 (tail)
+    out = u2.entries_for(r, [m], {"X-1": cs}, {"X-1": "no"})
+    assert list(out) == [(1440, "tail")] and out[(1440, "tail")][0][1] == 0.12 and out[(1440, "tail")][0][2]

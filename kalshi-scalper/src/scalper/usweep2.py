@@ -26,6 +26,9 @@ SCREEN_MIN_MARKETS, SCREEN_MIN_DATES = 15, 2   # stage A screen: a candidate nee
 MIN_MARKETS, MIN_DATES, MIN_MEDIAN_VOLUME = 300, 20, 100.0
 SAMPLE_PER_SERIES = 30
 CANDLE_BUDGET = 1200           # candle requests (one per development market); series taken by descending median volume until the budget is used
+# Amendment 1 (owner decision, Oct 28 rule held strictly): NO buy-the-favourite research. entries_for below is the tail-only copy of usweep1.entries_for
+# (usweep1.py and its RULES are not touched); no favourite entry is built and no favourite result is computed or printed.
+TAIL = u1.RULES["tail"]
 PAGE_CAP = 1                   # exact census: one page of 1000 per candidate (capped flag kept)
 
 
@@ -101,7 +104,7 @@ def census() -> None:
     cand = candidates(rows)
     meta = {s["ticker"]: s for s in api._get("/series", {"limit": 20000}).get("series", [])}
     (CACHE / "series_list.json").write_text(json.dumps(list(meta.values())))
-    todo = sorted(k for k in cand if not (meta.get(k, {}).get("frequency") == "fifteen_min" or k.startswith("KXMVE")))
+    todo = sorted((k for k in cand if not (meta.get(k, {}).get("frequency") == "fifteen_min" or k.startswith("KXMVE"))), key=lambda k: (-cand[k]["n"], k))      # busiest first (stage A count, structure only): the census is stopped by count, see Amendment 1
     path, rpath = CACHE / "census.jsonl", CACHE / "census_results.jsonl"
     done = {json.loads(x)["ticker"] for x in path.read_text().splitlines()} if path.exists() else set()
     todo = [t for t in todo if t not in done]
@@ -155,6 +158,32 @@ def select() -> None:
     print(f"budget: {used} candle requests; {len(skipped)} eligible series NOT tested (budget)")
     (WORKERS / "USWEEP2_SERIES.json").write_text(json.dumps({"rule": f"n>={MIN_MARKETS} settled in 60 days, >={MIN_DATES} close dates, median volume >={MIN_MEDIAN_VOLUME}, not in USWEEP1_SERIES, not KXMVE, not fifteen_min", "budget_skipped": skipped, "series": sel}, indent=1))
     print(f"{len(rows)} exact-counted; {len(sel)} eligible")
+
+
+def entries_for(rec: dict, ms: list, candles: dict, results: dict) -> dict:
+    """{(look_minutes, "tail"): [(date, price_paid, won, net, volume, spread)]}: the side whose ask is 0.05 to 0.15 (the cheaper if both). Nothing else."""
+    cls = rec["class"]; interval = 1 if cls == "H" else 60
+    out: dict = {}
+    for m in ms:
+        t, open_ts, close_ts = m[0], m[1], m[2]
+        res, cs = results.get(t), candles.get(t)
+        if res is None or cs is None:
+            continue
+        anc = u1.anchor_of(m)
+        for T in u1.LOOKS[cls]:
+            target = anc - T * 60
+            if target <= open_ts or target >= close_ts:
+                continue
+            q = u1.decision_quote(cs, target, interval)
+            if not q:
+                continue
+            _, bid, ask, vol = q
+            picks = [(s, p) for s, p in (("yes", ask), ("no", round(1 - bid, 4))) if TAIL[0] <= p <= TAIL[1]]
+            if picks:
+                side, p = min(picks, key=lambda x: x[1])
+                won = side == res
+                out.setdefault((T, "tail"), []).append((u1.market_date(m), p, won, u1.net_per_contract(won, p), vol or 0.0, ask - bid))
+    return out
 
 
 def sampled(rec: dict) -> list:
@@ -231,7 +260,7 @@ def score() -> None:
     for s in sel:
         dev, dev_days = dev_markets(byt[s["ticker"]])
         half_cut = dev_days[len(dev_days) // 2] if dev_days else None
-        ent = u1.entries_for(s, dev, candles, results)
+        ent = entries_for(s, dev, candles, results)
         for (T, rule), rows in sorted(ent.items()):
             a = [r for r in rows if r[0] < half_cut]; b = [r for r in rows if r[0] >= half_cut]
             stress = [(r[0], r[3] - 0.2 * u1.fee_per_contract(r[1])) for r in rows]
