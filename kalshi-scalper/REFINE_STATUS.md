@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 3:45 PM CT (21:45Z): CORRECTION to W17 and S-FLOW1 (the tape was deduplicated by accident)
+
+W19 found that the W17 script loaded the R6 tape into a set of (time, price, count, side) tuples, which collapses identical same-timestamp fills (14.19 million rows kept of 15.39 million). I reran W17 on every raw row with the same fixed threshold (-0.036): low n 76, win 36.8%, PF 2.54, +13.25c; high n 70, win 17.1%, PF 0.68, -3.92c; permutation p = 0.0026 (one sided, 10,000 shuffles); non-trigger pool low PF 2.48 vs high 0.50; the 12 OICORE trigger windows are still unreadable (7 low PF 3.13, 5 high PF 5.77). The lead survives on the full tape with slightly smaller numbers (the earlier PF 2.84 / 0.63 was on the collapsed tape). S-FLOW1 is therefore defined on the FULL public trade list (every trade, no deduplication), threshold -0.036, which is what flow_forward.py computes from the public endpoint; the cross-check imbalances that differed (0.19 vs 0.11 on one window) came from the collapsed R6 set. One more try counted.
+
 ## 2026-11-03 3:39 PM CT (21:39Z): W18 FLOW-ROBUST RESULT, W19 FLOW-FORWARD REGISTERED
 
 W18 (about 17 low-vs-high comparisons counted into N): the W17 lead survives every cut but stays small-n. Price buckets 0.05 to 0.15 / 0.15 to 0.30 / 0.30 to 0.50: low beats high in all three (PF 3.40 vs 1.21, 1.97 vs 0.46, 10.84 vs 0.92; cells 9 to 19). Hour blocks (CT) 00-08 / 08-16 / 16-24: low above high in all (3.04 vs 0.71, 2.18 vs 0.34, 3.58 vs 0.67). By day: low PF above 1 on all 6 days, beats high on 4 of 6 (Oct 29 n 7 and Nov 3 a tie are too small). Sign of the cheap side's mid move: holds in both. Window length: -300 s PF 2.15 vs 0.97, -360 s (registered) 2.84 vs 0.63, -480 s 2.50 vs 0.82: the registered window is the best of three. Weakens: all cells small, only 6 days, the high half is mildly negative in some cells so the edge is mostly the low half. Low won 15 of 17 comparisons.
