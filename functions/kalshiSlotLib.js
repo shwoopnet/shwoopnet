@@ -77,11 +77,12 @@ const SLOT_STRATEGIES = Object.freeze([
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
   // CHEAP1 (Nov 3, 2026, the owner: a third live strategy, "thats what i asked for"): the research session's REF_BTC_UNDERDOG_180 / REV1 cheap-side rule on Bitcoin, but ONLY in the
-  // windows where OICORE's trigger does NOT fire (oiRiseMax 86,300), so it never doubles OICORE's bet on the same side and window. Cheaper side 15c to 49c, 180 to 120 s before the close,
+  // windows where OICORE's trigger does NOT fire (oiRiseMax 86,300), so it never doubles OICORE's bet on the same side and window. The NO side priced 5c to 45c (REV1 as registered;
+  // the both-sides underdog version was -0.49c a contract in the non-OICORE windows, REV1SPLIT, Nov 3, 2026, so it was dropped before any order), 180 to 120 s before the close,
   // 5 contracts, held to settlement. Below the research bar (forward PF about 1.20 on 127 trades, z about 1.0); a capped probe the owner chose. Held until the Nov 5 REV1 read.
   Object.freeze({
     id: "CHEAP1", readme: "kalshi-scalper/README.md#SLOT-CHEAP1", series: Object.freeze(["KXBTC15M"]),
-    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.15, priceMax: 0.49, leftMaxSec: 180, leftMinSec: 120, oiRiseMax: 86300 }),
+    entry: Object.freeze({ sideRule: "no", priceMin: 0.05, priceMax: 0.45, leftMaxSec: 180, leftMinSec: 120, oiRiseMax: 86300 }),
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
     killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 100, net: -15 }) }),

@@ -10,14 +10,14 @@ const O = slot.SLOT_STRATEGIES.find((s) => s.id === 'OICORE');
 const gates = {};
 gates.CH1 = () => {
   assert.ok(C && slot.validateSlotStrategy(C).ok, 'CHEAP1 is registered and valid');
-  assert.deepStrictEqual([C.series.slice(), C.entry.sideRule, C.entry.priceMin, C.entry.priceMax, C.entry.leftMaxSec, C.entry.leftMinSec], [['KXBTC15M'], 'cheap', 0.15, 0.49, 180, 120]);
+  assert.deepStrictEqual([C.series.slice(), C.entry.sideRule, C.entry.priceMin, C.entry.priceMax, C.entry.leftMaxSec, C.entry.leftMinSec], [['KXBTC15M'], 'no', 0.05, 0.45, 180, 120]);
   assert.strictEqual(C.entry.oiRiseMax, O.entry.oiRiseMin, 'it trades exactly the windows OICORE leaves alone');
   assert.strictEqual(C.contractsPerOrder, 5); assert.strictEqual(C.exit.holdToSettle, true);
   assert.deepStrictEqual([C.killRules.maxConsecutiveLosses, C.killRules.minNet.afterFills, C.killRules.minNet.net], [20, 100, -15]);
   assert.ok(!slot.SLOT_LADDERS || !slot.SLOT_LADDERS.CHEAP1, 'no size ladder: always 5');
 };
 const NOW = Date.parse('2026-11-20T16:57:30Z');
-const input = (id, oiRise, extra) => Object.assign({ strategyId: id, ticker: 'KXBTC15M-26NOV201200-00', side: 'yes', limit: 0.3, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [],
+const input = (id, oiRise, extra) => Object.assign({ strategyId: id, ticker: 'KXBTC15M-26NOV201200-00', side: 'no', limit: 0.3, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [],
   slotOrdersComplete: true, lockTxn: true, lock: null, position: 0, sizingBase: 800, windowCapFraction: 0.055, killLatch: null, secondsLeft: 150, now: NOW, oiRise }, extra || {});
 gates.CH2 = () => {
   const lo = slot.slotOrderCheck(input('CHEAP1', 40000));
@@ -28,8 +28,9 @@ gates.CH2 = () => {
   assert.ok(!slot.slotOrderCheck(input('OICORE', 40000)).allowed && slot.slotOrderCheck(input('OICORE', 90000)).allowed, 'and OICORE still trades only its own windows');
 };
 gates.CH3 = () => {
-  assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { limit: 0.14 })).allowed, 'under 15c: no');
-  assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { limit: 0.5 })).allowed, 'over 49c: no');
+  assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { limit: 0.04 })).allowed, 'under 5c: no');
+  assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { limit: 0.46 })).allowed, 'over 45c: no');
+  assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { side: 'yes' })).allowed, 'NO side only');
   assert.ok(!slot.slotOrderCheck(input('CHEAP1', 40000, { secondsLeft: 200 })).allowed, 'outside 180 to 120 s: no');
   const w = slot.slotOrderCheck(input('CHEAP1', 40000, { wanted: 50 }));
   assert.ok(w.allowed && w.count === 5, 'a caller asking for more never gets more than 5');
