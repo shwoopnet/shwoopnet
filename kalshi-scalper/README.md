@@ -8304,3 +8304,6 @@ Registered first (`workers/USWEEP1_REGISTRATION.md`, commit f73bc8b plus Amendme
 - P08 SMILE ladder interpolation residual: **NOT_ENOUGH_DATA**, 0 trades (largest gap 3.07c, trigger 4c).
 - P09 SETTLE settlement windows: **NOT_ENOUGH_DATA**, n 82, win 17.1% vs 15.2%, PF 1.30 / 0.97.
 - P10 REOPEN: **FALSIFIED**, n 158, win 17.7% vs 16.2%, PF 1.64 / 0.84, excess +8.7c / +2.9c.
+
+### P06 (PUB20) W3 read authorised by owner 2026-11-03 (note written before the read)
+One read of the frozen W3 (closes 10-05 on) for the fix-window rule, registered rules unchanged. Holds up only if W3 net is positive after fees, W3 PF is at least 1.5 and pooled W1+W2+W3 PF is at least 1.5; else FALSIFIED. See `workers/PUB20_RESULT.md` addendum.

@@ -43,3 +43,13 @@ but not the price: the controls were even worse than the rule. The pass bar was 
 - SETTLE times (silver 13:30, copper 13:00, WTI and gas 14:30 Eastern) were from memory and not checked against CME; a wrong time makes P09 a test
   of another window. Trades inside one close are not independent across the 9 series; the z uses day clusters.
 - P01/P02 use strikes as the spot at the open (floating strikes); a rounded strike can make a zero move.
+
+## Addendum: P06 W3 read authorised by owner 2026-11-03 (written and pushed BEFORE the read; no W3 outcome seen)
+Owner said yes via main: read W3 for P06 ONCE, no re-definition, no re-run. Exact windows (unchanged from the registration): weekdays, windows closing at
+16:00 London (UTC 15:00 in BST, 16:00 in GMT after 2026-10-25) and 10:00 US Eastern (UTC 14:00 in EDT, 15:00 in EST after 2026-11-01) for EURUSD,
+GBPUSD, USDJPY, and 12:00 London for silver; Central time = Eastern minus 1 hour. W3 = closes 2026-10-05 to the end of the data (56 trades counted
+from quotes in `counts`, no result read). Cheap side, ask 0.05 to 0.50, HARD fill limit 0.50, fill at close-120 ask, held, C = 10, fee 7% x C x p x (1-p)
+rounded up; control = same series 2 hours before and after (at least 10 control trades) as registered.
+**Decision rule (fixed now):** holds up only if W3 mean net after fees is positive AND W3 PF is at least 1.5 AND pooled W1+W2+W3 PF is at least 1.5.
+Disclosed in advance: W1 PF was 1.18, below the registered per-window 1.5 bar, so under the strict registered kill rule P06 is already
+not a pass; this read decides only whether the owner-authorised probe spec is written. Else FALSIFIED and stop.
