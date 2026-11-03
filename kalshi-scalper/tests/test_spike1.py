@@ -119,6 +119,44 @@ def test_fee_is_event1_cost():
     assert abs(spike1.net_c(0.2, True) - 100 * (0.8 - spike1.event1.gen6.fee(0.2, 10))) < 1e-9
 
 
+def test_cont_leg_is_the_other_side_with_limit():
+    prev = [quiet(CT - 900 * j) for j in range(1, 5)]
+    mids = {s: 0.50 for s in range(840, 59, -60)}
+    mids[480] = 0.80
+    mids[420] = 0.80
+    cur = win(CT, mids)
+    trig, _, _ = spike1.window_events(cur, by(*prev, cur))
+    b = spike1.cont_leg(cur, trig)
+    assert b["side"] == "yes" and abs(b["fill"] - 0.81) < 1e-6
+    cur["cs"][CT - 420] = (0.985, 0.995, 1.0)
+    assert spike1.cont_leg(cur, trig) is None                  # 0.995 > 0.97 limit
+
+
+def test_verdict_floors_and_kills():
+    def h(n, pf, ab, ac, x12):
+        return {"A": {"n": n, "pf": pf}, "A_minus_B": (ab, 0, 1, 0), "A_minus_ctrl": (ac, 0, 1, 0), "A_x12": {"pf": x12}}
+    ok = h(200, 2.0, 1.0, 1.0, 1.8)
+    assert spike1.verdict(ok, ok, 400)[0] == "PASS_SCREEN"
+    assert spike1.verdict(ok, h(30, 2.0, 1, 1, 1.8), 230)[0] == "NOT_ENOUGH_DATA"
+    assert spike1.verdict(ok, ok, 149)[0] == "NOT_ENOUGH_DATA"
+    assert spike1.verdict(ok, h(200, 1.4, 1, 1, 1.8), 400)[0] == "FALSIFIED"
+    assert spike1.verdict(ok, h(200, 2.0, -1, 1, 1.8), 400)[0] == "FALSIFIED"
+    assert spike1.verdict(ok, h(200, 2.0, 1, -1, 1.8), 400)[0] == "FALSIFIED"
+
+
+def test_diff_vs_ctrl_cell_and_fallback():
+    def t(h, win, fill=0.2, look=480):
+        return {"series": "S", "hour": h, "third": 1, "day": "d", "win": win, "tr": {"fill": fill, "look": look}}
+    ctrl = [t(5, False) for _ in range(5)]
+    m, z, used, dropped = spike1.diff_vs_ctrl([t(5, True), t(5, True)], ctrl)
+    assert used == 2 and dropped == 0 and m > 0
+    m2, z2, used2, dropped2 = spike1.diff_vs_ctrl([t(7, True)], ctrl)       # hour 7: neighbours 6 and 8 are empty
+    assert used2 == 0 and dropped2 == 1
+    ctrl2 = [t(4, False) for _ in range(3)] + [t(6, False) for _ in range(3)]
+    _, _, used3, _ = spike1.diff_vs_ctrl([t(5, True), t(5, False)], ctrl2)  # empty cell, neighbours give 6
+    assert used3 == 2
+
+
 if __name__ == "__main__":
     fails = 0
     for k, f in list(globals().items()):

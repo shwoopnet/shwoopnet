@@ -161,6 +161,16 @@ def any_spike(w, by_ct):
     return False
 
 
+def cont_leg(w, tr):
+    """Try B on the same window as a reversal trade: the OTHER side (in the spike's direction) at the same next candle's ask, hard limit 0.97."""
+    side = "yes" if tr["side"] == "no" else "no"
+    f = w["cs"].get(w["ct"] - tr["look"] + 60)
+    if f is None or f[0] is None or f[1] is None or not 0 < f[0] < f[1] < 1:
+        return None
+    p = side_ask(f, side)
+    return {"side": side, "fill": float(p)} if 0 < p <= 0.97 + 1e-9 else None
+
+
 def hour_of(ct):
     return (ct // 3600) % 24
 
@@ -171,7 +181,7 @@ def build(series=SERIES, with_result=False):
     for sr in series:
         wins = load(sr, with_result)
         by_ct = {w["ct"]: w for w in wins}
-        d = {"rev": [], "cont": [], "ctrl": [], "nwin": defaultdict(int), "nsd": defaultdict(int), "nspike": defaultdict(int)}
+        d = {"rev": [], "cont": [], "B": [], "ctrl": [], "nwin": defaultdict(int), "nsd": defaultdict(int), "nspike": defaultdict(int)}
         for w in wins:
             th = third_of(w["ct"])
             d["nwin"][th] += 1
@@ -185,6 +195,11 @@ def build(series=SERIES, with_result=False):
                                   win=((w["res"] == "yes") == (tr["side"] == "yes")) if with_result else None)
             if trig:
                 d[trig["kind"]].append(row(trig))
+                if trig["kind"] == "rev":
+                    b = cont_leg(w, trig)
+                    d["B"].append(row(b) if b else {"series": sr, "ct": w["ct"], "tr": None, "third": th, "day": day_of(w["ct"]), "hour": hour_of(w["ct"]), "win": None})
+                    if with_result and b:
+                        d["B"][-1]["look"] = trig["look"]
             for tr in ctrl:
                 d["ctrl"].append(row(tr))
         out[sr] = d
@@ -202,6 +217,122 @@ def spread_median(series):
     return statistics.median(v) if v else None
 
 
+def net_slip(t, m=1.0, slip=0.0):
+    f = min(t["tr"]["fill"] + slip, 0.99)
+    return net_c(f, t["win"], 10, m)
+
+
+def summ(T, m=1.0, slip=0.0):
+    T = [t for t in T if t.get("tr")]
+    if not T:
+        return {"n": 0}
+    v = [net_slip(t, m, slip) for t in T]
+    mean, se, z = cluster_mean_z([(t["day"], x) for t, x in zip(T, v)])
+    return {"n": len(T), "days": len({t["day"] for t in T}), "win": sum(1 for t in T if t["win"]) / len(T),
+            "avg_fill": sum(t["tr"]["fill"] for t in T) / len(T), "pf": pf(v), "mean_c": mean, "z": z, "net_usd_c10": sum(v) / 10.0}
+
+
+def ctrl_cells(ctrl):
+    by = defaultdict(list)
+    for t in ctrl:
+        by[(t["series"], t["hour"], t["tr"]["look"], t["third"])].append(net_c(t["tr"]["fill"], t["win"]))
+    return by
+
+
+def diff_vs_ctrl(T, ctrl):
+    """Each trade's net minus the mean net of control trades in its (series, UTC hour, look, third) cell; if the cell has fewer than CTRL_MIN,
+    the cells one hour either side; if still fewer the trade is dropped. Returns (mean c, z, used, dropped)."""
+    by = ctrl_cells(ctrl)
+    res, dropped = [], 0
+    for t in T:
+        k = (t["series"], t["hour"], t["tr"]["look"], t["third"])
+        v = by.get(k, [])
+        if len(v) < CTRL_MIN:
+            v = [x for sh in (-1, 1) for x in by.get((k[0], (k[1] + sh) % 24, k[2], k[3]), [])]
+        if len(v) < CTRL_MIN:
+            dropped += 1
+            continue
+        res.append((t["day"], net_c(t["tr"]["fill"], t["win"]) - sum(v) / len(v)))
+    if len(res) < 2:
+        return 0.0, 0.0, len(res), dropped
+    mean, se, z = cluster_mean_z(res)
+    return mean, z, len(res), dropped
+
+
+def diff_vs_B(A, B):
+    """Per window: A net minus B net where both filled. Returns (mean c, z, used, dropped)."""
+    bm = {(b["series"], b["ct"]): b for b in B if b.get("tr")}
+    res, dropped = [], 0
+    for a in A:
+        b = bm.get((a["series"], a["ct"]))
+        if b is None:
+            dropped += 1
+            continue
+        res.append((a["day"], net_c(a["tr"]["fill"], a["win"]) - net_c(b["tr"]["fill"], b["win"])))
+    if len(res) < 2:
+        return 0.0, 0.0, len(res), dropped
+    mean, se, z = cluster_mean_z(res)
+    return mean, z, len(res), dropped
+
+
+def half_report(label, A, B, C, third):
+    a = [t for t in A if t["third"] == third]
+    b = [t for t in B if t["third"] == third and t.get("tr")]
+    c = [t for t in C if t["third"] == third]
+    r = {"label": label, "A": summ(a), "A_x12": summ(a, 1.2), "A_slip1c": summ(a, 1.0, 0.01), "B": summ(b), "ctrl": summ(c)}
+    r["A_minus_B"] = diff_vs_B(a, b)
+    r["A_minus_ctrl"] = diff_vs_ctrl(a, c)
+    return r
+
+
+def verdict(w1, w2, n_pool):
+    a1, a2 = w1["A"], w2["A"]
+    if n_pool < FLOOR_N or a1["n"] < HALF_FLOOR or a2["n"] < HALF_FLOOR:
+        return "NOT_ENOUGH_DATA", ["pooled W1+W2 n %d (floor %d), halves %d / %d (floor %d)" % (n_pool, FLOOR_N, a1["n"], a2["n"], HALF_FLOOR)]
+    why = []
+    for nm, w in (("W1", w1), ("W2", w2)):
+        if w["A"]["pf"] < 1.5:
+            why.append(f"{nm} PF {w['A']['pf']:.2f} < 1.5")
+        if w["A_minus_B"][0] <= 0:
+            why.append(f"{nm} A minus B {w['A_minus_B'][0]:+.2f}c not positive")
+        if w["A_minus_ctrl"][0] <= 0:
+            why.append(f"{nm} A minus control {w['A_minus_ctrl'][0]:+.2f}c not positive")
+        if w["A_x12"]["pf"] <= 1.0:
+            why.append(f"{nm} x1.2 PF {w['A_x12']['pf']:.2f} <= 1.0")
+    return ("FALSIFIED" if why else "PASS_SCREEN"), why
+
+
+def score():
+    if OUT.exists():
+        print("refusing a second run:", OUT)
+        sys.exit(2)
+    B = build(with_result=True)
+    A = [t for d in B.values() for t in d["rev"]]
+    Cn = [t for d in B.values() for t in d["cont"]]
+    Bb = [t for d in B.values() for t in d["B"]]
+    Cc = [t for d in B.values() for t in d["ctrl"]]
+    w1, w2 = half_report("W1", A, Bb, Cc, 1), half_report("W2", A, Bb, Cc, 2)
+    n_pool = w1["A"]["n"] + w2["A"]["n"]
+    v, why = verdict(w1, w2, n_pool)
+    out = {"verdict": v, "why": why, "W1": w1, "W2": w2, "n_pool": n_pool, "literal_cheap_continuation_n": len(Cn),
+           "pooled_A": summ([t for t in A if t["third"] in (1, 2)]), "pooled_B": summ([t for t in Bb if t["third"] in (1, 2) and t.get("tr")]),
+           "pooled_ctrl": summ([t for t in Cc if t["third"] in (1, 2)]), "W3": "frozen, not read"}
+    out["pooled_A_minus_B"] = diff_vs_B([t for t in A if t["third"] in (1, 2)], [t for t in Bb if t["third"] in (1, 2)])
+    out["pooled_A_minus_ctrl"] = diff_vs_ctrl([t for t in A if t["third"] in (1, 2)], [t for t in Cc if t["third"] in (1, 2)])
+    per = {}
+    for sr, d in B.items():
+        per[sr] = {"A_W1": summ([t for t in d["rev"] if t["third"] == 1]), "A_W2": summ([t for t in d["rev"] if t["third"] == 2]),
+                   "B_W12": summ([t for t in d["B"] if t["third"] in (1, 2) and t.get("tr")]),
+                   "ctrl_W12": summ([t for t in d["ctrl"] if t["third"] in (1, 2)])}
+    out["per_series_information"] = per
+    if v == "PASS_SCREEN":
+        out["W3"] = "screen passed; W3 to be read once by a separate registered command"
+    OUT.write_text(json.dumps(out, indent=1, default=str))
+    print(json.dumps({k: out[k] for k in out if k != "per_series_information"}, indent=1, default=str))
+    for sr, d in per.items():
+        print(sr, {k: (round(x.get("pf", 0), 2), x["n"]) for k, x in d.items()})
+
+
 def counts():
     B = build()
     print("series | windows W1/W2/W3 | with sd W1/W2/W3 | any-spike W1/W2/W3 | rev W1/W2/W3 | cont W1/W2/W3 | ctrl W1/W2/W3 | median spread")
@@ -214,5 +345,7 @@ def counts():
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "counts":
         counts()
+    elif len(sys.argv) > 1 and sys.argv[1] == "score":
+        score()
     else:
         print(__doc__)
