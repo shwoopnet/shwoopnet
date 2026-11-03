@@ -80,6 +80,20 @@ gates.SF7 = () => {
   assert.ok(!/entr/i.test(m[1]) && /closes/.test(m[1]), 'the confirmation says closes, not entries');
 };
 
+gates.SF8 = () => {
+  // Nov 3, 2026: the Settings changelog had Nov 1 to Nov 3 entries under an "Oct 30" heading. The top heading must be the newest date among CLAUDE.md's dated sections, so a change noted there cannot sit under an old day on the site.
+  const notes = fs.readFileSync(path.join(__dirname, '..', 'CLAUDE.md'), 'utf8');
+  const MON = { Jan: 1, Feb: 2, Mar: 3, Apr: 4, May: 5, Jun: 6, Jul: 7, Aug: 8, Sep: 9, Oct: 10, Nov: 11, Dec: 12 };
+  const dates = [...notes.matchAll(/^## .*\((Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2}), 2026/gm)].map((m) => MON[m[1]] * 100 + Number(m[2]));
+  assert.ok(dates.length > 5, 'dated sections found in CLAUDE.md');
+  const newest = Math.max(...dates);
+  const top = /<div class="changelog-day">(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})<\/div>/.exec(html);
+  assert.ok(top, 'the changelog has day headings');
+  assert.strictEqual(MON[top[1]] * 100 + Number(top[2]), newest, 'the top changelog heading (' + top[0] + ') is the newest dated section in CLAUDE.md');
+  // headings run newest first
+  const heads = [...html.matchAll(/<div class="changelog-day">(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})<\/div>/g)].map((m) => MON[m[1]] * 100 + Number(m[2]));
+  for (let i = 1; i < heads.length; i++) assert.ok(heads[i] <= heads[i - 1], 'changelog days run newest first');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
