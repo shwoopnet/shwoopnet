@@ -111,8 +111,13 @@ def lane_value(samples, T, pool_day, period_days, vol24, case):
         cost += fills * c
     capcost = cap * CAP_YEAR / 365.0
     net = reward - cost - capcost
-    k = 100.0 / cap if cap > 0 else 0.0
-    return {"f": f, "reward100": reward * k, "cost100": cost * k, "net100": net * k, "cap": cap, "fills_day": sum(min(q, half * sh * mult) for sh in (sy, sn))}
+    # per $100 resting: a lane holding less than $100 is NOT scaled up (the rest of the $100 sits idle)
+    k = 100.0 / max(cap, 100.0)
+    # stress (information): every lane's two sides are filled in full once in the program period (volume ignored)
+    floor_cost = sum(q * (ADV[case] * p if p <= 0.15 else ADV_MID[case]) for p in (py, pn)) / max(period_days, 1.0)
+    return {"f": f, "reward100": reward * k, "cost100": cost * k, "net100": net * k, "cap": cap,
+            "reward": reward, "net": net, "net_floor100": (reward - floor_cost - capcost) * k,
+            "fills_day": sum(min(q, half * sh * mult) for sh in (sy, sn))}
 
 
 def verdict(lanes, scored_min=100):
