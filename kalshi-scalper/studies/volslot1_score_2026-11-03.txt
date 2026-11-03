@@ -1,0 +1,23 @@
+quiet W1 {'n': 156, 'win': 0.891, 'avg_fill': 0.894, 'payoff': 0.108, 'pf': 0.882, 'pf_x12': 0.87, 'mean_c': -0.956, 'z': -0.417, 'diff_loud_c': -1.8, 'diff_loud_z': -0.457, 'diff_all_c': 0.579, 'diff_all_z': 0.235}
+quiet W2 {'n': 448, 'win': 0.888, 'avg_fill': 0.899, 'payoff': 0.102, 'pf': 0.816, 'pf_x12': 0.804, 'mean_c': -1.631, 'z': -1.095, 'diff_loud_c': -0.44, 'diff_loud_z': -0.226, 'diff_all_c': -0.182, 'diff_all_z': -0.113}
+quiet pooled {'n': 604, 'win': 0.889, 'avg_fill': 0.898, 'payoff': 0.104, 'pf': 0.832, 'pf_x12': 0.82, 'mean_c': -1.456, 'z': -1.159}
+loud W1 {'n': 127, 'win': 0.866, 'avg_fill': 0.851, 'payoff': 0.169, 'pf': 1.091, 'pf_x12': 1.076, 'mean_c': 0.844, 'z': 0.263}
+loud W2 {'n': 432, 'win': 0.882, 'avg_fill': 0.887, 'payoff': 0.116, 'pf': 0.864, 'pf_x12': 0.852, 'mean_c': -1.191, 'z': -0.95}
+loud pooled {'n': 559, 'win': 0.878, 'avg_fill': 0.879, 'payoff': 0.127, 'pf': 0.918, 'pf_x12': 0.905, 'mean_c': -0.728, 'z': -0.602}
+mid W1 {'n': 278, 'win': 0.892, 'avg_fill': 0.885, 'payoff': 0.121, 'pf': 1.002, 'pf_x12': 0.989, 'mean_c': 0.019, 'z': 0.011}
+mid W2 {'n': 852, 'win': 0.887, 'avg_fill': 0.893, 'payoff': 0.11, 'pf': 0.867, 'pf_x12': 0.855, 'mean_c': -1.159, 'z': -1.099}
+mid pooled {'n': 1130, 'win': 0.888, 'avg_fill': 0.891, 'payoff': 0.113, 'pf': 0.901, 'pf_x12': 0.889, 'mean_c': -0.869, 'z': -0.95}
+all W1 {'n': 1282, 'win': 0.884, 'avg_fill': 0.893, 'payoff': 0.109, 'pf': 0.829, 'pf_x12': 0.818, 'mean_c': -1.535, 'z': -1.704}
+all W2 {'n': 2615, 'win': 0.886, 'avg_fill': 0.895, 'payoff': 0.107, 'pf': 0.837, 'pf_x12': 0.825, 'mean_c': -1.449, 'z': -2.424}
+all pooled {'n': 3897, 'win': 0.886, 'avg_fill': 0.894, 'payoff': 0.108, 'pf': 0.834, 'pf_x12': 0.823, 'mean_c': -1.477, 'z': -2.965}
+pooled quiet-loud {'diff_c': -0.7281921951450666, 'diff_z': -0.41764735182904505} quiet-all {'diff_c': 0.02085893037095987, 'diff_z': 0.015436203722633924}
+verdict FALSIFIED probe_flag False unclassified 1604 worst loss $ 9.729999999999999
+KXEURUSD15M {'n': 0}
+KXGBPUSD15M {'n': 0}
+KXUSDJPY15M {'n': 0}
+KXSILVER15M {'n': 163, 'win': 0.89, 'avg_fill': 0.884, 'payoff': 0.123, 'pf': 0.989, 'pf_x12': 0.975, 'mean_c': -0.098, 'z': -0.034}
+KXCOPPER15M {'n': 98, 'win': 0.898, 'avg_fill': 0.886, 'payoff': 0.122, 'pf': 1.077, 'pf_x12': 1.064, 'mean_c': 0.604, 'z': 0.237}
+KXWTI15M {'n': 189, 'win': 0.878, 'avg_fill': 0.901, 'payoff': 0.094, 'pf': 0.681, 'pf_x12': 0.671, 'mean_c': -2.906, 'z': -1.365}
+KXNATGAS15M {'n': 132, 'win': 0.886, 'avg_fill': 0.917, 'payoff': 0.08, 'pf': 0.621, 'pf_x12': 0.612, 'mean_c': -3.555, 'z': -1.509}
+KXPLATINUM15M {'n': 10, 'win': 1.0, 'avg_fill': 0.903, 'payoff': 0.0, 'pf': 99.0, 'pf_x12': 99.0, 'mean_c': 9.07, 'z': 3.35}
+KXPALLADIUM15M {'n': 12, 'win': 0.917, 'avg_fill': 0.907, 'payoff': 0.097, 'pf': 1.07, 'pf_x12': 1.049, 'mean_c': 0.4, 'z': 0.076}
