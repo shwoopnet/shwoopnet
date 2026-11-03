@@ -135,3 +135,10 @@ the due date (`--force-info` prints information that needs no outcome and writes
 | `python -m scalper.barrier1_fwd forward` | BARRIER1F | 2027-11-01 | 40 forward fills; recdaily; OKX public hourly |
 
 WXENS1: its read command lives in `scalper.wxens1` on the recorder branch `claude/v2-recorder-wxens`; it is deliberately not duplicated here.
+
+## Rulings from main (2026-11-03, owner decisions) - supersede the rows above
+- DROP from the calendar and never run or read: the five USWEEP1 favourite watch items, GAS1-F favourites, ABSORB-F (strict Oct 28 favourite-and-hold ban; removed from RECDAILY_WATCHLIST.json on main).
+- DROP the Nov 12 L1 reads (HOUR3-F, ENTRY2, FLIPS0-F, P6F/P6R and the rest): refinements of a live strategy, owned by the refinement chat, not this session.
+- RUN: REV1 on 2026-11-05 with the OICORE fired / not-fired split (owner-asked, `python -m scalper.rev1 run`, fresh_update first).
+- Recorders daily, ref and wxens were merged to main as shwoopnet#705 (extracted files only, not the review branches); the owner runs each workflow once by hand. Future recorder changes go on a branch cut from main containing only recorder files (no research files); readers and notes stay on claude/epic-ptolemy-0amjd9. Do not push or merge the old review branches.
+- Keep at least 5 workers; favour high-arrival families (maker tests, weather brackets, cheap-side OICORE-shaped ideas) per POWER1.
