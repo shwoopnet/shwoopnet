@@ -1,6 +1,6 @@
 # COST1 result (2026-11-03). Measurement and desk research. No strategy scored, 0 tries, N unchanged (about 728,700).
 
-Code `src/scalper/cost1.py`, `tests/test_cost1.py` (committed before this file). Full 99-row fee table: `python -m scalper.cost1 fees`. Spread: `python -m scalper.cost1 spread` (history + fresh + replicated 15 minute candles; 8.1M candle observations folded so a NO buyer sees the same spread at 1 - mid).
+Code `src/scalper/cost1.py`, `tests/test_cost1.py` (committed before this file). Full 99-row fee table: `python -m scalper.cost1 fees`. Spread: `python -m scalper.cost1 spread` (history + fresh + replicated 15 minute candles; about 3.1M folded candle observations so a NO buyer sees the same spread at 1 - mid).
 
 ## 1. Taker fee: ceil_to_cent(0.07 x C x p x (1-p)) per order
 Total fee in cents (and per contract, and percent of price) at selected prices; every price 1..99 is in the CSV.
