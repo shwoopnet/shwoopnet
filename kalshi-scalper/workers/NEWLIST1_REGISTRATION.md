@@ -68,3 +68,16 @@ late-life control exists to hold that fixed within a family.
 
 ## Outcome status at registration
 No outcome seen. Candles: none downloaded. `res` table holds settled results from the listing, unread. Expected read date: the day candles finish (2026-11-04 or earlier), one scored run.
+
+
+## Amendment 1 (2026-11-03, metadata only, BEFORE any candle download or any outcome): family list, sample cap, cut dates
+Coordinator order: stop my separate 1,330-series scan (killed; its partial table deleted) and take families from the USWEEP1 census
+(`scratchpad/sweep/census.jsonl`: ticker, open, close, expiration, volume per settled market, no results; census of 1,753 series, markets closing
+in the last 60 days). Rule applied: census series (KXMVE, 15M, KXGOLD* dropped) with at least 200 markets of life (close - open) >= 12 hours.
+**137 families, 86,128 eligible markets.** Sample cap changed from 400 to **40 markets per family** (smallest md5(ticker)), because the shared rate
+limit allows about 1 candle call per 1 to 2 seconds; 5,480 markets picked. Cut dates over the picked set by close time:
+**D closes before 2026-09-30 03:59 UTC; V 2026-09-30 03:59 to before 2026-10-19 03:59; H (frozen, unread) 2026-10-19 03:59 on.** Everything else unchanged.
+Families: KXAAAGASD KXAAAGASDAK KXAAAGASDAL KXAAAGASDAR KXAAAGASDAZ KXAAAGASDCA KXAAAGASDCO KXAAAGASDCT KXAAAGASDDE KXAAAGASDFL KXAAAGASDGA KXAAAGASDHI KXAAAGASDIA KXAAAGASDID KXAAAGASDIL KXAAAGASDIN KXAAAGASDKS KXAAAGASDKY KXAAAGASDLA KXAAAGASDMA KXAAAGASDMD KXAAAGASDME KXAAAGASDMI KXAAAGASDMN KXAAAGASDMO KXAAAGASDMS KXAAAGASDMT KXAAAGASDNC KXAAAGASDND KXAAAGASDNE KXAAAGASDNH KXAAAGASDNJ KXAAAGASDNM KXAAAGASDNV KXAAAGASDNY KXAAAGASDOH KXAAAGASDOK KXAAAGASDOR KXAAAGASDPA KXAAAGASDRI KXAAAGASDSC KXAAAGASDSD KXAAAGASDTN KXAAAGASDTX KXAAAGASDUT KXAAAGASDVA KXAAAGASDVT KXAAAGASDWA KXAAAGASDWI KXAAAGASDWV KXAAAGASDWY KXAAAGASW KXAAAGASWNJ KXALBUMEQUIV KXBBCHARTPOSITIONALBUM KXBBCHARTPOSITIONSONG KXBIGGESTQUAKE KXBILLBOARDRUNNERUPSONG KXBRENTD KXCOPPERD KXCOPPERW KXCS2MAP KXDIESELD KXDIESELW KXDJI KXEURUSD KXHIGHAUS KXHIGHCHI KXHIGHDEN KXHIGHLAX KXHIGHMIA KXHIGHNY KXHIGHPHIL KXHIGHTATL KXHIGHTBOS KXHIGHTDAL KXHIGHTDC KXHIGHTEWR KXHIGHTHOU KXHIGHTLV KXHIGHTMIN KXHIGHTNOLA KXHIGHTOKC KXHIGHTPHX KXHIGHTSAN KXHIGHTSATX KXHIGHTSDF KXHIGHTSEA KXHIGHTSFO KXHIGHTTTN KXINX KXINXU KXLALIGA2SPREAD KXLALIGACORNERS KXLOWTATL KXLOWTAUS KXLOWTBOS KXLOWTCHI KXLOWTDAL KXLOWTDC KXLOWTDEN KXLOWTEWR KXLOWTHOU KXLOWTLAX KXLOWTLV KXLOWTMIA KXLOWTMIN KXLOWTNOLA KXLOWTNYC KXLOWTOKC KXLOWTPHIL KXLOWTPHX KXLOWTSAN KXLOWTSATX KXLOWTSDF KXLOWTSEA KXLOWTSFO KXLOWTTTN KXMLBGAME KXMLBHA KXNASDAQ100 KXNASDAQ100U KXNATGASD KXNATGASW KXNFLFFWEEKLEAD KXNFLFFWEEKTOP KXNFLWEEKMOSTPASSYDS KXNFLWEEKMOSTRECYDS KXNFLWEEKMOSTRSHYDS KXPUREALBUMS KXRAIN KXRAINWKND KXRANKLISTSONGTOP10 KXSHIBA KXSHIBAD KXSILVERD KXSVNPLTOTAL.
+Disclosed: 50 of the families are state AAA gas price ladders and 33 are daily temperature highs and lows, so the pooled claims are dominated by gas, weather and
+index ladders; per-family cells are information only. Only listing counts were used to choose; no price or result was read.
+Results (settled yes/no) will be fetched from the public listing for the picked markets only after this push.

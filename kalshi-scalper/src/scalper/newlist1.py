@@ -186,7 +186,7 @@ def choose():
 
 
 # ---------------------------------------------------------------- fetch
-CAP_PER_FAMILY = 400
+CAP_PER_FAMILY = 40
 
 
 def pick_markets(c, uni):
@@ -202,7 +202,7 @@ def pick_markets(c, uni):
     return out
 
 
-def fetch(threads: int = 2, sleep: float = 0.3):
+def fetch(threads: int = 1, sleep: float = 0.8):
     from scalper import api
     uni = json.load(open(UNIVERSE))
     c0 = conn()
@@ -341,6 +341,51 @@ def score(force=False):
     return res_all
 
 
+
+CENSUS = os.environ.get("NEWLIST1_CENSUS", "")  # USWEEP1 census.jsonl (metadata only, no results)
+
+
+def choose_census(path=None):
+    """Amendment 1: families come from the USWEEP1 census (metadata only: ticker, open, close, expiration, volume),
+    not from a separate scan. Rebuilds mk from it, then the universe and cuts as in choose()."""
+    path = path or CENSUS
+    c = conn()
+    c.execute("delete from mk"); c.execute("delete from res"); c.execute("delete from sdone")
+    for line in open(path):
+        d = json.loads(line)
+        t = d["ticker"]
+        if t.startswith("KXMVE") or "15M" in t or t.startswith("KXGOLD"):
+            continue
+        c.executemany("insert or ignore into mk values (?,?,?,?,?,?,?)",
+                      [(m[0], t, m[0].rsplit("-", 1)[0], d.get("cat"), 0, m[1], m[2]) for m in d["markets"]])
+    c.commit()
+    return choose()
+
+
+def results():
+    """After Amendment 1 only: settled results for the picked markets, one listing call per family."""
+    from scalper import api
+    uni = json.load(open(UNIVERSE))
+    c = conn()
+    picked = {m[0] for m in pick_markets(c, uni)}
+    for s in sorted(uni):
+        cur, n, pages = None, 0, 0
+        while pages < MAX_PAGES:
+            p = {"series_ticker": s, "status": "settled", "min_close_ts": START_CLOSE, "limit": 1000}
+            if cur:
+                p["cursor"] = cur
+            d = api._get("/markets", p); pages += 1
+            for m in d.get("markets", []):
+                if m["ticker"] in picked and m.get("result") in ("yes", "no"):
+                    c.execute("insert or ignore into res values (?,?)", (m["ticker"], m["result"])); n += 1
+            cur = d.get("cursor")
+            if not cur:
+                break
+            time.sleep(0.6)
+        c.commit()
+        print("results", s, n, flush=True)
+
+
 if __name__ == "__main__":
     sys.path.insert(0, os.path.join(HERE, ".."))
     cmd = sys.argv[1] if len(sys.argv) > 1 else ""
@@ -348,6 +393,10 @@ if __name__ == "__main__":
         meta()
     elif cmd == "choose":
         choose()
+    elif cmd == "choose_census":
+        choose_census()
+    elif cmd == "results":
+        results()
     elif cmd == "fetch":
         fetch()
     elif cmd == "score":
