@@ -1,0 +1,20 @@
+GAS2 read. Series 17, scored dates 24 (2026-09-16 to 2026-10-09), markets with a valid look quote 5314, missing or invalid 2604
+Brier on scored markets: model 0.1705 vs market mid 0.0805
+CONTROL (all cheap strikes in band): n 2310, days 24, win 0.025 vs mean price 0.136, net -11.90c, z -13.46, PF 0.15, halves A -10.42c (n 1110) / B -13.27c (n 1200), stress x1.2 -12.05c, vol>0 subset n 351 net -10.48c
+    ask 0.03-0.10: n 904, win 0.013 vs price 0.053, net -4.37c
+    ask 0.10-0.20: n 818, win 0.026 vs price 0.147, net -13.08c
+    ask 0.20-0.30: n 588, win 0.043 vs price 0.247, net -21.82c
+MODEL (p >= 3 x ask, <= 2 per series-day): n 393, days 24, win 0.020 vs mean price 0.075, net -5.98c, z -5.72, PF 0.23, halves A -3.70c (n 221) / B -8.90c (n 172), stress x1.2 -6.05c, vol>0 subset n 88 net -7.00c
+    ask 0.03-0.10: n 294, win 0.010 vs price 0.045, net -3.88c
+    ask 0.10-0.20: n 73, win 0.055 vs price 0.141, net -9.46c
+    ask 0.20-0.30: n 26, win 0.038 vs price 0.225, net -19.89c
+  model side yes: n 259, days 23, win 0.027 vs mean price 0.081, net -5.96c, z -3.91, PF 0.28, halves A -2.81c (n 135) / B -9.39c (n 124), stress x1.2 -6.04c, vol>0 subset n 42 net -9.75c
+    ask 0.03-0.10: n 177, win 0.011 vs price 0.044, net -3.58c
+    ask 0.10-0.20: n 59, win 0.068 vs price 0.138, net -7.87c
+    ask 0.20-0.30: n 23, win 0.043 vs price 0.225, net -19.41c
+  model side no: n 134, days 17, win 0.007 vs mean price 0.063, net -6.01c, z -7.78, PF 0.11, halves A -5.09c (n 86) / B -7.65c (n 48), stress x1.2 -6.08c, vol>0 subset n 46 net -4.49c
+    ask 0.03-0.10: n 117, win 0.009 vs price 0.048, net -4.34c
+    ask 0.10-0.20: n 14, win 0.000 vs price 0.152, net -16.16c
+    ask 0.20-0.30: n 3, win 0.000 vs price 0.223, net -23.60c
+model trades by series: KXAAAGASD 39, KXAAAGASDAZ 7, KXAAAGASDCA 12, KXAAAGASDFL 25, KXAAAGASDGA 18, KXAAAGASDIL 30, KXAAAGASDMA 24, KXAAAGASDMI 28, KXAAAGASDNC 28, KXAAAGASDNJ 21, KXAAAGASDNY 22, KXAAAGASDOH 32, KXAAAGASDPA 34, KXAAAGASDTN 18, KXAAAGASDTX 16, KXAAAGASDVA 15, KXAAAGASDWA 24
+VERDICT: FALSIFIED
