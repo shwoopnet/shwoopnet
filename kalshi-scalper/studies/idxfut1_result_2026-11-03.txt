@@ -1,0 +1,32 @@
+IDXFUT1 run 2026-11-03T14:25:35Z N=728763 z bar 5.27 C=10 windows ['W1', 'W2']; days 47 cuts W1<=2026-09-14 W2<=2026-10-06
+  stat ('KXINXU-10', 'event-looks') 31
+  stat ('KXINXU-30', 'event-looks') 31
+  stat ('KXNASDAQ100U-10', 'event-looks') 31
+  stat ('KXNASDAQ100U-30', 'event-looks') 31
+TREATED KXINXU-10 W1: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXINXU-10 W1: n 15 days 15 win 0.0% price 0.091 PF 0.00 mean -96.87c | fees x1.2 mean -98.07c | +1c slip mean -107.40c
+TREATED KXINXU-10 W2: n 4 days 4 win 25.0% price 0.182 PF 1.42 mean +56.50c | fees x1.2 mean +54.50c | +1c slip mean +46.25c
+CONTROL KXINXU-10 W2: n 16 days 16 win 12.5% price 0.092 PF 1.31 mean +26.25c | fees x1.2 mean +25.00c | +1c slip mean +15.62c
+TREATED KXINXU-30 W1: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXINXU-30 W1: n 15 days 15 win 6.7% price 0.096 PF 0.62 mean -36.00c | fees x1.2 mean -37.13c | +1c slip mean -46.27c
+TREATED KXINXU-30 W2: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXINXU-30 W2: n 16 days 16 win 18.8% price 0.096 PF 2.01 mean +85.37c | fees x1.2 mean +84.19c | +1c slip mean +74.81c
+TREATED KXNASDAQ100U-10 W1: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXNASDAQ100U-10 W1: n 13 days 13 win 7.7% price 0.106 PF 0.65 mean -36.31c | fees x1.2 mean -37.69c | +1c slip mean -46.77c
+TREATED KXNASDAQ100U-10 W2: n 1 days 1 win 0.0% price 0.210 PF 0.00 mean -222.00c | fees x1.2 mean -224.00c | +1c slip mean -233.00c
+CONTROL KXNASDAQ100U-10 W2: n 15 days 15 win 13.3% price 0.110 PF 1.16 mean +16.13c | fees x1.2 mean +14.87c | +1c slip mean +5.60c
+TREATED KXNASDAQ100U-30 W1: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXNASDAQ100U-30 W1: n 15 days 15 win 13.3% price 0.106 PF 1.21 mean +20.33c | fees x1.2 mean +18.87c | +1c slip mean +9.73c
+TREATED KXNASDAQ100U-30 W2: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL KXNASDAQ100U-30 W2: n 16 days 16 win 6.2% price 0.097 PF 0.58 mean -41.00c | fees x1.2 mean -42.06c | +1c slip mean -51.44c
+TREATED POOLED W1: n 0 days 0 win 0.0% price 0.000 PF 0.00 mean +0.00c | fees x1.2 mean +0.00c | +1c slip mean +0.00c
+CONTROL POOLED W1: n 58 days 15 win 6.9% price 0.099 PF 0.62 mean -37.24c | fees x1.2 mean -38.53c | +1c slip mean -47.71c
+TREATED POOLED W2: n 5 days 4 win 20.0% price 0.188 PF 1.01 mean +0.80c | fees x1.2 mean -1.20c | +1c slip mean -9.60c
+CONTROL POOLED W2: n 63 days 16 win 12.7% price 0.099 PF 1.24 mean +21.78c | fees x1.2 mean +20.59c | +1c slip mean +11.24c
+calibration (every strike-side with ask 0.03..0.30), pooled windows:
+  ratio<1: n 949 price 0.110 win 0.120 model 0.037
+  1<=ratio<3: n 107 price 0.171 win 0.131 model 0.229
+  ratio>=3: n 8 price 0.158 win 0.125 model 0.595
+pooled treated W1+W2: n 5, mean +0.80c, day-clustered z +0.00 (bar 5.27)
+VERDICT: NOT_ENOUGH_DATA | pooled treated 5 under 150
+gate: PF W1 0.00 W2 1.01, fees x1.2 mean -1.20c, treated above control both: False -> FALSIFIED (any one failing)
