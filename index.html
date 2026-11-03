@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 3</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the price tile no longer shows Dogecoin, which is paused</li>
                   <li>Trading: OICORE's limit sits 1c above the price it sees, so it stops missing fills when the price ticks up a cent (at most 1c a contract more)</li>
                   <li>Trading: gold's base size is held at 15 contracts (it was allowed to grow to 40 with the balance); the profit add-on and everything else are unchanged</li>
                   <li>Trading: Dogecoin is paused in code (no new orders, no resume date; an open one is still sold). At gold's ladder size it had 7 early sells in 57 fills, and the last 24 hours lost $36.92. Gold is the only market L1 trades now (#697)</li>
@@ -3377,7 +3378,6 @@
   // does not carry, so that row says where the price sits and no more. Pure: relay markets and the clock in, rows out.
   var KAL_PRICE_WATCH = [
     { name: 'Gold', series: 'KXGOLD15M', kind: 'fav', lo: 0.88, hi: 0.97, gold: true },
-    { name: 'Dogecoin', series: 'KXDOGE15M', kind: 'fav', lo: 0.88, hi: 0.97 },
     { name: 'Bitcoin', series: 'KXBTC15M', kind: 'cheap', lo: 0.05, hi: 0.50 }
   ];
   function kalshiPriceWatch(markets, now){
