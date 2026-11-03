@@ -27,6 +27,30 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 3, 2026, 6:32 AM CT (12:32Z): what do L1's losses have in common? (asked by main for the owner; read only)
+
+Data: live gold and Dogecoin settled fills since Oct 20 (346 fills, 21 early sells = 6.1%, plus 2 settle-against losses) and the 62 day candle history (gold 1,179 and Dogecoin 1,776 in-band windows, 179 early sells = 6.1%, no settle-against). Outcome scored: early sell at the 25c line. Dimensions fixed before looking: side, price, hour of day (CT), weekday, rise3, rng5, spread, move into the entry in the last minute, time since the last early sell, early sells among the previous 4 windows, and (live only) depth at the limit and share of the touch. Tries: **147 bucket comparisons** (37 live, 110 history in gold, Doge and pooled), so about 7 would reach p under 0.05 by chance and a Bonferroni line is p under 0.0003.
+
+**What does NOT separate losses (all noise or opposite):**
+- **Side:** NO 6.1% (12 of 197) against YES 6.0% (9 of 149) live; NO 6.1% against YES 6.0% pooled in history (p 0.88). The five recent NO losses are a recent cluster, not a rule.
+- **Hour and weekday:** 5.3% to 6.6% by six-hour block in history, no pattern; live Monday 15% (8 of 53, p 0.007) does not appear in history (Monday 6.9%).
+- **rise3 and rng5:** history quartiles are flat (5.1% to 6.8%, p over 0.2); live rise3 under 0 loses 13.5% (5 of 37, p 0.051), which does not replicate in history. Not a rule.
+- **Spread:** 5.8% at 1c or less, 7.6% above (p 0.14). **Hours since the last early sell:** no pattern. **Early sells in the previous 4 windows:** 0 earlier = 6.7%, 1 or more = 4.0% (p 0.010): if anything the opposite of clustering.
+- **Depth and share of the touch (live only):** order larger than the touch 16% (4 of 25, p 0.08), otherwise 0% to 7%. Not significant.
+- **Move into the entry in the last minute (history):** the biggest rise into the entry loses 8.1% against 4.2% to 6.6% for the rest (pooled p 0.012, Dogecoin 0.012, gold same direction, 0.31): a mean reversion story, but it does not survive the 147 count.
+
+**What survives: PRICE.** Early sells fall steadily with the price paid, in both series and in the live record:
+| Price | History windows | Early sells | Net per contract (first / second half) | Share of all early sells |
+|---|---|---|---|---|
+| 88 to 90c | 477 | 10.5% | +1.07c (+0.55 / +1.55) | 28% |
+| 90 to 92c | 721 | 9.8% | **-0.43c (+0.23 / -1.13)** | 40% |
+| 92 to 94c | 618 | 4.5% | +2.42c (+1.93 / +2.88) | 16% |
+| 94 to 96c | 691 | 2.7% | +2.13c (+1.30 / +2.95) | 11% |
+| 96 to 97c | 448 | 2.5% | +1.02c (+0.60 / +1.49) | 6% |
+Pooled p is under 0.0003 for four of the five buckets, the same shape in gold (10.0, 8.7, 5.1, 1.5, 3.7%) and Dogecoin (10.8, 10.6, 4.1, 3.5, 1.7%), and the live record agrees on the main points (90 to 92c lost 13.0%, 12 of 92; 92 to 96c lost 1 of 149; the same bucket nets -$21.32 live). The mechanism is the obvious one: a cheaper favourite is less likely to hold, and 88 to 92c is where the win (7 to 10c) fails to pay for the 80c loss often enough. **The 90 to 92c bucket is the only one with a negative net per contract**, 40% of all early sells from 24% of windows. That is C1's cell, found on the live fills and now seen independently on 721 history windows (history gets no credit toward adopting a filter, README P1; the forward read stays at 80 settled cell fills, currently 15 settled, 3 losses, net -$12.25). Skipping 90 to 92c in history would raise the net per contract from +1.23c to +1.76c on 76% of the windows; skipping 88 to 92c gives +1.95c on 59% but a smaller total (the 88 to 90c bucket is positive, +1.07c). So nothing NEW to register: C1 is the rule the data points to, and the data does not support widening it to 88 to 90c.
+
+**Loss runs and dollars:** longest run of consecutive losing fills live: 2 (-$17.79); no longer run, and no loss clustering by the prior-loss test above. Loss dollars by US Central day (net / loss dollars / early sells): Oct 21 -$6.25 / -$11.79 / 4; Oct 25 -$3.93 / -$9.58 / 1; Oct 26 -$7.26 / -$19.33 / 3; Oct 27 -$0.09 / -$11.39 / 2; Oct 30 +$2.14 / -$12.77 / 2; Oct 31 +$3.51 / -$8.70 / 1; **Nov 2 -$41.42 / -$55.32 / 6** (Dogecoin 04:09 94.2c -$11.47, 14:54 90.4c -$5.51, 18:09 90.7c -$10.22, 19:54 96.1c -$8.48, 23:39 90.2c -$10.33, and gold 20:24 89.0c -$9.31, all US Central, five of them in the 88 to 92c range); Nov 3 so far -$1.00 / -$9.64 / 1. Nov 2 is the worst day on record by a factor of 5 (the previous worst was -$7.26): about 5% of a $779 base or 8% of $540. **Live, the 90 to 92c bucket alone is 92 fills with net -$21.32 against +$31.68 for the other 254 fills, and holds 12 of the 21 early sells (-$74.49 of -$131.77).** Skipping it would have turned Nov 2 from -$41.42 into -$20.58 (still a bad day) and the whole record from +$10.36 to +$31.68, at the cost of 27% of the fills. That is in-sample (the live fills are where C1 came from), so it adds nothing to the case for adoption; the forward read stays at 80.
+
 ### Nov 2, 2026, 20:24 PM CT (02:24Z Nov 3): Dogecoin ladder record 5 losses in 51 (9.8%, net -$9.77); C8's absolute threshold has gone stale and the lead is weaker than it looked
 
 **Dogecoin at ladder size (130 hour window from Oct 30 8 PM CT): 51 settled fills, 5 losses (9.8%), net -$9.77, -1.44c a contract.** The fifth loss is in the window since my last note; the review rule (last 100 settled lose more than 8% or net under +0.5c a contract) reads at 100 and has not fired, but both lines are now crossed in this half-sample. Gold at ladder size: 47 fills, 1 loss. The candle engine on the Dogecoin windows that closed after 17:10Z (C8's forward read) agrees: **4 early sells in the 11 in-band windows (36%)** against 6.2% over the 62 day history (the chance of 4 or more in 11 at 6.2% is about 0.5%, before counting that I looked because it was bad). Dogecoin is in a bad stretch both live and in the engine.
