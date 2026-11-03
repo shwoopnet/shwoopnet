@@ -57,3 +57,7 @@ The seller of the tail at the ask is a resting maker; resting demand for the com
 One rule (one feature, one fixed sign, ON versus its complement; the complement is not a second try). **N +2** (one rule at +2), running count about 730,215, z bar about 5.27.
 
 Code `src/scalper/bookimb1.py`, `src/scalper/bookimb1_fwd.py`, tests `tests/test_bookimb1.py` (synthetic books), result `workers/BOOKIMB1_RESULT.md`.
+
+## Amendment 1 (2026-11-03, before any outcome was joined; only counts of trades were printed)
+
+Typo fix: "within 3 ticks of the best bid" means price >= best - 0.03 with a float tolerance of 1e-9 BELOW that line (so a level exactly 3 ticks away IS counted). The registration text wrote `+ 1e-9`, which would have dropped the third tick through float error; the intent (within 3 ticks inclusive) is unchanged and no feature value or outcome had been computed. The count run (no outcome) printed DEV 95 tradable cheap-tail trades, 52 ON and 43 OFF, in 53 closes; ON is therefore well under 150 and the expected verdict is NOT_ENOUGH_DATA.
