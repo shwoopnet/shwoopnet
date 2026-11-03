@@ -8291,3 +8291,16 @@ Registered first (`workers/PUB20_REGISTRATION.md`), before any outcome of any PU
 ## Registration: USWEEP1 (universe sweep of every non-15-minute Kalshi series, one tail and one favourite rule family, 2026-11-03)
 
 Registered first (`workers/USWEEP1_REGISTRATION.md`, commit f73bc8b plus Amendment 1: census capped at 14:50 UTC), before any outcome. **Name disclosure:** first drafted as SWEEP1, which already belongs to the retired Oct 27 Bitcoin big-print study (`src/scalper/sweep1.py`, restored untouched); this study is USWEEP1, code `src/scalper/usweep1.py`, tests `tests/test_usweep1.py`. Universe: all `/series` (15,663) minus 16 KXMVE parlay collections and 38 fifteen_min series; eligible = 300 settled markets and 20 dates in 60 days. Rules: tail (ask 5-15c) and favourite (85-97c), looks by life class (H 30/15/5 min, D 24/6/1 h, W 72/24/6 h), taker at the ask, held, fee 7% x C x p x (1-p) rounded up, C = 10. Frozen last third of dates never fetched. N added = 6 x eligible series (stated in the result). Already covered, not re-scored: FLB1, SP1, scout, WX1 to WX3, calibration scan, ARB1 to ARB5, SPORTCONS1, RULES1, FEE1, all 15 minute series. Prediction: nothing clears the deflated bar; about 25% of cells positive in both halves by luck. Cache and resume: `USWEEP1_CACHE=/tmp/claude-0/-home-user-shwoopnet/026f6e8f-6dc4-5e3b-8c3b-e0089b12fb94/scratchpad/sweep`.
+
+## Result: PUB20 (run once 2026-11-03; registered in 1879dab, code and Amendment 1 in 5739adf; `workers/PUB20_RESULT.md`, `src/scalper/pub20.py`, `tests/test_pub20.py`)
+0 of 10 clear the bar; W3 unread for all. Cheap side (ask 0.05 to 0.50, fill ask at close-120, held), C = 10, fee 7% x C x p x (1-p) rounded up, N about 728,755, z bar 5.27. Universe A: EURUSD, GBPUSD, USDJPY, silver, copper, WTI, gas, platinum, palladium 15 minute; B: KXINXU and KXNASDAQ100U 4 pm ladders; no crypto or gold.
+- P01 NR7 compression: **FALSIFIED**, n 1,431, win 13.7% vs 15.8% paid, PF 0.77 / 0.77, mean -2.94c.
+- P02 VOLEXP volatility clustering: **FALSIFIED**, n 2,855, win 15.4% vs 15.8%, PF 0.90 / 0.90, mean -1.25c.
+- P03 DOWFRI Friday afternoon: **FALSIFIED**, n 538, win 16.2% vs 16.6%, PF 0.90 / 0.90, excess vs Tue to Thu +2.8c / +0.5c.
+- P04 XSREV cross-sectional reversal: **NOT_ENOUGH_DATA**, n 106 (W2 only), win 54.7% vs 52.9%, PF 1.02.
+- P05 NDXLEAD S&P/Nasdaq ladder lead-lag: **NOT_ENOUGH_DATA**, 0 trades in W1+W2.
+- P06 FIXES fix windows: **NOT_ENOUGH_DATA**, n 41 (16, 25), win 19.5% vs 13.2%, PF 1.18 / 1.81, excess +6.1c / +17.1c, z 0.68; **positive in both halves, flagged with a capped-probe spec in the result file, not a recommendation.**
+- P07 MONTHEND: **FALSIFIED**, n 1,428, win 15.2% vs 15.3%, PF 0.80 / 0.97, excess +1.4c / +4.7c but net negative.
+- P08 SMILE ladder interpolation residual: **NOT_ENOUGH_DATA**, 0 trades (largest gap 3.07c, trigger 4c).
+- P09 SETTLE settlement windows: **NOT_ENOUGH_DATA**, n 82, win 17.1% vs 15.2%, PF 1.30 / 0.97.
+- P10 REOPEN: **FALSIFIED**, n 158, win 17.7% vs 16.2%, PF 1.64 / 0.84, excess +8.7c / +2.9c.
