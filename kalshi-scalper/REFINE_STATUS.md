@@ -2,7 +2,7 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-03 10:10 CT (16:10Z): S-LIM1 REGISTERED (OICORE limit +1c shadow), items 6 and 7 answered
+## 2026-11-03 09:10 AM CT (15:10Z): S-LIM1 REGISTERED (OICORE limit +1c shadow), items 6 and 7 answered
 
 S-LIM1: for every OICORE order, record whether a limit 1c and 2c above the placed limit would have filled (R6 book ask path in the 12 s after the order) and the settled outcome; read at 30 unfilled orders. Prediction: unfilled win rate above 20% and net above 0 at +1c. Kill: net under 0 on 20 unfilled. Seed (6 unfilled, history of this record, not evidence): 3 won, about +$12.2 at +1c if all filled; book rows exist for only 3 of the 6. 1 try. OICORE kill rules replayed on 18 live fills: tracking; net -$6 after 40 is not tight (false kill 0.1% at a true 28%), streak-18 is (6.4% within 100 fills at 28%, 27% at 20%). Correlation with gold: 2 shared windows, unmeasurable. Open: BTC candle pull for sub-bands, timing, time of day, jump strength, relative trigger (resumed 15:00Z).
 
