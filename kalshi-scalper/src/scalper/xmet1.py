@@ -125,7 +125,13 @@ def fetch() -> None:
         if tk not in have:
             by[m["close"]].append(tk)
     closes = sorted(by)
-    groups = [closes[i:i + 10] for i in range(0, len(closes), 10)]
+    groups, cur = [], []
+    for c in closes:   # at most 10 windows and 2 hours per request (Kalshi caps one request at 10,000 candles across its markets)
+        if cur and (len(cur) >= 10 or c - cur[0] > 7200):
+            groups.append(cur); cur = []
+        cur.append(c)
+    if cur:
+        groups.append(cur)
     pause = 0.3
     for i, g in enumerate(groups):
         tks = [t for c in g for t in by[c]]
