@@ -30,6 +30,29 @@ function slotCaps(sizingBase) {
   for (const k of Object.keys(SLOT_CAP_FRACTIONS)) out[k] = Math.min(SLOT_CAP_FRACTIONS[k] * base, SLOT_CAP_CEILINGS[k]);
   return out;
 }
+// ---- The OICORE size ladder (Nov 3, 2026, the owner: "yes build it", on the refinement chat's scaling spec). ----------------------------------------------
+// A strategy listed here may send MORE than its registry contractsPerOrder, one step at a time, but only as its OWN settled record earns it. The step is replayed from the
+// strategy's own order documents every time (no stored step, no counter, nothing the page or Firestore can raise), so two instances always compute the same size, and a
+// reviewed edit that moves reviewedAt starts the ladder again from the bottom. Each step also needs a sizing base big enough that a 95th percentile losing run plus an L1 bad
+// day stays inside the shared 12% stop (minBase, the refinement chat's B4 table); a smaller base holds the size down without changing the replayed step.
+// Up: at least upFills fills AND upDays days at the current step, and over those fills a win rate of upWinRate or more, a net of upNetPerContract x contracts or more,
+// profit factor upPf or more, and a drawdown since the step began under upMaxDrawdownPerContract x contracts. Down one step at once: drawdown since the step began at
+// downDrawdownPerContract x contracts or more, or (with downWindow fills at the step) a win rate under downWinRate or a net under downNetPerContract x contracts over the last
+// downWindow; down two when both of the first two hit. Never below the first step, never above SLOT_LADDER_MAX_CONTRACTS.
+// For a laddered strategy the base-scaled daily and lifetime loss caps are replaced by caps that scale with the contract count: a daily loss cap of dailyPerContract x
+// contracts (at least the base cap, at most dailyMaxFraction of the base and dailyCeiling dollars) and a drawdown stop from its own peak result of stopPerContract x
+// contracts (at most stopMaxFraction of the base and stopCeiling dollars). The drawdown stop refuses every new order until a reviewed edit moves reviewedAt.
+const SLOT_LADDER_MAX_CONTRACTS = 30;
+const SLOT_LADDERS = Object.freeze({
+  OICORE: Object.freeze({
+    steps: Object.freeze([10, 12, 15, 20, 30]),
+    minBase: Object.freeze([0, 825, 900, 1030, 1350]),
+    upFills: 40, upDays: 14, upWinRate: 0.20, upNetPerContract: 1.0, upPf: 1.3, upMaxDrawdownPerContract: 3,
+    downDrawdownPerContract: 3, downWindow: 40, downWinRate: 0.15, downNetPerContract: -2,
+    dailyPerContract: 2.5, dailyMaxFraction: 0.06, dailyCeiling: 75,
+    stopPerContract: 5, stopMaxFraction: 0.12, stopCeiling: 150,
+  }),
+});
 const SLOT_DEPTH_SHARE = 0.25;                         // never more than this share of the size resting at the touch (Kalshi gives the top level only)
 const SLOT_MIN_PRICE = 0.05, SLOT_MAX_PRICE = 0.97;    // entry limit price bounds (YES price for a yes buy, the NO price for a no buy)
 const SLOT_ENTRY_LEFT_MIN_SEC = 120, SLOT_ENTRY_LEFT_MAX_SEC = 840;
@@ -326,6 +349,70 @@ function killCheck(strategy, slotOrders, latch) {
   return { killed: false, reason: "" };
 }
 
+// ---- The ladder, replayed from the strategy's own record (pure) --------------------------------------------------------------------------------
+function validLadder(L, strategy) {
+  if (!isObj(L) || !Array.isArray(L.steps) || !Array.isArray(L.minBase) || L.steps.length < 1 || L.steps.length !== L.minBase.length) return false;
+  if (L.steps[0] !== strategy.contractsPerOrder) return false;
+  for (let k = 0; k < L.steps.length; k++) {
+    if (!Number.isInteger(L.steps[k]) || L.steps[k] < 1 || L.steps[k] > SLOT_LADDER_MAX_CONTRACTS || !isNum(L.minBase[k]) || L.minBase[k] < 0) return false;
+    if (k > 0 && !(L.steps[k] > L.steps[k - 1] && L.minBase[k] >= L.minBase[k - 1])) return false;
+  }
+  const pos = ["upFills", "upDays", "upNetPerContract", "upPf", "upMaxDrawdownPerContract", "downDrawdownPerContract", "downWindow", "dailyPerContract", "dailyMaxFraction", "dailyCeiling", "stopPerContract", "stopMaxFraction", "stopCeiling"];
+  if (pos.some((k) => !(isNum(L[k]) && L[k] > 0))) return false;
+  if (!(isNum(L.upWinRate) && L.upWinRate > 0 && L.upWinRate < 1) || !(isNum(L.downWinRate) && L.downWinRate >= 0 && L.downWinRate < L.upWinRate) || !(isNum(L.downNetPerContract) && L.downNetPerContract <= 0)) return false;
+  return L.dailyMaxFraction <= 0.12 && L.stopMaxFraction <= 0.12;
+}
+// One strategy's own final results since reviewedAt, in settlement order (the same order and the same filter as killCheck), plus what its unsettled orders would add if counted as lost.
+function ownResults(strategy, slotOrders) {
+  const re = Date.parse(strategy.reviewedAt + "T00:00:00Z");
+  const when = (t) => { const s = num(t.settledAt); if (Number.isFinite(s)) return s; const ts = num(t.ts); return Number.isFinite(ts) ? ts : Infinity; };
+  const rows = [];
+  let openWorst = 0;
+  for (const t of slotOrders || []) {
+    if (!isSlotOrder(t) || t.slotId !== strategy.id) continue;
+    const a = accountOrder(t);
+    if (!a.counted || (t.settled === true && t.result === "hand")) continue;
+    if (!a.final) { openWorst += a.net - a.openCost; continue; }
+    const at = when(t);
+    if (Number.isFinite(re) && at < re) continue;
+    rows.push({ at, net: a.net, id: String(t.id || t.clientOrderId || "") });
+  }
+  rows.sort((x, y) => x.at - y.at || (x.id < y.id ? -1 : x.id > y.id ? 1 : 0));
+  return { rows, openWorst };
+}
+// Returns { laddered, step, size, fillsAtStep, drawdown, ddStop, dailyCap }. A strategy with no (valid) ladder sends its registry size and keeps the base-scaled caps.
+function slotLadderState(strategy, slotOrders, sizingBase) {
+  const L = SLOT_LADDERS[strategy && strategy.id];
+  const base = isNum(sizingBase) && sizingBase > 0 ? sizingBase : 0;
+  if (!strategy || !L || !validLadder(L, strategy)) return { laddered: false, step: 0, size: strategy ? strategy.contractsPerOrder : 0, fillsAtStep: 0, drawdown: 0, ddStop: 0, dailyCap: 0 };
+  const { rows, openWorst } = ownResults(strategy, slotOrders);
+  const DAY = 86400000, last = L.steps.length - 1;
+  let idx = 0, cum = 0, peak = 0, stepAt = Date.parse(strategy.reviewedAt + "T00:00:00Z"), stepPeak = 0, at = [];
+  const reset = (x) => { stepAt = x.at; stepPeak = cum; at = []; };
+  for (const x of rows) {
+    cum += x.net; peak = Math.max(peak, cum); stepPeak = Math.max(stepPeak, cum); at.push(x.net);
+    const c = L.steps[idx], ddStep = stepPeak - cum;
+    const w = at.slice(-L.downWindow), full = w.length >= L.downWindow;
+    const wWin = full ? w.filter((v) => v > 0).length / w.length : 1, wNet = w.reduce((a, v) => a + v, 0);
+    const hitDd = ddStep >= L.downDrawdownPerContract * c - 1e-9, hitWin = full && wWin < L.downWinRate, hitNet = full && wNet < L.downNetPerContract * c;
+    if (idx > 0 && (hitDd || hitWin || hitNet)) { idx = Math.max(0, idx - (hitDd && hitWin ? 2 : 1)); reset(x); continue; }
+    if (idx < last && at.length >= L.upFills && Number.isFinite(stepAt) && x.at - stepAt >= L.upDays * DAY) {
+      const wins = at.filter((v) => v > 0), losses = at.filter((v) => v < 0);
+      const gw = wins.reduce((a, v) => a + v, 0), gl = -losses.reduce((a, v) => a + v, 0), net = gw - gl;
+      const pf = gl > 0 ? gw / gl : (gw > 0 ? Infinity : 0);
+      if (wins.length / at.length >= L.upWinRate && net >= L.upNetPerContract * c - 1e-9 && pf >= L.upPf && ddStep < L.upMaxDrawdownPerContract * c) { idx += 1; reset(x); }
+    }
+  }
+  let eff = idx;
+  while (eff > 0 && !(base >= L.minBase[eff])) eff -= 1;
+  const size = L.steps[eff];
+  const baseCaps = slotCaps(base);
+  const dailyCap = Math.min(Math.max(baseCaps.daily, L.dailyPerContract * size), L.dailyMaxFraction * base, L.dailyCeiling);
+  const ddStop = Math.min(L.stopPerContract * size, L.stopMaxFraction * base, L.stopCeiling);
+  const drawdown = Math.max(0, peak - (cum + openWorst));
+  return { laddered: true, step: idx, size, fillsAtStep: at.length, drawdown, ddStop, dailyCap };
+}
+
 // ---- The one gate every slot order passes ----------------------------------------------------------------------------------------------
 // Returns { allowed, count, reasons, cost, cid }. `count` is the wanted count cut down to whatever every cap allows; allowed is false when that is under 1.
 // Never throws on bad input. Inputs: strategyId, ticker, side, limit (price of the side bought), step, wanted (optional, default contractsPerOrder), depthAtTouch (size resting at the
@@ -371,15 +458,21 @@ function slotOrderCheckWith(flags, input) {
   if (!isNum(i.now)) return no("no clock");
   const risk = slotRiskContract(i.slotOrders, i.now);
   const caps = slotCaps(i.sizingBase);
+  // A laddered strategy (SLOT_LADDERS) has caps that grow with its contract count: a daily loss cap and a drawdown stop from its own peak, in place of the base-scaled daily and lifetime caps.
+  const lad = slotLadderState(strategy, i.slotOrders, i.sizingBase);
+  if (lad.laddered) caps.daily = lad.dailyCap;
   if (risk.day.worst <= -caps.daily + 1e-9) return no("the slot's own daily loss cap is reached");
-  if (risk.lifetime.worst <= -caps.lifetime + 1e-9) return no("the slot's own lifetime loss cap is reached");
+  if (lad.laddered) { if (lad.drawdown >= lad.ddStop - 1e-9) return no("the strategy's drawdown stop is reached ($" + lad.drawdown.toFixed(2) + " from its best result)"); }
+  else if (risk.lifetime.worst <= -caps.lifetime + 1e-9) return no("the slot's own lifetime loss cap is reached");
   // How many contracts every cap allows. Depth is the top of the book only, so unknown depth refuses rather than guesses.
   if (!isNum(i.depthAtTouch) || !(i.depthAtTouch > 0)) return no("the size resting at the touch is unknown");
-  const wanted = Number.isInteger(i.wanted) ? i.wanted : strategy.contractsPerOrder;
+  const sizeNow = lad.laddered ? lad.size : strategy.contractsPerOrder;
+  const wanted = Number.isInteger(i.wanted) ? i.wanted : sizeNow;
   const reasons = [];
-  let n = Math.min(wanted, strategy.contractsPerOrder, SLOT_MAX_CONTRACTS_PER_ORDER);
+  let n = Math.min(wanted, sizeNow, lad.laddered ? SLOT_LADDER_MAX_CONTRACTS : SLOT_MAX_CONTRACTS_PER_ORDER);
   const openHere = risk.openContractsByTicker[i.ticker] || 0;
-  n = Math.min(n, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET - openHere, Math.floor(i.depthAtTouch * SLOT_DEPTH_SHARE + 1e-9));
+  const openLimit = lad.laddered ? Math.min(Math.max(SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, sizeNow), SLOT_LADDER_MAX_CONTRACTS) : SLOT_MAX_OPEN_CONTRACTS_PER_MARKET;
+  n = Math.min(n, openLimit - openHere, Math.floor(i.depthAtTouch * SLOT_DEPTH_SHARE + 1e-9));
   const wk = windowKey(i.ticker);
   const l1Used = i.l1Orders.filter((t) => t && windowKey(normTicker(t.ticker)) === wk && (num(t.fillCount) > 0 || SLOT_OPEN_STATUSES.includes(normStatus(t.status)))).reduce((a, t) => a + Math.max(0, (num(t.maxCost) || 0) - (num(t.addonCost) || 0)), 0);
   const slotUsed = slotWindowSpent(i.slotOrders, i.ticker);
@@ -388,7 +481,7 @@ function slotOrderCheckWith(flags, input) {
   // The slot takes at most half of the shared window cap and always leaves one L1 contract of room, so L1's first order in a window is never starved.
   const windowRoom = Math.min(windowCap - l1Used - slotUsed - SLOT_L1_RESERVE, windowCap * SLOT_WINDOW_SHARE - slotUsed);
   // The new order's own cost must fit under what is left of the daily and lifetime loss caps (worst is zero or negative), so one order can never overshoot them.
-  const dailyRoom = caps.daily + risk.day.worst, lifeRoom = caps.lifetime + risk.lifetime.worst;
+  const dailyRoom = caps.daily + risk.day.worst, lifeRoom = lad.laddered ? lad.ddStop - lad.drawdown : caps.lifetime + risk.lifetime.worst;
   while (n >= 1) {
     const c = costOf(n);
     if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
@@ -455,6 +548,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
+  SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
