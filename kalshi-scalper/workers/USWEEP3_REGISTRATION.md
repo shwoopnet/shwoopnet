@@ -1,0 +1,31 @@
+# USWEEP3 registration: the third universe sweep, everything that is NOT sports (Strategy Research V2, research only; written 2026-11-03 before any candle was downloaded and before any outcome of any rule was read, computed or printed)
+
+Code `src/scalper/usweep3.py` (thin: imports `usweep1` and `usweep2`, neither edited), tests `tests/test_usweep3.py`. No live code, `functions/`, L1 or OICORE; no promote verb. **Owner rule (Oct 28, held strictly Nov 3): CHEAP SIDE ONLY (ask 5 to 15c). No favourite-and-hold research; no favourite entry is built and no favourite result is computed or printed.**
+
+## Why a third sweep
+USWEEP1 tested 119 series, USWEEP2 62 more (60 Sports; rule: >= 300 settled, >= 20 dates, median volume >= 100). Result so far: no lead; sports tails win about 10% at 9.7 to 10c paid, pooled -1.09c. USWEEP2's rule left almost only sports. About 11,600 non-sports series exist in `/series` (Entertainment, Elections, Politics, Financials, Economics, Climate and Weather, Mentions, Science and Technology, Crypto, Companies, World, Commodities, Health, Social, Transportation, Exotics). This sweep relaxes the volume of the eligibility rule and aims at them.
+
+## Disclosure (structure only, read before this file)
+`/series` list (ticker, category, frequency); USWEEP2's stage A crawl (330,612 non-parlay markets in 72 hourly windows: ticker, series, open, close, expected expiration, volume, early-close flag, NO result); USWEEP2's exact 60 day counts for 607 series (structure; its results file is not read by selection). One API timing test (a 200 event page, a 60 day KXHIGHNY listing) with no outcome kept. Nothing scored. No candle downloaded.
+
+## Universe and stages
+- **Categories:** every `/series` category except Sports. Headline strata: Economics, Climate and Weather, Politics (with Elections), Financials, Crypto (daily, weekly, monthly ladders only), Commodities, Companies, Science and Technology, Entertainment, World, Mentions; the small rest (Health, Social, Transportation, Exotics, Culture, Business, Education) form one stratum "Other".
+- **Excluded:** every series in `USWEEP1_SERIES.json` or `USWEEP2_SERIES.json`; KXMVE parlays; `frequency == fifteen_min`; 15 minute crypto and gold; Sports.
+- **Stage A candidates (structure):** non-excluded series that (a) have `frequency` hourly, daily, weekly, monthly or quarterly in `/series`, or (b) were seen in the USWEEP2 crawl with >= 10 markets on >= 2 close dates. Custom, one_off and annual series not seen in the crawl are NOT REACHED (reported by count).
+- **Stage B (exact 60 day settled listing, one page of 1000, capped flag kept):** candidates counted round robin across the strata (so every category is reached before any is finished), series with a USWEEP2 count reused, stopped by time. Results are stored in a separate file (`census_results3.jsonl`) that `select` never reads. Series not counted are reported NOT TESTED (rate limit).
+- **Eligible (relaxed, fixed here):** >= 100 settled markets in 60 days, >= 15 close dates, >= 17 distinct events (about 2 a week; event = ticker without its last dash segment), median volume per market >= 20 contracts, life class from the median anchor minus open (H up to 4 h, D up to 3 days, W longer; as USWEEP1).
+- **Sample:** per series at most **40 markets with the smallest md5(ticker)**; their dates sorted, **the last third frozen and never fetched**, first two thirds development; halves A and B by date.
+- **Candle budget: 6,000 development markets in all**, stratified: within each stratum series are ranked by median volume; strata take turns, one series each, highest rank first, until the budget is used (a stratum with nothing left is skipped). Candles are batched up to 8 markets a request under the 10,000 candle limit (the discovery of USWEEP2). Untested eligible series are reported NOT TESTED (cause: candle budget).
+
+## Rule (one rule, three looks per class)
+Tail: the side whose ask is 0.05 to 0.15 (the cheaper if both), taker at the ask at the look, held to settlement. Looks H {30, 15, 5} min, D {24 h, 6 h, 1 h}, W {72 h, 24 h, 6 h} before the anchor (expected expiration when present, else close). Quote = last candle ending at or before the look, at most one period earlier, two sided. Fee 7% x C x p x (1-p) rounded up to the cent, C = 10; stress fee x1.2. (`usweep2.entries_for`, the tail-only copy.)
+**LEAD** only if n >= 100 in development, n >= 40 in each half, net per contract > 0 in both halves and at fee x1.2, day-clustered z >= 2.0 and positive on the traded subset. A claim of an edge needs z at the deflated bar (one-sided 0.05 / N_total, about 5.27); otherwise leads are NOT_ENOUGH_DATA and the sweep is FALSIFIED as a family if no cell clears the bar. A cell with a mechanism-bearing cluster (same event type, same counterparty story) is an OBSERVATION only. Power: with up to 27 development markets a series and a tail entry in a minority of them, **a single series cell will almost never reach n >= 100**; the LEAD rule is therefore almost unreachable per series by construction, and the registered readout adds, as OBSERVATION ONLY (never a LEAD, no promote), the pooled cell per (category, life class, look) with the day-clustered z and the number of series in it. Run once; list, rules and sample are not changed after the first outcome.
+
+## N rule
+**N added = 3 x (series actually tested)** (3 looks x 1 rule), written in `workers/USWEEP3_SERIES.json` before candles or results are fetched; the coordinator keeps the total (about 730,200; deflated bar about 5.27).
+
+## Numeric prediction
+Market calibrated: pooled tail net -0.5c to -1.5c per contract; about a quarter of cells with data positive in both halves by luck; at most a handful with n >= 40 per half; **no cell reaches the deflated bar (prior of a bar-clearing cell 2%)**; at least one pooled (category, class, look) group looks positive by chance.
+
+## Kill rules
+No cell with n >= 40 per half and z >= 2 and positive in both halves and at x1.2: the family is FALSIFIED on this sample. If fewer than 2,000 development markets are fetched (rate limit), the result is reported as coverage only. A failed fetch is not retried with a different rule. Fetching stops on a repeated 429 storm and resumes; the list is not edited.
