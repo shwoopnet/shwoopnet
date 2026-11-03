@@ -67,5 +67,5 @@ assert abs(s["per_order"] - (70 - 30) / 3) < 1e-9 and s["fills"] == 2
 assert T.summarise(M.guard_view(os_), "pess")["fills"] == 0
 assert T.summarise(M.guard_view(os_), "opt")["fills"] == 2
 # buckets only show 16c to 40c
-assert all("bid" in b and int(b.split()[1].split("-")[1][:-1]) <= 40 for b in M.buckets(os_, "pess"))
+assert [b.split(":")[0].strip() for b in M.buckets(os_, "pess")] == ["bid 16-25c", "bid 26-33c", "bid 34-40c"]
 print("ok")
