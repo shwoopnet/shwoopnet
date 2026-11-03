@@ -1,0 +1,21 @@
+{
+  "note": "WXENS1 (workers/WXENS1_REGISTRATION.md). 14 US cities recorded; the 8 tested are chosen from the first 7 days of volume. std_offset_h is the local STANDARD time offset from UTC (the market day is a standard time day). station is the airport or park named in each event's rules text, checked from events.csv.",
+  "cities": [
+    {"key": "NYC", "series": "KXHIGHNY",   "station": "KNYC", "iem_network": "NY_ASOS", "iem_station": "NYC", "lat": 40.7789, "lon": -73.9692, "std_offset_h": -5},
+    {"key": "LAX", "series": "KXHIGHLAX",  "station": "KLAX", "iem_network": "CA_ASOS", "iem_station": "LAX", "lat": 33.9425, "lon": -118.4081, "std_offset_h": -8},
+    {"key": "MIA", "series": "KXHIGHMIA",  "station": "KMIA", "iem_network": "FL_ASOS", "iem_station": "MIA", "lat": 25.7959, "lon": -80.2870, "std_offset_h": -5},
+    {"key": "CHI", "series": "KXHIGHCHI",  "station": "KMDW", "iem_network": "IL_ASOS", "iem_station": "MDW", "lat": 41.7868, "lon": -87.7524, "std_offset_h": -6},
+    {"key": "AUS", "series": "KXHIGHAUS",  "station": "KAUS", "iem_network": "TX_ASOS", "iem_station": "AUS", "lat": 30.1945, "lon": -97.6699, "std_offset_h": -6},
+    {"key": "DEN", "series": "KXHIGHDEN",  "station": "KDEN", "iem_network": "CO_ASOS", "iem_station": "DEN", "lat": 39.8561, "lon": -104.6737, "std_offset_h": -7},
+    {"key": "PHL", "series": "KXHIGHPHIL", "station": "KPHL", "iem_network": "PA_ASOS", "iem_station": "PHL", "lat": 39.8729, "lon": -75.2407, "std_offset_h": -5},
+    {"key": "SFO", "series": "KXHIGHTSFO", "station": "KSFO", "iem_network": "CA_ASOS", "iem_station": "SFO", "lat": 37.6190, "lon": -122.3750, "std_offset_h": -8},
+    {"key": "PHX", "series": "KXHIGHTPHX", "station": "KPHX", "iem_network": "AZ_ASOS", "iem_station": "PHX", "lat": 33.4373, "lon": -112.0078, "std_offset_h": -7},
+    {"key": "SEA", "series": "KXHIGHTSEA", "station": "KSEA", "iem_network": "WA_ASOS", "iem_station": "SEA", "lat": 47.4444, "lon": -122.3138, "std_offset_h": -8},
+    {"key": "DAL", "series": "KXHIGHTDAL", "station": "KDFW", "iem_network": "TX_ASOS", "iem_station": "DFW", "lat": 32.8998, "lon": -97.0403, "std_offset_h": -6},
+    {"key": "ATL", "series": "KXHIGHTATL", "station": "KATL", "iem_network": "GA_ASOS", "iem_station": "ATL", "lat": 33.6367, "lon": -84.4281, "std_offset_h": -5},
+    {"key": "HOU", "series": "KXHIGHTHOU", "station": "KHOU", "iem_network": "TX_ASOS", "iem_station": "HOU", "lat": 29.6454, "lon": -95.2789, "std_offset_h": -6},
+    {"key": "LAS", "series": "KXHIGHTLV",  "station": "KLAS", "iem_network": "NV_ASOS", "iem_station": "LAS", "lat": 36.0801, "lon": -115.1522, "std_offset_h": -8}
+  ],
+  "ensemble_models": ["gfs_seamless", "ecmwf_ifs025", "icon_seamless"],
+  "due_local_hours": [7, 10]
+}
