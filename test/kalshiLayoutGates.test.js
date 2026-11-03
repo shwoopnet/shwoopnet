@@ -488,7 +488,7 @@ gates.Y20 = () => {
 gates.Y31 = () => {
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'every market the bot can hold has a price on the relay, so its open position can draw a chance and a chart');
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M', 'KXSILVER15M'], 'every market the bot can hold has a price on the relay, so its open position can draw a chance and a chart');
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
@@ -525,11 +525,11 @@ gates.Y34 = () => {
 // Y35: Ethereum live on the page: a named-preset select (never a number), it asks before any size above off, the profit stats call an Ethereum trade Ethereum (not Bitcoin).
 gates.Y35 = () => {
   assert.ok(!/kalEthLive|kalEthMsg|kalshiExtraSeries|liveExtra/.test(html), 'the Ethereum size dropdown, its handler and its callable are gone from the page');
-  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : \/AUDUSD\/\.test\(s\) \? 'AUD\/USD' : \/USDCAD\/\.test\(s\) \? 'USD\/CAD' : \/NATGAS\/\.test\(s\) \? 'Natural gas' : 'Bitcoin';/.test(html), 'an Ethereum, XRP, Dogecoin or probe-market trade is counted under its own name in the performance table, never under Bitcoin');
+  assert.ok(/return \/GOLD\/\.test\(s\) \? 'Gold' : \/ETH\/\.test\(s\) \? 'Ethereum' : \/XRP\/\.test\(s\) \? 'XRP' : \/DOGE\/\.test\(s\) \? 'Dogecoin' : \/AUDUSD\/\.test\(s\) \? 'AUD\/USD' : \/USDCAD\/\.test\(s\) \? 'USD\/CAD' : \/NATGAS\/\.test\(s\) \? 'Natural gas' : \/SILVER\/\.test\(s\) \? 'Silver' : 'Bitcoin';/.test(html), 'an Ethereum, XRP, Dogecoin or probe-market trade is counted under its own name in the performance table, never under Bitcoin');
   // Run the real function: a probe trade must never be labelled Bitcoin, because Bitcoin is the fallback for an unknown ticker.
   const m = /(function kalshiMarketName\(o\)\{[\s\S]*?\n  \})\n/.exec(html); assert.ok(m, 'missing kalshiMarketName');
   const name = new Function(m[1] + '; return kalshiMarketName;')();
-  assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum']);
+  assert.deepStrictEqual(['KXAUDUSD15M-26OCT201615-T1', 'KXUSDCAD15M-X', 'KXNATGAS15M-X', 'KXBTC15M-X', 'KXETH15M-X', 'KXSILVER15M-26NOV031415-15'].map((t) => name({ ticker: t })), ['AUD/USD', 'USD/CAD', 'Natural gas', 'Bitcoin', 'Ethereum', 'Silver'], 'a silver trade is Silver, never the Bitcoin fallback');
 };
 
 
@@ -644,7 +644,7 @@ gates.BS1 = () => {
   assert.strictEqual(f.kalshiHeartbeat({ active: true, lastTickAt: T0 - 400000 }, T0).state, 'down', 'over 5 minutes means the function is not running');
   assert.strictEqual(f.kalshiHeartbeat({ active: true }, T0).state, 'quiet', 'running with no check recorded yet is waiting, not alive');
   const a = f.kalshiNextEntry(T0 + 60000);
-  assert.deepStrictEqual([a.at, a.name, /^Gold, /.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
+  assert.deepStrictEqual([a.at, a.name, /^Gold and silver, /.test(a.what), /10 minute|XRP|natural gas|Bitcoin|AUD|CAD/.test(a.what)], [T0 + 540000, 'Closing buy', true, false], 'a minute into a quarter the next look is the Closing buy at minute 9, and it names no paused market');
   const b = f.kalshiNextEntry(T0 + 330000);
   assert.deepStrictEqual([b.at, b.name], [T0 + 540000, 'Closing buy'], 'minute 5 has no look of its own: the 10 minute look belonged to paused markets');
   const c = f.kalshiNextEntry(T0 + 600000);

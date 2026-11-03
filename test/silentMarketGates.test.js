@@ -74,7 +74,7 @@ gates.S7 = () => {
   const series = /const L1_SERIES = \[([^\]]*)\]/.exec(server)[1];
   const probes = /const PROBE_SERIES = \[([^\]]*)\]/.exec(server)[1];
   const all = (series.replace('...PROBE_SERIES', probes).match(/KX[A-Z]+15M/g) || []);
-  const names = { KXGOLD15M: 'Gold', KXXRP15M: 'XRP', KXDOGE15M: 'Dogecoin', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas' };
+  const names = { KXGOLD15M: 'Gold', KXXRP15M: 'XRP', KXDOGE15M: 'Dogecoin', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas', KXSILVER15M: 'Silver' };
   const smooth = ['KXBTC15M', 'KXETH15M'];
   all.forEach((s) => assert.ok(smooth.includes(s) || (names[s] && new RegExp("name: '" + names[s].replace('/', '\\/') + "'").test(watch)), s + ' is either watched or deliberately left out'));
   assert.ok(/kalshiSilentMarkets\(orders, s, now\)/.test(html) && /Needs a look/.test(html), 'the Bot status card shows the warning');

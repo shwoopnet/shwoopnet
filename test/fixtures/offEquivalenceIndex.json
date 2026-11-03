@@ -157,6 +157,12 @@
     null
    ],
    [
+    "fetch",
+    "GET",
+    "/trade-api/v2/markets?series_ticker=KXSILVER15M&status=open&limit=5",
+    null
+   ],
+   [
     "get",
     "kalshiLiveControl/sizing"
    ],

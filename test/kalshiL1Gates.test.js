@@ -698,7 +698,7 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'GOLD FIRST, then XRP, Bitcoin, Dogecoin and Ethereum (the later ones yield when a window is full); Solana is not on it; the three probe markets left the list on Oct 30, 2026');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXSILVER15M'], 'GOLD FIRST, then XRP, Bitcoin, Dogecoin and Ethereum (the later ones yield when a window is full); Solana is not on it; the three probe markets left the list on Oct 30, 2026; silver (a 1 contract probe, Nov 3, 2026) is LAST, so it only takes what gold leaves in a window');
   assert.ok(live.PROBE_SERIES.every((x) => !live.L1_SERIES.includes(x) && live.PAUSED_SERIES.includes(x)), 'the probe markets are not on the tick and are still paused, so putting one back in the list is not enough to trade it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
@@ -714,7 +714,7 @@ gates.PR1 = async () => {
   assert.ok(!aud, 'a probe market no longer trades: it left L1_SERIES on Oct 30, 2026 (the owner), even when its quotes are handed to the tick and nothing is paused');
 };
 gates.PR2 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold, then the four capped markets; no probe markets');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXSILVER15M'], 'gold, then the four capped markets, then silver last; no probe markets');
   assert.deepStrictEqual(live.PROBE_SERIES, ['KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the probe list is kept (the drop rule and the alerts name them), but it is not on the tick');
   // a window already at its combined limit still takes no new order (the probe market used to be the one that showed it; Bitcoin stands in)
   const w = world({ session: wsess({}), balance: rich });
@@ -1341,7 +1341,7 @@ gates.RL3 = async () => {
 // FS1 to FS3: fixed order sizes (Oct 23, 2026, the owner: "yeah build", on the research session's sizing proposal at a $500 balance). XRP and Dogecoin trade 3 contracts, natural gas 2; Bitcoin and Ethereum stay at 1.
 // Consequence: the larger size reaches only the three markets the history supports, and never grows through the ladder, the profit add-on, a stored value or a second crypto order in the window.
 gates.FS1 = async () => {
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'exactly these markets, at exactly these sizes (Dogecoin is back to a fixed 5 on Nov 3, 2026)');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5, KXSILVER15M: 1 }, 'exactly these markets, at exactly these sizes (Dogecoin is back to a fixed 5 on Nov 3, 2026; silver is a fixed 1 from the same day)');
   const one = async (series, ticker, closeAt) => {
     const w = world({ session: wsess({}), balance: rich, fresh: { [ticker]: { exchange_index: 0, close_time: iso(closeAt) } } });
     await tick(w, { quotes: [quote({ close_time: iso(closeAt) }, series, ticker)], sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 50, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
@@ -1374,16 +1374,16 @@ gates.FS2 = async () => {
 };
 gates.FS3 = () => {
   const src = fnSrcLib();
-  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
+  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5, KXSILVER15M: 1 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
 };
 
 // OS1: series order (Oct 23, 2026, the owner's reorder after the research session's question). Consequence: when two capped crypto markets qualify in the same tick, the 3 contract market (XRP over Bitcoin, Dogecoin over Ethereum) gets the one crypto order of the window, and nothing else about the order changes.
 gates.OS1 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum; no probes');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M', 'KXSILVER15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum, silver last; no probes');
   assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is three markets');
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'sizes unchanged');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5, KXSILVER15M: 1 }, 'sizes unchanged');
   const run = async (list, lead) => {
     const close = NOW + (lead === '10m' ? 600000 : 360000);
     const fresh = {}, quotes = [];
@@ -1402,7 +1402,7 @@ gates.OS1 = async () => {
   const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-06']], '6m');
   assert.ok(btc.posts.length === 1 && btc.posts[0].ticker.includes('KXBTC') && Number(btc.posts[0].count) === 1, 'Bitcoin alone still trades, at one contract');
   const src = fnSrcLib();
-  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M"\];/.test(src), 'the order is a hard list in code');
+  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M", "KXSILVER15M"\];/.test(src), 'the order is a hard list in code');
 };
 
 
@@ -1503,6 +1503,59 @@ gates.QH2 = async () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
   assert.ok(/!inQuietHours\(x, now\)/.test(src), 'it filters candidates only: the exit watch is untouched');
   assert.ok(!/inQuietHours/.test(src.slice(src.indexOf('async function runExitWatch'), src.indexOf('async function runExitWatch') + 6000)), 'an open position is still sold whatever the clock says');
+};
+
+// SV1 to SV3: silver, a held and capped live probe (Nov 3, 2026, the owner asked for a third live strategy). L1's own rule on KXSILVER15M at a FIXED 1 contract.
+// Consequence: silver can never put more than one contract at risk, however large the balance, the ladder cap or the reinvest pool; it only takes the room in a window that gold leaves; and it counts toward the same window limit as every other L1 order.
+const SILV = 'KXSILVER15M-26OCT091500-00';
+gates.SV1 = async () => {
+  assert.strictEqual(live.maxContractsFor('KXSILVER15M'), 1, 'the size lock allows silver one contract and no more');
+  assert.strictEqual(live.FIXED_CONTRACTS.KXSILVER15M, 1, 'silver is a fixed size');
+  const cases = [
+    { name: 'a rich account with a full pool', session: { sizing: true, sizeCap: 40, sizeAddon: 30, sizeBase: 5000, sizePool: 500, sizeNextReview: NOW + 86400000 }, balance: { balance_breakdown: [{ balance: '5000.0000', exchange_index: 2 }, { balance: '5000.0000', exchange_index: 0 }] }, state: { cap: 40, base: 5000, reviewedAt: NOW - 1000, pool: 500, saved: 0, appliedTs: NOW - 1000, lastStopAt: null } },
+    { name: 'a small account', session: { sizing: true, sizeCap: 1, sizeAddon: 0, sizeBase: 40, sizeNextReview: NOW + 86400000 }, balance: { balance_breakdown: [{ balance: '40.0000', exchange_index: 2 }, { balance: '40.0000', exchange_index: 0 }] }, state: { cap: 1, base: 40, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null } },
+    { name: 'sizing off', session: {}, balance: rich, state: null },
+  ];
+  for (const c of cases) {
+    const w = world({ session: c.session, balance: c.balance });
+    await tick(w, { pausedSeries: undefined, quotes: [quote({}, 'KXSILVER15M', SILV)], sizingState: c.state, setSizingState: async () => {} });   // the REAL pause list, as index.js runs it
+    assert.strictEqual(w.posts.length, 1, 'silver trades with the real pause list (' + c.name + ')');
+    assert.strictEqual(Number(w.posts[0].count), 1, 'silver is exactly 1 contract with ' + c.name + ': ' + w.posts[0].count);
+    assert.strictEqual(w.posts[0].client_order_id, 'L1-' + SILV, 'the client order id comes from the market, like every L1 order');
+    const rec = w.docs.get('L1-' + SILV);
+    assert.ok(rec && rec.strategy === 'L1' && !rec.addon && !rec.addonCost && rec.entryLead === '6m', 'an L1 order at the 6 minute look with no reinvested profit (' + c.name + ')');
+  }
+  // a sizing bug that worked out a bigger silver order is refused before anything is sent
+  const saved = live.FIXED_CONTRACTS.KXSILVER15M;
+  live.FIXED_CONTRACTS.KXSILVER15M = 5;
+  try {
+    const w = world({ session: wsess({}), balance: rich });
+    await tick(w, { pausedSeries: undefined, quotes: [quote({}, 'KXSILVER15M', SILV)], sizingState: wstate, setSizingState: async () => {} });
+    assert.strictEqual(w.posts.length, 0, 'a 5 contract silver order never reaches the broker');
+  } finally { live.FIXED_CONTRACTS.KXSILVER15M = saved; }
+};
+gates.SV2 = async () => {
+  assert.strictEqual(live.L1_SERIES[live.L1_SERIES.length - 1], 'KXSILVER15M', 'silver is last, so it only takes what gold leaves in a window');
+  assert.ok(!live.PAUSED_SERIES.includes('KXSILVER15M'), 'silver is not paused');
+  for (const [name, list] of Object.entries({ CAPPED_SERIES: live.CAPPED_SERIES, PROBE_SERIES: live.PROBE_SERIES, EARLY_PROBE_SERIES: live.EARLY_PROBE_SERIES, SMOOTH_SERIES: live.SMOOTH_SERIES })) assert.ok(!list.includes('KXSILVER15M'), 'silver is not in ' + name + ': it is gold\'s rule at 6 minutes, not a crypto, smooth or 10 minute market');
+  // gold and silver in the same window: gold goes first at its ladder size, silver second with one contract
+  const both = world({ session: wsess({}), balance: rich });
+  await tick(both, { pausedSeries: undefined, quotes: [quote({}, 'KXSILVER15M', SILV), quote({}, 'KXGOLD15M', GOLD)], sizingState: wstate, setSizingState: async () => {} });
+  assert.deepStrictEqual(both.posts.map((p) => p.ticker), [GOLD, SILV], 'gold is sent before silver even when silver is handed over first');
+  assert.ok(Number(both.posts[0].count) > 1 && Number(both.posts[1].count) === 1, 'gold keeps its ladder size and silver takes one: ' + both.posts.map((p) => p.count));
+  const spent = [...both.docs.values()].reduce((a, d) => a + d.maxCost, 0);
+  assert.ok(spent <= live.L1_WINDOW_CAP_FRACTION * 1000 + 1e-9, 'gold and silver together stay inside the one window limit: $' + spent.toFixed(2));
+};
+gates.SV3 = async () => {
+  // a window that gold already filled to the combined limit leaves silver nothing: it shares the 5.5% cap, it does not sit beside it
+  const w = world({ session: wsess({}), balance: rich });
+  w.docs.set('L1-gold-earlier', { strategy: 'L1', ticker: GOLD, series: 'KXGOLD15M', status: 'filled', maxCost: live.L1_WINDOW_CAP_FRACTION * 1000, addonCost: 0, ts: NOW - 60000 });
+  await tick(w, { pausedSeries: undefined, quotes: [quote({}, 'KXSILVER15M', SILV)], sizingState: wstate, setSizingState: async () => {} });
+  assert.strictEqual(w.posts.length, 0, 'a full window takes no silver order');
+  // the alerts and the page's price relay know the market, so an open silver position is named and priced
+  const push = fs.readFileSync(path.join(root, 'functions', 'kalshiPushLib.js'), 'utf8');
+  assert.ok(/KXSILVER15M: "Silver"/.test(push), 'a silver close alert says Silver, not a raw ticker');
+  assert.ok(require('../functions/kalshiLib.js').KALSHI_EXTRA_SERIES.includes('KXSILVER15M'), 'the relay carries silver, so its open position has a price');
 };
 
 (async () => {

@@ -11,7 +11,7 @@ const iso = (ms) => new Date(ms).toISOString();
 const pem = crypto.generateKeyPairSync('ed25519').privateKey.export({ type: 'pkcs8', format: 'pem' });
 const gates = {};
 
-const TICKER = { KXGOLD15M: 'KXGOLD15M-26OCT071415-06', KXXRP15M: 'KXXRP15M-26OCT071415-10', KXBTC15M: 'KXBTC15M-26OCT071415-06', KXDOGE15M: 'KXDOGE15M-26OCT071415-06', KXETH15M: 'KXETH15M-26OCT071415-06', KXAUDUSD15M: 'KXAUDUSD15M-26OCT071415-06', KXUSDCAD15M: 'KXUSDCAD15M-26OCT071415-06', KXNATGAS15M: 'KXNATGAS15M-26OCT071415-10' };
+const TICKER = { KXGOLD15M: 'KXGOLD15M-26OCT071415-06', KXXRP15M: 'KXXRP15M-26OCT071415-10', KXBTC15M: 'KXBTC15M-26OCT071415-06', KXDOGE15M: 'KXDOGE15M-26OCT071415-06', KXETH15M: 'KXETH15M-26OCT071415-06', KXAUDUSD15M: 'KXAUDUSD15M-26OCT071415-06', KXUSDCAD15M: 'KXUSDCAD15M-26OCT071415-06', KXNATGAS15M: 'KXNATGAS15M-26OCT071415-10', KXSILVER15M: 'KXSILVER15M-26OCT071415-06' };
 const leftFor = (series) => (live.EARLY_PROBE_SERIES.includes(series) ? 600000 : 360000);
 const quote = (series) => ({ series, m: { ticker: TICKER[series], status: 'active', close_time: iso(NOW + leftFor(series)), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9100' } });
 const sess = (extra) => Object.assign({ active: true, until: NOW + 3600000, ordersSent: 0, startCash: 100, sizing: true, sizeCap: 40, sizeAddon: 0, sizeBase: 1000, sizeNextReview: NOW + 86400000 }, extra || {});
@@ -51,7 +51,7 @@ const tick = (w, series, extra = {}) => live.runL1Tick({
   sizingState: state, setSizingState: async () => {}, ...extra,
 });
 const noPause = { pausedSeries: [] };
-const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: null, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2 };
+const EXPECTED = { KXGOLD15M: null, KXXRP15M: 1, KXBTC15M: 1, KXDOGE15M: null, KXETH15M: 1, KXAUDUSD15M: 1, KXUSDCAD15M: 1, KXNATGAS15M: 2, KXSILVER15M: 1 };
 
 // SZ1: the incident. A 12 contract Dogecoin order is never sent, leaves no order document behind, says why, and does not stop the other markets from trading.
 gates.SZ1 = async () => {

@@ -5,7 +5,7 @@ const KALSHI_SERIES = ["KXBTC15M", "KXGOLD15M"];
 // Shown on the Live books tab as read-only market cards (Ethereum, XRP and Dogecoin: markets the live bot trades but the signal library does not read). Deliberately NOT part of KALSHI_SERIES: the live signal library and the book
 // recorder read that list, and the live bot must never see these as candidates.
 // The three probe markets (AUD/USD, USD/CAD, natural gas) were added Oct 23, 2026: an open position on one of them had no price here, so its row on the Bot page had no chance, no time left and no chart.
-const KALSHI_EXTRA_SERIES = ["KXETH15M", "KXXRP15M", "KXDOGE15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M"];
+const KALSHI_EXTRA_SERIES = ["KXETH15M", "KXXRP15M", "KXDOGE15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXSILVER15M"];   // silver added Nov 3, 2026 with its L1 probe, so an open silver position has a price
 
 function kalshiNum(x) {
   const n = parseFloat(x);

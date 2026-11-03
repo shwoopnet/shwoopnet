@@ -27,7 +27,7 @@ gates.SC2 = () => {
   // every strategy's next look: the Closing buy at 9:00 into each 15 minutes, the open interest jump at 12:00
   const Q = 900000, base = Math.floor(TUE / Q) * Q;
   const at = (offsetMs) => lib(base + offsetMs).kalshiNextEntry(base + offsetMs);
-  let n = at(60000); assert.strictEqual(n.name, 'Closing buy'); assert.strictEqual(n.inMs, 480000); assert.ok(/^Gold, /.test(n.what) && /then Open interest jump \(Bitcoin\)/.test(n.then));
+  let n = at(60000); assert.strictEqual(n.name, 'Closing buy'); assert.strictEqual(n.inMs, 480000); assert.ok(/^Gold and silver, /.test(n.what) && /then Open interest jump \(Bitcoin\)/.test(n.then), 'the Closing buy names both live L1 markets, gold and silver (Nov 3, 2026)');
   n = at(600000); assert.strictEqual(n.name, 'Open interest jump', 'after the 9 minute look the next one is the Bitcoin strategy'); assert.strictEqual(n.inMs, 120000); assert.ok(/Bitcoin/.test(n.what) && /then Closing buy/.test(n.then));
   n = at(800000); assert.strictEqual(n.name, 'Closing buy', 'after the 12 minute look it wraps to the next quarter hour'); assert.strictEqual(n.inMs, 640000);
   assert.ok(n.frac > 0 && n.frac < 1, 'the ring fills between the previous look and the next');
@@ -49,7 +49,9 @@ gates.SC4 = () => {
   assert.strictEqual(noFav.state, 'in', 'a market at 5c yes has a 95c no side: the favourite is the no side, inside the band'); assert.ok(Math.abs(noFav.price - 0.95) < 1e-9);
   assert.strictEqual(by('Bitcoin').state, 'in', 'the Bitcoin strategy buys the cheaper side: no at 12c is inside 5c to 50c'); assert.ok(Math.abs(by('Bitcoin').price - 0.12) < 1e-9, 'the cheaper side is 1 minus the yes bid');
   const out = l.kalshiPriceWatch([mk('KXGOLD15M', 0.83, 0.84), mk('KXBTC15M', 0.01, 0.02)], TUE);
-  assert.strictEqual(out[0].state, 'below', 'gold at 84c is below the band: this is why nothing is trading'); assert.strictEqual(out[1].state, 'below', 'a cheaper side under 5c is below the Bitcoin range');
+  assert.strictEqual(out[0].state, 'below', 'gold at 84c is below the band: this is why nothing is trading'); assert.strictEqual(out.find((r) => r.name === 'Bitcoin').state, 'below', 'a cheaper side under 5c is below the Bitcoin range');
+  const sv = l.kalshiPriceWatch([mk('KXSILVER15M', 0.93, 0.94)], TUE).find((r) => r.name === 'Silver');
+  assert.ok(sv && sv.state === 'in' && Math.abs(sv.price - 0.94) < 1e-9, 'silver (an L1 market from Nov 3, 2026) has its own tile on the same 88c to 97c band as gold');
   assert.strictEqual(l.kalshiPriceWatch([mk('KXGOLD15M', 0.985, 0.99)], TUE)[0].state, 'above');
   assert.ok(out[0].pos >= 0 && out[0].pos <= 1 && out[0].bandWidth > 0, 'the marker and band are fractions of the scale');
 };

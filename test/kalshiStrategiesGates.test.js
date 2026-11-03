@@ -60,7 +60,7 @@ gates.ST6 = () => {
   }
   const l1m = /L1: \{ name: 'Closing buy', markets: '([^']+)'/.exec(html); assert.ok(l1m, 'L1 markets are listed');
   assert.ok(!/L1E:/.test(html), 'L1E is gone (the owner, Oct 30, 2026: "remove L1E altogether"; Ethereum is paused)');
-  const NAMES = { KXGOLD15M: 'Gold', KXDOGE15M: 'Dogecoin', KXETH15M: 'Ethereum', KXBTC15M: 'Bitcoin', KXXRP15M: 'XRP', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas' };
+  const NAMES = { KXGOLD15M: 'Gold', KXDOGE15M: 'Dogecoin', KXETH15M: 'Ethereum', KXBTC15M: 'Bitcoin', KXXRP15M: 'XRP', KXAUDUSD15M: 'AUD/USD', KXUSDCAD15M: 'USD/CAD', KXNATGAS15M: 'Natural gas', KXSILVER15M: 'Silver' };
   const tradingNow = live.L1_SERIES.filter((x) => !live.PAUSED_SERIES.includes(x)).map((x) => NAMES[x]);
   assert.deepStrictEqual(l1m[1].split(', ').sort(), tradingNow.sort(), 'L1 lists the markets the code trades under the L1 rule (not paused)');
 };
