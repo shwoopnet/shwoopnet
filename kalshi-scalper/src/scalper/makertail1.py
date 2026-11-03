@@ -205,7 +205,17 @@ def parse_iso(s):
     return datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp()
 
 
+_CACHE = []
+
+
 def load():
+    if _CACHE:
+        return _CACHE[0]
+    _CACHE.append(_load())
+    return _CACHE[0]
+
+
+def _load():
     """Returns (polls {ticker: [Poll]}, close {ticker: ts}, trades {ticker: [(t, yp, count, side)]}, tape_polls {ticker or '*': [t]})."""
     polls, closes, trades, seen, seenp, tpolls = defaultdict(list), {}, defaultdict(list), set(), set(), set()
     for commit, path in book_files():
