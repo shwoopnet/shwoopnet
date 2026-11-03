@@ -1,0 +1,51 @@
+# COMDAY1 registration: Kalshi DAILY commodity ladders (cheap side only, held to settlement) against an OUTSIDE price (OKX perpetuals) and a fat-tailed model; one look at 6 hours and, counted separately, one at 1 hour before the close
+
+Worker COMDAY1, Strategy Research V2, 2026-11-03. Research only, discovery only, no promote verb, no live code. Written and pushed before any Kalshi candle, any Kalshi result or expiration value, or any OKX bar was downloaded or compared with a Kalshi quote. N +4 (2 rules: the 6 hour look and the 1 hour look; the series are pooled inside a look). Owner rule (Nov 3, strict) applies: only the CHEAP side (ask 3c to 30c) is ever a candidate; the code has no favourite-side rule and prints no favourite-side result.
+
+## What was looked at before registering (disclosed; structure only, no outcome, no quote)
+
+- Series list (public): KXWTI (WTI daily, "daily settlement price ... above K", closes 14:30 ET), KXBRENTD, KXNATGASD, KXGOLDD (daily gold bracket, NOT the 15 minute KXGOLD15M), KXSILVERD, KXCOPPERD (all "close of the 1-minute candlestick ... at 5:00 PM ET is above K"). Platinum and palladium have only hourly and 15 minute markets; coffee has no outside price: not included.
+- Market counts and dates only (listing, results not read): KXWTI 870 days of history (from 2022), KXBRENTD 125 days from 2026-03-22, KXNATGASD 120 from 03-29, KXGOLDD 124 from 03-24, KXSILVERD 124 from 03-24, KXCOPPERD 123 from 03-24; about 20 to 77 strikes a day; all strikes seen in the first 300 listed of KXWTI, KXGOLDD, KXNATGASD are `strike_type = greater` (above K). Other strike types, if any, are skipped and counted.
+- OKX perpetuals (public, keyless, reachable): `CL-USDT-SWAP` (listed 2026-03-04), `BZ-USDT-SWAP` (03-24), `NG-USDT-SWAP` (03-10), `XAU-USDT-SWAP` (2025-04), `XAG-USDT-SWAP` (2026-01), `XCU-USDT-SWAP` (03-04). 1 minute history exists back to at least 2026-04-01 (two sample rows were looked at). Window of the test: close dates from **2026-03-24** (first day all six exist) to 2026-11-02.
+- The kernel lesson from the priors is carried in: IDXFUT1 (a 60 minute lognormal is too thin in the wings: model 3.7% for asks at 11%) and VOLGAP1 (the ladder's smile already prices the wings), SETTLE1 (silver and WTI quotes equal the reference; platinum, palladium and natural gas perps are over-confident by 5 to 11 points). Expect NOT_ENOUGH_DATA or FALSIFIED; the new part is the daily horizon, fat tails, commodities, and about 7 months.
+
+## The rule (exact)
+
+- **Series and references:** KXWTI-CL, KXBRENTD-BZ, KXNATGASD-NG, KXGOLDD-XAU, KXSILVERD-XAG, KXCOPPERD-XCU. One rule for all, no per-series tuning, no series dropped after seeing a result.
+- **Dates and windows:** the distinct Kalshi close dates (UTC date of close_time) in the union of the six series from 2026-03-24 to 2026-11-02, sorted. First two thirds = development; **the last third by date is FROZEN: not fetched from Kalshi, not scored, not printed** (W3). Development is split at the median date: W1 first half, W2 second half. A weekend or a day with no listed market is simply absent.
+- **Looks:** D = close_time minus L, L = 360 minutes (rule A) and L = 60 minutes (rule B). Two rules, scored separately, never pooled.
+- **Outside price at the look:** R = close of the OKX 5 minute bar that ends at D. Scale: r = (expiration_value of the PREVIOUS listed day's market of the same series) / (close of the OKX 5 minute bar ending at that previous close_time); S = R x r. (This removes a constant contract-month or basis gap; it uses only a settled value from before the look. A day with no previous-day value or bar is skipped and counted.)
+- **Vol:** sigma_min = sqrt(mean of squared 5 minute log returns of the OKX closes over the 240 minutes ending at D) / sqrt(5), zero mean, needs at least 36 returns. Horizon H = L minutes. Same 240 minute window for both looks; no tuning.
+- **Model (fat tailed, fixed):** ln(S_T / S) ~ Student t with 4 degrees of freedom, variance matched to sigma_min^2 x H (scale = sigma_min x sqrt(H) / sqrt(2)); zero drift. P(YES at K, "above K") = 1 - F4( ln(K / S) / scale ). No other kernel is scored. The Gaussian value is printed in the calibration table as information only.
+- **Strikes considered:** only strike_type "greater" with model P(YES) between 0.03 and 0.97 at that look (this pre-filter uses OKX only and sets which candles are downloaded). A cheap side with model probability above 0.97 is not a candidate (a reference break, not an edge).
+- **Quote and fill:** the Kalshi 1 minute candle in force at D + 60 seconds (the first minute after the signal): the latest candle ending at or before D + 60 and no older than 60 minutes with a two-sided quote (0 < yes_bid < yes_ask < 1). Candidates: YES at the yes_ask a with 0.03 <= a <= 0.30 and P(YES) >= 3a; NO at b = 1 - yes_bid with 0.03 <= b <= 0.30 and (1 - P(YES)) >= 3b. **Hard limit 0.30.** Taker at that price, held to settlement, no stop. **At most 2 trades per series per look per day:** the two candidates with the largest model edge (p - price).
+- **Costs:** C = 10, fee 7% x C x p x (1 - p) rounded up to the cent per order; also scored at fees x1.2 and at +1c slippage on the fill.
+- **Control (no model, same candles):** every strike-side with a two-sided quote and an ask 0.03 to 0.30 on the pre-filtered strikes, no ratio rule, no per-day cap, same hold; scored per series-day cluster. **Calibration (information, not a try):** every such strike-side bucketed by model ratio p/a (under 1, 1 to 3, at least 3) and by model p (0.03 to 0.09, 0.09 to 0.2, 0.2 to 0.4, above 0.4): n, mean price, win rate, mean model p (t4 and Gaussian).
+- **Fetch plan (so a partial fetch cannot bias):** development series-days ordered by md5("COMDAY1|series|date"); Kalshi candles are fetched in that order, one thread, 0.4 s between requests, backoff on 429, cache outside the repo. Scoring happens ONCE, after the fetch finishes or at a 4 hour cap, using, per series, the series-days in rank order up to the longest prefix completed for ALL six series (the prefix length is printed). Historical endpoint for markets closing before 2026-09-04, live endpoint after.
+
+## Counterparty
+
+Daily ladders are quoted by market makers who price off the front-month future: a quote that is stale or too thin in the wing against the live outside price would sell a cheap strike at a third of its probability, and fat-tailed commodities (energy on inventory days and geopolitical headlines, gas on weather runs) have heavier wings than a lognormal. **Honest alternative (expected):** the quoters already price the wings (Kalshi's smile is wider than any single-vol model), the OKX perps are thin and over-confident (SETTLE1), and a model that is least wrong where the market is most right picks only the strikes where the model is mistaken (VOLGAP1, IDXFUT1), the favourite-longshot loss then costs 1 to 3 points.
+
+## Numeric prediction (before any outcome)
+
+Take-up: **0.25 treated trades per series per look per day** (range 0.05 to 0.8), about 150 (range 30 to 450) treated trades per look in W1 + W2 pooled across six series; P(at least 150 in W1 + W2) about 45% for rule A, 35% for rule B (shorter horizon, thinner wing). Win rate **about 8% at a mean price about 0.14** (model p about 0.30), win rate in the ratio-at-least-3 bucket 8 to 15 points below the model p; **PF 0.6 per window (range 0.2 to 1.4)**; control (all cheap strike-sides) PF 0.7, win rate about 1.5 points under the price. Calibration: the bucket rises with the model but stays below it. P(verdict FALSIFIED or NOT_ENOUGH_DATA) about 96%.
+
+## Kill criteria and verdicts
+
+- Pooled treated trades in W1 + W2 (per rule) under 150: **NOT_ENOUGH_DATA**, with the measured trades per day, the days to go to 150 (trades / day in development, calendar days of daily-listed trading, assuming the same rate) and the dated forward freeze below. Informational lines still printed. A series with fewer than 8 treated days in W1 or W2 is NOT_ENOUGH_DATA on its own.
+- **FALSIFIED** if the mean net per trade after fees is not above 0 in BOTH W1 and W2, or PF is under 1.5 in W1 or in W2, or the mean at fees x1.2 is not above 0, or treated minus control mean per trade is not positive in both windows.
+- Only if all hold and the day-clustered z of the net per trade (clusters = series-days) is at least the bar for N about 730,119 (z 5.27): NOT_YET_FALSIFIED, which earns a W3 read once and a forward registration only. Anything weaker is a lead at best.
+- No parameter changes after this commit (vol window, nu, ratio, looks, band, cap of 2, scale rule). A later variant (another nu, an empirical-return kernel, 60 minute vol, hourly ladders) is a new counted try with its own registration.
+
+## Capped-probe spec (written to be filled in only if both windows are positive with a mechanism; otherwise "none")
+
+1 contract per order, hard limit 0.30 and model ratio at least 3 at the look, YES or NO whichever the rule picks, at most 2 orders per series per look per day, worst day = (number of series in the probe) x 2 x (30c + 1.5c fee) at one contract, held to settlement. Kill: 3 straight probe losses beyond the expected run, net under -$3 after 40 fills, or PF under 1 after 40 fills. Would need an outside price feed (OKX) that does not exist in the bot: needs the owner's approval and is not a recommendation.
+
+## Forward plan if NOT_ENOUGH_DATA (dated)
+
+The keyless recorder branch `claude/v2-recorder-daily` (not on main; main or the owner merges) already polls KXGOLDD, KXSILVERD, KXNATGASD and KXBRENTD every 30 minutes (stores every poll, so the 360 and 60 minute looks can both be read); KXWTI and KXCOPPERD are not on its watchlist and would need a watchlist edit (no code change). The OKX klines can be fetched afterwards for any past day, so only the Kalshi quotes must be recorded. Forward read: **once, on or after 2027-01-31**, if at least 150 treated trades have accrued in recorded days (otherwise stated days-to-go), rule frozen as above, z bar as then recorded. Until the recorder is merged, no forward data accrues.
+
+## Expected read date
+
+Scored once on the data on file: 2026-11-03 or 2026-11-04, after the Kalshi candle fetch for the registered prefix finishes. Nothing is scored before the fetch is done.
