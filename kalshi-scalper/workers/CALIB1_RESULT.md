@@ -3,7 +3,7 @@
 Registration `workers/CALIB1_REGISTRATION.md` (sha256 `24a9c230e97e6216a948b2269f1378974af356546999822896e7ffbbf172f6cc`, commit 52f8370, pushed before `score`). Data `workers/CALIB1_RESULT.json`, code `src/scalper/calib1.py`, tests `tests/test_calib1.py`. **Cheap side only (ask 3c to 30c); no favourite-side figure was computed or printed.** Cached development data only, no new Kalshi fetch, frozen thirds untouched (0 frozen markets in the caches).
 
 ## Pooled
-**16,041 cheap-side entries, 3,535 events, 12,479 markets** (USWEEP1 11,541; USWEEP2 1,308; USWEEP3 575; NEWLIST1 2,617, before deduplication of (market, look)). Life class: D 12,078 entries, W 1,950, H 15 (the sweeps' hourly series barely reach the cheap band, so H says nothing).
+**16,041 cheap-side entries, 3,535 events, 12,479 markets** (USWEEP1 11,541; USWEEP2 1,308; USWEEP3 575; NEWLIST1 2,617, before deduplication of (market, look)). Life class: D 14,076 entries, W 1,950, H 15 (the sweeps' hourly series barely reach the cheap band, so H says nothing).
 
 Pooled calibration curve, all classes (win rate vs mean price paid, net after fee, event-cluster 95% interval):
 | ask | n | events | win | price | win - price | net per contract |
