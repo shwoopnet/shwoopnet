@@ -8602,3 +8602,6 @@ Full text: `workers/SLOWSTAT1_REGISTRATION.md`. Duplicate check: gas (GAS1, ECON
 
 ### Result: SLOWSTAT1 (2026-11-03): NOT_RUNNABLE (`workers/SLOWSTAT1_RESULT.md`, `src/scalper/slowstat1.py`, registration commit d55b25f plus Amendment 1)
 Nothing scored. Listings alone: only KXADP (19 events, 47 scoreable markets) and KXEGGS (19 events, 7) have the 12 events an sd needs; every other candidate with a free reference has 1 to 10 events. Total scoreable markets 54 against 150 needed. Census rerun 2027-02-01. N +2, about 730,287.
+
+### BOXOFF1 (2026-11-03): weekend box office nowcast from Friday gross, NOT_RUNNABLE
+Registered in `workers/BOXOFF1_REGISTRATION.md` (commit 26ee152) before any outcome. Census of the public series list: no weekend box office or opening gross series exists (only KXTOPMOVIE streaming hours, 2 events; KXSLATECOUNT 1 event; Golden Globes box office award), 0 of about 25 needed events; duplicates ENTER1's finding. Nothing scored. Result `workers/BOXOFF1_RESULT.md`. N +2.
