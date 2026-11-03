@@ -322,7 +322,7 @@ def prefilter(S_sg: dict, markets_: list, c: int):
 def candles() -> None:
     M = load_markets()
     sd = series_days(M)
-    bars_all = json.loads((CACHE / "okx.json").read_text())
+    bars_all = {k: {int(a): b for a, b in v.items()} for k, v in json.loads((CACHE / "okx.json").read_text()).items()}
     order = sorted(sd, key=lambda k: rank_key(*k))
     cpath = CACHE / "candles.jsonl"
     done = set()
