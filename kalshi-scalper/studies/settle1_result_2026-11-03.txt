@@ -1,0 +1,41 @@
+market-looks with a signal and a quote: 26863; triggered |z|>=1.0: 16349 (60.9%)
+-- no outcome used below: share of triggered looks whose implied side is still cheap, per family and look
+KXSILVER15M L=180: market-looks 4386 triggered 2609 (59.5%); implied side price <=0.30: 6 (0.23%), <=0.50: 1.11%, mean price 0.956, mean model p 0.955
+KXSILVER15M L=120: market-looks 4157 triggered 2700 (65.0%); implied side price <=0.30: 28 (1.04%), <=0.50: 1.85%, mean price 0.961, mean model p 0.962
+KXPLATINUM15M L=180: market-looks 1358 triggered 771 (56.8%); implied side price <=0.30: 18 (2.33%), <=0.50: 4.80%, mean price 0.902, mean model p 0.952
+KXPLATINUM15M L=120: market-looks 1078 triggered 624 (57.9%); implied side price <=0.30: 35 (5.61%), <=0.50: 9.29%, mean price 0.870, mean model p 0.952
+KXPALLADIUM15M L=180: market-looks 1355 triggered 709 (52.3%); implied side price <=0.30: 26 (3.67%), <=0.50: 7.33%, mean price 0.876, mean model p 0.952
+KXPALLADIUM15M L=120: market-looks 1112 triggered 621 (55.8%); implied side price <=0.30: 57 (9.18%), <=0.50: 12.56%, mean price 0.843, mean model p 0.957
+KXWTI15M L=180: market-looks 4553 triggered 2701 (59.3%); implied side price <=0.30: 16 (0.59%), <=0.50: 1.26%, mean price 0.948, mean model p 0.955
+KXWTI15M L=120: market-looks 4266 triggered 2764 (64.8%); implied side price <=0.30: 22 (0.80%), <=0.50: 2.13%, mean price 0.957, mean model p 0.962
+KXNATGAS15M L=180: market-looks 2582 triggered 1566 (60.7%); implied side price <=0.30: 73 (4.66%), <=0.50: 6.51%, mean price 0.897, mean model p 0.953
+KXNATGAS15M L=120: market-looks 2016 triggered 1284 (63.7%); implied side price <=0.30: 94 (7.32%), <=0.50: 9.89%, mean price 0.877, mean model p 0.955
+triggered dates 68 thirds sizes {'W1': 23, 'W2': 23, 'W3': 22}
+treated trades per window (counts only; W3 outcomes never loaded): {'W1': 23, 'W2': 93, 'W3': 197}
+== treated, outcomes (W1 and W2 only)
+pooled W1                          n=  23 days= 13 win=0.174 price=0.150 PF=1.10 mean=+1.44c z=+0.16
+pooled W2                          n=  93 days= 20 win=0.161 price=0.180 PF=0.81 mean=-2.95c z=-0.76
+pooled W1+W2                       n= 116 days= 33 win=0.164 price=0.174 PF=0.86 mean=-2.08c z=-0.57
+pooled W1+W2 fees x1.2             n= 116 days= 33 win=0.164 price=0.174 PF=0.85 mean=-2.27c z=-0.63
+pooled W1+W2 +1c slip              n= 116 days= 33 win=0.164 price=0.174 PF=0.80 mean=-3.12c z=-0.86
+KXSILVER15M L=180 W1+W2            n=   4 days=  4 win=0.250 price=0.190 PF=1.32 mean=+4.88c z=+0.22
+KXSILVER15M L=120 W1+W2            n=  14 days= 11 win=0.214 price=0.148 PF=1.46 mean=+5.76c z=+0.50
+KXPLATINUM15M L=180 W1+W2          n=   2 days=  2 win=0.500 price=0.210 PF=5.04 mean=+27.85c z=+0.95
+KXPLATINUM15M L=120 W1+W2          n=   3 days=  2 win=0.333 price=0.187 PF=2.08 mean=+13.63c z=+1.44
+KXPALLADIUM15M L=180 W1+W2         n=   3 days=  1 win=0.000 price=0.223 PF=0.00 mean=-23.57c z=-9950140426721690.00
+KXPALLADIUM15M L=120 W1+W2         n=   8 days=  2 win=0.125 price=0.186 PF=0.58 mean=-7.21c z=-0.62
+KXWTI15M L=180 W1+W2               n=   7 days=  7 win=0.429 price=0.147 PF=4.89 mean=+27.26c z=+1.57
+KXWTI15M L=120 W1+W2               n=  10 days=  9 win=0.300 price=0.180 PF=1.84 mean=+10.88c z=+0.73
+KXNATGAS15M L=180 W1+W2            n=  33 days= 16 win=0.152 price=0.170 PF=0.80 mean=-2.80c z=-0.53
+KXNATGAS15M L=120 W1+W2            n=  32 days= 17 win=0.031 price=0.182 PF=0.14 mean=-16.14c z=-4.15
+control |z|<0.25 cheap side W1+W2  n= 468 days= 41 win=0.197 price=0.175 PF=1.08 mean=+1.17c z=+0.64
+== calibration of the implied side, ALL triggered looks on W1+W2 dates (information)
+KXSILVER15M: n=3573 implied-side win 0.956 mean Phi 0.959 mean price 0.957
+KXPLATINUM15M: n=204 implied-side win 0.853 mean Phi 0.961 mean price 0.874
+KXPALLADIUM15M: n=213 implied-side win 0.845 mean Phi 0.958 mean price 0.858
+KXWTI15M: n=3641 implied-side win 0.958 mean Phi 0.957 mean price 0.951
+KXNATGAS15M: n=1588 implied-side win 0.905 mean Phi 0.957 mean price 0.902
+days with a treated trade per family (W1+W2): {'KXSILVER15M': 13, 'KXPLATINUM15M': 3, 'KXPALLADIUM15M': 2, 'KXWTI15M': 14, 'KXNATGAS15M': 19}
+VERDICT pooled: NOT_ENOUGH_DATA (pooled W1+W2 treated trades 116 < 150)
+note: PF under 1.5 in at least one read window, so FALSIFIED on that line whatever the count says
+OUTCOME-BLIND counts: market-looks 26863, triggered 16349, treated 313
