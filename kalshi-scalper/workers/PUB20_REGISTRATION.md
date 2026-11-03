@@ -146,3 +146,19 @@ If a rule fires on fewer than 150 W1 + W2 trades the verdict is NOT_ENOUGH_DATA 
 - Inventory skew (rule 8) needs order books (R6 recorder is forward only).
 - Turn-of-year, day-of-week and turn-of-month effects on the S&P itself (Ariel 1987, French 1980) cannot be tested as a Kalshi price
   question with 47 index days; P07 and P03 are the part testable on 15 minute markets.
+
+## Amendment 1 (2026-11-03, written after the outcome-free `counts` run and before any result was computed or read)
+`counts` reads quotes only (the `result` column is not touched) and showed three design problems, fixed here with no outcome seen:
+1. **Control too thin.** Controls keyed by series and exact 15 minute slot had under 10 control trades for most event trades (P03, P07, P10: 80% to
+   90% of event trades would be dropped), which is a power loss, not a test. Control keys are coarsened: P03 control = the same series' Tuesday to
+   Thursday trades closing 12:00 to 17:00 Eastern (key = series); P07 control = the same series' trades in the same Eastern HOUR on the other
+   weekdays; P10 control = the same series' Monday to Thursday trades in the same US Central HOUR. P06 and P09 keep the 2 hour offset control.
+   The 10-trade minimum per key and per third stands.
+2. **Ladder candles are sparse** (inx1 holds the 4 pm closes only, 47 closes, a candle only when a strike printed or re-quoted). Quote at the
+   look = the last candle ending in (look - 300 s, look]; fill = the first candle ending in (look, look + 300 s]; "next candle" in P05 and
+   P08 reads that way. Trigger thresholds are unchanged.
+3. **Disclosed before the run, from quotes only:** P08 needs at least 7 strikes with spread at most 0.06; 60 of 94 index closes have them, and the
+   largest gap between a leave-one-out fitted probability and a quoted ask or bid on any of the 850 strike quotes was 3.07c, so the 4c trigger
+   never fires: P08 will report 0 trades, NOT_ENOUGH_DATA (the ladder is smooth to within the spread; thresholds NOT lowered). P05 fires on 1
+   close; P04 has only 2 series in W1 (the other pairs start 08-27 and 09-23), so W1 has 0 trades and n12 is 106 (NOT_ENOUGH_DATA expected).
+No other change. Parameters of P01, P02, P04 to P06, P09 are as registered.
