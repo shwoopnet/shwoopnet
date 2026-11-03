@@ -493,9 +493,9 @@ def parity():
     w1, w2, _ = split_dates(dates_all())
     recs, _ = build_records(set(w1) | set(w2))
     disc = [r for r in recs if gen6.DISC[0] <= r["ct"] < gen6.DISC[1]]
-    A = arrays(disc)
-    m = A["doi"] > FIXED
-    v = A["net"][m]
+    fill = np.array([r["fill"] for r in disc]); win = np.array([r["win"] for r in disc]); doi = np.array([r["doi"] for r in disc])
+    m = doi > FIXED
+    v = (win - fill - gen6.vfee(fill, C))[m]
     print("discovery fixed rise n", int(m.sum()), "PF", round(gen6.pf(v), 2), "(published 222, 2.28)")
 
 
