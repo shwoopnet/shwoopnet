@@ -76,4 +76,42 @@ print(json.dumps([len(m.trade_rows(1, t, seen)), len(m.trade_rows(2, t, seen)), 
   assert.deepStrictEqual(out, [1, 0, 1]);
 };
 
+// B7 (RECBOOK2, research only): scripts/record_book2.py is a copy that also records the hourly Ethereum and gold ladders into book2/ (series column, event named by its Eastern close hour, 5 s cadence). Network faked.
+gates.B7 = () => {
+  const py2 = (code) => execFileSync('python3', ['-I', '-c', `
+import importlib.util, json
+spec = importlib.util.spec_from_file_location('rb2', ${JSON.stringify(path.join(root, 'scripts', 'record_book2.py'))}); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
+${code}`], { encoding: 'utf8' });
+  const out = JSON.parse(py2(`
+resp = {"orderbook_fp": {"no_dollars": [["0.4600", "10"], ["0.5000", "5"]], "yes_dollars": [["0.4500", "7"]]}}
+row = m.book_row(111, "d", {"ticker": "KXETHD-26NOV0317-T1", "floor_strike": 1, "close_time": "X"}, resp, "KXETHD")
+tr = m.trade_rows(5, [{"ticker": "T", "trade_id": "a"}], set(), "KXGOLDH")
+ms = [{"ticker": "KXETHD-X-T%d" % i, "close_time": "2026-11-03T22:00:00Z", "floor_strike": i, "yes_bid_dollars": "0.%02d" % (10 * i)} for i in range(1, 9)]
+calls = []
+def fake(url):
+    calls.append(url)
+    return (200, {"markets": ms, "cursor": ""}, "") if "event_ticker=KXETHD-26NOV0317" in url else (200, {"markets": [], "cursor": ""}, "")
+m.http_get = fake
+a = len(m.discover("KXETHD", 1793743200)); n1 = len(calls); calls.clear()
+b = m.discover("KXGOLDH", 1793743200)
+m.http_get = lambda url: (429, None, "")
+c = m.discover("KXETHD", 1793743200)
+print(json.dumps({"cols": len(m.BOOK_COLS), "row": row[:3], "rowlen": len(row), "trlen": len(tr[0]), "trcols": len(m.TRADE_COLS), "ev": [m.event_ticker("KXETHD", 1793743200), m.event_ticker("KXETHD", 1782939600)],
+  "found": [a, n1, b, len(calls), c], "series": list(m.DEFAULT_SERIES), "every": m.BOOK_EVERY_S, "none": m.book_row(1, "d", {}, {}, "S")}))`));
+  assert.strictEqual(out.rowlen, out.cols, 'one value per book column');
+  assert.strictEqual(out.trlen, out.trcols, 'one value per trade column');
+  assert.deepStrictEqual(out.row, ['KXETHD', 111, 'd'], 'a leading series column');
+  assert.strictEqual(out.none, null);
+  assert.deepStrictEqual(out.ev, ['KXETHD-26NOV0317', 'KXETHD-26JUL0117'], 'the event is named by its Eastern close hour, winter and summer');
+  assert.deepStrictEqual(out.found, [7, 1, [], 2, []], 'event asked first, series list as fallback, a refused read is an empty hour');
+  assert.deepStrictEqual(out.series, ['KXETHD', 'KXGOLDH']);
+  assert.strictEqual(out.every, 5);
+  const code = fs.readFileSync(path.join(root, 'scripts', 'record_book2.py'), 'utf8').replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
+  assert.ok(!/PRIVATE|SECRET|Authorization|ACCESS[-_]?KEY|SIGNATURE|\/portfolio|create_order|method\s*=\s*["'](POST|PUT|DELETE)/i.test(code), 'public reads only');
+  assert.ok(!/KXBTC15M|KXXRP|KXDOGE|KXGOLD15M/.test(code), 'nothing the live bot trades');
+  const wf2 = fs.readFileSync(path.join(root, '.github', 'workflows', 'record-book2.yml'), 'utf8');
+  assert.ok(/cron: "50 3,7,11,15,19,23 \* \* \*"/.test(wf2) && /timeout-minutes: 330/.test(wf2) && /group: record-book2/.test(wf2) && /record_book2\.py/.test(wf2), 'same 4 hour pattern, its own queue');
+  assert.ok(!/git push[^\n]*\bmain\b/.test(wf2) && !/secrets\.(?!GITHUB_TOKEN)/.test(wf2) && /permissions:\s*\n\s*contents: write/.test(wf2), 'data branch only, built-in token only');
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }
