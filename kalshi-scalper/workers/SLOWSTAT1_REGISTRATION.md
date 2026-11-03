@@ -23,3 +23,6 @@ FALSIFIED if mean net after fees is not above 0 in both halves, or PF under 1.5.
 
 ## Forward plan
 Re-run the census (`python -m scalper.slowstat1 census`) on 2027-02-01. The rule becomes runnable only if one reference-backed series shows 40 or more events with trading (monthly releases: KXADP reaches that around 2028), or the pooled cap exceeds 400. No recorder is needed: Kalshi keeps settled candles.
+
+## Amendment 1 (2026-11-03, before any outcome, price or candle was joined)
+The feasibility paragraph above summed raw markets and said "below 150"; my first count also used a listing helper that returned only the recent tier. The raw sum across all candidates is about 400 markets, so that sentence was wrong. The binding limit is events, and it is now stated as a rule: a series is scoreable only with at least 12 events before the cut (an sd needs 8 changes in the first two thirds), and only its last-third events with at least 20 contracts traded can be scored (`cap()` in `src/scalper/slowstat1.py`). NOT_RUNNABLE if the total scoreable markets, an upper bound on trades, is under 150.
