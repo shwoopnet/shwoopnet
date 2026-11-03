@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 1:44 PM CT (19:44Z): W9 EXIT-SHAPE RESULT
+
+W9 (6 tries): no variant passes in either market. Gold net c per contract (PF) none 1.28 (1.25), plain 25c 1.42 (1.28), A (exit only while more than 120 s remain) 1.43, B (two closes at or under 25c) 1.34, C (two closes at or under 20c) 1.32; plain 25c beats none in all three thirds, A ties it (+0.01c). Dogecoin none 1.71 (1.37), plain 25c 1.10 (1.22), A 1.18, B 1.52 (1.32), C 1.64 (1.35): the confirmed lines recover most of the plain exit's cost (they sell 35% to 40% fewer) but never beat holding in D2 or the holdout. Plain 25c sells 21 eventual winners out of 110 on Dogecoin, 2 of 69 on gold. Nothing to change; the Dogecoin pattern (plain early sells hurt, confirmed sells nearly free) is a forward-test question only. Candle limitation stated (exit at the minute close, no 10 second watch).
+
 ## 2026-11-03 1:43 PM CT (19:43Z): W9 EXIT-SHAPE REGISTERED
 
 W9: do exit SHAPES that sell less often (not a different line) beat the plain 25c line and no exit, on gold and Dogecoin 62 day candles (q3.py simulator, in-band 0.88 to 0.97 at -360 s)? Variants, each vs 25c and vs none: (A) 25c exit only while more than 120 s remain; (B) 25c exit only after TWO consecutive one minute closes at or below 0.25; (C) 20c line with the B confirmation. 3 variants x 2 markets = 6 tries. Read net c per contract and PF in thirds D1, D2, holdout. Pass: better than both the plain 25c line and no exit in all three thirds for that market. Prediction: B and C reduce the early sell count by 30% to 60% and land between 25c and none on net; none passes the bar. Candle limitation (exit at the minute close) stated; a lead for the owner only.
