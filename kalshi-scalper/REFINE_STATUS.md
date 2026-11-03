@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 1:40 PM CT (19:40Z): W3 OI-OTHER RESULT, W6 OI-NULL REGISTERED
+
+W3 (13 tries, 12 series planned plus gold): OICORE's rule with a relative open interest jump (series own 59th percentile of the first half) passes on 0 of 13 series (best holdout PF 1.19 Silver, best discovery 1.04 HYPE; gold 1.00 / 1.07, Dogecoin 1.03 / 0.84; commodities and forex negative, Palladium -5.04c, GBP/USD -4.29c, USD/JPY -4.06c). Prediction was at most 1 by chance: 0. Open interest jump is specific to Bitcoin in this data: nothing to name for a forward shadow. Counted 13 tries.
+W6 OI-NULL REGISTERED: is the open interest trigger the edge or is it the cheap side? On oi/btc.jsonl (453 fixed-rule trades): (a) 5,000 random draws of the same number of cheap-side windows (same price band, same fill rule) from all windows with a cheap side in band, no open interest condition; report the share of draws with PF at or above the live rule's PF 1.81 (discovery) and 2.85 (holdout), (b) PF and win rate by decile of OIR (open interest rise) among cheap-side windows. Prediction: the random draws almost never reach 1.81 (under 5%); PF rises with OIR decile. 11 tries. Falsifier: if random cheap-side windows match the rule 20% of the time or more, the OI trigger adds nothing and OICORE is a cheap-side bet.
+
 ## 2026-11-03 1:40 PM CT (19:40Z): W4 DOGE-EXIT RESULT, W5 PRICE-TILT REGISTERED
 
 W4 (14 tries): 1,776 Dogecoin trades (592 per slice), 110 early sells. Same single pass as gold: entry price at or below 0.932 (early sell rate 7.4% / 9.4% / 10.1% against 3.4% / 3.9% / 2.5%, ratio 2.2 / 2.4 / 4.1), mechanical. The cheaper half nets +1.97c, +0.37c, -0.20c a contract in D1, D2, holdout; skipping it lifts PF in every slice but cuts total dollars in D1, D2 and overall (19.57 to 13.20) and raises them only in the holdout. Spread and low OI change each showed a strong ratio in one slice only. No new predictor.
