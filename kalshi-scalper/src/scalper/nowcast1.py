@@ -108,10 +108,10 @@ def gdp_candles():
         close = int(ts(m["close"]).timestamp())
         try:
             path = f"/historical/markets/{tk}/candlesticks" if m["src"] == "hist" else f"/series/{m['series']}/markets/{tk}/candlesticks"
-            d = api._get(path, {"start_ts": close - 4 * 86400, "end_ts": close - 20 * 3600, "period_interval": 60})
+            d = api._get(path, {"start_ts": close - 4 * 86400, "end_ts": close - 20 * 3600, "period_interval": 60}, retries=3)
             have[tk] = [(c["end_period_ts"], pick(c.get("yes_bid")), pick(c.get("yes_ask")), api.f(c.get("volume_fp") if c.get("volume_fp") is not None else c.get("volume")), pick(c.get("price"))) for c in d.get("candlesticks", [])]
         except Exception as e:
-            print("skip", tk, e); continue
+            print("skip", tk, str(e)[:60], flush=True); continue
         if i % 25 == 0:
             cp.write_text(json.dumps(have)); print(i, len(mk), flush=True)
         time.sleep(0.4)
@@ -271,7 +271,7 @@ def pf(xs):
 def line(label, tr):
     if not tr:
         return f"{label}: no trades"
-    nets = [t["net"] for t in tr]; m, _, z = cluster_mean_z([(t["date"], t["net"]) for t in tr])
+    nets = [t["net"] for t in tr]; _, _, z = cluster_mean_z([(t["date"], t["net"]) for t in tr]); m = float(np.mean(nets))
     return (f"{label}: {len(tr)} trades on {len({t['date'] for t in tr})} dates, win {100 * np.mean([t['win'] for t in tr]):.1f}% vs mean price {100 * np.mean([t['price'] for t in tr]):.1f}c, "
             f"PF {pf(nets):.2f}, mean {100 * m:+.2f}c, date-clustered z {z:+.2f}")
 
@@ -304,8 +304,8 @@ def main(argv):
         m1 = np.mean([t["net"] for t in h1]) if h1 else None; m2 = np.mean([t["net"] for t in h2]) if h2 else None
         if m1 is None or m2 is None or m1 <= 0 or m2 <= 0 or pf(nets) < 1.5:
             verdict = "FALSIFIED"
-    if len(tr) < 100 and verdict != "FALSIFIED":
-        verdict = "NOT_ENOUGH_DATA"
+    if len(tr) < 100:
+        verdict = "NOT_ENOUGH_DATA"  # the registration: under 100 development trades is NOT_ENOUGH_DATA regardless of PF or of a one-trade half
     L.insert(0, f"NOWCAST1 {verdict} (n {len(tr)} development trades; NOT_ENOUGH_DATA floor 100 development / 150 total)")
     RESULT.write_text("\n".join(L) + "\n"); print("\n".join(L))
 
