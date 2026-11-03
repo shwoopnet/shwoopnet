@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 10:50 AM CT (16:50Z): gold reconcile and OICORE scaling spec sent to main (read only, drafts)
+
+A) Gold alone is +$52.78 over all 237 fills (Oct 7 to Nov 3, after fees, exits at realised loss, no hand closes); all L1 markets together are -$4.22 (937 fills, PF 0.99); plus OICORE +$24.17 the bot is +$19.95. The page's number was not available to me; asked main for card, range and figure. B) OICORE spec: hard constants (10 per order, 10 open per ticker) bind first; depth within 1c of the touch is at least 766 in 12 of 12 sampled windows; daily net cap $16 binds at p5 days at 10 contracts; lifetime cap is net since start, not drawdown; replacement caps scale with contracts (daily 2.5 x c, drawdown from peak 5 x c); ladder 10, 12, 15, 20, 30, 40, 50 with evidence gates; income map (backtest, 76% fill): about $11.9 per contract per month, so $2,000 to $3,000 needs 170 to 250 contracts and a base of $5,000 to $7,000. Nothing live.
+
 ## 2026-11-03 09:40 AM CT (15:40Z): OICORE-HIST HOLDOUT SCORED (windows after 2026-10-29 21:45Z, 443 windows, 25 fixed-rule trades)
 
 P1 FAILED: 86,300 to 120,000 had PF 2.35 (n 13), not under 1.5; 120,000 to 200,000 PF 9.6 (n 8). P2 FAILED: share of windows over 86,300 was 40% and 41% (it had been 45% to 51%), so the drift stopped. P3 not testable (n 1). Fixed 86,300: PF 2.85 (n 25, win 32%). Relative 0.2676: PF 1.35 (n 18). Verdict: keep the fixed number. Sim vs live: 23 trigger windows, 24 live orders; trigger fired but no live order in 4 windows (Nov 1 14:45Z, Nov 2 14:45Z, 15:45Z, 17:00Z; reason not recorded). Shadows registered with main: S-LIM1, S-JUMP1 (log OIR on every OICORE order and window, read at 40 fills), S-TIM1 (OI window 300 to 180 s, discovery PF 2.72 n 200, holdout 3.54 n 12). N +36 for the exploratory splits, +3 for the three predictions.
