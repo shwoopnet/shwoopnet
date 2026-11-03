@@ -125,7 +125,7 @@ def fetch() -> None:
         if tk not in have:
             by[m["close"]].append(tk)
     closes = sorted(by)
-    groups = [closes[i:i + 4] for i in range(0, len(closes), 4)]
+    groups = [closes[i:i + 10] for i in range(0, len(closes), 10)]
     pause = 0.3
     for i, g in enumerate(groups):
         tks = [t for c in g for t in by[c]]
