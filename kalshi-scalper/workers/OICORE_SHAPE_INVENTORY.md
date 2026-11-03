@@ -170,3 +170,4 @@ On Bitcoin's 15 minute market (`KXBTC15M`), at the one minute candle ending 180 
 | MENTIONBASE1 | NBA announcer word markets vs base rate | dev PF 1.25 (68), last third PF 1.04 (98): no edge | main's agent |
 | SPLATE1 | in-play sports late-game favourites | DECLINED | falls under the Oct 28 favourite-and-hold rule, held strictly by the owner (2026-11-03) |
 | VOLSLOT1, HRSEAS1 favourite mirrors, USWEEP favourite halves | favourite-and-hold | FALSIFIED / dropped | nothing more is registered in this shape |
+| PUBINDEX1 | AAA gas daily/weekly: settlement source known before the close | FALSIFIED: daily n 538 PF 0.80 dev, holdout 32 PF 0.39; weekly 9 trades | main's agent; official number publishes after Kalshi closes; overlaps GAS2 (FALSIFIED) |

@@ -8552,3 +8552,6 @@ Public programs: 4,387 active (6,948 upcoming), pool median $14.2 a market a day
 
 ### NEWLIST1 result (scored once 2026-11-03 23:04 UTC): FALSIFIED (cheap side)
 Stratified prefix rank 0..9 (1,370 markets, 137 families), looks 1 h / 3 h / 6 h and a late control, Try A (cheap side 5-30c, held, fee rounded up, C=10), development/validation pooled: win 9.0% / 11.0% / 10.4% vs 14.8-15.7c paid, PF 0.48 / 0.64 / 0.60 in D and 0.45 / 0.52 / 0.36 in V (late control PF 0.55 / 0.16); no family has n >= 20 and PF > 1 in both windows; H unread. Disclosures (in workers/NEWLIST1_RESULT.md): a sort-key bug fix after a crash before any output; the registered favourite Try B was not amended out after the owner's 2026-11-03 strict ruling, its pooled cells were printed once by the coordinator, are not reported or used and are withdrawn (N charge stays). N +4.
+
+### Main's agent's result added to the ledger (2026-11-03, reported by main; not run by V2)
+PUBINDEX1 (AAA gas daily/weekly 'settlement source known before the close'): FALSIFIED, the official number publishes after Kalshi closes; daily rule n 538 PF 0.80 in development, holdout 32 trades PF 0.39; weekly 9 trades; 6 variants, N +6 (running about 730,220). TSA untested (tsa.gov 403). Do not repeat GAS2's overlapping angle (cheap AAA gas strikes, FALSIFIED) without checking this first.
