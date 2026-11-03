@@ -1,0 +1,1039 @@
+level,confidence,verdict_mention,id,date,lane,universe,rule_shape,n,n_z,z_first,z_max,z_min,pf_first,pf_second,pos_both_halves,verdict,holdout_read,holdout_outcome,n_charged,source,shared_block,title
+family,high,,FALS3,2026-08-06,15-minute crypto,,generator/search,257,4,-4.97,-2.03,-6.19,1.61,1.53,yes,FALSIFIED,no,n.a.,18208,workers/FALS3_RESULT.md,,"FALS3 result: falsifier for GEN4's core (Bitcoin favourite 50c to 85c at about 148 s), research only"
+try,high,,FALS3:Bitcoin,2026-08-06,15-minute crypto,,generator/search,2576,1,-4.97,-4.97,-4.97,0.77,,,unknown,unknown,,,table in FALS3,,
+try,high,,FALS3:Bitcoin,2026-08-06,15-minute crypto,,generator/search,2576,1,-6.19,-6.19,-6.19,0.72,,,unknown,unknown,,,table in FALS3,,
+try,high,,FALS3:Bitcoin,2026-08-06,15-minute crypto,,generator/search,1876,1,-3.24,-3.24,-3.24,0.83,,,unknown,unknown,,,table in FALS3,,
+try,high,,FALS3:Bitcoin,2026-08-06,15-minute crypto,,generator/search,1863,1,-2.03,-2.03,-2.03,0.87,,,unknown,unknown,,,table in FALS3,,
+family,high,,H1,2026-10-05,15-minute crypto+gold,,favourite,4871,4,-4.20,1.34,-4.20,,,,FALSIFIED,no,n.a.,,README:166,,"Verdict H1, favourites underpriced when held to settlement: `FALSIFIED`."
+try,high,,H1:10 min before close,2026-10-05,15-minute crypto+gold,,favourite,764,1,1.34,1.34,1.34,,,,unknown,unknown,,,table in H1,,
+try,high,,H1:2 min,2026-10-05,15-minute crypto+gold,,favourite,1320,1,-4.20,-4.20,-4.20,,,,unknown,unknown,,,table in H1,,
+try,high,,H1:5 min,2026-10-05,15-minute crypto+gold,,favourite,1857,1,0.90,0.90,0.90,,,,unknown,unknown,,,table in H1,,
+family,high,,H2,2026-10-05,15-minute crypto+gold,,round-trip scalp,4871,2,-13.10,-11.30,-13.10,,,,FALSIFIED,no,n.a.,,README:353,,"Verdict H2, buy at 40c or 50c and sell at 80c: `FALSIFIED`."
+try,high,,H2:40c to 80c,2026-10-05,15-minute crypto+gold,,round-trip scalp,3162,1,-13.10,-13.10,-13.10,,,,unknown,unknown,,,table in H2,,
+try,high,,H2:50c to 80c,2026-10-05,15-minute crypto+gold,,round-trip scalp,2593,1,-11.30,-11.30,-11.30,,,,unknown,unknown,,,table in H2,,
+family,high,,H3,2026-10-06,15-minute crypto+gold,,maker,5907,2,-5.20,-3.39,-5.20,,,,FALSIFIED,no,n.a.,,README:381,,"Verdict H3, resting buy orders earn the spread H2 pays: `FALSIFIED`."
+try,high,,H3:40c,2026-10-06,15-minute crypto+gold,,maker,,1,-5.20,-5.20,-5.20,,,,unknown,unknown,,,table in H3,,
+try,high,,H3:50c,2026-10-06,15-minute crypto+gold,,maker,,1,-3.39,-3.39,-3.39,,,,unknown,unknown,,,table in H3,,
+family,high,,H4,2026-10-06,15-minute crypto+gold,,round-trip scalp,4871,1,-10.15,-10.15,-10.15,,,,FALSIFIED,no,n.a.,,README:406,,"Verdict H4, buy at 30c and sell at 80c: `FALSIFIED`."
+try,high,,H4:30c to 80c,2026-10-06,15-minute crypto+gold,,round-trip scalp,3112,1,-10.15,-10.15,-10.15,,,,unknown,unknown,,,table in H4,,
+family,high,,H5,2026-10-06,15-minute crypto+gold,,maker,1219,0,,,,,,,FALSIFIED,no,n.a.,,README:250,,"Verdict H5, quoting both sides as a market maker: `FALSIFIED`."
+family,high,,H7,2026-10-07,15-minute crypto,,other/unclear,,1,-2.06,-2.06,-2.06,,,,FALSIFIED,no,n.a.,,README:216,,"Verdict H7, how far spot sits from the target vs the market's price: `FALSIFIED`."
+family,manual,,L1,2026-10-07,15-minute crypto+gold,,favourite,1447,3,1.45,2.94,1.45,,,yes,FALSIFIED,no,n.a.,1,"manual:README:752,903,3389",,"L1 favourite 88c to 97c at 6 min: first run (30 days) z 1.45 FALSIFIED; older W0 z 2.68; 28 older days pooled z 3.20; 68 days z 2.52 (BTC 0.81, ETH 1.26, gold 2.94)"
+family,high,,L2,2026-10-07,15-minute crypto+gold,,favourite,4871,3,1.45,1.45,-8.30,,,,FALSIFIED,no,n.a.,,README:752,yes,"Verdict L1, L2 and L3 each ran once (`python -m scalper.lstrats`, commit 962459f), all `FALSIFIED`."
+try,high,,"L2:L1 favorite 88c to 97c, 6 min left",2026-10-07,15-minute crypto+gold,,favourite,1447,1,1.45,1.45,1.45,,,,unknown,unknown,,,table in L2,,
+try,high,,"L2:L2 H7 entries, sell at 80c (Bitcoin)",2026-10-07,15-minute crypto+gold,,favourite,879,1,-8.30,-8.30,-8.30,,,,unknown,unknown,,,table in L2,,
+try,high,,"L2:L3 favorite 90c to 98c, 2 min left",2026-10-07,15-minute crypto+gold,,favourite,1374,1,-2.94,-2.94,-2.94,,,,unknown,unknown,,,table in L2,,
+family,high,,L3,2026-10-07,15-minute crypto+gold,,favourite,4871,3,1.45,1.45,-8.30,,,,FALSIFIED,no,n.a.,,README:752,yes,"Verdict L1, L2 and L3 each ran once (`python -m scalper.lstrats`, commit 962459f), all `FALSIFIED`."
+try,high,,"L3:L1 favorite 88c to 97c, 6 min left",2026-10-07,15-minute crypto+gold,,favourite,1447,1,1.45,1.45,1.45,,,,unknown,unknown,,,table in L3,,
+try,high,,"L3:L2 H7 entries, sell at 80c (Bitcoin)",2026-10-07,15-minute crypto+gold,,favourite,879,1,-8.30,-8.30,-8.30,,,,unknown,unknown,,,table in L3,,
+try,high,,"L3:L3 favorite 90c to 98c, 2 min left",2026-10-07,15-minute crypto+gold,,favourite,1374,1,-2.94,-2.94,-2.94,,,,unknown,unknown,,,table in L3,,
+family,low,FALSIFIED,L8,2026-10-07,15-minute crypto+gold,,maker,1822,12,2.68,4.11,-3.40,,,,unknown,unknown,unknown,,README-text:L8,,"Pre-registration: L8 and L9 (fixed 2026-10-07, before any code or any price was looked at for these rules)"
+family,low,FALSIFIED,L9,2026-10-07,15-minute crypto+gold,,maker,1822,12,2.68,4.11,-3.40,,,,unknown,unknown,unknown,,README-text:L9,,"Pre-registration: L8 and L9 (fixed 2026-10-07, before any code or any price was looked at for these rules)"
+family,manual,,OVERNIGHT,2026-10-07,15-minute crypto+gold,,generator/search,311,1,3.46,3.46,,,,,NOT_ENOUGH_DATA,no,n.a.,311,manual:README:903,,"overnight search on older data, 311 rules, 4 survivors, best pooled z 3.46 (null best-of P 0.008); forward read all NOT_ENOUGH_DATA"
+family,manual,,SEARCH1,2026-10-07,15-minute crypto+gold,,generator/search,437,1,2.99,2.99,,,,,FALSIFIED,yes,failed,437,manual:README:857,,"first automated rule search, 437 rules; best design z 2.99, holdout best z 1.62 (-0.90c)"
+family,high,,B1,2026-10-08,15-minute crypto+gold,,favourite,,5,-0.24,1.45,-0.24,,,,FALSIFIED,no,n.a.,,README:2029,yes,Verdict B1 to B3: all three `FALSIFIED`.
+try,high,,B1:B1 walk-forward,2026-10-08,15-minute crypto+gold,,favourite,2302,1,-0.24,-0.24,-0.24,,,,FALSIFIED,unknown,,,table in B1,,
+try,high,,B1:B2 88c to 95c,2026-10-08,15-minute crypto+gold,,favourite,2533,1,1.45,1.45,1.45,,,,FALSIFIED,unknown,,,table in B1,,
+try,high,,B1:B3 90c to 97c,2026-10-08,15-minute crypto+gold,,favourite,2911,1,0.93,0.93,0.93,,,,FALSIFIED,unknown,,,table in B1,,
+family,high,,B2,2026-10-08,15-minute crypto+gold,,filter on L1,,5,-0.24,1.45,-0.24,,,,FALSIFIED,no,n.a.,,README:2029,yes,Verdict B1 to B3: all three `FALSIFIED`.
+try,high,,B2:B1 walk-forward,2026-10-08,15-minute crypto+gold,,filter on L1,2302,1,-0.24,-0.24,-0.24,,,,FALSIFIED,unknown,,,table in B2,,
+try,high,,B2:B2 88c to 95c,2026-10-08,15-minute crypto+gold,,filter on L1,2533,1,1.45,1.45,1.45,,,,FALSIFIED,unknown,,,table in B2,,
+try,high,,B2:B3 90c to 97c,2026-10-08,15-minute crypto+gold,,filter on L1,2911,1,0.93,0.93,0.93,,,,FALSIFIED,unknown,,,table in B2,,
+family,high,,B3,2026-10-08,15-minute crypto+gold,,favourite,,5,-0.24,1.45,-0.24,,,,FALSIFIED,no,n.a.,,README:2029,yes,Verdict B1 to B3: all three `FALSIFIED`.
+try,high,,B3:B1 walk-forward,2026-10-08,15-minute crypto+gold,,favourite,2302,1,-0.24,-0.24,-0.24,,,,FALSIFIED,unknown,,,table in B3,,
+try,high,,B3:B2 88c to 95c,2026-10-08,15-minute crypto+gold,,favourite,2533,1,1.45,1.45,1.45,,,,FALSIFIED,unknown,,,table in B3,,
+try,high,,B3:B3 90c to 97c,2026-10-08,15-minute crypto+gold,,favourite,2911,1,0.93,0.93,0.93,,,,FALSIFIED,unknown,,,table in B3,,
+family,low,FALSIFIED,C1,2026-10-08,cost/execution,,cheap side,300,3,-8.62,-8.62,-9.51,,,,unknown,unknown,unknown,,README-text:C1,,"Pre-registration: the cheap side, scalped early, C1 to C3 (fixed 2026-10-08 16:19 UTC, before any code and before any cheap-side trade was priced)"
+try,high,,"C1:C1 5c target, else hold",2026-10-08,cost/execution,,cheap side,1701,1,-8.62,-8.62,-8.62,,,,FALSIFIED,unknown,,,table in C1,,
+try,high,,"C1:C2 5c target, else sell at 6 min left",2026-10-08,cost/execution,,cheap side,1701,1,-9.51,-9.51,-9.51,,,,FALSIFIED,unknown,,,table in C1,,
+try,high,,"C1:C3 10c target, else sell at 6 min left",2026-10-08,cost/execution,,cheap side,1701,1,-8.66,-8.66,-8.66,,,,FALSIFIED,unknown,,,table in C1,,
+family,low,FALSIFIED,C3,2026-10-08,cost/execution,,cheap side,300,3,-8.62,-8.62,-9.51,,,,unknown,unknown,unknown,,README-text:C3,,"Pre-registration: the cheap side, scalped early, C1 to C3 (fixed 2026-10-08 16:19 UTC, before any code and before any cheap-side trade was priced)"
+try,high,,"C3:C1 5c target, else hold",2026-10-08,cost/execution,,cheap side,1701,1,-8.62,-8.62,-8.62,,,,FALSIFIED,unknown,,,table in C3,,
+try,high,,"C3:C2 5c target, else sell at 6 min left",2026-10-08,cost/execution,,cheap side,1701,1,-9.51,-9.51,-9.51,,,,FALSIFIED,unknown,,,table in C3,,
+try,high,,"C3:C3 10c target, else sell at 6 min left",2026-10-08,cost/execution,,cheap side,1701,1,-8.66,-8.66,-8.66,,,,FALSIFIED,unknown,,,table in C3,,
+family,low,NOT_ENOUGH_DATA,F1,2026-10-08,15-minute gold,,round-trip scalp,300,0,,,,0.43,0.60,no,unknown,unknown,unknown,,README-text:F1,,"Pre-registration: favorite scalps and the dip buy, F1 to F3 (ledger rows O22, O23 and O26; fixed 2026-10-08 17:23 UTC, before any code and before any of these was priced)"
+family,low,NOT_ENOUGH_DATA,F3,2026-10-08,15-minute crypto+gold,,round-trip scalp,300,0,,,,,,,unknown,unknown,unknown,,README-text:F3,,"Pre-registration: favorite scalps and the dip buy, F1 to F3 (ledger rows O22, O23 and O26; fixed 2026-10-08 17:23 UTC, before any code and before any of these was priced)"
+family,low,NOT_ENOUGH_DATA,F5,2026-10-08,other,,favourite,300,0,,,,,,,unknown,unknown,unknown,,README-text:F5,,"Pre-registration: three more forward looks, F5 to F7, and a power table (fixed 2026-10-08 02:51 UTC, before any of them was run on any market)"
+family,low,FALSIFIED,F8,2026-10-08,other,,favourite,300,1,-1.00,-1.00,-1.00,,,,unknown,unknown,unknown,,README-text:F8,,"Pre-registration: a forward look at the Q2 complement, F8 (fixed 2026-10-08 03:13 UTC, before it was run on any market after 03:25)"
+family,low,FALSIFIED,F9,2026-10-08,cost/execution,,generator/search,,3,-0.24,1.45,-0.24,,,,unknown,unknown,unknown,,README-text:F9,,"Pre-registration: a forward look at 92c to 95c, F9 (fixed 2026-10-08 14:21 UTC, before it was run on any market after 14:30)"
+family,high,,M1,2026-10-08,15-minute crypto+gold,,round-trip scalp,9236,4,-0.80,-0.80,-13.02,,,,FALSIFIED,no,n.a.,,README:1513,,"Verdict M1, early window momentum: `FALSIFIED`."
+try,high,,"M1:threshold 5c, hold 5",2026-10-08,15-minute crypto+gold,,round-trip scalp,9206,1,-7.59,-7.59,-7.59,,,,unknown,unknown,,,table in M1,,
+try,high,,"M1:threshold 5c, hold to settlement",2026-10-08,15-minute crypto+gold,,round-trip scalp,9236,1,-0.80,-0.80,-0.80,,,,unknown,unknown,,,table in M1,,
+try,high,,"M1:threshold 8c, hold 3",2026-10-08,15-minute crypto+gold,,round-trip scalp,8094,1,-13.02,-13.02,-13.02,,,,unknown,unknown,,,table in M1,,
+family,high,,N1,2026-10-08,15-minute crypto,,round-trip scalp,,2,-2.55,-2.36,-2.55,,,,FALSIFIED,no,n.a.,,README:1892,yes,Verdict N1 and N2: both `FALSIFIED`.
+try,high,,"N1:N1, 2 minutes left",2026-10-08,15-minute crypto,,round-trip scalp,,1,-2.55,-2.55,-2.55,,,,FALSIFIED,unknown,,,table in N1,,
+try,high,,"N1:N2, 1 minute left",2026-10-08,15-minute crypto,,round-trip scalp,,1,-2.36,-2.36,-2.36,,,,FALSIFIED,unknown,,,table in N1,,
+family,high,,N2,2026-10-08,15-minute crypto,,round-trip scalp,,2,-2.55,-2.36,-2.55,,,,FALSIFIED,no,n.a.,,README:1892,yes,Verdict N1 and N2: both `FALSIFIED`.
+try,high,,"N2:N1, 2 minutes left",2026-10-08,15-minute crypto,,round-trip scalp,,1,-2.55,-2.55,-2.55,,,,FALSIFIED,unknown,,,table in N2,,
+try,high,,"N2:N2, 1 minute left",2026-10-08,15-minute crypto,,round-trip scalp,,1,-2.36,-2.36,-2.36,,,,FALSIFIED,unknown,,,table in N2,,
+family,low,FALSIFIED,OP4,2026-10-08,cost/execution,,favourite,1500,5,2.61,2.90,0.12,,,,unknown,unknown,unknown,,README-text:OP4,,"Pre-registration: two more filters on L1, OP4 and OP5 (ledger rows O17 and O19; fixed 2026-10-08 17:46 UTC, before any code and before either split was computed)"
+try,high,,OP4:OP4 early favorite (ask 0.85 or more at ,2026-10-08,cost/execution,,favourite,,2,2.62,2.62,0.12,,,,FALSIFIED,unknown,,,table in OP4,,
+try,high,,OP4:OP5 tight book (spread 0.02 or less),2026-10-08,cost/execution,,favourite,,2,2.90,2.90,1.31,,,,FALSIFIED,unknown,,,table in OP4,,
+family,low,FALSIFIED,OP5,2026-10-08,cost/execution,,favourite,1500,5,2.61,2.90,0.12,,,,unknown,unknown,unknown,,README-text:OP5,,"Pre-registration: two more filters on L1, OP4 and OP5 (ledger rows O17 and O19; fixed 2026-10-08 17:46 UTC, before any code and before either split was computed)"
+try,high,,OP5:OP4 early favorite (ask 0.85 or more at ,2026-10-08,cost/execution,,favourite,,2,2.62,2.62,0.12,,,,FALSIFIED,unknown,,,table in OP5,,
+try,high,,OP5:OP5 tight book (spread 0.02 or less),2026-10-08,cost/execution,,favourite,,2,2.90,2.90,1.31,,,,FALSIFIED,unknown,,,table in OP5,,
+family,high,,P2,2026-10-08,15-minute crypto+gold,,maker,,0,,,,,,,FALSIFIED,no,n.a.,,README:1736,,"Verdict P2 simulator built (`python -m scalper.bookmaker`), not yet run on a settled market."
+family,high,,Q1,2026-10-08,15-minute crypto+gold,,favourite,3400,11,2.71,2.71,-1.00,,,,FALSIFIED,no,n.a.,,README:1771,yes,Verdict Q1 to Q3: all three `FALSIFIED`.
+try,high,,Q1:Q1 at K=0.5 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,1.02,1.02,1.02,,,,FALSIFIED,unknown,,,table in Q1,,
+try,high,,Q1:Q1 at K=2.0 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,0.24,0.24,0.24,,,,FALSIFIED,unknown,,,table in Q1,,
+try,high,,Q1:Q1 spot support (Bitcoin),2026-10-08,15-minute crypto+gold,,favourite,,2,1.43,1.43,0.64,,,,FALSIFIED,unknown,,,table in Q1,,
+try,high,,Q1:Q2 previous result agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.03,1.03,-1.00,,,,FALSIFIED,unknown,,,table in Q1,,
+try,high,,Q1:Q3 other series agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.70,1.70,-0.43,,,,FALSIFIED,unknown,,,table in Q1,,
+family,high,,Q2,2026-10-08,15-minute crypto+gold,,favourite,331,10,0.64,1.70,-1.00,,,,FALSIFIED,no,n.a.,,README:1771,yes,Verdict Q1 to Q3: all three `FALSIFIED`.
+try,high,,Q2:Q1 at K=0.5 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,1.02,1.02,1.02,,,,FALSIFIED,unknown,,,table in Q2,,
+try,high,,Q2:Q1 at K=2.0 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,0.24,0.24,0.24,,,,FALSIFIED,unknown,,,table in Q2,,
+try,high,,Q2:Q1 spot support (Bitcoin),2026-10-08,15-minute crypto+gold,,favourite,,2,1.43,1.43,0.64,,,,FALSIFIED,unknown,,,table in Q2,,
+try,high,,Q2:Q2 previous result agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.03,1.03,-1.00,,,,FALSIFIED,unknown,,,table in Q2,,
+try,high,,Q2:Q3 other series agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.70,1.70,-0.43,,,,FALSIFIED,unknown,,,table in Q2,,
+family,high,,Q3,2026-10-08,15-minute crypto+gold,,favourite,3400,11,2.71,2.71,-1.00,,,,FALSIFIED,no,n.a.,,README:1771,yes,Verdict Q1 to Q3: all three `FALSIFIED`.
+try,high,,Q3:Q1 at K=0.5 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,1.02,1.02,1.02,,,,FALSIFIED,unknown,,,table in Q3,,
+try,high,,Q3:Q1 at K=2.0 (information),2026-10-08,15-minute crypto+gold,,favourite,,1,0.24,0.24,0.24,,,,FALSIFIED,unknown,,,table in Q3,,
+try,high,,Q3:Q1 spot support (Bitcoin),2026-10-08,15-minute crypto+gold,,favourite,,2,1.43,1.43,0.64,,,,FALSIFIED,unknown,,,table in Q3,,
+try,high,,Q3:Q2 previous result agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.03,1.03,-1.00,,,,FALSIFIED,unknown,,,table in Q3,,
+try,high,,Q3:Q3 other series agrees,2026-10-08,15-minute crypto+gold,,favourite,,2,1.70,1.70,-0.43,,,,FALSIFIED,unknown,,,table in Q3,,
+family,low,NOT_RUNNABLE,S01,2026-10-08,15-minute crypto,,generator/search,,41,1.17,1.46,-14.10,0.89,,,unknown,unknown,unknown,6,README-text:S01,,"Pre-registration: the strategy search, S01 to S42 (fixed 2026-10-08, before any strategy was run)"
+try,high,,S01:1,2026-10-08,15-minute crypto,,generator/search,55,1,1.17,1.17,1.17,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:10,2026-10-08,15-minute crypto,,generator/search,1143,1,-0.20,-0.20,-0.20,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:11,2026-10-08,15-minute crypto,,generator/search,56,1,-0.21,-0.21,-0.21,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:12,2026-10-08,15-minute crypto,,generator/search,2904,1,-0.33,-0.33,-0.33,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:13,2026-10-08,15-minute crypto,,generator/search,2202,1,-0.69,-0.69,-0.69,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:14,2026-10-08,15-minute crypto,,generator/search,676,1,-0.77,-0.77,-0.77,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:15,2026-10-08,15-minute crypto,,generator/search,314,1,-0.84,-0.84,-0.84,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:16,2026-10-08,15-minute crypto,,generator/search,494,1,-1.05,-1.05,-1.05,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:17,2026-10-08,15-minute crypto,,generator/search,3159,1,-1.05,-1.05,-1.05,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:18,2026-10-08,15-minute crypto,,generator/search,61,1,-1.08,-1.08,-1.08,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:19,2026-10-08,15-minute crypto,,generator/search,140,1,-1.09,-1.09,-1.09,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:2,2026-10-08,15-minute crypto,,generator/search,91,1,0.87,0.87,0.87,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:20,2026-10-08,15-minute crypto,,generator/search,1625,1,-1.13,-1.13,-1.13,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:21,2026-10-08,15-minute crypto,,generator/search,1409,1,-1.48,-1.48,-1.48,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:22,2026-10-08,15-minute crypto,,generator/search,506,1,-1.51,-1.51,-1.51,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:23,2026-10-08,15-minute crypto,,generator/search,2153,1,-1.57,-1.57,-1.57,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:24,2026-10-08,15-minute crypto,,generator/search,502,1,-1.62,-1.62,-1.62,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:25,2026-10-08,15-minute crypto,,generator/search,1671,1,-1.77,-1.77,-1.77,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:26,2026-10-08,15-minute crypto,,generator/search,1145,1,-2.03,-2.03,-2.03,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:27,2026-10-08,15-minute crypto,,generator/search,3330,1,-2.05,-2.05,-2.05,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:28,2026-10-08,15-minute crypto,,generator/search,611,1,-2.06,-2.06,-2.06,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:29,2026-10-08,15-minute crypto,,generator/search,56,1,-2.17,-2.17,-2.17,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:3,2026-10-08,15-minute crypto,,generator/search,214,1,0.86,0.86,0.86,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:30,2026-10-08,15-minute crypto,,generator/search,202,1,-2.21,-2.21,-2.21,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:31,2026-10-08,15-minute crypto,,generator/search,2073,1,-2.21,-2.21,-2.21,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:32,2026-10-08,15-minute crypto,,generator/search,6805,1,-2.26,-2.26,-2.26,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:33,2026-10-08,15-minute crypto,,generator/search,133,1,-2.58,-2.58,-2.58,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:34,2026-10-08,15-minute crypto,,generator/search,2875,1,-2.64,-2.64,-2.64,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:35,2026-10-08,15-minute crypto,,generator/search,612,1,-2.74,-2.74,-2.74,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:36,2026-10-08,15-minute crypto,,generator/search,371,1,-2.78,-2.78,-2.78,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:37,2026-10-08,15-minute crypto,,generator/search,2343,1,-3.91,-3.91,-3.91,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:38,2026-10-08,15-minute crypto,,generator/search,5247,1,-14.10,-14.10,-14.10,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:4,2026-10-08,15-minute crypto,,generator/search,158,1,0.38,0.38,0.38,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:40,2026-10-08,15-minute crypto,,generator/search,29,1,1.46,1.46,1.46,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:41,2026-10-08,15-minute crypto,,generator/search,32,1,-1.13,-1.13,-1.13,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:42,2026-10-08,15-minute crypto,,generator/search,11,1,-0.81,-0.81,-0.81,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:5,2026-10-08,15-minute crypto,,generator/search,117,1,0.36,0.36,0.36,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:6,2026-10-08,15-minute crypto,,generator/search,300,1,0.29,0.29,0.29,,,,FALSIFIED,unknown,,,table in S01,,
+try,high,,S01:7,2026-10-08,15-minute crypto,,generator/search,286,1,0.27,0.27,0.27,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:8,2026-10-08,15-minute crypto,,generator/search,283,1,0.02,0.02,0.02,,,,NOT_ENOUGH_DATA,unknown,,,table in S01,,
+try,high,,S01:9,2026-10-08,15-minute crypto,,generator/search,793,1,-0.02,-0.02,-0.02,,,,FALSIFIED,unknown,,,table in S01,,
+family,low,NOT_RUNNABLE,S42,2026-10-08,politics,,round-trip scalp,11743,45,1.17,1.46,-14.10,,,,unknown,unknown,unknown,,README-text:S42,,"Pre-registration: the strategy search, S01 to S42 (fixed 2026-10-08, before any strategy was run)"
+try,high,,S42:1,2026-10-08,politics,,round-trip scalp,55,1,1.17,1.17,1.17,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:10,2026-10-08,politics,,round-trip scalp,1143,1,-0.20,-0.20,-0.20,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:11,2026-10-08,politics,,round-trip scalp,56,1,-0.21,-0.21,-0.21,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:12,2026-10-08,politics,,round-trip scalp,2904,1,-0.33,-0.33,-0.33,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:13,2026-10-08,politics,,round-trip scalp,2202,1,-0.69,-0.69,-0.69,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:14,2026-10-08,politics,,round-trip scalp,676,1,-0.77,-0.77,-0.77,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:15,2026-10-08,politics,,round-trip scalp,314,1,-0.84,-0.84,-0.84,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:16,2026-10-08,politics,,round-trip scalp,494,1,-1.05,-1.05,-1.05,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:17,2026-10-08,politics,,round-trip scalp,3159,1,-1.05,-1.05,-1.05,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:18,2026-10-08,politics,,round-trip scalp,61,1,-1.08,-1.08,-1.08,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:19,2026-10-08,politics,,round-trip scalp,140,1,-1.09,-1.09,-1.09,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:2,2026-10-08,politics,,round-trip scalp,91,1,0.87,0.87,0.87,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:20,2026-10-08,politics,,round-trip scalp,1625,1,-1.13,-1.13,-1.13,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:21,2026-10-08,politics,,round-trip scalp,1409,1,-1.48,-1.48,-1.48,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:22,2026-10-08,politics,,round-trip scalp,506,1,-1.51,-1.51,-1.51,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:23,2026-10-08,politics,,round-trip scalp,2153,1,-1.57,-1.57,-1.57,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:24,2026-10-08,politics,,round-trip scalp,502,1,-1.62,-1.62,-1.62,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:25,2026-10-08,politics,,round-trip scalp,1671,1,-1.77,-1.77,-1.77,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:26,2026-10-08,politics,,round-trip scalp,1145,1,-2.03,-2.03,-2.03,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:27,2026-10-08,politics,,round-trip scalp,3330,1,-2.05,-2.05,-2.05,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:28,2026-10-08,politics,,round-trip scalp,611,1,-2.06,-2.06,-2.06,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:29,2026-10-08,politics,,round-trip scalp,56,1,-2.17,-2.17,-2.17,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:3,2026-10-08,politics,,round-trip scalp,214,1,0.86,0.86,0.86,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:30,2026-10-08,politics,,round-trip scalp,202,1,-2.21,-2.21,-2.21,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:31,2026-10-08,politics,,round-trip scalp,2073,1,-2.21,-2.21,-2.21,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:32,2026-10-08,politics,,round-trip scalp,6805,1,-2.26,-2.26,-2.26,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:33,2026-10-08,politics,,round-trip scalp,133,1,-2.58,-2.58,-2.58,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:34,2026-10-08,politics,,round-trip scalp,2875,1,-2.64,-2.64,-2.64,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:35,2026-10-08,politics,,round-trip scalp,612,1,-2.74,-2.74,-2.74,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:36,2026-10-08,politics,,round-trip scalp,371,1,-2.78,-2.78,-2.78,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:37,2026-10-08,politics,,round-trip scalp,2343,1,-3.91,-3.91,-3.91,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:38,2026-10-08,politics,,round-trip scalp,5247,1,-14.10,-14.10,-14.10,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:4,2026-10-08,politics,,round-trip scalp,158,1,0.38,0.38,0.38,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:40,2026-10-08,politics,,round-trip scalp,29,1,1.46,1.46,1.46,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:41,2026-10-08,politics,,round-trip scalp,32,1,-1.13,-1.13,-1.13,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:42,2026-10-08,politics,,round-trip scalp,11,1,-0.81,-0.81,-0.81,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:5,2026-10-08,politics,,round-trip scalp,117,1,0.36,0.36,0.36,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:6,2026-10-08,politics,,round-trip scalp,300,1,0.29,0.29,0.29,,,,FALSIFIED,unknown,,,table in S42,,
+try,high,,S42:7,2026-10-08,politics,,round-trip scalp,286,1,0.27,0.27,0.27,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:8,2026-10-08,politics,,round-trip scalp,283,1,0.02,0.02,0.02,,,,NOT_ENOUGH_DATA,unknown,,,table in S42,,
+try,high,,S42:9,2026-10-08,politics,,round-trip scalp,793,1,-0.02,-0.02,-0.02,,,,FALSIFIED,unknown,,,table in S42,,
+family,manual,,STRATSEARCH42,2026-10-08,15-minute crypto+gold,,generator/search,41569,1,1.17,1.17,,,,,FALSIFIED,no,n.a.,42,manual:README:1214,,"S01 to S42, 42 strategies, 0 survivors, best z 1.17, null best-of P 0.596; W3 holdout never read"
+family,low,FALSIFIED,T2,2026-10-08,cost/execution,KXBTC15M KXGOLD15M,exit/risk rule,300,4,-1.03,1.22,-10.22,,,,unknown,unknown,unknown,,README-text:T2,,"Pre-registration: T2, early taker flow, closed before L1 (fixed 2026-10-08, before the T1 fetch finished and before any T1 or T2 result was computed)"
+try,high,,"T2:T1 early taker flow, held to settlement",2026-10-08,cost/execution,,exit/risk rule,1240,1,-1.03,-1.03,-1.03,,,,FALSIFIED,unknown,,,table in T2,,
+try,high,,"T2:T2 the same, sold 7 minutes before the c",2026-10-08,cost/execution,,exit/risk rule,1240,1,-2.54,-2.54,-2.54,,,,FALSIFIED,unknown,,,table in T2,,
+try,high,,T2:T3 early drift scalp (the owner's record,2026-10-08,cost/execution,,exit/risk rule,1240,1,-10.22,-10.22,-10.22,,,,FALSIFIED,unknown,,,table in T2,,
+try,high,,"T2:T4 cheap side scalp, seconds 61 to 179",2026-10-08,cost/execution,,exit/risk rule,1240,1,1.22,1.22,1.22,,,,FALSIFIED,unknown,,,table in T2,,
+family,low,FALSIFIED,T3,2026-10-08,15-minute crypto,KXBTC15M KXGOLD15M,round-trip scalp,300,0,,,,,,,unknown,unknown,unknown,,README-text:T3,,"Pre-registration: T3, the early drift scalp at tick level (the owner's own trade, fixed 2026-10-08, before any trade bar was fetched and before any result was computed)"
+family,high,,X1,2026-10-08,15-minute crypto+gold,,exit/risk rule,,4,-0.65,-0.44,-0.75,,,,FALSIFIED,no,n.a.,,README:1934,yes,Verdict X1 to X4: all four `FALSIFIED` as an improvement in the mean.
+try,high,,X1:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,6,1,-0.65,-0.65,-0.65,,,,FALSIFIED,unknown,,,table in X1,,
+try,high,,X1:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,7,1,-0.75,-0.75,-0.75,,,,FALSIFIED,unknown,,,table in X1,,
+try,high,,X1:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,10,1,-0.44,-0.44,-0.44,,,,FALSIFIED,unknown,,,table in X1,,
+try,high,,X1:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,15,1,-0.57,-0.57,-0.57,,,,FALSIFIED,unknown,,,table in X1,,
+family,high,,X2,2026-10-08,15-minute crypto+gold,,other/unclear,,4,-0.65,-0.44,-0.75,,,,FALSIFIED,no,n.a.,,README:1934,yes,Verdict X1 to X4: all four `FALSIFIED` as an improvement in the mean.
+try,high,,X2:X1 50c,2026-10-08,15-minute crypto+gold,,other/unclear,6,1,-0.65,-0.65,-0.65,,,,FALSIFIED,unknown,,,table in X2,,
+try,high,,X2:X2 60c,2026-10-08,15-minute crypto+gold,,other/unclear,7,1,-0.75,-0.75,-0.75,,,,FALSIFIED,unknown,,,table in X2,,
+try,high,,X2:X3 70c,2026-10-08,15-minute crypto+gold,,other/unclear,10,1,-0.44,-0.44,-0.44,,,,FALSIFIED,unknown,,,table in X2,,
+try,high,,X2:X4 80c,2026-10-08,15-minute crypto+gold,,other/unclear,15,1,-0.57,-0.57,-0.57,,,,FALSIFIED,unknown,,,table in X2,,
+family,high,,X3,2026-10-08,15-minute crypto+gold,,exit/risk rule,,4,-0.65,-0.44,-0.75,,,,FALSIFIED,no,n.a.,,README:1934,yes,Verdict X1 to X4: all four `FALSIFIED` as an improvement in the mean.
+try,high,,X3:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,6,1,-0.65,-0.65,-0.65,,,,FALSIFIED,unknown,,,table in X3,,
+try,high,,X3:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,7,1,-0.75,-0.75,-0.75,,,,FALSIFIED,unknown,,,table in X3,,
+try,high,,X3:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,10,1,-0.44,-0.44,-0.44,,,,FALSIFIED,unknown,,,table in X3,,
+try,high,,X3:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,15,1,-0.57,-0.57,-0.57,,,,FALSIFIED,unknown,,,table in X3,,
+family,high,,X4,2026-10-08,15-minute crypto+gold,,exit/risk rule,,4,-0.65,-0.44,-0.75,,,,FALSIFIED,no,n.a.,,README:1934,yes,Verdict X1 to X4: all four `FALSIFIED` as an improvement in the mean.
+try,high,,X4:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,6,1,-0.65,-0.65,-0.65,,,,FALSIFIED,unknown,,,table in X4,,
+try,high,,X4:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,7,1,-0.75,-0.75,-0.75,,,,FALSIFIED,unknown,,,table in X4,,
+try,high,,X4:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,10,1,-0.44,-0.44,-0.44,,,,FALSIFIED,unknown,,,table in X4,,
+try,high,,X4:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,15,1,-0.57,-0.57,-0.57,,,,FALSIFIED,unknown,,,table in X4,,
+family,high,,X5,2026-10-08,15-minute crypto+gold,,exit/risk rule,,7,-0.02,-0.02,-0.97,,,,FALSIFIED,no,n.a.,,README:1988,yes,Verdict X5 to X7: all three `FALSIFIED`; the whole exit family is now X1 to X7.
+try,high,,X5:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.59,-0.59,-0.59,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.71,-0.71,-0.71,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.50,-0.50,-0.50,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X5 40c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.97,-0.97,-0.97,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X6 30c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X5,,
+try,high,,X5:X7 20c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.02,-0.02,-0.02,,,,FALSIFIED,unknown,,,table in X5,,
+family,high,,X6,2026-10-08,15-minute crypto+gold,,exit/risk rule,,7,-0.02,-0.02,-0.97,,,,FALSIFIED,no,n.a.,,README:1988,yes,Verdict X5 to X7: all three `FALSIFIED`; the whole exit family is now X1 to X7.
+try,high,,X6:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.59,-0.59,-0.59,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.71,-0.71,-0.71,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.50,-0.50,-0.50,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X5 40c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.97,-0.97,-0.97,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X6 30c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X6,,
+try,high,,X6:X7 20c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.02,-0.02,-0.02,,,,FALSIFIED,unknown,,,table in X6,,
+family,high,,X7,2026-10-08,15-minute crypto+gold,,exit/risk rule,,7,-0.02,-0.02,-0.97,,,,FALSIFIED,no,n.a.,,README:1988,yes,Verdict X5 to X7: all three `FALSIFIED`; the whole exit family is now X1 to X7.
+try,high,,X7:X1 50c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.59,-0.59,-0.59,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X2 60c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.71,-0.71,-0.71,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X3 70c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X4 80c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.50,-0.50,-0.50,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X5 40c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.97,-0.97,-0.97,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X6 30c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.36,-0.36,-0.36,,,,FALSIFIED,unknown,,,table in X7,,
+try,high,,X7:X7 20c,2026-10-08,15-minute crypto+gold,,exit/risk rule,,1,-0.02,-0.02,-0.02,,,,FALSIFIED,unknown,,,table in X7,,
+family,high,,E1,2026-10-09,15-minute crypto,,other/unclear,,4,1.21,2.80,0.75,,,,FALSIFIED,no,n.a.,,README:2492,yes,"Results: E1 and E2, one run, read once (2026-10-09; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,E1:E1 ETH,2026-10-09,15-minute crypto,,other/unclear,,1,1.21,1.21,1.21,,,,FALSIFIED,unknown,,,table in E1,,
+try,high,,E1:E2 SOL,2026-10-09,15-minute crypto,,other/unclear,,1,1.24,1.24,1.24,,,,FALSIFIED,unknown,,,table in E1,,
+try,high,,E1:reference: Bitcoin,2026-10-09,15-minute crypto,,other/unclear,,1,0.75,0.75,0.75,,,,FALSIFIED,unknown,,,table in E1,,
+try,high,,E1:reference: gold,2026-10-09,15-minute crypto,,other/unclear,,1,2.80,2.80,2.80,,,,NOT_YET_FALSIFIED,unknown,,,table in E1,,
+family,high,,E2,2026-10-09,15-minute crypto,,other/unclear,,4,1.21,2.80,0.75,,,,FALSIFIED,no,n.a.,,README:2492,yes,"Results: E1 and E2, one run, read once (2026-10-09; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,E2:E1 ETH,2026-10-09,15-minute crypto,,other/unclear,,1,1.21,1.21,1.21,,,,FALSIFIED,unknown,,,table in E2,,
+try,high,,E2:E2 SOL,2026-10-09,15-minute crypto,,other/unclear,,1,1.24,1.24,1.24,,,,FALSIFIED,unknown,,,table in E2,,
+try,high,,E2:reference: Bitcoin,2026-10-09,15-minute crypto,,other/unclear,,1,0.75,0.75,0.75,,,,FALSIFIED,unknown,,,table in E2,,
+try,high,,E2:reference: gold,2026-10-09,15-minute crypto,,other/unclear,,1,2.80,2.80,2.80,,,,NOT_YET_FALSIFIED,unknown,,,table in E2,,
+family,low,FALSIFIED,S1,2026-10-09,perps/venues,,other/unclear,,0,,,,,,,unknown,unknown,unknown,18,README-text:S1,,"Pre-registration: S1, size 2x for the first 10 filled trades after a start or a loss (the owner's idea; fixed 2026-10-09, before any code for it and before any result; information only, no verdict wor"
+family,high,,T1,2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,5,-10.00,1.22,-10.22,,,,FALSIFIED,no,n.a.,,README:2367,yes,"Results: T1 to T4, one run each, read once at 1,240 markets (2026-10-09 05:50 UTC; the rules, thresholds, predictions and kill criteria are those registered above and in the amendment; nothing was cha"
+try,high,,"T1:T1 early taker flow, held to settlement",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-1.03,-1.03,-1.03,,,,FALSIFIED,unknown,,,table in T1,,
+try,high,,"T1:T2 the same, sold 7 minutes before the c",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-2.54,-2.54,-2.54,,,,FALSIFIED,unknown,,,table in T1,,
+try,high,,T1:T3 early drift scalp (the owner's record,2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-10.22,-10.22,-10.22,,,,FALSIFIED,unknown,,,table in T1,,
+try,high,,"T1:T4 cheap side scalp, seconds 61 to 179",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,1.22,1.22,1.22,,,,FALSIFIED,unknown,,,table in T1,,
+family,high,,T4,2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,5,-10.00,1.22,-10.22,,,,FALSIFIED,no,n.a.,,README:2367,yes,"Results: T1 to T4, one run each, read once at 1,240 markets (2026-10-09 05:50 UTC; the rules, thresholds, predictions and kill criteria are those registered above and in the amendment; nothing was cha"
+try,high,,"T4:T1 early taker flow, held to settlement",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-1.03,-1.03,-1.03,,,,FALSIFIED,unknown,,,table in T4,,
+try,high,,"T4:T2 the same, sold 7 minutes before the c",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-2.54,-2.54,-2.54,,,,FALSIFIED,unknown,,,table in T4,,
+try,high,,T4:T3 early drift scalp (the owner's record,2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,-10.22,-10.22,-10.22,,,,FALSIFIED,unknown,,,table in T4,,
+try,high,,"T4:T4 cheap side scalp, seconds 61 to 179",2026-10-09,15-minute crypto+gold,,round-trip scalp,1240,1,1.22,1.22,1.22,,,,FALSIFIED,unknown,,,table in T4,,
+family,high,,B4,2026-10-10,15-minute crypto+gold,,filter on L1,953,6,-0.05,2.42,-0.70,,,,FALSIFIED,no,n.a.,,README:2634,,"Results: B4, one run, read once (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,"B4:B4 84c to 88c, both series",2026-10-10,15-minute crypto+gold,,filter on L1,,1,-0.05,-0.05,-0.05,,,,FALSIFIED,unknown,,,table in B4,,
+family,high,,T5,2026-10-10,15-minute crypto+gold,,cheap side,1240,2,-5.00,-5.00,-5.16,,,,FALSIFIED,no,n.a.,,README:2510,,"Results: T5, one run, read once at all 1,240 markets (2026-10-10; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,"T5:T5 cheap side scalp, minutes 5 to 8",2026-10-10,15-minute crypto+gold,,cheap side,,1,-5.16,-5.16,-5.16,,,,FALSIFIED,unknown,,,table in T5,,
+family,low,FALSIFIED,X8,2026-10-10,other,,exit/risk rule,,0,,,,,,,unknown,unknown,unknown,,README-text:X8,,"Pre-registration: X8, an exit at 70c on 10 second books (fixed 2026-10-10, before any fresh day of 10 second data has been read)"
+family,low,FALSIFIED,OW1,2026-10-12,cost/execution,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:OW1,,"Pre-registration: OW1, the opening window, two lanes (the owner's request; fixed 2026-10-12 before any paper record existed and before any rule was run on a market that closes after 16:00 UTC)"
+family,high,,OW2,2026-10-12,15-minute crypto+gold,,round-trip scalp,4831,4,-13.95,-11.65,-13.95,,,,FALSIFIED,no,n.a.,,README:2749,,"Verdict OW2 ran once (`python -m scalper.ow2`, commit afbb3e0, 4,831 markets, 31 days): all four variants `FALSIFIED`."
+try,high,,"OW2:OW2-A (20c to 40c, +10%)",2026-10-12,15-minute crypto+gold,,round-trip scalp,3086,1,-13.95,-13.95,-13.95,,,,unknown,unknown,,,table in OW2,,
+try,high,,"OW2:OW2-B (20c to 40c, +15%)",2026-10-12,15-minute crypto+gold,,round-trip scalp,3086,1,-13.32,-13.32,-13.32,,,,unknown,unknown,,,table in OW2,,
+try,high,,"OW2:OW2-C (40c to 80c, +10%)",2026-10-12,15-minute crypto+gold,,round-trip scalp,4763,1,-12.43,-12.43,-12.43,,,,unknown,unknown,,,table in OW2,,
+try,high,,"OW2:OW2-D (40c to 80c, +15%)",2026-10-12,15-minute crypto+gold,,round-trip scalp,4763,1,-11.65,-11.65,-11.65,,,,unknown,unknown,,,table in OW2,,
+family,high,,OW3,2026-10-12,15-minute crypto+gold,,favourite,4831,3,-0.90,1.15,-0.92,,,,FALSIFIED,no,n.a.,,README:2778,yes,"Verdict OW3, OW4 and OW7 each ran once (`python -m scalper.ow3`, commit a960233, 4,831 markets, 31 days): all three `FALSIFIED`."
+try,high,,OW3:OW3 NO minus YES (price-matched residual,2026-10-12,15-minute crypto+gold,,favourite,2371,1,-0.90,-0.90,-0.90,,,,unknown,unknown,,,table in OW3,,
+try,high,,OW3:OW4 US hours minus other weekday hours,2026-10-12,15-minute crypto+gold,,favourite,324,1,-0.92,-0.92,-0.92,,,,unknown,unknown,,,table in OW3,,
+try,high,,OW3:OW7 kept two terciles minus lowest terci,2026-10-12,15-minute crypto+gold,,favourite,967,1,1.15,1.15,1.15,,,,unknown,unknown,,,table in OW3,,
+family,high,,OW4,2026-10-12,15-minute crypto+gold,,favourite,4831,3,-0.90,1.15,-0.92,,,,FALSIFIED,no,n.a.,,README:2778,yes,"Verdict OW3, OW4 and OW7 each ran once (`python -m scalper.ow3`, commit a960233, 4,831 markets, 31 days): all three `FALSIFIED`."
+try,high,,OW4:OW3 NO minus YES (price-matched residual,2026-10-12,15-minute crypto+gold,,favourite,2371,1,-0.90,-0.90,-0.90,,,,unknown,unknown,,,table in OW4,,
+try,high,,OW4:OW4 US hours minus other weekday hours,2026-10-12,15-minute crypto+gold,,favourite,324,1,-0.92,-0.92,-0.92,,,,unknown,unknown,,,table in OW4,,
+try,high,,OW4:OW7 kept two terciles minus lowest terci,2026-10-12,15-minute crypto+gold,,favourite,967,1,1.15,1.15,1.15,,,,unknown,unknown,,,table in OW4,,
+family,high,,OW7,2026-10-12,15-minute crypto+gold,,favourite,4831,3,-0.90,1.15,-0.92,,,,FALSIFIED,no,n.a.,,README:2778,yes,"Verdict OW3, OW4 and OW7 each ran once (`python -m scalper.ow3`, commit a960233, 4,831 markets, 31 days): all three `FALSIFIED`."
+try,high,,OW7:OW3 NO minus YES (price-matched residual,2026-10-12,15-minute crypto+gold,,favourite,2371,1,-0.90,-0.90,-0.90,,,,unknown,unknown,,,table in OW7,,
+try,high,,OW7:OW4 US hours minus other weekday hours,2026-10-12,15-minute crypto+gold,,favourite,324,1,-0.92,-0.92,-0.92,,,,unknown,unknown,,,table in OW7,,
+try,high,,OW7:OW7 kept two terciles minus lowest terci,2026-10-12,15-minute crypto+gold,,favourite,967,1,1.15,1.15,1.15,,,,unknown,unknown,,,table in OW7,,
+family,high,,SS1,2026-10-12,15-minute crypto+gold,,round-trip scalp,759,1,-5.27,-5.27,-5.27,,,,FALSIFIED,yes,failed,,README:2827,,"Verdict SS1 ran once (`python -m scalper.ss1`, commit 23749f4, 4,831 markets): `FALSIFIED`. No scalp is close to profitable."
+family,high,,SS2,2026-10-12,15-minute crypto+gold,,round-trip scalp,6254,1,-0.77,-0.77,-0.77,,,,FALSIFIED,yes,failed,,README:2860,,"Verdict SS2 ran once (`python -m scalper.ss2`, commit after the pre-registration, 10,288 settled markets, 40 days, Bitcoin, gold and Ethereum): nothing passes."
+family,high,,ARB1,2026-10-13,other,,seasonality/calendar,14100,0,,,,,,,FALSIFIED,no,n.a.,,README:3611,,"Result: ARB1, locked arithmetic across mutually exclusive events (12 scans, 3.5 hours, 2026-10-13 and 14)"
+family,low,FALSIFIED,BK1,2026-10-13,15-minute crypto+gold,KXSILVER15M KXCOPPER15M KXPLATINUM15M KXPALLADIUM15M,favourite,150,7,-3.75,-0.75,-7.69,0.70,,,unknown,unknown,unknown,,README-text:BK1,,"Pre-registration: BK1 (seven basket and pair ideas, written 2026-10-13 before `bk1.py` was run on any market)"
+try,high,,BK1:BK1 favorite at the open,2026-10-13,15-minute crypto+gold,,favourite,10239,1,-3.75,-3.75,-3.75,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK2 underdog at the open,2026-10-13,15-minute crypto+gold,,favourite,10239,1,-3.43,-3.43,-3.43,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK3 Bitcoin YES + Ethereum NO (pair),2026-10-13,15-minute crypto+gold,,favourite,3792,1,-7.69,-7.69,-7.69,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK4 Bitcoin YES + gold NO (pair),2026-10-13,15-minute crypto+gold,,favourite,2692,1,-4.19,-4.19,-4.19,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK5 divergence pair,2026-10-13,15-minute crypto+gold,,favourite,453,1,-2.10,-2.10,-2.10,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK6 narrow spread only,2026-10-13,15-minute crypto+gold,,favourite,9455,1,-3.81,-3.81,-3.81,,,,FALSIFIED,unknown,,,table in BK1,,
+try,high,,BK1:BK7 Ethereum lags Bitcoin's early extrem,2026-10-13,15-minute crypto+gold,,favourite,18,1,-0.75,-0.75,-0.75,,,,NOT_ENOUGH_DATA,unknown,,,table in BK1,,
+family,low,FALSIFIED,DT1,2026-10-13,weather,,model-vs-price,135,1,-4.17,-4.17,-4.17,,,,unknown,unknown,unknown,,README-text:DT1,,"Pre-registration: DT1, a decision tree that skips L1 entries it flags as losers (written 2026-10-13 before any tree was fitted)"
+family,high,,E3,2026-10-13,other 15-minute series,,favourite,19139,13,-0.03,2.97,-3.07,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:3187,,"Result: E3, L1 unchanged on seven more 15 minute series (run once on 2026-10-13)"
+try,high,,E3:BNB,2026-10-13,other 15-minute series,,favourite,1083,1,-1.16,-1.16,-1.16,,,,FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:Dogecoin,2026-10-13,other 15-minute series,,favourite,1206,1,2.97,2.97,2.97,,,,NOT_YET_FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:EUR/USD,2026-10-13,other 15-minute series,,favourite,340,1,-0.50,-0.50,-0.50,,,,FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:GBP/USD,2026-10-13,other 15-minute series,,favourite,343,1,-1.93,-1.93,-1.93,,,,FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:HYPE,2026-10-13,other 15-minute series,,favourite,1245,1,-0.24,-0.24,-0.24,,,,FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:USD/JPY,2026-10-13,other 15-minute series,,favourite,345,1,-2.18,-2.18,-2.18,,,,FALSIFIED,unknown,,,table in E3,,
+try,high,,E3:XRP,2026-10-13,other 15-minute series,,favourite,1262,1,2.37,2.37,2.37,,,,NOT_YET_FALSIFIED,unknown,,,table in E3,,
+family,high,,E3B,2026-10-13,15-minute crypto,,favourite,1917,6,3.97,3.97,0.85,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:3316,,"Result: E3B, the backward holdout for XRP and Dogecoin (run once on 2026-10-13)"
+family,low,FALSIFIED,E3F,2026-10-13,other,,other/unclear,1500,0,,,,,,,unknown,unknown,unknown,,README-text:E3F,,"Pre-registration: E3F, the forward read of E3's two passes (written 2026-10-13 before any day it covers existed)"
+family,high,,E4,2026-10-13,hourly ladders,KXINXU KXBTCD KXETHD,favourite,,7,-2.37,0.96,-2.37,,,,FALSIFIED,no,n.a.,,README:3473,,"Result: E4, L1 unchanged on the hourly ladders (run once on 2026-10-13)"
+try,high,,E4:Bitcoin hourly,2026-10-13,hourly ladders,,favourite,348,2,0.96,0.96,0.83,,,,FALSIFIED,unknown,,,table in E4,,
+try,high,,E4:Ethereum hourly,2026-10-13,hourly ladders,,favourite,280,2,0.64,0.64,0.49,,,,FALSIFIED,unknown,,,table in E4,,
+try,high,,E4:S&P 500 hourly,2026-10-13,hourly ladders,,favourite,250,2,-1.78,-1.58,-1.78,,,,FALSIFIED,unknown,,,table in E4,,
+family,high,,FLB1,2026-10-13,other,,favourite,2669,3,-0.81,-0.81,-2.43,,,,FALSIFIED,no,n.a.,,README:3529,,"Result: FLB1, favourites in long-dated, non-sports, non-price markets (run once on 2026-10-13)"
+try,high,,FLB1:168 h,2026-10-13,other,,favourite,873,1,-0.95,-0.95,-0.95,,,,FALSIFIED,unknown,,,table in FLB1,,
+try,high,,FLB1:24 h,2026-10-13,other,,favourite,1837,1,-0.81,-0.81,-0.81,,,,FALSIFIED,unknown,,,table in FLB1,,
+try,high,,FLB1:72 h,2026-10-13,other,,favourite,2196,1,-2.43,-2.43,-2.43,,,,FALSIFIED,unknown,,,table in FLB1,,
+family,none,,FWD1,2026-10-13,15-minute crypto,,favourite,500,0,,,,,,,no result parsed,unknown,unknown,,REG:3418,,"Pre-registration: FWD1, the live series on days that do not exist yet (written 2026-10-13 before any such day)"
+family,high,,L1B,2026-10-13,15-minute crypto+gold,,favourite,7213,8,2.52,3.20,0.81,,,,FALSIFIED,no,n.a.,,README:3389,,"Result: L1B, the live rule on the 28 days before the book (run once on 2026-10-13)"
+try,high,,L1B:Bitcoin,2026-10-13,15-minute crypto+gold,,favourite,838,1,0.88,0.88,0.88,,,,FALSIFIED,unknown,,,table in L1B,,
+try,high,,L1B:Ethereum,2026-10-13,15-minute crypto+gold,,favourite,901,1,2.24,2.24,2.24,,,,NOT_YET_FALSIFIED,unknown,,,table in L1B,,
+try,high,,L1B:Gold,2026-10-13,15-minute crypto+gold,,favourite,620,1,2.73,2.73,2.73,,,,NOT_YET_FALSIFIED,unknown,,,table in L1B,,
+try,high,,"L1B:pooled (information, not a try)",2026-10-13,15-minute crypto+gold,,favourite,2359,1,3.20,3.20,3.20,,,,unknown,unknown,,,table in L1B,,
+family,high,,PM1,2026-10-13,perps/venues,,favourite,393,2,-3.84,-2.51,-3.84,,,,FALSIFIED,no,n.a.,,README:3350;README:6827,,"Result: PM1, Polymarket's 15 minute price against Kalshi's (run once on 2026-10-13) | Result: PM1 (run once on 2026-10-27): NOT_ENOUGH_DATA (0 strike-time pairs; the test could not be made)"
+try,high,,PM1:Bitcoin,2026-10-13,perps/venues,,favourite,,1,-3.84,-3.84,-3.84,,,,FALSIFIED,unknown,,,table in PM1,,
+try,high,,PM1:Ethereum,2026-10-13,perps/venues,,favourite,,1,-2.51,-2.51,-2.51,,,,FALSIFIED,unknown,,,table in PM1,,
+family,high,,PM2,2026-10-13,perps/venues,,filter on L1,1738,1,-1.34,-1.34,-1.34,,,,FALSIFIED,no,n.a.,,README:3501,yes,"Result: PM2, skip an L1 entry when Polymarket disagrees, on the 28 older days (run once on 2026-10-13)"
+family,low,FALSIFIED,PM3,2026-10-13,perps/venues,,filter on L1,258,8,-2.80,1.94,-4.20,,,,unknown,unknown,unknown,2,README-text:PM3,,"Pre-registration: PM3, the Polymarket-disagreement filter on days that do not exist yet (written 2026-10-13 before any such day)"
+family,high,,SP1,2026-10-13,sports,KXATPCHALLENGERMATCH,favourite,209,2,-2.79,-2.79,-2.79,,,,FALSIFIED,no,n.a.,,README:3177,,"Result: SP1, heavy favourites in sports game-winner markets (run once on 2026-10-13)"
+family,none,,VOL1,2026-10-13,15-minute crypto,,filter on L1,391,0,,,,,,,no result parsed,unknown,unknown,,REG:3485,,"Pre-registration: VOL1, skip Bitcoin and Ethereum entries made in a busy minute (written 2026-10-13 before any day it covers existed)"
+family,low,NOT_ENOUGH_DATA,WX1,2026-10-13,weather,,model-vs-price,200,0,,,,,,,unknown,unknown,unknown,,README-text:WX1,,"Pre-registration: WX1, daily high-temperature markets against a public forecast (written 2026-10-13 before any weather market was downloaded and before any forecast was fetched)"
+family,high,,BNB,2026-10-14,other 15-minute series,,favourite,,3,1.94,1.94,-0.74,,,,FALSIFIED,no,n.a.,,README:3646,yes,"Result: E3C, HYPE and BNB on the 29 older days (run once on 2026-10-14)"
+try,high,,BNB:BNB,2026-10-14,other 15-minute series,,favourite,897,1,-0.74,-0.74,-0.74,,,,FALSIFIED,unknown,,,table in BNB,,
+try,high,,BNB:HYPE,2026-10-14,other 15-minute series,,favourite,880,1,-0.60,-0.60,-0.60,,,,FALSIFIED,unknown,,,table in BNB,,
+family,high,,BUYDIP1,2026-10-14,options,,structural lock,,0,,,,,,,FALSIFIED,no,n.a.,,README:3689,,"Result: BUYDIP1, buy at key levels against plain monthly buying (run once on 2026-10-14)"
+family,high,,E3C,2026-10-14,other 15-minute series,,favourite,5442,3,1.94,1.94,-0.74,,,,FALSIFIED,no,n.a.,,README:3646,yes,"Result: E3C, HYPE and BNB on the 29 older days (run once on 2026-10-14)"
+try,high,,E3C:BNB,2026-10-14,other 15-minute series,,favourite,897,1,-0.74,-0.74,-0.74,,,,FALSIFIED,unknown,,,table in E3C,,
+try,high,,E3C:HYPE,2026-10-14,other 15-minute series,,favourite,880,1,-0.60,-0.60,-0.60,,,,FALSIFIED,unknown,,,table in E3C,,
+family,high,,E5,2026-10-14,other 15-minute series,KXWTI15M,favourite,588,14,0.85,1.94,-2.24,,,,FALSIFIED,no,n.a.,,README:3579;README:3642,yes,"Result: E5, L1 unchanged on other commodities and two more coins (run once on 2026-10-14) | Result: E5B, crude oil on E5's holdout (run once on 2026-10-14)"
+try,high,,E5:Copper,2026-10-14,other 15-minute series,,favourite,837,1,-0.17,-0.17,-0.17,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Crude oil (WTI),2026-10-14,other 15-minute series,,favourite,784,1,1.10,1.10,1.10,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:NEAR,2026-10-14,other 15-minute series,,favourite,1201,1,-1.05,-1.05,-1.05,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Natural gas,2026-10-14,other 15-minute series,,favourite,860,1,1.94,1.94,1.94,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Palladium,2026-10-14,other 15-minute series,,favourite,394,1,-0.74,-0.74,-0.74,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Platinum,2026-10-14,other 15-minute series,,favourite,436,1,-0.30,-0.30,-0.30,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Silver,2026-10-14,other 15-minute series,,favourite,742,1,0.20,0.20,0.20,,,,unknown,unknown,,,table in E5,,
+try,high,,E5:Zcash,2026-10-14,other 15-minute series,,favourite,1155,1,-2.24,-2.24,-2.24,,,,unknown,unknown,,,table in E5,,
+family,high,,E5B,2026-10-14,other 15-minute series,KXWTI15M,favourite,588,2,-0.97,1.10,-0.97,,,,FALSIFIED,no,n.a.,,README:3642,yes,"Result: E5B, crude oil on E5's holdout (run once on 2026-10-14)"
+family,high,,HYPE,2026-10-14,other 15-minute series,,favourite,,3,1.94,1.94,-0.74,,,,FALSIFIED,no,n.a.,,README:3646,yes,"Result: E3C, HYPE and BNB on the 29 older days (run once on 2026-10-14)"
+try,high,,HYPE:BNB,2026-10-14,other 15-minute series,,favourite,897,1,-0.74,-0.74,-0.74,,,,FALSIFIED,unknown,,,table in HYPE,,
+try,high,,HYPE:HYPE,2026-10-14,other 15-minute series,,favourite,880,1,-0.60,-0.60,-0.60,,,,FALSIFIED,unknown,,,table in HYPE,,
+family,high,,IDX1,2026-10-14,other,,cheap side,178,6,-1.01,2.27,-1.01,,,,FALSIFIED,no,n.a.,4,README:3730,,"Result: IDX1, overnight drift, turn of the month and the pre-holiday session (run once on 2026-10-14)"
+try,high,,"IDX1:Overnight, QQQ",2026-10-14,other,,cheap side,,2,0.25,2.25,0.25,,,,FALSIFIED,unknown,,,table in IDX1,,
+try,high,,"IDX1:Overnight, SPY",2026-10-14,other,,cheap side,,2,-1.01,1.76,-1.01,,,,FALSIFIED,unknown,,,table in IDX1,,
+try,high,,"IDX1:Turn of the month, SPY",2026-10-14,other,,cheap side,,2,0.72,2.27,0.72,,,,FALSIFIED,unknown,,,table in IDX1,,
+family,high,,XM1,2026-10-14,hourly ladders,,model-vs-price,,2,-0.90,-0.90,-4.20,,,,FALSIFIED,no,n.a.,,README:3598,,"Result: XM1, the hourly ladder as a second price for the 15 minute market (run once on 2026-10-14)"
+try,high,,XM1:Bitcoin,2026-10-14,hourly ladders,,model-vs-price,773,1,-0.90,-0.90,-0.90,,,,FALSIFIED,unknown,,,table in XM1,,
+try,high,,XM1:Ethereum,2026-10-14,hourly ladders,,model-vs-price,671,1,-4.20,-4.20,-4.20,,,,FALSIFIED,unknown,,,table in XM1,,
+family,none,,PAPER1,2026-10-20,other 15-minute series,KXAUDUSD15M KXUSDCAD15M KXNATGAS15M,favourite,300,0,,,,,,,no result parsed,unknown,unknown,,REG:3826,,"Pre-registration: PAPER1, forward paper tracking of three candidates (written 2026-10-20 before any paper entry exists)"
+family,high,,TP1,2026-10-20,15-minute crypto+gold,,favourite,,3,-3.14,-0.76,-3.14,,,,FALSIFIED,no,n.a.,,README:3795,yes,"Result: TP1, take profit at 99c on L1's entries (run once on 2026-10-20)"
+try,high,,"TP1:28 older days (l1b.sqlite, holdout)",2026-10-20,15-minute crypto+gold,,favourite,2359,1,-3.14,-3.14,-3.14,,,,unknown,unknown,,,table in TP1,,
+try,high,,"TP1:40 days (book.sqlite, primary)",2026-10-20,15-minute crypto+gold,,favourite,3038,1,-0.76,-0.76,-0.76,,,,unknown,unknown,,,table in TP1,,
+family,high,,APP1,2026-10-21,daily/weekly ladders,,model-vs-price,,3,-4.30,-2.27,-4.31,,,,FALSIFIED,no,n.a.,4631,README:3916,yes,"Results: GAS1, APP1 and CMD1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"APP1:CMD1, six commodity daily ladders, poole",2026-10-21,daily/weekly ladders,,model-vs-price,1054,1,-4.31,-4.31,-4.31,,,,FALSIFIED,unknown,,,table in APP1,,
+try,high,,"APP1:GAS1, AAA gas price ladder",2026-10-21,daily/weekly ladders,,model-vs-price,184,1,-2.27,-2.27,-2.27,,,,FALSIFIED,unknown,,,table in APP1,,
+family,high,,CMD1,2026-10-21,other 15-minute series,,model-vs-price,,4,-4.30,-2.27,-4.31,,,,FALSIFIED,no,n.a.,,README:3916,yes,"Results: GAS1, APP1 and CMD1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"CMD1:CMD1, six commodity daily ladders, poole",2026-10-21,other 15-minute series,,model-vs-price,1054,1,-4.31,-4.31,-4.31,,,,FALSIFIED,unknown,,,table in CMD1,,
+try,high,,"CMD1:GAS1, AAA gas price ladder",2026-10-21,other 15-minute series,,model-vs-price,184,1,-2.27,-2.27,-2.27,,,,FALSIFIED,unknown,,,table in CMD1,,
+family,high,,CS1,2026-10-21,15-minute crypto,,other/unclear,106,5,-0.41,1.58,-0.41,,,,FALSIFIED,no,n.a.,,README:4609,yes,"Results: RP1, CS1 and FA1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"CS1:CS1 on ETH (information, 106 months)",2026-10-21,15-minute crypto,,other/unclear,,1,0.77,0.77,0.77,,,,NOT_ENOUGH_DATA,unknown,,,table in CS1,,
+try,high,,"CS1:CS1, Bitcoin spot volatility managed",2026-10-21,15-minute crypto,,other/unclear,,1,0.45,0.45,0.45,,,,FALSIFIED,unknown,,,table in CS1,,
+try,high,,"CS1:FA1, MTUM/QUAL/VLUE/SIZE vs SPY",2026-10-21,15-minute crypto,,other/unclear,,1,-0.41,-0.41,-0.41,,,,FALSIFIED,unknown,,,table in CS1,,
+try,high,,"CS1:RP1, inverse-volatility SPY/TLT/GLD/DBC ",2026-10-21,15-minute crypto,,other/unclear,,1,1.58,1.58,1.58,,,,FALSIFIED,unknown,,,table in CS1,,
+family,high,,DL1,2026-10-21,cost/execution,,filter on L1,200,1,3.33,3.33,3.33,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:4520,,"Results: DL1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,EL1,2026-10-21,15-minute crypto,,favourite,79852,1,1.71,1.71,1.71,,,,FALSIFIED,no,n.a.,,README:4753,,"Result: EL1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,EX10,2026-10-21,15-minute crypto,,exit/risk rule,10779,1,3.66,3.66,3.66,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:4883,,"Result: EX10, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,FA1,2026-10-21,15-minute crypto,,other/unclear,106,5,-0.41,1.58,-0.41,,,,FALSIFIED,no,n.a.,,README:4609,yes,"Results: RP1, CS1 and FA1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"FA1:CS1 on ETH (information, 106 months)",2026-10-21,15-minute crypto,,other/unclear,,1,0.77,0.77,0.77,,,,NOT_ENOUGH_DATA,unknown,,,table in FA1,,
+try,high,,"FA1:CS1, Bitcoin spot volatility managed",2026-10-21,15-minute crypto,,other/unclear,,1,0.45,0.45,0.45,,,,FALSIFIED,unknown,,,table in FA1,,
+try,high,,"FA1:FA1, MTUM/QUAL/VLUE/SIZE vs SPY",2026-10-21,15-minute crypto,,other/unclear,,1,-0.41,-0.41,-0.41,,,,FALSIFIED,unknown,,,table in FA1,,
+try,high,,"FA1:RP1, inverse-volatility SPY/TLT/GLD/DBC ",2026-10-21,15-minute crypto,,other/unclear,,1,1.58,1.58,1.58,,,,FALSIFIED,unknown,,,table in FA1,,
+family,high,,FUND1,2026-10-21,perps/venues,,round-trip scalp,,0,,,,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:4345,,"Results: FUND1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,low,NOT_YET_FALSIFIED,FWD2,2026-10-21,perps/venues,,filter on L1,,0,,,,,,,unknown,unknown,unknown,,README-text:FWD2,,"Pre-registration: FWD2, a forward read of ""skip a wide spread"" on the live bot's own orders (the owner's choice after TREE2; written 2026-10-21 before any live order's spread was looked at)"
+family,low,NOT_YET_FALSIFIED,FWD3,2026-10-21,15-minute crypto,,filter on L1,,0,,,,,,,unknown,unknown,unknown,,README-text:FWD3,,"Pre-registration: FWD3, ""a fill much better than decided is a warning"" on the bot's own new orders (written 2026-10-21 before any order from 2026-10-22 was looked at)"
+family,low,NOT_RUNNABLE,FWD5,2026-10-21,economics/macro,,favourite,200,0,,,,,,,unknown,unknown,unknown,,README-text:FWD5,,"Pre-registration: FWD5, do the live probe series (AUD/USD, USD/CAD, natural gas) earn money under L1? (idea N3; written 2026-10-21 before any live order on those series from 2026-10-22 was looked at)"
+family,low,NOT_ENOUGH_DATA,FWD6,2026-10-21,perps/venues,,model-vs-price,,0,,,,,,,unknown,unknown,unknown,,README-text:FWD6,,"Pre-registration: FWD6, the best hour of each live series, read forward (written 2026-10-21 before any live order from 2026-10-22 was looked at by hour; the owner's pick)"
+family,low,NOT_ENOUGH_DATA,FWD7,2026-10-21,15-minute crypto,,favourite,200,1,1.97,1.97,1.97,,,,unknown,unknown,unknown,,README-text:FWD7,,"Pre-registration: FWD7, L1 entered at 10 minutes left on all 18 series, read forward (the owner's pick after EL1; written 2026-10-21 before any fresh-day 10 minute entry was computed)"
+family,low,NOT_YET_FALSIFIED,FWD8,2026-10-21,15-minute crypto,,exit/risk rule,564,0,,,,,,,unknown,unknown,unknown,,README-text:FWD8,,"Pre-registration: FWD8, the live 10 minute probes on natural gas and XRP (written 2026-10-21 before any such order exists; only meaningful if the main session and the owner decide to build the proposa"
+family,high,,GAS1,2026-10-21,daily/weekly ladders,,model-vs-price,,3,-4.30,-2.27,-4.31,,,,FALSIFIED,no,n.a.,,README:3916,yes,"Results: GAS1, APP1 and CMD1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"GAS1:CMD1, six commodity daily ladders, poole",2026-10-21,daily/weekly ladders,,model-vs-price,1054,1,-4.31,-4.31,-4.31,,,,FALSIFIED,unknown,,,table in GAS1,,
+try,high,,"GAS1:GAS1, AAA gas price ladder",2026-10-21,daily/weekly ladders,,model-vs-price,184,1,-2.27,-2.27,-2.27,,,,FALSIFIED,unknown,,,table in GAS1,,
+family,high,,HL1,2026-10-21,daily/weekly ladders,,favourite,,3,-0.82,0.68,-14.55,,,,FALSIFIED,no,n.a.,,README:4710,yes,"Results: HL1 and SL1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,HS1,2026-10-21,politics,,round-trip scalp,79852,1,-9.74,-9.74,-9.74,,,,FALSIFIED,no,n.a.,,README:4664,,"Result: HS1, one run, read once (2026-10-21), and a registration mistake in it"
+family,manual,,L1-GOLD-FIRST,2026-10-21,15-minute gold,,favourite,1397,1,2.94,2.94,,,,,NOT_YET_FALSIFIED,no,n.a.,0,"manual:README:3402,CLAUDE.md gold first",,"gold chosen as the only ladder market AFTER the 68 day split by series (z 2.94) and the first 302 live trades; selection among 3 series, charged 0"
+family,high,,LQ1,2026-10-21,other,,structural lock,242,0,,,,,,,FALSIFIED,no,n.a.,,README:4535,,"Results: LQ1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,low,NOT_ENOUGH_DATA,ML1,2026-10-21,15-minute crypto,,favourite,6000,1,1.71,1.71,1.71,,,,unknown,unknown,unknown,,README-text:ML1,,"Pre-registration: RP1, CS1, FA1 and ML1, four owner picks (written 2026-10-21 before any return, weight or window below was computed)"
+family,high,,PAT1,2026-10-21,other,,filter on L1,250,2,-0.25,-0.15,-0.25,,,,FALSIFIED,no,n.a.,,README:4080,yes,"Results: TREE1 and PAT1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,PERP1,2026-10-21,perps/venues,,round-trip scalp,745,10,-4.90,3.83,-4.90,,,,NOT_YET_FALSIFIED,unknown,unknown,4632,README:3962,,"Result: PERP1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,PERP1:All trades except the 10 best,2026-10-21,perps/venues,,round-trip scalp,735,1,0.99,0.99,0.99,,,,unknown,unknown,,,table in PERP1,,
+try,high,,"PERP1:Bitcoin and Ethereum, all years",2026-10-21,perps/venues,,round-trip scalp,323,1,3.44,3.44,3.44,,,,unknown,unknown,,,table in PERP1,,
+try,high,,"PERP1:Entries from 2022 on, Bitcoin and Ethere",2026-10-21,perps/venues,,round-trip scalp,168,1,0.40,0.40,0.40,,,,unknown,unknown,,,table in PERP1,,
+try,high,,"PERP1:Entries from 2022 on, all markets",2026-10-21,perps/venues,,round-trip scalp,287,1,-0.01,-0.01,-0.01,,,,unknown,unknown,,,table in PERP1,,
+try,high,,"PERP1:Entries from 2022 on, gold and S&P 500",2026-10-21,perps/venues,,round-trip scalp,119,1,-2.70,-2.70,-2.70,,,,unknown,unknown,,,table in PERP1,,
+try,high,,"PERP1:Gold and S&P 500, all years",2026-10-21,perps/venues,,round-trip scalp,422,1,-4.87,-4.87,-4.87,,,,unknown,unknown,,,table in PERP1,,
+try,high,,PERP1:Longs,2026-10-21,perps/venues,,round-trip scalp,389,1,3.83,3.83,3.83,,,,unknown,unknown,,,table in PERP1,,
+try,high,,PERP1:Shorts,2026-10-21,perps/venues,,round-trip scalp,356,1,-1.20,-1.20,-1.20,,,,unknown,unknown,,,table in PERP1,,
+family,high,,PERP2,2026-10-21,perps/venues,,other/unclear,,2,1.31,1.31,-2.07,,,,FALSIFIED,no,n.a.,4634,README:4023,yes,"Results: PERP2 and PERP3, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"PERP2:PERP2, buy the dip in an uptrend",2026-10-21,perps/venues,,other/unclear,393,1,1.31,1.31,1.31,,,,FALSIFIED,unknown,,,table in PERP2,,
+try,high,,"PERP2:PERP3, gold against silver",2026-10-21,perps/venues,,other/unclear,84,1,-2.07,-2.07,-2.07,,,,FALSIFIED,unknown,,,table in PERP2,,
+family,high,,PERP3,2026-10-21,perps/venues,,exit/risk rule,,3,-7.60,1.31,-7.60,,,,FALSIFIED,no,n.a.,4634,README:4023;README:6849,yes,"Results: PERP2 and PERP3, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them) | Result: PERP3 (run once on 2026-10-27): FALSIFI"
+try,high,,"PERP3:PERP2, buy the dip in an uptrend",2026-10-21,perps/venues,,exit/risk rule,393,1,1.31,1.31,1.31,,,,FALSIFIED,unknown,,,table in PERP3,,
+try,high,,"PERP3:PERP3, gold against silver",2026-10-21,perps/venues,,exit/risk rule,84,1,-2.07,-2.07,-2.07,,,,FALSIFIED,unknown,,,table in PERP3,,
+family,high,,RP1,2026-10-21,15-minute crypto,,other/unclear,106,5,-0.41,1.58,-0.41,,,,FALSIFIED,no,n.a.,,README:4609,yes,"Results: RP1, CS1 and FA1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"RP1:CS1 on ETH (information, 106 months)",2026-10-21,15-minute crypto,,other/unclear,,1,0.77,0.77,0.77,,,,NOT_ENOUGH_DATA,unknown,,,table in RP1,,
+try,high,,"RP1:CS1, Bitcoin spot volatility managed",2026-10-21,15-minute crypto,,other/unclear,,1,0.45,0.45,0.45,,,,FALSIFIED,unknown,,,table in RP1,,
+try,high,,"RP1:FA1, MTUM/QUAL/VLUE/SIZE vs SPY",2026-10-21,15-minute crypto,,other/unclear,,1,-0.41,-0.41,-0.41,,,,FALSIFIED,unknown,,,table in RP1,,
+try,high,,"RP1:RP1, inverse-volatility SPY/TLT/GLD/DBC ",2026-10-21,15-minute crypto,,other/unclear,,1,1.58,1.58,1.58,,,,FALSIFIED,unknown,,,table in RP1,,
+family,high,,SECT1,2026-10-21,other,,round-trip scalp,,0,,,,,,,FALSIFIED,no,n.a.,,README:4263,,"Results: SECT1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,SL1,2026-10-21,daily/weekly ladders,,favourite,,3,-0.82,0.68,-14.55,,,,FALSIFIED,no,n.a.,,README:4710,yes,"Results: HL1 and SL1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,SLOW1,2026-10-21,other,,round-trip scalp,,0,,,,,,,FALSIFIED,no,n.a.,,README:4217,,"Results: SLOW1, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,TREE1,2026-10-21,other,,filter on L1,250,2,-0.25,-0.15,-0.25,,,,FALSIFIED,no,n.a.,,README:4080,yes,"Results: TREE1 and PAT1, one run each (2026-10-21; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,TREE2,2026-10-21,other 15-minute series,,filter on L1,,0,,,,,,,FALSIFIED,no,n.a.,4637,README:4112,,"Results: TREE2, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,V3,2026-10-21,other,,other/unclear,,2,0.92,0.92,0.79,,,,FALSIFIED,no,n.a.,,README:4578,yes,"Results: V3 and V4, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,"V3:V3, TLT",2026-10-21,other,,other/unclear,,1,0.92,0.92,0.92,,,,FALSIFIED,unknown,,,table in V3,,
+try,high,,"V3:V4, GLD",2026-10-21,other,,other/unclear,,1,0.79,0.79,0.79,,,,FALSIFIED,unknown,,,table in V3,,
+family,high,,V4,2026-10-21,other,,other/unclear,,2,0.92,0.92,0.79,,,,FALSIFIED,no,n.a.,,README:4578,yes,"Results: V3 and V4, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+try,high,,"V4:V3, TLT",2026-10-21,other,,other/unclear,,1,0.92,0.92,0.92,,,,FALSIFIED,unknown,,,table in V4,,
+try,high,,"V4:V4, GLD",2026-10-21,other,,other/unclear,,1,0.79,0.79,0.79,,,,FALSIFIED,unknown,,,table in V4,,
+family,high,,VM,2026-10-21,other,,round-trip scalp,,2,2.47,3.42,2.47,,,,FALSIFIED,no,n.a.,,README:4407,,"Results: VM, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,VM2,2026-10-21,other,,round-trip scalp,198,0,,,,,,,FALSIFIED,no,n.a.,,README:4460,,"Results: VM2, one run, read once (2026-10-21; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,CAP1,2026-10-22,cost/execution,,favourite,8085,5,1.83,1.83,-1.31,,,,FALSIFIED,no,n.a.,,README:4961,yes,"Results: MC1, SF1 and CAP1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,CM1,2026-10-22,other 15-minute series,,filter on L1,354,2,0.69,0.69,0.57,,,,FALSIFIED,no,n.a.,,README:5113,yes,"Results: CM1 and VT1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"CM1:CM1, top 5 of 17 country ETFs by 12-1 mo",2026-10-22,other 15-minute series,,filter on L1,,1,0.69,0.69,0.69,,,,FALSIFIED,unknown,,,table in CM1,,
+try,high,,"CM1:VT1, SVXY when VIX / VIX3M < 0.95",2026-10-22,other 15-minute series,,filter on L1,,1,0.57,0.57,0.57,,,,FALSIFIED,unknown,,,table in CM1,,
+family,low,FALSIFIED,CONC1,2026-10-22,15-minute crypto,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:CONC1,,"Pre-registration: CONC1 (2026-10-22), enter an L1 favourite only when the other crypto series agree"
+family,none,,CONC2-F,2026-10-22,15-minute crypto,,favourite,,1,-1.79,-1.79,-1.79,,,,no result parsed,unknown,unknown,,REG:5444,,"Pre-registration: CONC2-F (2026-10-22), the reverse CONC1 lead, scored only on fresh days"
+family,low,NOT_ENOUGH_DATA,CROWD1,2026-10-22,cost/execution,,filter on L1,,0,,,,,,,unknown,unknown,unknown,,README-text:CROWD1,,"Pre-registration: CROWD1 (2026-10-22), skip the whole window when two or more live series qualify"
+family,none,,CW10,2026-10-22,other 15-minute series,,favourite,1500,0,,,,,,,no result parsed,unknown,unknown,,REG:5194,,"Pre-registration: SQ1, TS1 and CW10, three deployable candidates (the owner's picks; written 2026-10-22 before any of them was computed on any data)"
+family,high,,DL10,2026-10-22,cost/execution,,filter on L1,10779,2,2.04,2.04,0.48,,,,FALSIFIED,no,n.a.,,README:5044,,"Result: DL10, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,low,FALSIFIED,ENTRY1,2026-10-22,other,,other/unclear,,0,,,,,,,unknown,unknown,unknown,,README-text:ENTRY1,,"Pre-registration: ENTRY1 (2026-10-22), does choosing each series' entry minute from past data beat a fixed 6 minutes"
+family,high,,FEAT1,2026-10-22,daily/weekly ladders,,filter on L1,24792,3,2.60,2.72,2.32,,,,FALSIFIED,no,n.a.,,README:5272,,"Result: FEAT1, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,FEAT2,2026-10-22,15-minute crypto,,model-vs-price,24792,3,3.85,4.99,3.00,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:5286,,"Result: FEAT2, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,FEAT3,2026-10-22,other 15-minute series,,model-vs-price,3611,1,1.11,1.11,1.11,,,,FALSIFIED,no,n.a.,,README:5326,,"Result: FEAT3, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,FEAT4,2026-10-22,other,,model-vs-price,18735,3,3.05,3.17,3.05,,,,FALSIFIED,no,n.a.,,README:5376,,"Result: FEAT4, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,FIX1,2026-10-22,15-minute gold,,generator/search,,2,0.09,5.32,0.09,,,,FALSIFIED,no,n.a.,,README:5079,yes,"Results: FIX1 and the JUMP1 history look (2026-10-22; FIX1 as registered; the JUMP1 split is information, JUMP1 itself is a forward read)"
+family,low,NOT_ENOUGH_DATA,FLAT-R,2026-10-22,other 15-minute series,,other/unclear,,0,,,,,,,unknown,unknown,unknown,,README-text:FLAT-R,,"Pre-registration: FLAT-R (2026-10-22), FLAT2 replicated on 15 minute series no study has touched"
+family,low,NOT_ENOUGH_DATA,FLAT1,2026-10-22,cost/execution,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:FLAT1,,"Pre-registration: FLAT1 (2026-10-22), a firm and flat favourite in the 5 minutes before entry"
+family,low,NOT_YET_FALSIFIED,FLAT2,2026-10-22,15-minute crypto,,cheap side,494,0,,,,,,,unknown,unknown,unknown,,README-text:FLAT2,,"Pre-registration: FLAT2 (2026-10-22), FLAT1 with a looser cut chosen from the feature quantiles"
+family,none,,FLAT3,2026-10-22,other 15-minute series,,round-trip scalp,,8,1.89,5.25,0.06,,,,no result parsed,unknown,unknown,,REG:5530,,"Pre-registration: FLAT3 (2026-10-22), where in time does FLAT's gap sit"
+family,low,NOT_ENOUGH_DATA,FWD9,2026-10-22,other 15-minute series,KXNATGAS15M,filter on L1,,0,,,,,,,unknown,unknown,unknown,,README-text:FWD9,,"Pre-registration: MC1, SF1, FWD9 and CAP1, the owner's four picks (written 2026-10-22 before any of the four was computed except the counts stated)"
+family,high,,HOUR1,2026-10-22,15-minute crypto,,favourite,,4,1.97,1.97,1.18,,,,FALSIFIED,no,n.a.,,README:5012,yes,"Results: SIDE1, HOUR1 and XLEAD1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,HOUR1:HOUR1,2026-10-22,15-minute crypto,,favourite,,1,1.51,1.51,1.51,,,,FALSIFIED,unknown,,,table in HOUR1,,
+try,high,,HOUR1:SIDE1 (360 s),2026-10-22,15-minute crypto,,favourite,,1,1.18,1.18,1.18,,,,FALSIFIED,unknown,,,table in HOUR1,,
+try,high,,HOUR1:SIDE1 at 600 s (information),2026-10-22,15-minute crypto,,favourite,,1,1.97,1.97,1.97,,,,unknown,unknown,,,table in HOUR1,,
+family,high,,JUMP1,2026-10-22,15-minute crypto,,favourite,200,2,0.09,5.32,0.09,,,,FALSIFIED,no,n.a.,,README:5079,yes,"Results: FIX1 and the JUMP1 history look (2026-10-22; FIX1 as registered; the JUMP1 split is information, JUMP1 itself is a forward read)"
+family,low,FALSIFIED,LOSSCL1,2026-10-22,other,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:LOSSCL1,,"Pre-registration: LOSSCL1 (2026-10-22), do favourite flips cluster in the same series"
+family,high,,MC1,2026-10-22,cost/execution,,favourite,8085,5,1.83,1.83,-1.31,,,,FALSIFIED,no,n.a.,,README:4961,yes,"Results: MC1, SF1 and CAP1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,low,FALSIFIED,RECORD1,2026-10-22,15-minute crypto,,round-trip scalp,150,1,-0.06,-0.06,-0.06,0.99,,,unknown,unknown,unknown,,README-text:RECORD1,,Pre-registration: RECORD1 (written 2026-10-22 before any real recorder file has been read)
+family,high,,SCI1,2026-10-22,other 15-minute series,,favourite,24064,4,0.64,1.31,-1.46,,,,FALSIFIED,no,n.a.,,README:4939,yes,"Results: SESS1 and SCI1, one run each (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,SESS1,2026-10-22,other 15-minute series,,favourite,24064,4,0.64,1.31,-1.46,,,,FALSIFIED,no,n.a.,,README:4939,yes,"Results: SESS1 and SCI1, one run each (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,SF1,2026-10-22,cost/execution,,favourite,8085,5,1.83,1.83,-1.31,,,,FALSIFIED,no,n.a.,,README:4961,yes,"Results: MC1, SF1 and CAP1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+family,high,,SIDE1,2026-10-22,15-minute crypto,,favourite,,4,1.97,1.97,1.18,,,,FALSIFIED,no,n.a.,,README:5012,yes,"Results: SIDE1, HOUR1 and XLEAD1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,SIDE1:HOUR1,2026-10-22,15-minute crypto,,favourite,,1,1.51,1.51,1.51,,,,FALSIFIED,unknown,,,table in SIDE1,,
+try,high,,SIDE1:SIDE1 (360 s),2026-10-22,15-minute crypto,,favourite,,1,1.18,1.18,1.18,,,,FALSIFIED,unknown,,,table in SIDE1,,
+try,high,,SIDE1:SIDE1 at 600 s (information),2026-10-22,15-minute crypto,,favourite,,1,1.97,1.97,1.97,,,,unknown,unknown,,,table in SIDE1,,
+family,low,NOT_YET_FALSIFIED,SQ1,2026-10-22,perps/venues,,favourite,1500,0,,,,,,,unknown,unknown,unknown,,README-text:SQ1,,"Pre-registration: SQ1, TS1 and CW10, three deployable candidates (the owner's picks; written 2026-10-22 before any of them was computed on any data)"
+family,low,FALSIFIED,STACK1,2026-10-22,cost/execution,,round-trip scalp,,6,3.66,5.25,0.06,,,,unknown,unknown,unknown,,README-text:STACK1,,"Pre-registration: STACK1 (2026-10-22), does FLAT2 stack with the 10 minute entry and the one-crypto-order-per-window rule"
+try,high,,STACK1:300 (5 min),2026-10-22,cost/execution,,round-trip scalp,,1,3.66,3.66,3.66,,,,unknown,unknown,,,table in STACK1,,
+try,high,,"STACK1:360 (6 min, FLAT2)",2026-10-22,cost/execution,,round-trip scalp,,1,5.25,5.25,5.25,,,,unknown,unknown,,,table in STACK1,,
+try,high,,STACK1:420 (7 min),2026-10-22,cost/execution,,round-trip scalp,,1,1.89,1.89,1.89,,,,unknown,unknown,,,table in STACK1,,
+try,high,,STACK1:480 (8 min),2026-10-22,cost/execution,,round-trip scalp,,1,1.12,1.12,1.12,,,,unknown,unknown,,,table in STACK1,,
+try,high,,STACK1:540 (9 min),2026-10-22,cost/execution,,round-trip scalp,,1,0.06,0.06,0.06,,,,unknown,unknown,,,table in STACK1,,
+try,high,,"STACK1:600 (10 min, STACK1 A)",2026-10-22,cost/execution,,round-trip scalp,,1,0.69,0.69,0.69,,,,unknown,unknown,,,table in STACK1,,
+family,low,NOT_YET_FALSIFIED,TS1,2026-10-22,other,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:TS1,,"Pre-registration: SQ1, TS1 and CW10, three deployable candidates (the owner's picks; written 2026-10-22 before any of them was computed on any data)"
+family,high,,VRP2,2026-10-22,other 15-minute series,,model-vs-price,440,0,,,,,,,FALSIFIED,no,n.a.,,README:5069,,"Result: VRP2, one run, read once (2026-10-22; the rule, bar and prediction are those registered above; nothing was changed after seeing them)"
+family,high,,VT1,2026-10-22,other 15-minute series,,filter on L1,354,2,0.69,0.69,0.57,,,,FALSIFIED,no,n.a.,,README:5113,yes,"Results: CM1 and VT1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,"VT1:CM1, top 5 of 17 country ETFs by 12-1 mo",2026-10-22,other 15-minute series,,filter on L1,,1,0.69,0.69,0.69,,,,FALSIFIED,unknown,,,table in VT1,,
+try,high,,"VT1:VT1, SVXY when VIX / VIX3M < 0.95",2026-10-22,other 15-minute series,,filter on L1,,1,0.57,0.57,0.57,,,,FALSIFIED,unknown,,,table in VT1,,
+family,high,,XLEAD1,2026-10-22,15-minute crypto,,favourite,,4,1.97,1.97,1.18,,,,FALSIFIED,no,n.a.,,README:5012,yes,"Results: SIDE1, HOUR1 and XLEAD1, one run (2026-10-22; the rules, bars and predictions are those registered above; nothing was changed after seeing them)"
+try,high,,XLEAD1:HOUR1,2026-10-22,15-minute crypto,,favourite,,1,1.51,1.51,1.51,,,,FALSIFIED,unknown,,,table in XLEAD1,,
+try,high,,XLEAD1:SIDE1 (360 s),2026-10-22,15-minute crypto,,favourite,,1,1.18,1.18,1.18,,,,FALSIFIED,unknown,,,table in XLEAD1,,
+try,high,,XLEAD1:SIDE1 at 600 s (information),2026-10-22,15-minute crypto,,favourite,,1,1.97,1.97,1.97,,,,unknown,unknown,,,table in XLEAD1,,
+family,low,FALSIFIED,BTC1,2026-10-23,15-minute crypto,,round-trip scalp,150,4,0.43,0.73,-4.18,1.06,,,unknown,unknown,unknown,4,README-text:BTC1,,"Pre-registration: BTC1 (2026-10-23, before any outcome was split by the prior window), a new mindset for Bitcoin: the window is not independent of the one before it"
+family,none,,FLIP1,2026-10-23,other,,round-trip scalp,,0,,,,,,,no result parsed,unknown,unknown,,REG:5784,,"Pre-registration: FLIP1 (2026-10-23, forward, live orders only; a protective rule, not an income source)"
+family,low,FALSIFIED,GOLD2,2026-10-23,15-minute gold,KXBTCD KXGOLDD,model-vs-price,210,5,-0.89,1.00,-2.60,0.75,0.69,no,unknown,unknown,unknown,5,README-text:GOLD2,,"Pre-registration: GOLD2 (2026-10-23, before any gold outcome was split by these rules)"
+family,low,FALSIFIED,HOUR2,2026-10-23,15-minute gold,,other/unclear,,0,,,,,,,unknown,unknown,unknown,,README-text:HOUR2,,Pre-registration: HOUR2 (written 2026-10-23 before any non-gold number by hour was computed)
+family,low,NOT_ENOUGH_DATA,HOUR3,2026-10-23,15-minute crypto,,favourite,3999,8,1.90,3.45,-5.96,1.75,,,unknown,unknown,unknown,,README-text:HOUR3,,"Pre-registration: HOUR3 (2026-10-23), does the hour-closing window carry an edge on the other crypto series"
+family,low,NOT_YET_FALSIFIED,IDEAS100,2026-10-23,15-minute crypto,,favourite,247,4,-3.08,5.39,-3.08,4.73,,,unknown,unknown,unknown,200,README-text:IDEAS100,,"Pre-registration: IDEAS100 (2026-10-23, before any of these rules was scored), one hundred Bitcoin and Ethereum entry rules"
+family,low,FALSIFIED,IDEAS20,2026-10-23,15-minute crypto,,maker,7393,1,-3.78,-3.78,-3.78,1.06,,,unknown,unknown,unknown,,README-text:IDEAS20,,"Pre-registration: IDEAS20 (2026-10-23, before any of these rules was scored), twenty new Bitcoin ideas"
+family,low,FALSIFIED,LAG2,2026-10-23,15-minute crypto,,round-trip scalp,150,0,,,,,,,unknown,unknown,unknown,,README-text:LAG2,,"Pre-registration: LAG2 (2026-10-23, before any of this data was scored), the one Bitcoin edge with a mechanism: Kalshi's trades against the spot price"
+family,low,NOT_ENOUGH_DATA,SCAN1,2026-10-23,cost/execution,,favourite,,0,,,,0.93,,,unknown,unknown,unknown,6,README-text:SCAN1,,"Pre-registration: SCAN1 (2026-10-23), mine the recorded history for rules, then test them on days the mining never saw"
+family,low,FALSIFIED,SCAN2-F,2026-10-23,cost/execution,,favourite,,0,,,,,,,unknown,unknown,unknown,,README-text:SCAN2-F,,"Pre-registration: SCAN2-F (2026-10-23), the one rule that held, scored on fresh days it never saw"
+family,low,NOT_YET_FALSIFIED,SMOOTH20,2026-10-23,15-minute crypto,,round-trip scalp,,0,,,,1.76,,,unknown,unknown,unknown,,README-text:SMOOTH20,,"Pre-registration: SMOOTH20 (2026-10-23, before any variant was scored), twenty variables of the ""smooth climb"" family, discovered on other series and confirmed on Bitcoin and Ethereum"
+family,low,FALSIFIED,TAIL1,2026-10-23,other 15-minute series,,cheap side,,2,-4.17,-4.17,-11.69,0.90,,,unknown,unknown,unknown,6,README-text:TAIL1,,"Pre-registration: TAIL1 (2026-10-23, before any tail outcome was computed)"
+family,low,NOT_YET_FALSIFIED,COMM1,2026-10-24,other 15-minute series,,round-trip scalp,,1,1.86,1.86,1.86,1.54,,,unknown,unknown,unknown,10,README-text:COMM1,,"Pre-registration: COMM1 (2026-10-24, before any outcome was scored), different strategies for the six commodity 15 minute series"
+family,high,,BTCBOOK,2026-10-25,15-minute crypto+gold,,round-trip scalp,,4,-1.02,-0.55,-1.70,,,,FALSIFIED,no,n.a.,4,README:6396,,Result: BTCBOOK (run once on 2026-10-25): all four FALSIFIED
+try,high,,"BTCBOOK:BK1 sibling catch-up, target Bitcoin",2026-10-25,15-minute crypto+gold,,round-trip scalp,740,1,-1.02,-1.02,-1.02,,,,unknown,unknown,,,table in BTCBOOK,,
+try,high,,"BTCBOOK:BK1 sibling catch-up, target Ethereum",2026-10-25,15-minute crypto+gold,,round-trip scalp,515,1,-0.55,-0.55,-0.55,,,,unknown,unknown,,,table in BTCBOOK,,
+try,high,,"BTCBOOK:BK2 streak continue (4 in a row), Bitcoi",2026-10-25,15-minute crypto+gold,,round-trip scalp,830,1,-0.69,-0.69,-0.69,,,,unknown,unknown,,,table in BTCBOOK,,
+try,high,,"BTCBOOK:BK2 streak fade (4 in a row), Bitcoin",2026-10-25,15-minute crypto+gold,,round-trip scalp,830,1,-1.70,-1.70,-1.70,,,,unknown,unknown,,,table in BTCBOOK,,
+family,high,,FACT1,2026-10-25,15-minute crypto+gold,,favourite,7393,2,-0.01,-0.01,-0.19,,,,NOT_ENOUGH_DATA,no,n.a.,4230,README:6426,,"Result: FACT1, 4,230 complete strategies for Bitcoin and Ethereum (run once on 2026-10-25): NOT_ENOUGH_DATA, nothing deployable"
+family,high,,IV1,2026-10-25,15-minute crypto,,model-vs-price,,4,3.46,7.08,-4.39,,,,FALSIFIED,no,n.a.,,README:6263,,"Result: IV1, implied-volatility fair value (run 2026-10-25; first read discarded for a lookahead bug, corrected read stands)"
+try,high,,IV1:Bitcoin,2026-10-25,15-minute crypto,,model-vs-price,5423,1,-1.64,-1.64,-1.64,,,,FALSIFIED,unknown,,,table in IV1,,
+try,high,,IV1:Ethereum,2026-10-25,15-minute crypto,,model-vs-price,5601,1,-4.39,-4.39,-4.39,,,,FALSIFIED,unknown,,,table in IV1,,
+family,high,,P5,2026-10-25,15-minute crypto+gold,,structural lock,28390,2,0.93,0.93,-3.38,,,,FALSIFIED,no,n.a.,2,README:6466,,"Result: P5, a market-wide volatility state (run once on 2026-10-25): both FALSIFIED"
+family,high,,P6,2026-10-25,15-minute crypto+gold,,favourite,1609,1,2.55,2.55,2.55,,,,NOT_ENOUGH_DATA,no,n.a.,1,README:6474,,"Result: P6, adaptive timing-and-series allocator (run once on 2026-10-25): NOT_ENOUGH_DATA by the +1.5c bar, positive out of sample"
+family,none,,P6R,2026-10-25,other 15-minute series,,round-trip scalp,,1,4.93,4.93,4.93,,,,no result parsed,unknown,unknown,,REG:6490,,"Registered: P6R, the allocator restricted to XRP, Dogecoin, WTI, natural gas and silver (2026-10-25; 1 try, running count about 14,528)"
+family,high,,PROG1,2026-10-25,economics/macro,,favourite,,5,2.76,2.76,-2.42,,,,NOT_ENOUGH_DATA,no,n.a.,2,README:6449,,"Result: PROG1 (run once on 2026-10-25): P1 NOT_ENOUGH_DATA, P2 and P3 FALSIFIED (wrong sign), P4 NOT_ENOUGH_DATA"
+try,high,,PROG1:P1 US-hours (window closes 12 to 18 UTC),2026-10-25,economics/macro,,favourite,,1,1.41,1.41,1.41,,,,NOT_ENOUGH_DATA,unknown,,,table in PROG1,,
+try,high,,PROG1:P2 cooling-off (no loss in the previous ,2026-10-25,economics/macro,,favourite,,1,-2.19,-2.19,-2.19,,,,FALSIFIED,unknown,,,table in PROG1,,
+try,high,,PROG1:P3 breadth (top third by number of serie,2026-10-25,economics/macro,,favourite,,1,-2.42,-2.42,-2.42,,,,FALSIFIED,unknown,,,table in PROG1,,
+try,high,,PROG1:P4 adaptive allocator (one entry per win,2026-10-25,economics/macro,,favourite,,1,2.76,2.76,2.76,,,,NOT_ENOUGH_DATA,unknown,,,table in PROG1,,
+family,high,,QUIRK1,2026-10-25,15-minute crypto+gold,,other/unclear,,2,-0.90,-0.90,-1.40,,,,NOT_ENOUGH_DATA,no,n.a.,36,README:6246,,Result: QUIRK1 (run once on 2026-10-25)
+family,high,,RT1,2026-10-25,15-minute crypto+gold,,favourite,,0,,,,,,,FALSIFIED,no,n.a.,2,README:6330,,"Result: RT1, take 99c and re-enter at 92c (run once on 2026-10-25): both FALSIFIED"
+family,high,,RT2,2026-10-25,15-minute crypto+gold,,seasonality/calendar,,1,0.90,0.90,0.90,,,,NOT_ENOUGH_DATA,no,n.a.,1,README:6362,,"Result: RT2, reverse after a 99c favourite drops to 92c (run once on 2026-10-25): NOT_ENOUGH_DATA"
+family,high,,SEARCH5K,2026-10-25,15-minute crypto+gold,,generator/search,2819,0,,,,,,,FALSIFIED,no,n.a.,5000,README:6308,,Result: SEARCH5K (run once on 2026-10-25): FALSIFIED
+family,high,,TAPE20,2026-10-25,15-minute crypto+gold,,favourite,,6,-2.63,2.30,-2.63,,,,NOT_ENOUGH_DATA,no,n.a.,16,README:6482,,"Result: TAPE20, the trade tape in the two minutes before the 6 minute decision (run once on 2026-10-25): no rule passed"
+family,high,,CRYPTO1,2026-10-26,15-minute crypto,,round-trip scalp,685,1,-1.93,-1.93,-1.93,,,,FALSIFIED,no,n.a.,384,README:6581,,"Result: CRYPTO1, slow Bitcoin and Ethereum strategies, 2019 to 2026 (run once on 2026-10-26): FALSIFIED"
+family,none,,FP1,2026-10-26,cost/execution,,seasonality/calendar,400,0,,,,,,,no result parsed,unknown,unknown,,REG:6598,,"Pre-registration: FP1, footprint on tennis jumps: does real buying behind a 5c jump keep it going? (written 2026-10-26 before any tape was fetched for tennis events and before the SC1 read; 4 tries, r"
+family,none,,FP2,2026-10-26,15-minute gold,,favourite,,0,,,,,,,no result parsed,unknown,unknown,,REG:6610,,"Pre-registration: FP2, gold footprint as a loss warning: does opposing taker flow before the 6 minute decision mark the losers? (written 2026-10-26 before any gold tape was fetched or split; 2 tries, "
+family,high,,LAD1,2026-10-26,hourly ladders,,model-vs-price,,6,-1.89,0.08,-1.98,,,,FALSIFIED,no,n.a.,6,README:6550,,"Result: LAD1, option-style fair value on the hourly Bitcoin ladder (run once on 2026-10-26): all six FALSIFIED"
+try,high,,LAD1:15 min,2026-10-26,hourly ladders,,model-vs-price,1156,1,-1.52,-1.52,-1.52,,,,unknown,unknown,,,table in LAD1,,
+try,high,,LAD1:15 min,2026-10-26,hourly ladders,,model-vs-price,999,1,-1.41,-1.41,-1.41,,,,unknown,unknown,,,table in LAD1,,
+try,high,,LAD1:30 min,2026-10-26,hourly ladders,,model-vs-price,1642,1,-1.88,-1.88,-1.88,,,,unknown,unknown,,,table in LAD1,,
+try,high,,LAD1:30 min,2026-10-26,hourly ladders,,model-vs-price,1346,1,0.08,0.08,0.08,,,,unknown,unknown,,,table in LAD1,,
+try,high,,LAD1:45 min,2026-10-26,hourly ladders,,model-vs-price,1698,1,-1.89,-1.89,-1.89,,,,unknown,unknown,,,table in LAD1,,
+try,high,,LAD1:45 min,2026-10-26,hourly ladders,,model-vs-price,1236,1,-1.98,-1.98,-1.98,,,,unknown,unknown,,,table in LAD1,,
+family,high,,BOUNCE1,2026-10-27,15-minute crypto+gold,,cheap side,1205,1,-5.44,-5.44,-5.44,,,,FALSIFIED,no,n.a.,,README:6755,,"Result: BOUNCE1 (run once on 2026-10-27): FALSIFIED, and the cheap side near the strike is the worst place to buy"
+family,high,,CAL1,2026-10-27,other,,seasonality/calendar,,0,,,,,,,FALSIFIED,no,n.a.,,README:6811,,"Result: CAL1 (run once on 2026-10-27): FALSIFIED, with a correction to the null"
+family,high,,F6,2026-10-27,sports,KX10,favourite,1788,4,-0.30,-0.30,-5.68,,,,FALSIFIED,no,n.a.,,README:6697,yes,"Result: F6 and F7 (sports1, run once on 2026-10-27): both FALSIFIED"
+family,high,,F7,2026-10-27,sports,KX10,favourite,1788,4,-0.30,-0.30,-5.68,,,,FALSIFIED,no,n.a.,,README:6697,yes,"Result: F6 and F7 (sports1, run once on 2026-10-27): both FALSIFIED"
+family,high,,FLOW1,2026-10-27,perps/venues,,favourite,,2,2.62,2.62,0.63,,,,FALSIFIED,no,n.a.,,README:6903,,Result: FLOW1 (run once on 2026-10-27): FALSIFIED for all 32 variants
+family,high,,FP3,2026-10-27,cost/execution,,maker,,0,,,,,,,FALSIFIED,no,n.a.,,README:6719,,Result: FP3 (run once on 2026-10-27): FALSIFIED
+family,low,NOT_YET_FALSIFIED,HOURS1,2026-10-27,other 15-minute series,,favourite,,3,1.52,1.76,0.45,0.96,,,unknown,unknown,unknown,,README-text:HOURS1,,"Pre-registration: HOURS1, trade the L1 rule only in 12 to 18 UTC (forward claim; written 2026-10-27 after seeing the numbers below, so the numbers are NOT evidence; 1 try, running count about 14,631)"
+family,high,,HOURS2,2026-10-27,15-minute crypto+gold,,favourite,,3,1.52,1.76,0.45,0.96,,,NOT_ENOUGH_DATA,no,n.a.,,README:6671,,Result: HOURS2 (run once on 2026-10-27): NOT_ENOUGH_DATA (12 to 18 UTC does not hold up in the whole history)
+family,high,,HUNT1,2026-10-27,15-minute crypto+gold,,favourite,,0,,,,,,,FALSIFIED,no,n.a.,,README:6683,,Result: HUNT1 (run once on 2026-10-27): FALSIFIED
+family,high,,HUNT2,2026-10-27,15-minute crypto+gold,,generator/search,852975,0,,,,,,,FALSIFIED,no,n.a.,,README:6691,,Result: HUNT2 (run once on 2026-10-27): FALSIFIED
+family,high,,MAKER1,2026-10-27,15-minute crypto+gold,,maker,3159,1,2.30,2.30,2.30,,,,FALSIFIED,no,n.a.,,README:6737,,Result: MAKER1 (run once on 2026-10-27): all six FALSIFIED
+family,high,,MAKER2,2026-10-27,15-minute crypto+gold,,maker,,0,,,,,,,FALSIFIED,no,n.a.,,README:6871,,"Result: MAKER2 (run once on 2026-10-27): FALSIFIED (resting bids beat crossing on the fills they get, and lose on the whole)"
+family,high,,MAKER3,2026-10-27,15-minute crypto+gold,,maker,,2,-10.95,-10.95,-14.43,,,,FALSIFIED,no,n.a.,,README:6879,,Result: MAKER3 (run once on 2026-10-27): FALSIFIED
+family,high,,PULL1,2026-10-27,15-minute crypto+gold,,exit/risk rule,,0,,,,,,,FALSIFIED,no,n.a.,,README:6785,,Result: PULL1 (run once on 2026-10-27): FALSIFIED
+family,none,,REV1,2026-10-27,15-minute crypto,,round-trip scalp,400,0,,,,,,,no result parsed,unknown,unknown,,REG:6769,,"Pre-registration: REV1, forward claim: Bitcoin, buy the cheap NO side with 2 to 3 minutes left, hold to settlement (written 2026-10-27 after the numbers above, so they are NOT evidence; 1 try, running"
+family,high,,SC1,2026-10-27,sports,,round-trip scalp,840,0,,,,,,,FALSIFIED,no,n.a.,,README:6645,,"Result: SC1, in-play tennis scalping after a 5c jump (run once on 2026-10-27): all four FALSIFIED"
+family,none,,SWEEP1,2026-10-27,15-minute crypto,,generator/search,200,0,,,,,,,no result parsed,unknown,unknown,,REG:6789,,"Pre-registration: SWEEP1, big prints and sweeps on Bitcoin 15 minute markets, followed or faded, with a scale-out exit (built with the owner on 2026-10-27 from their answers: signal = big print or swe"
+family,high,,THROTTLE1,2026-10-27,15-minute crypto+gold,,favourite,,0,,,,,,,FALSIFIED,no,n.a.,,README:6887,,Result: THROTTLE1 (run once on 2026-10-27): FALSIFIED on the registered bar; the drawdown cut is real but mostly mechanical
+family,high,,UNDER1,2026-10-27,15-minute crypto+gold,,generator/search,,2,2.77,2.77,-2.17,,,,FALSIFIED,no,n.a.,,README:6763,,"Result: UNDER1 (run once on 2026-10-27): FALSIFIED, with one thing worth a forward test"
+family,high,,WX3,2026-10-27,weather,,structural lock,,0,,,,,,,FALSIFIED,no,n.a.,,README:6715,,Result: WX3 (run once on 2026-10-27): FALSIFIED
+family,high,,ARB2,2026-10-28,other,,structural lock,,0,,,,,,,FALSIFIED,no,n.a.,,README:7335,yes,"Results: ARB2, ARB3, ARB4 (12 scans each, 2026-10-28 23:51 to 2026-10-29 03:40 UTC): all FALSIFIED"
+family,high,,ARB3,2026-10-28,other,,structural lock,,0,,,,,,,FALSIFIED,no,n.a.,,README:7335,yes,"Results: ARB2, ARB3, ARB4 (12 scans each, 2026-10-28 23:51 to 2026-10-29 03:40 UTC): all FALSIFIED"
+family,high,,ARB4,2026-10-28,other,,structural lock,,0,,,,,,,FALSIFIED,no,n.a.,,README:7335,yes,"Results: ARB2, ARB3, ARB4 (12 scans each, 2026-10-28 23:51 to 2026-10-29 03:40 UTC): all FALSIFIED"
+family,high,,AUTO1,2026-10-28,15-minute crypto+gold,,generator/search,83,0,,,,2.50,,,PASSED,yes,survived,,README:7185,,Result: AUTO1 (2026-10-28)
+family,high,,AUTO2,2026-10-28,15-minute crypto+gold,,generator/search,107,0,,,,2.50,,,FALSIFIED,no,n.a.,,README:7189,,Result: AUTO2 (2026-10-28)
+family,high,,AUTO3,2026-10-28,15-minute crypto+gold,,generator/search,111,0,,,,3.48,,,FALSIFIED,no,n.a.,,README:7198,,Result: AUTO3 (2026-10-28)
+family,high,,CARRY1,2026-10-28,perps/venues,,model-vs-price,,0,,,,,,,FALSIFIED,no,n.a.,,README:7060,,"Result: CARRY1 (run once on 2026-10-28; discovery lane): FALSIFIED as a deployable now; real in 2020 to 2021, flat since"
+family,high,,CPI1,2026-10-28,economics/macro,,model-vs-price,157,2,0.46,0.46,-1.78,0.93,,,NOT_ENOUGH_DATA,no,n.a.,,README:6966;README:8115,yes,"Result: CPI1 (run once on 2026-10-28; discovery lane): NOT_ENOUGH_DATA (7 trades on 2 releases); not tuned | Result: CPI1 and MENT1 rerun (2026-10-31, first valid scoring after the candle parser fix; "
+family,high,,DAYCUT1,2026-10-28,15-minute crypto+gold,,exit/risk rule,620,0,,,,1.00,,,FALSIFIED,no,n.a.,,README:7235,,"Result: DAYCUT1 (run once, 2026-10-28): all six rules FALSIFIED by the registered test"
+family,high,,EXIT2,2026-10-28,15-minute crypto+gold,,exit/risk rule,,4,3.23,3.23,-5.05,,,,NOT_YET_FALSIFIED,unknown,unknown,,README:6948,,Result: EXIT2 (run once on 2026-10-28; L1 upkeep lane): holding beats the 25c exit line on both halves; no other line beats 25c
+family,high,,FALS4,2026-10-28,15-minute crypto,,generator/search,7869,6,-0.20,4.42,-5.56,2.28,1.85,yes,SURVIVES,unknown,unknown,23,README:7732;workers/FALS4_RESULT.md,,"Result: FALS4 (falsifier on GEN6's open interest core), 2026-10-29 | FALS4 result: falsifier for GEN6's open interest core (Bitcoin cheap side at 180 s after an open interest jump), research only"
+family,high,,FALS5,2026-10-28,15-minute crypto,KXBTC15M,generator/search,584,3,-0.15,3.24,-4.04,1.09,0.62,no,MIXED,unknown,unknown,12,README:7889;workers/FALS5_RESULT.md,,"Result: FALS5 (the Bitcoin open interest core: jump or level regime), 2026-10-30 | FALS5 result: is the Bitcoin open interest core's edge the OI JUMP or the OI LEVEL regime? (research only)"
+family,high,,FUNDX1,2026-10-28,perps/venues,,round-trip scalp,,0,,,,,,,NOT_ENOUGH_DATA,no,n.a.,,README:7094,,"Result: FUNDX1 (run once on 2026-10-28; discovery lane): NOT_ENOUGH_DATA, and the difference is too small anyway"
+family,high,,GROW1,2026-10-28,15-minute crypto+gold,,favourite,100,0,,,,1.00,,,FALSIFIED,no,n.a.,,README:6931,,"Result: GROW1 (run once on 2026-10-28; L1 upkeep lane): FALSIFIED on the registered bar by 0.01 of profit factor; the walk-forward series choice is what grows an account, sizing alone does not"
+family,high,,HIST1,2026-10-28,15-minute crypto+gold,,generator/search,805,0,,,,,,,FALSIFIED,no,n.a.,576,README:7167,,"Result: HIST1 (run once, 2026-10-28)"
+family,low,NOT_ENOUGH_DATA,INDEX1,2026-10-28,daily/weekly ladders,,model-vs-price,457,0,,,,,,,unknown,unknown,unknown,6,README-text:INDEX1,,Strategy card INDEX1: the S&P 500 end-of-day level ladder against a volatility-implied probability (discovery lane; not L1; owner's go-all of 2026-10-28; written before any index price was compared wi
+family,high,,MAKER4,2026-10-28,15-minute crypto+gold,,maker,983,0,,,,0.00,,,FALSIFIED,no,n.a.,,README:7240,,"Result: MAKER4 (run once, 2026-10-28): FALSIFIED"
+family,high,,MECH1,2026-10-28,15-minute crypto,,favourite,145,4,1.07,4.75,1.07,1.87,,,unknown,unknown,unknown,2,README:7764;workers/MECH1_RESULT.md,,"Result: MECH1 (who is on the other side of the Bitcoin open interest core, public tape), 2026-10-30 | MECH1 result: who is on the other side of the Bitcoin open interest core (research only)"
+try,high,,MECH1:disc HIGH (share > 0.521),2026-10-28,15-minute crypto,,favourite,111,1,1.07,1.07,1.07,1.32,,,unknown,unknown,,,table in MECH1,,
+try,high,,MECH1:disc LOW,2026-10-28,15-minute crypto,,favourite,111,1,4.75,4.75,4.75,3.85,,,unknown,unknown,,,table in MECH1,,
+try,high,,MECH1:val HIGH (share > 0.520),2026-10-28,15-minute crypto,,favourite,166,1,3.03,3.03,3.03,1.87,,,unknown,unknown,,,table in MECH1,,
+try,high,,MECH1:val LOW,2026-10-28,15-minute crypto,,favourite,167,1,3.02,3.02,3.02,1.83,,,unknown,unknown,,,table in MECH1,,
+family,high,,MENT1,2026-10-28,entertainment,,seasonality/calendar,268,3,-0.58,0.46,-1.78,1.09,0.80,no,NOT_ENOUGH_DATA,no,n.a.,,README:6970;README:8115,yes,"Result: MENT1 (run once on 2026-10-28; discovery lane): NOT_ENOUGH_DATA (71 independent events against the registered 100); the point estimate is negative | Result: CPI1 and MENT1 rerun (2026-10-31, f"
+family,high,,PAIRS1,2026-10-28,perps/venues,,exit/risk rule,,0,,,,,,,FALSIFIED,no,n.a.,,README:7090,,Result: PAIRS1 (run once on 2026-10-28; discovery lane): FALSIFIED
+family,high,,PERPFLOW1,2026-10-28,perps/venues,,round-trip scalp,685,1,-6.40,-6.40,-6.40,,,,FALSIFIED,no,n.a.,,README:6984,,Result: PERPFLOW1 (run once on 2026-10-28; discovery lane): FALSIFIED
+family,high,,QUOTE1,2026-10-28,other,,maker,392,0,,,,,,,NOT_ENOUGH_DATA,no,n.a.,,README:7113,,"Result: QUOTE1 (run once on 2026-10-28; no-view lane): NOT_ENOUGH_DATA by the registered minimum (199 independent closes against 300), and the profit factor is about zero"
+family,high,,SCALP1,2026-10-28,15-minute crypto+gold,,round-trip scalp,8237,0,,,,,,,FALSIFIED,no,n.a.,,README:7157,yes,"Result: SCALP1 and SCALP2 (run once, 2026-10-28)"
+family,high,,SCALP2,2026-10-28,15-minute crypto+gold,,round-trip scalp,8237,0,,,,,,,FALSIFIED,no,n.a.,,README:7157,yes,"Result: SCALP1 and SCALP2 (run once, 2026-10-28)"
+family,high,,SIZE1,2026-10-28,cost/execution,,maker,16,0,,,,1.02,,,unknown,unknown,unknown,,README:7250,,Result: SIZE1 (2026-10-28): size changes no verdict
+family,high,,SIZE2,2026-10-28,cost/execution,,exit/risk rule,,0,,,,2.17,,,unknown,unknown,unknown,,README:7262,,Result: SIZE2 (2026-10-28)
+family,high,,ARB5,2026-10-29,sports,,structural lock,691,0,,,,,,,FALSIFIED,no,n.a.,,README:7368,,"Result: ARB5 (run once, 2026-10-29): FALSIFIED"
+family,high,,AUTO,2026-10-29,other,KXGOLD15M,round-trip scalp,,0,,,,0.53,,,unknown,unknown,unknown,,workers/AUTO_RESULT.md,,"AUTO result: forward reads that run themselves, plus a nightly live watcher (2026-10-29, V2, research only)"
+family,high,,BAND2,2026-10-29,15-minute crypto+gold,,exit/risk rule,,4,3.58,3.58,2.45,1.12,,,unknown,unknown,unknown,,README:7678,,"Result: BAND2 (run once, 2026-10-29, V2; registration e0c17f2): the live 91-92c hole is NOT in L1's history (information; no strategy verdict by registration)"
+family,high,,BTCAVG,2026-10-29,15-minute crypto,,filter on L1,149,0,,,,1.50,,,NOT_ENOUGH_DATA,yes,unknown,,workers/BTCAVG_RESULT.md,,"BTCAVG result (V2 worker, 2026-10-29)"
+family,high,,CAL,2026-10-29,other,,seasonality/calendar,300,0,,,,,,,unknown,unknown,unknown,,workers/CAL_RESULT.md,,"CAL result: event calendar and power check (Strategy Research V2, 2026-10-29, research only)"
+family,high,,CONF1,2026-10-29,hourly ladders,,favourite,116,1,1.35,1.35,1.35,0.57,,,FALSIFIED,yes,failed,,README:7455;README:7491,yes,"Results: CONF1 TWIN and TAPE (2026-10-29): both FALSIFIED (LADDER waits for the corrected hourly file) | Result: CONF1 LADDER (run once, 2026-10-29): NOT_ENOUGH_DATA"
+family,high,,CONF2,2026-10-29,15-minute crypto+gold,,favourite,190,1,-0.32,-0.32,-0.32,0.91,,,FALSIFIED,yes,failed,,README:7644,,"Result: CONF2 (run once, 2026-10-29, V2): FALSIFIED by the registered kill; window C not read"
+family,high,,CORR1,2026-10-29,hourly ladders,,generator/search,,0,,,,0.43,0.60,no,FALSIFIED,no,n.a.,,README:7487,,"Result: CORR1 (run once, 2026-10-29): G3H1 and G3H2 FALSIFIED on the look-ahead-free file; the whole GEN3 family was the look-ahead"
+family,high,,DAILY2,2026-10-29,daily/weekly ladders,,model-vs-price,129,23,-0.23,1.39,-6.29,0.54,,,NOT_ENOUGH_DATA,no,n.a.,,workers/DAILY2_RESULT.md,,"DAILY2 result: WTI, EUR/USD and USD/JPY daily markets against a fair value from the outside price"
+try,high,,DAILY2:EUR/USD 10 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,0.23,0.23,0.23,4.92,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:EUR/USD 10 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.68,-0.68,-0.68,0.20,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:EUR/USD 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.92,-0.92,-0.92,2.09,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:EUR/USD 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-1.30,-1.30,-1.30,0.54,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:EUR/USD 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.60,-0.60,-0.60,5.09,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:EUR/USD 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.75,-0.75,-0.75,0.73,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:USD/JPY 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.63,-0.63,-0.63,,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:USD/JPY 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.45,-0.45,-0.45,1.04,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:USD/JPY 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,1.39,1.39,1.39,3.50,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:USD/JPY 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.32,-0.32,-0.32,0.54,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 10 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-1.01,-1.01,-1.01,0.18,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 10 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.40,-0.40,-0.40,1.56,,,FALSIFIED,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.19,-0.19,-0.19,0.61,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 30 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-0.23,-0.23,-0.23,0.91,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-4.75,-4.75,-4.75,0.00,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+try,high,,DAILY2:WTI 60 min,2026-10-29,daily/weekly ladders,,model-vs-price,,1,-6.29,-6.29,-6.29,0.12,,,NOT_ENOUGH_DATA,unknown,,,table in DAILY2,,
+family,high,,DCAP1,2026-10-29,15-minute crypto+gold,,exit/risk rule,140,0,,,,1.30,1.21,yes,FALSIFIED,no,n.a.,,README:7578,yes,"Results: TIMEX1 FALSIFIED; DCAP1 caps FALSIFIED, SPREAD1 alone meets the risk definition on all 18 series only (run once each, 2026-10-29, V2)"
+family,high,,EVT1,2026-10-29,15-minute crypto+gold,,seasonality/calendar,300,30,1.17,2.88,-2.35,1.60,,,FALSIFIED,no,n.a.,480,README:7748;workers/EVT1_RESULT.md,,"Result: EVT1 (scheduled-event windows, gold and Bitcoin), 2026-10-29 | EVT1 result: scheduled-event windows on gold and Bitcoin 15 minute markets (run once, 2026-10-30; research only)"
+try,high,,EVT1:BTC CME_BTC_CLOSE after CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,1.06,1.06,0.17,1.35,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC FUNDING after CHEAP180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,0.19,0.47,0.19,1.74,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC FUNDING contain CHEAP180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-0.03,-0.03,-0.15,1.60,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC SETTLE_BTC after CHEAP180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,0.91,1.08,0.91,1.68,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC SETTLE_BTC after FAV360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-2.35,-1.01,-2.35,1.07,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC SETTLE_BTC after FAVMID180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-1.69,-1.59,-1.69,0.33,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC SETTLE_BTC before CHEAP180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,2.87,2.87,-0.59,1.40,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC SETTLE_BTC before FAV360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-0.95,2.06,-0.95,0.87,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:BTC TSY before / after CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,1.94,1.94,-0.97,0.32,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:gold CME_GOLD_SETTLE after CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-1.20,1.01,-1.20,0.54,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:gold CME_GOLD_SETTLE before CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,1.16,1.16,-0.66,1.12,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:gold TSY after CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-0.79,-0.79,-1.34,0.74,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:gold TSY before CHEAP180,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,-0.97,2.88,-0.97,0.35,,,unknown,unknown,,,table in EVT1,,
+try,high,,EVT1:gold TSY before CHEAP360,2026-10-29,15-minute crypto+gold,,seasonality/calendar,,2,1.10,1.52,1.10,0.94,,,unknown,unknown,,,table in EVT1,,
+family,high,,EXIT1,2026-10-29,15-minute crypto+gold,,exit/risk rule,,0,,,,0.80,0.75,no,FALSIFIED,no,n.a.,,README:7447,yes,"Results: EXIT1, REGIME1, GOLD1D (run once each, 2026-10-29; L1's history, 32,499 entries, windows by close-date thirds; PF per contract at 1 contract with per-order rounded fees unless stated)"
+family,high,,FALS1,2026-10-29,15-minute crypto+gold,,generator/search,1676,1,0.98,0.98,0.98,1.44,,,FALSIFIED,no,n.a.,10,workers/FALS1_RESULT.md,,"FALS1 result: falsifier for MKTTIME1's gold 20:00 to 24:00 Central block (run once, 2026-10-29, V2, research only)"
+family,high,,FALS2,2026-10-29,15-minute crypto+gold,,exit/risk rule,,0,,,,1.22,,,unknown,unknown,unknown,,workers/FALS2_RESULT.md,,FALS2 result: falsifier for RISK1 (the account risk estimate)
+family,high,,FAM2,2026-10-29,economics/macro,,exit/risk rule,,0,,,,,,,FALSIFIED,yes,failed,,workers/FAM2_RESULT.md,,"FAM2 result: XLEAD1, macro futures leading the 15 minute Kalshi quotes (run once, 2026-10-29)"
+family,low,DUPLICATE,FEE1,2026-10-29,perps/venues,,structural lock,258,0,,,,,,,unknown,unknown,unknown,2,README-text:FEE1,,"Pre-registration: RULES1 and FEE1 (owner approved via the main session, 2026-10-29; analysis only; written before either is run)"
+family,low,FALSIFIED,G3H1,2026-10-29,hourly ladders,KXBTCD,generator/search,150,0,,,,0.43,0.60,no,unknown,unknown,unknown,,README-text:G3H1,,"Pre-registration: GEN3-F1, forward paper read of G3H1 on recorded order books (written 2026-10-29 before any recorded book row is read)"
+family,low,FALSIFIED,G3H2,2026-10-29,hourly ladders,KXBTCD,generator/search,,0,,,,0.43,0.60,no,unknown,unknown,unknown,,README-text:G3H2,,"Pre-registration: CORR1, G3H1 and G3H2 re-read on a look-ahead-free hourly ladder file (written 2026-10-29 before the new file is fetched)"
+family,high,,GEN1,2026-10-29,15-minute crypto+gold,,generator/search,150,0,,,,,,,NO_WINNER,no,n.a.,,README:7331,,"Result: GEN1 (2026-10-29): NO_WINNER, FALSIFIED before the holdout"
+family,high,,GEN1S,2026-10-29,15-minute crypto+gold,,generator/search,258,1,0.65,0.65,0.65,,,,NO_WINNER,no,n.a.,,README:7326,,"Result: GEN1S (2026-10-29): NO_WINNER, FALSIFIED before the holdout"
+family,high,,GEN2,2026-10-29,15-minute crypto+gold,,generator/search,99026,0,,,,,,,NO_WINNER,no,n.a.,,README:7384,,"Result: GEN2 (2026-10-29): NO_WINNER, FALSIFIED before the holdout"
+family,high,,GEN3,2026-10-29,hourly ladders,KXBTCD,generator/search,211,2,5.66,5.66,5.33,1.45,,,PASSED,yes,failed,,README:7403,,"Result: GEN3 (2026-10-29): ONE STRATEGY PASSED EVERY REGISTERED GATE, including the frozen holdout. NOT_YET_FALSIFIED; earns a forward paper read only."
+family,high,,GEN4,2026-10-29,15-minute crypto,KXBTC15M,generator/search,149,10,2.42,2.42,1.39,0.76,0.59,no,NOT_RUNNABLE,no,n.a.,1,workers/GEN4_RESULT.md,,"GEN4 result (V2 worker, 2026-10-29, research only)"
+try,high,,GEN4:B01,2026-10-29,15-minute crypto,,generator/search,82,1,2.42,2.42,2.42,2.13,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B02,2026-10-29,15-minute crypto,,generator/search,91,1,2.31,2.31,2.31,2.09,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B03,2026-10-29,15-minute crypto,,generator/search,77,1,2.13,2.13,2.13,1.62,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B04,2026-10-29,15-minute crypto,,generator/search,75,1,2.04,2.04,2.04,2.04,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B05,2026-10-29,15-minute crypto,,generator/search,86,1,1.68,1.68,1.68,1.78,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B06,2026-10-29,15-minute crypto,,generator/search,96,1,1.78,1.78,1.78,1.54,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B07,2026-10-29,15-minute crypto,,generator/search,56,1,1.39,1.39,1.39,1.68,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B08,2026-10-29,15-minute crypto,,generator/search,91,1,1.85,1.85,1.85,2.24,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B09,2026-10-29,15-minute crypto,,generator/search,93,1,1.52,1.52,1.52,1.51,,,unknown,unknown,,,table in GEN4,,
+try,high,,GEN4:B10,2026-10-29,15-minute crypto,,generator/search,77,1,1.59,1.59,1.59,1.79,,,unknown,unknown,,,table in GEN4,,
+family,high,,GEN5,2026-10-29,15-minute gold,,generator/search,1864,11,0.60,0.82,-2.99,1.25,0.72,no,NO_WINNER,no,n.a.,,workers/GEN5_RESULT.md,,"GEN5 result (2026-10-29): NO_WINNER, FALSIFIED at validation. No forward candidate."
+try,high,,GEN5:B1 survivor,2026-10-29,15-minute gold,,generator/search,26,1,-0.49,-0.49,-0.49,1.55,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:G1 survivor,2026-10-29,15-minute gold,,generator/search,29,1,0.60,0.60,0.60,1.51,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:G2 survivor,2026-10-29,15-minute gold,,generator/search,34,1,-1.15,-1.15,-1.15,1.58,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:G3 survivor,2026-10-29,15-minute gold,,generator/search,36,1,-0.85,-0.85,-0.85,1.60,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,32,1,0.82,0.82,0.82,1.41,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,,1,-1.31,-1.31,-1.31,1.48,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,,1,-2.99,-2.99,-2.99,1.47,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,,1,-1.44,-1.44,-1.44,1.36,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,,1,0.44,0.44,0.44,1.33,,,unknown,unknown,,,table in GEN5,,
+try,high,,GEN5:info,2026-10-29,15-minute gold,,generator/search,,1,-0.14,-0.14,-0.14,1.27,,,unknown,unknown,,,table in GEN5,,
+family,high,,GEN6,2026-10-29,15-minute crypto+gold,,generator/search,222,36,4.41,5.40,-2.01,2.28,,,FALSIFIED,yes,failed,62163,README:7728;workers/GEN6_RESULT.md,,"Result: GEN6 (late-window underdog generator, gold and Bitcoin), 2026-10-29 | GEN6 result (2026-10-30): late-window underdog generator. Gold FALSIFIED; Bitcoin 13 rules sent to FORWARD, 7 of them one "
+try,high,,GEN6:B01,2026-10-29,15-minute crypto+gold,,generator/search,31,2,4.41,4.41,3.31,2.81,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B02,2026-10-29,15-minute crypto+gold,,generator/search,25,2,2.65,2.65,2.49,2.42,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B03,2026-10-29,15-minute crypto+gold,,generator/search,63,2,5.40,5.40,3.44,2.41,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B04,2026-10-29,15-minute crypto+gold,,generator/search,51,2,3.38,4.05,3.38,2.06,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B05,2026-10-29,15-minute crypto+gold,,generator/search,11,2,2.03,2.03,1.36,1.60,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B06,2026-10-29,15-minute crypto+gold,,generator/search,31,2,5.37,5.37,2.07,3.51,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B07,2026-10-29,15-minute crypto+gold,,generator/search,17,2,2.30,2.30,1.28,1.72,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B08,2026-10-29,15-minute crypto+gold,,generator/search,60,2,3.33,3.33,2.06,2.14,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B09,2026-10-29,15-minute crypto+gold,,generator/search,16,2,1.54,1.54,1.32,1.55,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B10,2026-10-29,15-minute crypto+gold,,generator/search,111,2,5.04,5.04,2.95,2.19,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B11,2026-10-29,15-minute crypto+gold,,generator/search,18,2,1.87,1.87,0.75,1.82,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B12,2026-10-29,15-minute crypto+gold,,generator/search,14,2,2.34,2.34,1.03,1.83,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:B13,2026-10-29,15-minute crypto+gold,,generator/search,24,2,2.55,2.55,1.22,1.70,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:look 120 s,2026-10-29,15-minute crypto+gold,,generator/search,,2,-0.89,0.15,-0.89,0.80,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:look 180 s,2026-10-29,15-minute crypto+gold,,generator/search,,2,4.41,4.53,4.41,2.28,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:look 240 s,2026-10-29,15-minute crypto+gold,,generator/search,,2,4.46,4.46,2.48,2.34,,,unknown,unknown,,,table in GEN6,,
+try,high,,GEN6:look 60 s,2026-10-29,15-minute crypto+gold,,generator/search,,2,-1.24,-1.24,-2.01,0.68,,,unknown,unknown,,,table in GEN6,,
+try,high,,"GEN6:no condition, 180 s (the base)",2026-10-29,15-minute crypto+gold,,generator/search,,2,2.67,2.67,0.19,1.18,,,unknown,unknown,,,table in GEN6,,
+family,high,,GEN7,2026-10-29,15-minute crypto+gold,,generator/search,,13,2.28,3.42,-1.16,3.28,1.80,yes,FALSIFIED,no,n.a.,27621,README:7736;workers/GEN7_RESULT.md,,"Result: GEN7 (open interest flow generator, entries 840 to 240 s, gold and Bitcoin), 2026-10-29 | GEN7 result (2026-10-30): open interest flow generator, 840 to 240 s. Gold FALSIFIED; Bitcoin 2 rules "
+try,high,,"GEN7:B01 cheap both 240, npv1 > 0.281, vol > ",2026-10-29,15-minute crypto+gold,,generator/search,24,2,3.42,3.42,2.28,3.28,,,NOT_YET_FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:B02 cheap both 300 to 240, npv1 > 0.393,",2026-10-29,15-minute crypto+gold,,generator/search,19,2,2.54,2.54,1.97,1.75,,,NOT_YET_FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:cheap both 240, doi3 > 69.8k, npvw > 0.3",2026-10-29,15-minute crypto+gold,,generator/search,25,1,0.49,0.49,0.49,1.85,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:cheap both 240, npv5 > 0.307, bid <= 0.6",2026-10-29,15-minute crypto+gold,,generator/search,18,1,-0.65,-0.65,-0.65,1.56,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:cheap both 300 to 240, doi5 > 130k, ETH ",2026-10-29,15-minute crypto+gold,,generator/search,41,1,0.93,0.93,0.93,1.55,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:cheap both 360 to 300, doi3 > 125k, npv3",2026-10-29,15-minute crypto+gold,,generator/search,30,1,-1.16,-1.16,-1.16,1.50,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:cheap yes 840 to 240, sdoi5 > 0.172, doi",2026-10-29,15-minute crypto+gold,,generator/search,77,1,-0.50,-0.50,-0.50,1.51,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:fav yes 360 to 300, npvw > 0.355, doi3 <",2026-10-29,15-minute crypto+gold,,generator/search,12,1,0.32,0.32,0.32,1.55,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:fav yes 480 to 360, doi3 > 82.2k, npvw >",2026-10-29,15-minute crypto+gold,,generator/search,50,1,0.12,0.12,0.12,1.68,,,FALSIFIED,unknown,,,table in GEN7,,
+try,high,,"GEN7:fav yes 840 to 300, npv5 > 0.307, ETH mi",2026-10-29,15-minute crypto+gold,,generator/search,45,1,-0.59,-0.59,-0.59,1.58,,,FALSIFIED,unknown,,,table in GEN7,,
+family,high,,GOLD1D,2026-10-29,15-minute crypto+gold,,exit/risk rule,,0,,,,0.80,0.75,no,FALSIFIED,no,n.a.,,README:7447,yes,"Results: EXIT1, REGIME1, GOLD1D (run once each, 2026-10-29; L1's history, 32,499 entries, windows by close-date thirds; PF per contract at 1 contract with per-order rounded fees unless stated)"
+family,high,,GOLDFV1,2026-10-29,15-minute gold,KXGOLD15M,model-vs-price,,0,,,,1.25,1.11,yes,FALSIFIED,yes,failed,,README:7517,,"Result: GOLDFV1 (run once, 2026-10-29, Strategy Research V2): all four tries FALSIFIED; holdout not read"
+family,high,,HOUSE1,2026-10-29,15-minute crypto+gold,,round-trip scalp,,0,,,,,,,FALSIFIED,no,n.a.,,README:7652,,"Result: HOUSE1 (run once, 2026-10-29, V2): FALSIFIED (12 tries)"
+family,high,,HOUSE2,2026-10-29,15-minute crypto+gold,,exit/risk rule,,0,,,,,,,FALSIFIED,no,n.a.,,README:7660,,"Result: HOUSE2 (run once, 2026-10-29, V2; registration commit 6afd429, README sha256 5a39a28d12375894...): FALSIFIED (18 tries)"
+family,high,,HOUSE3,2026-10-29,15-minute crypto+gold,,exit/risk rule,11802,2,0.55,0.55,-2.29,,,,FALSIFIED,no,n.a.,,README:7670,,"Result: HOUSE3 (run once, 2026-10-29, V2; registration commit 01dd630): FALSIFIED by the registered gate, and by the pass bar (40 tries)"
+family,high,,INX1,2026-10-29,daily/weekly ladders,KXINXU KXNASDAQ100U,generator/search,11161,0,,,,1.50,,,FALSIFIED,no,n.a.,,workers/INX1_RESULT.md,,"INX1 result (run once, 2026-10-29, Strategy Research V2, worker INX1): all six tries FALSIFIED; holdout C not read"
+family,high,,LADDER,2026-10-29,hourly ladders,,favourite,116,1,1.35,1.35,1.35,0.57,,,NOT_ENOUGH_DATA,yes,unknown,,README:7491,yes,"Result: CONF1 LADDER (run once, 2026-10-29): NOT_ENOUGH_DATA"
+family,high,,LADL1,2026-10-29,hourly ladders,KXBTCD KXETHD KXGOLDD KXGOLDW,favourite,,2,-2.39,-2.39,-2.60,,,,FALSIFIED,no,n.a.,,README:7628,,"Result: LADL1 (run once, 2026-10-29, V2 finished the download from the old chat's partial files): Bitcoin and Ethereum hourly FALSIFIED; gold daily and weekly NOT_ENOUGH_DATA"
+family,high,,LATECAL,2026-10-29,15-minute crypto,,generator/search,,99,-0.22,1.48,-1.99,0.79,,,NOT_ENOUGH_DATA,yes,unknown,,workers/LATECAL_RESULT.md,,"LATECAL result (V2 worker, 2026-10-29, research only)"
+family,high,,LOCK2H,2026-10-29,hourly ladders,,structural lock,,0,,,,,,,NOT_ENOUGH_DATA,no,n.a.,,README:7544,,"Result: LOCK2H (run once, 2026-10-29, V2): NOT_ENOUGH_DATA (by the registered rule: some minute-close locks, none confirmable)"
+family,high,,MKTTIME1,2026-10-29,15-minute crypto+gold,,filter on L1,315,0,,,,1.44,,,FALSIFIED,no,n.a.,,README:7606,,"Result: MKTTIME1 (run once, 2026-10-29, V2): FALSIFIED by the registered one-market kill; gold 20:00 to 24:00 Central is information"
+family,high,,MM1,2026-10-29,15-minute gold,KXGOLD15M,maker,,0,,,,,,,NOT_ENOUGH_DATA,no,n.a.,,README:7459,,"Result: MM1 (2026-10-29): NOT_ENOUGH_DATA (last 150 seconds), NOT_RUNNABLE (mid-window)"
+family,high,,MUT1,2026-10-29,15-minute crypto+gold,,generator/search,,0,,,,1.25,1.22,yes,FALSIFIED,no,n.a.,,README:7594,,"Result: MUT1 (run once, 2026-10-29, V2): FALSIFIED (registered kill: nothing frozen)"
+family,manual,,OICORE,2026-10-29,15-minute crypto,,cheap side,555,2,4.53,4.53,4.42,2.28,1.85,yes,NOT_YET_FALSIFIED,no,n.a.,1,"manual:README:7728,7732",,"Bitcoin open interest core (GEN6 survivor; FALS4 reimplementation z 4.42): history windows only, no frozen holdout; forward rows running"
+family,high,,PPW1,2026-10-29,15-minute crypto+gold,,generator/search,32621,9,0.49,0.49,-0.88,0.94,1.05,no,FALSIFIED,no,n.a.,,workers/PPW1_RESULT.md,,"PPW1 result (Strategy Research V2, 2026-10-29, research only)"
+try,high,,PPW1:(information) the same without XRP,2026-10-29,15-minute crypto+gold,,generator/search,,1,-0.15,-0.15,-0.15,1.175,,,unknown,unknown,,,table in PPW1,,
+try,high,,PPW1:CHEAP1-C cheapest of BTC/ETH/XRP/DOGE vs,2026-10-29,15-minute crypto+gold,,generator/search,,1,-0.27,-0.27,-0.27,1.246,,,FALSIFIED,unknown,,,table in PPW1,,
+try,high,,PPW1:CHEAP1-M silver when cheaper vs gold,2026-10-29,15-minute crypto+gold,,generator/search,,1,-0.88,-0.88,-0.88,1.407,,,FALSIFIED,unknown,,,table in PPW1,,
+try,high,,PPW1:SCALEIN1 add leg alone (live five),2026-10-29,15-minute crypto+gold,,generator/search,,1,-0.80,-0.80,-0.80,0.54,,,FALSIFIED,unknown,,,table in PPW1,,
+family,low,FALSIFIED,Q2B,2026-10-29,15-minute crypto,,maker,300,0,,,,0.00,,,unknown,unknown,unknown,,README-text:Q2B,,"QUOTE2B registration: resting two-sided quotes on the Bitcoin hourly ladder with a real queue model (V2 worker Q2B, 2026-10-29, research only)"
+family,none,,R6T,2026-10-29,15-minute crypto,KXGOLD15M KXBTC15M KXETH15M KXDOGE15M,maker,440,8,-12.00,-6.70,-12.00,0.00,,,no result parsed,unknown,unknown,,REG:workers/R6T_REGISTRATION.md,,"R6T registration: MAKER5 and L1Q1 on recorder R6 (V2 worker R6T, 2026-10-29, research only)"
+family,high,,REGIME1,2026-10-29,15-minute crypto+gold,,exit/risk rule,,0,,,,0.80,0.75,no,FALSIFIED,no,n.a.,,README:7447,yes,"Results: EXIT1, REGIME1, GOLD1D (run once each, 2026-10-29; L1's history, 32,499 entries, windows by close-date thirds; PF per contract at 1 contract with per-order rounded fees unless stated)"
+family,high,,RISK1,2026-10-29,15-minute crypto+gold,,exit/risk rule,486,0,,,,0.91,,,unknown,unknown,unknown,1,workers/RISK1_RESULT.md,,"RISK1 result: the account under the current live rules, day-block bootstrap of the history"
+family,low,NOT_ENOUGH_DATA,RULES1,2026-10-29,daily/weekly ladders,KXBTC KXBTCD KXETH KXETHD,structural lock,258,0,,,,,,,unknown,unknown,unknown,2,README-text:RULES1,,"Pre-registration: RULES1 and FEE1 (owner approved via the main session, 2026-10-29; analysis only; written before either is run)"
+family,high,,SIZE3,2026-10-29,cost/execution,,filter on L1,11814,1,3.58,3.58,3.58,1.34,1.21,yes,FALSIFIED,no,n.a.,,README:7704,,"Result: SIZE3 (run once, 2026-10-29, V2; registration cfbdf81): FALSIFIED (17 tries)"
+family,high,,SLOTEX,2026-10-29,15-minute crypto,KXBTC15M,exit/risk rule,,1,2.61,2.61,2.61,2.72,1.52,yes,FALSIFIED,no,n.a.,504,README:7740;workers/SLOTEX_RESULT.md,,"Result: SLOTEX (open interest core with exits before settlement, for the second slot), 2026-10-29 | SLOTEX result (2026-10-30)"
+family,high,,SLOTEX-ETH,2026-10-29,15-minute crypto,KXETH15M,exit/risk rule,109,0,,,,1.08,0.84,no,NOT_ENOUGH_DATA,no,n.a.,64,README:7744;workers/SLOTEX_ETH_RESULT.md,,"Result: SLOTEX-ETH (the Bitcoin open interest core on Ethereum, no tuning), 2026-10-29 | SLOTEX-ETH result (2026-10-30)"
+family,high,,SPREAD1,2026-10-29,15-minute crypto+gold,,exit/risk rule,140,0,,,,1.30,1.21,yes,FALSIFIED,no,n.a.,,README:7578,yes,"Results: TIMEX1 FALSIFIED; DCAP1 caps FALSIFIED, SPREAD1 alone meets the risk definition on all 18 series only (run once each, 2026-10-29, V2)"
+family,none,,STRUCT1,2026-10-29,15-minute crypto+gold,KXGOLD15M KXBTC15M KXETH15M KXDOGE15M,generator/search,,0,,,,,,,no result parsed,unknown,unknown,0,REG:workers/STRUCT1_REGISTRATION.md,,"STRUCT1 registration: two information pieces on L1's history (Strategy Research V2, 2026-10-29, research only, no verdicts asked)"
+family,high,,TAPE,2026-10-29,hourly ladders,,favourite,,0,,,,,,,FALSIFIED,no,n.a.,,README:7455,yes,Results: CONF1 TWIN and TAPE (2026-10-29): both FALSIFIED (LADDER waits for the corrected hourly file)
+family,high,,THETA1,2026-10-29,sports,,favourite,30561,1,-8.90,-8.90,-8.90,0.15,,,NO_WINNER,no,n.a.,,README:7388,,"Result: THETA1 (run once, 2026-10-29): NO_WINNER, all 27 cells FALSIFIED in discovery"
+family,high,,TIMEX1,2026-10-29,15-minute crypto+gold,,exit/risk rule,32499,3,1.12,1.12,-3.00,,,,FALSIFIED,no,n.a.,,README:7578,yes,"Results: TIMEX1 FALSIFIED; DCAP1 caps FALSIFIED, SPREAD1 alone meets the risk definition on all 18 series only (run once each, 2026-10-29, V2)"
+family,high,,TWIN,2026-10-29,hourly ladders,,favourite,,0,,,,,,,FALSIFIED,no,n.a.,,README:7455,yes,Results: CONF1 TWIN and TAPE (2026-10-29): both FALSIFIED (LADDER waits for the corrected hourly file)
+family,low,FALSIFIED,DEPTH1,2026-10-30,15-minute crypto,KXGOLD15M KXBTC15M,maker,,0,,,,,,,unknown,unknown,unknown,,README-text:DEPTH1,,Pre-registration: DEPTH1
+family,high,,ESPN1,2026-10-30,sports,,round-trip scalp,1613,21,-2.54,1.37,-2.54,0.76,,,FALSIFIED,yes,failed,4,README:7752;workers/ESPN1_RESULT.md,,"Result: ESPN1 (ESPN in-play win probability vs Kalshi game-winner asks), 2026-10-30 | ESPN1 result: ESPN in-play win probability against Kalshi game-winner asks"
+try,high,,ESPN1:V1,2026-10-30,sports,,round-trip scalp,,1,-1.59,-1.59,-1.59,0.85,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V1 all, 0.08",2026-10-30,sports,,round-trip scalp,,1,0.85,0.85,0.85,1.09,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V1 all, 0.08",2026-10-30,sports,,round-trip scalp,,1,-2.21,-2.21,-2.21,0.80,,,unknown,unknown,,,table in ESPN1,,
+try,high,,ESPN1:V2,2026-10-30,sports,,round-trip scalp,,1,-0.38,-0.38,-0.38,0.96,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V2 all, 0.15",2026-10-30,sports,,round-trip scalp,,1,1.37,1.37,1.37,1.17,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V2 all, 0.15",2026-10-30,sports,,round-trip scalp,,1,-0.16,-0.16,-0.16,0.98,,,unknown,unknown,,,table in ESPN1,,
+try,high,,ESPN1:V3,2026-10-30,sports,,round-trip scalp,,1,-1.48,-1.48,-1.48,0.83,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V3 football, 0.08",2026-10-30,sports,,round-trip scalp,,1,-0.12,-0.12,-0.12,0.98,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V3 football, 0.08",2026-10-30,sports,,round-trip scalp,,1,-2.34,-2.34,-2.34,0.76,,,unknown,unknown,,,table in ESPN1,,
+try,high,,ESPN1:V4,2026-10-30,sports,,round-trip scalp,,1,-0.67,-0.67,-0.67,0.89,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V4 NBA+MLB, 0.08",2026-10-30,sports,,round-trip scalp,,1,1.13,1.13,1.13,1.17,,,unknown,unknown,,,table in ESPN1,,
+try,high,,"ESPN1:V4 NBA+MLB, 0.08",2026-10-30,sports,,round-trip scalp,,1,-0.46,-0.46,-0.46,0.92,,,unknown,unknown,,,table in ESPN1,,
+family,high,,ETHFUNNEL,2026-10-30,15-minute crypto,,round-trip scalp,7400,0,,,,,,,unknown,unknown,unknown,0,README:7989;workers/ETHFUNNEL_RESULT.md,,"Result: ETHFUNNEL (Ethereum smooth climb funnel, measurement, 0 tries), 2026-10-30 | ETHFUNNEL result (2026-10-30, measurement, 0 tries; registration `workers/ETHFUNNEL_REGISTRATION.md`)"
+family,high,,EXITOI-G,2026-10-30,15-minute crypto+gold,KXGOLD15M KXDOGE15M KXETH15M,exit/risk rule,1028,8,-1.24,1.51,-2.89,0.99,1.00,no,FALSIFIED,no,n.a.,4,README:7776;workers/EXITOI_G_RESULT.md,,"Result: EXITOI-G (NEWH3's open interest exit on gold, Dogecoin, Ethereum L1 entries), 2026-10-30 | EXITOI-G result (V2 worker EXITOI-G, 2026-10-30, research only)"
+try,high,,"EXITOI-G:Bitcoin (NEWH3, reference, not counted)",2026-10-30,15-minute crypto+gold,,exit/risk rule,,1,1.51,1.51,1.51,0.988,,,NOT_ENOUGH_DATA,unknown,,,table in EXITOI-G,,
+try,high,,EXITOI-G:Dogecoin KXDOGE15M,2026-10-30,15-minute crypto+gold,,exit/risk rule,,1,-2.89,-2.89,-2.89,1.390,,,NOT_ENOUGH_DATA,unknown,,,table in EXITOI-G,,
+try,high,,EXITOI-G:Ethereum KXETH15M,2026-10-30,15-minute crypto+gold,,exit/risk rule,,1,0.47,0.47,0.47,1.096,,,NOT_ENOUGH_DATA,unknown,,,table in EXITOI-G,,
+try,high,,EXITOI-G:Gold KXGOLD15M,2026-10-30,15-minute crypto+gold,,exit/risk rule,,1,-1.66,-1.66,-1.66,1.237,,,NOT_ENOUGH_DATA,unknown,,,table in EXITOI-G,,
+try,high,,"EXITOI-G:Pooled (gold, Doge, ETH, BTC)",2026-10-30,15-minute crypto+gold,,exit/risk rule,,1,-1.24,-1.24,-1.24,1.158,,,FALSIFIED,unknown,,,table in EXITOI-G,,
+family,high,,FXUSD,2026-10-30,other 15-minute series,,seasonality/calendar,2525,2,0.85,0.85,-0.96,1.44,,,NOT_ENOUGH_DATA,yes,failed,4,README:8017;workers/FXUSD_RESULT.md,,"Result: FXUSD (pooled US dollar calendar moments, five Kalshi FX 15 minute series), 2026-10-30 | FXUSD result (2026-10-30, run once)"
+try,high,,FXUSD:Discovery,2026-10-30,other 15-minute series,,seasonality/calendar,59,1,0.85,0.85,0.85,1.44,,,unknown,unknown,,,table in FXUSD,,
+try,high,,FXUSD:Validation,2026-10-30,other 15-minute series,,seasonality/calendar,23,1,-0.96,-0.96,-0.96,0.61,,,unknown,unknown,,,table in FXUSD,,
+family,high,,GEN10,2026-10-30,15-minute gold,,generator/search,3072,14,1.07,1.07,-1.47,0.86,,,FALSIFIED,no,n.a.,21225,README:7881;workers/GEN10_RESULT.md,,"Result: GEN10 (gold trade-tape generator, mid-window entries held to settlement), 2026-10-30 | GEN10 result (2026-10-30): gold's trade tape at 10 second resolution, mid-window entries (840 to 420 s) h"
+try,high,,"GEN10:both 540 s, dp30 > -2 & c10 > 27 & iw <=",2026-10-30,15-minute gold,,generator/search,,1,-1.47,-1.47,-1.47,1.39,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:both 600 s, dp30 <= 0 & dpw > 25 & f30 >",2026-10-30,15-minute gold,,generator/search,,1,-0.94,-0.94,-0.94,1.88,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:both 600 s, dp30 <= 0 & dpw > 25 & f30 >",2026-10-30,15-minute gold,,generator/search,,1,-0.94,-0.94,-0.94,1.88,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:both 660 s, f60 <= 2069 & bigdir30 > -1 ",2026-10-30,15-minute gold,,generator/search,,1,0.84,0.84,0.84,1.43,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 480 to 420 s, dp60 <= -8 & px > 24 & ",2026-10-30,15-minute gold,,generator/search,,1,-0.36,-0.36,-0.36,1.31,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 480 to 420 s, px <= 24 & c60 <= 199 &",2026-10-30,15-minute gold,,generator/search,,1,0.01,0.01,0.01,1.40,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 600 s, tbig <= 0 & dpw > 25",2026-10-30,15-minute gold,,generator/search,,1,1.07,1.07,1.07,1.97,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 600 s, tbig <= 0 & dpw > 25",2026-10-30,15-minute gold,,generator/search,,1,1.07,1.07,1.07,1.97,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 660 s, dp30 > -2 & px > 76",2026-10-30,15-minute gold,,generator/search,,1,-0.24,-0.24,-0.24,1.41,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 660 to 600 s, bigdir30 > -1 & f60 > 4",2026-10-30,15-minute gold,,generator/search,,1,-1.20,-1.20,-1.20,1.50,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:no 660 to 600 s, bigdir30 > -1 & f60 > 4",2026-10-30,15-minute gold,,generator/search,,1,-1.20,-1.20,-1.20,1.50,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:yes 600 to 540 s, f60 <= -3830 & px > 61",2026-10-30,15-minute gold,,generator/search,,1,0.02,0.02,0.02,1.35,,,unknown,unknown,,,table in GEN10,,
+try,high,,"GEN10:yes 840 to 480 s, f30 > 2306 & fw <= -57",2026-10-30,15-minute gold,,generator/search,,1,0.83,0.83,0.83,1.41,,,unknown,unknown,,,table in GEN10,,
+family,high,,GEN11,2026-10-30,15-minute crypto,,generator/search,558,18,-0.80,1.40,-1.49,0.87,,,FALSIFIED,no,n.a.,28450,README:7933;workers/GEN11_RESULT.md,,"Result: GEN11 (Bitcoin trade-tape generator, mid-window entries held to settlement), 2026-10-30 | GEN11 result (2026-10-30): Bitcoin's trade tape at 10 second resolution, mid-window entries (840 to 42"
+try,high,,"GEN11:both 480 to 420 s, iw <= -0.046 & dp60 >",2026-10-30,15-minute crypto,,generator/search,,1,-1.49,-1.49,-1.49,1.40,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 540 s, f30 <= 0 & c60 > 1944",2026-10-30,15-minute crypto,,generator/search,,1,1.40,1.40,1.40,1.44,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 540 to 420 s, fw <= -18,130 & px <=",2026-10-30,15-minute crypto,,generator/search,,1,-0.65,-0.65,-0.65,1.43,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 600 s, dp10 <= -5",2026-10-30,15-minute crypto,,generator/search,,1,-0.78,-0.78,-0.78,1.53,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 600 s, dp10 <= -5",2026-10-30,15-minute crypto,,generator/search,,1,-0.78,-0.78,-0.78,1.53,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 660 s, i30 > -0.077 & iw <= -0.092 ",2026-10-30,15-minute crypto,,generator/search,,1,-0.68,-0.68,-0.68,1.55,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 660 s, i30 > -0.077 & iw <= -0.092 ",2026-10-30,15-minute crypto,,generator/search,,1,-0.68,-0.68,-0.68,1.55,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 660 to 600 s, f60 > -35,040 & bigdi",2026-10-30,15-minute crypto,,generator/search,,1,-0.75,-0.75,-0.75,1.42,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 720 s, big30 > 2000 & iw <= 0.092 &",2026-10-30,15-minute crypto,,generator/search,,1,-0.18,-0.18,-0.18,1.58,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 720 s, big30 > 2000 & iw <= 0.092 &",2026-10-30,15-minute crypto,,generator/search,,1,-0.18,-0.18,-0.18,1.58,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 780 to 720 s, c10 <= 365 & f60 <= -",2026-10-30,15-minute crypto,,generator/search,,1,-0.05,-0.05,-0.05,1.59,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:both 780 to 720 s, c10 <= 365 & f60 <= -",2026-10-30,15-minute crypto,,generator/search,,1,-0.05,-0.05,-0.05,1.59,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:no 480 s, c30 > 877 & f10 > -5124",2026-10-30,15-minute crypto,,generator/search,,1,0.08,0.08,0.08,1.63,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:no 480 s, c30 > 877 & f10 > -5124",2026-10-30,15-minute crypto,,generator/search,,1,0.08,0.08,0.08,1.63,,,unknown,unknown,,,table in GEN11,,
+try,high,,"GEN11:no 780 to 720 s, f30 <= 7058 & px <= 68 ",2026-10-30,15-minute crypto,,generator/search,,1,-1.18,-1.18,-1.18,1.48,,,unknown,unknown,,,table in GEN11,,
+family,high,,GEN8,2026-10-30,15-minute crypto+gold,,generator/search,,14,-2.51,1.50,-3.14,0.55,0.52,no,FALSIFIED,no,n.a.,35738,README:7808;workers/GEN8_RESULT.md,,"Result: GEN8 (mid-price round trips, never held, gold and Bitcoin), 2026-10-30 | GEN8 result (2026-10-30): mid-price round trips (30c to 70c, sell 1 to 5 minutes later, never held). Bitcoin and gold F"
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-2.51,-2.51,-2.51,1.14,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-0.31,-0.31,-0.31,1.12,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.53,-1.53,-1.53,1.09,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.96,-1.96,-1.96,1.08,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-0.46,-0.46,-0.46,1.07,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-2.07,-2.07,-2.07,1.05,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-0.12,-0.12,-0.12,1.05,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-0.91,-0.91,-0.91,1.04,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.44,-1.44,-1.44,1.04,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.06,-3.06,-3.06,1.04,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.85,-1.85,-1.85,1.09,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.14,-3.14,-3.14,1.08,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.54,-1.54,-1.54,1.06,,,unknown,unknown,,,table in GEN8,,
+try,high,,GEN8:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,1.50,1.50,1.50,0.93,,,unknown,unknown,,,table in GEN8,,
+family,high,,GEN9,2026-10-30,15-minute crypto+gold,,generator/search,113,20,-4.55,-1.92,-6.35,0.25,0.24,no,FALSIFIED,no,n.a.,51067,README:7846;workers/GEN9_RESULT.md,,"Result: GEN9 (sub-minute tape generator, short round trips on Bitcoin and gold), 2026-10-30 | GEN9 result (2026-10-30): sub-minute round trips from the public trade tape (10 second bars, 20c to 80c, s"
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-4.55,-4.55,-4.55,0.98,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.64,-3.64,-3.64,0.87,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.91,-3.91,-3.91,0.78,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-4.98,-4.98,-4.98,0.76,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.88,-3.88,-3.88,0.75,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.05,-3.05,-3.05,0.75,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.58,-3.58,-3.58,0.75,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-1.92,-1.92,-1.92,0.72,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-5.00,-5.00,-5.00,0.72,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:BTC,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.67,-3.67,-3.67,0.70,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-6.27,-6.27,-6.27,0.85,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.92,-3.92,-3.92,0.73,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-4.23,-4.23,-4.23,0.70,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-2.94,-2.94,-2.94,0.69,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.14,-3.14,-3.14,0.69,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.79,-3.79,-3.79,0.69,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-2.29,-2.29,-2.29,0.68,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-3.72,-3.72,-3.72,0.66,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-6.18,-6.18,-6.18,0.64,,,unknown,unknown,,,table in GEN9,,
+try,high,,GEN9:GOLD,2026-10-30,15-minute crypto+gold,,generator/search,,1,-6.35,-6.35,-6.35,0.63,,,unknown,unknown,,,table in GEN9,,
+family,high,,GOLDFILL,2026-10-30,15-minute gold,,maker,,0,,,,,,,FALSIFIED,no,n.a.,8,README:7760,,"Result: GOLDFILL (fill model for L1's gold entry, quotes and tape only, no outcome read), 2026-10-30"
+family,high,,GOLDPYTH-H,2026-10-30,15-minute gold,KXGOLD15M,round-trip scalp,,0,,,,,,,NOT_RUNNABLE,no,n.a.,0,README:7804;workers/GOLDPYTH_H_RESULT.md,,"Result: GOLDPYTH-H (Pyth gold history against Kalshi's gold quotes), 2026-10-30: NOT_RUNNABLE | GOLDPYTH-H result (V2 worker, 2026-10-30): NOT_RUNNABLE, no try spent (N +0, running count unchanged)"
+family,high,,LADFADE,2026-10-30,hourly ladders,KXBTC15M,generator/search,105,3,0.02,0.19,-0.30,1.01,,,FALSIFIED,yes,failed,1,README:7816;workers/LADFADE_RESULT.md,,"Result: LADFADE (fade the Bitcoin 15 minute first-minute overshoot past the hourly ladder), 2026-10-30 | LADFADE result (V2 worker, 2026-10-30, research only)"
+try,high,,LADFADE:all,2026-10-30,hourly ladders,,generator/search,105,1,0.02,0.02,0.02,1.01,,,unknown,unknown,,,table in LADFADE,,
+try,high,,LADFADE:bought NO (ladder leaned YES),2026-10-30,hourly ladders,,generator/search,50,1,-0.30,-0.30,-0.30,0.94,,,unknown,unknown,,,table in LADFADE,,
+try,high,,LADFADE:bought YES (ladder leaned NO),2026-10-30,hourly ladders,,generator/search,55,1,0.19,0.19,0.19,1.07,,,unknown,unknown,,,table in LADFADE,,
+family,high,,LIQ1-INFO,2026-10-30,perps/venues,KXBTC15M,round-trip scalp,3291,0,,,,,,,PASSED,unknown,unknown,0,README:7800;workers/LIQ1_INFO_RESULT.md,,"Result: LIQ1-INFO (does a Deribit liquidation move Kalshi's Bitcoin quote and revert; no outcomes), 2026-10-30 | LIQ1-INFO result (information check only, no outcomes)"
+family,high,,LOCK2,2026-10-30,hourly ladders,,structural lock,5000,0,,,,,,,FALSIFIED,no,n.a.,,README:7964,,"Result: LOCK2 (locks between the 15 minute contract and the hourly ladder at coincident closes, forward, read once), 2026-10-30"
+family,high,,NEWH1,2026-10-30,15-minute crypto+gold,,generator/search,7869,1,-2.34,-2.34,-2.34,1.02,0.98,no,FALSIFIED,no,n.a.,9,README:7756;workers/NEWH1_RESULT.md,,"Result: NEWH1 (five new mechanisms on gold and Bitcoin), 2026-10-30 | NEWH1 result (V2 worker NEWH1, 2026-10-30, research only)"
+family,high,,NEWH10,2026-10-30,hourly ladders,KXBTCD KXGOLDH KXGOLDD KXGOLDW,seasonality/calendar,431,12,-2.62,1.68,-2.62,1.23,1.26,yes,FALSIFIED,no,n.a.,6,README:7820;workers/NEWH10_RESULT.md,,"Result: NEWH10 (does the hourly ladders' width follow the clock? weekends, US hours, Asian hours, macro releases), 2026-10-30 | NEWH10 result (V2 worker NEWH10, 2026-10-30, research only)"
+try,high,,NEWH10:H1 WKNDWIDE (Bitcoin ladder too wide at ,2026-10-30,hourly ladders,,seasonality/calendar,,2,1.24,1.24,1.16,1.23,,,FALSIFIED,unknown,,,table in NEWH10,,
+try,high,,NEWH10:H2 USNARROW-BTC (ladder too narrow in US,2026-10-30,hourly ladders,,seasonality/calendar,,2,-0.14,-0.01,-0.14,0.97,,,FALSIFIED,unknown,,,table in NEWH10,,
+try,high,,NEWH10:H3 ASIAWIDE-GOLD (gold hourly ladder too,2026-10-30,hourly ladders,,seasonality/calendar,,2,-1.07,-1.07,-1.44,0.70,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH10,,
+try,high,,NEWH10:H4 USNARROW-GOLD (gold hourly ladder too,2026-10-30,hourly ladders,,seasonality/calendar,,2,-1.35,-1.35,-2.17,0.65,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH10,,
+family,high,,NEWH11,2026-10-30,15-minute gold,KXBTC15M KXGOLD15M,generator/search,1840,6,1.46,2.74,-2.12,0.98,0.81,no,NOT_ENOUGH_DATA,yes,unknown,4,README:7834;workers/NEWH11_RESULT.md,,"Result: NEWH11 (gold's opening quote against COMEX; the CME weekend gap on Bitcoin), 2026-10-30 | NEWH11 result (V2 worker NEWH11, 2026-10-30, research only)"
+try,high,,NEWH11:H1 GOLDOPEN (gold window's first minute ,2026-10-30,15-minute gold,,generator/search,,2,1.46,1.46,-0.75,1.51,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH11,,
+try,high,,"NEWH11:H2 CMEGAP-W (weekend windows, Bitcoin at",2026-10-30,15-minute gold,,generator/search,,2,-0.20,-0.20,-1.30,0.98,,,FALSIFIED,unknown,,,table in NEWH11,,
+try,high,,NEWH11:H3 CMEGAP-R (Sunday reopen to Monday clo,2026-10-30,15-minute gold,,generator/search,,2,2.74,2.74,-2.12,1.82,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH11,,
+family,high,,NEWH12,2026-10-30,15-minute crypto,KXETHD,round-trip scalp,512,9,-4.20,-0.30,-4.20,0.89,,,FALSIFIED,no,n.a.,6,README:7862;workers/NEWH12_RESULT.md,,"Result: NEWH12 (cross-asset lead and lag among the 15 minute crypto books in the same window), 2026-10-30 | NEWH12 result (V2 worker NEWH12, 2026-10-30, research only)"
+try,high,,NEWH12:H1 XLAG-ETH (Bitcoin's book moved 15c+ i,2026-10-30,15-minute crypto,,round-trip scalp,,2,-1.11,-0.30,-1.11,0.89,,,FALSIFIED,unknown,,,table in NEWH12,,
+try,high,,"NEWH12:H2 XLAG-DOGE (same, Dogecoin lagging)",2026-10-30,15-minute crypto,,round-trip scalp,,2,-0.86,-0.86,-1.51,0.92,,,FALSIFIED,unknown,,,table in NEWH12,,
+try,high,,NEWH12:H3 XLAG2-DOGE (Bitcoin AND Ethereum each,2026-10-30,15-minute crypto,,round-trip scalp,,2,-0.43,-0.43,-1.05,0.96,,,FALSIFIED,unknown,,,table in NEWH12,,
+try,high,,NEWH12:H4 XLAG-BTC (control: Ethereum's book mo,2026-10-30,15-minute crypto,,round-trip scalp,,2,-1.08,-1.08,-1.24,0.90,,,FALSIFIED,unknown,,,table in NEWH12,,
+family,high,,NEWH13,2026-10-30,hourly ladders,KXBTCD KXGOLDH,structural lock,873,5,-1.57,1.02,-1.57,1.17,0.64,no,NOT_RUNNABLE,no,n.a.,7,README:7907;workers/NEWH13_RESULT.md,,"Result: NEWH13 (cross-market consistency and arbitrage: the same event priced twice, gold and Bitcoin), 2026-10-30 | NEWH13 result (V2 worker NEWH13, 2026-10-30, research only)"
+try,high,,NEWH13:H1 GLOCKH (gold 15 minute YES or NO plus,2026-10-30,hourly ladders,,structural lock,,2,-1.03,1.02,-1.03,0.22,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH13,,
+try,high,,NEWH13:H2 GLADX-L (the gold LADDER leg bought t,2026-10-30,hourly ladders,,structural lock,,2,0.21,0.21,-0.56,1.17,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH13,,
+family,high,,NEWH14,2026-10-30,hourly ladders,KXBTCD KXGOLDD KXGOLDH,model-vs-price,1157,11,-2.60,0.73,-3.82,0.75,0.69,no,NOT_RUNNABLE,no,n.a.,5,README:7941;workers/NEWH14_RESULT.md,,"Result: NEWH14 (volatility structures across the strikes of the hourly Bitcoin ladder; the GOLD2 count), 2026-10-30 | NEWH14 result (Strategy Research V2 worker NEWH14, 2026-10-30, research only)"
+try,high,,NEWH14:H1 STRANGLE-RV (buy the wings when the m,2026-10-30,hourly ladders,,model-vs-price,,2,-2.60,-2.60,-3.82,0.79,,,FALSIFIED,unknown,,,table in NEWH14,,
+try,high,,NEWH14:H2 CONDOR-RV (buy the middle when the mo,2026-10-30,hourly ladders,,model-vs-price,,2,-1.07,-1.07,-1.28,0.83,,,FALSIFIED,unknown,,,table in NEWH14,,
+try,high,,NEWH14:H3 CONDOR-ALWAYS (buy the middle every h,2026-10-30,hourly ladders,,model-vs-price,,2,-0.24,0.73,-0.24,0.98,,,FALSIFIED,unknown,,,table in NEWH14,,
+family,high,,NEWH15,2026-10-30,other 15-minute series,KXCRYPTOLEAD15M KXBTC15M,generator/search,6343,6,-2.04,-0.74,-4.70,0.80,,,FALSIFIED,yes,failed,,README:8006;workers/NEWH15_RESULT.md,,"Result: NEWH15 (all 15 minute series inventoried; the Coin Race), 2026-10-30 | NEWH15 result (2026-10-30, research only; registration `workers/NEWH15_REGISTRATION.md`, commit 2db0996, before any race "
+try,high,,NEWH15:,2026-10-30,other 15-minute series,,generator/search,308,1,-2.23,-2.23,-2.23,0.76,,,unknown,unknown,,,table in NEWH15,,
+try,high,,NEWH15:,2026-10-30,other 15-minute series,,generator/search,323,1,-4.70,-4.70,-4.70,0.60,,,unknown,unknown,,,table in NEWH15,,
+try,high,,NEWH15:,2026-10-30,other 15-minute series,,generator/search,102,1,-0.74,-0.74,-0.74,0.87,,,unknown,unknown,,,table in NEWH15,,
+try,high,,NEWH15:H1 RACE-UP-HYPE (YES HYPE when UP),2026-10-30,other 15-minute series,,generator/search,473,1,-2.04,-2.04,-2.04,0.80,,,unknown,unknown,,,table in NEWH15,,
+try,high,,NEWH15:H2 RACE-DOWN-BTC (YES BTC when DOWN),2026-10-30,other 15-minute series,,generator/search,464,1,-1.90,-1.90,-1.90,0.83,,,unknown,unknown,,,table in NEWH15,,
+try,high,,NEWH15:H3 RACE-UP-BTCNO (NO BTC when UP),2026-10-30,other 15-minute series,,generator/search,104,1,-1.17,-1.17,-1.17,0.74,,,unknown,unknown,,,table in NEWH15,,
+family,high,,NEWH16,2026-10-30,15-minute crypto+gold,,generator/search,100,15,-2.97,1.13,-2.97,1.14,1.18,yes,FALSIFIED,no,n.a.,,README:7993;workers/NEWH16_RESULT.md,,"Result: NEWH16 (documented short horizon binary market edges, held coin flip entries; run once 2026-10-30; research only) | NEWH16 result (run once, 2026-10-30, research only)"
+family,high,,NEWH17,2026-10-30,other 15-minute series,,generator/search,,0,,,,1.50,,,NOT_ENOUGH_DATA,no,n.a.,0,README:8034;workers/NEWH17_RESULT.md,,"Result: NEWH17 (feasibility screen of untested 15 minute ideas; 0 tries; 2026-10-30) | NEWH17 result (2026-10-30, research only)"
+family,high,,NEWH2,2026-10-30,15-minute gold,KXGOLDH,generator/search,5645,1,-1.44,-1.44,-1.44,0.73,0.85,no,FALSIFIED,no,n.a.,4,README:7768;workers/NEWH2_RESULT.md,,"Result: NEWH2 (four gold mechanisms), 2026-10-30 | NEWH2 result (V2 worker NEWH2, 2026-10-30, research only)"
+family,high,,NEWH3,2026-10-30,15-minute crypto,KXBTCD,generator/search,7869,4,1.51,1.51,-2.10,1.08,0.76,no,FALSIFIED,no,n.a.,4,README:7772;workers/NEWH3_RESULT.md,,"Result: NEWH3 (four Bitcoin mechanisms), 2026-10-30 | NEWH3 result (V2 worker NEWH3, 2026-10-30, research only)"
+family,high,,NEWH4,2026-10-30,hourly ladders,KXBTCD KXGOLDH,cheap side,1500,8,-2.87,-2.23,-4.92,0.70,0.66,no,FALSIFIED,no,n.a.,5,README:7780;workers/NEWH4_RESULT.md,,"Result: NEWH4 (the hourly ladders themselves, Bitcoin KXBTCD and gold KXGOLDH), 2026-10-30 | NEWH4 result (V2 worker NEWH4, 2026-10-30, research only)"
+family,high,,NEWH5,2026-10-30,15-minute crypto+gold,,filter on L1,,4,-3.00,0.02,-3.87,1.23,,,FALSIFIED,no,n.a.,4,README:7784;workers/NEWH5_RESULT.md,,"Result: NEWH5 (four skip filters on L1's gold entry), 2026-10-30, information only | NEWH5 result (V2 worker NEWH5, 2026-10-30, research only)"
+try,high,,NEWH5:F1 GLADF: hourly ladder 5c+ less sure of,2026-10-30,15-minute crypto+gold,,filter on L1,,1,-3.87,-3.87,-3.87,,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH5,,
+try,high,,NEWH5:F2 GTHIN: window volume before the look ,2026-10-30,15-minute crypto+gold,,filter on L1,,1,-0.30,-0.30,-0.30,,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH5,,
+try,high,,NEWH5:F4 GPRIOR: previous 15 minutes moved $6.,2026-10-30,15-minute crypto+gold,,filter on L1,,1,0.02,0.02,0.02,,,,FALSIFIED,unknown,,,table in NEWH5,,
+family,high,,NEWH6,2026-10-30,15-minute crypto+gold,,round-trip scalp,5645,5,-4.57,-4.57,-10.00,0.61,,,FALSIFIED,no,n.a.,8,README:7788;workers/NEWH6_RESULT.md,,"Result: NEWH6 (round trips on gold and Bitcoin, never held to settlement), 2026-10-30 | NEWH6 result (V2 worker NEWH6, 2026-10-30, research only)"
+family,high,,NEWH7,2026-10-30,15-minute crypto+gold,,round-trip scalp,5645,9,-4.56,-0.55,-4.56,0.81,0.81,no,FALSIFIED,no,n.a.,4,README:7792;workers/NEWH7_RESULT.md,,"Result: NEWH7 (implied volatility gaps, Coinbase premium, volatility lag), 2026-10-30 | NEWH7 result (V2 worker NEWH7, 2026-10-30, research only)"
+try,high,,NEWH7:H1 IVGAP (DVOL / RV24h top third; same t,2026-10-30,15-minute crypto+gold,,round-trip scalp,892,2,-1.75,-1.19,-1.75,0.84,,,FALSIFIED,unknown,,,table in NEWH7,,
+try,high,,NEWH7:H1 IVGAP (GVZ / RV20 top third; cheap si,2026-10-30,15-minute crypto+gold,,round-trip scalp,805,2,-1.71,-1.71,-4.56,0.85,,,FALSIFIED,unknown,,,table in NEWH7,,
+try,high,,NEWH7:H2 COINPREM (Coinbase-over-Binance premi,2026-10-30,15-minute crypto+gold,,round-trip scalp,257,2,-0.55,-0.55,-1.69,0.93,,,FALSIFIED,unknown,,,table in NEWH7,,
+try,high,,NEWH7:H3 VEGALAG (DVOL 5 min rise at the 99th ,2026-10-30,15-minute crypto+gold,,round-trip scalp,43,2,-1.18,-0.86,-1.18,0.67,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH7,,
+family,high,,NEWH8,2026-10-30,15-minute crypto,,cheap side,7869,11,2.49,2.49,-3.58,2.42,1.71,yes,FALSIFIED,no,n.a.,8,README:7796;workers/NEWH8_RESULT.md,,"Result: NEWH8 (what else is true in the open interest core's windows; independent late cheap-side conditions), 2026-10-30 | NEWH8 result (V2 worker NEWH8, 2026-10-30, research only)"
+try,high,,"NEWH8:R1 BUSYCALM (3 min volume above V90, che",2026-10-30,15-minute crypto,,cheap side,48,2,1.77,2.49,1.77,2.42,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH8,,
+try,high,,NEWH8:R2 PEEROI-X (Ethereum doi above E90 whil,2026-10-30,15-minute crypto,,cheap side,113,2,0.48,0.48,-0.99,1.13,,,FALSIFIED,unknown,,,table in NEWH8,,
+try,high,,NEWH8:R3 GOLDX (gold's cheap side when Bitcoin,2026-10-30,15-minute crypto,,cheap side,452,2,0.70,0.70,0.65,1.09,,,FALSIFIED,unknown,,,table in NEWH8,,
+try,high,,NEWH8:R4 SETTLED,2026-10-30,15-minute crypto,,cheap side,233,2,-2.02,-0.06,-2.02,0.69,,,FALSIFIED,unknown,,,table in NEWH8,,
+try,high,,NEWH8:R4 SETTLED (cheap side last led 6+ min a,2026-10-30,15-minute crypto,,cheap side,237,2,-0.59,-0.59,-3.58,0.88,,,FALSIFIED,unknown,,,table in NEWH8,,
+family,high,,NEWH9,2026-10-30,hourly ladders,KXBTCD KXGOLDH KXBTC15M KXGOLD15M,generator/search,8053,11,0.00,1.05,-3.19,0.89,0.95,no,NOT_ENOUGH_DATA,no,n.a.,7,README:7812;workers/NEWH9_RESULT.md,,"Result: NEWH9 (ladder locks, the ladder's lean at the 15 minute open, session drifts at the open), 2026-10-30 | NEWH9 result (V2 worker NEWH9, 2026-10-30, research only)"
+try,high,,NEWH9:H1 LADLOCK,2026-10-30,hourly ladders,,generator/search,,2,1.00,1.05,1.00,,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH9,,
+try,high,,NEWH9:H1 LADLOCK (YES at K1 + NO at K2 below $,2026-10-30,hourly ladders,,generator/search,,1,0.00,0.00,0.00,,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH9,,
+try,high,,NEWH9:H2 LADLEAN (hourly ladder's lean at the ,2026-10-30,hourly ladders,,generator/search,,2,-1.28,-0.52,-1.28,0.89,,,FALSIFIED,unknown,,,table in NEWH9,,
+try,high,,"NEWH9:H3 ASIAGOLD (gold UP at the open, Shangh",2026-10-30,hourly ladders,,generator/search,,2,-1.53,-1.53,-1.83,0.88,,,FALSIFIED,unknown,,,table in NEWH9,,
+try,high,,"NEWH9:H4 NYGOLD (gold DOWN at the open, COMEX ",2026-10-30,hourly ladders,,generator/search,,2,-1.13,-1.11,-1.13,0.90,,,FALSIFIED,unknown,,,table in NEWH9,,
+try,high,,"NEWH9:H5 BTC10AM (Bitcoin DOWN at the open, 9:",2026-10-30,hourly ladders,,generator/search,,2,-3.19,-0.67,-3.19,0.54,,,NOT_ENOUGH_DATA,unknown,,,table in NEWH9,,
+family,high,,OIDRIFT,2026-10-30,15-minute crypto,KXBTC15M,round-trip scalp,,0,,,,,,,unknown,unknown,unknown,1,workers/OIDRIFT_RESULT.md,,OIDRIFT result: drift threshold forward candidate for the Bitcoin open interest core (research only)
+family,high,,RACELOCK,2026-10-30,15-minute crypto,KXCRYPTOLEAD15M,structural lock,1662,2,-4.30,-4.30,-5.02,0.77,,,NOT_YET_FALSIFIED,unknown,unknown,,README:8021;workers/RACELOCK_RESULT.md,,"Result: RACELOCK (Coin Race Dutch book and over-round), 2026-10-30 | RACELOCK result (2026-10-30, research only)"
+try,high,,RACELOCK:discovery,2026-10-30,15-minute crypto,,structural lock,1662,1,-4.30,-4.30,-4.30,0.770,,,unknown,unknown,,,table in RACELOCK,,
+try,high,,RACELOCK:validation,2026-10-30,15-minute crypto,,structural lock,1379,1,-5.02,-5.02,-5.02,0.775,,,unknown,unknown,,,table in RACELOCK,,
+family,high,,SPORTCONS1,2026-10-30,sports,KX10,structural lock,1613,0,,,,,,,NOT_RUNNABLE,no,n.a.,3,README:8047;workers/SPORTCONS1_RESULT.md,,"Result: SPORTCONS1 (sports consistency locks, winner complement and game vs first-half totals), 2026-10-30 | SPORTCONS1 result (2026-10-30)"
+family,high,,WXNEW1,2026-10-30,weather,,model-vs-price,1197,15,-4.17,0.46,-4.17,0.80,0.67,no,FALSIFIED,no,n.a.,2,README:8105;workers/WXNEW1_RESULT.md,,"Result: WXNEW1 (weather markets, new angles; owner-opened 2026-10-30), 2026-10-31 | WXNEW1 result (scored once, 2026-10-31 03:30 UTC = 10:30 PM Central on Oct 30)"
+try,high,,"WXNEW1:Discovery (2026-08-23 to 2026-10-04, 41 ",2026-10-30,weather,,model-vs-price,399,2,-1.55,-1.33,-1.55,0.82,,,unknown,unknown,,,table in WXNEW1,,
+try,high,,WXNEW1:Pooled discovery + validation,2026-10-30,weather,,model-vs-price,526,2,-2.16,-1.90,-2.16,0.78,,,unknown,unknown,,,table in WXNEW1,,
+try,high,,"WXNEW1:Validation (2026-10-04 to 2026-10-19, 15",2026-10-30,weather,,model-vs-price,127,2,-1.73,-1.73,-1.74,0.68,,,unknown,unknown,,,table in WXNEW1,,
+family,high,,XVENUE1,2026-10-30,perps/venues,,cheap side,16222,0,,,,,,,unknown,unknown,unknown,0,README:8002;workers/XVENUE1_RESULT.md,,"Result: XVENUE1, Kalshi against Polymarket 15 minute Bitcoin and Ethereum resolutions (run 2026-10-30, measurement only) | XVENUE1: do Kalshi and Polymarket resolve the same 15 minute window different"
+family,high,,CPIMENT_RERUN,2026-10-31,economics/macro,KXCPI,seasonality/calendar,6346,9,-1.78,1.07,-1.78,0.84,0.87,no,FALSIFIED,no,n.a.,,workers/CPIMENT_RERUN_RESULT.md,,"CPIMENT-RERUN result (2026-10-31): CPI1 FALSIFIED, MENT1 FALSIFIED (first valid scoring; run 1 is VOID)"
+try,high,,CPIMENT_RERUN:Core,2026-10-31,economics/macro,,seasonality/calendar,102,1,1.07,1.07,1.07,1.34,,,unknown,unknown,,,table in CPIMENT_RERUN,,
+try,high,,CPIMENT_RERUN:Headline,2026-10-31,economics/macro,,seasonality/calendar,138,1,-0.28,-0.28,-0.28,0.93,,,unknown,unknown,,,table in CPIMENT_RERUN,,
+try,high,,CPIMENT_RERUN:Pooled (the claim),2026-10-31,economics/macro,,seasonality/calendar,240,1,0.46,0.46,0.46,1.11,,,unknown,unknown,,,table in CPIMENT_RERUN,,
+family,none,,DERIBIT-IMPLIED,2026-10-31,perps/venues,KXBTCD,model-vs-price,140,0,,,,1.00,,,no result parsed,unknown,unknown,,REG:8120,,"Pre-registration: DERIBIT-IMPLIED, hourly Bitcoin ladder against Deribit's options-implied digital probability (written 2026-10-31, 2:50 PM CT, before any recorded row exists; 2 tries, running count a"
+family,high,,ECONNEW1,2026-10-31,economics/macro,KXJOBLESSCLAIMS,model-vs-price,179,9,0.29,1.29,-1.62,0.89,,,FALSIFIED,no,n.a.,3,workers/ECONNEW1_RESULT.md,,"ECONNEW1 result (Strategy Research V2, 2026-10-31, research only)"
+try,high,,ECONNEW1:Discovery (to 2026-03-31),2026-10-31,economics/macro,,model-vs-price,79,1,1.29,1.29,1.29,1.55,,,unknown,unknown,,,table in ECONNEW1,,
+try,high,,ECONNEW1:Frozen holdout (2026-10-17 on; 2 release,2026-10-31,economics/macro,,model-vs-price,3,1,0.95,0.95,0.95,3.44,,,unknown,unknown,,,table in ECONNEW1,,
+try,high,,ECONNEW1:Pooled discovery + validation,2026-10-31,economics/macro,,model-vs-price,152,1,0.07,0.07,0.07,1.02,,,unknown,unknown,,,table in ECONNEW1,,
+try,high,,"ECONNEW1:Pooled, fees x1.2",2026-10-31,economics/macro,,model-vs-price,152,1,0.01,0.01,0.01,1.00,,,unknown,unknown,,,table in ECONNEW1,,
+try,high,,ECONNEW1:Validation (2026-04-01 to 10-16),2026-10-31,economics/macro,,model-vs-price,73,1,-1.62,-1.62,-1.62,0.57,,,unknown,unknown,,,table in ECONNEW1,,
+family,high,,ECONNEW2,2026-10-31,economics/macro,KXPCECORE KXAAAGASW,generator/search,100,12,-4.35,-0.21,-4.46,0.07,0.27,no,NOT_ENOUGH_DATA,no,n.a.,2,README:8097;workers/ECONNEW2_RESULT.md,,"Result: ECONNEW2 (weekly AAA gas ladder vs RBOB; core PCE vs the Cleveland nowcast), 2026-10-31 | ECONNEW2 result (Strategy Research V2, 2026-10-31, research only)"
+try,high,,ECONNEW2:Discovery (closes before 2025-11-14),2026-10-31,economics/macro,,generator/search,30,1,-4.35,-4.35,-4.35,0.07,,,unknown,unknown,,,table in ECONNEW2,,
+try,high,,ECONNEW2:Discovery (releases to 2025-12-19),2026-10-31,economics/macro,,generator/search,13,1,-1.52,-1.52,-1.52,0.37,,,unknown,unknown,,,table in ECONNEW2,,
+try,high,,ECONNEW2:Pooled,2026-10-31,economics/macro,,generator/search,21,1,-1.20,-1.20,-1.20,0.53,,,unknown,unknown,,,table in ECONNEW2,,
+try,high,,ECONNEW2:Pooled disc + val,2026-10-31,economics/macro,,generator/search,59,1,-4.46,-4.46,-4.46,0.16,,,unknown,unknown,,,table in ECONNEW2,,
+try,high,,ECONNEW2:Validation (2025-11-14 to 2026-05-07),2026-10-31,economics/macro,,generator/search,29,1,-2.28,-2.28,-2.28,0.27,,,unknown,unknown,,,table in ECONNEW2,,
+try,high,,ECONNEW2:Validation (2026-01-29 to 2026-05-28),2026-10-31,economics/macro,,generator/search,8,1,-0.21,-0.21,-0.21,0.84,,,unknown,unknown,,,table in ECONNEW2,,
+family,high,,LADLONG1,2026-10-31,hourly ladders,KXBTCD,cheap side,595,14,-1.09,5.27,-1.09,0.64,0.72,no,FALSIFIED,no,n.a.,4,README:8053;workers/LADLONG1_RESULT.md,,"Result: LADLONG1 (sell the far wings of the hourly Bitcoin ladder by buying the other side, held), 2026-10-31 | LADLONG1 result (V2 worker, 2026-10-31, research only)"
+try,high,,LADLONG1:,2026-10-31,hourly ladders,,cheap side,1130,1,-0.20,-0.20,-0.20,0.95,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,LADLONG1:,2026-10-31,hourly ladders,,cheap side,687,1,1.35,1.35,1.35,1.25,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,LADLONG1:,2026-10-31,hourly ladders,,cheap side,649,1,-0.82,-0.82,-0.82,0.86,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,LADLONG1:,2026-10-31,hourly ladders,,cheap side,1101,1,-0.94,-0.94,-0.94,0.80,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,"LADLONG1:DNfar 94c-98c (YES, ~0.970)",2026-10-31,hourly ladders,,cheap side,1028,1,-0.41,-0.41,-0.41,0.90,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,"LADLONG1:DNnear 88c-94c (YES, ~0.926)",2026-10-31,hourly ladders,,cheap side,687,1,0.11,0.11,0.11,1.02,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,"LADLONG1:UPfar 2c-6c YES mid (NO, paid ~0.967)",2026-10-31,hourly ladders,,cheap side,1085,1,-1.09,-1.09,-1.09,0.72,,,unknown,unknown,,,table in LADLONG1,,
+try,high,,"LADLONG1:UPnear 6c-12c (NO, ~0.918)",2026-10-31,hourly ladders,,cheap side,731,1,0.13,0.13,0.13,1.02,,,unknown,unknown,,,table in LADLONG1,,
+family,high,,OICOREX1,2026-10-31,other 15-minute series,KXJOBLESSCLAIMS,generator/search,152,22,0.07,4.53,-12.00,1.50,,,FALSIFIED,no,n.a.,8,README:8074;workers/OICOREX1_RESULT.md,,"Result: OICOREX1 (the Bitcoin open interest core on the other 15 minute markets), 2026-10-31 | OICOREX1 result: the Bitcoin open interest core on the other 15 minute markets (2026-10-31)"
+try,high,,OICOREX1:KXBNB15M,2026-10-31,other 15-minute series,,generator/search,,2,0.91,0.91,-0.28,1.23,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXBTC15M,2026-10-31,other 15-minute series,,generator/search,,2,4.41,4.53,4.41,2.28,,,unknown,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXDOGE15M,2026-10-31,other 15-minute series,,generator/search,,2,1.22,1.22,-0.19,1.36,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXHYPE15M,2026-10-31,other 15-minute series,,generator/search,,2,0.93,0.93,-1.42,1.20,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXNEAR15M,2026-10-31,other 15-minute series,,generator/search,,2,-0.32,-0.32,-1.59,0.92,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXSILVER15M,2026-10-31,other 15-minute series,,generator/search,,2,-1.95,-1.00,-1.95,0.55,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXWTI15M,2026-10-31,other 15-minute series,,generator/search,,2,0.12,0.53,0.12,1.02,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXXRP15M,2026-10-31,other 15-minute series,,generator/search,,2,0.49,1.41,0.49,1.09,,,FALSIFIED,unknown,,,table in OICOREX1,,
+try,high,,OICOREX1:KXZEC15M,2026-10-31,other 15-minute series,,generator/search,,2,-1.62,0.67,-1.62,0.68,,,FALSIFIED,unknown,,,table in OICOREX1,,
+family,low,NOT_ENOUGH_DATA,RAINCAL,2026-10-31,weather,KXRAIN KXRAIND,generator/search,450,2,-2.50,-2.50,-4.17,,,,unknown,unknown,unknown,0,README-text:RAINCAL,,"Pre-registration: RAINCAL, daily rain markets (KXRAIN) against the NWS probability of precipitation (written 2026-10-31, about 3:00 PM CT, before any recorded row exists; 2 tries, running count about "
+family,none,,SPORTS-PRE,2026-10-31,sports,KXNFLGAME KXNCAAFGAME KXNBAGAME KXMLBGAME,model-vs-price,600,0,,,,0.95,,,no result parsed,unknown,unknown,,REG:8124,,"Pre-registration: SPORTS-PRE, pre-game moneylines against ESPN's pre-game win probability (written 2026-10-31, 2:50 PM CT, before any recorded row exists; 2 tries, running count about 728,696, z bar a"
+family,high,,CHART1,2026-11-02,entertainment,,round-trip scalp,150,0,,,,,,,NOT_RUNNABLE,no,n.a.,2,README:8137;workers/CHART1_RESULT.md,,Result: CHART1 (2026-11-02): NOT_RUNNABLE (no outcome computed) | CHART1 result (2026-11-02)
+family,high,,EQUAKE1,2026-11-02,other,KXBIGGESTQUAKE KXEARTHQUAKEM,model-vs-price,150,2,-0.92,-0.92,-0.92,0.60,,,NOT_ENOUGH_DATA,no,n.a.,2,README:8151;workers/EQUAKE1_RESULT.md,,"Result: EQUAKE1 (earthquake markets against a Gutenberg-Richter base rate from USGS; worker, 2026-11-02; `workers/EQUAKE1_RESULT.md`, `src/scalper/equake1.py`, registration commit 98b39fe) | EQUAKE1 r"
+family,high,,ESPORT1,2026-11-02,sports,KXCS2MAP,seasonality/calendar,164,10,-1.14,-0.69,-1.81,0.85,,,FALSIFIED,no,n.a.,2,README:8177;workers/ESPORT1_RESULT.md,,"Result: ESPORT1 (2026-11-02): both tries FALSIFIED (registered in 2590e42; `workers/ESPORT1_RESULT.md`, `src/scalper/esport1.py`) | ESPORT1 result (2026-11-02; registration commit 2590e42, scorer comm"
+family,high,,HOURLY1,2026-11-02,hourly ladders,KXSOLD KXXRPD KXDOGED KXHYPED,round-trip scalp,45438,24,-0.66,3.06,-1.13,0.96,,,FALSIFIED,no,n.a.,,README:8192;workers/HOURLY1_RESULT.md,,"Result: HOURLY1 (2026-11-02; registered in acdb9e5; `workers/HOURLY1_RESULT.md`, `src/scalper/hourly1.py`) | HOURLY1 result (2026-11-02; registered in acdb9e5 before any candle; `src/scalper/hourly1.p"
+family,high,,LAG15,2026-11-02,other 15-minute series,KXHYPE15M KXBNB15M KXZEC15M KXNEAR15M,round-trip scalp,,7,-1.22,-0.21,-1.39,0.87,,,FALSIFIED,yes,failed,,README:8186;workers/LAG15_RESULT.md,,"Result: LAG15 (2026-11-02; registered in 0aea1f9; `workers/LAG15_RESULT.md`, `src/scalper/lag15.py`) | LAG15 result (2026-11-02; registered in 0aea1f9 before any candle; `src/scalper/lag15.py`, `tests"
+family,high,,MORTGAGE1,2026-11-02,economics/macro,KX30YMORTW,seasonality/calendar,150,5,-2.71,-2.01,-5.85,1.15,0.34,no,NOT_ENOUGH_DATA,yes,unknown,2,README:8154;workers/MORTGAGE1_RESULT.md,,"Result: MORTGAGE1 (2026-11-02; registered in 1c0afbe; `workers/MORTGAGE1_RESULT.md`, `src/scalper/mortgage1.py`) | MORTGAGE1 result (single run 2026-11-02, after registration commit 1c0afbe; `src/scal"
+family,high,,SPOTD1,2026-11-02,entertainment,KXSPOTIFYD KXSPOTIFYGLOBALD KXSPOTIFYARTISTD,model-vs-price,150,7,-0.39,0.39,-1.20,0.45,,,FALSIFIED,no,n.a.,2,README:8180;workers/SPOTD1_RESULT.md,,"Result: SPOTD1 (2026-11-02): FALSIFIED (both tries; model Brier far worse than the market; also under 150 trades). `workers/SPOTD1_RESULT.md`, `src/scalper/spotd1.py`, registration commit 14b96f5 (bef"
+family,low,NOT_RUNNABLE,TSA,2026-11-02,economics/macro,KXTSA KXTSAW,seasonality/calendar,150,1,0.67,0.67,0.67,1.10,1.25,yes,unknown,unknown,unknown,2,README-text:TSA,,"Pre-registration: TSA1, weekly TSA throughput ladder (KXTSAW and TSAW) against same-week-last-year x trailing YoY (written 2026-11-02, before any candle was downloaded or any result computed; 2 tries,"
+family,high,,TSA1,2026-11-02,economics/macro,KXTSAW KXTSA,seasonality/calendar,119,4,0.67,0.67,0.26,1.10,1.25,yes,FALSIFIED,no,n.a.,2,README:8157;workers/TSA1_RESULT.md,,Result: TSA1 (2026-11-02): FALSIFIED (Brier worse than the market; PF under 1.5 in both read windows; trades 119 under the 150 floor) | TSA1 result (2026-11-02; registration `workers/TSA1_REGISTRATION
+family,high,,WTIW1,2026-11-02,daily/weekly ladders,KXWTIH KXSILVERH KXWTIW KXTNOTEW,round-trip scalp,150,3,0.77,1.11,0.77,2.02,,,NOT_ENOUGH_DATA,no,n.a.,6,README:8183;workers/WTIW1_RESULT.md,,"Result: WTIW1 (2026-11-02; registered in ed02a43; `workers/WTIW1_RESULT.md`, `src/scalper/wtiw1.py`) | WTIW1 result (2026-11-02; registration commit ed02a43, pushed before any candle; `src/scalper/wti"
+family,high,,BARRIER1,2026-11-03,15-minute crypto,KXBTCMAXW KXBTCMAXM KXETHMAXM KXBTCMAXMON,model-vs-price,,0,,,,0.00,,,NOT_ENOUGH_DATA,no,n.a.,4,README:8422;workers/BARRIER1_RESULT.md,,"Result: BARRIER1 (monthly one-touch markets vs a reflection-principle model; run once 2026-11-03): NOT_ENOUGH_DATA | BARRIER1 result (run once, 2026-11-03): NOT_ENOUGH_DATA"
+family,low,FALSIFIED,BOOKCH1,2026-11-03,other 15-minute series,KXINXU KXNASDAQ100U,favourite,150,0,,,,,,,unknown,unknown,unknown,20,README-text:BOOKCH1,,"Pre-registration: BOOKCH1, relative order book imbalance (and, as a separately counted second try, cheap-side depth withdrawal) as the trigger, the cheaper side (ask 0.05 to 0.50) of Bitcoin and XRP 1"
+family,high,,COST1,2026-11-03,cost/execution,KXBTCD,maker,,1,2.30,2.30,2.30,,,,unknown,unknown,unknown,0,README:8283;workers/COST1_RESULT.md,yes,"Result: VENUES1 and COST1 (Strategy Research V2 worker, 2026-11-03; measurement and desk research, 0 tries, N unchanged about 728,700) | COST1 result (2026-11-03). Measurement and desk research. No st"
+family,none,,COUNT1,2026-11-03,daily/weekly ladders,KXTRUTHSOCIAL KXTRUTHSOCIALD KXEOWEEK,model-vs-price,,0,,,,,,,no result parsed,unknown,unknown,,REG:8443,,"Registration: COUNT1 (count / pace markets: Truth Social post counts weekly and daily against a pace model on CNN's public archive, cheap bracket with a 3x ratio rule; 2 rules, N +4), 2026-11-03"
+family,none,,DATA830,2026-11-03,other 15-minute series,,seasonality/calendar,,0,,,,2.47,,,no result parsed,unknown,unknown,,REG:8276,,"Pre-registration: EVENT830, forward-only freeze of EVENT1's DATA830 slice: the cheap side (ask 0.05 to 0.50, hard fill limit 0.50) of silver, copper, WTI, EURUSD, GBPUSD, USDJPY, HYPE and BNB 15 minut"
+family,none,,ELECT1,2026-11-03,politics,KXBTCD,cheap side,150,1,-0.63,-0.63,-0.63,0.71,,,no result parsed,unknown,unknown,4,REG:8453,,"Pre-registration: ELECT1, cheap side (ask 3c to 30c) of US midterm race-winner markets on election night 2026-11-03, rating-implied probability at least 3x ask vs plain control, held to settlement (wr"
+family,high,,ENTER1,2026-11-03,entertainment,KXELONTWEETS KXPOTUSTWEETS KXFEDTWEETS KXRT,cheap side,150,0,,,,0.86,,,NOT_RUNNABLE,no,n.a.,2,README:8437;workers/ENTER1_RESULT.md,,"Registration and result: ENTER1, public-number entertainment/culture markets, cheap side held (2026-11-03; discovery lane; N +2, running about 730,062, z bar about 5.27) | ENTER1 result (2026-11-03): "
+family,high,,EVENT1,2026-11-03,other 15-minute series,,seasonality/calendar,2,18,0.19,4.40,-3.05,2.47,1.71,yes,FALSIFIED,no,n.a.,8,README:8260;workers/EVENT1_RESULT.md,,"Result: EVENT1 (cheap side next to scheduled events on silver, copper, WTI, EURUSD, GBPUSD, USDJPY, HYPE, BNB), 2026-11-03 | EVENT1 result (run once, 2026-11-03; research only)"
+try,high,,EVENT1:W1 08-06 to 09-04,2026-11-03,other 15-minute series,,seasonality/calendar,283,1,1.25,1.25,1.25,1.20,,,unknown,unknown,,,table in EVENT1,,
+try,high,,EVENT1:W1+W2,2026-11-03,other 15-minute series,,seasonality/calendar,617,1,0.19,0.19,0.19,1.02,,,unknown,unknown,,,table in EVENT1,,
+try,high,,EVENT1:W2 09-05 to 10-04,2026-11-03,other 15-minute series,,seasonality/calendar,334,1,-0.84,-0.84,-0.84,0.89,,,unknown,unknown,,,table in EVENT1,,
+family,low,NOT_ENOUGH_DATA,EVENT830,2026-11-03,other 15-minute series,,seasonality/calendar,,2,-1.40,-1.40,-2.95,0.83,0.74,no,unknown,unknown,unknown,22,README-text:EVENT830,,"Pre-registration: EVENT830, forward-only freeze of EVENT1's DATA830 slice: the cheap side (ask 0.05 to 0.50, hard fill limit 0.50) of silver, copper, WTI, EURUSD, GBPUSD, USDJPY, HYPE and BNB 15 minut"
+family,high,,FAMSPORTS,2026-11-03,sports,,model-vs-price,122,3,-1.12,-0.35,-1.12,0.70,0.82,no,FALSIFIED,no,n.a.,2,README:8264;workers/FAMSPORTS_RESULT.md,,"Result: FAMSPORTS (2026-11-03; registered in 8bb158d; `workers/FAMSPORTS_RESULT.md`, `src/scalper/famsports.py`): both tries FALSIFIED | FAMSPORTS result (run once 2026-11-03; registered in 8bb158d be"
+try,high,,"FAMSPORTS:Try A, edge 0.08",2026-11-03,sports,,model-vs-price,47,1,-1.12,-1.12,-1.12,0.73,,,unknown,unknown,,,table in FAMSPORTS,,
+try,high,,"FAMSPORTS:Try B, edge 0.15",2026-11-03,sports,,model-vs-price,16,1,-0.35,-0.35,-0.35,0.19,,,unknown,unknown,,,table in FAMSPORTS,,
+family,low,DUPLICATE,FAMWX,2026-11-03,weather,,model-vs-price,1197,2,-2.50,-2.50,-4.17,,,,unknown,unknown,unknown,0,README-text:FAMWX,,FAMWX registration and result: weather daily highs/lows against a public keyless forecast (2026-11-03)
+family,high,,FAMXV,2026-11-03,sports,,structural lock,230,0,,,,1.50,,,DUPLICATE,no,n.a.,2,README:8273;workers/FAMXV_RESULT.md,,"Result: FAMXV (2026-11-03; registered in 8bb158d, Amendment 1 in 953e67a before any outcome; `workers/FAMXV_RESULT.md`, `src/scalper/famxv.py`) | FAMXV result (run once 2026-11-03 after Amendment 1; r"
+family,none,,FEDIMPL1,2026-11-03,economics/macro,KXTNOTE,model-vs-price,150,0,,,,,,,no result parsed,unknown,unknown,4,REG:8425,,"Registration: FEDIMPL1 (cheap outcomes of Kalshi FOMC markets, KXFEDDECISION and KXFED, against a rate implied by the 1 month Treasury bill yield; 2 rules, N +4), 2026-11-03"
+family,high,,HRSEAS1,2026-11-03,hourly ladders,KXBTCD KXETHD,cheap side,150,0,,,,0.93,1.03,no,FALSIFIED,yes,failed,18,README:8411;workers/HRSEAS1_RESULT.md,,"Result: HRSEAS1 (run once on 2026-11-03; development, then the frozen last third for the one slot that passed): FALSIFIED | HRSEAS1 result: clock-block seasonality of the cheap tail on the hourly Bitc"
+family,high,,IDXFUT1,2026-11-03,daily/weekly ladders,,model-vs-price,121,0,,,,1.01,,,NOT_ENOUGH_DATA,no,n.a.,8,README:8339;workers/IDXFUT1_RESULT.md,,"Result: IDXFUT1 (S&P 500 and Nasdaq 100 4 pm ladders against OKX SPY and QQQ equity-index perps and 60 minute realised vol; cheap asks, reference probability at least 3x the ask), 2026-11-03 | IDXFUT1"
+family,high,,MAKERTAIL1,2026-11-03,hourly ladders,KXBTCD,maker,175,6,-2.88,0.63,-2.88,0.71,,,NOT_ENOUGH_DATA,no,n.a.,4,README:8456;workers/MAKERTAIL1_RESULT.md,,"Result: MAKERTAIL1 (run once 2026-11-03, DEV only; `workers/MAKERTAIL1_RESULT.md`, `src/scalper/makertail1.py`, registration commit 49a0fce): NOT_ENOUGH_DATA by the code (143 of 150 pessimistic fills)"
+try,high,,MAKERTAIL1:OPTIMISTIC (queue ahead all cancels; inf,2026-11-03,hourly ladders,,maker,,1,0.13,0.13,0.13,1.03,,,unknown,unknown,,,table in MAKERTAIL1,,
+try,high,,MAKERTAIL1:PESSIMISTIC (queue never cancels; verdic,2026-11-03,hourly ladders,,maker,,1,-1.01,-1.01,-1.01,0.71,,,unknown,unknown,,,table in MAKERTAIL1,,
+try,high,,MAKERTAIL1:middle (half the queue cancels; info),2026-11-03,hourly ladders,,maker,,1,-1.07,-1.07,-1.07,0.70,,,unknown,unknown,,,table in MAKERTAIL1,,
+family,high,,MECHOI1,2026-11-03,15-minute crypto,,cheap side,3119,0,,,,2.28,,,NOT_ENOUGH_DATA,no,n.a.,,README:8270;workers/MECHOI1_RESULT.md,,"Result: MECHOI1 (2026-11-03; registered in afab6e8 before any outcome; `workers/MECHOI1_RESULT.md`, `src/scalper/mechoi1.py`, `tests/test_mechoi1.py`) | MECHOI1 result: why does OICORE work? (2026-11-"
+family,low,FALSIFIED,NEWLIST1,2026-11-03,15-minute gold,KXMVE,cheap side,,0,,,,0.70,,,unknown,unknown,unknown,4,README-text:NEWLIST1,,"Registration: NEWLIST1 (cheap sides, ask 5c to 30c, in the first 1, 3 and 6 hours after a market is listed; non-15-minute families), 2026-11-03"
+family,high,,NOWCAST1,2026-11-03,economics/macro,KXGDP,model-vs-price,150,0,,,,1.00,,,NOT_ENOUGH_DATA,no,n.a.,2,README:8440;workers/NOWCAST1_RESULT.md,,"Result: NOWCAST1 (macro release ladders vs public nowcast, cheap side 3x ratio rule; run 2026-11-03, development only, holdout of 44 release-series unread): NOT_ENOUGH_DATA | NOWCAST1 result (Strategy"
+family,high,,OEXIT1,2026-11-03,15-minute crypto,,exit/risk rule,18,0,,,,3.23,,,unknown,yes,unknown,3,README:8241;workers/OEXIT1_RESULT.md,,"Result: OEXIT1 (sell half at 3x the entry price on OICORE), 2026-11-03 | OEXIT1 result: selling half at 3x on OICORE (2026-11-03, run once, registration `workers/OEXIT1_REGISTRATION.md` commit 4d64d15"
+family,high,,OIHR1,2026-11-03,hourly ladders,KXBTCD KXETHD KXGOLDH,cheap side,,12,-1.01,0.53,-4.18,0.80,0.64,no,FALSIFIED,no,n.a.,4,README:8397;workers/OIHR1_RESULT.md,,"Result: OIHR1 (the OICORE shape on the hourly Bitcoin ladder KXBTCD), 2026-11-03 | OIHR1 result: the OICORE shape on the hourly Bitcoin ladder KXBTCD (2026-11-03)"
+try,high,,OIHR1:A (lean side) W1 trigger,2026-11-03,hourly ladders,,cheap side,35,1,-1.01,-1.01,-1.01,0.63,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:A W1 control,2026-11-03,hourly ladders,,cheap side,219,1,-0.69,-0.69,-0.69,0.87,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:A W2 control,2026-11-03,hourly ladders,,cheap side,227,1,-1.83,-1.83,-1.83,0.74,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:A W2 trigger,2026-11-03,hourly ladders,,cheap side,35,1,0.49,0.49,0.49,1.21,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:A pooled control,2026-11-03,hourly ladders,,cheap side,446,1,-1.69,-1.69,-1.69,0.80,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:A pooled trigger,2026-11-03,hourly ladders,,cheap side,70,1,-0.34,-0.34,-0.34,0.90,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B (cheaper side) W1 trigger,2026-11-03,hourly ladders,,cheap side,35,1,-2.40,-2.40,-2.40,0.37,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B W1 control,2026-11-03,hourly ladders,,cheap side,206,1,-3.22,-3.22,-3.22,0.63,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B W2 control,2026-11-03,hourly ladders,,cheap side,217,1,-2.88,-2.88,-2.88,0.65,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B W2 trigger,2026-11-03,hourly ladders,,cheap side,34,1,0.53,0.53,0.53,1.22,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B pooled control,2026-11-03,hourly ladders,,cheap side,423,1,-4.18,-4.18,-4.18,0.64,,,unknown,unknown,,,table in OIHR1,,
+try,high,,OIHR1:B pooled trigger,2026-11-03,hourly ladders,,cheap side,69,1,-0.93,-0.93,-0.93,0.76,,,unknown,unknown,,,table in OIHR1,,
+family,high,,P06,2026-11-03,other,,other/unclear,,3,-0.62,1.08,-0.62,0.78,,,FALSIFIED,no,n.a.,,README:8311,,"Result: P06 (PUB20) W3 read, 2026-11-03: FALSIFIED"
+family,high,,PERPOI1,2026-11-03,hourly ladders,KXBTCPERP KXBTCD,cheap side,330,0,,,,0.73,0.40,no,NOT_ENOUGH_DATA,no,n.a.,4,README:8393;workers/PERPOI1_RESULT.md,,"Result: PERPOI1 (perp open-interest surge to a cheap-tail trade on the hourly Bitcoin ladder), development read 2026-11-03 | PERPOI1 result (development read, run once 2026-11-03; rule, bars and split"
+family,high,,PUB20,2026-11-03,other,KXINXU KXNASDAQ100U,round-trip scalp,150,13,-0.62,4.50,-3.76,0.77,0.77,no,FALSIFIED,no,n.a.,20,README:8295;workers/PUB20_RESULT.md,,"Result: PUB20 (run once 2026-11-03; registered in 1879dab, code and Amendment 1 in 5739adf; `workers/PUB20_RESULT.md`, `src/scalper/pub20.py`, `tests/test_pub20.py`) | PUB20 result (run once 2026-11-0"
+family,high,,QSTALE1,2026-11-03,other 15-minute series,,round-trip scalp,343,8,-0.91,0.62,-3.50,0.82,0.82,no,FALSIFIED,no,n.a.,,README:8230;workers/QSTALE1_RESULT.md,,"Result: QSTALE1 (2026-11-03): FALSIFIED (registered in 24dcffc, before any outcome; `workers/QSTALE1_RESULT.md`, `src/scalper/qstale1.py`, `tests/test_qstale1.py`) | QSTALE1 result: a stale quote with"
+try,high,,QSTALE1:W1 (2026-08-06 to 09-04),2026-11-03,other 15-minute series,,round-trip scalp,282,1,-2.14,-2.14,-2.14,0.72,,,unknown,unknown,,,table in QSTALE1,,
+try,high,,QSTALE1:W2 (2026-09-05 to 10-04),2026-11-03,other 15-minute series,,round-trip scalp,167,1,0.62,0.62,0.62,1.20,,,unknown,unknown,,,table in QSTALE1,,
+try,high,,QSTALE1:pooled W1+W2,2026-11-03,other 15-minute series,,round-trip scalp,449,1,-0.91,-0.91,-0.91,0.87,,,unknown,unknown,,,table in QSTALE1,,
+family,high,,SETTLE1,2026-11-03,other 15-minute series,,round-trip scalp,,8,-0.57,1.08,-4.15,5.04,2.08,yes,NOT_ENOUGH_DATA,no,n.a.,10,README:8351;workers/SETTLE1_RESULT.md,,"Result: SETTLE1 (2026-11-03): NOT_ENOUGH_DATA by count, FALSIFIED on every PF line (registered in bddb529; `workers/SETTLE1_RESULT.md`, `src/scalper/settle1.py`, `tests/test_settle1.py`, `studies/sett"
+try,high,,SETTLE1:Control (,2026-11-03,other 15-minute series,,round-trip scalp,,1,1.08,1.08,1.08,0.197,,,unknown,unknown,,,table in SETTLE1,,
+try,high,,SETTLE1:W1,2026-11-03,other 15-minute series,,round-trip scalp,23,1,0.16,0.16,0.16,1.10,,,unknown,unknown,,,table in SETTLE1,,
+try,high,,SETTLE1:W1+W2,2026-11-03,other 15-minute series,,round-trip scalp,116,1,-0.57,-0.57,-0.57,0.86,,,unknown,unknown,,,table in SETTLE1,,
+try,high,,SETTLE1:W1+W2 +1c slip,2026-11-03,other 15-minute series,,round-trip scalp,116,1,-0.86,-0.86,-0.86,0.80,,,unknown,unknown,,,table in SETTLE1,,
+try,high,,SETTLE1:W1+W2 fees x1.2,2026-11-03,other 15-minute series,,round-trip scalp,116,1,-0.63,-0.63,-0.63,0.85,,,unknown,unknown,,,table in SETTLE1,,
+try,high,,SETTLE1:W2,2026-11-03,other 15-minute series,,round-trip scalp,93,1,-0.76,-0.76,-0.76,0.81,,,unknown,unknown,,,table in SETTLE1,,
+family,high,,SKEW1,2026-11-03,hourly ladders,KXBTCD,cheap side,1249,4,-0.63,-0.63,-4.43,0.69,0.77,no,FALSIFIED,no,n.a.,4,README:8465;workers/SKEW1_RESULT.md,,"Result: SKEW1 (run once 2026-11-03, DEV only; `workers/SKEW1_RESULT.md`): FALSIFIED | SKEW1 result (run once on 2026-11-03, DEV only; registration `workers/SKEW1_REGISTRATION.md`, commit 0c7be8c, push"
+try,high,,SKEW1:DOWN: buy NO below spot,2026-11-03,hourly ladders,,cheap side,1249,1,-4.43,-4.43,-4.43,0.72,,,unknown,unknown,,,table in SKEW1,,
+try,high,,SKEW1:UP: buy YES above spot,2026-11-03,hourly ladders,,cheap side,1278,1,-3.58,-3.58,-3.58,0.77,,,unknown,unknown,,,table in SKEW1,,
+family,high,,SNAPBACK1,2026-11-03,perps/venues,KXBTCPERP KXETHPERP,round-trip scalp,,0,,,,0.39,,,FALSIFIED,no,n.a.,8,README:8369;workers/SNAPBACK1_RESULT.md,,"Result: SNAPBACK1 (development read, run once 2026-11-03): FALSIFIED in all 8 cells; frozen third unread | SNAPBACK1 result (development read, run once 2026-11-03; rule, grid, bars and split exactly a"
+family,high,,SPIKE1,2026-11-03,other 15-minute series,,round-trip scalp,55339,13,-3.19,0.39,-9.30,0.97,1.05,no,FALSIFIED,no,n.a.,4,README:8336;workers/SPIKE1_RESULT.md,,"Result: SPIKE1 (2026-11-03; registered in fc135cc, code and tests in 6409fa3 before the run, one run; `workers/SPIKE1_RESULT.md`, `src/scalper/spike1.py`): FALSIFIED | SPIKE1 result (2026-11-03; regis"
+try,high,,"SPIKE1:A minus B per window, W1 / W2 / pooled",2026-11-03,other 15-minute series,,round-trip scalp,284,1,-1.79,-1.79,-1.79,,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,"SPIKE1:A minus control, W1 / W2 / pooled",2026-11-03,other 15-minute series,,round-trip scalp,298,1,-0.41,-0.41,-0.41,,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,SPIKE1:A pooled,2026-11-03,other 15-minute series,,round-trip scalp,857,1,-3.19,-3.19,-3.19,0.74,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,"SPIKE1:A reversal, W1 (08-06 to 09-04)",2026-11-03,other 15-minute series,,round-trip scalp,298,1,-1.31,-1.31,-1.31,0.79,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,"SPIKE1:A reversal, W2 (09-05 to 10-04)",2026-11-03,other 15-minute series,,round-trip scalp,559,1,-3.22,-3.22,-3.22,0.72,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,"SPIKE1:B continuation (favourite side), W1 / W2",2026-11-03,other 15-minute series,,round-trip scalp,284,1,0.39,0.39,0.39,0.97,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,SPIKE1:B pooled,2026-11-03,other 15-minute series,,round-trip scalp,810,1,0.15,0.15,0.15,1.02,,,unknown,unknown,,,table in SPIKE1,,
+try,high,,"SPIKE1:Control (cheap side, same series, hour, ",2026-11-03,other 15-minute series,,round-trip scalp,55339,1,-9.30,-9.30,-9.30,0.74,,,unknown,unknown,,,table in SPIKE1,,
+family,low,FALSIFIED,STRADDLE1,2026-11-03,options,,exit/risk rule,300,1,2.90,2.90,2.90,,,,unknown,unknown,unknown,2,README-text:STRADDLE1,,"Registration: STRADDLE1 (pre-earnings ATM straddle run-up, US equity options; Gao, Xing, Zhang 2018), 2026-11-03"
+family,high,,SWING1,2026-11-03,sports,,cheap side,1389,7,1.84,3.08,0.51,0.99,,,FALSIFIED,no,n.a.,2,README:8401;workers/SWING1_RESULT.md,,"Result: SWING1 (run once on 2026-11-03, W1 and W2 only; frozen W3 unread): FALSIFIED | Result: SWING1 (run once on 2026-11-03; W1 and W2 only, frozen W3 unread): FALSIFIED"
+family,high,,TODSEAS1,2026-11-03,other 15-minute series,,cheap side,100,15,-1.40,3.30,-3.40,0.83,0.74,no,FALSIFIED,no,n.a.,22,README:8328;workers/TODSEAS1_RESULT.md,,"Result: TODSEAS1 (time-of-day slots, FX / metals / energy 15 minute, cheap side 5c to 30c), run once 2026-11-03 | TODSEAS1 result (run once 2026-11-03; research only)"
+try,high,,TODSEAS1:S1 HALT_IN 17:00 ET,2026-11-03,other 15-minute series,,cheap side,22,1,0.19,0.19,0.19,1.40,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S10 US_LATE 15:00 ET,2026-11-03,other 15-minute series,,cheap side,29,1,0.28,0.28,0.28,0.79,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S2 HALT_OUT 18:15 ET,2026-11-03,other 15-minute series,,cheap side,17,1,3.30,3.30,3.30,0.00,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S3 FX_ROLL,2026-11-03,other 15-minute series,,cheap side,0,1,-3.40,-3.40,-3.40,0.00,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S5 TOKYO_CLOSE 15:30 JST,2026-11-03,other 15-minute series,,cheap side,27,1,-2.08,-2.08,-2.08,2.58,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S6 PRE_LONDON 07:00,2026-11-03,other 15-minute series,,cheap side,28,1,-1.71,-1.71,-1.71,1.36,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S7 LSE_CLOSE 16:30,2026-11-03,other 15-minute series,,cheap side,21,1,-0.30,-0.30,-0.30,0.00,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S8 PRE_US 09:00 ET,2026-11-03,other 15-minute series,,cheap side,23,1,1.17,1.17,1.17,0.46,,,unknown,unknown,,,table in TODSEAS1,,
+try,high,,TODSEAS1:S9 NY_MIDDAY 12:00 ET,2026-11-03,other 15-minute series,,cheap side,23,1,-2.70,-2.70,-2.70,0.47,,,unknown,unknown,,,table in TODSEAS1,,
+family,high,,TSLM1,2026-11-03,other 15-minute series,,cheap side,100,10,-0.83,-0.29,-3.00,0.82,,,FALSIFIED,no,n.a.,,README:8227;workers/TSLM1_RESULT.md,,"Result: TSLM1 (2026-11-03; registered in ab919bd, Amendment 1 in 32f9fd4 before any outcome; `workers/TSLM1_RESULT.md`, `src/scalper/tslm1.py`) | TSLM1 result: shock then calm, cheaper side held to se"
+try,high,,TSLM1:LATE W1,2026-11-03,other 15-minute series,,cheap side,1729,1,-2.47,-2.47,-2.47,0.84,,,unknown,unknown,,,table in TSLM1,,
+try,high,,TSLM1:LATE W2,2026-11-03,other 15-minute series,,cheap side,1726,1,-1.81,-1.81,-1.81,0.86,,,unknown,unknown,,,table in TSLM1,,
+try,high,,TSLM1:LATE pooled W1+W2,2026-11-03,other 15-minute series,,cheap side,3455,1,-2.99,-2.99,-2.99,0.85,,,unknown,unknown,,,table in TSLM1,,
+try,high,,TSLM1:PRIMARY W1,2026-11-03,other 15-minute series,,cheap side,276,1,-1.03,-1.03,-1.03,0.82,,,unknown,unknown,,,table in TSLM1,,
+try,high,,TSLM1:PRIMARY W2,2026-11-03,other 15-minute series,,cheap side,229,1,-0.29,-0.29,-0.29,0.92,,,unknown,unknown,,,table in TSLM1,,
+try,high,,TSLM1:PRIMARY pooled W1+W2,2026-11-03,other 15-minute series,,cheap side,505,1,-0.83,-0.83,-0.83,0.86,,,unknown,unknown,,,table in TSLM1,,
+family,high,,USWEEP1,2026-11-03,daily/weekly ladders,KXSILVERD KXNATGASD KXGOLDD KXBRENTD,generator/search,650,21,1.04,14.21,0.21,5.27,,,NOT_YET_FALSIFIED,unknown,unknown,,README:8361;workers/USWEEP1_RESULT.md,,"Result: USWEEP1 (universe sweep, run once on 2026-11-03): no lead; five daily-favourite watch items registered forward | USWEEP1 result (run once on 2026-11-03; research only; code `src/scalper/usweep"
+try,high,,USWEEP1:KXAAAGASDAL,2026-11-03,daily/weekly ladders,,generator/search,39,1,11.72,11.72,11.72,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXAAAGASDLA,2026-11-03,daily/weekly ladders,,generator/search,41,1,0.53,0.53,0.53,1.29,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXAAAGASDWV,2026-11-03,daily/weekly ladders,,generator/search,43,1,0.28,0.28,0.28,1.23,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXBRENTD,2026-11-03,daily/weekly ladders,,generator/search,44,1,2.10,2.10,2.10,3.14,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXGOLDD,2026-11-03,daily/weekly ladders,,generator/search,48,1,2.22,2.22,2.22,3.30,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHAUS,2026-11-03,daily/weekly ladders,,generator/search,38,1,0.21,0.21,0.21,1.13,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHDEN,2026-11-03,daily/weekly ladders,,generator/search,43,1,1.01,1.01,1.01,1.77,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHLAX,2026-11-03,daily/weekly ladders,,generator/search,26,1,0.65,0.65,0.65,1.49,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHTBOS,2026-11-03,daily/weekly ladders,,generator/search,33,1,7.78,7.78,7.78,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHTDAL,2026-11-03,daily/weekly ladders,,generator/search,42,1,0.92,0.92,0.92,1.69,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHTLV,2026-11-03,daily/weekly ladders,,generator/search,31,1,9.63,9.63,9.63,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXHIGHTSATX,2026-11-03,daily/weekly ladders,,generator/search,52,1,1.79,1.79,1.79,2.30,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXINX,2026-11-03,daily/weekly ladders,,generator/search,27,1,11.72,11.72,11.72,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXLOWTATL,2026-11-03,daily/weekly ladders,,generator/search,31,1,0.54,0.54,0.54,1.47,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXLOWTCHI,2026-11-03,daily/weekly ladders,,generator/search,22,1,0.57,0.57,0.57,1.51,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXLOWTHOU,2026-11-03,daily/weekly ladders,,generator/search,26,1,10.40,10.40,10.40,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXLOWTMIN,2026-11-03,daily/weekly ladders,,generator/search,29,1,0.89,0.89,0.89,1.97,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXLOWTNYC,2026-11-03,daily/weekly ladders,,generator/search,29,1,1.23,1.23,1.23,2.20,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXNATGASD,2026-11-03,daily/weekly ladders,,generator/search,67,1,3.71,3.71,3.71,5.27,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXRAIN,2026-11-03,daily/weekly ladders,,generator/search,21,1,14.21,14.21,14.21,,,,unknown,unknown,,,table in USWEEP1,,
+try,high,,USWEEP1:KXSILVERD,2026-11-03,daily/weekly ladders,,generator/search,106,1,1.04,1.04,1.04,1.94,,,unknown,unknown,,,table in USWEEP1,,
+family,none,,USWEEP2,2026-11-03,hourly ladders,KXMVE,generator/search,,0,,,,,,,no result parsed,unknown,unknown,6,REG:8446,,"Registration: USWEEP2 (faster, broader universe sweep; 2026-11-03)"
+family,high,,VENUES1,2026-11-03,hourly ladders,KXBTCD,maker,16222,1,-3.84,-3.84,-3.84,0.98,,,NOT_YET_FALSIFIED,unknown,unknown,0,README:8283;workers/VENUES1_RESULT.md,yes,"Result: VENUES1 and COST1 (Strategy Research V2 worker, 2026-11-03; measurement and desk research, 0 tries, N unchanged about 728,700) | VENUES1 result (2026-11-03). Desk research plus arithmetic on h"
+family,high,,VOLGAP1,2026-11-03,hourly ladders,KXBTCD KXETHD KXGOLDH,cheap side,3097,14,-7.54,1.53,-7.54,0.00,,,NOT_ENOUGH_DATA,no,n.a.,6,README:8314;workers/VOLGAP1_RESULT.md,,"Result: VOLGAP1 (ladder-implied vol against 15 minutes of realised vol; cheap far strikes on the hourly Bitcoin, Ethereum and gold ladders), 2026-11-03 | VOLGAP1 result (2026-11-03; registered in c62a"
+family,high,,VOLSLOT1,2026-11-03,other 15-minute series,,generator/search,100,15,-1.16,0.24,-2.97,0.83,,,FALSIFIED,no,n.a.,6,README:8346;workers/VOLSLOT1_RESULT.md,,"Result: VOLSLOT1 (favourite 85c to 97c in the quietest clock slots, FX / metals / energy 15 minute), run once 2026-11-03: FALSIFIED | VOLSLOT1 result (run once 2026-11-03; research only)"
+try,high,,VOLSLOT1:ALL slots (control),2026-11-03,other 15-minute series,,generator/search,3897,1,-2.97,-2.97,-2.97,0.83,,,unknown,unknown,,,table in VOLSLOT1,,
+try,high,,VOLSLOT1:LOUD (control),2026-11-03,other 15-minute series,,generator/search,559,1,-0.60,-0.60,-0.60,0.92,,,unknown,unknown,,,table in VOLSLOT1,,
+try,high,,VOLSLOT1:MID,2026-11-03,other 15-minute series,,generator/search,1130,1,-0.95,-0.95,-0.95,0.90,,,unknown,unknown,,,table in VOLSLOT1,,
+try,high,,VOLSLOT1:QUIET,2026-11-03,other 15-minute series,,generator/search,156,1,-0.42,-0.42,-0.42,0.88,,,unknown,unknown,,,table in VOLSLOT1,,
+try,high,,VOLSLOT1:QUIET,2026-11-03,other 15-minute series,,generator/search,448,1,-1.10,-1.10,-1.10,0.82,,,unknown,unknown,,,table in VOLSLOT1,,
+try,high,,VOLSLOT1:QUIET,2026-11-03,other 15-minute series,,generator/search,604,1,-1.16,-1.16,-1.16,0.83,,,unknown,unknown,,,table in VOLSLOT1,,
+family,high,,XCRY1,2026-11-03,other 15-minute series,,round-trip scalp,100,9,-1.67,0.18,-2.43,0.85,,,FALSIFIED,yes,failed,,README:8210;workers/XCRY1_RESULT.md,,"Result: XCRY1 (2026-11-03; registered in d274ec5; `workers/XCRY1_RESULT.md`, `src/scalper/xcry1.py`) | XCRY1 result (2026-11-03; registered in d274ec5 before any data; `src/scalper/xcry1.py`, `tests/t"
+family,high,,XLADDER1,2026-11-03,daily/weekly ladders,KXINX KXNASDAQ100,seasonality/calendar,,0,,,,0.60,,,NOT_ENOUGH_DATA,no,n.a.,4,README:8428;workers/XLADDER1_RESULT.md,,"Result: XLADDER1 (S&P 500 range brackets against the 4 pm ladder, partial data), 2026-11-03 | XLADDER1 result (V2 worker, 2026-11-03, research only)"
+family,high,,XMET1,2026-11-03,other 15-minute series,KXSILVER15M KXCOPPER15M KXPLATINUM15M KXPALLADIUM15M,round-trip scalp,100,6,-0.99,0.50,-5.17,0.53,1.07,no,FALSIFIED,yes,failed,2,README:8213;workers/XMET1_RESULT.md,,"Result: XMET1 (2026-11-03): FALSIFIED (registered in b70fda4; `workers/XMET1_RESULT.md`, `src/scalper/xmet1.py`, `tests/test_xmet1.py`) | XMET1 result (2026-11-03; registered in b70fda4 before any can"
+family,high,,XOI1,2026-11-03,other 15-minute series,,round-trip scalp,100,4,-0.73,0.25,-1.38,1.01,0.87,no,FALSIFIED,no,n.a.,,README:8206;workers/XOI1_RESULT.md,,"Result: XOI1 (2026-11-03): FALSIFIED (registered in db0034a, before any alt outcome; `workers/XOI1_RESULT.md`, `src/scalper/xoi1.py`, `tests/test_xoi1.py`) | XOI1 result: Bitcoin's open interest jump "
+try,high,,XOI1:W1 (2026-08-06 to 09-03),2026-11-03,other 15-minute series,,round-trip scalp,1470,1,0.25,0.25,0.25,1.02,,,unknown,unknown,,,table in XOI1,,
+try,high,,XOI1:W2 (2026-09-04 to 10-02),2026-11-03,other 15-minute series,,round-trip scalp,1327,1,-1.38,-1.38,-1.38,0.88,,,unknown,unknown,,,table in XOI1,,
+try,high,,XOI1:pooled W1+W2,2026-11-03,other 15-minute series,,round-trip scalp,2797,1,-0.73,-0.73,-0.73,0.95,,,unknown,unknown,,,table in XOI1,,
