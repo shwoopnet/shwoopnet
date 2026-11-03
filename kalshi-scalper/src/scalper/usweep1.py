@@ -111,7 +111,7 @@ def census() -> None:
         except Exception as e:
             rec = {"ticker": t, "freq": s.get("frequency"), "cat": s.get("category"), "title": s.get("title"), "error": str(e)[:100], "n": 0, "markets": []}
         with lock:
-            f.write(json.dumps(rec) + "\n")
+            f.write(json.dumps(rec) + "\n"); f.flush()
             cnt[0] += 1
             if cnt[0] % 200 == 0:
                 f.flush()
