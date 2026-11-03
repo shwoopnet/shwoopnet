@@ -85,6 +85,13 @@ def classify(btc: dict, eth: dict, look: int):
     return ("NONE", side, S)
 
 
+def event_ticker_of(ct: int) -> str:
+    """KXETHD-<yy><MON><dd><HH> with the date and hour in New York time (checked against the listed tickers at fetch)."""
+    from zoneinfo import ZoneInfo
+    d = datetime.fromtimestamp(ct, ZoneInfo("America/New_York"))
+    return "KXETHD-" + d.strftime("%y%b%d%H").upper()
+
+
 def in_control(event_ticker: str) -> bool:
     return int(hashlib.md5(event_ticker.encode()).hexdigest(), 16) % CONTROL_MOD == 0
 
@@ -246,17 +253,22 @@ def fetch() -> None:
     # listings: one per development close
     lp = CACHE / "listings.jsonl"
     done = {json.loads(l)["ct"] for l in lp.read_text().splitlines()} if lp.exists() else set()
-    with lp.open("a") as fh:
-        for i, ct in enumerate(cts):
-            if ct in done or ct not in cls:
-                continue
+    need = [ct for ct in cts if ct in cls and cls[ct][1] is not None and (cls[ct][0] != "NONE" or in_control(event_ticker_of(ct))) and ct not in done]
+    print("listings needed", len(need), flush=True)
+    import threading
+    lock = threading.Lock()
+    def work(chunk):
+        for ct in chunk:
             ms = list(api.settled_markets("KXETHD", ct - 1, ct))
             rows = [[m["ticker"], m.get("event_ticker"), m.get("floor_strike"), m.get("result")] for m in ms
                     if backfill.iso_ts(m.get("close_time")) == ct]
-            fh.write(json.dumps({"ct": ct, "m": rows}) + "\n"); fh.flush()
-            if i % 50 == 0:
-                print(f"listing {i}/{len(cts)}", flush=True)
+            with lock:
+                with lp.open("a") as fh:
+                    fh.write(json.dumps({"ct": ct, "m": rows}) + "\n")
             time.sleep(0.25)
+    ths = [threading.Thread(target=work, args=(need[i::2],)) for i in range(2)]
+    [t.start() for t in ths]
+    [t.join() for t in ths]
     # candles for the selected strikes
     cp = CACHE / "candles.jsonl"
     have = {json.loads(l)["tk"] for l in cp.read_text().splitlines()} if cp.exists() else set()
