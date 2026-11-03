@@ -180,7 +180,7 @@ def run():
                 pay = 1.0 if m["result"] == "yes" else 0.0
                 rows.append((m["ticker"], pm, ask, pay))
                 if LOW <= ask <= HARD: ctrl.append((half, pay - ask - fee(ask)))
-            for tk, pm, ask, pay in select([(r[0], r[1], r[2]) for r in rows]):
+            for tk, pm, ask in select([(r[0], r[1], r[2]) for r in rows]):
                 p = [r for r in rows if r[0] == tk][0][3]
                 trades.append((half, p - ask - fee(ask), tk, pm, ask))
             # source check: archive full-period total vs winning bracket
