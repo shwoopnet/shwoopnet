@@ -49,3 +49,6 @@ One rule scored once. **N +2** (running about 730,010 before; about 730,012 afte
 
 ## Forward plan if NOT_ENOUGH_DATA
 Release dates (US Central, 7:30 am; GDP 7:30 am): CPI Nov 10 (October CPI), core PCE and GDP (Q3 second estimate) Nov 25 (Q3 advance already settled 2026-10-29), CPI Dec 10, core PCE Dec 23 (to be confirmed from BEA). A candidate JSON in `workers/candidates/NOWCAST1.json` (EVENT830 pattern) freezes the rule; the forward look is 24 hours before each release. Releases per month 2.6 (CPI head+core, core PCE), GDP 0.33 a month.
+
+## Amendment 1 (2026-11-03, before any GDP candle was fetched or any trade formed)
+GDP events whose settlement timestamp is more than 7 days after the market's close_time are excluded (the 2025 shutdown delayed the Q3 2025 advance estimate by weeks; a 24 hour look before the posted close would precede the final GDPNow by weeks, a pure lookahead). Quarter mapping: release month Jan or Feb is the prior Q4, Mar to May Q1, Jun to Aug Q2, Sep to Dec Q3 (`gdp_quarter`). Windows are cut by the count of eligible release-series (market listing, nowcast and 36 error months, or for GDP a FRED value, a "greater" strike and an on-time settlement), sorted by close time; the cut dates are printed by `prep` and pushed before the run. Code `src/scalper/nowcast1.py`, tests `tests/test_nowcast1.py`.
