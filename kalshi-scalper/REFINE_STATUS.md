@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 3:35 PM CT (21:35Z): W16 OICORE-TAKE-PROFIT RESULT
+
+W16 (3 tries): none passes. Hold: +7.73c a contract, PF 1.857 (thirds 2.205 / 1.659 / 1.768). Take profit at 2x: 66 exits, +5.83c, PF 1.667; 3x: 49 exits, +6.12c, PF 1.690; 5x: 21 exits, +6.86c, PF 1.762; PF below hold in every third for every level. Thin test (only the candles ending close-60 and close exist after the fill). Holding to settlement stays best.
+
 ## 2026-11-03 3:34 PM CT (21:34Z): HOURLY CHECK-IN, 0 workers running, W16 and W17 REGISTERED
 
 W16 OICORE-TAKE-PROFIT: OICORE holds to settlement (SLOTEX: held 1.85 vs sell at 60 s 1.52). Never tested: a take-profit level. On the 453 fixed-rule trades (oi/btc.jsonl, windows closing 2026-08-31 to 2026-11-03), exit the first later one minute candle close at which the bought side's bid is at or above k times the entry price, for k = 2, 3, 5 (never past 0.97), at that bid, fee 0.07*p*(1-p) on both legs; else hold. Chronological thirds. Pass: PF above the hold rule's PF in all three thirds AND total net per contract above hold. 3 tries. Prediction: none passes (cheap side payoffs are lumpy and the winners are the ones that run to 1.00; a take-profit sells them early). Candle limitation stated.
