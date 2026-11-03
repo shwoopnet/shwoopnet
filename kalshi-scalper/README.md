@@ -8611,3 +8611,7 @@ Full text `workers/INPLAY1_REGISTRATION.md`. Duplicate check: not SWING1 (price 
 
 ## Result: INPLAY1 (run once 2026-11-03, games before the frozen cut only): NOT_ENOUGH_DATA, 0 wins in 30
 `workers/INPLAY1_RESULT.md`, code `src/scalper/inplay1.py`. 920 games (college football 525, MLB 395); ESPN in-play probability at least 3x the cheap-side ask (3c to 30c) at start +60/+90/+120 min: 30 trades (9 W1, 21 W2), win 0 against mean ask 7.7c and ESPN 31%, net -8.2c, PF 0.00 in both halves; control (all cheap sides at the looks) 1,388 rows win 12.6% vs ask 14.4%, net -2.6c, PF 0.79. Under 150: about 8 months to go. Calibration: on the ratio rows Kalshi's mid beats ESPN (Brier 0.007 vs 0.114). Frozen W3 unread. No probe spec. Registration sha256 prefix e2ab868987e47310. N +2.
+
+## Registration and result: EARN1 (company metric / earnings-style markets, cheap side vs consensus surprise), 2026-11-03, `NOT_RUNNABLE`
+
+Registered before any outcome was joined (`workers/EARN1_REGISTRATION.md`, result `workers/EARN1_RESULT.md`). Census of the 216 Companies series: the numeric ones (Tesla deliveries, Netflix/Spotify subscribers, Facebook DAU, Coinbase volume) have 0 markets live or historical; the 26 "Annual KPI" series have 0 settled markets (active to 2027-2028); Starbucks KPI has 14 settled markets in 2 events, all after the frozen cut. Bar 25 events and 150 scoreable markets before 2026-10-03T16:00Z: got 0 and 0. Nothing fetched past status, nothing scored. Earnings-call word markets are MENT1 (FALSIFIED). Forward plan: re-census 2027-04-30. **N: +2.**
