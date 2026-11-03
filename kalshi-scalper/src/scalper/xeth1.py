@@ -296,11 +296,18 @@ def fetch() -> None:
             ct = ch[0][1]
             for ct_ in sorted({c for _, c in ch}):
                 sub = [tk for tk, c in ch if c == ct_]
-                got = api.batch_candlesticks(sub, ct_ - LEAD - 240, ct_ - LEAD + 120)
+                for attempt in range(6):
+                    try:
+                        got = api.batch_candlesticks(sub, ct_ - LEAD - 240, ct_ - LEAD + 120)
+                        break
+                    except RuntimeError:
+                        time.sleep(30 * (attempt + 1))
+                else:
+                    raise RuntimeError("candles kept failing")
                 for tk in sub:
                     rows = [r for r in (backfill.parse_candle(x, tk, "KXETHD") for x in got.get(tk, [])) if r]
                     fh.write(json.dumps({"tk": tk, "c": [[r[2], r[6], r[10]] for r in rows]}) + "\n")
-                time.sleep(0.4)
+                time.sleep(1.5)
             fh.flush()
             if (i // BATCH) % 25 == 0:
                 print(f"candles {i}/{len(want)}", flush=True)
