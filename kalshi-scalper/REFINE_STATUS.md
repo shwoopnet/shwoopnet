@@ -27,6 +27,15 @@ Refill rule: if this list falls under 5 open items, add from: Dogecoin entry tim
 
 ## Entries
 
+### Nov 2, 2026, 18:48 PM CT (00:48Z Nov 3): Dogecoin's ladder-size record reaches the review lines at 50 settled fills (4 losses, 8.0%, net -0.19c a contract); C1's cell now 2 losses in 11
+
+New loss: 00:09:03Z Nov 3, Dogecoin NO side, 13 contracts, 90.7c, early sell, **-$10.22** (79c a contract). Dogecoin at ladder size since Oct 30 8 PM CT (130 hour window): **50 settled fills, 4 losses (8.0%, 95% range about 3% to 19%), net -$1.29, -0.19c a contract.** The review rule written for it is to go back to a fixed size if the LAST 100 settled orders lose more than 8% or net under +0.5c a contract; it is read at 100 settled, and we are at 50, so the rule has not fired. But both lines are now touched in half the sample: loss rate exactly 8.0% (it was 4.7% two days ago and 6.1% yesterday afternoon) and net below +0.5c. History (62 days, 6 minute look) says Dogecoin's rule loses 6.2% of in-band windows and nets +1.1c in the simulator, which runs about 1 to 1.7c below live, so a live +2.8c to +1.1c was the earlier read; the ladder-size period has lost that margin. Sizes were 13 to 15 contracts, so one loss costs $5.5 to $11.5; the four losses are -8.70, -11.47, -5.51 and -10.22.
+- C1 cell (90 to 92c, forward since 22:55Z Nov 1): 11 settled fills, **2 losses**, net -$4.95 (both of the last two Dogecoin losses, -$5.51 and -$10.22, sit in the cell). 2 in 11 is 18%; history for the cell was 9.7%. Too small to read; the read stays at 80 settled cell fills.
+- C9 (Silver forward): 3 in-band windows, 1 lost (a window where gold also lost in the candle engine); too few to read.
+- C8: 31 windows read, 10 in band, none in the low open interest arm yet.
+
+A drift flag (live ladder-size Dogecoin below the history), not a kill. Told main.
+
 ### Nov 2, 2026, 15:53 PM CT (21:53Z): C9 REGISTERED BEFORE COUNTING: forward shadow read of L1's own rule on SILVER (KXSILVER15M). Public candles only, no code, no change to orders. Counts windows that close after 22:00Z Nov 2.
 
 Requested by main at the owner's direction (approved). Silver was the only near-miss in C7 (+1.09c a contract, lost share 6.5%, 125 in-band windows a week, 1.0c spread, 173 contracts at the touch).
