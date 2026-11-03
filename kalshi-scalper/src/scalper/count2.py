@@ -40,9 +40,15 @@ def parse_tornado_rows(text):
     return n
 
 
+def strike_of(m):
+    """floor_strike; six KXTORNADO-25JAN markets have none, so the number after 'above' in rules_primary is used (implementation detail)."""
+    if m.get("floor_strike") is not None: return m["floor_strike"]
+    import re
+    return float(re.search(r"above ([\d.]+)", m["rules_primary"]).group(1))
+
+
 def strike_prob(m, c, pmf):
-    t = m["strike_type"]; lo = m.get("floor_strike")
-    if t != "greater": raise ValueError(t)
+    lo = strike_of(m)
     return sum(q for k, q in enumerate(pmf) if c + k > lo)
 
 
@@ -239,10 +245,10 @@ def cmd_run(r_mult=1.0):
         half = 0 if idx < len(dev) // 2 else 1
         look = look_of(y, mo)
         tot = month_total(y, mo)
-        ok_all = all((m["result"] == "yes") == (tot > m["floor_strike"]) for m in L if m["result"] in ("yes", "no"))
+        ok_all = all((m["result"] == "yes") == (tot > strike_of(m)) for m in L if m["result"] in ("yes", "no"))
         srcall.append(ok_all)
-        yes = sorted(m["floor_strike"] for m in L if m["result"] == "yes")
-        no = sorted(m["floor_strike"] for m in L if m["result"] == "no")
+        yes = sorted(strike_of(m) for m in L if m["result"] == "yes")
+        no = sorted(strike_of(m) for m in L if m["result"] == "no")
         srcexact.append(bool(yes or no) and (not yes or tot > max(yes)) and (not no or tot <= min(no)))
         if any(datetime.fromisoformat(m["open_time"].replace("Z", "+00:00")) > look - timedelta(minutes=60) for m in L):
             notopen += 1; continue

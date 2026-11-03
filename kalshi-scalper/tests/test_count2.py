@@ -12,6 +12,10 @@ def test_parse_tornado_section():
 def test_pmf_sums():
     assert abs(sum(c.nb_pmf(30, 5, 800)) - 1) < 1e-6 and c.nb_pmf(0, 5, 3)[0] == 1.0
 
+def test_strike_of():
+    assert c.strike_of({"floor_strike": None, "rules_primary": "number of tornadoes in Jan is above 75 , then"}) == 75
+    assert c.strike_of({"floor_strike": 12, "rules_primary": ""}) == 12
+
 def test_strike_greater():
     pmf = [0.0] * 3 + [1.0]
     assert c.strike_prob({"strike_type": "greater", "floor_strike": 12}, 10, pmf) == 1.0
