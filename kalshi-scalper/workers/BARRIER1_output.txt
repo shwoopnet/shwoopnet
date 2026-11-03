@@ -1,0 +1,9 @@
+markets with model 77 dropped {'no_strike_or_quote': 88} events 3 holdout_from 1793505600
+cheap dev n 3 events 1 win 0.0 price 0.083 model 0.177 net -0.0893 half1 -0.054 half2 -0.107 pf 0.0
+cheap hold n 0 events 0 win None price None model None net None half1 None half2 None pf None
+rich dev n 0 events 0 win None price None model None net None half1 None half2 None pf None
+rich hold n 0 events 0 win None price None model None net None half1 None half2 None pf None
+model p 0 0.1 n 50 yes 0.0 meanp 0.014 mean ask 0.144
+model p 0.1 0.3 n 12 yes 0.0 meanp 0.186 mean ask 0.174
+model p 0.3 0.6 n 11 yes 0.273 meanp 0.443 mean ask 0.423
+model p 0.6 1.01 n 4 yes 0.5 meanp 0.744 mean ask 0.715
