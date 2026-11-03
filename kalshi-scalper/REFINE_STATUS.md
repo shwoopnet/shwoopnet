@@ -2,12 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-03 2:40 PM CT (19:40Z): W1 OICORE-SKIP RESULT, W4 DOGE-EXIT REGISTERED
+## 2026-11-03 1:35 PM CT (19:35Z): W1 OICORE-SKIP RESULT, W4 DOGE-EXIT REGISTERED
 
 W1 (11 testable tries of 12; stale-book count was zero on every trade): 453 trades (D1 214, D2 214, holdout 25), baseline PF 2.25 / 1.47 / 2.85. One rule passed the registered bar: keep only trades where the bought side's yes-mid change from -360 s to -180 s (sdir) is at or above its D1 median (-0.09): PF 3.13 / 1.54 / 4.06, net +10.41c a contract against +7.73, removes 51% of trades. Thin: D2 moves 1.47 to 1.54 and the skipped half still has PF 1.38 in D2; one pass in 12 tries is about chance. Near miss: skip spread below 0.01 (3.06 / 1.56 / 2.78, holdout under baseline by noise). Lead only; shadow S-SDIR1 (log sdir on every OICORE order and trigger window, read at 40 fills; the rule keeps cheap sides that have not already run up). No live change.
 W4 DOGE-EXIT REGISTERED: same plan and bar as W2 on oi/doge.jsonl (Dogecoin on gold's ladder; 62 days), 14 tries into N. Prediction: price at or below the D1 median predicts early sells again (mechanical); nothing else passes.
 
-## 2026-11-03 1:50 PM CT (19:50Z): W2 GOLD-EXIT RESULT, W3 OI-OTHER REGISTERED
+## 2026-11-03 1:35 PM CT (19:35Z): W2 GOLD-EXIT RESULT, W3 OI-OTHER REGISTERED
 
 W2 (14 tries counted): one feature passed the registered bar in D1, D2 and holdout: entry price at or below 0.926 (early sell rate 9.1% / 7.7% / 9.0% against 4.1% / 3.3% / 2.1%, ratio 2.2 / 2.3 / 4.3). Judged mechanical (a cheaper entry sits closer to the 25c line) and not a skip rule: the flagged group still nets +0.60c, +1.81c, +1.06c a contract, skipping it takes the 62 day total from 16.71 to 10.10 per contract. Spread, open interest change, bid change, side and hour block did not pass. Nothing else predicts the early sell. Lead only: a forward shadow could track whether the early sell rate keeps rising as price falls.
 W3 OI-OTHER REGISTERED before scoring: OICORE's rule (cheap side ask 0.05 to 0.50 at -180 s, fill at -120 s ask, hold, fee 7% p(1-p)) with the relative open interest jump (oi(-180) over oi(-360) minus 1, threshold = the series' own 59th percentile of that ratio over its first half, so about 41% of windows fire, matching Bitcoin's current share) on the 11 series with candles in oi/c7_*.jsonl plus oi/doge.jsonl. First half of each series' windows = discovery, second half = holdout. Pass bar: PF 1.5 or better and at least 40 trades in each half. 12 tries. Prediction: at most 1 series passes by chance. A pass is a name for a forward shadow, never a live change.
