@@ -1,0 +1,14 @@
+games 920 (before cut), cheap-side rows 1388, treated trades 30 (W1 9, W2 21)
+W1: n 9, win 0.000 vs ask 0.063 vs ESPN 0.258, mean net -6.80c, PF 0.00, z -7.25
+W2: n 21, win 0.000 vs ask 0.083 vs ESPN 0.332, mean net -8.86c, PF 0.00, z -4.38
+W1+W2: n 30, win 0.000 vs ask 0.077 vs ESPN 0.310, mean net -8.24c, PF 0.00, z -5.61
+W1+W2 fees x1.2: n 30, win 0.000 vs ask 0.077 vs ESPN 0.310, mean net -8.35c, PF 0.00, z -5.63
+half 1: n 15, win 0.000 vs ask 0.055 vs ESPN 0.226, mean net -5.89c, PF 0.00, z -7.85
+half 2: n 15, win 0.000 vs ask 0.099 vs ESPN 0.393, mean net -10.59c, PF 0.00, z -4.47
+KXNCAAFGAME: n 24, win 0.000 vs ask 0.084 vs ESPN 0.336, mean net -8.99c, PF 0.00, z -5.33
+KXMLBGAME: n 6, win 0.000 vs ask 0.048 vs ESPN 0.206, mean net -5.23c, PF 0.00, z -5.96
+control (all cheap sides at the looks): n 1388, win 0.126 vs ask 0.144 vs ESPN 0.165, mean net -2.64c, PF 0.79, z -2.37
+control by ask band: band0: n 439 net -4.03c; band1: n 289 net -3.34c; band2: n 237 net -0.15c; band3: n 210 net -5.24c; band4: n 213 net +0.99c
+calibration cheap-side rows: n 1388, Brier ESPN 0.1087 vs Kalshi mid 0.1006
+rows with ratio >= 3 (any look): 38; n 38, Brier ESPN 0.1137 vs Kalshi mid 0.0069
+trades per month of file span ~32.1
