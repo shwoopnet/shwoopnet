@@ -1341,14 +1341,14 @@ gates.RL3 = async () => {
 // FS1 to FS3: fixed order sizes (Oct 23, 2026, the owner: "yeah build", on the research session's sizing proposal at a $500 balance). XRP and Dogecoin trade 3 contracts, natural gas 2; Bitcoin and Ethereum stay at 1.
 // Consequence: the larger size reaches only the three markets the history supports, and never grows through the ladder, the profit add-on, a stored value or a second crypto order in the window.
 gates.FS1 = async () => {
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2 }, 'exactly these two markets, at exactly these sizes (Dogecoin left the list for the gold ladder Oct 30, 2026)');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'exactly these markets, at exactly these sizes (Dogecoin is back to a fixed 5 on Nov 3, 2026)');
   const one = async (series, ticker, closeAt) => {
     const w = world({ session: wsess({}), balance: rich, fresh: { [ticker]: { exchange_index: 0, close_time: iso(closeAt) } } });
     await tick(w, { quotes: [quote({ close_time: iso(closeAt) }, series, ticker)], sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 50, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
     return w;
   };
   const doge = await one('KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000);
-  assert.ok(doge.posts.length === 1 && Number(doge.posts[0].count) > 5, 'Dogecoin takes the gold ladder size, not a fixed one (5 before Oct 30, 2026): ' + doge.posts.map((p) => p.count));
+  assert.ok(doge.posts.length === 1 && Number(doge.posts[0].count) === 5, 'Dogecoin takes a fixed 5 again (Nov 3, 2026), whatever the ladder or the pool say: ' + doge.posts.map((p) => p.count));
   const xrp = await one('KXXRP15M', XRP10, NOW + 600000);
   assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 1, 'XRP takes 1 contract (back from 3 on Oct 25, 2026)');
   const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
@@ -1374,7 +1374,7 @@ gates.FS2 = async () => {
 };
 gates.FS3 = () => {
   const src = fnSrcLib();
-  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
+  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
 };
@@ -1383,7 +1383,7 @@ gates.FS3 = () => {
 gates.OS1 = async () => {
   assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum; no probes');
   assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is three markets');
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2 }, 'sizes unchanged');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'sizes unchanged');
   const run = async (list, lead) => {
     const close = NOW + (lead === '10m' ? 600000 : 360000);
     const fresh = {}, quotes = [];

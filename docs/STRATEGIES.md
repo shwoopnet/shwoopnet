@@ -6,7 +6,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 **What it is.** About 6 minutes before a 15 minute Kalshi market closes, buy the side that is already priced 88c to 97c (the heavy favourite) and hold it to settlement, selling early only if the side's bid falls to 25c. It collects the last few cents of a nearly settled market. Wins are small, a loss is large, so it only works at a high win rate.
 
-**Markets.** Gold (`KXGOLD15M`) and Dogecoin (`KXDOGE15M`). Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
+**Markets.** Gold (`KXGOLD15M`) and Dogecoin (`KXDOGE15M`). Gold scales on the size ladder; Dogecoin is a fixed 5 contracts again since Nov 3 (it was on the ladder Oct 30 to Nov 3). Gold is closed Friday 17:00 to Sunday 18:00. Dogecoin runs around the clock. No quiet hours (the 8 PM to midnight block was lifted Oct 30). Paused in code and never candidates: XRP, Bitcoin, Ethereum and the three probe markets. XRP, Bitcoin and Ethereum stay in the list so quotes, names and the exit watch still work.
 
 **Entry rule.**
 1. Look when 5.5 to 6.7 minutes remain (330,000 to 400,000 ms), once per market.
@@ -80,6 +80,6 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 |---|---|---|
 | Win rate | about 92% to 95% | about 28% to 30% |
 | Typical win and loss | win about 6c a contract, loss about 66c (early sell) | win about 3 to 4 times cost, loss the whole premium (6c to 50c) |
-| Size | ladder: $43 per contract, +1 per 3 days, add-on, ceiling 40 / 50 | fixed 10 |
+| Size | gold: ladder, $43 per contract, +1 per 3 days, add-on, ceiling 40 / 50; Dogecoin: fixed 5 | fixed 10 |
 | Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) |

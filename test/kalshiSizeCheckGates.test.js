@@ -108,7 +108,7 @@ gates.SZ5 = () => {
   assert.strictEqual(live.maxContractsFor('KXSOL15M'), 0);
   assert.strictEqual(live.maxContractsFor(undefined), 0);
   assert.strictEqual(live.maxContractsFor('KXXRP15M'), 1);
-  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), live.L1_ORDER_CEILING, 'Dogecoin follows the gold ladder since Oct 30, 2026');
+  assert.strictEqual(live.maxContractsFor('KXDOGE15M'), 5, 'Dogecoin is back to a fixed 5 (Nov 3, 2026)');
   assert.strictEqual(live.maxContractsFor('KXBTC15M'), 1);
   assert.strictEqual(live.maxContractsFor('KXNATGAS15M'), 0, 'natural gas left the list on Oct 30, 2026: an order for it is refused outright, whatever its size');
   assert.strictEqual(live.maxContractsFor('KXAUDUSD15M'), 0);
