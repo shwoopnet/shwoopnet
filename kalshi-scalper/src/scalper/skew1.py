@@ -263,6 +263,9 @@ def main(argv):
     mode = argv[1] if len(argv) > 1 else "counts"
     if mode == "eth":
         ev = load(["ladders.sqlite"], "KXETHD")
+        if not spots(ev):
+            print("INFO ETH: no usable 25 minute look candle in ladders.sqlite (its candles end 5 to 7 minutes before the close); not run")
+            return
         tr, fn = build(ev)
         report(tr, fn, ev, "INFO ETH")
         return
