@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 1:45 PM CT (19:45Z): W8 FORWARD-OICORE BUILT, first forward read (S-JUMP1 and S-SDIR1 counters at n 25)
+
+Tool: forward_oicore.py in the scratchpad (`python3 forward_oicore.py <fresh report json>`; public candles only). Windows since 2026-10-30T12:00Z: 25 trigger windows, 25 live OICORE orders (19 same side and matched; 6 trigger windows with no live order: Nov 1 14:45Z, Nov 2 14:45Z, 15:45Z, 17:00Z, Nov 3 17:30Z and one more). By OIR band: 86,300 to 106,000: 13 triggers, 9 fills, 3 wins, 6 losses, live +$19.00; 106,000 and over: 12 triggers, 6 fills, 2 wins, 4 losses, +$7.64. By sdir: at or above -0.09: 6 triggers, 3 fills, 1 win, +$3.80; below -0.09: 19 triggers, 12 fills, 4 wins, +$22.84. So at n 25 neither history lead (top band better, high sdir better) shows in the live record; both are far from readable (40 fills is the registered reading). Fill timing check on history: filling at the signal candle (-180 s) instead of -120 s gives PF 1.73, +8.36c a contract (vs 1.86, +7.73c): the -120 s fill assumption is not what flatters the sim.
+
 ## 2026-11-03 1:44 PM CT (19:44Z): W9 EXIT-SHAPE RESULT
 
 W9 (6 tries): no variant passes in either market. Gold net c per contract (PF) none 1.28 (1.25), plain 25c 1.42 (1.28), A (exit only while more than 120 s remain) 1.43, B (two closes at or under 25c) 1.34, C (two closes at or under 20c) 1.32; plain 25c beats none in all three thirds, A ties it (+0.01c). Dogecoin none 1.71 (1.37), plain 25c 1.10 (1.22), A 1.18, B 1.52 (1.32), C 1.64 (1.35): the confirmed lines recover most of the plain exit's cost (they sell 35% to 40% fewer) but never beat holding in D2 or the holdout. Plain 25c sells 21 eventual winners out of 110 on Dogecoin, 2 of 69 on gold. Nothing to change; the Dogecoin pattern (plain early sells hurt, confirmed sells nearly free) is a forward-test question only. Candle limitation stated (exit at the minute close, no 10 second watch).
