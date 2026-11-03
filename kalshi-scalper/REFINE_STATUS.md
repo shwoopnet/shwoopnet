@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 2:38 PM CT (20:38Z): W14 DASH BUILT
+
+dash.sh in the scratchpad (`bash dash.sh`, needs KALSHI_REPORT_TOKEN in the environment): one 27 line block with the L1 and OICORE silence flags (L1 last order 1.2 hours ago, OICORE 0.4 hours ago at 20:37Z), the Dogecoin ladder tally and its triggers (net below -20 already reported to main, 76 settled and 8th loss not reached), C1, C9, OICORE cumulative (21 filled, 6 won, 15 lost, +$32.46), the S-LIM1-LIVE tag count (2, +$8.29), the OICORE forward band tables and the gold and Dogecoin summaries. Used on every wake from now.
+
 ## 2026-11-03 2:37 PM CT (20:37Z): W12 TAPE-EXIT RESULT, W15 R6-FINAL REGISTERED
 
 W12 (4 tries): R6 tape overlaps the candle files on Oct 29 to Nov 2; gold 97 windows with tape, 27 in band; Dogecoin 219, 58 in band. Gold: candle rule 0 early sells, tape first touch 1 (and that window won); Dogecoin: 3 candle sells and 3 tape touches are the same windows (2 of 3 won). Net c per contract: gold hold +6.98, candle +6.98, tape +4.16 (n 27); Dogecoin hold +4.89, candle +2.21, tape +2.65 (n 58). The prediction (tape fires on more windows) is not supported on this thin sample; the tape figures are if anything optimistic (a trade at 0.25 is not a guaranteed fill). Lead only.
