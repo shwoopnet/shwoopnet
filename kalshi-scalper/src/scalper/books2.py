@@ -25,7 +25,7 @@ LO, HI, RATIO, C, LEAD, MAXQ = 0.03, 0.30, 3.0, 10, 120, 0.10
 PRIOR_SD = {("T", "KXNCAAFGAME"): 14.0, ("T", "KXNFLGAME"): 10.0, ("T", "KXMLBGAME"): 3.2,
             ("S", "KXNCAAFGAME"): 16.0, ("S", "KXNFLGAME"): 13.0, ("S", "KXMLBGAME"): 3.3}
 KSER = {"KXNCAAFGAME": ("KXNCAAFTOTAL", "KXNCAAFSPREAD"), "KXNFLGAME": ("KXNFLTOTAL", "KXNFLSPREAD"), "KXMLBGAME": ("KXMLBTOTAL", "KXMLBSPREAD")}
-ESPN = {"KXNCAAFGAME": "football/college-football", "KXNFLGAME": "football/nfl", "KXMLBGAME": "baseball/mlb"}
+ESPN = {"KXNCAAFGAME": "football/leagues/college-football", "KXNFLGAME": "football/leagues/nfl", "KXMLBGAME": "baseball/leagues/mlb"}
 UA = "research-bot BOOKS2 (kalshi research)"
 
 
@@ -134,32 +134,37 @@ def http(url):
     return None
 
 
+def fit_games():
+    """Games with a DK line in the first two thirds of each league by start time (the sd fit set)."""
+    by = defaultdict(list)
+    for s, gid, st, ev, h, a in games():
+        if dk_lines(gid):
+            by[s].append((st, gid, h, a))
+    out = []
+    for s, gl in by.items():
+        gl.sort()
+        out += [(s, gid, h, a) for st, gid, h, a in gl[:(2 * len(gl)) // 3]]
+    return out
+
+
 def fetch_scores():
+    """Final scores from ESPN's core API for the fit set only (the test third's scores are never fetched)."""
     out = CACHE / "scores.json"
     have = json.load(open(out)) if out.exists() else {}
-    gs = games()
-    want = defaultdict(set)
-    for s, gid, st, ev, h, a in gs:
-        if dk_lines(gid):
-            d = datetime.fromtimestamp(st - 6 * 3600, timezone.utc).date()  # US evening games belong to the previous US date
-            for dd in (d, datetime.fromtimestamp(st, timezone.utc).date()):
-                want[(s, dd.strftime("%Y%m%d"))].add(gid)
-    for (s, ds), ids in sorted(want.items()):
-        if all(g in have for g in ids):
+    for s, gid, h, a in fit_games():
+        if gid in have:
             continue
-        extra = "&groups=80" if s == "KXNCAAFGAME" else ""
-        d = http(f"https://site.api.espn.com/apis/site/v2/sports/{ESPN[s]}/scoreboard?dates={ds}&limit=400{extra}")
-        time.sleep(1.0)
-        if not d:
-            continue
-        for ev in d.get("events", []):
-            comp = ev["competitions"][0]
-            sc = {c["homeAway"]: c.get("score") for c in comp["competitors"]}
-            if comp["status"]["type"].get("completed") and sc.get("home") is not None and sc.get("away") is not None:
-                have[ev["id"]] = [int(float(sc["home"])), int(float(sc["away"]))]
-        json.dump(have, open(out, "w"))
+        sc = []
+        for team in (h, a):
+            d = http(f"https://sports.core.api.espn.com/v2/sports/{ESPN[s]}/events/{gid}/competitions/{gid}/competitors/{team}/score")
+            time.sleep(1.0)
+            sc.append(d.get("value") if d else None)
+        if None not in sc:
+            have[gid] = [int(sc[0]), int(sc[1])]
+        if len(have) % 25 == 0:
+            json.dump(have, open(out, "w"))
     json.dump(have, open(out, "w"))
-    print("scores for", len(have), "events")
+    print("scores for", len(have), "games", flush=True)
 
 
 if __name__ == "__main__":
