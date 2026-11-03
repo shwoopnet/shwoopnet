@@ -42,28 +42,31 @@ gates.SC3 = () => {
 const mk = (series, bid, ask, close, askSz, bidSz) => ({ series, ticker: series + '-X', closeTime: close || '2026-10-27T18:15:00Z', yesBid: bid, yesAsk: ask, yesAskSz: askSz === undefined ? 100 : askSz, yesBidSz: bidSz === undefined ? 80 : bidSz });
 gates.SC4 = () => {
   const l = lib(TUE);
-  const rows = l.kalshiPriceWatch([mk('KXGOLD15M', 0.91, 0.92), mk('KXDOGE15M', 0.05, 0.07), mk('KXBTC15M', 0.88, 0.90)], TUE), by = (n) => rows.find((r) => r.name === n);
+  const rows = l.kalshiPriceWatch([mk('KXGOLD15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)], TUE), by = (n) => rows.find((r) => r.name === n);
+  assert.ok(!rows.some((r) => r.name === 'Dogecoin'), 'Dogecoin is paused (Nov 3, 2026), so it has no price tile');
+  const noFav = l.kalshiPriceWatch([mk('KXGOLD15M', 0.05, 0.07)], TUE).find((r) => r.name === 'Gold');
   assert.strictEqual(by('Gold').state, 'in', 'gold favourite side (yes at 92c) is inside 88c to 97c'); assert.ok(Math.abs(by('Gold').price - 0.92) < 1e-9);
-  assert.strictEqual(by('Dogecoin').state, 'in', 'a market at 5c yes has a 95c no side: the favourite is the no side, inside the band'); assert.ok(Math.abs(by('Dogecoin').price - 0.95) < 1e-9);
+  assert.strictEqual(noFav.state, 'in', 'a market at 5c yes has a 95c no side: the favourite is the no side, inside the band'); assert.ok(Math.abs(noFav.price - 0.95) < 1e-9);
   assert.strictEqual(by('Bitcoin').state, 'in', 'the Bitcoin strategy buys the cheaper side: no at 12c is inside 5c to 50c'); assert.ok(Math.abs(by('Bitcoin').price - 0.12) < 1e-9, 'the cheaper side is 1 minus the yes bid');
-  const out = l.kalshiPriceWatch([mk('KXGOLD15M', 0.83, 0.84), mk('KXDOGE15M', 0.985, 0.99), mk('KXBTC15M', 0.01, 0.02)], TUE);
-  assert.strictEqual(out[0].state, 'below', 'gold at 84c is below the band: this is why nothing is trading'); assert.strictEqual(out[1].state, 'above'); assert.strictEqual(out[2].state, 'below', 'a cheaper side under 5c is below the Bitcoin range');
+  const out = l.kalshiPriceWatch([mk('KXGOLD15M', 0.83, 0.84), mk('KXBTC15M', 0.01, 0.02)], TUE);
+  assert.strictEqual(out[0].state, 'below', 'gold at 84c is below the band: this is why nothing is trading'); assert.strictEqual(out[1].state, 'below', 'a cheaper side under 5c is below the Bitcoin range');
+  assert.strictEqual(l.kalshiPriceWatch([mk('KXGOLD15M', 0.985, 0.99)], TUE)[0].state, 'above');
   assert.ok(out[0].pos >= 0 && out[0].pos <= 1 && out[0].bandWidth > 0, 'the marker and band are fractions of the scale');
 };
 gates.SC5 = () => {
-  const r = lib(FRI_EVE).kalshiPriceWatch([mk('KXGOLD15M', 0.91, 0.92, '2026-10-31T01:45:00Z'), mk('KXDOGE15M', 0.5, 0.52, '2026-10-31T01:45:00Z')], FRI_EVE);
-  assert.strictEqual(r[0].state, 'closed', 'gold is shown closed on a Friday evening whatever the relay says'); assert.strictEqual(r[1].state, 'in' === r[1].state ? 'in' : r[1].state);
+  const r = lib(FRI_EVE).kalshiPriceWatch([mk('KXGOLD15M', 0.91, 0.92, '2026-10-31T01:45:00Z')], FRI_EVE);
+  assert.strictEqual(r[0].state, 'closed', 'gold is shown closed on a Friday evening whatever the relay says');
   const none = lib(TUE).kalshiPriceWatch([], TUE); assert.ok(none.every((x) => x.state === 'none'), 'no relay data: no quote, never a made-up price');
-  const stale = lib(TUE).kalshiPriceWatch([mk('KXDOGE15M', 0.9, 0.91, '2026-10-27T17:00:00Z')], TUE).find((x) => x.name === 'Dogecoin'); assert.strictEqual(stale.state, 'none', 'a market that already closed is not shown');
-  const zero = lib(TUE).kalshiPriceWatch([mk('KXDOGE15M', 0, 0, '2026-10-27T18:15:00Z')], TUE).find((x) => x.name === 'Dogecoin'); assert.strictEqual(zero.state, 'none', 'an empty book is no quote');
+  const stale = lib(TUE).kalshiPriceWatch([mk('KXGOLD15M', 0.9, 0.91, '2026-10-27T17:00:00Z')], TUE).find((x) => x.name === 'Gold'); assert.strictEqual(stale.state, 'none', 'a market that already closed is not shown');
+  const zero = lib(TUE).kalshiPriceWatch([mk('KXGOLD15M', 0, 0, '2026-10-27T18:15:00Z')], TUE).find((x) => x.name === 'Gold'); assert.strictEqual(zero.state, 'none', 'an empty book is no quote');
 };
 gates.SC6 = () => {
   // the redraw reads only the relay data and never throws on empty data; the rendered tile names the verdict in words
-  const el = { innerHTML: '' }, depth = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.83, 0.84), mk('KXDOGE15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };
+  const el = { innerHTML: '' }, depth = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };   // Dogecoin is paused (Nov 3, 2026) and has no tile; 'below' is covered by SC4
   const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEscapedPriceCell') + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + fn('kalshiEscapedDepthRows') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
   const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: (id) => (id === 'kalPrices' ? el : (id === 'kalDepth' ? depth : null)) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + ' seconds ago', data, () => [], () => 'Gold');
   f();
-  assert.ok(/Below the 88c to 97c band/.test(el.innerHTML) && /Inside the 88c to 97c band/.test(el.innerHTML) && /Inside the 5c to 50c band/.test(el.innerHTML), 'each market gets a verdict in words');
+  assert.ok(/Inside the 88c to 97c band/.test(el.innerHTML) && !/Dogecoin/.test(el.innerHTML) && /Inside the 5c to 50c band/.test(el.innerHTML), 'each market gets a verdict in words');
   assert.ok(/Depth at the touch/.test(depth.innerHTML) && /No book yet|resting/.test(depth.innerHTML), 'the depth tile is drawn with the prices');
   assert.ok(/Read 14 seconds ago\./.test(el.innerHTML) && !/ago ago/.test(el.innerHTML) && /open interest jump/i.test(el.innerHTML), 'the age of the read (said once) and the open interest caveat are shown');
   const empty = { innerHTML: '' }; new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: () => empty }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '', (s) => s, null, () => [], () => 'Gold')();
@@ -77,13 +80,13 @@ gates.SC7 = () => {
 gates.SC8 = () => {
   // depth at the touch: buying YES meets the YES ask size, buying NO meets the YES bid size; the share is the last order over that
   const l = lib(TUE);
-  const yesSide = l.kalshiPriceWatch([mk('KXDOGE15M', 0.90, 0.92, null, 120, 45)], TUE).find((x) => x.name === 'Dogecoin');
+  const yesSide = l.kalshiPriceWatch([mk('KXGOLD15M', 0.90, 0.92, null, 120, 45)], TUE).find((x) => x.name === 'Gold');
   assert.strictEqual(yesSide.depth, 120, 'the favourite is the YES side (92c): the depth is the YES ask size');
-  const noSide = l.kalshiPriceWatch([mk('KXDOGE15M', 0.05, 0.07, null, 120, 45)], TUE).find((x) => x.name === 'Dogecoin');
+  const noSide = l.kalshiPriceWatch([mk('KXGOLD15M', 0.05, 0.07, null, 120, 45)], TUE).find((x) => x.name === 'Gold');
   assert.strictEqual(noSide.depth, 45, 'the favourite is the NO side (95c): buying NO meets the YES bid size');
   const cheap = l.kalshiPriceWatch([mk('KXBTC15M', 0.87, 0.89, null, 300, 70)], TUE).find((x) => x.name === 'Bitcoin');
   assert.strictEqual(cheap.depth, 70, 'the Bitcoin strategy buys the cheaper NO side (13c): the YES bid size');
-  assert.strictEqual(l.kalshiPriceWatch([mk('KXDOGE15M', 0.9, 0.92, null, null, null)], TUE).find((x) => x.name === 'Dogecoin').depth, null, 'no size in the relay: no depth, never a made-up number');
+  assert.strictEqual(l.kalshiPriceWatch([mk('KXGOLD15M', 0.9, 0.92, null, null, null)], TUE).find((x) => x.name === 'Gold').depth, null, 'no size in the relay: no depth, never a made-up number');
   // the rows: the share of the book the last order was, in words, with a warning at 30% or more
   const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + '; return { kalshiLastOrderSizes, kalshiEscapedDepthRow };';
   const d = new Function('Math', 'Number', 'String', 'Array', 'escapeHtml', 'kalshiMarketName', src)(Math, Number, String, Array, (x) => String(x), (o) => (/DOGE/.test(o.series) ? 'Dogecoin' : 'Gold'));
