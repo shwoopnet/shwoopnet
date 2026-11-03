@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 08:00 CT (13:30Z): owner's six questions answered to main (read only)
+
+Gold 14 ct + OICORE 10 ct bootstrap from live fills: median $276 a month (90% $178 to $369); OICORE rests on 18 trades, so treat it as $0 to $190. 12% stop (about $66 on an assumed $550 base) needs about 7 gold losses in a day; worst realized 24h so far -$10.13. Gold exit: sim PF 1.28 at 25c and 15c, 1.25 with no exit, live 9 exits saved about $8.3 (8 of 9 would have lost anyway). No-fills: gold 121 won of 132 (loss rate 8.3% vs 4.6% filled, so fills are not missed winners); OICORE 3 of 6 won (n too small). OICORE needs a shadow before any limit change. Open: BTC candle pull for the relative trigger (OIREL) restarted 13:00Z after dying under nohup; drift analysis follows.
+
 ## Standing queue (ranked; refill when under 5; each item needs a registration here BEFORE scoring and adds its tries to N)
 
 Counts as of 2026-10-30 2:00 PM CT: N 728,652. Status: R = registered, Q = queued.
