@@ -208,3 +208,35 @@ def run():
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "run":
         run()
+
+
+W3_OUT = os.path.join(DATA, "hrseas1_w3.json")
+
+
+def run_w3():
+    """Registered section 8: only a slot that PASSED development is read on the frozen last third, once. Only fav/WEEKEND passed."""
+    if os.path.exists(W3_OUT):
+        raise SystemExit("W3 already read once")
+    with open(OUT) as f:
+        dev = json.load(f)
+    passed = [k for k, v in dev.items() if isinstance(v, dict) and str(v.get("verdict", "")).startswith("PASS")]
+    assert passed == ["fav/WEEKEND"], passed
+    db, ev = load_events()
+    closes = [x for x in sorted(ev) if x >= dev["cut2"]]
+    rows = []
+    for ct in closes:
+        for t in trades_for_close(db, ct, ev[ct]):
+            t["blocks"] = block_names(ct)
+            rows.append(t)
+    fav = [x for x in rows if x["kind"] == "fav"]
+    inb = [x for x in fav if "WEEKEND" in x["blocks"]]
+    ctl = [x for x in fav if "WEEKEND" not in x["blocks"]]
+    rng = np.random.default_rng(12345)
+    res = {"closes": len(closes), "weekend": stats(inb), "control": stats(ctl), "diff": boot_diff(inb, ctl, rng)}
+    print(json.dumps(res, default=str))
+    with open(W3_OUT, "w") as f:
+        json.dump(res, f, default=str)
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "w3":
+    run_w3()
