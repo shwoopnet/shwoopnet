@@ -165,7 +165,10 @@ def run():
         cand = json.loads((CACHE / f"candles_{t}.json").read_text())
         dev, hold = split_events(allm[t])
         trades, ctrl, hit, skip, src = [], [], 0, 0, []
+        incomplete = 0
         for idx, (_, e, L, per) in enumerate(dev):
+            if not all(m["ticker"] in cand for m in L):   # Amendment 2: score only events whose markets are all fetched
+                incomplete += 1; continue
             look, c, mu, pmf = model(posts, per[0], per[1], lh)
             half = 0 if idx < len(dev) // 2 else 1
             rows = []
@@ -184,7 +187,7 @@ def run():
             tot = sum(1 for x in posts if per[0] <= x < per[1])
             win = [m for m in L if m["result"] == "yes"]
             if win: src.append(bracket_prob(win[0], tot, [1.0]) > 0)
-        s = {"kind": kind, "dev_events": len(dev), "holdout_events": len(hold), "skipped_markets": skip,
+        s = {"kind": kind, "dev_events": len(dev), "holdout_events": len(hold), "skipped_markets": skip, "incomplete_events_not_scored": incomplete,
              "rule": stats([x[1] for x in trades]), "rule_h1": stats([x[1] for x in trades if x[0] == 0]), "rule_h2": stats([x[1] for x in trades if x[0] == 1]),
              "control": stats([x[1] for x in ctrl]), "source_ok": (sum(src) / len(src)) if src else None, "source_n": len(src),
              "trades": [(x[2], round(x[3], 3), x[4], round(x[1], 3)) for x in trades]}

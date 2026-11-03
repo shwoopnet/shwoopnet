@@ -8470,3 +8470,5 @@ Full note `workers/FEDIMPL1_RESULT.md`. 30 meetings have Kalshi history (KXFEDDE
 
 ### AUDIT1 (2026-11-03, read-only audit of every registered result; N +0, no try, no verdict changed)
 Table `workers/AUDIT1_TABLE.csv` (379 families, 659 table cells), statistics `src/scalper/audit1.py` (`tests/test_audit1.py`), report `workers/AUDIT1_REPORT.md`: z values are overdispersed against N(0,1) but the losing tail is larger than the winning tail in every lane, no registered test clears the deflated bar of about 5.27 and then a clean holdout (GEN3 5.66 is void), OICORE is at 4.53, and the least-covered lanes by census volume are weather, economics/macro, politics, daily/weekly ladders and sports.
+
+### COUNT1 Amendment 2 (2026-11-03, before scoring): weekly scored on all 26 fetched development events; daily scored only on the 5 development events with all markets fetched (date-order fetch, not outcome-based); frozen thirds untouched. See `workers/COUNT1_REGISTRATION.md`.
