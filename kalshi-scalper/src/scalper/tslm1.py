@@ -3,7 +3,7 @@ places an order, reads a key or decides anything live.
     PYTHONPATH=src python -m scalper.tslm1 counts   (outcome-free: eligible windows, trigger counts per third; reads NO result)
     PYTHONPATH=src python -m scalper.tslm1 score    (once; refuses a second run)
 Candle = (bid_c, ask_c, volume, oi) keyed by end_ts. Mid change at end e = mid(e) - mid(e - 60), both candles two sided and present.
-Big = absolute change >= the 95th percentile (and > 0) of that series' one minute absolute mid changes with end in (open - 24h, open]
+Big = absolute change (ends 840..180 s before its market's close only, AMENDMENT 1) >= the 95th percentile (and > 0) of that series' one minute absolute mid changes with end in (open - 24h, open]
 (open = close - 900, so nothing from the window itself is in the threshold). Calm = absolute change <= the same trailing median.
 PRIMARY (SHOCK_CALM): a big change ending 840..360 s before the close (first 9 minutes) AND the three changes ending 300, 240, 180 s
 before the close are all available, all <= the median and none big. LATE (alternative, one more try): no big change in the first 9
@@ -53,6 +53,8 @@ def series_changes(markets):
     pairs = []
     for tk, (ct, res, cs, f) in markets.items():
         for e in cs:
+            if not 180 <= ct - e <= 840:       # AMENDMENT 1: only the part of a market the trigger reads (see registration)
+                continue
             d = change_at(cs, e)
             if d is not None:
                 pairs.append((e, d))
