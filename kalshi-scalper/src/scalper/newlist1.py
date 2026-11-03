@@ -330,7 +330,7 @@ def score(force=False):
     for rule in ("A", "B"):
         rows, stat = build_rows(c, uni, rule)
         res_all[rule] = {"stat": stat, "cells": {}}
-        keys = sorted(set(rows))
+        keys = sorted(set(rows), key=lambda k: (k[0], str(k[1])))   # fix 2026-11-03: look keys mix ints and 'late'; the first run crashed here before any output
         fam = sorted({k[0] for k in keys})
         for look in list(LOOK_H) + ["late"]:
             pooled = [r for k in keys if k[1] == look for r in rows[k]]
