@@ -1,0 +1,60 @@
+# COUNT2 registration (registered 2026-11-03, before any Kalshi candle, any bracket price or any SPC file read)
+
+Worker COUNT2, research session "Strategy Research V2". Discovery only. No live code, no functions/, no L1, no OICORE, no promote verb. N: **+2** (one rule; the coordinator keeps the total, about 730,095 before this, z bar about 5.27).
+
+## Why this exists
+COUNT1 (workers/COUNT1_RESULT.md) priced Truth Social post-count brackets against CNN's public archive and got NOT_ENOUGH_DATA plus SOURCE_MISMATCH: Kalshi settles on Roll Call's count, not the archive, so the running count was biased. The lesson: the public reference must be the SAME source Kalshi settles on and must be observable mid-period. COUNT2 looks for count or threshold series whose settlement text names a keyless, dated, queryable public archive.
+
+## Duplicate check (done first)
+Read: README COUNT1, EQUAKE1, TSA1, MENT1, ENTER1, CHART1, NOWCAST1, USWEEP generic sweeps, WXNEW1 (monthly rain and snow: about 2 settled months each, NOT_RUNNABLE), workers/OICORE_SHAPE_INVENTORY.md, workers/COUNT1_REGISTRATION.md. Not repeated: Truth Social counts (COUNT1), earthquakes (EQUAKE1, KXBIGGESTQUAKE), TSA throughput (TSA1), BLS and claims, weather daily and monthly accumulations (WXNEW1/NOWCAST1), X post counts, Spotify and chart counts (ENTER1). The tornado-count series KXTORNADO appears nowhere in the README or workers/ before this file (grep: no hits).
+
+## Data used to build the candidate table (metadata only)
+The cached public series list (`series.json` in the research scratchpad, 15,680 series, refreshed 2026-11-03; the older copy is dated 2026-10-30) searched by settlement-source domain (federalregister.gov, congress.gov, govinfo.gov, sec.gov, steampowered.com, github.com, huggingface.co, nhc.noaa.gov, spc.noaa.gov, usgs.gov, cdc.gov, whitehouse.gov, bls.gov, faa.gov, wikimedia) and by title keywords (how many, number of, count, filings, signed, named storm, hurricane, players, stars, downloads, commits, releases, executive order, tornado, cases, launches). For the candidates the settled market listings (`/markets?status=settled` and `/historical/markets`, metadata: tickers, strikes, open and close times, rules text) were fetched. The listing rows carry `result`; I printed exactly ONE market's result by accident (KXTORNADO-26SEP-100: no, which belongs to the frozen third) and used nothing from it. No candle, no price, no SPC file was read before this commit. The one SPC file touched was a reachability test of a 2024-05-17 daily report (200 OK, 135 lines); its content was not analysed.
+
+## Candidate table (settlement source, cadence, settled events, queryable?)
+| Series | Settles on (rules text) | Cadence | Settled events | Source queryable at a past look, keyless? | Verdict |
+|---|---|---|---|---|---|
+| **KXTORNADO / TORNADO** | "preliminary number of tornadoes" from the "Storm Reports Legend" of the SPC "Preliminary Report Summary" | monthly, thresholds `greater` (3 to 17 markets per month) | **39** (2023-07 to 2026-09), 354 markets | YES: SPC daily filtered storm reports `https://www.spc.noaa.gov/climo/reports/YYMMDD_rpts.csv`, keyless, archived back to 2004 or earlier | **RUN** (only family meeting both bars) |
+| KXTRUMPNOMNUM | publication dates on whitehouse.gov "Presidential Actions" (nominations sent to the Senate) | weekly, `greater_or_equal`, 4 markets | 15 | whitehouse.gov page is current-only for "as checked at 10:00 ET"; no dated past view | too few events, NOT_RUNNABLE |
+| KXJUDGECOUNT | congress.gov confirmations | monthly | 11 | congress.gov API needs a key | NOT_RUNNABLE |
+| KXPARDONSTRUMP | justice.gov / whitehouse.gov pardons | monthly | 11 | no dated queryable archive | NOT_RUNNABLE |
+| KXTRUMPENDORSEMENTS | judgement of Truth Social posts ("clear, affirmative statement", counts reaffirmations) | weekly | 30 | no archive equals the judged count (COUNT1 lesson) | fails (a) |
+| KXTRUFTSA | Truflation index of daily TSA screened | daily thresholds | 38 | Truflation, not the TSA table (TSA1 covered TSA) | duplicate / fails (a) |
+| KXTRUMPDELETE | Roll Call deleted-post count | monthly | 7 | no archive | NOT_RUNNABLE |
+| KXBILLSSIGNED / KXBILLSCOUNT / KXPRESSBRIEFINGCOUNT | congress.gov / whitehouse.gov | monthly | 1, 2, 3 events | key or no dated view | too few events |
+| KXEOWEEK / KXEODATE | federalregister.gov | weekly / one-off | many / 1 | Federal Register publication lags signing 3 to 7 days (COUNT1: not observable mid-period) | NOT_RUNNABLE |
+| KXSWENCOUNTERS, KXCH11, KXH5N1CASES, KXCASEW/KXCASED, KXNAMEDSTORM, KXHURCMAJ, KXFEDEMPLOYEES, KXHOUSEBILLS, KXSENATEBILLS | CBP, BLS, CDC, NHC, FRED, congress.gov | monthly or seasonal | 9, 1, 2, 39 (ended 2022), 2, 2, 2, 1, 1 | monthly releases land after the period, or the series ended | NOT_RUNNABLE / too few |
+| Steam, GitHub, Hugging Face, PyPI, npm, SEC, Wikipedia | no count or threshold series found whose settlement is that source (Steam: KXTOPSELLERS rank; Hugging Face: KXTOPAI leaderboard; GitHub: 6 series, none a repo count) | | | | none |
+| KXEOCOUNT | | | 0 settled | | not listed |
+
+Selection rule (fixed now): a family is run if (a) its rules name a source identical to a keyless dated archive that can be queried for the running value at any past look, and (b) it has at least 20 settled events. Only KXTORNADO meets both. The target of up to three families therefore yields **one**.
+
+## Rule COUNT2-T (the one registered cell)
+Universe: every settled event of KXTORNADO/TORNADO (39), sorted by period start. **Split:** the first 26 events (2/3 by period start) are DEVELOPMENT (first 13 = half 1, last 13 = half 2); the last 13 are the FROZEN HOLDOUT: NO candle downloaded for them, no result read, no SPC file for their months downloaded for scoring, until a single holdout read that happens only if development shows mean net above 0 in both halves, PF at least 1.5, n at least 30, and not before 2026-11-17.
+**Period.** The calendar month from 00:00 ET on the 1st to 00:00 ET on the 1st of the next month (the rules say "in <Month Year>"; Kalshi closes at 23:59 ET). **Look = 50% of the period elapsed** (the midpoint instant). An event is scored only if all its markets' `open_time` is at or before look minus 60 minutes; otherwise it is counted `markets_not_open_at_look` and skipped (by design, not by outcome).
+**Count so far (the exact settlement source).** The SPC daily file for date D (`YYMMDD_rpts.csv`) is the tornado section (lines after the header `Time,F_Scale,Location,County,State,Lat,Lon,Comments` until the next header line starting `Time,Speed`; a file with no tornado rows contributes 0). The month total is the sum over the file dates D in the month (SPC days run 12Z to 12Z and are labelled by the start date). File D is usable at the look if D + 2 days at 00:00 ET is at or before the look (its 12Z day has ended and the file has had about a day to be filed). c = sum of tornado rows over usable file dates inside the month; n_rem = days in the month minus the number of usable dates inside the month (this includes the not yet usable days).
+**Pace model (frozen now, no tuning).** daily_rate = 0.5 x trail + 0.5 x clim, where trail = mean tornado rows per file date over the last 14 usable dates (crossing into the previous month if needed) and clim = mean tornado rows per file date for that calendar month over 2015-01-01 to 2022-12-31 (leave-one-year-out when calibrating r below; all of 2015 to 2022 for scoring; years before the series existed, so no Kalshi outcome is involved). Remaining count R ~ negative binomial with mean mu = n_rem x daily_rate and variance mu + mu^2 / r. **r is calibrated once, before any Kalshi data, on the 96 year-months of 2015 to 2022**: simulate the same look (midpoint), the same c, trail and clim (leave-one-year-out) and set r = sum(mu^2) / sum((R_true - mu)^2 - mu), clipped to [0.5, 20]. Sensitivity reported only: r/2 and 2r. total = c + R; the probability of a `greater` market is P(total > floor_strike). Strike semantics: `greater` total > floor.
+**Entry.** Quotes: one minute candles of each market in [look - 60 min, look + 15 min]. YES side: signal quote = last yes_ask close at or before the look (at most 60 minutes old), FILL = yes_ask close of the first candle ending after the look (within 15 minutes). NO side: the same with no_ask = 1 - yes_bid close. A side qualifies if its FILL ask is in [0.03, 0.30] (hard limit 0.30) and its model probability is at least 3 x the fill ask. At most 2 qualifying sides per month (highest p_model / ask), 1 contract each, held to settlement (the market `result`, no early exit). A market with no valid quote is skipped and counted.
+**Fees.** 7% x C x p x (1 - p) rounded up to the cent with C = 10, divided by 10 for one contract (p = fill ask). Net per contract = payoff - ask - fee.
+**Control.** Every side (YES and NO) of the same months with fill ask in [0.03, 0.30], equal weight, one contract each. Reported next to the rule.
+**Source check (data quality, not a selection tool).** In the development months, the share where the SPC month total (above, all file dates) is consistent with EVERY settled market of the event (total > floor for each market with result yes, total <= floor for each with result no). If under 90%, tag SOURCE_MISMATCH and the verdict is NOT_ENOUGH_DATA whatever the P&L. Also reported: the share where it matches the exact winning bracket of the grid.
+
+## Numeric predictions (before any outcome)
+- Scored development events: 14 to 24 of 26 (markets must be open at mid-month). Trades: 3 to 25 (80%), take-up 0.2 to 1.0 per event.
+- Source check (consistent with all markets): 55% passes 90%; the SPC legend counts may include or exclude duplicate or later-corrected reports.
+- Win rate of the bought cheap sides: below the model's mean p (overconfidence), as in COUNT1 (27% against 44%). Mean net per contract between -6c and +6c; PF under 1.5: 85%.
+- Verdict **NOT_ENOUGH_DATA** (97%); FALSIFIED if n were 150 or more with the pooled sign wrong.
+
+## Kill rules / verdicts (fixed now)
+- **NOT_ENOUGH_DATA**: fewer than 150 trades (development plus holdout). Report n, mean net, PF and the months to go: at 12 events a year the 150 trades take 150 / (12 x take-up) years, written in the result.
+- **FALSIFIED**: at 150 or more trades, mean net after fees not above 0 in BOTH halves, or PF under 1.5, or rule minus control under 1c.
+- **SURVIVES (forward test only)**: all clear and the holdout agrees. Nothing here promotes anything. Multiple testing: one cell, N +2; at n under 150 no pass is possible whatever the PF.
+
+## Capped probe spec (only if positive in both halves with a mechanism)
+1 contract, ask 3c to 30c, at most 2 sides per month, worst loss 60c a month, kill after 20 fills with net under -$3.00 or 40 fills with PF under 1.0. The mechanism would have to be that a cheap tail threshold is mispriced because retail anchors on the year to date or the last outbreak instead of the month's climatology and the remaining days; the counterparty is the retail buyer of the long shot or the seller of the sure thing.
+
+## Forward freeze (if NOT_ENOUGH_DATA)
+This exact rule (frozen constants r, 0.5/0.5 blend, 14 day trail, climatology 2015 to 2022, look at the midpoint, 3x, 0.30, 2 per month, fee) is frozen from this commit for months starting after 2026-11-03: the November 2026 event (look 2026-11-16 12:00 ET), December and so on; quotes are read from the 1 minute candles after each month (they stay available), SPC files stay online. Expected: about 12 events a year x the measured take-up; 40 forward trades are a multi-year wait, stated in the result.
+
+## Code
+`src/scalper/count2.py` (`fetch` for SPC files and candles of development events only, `calib` for r, `run` once), `tests/test_count2.py` (CSV section parse, usable-date rule around month ends and DST, strike semantics, NO-side ask, NB pmf sums to 1, fee, 2 per month cap). Cache outside the repo (`/tmp/count2_cache`). One thread, sleeps, backoff on 429.
