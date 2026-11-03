@@ -58,7 +58,15 @@ def fetch() -> None:
             ms = [m for m in by[c] if m["ticker"] not in have]
             for i in range(0, len(ms), 100):
                 chunk = ms[i:i + 100]
-                got = api.batch_candlesticks([m["ticker"] for m in chunk], c - CANDLE_LO, c - CANDLE_HI)
+                for attempt in range(12):
+                    try:
+                        got = api.batch_candlesticks([m["ticker"] for m in chunk], c - CANDLE_LO, c - CANDLE_HI)
+                        break
+                    except RuntimeError as err:
+                        print("  retry", attempt, str(err)[:60], flush=True)
+                        time.sleep(30 + 20 * attempt)
+                else:
+                    raise RuntimeError("giving up")
                 for m in chunk:
                     t = m["ticker"]
                     rows = [r for r in (backfill.parse_candle(x, t, series) for x in got.get(t, [])) if r]
@@ -68,7 +76,7 @@ def fetch() -> None:
                     db.execute("INSERT OR REPLACE INTO bracket VALUES(?,?,?,?,?,?)",
                                (t, series, c, m.get("strike_type"), m.get("floor_strike"), m.get("cap_strike")))
                 db.commit()
-                time.sleep(0.6)
+                time.sleep(2.0)
     print("fetch done", flush=True)
 
 
