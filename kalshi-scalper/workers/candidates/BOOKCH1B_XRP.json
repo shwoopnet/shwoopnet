@@ -1,0 +1,11 @@
+{
+ "id": "BOOKCH1B_XRP",
+ "market": "KXXRP15M",
+ "stage": "discovery",
+ "freeze_utc": "2026-11-04T00:00:00Z",
+ "source": "r6",
+ "evaluator": "scalper.bookch1:forward_eval",
+ "params": {"series": "KXXRP15M", "definition": "withdrawal", "history_from": 1793311200},
+ "generator": "BOOKCH1 (forward only, registered before any R6 outcome)",
+ "description": "Cheaper side's top-5 bid size down from 360 s to 180 s, below 0 and under the 10th percentile of the market's own trailing 24 hours (depth withdrawal; the separately counted second try). Cheaper side (ask 0.05 to 0.50, 10+ displayed) at the first ask 1 s after the 180 s look, held to settlement. Trailing 24 hour cut, 48 window minimum. No backtest; forward windows only. Verdict is the pooled Bitcoin and XRP rows. 2 tries counted (primary and alternative). workers/BOOKCH1_REGISTRATION.md."
+}
