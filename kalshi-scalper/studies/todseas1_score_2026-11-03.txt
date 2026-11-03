@@ -1,0 +1,46 @@
+S1 NOT_ENOUGH_DATA  {'n': 58, 'win': 0.121, 'avg_fill': 0.102, 'payoff': 8.221, 'pf': 1.128, 'pf_x12': 1.114, 'mean_c': 1.176, 'z': 0.279, 'diff_c': 6.075, 'diff_z': 0.928}
+    W1 {'n': 22, 'win': 0.136, 'avg_fill': 0.095, 'pf': 1.397, 'pf_x12': 1.379, 'mean_c': 3.473, 'z': 0.484, 'diff_c': 15.873, 'diff_z': 1.581, 'n_used': 16, 'dropped': 6}
+    W2 {'n': 36, 'win': 0.111, 'avg_fill': 0.107, 'pf': 0.976, 'pf_x12': 0.963, 'mean_c': -0.228, 'z': -0.044, 'diff_c': 1.596, 'diff_z': 0.193, 'n_used': 35, 'dropped': 1}
+S2 NOT_ENOUGH_DATA  {'n': 39, 'win': 0.077, 'avg_fill': 0.105, 'payoff': 7.863, 'pf': 0.655, 'pf_x12': 0.647, 'mean_c': -3.477, 'z': -0.92, 'diff_c': 0.967, 'diff_z': 0.184}
+    W1 {'n': 17, 'win': 0.0, 'avg_fill': 0.098, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -10.476, 'z': -6.268, 'diff_c': -2.079, 'diff_z': -0.653, 'n_used': 17, 'dropped': 0}
+    W2 {'n': 22, 'win': 0.136, 'avg_fill': 0.11, 'pf': 1.197, 'pf_x12': 1.183, 'mean_c': 1.932, 'z': 0.327, 'diff_c': 3.321, 'diff_z': 0.37, 'n_used': 22, 'dropped': 0}
+S3 NOT_ENOUGH_DATA  {'n': 6, 'win': 0.0, 'avg_fill': 0.088, 'payoff': 0.0, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -9.433, 'z': -5.181, 'diff_c': -3.417, 'diff_z': -0.483}
+    W1 {'n': 0}
+    W2 {'n': 6, 'win': 0.0, 'avg_fill': 0.088, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -9.433, 'z': -5.181, 'diff_c': -3.417, 'diff_z': -0.483, 'n_used': 6, 'dropped': 0}
+S4 NOT_ENOUGH_DATA  {'n': 3, 'win': 0.0, 'avg_fill': 0.067, 'payoff': 0.0, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -7.167, 'z': -6.124, 'diff_c': -6.678, 'diff_z': -0.836}
+    W1 {'n': 0}
+    W2 {'n': 3, 'win': 0.0, 'avg_fill': 0.067, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -7.167, 'z': -6.124, 'diff_c': -6.678, 'diff_z': -0.836, 'n_used': 3, 'dropped': 0}
+S5 NOT_ENOUGH_DATA  {'n': 74, 'win': 0.095, 'avg_fill': 0.077, 'payoff': 11.337, 'pf': 1.184, 'pf_x12': 1.169, 'mean_c': 1.226, 'z': 0.399, 'diff_c': -2.381, 'diff_z': -0.538}
+    W1 {'n': 27, 'win': 0.148, 'avg_fill': 0.066, 'pf': 2.58, 'pf_x12': 2.541, 'mean_c': 7.796, 'z': 1.211, 'diff_c': 11.847, 'diff_z': 1.398, 'n_used': 22, 'dropped': 5}
+    W2 {'n': 47, 'win': 0.064, 'avg_fill': 0.084, 'pf': 0.666, 'pf_x12': 0.657, 'mean_c': -2.549, 'z': -0.892, 'diff_c': -9.186, 'diff_z': -2.077, 'n_used': 46, 'dropped': 1}
+S6 NOT_ENOUGH_DATA  {'n': 75, 'win': 0.08, 'avg_fill': 0.074, 'payoff': 11.61, 'pf': 1.01, 'pf_x12': 0.996, 'mean_c': 0.063, 'z': 0.022, 'diff_c': -8.111, 'diff_z': -1.668}
+    W1 {'n': 28, 'win': 0.107, 'avg_fill': 0.08, 'pf': 1.357, 'pf_x12': 1.338, 'mean_c': 2.186, 'z': 0.455, 'diff_c': -6.455, 'diff_z': -0.637, 'n_used': 23, 'dropped': 5}
+    W2 {'n': 47, 'win': 0.064, 'avg_fill': 0.071, 'pf': 0.825, 'pf_x12': 0.815, 'mean_c': -1.202, 'z': -0.345, 'diff_c': -8.921, 'diff_z': -1.706, 'n_used': 47, 'dropped': 0}
+S7 NOT_ENOUGH_DATA  {'n': 70, 'win': 0.1, 'avg_fill': 0.091, 'payoff': 9.347, 'pf': 1.039, 'pf_x12': 1.025, 'mean_c': 0.316, 'z': 0.056, 'diff_c': -4.834, 'diff_z': -0.708}
+    W1 {'n': 21, 'win': 0.0, 'avg_fill': 0.082, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -8.771, 'z': -5.494, 'diff_c': -16.022, 'diff_z': -2.65, 'n_used': 20, 'dropped': 1}
+    W2 {'n': 49, 'win': 0.143, 'avg_fill': 0.095, 'pf': 1.531, 'pf_x12': 1.511, 'mean_c': 4.21, 'z': 0.543, 'diff_c': -0.267, 'diff_z': -0.03, 'n_used': 49, 'dropped': 0}
+S8 NOT_ENOUGH_DATA  {'n': 72, 'win': 0.083, 'avg_fill': 0.09, 'payoff': 9.285, 'pf': 0.844, 'pf_x12': 0.832, 'mean_c': -1.254, 'z': -0.482, 'diff_c': 5.62, 'diff_z': 1.681}
+    W1 {'n': 23, 'win': 0.043, 'avg_fill': 0.083, 'pf': 0.462, 'pf_x12': 0.456, 'mean_c': -4.47, 'z': -1.192, 'diff_c': 6.459, 'diff_z': 1.464, 'n_used': 23, 'dropped': 0}
+    W2 {'n': 49, 'win': 0.102, 'avg_fill': 0.093, 'pf': 1.032, 'pf_x12': 1.017, 'mean_c': 0.255, 'z': 0.076, 'diff_c': 5.218, 'diff_z': 1.172, 'n_used': 48, 'dropped': 1}
+S9 NOT_ENOUGH_DATA  {'n': 79, 'win': 0.013, 'avg_fill': 0.087, 'payoff': 9.714, 'pf': 0.125, 'pf_x12': 0.123, 'mean_c': -8.044, 'z': -5.457, 'diff_c': -11.563, 'diff_z': -2.951}
+    W1 {'n': 23, 'win': 0.043, 'avg_fill': 0.083, 'pf': 0.468, 'pf_x12': 0.463, 'mean_c': -4.461, 'z': -1.122, 'diff_c': -12.708, 'diff_z': -1.403, 'n_used': 22, 'dropped': 1}
+    W2 {'n': 56, 'win': 0.0, 'avg_fill': 0.089, 'pf': 0.0, 'pf_x12': 0.0, 'mean_c': -9.516, 'z': -10.113, 'diff_c': -11.113, 'diff_z': -2.701, 'n_used': 56, 'dropped': 0}
+S10 NOT_ENOUGH_DATA  {'n': 86, 'win': 0.14, 'avg_fill': 0.116, 'payoff': 7.192, 'pf': 1.166, 'pf_x12': 1.151, 'mean_c': 1.662, 'z': 0.345, 'diff_c': 1.56, 'diff_z': 0.391}
+    W1 {'n': 29, 'win': 0.103, 'avg_fill': 0.116, 'pf': 0.79, 'pf_x12': 0.779, 'mean_c': -2.01, 'z': -0.39, 'diff_c': 1.736, 'diff_z': 0.301, 'n_used': 29, 'dropped': 0}
+    W2 {'n': 57, 'win': 0.158, 'avg_fill': 0.115, 'pf': 1.346, 'pf_x12': 1.329, 'mean_c': 3.53, 'z': 0.533, 'diff_c': 1.471, 'diff_z': 0.279, 'n_used': 57, 'dropped': 0}
+FAM FALSIFIED  {'n': 562, 'win': 0.087, 'avg_fill': 0.092, 'payoff': 9.116, 'pf': 0.871, 'pf_x12': 0.859, 'mean_c': -1.087, 'z': -0.934, 'diff_c': -2.315, 'diff_z': -1.397}
+    W1 {'n': 190, 'win': 0.079, 'avg_fill': 0.088, 'pf': 0.817, 'pf_x12': 0.807, 'mean_c': -1.463, 'z': -0.851, 'diff_c': -0.409, 'diff_z': -0.165, 'n_used': 172, 'dropped': 18}
+    W2 {'n': 372, 'win': 0.091, 'avg_fill': 0.094, 'pf': 0.896, 'pf_x12': 0.885, 'mean_c': -0.895, 'z': -0.59, 'diff_c': -2.858, 'diff_z': -1.271, 'n_used': 369, 'dropped': 3}
+baseline {'W1': {'n': 1877, 'win': 0.085, 'avg_fill': 0.093, 'pf': 0.829, 'mean_c': -1.463}, 'W2': {'n': 3863, 'win': 0.078, 'avg_fill': 0.095, 'pf': 0.738, 'mean_c': -2.335}}
+KXEURUSD15M {'n': 18, 'win': 0.111, 'avg_fill': 0.116, 'pf': 0.881, 'mean_c': -1.233}
+KXGBPUSD15M {'n': 18, 'win': 0.0, 'avg_fill': 0.078, 'pf': 0.0, 'mean_c': -8.317}
+KXUSDJPY15M {'n': 19, 'win': 0.105, 'avg_fill': 0.122, 'pf': 0.784, 'mean_c': -2.447}
+KXSILVER15M {'n': 138, 'win': 0.116, 'avg_fill': 0.094, 'pf': 1.196, 'mean_c': 1.539}
+KXCOPPER15M {'n': 90, 'win': 0.122, 'avg_fill': 0.085, 'pf': 1.424, 'mean_c': 3.152}
+KXWTI15M {'n': 120, 'win': 0.05, 'avg_fill': 0.086, 'pf': 0.51, 'mean_c': -4.174}
+KXNATGAS15M {'n': 92, 'win': 0.065, 'avg_fill': 0.092, 'pf': 0.629, 'mean_c': -3.276}
+KXPLATINUM15M {'n': 34, 'win': 0.118, 'avg_fill': 0.091, 'pf': 1.259, 'mean_c': 2.024}
+KXPALLADIUM15M {'n': 33, 'win': 0.061, 'avg_fill': 0.101, 'pf': 0.508, 'mean_c': -4.7}
+class_fx {'n': 55, 'win': 0.073, 'avg_fill': 0.106, 'pf': 0.605, 'mean_c': -3.971}
+class_metals {'n': 295, 'win': 0.112, 'avg_fill': 0.092, 'pf': 1.175, 'mean_c': 1.389}
+class_energy {'n': 212, 'win': 0.057, 'avg_fill': 0.089, 'pf': 0.563, 'mean_c': -3.784}
