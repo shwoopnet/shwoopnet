@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 09:40 AM CT (15:40Z): OICORE-HIST HOLDOUT SCORED (windows after 2026-10-29 21:45Z, 443 windows, 25 fixed-rule trades)
+
+P1 FAILED: 86,300 to 120,000 had PF 2.35 (n 13), not under 1.5; 120,000 to 200,000 PF 9.6 (n 8). P2 FAILED: share of windows over 86,300 was 40% and 41% (it had been 45% to 51%), so the drift stopped. P3 not testable (n 1). Fixed 86,300: PF 2.85 (n 25, win 32%). Relative 0.2676: PF 1.35 (n 18). Verdict: keep the fixed number. Sim vs live: 23 trigger windows, 24 live orders; trigger fired but no live order in 4 windows (Nov 1 14:45Z, Nov 2 14:45Z, 15:45Z, 17:00Z; reason not recorded). Shadows registered with main: S-LIM1, S-JUMP1 (log OIR on every OICORE order and window, read at 40 fills), S-TIM1 (OI window 300 to 180 s, discovery PF 2.72 n 200, holdout 3.54 n 12). N +36 for the exploratory splits, +3 for the three predictions.
+
 ## 2026-11-03 09:26 AM CT (15:26Z): OICORE-HIST REGISTERED (predictions fixed before the holdout is scored)
 
 Discovery file: Bitcoin 15 minute windows closing 2026-08-31 to 2026-10-29 21:45Z (5,437 windows with candles at -480 to -60 s; an exploratory pass was run on them first, about 36 splits counted into N, so they are descriptions, not evidence). Holdout: the windows closing AFTER 2026-10-29T21:45Z (still being pulled; the live OICORE orders start Oct 30), scored once, same engine (OIR = open interest at -180 s minus at -360 s, cheaper side ask 0.05 to 0.50 at -180 s, fill at the ask at -120 s, held to settlement, fee 7% x p x (1-p)). Discovery readings: live rule PF 1.81 (n 428, thirds 2.13 / 1.72 / 1.64); the share of windows with OIR of 86,300 or more rose from 16% (week of Aug 31) to 45% to 51% (weeks of Oct 12 and 19); relative 0.2676 PF 1.68 (n 400); jump strength 86,300 to 120,000 PF 1.31 (win 18.7%, n 235), 120,000 to 200,000 PF 2.21 (n 154), 200,000 to 400,000 PF 2.78 (n 37).
