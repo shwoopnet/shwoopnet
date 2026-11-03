@@ -37,3 +37,6 @@ Median absolute gap 1c to 2c; a gap of 4c or more in 4% to 12% of games, 8c or m
 
 ## 8. Expected read date and data needed
 Today on the 258 games. Data needed for a verdict: 150 triggered trades is about 150 / 0.08 = 1,900 games, i.e. a full NBA season plus an NFL season (about 2027-04-20 for NBA and NFL regular seasons to date); candles and Polymarket history stay retrievable after the fact, so no recorder is needed.
+
+## Amendment 1 (2026-11-03, written before any Kalshi pre-game candle was read and before any gap or outcome was computed)
+The first run of `famxv run` (plumbing only) found 0 eligible games: `espn1.sqlite` candles start about 8 minutes before the game (the ESPN1 download was the in-play window), so no Kalshi quote exists on file 90 to 30 minutes before the start. That run printed no gap, Brier, trade or outcome (every drop was "no Kalshi quote"), so no result was read. Change: `famxv fetch` also downloads Kalshi's public 1 minute candles for the 460 team markets from 100 to 10 minutes before the start into `data/famxv/kpre.json` (batch candlesticks, same endpoint as ESPN1). Nothing else in sections 4 to 8 changes. The one scored read is the next `run` (the first run's empty result file is removed because it carried no information; its text is quoted here).
