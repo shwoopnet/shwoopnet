@@ -81,3 +81,8 @@ Families: KXAAAGASD KXAAAGASDAK KXAAAGASDAL KXAAAGASDAR KXAAAGASDAZ KXAAAGASDCA 
 Disclosed: 50 of the families are state AAA gas price ladders and 33 are daily temperature highs and lows, so the pooled claims are dominated by gas, weather and
 index ladders; per-family cells are information only. Only listing counts were used to choose; no price or result was read.
 Results (settled yes/no) will be fetched from the public listing for the picked markets only after this push.
+
+## Amendment 2 (2026-11-03 ~19:55 UTC, before any candle outcome was read or scored)
+Why: the shared Kalshi rate limit (six workers fetching) cut the candle fetch to about 100 markets in 30 minutes, which would take about a day for the registered 40 markets per family, and the fetch ran family by family (alphabetical), so a partial run would be a non-random slice of the families.
+What changes (order and stopping only; the family list, the 40-per-family md5 cap, the cut dates D/V/H, the claims A1,A3,A6,B1,B3,B6, the kill rules and N are unchanged): the fetch now goes in md5-rank order ACROSS families (rank 0 of every family, then rank 1, and so on), so any prefix of the fetch is a stratified random sample. `score` runs ONCE on whatever prefix is complete at the first of: (a) rank 0..9 (10 markets per family, about 1,370 markets) complete, or (b) 2026-11-04 02:00 UTC. The result file states the rank reached and the n per claim; a claim below its n floor is NOT_ENOUGH_DATA, never a pass. H (the frozen third) stays unread unless a claim passes D and V.
+Code: src/scalper/newlist1.py fetch() ordering only (7 tests pass). No outcome had been scored.

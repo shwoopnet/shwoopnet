@@ -206,8 +206,14 @@ def fetch(threads: int = 1, sleep: float = 0.8):
     from scalper import api
     uni = json.load(open(UNIVERSE))
     c0 = conn()
-    todo = [m for m in pick_markets(c0, uni)
-            if not c0.execute("select 1 from cdone where ticker=?", (m[0],)).fetchone()]
+    # Amendment 2 (2026-11-03, before any outcome was read): fetch in md5-rank order ACROSS families (rank 0 of every
+    # family, then rank 1, ...) so that any prefix of the fetch is a stratified sample, not an alphabetical slice.
+    picked, seen, ranked = pick_markets(c0, uni), {}, []
+    for m in picked:                                    # pick_markets lists each family in md5 order
+        ranked.append((seen.get(m[1], 0), m[1], m)); seen[m[1]] = seen.get(m[1], 0) + 1
+    ranked.sort(key=lambda r: (r[0], r[1]))
+    todo = [r[2] for r in ranked
+            if not c0.execute("select 1 from cdone where ticker=?", (r[2][0],)).fetchone()]
     c0.close()
     print("markets to fetch", len(todo), flush=True)
 
