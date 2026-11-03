@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 2:37 PM CT (20:37Z): W12 TAPE-EXIT RESULT, W15 R6-FINAL REGISTERED
+
+W12 (4 tries): R6 tape overlaps the candle files on Oct 29 to Nov 2; gold 97 windows with tape, 27 in band; Dogecoin 219, 58 in band. Gold: candle rule 0 early sells, tape first touch 1 (and that window won); Dogecoin: 3 candle sells and 3 tape touches are the same windows (2 of 3 won). Net c per contract: gold hold +6.98, candle +6.98, tape +4.16 (n 27); Dogecoin hold +4.89, candle +2.21, tape +2.65 (n 58). The prediction (tape fires on more windows) is not supported on this thin sample; the tape figures are if anything optimistic (a trade at 0.25 is not a guaranteed fill). Lead only.
+W15 R6-FINAL REGISTERED (a tool, not a read): the R6 recorder stops 2026-11-13 23:59Z. Write r6_final.py in the scratchpad that, run once on Nov 12 to 13 after `git fetch origin quote-data`, reruns on ALL recorded days, with the rules already registered and unchanged: the gold depth-sum (orders 15, 30, 60, 125, 250 walked through the 5 recorded levels, windows in band, median and maximum extra cents), the OICORE trigger-window depth within 1c of the touch (cap.py), W10 (touch size and imbalance on the Bitcoin cheap-side pool, halves by time), and W12 (tape first touch vs candle exit for gold and Dogecoin). It prints the window counts and the same tables as the first runs. No new tests; the point is to read the same registered questions on about twice the days.
+
 ## 2026-11-03 2:36 PM CT (20:36Z): W13 FORWARD-L1 BUILT, W14 DASH REGISTERED
 
 W13 tool forward_l1.py in the scratchpad. First read: gold whole record 246 fills, 10 early sells (4.1%), 12 losses, net +$47.10 (it was +$52.78 at 12:31Z: the 94 to 97c bucket took a new early sell, -$10.48); since 2026-11-02T22:55Z 19 fills, 2 early sells, net -$6.83. At or below 0.926: 114 fills, 9 early sells (7.9%), net +$20.42; above 0.926: 132 fills, 1 early sell (0.8%), net +$26.68. Dogecoin ladder 61 fills, 7 early sells, net -$23.12; hold counterfactual -$45.14 vs exits -$64.35 (3 of 7 would have won). Gold hold counterfactual, whole record: 10 early sells, 1 would have won, exits -$73.35 vs hold -$82.54 (exits better by about $9).
