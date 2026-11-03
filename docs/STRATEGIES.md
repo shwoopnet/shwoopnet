@@ -36,7 +36,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 - Dogecoin at ladder size (11 to 13 contracts, since Oct 30): 51 orders, 33 fills, 1 loss (-$8.70), net +$14.34 (refinement chat). Dogecoin's no-fill share is about 35%.
 - History (backtest, in-sample, upper bounds): gold profit factor 1.44 / 1.03 / 1.17 by third; Dogecoin 1.29 / 1.26 / 1.15 (research session). Holding to settlement beat every exit shape in history (EXIT1: hold 0.961 / 0.928 / 0.898, 25c line 0.921 / 0.897 / 0.869 per contract).
 
-**Not known.** The research bar (profit factor 1.5 in each of three windows after fees and after deflating for how many things were tried) has never been met by L1. The live edge comes from a 5% loss rate against a break-even rate of roughly 8% at these prices, which is thin: a few more early sells move it. Review rule to write: Dogecoin goes back to a fixed size if its last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract (review at 250 settled).
+**Not known.** The research bar (profit factor 1.5 in each of three windows after fees and after deflating for how many things were tried) has never been met by L1. The live edge comes from a 5% loss rate against a break-even rate of roughly 8% at these prices, which is thin: a few more early sells move it. Review rule (written Oct 30): Dogecoin goes back to a fixed size of 5 if its last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract. Since Nov 2 the Bot page warns when this line is crossed; it changes nothing by itself.
 
 ## OICORE "Open interest jump" (Bitcoin, second slot)
 

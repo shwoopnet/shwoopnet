@@ -1605,17 +1605,30 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
-                <div class="changelog-day">Oct 30</div>
+                <div class="changelog-day">Nov 3</div>
                 <ul class="changelog-list">
+                  <li>Settings: this changelog is now grouped under the right days, and a test keeps its newest day in step with the notes; stale lines in the strategy docs were corrected</li>
                   <li>Bot page: the Order switch row and the loading note no longer print on top of each other in the Account card, and the Rules text now says each strategy has its own stop</li>
+                </ul>
+                <div class="changelog-day">Nov 2</div>
+                <ul class="changelog-list">
                   <li>Deploy scripts: the order switch is now checked in the project env file too (it overrides the main one), and the Bot page's switch reader is deployed with the bot; this fixes the "Order switch OFF" that stopped orders after the Nov 2 deploy</li>
                   <li>Bot page: under the Loss stop, each strategy's own stop used (L1 and OICORE), now that the bot judges each on its own orders; percentages only</li>
                   <li>Bot page: a warning (Bot status and the bell) when Dogecoin's last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract, your written review rule; it only tells you, nothing changes by itself</li>
                   <li>Bot: L1 and OICORE now each have their own loss stop, measured on their own orders (a profitable OICORE can no longer hide an L1 loss, and each strategy is checked on its own record); the account stop over both is unchanged, and no number changed</li>
+                </ul>
+                <div class="changelog-day">Nov 1</div>
+                <ul class="changelog-list">
                   <li>Bot page: the Account result chart now grows to fill its card beside the taller Bot status card (no empty space below it), and the status card no longer says "ago ago"</li>
+                </ul>
+                <div class="changelog-day">Oct 31</div>
+                <ul class="changelog-list">
                   <li>Bot page on a phone: a redraw no longer moves the page up while you are scrolled down (the scroll position is put back after each redraw)</li>
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
                   <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
+                </ul>
+                <div class="changelog-day">Oct 30</div>
+                <ul class="changelog-list">
                   <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
                   <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>

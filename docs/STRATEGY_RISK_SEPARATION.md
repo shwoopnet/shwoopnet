@@ -1,12 +1,14 @@
 # Separate risk, sizing and scaling per strategy (design draft, Nov 1, 2026)
 
+**Status, Nov 3, 2026:** steps 2 (each strategy's own stop, no number changed) and 5 (the own stop meters) are built and live. Steps 3 and 4 and every number in the proposed parameter table below are still drafts; the live own stop for both strategies is 12% of the sizing base (`RISK_PROFILES`), and an L1 stop still ends the session, which also stops OICORE.
+
 The owner (Nov 1, 2026): "each strategy can have different risk, sizing, and scaling parameters, dependent on its PF and its win rate", "L1 and OICORE should be completely separate with risk scaling". This is a DESIGN DRAFT. Nothing here is built, nothing changes live until the owner approves the numbers and each step ships as its own reviewed pull request.
 
 ## Where the two strategies are tied together today (read from the code)
 
 | Coupling | Where | Effect |
 |---|---|---|
-| One loss stop | `botRisk` (`kalshiLiveLib.js`) adds the slot's net and open cost to L1's (`slotRiskForBotRisk`); the stop is 12% of L1's sizing base plus the add-on allowance | An OICORE loss can trip the stop that ends L1's session, and a bad L1 day shrinks OICORE's room |
+| One loss stop (as it was before Nov 2; each strategy now has its own 12% stop plus the combined backstop) | `botRisk` (`kalshiLiveLib.js`) adds the slot's net and open cost to L1's (`slotRiskForBotRisk`); the stop is 12% of L1's sizing base plus the add-on allowance | An OICORE loss can trip the stop that ends L1's session, and a bad L1 day shrinks OICORE's room |
 | One session | The slot tick runs right after the L1 tick and needs the figures it hands over (`shareOut`); with none it skips ("no shared risk figures from the L1 tick") | When L1's stop ends the session, OICORE stops too |
 | One window cap | L1's room is 5.5% of the sizing base minus everything in the window, OICORE's spend counted (`slotWindowSpent`); the slot may use at most half of it (`SLOT_WINDOW_SHARE`) and leaves $1.05 for one L1 contract | OICORE can take room from gold or Dogecoin in the same window, and the reverse |
 | One sizing base | `sizeBase` comes from L1's review (balance minus skimmed profit); the slot's dollar caps are fractions of that same number (`slotCaps`) | OICORE's caps move with L1's review timing |
@@ -34,7 +36,7 @@ The account backstop stays and covers both: a combined stop (one number above ea
 | Size rule | as now: one contract per $43 of base, add-on capped at a quarter of base | stays 10 until 100 settled fills AND the Nov 13 read; ceiling 15 (20 only by a reviewed edit at 250 fills) |
 | Step up | keep +1 per 3 day review (the owner kept +1 on Nov 1; +2 only if insisted, never +3) | at most +2 per 3 days, and only after 60 settled fills net at least +1c a contract AND at least 20% wins |
 | Step down | within 2 hours of a lower balance | back to 10 if the last 60 fills net under -$1 a contract |
-| Own stop | 12% of base, L1 orders only | 4% of base, OICORE orders only; at 15 contracts and a $540 base a normal 10 loss run can end it, so the kill rules and this stop are close together |
+| Own stop | 12% of base, L1 orders only | 4% of base (a proposal; live is 12%), OICORE orders only; at 15 contracts and a $540 base a normal 10 loss run can end it, so the kill rules and this stop are close together |
 | Own window cap | 5.5% of base | 2% of base, plus a per-order dollar cap of 1% of base (it would cut the 39c to 50c entries, where the wins came from, at 25 or more contracts) |
 | Kill rules | none (loss stop only) | 18 losses in a row, or net under -$6 after 40 fills (keep both) |
 | Account backstop | combined stop 15% of base, combined window cap 6.5% | same two numbers, shared (14% would lose nothing) |
