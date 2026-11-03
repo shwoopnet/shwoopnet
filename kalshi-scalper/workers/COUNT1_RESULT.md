@@ -19,3 +19,6 @@ Not triggered (not positive in both halves with a mechanism at n worth reading; 
 
 ## Not run
 KXEOWEEK (publication lag), KXELONTWEETS (dormant, no overlap), KXPOTUSTWEETS (forward only, 5 overlapping events). N +4.
+
+## COUNT1B update (2026-11-03, added after the numbers above, which are not edited)
+The definition reconciliation (`workers/COUNT1B_RESULT.md`) ran 8 counting definitions on 55 settled periods before 2026-10-20: NO_DEFINITION_MATCHES (selected D7, confirmation 57.1%, bar 90%). Weekly SOURCE_MISMATCH stays (best 72% weekly under any definition). Daily: the plain archive count matched 19 of 19, a lead that needs its own daily-only registration from 2026-11-04 before the daily pace rule can be read. The forward freeze above is unchanged.
