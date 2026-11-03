@@ -1,0 +1,27 @@
+PERPOI1 development read (closes 1787529600 to 1793732400; cut1 1789597200 cut2 1791664800; holdout closes after cut2 NOT computed)
+[all] counts {'closes': 772, 'usable': 772, 'surge': 34, 'surge_dir': 34, 'A_noquote': 14}
+[all] A n=20 win=15.0% meanprice=0.217 mean_net_per_contract=-0.0792 PF=0.58 PFx1.2=0.57
+   C=1 mean net per contract -0.0840
+[all] B n=34 win=14.7% meanprice=0.214 mean_net_per_contract=-0.0788 PF=0.58 PFx1.2=0.57
+   C=1 mean net per contract -0.0838
+[all] ctrl n=330 win=16.7% meanprice=0.201 mean_net_per_contract=-0.0457 PF=0.74 PFx1.2=0.73
+   C=1 mean net per contract -0.0508
+[all] trigger-minus-control mean net per contract (C=10) -0.0334 (boot 5% -0.1591, 95% +0.1104)
+[h1] counts {'closes': 563, 'usable': 563, 'surge': 24, 'surge_dir': 24, 'A_noquote': 12}
+[h1] A n=12 win=16.7% meanprice=0.202 mean_net_per_contract=-0.0465 PF=0.73 PFx1.2=0.72
+   C=1 mean net per contract -0.0508
+[h1] B n=24 win=16.7% meanprice=0.205 mean_net_per_contract=-0.0500 PF=0.71 PFx1.2=0.70
+   C=1 mean net per contract -0.0546
+[h1] ctrl n=234 win=17.1% meanprice=0.198 mean_net_per_contract=-0.0389 PF=0.77 PFx1.2=0.76
+   C=1 mean net per contract -0.0442
+[h1] trigger-minus-control mean net per contract (C=10) -0.0076 (boot 5% -0.1707, 95% +0.1843)
+[h2] counts {'closes': 209, 'usable': 209, 'surge': 10, 'surge_dir': 10, 'A_noquote': 2}
+[h2] A n=8 win=12.5% meanprice=0.240 mean_net_per_contract=-0.1281 PF=0.40 PFx1.2=0.40
+   C=1 mean net per contract -0.1338
+[h2] B n=10 win=10.0% meanprice=0.235 mean_net_per_contract=-0.1480 PF=0.32 PFx1.2=0.31
+   C=1 mean net per contract -0.1540
+[h2] ctrl n=96 win=15.6% meanprice=0.207 mean_net_per_contract=-0.0624 PF=0.65 PFx1.2=0.64
+   C=1 mean net per contract -0.0671
+[h2] trigger-minus-control mean net per contract (C=10) -0.0657 (boot 5% -0.2240, 95% +0.1474)
+development A trades 20 over 47.9 days (12.7 a month); months to 150 total: 10.2
+VERDICT: NOT_ENOUGH_DATA (A dev trades 20 < 100)
