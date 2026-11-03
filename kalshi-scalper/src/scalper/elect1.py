@@ -20,7 +20,7 @@ def series_in_universe(tickers):
     return sorted(t for t in tickers if UNIVERSE_RE.match(t) and not NOT_RE.search(t))
 
 
-def get(path, retries=8):
+def get(path, retries=20):
     last = None
     for i in range(retries):
         try:
@@ -28,7 +28,7 @@ def get(path, retries=8):
                 return json.load(r)
         except urllib.error.HTTPError as e:
             last = e
-            time.sleep(min(60, 5 * (i + 1)) if e.code == 429 else 2 * (i + 1))
+            time.sleep(min(10, 2 * (i + 1)) if e.code == 429 else 2 * (i + 1))
         except Exception as e:  # noqa
             last = e
             time.sleep(2 * (i + 1))
@@ -50,12 +50,23 @@ def snapshot(out):
     allser = [s["ticker"] for s in get("/series?category=Elections")["series"]]
     allser += [s["ticker"] for s in get("/series?category=Politics")["series"]]
     sers = series_in_universe(set(allser))
+    pri = lambda t: (0 if 'SENATE' in t and 'HOUSE' not in t else 1 if 'GOV' in t else 2 if t in ('HOUSE','CONTROLH','CONTROLS','KXHOUSE') else 3, t)
+    sers.sort(key=pri)
+    print('universe series', len(sers), flush=True)
     cols = ["series", "ticker", "event_ticker", "title", "yes_sub_title", "status", "yes_bid", "yes_ask", "last", "volume",
             "open_interest", "close_time", "quote_utc"]
     n = 0
-    with open(out, "w", newline="") as fh:
-        w = csv.writer(fh); w.writerow(cols)
+    import os
+    done = set()
+    if os.path.exists(out):
+        done = {r["series"] for r in csv.DictReader(open(out))}
+    with open(out, "a", newline="") as fh:
+        w = csv.writer(fh)
+        if not done:
+            w.writerow(cols)
         for s in sers:
+            if s in done:
+                continue
             try:
                 d = get("/markets?series_ticker=%s&limit=200" % s)
             except Exception as e:  # noqa
