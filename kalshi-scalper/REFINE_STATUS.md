@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 2:35 PM CT (20:35Z): W10 R6-BOOK-OICORE RESULT, W13 FORWARD-L1 REGISTERED
+
+W10 (4 testable tries; spread is exactly 1c in every window): pool 146 Bitcoin cheap-side windows on the R6 days (win 27.4%, PF 1.48, +5.01c), halves of 73. No book feature passes: touch size (median 1,639) high cell PF 1.56 vs low 1.38 but the sign of the win rate flips between halves; imbalance (median 0.876) high cell win 32.9% vs 21.9% but PF 1.41 vs 2.20 in half 1. Noise at this size; the Nov 12 to 13 rerun will have about 1.5x the windows.
+W13 FORWARD-L1 REGISTERED (a tool): forward_l1.py in the scratchpad: from a fresh report, the gold and Dogecoin ladder forward counters in one table: fills, early sells and early sell share by entry price bucket (88 to 90, 90 to 92, 92 to 94, 94 to 97), at or below 0.926 vs above (the W2 lead), net dollars, since 2026-11-02T22:55Z (the C1 start) and since 2026-10-30T20:00Z for Dogecoin; plus the live Dogecoin early sell hold counterfactual (market results by public API). Read-only, no key.
+
 ## 2026-11-03 2:35 PM CT (20:35Z): W11 GOLD-LOOK RESULT, W12 TAPE-EXIT REGISTERED
 
 W11 (4 tries): 0 of 4 pass. Gold at -420 s: PF 1.44 (+2.07c a contract, n 997) vs 1.28 at -360 s, thirds 1.29 / 1.89 / 1.28 vs 1.14 / 1.34 / 1.39: higher in total and in D1 and D2, lower in the holdout, so fails; -300 s: PF 1.14. Dogecoin -420 s: 1.27 vs 1.22 (D1 1.24 vs 1.35, fails), -300 s: 1.02. The looks pick about 60% to 73% of the same windows, so differences are partly a different sample. Lead only (gold -420 s), nothing to act on.
