@@ -116,8 +116,10 @@ function makeRunners(flags) {
       const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
       const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
       const sidePrice = side === "yes" ? yesPrice : noPrice;
-      const touch = side === "yes" ? yesPrice : Math.round((1 - noPrice) * 100) / 100;       // the YES price the order goes to, which is what Kalshi's body carries
       if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
+      // The limit may sit a reviewed amount above the side's touch (SLOT_LIMIT_SLIP, OICORE 1c), never past the band; the band test above is on the quoted price.
+      const limitSide = slotLib.slotLimitFor(s, sidePrice);
+      const touch = side === "yes" ? limitSide : Math.round((1 - limitSide) * 100) / 100;     // the YES price the order goes to, which is what Kalshi's body carries
       const depth = num(side === "yes" ? m.yes_ask_size_fp : m.yes_bid_size_fp);
       // The open interest condition (public candles, no key): open interest at the candle ending 180 s before the close minus the one ending 360 s before it. Any missing candle is no order.
       let oiRise = null;
@@ -153,7 +155,7 @@ function makeRunners(flags) {
         for (const t of l1Fresh) l1Merged.set(t.id || t.clientOrderId, t);
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
-        const c = check({ strategyId: s.id, ticker, side, limit: sidePrice, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
+        const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
           lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, position, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders

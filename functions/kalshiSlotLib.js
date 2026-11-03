@@ -30,6 +30,17 @@ function slotCaps(sizingBase) {
   for (const k of Object.keys(SLOT_CAP_FRACTIONS)) out[k] = Math.min(SLOT_CAP_FRACTIONS[k] * base, SLOT_CAP_CEILINGS[k]);
   return out;
 }
+// OICORE limit 1c above the touch (Nov 3, 2026, the owner: "build 1", on the refinement chat's S-LIM1 read: 6 of 24 OICORE limits went unfilled because the ask moved up 1c within
+// seconds, and 3 of those 6 won). The order still fills at the best ask when the ask has not moved (Kalshi gives price improvement), so this only adds fills that would have been missed,
+// at most 1c a contract worse. Never past the strategy's own priceMax. A reviewed edit; at most 2c for any strategy.
+const SLOT_LIMIT_SLIP = Object.freeze({ OICORE: 0.01 });
+const SLOT_LIMIT_SLIP_MAX = 0.02;
+function slotLimitFor(strategy, sidePrice) {
+  const raw = SLOT_LIMIT_SLIP[strategy && strategy.id];
+  const slip = isNum(raw) && raw > 0 && raw <= SLOT_LIMIT_SLIP_MAX + 1e-9 ? raw : 0;
+  if (!isNum(sidePrice) || !strategy || !strategy.entry) return sidePrice;
+  return Math.round(Math.min(sidePrice + slip, Math.max(sidePrice, strategy.entry.priceMax)) * 100) / 100;
+}
 const SLOT_DEPTH_SHARE = 0.25;                         // never more than this share of the size resting at the touch (Kalshi gives the top level only)
 const SLOT_MIN_PRICE = 0.05, SLOT_MAX_PRICE = 0.97;    // entry limit price bounds (YES price for a yes buy, the NO price for a no buy)
 const SLOT_ENTRY_LEFT_MIN_SEC = 120, SLOT_ENTRY_LEFT_MAX_SEC = 840;
@@ -455,6 +466,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
+  SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,

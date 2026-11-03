@@ -2876,6 +2876,8 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 
 **Numeric prediction.** From history, held to settlement, 10 contracts, fees rounded up: discovery (Aug 6 to Sep 20) profit factor 2.28 (222 trades), validation (Sep 21 to Oct 27) 1.85 (333 trades); fees x1.2 1.82; entry 2c worse 1.44; at 1 contract 1.75. Win rate about 28%. About 35 to 60 signals a week and rising as open interest grows. Live I expect LESS than the history: the fill must happen within about a minute (one minute late the discovery profit factor was 0.94), the size at the ask is unmeasured, and about 36% to 40% of historical fills were under 5c, which the live price band (5c and up at the time of the order) will not allow.
 
+**Limit 1c above the touch (2026-11-03, the owner: "build 1").** Code: `SLOT_LIMIT_SLIP` and `slotLimitFor` in `functions/kalshiSlotLib.js`; tests LM1 to LM3. Why: the refinement chat's S-LIM1 read, 6 of 24 OICORE limits unfilled because the ask moved up 1c within seconds, 3 of those 6 won (about +$12 at 10 contracts against the live +$25). n is 6, so this is a probe of the rule, not a finding. Cost: at most 1c a contract on fills that would have filled anyway at the touch only if the ask moved; Kalshi fills at the best ask. Never past priceMax. Review rule: after 20 OICORE orders that filled above the price first seen, revert to the touch if their net is below zero (refinement chat reads it).
+
 **Kill rules (fixed now, in code; only a reviewed edit re-arms).**
 1. Net result below -$6 after 40 filled trades (`minNet`).
 2. 18 settled losses in a row (`maxConsecutiveLosses`; a streak of 5 is normal at a 28% win rate and is NOT a signal).
