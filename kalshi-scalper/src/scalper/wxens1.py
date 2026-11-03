@@ -163,17 +163,17 @@ def primary_polls(quotes: list[dict], offsets: dict) -> dict:
     return out
 
 
-def ens_members(ens: list[dict]) -> dict:
+def ens_members(ens: list[dict], vcol: str = "tmax_f") -> dict:
     """{(city, target_date, look, poll_ts): {model: [tmax]}}."""
     out = defaultdict(lambda: defaultdict(list))
     for r in ens:
-        v = _f(r["tmax_f"])
+        v = _f(r[vcol])
         if v is not None:
             out[(r["city"], r["target_date"], r["look"], int(float(r["poll_ts"])))][r["model"]].append(v)
     return out
 
 
-def official_max(results: list[dict], obs: list[dict]) -> dict:
+def official_max(results: list[dict], obs: list[dict], ocol: str = "iem_max_tmpf") -> dict:
     """{(city, target_date): settled maximum}: the settled markets' expiration_value first, the IEM daily summary only when none is numeric."""
     out = {}
     for r in results:
@@ -182,8 +182,8 @@ def official_max(results: list[dict], obs: list[dict]) -> dict:
             out[(r["city"], r["target_date"])] = v
     for r in obs:
         k = (r["city"], r["target_date"])
-        if k not in out and _f(r.get("iem_max_tmpf")) is not None:
-            out[k] = _f(r["iem_max_tmpf"])
+        if k not in out and _f(r.get(ocol)) is not None:
+            out[k] = _f(r[ocol])
     return out
 
 
@@ -208,15 +208,16 @@ def bias_for(city: str, target_date: str, look: int, errors: dict) -> float:
     return sum(use) / len(use) if len(use) >= BIAS_MIN_DAYS else 0.0
 
 
-def build(data_dir: str, watchlist: str):
+def build(data_dir: str, watchlist: str, sfx: str = "", vcol: str = "tmax_f", ocol: str = "iem_max_tmpf"):
     """Everything the count and the run need: per city-day the bracket table at the primary poll with model probabilities (no outcome except the bias inputs, which are earlier days)."""
     w = json.load(open(watchlist))
     offsets = {c["key"]: c["std_offset_h"] for c in w["cities"]}
-    quotes, ens = _rows(data_dir, "quotes"), _rows(data_dir, "ens")
-    results, obs = _rows(data_dir, "results"), _rows(data_dir, "obs")
+    # sfx/vcol/ocol let WXLOW1 read the daily-low tables ("_low", "tmin_f", "iem_min_tmpf") with the SAME code; the defaults are the WXENS1 highs
+    quotes, ens = _rows(data_dir, "quotes" + sfx), _rows(data_dir, "ens" + sfx)
+    results, obs = _rows(data_dir, "results" + sfx), _rows(data_dir, "obs" + sfx)
     polls = primary_polls(quotes, offsets)
-    members = ens_members(ens)
-    official = official_max(results, obs)
+    members = ens_members(ens, vcol)
+    official = official_max(results, obs, ocol)
     seen = result_seen_ts(results)
     # model errors at the primary look: official max minus the pooled ensemble mean at the first primary poll of that day
     errors = {}
@@ -240,8 +241,8 @@ def build(data_dir: str, watchlist: str):
     return days, official
 
 
-def results_by_ticker(data_dir: str) -> dict:
-    return {r["ticker"]: r["result"] for r in _rows(data_dir, "results")}
+def results_by_ticker(data_dir: str, sfx: str = "") -> dict:
+    return {r["ticker"]: r["result"] for r in _rows(data_dir, "results" + sfx)}
 
 
 def choose_cities(days: dict, n: int = N_CITIES, first_days: int = CITY_DAYS) -> list[str]:
