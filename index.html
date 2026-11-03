@@ -1428,7 +1428,7 @@
               <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one order at a time (up to $2.00 a contract) except gold and Dogecoin, whose size scales with the account in code (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one order at a time (up to $2.00 a contract) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 40, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1437,8 +1437,8 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold, Dogecoin.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas.</span> Gold and Dogecoin trade around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
-                <div class="kal-note"><b>Size.</b> Gold and Dogecoin grow with the account (one contract per $43 of balance, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
+                <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
                 <div class="kal-note"><b>Reinvest pool rebuilds after every win (fixed, always on).</b> Half of every win refills the pool, and the extra contracts it buys are capped at a quarter of the base size.</div>
@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 3</div>
                 <ul class="changelog-list">
+                  <li>Trading: Dogecoin is paused in code (no new orders, no resume date; an open one is still sold). At gold's ladder size it had 7 early sells in 57 fills, and the last 24 hours lost $36.92. Gold is the only market L1 trades now (#697)</li>
                   <li>Settings: this changelog is now grouped under the right days, and a test keeps its newest day in step with the notes; stale lines in the strategy docs were corrected</li>
                   <li>Bot page: the Order switch row and the loading note no longer print on top of each other in the Account card, and the Rules text now says each strategy has its own stop</li>
                 </ul>
@@ -3184,13 +3185,14 @@
     }
     return t;
   }
+  // Dogecoin went back to a fixed 5 on Nov 3, 2026 (the owner), which is what this rule said to do, so only orders before KAL_DOGE_LADDER_TO count and the warning stays quiet for good.
   // Dogecoin's review rule (the owner, Oct 30, 2026, when Dogecoin moved onto gold's size ladder): go back to a fixed size of 5 if its LAST 100 settled orders at ladder size lose more than 8%
   // or net under +0.5c a contract. This is a prompt for the owner to decide, never a change: nothing here touches the bot. Only orders from the ladder's start count, early sells that lost are losses,
   // and hand-closed orders are not the bot's. Under 100 settled orders it only tracks (state 'tracking'), so a thin sample never raises an alarm.
-  var KAL_DOGE_LADDER_FROM = Date.parse('2026-10-30T20:24:00Z'), KAL_DOGE_REVIEW_N = 100, KAL_DOGE_LOSS_LINE = 0.08, KAL_DOGE_NET_LINE_C = 0.5;
+  var KAL_DOGE_LADDER_FROM = Date.parse('2026-10-30T20:24:00Z'), KAL_DOGE_LADDER_TO = Date.parse('2026-11-03T14:00:00Z'), KAL_DOGE_REVIEW_N = 100, KAL_DOGE_LOSS_LINE = 0.08, KAL_DOGE_NET_LINE_C = 0.5;
   function kalshiDogeReview(orders){
     var rows = (orders || []).filter(function(o){
-      return o && o.strategy === 'L1' && (o.series === 'KXDOGE15M' || String(o.ticker || '').indexOf('KXDOGE15M') === 0) && Number(o.ts) >= KAL_DOGE_LADDER_FROM &&
+      return o && o.strategy === 'L1' && (o.series === 'KXDOGE15M' || String(o.ticker || '').indexOf('KXDOGE15M') === 0) && Number(o.ts) >= KAL_DOGE_LADDER_FROM && Number(o.ts) < KAL_DOGE_LADDER_TO &&
         !(o.settled === true && o.result === 'hand') && kalshiOrderPnl(o) !== null;
     }).sort(function(p, q){ return Number(q.ts) - Number(p.ts); });
     var out = { settled: rows.length, n: Math.min(rows.length, KAL_DOGE_REVIEW_N), state: 'tracking', lossShare: null, netCents: null, latest: rows.length ? Number(rows[0].ts) : null, reasons: [] };
@@ -3342,7 +3344,7 @@
   // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold and Dogecoin), the open interest jump 3 minutes before it
   // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
   var KAL_LOOKS = [
-    { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'Dogecoin' : 'gold and Dogecoin') + ', 6 minutes before the close'; } },
+    { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; } },
     { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } }
   ];
   function kalshiNextEntry(now){
@@ -3360,7 +3362,7 @@
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3730,7 +3732,7 @@ kalshiStatusTick();
   var KAL_SLOT_REGISTERED = ['OICORE'];
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
-    L1: { name: 'Closing buy', markets: 'Gold, Dogecoin', note: '' },
+    L1: { name: 'Closing buy', markets: 'Gold', note: '' },
     OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){

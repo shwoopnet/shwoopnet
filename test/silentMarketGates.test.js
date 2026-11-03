@@ -29,10 +29,10 @@ const T = (iso) => Date.parse(iso);
 const TUE = T('2026-10-20T20:00:00Z');
 
 gates.S1 = () => {
-  const o = [...every('KXDOGE15M', TUE - 6 * H, 20 * MIN, 3), ...every('KXGOLD15M', TUE - 10 * MIN, 30 * MIN, 3)];
+  const o = [...every('KXGOLD15M', TUE - 6 * H, 20 * MIN, 3), ...every('KXDOGE15M', TUE - 10 * MIN, 30 * MIN, 3)];
   const out = f.kalshiSilentMarkets(o, live, TUE);
-  assert.strictEqual(out.length, 1, 'only the market that went quiet is named: ' + out.join(' | '));
-  assert.ok(/^Dogecoin has sent no order for 6 hours/.test(out[0]) && /about every 20 minutes/.test(out[0]), out[0]);
+  assert.strictEqual(out.length, 1, 'only the market that went quiet is named (Dogecoin is paused and never is): ' + out.join(' | '));
+  assert.ok(/^Gold has sent no order for 6 hours/.test(out[0]) && /about every 20 minutes/.test(out[0]), out[0]);
 };
 
 gates.S2 = () => {
@@ -56,8 +56,7 @@ gates.S5 = () => {
   const SAT = T('2026-10-24T17:00:00Z');
   const o = [...every('KXGOLD15M', SAT - 20 * H, 30 * MIN, 3), ...every('KXDOGE15M', SAT - 7 * H, 20 * MIN, 3), ...every('KXAUDUSD15M', SAT - 20 * H, 60 * MIN, 3)];
   const out = f.kalshiSilentMarkets(o, live, SAT);
-  assert.strictEqual(out.length, 1, 'a closed weekend is not a stop for gold or the forex pairs, but Dogecoin is still named: ' + out.join(' | '));
-  assert.ok(/^Dogecoin /.test(out[0]));
+  assert.deepStrictEqual(out, [], 'a closed weekend is not a stop for gold or the forex pairs, and Dogecoin is paused (Nov 3, 2026), so nothing is named: ' + out.join(' | '));
 };
 
 gates.S6 = () => {

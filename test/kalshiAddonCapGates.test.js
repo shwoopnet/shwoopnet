@@ -28,7 +28,7 @@ gates.A3 = () => {
 gates.A4 = () => {
   // Capped and probe series still get no add-on: the tick forces their fixed size and addon 0.
   const src = fs.readFileSync(__dirname + '/../functions/kalshiLiveLib.js', 'utf8');
-  assert.ok(/PROBE_SERIES\.includes\(c\.series\) \|\| CAPPED_SERIES\.includes\(c\.series\)\) \{ count = [^}]*addonUsed = 0;/.test(src));
+  assert.ok(/PROBE_SERIES\.includes\(c\.series\) \|\| CAPPED_SERIES\.includes\(c\.series\) \|\| FIXED_CONTRACTS\[c\.series\]\) \{ count = [^}]*addonUsed = 0;/.test(src));
 };
 gates.A5 = () => {
   // The clamp never raises a count.
