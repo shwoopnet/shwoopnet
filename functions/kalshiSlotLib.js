@@ -48,7 +48,7 @@ const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before s
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
 const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
-const SLOT_LAST_REVIEWED_ON = "2026-10-30";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
+const SLOT_LAST_REVIEWED_ON = "2026-11-05";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
 const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
 
@@ -76,16 +76,29 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 18, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
+  // CHEAP1 (Nov 3, 2026, the owner: a third live strategy, "thats what i asked for"): the research session's REF_BTC_UNDERDOG_180 / REV1 cheap-side rule on Bitcoin, but ONLY in the
+  // windows where OICORE's trigger does NOT fire (oiRiseMax 86,300), so it never doubles OICORE's bet on the same side and window. Cheaper side 15c to 49c, 180 to 120 s before the close,
+  // 5 contracts, held to settlement. Below the research bar (forward PF about 1.20 on 127 trades, z about 1.0); a capped probe the owner chose. Held until the Nov 5 REV1 read.
+  Object.freeze({
+    id: "CHEAP1", readme: "kalshi-scalper/README.md#SLOT-CHEAP1", series: Object.freeze(["KXBTC15M"]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.15, priceMax: 0.49, leftMaxSec: 180, leftMinSec: 120, oiRiseMax: 86300 }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 100, net: -15 }) }),
+    forwardReadDate: "2026-11-19", reviewedAt: "2026-11-05",
+  }),
 ]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
 const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
+// Optional (Nov 3, 2026, CHEAP1): the open interest rise must be BELOW this line (OICORE's windows are left to OICORE). A missing or unreadable rise means no order.
+const ENTRY_KEYS_OIMAX = ENTRY_KEYS.concat(["oiRiseMax"]);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE"]);
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "CHEAP1"]);   // CHEAP1 added Nov 3, 2026 (the owner): held to settlement like OICORE
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -101,11 +114,12 @@ function validateSlotStrategy(s) {
   if (!/^[A-Z0-9]{2,10}$/.test(s.id)) e.push("id must be 2 to 10 capitals or digits");
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI)) e.push("entry has the wrong fields");
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_OIMAX)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
+    if (Object.prototype.hasOwnProperty.call(x, "oiRiseMax") && !(isNum(x.oiRiseMax) && x.oiRiseMax >= 1000)) e.push("entry.oiRiseMax must be a number of contracts, at least 1000");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMaxSec > SLOT_ENTRY_LEFT_MAX_SEC || x.leftMinSec < SLOT_ENTRY_LEFT_MIN_SEC || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside " + SLOT_ENTRY_LEFT_MIN_SEC + " to " + SLOT_ENTRY_LEFT_MAX_SEC + " seconds");
   }
@@ -354,6 +368,7 @@ function slotOrderCheckWith(flags, input) {
   if (i.side !== "yes" && i.side !== "no") return no("the side must be yes or no");
   if (strategy.entry.sideRule !== "favourite" && strategy.entry.sideRule !== "cheap" && strategy.entry.sideRule !== i.side) return no("this strategy only buys " + strategy.entry.sideRule);
   // The open interest condition: no readable rise, or a rise below the line, is no order (fail closed). `oiRise` is the caller's reading of the public candles; the line is the strategy's, in code.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMax") && !(isNum(i.oiRise) && i.oiRise < strategy.entry.oiRiseMax)) return no("the open interest rise is missing or at/above " + strategy.entry.oiRiseMax + " contracts (that window belongs to OICORE)");
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");
   if (i.slotOrders.some((t) => isSlotOrder(t) && !Number.isFinite(num(t.ts)))) return no("a slot order has no readable time, so the loss figures cannot be trusted");

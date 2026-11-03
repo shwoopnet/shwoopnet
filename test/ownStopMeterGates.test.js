@@ -12,7 +12,8 @@ const gates = {};
 gates.OM1 = () => {
   // each strategy is judged on its own orders: an L1 loss of $6 is 50% of L1's own $12 stop whatever OICORE did, and the reverse
   const r = lib.kalshiOwnStops([l1(-6), sl(5)], s, NOW);
-  assert.deepStrictEqual(r.map((x) => x.id), ['L1', 'OICORE']);
+  assert.deepStrictEqual(r.map((x) => x.id), ['L1', 'OICORE', 'CHEAP1'], 'one meter per strategy, CHEAP1 included (Nov 3, 2026)');
+  assert.strictEqual(r[2].fraction, 0, 'CHEAP1 has no orders here: 0% used');
   assert.ok(Math.abs(r[0].fraction - 0.5) < 1e-9, 'L1 own ' + r[0].fraction); assert.strictEqual(r[1].fraction, 0, 'a profitable OICORE shows 0% used');
   const r2 = lib.kalshiOwnStops([l1(3), sl(-2)], s, NOW);
   assert.strictEqual(r2[0].fraction, 0); assert.ok(Math.abs(r2[1].fraction - 2 / 12) < 1e-9, 'OICORE own ' + r2[1].fraction);

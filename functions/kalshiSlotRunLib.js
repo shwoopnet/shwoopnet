@@ -123,13 +123,15 @@ function makeRunners(flags) {
       const depth = num(side === "yes" ? m.yes_ask_size_fp : m.yes_bid_size_fp);
       // The open interest condition (public candles, no key): open interest at the candle ending 180 s before the close minus the one ending 360 s before it. Any missing candle is no order.
       let oiRise = null;
-      if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin")) {
+      const wantsOi = Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin") || Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMax");
+      if (wantsOi) {
         const closeSec = Math.round(Date.parse(m.close_time) / 1000);
         const cr = await live.liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
           params: { start_ts: String(closeSec - 480), end_ts: String(closeSec - 60), period_interval: "1" }, nowMs: now });
         oiRise = oiRiseFromCandles(cr.status === 200 && cr.body ? cr.body.candlesticks : null, closeSec);
         if (oiRise === null) { results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
-        if (oiRise < s.entry.oiRiseMin) { results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+        if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMin") && oiRise < s.entry.oiRiseMin) { results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+        if (Object.prototype.hasOwnProperty.call(s.entry, "oiRiseMax") && oiRise >= s.entry.oiRiseMax) { results.push(ticker + ": open interest rose " + oiRise + ", at or over " + s.entry.oiRiseMax + ", left to OICORE"); continue; }
       }
       // The position is read BEFORE the transaction and may be stale by the time it commits; the direction lock, not this read, is what closes that gap.
       const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
