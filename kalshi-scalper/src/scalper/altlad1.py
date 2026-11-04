@@ -159,7 +159,9 @@ def pick(cands: list) -> list:
 
 
 def net_c(side: str, price: float, res: str, mult: float = 1.0, slip: float = 0.0) -> float:
-    return L.pnl(side, price + slip, res, mult) if slip == 0 else ((1.0 if (res == "yes") == (side == "yes") else 0.0) - price - slip - L.fee(price + slip, mult)) * 100
+    """Net cents per contract. res is the stored 'y'/'n' (or 'yes'/'no'); the side bought wins when it matches."""
+    won = (res[0] == "y") == (side == "yes")
+    return ((1.0 if won else 0.0) - price - slip - L.fee(price + slip, mult)) * 100
 
 
 def stats(rows):

@@ -1,0 +1,33 @@
+ALTLAD1 run 2026-11-04T05:26:53.437185+00:00 N=730347 z bar 5.27 cost: fee 7% x C x p x (1-p) rounded up, C=10, taker at the quote at D+60; cheap side only (ask 3c to 30c)
+series with markets: {'KXSOLD': 249750, 'KXXRPD': 63440, 'KXDOGED': 45542, 'KXHYPED': 145875, 'KXBNBD': 63330, 'KXSHIBAD': 1046}; dev dates 37 (2026-08-28 to 2026-10-03); frozen cut 2026-10-03T16:00:00+00:00 never listed
+df fit (OKX only, first two thirds of dates): {'A': {'df': 4, 'n': 2844}, 'B': {'df': 4, 'n': 2844}}
+=== RULE A (look 30 minutes before the close): NOT_ENOUGH_DATA | treated trades 29 under 150
+W1 treated: n 7 days 5 PF 0.00 mean -10.51c z -4.37 | x1.2 mean -10.64c || control: n 2836 days 1394 PF 0.70 mean -3.83c z -6.12
+W2 treated: n 22 days 21 PF 2.17 mean +4.71c z +0.76 | x1.2 mean +4.67c || control: n 4464 days 1574 PF 0.75 mean -3.10c z -5.57
+pooled treated: n 29 days 26 PF 1.18 mean +1.03c z +0.21 | +1c slip mean -0.00c
+treated win rate 0.069 vs mean price 0.054, model p 0.227
+per series (descriptive): KXBNBD n 2 mean -14.3c, KXHYPED n 9 mean +7.0c, KXSOLD n 9 mean -7.6c, KXXRPD n 9 mean +7.1c
+forward: 0.78 treated trades per development date; days to 150 at this rate 191 (forward read on or after 2026-12-04)
+rule A calibration (every cheap strike-side, W1+W2):
+  ratio [0,1): n 4378 price 0.146 win 0.118 model t 0.097 gauss 0.127
+  ratio [1,3): n 2890 price 0.130 win 0.109 model t 0.172 gauss 0.212
+  ratio [3,1e+09): n 32 price 0.055 win 0.062 model t 0.242 gauss 0.278
+  model p [0,0.09): n 3225 price 0.090 win 0.066 model t 0.056 gauss 0.075
+  model p [0.09,0.2): n 2714 price 0.154 win 0.127 model t 0.137 gauss 0.183
+  model p [0.2,0.4): n 1288 price 0.226 win 0.196 model t 0.265 gauss 0.312
+  model p [0.4,1.01): n 73 price 0.253 win 0.288 model t 0.473 gauss 0.482
+=== RULE B (look 10 minutes before the close): NOT_ENOUGH_DATA | treated trades 104 under 150
+W1 treated: n 29 days 28 PF 0.00 mean -6.80c z -9.95 | x1.2 mean -6.88c || control: n 1618 days 1054 PF 0.58 mean -5.04c z -7.42
+W2 treated: n 75 days 72 PF 0.42 mean -3.39c z -1.85 | x1.2 mean -3.46c || control: n 2672 days 1378 PF 0.60 mean -4.74c z -8.53
+pooled treated: n 104 days 100 PF 0.29 mean -4.35c z -3.22 | +1c slip mean -5.39c
+treated win rate 0.019 vs mean price 0.058, model p 0.217
+per series (descriptive): KXBNBD n 8 mean -7.0c, KXDOGED n 2 mean -4.3c, KXHYPED n 44 mean -0.9c, KXSOLD n 38 mean -7.4c, KXXRPD n 12 mean -5.3c
+forward: 2.81 treated trades per development date; days to 150 at this rate 53 (forward read on or after 2026-12-04)
+rule B calibration (every cheap strike-side, W1+W2):
+  ratio [0,1): n 1976 price 0.144 win 0.090 model t 0.091 gauss 0.120
+  ratio [1,3): n 2210 price 0.120 win 0.090 model t 0.180 gauss 0.216
+  ratio [3,1e+09): n 104 price 0.058 win 0.019 model t 0.217 gauss 0.260
+  model p [0,0.09): n 1854 price 0.082 win 0.050 model t 0.056 gauss 0.075
+  model p [0.09,0.2): n 1461 price 0.138 win 0.087 model t 0.137 gauss 0.183
+  model p [0.2,0.4): n 838 price 0.199 win 0.149 model t 0.275 gauss 0.321
+  model p [0.4,1.01): n 137 price 0.242 win 0.255 model t 0.476 gauss 0.482

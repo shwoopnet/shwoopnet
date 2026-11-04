@@ -91,10 +91,13 @@ def test_pick_ratio_cap_and_tiebreak():
 
 
 def test_net_includes_fee_and_slip():
-    assert abs(A.net_c("yes", 0.10, "y") - (0.9 - A.L.fee(0.10)) * 100) < 1e-9 or True
-    assert A.net_c("yes", 0.10, "no") < 0
-    assert A.net_c("no", 0.10, "no") > 0
-    assert A.net_c("yes", 0.10, "yes", 1.0, 0.01) < A.net_c("yes", 0.10, "yes")
+    assert abs(A.net_c("yes", 0.10, "y") - (0.9 - A.L.fee(0.10)) * 100) < 1e-9
+    assert abs(A.net_c("no", 0.10, "n") - (0.9 - A.L.fee(0.10)) * 100) < 1e-9
+    assert abs(A.net_c("no", 0.10, "y") - (-0.10 - A.L.fee(0.10)) * 100) < 1e-9      # a NO bought on a market that resolved YES loses
+    assert abs(A.net_c("yes", 0.10, "n") - (-0.10 - A.L.fee(0.10)) * 100) < 1e-9
+    assert A.net_c("yes", 0.10, "n") < 0
+    assert A.net_c("no", 0.10, "n") > 0
+    assert A.net_c("yes", 0.10, "y", 1.0, 0.01) < A.net_c("yes", 0.10, "y")
 
 
 def test_frozen_cut_and_no_favourite_rule_in_source():
