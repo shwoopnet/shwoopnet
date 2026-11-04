@@ -121,14 +121,36 @@ def event_date(event: str):
     return datetime(2000 + int(m.group(1)), mon, int(m.group(3)))
 
 
+KNOWN = {"ANA", "BOS", "BUF", "CAR", "CBJ", "CGY", "CHI", "COL", "DAL", "DET", "EDM", "FLA", "LAK", "MIN", "MTL", "NJD", "NSH", "NYI",
+         "NYR", "OTT", "PHI", "PIT", "SEA", "SJS", "STL", "TBL", "TOR", "UTA", "VAN", "VGK", "WPG", "WSH"}
+
+
 def event_teams(event: str):
-    m = re.match(r"^[A-Z0-9]+-\d\d[A-Z]{3}\d\d([A-Z]{3})([A-Z]{3})$", event)
-    return (team_code(m.group(1)), team_code(m.group(2))) if m else None
+    """(away, home) ESPN codes from the event ticker tail (Kalshi writes TB, LA, NJ, SJ with two letters); None if it does not split."""
+    m = re.match(r"^[A-Z0-9]+-\d\d[A-Z]{3}\d\d([A-Z]{4,6})$", event)
+    if not m:
+        return None
+    t = m.group(1)
+    for i in (3, 2, 4):
+        x, y = t[:i], t[i:]
+        if team_code(x) in KNOWN and team_code(y) in KNOWN:
+            return team_code(x), team_code(y)
+    return None
 
 
-def player_team(ticker: str):
-    m = re.match(r"^[A-Z0-9]+-\d\d[A-Z]{3}\d\d[A-Z]{6}-([A-Z]{3})", ticker)
-    return team_code(m.group(1)) if m else None
+def player_team(ticker: str, teams):
+    """The player's team: the ticker's player segment starts with that team's code (raw or mapped)."""
+    parts = ticker.split("-")
+    if len(parts) < 3:
+        return None
+    seg = parts[2]
+    cands = []
+    for t in teams or ():
+        cands += [(t, t)] + [(k, t) for k, v in TEAM_MAP.items() if v == t]
+    for raw, t in sorted(cands, key=lambda x: -len(x[0])):
+        if seg.startswith(raw):
+            return t
+    return None
 
 
 def cheap_side(bid: float, ask: float):
@@ -357,7 +379,7 @@ def cmd_build():
         if nm not in phist:
             unmatched_player += 1
             continue
-        mk.append((tk, best[1], nm, strike, player_team(tk)))
+        mk.append((tk, best[1], nm, strike, player_team(tk, tm)))
     print("markets", total, "no game", unmatched_game, "no player history", unmatched_player, "kept", len(mk), flush=True)
     gs = sorted({(games[g]["st"], g) for _, g, _, _, _ in mk})
     labels = split_labels(len(gs))

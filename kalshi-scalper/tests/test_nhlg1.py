@@ -57,7 +57,11 @@ def test_pick_trades_two_per_game_ratio_and_control():
 def test_event_and_ticker_parsing():
     assert n.event_teams("KXNHLGOAL-26NOV03UTATOR") == ("UTA", "TOR")
     assert n.event_teams("KXNHLGOAL-26MAR01TBLNJD") == ("TBL", "NJD")
-    assert n.player_team("KXNHLGOAL-26NOV03UTATOR-TORJROSLOVIC96-3") == "TOR"
+    assert n.player_team("KXNHLGOAL-26NOV03UTATOR-TORJROSLOVIC96-3", ("UTA", "TOR")) == "TOR"
+    assert n.event_teams("KXNHLGOAL-26MAY03MTLTB") == ("MTL", "TBL")
+    assert n.event_teams("KXNHLGOAL-26APR21LACOL") == ("LAK", "COL")
+    assert n.event_teams("KXNHLGOAL-26APR26COLLA") == ("COL", "LAK")
+    assert n.player_team("KXNHLGOAL-26MAY03MTLTB-TBBHAGEL88-1", ("MTL", "TBL")) == "TBL"
     assert n.event_date("KXNHLGOAL-26NOV03UTATOR").day == 3
     assert n.norm_name("Mitch Marner Jr.") == "mitch marner"
     assert n.team_code("TB") == "TBL"
