@@ -8797,3 +8797,5 @@ Registration sha256 `c09b4aa78f73e95641b9e75f44f1e27bf42d91c2f98318fc22cdac24c1b
 
 ### Result: NHLALL1 Amendment 2 (2026-11-04): LEAD by the registered bar, razor thin; not a promotion
 `workers/NHLALL1_RESULT.md` (addendum), `workers/NHLALL1_RESULT2.json`. Combined 75 games (61 old + 14 new usable of 115 new completed; 9 dropped after retries), cheap YES side, 2 per game by sha1: **n 150, +7.2c net per contract, game-clustered z 1.97, lower 95% +0.03c, date z 2.20 (lower +0.78c), PF 1.507, halves +6.2c / +8.3c, fees x1.2 lower bound -0.19c**. Every margin is a hair (n exactly the 150 stopping point), z far below 5.27. New 14 games alone: n 28, +9.2c, z 1.06. Lowest ladder-sum tercile: n 38, +16.8c, H2 only 6 trades, NOT_ENOUGH_DATA. Prediction (-3c, LEAD at most 5%) missed. Forward: the frozen 225 post-cut events, one read, owner approval. N +2, running about 730,377.
+
+NHLROUND1 RESULT 2026-11-04: NOT_ENOUGH_DATA (scored once on the NHLALL1 cache, 75 games). Treated (ladder ask sum <= 3.6085): n 92 in 46 games, +8.24c PF 1.58, z 1.73, lower bound -1.07c; H1 +14.5c, H2 +1.96c. Not independent of NHLALL1 (same games). Details: workers/NHLROUND1_RESULT.md.
