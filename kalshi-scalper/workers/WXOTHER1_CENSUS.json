@@ -1,0 +1,1098 @@
+{
+ "cut": "2026-10-03T16:00:00Z",
+ "families": {
+  "air quality": {
+   "pooled": {
+    "events": 1,
+    "first": "2026-07-19T19:00:00Z",
+    "last": "2026-07-19T19:00:00Z",
+    "markets": 13,
+    "traded_events": 1,
+    "upper_bound": 2
+   },
+   "series": {
+    "KXAQICITY": {
+     "events": 1,
+     "first": "2026-07-19T19:00:00Z",
+     "last": "2026-07-19T19:00:00Z",
+     "markets": 13,
+     "traded_events": 1,
+     "upper_bound": 2
+    }
+   }
+  },
+  "degree days / CO2": {
+   "pooled": {
+    "events": 12,
+    "first": "2021-07-26T23:00:00Z",
+    "last": "2022-07-27T14:02:35.834731Z",
+    "markets": 14,
+    "traded_events": 12,
+    "upper_bound": 13
+   },
+   "series": {
+    "KXCO2": {
+     "events": 12,
+     "first": "2021-07-26T23:00:00Z",
+     "last": "2022-07-27T14:02:35.834731Z",
+     "markets": 14,
+     "traded_events": 12,
+     "upper_bound": 13
+    }
+   }
+  },
+  "hourly directional temperature": {
+   "pooled": {
+    "events": 12699,
+    "first": "2026-03-11T00:00:00Z",
+    "last": "2026-10-03T15:00:00Z",
+    "markets": 153273,
+    "traded_events": 12036,
+    "upper_bound": 23491
+   },
+   "series": {
+    "KXTEMPAUSH": {
+     "events": 1509,
+     "first": "2026-07-08T22:00:00Z",
+     "last": "2026-09-10T14:00:00Z",
+     "markets": 15234,
+     "traded_events": 1402,
+     "upper_bound": 2704
+    },
+    "KXTEMPBOSH": {
+     "events": 10,
+     "first": "2026-04-16T23:00:00Z",
+     "last": "2026-04-21T00:00:00Z",
+     "markets": 222,
+     "traded_events": 0,
+     "upper_bound": 0
+    },
+    "KXTEMPCHIH": {
+     "events": 1527,
+     "first": "2026-04-16T23:00:00Z",
+     "last": "2026-09-10T14:00:00Z",
+     "markets": 15533,
+     "traded_events": 1476,
+     "upper_bound": 2887
+    },
+    "KXTEMPCHIHS": {
+     "events": 547,
+     "first": "2026-09-10T15:00:00Z",
+     "last": "2026-10-03T15:00:00Z",
+     "markets": 5470,
+     "traded_events": 547,
+     "upper_bound": 1093
+    },
+    "KXTEMPDCH": {
+     "events": 1526,
+     "first": "2026-04-16T23:00:00Z",
+     "last": "2026-09-10T14:00:00Z",
+     "markets": 15530,
+     "traded_events": 1305,
+     "upper_bound": 2407
+    },
+    "KXTEMPLAXH": {
+     "events": 1516,
+     "first": "2026-07-08T22:00:00Z",
+     "last": "2026-09-10T14:00:00Z",
+     "markets": 15325,
+     "traded_events": 1499,
+     "upper_bound": 2994
+    },
+    "KXTEMPLAXHS": {
+     "events": 544,
+     "first": "2026-09-10T15:00:00Z",
+     "last": "2026-10-03T15:00:00Z",
+     "markets": 5440,
+     "traded_events": 540,
+     "upper_bound": 1052
+    },
+    "KXTEMPMIAH": {
+     "events": 1171,
+     "first": "2026-04-16T23:00:00Z",
+     "last": "2026-10-03T15:00:00Z",
+     "markets": 11785,
+     "traded_events": 1162,
+     "upper_bound": 2322
+    },
+    "KXTEMPNYCH": {
+     "events": 3806,
+     "first": "2026-03-11T00:00:00Z",
+     "last": "2026-09-10T14:00:00Z",
+     "markets": 63304,
+     "traded_events": 3565,
+     "upper_bound": 6958
+    },
+    "KXTEMPNYCHS": {
+     "events": 543,
+     "first": "2026-09-10T15:00:00Z",
+     "last": "2026-10-03T15:00:00Z",
+     "markets": 5430,
+     "traded_events": 540,
+     "upper_bound": 1074
+    }
+   }
+  },
+  "hurricanes and storms": {
+   "pooled": {
+    "events": 152,
+    "first": "2021-08-15T00:00:00Z",
+    "last": "2026-10-01T21:35:53Z",
+    "markets": 758,
+    "traded_events": 144,
+    "upper_bound": 261
+   },
+   "series": {
+    "KXFIRSTHURRICANE": {
+     "events": 2,
+     "first": "2026-07-24T15:40:13Z",
+     "last": "2026-07-27T22:04:24Z",
+     "markets": 56,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXHURCAL": {
+     "events": 1,
+     "first": "2023-09-06T23:20:54.985305Z",
+     "last": "2023-09-06T23:20:54.985305Z",
+     "markets": 7,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURCAT": {
+     "events": 89,
+     "first": "2021-08-31T18:00:00Z",
+     "last": "2026-10-01T21:35:53Z",
+     "markets": 419,
+     "traded_events": 83,
+     "upper_bound": 152
+    },
+    "KXHURCATFL": {
+     "events": 1,
+     "first": "2021-08-15T00:00:00Z",
+     "last": "2021-08-15T00:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURCATH": {
+     "events": 1,
+     "first": "2021-08-23T00:00:00Z",
+     "last": "2021-08-23T00:00:00Z",
+     "markets": 2,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURCATI": {
+     "events": 1,
+     "first": "2021-08-28T18:00:00Z",
+     "last": "2021-08-28T18:00:00Z",
+     "markets": 2,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURCHARL": {
+     "events": 1,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2023-12-01T04:59:00Z",
+     "markets": 5,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURCLAND": {
+     "events": 1,
+     "first": "2021-12-01T15:00:00Z",
+     "last": "2021-12-01T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURCMAJ": {
+     "events": 2,
+     "first": "2021-12-01T15:00:00Z",
+     "last": "2023-09-07T14:03:57.509759Z",
+     "markets": 6,
+     "traded_events": 2,
+     "upper_bound": 3
+    },
+    "KXHURCOASTTEX": {
+     "events": 1,
+     "first": "2023-11-28T14:44:55.23627Z",
+     "last": "2023-11-28T14:44:55.23627Z",
+     "markets": 5,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURCTOT": {
+     "events": 4,
+     "first": "2022-11-02T14:02:07.697053Z",
+     "last": "2025-11-03T22:21:55.576425Z",
+     "markets": 28,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXHURCTOTMAJ": {
+     "events": 4,
+     "first": "2022-09-20T14:10:16.47017Z",
+     "last": "2026-07-01T17:58:00Z",
+     "markets": 35,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXHURHAT": {
+     "events": 1,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2023-12-01T04:59:00Z",
+     "markets": 5,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURJACKFL": {
+     "events": 2,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURMIA": {
+     "events": 3,
+     "first": "2022-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 15,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXHURMYR": {
+     "events": 1,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2023-12-01T04:59:00Z",
+     "markets": 5,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURNJ": {
+     "events": 2,
+     "first": "2022-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 8,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXHURNO": {
+     "events": 3,
+     "first": "2022-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 15,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXHURNOR": {
+     "events": 2,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXHURNYC": {
+     "events": 3,
+     "first": "2022-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 13,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXHURORL": {
+     "events": 3,
+     "first": "2022-12-01T04:59:00Z",
+     "last": "2024-10-14T22:39:59.443294Z",
+     "markets": 15,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXHURPATHFLA": {
+     "events": 1,
+     "first": "2025-12-31T15:00:00Z",
+     "last": "2025-12-31T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHGENERAL": {
+     "events": 1,
+     "first": "2025-08-31T14:00:00Z",
+     "last": "2025-08-31T14:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHGENERALMAJOR": {
+     "events": 1,
+     "first": "2025-08-31T14:00:00Z",
+     "last": "2025-08-31T14:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHGULFCOAST": {
+     "events": 1,
+     "first": "2025-12-31T15:00:00Z",
+     "last": "2025-12-31T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHHAWAII": {
+     "events": 1,
+     "first": "2025-12-31T15:00:00Z",
+     "last": "2025-12-31T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHHOU": {
+     "events": 1,
+     "first": "2025-12-31T15:00:00Z",
+     "last": "2025-12-31T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURPATHSCAROLINA": {
+     "events": 1,
+     "first": "2025-12-31T15:00:00Z",
+     "last": "2025-12-31T15:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURRICANE": {
+     "events": 1,
+     "first": "2026-07-01T03:59:00Z",
+     "last": "2026-07-01T03:59:00Z",
+     "markets": 11,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXHURRICANENAMES": {
+     "events": 3,
+     "first": "2026-07-29T14:45:58Z",
+     "last": "2026-08-21T15:48:40Z",
+     "markets": 8,
+     "traded_events": 3,
+     "upper_bound": 5
+    },
+    "KXHURSAV": {
+     "events": 2,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXHURTB": {
+     "events": 2,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXHURWIL": {
+     "events": 2,
+     "first": "2023-12-01T04:59:00Z",
+     "last": "2024-12-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXNEXTCAT5HURDATE": {
+     "events": 2,
+     "first": "2025-08-15T03:59:00Z",
+     "last": "2026-09-01T03:59:00Z",
+     "markets": 5,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXNEXTHURDATE": {
+     "events": 2,
+     "first": "2025-06-15T03:59:00Z",
+     "last": "2026-08-15T03:59:00Z",
+     "markets": 10,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXTROPSTORM": {
+     "events": 3,
+     "first": "2023-09-07T14:02:40.741971Z",
+     "last": "2025-12-02T04:59:00Z",
+     "markets": 24,
+     "traded_events": 3,
+     "upper_bound": 6
+    }
+   }
+  },
+  "monthly/annual extreme temperature": {
+   "pooled": {
+    "events": 9,
+    "first": "2021-12-02T15:00:00Z",
+    "last": "2026-07-05T03:59:59Z",
+    "markets": 86,
+    "traded_events": 9,
+    "upper_bound": 14
+   },
+   "series": {
+    "KXHOLIDAYTMAX": {
+     "events": 3,
+     "first": "2026-07-05T03:59:59Z",
+     "last": "2026-07-05T03:59:59Z",
+     "markets": 60,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXHOLIDAYTMIN": {
+     "events": 1,
+     "first": "2026-07-05T03:59:59Z",
+     "last": "2026-07-05T03:59:59Z",
+     "markets": 20,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXMINNYC": {
+     "events": 5,
+     "first": "2021-12-02T15:00:00Z",
+     "last": "2022-04-01T14:00:00Z",
+     "markets": 6,
+     "traded_events": 5,
+     "upper_bound": 6
+    }
+   }
+  },
+  "monthly/annual temperature rank": {
+   "pooled": {
+    "events": 67,
+    "first": "2021-11-02T14:00:00Z",
+    "last": "2026-09-15T16:25:33Z",
+    "markets": 223,
+    "traded_events": 66,
+    "upper_bound": 95
+   },
+   "series": {
+    "KXAVGTEMP": {
+     "events": 2,
+     "first": "2022-12-08T15:59:00Z",
+     "last": "2023-09-11T14:59:00Z",
+     "markets": 14,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXGTEMP": {
+     "events": 4,
+     "first": "2023-01-01T04:59:00Z",
+     "last": "2025-12-31T16:00:00Z",
+     "markets": 4,
+     "traded_events": 4,
+     "upper_bound": 4
+    },
+    "KXHMONTH": {
+     "events": 31,
+     "first": "2024-02-01T04:59:00Z",
+     "last": "2026-09-15T16:25:33Z",
+     "markets": 31,
+     "traded_events": 31,
+     "upper_bound": 31
+    },
+    "KXHMONTHRANGE": {
+     "events": 27,
+     "first": "2024-06-14T03:59:00Z",
+     "last": "2026-09-13T23:20:09Z",
+     "markets": 162,
+     "traded_events": 27,
+     "upper_bound": 54
+    },
+    "KXHOTYEAR": {
+     "events": 1,
+     "first": "2024-01-01T04:59:00Z",
+     "last": "2024-01-01T04:59:00Z",
+     "markets": 10,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXTEMP": {
+     "events": 1,
+     "first": "2022-01-10T00:00:00Z",
+     "last": "2022-01-10T00:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXTEMPMON": {
+     "events": 1,
+     "first": "2021-11-02T14:00:00Z",
+     "last": "2021-11-02T14:00:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    }
+   }
+  },
+  "rain totals (month/week)": {
+   "pooled": {
+    "events": 139,
+    "first": "2024-03-01T04:59:00Z",
+    "last": "2026-10-03T00:00:30Z",
+    "markets": 930,
+    "traded_events": 139,
+    "upper_bound": 273
+   },
+   "series": {
+    "KXRAINAUSM": {
+     "events": 12,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-03T00:00:22Z",
+     "markets": 75,
+     "traded_events": 12,
+     "upper_bound": 23
+    },
+    "KXRAINCHIM": {
+     "events": 13,
+     "first": "2025-07-01T03:59:00Z",
+     "last": "2026-10-03T00:00:20Z",
+     "markets": 85,
+     "traded_events": 13,
+     "upper_bound": 25
+    },
+    "KXRAINCLLM": {
+     "events": 1,
+     "first": "2026-10-03T00:00:30Z",
+     "last": "2026-10-03T00:00:30Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXRAINDALM": {
+     "events": 12,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-03T00:00:23Z",
+     "markets": 81,
+     "traded_events": 12,
+     "upper_bound": 24
+    },
+    "KXRAINDENM": {
+     "events": 11,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-01T03:59:59Z",
+     "markets": 77,
+     "traded_events": 11,
+     "upper_bound": 22
+    },
+    "KXRAINHOUM": {
+     "events": 11,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-01T03:59:59Z",
+     "markets": 74,
+     "traded_events": 11,
+     "upper_bound": 22
+    },
+    "KXRAINLAXM": {
+     "events": 11,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-01T03:59:59Z",
+     "markets": 78,
+     "traded_events": 11,
+     "upper_bound": 22
+    },
+    "KXRAINMIAM": {
+     "events": 12,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-03T00:00:21Z",
+     "markets": 87,
+     "traded_events": 12,
+     "upper_bound": 23
+    },
+    "KXRAINMKEM": {
+     "events": 1,
+     "first": "2026-10-03T00:00:30Z",
+     "last": "2026-10-03T00:00:30Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXRAINNYCM": {
+     "events": 32,
+     "first": "2024-03-01T04:59:00Z",
+     "last": "2026-10-01T03:59:00Z",
+     "markets": 209,
+     "traded_events": 32,
+     "upper_bound": 64
+    },
+    "KXRAINSEAM": {
+     "events": 11,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-01T03:59:59Z",
+     "markets": 78,
+     "traded_events": 11,
+     "upper_bound": 22
+    },
+    "KXRAINSFOM": {
+     "events": 11,
+     "first": "2025-12-01T04:59:59Z",
+     "last": "2026-10-01T03:59:59Z",
+     "markets": 74,
+     "traded_events": 11,
+     "upper_bound": 22
+    },
+    "KXRAINSTPM": {
+     "events": 1,
+     "first": "2026-08-01T03:59:00Z",
+     "last": "2026-08-01T03:59:00Z",
+     "markets": 10,
+     "traded_events": 1,
+     "upper_bound": 2
+    }
+   }
+  },
+  "sea ice": {
+   "pooled": {
+    "events": 10,
+    "first": "2021-10-02T14:00:00Z",
+    "last": "2026-10-02T03:59:00Z",
+    "markets": 71,
+    "traded_events": 10,
+    "upper_bound": 17
+   },
+   "series": {
+    "KXARCTICICEMAX": {
+     "events": 3,
+     "first": "2024-03-12T14:50:01.416328Z",
+     "last": "2026-04-01T17:59:00Z",
+     "markets": 27,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXARCTICICEMIN": {
+     "events": 4,
+     "first": "2023-09-07T16:24:13.170893Z",
+     "last": "2026-10-02T03:59:00Z",
+     "markets": 41,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXARTICICE": {
+     "events": 1,
+     "first": "2023-01-01T04:59:00Z",
+     "last": "2023-01-01T04:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXSEAICE": {
+     "events": 2,
+     "first": "2021-10-02T14:00:00Z",
+     "last": "2021-11-02T14:00:00Z",
+     "markets": 2,
+     "traded_events": 2,
+     "upper_bound": 2
+    }
+   }
+  },
+  "snowfall": {
+   "pooled": {
+    "events": 100,
+    "first": "2021-12-03T15:00:00Z",
+    "last": "2026-04-01T06:59:00Z",
+    "markets": 501,
+    "traded_events": 99,
+    "upper_bound": 187
+   },
+   "series": {
+    "KXAUSSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 16,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXBOSSNOWM": {
+     "events": 4,
+     "first": "2025-12-15T15:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 24,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXBOSSNOWXMAS": {
+     "events": 1,
+     "first": "2025-12-26T04:59:00Z",
+     "last": "2025-12-26T04:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXCHISNOWM": {
+     "events": 5,
+     "first": "2025-12-09T14:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 30,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXCHISNOWXMAS": {
+     "events": 1,
+     "first": "2025-12-26T04:59:00Z",
+     "last": "2025-12-26T04:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXDALSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 20,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXDCSNOWM": {
+     "events": 4,
+     "first": "2025-12-15T15:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 24,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXDENSNOWMB": {
+     "events": 4,
+     "first": "2025-12-09T14:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 28,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXDETSNOWM": {
+     "events": 4,
+     "first": "2025-12-09T14:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 24,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXHOUSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 16,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXJACWSNOWM": {
+     "events": 3,
+     "first": "2025-12-09T14:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 18,
+     "traded_events": 3,
+     "upper_bound": 6
+    },
+    "KXLAXSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 8,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXMIASNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 12,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXNYCSNOWM": {
+     "events": 4,
+     "first": "2025-12-15T15:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 28,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXNYCSNOWXMAS": {
+     "events": 1,
+     "first": "2025-12-26T04:59:00Z",
+     "last": "2025-12-26T04:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXPHILSNOWM": {
+     "events": 4,
+     "first": "2025-12-15T15:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 24,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXSEASNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 20,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXSFOSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T18:58:59Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 8,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXSLCSNOWM": {
+     "events": 4,
+     "first": "2026-01-01T15:00:00Z",
+     "last": "2026-04-01T06:59:00Z",
+     "markets": 11,
+     "traded_events": 4,
+     "upper_bound": 8
+    },
+    "KXSNOWAZ": {
+     "events": 1,
+     "first": "2025-01-01T04:59:00Z",
+     "last": "2025-01-01T04:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    },
+    "KXSNOWNY": {
+     "events": 8,
+     "first": "2021-12-26T04:59:00Z",
+     "last": "2022-02-20T04:59:00Z",
+     "markets": 17,
+     "traded_events": 8,
+     "upper_bound": 13
+    },
+    "KXSNOWNYM": {
+     "events": 17,
+     "first": "2021-12-03T15:00:00Z",
+     "last": "2025-03-03T15:00:00Z",
+     "markets": 91,
+     "traded_events": 17,
+     "upper_bound": 30
+    },
+    "KXSNOWS": {
+     "events": 1,
+     "first": "2024-12-26T04:59:00Z",
+     "last": "2024-12-26T04:59:00Z",
+     "markets": 15,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXSNOWSTORM": {
+     "events": 6,
+     "first": "2026-01-27T04:59:00Z",
+     "last": "2026-02-25T15:00:00Z",
+     "markets": 63,
+     "traded_events": 6,
+     "upper_bound": 12
+    }
+   }
+  },
+  "space weather": {
+   "pooled": {
+    "events": 12,
+    "first": "2021-11-02T14:00:00Z",
+    "last": "2025-11-12T01:21:30.078774Z",
+    "markets": 14,
+    "traded_events": 12,
+    "upper_bound": 14
+   },
+   "series": {
+    "KXGSTORM": {
+     "events": 9,
+     "first": "2021-11-02T14:00:00Z",
+     "last": "2022-03-01T17:48:09.682523Z",
+     "markets": 11,
+     "traded_events": 9,
+     "upper_bound": 11
+    },
+    "KXXFLARE": {
+     "events": 3,
+     "first": "2025-08-01T03:59:00Z",
+     "last": "2025-11-12T01:21:30.078774Z",
+     "markets": 3,
+     "traded_events": 3,
+     "upper_bound": 3
+    }
+   }
+  },
+  "tornadoes": {
+   "pooled": {
+    "events": 39,
+    "first": "2023-08-01T03:59:00Z",
+    "last": "2026-10-01T03:59:00Z",
+    "markets": 354,
+    "traded_events": 39,
+    "upper_bound": 78
+   },
+   "series": {
+    "KXTORNADO": {
+     "events": 39,
+     "first": "2023-08-01T03:59:00Z",
+     "last": "2026-10-01T03:59:00Z",
+     "markets": 354,
+     "traded_events": 39,
+     "upper_bound": 78
+    }
+   }
+  },
+  "water temperature / level": {
+   "pooled": {
+    "events": 9,
+    "first": "2021-11-03T14:00:00Z",
+    "last": "2026-07-03T14:00:00Z",
+    "markets": 49,
+    "traded_events": 9,
+    "upper_bound": 15
+   },
+   "series": {
+    "KXCORIVER": {
+     "events": 2,
+     "first": "2022-08-17T14:56:31.753925Z",
+     "last": "2023-08-21T22:50:10.880219Z",
+     "markets": 17,
+     "traded_events": 2,
+     "upper_bound": 4
+    },
+    "KXMEAD": {
+     "events": 6,
+     "first": "2021-11-03T14:00:00Z",
+     "last": "2026-07-03T14:00:00Z",
+     "markets": 29,
+     "traded_events": 6,
+     "upper_bound": 9
+    },
+    "KXMICHTEMP": {
+     "events": 1,
+     "first": "2022-08-30T03:59:00Z",
+     "last": "2022-08-30T03:59:00Z",
+     "markets": 3,
+     "traded_events": 1,
+     "upper_bound": 2
+    }
+   }
+  },
+  "weekly temperature": {
+   "pooled": {
+    "events": 63,
+    "first": "2026-08-18T03:59:00Z",
+    "last": "2026-09-28T03:59:59Z",
+    "markets": 311,
+    "traded_events": 53,
+    "upper_bound": 95
+   },
+   "series": {
+    "KXAVGTATL": {
+     "events": 1,
+     "first": "2026-08-24T03:59:00Z",
+     "last": "2026-08-24T03:59:00Z",
+     "markets": 5,
+     "traded_events": 1,
+     "upper_bound": 2
+    },
+    "KXAVGTKAUS": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 10
+    },
+    "KXAVGTKDEN": {
+     "events": 6,
+     "first": "2026-08-24T05:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 4,
+     "upper_bound": 6
+    },
+    "KXAVGTKDFW": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 10
+    },
+    "KXAVGTKIAH": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 8
+    },
+    "KXAVGTKLAS": {
+     "events": 6,
+     "first": "2026-08-24T06:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 6,
+     "upper_bound": 12
+    },
+    "KXAVGTKMSY": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 9
+    },
+    "KXAVGTKOKC": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 9
+    },
+    "KXAVGTKPHX": {
+     "events": 6,
+     "first": "2026-08-24T06:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 5,
+     "upper_bound": 8
+    },
+    "KXAVGTKSAN": {
+     "events": 7,
+     "first": "2026-08-24T03:59:00Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 35,
+     "traded_events": 5,
+     "upper_bound": 10
+    },
+    "KXAVGTKSAT": {
+     "events": 6,
+     "first": "2026-08-24T04:59:59Z",
+     "last": "2026-09-28T03:59:59Z",
+     "markets": 30,
+     "traded_events": 6,
+     "upper_bound": 10
+    },
+    "KXHEATAPHX": {
+     "events": 1,
+     "first": "2026-08-18T03:59:00Z",
+     "last": "2026-08-18T03:59:00Z",
+     "markets": 1,
+     "traded_events": 1,
+     "upper_bound": 1
+    }
+   }
+  }
+ },
+ "rule": "listings only: events, markets with volume>=20, upper bound = per event at most 2 traded markets; no price, candle or result"
+}
