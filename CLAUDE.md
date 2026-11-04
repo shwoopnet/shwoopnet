@@ -756,6 +756,10 @@ The L1 row in the Strategies table (`renderKalshiStrategies`) now counts only or
 
 A third of gold orders (79 of 234 since Oct 21) and 8 OICORE orders ended "no fill" with no reason kept. L1 (`runL1Tick`) and the second slot now store Kalshi's own order status as `kalshiStatus` on the order document when Kalshi returns one (the slot also stores `answeredAtMs`). Log only: nothing reads it, no order changes, and the off-equivalence fixtures are unchanged (their mocked answers carry no status). Test NF1. Needs `bash functions/deploy-latest.sh`.
 
+## Bot status covers EVENT830 (Nov 4, 2026, the owner: "check to see if the bot status page includes other strategies outside of L1 & OICORE ... our dashboard is as an overall")
+
+The Strategies table, the chips, the Own stops line and the Rules text already named EVENT830; the Bot status card did not. `KAL_LOOKS` now has a third look, Release day longshot, at 12:00 into a quarter, counted ONLY in a window whose close is in its `closes` list (a copy of `SLOT_CALENDARS.EVENT830`; gate SF9 requires the two to be equal). When it falls at the same moment as the open interest jump the ring names both as one look (`kalshiNextEntry` merges looks at the same instant). The prices tile adds a cell (`kalshiEventNext`, `kalshiEscapedEventCell`): the next listed window in Central time and the release, a countdown within a day, and "No listed release window left" after Dec 23 (the relay does not read EVENT830's eight markets, so it shows no price). A new release date is a reviewed edit of the bot's calendar and this copy together. Tests SC6, SC9, SF9. Page only, live on merge.
+
 ## The report carries the no-fill reason (Nov 4, 2026, the refinement chat's request)
 
 With `?orders=1` every L1 and slot row now has `kalshiStatus` (from #712's log: letters and underscores only, at most 24, lowercased; null when the order predates the log or the value is odd). Rows already had `answeredAtMs`. Test R9; R2 and OV3 list the new key on purpose. Needs `bash functions/deploy-report.sh` (or `deploy-latest.sh`).
