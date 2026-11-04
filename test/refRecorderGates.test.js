@@ -117,4 +117,63 @@ print(json.dumps([len(rows), failed, rows[0][8], rows[0][10]]))`));
   assert.deepStrictEqual(out2, [1, false, '', 'no_score_yet']);
 };
 
+// R10 (RECBUILD1): the Yahoo 1 minute adapter keeps bars with a close, drops what is already on file, and returns [] for a body that is not a chart (a counted failure, never a made-up value).
+const YAHOO = JSON.stringify({ chart: { result: [{ meta: { symbol: 'CL=F' }, timestamp: [1000, 1060, 1120, 1180], indicators: { quote: [{ open: [70, 71, null, 73], high: [71, 72, null, 74], low: [69, 70, null, 72], close: [70.5, 71.5, null, 73.5], volume: [10, null, null, 5] }] } }], error: null } });
+gates.R10 = () => {
+  const out = JSON.parse(py(`
+import ref_adapters as ad
+body = ${JSON.stringify(YAHOO)}
+print(json.dumps({"all": ad.yahoo1m_parse({}, [body]), "after": ad.yahoo1m_parse({"after_ts": 1060}, [body]), "bad": [ad.yahoo1m_parse({}, ["<html>"]), ad.yahoo1m_parse({}, ['{"chart":{"result":null}}']), ad.yahoo1m_parse({}, ['{"chart":{"result":[{"meta":{"symbol":"X"}}]}}'])],
+  "url": ad.yahoo1m_url("EURUSD=X", "7d"), "hosts": list(ad.YH_HOSTS), "reg": "yahoo1m" in ad.ADAPTERS}))`));
+  assert.deepStrictEqual(out.all, [[1000, 'CL=F', 70.5, 10, 'o=70;h=71;l=69'], [1060, 'CL=F', 71.5, '', 'o=71;h=72;l=70'], [1180, 'CL=F', 73.5, 5, 'o=73;h=74;l=72']]);
+  assert.deepStrictEqual(out.after.map((r) => r[0]), [1180], 'bars at or before the mark are dropped; a null close is skipped');
+  assert.deepStrictEqual(out.bad, [[], [], []]);
+  assert.strictEqual(out.url, 'https://query2.finance.yahoo.com/v8/finance/chart/EURUSD%3DX?interval=1m&range=7d&includePrePost=false');
+  assert.deepStrictEqual(out.hosts, ['query2.finance.yahoo.com', 'query1.finance.yahoo.com']); assert.strictEqual(out.reg, true);
+  assert.ok(/YH_HOSTS = \("query2\.finance\.yahoo\.com", "query1\.finance\.yahoo\.com"\)/.test(adapters), 'only the two public Yahoo chart hosts');
+};
+
+// R11 (RECBUILD1): the standalone Yahoo reference: the first run is a 7 day backfill, later runs ask for 1 day and add only newer bars, a gap over 20 hours backfills again, a failed symbol keeps its mark,
+// a 429 on one Yahoo host falls back once to the other (the User-Agent is never changed), and a run with nothing standalone is unchanged.
+gates.R11 = () => {
+  const out = JSON.parse(py(`
+import ref_adapters as ad
+m._sleep = lambda x: None
+urls = []
+body = ${JSON.stringify(YAHOO)}
+def get(url):
+    urls.append(url)
+    if "SI%3DF" in url: return 500, None, ""
+    if "query2" in url and "NG%3DF" in url: return 429, None, ""
+    return 200, body, ""
+m.http_get = get
+ref = {"id": "yahoo_1m", "adapter": "yahoo1m", "params": {"symbols": ["CL=F", "NG=F", "SI=F"], "range": "1d", "backfill_range": "7d"}}
+state = {}
+rows, calls, n429, fails = m.run_standalone(ref, "x", 7200, 2000, state)
+first_urls = list(urls); urls.clear()
+rows2, c2, n2, f2 = m.run_standalone(ref, "x", 7200, 2060, state)      # 60 s later, nothing newer than the high-water mark
+second = list(urls); urls.clear()
+state["CL=F"] = 100
+m.run_standalone(ref, "x", 7200, 100 + 21 * 3600, state)
+gap = [u for u in urls if "CL%3DF" in u][0]; urls.clear()
+state["CL=F"] = 1000
+m.run_standalone(ref, "x", 7200, 1000 + 3600, state)
+recent = [u for u in urls if "CL%3DF" in u][0]
+print(json.dumps({"n": len(rows), "r0": rows[0], "state": state, "fails": fails, "n429": n429, "first_rng": ["range=7d" in u for u in first_urls], "hosts": sorted({u.split("/")[2] for u in first_urls}),
+  "n2": len(rows2), "f2": f2, "second_rng": ["range=1d" in u for u in second][:1], "gap7": "range=7d" in gap, "recent1": "range=1d" in recent, "refvals": len(m.REF_COLS) == len(rows[0]),
+  "standalone": m.load_standalone(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json'))})[0]["params"]["symbols"]}))`));
+  assert.strictEqual(out.n, 6, 'CL=F and NG=F gave 3 bars each; SI=F failed');
+  assert.strictEqual(out.r0[2], 'yahoo_1m:CL=F'); assert.strictEqual(out.r0[6], 1000); assert.strictEqual(out.r0[7], 'CL=F');
+  assert.strictEqual(out.state['CL=F'], 1180); assert.strictEqual(out.state['NG=F'], 1180); assert.ok(!('SI=F' in out.state), 'a failed symbol keeps no mark, so the next run backfills it');
+  assert.strictEqual(out.fails, 1); assert.ok(out.n429 >= 1, 'the 429 is counted');
+  assert.strictEqual(out.first_rng.every(Boolean), true, 'the first run is a 7 day backfill');
+  assert.ok(out.hosts.includes('query1.finance.yahoo.com') && out.hosts.includes('query2.finance.yahoo.com'), 'one fallback to the other host');
+  assert.strictEqual(out.n2, 0, 'no duplicate bars'); assert.strictEqual(out.f2, 1);
+  assert.deepStrictEqual(out.second_rng, [true]); assert.strictEqual(out.gap7, true); assert.strictEqual(out.recent1, true); assert.strictEqual(out.refvals, true);
+  assert.deepStrictEqual(out.standalone, ['EURUSD=X', 'GBPUSD=X', 'JPY=X', 'AUDUSD=X', 'CAD=X', 'CL=F', 'NG=F', 'SI=F']);
+  const code = strip(script + adapters);
+  assert.ok(!/Mozilla|Chrome|Safari|spoof/i.test(code), 'no browser User-Agent');
+  assert.ok(/"ref", "bars", day, "%s\.csv\.gz" % int\(now\)/.test(script), 'standalone bars go to a file named for the poll second, never overwritten by a re-run of the slot');
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }

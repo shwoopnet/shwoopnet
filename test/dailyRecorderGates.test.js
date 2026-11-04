@@ -79,4 +79,26 @@ print(json.dumps([ms, calls, n429, bad]))`));
   assert.deepStrictEqual(out, [[], 2, 2, true]);
 };
 
+// D7 (RECBUILD1, Nov 4, 2026): the STRESSDAY1 extension: the Financials and Commodities daily, weekly and hourly ladders, every series once, nothing 15 minute, the existing BARRIER1, NOWCAST1 and FEDIMPL1
+// entries untouched, and looks that match the CALIB1 grid (daily 1440/360/60, weekly 4320/1440/360, hourly 30/15/5 minutes before the close).
+gates.D7 = () => {
+  const sd = watch.watch.filter((e) => e.test === 'STRESSDAY1');
+  assert.strictEqual(sd.length, 32);
+  const names = sd.map((e) => e.series);
+  assert.strictEqual(new Set(names).size, 32, 'no series twice');
+  const others = new Set(watch.watch.filter((e) => e.test !== 'STRESSDAY1').map((e) => e.series));
+  for (const n of names) assert.ok(!others.has(n), n + ' is already watched by another test');
+  for (const must of ['KXGOLDD', 'KXSILVERD', 'KXNATGASD', 'KXBRENTD', 'KXWTI', 'KXINX', 'KXNASDAQ100', 'KXEURUSD', 'KXUSDJPY', 'KXUST10A', 'KXGOLDW', 'KXWTIW', 'KXDJI']) assert.ok(names.includes(must), must);
+  const looks = (e) => JSON.stringify(e.looks_minutes_before_close);
+  for (const e of sd) {
+    assert.ok(!/15M$/.test(e.series) && !e.keep_all_open, e.series);
+    if (/W$|AW$/.test(e.series) && e.series !== 'KXUST10A') { assert.strictEqual(looks(e), '[4320,1440,360]', e.series); assert.strictEqual(e.window_hours, 170, e.series); }
+    else if (e.series === 'KXDJI') { assert.strictEqual(looks(e), '[30,15,5]'); assert.strictEqual(e.window_hours, 3); }
+    else { assert.strictEqual(looks(e), '[1440,360,60]', e.series); assert.strictEqual(e.window_hours, 30, e.series); }
+  }
+  assert.strictEqual(watch.watch.filter((e) => e.test === 'BARRIER1').length, 14, 'BARRIER1 is untouched');
+  assert.strictEqual(watch.watch.filter((e) => e.test === 'NOWCAST1').length, 4); assert.strictEqual(watch.watch.filter((e) => e.test === 'FEDIMPL1').length, 2);
+  assert.ok(sd.length + others.size <= 60, 'one run stays at about 2 reads a series, well inside its 15 minute limit');
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }

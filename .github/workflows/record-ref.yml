@@ -1,4 +1,5 @@
 # Nov 3, 2026 (research only, RECREF): every 2 hours records the Kalshi quotes of a watchlist of entertainment and tech series that settle on a public number, together with the current value of that number from its public source (kworb Spotify charts, Rotten Tomatoes, Metacritic, Apple App Store, Polymarket xtracker post counts), so a later test can ask whether the live reference already implied the outcome at the look.
+# Nov 4, 2026 (RECBUILD1): also polls Yahoo Finance 1 minute bars (forex, WTI, natural gas, silver) as a standalone reference, a 7 day backfill on the first run (public chart endpoint, GET only, honest User-Agent, never spoofed).
 # Public data only: no key, no secret, no order, GET only, one request per second per host. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch under ref/, never to main. What is polled is listed in kalshi-scalper/workers/RECREF_WATCHLIST.json.
 # Scheduled runs are often late or dropped, so each run writes files named for its 2 hour slot (a re-run of a slot overwrites them) and every row carries its own timestamp.
 name: record-ref
