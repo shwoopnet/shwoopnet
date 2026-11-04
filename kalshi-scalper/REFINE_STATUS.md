@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 7:34 PM CT (01:34Z Nov 4): W23 FLOW1-TRACKER BUILT
+
+forward_flow1.py in the scratchpad (`python3 -I forward_flow1.py <report.json>`; refresh flow_cache.jsonl first by running flow_forward.py): selects slotOrders with `strategy == 'FLOW1'` (the slot id field is `strategy`), prints 'no FLOW1 orders yet' otherwise; the four registered divergence flags with 'n too small' counts. Tested on a synthetic report only (no flag fired; the flag branches ran only to the threshold checks). The recorded field is read from `flow` (also flowImb, imbalance, imb). dash.sh edited: the L1 marker prints only past 6 hours on a weekday (a plain note between 3 and 6), and the block ends with the FLOW1 block. dash.sh itself was only syntax checked (bash -n).
+
 ## 2026-11-03 7:34 PM CT (01:34Z Nov 4): HOURLY CHECK-IN, 0 workers running, W23 and W24 REGISTERED
 
 W23 FLOW1-TRACKER (a tool, needed the moment FLOW1 is live): forward_flow1.py in the scratchpad: reads a fresh report (slotOrders with slotId FLOW1; strategy id may be 'FLOW1' or in the slot field: handle both), the shadow low-half windows from flow_cache.jsonl (windows closing since the first FLOW1 order), and prints the four registered divergence flags: (a) fill rate vs shadow low-half windows (after 20), (b) live average fill vs the shadow -120 s ask (after 10 fills), (c) win rate and net (after 20 and 30 fills) next to the shadow low-half PF, (d) the recorded `flow` field vs my flow_forward imbalance for the same window (share differing by more than 0.05). It prints 'no FLOW1 orders yet' until then. Also updates dash.sh to print the 6 hour L1 silence marker.
