@@ -97,6 +97,12 @@ def candles():
             key = f"{suf}|{fam}|{i}"
             if key not in done:
                 jobs.append((key, g["start"], tks[i:i + 8]))
+    cutt = {}
+    for gs in KSER:
+        gl = sorted(g["start"] for g in tab.values() if g["series"] == gs)
+        cutt[gs] = gl[(2 * len(gl)) // 3]
+    # test third first: the fit two thirds are information only
+    jobs.sort(key=lambda j: 0 if tab[j[0].split("|")[0]]["start"] >= cutt[tab[j[0].split("|")[0]]["series"]] else 1)
     print("jobs", len(jobs), "markets", sum(len(v) for v in plan.values()), flush=True)
     fh = open(outp, "a")
 
