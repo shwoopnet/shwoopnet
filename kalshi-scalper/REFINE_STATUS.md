@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:50 AM CT (09:50Z): W54 gold limit rule; the +1c idea is withdrawn
+
+- W54 (descriptive): code rule (l1Pick, kalshiLiveLib.js ~line 603): YES limit is the ask rounded up to the next cent, NO limit is the YES bid rounded down, so the limit is under 1c above the seen ask by construction. Gold fills (247 with a seenAsk; avgFill null, fill back-solved from settledPnl, 11 early sells excluded): within 0.5c of the seen ask n 150, win 99.3%, +6.00c/ct; about 1c above n 86, win 98.8%, +4.19c/ct. Gold no-fills: 135 in this file (W52 counted 78; the two counts disagree and I have not reconciled them). Of those, 77 would have filled at order+1c: win 90.9%, -1.68c/ct (a ceiling, selected on price rising); 10 had an ask above order+1c; 42 have no candle and 6 no result. So the missed trades were worse than the fills, and a +1c cushion would not help.
+- This overrides W52's possible brief (gold limit +1c): withdrawn, do not send. W52's "+3.04c if filled at the order price" is the same sample at a price that was not available.
+
 ## 2026-11-04 03:40 AM CT (09:40Z): W55 OICORE loss-run history
 
 - W55 (descriptive; 453 historical triggers, 123 wins, 85 loss runs): longest run 15 in a row (3.6 days, Sep 3 to 7); runs of 10 or more: 3; 14 or more: 2; 18 or more: 0. Longest gap between wins 5.7 days from Sep 11. The 18-in-a-row kill has never been hit in history and was missed by 3 in the worst case, so a chance firing is small but not negligible (W38 simulated 7.8% over 40 fills). A 15 to 17 streak should be read as the live warning zone, not yet a kill. Current live streak 4.
