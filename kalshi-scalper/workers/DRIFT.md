@@ -1,5 +1,56 @@
 # DRIFT: the bot's live orders against L1's history rule on the same markets and minutes (newest first; aggregates only; `python -m scalper.drift run`)
 
+## 2026-11-04 01:37 CT (report window 2026-10-05 02:36 CT to now; history candles up to 2026-11-03 19:30 CT)
+
+**1. Coverage.** Live orders sent (filled or not) against the history rule at the order's own look; history entries at the bot's look the bot did not take, by reason.
+
+| Window | Market | Live orders | Match | History: no entry | History: other side | No candle | Mismatch share (of those with a candle) | History entries | Taken | Not live yet | Paused (XRP) | Bot not trading | One crypto per window | Smooth gate | Other | Other share |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 7d | gold | 109 | 94 | 10 | 0 | 5 | 9.6% | 111 | 94 | 0 | 0 | 5 | 0 | 0 | 12 | 10.8% |
+| 7d | Bitcoin | 3 | 3 | 0 | 0 | 0 | 0.0% | 185 | 3 | 0 | 0 | 9 | 33 | 131 | 9 | 4.9% |
+| 7d | Ethereum | 0 | 0 | 0 | 0 | 0 | n/a | 197 | 0 | 0 | 0 | 10 | 37 | 149 | 1 | 0.5% |
+| 7d | Dogecoin | 149 | 140 | 9 | 0 | 0 | 6.0% | 175 | 140 | 0 | 0 | 6 | 0 | 0 | 29 | 16.6% |
+| 7d | XRP | 0 | 0 | 0 | 0 | 0 | n/a | 113 | 0 | 0 | 113 | 0 | 0 | 0 | 0 | 0.0% |
+| 30d | gold | 386 | 351 | 30 | 0 | 5 | 7.9% | 547 | 351 | 67 | 0 | 90 | 0 | 0 | 39 | 7.1% |
+| 30d | Bitcoin | 249 | 231 | 18 | 0 | 0 | 7.2% | 736 | 231 | 30 | 0 | 170 | 88 | 174 | 43 | 5.8% |
+| 30d | Ethereum | 175 | 163 | 12 | 0 | 0 | 6.9% | 791 | 163 | 139 | 0 | 159 | 93 | 199 | 38 | 4.8% |
+| 30d | Dogecoin | 292 | 270 | 22 | 0 | 0 | 7.5% | 794 | 270 | 418 | 0 | 9 | 41 | 0 | 56 | 7.1% |
+| 30d | XRP | 117 | 99 | 18 | 0 | 0 | 15.4% | 665 | 99 | 432 | 115 | 2 | 8 | 0 | 9 | 1.4% |
+
+**2. Slippage** (held filled orders: price paid minus the history candle's closing ask of the same side at the decision minute, cents; positive = paid more).
+
+| Window | Market | Priced | Mean | Median | 10th / 90th pct | <=-2c | -1c | 0c | +1c | +2c | >=+3c |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 7d | gold | 66 | +0.66 | +0.5 | -0.7 / +2.3 | 3 | 3 | 29 | 17 | 9 | 5 |
+| 7d | Bitcoin | 1 | +1.20 | +1.2 | n/a | 0 | 0 | 0 | 1 | 0 | 0 |
+| 7d | Ethereum | 0 | n/a | n/a | n/a | 0 | 0 | 0 | 0 | 0 | 0 |
+| 7d | Dogecoin | 85 | +1.03 | +0.6 | -0.3 / +3.0 | 1 | 6 | 32 | 29 | 6 | 11 |
+| 7d | XRP | 0 | n/a | n/a | n/a | 0 | 0 | 0 | 0 | 0 | 0 |
+| 30d | gold | 237 | +0.59 | +0.5 | -0.5 / +2.0 | 11 | 11 | 105 | 76 | 21 | 13 |
+| 30d | Bitcoin | 146 | +0.44 | +0.4 | -0.3 / +1.4 | 7 | 6 | 70 | 50 | 10 | 3 |
+| 30d | Ethereum | 103 | +0.87 | +0.7 | -0.1 / +2.0 | 1 | 4 | 44 | 36 | 11 | 7 |
+| 30d | Dogecoin | 189 | +0.91 | +0.6 | -0.2 / +2.5 | 3 | 12 | 75 | 62 | 20 | 17 |
+| 30d | XRP | 76 | +1.76 | +1.0 | -0.1 / +4.0 | 2 | 2 | 25 | 21 | 14 | 12 |
+
+**3. Result drift.** Live loss rate (filled, settled; an exit counts as a loss) against the history rule at the bot's look on the same market and the same US Central days; and on matched orders, live against the history rule's own outcome for the same markets.
+
+| Window | Market | Live settled | Live losses | Days | History entries those days | History losses | Matched | Live loss rate (matched) | History loss rate (matched) | Live orders the history rule would not take: settled, losses |
+|---|---|---|---|---|---|---|---|---|---|---|
+| 7d | gold | 74 | 4 (5.4%) | 7 | 111 | 5 (4.5%) | 62 | 3.2% | 3.2% | 12, 2 (16.7%) |
+| 7d | Bitcoin | 1 | 0 (0.0%) | 1 | 30 | 1 (3.3%) | 1 | 0.0% | 0.0% | 0, 0 (n/a) |
+| 7d | Ethereum | 0 | 0 (n/a) | 0 | 0 | 0 (n/a) | 0 | n/a | n/a | 0, 0 (n/a) |
+| 7d | Dogecoin | 95 | 9 (9.5%) | 7 | 175 | 11 (6.3%) | 88 | 9.1% | 5.7% | 7, 1 (14.3%) |
+| 7d | XRP | 0 | 0 (n/a) | 0 | 0 | 0 (n/a) | 0 | n/a | n/a | 0, 0 (n/a) |
+| 30d | gold | 252 | 13 (5.2%) | 22 | 453 | 23 (5.1%) | 225 | 4.4% | 4.4% | 27, 3 (11.1%) |
+| 30d | Bitcoin | 155 | 11 (7.1%) | 15 | 392 | 26 (6.6%) | 147 | 6.1% | 5.4% | 8, 2 (25.0%) |
+| 30d | Ethereum | 113 | 9 (8.0%) | 12 | 325 | 27 (8.3%) | 104 | 8.7% | 5.8% | 9, 0 (0.0%) |
+| 30d | Dogecoin | 204 | 14 (6.9%) | 15 | 387 | 21 (5.4%) | 186 | 5.9% | 3.8% | 18, 3 (16.7%) |
+| 30d | XRP | 86 | 12 (14.0%) | 8 | 129 | 8 (6.2%) | 72 | 8.3% | 6.9% | 14, 6 (42.9%) |
+
+**Flags:** Dogecoin 7d: slippage mean +1.03c on 85 held orders (above 1c); XRP 30d: slippage mean +1.76c on 76 held orders (above 1c)
+
+Aggregates only; raw rows stay in the scratchpad. A live order the history rule would not take is usually a quote that moved between the candle's close and the send a few seconds later; the bot reads the market object, the history reads the minute candle. Information only; nothing here changes a live rule.
+
 ## 2026-11-03 07:01 CT (report window 2026-10-04 08:01 CT to now; history candles up to 2026-11-03 05:15 CT)
 
 **1. Coverage.** Live orders sent (filled or not) against the history rule at the order's own look; history entries at the bot's look the bot did not take, by reason.
