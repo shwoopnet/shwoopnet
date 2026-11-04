@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:00 AM CT (09:00Z): W46 OICORE trigger rate and Nov 13 read size
+
+- W46 (62 days, 5,876 windows): the OICORE trigger fires 7.3 a day (median 7, range 0-15; last 30 days 8.4). By CT block: 0-6 11%, 6-12 19%, 12-18 27%, 18-24 43%. Expected about 51 triggers in the next 7 days. 40 triggers take about 5.5 days, 100 about 14 (12 at the recent rate). Live has 24 fills in 5 days, so the live fill rate is well under the trigger rate (triggers are not fills). The Nov 13 read will have roughly 55 to 65 triggers at most, so it will be short of 100: the read should say so up front and not call a pass on a thin sample.
+
 ## 2026-11-04 02:55 AM CT (08:55Z): W45 gold by price band
 
 - W45 (descriptive, 252 gold fills, 13 losses): 0.88-0.90 n 40, 6 losses, -$11.40, PF 0.73, win 85.0% vs break-even 89.1%; 0.90-0.93 n 81, 5 losses, +$22.54, PF 1.66, win 93.8% vs 91.8%; 0.93-0.97 n 131, 2 losses, +$27.12, PF 2.18, win 98.5% vs 95.4%. The lowest band lost and the highest did best, on 6, 5 and 2 losses. Band chosen after the losses were seen, so history cannot count toward a price floor; forward orders only. Candidate for a pre-registered forward read (S-GPB1: gold fills below 0.90 from Nov 4, read at 40 fills; flag if PF under 1.0). Registering now.
