@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:27 PM CT (20:27Z): OICORE fills 28 to 30: one win, two losses
+
+- Three new OICORE fills since the 14:12Z loss: 19:27Z (1:27 PM CT) KXBTC15M-26NOV041430-30 YES 10 at 0.18, won +7.99; 19:42Z KXBTC15M-26NOV041445-45 YES 10 at 0.05, lost -0.64; 20:12Z KXBTC15M-26NOV041515-15 NO 10 at 0.06, lost -0.75. Net of the three +6.60. Record: 30 fills, 8 won, 22 lost, net +42.46, PF 3.12 (was 27 fills, 7 won, 20 lost, +35.86, PF 2.92); loss streak 2 (kill at 18, 16 away). The interim 40 fill look is now 10 fills away (about Nov 6). S-JUMP1 and S-SDIR1 are 22 of 40; S-OIRLOW1 3 windows, 1 win, 3 of 40; S-GPB1 3 of 40; S-GQH1 11 of 40; C2 9 of 40; no flags. kalshiStatus is still on 0 of 1,482 report rows (waiting for the owner to deploy the report).
+
 ## 2026-11-04 11:34 AM CT (17:34Z): S-OIRLOW1 first window
 
 - S-OIRLOW1 (open interest rise in [60,000, 86,300), forward since 14:00Z Nov 4) has its first window: 1 window, 0 wins, PF 0.00, net -3.10c/ct, 1 of 40. Nothing to read yet. The band triggers rarely (1 window in 3.5 hours), so 40 windows may take weeks and not the 8 to 10 days I wrote; I will say so again at the 10 day mark. Everything else is unchanged since 16:33Z: OICORE 27 fills, 7 won, 20 lost, net 35.86, PF 2.92, streak 1; S-GPB1 3 of 40; S-GQH1 11 of 40; S-JUMP1 and S-SDIR1 20 of 40; C2 9 of 40; no flags. Waiting on main for kalshiStatus in the report (PR 716).
