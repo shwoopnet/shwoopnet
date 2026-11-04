@@ -30,9 +30,28 @@ const num = (v) => (v === undefined || v === null || v === "" ? NaN : Number(v))
 const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
 const OPEN_SHORT = ["active", "open"];
+const FLOW_MIN_TRADES = 5;   // S-FLOW1 dropped windows with fewer trades than this, so FLOW1 sends nothing on them
+const FLOW_PAGES = 5;   // FLOW1's trade-tape read: at most this many pages of 1,000 trades for 3 minutes of one market; more means a partial read, so no order
 
 // Open interest rise to the signal candle (the one ending 180 s before the close) over the 3 minutes before it. The research read it from the candle that ENDS at those two instants; a
 // missing candle, a missing value or a non-finite number is null, never a guess.
+// Taker flow on `side` from Kalshi's public trades between fromSec (inclusive) and toSec (exclusive): (contracts takers bought on that side - contracts they sold) / total. A taker buying the
+// other side is selling this one. Every trade counts (no de-duplication: the S-FLOW1 definition). Fewer than FLOW_MIN_TRADES readable trades in the span is null (S-FLOW1 dropped those windows), never zero.
+function flowFromTrades(trades, side, fromSec, toSec) {
+  if (!Array.isArray(trades) || (side !== "yes" && side !== "no")) return null;
+  let bought = 0, sold = 0, n = 0;
+  for (const t of trades) {
+    if (!t) continue;
+    const ts = Date.parse(t.created_time) / 1000;
+    const size = num(t.count_fp !== undefined && t.count_fp !== null ? t.count_fp : t.count);
+    const taker = t.taker_outcome_side !== undefined ? t.taker_outcome_side : t.taker_side;
+    if (!Number.isFinite(ts) || ts < fromSec || ts >= toSec || !(size > 0) || (taker !== "yes" && taker !== "no")) continue;
+    n += 1;
+    if (taker === side) bought += size; else sold += size;
+  }
+  const total = bought + sold;
+  return n >= FLOW_MIN_TRADES && total > 0 ? (bought - sold) / total : null;
+}
 function oiRiseFromCandles(candles, closeSec) {
   if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
   const at = (sec) => { const c = candles.find((x) => x && Number(x.end_period_ts) === sec); const v = c ? num(c.open_interest_fp) : NaN; return Number.isFinite(v) ? v : null; };
@@ -137,6 +156,26 @@ function makeRunners(flags) {
         if (oiRise === null) { results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
         if (oiRise < s.entry.oiRiseMin) { results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
       }
+      // The taker flow condition (FLOW1; public trade tape, no key): flow on the side bought over 360 to 180 s before the close, at most FLOW_PAGES pages. Unreadable means no order.
+      let flow = null;
+      if (Object.prototype.hasOwnProperty.call(s.entry, "flowMax")) {
+        const closeSec = Math.round(Date.parse(m.close_time) / 1000);
+        const all = [];
+        let cursor = "", ok = true;
+        for (let page = 0; page < FLOW_PAGES; page++) {
+          const params = { ticker, min_ts: String(closeSec - 360), max_ts: String(closeSec - 180), limit: "1000" };
+          if (cursor) params.cursor = cursor;
+          const tr = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/trades", params, nowMs: now });
+          if (!(tr.status === 200 && tr.body && Array.isArray(tr.body.trades))) { ok = false; break; }
+          all.push(...tr.body.trades);
+          cursor = tr.body.cursor || "";
+          if (!cursor) break;
+          if (page === FLOW_PAGES - 1) ok = false;   // more pages than allowed: the flow would be partial, so no order
+        }
+        flow = ok ? flowFromTrades(all, side, closeSec - 360, closeSec - 180) : null;
+        if (flow === null) { results.push(ticker + ": the taker flow could not be read, nothing sent"); continue; }
+        if (flow > s.entry.flowMax + 1e-12) { results.push(ticker + ": taker flow " + flow.toFixed(3) + ", above " + s.entry.flowMax + ", no signal"); continue; }
+      }
       // The position is read BEFORE the transaction and may be stale by the time it commits; the direction lock, not this read, is what closes that gap.
       const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
       let position = NaN;
@@ -162,7 +201,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -187,6 +226,7 @@ function makeRunners(flags) {
         Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise,
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
+        if (flow !== null) record.flow = Number(flow.toFixed(4));
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };
       { const fresh = Number(clock()); if (!Number.isFinite(fresh) || fresh - now > MAX_STALE_MS) { results.push(ticker + ": too long since the minute began, nothing sent"); continue; } }
@@ -444,5 +484,5 @@ async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId }) {
 const prod = makeRunners(undefined);
 module.exports = {
   runSlotTick: prod.runSlotTick, runSlotExits: prod.runSlotExits, slotExitIdle: prod.slotExitIdle, runSlotSettle: prod.runSlotSettle, unsoldOf, EXIT_LOOKBACK_MS,
-  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles }),
+  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles, flowFromTrades }),
 };

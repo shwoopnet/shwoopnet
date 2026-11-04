@@ -109,7 +109,7 @@ gates['EV5 one contract: whatever is asked for, one contract is the most the gat
 };
 
 gates['EV6 holding to settlement and the eight markets are this id\'s alone: another strategy copying them is refused'] = () => {
-  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830']);
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'FLOW1']);
   const copy = (o) => Object.assign(JSON.parse(JSON.stringify(ev)), o);
   assert.ok(slot.validateSlotStrategy(copy({})).ok);
   assert.ok(!slot.validateSlotStrategy(copy({ id: 'EVENT831' })).ok, 'another id may not hold, use the eight markets or the calendar');

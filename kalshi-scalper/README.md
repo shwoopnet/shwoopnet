@@ -2866,6 +2866,14 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 - **Nothing is built from it.** L1 is not changed.
 - **Count.** 1,760 variants: **4,576** tried in total.
 
+## SLOT-FLOW1: seller-flow probe (registered 2026-11-04 before its first order; the owner: "can probably go live")
+
+**A capped probe the owner chose, below the research bar.** Source: the refinement chat's S-FLOW1 lead (146 Bitcoin 15 minute windows on the R6 recorded days Oct 29 to Nov 3; threshold -0.036 fixed at the D1 median): low-flow half n 76, win 36.8%, PF 2.54, +13.25c a contract; high half n 70, PF 0.68; permutation p 0.0026; holds in every price, hour, open interest and price-change cell checked (W18, W22). Not confirmed on hourly ladders (FLOWHR1, 14 trades, wrong sign). Counterparty: none named.
+
+**Rule (code: `SLOT_STRATEGIES` id `FLOW1`).** In the 180 to 120 s before the close, buy the CHEAPER side priced 5c to 50c, 5 contracts, held to settlement, only when the taker flow on that side over 360 to 180 s before the close is at or below -0.036 (net selling), from the public trade tape, every trade counted. Unreadable flow sends nothing.
+
+**Prediction.** PF above 1.3 on its first 40 fills (history 2.54 is a 6 day number and will shrink). **Kill (in code):** 15 losses in a row; net under -$10 after 40 fills; the slot caps. Forward read 2026-11-20, alongside S-FLOW1 and the research session's FLOW1 history test; a FALSIFIED there removes it by a reviewed edit.
+
 ## SLOT-OICORE: the second slot's first live probe (registered 2026-10-30 before the first order; the owner: "i wanna get this live", "start at 5", "scale to 10 quickly", "we can remove that rule in this specific instance")
 
 **This is a capped live probe chosen by the owner, not a strategy that met the research bar.** The research session (V2) found it in GEN6 and it survived its falsifier FALS4 (exact reproduction, no look-ahead) but reads NOT_YET_FALSIFIED: day z 4.42 against a deflated bar of about 5.2, two history windows only, held to settlement (`workers/GEN6_RESULT.md`, `workers/FALS4_RESULT.md`, `workers/SLOTEX_RESULT.md`, `workers/SLOTEX_ETH_RESULT.md` on the research branch).
