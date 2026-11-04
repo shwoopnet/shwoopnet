@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:15 AM CT (12:15Z): W84 OICORE weekend gap
+
+- W84 (descriptive; 461 sim triggers): weekday +9.38c/ct, weekend +2.23c, difference +7.16c, permutation p 0.080 two-sided (5000 shuffles), not significant at 0.05 and uncorrected for the other splits tried (hour blocks in W83, weeks in W64, price bands in W36 and W53). Weekend win rate 27 of 119 = 22.7% (Wilson 95% 16.1% to 31.0%). Weekend by month: Sep n 33, +4.35c, PF 1.41; Oct n 78, +0.67c, PF 1.04; Nov n 8, +8.69c (too few). Positive in each month but weak. History cannot count toward a weekend filter; it stays a forward question. Tracking: live OICORE weekend fills (Saturday and Sunday CT close) versus weekday, information only. At the live pace about 13 weekend triggers per weekend, so it will not be readable by Nov 13 (one weekend, Nov 7 to 8).
+
 ## 2026-11-04 06:10 AM CT (12:10Z): W83 OICORE by time of day and weekday
 
 - W83 (descriptive; 461 sim triggers, hold, CT close hour): 0-6 n 50, 6 wins, PF 0.67, -3.71c/ct; 6-12 n 90, 19 wins, PF 1.99, +6.12c; 12-18 n 126, 33 wins, PF 1.87, +8.16c; 18-24 n 195, 65 wins, PF 2.14, +10.67c. Weekday n 342, 96 wins, PF 2.27, +9.38c; weekend n 119, 27 wins, PF 1.17, +2.23c. Permutation test on the PF spread across the four blocks (5000 shuffles): observed 1.47, p 0.24, so the block spread is not beyond chance, and the 0-6 weakness rests on 6 wins in 50. The weekday vs weekend gap was not tested. History cannot count toward a filter. Forward tag for the Nov 13 read: report OICORE live fills split weekday vs weekend and by block, as information only (no rule).
