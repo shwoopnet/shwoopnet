@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:10 AM CT (08:10Z): W36 OICORE by order price band
+
+- W36 (descriptive): live 24 fills: 5-15c n 20, 15% win, PF 1.89, +6.5c; 15-30c n 2; 30-50c n 2. Sim 31 triggers since Oct 30: 5-15c n 21, PF 2.36, +5.0c; 15-30c n 4, PF 10.2; 30-50c n 6, PF 1.13. Upper cells hold 2 to 6 trades, so no filter can be justified, and history cannot count toward adopting one. No change.
+
 ## 2026-11-04 02:05 AM CT (08:05Z): W35 gold early sells since Nov 2
 
 - W35 (descriptive, n=3, cannot change a rule): gold since Nov 2 22:55Z, 25 fills, net -$15.66, three early sells (-$9.31, -$13.56, -$12.74). All three would have lost at settlement too. Selling -$35.61 vs holding -$38.37, so the 25c line was $2.76 better. Matches the full-history finding (gold slightly better selling). Exit price taken as the 25c line (report has no exit time).
