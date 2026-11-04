@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:45 AM CT (12:45Z): W90 Nov 13 read template
+
+- W90: `oicore_nov13.py <dash_report.json>` (scratchpad) is the fixed template for the registered Nov 13 forward read of OICORE; no network, thresholds fixed in code. On the 08:26Z report: 25 fills, 6 wins, 19 losses, net +$28.94, PF 2.74, +11.86c/ct, win rate 24.0% (Wilson 95% 11.5% to 43.4%); loss streak current 5, longest 5 (kill at 18); net kill n/a (applies after 40 fills); tagged 6 fills, 1 win, +$4.77; untagged 19 fills, 5 wins, +$24.17; weekday 17 fills +$19.72, weekend 8 fills +$9.22; CT blocks 0-6 -$0.64, 6-12 -$4.80, 12-18 +$30.27, 18-24 +$4.11; sim vs live 31 sim triggers, 17 matched, 13 with no live order, 7 live orders with no sim trigger. Verdict line uses W67's wording: net > 0 is the minimum, PF 1.5 is not a pass/fail bar below 100 fills, the two registered kills stay. Run it on Nov 13 and again on the extended read if main agrees.
+
 ## 2026-11-04 06:40 AM CT (12:40Z): W89 OICORE live fills per day
 
 - W89 (`oicore_rate.py`, offline on dash_report.json, oi/btc.jsonl and fwd_cache.jsonl): CT day, sim triggers / orders / fills / fill rate / cumulative fills: Oct 30 5/6/5/83%/5; Oct 31 4/5/4/80%/9; Nov 1 8/8/4/50%/13; Nov 2 6/5/5/100%/18; Nov 3 8/8/6/75%/24; Nov 4 (partial) 0/1/1/100%/25 (the Nov 4 trigger count is 0 only because the candle data stops before today). Trailing 5 full-day pace 4.8 fills a day. At that pace 40 fills about Nov 7, and 100 fills about Nov 19, so the Nov 13 read would hold about 68 fills, not 100. Fill rate (orders that fill) averages roughly 77%. Use this table to date the interim reads: a 40 fill look on about Nov 7 (net > 0 and the 18-streak kill are the only live checks), the registered read Nov 13, and an extended read about Nov 19 if main agrees (W67).
