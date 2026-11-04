@@ -56,6 +56,15 @@ gates.SF4 = () => {
   assert.ok(/name: 'Open interest jump', what: function\(\)\{ return 'Bitcoin,/.test(looks[0]), 'the open interest jump names Bitcoin (the second strategy trades it through the slot)');
   assert.ok(!/10 minute look/.test(looks[0]) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
 };
+gates.SF9 = () => {
+  // Nov 4, 2026: the Bot status card's copy of EVENT830's release calendar must equal the bot's (SLOT_CALENDARS.EVENT830), so the countdown never names a window the bot will not trade, or misses one it will.
+  const slot = require('../functions/kalshiSlotLib.js');
+  const looks = /var KAL_LOOKS = \[[\s\S]*?\n  \];\n/.exec(html)[0];
+  const closes = [...(/closes: \[([^\]]+)\]/.exec(looks) || assert.fail('the release look has its dates'))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  assert.deepStrictEqual(closes, slot.SLOT_CALENDARS.EVENT830.map((r) => r.closeUtc), 'the page lists exactly the release windows in the bot\'s code');
+  const kinds = [...(/kinds: \[([^\]]+)\]/.exec(looks) || assert.fail('the release look has its kinds'))[1].matchAll(/'([^']+)'/g)];
+  assert.strictEqual(kinds.length, closes.length, 'one release name per date');
+};
 gates.SF5 = () => {
   const watch = /var KAL_WATCH = (\[[\s\S]*?\]);\s*\n/.exec(html);
   assert.ok(watch, 'KAL_WATCH is found');
