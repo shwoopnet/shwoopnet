@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 6:34 PM CT (00:34Z Nov 4): W22 FLOW-INDEP RESULT
+
+W22 (4 correlations + 4 cells; full tape, 146 pool windows): rank correlation of the flow imbalance with sdir -0.056, OIR -0.048, entry price +0.003, spread +0.021 (needs about 0.16 for p 0.05). The 2x2 keeps the flow direction in every cell: within sdir low / high: flow-low PF 2.78 (n 36) and 2.38 (n 40) vs flow-high 0.71 (n 37) and 0.67 (n 33); within OIR low / high: flow-low PF 1.78 (n 40) and 3.96 (n 36) vs flow-high 0.71 (n 33) and 0.65 (n 37). Smallest cell 33. Reading: the flow lead is not a repackaging of the price change or the open interest rise: S-FLOW1 and S-SDIR1 / S-JUMP1 are separate signals on this pool. Caveats unchanged: 146 windows, 6 days, no deflation for the splits.
+
 ## 2026-11-03 6:33 PM CT (00:33Z Nov 4): HOURLY CHECK-IN, 0 workers running, W21 and W22 REGISTERED
 
 W21 FLOW-L1: the W17 feature on L1. On the R6 days (r6t tape, full rows, no deduplication) for gold and Dogecoin windows in band 0.88 to 0.97 at -360 s (candle rule, 25c exit as in q3.py): taker flow imbalance in -360 to -300 s? NO: the entry is at -360 s, so use the flow in the 3 minutes BEFORE the entry, -540 to -360 s, imbalance toward the bought side = (contracts bought on the bought side minus sold) over total; split at the pool median (computed on the first half of the R6 days only), test early sell rate and net per contract, low vs high, both sides = 2 tries per market. Pass: early sell rate ratio of at least 2 and at least 15 flagged in both chronological halves. Prediction: none passes (about 27 gold and 58 Dogecoin in-band windows only). Lead only.
