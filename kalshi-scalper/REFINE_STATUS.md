@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:25 AM CT (09:25Z): W51 why my sim misses 7 live OICORE orders
+
+- W51: 7 live OICORE orders since Oct 30 12:00Z (6 fills, 1 no-fill) have no sim trigger. OIR passed in all 7 (87k to 244k) and candles were present. The only failed condition is my cheap-side ask at the close-180 candle: 0.015 to 0.044, all under 0.05. The bot saw 0.041 to 0.067 about 162 to 177 s before close and its limit was ask+1c (0.05 to 0.07). Cause: the bot reads the price 5 to 20 s after my candle, and prices of 0.04 to 0.05 are common; the band appears to be applied to the limit (ask+1c), so asks of 0.04 to 0.049 still qualify, while my sim needs ask >= 0.05. My sim is stricter at the 0.05 edge, so its sim table (31 windows) undercounts live triggers by about 7. Orders carry no oiRise field, so the bot's OIR cannot be compared. Action: the S-OICORE forward bands should key off the live orders, not my trigger replica, for the Nov 13 read; sim bands stay a side view. Note for the read: 5 to 6c entries are the lottery-ticket end where fee rounding and 1c matter most.
+
 ## 2026-11-04 03:20 AM CT (09:20Z): W49 gold in-band windows without a fill
 
 - W49 (descriptive; gold asks Oct 21 to Nov 2 14:30Z only, "in band" = either side's ask 0.88 to 0.97 on the candle ending 6 minutes before close): 767 windows, 207 in band, 115 live filled (56%). 92 in-band windows had no fill: 56 sent but not filled, 20 no order record, 16 in the 20-24 CT quiet hours (block live only Oct 29-30). Excluding those 16: 76 skipped windows with known results; held with fee, 75 won, +5.92c/ct. Fills for the 56 "no fill" orders not modelled. Loose definition (either side), so it may overcount; but if real, the skipped gold windows were nearly all winners, which is the limit-miss pattern again (price moves to 0.97+ or off). This is a lead, not a finding. W52 checks why the 56 did not fill.
