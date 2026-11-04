@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:25 AM CT (10:25Z): wake check 08:05Z
+
+- OICORE settled the 25th fill as a loss: 6 won, 19 lost, net +$28.94, PF 2.74, loss streak now 5 (kill at 18; W55 warning zone 15 to 17). L1 last order 0.2h ago, OICORE 0.1h. S-LIM1-LIVE: 6 tagged, +$4.77 (review at 20). C9 Silver: 36 in band, 3 lost. Dogecoin paused, no FLOW1 orders. S-FLOW2 tracker running (first windows close after 08:15Z). `flow_forward.py` writes no output when run through the wake path; rerun it from the foreground in a file next wake.
+
 ## 2026-11-04 04:20 AM CT (10:20Z): W61 gold by order size
 
 - W61 (descriptive; 252 filled gold orders): 1-5 contracts n 52, 3 losses, +$0.35, PF 1.03; 6-10 n 104, 3 losses, +$28.63, PF 2.59 (mean loss $5.99, mean win $0.46); 11-15 n 87, 7 losses, -$3.68, PF 0.95 (mean loss $10.16, mean win $0.84, max loss $13.56); 16+ n 9, 0 losses, +$12.97. Since Nov 3: 24 orders, 9 (38%) at exactly 15, the rest 12 to 14, none above, so the 15 cap binds on over a third of orders. Reading: the profit sits at 6-10 contracts and the 11-15 band has given back its win-rate edge to a bigger loss; this is the owner's scaling worry in numbers, but sizes grew with time, so it is confounded with the period (Nov 2-3 losses). Not evidence that size causes losses (same loss rate per order, bigger dollars per loss); it shows that at 15 contracts one loss (~$13.6) takes about 16 average wins ($0.84). History only; the freeze at 15 stands. Forward: watch the 11-15 band's PF in the S-GPB1 table.
