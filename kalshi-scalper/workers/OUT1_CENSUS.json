@@ -1,0 +1,321 @@
+{
+ "n_games": 335,
+ "covered": 241,
+ "trig_games": 26,
+ "trig_teamgames": 26,
+ "rows": [
+  {
+   "gid": "401772940",
+   "start": 1760055300,
+   "season": 2025,
+   "week": 6,
+   "team": "NYG",
+   "out": [
+    "darius slayton:Out"
+   ],
+   "n_ben": 5,
+   "n_rungs": 30
+  },
+  {
+   "gid": "401772748",
+   "start": 1760288400,
+   "season": 2025,
+   "week": 6,
+   "team": "PIT",
+   "out": [
+    "calvin austin:Out"
+   ],
+   "n_ben": 5,
+   "n_rungs": 30
+  },
+  {
+   "gid": "401772635",
+   "start": 1760880600,
+   "season": 2025,
+   "week": 7,
+   "team": "LA",
+   "out": [
+    "puka nacua:Out"
+   ],
+   "n_ben": 5,
+   "n_rungs": 27
+  },
+  {
+   "gid": "401772860",
+   "start": 1760893200,
+   "season": 2025,
+   "week": 7,
+   "team": "NYJ",
+   "out": [
+    "garrett wilson:Doubtful"
+   ],
+   "n_ben": 5,
+   "n_rungs": 27
+  },
+  {
+   "gid": "401772864",
+   "start": 1760905500,
+   "season": 2025,
+   "week": 7,
+   "team": "WAS",
+   "out": [
+    "deebo samuel:Out"
+   ],
+   "n_ben": 5,
+   "n_rungs": 18
+  },
+  {
+   "gid": "401772758",
+   "start": 1761498000,
+   "season": 2025,
+   "week": 8,
+   "team": "NYJ",
+   "out": [
+    "josh reynolds:Out"
+   ],
+   "n_ben": 1,
+   "n_rungs": 4
+  },
+  {
+   "gid": "401772867",
+   "start": 1761498000,
+   "season": 2025,
+   "week": 8,
+   "team": "PHI",
+   "out": [
+    "a j brown:Out"
+   ],
+   "n_ben": 4,
+   "n_rungs": 24
+  },
+  {
+   "gid": "401772866",
+   "start": 1761498000,
+   "season": 2025,
+   "week": 8,
+   "team": "HOU",
+   "out": [
+    "nico collins:Out"
+   ],
+   "n_ben": 6,
+   "n_rungs": 35
+  },
+  {
+   "gid": "401772873",
+   "start": 1762117500,
+   "season": 2025,
+   "week": 9,
+   "team": "JAX",
+   "out": [
+    "travis hunter:Out"
+   ],
+   "n_ben": 7,
+   "n_rungs": 58
+  },
+  {
+   "gid": "401772770",
+   "start": 1762711200,
+   "season": 2025,
+   "week": 10,
+   "team": "JAX",
+   "out": [
+    "brian thomas:Out",
+    "hunter long:Out"
+   ],
+   "n_ben": 7,
+   "n_rungs": 58
+  },
+  {
+   "gid": "401772777",
+   "start": 1763328300,
+   "season": 2025,
+   "week": 11,
+   "team": "BAL",
+   "out": [
+    "rashod bateman:Out"
+   ],
+   "n_ben": 6,
+   "n_rungs": 64
+  },
+  {
+   "gid": "401772928",
+   "start": 1763342400,
+   "season": 2025,
+   "week": 11,
+   "team": "DET",
+   "out": [
+    "sam laporta:Out"
+   ],
+   "n_ben": 6,
+   "n_rungs": 68
+  },
+  {
+   "gid": "401772886",
+   "start": 1763920800,
+   "season": 2025,
+   "week": 12,
+   "team": "TEN",
+   "out": [
+    "elic ayomanor:Out"
+   ],
+   "n_ben": 6,
+   "n_rungs": 59
+  },
+  {
+   "gid": "401772930",
+   "start": 1764292800,
+   "season": 2025,
+   "week": 13,
+   "team": "CIN",
+   "out": [
+    "tee higgins:Out"
+   ],
+   "n_ben": 7,
+   "n_rungs": 77
+  },
+  {
+   "gid": "401772897",
+   "start": 1765142700,
+   "season": 2025,
+   "week": 14,
+   "team": "CHI",
+   "out": [
+    "rome odunze:Out"
+   ],
+   "n_ben": 8,
+   "n_rungs": 80
+  },
+  {
+   "gid": "401772948",
+   "start": 1765502100,
+   "season": 2025,
+   "week": 15,
+   "team": "TB",
+   "out": [
+    "cade otton:Doubtful"
+   ],
+   "n_ben": 6,
+   "n_rungs": 69
+  },
+  {
+   "gid": "401772808",
+   "start": 1766944800,
+   "season": 2025,
+   "week": 17,
+   "team": "NE",
+   "out": [
+    "mack hollins:Out"
+   ],
+   "n_ben": 7,
+   "n_rungs": 69
+  },
+  {
+   "gid": "401772950",
+   "start": 1766955900,
+   "season": 2025,
+   "week": 17,
+   "team": "NYG",
+   "out": [
+    "theo johnson:Out"
+   ],
+   "n_ben": 5,
+   "n_rungs": 55
+  },
+  {
+   "gid": "401772966",
+   "start": 1767549600,
+   "season": 2025,
+   "week": 18,
+   "team": "NO",
+   "out": [
+    "chris olave:Out"
+   ],
+   "n_ben": 1,
+   "n_rungs": 10
+  },
+  {
+   "gid": "401772964",
+   "start": 1767549600,
+   "season": 2025,
+   "week": 18,
+   "team": "CLE",
+   "out": [
+    "harold fannin:Out"
+   ],
+   "n_ben": 2,
+   "n_rungs": 13
+  },
+  {
+   "gid": "401772963",
+   "start": 1767549600,
+   "season": 2025,
+   "week": 18,
+   "team": "NYG",
+   "out": [
+    "wan dale robinson:Out"
+   ],
+   "n_ben": 1,
+   "n_rungs": 5
+  },
+  {
+   "gid": "401772955",
+   "start": 1767561900,
+   "season": 2025,
+   "week": 18,
+   "team": "LA",
+   "out": [
+    "terrance ferguson:Doubtful"
+   ],
+   "n_ben": 1,
+   "n_rungs": 9
+  },
+  {
+   "gid": "401772958",
+   "start": 1767561900,
+   "season": 2025,
+   "week": 18,
+   "team": "MIA",
+   "out": [
+    "de von achane:Doubtful"
+   ],
+   "n_ben": 0,
+   "n_rungs": 0
+  },
+  {
+   "gid": "401872938",
+   "start": 1789923600,
+   "season": 2026,
+   "week": 2,
+   "team": "BAL",
+   "out": [
+    "zay flowers:Doubtful"
+   ],
+   "n_ben": 6,
+   "n_rungs": 96
+  },
+  {
+   "gid": "401872958",
+   "start": 1790539500,
+   "season": 2026,
+   "week": 3,
+   "team": "SF",
+   "out": [
+    "demarcus robinson:Out"
+   ],
+   "n_ben": 6,
+   "n_rungs": 99
+  },
+  {
+   "gid": "401872963",
+   "start": 1790640900,
+   "season": 2026,
+   "week": 3,
+   "team": "PHI",
+   "out": [
+    "dallas goedert:Out"
+   ],
+   "n_ben": 9,
+   "n_rungs": 135
+  }
+ ]
+}
