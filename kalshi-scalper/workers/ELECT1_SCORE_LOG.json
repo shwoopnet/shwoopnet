@@ -1,0 +1,188 @@
+{
+ "control": {
+  "trades": 117,
+  "n": 65,
+  "win_rate": 0.0,
+  "mean_ask": 0.0954923076923077,
+  "net": -66.10000000000001,
+  "net_per_trade": -1.016923076923077,
+  "pf": 0.0,
+  "by_party": {
+   "R": {
+    "n": 52,
+    "win_rate": 0.0,
+    "mean_ask": 0.09580769230769232,
+    "net": -53.04,
+    "net_per_trade": -1.02,
+    "pf": 0.0
+   },
+   "D": {
+    "n": 10,
+    "win_rate": 0.0,
+    "mean_ask": 0.0731,
+    "net": -7.83,
+    "net_per_trade": -0.783,
+    "pf": 0.0
+   }
+  },
+  "by_type": {
+   "CONTROLH": {
+    "n": 1,
+    "win_rate": 0.0,
+    "mean_ask": 0.064,
+    "net": -0.6900000000000001,
+    "net_per_trade": -0.6900000000000001,
+    "pf": 0.0
+   },
+   "CONTROLS": {
+    "n": 1,
+    "win_rate": 0.0,
+    "mean_ask": 0.27,
+    "net": -2.8400000000000003,
+    "net_per_trade": -2.8400000000000003,
+    "pf": 0.0
+   },
+   "GOV": {
+    "n": 20,
+    "win_rate": 0.0,
+    "mean_ask": 0.1018,
+    "net": -21.67,
+    "net_per_trade": -1.0835000000000001,
+    "pf": 0.0
+   },
+   "HOUSE": {
+    "n": 31,
+    "win_rate": 0.0,
+    "mean_ask": 0.08358064516129032,
+    "net": -27.660000000000004,
+    "net_per_trade": -0.8922580645161291,
+    "pf": 0.0
+   },
+   "HOUSEAKAL": {
+    "n": 0,
+    "win_rate": null,
+    "mean_ask": null,
+    "net": 0,
+    "net_per_trade": null,
+    "pf": null
+   },
+   "SENATE": {
+    "n": 12,
+    "win_rate": 0.0,
+    "mean_ask": 0.10383333333333333,
+    "net": -13.24,
+    "net_per_trade": -1.1033333333333333,
+    "pf": 0.0
+   }
+  },
+  "boot_by_state": [
+   -1.2073913043478264,
+   -0.8229687499999999,
+   33
+  ]
+ },
+ "ref": {
+  "trades": 5,
+  "n": 5,
+  "win_rate": 0.0,
+  "mean_ask": 0.0446,
+  "net": -2.41,
+  "net_per_trade": -0.48200000000000004,
+  "pf": 0.0,
+  "by_party": {
+   "R": {
+    "n": 4,
+    "win_rate": 0.0,
+    "mean_ask": 0.046,
+    "net": -1.99,
+    "net_per_trade": -0.4975,
+    "pf": 0.0
+   },
+   "D": {
+    "n": 1,
+    "win_rate": 0.0,
+    "mean_ask": 0.039,
+    "net": -0.42000000000000004,
+    "net_per_trade": -0.42000000000000004,
+    "pf": 0.0
+   }
+  },
+  "by_type": {
+   "GOV": {
+    "n": 1,
+    "win_rate": 0.0,
+    "mean_ask": 0.063,
+    "net": -0.68,
+    "net_per_trade": -0.68,
+    "pf": 0.0
+   },
+   "SENATE": {
+    "n": 4,
+    "win_rate": 0.0,
+    "mean_ask": 0.04,
+    "net": -1.73,
+    "net_per_trade": -0.4325,
+    "pf": 0.0
+   }
+  },
+  "boot_by_state": [
+   -0.608,
+   -0.35600000000000004,
+   5
+  ]
+ },
+ "unsettled": [
+  "CONTROLH-2028-D",
+  "CONTROLS-2028-R",
+  "GOVPARTYDE-28-R",
+  "GOVPARTYIN-28-D",
+  "GOVPARTYKY-27-D",
+  "GOVPARTYLA-27-D",
+  "GOVPARTYMO-28-D",
+  "GOVPARTYMS-27-D",
+  "GOVPARTYMT-28-R",
+  "GOVPARTYND-28-D",
+  "GOVPARTYUT-28-D",
+  "GOVPARTYWA-28-R",
+  "GOVPARTYWV-28-R",
+  "HOUSEAKAL-26-R",
+  "HOUSEAZ1-26-D",
+  "HOUSEAZ6-26-R",
+  "HOUSECA13-26-D",
+  "HOUSECA22-26-D",
+  "HOUSEFL13-26-D",
+  "HOUSEMI10-26-D",
+  "HOUSEMI7-26-D",
+  "HOUSENC1-26-D",
+  "HOUSENY3-26-D",
+  "HOUSENY4-26-D",
+  "HOUSEVA1-26-D",
+  "HOUSEWA3-26-D",
+  "KXGOVAK-26-JKRE",
+  "KXHOUSETX32-26-D",
+  "KXHOUSETX9-26-D",
+  "KXHOUSEUT02-26-D",
+  "SENATEAK-26-D",
+  "SENATEAL-28-2-D",
+  "SENATECA-28-D",
+  "SENATECO-28-D",
+  "SENATECT-28-R",
+  "SENATEFL-28-R",
+  "SENATEHI-28-R",
+  "SENATEIL-28-R",
+  "SENATEIN-28-D",
+  "SENATEKS-28-R",
+  "SENATEMD-28-D",
+  "SENATEMO-28-D",
+  "SENATEMS-26-D",
+  "SENATEND-28-D",
+  "SENATENY-28-D",
+  "SENATEOK-28-R",
+  "SENATEOR-28-D",
+  "SENATEPA-28-JFET",
+  "SENATESC-28-D",
+  "SENATEUT-28-D",
+  "SENATEVT-28-D",
+  "SENATEWA-28-R"
+ ]
+}
