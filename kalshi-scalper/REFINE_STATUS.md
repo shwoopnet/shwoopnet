@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:35 AM CT (12:35Z): W88 silence flag calibration
+
+- W88 (descriptive; CT): gold L1, 387 orders since Oct 7: gap median 0.75h, p90 2.25h, max 93.3h; weekday gaps p90 2.25h, p99 5.0h, max 21.3h. Longest gaps are weekends (Fri Oct 16 15:54, 93.2h; Oct 9, 67.7h; Oct 30 12:09, 54.5h; Oct 23, 50.5h) and one overnight (Thu Oct 15 18:39, 21.3h). My 6h weekday flag would have fired on 2 weekday gaps. OICORE, 33 orders since Oct 30: gap median 1.88h, p90 9.65h, max 14.25h; weekday p99 11.2h. My 14h flag would have fired twice, both on overnight gaps starting Friday or Sunday night, so both false. Decisions: gold's silence flag becomes 5h on weekdays (p99), ignoring gaps that start Friday after 15:00 CT or on the weekend; the OICORE flag stays at 14h for now (the 12h suggestion rests on 18 gaps) but I will not treat a gap that starts Friday or Sunday night as a stall. Both flags only prompt a look at the bot's status; they do not trigger any action.
+
 ## 2026-11-04 06:30 AM CT (12:30Z): W87 one script for the forward trackers
 
 - W87: `fwd_all.py [report.json]` (scratchpad) prints, from the newest dash_report.json: S-GPB1 (0 of 40 fills below 0.90), S-GQH1 (20-24 CT: 11 fills, 2 losses, -$14.29, PF 0.35; other hours 26 fills, 1 loss, +$10.08, PF 1.74), OICORE live split (25 fills): weekday 17 fills, 4 wins, +$19.72; weekend 8 fills, 2 wins, +$9.22; by CT block 0-6 1 fill -$0.64, 6-12 5 fills -$4.80, 12-18 7 fills +$30.27, 18-24 12 fills +$4.11 (information only; live weekend is not weak so far on 8 fills); gold size bands (1-5 PF 1.03, 6-10 PF 2.59, 11-15 PF 0.95, 16+ 9 fills); 38% of gold fills since Nov 3 at the 15 cap; OICORE loss streak 5 (longest 5), 13 from the 18 kill and outside the 15-17 warning zone. Thresholds unchanged. Use it each wake in place of the three separate scripts.
