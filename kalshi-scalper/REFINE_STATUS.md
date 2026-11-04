@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:20 AM CT (10:20Z): W61 gold by order size
+
+- W61 (descriptive; 252 filled gold orders): 1-5 contracts n 52, 3 losses, +$0.35, PF 1.03; 6-10 n 104, 3 losses, +$28.63, PF 2.59 (mean loss $5.99, mean win $0.46); 11-15 n 87, 7 losses, -$3.68, PF 0.95 (mean loss $10.16, mean win $0.84, max loss $13.56); 16+ n 9, 0 losses, +$12.97. Since Nov 3: 24 orders, 9 (38%) at exactly 15, the rest 12 to 14, none above, so the 15 cap binds on over a third of orders. Reading: the profit sits at 6-10 contracts and the 11-15 band has given back its win-rate edge to a bigger loss; this is the owner's scaling worry in numbers, but sizes grew with time, so it is confounded with the period (Nov 2-3 losses). Not evidence that size causes losses (same loss rate per order, bigger dollars per loss); it shows that at 15 contracts one loss (~$13.6) takes about 16 average wins ($0.84). History only; the freeze at 15 stands. Forward: watch the 11-15 band's PF in the S-GPB1 table.
+
 ## 2026-11-04 04:15 AM CT (10:15Z): W60 OICORE no-fill orders
 
 - W60 (descriptive, n 8): 3 of 8 unfilled OICORE orders would have won held (Oct 31 18:30, Nov 1 09:00, Nov 1 11:15 closes). Net after fee: filled at the sim's close-120 candle ask +19.72c/ct; filled at the order price +16.88c/ct. Order price within 1c of seenAsk in 6 of 8; the two NO orders show a seenAsk near 0.75 and 0.92, which is the YES-side ask, not the NO price (a labelling point for the read: use 1 - seenBid for NO). The close-120 candle ask was lower than the order price in 6 of 8, so those orders rested above where the sim would have bought, and so were not unfilled for a price that moved up: the cause there is not clear. The positive net comes from a few cheap wins; n 8 cannot support a claim. Why 6 of 8 failed to fill with an order above the later candle ask is an open question for the code owner (an immediate-or-cancel order priced above the ask should fill if size exists); not mine to chase.
