@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 12:17 AM CT (06:17Z Nov 4): RELEASE-TIME GOLD WINDOWS (main's question; registered as I ran it: a descriptive check, 4 tries counted)
+
+Gold windows closing at 8:30 ET or 10:00 ET on weekdays (US data release times; no calendar of release days was available, so every weekday is treated as a possible release day) against all other windows. 62 day candle sim (25c exit, q3.py): 8:30 ET n 10 in band, 0 early sells, +6.77c a contract; 10:00 ET n 15, 1 early sell (6.7%), +0.67c; all other windows n 1,154, 68 early sells (5.9%), +1.38c, PF 1.27; Thursdays 8:30 n 2, first Fridays n 0. Live gold fills: 8:30 ET 3 fills, 1 early sell (the -$13.56 loss), net -$12.47; 10:00 ET 3 fills, 0 early sells, +$1.93; other 245 fills, 10 early sells, +$48.13. Verdict: no evidence either way: gold is rarely in band in these two windows (about 10 and 15 windows in 62 days, 3 and 3 live fills), so a skip rule would remove about 0.2 trades a week and could not be read for a year. The history is not worse at 8:30 (0 early sells in 10). Not registered as a shadow (nothing could be measured in a useful time); noted as a one-observation anecdote.
+
 ## 2026-11-03 11:55 PM CT (05:55Z Nov 4): W30 FLOW-OOS-D RESULT (partial), FLOW VERDICT ACROSS ALL MY BLOCKS
 
 W30 (V2's rules; Sep 2 from /historical/trades, Sep 9 and a partial Oct 27 from the live endpoint): Sep 2 low n 11 PF 0.52 (-4.50c), high n 11 PF 1.65 (+5.06c); Sep 9 low n 16 PF 0.82 (-2.67c), high n 21 PF 0.78 (-2.60c); Oct 27 (12 of 49 markets only, thin) low n 10 PF 1.03, high n 4; block low n 37 win 13.5% PF 0.79 -2.43c, high n 36 PF 0.85 -1.61c. No low-flow edge on these days; Oct 27 can be completed by rerunning flow_oos_d.py.
