@@ -265,12 +265,18 @@ def predictions(upto_window):
     pairs, R = run_elo(allm, ha, nu, k)
     pred = {m["key"]: p for m, p in pairs}
     by = defaultdict(list)
-    for m in allm:
-        if m["start"] >= WIN_START:
-            by[m["lg"]].append(m)
+    if upto_window:
+        for m in allm:
+            if m["start"] >= WIN_START:
+                by[m["lg"]].append(m)
+    else:  # census: names and start times only (SOCCER1's ESPN list, no result), static pre-window ratings
+        for l in open(S1CACHE / "espn.jsonl"):
+            m = json.loads(l)
+            if m["home"] and WIN_START <= m["start"] < W3_START and m["lg"] in SLUG2PRE:
+                by[m["lg"]].append(m)
     rows = []
     for r in join_events(by):
-        p = pred.get(r["espn"]["key"])
+        p = pred.get(r["espn"]["key"]) if upto_window else R.predict(r["espn"]["home"], r["espn"]["away"], r["espn"]["lg"])
         if p is None:
             continue
         rows.append(dict(r, elo=outcome_probs(r, p)))
