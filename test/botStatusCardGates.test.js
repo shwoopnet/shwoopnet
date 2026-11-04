@@ -63,7 +63,7 @@ gates.SC5 = () => {
 gates.SC6 = () => {
   // the redraw reads only the relay data and never throws on empty data; the rendered tile names the verdict in words
   const el = { innerHTML: '' }, depth = { innerHTML: '' }; const data = { fetchedAt: TUE - 14000, markets: [mk('KXGOLD15M', 0.91, 0.92), mk('KXBTC15M', 0.88, 0.90)] };   // Dogecoin is paused (Nov 3, 2026) and has no tile; 'below' is covered by SC4
-  const src = block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEscapedPriceCell') + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + fn('kalshiEscapedDepthRows') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
+  const src = block(/  var KAL_LOOKS = \[[\s\S]*?\n  \];\n/) + block(/  var KAL_PRICE_WATCH = \[[\s\S]*?\n  \];\n/) + fn('kalshiCtWeekMinute') + fn('kalshiGoldClosed') + fn('kalshiPriceWatch') + fn('kalshiEventNext') + fn('kalshiDurationText') + fn('kalshiEscapedPriceCell') + fn('kalshiEscapedEventCell') + fn('kalshiLastOrderSizes') + fn('kalshiEscapedDepthRow') + fn('kalshiEscapedDepthRows') + fn('kalshiRenderPrices') + '; return kalshiRenderPrices;';
   const f = new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: (id) => (id === 'kalPrices' ? el : (id === 'kalDepth' ? depth : null)) }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '9:45 PM', (s) => s + ' seconds ago', data, () => [], () => 'Gold');
   f();
   assert.ok(/Inside the 88c to 97c band/.test(el.innerHTML) && !/Dogecoin/.test(el.innerHTML) && /Inside the 5c to 50c band/.test(el.innerHTML), 'each market gets a verdict in words');
@@ -71,6 +71,25 @@ gates.SC6 = () => {
   assert.ok(/Read 14 seconds ago\./.test(el.innerHTML) && !/ago ago/.test(el.innerHTML) && /open interest jump/i.test(el.innerHTML), 'the age of the read (said once) and the open interest caveat are shown');
   const empty = { innerHTML: '' }; new Function('document', 'Date', 'Intl', 'Math', 'Number', 'Array', 'Object', 'String', 'escapeHtml', 'kalTime', 'kalshiAgeText', 'kalshiBooksLast', 'kalshiAllOrders', 'kalshiMarketName', src)({ getElementById: () => empty }, DateStub(TUE), Intl, Math, Number, Array, Object, String, (x) => String(x), () => '', (s) => s, null, () => [], () => 'Gold')();
   assert.ok(/No quote yet/.test(empty.innerHTML) && /Reading the markets/.test(empty.innerHTML), 'no data yet: says so');
+  assert.ok(/Release day longshot/.test(el.innerHTML) && /Next window Thu, Nov 5, 7:27 AM Central \(jobless claims\)/.test(el.innerHTML), 'the tile covers EVENT830 too: its next release window, in Central time');
+};
+// SC9 (Nov 4, 2026, the owner: "check to see if the bot status page includes other strategies outside of L1 & OICORE ... our dashboard is as an overall"): the ring and the price tile cover EVENT830.
+// Consequence: on a release day the countdown names the release window (with the open interest jump, which looks at the same moment); on any other day it never claims one; after the last listed date the tile says none is left.
+gates.SC9 = () => {
+  const Q = 900000, rel = RealDate.parse('2026-11-05T13:30:00Z'), plain = RealDate.parse('2026-11-04T13:30:00Z');
+  const onDay = lib(rel - 6 * 60000).kalshiNextEntry(rel - 6 * 60000);
+  assert.strictEqual(onDay.at, rel - 180000, 'on a release day the next look is 3 minutes before the 7:30 AM Central close');
+  assert.ok(/Open interest jump and Release day longshot/.test(onDay.name) && /Bitcoin/.test(onDay.what) && /Silver, copper, oil/.test(onDay.what), 'both strategies looking at that moment are named, as one look');
+  const offDay = lib(plain - 6 * 60000).kalshiNextEntry(plain - 6 * 60000);
+  assert.strictEqual(offDay.name, 'Open interest jump', 'on a day with no listed release the countdown never names the release window');
+  let seen = 0; for (let t = RealDate.parse('2026-11-04T00:00:00Z'); t < RealDate.parse('2026-11-05T00:00:00Z'); t += 60000) { if (/Release day/.test(lib(t).kalshiNextEntry(t).name + lib(t).kalshiNextEntry(t).then)) seen++; } assert.strictEqual(seen, 0, 'Nov 4 has no release window at any minute');
+  const src = block(/  var KAL_LOOKS = \[[\s\S]*?\n  \];\n/) + fn('kalshiEventNext') + fn('kalshiDurationText') + fn('kalshiEscapedEventCell') + '; return { kalshiEventNext, kalshiEscapedEventCell };';
+  const m = new Function('Date', 'Intl', 'escapeHtml', src)(RealDate, Intl, (x) => String(x));
+  assert.strictEqual(m.kalshiEventNext(rel - 150000).close, rel, 'still enterable 2.5 minutes before the close');
+  assert.strictEqual(m.kalshiEventNext(rel - 60000).close, RealDate.parse('2026-11-06T13:30:00Z'), 'past the entry window: the next listed date');
+  assert.strictEqual(m.kalshiEventNext(RealDate.parse('2026-12-24T00:00:00Z')), null, 'after the last listed date: none');
+  assert.ok(/No listed release window left/.test(m.kalshiEscapedEventCell(null, 0)), 'and the tile says so instead of inventing a date');
+  assert.ok(/In 2 hours/.test(m.kalshiEscapedEventCell(m.kalshiEventNext(rel - 180000 - 2 * 3600000), rel - 180000 - 2 * 3600000)), 'within a day it counts down');
 };
 gates.SC7 = () => {
   assert.ok(/\.kal-st-top\{[^}]*grid-template-columns/.test(html) && /@container \(max-width:520px\)\{ \.kal-st-top\{ grid-template-columns:1fr; \} \}/.test(html) && /@media \(max-width:520px\)\{ \.kal-st-top, \.kal-st-bottom\{ grid-template-columns:1fr; \} \}/.test(html) && /@container \(max-width:760px\)\{ \.kal-st-bottom\{ grid-template-columns:1fr; \} \}/.test(html), 'ring and health side by side, stacked when the card or the screen is narrow');
