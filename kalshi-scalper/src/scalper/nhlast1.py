@@ -245,3 +245,108 @@ if __name__ == "__main__":
         fetch(sys.argv[2], float(sys.argv[3]))
     elif cmd == "score":
         score()
+
+
+# ----------------------------------------------------------------------------- amendment 2 (assists continuation block)
+FIRST = ROOT / "workers" / "NHLAST1_FIRST_BLOCK.json"
+E_FROZEN = 4.2105263157894735
+OLD_TRADES = 140
+
+
+def block2_order():
+    c = conn()
+    old = set(json.load(open(FIRST))["fetched_events"])
+    s = sqlite3.connect(SRC_DB, timeout=120)
+    nhlg1 = {suffix(r[0]) for r in s.execute("SELECT DISTINCT t.event FROM kmarket t JOIN cdone d ON d.ticker=t.ticker")}
+    n1 = {r[0]: r[1] for r in c.execute("SELECT event,COUNT(*) FROM kmarket WHERE series='KXNHLAST' AND strike=0.5 AND volume>0 GROUP BY event")}
+    gm = {r[0]: r[1] for r in c.execute("SELECT event,deferred FROM gm WHERE series='KXNHLAST'")}
+    evs = [e for e in gm if n1.get(e, 0) >= MIN_LADDER and e not in old and suffix(e) not in nhlg1]
+    return order_games(evs, {e for e in evs if gm[e]})
+
+
+def fetch2(minutes):
+    c = conn()
+    t_end = time.time() + 60 * minutes
+    starts = {r[0]: r[1] for r in c.execute("SELECT event,start_ts FROM gm WHERE series='KXNHLAST'")}
+    byg = defaultdict(list)
+    for tk, ev in c.execute("SELECT ticker,event FROM kmarket WHERE series='KXNHLAST' AND strike IN (0.5,1.5) AND volume>0"):
+        byg[ev].append(tk)
+    total, games = OLD_TRADES, 0
+    for ev in block2_order():
+        if total >= MIN_TRADES:
+            print("stopping rule reached: pooled trades", total, "new games", games, flush=True)
+            return
+        if time.time() > t_end:
+            print("time box reached: pooled trades", total, "new games", games, flush=True)
+            return
+        for tk in byg[ev]:
+            if c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone():
+                continue
+            cs = None
+            for a in range(8):
+                try:
+                    cs = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": starts[ev] - 3600, "end_ts": starts[ev], "period_interval": 1}, retries=1).get("candlesticks", [])
+                    break
+                except Exception as e:  # noqa: BLE001
+                    if "404" in str(e) and a >= 1:
+                        break
+                    time.sleep(2 + 4 * a)
+            time.sleep(0.6)
+            if cs is None:
+                break
+            for x in cs:
+                c.execute("INSERT OR IGNORE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
+            c.execute("INSERT OR IGNORE INTO cdone VALUES(?,?)", (tk, len(cs)))
+            c.commit()
+        if all(c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone() for tk in byg[ev]):
+            games += 1
+            nl = ch = 0
+            for tk in byg[ev]:
+                q = look_quote(c.execute("SELECT end_ts,bid,ask FROM candle WHERE ticker=?", (tk,)).fetchall(), starts[ev])
+                if q is None:
+                    continue
+                nl += tk.endswith("-1")
+                ch += cheap_side(*q) is not None
+            total += min(2, ch) if nl >= MIN_LADDER else 0
+            print("game", games, ev, "pooled trades", total, flush=True)
+        else:
+            print("dropped after retries:", ev, flush=True)
+    print("order exhausted", total, games, flush=True)
+
+
+def score2():
+    G = entries("KXNHLAST")
+    old = set(json.load(open(FIRST))["scored_events"])
+    out = {}
+    for nm, S in (("combined", G), ("new_only", [g for g in G if g["event"] not in old])):
+        med = st.median([g["start"] for g in S])
+        for g in S:
+            g["ur"] = g["lsum"] < E_FROZEN
+            for t in g["cheap"]:
+                t["half"] = "H1" if g["start"] < med else "H2"
+        pool = [t for g in S for t in pick_two(g["cheap"])]
+        d = dict(games=len(S), overlap_games=sum(g["overlap"] for g in S), mean_sum_ask=sum(g["lsum"] for g in S) / len(S),
+                 mean_scorers=sum(g["scorers"] for g in S) / len(S), under_round_games=sum(g["ur"] for g in S))
+        for rule, T in (("pooled", pool), ("under_round", [t for t in pool if t.get("ur", False) or any(g["ur"] and g["event"] == t["game"] for g in S)]),
+                        ("over_round", None)):
+            if T is None:
+                ur = {g["event"] for g in S if g["ur"]}
+                T = [t for t in pool if t["game"] not in ur]
+            if rule == "under_round":
+                ur = {g["event"] for g in S if g["ur"]}
+                T = [t for t in pool if t["game"] in ur]
+            b = dict(game=clustered(T, "game"), date=clustered(T, "date"), x12=clustered(T, "game", 1.2))
+            for h in ("H1", "H2"):
+                b[h] = clustered([t for t in T if t["half"] == h], "game")
+            b["verdict"] = verdict(b["game"]["n"], [b["H1"]["mean_c"], b["H2"]["mean_c"]], b["game"]["lo95_c"], b["game"]["pf"])
+            d[rule] = b
+        out[nm] = d
+    json.dump(out, open(ROOT / "workers" / "NHLAST1_RESULT2.json", "w"), indent=1, default=str)
+    for k, v in out.items():
+        print("==", k, {a: b for a, b in v.items() if not isinstance(b, dict)})
+        for r in ("pooled", "under_round", "over_round"):
+            print(r, {a: (fmt(b) if isinstance(b, dict) else b) for a, b in v[r].items()})
+
+
+if __name__ == "__main__" and sys.argv[1] in ("block2", "score2"):
+    {"block2": lambda: fetch2(float(sys.argv[2])), "score2": score2}[sys.argv[1]]()
