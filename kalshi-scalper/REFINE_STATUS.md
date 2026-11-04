@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:20 AM CT (11:20Z): W74 C1 cell status
+
+- W74 (against the registration at line ~625): C1 cell = gold plus Dogecoin L1 fills priced 0.90 up to 0.92, after Nov 1 22:55Z, early sell counts as a loss. Kill rules: at 80 settled fills dead if net above +1.5c/ct, or loss rate under 4%, or Fisher p (cell vs rest) above 0.30; neither dead nor PASS is INCONCLUSIVE (another 80); early kill at 40 needs zero losses and net above +2.0c. Now 19 settled, 3 losses (15.8%), net -$7.78, mean price 0.908. The 40-fill early kill is already impossible. Wilson 95% on the loss rate 5.5% to 37.6%; break-even loss rate at 0.908 about 11 to 12%, so the interval straddles it. Needs 61 more settled fills; the cell takes Dogecoin fills, and Dogecoin is now paused, so the cell now fills on gold only and the roughly 38 a week registered rate will be lower (about 11 days was the estimate with Dogecoin; expect longer). Fisher not computed. No change.
+
 ## 2026-11-04 05:15 AM CT (11:15Z): W73 worst rolling 24 hours vs the 12% stop
 
 - W73 (descriptive; all L1 plus OICORE orders by settledPnl, stamped at market close from the ticker's Eastern time, 24h window stepped hourly over 7 days): minimum rolling 24h net -$35.61, window ending Nov 3 14:00 UTC (8:00 AM CT); current window -$6.36. The report carries no sizing base, so the percentage is an assumption: at a guessed base of $500 the minimum is -7.1% of base against a $60 stop (at $400 -8.9% of a $48 stop; at $600 -5.9% of $72). Under every guessed base the worst day stayed under the stop, but the base is a guess from the order size and open orders also count as lost in the real stop, so the real margin could be tighter. Needs the true sizing base (kalshiLiveControl/sizing, owner or main) to firm up; I have no read of it. Context only.
