@@ -12,6 +12,7 @@ on:
   schedule:
     - cron: "4,24,44 11-15 * * *"
     - cron: "14,34,54 11-15 * * *"   # a second set ten minutes later: a dropped start costs about ten minutes, not twenty
+    - cron: "9,29,49 11-15 * * *"    # Nov 4, 2026: a third set. In three days no scheduled start landed in any window, so more distinct minutes (a pass is stamped by its own time, so extra passes only add rows)
     - cron: "50 17 * * *"            # once a day: no city is in its window, so this run only copies the last days' settled results
   workflow_dispatch: {}
 permissions:
@@ -61,5 +62,5 @@ jobs:
           gzip -9 -f raincal/*/*/*.csv 2>/dev/null || true
           git add raincal
           git commit -q -m "raincal $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
-          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          for i in 1 2 3 4 5 6; do git push -q origin quote-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin quote-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1

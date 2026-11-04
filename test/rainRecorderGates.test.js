@@ -50,6 +50,7 @@ gates.RC2 = () => {
   assert.ok(/ref: main/.test(wf) && /python3 code\/scripts\/record_rain\.py "data\/raincal\/\$STAMP"/.test(wf), 'the script comes from main, the data goes under raincal/');
   assert.ok(!/pull_request_target|github\.event\.(issue|pull_request|comment|head_commit)/.test(wf));
   assert.ok(/cron: "4,24,44 11-15 \* \* \*"/.test(wf) && /cron: "14,34,54 11-15 \* \* \*"/.test(wf), 'triggered inside the 11:00 to 15:59 UTC hours when some US city is between 6:00 and 8:00 AM local standard time');
+  assert.ok(/cron: "9,29,49 11-15 \* \* \*"/.test(wf), 'a third set of minutes (RECPATCH1): scheduled starts were dropped in every window for three days');
 };
 
 // RC3: neither the workflow nor the script is published with the site.

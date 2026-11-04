@@ -224,7 +224,7 @@ def write_gz(path, cols, rows):
         w.writerows(rows)
 
 
-def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, kinds=("high", "low")):
+def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, kinds=("high", "low"), redo=False):
     """One snapshot. Returns the run summary row. `due_hours` defaults to the watchlist's (7, 10); `results` True/False forces the results step, None = UTC hours 01, 07, 13, 19.
     `kinds` ("high", "low"): the WXLOW1 lows ride in the same ensemble call and the same NWS forecast body as the highs, so they add one Kalshi listing per due city and no other request."""
     now = time.time() if now is None else now
@@ -238,6 +238,10 @@ def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, 
     cities = [c for c in w["cities"] if only is None or c["key"] in only]
     plan = [(c, due_targets(c, now, due_hours)) for c in cities]
     plan = [(c, t) for c, t in plan if t]
+    # Already-done guard (RECPATCH1): the workflow has a second start 30 minutes after the first. One run records every due city of the UTC hour, so if this hour's
+    # snapshot files are already on the branch a second run must not overwrite them (the reader wants the FIRST poll at or after the look). It logs a row with no due city.
+    if plan and not redo and any(os.path.exists(os.path.join(data_dir, ROOT, n, day, hh + ".csv.gz")) for n in ("ens", "quotes")):
+        plan = []
     t = {k: [] for k in COLS}
     calls = n429 = errs = 0
     hdr0 = ""
@@ -381,9 +385,10 @@ def main(argv):
     ap.add_argument("--watchlist", default=os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "kalshi-scalper", "workers", "WXENS1_WATCHLIST.json"))
     ap.add_argument("--wide", action="store_true", help="manual run: accept local hours 7,8,10,11 as the 07:00 and 10:00 looks")
     ap.add_argument("--results", action="store_true", help="force the results step")
+    ap.add_argument("--redo", action="store_true", help="record the hour again even if its files already exist (overwrites them)")
     ap.add_argument("--highs-only", action="store_true", help="skip the WXLOW1 daily low tables")
     a = ap.parse_args(argv)
-    print(run(a.watchlist, a.data_dir, due_hours=(7, 8, 10, 11) if a.wide else None, results=True if a.results else None, kinds=("high",) if a.highs_only else ("high", "low")))
+    print(run(a.watchlist, a.data_dir, due_hours=(7, 8, 10, 11) if a.wide else None, results=True if a.results else None, kinds=("high",) if a.highs_only else ("high", "low"), redo=a.redo))
     return 0
 
 

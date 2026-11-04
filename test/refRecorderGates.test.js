@@ -100,4 +100,21 @@ print(json.dumps([ms, calls, n429, bad, rows, failed]))`));
   assert.deepStrictEqual(out, [[], 3, 3, true, [], true]);
 };
 
+// R9 (RECPATCH1): a Rotten Tomatoes page with no score yet is "no_score_yet", not a parse failure; an unreadable page is still a failure; a page with a score is unchanged.
+gates.R9 = () => {
+  const out = JSON.parse(py(`
+import ref_adapters as ad
+noscore = '<script id="media-hero-json" type="application/json">{}</script><rt-text>Tomatometer</rt-text>'
+scored = '"aggregateRating":{"@type":"AggregateRating","name":"Tomatometer","ratingCount":67,"ratingValue":"90","reviewCount":67}'
+print(json.dumps([ad.rt_parse({}, [noscore]), ad.rt_parse({}, ["<html>blocked</html>"]), ad.rt_parse({}, [scored])]))`));
+  assert.deepStrictEqual(out, [[[1, 'tomatometer', null, null, 'no_score_yet']], [], [[1, 'tomatometer', 90, 67, 'percent;critic_reviews']]]);
+  const out2 = JSON.parse(py(`
+m._sleep = lambda x: None
+page = '<script id="media-hero-json" type="application/json">{}</script><rt-text>Tomatometer</rt-text>'
+m.http_get = lambda url: (200, page, "")
+rows, c, n, failed = m.poll_target({"id": "rt_page", "adapter": "rt"}, "k", "https://www.rottentomatoes.com/m/k", 1, 1)
+print(json.dumps([len(rows), failed, rows[0][8], rows[0][10]]))`));
+  assert.deepStrictEqual(out2, [1, false, '', 'no_score_yet']);
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }
