@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:05 AM CT (10:05Z): W58 OICORE order timing
+
+- W58 (descriptive): the timing fields (startToSendMs, answerMs, startLateMs and the rest) are null on every OICORE slot order, so no timing medians exist for the second slot (only L1 gold carries them). Fallback, record time vs the ticker's close: filled median 175.1 s before close (161.2 to 176.8), no fill median 175.8 s (166.5 to 176.7). No-fills were not sent later. The script assumed EDT for the ticker's Eastern time; the clocks changed Nov 1, so any order after that would be an hour off if it is not handled, yet the offsets are all near 175 s, so this does not look wrong. Not chased. Gap for the Nov 13 read: ask for slot orders to carry the same timing fields as L1.
+
 ## 2026-11-04 04:00 AM CT (10:00Z): W57 gold no-fill counts reconciled
 
 - W57: `dash_report.json` has 387 gold orders (first Oct 7): 252 filled, 135 no fill, no other status. Since Oct 21: 234 orders, 155 filled, 79 no fill. So W54's 135 was the whole file with no date filter; W52's 78 was Oct 21 onward on an earlier copy of the file (now 79); W49's 56 was in-band windows without a filled order, a different thing. The right number for "gold no-fill orders since Oct 21" is 79. Conclusions of W52 and W54 stand (they do not depend on the exact count).
