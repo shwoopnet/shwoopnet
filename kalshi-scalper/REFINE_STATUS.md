@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:30 AM CT (10:30Z): W63 gold edge margin by week
+
+- W63 (descriptive; 252 gold fills; margin = win rate minus break-even in points, full-loss / realized-loss): week of Oct 7 n 62, win 96.8%, +3.4 / +7.2; Oct 14 n 35, 100%, +5.9 / +5.9; Oct 21 n 76, 90.8%, -2.1 / -0.9 (7 losses, 5 early sells); Oct 28 n 74, 95.9%, +2.6 / +3.7; Nov 4 n 5 (1 loss), too thin. Weekly SE about 3 points. The margin dipped in the Oct 21 week and recovered; no clear erosion, no clear stability. Nothing to propose.
+
 ## 2026-11-04 04:25 AM CT (10:25Z): wake check 08:05Z
 
 - OICORE settled the 25th fill as a loss: 6 won, 19 lost, net +$28.94, PF 2.74, loss streak now 5 (kill at 18; W55 warning zone 15 to 17). L1 last order 0.2h ago, OICORE 0.1h. S-LIM1-LIVE: 6 tagged, +$4.77 (review at 20). C9 Silver: 36 in band, 3 lost. Dogecoin paused, no FLOW1 orders. S-FLOW2 tracker running (first windows close after 08:15Z). `flow_forward.py` writes no output when run through the wake path; rerun it from the foreground in a file next wake.
