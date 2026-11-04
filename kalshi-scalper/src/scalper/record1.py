@@ -14,7 +14,7 @@ import statistics as st
 import subprocess
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from .calibration import cluster_mean_z
 from .paths import DATA_DIR
@@ -196,5 +196,66 @@ def main(argv: list[str]) -> None:
     print("\n".join(out))
 
 
+# ---- RECORD1B (workers/RECORD1B_REGISTRATION.md): the same rule on rows recorded with the fixed clock check. Nothing above this line changes. ----
+CLOCK_VERSION_B, RESULT_B, MIN_DAYS_AFTER, CLOCK_SAMPLES_MIN = "clock2", DATA_DIR / "record1b_result.txt", 14, 1
+
+
+def run_clock_ok_b(run: dict[str, list[dict]]):
+    """None if the run is not a fixed-clock run (no clock row, or any row without the version tag) or has no answered sample; else True when the MEDIAN over its samples
+    of |offset| + rtt/2 (the worst the reading could be wrong by) is within MAX_OFFSET_MS. A median, so one lopsided sample cannot fail a run; the old max rule did."""
+    rows = run["clock"]
+    if not rows or any(r.get("version") != CLOCK_VERSION_B for r in rows):
+        return None
+    bounds = [abs(float(r["offset_ms"])) + float(r["rtt_ms"]) / 2 for r in rows if r["offset_ms"] not in ("", None) and r.get("rtt_ms") not in ("", None)]
+    if len(bounds) < CLOCK_SAMPLES_MIN:
+        return None
+    return st.median(bounds) <= MAX_OFFSET_MS
+
+
+def trades_b(allr: dict[str, dict[str, list[dict]]]) -> tuple[list[dict], dict]:
+    """Only runs tagged clock2 whose clock check could be made; each trade carries its run's new clock_ok. Returns (trades, counts)."""
+    trades, c = [], {"runs": 0, "runs_used": 0, "runs_no_clock": 0, "first_date": None}
+    for f, run in allr.items():
+        ok = run_clock_ok_b(run)
+        if not run["clock"] or any(r.get("version") != CLOCK_VERSION_B for r in run["clock"]):
+            continue
+        c["runs"] += 1
+        if ok is None:
+            c["runs_no_clock"] += 1
+            continue
+        c["runs_used"] += 1
+        c["first_date"] = min(c["first_date"] or f.split("/")[1], f.split("/")[1])
+        t, _ = trades_for_run(run)
+        for x in t:
+            x["clock_ok"] = ok
+        trades += t
+    return trades, c
+
+
+def main_b(argv: list[str]) -> None:
+    """python -m scalper.record1 record1b look|read. `read` is refused before 300 trades on 10 dates, before 14 days after the first fixed-clock run, and a second time."""
+    if len(argv) < 3 or argv[2] not in ("look", "read"):
+        print(__doc__)
+        return
+    subprocess.run(["git", "fetch", "-q", "origin", "quote-data"], check=False)
+    trades, c = trades_b(runs())
+    j = judge(trades)
+    if argv[2] == "read":
+        first = datetime.strptime(c["first_date"], "%Y-%m-%d").replace(tzinfo=timezone.utc) if c["first_date"] else None
+        if first is None or datetime.now(timezone.utc) < first.replace(hour=0) + timedelta(days=MIN_DAYS_AFTER):
+            print(f"Refusing the RECORD1B read: it is not yet {MIN_DAYS_AFTER} days after the first fixed-clock run ({c['first_date']}).")
+            return
+        if j["n"] < MIN_N or j["dates"] < MIN_DAYS:
+            print(f"Refusing the RECORD1B read: {j['n']} qualifying trades on {j['dates']} dates (needs {MIN_N} and {MIN_DAYS}).")
+            return
+        if RESULT_B.exists():
+            print(f"Refusing to run again: {RESULT_B} exists.")
+            return
+    out = [("RECORD1B REGISTERED READ" if argv[2] == "read" else "RECORD1B INFORMATION LOOK (decides nothing)") + f": {c}", str(j)]
+    if argv[2] == "read":
+        RESULT_B.write_text("\n".join(out) + "\n")
+    print("\n".join(out))
+
+
 if __name__ == "__main__":
-    main(sys.argv)
+    main_b(sys.argv) if len(sys.argv) > 1 and sys.argv[1] == "record1b" else main(sys.argv)
