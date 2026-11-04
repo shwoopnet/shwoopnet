@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:55 AM CT (12:55Z): W92 S-FLOWL1 tracker built
+
+- W92: `flowl1_forward.py` (scratchpad, cache `flowl1_cache.jsonl`, resumable) built with the fixed definitions from the last entry. First run: 16 gold windows closed after 04:43Z, 3 in-band with at least 5 flow trades (0 dropped thin): first half 1 window +8.60c/ct, second half 2 windows +9.25c/ct, all 3 +9.03c/ct, 0 losses; flagged 1 window (0 losses), unflagged 2 (0 losses); early sells 0 of 20 needed, not readable. Two choices the worker made where the registration was silent, now part of the definition: an early sell exits at 0.25 (the line price, not the candle low) and fees are the per 10 contract ceiling fee on each leg traded. Rerun each wake or two (cheap, resumes from the cache).
+
 ## 2026-11-04 06:50 AM CT (12:50Z): S-FLOWL1 definitions fixed before building
 
 - W91 stopped, correctly: the S-FLOWL1 line (the W28 entry, Nov 3 10:43 PM CT) left four things open. Fixed now, before any data is read: (1) start = windows closing after 2026-11-04T04:43:00Z; (2) unit = every new gold in-band window from public data (not live fills), Dogecoin dropped because it is paused; (3) in-band = the side with ask 0.88 to 0.97 on the candle ending at close-360, bought at that ask; flow = (contracts takers bought minus sold on that side) / total over [close-540, close-360), every public trade, no dedup, at least 5 trades, flagged if flow <= -0.151 (the registered gold median); (4) read at 20 early sells (an early sell = the side's bid at or below 0.25 after entry), kill if the flagged loss rate is not above 1.3 times the unflagged loss rate, with the tracker also printing the halves, net and PF as information. Gold early sells run about 4% of fills, so 20 take roughly 40 days; low priority, no decisions depend on it.
