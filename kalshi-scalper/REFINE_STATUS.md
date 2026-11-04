@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:20 AM CT (09:20Z): W49 gold in-band windows without a fill
+
+- W49 (descriptive; gold asks Oct 21 to Nov 2 14:30Z only, "in band" = either side's ask 0.88 to 0.97 on the candle ending 6 minutes before close): 767 windows, 207 in band, 115 live filled (56%). 92 in-band windows had no fill: 56 sent but not filled, 20 no order record, 16 in the 20-24 CT quiet hours (block live only Oct 29-30). Excluding those 16: 76 skipped windows with known results; held with fee, 75 won, +5.92c/ct. Fills for the 56 "no fill" orders not modelled. Loose definition (either side), so it may overcount; but if real, the skipped gold windows were nearly all winners, which is the limit-miss pattern again (price moves to 0.97+ or off). This is a lead, not a finding. W52 checks why the 56 did not fill.
+
 ## 2026-11-04 03:15 AM CT (09:15Z): W50 OICORE missed windows, refetched
 
 - W50: the cache was already complete (0 new windows). Since Oct 30 12:00Z: 31 sim trigger windows; 18 matched a filled live order; 13 not (7 "no fill" orders, 6 no order record). Slot orders overall 32 (24 filled, 8 no fill). 6 live fills and 1 no-fill have no sim trigger, so the sim does not reproduce everything (the trigger rule in my sim differs from the bot's at the edges; not chased). Sim net: filled +6.58c/ct (n 18), not filled +17.14c/ct (n 13). The gap rides on 4 big winners (+79.9, +91.4, +48.2, +89.4c, cheap side at 8 to 19c); the other 9 misses are small losers. n cannot support a claim; consistent with adverse selection at the limit, not shown. This repeats the S-LIM1 question; the live tag read (5 of 20) is the right test. No change.
