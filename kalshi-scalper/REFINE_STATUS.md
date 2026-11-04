@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:15 AM CT (11:15Z): W73 worst rolling 24 hours vs the 12% stop
+
+- W73 (descriptive; all L1 plus OICORE orders by settledPnl, stamped at market close from the ticker's Eastern time, 24h window stepped hourly over 7 days): minimum rolling 24h net -$35.61, window ending Nov 3 14:00 UTC (8:00 AM CT); current window -$6.36. The report carries no sizing base, so the percentage is an assumption: at a guessed base of $500 the minimum is -7.1% of base against a $60 stop (at $400 -8.9% of a $48 stop; at $600 -5.9% of $72). Under every guessed base the worst day stayed under the stop, but the base is a guess from the order size and open orders also count as lost in the real stop, so the real margin could be tighter. Needs the true sizing base (kalshiLiveControl/sizing, owner or main) to firm up; I have no read of it. Context only.
+
 ## 2026-11-04 05:10 AM CT (11:10Z): W72 gold 30-day range (day bootstrap)
 
 - W72 (descriptive; 29 US Central days, 252 fills, total +$38.26; whole days resampled, 5000 draws of 30 days): 30-day net 5th -$9.86, median +$39.15, 95th +$91.05. P(30-day drawdown deeper than $40) 3.8%; deeper than $60: 0.4%. Caveats: 29 days is thin, early days used smaller sizes (the 15 contract cap would widen the dollars), and independent days hide streaks across days (the Oct 23 to 29 drawdown and the Nov 2 to 3 losses are one cluster). Read the tails as a floor on the risk, not an estimate of it. The 12% loss stop remains the actual bound.
