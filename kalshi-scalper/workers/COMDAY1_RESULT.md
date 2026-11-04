@@ -15,7 +15,7 @@ Series KXWTI, KXBRENTD, KXNATGASD, KXGOLDD (daily gold bracket), KXSILVERD, KXCO
 | B treated W1+W2 | 44 | 21 | 0.0% | 0.108 | 0.00 | -11.47c | -10.58 |
 | B control | 416 | 75 | 4.8% | 0.143 | 0.26 | -10.34c | -8.85 |
 
-Rule A treated is +10c in W1 on 19 trades and -8c in W2 on 9: noise, and its W2 fails the registered line (PF under 1.5, mean not above 0), so by the registered kill line it would read FALSIFIED if the count were sufficient. Per series (descriptive, n 2 to 18): natural gas 9 trades 0 wins, gold 4 and silver 3 and copper-less wins none, WTI/Brent/copper 3 trades each with one win. Duplicate check: no overlap with IDXFUT1 (index ladders), VOLGAP1 (hourly), SETTLE1 (15 minute metals); USWEEP1's KXGOLDD/KXNATGASD/KXBRENTD/KXSILVERD rows were favourites (not used); same underlyings as L1 gold but a different, daily, cheap-side bet.
+Rule A treated is +10c in W1 on 19 trades and -8c in W2 on 9: noise, and its W2 fails the registered line (PF under 1.5, mean not above 0), so by the registered kill line it would read FALSIFIED if the count were sufficient. Per series (descriptive, n 2 to 18): rule A: natural gas 9 trades 0 wins, gold 4 and silver 3 no wins, WTI, Brent and copper 3 to 6 trades with one win each; rule B: no series has a win. Duplicate check: no overlap with IDXFUT1 (index ladders), VOLGAP1 (hourly), SETTLE1 (15 minute metals); USWEEP1's KXGOLDD/KXNATGASD/KXBRENTD/KXSILVERD rows were favourites (not used); same underlyings as L1 gold but a different, daily, cheap-side bet.
 
 ## Calibration (the information that matters)
 Every cheap strike-side, W1+W2, t4 model against price against outcome:
