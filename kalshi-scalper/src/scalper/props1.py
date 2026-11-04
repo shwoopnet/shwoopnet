@@ -400,10 +400,10 @@ def cmd_build():
                 for st, d in L:
                     if st >= split_ts[lg]:
                         break
-                    v = d[stat]
+                    v = max(0.0, d[stat])  # negative yards counted as 0 (NB needs counts)
                     allv.append(v)
                     if len(prior) >= 3:
-                        rows_fit.append((list(prior), int(round(v))))
+                        rows_fit.append((list(prior), max(0, int(round(v)))))
                     prior.append(v)
             m_lg = sum(allv) / len(allv) if allv else 1.0
             best = fit_kr(rows_fit, m_lg)
@@ -420,7 +420,7 @@ def cmd_build():
         if (lg, stat) not in fits or k is None or k[0] is None:
             continue
         kk, rr, mlg = fits[(lg, stat)]
-        prior = [d[stat] for st, d in hist[(lg, aid)] if st < st_row[0]]
+        prior = [max(0.0, d[stat]) for st, d in hist[(lg, aid)] if st < st_row[0]]
         mu = shrunk_mean(prior, mlg, kk)
         if mu is None:
             continue
@@ -439,7 +439,8 @@ def cmd_build():
 def cmd_candles():
     c = conn()
     todo = [r for r in c.execute("""SELECT m.ticker,k.series,k.close_time,g.start_ts,k.src FROM mgame m JOIN kmarket k ON k.ticker=m.ticker
-        JOIN game g ON g.id=m.gid AND g.league=m.league WHERE m.sampled=1 AND m.ticker NOT IN (SELECT ticker FROM cdone) ORDER BY g.start_ts""")]
+        JOIN game g ON g.id=m.gid AND g.league=m.league WHERE m.sampled=1 AND m.ticker NOT IN (SELECT ticker FROM cdone)""")]
+    todo.sort(key=lambda r: (sha(str(r[3])[:0] + r[0].rsplit('-', 1)[0]), r[0]))  # by sha1(game-player prefix): stopping early stays unbiased
     print("candles to fetch", len(todo), flush=True)
     live = [r for r in todo if r[4] == "live"]
     hist_ = [r for r in todo if r[4] != "live"]
