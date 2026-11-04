@@ -1,0 +1,67 @@
+{
+ "selected_hp": {
+  "logit": {
+   "lam": 100.0,
+   "val_logloss": 0.2999041560864364
+  },
+  "gbt": {
+   "depth": 3,
+   "trees": 50,
+   "val_logloss": 0.2960603742417068
+  }
+ },
+ "candidates": {
+  "logit": [
+   {
+    "lam": 0.1,
+    "val_logloss": 0.3056039387447694
+   },
+   {
+    "lam": 1.0,
+    "val_logloss": 0.3037871710281167
+   },
+   {
+    "lam": 10.0,
+    "val_logloss": 0.3011545080753855
+   },
+   {
+    "lam": 100.0,
+    "val_logloss": 0.2999041560864364
+   }
+  ],
+  "gbt": [
+   {
+    "depth": 2,
+    "trees": 50,
+    "val_logloss": 0.29891136850036026
+   },
+   {
+    "depth": 2,
+    "trees": 150,
+    "val_logloss": 0.2994951322130306
+   },
+   {
+    "depth": 3,
+    "trees": 50,
+    "val_logloss": 0.2960603742417068
+   },
+   {
+    "depth": 3,
+    "trees": 150,
+    "val_logloss": 0.3003051853129994
+   }
+  ]
+ },
+ "selected_test_counts": {
+  "logit@2c": 0,
+  "logit@4c": 0,
+  "gbt@2c": 14,
+  "gbt@4c": 3
+ },
+ "base": {
+  "train_win": 0.08827028313109683,
+  "train_price": 0.1355032119914347
+ },
+ "train_n": 4203,
+ "test_n": 2319
+}
