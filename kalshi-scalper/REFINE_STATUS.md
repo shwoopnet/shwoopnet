@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:55 AM CT (11:55Z): W80 gold's 11 early sells
+
+- W80 (descriptive; n 11; the report has no sell-time field, so the sell is the first candle after entry whose side bid low was 25c or under): 8 of 11 detected, all 1 to 3 minutes before close (3 min x4, 2 min x3, 1 min x1); 3 unknown (no usable candle). Recovery: 0 of 11 had the side bid go back above the entry price (two bounced to 0.62 and 0.66, still under the 0.90 and 0.92 entries). Settlement: 10 of 11 settled against us; 1 (Oct 13 05:15, yes, 0.89 entry) would have won held. So on gold's own early sells the 25c line beat holding by a wide margin. This agrees with the earlier gold-slightly-better-selling finding and with W35 (selling $2.76 better on three). The sample is every time the line was hit, so it is not a pick-the-losers bias: a market that hit 25c and would have recovered counts as the one winner above. No change to the exit line.
+
 ## 2026-11-04 05:50 AM CT (11:50Z): S-FLOW1 forward table at 08:17Z
 
 - S-FLOW1 (windows closing after Nov 3 21:45Z, 21 pool windows): LOW (imbalance <= -0.036) n 10, win 30.0%, PF 1.33, +3.45c/ct; HIGH n 11, win 18.2%, PF 1.38, +2.38c/ct; all pool n 21, win 23.8%, PF 1.35, +2.89c/ct. Low and high are indistinguishable so far (PF 1.33 vs 1.38). 39 more pool windows to reach 60 (about 100 more for 60 low-half windows if read on the low half). S-FLOW2 (non-trigger only): 0 of 150 windows. Nothing here supports the flow split.
