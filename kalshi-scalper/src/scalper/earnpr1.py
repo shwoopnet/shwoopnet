@@ -157,3 +157,92 @@ def verdict(treated, control, lead_median_min, quote_share, events):
     if pf(nets) < BAR_PF or sum(h1) <= 0 or sum(h2) <= 0 or sum(nets) / len(nets) <= cm:
         return "FALSIFIED"
     return "NOT_YET_FALSIFIED"
+
+
+# ---------------------------------------------------------------- the one scored read (run once, after the registration push)
+def score(cache, markets_path, candle_files, result_path):
+    import glob, json, os
+    if os.path.exists(result_path):
+        raise SystemExit(f"Refusing to run again: {result_path} exists.")
+    ev = json.load(open(os.path.join(cache, "events.json")))
+    rows = json.load(open(os.path.join(cache, "census_rows.json")))
+    texts = json.load(open(os.path.join(cache, "texts.json")))
+    res = {m["t"]: m["res"] for m in json.load(open(markets_path)).values()}
+    cd = {}
+    for f in sorted(glob.glob(candle_files)):
+        cd.update(json.load(open(f)))
+    ok = sorted((r for r in rows if r.get("has_text") and r["close"] < CUT), key=lambda r: r["occ"])
+    k = len(ok) * 2 // 3
+    fit, test = ok[:k], ok[k:]
+    fit_rows = []
+    for r in fit:
+        for m in ev[r["ev"]]:
+            if m["word"] and m["t"] in res:
+                fit_rows.append((stem_of(m["word"]), in_release(m["word"], texts[r["acc"]]), res[m["t"]] == "yes"))
+    rate = fit_model(fit_rows)
+
+    def side_rows(rs):
+        out = []  # per market: dict(ev, t, stem, inrel, bid, ask, yes, kind)
+        for r in rs:
+            for m in ev[r["ev"]]:
+                if not m["word"] or m["t"] not in res:
+                    continue
+                q = look_quote(cd.get(m["t"]) or [], r["acc_ts"], r["occ"])
+                if not q:
+                    continue
+                out.append(dict(ev=r["ev"], t=m["t"], stem=stem_of(m["word"]), inrel=in_release(m["word"], texts[r["acc"]]), bid=q[1], ask=q[2], yes=res[m["t"]] == "yes", kind=r["kind"], occ=r["occ"]))
+        return out
+
+    def trades(rows_, arm=None):
+        """arm 'A'/'B' treated; arm 'cA'/'cB' control (cheap side, no text condition)."""
+        out = []
+        by = defaultdict(list)
+        for x in rows_:
+            if arm in ("A", "cA") and ASK_LO <= x["ask"] <= ASK_HI:
+                price, win, mod = x["ask"], x["yes"], rate(x["stem"], True)
+                if arm == "A" and (not x["inrel"] or mod < MODEL_MULT * price):
+                    continue
+            elif arm in ("B", "cB") and ASK_LO <= 1 - x["bid"] <= ASK_HI and x["bid"] >= B_YES_BID_MIN:
+                price, win, mod = 1 - x["bid"], not x["yes"], 1 - rate(x["stem"], False)
+                if arm == "B" and (x["inrel"] or mod < MODEL_MULT * price):
+                    continue
+            else:
+                continue
+            by[x["ev"]].append((mod / price, dict(ev=x["ev"], t=x["t"], net=trade_net(price, win), st=trade_net(price, win, 1.2), price=price, win=win, kind=x["kind"], occ=x["occ"])))
+        for lst in by.values():
+            lst.sort(key=lambda z: -z[0])
+            out += [z[1] for z in (lst[:MAX_PER_EVENT] if arm in ("A", "B") else lst)]
+        return out
+
+    T = side_rows(test)
+    F = side_rows(fit)
+    med = sorted(r["occ"] for r in test)[len(test) // 2]
+    lead = sorted(r["lead_min"] for r in ok)[len(ok) // 2]
+    qshare = sum(1 for r in ok if any(look_quote(cd.get(m["t"]) or [], r["acc_ts"], r["occ"]) for m in ev[r["ev"]])) / len(ok)
+    lines = [f"EARNPR1 scored once. FIT events {len(fit)}, TEST events {len(test)}, TEST markets with a look quote {len(T)}, events with any look quote {qshare:.3f} (all text-matched), lead median {lead:.1f} min"]
+    summary = {}
+    for arm, ctl in (("A", "cA"), ("B", "cB")):
+        for tag, rows_ in (("TEST", T), ("FIT_in_sample", F)):
+            tr = trades(rows_, arm); cn = trades(rows_, ctl)
+            for t_ in tr + cn:
+                t_["half"] = 1 if t_["occ"] < med else 2
+            nets = [t_["net"] for t_ in tr]
+            if not tr:
+                lines.append(f"Arm {arm} {tag}: 0 treated, control {len(cn)}"); summary[(arm, tag)] = None; continue
+            m_, z, ncl = cluster_z([(t_["ev"], t_["net"]) for t_ in tr])
+            cm_, cz, cncl = cluster_z([(t_["ev"], t_["net"]) for t_ in cn]) if cn else (0.0, 0.0, 0)
+            h = {i: [t_["net"] for t_ in tr if t_["half"] == i] for i in (1, 2)}
+            win = sum(t_["win"] for t_ in tr) / len(tr); ap = sum(t_["price"] for t_ in tr) / len(tr)
+            cw = sum(t_["win"] for t_ in cn) / len(cn) if cn else 0; cp = sum(t_["price"] for t_ in cn) / len(cn) if cn else 0
+            sch = [t_["net"] for t_ in tr if t_["kind"] == "sched"]; prx = [t_["net"] for t_ in tr if t_["kind"] == "proxy"]
+            v = verdict(tr, cn, lead, qshare, len({t_["ev"] for t_ in tr}) if tag == "TEST" else 0) if tag == "TEST" else "info only"
+            lines.append(f"Arm {arm} {tag}: treated {len(tr)} on {ncl} events, win {win:.3f} at mean price {ap:.3f}, mean net {m_*100:+.2f}c (z {z:+.2f}), PF {pf(nets):.2f}, PF x1.2 fees {pf([t_['st'] for t_ in tr]):.2f}, halves D1 {sum(h[1])*10:+.2f}$ ({len(h[1])}) D2 {sum(h[2])*10:+.2f}$ ({len(h[2])}), sched {len(sch)} PF {pf(sch) if sch else 0:.2f} proxy {len(prx)} PF {pf(prx) if prx else 0:.2f} | control {len(cn)} on {cncl} events, win {cw:.3f} at {cp:.3f}, mean {cm_*100:+.2f}c, PF {pf([t_['net'] for t_ in cn]) if cn else 0:.2f} | treated minus control {100*(m_-cm_):+.2f}c | verdict {v}")
+            summary[(arm, tag)] = v
+    open(result_path, "w").write("\n".join(lines) + "\n")
+    print("\n".join(lines))
+
+
+if __name__ == "__main__":
+    import os
+    from .paths import DATA_DIR
+    score(os.environ.get("EARNPR1_CACHE", os.path.expanduser("~/.cache/earnpr1")), str(DATA_DIR / "ment1" / "markets.json"), str(DATA_DIR / "ment1" / "candles_*.json"), str(DATA_DIR / "earnpr1_result.txt"))

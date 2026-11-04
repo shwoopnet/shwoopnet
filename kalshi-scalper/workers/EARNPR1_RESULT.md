@@ -1,0 +1,14 @@
+# EARNPR1 result (run once, 2026-11-04): Arm A and Arm B both NOT_ENOUGH_DATA; both point estimates negative
+
+Registration sha256 `5a696903f57b00616fd7e0a40cb8f6566b7e9dab29ff44122c8b3b14c89f4abe` (pushed in commit 8483318 before any price was joined). Code `src/scalper/earnpr1.py` (module run), tests `tests/test_earnpr1.py`, raw output `workers/EARNPR1_result.txt`. Prices: MENT1's cached hourly candles, no new fetch; rules as registered, nothing tuned.
+
+**Setup.** 420 pre-cut events, 379 matched to an 8-K 2.02, 361 with Ex-99.1 text; filing-to-call lead median 259 minutes (NOT_RUNNABLE floor 20 not hit); 95.8% of the text-matched events have a look quote (floor 40% not hit). FIT 240 events (model only), TEST 121 events (2026-06-08 to 2026-10-01; all carry Kalshi's scheduled call time), 1,536 TEST markets with a look quote.
+
+| | treated | events | win vs mean price | mean net | PF (x1.2 fees) | D1 / D2 net (10 contracts) | control (cheap side, no text) | treated minus control |
+|---|---|---|---|---|---|---|---|---|
+| Arm A (word in release, buy cheap YES) | 51 | 38 | 7.8% at 13.9c | -6.83c (z -1.88) | 0.47 (0.47) | -$12.76 / -$22.09 | 521 trades, 10.7% at 16.6c, -6.76c, PF 0.55 | -0.08c |
+| Arm B (word absent, buy cheap NO, YES bid 70c+) | 83 | 56 | 10.8% at 10.8c | -0.66c (z -0.18) | 0.93 (0.92) | +$6.87 / -$12.31 | 380 trades, 10.0% at 14.1c, -4.90c, PF 0.62 | +4.24c |
+
+Verdict per the registered kill rules: **Arm A NOT_ENOUGH_DATA (51 treated against 150; also FALSIFIED on every other test: PF 0.47, both halves negative, treated not above control). Arm B NOT_ENOUGH_DATA (83 against 150; PF 0.93, second half negative).** In-sample FIT (information only, never judged): Arm A 97 trades PF 0.66, Arm B 194 trades PF 0.42 (mean -5.41c, z -3.32), so no edge is hiding in the model's own training period either. A word that IS in the release and is cheap is cheap for a reason: the win rate on those sits at 7.8% against a 13.9c price, below the price. Arm B's treated side beats its control by 4c, but that is the model choosing cheaper NO sides (10.8c against 14.1c), not a profit; it still loses a fraction of a cent after the fee and is not significant. The market already prices the release: the registered 60% "quote already priced it" is what the data show. No try beyond the registered four.
+
+**Forward plan.** Treated rate in TEST: about 2.9 Arm A and 4.8 Arm B trades per week (121 events in 17.4 weeks). Events from 2026-10-04 to 2026-12-15 (10 weeks, earnings season clustered) would give about 30 Arm A and 50 Arm B trades: still under 150, so the forward read on 2026-12-16 cannot reach the bar for either arm alone; it is registered as an information read only (same rules, model frozen on all pre-cut events, read once, expected result NOT_ENOUGH_DATA). With Arm A at PF 0.47 on its own, there is no case for waiting: not a lead. **N: +4** (A and B at 2 each), running count about 730,417 (z bar 5.27).
