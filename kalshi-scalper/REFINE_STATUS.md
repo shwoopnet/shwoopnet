@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:40 AM CT (11:40Z): W78 S-LIM1-LIVE review date
+
+- W78 (descriptive): tag = a filled, settled OICORE order whose average fill is at least 0.95c above the first-seen ask (NO orders: 1 minus the seen bid). Revert rule: net below $0 over the tagged fills when the count reaches 20. Now tagged n 6, 1 win, +$4.77 (+7.95c/ct); untagged n 19, 5 wins, +$24.17 (+13.14c/ct). 14 more tagged fills needed; at about 1 tagged per 4 fills and 5 fills a day that is about 11 days, so the review is expected about Nov 15 (a little later with settlement lag). The tagged group earns less per contract than untagged (+7.95c vs +13.14c) on n 6, which is not a difference yet.
+
 ## 2026-11-04 05:35 AM CT (11:35Z): W77 R6 book at OICORE order time
 
 - W77 (descriptive; 24 of 33 OICORE orders had an R6 Bitcoin book poll within 6 s before the order): filled 19 orders, median touch size 628, median within 1c 3,788, 17 fit 10 contracts at the touch (the two that did not had touches of 5 and 8 and still filled); unfilled 5 of the 8, median touch size 2,808, median within 1c 3,850, 4 fit 10, one had zero at the touch. Touch size does not explain fills: unfilled orders mostly had deep touches. Together with W62 (heavy tape at the price within 1 s) this points away from a thin book. Candidate causes not tested: a limit equal to or just below the ask when the book moved (0.06 vs ask 0.06, 0.26 vs 0.26 in the sample), or the order arriving after the quote changed. The cheap way to settle it is the logged exchange status (the W70 brief). No change.
