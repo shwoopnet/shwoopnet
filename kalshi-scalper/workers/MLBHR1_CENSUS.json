@@ -1,0 +1,21 @@
+{
+ "total_listed": 225163,
+ "pre_cut_markets": 222536,
+ "post_cut_events": 62,
+ "KXMLBHR": {
+  "pre_cut_events_with_a_volume_1plus": 2444,
+  "rungs_1plus_with_volume": 43263,
+  "rungs_per_event_median": 18.0,
+  "rungs_per_event_mean": 17.701718494271685,
+  "first": "2026-03-26T02:44:10Z",
+  "last": "2026-10-02T03:30:10Z"
+ },
+ "KXMLBHIT": {
+  "pre_cut_events_with_a_volume_1plus": 2445,
+  "rungs_1plus_with_volume": 43031,
+  "rungs_per_event_median": 18,
+  "rungs_per_event_mean": 17.59959100204499,
+  "first": "2026-03-26T02:45:17Z",
+  "last": "2026-10-02T03:30:13Z"
+ }
+}
