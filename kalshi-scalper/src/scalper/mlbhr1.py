@@ -184,7 +184,7 @@ def cmd_candles(series, minutes, mode, stride=1, offset=0):
                 need = [t for t in two if t not in done]
             else:
                 if any(t not in done for t in two):
-                    break  # ladder games are the md5 prefix whose pooled rungs are done
+                    continue  # ladder games: those, in md5 order, whose pooled rungs are done (a failed fetch must not block the rest)
                 need = [t for t in byg[g] if t not in done]
             if need:
                 want[g] = need
