@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:40 AM CT (10:40Z): W65 OICORE live win rate vs history
+
+- W65 (descriptive): live 6/25 = 24.0% (Wilson 95% 11.5% to 43.4%); sim for the same windows 8/31 = 25.8% (13.7% to 43.2%); weekly history 123/453 = 27.2% (23.3% to 31.4%). Live is inside the historical interval, just. P(6 or fewer wins in 25 | 27.2%) = 0.46, so the live win rate is unremarkable: no win-rate shortfall is shown. The +$28.94 comes from the payoff mix (cheap-side wins), not the win count. The live probe is tracking history so far; the sample cannot say more.
+
 ## 2026-11-04 04:35 AM CT (10:35Z): W64 OICORE sim by week
 
 - W64 (descriptive; 453 sim triggers, fill at close-120 ask, weeks start Monday UTC): Aug 31 (Sep 2 on) n 18, 1 win, PF 0.42, -4.2c; Sep 7 n 31, PF 2.58, +16.0c; Sep 14 n 32, PF 1.76, +6.8c; Sep 21 n 54, PF 2.32, +9.7c; Sep 28 n 68, PF 2.28, +9.5c; Oct 5 n 65, PF 1.52, +5.3c; Oct 12 n 60, PF 1.95, +9.4c; Oct 19 n 67, PF 1.32, +3.5c; Oct 26 n 49, PF 1.95, +8.4c; Nov 2 (partial) n 9, PF 4.14. One of 10 weeks under PF 1 (the first, 18 triggers). Spread across weeks, not concentrated. The weakest full week was Oct 19 (1.32), the most recent full week is back at 1.95, so the earlier read of "weaker lately" is not supported. Caveat: the 86,300 threshold was found on this same history, so weekly consistency here is in-sample; the live probe from Oct 30 is the out-of-sample test.
