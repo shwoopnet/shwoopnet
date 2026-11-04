@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 01:52 AM CT (07:52Z): W31 flow block E done, S-FLOW2 waiting
+
+- W31 (Sep 5/12/19, V2 rules, fixed -0.036, 206 pool windows, live trades endpoint): low n 67, win 22.4%, PF 2.27, +8.96c; high n 108, win 24.1%, PF 1.73, +7.74c. Low beats high on 1 of 3 days; block gap +1.2c, noise. Pooled with earlier blocks the flow split is not reliable (August block went the other way). No change to the FLOW1 view: not a tradable edge.
+- S-FLOW2 tracker: no windows yet (starts 08:00Z). Dash: L1 last order 0.9h ago, OICORE 3.4h (under 14h), loss streak unchanged, Dogecoin paused, no FLOW1 orders.
+
 ## 2026-11-04 1:39 AM CT (07:39Z Nov 4): W33 FLOW2-TRACKER BUILT
 
 flow2_forward.py in the scratchpad (re-run: `cd scratchpad && python3 -I flow2_forward.py`; resumable, cache flow2_cache.jsonl, needs flow_forward.py in the same folder): Bitcoin markets closing after 2026-11-04T08:00:00Z (hard-coded registration time), V2's pool rule (cheap side YES first inside 0.05 to 0.50, which equals the lower ask; fill capped at 0.50; fee rounded up on 10 contracts), flow over [-360, -180) of every public trade with at least 5 trades, trigger flag from open_interest_fp (rise at least 86,300; unknown windows excluded and counted). Prints the registered NON-trigger table (low <= -0.036 vs high: n, win rate, PF, net; low minus high; low windows so far of the 150 needed; PASS/FAIL/NEITHER at 150) and the trigger table as information. It prints 'no windows yet' before 08:00Z. A few hundred windows take 10 to 15 minutes to pull.
