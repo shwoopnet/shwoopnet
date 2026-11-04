@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:40 AM CT (09:40Z): W55 OICORE loss-run history
+
+- W55 (descriptive; 453 historical triggers, 123 wins, 85 loss runs): longest run 15 in a row (3.6 days, Sep 3 to 7); runs of 10 or more: 3; 14 or more: 2; 18 or more: 0. Longest gap between wins 5.7 days from Sep 11. The 18-in-a-row kill has never been hit in history and was missed by 3 in the worst case, so a chance firing is small but not negligible (W38 simulated 7.8% over 40 fills). A 15 to 17 streak should be read as the live warning zone, not yet a kill. Current live streak 4.
+
 ## 2026-11-04 03:35 AM CT (09:35Z): W53 OICORE low-price end; wake check 08:00Z
 
 - W53 (descriptive): live fills at or under 0.07: n 11, 2 wins, 9 losses, +$13.26 (fee 6.6% of $6.10 at risk); above 0.07: n 13, 4 wins, 9 losses, +$16.32 (fee 5.2% of $21.20). History, 453 triggers, fill at close-120 ask: all win 27.2%, +7.73c, PF 1.86; excluding fill ask under 0.07 (257 left) win 44.7%, +12.68c, PF 1.91; the excluded 196 alone win 4.1%, +1.25c, PF 1.47. The cheap end is a small part of profit; history cannot count toward a filter. No change.
