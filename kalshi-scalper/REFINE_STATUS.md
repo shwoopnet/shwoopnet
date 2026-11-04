@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:53 AM CT (08:53Z): W114 PR 711 still open, no live code changes on main
+
+- W114 (read only, nothing posted): PR 711 (Remove FLOW1) is open, not a draft, mergeable and clean, created 05:59Z Nov 4, one commit; it takes FLOW1 out of SLOT_STRATEGIES and SLOT_HOLD_ALLOWED, existing FLOW1 orders still exit and settle, and it needs deploy-latest.sh after the owner merges. PR 709 merged 01:18Z. No pull request has merged to main since 05:00Z (latest merges are 710, the Strategies table with L1 row counts only gold, 01:52Z, page only, and 709). origin/main is at efc916e6 (710); no commit since the cutoff touches kalshiLiveLib.js, kalshiSlotLib.js, index.js or kalshiSlotRunLib.js. Nothing changes the OICORE or gold rules, sizes, the paused list or my trackers' assumptions. Pending: 711.
+
 ## 2026-11-04 02:52 AM CT (08:52Z): W112 toolbox README
 
 - W112: `TOOLBOX.md` (scratchpad, 38 lines) lists the scripts that matter: Daily (wake.sh and what it calls), registered trackers, the Nov 13 read (oicore_nov13.py), the R6 final (r6_final_fixed2.py and caveats), tests (test_flags.py) and helpers (logentry.py), plus a dates table. Gaps noted by the worker: S-GQH1 lives inside fwd_all.py and C1 is a line printed by dash.sh (no standalone scripts); forward_oicore.py and the network behaviour of oicore_nov13.py are partly inferred from the code, not fully read. The `--live` flag on the Nov 12 R6 run was added by the worker and matches the scheduled task.
