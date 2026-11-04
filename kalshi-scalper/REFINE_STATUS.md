@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 6:37 PM CT (00:37Z Nov 4): W21 FLOW-L1 RESULT
+
+W21 (2 tries per market): no pass, as predicted. Gold 27 in-band windows on the R6 days had 0 early sells in either flow group (untestable). Dogecoin 58 windows (median -0.015 from the first half): flagged above-median 30 windows with 2 early sells, unflagged 28 with 1 (overall rate ratio 1.87 from 3 to 4 early sells); the sign flips between halves (the first-half cluster is in the flagged group, the second-half one in the unflagged). Noise-sized. The flow feature does not extend to L1 early sells on this sample.
+
 ## 2026-11-03 6:34 PM CT (00:34Z Nov 4): W22 FLOW-INDEP RESULT
 
 W22 (4 correlations + 4 cells; full tape, 146 pool windows): rank correlation of the flow imbalance with sdir -0.056, OIR -0.048, entry price +0.003, spread +0.021 (needs about 0.16 for p 0.05). The 2x2 keeps the flow direction in every cell: within sdir low / high: flow-low PF 2.78 (n 36) and 2.38 (n 40) vs flow-high 0.71 (n 37) and 0.67 (n 33); within OIR low / high: flow-low PF 1.78 (n 40) and 3.96 (n 36) vs flow-high 0.71 (n 33) and 0.65 (n 37). Smallest cell 33. Reading: the flow lead is not a repackaging of the price change or the open interest rise: S-FLOW1 and S-SDIR1 / S-JUMP1 are separate signals on this pool. Caveats unchanged: 146 windows, 6 days, no deflation for the splits.
