@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:34 AM CT (11:34Z): W124 FLOW1 ledger: one shadow window with no live order
+
+- W124 (`flow1_ledger.py`, offline, reads flow_cache.jsonl and dash_report.json; `--table` prints rows; wired into wake_shadows.py with a FLAG when unmatched windows exist): 8 Bitcoin windows, cache to 11:00Z, counted from the first live order (09:27Z). Shadow low windows: 2 (09:30 close and 10:00 close; the 09:15 close was also low but is before the live start). Live FLOW1 orders: 1 (09:30 close, YES 5 at 0.12, filled, lost). Matched 1; shadow-only (live missed) 1: the 10:00 close (shadow ask 0.11, flow -0.107, no live order at all, not even a no fill record); live-only 0. The shadow's -120 s ask for the 09:30 window was 0.06 against the live fill of 0.12. One miss in two is a sample of 2: rule (a) (fill rate under 50 percent of shadow low windows) needs 20. Watch what the live bot's own conditions skip (its signal is read at about -176 s, the shadow's at -180 s with the fill at -120 s, and the live ask band may differ). Windows after 11:00Z are not yet in the cache; refresh with flow_forward.py.
+
 ## 2026-11-04 05:33 AM CT (11:33Z): W123 gold dry spell was normal
 
 - W123 (descriptive; gold since Oct 7: 390 orders, 253 filled, 137 no fill): weekday gaps between fills (236 gaps): median 1.0h, p90 3.5h, p99 7.5h; longest gaps 93.8h (Oct 16 to 20), 69.8h (Oct 9 to 12), 55.5h (Oct 30 to Nov 1), 50.8h (Oct 23 to 25); longest weekday night gap 21.3h (Oct 15 to 16). This morning's dry spell: last fill 06:54Z, next fill 11:09Z (a 12 contract gold fill, 6:09 AM CT), a 4.25h gap, about the 92nd percentile (read off p90 and p99, not computed exactly). The 07:54Z, 08:39Z and 09:09Z no-fills were three in a row: the longest historical run of no-fills is 4, and runs of 3 or more happened 11 times in 89 runs, so not rare. Nothing wrong with gold.
