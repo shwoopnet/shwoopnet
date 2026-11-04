@@ -8857,3 +8857,6 @@ Registration sha256 `b16e614e98957eec37b1bff5a373d4db844b5a54cbba6bbf0fea97d4d86
 
 ### RECORD1 information look (2026-11-04 15:13 UTC, 9:13 AM CT; not the registered read, decides nothing)
 58 runs, 3,237 windows, 769,094 polls, 0 refused (429 share 0.0%). n 334 qualifying trades over 14 dates (the registered read already ran ONCE on 2026-11-03: 300 trades, NOT_ENOUGH_DATA; `read` now refuses a second run by design). Information only: mean +4.23c, z 1.86, stress +4.05c, 4 assets (XRP 56 trades +9.96c, BTC 116 +4.42c, ETH 86 +3.64c, SOL 76 +0.37c), mean model gap 18.98c, **clock_ok still False**. Verdict NOT_ENOUGH_DATA; nothing decided.
+
+### Result: NHLAST1 Amendment 3 (2026-11-04), frozen post-cut assists read: pooled FALSIFIED (n 314, -3.66c), filter arm NOT_ENOUGH_DATA (n 9, structural mismatch); N +2
+`workers/NHLAST1_RESULT.md` (addendum 2), `workers/NHLAST1_RESULT3.json`; amendment sha256 `ec6605759eda388f3395561643c5dbcec50ca7ab2029bdea8fdea2ec0d9896f1`. 168 of 209 frozen games usable (box ended on 41). Pooled cap 2: win 22.9% at 25.2c, net -3.66c, game z -1.59, lower -8.17c, PF 0.82, H1 -0.6c, H2 -6.3c. Frozen ladders are about 20 rungs (sum of asks 6.06 vs 3.74 in the first block), so only 10 games fall under E 4.21 and the filter arm has 9 trades (-29.8c). The assists hint is dead as a pooled rule.
