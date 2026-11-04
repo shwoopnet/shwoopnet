@@ -755,3 +755,7 @@ The L1 row in the Strategies table (`renderKalshiStrategies`) now counts only or
 ## No-fill reason logged (Nov 4, 2026, the refinement chat's request)
 
 A third of gold orders (79 of 234 since Oct 21) and 8 OICORE orders ended "no fill" with no reason kept. L1 (`runL1Tick`) and the second slot now store Kalshi's own order status as `kalshiStatus` on the order document when Kalshi returns one (the slot also stores `answeredAtMs`). Log only: nothing reads it, no order changes, and the off-equivalence fixtures are unchanged (their mocked answers carry no status). Test NF1. Needs `bash functions/deploy-latest.sh`.
+
+## The report carries the no-fill reason (Nov 4, 2026, the refinement chat's request)
+
+With `?orders=1` every L1 and slot row now has `kalshiStatus` (from #712's log: letters and underscores only, at most 24, lowercased; null when the order predates the log or the value is odd). Rows already had `answeredAtMs`. Test R9; R2 and OV3 list the new key on purpose. Needs `bash functions/deploy-report.sh` (or `deploy-latest.sh`).

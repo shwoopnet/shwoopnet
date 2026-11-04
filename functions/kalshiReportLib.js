@@ -69,6 +69,8 @@ function context(o) {
     orderedCount: num(o.count), price: num(o.price), limit: num(o.limit), seenBid: num(seen.bid), seenAsk: num(seen.ask), bidSize: num(seen.bidSize), askSize: num(seen.askSize),
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
+    // Kalshi's own status for the order (Nov 4, 2026, the refinement chat's no-fill table; logged on the order since #712): a short word such as "canceled" or "executed", letters and underscores only, null when not logged.
+    kalshiStatus: typeof o.kalshiStatus === "string" && /^[a-z_]{1,24}$/i.test(o.kalshiStatus) ? o.kalshiStatus.toLowerCase() : null,
     ...timing(o),
   };
 }
