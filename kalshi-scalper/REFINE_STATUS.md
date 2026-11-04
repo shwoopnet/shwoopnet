@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:56 AM CT (08:56Z): W116 dash.sh and wake.sh made safe
+
+- W116: the four fixes from W115 are applied (backups dash.sh.bak, wake.sh.bak): both scripts exit early with a clear message (rc 2) when KALSHI_REPORT_TOKEN is unset, never echoing it; dash.sh fetches into a temp file and replaces dash_report.json only if it parses and has orders and generatedAt, otherwise it prints FETCH FAILED, using the last good report from <time> and carries on; the path comes from the script's own directory; TOOLBOX.md says to export the token first. Tests: unset token exits rc 2 with the report's md5 unchanged; a normal run fetches a fresh report. I also exercised the FETCH FAILED branch myself with a dummy token (report md5 unchanged before and after, the old report was used). Also seen on that run: L1 placed a new gold order at 08:39Z (0.3h before the check); OICORE last order is 07:57Z (1.0h).
+
 ## 2026-11-04 02:54 AM CT (08:54Z): W115 smoke test: dash.sh can overwrite the report with an error
 
 - W115 (clean shell, Python 3.13): wake.sh ran in 10 s but failed in substance when KALSHI_REPORT_TOKEN was not exported: dash.sh's fetch returned an unauthorized error and overwrote dash_report.json, then dash.sh died with KeyError orders and fwd_all.py with KeyError generatedAt (the worker restored the files from backup; the report on disk is intact). oicore_nov13.py, fwd_all.py and test_flags.py (all PASS) ran fine. Fixes needed: (1) dash.sh and wake.sh exit early with a clear message if the token is unset (never echoing it); (2) dash.sh writes the fetch to a temp file and replaces dash_report.json only if the JSON has orders, so a transient failure cannot wipe the last good report; (3) replace the hard-coded scratchpad path with the script's own directory; (4) TOOLBOX.md says to export the token first. This is a real hazard (a bad fetch overwrote the good report); fix queued as W116.
