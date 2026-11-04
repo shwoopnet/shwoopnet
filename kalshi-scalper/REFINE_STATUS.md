@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:52 AM CT (08:52Z): W112 toolbox README
+
+- W112: `TOOLBOX.md` (scratchpad, 38 lines) lists the scripts that matter: Daily (wake.sh and what it calls), registered trackers, the Nov 13 read (oicore_nov13.py), the R6 final (r6_final_fixed2.py and caveats), tests (test_flags.py) and helpers (logentry.py), plus a dates table. Gaps noted by the worker: S-GQH1 lives inside fwd_all.py and C1 is a line printed by dash.sh (no standalone scripts); forward_oicore.py and the network behaviour of oicore_nov13.py are partly inferred from the code, not fully read. The `--live` flag on the Nov 12 R6 run was added by the worker and matches the scheduled task.
+
 ## 2026-11-04 02:52 AM CT (08:52Z): W113 interim 40 fill look checklist registered
 
 - W113: `interim_40.md` (scratchpad) is the checklist for the OICORE 40-fill look expected about Nov 7, written before the data. Commands: fetch a fresh nightly report (last 14 days, orders=1), then `oicore_nov13.py` on it and `fwd_all.py`. Only two things can change a decision: the loss streak reaching 18, and net under -$6.00 after 40 fills; everything else (PF, win rate, weekend, time blocks, tags, price bands) is information only. Verdict wording: net above 0 is the minimum, PF 1.5 is not a bar below 100 fills, name the fill count and say interim, not the Nov 13 read. Not allowed: filters from history, new splits, a change of the 10 contract size, promoting or deploying anything. If a kill rule is hit I report it to main; the decision and any change belong to main and the owner, not to me. One line to main: OICORE at N fills, net, streak, no kill hit or which kill hit.
