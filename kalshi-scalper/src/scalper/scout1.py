@@ -2,7 +2,7 @@
 Usage: python -m scalper.scout1 census OUT.json SERIES...   (counts markets/events/close dates settled before the frozen cut, per month, plus median volume)
 The census never reads `result`, `settlement_value`, prices or any outcome."""
 from __future__ import annotations
-import collections, json, statistics as st, sys, time, urllib.parse, urllib.request
+import collections, json, statistics as st, sys, time, urllib.error, urllib.parse, urllib.request
 
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 CUT = "2026-10-03T16:00:00Z"
@@ -434,6 +434,20 @@ def cmd_build():
     print("TEST games with a model", len(games), "sampled markets", c.execute("SELECT COUNT(*) FROM mgame WHERE sampled=1").fetchone()[0], flush=True)
 
 
+def hist_candles(tk, st):
+    """One archived market's candles; a 429 waits 2 s and asks again (the shared limit is about 1 request a second). Plumbing only."""
+    q = urllib.parse.urlencode(dict(start_ts=st - 7200, end_ts=st, period_interval=1))
+    for i in range(40):
+        try:
+            req = urllib.request.Request(f"{BASE}/historical/markets/{tk}/candlesticks?{q}", headers={"User-Agent": UA})
+            return json.load(urllib.request.urlopen(req, timeout=30))
+        except urllib.error.HTTPError as e:
+            if e.code != 429:
+                raise
+            time.sleep(2.0)
+    raise RuntimeError("429 storm " + tk)
+
+
 def cmd_candles():
     c = conn()
     todo = list(c.execute("""SELECT m.ticker,g.start_ts,k.src FROM mgame m JOIN kmarket k ON k.ticker=m.ticker JOIN game g ON g.id=m.gid
@@ -467,7 +481,7 @@ def cmd_candles():
     print("hist one by one", len(hist_), flush=True)
     for i, (tk, st, _) in enumerate(hist_):
         try:
-            d = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": st - 7200, "end_ts": st, "period_interval": 1})
+            d = hist_candles(tk, st)
             cs = d.get("candlesticks", [])
         except Exception:  # noqa: BLE001
             cs = None
@@ -478,7 +492,7 @@ def cmd_candles():
         if i % 100 == 0:
             c.commit()
             print("hist", i, "/", len(hist_), flush=True)
-        time.sleep(1.0)
+        time.sleep(0.9)
     c.commit()
     for i in range(0, len(live), 8):
         batch = live[i:i + 8]
