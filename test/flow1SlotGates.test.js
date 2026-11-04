@@ -18,10 +18,12 @@ gates.FL1 = () => {
 };
 gates.FL2 = () => {
   const f = run._testOnly.flowFromTrades, t = (sec, side, n) => ({ created_time: new Date(sec * 1000).toISOString(), taker_side: side, count_fp: String(n) });
-  assert.strictEqual(f([t(100, 'no', 30), t(110, 'yes', 10)], 'yes', 100, 200), -0.5, 'takers sold YES 30 (bought NO) and bought YES 10: (10 - 30) / 40');
-  assert.strictEqual(f([t(100, 'no', 30), t(110, 'yes', 10)], 'no', 100, 200), 0.5, 'the same tape from the NO side');
-  assert.strictEqual(f([t(99, 'no', 30), t(200, 'yes', 10)], 'yes', 100, 200), null, 'trades outside the span do not count; nothing left is null, never zero');
-  assert.strictEqual(f([t(100, 'no', 5), t(100, 'no', 5)], 'yes', 100, 200), -1, 'identical trades both count (no de-duplication)');
+  const tape = [t(100, 'no', 10), t(101, 'no', 10), t(102, 'no', 10), t(110, 'yes', 5), t(111, 'yes', 5)];
+  assert.strictEqual(f(tape, 'yes', 100, 200), -0.5, 'takers sold YES 30 (bought NO) and bought YES 10: (10 - 30) / 40');
+  assert.strictEqual(f(tape, 'no', 100, 200), 0.5, 'the same tape from the NO side');
+  assert.strictEqual(f(tape.slice(0, 4), 'yes', 100, 200), null, 'fewer than 5 trades: no reading (S-FLOW1 dropped those windows)');
+  assert.strictEqual(f([t(99, 'no', 30), t(200, 'yes', 10)].concat(tape.slice(0, 3)), 'yes', 100, 200), null, 'trades outside [start, end) do not count');
+  assert.strictEqual(f(Array.from({ length: 5 }, () => t(100, 'no', 5)), 'yes', 100, 200), -1, 'identical trades all count (no de-duplication)');
   assert.strictEqual(f(null, 'yes', 0, 1), null);
 };
 const NOW = Date.parse('2026-11-20T16:57:30Z');

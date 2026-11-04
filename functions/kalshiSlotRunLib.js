@@ -30,25 +30,27 @@ const num = (v) => (v === undefined || v === null || v === "" ? NaN : Number(v))
 const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
 const OPEN_SHORT = ["active", "open"];
+const FLOW_MIN_TRADES = 5;   // S-FLOW1 dropped windows with fewer trades than this, so FLOW1 sends nothing on them
 const FLOW_PAGES = 5;   // FLOW1's trade-tape read: at most this many pages of 1,000 trades for 3 minutes of one market; more means a partial read, so no order
 
 // Open interest rise to the signal candle (the one ending 180 s before the close) over the 3 minutes before it. The research read it from the candle that ENDS at those two instants; a
 // missing candle, a missing value or a non-finite number is null, never a guess.
 // Taker flow on `side` from Kalshi's public trades between fromSec (inclusive) and toSec (exclusive): (contracts takers bought on that side - contracts they sold) / total. A taker buying the
-// other side is selling this one. Every trade counts (no de-duplication: the S-FLOW1 definition). No readable trade in the span is null, never zero.
+// other side is selling this one. Every trade counts (no de-duplication: the S-FLOW1 definition). Fewer than FLOW_MIN_TRADES readable trades in the span is null (S-FLOW1 dropped those windows), never zero.
 function flowFromTrades(trades, side, fromSec, toSec) {
   if (!Array.isArray(trades) || (side !== "yes" && side !== "no")) return null;
-  let bought = 0, sold = 0;
+  let bought = 0, sold = 0, n = 0;
   for (const t of trades) {
     if (!t) continue;
     const ts = Date.parse(t.created_time) / 1000;
     const size = num(t.count_fp !== undefined && t.count_fp !== null ? t.count_fp : t.count);
     const taker = t.taker_outcome_side !== undefined ? t.taker_outcome_side : t.taker_side;
     if (!Number.isFinite(ts) || ts < fromSec || ts >= toSec || !(size > 0) || (taker !== "yes" && taker !== "no")) continue;
+    n += 1;
     if (taker === side) bought += size; else sold += size;
   }
   const total = bought + sold;
-  return total > 0 ? (bought - sold) / total : null;
+  return n >= FLOW_MIN_TRADES && total > 0 ? (bought - sold) / total : null;
 }
 function oiRiseFromCandles(candles, closeSec) {
   if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
