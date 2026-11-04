@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 7:13 PM CT (01:13Z Nov 4): FLOW1 LIVE-TRACKING PLAN REGISTERED (before any live fill)
+
+Main: the owner puts the flow lead live as a capped probe FLOW1 (shwoopnet#709, not merged as of this entry): Bitcoin 15m cheaper side 5c to 50c at 180 to 120 s before the close, 5 contracts, held, only when flow over -360 to -180 s on that side is at or below -0.036, orders record `flow`. Tracking, kept apart: S-FLOW1 (shadow) stays on ALL pool windows from flow_forward.py (every public trade); FLOW1 live fills are read from slotOrders with the FLOW1 id and reported separately. Divergence flags (fixed now): (a) fill rate: FLOW1 live orders that fill over shadow low-half windows in the same period under 50% after 20 shadow low windows; (b) price: live average fill more than 1.5c above the shadow's fill (the -120 s ask) after 10 fills; (c) win rate: live win rate under 20% after 20 fills, or a live record net under zero while the shadow low half is above PF 1.5 after 30 fills; (d) the `flow` recorded on live orders differs from my flow_forward value for the same window by more than 0.05 on more than 20% of orders. Any flag goes to main at once. Kill rules are the strategy registry's (main's), not mine.
+
 ## 2026-11-03 6:37 PM CT (00:37Z Nov 4): W21 FLOW-L1 RESULT
 
 W21 (2 tries per market): no pass, as predicted. Gold 27 in-band windows on the R6 days had 0 early sells in either flow group (untestable). Dogecoin 58 windows (median -0.015 from the first half): flagged above-median 30 windows with 2 early sells, unflagged 28 with 1 (overall rate ratio 1.87 from 3 to 4 early sells); the sign flips between halves (the first-half cluster is in the flagged group, the second-half one in the unflagged). Noise-sized. The flow feature does not extend to L1 early sells on this sample.
