@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:29 AM CT (13:29Z): OICORE 26th fill is a win (+8.93)
+
+- OICORE placed and won its 26th fill: 12:57Z (6:57 AM CT) Nov 4, KXBTC15M-26NOV040800-00, YES 10 contracts at 0.09, filled, settled +$8.93. The record is now 26 fills, 7 won, 19 lost, net +$37.87, PF 3.27 (before: 25 fills, 6 won, 19 lost, +$28.94, PF 2.74); the loss streak is reset to 0 (kill at 18, 18 away). The previous OICORE order was the 07:57Z loss (-$0.64), so the gap between orders was 5 hours (inside the 14 hour flag). S-JUMP1 and S-SDIR1 are 19 of 40. S-GPB1: 2 forward gold fills below 0.90 (net +$1.46 combined, no loss) and 1 at 0.90 or above (+$0.33): 2 of 40. FLOW1 unchanged (2 orders, 1 filled, -$0.64). No flag fired except the known FLOW1 ledger FLAG (the 10:00 close, no live order).
+
 ## 2026-11-04 06:42 AM CT (12:42Z): W125 faster wake.sh; first S-GPB1 fills
 
 - W125: the three slow trackers (flow2_forward.py, flowl1_forward.py, flow_forward.py) now fetch at most 40 uncached windows per run (env W125_CAP) and print a W125 CAP line when windows are pending, with a lock file each so two runs cannot append to one cache; wake.sh has a --fast mode (prints dash, fwd_all, shadows and flags, starts the trackers detached, shows their previous output marked with its time; 14 s in the test) and the default mode waits at most 120 s (WAKE_TRACKER_WAIT) then prints still running. Definitions and thresholds unchanged; backups *.w125bak; test_flags.py 35 PASS. Cause of the earlier tool timeout: a stale cache made the trackers refetch hours of windows. The full run that was in progress finished: no flags fired except the known FLOW1 ledger FLAG (shadow low 3, live orders 2, matched 2, shadow-only 1: the 10:00 close, no live order). S-GPB1 has its first forward gold fills since 09:00Z: one below 0.90 (net +$1.46, no loss) and one at 0.90 or above (+$0.33, no loss): 1 of 40 below 0.90. OICORE unchanged (25 fills, +$28.94, streak 5; last order 07:57Z), FLOW1 2 orders, 1 filled, -$0.64.
