@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:15 AM CT (10:15Z): W60 OICORE no-fill orders
+
+- W60 (descriptive, n 8): 3 of 8 unfilled OICORE orders would have won held (Oct 31 18:30, Nov 1 09:00, Nov 1 11:15 closes). Net after fee: filled at the sim's close-120 candle ask +19.72c/ct; filled at the order price +16.88c/ct. Order price within 1c of seenAsk in 6 of 8; the two NO orders show a seenAsk near 0.75 and 0.92, which is the YES-side ask, not the NO price (a labelling point for the read: use 1 - seenBid for NO). The close-120 candle ask was lower than the order price in 6 of 8, so those orders rested above where the sim would have bought, and so were not unfilled for a price that moved up: the cause there is not clear. The positive net comes from a few cheap wins; n 8 cannot support a claim. Why 6 of 8 failed to fill with an order above the later candle ask is an open question for the code owner (an immediate-or-cancel order priced above the ask should fill if size exists); not mine to chase.
+
 ## 2026-11-04 04:10 AM CT (10:10Z): W59 gold no-fill share
 
 - W59 (descriptive; gold since Oct 21, 234 orders, 79 no fill, 33.8%): flat by CT block (0-6 37%, 6-12 32%, 12-18 34%, 18-24 33%). startLateMs on 52 orders only (median 3,960 ms): no-fill share 31% at or below the median, 27% above; lateness similar for no-fill and filled (3,820 vs 4,002 ms). No-fills are not concentrated by time or lateness; a third of gold orders miss at random. Closes the gold no-fill line unless a code change moves it.
