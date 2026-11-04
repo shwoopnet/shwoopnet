@@ -1,0 +1,41 @@
+# Nov 3, 2026 (research only, WXENS1): records the Open-Meteo ensemble members, the NWS point forecast and the Kalshi quotes of the daily high temperature markets of 14 US cities at the registered looks (07:00 and 10:00 local standard time), and each market's result and the IEM observed maximum after it settles.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch under wxens/, never to main. Which cities and models: kalshi-scalper/workers/WXENS1_WATCHLIST.json.
+# Scheduled runs are often late or dropped, so each run writes files named for its UTC hour (a re-run of the hour overwrites) and every row carries its own timestamp; the reader takes the first poll at or after the 10:00 look.
+name: record-wxens
+on:
+  schedule:
+    - cron: "12 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-wxens
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Get the recorder script and watchlist from main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Take one snapshot
+        run: python3 code/scripts/record_wxens.py data --watchlist code/kalshi-scalper/workers/WXENS1_WATCHLIST.json
+      - name: Commit and push the data branch
+        if: always()
+        run: |
+          cd data
+          git config user.name "wxens-recorder"
+          git config user.email "wxens-recorder@users.noreply.github.com"
+          git add wxens
+          git commit -q -m "wxens $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          exit 1
