@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:05 AM CT (12:05Z): W82 C9 Silver status
+
+- W82 (descriptive; run about 08:20Z): C9 Silver forward (windows closing after Nov 2 22:00Z): 36 in-band, 3 lost (8.3%), net -0.02c/ct (SE 4.38c). Registered rule: prediction over 400 windows is lost share at most 8% and net at least +0.5c; kill at 200 if lost share above 12% or net below -2.0c; kill at 400 if lost share above 10% or net below -1.0c; otherwise inconclusive and extend by 400. Pace 25 windows a day (36 in 1.43 days) against the registered about 18 a day, so the 200-window read is about Nov 10 to 11 (Nov 13 at the registered pace). Silver is not in L1_SERIES on main (gold, XRP, Bitcoin, Dogecoin, Ethereum only), so this is a pure paper tracker. No action.
+
 ## 2026-11-04 06:00 AM CT (12:00Z): W81 OICORE exit-rule check
 
 - W81 (check only, not a proposal; sim set is 461 triggers now, the cache runs to Nov 4): hold PF 1.84, +7.54c/ct; stop at 50% of entry PF 1.96, +7.78c; take-profit at 3x entry PF 1.68, +5.94c. The 17 sim triggers matched to a live fill: hold 2.65 / +9.00c; stop 2.71 / +9.14c; take-profit 2.51 / +7.95c. Caveats: only 1-minute close bids (touches checked on closes), exits assumed filled at the bid with no slippage (optimistic on thin books). The stop's edge over hold is within noise. Holding stands (V2's SLOTEX/EXIT1). Note the cache now has 461 triggers, so my older 453 figures are a few days stale; counts in this log before this entry used 453.
