@@ -747,3 +747,11 @@ The separate Strategies card is gone. The table (`#kalStrategies`, `renderKalshi
 ## Strategies table: L1 counts only its live markets (Nov 4, 2026, the owner: "yeah i think that would be fine")
 
 The L1 row in the Strategies table (`renderKalshiStrategies`) now counts only orders on markets L1 trades now (`kalshiIsActive`: gold), not Dogecoin's, Bitcoin's, XRP's, Ethereum's or the probes' old orders. Why: the row is labelled "Gold" but showed -$6.55 for the month while gold alone was about +$53, which read as gold losing. The paused markets' results stay in All strategies (the account figure) (so the rows may not add up to it; no note is shown, because ST2 keeps the table free of text under it). Test ST8 updated. Page only, nothing to deploy.
+
+## FLOW1 removed (Nov 4, 2026, both research chats recommended it)
+
+`FLOW1` is out of `SLOT_STRATEGIES` and `SLOT_HOLD_ALLOWED`; the `flowMax` entry field and `flowFromTrades` stay in code. Why: the research session's registered FLOW1 history test (2,568 Bitcoin windows, Aug 6 to Oct 2, scored once) found the low-flow cheap side at PF 1.13 to 1.23 and the HIGH-flow side better in the second half (low minus high -3.6c, within-day permutation p 0.49); a per-window diff showed no data bug, only that the refinement chat's six replication days were a favourable slice (the other 28 days: low PF 1.04, high 1.52); the refinement chat's second out-of-sample block (Aug 12 to Sep 9) agreed (low about -0.5c). Expected value about zero. Any FLOW1 order already placed is still exited and settled (`SLOT_EVER_USED`), and the page labels it "Seller flow (removed)". The shadow S-FLOW1 keeps scoring; a re-admission would be a reviewed edit after a forward read above PF 1.5 on 60+ low-half windows. Needs `bash functions/deploy-latest.sh`.
+
+## No-fill reason logged (Nov 4, 2026, the refinement chat's request)
+
+A third of gold orders (79 of 234 since Oct 21) and 8 OICORE orders ended "no fill" with no reason kept. L1 (`runL1Tick`) and the second slot now store Kalshi's own order status as `kalshiStatus` on the order document when Kalshi returns one (the slot also stores `answeredAtMs`). Log only: nothing reads it, no order changes, and the off-equivalence fixtures are unchanged (their mocked answers carry no status). Test NF1. Needs `bash functions/deploy-latest.sh`.

@@ -1096,6 +1096,7 @@ async function runL1Tick(args) {
       const filledCount = Number(d.fill_count || 0);
       await store.updateTest(cid, {
         sentAtMs, answeredAtMs, tickStartMs: now,
+        ...(d.status ? { kalshiStatus: String(d.status).slice(0, 24) } : {}),   // log only (Nov 4, 2026, the refinement chat: a third of gold orders end "no fill" with no reason kept); nothing reads it
         status: filledCount > 0 ? "filled" : "no fill", orderId: d.order_id, fillCount: String(d.fill_count || "0"),
         remainingCount: String(d.remaining_count || "0"), averageFillPrice: d.average_fill_price || null,
         averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,

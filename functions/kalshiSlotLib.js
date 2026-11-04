@@ -133,19 +133,8 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 40, net: 0 }) }),
     forwardReadDate: "2026-12-07", reviewedAt: "2026-11-05",
   }),
-  // FLOW1 (Nov 4, 2026, the owner: "can probably go live", on the refinement chat's S-FLOW1 lead): Bitcoin 15 minute, the CHEAPER side priced 5c to 50c, 180 to 120 s before the close, ONLY when
-  // takers were net SELLING that cheap side over the 3 minutes before the look (flow = (contracts takers bought on the cheap side - contracts they sold) / total, from Kalshi's public trade tape for
-  // 360 to 180 s before the close, at or below -0.036). History (146 windows, Oct 29 to Nov 3): low-flow half win 36.8%, PF 2.54, +13.25c a contract; high half PF 0.68; permutation p 0.0026; a separate
-  // signal from open interest and price change. 6 days of data and no named mechanism: a capped probe, BELOW the research bar, live before the forward read (S-FLOW1) and the history test (FLOW1) finish.
-  // 5 contracts, held. Shares the slot's open-contract cap per market, so in a window OICORE also trades, OICORE (listed first) takes the room and FLOW1 adds nothing.
-  Object.freeze({
-    id: "FLOW1", readme: "kalshi-scalper/README.md#SLOT-FLOW1", series: Object.freeze(["KXBTC15M"]),
-    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, flowMax: -0.036 }),
-    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
-    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-    killRules: Object.freeze({ maxConsecutiveLosses: 15, minNet: Object.freeze({ afterFills: 40, net: -10 }) }),
-    forwardReadDate: "2026-11-20", reviewedAt: "2026-11-05",
-  }),
+  // FLOW1 (seller-flow probe, live Nov 4, 2026) was REMOVED the same day after the research session's FLOW1 history test (2,568 windows, low-flow PF 1.13 to 1.23, low minus high -3.6c,
+  // p 0.49) and the refinement chat's second out-of-sample block both found no reliable edge. The flowMax entry field and flowFromTrades stay in code; a re-admission is a reviewed edit.
 ]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
@@ -159,7 +148,7 @@ const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "FLOW1"]);   // FLOW1 added Nov 4, 2026 (the owner): held to settlement   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830"]);   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
