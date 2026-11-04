@@ -12,7 +12,7 @@ const gates = {};
 gates.OM1 = () => {
   // each strategy is judged on its own orders: an L1 loss of $6 is 50% of L1's own $12 stop whatever OICORE did, and the reverse
   const r = lib.kalshiOwnStops([l1(-6), sl(5)], s, NOW);
-  assert.deepStrictEqual(r.map((x) => x.id), ['L1', 'OICORE + EVENT830'], 'the second stop is one budget over the whole slot (RISK_PROFILES.SECOND), so it is one figure');
+  assert.deepStrictEqual(r.map((x) => x.id), ['L1', 'OICORE + EVENT830 + FLOW1'], 'the second stop is one budget over the whole slot (RISK_PROFILES.SECOND), so it is one figure');
   const e1 = sl(-2, { slotId: 'EVENT830', ticker: 'KXSILVER15M-26NOV050830-30' }), o1 = sl(-1);
   const ev = lib.kalshiOwnStops([e1, o1], s, NOW), alone = (x) => lib.kalshiRiskMeter([x], s, NOW).fraction;
   assert.ok(alone(e1) > 0 && Math.abs(ev[1].fraction - (alone(e1) + alone(o1))) < 1e-9, 'an EVENT830 loss and an OICORE loss use the same slot stop: ' + ev[1].fraction);

@@ -133,6 +133,19 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 40, net: 0 }) }),
     forwardReadDate: "2026-12-07", reviewedAt: "2026-11-05",
   }),
+  // FLOW1 (Nov 4, 2026, the owner: "can probably go live", on the refinement chat's S-FLOW1 lead): Bitcoin 15 minute, the CHEAPER side priced 5c to 50c, 180 to 120 s before the close, ONLY when
+  // takers were net SELLING that cheap side over the 3 minutes before the look (flow = (contracts takers bought on the cheap side - contracts they sold) / total, from Kalshi's public trade tape for
+  // 360 to 180 s before the close, at or below -0.036). History (146 windows, Oct 29 to Nov 3): low-flow half win 36.8%, PF 2.54, +13.25c a contract; high half PF 0.68; permutation p 0.0026; a separate
+  // signal from open interest and price change. 6 days of data and no named mechanism: a capped probe, BELOW the research bar, live before the forward read (S-FLOW1) and the history test (FLOW1) finish.
+  // 5 contracts, held. Shares the slot's open-contract cap per market, so in a window OICORE also trades, OICORE (listed first) takes the room and FLOW1 adds nothing.
+  Object.freeze({
+    id: "FLOW1", readme: "kalshi-scalper/README.md#SLOT-FLOW1", series: Object.freeze(["KXBTC15M"]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, flowMax: -0.036 }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 5,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 15, minNet: Object.freeze({ afterFills: 40, net: -10 }) }),
+    forwardReadDate: "2026-11-20", reviewedAt: "2026-11-05",
+  }),
 ]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
@@ -140,11 +153,13 @@ const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSe
 const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
 // Optional (Nov 3, 2026, EVENT830): maxSpread, the widest YES spread (ask minus bid) at which an order may go; calendar, the name of a frozen list in SLOT_CALENDARS (it must be the strategy's own id).
 const ENTRY_KEYS_CAL = ENTRY_KEYS.concat(["maxSpread", "calendar"]);
+// Optional (Nov 4, 2026, FLOW1): taker flow on the side bought over the 3 minutes before the look must be at or below this (net selling). A missing or unreadable flow means no order.
+const ENTRY_KEYS_FLOW = ENTRY_KEYS.concat(["flowMax"]);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830"]);   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "FLOW1"]);   // FLOW1 added Nov 4, 2026 (the owner): held to settlement   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -161,11 +176,12 @@ function validateSlotStrategy(s) {
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
   if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL)) e.push("entry has the wrong fields");
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
+    if (Object.prototype.hasOwnProperty.call(x, "flowMax") && !(isNum(x.flowMax) && x.flowMax >= -1 && x.flowMax <= 0)) e.push("entry.flowMax must be a share from -1 to 0 (net selling)");
     if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
     if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(x.calendar === s.id && Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, x.calendar) && SLOT_CALENDARS[x.calendar].length > 0)) e.push("entry.calendar must name this strategy's own frozen calendar in SLOT_CALENDARS");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
@@ -416,6 +432,7 @@ function slotOrderCheckWith(flags, input) {
   if (i.side !== "yes" && i.side !== "no") return no("the side must be yes or no");
   if (strategy.entry.sideRule !== "favourite" && strategy.entry.sideRule !== "cheap" && strategy.entry.sideRule !== i.side) return no("this strategy only buys " + strategy.entry.sideRule);
   // The open interest condition: no readable rise, or a rise below the line, is no order (fail closed). `oiRise` is the caller's reading of the public candles; the line is the strategy's, in code.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "flowMax") && !(isNum(i.flow) && i.flow >= -1 && i.flow <= strategy.entry.flowMax + 1e-12)) return no("the taker flow is missing or above " + strategy.entry.flowMax);
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   // A calendar strategy enters only the window that closes at a listed release (the close Kalshi reports and the ticker's window code must both match one frozen row); a spread rule refuses a missing or wide spread.
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "calendar") && !slotCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is not a listed release window");
