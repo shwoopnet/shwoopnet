@@ -426,7 +426,7 @@ def cmd_build():
     print("TEST markets with a model", made, "TEST games", len({g for _, g, *_ in mk if lab[g] != 'FIT'}), flush=True)
 
 
-def cmd_candles(minutes: float):
+def cmd_candles(minutes: float, stride: int = 1, offset: int = 0):
     c = conn()
     t_end = time.time() + 60 * minutes
     starts = {r[0]: r[1] for r in c.execute("SELECT id,start_ts FROM game")}
@@ -443,6 +443,8 @@ def cmd_candles(minutes: float):
         if not pending:
             break
         for gi, gid in enumerate(pending):
+            if gi % stride != offset:
+                continue
             if time.time() > t_end:
                 print("time box reached", flush=True)
                 break
@@ -552,4 +554,4 @@ def cmd_score():
 
 if __name__ == "__main__":
     cmd = sys.argv[1]
-    {"espn": cmd_espn, "markets": cmd_markets, "build": cmd_build, "score": cmd_score}.get(cmd, lambda: cmd_candles(float(sys.argv[2])))()
+    {"espn": cmd_espn, "markets": cmd_markets, "build": cmd_build, "score": cmd_score}.get(cmd, lambda: cmd_candles(float(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 1, int(sys.argv[4]) if len(sys.argv) > 4 else 0))()

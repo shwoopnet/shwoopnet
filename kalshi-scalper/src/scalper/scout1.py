@@ -479,6 +479,8 @@ def cmd_candles():
     gid_of = {r[0]: r[1] for r in c.execute("SELECT ticker,gid FROM mgame")}
     hist_.sort(key=lambda r: (sha(gid_of[r[0]]), r[0]))
     print("hist one by one", len(hist_), flush=True)
+    if os.environ.get("SCOUT1_SKIP_HIST"):  # Amendment 1: the one-by-one phase stopped at its time limit
+        hist_ = []
     for i, (tk, st, _) in enumerate(hist_):
         try:
             d = hist_candles(tk, st)
