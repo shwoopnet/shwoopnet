@@ -461,6 +461,9 @@ def cmd_candles():
         time.sleep(0.8)
     c.commit()
     hist_ = [r for r in hist_ if not c.execute("SELECT 1 FROM cdone WHERE ticker=?", (r[0],)).fetchone()]
+    # Amendment 1 (workers/SCOUT1_REGISTRATION.md): the one-by-one fetch is rate limited, so games are fetched in sha1(game) order, a random subset of games
+    gid_of = {r[0]: r[1] for r in c.execute("SELECT ticker,gid FROM mgame")}
+    hist_.sort(key=lambda r: (sha(gid_of[r[0]]), r[0]))
     print("hist one by one", len(hist_), flush=True)
     for i, (tk, st, _) in enumerate(hist_):
         try:
