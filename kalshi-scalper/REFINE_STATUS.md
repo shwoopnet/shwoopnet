@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:50 AM CT (11:50Z): S-FLOW1 forward table at 08:17Z
+
+- S-FLOW1 (windows closing after Nov 3 21:45Z, 21 pool windows): LOW (imbalance <= -0.036) n 10, win 30.0%, PF 1.33, +3.45c/ct; HIGH n 11, win 18.2%, PF 1.38, +2.38c/ct; all pool n 21, win 23.8%, PF 1.35, +2.89c/ct. Low and high are indistinguishable so far (PF 1.33 vs 1.38). 39 more pool windows to reach 60 (about 100 more for 60 low-half windows if read on the low half). S-FLOW2 (non-trigger only): 0 of 150 windows. Nothing here supports the flow split.
+
 ## 2026-11-04 05:45 AM CT (11:45Z): W79 FLOW1 is merged on main, removal PR open
 
 - W79 (read only, nothing posted): PR 709 "FLOW1: seller-flow probe on the Bitcoin cheap side (5 contracts)" is merged (Nov 4 01:18Z). PR 711 "Remove FLOW1 (no reliable edge)" is open, mergeable, created 05:59Z; it would take FLOW1 out of SLOT_STRATEGIES and SLOT_HOLD_ALLOWED. origin/main `kalshiSlotLib.js` lists OICORE and FLOW1 in SLOT_STRATEGIES. So FLOW1 is in the code on main and becomes live at the next `deploy-sizing.sh` unless 711 merges first; the deployed bot still shows no FLOW1 orders (dash). My view is unchanged: the flow split is not a reliable edge (W31 block E, V2's FLOW1 FALSIFIED, S-FLOW2 forward not started yet), so 711 should go before the next deploy. Merging is the owner's word.
