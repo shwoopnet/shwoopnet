@@ -442,8 +442,9 @@ def cmd_candles():
     live = [r for r in todo if r[2] == "live"]
     hist_ = [r for r in todo if r[2] != "live"]
     # plumbing only: the batch endpoint also answers for the newer archived markets; those it leaves empty go one by one below
-    for i in range(0, len(hist_), 8):
-        batch = hist_[i:i + 8]
+    newer = [r for r in hist_ if r[1] >= 1788000000]  # 2026-08-29: the batch endpoint answered from about 08-28 on (probe, plumbing only)
+    for i in range(0, len(newer), 8):
+        batch = newer[i:i + 8]
         try:
             res = api.batch_candlesticks([x[0] for x in batch], min(x[1] for x in batch) - 7200, max(x[1] for x in batch))
         except Exception:  # noqa: BLE001
@@ -456,7 +457,7 @@ def cmd_candles():
                 c.execute("INSERT OR REPLACE INTO cdone VALUES(?,?)", (tk, len(cs)))
         if (i // 8) % 20 == 0:
             c.commit()
-            print("hist batch", i, "/", len(hist_), flush=True)
+            print("hist batch", i, "/", len(newer), flush=True)
         time.sleep(0.8)
     c.commit()
     hist_ = [r for r in hist_ if not c.execute("SELECT 1 FROM cdone WHERE ticker=?", (r[0],)).fetchone()]
