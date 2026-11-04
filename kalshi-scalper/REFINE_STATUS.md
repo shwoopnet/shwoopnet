@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:35 AM CT (09:35Z): W53 OICORE low-price end; wake check 08:00Z
+
+- W53 (descriptive): live fills at or under 0.07: n 11, 2 wins, 9 losses, +$13.26 (fee 6.6% of $6.10 at risk); above 0.07: n 13, 4 wins, 9 losses, +$16.32 (fee 5.2% of $21.20). History, 453 triggers, fill at close-120 ask: all win 27.2%, +7.73c, PF 1.86; excluding fill ask under 0.07 (257 left) win 44.7%, +12.68c, PF 1.91; the excluded 196 alone win 4.1%, +1.25c, PF 1.47. The cheap end is a small part of profit; history cannot count toward a filter. No change.
+- Wake 08:00Z: L1 last order 0.1h ago, OICORE 0.1h (25th fill, not yet settled; record still 6 won 18 lost, +$29.58, streak 4). Dogecoin paused, no FLOW1 orders. S-GPB1 0 of 40. S-FLOW2 windows start now.
+
 ## 2026-11-04 03:30 AM CT (09:30Z): W52 why gold orders do not fill
 
 - W52 (descriptive; 78 gold no-fill orders since Oct 21, W49's 56 was in-band windows only): the bot's own seen ask was at or below the order price in all 78, and the book had size in all 78. The candle ask after the send was above the order price in 61 of 69 windows (88%). Cause: the ask rose between the bot's read and the order reaching Kalshi, so the immediate-or-cancel limit found nothing. If filled at the order price, the 69 windows with results would have won 95.7%, +3.04c/ct after fee. Caveat that matters: those are the windows where price ROSE, so a fill at the new, higher ask earns less than +3.04c, and the unfilled set is selected by the move itself. So this is the ceiling of what a looser limit could add, not an estimate. It is the same adverse-selection shape as the OICORE S-LIM1-LIVE tag read; gold has no live test of a looser limit. Possible pre-registered brief for the owner (not sent, not live): gold limit +1c over the seen ask, read on tagged fills at 40. Hold until S-LIM1-LIVE reads (OICORE tagged 5 of 20).
