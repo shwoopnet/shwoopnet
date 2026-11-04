@@ -270,7 +270,7 @@ def fetch():
 
     todo = [e for e in uni if e not in have]
     def paced(ev):
-        time.sleep(1.1)   # one thread, about 50 requests a minute: a burst of five trips Kalshi's 429
+        time.sleep(3.3)   # one thread, about 17 requests a minute: measured 2026-11-04, faster than that returns 429 on 40% of calls
         return one(ev)
     with ThreadPoolExecutor(1) as ex:
         for i, (ev, v) in enumerate(ex.map(paced, todo)):
