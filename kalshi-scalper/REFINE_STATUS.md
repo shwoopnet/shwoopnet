@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:55 AM CT (09:55Z): W56 gold order timing
+
+- W56 (descriptive; timing fields exist on 37 of 252 filled gold orders, all recent): tick start to order sent median 949 ms, p90 1,169, max 1,443; exchange answer median 37 ms, p90 41; tick start to answer median 984 ms, p90 1,210; scheduler lateness (startLateMs) median 4,002 ms, p90 9,625, max 13,513. About 1 s round trip, nearly all of it the bot's own work before sending; the exchange is quick. The tick itself starts a median 4 s late, which matters more for the decision look (the 6 minute candle) than the 1 s send. Connects to W52: the ask can move inside that 1 s, which is the unfilled-limit cause. An engineering note for main, not a strategy change: shortening the pre-send work or reading the ask last would cut misses. Not proposed as a rule; no profit from it is shown (W54: missed trades were worse than fills).
+
 ## 2026-11-04 03:50 AM CT (09:50Z): W54 gold limit rule; the +1c idea is withdrawn
 
 - W54 (descriptive): code rule (l1Pick, kalshiLiveLib.js ~line 603): YES limit is the ask rounded up to the next cent, NO limit is the YES bid rounded down, so the limit is under 1c above the seen ask by construction. Gold fills (247 with a seenAsk; avgFill null, fill back-solved from settledPnl, 11 early sells excluded): within 0.5c of the seen ask n 150, win 99.3%, +6.00c/ct; about 1c above n 86, win 98.8%, +4.19c/ct. Gold no-fills: 135 in this file (W52 counted 78; the two counts disagree and I have not reconciled them). Of those, 77 would have filled at order+1c: win 90.9%, -1.68c/ct (a ceiling, selected on price rising); 10 had an ask above order+1c; 42 have no candle and 6 no result. So the missed trades were worse than the fills, and a +1c cushion would not help.
