@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:30 AM CT (11:30Z): W76 R6 recorder coverage
+
+- W76 (descriptive): `book15r6` on quote-data has 7 dates and 29 HHMM folders, first Oct 29 22:03 UTC, newest Nov 4 04:03 UTC. Since Nov 1 a folder lands every 4.0 h (on schedule). One real hole: Nov 2 08:02 to 17:07 UTC (9.1 h, about 5 h missing); Oct 30 to 31 runs were uneven (3.6 to 7.1 h gaps). Coverage over 394 windows per market (Oct 29 22:15Z to Nov 4 08:00Z): windows with a market XRP 363, Dogecoin 361, Bitcoin 360, Ethereum 353, gold 228 (the rest are "no open market", mostly gold's closed hours); all with at least 90% good polls. Enough for the R6 final read; the Nov 2 hole costs about 20 windows per market. Recorder stops by itself Nov 13 23:59 UTC; `r6_final.py` is scheduled Nov 12 13:00Z and again after Nov 14.
+
 ## 2026-11-04 05:25 AM CT (11:25Z): W75 C1 cell rate and Fisher
 
 - W75 (descriptive; Nov 1 22:55Z to Nov 4): cell fills per day, gold / Dogecoin: Nov 1 0/1, Nov 2 5/4, Nov 3 4/4, Nov 4 (partial) 1/0. Gold cell fills 10 in about 2.4 days. The worker divided by 7 days (1.43 a day, 43 days to 61 more fills), which understates the rate because the data spans only about 2.4 days; my corrected figure is about 4 a day gold only, so about 15 days to 61 more settled cell fills (a rough guess from 10 fills). Settled cell fills 19 (3 losses, 16 wins); all other gold+Doge fills 44 (6 losses, 38 wins). Fisher's exact p for the cell's loss count against the rest: 1.0 two-sided, 0.55 one-sided. The cell's loss rate (16%) is not different from the rest (14%). So the cell is not showing a distinct weakness; the registered read at 80 stays (about Nov 19 on current pace).
