@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:40 AM CT (12:40Z): W89 OICORE live fills per day
+
+- W89 (`oicore_rate.py`, offline on dash_report.json, oi/btc.jsonl and fwd_cache.jsonl): CT day, sim triggers / orders / fills / fill rate / cumulative fills: Oct 30 5/6/5/83%/5; Oct 31 4/5/4/80%/9; Nov 1 8/8/4/50%/13; Nov 2 6/5/5/100%/18; Nov 3 8/8/6/75%/24; Nov 4 (partial) 0/1/1/100%/25 (the Nov 4 trigger count is 0 only because the candle data stops before today). Trailing 5 full-day pace 4.8 fills a day. At that pace 40 fills about Nov 7, and 100 fills about Nov 19, so the Nov 13 read would hold about 68 fills, not 100. Fill rate (orders that fill) averages roughly 77%. Use this table to date the interim reads: a 40 fill look on about Nov 7 (net > 0 and the 18-streak kill are the only live checks), the registered read Nov 13, and an extended read about Nov 19 if main agrees (W67).
+
 ## 2026-11-04 06:35 AM CT (12:35Z): W88 silence flag calibration
 
 - W88 (descriptive; CT): gold L1, 387 orders since Oct 7: gap median 0.75h, p90 2.25h, max 93.3h; weekday gaps p90 2.25h, p99 5.0h, max 21.3h. Longest gaps are weekends (Fri Oct 16 15:54, 93.2h; Oct 9, 67.7h; Oct 30 12:09, 54.5h; Oct 23, 50.5h) and one overnight (Thu Oct 15 18:39, 21.3h). My 6h weekday flag would have fired on 2 weekday gaps. OICORE, 33 orders since Oct 30: gap median 1.88h, p90 9.65h, max 14.25h; weekday p99 11.2h. My 14h flag would have fired twice, both on overnight gaps starting Friday or Sunday night, so both false. Decisions: gold's silence flag becomes 5h on weekdays (p99), ignoring gaps that start Friday after 15:00 CT or on the weekend; the OICORE flag stays at 14h for now (the 12h suggestion rests on 18 gaps) but I will not treat a gap that starts Friday or Sunday night as a stall. Both flags only prompt a look at the bot's status; they do not trigger any action.
