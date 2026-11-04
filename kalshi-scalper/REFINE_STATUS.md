@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:10 AM CT (11:10Z): W72 gold 30-day range (day bootstrap)
+
+- W72 (descriptive; 29 US Central days, 252 fills, total +$38.26; whole days resampled, 5000 draws of 30 days): 30-day net 5th -$9.86, median +$39.15, 95th +$91.05. P(30-day drawdown deeper than $40) 3.8%; deeper than $60: 0.4%. Caveats: 29 days is thin, early days used smaller sizes (the 15 contract cap would widen the dollars), and independent days hide streaks across days (the Oct 23 to 29 drawdown and the Nov 2 to 3 losses are one cluster). Read the tails as a floor on the risk, not an estimate of it. The 12% loss stop remains the actual bound.
+
 ## 2026-11-04 05:05 AM CT (11:05Z): W71 gold day-to-day volatility
 
 - W71 (descriptive; 252 settled gold fills, Oct 7 to Nov 4, 29 days, 22 with fills, US Central days): total +$38.26, mean +$1.32/day, median +$0.02/day. Negative days 7 of 29 (24%), 7 of 22 days with fills (32%). Best day Oct 29 +$16.93; worst Nov 3 -$11.38 (18 fills). Longest drawdown Oct 23 to Oct 29 (6 days, depth -$17.40). Running total peaked +$50.30 on Nov 1, now $12.04 below the peak. 4 of the last 10 days lost money. The median day is about zero while the mean is carried by a few big days, which is the shape of a rule that wins small and loses big. Context only, no change.
