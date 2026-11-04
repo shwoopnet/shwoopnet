@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:00 AM CT (10:00Z): W57 gold no-fill counts reconciled
+
+- W57: `dash_report.json` has 387 gold orders (first Oct 7): 252 filled, 135 no fill, no other status. Since Oct 21: 234 orders, 155 filled, 79 no fill. So W54's 135 was the whole file with no date filter; W52's 78 was Oct 21 onward on an earlier copy of the file (now 79); W49's 56 was in-band windows without a filled order, a different thing. The right number for "gold no-fill orders since Oct 21" is 79. Conclusions of W52 and W54 stand (they do not depend on the exact count).
+
 ## 2026-11-04 03:55 AM CT (09:55Z): W56 gold order timing
 
 - W56 (descriptive; timing fields exist on 37 of 252 filled gold orders, all recent): tick start to order sent median 949 ms, p90 1,169, max 1,443; exchange answer median 37 ms, p90 41; tick start to answer median 984 ms, p90 1,210; scheduler lateness (startLateMs) median 4,002 ms, p90 9,625, max 13,513. About 1 s round trip, nearly all of it the bot's own work before sending; the exchange is quick. The tick itself starts a median 4 s late, which matters more for the decision look (the 6 minute candle) than the 1 s send. Connects to W52: the ask can move inside that 1 s, which is the unfilled-limit cause. An engineering note for main, not a strategy change: shortening the pre-send work or reading the ask last would cut misses. Not proposed as a rule; no profit from it is shown (W54: missed trades were worse than fills).
