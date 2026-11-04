@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:55 AM CT (08:55Z): W45 gold by price band
+
+- W45 (descriptive, 252 gold fills, 13 losses): 0.88-0.90 n 40, 6 losses, -$11.40, PF 0.73, win 85.0% vs break-even 89.1%; 0.90-0.93 n 81, 5 losses, +$22.54, PF 1.66, win 93.8% vs 91.8%; 0.93-0.97 n 131, 2 losses, +$27.12, PF 2.18, win 98.5% vs 95.4%. The lowest band lost and the highest did best, on 6, 5 and 2 losses. Band chosen after the losses were seen, so history cannot count toward a price floor; forward orders only. Candidate for a pre-registered forward read (S-GPB1: gold fills below 0.90 from Nov 4, read at 40 fills; flag if PF under 1.0). Registering now.
+
 ## 2026-11-04 02:50 AM CT (08:50Z): W44 OICORE entry-time sensitivity
 
 - W44 (descriptive, 31 simulated trigger windows since Oct 30, same 8 winners throughout): candles are 1 minute, so neighbours were used. Entry at close-180 ask PF 1.92, +9.83c; close-120 (registered) PF 2.60, +11.01c; close-60 PF 1.56, +2.06c. The registered close-120 is the best of the three. Rule unchanged; nothing to propose.
