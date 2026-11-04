@@ -767,3 +767,7 @@ With `?orders=1` every L1 and slot row now has `kalshiStatus` (from #712's log: 
 ## A removed strategy leaves the Strategies table (Nov 4, 2026, the owner: "Hide it")
 
 A slot strategy no longer in `KAL_SLOT_REGISTERED` (FLOW1) is drawn as a row only while it has an open order; with nothing open the row is `hidden` and still counts in the All strategies total (`kalshiStrategiesTableHtml` sums every row, draws only the visible ones). Test ST17. Page only, live on merge.
+
+## NHL recorder removed (Nov 4, 2026, the owner: "Remove it")
+
+`record-nhl.yml`, `scripts/record_nhl.py`, `test/nhlRecorderGates.test.js` and its fixtures (added in #714) are gone. Why: the frozen post-cut NHL reads both failed (goals -3.15c over 209 games, assists -3.66c over 168), and Kalshi now lists about 20 to 34 rungs per game, so the under-round filter it was built to test no longer applies; it would have used about 12,000 Actions minutes a month. The Yahoo reference adapter and the STRESSDAY1 watchlist from the same pull request stay. What it recorded before removal stays on `quote-data` under `nhl/`.
