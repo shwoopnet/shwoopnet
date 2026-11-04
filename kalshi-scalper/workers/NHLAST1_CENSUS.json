@@ -1,0 +1,25 @@
+{
+ "unmatched_events": 2,
+ "series": {
+  "KXNHLAST": {
+   "eligible_games_5plus_rungs": 310,
+   "eligible_fresh_games": 259,
+   "matched_games": 750,
+   "deferred_goal_overlap_games": 158,
+   "fresh_games": 592,
+   "rungs_1plus_2plus": 5109,
+   "rungs_per_game_median": 4.0,
+   "rungs_1plus_per_game_median": 4.0
+  },
+  "KXNHLPTS": {
+   "eligible_games_5plus_rungs": 494,
+   "eligible_fresh_games": 394,
+   "matched_games": 813,
+   "deferred_goal_overlap_games": 171,
+   "fresh_games": 642,
+   "rungs_1plus_2plus": 8463,
+   "rungs_per_game_median": 8,
+   "rungs_1plus_per_game_median": 6.0
+  }
+ }
+}
