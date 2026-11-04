@@ -1,0 +1,66 @@
+{
+ "events": [
+  {
+   "id": "401892644",
+   "date": "2026-11-05T00:30Z",
+   "status": {
+    "type": {
+     "state": "pre"
+    }
+   },
+   "competitions": [
+    {
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "2",
+        "abbreviation": "BUF",
+        "displayName": "Buffalo Sabres"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "14",
+        "abbreviation": "OTT",
+        "displayName": "Ottawa Senators"
+       }
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "id": "401892645",
+   "date": "2026-11-05T00:30Z",
+   "status": {
+    "type": {
+     "state": "pre"
+    }
+   },
+   "competitions": [
+    {
+     "competitors": [
+      {
+       "homeAway": "home",
+       "team": {
+        "id": "26",
+        "abbreviation": "FLA",
+        "displayName": "Florida Panthers"
+       }
+      },
+      {
+       "homeAway": "away",
+       "team": {
+        "id": "4",
+        "abbreviation": "CHI",
+        "displayName": "Chicago Blackhawks"
+       }
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

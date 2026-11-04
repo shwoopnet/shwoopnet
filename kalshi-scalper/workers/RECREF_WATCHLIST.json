@@ -11,6 +11,10 @@
     {"id": "billboard_200", "adapter": "billboard", "params": {"url": "https://www.billboard.com/charts/billboard-200/", "top": 25}},
     {"id": "steam_top_sellers", "adapter": "steam", "params": {"url": "https://store.steampowered.com/search/results/?filter=topsellers&json=1&cc=us&count=25", "top": 25}}
   ],
+  "standalone_refs": [
+    {"id": "yahoo_1m", "adapter": "yahoo1m", "params": {"symbols": ["EURUSD=X", "GBPUSD=X", "JPY=X", "AUDUSD=X", "CAD=X", "CL=F", "NG=F", "SI=F"], "range": "1d", "backfill_range": "7d"},
+     "_what": "RECBUILD1 (2026-11-04, the owner approved collector 2): Yahoo's public 1 minute chart for EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD, WTI, natural gas and silver futures, no Kalshi series attached. Yahoo keeps only about 7 days of 1 minute bars, so the first run backfills 7d and later runs add only bars newer than the high-water mark in ref/yahoo1m_state.json (rows go to ref/bars/<date>/<poll second>.csv.gz with the refvals columns: rank = unix second, name = symbol, value = close, value2 = volume, note = o/h/l). Fed to FXREF1, HRLYFX1 and COMDAY1 once registered."}
+  ],
   "series": [
     {"series": "KXRT", "family": "rotten_tomatoes", "refs": ["rt_page"], "rule_source": "Tomatometer score of the film's Rotten Tomatoes page at 10:00 AM ET on the close day; threshold markets above N. Closes in under 7 days."},
     {"series": "KXMC", "family": "metacritic", "refs": ["mc_page"], "rule_source": "Metascore of the game's Metacritic page seven days after release at 10:00 AM ET; threshold markets."},

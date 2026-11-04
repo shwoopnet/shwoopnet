@@ -180,6 +180,55 @@ def poll_target(ref, key, url, slot, ts):
     return out, calls, n429, not out
 
 
+def load_standalone(path):
+    """References polled on their own, with no Kalshi series attached (the Yahoo 1 minute reference bars). [] when the watchlist has none."""
+    return json.load(open(path)).get("standalone_refs") or []
+
+
+def state_path(data_dir):
+    return os.path.join(data_dir, "ref", "yahoo1m_state.json")
+
+
+def load_state(data_dir):
+    """{symbol: unix second of the last 1 minute bar on file}. A missing or unreadable file means 'nothing on file', which makes the next run a 7 day backfill."""
+    try:
+        d = json.load(open(state_path(data_dir)))
+        return {k: int(v) for k, v in d.items()} if isinstance(d, dict) else {}
+    except (OSError, ValueError, TypeError):
+        return {}
+
+
+def range_for(last_ts, now, p):
+    """Backfill (7d, the most Yahoo keeps at 1 minute) when nothing is on file or the gap is over 20 hours; otherwise today's bars."""
+    return p.get("range", "1d") if last_ts and now - last_ts <= 20 * 3600 else p.get("backfill_range", "7d")
+
+
+def run_standalone(ref, data_dir, slot, now, state):
+    """Poll each symbol of one standalone reference. Returns (rows, calls, n429, failures); updates `state` with the newest bar kept per symbol.
+    A symbol that cannot be read is a counted failure and keeps its old high-water mark, so the next run backfills the gap (inside Yahoo's 7 days)."""
+    p = ref.get("params") or {}
+    rows, calls, n429, fails = [], 0, 0, 0
+    for sym in p.get("symbols") or []:
+        last = state.get(sym, 0)
+        rng = range_for(last, now, p)
+        url = ad.yahoo1m_url(sym, rng)
+        st, body, _d, n, c = get_retry(url)
+        if st != 200 or not body:                      # the other host of the same service, one plain try (never a different User-Agent)
+            url = ad.yahoo1m_url(sym, rng, ad.YH_HOSTS[1])
+            st, body, _d = http_get(url)
+            c += 1
+            n += 1 if st == 429 else 0
+        calls, n429 = calls + c, n429 + n
+        parsed = ad.yahoo1m_parse({"after_ts": last}, [body]) if st == 200 and body else []
+        if st != 200 or not body or (not parsed and ad.yahoo1m_parse({}, [body]) == []):
+            fails += 1
+            continue
+        rows += [[slot, int(now), ref["id"] + ":" + sym, ref["adapter"], url, st, r[0], r[1], r[2], r[3], r[4]] for r in parsed]
+        if parsed:
+            state[sym] = max(last, max(r[0] for r in parsed))
+    return rows, calls, n429, fails
+
+
 def known_results(data_dir):
     seen = set()
     for p in glob.glob(os.path.join(data_dir, "ref", "results", "**", "*.csv.gz"), recursive=True):
@@ -209,7 +258,7 @@ def run(watchlist, data_dir, now=None):
     entries, refs, default_window = load_watchlist(watchlist)
     seen = known_results(data_dir)
     qrows, rrows, vrows = [], [], []
-    ck = cr = n429 = errs = fails = 0
+    ck = cr = n429 = errs = fails = vrows_n = 0
     date0 = ""
     done, used = set(), set()
     for e in entries:
@@ -239,11 +288,22 @@ def run(watchlist, data_dir, now=None):
             if m.get("ticker") not in seen and m.get("result") in ("yes", "no"):
                 seen.add(m["ticker"])
                 rrows.append(result_row(e["series"], m, int(now)))
+    state = load_state(data_dir)
+    for sref in load_standalone(watchlist):
+        rows, c2, n2, f2 = run_standalone(sref, data_dir, slot, int(now), state)
+        if rows:       # its own file named for the poll second (never the slot): the high-water mark moves on, so a re-run in the same slot must not overwrite bars an earlier run already kept
+            write_gz(os.path.join(data_dir, "ref", "bars", day, "%s.csv.gz" % int(now)), REF_COLS, rows)
+        vrows_n += len(rows)
+        cr, n429, fails = cr + c2, n429 + n2, fails + f2
+        used.add(sref["id"])
+    if state:
+        os.makedirs(os.path.dirname(state_path(data_dir)), exist_ok=True)
+        json.dump(state, open(state_path(data_dir), "w"), sort_keys=True)
     write_gz(os.path.join(data_dir, "ref", "quotes", day, hhmm + ".csv.gz"), QUOTE_COLS, qrows)
     write_gz(os.path.join(data_dir, "ref", "refvals", day, hhmm + ".csv.gz"), REF_COLS, vrows)
     if rrows:
         write_gz(os.path.join(data_dir, "ref", "results", day, hhmm + ".csv.gz"), RESULT_COLS, rrows)
-    summary = [slot, int(now), len(entries), len(used), ck, cr, n429, errs, fails, len(qrows), len(vrows), len(rrows)]
+    summary = [slot, int(now), len(entries), len(used), ck, cr, n429, errs, fails, len(qrows), len(vrows) + vrows_n, len(rrows)]
     runs = os.path.join(data_dir, "ref", "runs", day + ".csv")
     os.makedirs(os.path.dirname(runs), exist_ok=True)
     new = not os.path.exists(runs)
