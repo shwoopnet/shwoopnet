@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 6:20 PM CT (00:20Z Nov 4; clock slip noted: actual time 00:16Z): L1 silence rule changed (my own watch, no live effect)
+
+Gold orders have 19 weekday gaps over 3 hours in the record (examples: Oct 26 03:24Z to 07:24Z 4.0 h, Oct 30 00:54Z to 05:54Z 5.0 h, Nov 2 11:24Z to 20:54Z 9.5 h, Nov 3 09:39Z to 13:24Z 3.8 h), so a 3 hour flag fires on ordinary quiet stretches. New watch rule: flag L1 silence at 6 hours with no order on a weekday (UTC Monday to Friday), and at any weekday gap over 6 hours also check that in-band gold windows existed (public candles) before calling it a stop. OICORE silence flag stays at 14 hours. dash.sh still prints the 3 hour marker; read it as a note, not a flag, until I edit it.
+
 ## 2026-11-03 3:45 PM CT (21:45Z): CORRECTION to W17 and S-FLOW1 (the tape was deduplicated by accident)
 
 W19 found that the W17 script loaded the R6 tape into a set of (time, price, count, side) tuples, which collapses identical same-timestamp fills (14.19 million rows kept of 15.39 million). I reran W17 on every raw row with the same fixed threshold (-0.036): low n 76, win 36.8%, PF 2.54, +13.25c; high n 70, win 17.1%, PF 0.68, -3.92c; permutation p = 0.0026 (one sided, 10,000 shuffles); non-trigger pool low PF 2.48 vs high 0.50; the 12 OICORE trigger windows are still unreadable (7 low PF 3.13, 5 high PF 5.77). The lead survives on the full tape with slightly smaller numbers (the earlier PF 2.84 / 0.63 was on the collapsed tape). S-FLOW1 is therefore defined on the FULL public trade list (every trade, no deduplication), threshold -0.036, which is what flow_forward.py computes from the public endpoint; the cross-check imbalances that differed (0.19 vs 0.11 on one window) came from the collapsed R6 set. One more try counted.
