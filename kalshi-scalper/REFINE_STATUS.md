@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:42 AM CT (12:42Z): W125 faster wake.sh; first S-GPB1 fills
+
+- W125: the three slow trackers (flow2_forward.py, flowl1_forward.py, flow_forward.py) now fetch at most 40 uncached windows per run (env W125_CAP) and print a W125 CAP line when windows are pending, with a lock file each so two runs cannot append to one cache; wake.sh has a --fast mode (prints dash, fwd_all, shadows and flags, starts the trackers detached, shows their previous output marked with its time; 14 s in the test) and the default mode waits at most 120 s (WAKE_TRACKER_WAIT) then prints still running. Definitions and thresholds unchanged; backups *.w125bak; test_flags.py 35 PASS. Cause of the earlier tool timeout: a stale cache made the trackers refetch hours of windows. The full run that was in progress finished: no flags fired except the known FLOW1 ledger FLAG (shadow low 3, live orders 2, matched 2, shadow-only 1: the 10:00 close, no live order). S-GPB1 has its first forward gold fills since 09:00Z: one below 0.90 (net +$1.46, no loss) and one at 0.90 or above (+$0.33, no loss): 1 of 40 below 0.90. OICORE unchanged (25 fills, +$28.94, streak 5; last order 07:57Z), FLOW1 2 orders, 1 filled, -$0.64.
+
 ## 2026-11-04 05:54 AM CT (11:54Z): FLOW1 second order (no fill), ledger refreshed
 
 - FLOW1 live orders now 2: the 09:30 close (YES 5 at 0.12, filled, lost -$0.64) and the 11:30 close (KXBTC15M-26NOV040630-30, NO, 0 filled of the order, limit 0.25, status no fill, placed 11:27:04Z). Ledger after refreshing the cache to 11:45Z: shadow low windows 3, live orders 2, matched 2, shadow-only (live missed) 1 (the 10:00 close, 040500-00, no live order at all), live-only 0. The FLAG line in wake.sh about unmatched windows was partly a stale cache (the 11:30 close was not yet in it); one real miss remains. Rule (a) needs 20 shadow windows; fills 1 of 2 so far. OICORE unchanged (25 fills, +$28.94, streak 5); no OICORE order since 07:57Z.
