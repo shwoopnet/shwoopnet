@@ -248,7 +248,8 @@ function makeRunners(flags) {
       if (res.status >= 200 && res.status < 300 && d.order_id) {
         const filledCount = Number(d.fill_count || 0);
         const patch = { status: filledCount > 0 ? "filled" : "no fill", orderId: d.order_id, fillCount: String(d.fill_count || "0"), remainingCount: String(d.remaining_count || "0"),
-          averageFillPrice: d.average_fill_price || null, averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price };
+          averageFillPrice: d.average_fill_price || null, averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,
+          ...(d.status ? { kalshiStatus: String(d.status).slice(0, 24) } : {}), answeredAtMs: Date.now() };   // log only (Nov 4, 2026): why an order did not fill; nothing reads it
         await store.updateSlotOrder(cid, patch);
         Object.assign(rec, patch);
         await log("slot order", s.id + " " + side + " " + rec.count + " at " + (sidePrice * 100).toFixed(0) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
