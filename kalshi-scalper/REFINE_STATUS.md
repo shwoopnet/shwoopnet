@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:05 AM CT (13:05Z): W94 wake.sh built
+
+- W94: `wake.sh` (scratchpad, 900 s budget) runs dash.sh, fwd_all.py on the fresh report, then flow2_forward.py, flowl1_forward.py and flow_forward.py in the background (waits up to 8 minutes, marks any unfinished as still running) and prints only the silence and kill flags that fire plus the trackers. Flags built in: gold L1 5h on weekdays, OICORE 14h, OICORE streak warning 15 to 17 and kill 18, S-LIM1-LIVE at 20 tagged, C9 at 200 windows, C1 at 80 settled, Doge paused. Interpretation calls fixed: "Friday or Sunday night" = a gap starting at or after 18:00 CT on those days; gold's weekday rule also needs the current CT day to be a weekday. First run about 08:37Z: no flags fired. Trackers: S-GPB1 0 of 40; S-GQH1 20-24 CT -$14.29 PF 0.35 vs +$10.08 elsewhere; gold at the 15 cap 38% since Nov 3; S-FLOW2 1 of 150; S-FLOWL1 0 of 20 early sells; S-FLOW1 22 pool windows, 38 short of 60, low PF 1.24 vs high 1.38. From now on one wake runs `bash wake.sh`.
+
 ## 2026-11-04 07:00 AM CT (13:00Z): W93 price band table added to the Nov 13 template
 
 - W93: `oicore_nov13.py` now also prints table (5b), live fills by order price (information only; fee per order rounded over price x count): at or under 0.07: 12 fills, 2 wins, +$12.62, PF 3.07, fee 7.3% of cost; 0.07 to 0.15: 9 fills, 1 win, +$0.08, PF 1.01, fee 6.7%; above 0.15: 4 fills, 3 wins, +$16.24, PF 10.55, fee 4.6%. Tagged 6 fills +$4.77 PF 2.04; untagged 19 fills +$24.17 PF 3.00. Every cell is tiny; note that the middle band (0.07 to 0.15, 9 fills) is flat and the profit sits in the cheapest and the dearest cells, which is just the lottery shape. No change, no filter.
