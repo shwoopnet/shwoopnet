@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:00 AM CT (09:00Z): W117 dash.sh failure-mode tests all pass
+
+- W117 (`test_dash.py`, a PATH-shimmed curl and a fake token in a temp folder, no network and no real token): five failure modes of the fixed dash.sh all PASS: HTTP 500 body, malformed JSON, JSON without orders, empty body, timeout (curl exit 28). Each leaves the seed report byte-identical (md5), prints FETCH FAILED and removes the temp file. The helper scripts are deliberately not copied into the test, so only the fetch and fallback path is covered. The real dash_report.json was not touched. Scheduled reads now armed: OICORE interim 40 fill look Nov 7 15:00Z, OICORE read Nov 13 15:00Z, R6 final Nov 12 13:00Z (fixed2).
+
 ## 2026-11-04 02:56 AM CT (08:56Z): W116 dash.sh and wake.sh made safe
 
 - W116: the four fixes from W115 are applied (backups dash.sh.bak, wake.sh.bak): both scripts exit early with a clear message (rc 2) when KALSHI_REPORT_TOKEN is unset, never echoing it; dash.sh fetches into a temp file and replaces dash_report.json only if it parses and has orders and generatedAt, otherwise it prints FETCH FAILED, using the last good report from <time> and carries on; the path comes from the script's own directory; TOOLBOX.md says to export the token first. Tests: unset token exits rc 2 with the report's md5 unchanged; a normal run fetches a fresh report. I also exercised the FETCH FAILED branch myself with a dummy token (report md5 unchanged before and after, the old report was used). Also seen on that run: L1 placed a new gold order at 08:39Z (0.3h before the check); OICORE last order is 07:57Z (1.0h).
