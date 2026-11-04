@@ -92,4 +92,15 @@ gates.W6 = () => {
   assert.ok(/Open-Meteo/.test(reg) && /how to turn it off/i.test(reg));
 };
 
+// W7 (WXLOW1): the lows ride in the same ensemble call, every low table is named with a _low suffix beside the highs, and the lows watchlist names only KXLOWT series.
+gates.W7 = () => {
+  assert.ok(watch.cities.every((c) => /^KXLOWT[A-Z]+$/.test(c.low_series)), 'every city has a KXLOWT series in the watchlist');
+  assert.strictEqual(new Set(watch.cities.map((c) => c.low_series)).size, 14);
+  assert.ok(!/KX[A-Z0-9]{2,}/.test(strip(script)), 'the script still names no ticker');
+  const code = strip(script);
+  assert.ok(/daily=%s/.test(code) && /temperature_2m_max,temperature_2m_min/.test(code), 'one ensemble request carries both variables');
+  assert.strictEqual((code.match(/OPENMETEO,/g) || []).length, 1, 'one ensemble call site');
+  for (const t of ['ens_low', 'nws_low', 'quotes_low', 'events_low', 'results_low', 'obs_low']) assert.ok(code.includes('"' + t + '"'), t);
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }
