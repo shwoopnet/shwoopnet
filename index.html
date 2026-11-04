@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 4</div>
                 <ul class="changelog-list">
+                  <li>Bot status: the countdown ring and the prices tile now cover EVENT830 (the release day longshot), with its next listed release window, so the card covers every live strategy</li>
                   <li>Trading: FLOW1 is removed; the longer history test and a second out-of-sample check found no reliable edge (its open orders still settle normally)</li>
                   <li>Bot page: the L1 row in Strategies counts only the markets L1 trades now (gold); paused markets' earlier results stay in All strategies</li>
                   <li>Trading: FLOW1, a fourth strategy probe: Bitcoin cheap side (5c to 50c), 5 contracts, only when takers were net selling that side in the 3 minutes before, held to settlement</li>
@@ -3360,12 +3361,27 @@
   // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
   var KAL_LOOKS = [
     { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; } },
-    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } }
+    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } },
+    // EVENT830 (Nov 3, 2026, the second slot): only in the listed windows that close at a US 8:30 AM Eastern release (7:30 AM Central), 3 minutes before that close. `closes` is a copy of SLOT_CALENDARS.EVENT830 in the bot's code (gate SF9 compares them); a later date is a reviewed edit of both.
+    { at: 720000, name: 'Release day longshot', what: function(){ return 'Silver, copper, oil, FX, HYPE and BNB, at the 7:30 AM release'; },
+      closes: ['2026-11-05T13:30:00Z', '2026-11-06T13:30:00Z', '2026-11-10T13:30:00Z', '2026-11-12T13:30:00Z', '2026-11-13T13:30:00Z', '2026-11-17T13:30:00Z', '2026-11-19T13:30:00Z', '2026-11-25T13:30:00Z',
+        '2026-12-03T13:30:00Z', '2026-12-04T13:30:00Z', '2026-12-10T13:30:00Z', '2026-12-15T13:30:00Z', '2026-12-16T13:30:00Z', '2026-12-17T13:30:00Z', '2026-12-23T13:30:00Z'],
+      kinds: ['jobless claims', 'jobs report', 'CPI', 'jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE', 'jobless claims', 'jobs report', 'CPI and jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE'] }
   ];
   function kalshiNextEntry(now){
     var Q = 900000, base = Math.floor(now / Q) * Q, goldClosed = kalshiGoldClosed(now), events = [];
-    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){ events.push({ at: base + q * Q + l.at, look: l }); }); }
+    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){
+      // a calendar look counts only in a listed window: the close of this quarter must be one of its dates
+      if(l.closes && l.closes.map(Date.parse).indexOf(base + (q + 1) * Q) < 0){ return; }
+      events.push({ at: base + q * Q + l.at, look: l });
+    }); }
     events.sort(function(a, b){ return a.at - b.at; });
+    // two strategies looking at the same moment (the open interest jump and a release window) are one look, both named
+    events = events.reduce(function(out, e){
+      var last = out[out.length - 1];
+      if(last && last.at === e.at){ var a = last.look, b = e.look; last.look = { name: a.name + ' and ' + b.name, what: function(g){ return a.what(g) + '; ' + b.what(g); } }; return out; }
+      out.push({ at: e.at, look: e.look }); return out;
+    }, []);
     var i = 0; while(i < events.length && events[i].at <= now){ i++; }
     var next = events[i], prev = events[i - 1], after = events[i + 1];
     if(!next || !prev){ return null; }
@@ -3408,6 +3424,12 @@
       out.pos = Math.max(0, Math.min(1, (p - from) / span)); out.bandLeft = (w.lo - from) / span; out.bandWidth = (w.hi - w.lo) / span;
       return out;
     });
+  }
+  // The next release window the Release day longshot (EVENT830) can still enter: the first listed close at least 2 minutes away (it enters 3 to 2 minutes before the close). Null after the last listed date. Pure: the clock in.
+  function kalshiEventNext(now){
+    var l = KAL_LOOKS.filter(function(x){ return x.closes; })[0]; if(!l){ return null; }
+    for(var i = 0; i < l.closes.length; i++){ var c = Date.parse(l.closes[i]); if(c - 120000 > now){ return { at: c - 180000, close: c, kind: l.kinds[i] || '', inMs: c - 180000 - now }; } }
+    return null;
   }
   function kalshiDurationText(ms){
     var m = Math.round(ms / 60000);
@@ -3681,6 +3703,14 @@ kalshiStatusTick();
         '<div class="kal-st-sub">' + escapeHtml(verdict) + '. Closes ' + escapeHtml(kalTime(r.closeAt)) + '</div></div>';
   }
   // The size of the bot's most recent order in each market (ordered contracts, both strategies), for the depth tile.
+  // The Release day longshot's cell in the price tile: it trades only on listed release days, so the cell says when the next window is (the relay does not read its eight markets).
+  function kalshiEscapedEventCell(ev, now){
+    var head = '<div class="kal-st-pname">Release day longshot <span class="kal-st-dim">&middot; cheaper side</span></div>';
+    if(!ev){ return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig kal-st-dim">&mdash;</div><div class="kal-st-sub">No listed release window left</div></div>'; }
+    var day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(ev.close));
+    var soon = ev.inMs <= 0 ? 'Looking now' : (ev.inMs < 86400000 ? 'In ' + kalshiDurationText(ev.inMs) : day);
+    return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig">' + escapeHtml(soon) + '</div><div class="kal-st-sub">Next window ' + escapeHtml(day) + ', 7:27 AM Central (' + escapeHtml(ev.kind) + '). 5c to 50c, 8 markets</div></div>';
+  }
   function kalshiLastOrderSizes(orders){
     var latest = {};
     (orders || []).forEach(function(o){
@@ -3705,7 +3735,7 @@ kalshiStatusTick();
     var now = Date.now(), data = kalshiBooksLast, rows = kalshiPriceWatch(data && data.markets, now);
     var depthEl = document.getElementById('kalDepth');
     if(depthEl){ var sizes = kalshiLastOrderSizes(kalshiAllOrders()); depthEl.innerHTML = '<div class="kal-st-lbl">Depth at the touch, against our order size</div>' + kalshiEscapedDepthRows(rows, sizes) + '<div class="kal-st-sub" style="margin-top:8px">Top of the book only. A big share of it is where orders tend to miss.</div>'; }
-    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + '</div>' +
+    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + kalshiEscapedEventCell(kalshiEventNext(now), now) + '</div>' +
       '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + '. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
   }
   var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
