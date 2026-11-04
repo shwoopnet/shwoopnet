@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:52 AM CT (08:52Z): W113 interim 40 fill look checklist registered
+
+- W113: `interim_40.md` (scratchpad) is the checklist for the OICORE 40-fill look expected about Nov 7, written before the data. Commands: fetch a fresh nightly report (last 14 days, orders=1), then `oicore_nov13.py` on it and `fwd_all.py`. Only two things can change a decision: the loss streak reaching 18, and net under -$6.00 after 40 fills; everything else (PF, win rate, weekend, time blocks, tags, price bands) is information only. Verdict wording: net above 0 is the minimum, PF 1.5 is not a bar below 100 fills, name the fill count and say interim, not the Nov 13 read. Not allowed: filters from history, new splits, a change of the 10 contract size, promoting or deploying anything. If a kill rule is hit I report it to main; the decision and any change belong to main and the owner, not to me. One line to main: OICORE at N fills, net, streak, no kill hit or which kill hit.
+
 ## 2026-11-04 02:50 AM CT (08:50Z): corrections from the W110 audit, and the heading clock
 
 - Heading clock: the time stamps on my entries from about 02:05 AM CT onward had drifted ahead of the real clock (the last ones said 08:20 AM CT when it was 02:48 AM CT). All of them are now rewritten from their git commit times (UTC minus 6 hours, Central Standard Time after Nov 1). Trust the commit times. W109's digest also noticed the mismatch.
