@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:30 AM CT (13:30Z): W98 C2 tracker built
+
+- W98: C2 (skip negative rise3) was fully stated, so `c2_fwd.py` is built and called from `wake_shadows.py` (FLAG at 40). Registration: gold and Dogecoin L1 fills after Nov 1 21:15Z; rise3 as logged on the order, negative means below 0; read at 40 negative-rise3 fills; dead if 1 or fewer losses or net above +$2; predicted at least 3 losses and net under $0. Two choices not in the registration, now fixed: a loss is settledPnl below 0, and only settled fills count toward the 40. Current read: 9 of 40 negative-rise3 fills, 1 loss, net -$2.67. Dogecoin is paused, so the cell now fills on gold alone (slow). The clause "dead if JUMP1 is FALSIFIED" and V2's confirmation of how JUMP1 counts rise3 stay a manual check; no answer recorded.
+
 ## 2026-11-04 07:25 AM CT (13:25Z): W97 retry fix for failed candle fetches
 
 - W97 (in a scratchpad copy `w97/`, real `oi/` untouched): `r6_final_fixed2.py` no longer writes a failed candle request as done (`have()` skips `ok:false` rows, so they retry on the next `--live` run), with a `--retry-only` flag that skips the git sync and the analysis. Of the 5 stored `ok:false` rows, 2 now fill (gold KXGOLD15M-26NOV030715-15, Doge KXDOGE15M-26NOV031030-30). The other 3 (gold Oct 14, Doge Oct 5 and Oct 7) are outside the R6 book set, so `topup()` never reaches them; fetched directly: gold Oct 14 and Doge Oct 5 return data, Doge Oct 7 got a 429 and needs another try. These 3 are not stored. The Nov 12 13:00Z scheduled task now calls `r6_final_fixed2.py`. The real `oi/gold.jsonl` and `oi/doge.jsonl` still hold the 5 failed rows until the next live run; they feed old reads only (gold and Doge are not OICORE), so no result changes.
