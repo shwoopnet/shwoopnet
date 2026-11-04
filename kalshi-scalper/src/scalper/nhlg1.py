@@ -436,39 +436,42 @@ def cmd_candles(minutes: float):
     ev = {r[0]: r[1] for r in c.execute("SELECT ticker,event FROM kmarket")}
     order = sorted(byg, key=lambda g: md5(ev[byg[g][0]]))
     print("TEST games", len(order), "markets", sum(len(v) for v in byg.values()), flush=True)
-    done_games = 0
-    for gi, gid in enumerate(order):
-        if time.time() > t_end:
-            print("time box reached at game", gi, flush=True)
+    n_ok = n_fail = 0
+    for pas in range(4):
+        pending = [g for g in order if any(not c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone() for tk in byg[g])]
+        print("pass", pas, "games with markets left", len(pending), flush=True)
+        if not pending:
             break
-        st = starts[gid]
-        for tk in byg[gid]:
-            if c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone():
-                continue
-            cs = None
-            for _ in range(3):
-                try:
-                    d = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": st - 3600, "end_ts": st, "period_interval": 1}, retries=4)
-                    cs = d.get("candlesticks", [])
-                    break
-                except Exception:  # noqa: BLE001
+        for gi, gid in enumerate(pending):
+            if time.time() > t_end:
+                print("time box reached", flush=True)
+                break
+            st = starts[gid]
+            for tk in byg[gid]:
+                if c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone():
+                    continue
+                cs = None
+                for a in range(4):
                     try:
-                        cs = api.candlesticks("KXNHLGOAL", tk, st - 3600, st)
+                        cs = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": st - 3600, "end_ts": st, "period_interval": 1}, retries=1).get("candlesticks", [])
                         break
                     except Exception:  # noqa: BLE001
-                        time.sleep(5)
-            if cs is None:
-                continue
-            for x in cs:
-                c.execute("INSERT OR REPLACE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
-            c.execute("INSERT OR REPLACE INTO cdone VALUES(?,?)", (tk, len(cs)))
-            time.sleep(0.4)
-        c.commit()
-        done_games += 1
-        if gi % 10 == 0:
-            print("game", gi, "/", len(order), flush=True)
+                        time.sleep(2 + 3 * a)
+                time.sleep(0.5)
+                if cs is None:
+                    n_fail += 1
+                    continue
+                n_ok += 1
+                for x in cs:
+                    c.execute("INSERT OR REPLACE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
+                c.execute("INSERT OR REPLACE INTO cdone VALUES(?,?)", (tk, len(cs)))
+            c.commit()
+            if gi % 5 == 0:
+                print("pass", pas, "game", gi, "/", len(pending), "ok", n_ok, "fail", n_fail, flush=True)
+        if time.time() > t_end:
+            break
     c.commit()
-    print("candles pass done; games started", done_games, flush=True)
+    print("candles done; ok", n_ok, "fail", n_fail, flush=True)
 
 
 def load_entries(c):

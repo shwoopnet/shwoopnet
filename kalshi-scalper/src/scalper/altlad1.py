@@ -295,7 +295,10 @@ def cmd_fit() -> None:
 def cmd_candles() -> None:
     ser = active_series()
     fit = load("fit.json", {})
-    have = load("candles.json", {})
+    rev = os.environ.get("ALTLAD1_REV") == "1"       # logistics only: a second thread walks the same md5 order from the far end (own file)
+    myfile = "candles_rev.json" if rev else "candles.json"
+    other = "candles.json" if rev else "candles_rev.json"
+    have = load(myfile, {})
     ev = events_of(ser)
     work = defaultdict(list)
     for (s, e, close), strikes in ev.items():
@@ -311,11 +314,16 @@ def cmd_candles() -> None:
                     work[(s, e, close)].append(tk)
     work = {k: sorted(set(v)) for k, v in work.items()}
     order = sorted(work, key=lambda k: event_rank(k[1]))
+    if rev:
+        order = order[::-1]
     print("events to fetch", len(order), "tickers", sum(len(v) for v in work.values()), flush=True)
     pause, done, t0 = 0.3, 0, time.time()
+    seen_other = load(other, {})
     for i, k in enumerate(order):
         s, e, close = k
-        todo = [t for t in work[k] if t not in have]
+        if i % 40 == 0:
+            seen_other = load(other, {})
+        todo = [t for t in work[k] if t not in have and t not in seen_other]
         for j in range(0, len(todo), 100):
             tks = todo[j:j + 100]
             for attempt in range(12):
@@ -341,9 +349,9 @@ def cmd_candles() -> None:
             time.sleep(pause)
         done += 1
         if done % 40 == 0:
-            save("candles.json", have)
+            save(myfile, have)
             print("candles event", i + 1, "of", len(order), "pause", round(pause, 2), "min", round((time.time() - t0) / 60, 1), flush=True)
-    save("candles.json", have)
+    save(myfile, have)
     print("done", flush=True)
 
 
@@ -389,7 +397,7 @@ def bucket_lines(rows, tag):
 def cmd_census() -> None:
     ser = active_series()
     fit = load("fit.json", {})
-    cands = load("candles.json", {})
+    cands = {**load("candles_rev.json", {}), **load("candles.json", {})}
     kl = {c: klines_of(c) for c in {COINS[s] for s in ser}}
     dates = dev_dates(ser)
     for key in LOOKS:
@@ -425,7 +433,7 @@ def cmd_score() -> None:
         return
     ser = active_series()
     fit = load("fit.json", {})
-    cands = load("candles.json", {})
+    cands = {**load("candles_rev.json", {}), **load("candles.json", {})}
     kl = {c: klines_of(c) for c in {COINS[s] for s in ser}}
     dates = dev_dates(ser)
     half = {d: ("W1" if i < len(dates) // 2 else "W2") for i, d in enumerate(dates)}
