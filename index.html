@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 4</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the L1 row in Strategies counts only the markets L1 trades now (gold); paused markets' earlier results stay in All strategies</li>
                   <li>Trading: FLOW1, a fourth strategy probe: Bitcoin cheap side (5c to 50c), 5 contracts, only when takers were net selling that side in the 3 minutes before, held to settlement</li>
                 </ul>
                 <div class="changelog-day">Nov 3</div>
@@ -3826,7 +3827,7 @@ kalshiStatusTick();
     if(needsOlder){ var pick = hit ? kalshiPnlSource(kalshiLiveOrders, hit) : null; if(pick && !hit.failed){ l1src = pick.orders; } else { partial = true; } }
     var rangeLabel = (KAL_PNL_RANGES.filter(function(r){ return r.key === key; })[0] || { label: key }).label;
     var l1Orders = kalshiResolveOrders(l1src, acct && acct.results, fills);
-    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1'; }), now, since);   // includes Ethereum's old orders, so the table still adds up to the Account result
+    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1' && kalshiIsActive(o); }), now, since);   // only the markets L1 trades now (the owner, Nov 4, 2026: the row said Gold but carried Dogecoin's and other paused markets' old results); those stay in All strategies
     var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);

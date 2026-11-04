@@ -70,7 +70,7 @@ gates.ST7 = () => {
 };
 gates.ST8 = () => {
   // The owner (Oct 30, 2026): "pnl doesnt match". The Strategies rows and the Account card's Today must be worked out from the same orders and the same fills, so the rows add up to Today.
-  assert.ok(/var l1Orders = kalshiResolveOrders\(l1src, acct && acct\.results, fills\);/.test(html) && /kalshiStrategyOf\(o\) === 'L1'; \}\), now, since\)/.test(html) , 'the L1 row uses the account fills');
+  assert.ok(/var l1Orders = kalshiResolveOrders\(l1src, acct && acct\.results, fills\);/.test(html) && /kalshiStrategyOf\(o\) === 'L1' && kalshiIsActive\(o\); \}\), now, since\)/.test(html) , 'the L1 row uses the account fills');
   assert.ok(/kalshiResolveOrders\(kalshiSlotOrders\.filter\(function\(o\)\{ return o && o\.slotId === id; \}\), acct && acct\.results, fills\), now, since\)/.test(html), 'and so does every second-strategy row');
   assert.ok(/var botOrders = kalshiResolveOrders\(kalshiAllOrders\(\), a\.results, a\.fills && a\.fills\.ok \? kalshiGroupFills\(a\.fills\.fills\) : \[\]\);/.test(html), 'the Account card counts L1 and the second strategy, with the same fills');
 };
