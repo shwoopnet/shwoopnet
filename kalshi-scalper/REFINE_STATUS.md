@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:35 AM CT (11:35Z): W77 R6 book at OICORE order time
+
+- W77 (descriptive; 24 of 33 OICORE orders had an R6 Bitcoin book poll within 6 s before the order): filled 19 orders, median touch size 628, median within 1c 3,788, 17 fit 10 contracts at the touch (the two that did not had touches of 5 and 8 and still filled); unfilled 5 of the 8, median touch size 2,808, median within 1c 3,850, 4 fit 10, one had zero at the touch. Touch size does not explain fills: unfilled orders mostly had deep touches. Together with W62 (heavy tape at the price within 1 s) this points away from a thin book. Candidate causes not tested: a limit equal to or just below the ask when the book moved (0.06 vs ask 0.06, 0.26 vs 0.26 in the sample), or the order arriving after the quote changed. The cheap way to settle it is the logged exchange status (the W70 brief). No change.
+
 ## 2026-11-04 05:30 AM CT (11:30Z): W76 R6 recorder coverage
 
 - W76 (descriptive): `book15r6` on quote-data has 7 dates and 29 HHMM folders, first Oct 29 22:03 UTC, newest Nov 4 04:03 UTC. Since Nov 1 a folder lands every 4.0 h (on schedule). One real hole: Nov 2 08:02 to 17:07 UTC (9.1 h, about 5 h missing); Oct 30 to 31 runs were uneven (3.6 to 7.1 h gaps). Coverage over 394 windows per market (Oct 29 22:15Z to Nov 4 08:00Z): windows with a market XRP 363, Dogecoin 361, Bitcoin 360, Ethereum 353, gold 228 (the rest are "no open market", mostly gold's closed hours); all with at least 90% good polls. Enough for the R6 final read; the Nov 2 hole costs about 20 windows per market. Recorder stops by itself Nov 13 23:59 UTC; `r6_final.py` is scheduled Nov 12 13:00Z and again after Nov 14.
