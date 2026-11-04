@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 7:35 PM CT (01:35Z Nov 4): W24 FLOW-POWER RESULT
+
+W24 (a calculation, no tries): R6 pool rate 31.9 pool windows a day (last two full days about 40), low-half share 52.1% (76 of 146): 60 pool windows in 1.5 to 1.9 days, 60 low-half windows in 2.9 to 3.6 days, 100 low-half windows in 4.8 to 6.0 days. Power of the S-FLOW1 kill rule (low half PF under 1.2 on 60 windows), win and loss sizes fixed at the R6 low-half values (win 0.593, loss 0.136 per contract, win rate varied to hit the true PF): probability the kill fires: true PF 2.5: 2.1%; 1.8: 13.4%; 1.4: 34.0%; 1.0: 67.8%; at 100 windows: 0.3%, 7.6%, 30.0%, 73.4%. So the rule rarely kills a real but decayed edge (PF 1.4 survives 66% of the time at 60 windows) and kills a true PF 1.8 edge 13% of the time. Caveats: windows treated as independent (neighbouring windows are not), sizes from the same 76 windows that chose the threshold, the price mix going forward may differ.
+
 ## 2026-11-03 7:34 PM CT (01:34Z Nov 4): W23 FLOW1-TRACKER BUILT
 
 forward_flow1.py in the scratchpad (`python3 -I forward_flow1.py <report.json>`; refresh flow_cache.jsonl first by running flow_forward.py): selects slotOrders with `strategy == 'FLOW1'` (the slot id field is `strategy`), prints 'no FLOW1 orders yet' otherwise; the four registered divergence flags with 'n too small' counts. Tested on a synthetic report only (no flag fired; the flag branches ran only to the threshold checks). The recorded field is read from `flow` (also flowImb, imbalance, imb). dash.sh edited: the L1 marker prints only past 6 hours on a weekday (a plain note between 3 and 6), and the block ends with the FLOW1 block. dash.sh itself was only syntax checked (bash -n).
