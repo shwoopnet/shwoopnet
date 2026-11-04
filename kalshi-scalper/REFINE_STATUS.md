@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:00 AM CT (13:00Z): W93 price band table added to the Nov 13 template
+
+- W93: `oicore_nov13.py` now also prints table (5b), live fills by order price (information only; fee per order rounded over price x count): at or under 0.07: 12 fills, 2 wins, +$12.62, PF 3.07, fee 7.3% of cost; 0.07 to 0.15: 9 fills, 1 win, +$0.08, PF 1.01, fee 6.7%; above 0.15: 4 fills, 3 wins, +$16.24, PF 10.55, fee 4.6%. Tagged 6 fills +$4.77 PF 2.04; untagged 19 fills +$24.17 PF 3.00. Every cell is tiny; note that the middle band (0.07 to 0.15, 9 fills) is flat and the profit sits in the cheapest and the dearest cells, which is just the lottery shape. No change, no filter.
+
 ## 2026-11-04 06:55 AM CT (12:55Z): W92 S-FLOWL1 tracker built
 
 - W92: `flowl1_forward.py` (scratchpad, cache `flowl1_cache.jsonl`, resumable) built with the fixed definitions from the last entry. First run: 16 gold windows closed after 04:43Z, 3 in-band with at least 5 flow trades (0 dropped thin): first half 1 window +8.60c/ct, second half 2 windows +9.25c/ct, all 3 +9.03c/ct, 0 losses; flagged 1 window (0 losses), unflagged 2 (0 losses); early sells 0 of 20 needed, not readable. Two choices the worker made where the registration was silent, now part of the definition: an early sell exits at 0.25 (the line price, not the candle low) and fees are the per 10 contract ceiling fee on each leg traded. Rerun each wake or two (cheap, resumes from the cache).
