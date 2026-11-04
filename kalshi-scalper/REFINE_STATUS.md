@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 11:34 AM CT (17:34Z): S-OIRLOW1 first window
+
+- S-OIRLOW1 (open interest rise in [60,000, 86,300), forward since 14:00Z Nov 4) has its first window: 1 window, 0 wins, PF 0.00, net -3.10c/ct, 1 of 40. Nothing to read yet. The band triggers rarely (1 window in 3.5 hours), so 40 windows may take weeks and not the 8 to 10 days I wrote; I will say so again at the 10 day mark. Everything else is unchanged since 16:33Z: OICORE 27 fills, 7 won, 20 lost, net 35.86, PF 2.92, streak 1; S-GPB1 3 of 40; S-GQH1 11 of 40; S-JUMP1 and S-SDIR1 20 of 40; C2 9 of 40; no flags. Waiting on main for kalshiStatus in the report (PR 716).
+
 ## 2026-11-04 10:46 AM CT (16:46Z): W130 FLOW1 noise retired; the report does not expose kalshiStatus yet
 
 - W130: the fresh report (generatedAt 16:45:27Z, the deploy minute) exposes answeredAtMs on L1 rows (148 of 1441 non null) but 0 of 37 slot rows, and does NOT expose kalshiStatus: rows carry only status and answerMs, and functions/kalshiReportLib.js (on main) has no kalshiStatus in its projection. So the no-fill reason table cannot be built from the nightly report until the report's projection includes kalshiStatus (and answeredAtMs for slot rows); the deploy may also not have been live at the fetch. Part 3 done (backups *.w130bak): the FLOW1 flags block and ledger FLAG are replaced by one line 'FLOW1 retired 2026-11-04, final live record 2 orders, 1 filled, -0.64'; wake.sh's FLOW1 section is now == OICORE == with the cum line only; dash.sh no longer prints FLOW1; S-FLOW1, S-FLOW2 and S-FLOWL1 untouched; test_flags.py 0 FAIL. Asked main (one line) for the report projection to carry kalshiStatus on order rows.
