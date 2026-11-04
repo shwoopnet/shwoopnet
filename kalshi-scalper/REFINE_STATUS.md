@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:50 AM CT (08:50Z): W44 OICORE entry-time sensitivity
+
+- W44 (descriptive, 31 simulated trigger windows since Oct 30, same 8 winners throughout): candles are 1 minute, so neighbours were used. Entry at close-180 ask PF 1.92, +9.83c; close-120 (registered) PF 2.60, +11.01c; close-60 PF 1.56, +2.06c. The registered close-120 is the best of the three. Rule unchanged; nothing to propose.
+
 ## 2026-11-04 02:45 AM CT (08:45Z): W43 gold 20-24 CT forward, S-GQH1 registered
 
 - W43 (gold fills since Oct 30 19:30Z): 20-24 CT n 11, 2 losses (both early sells), -$14.29, PF 0.35; other hours n 26, 1 loss, +$10.08, PF 1.74. n too small to call (2 of 11 vs 1 of 26). Script `w43.py` reruns it.
