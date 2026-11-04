@@ -8,7 +8,7 @@ Registration: `workers/TENNIS1_REGISTRATION.md` (sha256 `986786be6be818d89e9e464
 - Candle fetch (look = last two-sided 1 minute quote 10 minutes before the ESPN start) for the first 1,279 events in time order, then stopped: Kalshi's rate limit on this shared egress (HTTP 429 on 40% of calls at 2 s spacing; about 4 requests a minute sustained) puts the remaining 6,000 events at about 25 hours.
 
 ## Prices-only census (no result read)
-1,279 events fetched: 29 had no valid look, 794 had no side with ask 3c to 30c, 456 cheap-side rows, **13 treated** (Elo >= 3x ask, ask <= 0.30). Treated share 1.02% of events (95% interval 0.5% to 1.7%). Projected on all 7,281 events: **about 74 treated trades (interval 37 to 124)**, below the registered 150 even at the top of the interval. Rule 3 of the registration: under 150 treated trades is NOT_ENOUGH_DATA, decided without reading any outcome.
+1,279 events fetched: 29 had no valid look, 794 had no side with ask 3c to 30c, 456 cheap-side rows, **13 treated** (Elo >= 3x ask, ask <= 0.30). Treated share 1.02% of events (95% interval 0.47% to 1.57%). Projected on all 7,281 events: **about 74 treated trades (interval 34 to 114)**, below the registered 150 even at the top of the interval. Rule 3 of the registration: under 150 treated trades is NOT_ENOUGH_DATA, decided without reading any outcome.
 Why so few: the market and a results-only Elo rarely disagree by 3 times on a cheap side, and 62% of matches have no side at 3c to 30c (the favourite is above 70c and the other side above 30c is rare in tennis, mid-priced matches dominate).
 
 ## Verdict and forward plan
