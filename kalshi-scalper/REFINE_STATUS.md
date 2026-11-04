@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:35 AM CT (08:35Z): W41 gold quiet hours were lifted
+
+- W41: not an anomaly. Gold's 20:00-23:59 CT block went live in #618 (Oct 29 1:01 PM CT) and was lifted in #669 (Oct 30 2:30 PM CT); `QUIET_HOURS_CT` on main is now empty. Since Oct 30 gold trades those hours (16 orders Nov 1-3, 11 filled). Times converted UTC to Chicago with DST handled. So W39's 18-24 block (n 84, PF 0.85) is mostly orders the block never covered. The CLAUDE.md "Gold's quiet hours" section is stale (it says live); freshness agent or main should fix it. Not mine to edit.
+
 ## 2026-11-04 02:30 AM CT (08:30Z): W40 OICORE win concentration
 
 - W40 (descriptive): 6 wins in 24 fills, spread over 4 days (2 each on Oct 31, Nov 2, Nov 3, one Oct 30), 4 of 6 between 13:00 and 16:00 CT. Wins $4.34 to $9.36; 18 losses $0.32 to $1.70, $16.01 total. Largest win is 32% of net; net without it +$20.22; without the top 2 (both $9.36) +$10.86. Still positive but about a third of net rides on two trades, so the record is thin. Consistent with the Nov 13 read being the real test.
