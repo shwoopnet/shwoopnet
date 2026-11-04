@@ -1,97 +1,97 @@
 # FORWARD LEDGER (automatic; research only)
 
-Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-11-04 16:03 UTC.
+Written by `python -m scalper.fwdledger run` (once per AUTO pass, `scalper.autoscore check`). Last updated 2026-11-04 17:14 UTC.
 Forward evidence counts only windows that CLOSED after a candidate's freeze time, had the data its rule needs and have settled.
 Fees 7% x C x p x (1-p) rounded up to the cent per order, at 1 and 10 contracts; held to settlement pays the entry fee only. Win = net at 10 contracts above zero. Net per contract is at 10 contracts. Trades per week: forward trades over the time from the freeze to the last evaluated close.
 This ledger never promotes anything. READY FOR THE FALSIFIER means only: forward PF 1.5+ at 1 and at 10 contracts on 30+ trades over 10+ trade days. It earns a falsifier read, nothing more. How a generator adds a candidate: `workers/candidates/README.md`.
 
 | id | market | stage | freeze | fwd days | trades | wins | losses | PF 1c | PF 10c | net/contract | trades/week | updated | flag |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| BOOKCH1B_BTC | KXBTC15M | discovery | 2026-11-04 | 1 | 4 | 0 | 4 | 0.00 | 0.00 | -6.83c | 28.0 | 2026-11-04 16:03 UTC |  |
-| BOOKCH1B_XRP | KXXRP15M | discovery | 2026-11-04 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| BOOKCH1_BTC | KXBTC15M | discovery | 2026-11-04 | 1 | 8 | 3 | 5 | 1.44 | 1.48 | +8.99c | 56.0 | 2026-11-04 16:03 UTC |  |
-| BOOKCH1_XRP | KXXRP15M | discovery | 2026-11-04 | 1 | 1 | 0 | 1 | 0.00 | 0.00 | -42.70c | 7.0 | 2026-11-04 16:03 UTC |  |
-| USWEEP1_KXBRENTD_FAV_60 | KXBRENTD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| USWEEP1_KXGOLDD_FAV_360 | KXGOLDD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| USWEEP1_KXHIGHTSATX_FAV_1440 | KXHIGHTSATX | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| USWEEP1_KXNATGASD_FAV_360 | KXNATGASD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| USWEEP1_KXSILVERD_FAV_360 | KXSILVERD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| EVENT830 | KXSILVER15M,KXCOPPER15M,KXWTI15M,KXEURUSD15M,KXGBPUSD15M,KXUSDJPY15M,KXHYPE15M,KXBNB15M | discovery | 2026-11-03 | 2 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 16:03 UTC |  |
-| REF_GEN6_OIREL | KXBTC15M | reference | 2026-10-30 | 6 | 20 | 5 | 15 | 1.92 | 2.04 | +8.24c | 27.8 | 2026-11-04 16:03 UTC |  |
-| LADFADE_BTC | KXBTC15M | validation | 2026-10-30 | 6 | 34 | 11 | 23 | 0.62 | 0.62 | -10.77c | 46.3 | 2026-11-04 16:03 UTC |  |
-| REF_GEN6_OICORE | KXBTC15M | reference | 2026-10-30 | 6 | 33 | 9 | 24 | 2.59 | 2.79 | +11.89c | 41.8 | 2026-11-04 16:03 UTC |  |
-| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 13 | 6 | 7 | 6.27 | 6.88 | +25.68c | 16.3 | 2026-11-04 16:03 UTC |  |
-| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 13 | 2 | 11 | 1.50 | 2.20 | +2.64c | 16.3 | 2026-11-04 16:03 UTC |  |
-| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 6 | 33 | 11 | 22 | 2.72 | 3.01 | +11.01c | 41.5 | 2026-11-04 16:03 UTC |  |
-| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 6 | 28 | 7 | 21 | 1.71 | 1.86 | +5.47c | 35.2 | 2026-11-04 16:03 UTC |  |
-| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 6 | 12 | 1 | 11 | 0.02 | 0.02 | -15.16c | 15.1 | 2026-11-04 16:03 UTC |  |
-| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 6 | 18 | 7 | 11 | 5.03 | 5.64 | +18.36c | 22.6 | 2026-11-04 16:03 UTC |  |
-| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 6 | 19 | 7 | 12 | 1.67 | 1.77 | +6.42c | 23.9 | 2026-11-04 16:03 UTC |  |
-| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 6 | 27 | 3 | 24 | 0.72 | 0.77 | -2.36c | 33.9 | 2026-11-04 16:03 UTC |  |
-| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 6 | 15 | 4 | 11 | 0.54 | 0.61 | -4.23c | 18.8 | 2026-11-04 16:03 UTC |  |
-| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 6 | 65 | 13 | 52 | 1.43 | 1.52 | +4.27c | 81.6 | 2026-11-04 16:03 UTC |  |
-| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 6 | 19 | 3 | 16 | 2.13 | 2.58 | +5.53c | 23.9 | 2026-11-04 16:03 UTC |  |
-| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 6 | 8 | 1 | 7 | 0.53 | 0.56 | -5.53c | 10.0 | 2026-11-04 16:03 UTC |  |
-| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 6 | 16 | 8 | 8 | 2.28 | 2.56 | +7.38c | 20.1 | 2026-11-04 16:03 UTC |  |
-| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 6 | 167 | 61 | 106 | 1.19 | 1.21 | +4.13c | 209.8 | 2026-11-04 16:03 UTC |  |
-| GEN7_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 12 | 4 | 8 | 4.39 | 5.53 | +13.02c | 15.0 | 2026-11-04 16:03 UTC |  |
-| GEN7_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 20 | 4 | 16 | 0.64 | 0.70 | -3.40c | 24.9 | 2026-11-04 16:03 UTC |  |
-| REF_GEN6_OIDRIFT | KXBTC15M | reference | 2026-10-30 | 6 | 1 | 0 | 1 | 0.00 | 0.00 | -43.80c | 1.2 | 2026-11-04 16:03 UTC |  |
-| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 5 | 113 | 29 | 84 | 0.74 | 0.75 | -5.41c | 140.9 | 2026-11-04 16:03 UTC |  |
-| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 6 | 31 | 30 | 1 | 0.73 | 0.96 | -0.12c | 38.6 | 2026-11-04 16:03 UTC |  |
-| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 104 | 71 | 33 | 0.86 | 0.92 | -1.57c | 132.4 | 2026-11-04 16:03 UTC |  |
-| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 104 | 71 | 33 | 0.86 | 0.92 | -1.51c | 132.4 | 2026-11-04 16:03 UTC |  |
-| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 6 | 96 | 53 | 43 | 1.11 | 1.17 | +3.26c | 122.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 6 | 104 | 73 | 31 | 0.95 | 0.97 | -0.63c | 132.4 | 2026-11-04 16:03 UTC |  |
-| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 6 | 86 | 38 | 48 | 1.34 | 1.41 | +5.35c | 109.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 6 | 114 | 48 | 66 | 1.34 | 1.38 | +4.97c | 145.1 | 2026-11-04 16:03 UTC |  |
-| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 6 | 69 | 27 | 42 | 1.04 | 1.10 | +1.54c | 87.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 6 | 111 | 77 | 34 | 0.86 | 0.91 | -1.90c | 141.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 6 | 107 | 43 | 64 | 1.00 | 1.03 | +0.48c | 136.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 6 | 99 | 65 | 34 | 0.73 | 0.78 | -4.51c | 126.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 6 | 101 | 42 | 59 | 1.21 | 1.25 | +3.30c | 128.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 6 | 104 | 76 | 28 | 1.11 | 1.18 | +3.17c | 132.4 | 2026-11-04 16:03 UTC |  |
-| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 6 | 121 | 81 | 40 | 0.79 | 0.84 | -3.08c | 154.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 6 | 92 | 68 | 24 | 1.15 | 1.23 | +3.87c | 117.1 | 2026-11-04 16:03 UTC |  |
-| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 6 | 94 | 49 | 45 | 0.84 | 0.85 | -3.13c | 119.6 | 2026-11-04 16:03 UTC |  |
-| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 6 | 107 | 74 | 33 | 0.87 | 0.92 | -1.61c | 136.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 6 | 96 | 66 | 30 | 0.83 | 0.85 | -3.20c | 122.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 6 | 101 | 68 | 33 | 0.84 | 0.89 | -2.10c | 128.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 6 | 99 | 67 | 32 | 0.85 | 0.87 | -2.86c | 126.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 6 | 86 | 57 | 29 | 0.76 | 0.81 | -3.93c | 109.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 6 | 63 | 41 | 22 | 0.66 | 0.70 | -7.04c | 80.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 6 | 110 | 75 | 35 | 0.84 | 0.86 | -2.91c | 140.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 6 | 73 | 49 | 24 | 0.81 | 0.83 | -3.67c | 92.9 | 2026-11-04 16:03 UTC |  |
-| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 6 | 91 | 60 | 31 | 0.74 | 0.75 | -5.57c | 115.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 6 | 89 | 62 | 27 | 0.87 | 0.92 | -1.70c | 113.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 6 | 102 | 67 | 35 | 0.71 | 0.75 | -5.67c | 129.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 6 | 73 | 49 | 24 | 0.77 | 0.82 | -3.85c | 92.9 | 2026-11-04 16:03 UTC |  |
-| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 6 | 88 | 62 | 26 | 0.94 | 1.00 | -0.08c | 112.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 6 | 109 | 79 | 30 | 1.00 | 1.07 | +1.21c | 138.7 | 2026-11-04 16:03 UTC |  |
-| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 6 | 84 | 59 | 25 | 0.80 | 0.86 | -2.94c | 106.9 | 2026-11-04 16:03 UTC |  |
-| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 6 | 119 | 84 | 35 | 0.88 | 0.93 | -1.35c | 151.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 6 | 92 | 65 | 27 | 0.96 | 1.02 | +0.33c | 117.1 | 2026-11-04 16:03 UTC |  |
-| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 6 | 73 | 48 | 25 | 0.77 | 0.82 | -3.75c | 92.9 | 2026-11-04 16:03 UTC |  |
-| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 6 | 108 | 71 | 37 | 0.74 | 0.76 | -5.47c | 137.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 6 | 85 | 22 | 63 | 1.62 | 1.69 | +7.89c | 108.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 6 | 92 | 66 | 26 | 0.96 | 1.03 | +0.52c | 117.1 | 2026-11-04 16:03 UTC |  |
-| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 6 | 96 | 38 | 58 | 1.24 | 1.33 | +3.96c | 122.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 6 | 114 | 76 | 38 | 0.73 | 0.75 | -5.83c | 145.1 | 2026-11-04 16:03 UTC |  |
-| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 6 | 111 | 75 | 36 | 0.84 | 0.89 | -2.33c | 141.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 6 | 120 | 81 | 39 | 0.78 | 0.84 | -3.44c | 152.7 | 2026-11-04 16:03 UTC |  |
-| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 6 | 74 | 51 | 23 | 0.86 | 0.87 | -2.61c | 94.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 6 | 88 | 24 | 64 | 1.65 | 1.74 | +8.49c | 112.0 | 2026-11-04 16:03 UTC |  |
-| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 6 | 113 | 77 | 36 | 0.82 | 0.88 | -2.72c | 143.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 6 | 111 | 81 | 30 | 1.12 | 1.14 | +2.51c | 141.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 6 | 89 | 59 | 30 | 0.76 | 0.81 | -4.06c | 113.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 6 | 102 | 72 | 30 | 0.96 | 0.98 | -0.40c | 129.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 6 | 111 | 76 | 35 | 0.88 | 0.90 | -2.08c | 141.3 | 2026-11-04 16:03 UTC |  |
-| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 6 | 91 | 62 | 29 | 0.72 | 0.77 | -5.28c | 115.8 | 2026-11-04 16:03 UTC |  |
-| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 6 | 112 | 78 | 34 | 0.96 | 0.99 | -0.29c | 142.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 6 | 85 | 58 | 27 | 0.90 | 0.92 | -1.60c | 108.2 | 2026-11-04 16:03 UTC |  |
-| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 6 | 108 | 74 | 34 | 0.79 | 0.84 | -3.35c | 137.5 | 2026-11-04 16:03 UTC |  |
-| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 6 | 106 | 73 | 33 | 0.87 | 0.89 | -2.39c | 134.9 | 2026-11-04 16:03 UTC |  |
-| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 5 | 81 | 77 | 4 | 1.29 | 1.39 | +1.83c | 100.2 | 2026-11-04 16:03 UTC |  |
+| BOOKCH1B_BTC | KXBTC15M | discovery | 2026-11-04 | 1 | 4 | 0 | 4 | 0.00 | 0.00 | -6.83c | 28.0 | 2026-11-04 17:14 UTC |  |
+| BOOKCH1B_XRP | KXXRP15M | discovery | 2026-11-04 | 1 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| BOOKCH1_BTC | KXBTC15M | discovery | 2026-11-04 | 1 | 8 | 3 | 5 | 1.44 | 1.48 | +8.99c | 56.0 | 2026-11-04 17:14 UTC |  |
+| BOOKCH1_XRP | KXXRP15M | discovery | 2026-11-04 | 1 | 1 | 0 | 1 | 0.00 | 0.00 | -42.70c | 7.0 | 2026-11-04 17:14 UTC |  |
+| USWEEP1_KXBRENTD_FAV_60 | KXBRENTD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| USWEEP1_KXGOLDD_FAV_360 | KXGOLDD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| USWEEP1_KXHIGHTSATX_FAV_1440 | KXHIGHTSATX | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| USWEEP1_KXNATGASD_FAV_360 | KXNATGASD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| USWEEP1_KXSILVERD_FAV_360 | KXSILVERD | discovery | 2026-11-03 | 0 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| EVENT830 | KXSILVER15M,KXCOPPER15M,KXWTI15M,KXEURUSD15M,KXGBPUSD15M,KXUSDJPY15M,KXHYPE15M,KXBNB15M | discovery | 2026-11-03 | 2 | 0 | 0 | 0 | 0.00 | 0.00 | +0.00c | 0.0 | 2026-11-04 17:14 UTC |  |
+| REF_GEN6_OIREL | KXBTC15M | reference | 2026-10-30 | 6 | 20 | 5 | 15 | 1.92 | 2.04 | +8.24c | 27.8 | 2026-11-04 17:14 UTC |  |
+| LADFADE_BTC | KXBTC15M | validation | 2026-10-30 | 6 | 34 | 11 | 23 | 0.62 | 0.62 | -10.77c | 46.3 | 2026-11-04 17:14 UTC |  |
+| REF_GEN6_OICORE | KXBTC15M | reference | 2026-10-30 | 6 | 33 | 9 | 24 | 2.59 | 2.79 | +11.89c | 41.8 | 2026-11-04 17:14 UTC |  |
+| GEN6_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 13 | 6 | 7 | 6.27 | 6.88 | +25.68c | 16.3 | 2026-11-04 17:14 UTC |  |
+| GEN6_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 13 | 2 | 11 | 1.50 | 2.20 | +2.64c | 16.3 | 2026-11-04 17:14 UTC |  |
+| GEN6_B03 | KXBTC15M | validation | 2026-10-30 | 6 | 33 | 11 | 22 | 2.72 | 3.01 | +11.01c | 41.5 | 2026-11-04 17:14 UTC |  |
+| GEN6_B04 | KXBTC15M | validation | 2026-10-30 | 6 | 28 | 7 | 21 | 1.71 | 1.86 | +5.47c | 35.2 | 2026-11-04 17:14 UTC |  |
+| GEN6_B05 | KXBTC15M | validation | 2026-10-30 | 6 | 12 | 1 | 11 | 0.02 | 0.02 | -15.16c | 15.1 | 2026-11-04 17:14 UTC |  |
+| GEN6_B06 | KXBTC15M | validation | 2026-10-30 | 6 | 18 | 7 | 11 | 5.03 | 5.64 | +18.36c | 22.6 | 2026-11-04 17:14 UTC |  |
+| GEN6_B07 | KXBTC15M | validation | 2026-10-30 | 6 | 19 | 7 | 12 | 1.67 | 1.77 | +6.42c | 23.9 | 2026-11-04 17:14 UTC |  |
+| GEN6_B08 | KXBTC15M | validation | 2026-10-30 | 6 | 27 | 3 | 24 | 0.72 | 0.77 | -2.36c | 33.9 | 2026-11-04 17:14 UTC |  |
+| GEN6_B09 | KXBTC15M | validation | 2026-10-30 | 6 | 15 | 4 | 11 | 0.54 | 0.61 | -4.23c | 18.8 | 2026-11-04 17:14 UTC |  |
+| GEN6_B10 | KXBTC15M | validation | 2026-10-30 | 6 | 65 | 13 | 52 | 1.43 | 1.52 | +4.27c | 81.6 | 2026-11-04 17:14 UTC |  |
+| GEN6_B11 | KXBTC15M | validation | 2026-10-30 | 6 | 19 | 3 | 16 | 2.13 | 2.58 | +5.53c | 23.9 | 2026-11-04 17:14 UTC |  |
+| GEN6_B12 | KXBTC15M | validation | 2026-10-30 | 6 | 8 | 1 | 7 | 0.53 | 0.56 | -5.53c | 10.0 | 2026-11-04 17:14 UTC |  |
+| GEN6_B13 | KXBTC15M | validation | 2026-10-30 | 6 | 16 | 8 | 8 | 2.28 | 2.56 | +7.38c | 20.1 | 2026-11-04 17:14 UTC |  |
+| REF_BTC_UNDERDOG_180 | KXBTC15M | reference | 2026-10-30 | 6 | 167 | 61 | 106 | 1.19 | 1.21 | +4.13c | 209.8 | 2026-11-04 17:14 UTC |  |
+| GEN7_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 12 | 4 | 8 | 4.39 | 5.53 | +13.02c | 15.0 | 2026-11-04 17:14 UTC |  |
+| GEN7_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 20 | 4 | 16 | 0.64 | 0.70 | -3.40c | 24.9 | 2026-11-04 17:14 UTC |  |
+| REF_GEN6_OIDRIFT | KXBTC15M | reference | 2026-10-30 | 6 | 1 | 0 | 1 | 0.00 | 0.00 | -43.80c | 1.2 | 2026-11-04 17:14 UTC |  |
+| REF_GOLD_UNDERDOG_180 | KXGOLD15M | reference | 2026-10-30 | 5 | 113 | 29 | 84 | 0.74 | 0.75 | -5.41c | 140.9 | 2026-11-04 17:14 UTC |  |
+| REF_LATECAL_BTC | KXBTC15M | reference | 2026-10-30 | 6 | 31 | 30 | 1 | 0.73 | 0.96 | -0.12c | 38.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B01 | KXBTC15M | validation | 2026-10-30 | 6 | 110 | 74 | 36 | 0.81 | 0.87 | -2.66c | 135.9 | 2026-11-04 17:14 UTC |  |
+| GEN4_B02 | KXBTC15M | validation | 2026-10-30 | 6 | 111 | 74 | 37 | 0.79 | 0.84 | -3.19c | 137.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B03 | KXBTC15M | validation | 2026-10-30 | 6 | 102 | 58 | 44 | 1.20 | 1.25 | +4.78c | 126.0 | 2026-11-04 17:14 UTC |  |
+| GEN4_B04 | KXBTC15M | validation | 2026-10-30 | 6 | 107 | 76 | 31 | 0.99 | 1.02 | +0.37c | 132.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B05 | KXBTC15M | validation | 2026-10-30 | 6 | 92 | 42 | 50 | 1.39 | 1.46 | +5.94c | 113.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B06 | KXBTC15M | validation | 2026-10-30 | 6 | 122 | 53 | 69 | 1.44 | 1.49 | +6.19c | 150.7 | 2026-11-04 17:14 UTC |  |
+| GEN4_B07 | KXBTC15M | validation | 2026-10-30 | 6 | 70 | 28 | 42 | 1.09 | 1.15 | +2.31c | 86.5 | 2026-11-04 17:14 UTC |  |
+| GEN4_B08 | KXBTC15M | validation | 2026-10-30 | 6 | 118 | 80 | 38 | 0.79 | 0.84 | -3.41c | 145.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B09 | KXBTC15M | validation | 2026-10-30 | 6 | 114 | 48 | 66 | 1.06 | 1.09 | +1.42c | 140.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B10 | KXBTC15M | validation | 2026-10-30 | 6 | 105 | 67 | 38 | 0.67 | 0.72 | -6.14c | 129.7 | 2026-11-04 17:14 UTC |  |
+| GEN4_B11 | KXBTC15M | validation | 2026-10-30 | 6 | 109 | 47 | 62 | 1.31 | 1.36 | +4.58c | 134.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B12 | KXBTC15M | validation | 2026-10-30 | 6 | 110 | 79 | 31 | 1.04 | 1.10 | +1.86c | 135.9 | 2026-11-04 17:14 UTC |  |
+| GEN4_B13 | KXBTC15M | validation | 2026-10-30 | 6 | 129 | 85 | 44 | 0.74 | 0.80 | -4.17c | 159.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B14 | KXBTC15M | validation | 2026-10-30 | 6 | 98 | 71 | 27 | 1.06 | 1.13 | +2.36c | 121.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B15 | KXBTC15M | validation | 2026-10-30 | 6 | 100 | 54 | 46 | 0.93 | 0.95 | -0.98c | 123.5 | 2026-11-04 17:14 UTC |  |
+| GEN4_B16 | KXBTC15M | validation | 2026-10-30 | 6 | 113 | 77 | 36 | 0.82 | 0.88 | -2.63c | 139.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B17 | KXBTC15M | validation | 2026-10-30 | 6 | 102 | 69 | 33 | 0.80 | 0.81 | -4.10c | 126.0 | 2026-11-04 17:14 UTC |  |
+| GEN4_B18 | KXBTC15M | validation | 2026-10-30 | 6 | 107 | 71 | 36 | 0.79 | 0.84 | -3.19c | 132.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B19 | KXBTC15M | validation | 2026-10-30 | 6 | 105 | 69 | 36 | 0.78 | 0.80 | -4.54c | 129.7 | 2026-11-04 17:14 UTC |  |
+| GEN4_B20 | KXBTC15M | validation | 2026-10-30 | 6 | 92 | 59 | 33 | 0.68 | 0.73 | -5.98c | 113.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B21 | KXBTC15M | validation | 2026-10-30 | 6 | 68 | 43 | 25 | 0.62 | 0.66 | -8.42c | 84.0 | 2026-11-04 17:14 UTC |  |
+| GEN4_B22 | KXBTC15M | validation | 2026-10-30 | 6 | 116 | 77 | 39 | 0.78 | 0.80 | -4.54c | 143.3 | 2026-11-04 17:14 UTC |  |
+| GEN4_B23 | KXBTC15M | validation | 2026-10-30 | 6 | 74 | 49 | 25 | 0.78 | 0.80 | -4.43c | 91.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B24 | KXBTC15M | validation | 2026-10-30 | 6 | 98 | 63 | 35 | 0.69 | 0.70 | -6.98c | 121.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B25 | KXBTC15M | validation | 2026-10-30 | 6 | 95 | 67 | 28 | 0.92 | 0.97 | -0.55c | 117.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B26 | KXBTC15M | validation | 2026-10-30 | 6 | 109 | 70 | 39 | 0.67 | 0.71 | -6.92c | 134.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B27 | KXBTC15M | validation | 2026-10-30 | 6 | 74 | 49 | 25 | 0.75 | 0.79 | -4.60c | 91.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B28 | KXBTC15M | validation | 2026-10-30 | 6 | 93 | 65 | 28 | 0.92 | 0.97 | -0.52c | 114.9 | 2026-11-04 17:14 UTC |  |
+| GEN4_B29 | KXBTC15M | validation | 2026-10-30 | 6 | 116 | 82 | 34 | 0.91 | 0.97 | -0.52c | 143.3 | 2026-11-04 17:14 UTC |  |
+| GEN4_B30 | KXBTC15M | validation | 2026-10-30 | 6 | 90 | 62 | 28 | 0.76 | 0.81 | -4.12c | 111.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B31 | KXBTC15M | validation | 2026-10-30 | 6 | 126 | 89 | 37 | 0.89 | 0.94 | -1.22c | 155.6 | 2026-11-04 17:14 UTC |  |
+| GEN4_B32 | KXBTC15M | validation | 2026-10-30 | 6 | 98 | 70 | 28 | 1.01 | 1.08 | +1.27c | 121.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B33 | KXBTC15M | validation | 2026-10-30 | 6 | 74 | 48 | 26 | 0.74 | 0.79 | -4.51c | 91.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B34 | KXBTC15M | validation | 2026-10-30 | 6 | 115 | 74 | 41 | 0.70 | 0.71 | -6.67c | 142.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B35 | KXBTC15M | validation | 2026-10-30 | 6 | 95 | 25 | 70 | 1.68 | 1.75 | +8.23c | 117.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B36 | KXBTC15M | validation | 2026-10-30 | 6 | 98 | 71 | 27 | 1.02 | 1.08 | +1.49c | 121.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B37 | KXBTC15M | validation | 2026-10-30 | 6 | 103 | 43 | 60 | 1.29 | 1.39 | +4.60c | 127.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B38 | KXBTC15M | validation | 2026-10-30 | 6 | 121 | 79 | 42 | 0.69 | 0.71 | -6.95c | 149.5 | 2026-11-04 17:14 UTC |  |
+| GEN4_B39 | KXBTC15M | validation | 2026-10-30 | 6 | 118 | 79 | 39 | 0.82 | 0.87 | -2.79c | 145.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B40 | KXBTC15M | validation | 2026-10-30 | 6 | 128 | 85 | 43 | 0.74 | 0.80 | -4.49c | 158.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B41 | KXBTC15M | validation | 2026-10-30 | 6 | 80 | 53 | 27 | 0.77 | 0.78 | -4.82c | 98.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B42 | KXBTC15M | validation | 2026-10-30 | 6 | 98 | 27 | 71 | 1.73 | 1.83 | +9.18c | 121.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_B43 | KXBTC15M | validation | 2026-10-30 | 6 | 119 | 79 | 40 | 0.76 | 0.81 | -4.33c | 147.0 | 2026-11-04 17:14 UTC |  |
+| GEN4_B44 | KXBTC15M | validation | 2026-10-30 | 6 | 118 | 85 | 33 | 1.07 | 1.09 | +1.68c | 145.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B45 | KXBTC15M | validation | 2026-10-30 | 6 | 95 | 61 | 34 | 0.70 | 0.74 | -5.84c | 117.4 | 2026-11-04 17:14 UTC |  |
+| GEN4_B46 | KXBTC15M | validation | 2026-10-30 | 6 | 107 | 75 | 32 | 0.94 | 0.96 | -0.77c | 132.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B47 | KXBTC15M | validation | 2026-10-30 | 6 | 117 | 78 | 39 | 0.81 | 0.83 | -3.75c | 144.5 | 2026-11-04 17:14 UTC |  |
+| GEN4_B48 | KXBTC15M | validation | 2026-10-30 | 6 | 97 | 68 | 29 | 0.81 | 0.86 | -3.02c | 119.8 | 2026-11-04 17:14 UTC |  |
+| GEN4_B49 | KXBTC15M | validation | 2026-10-30 | 6 | 119 | 82 | 37 | 0.94 | 0.96 | -0.86c | 147.0 | 2026-11-04 17:14 UTC |  |
+| GEN4_B50 | KXBTC15M | validation | 2026-10-30 | 6 | 90 | 61 | 29 | 0.88 | 0.90 | -2.04c | 111.2 | 2026-11-04 17:14 UTC |  |
+| GEN4_B51 | KXBTC15M | validation | 2026-10-30 | 6 | 115 | 79 | 36 | 0.81 | 0.86 | -2.91c | 142.1 | 2026-11-04 17:14 UTC |  |
+| GEN4_REF_FAV150 | KXBTC15M | reference | 2026-10-30 | 6 | 113 | 76 | 37 | 0.81 | 0.83 | -3.80c | 139.6 | 2026-11-04 17:14 UTC |  |
+| REF_L1_GOLD | KXGOLD15M | reference | 2026-10-30 | 5 | 81 | 77 | 4 | 1.29 | 1.39 | +1.83c | 100.2 | 2026-11-04 17:14 UTC |  |
 
 ## History per candidate
 
@@ -496,8 +496,8 @@ PF at 1 contract 0.73, at 10 contracts 0.96, at 10 contracts with fees x1.2 0.95
 ### GEN4_B01
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask <= 7.779 and zd >= -1.585; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 2.13 n 46; validation PF1 2.64 n 35 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 104 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.86, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.90; net per contract -2.69c at 1, -1.57c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 110 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.81, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.85; net per contract -3.79c at 1, -2.66c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -506,13 +506,13 @@ PF at 1 contract 0.86, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.90
 | 2026-11-01 | 28 | 18 | 10 | -57.7c | -149.7c | 0.88 |
 | 2026-11-02 | 20 | 13 | 7 | -120.1c | -269.8c | 0.83 |
 | 2026-11-03 | 15 | 11 | 4 | +18.2c | -251.6c | 0.87 |
-| 2026-11-04 | 11 | 9 | 2 | +88.3c | -163.3c | 0.92 |
+| 2026-11-04 | 17 | 12 | 5 | -40.9c | -292.5c | 0.87 |
 
 ### GEN4_B02
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 60 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.4281 and zd >= -2.066; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 2.09 n 51; validation PF1 2.40 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 104 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.86, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.90; net per contract -2.60c at 1, -1.51c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 111 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.82; net per contract -4.27c at 1, -3.19c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -521,13 +521,13 @@ PF at 1 contract 0.86, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.90
 | 2026-11-01 | 27 | 18 | 9 | -12.8c | -112.9c | 0.90 |
 | 2026-11-02 | 18 | 11 | 7 | -100.5c | -213.4c | 0.85 |
 | 2026-11-03 | 17 | 12 | 5 | -78.4c | -291.8c | 0.84 |
-| 2026-11-04 | 13 | 11 | 2 | +134.8c | -157.0c | 0.92 |
+| 2026-11-04 | 20 | 14 | 6 | -61.9c | -353.7c | 0.84 |
 
 ### GEN4_B03
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 <= 0 and sp15 >= -0.1949 and zd >= -0.3503; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.62 n 40; validation PF1 2.39 n 33 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 96 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.11, at 10 contracts 1.17, at 10 contracts with fees x1.2 1.15; net per contract +2.28c at 1, +3.26c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 102 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.20, at 10 contracts 1.25, at 10 contracts with fees x1.2 1.24; net per contract +3.80c at 1, +4.78c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -536,13 +536,13 @@ PF at 1 contract 1.11, at 10 contracts 1.17, at 10 contracts with fees x1.2 1.15
 | 2026-11-01 | 25 | 11 | 14 | -180.6c | -333.0c | 0.74 |
 | 2026-11-02 | 18 | 12 | 6 | +237.2c | -95.8c | 0.94 |
 | 2026-11-03 | 16 | 10 | 6 | +89.8c | -6.0c | 1.00 |
-| 2026-11-04 | 10 | 8 | 2 | +318.5c | +312.5c | 1.17 |
+| 2026-11-04 | 16 | 13 | 3 | +493.8c | +487.8c | 1.25 |
 
 ### GEN4_B04
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.17 and lsz_ask <= 8.072 and lsz_bid <= 8.053; bought at that ask; held to settlement. Discovery PF1 2.04 n 41; validation PF1 2.27 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 104 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.95, at 10 contracts 0.97, at 10 contracts with fees x1.2 0.96; net per contract -1.11c at 1, -0.63c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 107 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.99, at 10 contracts 1.02, at 10 contracts with fees x1.2 1.00; net per contract -0.10c at 1, +0.37c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -551,13 +551,13 @@ PF at 1 contract 0.95, at 10 contracts 0.97, at 10 contracts with fees x1.2 0.96
 | 2026-11-01 | 29 | 21 | 8 | +57.7c | -56.1c | 0.96 |
 | 2026-11-02 | 20 | 12 | 8 | -241.0c | -297.1c | 0.84 |
 | 2026-11-03 | 14 | 11 | 3 | +163.3c | -133.8c | 0.93 |
-| 2026-11-04 | 8 | 6 | 2 | +68.2c | -65.6c | 0.97 |
+| 2026-11-04 | 11 | 9 | 2 | +173.3c | +39.5c | 1.02 |
 
 ### GEN4_B05
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 120 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp30 >= 0.5295; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.78 n 41; validation PF1 2.18 n 37 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 86 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.34, at 10 contracts 1.41, at 10 contracts with fees x1.2 1.39; net per contract +4.49c at 1, +5.35c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 92 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.39, at 10 contracts 1.46, at 10 contracts with fees x1.2 1.44; net per contract +5.06c at 1, +5.94c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -566,13 +566,13 @@ PF at 1 contract 1.34, at 10 contracts 1.41, at 10 contracts with fees x1.2 1.39
 | 2026-11-01 | 16 | 6 | 10 | -27.0c | -53.6c | 0.93 |
 | 2026-11-02 | 18 | 10 | 8 | +371.1c | +317.5c | 1.38 |
 | 2026-11-03 | 11 | 5 | 6 | -56.6c | +260.9c | 1.25 |
-| 2026-11-04 | 12 | 6 | 6 | +199.6c | +460.5c | 1.41 |
+| 2026-11-04 | 18 | 10 | 8 | +285.2c | +546.1c | 1.46 |
 
 ### GEN4_B06
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp30 >= 0.5295 and spread <= 0.01; bought at that ask; held to settlement. Discovery PF1 1.54 n 52; validation PF1 2.08 n 41 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 114 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.34, at 10 contracts 1.38, at 10 contracts with fees x1.2 1.36; net per contract +4.51c at 1, +4.97c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 122 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.44, at 10 contracts 1.49, at 10 contracts with fees x1.2 1.47; net per contract +5.72c at 1, +6.19c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -581,13 +581,13 @@ PF at 1 contract 1.34, at 10 contracts 1.38, at 10 contracts with fees x1.2 1.36
 | 2026-11-01 | 20 | 7 | 13 | -123.4c | -192.8c | 0.80 |
 | 2026-11-02 | 23 | 12 | 11 | +380.0c | +187.2c | 1.16 |
 | 2026-11-03 | 15 | 8 | 7 | +137.1c | +324.3c | 1.24 |
-| 2026-11-04 | 19 | 8 | 11 | +242.4c | +566.7c | 1.38 |
+| 2026-11-04 | 27 | 13 | 14 | +430.3c | +754.6c | 1.49 |
 
 ### GEN4_B07
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= 0.3412 and vol <= 0.311; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.68 n 43; validation PF1 2.08 n 24 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 69 on 5 days; zero-volume trades 0.
-PF at 1 contract 1.04, at 10 contracts 1.10, at 10 contracts with fees x1.2 1.09; net per contract +0.70c at 1, +1.54c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 70 on 5 days; zero-volume trades 0.
+PF at 1 contract 1.09, at 10 contracts 1.15, at 10 contracts with fees x1.2 1.14; net per contract +1.46c at 1, +2.31c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -595,13 +595,13 @@ PF at 1 contract 1.04, at 10 contracts 1.10, at 10 contracts with fees x1.2 1.09
 | 2026-11-01 | 22 | 6 | 16 | -210.7c | -185.4c | 0.75 |
 | 2026-11-02 | 12 | 7 | 5 | +236.8c | +51.4c | 1.06 |
 | 2026-11-03 | 10 | 5 | 5 | +86.1c | +137.5c | 1.14 |
-| 2026-11-04 | 9 | 2 | 7 | -31.1c | +106.4c | 1.10 |
+| 2026-11-04 | 10 | 3 | 7 | +23.9c | +161.4c | 1.15 |
 
 ### GEN4_B08
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.4281; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 2.24 n 52; validation PF1 1.99 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 111 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.86, at 10 contracts 0.91, at 10 contracts with fees x1.2 0.89; net per contract -3.00c at 1, -1.90c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 118 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83; net per contract -4.49c at 1, -3.41c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -610,13 +610,13 @@ PF at 1 contract 0.86, at 10 contracts 0.91, at 10 contracts with fees x1.2 0.89
 | 2026-11-01 | 28 | 19 | 9 | -91.5c | -157.1c | 0.88 |
 | 2026-11-02 | 19 | 11 | 8 | -215.6c | -372.7c | 0.79 |
 | 2026-11-03 | 17 | 12 | 5 | -35.5c | -408.2c | 0.81 |
-| 2026-11-04 | 14 | 12 | 2 | +197.7c | -210.5c | 0.91 |
+| 2026-11-04 | 21 | 15 | 6 | +5.7c | -402.5c | 0.84 |
 
 ### GEN4_B09
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 120 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp30 >= -0.06831; bought at that ask; held to settlement. Discovery PF1 1.51 n 49; validation PF1 1.94 n 40 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 107 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.00, at 10 contracts 1.03, at 10 contracts with fees x1.2 1.02; net per contract +0.06c at 1, +0.48c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 114 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.06, at 10 contracts 1.09, at 10 contracts with fees x1.2 1.07; net per contract +1.00c at 1, +1.42c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -625,13 +625,13 @@ PF at 1 contract 1.00, at 10 contracts 1.03, at 10 contracts with fees x1.2 1.02
 | 2026-11-01 | 26 | 9 | 17 | -168.2c | -413.5c | 0.67 |
 | 2026-11-02 | 19 | 10 | 9 | +361.3c | -52.2c | 0.96 |
 | 2026-11-03 | 15 | 6 | 9 | -80.2c | -132.4c | 0.92 |
-| 2026-11-04 | 13 | 6 | 7 | +183.6c | +51.2c | 1.03 |
+| 2026-11-04 | 20 | 11 | 9 | +294.6c | +162.2c | 1.09 |
 
 ### GEN4_B10
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp30 <= 2.256 and sp5 <= 0.353; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.79 n 46; validation PF1 1.93 n 33 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 99 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.73, at 10 contracts 0.78, at 10 contracts with fees x1.2 0.77; net per contract -5.66c at 1, -4.51c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 105 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.67, at 10 contracts 0.72, at 10 contracts with fees x1.2 0.71; net per contract -7.27c at 1, -6.14c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -640,13 +640,13 @@ PF at 1 contract 0.73, at 10 contracts 0.78, at 10 contracts with fees x1.2 0.77
 | 2026-11-01 | 25 | 17 | 8 | +13.5c | -298.1c | 0.76 |
 | 2026-11-02 | 15 | 9 | 6 | -68.2c | -366.3c | 0.76 |
 | 2026-11-03 | 15 | 10 | 5 | -121.6c | -487.9c | 0.74 |
-| 2026-11-04 | 13 | 10 | 3 | +41.2c | -446.7c | 0.78 |
+| 2026-11-04 | 19 | 12 | 7 | -156.7c | -644.6c | 0.72 |
 
 ### GEN4_B11
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.4281 and sp30 >= 0.5295; bought at that ask; held to settlement. Discovery PF1 1.50 n 46; validation PF1 1.91 n 38 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 101 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.21, at 10 contracts 1.25, at 10 contracts with fees x1.2 1.23; net per contract +2.81c at 1, +3.30c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 109 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.31, at 10 contracts 1.36, at 10 contracts with fees x1.2 1.34; net per contract +4.10c at 1, +4.58c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -655,13 +655,13 @@ PF at 1 contract 1.21, at 10 contracts 1.25, at 10 contracts with fees x1.2 1.23
 | 2026-11-01 | 17 | 6 | 11 | -110.0c | -223.4c | 0.72 |
 | 2026-11-02 | 22 | 12 | 10 | +274.3c | +50.9c | 1.05 |
 | 2026-11-03 | 14 | 8 | 6 | +79.8c | +130.7c | 1.11 |
-| 2026-11-04 | 17 | 7 | 10 | +202.3c | +333.0c | 1.25 |
+| 2026-11-04 | 25 | 12 | 13 | +368.5c | +499.2c | 1.36 |
 
 ### GEN4_B12
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 30 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and bid >= 0.16 and lsz_ask <= 7.779 and sp5 >= 0.1732; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 2.32 n 43; validation PF1 1.90 n 30 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 104 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.11, at 10 contracts 1.18, at 10 contracts with fees x1.2 1.16; net per contract +1.98c at 1, +3.17c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 110 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.04, at 10 contracts 1.10, at 10 contracts with fees x1.2 1.08; net per contract +0.69c at 1, +1.86c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -670,13 +670,13 @@ PF at 1 contract 1.11, at 10 contracts 1.18, at 10 contracts with fees x1.2 1.16
 | 2026-11-01 | 26 | 16 | 10 | -217.1c | +15.9c | 1.01 |
 | 2026-11-02 | 20 | 13 | 7 | -112.7c | -96.8c | 0.94 |
 | 2026-11-03 | 15 | 12 | 3 | +171.5c | +74.7c | 1.04 |
-| 2026-11-04 | 12 | 11 | 1 | +254.5c | +329.2c | 1.18 |
+| 2026-11-04 | 18 | 14 | 4 | +129.5c | +204.2c | 1.10 |
 
 ### GEN4_B13
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.26; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.65 n 56; validation PF1 1.90 n 42 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 121 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83; net per contract -4.22c at 1, -3.08c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 129 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.74, at 10 contracts 0.80, at 10 contracts with fees x1.2 0.78; net per contract -5.31c at 1, -4.17c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -685,13 +685,13 @@ PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83
 | 2026-11-01 | 30 | 19 | 11 | -122.7c | -351.1c | 0.76 |
 | 2026-11-02 | 21 | 13 | 8 | -111.0c | -462.1c | 0.76 |
 | 2026-11-03 | 17 | 12 | 5 | -44.5c | -506.6c | 0.77 |
-| 2026-11-04 | 15 | 12 | 3 | +134.3c | -372.3c | 0.84 |
+| 2026-11-04 | 23 | 16 | 7 | -31.1c | -537.7c | 0.80 |
 
 ### GEN4_B14
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 90 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.4281 and lsz_ask <= 7.779; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 2.30 n 44; validation PF1 1.90 n 30 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 92 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.15, at 10 contracts 1.23, at 10 contracts with fees x1.2 1.21; net per contract +2.63c at 1, +3.87c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 98 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.06, at 10 contracts 1.13, at 10 contracts with fees x1.2 1.12; net per contract +1.13c at 1, +2.36c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -700,13 +700,13 @@ PF at 1 contract 1.15, at 10 contracts 1.23, at 10 contracts with fees x1.2 1.21
 | 2026-11-01 | 25 | 17 | 8 | -40.7c | +121.5c | 1.13 |
 | 2026-11-02 | 16 | 11 | 5 | -33.3c | +88.2c | 1.07 |
 | 2026-11-03 | 14 | 11 | 3 | +114.4c | +202.6c | 1.14 |
-| 2026-11-04 | 9 | 8 | 1 | +153.5c | +356.1c | 1.23 |
+| 2026-11-04 | 15 | 11 | 4 | +28.5c | +231.1c | 1.13 |
 
 ### GEN4_B15
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 90 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.26 and sp15 >= -0.01237 and spread >= 0.001; bought at that ask; held to settlement. Discovery PF1 1.55 n 42; validation PF1 1.86 n 31 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 94 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.84, at 10 contracts 0.85, at 10 contracts with fees x1.2 0.84; net per contract -3.55c at 1, -3.13c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 100 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.93, at 10 contracts 0.95, at 10 contracts with fees x1.2 0.94; net per contract -1.40c at 1, -0.98c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -715,13 +715,13 @@ PF at 1 contract 0.84, at 10 contracts 0.85, at 10 contracts with fees x1.2 0.84
 | 2026-11-01 | 23 | 10 | 13 | -304.5c | -705.2c | 0.49 |
 | 2026-11-02 | 19 | 12 | 7 | +207.6c | -497.6c | 0.70 |
 | 2026-11-03 | 14 | 9 | 5 | +95.8c | -401.8c | 0.79 |
-| 2026-11-04 | 10 | 6 | 4 | +107.9c | -293.9c | 0.85 |
+| 2026-11-04 | 16 | 11 | 5 | +304.1c | -97.7c | 0.95 |
 
 ### GEN4_B16
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask <= 7.779 and spread <= 0.01; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 2.14 n 48; validation PF1 1.83 n 35 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 107 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.87, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91; net per contract -2.85c at 1, -1.61c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 113 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.82, at 10 contracts 0.88, at 10 contracts with fees x1.2 0.87; net per contract -3.85c at 1, -2.63c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -730,13 +730,13 @@ PF at 1 contract 0.87, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91
 | 2026-11-01 | 29 | 19 | 10 | -131.2c | -166.7c | 0.88 |
 | 2026-11-02 | 19 | 12 | 7 | -169.2c | -335.9c | 0.82 |
 | 2026-11-03 | 15 | 11 | 4 | +61.6c | -274.3c | 0.87 |
-| 2026-11-04 | 11 | 9 | 2 | +101.8c | -172.5c | 0.92 |
+| 2026-11-04 | 17 | 12 | 5 | -23.2c | -297.5c | 0.88 |
 
 ### GEN4_B17
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb <= 0.4847 and zd >= -2.066; bought at that ask; held to settlement. Discovery PF1 1.52 n 48; validation PF1 1.82 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 96 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.83, at 10 contracts 0.85, at 10 contracts with fees x1.2 0.84; net per contract -3.64c at 1, -3.20c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 102 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.80, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80; net per contract -4.54c at 1, -4.10c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -745,13 +745,13 @@ PF at 1 contract 0.83, at 10 contracts 0.85, at 10 contracts with fees x1.2 0.84
 | 2026-11-01 | 24 | 18 | 6 | +60.0c | -335.1c | 0.74 |
 | 2026-11-02 | 14 | 8 | 6 | -120.2c | -455.3c | 0.72 |
 | 2026-11-03 | 14 | 10 | 4 | +47.6c | -407.7c | 0.79 |
-| 2026-11-04 | 13 | 11 | 2 | +100.7c | -307.0c | 0.85 |
+| 2026-11-04 | 19 | 14 | 5 | -10.6c | -418.3c | 0.81 |
 
 ### GEN4_B18
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 60 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 >= 0 and lsz_ask <= 7.779 and zd >= -0.6765; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.63 n 43; validation PF1 1.81 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 101 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.84, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.88; net per contract -3.21c at 1, -2.10c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 107 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83; net per contract -4.31c at 1, -3.19c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -760,13 +760,13 @@ PF at 1 contract 0.84, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.88
 | 2026-11-01 | 28 | 19 | 9 | +19.9c | -68.2c | 0.94 |
 | 2026-11-02 | 18 | 12 | 6 | -67.7c | -135.9c | 0.91 |
 | 2026-11-03 | 15 | 9 | 6 | -151.4c | -287.3c | 0.84 |
-| 2026-11-04 | 11 | 9 | 2 | +75.5c | -211.8c | 0.89 |
+| 2026-11-04 | 17 | 12 | 5 | -53.7c | -341.0c | 0.84 |
 
 ### GEN4_B19
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.36 and imb >= -0.6701; bought at that ask; held to settlement. Discovery PF1 1.78 n 48; validation PF1 1.81 n 33 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 99 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.85, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.86; net per contract -3.28c at 1, -2.86c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 105 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.78, at 10 contracts 0.80, at 10 contracts with fees x1.2 0.79; net per contract -4.95c at 1, -4.54c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -775,13 +775,13 @@ PF at 1 contract 0.85, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.86
 | 2026-11-01 | 24 | 17 | 7 | +18.5c | -170.9c | 0.86 |
 | 2026-11-02 | 15 | 8 | 7 | -220.1c | -391.0c | 0.77 |
 | 2026-11-03 | 15 | 11 | 4 | +57.8c | -333.2c | 0.83 |
-| 2026-11-04 | 12 | 9 | 3 | +49.8c | -283.4c | 0.87 |
+| 2026-11-04 | 18 | 11 | 7 | -143.0c | -476.2c | 0.80 |
 
 ### GEN4_B20
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.0742 and imb >= -0.4281 and sp5 <= 0; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.66 n 43; validation PF1 1.77 n 30 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 86 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80; net per contract -5.02c at 1, -3.93c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 92 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.68, at 10 contracts 0.73, at 10 contracts with fees x1.2 0.72; net per contract -7.07c at 1, -5.98c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -790,13 +790,13 @@ PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80
 | 2026-11-01 | 23 | 16 | 7 | +53.3c | +21.6c | 1.02 |
 | 2026-11-02 | 13 | 6 | 7 | -249.2c | -227.6c | 0.82 |
 | 2026-11-03 | 14 | 9 | 5 | -125.6c | -353.2c | 0.78 |
-| 2026-11-04 | 10 | 8 | 2 | +15.4c | -337.8c | 0.81 |
+| 2026-11-04 | 16 | 10 | 6 | -197.1c | -550.3c | 0.73 |
 
 ### GEN4_B21
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb <= 0.902 and lsz_bid >= 7.292; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.54 n 44; validation PF1 1.76 n 28 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 63 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.66, at 10 contracts 0.70, at 10 contracts with fees x1.2 0.69; net per contract -8.10c at 1, -7.04c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 68 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.62, at 10 contracts 0.66, at 10 contracts with fees x1.2 0.65; net per contract -9.45c at 1, -8.42c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -805,13 +805,13 @@ PF at 1 contract 0.66, at 10 contracts 0.70, at 10 contracts with fees x1.2 0.69
 | 2026-11-01 | 11 | 9 | 2 | +69.5c | -133.3c | 0.76 |
 | 2026-11-02 | 13 | 7 | 6 | -194.3c | -327.6c | 0.66 |
 | 2026-11-03 | 12 | 7 | 5 | -142.6c | -470.2c | 0.63 |
-| 2026-11-04 | 12 | 9 | 3 | +26.4c | -443.8c | 0.70 |
+| 2026-11-04 | 17 | 11 | 6 | -102.2c | -572.4c | 0.66 |
 
 ### GEN4_B22
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask <= 8.456 and lsz_bid >= 6.195; bought at that ask; held to settlement. Discovery PF1 1.63 n 49; validation PF1 1.73 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 110 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.84, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.85; net per contract -3.35c at 1, -2.91c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 116 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.78, at 10 contracts 0.80, at 10 contracts with fees x1.2 0.79; net per contract -4.98c at 1, -4.54c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -820,13 +820,13 @@ PF at 1 contract 0.84, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.85
 | 2026-11-01 | 27 | 16 | 11 | -317.3c | -429.0c | 0.71 |
 | 2026-11-02 | 18 | 10 | 8 | -240.2c | -669.2c | 0.67 |
 | 2026-11-03 | 17 | 14 | 3 | +169.4c | -499.8c | 0.77 |
-| 2026-11-04 | 13 | 11 | 2 | +180.0c | -319.8c | 0.86 |
+| 2026-11-04 | 19 | 13 | 6 | -27.4c | -527.2c | 0.80 |
 
 ### GEN4_B23
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and vol <= 0.311; bought at that ask; held to settlement. Discovery PF1 1.55 n 40; validation PF1 1.71 n 28 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 73 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.81, at 10 contracts 0.83, at 10 contracts with fees x1.2 0.82; net per contract -4.15c at 1, -3.67c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 74 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.78, at 10 contracts 0.80, at 10 contracts with fees x1.2 0.79; net per contract -4.91c at 1, -4.43c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -835,13 +835,13 @@ PF at 1 contract 0.81, at 10 contracts 0.83, at 10 contracts with fees x1.2 0.82
 | 2026-11-01 | 26 | 20 | 6 | +139.6c | -161.8c | 0.83 |
 | 2026-11-02 | 14 | 8 | 6 | -159.0c | -320.8c | 0.76 |
 | 2026-11-03 | 11 | 7 | 4 | -58.6c | -379.4c | 0.76 |
-| 2026-11-04 | 5 | 5 | 0 | +111.5c | -267.9c | 0.83 |
+| 2026-11-04 | 6 | 5 | 1 | +51.7c | -327.7c | 0.80 |
 
 ### GEN4_B24
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 30 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_bid >= 7.292; bought at that ask; held to settlement. Discovery PF1 2.01 n 50; validation PF1 1.65 n 38 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 91 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.74, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74; net per contract -5.99c at 1, -5.57c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 98 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.69, at 10 contracts 0.70, at 10 contracts with fees x1.2 0.69; net per contract -7.39c at 1, -6.98c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -850,13 +850,13 @@ PF at 1 contract 0.74, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74
 | 2026-11-01 | 19 | 10 | 9 | -375.6c | -402.5c | 0.62 |
 | 2026-11-02 | 18 | 11 | 7 | -157.0c | -559.5c | 0.63 |
 | 2026-11-03 | 17 | 12 | 5 | -53.1c | -612.6c | 0.67 |
-| 2026-11-04 | 14 | 11 | 3 | +105.8c | -506.8c | 0.75 |
+| 2026-11-04 | 21 | 14 | 7 | -71.0c | -683.6c | 0.70 |
 
 ### GEN4_B25
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 120 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= -0.1949; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 2.00 n 40; validation PF1 1.64 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 89 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.87, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91; net per contract -2.80c at 1, -1.70c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 95 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.92, at 10 contracts 0.97, at 10 contracts with fees x1.2 0.96; net per contract -1.65c at 1, -0.55c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -865,13 +865,13 @@ PF at 1 contract 0.87, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91
 | 2026-11-01 | 22 | 16 | 6 | +27.5c | -274.6c | 0.77 |
 | 2026-11-02 | 17 | 10 | 7 | -223.1c | -497.7c | 0.70 |
 | 2026-11-03 | 14 | 12 | 2 | +192.4c | -305.3c | 0.83 |
-| 2026-11-04 | 9 | 8 | 1 | +153.9c | -151.4c | 0.92 |
+| 2026-11-04 | 15 | 13 | 2 | +253.4c | -51.9c | 0.97 |
 
 ### GEN4_B26
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.36 and lsz_bid >= 5.465; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.57 n 49; validation PF1 1.63 n 35 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 102 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.71, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74; net per contract -6.77c at 1, -5.67c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 109 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.67, at 10 contracts 0.71, at 10 contracts with fees x1.2 0.70; net per contract -8.00c at 1, -6.92c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -880,13 +880,13 @@ PF at 1 contract 0.71, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74
 | 2026-11-01 | 24 | 16 | 8 | -129.8c | -514.6c | 0.64 |
 | 2026-11-02 | 16 | 9 | 7 | -187.7c | -702.3c | 0.63 |
 | 2026-11-03 | 15 | 11 | 4 | +51.2c | -651.1c | 0.70 |
-| 2026-11-04 | 13 | 10 | 3 | +73.1c | -578.0c | 0.75 |
+| 2026-11-04 | 20 | 13 | 7 | -103.4c | -754.5c | 0.71 |
 
 ### GEN4_B27
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and vol <= 0.311; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.52 n 40; validation PF1 1.63 n 28 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 73 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.77, at 10 contracts 0.82, at 10 contracts with fees x1.2 0.81; net per contract -5.01c at 1, -3.85c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 74 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.75, at 10 contracts 0.79, at 10 contracts with fees x1.2 0.78; net per contract -5.75c at 1, -4.60c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -895,13 +895,13 @@ PF at 1 contract 0.77, at 10 contracts 0.82, at 10 contracts with fees x1.2 0.81
 | 2026-11-01 | 26 | 20 | 6 | +134.2c | -168.8c | 0.83 |
 | 2026-11-02 | 14 | 8 | 6 | -161.3c | -330.1c | 0.75 |
 | 2026-11-03 | 11 | 7 | 4 | -61.5c | -391.6c | 0.75 |
-| 2026-11-04 | 5 | 5 | 0 | +110.7c | -280.9c | 0.82 |
+| 2026-11-04 | 6 | 5 | 1 | +50.9c | -340.7c | 0.79 |
 
 ### GEN4_B28
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 90 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 <= 0 and lsz_ask <= 7.388; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.92 n 40; validation PF1 1.61 n 28 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 88 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.94, at 10 contracts 1.00, at 10 contracts with fees x1.2 0.98; net per contract -1.21c at 1, -0.08c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 93 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.92, at 10 contracts 0.97, at 10 contracts with fees x1.2 0.96; net per contract -1.64c at 1, -0.52c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -910,13 +910,13 @@ PF at 1 contract 0.94, at 10 contracts 1.00, at 10 contracts with fees x1.2 0.98
 | 2026-11-01 | 25 | 18 | 7 | +51.3c | -71.5c | 0.93 |
 | 2026-11-02 | 15 | 11 | 4 | +30.4c | -41.1c | 0.97 |
 | 2026-11-03 | 13 | 8 | 5 | -110.4c | -151.5c | 0.91 |
-| 2026-11-04 | 8 | 7 | 1 | +144.5c | -7.0c | 1.00 |
+| 2026-11-04 | 13 | 10 | 3 | +103.1c | -48.4c | 0.97 |
 
 ### GEN4_B29
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.1233; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 2.26 n 51; validation PF1 1.61 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 109 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.00, at 10 contracts 1.07, at 10 contracts with fees x1.2 1.05; net per contract -0.01c at 1, +1.21c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 116 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.91, at 10 contracts 0.97, at 10 contracts with fees x1.2 0.96; net per contract -1.71c at 1, -0.52c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -925,13 +925,13 @@ PF at 1 contract 1.00, at 10 contracts 1.07, at 10 contracts with fees x1.2 1.05
 | 2026-11-01 | 28 | 19 | 9 | -99.6c | +35.7c | 1.03 |
 | 2026-11-02 | 18 | 11 | 7 | -131.1c | -95.4c | 0.94 |
 | 2026-11-03 | 17 | 13 | 4 | +59.2c | -36.2c | 0.98 |
-| 2026-11-04 | 14 | 12 | 2 | +168.3c | +132.1c | 1.07 |
+| 2026-11-04 | 21 | 15 | 6 | -24.2c | -60.4c | 0.97 |
 
 ### GEN4_B30
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask >= 7.388 and sp15 >= -0.9017 and sp30 <= 2.256; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.78 n 45; validation PF1 1.61 n 36 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 84 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.80, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.84; net per contract -4.03c at 1, -2.94c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 90 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.79; net per contract -5.20c at 1, -4.12c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -940,13 +940,13 @@ PF at 1 contract 0.80, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.84
 | 2026-11-01 | 21 | 15 | 6 | -56.9c | -379.1c | 0.66 |
 | 2026-11-02 | 14 | 9 | 5 | -94.9c | -474.0c | 0.66 |
 | 2026-11-03 | 13 | 10 | 3 | +59.0c | -415.0c | 0.74 |
-| 2026-11-04 | 11 | 10 | 1 | +167.7c | -247.3c | 0.86 |
+| 2026-11-04 | 17 | 13 | 4 | +44.1c | -370.9c | 0.81 |
 
 ### GEN4_B31
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_bid <= 8.422; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.71 n 55; validation PF1 1.59 n 38 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 119 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.88, at 10 contracts 0.93, at 10 contracts with fees x1.2 0.92; net per contract -2.50c at 1, -1.35c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 126 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.89, at 10 contracts 0.94, at 10 contracts with fees x1.2 0.93; net per contract -2.37c at 1, -1.22c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -955,13 +955,13 @@ PF at 1 contract 0.88, at 10 contracts 0.93, at 10 contracts with fees x1.2 0.92
 | 2026-11-01 | 30 | 21 | 9 | -26.9c | -235.2c | 0.84 |
 | 2026-11-02 | 21 | 14 | 7 | -56.0c | -291.2c | 0.85 |
 | 2026-11-03 | 15 | 10 | 5 | -29.4c | -320.6c | 0.86 |
-| 2026-11-04 | 15 | 13 | 2 | +160.0c | -160.6c | 0.93 |
+| 2026-11-04 | 22 | 18 | 4 | +167.4c | -153.2c | 0.94 |
 
 ### GEN4_B32
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 120 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= -0.459; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.95 n 40; validation PF1 1.57 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 92 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.96, at 10 contracts 1.02, at 10 contracts with fees x1.2 1.00; net per contract -0.76c at 1, +0.33c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 98 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.01, at 10 contracts 1.08, at 10 contracts with fees x1.2 1.06; net per contract +0.17c at 1, +1.27c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -970,13 +970,13 @@ PF at 1 contract 0.96, at 10 contracts 1.02, at 10 contracts with fees x1.2 1.00
 | 2026-11-01 | 22 | 14 | 8 | -78.2c | -153.9c | 0.86 |
 | 2026-11-02 | 17 | 12 | 5 | -30.0c | -183.9c | 0.86 |
 | 2026-11-03 | 14 | 11 | 3 | +61.9c | -122.0c | 0.92 |
-| 2026-11-04 | 10 | 9 | 1 | +152.2c | +30.2c | 1.02 |
+| 2026-11-04 | 16 | 14 | 2 | +246.7c | +124.7c | 1.08 |
 
 ### GEN4_B33
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and spread >= 0.001 and vol <= 0.311; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 1.59 n 40; validation PF1 1.54 n 28 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 73 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.77, at 10 contracts 0.82, at 10 contracts with fees x1.2 0.81; net per contract -5.03c at 1, -3.75c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 74 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.74, at 10 contracts 0.79, at 10 contracts with fees x1.2 0.78; net per contract -5.78c at 1, -4.51c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -985,13 +985,13 @@ PF at 1 contract 0.77, at 10 contracts 0.82, at 10 contracts with fees x1.2 0.81
 | 2026-11-01 | 26 | 20 | 6 | +129.0c | -135.1c | 0.86 |
 | 2026-11-02 | 14 | 8 | 6 | -163.9c | -299.0c | 0.77 |
 | 2026-11-03 | 11 | 7 | 4 | -60.3c | -359.3c | 0.77 |
-| 2026-11-04 | 5 | 4 | 1 | +85.4c | -273.9c | 0.82 |
+| 2026-11-04 | 6 | 4 | 2 | +25.6c | -333.7c | 0.79 |
 
 ### GEN4_B34
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_bid >= 6.824 and spread <= 0.01; bought at that ask; held to settlement. Discovery PF1 1.83 n 52; validation PF1 1.54 n 41 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 108 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.74, at 10 contracts 0.76, at 10 contracts with fees x1.2 0.75; net per contract -5.88c at 1, -5.47c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 115 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.70, at 10 contracts 0.71, at 10 contracts with fees x1.2 0.70; net per contract -7.08c at 1, -6.67c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1000,13 +1000,13 @@ PF at 1 contract 0.74, at 10 contracts 0.76, at 10 contracts with fees x1.2 0.75
 | 2026-11-01 | 27 | 16 | 11 | -335.8c | -435.1c | 0.69 |
 | 2026-11-02 | 19 | 11 | 8 | -217.6c | -652.7c | 0.66 |
 | 2026-11-03 | 17 | 12 | 5 | -43.5c | -696.2c | 0.69 |
-| 2026-11-04 | 14 | 11 | 3 | +105.8c | -590.4c | 0.76 |
+| 2026-11-04 | 21 | 14 | 7 | -71.0c | -767.2c | 0.71 |
 
 ### GEN4_B35
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side DOG; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 >= 0 and sp15 >= 1.584 and spread <= 0.01; bought at that ask; held to settlement. Discovery PF1 2.38 n 41; validation PF1 1.52 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 85 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.62, at 10 contracts 1.69, at 10 contracts with fees x1.2 1.67; net per contract +7.39c at 1, +7.89c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 95 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.68, at 10 contracts 1.75, at 10 contracts with fees x1.2 1.73; net per contract +7.73c at 1, +8.23c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1015,13 +1015,13 @@ PF at 1 contract 1.62, at 10 contracts 1.69, at 10 contracts with fees x1.2 1.67
 | 2026-11-01 | 10 | 5 | 5 | +286.9c | +560.2c | 2.44 |
 | 2026-11-02 | 20 | 3 | 17 | -50.1c | +510.1c | 1.74 |
 | 2026-11-03 | 10 | 4 | 6 | +175.1c | +685.2c | 1.88 |
-| 2026-11-04 | 18 | 2 | 16 | -14.9c | +670.3c | 1.69 |
+| 2026-11-04 | 28 | 5 | 23 | +96.6c | +781.8c | 1.75 |
 
 ### GEN4_B36
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 120 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= -0.459; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 1.83 n 40; validation PF1 1.52 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 92 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.96, at 10 contracts 1.03, at 10 contracts with fees x1.2 1.01; net per contract -0.68c at 1, +0.52c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 98 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.02, at 10 contracts 1.08, at 10 contracts with fees x1.2 1.07; net per contract +0.30c at 1, +1.49c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1030,13 +1030,13 @@ PF at 1 contract 0.96, at 10 contracts 1.03, at 10 contracts with fees x1.2 1.01
 | 2026-11-01 | 22 | 15 | 7 | -72.0c | -167.9c | 0.85 |
 | 2026-11-02 | 17 | 12 | 5 | -51.3c | -219.2c | 0.85 |
 | 2026-11-03 | 14 | 11 | 3 | +83.6c | -135.6c | 0.92 |
-| 2026-11-04 | 10 | 9 | 1 | +183.0c | +47.4c | 1.03 |
+| 2026-11-04 | 16 | 14 | 2 | +282.0c | +146.4c | 1.08 |
 
 ### GEN4_B37
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side NO; first poll with 150 to 60 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm30 <= 0.17 and sp5 >= 0.353 and spread >= 0.001; bought at that ask; sold at the side's bid at 30 s left (held if no bid). Discovery PF1 1.52 n 43; validation PF1 1.49 n 39 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 96 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.24, at 10 contracts 1.33, at 10 contracts with fees x1.2 1.30; net per contract +3.00c at 1, +3.96c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 103 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.29, at 10 contracts 1.39, at 10 contracts with fees x1.2 1.36; net per contract +3.63c at 1, +4.60c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1045,13 +1045,13 @@ PF at 1 contract 1.24, at 10 contracts 1.33, at 10 contracts with fees x1.2 1.30
 | 2026-11-01 | 25 | 10 | 15 | -25.0c | -54.2c | 0.93 |
 | 2026-11-02 | 15 | 8 | 7 | +323.3c | +269.1c | 1.29 |
 | 2026-11-03 | 12 | 4 | 8 | -52.8c | +216.3c | 1.20 |
-| 2026-11-04 | 13 | 6 | 7 | +163.5c | +379.8c | 1.33 |
+| 2026-11-04 | 20 | 11 | 9 | +257.7c | +474.0c | 1.39 |
 
 ### GEN4_B38
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp5 <= 0.0315; bought at that ask; held to settlement. Discovery PF1 1.50 n 55; validation PF1 1.46 n 40 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 114 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.73, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74; net per contract -6.29c at 1, -5.83c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 121 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.69, at 10 contracts 0.71, at 10 contracts with fees x1.2 0.70; net per contract -7.40c at 1, -6.95c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1060,13 +1060,13 @@ PF at 1 contract 0.73, at 10 contracts 0.75, at 10 contracts with fees x1.2 0.74
 | 2026-11-01 | 29 | 20 | 9 | -37.5c | -435.2c | 0.72 |
 | 2026-11-02 | 19 | 11 | 8 | -247.0c | -682.2c | 0.67 |
 | 2026-11-03 | 17 | 11 | 6 | -110.6c | -792.8c | 0.68 |
-| 2026-11-04 | 15 | 13 | 2 | +128.4c | -664.4c | 0.75 |
+| 2026-11-04 | 22 | 16 | 6 | -48.4c | -841.2c | 0.71 |
 
 ### GEN4_B39
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= -0.01237; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 2.44 n 55; validation PF1 1.46 n 40 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 111 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.84, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.88; net per contract -3.41c at 1, -2.33c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 118 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.82, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.86; net per contract -3.87c at 1, -2.79c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1075,13 +1075,13 @@ PF at 1 contract 0.84, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.88
 | 2026-11-01 | 27 | 20 | 7 | +115.7c | -22.5c | 0.98 |
 | 2026-11-02 | 20 | 11 | 9 | -220.8c | -243.3c | 0.86 |
 | 2026-11-03 | 16 | 11 | 5 | -25.3c | -268.6c | 0.87 |
-| 2026-11-04 | 14 | 10 | 4 | +10.3c | -258.3c | 0.89 |
+| 2026-11-04 | 21 | 14 | 7 | -60.5c | -329.1c | 0.87 |
 
 ### GEN4_B40
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.9734; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 1.57 n 55; validation PF1 1.44 n 42 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 120 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.78, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83; net per contract -4.68c at 1, -3.44c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 128 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.74, at 10 contracts 0.80, at 10 contracts with fees x1.2 0.78; net per contract -5.70c at 1, -4.49c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1090,13 +1090,13 @@ PF at 1 contract 0.78, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83
 | 2026-11-01 | 30 | 20 | 10 | -111.5c | -369.6c | 0.76 |
 | 2026-11-02 | 20 | 12 | 8 | -181.9c | -551.5c | 0.73 |
 | 2026-11-03 | 17 | 12 | 5 | -1.0c | -552.5c | 0.77 |
-| 2026-11-04 | 15 | 12 | 3 | +139.5c | -413.0c | 0.84 |
+| 2026-11-04 | 23 | 16 | 7 | -21.7c | -574.2c | 0.80 |
 
 ### GEN4_B41
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_bid >= 7.733 and spread >= 0.01; bought at that ask; held to settlement. Discovery PF1 1.52 n 43; validation PF1 1.43 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 74 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.86, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.86; net per contract -3.01c at 1, -2.61c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 80 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.77, at 10 contracts 0.78, at 10 contracts with fees x1.2 0.77; net per contract -5.23c at 1, -4.82c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1105,13 +1105,13 @@ PF at 1 contract 0.86, at 10 contracts 0.87, at 10 contracts with fees x1.2 0.86
 | 2026-11-01 | 15 | 8 | 7 | -304.2c | -223.7c | 0.73 |
 | 2026-11-02 | 15 | 10 | 5 | -44.6c | -268.3c | 0.76 |
 | 2026-11-03 | 13 | 9 | 4 | -47.9c | -316.2c | 0.77 |
-| 2026-11-04 | 11 | 9 | 2 | +123.1c | -193.1c | 0.87 |
+| 2026-11-04 | 17 | 11 | 6 | -69.7c | -385.9c | 0.78 |
 
 ### GEN4_B42
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side DOG; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 >= -0.07 and imb >= -0.9734 and sp15 >= 1.584; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 2.23 n 41; validation PF1 1.42 n 31 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 88 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.65, at 10 contracts 1.74, at 10 contracts with fees x1.2 1.72; net per contract +7.70c at 1, +8.49c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 98 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.73, at 10 contracts 1.83, at 10 contracts with fees x1.2 1.81; net per contract +8.39c at 1, +9.18c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1120,13 +1120,13 @@ PF at 1 contract 1.65, at 10 contracts 1.74, at 10 contracts with fees x1.2 1.72
 | 2026-11-01 | 11 | 5 | 6 | +278.0c | +626.6c | 2.59 |
 | 2026-11-02 | 21 | 4 | 17 | -7.9c | +618.7c | 1.88 |
 | 2026-11-03 | 10 | 4 | 6 | +174.5c | +793.2c | 2.00 |
-| 2026-11-04 | 18 | 2 | 16 | -46.0c | +747.2c | 1.74 |
+| 2026-11-04 | 28 | 5 | 23 | +106.6c | +899.8c | 1.83 |
 
 ### GEN4_B43
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask <= 8.072; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.75 n 48; validation PF1 1.38 n 37 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 113 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.82, at 10 contracts 0.88, at 10 contracts with fees x1.2 0.86; net per contract -3.85c at 1, -2.72c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 119 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80; net per contract -5.44c at 1, -4.33c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1135,13 +1135,13 @@ PF at 1 contract 0.82, at 10 contracts 0.88, at 10 contracts with fees x1.2 0.86
 | 2026-11-01 | 30 | 20 | 10 | -119.9c | -384.9c | 0.75 |
 | 2026-11-02 | 20 | 12 | 8 | -203.8c | -588.7c | 0.71 |
 | 2026-11-03 | 16 | 12 | 4 | +96.0c | -492.7c | 0.79 |
-| 2026-11-04 | 13 | 11 | 2 | +185.6c | -307.1c | 0.88 |
+| 2026-11-04 | 19 | 13 | 6 | -22.2c | -514.9c | 0.81 |
 
 ### GEN4_B44
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp5 >= 0.353; bought at that ask; held to settlement. Discovery PF1 2.35 n 51; validation PF1 1.38 n 37 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 111 on 6 days; zero-volume trades 0.
-PF at 1 contract 1.12, at 10 contracts 1.14, at 10 contracts with fees x1.2 1.13; net per contract +2.13c at 1, +2.51c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 118 on 6 days; zero-volume trades 0.
+PF at 1 contract 1.07, at 10 contracts 1.09, at 10 contracts with fees x1.2 1.08; net per contract +1.29c at 1, +1.68c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1150,13 +1150,13 @@ PF at 1 contract 1.12, at 10 contracts 1.14, at 10 contracts with fees x1.2 1.13
 | 2026-11-01 | 27 | 17 | 10 | -221.4c | -65.3c | 0.95 |
 | 2026-11-02 | 20 | 14 | 6 | +39.2c | -26.1c | 0.98 |
 | 2026-11-03 | 16 | 13 | 3 | +175.9c | +149.8c | 1.09 |
-| 2026-11-04 | 15 | 12 | 3 | +128.9c | +278.7c | 1.14 |
+| 2026-11-04 | 22 | 16 | 6 | +48.1c | +197.9c | 1.09 |
 
 ### GEN4_B45
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and ask >= 0.0742 and lsz_bid >= 6.824; bought at that ask; sold at the side's bid at 15 s left (held if no bid). Discovery PF1 2.02 n 47; validation PF1 1.37 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 89 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80; net per contract -5.22c at 1, -4.06c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 95 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.70, at 10 contracts 0.74, at 10 contracts with fees x1.2 0.73; net per contract -6.97c at 1, -5.84c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1165,13 +1165,13 @@ PF at 1 contract 0.76, at 10 contracts 0.81, at 10 contracts with fees x1.2 0.80
 | 2026-11-01 | 21 | 14 | 7 | -111.0c | -100.0c | 0.90 |
 | 2026-11-02 | 14 | 7 | 7 | -234.3c | -334.3c | 0.76 |
 | 2026-11-03 | 14 | 9 | 5 | -96.9c | -431.2c | 0.75 |
-| 2026-11-04 | 12 | 9 | 3 | +70.3c | -360.9c | 0.81 |
+| 2026-11-04 | 18 | 11 | 7 | -123.4c | -554.6c | 0.74 |
 
 ### GEN4_B46
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 20 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and bid >= 0.11 and lsz_ask <= 7.388; bought at that ask; held to settlement. Discovery PF1 2.64 n 45; validation PF1 1.34 n 34 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 102 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.96, at 10 contracts 0.98, at 10 contracts with fees x1.2 0.97; net per contract -0.86c at 1, -0.40c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 107 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.94, at 10 contracts 0.96, at 10 contracts with fees x1.2 0.95; net per contract -1.22c at 1, -0.77c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1180,13 +1180,13 @@ PF at 1 contract 0.96, at 10 contracts 0.98, at 10 contracts with fees x1.2 0.97
 | 2026-11-01 | 28 | 19 | 9 | -73.1c | -76.5c | 0.94 |
 | 2026-11-02 | 18 | 13 | 5 | -3.0c | -79.5c | 0.95 |
 | 2026-11-03 | 14 | 9 | 5 | -93.1c | -172.6c | 0.91 |
-| 2026-11-04 | 11 | 9 | 2 | +131.3c | -41.3c | 0.98 |
+| 2026-11-04 | 16 | 12 | 4 | +90.5c | -82.1c | 0.96 |
 
 ### GEN4_B47
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 60 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and lsz_ask <= 8.072; bought at that ask; held to settlement. Discovery PF1 1.79 n 48; validation PF1 1.33 n 37 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 111 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.88, at 10 contracts 0.90, at 10 contracts with fees x1.2 0.89; net per contract -2.54c at 1, -2.08c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 117 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.81, at 10 contracts 0.83, at 10 contracts with fees x1.2 0.82; net per contract -4.21c at 1, -3.75c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1195,13 +1195,13 @@ PF at 1 contract 0.88, at 10 contracts 0.90, at 10 contracts with fees x1.2 0.89
 | 2026-11-01 | 29 | 20 | 9 | -32.6c | -293.4c | 0.80 |
 | 2026-11-02 | 20 | 12 | 8 | -200.8c | -494.2c | 0.75 |
 | 2026-11-03 | 16 | 12 | 4 | +99.9c | -394.3c | 0.82 |
-| 2026-11-04 | 12 | 10 | 2 | +163.0c | -231.3c | 0.90 |
+| 2026-11-04 | 18 | 12 | 6 | -44.4c | -438.7c | 0.83 |
 
 ### GEN4_B48
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 120 to 10 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm15 >= -0.09 and sp30 >= -2.625; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.70 n 41; validation PF1 1.33 n 32 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 91 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.72, at 10 contracts 0.77, at 10 contracts with fees x1.2 0.76; net per contract -6.38c at 1, -5.28c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 97 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.81, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.85; net per contract -4.13c at 1, -3.02c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1210,13 +1210,13 @@ PF at 1 contract 0.72, at 10 contracts 0.77, at 10 contracts with fees x1.2 0.76
 | 2026-11-01 | 23 | 16 | 7 | -81.2c | -417.0c | 0.68 |
 | 2026-11-02 | 17 | 11 | 6 | -186.6c | -603.6c | 0.65 |
 | 2026-11-03 | 13 | 10 | 3 | +49.2c | -554.4c | 0.71 |
-| 2026-11-04 | 10 | 8 | 2 | +73.9c | -480.5c | 0.77 |
+| 2026-11-04 | 16 | 14 | 2 | +261.3c | -293.1c | 0.86 |
 
 ### GEN4_B49
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 45 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and sp15 >= -0.1949; bought at that ask; held to settlement. Discovery PF1 2.47 n 55; validation PF1 1.33 n 42 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 112 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.96, at 10 contracts 0.99, at 10 contracts with fees x1.2 0.97; net per contract -0.71c at 1, -0.29c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 119 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.94, at 10 contracts 0.96, at 10 contracts with fees x1.2 0.94; net per contract -1.28c at 1, -0.86c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1225,13 +1225,13 @@ PF at 1 contract 0.96, at 10 contracts 0.99, at 10 contracts with fees x1.2 0.97
 | 2026-11-01 | 27 | 20 | 7 | +119.8c | -13.1c | 0.99 |
 | 2026-11-02 | 20 | 11 | 9 | -218.7c | -231.8c | 0.87 |
 | 2026-11-03 | 17 | 13 | 4 | +96.4c | -135.4c | 0.93 |
-| 2026-11-04 | 14 | 11 | 3 | +103.0c | -32.4c | 0.99 |
+| 2026-11-04 | 21 | 15 | 6 | +33.0c | -102.4c | 0.96 |
 
 ### GEN4_B50
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 120 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and imb >= -0.4281 and sp15 >= -0.1949 and zd >= -1.214; bought at that ask; held to settlement. Discovery PF1 1.87 n 41; validation PF1 1.31 n 30 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 85 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.90, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91; net per contract -2.02c at 1, -1.60c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 90 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.88, at 10 contracts 0.90, at 10 contracts with fees x1.2 0.89; net per contract -2.47c at 1, -2.04c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1240,13 +1240,13 @@ PF at 1 contract 0.90, at 10 contracts 0.92, at 10 contracts with fees x1.2 0.91
 | 2026-11-01 | 24 | 17 | 7 | -2.9c | +107.1c | 1.12 |
 | 2026-11-02 | 14 | 7 | 7 | -249.5c | -142.4c | 0.89 |
 | 2026-11-03 | 14 | 9 | 5 | -75.7c | -218.1c | 0.87 |
-| 2026-11-04 | 9 | 7 | 2 | +82.5c | -135.6c | 0.92 |
+| 2026-11-04 | 14 | 10 | 4 | +34.8c | -183.3c | 0.90 |
 
 ### GEN4_B51
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. Bitcoin 15 minute, recorder quotes. Side FAV; first poll with 150 to 90 s left, side ask 0.03 to 0.85, at least 1 contract at the ask, and dm5 <= 0.04 and imb <= 0.4847; bought at that ask; sold at the side's bid at 5 s left (held if no bid). Discovery PF1 1.72 n 50; validation PF1 1.30 n 36 on 3 dates. Passed the GEN4 screens only; not a candidate in the owner's sense.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 108 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83; net per contract -4.45c at 1, -3.35c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 115 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.81, at 10 contracts 0.86, at 10 contracts with fees x1.2 0.85; net per contract -4.00c at 1, -2.91c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1255,13 +1255,13 @@ PF at 1 contract 0.79, at 10 contracts 0.84, at 10 contracts with fees x1.2 0.83
 | 2026-11-01 | 27 | 18 | 9 | -120.0c | -346.0c | 0.75 |
 | 2026-11-02 | 18 | 13 | 5 | +47.3c | -298.7c | 0.83 |
 | 2026-11-03 | 16 | 10 | 6 | -133.0c | -431.7c | 0.79 |
-| 2026-11-04 | 14 | 11 | 3 | +70.4c | -361.3c | 0.84 |
+| 2026-11-04 | 21 | 16 | 5 | +97.6c | -334.1c | 0.86 |
 
 ### GEN4_REF_FAV150
 
 Evaluator `scalper.gen4:evaluate`, source `quotes`, frozen 2026-10-30T00:00:00Z. The unconditional core of 41 of the 51 GEN4 validation passes: buy the favourite (side ask 0.50 to 0.85) at the first poll 150 to 120 s before the close, hold. Discovery PF1 1.61 n 50; validation PF1 1.57 n 35. Shows whether the conditions add anything forward.
-Windows evaluated 339 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 106 on 6 days; zero-volume trades 0.
-PF at 1 contract 0.87, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.87; net per contract -2.83c at 1, -2.39c at 10.
+Windows evaluated 354 on 6 days; without the data the rule needs 0; evaluator errors 0. Trades 113 on 6 days; zero-volume trades 0.
+PF at 1 contract 0.81, at 10 contracts 0.83, at 10 contracts with fees x1.2 0.81; net per contract -4.24c at 1, -3.80c at 10.
 
 | date (UTC) | trades | wins | losses | net/contract 10c (day) | cumulative net/contract 10c | cumulative PF 10c |
 |---|---|---|---|---|---|---|
@@ -1270,7 +1270,7 @@ PF at 1 contract 0.87, at 10 contracts 0.89, at 10 contracts with fees x1.2 0.87
 | 2026-11-01 | 25 | 18 | 7 | +26.8c | -322.0c | 0.77 |
 | 2026-11-02 | 17 | 10 | 7 | -137.6c | -459.6c | 0.75 |
 | 2026-11-03 | 15 | 11 | 4 | +59.7c | -399.9c | 0.81 |
-| 2026-11-04 | 14 | 12 | 2 | +146.7c | -253.2c | 0.89 |
+| 2026-11-04 | 21 | 15 | 6 | -29.2c | -429.1c | 0.83 |
 
 ### REF_L1_GOLD
 
