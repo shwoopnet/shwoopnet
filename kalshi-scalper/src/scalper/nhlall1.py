@@ -315,11 +315,13 @@ def cmd_block2(minutes):
                 try:
                     cs = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": starts[ev] - 3600, "end_ts": starts[ev], "period_interval": 1}, retries=1).get("candlesticks", [])
                     break
-                except Exception:  # noqa: BLE001
+                except Exception as e:  # noqa: BLE001
+                    if "404" in str(e) and a >= 1:
+                        break  # not on the historical endpoint: no point waiting, the game is dropped below
                     time.sleep(2 + 4 * a)
             time.sleep(0.6)
             if cs is None:
-                continue
+                break  # one market failed after its retries: the game is dropped, no more requests on its other rungs
             for x in cs:
                 c.execute("INSERT OR IGNORE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
             c.execute("INSERT OR IGNORE INTO cdone VALUES(?,?)", (tk, len(cs)))
