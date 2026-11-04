@@ -2,303 +2,308 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-04 08:20 AM CT (14:20Z): W108 S-GQH1 flag added, all flag tests pass
+## 2026-11-04 02:55 AM CT (08:55Z): corrections from the W110 audit, and the heading clock
+
+- Heading clock: the time stamps on my entries from about 02:05 AM CT onward had drifted ahead of the real clock (the last ones said 08:20 AM CT when it was 02:48 AM CT). All of them are now rewritten from their git commit times (UTC minus 6 hours, Central Standard Time after Nov 1). Trust the commit times. W109's digest also noticed the mismatch.
+- W110 audit of the 25 newest entries against the 08:36Z report: everything else matches (OICORE 25 fills, 6 wins, 19 losses, +$28.94, PF 2.74, streak 5; the 33/25/8 orders; gold 252 fills, 13 losses, 11 early sells, +$38.26; the S-GQH1 and S-GPB1 tables; gold size bands; W85's day sums; C2 9 of 40). Corrections: (1) W99 said 22 of 25 fills are 10 contracts; the report shows 23 at 10, one at 5, one at 9, so 23 (fixed above). (2) W89 gives 40 fills about Nov 7 and W96 gives about Nov 8; they count different things (all fills against trigger-window fills only), a label issue. (3) W106's "$0.38" extra at 16 contracts does not equal the 9 orders' wins ($5.73): treat the W106 dollar figures as rough; the direction (the freeze saved money in this window on two losses) stands. Sim trigger counts: 453 in the older entries (W53, W55, W64, W65, W66), 461 in W81, W83, W84 as the cache grew; 31 is the since-Oct-30 subset. No-fills: 78 in W52 (earlier copy of the file), 79 current (W57, W59), 135 the whole file.
+
+## 2026-11-04 02:48 AM CT (08:48Z): W108 S-GQH1 flag added, all flag tests pass
 
 - W108: the S-GQH1 flag now lives in section (2) of `fwd_all.py` (which `wake.sh` runs): at 40 block fills it prints FLAG, and FLAG-TO-MAIN only if block losses are 5 or more, block PF is under 1.0 and other hours' PF is over 1.3; otherwise a note. `test_flags.py`: 29 of 29 PASS (22 existing, 7 for S-GQH1 including strong at 40, weak at 40, 39 fills). A bug in my earlier test of this flag was fixed too (fills had been spaced 15 minutes apart so most fell outside the 20-24 block; now 1 minute apart). Live now: 11 of 40 block fills. All registered forward flags are now tested.
 
-## 2026-11-04 08:15 AM CT (14:15Z): W107 flag test, one silent flag found
+## 2026-11-04 02:47 AM CT (08:47Z): W107 flag test, one silent flag found
 
 - W107 (`test_flags.py`, runs the real flag code from `wake.sh` with a frozen clock on synthetic reports in a temp folder; `dash_report.json` untouched): 22 of 23 cases PASS, including controls just below each threshold that correctly stay quiet. Passing: gold silence over 5h on a weekday (a weekend gap stays quiet), OICORE silence over 14h, loss streak 15 (WARNING) and 18 (KILL), S-LIM1-LIVE at 20 tagged, C1 at 80 settled, C9 at 200, S-JUMP1 and S-SDIR1 at 40, C2 at 40, S-GPB1 at 40. The one FAIL is S-GQH1 at 40: `fwd_all.py` section (2) prints its table only, and neither `wake.sh` nor `wake_shadows.py` has a count at 40 or a flag rule. Two cases are parse-only (C9 uses a hand-written line, S-JUMP1 and S-SDIR1 use a stub for `forward_oicore.py`). Fix queued as W108 using the S-GQH1 registered rule (flag at 40 block fills; to main if block losses are 5 or more and block PF is under 1.0 while other hours' PF is over 1.3).
 
-## 2026-11-04 08:10 AM CT (14:10Z): W106 what the 15 contract freeze did on Nov 3 to 4
+## 2026-11-04 02:45 AM CT (08:45Z): W106 what the 15 contract freeze did on Nov 3 to 4
 
 - W106 (descriptive; the order record has no ladder size or balance, so bracketed at 16 to 20 contracts): gold fills Nov 3 to Nov 4: 24 fills, net -$16.63; counts 15 (9 orders), 12 (7), 13 (5), 14 (3). The 9 orders at exactly 15 net -$20.57 and hold both losses of the sample (-$13.56 and -$12.74); their wins total $0.38 at 16 contracts and $1.91 at 20 if scaled. Unfrozen, scaling those 9 linearly: extra profit +$0.38 (16) or +$1.91 (20); extra loss -$1.75 (16) or -$8.77 (20); net -$1.37 (16) or -$6.86 (20), so the freeze saved money in this window. Two losses in 9 orders say nothing about the rule; the reading to keep is that at this size one loss outweighs about 30 wins. The freeze stays the owner's choice and I do not argue for a different number.
 
-## 2026-11-04 08:05 AM CT (14:05Z): W105 R6 book on the 8 unfilled OICORE orders
+## 2026-11-04 02:45 AM CT (08:45Z): W105 R6 book on the 8 unfilled OICORE orders
 
 - W105 (hypothesis stated first: most no-fills are the ask moving above the limit within about 1 s; result NOT supported as a majority): of 8 unfilled orders, 3 ask above the limit (Oct 31 22:27 YES 0.25, ask 0.26 to 0.27; Nov 3 22:27 YES 0.44, ask 0.46; Nov 4 01:57 NO 0.09, ask 0.097 before and 0.12 to 0.13 after), 2 ask at or below the limit with size (Nov 1 13:57 YES 0.14, ask 0.14 with size 348 about 1 s later; Nov 2 04:27 YES 0.06, ask 0.06 with size 2,808 just before), 3 with no R6 poll near the order. In 2 of the 3 "above" cases the ask was already above the limit before the order (the price moved earlier, the bot's seen ask was stale by the time of sending); only the Nov 4 case rose after. The 2 "should have filled" cases cannot be settled with 2 s polls. Together with W62, W77 and W104: no-fills are not a thin book; they are a mix of a stale seen ask and a quote that moved within a second or two. The logged exchange answer (the W70 brief) is the way to separate them. Nothing to act on in the strategy.
 
-## 2026-11-04 08:00 AM CT (14:00Z): W104 depth-share clamp test
+## 2026-11-04 02:44 AM CT (08:44Z): W104 depth-share clamp test
 
 - W104 (partly supported): 31 of 33 OICORE orders match min(10, floor(0.25 x touch)), touch = askSize for a YES buy and bidSize for a NO buy (depthAtLimit and shareOfDepth are null on these records, so book sizes were used). Nov 1 09:00 (0.14 YES): touch 10.02, rule gives 2, 2 ordered: depth clamp confirmed. Oct 30 20:30 (0.50 NO): touch 138.53, rule gives 10, 9 ordered: not a depth clamp, another cap (dollar) bound it. Mismatches: that order, and the first order (Oct 30 12:42) at 5 contracts when 10 was expected, which predates the step to 10. No other order had a touch under 40, so the touches of 5 and 8 W77 mentioned could not be matched here. Consequence: the depth clamp is real and small touches cut size (a low-liquidity quote gets fewer contracts, as designed); the 9 at 0.50 stays unexplained but costs about $0.50 and sits on the first day. Nothing to act on.
 
-## 2026-11-04 07:55 AM CT (13:55Z): W103 the S-LIM1-LIVE tag is not robust to the ask source
+## 2026-11-04 02:44 AM CT (08:44Z): W103 the S-LIM1-LIVE tag is not robust to the ask source
 
 - W103 (24 of 33 OICORE orders have an R6 poll within 6 s before the order): bot seen ask vs R6 best ask for the bought side: mean absolute difference 1.22c, max 6.50c, 12 of 24 differ by 1c or more. The tag (fill at least 0.95c above the first-seen ask) would change for 7 filled, settled matched orders (Oct 30 14:42, Oct 30 23:27, Nov 1 03:12, Nov 1 15:12, Nov 2 20:12, Nov 3 03:42, Nov 3 15:27); all 7 flip from untagged to tagged, because the R6 ask is lower than the bot's seen ask (R6 polls are up to 6 s old, so this is partly the book moving in those seconds, which is the very effect the tag tries to measure). So the tagged/untagged split depends on which ask is used and on timing within seconds. The registration defines the tag from the bot's own first-seen ask, and I keep that definition for the review at 20 tagged (changing it now would be choosing after seeing data), but treat the tagged vs untagged comparison as soft: it is a measure of how far the price moved against the order in the seconds around entry, not a clean treatment. Caveat: the dashboard report may predate the newest orders.
 
-## 2026-11-04 07:50 AM CT (13:50Z): W102 the window cap does not explain the clamps
+## 2026-11-04 02:43 AM CT (08:43Z): W102 the window cap does not explain the clamps
 
 - W102: neither clamped order had any other order in its window (L1 or slot, any series): Nov 1 09:00 (2 contracts, 0.14, no fill) was alone with at most $0.28 open; Oct 30 20:30 (9 contracts, 0.50, filled) was alone with $4.50 open. At an assumed base of about $490 the 5.5% window cap is about $26.95 and the slot 2% about $9.80, so both orders sit far under them (the slot cap alone would allow about 19 contracts at 0.50). The window cap is ruled out. Remaining candidate from W101: the depth share clamp (25% of the size at the touch): a touch of 8 gives 2 contracts and a touch of 36 gives 9. W77 saw two filled orders with touches of 5 and 8, which fits. Checking this in W104 (the order record's `bidSize` and `askSize` and `depthAtLimit` fields).
 
-## 2026-11-04 07:45 AM CT (13:45Z): W101 what clamps OICORE orders, and an implied sizing base
+## 2026-11-04 02:42 AM CT (08:42Z): W101 what clamps OICORE orders, and an implied sizing base
 
 - W101 (from origin/main `kalshiSlotLib.js`; the base is not in the code): OICORE is 10 contracts, stepped down one at a time until the cost fits all of: per order 1% of base (max $20); per window 2% of base minus slot dollars already in the window; open total 3% of base minus open slot dollars; window room min(5.5% x base - L1 spend - slot spend - $1.05, 2.75% x base - slot spend); daily room 2% of base plus the day's worst net; lifetime room 6% of base plus the lifetime worst net. Also depth share 25% of the touch size and open contracts per market at most 10. The 9 at 0.50: 10 would cost about $5.18 (including fee) and 9 about $4.66, so if the per-order cap bound, the base is about $466 to $518 (my W73 guess of $500 sits inside it). The 2 at 0.14: 10 would cost about $1.49, 2 about $0.30, 3 about $0.45, so the binding room was only $0.30 to $0.45; a per-order cap on a $490 base is about $4.9, so something else bound: window room (L1 or slot dollars already open in that window), open-total room or a daily or lifetime room used up. Cannot separate these without the order timestamps and other open orders. Consequence for the read: dearer entries (30c to 50c) are the ones clamped below 10 contracts, so per-contract numbers are the fair comparison and dollar totals understate the dear end. With a base of about $490, the worst rolling 24 hours (-$35.61, W73) is about -7.3% against the 12% stop (about $59), and the OICORE per order cap is about $4.9.
 
-## 2026-11-04 07:40 AM CT (13:40Z): W100 C4, C5 and S-TIM1 are not buildable as registered
+## 2026-11-04 02:42 AM CT (08:42Z): W100 C4, C5 and S-TIM1 are not buildable as registered
 
 - W100 (no files edited, nothing guessed): C4 (15c early-sell line, gold and Dogecoin): stated kill rule (fewer than 3 of 16 exited positions settled in the bought side's favour) and prediction (at least 3, 20%); missing the as-of time, the 16 tickers, whether it is forward or a one-time count (V2 counts them), and what "in favour" means with fees. C5 (Dogecoin upper band edge 96c): stated read size 30, prediction (net under +1.0c, at least 1 loss), kill (net above +2.5c or 0 losses); missing start time, order source (Dogecoin is paused so no forward fills exist), fill price source, the 96 to 97c boundary. S-TIM1 (OI window 300 to 180 s): stated window, discovery PF 2.72 on n 200, holdout PF 3.54 on n 12; missing order set, start time, read size, kill or pass rule, and the threshold for the new window. Decisions: C5 is closed as moot while Dogecoin is paused (reopen if it returns); C4 stays a V2 one-time count; S-TIM1 needs V2 or main to write the missing definitions, and the holdout of 12 is far too small to adopt anything. I do not guess definitions for shadows I did not register.
 
-## 2026-11-04 07:35 AM CT (13:35Z): W99 OICORE orders against the spec
+## 2026-11-04 02:41 AM CT (08:41Z): W99 OICORE orders against the spec
 
-- W99 (audit of 33 OICORE slot orders, 25 filled, 8 no fill): ticker, strategy and side all match the spec (KXBTC15M, cheaper side, bought-side price at most 0.50 on all 33, all in 5c to 50c), send time 161 to 177 s before the close (none outside 120 to 180 s), no filled order unsettled. Only size deviates: ordered count is not 10 on 3 orders: Oct 30 08:45 (-45) ordered 5, filled 5 (before the step to 10); Oct 30 20:30 (-30) ordered 9, filled 9 (price 0.50); Nov 1 09:00 (-00) ordered 2, no fill (price 0.14). The other 30 ordered 10 and all 23 other fills are 10. The 9 at 0.50 and the 2 at 0.14 look like dollar-cap or window-cap clamps (the slot's per order cap scales with the sizing base), not wrong-side or timing errors; the cause was not confirmed. Note for the read: 22 of the 25 fills are 10 contracts, so net per contract is comparable across fills. Nothing to act on.
+- W99 (audit of 33 OICORE slot orders, 25 filled, 8 no fill): ticker, strategy and side all match the spec (KXBTC15M, cheaper side, bought-side price at most 0.50 on all 33, all in 5c to 50c), send time 161 to 177 s before the close (none outside 120 to 180 s), no filled order unsettled. Only size deviates: ordered count is not 10 on 3 orders: Oct 30 08:45 (-45) ordered 5, filled 5 (before the step to 10); Oct 30 20:30 (-30) ordered 9, filled 9 (price 0.50); Nov 1 09:00 (-00) ordered 2, no fill (price 0.14). The other 30 ordered 10 and all 23 other fills are 10. The 9 at 0.50 and the 2 at 0.14 look like dollar-cap or window-cap clamps (the slot's per order cap scales with the sizing base), not wrong-side or timing errors; the cause was not confirmed. Note for the read: 23 of the 25 fills are 10 contracts (corrected from 22 on the W110 audit), so net per contract is comparable across fills. Nothing to act on.
 
-## 2026-11-04 07:30 AM CT (13:30Z): W98 C2 tracker built
+## 2026-11-04 02:41 AM CT (08:41Z): W98 C2 tracker built
 
 - W98: C2 (skip negative rise3) was fully stated, so `c2_fwd.py` is built and called from `wake_shadows.py` (FLAG at 40). Registration: gold and Dogecoin L1 fills after Nov 1 21:15Z; rise3 as logged on the order, negative means below 0; read at 40 negative-rise3 fills; dead if 1 or fewer losses or net above +$2; predicted at least 3 losses and net under $0. Two choices not in the registration, now fixed: a loss is settledPnl below 0, and only settled fills count toward the 40. Current read: 9 of 40 negative-rise3 fills, 1 loss, net -$2.67. Dogecoin is paused, so the cell now fills on gold alone (slow). The clause "dead if JUMP1 is FALSIFIED" and V2's confirmation of how JUMP1 counts rise3 stay a manual check; no answer recorded.
 
-## 2026-11-04 07:25 AM CT (13:25Z): W97 retry fix for failed candle fetches
+## 2026-11-04 02:40 AM CT (08:40Z): W97 retry fix for failed candle fetches
 
 - W97 (in a scratchpad copy `w97/`, real `oi/` untouched): `r6_final_fixed2.py` no longer writes a failed candle request as done (`have()` skips `ok:false` rows, so they retry on the next `--live` run), with a `--retry-only` flag that skips the git sync and the analysis. Of the 5 stored `ok:false` rows, 2 now fill (gold KXGOLD15M-26NOV030715-15, Doge KXDOGE15M-26NOV031030-30). The other 3 (gold Oct 14, Doge Oct 5 and Oct 7) are outside the R6 book set, so `topup()` never reaches them; fetched directly: gold Oct 14 and Doge Oct 5 return data, Doge Oct 7 got a 429 and needs another try. These 3 are not stored. The Nov 12 13:00Z scheduled task now calls `r6_final_fixed2.py`. The real `oi/gold.jsonl` and `oi/doge.jsonl` still hold the 5 failed rows until the next live run; they feed old reads only (gold and Doge are not OICORE), so no result changes.
 
-## 2026-11-04 07:20 AM CT (13:20Z): W96 S-JUMP1 and S-SDIR1 flags in wake.sh
+## 2026-11-04 02:39 AM CT (08:39Z): W96 S-JUMP1 and S-SDIR1 flags in wake.sh
 
 - W96: `wake_shadows.py` plus a "== SHADOWS ==" call in `wake.sh` prints the S-JUMP1 table (OIR band) and the S-SDIR1 table (sdir) from `forward_oicore.py` on the fresh report, with a FLAG line at 40 or more settled OICORE fills on trigger windows since Oct 30 12:00Z. Definitions and thresholds unchanged. Ambiguity resolved here: "40 fills" means the total, not per group (decided before reading: total). Run now: 18 of 40 fills. S-JUMP1: 86,300 to 106,000 has 10 fills, 3 wins, +$18.04; 106,000 and over 8 fills, 2 wins, +$5.29. S-SDIR1: at or above -0.09 has 4 fills, 1 win, +$2.73; below -0.09 has 14 fills, 4 wins, +$20.60. At the 4.8 fills a day pace the 40 fill look is about Nov 8 for these (they count only trigger-window fills).
 
-## 2026-11-04 07:15 AM CT (13:15Z): W69 r6_final.py live mode tested
+## 2026-11-04 02:39 AM CT (08:39Z): W69 r6_final.py live mode tested
 
 - W69: the ORIGINAL `r6_final.py --live` was NOT run: its line 20 runs `git fetch origin quote-data` into the project's own `.git` (outside the scratchpad), and line 30 reads it. `r6_final_fixed.py` fetches into a bare mirror (`scratchpad/mirror.git`, reusing the project's objects read-only through alternates) and ran `--live` to completion with no error: about 17 minutes, fetch rc 0, 0 new book files (all 29 already local), 239 candle rows added (gold 97, Dogecoin 142); book days Oct 29 to Nov 4 (7 days); gold depth-sum used 61 windows, extra cost above the touch 0.00c median up to 0.41c at the maximum (250 contracts); `w12.py` gold read: 9 candle sells, 3 won at settle, hold net +0.60c/ct against candle -1.59c. `oi/` was backed up to `oi_backup_w69` first because `--live` appends to `oi/*.jsonl`. Known issues: (1) line 20 (fixed in the copy); (2) line 86 writes `ok:false` rows when a candle request fails and `have()` then counts them as done, so failed fetches never retry (2 rows in `oi/gold.jsonl`, 3 in `oi/doge.jsonl`; not fixed); (3) runtime 17 minutes needs a timeout of 30 minutes or more and `python3 -u`; (4) `D.UTC` needs Python 3.11 or later; (5) a deprecation warning in `w12.py`. The Nov 12 13:00Z scheduled task now calls `r6_final_fixed.py` (prompt updated).
 
-## 2026-11-04 07:10 AM CT (13:10Z): W95 inventory of registered shadows
+## 2026-11-04 02:39 AM CT (08:39Z): W95 inventory of registered shadows
 
 - W95 (`shadows_inventory.md`, 19 rows, scratchpad): in wake.sh already: S-GPB1 (read 40), S-GQH1 (read 40), S-LIM1-LIVE (review at 20 tagged), S-FLOW1 (kill if low-half PF under 1.2 on 60+ new windows), S-FLOW2 (150 low windows), S-FLOWL1 (20 early sells), C1 (80 settled), C9 (200 and 400). Registered with no tracker: S-TIM1 (OI window 300 to 180 s shadow; no read size or kill rule stated), C2 (skip negative rise3, 40 fills, never built), C4 and C5 (queued, never scored). Script exists but not in wake.sh: S-JUMP1 and S-SDIR1 (read at 40 fills; forward_oicore.py prints only the OIR band table, so no 40 fill flag fires), C8 (Doge, `c8_fwd.py`, threshold stale and Doge is paused), `forward_flow1.py` (live FLOW1 orders; FLOW1 is not live). Closed: S-LIM1 (replaced), C3 (dead), C6 and C7 (history only). Next: add S-JUMP1 and S-SDIR1 40-fill flags to wake.sh (W96). S-TIM1, C2, C4, C5 stay unbuilt until their definitions are written down.
 
-## 2026-11-04 07:05 AM CT (13:05Z): W94 wake.sh built
+## 2026-11-04 02:37 AM CT (08:37Z): W94 wake.sh built
 
 - W94: `wake.sh` (scratchpad, 900 s budget) runs dash.sh, fwd_all.py on the fresh report, then flow2_forward.py, flowl1_forward.py and flow_forward.py in the background (waits up to 8 minutes, marks any unfinished as still running) and prints only the silence and kill flags that fire plus the trackers. Flags built in: gold L1 5h on weekdays, OICORE 14h, OICORE streak warning 15 to 17 and kill 18, S-LIM1-LIVE at 20 tagged, C9 at 200 windows, C1 at 80 settled, Doge paused. Interpretation calls fixed: "Friday or Sunday night" = a gap starting at or after 18:00 CT on those days; gold's weekday rule also needs the current CT day to be a weekday. First run about 08:37Z: no flags fired. Trackers: S-GPB1 0 of 40; S-GQH1 20-24 CT -$14.29 PF 0.35 vs +$10.08 elsewhere; gold at the 15 cap 38% since Nov 3; S-FLOW2 1 of 150; S-FLOWL1 0 of 20 early sells; S-FLOW1 22 pool windows, 38 short of 60, low PF 1.24 vs high 1.38. From now on one wake runs `bash wake.sh`.
 
-## 2026-11-04 07:00 AM CT (13:00Z): W93 price band table added to the Nov 13 template
+## 2026-11-04 02:35 AM CT (08:35Z): W93 price band table added to the Nov 13 template
 
 - W93: `oicore_nov13.py` now also prints table (5b), live fills by order price (information only; fee per order rounded over price x count): at or under 0.07: 12 fills, 2 wins, +$12.62, PF 3.07, fee 7.3% of cost; 0.07 to 0.15: 9 fills, 1 win, +$0.08, PF 1.01, fee 6.7%; above 0.15: 4 fills, 3 wins, +$16.24, PF 10.55, fee 4.6%. Tagged 6 fills +$4.77 PF 2.04; untagged 19 fills +$24.17 PF 3.00. Every cell is tiny; note that the middle band (0.07 to 0.15, 9 fills) is flat and the profit sits in the cheapest and the dearest cells, which is just the lottery shape. No change, no filter.
 
-## 2026-11-04 06:55 AM CT (12:55Z): W92 S-FLOWL1 tracker built
+## 2026-11-04 02:34 AM CT (08:34Z): W92 S-FLOWL1 tracker built
 
 - W92: `flowl1_forward.py` (scratchpad, cache `flowl1_cache.jsonl`, resumable) built with the fixed definitions from the last entry. First run: 16 gold windows closed after 04:43Z, 3 in-band with at least 5 flow trades (0 dropped thin): first half 1 window +8.60c/ct, second half 2 windows +9.25c/ct, all 3 +9.03c/ct, 0 losses; flagged 1 window (0 losses), unflagged 2 (0 losses); early sells 0 of 20 needed, not readable. Two choices the worker made where the registration was silent, now part of the definition: an early sell exits at 0.25 (the line price, not the candle low) and fees are the per 10 contract ceiling fee on each leg traded. Rerun each wake or two (cheap, resumes from the cache).
 
-## 2026-11-04 06:50 AM CT (12:50Z): S-FLOWL1 definitions fixed before building
+## 2026-11-04 02:30 AM CT (08:30Z): S-FLOWL1 definitions fixed before building
 
 - W91 stopped, correctly: the S-FLOWL1 line (the W28 entry, Nov 3 10:43 PM CT) left four things open. Fixed now, before any data is read: (1) start = windows closing after 2026-11-04T04:43:00Z; (2) unit = every new gold in-band window from public data (not live fills), Dogecoin dropped because it is paused; (3) in-band = the side with ask 0.88 to 0.97 on the candle ending at close-360, bought at that ask; flow = (contracts takers bought minus sold on that side) / total over [close-540, close-360), every public trade, no dedup, at least 5 trades, flagged if flow <= -0.151 (the registered gold median); (4) read at 20 early sells (an early sell = the side's bid at or below 0.25 after entry), kill if the flagged loss rate is not above 1.3 times the unflagged loss rate, with the tracker also printing the halves, net and PF as information. Gold early sells run about 4% of fills, so 20 take roughly 40 days; low priority, no decisions depend on it.
 
-## 2026-11-04 06:45 AM CT (12:45Z): W90 Nov 13 read template
+## 2026-11-04 02:29 AM CT (08:29Z): W90 Nov 13 read template
 
 - W90: `oicore_nov13.py <dash_report.json>` (scratchpad) is the fixed template for the registered Nov 13 forward read of OICORE; no network, thresholds fixed in code. On the 08:26Z report: 25 fills, 6 wins, 19 losses, net +$28.94, PF 2.74, +11.86c/ct, win rate 24.0% (Wilson 95% 11.5% to 43.4%); loss streak current 5, longest 5 (kill at 18); net kill n/a (applies after 40 fills); tagged 6 fills, 1 win, +$4.77; untagged 19 fills, 5 wins, +$24.17; weekday 17 fills +$19.72, weekend 8 fills +$9.22; CT blocks 0-6 -$0.64, 6-12 -$4.80, 12-18 +$30.27, 18-24 +$4.11; sim vs live 31 sim triggers, 17 matched, 13 with no live order, 7 live orders with no sim trigger. Verdict line uses W67's wording: net > 0 is the minimum, PF 1.5 is not a pass/fail bar below 100 fills, the two registered kills stay. Run it on Nov 13 and again on the extended read if main agrees.
 
-## 2026-11-04 06:40 AM CT (12:40Z): W89 OICORE live fills per day
+## 2026-11-04 02:28 AM CT (08:28Z): W89 OICORE live fills per day
 
 - W89 (`oicore_rate.py`, offline on dash_report.json, oi/btc.jsonl and fwd_cache.jsonl): CT day, sim triggers / orders / fills / fill rate / cumulative fills: Oct 30 5/6/5/83%/5; Oct 31 4/5/4/80%/9; Nov 1 8/8/4/50%/13; Nov 2 6/5/5/100%/18; Nov 3 8/8/6/75%/24; Nov 4 (partial) 0/1/1/100%/25 (the Nov 4 trigger count is 0 only because the candle data stops before today). Trailing 5 full-day pace 4.8 fills a day. At that pace 40 fills about Nov 7, and 100 fills about Nov 19, so the Nov 13 read would hold about 68 fills, not 100. Fill rate (orders that fill) averages roughly 77%. Use this table to date the interim reads: a 40 fill look on about Nov 7 (net > 0 and the 18-streak kill are the only live checks), the registered read Nov 13, and an extended read about Nov 19 if main agrees (W67).
 
-## 2026-11-04 06:35 AM CT (12:35Z): W88 silence flag calibration
+## 2026-11-04 02:27 AM CT (08:27Z): W88 silence flag calibration
 
 - W88 (descriptive; CT): gold L1, 387 orders since Oct 7: gap median 0.75h, p90 2.25h, max 93.3h; weekday gaps p90 2.25h, p99 5.0h, max 21.3h. Longest gaps are weekends (Fri Oct 16 15:54, 93.2h; Oct 9, 67.7h; Oct 30 12:09, 54.5h; Oct 23, 50.5h) and one overnight (Thu Oct 15 18:39, 21.3h). My 6h weekday flag would have fired on 2 weekday gaps. OICORE, 33 orders since Oct 30: gap median 1.88h, p90 9.65h, max 14.25h; weekday p99 11.2h. My 14h flag would have fired twice, both on overnight gaps starting Friday or Sunday night, so both false. Decisions: gold's silence flag becomes 5h on weekdays (p99), ignoring gaps that start Friday after 15:00 CT or on the weekend; the OICORE flag stays at 14h for now (the 12h suggestion rests on 18 gaps) but I will not treat a gap that starts Friday or Sunday night as a stall. Both flags only prompt a look at the bot's status; they do not trigger any action.
 
-## 2026-11-04 06:30 AM CT (12:30Z): W87 one script for the forward trackers
+## 2026-11-04 02:24 AM CT (08:24Z): W87 one script for the forward trackers
 
 - W87: `fwd_all.py [report.json]` (scratchpad) prints, from the newest dash_report.json: S-GPB1 (0 of 40 fills below 0.90), S-GQH1 (20-24 CT: 11 fills, 2 losses, -$14.29, PF 0.35; other hours 26 fills, 1 loss, +$10.08, PF 1.74), OICORE live split (25 fills): weekday 17 fills, 4 wins, +$19.72; weekend 8 fills, 2 wins, +$9.22; by CT block 0-6 1 fill -$0.64, 6-12 5 fills -$4.80, 12-18 7 fills +$30.27, 18-24 12 fills +$4.11 (information only; live weekend is not weak so far on 8 fills); gold size bands (1-5 PF 1.03, 6-10 PF 2.59, 11-15 PF 0.95, 16+ 9 fills); 38% of gold fills since Nov 3 at the 15 cap; OICORE loss streak 5 (longest 5), 13 from the 18 kill and outside the 15-17 warning zone. Thresholds unchanged. Use it each wake in place of the three separate scripts.
 
-## 2026-11-04 06:25 AM CT (12:25Z): W86 try ledger (how many splits this log has looked at)
+## 2026-11-04 02:23 AM CT (08:23Z): W86 try ledger (how many splits this log has looked at)
 
 - W86 (descriptive; approximate, the worker read lines 1 to 226 in full and searched the rest of the 992 line log): about 380 splits tried (147 loss-feature buckets on Nov 3, 37 open interest skip cells, 11 price cells and rise3, about 62 hour, weekday, week, size and price cells on Nov 4, about 121 registered W1 to W31 splits). Bonferroni threshold 0.05 / 380 = about 0.00013 (the log's own 147 count gives 0.0003). Splits with p under 0.10: Monday live loss rate 0.007; prior early sells 0.010 (wrong direction); biggest last-minute rise 0.012; 90 to 92c price cell 0.012 (about 0.12 after 10 cells); live rise3 below 0 0.051; order larger than the touch 0.08; Dogecoin late orders z about 3.0; Dogecoin low open interest (C8) 0.027 discovery and 0.0016 validation; relative open interest cut 0.016; OICORE weekend gap 0.080. Survivors: none; the smallest p (0.0016) is about 12 times the threshold. Ledger file: scratchpad `try_ledger.md`. Standing reading: nothing found in this log's slicing of live data beats chance after the try count, so every item here stays a forward question. Count approximate; treat 380 as a floor on what was tried.
 
-## 2026-11-04 06:20 AM CT (12:20Z): W85 gold by day of week
+## 2026-11-04 02:22 AM CT (08:22Z): W85 gold by day of week
 
 - W85 (descriptive; 252 settled gold fills, CT dates): weekday 240 fills, 12 losses (5.0%), +$37.60, PF 1.42, +1.73c/ct; weekend 12 fills (all Sunday, Saturday is closed), 1 loss, +$0.66, PF 1.07. Mon n 34, 3 losses, -$3.54, PF 0.87; Tue n 55, 5 losses, -$10.55, PF 0.76; Wed n 55, 3 losses, +$9.82, PF 1.90; Thu n 67, 0 losses, +$31.81; Fri n 29, 1 loss, +$10.06, PF 2.14. Weekend vs weekday loss-rate permutation p 1.00 (uninformative at n 12). Mon and Tue are the weak days (89 fills, -$14.09) and Thu carries the profit (+$31.81 of +$38.26), but that is five day-of-week cells on 13 losses, the shape chance produces; no filter, no forward registration beyond watching the same table each week. Not acted on.
 
-## 2026-11-04 06:15 AM CT (12:15Z): W84 OICORE weekend gap
+## 2026-11-04 02:21 AM CT (08:21Z): W84 OICORE weekend gap
 
 - W84 (descriptive; 461 sim triggers): weekday +9.38c/ct, weekend +2.23c, difference +7.16c, permutation p 0.080 two-sided (5000 shuffles), not significant at 0.05 and uncorrected for the other splits tried (hour blocks in W83, weeks in W64, price bands in W36 and W53). Weekend win rate 27 of 119 = 22.7% (Wilson 95% 16.1% to 31.0%). Weekend by month: Sep n 33, +4.35c, PF 1.41; Oct n 78, +0.67c, PF 1.04; Nov n 8, +8.69c (too few). Positive in each month but weak. History cannot count toward a weekend filter; it stays a forward question. Tracking: live OICORE weekend fills (Saturday and Sunday CT close) versus weekday, information only. At the live pace about 13 weekend triggers per weekend, so it will not be readable by Nov 13 (one weekend, Nov 7 to 8).
 
-## 2026-11-04 06:10 AM CT (12:10Z): W83 OICORE by time of day and weekday
+## 2026-11-04 02:21 AM CT (08:21Z): W83 OICORE by time of day and weekday
 
 - W83 (descriptive; 461 sim triggers, hold, CT close hour): 0-6 n 50, 6 wins, PF 0.67, -3.71c/ct; 6-12 n 90, 19 wins, PF 1.99, +6.12c; 12-18 n 126, 33 wins, PF 1.87, +8.16c; 18-24 n 195, 65 wins, PF 2.14, +10.67c. Weekday n 342, 96 wins, PF 2.27, +9.38c; weekend n 119, 27 wins, PF 1.17, +2.23c. Permutation test on the PF spread across the four blocks (5000 shuffles): observed 1.47, p 0.24, so the block spread is not beyond chance, and the 0-6 weakness rests on 6 wins in 50. The weekday vs weekend gap was not tested. History cannot count toward a filter. Forward tag for the Nov 13 read: report OICORE live fills split weekday vs weekend and by block, as information only (no rule).
 
-## 2026-11-04 06:05 AM CT (12:05Z): W82 C9 Silver status
+## 2026-11-04 02:20 AM CT (08:20Z): W82 C9 Silver status
 
 - W82 (descriptive; run about 08:20Z): C9 Silver forward (windows closing after Nov 2 22:00Z): 36 in-band, 3 lost (8.3%), net -0.02c/ct (SE 4.38c). Registered rule: prediction over 400 windows is lost share at most 8% and net at least +0.5c; kill at 200 if lost share above 12% or net below -2.0c; kill at 400 if lost share above 10% or net below -1.0c; otherwise inconclusive and extend by 400. Pace 25 windows a day (36 in 1.43 days) against the registered about 18 a day, so the 200-window read is about Nov 10 to 11 (Nov 13 at the registered pace). Silver is not in L1_SERIES on main (gold, XRP, Bitcoin, Dogecoin, Ethereum only), so this is a pure paper tracker. No action.
 
-## 2026-11-04 06:00 AM CT (12:00Z): W81 OICORE exit-rule check
+## 2026-11-04 02:19 AM CT (08:19Z): W81 OICORE exit-rule check
 
 - W81 (check only, not a proposal; sim set is 461 triggers now, the cache runs to Nov 4): hold PF 1.84, +7.54c/ct; stop at 50% of entry PF 1.96, +7.78c; take-profit at 3x entry PF 1.68, +5.94c. The 17 sim triggers matched to a live fill: hold 2.65 / +9.00c; stop 2.71 / +9.14c; take-profit 2.51 / +7.95c. Caveats: only 1-minute close bids (touches checked on closes), exits assumed filled at the bid with no slippage (optimistic on thin books). The stop's edge over hold is within noise. Holding stands (V2's SLOTEX/EXIT1). Note the cache now has 461 triggers, so my older 453 figures are a few days stale; counts in this log before this entry used 453.
 
-## 2026-11-04 05:55 AM CT (11:55Z): W80 gold's 11 early sells
+## 2026-11-04 02:19 AM CT (08:19Z): W80 gold's 11 early sells
 
 - W80 (descriptive; n 11; the report has no sell-time field, so the sell is the first candle after entry whose side bid low was 25c or under): 8 of 11 detected, all 1 to 3 minutes before close (3 min x4, 2 min x3, 1 min x1); 3 unknown (no usable candle). Recovery: 0 of 11 had the side bid go back above the entry price (two bounced to 0.62 and 0.66, still under the 0.90 and 0.92 entries). Settlement: 10 of 11 settled against us; 1 (Oct 13 05:15, yes, 0.89 entry) would have won held. So on gold's own early sells the 25c line beat holding by a wide margin. This agrees with the earlier gold-slightly-better-selling finding and with W35 (selling $2.76 better on three). The sample is every time the line was hit, so it is not a pick-the-losers bias: a market that hit 25c and would have recovered counts as the one winner above. No change to the exit line.
 
-## 2026-11-04 05:50 AM CT (11:50Z): S-FLOW1 forward table at 08:17Z
+## 2026-11-04 02:18 AM CT (08:18Z): S-FLOW1 forward table at 08:17Z
 
 - S-FLOW1 (windows closing after Nov 3 21:45Z, 21 pool windows): LOW (imbalance <= -0.036) n 10, win 30.0%, PF 1.33, +3.45c/ct; HIGH n 11, win 18.2%, PF 1.38, +2.38c/ct; all pool n 21, win 23.8%, PF 1.35, +2.89c/ct. Low and high are indistinguishable so far (PF 1.33 vs 1.38). 39 more pool windows to reach 60 (about 100 more for 60 low-half windows if read on the low half). S-FLOW2 (non-trigger only): 0 of 150 windows. Nothing here supports the flow split.
 
-## 2026-11-04 05:45 AM CT (11:45Z): W79 FLOW1 is merged on main, removal PR open
+## 2026-11-04 02:15 AM CT (08:15Z): W79 FLOW1 is merged on main, removal PR open
 
 - W79 (read only, nothing posted): PR 709 "FLOW1: seller-flow probe on the Bitcoin cheap side (5 contracts)" is merged (Nov 4 01:18Z). PR 711 "Remove FLOW1 (no reliable edge)" is open, mergeable, created 05:59Z; it would take FLOW1 out of SLOT_STRATEGIES and SLOT_HOLD_ALLOWED. origin/main `kalshiSlotLib.js` lists OICORE and FLOW1 in SLOT_STRATEGIES. So FLOW1 is in the code on main and becomes live at the next `deploy-sizing.sh` unless 711 merges first; the deployed bot still shows no FLOW1 orders (dash). My view is unchanged: the flow split is not a reliable edge (W31 block E, V2's FLOW1 FALSIFIED, S-FLOW2 forward not started yet), so 711 should go before the next deploy. Merging is the owner's word.
 
-## 2026-11-04 05:40 AM CT (11:40Z): W78 S-LIM1-LIVE review date
+## 2026-11-04 02:14 AM CT (08:14Z): W78 S-LIM1-LIVE review date
 
 - W78 (descriptive): tag = a filled, settled OICORE order whose average fill is at least 0.95c above the first-seen ask (NO orders: 1 minus the seen bid). Revert rule: net below $0 over the tagged fills when the count reaches 20. Now tagged n 6, 1 win, +$4.77 (+7.95c/ct); untagged n 19, 5 wins, +$24.17 (+13.14c/ct). 14 more tagged fills needed; at about 1 tagged per 4 fills and 5 fills a day that is about 11 days, so the review is expected about Nov 15 (a little later with settlement lag). The tagged group earns less per contract than untagged (+7.95c vs +13.14c) on n 6, which is not a difference yet.
 
-## 2026-11-04 05:35 AM CT (11:35Z): W77 R6 book at OICORE order time
+## 2026-11-04 02:14 AM CT (08:14Z): W77 R6 book at OICORE order time
 
 - W77 (descriptive; 24 of 33 OICORE orders had an R6 Bitcoin book poll within 6 s before the order): filled 19 orders, median touch size 628, median within 1c 3,788, 17 fit 10 contracts at the touch (the two that did not had touches of 5 and 8 and still filled); unfilled 5 of the 8, median touch size 2,808, median within 1c 3,850, 4 fit 10, one had zero at the touch. Touch size does not explain fills: unfilled orders mostly had deep touches. Together with W62 (heavy tape at the price within 1 s) this points away from a thin book. Candidate causes not tested: a limit equal to or just below the ask when the book moved (0.06 vs ask 0.06, 0.26 vs 0.26 in the sample), or the order arriving after the quote changed. The cheap way to settle it is the logged exchange status (the W70 brief). No change.
 
-## 2026-11-04 05:30 AM CT (11:30Z): W76 R6 recorder coverage
+## 2026-11-04 02:13 AM CT (08:13Z): W76 R6 recorder coverage
 
 - W76 (descriptive): `book15r6` on quote-data has 7 dates and 29 HHMM folders, first Oct 29 22:03 UTC, newest Nov 4 04:03 UTC. Since Nov 1 a folder lands every 4.0 h (on schedule). One real hole: Nov 2 08:02 to 17:07 UTC (9.1 h, about 5 h missing); Oct 30 to 31 runs were uneven (3.6 to 7.1 h gaps). Coverage over 394 windows per market (Oct 29 22:15Z to Nov 4 08:00Z): windows with a market XRP 363, Dogecoin 361, Bitcoin 360, Ethereum 353, gold 228 (the rest are "no open market", mostly gold's closed hours); all with at least 90% good polls. Enough for the R6 final read; the Nov 2 hole costs about 20 windows per market. Recorder stops by itself Nov 13 23:59 UTC; `r6_final.py` is scheduled Nov 12 13:00Z and again after Nov 14.
 
-## 2026-11-04 05:25 AM CT (11:25Z): W75 C1 cell rate and Fisher
+## 2026-11-04 02:12 AM CT (08:12Z): W75 C1 cell rate and Fisher
 
 - W75 (descriptive; Nov 1 22:55Z to Nov 4): cell fills per day, gold / Dogecoin: Nov 1 0/1, Nov 2 5/4, Nov 3 4/4, Nov 4 (partial) 1/0. Gold cell fills 10 in about 2.4 days. The worker divided by 7 days (1.43 a day, 43 days to 61 more fills), which understates the rate because the data spans only about 2.4 days; my corrected figure is about 4 a day gold only, so about 15 days to 61 more settled cell fills (a rough guess from 10 fills). Settled cell fills 19 (3 losses, 16 wins); all other gold+Doge fills 44 (6 losses, 38 wins). Fisher's exact p for the cell's loss count against the rest: 1.0 two-sided, 0.55 one-sided. The cell's loss rate (16%) is not different from the rest (14%). So the cell is not showing a distinct weakness; the registered read at 80 stays (about Nov 19 on current pace).
 
-## 2026-11-04 05:20 AM CT (11:20Z): W74 C1 cell status
+## 2026-11-04 02:12 AM CT (08:12Z): W74 C1 cell status
 
 - W74 (against the registration at line ~625): C1 cell = gold plus Dogecoin L1 fills priced 0.90 up to 0.92, after Nov 1 22:55Z, early sell counts as a loss. Kill rules: at 80 settled fills dead if net above +1.5c/ct, or loss rate under 4%, or Fisher p (cell vs rest) above 0.30; neither dead nor PASS is INCONCLUSIVE (another 80); early kill at 40 needs zero losses and net above +2.0c. Now 19 settled, 3 losses (15.8%), net -$7.78, mean price 0.908. The 40-fill early kill is already impossible. Wilson 95% on the loss rate 5.5% to 37.6%; break-even loss rate at 0.908 about 11 to 12%, so the interval straddles it. Needs 61 more settled fills; the cell takes Dogecoin fills, and Dogecoin is now paused, so the cell now fills on gold only and the roughly 38 a week registered rate will be lower (about 11 days was the estimate with Dogecoin; expect longer). Fisher not computed. No change.
 
-## 2026-11-04 05:15 AM CT (11:15Z): W73 worst rolling 24 hours vs the 12% stop
+## 2026-11-04 02:11 AM CT (08:11Z): W73 worst rolling 24 hours vs the 12% stop
 
 - W73 (descriptive; all L1 plus OICORE orders by settledPnl, stamped at market close from the ticker's Eastern time, 24h window stepped hourly over 7 days): minimum rolling 24h net -$35.61, window ending Nov 3 14:00 UTC (8:00 AM CT); current window -$6.36. The report carries no sizing base, so the percentage is an assumption: at a guessed base of $500 the minimum is -7.1% of base against a $60 stop (at $400 -8.9% of a $48 stop; at $600 -5.9% of $72). Under every guessed base the worst day stayed under the stop, but the base is a guess from the order size and open orders also count as lost in the real stop, so the real margin could be tighter. Needs the true sizing base (kalshiLiveControl/sizing, owner or main) to firm up; I have no read of it. Context only.
 
-## 2026-11-04 05:10 AM CT (11:10Z): W72 gold 30-day range (day bootstrap)
+## 2026-11-04 02:10 AM CT (08:10Z): W72 gold 30-day range (day bootstrap)
 
 - W72 (descriptive; 29 US Central days, 252 fills, total +$38.26; whole days resampled, 5000 draws of 30 days): 30-day net 5th -$9.86, median +$39.15, 95th +$91.05. P(30-day drawdown deeper than $40) 3.8%; deeper than $60: 0.4%. Caveats: 29 days is thin, early days used smaller sizes (the 15 contract cap would widen the dollars), and independent days hide streaks across days (the Oct 23 to 29 drawdown and the Nov 2 to 3 losses are one cluster). Read the tails as a floor on the risk, not an estimate of it. The 12% loss stop remains the actual bound.
 
-## 2026-11-04 05:05 AM CT (11:05Z): W71 gold day-to-day volatility
+## 2026-11-04 02:10 AM CT (08:10Z): W71 gold day-to-day volatility
 
 - W71 (descriptive; 252 settled gold fills, Oct 7 to Nov 4, 29 days, 22 with fills, US Central days): total +$38.26, mean +$1.32/day, median +$0.02/day. Negative days 7 of 29 (24%), 7 of 22 days with fills (32%). Best day Oct 29 +$16.93; worst Nov 3 -$11.38 (18 fills). Longest drawdown Oct 23 to Oct 29 (6 days, depth -$17.40). Running total peaked +$50.30 on Nov 1, now $12.04 below the peak. 4 of the last 10 days lost money. The median day is about zero while the mean is carried by a few big days, which is the shape of a rule that wins small and loses big. Context only, no change.
 
-## 2026-11-04 05:00 AM CT (11:00Z): W70 what a no-fill order records; log-only brief drafted
+## 2026-11-04 02:09 AM CT (08:09Z): W70 what a no-fill order records; log-only brief drafted
 
 - W70 (read only; dash_report.json is a projection, not the raw docs): the reason an order did not fill is NOT recorded. No-fill orders carry ts, ticker, side, count 0, orderedCount, price, status (gold also limit, seenBid/seenAsk, sizes, timing; OICORE also strategy). Code (kalshiLiveLib.js ~1069, kalshiSlotRunLib.js ~194): on HTTP 2xx with an order id and fill_count 0 the patch stores status "no fill", orderId, fillCount, remainingCount, averageFillPrice, averageFeePaid, sentSide, sentPrice; the doc also holds `seen` (the book at decision) and clientOrderId. Only HTTP errors write `error`. "No fill" just means fill_count 0; Kalshi's order status or cancel reason is dropped.
 - Brief draft (NOT sent to the owner, not live, for main to judge): log Kalshi's returned order status (and the answer time) on the no-fill patch for both L1 and slot orders. Logging only: no order waits for it, nothing that decides an order reads it, no change to price, size or rules. Why: 79 gold and 8 OICORE no-fills since Oct 21 cannot be explained today (W52, W62), and about a third of gold orders miss. Kill: none needed, it is a field. Review: after 30 no-fills carry the field, list the statuses. Needs `bash functions/deploy-sizing.sh`.
 
-## 2026-11-04 04:55 AM CT (10:55Z): W62 OICORE no-fills were not thin books
+## 2026-11-04 02:09 AM CT (08:09Z): W62 OICORE no-fills were not thin books
 
 - W62 (public trade tape, all 8 unfilled OICORE orders; hypothesis stated first: the book had no resting size at the order price): NOT SUPPORTED. Taker buys of our side at or below the order price came within about 1 s of the order time for 5 of 8 (250 to 5,234 contracts: Oct 31 18:30, Nov 1 09:00, 09:15, 23:30, Nov 3 17:30). Unclear for 3: Nov 1 11:15 had no taker buys of our side (fits a thin quote), Oct 30 21:30 first hit at 58 s, Nov 3 21:00 first hit at 44 s. Caveat: trades at the price do not prove our order was at the front. So most OICORE no-fills are not explained by an empty book; the order either arrived after the size was gone or was rejected or timed out for a reason the order record does not carry. Open question for the code owner (the order record gives only "no fill"): which of IOC expiry, late arrival or rejection. Not a strategy question; no change proposed. Also note the earlier W60 point that 6 of 8 had a lower later ask than the order price fits an order that missed the quote's moment, not a thin book.
 
-## 2026-11-04 04:50 AM CT (10:50Z): W67 power of the Nov 13 OICORE read
+## 2026-11-04 02:08 AM CT (08:08Z): W67 power of the Nov 13 OICORE read
 
 - W67 (bootstrap, 5000 draws; edge real at the full historical mean +7.73c / half the mean +3.87c): n 40: P(PF >= 1.5) 0.67 / 0.36, P(PF >= 1.0 or net > 0) 0.90 / 0.72; n 55: 0.70 / 0.36, 0.94 / 0.77; n 100: 0.78 / 0.32, 0.98 / 0.84. Reading: even if the edge is fully real, a PF >= 1.5 read at 40 to 55 fills fails about 30% of the time, and it barely separates a real edge from a half-size one (0.70 vs 0.36). The sign of net separates them better only at larger n. So the Nov 13 read should be set up as: net > 0 is the minimum, PF >= 1.5 is not a pass/fail bar at 55 fills, and a miss is not a kill (the registered kills stay the 18-streak and net below -$6 after 40 fills). Decision for the owner/main, not mine: whether to extend the read to 100 fills (about Nov 18, if fills run near the trigger rate).
 
-## 2026-11-04 04:45 AM CT (10:45Z): W66 how wide a 25 fill OICORE result is
+## 2026-11-04 02:07 AM CT (08:07Z): W66 how wide a 25 fill OICORE result is
 
 - W66 (bootstrap of the 453 sim triggers, 5000 resamples; 5th / 50th / 95th): all 453: PF 1.49 / 1.86 / 2.29, +4.8 / +7.8 / +10.6 c/ct, $216 / $351 / $481 at 10 contracts. A 25-trigger sample: PF 0.65 / 1.87 / 4.67, -4.2 / +7.7 / +20.4 c/ct, -$10 / +$19 / +$51. P(net < 0) 14.6% and P(net < +$10) 31.6% for 25 triggers at 10 contracts. So live +$28.94 on 25 fills is inside the range and says little either way; it resamples history only and does not test whether the edge exists live. Planning point for Nov 13: with about 55 to 65 triggers, the sim's own spread is still wide; a pass cannot be called on one number.
 
-## 2026-11-04 04:40 AM CT (10:40Z): W65 OICORE live win rate vs history
+## 2026-11-04 02:07 AM CT (08:07Z): W65 OICORE live win rate vs history
 
 - W65 (descriptive): live 6/25 = 24.0% (Wilson 95% 11.5% to 43.4%); sim for the same windows 8/31 = 25.8% (13.7% to 43.2%); weekly history 123/453 = 27.2% (23.3% to 31.4%). Live is inside the historical interval, just. P(6 or fewer wins in 25 | 27.2%) = 0.46, so the live win rate is unremarkable: no win-rate shortfall is shown. The +$28.94 comes from the payoff mix (cheap-side wins), not the win count. The live probe is tracking history so far; the sample cannot say more.
 
-## 2026-11-04 04:35 AM CT (10:35Z): W64 OICORE sim by week
+## 2026-11-04 02:06 AM CT (08:06Z): W64 OICORE sim by week
 
 - W64 (descriptive; 453 sim triggers, fill at close-120 ask, weeks start Monday UTC): Aug 31 (Sep 2 on) n 18, 1 win, PF 0.42, -4.2c; Sep 7 n 31, PF 2.58, +16.0c; Sep 14 n 32, PF 1.76, +6.8c; Sep 21 n 54, PF 2.32, +9.7c; Sep 28 n 68, PF 2.28, +9.5c; Oct 5 n 65, PF 1.52, +5.3c; Oct 12 n 60, PF 1.95, +9.4c; Oct 19 n 67, PF 1.32, +3.5c; Oct 26 n 49, PF 1.95, +8.4c; Nov 2 (partial) n 9, PF 4.14. One of 10 weeks under PF 1 (the first, 18 triggers). Spread across weeks, not concentrated. The weakest full week was Oct 19 (1.32), the most recent full week is back at 1.95, so the earlier read of "weaker lately" is not supported. Caveat: the 86,300 threshold was found on this same history, so weekly consistency here is in-sample; the live probe from Oct 30 is the out-of-sample test.
 
-## 2026-11-04 04:30 AM CT (10:30Z): W63 gold edge margin by week
+## 2026-11-04 02:06 AM CT (08:06Z): W63 gold edge margin by week
 
 - W63 (descriptive; 252 gold fills; margin = win rate minus break-even in points, full-loss / realized-loss): week of Oct 7 n 62, win 96.8%, +3.4 / +7.2; Oct 14 n 35, 100%, +5.9 / +5.9; Oct 21 n 76, 90.8%, -2.1 / -0.9 (7 losses, 5 early sells); Oct 28 n 74, 95.9%, +2.6 / +3.7; Nov 4 n 5 (1 loss), too thin. Weekly SE about 3 points. The margin dipped in the Oct 21 week and recovered; no clear erosion, no clear stability. Nothing to propose.
 
-## 2026-11-04 04:25 AM CT (10:25Z): wake check 08:05Z
+## 2026-11-04 02:05 AM CT (08:05Z): wake check 08:05Z
 
 - OICORE settled the 25th fill as a loss: 6 won, 19 lost, net +$28.94, PF 2.74, loss streak now 5 (kill at 18; W55 warning zone 15 to 17). L1 last order 0.2h ago, OICORE 0.1h. S-LIM1-LIVE: 6 tagged, +$4.77 (review at 20). C9 Silver: 36 in band, 3 lost. Dogecoin paused, no FLOW1 orders. S-FLOW2 tracker running (first windows close after 08:15Z). `flow_forward.py` writes no output when run through the wake path; rerun it from the foreground in a file next wake.
 
-## 2026-11-04 04:20 AM CT (10:20Z): W61 gold by order size
+## 2026-11-04 02:04 AM CT (08:04Z): W61 gold by order size
 
 - W61 (descriptive; 252 filled gold orders): 1-5 contracts n 52, 3 losses, +$0.35, PF 1.03; 6-10 n 104, 3 losses, +$28.63, PF 2.59 (mean loss $5.99, mean win $0.46); 11-15 n 87, 7 losses, -$3.68, PF 0.95 (mean loss $10.16, mean win $0.84, max loss $13.56); 16+ n 9, 0 losses, +$12.97. Since Nov 3: 24 orders, 9 (38%) at exactly 15, the rest 12 to 14, none above, so the 15 cap binds on over a third of orders. Reading: the profit sits at 6-10 contracts and the 11-15 band has given back its win-rate edge to a bigger loss; this is the owner's scaling worry in numbers, but sizes grew with time, so it is confounded with the period (Nov 2-3 losses). Not evidence that size causes losses (same loss rate per order, bigger dollars per loss); it shows that at 15 contracts one loss (~$13.6) takes about 16 average wins ($0.84). History only; the freeze at 15 stands. Forward: watch the 11-15 band's PF in the S-GPB1 table.
 
-## 2026-11-04 04:15 AM CT (10:15Z): W60 OICORE no-fill orders
+## 2026-11-04 02:04 AM CT (08:04Z): W60 OICORE no-fill orders
 
 - W60 (descriptive, n 8): 3 of 8 unfilled OICORE orders would have won held (Oct 31 18:30, Nov 1 09:00, Nov 1 11:15 closes). Net after fee: filled at the sim's close-120 candle ask +19.72c/ct; filled at the order price +16.88c/ct. Order price within 1c of seenAsk in 6 of 8; the two NO orders show a seenAsk near 0.75 and 0.92, which is the YES-side ask, not the NO price (a labelling point for the read: use 1 - seenBid for NO). The close-120 candle ask was lower than the order price in 6 of 8, so those orders rested above where the sim would have bought, and so were not unfilled for a price that moved up: the cause there is not clear. The positive net comes from a few cheap wins; n 8 cannot support a claim. Why 6 of 8 failed to fill with an order above the later candle ask is an open question for the code owner (an immediate-or-cancel order priced above the ask should fill if size exists); not mine to chase.
 
-## 2026-11-04 04:10 AM CT (10:10Z): W59 gold no-fill share
+## 2026-11-04 02:04 AM CT (08:04Z): W59 gold no-fill share
 
 - W59 (descriptive; gold since Oct 21, 234 orders, 79 no fill, 33.8%): flat by CT block (0-6 37%, 6-12 32%, 12-18 34%, 18-24 33%). startLateMs on 52 orders only (median 3,960 ms): no-fill share 31% at or below the median, 27% above; lateness similar for no-fill and filled (3,820 vs 4,002 ms). No-fills are not concentrated by time or lateness; a third of gold orders miss at random. Closes the gold no-fill line unless a code change moves it.
 
-## 2026-11-04 04:05 AM CT (10:05Z): W58 OICORE order timing
+## 2026-11-04 02:03 AM CT (08:03Z): W58 OICORE order timing
 
 - W58 (descriptive): the timing fields (startToSendMs, answerMs, startLateMs and the rest) are null on every OICORE slot order, so no timing medians exist for the second slot (only L1 gold carries them). Fallback, record time vs the ticker's close: filled median 175.1 s before close (161.2 to 176.8), no fill median 175.8 s (166.5 to 176.7). No-fills were not sent later. The script assumed EDT for the ticker's Eastern time; the clocks changed Nov 1, so any order after that would be an hour off if it is not handled, yet the offsets are all near 175 s, so this does not look wrong. Not chased. Gap for the Nov 13 read: ask for slot orders to carry the same timing fields as L1.
 
-## 2026-11-04 04:00 AM CT (10:00Z): W57 gold no-fill counts reconciled
+## 2026-11-04 02:03 AM CT (08:03Z): W57 gold no-fill counts reconciled
 
 - W57: `dash_report.json` has 387 gold orders (first Oct 7): 252 filled, 135 no fill, no other status. Since Oct 21: 234 orders, 155 filled, 79 no fill. So W54's 135 was the whole file with no date filter; W52's 78 was Oct 21 onward on an earlier copy of the file (now 79); W49's 56 was in-band windows without a filled order, a different thing. The right number for "gold no-fill orders since Oct 21" is 79. Conclusions of W52 and W54 stand (they do not depend on the exact count).
 
-## 2026-11-04 03:55 AM CT (09:55Z): W56 gold order timing
+## 2026-11-04 02:02 AM CT (08:02Z): W56 gold order timing
 
 - W56 (descriptive; timing fields exist on 37 of 252 filled gold orders, all recent): tick start to order sent median 949 ms, p90 1,169, max 1,443; exchange answer median 37 ms, p90 41; tick start to answer median 984 ms, p90 1,210; scheduler lateness (startLateMs) median 4,002 ms, p90 9,625, max 13,513. About 1 s round trip, nearly all of it the bot's own work before sending; the exchange is quick. The tick itself starts a median 4 s late, which matters more for the decision look (the 6 minute candle) than the 1 s send. Connects to W52: the ask can move inside that 1 s, which is the unfilled-limit cause. An engineering note for main, not a strategy change: shortening the pre-send work or reading the ask last would cut misses. Not proposed as a rule; no profit from it is shown (W54: missed trades were worse than fills).
 
-## 2026-11-04 03:50 AM CT (09:50Z): W54 gold limit rule; the +1c idea is withdrawn
+## 2026-11-04 02:02 AM CT (08:02Z): W54 gold limit rule; the +1c idea is withdrawn
 
 - W54 (descriptive): code rule (l1Pick, kalshiLiveLib.js ~line 603): YES limit is the ask rounded up to the next cent, NO limit is the YES bid rounded down, so the limit is under 1c above the seen ask by construction. Gold fills (247 with a seenAsk; avgFill null, fill back-solved from settledPnl, 11 early sells excluded): within 0.5c of the seen ask n 150, win 99.3%, +6.00c/ct; about 1c above n 86, win 98.8%, +4.19c/ct. Gold no-fills: 135 in this file (W52 counted 78; the two counts disagree and I have not reconciled them). Of those, 77 would have filled at order+1c: win 90.9%, -1.68c/ct (a ceiling, selected on price rising); 10 had an ask above order+1c; 42 have no candle and 6 no result. So the missed trades were worse than the fills, and a +1c cushion would not help.
 - This overrides W52's possible brief (gold limit +1c): withdrawn, do not send. W52's "+3.04c if filled at the order price" is the same sample at a price that was not available.
 
-## 2026-11-04 03:40 AM CT (09:40Z): W55 OICORE loss-run history
+## 2026-11-04 02:01 AM CT (08:01Z): W55 OICORE loss-run history
 
 - W55 (descriptive; 453 historical triggers, 123 wins, 85 loss runs): longest run 15 in a row (3.6 days, Sep 3 to 7); runs of 10 or more: 3; 14 or more: 2; 18 or more: 0. Longest gap between wins 5.7 days from Sep 11. The 18-in-a-row kill has never been hit in history and was missed by 3 in the worst case, so a chance firing is small but not negligible (W38 simulated 7.8% over 40 fills). A 15 to 17 streak should be read as the live warning zone, not yet a kill. Current live streak 4.
 
-## 2026-11-04 03:35 AM CT (09:35Z): W53 OICORE low-price end; wake check 08:00Z
+## 2026-11-04 02:00 AM CT (08:00Z): W53 OICORE low-price end; wake check 08:00Z
 
 - W53 (descriptive): live fills at or under 0.07: n 11, 2 wins, 9 losses, +$13.26 (fee 6.6% of $6.10 at risk); above 0.07: n 13, 4 wins, 9 losses, +$16.32 (fee 5.2% of $21.20). History, 453 triggers, fill at close-120 ask: all win 27.2%, +7.73c, PF 1.86; excluding fill ask under 0.07 (257 left) win 44.7%, +12.68c, PF 1.91; the excluded 196 alone win 4.1%, +1.25c, PF 1.47. The cheap end is a small part of profit; history cannot count toward a filter. No change.
 - Wake 08:00Z: L1 last order 0.1h ago, OICORE 0.1h (25th fill, not yet settled; record still 6 won 18 lost, +$29.58, streak 4). Dogecoin paused, no FLOW1 orders. S-GPB1 0 of 40. S-FLOW2 windows start now.
 
-## 2026-11-04 03:30 AM CT (09:30Z): W52 why gold orders do not fill
+## 2026-11-04 01:59 AM CT (07:59Z): W52 why gold orders do not fill
 
 - W52 (descriptive; 78 gold no-fill orders since Oct 21, W49's 56 was in-band windows only): the bot's own seen ask was at or below the order price in all 78, and the book had size in all 78. The candle ask after the send was above the order price in 61 of 69 windows (88%). Cause: the ask rose between the bot's read and the order reaching Kalshi, so the immediate-or-cancel limit found nothing. If filled at the order price, the 69 windows with results would have won 95.7%, +3.04c/ct after fee. Caveat that matters: those are the windows where price ROSE, so a fill at the new, higher ask earns less than +3.04c, and the unfilled set is selected by the move itself. So this is the ceiling of what a looser limit could add, not an estimate. It is the same adverse-selection shape as the OICORE S-LIM1-LIVE tag read; gold has no live test of a looser limit. Possible pre-registered brief for the owner (not sent, not live): gold limit +1c over the seen ask, read on tagged fills at 40. Hold until S-LIM1-LIVE reads (OICORE tagged 5 of 20).
 
-## 2026-11-04 03:25 AM CT (09:25Z): W51 why my sim misses 7 live OICORE orders
+## 2026-11-04 01:59 AM CT (07:59Z): W51 why my sim misses 7 live OICORE orders
 
 - W51: 7 live OICORE orders since Oct 30 12:00Z (6 fills, 1 no-fill) have no sim trigger. OIR passed in all 7 (87k to 244k) and candles were present. The only failed condition is my cheap-side ask at the close-180 candle: 0.015 to 0.044, all under 0.05. The bot saw 0.041 to 0.067 about 162 to 177 s before close and its limit was ask+1c (0.05 to 0.07). Cause: the bot reads the price 5 to 20 s after my candle, and prices of 0.04 to 0.05 are common; the band appears to be applied to the limit (ask+1c), so asks of 0.04 to 0.049 still qualify, while my sim needs ask >= 0.05. My sim is stricter at the 0.05 edge, so its sim table (31 windows) undercounts live triggers by about 7. Orders carry no oiRise field, so the bot's OIR cannot be compared. Action: the S-OICORE forward bands should key off the live orders, not my trigger replica, for the Nov 13 read; sim bands stay a side view. Note for the read: 5 to 6c entries are the lottery-ticket end where fee rounding and 1c matter most.
 
-## 2026-11-04 03:20 AM CT (09:20Z): W49 gold in-band windows without a fill
+## 2026-11-04 01:58 AM CT (07:58Z): W49 gold in-band windows without a fill
 
 - W49 (descriptive; gold asks Oct 21 to Nov 2 14:30Z only, "in band" = either side's ask 0.88 to 0.97 on the candle ending 6 minutes before close): 767 windows, 207 in band, 115 live filled (56%). 92 in-band windows had no fill: 56 sent but not filled, 20 no order record, 16 in the 20-24 CT quiet hours (block live only Oct 29-30). Excluding those 16: 76 skipped windows with known results; held with fee, 75 won, +5.92c/ct. Fills for the 56 "no fill" orders not modelled. Loose definition (either side), so it may overcount; but if real, the skipped gold windows were nearly all winners, which is the limit-miss pattern again (price moves to 0.97+ or off). This is a lead, not a finding. W52 checks why the 56 did not fill.
 
-## 2026-11-04 03:15 AM CT (09:15Z): W50 OICORE missed windows, refetched
+## 2026-11-04 01:58 AM CT (07:58Z): W50 OICORE missed windows, refetched
 
 - W50: the cache was already complete (0 new windows). Since Oct 30 12:00Z: 31 sim trigger windows; 18 matched a filled live order; 13 not (7 "no fill" orders, 6 no order record). Slot orders overall 32 (24 filled, 8 no fill). 6 live fills and 1 no-fill have no sim trigger, so the sim does not reproduce everything (the trigger rule in my sim differs from the bot's at the edges; not chased). Sim net: filled +6.58c/ct (n 18), not filled +17.14c/ct (n 13). The gap rides on 4 big winners (+79.9, +91.4, +48.2, +89.4c, cheap side at 8 to 19c); the other 9 misses are small losers. n cannot support a claim; consistent with adverse selection at the limit, not shown. This repeats the S-LIM1 question; the live tag read (5 of 20) is the right test. No change.
 
-## 2026-11-04 03:10 AM CT (09:10Z): W48 OICORE missed windows, unresolved
+## 2026-11-04 01:57 AM CT (07:57Z): W48 OICORE missed windows, unresolved
 
 - W48 (cache only, does NOT reproduce 7 missed / 24 filled): 31 sim trigger windows, 18 matched to a filled order, 13 not (7 with a "no fill" order, 6 with no order record). Sim net: matched +6.58c/ct, unmatched +17.14c/ct. 6 live fills (e.g. KXBTC15M-26OCT301045-45) and 1 no-fill have no trigger in the cache, so the cache is stale and the split is unreliable. Orders carry no guard reason, so a slot-guard block cannot be told from no order. If it holds, the windows the bot misses are the better ones (the S-LIM1 / no-fill theme: price moves away, which is also when the side wins big). Not yet a finding. W50 reruns it against refetched candles.
 
-## 2026-11-04 03:05 AM CT (09:05Z): W47 S-GPB1 tracker built
+## 2026-11-04 01:57 AM CT (07:57Z): W47 S-GPB1 tracker built
 
 - W47: `gpb1.py` prints the S-GPB1 forward table (gold fills from 09:00Z Nov 4, below 0.90 vs 0.90 and above; flag at 40 fills below 0.90 if PF under 1.0). Near-empty now (0 of 40), as expected. Rerun on a fresh report each wake, along with `w43.py` (S-GQH1).
 
-## 2026-11-04 03:00 AM CT (09:00Z): W46 OICORE trigger rate and Nov 13 read size
+## 2026-11-04 01:56 AM CT (07:56Z): W46 OICORE trigger rate and Nov 13 read size
 
 - W46 (62 days, 5,876 windows): the OICORE trigger fires 7.3 a day (median 7, range 0-15; last 30 days 8.4). By CT block: 0-6 11%, 6-12 19%, 12-18 27%, 18-24 43%. Expected about 51 triggers in the next 7 days. 40 triggers take about 5.5 days, 100 about 14 (12 at the recent rate). Live has 24 fills in 5 days, so the live fill rate is well under the trigger rate (triggers are not fills). The Nov 13 read will have roughly 55 to 65 triggers at most, so it will be short of 100: the read should say so up front and not call a pass on a thin sample.
 
-## 2026-11-04 02:55 AM CT (08:55Z): W45 gold by price band
+## 2026-11-04 01:56 AM CT (07:56Z): W45 gold by price band
 
 - W45 (descriptive, 252 gold fills, 13 losses): 0.88-0.90 n 40, 6 losses, -$11.40, PF 0.73, win 85.0% vs break-even 89.1%; 0.90-0.93 n 81, 5 losses, +$22.54, PF 1.66, win 93.8% vs 91.8%; 0.93-0.97 n 131, 2 losses, +$27.12, PF 2.18, win 98.5% vs 95.4%. The lowest band lost and the highest did best, on 6, 5 and 2 losses. Band chosen after the losses were seen, so history cannot count toward a price floor; forward orders only. Candidate for a pre-registered forward read (S-GPB1: gold fills below 0.90 from Nov 4, read at 40 fills; flag if PF under 1.0). Registering now.
 
-## 2026-11-04 02:50 AM CT (08:50Z): W44 OICORE entry-time sensitivity
+## 2026-11-04 01:56 AM CT (07:56Z): W44 OICORE entry-time sensitivity
 
 - W44 (descriptive, 31 simulated trigger windows since Oct 30, same 8 winners throughout): candles are 1 minute, so neighbours were used. Entry at close-180 ask PF 1.92, +9.83c; close-120 (registered) PF 2.60, +11.01c; close-60 PF 1.56, +2.06c. The registered close-120 is the best of the three. Rule unchanged; nothing to propose.
 
-## 2026-11-04 02:45 AM CT (08:45Z): W43 gold 20-24 CT forward, S-GQH1 registered
+## 2026-11-04 01:55 AM CT (07:55Z): W43 gold 20-24 CT forward, S-GQH1 registered
 
 - W43 (gold fills since Oct 30 19:30Z): 20-24 CT n 11, 2 losses (both early sells), -$14.29, PF 0.35; other hours n 26, 1 loss, +$10.08, PF 1.74. n too small to call (2 of 11 vs 1 of 26). Script `w43.py` reruns it.
 - Registered S-GQH1 (forward only, before more data): read once at 40 gold fills in 20-24 CT (now 11) from `w43.py`. Flag to main as a decision (not a change by me) if block losses are 5 or more and block PF is under 1.0 while other hours' PF is over 1.3. Otherwise note and keep watching. The block was lifted by the owner in #669; reinstating it is the owner's reviewed edit.
 
-## 2026-11-04 02:40 AM CT (08:40Z): W42 Dogecoin ladder split
+## 2026-11-04 01:55 AM CT (07:55Z): W42 Dogecoin ladder split
 
 - W42 (descriptive, 61 ladder orders, 7 losses, -$23.12, PF 0.64): first half (30) 1 loss, +$12.39, PF 2.42; second half (31) 6 losses, -$35.51, PF 0.36. All but one order were above 5 contracts (11 to 15), so no small-size test exists. By size band PF 0.52 (11-12), 0.60 (13), 0.84 (14-15): no band profitable, losses about $9 each at every size, so they do not scale with size. 6 of 7 losses came Nov 2-3. Dogecoin stays paused; un-pausing is a reviewed owner edit, nothing here argues for it.
 
-## 2026-11-04 02:35 AM CT (08:35Z): W41 gold quiet hours were lifted
+## 2026-11-04 01:54 AM CT (07:54Z): W41 gold quiet hours were lifted
 
 - W41: not an anomaly. Gold's 20:00-23:59 CT block went live in #618 (Oct 29 1:01 PM CT) and was lifted in #669 (Oct 30 2:30 PM CT); `QUIET_HOURS_CT` on main is now empty. Since Oct 30 gold trades those hours (16 orders Nov 1-3, 11 filled). Times converted UTC to Chicago with DST handled. So W39's 18-24 block (n 84, PF 0.85) is mostly orders the block never covered. The CLAUDE.md "Gold's quiet hours" section is stale (it says live); freshness agent or main should fix it. Not mine to edit.
 
-## 2026-11-04 02:30 AM CT (08:30Z): W40 OICORE win concentration
+## 2026-11-04 01:54 AM CT (07:54Z): W40 OICORE win concentration
 
 - W40 (descriptive): 6 wins in 24 fills, spread over 4 days (2 each on Oct 31, Nov 2, Nov 3, one Oct 30), 4 of 6 between 13:00 and 16:00 CT. Wins $4.34 to $9.36; 18 losses $0.32 to $1.70, $16.01 total. Largest win is 32% of net; net without it +$20.22; without the top 2 (both $9.36) +$10.86. Still positive but about a third of net rides on two trades, so the record is thin. Consistent with the Nov 13 read being the real test.
 
-## 2026-11-04 02:25 AM CT (08:25Z): W39 gold by hour block
+## 2026-11-04 01:54 AM CT (07:54Z): W39 gold by hour block
 
 - W39 (descriptive, 252 settled, 13 losses), CT order hour: 0-6 n 50, 3 losses, +$16.26, PF 2.36; 6-12 n 64, 2, +$18.04, PF 1.81; 12-18 n 54, 2, +$11.02, PF 1.58; 18-24 n 84, 6, -$7.05, PF 0.85. The 20-24 block (n 53, 5 losses, -$14.99) is the one already skipped since Oct 29; 11 orders dated Nov 2-4 still fall in it, so check when the skip actually went live. No block can justify a rule; forward orders only.
 
-## 2026-11-04 02:20 AM CT (08:20Z): W38 OICORE kill-rule odds
+## 2026-11-04 01:53 AM CT (07:53Z): W38 OICORE kill-rule odds
 
 - W38 (simulation, 20000 runs, live rate Beta(7,19), start streak 4): the 18-in-a-row kill fires within the next 40 fills in 7.8% of runs; net under -$6 at fill 40 about 0% (starting net +$29.58, mean win $7.60, mean loss $0.89); median ending net about +$49. At the simulated trigger rate (18/31) neither kill fires. The streak kill is the live risk, the net kill is nearly unreachable. Not a recommendation to change either rule.
 
-## 2026-11-04 02:15 AM CT (08:15Z): W37 gold loss clustering
+## 2026-11-04 01:53 AM CT (07:53Z): W37 gold loss clustering
 
 - W37 (descriptive): gold, 252 settled orders, 13 losses. Adjacent loss pairs within 2h: observed 2, shuffle mean 0.74 (2000 shuffles), one-sided p 0.161. Not significant; n too small to say. Losses fall on 9 of 21 trading days, never 3 in a day. No change.
 
-## 2026-11-04 02:10 AM CT (08:10Z): W36 OICORE by order price band
+## 2026-11-04 01:52 AM CT (07:52Z): W36 OICORE by order price band
 
 - W36 (descriptive): live 24 fills: 5-15c n 20, 15% win, PF 1.89, +6.5c; 15-30c n 2; 30-50c n 2. Sim 31 triggers since Oct 30: 5-15c n 21, PF 2.36, +5.0c; 15-30c n 4, PF 10.2; 30-50c n 6, PF 1.13. Upper cells hold 2 to 6 trades, so no filter can be justified, and history cannot count toward adopting one. No change.
 
