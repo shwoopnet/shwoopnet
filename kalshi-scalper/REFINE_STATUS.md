@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:15 AM CT (09:15Z): W50 OICORE missed windows, refetched
+
+- W50: the cache was already complete (0 new windows). Since Oct 30 12:00Z: 31 sim trigger windows; 18 matched a filled live order; 13 not (7 "no fill" orders, 6 no order record). Slot orders overall 32 (24 filled, 8 no fill). 6 live fills and 1 no-fill have no sim trigger, so the sim does not reproduce everything (the trigger rule in my sim differs from the bot's at the edges; not chased). Sim net: filled +6.58c/ct (n 18), not filled +17.14c/ct (n 13). The gap rides on 4 big winners (+79.9, +91.4, +48.2, +89.4c, cheap side at 8 to 19c); the other 9 misses are small losers. n cannot support a claim; consistent with adverse selection at the limit, not shown. This repeats the S-LIM1 question; the live tag read (5 of 20) is the right test. No change.
+
 ## 2026-11-04 03:10 AM CT (09:10Z): W48 OICORE missed windows, unresolved
 
 - W48 (cache only, does NOT reproduce 7 missed / 24 filled): 31 sim trigger windows, 18 matched to a filled order, 13 not (7 with a "no fill" order, 6 with no order record). Sim net: matched +6.58c/ct, unmatched +17.14c/ct. 6 live fills (e.g. KXBTC15M-26OCT301045-45) and 1 no-fill have no trigger in the cache, so the cache is stale and the split is unreliable. Orders carry no guard reason, so a slot-guard block cannot be told from no order. If it holds, the windows the bot misses are the better ones (the S-LIM1 / no-fill theme: price moves away, which is also when the side wins big). Not yet a finding. W50 reruns it against refetched candles.
