@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 6:33 PM CT (00:33Z Nov 4): HOURLY CHECK-IN, 0 workers running, W21 and W22 REGISTERED
+
+W21 FLOW-L1: the W17 feature on L1. On the R6 days (r6t tape, full rows, no deduplication) for gold and Dogecoin windows in band 0.88 to 0.97 at -360 s (candle rule, 25c exit as in q3.py): taker flow imbalance in -360 to -300 s? NO: the entry is at -360 s, so use the flow in the 3 minutes BEFORE the entry, -540 to -360 s, imbalance toward the bought side = (contracts bought on the bought side minus sold) over total; split at the pool median (computed on the first half of the R6 days only), test early sell rate and net per contract, low vs high, both sides = 2 tries per market. Pass: early sell rate ratio of at least 2 and at least 15 flagged in both chronological halves. Prediction: none passes (about 27 gold and 58 Dogecoin in-band windows only). Lead only.
+W22 FLOW-INDEP: is the S-FLOW1 imbalance a repeat of other features? On the 146 pool windows (full tape): rank correlation of imbalance with sdir (bought side mid change -360 to -180), OIR (open interest rise), entry price and the first minute spread; and PF by imbalance half WITHIN each half of sdir (a 2x2) and within each half of OIR; at least 25 windows per cell else report n only. 0 new rules, 4 correlations + 4 cells. Prediction: |rho| under 0.3 for all four, the flow split keeps its sign in every sdir and OIR half. Output decides whether S-SDIR1 and S-FLOW1 are one signal or two.
+
 ## 2026-11-03 6:20 PM CT (00:20Z Nov 4; clock slip noted: actual time 00:16Z): L1 silence rule changed (my own watch, no live effect)
 
 Gold orders have 19 weekday gaps over 3 hours in the record (examples: Oct 26 03:24Z to 07:24Z 4.0 h, Oct 30 00:54Z to 05:54Z 5.0 h, Nov 2 11:24Z to 20:54Z 9.5 h, Nov 3 09:39Z to 13:24Z 3.8 h), so a 3 hour flag fires on ordinary quiet stretches. New watch rule: flag L1 silence at 6 hours with no order on a weekday (UTC Monday to Friday), and at any weekday gap over 6 hours also check that in-band gold windows existed (public candles) before calling it a stop. OICORE silence flag stays at 14 hours. dash.sh still prints the 3 hour marker; read it as a note, not a flag, until I edit it.
