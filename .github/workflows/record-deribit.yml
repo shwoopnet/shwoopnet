@@ -41,5 +41,5 @@ jobs:
           git config user.email "deribit-recorder@users.noreply.github.com"
           git add deribit
           git commit -q -m "deribit $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
-          for i in 1 2 3; do git push -q origin quote-data && exit 0; git pull -q --rebase origin quote-data || true; done
+          for i in 1 2 3 4 5 6; do git push -q origin quote-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin quote-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1

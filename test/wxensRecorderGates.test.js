@@ -103,4 +103,23 @@ gates.W7 = () => {
   for (const t of ['ens_low', 'nws_low', 'quotes_low', 'events_low', 'results_low', 'obs_low']) assert.ok(code.includes('"' + t + '"'), t);
 };
 
+// W8 (RECPATCH1): a second hourly start (30 minutes later) must not record the same UTC hour twice: when the hour's files exist the run makes no call and logs no due city; `redo` overrides.
+gates.W8 = () => {
+  assert.ok(/cron: "12 \* \* \* \*"/.test(wf) && /cron: "42 \* \* \* \*"/.test(wf), 'a second trigger 30 minutes after the first');
+  const out = JSON.parse(py(`
+import tempfile, os
+d = tempfile.mkdtemp()
+calls = []
+m.http_get = lambda url: (calls.append(url), (500, None, ""))[1]
+m.due_targets = lambda c, now, h: [("x", "y")]
+now = 1_800_000_000
+day, hh = m.time.strftime("%Y-%m-%d", m.time.gmtime(now)), m.time.strftime("%H", m.time.gmtime(m.slot_of(now)))
+p = os.path.join(d, "wxens", "ens", day); os.makedirs(p); open(os.path.join(p, hh + ".csv.gz"), "wb").write(b"x")
+r1 = m.run(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'WXENS1_WATCHLIST.json'))}, d, now=now, results=False)
+n1 = len(calls)
+r2 = m.run(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'WXENS1_WATCHLIST.json'))}, d, now=now, results=False, redo=True)
+print(json.dumps([r1[4], n1, r2[4] > 0, len(calls) > 0]))`));
+  assert.deepStrictEqual(out, [0, 0, true, true]);
+};
+
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }

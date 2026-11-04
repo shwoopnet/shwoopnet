@@ -89,6 +89,10 @@ def rt_parse(p, bodies):
     a = re.search(r'"scorePercent"\s*:\s*"([0-9]+)%"[^{}]*?"title"\s*:\s*"Popcornmeter"', h, re.S)
     if a:
         out.append([2, "popcornmeter", _num(a.group(1)), None, "percent"])
+    if not out and "media-hero-json" in h and "Tomatometer" in h:
+        # Nov 4, 2026 (RECPATCH1): a real title page whose critics have not published a score yet (embargo or too few reviews) has no AggregateRating at all. That is a
+        # normal state, not a parser failure (it was counted as one on every run: 3 of 3 films on 11-04). Marked so a later read can tell "no score yet" from "page unreadable".
+        out.append([1, "tomatometer", None, None, "no_score_yet"])
     return out
 
 
