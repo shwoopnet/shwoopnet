@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 08:15 AM CT (14:15Z): W107 flag test, one silent flag found
+
+- W107 (`test_flags.py`, runs the real flag code from `wake.sh` with a frozen clock on synthetic reports in a temp folder; `dash_report.json` untouched): 22 of 23 cases PASS, including controls just below each threshold that correctly stay quiet. Passing: gold silence over 5h on a weekday (a weekend gap stays quiet), OICORE silence over 14h, loss streak 15 (WARNING) and 18 (KILL), S-LIM1-LIVE at 20 tagged, C1 at 80 settled, C9 at 200, S-JUMP1 and S-SDIR1 at 40, C2 at 40, S-GPB1 at 40. The one FAIL is S-GQH1 at 40: `fwd_all.py` section (2) prints its table only, and neither `wake.sh` nor `wake_shadows.py` has a count at 40 or a flag rule. Two cases are parse-only (C9 uses a hand-written line, S-JUMP1 and S-SDIR1 use a stub for `forward_oicore.py`). Fix queued as W108 using the S-GQH1 registered rule (flag at 40 block fills; to main if block losses are 5 or more and block PF is under 1.0 while other hours' PF is over 1.3).
+
 ## 2026-11-04 08:10 AM CT (14:10Z): W106 what the 15 contract freeze did on Nov 3 to 4
 
 - W106 (descriptive; the order record has no ladder size or balance, so bracketed at 16 to 20 contracts): gold fills Nov 3 to Nov 4: 24 fills, net -$16.63; counts 15 (9 orders), 12 (7), 13 (5), 14 (3). The 9 orders at exactly 15 net -$20.57 and hold both losses of the sample (-$13.56 and -$12.74); their wins total $0.38 at 16 contracts and $1.91 at 20 if scaled. Unfrozen, scaling those 9 linearly: extra profit +$0.38 (16) or +$1.91 (20); extra loss -$1.75 (16) or -$8.77 (20); net -$1.37 (16) or -$6.86 (20), so the freeze saved money in this window. Two losses in 9 orders say nothing about the rule; the reading to keep is that at this size one loss outweighs about 30 wins. The freeze stays the owner's choice and I do not argue for a different number.
