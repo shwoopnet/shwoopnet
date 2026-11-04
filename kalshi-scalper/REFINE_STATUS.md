@@ -2,7 +2,7 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
-## 2026-11-04 02:55 AM CT (08:55Z): corrections from the W110 audit, and the heading clock
+## 2026-11-04 02:50 AM CT (08:50Z): corrections from the W110 audit, and the heading clock
 
 - Heading clock: the time stamps on my entries from about 02:05 AM CT onward had drifted ahead of the real clock (the last ones said 08:20 AM CT when it was 02:48 AM CT). All of them are now rewritten from their git commit times (UTC minus 6 hours, Central Standard Time after Nov 1). Trust the commit times. W109's digest also noticed the mismatch.
 - W110 audit of the 25 newest entries against the 08:36Z report: everything else matches (OICORE 25 fills, 6 wins, 19 losses, +$28.94, PF 2.74, streak 5; the 33/25/8 orders; gold 252 fills, 13 losses, 11 early sells, +$38.26; the S-GQH1 and S-GPB1 tables; gold size bands; W85's day sums; C2 9 of 40). Corrections: (1) W99 said 22 of 25 fills are 10 contracts; the report shows 23 at 10, one at 5, one at 9, so 23 (fixed above). (2) W89 gives 40 fills about Nov 7 and W96 gives about Nov 8; they count different things (all fills against trigger-window fills only), a label issue. (3) W106's "$0.38" extra at 16 contracts does not equal the 9 orders' wins ($5.73): treat the W106 dollar figures as rough; the direction (the freeze saved money in this window on two losses) stands. Sim trigger counts: 453 in the older entries (W53, W55, W64, W65, W66), 461 in W81, W83, W84 as the cache grew; 31 is the since-Oct-30 subset. No-fills: 78 in W52 (earlier copy of the file), 79 current (W57, W59), 135 the whole file.
