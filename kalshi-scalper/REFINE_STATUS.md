@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 08:10 AM CT (14:10Z): W106 what the 15 contract freeze did on Nov 3 to 4
+
+- W106 (descriptive; the order record has no ladder size or balance, so bracketed at 16 to 20 contracts): gold fills Nov 3 to Nov 4: 24 fills, net -$16.63; counts 15 (9 orders), 12 (7), 13 (5), 14 (3). The 9 orders at exactly 15 net -$20.57 and hold both losses of the sample (-$13.56 and -$12.74); their wins total $0.38 at 16 contracts and $1.91 at 20 if scaled. Unfrozen, scaling those 9 linearly: extra profit +$0.38 (16) or +$1.91 (20); extra loss -$1.75 (16) or -$8.77 (20); net -$1.37 (16) or -$6.86 (20), so the freeze saved money in this window. Two losses in 9 orders say nothing about the rule; the reading to keep is that at this size one loss outweighs about 30 wins. The freeze stays the owner's choice and I do not argue for a different number.
+
 ## 2026-11-04 08:05 AM CT (14:05Z): W105 R6 book on the 8 unfilled OICORE orders
 
 - W105 (hypothesis stated first: most no-fills are the ask moving above the limit within about 1 s; result NOT supported as a majority): of 8 unfilled orders, 3 ask above the limit (Oct 31 22:27 YES 0.25, ask 0.26 to 0.27; Nov 3 22:27 YES 0.44, ask 0.46; Nov 4 01:57 NO 0.09, ask 0.097 before and 0.12 to 0.13 after), 2 ask at or below the limit with size (Nov 1 13:57 YES 0.14, ask 0.14 with size 348 about 1 s later; Nov 2 04:27 YES 0.06, ask 0.06 with size 2,808 just before), 3 with no R6 poll near the order. In 2 of the 3 "above" cases the ask was already above the limit before the order (the price moved earlier, the bot's seen ask was stale by the time of sending); only the Nov 4 case rose after. The 2 "should have filled" cases cannot be settled with 2 s polls. Together with W62, W77 and W104: no-fills are not a thin book; they are a mix of a stale seen ask and a quote that moved within a second or two. The logged exchange answer (the W70 brief) is the way to separate them. Nothing to act on in the strategy.
