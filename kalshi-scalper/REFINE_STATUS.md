@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:25 AM CT (11:25Z): W75 C1 cell rate and Fisher
+
+- W75 (descriptive; Nov 1 22:55Z to Nov 4): cell fills per day, gold / Dogecoin: Nov 1 0/1, Nov 2 5/4, Nov 3 4/4, Nov 4 (partial) 1/0. Gold cell fills 10 in about 2.4 days. The worker divided by 7 days (1.43 a day, 43 days to 61 more fills), which understates the rate because the data spans only about 2.4 days; my corrected figure is about 4 a day gold only, so about 15 days to 61 more settled cell fills (a rough guess from 10 fills). Settled cell fills 19 (3 losses, 16 wins); all other gold+Doge fills 44 (6 losses, 38 wins). Fisher's exact p for the cell's loss count against the rest: 1.0 two-sided, 0.55 one-sided. The cell's loss rate (16%) is not different from the rest (14%). So the cell is not showing a distinct weakness; the registered read at 80 stays (about Nov 19 on current pace).
+
 ## 2026-11-04 05:20 AM CT (11:20Z): W74 C1 cell status
 
 - W74 (against the registration at line ~625): C1 cell = gold plus Dogecoin L1 fills priced 0.90 up to 0.92, after Nov 1 22:55Z, early sell counts as a loss. Kill rules: at 80 settled fills dead if net above +1.5c/ct, or loss rate under 4%, or Fisher p (cell vs rest) above 0.30; neither dead nor PASS is INCONCLUSIVE (another 80); early kill at 40 needs zero losses and net above +2.0c. Now 19 settled, 3 losses (15.8%), net -$7.78, mean price 0.908. The 40-fill early kill is already impossible. Wilson 95% on the loss rate 5.5% to 37.6%; break-even loss rate at 0.908 about 11 to 12%, so the interval straddles it. Needs 61 more settled fills; the cell takes Dogecoin fills, and Dogecoin is now paused, so the cell now fills on gold only and the roughly 38 a week registered rate will be lower (about 11 days was the estimate with Dogecoin; expect longer). Fisher not computed. No change.
