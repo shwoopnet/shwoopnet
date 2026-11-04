@@ -144,6 +144,223 @@ def elo_before(matches, t_iso):
     return advance
 
 
+# ---------------------------------------------------------------- data
+SERIES = ("KXATPMATCH", "KXWTAMATCH")
+EV = re.compile(r"-(\d{2}[A-Z]{3}\d{2})")
+D = __import__("pathlib").Path(os.environ.get("TENNIS1_DIR", "/tmp/t1/tennis1"))   # cache lives outside the repo
+ESPN_DIR = __import__("pathlib").Path(os.environ.get("TENNIS1_ESPN", "/tmp/t1/espn"))
+RESULT = D / "tennis1_result.txt"
+FIELDS = ("ticker", "event_ticker", "close_time", "open_time", "yes_sub_title")
+
+
+def list_markets(with_result: bool):
+    """Settled markets before the cut, live and historical. with_result is False until the one scored read."""
+    from . import api
+    cut = CUT.strftime("%Y-%m-%dT%H:%M")
+    out = {}
+    for s in SERIES:
+        for path, live in (("/historical/markets", False), ("/markets", True)):
+            cur = None
+            while True:
+                p = {"series_ticker": s, "limit": 1000}
+                if live:
+                    p["status"] = "settled"
+                if cur:
+                    p["cursor"] = cur
+                d = api._get(path, p)
+                for m in d.get("markets", []):
+                    if (m.get("close_time") or "") < cut and m.get("result") in ("yes", "no"):
+                        row = {k: m.get(k) for k in FIELDS} | {"series": s, "src": "live" if live else "hist"}
+                        if with_result:
+                            row["result"] = m["result"]
+                        out[m["ticker"]] = row
+                cur = d.get("cursor")
+                if not cur or not d.get("markets"):
+                    break
+    return out
+
+
+def espn_matches():
+    """{'Men': [...], 'Women': [...]} of (start, a, b, winner_idx, id) rated matches, de-duplicated by competition id across both feeds."""
+    seen, rows = set(), []
+    for t in ("atp", "wta"):
+        for r in json.loads((ESPN_DIR / f"{t}.json").read_text()):
+            if r["id"] not in seen:
+                seen.add(r["id"])
+                rows.append(r)
+    allm = {}
+    for r in rows:
+        g = "Men" if "Men" in (r.get("grp") or "") else "Women"
+        allm.setdefault(g, []).append(r)
+    rated = {g: build_matches(v) for g, v in allm.items()}
+    # every singles result (final, retired, walkover) is a candidate for matching a Kalshi event; only final ones rate
+    cand = defaultdict(list)
+    for g, v in allm.items():
+        for r in v:
+            if "Singles" in (r.get("grp") or "") and r["win"].count(True) == 1:
+                cand[frozenset(map(norm, r["names"]))].append((r["date"], g))
+    return rated, cand
+
+
+def event_date(ev: str):
+    m = EV.search(ev)
+    return datetime.strptime(m.group(1), "%y%b%d").replace(tzinfo=timezone.utc) if m else None
+
+
+def universe(markets, rated, cand):
+    """One row per Kalshi event matched to an ESPN match with both players ready: first market ticker, start unix, side names, Elo p for each market."""
+    byev = defaultdict(dict)
+    for tk, m in markets.items():
+        byev[m["event_ticker"]][tk] = m
+    advs = {g: elo_before(rated[g], None) for g in rated}
+    work = []
+    for ev, mk in byev.items():
+        if len(mk) != 2:
+            continue
+        d = event_date(ev)
+        if d is None:
+            continue
+        names = {tk: norm(m["yes_sub_title"]) for tk, m in mk.items()}
+        c = [(t, g) for t, g in cand.get(frozenset(names.values()), []) if abs((datetime.strptime(t[:10], "%Y-%m-%d").replace(tzinfo=timezone.utc) - d).days) <= 2]
+        if not c:
+            continue
+        t, g = sorted(c)[0]
+        start = datetime.strptime(t, "%Y-%m-%dT%H:%MZ").replace(tzinfo=timezone.utc)
+        if start >= CUT:
+            continue
+        work.append((t, g, ev, mk, names, int(start.timestamp())))
+    work.sort(key=lambda x: x[0])
+    uni = {}
+    for t, g, ev, mk, names, start in work:
+        e = advs[g](t)
+        a, b = list(names.values())
+        if not e.ready(a, b):
+            continue
+        first = sorted(mk)[0]
+        uni[ev] = dict(event=ev, series=mk[first]["series"], src=mk[first]["src"], first=first, start=start, gender=g, startiso=t,
+                       p={tk: e.prob(names[tk], [n for k, n in names.items() if k != tk][0]) for tk in mk})
+    return uni
+
+
+def fetch():
+    from . import api
+    from .candlefield import quote_close
+    from concurrent.futures import ThreadPoolExecutor
+    D.mkdir(parents=True, exist_ok=True)
+    mp = D / "markets.json"
+    if not mp.exists():
+        mp.write_text(json.dumps(list_markets(False)))
+    markets = json.loads(mp.read_text())
+    rated, cand = espn_matches()
+    uni = universe(markets, rated, cand)
+    (D / "universe.json").write_text(json.dumps(uni))
+    print(len(uni), "events in the universe", flush=True)
+    cp = D / "candles.json"
+    have = json.loads(cp.read_text()) if cp.exists() else {}
+
+    def one(ev):
+        u = uni[ev]
+        path = f"/historical/markets/{u['first']}/candlesticks" if u["src"] == "hist" else f"/series/{u['series']}/markets/{u['first']}/candlesticks"
+        try:
+            d = api._get(path, {"start_ts": u["start"] - 86400, "end_ts": u["start"], "period_interval": 1})
+        except Exception:
+            return ev, None
+        return ev, [(c["end_period_ts"], quote_close(c.get("yes_bid")), quote_close(c.get("yes_ask"))) for c in d.get("candlesticks", [])]
+
+    todo = [e for e in uni if e not in have]
+    with ThreadPoolExecutor(2) as ex:
+        for i, (ev, v) in enumerate(ex.map(one, todo)):
+            if v is not None:
+                have[ev] = v
+            if i % 200 == 0:
+                cp.write_text(json.dumps(have))
+                print(i, len(todo), flush=True)
+    cp.write_text(json.dumps(have))
+    print("done", len(have), flush=True)
+
+
+def look(candles, start):
+    """Last candle ending at or before start - 600 with a valid two-sided quote: (yes_bid, yes_ask) or None."""
+    best = None
+    for end, b, a in candles:
+        if end <= start - LEAD_S and b is not None and a is not None and 0 < b < a < 1:
+            if best is None or end > best[0]:
+                best = (end, b, a)
+    return (best[1], best[2]) if best else None
+
+
+def build_rows(uni, candles, results):
+    """Cheap-side rows: (event, net_cents, won, ask, start, p_side, treated). results is ticker -> 'yes'|'no' (None until the scored read)."""
+    rows, nolook, nocheap = [], 0, 0
+    for ev, u in uni.items():
+        q = look(candles.get(ev, []), u["start"]) if ev in candles else None
+        if q is None:
+            nolook += 1
+            continue
+        cs = cheap_side(*q)
+        if cs is None:
+            nocheap += 1
+            continue
+        side, ask = cs
+        tk = u["first"]
+        other = [t for t in u["p"] if t != tk][0]
+        p_side = u["p"][tk] if side == "yes" else u["p"][other]
+        win_tk = tk if side == "yes" else other
+        if results is None:
+            rows.append((ev, None, None, ask, u["start"], p_side, treated(p_side, ask)))
+            continue
+        # side "yes" wins if the first market resolved yes; side "no" wins if it resolved no
+        won = (results[tk] == "yes") if side == "yes" else (results[tk] == "no")
+        rows.append((ev, net_cents(ask, won), won, ask, u["start"], p_side, treated(p_side, ask)))
+    return rows, nolook, nocheap
+
+
+def cluster_z(obs):
+    from .calibration import cluster_mean_z
+    return cluster_mean_z(obs)
+
+
+def run():
+    if RESULT.exists():
+        print("refused: the scored read was already run (", RESULT, ")")
+        return
+    uni = json.loads((D / "universe.json").read_text())
+    candles = json.loads((D / "candles.json").read_text())
+    markets = list_markets(True)
+    results = {tk: m["result"] for tk, m in markets.items()}
+    uni = {e: u for e, u in uni.items() if u["first"] in results}
+    rows, nolook, nocheap = build_rows(uni, candles, results)
+    tr = [r for r in rows if r[6]]
+    ctl = rows
+    lines = [f"universe events {len(uni)}, no look {nolook}, no cheap side {nocheap}, cheap-side rows {len(rows)}, treated {len(tr)}"]
+    for tag, rs in (("treated", tr), ("control", ctl)):
+        s = summary([(r[0], r[1], r[2], r[3]) for r in rs])
+        if s["n"]:
+            m, se, z = cluster_z([(r[0], r[1]) for r in rs])
+            lines.append(f"{tag}: n {s['n']} mean {s['mean']:+.2f}c win {s['win']:.3f} vs mean ask {s['ask']:.3f} PF {s['pf']:.2f} cluster z {z:+.2f}")
+    if tr:
+        starts = sorted(r[4] for r in tr)
+        mid = starts[len(starts) // 2]
+        h1 = [r[1] for r in tr if r[4] < mid]
+        h2 = [r[1] for r in tr if r[4] >= mid]
+        lines.append(f"halves {len(h1)}/{sum(h1)/max(len(h1),1):+.2f}c, {len(h2)}/{sum(h2)/max(len(h2),1):+.2f}c")
+        v = verdict([(r[0], r[1], r[2], r[3], r[4]) for r in tr], mid)
+        m, se, z = cluster_z([(r[0], r[1]) for r in tr])
+        cm = sum(r[1] for r in ctl) / len(ctl)
+        if v == "NOT_YET_FALSIFIED" and not (z >= 5.27 and m >= 2.0 and m > cm):
+            v = "FALSIFIED"
+        lines.append("VERDICT " + v)
+    else:
+        lines.append("VERDICT NOT_ENOUGH_DATA")
+    RESULT.write_text("\n".join(lines) + "\n")
+    print("\n".join(lines))
+
+
 if __name__ == "__main__":
-    print(__doc__)
-    sys.exit(0)
+    cmd = sys.argv[1] if len(sys.argv) > 1 else ""
+    if cmd == "fetch":
+        fetch()
+    elif cmd == "run":
+        run()
+    else:
+        print(__doc__)
