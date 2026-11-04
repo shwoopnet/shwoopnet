@@ -1,3 +1,4 @@
 slot_ts,poll_ts,server_date_header,clock_skew_s,series_polled,calls,n429,n_errors,quote_rows,result_rows
 1793755800,1793756218,"Wed, 04 Nov 2026 01:37:21 GMT",-22.6,20,40,0,0,109,134
 1793777400,1793779111,"Wed, 04 Nov 2026 07:58:56 GMT",-24.4,20,40,0,0,107,2
+1793797200,1793798378,"Wed, 04 Nov 2026 13:20:07 GMT",-29.0,20,40,0,0,107,0
