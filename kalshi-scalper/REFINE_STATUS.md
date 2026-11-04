@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 12:34 AM CT (06:34Z Nov 4): W30 COMPLETED (Oct 27 finished)
+
+Block D (Sep 2, Sep 9, Oct 27; V2's rules): Oct 27 low n 21 win 14.3% PF 1.18 +1.77c, high n 18 PF 0.93 -0.68c; block D all: low n 48 win 14.6% PF 0.90 -1.15c, high n 50 win 14.0% PF 0.98 -0.22c. Low minus high -0.9c (block D). With block C (Aug): low n 68 +0.6c, high n 77 -3.2c, the second out-of-sample set (C + D) is low n 116 about -0.2c, high n 127 about -1.9c: low minus high about +1.7c, low itself about zero. Matches V2's picture. Third block (W31, Sep 5, 12, 19) pending.
+
 ## 2026-11-04 12:33 AM CT (06:33Z Nov 4): HOURLY CHECK-IN, 0 workers running, W31 REGISTERED (third flow block, V2's rules)
 
 W31 FLOW-OOS-E: the same test as W29/W30 on three more fixed UTC days never looked at: 2026-09-05, 09-12 and 09-19 (V2's rules: lower-ask cheap side 0.05 to 0.50 at -180 s, fill ask at the -120 s candle capped at 0.50, fee rounded up on a 10 contract order, flow [-360, -180) in contracts, at least 5 trades, FIXED threshold -0.036). Report low/high n, win rate, PF, net a contract per day and for the block. No new pass bar: it adds a third block (about 150 windows) to the pooled out-of-sample table already logged (blocks A to D), so the final low-minus-high can be stated on about 650 windows. Prediction: low net about +1c, high about -2c, low minus high about +3c. Also rerun flow_oos_d.py in the background to finish Oct 27 (cached).
