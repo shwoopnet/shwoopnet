@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:35 AM CT (10:35Z): W64 OICORE sim by week
+
+- W64 (descriptive; 453 sim triggers, fill at close-120 ask, weeks start Monday UTC): Aug 31 (Sep 2 on) n 18, 1 win, PF 0.42, -4.2c; Sep 7 n 31, PF 2.58, +16.0c; Sep 14 n 32, PF 1.76, +6.8c; Sep 21 n 54, PF 2.32, +9.7c; Sep 28 n 68, PF 2.28, +9.5c; Oct 5 n 65, PF 1.52, +5.3c; Oct 12 n 60, PF 1.95, +9.4c; Oct 19 n 67, PF 1.32, +3.5c; Oct 26 n 49, PF 1.95, +8.4c; Nov 2 (partial) n 9, PF 4.14. One of 10 weeks under PF 1 (the first, 18 triggers). Spread across weeks, not concentrated. The weakest full week was Oct 19 (1.32), the most recent full week is back at 1.95, so the earlier read of "weaker lately" is not supported. Caveat: the 86,300 threshold was found on this same history, so weekly consistency here is in-sample; the live probe from Oct 30 is the out-of-sample test.
+
 ## 2026-11-04 04:30 AM CT (10:30Z): W63 gold edge margin by week
 
 - W63 (descriptive; 252 gold fills; margin = win rate minus break-even in points, full-loss / realized-loss): week of Oct 7 n 62, win 96.8%, +3.4 / +7.2; Oct 14 n 35, 100%, +5.9 / +5.9; Oct 21 n 76, 90.8%, -2.1 / -0.9 (7 losses, 5 early sells); Oct 28 n 74, 95.9%, +2.6 / +3.7; Nov 4 n 5 (1 loss), too thin. Weekly SE about 3 points. The margin dipped in the Oct 21 week and recovered; no clear erosion, no clear stability. Nothing to propose.
