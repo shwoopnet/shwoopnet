@@ -1,0 +1,51 @@
+COMDAY1 run 2026-11-04T02:08:33.584889+00:00 z bar 5.27 (N about 730,119); fee 7% x C x p x (1-p) rounded up, C=10, taker at the quote in force at D+60
+rank prefix completed for all six series: 27 series-days each (162 series-days); development only, W3 never loaded
+days W1 52 W2 53
+=== RULE A (look 360 min before the close)  skipped: {'no_state': 5, 'no_quote': 235}
+TREATED W1: n 19 days 10 win 21.1% price 0.101 PF 2.51 mean +10.28c z +1.02 | x1.2 +10.17c | +1c +9.24c
+TREATED W2: n 9 days 5 win 0.0% price 0.079 PF 0.00 mean -8.42c z -2.75 | x1.2 -8.51c | +1c -9.47c
+TREATED W1+W2: n 28 days 15 win 14.3% price 0.094 PF 1.58 mean +4.27c z +0.59 | x1.2 +4.16c | +1c +3.22c
+CONTROL (all cheap strike-sides) W1: n 699 days 39 win 6.9% price 0.145 PF 0.39 mean -8.48c z -5.05 | x1.2 -8.64c | +1c -9.53c
+CONTROL (all cheap strike-sides) W2: n 886 days 42 win 7.7% price 0.134 PF 0.49 mean -6.59c z -3.52 | x1.2 -6.74c | +1c -7.64c
+CONTROL (all cheap strike-sides) W1+W2: n 1585 days 81 win 7.3% price 0.139 PF 0.44 mean -7.42c z -5.80 | x1.2 -7.58c | +1c -8.47c
+per series (treated, W1+W2; descriptive):
+  KXWTI: n 3 days 3 win 33.3% price 0.100 PF 8.92 mean +22.70c z +1.03 | x1.2 +22.57c | +1c +21.63c
+  KXBRENTD: n 3 days 2 win 33.3% price 0.120 PF 3.90 mean +20.57c z +1.83 | x1.2 +20.43c | +1c +19.53c
+  KXNATGASD: n 9 days 5 win 0.0% price 0.077 PF 0.00 mean -8.21c z -5.91 | x1.2 -8.31c | +1c -9.27c
+  KXGOLDD: n 4 days 2 win 0.0% price 0.043 PF 0.00 mean -4.58c z -8.35 | x1.2 -4.65c | +1c -5.65c
+  KXSILVERD: n 3 days 2 win 0.0% price 0.050 PF 0.00 mean -5.40c z -3480314656980034.50 | x1.2 -5.40c | +1c -6.40c
+  KXCOPPERD: n 6 days 3 win 33.3% price 0.160 PF 2.47 mean +16.35c z +0.60 | x1.2 +16.20c | +1c +15.33c
+calibration of every cheap strike-side (price 0.03 to 0.30), W1+W2 by ratio p/price (t4) :
+  ratio<1: n 803 price 0.154 win 0.071 model t4 0.094 gauss 0.123
+  1<=ratio<3: n 698 price 0.127 win 0.079 model t4 0.173 gauss 0.212
+  ratio>=3: n 84 price 0.102 win 0.048 model t4 0.593 gauss 0.589
+calibration by model p (t4):
+  p 0.03-0.09: n 662 price 0.098 win 0.044 model t4 0.056 gauss 0.074
+  p 0.09-0.2: n 543 price 0.145 win 0.077 model t4 0.137 gauss 0.184
+  p 0.2-0.4: n 301 price 0.212 win 0.126 model t4 0.264 gauss 0.312
+  p 0.4-0.98: n 79 price 0.159 win 0.089 model t4 0.694 gauss 0.677
+RULE A VERDICT: NOT_ENOUGH_DATA (28 treated trades under 150; 0.267 per development date pooled, days to go at that rate 458 dates of listing)
+=== RULE B (look 60 min before the close)  skipped: {'no_state': 5, 'no_quote': 1287}
+TREATED W1: n 15 days 8 win 0.0% price 0.130 PF 0.00 mean -13.79c z -7.70 | x1.2 -13.95c | +1c -14.85c
+TREATED W2: n 29 days 13 win 0.0% price 0.096 PF 0.00 mean -10.26c z -7.98 | x1.2 -10.37c | +1c -11.29c
+TREATED W1+W2: n 44 days 21 win 0.0% price 0.108 PF 0.00 mean -11.47c z -10.58 | x1.2 -11.59c | +1c -12.51c
+CONTROL (all cheap strike-sides) W1: n 166 days 34 win 4.8% price 0.162 PF 0.23 mean -12.38c z -7.06 | x1.2 -12.56c | +1c -13.43c
+CONTROL (all cheap strike-sides) W2: n 250 days 41 win 4.8% price 0.130 PF 0.29 mean -8.98c z -5.85 | x1.2 -9.12c | +1c -10.02c
+CONTROL (all cheap strike-sides) W1+W2: n 416 days 75 win 4.8% price 0.143 PF 0.26 mean -10.34c z -8.85 | x1.2 -10.50c | +1c -11.38c
+per series (treated, W1+W2; descriptive):
+  KXWTI: n 2 days 1 win 0.0% price 0.110 PF 0.00 mean -11.70c z +0.00 | x1.2 -11.85c | +1c -12.75c
+  KXBRENTD: n 13 days 9 win 0.0% price 0.089 PF 0.00 mean -9.52c z -7.93 | x1.2 -9.62c | +1c -10.58c
+  KXNATGASD: n 18 days 10 win 0.0% price 0.139 PF 0.00 mean -14.80c z -7.87 | x1.2 -14.96c | +1c -15.83c
+  KXGOLDD: n 4 days 3 win 0.0% price 0.062 PF 0.00 mean -6.73c z -11.39 | x1.2 -6.80c | +1c -7.75c
+  KXSILVERD: n 3 days 2 win 0.0% price 0.053 PF 0.00 mean -5.73c z -36.49 | x1.2 -5.77c | +1c -6.77c
+  KXCOPPERD: n 4 days 3 win 0.0% price 0.110 PF 0.00 mean -11.73c z -18.02 | x1.2 -11.83c | +1c -12.75c
+calibration of every cheap strike-side (price 0.03 to 0.30), W1+W2 by ratio p/price (t4) :
+  ratio<1: n 228 price 0.160 win 0.061 model t4 0.087 gauss 0.114
+  1<=ratio<3: n 130 price 0.135 win 0.046 model t4 0.225 gauss 0.256
+  ratio>=3: n 58 price 0.094 win 0.000 model t4 0.441 gauss 0.453
+calibration by model p (t4):
+  p 0.03-0.09: n 184 price 0.116 win 0.022 model t4 0.055 gauss 0.073
+  p 0.09-0.2: n 118 price 0.144 win 0.068 model t4 0.138 gauss 0.185
+  p 0.2-0.4: n 69 price 0.180 win 0.087 model t4 0.285 gauss 0.329
+  p 0.4-0.98: n 45 price 0.190 win 0.044 model t4 0.634 gauss 0.614
+RULE B VERDICT: NOT_ENOUGH_DATA (44 treated trades under 150; 0.419 per development date pooled, days to go at that rate 253 dates of listing)
