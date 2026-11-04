@@ -8848,3 +8848,6 @@ Registration sha256 `b16e614e98957eec37b1bff5a373d4db844b5a54cbba6bbf0fea97d4d86
 
 ### NHLALL1 Amendment 3 (2026-11-04, owner approved opening the frozen events; written and pushed before any frozen candle or outcome; N +2)
 `workers/NHLALL1_AMENDMENT3.md`, `workers/NHLALL1_FROZEN_EVENTS.json`: ONE frozen read of the 209 post-2026-10-03 KXNHLGOAL events (6,915 volume-positive 1+ rungs; the live candle endpoint because Kalshi's historical cutoff is 2026-09-05), the rule exactly as registered, cuts frozen (terciles 2.75 / 3.66; NHLROUND1 sum <= 3.6085), claims in order pooled cap-2, lowest tercile, NHLROUND1 arm, each with the unchanged bar (n >= 150, both halves positive, game lower 95% bound above 0, PF >= 1.5). Strict md5 order, one process, 8 retries, 6 hour box.
+
+### NHLAST1 Amendment 3 (2026-11-04, written and pushed before any frozen candle; owner approved; N +2)
+`workers/NHLAST1_AMENDMENT3.md`: ONE read of the 209 frozen post-cut KXNHLAST events (1+ rungs, at least 5 listed, all matched to ESPN times) with the registered rule, frozen E 4.21 filter arm first then the pooled arm, strict md5 order, one process, 8 retries, 6 hour box. Census `workers/NHLAST1_CENSUS3.json`, code `src/scalper/nhlast1_frozen.py`.
