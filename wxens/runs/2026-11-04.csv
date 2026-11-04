@@ -1,3 +1,4 @@
 slot_ts,poll_ts,server_date_header,clock_skew_s,cities_due,calls,n429,n_errors,ens_rows,nws_rows,quote_rows,result_rows,obs_rows,ens_low_rows,nws_low_rows,quote_low_rows,result_low_rows,obs_low_rows
 1793757600,1793758773,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 1793786400,1793789589,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+1793797200,1793798373,"Wed, 04 Nov 2026 13:19:45 GMT",-11.5,4,144,0,0,976,8,24,300,50,976,12,24,294,49
