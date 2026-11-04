@@ -1,0 +1,25 @@
+pool 16201 rows, 3558 events; D1 1186 D2 1186 test 1186 events
+PATH_FALL      treated  capped rows  2753 | score-set  1472 (1044 ev; D1  613 D2  859) | test  1281 | strength 3 | rank 4416
+PATH_FALL      placebo  capped rows  1049 | score-set   570 ( 465 ev; D1  272 D2  298) | test   479 | strength 3 | rank -
+PEAK_COLLAPSE  treated  capped rows  3380 | score-set  2483 (1578 ev; D1 1204 D2 1279) | test   897 | strength 3 | rank 7449
+PEAK_COLLAPSE  placebo  capped rows  2205 | score-set  1642 (1068 ev; D1  928 D2  714) | test   563 | strength 3 | rank -
+VS_OPEN        treated  capped rows  2869 | score-set  2109 (1426 ev; D1  998 D2 1111) | test   760 | strength 2 | rank 4218
+VS_OPEN        placebo  capped rows  2107 | score-set  1568 (1074 ev; D1  856 D2  712) | test   539 | strength 2 | rank -
+NONROUND       treated  capped rows  5800 | score-set  3761 (2222 ev; D1 1906 D2 1855) | test  2039 | strength 2 | rank 7522
+NONROUND       placebo  capped rows  2624 | score-set  1449 (1088 ev; D1  704 D2  745) | test  1175 | strength 2 | rank -
+FEE_WASTE      treated  capped rows  2178 | score-set  1194 ( 905 ev; D1  612 D2  582) | test   984 | strength 1 | rank 1194
+FEE_WASTE      placebo  capped rows  2627 | score-set  1593 (1156 ev; D1  748 D2  845) | test  1034 | strength 1 | rank -
+SPREADM        treated  capped rows  1225 | score-set   817 ( 584 ev; D1  414 D2  403) | test   408 | strength 2 | rank 1634
+SPREADM        placebo  capped rows  3031 | score-set  1691 (1109 ev; D1  849 D2  842) | test  1340 | strength 2 | rank -
+SHOULDER       treated  capped rows  1798 | score-set   882 ( 545 ev; D1  387 D2  495) | test   916 | strength 3 | rank 2646
+SHOULDER       placebo  capped rows  1232 | score-set   337 ( 226 ev; D1  120 D2  217) | test   895 | strength 3 | rank -
+INTERIOR       treated  capped rows  4217 | score-set  2629 (1552 ev; D1 1318 D2 1311) | test  1588 | strength 4 | rank 10516
+INTERIOR       placebo  capped rows  1352 | score-set   725 ( 619 ev; D1  364 D2  361) | test   627 | strength 4 | rank -
+VOLRANK        treated  capped rows   776 | score-set   524 ( 485 ev; D1  232 D2  292) | test   252 | strength 2 | rank 1048
+VOLRANK        placebo  capped rows   676 | score-set   466 ( 452 ev; D1  207 D2  259) | test   210 | strength 2 | rank -
+OFFHOURS       treated  capped rows   291 | score-set   217 ( 145 ev; D1  129 D2   88) | test    74 | strength 2 | rank 434
+OFFHOURS       placebo  capped rows  3143 | score-set  2398 (1418 ev; D1 1166 D2 1232) | test   745 | strength 2 | rank -
+WEEKEND        treated  capped rows  2275 | score-set  1534 ( 914 ev; D1  920 D2  614) | test   741 | strength 2 | rank 3068
+WEEKEND        placebo  capped rows  2882 | score-set  1897 (1121 ev; D1  841 D2 1056) | test   985 | strength 2 | rank -
+YDAY           treated  capped rows   240 | score-set   175 ( 153 ev; D1   96 D2   79) | test    65 | strength 2 | rank 350
+YDAY           placebo  capped rows  1650 | score-set  1267 ( 710 ev; D1  608 D2  659) | test   383 | strength 2 | rank -
