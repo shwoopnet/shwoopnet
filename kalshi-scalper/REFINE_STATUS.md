@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:20 AM CT (12:20Z): W85 gold by day of week
+
+- W85 (descriptive; 252 settled gold fills, CT dates): weekday 240 fills, 12 losses (5.0%), +$37.60, PF 1.42, +1.73c/ct; weekend 12 fills (all Sunday, Saturday is closed), 1 loss, +$0.66, PF 1.07. Mon n 34, 3 losses, -$3.54, PF 0.87; Tue n 55, 5 losses, -$10.55, PF 0.76; Wed n 55, 3 losses, +$9.82, PF 1.90; Thu n 67, 0 losses, +$31.81; Fri n 29, 1 loss, +$10.06, PF 2.14. Weekend vs weekday loss-rate permutation p 1.00 (uninformative at n 12). Mon and Tue are the weak days (89 fills, -$14.09) and Thu carries the profit (+$31.81 of +$38.26), but that is five day-of-week cells on 13 losses, the shape chance produces; no filter, no forward registration beyond watching the same table each week. Not acted on.
+
 ## 2026-11-04 06:15 AM CT (12:15Z): W84 OICORE weekend gap
 
 - W84 (descriptive; 461 sim triggers): weekday +9.38c/ct, weekend +2.23c, difference +7.16c, permutation p 0.080 two-sided (5000 shuffles), not significant at 0.05 and uncorrected for the other splits tried (hour blocks in W83, weeks in W64, price bands in W36 and W53). Weekend win rate 27 of 119 = 22.7% (Wilson 95% 16.1% to 31.0%). Weekend by month: Sep n 33, +4.35c, PF 1.41; Oct n 78, +0.67c, PF 1.04; Nov n 8, +8.69c (too few). Positive in each month but weak. History cannot count toward a weekend filter; it stays a forward question. Tracking: live OICORE weekend fills (Saturday and Sunday CT close) versus weekday, information only. At the live pace about 13 weekend triggers per weekend, so it will not be readable by Nov 13 (one weekend, Nov 7 to 8).
