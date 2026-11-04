@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 10:45 AM CT (16:45Z): Main: #711 and #712 deployed; FLOW1 is out; no-fills now carry a reason
+
+- Message from main (data): the owner deployed #711 and #712 just now (about 16:45Z Nov 4). FLOW1 is out of the live registry (no new FLOW1 orders; existing ones still exit and settle). Every new L1 and slot order now stores Kalshi's own status as kalshiStatus, and slot orders also store answeredAtMs, so no-fills from here on carry a reason; orders placed before the deploy do not have it. What this changes for me: (1) FLOW1 live tracking (the four divergence flags, the FLOW1 ledger FLAG) is over: final live record 2 orders, 1 filled, lost -$0.64; the research shadows S-FLOW1 and S-FLOW2 keep running as forward questions only; the wake.sh FLOW1 block and the ledger FLAG are now stale noise and are to be retired. (2) The W70 brief is done by main: the reason a no-fill happened will appear in kalshiStatus. A table of no-fill statuses (by strategy, with answeredAtMs) goes into wake.sh once the report exposes the field (the report's projection may not carry it; check). (3) The Nov 13 OICORE read is not affected by the FLOW1 removal.
+
 ## 2026-11-04 08:33 AM CT (14:33Z): OICORE 27th fill is a loss (-2.01)
 
 - OICORE's 27th fill: 14:12Z (8:12 AM CT) Nov 4, KXBTC15M-26NOV040915-15, YES 10 contracts at 0.18, filled, settled -$2.01 (a full loss of the 0.18 price plus fee). Record: 27 fills, 7 won, 20 lost, net +$35.86, PF 2.92; loss streak 1 (kill at 18, 17 away). The previous order was the 12:57Z win (+$8.93), 1h15m earlier. S-JUMP1 and S-SDIR1 are 20 of 40 fills. S-GPB1 2 of 40, S-GQH1 11 of 40, C2 9 of 40, S-OIRLOW1 0 of 40 (the cache had not yet seen windows closing after 14:00Z). FLOW1 unchanged (2 orders, 1 filled, -$0.64), shadow low half 6 windows. No flag fired except the known FLOW1 ledger FLAG. The order of the day so far: 3 OICORE fills (07:57Z loss -$0.64, 12:57Z win +$8.93, 14:12Z loss -$2.01), net +$6.28.
