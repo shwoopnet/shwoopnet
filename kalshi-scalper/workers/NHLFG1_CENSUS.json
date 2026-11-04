@@ -1,0 +1,17 @@
+{
+ "unmatched_events": 1,
+ "games_matched": 997,
+ "FG": {
+  "games": 994,
+  "rungs": 11987,
+  "rungs_per_game_median": 11.0,
+  "mean": 12.059356136820925
+ },
+ "G2": {
+  "games": 437,
+  "rungs": 2613,
+  "rungs_per_game_median": 4,
+  "mean": 5.979405034324943
+ },
+ "games_already_fetched_by_NHLALL1": 179
+}
