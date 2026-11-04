@@ -441,6 +441,26 @@ def cmd_candles():
     print("candles to fetch", len(todo), flush=True)
     live = [r for r in todo if r[2] == "live"]
     hist_ = [r for r in todo if r[2] != "live"]
+    # plumbing only: the batch endpoint also answers for the newer archived markets; those it leaves empty go one by one below
+    for i in range(0, len(hist_), 8):
+        batch = hist_[i:i + 8]
+        try:
+            res = api.batch_candlesticks([x[0] for x in batch], min(x[1] for x in batch) - 7200, max(x[1] for x in batch))
+        except Exception:  # noqa: BLE001
+            res = {}
+        for tk, st, _ in batch:
+            cs = res.get(tk) or []
+            if cs:
+                for x in cs:
+                    c.execute("INSERT OR REPLACE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
+                c.execute("INSERT OR REPLACE INTO cdone VALUES(?,?)", (tk, len(cs)))
+        if (i // 8) % 20 == 0:
+            c.commit()
+            print("hist batch", i, "/", len(hist_), flush=True)
+        time.sleep(0.8)
+    c.commit()
+    hist_ = [r for r in hist_ if not c.execute("SELECT 1 FROM cdone WHERE ticker=?", (r[0],)).fetchone()]
+    print("hist one by one", len(hist_), flush=True)
     for i, (tk, st, _) in enumerate(hist_):
         try:
             d = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": st - 7200, "end_ts": st, "period_interval": 1})
@@ -454,7 +474,7 @@ def cmd_candles():
         if i % 100 == 0:
             c.commit()
             print("hist", i, "/", len(hist_), flush=True)
-        time.sleep(0.4)
+        time.sleep(1.0)
     c.commit()
     for i in range(0, len(live), 8):
         batch = live[i:i + 8]

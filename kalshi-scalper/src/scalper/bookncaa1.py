@@ -217,7 +217,7 @@ def stage_odds(box):
     print("odds stage:", len(games), "events processed,", sum(1 for v in games.values() if v), "matched", flush=True)
 
 
-def stage_candles(box):
+def stage_candles(box, reverse=False):
     sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
     from scalper import api
     (CACHE / "candles").mkdir(parents=True, exist_ok=True)
@@ -228,7 +228,7 @@ def stage_candles(box):
         except Exception:
             time.sleep(20); continue
         did = 0
-        for e in events():
+        for e in (events()[::-1] if reverse else events()):
             g = games.get(e)
             if not g or time.time() - t0 > box:
                 continue
@@ -312,5 +312,5 @@ def stage_score():
 if __name__ == "__main__":
     CACHE.mkdir(parents=True, exist_ok=True)
     v = sys.argv[1]
-    {"odds": lambda: stage_odds(float(sys.argv[2])), "candles": lambda: stage_candles(float(sys.argv[2])),
+    {"odds": lambda: stage_odds(float(sys.argv[2])), "candles": lambda: stage_candles(float(sys.argv[2]), len(sys.argv) > 3 and sys.argv[3] == "reverse"),
      "entries": stage_entries, "results": stage_results, "score": stage_score}[v]()
