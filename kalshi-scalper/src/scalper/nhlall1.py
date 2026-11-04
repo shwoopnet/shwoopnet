@@ -205,7 +205,7 @@ def entries(c):
             sd = cheap_side(bid, ask)
             if sd:
                 side, a = sd
-                cheap.append(dict(ticker=tk, game=ev, date=ev[11:18], side=side, ask=a, win=(res[tk] == "yes") == (side == "yes"), start=stt))
+                cheap.append(dict(ticker=tk, game=ev, date=ev[10:17], side=side, ask=a, win=(res[tk] == "yes") == (side == "yes"), start=stt))
         if len(ladder) < 8:
             continue
         games.append(dict(event=ev, start=stt, lsum=sum(a for a, _ in ladder), scorers=sum(1 for _, y in ladder if y), nl=len(ladder), cheap=cheap))
