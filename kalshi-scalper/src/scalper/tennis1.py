@@ -13,6 +13,7 @@ import math
 import os
 import re
 import sys
+import time
 import unicodedata
 from collections import defaultdict
 from datetime import datetime, timezone
@@ -268,8 +269,11 @@ def fetch():
         return ev, [(c["end_period_ts"], quote_close(c.get("yes_bid")), quote_close(c.get("yes_ask"))) for c in d.get("candlesticks", [])]
 
     todo = [e for e in uni if e not in have]
-    with ThreadPoolExecutor(2) as ex:
-        for i, (ev, v) in enumerate(ex.map(one, todo)):
+    def paced(ev):
+        time.sleep(1.1)   # one thread, about 50 requests a minute: a burst of five trips Kalshi's 429
+        return one(ev)
+    with ThreadPoolExecutor(1) as ex:
+        for i, (ev, v) in enumerate(ex.map(paced, todo)):
             if v is not None:
                 have[ev] = v
             if i % 200 == 0:
