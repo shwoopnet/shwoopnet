@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:33 AM CT (13:33Z): S-OIRLOW1 registered before any data: is the 86,300 threshold a cliff
+
+- Registered now (forward only, nothing read): S-OIRLOW1 tests whether OICORE's 86,300 open interest threshold is a sharp edge or part of a smooth effect. Windows: Bitcoin KXBTC15M closing after 2026-11-04T14:00:00Z. Trigger: open interest rise (the candle ending at close-180 minus the candle ending at close-360) in [60,000, 86,300), cheap side (the lower ask side) with ask 0.05 to 0.50 at close-180. Fill: that side's ask on the candle ending at close-120, hold to settlement, fee 0.07 x p x (1-p) rounded up per 10 contracts. Read once at 40 windows (about 8 to 10 days at the band's trigger rate). Information only, no live change either way: if net is positive and PF is 1.5 or better the threshold looks like part of a smooth effect (reads as support for OICORE's mechanism); if net is zero or negative the threshold may be fitted to the sample (reads as a warning for the Nov 13 OICORE read, not a kill). Pass or fail does not touch the registered OICORE kill rules. N tried so far in this log is about 380 splits; this is one forward test, not counted toward adopting anything.
+
 ## 2026-11-04 07:29 AM CT (13:29Z): OICORE 26th fill is a win (+8.93)
 
 - OICORE placed and won its 26th fill: 12:57Z (6:57 AM CT) Nov 4, KXBTC15M-26NOV040800-00, YES 10 contracts at 0.09, filled, settled +$8.93. The record is now 26 fills, 7 won, 19 lost, net +$37.87, PF 3.27 (before: 25 fills, 6 won, 19 lost, +$28.94, PF 2.74); the loss streak is reset to 0 (kill at 18, 18 away). The previous OICORE order was the 07:57Z loss (-$0.64), so the gap between orders was 5 hours (inside the 14 hour flag). S-JUMP1 and S-SDIR1 are 19 of 40. S-GPB1: 2 forward gold fills below 0.90 (net +$1.46 combined, no loss) and 1 at 0.90 or above (+$0.33): 2 of 40. FLOW1 unchanged (2 orders, 1 filled, -$0.64). No flag fired except the known FLOW1 ledger FLAG (the 10:00 close, no live order).
