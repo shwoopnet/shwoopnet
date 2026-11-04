@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:10 AM CT (12:10Z): W83 OICORE by time of day and weekday
+
+- W83 (descriptive; 461 sim triggers, hold, CT close hour): 0-6 n 50, 6 wins, PF 0.67, -3.71c/ct; 6-12 n 90, 19 wins, PF 1.99, +6.12c; 12-18 n 126, 33 wins, PF 1.87, +8.16c; 18-24 n 195, 65 wins, PF 2.14, +10.67c. Weekday n 342, 96 wins, PF 2.27, +9.38c; weekend n 119, 27 wins, PF 1.17, +2.23c. Permutation test on the PF spread across the four blocks (5000 shuffles): observed 1.47, p 0.24, so the block spread is not beyond chance, and the 0-6 weakness rests on 6 wins in 50. The weekday vs weekend gap was not tested. History cannot count toward a filter. Forward tag for the Nov 13 read: report OICORE live fills split weekday vs weekend and by block, as information only (no rule).
+
 ## 2026-11-04 06:05 AM CT (12:05Z): W82 C9 Silver status
 
 - W82 (descriptive; run about 08:20Z): C9 Silver forward (windows closing after Nov 2 22:00Z): 36 in-band, 3 lost (8.3%), net -0.02c/ct (SE 4.38c). Registered rule: prediction over 400 windows is lost share at most 8% and net at least +0.5c; kill at 200 if lost share above 12% or net below -2.0c; kill at 400 if lost share above 10% or net below -1.0c; otherwise inconclusive and extend by 400. Pace 25 windows a day (36 in 1.43 days) against the registered about 18 a day, so the 200-window read is about Nov 10 to 11 (Nov 13 at the registered pace). Silver is not in L1_SERIES on main (gold, XRP, Bitcoin, Dogecoin, Ethereum only), so this is a pure paper tracker. No action.
