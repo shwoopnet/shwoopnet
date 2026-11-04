@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 06:00 AM CT (12:00Z): W81 OICORE exit-rule check
+
+- W81 (check only, not a proposal; sim set is 461 triggers now, the cache runs to Nov 4): hold PF 1.84, +7.54c/ct; stop at 50% of entry PF 1.96, +7.78c; take-profit at 3x entry PF 1.68, +5.94c. The 17 sim triggers matched to a live fill: hold 2.65 / +9.00c; stop 2.71 / +9.14c; take-profit 2.51 / +7.95c. Caveats: only 1-minute close bids (touches checked on closes), exits assumed filled at the bid with no slippage (optimistic on thin books). The stop's edge over hold is within noise. Holding stands (V2's SLOTEX/EXIT1). Note the cache now has 461 triggers, so my older 453 figures are a few days stale; counts in this log before this entry used 453.
+
 ## 2026-11-04 05:55 AM CT (11:55Z): W80 gold's 11 early sells
 
 - W80 (descriptive; n 11; the report has no sell-time field, so the sell is the first candle after entry whose side bid low was 25c or under): 8 of 11 detected, all 1 to 3 minutes before close (3 min x4, 2 min x3, 1 min x1); 3 unknown (no usable candle). Recovery: 0 of 11 had the side bid go back above the entry price (two bounced to 0.62 and 0.66, still under the 0.90 and 0.92 entries). Settlement: 10 of 11 settled against us; 1 (Oct 13 05:15, yes, 0.89 entry) would have won held. So on gold's own early sells the 25c line beat holding by a wide margin. This agrees with the earlier gold-slightly-better-selling finding and with W35 (selling $2.76 better on three). The sample is every time the line was hit, so it is not a pick-the-losers bias: a market that hit 25c and would have recovered counts as the one winner above. No change to the exit line.
