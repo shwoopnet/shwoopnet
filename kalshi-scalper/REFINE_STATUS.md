@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:05 AM CT (08:05Z): W35 gold early sells since Nov 2
+
+- W35 (descriptive, n=3, cannot change a rule): gold since Nov 2 22:55Z, 25 fills, net -$15.66, three early sells (-$9.31, -$13.56, -$12.74). All three would have lost at settlement too. Selling -$35.61 vs holding -$38.37, so the 25c line was $2.76 better. Matches the full-history finding (gold slightly better selling). Exit price taken as the 25c line (report has no exit time).
+
 ## 2026-11-04 02:00 AM CT (08:00Z): W34 OICORE slippage, no problem
 
 - W34 (24 filled OICORE orders): order price vs the ask the bot saw at decision (seenAsk): mean +0.33c, none 1c or more worse. The first comparison against the close-120 candle ask gave -2.16c, but that mostly measures price drift (candle comes 0 to 60 s after the order; report avgFill is null, so the order price is the limit). Verdict by the registered rule: no slippage problem.
