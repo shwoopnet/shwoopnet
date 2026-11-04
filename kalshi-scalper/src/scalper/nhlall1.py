@@ -266,3 +266,108 @@ if __name__ == "__main__":
         cmd_candles(float(sys.argv[2]), int(sys.argv[3]) if len(sys.argv) > 3 else 1, int(sys.argv[4]) if len(sys.argv) > 4 else 0)
     elif cmd == "score":
         score()
+
+
+# ----------------------------------------------------------------------------- amendment 2 (continuation block)
+OLD = ROOT / "workers" / "NHLALL1_FIRST61.json"
+CUTS = (2.75, 3.66)
+OLD_TRADES = 122
+
+
+def next_block_order(c):
+    old = set(json.load(open(OLD)))
+    return [r[0] for r in c.execute("SELECT event FROM gm WHERE excluded=0 ORDER BY md5") if r[0] not in old]
+
+
+def candidate_trades(c, ev, stt, tks):
+    """Trade count of a fully fetched game from quotes only (no result is read): 0 if fewer than 8 valid ladder quotes, else min(2, cheap rungs)."""
+    nl = ch = 0
+    for tk in tks:
+        q = look_quote(c.execute("SELECT end_ts,bid,ask FROM candle WHERE ticker=?", (tk,)).fetchall(), stt)
+        if q is None:
+            continue
+        nl += 1
+        ch += cheap_side(*q) is not None
+    return min(MAXPER, ch) if nl >= 8 else 0
+
+
+def cmd_block2(minutes):
+    """ONE process, strict md5 order over the unfetched pre-cut games; each market retried before the game is dropped; stops at 150 pooled trades."""
+    c = conn()
+    t_end = time.time() + 60 * minutes
+    starts = {r[0]: r[1] for r in c.execute("SELECT event,start_ts FROM gm")}
+    byg = defaultdict(list)
+    for tk, ev in c.execute("SELECT ticker,event FROM rung"):
+        byg[ev].append(tk)
+    total, games = OLD_TRADES, 0
+    for ev in next_block_order(c):
+        if total >= MIN_TRADES:
+            print("stopping rule reached: pooled trades", total, "new games", games, flush=True)
+            return
+        if time.time() > t_end:
+            print("time box reached: pooled trades", total, "new games", games, flush=True)
+            return
+        for tk in byg[ev]:
+            if c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone():
+                continue
+            cs = None
+            for a in range(8):
+                try:
+                    cs = api._get(f"/historical/markets/{tk}/candlesticks", {"start_ts": starts[ev] - 3600, "end_ts": starts[ev], "period_interval": 1}, retries=1).get("candlesticks", [])
+                    break
+                except Exception:  # noqa: BLE001
+                    time.sleep(2 + 4 * a)
+            time.sleep(0.6)
+            if cs is None:
+                continue
+            for x in cs:
+                c.execute("INSERT OR IGNORE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
+            c.execute("INSERT OR IGNORE INTO cdone VALUES(?,?)", (tk, len(cs)))
+            c.commit()
+        if all(c.execute("SELECT 1 FROM cdone WHERE ticker=?", (tk,)).fetchone() for tk in byg[ev]):
+            games += 1
+            total += candidate_trades(c, ev, starts[ev], byg[ev])
+            print("game", games, ev, "pooled trades", total, flush=True)
+        else:
+            print("dropped after retries:", ev, flush=True)
+    print("order exhausted", total, games, flush=True)
+
+
+def score2():
+    c = conn()
+    G = entries(c)
+    old = set(json.load(open(OLD)))
+    med = st.median([g["start"] for g in G])
+    for g in G:
+        g["tc"] = tercile_of(g["lsum"], CUTS)
+        for t in g["cheap"]:
+            t["half"] = "H1" if g["start"] < med else "H2"
+            t["tc"] = g["tc"]
+    out = {}
+    sets = {"combined": G, "new_only": [g for g in G if g["event"] not in old]}
+    for nm, S in sets.items():
+        pool = [t for g in S for t in pick_two(g["cheap"])]
+        low = [t for t in pool if t["tc"] == 0]
+        d = dict(games=len(S))
+        for rule, T in (("pooled", pool), ("low_tercile", low)):
+            b = dict(game=clustered(T, "game"), date=clustered(T, "date"), x12=clustered(T, "game", 1.2))
+            for h in ("H1", "H2"):
+                b[h] = clustered([t for t in T if t["half"] == h], "game")
+            b["verdict"] = verdict(b["game"]["n"], [b["H1"]["mean_c"], b["H2"]["mean_c"]], b["game"]["lo95_c"], b["game"]["pf"])
+            d[rule] = b
+        d["by_tercile"] = {i: clustered([t for t in pool if t["tc"] == i], "game") for i in range(3)}
+        d["tercile_games"] = {i: sum(1 for g in S if g["tc"] == i) for i in range(3)}
+        d["uncapped_all_cheap"] = clustered([t for g in S for t in g["cheap"]], "game")
+        d["ladder"] = dict(mean_sum_ask=sum(g["lsum"] for g in S) / len(S), mean_scorers=sum(g["scorers"] for g in S) / len(S))
+        out[nm] = d
+    json.dump(out, open(ROOT / "workers" / "NHLALL1_RESULT2.json", "w"), indent=1, default=str)
+    for k, v in out.items():
+        print("==", k, v["games"])
+        for r in ("pooled", "low_tercile"):
+            print(r, {a: (fmt(b) if isinstance(b, dict) else b) for a, b in v[r].items()})
+        print("by_tercile", {i: fmt(b) for i, b in v["by_tercile"].items()}, v["tercile_games"])
+        print("uncapped", fmt(v["uncapped_all_cheap"]), v["ladder"])
+
+
+if __name__ == "__main__" and sys.argv[1] in ("block2", "score2"):
+    {"block2": lambda: cmd_block2(float(sys.argv[2])), "score2": score2}[sys.argv[1]]()

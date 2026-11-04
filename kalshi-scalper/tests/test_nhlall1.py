@@ -32,3 +32,9 @@ def test_clustered_net_and_verdict():
     assert n.verdict(200, [1, -1], 1, 2) == "FALSIFIED"
     assert n.verdict(200, [1, 1], 1, 1.2) == "FALSIFIED"
     assert n.verdict(200, [1, 1], -0.1, 2) == "FALSIFIED"
+
+
+def test_terciles_frozen_and_old_block_size():
+    import json, pathlib
+    old = json.load(open(pathlib.Path(__file__).resolve().parents[1] / "workers" / "NHLALL1_FIRST61.json"))
+    assert len(old) == 61 and n.CUTS == (2.75, 3.66) and n.OLD_TRADES == 122
