@@ -467,7 +467,7 @@ def cmd_candles(minutes: float, stride: int = 1, offset: int = 0):
                 for x in cs:
                     c.execute("INSERT OR REPLACE INTO candle VALUES(?,?,?,?)", (tk, x["end_period_ts"], quote_close(x.get("yes_bid")), quote_close(x.get("yes_ask"))))
                 c.execute("INSERT OR REPLACE INTO cdone VALUES(?,?)", (tk, len(cs)))
-            c.commit()
+                c.commit()
             if gi % 5 == 0:
                 print("pass", pas, "game", gi, "/", len(pending), "ok", n_ok, "fail", n_fail, flush=True)
         if time.time() > t_end:
