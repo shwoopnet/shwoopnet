@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:34 AM CT (13:34Z): W126 S-OIRLOW1 tracker built, untested paths
+
+- W126: `oirlow1_forward.py` built with the registered definitions unchanged (Bitcoin windows closing after 14:00Z, OIR in [60000, 86300), cheap side ask 0.05..0.50 at close-180, fill at the close-120 ask, hold, fee 0.07*p*(1-p) rounded up per 10 contracts, read at 40); at most 40 new windows fetched per run, cache oirlow1_cache.jsonl, lock file, READ-READY line at 40. A block was appended to wake_shadows.py. Run once: 0 markets closed after 14:00Z, so 0 of 40. Untested: the 40 window path, the fee rounding, and the new wake_shadows.py block; a test with a synthetic cache is next (W128).
+
 ## 2026-11-04 07:33 AM CT (13:33Z): S-OIRLOW1 registered before any data: is the 86,300 threshold a cliff
 
 - Registered now (forward only, nothing read): S-OIRLOW1 tests whether OICORE's 86,300 open interest threshold is a sharp edge or part of a smooth effect. Windows: Bitcoin KXBTC15M closing after 2026-11-04T14:00:00Z. Trigger: open interest rise (the candle ending at close-180 minus the candle ending at close-360) in [60,000, 86,300), cheap side (the lower ask side) with ask 0.05 to 0.50 at close-180. Fill: that side's ask on the candle ending at close-120, hold to settlement, fee 0.07 x p x (1-p) rounded up per 10 contracts. Read once at 40 windows (about 8 to 10 days at the band's trigger rate). Information only, no live change either way: if net is positive and PF is 1.5 or better the threshold looks like part of a smooth effect (reads as support for OICORE's mechanism); if net is zero or negative the threshold may be fitted to the sample (reads as a warning for the Nov 13 OICORE read, not a kill). Pass or fail does not touch the registered OICORE kill rules. N tried so far in this log is about 380 splits; this is one forward test, not counted toward adopting anything.
