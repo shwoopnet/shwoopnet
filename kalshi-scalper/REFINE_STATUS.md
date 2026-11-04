@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:45 AM CT (08:45Z): W43 gold 20-24 CT forward, S-GQH1 registered
+
+- W43 (gold fills since Oct 30 19:30Z): 20-24 CT n 11, 2 losses (both early sells), -$14.29, PF 0.35; other hours n 26, 1 loss, +$10.08, PF 1.74. n too small to call (2 of 11 vs 1 of 26). Script `w43.py` reruns it.
+- Registered S-GQH1 (forward only, before more data): read once at 40 gold fills in 20-24 CT (now 11) from `w43.py`. Flag to main as a decision (not a change by me) if block losses are 5 or more and block PF is under 1.0 while other hours' PF is over 1.3. Otherwise note and keep watching. The block was lifted by the owner in #669; reinstating it is the owner's reviewed edit.
+
 ## 2026-11-04 02:40 AM CT (08:40Z): W42 Dogecoin ladder split
 
 - W42 (descriptive, 61 ladder orders, 7 losses, -$23.12, PF 0.64): first half (30) 1 loss, +$12.39, PF 2.42; second half (31) 6 losses, -$35.51, PF 0.36. All but one order were above 5 contracts (11 to 15), so no small-size test exists. By size band PF 0.52 (11-12), 0.60 (13), 0.84 (14-15): no band profitable, losses about $9 each at every size, so they do not scale with size. 6 of 7 losses came Nov 2-3. Dogecoin stays paused; un-pausing is a reviewed owner edit, nothing here argues for it.
