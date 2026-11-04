@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:05 AM CT (11:05Z): W71 gold day-to-day volatility
+
+- W71 (descriptive; 252 settled gold fills, Oct 7 to Nov 4, 29 days, 22 with fills, US Central days): total +$38.26, mean +$1.32/day, median +$0.02/day. Negative days 7 of 29 (24%), 7 of 22 days with fills (32%). Best day Oct 29 +$16.93; worst Nov 3 -$11.38 (18 fills). Longest drawdown Oct 23 to Oct 29 (6 days, depth -$17.40). Running total peaked +$50.30 on Nov 1, now $12.04 below the peak. 4 of the last 10 days lost money. The median day is about zero while the mean is carried by a few big days, which is the shape of a rule that wins small and loses big. Context only, no change.
+
 ## 2026-11-04 05:00 AM CT (11:00Z): W70 what a no-fill order records; log-only brief drafted
 
 - W70 (read only; dash_report.json is a projection, not the raw docs): the reason an order did not fill is NOT recorded. No-fill orders carry ts, ticker, side, count 0, orderedCount, price, status (gold also limit, seenBid/seenAsk, sizes, timing; OICORE also strategy). Code (kalshiLiveLib.js ~1069, kalshiSlotRunLib.js ~194): on HTTP 2xx with an order id and fill_count 0 the patch stores status "no fill", orderId, fillCount, remainingCount, averageFillPrice, averageFeePaid, sentSide, sentPrice; the doc also holds `seen` (the book at decision) and clientOrderId. Only HTTP errors write `error`. "No fill" just means fill_count 0; Kalshi's order status or cancel reason is dropped.
