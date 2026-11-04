@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:15 AM CT (08:15Z): W37 gold loss clustering
+
+- W37 (descriptive): gold, 252 settled orders, 13 losses. Adjacent loss pairs within 2h: observed 2, shuffle mean 0.74 (2000 shuffles), one-sided p 0.161. Not significant; n too small to say. Losses fall on 9 of 21 trading days, never 3 in a day. No change.
+
 ## 2026-11-04 02:10 AM CT (08:10Z): W36 OICORE by order price band
 
 - W36 (descriptive): live 24 fills: 5-15c n 20, 15% win, PF 1.89, +6.5c; 15-30c n 2; 30-50c n 2. Sim 31 triggers since Oct 30: 5-15c n 21, PF 2.36, +5.0c; 15-30c n 4, PF 10.2; 30-50c n 6, PF 1.13. Upper cells hold 2 to 6 trades, so no filter can be justified, and history cannot count toward adopting one. No change.
