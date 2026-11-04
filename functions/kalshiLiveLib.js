@@ -816,7 +816,7 @@ const L1_WINDOW_CAP_FRACTION = 0.055;
 // slot can no longer hide an L1 loss from L1's own stop. Tightening OICORE's own stop (the reviewed draft says 4%) is a later, separate edit of one number here.
 const RISK_PROFILES = Object.freeze({
   L1: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION }),
-  SECOND: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION }),   // the second strategy (OICORE today)
+  SECOND: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION }),   // the second slot as a whole: OICORE and, since Nov 3, 2026, EVENT830 share this one budget
   ACCOUNT: Object.freeze({ stopFraction: L1_SIZED_STOP_FRACTION, windowCapFraction: L1_WINDOW_CAP_FRACTION }),
 });
 function windowKey(ticker) { const p = String(ticker || "").split("-"); return p.length >= 2 ? p[1] : String(ticker || ""); }

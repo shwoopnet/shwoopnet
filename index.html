@@ -1437,7 +1437,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
                 <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 3</div>
                 <ul class="changelog-list">
+                  <li>Trading: a second probe in the second strategy slot, EVENT830: only on the listed 8:30 AM Eastern data release days of Nov and Dec 2026, 1 contract of the cheaper side (at most 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB in the window that closes at the release, held to settlement; below the research bar</li>
                   <li>Research: three read-only data recorders (daily markets, entertainment references, weather brackets) run on GitHub Actions and write only to the research data branch; no trading changes</li>
                   <li>Bot page: the price tile no longer shows Dogecoin, which is paused</li>
                   <li>Trading: OICORE's limit sits 1c above the price it sees, so it stops missing fills when the price ticks up a cent (at most 1c a contract more)</li>
@@ -2261,7 +2262,8 @@
   // A minute the bot skipped, said plainly (Oct 22, 2026). The server writes why it sent nothing; a read Kalshi refused with 429 is now retried once on its own, so say so. Any other note is shown as written.
   // A minute's result is one line per market the bot looked at ("KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-...: another crypto market already holds this window"). Shown as it was written it is a wall of tickers, so each market
   // becomes its own short line with the market's name. The server cuts the note at 300 characters; a last line that was cut off is dropped rather than shown half written.
-  var KAL_SERIES_NAMES = { GOLD: 'Gold', BTC: 'Bitcoin', ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin', AUDUSD: 'AUD/USD', USDCAD: 'USD/CAD', NATGAS: 'Natural gas', SOL: 'Solana' };
+  var KAL_SERIES_NAMES = { GOLD: 'Gold', BTC: 'Bitcoin', ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin', AUDUSD: 'AUD/USD', USDCAD: 'USD/CAD', NATGAS: 'Natural gas', SOL: 'Solana',
+    SILVER: 'Silver', COPPER: 'Copper', WTI: 'WTI oil', EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', HYPE: 'HYPE', BNB: 'BNB' };
   function kalshiMarketLines(note){
     var n = String(note || '');
     if(!/^KX[A-Z]+15M-[A-Z0-9]+-\d+: /.test(n)){ return null; }
@@ -2364,6 +2366,9 @@
   // Which market an order was in, by its series (or ticker). One rule for the By market table and the hover on the bars, so a trade has one name on the page.
   function kalshiMarketName(o){
     var s = String(o.series || o.ticker || '');
+    // EVENT830's eight markets (Nov 3, 2026) are named before the Bitcoin fallback, so a release-day order is never shown as Bitcoin.
+    var ev = /^KX(SILVER|COPPER|WTI|EURUSD|GBPUSD|USDJPY|HYPE|BNB)15M/.exec(s);
+    if(ev){ return { SILVER: 'Silver', COPPER: 'Copper', WTI: 'WTI oil', EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', HYPE: 'HYPE', BNB: 'BNB' }[ev[1]]; }
     return /GOLD/.test(s) ? 'Gold' : /ETH/.test(s) ? 'Ethereum' : /XRP/.test(s) ? 'XRP' : /DOGE/.test(s) ? 'Dogecoin' : /AUDUSD/.test(s) ? 'AUD/USD' : /USDCAD/.test(s) ? 'USD/CAD' : /NATGAS/.test(s) ? 'Natural gas' : 'Bitcoin';
   }
 
@@ -3732,11 +3737,12 @@ kalshiStatusTick();
   // Every order the bot placed, L1's and the second slot's: used to RECOGNISE the bot's fills, so a slot fill is never shown as a manual trade or an unmatched position.
   function kalshiAllOrders(){ return (kalshiLiveOrders || []).concat(kalshiSlotOrders || []); }
   // The second-slot strategies registered in the bot's code (SLOT_STRATEGIES in the bot's slot library), so the Strategies module lists them before a first order. A test compares this list with the registry. Labels only.
-  var KAL_SLOT_REGISTERED = ['OICORE'];
+  var KAL_SLOT_REGISTERED = ['OICORE', 'EVENT830'];
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
     L1: { name: 'Closing buy', markets: 'Gold', note: '' },
-    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
+    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' },
+    EVENT830: { name: 'Release day longshot', markets: 'Silver, Copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE, BNB', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){
     var seen = {}, out = [];
@@ -3748,11 +3754,11 @@ kalshiStatusTick();
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
   // Each strategy's OWN loss stop used (Nov 2, 2026, since the bot judges L1 and the second strategy each on its own orders): the same meter as the account's, fed one strategy's orders at a time. Percentages only.
+  // Since Nov 3, 2026 the slot holds two strategies (OICORE and EVENT830) and the bot's second stop (RISK_PROFILES.SECOND) is ONE budget over every slot order, so the page shows it as one figure named after all of them, not one per strategy.
   function kalshiOwnStops(orders, st, now){
-    return ['L1'].concat(KAL_SLOT_REGISTERED).map(function(id){
-      var sub = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === id; });
-      return { id: id, fraction: kalshiRiskMeter(sub, st, now).fraction };
-    });
+    var l1 = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === 'L1'; });
+    var slot = (orders || []).filter(function(o){ return kalshiStrategyOf(o) !== 'L1'; });
+    return [{ id: 'L1', fraction: kalshiRiskMeter(l1, st, now).fraction }, { id: KAL_SLOT_REGISTERED.join(' + '), fraction: kalshiRiskMeter(slot, st, now).fraction }];
   }
   // The markets ACTIVELY in the Strategies list (the owner, Oct 30, 2026: the Bot status card should count only those): a strategy and a market it trades, read from the same labels the Strategies table shows (KAL_STRATEGY_INFO).
   // An order counts when its strategy and its market are a pair on that list, so a paused market (XRP) and Bitcoin's old L1 orders (L1 no longer trades it; the second strategy does) are left out.
