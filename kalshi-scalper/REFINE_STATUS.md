@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-03 10:32 PM CT (04:32Z Nov 4): W25 COMPLETED (Sep 29 finished), OUT-OF-SAMPLE FLOW TEST FINAL
+
+Block A (all 153 pool windows, Sep 15, 22, 29): low n 79 win 27.8% PF 1.73 +6.25c a contract; high n 74 win 21.6% PF 0.63 -5.62c. By day: Sep 15 low PF 1.84 / high 0.68; Sep 22 1.25 / 0.80; Sep 29 2.16 / 0.45. Block B (Oct 6, 13, 20): low n 66 PF 1.49 +4.20c; high n 70 PF 0.84 -1.88c. COMBINED out-of-sample, 289 pool windows on 6 days never used to find the lead: low n 145, net about +5.3c a contract, PF about 1.6; high n 144, net about -3.8c, PF about 0.7. Registered bar: low PF at or above 1.5 (block A 1.73, combined about 1.6; block B 1.49 on its own, a hair under), high PF under 1.0 (both blocks), low beats high in each block on PF and win rate (yes in both): PASS on the combined test, with the size about 45% of the discovery (R6 low net +13.3c). Per day the low half beat the high half on 5 of 6 days (Oct 13 reverses). The forward S-FLOW1 read (windows from Nov 3 21:45Z) continues as the clean confirmation.
+
 ## 2026-11-03 9:37 PM CT (03:37Z Nov 4): W25 FLOW-OOS-A RESULT and the out-of-sample verdict for S-FLOW1
 
 W25 (partial: the 50 minute cap ran out under rate limits): pool windows Sep 15 = 54, Sep 22 = 48, Sep 29 = 51 (153); fetched 104 (Sep 15 54, Sep 22 47, Sep 29 only 3: not done, resumable). Fixed split -0.036. Low: Sep 15 n 32 win 37.5% PF 1.84 +7.76c; Sep 22 n 20 win 25.0% PF 1.25 +2.78c; all n 54 win 33.3% PF 1.77 +7.39c. High: Sep 15 n 22 PF 0.68 -3.59c; Sep 22 n 27 PF 0.97 -0.32c; all n 50 win 22.0% PF 0.91 -1.03c.
