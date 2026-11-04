@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:20 AM CT (08:20Z): W38 OICORE kill-rule odds
+
+- W38 (simulation, 20000 runs, live rate Beta(7,19), start streak 4): the 18-in-a-row kill fires within the next 40 fills in 7.8% of runs; net under -$6 at fill 40 about 0% (starting net +$29.58, mean win $7.60, mean loss $0.89); median ending net about +$49. At the simulated trigger rate (18/31) neither kill fires. The streak kill is the live risk, the net kill is nearly unreachable. Not a recommendation to change either rule.
+
 ## 2026-11-04 02:15 AM CT (08:15Z): W37 gold loss clustering
 
 - W37 (descriptive): gold, 252 settled orders, 13 losses. Adjacent loss pairs within 2h: observed 2, shuffle mean 0.74 (2000 shuffles), one-sided p 0.161. Not significant; n too small to say. Losses fall on 9 of 21 trading days, never 3 in a day. No change.
