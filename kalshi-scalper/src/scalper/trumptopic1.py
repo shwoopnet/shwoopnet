@@ -18,6 +18,7 @@ import time
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
+from . import fwdread as fr
 from .paths import DATA_DIR
 
 ARCHIVE = "https://ix.cnn.io/data/truth-social/truth_archive.json"
@@ -211,8 +212,247 @@ def census(listing, posts, out=print):
     return res
 
 
+# ------------------------------------------------------------------ candles, history scoring
+
+CACHE = None   # set by the CLI: a directory OUTSIDE the repo
+
+
+def get_candles(m, look, api, quote_close):
+    """[(end_ts, bid, ask)] one minute candles in [look - 60 min, look]; historical endpoint for markets closed before 2026-09-04, live series endpoint after."""
+    tk = m["ticker"]
+    src = f"/historical/markets/{tk}/candlesticks" if m["close_time"] < "2026-09-04" else f"/series/{m['series']}/markets/{tk}/candlesticks"
+    d = api._get(src, {"start_ts": int((look - timedelta(minutes=60)).timestamp()), "end_ts": int(look.timestamp()), "period_interval": 1})
+    time.sleep(0.4)
+    return [(c["end_period_ts"], quote_close(c.get("yes_bid")), quote_close(c.get("yes_ask"))) for c in d.get("candlesticks", [])]
+
+
+def fit_rows(fit_events, posts):
+    """[(stem, bucket, yes)] for every real-word market of the fit events (uses their results)."""
+    rows = []
+    for occ, _e, _s, L in fit_events:
+        look = occ - LOOK_BEFORE
+        for m in L:
+            if m.get("result") in ("yes", "no"):
+                rows.append((stem_key(m["yes_sub_title"]), bucket(posts_prior(posts, m["yes_sub_title"], look)), int(m["result"] == "yes")))
+    return rows
+
+
+def score_events(events, posts, model, candles_fn):
+    """Per event: list of dicts for every market with a valid quote (k, p, bid, ask, yes), plus skipped count. Only events with >= 1 feed candidate are fetched."""
+    out = []
+    for occ, e, s, L in events:
+        look = occ - LOOK_BEFORE
+        ks = {m["ticker"]: posts_prior(posts, m["yes_sub_title"], look) for m in L}
+        if not any(k >= MIN_POSTS for k in ks.values()):
+            continue
+        rows, skipped = [], 0
+        for m in L:
+            q = last_quote(candles_fn(m, look), look)
+            if not q or m.get("result") not in ("yes", "no"):
+                skipped += 1
+                continue
+            k = ks[m["ticker"]]
+            rows.append({"ticker": m["ticker"], "k": k, "p": model(stem_key(m["yes_sub_title"]), bucket(k)), "bid": q[0], "ask": q[1], "yes": m["result"] == "yes"})
+        out.append((occ, e, rows, skipped))
+    return out
+
+
+def summarize(scored):
+    """(treated nets, control nets, treated rows, halves by event date)."""
+    tr, ct = [], []
+    n = len(scored)
+    for i, (occ, e, rows, _sk) in enumerate(scored):
+        half = 0 if i < n // 2 else 1
+        for r in rows:
+            if LOW <= r["ask"] <= HARD:
+                ct.append(net(r["ask"], r["yes"]))
+        for t, p, a in select([(r["ticker"], r["p"], r["ask"]) for r in rows if r["k"] >= MIN_POSTS]):
+            r = next(x for x in rows if x["ticker"] == t)
+            tr.append((half, net(a, r["yes"]), a, r["yes"], e))
+    return tr, ct
+
+
+def report(label, scored, out=print):
+    tr, ct = summarize(scored)
+    v = [t[1] for t in tr]
+    n = len(v)
+    mean = sum(v) / n if n else 0.0
+    h1 = [t[1] for t in tr if t[0] == 0]; h2 = [t[1] for t in tr if t[0] == 1]
+    cm = sum(ct) / len(ct) if ct else 0.0
+    nev = len({t[4] for t in tr})
+    wr = sum(t[3] for t in tr) / n if n else 0.0
+    ap = sum(t[2] for t in tr) / n if n else 0.0
+    ver = verdict(n, nev, mean, pf(v) if v else 0.0, sum(h1) / len(h1) if h1 else 0.0, sum(h2) / len(h2) if h2 else 0.0, cm)
+    out(f"{label}: events scored {len(scored)} (with a feed candidate); treated {n} on {nev} events; win {wr:.1%} at mean fill {ap:.3f}; mean net {mean * 100:+.2f}c; PF {pf(v) if v else 0:.2f}; "
+        f"halves n {len(h1)} {(sum(h1) / len(h1) * 100 if h1 else 0):+.2f}c / n {len(h2)} {(sum(h2) / len(h2) * 100 if h2 else 0):+.2f}c; "
+        f"control (all cheap YES, same events) n {len(ct)} mean {cm * 100:+.2f}c PF {pf(ct) if ct else 0:.2f}; VERDICT {ver}")
+    return ver
+
+
+# ------------------------------------------------------------------ forward: listing, model, snapshot, read
+
+DUE = fr.utc(2027, 6, 30)
+
+
+def list_all():
+    """Every market of both series (historical and live lists), with result where settled."""
+    from . import api
+    allm = {}
+    for s in SERIES:
+        for path in ("/historical/markets", "/markets"):
+            cur = None
+            while True:
+                p = {"series_ticker": s, "limit": 1000}
+                if cur:
+                    p["cursor"] = cur
+                d = api._get(path, p)
+                for m in d.get("markets", []):
+                    allm[m["ticker"]] = {k: m.get(k) for k in ("ticker", "event_ticker", "close_time", "open_time", "occurrence_datetime", "volume_fp", "yes_sub_title",
+                                                                 "custom_strike", "title", "status", "result")} | {"series": s}
+                cur = d.get("cursor")
+                if not cur or not d.get("markets"):
+                    break
+                time.sleep(0.4)
+    return list(allm.values())
+
+
+def model_from(listing, posts):
+    fit_e, _held, _fwd = split_history(events_from_listing(listing))
+    return fit(fit_rows(fit_e, posts))
+
+
+def snapshot(argv, now=None, posts_fn=None, listing_fn=None, candles_fn=None, path=None, out=print):
+    now = now or datetime.now(UTC)
+    path = path or SNAP_FILE
+    posts, fetched = (posts_fn or (lambda: (load_posts(), datetime.now(UTC))))()
+    listing = (listing_fn or list_all)()
+    model = model_from(listing, posts)
+    have = set()
+    if path.exists():
+        with open(path, newline="") as fh:
+            have = {r["ticker"] for r in csv.DictReader(fh)}
+    if candles_fn is None:
+        from . import api
+        from .candlefield import quote_close
+        candles_fn = lambda m, look: get_candles(m, look, api, quote_close)
+    new = not path.exists()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    wrote = nev = 0
+    with open(path, "a", newline="") as fh:
+        w = csv.writer(fh)
+        if new:
+            w.writerow(SNAP_FIELDS)
+        for occ, e, s, L in events_from_listing(listing):
+            look = occ - LOOK_BEFORE
+            if occ < FWD_START or now < look + timedelta(minutes=1):
+                continue
+            todo = [m for m in L if m["ticker"] not in have]
+            if not todo:
+                continue
+            rows = []
+            for m in todo:
+                k = posts_prior(posts, m["yes_sub_title"], look)
+                q = last_quote(candles_fn(m, look), look)
+                rows.append((m, k, q, model(stem_key(m["yes_sub_title"]), bucket(k))))
+            chosen = {t for t, _p, _a in select([(m["ticker"], p, q[1]) for m, k, q, p in rows if q and k >= MIN_POSTS])}
+            for m, k, q, p in rows:
+                ok = bool(q) and LOW <= q[1] <= HARD
+                w.writerow([e, m["ticker"], s, m["yes_sub_title"], occ.isoformat(), look.isoformat(), k, bucket(k), round(p, 5), "" if not q else q[0], "" if not q else q[1],
+                            "" if not q else round(q[2], 1), int(ok), int(ok and k >= MIN_POSTS and p >= RATIO * q[1]), int(m["ticker"] in chosen),
+                            fetched.isoformat(), posts[-1][0].isoformat() if posts else ""])
+                wrote += 1
+            nev += 1
+    out(f"snapshot: events written {nev}, rows {wrote} -> {path}")
+    return 0
+
+
+SPEC = fr.Spec(
+    id="TRUMPTOPIC1",
+    title="forward read of Trump speech word markets (KXTRUMPMENTION, KXTRUMPMENTIONB), events from 2026-11-05, CNN archive post content",
+    sources=["workers/TRUMPTOPIC1_REGISTRATION.md"],
+    rule=[
+        "Signal needs k >= 2.",
+        "Treated trade: signal (k >= 2), fill ask in [0.03, 0.30] (hard limit 0.30), p_model >= 3 x fill ask.",
+        "At most 2 per event (highest p_model / ask, ties by ticker).",
+        "**NOT_ENOUGH_DATA**: fewer than 150 treated trades or fewer than 25 events with a treated trade.",
+        "**FALSIFIED**: at 150 or more treated trades and 25 events, PF under 1.5 after fee",
+    ],
+    window=["settled events with occurrence from 2026-11-05T00:00Z in KXTRUMPMENTION and KXTRUMPMENTIONB; archive posts; one minute candles [look - 60 min, look]; results"],
+    due=None,
+    due_note="at 150 treated trades or on 2027-06-30, whichever is first",
+)
+
+
+def _forward_scored(now, posts_fn=None, listing_fn=None, candles_fn=None):
+    posts = (posts_fn or (lambda: (load_posts(), None)))()[0]
+    listing = (listing_fn or list_all)()
+    model = model_from(listing, posts)
+    if candles_fn is None:
+        from . import api
+        from .candlefield import quote_close
+        candles_fn = lambda m, look: get_candles(m, look, api, quote_close)
+    fwd = [e for e in events_from_listing(listing) if e[0] >= FWD_START and e[0] + timedelta(hours=1) < now]
+    return score_events(fwd, posts, model, candles_fn)
+
+
+def forward(argv, now=None, posts_fn=None, listing_fn=None, candles_fn=None, out=print):
+    now = now or datetime.now(UTC)
+
+    def counts():
+        sc = _forward_scored(now, posts_fn, listing_fn, candles_fn)
+        tr, _ct = summarize(sc)
+        return len(sc), len(tr)
+
+    def ready(n):
+        if n >= DUE:
+            return None
+        ne, nt = counts()
+        return None if nt >= TRADES_DUE else f"{nt} forward treated trades on {ne} events with a candidate, under {TRADES_DUE}, and not yet {DUE:%Y-%m-%d}."
+
+    def info():
+        ne, nt = counts()
+        return [f"forward events with a feed candidate {ne}; treated trades so far {nt} (settled events only; the count reads results of settled markets, but no read is made)"]
+
+    def real():
+        lines = []
+        sc = _forward_scored(now, posts_fn, listing_fn, candles_fn)
+        ver = report("FORWARD", sc, out=lines.append)
+        return lines, lines[0] if lines else ver
+
+    return fr.run(SPEC, argv, real, info, now=now, ready=ready, out=out)
+
+
+main_fwd = fr.cli(forward)
+
+
 def main(argv):
     cmd = argv[1] if len(argv) > 1 else ""
+    if cmd == "snapshot":
+        return snapshot(argv[2:])
+    if cmd == "forward":
+        return main_fwd(argv)
+    if cmd == "history":
+        from . import api
+        from .candlefield import quote_close
+        import pathlib
+        listing = json.load(open(argv[2]))
+        posts = load_posts(json.load(open(argv[3])))
+        cache = pathlib.Path(argv[4]); cache.mkdir(parents=True, exist_ok=True)
+        cp = cache / "candles.json"
+        have = json.loads(cp.read_text()) if cp.exists() else {}
+
+        def cf(m, look):
+            if m["ticker"] not in have:
+                have[m["ticker"]] = get_candles(m, look, api, quote_close)
+                if len(have) % 25 == 0:
+                    cp.write_text(json.dumps(have))
+            return have[m["ticker"]]
+        ev = events_from_listing(listing)
+        fit_e, held, _fwd = split_history(ev)
+        model = fit(fit_rows(fit_e, posts))
+        report("HELD-OUT (scored once)", score_events(held, posts, model, cf))
+        cp.write_text(json.dumps(have))
+        return 0
     if cmd == "census":
         listing = json.load(open(argv[2]))
         posts = load_posts(json.load(open(argv[3])))
