@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:54 AM CT (08:54Z): W115 smoke test: dash.sh can overwrite the report with an error
+
+- W115 (clean shell, Python 3.13): wake.sh ran in 10 s but failed in substance when KALSHI_REPORT_TOKEN was not exported: dash.sh's fetch returned an unauthorized error and overwrote dash_report.json, then dash.sh died with KeyError orders and fwd_all.py with KeyError generatedAt (the worker restored the files from backup; the report on disk is intact). oicore_nov13.py, fwd_all.py and test_flags.py (all PASS) ran fine. Fixes needed: (1) dash.sh and wake.sh exit early with a clear message if the token is unset (never echoing it); (2) dash.sh writes the fetch to a temp file and replaces dash_report.json only if the JSON has orders, so a transient failure cannot wipe the last good report; (3) replace the hard-coded scratchpad path with the script's own directory; (4) TOOLBOX.md says to export the token first. This is a real hazard (a bad fetch overwrote the good report); fix queued as W116.
+
 ## 2026-11-04 02:53 AM CT (08:53Z): W114 PR 711 still open, no live code changes on main
 
 - W114 (read only, nothing posted): PR 711 (Remove FLOW1) is open, not a draft, mergeable and clean, created 05:59Z Nov 4, one commit; it takes FLOW1 out of SLOT_STRATEGIES and SLOT_HOLD_ALLOWED, existing FLOW1 orders still exit and settle, and it needs deploy-latest.sh after the owner merges. PR 709 merged 01:18Z. No pull request has merged to main since 05:00Z (latest merges are 710, the Strategies table with L1 row counts only gold, 01:52Z, page only, and 709). origin/main is at efc916e6 (710); no commit since the cutoff touches kalshiLiveLib.js, kalshiSlotLib.js, index.js or kalshiSlotRunLib.js. Nothing changes the OICORE or gold rules, sizes, the paused list or my trackers' assumptions. Pending: 711.
