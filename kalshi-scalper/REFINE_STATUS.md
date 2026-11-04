@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 08:20 AM CT (14:20Z): W108 S-GQH1 flag added, all flag tests pass
+
+- W108: the S-GQH1 flag now lives in section (2) of `fwd_all.py` (which `wake.sh` runs): at 40 block fills it prints FLAG, and FLAG-TO-MAIN only if block losses are 5 or more, block PF is under 1.0 and other hours' PF is over 1.3; otherwise a note. `test_flags.py`: 29 of 29 PASS (22 existing, 7 for S-GQH1 including strong at 40, weak at 40, 39 fills). A bug in my earlier test of this flag was fixed too (fills had been spaced 15 minutes apart so most fell outside the 20-24 block; now 1 minute apart). Live now: 11 of 40 block fills. All registered forward flags are now tested.
+
 ## 2026-11-04 08:15 AM CT (14:15Z): W107 flag test, one silent flag found
 
 - W107 (`test_flags.py`, runs the real flag code from `wake.sh` with a frozen clock on synthetic reports in a temp folder; `dash_report.json` untouched): 22 of 23 cases PASS, including controls just below each threshold that correctly stay quiet. Passing: gold silence over 5h on a weekday (a weekend gap stays quiet), OICORE silence over 14h, loss streak 15 (WARNING) and 18 (KILL), S-LIM1-LIVE at 20 tagged, C1 at 80 settled, C9 at 200, S-JUMP1 and S-SDIR1 at 40, C2 at 40, S-GPB1 at 40. The one FAIL is S-GQH1 at 40: `fwd_all.py` section (2) prints its table only, and neither `wake.sh` nor `wake_shadows.py` has a count at 40 or a flag rule. Two cases are parse-only (C9 uses a hand-written line, S-JUMP1 and S-SDIR1 use a stub for `forward_oicore.py`). Fix queued as W108 using the S-GQH1 registered rule (flag at 40 block fills; to main if block losses are 5 or more and block PF is under 1.0 while other hours' PF is over 1.3).
