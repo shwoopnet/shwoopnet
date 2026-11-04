@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 1:39 AM CT (07:39Z Nov 4): W33 FLOW2-TRACKER BUILT
+
+flow2_forward.py in the scratchpad (re-run: `cd scratchpad && python3 -I flow2_forward.py`; resumable, cache flow2_cache.jsonl, needs flow_forward.py in the same folder): Bitcoin markets closing after 2026-11-04T08:00:00Z (hard-coded registration time), V2's pool rule (cheap side YES first inside 0.05 to 0.50, which equals the lower ask; fill capped at 0.50; fee rounded up on 10 contracts), flow over [-360, -180) of every public trade with at least 5 trades, trigger flag from open_interest_fp (rise at least 86,300; unknown windows excluded and counted). Prints the registered NON-trigger table (low <= -0.036 vs high: n, win rate, PF, net; low minus high; low windows so far of the 150 needed; PASS/FAIL/NEITHER at 150) and the trigger table as information. It prints 'no windows yet' before 08:00Z. A few hundred windows take 10 to 15 minutes to pull.
+
 ## 2026-11-04 1:37 AM CT (07:37Z Nov 4): S-FLOW2 REGISTERED (the outside-the-trigger flow split) before any more days are read
 
 Main: V2's per-window diff found no bug (my 89 overlapping Sep 15, 22, 29 windows match V2's exactly, imbalance difference 0.0000). On those three days V2 also gets low +8.84c PF 2.51 vs high -2.42c; V2's other 28 D2 days give low +0.38c PF 1.04 vs high +5.64c PF 1.52. So the conflict is the slice of days: my picked days are favourable. The owner has a PR to remove FLOW1 (shwoopnet#711) awaiting his word. Main asks that my outside-OICORE finding (586 windows from days I picked, non-trigger low +4.8c vs high -0.2c) be registered before reading any more days.
