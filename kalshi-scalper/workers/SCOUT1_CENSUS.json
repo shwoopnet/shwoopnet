@@ -1,0 +1,1203 @@
+{
+ "cut": "2026-10-03T16:00:00Z",
+ "note": "listings and close times only; no candle, price or result read; capped=listing stopped at 6 pages per endpoint (counts are lower bounds); KXMLBKS counted to the end",
+ "series": {
+  "KX10YRRATEH": {
+   "capped": false,
+   "close_days": 0,
+   "events": 0,
+   "first": null,
+   "last": null,
+   "markets": 0,
+   "median_volume": 0
+  },
+  "KX2YRRATEH": {
+   "capped": false,
+   "close_days": 0,
+   "events": 0,
+   "first": null,
+   "last": null,
+   "markets": 0,
+   "median_volume": 0
+  },
+  "KXAAAGASM": {
+   "capped": false,
+   "close_days": 34,
+   "events": 34,
+   "first": "2023-12-31T14:55:00Z",
+   "last": "2026-09-30T03:59:00Z",
+   "markets": 505,
+   "median_volume": 20589.58
+  },
+  "KXADP": {
+   "capped": false,
+   "close_days": 19,
+   "events": 19,
+   "first": "2025-04-02T12:14:00Z",
+   "last": "2026-09-30T12:14:00Z",
+   "markets": 143,
+   "median_volume": 1915.63
+  },
+  "KXALLSVENSKANGAME": {
+   "capped": false,
+   "close_days": 14,
+   "events": 34,
+   "first": "2026-08-29T15:07:05Z",
+   "last": "2026-09-20T16:34:14Z",
+   "markets": 102,
+   "median_volume": 39002.229999999996
+  },
+  "KXATPCHALLENGERMATCH": {
+   "capped": true,
+   "close_days": 117,
+   "events": 4213,
+   "first": "2026-06-09T10:10:55Z",
+   "last": "2026-10-03T15:41:00Z",
+   "markets": 8868,
+   "median_volume": 230987.5
+  },
+  "KXAVGTKAUS": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 139.72
+  },
+  "KXAVGTKDEN": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T05:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 1.88
+  },
+  "KXAVGTKDFW": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 61.7
+  },
+  "KXAVGTKIAH": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 33.92
+  },
+  "KXAVGTKLAS": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T06:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 28.89
+  },
+  "KXAVGTKMSY": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 122.73
+  },
+  "KXAVGTKOKC": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 57.06
+  },
+  "KXAVGTKPHX": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T06:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 16.0
+  },
+  "KXAVGTKSAN": {
+   "capped": false,
+   "close_days": 6,
+   "events": 7,
+   "first": "2026-08-24T03:59:00Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 40,
+   "median_volume": 477.95500000000004
+  },
+  "KXAVGTKSAT": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-08-24T04:59:59Z",
+   "last": "2026-09-28T03:59:59Z",
+   "markets": 35,
+   "median_volume": 15.66
+  },
+  "KXBNBD": {
+   "capped": true,
+   "close_days": 4,
+   "events": 82,
+   "first": "2026-08-31T09:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXBOSSNOWM": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2025-12-15T15:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 24,
+   "median_volume": 15369.0
+  },
+  "KXBRENTMON": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-04-30T21:00:00Z",
+   "last": "2026-09-30T21:00:00Z",
+   "markets": 170,
+   "median_volume": 12349.145
+  },
+  "KXBTC": {
+   "capped": true,
+   "close_days": 2,
+   "events": 33,
+   "first": "2026-09-02T10:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXBTCMAXMON": {
+   "capped": false,
+   "close_days": 27,
+   "events": 17,
+   "first": "2026-01-13T22:19:09.254883Z",
+   "last": "2026-10-01T18:51:08Z",
+   "markets": 115,
+   "median_volume": 114971.36
+  },
+  "KXBUNDESLIGAGAME": {
+   "capped": false,
+   "close_days": 113,
+   "events": 347,
+   "first": "2025-08-23T14:52:49.123422Z",
+   "last": "2026-09-20T19:27:05Z",
+   "markets": 1068,
+   "median_volume": 90577.0
+  },
+  "KXCASED": {
+   "capped": false,
+   "close_days": 256,
+   "events": 256,
+   "first": "2021-07-25T00:00:00Z",
+   "last": "2022-08-20T16:29:00Z",
+   "markets": 262,
+   "median_volume": 2672.0
+  },
+  "KXCBAGAME": {
+   "capped": false,
+   "close_days": 118,
+   "events": 449,
+   "first": "2025-12-12T13:50:30.758121Z",
+   "last": "2026-06-05T13:45:08Z",
+   "markets": 898,
+   "median_volume": 67583.58
+  },
+  "KXCHISNOWM": {
+   "capped": false,
+   "close_days": 7,
+   "events": 7,
+   "first": "2025-12-09T14:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 35,
+   "median_volume": 9527.0
+  },
+  "KXCO2": {
+   "capped": false,
+   "close_days": 12,
+   "events": 12,
+   "first": "2021-07-26T23:00:00Z",
+   "last": "2022-07-27T14:02:35.834731Z",
+   "markets": 14,
+   "median_volume": 2726.5
+  },
+  "KXCOPPERMON": {
+   "capped": false,
+   "close_days": 7,
+   "events": 7,
+   "first": "2026-03-31T21:00:00Z",
+   "last": "2026-09-30T21:00:00Z",
+   "markets": 330,
+   "median_volume": 246.29000000000002
+  },
+  "KXCORNW": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-04-10T21:00:00Z",
+   "last": "2026-05-01T18:20:00Z",
+   "markets": 140,
+   "median_volume": 195.15
+  },
+  "KXCPI": {
+   "capped": false,
+   "close_days": 63,
+   "events": 63,
+   "first": "2021-07-12T23:00:00Z",
+   "last": "2026-09-11T12:25:00Z",
+   "markets": 508,
+   "median_volume": 16822.0
+  },
+  "KXCPIYOY": {
+   "capped": false,
+   "close_days": 46,
+   "events": 46,
+   "first": "2022-12-13T13:25:00Z",
+   "last": "2026-09-11T12:29:00Z",
+   "markets": 650,
+   "median_volume": 2826.5
+  },
+  "KXCS2GAME": {
+   "capped": true,
+   "close_days": 131,
+   "events": 4427,
+   "first": "2026-05-26T10:49:55Z",
+   "last": "2026-10-03T15:49:41Z",
+   "markets": 8868,
+   "median_volume": 12337.55
+  },
+  "KXDALSNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-01-01T18:58:59Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 20,
+   "median_volume": 4869.0
+  },
+  "KXDAVISCUPMATCH": {
+   "capped": false,
+   "close_days": 10,
+   "events": 101,
+   "first": "2025-11-18T19:56:20.525075Z",
+   "last": "2026-09-22T16:35:11Z",
+   "markets": 202,
+   "median_volume": 140933.18
+  },
+  "KXDCSNOWM": {
+   "capped": false,
+   "close_days": 5,
+   "events": 5,
+   "first": "2025-12-15T15:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 24,
+   "median_volume": 35272.5
+  },
+  "KXDENSNOWMB": {
+   "capped": false,
+   "close_days": 5,
+   "events": 5,
+   "first": "2025-12-09T14:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 28,
+   "median_volume": 3838.5
+  },
+  "KXDETSNOWM": {
+   "capped": false,
+   "close_days": 8,
+   "events": 6,
+   "first": "2025-12-09T14:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 24,
+   "median_volume": 13131.0
+  },
+  "KXDOGE": {
+   "capped": true,
+   "close_days": 5,
+   "events": 115,
+   "first": "2026-08-30T01:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXEGGS": {
+   "capped": false,
+   "close_days": 19,
+   "events": 19,
+   "first": "2025-03-12T13:31:00Z",
+   "last": "2026-09-11T12:25:00Z",
+   "markets": 19,
+   "median_volume": 46989.0
+  },
+  "KXEPLGAME": {
+   "capped": false,
+   "close_days": 136,
+   "events": 437,
+   "first": "2025-05-11T14:12:12.297475Z",
+   "last": "2026-09-20T17:28:06Z",
+   "markets": 1341,
+   "median_volume": 375694.0
+  },
+  "KXERCOTWESTW": {
+   "capped": false,
+   "close_days": 0,
+   "events": 0,
+   "first": null,
+   "last": null,
+   "markets": 0,
+   "median_volume": 0
+  },
+  "KXEREDIVISIEGAME": {
+   "capped": false,
+   "close_days": 95,
+   "events": 285,
+   "first": "2025-10-31T21:10:47.048534Z",
+   "last": "2026-09-20T16:54:15Z",
+   "markets": 882,
+   "median_volume": 29786.5
+  },
+  "KXETH": {
+   "capped": true,
+   "close_days": 2,
+   "events": 21,
+   "first": "2026-09-02T23:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXEUROLEAGUEGAME": {
+   "capped": false,
+   "close_days": 87,
+   "events": 337,
+   "first": "2025-11-12T22:09:50.685399Z",
+   "last": "2026-10-02T20:55:04Z",
+   "markets": 674,
+   "median_volume": 135343.5
+  },
+  "KXEURUSDH": {
+   "capped": true,
+   "close_days": 8,
+   "events": 60,
+   "first": "2026-01-21T20:00:00Z",
+   "last": "2026-01-30T19:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXFLIGHTORD": {
+   "capped": false,
+   "close_days": 53,
+   "events": 53,
+   "first": "2022-07-15T03:59:00Z",
+   "last": "2025-11-14T04:59:00Z",
+   "markets": 162,
+   "median_volume": 248.5
+  },
+  "KXGDP": {
+   "capped": false,
+   "close_days": 21,
+   "events": 21,
+   "first": "2021-07-28T23:00:00Z",
+   "last": "2026-07-30T12:29:00Z",
+   "markets": 183,
+   "median_volume": 14992.0
+  },
+  "KXGOLDMON": {
+   "capped": false,
+   "close_days": 8,
+   "events": 8,
+   "first": "2026-02-27T22:00:00Z",
+   "last": "2026-09-30T21:00:00Z",
+   "markets": 390,
+   "median_volume": 1158.3049999999998
+  },
+  "KXH100W": {
+   "capped": false,
+   "close_days": 24,
+   "events": 24,
+   "first": "2026-03-27T21:00:00Z",
+   "last": "2026-09-04T21:00:00Z",
+   "markets": 25,
+   "median_volume": 2026.71
+  },
+  "KXHMONTH": {
+   "capped": false,
+   "close_days": 31,
+   "events": 31,
+   "first": "2024-02-01T04:59:00Z",
+   "last": "2026-09-15T16:25:33Z",
+   "markets": 31,
+   "median_volume": 59443.0
+  },
+  "KXHOUSINGSTART": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-04-29T14:12:05Z",
+   "last": "2026-09-17T12:29:00Z",
+   "markets": 50,
+   "median_volume": 625.69
+  },
+  "KXHOUSNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-01-01T18:58:59Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 16,
+   "median_volume": 5209.5
+  },
+  "KXHUNDREDMATCH": {
+   "capped": false,
+   "close_days": 20,
+   "events": 28,
+   "first": "2026-07-26T17:01:10Z",
+   "last": "2026-08-16T20:31:16Z",
+   "markets": 56,
+   "median_volume": 1573216.525
+  },
+  "KXHYPE": {
+   "capped": true,
+   "close_days": 4,
+   "events": 82,
+   "first": "2026-08-31T09:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXINXU": {
+   "capped": true,
+   "close_days": 15,
+   "events": 99,
+   "first": "2026-08-14T20:00:00Z",
+   "last": "2026-09-03T20:00:00Z",
+   "markets": 6000,
+   "median_volume": 4.0
+  },
+  "KXIPLGAME": {
+   "capped": false,
+   "close_days": 62,
+   "events": 75,
+   "first": "2025-04-29T21:36:56.441549Z",
+   "last": "2026-05-29T17:56:19Z",
+   "markets": 150,
+   "median_volume": 6653620.385
+  },
+  "KXISMPMI": {
+   "capped": false,
+   "close_days": 14,
+   "events": 14,
+   "first": "2025-04-01T13:59:00Z",
+   "last": "2026-10-01T13:59:00Z",
+   "markets": 113,
+   "median_volume": 717.0
+  },
+  "KXITFMATCH": {
+   "capped": true,
+   "close_days": 40,
+   "events": 3474,
+   "first": "2026-08-03T05:31:39Z",
+   "last": "2026-10-03T15:00:08Z",
+   "markets": 6948,
+   "median_volume": 47637.07
+  },
+  "KXITFWMATCH": {
+   "capped": true,
+   "close_days": 39,
+   "events": 3000,
+   "first": "2026-07-27T12:25:46Z",
+   "last": "2026-09-03T23:31:03Z",
+   "markets": 6000,
+   "median_volume": 59067.16
+  },
+  "KXJACWSNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2025-12-09T14:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 18,
+   "median_volume": 11311.0
+  },
+  "KXJOBLESSCLAIMS": {
+   "capped": false,
+   "close_days": 58,
+   "events": 58,
+   "first": "2025-06-12T12:30:00Z",
+   "last": "2026-10-01T12:25:00Z",
+   "markets": 568,
+   "median_volume": 1150.55
+  },
+  "KXKBOGAME": {
+   "capped": false,
+   "close_days": 155,
+   "events": 752,
+   "first": "2026-03-31T14:41:21Z",
+   "last": "2026-10-03T08:40:03Z",
+   "markets": 1564,
+   "median_volume": 34725.15
+  },
+  "KXLALIGAGAME": {
+   "capped": false,
+   "close_days": 177,
+   "events": 454,
+   "first": "2025-05-11T16:31:52.600522Z",
+   "last": "2026-09-20T21:06:25Z",
+   "markets": 1395,
+   "median_volume": 188347.93
+  },
+  "KXLAXSNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-01-01T18:58:59Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 8,
+   "median_volume": 49366.5
+  },
+  "KXLIGAMXGAME": {
+   "capped": false,
+   "close_days": 106,
+   "events": 287,
+   "first": "2025-11-08T03:05:16.26944Z",
+   "last": "2026-09-28T05:18:57Z",
+   "markets": 888,
+   "median_volume": 195261.5
+  },
+  "KXLIGAPORTUGALGAME": {
+   "capped": false,
+   "close_days": 118,
+   "events": 294,
+   "first": "2025-10-31T22:25:50.907857Z",
+   "last": "2026-09-20T21:36:13Z",
+   "markets": 909,
+   "median_volume": 39720.0
+  },
+  "KXLIGUE1GAME": {
+   "capped": false,
+   "close_days": 118,
+   "events": 354,
+   "first": "2025-08-15T21:18:29.641172Z",
+   "last": "2026-09-20T20:46:49Z",
+   "markets": 1092,
+   "median_volume": 63113.95
+  },
+  "KXLOLGAME": {
+   "capped": false,
+   "close_days": 257,
+   "events": 2829,
+   "first": "2025-12-11T12:19:42.12217Z",
+   "last": "2026-10-03T13:19:45Z",
+   "markets": 5844,
+   "median_volume": 26299.614999999998
+  },
+  "KXLOLMAP": {
+   "capped": true,
+   "close_days": 158,
+   "events": 3635,
+   "first": "2026-04-21T18:15:37Z",
+   "last": "2026-10-02T18:54:49Z",
+   "markets": 7712,
+   "median_volume": 8118.549999999999
+  },
+  "KXMEAD": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2021-11-03T14:00:00Z",
+   "last": "2026-07-03T14:00:00Z",
+   "markets": 29,
+   "median_volume": 2121.28
+  },
+  "KXMLBF5TOTAL": {
+   "capped": true,
+   "close_days": 94,
+   "events": 1195,
+   "first": "2026-06-28T19:15:00Z",
+   "last": "2026-10-02T02:09:51Z",
+   "markets": 9031,
+   "median_volume": 10704.65
+  },
+  "KXMLBHIT": {
+   "capped": true,
+   "close_days": 19,
+   "events": 186,
+   "first": "2026-08-26T23:01:47Z",
+   "last": "2026-10-02T03:30:13Z",
+   "markets": 10316,
+   "median_volume": 193.255
+  },
+  "KXMLBHR": {
+   "capped": true,
+   "close_days": 29,
+   "events": 334,
+   "first": "2026-08-22T01:35:18Z",
+   "last": "2026-10-02T03:30:10Z",
+   "markets": 11057,
+   "median_volume": 2087.86
+  },
+  "KXMLBHRR": {
+   "capped": true,
+   "close_days": 13,
+   "events": 110,
+   "first": "2026-08-29T21:20:53Z",
+   "last": "2026-10-02T03:30:18Z",
+   "markets": 9384,
+   "median_volume": 29.18
+  },
+  "KXMLBKS": {
+   "capped": false,
+   "close_days": 186,
+   "events": 2432,
+   "first": "2026-03-26T04:09:57Z",
+   "last": "2026-10-02T03:02:27Z",
+   "markets": 35535,
+   "median_volume": 1654.08
+  },
+  "KXMLBRFI": {
+   "capped": false,
+   "close_days": 199,
+   "events": 2462,
+   "first": "2025-10-17T22:40:24.910672Z",
+   "last": "2026-10-02T00:47:31Z",
+   "markets": 2557,
+   "median_volume": 153433.72
+  },
+  "KXMLBTB": {
+   "capped": true,
+   "close_days": 16,
+   "events": 153,
+   "first": "2026-08-28T22:05:36Z",
+   "last": "2026-10-02T03:30:15Z",
+   "markets": 10060,
+   "median_volume": 25.33
+  },
+  "KXMTA": {
+   "capped": false,
+   "close_days": 47,
+   "events": 47,
+   "first": "2021-07-18T23:00:00Z",
+   "last": "2025-08-18T03:59:00Z",
+   "markets": 49,
+   "median_volume": 2653.0
+  },
+  "KXMUSKNW": {
+   "capped": false,
+   "close_days": 8,
+   "events": 8,
+   "first": "2026-03-31T21:25:00Z",
+   "last": "2026-08-31T22:59:00Z",
+   "markets": 114,
+   "median_volume": 2609.87
+  },
+  "KXNASDAQ100U": {
+   "capped": true,
+   "close_days": 3,
+   "events": 15,
+   "first": "2026-09-01T20:00:00Z",
+   "last": "2026-09-03T20:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXNATGASMON": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2026-04-30T21:00:00Z",
+   "last": "2026-09-30T21:00:00Z",
+   "markets": 240,
+   "median_volume": 161.5
+  },
+  "KXNBA1H": {
+   "capped": false,
+   "close_days": 0,
+   "events": 0,
+   "first": null,
+   "last": null,
+   "markets": 0,
+   "median_volume": 0
+  },
+  "KXNFLFIRSTTD": {
+   "capped": false,
+   "close_days": 105,
+   "events": 338,
+   "first": "2025-09-05T00:40:30.288052Z",
+   "last": "2026-10-02T04:15:28Z",
+   "markets": 6741,
+   "median_volume": 1601.0
+  },
+  "KXNFLTD": {
+   "capped": true,
+   "close_days": 17,
+   "events": 55,
+   "first": "2026-08-07T00:53:19Z",
+   "last": "2026-10-02T04:01:28Z",
+   "markets": 2336,
+   "median_volume": 16933.1
+  },
+  "KXNHLGOAL": {
+   "capped": true,
+   "close_days": 48,
+   "events": 103,
+   "first": "2026-04-14T02:51:09Z",
+   "last": "2026-06-15T03:40:52Z",
+   "markets": 6000,
+   "median_volume": 414.58000000000004
+  },
+  "KXNHLTOTAL": {
+   "capped": true,
+   "close_days": 164,
+   "events": 1006,
+   "first": "2025-12-10T03:15:14.313777Z",
+   "last": "2026-10-03T04:45:28Z",
+   "markets": 6676,
+   "median_volume": 9128.5
+  },
+  "KXNPBGAME": {
+   "capped": false,
+   "close_days": 169,
+   "events": 881,
+   "first": "2026-03-27T20:06:38Z",
+   "last": "2026-10-03T12:30:01Z",
+   "markets": 1824,
+   "median_volume": 37238.015
+  },
+  "KXNYCSNOWM": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2025-12-15T15:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 28,
+   "median_volume": 188376.0
+  },
+  "KXODIMATCH": {
+   "capped": false,
+   "close_days": 56,
+   "events": 133,
+   "first": "2026-05-30T18:20:53Z",
+   "last": "2026-09-30T19:33:13Z",
+   "markets": 266,
+   "median_volume": 186896.93
+  },
+  "KXOIL": {
+   "capped": false,
+   "close_days": 11,
+   "events": 11,
+   "first": "2022-03-10T15:12:54.978877Z",
+   "last": "2022-08-17T20:59:00Z",
+   "markets": 28,
+   "median_volume": 6725.0
+  },
+  "KXPAYROLLS": {
+   "capped": false,
+   "close_days": 43,
+   "events": 43,
+   "first": "2023-04-07T12:25:00Z",
+   "last": "2026-10-02T12:29:00Z",
+   "markets": 396,
+   "median_volume": 23464.32
+  },
+  "KXPGAR1LEAD": {
+   "capped": false,
+   "close_days": 65,
+   "events": 38,
+   "first": "2026-02-06T01:26:43Z",
+   "last": "2026-10-02T01:54:31Z",
+   "markets": 4228,
+   "median_volume": 21176.8
+  },
+  "KXPGATOP10": {
+   "capped": false,
+   "close_days": 111,
+   "events": 44,
+   "first": "2026-01-17T19:12:21.894131Z",
+   "last": "2026-10-02T17:40:15Z",
+   "markets": 4548,
+   "median_volume": 1783.755
+  },
+  "KXPGATOP20": {
+   "capped": false,
+   "close_days": 113,
+   "events": 44,
+   "first": "2026-01-17T19:10:39.604693Z",
+   "last": "2026-10-02T17:40:15Z",
+   "markets": 4548,
+   "median_volume": 4085.715
+  },
+  "KXPGATOUR": {
+   "capped": true,
+   "close_days": 135,
+   "events": 63,
+   "first": "2025-07-13T18:26:25.085174Z",
+   "last": "2026-10-02T17:40:14Z",
+   "markets": 6171,
+   "median_volume": 86527.0
+  },
+  "KXPHILSNOWM": {
+   "capped": false,
+   "close_days": 6,
+   "events": 6,
+   "first": "2025-12-15T15:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 24,
+   "median_volume": 32799.0
+  },
+  "KXRAINCHIM": {
+   "capped": false,
+   "close_days": 14,
+   "events": 14,
+   "first": "2025-07-01T03:59:00Z",
+   "last": "2026-10-03T00:00:20Z",
+   "markets": 95,
+   "median_volume": 6530.49
+  },
+  "KXRAINDENM": {
+   "capped": false,
+   "close_days": 11,
+   "events": 11,
+   "first": "2025-12-01T04:59:59Z",
+   "last": "2026-10-01T03:59:59Z",
+   "markets": 87,
+   "median_volume": 2836.13
+  },
+  "KXRAINNAPAM": {
+   "capped": false,
+   "close_days": 0,
+   "events": 0,
+   "first": null,
+   "last": null,
+   "markets": 0,
+   "median_volume": 0
+  },
+  "KXRAINNYC": {
+   "capped": false,
+   "close_days": 868,
+   "events": 869,
+   "first": "2021-09-09T03:59:00Z",
+   "last": "2026-07-16T03:59:00Z",
+   "markets": 895,
+   "median_volume": 2019.0
+  },
+  "KXRAINNYCM": {
+   "capped": false,
+   "close_days": 40,
+   "events": 36,
+   "first": "2024-03-01T04:59:00Z",
+   "last": "2026-10-01T03:59:00Z",
+   "markets": 222,
+   "median_volume": 5087.5
+  },
+  "KXRT": {
+   "capped": false,
+   "close_days": 37,
+   "events": 74,
+   "first": "2026-01-26T15:00:00Z",
+   "last": "2026-09-28T14:00:00Z",
+   "markets": 1224,
+   "median_volume": 19071.67
+  },
+  "KXRTX5090WS": {
+   "capped": false,
+   "close_days": 16,
+   "events": 16,
+   "first": "2026-06-19T20:00:00Z",
+   "last": "2026-10-02T20:00:00Z",
+   "markets": 197,
+   "median_volume": 2991.02
+  },
+  "KXSEASNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-01-01T18:58:59Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 20,
+   "median_volume": 15257.0
+  },
+  "KXSERIEAGAME": {
+   "capped": false,
+   "close_days": 150,
+   "events": 430,
+   "first": "2025-08-23T18:31:51.366759Z",
+   "last": "2026-09-20T20:46:51Z",
+   "markets": 1320,
+   "median_volume": 117504.475
+  },
+  "KXSILVERH": {
+   "capped": true,
+   "close_days": 8,
+   "events": 146,
+   "first": "2026-08-26T09:00:00Z",
+   "last": "2026-09-03T22:00:00Z",
+   "markets": 6000,
+   "median_volume": 1.0
+  },
+  "KXSILVERW": {
+   "capped": false,
+   "close_days": 30,
+   "events": 30,
+   "first": "2026-03-13T21:00:00Z",
+   "last": "2026-10-02T21:00:00Z",
+   "markets": 1250,
+   "median_volume": 152.0
+  },
+  "KXSLCSNOWM": {
+   "capped": false,
+   "close_days": 4,
+   "events": 4,
+   "first": "2026-01-01T15:00:00Z",
+   "last": "2026-04-01T06:59:00Z",
+   "markets": 11,
+   "median_volume": 43179.0
+  },
+  "KXSNOWNYM": {
+   "capped": false,
+   "close_days": 18,
+   "events": 17,
+   "first": "2021-12-03T15:00:00Z",
+   "last": "2025-03-03T15:00:00Z",
+   "markets": 91,
+   "median_volume": 6864.0
+  },
+  "KXSOLD": {
+   "capped": true,
+   "close_days": 2,
+   "events": 21,
+   "first": "2026-09-02T23:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXSOLE": {
+   "capped": true,
+   "close_days": 2,
+   "events": 21,
+   "first": "2026-09-02T23:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXSOLMAXMON": {
+   "capped": false,
+   "close_days": 26,
+   "events": 17,
+   "first": "2026-01-06T22:30:44.576888Z",
+   "last": "2026-10-02T02:49:56Z",
+   "markets": 94,
+   "median_volume": 10523.5
+  },
+  "KXSPRLVL": {
+   "capped": false,
+   "close_days": 15,
+   "events": 15,
+   "first": "2026-04-01T14:29:00Z",
+   "last": "2026-09-30T14:29:00Z",
+   "markets": 190,
+   "median_volume": 1683.54
+  },
+  "KXSUPERLIGGAME": {
+   "capped": false,
+   "close_days": 107,
+   "events": 270,
+   "first": "2025-10-31T19:10:53.660148Z",
+   "last": "2026-09-20T19:13:08Z",
+   "markets": 837,
+   "median_volume": 36629.0
+  },
+  "KXT20MATCH": {
+   "capped": false,
+   "close_days": 213,
+   "events": 1535,
+   "first": "2026-02-05T11:01:13Z",
+   "last": "2026-10-03T13:40:06Z",
+   "markets": 3228,
+   "median_volume": 19681.045
+  },
+  "KXTEMPLAXH": {
+   "capped": true,
+   "close_days": 26,
+   "events": 596,
+   "first": "2026-08-09T23:00:00Z",
+   "last": "2026-09-03T22:00:00Z",
+   "markets": 6000,
+   "median_volume": 13.0
+  },
+  "KXTEMPMIAH": {
+   "capped": true,
+   "close_days": 25,
+   "events": 467,
+   "first": "2026-04-16T23:00:00Z",
+   "last": "2026-09-03T22:00:00Z",
+   "markets": 4745,
+   "median_volume": 108.0
+  },
+  "KXTEMPNYCH": {
+   "capped": true,
+   "close_days": 33,
+   "events": 754,
+   "first": "2026-08-09T23:00:00Z",
+   "last": "2026-09-10T14:00:00Z",
+   "markets": 9255,
+   "median_volume": 15.0
+  },
+  "KXTNOTED": {
+   "capped": true,
+   "close_days": 400,
+   "events": 400,
+   "first": "2024-06-11T19:25:00Z",
+   "last": "2026-07-01T19:25:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXTNOTEW": {
+   "capped": false,
+   "close_days": 170,
+   "events": 170,
+   "first": "2023-02-17T20:25:00Z",
+   "last": "2026-06-26T19:25:00Z",
+   "markets": 2544,
+   "median_volume": 8.0
+  },
+  "KXTORNADO": {
+   "capped": false,
+   "close_days": 40,
+   "events": 40,
+   "first": "2023-08-01T03:59:00Z",
+   "last": "2026-10-01T03:59:00Z",
+   "markets": 365,
+   "median_volume": 2476.0
+  },
+  "KXU3": {
+   "capped": false,
+   "close_days": 63,
+   "events": 63,
+   "first": "2021-08-05T23:00:00Z",
+   "last": "2026-10-02T12:29:00Z",
+   "markets": 599,
+   "median_volume": 1792.52
+  },
+  "KXUCLGAME": {
+   "capped": false,
+   "close_days": 55,
+   "events": 301,
+   "first": "2025-04-29T21:35:51.998438Z",
+   "last": "2026-09-10T21:10:51Z",
+   "markets": 903,
+   "median_volume": 247300.45
+  },
+  "KXUFCFIGHT": {
+   "capped": false,
+   "close_days": 143,
+   "events": 717,
+   "first": "2025-05-11T02:44:58.965049Z",
+   "last": "2026-09-30T23:06:25Z",
+   "markets": 1474,
+   "median_volume": 372836.43
+  },
+  "KXUSDJPYH": {
+   "capped": true,
+   "close_days": 8,
+   "events": 60,
+   "first": "2026-01-21T20:00:00Z",
+   "last": "2026-01-30T19:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXUSPPI": {
+   "capped": false,
+   "close_days": 2,
+   "events": 2,
+   "first": "2026-05-13T12:29:00Z",
+   "last": "2026-09-10T12:29:00Z",
+   "markets": 28,
+   "median_volume": 686.28
+  },
+  "KXVALORANTGAME": {
+   "capped": false,
+   "close_days": 257,
+   "events": 1591,
+   "first": "2025-09-26T01:54:46.578711Z",
+   "last": "2026-10-03T14:19:53Z",
+   "markets": 3255,
+   "median_volume": 23918.12
+  },
+  "KXWCADVANCE": {
+   "capped": false,
+   "close_days": 17,
+   "events": 31,
+   "first": "2026-06-28T20:59:42Z",
+   "last": "2026-07-18T23:05:04Z",
+   "markets": 62,
+   "median_volume": 35139013.485
+  },
+  "KXWCGAME": {
+   "capped": false,
+   "close_days": 35,
+   "events": 104,
+   "first": "2026-06-11T21:07:29Z",
+   "last": "2026-07-19T21:18:52Z",
+   "markets": 312,
+   "median_volume": 11691349.54
+  },
+  "KXWNBAGAME": {
+   "capped": false,
+   "close_days": 235,
+   "events": 652,
+   "first": "2025-05-23T04:16:28.48545Z",
+   "last": "2026-10-03T03:25:05Z",
+   "markets": 1328,
+   "median_volume": 501120.92000000004
+  },
+  "KXWTAMATCH": {
+   "capped": true,
+   "close_days": 253,
+   "events": 3325,
+   "first": "2026-01-13T09:27:31.824592Z",
+   "last": "2026-10-03T14:54:46Z",
+   "markets": 6872,
+   "median_volume": 348653.19
+  },
+  "KXWTIH": {
+   "capped": true,
+   "close_days": 8,
+   "events": 150,
+   "first": "2026-08-26T12:00:00Z",
+   "last": "2026-09-03T22:00:00Z",
+   "markets": 6000,
+   "median_volume": 1.0
+  },
+  "KXXRP": {
+   "capped": true,
+   "close_days": 4,
+   "events": 82,
+   "first": "2026-08-31T09:00:00Z",
+   "last": "2026-09-03T23:00:00Z",
+   "markets": 6000,
+   "median_volume": 0.0
+  },
+  "KXXRPMAXMON": {
+   "capped": false,
+   "close_days": 24,
+   "events": 15,
+   "first": "2026-02-01T04:59:59Z",
+   "last": "2026-10-01T03:59:59Z",
+   "markets": 95,
+   "median_volume": 15847.0
+  }
+ }
+}
