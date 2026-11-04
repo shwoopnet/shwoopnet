@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:25 AM CT (08:25Z): W39 gold by hour block
+
+- W39 (descriptive, 252 settled, 13 losses), CT order hour: 0-6 n 50, 3 losses, +$16.26, PF 2.36; 6-12 n 64, 2, +$18.04, PF 1.81; 12-18 n 54, 2, +$11.02, PF 1.58; 18-24 n 84, 6, -$7.05, PF 0.85. The 20-24 block (n 53, 5 losses, -$14.99) is the one already skipped since Oct 29; 11 orders dated Nov 2-4 still fall in it, so check when the skip actually went live. No block can justify a rule; forward orders only.
+
 ## 2026-11-04 02:20 AM CT (08:20Z): W38 OICORE kill-rule odds
 
 - W38 (simulation, 20000 runs, live rate Beta(7,19), start streak 4): the 18-in-a-row kill fires within the next 40 fills in 7.8% of runs; net under -$6 at fill 40 about 0% (starting net +$29.58, mean win $7.60, mean loss $0.89); median ending net about +$49. At the simulated trigger rate (18/31) neither kill fires. The streak kill is the live risk, the net kill is nearly unreachable. Not a recommendation to change either rule.
