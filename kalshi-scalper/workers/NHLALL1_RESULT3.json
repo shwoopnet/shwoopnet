@@ -1,0 +1,280 @@
+{
+ "drops": {
+  "events": 209,
+  "rung_without_result": 198
+ },
+ "usable_games": 209,
+ "A_pooled": {
+  "game": {
+   "n": 418,
+   "clusters": 209,
+   "mean_c": -3.147846889952154,
+   "se_c": 1.6247369240488936,
+   "z": -1.93745020708191,
+   "lo95_c": -6.332331261087985,
+   "pf": 0.7649097730927281,
+   "win": 0.12440191387559808,
+   "price": 0.14703349282296652
+  },
+  "date": {
+   "n": 418,
+   "clusters": 30,
+   "mean_c": -3.147846889952154,
+   "se_c": 1.7934293660685818,
+   "z": -1.7552109659342885,
+   "lo95_c": -6.662968447446574,
+   "pf": 0.7649097730927281,
+   "win": 0.12440191387559808,
+   "price": 0.14703349282296652
+  },
+  "x12": {
+   "n": 418,
+   "clusters": 209,
+   "mean_c": -3.3247846889952157,
+   "se_c": 1.624941551359849,
+   "z": -2.0460949418228833,
+   "lo95_c": -6.5096701296605195,
+   "pf": 0.7544940644431882,
+   "win": 0.12440191387559808,
+   "price": 0.14703349282296652
+  },
+  "H1": {
+   "n": 204,
+   "clusters": 102,
+   "mean_c": -3.351960784313726,
+   "se_c": 2.39735532084728,
+   "z": -1.3981910629455907,
+   "lo95_c": -8.050777213174396,
+   "pf": 0.7488153399698783,
+   "win": 0.12254901960784313,
+   "price": 0.1472058823529412
+  },
+  "H2": {
+   "n": 214,
+   "clusters": 107,
+   "mean_c": -2.9532710280373844,
+   "se_c": 2.201811567149415,
+   "z": -1.3412914493227273,
+   "lo95_c": -7.268821699650238,
+   "pf": 0.7801509722753678,
+   "win": 0.1261682242990654,
+   "price": 0.14686915887850469
+  },
+  "verdict": "FALSIFIED",
+  "games": 209
+ },
+ "B_lowest_tercile": {
+  "game": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "date": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "x12": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "H1": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "H2": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "verdict": "NOT_ENOUGH_DATA",
+  "games": 0
+ },
+ "C_nhlround1": {
+  "game": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "date": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "x12": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "H1": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "H2": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "verdict": "NOT_ENOUGH_DATA",
+  "games": 0
+ },
+ "uncapped_all_cheap": {
+  "n": 5986,
+  "clusters": 209,
+  "mean_c": -0.8509689274974952,
+  "se_c": 0.3841314561322575,
+  "z": -2.215306541322417,
+  "lo95_c": -1.60386658151672,
+  "pf": 0.9320826916794996,
+  "win": 0.14400267290344138,
+  "price": 0.14380053458068826
+ },
+ "by_ask_uncapped": {
+  "3-8c": {
+   "n": 1259,
+   "clusters": 209,
+   "mean_c": -0.6374900714853067,
+   "se_c": 0.6636185891003167,
+   "z": -0.9606272065849857,
+   "lo95_c": -1.9381825061219276,
+   "pf": 0.8823477674514056,
+   "win": 0.050833995234312944,
+   "price": 0.05328038125496425
+  },
+  "8-15c": {
+   "n": 2032,
+   "clusters": 209,
+   "mean_c": -0.2652066929133866,
+   "se_c": 0.5987838432818029,
+   "z": -0.44290889924458693,
+   "lo95_c": -1.4388230257457204,
+   "pf": 0.9743908987658779,
+   "win": 0.11466535433070867,
+   "price": 0.1100246062992126
+  },
+  "15-30c": {
+   "n": 2695,
+   "clusters": 209,
+   "mean_c": -1.392356215213359,
+   "se_c": 0.686159507012381,
+   "z": -2.029201958121722,
+   "lo95_c": -2.737228848957626,
+   "pf": 0.9203927325803412,
+   "win": 0.20964749536178107,
+   "price": 0.2115547309833024
+  }
+ },
+ "by_tercile_capped": {
+  "0": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "1": {
+   "n": 0,
+   "clusters": 0,
+   "mean_c": NaN,
+   "se_c": NaN,
+   "z": NaN,
+   "lo95_c": NaN,
+   "pf": Infinity,
+   "win": NaN,
+   "price": NaN
+  },
+  "2": {
+   "n": 418,
+   "clusters": 209,
+   "mean_c": -3.147846889952154,
+   "se_c": 1.6247369240488936,
+   "z": -1.93745020708191,
+   "lo95_c": -6.332331261087985,
+   "pf": 0.7649097730927281,
+   "win": 0.12440191387559808,
+   "price": 0.14703349282296652
+  }
+ },
+ "ladder": {
+  "mean_sum_ask": 5.286698564593301,
+  "mean_scorers": 5.320574162679426,
+  "games_sum_le_round": 0,
+  "tercile_games": {
+   "0": 0,
+   "1": 0,
+   "2": 209
+  }
+ },
+ "candle_fields_before_puck_drop": {
+  "candles": 121898,
+  "with_volume": 121898,
+  "with_open_interest": 121898
+ }
+}
