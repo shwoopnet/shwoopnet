@@ -23,6 +23,16 @@ gates.ST1 = () => {
   assert.ok(!/kal-chip-slot/.test(html) && /\.kal-chip\{[^}]*color:var\(--muted\)/.test(html), 'the chip is a quiet muted label: the bright treatment is for figures and urgent items');
   assert.deepStrictEqual(f.kalshiSlotIds([{ ts: 1, slotId: 'A' }, { ts: 2, slotId: 'A' }, { ts: 3 }, { slotId: 'B' }]), ['A'], 'only orders with an id and a time name a strategy');
 };
+// ST17 (Nov 4, 2026, the owner: "Hide it"): a removed strategy with nothing open is not a row, but its result still counts in All strategies, so the account figure does not move.
+gates.ST17 = () => {
+  const done = f.kalshiOrdersSummary([{ ts: 2, slotId: 'FLOW1', fillCount: 1, settledPnl: -0.64 }], 5), l1 = f.kalshiOrdersSummary([{ ts: 3, fillCount: 1, settledPnl: 1 }], 5);
+  const rows = [{ id: 'L1', info: { name: 'Closing buy', markets: 'Gold', note: '' }, sum: l1, status: 'Running', ageText: '' }, { id: 'FLOW1', info: { name: 'Seller flow (removed)', markets: 'Bitcoin', note: '' }, sum: done, status: '', ageText: '', hidden: true }];
+  const h = f.kalshiStrategiesTableHtml(rows, esc, money);
+  assert.ok(!/Seller flow/.test(h), 'the removed strategy has no row');
+  assert.ok(/\+\$0\.36/.test(h), 'All strategies still includes its -$0.64 (1.00 - 0.64)');
+  const src = html.slice(html.indexOf('kalshiSlotIds(kalshiSlotOrders).forEach'), html.indexOf('tbl.innerHTML = kalshiStrategiesTableHtml'));
+  assert.ok(/KAL_SLOT_REGISTERED\.indexOf\(id\) < 0/.test(src) && /hidden: gone && !sum\.open\.length/.test(src), 'only a strategy out of the registry with nothing open is hidden');
+};
 gates.ST2 = () => {
   const s = f.kalshiOrdersSummary([{ ts: 2, slotId: 'X', fillCount: 1, settledPnl: -0.9 }, { ts: 3, slotId: 'X', fillCount: 1, settled: false }, { ts: 4, slotId: 'X', fillCount: 2, settledPnl: 1.2 }], 5);
   assert.strictEqual(s.n, 2); assert.strictEqual(s.lost, 1); assert.strictEqual(s.won, 1); assert.strictEqual(s.open.length, 1); assert.strictEqual(s.net, 0.3);

@@ -763,3 +763,7 @@ The Strategies table, the chips, the Own stops line and the Rules text already n
 ## The report carries the no-fill reason (Nov 4, 2026, the refinement chat's request)
 
 With `?orders=1` every L1 and slot row now has `kalshiStatus` (from #712's log: letters and underscores only, at most 24, lowercased; null when the order predates the log or the value is odd). Rows already had `answeredAtMs`. Test R9; R2 and OV3 list the new key on purpose. Needs `bash functions/deploy-report.sh` (or `deploy-latest.sh`).
+
+## A removed strategy leaves the Strategies table (Nov 4, 2026, the owner: "Hide it")
+
+A slot strategy no longer in `KAL_SLOT_REGISTERED` (FLOW1) is drawn as a row only while it has an open order; with nothing open the row is `hidden` and still counts in the All strategies total (`kalshiStrategiesTableHtml` sums every row, draws only the visible ones). Test ST17. Page only, live on merge.
