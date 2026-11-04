@@ -276,7 +276,7 @@ def fetch():
         for i, (ev, v) in enumerate(ex.map(paced, todo)):
             if v is not None:
                 have[ev] = v
-            if i % 200 == 0:
+            if i % 25 == 0:
                 cp.write_text(json.dumps(have))
                 print(i, len(todo), flush=True)
     cp.write_text(json.dumps(have))
