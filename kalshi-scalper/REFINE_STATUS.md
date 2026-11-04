@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:05 AM CT (09:05Z): W47 S-GPB1 tracker built
+
+- W47: `gpb1.py` prints the S-GPB1 forward table (gold fills from 09:00Z Nov 4, below 0.90 vs 0.90 and above; flag at 40 fills below 0.90 if PF under 1.0). Near-empty now (0 of 40), as expected. Rerun on a fresh report each wake, along with `w43.py` (S-GQH1).
+
 ## 2026-11-04 03:00 AM CT (09:00Z): W46 OICORE trigger rate and Nov 13 read size
 
 - W46 (62 days, 5,876 windows): the OICORE trigger fires 7.3 a day (median 7, range 0-15; last 30 days 8.4). By CT block: 0-6 11%, 6-12 19%, 12-18 27%, 18-24 43%. Expected about 51 triggers in the next 7 days. 40 triggers take about 5.5 days, 100 about 14 (12 at the recent rate). Live has 24 fills in 5 days, so the live fill rate is well under the trigger rate (triggers are not fills). The Nov 13 read will have roughly 55 to 65 triggers at most, so it will be short of 100: the read should say so up front and not call a pass on a thin sample.
