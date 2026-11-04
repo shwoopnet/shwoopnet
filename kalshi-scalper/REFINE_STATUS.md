@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:45 AM CT (10:45Z): W66 how wide a 25 fill OICORE result is
+
+- W66 (bootstrap of the 453 sim triggers, 5000 resamples; 5th / 50th / 95th): all 453: PF 1.49 / 1.86 / 2.29, +4.8 / +7.8 / +10.6 c/ct, $216 / $351 / $481 at 10 contracts. A 25-trigger sample: PF 0.65 / 1.87 / 4.67, -4.2 / +7.7 / +20.4 c/ct, -$10 / +$19 / +$51. P(net < 0) 14.6% and P(net < +$10) 31.6% for 25 triggers at 10 contracts. So live +$28.94 on 25 fills is inside the range and says little either way; it resamples history only and does not test whether the edge exists live. Planning point for Nov 13: with about 55 to 65 triggers, the sim's own spread is still wide; a pass cannot be called on one number.
+
 ## 2026-11-04 04:40 AM CT (10:40Z): W65 OICORE live win rate vs history
 
 - W65 (descriptive): live 6/25 = 24.0% (Wilson 95% 11.5% to 43.4%); sim for the same windows 8/31 = 25.8% (13.7% to 43.2%); weekly history 123/453 = 27.2% (23.3% to 31.4%). Live is inside the historical interval, just. P(6 or fewer wins in 25 | 27.2%) = 0.46, so the live win rate is unremarkable: no win-rate shortfall is shown. The +$28.94 comes from the payoff mix (cheap-side wins), not the win count. The live probe is tracking history so far; the sample cannot say more.
