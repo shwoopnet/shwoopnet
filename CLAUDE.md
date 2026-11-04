@@ -747,3 +747,7 @@ The separate Strategies card is gone. The table (`#kalStrategies`, `renderKalshi
 ## Strategies table: L1 counts only its live markets (Nov 4, 2026, the owner: "yeah i think that would be fine")
 
 The L1 row in the Strategies table (`renderKalshiStrategies`) now counts only orders on markets L1 trades now (`kalshiIsActive`: gold), not Dogecoin's, Bitcoin's, XRP's, Ethereum's or the probes' old orders. Why: the row is labelled "Gold" but showed -$6.55 for the month while gold alone was about +$53, which read as gold losing. The paused markets' results stay in All strategies (the account figure) (so the rows may not add up to it; no note is shown, because ST2 keeps the table free of text under it). Test ST8 updated. Page only, nothing to deploy.
+
+## No-fill reason logged (Nov 4, 2026, the refinement chat's request)
+
+A third of gold orders (79 of 234 since Oct 21) and 8 OICORE orders ended "no fill" with no reason kept. L1 (`runL1Tick`) and the second slot now store Kalshi's own order status as `kalshiStatus` on the order document when Kalshi returns one (the slot also stores `answeredAtMs`). Log only: nothing reads it, no order changes, and the off-equivalence fixtures are unchanged (their mocked answers carry no status). Test NF1. Needs `bash functions/deploy-latest.sh`.
