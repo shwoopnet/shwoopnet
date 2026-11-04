@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 04:50 AM CT (10:50Z): W67 power of the Nov 13 OICORE read
+
+- W67 (bootstrap, 5000 draws; edge real at the full historical mean +7.73c / half the mean +3.87c): n 40: P(PF >= 1.5) 0.67 / 0.36, P(PF >= 1.0 or net > 0) 0.90 / 0.72; n 55: 0.70 / 0.36, 0.94 / 0.77; n 100: 0.78 / 0.32, 0.98 / 0.84. Reading: even if the edge is fully real, a PF >= 1.5 read at 40 to 55 fills fails about 30% of the time, and it barely separates a real edge from a half-size one (0.70 vs 0.36). The sign of net separates them better only at larger n. So the Nov 13 read should be set up as: net > 0 is the minimum, PF >= 1.5 is not a pass/fail bar at 55 fills, and a miss is not a kill (the registered kills stay the 18-streak and net below -$6 after 40 fills). Decision for the owner/main, not mine: whether to extend the read to 100 fills (about Nov 18, if fills run near the trigger rate).
+
 ## 2026-11-04 04:45 AM CT (10:45Z): W66 how wide a 25 fill OICORE result is
 
 - W66 (bootstrap of the 453 sim triggers, 5000 resamples; 5th / 50th / 95th): all 453: PF 1.49 / 1.86 / 2.29, +4.8 / +7.8 / +10.6 c/ct, $216 / $351 / $481 at 10 contracts. A 25-trigger sample: PF 0.65 / 1.87 / 4.67, -4.2 / +7.7 / +20.4 c/ct, -$10 / +$19 / +$51. P(net < 0) 14.6% and P(net < +$10) 31.6% for 25 triggers at 10 contracts. So live +$28.94 on 25 fills is inside the range and says little either way; it resamples history only and does not test whether the edge exists live. Planning point for Nov 13: with about 55 to 65 triggers, the sim's own spread is still wide; a pass cannot be called on one number.
