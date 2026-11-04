@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 03:10 AM CT (09:10Z): W48 OICORE missed windows, unresolved
+
+- W48 (cache only, does NOT reproduce 7 missed / 24 filled): 31 sim trigger windows, 18 matched to a filled order, 13 not (7 with a "no fill" order, 6 with no order record). Sim net: matched +6.58c/ct, unmatched +17.14c/ct. 6 live fills (e.g. KXBTC15M-26OCT301045-45) and 1 no-fill have no trigger in the cache, so the cache is stale and the split is unreliable. Orders carry no guard reason, so a slot-guard block cannot be told from no order. If it holds, the windows the bot misses are the better ones (the S-LIM1 / no-fill theme: price moves away, which is also when the side wins big). Not yet a finding. W50 reruns it against refetched candles.
+
 ## 2026-11-04 03:05 AM CT (09:05Z): W47 S-GPB1 tracker built
 
 - W47: `gpb1.py` prints the S-GPB1 forward table (gold fills from 09:00Z Nov 4, below 0.90 vs 0.90 and above; flag at 40 fills below 0.90 if PF under 1.0). Near-empty now (0 of 40), as expected. Rerun on a fresh report each wake, along with `w43.py` (S-GQH1).
