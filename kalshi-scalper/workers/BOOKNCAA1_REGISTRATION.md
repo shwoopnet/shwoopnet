@@ -39,3 +39,6 @@ Match rate after fallback 60 to 75%; games with odds 3,000 to 3,700; candidates 
 
 ## Hygiene
 ESPN 1 request per second, honest User-Agent, no spoofing. Kalshi polite. Code `src/scalper/bookncaa1.py`, tests `tests/test_bookncaa1.py`; result `workers/BOOKNCAA1_RESULT.md` and README.
+
+## Entries fixed before any outcome was read (2026-11-04)
+Scoreboards 5,283 events processed, 4,976 matched (3,442 exact, 1,534 unique-per-date fallback), odds cached for 4,963. Candles fetched for 2,252 events in md5 order (two workers, one from each end of the md5 order, time box about 2.5 hours; 3,031 events not fetched, a random md5 subset not read in; 99 candle errors, 429 exhausted, left out). Entries file `entries.json`: **1,081 candidates** (book underdog, valid look, ask in [0.03, 0.30]); **0 with q >= 3 x ask** (largest q/ask 2.01), computed from prices and book only. sha256 `65630494b3402f4ab8d82640cf87082f124c2784a5ecfda62e50b682aedffb15`. Outcomes read only after this commit.
