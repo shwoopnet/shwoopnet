@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
@@ -107,6 +107,13 @@ gates.R8 = () => {
   const bare = lib.buildReport([ord({ tickStartMs: null })], NOW, 24, true).orders[0];
   assert.ok(bare.tickStartMs === null && bare.sentAtMs === null && bare.startLateMs === null && bare.startToSendMs === null && bare.answerMs === null, 'an order from before the log has no timing, never a made-up zero');
   assert.ok(!/orderId|clientOrderId/.test(JSON.stringify(r)), 'still no id');
+};
+// R9 (Nov 4, 2026): the no-fill reason Kalshi gave reaches the report, so a no-fill can be told apart (cancelled at the limit, never posted) without reading the database; anything that is not a short plain word is dropped, never passed through.
+gates.R9 = () => {
+  const r = lib.buildReport([ord({ kalshiStatus: 'canceled' })], NOW, 24, true).orders[0];
+  assert.strictEqual(r.kalshiStatus, 'canceled', 'the status is on the row');
+  assert.strictEqual(lib.buildReport([ord({})], NOW, 24, true).orders[0].kalshiStatus, null, 'an order from before the log has none, never a guess');
+  assert.strictEqual(lib.buildReport([ord({ kalshiStatus: '<script>x</script>' })], NOW, 24, true).orders[0].kalshiStatus, null, 'an odd value is dropped');
 };
 gates.R5 = () => {
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiReportLib.js'), 'utf8');
