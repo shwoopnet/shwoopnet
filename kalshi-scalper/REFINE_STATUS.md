@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:35 AM CT (13:35Z): W99 OICORE orders against the spec
+
+- W99 (audit of 33 OICORE slot orders, 25 filled, 8 no fill): ticker, strategy and side all match the spec (KXBTC15M, cheaper side, bought-side price at most 0.50 on all 33, all in 5c to 50c), send time 161 to 177 s before the close (none outside 120 to 180 s), no filled order unsettled. Only size deviates: ordered count is not 10 on 3 orders: Oct 30 08:45 (-45) ordered 5, filled 5 (before the step to 10); Oct 30 20:30 (-30) ordered 9, filled 9 (price 0.50); Nov 1 09:00 (-00) ordered 2, no fill (price 0.14). The other 30 ordered 10 and all 23 other fills are 10. The 9 at 0.50 and the 2 at 0.14 look like dollar-cap or window-cap clamps (the slot's per order cap scales with the sizing base), not wrong-side or timing errors; the cause was not confirmed. Note for the read: 22 of the 25 fills are 10 contracts, so net per contract is comparable across fills. Nothing to act on.
+
 ## 2026-11-04 07:30 AM CT (13:30Z): W98 C2 tracker built
 
 - W98: C2 (skip negative rise3) was fully stated, so `c2_fwd.py` is built and called from `wake_shadows.py` (FLAG at 40). Registration: gold and Dogecoin L1 fills after Nov 1 21:15Z; rise3 as logged on the order, negative means below 0; read at 40 negative-rise3 fills; dead if 1 or fewer losses or net above +$2; predicted at least 3 losses and net under $0. Two choices not in the registration, now fixed: a loss is settledPnl below 0, and only settled fills count toward the 40. Current read: 9 of 40 negative-rise3 fills, 1 loss, net -$2.67. Dogecoin is paused, so the cell now fills on gold alone (slow). The clause "dead if JUMP1 is FALSIFIED" and V2's confirmation of how JUMP1 counts rise3 stay a manual check; no answer recorded.
