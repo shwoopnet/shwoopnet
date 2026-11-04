@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:40 AM CT (08:40Z): W42 Dogecoin ladder split
+
+- W42 (descriptive, 61 ladder orders, 7 losses, -$23.12, PF 0.64): first half (30) 1 loss, +$12.39, PF 2.42; second half (31) 6 losses, -$35.51, PF 0.36. All but one order were above 5 contracts (11 to 15), so no small-size test exists. By size band PF 0.52 (11-12), 0.60 (13), 0.84 (14-15): no band profitable, losses about $9 each at every size, so they do not scale with size. 6 of 7 losses came Nov 2-3. Dogecoin stays paused; un-pausing is a reviewed owner edit, nothing here argues for it.
+
 ## 2026-11-04 02:35 AM CT (08:35Z): W41 gold quiet hours were lifted
 
 - W41: not an anomaly. Gold's 20:00-23:59 CT block went live in #618 (Oct 29 1:01 PM CT) and was lifted in #669 (Oct 30 2:30 PM CT); `QUIET_HOURS_CT` on main is now empty. Since Oct 30 gold trades those hours (16 orders Nov 1-3, 11 filled). Times converted UTC to Chicago with DST handled. So W39's 18-24 block (n 84, PF 0.85) is mostly orders the block never covered. The CLAUDE.md "Gold's quiet hours" section is stale (it says live); freshness agent or main should fix it. Not mine to edit.
