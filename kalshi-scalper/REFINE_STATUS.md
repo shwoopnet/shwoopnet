@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 1:33 AM CT (07:33Z Nov 4): HOURLY CHECK-IN, 1 worker running (W31), W32 REGISTERED
+
+W32 OICORE-FLOW-JOIN (no network): the trade caches already on disk cover about 700 Bitcoin pool windows on 14 days (flow_oos_a.jsonl, flow_oos_b.jsonl, flow_oos_c.jsonl, flow_oos_d.jsonl, flow_cache.jsonl). Join them to the OICORE rule on candles (open interest at -180 s minus at -360 s at or above 86,300, cheap side 0.05 to 0.50, fill at the -120 s ask, hold, fee 0.07 p (1-p), no cap; and also with V2's 0.50 fill cap): among the windows where the OICORE trigger fires, split by the fixed flow threshold -0.036. Report n, win rate, PF, net a contract for trigger/low, trigger/high, non-trigger/low, non-trigger/high, overall and per block. Candle limits: oi/btc.jsonl starts Sep 2, so August blocks cannot be joined (say so). Question: is the OICORE trigger the same edge as the flow lead, or are they separate, and does flow add to the trigger? No pass bar (a description for the owner's FLOW1 decision); 4 cells. Prediction: trigger windows have PF above non-trigger regardless of flow; flow adds little inside the trigger (V2 found PF 1.94 inside OICORE windows, 1.10 outside).
+
 ## 2026-11-04 12:34 AM CT (06:34Z Nov 4): W30 COMPLETED (Oct 27 finished)
 
 Block D (Sep 2, Sep 9, Oct 27; V2's rules): Oct 27 low n 21 win 14.3% PF 1.18 +1.77c, high n 18 PF 0.93 -0.68c; block D all: low n 48 win 14.6% PF 0.90 -1.15c, high n 50 win 14.0% PF 0.98 -0.22c. Low minus high -0.9c (block D). With block C (Aug): low n 68 +0.6c, high n 77 -3.2c, the second out-of-sample set (C + D) is low n 116 about -0.2c, high n 127 about -1.9c: low minus high about +1.7c, low itself about zero. Matches V2's picture. Third block (W31, Sep 5, 12, 19) pending.
