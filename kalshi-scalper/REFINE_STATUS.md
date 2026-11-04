@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 02:00 AM CT (08:00Z): W34 OICORE slippage, no problem
+
+- W34 (24 filled OICORE orders): order price vs the ask the bot saw at decision (seenAsk): mean +0.33c, none 1c or more worse. The first comparison against the close-120 candle ask gave -2.16c, but that mostly measures price drift (candle comes 0 to 60 s after the order; report avgFill is null, so the order price is the limit). Verdict by the registered rule: no slippage problem.
+
 ## 2026-11-04 01:52 AM CT (07:52Z): W31 flow block E done, S-FLOW2 waiting
 
 - W31 (Sep 5/12/19, V2 rules, fixed -0.036, 206 pool windows, live trades endpoint): low n 67, win 22.4%, PF 2.27, +8.96c; high n 108, win 24.1%, PF 1.73, +7.74c. Low beats high on 1 of 3 days; block gap +1.2c, noise. Pooled with earlier blocks the flow split is not reliable (August block went the other way). No change to the FLOW1 view: not a tradable edge.
