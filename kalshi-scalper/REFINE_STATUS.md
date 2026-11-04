@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 05:54 AM CT (11:54Z): FLOW1 second order (no fill), ledger refreshed
+
+- FLOW1 live orders now 2: the 09:30 close (YES 5 at 0.12, filled, lost -$0.64) and the 11:30 close (KXBTC15M-26NOV040630-30, NO, 0 filled of the order, limit 0.25, status no fill, placed 11:27:04Z). Ledger after refreshing the cache to 11:45Z: shadow low windows 3, live orders 2, matched 2, shadow-only (live missed) 1 (the 10:00 close, 040500-00, no live order at all), live-only 0. The FLAG line in wake.sh about unmatched windows was partly a stale cache (the 11:30 close was not yet in it); one real miss remains. Rule (a) needs 20 shadow windows; fills 1 of 2 so far. OICORE unchanged (25 fills, +$28.94, streak 5); no OICORE order since 07:57Z.
+
 ## 2026-11-04 05:34 AM CT (11:34Z): W124 FLOW1 ledger: one shadow window with no live order
 
 - W124 (`flow1_ledger.py`, offline, reads flow_cache.jsonl and dash_report.json; `--table` prints rows; wired into wake_shadows.py with a FLAG when unmatched windows exist): 8 Bitcoin windows, cache to 11:00Z, counted from the first live order (09:27Z). Shadow low windows: 2 (09:30 close and 10:00 close; the 09:15 close was also low but is before the live start). Live FLOW1 orders: 1 (09:30 close, YES 5 at 0.12, filled, lost). Matched 1; shadow-only (live missed) 1: the 10:00 close (shadow ask 0.11, flow -0.107, no live order at all, not even a no fill record); live-only 0. The shadow's -120 s ask for the 09:30 window was 0.06 against the live fill of 0.12. One miss in two is a sample of 2: rule (a) (fill rate under 50 percent of shadow low windows) needs 20. Watch what the live bot's own conditions skip (its signal is read at about -176 s, the shadow's at -180 s with the fill at -120 s, and the live ask band may differ). Windows after 11:00Z are not yet in the cache; refresh with flow_forward.py.
