@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-04 07:35 AM CT (13:35Z): W128 S-OIRLOW1 tracker tests all pass
+
+- W128 (synthetic caches in temp folders, `t128.py`, real cache untouched): all six cases PASS: 39 windows print 39 of 40 with no READ-READY and 40 windows print READ-READY; only OIR 60000, 86299 and asks 0.05, 0.50 count (OIR 59999 and 86300, asks 0.04 and 0.51 excluded); net per contract equals 1-p-ceil(70p(1-p))/100/10 at 0.05, 0.09, 0.30, 0.50 (fee per 10 contracts $0.04, 0.06, 0.15, 0.18); windows missing the c-120, c-180 or c-360 candle are dropped; closes before 14:00Z and exactly 14:00Z are excluded; the wake_shadows.py block runs on an empty cache and on 40 windows without a traceback. No bug found. S-OIRLOW1 is live as a tracker (0 of 40 until windows close after 14:00Z).
+
 ## 2026-11-04 07:34 AM CT (13:34Z): W126 S-OIRLOW1 tracker built, untested paths
 
 - W126: `oirlow1_forward.py` built with the registered definitions unchanged (Bitcoin windows closing after 14:00Z, OIR in [60000, 86300), cheap side ask 0.05..0.50 at close-180, fill at the close-120 ask, hold, fee 0.07*p*(1-p) rounded up per 10 contracts, read at 40); at most 40 new windows fetched per run, cache oirlow1_cache.jsonl, lock file, READ-READY line at 40. A block was appended to wake_shadows.py. Run once: 0 markets closed after 14:00Z, so 0 of 40. Untested: the 40 window path, the fee rounding, and the new wake_shadows.py block; a test with a synthetic cache is next (W128).
