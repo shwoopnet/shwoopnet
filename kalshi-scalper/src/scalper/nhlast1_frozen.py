@@ -124,7 +124,7 @@ def cmd_candles(minutes):
         if ev in starts:
             byg[ev].append(tk)
     games = 0
-    for ev in sorted(byg, key=game_key):
+    for ev in sorted(byg, key=game_key) * 2:  # second sweep is the retry pass for games that failed after 8 retries; fetched markets are skipped
         if time.time() > t_end:
             print("time box reached; games", games, flush=True)
             return
@@ -134,12 +134,12 @@ def cmd_candles(minutes):
             cs, last = None, ""
             for a in range(8):
                 try:
-                    path = f"/historical/markets/{tk}/candlesticks" if a % 2 == 0 or "404" not in last else f"/series/KXNHLAST/markets/{tk}/candlesticks"
+                    path = f"/series/KXNHLAST/markets/{tk}/candlesticks" if "404 " not in last[-40:] or a % 2 == 0 else f"/historical/markets/{tk}/candlesticks"
                     cs = api._get(path, {"start_ts": starts[ev] - 3600, "end_ts": starts[ev], "period_interval": 1}, retries=1).get("candlesticks", [])
                     break
                 except Exception as e:  # noqa: BLE001
                     last = str(e)
-                    time.sleep(2 + 4 * a)
+                    time.sleep(2 + 3 * a)
             time.sleep(0.6)
             if cs is None:
                 print("fail", tk, last[:80], flush=True)
