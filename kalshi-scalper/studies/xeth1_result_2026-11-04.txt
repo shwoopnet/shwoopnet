@@ -1,0 +1,11 @@
+TRIG H1: n 4 days 2 win 0.000 paid 0.138 PF 0.00 PFx1.2 0.00 mean -14.62c z -75.21
+TRIG H2: n 4 days 2 win 0.000 paid 0.092 PF 0.00 PFx1.2 0.00 mean -9.88c z -4.08
+TRIG ALL: n 8 days 4 win 0.000 paid 0.115 PF 0.00 PFx1.2 0.00 mean -12.25c z -7.21
+NONE H1: n 172 days 20 win 0.076 paid 0.123 PF 0.53 PFx1.2 0.52 mean -5.52c z -2.11
+NONE H2: n 160 days 21 win 0.087 paid 0.118 PF 0.66 PFx1.2 0.65 mean -3.78c z -2.17
+NONE ALL: n 332 days 41 win 0.081 paid 0.121 PF 0.59 PFx1.2 0.58 mean -4.68c z -2.93
+F H1: n 66 days 16 win 0.197 paid 0.130 PF 1.57 PFx1.2 1.55 mean +5.90c z +1.09
+F H2: n 59 days 16 win 0.102 paid 0.124 PF 0.74 PFx1.2 0.73 mean -2.97c z -0.62
+F ALL: n 125 days 32 win 0.152 paid 0.127 PF 1.16 PFx1.2 1.14 mean +1.71c z +0.45
+events {'TRIG': 5, 'F': 77, 'NONE': 215} classes {'TRIG': 5, 'F': 78, 'NONE': 903} ndays 42
+NOT_ENOUGH_DATA ['8 trigger trades of 150; 0.190 a day, about 746 more days at that rate']
