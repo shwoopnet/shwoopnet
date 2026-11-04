@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 4</div>
                 <ul class="changelog-list">
+                  <li>Bot page: a removed strategy (FLOW1) leaves the Strategies table once nothing of it is open; its result still counts in All strategies</li>
                   <li>Trading: FLOW1 is removed; the longer history test and a second out-of-sample check found no reliable edge (its open orders still settle normally)</li>
                   <li>Bot page: the L1 row in Strategies counts only the markets L1 trades now (gold); paused markets' earlier results stay in All strategies</li>
                   <li>Trading: FLOW1, a fourth strategy probe: Bitcoin cheap side (5c to 50c), 5 contracts, only when takers were net selling that side in the 3 minutes before, held to settlement</li>
@@ -3809,7 +3810,7 @@ kalshiStatusTick();
       t.today = Math.round(t.today * 10000) / 10000; t.net = Math.round(t.net * 10000) / 10000;
       totalRow = cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
     }
-    body = totalRow + rows.map(function(r){ return cell(r, r.info.name, true); }).join('');   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
+    body = totalRow + rows.filter(function(r){ return !r.hidden; }).map(function(r){ return cell(r, r.info.name, true); }).join('');   // a hidden row (a removed strategy with nothing open) still counts in the total above   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
     var notes = '';   // no explanatory text under the table (the owner, Oct 30, 2026); only a real problem is said
     if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
     return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
@@ -3832,7 +3833,9 @@ kalshiStatusTick();
     var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
-      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
+      // A strategy no longer in the bot's registry (FLOW1, removed Nov 4, 2026) is hidden once nothing of it is open (the owner, Nov 4, 2026: "Hide it"); its result still counts in All strategies.
+      var gone = KAL_SLOT_REGISTERED.indexOf(id) < 0;
+      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum), hidden: gone && !sum.open.length });
     });
     tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial, slotError: kalshiSlotError });     // hidden is the Layout menu's to set, never this render's
   }

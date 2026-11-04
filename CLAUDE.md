@@ -755,3 +755,7 @@ The L1 row in the Strategies table (`renderKalshiStrategies`) now counts only or
 ## No-fill reason logged (Nov 4, 2026, the refinement chat's request)
 
 A third of gold orders (79 of 234 since Oct 21) and 8 OICORE orders ended "no fill" with no reason kept. L1 (`runL1Tick`) and the second slot now store Kalshi's own order status as `kalshiStatus` on the order document when Kalshi returns one (the slot also stores `answeredAtMs`). Log only: nothing reads it, no order changes, and the off-equivalence fixtures are unchanged (their mocked answers carry no status). Test NF1. Needs `bash functions/deploy-latest.sh`.
+
+## A removed strategy leaves the Strategies table (Nov 4, 2026, the owner: "Hide it")
+
+A slot strategy no longer in `KAL_SLOT_REGISTERED` (FLOW1) is drawn as a row only while it has an open order; with nothing open the row is `hidden` and still counts in the All strategies total (`kalshiStrategiesTableHtml` sums every row, draws only the visible ones). Test ST17. Page only, live on merge.
