@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:23 AM CT (16:23Z): W-QUIET1 gold quiet hours read script built: 18 of 100 block entries, z +2.14, projected Dec 3
+
+- Worker built w_quiet/quiet_read.py (selftest 15 of 15, covers the 20:00 and 23:59 CT boundaries on both sides of daylight saving, fee 0.07*p*(1-p), NO side pricing) and w_quiet/REGISTRATION.md before the first score. Run with python3 -I quiet_read.py (the first fetch took about 7 minutes; windows cached in quiet_cache.jsonl). Information only, hypothetical entries from the 6 minute candle close, no 25c early sell.
+- First run, windows since 2026-10-30 12:00Z (the block went live, so only these are forward): 369 settled gold windows, 88 with a single in band side at the 6 minute look. Block: 18 entries, mean +6.55c per contract, se 0.41c. Rest: 70 entries, mean -0.21c, se 3.14c. z of block minus rest +2.14, so the block is NOT worse than the rest in this early read; the interim wording if it were read now would be DELETE the table entry, but it is NOT readable: only 18 of the 100 block entries needed. At 2.91 block entries a day, 100 arrives around 2026-12-03 CT, later than the Nov 24 to 26 plan.
+- Caution before trusting any of this: 369 windows in 6.2 days is below the roughly 590 a gold market might produce, and nobody has checked whether the listing is truncated, or whether gold simply has closed hours. A worker (w_quietcov) checks window coverage and recomputes the projected date. Not compared: V2's exact window definition, the ask at the order instant. The z is a read of 18 entries and means nothing yet; no action.
+
 ## 2026-11-05 10:23 AM CT (16:23Z): OICORE fill 36: loss, streak 4
 
 - One new OICORE fill, a loss of -1.80. Record after 36 fills: 9 won, 27 lost, net +45.87, PF 2.82. Loss streak 4 (kill at 18, 14 away). The 40 fill interim look is 4 fills away. S-JUMP1 and S-SDIR1 are 27 of 40. No flags. S-BUCKET1 forward counts start at 0 (the fill landed before or at the 10:18 AM CT cutoff or is unsettled; the tracker shows 0 forward fills). kalshiStatus is on 0 of 1,459 report rows.
