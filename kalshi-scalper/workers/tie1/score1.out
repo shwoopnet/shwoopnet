@@ -1,0 +1,9 @@
+ties 117 dropped {'noquote': 2, 'noside': 37} candidates 78
+CONTROL all candidates: n 78 win 0.141 mean ask 0.136 mean net -0.36c PF 0.97 z -0.10 PFx1.2 0.95
+TREATED deficit<=1: n 39 win 0.179 mean ask 0.189 mean net -2.01c PF 0.87 z -0.35 PFx1.2 0.85
+  treated D1: n 10 win 0.100 mean ask 0.192 mean net -10.29c PF 0.41 z -1.15 PFx1.2 0.40
+  treated D2: n 29 win 0.207 mean ask 0.188 mean net +0.85c PF 1.06 z 0.12 PFx1.2 1.04
+info deficit>=2: n 39 win 0.103 mean ask 0.084 mean net +1.28c PF 1.17 z 0.27 PFx1.2 1.15
+info treated home leg2: n 13 win 0.077 mean ask 0.211 mean net -14.58c PF 0.28 z -2.00 PFx1.2 0.28
+info treated away leg2: n 26 win 0.231 mean ask 0.178 mean net +4.28c PF 1.34 z 0.57 PFx1.2 1.32
+split date 2026-07-30
