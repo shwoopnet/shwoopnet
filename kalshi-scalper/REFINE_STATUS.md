@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:16 AM CT (16:16Z): W-GEXIT1 (gold early sells versus holding): selling helped
+
+- Worker finished read only (w_goldexit/REGISTRATION.md, try count 1, bar: hold beats exit in 8 of 10 or more exits AND total difference over +2 dollars; counterfactual, n small, cannot count toward changing the 25c line, which the owner set and no page can change). Gold has 11 settled early sells. As sold they lost 86.10; the same contracts held to the public settlement would have lost 95.74. Hold minus exit is -9.64 in total, about -0.88 per exit. Hold would have won in 1 of 11 (Oct 13, 09:09 AM CT, +0.99 held against -3.29 sold); in the other 10 the bought side lost at settlement, so selling saved money.
+- Bar not met. This is the opposite of the broad series EXIT1 finding (holding beat every exit shape across 18 series); on live gold the 25c sell has helped, n=11. Two other gold losses were not exits (hold to settlement losses of 4.49 NO and 9.44 YES), outside these totals. Not checked: the exit fill price and the price path between entry and sell; fees on the hold side (small bias); avgFill is null in the export so entry price is the order price field. Settlement results came from public Kalshi market GETs, no key.
+
 ## 2026-11-05 10:16 AM CT (16:16Z): W-FLOOR1 (OICORE fills at the 0.05 floor): forward tracker built
 
 - Worker finished read only (w_floor05/REGISTRATION.md, try count 1, information flag only: at 20 settled floor fills with net per contract below 0 it prints FLAG; no decision authority). Group A (OICORE fills at price 0.05): 9 fills, 1 win, net +4.44, +4.93c per contract, PF 1.90. Group B (0.05 to 0.06): 15 fills, 2 wins, +10.81, +7.46c, PF 2.37. Rest of OICORE: 26 fills, 8 wins, +43.23, +17.02c, PF 3.35. Group A wins about 1 in 9 (history 7.7%) and earns roughly a third of the rest per contract; too few fills to say more.
