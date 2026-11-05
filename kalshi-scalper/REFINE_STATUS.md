@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:27 AM CT (16:27Z): W-ORDERTIME1 (OICORE order timing versus no fill): no relation
+
+- Worker finished read only (w_ordertime/REGISTRATION.md, try count 2, bar permutation p under 0.025). 45 OICORE orders, 36 filled, 9 no fill. Seconds past the minute: filled median 3.97 s (mean 5.65), no fill median 3.97 s (mean 5.48); Mann-Whitney p 1.00, permutation p 0.908. Limit minus the quote seen on the side bought: filled median +0.009, no fill +0.005; permutation p 0.284; all no fill gaps are 0 to 1.3c. All 45 orders are later than :03 past the minute (min 3.2, median 4.0, max 18.8, 5 later than :10); gold L1 (416 orders): min 0.3, median 4.6, max 17.9, 64 later than :10. Bar not met: no sign that late or slow orders cause no fills (9 no fills could only show a large effect).
+- Field availability: tickStartMs, sentAtMs, startToSendMs, startLateMs and answerMs are null on all 45 OICORE rows; answeredAtMs exists on 10, so the start to send and answer comparisons could not be run. Not checked: why those timing fields are null on slot rows (they exist on gold), book depth at send. The report also lists two other second slot strategies with one fill each, EVENT830 (-0.49) and FLOW1 (-0.64); a registry worker (w_registry) confirms they are inert.
+
 ## 2026-11-05 10:26 AM CT (16:26Z): W-STALE1 (OICORE trigger robustness to a stale open interest read): fragile, missed windows are good ones
 
 - Worker finished read only (w_btcwindow/REGISTRATION.md, try count 0, no significance tests, no rule proposal). Candle convention: k[e] is the candle END epoch; original uses oi at e=close-180 minus e=close-360; stale 240 uses e=close-240 minus e=close-420; stale 300 uses e=close-300 minus e=close-480. Side and price are the live R2 rounding from the fresh e=close-180 quote, so only the OI read is stale. 6,075 ok rows, 3,569 priced in band.
