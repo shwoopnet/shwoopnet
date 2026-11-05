@@ -2,6 +2,13 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:11 AM CT (16:11Z): W-TIMING1 (OICORE entry at 180 s vs 120 s): null
+
+- Worker finished read only; registration written first (w_oicore_timing/REGISTRATION.md: 6 comparisons, try count 6, bar 2c net per contract with 40 or more triggers per side). Sim triggers with a readable price at both 180 s and 120 s: 461 all history, 31 in the live era (since Oct 30).
+- All triggers (n=461): price 18.0c at 180 s versus 18.7c at 120 s; net per contract +7.91c versus +7.36c, difference -0.55c (se 0.79c). Live era (n=31): +12.53c versus +12.61c, difference +0.08c (se 3.66c). Missed the bar: entry time inside the window does not matter on average. No change warranted.
+- Two cuts passed the bar mechanically (price moved toward the bought side after 180 s, n=163, net falls 17.65c; away, n=288, net rises 9.11c) but both split on information from after 180 s, so they only explain the null and cannot be traded.
+- Live versus sim: 19 of 35 live fills matched a sim trigger by ticker, side agreed on 18 of 19, price paid 13.5c live versus 13.1c sim. The other 16 live fills had no sim trigger on that ticker; not investigated by this worker, so a coverage audit (w_oicore_cover) was started. Not checked: candle closing asks are not the ask at the order instant; power is low (win rate about 27%).
+
 ## 2026-11-05 10:09 AM CT (16:09Z): Main's order: always keep 2 workers; two started
 
 - Main relayed the owner's decision (Nov 5): keep 2 workers running at all times, no real read is not a reason to run zero; CHEAP1 is closed (PR #702 closed after REV1) and is dropped from the list. I had been running zero workers since Nov 4 and said so each hour; that is now over.
