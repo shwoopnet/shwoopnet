@@ -2,6 +2,13 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:11 AM CT (16:11Z): W-GNOFILL1 (gold L1 no-fill study, 14 days): nothing found
+
+- Worker finished read only; registration written first (w_goldnofill/REGISTRATION.md, 16 splits, bar: 15 point gap with 30 or more orders per side). Gold orders in the last 14 days: 223, 148 filled, 75 no fill (33.6%); whole report history 416 orders, 268 filled, 148 no fill (35.6%).
+- Hour blocks 28.6% to 44.0% no fill (worst gap +11.7 points at 3 to 6 AM CT), no split met the bar. Price band: paid 0.93 or higher 26.9% no fill, 0.90 to 0.93 39.7%, under 0.90 40.5% (gap -13.1 points, just short). Depth at limit flat (34.4% to 39.1%).
+- Latency was the only split that met the bar: orders sent within 937 ms of tick start 43.9% no fill (18 of 41), slower 25.0% (10 of 40), 19 points on 81 orders. One binary split counted as two lines, not corrected for 16 tries, only about a third of orders carry latency, and the direction (faster fills worse) looks backwards, so possibly a confound with the entry window. Not a finding.
+- The 75 no fills would have won 70 of 75 (93.3%) if filled, against 140 of 148 (94.6%) for the filled orders: the missed orders look ordinary, no pile of lost winners or losers. Could not check whether the no fills are real book misses (kalshiStatus is empty in every order row), queue position, or orders before the report window. Verdict: nothing found; at most a shadow on latency if more latency tagged orders accumulate.
+
 ## 2026-11-05 10:11 AM CT (16:11Z): W-TIMING1 (OICORE entry at 180 s vs 120 s): null
 
 - Worker finished read only; registration written first (w_oicore_timing/REGISTRATION.md: 6 comparisons, try count 6, bar 2c net per contract with 40 or more triggers per side). Sim triggers with a readable price at both 180 s and 120 s: 461 all history, 31 in the live era (since Oct 30).
