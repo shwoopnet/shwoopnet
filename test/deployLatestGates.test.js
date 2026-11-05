@@ -51,6 +51,13 @@ gates.DL4 = () => {
   const out2 = run();
   assert.ok(/deploy-push\.sh/.test(out2) && /deploy-sizing\.sh/.test(out2), 'a change to the live library plans the exit watch and the bot function');
   assert.ok(out2.indexOf('[dry run] bash functions/deploy-push.sh') < out2.indexOf('[dry run] bash functions/deploy-sizing.sh'), 'in the required order');
+  // #721 (Nov 5, 2026) changed only kalshiLib.js and the wrapper said "nothing to deploy", so the relay kept its old market list.
+  fs.writeFileSync(path.join(origin, 'functions', 'kalshiLib.js'), 'y\n'); sh('git add -A && git commit -q -m four', origin);
+  const out3 = run();
+  assert.ok(/deploy-sizing\.sh/.test(out3) && !/nothing to deploy/.test(out3), 'a change to the relay series list plans the sizing deploy (it carries kalshiBooks)');
+  fs.writeFileSync(path.join(origin, 'functions', 'someNewLib.js'), 'z\n'); sh('git add -A && git commit -q -m five', origin);
+  const out4 = run();
+  assert.ok(/WARNING: these server files changed/.test(out4) && /someNewLib\.js/.test(out4), 'a server file no rule covers is named, never silent');
   fs.rmSync(tmp, { recursive: true, force: true });
 };
 

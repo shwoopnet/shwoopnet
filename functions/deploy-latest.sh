@@ -60,9 +60,14 @@ want() { echo "$CHANGED" | grep -Eq "$1"; }
 DO_PUSH=0; DO_SIZING=0; DO_REPORT=0
 want '^functions/(kalshiPushLib|kalshiExitAlarmLib|deploy-push)\.' && DO_PUSH=1
 want '^functions/(kalshiLiveLib|kalshiS[l]ot[A-Za-z]*Lib|deploy-sizing)\.' && DO_SIZING=1
+# kalshiLib (the market relay's series list), kalshiBookLib and kalshiSignalLib are loaded by kalshiBooks and the minute function. kalshiLib was missing here, so #721 (Nov 5, 2026) reported "nothing to deploy" while kalshiBooks needed one.
+want '^functions/(kalshiLib|kalshiBookLib|kalshiSignalLib)\.js$' && DO_SIZING=1
 want '^functions/(kalshiReportLib|deploy-report)\.' && DO_REPORT=1
 want '^functions/index\.js$' && { DO_SIZING=1; DO_REPORT=1; }
 want '^functions/(kalshiLiveLib)\.' && DO_PUSH=1   # the exit watch lives in kalshiLiveLib, so its changes also need the exit watch deployed
+# Any other changed server file no rule above claims is named, so a missing rule can never read as "nothing to deploy" in silence.
+UNCLAIMED="$(echo "$CHANGED" | grep -E '^functions/[^/]+\.js$' | grep -Ev '^functions/(kalshiPushLib|kalshiExitAlarmLib|kalshiLiveLib|kalshiS[l]ot[A-Za-z]*Lib|kalshiReportLib|index|kalshiLib|kalshiBookLib|kalshiSignalLib)\.js$' || true)"
+if [ -n "$UNCLAIMED" ]; then echo; echo "WARNING: these server files changed and no deploy here covers them; check which function uses them:"; echo "$UNCLAIMED"; fi
 PAGE_ONLY=0
 if [ $((DO_PUSH + DO_SIZING + DO_REPORT)) -eq 0 ]; then PAGE_ONLY=1; fi
 
