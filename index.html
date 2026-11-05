@@ -417,18 +417,17 @@
   /* Console layout: a fixed rail for the session, account and positions, and one wide column for the books, the trades and the log. */
   #page-kalshi .trades-header{ padding:20px 0 14px 0; }
   #page-kalshi .kal-header-bare{ justify-content:flex-end; padding:8px 0 10px 0; }
-  .kal-console{ grid-template-columns:340px minmax(0,1fr); gap:16px 28px; align-items:start; }
-  .kal-rail, .kal-main{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .kal-console{ align-items:start; }
   .kal-console .kal-card{ margin-bottom:0; }
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
   .kal-card-flush{ padding:0; }
-  .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
+  .kal-compact .kal-acct-head{ padding:0 0 10px 0; }
   .kal-botmenu > summary.kal-pill{ cursor:pointer; user-select:none; }
   /* The Running pill opens a small panel. It used to hang from the pill, narrower than the Account card and sticking out below it, so the card's edge showed behind it and it covered the next card's top. Now it is anchored to the whole card (the card is the positioned box, the pill's own box is not), the same width as the card, and lifted above the cards after it. */
-  .kal-rail .kal-card[data-card="account"]{ position:relative; z-index:6; }
-  .kal-rail .kal-botmenu{ position:static; }
+  .kal-card.kal-compact[data-card="account"]{ position:relative; z-index:6; }
+  .kal-compact .kal-botmenu{ position:static; }
   .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
-  .kal-rail .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
+  .kal-compact .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
   .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
   /* The Running pill opens a SMALL pop-over right under the pill (the owner, Oct 30, 2026: "dont care for this running pop up style - placement"), not a card spanning the whole Account card and covering Bot status. It holds only the controls and Rules and limits; the status lines live in Bot status. */
   .kal-console .kal-card[data-card="account"] .kal-botmenu{ position:relative; }
@@ -536,9 +535,9 @@
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
-  .kal-rail .kal-card{ padding:16px 20px; }
-  .kal-rail .kal-note{ margin-top:8px; }
-  .kal-rail .kal-actions{ margin:10px 0 2px 0; }
+  .kal-card.kal-compact{ padding:16px 20px; }
+  .kal-compact .kal-note{ margin-top:8px; }
+  .kal-compact .kal-actions{ margin:10px 0 2px 0; }
   .kal-btn-ghost{ background:transparent; color:var(--paper); border:1px solid var(--border); }
   .kal-acct-total{ font-family:'Public Sans', sans-serif; font-size:30px; font-weight:700; line-height:1.15; margin-bottom:8px; }
   .kal-rows{ display:flex; flex-direction:column; gap:8px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; }
@@ -560,9 +559,9 @@
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-perf{ padding:14px 22px 20px 22px; }
-  .kal-rail .kal-perf{ padding:12px 0 0 0; }
-  .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:12px; }
+  .kal-compact .kal-perf{ padding:12px 0 0 0; }
+  .kal-compact .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .kal-compact .kal-tile{ padding:7px 8px; } .kal-compact .kal-tile b{ font-size:13px; } .kal-compact .kal-tile .kal-lbl{ font-size:12px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
   .kal-tools-body .kal-actions{ margin:4px 0 2px; }
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
@@ -628,10 +627,36 @@
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
   }
 
-  /* Rearranging: only while "Unlock to rearrange" is ticked (never remembered, so a stray drag cannot happen on a normal visit). */
-  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; user-select:none; -webkit-user-select:none; }
-  .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
-  .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
+  /* Rearranging: only in Edit layout (never remembered, so a stray drag cannot happen on a normal visit). The cards are direct children of the grid since Nov 5, 2026; the old rule named the grid's children while the cards sat one level down in the rail and main wrappers, so the outline never showed. */
+  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; user-select:none; -webkit-user-select:none; }
+  .kal-bot-grid.kal-unlocked > .kal-card:hover{ transform:none; }
+  .kal-bot-grid.kal-unlocked > .kal-card .kal-card-title{ cursor:grab; }
+  .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ position:relative; z-index:50; transition:none; cursor:grabbing; outline-color:var(--paper); box-shadow:0 22px 50px rgba(0,0,0,.55); }
+  .kal-bot-grid.kal-unlocked.kal-drag-on{ cursor:grabbing; }
+  /* The edit controls sit in a strip across the top of each card, outside the card's own layout (the Account card is a grid, so a strip inside its flow landed in one of its cells). */
+  .kal-bot-grid.kal-unlocked > .kal-card{ position:relative; padding-top:62px; }
+  .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:46px; }
+  .kal-move{ position:absolute; top:12px; left:16px; right:16px; display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:0; }
+  .kal-move .kal-mini{ margin-right:0; min-height:32px; }
+  .kal-grip{ margin-right:auto; display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:12px; font-weight:600; cursor:grab; touch-action:none; }
+  .kal-edit-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 14px; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); }
+  .kal-edit-bar[hidden]{ display:none; }
+  .kal-edit-h{ font-weight:700; } .kal-edit-hint{ color:var(--muted); font-size:12px; flex:1 1 280px; }
+  .kal-edit-btns{ display:flex; gap:8px; flex-wrap:wrap; } .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ margin:0; min-height:36px; }
+  .kal-edit-btns .kal-mini:disabled{ opacity:.45; cursor:default; }
+  .kal-sr{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  /* Folding a card to its title row (Nov 5, 2026). The chevron sits in front of every card title; a folded card keeps only the row that holds its title (the Account card keeps the Running pill, so its controls stay one tap away). Important because the Account card's pieces carry id rules (display:contents) that would otherwise win. */
+  .kal-foldbtn{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin:-5px 4px -5px -6px; padding:0; vertical-align:middle; background:none; border:0; border-radius:6px; color:var(--muted); font:inherit; font-size:12px; cursor:pointer; }
+  .kal-foldbtn:hover{ color:var(--paper); background:rgba(255,255,255,.06); } .kal-foldbtn:focus-visible{ outline:2px solid var(--paper); outline-offset:1px; }
+  .kal-foldbtn > i{ display:inline-block; font-style:normal; transition:transform .18s ease; }
+  [data-folded="true"] .kal-foldbtn > i{ transform:rotate(-90deg); }
+  .kal-console > [data-card][data-folded="true"]{ align-self:start; }
+  .kal-console > [data-card][data-folded="true"] > :not(.kal-card-head):not(.kal-card-title):not(.kal-move){ display:none !important; }
+  .kal-console > [data-card][data-folded="true"] > .kal-card-title{ margin-bottom:0; }
+  .kal-console > [data-card="account"][data-folded="true"]{ display:block; }
+  .kal-console > [data-card="account"][data-folded="true"] .kal-acct-head{ display:flex; }
+  /* Half or Full only means something with two columns: on a phone the toggle is hidden and every card is one column. */
+  @media (max-width:900px){ .kal-move [data-width]{ display:none; } .kal-edit-hint{ flex-basis:100%; } .kal-move .kal-mini, .kal-grip, .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ min-height:40px; } .kal-move .kal-mini{ min-width:44px; } .kal-foldbtn{ width:40px; height:40px; margin:-12px 0 -12px -12px; } .kal-bot-grid.kal-unlocked > .kal-card{ padding-top:70px; } .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:54px; } }   /* a thumb needs 40px (mobileGates) */
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
@@ -861,9 +886,8 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-auto-flow:row dense; gap:18px; }   /* no named areas: a card's place follows its order (set by the layout code), so moving a card actually moves it (it did nothing while each card was pinned to its own area) */
-  .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
-  .kal-console [data-card="account"]{ grid-column:1 / -1; }
+  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }   /* no named areas and no dense packing: a card's place is its place in the one list of cards (Nov 5, 2026, the owner: "i don't have much say in where each card goes"), so what the page shows is the order the layout holds and a moved card lands exactly where it was dropped */
+  .kal-console > [data-card][data-w="full"]{ grid-column:1 / -1; }   /* Half or Full is the owner's choice per card (data-w, set by the layout code); a Half card takes one of the two columns */
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
@@ -916,8 +940,8 @@
   /* The result chart takes the height the Bot status card beside it gives the row (the owner, Nov 1, 2026: "big gap below account results"). The box keeps the chart's own shape as its minimum (aspect-ratio set in the markup) and grows past it; the drawing stretches with it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
   .kal-console [data-card="pnl"] #kalPnlBody{ flex:1 1 auto; display:flex; flex-direction:column; }
   .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
-  .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
-  .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
+  .kal-console [data-card="positions"]{ align-self:start; }
+  .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,2fr); gap:10px 28px; align-items:center; padding:20px 22px; }   /* balance and the loss stop on the left, the strategies table on the right (the owner, Oct 30, 2026: fold Strategies into the Account card) */
@@ -948,6 +972,10 @@
     .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
+  /* The Account card at Half width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
+  .kal-console [data-card="account"][data-w="half"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
+  .kal-console [data-card="account"][data-w="half"] .kal-acct-head, .kal-console [data-card="account"][data-w="half"] .kal-acct-total, .kal-console [data-card="account"][data-w="half"] .kal-today, .kal-console [data-card="account"][data-w="half"] .kal-acct-risk, .kal-console [data-card="account"][data-w="half"] #kalStrategies, .kal-console [data-card="account"][data-w="half"] .kal-rows > div, .kal-console [data-card="account"][data-w="half"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
+  .kal-console [data-card="account"][data-w="half"] .kal-tile{ grid-column:auto; grid-row:auto; }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
@@ -978,6 +1006,7 @@
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
     .tape-track{ animation: none; }
     .kal-ecg-wrap.flash{ animation: none; }
+    .kal-foldbtn > i{ transition: none; }
     .tape-set + .tape-set{ display:none; }
     .tape-view{ overflow-x:auto; }
     .news-item:hover{ transform: none; }
@@ -1009,6 +1038,7 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
   [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
+  [data-reduce-motion="true"] .kal-foldbtn > i{ transition: none; }
   [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
   [data-reduce-motion="true"] .tape-view{ overflow-x:auto; }
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
@@ -1410,7 +1440,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
+            <button type="button" class="kal-mini" id="kalLayoutEdit">Edit layout (move cards, set Half or Full)</button>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
         </details>
@@ -1419,9 +1449,13 @@
 
 
     <div class="kal-alert" id="kalAlert" role="alert" hidden><b id="kalAlertTitle"></b><span id="kalAlertText"></span> <button type="button" class="kal-alert-open" id="kalAlertOpen">See notifications</button></div>
+    <div class="kal-edit-bar" id="kalEditBar" hidden>
+      <span class="kal-edit-h">Editing the layout</span><span class="kal-edit-hint">Drag a card by its title or its grip (on a phone, touch and hold), or use its arrows. Half or Full sets its width.</span>
+      <span class="kal-edit-btns"><button type="button" class="kal-mini" id="kalEditUndo" disabled>Undo</button><button type="button" class="kal-mini" id="kalEditReset">Reset</button><button type="button" class="kal-mini" id="kalEditCancel">Cancel</button><button type="button" class="kal-btn" id="kalEditDone">Done</button></span>
+    </div>
+    <div class="kal-sr" id="kalLayoutLive" aria-live="polite"></div>
     <div id="kalTabBot" class="kal-bot-grid kal-console">
-      <div class="kal-rail">
-      <div class="kal-card" data-card="account">
+      <div class="kal-card kal-compact" data-w="full" data-card="account">
         <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div>
           <details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill" class="kal-pill">Not running</summary>
             <div class="kal-layout-body kal-botmenu-body">
@@ -1453,27 +1487,24 @@
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
         <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
-      <div class="kal-card" data-card="status">
+      <div class="kal-card kal-compact" data-w="half" data-card="status">
         <div class="kal-card-title">Bot status</div>
         <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
-      <div class="kal-card" data-card="positions">
-        <div class="kal-card-title">Open positions</div>
-        <div id="kalBotOpen"></div>
-      </div>
-      </div>
-      <div class="kal-main">
-      <div class="kal-card" data-card="pnl" id="kalPnl">
+      <div class="kal-card" data-w="half" data-card="pnl" id="kalPnl">
         <div class="kal-card-head" style="padding:0 0 12px"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
         <div id="kalPnlBody"></div>
       </div>
-      <div class="kal-card kal-card-flush" data-card="trades">
+      <div class="kal-card kal-compact" data-w="full" data-card="positions">
+        <div class="kal-card-title">Open positions</div>
+        <div id="kalBotOpen"></div>
+      </div>
+      <div class="kal-card kal-card-flush" data-w="full" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div id="kalBotStats"></div>
         <div class="kal-tr kal-tr-head"><span>Opened and closed</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
-      </div>
       </div>
     </div>
   </main>
@@ -1605,6 +1636,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Nov 5</div>
+                <ul class="changelog-list">
+                  <li>Bot page: a smoother, freer layout. Edit layout (in the Layout menu) lets any card go anywhere, by dragging (touch and hold on a phone) or with its arrows; the other cards slide out of the way. Each card can be Half or Full width, and every card can fold to its title row. Done, Cancel and Undo; an older saved layout carries over</li>
+                </ul>
                 <div class="changelog-day">Nov 4</div>
                 <ul class="changelog-list">
                   <li>Research: the NHL quote recorder is removed; both NHL ideas it was built to test failed on the held-back games</li>
@@ -4038,47 +4073,84 @@ kalshiStatusTick();
     if(mq.addEventListener){ mq.addEventListener('change', place); } else if(mq.addListener){ mq.addListener(place); }
   })();
 
-  // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
-  // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
+  // Layout of the Bot tab, rebuilt Nov 5, 2026 (the owner: "just more of a blocky interaction.. it doesnt move smoothly, i don't have much say in where each card goes on my page"; they chose smooth movement and free placement, no saved layouts yet).
+  // One ordered list of every card on one two column grid, so any card can go anywhere. Each card is Half or Full width (ignored on a phone, which is one column) and can be folded to its title row.
+  // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
     var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
-    var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
+    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades' };
+    var CARDS = ['account', 'status', 'pnl', 'positions', 'trades'];   // the default order, which is the look the page had before the rebuild
+    var WIDTHS = { account: 'full', status: 'half', pnl: 'half', positions: 'full', trades: 'full' };
+    var VERSION = 2, KEY = 'kalBotLayout';
+    function fresh(){ return { v: VERSION, order: CARDS.slice(), hidden: {}, width: {}, folded: {} }; }
+    function isOptional(k){ return OPTIONAL.some(function(o){ return o[0] === k; }); }
+    // A saved order with unknown names dropped and duplicates removed; a card it does not mention (one added after it was saved) goes right after the card that precedes it by default, not to the end.
+    function complete(list, def){
+      var want = list.filter(function(k, i, a){ return def.indexOf(k) > -1 && a.indexOf(k) === i; });
+      def.forEach(function(k, i){ if(want.indexOf(k) < 0){ var prev = i > 0 ? want.indexOf(def[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
+      return want;
+    }
+    // A layout saved before Nov 5, 2026 (no version) listed the cards in markup order, the rail's cards (account, status, positions) then the main column's (pnl, trades), and the page dealt them into
+    // the slots rail, rail, main, rail, main. Dealing the old list the same way gives the order the owner was looking at, so an old layout keeps its look instead of being thrown away. Its column count (cols) was never used and is dropped.
+    var OLD_DOM = ['account', 'status', 'positions', 'pnl', 'trades'], OLD_RAIL = ['account', 'status', 'positions'];
+    function migrateOrder(old){
+      var want = complete(old, OLD_DOM), rail = want.filter(function(k){ return OLD_RAIL.indexOf(k) > -1; }), main = want.filter(function(k){ return OLD_RAIL.indexOf(k) < 0; }), seq = [], r = 0, m = 0;
+      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var k = w === 'r' ? rail[r++] : main[m++]; if(k){ seq.push(k); } });
+      return seq.concat(rail.slice(r), main.slice(m));
+    }
+    // Anything read back (this browser or the account) is rebuilt from known names and values only, so a corrupt copy cannot hide the account card or set a width that does not exist.
+    function normalize(l){
+      var next = fresh();
+      if(!l || typeof l !== 'object'){ return next; }
+      if(Array.isArray(l.order)){
+        var order = l.order.filter(function(k){ return typeof k === 'string'; });
+        next.order = l.v === VERSION ? complete(order, CARDS) : migrateOrder(order);
+      }
+      OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
+      CARDS.forEach(function(k){
+        if(l.width && (l.width[k] === 'half' || l.width[k] === 'full')){ next.width[k] = l.width[k]; }
+        if(l.folded && l.folded[k] === true){ next.folded[k] = true; }
+      });
+      return next;
+    }
+    var layout = fresh(), migrated = false;
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-      if(saved && typeof saved === 'object'){
-        if(['auto', '1', '2', '3', '4'].indexOf(String(saved.cols)) > -1){ layout.cols = String(saved.cols); }
-        OPTIONAL.forEach(function(o){ if(saved.hidden && saved.hidden[o[0]] === true){ layout.hidden[o[0]] = true; } });
-        if(Array.isArray(saved.order)){ layout.order = saved.order.filter(function(k){ return typeof k === 'string'; }); }
-      }
+      if(saved && typeof saved === 'object'){ layout = normalize(saved); migrated = saved.v !== VERSION; }
     } catch(e){ /* storage can be blocked: the layout just resets each visit */ }
-    var grid = document.getElementById('kalTabBot'), list = document.getElementById('kalLayoutCards');
+    var grid = document.getElementById('kalTabBot'), list = document.getElementById('kalLayoutCards'), live = document.getElementById('kalLayoutLive');
     list.innerHTML = OPTIONAL.map(function(o){
       return '<label><input type="checkbox" data-card-toggle="' + o[0] + '"> ' + o[1] + '</label>';
     }).join('');
-    var DEFAULT_ORDER = Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); });
-    function currentOrder(){ return Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); }); }
-    // Saved order first (unknown names ignored), then any card the saved list does not mention, in its default place.
-    // The rail and main wrappers dissolve into the grid (display:contents), so what sets a card's place is its CSS order, not its place in the markup. The rail's cards and the main column's cards are dealt into the default slots (account, status, result line, positions, trades) in the order each column holds them.
-    function flow(){
-      var rail = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-rail > [data-card]')), main = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-main > [data-card]')), seq = [], r = 0, m = 0;
-      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
-      rail.slice(r).concat(main.slice(m)).forEach(function(c){ seq.push(c); });
-      seq.forEach(function(c, i){ c.style.order = String(i); });
-    }
-    function applyOrder(){
-      var want = (layout.order || []).filter(function(k, i, a){ return DEFAULT_ORDER.indexOf(k) > -1 && a.indexOf(k) === i; });
-      // A card the saved list does not mention (a card added after the layout was saved) goes right after the card that precedes it by default, not to the end.
-      DEFAULT_ORDER.forEach(function(k, i){ if(want.indexOf(k) < 0){ var prev = i > 0 ? want.indexOf(DEFAULT_ORDER[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
-      want.forEach(function(k){ var c = grid.querySelector('[data-card="' + k + '"]'); if(c){ c.parentNode.appendChild(c); } });   // each card moves only within its own column
-      flow();
-    }
+    function card(k){ return grid.querySelector(':scope > [data-card="' + k + '"]'); }
+    function allCards(){ return Array.prototype.slice.call(grid.querySelectorAll(':scope > [data-card]')); }
+    function visibleCards(){ return allCards().filter(function(c){ return !c.hidden; }); }
+    function currentOrder(){ return allCards().map(function(c){ return c.getAttribute('data-card'); }); }
+    function widthOf(k){ return layout.width[k] || WIDTHS[k]; }
+    // A fold chevron in front of every card title, on every visit (not only while editing).
+    CARDS.forEach(function(k){
+      var t = card(k) && card(k).querySelector('.kal-card-title');
+      if(!t){ return; }
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'kal-foldbtn'; b.setAttribute('data-fold', k); b.innerHTML = '<i aria-hidden="true">&#9662;</i>';
+      t.insertBefore(b, t.firstChild);
+    });
     function apply(){
-      applyOrder();
-      OPTIONAL.forEach(function(o){
-        var card = grid.querySelector('[data-card="' + o[0] + '"]');
-        if(card){ card.hidden = layout.hidden[o[0]] === true; }
-        list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true;
+      var want = layout.order;
+      want.forEach(function(k, i){ var c = card(k), at = allCards()[i]; if(c && at !== c){ grid.insertBefore(c, at || null); } });   // only a card that is out of place moves, so focus stays put on the rest
+      CARDS.forEach(function(k){
+        var c = card(k);
+        if(!c){ return; }
+        c.setAttribute('data-w', widthOf(k));
+        c.hidden = isOptional(k) && layout.hidden[k] === true;   // the account card is never hidden, whatever was saved
+        var folded = layout.folded[k] === true;
+        c.setAttribute('data-folded', folded ? 'true' : 'false');
+        var fb = c.querySelector('[data-fold]');
+        if(fb){ fb.setAttribute('aria-expanded', folded ? 'false' : 'true'); fb.setAttribute('aria-label', (folded ? 'Unfold ' : 'Fold ') + LABELS[k]); }
+        var wb = c.querySelector(':scope > .kal-move [data-width]');
+        if(wb){ var w = widthOf(k); wb.textContent = w === 'full' ? 'Full' : 'Half'; wb.setAttribute('aria-pressed', w === 'full' ? 'true' : 'false'); wb.setAttribute('aria-label', LABELS[k] + ' is ' + w + ' width. Make it ' + (w === 'full' ? 'half' : 'full') + ' width'); }
       });
+      OPTIONAL.forEach(function(o){ list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true; });
     }
     var localDirtyAt = 0, lastRemote = '';
     function save(skipSync){
@@ -4087,47 +4159,122 @@ kalshiStatusTick();
       // Saved to the account too (like the other settings), so the arrangement follows the user to another device.
       if(skipSync !== true && typeof syncUserSetting === 'function'){ syncUserSetting('kalBotLayout', layout, 300); }
     }
-    // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
+    function announce(msg){ if(!live){ return; } live.textContent = ''; setTimeout(function(){ live.textContent = msg; }, 30); }
+    // Smooth movement (FLIP): measure every card, change the order, measure again, and slide each card from where it was to where it is now, so the neighbours glide out of the way instead of jumping.
+    // None of it under the device reduce-motion setting or the page's own attribute for it: the cards then simply move.
+    function reducedMotion(){ return document.documentElement.getAttribute('data-reduce-motion') === 'true' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+    var FLIP_MS = 200;
+    function flip(fn, skip){
+      var cards = allCards();
+      if(reducedMotion() || typeof grid.animate !== 'function'){ cards.forEach(function(c){ if(c.__flip){ c.__flip.cancel(); c.__flip = null; } }); fn(); return; }
+      var first = cards.map(function(c){ return c.getBoundingClientRect(); });   // taken with any slide still running, so a new slide starts from where the card is on screen
+      cards.forEach(function(c){ if(c.__flip){ c.__flip.cancel(); c.__flip = null; } });
+      fn();
+      cards.forEach(function(c, i){
+        if(c === skip || c.hidden || !first[i].width){ return; }
+        var b = c.getBoundingClientRect(), dx = first[i].left - b.left, dy = first[i].top - b.top;
+        if(Math.abs(dx) < 1 && Math.abs(dy) < 1){ return; }
+        c.__flip = c.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: FLIP_MS, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      });
+    }
+    // Editing: only on request and never remembered (a normal visit cannot be dragged by accident). Changes show at once; Done keeps them, Cancel puts back the layout from before editing, Undo steps back one change.
+    var editing = false, before = null, undo = [], drag = null;
+    var bar = document.getElementById('kalEditBar'), undoBtn = document.getElementById('kalEditUndo');
+    function snapshot(){ return JSON.parse(JSON.stringify(layout)); }
+    function same(a, b){ return JSON.stringify(a) === JSON.stringify(b); }
+    function updateUndo(){ undoBtn.disabled = undo.length === 0; }
+    function change(mutate, msg){
+      var prev = snapshot();
+      flip(function(){ mutate(); apply(); });
+      if(same(prev, layout)){ return; }
+      if(editing){ undo.push(prev); updateUndo(); } else { save(); }
+      if(msg){ announce(typeof msg === 'function' ? msg() : msg); }
+    }
+    function placeText(k){ var v = visibleCards().map(function(c){ return c.getAttribute('data-card'); }); return LABELS[k] + ' moved to place ' + (v.indexOf(k) + 1) + ' of ' + v.length + '.'; }
+    function setUnlocked(on){
+      grid.classList.toggle('kal-unlocked', on);
+      allCards().forEach(function(c){
+        var k = c.getAttribute('data-card'), old = c.querySelector(':scope > .kal-move');
+        if(old){ old.remove(); }
+        if(on){
+          var b = document.createElement('div'); b.className = 'kal-move';
+          b.innerHTML = '<span class="kal-grip" aria-hidden="true">&#8942;&#8942; Drag</span>'
+            + '<button type="button" class="kal-mini" data-width="' + k + '"></button>'
+            + '<button type="button" class="kal-mini" data-move="-1" aria-label="Move ' + LABELS[k] + ' up">&#9650;</button>'
+            + '<button type="button" class="kal-mini" data-move="1" aria-label="Move ' + LABELS[k] + ' down">&#9660;</button>';
+          c.insertBefore(b, c.firstChild);
+        }
+      });
+      apply();
+    }
+    function startEdit(){
+      if(editing){ return; }
+      editing = true; before = snapshot(); undo = []; updateUndo();
+      var menu = document.getElementById('kalLayout'); if(menu){ menu.open = false; }
+      flip(function(){ bar.hidden = false; setUnlocked(true); });
+      announce('Editing the layout. Drag a card, or use its arrows. Done keeps the changes, Cancel puts the layout back.');
+      document.getElementById('kalEditDone').focus();
+    }
+    function endEdit(keep){
+      if(!editing){ return; }
+      if(drag){ endDrag(true); }
+      var prev = before;
+      editing = false; before = null; undo = []; updateUndo();
+      flip(function(){
+        if(!keep){ layout = prev; }
+        bar.hidden = true; setUnlocked(false);
+      });
+      if(keep && !same(prev, layout)){ save(); }
+      announce(keep ? 'Layout saved.' : 'Layout put back as it was.');
+      var eb = document.getElementById('kalLayoutEdit'); if(eb){ eb.blur(); }
+    }
+    document.getElementById('kalLayoutEdit').addEventListener('click', startEdit);
+    document.getElementById('kalEditDone').addEventListener('click', function(){ endEdit(true); });
+    document.getElementById('kalEditCancel').addEventListener('click', function(){ endEdit(false); });
+    undoBtn.addEventListener('click', function(){
+      if(!undo.length){ return; }
+      var prev = undo.pop();
+      flip(function(){ layout = prev; apply(); });
+      updateUndo(); announce('Last change undone.');
+    });
+    // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens and from the keyboard.
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
     var presentBtn = document.getElementById('kalPresentBtn');
     // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
     if(presentBtn){ presentBtn.addEventListener('click', function(){ kalshiSetPresent(document.documentElement.getAttribute('data-present') !== 'on'); }); }
-    var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
-    function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
-    function commitOrder(){ layout.order = currentOrder(); flow(); save(); }
-    function setUnlocked(on){
-      grid.classList.toggle('kal-unlocked', on);
-      Array.prototype.forEach.call(grid.querySelectorAll('[data-card]'), function(c){
-        c.draggable = on;
-        var old = c.querySelector(':scope > .kal-move');
-        if(old){ old.remove(); }
-        if(on){
-          var bar = document.createElement('div'); bar.className = 'kal-move';
-          bar.innerHTML = '<button type="button" class="kal-mini" data-move="-1" aria-label="Move this card up">&#9650;</button><button type="button" class="kal-mini" data-move="1" aria-label="Move this card down">&#9660;</button>';
-          c.insertBefore(bar, c.firstChild);
-        }
-      });
-    }
-    unlock.addEventListener('change', function(){ setUnlocked(unlock.checked); });
     grid.addEventListener('click', function(e){
-      var d = e.target && e.target.getAttribute && e.target.getAttribute('data-move');
-      if(!d || !grid.classList.contains('kal-unlocked')){ return; }
-      var card = e.target.closest('[data-card]'), cards = card ? visibleCards(card.parentNode) : [], i = cards.indexOf(card), j = i + Number(d);
-      if(i < 0 || j < 0 || j >= cards.length){ return; }
-      if(Number(d) < 0){ card.parentNode.insertBefore(card, cards[j]); } else { card.parentNode.insertBefore(card, cards[j].nextSibling); }
-      commitOrder();
+      var t = e.target && e.target.closest ? e.target.closest('button') : null;
+      if(!t || !grid.contains(t)){ return; }
+      var c = t.closest('#kalTabBot > [data-card]'), k = c && c.getAttribute('data-card');
+      if(!k){ return; }
+      if(t.hasAttribute('data-fold')){
+        change(function(){ if(layout.folded[k] === true){ delete layout.folded[k]; } else { layout.folded[k] = true; } }, function(){ return LABELS[k] + (layout.folded[k] === true ? ' folded.' : ' unfolded.'); });
+        t.focus();
+        return;
+      }
+      if(!grid.classList.contains('kal-unlocked')){ return; }
+      if(t.hasAttribute('data-width')){
+        change(function(){ layout.width[k] = widthOf(k) === 'full' ? 'half' : 'full'; }, function(){ return LABELS[k] + ' is now ' + widthOf(k) + ' width.'; });
+        t.focus();
+        return;
+      }
+      var d = Number(t.getAttribute('data-move'));
+      if(d !== 1 && d !== -1){ return; }
+      var cards = visibleCards(), i = cards.indexOf(c), j = i + d;
+      if(i < 0 || j < 0 || j >= cards.length){ announce(LABELS[k] + ' is already ' + (d < 0 ? 'first.' : 'last.')); return; }
+      change(function(){
+        if(d < 0){ grid.insertBefore(c, cards[j]); } else { grid.insertBefore(c, cards[j].nextSibling); }
+        layout.order = currentOrder();
+      }, function(){ return placeText(k); });
+      t.focus();
     });
-    grid.addEventListener('dragstart', function(e){
-      var c = grid.classList.contains('kal-unlocked') && e.target.closest ? e.target.closest('[data-card]') : null;
-      if(!c){ return; }
-      dragging = c; c.classList.add('kal-dragging');
-      if(e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', c.getAttribute('data-card')); } catch(x){ /* some browsers refuse */ } }
-    });
-    // The card the pointer is over, or the nearest one when it is in a gap, so a drag does not stall between cards.
-    function cardNear(x, y){
+    // Dragging with pointer events (mouse, pen and touch; the native drag and drop it replaces did not work on phones). A mouse drag starts after a few pixels; a touch drag starts after a short hold
+    // (so a swipe still scrolls the page) or at once on the grip. The card follows the pointer, and the order changes only when the pointer crosses the middle of another card, never on every pixel.
+    var HOLD_MS = 280, SLOP = 8;
+    function cardAt(x, y){
       var best = null, bestD = Infinity;
-      visibleCards(dragging.parentNode).forEach(function(c){
-        if(c === dragging){ return; }
+      visibleCards().forEach(function(c){
+        if(c === drag.card){ return; }
         var r = c.getBoundingClientRect();
         var dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
         var d = dx * dx + dy * dy;
@@ -4135,50 +4282,111 @@ kalshiStatusTick();
       });
       return best;
     }
-    grid.addEventListener('dragenter', function(e){ if(dragging){ e.preventDefault(); } });
-    grid.addEventListener('dragover', function(e){
-      if(!dragging){ return; }
-      e.preventDefault();   // every dragover must accept the drop, or some browsers stop reordering part way
-      if(e.dataTransfer){ e.dataTransfer.dropEffect = 'move'; }
-      var over = cardNear(e.clientX, e.clientY);
-      if(!over){ return; }
-      var r = over.getBoundingClientRect();
-      var after = e.clientY > r.top + r.height / 2;   // the cards of a column are stacked, so above or below the middle
-      var want = after ? over.nextSibling : over;
-      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); flow(); }
+    function follow(){
+      var c = drag.card, r = c.getBoundingClientRect(), slotL = r.left - drag.tx, slotT = r.top - drag.ty;
+      drag.tx = drag.x - drag.ox - slotL; drag.ty = drag.y - drag.oy - slotT;
+      c.style.transform = 'translate(' + drag.tx + 'px,' + drag.ty + 'px)';
+      return { left: slotL, top: slotT };
+    }
+    function frame(){
+      if(!drag || !drag.active){ return; }
+      var edge = 70, h = window.innerHeight;
+      if(drag.y < edge){ window.scrollBy(0, -Math.ceil((edge - drag.y) / 5)); } else if(drag.y > h - edge){ window.scrollBy(0, Math.ceil((drag.y - (h - edge)) / 5)); }
+      var slot = follow();
+      if(Date.now() - drag.swapAt > FLIP_MS){
+        var over = cardAt(drag.x, drag.y);
+        if(over){
+          var cards = visibleCards(), i = cards.indexOf(drag.card), j = cards.indexOf(over), r = over.getBoundingClientRect();
+          var sameRow = Math.abs(r.top - slot.top) < 24;
+          var past = sameRow ? (j < i ? drag.x < r.left + r.width / 2 : drag.x > r.left + r.width / 2) : (j < i ? drag.y < r.top + r.height / 2 : drag.y > r.top + r.height / 2);
+          if(past){
+            flip(function(){ grid.insertBefore(drag.card, j < i ? over : over.nextSibling); }, drag.card);
+            drag.swapAt = Date.now(); follow();
+          }
+        }
+      }
+      drag.raf = requestAnimationFrame(frame);
+    }
+    function beginDrag(){
+      var c = drag.card;
+      if(c.__flip){ c.__flip.cancel(); c.__flip = null; }
+      var r = c.getBoundingClientRect();
+      drag.active = true; drag.ox = drag.x - r.left; drag.oy = drag.y - r.top; drag.tx = 0; drag.ty = 0; drag.swapAt = 0;
+      c.classList.add('kal-dragging'); grid.classList.add('kal-drag-on');
+      drag.raf = requestAnimationFrame(frame);
+    }
+    function endDrag(revert){
+      var d = drag;
+      drag = null;
+      listen(false);
+      clearTimeout(d.timer);
+      if(!d.active){ return; }
+      cancelAnimationFrame(d.raf);
+      var c = d.card, from = c.getBoundingClientRect();
+      c.style.transition = 'none'; c.style.transform = ''; c.classList.remove('kal-dragging'); grid.classList.remove('kal-drag-on');
+      void c.offsetWidth; c.style.transition = '';   // the card's hover transition must not replay the drop as a second, slower slide
+      if(revert){ flip(function(){ layout = d.prev; apply(); }); return; }
+      layout.order = currentOrder();
+      if(!reducedMotion() && typeof c.animate === 'function'){   // the card settles into its new place instead of snapping there
+        var to = c.getBoundingClientRect();
+        c.__flip = c.animate([{ transform: 'translate(' + (from.left - to.left) + 'px,' + (from.top - to.top) + 'px)' }, { transform: 'none' }], { duration: FLIP_MS, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      }
+      if(!same(d.prev, layout)){ undo.push(d.prev); updateUndo(); announce(placeText(c.getAttribute('data-card'))); }
+    }
+    grid.addEventListener('pointerdown', function(e){
+      if(!editing || drag || (e.pointerType === 'mouse' && e.button !== 0)){ return; }
+      var t = e.target, onGrip = !!(t.closest && t.closest('.kal-grip'));
+      if(!onGrip && t.closest && t.closest('button, a, input, select, textarea, summary, label, details, [contenteditable]')){ return; }   // a control inside a card still works while editing
+      var c = t.closest && t.closest('#kalTabBot > [data-card]');
+      if(!c){ return; }
+      drag = { card: c, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, active: false, touch: e.pointerType !== 'mouse', prev: snapshot(), timer: 0 };
+      listen(true);
+      if(drag.touch){
+        if(onGrip){ beginDrag(); } else { drag.timer = setTimeout(function(){ if(drag && !drag.active){ beginDrag(); } }, HOLD_MS); }
+      }
+      if(e.pointerType === 'mouse'){ e.preventDefault(); }   // no text selection while a mouse drag starts
     });
-    grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
-    grid.addEventListener('dragend', function(){
-      if(!dragging){ return; }
-      dragging.classList.remove('kal-dragging'); dragging = null; commitOrder();
-    });
+    // Move, up and cancel are listened to only while a card is held (added on pointerdown, removed when it ends), so the page has no pointer listener of its own the rest of the time.
+    function onMove(e){
+      if(!drag){ return; }
+      drag.x = e.clientX; drag.y = e.clientY;
+      if(drag.active){ return; }
+      var moved = Math.abs(drag.x - drag.x0) + Math.abs(drag.y - drag.y0);
+      if(!drag.touch && moved > 5){ beginDrag(); }
+      else if(drag.touch && moved > SLOP){ endDrag(false); }   // the finger moved before the hold: it is a scroll, not a drag
+    }
+    function onUp(){ if(drag){ endDrag(false); } }
+    function listen(on){ ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window[on ? 'addEventListener' : 'removeEventListener'](n, n === 'pointermove' ? onMove : onUp); }); }
+    // Once a touch drag has begun the page must not scroll under the finger (it scrolls by itself near the top and bottom edges instead). On the grid, and registered up front, because a browser decides whether a touch may block scrolling when the touch starts.
+    grid.addEventListener('touchmove', function(e){ if(drag && drag.active && e.cancelable){ e.preventDefault(); } }, { passive: false });
+    grid.addEventListener('contextmenu', function(e){ if(editing && drag){ e.preventDefault(); } });   // a long press must not open the phone's menu
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && drag && drag.active){ endDrag(true); announce('Move cancelled.'); } });
     // The account's saved layout arrives from the shared user-settings snapshot; it is applied without writing it straight back.
     window.__kalBotLayout = {
       get: function(){ return layout; },
       set: function(l){
         if(!l || typeof l !== 'object'){ return; }
         // The account re-sends its saved layout on every update to the user document, which is constant. Apply it only when it is new, and
-        // never while a drag is in progress or just after our own change (the older copy would put the card straight back).
+        // never while editing or dragging or just after our own change (the older copy would put the card straight back).
         var key = JSON.stringify(l);
         if(key === lastRemote){ return; }
-        if(dragging || Date.now() - localDirtyAt < 4000){ return; }
+        if(editing || drag || Date.now() - localDirtyAt < 4000){ return; }
         lastRemote = key;
-        var next = { cols: 'auto', hidden: {}, order: null };
-        if(['auto', '1', '2', '3', '4'].indexOf(String(l.cols)) > -1){ next.cols = String(l.cols); }
-        OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
-        if(Array.isArray(l.order)){ next.order = l.order.filter(function(k){ return typeof k === 'string'; }); }
+        var next = normalize(l);
         layout = next; apply(); save(true);
-        if(unlock.checked){ setUnlocked(true); }
       }
     };
     list.addEventListener('change', function(e){
       var k = e.target && e.target.getAttribute('data-card-toggle');
       if(!k){ return; }
-      if(e.target.checked){ delete layout.hidden[k]; } else { layout.hidden[k] = true; }
-      apply(); save();
+      var on = e.target.checked;
+      change(function(){ if(on){ delete layout.hidden[k]; } else { layout.hidden[k] = true; } }, LABELS[k] + (on ? ' shown.' : ' hidden.'));
     });
-    document.getElementById('kalLayoutReset').addEventListener('click', function(){ layout = { cols: 'auto', hidden: {}, order: null }; apply(); save(); if(unlock.checked){ setUnlocked(true); } });
+    function reset(){ change(function(){ layout = fresh(); }, 'Layout reset to the default.'); }
+    document.getElementById('kalEditReset').addEventListener('click', reset);
+    document.getElementById('kalLayoutReset').addEventListener('click', reset);
     apply();
+    if(migrated){ save(true); }   // an old copy is rewritten in the new shape here only; the account copy is rewritten on the next change
   })();
 
   // Starting the bot asks twice: the first click only asks, the confirm click is the only one that starts it.
