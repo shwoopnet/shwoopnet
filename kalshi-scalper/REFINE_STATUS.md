@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:20 AM CT (16:20Z): S-BUCKET1 tracker tested: all branches pass
+
+- Test worker ran copies of the tracker on synthetic reports (original untouched). 39 B5 settled: FLAG none (39 of 40). 40 B5 at -2.00c: FLAG bucket1 printed. 40 B5 at exactly +1.0c: flagged (for 10 contracts and for 3). 40 B5 at +3c: FLAG none (B5 above +1c at 40). B10 at 25 fills prints the table line; at 24 prints nothing. Projected date with 10 B5 fills in 3.00 days: 3.33 a day, projected 40 around 2026-11-17 CT, checked by hand; under 1 day prints rate n/a. Quirk, not a bug: the flag compares the unrounded net per contract to 1.0, so 1.004c prints 1.00 and gets FLAG none while 0.996c prints 1.00 and flags.
+
 ## 2026-11-05 10:19 AM CT (16:19Z): S-BUCKET1 tracker built and wired into wake.sh
 
 - Worker built w_bucket1/bucket1_forward.py exactly as registered (cutoff 2026-11-05T16:18:41Z hard coded). Current output: B5, B10 and other forward each 0 fills; FLAG none (bucket1 B5 0 of 40 settled fills). Leak test on a synthetic report with orders at 16:18:40Z, exactly 16:18:41Z and 16:00Z: all three excluded; only the 16:18:42Z B5, a 17:00Z B10 and an unsettled 0.40 order counted. Not yet exercised: the 40 fill FLAG branch, the 25 fill B10 line and the projected date (needs fills); a worker will test those on synthetic data. Added as a BUCKET1 section in wake.sh.
