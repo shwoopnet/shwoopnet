@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:44 AM CT (16:44Z): W-JUMPEXP1 (expected S-JUMP1 band results, stated before the Nov 7 read)
+
+- Worker finished read only (w_jumpexp/REGISTRATION.md, a.py; try count 0, expectations only; also appended to interim_40.md). Bands (forward_oicore.py tab c1): 86300-106000 is OIR under 106000; 106000 and over is OIR at or above 106000; OIR = OI(close-180) minus OI(close-360). Sim = R2 rounding, deduped, all history, 536 triggers; live = 36 settled fills with OIR rebuilt from oi/btc.jsonl (all found).
+- 86300-106000: sim n 206, win 18.0% (95% 12.6 to 23.3), net +2.01c per contract (-2.77 to +7.03); live 15 fills, 4 wins (expected 2.7), exact p 0.33; expected fills by fill 40: 16.7; surprising at p under 0.1: 0 wins, or 6 or more of 15. 106000 and over: sim n 330, win 28.8% (23.6 to 33.9), net +10.78c (+6.22 to +15.41); live 21 fills, 5 wins (expected 6.0), exact p 0.81; expected by fill 40: 23.3; surprising: 0 to 2 wins or 10 or more of 21. Nov 7 yardstick: judge each band by its exact binomial p against the sim win rate at its final n, not by net. Not checked: live dollars are size weighted so only win counts were compared; live fill prices may differ from the sim's rounded prices; the low band's sim interval includes zero; live fills are a subset of sim triggers and the 9 no fill orders are excluded. So far live is in line with the sim in both bands.
+
 ## 2026-11-05 10:43 AM CT (16:43Z): W-THRESH1 (OICORE threshold fragility): no cliff at 86,300
 
 - Worker finished read only (w_thresh/REGISTRATION.md, try count 0, not for choosing a threshold; R2 rounding, band on the rounded price, fee 0.07p(1-p), 3,569 usable windows). All history, threshold: n, win%, net c/ct, PF: 60k 1058, 21.6, +4.18, 1.36 (CI +1.9 to +6.5); 70k 805, 22.2, +5.16, 1.46; 80k 622, 23.3, +6.19, 1.56; 85k 552, 24.1, +6.97, 1.64; 86,300 536, 24.6, +7.41, 1.68 (CI +4.0 to +10.8); 90k 491, 25.7, +8.05, 1.74; 100k 369, 28.2, +10.44, 2.00; 120k 241, 32.8, +13.56, 2.32 (CI +8.2 to +19.1).
