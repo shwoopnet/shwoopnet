@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:21 AM CT (16:21Z): Nov 7 and Nov 13 read tools dry run: pass, one wording gap fixed
+
+- Worker dry ran oicore_nov13.py on copies. On the real report it reads strategy OICORE from slotOrders and prints 35 fills, 9 wins, net 47.67, PF 3.04, equal to secondSlot.byStrategy.OICORE. Kill rules on synthetic copies: 17 consecutive losses prints ok (1 away), 18 prints KILL HIT (also when the streak is not at the end); net -7 at 40 fills prints KILL HIT, -5 and exactly -6 print ok; the net rule prints n/a under 40 fills. It exits 0 with kalshiStatus, answeredAtMs and null avgFill present, absent, with an extra unknown key, with slotOrders empty and with it absent.
+- Gap found and fixed (my scratchpad script only, backup oicore_nov13.py.bak): the script did not print the README's Nov 13 rule (SLOT-OICORE item 5: FALSIFIED if profit factor under 1.0 on at least 100 filled trades, or net under 0 on at least 150; a fill rate under 50% of signals, or a median ask size under 10 contracts, stops the probe). I confirmed the wording in the README myself and added a second print with that text and the fill count against 100. A follow up worker (w_stops) computes the two stop numbers (fill rate and median ask size) on the live record, which nobody had done.
+
 ## 2026-11-05 10:20 AM CT (16:20Z): S-BUCKET1 tracker tested: all branches pass
 
 - Test worker ran copies of the tracker on synthetic reports (original untouched). 39 B5 settled: FLAG none (39 of 40). 40 B5 at -2.00c: FLAG bucket1 printed. 40 B5 at exactly +1.0c: flagged (for 10 contracts and for 3). 40 B5 at +3c: FLAG none (B5 above +1c at 40). B10 at 25 fills prints the table line; at 24 prints nothing. Projected date with 10 B5 fills in 3.00 days: 3.33 a day, projected 40 around 2026-11-17 CT, checked by hand; under 1 day prints rate n/a. Quirk, not a bug: the flag compares the unrounded net per contract to 1.0, so 1.004c prints 1.00 and gets FLAG none while 0.996c prints 1.00 and flags.
