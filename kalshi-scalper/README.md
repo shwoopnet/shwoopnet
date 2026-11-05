@@ -8898,3 +8898,6 @@ Full text: `workers/TIE1_REGISTRATION.md` (sha256 `f154591808b6612c2e120f695c1d4
 
 ## Registration: PHYSCOUNT1 (physical-event and count-by-date markets: launches, asteroid, Rocket Lab, hurricane category; census gate 100 events; 2026-11-05)
 Registered first: `workers/PHYSCOUNT1_REGISTRATION.md`, before any price or outcome. Earthquakes (EQUAKE1), storms, space weather, air quality and tornadoes (WXOTHER1, COUNT2) already done. Cheap side only, outside fact is the catalog partial count at the look. Series scored only with 100 or more settled events before the cut. Prediction: all NOT_ENOUGH_DATA about 90%. N +1.
+
+## Result: PHYSCOUNT1 (2026-11-05, census only): NOT_ENOUGH_DATA for every series
+Full text `workers/PHYSCOUNT1_RESULT.md`. Events before the cut: KXHURCAT 89 (83 traded), KXSPACEXCOUNT 15, KXHURCTOTMAJ 4, KXRKLBCOUNT 1, asteroid, reuse, land, Starship 2025 one each, KXSPACEX, dock and orbit none. No wildfire, volcano, meteor, tsunami or satellite series. Nothing priced or scored. SpaceX count needs about 7 years to reach 100 events; hurricane category is covered by the WXOTHER1 2027-04-15 rerun; earthquakes by the EQUAKE1 forward read. N +1 (running about 730,447).
