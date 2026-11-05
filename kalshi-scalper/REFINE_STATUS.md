@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:45 AM CT (16:45Z): W-SDIREXP1 (expected S-SDIR1 results; note S-SDIR1 is not a YES versus NO split)
+
+- Worker finished read only (w_sdirexp/REGISTRATION.md, a.py, OUT.txt; try count 0; also appended to interim_40.md). Correction to how I have been describing it: S-SDIR1 is the bought side's YES mid change from close-360 to close-180 (sign flipped for NO), kept when sdir is at least -0.09; it is not a YES versus NO split (the worker tested that too as a side check). Sim, R2 rounding, OI at least 86,300, 536 triggers: sdir at least -0.09: win 27.2% (22.3 to 32.7), net +8.85c per contract (+4.08 to +13.99), n 276, live 17 fills 5 wins (expected 4.6, exact p 0.79); sdir below -0.09: win 21.9% (17.3 to 27.3), net +5.87c (+1.29 to +10.64), n 260, live 19 fills 4 wins (expected 4.2, p 1.00); all: 24.6%, +7.41c, live 36 fills 9 wins (expected 8.9, p 1.00). Expected fills by 40: about 19 and 21. Surprising (p under 0.1): 0, 1 or 8 plus wins in the high group (0, 1 or 9 plus at 19 fills), the same in the low group; whole set 0 to 4 or 14 plus (0 to 5 or 15 plus at 40).
+- Do the sim groups differ? Win 27.2% versus 21.9%, two proportion p 0.158: the data do not clearly show that the sdir filter carries information; both groups are positive. YES versus NO: sim win 25.2% versus 23.8% (p 0.705), no difference; live YES 20 fills 7 wins, NO 16 fills 2 wins, neither surprising (p 0.31 and 0.39). Not checked: 1 live fill had a different side than the sim's (live sdir used the live side); dollars; the sim fill price is a rounding model.
+
 ## 2026-11-05 10:44 AM CT (16:44Z): W-JUMPEXP1 (expected S-JUMP1 band results, stated before the Nov 7 read)
 
 - Worker finished read only (w_jumpexp/REGISTRATION.md, a.py; try count 0, expectations only; also appended to interim_40.md). Bands (forward_oicore.py tab c1): 86300-106000 is OIR under 106000; 106000 and over is OIR at or above 106000; OIR = OI(close-180) minus OI(close-360). Sim = R2 rounding, deduped, all history, 536 triggers; live = 36 settled fills with OIR rebuilt from oi/btc.jsonl (all found).
