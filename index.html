@@ -1643,6 +1643,9 @@
                 </ul>
                 <div class="changelog-day">Oct 31</div>
                 <ul class="changelog-list">
+                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
+                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
+                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page on a phone: a redraw no longer moves the page up while you are scrolled down (the scroll position is put back after each redraw)</li>
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
                   <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
@@ -1652,13 +1655,10 @@
                 </ul>
                 <div class="changelog-day">Oct 30</div>
                 <ul class="changelog-list">
-                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
                   <li>Bot status: redone as two tiles (the countdown to the next look and the health line) with the last order, orders today and which markets are open; win rate, edge and best and worst market are no longer on this card, and Needs a look shows only when something is wrong</li>
                   <li>Settings: the Phone alerts confirmation now says closes, stops and issues (it said entries, but a buy never alerts)</li>
-                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
                   <li>Page: zooming out in the browser now keeps the page centred instead of leaving it against the left edge</li>
                   <li>Page: browser zoom (Cmd minus and plus) now zooms the page properly on a desktop; the big-screen scale-up follows the screen instead of the window width, so zooming out no longer switches it on and cancels the zoom</li>
-                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page: the Rules text now says the Bitcoin probe (OICORE) sends 10 contracts, not 5, and no longer lists a one-crypto-order-per-window limit that no live market is under</li>
                   <li>Notes: corrected the project note about which Kalshi shard each market trades on (every live market is on shard 2; gold was wrongly listed on shard 0)</li>
                   <li>Trading: the 8 PM to midnight pause is lifted for gold and Dogecoin, so both trade around the clock again (it cost about 30 fills a week)</li>
