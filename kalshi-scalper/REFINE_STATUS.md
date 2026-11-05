@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:14 AM CT (16:14Z): W-MISSING1 (OICORE code read): code matches CLAUDE.md, sim differs on rounding and ties
+
+- Worker finished read only (w_oicore_missing/REGISTRATION.md, no try count). The live entry compares the live market read (GET markets/ticker) at the minute tick, about 177 s before close, not the candle close. Price is rounded UP to a whole cent (yes = ceil(yes_ask*100)/100; no = 1 - floor(yes_bid*100)/100), the cheaper rounded side is bought, and that rounded price is checked against 0.05 to 0.50 and used as the IOC limit. A raw 0.041 to 0.049 rounds to 0.05 and passes, which is why live limits run 0.05 to 0.07. Replaying the rule on seenBid and seenAsk reproduces side and price for 43 of 43 live OICORE orders since Oct 30. The code does what CLAUDE.md says.
+- The sim (forward_oicore.py) uses the raw c-180 candle ask, no cent rounding, no 177 s timing, and picks YES on an exact tie where the code picks NO. That accounts for the 9 live only fills; the Oct 31 NO at 0.50 was not a tie (live saw bid 0.50 ask 0.51, a one cent move).
+- 6 sim triggers have no live order and no no fill document: Nov 1 14:45Z, Nov 2 14:45Z, 15:45Z, 17:00Z, Nov 3 17:30Z, 23:00Z. All unexplained. Ruled out where visible: kill latch, daily and lifetime caps (net positive), L1 window use, depth share (cuts counts, never skips), OI margin (large except Nov 2 17:00, 86,523 vs 86,300). Still possible and not observable: the 20 s staleness refusal, a market read or 429 failure, an unresolved earlier order, a price move versus the candle. Live order timestamps run :03 to :18 past the minute, 20 of 42 later than :03. Not checked: the event log, session history and actual tick start times for those 6. Not actionable yet; a follow up (w_simround) reruns the sim with live rounding.
+
 ## 2026-11-05 10:13 AM CT (16:13Z): W-ODDS1 (OICORE kill rule and PF odds, stated in advance)
 
 - Worker finished read only (w_oicore_odds/REGISTRATION.md; 20,000 draws, seed 20261105). Start state is the real record: 35 fills, 9 wins, net +47.67, streak 3. New fills simulated at 10 contracts. Models: A live bootstrap, B sim all history (469 rows, win 26.9%, PF 1.86), C win probability halved (12.9%).
