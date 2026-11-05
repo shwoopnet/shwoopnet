@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:12 AM CT (16:12Z): W-GSIZE1 (gold loss rate by size band): noise
+
+- Worker finished read only (w_goldsize/REGISTRATION.md, 5 tests tried: 2 primary, 3 conditioned; bar permutation p under 0.05 and not explained by price or time). 268 settled gold fills, 13 losses (loss is settledPnl below 0, 25c exits included). Loss rate by band, Wilson 95%: 1 to 5: 3 of 52 (5.8%, 2.0 to 15.6); 6 to 10: 3 of 104 (2.9%, 1.0 to 8.1); 11 to 15: 7 of 91 (7.7%, 3.8 to 15.0); 16 plus: 0 of 21 (0 to 15.5). By thirds 4.4%, 4.5%, 5.6%.
+- Permutation p (10,000 draws, seed 20261105): four bands 0.286; thirds 0.94; within price tertiles 0.33; within CT time blocks 0.28; within both 0.38. Nothing near 0.05. Price paid is flat across bands (0.923 to 0.933), so it does not explain the PF gap.
+- The 11 to 15 band carries 71% of gross loss dollars on 34% of orders because its 7 losses were all 25c exits and its losses are bigger (avg loss -10.17 against -3.64 at 1 to 5), not because its loss rate is reliably higher. The 16 plus band has existed only since Oct 29 (21 orders). Not checked: day level clustering of losses, anything beyond this sample. Verdict: the PF gap by band is where a handful of losses fell, underpowered; no size recommendation and no shadow brief.
+
 ## 2026-11-05 10:12 AM CT (16:12Z): W-COVER1 (OICORE live vs sim trigger coverage): sim is close, not exact
 
 - Diagnostic worker finished read only (w_oicore_cover/REGISTRATION.md, no try count, no profitability read). 35 live OICORE fills against the sim: 26 windows are in oi/btc.jsonl and the other 9 are in fwd_cache.jsonl, so no true data gaps. With both files 25 of 35 fills match a sim trigger. This worker's count differs from the first timing worker's 19 matched (18 vs 17 with btc.jsonl alone), so treat the matching counts as approximate; the method is by ticker.
