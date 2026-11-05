@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:15 AM CT (16:15Z): W-SIMROUND1 (sim rerun with live cent rounding): history survives
+
+- Worker finished read only (w_simround/REGISTRATION.md, try count 2, bar: 1c net change or 30 or more triggers added or removed). All history rows (6,071 ok, 2,243 pass the OI rise of 86,300). Original sim: 469 triggers, win 26.9%, price 0.185, net +7.63c per contract, PF 1.86. R1 (rounded price, band on raw): 469, 26.9%, 0.179, +8.06c, PF 1.69. R2 (band on the rounded price, as live): 534, 24.5%, 0.163, +7.36c, PF 1.68.
+- Rounding added 65 triggers and removed 0, no side changes; all 65 are at price 0.05 (a raw ask of 0.04xx rounds up into the band). They won 7.7% for +2.36c per contract, PF 1.48. 65 added exceeds the 30 bar so rounding is reportable; the net change of -0.27c is under 1c. About 0.14 of the PF drop (1.86 to 1.72) is the original's c-120 price versus the c-180 candle (timing), and rounding itself costs about 0.04 more.
+- Verdict: the sim history survives live rounding (PF 1.86 becomes 1.68, net per contract barely moves). The added floor group at 0.05 is thin and low win rate. Not checked: candle closes are not the quote at the order instant, IOC fill at exactly the rounded limit is assumed, history cannot count toward adopting anything. A forward tracker for the 0.05 floor group (w_floor05) was started so the Nov 13 read can show it separately.
+
 ## 2026-11-05 10:14 AM CT (16:14Z): W-CLUSTER1 (loss clustering, gold and OICORE): none
 
 - Worker finished read only (w_cluster/REGISTRATION.md, try count 4, bar permutation p under 0.05 or any day within 50% of the shared stop; seed 12345, 10,000 draws, CT days). Data: 268 settled gold orders over 23 trading days with 13 losses; 35 settled OICORE orders (report slotOrders rows carry a strategy field, so I can read OICORE straight from them) with 26 losses, Oct 30 to Nov 5.
