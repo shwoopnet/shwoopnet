@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:19 AM CT (16:19Z): S-BUCKET1 tracker built and wired into wake.sh
+
+- Worker built w_bucket1/bucket1_forward.py exactly as registered (cutoff 2026-11-05T16:18:41Z hard coded). Current output: B5, B10 and other forward each 0 fills; FLAG none (bucket1 B5 0 of 40 settled fills). Leak test on a synthetic report with orders at 16:18:40Z, exactly 16:18:41Z and 16:00Z: all three excluded; only the 16:18:42Z B5, a 17:00Z B10 and an unsettled 0.40 order counted. Not yet exercised: the 40 fill FLAG branch, the 25 fill B10 line and the projected date (needs fills); a worker will test those on synthetic data. Added as a BUCKET1 section in wake.sh.
+
 ## 2026-11-05 10:18 AM CT (16:18Z): W-CALIB1 (OICORE edge by price bucket): a lead, registered forward as S-BUCKET1
 
 - Worker finished read only (w_calib/REGISTRATION.md, try count 4, bar: n 40 or more and a net per contract interval above zero in both history halves). Rule is the live one (cent rounding, band on the rounded price): 534 history triggers, split 267 early and 267 late. History, n, mean price, win rate, net per contract after fee (bootstrap 95%): 5 to 9c: 233, 6.6c, 6.9%, -0.15c (-3.2 to +3.3); 10 to 19c: 141, 13.4c, 24.1%, +9.9c (+3.0 to +17.0); 20 to 34c: 97, 26.9c, 50.5%, +22.3c (+12.2 to +32.0); 35 to 50c: 63, 42.6c, 50.8%, +6.5c (-6.1 to +19.0). Early and late halves: 10 to 19c +13.0c / +7.1c (late spans zero); 20 to 34c +26.8c / +17.3c (both above zero); 35 to 50c +5.7c / +7.0c (both span zero); 5 to 9c -1.4c / +1.3c.
