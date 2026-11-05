@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:26 AM CT (16:26Z): W-STALE1 (OICORE trigger robustness to a stale open interest read): fragile, missed windows are good ones
+
+- Worker finished read only (w_btcwindow/REGISTRATION.md, try count 0, no significance tests, no rule proposal). Candle convention: k[e] is the candle END epoch; original uses oi at e=close-180 minus e=close-360; stale 240 uses e=close-240 minus e=close-420; stale 300 uses e=close-300 minus e=close-480. Side and price are the live R2 rounding from the fresh e=close-180 quote, so only the OI read is stale. 6,075 ok rows, 3,569 priced in band.
+- Original: 536 triggers, win 24.6%, net +7.41c per contract. Stale 240 (one minute old): kept 352, lost 184, gained 185, overlap 65.7%; net per contract kept +8.65c, lost +5.03c (win 21.7%), gained +0.78c. Stale 300: kept 250, lost 286, gained 349, overlap 46.6%; kept +9.31c, lost +5.74c (win 23.1%), gained -2.81c (win 18.6%). The stale set's own net is +5.94c at 240 and +2.25c at 300.
+- Takeaway: the trigger is fragile. A one minute old read drops a third of triggers, the windows it misses are still profitable (+5c to +6c) so a late or stale tick loses good windows rather than bad ones, and the replacement triggers a stale read adds are weaker. This is consistent with the 8 no order windows being worth chasing if the cause is a stale OI candle, but it does not show that is the cause. Not checked: whether the live feed actually lags (the sim uses the final published OI), whether the bot retries on a later tick (not modelled), overlap after any extra band filter. A worker (w_ordertime) checks whether order timing relates to no fills.
+
 ## 2026-11-05 10:26 AM CT (16:26Z): W-GOLDDD1 (gold tail risk at 15 contracts, 30 trading days): the edge is not yet proven against break even
 
 - Worker finished read only (w_golddd/REGISTRATION.md, try count 0, a risk table; 20,000 paths, seed 20261105, fixed size 15 contracts). Inputs: 268 gold fills with count above 0 over 22 trading days (12.2 fills a day, Oct 7 to Nov 5), 13 losses (4.85%), Wilson 95% upper loss rate 8.1%, mean win +6.2c per contract, mean loss -75.8c. Arithmetic: break even loss rate is 6.2 / (6.2 + 75.8) = 7.6%, so the observed 4.85% is below it but the upper bound 8.1% is above it: the data cannot yet exclude a break even or negative gold edge at the 95% level.
