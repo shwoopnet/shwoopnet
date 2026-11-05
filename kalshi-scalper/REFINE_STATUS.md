@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:14 AM CT (16:14Z): W-CLUSTER1 (loss clustering, gold and OICORE): none
+
+- Worker finished read only (w_cluster/REGISTRATION.md, try count 4, bar permutation p under 0.05 or any day within 50% of the shared stop; seed 12345, 10,000 draws, CT days). Data: 268 settled gold orders over 23 trading days with 13 losses; 35 settled OICORE orders (report slotOrders rows carry a strategy field, so I can read OICORE straight from them) with 26 losses, Oct 30 to Nov 5.
+- Gold loss days: 8 of 23, dispersion index 1.36, permutation p 0.13 (fewer loss days than expected) and 0.15 (dispersion): not clustered. Gap to next gold loss: median 17.6 hours, p 0.14. Gold and OICORE: 3 shared loss days of 7 OICORE loss days and 8 gold loss days, but the test is saturated (OICORE lost on 7 of the 6 to 7 days in the gold span), p 0.999 for excess, 0 same 15 minute window pairs; almost no power.
+- Worst combined CT day (settled only): Oct 26 net -8.48; then Oct 25 -7.16, Oct 21 -6.85, Nov 3 -6.83. The shared stop is about 56 to 62 dollars, so the worst day used about 14% of it. Not checked: intraday open risk peaks, days with 0 or 1 trade, gold ladder size changing over time. Verdict: no clustering, no near stop day.
+
 ## 2026-11-05 10:14 AM CT (16:14Z): W-MISSING1 (OICORE code read): code matches CLAUDE.md, sim differs on rounding and ties
 
 - Worker finished read only (w_oicore_missing/REGISTRATION.md, no try count). The live entry compares the live market read (GET markets/ticker) at the minute tick, about 177 s before close, not the candle close. Price is rounded UP to a whole cent (yes = ceil(yes_ask*100)/100; no = 1 - floor(yes_bid*100)/100), the cheaper rounded side is bought, and that rounded price is checked against 0.05 to 0.50 and used as the IOC limit. A raw 0.041 to 0.049 rounds to 0.05 and passes, which is why live limits run 0.05 to 0.07. Replaying the rule on seenBid and seenAsk reproduces side and price for 43 of 43 live OICORE orders since Oct 30. The code does what CLAUDE.md says.
