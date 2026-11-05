@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:17 AM CT (16:17Z): W-DEPTH1 (OICORE order cuts below 10 contracts): caps barely bind
+
+- Worker finished read only (w_depthcut/REGISTRATION.md, try count 1, bar: 15% of target contracts lost or 5 dollars foregone). 44 OICORE orders since Oct 30, target 425 contracts (the first order's target was 5 before the 5 to 10 edit, #638, so its 5 was not a cut). Only 2 orders were cut below target, 9 contracts lost in all (2.1% of target). The 9 of 10 order (Oct 30 7:27 PM CT, price 0.50) was a dollar cap, not depth (depth ample at 138.5 with a cap of 34): lost 1 contract, realized +0.482 per contract, foregone +0.48. The 2 of 10 order (Nov 1 8:57 AM CT, price 0.14) was the depth share rule (touch 10.02, floor(0.25 x 10.02) = 2) and did not fill anyway, so 8 contracts lost and foregone 0 (not valuable). No other order was depth bound.
+- Bar not met: 2.1% of contracts and +0.48 foregone against 46.54 net. The caps barely bind; counterfactual only (same price, no market impact). Not checked: depthAtLimit is null on every report row (the worker used askSize and bidSize by side), and the actual sizing base.
+
 ## 2026-11-05 10:16 AM CT (16:16Z): W-GEXIT1 (gold early sells versus holding): selling helped
 
 - Worker finished read only (w_goldexit/REGISTRATION.md, try count 1, bar: hold beats exit in 8 of 10 or more exits AND total difference over +2 dollars; counterfactual, n small, cannot count toward changing the 25c line, which the owner set and no page can change). Gold has 11 settled early sells. As sold they lost 86.10; the same contracts held to the public settlement would have lost 95.74. Hold minus exit is -9.64 in total, about -0.88 per exit. Hold would have won in 1 of 11 (Oct 13, 09:09 AM CT, +0.99 held against -3.29 sold); in the other 10 the bought side lost at settlement, so selling saved money.
