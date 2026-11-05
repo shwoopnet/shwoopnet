@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:16 AM CT (16:16Z): W-FLOOR1 (OICORE fills at the 0.05 floor): forward tracker built
+
+- Worker finished read only (w_floor05/REGISTRATION.md, try count 1, information flag only: at 20 settled floor fills with net per contract below 0 it prints FLAG; no decision authority). Group A (OICORE fills at price 0.05): 9 fills, 1 win, net +4.44, +4.93c per contract, PF 1.90. Group B (0.05 to 0.06): 15 fills, 2 wins, +10.81, +7.46c, PF 2.37. Rest of OICORE: 26 fills, 8 wins, +43.23, +17.02c, PF 3.35. Group A wins about 1 in 9 (history 7.7%) and earns roughly a third of the rest per contract; too few fills to say more.
+- Rate: A 1.47 fills a day over 6.1 days, so 20 fills arrive about Nov 12 to 13; B 2.45 a day. Current line: FLAG none (floor05 9 of 20 settled fills). I added the tracker to wake.sh as a FLOOR05 section. Not checked: grouping uses the recorded price field (the cost of the side bought), and whether the rounding rule was live on the very first orders.
+
 ## 2026-11-05 10:15 AM CT (16:15Z): W-SIMROUND1 (sim rerun with live cent rounding): history survives
 
 - Worker finished read only (w_simround/REGISTRATION.md, try count 2, bar: 1c net change or 30 or more triggers added or removed). All history rows (6,071 ok, 2,243 pass the OI rise of 86,300). Original sim: 469 triggers, win 26.9%, price 0.185, net +7.63c per contract, PF 1.86. R1 (rounded price, band on raw): 469, 26.9%, 0.179, +8.06c, PF 1.69. R2 (band on the rounded price, as live): 534, 24.5%, 0.163, +7.36c, PF 1.68.
