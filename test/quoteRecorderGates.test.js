@@ -105,6 +105,25 @@ gates.Q8 = () => {
   assert.ok(/429/.test(code.slice(code.indexOf('async def poll_ladder'), code.indexOf('async def ladder_loop'))), 'a refused read backs off instead of asking harder');
 };
 
+// Q9 (RECCLOCK1, Nov 4, 2026): one slow SNTP sample (137 ms among 341 of 34 ms or less) failed the old RECORD1 clock check for a whole run. The check now keeps the LEAST delayed of several samples and records its delay.
+gates.Q9 = () => {
+  const out = JSON.parse(py(`
+seq = iter([(137.0, 300.0), None, (6.2, 21.0), (5.1, 18.4), (40.0, 90.0), (9.0, 25.0), None, (4.0, 30.0)])
+slept = []
+r = m.sntp_best(8, 0.2, sample_fn=lambda: next(seq), sleep=slept.append)
+none = m.sntp_best(3, 0, sample_fn=lambda: None, sleep=lambda d: None)
+print(json.dumps([r, none, len(slept), m.CLOCK_COLS, m.CLOCK_VERSION]))`));
+  assert.deepStrictEqual(out[0], [5, 18], 'the offset of the smallest round trip wins, not the first, the largest or the average');
+  assert.deepStrictEqual(out[1], ['', ''], 'no answer is blank (never zero), as before');
+  assert.strictEqual(out[2], 7, 'samples are spaced, none after the last');
+  assert.deepStrictEqual(out[3], ['t_local_ms', 'offset_ms', 'rtt_ms', 'version'], 'old columns keep their place; the delay and a version tag are added at the end');
+  assert.strictEqual(out[4], 'clock2');
+  const code = script.replace(/"""[\s\S]*?"""/g, '').replace(/#.*$/gm, '');
+  assert.ok(/data\[32:48\]/.test(code) && /\(t2 - t1\) \+ \(t3 - t4\)/.test(code), 'the standard four timestamp offset, not the server transmit time alone');
+  assert.ok(!/PRIVATE|SECRET|Authorization|\/portfolio|\/orders/i.test(code), 'still public and keyless');
+  assert.ok(/\[\[int\(time\.time\(\) \* 1000\), off, rtt, CLOCK_VERSION\]\]/.test(code), 'every clock row carries the delay and the tag');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
