@@ -2,6 +2,13 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:13 AM CT (16:13Z): W-ODDS1 (OICORE kill rule and PF odds, stated in advance)
+
+- Worker finished read only (w_oicore_odds/REGISTRATION.md; 20,000 draws, seed 20261105). Start state is the real record: 35 fills, 9 wins, net +47.67, streak 3. New fills simulated at 10 contracts. Models: A live bootstrap, B sim all history (469 rows, win 26.9%, PF 1.86), C win probability halved (12.9%).
+- 18 loss streak kill by fill 40 / 55 / 100: A 0 / 1.3% / 6.6%; B 0 / 1.0% / 5.3%; C 0 / 14.8% / 54.9%. Net below -6 at 40: 0% in all three (0.08% anywhere 40 to 100 under C). PF 1.5 or better at 40 / 55: 100% / 100% (A), 100% / 99% (B), 100% / 100% (C), because the banked +47.67 sits in the cumulative figure. Net at 40, median (p10 to p90): A 53 (43 to 66), B 51 (41 to 63), C 47 (42 to 59); at 55: A 75, B 62, C 50.
+- Read this plainly: the cumulative PF and net kills are nearly impossible to hit by fill 40 or 55, so a pass on those says little by itself; the streak kill is the only live risk and only under C. From zero fills the same models give PF 1.5 or better at 40 / 55 fills of A 94% / 97%, B 69% / 71%, C 35% / 34%, which is the honest scale of the Nov 13 test. Dates: 5.7 fills a day (range 5.0 to 7.3); fill 40 about Nov 6, fill 55 Nov 8 to 9, fill 100 about Nov 22.
+- Surprising on Nov 7 under any model: net below about 35, a streak of 10 or more, or PF under 1.5. On Nov 13 (about 85 fills): a streak kill or net below +25 under A or B; under C only net below +20. Not checked: iid draws (no regimes or clustering), sim win dollars lower than live (6.15 vs 7.94), fill rate holding. No adoption conclusion.
+
 ## 2026-11-05 10:12 AM CT (16:12Z): W-GSIZE1 (gold loss rate by size band): noise
 
 - Worker finished read only (w_goldsize/REGISTRATION.md, 5 tests tried: 2 primary, 3 conditioned; bar permutation p under 0.05 and not explained by price or time). 268 settled gold fills, 13 losses (loss is settledPnl below 0, 25c exits included). Loss rate by band, Wilson 95%: 1 to 5: 3 of 52 (5.8%, 2.0 to 15.6); 6 to 10: 3 of 104 (2.9%, 1.0 to 8.1); 11 to 15: 7 of 91 (7.7%, 3.8 to 15.0); 16 plus: 0 of 21 (0 to 15.5). By thirds 4.4%, 4.5%, 5.6%.
