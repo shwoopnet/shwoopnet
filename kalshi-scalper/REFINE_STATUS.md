@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:23 AM CT (16:23Z): OICORE fill 36: loss, streak 4
+
+- One new OICORE fill, a loss of -1.80. Record after 36 fills: 9 won, 27 lost, net +45.87, PF 2.82. Loss streak 4 (kill at 18, 14 away). The 40 fill interim look is 4 fills away. S-JUMP1 and S-SDIR1 are 27 of 40. No flags. S-BUCKET1 forward counts start at 0 (the fill landed before or at the 10:18 AM CT cutoff or is unsettled; the tracker shows 0 forward fills). kalshiStatus is on 0 of 1,459 report rows.
+
 ## 2026-11-05 10:22 AM CT (16:22Z): W-STOPS1 (README stop rule 5: fill rate and median ask size): neither trips
 
 - Worker finished read only (w_stops/REGISTRATION.md, try count 0, a status check against SLOT-OICORE item 5: stop if fill rate under 50% of signals or median ask size under 10 contracts). Fill rate since Oct 30 12:00Z: (a) orders sent: 35 filled of 43 sent = 81.4% (8 no fill, none partial); (b) against sim triggers under live rounding (44 triggers): 28 have a filled order = 63.6%, or 35 of 44 = 79.5% counting all filled orders (7 filled orders came from tickers the sim did not trigger on). By time: 10 of 15 orders filled Oct 30 to Nov 1, 25 of 28 filled from Nov 2. Nothing is under 50%.
