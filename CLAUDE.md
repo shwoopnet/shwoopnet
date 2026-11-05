@@ -771,3 +771,7 @@ A slot strategy no longer in `KAL_SLOT_REGISTERED` (FLOW1) is drawn as a row onl
 ## NHL recorder removed (Nov 4, 2026, the owner: "Remove it")
 
 `record-nhl.yml`, `scripts/record_nhl.py`, `test/nhlRecorderGates.test.js` and its fixtures (added in #714) are gone. Why: the frozen post-cut NHL reads both failed (goals -3.15c over 209 games, assists -3.66c over 168), and Kalshi now lists about 20 to 34 rungs per game, so the under-round filter it was built to test no longer applies; it would have used about 12,000 Actions minutes a month. The Yahoo reference adapter and the STRESSDAY1 watchlist from the same pull request stay. What it recorded before removal stays on `quote-data` under `nhl/`.
+
+## EVENT830 positions get a chart (Nov 5, 2026, the owner: "OICORE/EVENT do not" have charts)
+
+An open position's chart and "Chance now" come from the page's market relay (`kalshiBooks`), which read only `KALSHI_SERIES` and `KALSHI_EXTRA_SERIES`. EVENT830's eight markets were on neither, so its positions drew no chart. `KALSHI_EXTRA_SERIES` (`functions/kalshiLib.js`) now also lists them; display only, nothing that decides an order reads the list, and a failing extra series is still skipped. Gate Y31 now requires every market L1 or any second-slot strategy can hold to be on the relay. OICORE (Bitcoin) was already covered; its chart needs two reads about 5 seconds apart after the page opens. About 8 more public reads per relay refresh (cached 2 seconds). Needs `bash functions/deploy-sizing.sh` (it deploys `kalshiBooks`).

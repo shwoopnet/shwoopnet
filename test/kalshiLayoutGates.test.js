@@ -488,7 +488,11 @@ gates.Y20 = () => {
 gates.Y31 = () => {
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'every market the bot can hold has a price on the relay, so its open position can draw a chance and a chart');
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES.slice(0, 6), ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the L1 extras keep their place');
+  // Nov 5, 2026: every market any strategy can hold (L1 and every second-slot strategy) has a price on the relay, so its open position can draw a chance and a chart
+  const slot = require('../functions/kalshiSlotLib.js'), live = require('../functions/kalshiLiveLib.js');
+  const onRelay = lib.KALSHI_SERIES.concat(lib.KALSHI_EXTRA_SERIES);
+  live.L1_SERIES.concat(...slot.SLOT_STRATEGIES.map((s) => s.series)).forEach((x) => assert.ok(onRelay.includes(x), x + ' is on the relay'));
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');
