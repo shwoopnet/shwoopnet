@@ -19,4 +19,9 @@ try:
     r.guard([dict(ticker="X", close_ts=r.CUT)]); raise SystemExit("guard failed")
 except RuntimeError:
     pass
+# Amendment 1: an early close takes the neighbour's/Eastern reference's scheduled close
+byk = {("X", 1): dict(close_ts=1 * 86400 + 5 * 3600)}
+assert r.sched_close(dict(city="X", ticker="K-A-X", close_ts=2 * 86400 + 14 * 3600), byk, {}) == 2 * 86400 + 5 * 3600
+assert r.sched_close(dict(city="X", ticker="K-A-X", close_ts=2 * 86400 + 4 * 3600), byk, {}) == 2 * 86400 + 4 * 3600
+assert r.sched_close(dict(city="Y", ticker="K-A-Y", close_ts=2 * 86400 + 14 * 3600), {}, {"K-A": 2 * 86400 + 4 * 3600}) == 2 * 86400 + 4 * 3600
 print("ok")

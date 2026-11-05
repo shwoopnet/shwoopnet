@@ -144,8 +144,31 @@ def cmd_obs():
     json.dump(obs, open(f"{DIR}/obs.json", "w"))
 
 
+EASTERN_REF = "NYC"
+
+
+def sched_close(m, byk, bydate_ref):
+    """Amendment 1: an irregular close (early close) takes the scheduled close of the same city's previous dated market + 24 h;
+    a city with no such neighbour (DTW has one KXRAIN market in the window) takes the Eastern reference city's close for the ticker date."""
+    h = (m["close_ts"] % 86400) // 3600
+    prev = byk.get((m["city"], m["close_ts"] // 86400 - 1))
+    if prev is not None:
+        ph = (prev["close_ts"] % 86400) // 3600
+        return prev["close_ts"] + 86400 if abs(ph - h) > 1 else m["close_ts"]
+    ref = bydate_ref.get(m["ticker"].rsplit("-", 1)[0])
+    if ref is not None and abs(((ref % 86400) // 3600) - h) > 1:
+        return ref
+    return m["close_ts"]
+
+
 def cmd_triggers():
     mk = json.load(open(f"{DIR}/markets.json"))
+    byk = {(m["city"], m["close_ts"] // 86400): m for m in mk}
+    ref = {m["ticker"].rsplit("-", 1)[0]: m["close_ts"] for m in mk if m["city"] == EASTERN_REF}
+    for m in mk:
+        m["close_ts_listed"] = m["close_ts"]
+        m["close_ts"] = sched_close(m, byk, ref)
+    json.dump(mk, open(f"{DIR}/markets_amended.json", "w"))
     obs = json.load(open(f"{DIR}/obs.json"))
     dropped = [c for c, r in obs.items() if len(r) == 0]
     trig = []
@@ -188,7 +211,7 @@ def cmd_candles():
 
 
 def cmd_score():
-    mk = {m["ticker"]: m for m in json.load(open(f"{DIR}/markets.json"))}
+    mk = {m["ticker"]: m for m in json.load(open(f"{DIR}/markets_amended.json"))}
     T = json.load(open(f"{DIR}/triggers.json"))
     cands = json.load(open(f"{DIR}/candles.json"))
     dates = sorted({m["close_ts"] // 86400 for m in mk.values()})
