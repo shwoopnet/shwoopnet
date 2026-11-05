@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:24 AM CT (16:24Z): W-QUIETCOV1 (gold window coverage): nothing missing, projection moves to Dec 1
+
+- Worker finished read only (w_quietcov/REGISTRATION.md, try count 0). The public list (status settled, limit 1000, min_close_ts 2026-10-30 12:00Z) returned 370 markets in one page with no cursor: no truncation. 369 have a result and close after the start and the cache holds the same 369 tickers (0 missing either way; the extra one closes exactly at the start and is dropped by the close after start filter). Without the status filter 416 markets (370 finalized, 45 initialized, 1 active), the extras are future windows.
+- Cause of the low count is structural: a full day has 91 windows, not 95. Gold is closed Fri 16:00 CT to Sun about 17:30 CT and has a 90 minute gap at 16:15 to 17:15 CT each day. One Thursday gap (Nov 5, 02:15 to 04:00 CT, 8 windows) has no listed markets at all, so it is not a cache skip. The expected count over the period is about 4 full days plus partial Friday, Sunday and Thursday, which matches 369. All 86 live gold orders in the period (57 filled) are in the cache.
+- So the 18 block and 70 rest counts stand. Projection: block evenings are Sun to Thu, 16 windows each, 64 so far; in band share is 28%, about 4.5 entries per evening; 82 more entries need about 18.2 evenings, so the 100th block entry lands about Dec 1 CT (two days earlier than the Dec 3 estimate); a Thanksgiving closure would push it later. Not checked: why Nov 5 02:15 to 04:00 CT has no markets, holiday closures.
+
 ## 2026-11-05 10:24 AM CT (16:24Z): W-RECON1 (OICORE sim triggers versus live orders): one definition, counts reconciled
 
 - Worker finished read only (w_reconcile/REGISTRATION.md, table of 586 windows since 2026-10-30T12:00Z in w_reconcile/table.tsv). One definition: sim trigger R2 (open interest rise 86,300 or more over the 3 minutes to 180 s before close, cheaper rounded side 0.05 to 0.50, ties to NO), merge of oi/btc.jsonl and fwd_cache.jsonl keeping the fwd_cache row on a duplicate ticker. Live: 45 OICORE rows (36 filled, 9 no fill, all KXBTC15M).
