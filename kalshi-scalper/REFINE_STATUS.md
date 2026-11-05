@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:34 AM CT (16:34Z): Wake digest tool built (w_digest/wake_digest.py)
+
+- Worker built w_digest/wake_digest.py (stdlib; registration first; --dry skips saving last_digest.json). It prints NO CHANGE (OICORE 36/9/27 +45.87, streak 4, generatedAt ...) when nothing but generatedAt changed, or a CHANGED list with old to new and the full FLAG lines. Tests: extra OICORE win, tracker progress line edit and injected FLAG line all print CHANGED correctly; missing report prints DIGEST ERROR and exits 2. Silence hour counters are normalised so a ticking timer is not a change. Caveat: it runs wake_shadows.py live, which is slow, and the worker said the real shadows output hung on a modified (synthetic) report, so the worker stubbed shadows in its tests. A hang investigation (w_hang) is running; until it reports I keep using bash wake.sh --fast, which is unchanged.
+
 ## 2026-11-05 10:34 AM CT (16:34Z): W-EV830CAL1 (EVENT830 calendar sanity): no weekend or holiday dates
 
 - Worker finished read only (w_ev830cal/REGISTRATION.md; no try count). The calendar is calRow(day, window code, kind) in functions/kalshiSlotLib.js on origin/main; its comment names the source (workers/EVENT830_CALENDAR.md on the research branch: BEA, Census and BLS schedules, claims by the Thursday rule); Nov 26, Dec 24 and Dec 31 claims are deliberately left out. All 15 dates are weekdays (no weekend, no holiday); weekdays confirmed, release schedules themselves not. Plausible: Nov 5 Thu CLAIMS, Nov 6 Fri JOBS (first Friday), Nov 12 Thu CLAIMS, Nov 19 Thu CLAIMS, Dec 3 Thu CLAIMS, Dec 4 Fri JOBS, Dec 17 Thu CLAIMS. Cannot confirm (no web lookup): Nov 10 Tue CPI (day after Election Day, not a holiday), Nov 13 Fri PPI, Nov 17 Tue RETAIL, Nov 25 Wed GDP_PCE (day before Thanksgiving), Dec 10 Thu CPI_CLAIMS, Dec 15 Tue PPI, Dec 16 Wed RETAIL, Dec 23 Wed GDP_PCE.
