@@ -49,10 +49,12 @@ def cmd_fetch(out, sfile):
             if m["ticker"] in done: continue
             close = ts(m["close_time"]); look_end = close - lead_days(series) * 86400
             c = None
-            for path in (f"/historical/markets/{m['ticker']}/candlesticks", f"/series/{series}/markets/{m['ticker']}/candlesticks"):
+            # historical first; the live path only when the historical one raises (an empty list is an answer, and the live path 429s hard)
+            try:
+                c = api._get(f"/historical/markets/{m['ticker']}/candlesticks", {"start_ts": look_end - 4 * 86400, "end_ts": look_end, "period_interval": 60}, retries=3).get("candlesticks", [])
+            except Exception:
                 try:
-                    c = api._get(path, {"start_ts": look_end - 4 * 86400, "end_ts": look_end, "period_interval": 60}).get("candlesticks", [])
-                    if c: break
+                    c = api._get(f"/series/{series}/markets/{m['ticker']}/candlesticks", {"start_ts": look_end - 4 * 86400, "end_ts": look_end, "period_interval": 60}, retries=4).get("candlesticks", [])
                 except Exception:
                     c = None
             ask = bid = None; et = None
@@ -76,7 +78,7 @@ def boot(vals, clusters, n=2000, seed=1):
 
 def cmd_score(out):
     rows = [json.loads(l) for l in open(out)]
-    team = lambda r: r["series"] + "|" + r["close"][:4] if False else r["series"] + "|" + ("25" if r["close"] < "2026-02" else "26")
+    team = lambda r: r["event"] if r["series"] == "KXNBAWINS" else r["series"] + "|" + ("25" if r["close"] < "2026-02" else "26")
     elig = [r for r in rows if r["ask"] is not None and LO <= r["ask"] <= HI]
     byev = collections.defaultdict(list)
     for r in elig: byev[r["event"]].append(r)
