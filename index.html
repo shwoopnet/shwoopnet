@@ -653,6 +653,11 @@
   .kal-console > [data-card][data-folded="true"]{ align-self:start; }
   .kal-console > [data-card][data-folded="true"] > :not(.kal-card-head):not(.kal-card-title):not(.kal-move){ display:none !important; }
   .kal-console > [data-card][data-folded="true"] > .kal-card-title{ margin-bottom:0; }
+  /* A folded card shows its title only: range buttons, the trades filter and any other head control have nothing to act on while the card is closed (the owner, Nov 5, 2026: "only running should be visible when condensing"). The Account card keeps its Running pill (Start, Pause, Flatten). */
+  .kal-console > [data-card][data-folded="true"] .kal-card-head > :not(.kal-card-title):not(.kal-botmenu){ display:none !important; }
+  /* Every folded card is the same height: the cards pad their heads differently (Account result puts its padding on the card), so a folded card takes one padding on its head only. */
+  .kal-console > [data-card][data-folded="true"]{ padding:0 !important; }
+  .kal-console > [data-card][data-folded="true"] > .kal-card-head, .kal-console > [data-card][data-folded="true"] > .kal-card-title{ padding:14px 22px !important; min-height:52px; box-sizing:border-box; display:flex; align-items:center; }
   .kal-console > [data-card="account"][data-folded="true"]{ display:block; }
   .kal-console > [data-card="account"][data-folded="true"] .kal-acct-head{ display:flex; }
   /* Half or Full only means something with two columns: on a phone the toggle is hidden and every card is one column. */
@@ -1638,6 +1643,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 5</div>
                 <ul class="changelog-list">
+                  <li>Bot page: a folded card shows only its title (the Account card keeps its Running pill); the range buttons and the trades filter hide until it is opened</li>
                   <li>Bot page: the Start box and Rules text name every live strategy (L1 on gold, OICORE and EVENT830) and OICORE's limit 1c above the price it sees; changelog days and strategy docs brought up to date</li>
                   <li>Bot page: EVENT830's open positions now get a chart too (the price feed reads its eight markets)</li>
                   <li>Bot page: a smoother, freer layout. Edit layout (in the Layout menu) lets any card go anywhere, by dragging (touch and hold on a phone) or with its arrows; the other cards slide out of the way. Each card can be Half or Full width, and every card can fold to its title row. Done, Cancel and Undo; an older saved layout carries over</li>
