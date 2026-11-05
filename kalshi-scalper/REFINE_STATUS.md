@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:09 AM CT (16:09Z): Main's order: always keep 2 workers; two started
+
+- Main relayed the owner's decision (Nov 5): keep 2 workers running at all times, no real read is not a reason to run zero; CHEAP1 is closed (PR #702 closed after REV1) and is dropped from the list. I had been running zero workers since Nov 4 and said so each hour; that is now over.
+- Started two read only workers at 10:08 AM CT, each told to write a registration file before looking at outcomes: (1) gold L1 no-fill orders, by hour, price band, depth at limit and latency (bar: 15 points or more with 30 or more orders per side), and whether the missed windows would have won; (2) OICORE entry timing inside the 180 to 120 s window, sim at 180 s versus 120 s (bar: 2c per contract net with 40 or more triggers per side), plus live price paid versus sim. Neither may commit, push, deploy or write this file. Results go here only if they meet their own registered bar.
+
 ## 2026-11-05 08:28 AM CT (14:28Z): OICORE fill 35: loss, streak 3
 
 - One new OICORE fill, a loss of -0.64. Record after 35 settled fills: 9 won, 26 lost, net +47.67, PF 3.04. Loss streak 3 (kill at 18, 15 away). The 40 fill interim look is 5 fills away. S-JUMP1 and S-SDIR1 are 26 of 40. No flags. kalshiStatus is on 0 of 1,458 report rows.
