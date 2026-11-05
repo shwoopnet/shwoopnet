@@ -787,3 +787,7 @@ The Bot page cards (account, status, pnl, positions, trades) are ONE ordered lis
 ## The deploy wrapper missed the market list (Nov 5, 2026, the owner: "says nothing to deploy")
 
 After #721 (EVENT830 position charts) `deploy-latest.sh` said "nothing to deploy", because its file rules never named `functions/kalshiLib.js` (the relay's series list, loaded by `kalshiBooks`), and it then moved its marker past the change. Now `kalshiLib`, `kalshiBookLib` and `kalshiSignalLib` plan `deploy-sizing.sh` (which deploys `kalshiBooks`), and any other changed `functions/*.js` that no rule claims is printed as a WARNING, so a missing rule can never read as nothing to deploy. #721 itself needs `bash functions/deploy-sizing.sh` run by hand once. Test DL4.
+
+## A folded card shows only its title (Nov 5, 2026, the owner: "only running should be visible when condensing these")
+
+A folded Bot page card hides every control in its head (the Account result range buttons, the Recent trades filter) because they act on a body that is not shown; the Account card keeps its Running pill (`.kal-botmenu`: Start, Pause, Flatten). Folded cards take one padding on the head only, so all five are the same height (54px at desktop). Test L8 in `test/layoutSmoothGates.test.js`. Page only, live on merge.

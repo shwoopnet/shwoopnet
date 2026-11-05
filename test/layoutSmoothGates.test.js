@@ -126,6 +126,14 @@ gates.L7 = () => {
   assert.ok(/\.kal-bot-grid\.kal-unlocked > \.kal-card\{ outline:2px dashed var\(--border\);/.test(css), 'so the outline rule matches them');
 };
 
+// L8: a folded card shows its title and nothing else in its head, except the Account card's Running pill (the owner, Nov 5, 2026: "only running should be visible when condensing"). The range buttons and the trades filter act on a body that is not shown.
+gates.L8 = () => {
+  const h = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(h.includes('.kal-console > [data-card][data-folded="true"] .kal-card-head > :not(.kal-card-title):not(.kal-botmenu){ display:none !important; }'), 'head controls hide on a folded card');
+  assert.ok(/<div class="kal-card-head kal-acct-head">[\s\S]{0,200}<details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill"/.test(h), 'the Running pill sits in the kept .kal-botmenu, a direct child of the Account head');
+  assert.ok(/id="kalPnlRanges"/.test(h) && /<div class="kal-card-head"[^>]*><div class="kal-card-title"[^>]*>Account result<\/div><div class="kal-pnl-ranges" id="kalPnlRanges">/.test(h), 'the range buttons are a head child, so the rule hides them');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
