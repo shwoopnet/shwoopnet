@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:34 AM CT (16:34Z): W-EV830CAL1 (EVENT830 calendar sanity): no weekend or holiday dates
+
+- Worker finished read only (w_ev830cal/REGISTRATION.md; no try count). The calendar is calRow(day, window code, kind) in functions/kalshiSlotLib.js on origin/main; its comment names the source (workers/EVENT830_CALENDAR.md on the research branch: BEA, Census and BLS schedules, claims by the Thursday rule); Nov 26, Dec 24 and Dec 31 claims are deliberately left out. All 15 dates are weekdays (no weekend, no holiday); weekdays confirmed, release schedules themselves not. Plausible: Nov 5 Thu CLAIMS, Nov 6 Fri JOBS (first Friday), Nov 12 Thu CLAIMS, Nov 19 Thu CLAIMS, Dec 3 Thu CLAIMS, Dec 4 Fri JOBS, Dec 17 Thu CLAIMS. Cannot confirm (no web lookup): Nov 10 Tue CPI (day after Election Day, not a holiday), Nov 13 Fri PPI, Nov 17 Tue RETAIL, Nov 25 Wed GDP_PCE (day before Thanksgiving), Dec 10 Thu CPI_CLAIMS, Dec 15 Tue PPI, Dec 16 Wed RETAIL, Dec 23 Wed GDP_PCE.
+- Nov 6 13:30Z markets are not listed yet (at 16:33Z the latest listing for all 8 series was a Nov 5 window; the open market was the 16:45Z one), so no Nov 6 quotes were read. DST: all 15 rows use T13:30:00Z, no 12:30 or T12: anywhere, window codes end in 0830 (8:30 ET, EST). Not checked: the real BLS, BEA and Census calendars, the Nov 5 results. I scheduled a one shot check for Nov 6 8:30 AM CT (after the window) of whether the three shard 0 forex markets got orders. A docs worker (w_docs) is listing code versus doc contradictions for the slot strategies.
+
 ## 2026-11-05 10:33 AM CT (16:33Z): W-EV830WIN1 (why 5 of 8 EVENT830 markets had no order on Nov 5): 2 band fails, 3 forex markets unexplained
 
 - Worker finished read only (w_ev830win/REGISTRATION.md; no try count; public one minute candles used as a proxy for the live tick read). All 8 markets existed for the 2026-11-05 13:30Z close (tickers SERIES-26NOV050830-30, all finalized). Rule from kalshiSlotRunLib.js: market read 120 to 180 s before close with a two sided quote; spread at or below 0.10; the cheaper side's rounded price in 0.05 to 0.50; the shard must hold cost + 0.5.
