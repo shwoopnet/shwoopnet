@@ -46,7 +46,9 @@ QUOTE_COLS = ["t_send_ms", "t_recv_ms", "ticker", "yes_bid", "yes_ask", "bid_siz
 SPOT_COLS = ["t_recv_ms", "exchange", "asset", "price", "size", "exchange_time"]
 RESULT_COLS = ["ticker", "result", "close_time", "seen_ms"]
 COVER_COLS = ["window_close_utc", "ticker", "polls", "ok_polls", "n429", "rows", "first_recv_ms", "last_recv_ms"]
-CLOCK_COLS = ["t_local_ms", "offset_ms"]
+CLOCK_VERSION = "clock2"  # rows with this tag carry rtt_ms (an offset is good to within rtt_ms / 2) and come from the least delayed of CLOCK_SAMPLES samples
+CLOCK_SAMPLES = 8
+CLOCK_COLS = ["t_local_ms", "offset_ms", "rtt_ms", "version"]
 LADDER_COLS = QUOTE_COLS + ["close_time"]
 
 
@@ -121,20 +123,41 @@ def parse_bitstamp(msg):
 SERIES_ASSETS = set(SERIES.values())
 
 
-def sntp_offset_ms(host="time.cloudflare.com", timeout=3.0):
-    """How far this machine's clock is from a network time server, in ms (positive: the server is ahead). Blank on any failure."""
+def sntp_sample(host="time.cloudflare.com", timeout=3.0):
+    """One NTP exchange: (offset_ms, rtt_ms) with the standard four timestamps, or None on any failure. Positive offset: the server is ahead.
+    The offset is only trustworthy to within half the network delay, so the delay is returned with it."""
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.settimeout(timeout)
-        t0 = time.time()
+        t1 = time.time()
         s.sendto(b"\x1b" + 47 * b"\0", (host, 123))
         data, _ = s.recvfrom(48)
-        t3 = time.time()
-        secs, frac = struct.unpack("!II", data[40:48])
-        server = secs - 2208988800 + frac / 2 ** 32
-        return round((server - (t0 + t3) / 2) * 1000)
+        t4 = time.time()
+        s.close()
+        r_s, r_f, x_s, x_f = struct.unpack("!IIII", data[32:48])
+        t2 = r_s - 2208988800 + r_f / 2 ** 32
+        t3 = x_s - 2208988800 + x_f / 2 ** 32
+        return ((t2 - t1) + (t3 - t4)) / 2 * 1000, ((t4 - t1) - (t3 - t2)) * 1000
     except Exception:
-        return ""
+        return None
+
+
+def sntp_best(samples=CLOCK_SAMPLES, gap_s=0.2, host="time.cloudflare.com", sample_fn=None, sleep=time.sleep):
+    """(offset_ms, rtt_ms) of the sample with the SMALLEST round trip out of a few, or ("", "") if none answered.
+    Why: one sample can sit on a slow, lopsided path (a 137 ms reading among 341 others of 34 ms or less ended the old RECORD1 clock check); the least delayed
+    sample has the smallest possible error (at most rtt / 2), which is the standard NTP clock filter."""
+    fn = sample_fn or (lambda: sntp_sample(host))
+    got = []
+    for i in range(samples):
+        r = fn()
+        if r is not None:
+            got.append(r)
+        if i + 1 < samples:
+            sleep(gap_s)
+    if not got:
+        return "", ""
+    off, rtt = min(got, key=lambda x: x[1])
+    return round(off), round(rtt)
 
 
 def http_get(url):
@@ -344,8 +367,8 @@ class Recorder:
     async def clock_loop(self, stop_at):
         loop = asyncio.get_running_loop()
         while time.time() < stop_at:
-            off = await loop.run_in_executor(None, sntp_offset_ms)
-            self.out.write("clock", [[int(time.time() * 1000), off]])
+            off, rtt = await loop.run_in_executor(None, sntp_best)
+            self.out.write("clock", [[int(time.time() * 1000), off, rtt, CLOCK_VERSION]])
             await asyncio.sleep(1800)
 
 
