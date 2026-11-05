@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 08:28 AM CT (14:28Z): OICORE fill 35: loss, streak 3
+
+- One new OICORE fill, a loss of -0.64. Record after 35 settled fills: 9 won, 26 lost, net +47.67, PF 3.04. Loss streak 3 (kill at 18, 15 away). The 40 fill interim look is 5 fills away. S-JUMP1 and S-SDIR1 are 26 of 40. No flags. kalshiStatus is on 0 of 1,458 report rows.
+
 ## 2026-11-05 04:42 AM CT (10:42Z): OICORE fill 34 settled: loss, streak 2
 
 - The fill that sat unsettled from about 02:48 AM CT settled as a loss of -0.64 (it only looked stuck because the settle count lagged). Record after 34 settled fills: 9 won, 25 lost, net +48.31, PF 3.13, gross win 71.02, gross loss 22.71, worst loss 2.01, win rate 26.5%. Loss streak 2 (kill at 18, 16 away). The 40 fill interim look is 6 fills away. S-JUMP1 and S-SDIR1 are 25 of 40. No flags. kalshiStatus is on 0 of 1,455 report rows.
