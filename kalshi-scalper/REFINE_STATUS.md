@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:22 AM CT (16:22Z): W-STOPS1 (README stop rule 5: fill rate and median ask size): neither trips
+
+- Worker finished read only (w_stops/REGISTRATION.md, try count 0, a status check against SLOT-OICORE item 5: stop if fill rate under 50% of signals or median ask size under 10 contracts). Fill rate since Oct 30 12:00Z: (a) orders sent: 35 filled of 43 sent = 81.4% (8 no fill, none partial); (b) against sim triggers under live rounding (44 triggers): 28 have a filled order = 63.6%, or 35 of 44 = 79.5% counting all filled orders (7 filled orders came from tickers the sim did not trigger on). By time: 10 of 15 orders filled Oct 30 to Nov 1, 25 of 28 filled from Nov 2. Nothing is under 50%.
+- Touch size (askSize for YES, bidSize for NO): median 875 over all 43 sent orders and 1,431 over the 35 filled; smallest 10.02 (one YES order, Nov 1); 10th percentile about 94. Literal reading (touch under 10): no trip. Depth reading (touch must support 10 contracts at 25%, so touch of 40 or more): 42 of 43 pass; the median of min(10, 25% of touch) is 10 and no order had 25% of touch below its target.
+- Open item: this worker's trigger counts (44 triggers, 8 with only a no fill order, 8 with no order) disagree with the cover worker's (13 not filled, 7 and 6) and the timing worker's 19 matched; they use different windows or merges. A reconcile worker (w_reconcile) was started to produce one table and one definition. Not checked: the README gives no window for either number; recorded touch sizes could not be checked against the book at send time.
+
 ## 2026-11-05 10:21 AM CT (16:21Z): Nov 7 and Nov 13 read tools dry run: pass, one wording gap fixed
 
 - Worker dry ran oicore_nov13.py on copies. On the real report it reads strategy OICORE from slotOrders and prints 35 fills, 9 wins, net 47.67, PF 3.04, equal to secondSlot.byStrategy.OICORE. Kill rules on synthetic copies: 17 consecutive losses prints ok (1 away), 18 prints KILL HIT (also when the streak is not at the end); net -7 at 40 fills prints KILL HIT, -5 and exactly -6 print ok; the net rule prints n/a under 40 fills. It exits 0 with kalshiStatus, answeredAtMs and null avgFill present, absent, with an extra unknown key, with slotOrders empty and with it absent.
