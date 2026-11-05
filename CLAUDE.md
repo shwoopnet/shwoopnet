@@ -771,3 +771,7 @@ A slot strategy no longer in `KAL_SLOT_REGISTERED` (FLOW1) is drawn as a row onl
 ## NHL recorder removed (Nov 4, 2026, the owner: "Remove it")
 
 `record-nhl.yml`, `scripts/record_nhl.py`, `test/nhlRecorderGates.test.js` and its fixtures (added in #714) are gone. Why: the frozen post-cut NHL reads both failed (goals -3.15c over 209 games, assists -3.66c over 168), and Kalshi now lists about 20 to 34 rungs per game, so the under-round filter it was built to test no longer applies; it would have used about 12,000 Actions minutes a month. The Yahoo reference adapter and the STRESSDAY1 watchlist from the same pull request stay. What it recorded before removal stays on `quote-data` under `nhl/`.
+
+## Freshness fixes (Nov 5, 2026, the owner: "Fix all 7")
+
+The Start confirmation now says L1 trades nothing except gold (size held at 15) and that OICORE (10 contracts) and EVENT830 (1 contract) run with it; the Rules text says OICORE's limit sits 1c above the price it sees; three Oct 31 changelog lines (the update pop-up settle wait, the shard low-money alert, the countdown ring redesign) moved from Oct 30 to Oct 31; `docs/STRATEGIES.md` gained an EVENT830 section and table column, the 15 contract hold, Dogecoin paused and OICORE's 1c limit; `docs/PROJECT_OVERVIEW.md` and `docs/ROADMAP.md` say gold only, size held at 15, and name both slot probes; a few code comments in `index.html` no longer say "gold and Dogecoin" or a 5 minute tape. Page and docs only, live on merge; no trading code changed.
