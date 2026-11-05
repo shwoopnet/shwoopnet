@@ -1107,7 +1107,7 @@
     // read-only from the client SDK) -- general market data that's the
     // same for everyone (index/watchlist quotes, headlines, earnings
     // calendar).
-    // The market tape: prices for the strip and the index cards, and a few headlines, written every 5 minutes by a keyless scheduled function (functions/marketTapeLib.js).
+    // The market tape: prices for the strip and the index cards, and a few headlines, written every 15 minutes (every 5 until Oct 26, 2026) by a keyless scheduled function (functions/marketTapeLib.js).
     watchMarketTape: function(callback){
       return onSnapshot(doc(db, 'shared', 'marketTape'), function(snap){
         callback(snap.exists() ? snap.data() : null);
@@ -1428,7 +1428,7 @@
               <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one order at a time (up to $2.00 a contract) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause). L1 trades nothing except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review). OICORE (10 contracts) and EVENT830 (1 contract) run with it.</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1437,7 +1437,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
                 <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -1607,6 +1607,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 5</div>
                 <ul class="changelog-list">
+                  <li>Bot page: the Start box and Rules text name every live strategy (L1 on gold, OICORE and EVENT830) and OICORE's limit 1c above the price it sees; changelog days and strategy docs brought up to date</li>
                   <li>Bot page: EVENT830's open positions now get a chart too (the price feed reads its eight markets)</li>
                 </ul>
                 <div class="changelog-day">Nov 4</div>
@@ -1643,22 +1644,22 @@
                 </ul>
                 <div class="changelog-day">Oct 31</div>
                 <ul class="changelog-list">
+                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
+                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
+                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page on a phone: a redraw no longer moves the page up while you are scrolled down (the scroll position is put back after each redraw)</li>
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
                   <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
-                </ul>
-                <div class="changelog-day">Oct 30</div>
-                <ul class="changelog-list">
                   <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
                   <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>
-                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
+                </ul>
+                <div class="changelog-day">Oct 30</div>
+                <ul class="changelog-list">
                   <li>Bot status: redone as two tiles (the countdown to the next look and the health line) with the last order, orders today and which markets are open; win rate, edge and best and worst market are no longer on this card, and Needs a look shows only when something is wrong</li>
                   <li>Settings: the Phone alerts confirmation now says closes, stops and issues (it said entries, but a buy never alerts)</li>
-                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
                   <li>Page: zooming out in the browser now keeps the page centred instead of leaving it against the left edge</li>
                   <li>Page: browser zoom (Cmd minus and plus) now zooms the page properly on a desktop; the big-screen scale-up follows the screen instead of the window width, so zooming out no longer switches it on and cancels the zoom</li>
-                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page: the Rules text now says the Bitcoin probe (OICORE) sends 10 contracts, not 5, and no longer lists a one-crypto-order-per-window limit that no live market is under</li>
                   <li>Notes: corrected the project note about which Kalshi shard each market trades on (every live market is on shard 2; gold was wrongly listed on shard 0)</li>
                   <li>Trading: the 8 PM to midnight pause is lifted for gold and Dogecoin, so both trade around the clock again (it cost about 30 fills a week)</li>
@@ -3364,7 +3365,7 @@
   }
   // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour. Every market that can place an order now is entered about 6 minutes before the close (minute 9 of the quarter): gold, Dogecoin and Ethereum (on a smooth climb only).
   // XRP and natural gas, the only 10 minute looks, are paused in the bot's code (Oct 28, 2026), and so are Bitcoin (Oct 29, 2026) and the forex probes, so the page names none of them and shows no 10 minute look (the owner, Oct 29, 2026: "XRP is paused, isn't it").
-  // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold and Dogecoin), the open interest jump 3 minutes before it
+  // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold; Dogecoin is paused), the open interest jump 3 minutes before it
   // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
   var KAL_LOOKS = [
     { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; } },
@@ -3409,7 +3410,7 @@
   // Gold has no weekend: closed from Friday 17:00 to Sunday 18:00 Central (the same window the silent-market warning uses); Dogecoin and Bitcoin trade all week.
   function kalshiGoldClosed(now){ var wm = kalshiCtWeekMinute(now); return wm >= 7200 + 1020 || wm < 1080; }
   // Prices right now against what each strategy buys (the owner, Oct 31, 2026: "all unique and helpful"; nothing else on the page shows this, and it answers "why is nothing trading"). From the market relay the page already reads: for the open
-  // 15 minute market of each series, the price to BUY the favourite side (gold and Dogecoin buy 88c to 97c) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
+  // 15 minute market of each series, the price to BUY the favourite side (gold buys 88c to 97c; Dogecoin is paused and not shown) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
   // does not carry, so that row says where the price sits and no more. Pure: relay markets and the clock in, rows out.
   var KAL_PRICE_WATCH = [
     { name: 'Gold', series: 'KXGOLD15M', kind: 'fav', lo: 0.88, hi: 0.97, gold: true },
@@ -4715,7 +4716,7 @@ kalshiStatusTick();
   }
 
   // ---------- The market tape (strip on every page, index cards, headlines, "as of") ----------
-  // Prices here come from shared/marketTape, written every 5 minutes around the clock by a keyless function. The page makes no market-data call of its own.
+  // Prices here come from shared/marketTape, written every 15 minutes around the clock by a keyless function. The page makes no market-data call of its own.
   var TAPE_ITEMS = [
     { sym:'^GSPC', name:'S&P 500', kind:'index' }, { sym:'^NDX', name:'Nasdaq 100', kind:'index' }, { sym:'^DJI', name:'Dow', kind:'index' },
     { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'^TNX', name:'10Y yield', kind:'yield' }, { sym:'TLT', name:'Long bonds', kind:'etf' },
@@ -4761,7 +4762,7 @@ kalshiStatusTick();
   }
 
   // ---------- The Brief (the owner chose concept B, Oct 23, 2026): the week's scheduled events with a countdown, three pairs of small charts (crypto, equities, commodities) and the news ----------
-  // Everything comes from shared/marketTape (written every 5 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
+  // Everything comes from shared/marketTape (written every 15 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
   var BRIEF_CHART_GROUPS = [
     { title: 'Crypto', items: [{ sym: 'BTC-USD', name: 'Bitcoin' }, { sym: 'ETH-USD', name: 'Ethereum' }] },
     { title: 'Equities', items: [{ sym: 'SPY', name: 'S&P 500 (SPY)' }, { sym: 'QQQ', name: 'Nasdaq 100 (QQQ)' }] },
