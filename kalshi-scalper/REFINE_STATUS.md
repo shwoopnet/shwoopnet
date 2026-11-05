@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:12 AM CT (16:12Z): W-COVER1 (OICORE live vs sim trigger coverage): sim is close, not exact
+
+- Diagnostic worker finished read only (w_oicore_cover/REGISTRATION.md, no try count, no profitability read). 35 live OICORE fills against the sim: 26 windows are in oi/btc.jsonl and the other 9 are in fwd_cache.jsonl, so no true data gaps. With both files 25 of 35 fills match a sim trigger. This worker's count differs from the first timing worker's 19 matched (18 vs 17 with btc.jsonl alone), so treat the matching counts as approximate; the method is by ticker.
+- The 10 unmatched fills: open interest rise below 86,300 in 0 (every one is 86,987 or more, so OI timing is not the cause); price outside 0.05 to 0.50 at the c-180 candle in 9 (live saw 0.041 to 0.067 and paid a limit of 0.05 to 0.07, the candle close showed 0.015 to 0.044, so live seems to read the price a few seconds after the candle close); side mismatch in 1 (a tie: live bought NO at 0.50 where the sim's YES ask was 0.50).
+- Reverse, since Oct 30 12:00Z (582 windows): 13 sim triggers without a filled live order, 7 with a live no fill order and 6 with no live order at all (reason unknown). Verdict: OI rise agrees; the price band is timing sensitive near 0.05, so the sim is a close but imperfect stand in for live triggers. A follow up worker (w_oicore_missing) reads the code for the exact price the band is checked on and for why 6 triggers got no order. It may reveal a code versus doc difference; I will tell main only if it does.
+
 ## 2026-11-05 10:11 AM CT (16:11Z): W-GNOFILL1 (gold L1 no-fill study, 14 days): nothing found
 
 - Worker finished read only; registration written first (w_goldnofill/REGISTRATION.md, 16 splits, bar: 15 point gap with 30 or more orders per side). Gold orders in the last 14 days: 223, 148 filled, 75 no fill (33.6%); whole report history 416 orders, 268 filled, 148 no fill (35.6%).
