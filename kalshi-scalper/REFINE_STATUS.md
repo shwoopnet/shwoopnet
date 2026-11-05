@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-05 10:28 AM CT (16:28Z): Gold forward tracker built and wired into wake.sh (cutoff 2026-11-05 16:27:35Z)
+
+- Worker built w_goldfwd/goldfwd_forward.py as registered (try count 1; forward only gold fills after the hard coded cutoff 2026-11-05T16:27:35Z; Clopper-Pearson by bisection). Current: 0 forward fills; last line FLAG none (goldfwd 0 of 100 settled fills). Synthetic tests all as expected: the cutoff excludes 5 gold fills at exactly the cutoff and 1 BTC fill, counting only the 3 gold fills after it; 100 forward fills with 2 losses gives a two sided interval of 0.24% to 7.04% and prints FLAG goldfwd: upper bound below break even; 100 fills with 15 losses gives 8.65% to 23.53% with break even recomputed to 7.57% and prints FLAG goldfwd: lower bound above break even (edge may be gone). Information only; added as a GOLDFWD section in wake.sh.
+
 ## 2026-11-05 10:27 AM CT (16:27Z): W-GOLDPOWER1 (gold break even and fills needed): one sided bound is already below break even
 
 - Worker finished read only (w_goldpower/REGISTRATION.md, try count 0; calc.py, out.txt). Gold, 268 fills, 13 losses (4.85%). Break even loss rate: (A) from observed per contract results with fees included, win +6.22c and loss -75.8c: 7.58%. (B) fee 0.07p(1-p) at mean price 0.928: 6.73% if every loss were a full loss; with losses 85% exits (-72.9c at price 0.904) and 15% settle losses (-92.1c) it is 8.0% on theory win size and 7.6% on observed. It depends on the mix of 25c exits versus full losses and on the price paid. Only 2 settle losses exist, so the settle loss size is weak.
