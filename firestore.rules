@@ -113,6 +113,11 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+    // Why a second-slot strategy sent no order in a window it was inside (Nov 5, 2026, log only). Written only by the server's minute function; the admin may read it, no browser may write it.
+    match /kalshiSlotSkips/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
 
     // The paper tracker's records (what L1's rule WOULD have bought on candidate markets, no money). Written only by the keyless scheduled function, readable only by the admin.
     match /kalshiPaperOrders/{id} {

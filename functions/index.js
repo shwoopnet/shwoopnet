@@ -690,6 +690,8 @@ exports.kalshiLiveArmed = onSchedule(
               keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch, quotes: slotQuotes, clock: Date.now,
               setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent, shared: shareOut, l1Result,
               sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
+              // Log only (Nov 5, 2026): why a strategy inside its entry span sent nothing. Called after the minute's orders, every error swallowed in runSlotTick; nothing that decides an order reads it.
+              recordSkip: slotStoreLib.slotSkipWriter(db),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
@@ -912,5 +914,7 @@ exports.kalshiNightlyReport = onRequest(
     // The second slot's orders (OICORE), read the same way, so the report covers every strategy.
     readDeploys: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(deployStamp.COLLECTION).get()).docs.map((d) => d.data()); },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
+    // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
+    readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
   })
 );
