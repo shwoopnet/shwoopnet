@@ -9004,3 +9004,6 @@ Full text: `workers/FLOWX1_REGISTRATION.md`. Not FLOW1 (Bitcoin 15 minute), FLOW
 
 ## Registration: DIGMET1 (digital-metric markets with a partially observable public count at the look; census then source gate; N +1), 2026-11-06
 Registered first, before any price, candle or outcome: `workers/DIGMET1_REGISTRATION.md`. Census (listings only, before the cut): Luminate 2,129 events, Spotify Charts 1,659 (SPOTD1), Netflix 337 (CHART1), YouTube Charts 249, Apple app rank 231, Ornn 200, Spotify total streams 197, Rotten Tomatoes 163, Fiscal.ai 89 (EARN1), Metacritic 43. `workers/DIGMET1_CENSUS.json`.
+
+## Result: DIGMET1 (2026-11-06): NOT_RUNNABLE (source gate; census only, no price or outcome read)
+`workers/DIGMET1_RESULT.md`. Families with at least 100 events (Luminate 2,129, YouTube Charts 249, Apple rank 231, Ornn 200, Spotify total streams 197, Rotten Tomatoes 163) have no free dated archive of the partial count at the look (Wayback blocked here; kworb and Rotten Tomatoes show only today). Spotify streams are the nearest: total at a past date cannot be rebuilt from kworb's charted days. Spotify Charts, Netflix and Fiscal.ai are already SPOTD1, CHART1 and EARN1. Accrual needed: a forward recorder of Spotify totals and RT scores for months. N +1. No lead.
