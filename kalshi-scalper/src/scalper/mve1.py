@@ -60,7 +60,7 @@ def list_window(a, b):
     return r["markets"]
 
 def candles(series, ticker, a, b):
-    return _get(f"/series/{series}/markets/{ticker}/candlesticks", {"start_ts": a, "end_ts": b, "period_interval": 1}).get("candlesticks", [])
+    return _get(f"/series/{series}/markets/{ticker}/candlesticks", {"start_ts": a, "end_ts": b, "period_interval": 1}, retries=2).get("candlesticks", [])
 
 def fl(x):
     try: return float(x)
