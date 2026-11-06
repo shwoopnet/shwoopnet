@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:03 AM CT (17:03Z): W-GOLDVOLUME1 (what gold's 35 missed windows were worth): between -$6 and +$6, sign not settled
+
+- Arithmetic on a small sample with an unknown fill price, not a forecast, no larger order or slip proposed (w_goldvolume/). The 35 unfilled qualifying gold windows (Nov 1 to Nov 6) at 14 contracts each: at the live +0.45c per contract +$2.20; at history +1.19c +$5.83; at live per order averages (32 wins x $0.62, 3 losses x $8.55) -$5.81; bucket gross at fill prices before fees and with no 25c exit -$5.21 (-$5.94 at mean price 0.926). At 91.4% wins against a 92.6c average price, break even sits about at the observed win rate. Reading: the missed gold volume is worth about nothing either way (a range of about -$6 to +$6 over six days), so raising the fill rate is not a lever for gold. Nothing changed.
+
 ## 2026-11-06 11:02 AM CT (17:02Z): W-GOLDNOFILL2 (outcome of gold's unfilled windows): not disproportionately winners or losers, unlike OICORE
 
 - Descriptive, try count 0, no rule (w_goldnofill2/; candle price is a 1 minute close, not the bot's quote; intervals wide). Entry side win rate in the 84 qualifying gold windows, Nov 1 to Nov 6 10:30 CT: filled 45/49 = 91.8% (Wilson 80.8 to 96.8); no fill row 20/22 = 90.9% (72.2 to 97.5); no order row 12/13 = 92.3% (66.7 to 98.6); unfilled combined 32/35 = 91.4% (77.6 to 97.0). Candle price bucket of unfilled windows, n / wins: 0.88 to 0.91 13/12; 0.92 to 0.94 13/12; 0.95 to 0.97 9/8; the 3 losses at 0.901, 0.921 and 0.97; mean candle price 0.926 unfilled vs 0.925 filled. Reading: gold's missed windows look like the filled ones, so the 41.7% miss rate costs gold volume (about 35 windows of 84 over the period), not a selection bias; a gold fill or order change would be a volume change, not an edge change. Unlike OICORE (W-OICORE-ADVERSE1, unfilled won 40% to 44% vs 21% to 24%). Nothing changed.
