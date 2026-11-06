@@ -14,7 +14,7 @@ gates.Y1 = () => {
 
 gates.Y2 = () => {
   // Rewritten Nov 5, 2026 for the smoother layout (one list, Edit layout instead of the Unlock tick box, pointer drag instead of native drag): same consequences, new code.
-  const iife = html.slice(html.indexOf("var VERSION = 2, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
   assert.ok(/id="kalLayoutEdit"/.test(html) && /id="kalEditBar" hidden/.test(html) && !/id="kalLayoutUnlock"/.test(html), 'rearranging starts off: Edit layout is a button and its bar starts hidden');
   assert.ok(!/editing|unlock/i.test(/function save\(skipSync\)\{([\s\S]*?)\n    \}/.exec(iife)[1]), 'editing is never saved, so a normal visit cannot be dragged by accident');
   assert.ok(/if\(!editing \|\| drag \|\|/.test(iife) && /grid\.classList\.contains\('kal-unlocked'\)/.test(iife), 'dragging, the arrows and the width toggle do nothing outside Edit layout');
@@ -39,7 +39,7 @@ gates.Y3 = () => {
 // drop, or some browsers stop part way (a faded card that never makes way).
 gates.Y4 = () => {
   // Native drag and drop was replaced by pointer events on Nov 5, 2026 (it did not work on phones). Same consequence: a drag keeps reordering when the pointer is in a gap between cards, and it changes the order only past another card's middle, not on every pixel.
-  const iife = html.slice(html.indexOf("var VERSION = 2, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
   assert.ok(/function cardAt\(x, y\)/.test(iife) && /if\(c === drag\.card\)\{ return; \}/.test(iife), 'the nearest other card is used when the pointer is in a gap');
   assert.ok(/r\.width \/ 2/.test(iife) && /r\.height \/ 2/.test(iife) && /var past = sameRow/.test(iife), 'a card moves only once the pointer is past the middle of another card');
   assert.ok(/Date\.now\(\) - drag\.swapAt > FLIP_MS/.test(iife), 'and not again until the last slide has finished, so two cards cannot flicker back and forth');
@@ -61,7 +61,7 @@ gates.Y5 = () => {
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
   assert.deepStrictEqual(names(seg), ['account', 'status', 'pnl', 'positions', 'trades'], 'one list: the account strip (with the Strategies table), the bot status (with the loss stop), the result line, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
   const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="pnl"'));
-  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="half" data-card="status">/.exec(seg)[1];
+  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="6" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
@@ -74,7 +74,8 @@ gates.Y5 = () => {
   const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   const tools = /id="kalTools"[\s\S]*?<\/details>\s*<details class="kal-layout" id="kalLayout"/.exec(page)[0];
   for (const id of ['kalAcctRefresh', 'kalDiagCopy', 'kalAcctStart', 'kalAcctBody']) assert.ok(tools.indexOf('id="' + id + '"') > -1, id + ' moved into the Tools menu in the header');
-  assert.ok(/\.kal-console\{ grid-template-columns:minmax\(0,1fr\) minmax\(0,1fr\); gap:18px; \}/.test(html) && /\.kal-console > \[data-card\]\[data-w="full"\]\{ grid-column:1 \/ -1; \}/.test(html), 'two equal columns; a Full card spans both (the fixed 340px rail rule was dead, overridden since Oct 23, 2026)');
+  // Nov 5, 2026: twelve equal columns (the resizable cards); a span of 12 is the old Full and 6 the old Half, the same widths.
+  assert.ok(/\.kal-console\{ grid-template-columns:repeat\(12, minmax\(0,1fr\)\); gap:18px; \}/.test(html) && /\.kal-console > \[data-card\]\[data-w="12"\]\{ grid-column:1 \/ -1; \}/.test(html), 'twelve equal columns; a full width card spans them all (the fixed 340px rail rule was dead, overridden since Oct 23, 2026)');
   assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
 };
 
@@ -83,7 +84,8 @@ gates.Y5 = () => {
 gates.Y6 = () => {
   const set = /set: function\(l\)\{([\s\S]*?)\n      \}\n    \};/.exec(html)[1];
   assert.ok(/var key = JSON\.stringify\(l\);\s*if\(key === lastRemote\)\{ return; \}/.test(set), 'a copy already applied is not applied again');
-  assert.ok(/if\(editing \|\| drag \|\| Date\.now\(\) - localDirtyAt < 4000\)\{ return; \}/.test(set), 'ignored while editing or dragging and just after our own change');
+  // Nov 5, 2026: a corner resize in progress (size) counts as editing too, so an account copy cannot snap a card back mid resize.
+  assert.ok(/if\(editing \|\| drag \|\| size \|\| Date\.now\(\) - localDirtyAt < 4000\)\{ return; \}/.test(set), 'ignored while editing, dragging or resizing and just after our own change');
   assert.ok(/lastRemote = key;/.test(set) && set.indexOf('lastRemote = key') > set.indexOf('localDirtyAt'), 'only a copy that was actually applied is remembered');
   assert.ok(/if\(skipSync !== true\)\{ localDirtyAt = Date\.now\(\); \}/.test(html), 'our own changes mark the layout as ahead of the account');
   assert.ok(/kal-unlocked > \.kal-card\{[^}]*user-select:none/.test(html), 'text inside a card cannot be picked up instead of the card');
@@ -290,7 +292,7 @@ gates.Y15 = () => {
 // A card stays in its own column: reordering, arrows and dragging all work within the parent the card is in, never across the rail and the main column.
 gates.Y9 = () => {
   // Inverted on Nov 5, 2026 on purpose: a card used to stay in its own column (rail or main); now any card can go anywhere, so the arrows and a drag move it within the one list of the grid.
-  const iife = html.slice(html.indexOf("var VERSION = 2, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
   assert.ok(/grid\.insertBefore\(c, at \|\| null\)/.test(iife), 'a saved order puts each card in its place in the one grid');
   assert.ok(/var cards = visibleCards\(\), i = cards\.indexOf\(c\), j = i \+ d;/.test(iife) && /grid\.insertBefore\(c, cards\[j\]\)/.test(iife), 'arrows move a card past its visible neighbour, across the whole page');
   assert.ok(/grid\.insertBefore\(drag\.card, j < i \? over : over\.nextSibling\)/.test(iife), 'a drag moves a card anywhere in the grid');

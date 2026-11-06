@@ -660,8 +660,16 @@
   .kal-console > [data-card][data-folded="true"] > .kal-card-head, .kal-console > [data-card][data-folded="true"] > .kal-card-title{ padding:14px 22px !important; min-height:52px; box-sizing:border-box; display:flex; align-items:center; }
   .kal-console > [data-card="account"][data-folded="true"]{ display:block; }
   .kal-console > [data-card="account"][data-folded="true"] .kal-acct-head{ display:flex; }
-  /* Half or Full only means something with two columns: on a phone the toggle is hidden and every card is one column. */
-  @media (max-width:900px){ .kal-move [data-width]{ display:none; } .kal-edit-hint{ flex-basis:100%; } .kal-move .kal-mini, .kal-grip, .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ min-height:40px; } .kal-move .kal-mini{ min-width:44px; } .kal-foldbtn{ width:40px; height:40px; margin:-12px 0 -12px -12px; } .kal-bot-grid.kal-unlocked > .kal-card{ padding-top:70px; } .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:54px; } }   /* a thumb needs 40px (mobileGates) */
+  /* The resize corner (Nov 5, 2026): only while editing, bottom right of each card. The Account card's corner changes its width only. The outline shows the snapped size while the corner is held. */
+  .kal-resize{ position:absolute; right:4px; bottom:4px; width:22px; height:22px; border-radius:6px; cursor:nwse-resize; touch-action:none; color:var(--muted); display:flex; align-items:flex-end; justify-content:flex-end; padding:3px; box-sizing:border-box; z-index:2; }
+  .kal-resize::before{ content:''; width:10px; height:10px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; border-radius:0 0 3px 0; }
+  .kal-resize:hover{ color:var(--paper); background:rgba(255,255,255,.06); }
+  [data-card="account"] > .kal-resize{ cursor:ew-resize; }
+  .kal-console > [data-card][data-folded="true"] > .kal-resize{ display:none; }
+  .kal-resize-ghost{ position:fixed; z-index:90; pointer-events:none; border:2px dashed var(--paper); border-radius:var(--radius); background:rgba(255,255,255,.04); box-sizing:border-box; }
+  .kal-resize-ghost > span{ position:absolute; right:8px; bottom:8px; padding:2px 8px; border-radius:6px; background:var(--panel); color:var(--paper); font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+  /* Sizes only mean something with twelve columns: on a phone the width and height buttons and the corner are hidden and every card is one column at its own height. */
+  @media (max-width:900px){ .kal-move [data-width], .kal-move [data-height], .kal-resize{ display:none; } .kal-edit-hint{ flex-basis:100%; } .kal-move .kal-mini, .kal-grip, .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ min-height:40px; } .kal-move .kal-mini{ min-width:44px; } .kal-foldbtn{ width:40px; height:40px; margin:-12px 0 -12px -12px; } .kal-bot-grid.kal-unlocked > .kal-card{ padding-top:70px; } .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:54px; } }   /* a thumb needs 40px (mobileGates) */
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
@@ -891,8 +899,15 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }   /* no named areas and no dense packing: a card's place is its place in the one list of cards (Nov 5, 2026, the owner: "i don't have much say in where each card goes"), so what the page shows is the order the layout holds and a moved card lands exactly where it was dropped */
-  .kal-console > [data-card][data-w="full"]{ grid-column:1 / -1; }   /* Half or Full is the owner's choice per card (data-w, set by the layout code); a Half card takes one of the two columns */
+  .kal-console{ grid-template-columns:repeat(12, minmax(0,1fr)); gap:18px; }   /* twelve columns since Nov 5, 2026 (the owner: "this should maybe all be adjustable? size wise"), so a card can be a quarter, a third, a half, two thirds or the full width; a span of 6 is exactly the old Half. No named areas and no dense packing: a card's place is its place in the one list of cards (Nov 5, 2026, the owner: "i don't have much say in where each card goes"), so what the page shows is the order the layout holds and a moved card lands exactly where it was dropped */
+  .kal-console > [data-card]{ grid-column:span 12; } .kal-console > [data-card][data-w="3"]{ grid-column:span 3; } .kal-console > [data-card][data-w="4"]{ grid-column:span 4; } .kal-console > [data-card][data-w="6"]{ grid-column:span 6; } .kal-console > [data-card][data-w="8"]{ grid-column:span 8; } .kal-console > [data-card][data-w="12"]{ grid-column:1 / -1; }   /* the width is the owner's choice per card (data-w, a span of the 12 columns, set by the layout code); only these five spans exist */
+  /* A set height (Nov 5, 2026): the card keeps its head and its body scrolls inside it. Wide screens only, and never on a folded card, which is its title row whatever was set. The Account card is never given one (its Start, Pause and Flatten menu hangs below its head and must not be cut off). */
+  @media (min-width:901px){
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]){ height:var(--kal-h); display:flex; flex-direction:column; box-sizing:border-box; }
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-head, .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-title{ flex:none; }
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-body{ flex:1 1 auto; min-height:0; overflow:auto; }
+  }
+  .kal-console [data-card="pnl"] > .kal-card-body{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }   /* the wrapper passes the row height on to the chart, as the card itself did before it existed */
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
@@ -969,7 +984,7 @@
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card]{ grid-column:1 / -1; }
+    .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }   /* the second selector outranks the span rules, so a width set on a desktop never makes extra columns on a phone */
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
     .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk, .kal-console [data-card="account"] #kalStrategies, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
     .kal-strat-mk{ display:none; }
@@ -977,10 +992,10 @@
     .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
-  /* The Account card at Half width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
-  .kal-console [data-card="account"][data-w="half"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
-  .kal-console [data-card="account"][data-w="half"] .kal-acct-head, .kal-console [data-card="account"][data-w="half"] .kal-acct-total, .kal-console [data-card="account"][data-w="half"] .kal-today, .kal-console [data-card="account"][data-w="half"] .kal-acct-risk, .kal-console [data-card="account"][data-w="half"] #kalStrategies, .kal-console [data-card="account"][data-w="half"] .kal-rows > div, .kal-console [data-card="account"][data-w="half"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
-  .kal-console [data-card="account"][data-w="half"] .kal-tile{ grid-column:auto; grid-row:auto; }
+  /* The Account card at less than the full width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
+  .kal-console [data-card="account"]:not([data-w="12"]){ grid-template-columns:minmax(0,1fr); gap:12px; }
+  .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-head, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-total, .kal-console [data-card="account"]:not([data-w="12"]) .kal-today, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-risk, .kal-console [data-card="account"]:not([data-w="12"]) #kalStrategies, .kal-console [data-card="account"]:not([data-w="12"]) .kal-rows > div, .kal-console [data-card="account"]:not([data-w="12"]) #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
+  .kal-console [data-card="account"]:not([data-w="12"]) .kal-tile{ grid-column:auto; grid-row:auto; }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
@@ -1445,7 +1460,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <button type="button" class="kal-mini" id="kalLayoutEdit">Edit layout (move cards, set Half or Full)</button>
+            <button type="button" class="kal-mini" id="kalLayoutEdit">Edit layout (move and resize cards)</button>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
         </details>
@@ -1455,12 +1470,12 @@
 
     <div class="kal-alert" id="kalAlert" role="alert" hidden><b id="kalAlertTitle"></b><span id="kalAlertText"></span> <button type="button" class="kal-alert-open" id="kalAlertOpen">See notifications</button></div>
     <div class="kal-edit-bar" id="kalEditBar" hidden>
-      <span class="kal-edit-h">Editing the layout</span><span class="kal-edit-hint">Drag a card by its title or its grip (on a phone, touch and hold), or use its arrows. Half or Full sets its width.</span>
+      <span class="kal-edit-h">Editing the layout</span><span class="kal-edit-hint">Drag a card by its title or its grip (on a phone, touch and hold), or use its arrows. Drag its bottom right corner to resize it (double click the corner for its own height), or use its width and height buttons.</span>
       <span class="kal-edit-btns"><button type="button" class="kal-mini" id="kalEditUndo" disabled>Undo</button><button type="button" class="kal-mini" id="kalEditReset">Reset</button><button type="button" class="kal-mini" id="kalEditCancel">Cancel</button><button type="button" class="kal-btn" id="kalEditDone">Done</button></span>
     </div>
     <div class="kal-sr" id="kalLayoutLive" aria-live="polite"></div>
     <div id="kalTabBot" class="kal-bot-grid kal-console">
-      <div class="kal-card kal-compact" data-w="full" data-card="account">
+      <div class="kal-card kal-compact" data-w="12" data-card="account">
         <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div>
           <details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill" class="kal-pill">Not running</summary>
             <div class="kal-layout-body kal-botmenu-body">
@@ -1492,19 +1507,19 @@
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
         <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
-      <div class="kal-card kal-compact" data-w="half" data-card="status">
+      <div class="kal-card kal-compact" data-w="6" data-card="status">
         <div class="kal-card-title">Bot status</div>
         <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
-      <div class="kal-card" data-w="half" data-card="pnl" id="kalPnl">
+      <div class="kal-card" data-w="6" data-card="pnl" id="kalPnl">
         <div class="kal-card-head" style="padding:0 0 12px"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
         <div id="kalPnlBody"></div>
       </div>
-      <div class="kal-card kal-compact" data-w="full" data-card="positions">
+      <div class="kal-card kal-compact" data-w="12" data-card="positions">
         <div class="kal-card-title">Open positions</div>
         <div id="kalBotOpen"></div>
       </div>
-      <div class="kal-card kal-card-flush" data-w="full" data-card="trades">
+      <div class="kal-card kal-card-flush" data-w="12" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div id="kalBotStats"></div>
@@ -1647,6 +1662,7 @@
                 </ul>
                 <div class="changelog-day">Nov 5</div>
                 <ul class="changelog-list">
+                  <li>Bot page: in Edit layout, drag a card's bottom right corner to resize it (width snaps to a quarter, a third, a half, two thirds or full; height snaps in steps and the card scrolls inside); double click the corner for its own height. A phone stays one column</li>
                   <li>Research: a perps recorder that samples every 30 seconds around the US stock open and close (Kalshi now lists single stock perps)</li>
                   <li>Deploy command: it now notices a change to the market price list, and names any server file it does not know how to deploy instead of saying nothing to deploy</li>
                   <li>Bot page: a folded card shows only its title (the Account card keeps its Running pill); the range buttons and the trades filter hide until it is opened</li>
@@ -4089,15 +4105,20 @@ kalshiStatusTick();
   })();
 
   // Layout of the Bot tab, rebuilt Nov 5, 2026 (the owner: "just more of a blocky interaction.. it doesnt move smoothly, i don't have much say in where each card goes on my page"; they chose smooth movement and free placement, no saved layouts yet).
-  // One ordered list of every card on one two column grid, so any card can go anywhere. Each card is Half or Full width (ignored on a phone, which is one column) and can be folded to its title row.
+  // One ordered list of every card on one grid, so any card can go anywhere, and each card can be folded to its title row.
+  // Sizes (Nov 5, 2026, the owner: "this should maybe all be adjustable? size wise i guess"): the grid has 12 columns and a card spans 3, 4, 6, 8 or 12 of them (a quarter, a third, a half, two thirds, the full width), and it can be given a height in steps of 40px,
+  // below which its body scrolls. Both are set in Edit layout by dragging the card's bottom right corner or with its buttons, and both are ignored on a phone (one column, every card at its own height).
   // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
     var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
     var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades' };
     var CARDS = ['account', 'status', 'pnl', 'positions', 'trades'];   // the default order, which is the look the page had before the rebuild
-    var WIDTHS = { account: 'full', status: 'half', pnl: 'half', positions: 'full', trades: 'full' };
-    var VERSION = 2, KEY = 'kalBotLayout';
-    function fresh(){ return { v: VERSION, order: CARDS.slice(), hidden: {}, width: {}, folded: {} }; }
+    var WIDTHS = { account: 12, status: 6, pnl: 6, positions: 12, trades: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
+    var SPANS = [3, 4, 6, 8, 12], SPAN_TEXT = { 3: '1/4', 4: '1/3', 6: '1/2', 8: '2/3', 12: 'Full' }, SPAN_WORDS = { 3: 'a quarter of the width', 4: 'a third of the width', 6: 'half the width', 8: 'two thirds of the width', 12: 'the full width' };
+    var H_STEP = 40, H_MIN_BODY = 120, H_MAX = 3000, H_STEPS = [240, 360, 480, 600];   // a set height snaps to 40px and never goes below the head plus 120px of body (or the card's own height, if that is less)
+    var NO_HEIGHT = { account: true };   // the Account card's Start, Pause and Flatten menu hangs below its head, so a set height could cut it off: that card only changes width
+    var VERSION = 3, KEY = 'kalBotLayout';
+    function fresh(){ return { v: VERSION, order: CARDS.slice(), hidden: {}, width: {}, height: {}, folded: {} }; }
     function isOptional(k){ return OPTIONAL.some(function(o){ return o[0] === k; }); }
     // A saved order with unknown names dropped and duplicates removed; a card it does not mention (one added after it was saved) goes right after the card that precedes it by default, not to the end.
     function complete(list, def){
@@ -4113,17 +4134,22 @@ kalshiStatusTick();
       ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var k = w === 'r' ? rail[r++] : main[m++]; if(k){ seq.push(k); } });
       return seq.concat(rail.slice(r), main.slice(m));
     }
-    // Anything read back (this browser or the account) is rebuilt from known names and values only, so a corrupt copy cannot hide the account card or set a width that does not exist.
+    // Anything read back (this browser or the account) is rebuilt from known names and values only, so a corrupt copy cannot hide the account card or set a width or height that does not exist.
+    // A version 2 copy (Nov 5, 2026, Half or Full) keeps its look: 'half' is a span of 6 and 'full' of 12, which are the same widths on the 12 column grid.
     function normalize(l){
       var next = fresh();
       if(!l || typeof l !== 'object'){ return next; }
       if(Array.isArray(l.order)){
         var order = l.order.filter(function(k){ return typeof k === 'string'; });
-        next.order = l.v === VERSION ? complete(order, CARDS) : migrateOrder(order);
+        next.order = (l.v === 2 || l.v === VERSION) ? complete(order, CARDS) : migrateOrder(order);
       }
       OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
       CARDS.forEach(function(k){
-        if(l.width && (l.width[k] === 'half' || l.width[k] === 'full')){ next.width[k] = l.width[k]; }
+        var w = l.width ? l.width[k] : undefined;
+        if(w === 'half'){ w = 6; } else if(w === 'full'){ w = 12; }
+        if(SPANS.indexOf(w) > -1){ next.width[k] = w; }
+        var h = l.height ? l.height[k] : undefined;
+        if(!NO_HEIGHT[k] && typeof h === 'number' && isFinite(h) && h >= H_MIN_BODY && h <= H_MAX){ next.height[k] = Math.round(h); }
         if(l.folded && l.folded[k] === true){ next.folded[k] = true; }
       });
       return next;
@@ -4142,6 +4168,16 @@ kalshiStatusTick();
     function visibleCards(){ return allCards().filter(function(c){ return !c.hidden; }); }
     function currentOrder(){ return allCards().map(function(c){ return c.getAttribute('data-card'); }); }
     function widthOf(k){ return layout.width[k] || WIDTHS[k]; }
+    function heightOf(k){ return NO_HEIGHT[k] ? null : (layout.height[k] || null); }
+    function heightText(h){ return h ? h + 'px tall' : 'Auto height'; }
+    // A card that can be given a height has one body under its head, so the body can scroll while the head stays put. The pieces are moved, not copied: every id and listener stays the same.
+    CARDS.forEach(function(k){
+      var c = card(k);
+      if(!c || NO_HEIGHT[k] || c.querySelector(':scope > .kal-card-body')){ return; }
+      var body = document.createElement('div'); body.className = 'kal-card-body';
+      Array.prototype.slice.call(c.children).forEach(function(ch){ if(!ch.matches('.kal-card-head, .kal-card-title')){ body.appendChild(ch); } });
+      c.appendChild(body);
+    });
     // A fold chevron in front of every card title, on every visit (not only while editing).
     CARDS.forEach(function(k){
       var t = card(k) && card(k).querySelector('.kal-card-title');
@@ -4156,14 +4192,18 @@ kalshiStatusTick();
       CARDS.forEach(function(k){
         var c = card(k);
         if(!c){ return; }
-        c.setAttribute('data-w', widthOf(k));
+        c.setAttribute('data-w', String(widthOf(k)));
+        var hh = heightOf(k);
+        if(hh){ c.setAttribute('data-h', String(hh)); c.style.setProperty('--kal-h', hh + 'px'); } else { c.removeAttribute('data-h'); c.style.removeProperty('--kal-h'); }
         c.hidden = isOptional(k) && layout.hidden[k] === true;   // the account card is never hidden, whatever was saved
         var folded = layout.folded[k] === true;
         c.setAttribute('data-folded', folded ? 'true' : 'false');
         var fb = c.querySelector('[data-fold]');
         if(fb){ fb.setAttribute('aria-expanded', folded ? 'false' : 'true'); fb.setAttribute('aria-label', (folded ? 'Unfold ' : 'Fold ') + LABELS[k]); }
         var wb = c.querySelector(':scope > .kal-move [data-width]');
-        if(wb){ var w = widthOf(k); wb.textContent = w === 'full' ? 'Full' : 'Half'; wb.setAttribute('aria-pressed', w === 'full' ? 'true' : 'false'); wb.setAttribute('aria-label', LABELS[k] + ' is ' + w + ' width. Make it ' + (w === 'full' ? 'half' : 'full') + ' width'); }
+        if(wb){ var w = widthOf(k); wb.textContent = SPAN_TEXT[w] + ' wide'; wb.setAttribute('aria-label', LABELS[k] + ' is ' + SPAN_WORDS[w] + '. Change its width'); }
+        var hb = c.querySelector(':scope > .kal-move [data-height]');
+        if(hb){ hb.textContent = heightText(hh); hb.setAttribute('aria-label', LABELS[k] + ' is ' + (hh ? hh + ' pixels tall' : 'its own height') + '. Change its height'); }
       });
       OPTIONAL.forEach(function(o){ list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true; });
     }
@@ -4209,15 +4249,18 @@ kalshiStatusTick();
     function setUnlocked(on){
       grid.classList.toggle('kal-unlocked', on);
       allCards().forEach(function(c){
-        var k = c.getAttribute('data-card'), old = c.querySelector(':scope > .kal-move');
-        if(old){ old.remove(); }
+        var k = c.getAttribute('data-card'), old = c.querySelector(':scope > .kal-move'), oldR = c.querySelector(':scope > .kal-resize');
+        if(old){ old.remove(); } if(oldR){ oldR.remove(); }
         if(on){
           var b = document.createElement('div'); b.className = 'kal-move';
           b.innerHTML = '<span class="kal-grip" aria-hidden="true">&#8942;&#8942; Drag</span>'
             + '<button type="button" class="kal-mini" data-width="' + k + '"></button>'
+            + (NO_HEIGHT[k] ? '' : '<button type="button" class="kal-mini" data-height="' + k + '"></button>')
             + '<button type="button" class="kal-mini" data-move="-1" aria-label="Move ' + LABELS[k] + ' up">&#9650;</button>'
             + '<button type="button" class="kal-mini" data-move="1" aria-label="Move ' + LABELS[k] + ' down">&#9660;</button>';
           c.insertBefore(b, c.firstChild);
+          var g = document.createElement('span'); g.className = 'kal-resize'; g.setAttribute('aria-hidden', 'true'); g.title = NO_HEIGHT[k] ? 'Drag to change the width' : 'Drag to resize. Double click for its own height';
+          c.appendChild(g);
         }
       });
       apply();
@@ -4233,6 +4276,7 @@ kalshiStatusTick();
     function endEdit(keep){
       if(!editing){ return; }
       if(drag){ endDrag(true); }
+      if(size){ sizeEnd(true); }
       var prev = before;
       editing = false; before = null; undo = []; updateUndo();
       flip(function(){
@@ -4268,8 +4312,14 @@ kalshiStatusTick();
         return;
       }
       if(!grid.classList.contains('kal-unlocked')){ return; }
-      if(t.hasAttribute('data-width')){
-        change(function(){ layout.width[k] = widthOf(k) === 'full' ? 'half' : 'full'; }, function(){ return LABELS[k] + ' is now ' + widthOf(k) + ' width.'; });
+      if(t.hasAttribute('data-width')){   // steps through a quarter, a third, a half, two thirds and the full width, then round again
+        change(function(){ layout.width[k] = nextSpan(widthOf(k)); }, function(){ return LABELS[k] + ' is now ' + SPAN_WORDS[widthOf(k)] + '.'; });
+        t.focus();
+        return;
+      }
+      if(t.hasAttribute('data-height')){   // Auto, then 240, 360, 480 and 600px (never below the card's minimum), then Auto again
+        var m = heightBounds(c);
+        change(function(){ var h = nextHeight(heightOf(k), m); if(h){ layout.height[k] = h; } else { delete layout.height[k]; } }, function(){ var h = heightOf(k); return LABELS[k] + ' is now ' + (h ? h + ' pixels tall.' : 'its own height.'); });
         t.focus();
         return;
       }
@@ -4282,6 +4332,76 @@ kalshiStatusTick();
         layout.order = currentOrder();
       }, function(){ return placeText(k); });
       t.focus();
+    });
+    function nextSpan(w){ var i = SPANS.indexOf(w); return SPANS[(i + 1) % SPANS.length]; }
+    function snapSpan(px, col, gap){   // the allowed span whose width is nearest to px
+      var best = SPANS[0], bestD = Infinity;
+      SPANS.forEach(function(n){ var d = Math.abs(n * col + (n - 1) * gap - px); if(d < bestD){ bestD = d; best = n; } });
+      return best;
+    }
+    function snapHeight(px, b){ return Math.min(H_MAX, Math.max(b.min, Math.round(px / H_STEP) * H_STEP)); }
+    function nextHeight(h, b){
+      var next = null;
+      for(var i = 0; i < H_STEPS.length; i++){ if(!h || H_STEPS[i] > h){ next = H_STEPS[i]; break; } }
+      return next ? Math.max(next, b.min) : null;
+    }
+    // The least a card may be made: its head plus 120px of body, or its whole own height if that is less, so nothing is ever cut to nothing (its body scrolls instead).
+    function heightBounds(c){
+      var r = c.getBoundingClientRect(), body = c.querySelector(':scope > .kal-card-body');
+      if(!body){ return { min: Math.ceil(r.height), natural: Math.ceil(r.height) }; }
+      var cs = window.getComputedStyle(c), head = body.getBoundingClientRect().top - r.top;
+      var natural = Math.ceil(head + body.scrollHeight + (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0));
+      return { min: Math.min(natural, Math.ceil(head + H_MIN_BODY)), natural: natural };
+    }
+    function phoneWidth(){ return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches); }
+    // Resizing by the corner: the outline shows the snapped size while the corner is held and the size is applied on release (one Undo step). The width snaps to an allowed span;
+    // the height snaps to 40px and only changes once the pointer has moved up or down by half a step, so widening a card does not also fix its height.
+    var size = null;
+    function sizeLabel(){ return SPAN_TEXT[size.span] + ', ' + (size.h ? size.h + 'px' : 'auto'); }
+    function sizeTrack(){
+      var r = size.card.getBoundingClientRect(), g = size.ghost;
+      g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+      g.style.width = (size.span * size.col + (size.span - 1) * size.gap) + 'px';
+      g.style.height = (size.h || size.h0Px) + 'px';
+      g.firstChild.textContent = sizeLabel();
+    }
+    function sizeMove(e){
+      if(!size){ return; }
+      var dx = e.clientX - size.x0, dy = e.clientY - size.y0;
+      if(Math.abs(dx) + Math.abs(dy) > 3){ size.moved = true; }
+      size.span = snapSpan(size.w0 + dx, size.col, size.gap);
+      if(!NO_HEIGHT[size.k] && size.card.getAttribute('data-folded') !== 'true' && (size.hTouched || Math.abs(dy) >= H_STEP / 2)){ size.hTouched = true; size.h = snapHeight(size.h0Px + dy, size.bounds); }
+      sizeTrack();
+    }
+    function sizeEnd(e){
+      var d = size;
+      size = null;
+      ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window.removeEventListener(n, n === 'pointermove' ? sizeMove : sizeEnd); });
+      if(!d){ return; }
+      d.ghost.remove(); d.card.classList.remove('kal-sizing');
+      if(e === true || !d.moved || !editing){ return; }   // Escape, a click without a move (part of a double click) or the end of editing: nothing changes
+      var k = d.k, w = d.span, h = d.h;
+      change(function(){ layout.width[k] = w; if(d.hTouched){ if(h){ layout.height[k] = h; } else { delete layout.height[k]; } } }, function(){ var hh = heightOf(k); return LABELS[k] + ' is now ' + SPAN_WORDS[widthOf(k)] + (NO_HEIGHT[k] ? '.' : ', ' + (hh ? hh + ' pixels tall.' : 'its own height.')); });
+    }
+    function sizeStart(e, c){
+      var k = c.getAttribute('data-card'), r = c.getBoundingClientRect(), gs = window.getComputedStyle(grid);
+      var gap = parseFloat(gs.columnGap) || 18, col = (grid.getBoundingClientRect().width - 11 * gap) / 12;
+      if(c.__flip){ c.__flip.cancel(); c.__flip = null; }
+      var ghost = document.createElement('div'); ghost.className = 'kal-resize-ghost'; ghost.appendChild(document.createElement('span'));
+      document.body.appendChild(ghost);
+      size = { card: c, k: k, x0: e.clientX, y0: e.clientY, w0: r.width, h0Px: Math.round(r.height), h: heightOf(k), span: widthOf(k), col: col, gap: gap, bounds: heightBounds(c), ghost: ghost, moved: false, hTouched: false };
+      c.classList.add('kal-sizing');
+      sizeTrack();
+      ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window.addEventListener(n, n === 'pointermove' ? sizeMove : sizeEnd); });
+      e.preventDefault();
+    }
+    // A double click on the corner gives the card back its own height (Auto, the default).
+    grid.addEventListener('dblclick', function(e){
+      var t = e.target && e.target.closest ? e.target.closest('.kal-resize') : null;
+      if(!t || !editing){ return; }
+      var c = t.closest('#kalTabBot > [data-card]'), k = c && c.getAttribute('data-card');
+      if(!k || NO_HEIGHT[k] || !layout.height[k]){ return; }
+      change(function(){ delete layout.height[k]; }, LABELS[k] + ' is now its own height.');
     });
     // Dragging with pointer events (mouse, pen and touch; the native drag and drop it replaces did not work on phones). A mouse drag starts after a few pixels; a touch drag starts after a short hold
     // (so a swipe still scrolls the page) or at once on the grip. The card follows the pointer, and the order changes only when the pointer crosses the middle of another card, never on every pixel.
@@ -4349,8 +4469,10 @@ kalshiStatusTick();
       if(!same(d.prev, layout)){ undo.push(d.prev); updateUndo(); announce(placeText(c.getAttribute('data-card'))); }
     }
     grid.addEventListener('pointerdown', function(e){
-      if(!editing || drag || (e.pointerType === 'mouse' && e.button !== 0)){ return; }
-      var t = e.target, onGrip = !!(t.closest && t.closest('.kal-grip'));
+      if(!editing || drag || size || (e.pointerType === 'mouse' && e.button !== 0)){ return; }
+      var t = e.target, corner = t.closest && t.closest('.kal-resize');
+      if(corner){ if(!phoneWidth()){ sizeStart(e, corner.closest('#kalTabBot > [data-card]')); } return; }   // the corner resizes at once, for touch too (no hold), and never starts a move
+      var onGrip = !!(t.closest && t.closest('.kal-grip'));
       if(!onGrip && t.closest && t.closest('button, a, input, select, textarea, summary, label, details, [contenteditable]')){ return; }   // a control inside a card still works while editing
       var c = t.closest && t.closest('#kalTabBot > [data-card]');
       if(!c){ return; }
@@ -4373,9 +4495,12 @@ kalshiStatusTick();
     function onUp(){ if(drag){ endDrag(false); } }
     function listen(on){ ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window[on ? 'addEventListener' : 'removeEventListener'](n, n === 'pointermove' ? onMove : onUp); }); }
     // Once a touch drag has begun the page must not scroll under the finger (it scrolls by itself near the top and bottom edges instead). On the grid, and registered up front, because a browser decides whether a touch may block scrolling when the touch starts.
-    grid.addEventListener('touchmove', function(e){ if(drag && drag.active && e.cancelable){ e.preventDefault(); } }, { passive: false });
+    grid.addEventListener('touchmove', function(e){ if(((drag && drag.active) || size) && e.cancelable){ e.preventDefault(); } }, { passive: false });
     grid.addEventListener('contextmenu', function(e){ if(editing && drag){ e.preventDefault(); } });   // a long press must not open the phone's menu
-    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && drag && drag.active){ endDrag(true); announce('Move cancelled.'); } });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && drag && drag.active){ endDrag(true); announce('Move cancelled.'); }
+      if(e.key === 'Escape' && size){ sizeEnd(true); announce('Resize cancelled.'); }
+    });
     // The account's saved layout arrives from the shared user-settings snapshot; it is applied without writing it straight back.
     window.__kalBotLayout = {
       get: function(){ return layout; },
@@ -4385,7 +4510,7 @@ kalshiStatusTick();
         // never while editing or dragging or just after our own change (the older copy would put the card straight back).
         var key = JSON.stringify(l);
         if(key === lastRemote){ return; }
-        if(editing || drag || Date.now() - localDirtyAt < 4000){ return; }
+        if(editing || drag || size || Date.now() - localDirtyAt < 4000){ return; }
         lastRemote = key;
         var next = normalize(l);
         layout = next; apply(); save(true);
