@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
@@ -128,6 +128,23 @@ gates.R5 = () => {
   const sh = fs.readFileSync(path.join(root, 'functions', 'deploy-report.sh'), 'utf8');
   assert.ok(/functions:secrets:get KALSHI_REPORT_TOKEN/.test(sh) && /keeping it/.test(sh), 'an existing token is kept');
   assert.ok(/ONLY=functions:kalshiNightlyReport\b/.test(sh), 'deploys only this function');
+};
+
+// R10: the report reads the fields the order documents really carry (averageFillPrice and averageFeePaid, as the POST answer stored them), not the export's column names. The report's avgFill was null on every row
+// for lack of this (found by the refinement chat, Nov 6, 2026), so the fill price and fee of an order, and with them its real result, could not be read from it.
+gates.R10 = () => {
+  const NOW = Date.parse('2026-11-06T12:00:00Z');
+  const o = (x) => Object.assign({ ticker: 'KXBTC15M-26NOV061215-15', side: 'yes', fillCount: 10, count: 10, averageFillPrice: '0.0700', averageFeePaid: '0.0049', status: 'filled', settled: true, result: 'no', settledPnl: -0.8, strategy: 'L1', ts: NOW - 3600000 }, x || {});
+  const slot = (x) => Object.assign(o({ slotId: 'OICORE' }), x || {});
+  const r = lib.buildReport([o(), o({ averageFillPrice: null, averageFeePaid: null, avgFill: 0.5, avgFee: 0.01 })], NOW, 24, true, [slot()]);
+  assert.strictEqual(r.orders[0].avgFill, 0.07);
+  assert.strictEqual(r.orders[0].avgFee, 0.0049);
+  assert.strictEqual(r.orders[1].avgFill, 0.5, 'an older shape that only has avgFill still reads');
+  assert.strictEqual(r.orders[1].avgFee, 0.01);
+  assert.strictEqual(r.slotOrders[0].avgFill, 0.07);
+  assert.strictEqual(r.slotOrders[0].avgFee, 0.0049);
+  const none = lib.buildReport([o({ averageFillPrice: undefined, averageFeePaid: undefined })], NOW, 24, true, []);
+  assert.strictEqual(none.orders[0].avgFill, null, 'a missing price stays null, never a made-up value');
 };
 
 (async () => {
