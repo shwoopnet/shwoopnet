@@ -1,0 +1,3 @@
+# PERPEQ2 result (2026-11-06): NOT_ENOUGH_DATA (nothing scored; the test is forward only)
+
+Registration `workers/PERPEQ2_REGISTRATION.md` (commit 623e6d5). Five sector pairs (XOM-CVX, KO-PG, AAPL-MSFT, GOOGL-META, NVDA-MU), z at least 2 over 20 hourly grid points, 18 to 48 hour hold, quotes from the exchange 1 minute candles. No ratio, trade or return computed; the pair list was fixed from the cost map only. Read date **2026-12-01**; expected 15 to 25 trades, so 100 trades is met about **2027-05** at that rate (verdict NOT_ENOUGH_DATA until then). Prediction: gross +3 bps against about 58 bps of cost, net -55 bps. N +7.

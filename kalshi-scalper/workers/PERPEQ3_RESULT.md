@@ -1,0 +1,3 @@
+# PERPEQ3 result (2026-11-06): NOT_ENOUGH_DATA (nothing scored; the test is forward only)
+
+Registration `workers/PERPEQ3_REGISTRATION.md` (commit 623e6d5). Premium to the venue's reference faded in cash hours on the 21 cost-chosen perps; needs `reference_price`, which only the recorder rows carry (not the candles), at about 4 samples a day and about 1.5 a day inside cash hours. Expected about 12 trades by 2026-12-01 and 100 only about **2027-07**; with the 5 minute cash-hours snapshots in `PERPEQ_RECORDER_REQUEST.md` item 2 it would be about 150 in the same window. No premium or return computed. N +2.
