@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:35 AM CT (17:35Z): W-GHOLD120-FEAS (is S-GHOLD120 feasible): borderline, lean shelve
+
+- Descriptive (w_ghold120/run2.py, res2.json; public 1 minute candles, intrabar bought side bid low; minute candles cannot give the exact second). For the 16 live gold early sells: 7 resolved, 9 unresolved (missing or empty candles). Of the 7, 3 first hit 25c inside the last 120 s (Nov 5 14:15, Nov 6 02:30, Nov 6 07:15 ET tickers); 4 hit earlier (minutes ending 180 to 120 s before close). Plausible range 3 to about 7 of 16, against the draft's under 4 shelve line. Even at 7 the forward pace is about 1 a month, so 15 qualifying exits are not reachable before about February. Reading: S-GHOLD120 is a shelve (too slow to read); note that two of the three last 2 minute exits are the Nov 5 to 6 recoveries that settled in our favour (W-GOLDCLUSTER1), so the idea has a real instance but cannot be tested in a useful time. Nothing changed.
+
 ## 2026-11-06 11:35 AM CT (17:35Z): W-REGS-SHARE (how many OICORE fills S-NEARTHR and S-EDGEFILT would remove): about 40%, counts only
 
 - Counts only, no outcomes (w_regs_share/ov.py). Sim over 548 triggers: S-NEARTHR removes 169 (31%; 170 in w_oicore_rise, a one trigger set difference), S-EDGEFILT removes 70 (13%); 19 are in both, so together 220 (40%). Live 47 fills: NEARTHR 17 per w_oicore_rise (14 by the sim's rise), EDGEFILT 5; overlap 1 (sim matched), so together 18 to 21 (about 40% to 45%). Reading: either filter alone would cut the OICORE fill rate by 13% to 31%, both about 40%, which would push the 100 fill read (about Nov 18) to about Nov 25 to 30 and the 150 fill net under 0 test later; so they are shadows only, not filters, until a forward record exists. Nothing changed.
