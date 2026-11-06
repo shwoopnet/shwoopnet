@@ -1,0 +1,11 @@
+# OVN5 registration: fade the overnight gap of the INDEX perp into 10:00 New York (1 minute candles; the index version of PERPEQ1 and OVN1; shared rules `CASHW_COMMON.md`; written 2026-11-06 before any outcome)
+
+**Mechanism and counterparty.** While the cash market is shut the index perp is the only place the index trades; its overnight move comes from thin flow, and the cash open then sets the price with full liquidity. If the overnight gap overshoots, the perp falls back by 10:00. Counterparty: the overnight taker who pays for news the cash market has not confirmed. Honest alternative: the perp is a fair forecast of the open, the gap is in the price and the fee is the whole result. **The brief's "perp 08:55 against the previous 16:00 cash close":** the perp's price level is not the index's (the units differ; a scale would be a free parameter), so the gap is the perp's own: g_p = perp mid at the candle ending 08:55 / perp mid at the candle ending 16:00 of the previous trading day - 1, which equals the cash-close version scaled at 16:00. Cash enters only as a second reading.
+
+**Rule (fixed, as PERPEQ1 with the index spread screen).** Trigger |g_p| at least 30 bps, at least 5 times the entry candle's own spread in bps, and entry spread at most 3 times the perp's median (0.95 and 1.09 bps). Trade AGAINST the gap sign at the 08:55 candle (g_p > 0: sell at the bid; g_p < 0: buy at the ask), exit at the candle ending 10:00 (buy back at the ask or sell at the bid). Control: continuation (same entries, opposite direction). Second reading, information only: ETF cash gap g_c = open of the 09:30 bar / previous 16:00 close - 1, and the share of dates where g_c has the sign of g_p. Development dates for OVN5 only: **2026-10-29 and 10-30** (shared file explains why).
+
+**Numeric prediction.** 2 dates x 2 perps = at most 4 candidate events; triggered 0 or 1 (an overnight gap of 30 bps in one night happens on maybe 1 date in 6); gross about +3 bps; net about -25 bps. NOT_ENOUGH_DATA 99%.
+
+**Kill criteria and bars.** Shared file. Read date **2026-12-01** on forward dates (candles plus later `cash1m` files); at about 15% of perp-dates triggering the 100 trade bar is not reachable on two perps in 2026 (about mid-2027); descriptive instrument as CASHGAP2.
+
+**N** +2.

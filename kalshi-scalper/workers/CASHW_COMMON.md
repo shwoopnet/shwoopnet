@@ -1,0 +1,26 @@
+# CASHOPEN2, CASHCLOSE2, CASHGAP2, OVN5 shared rules (index perps against the Yahoo 1 minute cash tape; Strategy Research V2 worker; written 2026-11-06, before any rule outcome of these tests was computed)
+
+Discovery only. No live code, no functions/, no index.html, no merge, deploy or promote verb. Four registered tests, not a generator. They are the INDEX-perp, 1 minute candle versions of CASHOPEN1, CASHCLOSE1, CASHGAP1 and of the OVN1 and PERPEQ1 family. The three CASH tests registered earlier read 30 second `perps30/` files; **checked 2026-11-06 about 17:00 UTC: no `perps30/` file exists on origin/main or origin/perp-data, so their data condition is not met and they are NOT run; their read date stays 2026-12-01 as registered (nothing amended).** The tests below use different data (exchange 1 minute candles), so they are new registrations with new IDs, not a rerun.
+
+## Data
+- Kalshi perp 1 minute candles (public, cached `data/perpgen/raw/`, through 2026-11-06 00:00Z): KXUS500PERP from 2026-10-06, KXUSTECH100PERP from 2026-10-14. Only CLOSE bid and ask are used (int64 sentinel, crossed and ask over twice the bid are missing). A minute the exchange did not serve is missing, never filled; a missing leg means no trade (counted).
+- Cash: `cash1m/2026-11-06.csv.gz` on origin/perp-data (Yahoo 1 minute bars including pre and post market; SPY, QQQ, ^GSPC, ^NDX from 2026-10-29, ES=F, NQ=F from 2026-10-30). Mapping: US 500 to SPY, US Tech 100 to QQQ (ETFs print a real 09:30 open; the index series starts from stale constituent prints). Only SPY and QQQ enter a rule; ES=F and NQ=F are used for the alignment test.
+- **Timestamp convention (tested before any rule, on development dates only):** a Kalshi candle ending at T carries the quote at T; a Yahoo bar starting at S has its close at S+60. So cash(T) = close of the Yahoo bar that STARTS at T-60, and the cash open of 09:30 = open of the bar starting at 09:30. Test: correlation of 1 minute log returns of the perp mid and the front future (ES=F, NQ=F) over 4,080 minutes of 2026-10-30 to 11-03 at shifts of the perp by -3 to +3 minutes: **0.991 at shift 0 for both perps and 0.002 to 0.033 at every other shift** (the wrong convention would show the peak one minute off). Known jump: 2026-11-03 20:03 ET, ES=F -19.5 bps, perp mid -18.7 bps in the same candle (US 500); NQ=F -34.6 bps, Tech 100 -33.3 bps. Times in New York time; the clock changed on 2026-11-01 (open was 13:30Z until Oct 30, 14:30Z from Nov 2).
+- A first fact, information only: the index perp and the future move together within the same minute (0.991), so a staleness of more than a minute is unlikely.
+
+## Cut (the overlap is 6 trading dates)
+Overlap dates with both cash and quotes: 2026-10-29, 10-30, 11-02, 11-03, 11-04, 11-05. **Held out (last third, never read, enforced in code by a date cap at load): 2026-11-04 and 2026-11-05.** Development: 2026-10-29, 10-30, 11-02, 11-03 (halves D1 = Oct 29 and 30, D2 = Nov 2 and 3). **OVN5 is stricter: its development dates are only 2026-10-29 and 10-30**, because OVN1 to OVN4 froze 2026-11-01 onward as their own held-out third, and OVN5 is the same mechanism; Nov 2 to 5 are not read for OVN5. Forward dates (2026-11-06 on, from fresh candles and later `cash1m` files) are development extension, first read **2026-12-01**; held out then 2026-11-04, 11-05 and any new last third cut by a new registration before that read. A held-out date is read once and only for a LEAD. Disclosure: all overlap dates after 2026-10-26 (US 500) and 2026-10-29 (Tech 100) lie inside the PERPGEN holdout for these two tickers; PERPGEN found no survivors and unlocked no holdout, and nothing here changes its guard file, and no PERPGEN loader path is used (candle files are read directly with a date cap).
+
+## Universe (on recorded spread only, frozen)
+The index perps, median 1 minute spread over the PERPGEN discovery region at most 5 bps: KXUS500PERP 0.95 bp, KXUSTECH100PERP 1.09 bp (`PERPDATA_REPORT.md`). Stock perps are forward only (PERPEQ1 to 4) and are not read here. US 2000 is inactive.
+
+## Cost
+Entry and exit at the recorded close ask or bid (buy at ask, sell at bid) of the candle named in each rule, plus a fee of 12 bps a side (placeholder from the repo's perps guide, NOT confirmed against Kalshi's fee page), also shown at 5 and 24 bps; break-even fee per side reported. Funding ignored (holds under 2 hours; omission flagged).
+
+## Verdict rules (the PERPEQ standard)
+NOT_ENOUGH_DATA: fewer than 100 trades or fewer than 30 trading-date clusters in development. FALSIFIED: with at least 100 trades on 30 clusters, any of: PF under 1.5 in either half, net per trade not above 0 in both halves, PF under 1.2 at the 24 bps fee (the x1.2 stress is applied at 12 bps: 14.4), trigger not better than its control, day-clustered z under 5.32. LEAD only if all pass; then the held-out dates are read once and PF under 1.5 there is FALSIFIED. With fewer trades the figures are printed as information and carry no verdict.
+
+## Count
+Four tests, +2 each (rule and control): **N +8**, running about 1,230,500 to about 1,230,508, deflated z bar about 5.32.
+
+Code `workers/cashw/score.py` and `common.py`, written and committed before the run.
