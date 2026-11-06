@@ -9,13 +9,13 @@ Two stocks of one sector share news; the log ratio of their perp prices should m
 XOM-CVX, KO-PG, AAPL-MSFT, GOOGL-META, NVDA-MU. Nothing else.
 
 ## Rule (fixed, no tuning)
-At each sample where both legs are active and under the 3 times median spread screen, r = ln(mid A / mid B). Baseline: the last 12 prior samples of that pair spanning at least 3 distinct New York trading dates (otherwise no signal). z = (r - mean) / sd of the baseline. Trigger: |z| at least 2.0. Trade: sell the rich leg at the bid and buy the cheap leg at the ask, equal dollar notional at the mids. Exit: the first sample at or after 18 hours later and no later than 48 hours (both legs at the recorded ask or bid), else no trade (counted). One open trade per pair at a time. Control: the reverse direction on the same triggers.
+Grid: the exchange 1 minute candles ending at 10:00, 11:00, 12:00, 13:00, 14:00, 15:00 and 15:55 New York on each trading day (7 a day); r = ln(mid A / mid B) where mid = (close bid + close ask) / 2; a grid point is skipped if either candle is missing or either spread is over 3 times its cost-map median. Baseline: the last 20 prior grid points of the pair (about 3 trading days; fewer than 20 or fewer than 3 dates means no signal). z = (r - mean) / sd of the baseline. Trigger: |z| at least 2.0. Trade: sell the rich leg at the close bid and buy the cheap leg at the close ask, equal dollar notional at the mids. Exit: the first grid point at least 18 hours later and no later than 48 hours (both legs at the close ask or bid), else no trade (counted). One open trade per pair at a time. Control: the reverse direction on the same triggers.
 
 ## Numeric prediction
-Triggers: about 5 pairs x 3 per month limited by the one-open-trade rule and the 18 hour hold = about 15 trades in development (range 6 to 30). Gross +3 bps on a ratio that moves about 100 bps a day (range -20 to +25), cost = 48 bps fees plus about 10 bps spread, net -55 bps, PF 0.0 to 0.3, win rate about 35%. Break-even fee per side will be reported (expected under 3 bps). Probabilities: NOT_ENOUGH_DATA 90%, FALSIFIED 10%.
+Triggers: 5 pairs x 15 dates x 7 grid points x P(|z| >= 2, about 0.05) = about 26, limited to about 15 to 25 trades by the one-open-trade rule and the 18 hour hold. Gross +3 bps on a ratio that moves about 100 bps a day (range -20 to +25), cost = 48 bps fees plus about 10 bps spread, net -55 bps, PF 0.0 to 0.3, win rate about 35%. Break-even fee per side will be reported (expected under 3 bps). Probabilities: NOT_ENOUGH_DATA 92%, FALSIFIED 8%.
 
 ## Kill, bars and cut
-As the common file; development read date **2026-12-01** (baseline needs 3 dates, so the first possible trigger is about 2026-11-11); held out from 2026-12-01 read once on or after 2026-12-30 only after a LEAD. The date 100 trades is met at the observed rate is reported (about 2027-04).
+As the common file; development read date **2026-12-01** (the first possible trigger is about 2026-11-12); held out from 2026-12-01 read once on or after 2026-12-30 only after a LEAD. The date 100 trades is met at the observed rate is reported (about 2027-05 at 20 trades a month).
 
 ## Count
 N +7 (pooled rule, control, and five per-pair readouts, which are information only).
