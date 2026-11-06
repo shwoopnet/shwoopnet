@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:51 AM CT (16:51Z): EVENT830 timing: Dec 7 is an interim read (main's default), kills unchanged; check price paid at about 15 fills
+
+- Main (Nov 6): on Dec 7 report EVENT830 as an INTERIM read (fills, wins, net, price paid vs the registered 14c to 18c, releases left), no pass or fail unless a kill rule has fired, re read at 40 fills; the 40 fill kill and the 20 loss streak stay as registered; main asked whether to rewrite the registration for the 27c fills. My answer: no rewrite on 5 fills (changing the registration after seeing results defeats the pre registration). At about 15 fills (around Nov 19 to 25) report the mean price paid against 14c to 18c; if it is still above about 20c, ask the owner whether to ADD a stated note (not move the bar) that the 19% win rate applies to a 14c to 18c mix and a dearer mix needs a higher win rate (break even is about the price plus 1c to 2c). Nothing changed in the bot.
+
 ## 2026-11-06 10:51 AM CT (16:51Z): W-EVENT830-PACE1 (EVENT830 fills by date): the Dec 7 40 fill read will not be reachable
 
 - Descriptive, try count 0 (w_event830_pace/). Start 5 fills, 13 releases left (Nov 10 to Dec 23). Cumulative fills by Dec 4 / Dec 23: low (1 per release) 13 / 18; observed (2.5) 25 / 37.5; high (4) 37 / 57. 40 fills: low never; observed not by Dec 23 (about the 15th release, so probably 2027); high Dec 10 (41); so not by Dec 7 under any scenario. Binomial (p 0.45, 35 more needed by Dec 4, 8 releases): 8 orders per window 7.6%; 6 orders 0.01%; 5 orders 0%; through Dec 23: 99%, 55%, 10% (observed releases averaged 5.5 orders, so 8 is optimistic). Reading: the registered net under $0 at 40 fills kill and the Dec 7 forward read are not available on Dec 7; the 40 fill read slips to Dec 10 at best, probably into 2027; the 20 loss streak cannot realistically fire at these fill counts. Corrects my earlier estimate in W-EVENT830-CAL1 (about 25 by Dec 7: it is about 25 by Dec 4, and 40 is not reached). Nothing changed.
