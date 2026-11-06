@@ -1,0 +1,422 @@
+{
+ "as_of": "2026-11-06T00:00:00Z",
+ "cuts": {
+  "KXAAVEPERP": {
+   "first_day": "2026-08-28",
+   "holdout_start": "2026-10-13",
+   "holdout_ts": 1791849600,
+   "last_day": "2026-11-05",
+   "n_days": 70,
+   "validation_start": "2026-09-20",
+   "validation_ts": 1789862400
+  },
+  "KXADAPERP": {
+   "first_day": "2026-08-31",
+   "holdout_start": "2026-10-14",
+   "holdout_ts": 1791936000,
+   "last_day": "2026-11-05",
+   "n_days": 67,
+   "validation_start": "2026-09-22",
+   "validation_ts": 1790035200
+  },
+  "KXALUMINUMPERP": {
+   "first_day": "2026-10-06",
+   "holdout_start": "2026-10-26",
+   "holdout_ts": 1792972800,
+   "last_day": "2026-11-05",
+   "n_days": 31,
+   "validation_start": "2026-10-16",
+   "validation_ts": 1792108800
+  },
+  "KXBCHPERP": {
+   "first_day": "2026-06-09",
+   "holdout_start": "2026-09-17",
+   "holdout_ts": 1789603200,
+   "last_day": "2026-11-05",
+   "n_days": 150,
+   "validation_start": "2026-07-29",
+   "validation_ts": 1785283200
+  },
+  "KXBNBPERP": {
+   "first_day": "2026-08-31",
+   "holdout_start": "2026-10-14",
+   "holdout_ts": 1791936000,
+   "last_day": "2026-11-05",
+   "n_days": 67,
+   "validation_start": "2026-09-22",
+   "validation_ts": 1790035200
+  },
+  "KXBTCPERP": {
+   "first_day": "2026-06-03",
+   "holdout_start": "2026-09-15",
+   "holdout_ts": 1789430400,
+   "last_day": "2026-11-05",
+   "n_days": 156,
+   "validation_start": "2026-07-25",
+   "validation_ts": 1784937600
+  },
+  "KXCOPPERPERP": {
+   "first_day": "2026-10-06",
+   "holdout_start": "2026-10-26",
+   "holdout_ts": 1792972800,
+   "last_day": "2026-11-05",
+   "n_days": 31,
+   "validation_start": "2026-10-16",
+   "validation_ts": 1792108800
+  },
+  "KXDOGEPERP": {
+   "first_day": "2026-06-09",
+   "holdout_start": "2026-09-17",
+   "holdout_ts": 1789603200,
+   "last_day": "2026-11-05",
+   "n_days": 150,
+   "validation_start": "2026-07-29",
+   "validation_ts": 1785283200
+  },
+  "KXETHPERP": {
+   "first_day": "2026-06-03",
+   "holdout_start": "2026-09-15",
+   "holdout_ts": 1789430400,
+   "last_day": "2026-11-05",
+   "n_days": 156,
+   "validation_start": "2026-07-25",
+   "validation_ts": 1784937600
+  },
+  "KXGOLDPERP": {
+   "first_day": "2026-09-10",
+   "holdout_start": "2026-10-18",
+   "holdout_ts": 1792281600,
+   "last_day": "2026-11-05",
+   "n_days": 57,
+   "validation_start": "2026-09-29",
+   "validation_ts": 1790640000
+  },
+  "KXHYPEPERP": {
+   "first_day": "2026-06-08",
+   "holdout_start": "2026-09-16",
+   "holdout_ts": 1789516800,
+   "last_day": "2026-11-05",
+   "n_days": 151,
+   "validation_start": "2026-07-28",
+   "validation_ts": 1785196800
+  },
+  "KXKSHIBPERP": {
+   "first_day": "2026-06-09",
+   "holdout_start": "2026-09-17",
+   "holdout_ts": 1789603200,
+   "last_day": "2026-11-05",
+   "n_days": 150,
+   "validation_start": "2026-07-29",
+   "validation_ts": 1785283200
+  },
+  "KXLINKPERP": {
+   "first_day": "2026-06-08",
+   "holdout_start": "2026-09-16",
+   "holdout_ts": 1789516800,
+   "last_day": "2026-11-05",
+   "n_days": 151,
+   "validation_start": "2026-07-28",
+   "validation_ts": 1785196800
+  },
+  "KXLTCPERP": {
+   "first_day": "2026-06-09",
+   "holdout_start": "2026-09-17",
+   "holdout_ts": 1789603200,
+   "last_day": "2026-11-05",
+   "n_days": 150,
+   "validation_start": "2026-07-29",
+   "validation_ts": 1785283200
+  },
+  "KXNEARPERP": {
+   "first_day": "2026-06-23",
+   "holdout_start": "2026-09-21",
+   "holdout_ts": 1789948800,
+   "last_day": "2026-11-05",
+   "n_days": 136,
+   "validation_start": "2026-08-07",
+   "validation_ts": 1786060800
+  },
+  "KXPALLADIUMPERP": {
+   "first_day": "2026-09-23",
+   "holdout_start": "2026-10-22",
+   "holdout_ts": 1792627200,
+   "last_day": "2026-11-05",
+   "n_days": 44,
+   "validation_start": "2026-10-07",
+   "validation_ts": 1791331200
+  },
+  "KXPLATINUMPERP": {
+   "first_day": "2026-09-23",
+   "holdout_start": "2026-10-22",
+   "holdout_ts": 1792627200,
+   "last_day": "2026-11-05",
+   "n_days": 44,
+   "validation_start": "2026-10-07",
+   "validation_ts": 1791331200
+  },
+  "KXSILVERPERP": {
+   "first_day": "2026-09-10",
+   "holdout_start": "2026-10-18",
+   "holdout_ts": 1792281600,
+   "last_day": "2026-11-05",
+   "n_days": 57,
+   "validation_start": "2026-09-29",
+   "validation_ts": 1790640000
+  },
+  "KXSOLPERP": {
+   "first_day": "2026-06-03",
+   "holdout_start": "2026-09-15",
+   "holdout_ts": 1789430400,
+   "last_day": "2026-11-05",
+   "n_days": 156,
+   "validation_start": "2026-07-25",
+   "validation_ts": 1784937600
+  },
+  "KXSUIPERP": {
+   "first_day": "2026-06-09",
+   "holdout_start": "2026-09-17",
+   "holdout_ts": 1789603200,
+   "last_day": "2026-11-05",
+   "n_days": 150,
+   "validation_start": "2026-07-29",
+   "validation_ts": 1785283200
+  },
+  "KXUNIPERP": {
+   "first_day": "2026-09-30",
+   "holdout_start": "2026-10-24",
+   "holdout_ts": 1792800000,
+   "last_day": "2026-11-05",
+   "n_days": 37,
+   "validation_start": "2026-10-12",
+   "validation_ts": 1791763200
+  },
+  "KXUS500PERP": {
+   "first_day": "2026-10-06",
+   "holdout_start": "2026-10-26",
+   "holdout_ts": 1792972800,
+   "last_day": "2026-11-05",
+   "n_days": 31,
+   "validation_start": "2026-10-16",
+   "validation_ts": 1792108800
+  },
+  "KXUSTECH100PERP": {
+   "first_day": "2026-10-14",
+   "holdout_start": "2026-10-29",
+   "holdout_ts": 1793232000,
+   "last_day": "2026-11-05",
+   "n_days": 23,
+   "validation_start": "2026-10-21",
+   "validation_ts": 1792540800
+  },
+  "KXVVVPERP": {
+   "first_day": "2026-08-28",
+   "holdout_start": "2026-10-13",
+   "holdout_ts": 1791849600,
+   "last_day": "2026-11-05",
+   "n_days": 70,
+   "validation_start": "2026-09-20",
+   "validation_ts": 1789862400
+  },
+  "KXWLDPERP": {
+   "first_day": "2026-08-28",
+   "holdout_start": "2026-10-13",
+   "holdout_ts": 1791849600,
+   "last_day": "2026-11-05",
+   "n_days": 70,
+   "validation_start": "2026-09-20",
+   "validation_ts": 1789862400
+  },
+  "KXWTIFUTURE": {
+   "first_day": "2026-10-14",
+   "holdout_start": "2026-10-29",
+   "holdout_ts": 1793232000,
+   "last_day": "2026-11-05",
+   "n_days": 23,
+   "validation_start": "2026-10-21",
+   "validation_ts": 1792540800
+  },
+  "KXXRPPERP": {
+   "first_day": "2026-06-03",
+   "holdout_start": "2026-09-15",
+   "holdout_ts": 1789430400,
+   "last_day": "2026-11-05",
+   "n_days": 156,
+   "validation_start": "2026-07-25",
+   "validation_ts": 1784937600
+  },
+  "KXZECPERP": {
+   "first_day": "2026-06-23",
+   "holdout_start": "2026-09-21",
+   "holdout_ts": 1789948800,
+   "last_day": "2026-11-05",
+   "n_days": 136,
+   "validation_start": "2026-08-07",
+   "validation_ts": 1786060800
+  }
+ },
+ "rule": "median 1m spread over discovery bars <= 6.0 bp and >= 7 discovery days",
+ "ticker_costs": {
+  "KXAAVEPERP": {
+   "cls": "Crypto",
+   "discovery_days": 23,
+   "median_spread_bp_discovery": 15.062
+  },
+  "KXADAPERP": {
+   "cls": "Crypto",
+   "discovery_days": 22,
+   "median_spread_bp_discovery": 9.877
+  },
+  "KXALUMINUMPERP": {
+   "cls": "Metals",
+   "discovery_days": 10,
+   "median_spread_bp_discovery": 8.097
+  },
+  "KXBCHPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 6.571
+  },
+  "KXBNBPERP": {
+   "cls": "Crypto",
+   "discovery_days": 22,
+   "median_spread_bp_discovery": 9.717
+  },
+  "KXBTCPERP": {
+   "cls": "Crypto",
+   "discovery_days": 52,
+   "median_spread_bp_discovery": 0.626
+  },
+  "KXCOPPERPERP": {
+   "cls": "Metals",
+   "discovery_days": 10,
+   "median_spread_bp_discovery": 4.049
+  },
+  "KXDOGEPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 3.775
+  },
+  "KXETHPERP": {
+   "cls": "Crypto",
+   "discovery_days": 52,
+   "median_spread_bp_discovery": 1.275
+  },
+  "KXGOLDPERP": {
+   "cls": "Metals",
+   "discovery_days": 19,
+   "median_spread_bp_discovery": 0.466
+  },
+  "KXHYPEPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 1.919
+  },
+  "KXKSHIBPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 8.167
+  },
+  "KXLINKPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 5.159
+  },
+  "KXLTCPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 4.11
+  },
+  "KXNEARPERP": {
+   "cls": "Crypto",
+   "discovery_days": 45,
+   "median_spread_bp_discovery": 7.149
+  },
+  "KXPALLADIUMPERP": {
+   "cls": "Metals",
+   "discovery_days": 14,
+   "median_spread_bp_discovery": 7.652
+  },
+  "KXPLATINUMPERP": {
+   "cls": "Metals",
+   "discovery_days": 14,
+   "median_spread_bp_discovery": 6.255
+  },
+  "KXSILVERPERP": {
+   "cls": "Metals",
+   "discovery_days": 19,
+   "median_spread_bp_discovery": 1.509
+  },
+  "KXSOLPERP": {
+   "cls": "Crypto",
+   "discovery_days": 52,
+   "median_spread_bp_discovery": 2.72
+  },
+  "KXSUIPERP": {
+   "cls": "Crypto",
+   "discovery_days": 50,
+   "median_spread_bp_discovery": 3.404
+  },
+  "KXUNIPERP": {
+   "cls": "Crypto",
+   "discovery_days": 12,
+   "median_spread_bp_discovery": 16.026
+  },
+  "KXUS500PERP": {
+   "cls": "Indices",
+   "discovery_days": 10,
+   "median_spread_bp_discovery": 0.949
+  },
+  "KXUSTECH100PERP": {
+   "cls": "Indices",
+   "discovery_days": 7,
+   "median_spread_bp_discovery": 1.086
+  },
+  "KXVVVPERP": {
+   "cls": "Crypto",
+   "discovery_days": 23,
+   "median_spread_bp_discovery": 10.631
+  },
+  "KXWLDPERP": {
+   "cls": "Crypto",
+   "discovery_days": 23,
+   "median_spread_bp_discovery": 13.633
+  },
+  "KXWTIFUTURE": {
+   "cls": "Energy",
+   "discovery_days": 7,
+   "median_spread_bp_discovery": 4.027
+  },
+  "KXXRPPERP": {
+   "cls": "Crypto",
+   "discovery_days": 52,
+   "median_spread_bp_discovery": 3.499
+  },
+  "KXZECPERP": {
+   "cls": "Crypto",
+   "discovery_days": 45,
+   "median_spread_bp_discovery": 5.175
+  }
+ },
+ "universe": {
+  "CRYPTO": [
+   "KXBTCPERP",
+   "KXDOGEPERP",
+   "KXETHPERP",
+   "KXHYPEPERP",
+   "KXLINKPERP",
+   "KXLTCPERP",
+   "KXSOLPERP",
+   "KXSUIPERP",
+   "KXXRPPERP",
+   "KXZECPERP"
+  ],
+  "NONCRYPTO": [
+   "KXCOPPERPERP",
+   "KXGOLDPERP",
+   "KXSILVERPERP",
+   "KXUS500PERP",
+   "KXUSTECH100PERP",
+   "KXWTIFUTURE"
+  ]
+ }
+}
