@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:58 AM CT (16:58Z): Forward trackers at 16:57Z: goldfwd 20 fills (5 losses, -$40.36), S-BUCKET1 B5 8 fills 0 wins
+
+- Descriptive (w_goldfwd_bkt/notes.md). goldfwd since 2026-11-05T16:27:35Z: 20 fills, all settled, 5 losses (25.0%, Clopper Pearson 8.66% to 49.10%), net -$40.36, -14.78c per contract, PF 0.25, break even loss rate 8.32%, FLAG none (20 of 100 fills); interim_40.md has no yardstick for goldfwd itself (nearest are S-GPB1 and S-GQH1). S-BUCKET1 since 2026-11-05T16:18:41Z: B5 8 fills, 0 wins, -$6.10, -7.62c per contract; B10 3 fills, 1 win, +$2.02, +6.73c per contract; 32 more B5 fills to reach 40 (the script projects about Nov 10 CT, interim_40 says Nov 14 to 16); FLAG none; W-BUCKETEXP1 applies: B5 sim win rate 7.0% (2.8 wins expected per 40, so 0 wins in 8 is not surprising, 0 in 40 would be: P about 5%), B10 sim win 34.6%. Cost gap figures repeated from W-COSTGAP1. Nothing changed.
+
 ## 2026-11-06 10:57 AM CT (16:57Z): W-GOLD-MARGIN1 (gold's history margin net of the live cost gap): about 57% left, none in the 0.90 to 0.92 bucket
 
 - Descriptive, try count 0, no recommendation (w_gold_margin/; live buckets are thin, 6, 7, 3 and 2 losses). Cents per contract by price bucket: history hold, history minus the 0.33c cost gap minus 0.2c entry slip, live: 0.88 to 0.90: +0.98, +0.78, live -0.43 (n 46); 0.90 to 0.92: +0.58, +0.04, live -0.24 (n 67); 0.92 to 0.94: +1.62, +1.00, live +0.39 (n 62); 0.94 to 0.97: +1.44, +0.86, live +1.29 (n 112); all: +1.19, +0.68, live +0.45 (n 287; live net $12.67 over 2,842.7 contracts). About 57% of the history margin is left after the two live costs; live sits below the adjusted history in three of four buckets; the 0.90 to 0.92 bucket has almost nothing left (+0.04c). Reading: gold's edge in live is positive but thin (+0.45c per contract), the lower two price buckets are at or below zero live, and the margin is smaller than the stop and ladder dynamics assume. Nothing changed.
