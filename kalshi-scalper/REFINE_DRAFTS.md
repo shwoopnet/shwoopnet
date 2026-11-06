@@ -170,3 +170,6 @@ Next, if the owner approves: write each as a `README.md#S-...` entry with the cu
 
 ## Open discrepancy on S-GHOLD120 (Nov 6 2026)
 The feasibility counts above come from the merge worker's reading of res2.json (7 of 16 with a bid at or below 0.25 in a minute candle, 5 within the last 120 s, about 5 a month). The worker that ran the check reported 3 of the 7 in the last 120 s and about 1 a month, and leaned toward shelving. The two use different readings of the same proxy, so the true share is between about 3 and 14 of 16. Treat the feasibility as unsettled and the idea as slow either way; nothing is started.
+
+## Update on S-GHOLD120 feasibility (Nov 6 2026, later)
+In gold history 62 of the 72 triggers of the 25c line (86%) fall in the last 120 s, so the live exit rate (16 in about 30 days) gives roughly 10 to 14 qualifying exits a month and 15 are reachable in about 5 to 6 weeks, not months. The shelve lean above is withdrawn; history alone shows no edge (hold +2.4c per contract on 2 wins of 62), so it stays a forward shadow draft only.
