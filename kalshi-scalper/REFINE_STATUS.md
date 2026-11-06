@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:40 AM CT (16:40Z): W-OICORE-CHEAP1 (how much OICORE's profit rests on its top wins): stays positive, thin
+
+- Descriptive, try count 0 (w_oicore_cheap/; one seed, fills treated as independent, no deflation, so P is not a significance test). 47 live fills, net +$41.79, PF 2.17; top winners 9.36, 9.36, 8.93, 8.93, 8.51, the top 3 all fills at 5 to 9 cents. Remove top 1: +$32.43 PF 1.91; top 2: +$23.07 PF 1.65; top 3: +$14.14 PF 1.40. Leave one out net 32.43 to 45.04, never at or below 0. Bootstrap (20,000 resamples): P(net at or below 0) 0.043, 5th percentile +$1.89, median +$41.13. Reading: the profit is about 10 wins worth $6 to $9 against losses of $0.5 to $3, still positive without the best three but PF falls under 1.5. Nothing changed.
+
 ## 2026-11-06 10:39 AM CT (16:39Z): W-EVENT830-NOFILL1 (why 6 of 11 EVENT830 orders did not fill): reachability does not separate them
 
 - Descriptive, try count 0 (w_event830_nofill/; public market and 1 minute candles, no key). All 11 orders placed about 173 s before the 13:30Z close. All 6 unfilled (BNB x2, WTI x2, GBPUSD, HYPE) had a limit inside the first 1 minute candle after the order (YES buys: ask low at or under the limit; NO buys: bid high at or over), exactly as the 5 fills did (silver x2, copper, EURUSD, USDJPY). The first candle traded 1,344 to 7,137 contracts for the no fills. Most limits stayed reachable to the close (markets run to 0.001 or 0.999 into the print); GBPUSD reachable in 1 of 3 candles. YES limits equalled the ask at order time. Possible, unproven: thin touch size for BNB and HYPE (10 to 32 contracts).
