@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:58 AM CT (16:58Z): S-EDGEFWD forward tracker built (read only), wired into wake.sh
+
+- Built by a worker (w_oicore_edgefwd/edgefwd_forward.py, REGISTRATION.md; read only). Question: do OICORE live fills whose raw c-180 cheaper side price is strictly between 0.04 and 0.05 (ceil rounded by the bot to 0.05; exactly 0.05 is not edge) net less per contract than the other fills. Cutoff 2026-11-06T17:00:00Z. Pre stated yardsticks: read at 20 settled edge fills; it only matters if edge fills net at least 5c per contract below the others and are negative in both halves; under 20 prints counts and NO READ. Selftest on past fills (cutoff Oct 30): 5 edge fills, 0 wins, -$3.42, -6.84c per contract; the other 42 fills net +10.92c per contract. Note: the worker's first draft used 'below 0.05' (14 edge fills) and was tightened to the definition above to match w_oicore_edge/e.py. Wired as an EDGEFWD section in wake.sh (backup wake.sh.pre_edgefwd). Nothing changed in the bot.
+
 ## 2026-11-06 10:58 AM CT (16:58Z): Forward trackers at 16:57Z: goldfwd 20 fills (5 losses, -$40.36), S-BUCKET1 B5 8 fills 0 wins
 
 - Descriptive (w_goldfwd_bkt/notes.md). goldfwd since 2026-11-05T16:27:35Z: 20 fills, all settled, 5 losses (25.0%, Clopper Pearson 8.66% to 49.10%), net -$40.36, -14.78c per contract, PF 0.25, break even loss rate 8.32%, FLAG none (20 of 100 fills); interim_40.md has no yardstick for goldfwd itself (nearest are S-GPB1 and S-GQH1). S-BUCKET1 since 2026-11-05T16:18:41Z: B5 8 fills, 0 wins, -$6.10, -7.62c per contract; B10 3 fills, 1 win, +$2.02, +6.73c per contract; 32 more B5 fills to reach 40 (the script projects about Nov 10 CT, interim_40 says Nov 14 to 16); FLAG none; W-BUCKETEXP1 applies: B5 sim win rate 7.0% (2.8 wins expected per 40, so 0 wins in 8 is not surprising, 0 in 40 would be: P about 5%), B10 sim win 34.6%. Cost gap figures repeated from W-COSTGAP1. Nothing changed.
