@@ -1,0 +1,26 @@
+dev closes 656 dates 28 2026-08-24 2026-09-20 D2 starts 2026-09-07
+scale median 0.9998483286191122 627
+EVM1 all dates 28 L_pi 0.0064 L_ip -0.0154 diff 0.0218 z 8.03
+EVM1 D1 dates 14 L_pi 0.0100 L_ip -0.0123 diff 0.0223 z 5.07
+EVM1 D2 dates 14 L_pi 0.0027 L_ip -0.0186 diff 0.0214 z 6.35
+EVM1 usable minute pairs 32476
+EVM2 trig all  n 0
+EVM2 trig all x1.2 n 0
+EVM2 ctrl all  n 627 gross -0.45 bp cost 25.44 bp net -25.88 PF 0.07
+EVM2 ctrl all x1.2 n 627 gross -0.45 bp cost 30.52 bp net -30.97 PF 0.05
+EVM2 trig D1  n 0
+EVM2 trig D1 x1.2 n 0
+EVM2 ctrl D1  n 313 gross -0.28 bp cost 25.45 bp net -25.73 PF 0.08
+EVM2 ctrl D1 x1.2 n 313 gross -0.28 bp cost 30.54 bp net -30.82 PF 0.05
+EVM2 trig D2  n 0
+EVM2 trig D2 x1.2 n 0
+EVM2 ctrl D2  n 314 gross -0.61 bp cost 25.42 bp net -26.03 PF 0.06
+EVM2 ctrl D2 x1.2 n 314 gross -0.61 bp cost 30.51 bp net -31.12 PF 0.04
+EVM2 day cluster mean,z (None, None)
+EVM3 trig all n 0 net 0.00c  
+EVM3 ctrl all n 506 net -3.13c PF 0.64 PF x1.2 0.56
+EVM3 trig D1 n 0 net 0.00c  
+EVM3 ctrl D1 n 254 net -2.49c PF 0.73 PF x1.2 0.64
+EVM3 trig D2 n 0 net 0.00c  
+EVM3 ctrl D2 n 252 net -3.78c PF 0.53 PF x1.2 0.45
+|B| bp n 627 median 1.55 p90 3.10 p99 5.03 max 7.45
