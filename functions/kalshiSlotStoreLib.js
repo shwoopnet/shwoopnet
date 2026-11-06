@@ -12,7 +12,7 @@
 
 const slotLib = require("./kalshiSlotLib");
 
-const SLOT = "kalshiSlotOrders", LOCK = "kalshiLiveDirection", CONTROL = "kalshiSlotControl", L1 = "kalshiLiveOrders";
+const SLOT = "kalshiSlotOrders", LOCK = "kalshiLiveDirection", CONTROL = "kalshiSlotControl", L1 = "kalshiLiveOrders", SKIPS = "kalshiSlotSkips";
 const alreadyExists = (e) => Boolean(e && (e.code === 6 || /ALREADY_EXISTS/.test(String(e.message))));
 const rows = (snap) => snap.docs.map((d) => ({ id: d.id, ...d.data() }));
 
@@ -160,4 +160,10 @@ function slotHooks(db) {
 // The order ids (entry and exit) of the slot's orders, handed to L1's settle sweep so a slot fill is never read as a hand sale of an L1 order.
 async function slotIgnoreSet(db) { return slotLib.slotIgnoreSet(rows(await db.collection(SLOT).get())); }
 
-module.exports = { slotStore, slotHooks, createLocked, slotIgnoreSet, releaseCloseLease, COLLECTIONS: Object.freeze({ SLOT, LOCK, CONTROL }) };
+// Skip reasons (Nov 5, 2026, log only): one document per strategy and market window, kalshiSlotSkips/{strategy}_{ticker}. A plain set (a full overwrite, not a merge), so the document always holds the
+// LATEST reason and its own detail, never a mix of two minutes' fields. Written only by runSlotTick's recordSkip hook after the minute's orders; nothing that decides an order reads this collection.
+function slotSkipWriter(db) {
+  return (d) => db.collection(SKIPS).doc(String(d.strategy) + "_" + String(d.ticker)).set(d);
+}
+
+module.exports = { slotStore, slotHooks, createLocked, slotIgnoreSet, releaseCloseLease, slotSkipWriter, COLLECTIONS: Object.freeze({ SLOT, LOCK, CONTROL, SKIPS }) };

@@ -417,18 +417,17 @@
   /* Console layout: a fixed rail for the session, account and positions, and one wide column for the books, the trades and the log. */
   #page-kalshi .trades-header{ padding:20px 0 14px 0; }
   #page-kalshi .kal-header-bare{ justify-content:flex-end; padding:8px 0 10px 0; }
-  .kal-console{ grid-template-columns:340px minmax(0,1fr); gap:16px 28px; align-items:start; }
-  .kal-rail, .kal-main{ display:flex; flex-direction:column; gap:16px; min-width:0; }
+  .kal-console{ align-items:start; }
   .kal-console .kal-card{ margin-bottom:0; }
   .kal-card-bare{ background:none; border:0; box-shadow:none; padding:0; }
   .kal-card-flush{ padding:0; }
-  .kal-rail .kal-acct-head{ padding:0 0 10px 0; }
+  .kal-compact .kal-acct-head{ padding:0 0 10px 0; }
   .kal-botmenu > summary.kal-pill{ cursor:pointer; user-select:none; }
   /* The Running pill opens a small panel. It used to hang from the pill, narrower than the Account card and sticking out below it, so the card's edge showed behind it and it covered the next card's top. Now it is anchored to the whole card (the card is the positioned box, the pill's own box is not), the same width as the card, and lifted above the cards after it. */
-  .kal-rail .kal-card[data-card="account"]{ position:relative; z-index:6; }
-  .kal-rail .kal-botmenu{ position:static; }
+  .kal-card.kal-compact[data-card="account"]{ position:relative; z-index:6; }
+  .kal-compact .kal-botmenu{ position:static; }
   .kal-botmenu-body{ min-width:min(320px,86vw); right:0; top:30px; }
-  .kal-rail .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
+  .kal-compact .kal-botmenu-body{ left:0; right:0; top:100%; min-width:0; margin-top:6px; z-index:30; box-shadow:0 14px 34px rgba(0,0,0,.28); }
   .kal-botmenu-body .kal-actions{ margin:4px 0 0 0; }
   /* The Running pill opens a SMALL pop-over right under the pill (the owner, Oct 30, 2026: "dont care for this running pop up style - placement"), not a card spanning the whole Account card and covering Bot status. It holds only the controls and Rules and limits; the status lines live in Bot status. */
   .kal-console .kal-card[data-card="account"] .kal-botmenu{ position:relative; }
@@ -536,9 +535,9 @@
   .kal-pill{ font-size:12px; font-weight:600; padding:3px 10px; border-radius:999px; border:1px solid var(--border); color:var(--muted); }
   .kal-pill.on{ color:var(--gain); border-color:var(--gain); } .kal-pill.warn{ color:#c58a00; border-color:#c58a00; } .kal-pill.bad{ color:var(--loss-text); border-color:var(--loss); }
   .kal-console .kal-lbl{ color:var(--muted); font-size:12px; }
-  .kal-rail .kal-card{ padding:16px 20px; }
-  .kal-rail .kal-note{ margin-top:8px; }
-  .kal-rail .kal-actions{ margin:10px 0 2px 0; }
+  .kal-card.kal-compact{ padding:16px 20px; }
+  .kal-compact .kal-note{ margin-top:8px; }
+  .kal-compact .kal-actions{ margin:10px 0 2px 0; }
   .kal-btn-ghost{ background:transparent; color:var(--paper); border:1px solid var(--border); }
   .kal-acct-total{ font-family:'Public Sans', sans-serif; font-size:30px; font-weight:700; line-height:1.15; margin-bottom:8px; }
   .kal-rows{ display:flex; flex-direction:column; gap:8px; padding-top:10px; border-top:1px solid var(--border); font-size:13px; }
@@ -560,9 +559,9 @@
   .kal-tr-t, .kal-tr-s{ color:var(--muted); } .kal-tr-p, .kal-tr-s{ text-align:right; } .kal-tr-p{ font-family:'Public Sans', sans-serif; font-weight:700; }
   .kal-foot{ padding:12px 22px; color:var(--muted); font-size:12px; border-top:1px solid var(--border); }
   .kal-perf{ padding:14px 22px 20px 22px; }
-  .kal-rail .kal-perf{ padding:12px 0 0 0; }
-  .kal-rail .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
-  .kal-rail .kal-tile{ padding:7px 8px; } .kal-rail .kal-tile b{ font-size:13px; } .kal-rail .kal-tile .kal-lbl{ font-size:12px; }
+  .kal-compact .kal-perf{ padding:12px 0 0 0; }
+  .kal-compact .kal-tiles{ grid-template-columns:repeat(3,minmax(0,1fr)); gap:6px; }
+  .kal-compact .kal-tile{ padding:7px 8px; } .kal-compact .kal-tile b{ font-size:13px; } .kal-compact .kal-tile .kal-lbl{ font-size:12px; }
   .kal-tools-body{ min-width:min(420px,88vw); max-height:70vh; overflow:auto; }
   .kal-tools-body .kal-actions{ margin:4px 0 2px; }
   .kal-tools-body .kal-note:empty, .kal-botmenu-body .kal-note:empty{ display:none; }
@@ -628,10 +627,49 @@
     .kal-tr > .kal-tr-p{ grid-column:2; grid-row:1 / span 3; align-self:center; }
   }
 
-  /* Rearranging: only while "Unlock to rearrange" is ticked (never remembered, so a stray drag cannot happen on a normal visit). */
-  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; cursor:grab; user-select:none; -webkit-user-select:none; }
-  .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ opacity:.45; }
-  .kal-move{ display:flex; justify-content:flex-end; gap:6px; margin-bottom:6px; }
+  /* Rearranging: only in Edit layout (never remembered, so a stray drag cannot happen on a normal visit). The cards are direct children of the grid since Nov 5, 2026; the old rule named the grid's children while the cards sat one level down in the rail and main wrappers, so the outline never showed. */
+  .kal-bot-grid.kal-unlocked > .kal-card{ outline:2px dashed var(--border); outline-offset:3px; user-select:none; -webkit-user-select:none; }
+  .kal-bot-grid.kal-unlocked > .kal-card:hover{ transform:none; }
+  .kal-bot-grid.kal-unlocked > .kal-card .kal-card-title{ cursor:grab; }
+  .kal-bot-grid.kal-unlocked > .kal-card.kal-dragging{ position:relative; z-index:50; transition:none; cursor:grabbing; outline-color:var(--paper); box-shadow:0 22px 50px rgba(0,0,0,.55); }
+  .kal-bot-grid.kal-unlocked.kal-drag-on{ cursor:grabbing; }
+  /* The edit controls sit in a strip across the top of each card, outside the card's own layout (the Account card is a grid, so a strip inside its flow landed in one of its cells). */
+  .kal-bot-grid.kal-unlocked > .kal-card{ position:relative; padding-top:62px; }
+  .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:46px; }
+  .kal-move{ position:absolute; top:12px; left:16px; right:16px; display:flex; justify-content:flex-end; align-items:center; gap:6px; margin:0; }
+  .kal-move .kal-mini{ margin-right:0; min-height:32px; }
+  .kal-grip{ margin-right:auto; display:inline-flex; align-items:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-size:12px; font-weight:600; cursor:grab; touch-action:none; }
+  .kal-edit-bar{ display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 14px; padding:12px 16px; border:1px solid var(--border); border-radius:var(--radius); background:var(--panel); }
+  .kal-edit-bar[hidden]{ display:none; }
+  .kal-edit-h{ font-weight:700; } .kal-edit-hint{ color:var(--muted); font-size:12px; flex:1 1 280px; }
+  .kal-edit-btns{ display:flex; gap:8px; flex-wrap:wrap; } .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ margin:0; min-height:36px; }
+  .kal-edit-btns .kal-mini:disabled{ opacity:.45; cursor:default; }
+  .kal-sr{ position:absolute; width:1px; height:1px; margin:-1px; padding:0; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap; border:0; }
+  /* Folding a card to its title row (Nov 5, 2026). The chevron sits in front of every card title; a folded card keeps only the row that holds its title (the Account card keeps the Running pill, so its controls stay one tap away). Important because the Account card's pieces carry id rules (display:contents) that would otherwise win. */
+  .kal-foldbtn{ display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; margin:-5px 4px -5px -6px; padding:0; vertical-align:middle; background:none; border:0; border-radius:6px; color:var(--muted); font:inherit; font-size:12px; cursor:pointer; }
+  .kal-foldbtn:hover{ color:var(--paper); background:rgba(255,255,255,.06); } .kal-foldbtn:focus-visible{ outline:2px solid var(--paper); outline-offset:1px; }
+  .kal-foldbtn > i{ display:inline-block; font-style:normal; transition:transform .18s ease; }
+  [data-folded="true"] .kal-foldbtn > i{ transform:rotate(-90deg); }
+  .kal-console > [data-card][data-folded="true"]{ align-self:start; }
+  .kal-console > [data-card][data-folded="true"] > :not(.kal-card-head):not(.kal-card-title):not(.kal-move){ display:none !important; }
+  .kal-console > [data-card][data-folded="true"] > .kal-card-title{ margin-bottom:0; }
+  /* A folded card shows its title only: range buttons, the trades filter and any other head control have nothing to act on while the card is closed (the owner, Nov 5, 2026: "only running should be visible when condensing"). The Account card keeps its Running pill (Start, Pause, Flatten). */
+  .kal-console > [data-card][data-folded="true"] .kal-card-head > :not(.kal-card-title):not(.kal-botmenu){ display:none !important; }
+  /* Every folded card is the same height: the cards pad their heads differently (Account result puts its padding on the card), so a folded card takes one padding on its head only. */
+  .kal-console > [data-card][data-folded="true"]{ padding:0 !important; }
+  .kal-console > [data-card][data-folded="true"] > .kal-card-head, .kal-console > [data-card][data-folded="true"] > .kal-card-title{ padding:14px 22px !important; min-height:52px; box-sizing:border-box; display:flex; align-items:center; }
+  .kal-console > [data-card="account"][data-folded="true"]{ display:block; }
+  .kal-console > [data-card="account"][data-folded="true"] .kal-acct-head{ display:flex; }
+  /* The resize corner (Nov 5, 2026): only while editing, bottom right of each card. The Account card's corner changes its width only. The outline shows the snapped size while the corner is held. */
+  .kal-resize{ position:absolute; right:4px; bottom:4px; width:22px; height:22px; border-radius:6px; cursor:nwse-resize; touch-action:none; color:var(--muted); display:flex; align-items:flex-end; justify-content:flex-end; padding:3px; box-sizing:border-box; z-index:2; }
+  .kal-resize::before{ content:''; width:10px; height:10px; border-right:2px solid currentColor; border-bottom:2px solid currentColor; border-radius:0 0 3px 0; }
+  .kal-resize:hover{ color:var(--paper); background:rgba(255,255,255,.06); }
+  [data-card="account"] > .kal-resize{ cursor:ew-resize; }
+  .kal-console > [data-card][data-folded="true"] > .kal-resize{ display:none; }
+  .kal-resize-ghost{ position:fixed; z-index:90; pointer-events:none; border:2px dashed var(--paper); border-radius:var(--radius); background:rgba(255,255,255,.04); box-sizing:border-box; }
+  .kal-resize-ghost > span{ position:absolute; right:8px; bottom:8px; padding:2px 8px; border-radius:6px; background:var(--panel); color:var(--paper); font-size:12px; font-weight:700; font-variant-numeric:tabular-nums; }
+  /* Sizes only mean something with twelve columns: on a phone the width and height buttons and the corner are hidden and every card is one column at its own height. */
+  @media (max-width:900px){ .kal-move [data-width], .kal-move [data-height], .kal-resize{ display:none; } .kal-edit-hint{ flex-basis:100%; } .kal-move .kal-mini, .kal-grip, .kal-edit-btns .kal-mini, .kal-edit-btns .kal-btn{ min-height:40px; } .kal-move .kal-mini{ min-width:44px; } .kal-foldbtn{ width:40px; height:40px; margin:-12px 0 -12px -12px; } .kal-bot-grid.kal-unlocked > .kal-card{ padding-top:70px; } .kal-bot-grid.kal-unlocked > .kal-card.kal-card-flush{ padding-top:54px; } }   /* a thumb needs 40px (mobileGates) */
   .kal-fold > summary{ cursor:pointer; margin-bottom:0; }
   .kal-fold[open] > summary{ margin-bottom:14px; }
   .kal-limits{ font-size:14px; line-height:1.7; }
@@ -861,9 +899,15 @@
   .kal-input, select.kal-input, .modal-field input{ background:var(--panel-raised); border:1px solid var(--border); border-radius:10px; }
   /* The Bot page layout (the owner chose L1, Oct 23, 2026): the Account card becomes a status strip across the top (state, balance, stake, pool, today), the markets take the wide left column, positions and recent trades stack on the right.
      The rail and main wrappers stay in the markup (the layout manager moves cards inside them) but lay out as if they were not there. A market that is in a trade shows its chart to the right of its own row, so the list does not jump when a chart appears. */
-  .kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); grid-auto-flow:row dense; gap:18px; }   /* no named areas: a card's place follows its order (set by the layout code), so moving a card actually moves it (it did nothing while each card was pinned to its own area) */
-  .kal-console > .kal-rail, .kal-console > .kal-main{ display:contents; }
-  .kal-console [data-card="account"]{ grid-column:1 / -1; }
+  .kal-console{ grid-template-columns:repeat(12, minmax(0,1fr)); gap:18px; }   /* twelve columns since Nov 5, 2026 (the owner: "this should maybe all be adjustable? size wise"), so a card can be a quarter, a third, a half, two thirds or the full width; a span of 6 is exactly the old Half. No named areas and no dense packing: a card's place is its place in the one list of cards (Nov 5, 2026, the owner: "i don't have much say in where each card goes"), so what the page shows is the order the layout holds and a moved card lands exactly where it was dropped */
+  .kal-console > [data-card]{ grid-column:span 12; } .kal-console > [data-card][data-w="3"]{ grid-column:span 3; } .kal-console > [data-card][data-w="4"]{ grid-column:span 4; } .kal-console > [data-card][data-w="6"]{ grid-column:span 6; } .kal-console > [data-card][data-w="8"]{ grid-column:span 8; } .kal-console > [data-card][data-w="12"]{ grid-column:1 / -1; }   /* the width is the owner's choice per card (data-w, a span of the 12 columns, set by the layout code); only these five spans exist */
+  /* A set height (Nov 5, 2026): the card keeps its head and its body scrolls inside it. Wide screens only, and never on a folded card, which is its title row whatever was set. The Account card is never given one (its Start, Pause and Flatten menu hangs below its head and must not be cut off). */
+  @media (min-width:901px){
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]){ height:var(--kal-h); display:flex; flex-direction:column; box-sizing:border-box; }
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-head, .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-title{ flex:none; }
+    .kal-console > [data-card][data-h]:not([data-folded="true"]):not([data-card="account"]) > .kal-card-body{ flex:1 1 auto; min-height:0; overflow:auto; }
+  }
+  .kal-console [data-card="pnl"] > .kal-card-body{ flex:1 1 auto; min-height:0; display:flex; flex-direction:column; }   /* the wrapper passes the row height on to the chart, as the card itself did before it existed */
   .kal-hb{ display:flex; align-items:center; gap:10px; font:700 15px 'Public Sans', sans-serif; margin:2px 0 8px; }
   .kal-hb-dot{ width:10px; height:10px; border-radius:50%; background:var(--muted); flex:none; }
   .kal-hb.ok .kal-hb-dot{ background:var(--gain); } .kal-hb.down .kal-hb-dot, .kal-hb.down{ color:var(--loss-text); background-clip:initial; } .kal-hb.down .kal-hb-dot{ background:var(--loss); }
@@ -916,8 +960,8 @@
   /* The result chart takes the height the Bot status card beside it gives the row (the owner, Nov 1, 2026: "big gap below account results"). The box keeps the chart's own shape as its minimum (aspect-ratio set in the markup) and grows past it; the drawing stretches with it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
   .kal-console [data-card="pnl"] #kalPnlBody{ flex:1 1 auto; display:flex; flex-direction:column; }
   .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
-  .kal-console [data-card="positions"]{ grid-column:1 / -1; align-self:start; }
-  .kal-console [data-card="trades"]{ grid-column:1 / -1; align-self:start; }
+  .kal-console [data-card="positions"]{ align-self:start; }
+  .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
      the card is one grid and the wrappers dissolve (display:contents) so each piece can be placed. */
   .kal-console [data-card="account"]{ display:grid; grid-template-columns:minmax(0,.85fr) minmax(0,2fr); gap:10px 28px; align-items:center; padding:20px 22px; }   /* balance and the loss stop on the left, the strategies table on the right (the owner, Oct 30, 2026: fold Strategies into the Account card) */
@@ -940,7 +984,7 @@
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card]{ grid-column:1 / -1; }
+    .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }   /* the second selector outranks the span rules, so a width set on a desktop never makes extra columns on a phone */
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
     .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk, .kal-console [data-card="account"] #kalStrategies, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
     .kal-strat-mk{ display:none; }
@@ -948,6 +992,10 @@
     .kal-console [data-card="account"] .kal-strat-tbl td.kal-nil{ display:none; }   /* after the rule above, so an empty cell (the total row has no markets or status) stays hidden */
     .kal-console [data-card="account"] .kal-tile{ grid-column:auto; grid-row:auto; }
   }
+  /* The Account card at less than the full width (a choice since Nov 5, 2026): about 680px is too narrow for the balance beside the strategies table, so its pieces stack, as on a phone. The table keeps its desktop columns. */
+  .kal-console [data-card="account"]:not([data-w="12"]){ grid-template-columns:minmax(0,1fr); gap:12px; }
+  .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-head, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-total, .kal-console [data-card="account"]:not([data-w="12"]) .kal-today, .kal-console [data-card="account"]:not([data-w="12"]) .kal-acct-risk, .kal-console [data-card="account"]:not([data-w="12"]) #kalStrategies, .kal-console [data-card="account"]:not([data-w="12"]) .kal-rows > div, .kal-console [data-card="account"]:not([data-w="12"]) #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
+  .kal-console [data-card="account"]:not([data-w="12"]) .kal-tile{ grid-column:auto; grid-row:auto; }
   .tf-btn{ border-radius:8px; font-weight:700; }
   .tf-btn:hover{ background:rgba(255,255,255,.05); border-color:var(--border); color:var(--paper); }
   .tf-btn.active{ background:var(--amber); border-color:var(--amber); color:var(--amber-contrast); }
@@ -978,6 +1026,7 @@
     .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
     .tape-track{ animation: none; }
     .kal-ecg-wrap.flash{ animation: none; }
+    .kal-foldbtn > i{ transition: none; }
     .tape-set + .tape-set{ display:none; }
     .tape-view{ overflow-x:auto; }
     .news-item:hover{ transform: none; }
@@ -1009,6 +1058,7 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
   [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
+  [data-reduce-motion="true"] .kal-foldbtn > i{ transition: none; }
   [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
   [data-reduce-motion="true"] .tape-view{ overflow-x:auto; }
   [data-reduce-motion="true"] .news-item:hover{ transform: none; }
@@ -1107,7 +1157,7 @@
     // read-only from the client SDK) -- general market data that's the
     // same for everyone (index/watchlist quotes, headlines, earnings
     // calendar).
-    // The market tape: prices for the strip and the index cards, and a few headlines, written every 5 minutes by a keyless scheduled function (functions/marketTapeLib.js).
+    // The market tape: prices for the strip and the index cards, and a few headlines, written every 15 minutes (every 5 until Oct 26, 2026) by a keyless scheduled function (functions/marketTapeLib.js).
     watchMarketTape: function(callback){
       return onSnapshot(doc(db, 'shared', 'marketTape'), function(snap){
         callback(snap.exists() ? snap.data() : null);
@@ -1410,7 +1460,7 @@
         <details class="kal-layout" id="kalLayout"><summary class="kal-mini">Layout &#9662;</summary>
           <div class="kal-layout-body">
             <div id="kalLayoutCards"></div>
-            <label><input type="checkbox" id="kalLayoutUnlock"> Unlock to rearrange (drag a card, or use its up and down arrows)</label>
+            <button type="button" class="kal-mini" id="kalLayoutEdit">Edit layout (move and resize cards)</button>
             <button type="button" class="kal-mini" id="kalLayoutReset">Reset layout</button>
           </div>
         </details>
@@ -1419,16 +1469,20 @@
 
 
     <div class="kal-alert" id="kalAlert" role="alert" hidden><b id="kalAlertTitle"></b><span id="kalAlertText"></span> <button type="button" class="kal-alert-open" id="kalAlertOpen">See notifications</button></div>
+    <div class="kal-edit-bar" id="kalEditBar" hidden>
+      <span class="kal-edit-h">Editing the layout</span><span class="kal-edit-hint">Drag a card by its title or its grip (on a phone, touch and hold), or use its arrows. Drag its bottom right corner to resize it (double click the corner for its own height), or use its width and height buttons.</span>
+      <span class="kal-edit-btns"><button type="button" class="kal-mini" id="kalEditUndo" disabled>Undo</button><button type="button" class="kal-mini" id="kalEditReset">Reset</button><button type="button" class="kal-mini" id="kalEditCancel">Cancel</button><button type="button" class="kal-btn" id="kalEditDone">Done</button></span>
+    </div>
+    <div class="kal-sr" id="kalLayoutLive" aria-live="polite"></div>
     <div id="kalTabBot" class="kal-bot-grid kal-console">
-      <div class="kal-rail">
-      <div class="kal-card" data-card="account">
+      <div class="kal-card kal-compact" data-w="12" data-card="account">
         <div class="kal-card-head kal-acct-head"><div class="kal-card-title" style="margin:0">Account</div>
           <details class="kal-layout kal-botmenu" id="kalBotMenu"><summary id="kalL1Pill" class="kal-pill">Not running</summary>
             <div class="kal-layout-body kal-botmenu-body">
               <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause), one order at a time (up to $2.00 a contract) except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review).</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause). L1 trades nothing except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review). OICORE (10 contracts) and EVENT830 (1 contract) run with it.</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1437,7 +1491,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c) 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (5c to 50c), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts to start, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
                 <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -1453,27 +1507,24 @@
         <div class="kal-acct-risk"><div class="kal-k">Loss stop</div><div id="kalRiskBody"><div class="kal-empty">Reading the bot...</div></div></div>
         <div class="kal-strats" id="kalStrategies"><div class="kal-empty">Reading the strategies...</div></div>
       </div>
-      <div class="kal-card" data-card="status">
+      <div class="kal-card kal-compact" data-w="6" data-card="status">
         <div class="kal-card-title">Bot status</div>
         <div id="kalStatusBody"><div class="kal-empty">Reading the bot...</div></div>
       </div>
-      <div class="kal-card" data-card="positions">
-        <div class="kal-card-title">Open positions</div>
-        <div id="kalBotOpen"></div>
-      </div>
-      </div>
-      <div class="kal-main">
-      <div class="kal-card" data-card="pnl" id="kalPnl">
+      <div class="kal-card" data-w="6" data-card="pnl" id="kalPnl">
         <div class="kal-card-head" style="padding:0 0 12px"><div class="kal-card-title" style="margin:0">Account result</div><div class="kal-pnl-ranges" id="kalPnlRanges"></div></div>
         <div id="kalPnlBody"></div>
       </div>
-      <div class="kal-card kal-card-flush" data-card="trades">
+      <div class="kal-card kal-compact" data-w="12" data-card="positions">
+        <div class="kal-card-title">Open positions</div>
+        <div id="kalBotOpen"></div>
+      </div>
+      <div class="kal-card kal-card-flush" data-w="12" data-card="trades">
         <div class="kal-card-head"><div class="kal-card-title" style="margin:0">Recent trades</div>
           <label class="kal-lbl" for="kalTradeFilter">Showing <select id="kalTradeFilter"><option value="bot">bot trades</option><option value="all">bot and manual</option></select></label></div>
         <div id="kalBotStats"></div>
         <div class="kal-tr kal-tr-head"><span>Opened and closed</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
-      </div>
       </div>
     </div>
   </main>
@@ -1605,8 +1656,37 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Nov 6</div>
+                <ul class="changelog-list">
+                  <li>Research: a daily saver of Yahoo 1 minute prices for the stocks, indexes and commodities behind the perps (Yahoo keeps only 7 days), and the 30 second perps recorder now runs to Feb 2027</li>
+                </ul>
+                <div class="changelog-day">Nov 5</div>
+                <ul class="changelog-list">
+                  <li>Bot page: in Edit layout, drag a card's bottom right corner to resize it (width snaps to a quarter, a third, a half, two thirds or full; height snaps in steps and the card scrolls inside); double click the corner for its own height. A phone stays one column</li>
+                  <li>Research: a perps recorder that samples every 30 seconds around the US stock open and close (Kalshi now lists single stock perps)</li>
+                  <li>Deploy command: it now notices a change to the market price list, and names any server file it does not know how to deploy instead of saying nothing to deploy</li>
+                  <li>Bot page: a folded card shows only its title (the Account card keeps its Running pill); the range buttons and the trades filter hide until it is opened</li>
+                  <li>Bot page: the Start box and Rules text name every live strategy (L1 on gold, OICORE and EVENT830) and OICORE's limit 1c above the price it sees; changelog days and strategy docs brought up to date</li>
+                  <li>Bot page: EVENT830's open positions now get a chart too (the price feed reads its eight markets)</li>
+                  <li>Bot page: a smoother, freer layout. Edit layout (in the Layout menu) lets any card go anywhere, by dragging (touch and hold on a phone) or with its arrows; the other cards slide out of the way. Each card can be Half or Full width, and every card can fold to its title row. Done, Cancel and Undo; an older saved layout carries over</li>
+                  <li>Bot: when OICORE or EVENT830 is inside its entry time but sends no order, the reason is now saved (for example stale minute, open interest too low, low money on the exchange shard) and listed in the nightly report</li>
+                </ul>
+                <div class="changelog-day">Nov 4</div>
+                <ul class="changelog-list">
+                  <li>Research: the NHL quote recorder is removed; both NHL ideas it was built to test failed on the held-back games</li>
+                  <li>Bot status: the countdown ring and the prices tile now cover EVENT830 (the release day longshot), with its next listed release window, so the card covers every live strategy</li>
+                  <li>Nightly report: each order row now carries Kalshi's own order status, so a no-fill shows why</li>
+                  <li>Bot page: a removed strategy (FLOW1) leaves the Strategies table once nothing of it is open; its result still counts in All strategies</li>
+                  <li>Trading: FLOW1 is removed; the longer history test and a second out-of-sample check found no reliable edge (its open orders still settle normally)</li>
+                  <li>Bot page: the L1 row in Strategies counts only the markets L1 trades now (gold); paused markets' earlier results stay in All strategies</li>
+                  <li>Trading: FLOW1, a fourth strategy probe: Bitcoin cheap side (5c to 50c), 5 contracts, only when takers were net selling that side in the 3 minutes before, held to settlement</li>
+                </ul>
                 <div class="changelog-day">Nov 3</div>
                 <ul class="changelog-list">
+                  <li>Trading: a second probe in the second strategy slot, EVENT830: only on the listed 8:30 AM Eastern data release days of Nov and Dec 2026, 1 contract of the cheaper side (at most 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB in the window that closes at the release, held to settlement; below the research bar</li>
+                  <li>Research: three read-only data recorders (daily markets, entertainment references, weather brackets) run on GitHub Actions and write only to the research data branch; no trading changes</li>
+                  <li>Bot page: the price tile no longer shows Dogecoin, which is paused</li>
+                  <li>Trading: OICORE's limit sits 1c above the price it sees, so it stops missing fills when the price ticks up a cent (at most 1c a contract more)</li>
                   <li>Trading: OICORE gets a size ladder (10, 12, 15, 20, 30 contracts), each step earned on its own record and the balance, with a daily loss cap and a drawdown stop that grow with its size</li>
                   <li>Trading: gold's base size is held at 15 contracts (it was allowed to grow to 40 with the balance); the profit add-on and everything else are unchanged</li>
                   <li>Trading: Dogecoin is paused in code (no new orders, no resume date; an open one is still sold). At gold's ladder size it had 7 early sells in 57 fills, and the last 24 hours lost $36.92. Gold is the only market L1 trades now (#697)</li>
@@ -1626,22 +1706,22 @@
                 </ul>
                 <div class="changelog-day">Oct 31</div>
                 <ul class="changelog-list">
+                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
+                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
+                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page on a phone: a redraw no longer moves the page up while you are scrolled down (the scroll position is put back after each redraw)</li>
                   <li>Research: the three data recorders now have extra start times, so a skipped start by GitHub costs about an hour of recording instead of up to four</li>
                   <li>Recent trades: each row now shows when the trade opened and when it closed (the early sell's own time, or the market's close; "Closes" while it is still open)</li>
-                </ul>
-                <div class="changelog-day">Oct 30</div>
-                <ul class="changelog-list">
                   <li>Page: the "A new version is ready" pop-up now waits until the site has stopped changing for a few minutes, so a burst of updates gives one prompt for the final version instead of one per update (a copy that is hours old is still offered at once)</li>
                   <li>Alerts: your phone now gets one alert (at most every six hours) when a market cannot trade because its Kalshi exchange is short of money, saying which exchange and how much, so a dry exchange no longer goes unnoticed</li>
                   <li>Bot status: redone again as a countdown ring (it now covers both strategies: the Closing buy and the open interest jump) beside a tall health line, with one wide tile showing each market's price right now against what its strategy buys (and when gold is closed); the rows already shown in the Strategies table are gone; a second tile shows how many contracts rest at the price each market would buy at against the size of our last order</li>
-                  <li>Deploys: each deploy now records which commit it came from, and the nightly report shows it for every function, so it is easy to confirm the latest merge is live</li>
+                </ul>
+                <div class="changelog-day">Oct 30</div>
+                <ul class="changelog-list">
                   <li>Bot status: redone as two tiles (the countdown to the next look and the health line) with the last order, orders today and which markets are open; win rate, edge and best and worst market are no longer on this card, and Needs a look shows only when something is wrong</li>
                   <li>Settings: the Phone alerts confirmation now says closes, stops and issues (it said entries, but a buy never alerts)</li>
-                  <li>Reports: the nightly order report now includes when each order was sent and how long each step took (numbers only, no ids), so late Dogecoin orders can be traced</li>
                   <li>Page: zooming out in the browser now keeps the page centred instead of leaving it against the left edge</li>
                   <li>Page: browser zoom (Cmd minus and plus) now zooms the page properly on a desktop; the big-screen scale-up follows the screen instead of the window width, so zooming out no longer switches it on and cancels the zoom</li>
-                  <li>Trading log: every new order now records when it was sent, when Kalshi answered and when the minute function started, so late Dogecoin orders can be traced to a slow step (logging only, no change to what the bot buys)</li>
                   <li>Bot page: the Rules text now says the Bitcoin probe (OICORE) sends 10 contracts, not 5, and no longer lists a one-crypto-order-per-window limit that no live market is under</li>
                   <li>Notes: corrected the project note about which Kalshi shard each market trades on (every live market is on shard 2; gold was wrongly listed on shard 0)</li>
                   <li>Trading: the 8 PM to midnight pause is lifted for gold and Dogecoin, so both trade around the clock again (it cost about 30 fills a week)</li>
@@ -2259,7 +2339,8 @@
   // A minute the bot skipped, said plainly (Oct 22, 2026). The server writes why it sent nothing; a read Kalshi refused with 429 is now retried once on its own, so say so. Any other note is shown as written.
   // A minute's result is one line per market the bot looked at ("KXGOLD15M-26OCT231200-00: filled; KXDOGE15M-...: another crypto market already holds this window"). Shown as it was written it is a wall of tickers, so each market
   // becomes its own short line with the market's name. The server cuts the note at 300 characters; a last line that was cut off is dropped rather than shown half written.
-  var KAL_SERIES_NAMES = { GOLD: 'Gold', BTC: 'Bitcoin', ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin', AUDUSD: 'AUD/USD', USDCAD: 'USD/CAD', NATGAS: 'Natural gas', SOL: 'Solana' };
+  var KAL_SERIES_NAMES = { GOLD: 'Gold', BTC: 'Bitcoin', ETH: 'Ethereum', XRP: 'XRP', DOGE: 'Dogecoin', AUDUSD: 'AUD/USD', USDCAD: 'USD/CAD', NATGAS: 'Natural gas', SOL: 'Solana',
+    SILVER: 'Silver', COPPER: 'Copper', WTI: 'WTI oil', EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', HYPE: 'HYPE', BNB: 'BNB' };
   function kalshiMarketLines(note){
     var n = String(note || '');
     if(!/^KX[A-Z]+15M-[A-Z0-9]+-\d+: /.test(n)){ return null; }
@@ -2362,6 +2443,9 @@
   // Which market an order was in, by its series (or ticker). One rule for the By market table and the hover on the bars, so a trade has one name on the page.
   function kalshiMarketName(o){
     var s = String(o.series || o.ticker || '');
+    // EVENT830's eight markets (Nov 3, 2026) are named before the Bitcoin fallback, so a release-day order is never shown as Bitcoin.
+    var ev = /^KX(SILVER|COPPER|WTI|EURUSD|GBPUSD|USDJPY|HYPE|BNB)15M/.exec(s);
+    if(ev){ return { SILVER: 'Silver', COPPER: 'Copper', WTI: 'WTI oil', EURUSD: 'EUR/USD', GBPUSD: 'GBP/USD', USDJPY: 'USD/JPY', HYPE: 'HYPE', BNB: 'BNB' }[ev[1]]; }
     return /GOLD/.test(s) ? 'Gold' : /ETH/.test(s) ? 'Ethereum' : /XRP/.test(s) ? 'XRP' : /DOGE/.test(s) ? 'Dogecoin' : /AUDUSD/.test(s) ? 'AUD/USD' : /USDCAD/.test(s) ? 'USD/CAD' : /NATGAS/.test(s) ? 'Natural gas' : 'Bitcoin';
   }
 
@@ -3343,16 +3427,31 @@
   }
   // The next time the bot looks to buy. Markets close every 15 minutes on the quarter hour. Every market that can place an order now is entered about 6 minutes before the close (minute 9 of the quarter): gold, Dogecoin and Ethereum (on a smooth climb only).
   // XRP and natural gas, the only 10 minute looks, are paused in the bot's code (Oct 28, 2026), and so are Bitcoin (Oct 29, 2026) and the forex probes, so the page names none of them and shows no 10 minute look (the owner, Oct 29, 2026: "XRP is paused, isn't it").
-  // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold and Dogecoin), the open interest jump 3 minutes before it
+  // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold; Dogecoin is paused), the open interest jump 3 minutes before it
   // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
   var KAL_LOOKS = [
     { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; } },
-    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } }
+    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } },
+    // EVENT830 (Nov 3, 2026, the second slot): only in the listed windows that close at a US 8:30 AM Eastern release (7:30 AM Central), 3 minutes before that close. `closes` is a copy of SLOT_CALENDARS.EVENT830 in the bot's code (gate SF9 compares them); a later date is a reviewed edit of both.
+    { at: 720000, name: 'Release day longshot', what: function(){ return 'Silver, copper, oil, FX, HYPE and BNB, at the 7:30 AM release'; },
+      closes: ['2026-11-05T13:30:00Z', '2026-11-06T13:30:00Z', '2026-11-10T13:30:00Z', '2026-11-12T13:30:00Z', '2026-11-13T13:30:00Z', '2026-11-17T13:30:00Z', '2026-11-19T13:30:00Z', '2026-11-25T13:30:00Z',
+        '2026-12-03T13:30:00Z', '2026-12-04T13:30:00Z', '2026-12-10T13:30:00Z', '2026-12-15T13:30:00Z', '2026-12-16T13:30:00Z', '2026-12-17T13:30:00Z', '2026-12-23T13:30:00Z'],
+      kinds: ['jobless claims', 'jobs report', 'CPI', 'jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE', 'jobless claims', 'jobs report', 'CPI and jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE'] }
   ];
   function kalshiNextEntry(now){
     var Q = 900000, base = Math.floor(now / Q) * Q, goldClosed = kalshiGoldClosed(now), events = [];
-    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){ events.push({ at: base + q * Q + l.at, look: l }); }); }
+    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){
+      // a calendar look counts only in a listed window: the close of this quarter must be one of its dates
+      if(l.closes && l.closes.map(Date.parse).indexOf(base + (q + 1) * Q) < 0){ return; }
+      events.push({ at: base + q * Q + l.at, look: l });
+    }); }
     events.sort(function(a, b){ return a.at - b.at; });
+    // two strategies looking at the same moment (the open interest jump and a release window) are one look, both named
+    events = events.reduce(function(out, e){
+      var last = out[out.length - 1];
+      if(last && last.at === e.at){ var a = last.look, b = e.look; last.look = { name: a.name + ' and ' + b.name, what: function(g){ return a.what(g) + '; ' + b.what(g); } }; return out; }
+      out.push({ at: e.at, look: e.look }); return out;
+    }, []);
     var i = 0; while(i < events.length && events[i].at <= now){ i++; }
     var next = events[i], prev = events[i - 1], after = events[i + 1];
     if(!next || !prev){ return null; }
@@ -3373,11 +3472,10 @@
   // Gold has no weekend: closed from Friday 17:00 to Sunday 18:00 Central (the same window the silent-market warning uses); Dogecoin and Bitcoin trade all week.
   function kalshiGoldClosed(now){ var wm = kalshiCtWeekMinute(now); return wm >= 7200 + 1020 || wm < 1080; }
   // Prices right now against what each strategy buys (the owner, Oct 31, 2026: "all unique and helpful"; nothing else on the page shows this, and it answers "why is nothing trading"). From the market relay the page already reads: for the open
-  // 15 minute market of each series, the price to BUY the favourite side (gold and Dogecoin buy 88c to 97c) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
+  // 15 minute market of each series, the price to BUY the favourite side (gold buys 88c to 97c; Dogecoin is paused and not shown) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
   // does not carry, so that row says where the price sits and no more. Pure: relay markets and the clock in, rows out.
   var KAL_PRICE_WATCH = [
     { name: 'Gold', series: 'KXGOLD15M', kind: 'fav', lo: 0.88, hi: 0.97, gold: true },
-    { name: 'Dogecoin', series: 'KXDOGE15M', kind: 'fav', lo: 0.88, hi: 0.97 },
     { name: 'Bitcoin', series: 'KXBTC15M', kind: 'cheap', lo: 0.05, hi: 0.50 }
   ];
   function kalshiPriceWatch(markets, now){
@@ -3396,6 +3494,12 @@
       out.pos = Math.max(0, Math.min(1, (p - from) / span)); out.bandLeft = (w.lo - from) / span; out.bandWidth = (w.hi - w.lo) / span;
       return out;
     });
+  }
+  // The next release window the Release day longshot (EVENT830) can still enter: the first listed close at least 2 minutes away (it enters 3 to 2 minutes before the close). Null after the last listed date. Pure: the clock in.
+  function kalshiEventNext(now){
+    var l = KAL_LOOKS.filter(function(x){ return x.closes; })[0]; if(!l){ return null; }
+    for(var i = 0; i < l.closes.length; i++){ var c = Date.parse(l.closes[i]); if(c - 120000 > now){ return { at: c - 180000, close: c, kind: l.kinds[i] || '', inMs: c - 180000 - now }; } }
+    return null;
   }
   function kalshiDurationText(ms){
     var m = Math.round(ms / 60000);
@@ -3669,6 +3773,14 @@ kalshiStatusTick();
         '<div class="kal-st-sub">' + escapeHtml(verdict) + '. Closes ' + escapeHtml(kalTime(r.closeAt)) + '</div></div>';
   }
   // The size of the bot's most recent order in each market (ordered contracts, both strategies), for the depth tile.
+  // The Release day longshot's cell in the price tile: it trades only on listed release days, so the cell says when the next window is (the relay does not read its eight markets).
+  function kalshiEscapedEventCell(ev, now){
+    var head = '<div class="kal-st-pname">Release day longshot <span class="kal-st-dim">&middot; cheaper side</span></div>';
+    if(!ev){ return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig kal-st-dim">&mdash;</div><div class="kal-st-sub">No listed release window left</div></div>'; }
+    var day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(ev.close));
+    var soon = ev.inMs <= 0 ? 'Looking now' : (ev.inMs < 86400000 ? 'In ' + kalshiDurationText(ev.inMs) : day);
+    return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig">' + escapeHtml(soon) + '</div><div class="kal-st-sub">Next window ' + escapeHtml(day) + ', 7:27 AM Central (' + escapeHtml(ev.kind) + '). 5c to 50c, 8 markets</div></div>';
+  }
   function kalshiLastOrderSizes(orders){
     var latest = {};
     (orders || []).forEach(function(o){
@@ -3693,7 +3805,7 @@ kalshiStatusTick();
     var now = Date.now(), data = kalshiBooksLast, rows = kalshiPriceWatch(data && data.markets, now);
     var depthEl = document.getElementById('kalDepth');
     if(depthEl){ var sizes = kalshiLastOrderSizes(kalshiAllOrders()); depthEl.innerHTML = '<div class="kal-st-lbl">Depth at the touch, against our order size</div>' + kalshiEscapedDepthRows(rows, sizes) + '<div class="kal-st-sub" style="margin-top:8px">Top of the book only. A big share of it is where orders tend to miss.</div>'; }
-    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + '</div>' +
+    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + kalshiEscapedEventCell(kalshiEventNext(now), now) + '</div>' +
       '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + '. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
   }
   var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
@@ -3731,11 +3843,13 @@ kalshiStatusTick();
   // Every order the bot placed, L1's and the second slot's: used to RECOGNISE the bot's fills, so a slot fill is never shown as a manual trade or an unmatched position.
   function kalshiAllOrders(){ return (kalshiLiveOrders || []).concat(kalshiSlotOrders || []); }
   // The second-slot strategies registered in the bot's code (SLOT_STRATEGIES in the bot's slot library), so the Strategies module lists them before a first order. A test compares this list with the registry. Labels only.
-  var KAL_SLOT_REGISTERED = ['OICORE'];
+  var KAL_SLOT_REGISTERED = ['OICORE', 'EVENT830'];
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
     L1: { name: 'Closing buy', markets: 'Gold', note: '' },
-    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
+    OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' },
+    EVENT830: { name: 'Release day longshot', markets: 'Silver, Copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE, BNB', note: '' },
+    FLOW1: { name: 'Seller flow (removed)', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){
     var seen = {}, out = [];
@@ -3747,11 +3861,11 @@ kalshiStatusTick();
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
   // Each strategy's OWN loss stop used (Nov 2, 2026, since the bot judges L1 and the second strategy each on its own orders): the same meter as the account's, fed one strategy's orders at a time. Percentages only.
+  // Since Nov 3, 2026 the slot holds two strategies (OICORE and EVENT830) and the bot's second stop (RISK_PROFILES.SECOND) is ONE budget over every slot order, so the page shows it as one figure named after all of them, not one per strategy.
   function kalshiOwnStops(orders, st, now){
-    return ['L1'].concat(KAL_SLOT_REGISTERED).map(function(id){
-      var sub = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === id; });
-      return { id: id, fraction: kalshiRiskMeter(sub, st, now).fraction };
-    });
+    var l1 = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === 'L1'; });
+    var slot = (orders || []).filter(function(o){ return kalshiStrategyOf(o) !== 'L1'; });
+    return [{ id: 'L1', fraction: kalshiRiskMeter(l1, st, now).fraction }, { id: KAL_SLOT_REGISTERED.join(' + '), fraction: kalshiRiskMeter(slot, st, now).fraction }];
   }
   // The markets ACTIVELY in the Strategies list (the owner, Oct 30, 2026: the Bot status card should count only those): a strategy and a market it trades, read from the same labels the Strategies table shows (KAL_STRATEGY_INFO).
   // An order counts when its strategy and its market are a pair on that list, so a paused market (XRP) and Bitcoin's old L1 orders (L1 no longer trades it; the second strategy does) are left out.
@@ -3795,7 +3909,7 @@ kalshiStatusTick();
       t.today = Math.round(t.today * 10000) / 10000; t.net = Math.round(t.net * 10000) / 10000;
       totalRow = cell({ info: { markets: '' }, sum: t, status: '', ageText: opts.age ? opts.age(t) : '' }, 'All strategies', false);
     }
-    body = totalRow + rows.map(function(r){ return cell(r, r.info.name, true); }).join('');   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
+    body = totalRow + rows.filter(function(r){ return !r.hidden; }).map(function(r){ return cell(r, r.info.name, true); }).join('');   // a hidden row (a removed strategy with nothing open) still counts in the total above   // the total is the first row (the owner, Oct 30, 2026): it is the account figure, the strategies are its parts
     var notes = '';   // no explanatory text under the table (the owner, Oct 30, 2026); only a real problem is said
     if(opts.slotError){ notes = '<div class="kal-note kal-warn">The second strategy\'s orders cannot be read (' + esc(opts.slotError) + '), so its row may show no orders even if it has traded. This is a page permission, not the bot.</div>' + notes; }
     return '<div class="kal-tbl-wrap"><table class="kal-strat-tbl"><thead><tr><th>Strategy</th><th>Markets</th><th>Today</th><th>Result' + (opts.rangeLabel ? ' (' + esc(opts.rangeLabel) + ')' : '') + '</th><th>Settled</th><th>Win rate</th><th>Open</th><th>Last order</th></tr></thead><tbody>' + body + '</tbody></table></div>' + notes +
@@ -3814,11 +3928,13 @@ kalshiStatusTick();
     if(needsOlder){ var pick = hit ? kalshiPnlSource(kalshiLiveOrders, hit) : null; if(pick && !hit.failed){ l1src = pick.orders; } else { partial = true; } }
     var rangeLabel = (KAL_PNL_RANGES.filter(function(r){ return r.key === key; })[0] || { label: key }).label;
     var l1Orders = kalshiResolveOrders(l1src, acct && acct.results, fills);
-    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1'; }), now, since);   // includes Ethereum's old orders, so the table still adds up to the Account result
+    var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1' && kalshiIsActive(o); }), now, since);   // only the markets L1 trades now (the owner, Nov 4, 2026: the row said Gold but carried Dogecoin's and other paused markets' old results); those stay in All strategies
     var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
-      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum) });
+      // A strategy no longer in the bot's registry (FLOW1, removed Nov 4, 2026) is hidden once nothing of it is open (the owner, Nov 4, 2026: "Hide it"); its result still counts in All strategies.
+      var gone = KAL_SLOT_REGISTERED.indexOf(id) < 0;
+      rows.push({ id: id, info: KAL_STRATEGY_INFO[id] || { name: 'Second strategy', markets: '', note: '' }, sum: sum, status: !on ? 'Stopped' : (sum.open.length ? 'Holding' : 'Waiting for a signal'), ageText: age(sum), hidden: gone && !sum.open.length });
     });
     tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial, slotError: kalshiSlotError });     // hidden is the Layout menu's to set, never this render's
   }
@@ -3989,47 +4105,108 @@ kalshiStatusTick();
     if(mq.addEventListener){ mq.addEventListener('change', place); } else if(mq.addListener){ mq.addListener(place); }
   })();
 
-  // Layout of the Bot tab: which of the optional cards show, and the order of the cards within the rail and within the main column (a card stays
-  // in its own column). Saved to the account. The session and account cards cannot be hidden, so the halt and stop buttons are always on screen.
+  // Layout of the Bot tab, rebuilt Nov 5, 2026 (the owner: "just more of a blocky interaction.. it doesnt move smoothly, i don't have much say in where each card goes on my page"; they chose smooth movement and free placement, no saved layouts yet).
+  // One ordered list of every card on one grid, so any card can go anywhere, and each card can be folded to its title row.
+  // Sizes (Nov 5, 2026, the owner: "this should maybe all be adjustable? size wise i guess"): the grid has 12 columns and a card spans 3, 4, 6, 8 or 12 of them (a quarter, a third, a half, two thirds, the full width), and it can be given a height in steps of 40px,
+  // below which its body scrolls. Both are set in Edit layout by dragging the card's bottom right corner or with its buttons, and both are ignored on a phone (one column, every card at its own height).
+  // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
     var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
-    var KEY = 'kalBotLayout', layout = { cols: 'auto', hidden: {}, order: null };
+    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades' };
+    var CARDS = ['account', 'status', 'pnl', 'positions', 'trades'];   // the default order, which is the look the page had before the rebuild
+    var WIDTHS = { account: 12, status: 6, pnl: 6, positions: 12, trades: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
+    var SPANS = [3, 4, 6, 8, 12], SPAN_TEXT = { 3: '1/4', 4: '1/3', 6: '1/2', 8: '2/3', 12: 'Full' }, SPAN_WORDS = { 3: 'a quarter of the width', 4: 'a third of the width', 6: 'half the width', 8: 'two thirds of the width', 12: 'the full width' };
+    var H_STEP = 40, H_MIN_BODY = 120, H_MAX = 3000, H_STEPS = [240, 360, 480, 600];   // a set height snaps to 40px and never goes below the head plus 120px of body (or the card's own height, if that is less)
+    var NO_HEIGHT = { account: true };   // the Account card's Start, Pause and Flatten menu hangs below its head, so a set height could cut it off: that card only changes width
+    var VERSION = 3, KEY = 'kalBotLayout';
+    function fresh(){ return { v: VERSION, order: CARDS.slice(), hidden: {}, width: {}, height: {}, folded: {} }; }
+    function isOptional(k){ return OPTIONAL.some(function(o){ return o[0] === k; }); }
+    // A saved order with unknown names dropped and duplicates removed; a card it does not mention (one added after it was saved) goes right after the card that precedes it by default, not to the end.
+    function complete(list, def){
+      var want = list.filter(function(k, i, a){ return def.indexOf(k) > -1 && a.indexOf(k) === i; });
+      def.forEach(function(k, i){ if(want.indexOf(k) < 0){ var prev = i > 0 ? want.indexOf(def[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
+      return want;
+    }
+    // A layout saved before Nov 5, 2026 (no version) listed the cards in markup order, the rail's cards (account, status, positions) then the main column's (pnl, trades), and the page dealt them into
+    // the slots rail, rail, main, rail, main. Dealing the old list the same way gives the order the owner was looking at, so an old layout keeps its look instead of being thrown away. Its column count (cols) was never used and is dropped.
+    var OLD_DOM = ['account', 'status', 'positions', 'pnl', 'trades'], OLD_RAIL = ['account', 'status', 'positions'];
+    function migrateOrder(old){
+      var want = complete(old, OLD_DOM), rail = want.filter(function(k){ return OLD_RAIL.indexOf(k) > -1; }), main = want.filter(function(k){ return OLD_RAIL.indexOf(k) < 0; }), seq = [], r = 0, m = 0;
+      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var k = w === 'r' ? rail[r++] : main[m++]; if(k){ seq.push(k); } });
+      return seq.concat(rail.slice(r), main.slice(m));
+    }
+    // Anything read back (this browser or the account) is rebuilt from known names and values only, so a corrupt copy cannot hide the account card or set a width or height that does not exist.
+    // A version 2 copy (Nov 5, 2026, Half or Full) keeps its look: 'half' is a span of 6 and 'full' of 12, which are the same widths on the 12 column grid.
+    function normalize(l){
+      var next = fresh();
+      if(!l || typeof l !== 'object'){ return next; }
+      if(Array.isArray(l.order)){
+        var order = l.order.filter(function(k){ return typeof k === 'string'; });
+        next.order = (l.v === 2 || l.v === VERSION) ? complete(order, CARDS) : migrateOrder(order);
+      }
+      OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
+      CARDS.forEach(function(k){
+        var w = l.width ? l.width[k] : undefined;
+        if(w === 'half'){ w = 6; } else if(w === 'full'){ w = 12; }
+        if(SPANS.indexOf(w) > -1){ next.width[k] = w; }
+        var h = l.height ? l.height[k] : undefined;
+        if(!NO_HEIGHT[k] && typeof h === 'number' && isFinite(h) && h >= H_MIN_BODY && h <= H_MAX){ next.height[k] = Math.round(h); }
+        if(l.folded && l.folded[k] === true){ next.folded[k] = true; }
+      });
+      return next;
+    }
+    var layout = fresh(), migrated = false;
     try {
       var saved = JSON.parse(localStorage.getItem(KEY) || 'null');
-      if(saved && typeof saved === 'object'){
-        if(['auto', '1', '2', '3', '4'].indexOf(String(saved.cols)) > -1){ layout.cols = String(saved.cols); }
-        OPTIONAL.forEach(function(o){ if(saved.hidden && saved.hidden[o[0]] === true){ layout.hidden[o[0]] = true; } });
-        if(Array.isArray(saved.order)){ layout.order = saved.order.filter(function(k){ return typeof k === 'string'; }); }
-      }
+      if(saved && typeof saved === 'object'){ layout = normalize(saved); migrated = saved.v !== VERSION; }
     } catch(e){ /* storage can be blocked: the layout just resets each visit */ }
-    var grid = document.getElementById('kalTabBot'), list = document.getElementById('kalLayoutCards');
+    var grid = document.getElementById('kalTabBot'), list = document.getElementById('kalLayoutCards'), live = document.getElementById('kalLayoutLive');
     list.innerHTML = OPTIONAL.map(function(o){
       return '<label><input type="checkbox" data-card-toggle="' + o[0] + '"> ' + o[1] + '</label>';
     }).join('');
-    var DEFAULT_ORDER = Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); });
-    function currentOrder(){ return Array.prototype.map.call(grid.querySelectorAll('[data-card]'), function(c){ return c.getAttribute('data-card'); }); }
-    // Saved order first (unknown names ignored), then any card the saved list does not mention, in its default place.
-    // The rail and main wrappers dissolve into the grid (display:contents), so what sets a card's place is its CSS order, not its place in the markup. The rail's cards and the main column's cards are dealt into the default slots (account, status, result line, positions, trades) in the order each column holds them.
-    function flow(){
-      var rail = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-rail > [data-card]')), main = Array.prototype.slice.call(grid.querySelectorAll(':scope > .kal-main > [data-card]')), seq = [], r = 0, m = 0;
-      ['r', 'r', 'm', 'r', 'm'].forEach(function(w){ var c = w === 'r' ? rail[r++] : main[m++]; if(c){ seq.push(c); } });
-      rail.slice(r).concat(main.slice(m)).forEach(function(c){ seq.push(c); });
-      seq.forEach(function(c, i){ c.style.order = String(i); });
-    }
-    function applyOrder(){
-      var want = (layout.order || []).filter(function(k, i, a){ return DEFAULT_ORDER.indexOf(k) > -1 && a.indexOf(k) === i; });
-      // A card the saved list does not mention (a card added after the layout was saved) goes right after the card that precedes it by default, not to the end.
-      DEFAULT_ORDER.forEach(function(k, i){ if(want.indexOf(k) < 0){ var prev = i > 0 ? want.indexOf(DEFAULT_ORDER[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
-      want.forEach(function(k){ var c = grid.querySelector('[data-card="' + k + '"]'); if(c){ c.parentNode.appendChild(c); } });   // each card moves only within its own column
-      flow();
-    }
+    function card(k){ return grid.querySelector(':scope > [data-card="' + k + '"]'); }
+    function allCards(){ return Array.prototype.slice.call(grid.querySelectorAll(':scope > [data-card]')); }
+    function visibleCards(){ return allCards().filter(function(c){ return !c.hidden; }); }
+    function currentOrder(){ return allCards().map(function(c){ return c.getAttribute('data-card'); }); }
+    function widthOf(k){ return layout.width[k] || WIDTHS[k]; }
+    function heightOf(k){ return NO_HEIGHT[k] ? null : (layout.height[k] || null); }
+    function heightText(h){ return h ? h + 'px tall' : 'Auto height'; }
+    // A card that can be given a height has one body under its head, so the body can scroll while the head stays put. The pieces are moved, not copied: every id and listener stays the same.
+    CARDS.forEach(function(k){
+      var c = card(k);
+      if(!c || NO_HEIGHT[k] || c.querySelector(':scope > .kal-card-body')){ return; }
+      var body = document.createElement('div'); body.className = 'kal-card-body';
+      Array.prototype.slice.call(c.children).forEach(function(ch){ if(!ch.matches('.kal-card-head, .kal-card-title')){ body.appendChild(ch); } });
+      c.appendChild(body);
+    });
+    // A fold chevron in front of every card title, on every visit (not only while editing).
+    CARDS.forEach(function(k){
+      var t = card(k) && card(k).querySelector('.kal-card-title');
+      if(!t){ return; }
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'kal-foldbtn'; b.setAttribute('data-fold', k); b.innerHTML = '<i aria-hidden="true">&#9662;</i>';
+      t.insertBefore(b, t.firstChild);
+    });
     function apply(){
-      applyOrder();
-      OPTIONAL.forEach(function(o){
-        var card = grid.querySelector('[data-card="' + o[0] + '"]');
-        if(card){ card.hidden = layout.hidden[o[0]] === true; }
-        list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true;
+      var want = layout.order;
+      want.forEach(function(k, i){ var c = card(k), at = allCards()[i]; if(c && at !== c){ grid.insertBefore(c, at || null); } });   // only a card that is out of place moves, so focus stays put on the rest
+      CARDS.forEach(function(k){
+        var c = card(k);
+        if(!c){ return; }
+        c.setAttribute('data-w', String(widthOf(k)));
+        var hh = heightOf(k);
+        if(hh){ c.setAttribute('data-h', String(hh)); c.style.setProperty('--kal-h', hh + 'px'); } else { c.removeAttribute('data-h'); c.style.removeProperty('--kal-h'); }
+        c.hidden = isOptional(k) && layout.hidden[k] === true;   // the account card is never hidden, whatever was saved
+        var folded = layout.folded[k] === true;
+        c.setAttribute('data-folded', folded ? 'true' : 'false');
+        var fb = c.querySelector('[data-fold]');
+        if(fb){ fb.setAttribute('aria-expanded', folded ? 'false' : 'true'); fb.setAttribute('aria-label', (folded ? 'Unfold ' : 'Fold ') + LABELS[k]); }
+        var wb = c.querySelector(':scope > .kal-move [data-width]');
+        if(wb){ var w = widthOf(k); wb.textContent = SPAN_TEXT[w] + ' wide'; wb.setAttribute('aria-label', LABELS[k] + ' is ' + SPAN_WORDS[w] + '. Change its width'); }
+        var hb = c.querySelector(':scope > .kal-move [data-height]');
+        if(hb){ hb.textContent = heightText(hh); hb.setAttribute('aria-label', LABELS[k] + ' is ' + (hh ? hh + ' pixels tall' : 'its own height') + '. Change its height'); }
       });
+      OPTIONAL.forEach(function(o){ list.querySelector('[data-card-toggle="' + o[0] + '"]').checked = layout.hidden[o[0]] !== true; });
     }
     var localDirtyAt = 0, lastRemote = '';
     function save(skipSync){
@@ -4038,47 +4215,202 @@ kalshiStatusTick();
       // Saved to the account too (like the other settings), so the arrangement follows the user to another device.
       if(skipSync !== true && typeof syncUserSetting === 'function'){ syncUserSetting('kalBotLayout', layout, 300); }
     }
-    // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens.
+    function announce(msg){ if(!live){ return; } live.textContent = ''; setTimeout(function(){ live.textContent = msg; }, 30); }
+    // Smooth movement (FLIP): measure every card, change the order, measure again, and slide each card from where it was to where it is now, so the neighbours glide out of the way instead of jumping.
+    // None of it under the device reduce-motion setting or the page's own attribute for it: the cards then simply move.
+    function reducedMotion(){ return document.documentElement.getAttribute('data-reduce-motion') === 'true' || !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches); }
+    var FLIP_MS = 200;
+    function flip(fn, skip){
+      var cards = allCards();
+      if(reducedMotion() || typeof grid.animate !== 'function'){ cards.forEach(function(c){ if(c.__flip){ c.__flip.cancel(); c.__flip = null; } }); fn(); return; }
+      var first = cards.map(function(c){ return c.getBoundingClientRect(); });   // taken with any slide still running, so a new slide starts from where the card is on screen
+      cards.forEach(function(c){ if(c.__flip){ c.__flip.cancel(); c.__flip = null; } });
+      fn();
+      cards.forEach(function(c, i){
+        if(c === skip || c.hidden || !first[i].width){ return; }
+        var b = c.getBoundingClientRect(), dx = first[i].left - b.left, dy = first[i].top - b.top;
+        if(Math.abs(dx) < 1 && Math.abs(dy) < 1){ return; }
+        c.__flip = c.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: FLIP_MS, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      });
+    }
+    // Editing: only on request and never remembered (a normal visit cannot be dragged by accident). Changes show at once; Done keeps them, Cancel puts back the layout from before editing, Undo steps back one change.
+    var editing = false, before = null, undo = [], drag = null;
+    var bar = document.getElementById('kalEditBar'), undoBtn = document.getElementById('kalEditUndo');
+    function snapshot(){ return JSON.parse(JSON.stringify(layout)); }
+    function same(a, b){ return JSON.stringify(a) === JSON.stringify(b); }
+    function updateUndo(){ undoBtn.disabled = undo.length === 0; }
+    function change(mutate, msg){
+      var prev = snapshot();
+      flip(function(){ mutate(); apply(); });
+      if(same(prev, layout)){ return; }
+      if(editing){ undo.push(prev); updateUndo(); } else { save(); }
+      if(msg){ announce(typeof msg === 'function' ? msg() : msg); }
+    }
+    function placeText(k){ var v = visibleCards().map(function(c){ return c.getAttribute('data-card'); }); return LABELS[k] + ' moved to place ' + (v.indexOf(k) + 1) + ' of ' + v.length + '.'; }
+    function setUnlocked(on){
+      grid.classList.toggle('kal-unlocked', on);
+      allCards().forEach(function(c){
+        var k = c.getAttribute('data-card'), old = c.querySelector(':scope > .kal-move'), oldR = c.querySelector(':scope > .kal-resize');
+        if(old){ old.remove(); } if(oldR){ oldR.remove(); }
+        if(on){
+          var b = document.createElement('div'); b.className = 'kal-move';
+          b.innerHTML = '<span class="kal-grip" aria-hidden="true">&#8942;&#8942; Drag</span>'
+            + '<button type="button" class="kal-mini" data-width="' + k + '"></button>'
+            + (NO_HEIGHT[k] ? '' : '<button type="button" class="kal-mini" data-height="' + k + '"></button>')
+            + '<button type="button" class="kal-mini" data-move="-1" aria-label="Move ' + LABELS[k] + ' up">&#9650;</button>'
+            + '<button type="button" class="kal-mini" data-move="1" aria-label="Move ' + LABELS[k] + ' down">&#9660;</button>';
+          c.insertBefore(b, c.firstChild);
+          var g = document.createElement('span'); g.className = 'kal-resize'; g.setAttribute('aria-hidden', 'true'); g.title = NO_HEIGHT[k] ? 'Drag to change the width' : 'Drag to resize. Double click for its own height';
+          c.appendChild(g);
+        }
+      });
+      apply();
+    }
+    function startEdit(){
+      if(editing){ return; }
+      editing = true; before = snapshot(); undo = []; updateUndo();
+      var menu = document.getElementById('kalLayout'); if(menu){ menu.open = false; }
+      flip(function(){ bar.hidden = false; setUnlocked(true); });
+      announce('Editing the layout. Drag a card, or use its arrows. Done keeps the changes, Cancel puts the layout back.');
+      document.getElementById('kalEditDone').focus();
+    }
+    function endEdit(keep){
+      if(!editing){ return; }
+      if(drag){ endDrag(true); }
+      if(size){ sizeEnd(true); }
+      var prev = before;
+      editing = false; before = null; undo = []; updateUndo();
+      flip(function(){
+        if(!keep){ layout = prev; }
+        bar.hidden = true; setUnlocked(false);
+      });
+      if(keep && !same(prev, layout)){ save(); }
+      announce(keep ? 'Layout saved.' : 'Layout put back as it was.');
+      var eb = document.getElementById('kalLayoutEdit'); if(eb){ eb.blur(); }
+    }
+    document.getElementById('kalLayoutEdit').addEventListener('click', startEdit);
+    document.getElementById('kalEditDone').addEventListener('click', function(){ endEdit(true); });
+    document.getElementById('kalEditCancel').addEventListener('click', function(){ endEdit(false); });
+    undoBtn.addEventListener('click', function(){
+      if(!undo.length){ return; }
+      var prev = undo.pop();
+      flip(function(){ layout = prev; apply(); });
+      updateUndo(); announce('Last change undone.');
+    });
+    // Rearranging: unlocked only on request and never remembered. Each card can be dragged, and also has arrows, which work on touch screens and from the keyboard.
     // Presentation view: a page attribute only, deliberately not stored anywhere (a reload is the full page again).
     var presentBtn = document.getElementById('kalPresentBtn');
     // The same switch as a button in the page header (the Layout menu was too easy to miss): it only toggles the page attribute, and it is never hidden by it, so the page can always be brought back.
     if(presentBtn){ presentBtn.addEventListener('click', function(){ kalshiSetPresent(document.documentElement.getAttribute('data-present') !== 'on'); }); }
-    var unlock = document.getElementById('kalLayoutUnlock'), dragging = null;
-    function visibleCards(parent){ return Array.prototype.filter.call((parent || grid).querySelectorAll(':scope > [data-card]'), function(c){ return !c.hidden; }); }
-    function commitOrder(){ layout.order = currentOrder(); flow(); save(); }
-    function setUnlocked(on){
-      grid.classList.toggle('kal-unlocked', on);
-      Array.prototype.forEach.call(grid.querySelectorAll('[data-card]'), function(c){
-        c.draggable = on;
-        var old = c.querySelector(':scope > .kal-move');
-        if(old){ old.remove(); }
-        if(on){
-          var bar = document.createElement('div'); bar.className = 'kal-move';
-          bar.innerHTML = '<button type="button" class="kal-mini" data-move="-1" aria-label="Move this card up">&#9650;</button><button type="button" class="kal-mini" data-move="1" aria-label="Move this card down">&#9660;</button>';
-          c.insertBefore(bar, c.firstChild);
-        }
-      });
-    }
-    unlock.addEventListener('change', function(){ setUnlocked(unlock.checked); });
     grid.addEventListener('click', function(e){
-      var d = e.target && e.target.getAttribute && e.target.getAttribute('data-move');
-      if(!d || !grid.classList.contains('kal-unlocked')){ return; }
-      var card = e.target.closest('[data-card]'), cards = card ? visibleCards(card.parentNode) : [], i = cards.indexOf(card), j = i + Number(d);
-      if(i < 0 || j < 0 || j >= cards.length){ return; }
-      if(Number(d) < 0){ card.parentNode.insertBefore(card, cards[j]); } else { card.parentNode.insertBefore(card, cards[j].nextSibling); }
-      commitOrder();
+      var t = e.target && e.target.closest ? e.target.closest('button') : null;
+      if(!t || !grid.contains(t)){ return; }
+      var c = t.closest('#kalTabBot > [data-card]'), k = c && c.getAttribute('data-card');
+      if(!k){ return; }
+      if(t.hasAttribute('data-fold')){
+        change(function(){ if(layout.folded[k] === true){ delete layout.folded[k]; } else { layout.folded[k] = true; } }, function(){ return LABELS[k] + (layout.folded[k] === true ? ' folded.' : ' unfolded.'); });
+        t.focus();
+        return;
+      }
+      if(!grid.classList.contains('kal-unlocked')){ return; }
+      if(t.hasAttribute('data-width')){   // steps through a quarter, a third, a half, two thirds and the full width, then round again
+        change(function(){ layout.width[k] = nextSpan(widthOf(k)); }, function(){ return LABELS[k] + ' is now ' + SPAN_WORDS[widthOf(k)] + '.'; });
+        t.focus();
+        return;
+      }
+      if(t.hasAttribute('data-height')){   // Auto, then 240, 360, 480 and 600px (never below the card's minimum), then Auto again
+        var m = heightBounds(c);
+        change(function(){ var h = nextHeight(heightOf(k), m); if(h){ layout.height[k] = h; } else { delete layout.height[k]; } }, function(){ var h = heightOf(k); return LABELS[k] + ' is now ' + (h ? h + ' pixels tall.' : 'its own height.'); });
+        t.focus();
+        return;
+      }
+      var d = Number(t.getAttribute('data-move'));
+      if(d !== 1 && d !== -1){ return; }
+      var cards = visibleCards(), i = cards.indexOf(c), j = i + d;
+      if(i < 0 || j < 0 || j >= cards.length){ announce(LABELS[k] + ' is already ' + (d < 0 ? 'first.' : 'last.')); return; }
+      change(function(){
+        if(d < 0){ grid.insertBefore(c, cards[j]); } else { grid.insertBefore(c, cards[j].nextSibling); }
+        layout.order = currentOrder();
+      }, function(){ return placeText(k); });
+      t.focus();
     });
-    grid.addEventListener('dragstart', function(e){
-      var c = grid.classList.contains('kal-unlocked') && e.target.closest ? e.target.closest('[data-card]') : null;
-      if(!c){ return; }
-      dragging = c; c.classList.add('kal-dragging');
-      if(e.dataTransfer){ e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', c.getAttribute('data-card')); } catch(x){ /* some browsers refuse */ } }
+    function nextSpan(w){ var i = SPANS.indexOf(w); return SPANS[(i + 1) % SPANS.length]; }
+    function snapSpan(px, col, gap){   // the allowed span whose width is nearest to px
+      var best = SPANS[0], bestD = Infinity;
+      SPANS.forEach(function(n){ var d = Math.abs(n * col + (n - 1) * gap - px); if(d < bestD){ bestD = d; best = n; } });
+      return best;
+    }
+    function snapHeight(px, b){ return Math.min(H_MAX, Math.max(b.min, Math.round(px / H_STEP) * H_STEP)); }
+    function nextHeight(h, b){
+      var next = null;
+      for(var i = 0; i < H_STEPS.length; i++){ if(!h || H_STEPS[i] > h){ next = H_STEPS[i]; break; } }
+      return next ? Math.max(next, b.min) : null;
+    }
+    // The least a card may be made: its head plus 120px of body, or its whole own height if that is less, so nothing is ever cut to nothing (its body scrolls instead).
+    function heightBounds(c){
+      var r = c.getBoundingClientRect(), body = c.querySelector(':scope > .kal-card-body');
+      if(!body){ return { min: Math.ceil(r.height), natural: Math.ceil(r.height) }; }
+      var cs = window.getComputedStyle(c), head = body.getBoundingClientRect().top - r.top;
+      var natural = Math.ceil(head + body.scrollHeight + (parseFloat(cs.paddingBottom) || 0) + (parseFloat(cs.borderBottomWidth) || 0));
+      return { min: Math.min(natural, Math.ceil(head + H_MIN_BODY)), natural: natural };
+    }
+    function phoneWidth(){ return !!(window.matchMedia && window.matchMedia('(max-width: 900px)').matches); }
+    // Resizing by the corner: the outline shows the snapped size while the corner is held and the size is applied on release (one Undo step). The width snaps to an allowed span;
+    // the height snaps to 40px and only changes once the pointer has moved up or down by half a step, so widening a card does not also fix its height.
+    var size = null;
+    function sizeLabel(){ return SPAN_TEXT[size.span] + ', ' + (size.h ? size.h + 'px' : 'auto'); }
+    function sizeTrack(){
+      var r = size.card.getBoundingClientRect(), g = size.ghost;
+      g.style.left = r.left + 'px'; g.style.top = r.top + 'px';
+      g.style.width = (size.span * size.col + (size.span - 1) * size.gap) + 'px';
+      g.style.height = (size.h || size.h0Px) + 'px';
+      g.firstChild.textContent = sizeLabel();
+    }
+    function sizeMove(e){
+      if(!size){ return; }
+      var dx = e.clientX - size.x0, dy = e.clientY - size.y0;
+      if(Math.abs(dx) + Math.abs(dy) > 3){ size.moved = true; }
+      size.span = snapSpan(size.w0 + dx, size.col, size.gap);
+      if(!NO_HEIGHT[size.k] && size.card.getAttribute('data-folded') !== 'true' && (size.hTouched || Math.abs(dy) >= H_STEP / 2)){ size.hTouched = true; size.h = snapHeight(size.h0Px + dy, size.bounds); }
+      sizeTrack();
+    }
+    function sizeEnd(e){
+      var d = size;
+      size = null;
+      ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window.removeEventListener(n, n === 'pointermove' ? sizeMove : sizeEnd); });
+      if(!d){ return; }
+      d.ghost.remove(); d.card.classList.remove('kal-sizing');
+      if(e === true || !d.moved || !editing){ return; }   // Escape, a click without a move (part of a double click) or the end of editing: nothing changes
+      var k = d.k, w = d.span, h = d.h;
+      change(function(){ layout.width[k] = w; if(d.hTouched){ if(h){ layout.height[k] = h; } else { delete layout.height[k]; } } }, function(){ var hh = heightOf(k); return LABELS[k] + ' is now ' + SPAN_WORDS[widthOf(k)] + (NO_HEIGHT[k] ? '.' : ', ' + (hh ? hh + ' pixels tall.' : 'its own height.')); });
+    }
+    function sizeStart(e, c){
+      var k = c.getAttribute('data-card'), r = c.getBoundingClientRect(), gs = window.getComputedStyle(grid);
+      var gap = parseFloat(gs.columnGap) || 18, col = (grid.getBoundingClientRect().width - 11 * gap) / 12;
+      if(c.__flip){ c.__flip.cancel(); c.__flip = null; }
+      var ghost = document.createElement('div'); ghost.className = 'kal-resize-ghost'; ghost.appendChild(document.createElement('span'));
+      document.body.appendChild(ghost);
+      size = { card: c, k: k, x0: e.clientX, y0: e.clientY, w0: r.width, h0Px: Math.round(r.height), h: heightOf(k), span: widthOf(k), col: col, gap: gap, bounds: heightBounds(c), ghost: ghost, moved: false, hTouched: false };
+      c.classList.add('kal-sizing');
+      sizeTrack();
+      ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window.addEventListener(n, n === 'pointermove' ? sizeMove : sizeEnd); });
+      e.preventDefault();
+    }
+    // A double click on the corner gives the card back its own height (Auto, the default).
+    grid.addEventListener('dblclick', function(e){
+      var t = e.target && e.target.closest ? e.target.closest('.kal-resize') : null;
+      if(!t || !editing){ return; }
+      var c = t.closest('#kalTabBot > [data-card]'), k = c && c.getAttribute('data-card');
+      if(!k || NO_HEIGHT[k] || !layout.height[k]){ return; }
+      change(function(){ delete layout.height[k]; }, LABELS[k] + ' is now its own height.');
     });
-    // The card the pointer is over, or the nearest one when it is in a gap, so a drag does not stall between cards.
-    function cardNear(x, y){
+    // Dragging with pointer events (mouse, pen and touch; the native drag and drop it replaces did not work on phones). A mouse drag starts after a few pixels; a touch drag starts after a short hold
+    // (so a swipe still scrolls the page) or at once on the grip. The card follows the pointer, and the order changes only when the pointer crosses the middle of another card, never on every pixel.
+    var HOLD_MS = 280, SLOP = 8;
+    function cardAt(x, y){
       var best = null, bestD = Infinity;
-      visibleCards(dragging.parentNode).forEach(function(c){
-        if(c === dragging){ return; }
+      visibleCards().forEach(function(c){
+        if(c === drag.card){ return; }
         var r = c.getBoundingClientRect();
         var dx = x < r.left ? r.left - x : (x > r.right ? x - r.right : 0), dy = y < r.top ? r.top - y : (y > r.bottom ? y - r.bottom : 0);
         var d = dx * dx + dy * dy;
@@ -4086,22 +4418,89 @@ kalshiStatusTick();
       });
       return best;
     }
-    grid.addEventListener('dragenter', function(e){ if(dragging){ e.preventDefault(); } });
-    grid.addEventListener('dragover', function(e){
-      if(!dragging){ return; }
-      e.preventDefault();   // every dragover must accept the drop, or some browsers stop reordering part way
-      if(e.dataTransfer){ e.dataTransfer.dropEffect = 'move'; }
-      var over = cardNear(e.clientX, e.clientY);
-      if(!over){ return; }
-      var r = over.getBoundingClientRect();
-      var after = e.clientY > r.top + r.height / 2;   // the cards of a column are stacked, so above or below the middle
-      var want = after ? over.nextSibling : over;
-      if(want !== dragging && dragging.nextSibling !== want){ dragging.parentNode.insertBefore(dragging, want); flow(); }
+    function follow(){
+      var c = drag.card, r = c.getBoundingClientRect(), slotL = r.left - drag.tx, slotT = r.top - drag.ty;
+      drag.tx = drag.x - drag.ox - slotL; drag.ty = drag.y - drag.oy - slotT;
+      c.style.transform = 'translate(' + drag.tx + 'px,' + drag.ty + 'px)';
+      return { left: slotL, top: slotT };
+    }
+    function frame(){
+      if(!drag || !drag.active){ return; }
+      var edge = 70, h = window.innerHeight;
+      if(drag.y < edge){ window.scrollBy(0, -Math.ceil((edge - drag.y) / 5)); } else if(drag.y > h - edge){ window.scrollBy(0, Math.ceil((drag.y - (h - edge)) / 5)); }
+      var slot = follow();
+      if(Date.now() - drag.swapAt > FLIP_MS){
+        var over = cardAt(drag.x, drag.y);
+        if(over){
+          var cards = visibleCards(), i = cards.indexOf(drag.card), j = cards.indexOf(over), r = over.getBoundingClientRect();
+          var sameRow = Math.abs(r.top - slot.top) < 24;
+          var past = sameRow ? (j < i ? drag.x < r.left + r.width / 2 : drag.x > r.left + r.width / 2) : (j < i ? drag.y < r.top + r.height / 2 : drag.y > r.top + r.height / 2);
+          if(past){
+            flip(function(){ grid.insertBefore(drag.card, j < i ? over : over.nextSibling); }, drag.card);
+            drag.swapAt = Date.now(); follow();
+          }
+        }
+      }
+      drag.raf = requestAnimationFrame(frame);
+    }
+    function beginDrag(){
+      var c = drag.card;
+      if(c.__flip){ c.__flip.cancel(); c.__flip = null; }
+      var r = c.getBoundingClientRect();
+      drag.active = true; drag.ox = drag.x - r.left; drag.oy = drag.y - r.top; drag.tx = 0; drag.ty = 0; drag.swapAt = 0;
+      c.classList.add('kal-dragging'); grid.classList.add('kal-drag-on');
+      drag.raf = requestAnimationFrame(frame);
+    }
+    function endDrag(revert){
+      var d = drag;
+      drag = null;
+      listen(false);
+      clearTimeout(d.timer);
+      if(!d.active){ return; }
+      cancelAnimationFrame(d.raf);
+      var c = d.card, from = c.getBoundingClientRect();
+      c.style.transition = 'none'; c.style.transform = ''; c.classList.remove('kal-dragging'); grid.classList.remove('kal-drag-on');
+      void c.offsetWidth; c.style.transition = '';   // the card's hover transition must not replay the drop as a second, slower slide
+      if(revert){ flip(function(){ layout = d.prev; apply(); }); return; }
+      layout.order = currentOrder();
+      if(!reducedMotion() && typeof c.animate === 'function'){   // the card settles into its new place instead of snapping there
+        var to = c.getBoundingClientRect();
+        c.__flip = c.animate([{ transform: 'translate(' + (from.left - to.left) + 'px,' + (from.top - to.top) + 'px)' }, { transform: 'none' }], { duration: FLIP_MS, easing: 'cubic-bezier(.2,.8,.3,1)' });
+      }
+      if(!same(d.prev, layout)){ undo.push(d.prev); updateUndo(); announce(placeText(c.getAttribute('data-card'))); }
+    }
+    grid.addEventListener('pointerdown', function(e){
+      if(!editing || drag || size || (e.pointerType === 'mouse' && e.button !== 0)){ return; }
+      var t = e.target, corner = t.closest && t.closest('.kal-resize');
+      if(corner){ if(!phoneWidth()){ sizeStart(e, corner.closest('#kalTabBot > [data-card]')); } return; }   // the corner resizes at once, for touch too (no hold), and never starts a move
+      var onGrip = !!(t.closest && t.closest('.kal-grip'));
+      if(!onGrip && t.closest && t.closest('button, a, input, select, textarea, summary, label, details, [contenteditable]')){ return; }   // a control inside a card still works while editing
+      var c = t.closest && t.closest('#kalTabBot > [data-card]');
+      if(!c){ return; }
+      drag = { card: c, x0: e.clientX, y0: e.clientY, x: e.clientX, y: e.clientY, active: false, touch: e.pointerType !== 'mouse', prev: snapshot(), timer: 0 };
+      listen(true);
+      if(drag.touch){
+        if(onGrip){ beginDrag(); } else { drag.timer = setTimeout(function(){ if(drag && !drag.active){ beginDrag(); } }, HOLD_MS); }
+      }
+      if(e.pointerType === 'mouse'){ e.preventDefault(); }   // no text selection while a mouse drag starts
     });
-    grid.addEventListener('drop', function(e){ if(dragging){ e.preventDefault(); } });
-    grid.addEventListener('dragend', function(){
-      if(!dragging){ return; }
-      dragging.classList.remove('kal-dragging'); dragging = null; commitOrder();
+    // Move, up and cancel are listened to only while a card is held (added on pointerdown, removed when it ends), so the page has no pointer listener of its own the rest of the time.
+    function onMove(e){
+      if(!drag){ return; }
+      drag.x = e.clientX; drag.y = e.clientY;
+      if(drag.active){ return; }
+      var moved = Math.abs(drag.x - drag.x0) + Math.abs(drag.y - drag.y0);
+      if(!drag.touch && moved > 5){ beginDrag(); }
+      else if(drag.touch && moved > SLOP){ endDrag(false); }   // the finger moved before the hold: it is a scroll, not a drag
+    }
+    function onUp(){ if(drag){ endDrag(false); } }
+    function listen(on){ ['pointermove', 'pointerup', 'pointercancel'].forEach(function(n){ window[on ? 'addEventListener' : 'removeEventListener'](n, n === 'pointermove' ? onMove : onUp); }); }
+    // Once a touch drag has begun the page must not scroll under the finger (it scrolls by itself near the top and bottom edges instead). On the grid, and registered up front, because a browser decides whether a touch may block scrolling when the touch starts.
+    grid.addEventListener('touchmove', function(e){ if(((drag && drag.active) || size) && e.cancelable){ e.preventDefault(); } }, { passive: false });
+    grid.addEventListener('contextmenu', function(e){ if(editing && drag){ e.preventDefault(); } });   // a long press must not open the phone's menu
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && drag && drag.active){ endDrag(true); announce('Move cancelled.'); }
+      if(e.key === 'Escape' && size){ sizeEnd(true); announce('Resize cancelled.'); }
     });
     // The account's saved layout arrives from the shared user-settings snapshot; it is applied without writing it straight back.
     window.__kalBotLayout = {
@@ -4109,27 +4508,26 @@ kalshiStatusTick();
       set: function(l){
         if(!l || typeof l !== 'object'){ return; }
         // The account re-sends its saved layout on every update to the user document, which is constant. Apply it only when it is new, and
-        // never while a drag is in progress or just after our own change (the older copy would put the card straight back).
+        // never while editing or dragging or just after our own change (the older copy would put the card straight back).
         var key = JSON.stringify(l);
         if(key === lastRemote){ return; }
-        if(dragging || Date.now() - localDirtyAt < 4000){ return; }
+        if(editing || drag || size || Date.now() - localDirtyAt < 4000){ return; }
         lastRemote = key;
-        var next = { cols: 'auto', hidden: {}, order: null };
-        if(['auto', '1', '2', '3', '4'].indexOf(String(l.cols)) > -1){ next.cols = String(l.cols); }
-        OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
-        if(Array.isArray(l.order)){ next.order = l.order.filter(function(k){ return typeof k === 'string'; }); }
+        var next = normalize(l);
         layout = next; apply(); save(true);
-        if(unlock.checked){ setUnlocked(true); }
       }
     };
     list.addEventListener('change', function(e){
       var k = e.target && e.target.getAttribute('data-card-toggle');
       if(!k){ return; }
-      if(e.target.checked){ delete layout.hidden[k]; } else { layout.hidden[k] = true; }
-      apply(); save();
+      var on = e.target.checked;
+      change(function(){ if(on){ delete layout.hidden[k]; } else { layout.hidden[k] = true; } }, LABELS[k] + (on ? ' shown.' : ' hidden.'));
     });
-    document.getElementById('kalLayoutReset').addEventListener('click', function(){ layout = { cols: 'auto', hidden: {}, order: null }; apply(); save(); if(unlock.checked){ setUnlocked(true); } });
+    function reset(){ change(function(){ layout = fresh(); }, 'Layout reset to the default.'); }
+    document.getElementById('kalEditReset').addEventListener('click', reset);
+    document.getElementById('kalLayoutReset').addEventListener('click', reset);
     apply();
+    if(migrated){ save(true); }   // an old copy is rewritten in the new shape here only; the account copy is rewritten on the next change
   })();
 
   // Starting the bot asks twice: the first click only asks, the confirm click is the only one that starts it.
@@ -4662,7 +5060,7 @@ kalshiStatusTick();
   }
 
   // ---------- The market tape (strip on every page, index cards, headlines, "as of") ----------
-  // Prices here come from shared/marketTape, written every 5 minutes around the clock by a keyless function. The page makes no market-data call of its own.
+  // Prices here come from shared/marketTape, written every 15 minutes around the clock by a keyless function. The page makes no market-data call of its own.
   var TAPE_ITEMS = [
     { sym:'^GSPC', name:'S&P 500', kind:'index' }, { sym:'^NDX', name:'Nasdaq 100', kind:'index' }, { sym:'^DJI', name:'Dow', kind:'index' },
     { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'^TNX', name:'10Y yield', kind:'yield' }, { sym:'TLT', name:'Long bonds', kind:'etf' },
@@ -4708,7 +5106,7 @@ kalshiStatusTick();
   }
 
   // ---------- The Brief (the owner chose concept B, Oct 23, 2026): the week's scheduled events with a countdown, three pairs of small charts (crypto, equities, commodities) and the news ----------
-  // Everything comes from shared/marketTape (written every 5 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
+  // Everything comes from shared/marketTape (written every 15 minutes by the keyless marketTapeTick); a symbol or the calendar that has not arrived is shown as missing, never as a made-up number.
   var BRIEF_CHART_GROUPS = [
     { title: 'Crypto', items: [{ sym: 'BTC-USD', name: 'Bitcoin' }, { sym: 'ETH-USD', name: 'Ethereum' }] },
     { title: 'Equities', items: [{ sym: 'SPY', name: 'S&P 500 (SPY)' }, { sym: 'QQQ', name: 'Nasdaq 100 (QQQ)' }] },

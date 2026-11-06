@@ -1,0 +1,30 @@
+{
+  "_what": "RECREF watchlist (2026-11-03, research only). Each series was chosen by rule: it had open markets closing within 7 days on 2026-11-03 (found by listing every open non-multivariate market, 38,808 of them), it settles on a public number, and that number's source can be read keyless from a GitHub runner. The script names no ticker; adding a series is an edit here.",
+  "default_window_hours": 168,
+  "refs": [
+    {"id": "rt_page", "adapter": "rt", "per_event": {"title_regex": "^(.*?) Rotten Tomatoes score", "sep": "_", "url": "https://www.rottentomatoes.com/m/{slug}"}, "max_targets": 8},
+    {"id": "mc_page", "adapter": "mc", "per_event": {"title_regex": "^(.*?) Metacritic score", "sep": "-", "url": "https://www.metacritic.com/game/{slug}/"}, "max_targets": 6},
+    {"id": "xt_trump_day", "adapter": "xtracker", "params": {"handle": "realDonaldTrump"}, "per_close": {"hours": 24}, "max_targets": 3},
+    {"id": "kworb_us_daily", "adapter": "kworb", "params": {"url": "https://kworb.net/spotify/country/us_daily.html", "top": 40}},
+    {"id": "kworb_us_weekly", "adapter": "kworb", "params": {"url": "https://kworb.net/spotify/country/us_weekly.html", "top": 40}},
+    {"id": "billboard_hot100", "adapter": "billboard", "params": {"url": "https://www.billboard.com/charts/hot-100/", "top": 25}},
+    {"id": "billboard_200", "adapter": "billboard", "params": {"url": "https://www.billboard.com/charts/billboard-200/", "top": 25}},
+    {"id": "steam_top_sellers", "adapter": "steam", "params": {"url": "https://store.steampowered.com/search/results/?filter=topsellers&json=1&cc=us&count=25", "top": 25}}
+  ],
+  "standalone_refs": [
+    {"id": "yahoo_1m", "adapter": "yahoo1m", "params": {"symbols": ["EURUSD=X", "GBPUSD=X", "JPY=X", "AUDUSD=X", "CAD=X", "CL=F", "NG=F", "SI=F"], "range": "1d", "backfill_range": "7d"},
+     "_what": "RECBUILD1 (2026-11-04, the owner approved collector 2): Yahoo's public 1 minute chart for EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD, WTI, natural gas and silver futures, no Kalshi series attached. Yahoo keeps only about 7 days of 1 minute bars, so the first run backfills 7d and later runs add only bars newer than the high-water mark in ref/yahoo1m_state.json (rows go to ref/bars/<date>/<poll second>.csv.gz with the refvals columns: rank = unix second, name = symbol, value = close, value2 = volume, note = o/h/l). Fed to FXREF1, HRLYFX1 and COMDAY1 once registered."}
+  ],
+  "series": [
+    {"series": "KXRT", "family": "rotten_tomatoes", "refs": ["rt_page"], "rule_source": "Tomatometer score of the film's Rotten Tomatoes page at 10:00 AM ET on the close day; threshold markets above N. Closes in under 7 days."},
+    {"series": "KXMC", "family": "metacritic", "refs": ["mc_page"], "rule_source": "Metascore of the game's Metacritic page seven days after release at 10:00 AM ET; threshold markets."},
+    {"series": "KXTRUTHSOCIALD", "family": "post_count", "refs": ["xt_trump_day"], "rule_source": "Number of Donald Trump Truth Social posts on one calendar day (ET); count brackets. Reference: Polymarket xtracker posts for the 24 hours before the close."},
+    {"series": "KXTOPSONG", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Which song is #1 on the Billboard Hot 100 for the chart dated the coming Saturday. Billboard's current chart is the last week; kworb's Spotify US weekly and daily lists are the in-week streams."},
+    {"series": "KXBILLBOARDRUNNERUPSONG", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Which song is #2 on the Billboard Hot 100 for the coming chart."},
+    {"series": "KXBBSINGLE", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Rank bucket (for example No. 7 to 10) of one song on the coming Billboard Hot 100."},
+    {"series": "KXTOPALBUM", "family": "billboard_200", "refs": ["billboard_200"], "rule_source": "Which album is #1 on the Billboard 200 for the coming chart. Billboard's current chart is the last week; there is no keyless in-week album source."},
+    {"series": "KXBILLBOARDRUNNERUPALBUM", "family": "billboard_200", "refs": ["billboard_200"], "rule_source": "Which album is #2 on the Billboard 200 for the coming chart."},
+    {"series": "KXSTEAMTOPSELLER", "family": "steam_chart", "refs": ["steam_top_sellers"], "rule_source": "Rank on Steam's USA Weekly Top Sellers (top 100 by revenue) for the week. The reference is the store's current top sellers list, a proxy, not the same list."}
+  ],
+  "_not_included": "Open on 2026-11-03 but no keyless reference found: KXYTVIEWSW (YouTube Charts artist daily views, 244 markets), KXYTTOPSONGW and KXYTTOPSONGGW (YouTube Charts weekly top songs), KXALBUMSTREAMS (album streams in a tracking week), the Carbon Arc index series (KXSTREAMARRAY, KXSTREAMINGADS, KXCARTAPP). Spotify daily and weekly chart series (KXSPOTIFYD and the others), App Store rank (KXAPPRANK*), Netflix, and weekly post-count series (KXPOTUSTWEETS, KXELONTWEETS) had no open market on 2026-11-03; add them here when they list."
+}

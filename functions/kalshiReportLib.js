@@ -69,6 +69,8 @@ function context(o) {
     orderedCount: num(o.count), price: num(o.price), limit: num(o.limit), seenBid: num(seen.bid), seenAsk: num(seen.ask), bidSize: num(seen.bidSize), askSize: num(seen.askSize),
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
+    // Kalshi's own status for the order (Nov 4, 2026, the refinement chat's no-fill table; logged on the order since #712): a short word such as "canceled" or "executed", letters and underscores only, null when not logged.
+    kalshiStatus: typeof o.kalshiStatus === "string" && /^[a-z_]{1,24}$/i.test(o.kalshiStatus) ? o.kalshiStatus.toLowerCase() : null,
     ...timing(o),
   };
 }
@@ -122,6 +124,24 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
   return out;
 }
 
+// Second-slot skip reasons (Nov 5, 2026, the owner: "Save skip reasons"): the last SKIP_DAYS of the slot's skip documents, as a count per reason code and one row per document. The document holds
+// strategy, ticker, a short fixed code, a few numbers and the minute; the row keeps those (numbers only in detail, a code that is not a short plain word is dropped) and never the document id.
+const SKIP_DAYS = 7;
+const MAX_SKIP_ROWS = 500;
+function skipSection(docs, nowMs) {
+  const since = nowMs - SKIP_DAYS * 86400000;
+  const word = (v, n) => (typeof v === "string" && /^[A-Za-z0-9_]{1,40}$/.test(v) ? v.slice(0, n) : null);
+  const rows = (Array.isArray(docs) ? docs : []).filter((d) => d && Number(d.atMs) >= since).map((d) => {
+    const detail = {};
+    if (d.detail && typeof d.detail === "object") for (const [k, v] of Object.entries(d.detail)) if (/^[A-Za-z]{1,20}$/.test(k) && typeof v === "number" && Number.isFinite(v)) detail[k] = v;
+    return { at: new Date(Number(d.atMs)).toISOString(), atMs: Number(d.atMs), strategy: word(d.strategy, 40), ticker: typeof d.ticker === "string" && /^[A-Z0-9-]{1,60}$/.test(d.ticker) ? d.ticker : null,
+      reason: word(d.reason, 40) || "unknown", secondsLeft: num(d.secondsLeft), detail: Object.keys(detail).length ? detail : null };
+  }).sort((a, b) => a.atMs - b.atMs);
+  const byReason = {};
+  rows.forEach((r) => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
+  return { days: SKIP_DAYS, count: rows.length, byReason: Object.fromEntries(Object.keys(byReason).sort().map((k) => [k, byReason[k]])), rows: rows.slice(-MAX_SKIP_ROWS) };
+}
+
 // Constant-time compare of two secrets of any length (hash both first so the lengths match).
 function sameToken(a, b) {
   const x = crypto.createHash("sha256").update(String(a)).digest(), y = crypto.createHash("sha256").update(String(b)).digest();
@@ -150,8 +170,12 @@ function makeReportHandler(deps) {
       // Which commit each function was deployed from (the deploy stamp). Optional, read only; a failure leaves the field out.
       let deploys;
       if (typeof deps.readDeploys === "function") { try { deploys = deployStampLib.summarize(await deps.readDeploys()); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      // The second slot's skip reasons, last SKIP_DAYS whatever `hours` says. Optional, read only; a failure leaves the field out and never blanks the report.
+      let skips;
+      if (typeof deps.readSkips === "function") { try { skips = skipSection(await deps.readSkips(now - SKIP_DAYS * 86400000), now); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
       if (deploys !== undefined) report.deploys = deploys;
+      if (skips !== undefined) report.skips = skips;
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
@@ -161,4 +185,4 @@ function makeReportHandler(deps) {
   };
 }
 
-module.exports = { buildReport, makeReportHandler, sameToken, MAX_HOURS, MAX_ORDER_ROWS };
+module.exports = { buildReport, makeReportHandler, sameToken, skipSection, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };

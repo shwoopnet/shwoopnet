@@ -38,7 +38,9 @@ gates.SF3 = () => {
   // The one deliberate exception: the sentence about the second strategy, which trades Bitcoin through the slot (not through L1, where Bitcoin stays paused). It must name only the registered strategy's market.
   const slotSpan = (menu.match(/<span id="kalRulesSlot">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(/Bitcoin only/.test(slotSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(slotSpan), 'the slot sentence names Bitcoin and nothing else');
-  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, ''));
+  const flowSpan = (menu.match(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(!flowSpan || (/Bitcoin only/.test(flowSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(flowSpan)), 'the FLOW1 sentence names Bitcoin and nothing else (Nov 4, 2026)');
+  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, ''));
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(rest), 'the Account card and its rules never name ' + n + ' as anything but paused'));
   const open = text((html.match(/id="kalL1Confirm"[\s\S]*?<\/span>/) || [''])[0]);
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(open), 'the Start confirmation does not mention paused ' + n));
@@ -53,6 +55,15 @@ gates.SF4 = () => {
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(looks[0].replace(/Bitcoin/g, '')) || n === 'Bitcoin', 'the next look does not name paused ' + n));
   assert.ok(/name: 'Open interest jump', what: function\(\)\{ return 'Bitcoin,/.test(looks[0]), 'the open interest jump names Bitcoin (the second strategy trades it through the slot)');
   assert.ok(!/10 minute look/.test(looks[0]) || live.EARLY_PROBE_SERIES.some((s) => !live.PAUSED_SERIES.includes(s)), 'no 10 minute look unless a market with one can trade');
+};
+gates.SF9 = () => {
+  // Nov 4, 2026: the Bot status card's copy of EVENT830's release calendar must equal the bot's (SLOT_CALENDARS.EVENT830), so the countdown never names a window the bot will not trade, or misses one it will.
+  const slot = require('../functions/kalshiSlotLib.js');
+  const looks = /var KAL_LOOKS = \[[\s\S]*?\n  \];\n/.exec(html)[0];
+  const closes = [...(/closes: \[([^\]]+)\]/.exec(looks) || assert.fail('the release look has its dates'))[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
+  assert.deepStrictEqual(closes, slot.SLOT_CALENDARS.EVENT830.map((r) => r.closeUtc), 'the page lists exactly the release windows in the bot\'s code');
+  const kinds = [...(/kinds: \[([^\]]+)\]/.exec(looks) || assert.fail('the release look has its kinds'))[1].matchAll(/'([^']+)'/g)];
+  assert.strictEqual(kinds.length, closes.length, 'one release name per date');
 };
 gates.SF5 = () => {
   const watch = /var KAL_WATCH = (\[[\s\S]*?\]);\s*\n/.exec(html);

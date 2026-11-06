@@ -171,9 +171,11 @@ gates.G24 = () => {
   assert.ok(optional, 'optional card list not found');
   assert.ok(!/'account'|'session'/.test(optional[1]), 'the account and session cards are not in the hideable list');
   assert.ok(/data-card="account"/.test(html) && !/data-card="session"/.test(html), 'the account card holds the bot controls and there is no separate session card');
-  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
   assert.ok(/try \{\s*var saved = JSON\.parse\(localStorage\.getItem\(KEY\)/.test(iife) && /try \{ localStorage\.setItem\(KEY/.test(iife), 'storage reads and writes are guarded');
-  assert.ok(/\['auto', '1', '2', '3', '4'\]\.indexOf\(String\(saved\.cols\)\)/.test(iife), 'a corrupt saved value cannot set a bad column count');
+  // Nov 5, 2026: the dead column count is gone; a corrupt saved copy is rebuilt from known names and values (normalize), so it cannot set a bad width or hide the account card.
+  // Nov 5, 2026 (resizable cards): a width is a span of 12 columns, and only the five allowed spans get through (old 'half' and 'full' are read as 6 and 12).
+  assert.ok(/layout = normalize\(saved\)/.test(iife) && /if\(SPANS\.indexOf\(w\) > -1\)\{ next\.width\[k\] = w; \}/.test(iife), 'a corrupt saved value cannot set a width that does not exist');
 };
 
 // On a phone the page must not scroll sideways: the live books grid may never ask for more than the card is wide, and the Layout menu's

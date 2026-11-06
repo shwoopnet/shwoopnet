@@ -16,7 +16,11 @@ const bot = require("./kalshiSignalLib");
 
 // ---- The master switch and the hard caps. Changing any of these is a reviewed code edit, never a stored value. ----------------------------
 const SLOT_ENABLED = true;                            // phase A: off. Turning it on is its own reviewed pull request, after the wiring phases.
-const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"]);
+// EVENT830's eight markets (Nov 3, 2026) are on the list too, but RESERVED: only the strategy named in SLOT_SERIES_RESERVED may trade them (the validator refuses any other id), so admitting them for the release probe does not open them to anything else.
+// None of them is an L1 market, so a position there can never sit against an L1 position.
+const EVENT830_SERIES = Object.freeze(["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]);
+const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M"].concat(EVENT830_SERIES));
+const SLOT_SERIES_RESERVED = Object.freeze(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}));
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
 const SLOT_MAX_SCALE_STEPS = 3;
@@ -29,6 +33,17 @@ function slotCaps(sizingBase) {
   const out = {};
   for (const k of Object.keys(SLOT_CAP_FRACTIONS)) out[k] = Math.min(SLOT_CAP_FRACTIONS[k] * base, SLOT_CAP_CEILINGS[k]);
   return out;
+}
+// OICORE limit 1c above the touch (Nov 3, 2026, the owner: "build 1", on the refinement chat's S-LIM1 read: 6 of 24 OICORE limits went unfilled because the ask moved up 1c within
+// seconds, and 3 of those 6 won). The order still fills at the best ask when the ask has not moved (Kalshi gives price improvement), so this only adds fills that would have been missed,
+// at most 1c a contract worse. Never past the strategy's own priceMax. A reviewed edit; at most 2c for any strategy.
+const SLOT_LIMIT_SLIP = Object.freeze({ OICORE: 0.01 });
+const SLOT_LIMIT_SLIP_MAX = 0.02;
+function slotLimitFor(strategy, sidePrice) {
+  const raw = SLOT_LIMIT_SLIP[strategy && strategy.id];
+  const slip = isNum(raw) && raw > 0 && raw <= SLOT_LIMIT_SLIP_MAX + 1e-9 ? raw : 0;
+  if (!isNum(sidePrice) || !strategy || !strategy.entry) return sidePrice;
+  return Math.round(Math.min(sidePrice + slip, Math.max(sidePrice, strategy.entry.priceMax)) * 100) / 100;
 }
 // ---- The OICORE size ladder (Nov 3, 2026, the owner: "yes build it", on the refinement chat's scaling spec). ----------------------------------------------
 // A strategy listed here may send MORE than its registry contractsPerOrder, one step at a time, but only as its OWN settled record earns it. The step is replayed from the
@@ -61,9 +76,49 @@ const SLOT_EXIT_LEFT_FLOOR_SEC = 45;                   // every exit is before s
 const SLOT_OPEN_STATUSES = Object.freeze(["filled", "sending", "unknown"]);   // the statuses runL1Tick counts as money in a window; ANY order with fills counts too, whatever its status
 const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at most this share of the shared window cap, so L1 (gold first) is never starved of its room
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
-const SLOT_LAST_REVIEWED_ON = "2026-10-30";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
-const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
+const SLOT_LAST_REVIEWED_ON = "2026-11-05";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
+const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
+
+// ---- Release calendars (Nov 3, 2026, EVENT830). A strategy whose entry names a calendar may enter ONLY the window that closes at one of these instants. Frozen in code, append only by a reviewed edit
+// (kalshi-scalper/README.md#SLOT-EVENT830): nothing stored, requested or typed on the page can add a date. Each entry carries the window two ways, so both must agree before an order: the UTC close
+// Kalshi reports for the market, and the ticker's own window code (Eastern time, YYMMMDDHHMM: 8:30 ET is "0830"). Every row is a US 8:30 AM ET data release; Eastern standard time applies from
+// Nov 1, 2026 to Mar 13, 2027, so 8:30 ET is 13:30 UTC (7:30 AM Central). Nov and Dec 2026 only, from workers/EVENT830_CALENDAR.md on the research branch (BEA, Census and the BLS schedule; weekly jobless
+// claims by the Thursday rule). Left out on purpose: the holiday-week claims of Nov 26, Dec 24 and Dec 31 (day unconfirmed), and every date after Dec 31, 2026 (no date is guessed).
+const calRow = (day, code, kind) => Object.freeze({ closeUtc: day + "T13:30:00Z", window: code, kind });
+const SLOT_CALENDARS = Object.freeze({
+  EVENT830: Object.freeze([
+    calRow("2026-11-05", "26NOV050830", "CLAIMS"), calRow("2026-11-06", "26NOV060830", "JOBS"), calRow("2026-11-10", "26NOV100830", "CPI"),
+    calRow("2026-11-12", "26NOV120830", "CLAIMS"), calRow("2026-11-13", "26NOV130830", "PPI"), calRow("2026-11-17", "26NOV170830", "RETAIL"),
+    calRow("2026-11-19", "26NOV190830", "CLAIMS"), calRow("2026-11-25", "26NOV250830", "GDP_PCE"),
+    calRow("2026-12-03", "26DEC030830", "CLAIMS"), calRow("2026-12-04", "26DEC040830", "JOBS"), calRow("2026-12-10", "26DEC100830", "CPI_CLAIMS"),
+    calRow("2026-12-15", "26DEC150830", "PPI"), calRow("2026-12-16", "26DEC160830", "RETAIL"), calRow("2026-12-17", "26DEC170830", "CLAIMS"),
+    calRow("2026-12-23", "26DEC230830", "GDP_PCE"),
+  ]),
+});
+// The calendar row a market belongs to, or null. Both the close Kalshi reports (milliseconds) and the ticker's window code must match the SAME row, so a wrong close time or a mislabelled ticker is refused.
+function slotCalendarRow(strategy, ticker, closeMs) {
+  const name = strategy && strategy.entry ? strategy.entry.calendar : undefined;
+  if (name === undefined) return null;
+  const rows = Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, name) ? SLOT_CALENDARS[name] : null;
+  if (!rows || !isNum(closeMs)) return null;
+  const wk = windowKey(String(ticker || ""));
+  return rows.find((r) => Date.parse(r.closeUtc) === closeMs && r.window === wk) || null;
+}
+// The series whose quotes the minute function must read NOW for a calendar strategy, because one of its listed windows is about to enter its entry time. Empty on every other minute, so the bot reads
+// nothing extra on a day with no release (and on a release day only around the one minute that can enter). Pure: the caller passes the clock and the strategies.
+const SLOT_CALENDAR_LEAD_MS = 30 * 1000;               // read from 30 seconds before the entry window opens, so a function that starts a little early still has the quotes
+function slotCalendarSeriesDue(strategies, now) {
+  const out = [];
+  if (!isNum(now)) return out;
+  for (const s of strategies || []) {
+    if (!s || !s.entry || s.entry.calendar === undefined) continue;
+    const rows = Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, s.entry.calendar) ? SLOT_CALENDARS[s.entry.calendar] : [];
+    const due = rows.some((r) => { const c = Date.parse(r.closeUtc); return now >= c - s.entry.leftMaxSec * 1000 - SLOT_CALENDAR_LEAD_MS && now <= c - s.entry.leftMinSec * 1000; });
+    if (due) for (const x of s.series) if (!out.includes(x)) out.push(x);
+  }
+  return out;
+}
 
 // ---- The registry. EMPTY in phase A. An entry is admitted only by a reviewed edit of this array. -----------------------------------------
 // Shape of an entry (every field required, unknown fields rejected):
@@ -89,16 +144,35 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 18, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
+  // EVENT830 (Nov 3, 2026, a held, capped live probe; pre-registration kalshi-scalper/README.md#SLOT-EVENT830, research record workers/EVENT830_REGISTRATION.md). On a listed US 8:30 AM ET release day only
+  // (SLOT_CALENDARS.EVENT830), in the eight L1-free 15 minute markets above, in the window that CLOSES at the release: 3 to 2 minutes before the close, if the YES spread is 10c or less, buy the CHEAPER side
+  // when its price is 5c to 50c, hard limit 50c (no slip), 1 contract, held to settlement. BELOW the research bar: the slice was picked after its parent test failed, and the registration's own prior is that it
+  // loses (profit factor central 1.05). Kill rules as close as the validator can say them: any time after 40 settled fills the strategy is latched off if its net is below $0 (profit factor under 1.0; the
+  // registered line is 1.2, which the validator cannot express), and the streak kill is the most the validator allows (20; at a 19% win rate a 10 loss run is expected). Worst single loss $0.52.
+  Object.freeze({
+    id: "EVENT830", readme: "kalshi-scalper/README.md#SLOT-EVENT830", series: EVENT830_SERIES,
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, maxSpread: 0.1, calendar: "EVENT830" }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 1,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 40, net: 0 }) }),
+    forwardReadDate: "2026-12-07", reviewedAt: "2026-11-05",
+  }),
+  // FLOW1 (seller-flow probe, live Nov 4, 2026) was REMOVED the same day after the research session's FLOW1 history test (2,568 windows, low-flow PF 1.13 to 1.23, low minus high -3.6c,
+  // p 0.49) and the refinement chat's second out-of-sample block both found no reliable edge. The flowMax entry field and flowFromTrades stay in code; a re-admission is a reviewed edit.
 ]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
 // Optional (Oct 30, 2026, the open interest core): the open interest on the market must have risen by at least this many contracts over the 3 minutes to the signal candle, or no order. Absent means no such condition.
 const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
+// Optional (Nov 3, 2026, EVENT830): maxSpread, the widest YES spread (ask minus bid) at which an order may go; calendar, the name of a frozen list in SLOT_CALENDARS (it must be the strategy's own id).
+const ENTRY_KEYS_CAL = ENTRY_KEYS.concat(["maxSpread", "calendar"]);
+// Optional (Nov 4, 2026, FLOW1): taker flow on the side bought over the 3 minutes before the look must be at or below this (net selling). A missing or unreadable flow means no order.
+const ENTRY_KEYS_FLOW = ENTRY_KEYS.concat(["flowMax"]);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE"]);
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830"]);   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];
@@ -114,11 +188,15 @@ function validateSlotStrategy(s) {
   if (!/^[A-Z0-9]{2,10}$/.test(s.id)) e.push("id must be 2 to 10 capitals or digits");
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI)) e.push("entry has the wrong fields");
+  if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
+    if (Object.prototype.hasOwnProperty.call(x, "flowMax") && !(isNum(x.flowMax) && x.flowMax >= -1 && x.flowMax <= 0)) e.push("entry.flowMax must be a share from -1 to 0 (net selling)");
+    if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
+    if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(x.calendar === s.id && Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, x.calendar) && SLOT_CALENDARS[x.calendar].length > 0)) e.push("entry.calendar must name this strategy's own frozen calendar in SLOT_CALENDARS");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMaxSec > SLOT_ENTRY_LEFT_MAX_SEC || x.leftMinSec < SLOT_ENTRY_LEFT_MIN_SEC || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside " + SLOT_ENTRY_LEFT_MIN_SEC + " to " + SLOT_ENTRY_LEFT_MAX_SEC + " seconds");
   }
@@ -431,7 +509,11 @@ function slotOrderCheckWith(flags, input) {
   if (i.side !== "yes" && i.side !== "no") return no("the side must be yes or no");
   if (strategy.entry.sideRule !== "favourite" && strategy.entry.sideRule !== "cheap" && strategy.entry.sideRule !== i.side) return no("this strategy only buys " + strategy.entry.sideRule);
   // The open interest condition: no readable rise, or a rise below the line, is no order (fail closed). `oiRise` is the caller's reading of the public candles; the line is the strategy's, in code.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "flowMax") && !(isNum(i.flow) && i.flow >= -1 && i.flow <= strategy.entry.flowMax + 1e-12)) return no("the taker flow is missing or above " + strategy.entry.flowMax);
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
+  // A calendar strategy enters only the window that closes at a listed release (the close Kalshi reports and the ticker's window code must both match one frozen row); a spread rule refuses a missing or wide spread.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "calendar") && !slotCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is not a listed release window");
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "maxSpread") && !(isNum(i.spread) && i.spread >= 0 && i.spread <= strategy.entry.maxSpread + 1e-9)) return no("the spread is missing or wider than " + strategy.entry.maxSpread);
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");
   if (i.slotOrders.some((t) => isSlotOrder(t) && !Number.isFinite(num(t.ts)))) return no("a slot order has no readable time, so the loss figures cannot be trusted");
   if (i.lockTxn !== true) return no("no proof that the direction lock was taken in the same transaction as the order");
@@ -549,6 +631,8 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
+  SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor,
+  EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,

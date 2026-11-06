@@ -13,34 +13,36 @@ gates.Y1 = () => {
 };
 
 gates.Y2 = () => {
-  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
-  assert.ok(/id="kalLayoutUnlock"/.test(html) && !/id="kalLayoutUnlock"[^>]*checked/.test(html), 'rearranging starts locked');
-  assert.ok(!/unlock/.test(/function save\(skipSync\)\{([\s\S]*?)\n    \}/.exec(iife)[1]), 'the unlocked state is never saved, so a normal visit cannot be dragged by accident');
-  assert.ok(/e\.target\.closest\(\x27\[data-card\]\x27\)/.test(iife) && /grid\.classList\.contains\('kal-unlocked'\)/.test(iife), 'dragging does nothing while locked');
-  assert.ok(/draggable = on/.test(iife) && /data-move/.test(iife), 'cards are draggable only when unlocked, with arrows for touch screens');
-  assert.ok(/DEFAULT_ORDER\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
-  assert.ok(/DEFAULT_ORDER\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(DEFAULT_ORDER\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
+  // Rewritten Nov 5, 2026 for the smoother layout (one list, Edit layout instead of the Unlock tick box, pointer drag instead of native drag): same consequences, new code.
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  assert.ok(/id="kalLayoutEdit"/.test(html) && /id="kalEditBar" hidden/.test(html) && !/id="kalLayoutUnlock"/.test(html), 'rearranging starts off: Edit layout is a button and its bar starts hidden');
+  assert.ok(!/editing|unlock/i.test(/function save\(skipSync\)\{([\s\S]*?)\n    \}/.exec(iife)[1]), 'editing is never saved, so a normal visit cannot be dragged by accident');
+  assert.ok(/if\(!editing \|\| drag \|\|/.test(iife) && /grid\.classList\.contains\('kal-unlocked'\)/.test(iife), 'dragging, the arrows and the width toggle do nothing outside Edit layout');
+  assert.ok(!/draggable/.test(iife) && /data-move/.test(iife) && /addEventListener\('pointerdown'/.test(iife), 'pointer drag (mouse and touch), with arrows for the keyboard');
+  assert.ok(/def\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
+  assert.ok(/def\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(def\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
   assert.ok(!/OPTIONAL = \[\['strategies'/.test(html), 'Strategies is part of the Account card now, so it is not a hideable card of its own');
-  assert.ok(/\['r', 'r', 'm', 'r', 'm'\]/.test(iife), 'account, status, result line, positions, trades is the default flow');
-  assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account and session cards still cannot be hidden, only moved');
+  assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades'\];/.test(html), 'account, status, result line, positions, trades is the default order');
+  assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account card still cannot be hidden, only moved');
 };
 
 gates.Y3 = () => {
   assert.ok(/if\(skipSync !== true && typeof syncUserSetting === 'function'\)\{ syncUserSetting\('kalBotLayout', layout, 300\); \}/.test(html), 'every change is saved to the account unless it just came from there');
   assert.ok(/kalBotLayout: \(s\.kalBotLayout && typeof s\.kalBotLayout === 'object'\) \? s\.kalBotLayout : null,/.test(html), 'and read back, only if it is an object');
   assert.ok(/window\.__kalBotLayout\.set\(shaped\.kalBotLayout\)/.test(html), 'applied on sign-in');
-  assert.ok(/layout = next; apply\(\); save\(true\);/.test(html), 'without writing it straight back');
-  assert.ok(/\['auto', '1', '2', '3', '4'\]\.indexOf\(String\(l\.cols\)\)/.test(html), 'a bad saved column count cannot get through');
+  assert.ok(/var next = normalize\(l\);\s*layout = next; apply\(\); save\(true\);/.test(html), 'rebuilt from known values, without writing it straight back');
+  // The column count was dead state (parsed and saved, read by nothing) and is gone since Nov 5, 2026; widths are per card and only 'half' or 'full' get through (layoutSmoothGates).
+  assert.ok(!/l\.cols|saved\.cols|cols: 'auto'/.test(html), 'no column count is read or saved any more');
 };
 
 // A drag must keep reordering when the pointer is in a gap between cards or over its own preview, and every dragover must accept the
 // drop, or some browsers stop part way (a faded card that never makes way).
 gates.Y4 = () => {
-  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
-  const over = /grid\.addEventListener\('dragover', function\(e\)\{([\s\S]*?)\n    \}\);/.exec(iife)[1];
-  assert.ok(/e\.preventDefault\(\);/.test(over) && over.indexOf('e.preventDefault()') < over.indexOf('cardNear('), 'every dragover accepts the drop before anything else');
-  assert.ok(/function cardNear\(x, y\)/.test(iife) && /if\(c === dragging\)\{ return; \}/.test(iife), 'the nearest other card is used when the pointer is in a gap');
-  assert.ok(/dropEffect = 'move'/.test(over) && /grid\.addEventListener\('dragenter'/.test(iife), 'a move is announced on enter and over');
+  // Native drag and drop was replaced by pointer events on Nov 5, 2026 (it did not work on phones). Same consequence: a drag keeps reordering when the pointer is in a gap between cards, and it changes the order only past another card's middle, not on every pixel.
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  assert.ok(/function cardAt\(x, y\)/.test(iife) && /if\(c === drag\.card\)\{ return; \}/.test(iife), 'the nearest other card is used when the pointer is in a gap');
+  assert.ok(/r\.width \/ 2/.test(iife) && /r\.height \/ 2/.test(iife) && /var past = sameRow/.test(iife), 'a card moves only once the pointer is past the middle of another card');
+  assert.ok(/Date\.now\(\) - drag\.swapAt > FLIP_MS/.test(iife), 'and not again until the last slide has finished, so two cards cannot flicker back and forth');
 };
 
 // Console layout: a rail (account, positions) beside one main column (books, the bot card with its performance, trades, detail, log), books tiles on top.
@@ -54,13 +56,12 @@ gates.Y5b = () => {
 gates.Y5 = () => {
   const i = html.indexOf('id="kalTabBot"');
   const seg = html.slice(i, html.indexOf('</main>', i));
-  const rail = /<div class="kal-rail">([\s\S]*?)\n      <\/div>\n      <div class="kal-main">/.exec(seg);
-  assert.ok(rail, 'the rail is there and the main column follows it');
+  // Nov 5, 2026: the rail and main wrappers are gone; the cards are one list on one grid, in the default order (the owner: "i don't have much say in where each card goes").
+  assert.ok(!/class="kal-rail"|class="kal-main"/.test(seg), 'no rail or main wrapper');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(rail[1]), ['account', 'status', 'positions'], 'the rail holds the account strip, the Strategies card (movable like the rest, Oct 30, 2026), the bot status (which carries the loss stop and risk meter) and the positions (the order flow and edge surface folds were removed for now, Oct 27, 2026)');
-  const main = seg.slice(seg.indexOf('<div class="kal-main">'));
-  assert.deepStrictEqual(names(main), ['pnl', 'trades'], 'the main column is the trades only: the market list left the Bot page on Oct 23, 2026 (the owner: Bot is the overview and live watch, Data is for deep dives, the Brief is for markets) (the Performance card moved to the Data page on Oct 21, 2026 at the owner\'s request; the bot card is gone, its controls sit in the account card)');
-  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card" data-card="positions">/.exec(rail[1])[1];
+  assert.deepStrictEqual(names(seg), ['account', 'status', 'pnl', 'positions', 'trades'], 'one list: the account strip (with the Strategies table), the bot status (with the loss stop), the result line, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
+  const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="pnl"'));
+  const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="6" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
   assert.ok(/data-card="account">\s*<div class="kal-card-head kal-acct-head">[\s\S]*?id="kalL1Pill"/.test(rail[1]), 'the running pill sits at the top right of the account card');
   assert.ok(!/data-card="session"/.test(html), 'there is no separate bot card any more');
@@ -73,7 +74,8 @@ gates.Y5 = () => {
   const page = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="kalTabBot"'));
   const tools = /id="kalTools"[\s\S]*?<\/details>\s*<details class="kal-layout" id="kalLayout"/.exec(page)[0];
   for (const id of ['kalAcctRefresh', 'kalDiagCopy', 'kalAcctStart', 'kalAcctBody']) assert.ok(tools.indexOf('id="' + id + '"') > -1, id + ' moved into the Tools menu in the header');
-  assert.ok(/\.kal-console\{ grid-template-columns:340px minmax\(0,1fr\);/.test(html), 'a fixed-width rail and a flexible main column');
+  // Nov 5, 2026: twelve equal columns (the resizable cards); a span of 12 is the old Full and 6 the old Half, the same widths.
+  assert.ok(/\.kal-console\{ grid-template-columns:repeat\(12, minmax\(0,1fr\)\); gap:18px; \}/.test(html) && /\.kal-console > \[data-card\]\[data-w="12"\]\{ grid-column:1 \/ -1; \}/.test(html), 'twelve equal columns; a full width card spans them all (the fixed 340px rail rule was dead, overridden since Oct 23, 2026)');
   assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}/.test(html), 'one column on a narrow screen, the rail first');
 };
 
@@ -82,7 +84,8 @@ gates.Y5 = () => {
 gates.Y6 = () => {
   const set = /set: function\(l\)\{([\s\S]*?)\n      \}\n    \};/.exec(html)[1];
   assert.ok(/var key = JSON\.stringify\(l\);\s*if\(key === lastRemote\)\{ return; \}/.test(set), 'a copy already applied is not applied again');
-  assert.ok(/if\(dragging \|\| Date\.now\(\) - localDirtyAt < 4000\)\{ return; \}/.test(set), 'ignored during a drag and just after our own change');
+  // Nov 5, 2026: a corner resize in progress (size) counts as editing too, so an account copy cannot snap a card back mid resize.
+  assert.ok(/if\(editing \|\| drag \|\| size \|\| Date\.now\(\) - localDirtyAt < 4000\)\{ return; \}/.test(set), 'ignored while editing, dragging or resizing and just after our own change');
   assert.ok(/lastRemote = key;/.test(set) && set.indexOf('lastRemote = key') > set.indexOf('localDirtyAt'), 'only a copy that was actually applied is remembered');
   assert.ok(/if\(skipSync !== true\)\{ localDirtyAt = Date\.now\(\); \}/.test(html), 'our own changes mark the layout as ahead of the account');
   assert.ok(/kal-unlocked > \.kal-card\{[^}]*user-select:none/.test(html), 'text inside a card cannot be picked up instead of the card');
@@ -288,10 +291,12 @@ gates.Y15 = () => {
 
 // A card stays in its own column: reordering, arrows and dragging all work within the parent the card is in, never across the rail and the main column.
 gates.Y9 = () => {
-  const iife = html.slice(html.indexOf("var KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset')"));
-  assert.ok(/c\.parentNode\.appendChild\(c\)/.test(iife), 'a saved order puts each card back in its own column');
-  assert.ok(/visibleCards\(card\.parentNode\)/.test(iife) && /card\.parentNode\.insertBefore\(card, cards\[j\]\)/.test(iife), 'arrows move a card within its column');
-  assert.ok(/visibleCards\(dragging\.parentNode\)/.test(iife) && /dragging\.parentNode\.insertBefore\(dragging, want\)/.test(iife), 'a drag moves a card within its column');
+  // Inverted on Nov 5, 2026 on purpose: a card used to stay in its own column (rail or main); now any card can go anywhere, so the arrows and a drag move it within the one list of the grid.
+  const iife = html.slice(html.indexOf("var VERSION = 3, KEY = 'kalBotLayout'"), html.indexOf("document.getElementById('kalLayoutReset').addEventListener"));
+  assert.ok(/grid\.insertBefore\(c, at \|\| null\)/.test(iife), 'a saved order puts each card in its place in the one grid');
+  assert.ok(/var cards = visibleCards\(\), i = cards\.indexOf\(c\), j = i \+ d;/.test(iife) && /grid\.insertBefore\(c, cards\[j\]\)/.test(iife), 'arrows move a card past its visible neighbour, across the whole page');
+  assert.ok(/grid\.insertBefore\(drag\.card, j < i \? over : over\.nextSibling\)/.test(iife), 'a drag moves a card anywhere in the grid');
+  assert.ok(!/parentNode\.insertBefore|parentNode\.appendChild/.test(iife), 'nothing moves a card within a wrapper any more');
   assert.ok(!/kalLayoutCols|colsSel/.test(html), 'no leftover column picker');
 };
 
@@ -399,9 +404,10 @@ gates.Y12 = () => {
 // Moving a card must change where it sits. While each Bot page card was pinned to a named grid area (acct, stat, pnl, pos, trd) the arrows and dragging reordered the markup and the page did not change at all (Oct 28, 2026, the owner: "layout moving doesnt work anymore").
 gates.Y13 = () => {
   assert.ok(!/grid-template-areas|grid-area\s*:\s*(acct|stat|pnl|pos|trd)\b/.test(html.slice(html.indexOf('.kal-console{'), html.indexOf('</style>', html.indexOf('.kal-console{')))), 'no card is pinned to a fixed area');
-  assert.ok(/function flow\(\)/.test(html) && /c\.style\.order = String\(i\)/.test(html), 'the layout code sets each card\'s order');
-  const fn = html.slice(html.indexOf('function commitOrder()'), html.indexOf('function commitOrder()') + 120);
-  assert.ok(/flow\(\)/.test(fn), 'a move is followed by a re-flow');
+  // Nov 5, 2026: the place is the DOM order of the one list (no CSS order dealing, no dense packing), so the page shows exactly the order the layout holds.
+  assert.ok(!/function flow\(\)/.test(html) && !/c\.style\.order = /.test(html) && !/grid-auto-flow:row dense/.test(html), 'no slot dealing and no dense packing that could put a card somewhere other than its place');
+  const fn = html.slice(html.indexOf('function change(mutate, msg)'), html.indexOf('function change(mutate, msg)') + 200);
+  assert.ok(/flip\(function\(\)\{ mutate\(\); apply\(\); \}\)/.test(fn), 'a move is applied through apply (and slides when motion is allowed)');
 };
 
 // The tiny chart under each market row: a line across the market's 15 minute window, the strike drawn and kept in range, and nothing drawn from too little data.
@@ -488,7 +494,11 @@ gates.Y20 = () => {
 gates.Y31 = () => {
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES, ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'every market the bot can hold has a price on the relay, so its open position can draw a chance and a chart');
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES.slice(0, 6), ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the L1 extras keep their place');
+  // Nov 5, 2026: every market any strategy can hold (L1 and every second-slot strategy) has a price on the relay, so its open position can draw a chance and a chart
+  const slot = require('../functions/kalshiSlotLib.js'), live = require('../functions/kalshiLiveLib.js');
+  const onRelay = lib.KALSHI_SERIES.concat(lib.KALSHI_EXTRA_SERIES);
+  live.L1_SERIES.concat(...slot.SLOT_STRATEGIES.map((s) => s.series)).forEach((x) => assert.ok(onRelay.includes(x), x + ' is on the relay'));
   const fnSrc = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   const relay = fnSrc.slice(fnSrc.indexOf('exports.kalshiBooks = onCall'), fnSrc.indexOf('exports.kalshiBooks = onCall') + 1600);
   assert.ok(/for \(const series of kalshi\.KALSHI_EXTRA_SERIES\) \{\s+try \{/.test(relay) && /skipped/.test(relay), 'a failure on the extra series is skipped, never taking the Bitcoin and gold cards down');

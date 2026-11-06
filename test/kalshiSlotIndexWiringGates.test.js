@@ -92,7 +92,7 @@ gates['SI2 with the gate forced on in memory (no strategy registered) the deploy
   // Test-only: the watch gate is on, as shipped, but the registry is forced EMPTY for this process only (the shipped registry holds OICORE); everything is restored in finally.
   const on = await withSlot({ watch: true, registry: [] }, () => harness.run(indexPath));
   assert.strictEqual(slotLib.slotWatch(), true);
-  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 1, 'the shipped registry was restored');
+  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 2, 'the shipped registry (OICORE and EVENT830; FLOW1 removed Nov 4, 2026) was restored');
   const sends = (log) => log.filter((x) => x[0] === 'fetch' && x[1] === 'POST');
   let slotReads = 0;
   for (let i = 0; i < golden.length; i++) {
@@ -246,10 +246,10 @@ gates['SI9 Flatten bookkeeping closes only the slot orders on markets the accoun
   slotLib.activeSlotStrategies = () => [{ id: 'TESTA' }, { id: 'TESTB' }];
   try { await hooks.afterFlatten({ results: [], now: NOW }); } finally { slotLib.activeSlotStrategies = real; }
   assert.deepStrictEqual((await d.rows('kalshiSlotControl')).killed, { TESTA: { killedAt: NOW, reason: 'flattened by the owner' }, TESTB: { killedAt: NOW, reason: 'flattened by the owner' } });
-  // The admitted registry itself: Flatten latches the one shipped strategy off, and only it.
+  // The admitted registry itself: Flatten latches every shipped strategy off (OICORE and, since Nov 3, 2026, EVENT830), and only them.
   const d3 = db({});
   await storeLib.slotHooks(d3).afterFlatten({ results: [], now: NOW });
-  assert.deepStrictEqual((await d3.rows('kalshiSlotControl')).killed, { OICORE: { killedAt: NOW, reason: 'flattened by the owner' } }, 'Flatten latches the admitted strategy off');
+  assert.deepStrictEqual((await d3.rows('kalshiSlotControl')).killed, { OICORE: { killedAt: NOW, reason: 'flattened by the owner' }, EVENT830: { killedAt: NOW, reason: 'flattened by the owner' } }, 'Flatten latches the admitted strategies off');
 };
 
 gates['SI10 the ignore set holds every slot entry and exit order id, so L1\'s sweep never reads a slot fill as a hand sale'] = async () => {
@@ -371,14 +371,15 @@ gates['SI14b the watch constant can never be false while entries are allowed: ad
   assert.ok(/const slotWatch = \(\) => slotActive\(\) \|\| SLOT_EVER_USED === true;/.test(src));
 };
 
-gates['SI14c the admitted state: exactly one strategy OICORE, valid, bounded by the library caps, and nothing stored or requested can enable or enlarge it'] = () => {
+gates['SI14c the admitted state: exactly two strategies, OICORE and EVENT830 (Nov 3, 2026), valid, bounded by the library caps, and nothing stored or requested can enable or enlarge them'] = () => {
   assert.strictEqual(slotLib.SLOT_ENABLED, true);
   assert.strictEqual(slotLib.slotActive(), true);
-  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 1);
+  assert.strictEqual(slotLib.SLOT_STRATEGIES.length, 2);
+  assert.deepStrictEqual(slotLib.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830']);
+  for (const x of slotLib.SLOT_STRATEGIES) assert.strictEqual(slotLib.validateSlotStrategy(x).ok, true, JSON.stringify(slotLib.validateSlotStrategy(x)));
   const s = slotLib.SLOT_STRATEGIES[0];
   assert.strictEqual(s.id, 'OICORE');
-  assert.strictEqual(slotLib.validateSlotStrategy(s).ok, true, JSON.stringify(slotLib.validateSlotStrategy(s)));
-  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE']);
+  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830']);
   assert.strictEqual(s.contractsPerOrder, 10);
   assert.ok(s.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
   assert.strictEqual(s.exit.holdToSettle, true);

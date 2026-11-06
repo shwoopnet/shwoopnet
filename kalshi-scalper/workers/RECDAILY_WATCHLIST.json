@@ -1,0 +1,496 @@
+{
+ "id": "RECDAILY",
+ "note": "Research only. The recorder (scripts/record_daily.py) reads this file; nothing else decides what is polled. Add a test by editing this file and nothing else. Looks are what the evaluators read through src/scalper/recdaily.py; the recorder itself stores every poll of every watched market, so a look can be added later without losing data. USWEEP1's favourite watch items were removed on Nov 3, 2026 (the owner held the Oct 28 favourite-and-hold ban strictly). Nov 4, 2026 (RECBUILD1, the owner approved collector 3): 32 Financials and Commodities daily, weekly and hourly ladder series were added for STRESSDAY1 (the series its census entries came from, USWEEP1 and USWEEP3 lists in workers/), so entry quotes at the CALIB1 looks (daily 1440/360/60, weekly 4320/1440/360, hourly 30/15/5 minutes before the close) are on file past 2026-10-02; the binding limit there is stress days (10 of 25), not entries. Cheap-side only is a READER rule; the recorder stores every poll.",
+ "poll_minutes": 30,
+ "default_window_hours": 30,
+ "fields": [
+  "yes_bid",
+  "yes_ask",
+  "last",
+  "volume",
+  "open_interest",
+  "close_time",
+  "open_time",
+  "result"
+ ],
+ "watch": [
+  {
+   "test": "NOWCAST1",
+   "series": "KXCPI",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440
+   ]
+  },
+  {
+   "test": "NOWCAST1",
+   "series": "KXCPICORE",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440
+   ]
+  },
+  {
+   "test": "NOWCAST1",
+   "series": "KXPCECORE",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440
+   ]
+  },
+  {
+   "test": "NOWCAST1",
+   "series": "KXGDP",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440
+   ]
+  },
+  {
+   "test": "FEDIMPL1",
+   "series": "KXFEDDECISION",
+   "window_hours": 30,
+   "looks_minutes_before_close": []
+  },
+  {
+   "test": "FEDIMPL1",
+   "series": "KXFED",
+   "window_hours": 30,
+   "looks_minutes_before_close": [],
+   "note": "the look is the last business day before the decision at the 19:00 UTC hourly candle; read it with recdaily.nearest_to_time, not a minutes-before-close look"
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXBTCMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXBTCMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXETHMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXETHMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXSOLMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXSOLMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXXRPMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXXRPMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXDOGEMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXDOGEMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXBNBMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXBNBMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXHYPEMAXMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "BARRIER1",
+   "series": "KXHYPEMINMON",
+   "keep_all_open": true,
+   "looks_after_open_minutes": [
+    2880
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXBRENTD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXCOPPERD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXGOLDD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXNATGASD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXSILVERD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXAUDUSDAD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXEURUSD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXGBPUSDAD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXINX",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXNASDAQ100",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXNZDUSDAD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDJPY",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUST10A",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUST2A",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUST30A",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUST5A",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUST7A",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXWTI",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    1440,
+    360,
+    60
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXAUDUSDAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXBRENTW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXCOPPERW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXEURUSDAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXGBPUSDAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXGOLDW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXNATGASW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDBRLAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDCADAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDJPYAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDMXNAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXUSDSEKAW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXWTIW",
+   "window_hours": 170,
+   "looks_minutes_before_close": [
+    4320,
+    1440,
+    360
+   ]
+  },
+  {
+   "test": "STRESSDAY1",
+   "series": "KXDJI",
+   "window_hours": 3,
+   "looks_minutes_before_close": [
+    30,
+    15,
+    5
+   ]
+  }
+ ],
+ "not_recorded": "EVENT830 (15 minute series) is already fed by the quote recorder and the candle ledger."
+}
