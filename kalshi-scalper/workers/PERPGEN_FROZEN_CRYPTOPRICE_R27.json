@@ -1,0 +1,11 @@
+{
+ "clusters": 0,
+ "cuts_sha256": "e2b729f82763d27104491efc9b7b8861339825ec7ae77d90f7d7e5bc01b0d61e",
+ "discovery_survivors": 0,
+ "frozen_id": "CRYPTOPRICE_R27",
+ "group": "CRYPTO",
+ "n_rules": 5000,
+ "seed": 1027,
+ "slice": "CRYPTOPRICE",
+ "survivors": []
+}
