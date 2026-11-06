@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:40 AM CT (16:40Z): W-GQH-NEXT1 (gold quiet hours block, hypothetical entries since Oct 30): block 26 of 26 won, review not readable yet
+
+- Descriptive, try count 0 (w_gqh_next/, public candles, quiet_read.py selftest OK). 461 settled gold windows since Oct 30 12:00Z (to Nov 6 10:30 CT); hypothetical L1 entries (6 minute look, one in band side 0.88 to 0.97, hold to settlement, fee 0.07p(1-p)): BLOCK (20:00 to 23:59 CT) 26 entries, 26 wins, 0 losses, +178.7c, +6.87c per contract (5 days); REST 89 entries, 81 wins, 8 losses, -178.7c, -2.01c per contract. z block minus rest +2.87 (block BETTER than rest, the opposite of the reason the block was added). By the registered interim rule (z under 0 delete, z at or above 1.5 below keep, between wait) a positive z reads delete, but the rule is read at 100 block entries; 26 is not readable. Need 74 more; at 3.6 per day projected about Nov 26 CT (consistent with Nov 24 to 26; weekends may slip it). Live block orders 0, as expected. Not checked: live record, real ask, the 25c early sell (not modelled), V2's exact window; 346 of 461 windows had no single in band side and are excluded. Nothing changed.
+
 ## 2026-11-06 10:40 AM CT (16:40Z): W-OICORE-CHEAP1 (how much OICORE's profit rests on its top wins): stays positive, thin
 
 - Descriptive, try count 0 (w_oicore_cheap/; one seed, fills treated as independent, no deflation, so P is not a significance test). 47 live fills, net +$41.79, PF 2.17; top winners 9.36, 9.36, 8.93, 8.93, 8.51, the top 3 all fills at 5 to 9 cents. Remove top 1: +$32.43 PF 1.91; top 2: +$23.07 PF 1.65; top 3: +$14.14 PF 1.40. Leave one out net 32.43 to 45.04, never at or below 0. Bootstrap (20,000 resamples): P(net at or below 0) 0.043, 5th percentile +$1.89, median +$41.13. Reading: the profit is about 10 wins worth $6 to $9 against losses of $0.5 to $3, still positive without the best three but PF falls under 1.5. Nothing changed.
