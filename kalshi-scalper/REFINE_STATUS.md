@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:39 AM CT (16:39Z): W-EVENT830-NOFILL1 (why 6 of 11 EVENT830 orders did not fill): reachability does not separate them
+
+- Descriptive, try count 0 (w_event830_nofill/; public market and 1 minute candles, no key). All 11 orders placed about 173 s before the 13:30Z close. All 6 unfilled (BNB x2, WTI x2, GBPUSD, HYPE) had a limit inside the first 1 minute candle after the order (YES buys: ask low at or under the limit; NO buys: bid high at or over), exactly as the 5 fills did (silver x2, copper, EURUSD, USDJPY). The first candle traded 1,344 to 7,137 contracts for the no fills. Most limits stayed reachable to the close (markets run to 0.001 or 0.999 into the print); GBPUSD reachable in 1 of 3 candles. YES limits equalled the ask at order time. Possible, unproven: thin touch size for BNB and HYPE (10 to 32 contracts).
+- Not checked: order time to live or IOC, queue position, sub minute ask path, depth past the top. Hindsight reachability from candle extremes is weak evidence. Nothing changed.
+
 ## 2026-11-06 10:38 AM CT (16:38Z): W-OICORE-MATCH1 (why OICORE live and the sim triggers differ): rounding and timing, not the rise
 
 - Descriptive, try count 0 (w_oicore_match/). A: 14 live fills with no sim trigger: all 14 pass the rise test (86,988 to 259,206 vs 86,300), all 14 fail the sim band at the close-180 candle. 9 of 14 had a live seen price of 0.041 to 0.047, which live rounds UP to the cent (kalshiSlotRunLib.js near line 117) to 0.05 and passes the band; the sim read in w_oicore_next used the raw candle against 0.05. Applying ceil to the cent to that sim read adds 10 triggers (49 to 59), 5 of these fills. The other 9 are price movement after the candle (live priced 5 to 8c where the candle read 1.5 to 4c; live looks ran 161 to 177 s before the close). The live seen price is closest to the c-180 candle in 38 of 47 fills (c-240 7, c-120 2), so timing is mostly aligned.
