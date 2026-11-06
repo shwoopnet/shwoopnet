@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:41 AM CT (16:41Z): W-GOLDEXIT1 (gold's live 25c exits against holding): hold better by $6.72, small
+
+- Descriptive, try count 0 (w_goldexit/; exit fill taken as order price, fees ignored on the hold side, settlement alone answers hold; one market fetch re-fetched by hand). Gold L1 Oct 7 to Nov 6: 287 filled; held to settlement 271 orders +$152.72; early sell exits 16 orders -$140.05 (gold net +$12.67). Hold would have won on only 3 of 16 exits (Oct 13 05:15 YES, Nov 5 23:45 YES, Nov 6 07:15 YES; the other 13 would have settled as full losses). Hold total -$133.33 vs exit -$140.05: hold better by $6.72. The three recoveries add about $27.2 (+4.28, +11.75, +11.25) and the 13 losers cost about $20.5 more by holding. Of the five Nov 5 to 6 exits, two recovered (+11.75, +11.25) and three lost more by holding (-3.25, -1.43, -1.95). Reading: consistent with EXIT1 (hold beats exit) but a small gap on 16 events and not evidence for moving the line; hold wins 3 of 16. Not checked: hold side fees, partial fill prices, 1 minute paths for older exits. Nothing changed.
+
 ## 2026-11-06 10:41 AM CT (16:41Z): W-GOLDSIZE1 (gold by week, size against loss cost): size doubled, break-even rate did not move
 
 - Descriptive, try count 0 (w_goldsize/; UTC weeks from Oct 7; order price used as fill, avgFill null; weekly rates noisy). Gold L1 287 settled. Week: orders, median contracts, losses, avg loss, avg win, net, break-even loss rate vs observed. W1 Oct 7: 62, 8, 2, $4.26, $0.39, +15.15, 8.4% vs 3.2%. W2 Oct 14: 35, 6, 0, none, $0.37, +12.79, about 4.1% vs 0%. W3 Oct 21: 76, 7, 7, $6.72, $0.52, -11.45, 7.2% vs 9.2%. W4 Oct 28: 74, 13, 3, $10.57, $0.88, +31.02, 7.7% vs 4.1%. W5 Nov 4 to 6 partial: 40, 14, 6, $11.12, $0.94, -34.83, 7.8% vs 15.0%. All: 287, 10, 18, $8.55, $0.62, +12.67, 6.8% vs 6.3%.
