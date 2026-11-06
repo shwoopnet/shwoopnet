@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:37 AM CT (16:37Z): W-GOLDSTOP-NEXT1 (how near gold gets to the 12% stop): gold alone never has, but it is not alone
+
+- Descriptive, try count 0 (w_goldstop_next/). Gold orders exist only Oct 7 to Nov 6 (about 30 days, not 60): 287 settled, 18 losses (6.3%); last 7 days 73 orders, 8 losses (11%), median 15 contracts at 0.927. 2,766 rolling 24h windows (15 minute grid): worst gold only net -$42.00 (1st percentile -$25.40); windows at or below -12% of base (-$55.92 at 466, -$58.80 at 490, -$62.16 at 518): 0, also 0 with one more open order counted lost (about $13.91).
+- Resampled P(24h net at or below the line), 400,000 windows, all 287 outcomes: 0.009% (466), 0.005% (490), 0.002% (518), with one open order 0.115%, 0.071%, 0.042%; using the last 7 days only: 0.22%, 0.14%, 0.09%, with one open 1.30%, 0.97%, 0.62%. Orders treated as independent, but losses cluster (11 of 18 in the last 10 days), so this understates. Not included: L1 non gold, OICORE and EVENT830, which share the real stop; the stop accounting was approximated, not replayed. The current -$46.58 window is a bigger drawdown than any past gold only window (-$42.00) and includes OICORE and EVENT830 losses. Nothing changed.
+
 ## 2026-11-06 10:36 AM CT (16:36Z): W-OICORE-NEXT1 (OICORE live vs sim at 47 fills): consistent, far from both kills, but fragile
 
 - Descriptive, try count 0 (w_oicore_next/). Live 47 fills, all settled: 10 wins, 37 losses, win rate 21.3% (Wilson 12.0% to 34.9%), net +$41.79, +9.01c per contract, PF 2.17. By fill price: 24 fills at 0.07 or less (2 wins, +$4.17), 14 at 0.07 to 0.15 (3 wins, +$14.01), 9 above 0.15 (5 wins, +$23.61). Three wins at 0.05, 0.06 and 0.09 carry $27.65 of the profit, so the result is fragile.
