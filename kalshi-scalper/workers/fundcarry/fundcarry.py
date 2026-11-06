@@ -10,6 +10,7 @@ D1_END = "2026-10-26"       # D1 = 2026-10-21..10-26, D2 = 2026-10-27..10-31
 UNIVERSE = ["KXGOLDPERP", "KXUS500PERP", "KXUSTECH100PERP", "KXSILVERPERP", "KXWTIFUTURE", "KXCOPPERPERP"]
 THRESH = 0.0010
 HOLD_MIN, HOLD_MAX = 7 * 3600, 12 * 3600
+AMEND1 = len(sys.argv) > 3 and sys.argv[3] == "amend1"
 FEES = {"verdict": 0.0005, "stress": 0.0012}
 
 
@@ -40,6 +41,8 @@ def quote(r):
             return None
         b, a, ref = float(r["bid"]), float(r["ask"]), float(r["reference_price"])
         if not (0 < b <= a) or ref <= 0:
+            return None
+        if AMEND1 and a > 2 * b:      # Amendment 1 (after the as-registered run): an ask of 9.2e14 (int64 no-ask sentinel) is not a quote
             return None
         return dict(b=b, a=a, m=(a + b) / 2, ref=ref, prem=(a + b) / 2 / ref - 1, db=float(r["funding_deadband"]), cap=float(r["funding_cap"]))
     except (ValueError, KeyError):
