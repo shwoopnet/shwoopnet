@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:51 AM CT (16:51Z): W-OICORE-ADVERSE1 (do OICORE's unfilled orders win more): suggestive, not significant
+
+- Descriptive, try count 0 (w_oicore_adverse/; sim win ignores fees and fill price; fill vs no fill is not randomised and no fills skew above 0.15). 49 sim triggers since Oct 30, all settled; sim win by what live did: live filled 8/33 = 24.2% [12.8, 41.0]; live no fill 4/9 = 44.4% [18.9, 73.3]; no live order 1/7 = 14.3% [2.6, 51.3]. Live orders by order win: filled 10/47 = 21.3% [12.0, 34.9]; no fill (10, result null, market result against the order side) 4/10 = 40.0% [16.8, 68.7]. Reading: unfilled orders won more often (40% to 44% against 21% to 24%) but the intervals overlap heavily; weaker than the 51% to 55% vs 14% to 15% in the W-OICORE-SLIP1 proxy; consistent with, not proof of, the dearer entries (which win more often) missing fills. Not checked: 14 filled live orders and 1 no fill with no sim trigger in the cache; 1 filled trigger whose sim side differs from the live side. Nothing changed.
+
 ## 2026-11-06 10:51 AM CT (16:51Z): EVENT830 timing: Dec 7 is an interim read (main's default), kills unchanged; check price paid at about 15 fills
 
 - Main (Nov 6): on Dec 7 report EVENT830 as an INTERIM read (fills, wins, net, price paid vs the registered 14c to 18c, releases left), no pass or fail unless a kill rule has fired, re read at 40 fills; the 40 fill kill and the 20 loss streak stay as registered; main asked whether to rewrite the registration for the 27c fills. My answer: no rewrite on 5 fills (changing the registration after seeing results defeats the pre registration). At about 15 fills (around Nov 19 to 25) report the mean price paid against 14c to 18c; if it is still above about 20c, ask the owner whether to ADD a stated note (not move the bar) that the 19% win rate applies to a 14c to 18c mix and a dearer mix needs a higher win rate (break even is about the price plus 1c to 2c). Nothing changed in the bot.
