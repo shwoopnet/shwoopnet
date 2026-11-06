@@ -45,3 +45,6 @@ The scratchpad scripts named above live in the refine session's scratchpad, not 
 ## Waiting on the owner's deploy (deploy-latest.sh), Nov 6 2026
 - PR 726 (slot skip reasons: kalshiSlotSkips/{strategy}_{ticker}, report `skips` section, 7 days) and #729 (avgFill, avgFee) are merged but not live until the owner runs deploy-latest.sh. Main will say when it is live.
 - When live: read the report's skips byReason for the 16 OICORE triggers with no order (W-OICORE-SKIP1); re-run the cost gap and slip checks with avgFill and avgFee (see the #729 note in REFINE_STATUS.md).
+
+## CORRECTION (Nov 6 2026, main): gold's quiet hours block is NOT live
+QUIET_HOURS_CT = {} on origin/main: the owner lifted the block on Oct 30 ("Lift it from both"). Drop the 100 block entry review (about Nov 26) and the 'block live since Nov 6 16:33Z' reading; S-GQH1 and the block hours stay as plain history only.
