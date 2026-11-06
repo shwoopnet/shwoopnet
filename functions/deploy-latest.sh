@@ -76,6 +76,8 @@ echo "Plan (in this order):"
 [ $DO_PUSH -eq 1 ]   && echo "  1. deploy-push.sh    (exit watch, Flatten, phone alerts)"
 [ $DO_SIZING -eq 1 ] && echo "  2. deploy-sizing.sh  (the bot's minute function, size lock, slot)"
 [ $DO_REPORT -eq 1 ] && echo "  3. deploy-report.sh  (nightly report)"
+# The Firestore rules are not deployed by any of the three scripts (only deploy-paper.sh carries them), so a rules change is named here, never run: the owner runs it by hand.
+want '^firestore\.rules$' && echo "  note: firestore.rules changed. This script does not deploy rules; run: npx firebase-tools deploy --only firestore:rules --project shwoopnet"
 if [ $PAGE_ONLY -eq 1 ]; then
   echo "  nothing to deploy: only page, docs or tests changed (the page is live once merged)."
   [ "${DRY_RUN:-}" = "1" ] || echo "$NEW" > "$MARKER"
