@@ -111,13 +111,13 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
   if (withOrders) {
     // One compact row per order. No order id, no client order id, nothing that identifies the account.
     out.orders = rows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
-      ts: new Date(Number(o.ts)).toISOString(), ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.avgFill),
+      ts: new Date(Number(o.ts)).toISOString(), ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.averageFillPrice != null ? o.averageFillPrice : o.avgFill), avgFee: num(o.averageFeePaid != null ? o.averageFeePaid : o.avgFee),
       entryLead: o.entryLead || null, status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), ...context(o),
     }));
     out.ordersTruncated = rows.length > MAX_ORDER_ROWS;
     // Slot rows are listed apart from L1's so the L1 row shape does not change; the strategy id replaces any order id.
     out.slotOrders = slotRows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
-      ts: new Date(Number(o.ts)).toISOString(), strategy: typeof o.slotId === "string" ? o.slotId.slice(0, 40) : null, ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.avgFill),
+      ts: new Date(Number(o.ts)).toISOString(), strategy: typeof o.slotId === "string" ? o.slotId.slice(0, 40) : null, ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.averageFillPrice != null ? o.averageFillPrice : o.avgFill), avgFee: num(o.averageFeePaid != null ? o.averageFeePaid : o.avgFee),
       status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), ...context(o),
     }));
   }
