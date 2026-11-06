@@ -1,0 +1,29 @@
+counts {'no_fill_candle': 28, 'no_flow': 44, 'no_flow_window': 439, 'no_signal_candle': 821, 'ok': 71, 'out_of_band': 255, 'over_limit': 14, 'tie': 13}
+CONTROL all {'n': 71, 'events': 65, 'days': 20, 'win': 0.1549, 'paid': 13.89, 'net_c10': -6.75, 'net_c1': 0.21, 'pf': 0.61, 'pf12': None, 'z_day': -1.17} pf12 0.55
+    D1 {'n': 26, 'events': 23, 'days': 10, 'win': 0.1923, 'paid': 16.15, 'net_c10': -6.35, 'net_c1': 1.62, 'pf': 0.66, 'pf12': None, 'z_day': -0.66}
+    D2 {'n': 45, 'events': 42, 'days': 10, 'win': 0.1333, 'paid': 12.58, 'net_c10': -6.98, 'net_c1': -0.6, 'pf': 0.57, 'pf12': None, 'z_day': -0.93}
+    fam commodities {'n': 33, 'events': 31, 'days': 15, 'win': 0.0909, 'paid': 10.94, 'net_c10': -8.73, 'net_c1': -3.15, 'pf': 0.43, 'pf12': None, 'z_day': -1.33}
+    fam crypto {'n': 2, 'events': 2, 'days': 2, 'win': 0.0, 'paid': 10.5, 'net_c10': -17.5, 'net_c1': -12.0, 'pf': 0.0, 'pf12': None, 'z_day': -1.52}
+    fam fx {'n': 8, 'events': 7, 'days': 6, 'win': 0.25, 'paid': 19.12, 'net_c10': -4.75, 'net_c1': 4.25, 'pf': 0.74, 'pf12': None, 'z_day': -0.47}
+    fam indices {'n': 28, 'events': 25, 'days': 12, 'win': 0.2143, 'paid': 16.11, 'net_c10': -4.21, 'net_c1': 3.89, 'pf': 0.78, 'pf12': None, 'z_day': -0.43}
+HIGH flow>=+0.30 (primary) {'n': 37, 'events': 36, 'days': 17, 'win': 0.1892, 'paid': 15.73, 'net_c10': -6.03, 'net_c1': 1.68, 'pf': 0.68, 'pf12': None, 'z_day': -0.81} pf12 0.61
+    D1 {'n': 15, 'events': 15, 'days': 8, 'win': 0.2667, 'paid': 16.27, 'net_c10': 0.93, 'net_c1': 8.93, 'pf': 1.06, 'pf12': None, 'z_day': 0.07}
+    D2 {'n': 22, 'events': 21, 'days': 9, 'win': 0.1364, 'paid': 15.36, 'net_c10': -10.77, 'net_c1': -3.27, 'pf': 0.45, 'pf12': None, 'z_day': -1.33}
+    fam commodities {'n': 18, 'events': 18, 'days': 10, 'win': 0.1111, 'paid': 13.17, 'net_c10': -10.06, 'net_c1': -3.5, 'pf': 0.45, 'pf12': None, 'z_day': -0.87}
+    fam crypto {'n': 1, 'events': 1, 'days': 1, 'win': 0.0, 'paid': 3.0, 'net_c10': -6.0, 'net_c1': -4.0, 'pf': 0.0, 'pf12': None, 'z_day': 0.0}
+    fam fx {'n': 7, 'events': 6, 'days': 5, 'win': 0.2857, 'paid': 21.43, 'net_c10': -4.57, 'net_c1': 5.43, 'pf': 0.77, 'pf12': None, 'z_day': -0.39}
+    fam indices {'n': 11, 'events': 11, 'days': 9, 'win': 0.2727, 'paid': 17.45, 'net_c10': -0.36, 'net_c1': 8.27, 'pf': 0.98, 'pf12': None, 'z_day': -0.03}
+COMPLEMENT <+0.30 {'n': 34, 'events': 32, 'days': 16, 'win': 0.1176, 'paid': 11.88, 'net_c10': -7.53, 'net_c1': -1.38, 'pf': 0.52, 'pf12': None, 'z_day': -1.04} pf12 0.47
+    D1 {'n': 11, 'events': 10, 'days': 7, 'win': 0.0909, 'paid': 16.0, 'net_c10': -16.27, 'net_c1': -8.36, 'pf': 0.24, 'pf12': None, 'z_day': -3.48}
+    D2 {'n': 23, 'events': 22, 'days': 9, 'win': 0.1304, 'paid': 9.91, 'net_c10': -3.35, 'net_c1': 1.96, 'pf': 0.75, 'pf12': None, 'z_day': -0.32}
+    fam commodities {'n': 15, 'events': 14, 'days': 11, 'win': 0.0667, 'paid': 8.27, 'net_c10': -7.13, 'net_c1': -2.73, 'pf': 0.4, 'pf12': None, 'z_day': -1.12}
+    fam crypto {'n': 1, 'events': 1, 'days': 1, 'win': 0.0, 'paid': 18.0, 'net_c10': -29.0, 'net_c1': -20.0, 'pf': 0.0, 'pf12': None, 'z_day': 0.0}
+    fam fx {'n': 1, 'events': 1, 'days': 1, 'win': 0.0, 'paid': 3.0, 'net_c10': -6.0, 'net_c1': -4.0, 'pf': 0.0, 'pf12': None, 'z_day': 0.0}
+    fam indices {'n': 17, 'events': 16, 'days': 9, 'win': 0.1765, 'paid': 15.24, 'net_c10': -6.71, 'net_c1': 1.06, 'pf': 0.65, 'pf12': None, 'z_day': -0.65}
+LOW flow<=-0.30 (secondary) {'n': 22, 'events': 21, 'days': 13, 'win': 0.0909, 'paid': 12.59, 'net_c10': -11.27, 'net_c1': -4.77, 'pf': 0.33, 'pf12': None, 'z_day': -2.01} pf12 0.29
+    D1 {'n': 6, 'events': 6, 'days': 6, 'win': 0.1667, 'paid': 18.17, 'net_c10': -12.0, 'net_c1': -3.0, 'pf': 0.43, 'pf12': None, 'z_day': -0.86}
+    D2 {'n': 16, 'events': 15, 'days': 7, 'win': 0.0625, 'paid': 10.5, 'net_c10': -11.0, 'net_c1': -5.44, 'pf': 0.27, 'pf12': None, 'z_day': -1.87}
+    fam commodities {'n': 7, 'events': 7, 'days': 5, 'win': 0.0, 'paid': 5.71, 'net_c10': -9.86, 'net_c1': -6.71, 'pf': 0.0, 'pf12': None, 'z_day': -5.24}
+    fam crypto {'n': 1, 'events': 1, 'days': 1, 'win': 0.0, 'paid': 18.0, 'net_c10': -29.0, 'net_c1': -20.0, 'pf': 0.0, 'pf12': None, 'z_day': 0.0}
+    fam indices {'n': 14, 'events': 13, 'days': 9, 'win': 0.1429, 'paid': 15.64, 'net_c10': -10.71, 'net_c1': -2.71, 'pf': 0.44, 'pf12': None, 'z_day': -1.23}
+treated minus complement (c per contract, C=10): 1.5 permutation one sided p (event-level shuffle of flags): 0.452
