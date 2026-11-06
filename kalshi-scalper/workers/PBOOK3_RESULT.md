@@ -1,0 +1,5 @@
+# PBOOK3 result (2026-11-06): NOT_ENOUGH_DATA (mid versus reference gap, fade it)
+Registration `workers/PBOOK3_REGISTRATION.md`; scorer `workers/pbook/pbook.py`; development 2026-10-21 to 10-31 only.
+**44 events on 7 days** against 60 events and 10 days needed. Information only: mean net -100.9 bp, gross -76.9 bp, win 11 percent, day z -3.00; D1 28 events -139.8 bp, D2 16 events -32.8 bp. Gap closure at the next sample: **mean 13.9 percent, median 4.5 percent** (prediction was mean about 20 percent, median under 30 percent): large gaps persist for hours, so they behave like a stale reference or a standing premium, consistent with BASIS1 (median 5 percent converged). Fading them is a large net loss at 12 bp a side. No verdict declared; funding paid or received is not recorded and may offset part of a persistent gap.
+Enough data: 44 events in 11 days (about 4 a day) means 60 events at about 15 days; with the 10 day bar met it is about **2026-11-20** with a re-registered cut and about 10 untouched dates.
+N +1 as registered. Research only.
