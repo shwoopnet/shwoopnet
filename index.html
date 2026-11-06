@@ -1656,6 +1656,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Nov 6</div>
+                <ul class="changelog-list">
+                  <li>Research: a daily saver of Yahoo 1 minute prices for the stocks, indexes and commodities behind the perps (Yahoo keeps only 7 days), and the 30 second perps recorder now runs to Feb 2027</li>
+                </ul>
                 <div class="changelog-day">Nov 5</div>
                 <ul class="changelog-list">
                   <li>Bot page: in Edit layout, drag a card's bottom right corner to resize it (width snaps to a quarter, a third, a half, two thirds or full; height snaps in steps and the card scrolls inside); double click the corner for its own height. A phone stays one column</li>
@@ -1665,6 +1669,7 @@
                   <li>Bot page: the Start box and Rules text name every live strategy (L1 on gold, OICORE and EVENT830) and OICORE's limit 1c above the price it sees; changelog days and strategy docs brought up to date</li>
                   <li>Bot page: EVENT830's open positions now get a chart too (the price feed reads its eight markets)</li>
                   <li>Bot page: a smoother, freer layout. Edit layout (in the Layout menu) lets any card go anywhere, by dragging (touch and hold on a phone) or with its arrows; the other cards slide out of the way. Each card can be Half or Full width, and every card can fold to its title row. Done, Cancel and Undo; an older saved layout carries over</li>
+                  <li>Bot: when OICORE or EVENT830 is inside its entry time but sends no order, the reason is now saved (for example stale minute, open interest too low, low money on the exchange shard) and listed in the nightly report</li>
                 </ul>
                 <div class="changelog-day">Nov 4</div>
                 <ul class="changelog-list">

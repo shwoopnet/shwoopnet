@@ -1,6 +1,6 @@
 # Samples Kalshi's PUBLIC perpetual markets every 30 seconds around the US stock open and close (research only, Nov 5, 2026, the owner: "Faster data, then 10 to 20 tests").
 # No secret is used or needed: plain GETs of a public endpoint; the built-in GITHUB_TOKEN only pushes gzipped CSV to the `perp-data` branch (under perps30/), never to main.
-# Started every 20 minutes on weekdays; the script itself records only inside the two New York time windows and exits at once otherwise. Stops by itself after 2026-12-07.
+# Started every 20 minutes on weekdays; the script itself records only inside the two New York time windows and exits at once otherwise. Stops by itself after 2027-02-26.
 name: record-perps-fast
 on:
   schedule:

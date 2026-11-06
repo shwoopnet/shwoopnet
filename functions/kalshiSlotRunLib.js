@@ -59,6 +59,29 @@ function oiRiseFromCandles(candles, closeSec) {
   return a === null || b === null ? null : Math.round((a - b) * 100) / 100;
 }
 
+// Skip reasons (Nov 5, 2026, the owner: "Save skip reasons"). LOG ONLY: when a registered strategy has a market inside its entry time span and this tick sends no order for it, the tick hands one
+// small record per strategy and ticker to args.recordSkip (index.js writes it to kalshiSlotSkips/{strategy}_{ticker}, overwriting, so the LATEST reason of a window is what is kept). Nothing that decides an
+// order reads that collection. The records are handed over only AFTER every order of the minute was sent (or at a return that sends nothing), the writes in parallel, every error swallowed, so a
+// failed write can never fail, change or hold up an order (this file has no timers, so a slow write is bounded by Firestore's own deadline, after the orders). No record is made outside the entry span
+// (the `jobs` list below is the span check).
+const SKIP_NOTE_MAX = 120;
+// slotOrderCheck's refusals are sentences; this maps them to the short fixed codes the skip log uses. Anything not listed is "gate" with the sentence kept in `note`.
+function checkReasonCode(text) {
+  const t = String(text || "");
+  if (/^killed:/.test(t)) return "killed";
+  if (/hedge|direction|both sides|no readable side|position could not be read/.test(t)) return "direction_lock";
+  if (/not read in full|no readable time/.test(t)) return "orders_unreadable";
+  if (/caps? |cap is reached|caps\b/.test(t)) return "cap";
+  if (/size resting at the touch/.test(t)) return "depth_unknown";
+  if (/entry time window/.test(t)) return "outside_window";
+  if (/entry band/.test(t)) return "price_out_of_band";
+  if (/open interest/.test(t)) return "oi_below";
+  if (/spread/.test(t)) return "spread_wide";
+  if (/release window/.test(t)) return "not_listed";
+  if (/step|scaling in/.test(t)) return "scale_in";
+  return "gate";
+}
+
 const unsoldOf = slotLib.slotUnsoldOf;     // one definition, in the library L1's exit watch hooks also use
 
 function makeRunners(flags) {
@@ -94,13 +117,32 @@ function makeRunners(flags) {
         const left = (Date.parse(q.m.close_time) - now) / 1000;
         // A calendar strategy (EVENT830) skips every market whose window is not a listed release before any read: on other days it makes no call at all.
         if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, q.m.ticker, Date.parse(q.m.close_time))) continue;
-        if (Number.isFinite(left) && left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec) jobs.push({ s, ticker: q.m.ticker, series: q.series });
+        if (Number.isFinite(left) && left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec) jobs.push({ s, ticker: q.m.ticker, series: q.series, closeTime: q.m.close_time });
       }
     }
     if (!jobs.length) return { skipped: early.length ? early.join("; ") : "no market in a slot entry window" };
 
+    // From here on every market in `jobs` is inside its strategy's entry span, so a market that ends this tick without an order gets a skip record (the latest reason wins).
+    const skips = new Map();
+    const skip = (job, reason, detail, note) => {
+      try {
+        const closeMs = Date.parse(job.closeTime);
+        let at = Number(typeof args.clock === "function" ? args.clock() : now); if (!Number.isFinite(at)) at = now;
+        const d = {};
+        for (const [k, v] of Object.entries(detail || {})) if (typeof v === "number" && Number.isFinite(v)) d[k] = v;
+        skips.set(job.s.id + "|" + job.ticker, { strategy: job.s.id, ticker: job.ticker, reason, detail: Object.keys(d).length ? d : null,
+          note: note ? String(note).slice(0, SKIP_NOTE_MAX) : null, atMs: at, secondsLeft: Number.isFinite(closeMs) ? Math.round((closeMs - at) / 1000) : null });
+      } catch (e) { /* log only */ }
+    };
+    const skipAll = (reason, note) => { for (const j of jobs) skip(j, reason, null, note); };
+    const flushSkips = async () => {
+      if (typeof args.recordSkip !== "function" || !skips.size) return;
+      try { await Promise.all([...skips.values()].map(async (d) => { try { await args.recordSkip(d); } catch (e) { /* log only */ } })); } catch (e) { /* log only */ }
+    };
+    const done = async (out) => { await flushSkips(); return out; };
+
     const sh = args.shared;
-    if (!sh || !Number.isFinite(sh.sizeBase) || !(sh.sizeBase > 0) || !sh.risk || !Number.isFinite(sh.risk.worst) || !Number.isFinite(sh.floor)) return { skipped: "no shared risk figures from the L1 tick" };
+    if (!sh || !Number.isFinite(sh.sizeBase) || !(sh.sizeBase > 0) || !sh.risk || !Number.isFinite(sh.risk.worst) || !Number.isFinite(sh.floor)) { skipAll("no_shared_risk"); return done({ skipped: "no shared risk figures from the L1 tick" }); }
     // Ending the session must never be skipped because a write failed: each step is tried on its own.
     const end = async (why, detail) => { try { await setSession({ active: false, endedAt: now, endedBecause: why }); } catch (e) { /* the unresolved check ends it next minute */ } await log("session ended", detail); return { ended: why }; };
     const clock = typeof args.clock === "function" ? args.clock : () => now;
@@ -108,16 +150,16 @@ function makeRunners(flags) {
     // Preconditions, every one failing closed (a skip, never an order).
     let latches, slotOrders, l1Fresh;
     try {
-      if (typeof args.sessionNow === "function") { const cur = await args.sessionNow(); if (!cur || cur.active !== true) return { skipped: "the session ended this minute" }; }
-      if (await store.halted()) return { skipped: "halted" };
-      if (await store.hasUnresolved(now)) return { skipped: "a slot order is unresolved" };
-      if (await store.l1HasUnresolved()) return { skipped: "an L1 order is unresolved" };
+      if (typeof args.sessionNow === "function") { const cur = await args.sessionNow(); if (!cur || cur.active !== true) { skipAll("session_ended"); return done({ skipped: "the session ended this minute" }); } }
+      if (await store.halted()) { skipAll("halted"); return done({ skipped: "halted" }); }
+      if (await store.hasUnresolved(now)) { skipAll("unresolved_order", "a slot order"); return done({ skipped: "a slot order is unresolved" }); }
+      if (await store.l1HasUnresolved()) { skipAll("unresolved_order", "an L1 order"); return done({ skipped: "an L1 order is unresolved" }); }
       try { latches = await store.killLatches(); } catch (e) { latches = { unreadable: true }; }   // an unreadable latch document kills every strategy (killCheck)
       slotOrders = await store.allSlotOrders();
       const since = Number.isFinite(sh.since) ? sh.since : now - 24 * 3600 * 1000;
       l1Fresh = await store.l1Recent(since);
-      if (!Array.isArray(slotOrders) || !Array.isArray(l1Fresh)) return { skipped: "orders unreadable" };
-    } catch (e) { return { skipped: "the slot's preconditions could not be read" }; }
+      if (!Array.isArray(slotOrders) || !Array.isArray(l1Fresh)) { skipAll("orders_unreadable"); return done({ skipped: "orders unreadable" }); }
+    } catch (e) { skipAll("preconditions_unreadable"); return done({ skipped: "the slot's preconditions could not be read" }); }
 
     const results = [];
     const committed = {};                          // dollars this tick has already committed on each shard
@@ -125,23 +167,24 @@ function makeRunners(flags) {
     const seenInShared = new Set((sh.recentList || []).map((t) => t.id || t.clientOrderId));
     for (const job of jobs) {
       const { s, ticker, series } = job;
+      let verdict = null;                          // the last refusal decide() gave inside the transaction, for the skip code (log only)
       const latch = latches && !latches.unreadable && Object.prototype.hasOwnProperty.call(latches, s.id) ? latches[s.id] : (latches && latches.unreadable ? latches : null);
       const mk = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
       const m = mk.status === 200 && mk.body && mk.body.market;
-      if (!m) { results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
+      if (!m) { skip(job, "market_unreadable", { http: mk.status }); results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
       const left = (Date.parse(m.close_time) - now) / 1000;
-      if (!OPEN_SHORT.includes(m.status) || !(left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec)) { results.push(ticker + ": not open in the entry window"); continue; }
+      if (!OPEN_SHORT.includes(m.status) || !(left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec)) { skip(job, "not_open"); results.push(ticker + ": not open in the entry window"); continue; }
       const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
-      if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { results.push(ticker + ": no two-sided quote"); continue; }
+      if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { skip(job, "no_quote"); results.push(ticker + ": no two-sided quote"); continue; }
       const spread = r4(ask - bid), closeMs = Date.parse(m.close_time);
       // The fresh market read must still be a listed release window (the gate checks it again at commit time) and, for a spread rule, no wider than the strategy allows.
-      if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, ticker, closeMs)) { results.push(ticker + ": not a listed release window"); continue; }
-      if (Number.isFinite(s.entry.maxSpread) && !(spread <= s.entry.maxSpread + 1e-9)) { results.push(ticker + ": the spread is " + spread.toFixed(2) + ", wider than " + s.entry.maxSpread.toFixed(2)); continue; }
+      if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, ticker, closeMs)) { skip(job, "not_listed"); results.push(ticker + ": not a listed release window"); continue; }
+      if (Number.isFinite(s.entry.maxSpread) && !(spread <= s.entry.maxSpread + 1e-9)) { skip(job, "spread_wide", { spread, max: s.entry.maxSpread }); results.push(ticker + ": the spread is " + spread.toFixed(2) + ", wider than " + s.entry.maxSpread.toFixed(2)); continue; }
       // Which side, and the price of that side at the touch (cents).
       const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
       const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
       const sidePrice = side === "yes" ? yesPrice : noPrice;
-      if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
+      if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { skip(job, "price_out_of_band", { price: sidePrice, min: s.entry.priceMin, max: s.entry.priceMax }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
       // The limit may sit a reviewed amount above the side's touch (SLOT_LIMIT_SLIP, OICORE 1c), never past the band; the band test above is on the quoted price.
       const limitSide = slotLib.slotLimitFor(s, sidePrice);
       const touch = side === "yes" ? limitSide : Math.round((1 - limitSide) * 100) / 100;     // the YES price the order goes to, which is what Kalshi's body carries
@@ -153,8 +196,8 @@ function makeRunners(flags) {
         const cr = await live.liveRequest({ fetchFn, method: "GET", path: "/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks",
           params: { start_ts: String(closeSec - 480), end_ts: String(closeSec - 60), period_interval: "1" }, nowMs: now });
         oiRise = oiRiseFromCandles(cr.status === 200 && cr.body ? cr.body.candlesticks : null, closeSec);
-        if (oiRise === null) { results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
-        if (oiRise < s.entry.oiRiseMin) { results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
+        if (oiRise === null) { skip(job, "no_oi_candle", { http: cr.status }); results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
+        if (oiRise < s.entry.oiRiseMin) { skip(job, "oi_below", { oiRise, min: s.entry.oiRiseMin }); results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
       }
       // The taker flow condition (FLOW1; public trade tape, no key): flow on the side bought over 360 to 180 s before the close, at most FLOW_PAGES pages. Unreadable means no order.
       let flow = null;
@@ -173,8 +216,8 @@ function makeRunners(flags) {
           if (page === FLOW_PAGES - 1) ok = false;   // more pages than allowed: the flow would be partial, so no order
         }
         flow = ok ? flowFromTrades(all, side, closeSec - 360, closeSec - 180) : null;
-        if (flow === null) { results.push(ticker + ": the taker flow could not be read, nothing sent"); continue; }
-        if (flow > s.entry.flowMax + 1e-12) { results.push(ticker + ": taker flow " + flow.toFixed(3) + ", above " + s.entry.flowMax + ", no signal"); continue; }
+        if (flow === null) { skip(job, "flow_unreadable"); results.push(ticker + ": the taker flow could not be read, nothing sent"); continue; }
+        if (flow > s.entry.flowMax + 1e-12) { skip(job, "flow_above", { flow, max: s.entry.flowMax }); results.push(ticker + ": taker flow " + flow.toFixed(3) + ", above " + s.entry.flowMax + ", no signal"); continue; }
       }
       // The position is read BEFORE the transaction and may be stale by the time it commits; the direction lock, not this read, is what closes that gap.
       const pos = await live.liveRequest({ fetchFn, keyId, pem, method: "GET", path: "/portfolio/positions", params: { ticker, limit: "20" }, nowMs: now });
@@ -183,18 +226,18 @@ function makeRunners(flags) {
         const row = pos.body.market_positions.find((x) => x.ticker === ticker);
         position = row ? num(row.position_fp !== undefined ? row.position_fp : row.position) : 0;
       }
-      if (!Number.isFinite(position)) { results.push(ticker + ": the position could not be read, nothing sent"); continue; }
+      if (!Number.isFinite(position)) { skip(job, "position_unreadable", { http: pos.status }); results.push(ticker + ": the position could not be read, nothing sent"); continue; }
       // Lowest step not yet attempted on this market (slotOrderCheck refuses a step that is not allowed yet).
       const mine = slotOrders.filter((t) => t && t.slotId === s.id && t.ticker === ticker);
       let step = 1; while (mine.some((t) => t.step === step) && step <= s.scaleIn.maxSteps) step += 1;
-      if (step > s.scaleIn.maxSteps) { results.push(ticker + ": every scale-in step was already used"); continue; }
+      if (step > s.scaleIn.maxSteps) { skip(job, "scale_in"); results.push(ticker + ": every scale-in step was already used"); continue; }
       const shardKey = String(m.exchange_index);
 
       // The authoritative decision, made INSIDE the store's transaction on the lock and the order books as they are at commit time.
-      const decide = (lockDoc, slotNow, l1Docs) => {
+      const decideNow = (lockDoc, slotNow, l1Docs) => {
         // The window is judged on the clock at commit time, not at the start of the minute: the slow reads before this (balance, markets, candles, L1's own order) can take many seconds.
         const nowD = Number(clock());
-        if (!Number.isFinite(nowD) || nowD - now > MAX_STALE_MS) return { allowed: false, reason: "too long since the minute began (" + Math.round((nowD - now) / 1000) + " s), nothing sent" };
+        if (!Number.isFinite(nowD) || nowD - now > MAX_STALE_MS) return { allowed: false, code: "stale_tick", detail: { lateSec: Math.round((nowD - now) / 1000) }, reason: "too long since the minute began (" + Math.round((nowD - now) / 1000) + " s), nothing sent" };
         const leftD = (Date.parse(m.close_time) - nowD) / 1000;
         const l1Merged = new Map();
         for (const t of l1Fresh) l1Merged.set(t.id || t.clientOrderId, t);
@@ -202,26 +245,26 @@ function makeRunners(flags) {
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
           lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
-        if (!c.allowed) return { allowed: false, reason: c.reasons.join("; ") };
+        if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
         const slotDelta = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst - slotLib.slotRiskForBotRisk(sh.slotOrders || [], sinceMs).worst;
         let newL1 = 0;
         for (const t of l1All) { if (!seenInShared.has(t.id || t.clientOrderId) && (num(t.fillCount) > 0 || ["filled", "sending", "unknown"].includes(String(t.status))) && !(t.settled === true)) newL1 += Math.max(0, num(t.maxCost) || 0); }
         const worstNow = sh.risk.worst + slotDelta - newL1;
-        if (!(worstNow - c.cost > sh.floor + 1e-9)) return { allowed: false, reason: "the shared loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
+        if (!(worstNow - c.cost > sh.floor + 1e-9)) return { allowed: false, code: "loss_stop", detail: { need: c.cost }, reason: "the shared loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
         // The slot's OWN loss stop (RISK_PROFILES.SECOND): its own orders against its own fraction of the sizing base, the new order counted as lost, so the slot is bounded on its own record
         // whatever L1 is doing. Skipped only when the profile is absent (a unit test's stub of the live module).
         const prof = live.RISK_PROFILES && live.RISK_PROFILES.SECOND;
         if (prof && Number.isFinite(prof.stopFraction)) {
           const ownWorst = slotLib.slotRiskForBotRisk(slotNow, sinceMs).worst;
-          if (!(ownWorst - c.cost > -(prof.stopFraction * sh.sizeBase) + 1e-9)) return { allowed: false, reason: "the slot's own loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
+          if (!(ownWorst - c.cost > -(prof.stopFraction * sh.sizeBase) + 1e-9)) return { allowed: false, code: "own_loss_stop", detail: { need: c.cost }, reason: "the slot's own loss stop leaves no room for a $" + c.cost.toFixed(2) + " order" };
         }
         // The shard must hold the money (L1's own check, with this minute's earlier L1 and slot orders taken off).
         const l1Shard = l1All.filter((t) => !seenInShared.has(t.id || t.clientOrderId) && String(t.exchangeIndex) === shardKey && t.settled !== true).reduce((a, t) => a + Math.max(0, num(t.maxCost) || 0), 0);
         const avail = live.availableFor(sh.balanceBody, m.exchange_index) - (committed[shardKey] || 0) - l1Shard;
-        if (!Number.isFinite(avail)) return { allowed: false, reason: "the balance came back in a shape this code does not recognise" };
-        if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, reason: "only $" + avail.toFixed(2) + " on its shard" };
+        if (!Number.isFinite(avail)) return { allowed: false, code: "balance_unreadable", reason: "the balance came back in a shape this code does not recognise" };
+        if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, code: "shard_short", detail: { shard: Number(m.exchange_index), avail: Number(avail.toFixed(2)), need: Number((c.cost + BALANCE_MARGIN).toFixed(2)) }, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
         Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise,
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
@@ -229,14 +272,21 @@ function makeRunners(flags) {
         if (flow !== null) record.flow = Number(flow.toFixed(4));
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };
-      { const fresh = Number(clock()); if (!Number.isFinite(fresh) || fresh - now > MAX_STALE_MS) { results.push(ticker + ": too long since the minute began, nothing sent"); continue; } }
+      // The same decision, with the refusal kept for the skip log. It changes nothing decide returns: the store sees exactly decideNow's verdict.
+      const decide = (lockDoc, slotNow, l1Docs) => { const v = decideNow(lockDoc, slotNow, l1Docs); verdict = v && v.allowed !== true ? v : null; return v; };
+      { const fresh = Number(clock()); if (!Number.isFinite(fresh) || fresh - now > MAX_STALE_MS) { skip(job, "stale_tick", { lateSec: Math.round((fresh - now) / 1000) }); results.push(ticker + ": too long since the minute began, nothing sent"); continue; } }
       // Flatten and Stop can land while this tick was reading (seconds, with timeouts). Read the halt again immediately before the order is recorded and sent.
       let halted;
       try { halted = await store.halted(); } catch (e) { halted = true; }
-      if (halted) { results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
+      if (halted) { skip(job, "halted"); results.push(ticker + ": the bot was halted while this minute ran, so nothing was sent"); continue; }
       let entry;
-      try { entry = await store.runSlotEntry({ ticker, side, decide, now }); } catch (e) { results.push(ticker + ": the order could not be recorded, so nothing was sent"); continue; }
-      if (!entry || entry.created !== true) { results.push(ticker + ": " + ((entry && entry.reason) || "not allowed")); continue; }
+      try { entry = await store.runSlotEntry({ ticker, side, decide, now }); } catch (e) { skip(job, "record_failed"); results.push(ticker + ": the order could not be recorded, so nothing was sent"); continue; }
+      if (!entry || entry.created !== true) {
+        const why = (entry && entry.reason) || "not allowed";
+        if (verdict && verdict.code) skip(job, verdict.code, verdict.detail, why);
+        else skip(job, why === "already attempted" ? "already_attempted" : "gate", null, why);
+        results.push(ticker + ": " + why); continue;
+      }
       const rec = entry.record, cid = rec.id;
       committed[shardKey] = (committed[shardKey] || 0) + rec.maxCost;
       slotOrders = slotOrders.concat([rec]);
@@ -267,20 +317,20 @@ function makeRunners(flags) {
         await writeLast(found
           ? { status: Number(found.fill_count_fp || 0) > 0 ? "filled" : "no fill", orderId: found.order_id, fillCount: String(found.fill_count_fp || "0"), recovered: true, error409: true }
           : { status: "unknown", error: "HTTP 409 and the order could not be found: " + short(res.body) });
-        return Object.assign(out, { results });
+        return done(Object.assign(out, { results }));
       }
       if (isAmbiguous(res.status)) {
         await latchOff("the answer for " + ticker + " was lost");
         const out = await end("attempted", "the answer for the slot order on " + ticker + " was lost (HTTP " + res.status + "). THE ORDER MAY OR MAY NOT EXIST. Check the Kalshi account (Portfolio, Orders) before starting again. Nothing was retried");
         await writeLast({ status: "unknown", error: "HTTP " + res.status + " " + short(res.body) });
-        return Object.assign(out, { results });
+        return done(Object.assign(out, { results }));
       }
       await latchOff("Kalshi refused the order for " + ticker);
       const out = await end("attempted", "Kalshi refused the slot order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
       await writeLast({ status: "error", error: "HTTP " + res.status + " " + short(res.body) });
-      return Object.assign(out, { results });
+      return done(Object.assign(out, { results }));
     }
-    return { ok: true, results };
+    return done({ ok: true, results });
   }
 
   // ---------------------------------------------------------------------------------------------------------------------------------
@@ -485,5 +535,5 @@ async function findOrder({ fetchFn, keyId, pem, ticker, clientOrderId }) {
 const prod = makeRunners(undefined);
 module.exports = {
   runSlotTick: prod.runSlotTick, runSlotExits: prod.runSlotExits, slotExitIdle: prod.slotExitIdle, runSlotSettle: prod.runSlotSettle, unsoldOf, EXIT_LOOKBACK_MS,
-  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles, flowFromTrades }),
+  _testOnly: Object.freeze({ makeRunners, oiRiseFromCandles, flowFromTrades, checkReasonCode }),
 };
