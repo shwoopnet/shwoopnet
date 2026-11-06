@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:43 AM CT (16:43Z): W-GOLDBAND1 (gold by price paid and side): loss rate falls with price, lower two buckets at or above break-even
+
+- Descriptive, try count 0, no filter proposed (w_goldband/; recorded settledPnl, fees not recomputed, size weighted dollars, no significance tests, no price versus time check). 287 settled gold orders, net +$12.67, 18 losses (16 early sells). Bucket: n, losses (exits), loss rate, net, break even loss rate (1 minus price) vs observed. 0.88 to 0.90: 46, 6 (5), 13.0%, -$1.85, 11.7% vs 13.1%. 0.90 to 0.92: 67, 7 (7), 10.4%, -$1.79, 9.2% vs 10.0%. 0.92 to 0.94: 62, 3 (2), 4.8%, +$2.25, 6.9% vs 7.1% (BE shown as observed pair). 0.94 to 0.97: 112, 2 (2), 1.8%, +$14.06, 4.4% vs 4.1%. Pattern: loss rate falls with price; the two lower buckets sit at or above break even, the upper two below it. By side the cells hold 0 to 9 losses and signs flip between YES and NO (YES 0.88 to 0.90 -15.81, NO +13.96; YES 0.92 to 0.94 -13.19, NO +15.44), so the side splits are noise. No registered gold band result exists (BUCKET1 is OICORE only). Nothing changed.
+
 ## 2026-11-06 10:43 AM CT (16:43Z): W-EVENT830-CAL1 (EVENT830 5 losses against its registration): consistent, and the Dec 7 read may be short of fills
 
 - Descriptive, try count 0 (w_event830_cal/; from README#SLOT-EVENT830, STRATEGIES.md, kalshiSlotLib.js; the original EVENT830_REGISTRATION.md and CALENDAR.md are on the research branch, not checked out). Registered: 15 windows at 13:30Z (Nov 5, 6, 10, 12, 13, 17, 19, 25; Dec 3, 4, 10, 15, 16, 17, 23); markets silver, copper, WTI, EURUSD, GBPUSD, USDJPY, HYPE, BNB; rule 180 to 120 s before the close, YES spread 10c or less, cheaper side priced 5c to 50c, limit 50c, 1 contract, hold; expected win rate about 19%, prior PF 1.05 (0.70 to 1.60), history PF 2.47 (21 trades) and 1.71 (28), picked after the parent test failed; kills net under 0 from 40 fills, 20 loss streak.
