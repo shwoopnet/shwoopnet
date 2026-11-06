@@ -1,0 +1,5 @@
+# CMD3 result (2026-11-06): NOT_ENOUGH_DATA (zero roll events in development)
+
+Registration `workers/CMD3_REGISTRATION.md`. Flag screen (futures one minute |change| at least 30 bp, perp under 20 percent of it), development sessions 10-30, 11-02, 11-03: gold 1, silver 0, copper 1, WTI 1, US 500 0, Tech 100 0. **All three flags are the final futures bar of the Friday session (17:00 ET, 10-30): gold +36.5 bp, copper -31.6 bp, WTI +115.9 bp, i.e. the weekly close print, not a contract roll and not inside an open session.** The registered rule needs an event with the session otherwise open, so there are 0 rule events; rule R was not scored. Prediction (zero roll events inside development, expiries CLZ6 2026-11-20 and Dec 18 for ES and NQ) held.
+**Enough:** 30 independent events about **2027-09 to 2027-10**; a CL-only read (6 monthly rolls) **2027-04-20**. The Friday close print is itself a recurring artefact (3 of 6 pairs, 1 date) that the CMD1 screen already excludes.
+N +1 as registered. No lead.

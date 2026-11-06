@@ -1,0 +1,145 @@
+CMD0 alignment: coincident argmax minutes of 18 (pair x event) by shift s (futures bar end shifted s minutes later than the perp T): {-1: 0, 0: 15, 1: 1} -> s = 0 confirmed
+   gold [('10-30 08:30 ET', 1), ('11-02 10:00 ET', 1), ('11-03 10:00 ET', 2)] perp argmax minute minus event, minutes
+   silver [('10-30 08:30 ET', 1), ('11-02 10:00 ET', 5), ('11-03 10:00 ET', 5)] perp argmax minute minus event, minutes
+   copper [('10-30 08:30 ET', 6), ('11-02 10:00 ET', 1), ('11-03 10:00 ET', 5)] perp argmax minute minus event, minutes
+   WTI [('10-30 08:30 ET', 3), ('11-02 10:00 ET', -5), ('11-03 10:00 ET', 4)] perp argmax minute minus event, minutes
+   US500 [('10-30 08:30 ET', 2), ('11-02 10:00 ET', 2), ('11-03 10:00 ET', 2)] perp argmax minute minus event, minutes
+   Tech100 [('10-30 08:30 ET', 2), ('11-02 10:00 ET', -5), ('11-03 10:00 ET', 2)] perp argmax minute minus event, minutes
+
+Lag profile: corr(futures return at T-k, perp return at T), k = -3..3 (k>0: futures earlier). halves D1 / D2, all
+  gold     D1  n  1439 [0.05, 0.001, 0.091, 0.936, 0.099, -0.002, 0.05]
+  gold     D2  n  5658 [-0.009, 0.035, -0.022, 0.982, -0.013, 0.034, -0.013]
+  gold     all n  7097 [0.01, 0.026, 0.014, 0.968, 0.022, 0.025, 0.008]
+  silver   D1  n  1439 [-0.033, -0.018, 0.09, 0.956, 0.065, -0.017, -0.036]
+  silver   D2  n  5587 [0.01, 0.013, 0.029, 0.962, 0.027, 0.016, 0.013]
+  silver   all n  7026 [-0.001, 0.005, 0.047, 0.961, 0.039, 0.007, -0.0]
+  copper   D1  n  1344 [-0.052, -0.02, 0.103, 0.822, 0.155, 0.122, -0.005]
+  copper   D2  n  2744 [0.0, -0.026, 0.056, 0.881, 0.099, 0.001, 0.009]
+  copper   all n  4088 [-0.013, -0.025, 0.067, 0.866, 0.112, 0.029, 0.005]
+  WTI      D1  n  1380 [-0.05, 0.043, 0.011, 0.866, 0.173, 0.033, -0.045]
+  WTI      D2  n  2760 [0.069, 0.033, 0.045, 0.988, 0.035, 0.035, 0.074]
+  WTI      all n  4140 [0.05, 0.034, 0.039, 0.967, 0.058, 0.035, 0.056]
+  US500    D1  n  1382 [0.039, 0.038, 0.023, 0.99, 0.028, 0.045, 0.036]
+  US500    D2  n  2878 [0.015, -0.008, -0.007, 0.99, 0.001, -0.01, 0.011]
+  US500    all n  4260 [0.022, 0.006, 0.003, 0.99, 0.009, 0.007, 0.019]
+  Tech100  D1  n  1381 [0.021, -0.004, 0.045, 0.991, 0.042, 0.006, 0.03]
+  Tech100  D2  n  2878 [-0.013, -0.014, -0.016, 0.99, -0.007, -0.012, -0.018]
+  Tech100  all n  4259 [-0.003, -0.011, 0.003, 0.99, 0.008, -0.006, -0.003]
+LEAD statistic (corr futures T-1 vs perp T, minus perp T-1 vs futures T): {('gold', 'D1'): 0.008, ('gold', 'D2'): 0.009, ('gold', 'all'): 0.008, ('silver', 'D1'): -0.025, ('silver', 'D2'): -0.002, ('silver', 'all'): -0.008, ('copper', 'D1'): 0.052, ('copper', 'D2'): 0.043, ('copper', 'all'): 0.045, ('WTI', 'D1'): 0.162, ('WTI', 'D2'): -0.01, ('WTI', 'all'): 0.019, ('US500', 'D1'): 0.005, ('US500', 'D2'): 0.008, ('US500', 'all'): 0.006, ('Tech100', 'D1'): -0.003, ('Tech100', 'D2'): 0.009, ('Tech100', 'all'): 0.005}
+pairs with statistic >= 0.03 of 6: {'D1': 2, 'D2': 1, 'all': 1}
+
+Cash index lead-lag (cash hours 09:30-16:00 ET), corr(cash return at T-k, perp return at T), k=-2..2 (information only)
+   ^GSPC US500 [(1152, 0.006), (1155, 0.006), (1158, 0.979), (1158, -0.005), (1158, -0.004)]
+   ^NDX Tech100 [(1152, -0.025), (1155, 0.047), (1158, 0.963), (1158, 0.017), (1158, -0.026)]
+
+--- CMD1 R1 basis reversion (|d| >= 10 bp, skip > 100 bp), pooled over six pairs, hold H
+== R1 H=5 trades 91 session clusters 3
+  gross after spread, before fee: mean -1.99 bp, hit 0.29, break-even fee/side -0.99 bp
+  net at  5 bp a side: mean -12.0 bp
+  net at 12 bp a side: mean -26.0 bp
+  net at 24 bp a side: mean -50.0 bp
+  D1 n 29 net12 -24.1 bp
+  D2 n 62 net12 -26.9 bp
+  per-session net12 bp: {'2026-10-30': -24.1, '2026-11-02': -28.0, '2026-11-03': -25.4} z -22.76
+  skipped 7 bad pairs >100bp 1
+== R1 H=15 (PRIMARY) trades 48 session clusters 3
+  gross after spread, before fee: mean 1.05 bp, hit 0.40, break-even fee/side 0.53 bp
+  net at  5 bp a side: mean -8.9 bp
+  net at 12 bp a side: mean -22.9 bp
+  net at 24 bp a side: mean -46.9 bp
+  D1 n 14 net12 -24.5 bp
+  D2 n 34 net12 -22.3 bp
+  per-session net12 bp: {'2026-10-30': -24.5, '2026-11-02': -30.2, '2026-11-03': -13.4} z -4.59
+  skipped 3 bad pairs >100bp 1
+== R1 H=30 trades 30 session clusters 3
+  gross after spread, before fee: mean 0.71 bp, hit 0.37, break-even fee/side 0.35 bp
+  net at  5 bp a side: mean -9.3 bp
+  net at 12 bp a side: mean -23.3 bp
+  net at 24 bp a side: mean -47.3 bp
+  D1 n 8 net12 -20.5 bp
+  D2 n 22 net12 -24.3 bp
+  per-session net12 bp: {'2026-10-30': -20.5, '2026-11-02': -30.0, '2026-11-03': -18.7} z -6.58
+  skipped 5 bad pairs >100bp 1
+
+--- CMD1 R2 follow the futures (|futures 1m return| >= 5 bp, perp caught up < 50 percent)
+== R2 H=1 trades 175 session clusters 3
+  gross after spread, before fee: mean -1.28 bp, hit 0.33, break-even fee/side -0.64 bp
+  net at  5 bp a side: mean -11.3 bp
+  net at 12 bp a side: mean -25.3 bp
+  net at 24 bp a side: mean -49.3 bp
+  D1 n 53 net12 -25.9 bp
+  D2 n 122 net12 -25.0 bp
+  per-session net12 bp: {'2026-10-30': -25.9, '2026-11-02': -26.1, '2026-11-03': -24.0} z -38.92
+  skipped 3
+== R2 H=5 (PRIMARY) trades 146 session clusters 3
+  gross after spread, before fee: mean -1.28 bp, hit 0.40, break-even fee/side -0.64 bp
+  net at  5 bp a side: mean -11.3 bp
+  net at 12 bp a side: mean -25.3 bp
+  net at 24 bp a side: mean -49.3 bp
+  D1 n 40 net12 -22.1 bp
+  D2 n 106 net12 -26.5 bp
+  per-session net12 bp: {'2026-10-30': -22.1, '2026-11-02': -29.0, '2026-11-03': -24.1} z -12.36
+  skipped 4
+== R2 H=15 trades 112 session clusters 3
+  gross after spread, before fee: mean 4.64 bp, hit 0.54, break-even fee/side 2.32 bp
+  net at  5 bp a side: mean -5.4 bp
+  net at 12 bp a side: mean -19.4 bp
+  net at 24 bp a side: mean -43.4 bp
+  D1 n 31 net12 -19.7 bp
+  D2 n 81 net12 -19.2 bp
+  per-session net12 bp: {'2026-10-30': -19.7, '2026-11-02': -29.8, '2026-11-03': -9.4} z -3.34
+  skipped 4
+
+--- CMD2 daily break and weekend (times ET and CT)
+  B1 gold break 11-02 17:00 ET perp drift Mb 4.6 bp below 10 bp
+  B1 silver break 11-02 17:00 ET perp drift Mb 4.1 bp below 10 bp
+  B1 copper break 11-02 17:00 ET perp drift Mb -0.2 bp below 10 bp
+  B1 WTI no quote at 17:00 or 17:59 ET
+  B1 US500 break 11-02 17:00 ET perp drift Mb -13.3 bp TRIGGER
+  B1 Tech100 break 11-02 17:00 ET perp drift Mb -26.7 bp TRIGGER
+  B1 note: Tue 11-03 break not scoreable (its 18:15 ET exit is in held-out session 11-04); Fri 10-30 17:00 is the weekend close.
+== B1 trades 2 session clusters 1
+  gross after spread, before fee: mean 4.76 bp, hit 0.50, break-even fee/side 2.38 bp
+  net at  5 bp a side: mean -5.2 bp
+  net at 12 bp a side: mean -19.2 bp
+  net at 24 bp a side: mean -43.2 bp
+  D1 n 0 net12 -
+  D2 n 2 net12 -19.2 bp
+  per-session net12 bp: {'2026-11-03': -19.2} z n/a (under 3 clusters or no variance)
+  B2 gold weekend drift W 28.3 bp TRIGGER
+  B2 silver weekend drift W 29.2 bp TRIGGER
+  B2 copper no quote at Fri 17:00 or Sun 17:59 ET 10-30 17:00 ET 11-01 17:59 ET
+  B2 WTI no quote at Fri 17:00 or Sun 17:59 ET 10-30 17:00 ET 11-01 17:59 ET
+  B2 US500 no quote at Fri 17:00 or Sun 17:59 ET 10-30 17:00 ET 11-01 17:59 ET
+  B2 Tech100 no quote at Fri 17:00 or Sun 17:59 ET 10-30 17:00 ET 11-01 17:59 ET
+== B2 trades 2 session clusters 1
+  gross after spread, before fee: mean -57.13 bp, hit 0.00, break-even fee/side -28.57 bp
+  net at  5 bp a side: mean -67.1 bp
+  net at 12 bp a side: mean -81.1 bp
+  net at 24 bp a side: mean -105.1 bp
+  D1 n 0 net12 -
+  D2 n 2 net12 -81.1 bp
+  per-session net12 bp: {'2026-11-02': -81.1} z n/a (under 3 clusters or no variance)
+
+--- CMD3 roll screen: flagged minutes (futures |1m change| >= 30 bp, perp under 20 percent of it), development
+   gold flagged minutes 1 [('10-30 17:00 ET', '36.5 bp')]
+   silver flagged minutes 0 []
+   copper flagged minutes 1 [('10-30 17:00 ET', '-31.6 bp')]
+   WTI flagged minutes 1 [('10-30 17:00 ET', '115.9 bp')]
+   US500 flagged minutes 0 []
+   Tech100 flagged minutes 0 []
+
+--- CMD4 break-even fee map (development only; cells under 10 trades print n only)
+  pair     rule                    n     gross bp  BE fee bp     net5    net12    net24    hit
+  gold     R1 H=15                 0  (under 10 trades, no map)
+  gold     R2 H=5                  0  (under 10 trades, no map)
+  silver   R1 H=15                 3  (under 10 trades, no map)
+  silver   R2 H=5                 60         0.48       0.24     -9.5    -23.5    -47.5   0.43
+  copper   R1 H=15                39         0.15       0.07     -9.9    -23.9    -47.9   0.36
+  copper   R2 H=5                 75        -2.76      -1.38    -12.8    -26.8    -50.8   0.37
+  WTI      R1 H=15                 1  (under 10 trades, no map)
+  WTI      R2 H=5                 11        -0.81      -0.41    -10.8    -24.8    -48.8   0.45
+  US500    R1 H=15                 0  (under 10 trades, no map)
+  US500    R2 H=5                  0  (under 10 trades, no map)
+  Tech100  R1 H=15                 5  (under 10 trades, no map)
+  Tech100  R2 H=5                  0  (under 10 trades, no map)
