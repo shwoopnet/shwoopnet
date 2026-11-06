@@ -1,0 +1,9 @@
+{
+ "id": "CRYPTOCTX_RUN65",
+ "group": "CRYPTOCTX",
+ "run": 65,
+ "seed": 1065,
+ "n_scored": 5000,
+ "survivors": [],
+ "n_before_clustering": 0
+}

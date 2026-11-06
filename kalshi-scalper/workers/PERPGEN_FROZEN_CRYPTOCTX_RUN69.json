@@ -1,0 +1,15 @@
+{
+ "id": "CRYPTOCTX_RUN69",
+ "group": "CRYPTOCTX",
+ "run": 69,
+ "seed": 1069,
+ "n_scored": 5000,
+ "survivors": [
+  {
+   "rule": "r5>=q0.75&xeth240>=q0.90|short|480",
+   "n": 387,
+   "pf12": 1.6094542358772759
+  }
+ ],
+ "n_before_clustering": 1
+}
