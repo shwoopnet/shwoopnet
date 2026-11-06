@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:43 AM CT (16:43Z): W-STOPMIX1 (combined rolling 24h since Oct 30): worst -$48.38 at 15:00Z today, 86% from gold
+
+- Descriptive, try count 0 (w_stopmix/; report generated 16:32Z; L1 plus OICORE, EVENT830 and 2 FLOW1 orders, filled only, settled at the ticker's ET close, 185 hourly points; dollars after the last order at 14:54Z not covered). Worst combined rolling 24h: -$48.38 at 2026-11-06 15:00Z (10:00 CT); next -47.83, -47.55, -46.58, all this morning. Hours below -$30: 19 of 185 (10%); below -$40: 5 of 185 (3%); best +$33.53. Worst window by strategy: L1 -41.53, OICORE -5.88, EVENT830 -0.97; share of gross losses L1 86%, OICORE 12%, EVENT830 2%; L1's five losses of $10.31 to $11.25 all fell between Nov 5 18:30Z and Nov 6 12:15Z. No unsettled fills in the report, so open cost changes nothing. The -$48 is under the roughly $56 to $62 stop line for bases 466 to 518 by $7.5 to $13.8 at its worst; the live base was not checked. Nothing changed.
+
 ## 2026-11-06 10:42 AM CT (16:42Z): W-OICORE-TIME1 (OICORE fills by CT block and day): descriptive tables, no cell supports an inference
 
 - Descriptive, try count 0, no filter proposed (w_oicore_time/; live close time inferred from order timestamp; cells 1 to 16 fills; blocks not corrected for looks). 47 fills, 10 wins, +$41.79 reproduced; sim 49 triggers since Oct 30 12:00Z. By 4h CT block of the close (fills / wins / net / sim triggers): 00-04 2/0/-1.28/1; 04-08 3/1/+7.97/2; 08-12 8/0/-8.83/15; 12-16 16/5/+31.64/11; 16-20 7/3/+16.57/10; 20-24 11/1/-4.28/10. By CT date: Oct 30 5/1/+1.25/5; Oct 31 4/2/+12.95/4; Nov 1 4/0/-3.73/8; Nov 2 5/2/+14.56/6; Nov 3 6/1/+4.55/8; Nov 4 9/3/+19.37/6; Nov 5 13/1/-6.52/12; Nov 6 1/0/-0.64/0 (partial). Notable mismatches: 08-12 block 15 sim triggers vs 8 fills, 12-16 16 fills vs 11 triggers, Nov 1 8 triggers vs 4 fills (cause not checked; tables not matched per window). Nothing changed.
