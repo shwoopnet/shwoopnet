@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 12:05 PM CT (18:05Z): S-NOFILLADV registered and built (owner approved, measure only): read at 20 no fill orders
+
+- Registered before scoring (w_nofilladv/REGISTRATION.md): question: do OICORE live orders that got no fill win more often than the filled ones; population: OICORE slotOrders since cutoff 2026-11-06T18:00:00Z (forward only; history 47 filled + 10 no fill is context only: no fill 4 of 10 = 40% [16.8, 68.7] vs filled 10 of 47 = 21.3% [12.0, 34.9], W-OICORE-ADVERSE1); outcome: the market result against the order side (public GET /markets/{ticker}, no key, no order); yardstick: read at 20 no fill orders, matters only if the no fill win rate exceeds the filled win rate by 15 points or more with non overlapping Wilson intervals, else drop; it can only lead to a brief for a limit +2c test and never changes an order; try count 2. nofilladv.py selftest reproduces the history; forward now 0 orders, NO READ. Wired as a NOFILLADV section in wake.sh (backup wake.sh.pre_nofilladv). Nothing changed in the bot.
+
 ## 2026-11-06 12:04 PM CT (18:04Z): Owner decision (via main): only S-NOFILLADV approved; the other five drafts stay unstarted; S-GHOLD120 tracker disabled in wake.sh
 
 - Main (Nov 6 about 18:04Z): the owner approved only S-NOFILLADV (measure only, no order change); S-EDGEFILT, S-NEARTHR, S-GFLOOR92, S-GCHEAPCAP and S-GHOLD120 stay unstarted. Action: the S-GHOLD120 section I had wired into wake.sh (read only, no order effect) is commented out (backup wake.sh.pre_disable_ghold); the tracker script stays in w_ghold120_fwd/ unused. S-EDGEFWD, S-RISEFWD and S-GOLDEXIT180 are earlier read only trackers of the live fills (not among the six drafts) and stay in wake.sh unless main says otherwise. Next: register S-NOFILLADV and run it (a worker). Nothing changed in the bot.
