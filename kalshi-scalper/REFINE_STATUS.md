@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:06 AM CT (17:06Z): OPEN CONFLICT (W-GQH-PROG1): interim_40 S-GQH1 shows 16 live gold fills in 20-24 CT, but the block is supposedly live since Oct 29
+
+- interim_40.md S-GQH1 (gold fills 20 to 24 CT since 2026-10-30 19:30): live 16 block fills, 2 losses, -$10.13; other hours 37 fills 1 loss +$21.86. W-GQH-NEXT1 and W-GQH-COST1 assumed the live bot placed 0 block orders since Oct 29 (the block went live with the deploy), which this contradicts. Possible reasons: the quiet hours table was deployed later than Oct 29 (so some block orders existed), the fills are by sent time vs the CT clock in a different zone, or the interim line counts close time (20 to 24 CT closes include orders placed 19:45 to 23:45) while the block applies to the order time. W-GQH-PROG1 also reports the 100 block entry projection at about Nov 26 CT and z +2.87 (block better than rest, which by the registered rule would read 'delete' if it held at 100). Until the date the block actually became live is settled, W-GQH-COST1 (about $25 not earned) and the block entries count are provisional. A worker checks the live gold order times by CT hour and date next. Nothing changed.
+
 ## 2026-11-06 11:05 AM CT (17:05Z): Skip reasons (PR 726) merged, not live: read byReason for the 16 OICORE gaps after deploy
 
 - Main (Nov 6): the slot tick writes kalshiSlotSkips/{strategy}_{ticker} with a reason code for every in span market that places no order, and the nightly report has a skips section (7 days); it starts recording once the owner runs deploy-latest.sh (pending); main will tell me when it is live, then read byReason for the 16 gaps (W-OICORE-SKIP1). Added to kalshi-scalper/REFINE_CHECKLIST.md with the #729 follow ups. Note the first skips will only cover windows after the deploy, so the 16 earlier gaps cannot be explained retroactively; the read will be on the new window gaps (OICORE triggers by the c-180 candle without a live order). Nothing changed.
