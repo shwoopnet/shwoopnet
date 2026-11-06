@@ -1,0 +1,5 @@
+# OVN4 result (2026-11-06): FALSIFIED (no overnight spread widening)
+Registration `workers/OVN4_REGISTRATION.md`. Hourly bid and ask close candles before 2026-11-01T00:00Z, ET buckets, relative spread in bps (median, candle count):
+- KXUS500PERP (441 candles, 19 days): CASH 0.73 (132), AFTER 0.70 (70), NIGHT 0.88 (191), WEEKEND 0.81 (47). NIGHT/CASH 1.20, WEEKEND/CASH 1.11. By half: D1 NIGHT 0.88 vs CASH 0.59 (1.49), D2 0.88 vs 0.96 (0.92).
+- KXUSTECH100PERP (294 candles, 13 days): CASH 1.07 (91), AFTER 0.95, NIGHT 1.09 (127), WEEKEND 1.08 (30). NIGHT/CASH 1.02, WEEKEND/CASH 1.01.
+Rule was FALSIFIED if NIGHT/CASH under 1.3: it is 1.20 and 1.02. The quoted spread does not widen overnight or on weekends on the index perps; it is about 1 bp at all hours, against a 24 bps round-trip fee, so there is no spread premium for a maker to earn or a taker to pay, and the fee is the only cost that matters. Caveats: hourly close snapshots, not the full book; stock and ETF perps (the ones with a real cash shutdown) have only 1 to 2 days of quotes, so this says nothing about them; the registered prediction of widening 1.5x to 4x was wrong.

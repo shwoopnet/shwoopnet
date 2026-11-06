@@ -1,0 +1,25 @@
+rows before cut 2062
+spread KXUS500PERP 53 0.96
+spread KXUSTECH100PERP 53 1.09
+universe ['KXUS500PERP', 'KXUSTECH100PERP']
+== OVN1 skips {'no t0 or t1': 10, '|q|<5bps': 1}
+   2026-10-22 KXUS500PERP net -50.8 bps signal -102.5 bps
+   2026-10-23 KXUS500PERP net -18.3 bps signal -17.6 bps
+   2026-10-22 KXUSTECH100PERP net -83.6 bps signal -175.7 bps
+OVN1 n=3 clusters=2 mean=-50.9bps PF=0.00 D1 n=3 mean=-50.9 D2 n=0 mean=-
+   day-clustered z=-1.75
+== OVN2 skips {}
+   2026-10-22 KXUS500PERP net 2.1 bps signal -105.5 bps
+   2026-10-23 KXUS500PERP net -30.9 bps signal -23.3 bps
+   2026-10-22 KXUSTECH100PERP net 33.5 bps signal -168.9 bps
+   2026-10-23 KXUSTECH100PERP net 36.9 bps signal 12.9 bps
+OVN2 n=4 clusters=2 mean=10.4bps PF=2.34 D1 n=4 mean=10.4 D2 n=0 mean=-
+   day-clustered z=1.40
+== OVN3F skips {}
+OVN3F n=0
+== OVN3L skips {}
+OVN3L n=0
+skips {'OVN1': {'no t0 or t1': 10, '|q|<5bps': 1}, 'OVN2': {}, 'OVN3F': {}, 'OVN3L': {}}
+== OVN4
+KXUS500PERP candles 441 {'AFTER': (70, 0.7), 'AFTER_D1': (55, 0.67), 'AFTER_D2': (15, 0.74), 'CASH': (132, 0.73), 'CASH_D1': (104, 0.59), 'CASH_D2': (28, 0.96), 'NIGHT': (191, 0.88), 'NIGHT_D1': (144, 0.88), 'NIGHT_D2': (47, 0.88), 'WEEKEND': (47, 0.81), 'WEEKEND_D1': (47, 0.81)} days {'CASH': 19, 'AFTER': 19, 'NIGHT': 19, 'WEEKEND': 8}
+KXUSTECH100PERP candles 294 {'AFTER': (46, 0.95), 'AFTER_D1': (32, 0.95), 'AFTER_D2': (14, 0.95), 'CASH': (91, 1.07), 'CASH_D1': (63, 1.08), 'CASH_D2': (28, 0.84), 'NIGHT': (127, 1.09), 'NIGHT_D1': (80, 1.09), 'NIGHT_D2': (47, 0.84), 'WEEKEND': (30, 1.08), 'WEEKEND_D1': (30, 1.08)} days {'CASH': 13, 'AFTER': 13, 'NIGHT': 13, 'WEEKEND': 4}

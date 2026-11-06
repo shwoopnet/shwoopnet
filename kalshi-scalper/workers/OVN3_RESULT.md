@@ -1,0 +1,3 @@
+# OVN3 result (2026-11-06): NOT_ENOUGH_DATA
+Registration `workers/OVN3_REGISTRATION.md`. 0 scorable weekend events in dev: the only dev weekend (Fri 2026-10-23 to Mon 2026-10-26) had no recorder sample in Monday's 05:00 to 09:25 ET window with a following 09:50 to 11:30 ET sample (Monday samples were 06:57 and 13:15 ET). Bar 30 weekends. The Fri 10-30 to Mon 11-02 weekend is in the held-out third and was not read.
+Enough data: about 30 weekends, i.e. around 2027-05 for dev plus a held-out third about 2027-07, and only if a Monday pre-open sample lands in the window (the 30 second open recorder would fix that).
