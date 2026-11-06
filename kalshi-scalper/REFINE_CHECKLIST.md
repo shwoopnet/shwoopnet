@@ -17,7 +17,6 @@ Trigger ids: NONE are recorded in REFINE_STATUS.md, interim_40.md or TOOLBOX.md.
 10. About Nov 18: extended OICORE read at 100 fills; C9 400 windows. About Nov 19: C1 (gold+Dogecoin 90 to 92c, 80 settled).
 11. About Nov 19 to 25: EVENT830 reaches about 15 fills. Report mean price paid vs registered 14c to 18c (live 27.6c on 5 fills). If still above about 20c, ask the owner whether to ADD a note (not move the bar). Do NOT rewrite the registration.
 12. Dec 7: EVENT830 INTERIM read only (fills, wins, net, price paid vs 14c to 18c, releases left; no pass/fail unless a kill fired). 40 fills not reachable by Dec 7 (Dec 10 at best, probably 2027). Kills: net under 0 at 40 fills, 20 loss streak, reviewedAt 2026-11-05.
-13. About Nov 24 to 26: S-GQH1 and quiet hours review at 100 block entries on fresh public-candle days (26 of 26 won at Nov 6, z block minus rest +2.87, block better than rest, opposite of why it was added; need 74 more at 3.6/day). Rule: z under 0 delete the table entry, z >= 1.5 below keep, between wait for December. The fwd_all.py S-GQH1 live tracker reads at 40 (16 block fills, 2 losses, -$10.13 at Nov 6; flag at 40: block losses >= 5, PF < 1.0, other PF > 1.3). Formal MKTTIME1-F in December.
 
 ## Open-ended trackers (no date; need fill counts)
 - goldfwd (since 2026-11-05T16:27:35Z, w_goldfwd_bkt): 20 fills Nov 6, 5 losses, -$40.36, PF 0.25, break even 8.32%. Flag at 100 fills (none yet). Rate of about 20 per day means about Nov 10 to 11.
@@ -28,7 +27,7 @@ Trigger ids: NONE are recorded in REFINE_STATUS.md, interim_40.md or TOOLBOX.md.
 - floor05: flag at 20 settled floor fills (13 A, 19 B so far), c per contract under 0.
 - S-FLOW2 (needs 150 windows; diff -0.77c vs +2c pass bar) and S-FLOWL1 (gold, read at 20 early sells, earliest about Dec 1) kept until their registered reads.
 
-## Report fix #729 follow ups (merged, NOT deployed as of Nov 6 10:59 AM CT)
+## Report fix #729 follow ups (merged; deploy-latest.sh ran Nov 6, confirm the time in the deploys stamps)
 Trigger: owner runs the report deploy (`bash functions/deploy-report.sh`); main will tell the refinement session; the report's deploys section shows a new stamp. Then on a fresh ?orders=1 report carrying avgFill and avgFee: (1) rerun w_costgap/run.py and w_event830_fee/fee.py (gold gap 0.33c, OICORE 0.62c; separate slip from fee rate); (2) rerun w_realpnl/real_pnl.py; (3) rerun W-GOLDSLIP1 with real fills; (4) recheck exit sale prices (W-GOLDEXIT-DEPTH1 used the order price: 15 of 16 gold exits sold below 25c, 11% extra loss).
 
 ## Standing rules
@@ -42,9 +41,9 @@ Nothing here changes trading code, sizes or rules; Stop/hold decisions are the o
 - Hourly routine (cron 32 * * * *): trig_017HTDZNKWfyBephf72bqcaG
 The scratchpad scripts named above live in the refine session's scratchpad, not in this repo.
 
-## Waiting on the owner's deploy (deploy-latest.sh), Nov 6 2026
-- PR 726 (slot skip reasons: kalshiSlotSkips/{strategy}_{ticker}, report `skips` section, 7 days) and #729 (avgFill, avgFee) are merged but not live until the owner runs deploy-latest.sh. Main will say when it is live.
-- When live: read the report's skips byReason for the 16 OICORE triggers with no order (W-OICORE-SKIP1); re-run the cost gap and slip checks with avgFill and avgFee (see the #729 note in REFINE_STATUS.md).
+## deploy-latest.sh status (Nov 6 2026)
+- Ran Nov 6 per main (main said about 12:15 PM CT, but the machine clock then read about 11:20 AM CT, so the time is unconfirmed: read the report deploys stamps). Live: skip reasons (kalshiSlotSkips, report skips section), #729 (avgFill, avgFee) and the #699 OICORE ladder.
+- To do: read skips byReason for new OICORE triggers with no order (W-OICORE-SKIP1; the 16 earlier gaps cannot be explained); rerun cost gap, fee and slip checks on orders carrying avgFill and avgFee; treat OICORE dollar figures after the deploy as the ladder, not 10 contracts.
 
-## CORRECTION (Nov 6 2026, main): gold's quiet hours block is NOT live
-QUIET_HOURS_CT = {} on origin/main: the owner lifted the block on Oct 30 ("Lift it from both"). Drop the 100 block entry review (about Nov 26) and the 'block live since Nov 6 16:33Z' reading; S-GQH1 and the block hours stay as plain history only.
+## Gold quiet hours
+Not live: QUIET_HOURS_CT is empty (lifted Oct 30). No block review is due; S-GQH1 is history only.
