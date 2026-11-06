@@ -31,7 +31,7 @@ _spec.loader.exec_module(base)
 NY = ZoneInfo("America/New_York")
 WINDOWS = (("open", (9, 10), (10, 30)), ("close", (15, 40), (17, 0)))
 EVERY_S = 30
-STOP_DATE = dt.date(2026, 12, 7)   # 30 days of data, then a reviewed edit to extend
+STOP_DATE = dt.date(2027, 2, 26)   # about 110 weekdays of data for V2's 150 trade reads (was 2026-12-07, extended Nov 6, 2026 at the owner's word); a reviewed edit to extend again
 
 
 def current_window(now_utc):

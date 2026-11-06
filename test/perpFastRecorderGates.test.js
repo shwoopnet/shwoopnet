@@ -58,7 +58,7 @@ p = os.path.join(d, '2026-11-05', 'open.csv.gz')
 rows = gzip.open(p, 'rt').read().strip().split('\\n')
 clock[0] = dt.datetime(2026, 11, 5, 15, 29, 30, tzinfo=u)
 b = m.main(d, now, fetch, sleep)
-clock[0] = dt.datetime(2026, 12, 8, 15, 0, 0, tzinfo=u)
+clock[0] = dt.datetime(2027, 2, 27, 15, 0, 0, tzinfo=u)
 c = m.main(d, now, fetch, sleep)
 print(json.dumps([a, len(rows) - 1, calls[0], b, c, os.listdir(d)]))`);
   assert.strictEqual(r[0], 0);

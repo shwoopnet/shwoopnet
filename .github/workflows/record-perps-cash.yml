@@ -1,0 +1,40 @@
+# Saves Yahoo's PUBLIC 1 minute prices for the things Kalshi's perpetual markets track (research only, Nov 6, 2026, V2's request: Yahoo keeps only about 7 days of 1 minute bars).
+# No secret is used or needed: plain GETs of public pages; the built-in GITHUB_TOKEN only pushes gzipped CSV to the `perp-data` branch (under cash1m/), never to main.
+# Three starts a night on Tuesday to Saturday UTC (after the US after-hours session ends); the script does nothing if the day's file exists. Stops by itself after 2027-02-26.
+name: record-perps-cash
+on:
+  schedule:
+    - cron: "0 2,3,4 * * 2-6"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-perps-cash
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Get the recorder script from main
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin perp-data; then git checkout -q -b perp-data FETCH_HEAD; else git checkout -q --orphan perp-data; fi
+      - name: Save the prices
+        run: python3 code/scripts/record_perps_cash.py data/cash1m
+      - name: Commit and push the data branch
+        run: |
+          cd data
+          git config user.name "perp-recorder"
+          git config user.email "perp-recorder@users.noreply.github.com"
+          git add cash1m 2>/dev/null || true
+          git commit -q -m "perps cash 1m $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin perp-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin perp-data || true; done
+          exit 1
