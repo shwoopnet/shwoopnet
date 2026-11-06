@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:17 AM CT (17:17Z): Note on W-OICOREPF1: delete the parenthetical about losses in a row
+
+- In W-OICOREPF1 I wrote that fills 31 to 47 included '7 of them losses in a row at times'. The worker did not report that; it was my unchecked guess. What the data does show (from W-OICORE-RUNS1) is the longest loss streak of 11 on Nov 5, which sits inside fills 30 to 47. W-OICOREFLAT1 is listing fills 31 to 47 now; use its result, not the parenthetical. Nothing changed.
+
 ## 2026-11-06 11:17 AM CT (17:17Z): W-OICOREPF1 (OICORE profit factor over its fills): lower bound above 1.0 since fill 20, now 1.06
 
 - Descriptive, try count 0, bootstrap 90% interval on PF, 20,000 draws (w_oicorepf/). 47 fills by time (matches: net +$41.79, PF 2.17, 10 wins). Fills / net / PF / 90% interval: 10 / +13.03 / 2.97 / 0.53 to 9.59; 20 / +33.53 / 3.78 / 1.34 to 8.30; 30 / +42.46 / 3.12 / 1.35 to 6.02; 40 / +42.46 / 2.49 / 1.13 to 4.48; 47 / +41.79 / 2.17 / 1.06 to 3.81. Net stayed above 0 throughout; the lower bound has been above 1.0 since fill 20 and is now only 1.06. At 47 fills the share of draws under 1.5 is 18% (under 1.0: 3.8%), so 1.5 is not ruled out. PF has drifted down from its early highs (the net has been flat at about +$42 since fill 30, 17 fills, 7 of them losses in a row at times). Reading: OICORE clears the minimum (net above 0, interval above 1.0) but its PF is regressing toward the sim's; at 100 fills the interval should narrow to a usable read. Nothing changed.
