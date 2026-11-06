@@ -984,7 +984,7 @@
   /* Every market shows its chart (the owner, Oct 23, 2026: "make charts appear even if no position"; it used to be only while in a trade). A market the account holds a position in gets a brighter outline instead. */
   @media (max-width:900px){
     .kal-console{ grid-template-columns:minmax(0,1fr); }
-    .kal-console [data-card]{ grid-column:1 / -1; }
+    .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }   /* the second selector outranks the span rules, so a width set on a desktop never makes extra columns on a phone */
     .kal-console [data-card="account"]{ grid-template-columns:minmax(0,1fr); gap:12px; }
     .kal-console [data-card="account"] .kal-acct-head, .kal-console [data-card="account"] .kal-acct-total, .kal-console [data-card="account"] .kal-today, .kal-console [data-card="account"] .kal-acct-risk, .kal-console [data-card="account"] #kalStrategies, .kal-console [data-card="account"] .kal-rows > div, .kal-console [data-card="account"] #kalL1Why{ grid-column:1 / -1; grid-row:auto; }
     .kal-strat-mk{ display:none; }
@@ -1658,6 +1658,9 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 5</div>
                 <ul class="changelog-list">
+                  <li>Bot page: in Edit layout, drag a card's bottom right corner to resize it (width snaps to a quarter, a third, a half, two thirds or full; height snaps in steps and the card scrolls inside); double click the corner for its own height. A phone stays one column</li>
+                  <li>Research: a perps recorder that samples every 30 seconds around the US stock open and close (Kalshi now lists single stock perps)</li>
+                  <li>Deploy command: it now notices a change to the market price list, and names any server file it does not know how to deploy instead of saying nothing to deploy</li>
                   <li>Bot page: a folded card shows only its title (the Account card keeps its Running pill); the range buttons and the trades filter hide until it is opened</li>
                   <li>Bot page: the Start box and Rules text name every live strategy (L1 on gold, OICORE and EVENT830) and OICORE's limit 1c above the price it sees; changelog days and strategy docs brought up to date</li>
                   <li>Bot page: EVENT830's open positions now get a chart too (the price feed reads its eight markets)</li>

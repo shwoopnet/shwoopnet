@@ -69,9 +69,9 @@ gates.L3 = () => {
 
 // L4: widths are ignored at phone width. Consequence: a Half card never squeezes into half a phone screen.
 gates.L4 = () => {
-  assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}\s*\.kal-console \[data-card\]\{ grid-column:1 \/ -1; \}/.test(css), 'one column on a phone, every card across it');
-  const block = css.indexOf('@media (max-width:900px){\n    .kal-console{ grid-template-columns:minmax(0,1fr); }\n    .kal-console [data-card]{');
-  assert.ok(block > css.indexOf('.kal-console{ grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:18px; }'), 'and the phone rule comes after the two column rule, so it wins');
+  assert.ok(/@media \(max-width:900px\)\{\s*\.kal-console\{ grid-template-columns:minmax\(0,1fr\); \}\s*\.kal-console \[data-card\], \.kal-console > \[data-card\]\[data-w\]\{ grid-column:1 \/ -1; \}/.test(css), 'one column on a phone, every card across it');
+  const block = css.indexOf('@media (max-width:900px){\n    .kal-console{ grid-template-columns:minmax(0,1fr); }\n    .kal-console [data-card], .kal-console > [data-card][data-w]{');
+  assert.ok(block > css.indexOf('.kal-console{ grid-template-columns:repeat(12, minmax(0,1fr)); gap:18px; }'), 'and the phone rule comes after the twelve column rule, so it wins (changed Nov 5, 2026: twelve columns)');
   // Changed Nov 5, 2026 (resizable cards): the width and height buttons and the corner are all hidden on a phone; widths are spans of 12 (12 is the old Full, 6 the old Half).
   assert.ok(/@media \(max-width:900px\)\{ \.kal-move \[data-width\], \.kal-move \[data-height\], \.kal-resize\{ display:none; \}/.test(css), 'the size controls are not offered where they mean nothing');
   assert.ok(/\.kal-console > \[data-card\]\[data-w="12"\]\{ grid-column:1 \/ -1; \}/.test(css) && !/grid-auto-flow:row dense/.test(css), 'on a wide screen a full width card spans every column, and there is no dense packing to reorder cards behind the owner\'s back');
@@ -84,11 +84,11 @@ gates.L4 = () => {
 gates.L5 = () => {
   const make = () => new Function(
     'var layout = { v: 3, order: ["account", "status", "pnl", "positions", "trades"], hidden: {}, width: {}, height: {}, folded: {} };' +
-    'var editing = false, before = null, undo = [], drag = null, saves = 0, KEY = "k";' +
+    'var editing = false, before = null, undo = [], drag = null, size = null, saves = 0, KEY = "k";' +
     'var bar = { hidden: true }, undoBtn = { disabled: true };' +
     'var document = { getElementById: function(){ return { focus: function(){}, blur: function(){}, open: true }; } };' +
     'var localStorage = { setItem: function(){} };' +
-    'function flip(fn){ fn(); } function apply(){} function setUnlocked(){} function announce(){} function endDrag(){} function save(){ saves++; }' +
+    'function flip(fn){ fn(); } function apply(){} function setUnlocked(){} function announce(){} function endDrag(){} function sizeEnd(){} function save(){ saves++; }' +
     ['snapshot', 'same', 'updateUndo', 'change', 'startEdit', 'endEdit'].map(grab).join('\n') +
     'return { start: startEdit, end: endEdit, change: change, get: function(){ return layout; }, saves: function(){ return saves; }, undo: function(){ return undo.length; } };')();
   let t = make();
@@ -174,11 +174,12 @@ gates.L10 = () => {
 
 // L11: on a phone every size is ignored. Consequence: a quarter width or a short card set on a desktop never squeezes into a phone screen or hides its body behind a scroll.
 gates.L11 = () => {
-  const media = /@media \(min-width:901px\)\{([\s\S]*?)\n  \}/.exec(css);
-  assert.ok(media && /\[data-h\][^{]*\{ height:var\(--kal-h\);/.test(media[1]) && /> \.kal-card-body\{ flex:1 1 auto; min-height:0; overflow:auto; \}/.test(media[1]), 'a set height and the inner scroll exist on wide screens only');
+  const at = css.indexOf('.kal-console > [data-card][data-h]:not([data-folded="true"])');
+  const open = css.lastIndexOf('@media (min-width:901px){', at), media = [css.slice(open, css.indexOf('\n  }', at) + 4)];
+  assert.ok(open > -1 && at - open < 40 && /\[data-h\][^{]*\{ height:var\(--kal-h\);/.test(media[0]) && /> \.kal-card-body\{ flex:1 1 auto; min-height:0; overflow:auto; \}/.test(media[0]), 'a set height and the inner scroll exist on wide screens only');
   const outside = css.replace(media[0], '');
   assert.ok(!/var\(--kal-h\)/.test(outside), 'nothing else reads the height');
-  const phone = css.lastIndexOf('@media (max-width:900px){\n    .kal-console{ grid-template-columns:minmax(0,1fr); }\n    .kal-console [data-card]{ grid-column:1 / -1; }');
+  const phone = css.lastIndexOf('@media (max-width:900px){\n    .kal-console{ grid-template-columns:minmax(0,1fr); }\n    .kal-console [data-card], .kal-console > [data-card][data-w]{ grid-column:1 / -1; }');
   assert.ok(phone > css.indexOf('.kal-console > [data-card][data-w="3"]{ grid-column:span 3; }'), 'the phone rule (one column, every card across it) comes after the span rules, so it wins');
   assert.ok(/if\(corner\)\{ if\(!phoneWidth\(\)\)\{ sizeStart\(e, /.test(iife), 'and the corner does nothing at phone width even if it were shown');
 };
@@ -198,7 +199,7 @@ gates.L12 = () => {
 
 // L13: a folded card ignores its set height. Consequence: folding a sized card gives the same title row as any other folded card, never a tall empty box.
 gates.L13 = () => {
-  assert.ok(/\[data-h\]:not\(\[data-folded="true"\]\)/.test(css) && !/\[data-folded="true"\][^{]*\{[^}]*var\(--kal-h\)/.test(css), 'the height rule never matches a folded card');
+  assert.ok(/\[data-h\]:not\(\[data-folded="true"\]\)/.test(css) && !/[^(]\[data-folded="true"\][^{]*\{[^}]*var\(--kal-h\)/.test(css), 'the height rule never matches a folded card');
   assert.ok(/size\.card\.getAttribute\('data-folded'\) !== 'true'/.test(iife), 'the corner of a folded card does not set a height');
   assert.ok(/\.kal-console > \[data-card\]\[data-folded="true"\] > \.kal-resize\{ display:none; \}/.test(css), 'and a folded card shows no corner');
   assert.ok(/> :not\(\.kal-card-head\):not\(\.kal-card-title\):not\(\.kal-move\)\{ display:none !important; \}/.test(css), 'the scrolling body is hidden like any other body');
