@@ -1,0 +1,15 @@
+spreads %: {'KXBTCPERP': 0.0037, 'KXETHPERP': 0.0044, 'KXSOLPERP': 0.0256, 'KXXRPPERP': 0.0388, 'KXKSHIBPERP': 0.0641, 'KXHYPEPERP': 0.0678, 'KXNEARPERP': 0.081, 'KXLINKPERP': 0.082, 'KXDOGEPERP': 0.0868, 'KXLTCPERP': 0.0885, 'KXSUIPERP': 0.0918}
+dev periods per ticker: {'KXBTCPERP': 310, 'KXDOGEPERP': 292, 'KXETHPERP': 310, 'KXHYPEPERP': 295, 'KXKSHIBPERP': 292, 'KXLINKPERP': 294, 'KXLTCPERP': 292, 'KXNEARPERP': 249, 'KXSOLPERP': 310, 'KXSUIPERP': 292, 'KXXRPPERP': 310}
+== PSET2 funding-window seasonality (dev only, funding_time < 2026-09-15T00:00:00Z)
+PSET2 end_hourUTC=4 long n=1077 days=103 mean_net_bp=-21.76 z=-1.33 D1_n=494 D1_bp=-25.48 D2_n=583 D2_bp=-18.61 win=38.1%
+PSET2 end_hourUTC=4 short n=1077 days=103 mean_net_bp=-37.54 z=-2.38 D1_n=494 D1_bp=-33.54 D2_n=583 D2_bp=-40.93 win=40.2%
+PSET2 end_hourUTC=12 long n=1079 days=103 mean_net_bp=-24.66 z=-2.17 D1_n=496 D1_bp=-33.76 D2_n=583 D2_bp=-16.91 win=39.1%
+PSET2 end_hourUTC=12 short n=1079 days=103 mean_net_bp=-34.65 z=-2.61 D1_n=496 D1_bp=-25.28 D2_n=583 D2_bp=-42.63 win=36.3%
+PSET2 end_hourUTC=20 long n=1079 days=103 mean_net_bp=-16.25 z=-1.28 D1_n=496 D1_bp=-31.94 D2_n=583 D2_bp=-2.90 win=44.7%
+PSET2 end_hourUTC=20 short n=1079 days=103 mean_net_bp=-43.06 z=-2.53 D1_n=496 D1_bp=-27.09 D2_n=583 D2_bp=-56.64 win=37.6%
+== PSET3 funding-extreme fade with recorded funding (dev only)
+PSET3 short_on_high n=66 days=46 mean_net_bp=-13.72 z=0.38 D1_n=24 D1_bp=74.84 D2_n=42 D2_bp=-64.33 win=54.5%
+PSET3 short_on_high (price only, no funding, no cost) n=66 days=46 mean_net_bp=10.38 z=0.99 D1_n=24 D1_bp=100.27 D2_n=42 D2_bp=-40.98 win=57.6%
+PSET3 long_on_low n=39 days=30 mean_net_bp=88.41 z=1.16 D1_n=21 D1_bp=6.39 D2_n=18 D2_bp=184.10 win=51.3%
+PSET3 long_on_low (price only, no funding, no cost) n=39 days=30 mean_net_bp=116.58 z=1.47 D1_n=21 D1_bp=34.98 D2_n=18 D2_bp=211.78 win=53.8%
+PSET3 both n=105 days=62 mean_net_bp=24.21 z=1.21 D1_n=45 D1_bp=42.90 D2_n=60 D2_bp=10.20 win=53.3%
