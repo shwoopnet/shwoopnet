@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:53 AM CT (16:53Z): W-GOLD-DOW1 (gold by CT weekday, history): no weekday separates from the rest
+
+- Descriptive, history only, try count 0, no rule (w_gold_dow/; 4,500 gold markets Sep 1 to Nov 6, 6 minute look, single in band side, hold, fee 0.07p(1-p), CT weekday of decision). Day: n, losses, loss% [Wilson 95], net c per contract +- 1.96 se: Mon 241, 19, 7.9 [5.1, 12.0], -1.18 +- 3.36; Tue 253, 11, 4.3 [2.4, 7.6], +2.52 +- 2.52; Wed 258, 18, 7.0 [4.5, 10.8], +0.17 +- 3.10; Thu 251, 9, 3.6 [1.9, 6.7], +3.36 +- 2.33; Fri 172, 12, 7.0 [4.0, 11.8], +0.19 +- 3.79; Sat 0 entries (market closed); Sun 98, 5, 5.1 [2.2, 11.4], +1.88 +- 4.33. Closed or thin: Saturday closed; Sunday only hours 0 to 9 and 17 to 23 (reopens about 17:00 CT); Friday has no hour 23 and fewer entries. Intervals overlap heavily, so no weekday separates from the rest (Mon worst, Thu best, within noise). Nothing changed.
+
 ## 2026-11-06 10:53 AM CT (16:53Z): S-RISEFWD forward tracker built (read only), wired into wake.sh
 
 - Built by a worker (w_oicore_risefwd/risefwd_forward.py, REGISTRATION.md; read only). Question registered: do OICORE live fills with rise at or above 150,000 net more per contract than fills between 86,300 and 150,000. Rise recomputed from the candle caches by ticker; cutoff 2026-11-06T17:00:00Z. Pre stated yardsticks: read at 40 settled fills above 150k (probably months away); it only matters if that group nets more than +5c per contract above the lower group with both halves positive (halves split at the median 150k+ fill time, each compared with the lower group over the same half); below 40 it prints counts and NO READ. Selftest with the cutoff moved back to Oct 30 matched all 47 past fills: 150k+ 16 fills at +3.11c per contract vs 86.3k to 150k 31 fills at +12.11c, the opposite direction to the sim (the reason it is tracked forward). Wired as a RISEFWD section in wake.sh (backup wake.sh.pre_risefwd). Nothing changed in the bot.
