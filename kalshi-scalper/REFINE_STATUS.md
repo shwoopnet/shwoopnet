@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:18 AM CT (17:18Z): deploy-latest.sh ran (Nov 6 about 12:15 PM CT): skip reasons, avgFill and avgFee, and the OICORE ladder (#699) are live
+
+- Main (Nov 6): the owner confirmed deploy-latest.sh ran at about 12:15 PM CT (about 18:15Z... check the report deploys stamps for exact times; main said about 12:15 PM CT = 18:15Z is wrong if the clock is CST: Nov 6 is CST, UTC-6, so 12:15 PM CT = 18:15Z; the earlier W-DEPLOYTIME1 stamp was 16:33Z). Live now: skip reasons (kalshiSlotSkips and the report skips section; rules for kalshiSlotSkips not deployed, server writes need none), the report avgFill and avgFee fix (#729, slot rows too), and the OICORE ladder (#699). IMPORTANT for my trackers: #699 changes OICORE's size going forward, so per contract figures remain comparable but dollar figures and the 10 contract assumption (W-OICORE-SIZE1, caps, stop room) must be re read; the fills before the deploy are the 10 contract record. To do next: (1) read the report deploys stamps; (2) read what #699 does (the ladder, sizes, caps); (3) check that new orders carry avgFill and avgFee, then re run W-COSTGAP1, W-EVENT830-FEE1 and W-GOLDSLIP1 on those; (4) read skips byReason for new OICORE triggers without an order (W-OICORE-SKIP1); (5) tell the trackers the deploy time (OICORE fills after it are on the new ladder). Nothing changed.
+
 ## 2026-11-06 11:17 AM CT (17:17Z): Note on W-OICOREPF1: delete the parenthetical about losses in a row
 
 - In W-OICOREPF1 I wrote that fills 31 to 47 included '7 of them losses in a row at times'. The worker did not report that; it was my unchecked guess. What the data does show (from W-OICORE-RUNS1) is the longest loss streak of 11 on Nov 5, which sits inside fills 30 to 47. W-OICOREFLAT1 is listing fills 31 to 47 now; use its result, not the parenthetical. Nothing changed.
