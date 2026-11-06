@@ -1,0 +1,4 @@
+# RO1 result: NOT_ENOUGH_DATA (12 trades on 7 day clusters). Scored 2026-11-06 ~12:30 US Central, code workers/lead/lead.py, print workers/lead/lead_output.txt. Development 2026-10-21 to 10-31 (11 dates, 53 samples); held out 2026-11-01 onward never loaded. Universe on spread only: BTC, ETH, SOL, XRP, gold, silver, copper, WTI, US 500, Tech 100 (median spread 0.4 to 4.1 bp).
+
+Information only: long gold after a Tech 100 interval of -0.5% or worse, 12 triggers, net -49.6 bp (D1 -61.2 on 5, D2 -41.3 on 7), PF 0.08, gross at mid -24.7 bp (gold fell with Tech 100, the opposite of the haven prediction), hit 1 of 12, reversed control net -0.2 bp (a short gold would have roughly paid its cost, 12 triggers, noise). Day z -2.21. Not a lead and not enough to call a reverse lead.
+Enough data: about 1.1 triggers a day, 100 triggers need about 90 dates, about 2027-01-20, later with a held-out third.

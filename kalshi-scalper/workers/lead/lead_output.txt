@@ -1,0 +1,27 @@
+universe ['KXBTCPERP', 'KXCOPPERPERP', 'KXETHPERP', 'KXGOLDPERP', 'KXSILVERPERP', 'KXSOLPERP', 'KXUS500PERP', 'KXUSTECH100PERP', 'KXWTIFUTURE', 'KXXRPPERP']
+median spread bp {'KXBTCPERP': 0.37, 'KXCOPPERPERP': 4.11, 'KXETHPERP': 0.44, 'KXGOLDPERP': 0.49, 'KXSILVERPERP': 1.86, 'KXSOLPERP': 2.56, 'KXUS500PERP': 0.96, 'KXUSTECH100PERP': 1.09, 'KXWTIFUTURE': 3.02, 'KXXRPPERP': 3.88}
+LL1 skipped 2
+== LL1 trades 40 day clusters 9
+  all n 40 net bp -42.7 PF 0.10
+  D1 n 26 net bp -39.3 PF 0.09
+  D2 n 14 net bp -49.0 PF 0.12
+  gross(mid) bp -5.9 stress net bp -47.5 control net bp -31.0 hit 0.17
+  day z -4.37
+  breakeven fee/side bp -2.9
+  info corr(BTC/ETH prev, Tech100 next) -0.03 over 49
+RO1 skipped 2
+== RO1 trades 12 day clusters 7
+  all n 12 net bp -49.6 PF 0.08
+  D1 n 5 net bp -61.2 PF 0.00
+  D2 n 7 net bp -41.3 PF 0.16
+  gross(mid) bp -24.7 stress net bp -54.4 control net bp -0.2 hit 0.08
+  day z -2.21
+  breakeven fee/side bp -12.4
+XS1 skipped dates 2
+== XS1 trades 9 day clusters 9
+  all n 9 net bp -80.4 PF 0.33
+  D1 n 5 net bp -41.2 PF 0.61
+  D2 n 4 net bp -129.3 PF 0.07
+  gross(mid) bp 16.3 stress net bp -90.0 control net bp -112.6 hit 0.44
+  day z -1.25
+  breakeven fee/side bp 8.1
