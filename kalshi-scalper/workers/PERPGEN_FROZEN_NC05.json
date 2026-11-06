@@ -1,0 +1,10 @@
+{
+ "id": "NC05",
+ "group": "NONCRYPTO",
+ "seed": 1005,
+ "n_discovery_survivors": 0,
+ "n_after_cluster": 0,
+ "cuts_sha256": "4621bba4bd6b7b183c0499ca3d16ef83e71d308dea48c54ea1bce2264d198d4c",
+ "rules": [],
+ "sha256_of_rules": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945"
+}
