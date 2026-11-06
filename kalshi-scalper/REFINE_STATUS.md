@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:36 AM CT (16:36Z): W-EVENT830-NEXT1 (EVENT830 live so far): 5 fills in 2 releases, 0 wins, -$1.46
+
+- Descriptive, try count 0 (w_event830_next/). Nov 5: 3 orders, 1 fill. Nov 6: 8 orders, 4 fills. Total 11 orders, 5 fills (45%), 0 won, 5 lost, net -$1.46 at 1 contract. Fills: silver 2 (-0.58), copper 1 (-0.41), USDJPY 1 (-0.41), EURUSD 1 (-0.06); no fills in BNB, WTI, GBPUSD, HYPE. Fee drag inferred about $0.08 of the loss (the report has no fee field). Kill distance: 5 of 40 fills (net check starts at 40), loss streak 5 of 20. Tracker FLAG none; forward read Dec 7. 5 fills say nothing about the rule; fill sizes not verified (avgFill null in the report). Nothing changed.
+
 ## 2026-11-06 10:35 AM CT (16:35Z): W-GOLDCLUSTER1 (the five gold early sells since Nov 5): scattered, not one regime
 
 - Descriptive, try count 0, no rule (w_goldcluster/REGISTRATION.md; about 102 public candle calls). Paths (bought side bid, minute candles): 3 true losses (13:30 ET Nov 5 NO 0.902 settled against; 14:15 ET NO 0.914, bid held to 2 minutes then crashed; 02:30 ET Nov 6 YES 0.943) and 2 recoveries (23:45 ET YES 0.934 dipped to 0.075 in the last minute then settled YES; 07:15 ET YES 0.933 low 0.15 then 0.999 YES), so the 25c sell turned two winners into losses. All five bids fell to 25c or lower only in the last 1 to 2 minutes.
