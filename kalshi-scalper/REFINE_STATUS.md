@@ -2,6 +2,12 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:36 AM CT (16:36Z): W-OICORE-NEXT1 (OICORE live vs sim at 47 fills): consistent, far from both kills, but fragile
+
+- Descriptive, try count 0 (w_oicore_next/). Live 47 fills, all settled: 10 wins, 37 losses, win rate 21.3% (Wilson 12.0% to 34.9%), net +$41.79, +9.01c per contract, PF 2.17. By fill price: 24 fills at 0.07 or less (2 wins, +$4.17), 14 at 0.07 to 0.15 (3 wins, +$14.01), 9 above 0.15 (5 wins, +$23.61). Three wins at 0.05, 0.06 and 0.09 carry $27.65 of the profit, so the result is fragile.
+- Sim same window: 49 triggers, 13 wins (26.5%, Wilson 16.2% to 40.3%), +10.15c per contract; intervals overlap live. Matching: 32 live fills on the same side as a sim trigger, 1 opposite, 14 live fills with no sim trigger, 16 sim triggers with no live order (about 70% of live fills predicted; cause not checked, likely candle timing).
+- Kill distance: loss streak now 3 (longest 11, kill 18); net +$41.79 after 47 fills against the under -$6 kill from 40 fills (cushion $47.79). Nov 13 rules need 100 fills (PF under 1.0) or 150 (net under 0), not reached. avgFill is null in the report so prices are order prices. Nothing changed.
+
 ## 2026-11-06 10:36 AM CT (16:36Z): W-EVENT830-NEXT1 (EVENT830 live so far): 5 fills in 2 releases, 0 wins, -$1.46
 
 - Descriptive, try count 0 (w_event830_next/). Nov 5: 3 orders, 1 fill. Nov 6: 8 orders, 4 fills. Total 11 orders, 5 fills (45%), 0 won, 5 lost, net -$1.46 at 1 contract. Fills: silver 2 (-0.58), copper 1 (-0.41), USDJPY 1 (-0.41), EURUSD 1 (-0.06); no fills in BNB, WTI, GBPUSD, HYPE. Fee drag inferred about $0.08 of the loss (the report has no fee field). Kill distance: 5 of 40 fills (net check starts at 40), loss streak 5 of 20. Tracker FLAG none; forward read Dec 7. 5 fills say nothing about the rule; fill sizes not verified (avgFill null in the report). Nothing changed.
