@@ -41,3 +41,7 @@ Nothing here changes trading code, sizes or rules; Stop/hold decisions are the o
 - EVENT830 Dec 7 14:00 CT (an INTERIM read; 40 fills will not be reached by then): trig_01AEWCMLQEdqT6R4bP1tgQY4
 - Hourly routine (cron 32 * * * *): trig_017HTDZNKWfyBephf72bqcaG
 The scratchpad scripts named above live in the refine session's scratchpad, not in this repo.
+
+## Waiting on the owner's deploy (deploy-latest.sh), Nov 6 2026
+- PR 726 (slot skip reasons: kalshiSlotSkips/{strategy}_{ticker}, report `skips` section, 7 days) and #729 (avgFill, avgFee) are merged but not live until the owner runs deploy-latest.sh. Main will say when it is live.
+- When live: read the report's skips byReason for the 16 OICORE triggers with no order (W-OICORE-SKIP1); re-run the cost gap and slip checks with avgFill and avgFee (see the #729 note in REFINE_STATUS.md).

@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:05 AM CT (17:05Z): Skip reasons (PR 726) merged, not live: read byReason for the 16 OICORE gaps after deploy
+
+- Main (Nov 6): the slot tick writes kalshiSlotSkips/{strategy}_{ticker} with a reason code for every in span market that places no order, and the nightly report has a skips section (7 days); it starts recording once the owner runs deploy-latest.sh (pending); main will tell me when it is live, then read byReason for the 16 gaps (W-OICORE-SKIP1). Added to kalshi-scalper/REFINE_CHECKLIST.md with the #729 follow ups. Note the first skips will only cover windows after the deploy, so the 16 earlier gaps cannot be explained retroactively; the read will be on the new window gaps (OICORE triggers by the c-180 candle without a live order). Nothing changed.
+
 ## 2026-11-06 11:05 AM CT (17:05Z): W-OICORE-SIZE1 (OICORE order sizes): 45 of 47 fills at 10 contracts, worst loss costs at most 9% of the stop room
 
 - Descriptive, try count 0 (w_oicore_size/). 47 fills: size 10 = 45 fills, 9 wins, +$37.77, +8.39c per contract; size 5 (1 fill, Oct 30, -$0.32) and size 9 (1 fill, Oct 31, price 0.50, +$4.34); overall +$41.79, +9.01c. Cuts below 10: 2. The 5 was the old 5 contract schedule (cost $0.30, depth limit 23, so not a cap). The 9 was the per order cap: 1% of 466 = $4.66 and 10 x 0.50 = $5.00 exceeds it; 10 contracts fit up to price 0.46. Worst single loss at 10 contracts (price 0.30 to 0.50): $3.00 to $5.00 against a 12% stop of $55.92 (5.5% window cap $25.63), at most 9% of the room; worst actual loss so far $3.25. The depth rule never bound a 10 fill (smallest limit 13). Reading: OICORE's size is not a risk to the shared stop (one loss at most 9% of the room); the only size cut that matters is the per order cap at prices above 0.46, which is a small effect (one order). Nothing changed.
