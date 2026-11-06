@@ -1,0 +1,92 @@
+{
+ "Apple": {
+  "events": 231,
+  "events_vol20": 225,
+  "series_with_events": 15
+ },
+ "Crunchyroll": {
+  "events": 24,
+  "events_vol20": 24,
+  "series_with_events": 16
+ },
+ "Fiscal.ai": {
+  "events": 89,
+  "events_vol20": 88,
+  "series_with_events": 57
+ },
+ "Google Trends": {
+  "events": 6,
+  "events_vol20": 5,
+  "series_with_events": 6
+ },
+ "Hits Daily Double": {
+  "events": 53,
+  "events_vol20": 51,
+  "series_with_events": 10
+ },
+ "LMSYS": {
+  "events": 9,
+  "events_vol20": 9,
+  "series_with_events": 6
+ },
+ "Luminate": {
+  "events": 2129,
+  "events_vol20": 844,
+  "series_with_events": 17
+ },
+ "Metacritic": {
+  "events": 43,
+  "events_vol20": 43,
+  "series_with_events": 29
+ },
+ "Netflix": {
+  "events": 337,
+  "events_vol20": 337,
+  "series_with_events": 8
+ },
+ "OpenRouter - AI Market Share": {
+  "events": 28,
+  "events_vol20": 27,
+  "series_with_events": 7
+ },
+ "Ornn": {
+  "events": 200,
+  "events_vol20": 181,
+  "series_with_events": 23
+ },
+ "Ramp AI Index": {
+  "events": 7,
+  "events_vol20": 7,
+  "series_with_events": 7
+ },
+ "Rotten Tomatoes": {
+  "events": 163,
+  "events_vol20": 162,
+  "series_with_events": 89
+ },
+ "Spotify": {
+  "events": 197,
+  "events_vol20": 192,
+  "series_with_events": 145
+ },
+ "Spotify Charts": {
+  "events": 1659,
+  "events_vol20": 1354,
+  "series_with_events": 13
+ },
+ "Steam Awards": {
+  "events": 7,
+  "events_vol20": 7,
+  "series_with_events": 7
+ },
+ "StockX": {
+  "events": 6,
+  "events_vol20": 6,
+  "series_with_events": 5
+ },
+ "YouTube Charts": {
+  "events": 249,
+  "events_vol20": 180,
+  "series_with_events": 7
+ }
+}
