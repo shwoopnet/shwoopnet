@@ -1,0 +1,71 @@
+======== CASHOPEN2 dev dates ['2026-10-29', '2026-10-30', '2026-11-02', '2026-11-03']
+TRIGGER: n 0
+TRIGGER: n 0
+TRIGGER: n 0
+CONTROL fee 5: n 16 on 4 dates, gross-mid +2.0, after crossing +1.0, net -9.0 bps, PF 0.14, clustered z -5.27
+CONTROL fee 12: n 16 on 4 dates, gross-mid +2.0, after crossing +1.0, net -23.0 bps, PF 0.00, clustered z -13.42
+CONTROL fee 24: n 16 on 4 dates, gross-mid +2.0, after crossing +1.0, net -47.0 bps, PF 0.00, clustered z -27.40
+TRIGGER D1: n 0
+TRIGGER D2: n 0
+VERDICT: NOT_ENOUGH_DATA (trades 0 of 100, trigger dates 0, dev dates 4, bar 30 dates)
+CASHCLOSE2 skipped perp-days (no prior cash close or missing candle): 2
+======== CASHCLOSE2 (trigger = momentum, control = always long) dev dates ['2026-10-29', '2026-10-30', '2026-11-02', '2026-11-03']
+TRIGGER fee 5: n 6 on 3 dates, gross-mid -9.5, after crossing -10.6, net -20.6 bps, PF 0.00, clustered z -1.62
+TRIGGER fee 12: n 6 on 3 dates, gross-mid -9.5, after crossing -10.6, net -34.6 bps, PF 0.00, clustered z -2.73
+TRIGGER fee 24: n 6 on 3 dates, gross-mid -9.5, after crossing -10.6, net -58.6 bps, PF 0.00, clustered z -4.62
+CONTROL fee 5: n 6 on 3 dates, gross-mid +11.1, after crossing +10.0, net +0.0 bps, PF 1.00, clustered z 0.00
+CONTROL fee 12: n 6 on 3 dates, gross-mid +11.1, after crossing +10.0, net -14.0 bps, PF 0.18, clustered z -1.18
+CONTROL fee 24: n 6 on 3 dates, gross-mid +11.1, after crossing +10.0, net -38.0 bps, PF 0.00, clustered z -3.20
+TRIGGER D1 fee 12: n 2 on 1 dates, gross-mid -34.7, after crossing -36.0, net -60.0 bps, PF 0.00, clustered z n/a
+TRIGGER D2 fee 12: n 4 on 2 dates, gross-mid +3.1, after crossing +2.1, net -21.9 bps, PF 0.00, clustered z n/a
+break-even fee per side (after crossing): -5.31 bps
+VERDICT: NOT_ENOUGH_DATA (trades 6 of 100, trigger dates 3, dev dates 4, bar 30 dates)
+   US500 2026-10-30 d -208.8 bp
+   US500 2026-11-02 d -39.7 bp
+   US500 2026-11-03 d +25.6 bp
+   USTECH100 2026-10-30 d -383.8 bp
+   USTECH100 2026-11-02 d -135.0 bp
+   USTECH100 2026-11-03 d +62.8 bp
+======== CASHGAP2 (fade; control = same fade, |gap| < 30 bp) dev dates ['2026-10-29', '2026-10-30', '2026-11-02', '2026-11-03']
+TRIGGER fee 5: n 5 on 3 dates, gross-mid -2.2, after crossing -3.7, net -13.7 bps, PF 0.00, clustered z -2.58
+TRIGGER fee 12: n 5 on 3 dates, gross-mid -2.2, after crossing -3.7, net -27.7 bps, PF 0.00, clustered z -4.81
+TRIGGER fee 24: n 5 on 3 dates, gross-mid -2.2, after crossing -3.7, net -51.7 bps, PF 0.00, clustered z -8.62
+CONTROL fee 5: n 1 on 1 dates, gross-mid -12.3, after crossing -13.2, net -23.2 bps, PF 0.00, clustered z n/a
+CONTROL fee 12: n 1 on 1 dates, gross-mid -12.3, after crossing -13.2, net -37.2 bps, PF 0.00, clustered z n/a
+CONTROL fee 24: n 1 on 1 dates, gross-mid -12.3, after crossing -13.2, net -61.2 bps, PF 0.00, clustered z n/a
+TRIGGER D1 fee 12: n 2 on 1 dates, gross-mid +1.0, after crossing -0.1, net -24.1 bps, PF 0.00, clustered z n/a
+TRIGGER D2 fee 12: n 3 on 2 dates, gross-mid -4.3, after crossing -6.1, net -30.1 bps, PF 0.00, clustered z n/a
+break-even fee per side (after crossing): -1.86 bps
+VERDICT: NOT_ENOUGH_DATA (trades 5 of 100, trigger dates 3, dev dates 4, bar 30 dates)
+   US500 2026-10-30 gap -105.6 bp
+   US500 2026-11-02 gap +49.5 bp
+   USTECH100 2026-10-30 gap -253.7 bp
+   USTECH100 2026-11-02 gap +68.9 bp
+   USTECH100 2026-11-03 gap +45.1 bp
+information: perp 09:30 to 09:40 return has the gap sign on 3 of 6 perp-dates (nonzero)
+   gap -105.6 bp  perp 10 min return -7.4 bp
+   gap +49.5 bp  perp 10 min return -0.7 bp
+   gap +8.1 bp  perp 10 min return +12.3 bp
+   gap -253.7 bp  perp 10 min return +9.4 bp
+   gap +68.9 bp  perp 10 min return -2.1 bp
+   gap +45.1 bp  perp 10 min return +15.8 bp
+======== OVN5 (fade; control = continuation) dev dates ['2026-10-29', '2026-10-30']
+TRIGGER fee 5: n 4 on 2 dates, gross-mid -7.5, after crossing -8.3, net -18.3 bps, PF 0.23, clustered z n/a
+TRIGGER fee 12: n 4 on 2 dates, gross-mid -7.5, after crossing -8.3, net -32.3 bps, PF 0.06, clustered z n/a
+TRIGGER fee 24: n 4 on 2 dates, gross-mid -7.5, after crossing -8.3, net -56.3 bps, PF 0.00, clustered z n/a
+CONTROL fee 5: n 4 on 2 dates, gross-mid +7.5, after crossing +6.7, net -3.3 bps, PF 0.74, clustered z n/a
+CONTROL fee 12: n 4 on 2 dates, gross-mid +7.5, after crossing +6.7, net -17.3 bps, PF 0.25, clustered z n/a
+CONTROL fee 24: n 4 on 2 dates, gross-mid +7.5, after crossing +6.7, net -41.3 bps, PF 0.00, clustered z n/a
+TRIGGER D1 fee 12: n 2 on 1 dates, gross-mid -29.8, after crossing -30.5, net -54.5 bps, PF 0.00, clustered z n/a
+TRIGGER D2 fee 12: n 2 on 1 dates, gross-mid +14.7, after crossing +13.9, net -10.1 bps, PF 0.28, clustered z n/a
+break-even fee per side (after crossing): -4.16 bps
+VERDICT: NOT_ENOUGH_DATA (trades 4 of 100, trigger dates 2, dev dates 2, bar 30 dates)
+   US500 2026-10-29 g_p -33.9 bp
+   US500 2026-10-30 g_p -102.9 bp
+   USTECH100 2026-10-29 g_p -107.7 bp
+   USTECH100 2026-10-30 g_p -255.8 bp
+information (index, date, perp overnight gap bp, ETF cash gap bp, entry spread bp):
+   ('US500', '2026-10-29', -33.9, None, 1.03)
+   ('US500', '2026-10-30', -102.9, -105.6, 0.52)
+   ('USTECH100', '2026-10-29', -107.7, None, 1.09)
+   ('USTECH100', '2026-10-30', -255.8, -253.7, 0.84)
