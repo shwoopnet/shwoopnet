@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:55 AM CT (16:55Z): W-OICORE-RUNS1 (OICORE loss streaks, live vs sim): an 11 loss streak is ordinary
+
+- Descriptive, try count 0 (w_oicore_runs/; the worker's rerun of oicore_hist.py's rule gave 478 triggers and 26.8% win rate, not the 549 and 24.5% of the maintained sim; cause unchecked). Live 47 fills, 10 wins, 37 losses: loss streaks 3, 2, 5, 2, 2, 5, 1, 3, 11, 3 (the 11 ran 2026-11-05 02:12Z to 21:27Z); losses between wins [2, 0, 5, 2, 2, 5, 1, 3, 11] after 3 losses before the first win. Sim, longest streak in 47 consecutive triggers: median 9, p95 15, max 15; 20.6% of windows reach 11 or more; shuffle null at the sim win rate: median 9, p95 16, P(at least 11) 0.32; at the live win rate 21.3% P(at least 11) is 0.52. Reading: live streaks are not longer than the sim's, and an 11 loss streak is ordinary at this win rate; the 18 streak kill needs 7 more, not unusual either (see W-OICORE-STREAK1). Nothing changed.
+
 ## 2026-11-06 10:55 AM CT (16:55Z): W-GOLDSIZE2 (gold result at fixed sizes): size sensitivity, arithmetic not a forecast
 
 - Descriptive, try count 0, no recommendation (w_goldsize2/; per contract result = settledPnl/count, already after fees, scaled to N; same fills, exit price and outcome at any size; ignores depth, pool and cap changes). Nov 5 and 6: 5 losses, all 25c exits, actual size 13 to 16: actual -$53.95; fixed 8 -$30.08; fixed 15 -$56.40. All 28 gold orders on those two days: -$18.40 at 8, -$34.51 at 15, -$33.38 actual. Gold net since Oct 7 (288 settled orders, one more than before, the 16:39Z win): fixed 8 +$26.13; fixed 10 +$32.67; fixed 15 +$49.00; actual size +$13.84. Fixed 15 exceeds actual because it replays the early small orders at 15; so size mostly scales both wins and losses, and the actual ladder's result is lower than a flat 15 or flat 8 mainly because the ladder grew into the Nov 5 to 6 losses (a timing effect, not an edge). Nothing changed.
