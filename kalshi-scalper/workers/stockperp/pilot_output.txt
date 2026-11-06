@@ -1,0 +1,44 @@
+MODE pilot dates ['2026-11-05'] perp names 19 cash names 19
+SPLAG1         n=6 dates=1 gross_mid=+62.0 gross_cross=+58.0 bp | net@12=+34.0 PF 8.47 | net@14.4=+29.2 PF 6.45 | net@24=+10.0 PF 1.87 | breakeven_fee_per_side=+29.0 bp win=83%
+SPLAG1_ctl     n=6 dates=1 gross_mid=-62.0 gross_cross=-66.0 bp | net@12=-90.0 PF 0.00 | net@14.4=-94.8 PF 0.00 | net@24=-114.0 PF 0.00 | breakeven_fee_per_side=-33.0 bp win=0%
+SPAUCT1        n=0
+SPAUCT1_ctl    n=0
+SPLIQ1         n=0
+SPLIQ1_ctl     n=0
+SPFUND1        n=0
+SPFUND1_ctl    n=0
+SPW1           n=0
+SPW1_ctl       n=0
+SPHALT1        n=0
+SPHALT1_ctl    n=0
+SPAUCT1:close:missing 3
+SPAUCT1:open:no_scale 19
+SPLAG1:missing_exit 1
+SPLAG1:trigger 7
+LEADLAG shift -3 min corr -0.041 n 6981
+LEADLAG shift -2 min corr 0.094 n 6984
+LEADLAG shift -1 min corr 0.009 n 6987
+LEADLAG shift +0 min corr 0.989 n 6988
+LEADLAG shift +1 min corr 0.001 n 6989
+LEADLAG shift +2 min corr 0.093 n 6990
+LEADLAG shift +3 min corr -0.047 n 6991
+CARRY0 name, n_days, mean_bp_per_day, share_positive
+CARRY0 XOM 2 -2.02 0.00
+CARRY0 QQQ 2 0.00 0.00
+CARRY0 AAPL 2 3.78 1.00
+CARRY0 SPY 2 0.00 0.50
+CARRY0 SPCX 2 -3.92 0.00
+CARRY0 GOOGL 2 -1.64 0.00
+CARRY0 MU 2 1.97 0.50
+CARRY0 NFLX 2 0.00 0.00
+CARRY0 NVDA 2 -0.81 0.00
+CARRY0 TSLA 2 0.72 0.50
+CARRY0 KO 2 0.00 0.00
+CARRY0 MSFT 2 0.00 0.00
+CARRY0 COST 4 1.15 0.75
+CARRY0 AMZN 2 0.00 0.00
+CARRY0 VZ 2 0.00 0.00
+CARRY0 CVX 2 0.00 0.00
+CARRY0 PG 2 0.00 0.00
+CARRY0 PLTR 2 2.25 0.50
+CARRY0 META 2 -0.65 0.50
