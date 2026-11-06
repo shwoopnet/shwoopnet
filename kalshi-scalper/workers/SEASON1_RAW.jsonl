@@ -484,3 +484,7 @@
 {"ticker": "KXMLBWINS-LAA-25-T70", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-25", "close": "2025-10-01T02:40:12.816498Z", "result": "yes", "ask": 0.99, "bid": 0.91, "look": 1757466000, "ncandles": 93}
 {"ticker": "KXMLBWINS-LAA-25-T60", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-25", "close": "2025-10-01T02:40:12.816498Z", "result": "yes", "ask": 1.0, "bid": 0.99, "look": 1757469600, "ncandles": 92}
 {"ticker": "KXMLBWINS-LAA-25-T50", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-25", "close": "2025-10-01T02:40:12.816498Z", "result": "yes", "ask": 1.0, "bid": 0.99, "look": 1757469600, "ncandles": 92}
+{"ticker": "KXMLBWINS-LAA-26-T85", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-26", "close": "2026-09-08T19:01:30Z", "result": "no", "ask": null, "bid": null, "look": null, "ncandles": 1}
+{"ticker": "KXMLBWINS-LAA-26-T80", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-26", "close": "2026-09-08T19:01:33Z", "result": "no", "ask": null, "bid": null, "look": null, "ncandles": 16}
+{"ticker": "KXMLBWINS-LAA-26-T75", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-26", "close": "2026-09-08T19:01:36Z", "result": "no", "ask": null, "bid": null, "look": null, "ncandles": 18}
+{"ticker": "KXMLBWINS-LAA-26-T70", "series": "KXMLBWINS-LAA", "event": "KXMLBWINS-LAA-26", "close": "2026-09-13T22:00:05Z", "result": "no", "ask": null, "bid": null, "look": null, "ncandles": 32}

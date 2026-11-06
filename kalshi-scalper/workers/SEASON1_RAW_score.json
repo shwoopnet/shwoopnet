@@ -1,0 +1,57 @@
+{
+ "ALL": {
+  "n": 55,
+  "wins": 0,
+  "mean_ask": 7.89,
+  "win_rate": 0.0,
+  "net_c": -13.25,
+  "net_c_fee12": -14.33,
+  "pf": 0.0,
+  "boot_lo_c": -15.98,
+  "boot_hi_c": -10.93
+ },
+ "D1": {
+  "n": 27,
+  "wins": 0,
+  "mean_ask": 6.15,
+  "win_rate": 0.0,
+  "net_c": -10.56,
+  "net_c_fee12": -11.44,
+  "pf": 0.0,
+  "boot_lo_c": -13.8,
+  "boot_hi_c": -8.22
+ },
+ "D2": {
+  "n": 28,
+  "wins": 0,
+  "mean_ask": 9.57,
+  "win_rate": 0.0,
+  "net_c": -15.86,
+  "net_c_fee12": -17.11,
+  "pf": 0.0,
+  "boot_lo_c": -20.26,
+  "boot_hi_c": -12.45
+ },
+ "NFL": {
+  "n": 50,
+  "wins": 0,
+  "mean_ask": 8.04,
+  "win_rate": 0.0,
+  "net_c": -13.48,
+  "net_c_fee12": -14.57,
+  "pf": 0.0,
+  "boot_lo_c": -16.52,
+  "boot_hi_c": -10.89
+ },
+ "MLB": {
+  "n": 5,
+  "wins": 0,
+  "mean_ask": 6.4,
+  "win_rate": 0.0,
+  "net_c": -11.0,
+  "net_c_fee12": -11.92,
+  "pf": 0.0,
+  "boot_lo_c": -13.8,
+  "boot_hi_c": -8.4
+ }
+}
