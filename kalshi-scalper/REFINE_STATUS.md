@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:37 AM CT (16:37Z): W-GOLDCLUMP1 (do gold losses cluster in time): no evidence beyond chance
+
+- Descriptive, try count 0, 5 statistics tried, no correction (w_goldclump/). 287 settled gold orders, 18 losses, Oct 7 to Nov 6, entry time in CT days, permutation 20,000 runs. Losses on 10 of 24 order days; max per day 3 (Oct 21, Nov 5), p 0.71. Max in any rolling 24h 5, p 0.10 (shuffled mean 3.6). Days with a loss 10, p 0.065 (borderline, slightly more concentrated). Gaps between the 17 consecutive loss pairs: min 0.5h, median 14.5h, max 190h; p(median that short) 0.18, p(min gap 0.5h or less) 0.26. Reading: nothing significant, so the 5 early sells in 19 fills since Nov 5 are not shown to be a clustering regime; low power at 18 losses. Not checked: settle time, regime or hour dependence, alignment with other markets' losses. Nothing changed.
+
 ## 2026-11-06 10:37 AM CT (16:37Z): W-GOLDSTOP-NEXT1 (how near gold gets to the 12% stop): gold alone never has, but it is not alone
 
 - Descriptive, try count 0 (w_goldstop_next/). Gold orders exist only Oct 7 to Nov 6 (about 30 days, not 60): 287 settled, 18 losses (6.3%); last 7 days 73 orders, 8 losses (11%), median 15 contracts at 0.927. 2,766 rolling 24h windows (15 minute grid): worst gold only net -$42.00 (1st percentile -$25.40); windows at or below -12% of base (-$55.92 at 466, -$58.80 at 490, -$62.16 at 518): 0, also 0 with one more open order counted lost (about $13.91).
