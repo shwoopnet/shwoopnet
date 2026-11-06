@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 11:35 AM CT (17:35Z): W-REGS-SHARE (how many OICORE fills S-NEARTHR and S-EDGEFILT would remove): about 40%, counts only
+
+- Counts only, no outcomes (w_regs_share/ov.py). Sim over 548 triggers: S-NEARTHR removes 169 (31%; 170 in w_oicore_rise, a one trigger set difference), S-EDGEFILT removes 70 (13%); 19 are in both, so together 220 (40%). Live 47 fills: NEARTHR 17 per w_oicore_rise (14 by the sim's rise), EDGEFILT 5; overlap 1 (sim matched), so together 18 to 21 (about 40% to 45%). Reading: either filter alone would cut the OICORE fill rate by 13% to 31%, both about 40%, which would push the 100 fill read (about Nov 18) to about Nov 25 to 30 and the 150 fill net under 0 test later; so they are shadows only, not filters, until a forward record exists. Nothing changed.
+
 ## 2026-11-06 11:34 AM CT (17:34Z): W-REGS-OICORE (three unscored pre-registration drafts for OICORE): S-EDGEFILT, S-NEARTHR, S-NOFILLADV
 
 - Drafts only, nothing scored (w_regs_oicore/DRAFTS.md; every figure quoted from this log, not recomputed; the try total not recounted: about 385 splits as of the earlier line, restate at registration). 1. S-EDGEFILT: skip OICORE entries whose raw cheaper price is strictly between 0.04 and 0.05; reuses S-EDGEFWD's fills and cutoff and adds the action and the kill line the read lacks (1 try). 2. S-NEARTHR: skip fills whose open interest rise is 86,300 to 100,000; a different cut from RISEFWD's 150k and uses one fixed threshold, so no scan (1 try); it would remove a large share of fills and slow the Nov 13 read (fill rate not measured, main should check before signing). 3. S-NOFILLADV: a forward measure of no fill adverse selection, no filter; it can only lead to a brief for a limit +2c test (2 tries). The cheap 0.05 to 0.07 bucket is already S-BUCKET1 and FLOOR05, so it is left out (overlaps draft 1). Next: these are drafts for main and the owner; none is started as a tracker. Nothing changed.
