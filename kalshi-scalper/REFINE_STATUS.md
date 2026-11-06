@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:12 AM CT (16:12Z): W-DAYLOSS1 follow up: why the shadow report disagreed (scope)
+
+- Main explained the mismatch: the nightly shadow report's CURRENT set is KXGOLD15M, KXBTC15M, KXETH15M and KXDOGE15M together (every settled order in the live record since Oct 7, including Bitcoin, Ethereum and Dogecoin, which are now paused; Dogecoin alone is -25.81 over the last 7 days), and its ALL set adds XRP and the probes; it applies each rule to the whole set's day, not per market. So most of its gain likely came from cutting Dogecoin and Bitcoin loss days, which is not available on gold alone, and the gold only replay (FALSIFIED) stands. Main said there is no need to reproduce it. I carry on with 2 workers, OICORE first.
+
 ## 2026-11-06 10:12 AM CT (16:12Z): W-GOLDDRIFT1 (gold L1 edge over time): no decay
 
 - Worker finished read only (w_golddrift/REGISTRATION.md, go.py; try count 2; bar: latest third's loss rate above the first third's with non overlapping Wilson intervals AND trend p under 0.025). Entry set is the dayloss replay unchanged: 1,213 entries, 30 early sells, net 236.23 at 15 contracts, PF 1.25. Weekly (UTC Monday weeks; n, loss rate, net dollars, PF; live fills, live loss rate, live net): 08-31: 82, 6.1%, 13.60, 1.21; 09-07: 152, 7.2%, 11.40, 1.08; 09-14: 158, 6.3%, 17.07, 1.13; 09-21: 125, 7.2%, -7.18, 0.94; 09-28: 141, 5.0%, 41.72, 1.45; 10-05: 136, 4.4%, 55.65, 1.75, live 37, 0.0%, +9.45; 10-12: 123, 5.7%, 29.62, 1.33, live 57, 3.5%, +17.57; 10-19: 132, 5.3%, 42.50, 1.48, live 53, 7.5%, -0.49; 10-26: 114, 6.1%, 21.13, 1.24, live 68, 5.9%, +15.95; 11-02: 50, 6.0%, 10.70, 1.28, live 53, 5.7%, +11.73 (live 268 fills in all).
