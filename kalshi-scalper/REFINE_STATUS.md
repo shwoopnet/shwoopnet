@@ -2,6 +2,11 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-06 10:09 AM CT (16:09Z): W-NOFILLINFER1 (can a gold no-fill reason be inferred from stored fields?): no
+
+- Worker finished read only (w_nofillinfer/REGISTRATION.md kept from the cut off run, an.py added; 0 new calls, the earlier run's 148 public candle GETs had all succeeded). Gold no fills since 2026-10-07: 148 (80 YES, 68 NO). Classes (a takes priority over b): (a) the minute's ask close was above the limit (YES) or the bid close below it (NO): 116 of 148; (b) touch size below the count outside (a): 0 (five orders overall had a touch under the count: 8.93/9, 5/9, 6/11, 1/13, 6.93/13, all inside (a)); (c) neither: 32. Medians for (a): ask move 3.1c (the candle close past the limit); seconds from tick start to send 0.87 s on only the 25 newer rows with timing fields. For (b) the median touch over the 70 rows that store one is about 2,471 contracts against a median count of 13.
+- Not quote misses at send: of the 145 rows with a seen quote, all 145 had it at or inside the limit (3 rows have no stored quote). Reliability of (a): low: the 'range reached above the limit' reading is true for all 148 (the minute's high or low always passes the limit); the close version is a minute end price up to 60 s after the order and no filled order control was run. Verdict: a no fill reason cannot be inferred well enough to replace kalshiStatus for reads; the seen quote at or inside the limit explains 145 of 148 no fills and a touch under the count only 5. The real reason is only knowable from the order's own response or a follow up read, which is main's decision (see W-POSTSTATUS1). Not checked: filled order controls, quote age before the timing fields existed, the 3 rows without a stored quote.
+
 ## 2026-11-06 10:08 AM CT (16:08Z): W-C2EXP1 (yardsticks for gold shadows C2, S-GPB1, S-GQH1)
 
 - Worker finished read only (w_c2exp/REGISTRATION.md written before computing, y.py, out.txt; try count 0; 0 API calls; appended to interim_40.md). History base: the live order stream before each shadow start (rise3 and price exist on orders; losses include 25c exits); in sample, since each rule was motivated by that same history.
