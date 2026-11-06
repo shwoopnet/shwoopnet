@@ -46,3 +46,19 @@ Engine `src/scalper/perpgen_cryptoctx.py`; ledgers `workers/perpgen_ledger/RUN51
 | 88 | 5000 | 1549 | 354 | 3095 | 2 | 0 | 0 | 0 | 0 | 1.344 `r5<=q0.50&rng60<=q0.50&xeth240>=q0.90\|short\|480` |
 | 89 | 5000 | 1506 | 325 | 3167 | 2 | 0 | 0 | 0 | 0 | 1.381 `dhi1440<=q0.10&rel_btc240<=q0.50&vol60>=q0.75\|long\|240` |
 | 90 | 5000 | 1552 | 320 | 3127 | 1 | 0 | 0 | 0 | 0 | 1.367 `fr_avg3>=q0.75&hod4==2&vol240<=q0.90\|long\|480` |
+
+## Stage 2 (validation, the 3 frozen survivors, read once at 12 bps a side)
+
+Frozen lists committed first (commit 38aeadf): `workers/PERPGEN_FROZEN_CRYPTOCTX_RUN52.json`, `_RUN66`, `_RUN69` (the other 37 runs froze empty lists). Raw output `workers/perpgen_ledger/cryptoctx_validation.json`.
+
+| run | rule | disc n / PF | val n | val dates | val PF 12 / 5 / 24 bps | PF assumed / flipped funding | halves PF | control PF (reversed) | core mean vs rule mean | fails | label |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| 52 | `mtf==2&xeth240>=q0.90\|short\|480` | 265 / 1.77 | 179 | 20 | 0.36 / 0.42 / 0.26 | 0.36 / 0.35 | 0.05, 1.51 | 1.36 | -0.51% vs -0.88% | PF12<1.3, halves, PF24<1, control, core | FALSIFIED |
+| 66 | `rel_btc60>=q0.75&xeth240>=q0.90\|short\|480` | 303 / 1.51 | 192 | 27 | 0.44 / 0.51 / 0.35 | 0.44 / 0.44 | 0.24, 0.97 | 1.24 | -0.51% vs -0.86% | PF12<1.3, halves, PF24<1, control, core | FALSIFIED |
+| 69 | `r5>=q0.75&xeth240>=q0.90\|short\|480` | 387 / 1.61 | 252 | 27 | 0.47 / 0.55 / 0.35 | 0.47 / 0.46 | 0.28, 0.90 | 1.13 | -0.51% vs -0.72% | PF12<1.3, halves, PF24<1, control, core | FALSIFIED |
+
+Validation survivors 0, clusters K = 0, audit (A1 to A10) and the holdout were not run and not read: no rule reached them, the holdout guard file was never written. All three discovery survivors are the same bet (ETH 240 minute return at its top decile, short, 8 hour hold) and all three LOSE in validation (PF 0.36 to 0.47, first half worst), the reversed direction wins (control PF 1.13 to 1.36, but a control is not a rule and was not tested as one; it is a hint of regime or reversal in a window, nothing more).
+
+## Totals
+
+N for this slice = 200,000 (40 runs x 5,000 distinct rules, RUN51 to RUN90, every ledger line written before its batch was scored). Discovery survivors 3 of 200,000 (3 clusters, all the xeth240 short 8 hour bet); validation survivors 0; audit survivors 0; holdout unread; CANDIDATES 0, LEADS 0, as predicted. About 15 percent of rules contain xgold60 or xus500_60 and cannot trade in discovery (no leader data in the crypto discovery region), counted in N.

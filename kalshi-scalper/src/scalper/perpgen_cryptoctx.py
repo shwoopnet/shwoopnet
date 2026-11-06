@@ -434,6 +434,56 @@ def cluster(surv, th):
     return keep
 
 
+def val_report(ds, A, rule):
+    atoms, d, h = parse(rule)
+    m = A[atoms[0]]
+    for a in atoms[1:]:
+        m = m & A[a]
+    idx, ign = entries(ds, m, h)
+    opp = "short" if d == "long" else "long"
+    out = dict(rule=rule, n=int(len(idx)), ignored=ign)
+    if len(idx) == 0:
+        out.update(ok=False, why="no trades"); return out, idx
+    net = trade_nets(ds, idx, h, d); dt = ds["date"][idx]
+    hf = halves(dt)
+    out["dates"] = int(len(np.unique(dt))); out["pf12"] = pf(net); out["mean12"] = float(net.mean())
+    out["pf5"] = pf(trade_nets(ds, idx, h, d, 0.0005)); out["pf24"] = pf(trade_nets(ds, idx, h, d, FEE24))
+    out["pf12_flipfund"] = pf(trade_nets(ds, idx, h, d, FEE12, -1))
+    out["pf12_priceonly"] = pf(trade_nets(ds, idx, h, d, FEE12, 0))
+    out["pf_h1"], out["pf_h2"] = (pf(net[hf]), pf(net[~hf])) if (hf.any() and (~hf).any()) else (None, None)
+    out["mean_h1"], out["mean_h2"] = (float(net[hf].mean()), float(net[~hf].mean())) if (hf.any() and (~hf).any()) else (None, None)
+    ctl = trade_nets(ds, idx, h, opp)
+    out["control_pf"], out["control_mean"] = pf(ctl), float(ctl.mean())
+    cidx, _ = entries(ds, np.ones(ds["N"], bool), h)
+    core = trade_nets(ds, cidx, h, d)
+    out["core_n"], out["core_mean"], out["core_pf"] = int(len(cidx)), float(core.mean()), pf(core)
+    fails = []
+    if len(idx) < 100: fails.append("n<100")
+    if out["dates"] < 10: fails.append("dates<10")
+    if out["pf12"] < 1.3: fails.append("PF12<1.3")
+    if out["pf_h1"] is None or out["pf_h1"] <= 1 or out["pf_h2"] <= 1 or out["mean_h1"] <= 0 or out["mean_h2"] <= 0: fails.append("halves")
+    if out["pf24"] < 1.0: fails.append("PF24<1")
+    if not (out["control_pf"] < 1.0 and out["control_mean"] < out["mean12"]): fails.append("control")
+    if not (out["core_mean"] < out["mean12"]): fails.append("core")
+    out["ok"] = not fails; out["fails"] = fails
+    return out, idx
+
+
+def validate(runs):
+    fid = "CRYPTOCTX_RUN%02d" % runs[0]
+    ds = build("validation", frozen_id=fid)
+    C = json.load(open(os.path.join(ROOT, "workers", "PERPGEN_CRYPTOCTX_CUTS.json")))["cuts"]
+    A = atom_arrays(ds, C)
+    res = []; surv = []
+    for r in runs:
+        fz = json.load(open(os.path.join(ROOT, "workers", "PERPGEN_FROZEN_CRYPTOCTX_RUN%02d.json" % r)))
+        for s in fz["survivors"]:
+            o, idx = val_report(ds, A, s["rule"]); o["run"] = r; o["disc_pf"] = s["pf12"]; o["disc_n"] = s["n"]
+            res.append(o)
+            if o["ok"]: surv.append(dict(rule=s["rule"], pf=o["pf12"], idx=idx))
+    return res, surv, ds
+
+
 def main():
     cmd = sys.argv[1]
     if cmd == "discover":
@@ -460,6 +510,13 @@ def main():
                 None if best[1] is None else "%.3f" % best[0], best[1], len(cl), time.time() - t1), flush=True)
             open(os.path.join(ROOT, "workers", "perpgen_ledger", "cryptoctx_run_summary.txt"), "a").write(
                 "RUN%02d N=%d disc_survivors=%d clusters=%d best_pf=%s best_rule=%s stages=%s\n" % (run, len(new), len(surv), len(cl), None if best[1] is None else "%.3f" % best[0], best[1], sc))
+    elif cmd == "validate":
+        runs = [int(x) for x in sys.argv[2:]]
+        res, surv, ds = validate(runs)
+        json.dump(res, open(os.path.join(ROOT, "workers", "perpgen_ledger", "cryptoctx_validation.json"), "w"), indent=1)
+        for o in res:
+            print({k: (round(v, 4) if isinstance(v, float) else v) for k, v in o.items()})
+        print("validation survivors", len(surv), "clusters at J>=0.5:", len(cluster(surv, 0.5)))
     else:
         raise SystemExit("unknown command")
 
