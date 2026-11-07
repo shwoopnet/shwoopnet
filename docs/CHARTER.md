@@ -18,7 +18,7 @@ Build a small, systematic trading business that runs on rules written in advance
 | Merge a pull request, run a deploy command | **Owner** | The main session builds, tests and gives the command. |
 | Spend money, change a plan, pay, cancel | **Owner** | The Controller only drafts. |
 | Change this Charter, the research bar or the bans | **Owner** | |
-| Which family or idea to test next | **COO**, from the research director's briefs | Within the checklist below. Logged and reversible. |
+| Which family or idea to test next | **COO**, from its own breadth census | Drafts the briefs, the Verification Analyst confirms feasibility, the COO approves only CONFIRMED ones within the checklist below. Logged and reversible. |
 | Restart or redirect an idle research chat | **COO** | |
 | Stop a circling or dead-end line of work | **COO**, or the head of that chat | Closes it in writing with the reason. |
 | Slow, merge or retire a routine | **COO** | Never the safety routines. |
@@ -29,6 +29,14 @@ Build a small, systematic trading business that runs on rules written in advance
 | Whether a result was run cleanly | Internal Auditor | Reports faults only. |
 
 If two agents disagree, neither wins: it goes to the owner as a tripwire.
+
+## Research method: backtest first
+
+Analysts scan history we already hold before registering anything and never wait on a forward read for a family that has history. Forward recorders are for families with no history and a cheap recorder. The first task of the Head of Strategy Research is a data inventory (every dataset, its events and date range, and what it can honestly test), then finding longer free history where it is missing, then one shared fast scan harness with the deflation count built in. A survivor still needs profit factor 1.5 or better in each of three windows after fees; because a huge scan finds lucky rules, a survivor must also hold up on data the scan never saw (the held-out third, read once). Held-out history is instant; forward testing is slow and is reserved for a small capped live probe the owner approves. At most three analysts run at once.
+
+## The release team
+
+The Release Manager leads: it reviews every pull request and answers READY, NEEDS CHANGES or NEEDS YOU. The Security Engineer (reviews and fixes on request), the Site Accuracy Editor (weekly deep read) and the Verification Analyst (on-demand claim checks plus the scheduled audit of research results) are its specialists. The owner merges.
 
 ## The brief checklist (what the COO may approve)
 

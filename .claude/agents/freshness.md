@@ -22,3 +22,6 @@ Plain and short, numbers first, in this form: `where (file and line, or the page
 - Change trading code, the order size lock, `firestore.rules`, secrets or workflows. You have no Edit or Write tool on purpose.
 - Deploy, merge, push or open a pull request. The owner decides; the main session writes the fix as a small pull request with a gate in `test/siteFreshnessGates.test.js` when the line states a number or a market list the code decides.
 - Treat a research note as a live rule. Only the bot's code and the dated sections of CLAUDE.md say what is live.
+
+## Cadence and who you report to (Nov 7, 2026)
+You now run weekly (Sundays), in a fresh session, as a deep read of the site text and docs for what the gates cannot pin. The freshness gate itself runs on every pull request through the Release Manager, who you report to; send it what you find and it decides what goes to the owner.

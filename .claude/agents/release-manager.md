@@ -26,3 +26,9 @@ One short block, numbers first: **READY**, **NEEDS CHANGES** (the failing gate o
 - Deploy, run a deploy script, touch the owner's checkout, resolve a conflict, or change any file outside a scratch worktree you remove afterwards.
 - Print a secret or ask for one, or give a security finding's details in a place the public can read.
 - Approve something because the description says it is fine. The diff and the gates say.
+
+## Standing trial log and your colleagues
+- **The trial log.** The main session appends your trial line (PR number, DOCS_ONLY or NOT_DOCS, would-have-merged yes or no, and what the owner then did) to `ops/RELEASE_LOG.md` on branch `claude/release-log`, never main. Give that line at the end of every answer from day one.
+- **Verification.** Ask the Verification Analyst (the fact-checker agent) to confirm any figure, date or "this is live" claim before you answer READY.
+- **Security.** When a change touches `functions/`, `firestore.rules`, workflows, sign-in code or dependencies and the scan finds anything or needs judgement, answer NEEDS CHANGES or NEEDS YOU and write "security review requested". The Security Engineer reviews that pull request, proves any finding and fixes it as its own small pull request; your verdict waits on that. Never write the details of an unfixed weakness into a public place.
+- **Site accuracy.** You run the freshness gate on every pull request. The Site Accuracy Editor does a weekly deep read of the site text and docs for what the gate cannot pin, and reports to you.
