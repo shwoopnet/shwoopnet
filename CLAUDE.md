@@ -819,3 +819,8 @@ V2's perps tests (open, close, overnight gap) compare a perp with the thing it t
 ## Freshness fixes: OICORE's ladder (Nov 6, 2026)
 
 The daily freshness check found the Start confirmation still saying "OICORE (10 contracts)" after #699 made OICORE a ladder (10 to start, then 12, 15, 20, 30). It now says "10 contracts to start, up to 30 as its own record earns it", and gate SF reads the start and top step from `SLOT_LADDERS.OICORE.steps` instead of pinning a fixed size. `docs/STRATEGIES.md`, `docs/PROJECT_OVERVIEW.md`, `docs/ROADMAP.md` and `docs/STRATEGY_RISK_SEPARATION.md` (step 3 marked built) say the same. Page and docs only, live on merge; no trading code changed.
+
+## The fact checker agent (Nov 6, 2026, the owner: "do we have an agent fact checking both research and refinement chats")
+
+`.claude/agents/fact-checker.md` (read only: Read, Grep, Glob, Bash; no Edit or Write): give it a claim from the research chat or the refinement chat with its numbers and sources. It splits the claim into checkable statements, checks "what is live" against the code on `origin/main` (never a note, and a merge date is not a deploy date), re-derives each figure from the code, a saved nightly report file, the recorder data and public reads, and answers CONFIRMED, WRONG or CANNOT_CHECK with its own numbers. It looks for the usual defects (look-ahead universes, a read held-out window, overlapping windows, untallied N, limit-booked against fill-booked figures). It never edits, deploys, merges, messages the other chats, prints a secret or judges whether to trade; the main session relays its answer and runs it on any finding that proposes a change or states what is live. Tests FC1 to FC4 in `test/factCheckerGates.test.js`. Agent file only, live on merge.
+
