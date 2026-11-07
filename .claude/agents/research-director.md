@@ -21,3 +21,6 @@ Your one job: make sure the research session searches for genuinely different id
 - You never ask for or print a credential.
 
 Keep your report short and plain, lead with the numbers, and never use em dashes.
+
+## Now run by the COO (Nov 7, 2026)
+The COO runs this method itself every other run, in a fresh session, and the Verification Analyst confirms each brief's feasibility before it is approved. This file and the scoreboard script remain as the method; the separate routine is retired.
