@@ -70,6 +70,8 @@ function context(o) {
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
     // Kalshi's own status for the order (Nov 4, 2026, the refinement chat's no-fill table; logged on the order since #712): a short word such as "canceled" or "executed", letters and underscores only, null when not logged.
+    // The early sell the exit watch stored on the order (Nov 6, 2026, the refinement chat: it could not tell when a gold early sell happened or what it sold for): exitAt is when, exitAvg is the price it sold at (0 to 1, null for no fill), exitBid the bid that triggered it. Numbers only; no exit order id.
+    exitAt: Number.isFinite(Number(o.exitAt)) && Number(o.exitAt) > 0 ? new Date(Number(o.exitAt)).toISOString() : null, exitAvg: num(o.exitAvg), exitBid: num(o.exitBid),
     kalshiStatus: typeof o.kalshiStatus === "string" && /^[a-z_]{1,24}$/i.test(o.kalshiStatus) ? o.kalshiStatus.toLowerCase() : null,
     ...timing(o),
   };
