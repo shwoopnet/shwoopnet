@@ -1,6 +1,6 @@
 """STOCKPERP1..6 scorer (frozen before any outcome). Usage: python3 -I score.py <datadir> pilot|dev
 datadir holds candles_1m.csv.gz (fetch.py), funding.json, cash.gz-style files cash_*.csv.gz (Yahoo 1 minute, origin/perp-data cash1m).
-pilot: ONLY trading date 2026-11-05 is loaded. dev: refuses to run before 2026-12-01 and never loads 2026-12-01 or later (held out).
+pilot: ONLY trading date 2026-11-05 is loaded. dev: refuses to run before 2026-12-19 and never loads 2026-12-19 or later (AMENDMENT1: development 2026-11-06 to 2026-12-18; held out 2026-12-21 to 2027-01-29 is never loaded by this file).
 Held-out dates are never read by this file at all."""
 import sys, os, gzip, csv, json, math, glob, statistics as st, collections, datetime as D
 from zoneinfo import ZoneInfo
@@ -8,8 +8,8 @@ NY = ZoneInfo("America/New_York")
 DATADIR, MODE = sys.argv[1], sys.argv[2]
 PILOT = {"2026-11-05"}
 if MODE == "dev":
-    if D.date.today() < D.date(2026, 12, 1): sys.exit("dev read date is 2026-12-01")
-    ALLOWED = lambda d: "2026-11-06" <= d < "2026-12-01"
+    if D.date.today() < D.date(2026, 12, 19): sys.exit("dev read date is 2026-12-19")
+    ALLOWED = lambda d: "2026-11-06" <= d <= "2026-12-18"
 else:
     ALLOWED = lambda d: d in PILOT
 U = "XOM QQQ AAPL SPY SPCX GOOGL MU NFLX NVDA TSLA KO MSFT COST AMZN VZ CVX PG PLTR META".split()
