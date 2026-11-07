@@ -1,0 +1,406 @@
+{
+ "model_fit_on": "first 4 UTC dates of Kalshi development W1",
+ "params_4day": {
+  "360": [
+   0.006753585224613243,
+   1.0501548162259946
+  ],
+  "600": [
+   -0.0010967644450182734,
+   0.982087970765931
+  ],
+  "h": [
+   0.0049999999999999906,
+   0.0050000000000000044,
+   0.0050000000000000044
+  ],
+  "fitted": true
+ },
+ "heldout_slice_last2dates_W1": {
+  "label": "W1 dates 5-6 (held-out slice, 4 day model)",
+  "L360": {
+   "n": 368,
+   "mid_rmse_c": 7.841391644164413,
+   "mid_mae_c": 5.762586292809834,
+   "mid_bias_c": -0.13508620022782689,
+   "n_extreme_mid": 216,
+   "mid_mae_extreme_c": 4.513905672839862,
+   "band_actual": 102,
+   "band_model": 86,
+   "band_both_same_side": 54,
+   "band_precision": 0.627906976744186,
+   "band_recall": 0.5294117647058824,
+   "pf_actual_priced": {
+    "n": 102,
+    "pf": 1.1404115825896923,
+    "mean_c": 0.7558823529411756,
+    "win": 0.9411764705882353
+   },
+   "pf_model_priced_model_set": {
+    "n": 86,
+    "pf": 1.9501779359430604,
+    "mean_c": 3.104651162790698,
+    "win": 0.9651162790697675
+   }
+  },
+  "L600": {
+   "n": 368,
+   "mid_rmse_c": 7.004353290214399,
+   "mid_mae_c": 5.412035401678979,
+   "mid_bias_c": 0.013225655990586763,
+   "n_extreme_mid": 125,
+   "mid_mae_extreme_c": 5.056170047362838,
+   "band_actual": 74,
+   "band_model": 54,
+   "band_both_same_side": 39,
+   "band_precision": 0.7222222222222222,
+   "band_recall": 0.527027027027027,
+   "pf_actual_priced": {
+    "n": 74,
+    "pf": 1.9858736059479551,
+    "mean_c": 3.5837837837837827,
+    "win": 0.9594594594594594
+   },
+   "pf_model_priced_model_set": {
+    "n": 54,
+    "pf": 1.2209737827715357,
+    "mean_c": 1.0925925925925928,
+    "win": 0.9444444444444444
+   }
+  }
+ },
+ "train_slice_first4dates_W1": {
+  "label": "W1 dates 1-4 (in sample)",
+  "L360": {
+   "n": 623,
+   "mid_rmse_c": 8.069910807478692,
+   "mid_mae_c": 5.927997794860209,
+   "mid_bias_c": -0.05646225675891837,
+   "n_extreme_mid": 346,
+   "mid_mae_extreme_c": 4.676581408125859,
+   "band_actual": 169,
+   "band_model": 147,
+   "band_both_same_side": 92,
+   "band_precision": 0.6258503401360545,
+   "band_recall": 0.5443786982248521,
+   "pf_actual_priced": {
+    "n": 169,
+    "pf": 0.7909317803660565,
+    "mean_c": -1.48698224852071,
+    "win": 0.9230769230769231
+   },
+   "pf_model_priced_model_set": {
+    "n": 147,
+    "pf": 0.7310098302055408,
+    "mean_c": -2.0476190476190474,
+    "win": 0.9183673469387755
+   }
+  },
+  "L600": {
+   "n": 623,
+   "mid_rmse_c": 7.249628801385998,
+   "mid_mae_c": 5.591400524635031,
+   "mid_bias_c": 0.04201547123405725,
+   "n_extreme_mid": 174,
+   "mid_mae_extreme_c": 5.4636994733314985,
+   "band_actual": 88,
+   "band_model": 76,
+   "band_both_same_side": 50,
+   "band_precision": 0.6578947368421053,
+   "band_recall": 0.5681818181818182,
+   "pf_actual_priced": {
+    "n": 88,
+    "pf": 1.6196319018404906,
+    "mean_c": 2.6397727272727263,
+    "win": 0.9545454545454546
+   },
+   "pf_model_priced_model_set": {
+    "n": 76,
+    "pf": 1.4447439353099731,
+    "mean_c": 2.1710526315789465,
+    "win": 0.9473684210526315
+   }
+  }
+ },
+ "params_final_W1_all_6_dates": {
+  "360": [
+   0.01229934699943716,
+   1.06125339233324
+  ],
+  "600": [
+   -0.0009736249934460597,
+   0.9842105101092349
+  ],
+  "h": [
+   0.0049999999999999906,
+   0.0050000000000000044,
+   0.0050000000000000044
+  ],
+  "fitted": true
+ },
+ "oos_W2": {
+  "label": "W2 dev dates (final model, drift check)",
+  "L360": {
+   "n": 1136,
+   "mid_rmse_c": 8.68488247750718,
+   "mid_mae_c": 6.386124090464214,
+   "mid_bias_c": 0.37918746054339264,
+   "n_extreme_mid": 624,
+   "mid_mae_extreme_c": 4.842656726949604,
+   "band_actual": 337,
+   "band_model": 273,
+   "band_both_same_side": 188,
+   "band_precision": 0.6886446886446886,
+   "band_recall": 0.5578635014836796,
+   "pf_actual_priced": {
+    "n": 337,
+    "pf": 0.8607979960636964,
+    "mean_c": -0.9234421364985158,
+    "win": 0.9287833827893175
+   },
+   "pf_model_priced_model_set": {
+    "n": 273,
+    "pf": 0.6390912987569652,
+    "mean_c": -3.0842490842490844,
+    "win": 0.9084249084249084
+   }
+  },
+  "L600": {
+   "n": 1136,
+   "mid_rmse_c": 7.560189044886191,
+   "mid_mae_c": 5.827841409848199,
+   "mid_bias_c": 0.2123520335568726,
+   "n_extreme_mid": 330,
+   "mid_mae_extreme_c": 5.446500740423792,
+   "band_actual": 195,
+   "band_model": 184,
+   "band_both_same_side": 120,
+   "band_precision": 0.6521739130434783,
+   "band_recall": 0.6153846153846154,
+   "pf_actual_priced": {
+    "n": 195,
+    "pf": 0.8157759506680368,
+    "mean_c": -1.4707692307692317,
+    "win": 0.9128205128205128
+   },
+   "pf_model_priced_model_set": {
+    "n": 184,
+    "pf": 0.4941286989196806,
+    "mean_c": -5.853260869565218,
+    "win": 0.875
+   }
+  }
+ },
+ "oos_W3": {
+  "label": "W3 dev dates (final model, drift check)",
+  "L360": {
+   "n": 960,
+   "mid_rmse_c": 7.970003055861246,
+   "mid_mae_c": 5.832999536759814,
+   "mid_bias_c": 0.23671826653304262,
+   "n_extreme_mid": 493,
+   "mid_mae_extreme_c": 4.036476825625406,
+   "band_actual": 238,
+   "band_model": 211,
+   "band_both_same_side": 137,
+   "band_precision": 0.6492890995260664,
+   "band_recall": 0.5756302521008403,
+   "pf_actual_priced": {
+    "n": 238,
+    "pf": 0.6655082536924414,
+    "mean_c": -2.749999999999999,
+    "win": 0.9117647058823529
+   },
+   "pf_model_priced_model_set": {
+    "n": 211,
+    "pf": 0.7085173501577287,
+    "mean_c": -2.18957345971564,
+    "win": 0.919431279620853
+   }
+  },
+  "L600": {
+   "n": 960,
+   "mid_rmse_c": 6.690615785449124,
+   "mid_mae_c": 5.27337308360391,
+   "mid_bias_c": -0.1985581446857543,
+   "n_extreme_mid": 253,
+   "mid_mae_extreme_c": 5.070654791535474,
+   "band_actual": 123,
+   "band_model": 116,
+   "band_both_same_side": 72,
+   "band_precision": 0.6206896551724138,
+   "band_recall": 0.5853658536585366,
+   "pf_actual_priced": {
+    "n": 123,
+    "pf": 1.135938359933957,
+    "mean_c": 0.8032520325203242,
+    "win": 0.9349593495934959
+   },
+   "pf_model_priced_model_set": {
+    "n": 116,
+    "pf": 0.46898432174505794,
+    "mean_c": -6.7155172413793105,
+    "win": 0.8620689655172413
+   }
+  }
+ },
+ "in_sample_W1": {
+  "label": "W1 (in sample)",
+  "L360": {
+   "n": 991,
+   "mid_rmse_c": 7.98238628696886,
+   "mid_mae_c": 5.860434683021037,
+   "mid_bias_c": 0.05051211896731752,
+   "n_extreme_mid": 562,
+   "mid_mae_extreme_c": 4.570037443067831,
+   "band_actual": 271,
+   "band_model": 241,
+   "band_both_same_side": 150,
+   "band_precision": 0.6224066390041494,
+   "band_recall": 0.5535055350553506,
+   "pf_actual_priced": {
+    "n": 271,
+    "pf": 0.9005196733481812,
+    "mean_c": -0.6428044280442802,
+    "win": 0.9298892988929889
+   },
+   "pf_model_priced_model_set": {
+    "n": 241,
+    "pf": 0.8323353293413174,
+    "mean_c": -1.161825726141078,
+    "win": 0.9253112033195021
+   }
+  },
+  "L600": {
+   "n": 991,
+   "mid_rmse_c": 7.159437801827918,
+   "mid_mae_c": 5.524902548348168,
+   "mid_bias_c": 0.034399185418275205,
+   "n_extreme_mid": 299,
+   "mid_mae_extreme_c": 5.280975296965641,
+   "band_actual": 162,
+   "band_model": 131,
+   "band_both_same_side": 90,
+   "band_precision": 0.6870229007633588,
+   "band_recall": 0.5555555555555556,
+   "pf_actual_priced": {
+    "n": 162,
+    "pf": 1.772635502407206,
+    "mean_c": 3.070987654320987,
+    "win": 0.9567901234567902
+   },
+   "pf_model_priced_model_set": {
+    "n": 131,
+    "pf": 1.35423197492163,
+    "mean_c": 1.725190839694656,
+    "win": 0.9465648854961832
+   }
+  }
+ },
+ "gate_mid_mae_over_8c": false,
+ "proxy": {
+  "BTC": {
+   "series": "KXBTC15M",
+   "windows": 1544,
+   "agree": 0.9397668393782384,
+   "disagree": 93,
+   "agree_settle_vs_kalshi_strike": 0.6619170984455959,
+   "open_minus_strike_bp": {
+    "mean": 12.718483460327086,
+    "median": 12.83570740458373,
+    "p05": 7.501408616144012,
+    "p95": 17.537120132226747,
+    "mean_abs": 12.726528869041273
+   },
+   "by_abs_dist_bp_at_6min": [
+    {
+     "lo": 0,
+     "hi": 1,
+     "n": 141,
+     "agree": 0.8936170212765957
+    },
+    {
+     "lo": 1,
+     "hi": 3,
+     "n": 254,
+     "agree": 0.9251968503937008
+    },
+    {
+     "lo": 3,
+     "hi": 6,
+     "n": 335,
+     "agree": 0.9343283582089552
+    },
+    {
+     "lo": 6,
+     "hi": 12,
+     "n": 416,
+     "agree": 0.9399038461538461
+    },
+    {
+     "lo": 12,
+     "hi": null,
+     "n": 398,
+     "agree": 0.9698492462311558
+    }
+   ],
+   "model_band_6min": {
+    "n": 372,
+    "agree": 0.956989247311828,
+    "disagree": 16
+   }
+  },
+  "ETH": {
+   "series": "KXETH15M",
+   "windows": 1543,
+   "agree": 0.9371354504212573,
+   "disagree": 97,
+   "agree_settle_vs_kalshi_strike": 0.728451069345431,
+   "open_minus_strike_bp": {
+    "mean": 12.26461955326151,
+    "median": 12.273399779276772,
+    "p05": 6.393319569845346,
+    "p95": 18.02701653605787,
+    "mean_abs": 12.334383051888592
+   },
+   "by_abs_dist_bp_at_6min": [
+    {
+     "lo": 0,
+     "hi": 1,
+     "n": 104,
+     "agree": 0.8942307692307693
+    },
+    {
+     "lo": 1,
+     "hi": 3,
+     "n": 162,
+     "agree": 0.8827160493827161
+    },
+    {
+     "lo": 3,
+     "hi": 6,
+     "n": 255,
+     "agree": 0.9058823529411765
+    },
+    {
+     "lo": 6,
+     "hi": 12,
+     "n": 387,
+     "agree": 0.9560723514211886
+    },
+    {
+     "lo": 12,
+     "hi": null,
+     "n": 635,
+     "agree": 0.9590551181102362
+    }
+   ],
+   "model_band_6min": {
+    "n": 353,
+    "agree": 0.9546742209631728,
+    "disagree": 16
+   }
+  }
+ },
+ "note": "MODEL RESULT: Binance path + fitted quote model; Kalshi development windows only (closes before 2026-10-28); never a live figure."
+}
