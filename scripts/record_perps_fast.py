@@ -34,6 +34,22 @@ EVERY_S = 30
 STOP_DATE = dt.date(2027, 2, 26)   # about 110 weekdays of data for V2's 150 trade reads (was 2026-12-07, extended Nov 6, 2026 at the owner's word); a reviewed edit to extend again
 
 
+EXTRA_COLUMNS = ["halt_sources", "is_open"]   # added Nov 6, 2026 (V2): the market's own halt list ("|" joined) and its schedule flag; empty when the field is absent
+
+
+def flags(m):
+    h = m.get("halt_sources")
+    halt = "|".join(str(x) for x in h) if isinstance(h, (list, tuple)) else base.num(h)
+    sched = m.get("schedule")
+    o = sched.get("is_open") if isinstance(sched, dict) else None
+    return [halt, "" if o is None else str(bool(o)).lower()]
+
+
+def rows_with_flags(markets, ts):
+    """The hourly recorder's rows (same columns, same order) plus the two flags, from the same market objects: no extra read."""
+    return [r + flags(m) for r, m in zip(base.rows(markets, ts), markets)]
+
+
 def current_window(now_utc):
     ny = now_utc.astimezone(NY)
     if ny.weekday() >= 5:
@@ -67,14 +83,14 @@ def main(out_dir, now_fn=lambda: dt.datetime.now(dt.timezone.utc), fetch_fn=fetc
         return 0
     buf = io.StringIO()
     w = csv.writer(buf)
-    w.writerow(base.COLUMNS)
+    w.writerow(base.COLUMNS + EXTRA_COLUMNS)
     samples = fails = 0
     while now_fn() < end:
         t0 = time.monotonic()
         try:
             markets = fetch_fn()
             if markets:
-                w.writerows(base.rows(markets, now_fn().strftime("%Y-%m-%dT%H:%M:%SZ")))
+                w.writerows(rows_with_flags(markets, now_fn().strftime("%Y-%m-%dT%H:%M:%SZ")))
                 samples += 1
         except Exception as e:   # one failed read costs one sample, never the window
             fails += 1

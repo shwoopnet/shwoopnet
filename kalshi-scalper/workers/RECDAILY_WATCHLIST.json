@@ -1,6 +1,6 @@
 {
  "id": "RECDAILY",
- "note": "Research only. The recorder (scripts/record_daily.py) reads this file; nothing else decides what is polled. Add a test by editing this file and nothing else. Looks are what the evaluators read through src/scalper/recdaily.py; the recorder itself stores every poll of every watched market, so a look can be added later without losing data. USWEEP1's favourite watch items were removed on Nov 3, 2026 (the owner held the Oct 28 favourite-and-hold ban strictly). Nov 4, 2026 (RECBUILD1, the owner approved collector 3): 32 Financials and Commodities daily, weekly and hourly ladder series were added for STRESSDAY1 (the series its census entries came from, USWEEP1 and USWEEP3 lists in workers/), so entry quotes at the CALIB1 looks (daily 1440/360/60, weekly 4320/1440/360, hourly 30/15/5 minutes before the close) are on file past 2026-10-02; the binding limit there is stress days (10 of 25), not entries. Cheap-side only is a READER rule; the recorder stores every poll.",
+ "note": "Research only. The recorder (scripts/record_daily.py) reads this file; nothing else decides what is polled. Add a test by editing this file and nothing else. Looks are what the evaluators read through src/scalper/recdaily.py; the recorder itself stores every poll of every watched market, so a look can be added later without losing data. USWEEP1's favourite watch items were removed on Nov 3, 2026 (the owner held the Oct 28 favourite-and-hold ban strictly). Nov 4, 2026 (RECBUILD1, the owner approved collector 3): 32 Financials and Commodities daily, weekly and hourly ladder series were added for STRESSDAY1 (the series its census entries came from, USWEEP1 and USWEEP3 lists in workers/), so entry quotes at the CALIB1 looks (daily 1440/360/60, weekly 4320/1440/360, hourly 30/15/5 minutes before the close) are on file past 2026-10-02; the binding limit there is stress days (10 of 25), not entries. Cheap-side only is a READER rule; the recorder stores every poll. Nov 6, 2026 (SOFR1, the owner approved V2's list): Kalshi's daily SOFR markets (KXSOFRD) are polled only on weekdays from 09:00 to 13:00 UTC (the half hour polls at :07 and :37, the last one at 12:37 UTC before the 12:59 UTC close; about 8 reads a day), with the NY Fed's daily SOFR row saved once a day under daily/ref/; both stop after 2027-02-26 (utc_hours, weekdays_only and stop_date are per entry limits read by scripts/record_daily.py).",
  "poll_minutes": 30,
  "default_window_hours": 30,
  "fields": [
@@ -490,7 +490,38 @@
     15,
     5
    ]
+  },
+  {
+   "test": "SOFR1",
+   "series": "KXSOFRD",
+   "window_hours": 30,
+   "looks_minutes_before_close": [
+    240,
+    120,
+    60,
+    30,
+    10
+   ],
+   "utc_hours": [
+    9,
+    13
+   ],
+   "weekdays_only": true,
+   "stop_date": "2027-02-26"
   }
  ],
- "not_recorded": "EVENT830 (15 minute series) is already fed by the quote recorder and the candle ledger."
+ "not_recorded": "EVENT830 (15 minute series) is already fed by the quote recorder and the candle ledger.",
+ "refs": [
+  {
+   "id": "NYFED_SOFR",
+   "test": "SOFR1",
+   "url": "https://markets.newyorkfed.org/api/rates/secured/sofr/last/1.json",
+   "utc_hours": [
+    9,
+    13
+   ],
+   "weekdays_only": true,
+   "stop_date": "2027-02-26"
+  }
+ ]
 }
