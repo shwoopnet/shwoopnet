@@ -1,0 +1,31 @@
+{
+ "h": 20.0,
+ "b": 0.0,
+ "K": {
+  "NPB": 8.0,
+  "KBO": 8.0
+ },
+ "split": {
+  "NPB": "20260803",
+  "KBO": "20260729"
+ },
+ "dropped": {
+  "npb unparsed or cancelled": 41,
+  "npb tie or unknown team": 18,
+  "kbo tie or unknown": 16
+ },
+ "n": {
+  "NPB": 833,
+  "KBO": 673
+ },
+ "info": {
+  "NPB model out-of-sample log-loss": 0.6773,
+  "NPB model out-of-sample n": 271,
+  "NPB elo_only out-of-sample log-loss": 0.6773,
+  "NPB elo_only out-of-sample n": 271,
+  "KBO model out-of-sample log-loss": 0.6636,
+  "KBO model out-of-sample n": 204,
+  "KBO elo_only out-of-sample log-loss": 0.6636,
+  "KBO elo_only out-of-sample n": 204
+ }
+}
