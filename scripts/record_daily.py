@@ -26,6 +26,7 @@ MAX_PAGES = 6
 QUOTE_COLS = ["slot_ts", "poll_ts", "server_date_header", "tests", "series", "ticker", "event_ticker", "open_time", "close_time", "mins_to_close", "status",
               "strike_type", "floor_strike", "cap_strike", "yes_bid", "yes_ask", "last", "volume", "open_interest"]
 RESULT_COLS = ["ticker", "series", "event_ticker", "close_time", "result", "expiration_value", "settlement_ts", "seen_ts"]
+REF_COLS = ["ref_id", "type", "effective_date", "percent_rate", "p1", "p25", "p75", "p99", "volume_billions", "revision", "seen_ts"]
 RUN_COLS = ["slot_ts", "poll_ts", "server_date_header", "clock_skew_s", "series_polled", "calls", "n429", "n_errors", "quote_rows", "result_rows"]
 
 
@@ -76,12 +77,55 @@ def load_watchlist(path):
     w = json.load(open(path))
     by_series = {}
     for e in w["watch"]:
-        s = by_series.setdefault(e["series"], {"tests": [], "window_hours": w.get("default_window_hours", 30), "keep_all_open": False})
+        s = by_series.setdefault(e["series"], {"tests": [], "window_hours": w.get("default_window_hours", 30), "keep_all_open": False, "utc_hours": None,
+                                               "weekdays_only": False, "stop_date": None})
+        # Optional per entry limits (SOFR1, Nov 6, 2026): poll only inside [h0, h1) UTC, only Monday to Friday, and never after stop_date. No limit means every slot, as before.
+        if e.get("utc_hours"):
+            s["utc_hours"] = e["utc_hours"]
+        if e.get("weekdays_only"):
+            s["weekdays_only"] = True
+        if e.get("stop_date"):
+            s["stop_date"] = e["stop_date"]
         s["tests"].append(e["test"])
         if e.get("keep_all_open"):
             s["keep_all_open"] = True
         s["window_hours"] = max(s["window_hours"], e.get("window_hours") or 0)
     return by_series
+
+
+def active(cfg, now):
+    """False when this series' own limits say not to poll at this moment (outside its UTC hours, a weekend, or past its stop date)."""
+    g = time.gmtime(now)
+    if cfg.get("stop_date") and time.strftime("%Y-%m-%d", g) > cfg["stop_date"]:
+        return False
+    if cfg.get("weekdays_only") and g.tm_wday >= 5:
+        return False
+    h = cfg.get("utc_hours")
+    return not h or h[0] <= g.tm_hour < h[1]
+
+
+def fetch_refs(refs, data_dir, now):
+    """Daily reference rows (the NY Fed's SOFR): one public GET per reference, written once per effective date. Returns (calls, errors)."""
+    calls = errs = 0
+    for r in refs:
+        if not active(r, now):
+            continue
+        st, body, _ = http_get(r["url"])
+        calls += 1
+        rows = []
+        if st == 200 and isinstance(body, dict):
+            for x in body.get("refRates") or []:
+                if x.get("effectiveDate") and x.get("percentRate") is not None:
+                    rows.append([r["id"], x.get("type", ""), x["effectiveDate"], x["percentRate"], x.get("percentPercentile1", ""), x.get("percentPercentile25", ""),
+                                 x.get("percentPercentile75", ""), x.get("percentPercentile99", ""), x.get("volumeInBillions", ""), x.get("revisionIndicator", ""), int(now)])
+        if not rows:
+            errs += 1
+            continue
+        path = os.path.join(data_dir, "daily", "ref", rows[0][2] + ".csv.gz")
+        if not os.path.exists(path):
+            write_gz(path, REF_COLS, rows)
+        _sleep(GAP_S)
+    return calls, errs
 
 
 def wanted(market, cfg, now):
@@ -165,6 +209,8 @@ def run(watchlist, data_dir, now=None, getter=None):
         seen = known_results(data_dir)
         qrows, rrows, calls, n429, errs, date0 = [], [], 0, 0, 0, ""
         for series, cfg in cfgs.items():
+            if not active(cfg, now):
+                continue
             ms, c, n, bad, date = list_markets(series, "open")
             calls, n429, errs, date0 = calls + c, n429 + n, errs + (1 if bad else 0), date or date0
             ts = int(time.time()) if getter is None else int(now)
@@ -176,6 +222,8 @@ def run(watchlist, data_dir, now=None, getter=None):
                 if m.get("ticker") not in seen and m.get("result") in ("yes", "no"):
                     seen.add(m["ticker"])
                     rrows.append(result_row(series, m, int(now)))
+        rc, re_ = fetch_refs(json.load(open(watchlist)).get("refs") or [], data_dir, now)
+        calls, errs = calls + rc, errs + re_
         write_gz(os.path.join(data_dir, "daily", "quotes", day, hhmm + ".csv.gz"), QUOTE_COLS, qrows)
         if rrows:
             write_gz(os.path.join(data_dir, "daily", "results", day, hhmm + ".csv.gz"), RESULT_COLS, rrows)
