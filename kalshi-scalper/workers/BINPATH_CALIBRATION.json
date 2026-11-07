@@ -1,0 +1,114 @@
+{
+ "cheap": [
+  {
+   "bin": "3-6c",
+   "hist_n": 50576,
+   "hist_model_ask": 0.03961661657703258,
+   "hist_win": 0.06362701676684593,
+   "kalshi_n": 366,
+   "kalshi_model_ask": 0.04021857923497268,
+   "kalshi_actual_ask": 0.05963934426229509,
+   "kalshi_win": 0.04644808743169399,
+   "hist_pf_at_model_ask": 1.301992857081973,
+   "kalshi_pf_at_actual_ask": 0.6422218493035744
+  },
+  {
+   "bin": "6-10c",
+   "hist_n": 61410,
+   "hist_model_ask": 0.07493095587037941,
+   "hist_win": 0.09469141833577593,
+   "kalshi_n": 461,
+   "kalshi_model_ask": 0.07468546637744035,
+   "kalshi_actual_ask": 0.09277440347071585,
+   "kalshi_win": 0.0824295010845987,
+   "hist_pf_at_model_ask": 1.1271038541059217,
+   "kalshi_pf_at_actual_ask": 0.7683957435665484
+  },
+  {
+   "bin": "10-15c",
+   "hist_n": 77018,
+   "hist_model_ask": 0.1200607650159703,
+   "hist_win": 0.1334493235347581,
+   "kalshi_n": 563,
+   "kalshi_model_ask": 0.11969804618117229,
+   "kalshi_actual_ask": 0.13434103019538188,
+   "kalshi_win": 0.13676731793960922,
+   "hist_pf_at_model_ask": 1.0301097995871988,
+   "kalshi_pf_at_actual_ask": 0.916495571068223
+  },
+  {
+   "bin": "15-20c",
+   "hist_n": 79216,
+   "hist_model_ask": 0.1701796354271864,
+   "hist_win": 0.17492678246818824,
+   "kalshi_n": 530,
+   "kalshi_model_ask": 0.17022641509433958,
+   "kalshi_actual_ask": 0.17927169811320753,
+   "kalshi_win": 0.1811320754716981,
+   "hist_pf_at_model_ask": 0.9385870717942533,
+   "kalshi_pf_at_actual_ask": 0.9139420420872884
+  },
+  {
+   "bin": "20-30c",
+   "hist_n": 167165,
+   "hist_model_ask": 0.24535943528848747,
+   "hist_win": 0.24476415517602368,
+   "kalshi_n": 1210,
+   "kalshi_model_ask": 0.2458512396694215,
+   "kalshi_actual_ask": 0.24108595041322314,
+   "kalshi_win": 0.2396694214876033,
+   "hist_pf_at_model_ask": 0.8968683142685454,
+   "kalshi_pf_at_actual_ask": 0.898916086050385
+  }
+ ],
+ "band": [
+  {
+   "bin": "88-90c",
+   "hist_n": 31284,
+   "hist_model_ask": 0.8849971231300348,
+   "hist_win": 0.862805267868559,
+   "kalshi_n": 224,
+   "kalshi_model_ask": 0.8856250000000001,
+   "kalshi_actual_ask": 0.8674598214285714,
+   "kalshi_win": 0.8616071428571429,
+   "hist_pf_at_model_ask": 0.7377875096986518,
+   "kalshi_pf_at_actual_ask": 0.8453932414002122
+  },
+  {
+   "bin": "90-92c",
+   "hist_n": 30438,
+   "hist_model_ask": 0.9050387673303109,
+   "hist_win": 0.8790327879624154,
+   "kalshi_n": 225,
+   "kalshi_model_ask": 0.9052444444444445,
+   "kalshi_actual_ask": 0.8882799999999998,
+   "kalshi_win": 0.8888888888888888,
+   "hist_pf_at_model_ask": 0.6746638881220184,
+   "kalshi_pf_at_actual_ask": 0.8889809063722108
+  },
+  {
+   "bin": "92-94c",
+   "hist_n": 30471,
+   "hist_model_ask": 0.9249768632470218,
+   "hist_win": 0.8977388336451052,
+   "kalshi_n": 233,
+   "kalshi_model_ask": 0.9254506437768241,
+   "kalshi_actual_ask": 0.9055836909871243,
+   "kalshi_win": 0.9141630901287554,
+   "hist_pf_at_model_ask": 0.6104531004318835,
+   "kalshi_pf_at_actual_ask": 0.9720127367186192
+  },
+  {
+   "bin": "94-97c",
+   "hist_n": 63584,
+   "hist_model_ask": 0.9553244526925011,
+   "hist_win": 0.9221030447911425,
+   "kalshi_n": 474,
+   "kalshi_model_ask": 0.9554641350210971,
+   "kalshi_actual_ask": 0.929464135021097,
+   "kalshi_win": 0.9367088607594937,
+   "hist_pf_at_model_ask": 0.42433262392331716,
+   "kalshi_pf_at_actual_ask": 0.9462916557579385
+  }
+ ]
+}

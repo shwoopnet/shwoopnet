@@ -1,0 +1,1306 @@
+{
+ "adapter": "binpath_ETH_cheap",
+ "runs": [
+  "binpath_ETH_cheap_ALL_RUN94001.json",
+  "binpath_ETH_cheap_ALL_RUN94002.json"
+ ],
+ "rules_scored": 10000,
+ "survivors": 67,
+ "truncation": {
+  "name": "truncation",
+  "checked": 200,
+  "mismatches": 0,
+  "passed": true
+ },
+ "validated": 67,
+ "validated_deflated": 31,
+ "independent_clusters_all_survivors": 10,
+ "cluster_sizes": [
+  34,
+  8,
+  8,
+  5,
+  5,
+  3,
+  1,
+  1,
+  1,
+  1
+ ],
+ "rows": [
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&fr_last:le:0.90&mrise3:le:0.25|yes|600",
+   "deflated": false,
+   "pf": [
+    2.759,
+    2.434,
+    1.976
+   ],
+   "n": [
+    161,
+    323,
+    356
+   ],
+   "all_pf": 2.3,
+   "z": 5.18,
+   "reverse_pf": 0.175,
+   "stress_pf": 2.3,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.901,
+    1.7,
+    2.25
+   ],
+   "n": [
+    957,
+    808,
+    804
+   ],
+   "all_pf": 1.945,
+   "z": 7.43,
+   "reverse_pf": 0.205,
+   "stress_pf": 1.945,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dist:ge:0.75&fmin:ge:0.10|yes|360",
+   "deflated": true,
+   "pf": [
+    2.661,
+    2.481,
+    2.38
+   ],
+   "n": [
+    160,
+    129,
+    693
+   ],
+   "all_pf": 2.439,
+   "z": 5.54,
+   "reverse_pf": 0.162,
+   "stress_pf": 2.439,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&vol15:le:0.25|no|360",
+   "deflated": true,
+   "pf": [
+    1.938,
+    2.21,
+    1.613
+   ],
+   "n": [
+    892,
+    533,
+    1824
+   ],
+   "all_pf": 1.797,
+   "z": 6.58,
+   "reverse_pf": 0.211,
+   "stress_pf": 1.797,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.745,
+    1.682,
+    2.053
+   ],
+   "n": [
+    1168,
+    974,
+    974
+   ],
+   "all_pf": 1.82,
+   "z": 7.18,
+   "reverse_pf": 0.238,
+   "stress_pf": 1.82,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&hour:le:0.75&r1:ge:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    1.563,
+    2.553,
+    1.54
+   ],
+   "n": [
+    442,
+    417,
+    510
+   ],
+   "all_pf": 1.849,
+   "z": 4.49,
+   "reverse_pf": 0.216,
+   "stress_pf": 1.849,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dow:eq:0&vol60:le:0.90|no|600",
+   "deflated": false,
+   "pf": [
+    3.198,
+    1.81,
+    2.158
+   ],
+   "n": [
+    131,
+    102,
+    115
+   ],
+   "all_pf": 2.428,
+   "z": 3.68,
+   "reverse_pf": 0.164,
+   "stress_pf": 2.428,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&fr_last:le:0.10&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.01,
+    1.878,
+    1.524
+   ],
+   "n": [
+    290,
+    677,
+    679
+   ],
+   "all_pf": 1.754,
+   "z": 4.65,
+   "reverse_pf": 0.225,
+   "stress_pf": 1.754,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&fr_last:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.01,
+    1.878,
+    1.524
+   ],
+   "n": [
+    290,
+    677,
+    679
+   ],
+   "all_pf": 1.754,
+   "z": 4.65,
+   "reverse_pf": 0.225,
+   "stress_pf": 1.754,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.90&fr_last:le:0.90&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.624,
+    1.684,
+    2.057
+   ],
+   "n": [
+    509,
+    894,
+    972
+   ],
+   "all_pf": 1.822,
+   "z": 6.1,
+   "reverse_pf": 0.24,
+   "stress_pf": 1.822,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r5:ge:0.10&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    2.192,
+    2.637,
+    2.275
+   ],
+   "n": [
+    617,
+    339,
+    763
+   ],
+   "all_pf": 2.315,
+   "z": 7.75,
+   "reverse_pf": 0.19,
+   "stress_pf": 2.315,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&hod4:eq:3&rng5:ge:0.25|no|600",
+   "deflated": false,
+   "pf": [
+    1.901,
+    2.386,
+    2.829
+   ],
+   "n": [
+    139,
+    149,
+    122
+   ],
+   "all_pf": 2.346,
+   "z": 3.71,
+   "reverse_pf": 0.171,
+   "stress_pf": 2.346,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng15:ge:0.25&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.703,
+    1.58,
+    2.1
+   ],
+   "n": [
+    1031,
+    900,
+    598
+   ],
+   "all_pf": 1.751,
+   "z": 5.95,
+   "reverse_pf": 0.246,
+   "stress_pf": 1.751,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&fmin:le:0.50|no|600",
+   "deflated": true,
+   "pf": [
+    2.083,
+    1.564,
+    1.915
+   ],
+   "n": [
+    513,
+    410,
+    427
+   ],
+   "all_pf": 1.868,
+   "z": 5.41,
+   "reverse_pf": 0.213,
+   "stress_pf": 1.868,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r3:le:0.50&rng5:le:0.50&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.613,
+    2.604,
+    1.893
+   ],
+   "n": [
+    130,
+    74,
+    269
+   ],
+   "all_pf": 2.194,
+   "z": 3.87,
+   "reverse_pf": 0.202,
+   "stress_pf": 2.194,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|vol60:le:0.10&zd:le:0.25|no|600",
+   "deflated": false,
+   "pf": [
+    1.721,
+    1.826,
+    1.515
+   ],
+   "n": [
+    326,
+    196,
+    1092
+   ],
+   "all_pf": 1.594,
+   "z": 3.87,
+   "reverse_pf": 0.379,
+   "stress_pf": 1.594,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.75&rng5:le:0.50&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    2.824,
+    2.92,
+    2.362
+   ],
+   "n": [
+    211,
+    97,
+    461
+   ],
+   "all_pf": 2.556,
+   "z": 5.87,
+   "reverse_pf": 0.173,
+   "stress_pf": 2.556,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|mrng5:ge:0.90&r9:le:0.90&vlr15:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.796,
+    1.8,
+    2.218
+   ],
+   "n": [
+    77,
+    48,
+    73
+   ],
+   "all_pf": 2.27,
+   "z": 3.92,
+   "reverse_pf": 0.312,
+   "stress_pf": 2.247,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng15:le:0.50&rng5:le:0.75&zd:le:0.10|no|360",
+   "deflated": true,
+   "pf": [
+    1.633,
+    1.595,
+    1.548
+   ],
+   "n": [
+    1086,
+    761,
+    1759
+   ],
+   "all_pf": 1.584,
+   "z": 5.48,
+   "reverse_pf": 0.21,
+   "stress_pf": 1.584,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&hour:le:0.75&rng5:ge:0.25|no|600",
+   "deflated": true,
+   "pf": [
+    1.827,
+    1.678,
+    2.201
+   ],
+   "n": [
+    666,
+    581,
+    472
+   ],
+   "all_pf": 1.877,
+   "z": 5.79,
+   "reverse_pf": 0.212,
+   "stress_pf": 1.877,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&vol15:le:0.10&zd:le:0.50|no|360",
+   "deflated": true,
+   "pf": [
+    2.033,
+    2.34,
+    1.747
+   ],
+   "n": [
+    694,
+    430,
+    2115
+   ],
+   "all_pf": 1.883,
+   "z": 7.84,
+   "reverse_pf": 0.281,
+   "stress_pf": 1.883,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&r1:le:0.75|yes|600",
+   "deflated": false,
+   "pf": [
+    1.582,
+    1.938,
+    1.507
+   ],
+   "n": [
+    813,
+    808,
+    739
+   ],
+   "all_pf": 1.679,
+   "z": 5.17,
+   "reverse_pf": 0.235,
+   "stress_pf": 1.679,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dist:le:0.25&fr_last:ge:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.584,
+    1.563,
+    1.915
+   ],
+   "n": [
+    312,
+    439,
+    175
+   ],
+   "all_pf": 1.635,
+   "z": 2.97,
+   "reverse_pf": 0.24,
+   "stress_pf": 1.635,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng15:le:0.10&vol15:le:0.50&zd:le:0.25|no|360",
+   "deflated": false,
+   "pf": [
+    1.524,
+    2.159,
+    1.613
+   ],
+   "n": [
+    456,
+    334,
+    1818
+   ],
+   "all_pf": 1.665,
+   "z": 4.89,
+   "reverse_pf": 0.313,
+   "stress_pf": 1.665,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dow:eq:3&rng5:ge:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.784,
+    2.182,
+    2.212
+   ],
+   "n": [
+    154,
+    112,
+    84
+   ],
+   "all_pf": 2.447,
+   "z": 3.52,
+   "reverse_pf": 0.165,
+   "stress_pf": 2.447,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|fr_last:le:0.10&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.578,
+    1.531,
+    1.965
+   ],
+   "n": [
+    356,
+    726,
+    835
+   ],
+   "all_pf": 1.726,
+   "z": 5.38,
+   "reverse_pf": 0.253,
+   "stress_pf": 1.726,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&rng15:le:0.10&vol15:le:0.75|no|600",
+   "deflated": false,
+   "pf": [
+    1.567,
+    1.545,
+    1.727
+   ],
+   "n": [
+    115,
+    87,
+    603
+   ],
+   "all_pf": 1.683,
+   "z": 3.6,
+   "reverse_pf": 0.353,
+   "stress_pf": 1.683,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|vol60:le:0.25&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.115,
+    2.449,
+    1.933
+   ],
+   "n": [
+    299,
+    156,
+    588
+   ],
+   "all_pf": 2.06,
+   "z": 5.23,
+   "reverse_pf": 0.21,
+   "stress_pf": 2.06,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|hour:ge:0.50&rng15:le:0.50&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.671,
+    3.923,
+    2.454
+   ],
+   "n": [
+    167,
+    70,
+    262
+   ],
+   "all_pf": 2.719,
+   "z": 5.12,
+   "reverse_pf": 0.165,
+   "stress_pf": 2.719,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r5:le:0.50&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.65,
+    1.667,
+    1.819
+   ],
+   "n": [
+    1116,
+    948,
+    761
+   ],
+   "all_pf": 1.701,
+   "z": 6.0,
+   "reverse_pf": 0.254,
+   "stress_pf": 1.701,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r1:ge:0.50&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.504,
+    1.942,
+    1.703
+   ],
+   "n": [
+    308,
+    231,
+    322
+   ],
+   "all_pf": 1.695,
+   "z": 3.44,
+   "reverse_pf": 0.263,
+   "stress_pf": 1.695,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r9:ge:0.10&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    2.152,
+    2.338,
+    2.126
+   ],
+   "n": [
+    755,
+    440,
+    795
+   ],
+   "all_pf": 2.183,
+   "z": 7.44,
+   "reverse_pf": 0.201,
+   "stress_pf": 2.183,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&hod4:eq:5&mrise3:le:0.75|no|600",
+   "deflated": false,
+   "pf": [
+    1.953,
+    2.124,
+    2.223
+   ],
+   "n": [
+    192,
+    133,
+    112
+   ],
+   "all_pf": 2.075,
+   "z": 3.38,
+   "reverse_pf": 0.193,
+   "stress_pf": 2.075,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&vol15:le:0.25|yes|600",
+   "deflated": true,
+   "pf": [
+    1.898,
+    2.446,
+    1.658
+   ],
+   "n": [
+    711,
+    389,
+    1352
+   ],
+   "all_pf": 1.847,
+   "z": 7.75,
+   "reverse_pf": 0.312,
+   "stress_pf": 1.847,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dow:eq:6|no|600",
+   "deflated": false,
+   "pf": [
+    1.8,
+    1.768,
+    2.611
+   ],
+   "n": [
+    123,
+    102,
+    132
+   ],
+   "all_pf": 2.077,
+   "z": 3.27,
+   "reverse_pf": 0.193,
+   "stress_pf": 2.077,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng15:le:0.25&rng5:le:0.50&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.214,
+    3.281,
+    2.036
+   ],
+   "n": [
+    128,
+    69,
+    366
+   ],
+   "all_pf": 2.219,
+   "z": 4.5,
+   "reverse_pf": 0.201,
+   "stress_pf": 2.219,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&dist:ge:0.50&tbi5:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    1.854,
+    1.817,
+    2.266
+   ],
+   "n": [
+    213,
+    79,
+    230
+   ],
+   "all_pf": 2.029,
+   "z": 3.71,
+   "reverse_pf": 0.195,
+   "stress_pf": 2.029,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&hod4:eq:3&mrng5:ge:0.50|no|600",
+   "deflated": false,
+   "pf": [
+    1.508,
+    1.668,
+    2.5
+   ],
+   "n": [
+    456,
+    432,
+    406
+   ],
+   "all_pf": 1.855,
+   "z": 5.34,
+   "reverse_pf": 0.311,
+   "stress_pf": 1.855,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|dist:le:0.75&vol15:le:0.10|no|360",
+   "deflated": false,
+   "pf": [
+    2.227,
+    2.196,
+    1.835
+   ],
+   "n": [
+    184,
+    91,
+    335
+   ],
+   "all_pf": 2.004,
+   "z": 3.81,
+   "reverse_pf": 0.187,
+   "stress_pf": 2.004,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&r9:le:0.50|no|600",
+   "deflated": true,
+   "pf": [
+    1.777,
+    1.691,
+    2.181
+   ],
+   "n": [
+    849,
+    753,
+    538
+   ],
+   "all_pf": 1.846,
+   "z": 6.29,
+   "reverse_pf": 0.214,
+   "stress_pf": 1.846,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|vol15:le:0.25&zd:le:0.10|yes|360",
+   "deflated": false,
+   "pf": [
+    1.987,
+    1.834,
+    1.588
+   ],
+   "n": [
+    708,
+    433,
+    1434
+   ],
+   "all_pf": 1.738,
+   "z": 5.24,
+   "reverse_pf": 0.199,
+   "stress_pf": 1.738,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|mrng5:ge:0.75&rng5:ge:0.50&vol15:le:0.25|yes|600",
+   "deflated": false,
+   "pf": [
+    1.635,
+    3.093,
+    1.699
+   ],
+   "n": [
+    266,
+    154,
+    269
+   ],
+   "all_pf": 1.942,
+   "z": 4.67,
+   "reverse_pf": 0.315,
+   "stress_pf": 1.93,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&rng5:le:0.75|no|600",
+   "deflated": true,
+   "pf": [
+    1.691,
+    1.659,
+    1.582
+   ],
+   "n": [
+    1326,
+    751,
+    1802
+   ],
+   "all_pf": 1.634,
+   "z": 6.92,
+   "reverse_pf": 0.359,
+   "stress_pf": 1.634,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|mrise3:ge:0.25&vol60:le:0.75&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.86,
+    2.016,
+    1.858
+   ],
+   "n": [
+    541,
+    317,
+    505
+   ],
+   "all_pf": 1.895,
+   "z": 5.31,
+   "reverse_pf": 0.23,
+   "stress_pf": 1.895,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|dist:ge:0.25&mrise3:le:0.50&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    3.129,
+    2.533,
+    2.222
+   ],
+   "n": [
+    309,
+    157,
+    504
+   ],
+   "all_pf": 2.554,
+   "z": 6.62,
+   "reverse_pf": 0.173,
+   "stress_pf": 2.554,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|hour:ge:0.75&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.107,
+    1.667,
+    1.518
+   ],
+   "n": [
+    364,
+    281,
+    263
+   ],
+   "all_pf": 1.796,
+   "z": 4.29,
+   "reverse_pf": 0.241,
+   "stress_pf": 1.796,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&fr_last:le:0.90&hod4:eq:2|yes|600",
+   "deflated": false,
+   "pf": [
+    1.5,
+    3.268,
+    1.911
+   ],
+   "n": [
+    66,
+    121,
+    133
+   ],
+   "all_pf": 2.315,
+   "z": 3.38,
+   "reverse_pf": 0.169,
+   "stress_pf": 2.315,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|dist:ge:0.75&r1:ge:0.25&zd:le:0.25|yes|600",
+   "deflated": false,
+   "pf": [
+    1.5,
+    3.351,
+    1.873
+   ],
+   "n": [
+    104,
+    63,
+    535
+   ],
+   "all_pf": 1.934,
+   "z": 4.65,
+   "reverse_pf": 0.323,
+   "stress_pf": 1.934,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&mrng5:ge:0.75|no|600",
+   "deflated": true,
+   "pf": [
+    1.92,
+    1.7,
+    2.25
+   ],
+   "n": [
+    928,
+    808,
+    804
+   ],
+   "all_pf": 1.952,
+   "z": 7.45,
+   "reverse_pf": 0.204,
+   "stress_pf": 1.952,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|vlr15:le:0.10&vol60:le:0.25&zd:le:0.25|no|600",
+   "deflated": false,
+   "pf": [
+    2.166,
+    2.168,
+    1.872
+   ],
+   "n": [
+    113,
+    57,
+    288
+   ],
+   "all_pf": 1.979,
+   "z": 3.68,
+   "reverse_pf": 0.308,
+   "stress_pf": 1.979,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng5:ge:0.10&tbi5:le:0.75&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.732,
+    1.589,
+    1.982
+   ],
+   "n": [
+    1043,
+    907,
+    841
+   ],
+   "all_pf": 1.759,
+   "z": 6.55,
+   "reverse_pf": 0.246,
+   "stress_pf": 1.759,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r1:le:0.90&tbi5:le:0.25&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    1.788,
+    1.874,
+    1.587
+   ],
+   "n": [
+    401,
+    343,
+    551
+   ],
+   "all_pf": 1.724,
+   "z": 4.39,
+   "reverse_pf": 0.249,
+   "stress_pf": 1.724,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng15:le:0.25&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.393,
+    2.272,
+    1.598
+   ],
+   "n": [
+    105,
+    58,
+    345
+   ],
+   "all_pf": 1.833,
+   "z": 3.05,
+   "reverse_pf": 0.247,
+   "stress_pf": 1.833,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&zd:le:0.25|no|600",
+   "deflated": true,
+   "pf": [
+    1.901,
+    1.7,
+    2.25
+   ],
+   "n": [
+    957,
+    808,
+    804
+   ],
+   "all_pf": 1.945,
+   "z": 7.43,
+   "reverse_pf": 0.205,
+   "stress_pf": 1.945,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&vlr15:le:0.90&vol15:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    2.494,
+    2.428,
+    1.948
+   ],
+   "n": [
+    323,
+    161,
+    864
+   ],
+   "all_pf": 2.13,
+   "z": 6.99,
+   "reverse_pf": 0.27,
+   "stress_pf": 2.13,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|rng5:le:0.50&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    2.824,
+    2.92,
+    2.362
+   ],
+   "n": [
+    211,
+    97,
+    461
+   ],
+   "all_pf": 2.556,
+   "z": 5.87,
+   "reverse_pf": 0.173,
+   "stress_pf": 2.556,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|dist:le:0.75&r1:ge:0.50&vol15:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.403,
+    3.634,
+    2.22
+   ],
+   "n": [
+    130,
+    55,
+    220
+   ],
+   "all_pf": 2.457,
+   "z": 5.1,
+   "reverse_pf": 0.254,
+   "stress_pf": 2.454,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|mrise3:le:0.75&rng5:le:0.50&zd:le:0.25|no|600",
+   "deflated": true,
+   "pf": [
+    2.136,
+    1.837,
+    1.621
+   ],
+   "n": [
+    727,
+    376,
+    1496
+   ],
+   "all_pf": 1.793,
+   "z": 7.57,
+   "reverse_pf": 0.344,
+   "stress_pf": 1.793,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|r5:ge:0.50&zd:le:0.25|no|600",
+   "deflated": true,
+   "pf": [
+    2.399,
+    2.059,
+    1.977
+   ],
+   "n": [
+    232,
+    122,
+    773
+   ],
+   "all_pf": 2.074,
+   "z": 6.41,
+   "reverse_pf": 0.302,
+   "stress_pf": 2.074,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&dist:ge:0.10&tbi5:le:0.90|no|600",
+   "deflated": true,
+   "pf": [
+    1.506,
+    1.619,
+    1.646
+   ],
+   "n": [
+    1802,
+    1239,
+    2067
+   ],
+   "all_pf": 1.59,
+   "z": 7.59,
+   "reverse_pf": 0.368,
+   "stress_pf": 1.59,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|tbi5:le:0.75&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.718,
+    1.616,
+    2.095
+   ],
+   "n": [
+    1050,
+    917,
+    949
+   ],
+   "all_pf": 1.807,
+   "z": 7.07,
+   "reverse_pf": 0.24,
+   "stress_pf": 1.807,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&r5:ge:0.50|yes|600",
+   "deflated": false,
+   "pf": [
+    2.067,
+    2.422,
+    1.845
+   ],
+   "n": [
+    168,
+    87,
+    605
+   ],
+   "all_pf": 1.945,
+   "z": 5.05,
+   "reverse_pf": 0.307,
+   "stress_pf": 1.945,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|fr_last:le:0.90&r9:le:0.90&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.624,
+    1.645,
+    2.04
+   ],
+   "n": [
+    509,
+    891,
+    962
+   ],
+   "all_pf": 1.799,
+   "z": 5.89,
+   "reverse_pf": 0.242,
+   "stress_pf": 1.799,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&r5:le:0.75&vol60:le:0.50|no|600",
+   "deflated": true,
+   "pf": [
+    2.211,
+    2.344,
+    2.325
+   ],
+   "n": [
+    503,
+    268,
+    621
+   ],
+   "all_pf": 2.288,
+   "z": 6.96,
+   "reverse_pf": 0.174,
+   "stress_pf": 2.288,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.10&r1:ge:0.25|no|600",
+   "deflated": true,
+   "pf": [
+    2.048,
+    2.049,
+    2.168
+   ],
+   "n": [
+    492,
+    347,
+    550
+   ],
+   "all_pf": 2.096,
+   "z": 6.34,
+   "reverse_pf": 0.193,
+   "stress_pf": 2.096,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|ask:le:0.25&fr_last:le:0.10&vlr15:le:0.25|yes|600",
+   "deflated": false,
+   "pf": [
+    1.529,
+    1.688,
+    1.589
+   ],
+   "n": [
+    154,
+    344,
+    537
+   ],
+   "all_pf": 1.613,
+   "z": 3.87,
+   "reverse_pf": 0.362,
+   "stress_pf": 1.613,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_cheap|ALL|vol15:le:0.10&vol60:le:0.25&zd:le:0.25|yes|360",
+   "deflated": false,
+   "pf": [
+    1.609,
+    1.639,
+    1.585
+   ],
+   "n": [
+    567,
+    366,
+    2007
+   ],
+   "all_pf": 1.596,
+   "z": 5.01,
+   "reverse_pf": 0.325,
+   "stress_pf": 1.596,
+   "validated": true
+  }
+ ],
+ "note": "MODEL RESULT: Binance path priced by the fitted quote model; not a live figure"
+}

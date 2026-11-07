@@ -1,0 +1,66 @@
+{
+ "binpath_BTC_band": {
+  "survivors": 14,
+  "kalshi_rows_in_arm": 596,
+  "survivors_with_trades": 1,
+  "pooled_union": {
+   "n": 1,
+   "win": 0.0,
+   "model_ask": 0.88,
+   "actual_ask": 0.89,
+   "pf_at_actual_ask": 0.0,
+   "pf_at_model_ask": 0.0,
+   "mean_net_actual_c": -90.0
+  },
+  "median_pf_actual": 0.0,
+  "share_pf_actual_ge_1_5": 0.0
+ },
+ "binpath_BTC_cheap": {
+  "survivors": 45,
+  "kalshi_rows_in_arm": 1616,
+  "survivors_with_trades": 45,
+  "pooled_union": {
+   "n": 272,
+   "win": 0.1213235294117647,
+   "model_ask": 0.07558823529411765,
+   "actual_ask": 0.12959191176470586,
+   "pf_at_actual_ask": 0.822308200434085,
+   "pf_at_model_ask": 1.4842105263157894,
+   "mean_net_actual_c": -2.076838235294118
+  },
+  "median_pf_actual": 0.8055555555555557,
+  "share_pf_actual_ge_1_5": 0.28888888888888886
+ },
+ "binpath_ETH_band": {
+  "survivors": 22,
+  "kalshi_rows_in_arm": 560,
+  "survivors_with_trades": 12,
+  "pooled_union": {
+   "n": 6,
+   "win": 1.0,
+   "model_ask": 0.9233333333333333,
+   "actual_ask": 0.9511666666666668,
+   "pf_at_actual_ask": 99.0,
+   "pf_at_model_ask": 99.0,
+   "mean_net_actual_c": 3.883333333333334
+  },
+  "median_pf_actual": 99.0,
+  "share_pf_actual_ge_1_5": 1.0
+ },
+ "binpath_ETH_cheap": {
+  "survivors": 67,
+  "kalshi_rows_in_arm": 1641,
+  "survivors_with_trades": 66,
+  "pooled_union": {
+   "n": 229,
+   "win": 0.08733624454148471,
+   "model_ask": 0.054803493449781665,
+   "actual_ask": 0.0835938864628821,
+   "pf_at_actual_ask": 0.9168218828162419,
+   "pf_at_model_ask": 1.3906131718395156,
+   "mean_net_actual_c": -0.682532751091703
+  },
+  "median_pf_actual": 0.41572545612510864,
+  "share_pf_actual_ge_1_5": 0.06060606060606061
+ }
+}

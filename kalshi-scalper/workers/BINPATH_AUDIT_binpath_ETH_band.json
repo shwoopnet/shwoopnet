@@ -1,0 +1,447 @@
+{
+ "adapter": "binpath_ETH_band",
+ "runs": [
+  "binpath_ETH_band_ALL_RUN92001.json",
+  "binpath_ETH_band_ALL_RUN92002.json",
+  "binpath_ETH_band_ALL_RUN92003.json",
+  "binpath_ETH_band_ALL_RUN92004.json"
+ ],
+ "rules_scored": 20000,
+ "survivors": 22,
+ "truncation": {
+  "name": "truncation",
+  "checked": 200,
+  "mismatches": 0,
+  "passed": true
+ },
+ "validated": 22,
+ "validated_deflated": 3,
+ "independent_clusters_all_survivors": 4,
+ "cluster_sizes": [
+  18,
+  2,
+  1,
+  1
+ ],
+ "rows": [
+  {
+   "id": "binpath_ETH_band|ALL|dist:ge:0.90&vlr15:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    1.873,
+    1.537,
+    4.115
+   ],
+   "n": [
+    441,
+    689,
+    177
+   ],
+   "all_pf": 1.784,
+   "z": 4.23,
+   "reverse_pf": 0.343,
+   "stress_pf": 1.784,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r1:le:0.25&r9:ge:0.10&rng5:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.284,
+    1.627,
+    2.067
+   ],
+   "n": [
+    185,
+    324,
+    65
+   ],
+   "all_pf": 1.846,
+   "z": 2.38,
+   "reverse_pf": 0.346,
+   "stress_pf": 1.846,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|fr_last:ge:0.25&rng5:ge:0.90&vol15:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    2.478,
+    1.597,
+    5.18
+   ],
+   "n": [
+    254,
+    557,
+    82
+   ],
+   "all_pf": 1.907,
+   "z": 5.28,
+   "reverse_pf": 0.333,
+   "stress_pf": 1.907,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|fr_last:le:0.75&r9:ge:0.90&vlr15:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    1.662,
+    1.627,
+    6.781
+   ],
+   "n": [
+    165,
+    471,
+    150
+   ],
+   "all_pf": 1.886,
+   "z": 4.19,
+   "reverse_pf": 0.317,
+   "stress_pf": 1.886,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r9:ge:0.90&vol60:le:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    1.872,
+    2.395,
+    99.0
+   ],
+   "n": [
+    154,
+    241,
+    89
+   ],
+   "all_pf": 2.631,
+   "z": 4.46,
+   "reverse_pf": 0.204,
+   "stress_pf": 2.631,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r5:ge:0.90&r9:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.789,
+    2.178,
+    99.0
+   ],
+   "n": [
+    209,
+    381,
+    53
+   ],
+   "all_pf": 2.541,
+   "z": 4.37,
+   "reverse_pf": 0.236,
+   "stress_pf": 2.541,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|ask:le:0.50&r9:ge:0.90|yes|360",
+   "deflated": true,
+   "pf": [
+    2.307,
+    1.81,
+    99.0
+   ],
+   "n": [
+    242,
+    411,
+    40
+   ],
+   "all_pf": 2.097,
+   "z": 8.14,
+   "reverse_pf": 0.336,
+   "stress_pf": 2.097,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dist:ge:0.90&mrng5:le:0.10&r1:le:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    4.927,
+    1.531,
+    99.0
+   ],
+   "n": [
+    96,
+    206,
+    47
+   ],
+   "all_pf": 2.228,
+   "z": 3.6,
+   "reverse_pf": 0.271,
+   "stress_pf": 2.228,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|mrise3:ge:0.25&vlr15:ge:0.75&vol15:ge:0.90|yes|360",
+   "deflated": true,
+   "pf": [
+    2.789,
+    1.751,
+    1.753
+   ],
+   "n": [
+    329,
+    493,
+    136
+   ],
+   "all_pf": 2.018,
+   "z": 6.22,
+   "reverse_pf": 0.323,
+   "stress_pf": 2.018,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r3:ge:0.10&rng5:le:0.75&vol15:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.889,
+    1.74,
+    1.924
+   ],
+   "n": [
+    121,
+    185,
+    57
+   ],
+   "all_pf": 2.059,
+   "z": 3.92,
+   "reverse_pf": 0.322,
+   "stress_pf": 2.059,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dow:eq:3&r5:ge:0.50&vlr15:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.094,
+    99.0,
+    3.124
+   ],
+   "n": [
+    66,
+    50,
+    52
+   ],
+   "all_pf": 3.474,
+   "z": 4.99,
+   "reverse_pf": 0.182,
+   "stress_pf": 3.474,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dist:ge:0.90&r1:ge:0.10&vlr15:ge:0.75|yes|360",
+   "deflated": true,
+   "pf": [
+    1.861,
+    1.897,
+    2.728
+   ],
+   "n": [
+    315,
+    495,
+    120
+   ],
+   "all_pf": 1.952,
+   "z": 5.84,
+   "reverse_pf": 0.311,
+   "stress_pf": 1.952,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dow:eq:0&fmin:le:0.10&fr_last:ge:0.50|yes|360",
+   "deflated": false,
+   "pf": [
+    1.941,
+    2.581,
+    1.778
+   ],
+   "n": [
+    63,
+    71,
+    57
+   ],
+   "all_pf": 2.094,
+   "z": 1.68,
+   "reverse_pf": 0.312,
+   "stress_pf": 2.094,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dist:ge:0.90&fmin:ge:0.50&vlr15:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    2.209,
+    1.708,
+    5.168
+   ],
+   "n": [
+    199,
+    351,
+    107
+   ],
+   "all_pf": 2.063,
+   "z": 4.28,
+   "reverse_pf": 0.296,
+   "stress_pf": 2.063,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|rng15:ge:0.90&vlr15:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    1.698,
+    1.626,
+    2.054
+   ],
+   "n": [
+    350,
+    433,
+    171
+   ],
+   "all_pf": 1.716,
+   "z": 4.56,
+   "reverse_pf": 0.374,
+   "stress_pf": 1.716,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dist:ge:0.90&hour:ge:0.10&r1:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    4.365,
+    1.966,
+    1.705
+   ],
+   "n": [
+    153,
+    302,
+    40
+   ],
+   "all_pf": 2.383,
+   "z": 4.01,
+   "reverse_pf": 0.255,
+   "stress_pf": 2.383,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|fr_last:ge:0.10&rng5:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.127,
+    1.604,
+    5.27
+   ],
+   "n": [
+    257,
+    561,
+    83
+   ],
+   "all_pf": 1.851,
+   "z": 4.52,
+   "reverse_pf": 0.343,
+   "stress_pf": 1.851,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r1:le:0.25&rng5:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    2.284,
+    1.627,
+    2.067
+   ],
+   "n": [
+    185,
+    324,
+    65
+   ],
+   "all_pf": 1.846,
+   "z": 2.38,
+   "reverse_pf": 0.346,
+   "stress_pf": 1.846,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|dow:eq:4&r9:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    1.888,
+    2.357,
+    99.0
+   ],
+   "n": [
+    72,
+    185,
+    40
+   ],
+   "all_pf": 2.502,
+   "z": 3.26,
+   "reverse_pf": 0.239,
+   "stress_pf": 2.502,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|hod4:eq:3&r3:ge:0.75&r5:ge:0.75|yes|360",
+   "deflated": false,
+   "pf": [
+    1.792,
+    1.906,
+    99.0
+   ],
+   "n": [
+    134,
+    230,
+    77
+   ],
+   "all_pf": 2.286,
+   "z": 3.37,
+   "reverse_pf": 0.271,
+   "stress_pf": 2.286,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r1:le:0.75&r3:le:0.50&r9:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    1.903,
+    1.596,
+    2.99
+   ],
+   "n": [
+    175,
+    305,
+    66
+   ],
+   "all_pf": 1.78,
+   "z": 4.02,
+   "reverse_pf": 0.343,
+   "stress_pf": 1.78,
+   "validated": true
+  },
+  {
+   "id": "binpath_ETH_band|ALL|r5:ge:0.90&vol15:ge:0.90|yes|360",
+   "deflated": false,
+   "pf": [
+    1.739,
+    1.651,
+    1.994
+   ],
+   "n": [
+    238,
+    452,
+    72
+   ],
+   "all_pf": 1.704,
+   "z": 2.42,
+   "reverse_pf": 0.369,
+   "stress_pf": 1.704,
+   "validated": true
+  }
+ ],
+ "note": "MODEL RESULT: Binance path priced by the fitted quote model; not a live figure"
+}

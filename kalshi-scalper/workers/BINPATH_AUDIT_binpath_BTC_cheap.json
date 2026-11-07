@@ -1,0 +1,888 @@
+{
+ "adapter": "binpath_BTC_cheap",
+ "runs": [
+  "binpath_BTC_cheap_ALL_RUN93001.json",
+  "binpath_BTC_cheap_ALL_RUN93002.json"
+ ],
+ "rules_scored": 10000,
+ "survivors": 45,
+ "truncation": {
+  "name": "truncation",
+  "checked": 200,
+  "mismatches": 0,
+  "passed": true
+ },
+ "validated": 45,
+ "validated_deflated": 15,
+ "independent_clusters_all_survivors": 10,
+ "cluster_sizes": [
+  11,
+  9,
+  6,
+  5,
+  4,
+  4,
+  3,
+  1,
+  1,
+  1
+ ],
+ "rows": [
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.75&dist:ge:0.50&zd:le:0.25|yes|600",
+   "deflated": true,
+   "pf": [
+    1.922,
+    2.201,
+    1.619
+   ],
+   "n": [
+    568,
+    253,
+    1069
+   ],
+   "all_pf": 1.786,
+   "z": 6.13,
+   "reverse_pf": 0.355,
+   "stress_pf": 1.786,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&rng5:le:0.10&vlr15:le:0.25|yes|360",
+   "deflated": false,
+   "pf": [
+    2.316,
+    2.702,
+    2.109
+   ],
+   "n": [
+    131,
+    83,
+    481
+   ],
+   "all_pf": 2.216,
+   "z": 4.22,
+   "reverse_pf": 0.168,
+   "stress_pf": 2.216,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|rng5:le:0.10&zd:le:0.10|no|360",
+   "deflated": false,
+   "pf": [
+    1.889,
+    2.756,
+    1.973
+   ],
+   "n": [
+    345,
+    176,
+    838
+   ],
+   "all_pf": 2.05,
+   "z": 5.2,
+   "reverse_pf": 0.169,
+   "stress_pf": 2.05,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&rng15:le:0.50|no|600",
+   "deflated": false,
+   "pf": [
+    1.757,
+    2.541,
+    1.606
+   ],
+   "n": [
+    264,
+    120,
+    425
+   ],
+   "all_pf": 1.792,
+   "z": 3.36,
+   "reverse_pf": 0.226,
+   "stress_pf": 1.792,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&fr_last:ge:0.50&mrise3:le:0.25|yes|600",
+   "deflated": false,
+   "pf": [
+    2.194,
+    2.228,
+    2.002
+   ],
+   "n": [
+    111,
+    205,
+    194
+   ],
+   "all_pf": 2.134,
+   "z": 3.48,
+   "reverse_pf": 0.19,
+   "stress_pf": 2.134,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|hod4:eq:4&rng15:le:0.90&zd:le:0.10|no|360",
+   "deflated": false,
+   "pf": [
+    1.564,
+    1.746,
+    1.686
+   ],
+   "n": [
+    377,
+    281,
+    443
+   ],
+   "all_pf": 1.659,
+   "z": 3.58,
+   "reverse_pf": 0.211,
+   "stress_pf": 1.659,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&dist:ge:0.50|yes|360",
+   "deflated": true,
+   "pf": [
+    1.942,
+    1.915,
+    1.931
+   ],
+   "n": [
+    767,
+    413,
+    1399
+   ],
+   "all_pf": 1.932,
+   "z": 7.0,
+   "reverse_pf": 0.199,
+   "stress_pf": 1.932,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.25&r5:ge:0.50|yes|600",
+   "deflated": false,
+   "pf": [
+    2.013,
+    2.228,
+    1.858
+   ],
+   "n": [
+    233,
+    112,
+    588
+   ],
+   "all_pf": 1.94,
+   "z": 4.67,
+   "reverse_pf": 0.322,
+   "stress_pf": 1.94,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&rng5:le:0.75|yes|600",
+   "deflated": false,
+   "pf": [
+    2.341,
+    2.042,
+    1.748
+   ],
+   "n": [
+    352,
+    203,
+    499
+   ],
+   "all_pf": 2.0,
+   "z": 4.77,
+   "reverse_pf": 0.201,
+   "stress_pf": 2.0,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|fmin:ge:0.25&hour:ge:0.25&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    1.984,
+    1.621,
+    1.524
+   ],
+   "n": [
+    571,
+    697,
+    631
+   ],
+   "all_pf": 1.697,
+   "z": 5.08,
+   "reverse_pf": 0.262,
+   "stress_pf": 1.697,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r5:ge:0.25&rng15:le:0.10&zd:le:0.25|yes|360",
+   "deflated": true,
+   "pf": [
+    1.686,
+    1.544,
+    1.762
+   ],
+   "n": [
+    507,
+    298,
+    1684
+   ],
+   "all_pf": 1.72,
+   "z": 6.54,
+   "reverse_pf": 0.314,
+   "stress_pf": 1.72,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&dist:ge:0.75&mrise3:le:0.75|no|360",
+   "deflated": true,
+   "pf": [
+    3.426,
+    2.984,
+    2.439
+   ],
+   "n": [
+    170,
+    117,
+    489
+   ],
+   "all_pf": 2.729,
+   "z": 5.57,
+   "reverse_pf": 0.143,
+   "stress_pf": 2.729,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|tbi5:le:0.10&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.049,
+    1.87,
+    1.692
+   ],
+   "n": [
+    187,
+    91,
+    428
+   ],
+   "all_pf": 1.809,
+   "z": 3.21,
+   "reverse_pf": 0.242,
+   "stress_pf": 1.809,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|fr_last:le:0.25&r5:ge:0.10&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.33,
+    2.151,
+    1.648
+   ],
+   "n": [
+    205,
+    348,
+    672
+   ],
+   "all_pf": 1.902,
+   "z": 4.74,
+   "reverse_pf": 0.238,
+   "stress_pf": 1.902,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|hod4:eq:5&vol60:ge:0.10&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.779,
+    1.831,
+    2.12
+   ],
+   "n": [
+    130,
+    199,
+    134
+   ],
+   "all_pf": 2.173,
+   "z": 3.95,
+   "reverse_pf": 0.203,
+   "stress_pf": 2.173,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|dist:ge:0.90&vol60:le:0.10&zd:le:0.50|yes|600",
+   "deflated": false,
+   "pf": [
+    1.567,
+    1.524,
+    1.65
+   ],
+   "n": [
+    125,
+    96,
+    627
+   ],
+   "all_pf": 1.623,
+   "z": 4.23,
+   "reverse_pf": 0.467,
+   "stress_pf": 1.564,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&r5:le:0.90|yes|600",
+   "deflated": true,
+   "pf": [
+    1.966,
+    1.626,
+    1.684
+   ],
+   "n": [
+    727,
+    873,
+    796
+   ],
+   "all_pf": 1.748,
+   "z": 5.89,
+   "reverse_pf": 0.229,
+   "stress_pf": 1.748,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r5:ge:0.10&rng5:le:0.10&zd:le:0.50|yes|600",
+   "deflated": true,
+   "pf": [
+    1.958,
+    1.673,
+    1.514
+   ],
+   "n": [
+    231,
+    117,
+    1113
+   ],
+   "all_pf": 1.597,
+   "z": 5.7,
+   "reverse_pf": 0.468,
+   "stress_pf": 1.542,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|vol15:le:0.90&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.614,
+    1.58,
+    1.585
+   ],
+   "n": [
+    919,
+    827,
+    1054
+   ],
+   "all_pf": 1.593,
+   "z": 4.76,
+   "reverse_pf": 0.281,
+   "stress_pf": 1.593,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&r9:ge:0.75|no|360",
+   "deflated": true,
+   "pf": [
+    3.453,
+    3.303,
+    2.526
+   ],
+   "n": [
+    123,
+    94,
+    433
+   ],
+   "all_pf": 2.807,
+   "z": 5.43,
+   "reverse_pf": 0.139,
+   "stress_pf": 2.807,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r3:le:0.75&rng15:le:0.25&zd:le:0.10|no|360",
+   "deflated": false,
+   "pf": [
+    1.837,
+    1.63,
+    1.902
+   ],
+   "n": [
+    437,
+    216,
+    814
+   ],
+   "all_pf": 1.842,
+   "z": 4.32,
+   "reverse_pf": 0.187,
+   "stress_pf": 1.842,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|mrise3:le:0.75&vol15:le:0.10&zd:le:0.25|no|360",
+   "deflated": true,
+   "pf": [
+    2.47,
+    1.988,
+    1.82
+   ],
+   "n": [
+    583,
+    316,
+    1235
+   ],
+   "all_pf": 2.019,
+   "z": 7.32,
+   "reverse_pf": 0.255,
+   "stress_pf": 2.019,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|mrng5:ge:0.90&r1:ge:0.10&vol15:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.758,
+    1.818,
+    1.684
+   ],
+   "n": [
+    111,
+    54,
+    254
+   ],
+   "all_pf": 1.719,
+   "z": 3.06,
+   "reverse_pf": 0.397,
+   "stress_pf": 1.697,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r9:le:0.50&vlr15:ge:0.10&vol15:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.728,
+    2.127,
+    1.517
+   ],
+   "n": [
+    128,
+    49,
+    147
+   ],
+   "all_pf": 2.078,
+   "z": 4.24,
+   "reverse_pf": 0.329,
+   "stress_pf": 2.055,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&r1:le:0.50&r9:ge:0.50|yes|360",
+   "deflated": false,
+   "pf": [
+    1.568,
+    1.555,
+    1.773
+   ],
+   "n": [
+    250,
+    143,
+    456
+   ],
+   "all_pf": 1.675,
+   "z": 3.32,
+   "reverse_pf": 0.232,
+   "stress_pf": 1.675,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10|yes|600",
+   "deflated": true,
+   "pf": [
+    1.966,
+    1.626,
+    1.684
+   ],
+   "n": [
+    727,
+    873,
+    796
+   ],
+   "all_pf": 1.748,
+   "z": 5.89,
+   "reverse_pf": 0.229,
+   "stress_pf": 1.748,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|mrise3:le:0.25&tbi5:le:0.50&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    1.989,
+    1.903,
+    2.156
+   ],
+   "n": [
+    310,
+    300,
+    411
+   ],
+   "all_pf": 2.03,
+   "z": 4.79,
+   "reverse_pf": 0.22,
+   "stress_pf": 2.03,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&vol15:le:0.50&vol60:le:0.90|no|600",
+   "deflated": false,
+   "pf": [
+    1.837,
+    2.613,
+    1.598
+   ],
+   "n": [
+    432,
+    258,
+    595
+   ],
+   "all_pf": 1.876,
+   "z": 4.6,
+   "reverse_pf": 0.213,
+   "stress_pf": 1.876,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|hour:le:0.90&vol15:le:0.10&zd:le:0.50|no|600",
+   "deflated": true,
+   "pf": [
+    1.726,
+    1.858,
+    1.615
+   ],
+   "n": [
+    773,
+    396,
+    1738
+   ],
+   "all_pf": 1.677,
+   "z": 9.13,
+   "reverse_pf": 0.43,
+   "stress_pf": 1.63,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|dow:eq:6&mrng5:ge:0.75&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.091,
+    1.857,
+    1.637
+   ],
+   "n": [
+    139,
+    151,
+    160
+   ],
+   "all_pf": 1.849,
+   "z": 2.5,
+   "reverse_pf": 0.24,
+   "stress_pf": 1.849,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|mrng5:ge:0.75&vol15:le:0.10&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.118,
+    3.164,
+    2.281
+   ],
+   "n": [
+    155,
+    61,
+    310
+   ],
+   "all_pf": 2.336,
+   "z": 4.24,
+   "reverse_pf": 0.188,
+   "stress_pf": 2.336,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r5:ge:0.10&zd:le:0.10|no|600",
+   "deflated": true,
+   "pf": [
+    1.798,
+    2.318,
+    1.647
+   ],
+   "n": [
+    607,
+    388,
+    797
+   ],
+   "all_pf": 1.842,
+   "z": 5.41,
+   "reverse_pf": 0.246,
+   "stress_pf": 1.842,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|dist:ge:0.50&hod4:eq:1&zd:le:0.25|no|600",
+   "deflated": false,
+   "pf": [
+    1.54,
+    1.924,
+    1.789
+   ],
+   "n": [
+    150,
+    55,
+    264
+   ],
+   "all_pf": 1.725,
+   "z": 3.15,
+   "reverse_pf": 0.366,
+   "stress_pf": 1.725,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|rng5:le:0.50&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.531,
+    3.004,
+    2.068
+   ],
+   "n": [
+    235,
+    108,
+    443
+   ],
+   "all_pf": 2.335,
+   "z": 5.14,
+   "reverse_pf": 0.193,
+   "stress_pf": 2.335,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r1:ge:0.10&zd:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    1.597,
+    1.685,
+    1.561
+   ],
+   "n": [
+    762,
+    667,
+    922
+   ],
+   "all_pf": 1.608,
+   "z": 4.4,
+   "reverse_pf": 0.28,
+   "stress_pf": 1.608,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r5:le:0.50&vol15:le:0.10|no|600",
+   "deflated": false,
+   "pf": [
+    2.443,
+    3.709,
+    1.505
+   ],
+   "n": [
+    144,
+    47,
+    200
+   ],
+   "all_pf": 2.105,
+   "z": 3.37,
+   "reverse_pf": 0.242,
+   "stress_pf": 2.104,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|dist:ge:0.50&zd:le:0.10|no|360",
+   "deflated": true,
+   "pf": [
+    2.244,
+    1.878,
+    1.883
+   ],
+   "n": [
+    626,
+    342,
+    1152
+   ],
+   "all_pf": 1.987,
+   "z": 5.46,
+   "reverse_pf": 0.176,
+   "stress_pf": 1.987,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r9:ge:0.10&tbi5:le:0.25&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.251,
+    2.074,
+    1.649
+   ],
+   "n": [
+    295,
+    156,
+    568
+   ],
+   "all_pf": 1.886,
+   "z": 4.52,
+   "reverse_pf": 0.237,
+   "stress_pf": 1.886,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.50&dist:ge:0.90|yes|600",
+   "deflated": false,
+   "pf": [
+    1.866,
+    1.564,
+    1.7
+   ],
+   "n": [
+    143,
+    96,
+    605
+   ],
+   "all_pf": 1.713,
+   "z": 4.71,
+   "reverse_pf": 0.443,
+   "stress_pf": 1.641,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r9:ge:0.10&zd:le:0.10|yes|600",
+   "deflated": true,
+   "pf": [
+    2.005,
+    1.739,
+    1.753
+   ],
+   "n": [
+    654,
+    529,
+    818
+   ],
+   "all_pf": 1.831,
+   "z": 5.8,
+   "reverse_pf": 0.247,
+   "stress_pf": 1.831,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.10&vol15:le:0.10|yes|360",
+   "deflated": true,
+   "pf": [
+    2.61,
+    1.915,
+    2.049
+   ],
+   "n": [
+    370,
+    204,
+    865
+   ],
+   "all_pf": 2.173,
+   "z": 6.36,
+   "reverse_pf": 0.171,
+   "stress_pf": 2.173,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|hour:le:0.90&vol60:le:0.25&zd:le:0.10|yes|600",
+   "deflated": false,
+   "pf": [
+    2.098,
+    2.236,
+    1.55
+   ],
+   "n": [
+    262,
+    124,
+    443
+   ],
+   "all_pf": 1.82,
+   "z": 3.86,
+   "reverse_pf": 0.244,
+   "stress_pf": 1.82,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.25&r9:ge:0.50&zd:le:0.90|no|600",
+   "deflated": false,
+   "pf": [
+    1.615,
+    1.697,
+    1.665
+   ],
+   "n": [
+    606,
+    326,
+    1028
+   ],
+   "all_pf": 1.655,
+   "z": 5.34,
+   "reverse_pf": 0.381,
+   "stress_pf": 1.655,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|r9:ge:0.10&rng5:le:0.90&zd:le:0.10|yes|600",
+   "deflated": true,
+   "pf": [
+    2.01,
+    1.79,
+    1.765
+   ],
+   "n": [
+    624,
+    485,
+    802
+   ],
+   "all_pf": 1.851,
+   "z": 5.84,
+   "reverse_pf": 0.244,
+   "stress_pf": 1.851,
+   "validated": true
+  },
+  {
+   "id": "binpath_BTC_cheap|ALL|ask:le:0.25&dist:ge:0.75|yes|600",
+   "deflated": false,
+   "pf": [
+    2.057,
+    2.437,
+    1.843
+   ],
+   "n": [
+    138,
+    77,
+    416
+   ],
+   "all_pf": 1.959,
+   "z": 4.04,
+   "reverse_pf": 0.317,
+   "stress_pf": 1.959,
+   "validated": true
+  }
+ ],
+ "note": "MODEL RESULT: Binance path priced by the fitted quote model; not a live figure"
+}

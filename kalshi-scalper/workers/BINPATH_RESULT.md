@@ -1,0 +1,41 @@
+# BINPATH RESULT (Nov 7, 2026): MODEL RESULT ONLY, never a live figure
+
+Protocol `workers/BINPATH_PROTOCOL.md` (committed 2eb42c6 before any rule was scored). Code `src/scalper/scan_binance.py` (new adapter; `scan.py` NOT edited), `src/scalper/binpath_diag.py` (descriptive checks), `tests/test_scan_binance.py`. Harness selftest passed before the runs. The held-out (closes from 2025-01-01) was NOT read: 64,800 windows per series (129,600 decision rows at two looks, BTC and ETH each) stay behind the harness guard (`scan_binance.py unseen`, counts from bar presence only). Disclosure: the quote model and the proxy count used Binance bars of 2026-10-11 to 10-27, inside that slice, for prices and one agreement count, no rule.
+
+## 1. Proxy error (Kalshi development windows, closes before 2026-10-28, `workers/BINPATH_QUOTE_MODEL_REPORT.json`)
+Binance window outcome (settle bar close above the window's open bar open) against Kalshi's settled result: **BTC 93.98% agree (1,544 windows, 93 disagree), ETH 93.71% (1,543, 97 disagree)**. Agreement rises with distance from the strike (BTC 89% under 1 bp, 97% over 12 bp). Among the windows the quote model prices into the 88c to 97c band at 6 minutes, 95.7% (BTC, 16 of 372 disagree) and 95.5% (ETH, 16 of 353). That is a 4% to 6% outcome error in a band whose whole loss rate is 3% to 12%: the proxy error is as large as the effect being searched for. Binance's open sits a steady +12.7 bp (BTC) and +12.3 bp (ETH) above Kalshi's strike (USDT against USD; p05 to p95 7.5 to 17.5 bp), so a Binance price is never compared with Kalshi's strike, only with Binance's own open. Kalshi's reference is an average of the last 60 seconds of a multi exchange index, Binance here is one minute close.
+
+## 2. Quote model (fitted on Kalshi development W1 only)
+Form fixed in the protocol: YES mid = Phi(c0 + c1 z), z = distance in bp over (15 minute realised sigma x sqrt(minutes left)). Fit on W1 dates 1 to 4, held-out slice W1 dates 5 and 6, final refit on all 6 W1 dates (`workers/BINPATH_QUOTE_MODEL.json`: 6 minute c0 0.012, c1 1.061; 10 minute c0 -0.001, c1 0.984; half spread 0.5c in every zone). It is the plain random walk price with a trailing vol, no more. **Out-of-sample mid error: MAE 5.8c, RMSE 7.8c (6 minute, held-out slice, n 368); 5.4c / 7.0c at 10 minutes; W2 dates 6.4c, W3 dates 5.8c.** The 8c MAE gate was not tripped. Band agreement is poor: of the entries the model prices in 88c to 97c, 62% to 72% are also in the band by Kalshi's actual ask (precision), and 53% to 56% of Kalshi's band entries are found (recall).
+
+## 3. The quote model is wrong in the tails, in the direction that creates survivors (`workers/BINPATH_CALIBRATION.json`)
+Model ask against Kalshi's actual ask for the same side (Kalshi dev, n 366 to 1,210 per bin), and the Binance history (2019-2024):
+- Cheap arm, model ask 3c to 6c: history win 6.4%, Kalshi actual ask 6.0c, Kalshi win 4.6%; PF at the model's price 1.30 (history), PF at Kalshi's actual price 0.64. 6c to 10c: history win 9.5%, Kalshi actual ask 9.3c; PF 1.13 at model price, 0.77 at Kalshi's. The model prices the deep tail at about 4c where Kalshi quotes about 6c and the history pays about 6.4%: a Gaussian tail model, not an edge.
+- Band arm: the model's ask is 2c to 3c ABOVE Kalshi's actual ask (94c to 97c: model 95.5c, Kalshi 92.9c, win 92.2% in history, 93.7% at Kalshi), which is why the unconditional band PF on the model price is 0.51 to 0.69 in every window (my protocol predicted 0.85 to 1.15: that prediction was WRONG, disclosed).
+Applying every validated survivor to the Kalshi development windows (`workers/BINPATH_KALSHI_CHECK.json`, tiny n, descriptive): **cheap arm survivors, BTC: 272 trades, model ask 7.6c, Kalshi's actual ask 13.0c, PF 1.48 at the model price and 0.82 at the actual price (median survivor PF 0.81, 29% of survivors at or above 1.5); ETH: 229 trades, model 5.5c, actual 8.4c, PF 1.39 and 0.92 (median 0.42, 6% at or above 1.5).** Band arm survivors fire almost never in Oct 2026 (BTC 1 trade, ETH 6), because their cuts (top decile of distance, momentum and volume) come from the 2019 to 2020 volatility regime, so the band survivors cannot be checked against a Kalshi price at all.
+
+## 4. Runs (every run: ledger written before scoring; seeds never reused; `workers/scan_ledger/binpath_*.ids.gz`)
+Per run: N before to after, rules passing W1 alone / W1 and W2 / the three window screen, exact float64 survivors (all pass the harness bar: PF 1.5 in each of W1, W2, W3 after fees, 40 trades per window, 150 total, 3 days per window), of which deflated (day clustered z at least the one-sided Bonferroni z at 0.05 / N; z bar 5.364 to 5.373), best PF in any window among rules with 40 or more trades there (99.0 is the cap: a window with no loss).
+
+| Dataset | Seed | N before to after | W1 | W1+W2 | Screen | Exact | Deflated | Best PF W1 / W2 / W3 |
+|---|---|---|---|---|---|---|---|---|
+| BTC band | 91001 | 1,230,505 to 1,235,505 | 101 | 16 | 3 | 3 | 1 | 99 / 99 / 99 |
+| BTC band | 91002 | to 1,240,505 | 91 | 11 | 2 | 2 | 0 | 99 / 99 / 99 |
+| BTC band | 91003 | to 1,245,505 | 113 | 20 | 3 | 3 | 1 | 99 / 99 / 99 |
+| BTC band | 91004 | to 1,250,505 | 115 | 24 | 6 | 6 | 0 | 99 / 99 / 99 |
+| ETH band | 92001 | to 1,255,505 | 106 | 11 | 5 | 5 | 0 | 99 / 99 / 99 |
+| ETH band | 92002 | to 1,260,505 | 120 | 11 | 5 | 4 | 2 | 99 / 99 / 99 |
+| ETH band | 92003 | to 1,265,505 | 117 | 13 | 5 | 5 | 1 | 99 / 99 / 99 |
+| ETH band | 92004 | to 1,270,505 | 131 | 16 | 8 | 8 | 0 | 99 / 99 / 99 |
+| BTC cheap | 93001 | to 1,275,505 | 89 | 34 | 20 | 20 | 7 | 3.45 / 3.30 / 3.69 |
+| BTC cheap | 93002 | to 1,280,505 | 101 | 48 | 25 | 25 | 8 | 5.63 / 3.71 / 2.28 |
+| ETH cheap | 94001 | to 1,285,505 | 89 | 53 | 35 | 35 | 16 | 3.20 / 3.92 / 3.95 |
+| ETH cheap | 94002 | to 1,290,505 | 84 | 50 | 32 | 32 | 15 | 3.13 / 3.63 / 3.94 |
+
+Rows per dataset (W1 / W2 / W3): BTC band 25,437 / 25,802 / 25,922; ETH band 25,990 / 26,650 / 25,976; BTC cheap 75,138 / 75,855 / 75,332; ETH cheap 74,443 / 76,542 / 74,817. N from the ledger: 730,489 prior + 500,000 PERPGEN + 60,016 here (60,000 rules + 16 baseline lines) = **1,290,505**, z bar 5.373. Baselines (no atom): band PF 0.51 to 0.69 in every window, direction and look; cheap PF 0.81 to 1.08 (6 minute 0.81 to 0.95, 10 minute 0.93 to 1.08).
+
+## 5. Audits and freeze (development data only; `workers/BINPATH_AUDIT_*.json`)
+All survivors pass all three audits (truncation: 200 random rows recomputed from a slice with every later bar deleted, 0 mismatches; reverse control: the opposite side at its own modelled ask, pooled PF under 1.0; fee stress x1.2, pooled PF at or above 1.0). Survivors / validated / deflated / independent clusters (overlap of trades at least 50% counted as one bet): BTC band 14 / 14 / 2 / 2; ETH band 22 / 22 / 3 / 4; BTC cheap 45 / 45 / 15 / 10; ETH cheap 67 / 67 / 31 / 10. All validated survivors are frozen with the harness command, one list per dataset (`workers/SCAN_FROZEN_BINPATH_{BTC,ETH}_{BAND,CHEAP}.json` with `.sha256`): 14, 22, 45 and 67 rules. The audits do not detect a quote model error that is correlated with a feature, so passing them says nothing about section 3.
+
+## 6. Reading
+My prediction (zero validated survivors, about 90%) was WRONG: 148 rules pass the bar, 51 of them deflated. They are not evidence of an edge against the contract price. The cheap arm is dominated by `ask <= q10` and `zd <= q10` (the deepest longshots, 27 to 34 of the survivors' atoms), exactly where the model prices the tail below both Kalshi and the realised frequency, and at Kalshi's actual price the same trades lose (PF 0.82 and 0.92). The band arm is dominated by momentum and distance atoms on the YES side at 6 minutes (`dist`, `r5`, `r9`, `vlr15`, `mrise3` at or above their W1 high quantiles); it could reflect trailing vol overstating the next minutes' vol after a spike (the model's price too low in those rows) or real continuation, and Oct 2026 has too few such rows to say. Not shown here: any Kalshi price, fill or profit factor. A held-out read on these frozen lists would test the model price again, not Kalshi's; it would need a quote model that reproduces Kalshi's tail asks before it means anything. Held-out untouched; guard file not written.

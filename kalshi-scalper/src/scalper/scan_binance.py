@@ -616,6 +616,60 @@ def run_binpath(ad, tab, n_rules, seed, batch=2000, out_dir=None, verbose=True):
     return summary
 
 
+def _cluster(sels, thr=0.5):
+    """Greedy clusters of survivors by overlap of the trades they take (intersection over the smaller set at least thr): a count of independent bets."""
+    cl = []
+    for i, a in enumerate(sels):
+        sa = set(a.tolist())
+        for c in cl:
+            sb = c["rows"]
+            if len(sa & sb) / max(1, min(len(sa), len(sb))) >= thr:
+                c["members"].append(i); c["rows"] |= sa; break
+        else:
+            cl.append(dict(members=[i], rows=set(sa)))
+    return [c["members"] for c in cl]
+
+
+def cmd_audit(a):
+    """Audit every survivor of every run file of one dataset (development data only), write the validated list for freezing and a summary."""
+    ad = BinAdapter(a.sym, a.arm)
+    tab = ad.build_dev(); cuts = S.make_cuts(tab); ats = S.AtomSet(tab, cuts)
+    csha = S.cuts_sha(cuts)
+    rd = os.path.join(S.SCAN_DATA, "runs")
+    files = sorted(os.path.join(rd, f) for f in os.listdir(rd) if f.startswith(tab.name + "_ALL_RUN") and f.endswith(".json"))
+    runs = [json.load(open(f)) for f in files]
+    assert all(r["cuts_sha256"] == csha for r in runs), "cut table changed between runs"
+    surv = [(r, s) for r in runs for s in r["survivors"]]
+    rules = [S.Rule(tuple(sorted(ats.names.index(S._name_of(sp)) for sp in s["atoms"])), s["dir"], s["variant"]) for r, s in surv]
+    trunc, per = audit_rules(ad, tab, ats, rules) if rules else (ad.truncation_test(tab, 200, 0), [])
+    sels = []
+    for rule in rules:
+        rows, net, nets = S._prep(tab, "ALL", rule.dir, rule.variant)
+        sels.append(rows[ats.A[list(rule.atoms)][:, rows].all(axis=0)])
+    clusters = _cluster(sels) if sels else []
+    validated = []
+    lines = []
+    for (r, s), au in zip(surv, per):
+        ok = trunc["passed"] and au["reverse_ok"] and au["stress_ok"]
+        e = s["exact"]
+        lines.append(dict(id=s["id"], deflated=s["deflated"], pf=[round(w["pf"], 3) for w in e["win"]], n=[w["n"] for w in e["win"]], all_pf=round(e["all"]["pf"], 3),
+                          z=round(e["all"]["z"], 2), reverse_pf=round(au["reverse_pf"], 3), stress_pf=round(au["stress_pf"], 3), validated=bool(ok)))
+        if ok:
+            validated.append(s)
+    out = dict(adapter=tab.name, runs=[os.path.basename(f) for f in files], rules_scored=sum(r["rules_scored"] for r in runs), survivors=len(surv),
+               truncation=trunc, validated=len(validated), validated_deflated=sum(1 for s in validated if s["deflated"]),
+               independent_clusters_all_survivors=len(clusters), cluster_sizes=sorted((len(c) for c in clusters), reverse=True), rows=lines,
+               note="MODEL RESULT: Binance path priced by the fitted quote model; not a live figure")
+    json.dump(out, open(os.path.join(S.WORKERS, "BINPATH_AUDIT_%s.json" % tab.name), "w"), indent=1)
+    base = dict(runs[-1]); base["survivors"] = validated
+    base["N_after"] = max(r["N_after"] for r in runs); base["z_bar"] = max(r["z_bar"] for r in runs)
+    vd = os.path.join(S.SCAN_DATA, "runs_validated"); os.makedirs(vd, exist_ok=True)
+    vf = os.path.join(vd, "%s_VALIDATED.json" % tab.name)
+    json.dump(base, open(vf, "w"), indent=1, default=str)
+    print(json.dumps({k: v for k, v in out.items() if k != "rows"}))
+    return vf
+
+
 def cmd_run(a):
     ad = BinAdapter(a.sym, a.arm)
     tab = ad.build_dev()
@@ -639,10 +693,10 @@ def cmd_unseen(a):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(prog="scan_binance")
-    ap.add_argument("cmd", choices=["model", "unseen", "baseline", "run"])
+    ap.add_argument("cmd", choices=["model", "unseen", "baseline", "run", "audit"])
     ap.add_argument("--sym", default="BTC"); ap.add_argument("--arm", default="band"); ap.add_argument("--n", type=int, default=5000); ap.add_argument("--seed", type=int)
     a = ap.parse_args(argv)
-    {"model": cmd_model, "unseen": cmd_unseen, "baseline": cmd_baseline, "run": cmd_run}[a.cmd](a)
+    {"model": cmd_model, "unseen": cmd_unseen, "baseline": cmd_baseline, "run": cmd_run, "audit": cmd_audit}[a.cmd](a)
 
 
 if __name__ == "__main__":
