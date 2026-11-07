@@ -220,6 +220,12 @@ gates.L14 = () => {
   assert.ok(/if\(e === true \|\| !d\.moved \|\| !editing\)\{ return; \}/.test(iife) && /change\(function\(\)\{ layout\.width\[k\] = w;/.test(iife), 'a resize goes through change (one Undo step, Cancel undoes it) and only once the corner moved');
 };
 
+// L15: a folded card still leaves room for the edit strip. Consequence: in Edit layout the Drag handle, width and arrow buttons never sit on top of a folded card's title (the owner's screenshot, Nov 7, 2026: cards 54px tall, strip drawn over the title).
+gates.L15 = () => {
+  assert.ok(/\.kal-bot-grid\.kal-unlocked > \.kal-card\[data-folded="true"\]\{ padding-top:56px !important; \}/.test(css), 'a folded card takes padding-top while editing, above the padding:0 !important of the folded rule');
+  assert.ok(/@media \(max-width:900px\)\{[^\n]*\.kal-bot-grid\.kal-unlocked > \.kal-card\[data-folded="true"\]\{ padding-top:64px !important; \}/.test(css), 'and the phone strip (40px buttons) gets 64px');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
