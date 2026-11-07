@@ -38,6 +38,11 @@ gates.CH6 = () => {
   assert.ok(/Normal/.test(charter) && /Warning/.test(charter) && /Stop/.test(charter) && /No new workers/.test(charter), 'three steps');
   assert.ok(/Burn and the throttle ladder/.test(coo) && /no percentage of the session limit used; say so rather than guess/.test(coo), 'the COO logs burn and does not guess a percentage');
 };
+gates.CH7 = () => {
+  // Tokens are a cost too: written efficiency rules, owned by the COO, measured per verdict.
+  assert.ok(/Efficiency across the board \(tokens and credits\)/.test(charter) && /Read once\./.test(charter) && /Fresh and short beats big and warm/.test(charter) && /No agent for a three-call job/.test(charter), 'the efficiency rules');
+  assert.ok(/tokens per verdict/i.test(charter) && /Token efficiency \(Charter/.test(coo) && /get_trigger/.test(coo), 'the COO measures tokens per verdict');
+};
 gates.CH5 = () => {
   // Public repo: no personal finance figures, no secrets, no em dashes.
   assert.ok(!/—/.test(charter), 'no em dashes');

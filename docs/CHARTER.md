@@ -91,6 +91,20 @@ The monthly R&D credit budget is set by the owner and kept privately by the Cont
 
 Biggest levers, in order: wake a chat less often, move a chat with a very large context to a fresh session with a short handoff (the COO proposes it, the chat's head writes the handoff), use lighter models and lower effort for reporting and checks, and cap the number of research workers when a run of tests finds nothing.
 
+## Efficiency across the board (tokens and credits)
+
+Tokens are a cost the same way credits are. The COO owns token efficiency across the team; the Controller owns the dollar side. Every agent follows these, and the COO measures them:
+1. **Read once.** Do not re-read a file, page or result already read this session. Quote the number, not the file.
+2. **Ask narrowly.** Pull one routine with `get_trigger`, not the whole inventory; page through `list_triggers` only when something changed (a full page of routine prompts is tens of thousands of tokens).
+3. **Fresh and short beats big and warm.** A routine that does not need a chat's memory runs in a fresh session. A chat near 780k tokens gets a fresh session with a short handoff, written by its head and proposed by the COO.
+4. **No agent for a three-call job.** Spawn a helper only for work that is long, parallel or needs a clean context.
+5. **Short outputs.** Results and reports under the length their routine states, numbers first, nothing the reader already has.
+6. **Lowest effort that works.** Reporting, checks and relays run at low effort; research and builds at the level they need.
+7. **Stop at the source.** When a source is closed or a test cannot be read, stop spending on it and say so once.
+8. **Batch independent calls** in one step.
+
+Every COO run reports tokens per verdict (output and cache-read tokens per research verdict since the last look) next to dollars, names the one habit costing the most, and proposes one change. A chat that repeatedly breaks these is told by the COO, and the repeat goes in the scorecard.
+
 ## The weekly scorecard
 
 Once a week the COO reports to the owner in under 20 lines: what it decided and why, what each decision yielded, what circled or closed, spend against yield, and anything it is unsure of. The owner can veto any decision; a vetoed decision is reversed and the reason becomes a line in this Charter.
