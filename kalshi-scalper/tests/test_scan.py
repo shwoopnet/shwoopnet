@@ -206,4 +206,151 @@ if (ROOT / "data" / "book.sqlite").exists() and (ROOT / "data" / "l1b.sqlite").e
         except S.Blocked:
             pass
 
+
+# ================================================================== HARNESS v1.1: audit hooks, perps extras
+import time as _time
+_t_v11 = _time.time()
+PERMS = 300
+
+
+def _frozen_doc(tab, rules, ats, cuts, group="ALL"):
+    ca = dict(cuts)
+    return dict(frozen_id="TESTAUD", adapter=tab.name, group=group, cuts=ca, cuts_sha256=S.cuts_sha(ca), table_sha256=tab.fingerprint(),
+                survivors=[dict(id="x", atoms=[ats.specs[a] for a in r.atoms], dir=r.dir, variant=r.variant) for r in rules])
+
+
+# ---- synthetic planted edge: every hook passes; the planted survivors collapse into few clusters
+pl_ad = S.SyntheticAdapter(days=30, per_day=500, nfeat=6, plant=True, seed=7)
+pl_tab = pl_ad.build_dev(); pl_cuts = S.make_cuts(pl_tab); pl_ats = S.AtomSet(pl_tab, pl_cuts)
+pl_run = S.run(pl_ad, 4000, 11, ledger_dir=os.path.join(TMP, "led_v11"), out_dir=os.path.join(TMP, "runs"), verbose=False, tab=pl_tab)
+assert pl_run["exact_survivors"] >= 1
+pl_rules = [S.Rule(tuple(sorted(pl_ats.names.index(S._name_of(sp)) for sp in sv["atoms"])), sv["dir"], sv["variant"]) for sv in pl_run["survivors"]]
+doc = _frozen_doc(pl_tab, pl_rules, pl_ats, {**pl_cuts, "_x": 1})
+doc["cuts_sha256"] = S.cuts_sha(pl_cuts)
+rep = S.audit_frozen(pl_ad, doc, tab=pl_tab, out_dir=False, perms=PERMS)
+hk = {h["name"]: h for h in rep["hooks"]}
+assert set(hk) >= {"truncation", "fee_stress", "placebo_shuffle", "plain_loop_recompute", "latency_stress", "cluster_dedupe"}, hk.keys()
+assert hk["placebo_shuffle"]["passed"] and hk["placebo_shuffle"]["max_p_plus"] <= 2.0 / (1 + PERMS), "planted edge: no shuffled run reaches the observed PF"
+assert hk["plain_loop_recompute"]["passed"], hk["plain_loop_recompute"]
+assert hk["latency_stress"]["passed"], "a planted edge of +16c survives 1.5c a bar of delay"
+assert 1 <= hk["cluster_dedupe"]["independent"] <= len(pl_rules)
+assert not rep["failed"], rep["failed"]
+assert "SCAN AUDIT TESTAUD" in rep["text"] and "independent survivors" in rep["text"]
+# the files are written where asked, json parses, text summary beside it
+S.audit_frozen(pl_ad, doc, tab=pl_tab, out_dir=TMP, perms=50)
+assert json.load(open(os.path.join(TMP, "SCAN_AUDIT_TESTAUD.json")))["frozen_id"] == "TESTAUD" and os.path.exists(os.path.join(TMP, "SCAN_AUDIT_TESTAUD.txt"))
+
+# ---- placebo: pure noise fails it (rule picks are indistinguishable from shuffled picks), a planted rule passes
+nz_ad = S.SyntheticAdapter(days=30, per_day=500, nfeat=6, plant=False, seed=8)
+nz_tab = nz_ad.build_dev(); nz_ats = S.AtomSet(nz_tab, S.make_cuts(nz_tab))
+rg2 = random.Random(5)
+ps_ = [S.placebo_shuffle(nz_tab, nz_ats, "ALL", S.draw_rule(rg2, nz_ats, nz_tab), perms=PERMS, seed=3)["p_plus"] for _ in range(12)]
+assert sum(1 for x in ps_ if x < 0.05) <= 2 and float(np.median(ps_)) > 0.2, "noise rules are not rejected by the placebo: %s" % ps_
+r_pl = pl_rules[0]
+assert S.placebo_shuffle(pl_tab, pl_ats, "ALL", r_pl, perms=PERMS)["passed"]
+assert S.placebo_shuffle(pl_tab, pl_ats, "ALL", r_pl, perms=100, seed=9) == S.placebo_shuffle(pl_tab, pl_ats, "ALL", r_pl, perms=100, seed=9), "fixed seed, same answer"
+# a noise 'survivor' (best of 300 random rules by weakest window PF) still has an unremarkable placebo p: a single-rule placebo is not selection corrected
+rg3 = random.Random(6)
+cand = [S.draw_rule(rg3, nz_ats, nz_tab) for _ in range(300)]
+sc_ = S.score_rules(nz_tab, nz_ats, "ALL", cand)
+best = cand[int(np.argmax([min(x["pf"]) if min(x["n"]) >= 40 else 0 for x in sc_]))]
+pb = S.placebo_shuffle(nz_tab, nz_ats, "ALL", best, perms=PERMS, seed=4)
+assert pb["observed_pf"] > 1.0 and pb["p_plus"] > 0.001, pb
+
+# ---- plain loop: agrees with the engine, and a defect on either side is loud
+r0 = pl_rules[0]
+assert S.plain_recompute(pl_ad, pl_tab, pl_ats, "ALL", r0)["passed"]
+_ex = S.exact_rule
+def _drop_one(tab, ats, group, rule, stress=False):
+    st = _ex(tab, ats, group, rule, stress)
+    st["rows"] = st["rows"][1:]
+    return st
+S.exact_rule = _drop_one
+try:
+    S.plain_recompute(pl_ad, pl_tab, pl_ats, "ALL", r0); raise AssertionError("a trade the engine lost must raise")
+except S.AuditMismatch as e:
+    assert "trade sets differ" in str(e)
+finally:
+    S.exact_rule = _ex
+
+# ---- cluster dedupe: identical selections are one cluster, disjoint ones are two
+a_hi = pl_ats.names.index("f2:ge:0.90"); a_lo = pl_ats.names.index("f2:le:0.10")
+ca = S.Rule((a_hi,), "yes", 360); cb = S.Rule((a_hi,), "no", 360); cc = S.Rule((a_lo,), "yes", 360)
+cl = S.cluster_dedupe(pl_ad, pl_tab, pl_ats, "ALL", [ca, cb, cc])
+assert cl["independent"] == 2 and sorted(len(c["members"]) for c in cl["clusters"]) == [1, 2], cl
+assert S.cluster_dedupe(pl_ad, pl_tab, pl_ats, "ALL", [ca, cc], thr=0.7)["independent"] == 2
+assert S.cluster_dedupe(pl_ad, pl_tab, pl_ats, "ALL", [ca, ca])["independent"] == 1
+
+# ---- latency: the fill price moves with the shift (Kalshi-shaped file), and a Kalshi plain loop equals the engine on the test sqlite
+S.AtomSet  # noqa
+kcuts_ = S.make_cuts(kt); kats = S.AtomSet(kt, kcuts_)
+kr = S.Rule((kats.names.index("ask:ge:0.10"),), "yes", 360)
+assert S.plain_recompute(ka, kt, kats, "ALL", kr)["passed"], "Kalshi plain loop equals the engine on the test file"
+lat = S.latency_stress(ka, kt, kats, "ALL", kr)
+base_pf = S.exact_rule(kt, kats, "ALL", kr)["all"]["pf"]
+assert abs(lat["shift_1"]["pf_pooled"] - round(base_pf, 3)) < 0.01 and lat["shift_1"]["missed"] == 0, "constant quotes: one minute later is the same fill"
+ka.markets[0][4].pop(ka.markets[0][2] - 300, None)             # delete market 0's quote at 5 minutes left: that fill is missed at shift 1
+ka._plain_state = None
+assert S.latency_stress(ka, kt, kats, "ALL", kr)["shift_1"]["missed"] >= 1
+# tamper with a settlement: the engine's table is stale against the plain loop, so the recompute must raise
+tk0 = ka.markets[3]; ka.markets[3] = (tk0[0], tk0[1], tk0[2], "no" if tk0[3] == "yes" else "yes", tk0[4]); ka._plain_state = None
+try:
+    S.plain_recompute(ka, kt, kats, "ALL", kr); raise AssertionError("a flipped settlement must raise")
+except S.AuditMismatch:
+    pass
+ka.markets[3] = tk0; ka._plain_state = None
+
+# ---- perps extras: leader returns, minutes to funding (synthetic grid, then a real development region)
+gl = {"t0": 1_000_000 * 60, "mid": np.exp(np.cumsum(np.full(3000, 1e-4)))}
+tt = np.array([gl["t0"] + 1000 * 60, gl["t0"] + 5 * 60, gl["t0"] - 60, gl["t0"] + 4000 * 60, gl["t0"] + 1000 * 60 + 7])
+lr = S.leader_ret(gl, tt, 60)
+assert abs(lr[0] - 60 * 1e-4 * 1e4) < 1e-2 and np.isnan(lr[1]) and np.isnan(lr[2]) and np.isnan(lr[3]) and np.isnan(lr[4]), "leader value only inside its own region and on a minute"
+g2 = {"t0": gl["t0"], "mid": gl["mid"].copy()}; g2["mid"][1001:] = np.nan
+assert S.leader_ret(g2, tt[:1], 60)[0] == lr[0], "deleting every leader minute after t leaves the feature unchanged"
+day0 = (1_790_000_000 // 86400) * 86400
+f_ts = np.array([day0 + h * 3600 + d * 86400 for d in range(3) for h in (4, 12, 20)], dtype=np.int64)
+mt = S.mtf_codes(np.array([day0 + 86400 * 1 + 3 * 3600 + 3000, day0 + 86400 + 9 * 3600, day0 + 86400 + 12 * 3600, day0 + 3600, day0 + 86400 + 20 * 3600 - 29 * 60]), f_ts)
+assert list(mt) == [0, 2, 3, -1, 0] or list(mt) == [0, 2, 3, -1, 0], list(mt)
+assert S.mtf_codes(np.array([day0 + 86400 + 3 * 3600 + 3000]), f_ts[:3])[0] == 0 and S.mtf_codes(np.array([day0 + 86400 + 3 * 3600 + 3000]), f_ts[:0])[0] == -1, "no published funding yet: missing"
+assert "extra" in S.PerpAdapter("CRYPTO", None, extra=True).opts and S.PerpAdapter("CRYPTO", None).opts == {"extra": False}
+
+if (ROOT / "data" / "perpgen" / "clean" / "dev").exists():
+    pe = S.PerpAdapter("CRYPTO", None, tickers=["KXBTCPERP", "KXETHPERP", "KXSOLPERP"], extra=True)
+    pet = pe.build_dev()
+    assert pet.fnames == S.FEATS_P + S.FEATS_PX and "mtf" in pet.cats
+    for nm, pref in (("KXBTCPERP", "xbtc"), ("KXETHPERP", "xeth")):
+        off, m = pe.offsets[nm]
+        assert np.isnan(pet.X[pet.fnames.index(pref + "60"), off:off + m]).all(), "a ticker does not lead itself"
+    off, m = pe.offsets["KXSOLPERP"]
+    assert np.isfinite(pet.X[pet.fnames.index("xbtc60"), off:off + m]).mean() > 0.9, "BTC leads SOL on the discovery dates"
+    assert pe.truncation_test(pet, 60, 2)["passed"], "extras use only data at or before the decision"
+    assert (pet.cats["mtf"] >= 0).mean() > 0.5
+    plain_base = S.PerpAdapter("CRYPTO", None, tickers=["KXBTCPERP", "KXETHPERP"]).build_dev()
+    assert plain_base.fnames == S.FEATS_P, "extras are opt-in: v1 atoms and ids are unchanged"
+    # plain loop and latency on a real perps development rule
+    pcuts = S.make_cuts(pet); pats = S.AtomSet(pet, pcuts)
+    prule = S.Rule((pats.names.index("r60:le:0.25"),), "long", 3600)
+    assert S.plain_recompute(pe, pet, pats, "CRYPTO", prule)["passed"], "perps plain loop equals the engine (entry, exit, funding, overlap rule)"
+    prule2 = S.Rule((pats.names.index("mtf:eq:0"), pats.names.index("xbtc60:ge:0.75")), "short", 14400)
+    assert S.plain_recompute(pe, pet, pats, "CRYPTO", prule2)["passed"]
+    lat = S.latency_stress(pe, pet, pats, "CRYPTO", prule)
+    assert set(lat) == {"shift_1", "shift_2"} and lat["shift_1"]["n_windows"] != [0, 0, 0]
+
+# ---- one real Kalshi development-region rule (closes before 2026-10-28 only; fresh.sqlite, no holdout row is read), every hook end to end
+if (ROOT / "data" / "fresh.sqlite").exists():
+    fad = S.KalshiAdapter(S.FRESH); ftab = fad.build_dev()
+    assert int(ftab.meta["close"].max()) < S.HOLD_FROM_TS
+    fcuts = S.make_cuts(ftab); fcuts["_series"] = ftab.meta["series_names"]
+    fats = S.AtomSet(ftab, {k: v for k, v in fcuts.items() if not k.startswith("_")})
+    frules = [S.Rule((fats.names.index("ask:ge:0.75"),), "yes", 360), S.Rule((fats.names.index("ask:ge:0.75"), fats.names.index("spread:le:0.50")), "yes", 360)]
+    fdoc = _frozen_doc(ftab, frules, fats, fcuts)
+    frep = S.audit_frozen(fad, fdoc, tab=ftab, out_dir=False, perms=200)
+    fh = {h["name"]: h for h in frep["hooks"]}
+    assert frep["cuts_match"] and fh["truncation"]["passed"] and fh["plain_loop_recompute"]["passed"], fh["plain_loop_recompute"]
+    assert fh["cluster_dedupe"]["independent"] == 1, "the second rule is a subset of the first: one cluster"
+    assert fh["latency_stress"]["per_rule"][0]["shift_1"]["n_windows"][0] > 100 and fh["placebo_shuffle"]["per_rule"][0]["perms"] == 200
+    print("real dev rule: PF", fh["plain_loop_recompute"]["per_rule"][0]["pf"], "placebo p", fh["placebo_shuffle"]["per_rule"][0]["p_plus"],
+          "latency pooled", [fh["latency_stress"]["per_rule"][0][k]["pf_pooled"] for k in ("shift_1", "shift_2")])
+print("v1.1 section: %.1fs" % (_time.time() - _t_v11))
+
 print("test_scan: ok")

@@ -181,6 +181,7 @@ class AtomSet:
 
     def __init__(self, tab, cuts, cat_values=None):
         self.names, self.specs, rows = [], [], []
+        self.cuts = cuts                                    # kept so the plain-loop audit can evaluate every atom without the matrix
         nsc = len(tab.scope_names)
         for fi, f in enumerate(tab.fnames):
             cv = np.array([[cuts[tab.scope_names[s]][f][qi] for qi in range(len(QS))] for s in range(nsc)], dtype=np.float32)   # (scopes, q)
@@ -719,8 +720,10 @@ class PerpAdapter(Adapter):
     perpdata until a PERPGEN_FROZEN_<id>.json exists); with an existing id, discovery + validation (the development region) is read and cut
     into W1, W2, W3 per ticker by UTC calendar days. The holdout comes only from perpdata.load_holdout and its own guard file."""
 
-    def __init__(self, group="CRYPTO", frozen_id=None, tickers=None, fee_bps=PERP_FEE_BPS):
+    def __init__(self, group="CRYPTO", frozen_id=None, tickers=None, fee_bps=PERP_FEE_BPS, extra=False):
         self.group, self.groups, self.frozen_id, self.fee = group, (group,), frozen_id, fee_bps
+        self.extra = bool(extra)                         # HARNESS v1.1: leader returns (BTC, ETH) and minutes-to-next-funding; off keeps v1 atoms and ids exactly
+        self.opts = dict(extra=self.extra)
         self.name = "perps_%s" % group.lower()
         self._tickers = tickers
         self.cuts_cache = {}
@@ -786,7 +789,8 @@ class PerpAdapter(Adapter):
         if stage == "dev" and not np.isnan(spread_med):
             defect |= g["sp"][ent] > 10 * spread_med
         H = len(PERP_HOLDS)
-        netL, netS, nsL, nsS, exit_ts = (np.full((len(idx), H), np.nan, dtype=np.float32) for _ in range(5))
+        netL, netS, nsL, nsS = (np.full((len(idx), H), np.nan, dtype=np.float32) for _ in range(4))
+        exit_ts = np.full((len(idx), H), np.nan, dtype=np.float64)      # float64: unix seconds in float32 round by up to 64 s and corrupted the one-position rule (found by the v1.1 plain-loop audit)
         for hi, h in enumerate(PERP_HOLDS):
             base = idx + 1 + h // 60
             ex = np.full(len(idx), -1, dtype=np.int64)
@@ -869,7 +873,13 @@ class PerpAdapter(Adapter):
                     keep[j] = True; free = EX[r, hi]
             return keep
 
-        tab = Table(self.name + (":holdout" if holdout else ""), [self.group], FEATS_P, X, cats, ts, date, win, scope, names, ("long", "short"), PERP_HOLDS,
+        fnames = FEATS_P
+        self.offsets, off = {}, 0
+        for p in parts:
+            self.offsets[p[1]] = (off, len(p[2]["ts"])); off += len(p[2]["ts"])
+        if self.extra:
+            X, cats, fnames = self._add_extra(pd, parts, X, cats, frozen_id, holdout)
+        tab = Table(self.name + (":holdout" if holdout else ""), [self.group], fnames, X, cats, ts, date, win, scope, names, ("long", "short"), PERP_HOLDS,
                     outcome, scope.astype(np.int64), thin_fn=thin, meta=dict(parts=names))
         return tab
 
@@ -913,6 +923,8 @@ class PerpAdapter(Adapter):
             a = perp_features(g, np.array([i]), P["f_ts"], P["f_rt"])
             b = perp_features(gt, np.array([i]), P["f_ts"][:ft], P["f_rt"][:ft])
             same = all(np.allclose(a[f], b[f], equal_nan=True) and np.allclose(a[f], P["feats"][f][k:k + 1], equal_nan=True) for f in FEATS_P)
+            if same and self.extra:
+                same = self._extra_truncation_ok(tk, P, k, rng)
             bad += 0 if same else 1; tested += 1
         return dict(name="truncation", checked=tested, mismatches=bad, passed=bad == 0)
 
@@ -974,8 +986,106 @@ class SyntheticAdapter(Adapter):
 
 
 ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
-            "perps_crypto": lambda frozen_id=None, **k: PerpAdapter("CRYPTO", frozen_id),
-            "perps_noncrypto": lambda frozen_id=None, **k: PerpAdapter("NONCRYPTO", frozen_id)}
+            "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
+            "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
+
+
+# ------------------------------------------------------------------ HARNESS v1.1: perps cross-asset leaders and minutes to the next funding
+# Opt-in (PerpAdapter(extra=True), CLI --perp-extra) so a v1 run, its atoms and its ledger ids are untouched. Protocol: PERPGEN_PROTOCOL.md (cross-asset
+# leads, mtf). A leader's return is used at a timestamp ONLY if the leader's own loaded region (the same stage this adapter reads for it: discovery,
+# plus validation with a frozen id; at a holdout read only leaders that are themselves in the guarded read) has both end minutes there; otherwise NaN and
+# the atom is false. BTC does not lead BTC, ETH does not lead ETH. xgold60 and xus500_60 of the protocol are NOT built (BTC and ETH only).
+FEATS_PX = ["xbtc15", "xbtc60", "xbtc240", "xeth60", "xeth240", "rel_btc60", "rel_btc240"]
+LEADER_TICKERS = (("xbtc", "KXBTCPERP", (15, 60, 240)), ("xeth", "KXETHPERP", (60, 240)))
+MTF_EDGES = (30, 120, 240)                             # minutes to the next funding: under 30, 30 to 120, 120 to 240, 240 and over (codes 0 to 3, -1 missing)
+
+
+def leader_ret(gl, t, w):
+    """Leader log mid return (bps) over the w minutes ending at the leader's minute t (both end minutes present in its grid), else NaN. Reads grid minutes <= t only."""
+    t = np.asarray(t, dtype=np.int64)
+    off = t - gl["t0"]; i = off // 60; N = len(gl["mid"])
+    ok = (off >= 0) & (off % 60 == 0) & (i >= w) & (i < N)
+    j = np.where(ok, i, 0); jw = np.where(ok, i - w, 0)
+    with np.errstate(all="ignore"):
+        r = (np.log(gl["mid"][j]) - np.log(gl["mid"][jw])) * 1e4
+    r[~ok] = np.nan
+    return r.astype(np.float32)
+
+
+def mtf_codes(t, f_ts):
+    """Minutes to the next funding as a bucket code. The calendar is read from funding rows published at or before t only (the distinct seconds of
+    day of the last 6 settlements, so a clock change moves it one settlement late rather than looking ahead); next = the nearest such slot strictly after t."""
+    t = np.asarray(t, dtype=np.int64); out = np.full(len(t), -1, dtype=np.int16)
+    if len(f_ts) == 0:
+        return out
+    j = np.searchsorted(f_ts, t, side="right")
+    for k in range(len(t)):
+        if j[k] == 0:
+            continue
+        slots = {int(x) % 86400 for x in f_ts[max(0, j[k] - 6):j[k]]}
+        d = min(((s_ - int(t[k])) % 86400) or 86400 for s_ in slots) / 60.0
+        out[k] = 0 if d < MTF_EDGES[0] else 1 if d < MTF_EDGES[1] else 2 if d < MTF_EDGES[2] else 3
+    return out
+
+
+def _px_features(leaders, tk, t, own):
+    """(7, len(t)) float32 in FEATS_PX order for ticker tk at decision seconds t; own = its r60 and r240."""
+    nan = np.full(len(t), np.nan, dtype=np.float32)
+    f = {k: nan.copy() for k in FEATS_PX}
+    for pref, lt, ws in LEADER_TICKERS:
+        gl = leaders.get(lt)
+        if gl is None or tk == lt:
+            continue
+        for w in ws:
+            f["%s%d" % (pref, w)] = leader_ret(gl, t, w)
+    for w in (60, 240):
+        f["rel_btc%d" % w] = (own["r%d" % w] - f["xbtc%d" % w]).astype(np.float32)
+    return np.stack([f[k] for k in FEATS_PX])
+
+
+def _perp_add_extra(self, pd, parts, X, cats, frozen_id, holdout):
+    self.leaders = {}
+    have = {p[1]: p[2]["grid"] for p in parts}
+    for _, lt, _ in LEADER_TICKERS:
+        if lt in have:
+            self.leaders[lt] = have[lt]
+        elif not holdout:                                            # a dev read of a leader outside the table; never at a holdout (that read is guarded)
+            try:
+                m1, fu = self._ticker_rows(pd, lt, frozen_id, False)
+                if len(m1) >= 3000:
+                    ts_ = np.array(sorted(r["ts"] for r in m1), dtype=np.int64)
+                    self.leaders[lt] = self._grid(sorted(m1, key=lambda r: r["ts"]), int(ts_[0]), int(ts_[-1]))
+            except (OSError, KeyError, ValueError):
+                pass
+    xs, ms = [], []
+    for si, tk, P in parts:
+        P["xf"] = _px_features(self.leaders, tk, P["ts"], P["feats"])
+        P["mtf"] = mtf_codes(P["ts"], P["f_ts"])
+        xs.append(P["xf"]); ms.append(P["mtf"])
+    X = np.concatenate([X, np.concatenate(xs, axis=1)], axis=0)
+    cats = dict(cats); cats["mtf"] = np.concatenate(ms)
+    return X, cats, list(FEATS_P) + FEATS_PX
+
+
+def _perp_extra_truncation_ok(self, tk, P, k, rng):
+    """Delete every leader minute after t and every funding row after t; the extras at row k must be unchanged."""
+    t = np.array([P["ts"][k]], dtype=np.int64)
+    cut = {}
+    for lt, gl in self.leaders.items():
+        i = int((t[0] - gl["t0"]) // 60)
+        gt = {kk: (vv.copy() if isinstance(vv, np.ndarray) else vv) for kk, vv in gl.items()}
+        for kk in ("bid", "ask", "mid", "sp", "vol", "oi", "px"):
+            gt[kk][max(i + 1, 0):] = np.nan
+        cut[lt] = gt
+    own = {"r%d" % w_: P["feats"]["r%d" % w_][k:k + 1] for w_ in (60, 240)}
+    a = _px_features(cut, tk, t, own)
+    ft = np.searchsorted(P["f_ts"], t[0], side="right")
+    m = mtf_codes(t, P["f_ts"][:ft])
+    return bool(np.allclose(a[:, 0], P["xf"][:, k], equal_nan=True) and m[0] == P["mtf"][k])
+
+
+PerpAdapter._add_extra = _perp_add_extra
+PerpAdapter._extra_truncation_ok = _perp_extra_truncation_ok
 
 
 # ------------------------------------------------------------------ audit hooks (dev data only)
@@ -1011,6 +1121,439 @@ def audit_fee_stress(adapter, tab, ats, group, rules):
     """A3: PF at the stress cost (Kalshi fees x1.2, perps 24 bps a side) must stay at least 1.0 pooled."""
     res = [exact_rule(tab, ats, group, r, stress=True)["all"]["pf"] for r in rules]
     return dict(name="fee_stress", pfs=res, passed=all(p >= 1.0 for p in res))
+
+
+# ------------------------------------------------------------------ HARNESS v1.1 audit hooks: plain-python reference, placebo, latency, clusters
+# The plain loop below is written from the fee function and the settlement definition, NOT from the vectorised engine: python floats, math.ceil, one
+# trade at a time. It shares only the feature definitions (kalshi_row, perp feature arrays), which the truncation hook audits on their own.
+PLACEBO_PERMS = 1000
+PLACEBO_SEED = 20261107
+PLACEBO_ALPHA = 0.05
+LATENCY_SHIFTS = (1, 2)
+CLUSTER_JACCARD = 0.7
+PLAIN_REL_TOL = 1e-4          # the engine's nets are float32 (then summed in float64); the plain loop is float64 throughout
+
+
+class AuditMismatch(AssertionError):
+    """The plain-loop recompute disagrees with the engine: a defect in one of the two, never to be averaged away."""
+
+
+def _thirds_of(dates):
+    """date -> window 0, 1, 2 by thirds of the distinct dates (the first r windows get one extra date, as numpy array_split does); written out, not np.array_split."""
+    ud = sorted(set(int(d) for d in dates)); q, r = divmod(len(ud), 3); out, i = {}, 0
+    for w in range(3):
+        k = q + (1 if w < r else 0)
+        for d in ud[i:i + k]:
+            out[d] = w
+        i += k
+    return out
+
+
+def _py_cut_ok(x, c, op):
+    """One numeric atom the way the engine defines it: a missing value or a missing cut is false; compared in float32 as the table stores them."""
+    if x != x or c != c:
+        return False
+    x32, c32 = np.float32(x), np.float32(c)
+    return bool(x32 >= c32) if op == "ge" else bool(x32 <= c32)
+
+
+def _atoms_ok(specs, cuts, scope_name, getnum, getcat):
+    for sp in specs:
+        if sp["kind"] == "cat":
+            if getcat(sp["feat"]) != sp["val"]:
+                return False
+        elif sp["kind"] == "num":
+            if not _py_cut_ok(getnum(sp["feat"]), cuts[scope_name][sp["feat"]][QS.index(sp["q"])], sp["op"]):
+                return False
+        else:
+            raise NotImplementedError("custom atoms are not part of a frozen survivor")
+    return True
+
+
+def _k_net(won, ask, c, mult):
+    fee_cents = math.ceil(mult * 0.07 * c * ask * (1.0 - ask) * 100.0 - 1e-9)       # per ORDER of c contracts, rounded up
+    return ((1.0 if won else 0.0) - ask) * 100.0 - fee_cents / c
+
+
+def _kalshi_plain_state(self, tab):
+    st = getattr(self, "_plain_state", None)
+    if st is not None and st["tab"] is tab:
+        return st
+    sp = self.spec
+    dates = set()
+    for tk, series, close_ts, res, cs in self.markets:           # a window's date counts if ANY look and side gave a usable row
+        hit = False
+        for L in sp.looks:
+            for side in (1, 0):
+                q = cs.get(close_ts - L)
+                if q is None or not _valid_quote(q[0], q[1]):
+                    continue
+                ask = q[1] if side else round(1 - q[0], 4)
+                if 0.02 <= ask <= 0.98:
+                    hit = True
+                    break
+            if hit:
+                break
+        if hit:
+            dates.add(close_ts // 86400)
+    st = dict(tab=tab, wmap=None if sp.win_cuts else _thirds_of(dates), rows={})
+    self._plain_state = st
+    return st
+
+
+def _kalshi_plain_trades(self, tab, ats, group, rule, shift=0, stress=False):
+    """Trades of one rule recomputed one at a time. shift = bars (minutes) of latency: the rule is decided at its own look from that look's features and
+    filled at the ask of the look `shift` minutes later; a market with no usable quote there is a MISSED fill (counted, not traded)."""
+    sp = self.spec
+    st = _kalshi_plain_state(self, tab)
+    L = rule.variant
+    want = 1 if rule.dir == "yes" else 0
+    specs = [ats.specs[a] for a in rule.atoms]
+    cuts = ats.cuts
+    mult = self.stress if stress else 1.0
+    snames = tab.meta["series_names"]
+    if L not in st["rows"]:
+        lst = []
+        for mi, (tk, series, close_ts, res, cs) in enumerate(self.markets):
+            for side in (1, 0):
+                r = kalshi_row(cs, close_ts, L, side)
+                if r is not None:
+                    lst.append((mi, side, r[0], r[1], r[2], close_ts, series, (res == "yes") == bool(side)))
+        st["rows"][L] = lst
+    keys, win, date, net, missed = [], [], [], [], 0
+    for mi, side, ask, feats, t, close_ts, series, won in st["rows"][L]:
+        if side != want:
+            continue
+        getnum = lambda f, feats=feats: feats[FEATS_K.index(f)]
+        getcat = lambda f, t=t, series=series: {"series": snames.index(series), "hod4": (t % 86400) // 14400, "dow": ((t // 86400) + 3) % 7}[f]
+        if not _atoms_ok(specs, cuts, "ALL", getnum, getcat):
+            continue
+        if shift:
+            r2 = kalshi_row(self.markets[mi][4], close_ts, L - 60 * shift, side)
+            if r2 is None:
+                missed += 1
+                continue
+            ask = r2[0]
+        d = close_ts // 86400
+        if sp.win_cuts:
+            w = 0 if close_ts < sp.win_cuts[0] else 1 if close_ts < sp.win_cuts[1] else 2
+        else:
+            w = st["wmap"][d]
+        keys.append((mi, side)); win.append(w); date.append(d); net.append(_k_net(won, ask, sp.contracts, mult))
+    return dict(keys=keys, win=win, date=date, net=net, missed=missed)
+
+
+def _perp_one_trade(g, P, i, hold, dirn, shift, fee, smed):
+    """One perps trade at decision minute i: entry at the bar after (plus shift), exit at the first usable bar within 5 minutes of the hold; None if void."""
+    N = len(g["mid"])
+    ent = i + 1 + shift
+    if ent >= N:
+        return None
+    ask_in, bid_in = g["ask"][ent], g["bid"][ent]
+    if ask_in != ask_in or bid_in != bid_in:
+        return None
+    spr = g["sp"][ent]
+    if spr > 100.0 or (smed == smed and spr > 10 * smed):
+        return None
+    base = ent + hold // 60
+    ex = -1
+    for k in range(6):
+        c = base + k
+        if c < N and g["bid"][c] == g["bid"][c] and g["ask"][c] == g["ask"][c]:
+            ex = c
+            break
+    if ex < 0:
+        return None
+    t_in, t_out = int(g["t0"]) + ent * 60, int(g["t0"]) + ex * 60
+    pay = 0.0
+    for ft, fr in zip(P["f_ts"], P["f_rt"]):                      # funding settled in (entry, exit]
+        if t_in < ft <= t_out:
+            pay += float(fr)
+    fund = pay * 1e4
+    bid_out, ask_out = g["bid"][ex], g["ask"][ex]
+    gross = ((bid_out / ask_in - 1.0) * 1e4 - fund) if dirn == "long" else (-(ask_out / bid_in - 1.0) * 1e4 + fund)
+    return float(gross) - 2 * fee, t_out
+
+
+def _perp_plain_trades(self, tab, ats, group, rule, shift=0, stress=False):
+    specs = [ats.specs[a] for a in rule.atoms]
+    cuts = ats.cuts
+    fee = self.fee * (2 if stress else 1)
+    keys, win, date, net, missed = [], [], [], [], 0
+    fi = {f: i for i, f in enumerate(tab.fnames)}
+    for tk, P in self.grids.items():
+        off, m = self.offsets[tk]
+        g = P["grid"]
+        ts = [int(x) for x in P["ts"]]
+        wmap = _thirds_of(t // 86400 for t in ts)
+        sp_ = sorted(float(x) for x in g["sp"][:max(1, int(len(g["sp"]) / 3))] if x == x)
+        smed = (sp_[len(sp_) // 2] if len(sp_) % 2 else 0.5 * (sp_[len(sp_) // 2 - 1] + sp_[len(sp_) // 2])) if sp_ else float("nan")
+        taken = []
+        for k in range(m):
+            t = ts[k]
+
+            def getcat(f, t=t, k=k):
+                if f == "hod4":
+                    return (t % 86400) // 14400
+                if f == "dow":
+                    return ((t // 86400) + 3) % 7
+                if f == "wkend":
+                    return 1 if ((t // 86400) + 3) % 7 >= 5 else 0
+                return int(tab.cats[f][off + k])
+            if not _atoms_ok(specs, cuts, tk, lambda f, k=k: float(tab.X[fi[f], off + k]), getcat):
+                continue
+            r = _perp_one_trade(g, P, int(P["idx"][k]), rule.variant, rule.dir, shift, fee, smed)
+            if r is None:
+                missed += 1
+                continue
+            taken.append((t, r[0], r[1]))
+        free = -1                                                   # one position per ticker, until its exit
+        for t, v, ex_t in sorted(taken):
+            if t + 60 + 60 * shift >= free:
+                keys.append((tk, t)); win.append(wmap[t // 86400]); date.append(t // 86400); net.append(v); free = ex_t
+    return dict(keys=keys, win=win, date=date, net=net, missed=missed)
+
+
+def _generic_plain_trades(self, tab, ats, group, rule, shift=0, stress=False):
+    """Fallback for table-only adapters (synthetic): the selection, windows and PF are redone in python from the table's own columns."""
+    if tab.thin is not None:
+        raise NotImplementedError
+    shift_fn = getattr(self, "shift_net", None)
+    if shift and shift_fn is None:
+        raise NotImplementedError
+    rows, net, nets = tab.outcome(rule.dir, rule.variant, group)
+    src = nets if stress else net
+    specs = [ats.specs[a] for a in rule.atoms]
+    fi = {f: i for i, f in enumerate(tab.fnames)}
+    keys, win, date, out = [], [], [], []
+    for pos in range(len(rows)):
+        v = float(src[pos])
+        i = int(rows[pos])
+        if v != v:
+            continue
+        if not _atoms_ok(specs, ats.cuts, tab.scope_names[int(tab.scope[i])], lambda f, i=i: float(tab.X[fi[f], i]), lambda f, i=i: int(tab.cats[f][i])):
+            continue
+        keys.append(i); win.append(int(tab.win[i])); date.append(int(tab.date[i])); out.append(shift_fn(v, shift) if shift else v)
+    return dict(keys=keys, win=win, date=date, net=out, missed=0)
+
+
+Adapter.plain_trades = _generic_plain_trades
+KalshiAdapter.plain_trades = _kalshi_plain_trades
+PerpAdapter.plain_trades = _perp_plain_trades
+SyntheticAdapter.shift_net = lambda self, v, shift: v - 1.5 * shift       # a fixed slippage per bar of delay (planted edges survive it)
+Adapter.trade_keys = lambda self, tab, rows: [int(r) for r in rows]
+Adapter.window_keys = lambda self, tab, rows: [int(r) for r in rows]
+KalshiAdapter.trade_keys = lambda self, tab, rows: [(int(tab.meta["market_index"][r]), int(tab.meta["side"][r])) for r in rows]
+KalshiAdapter.window_keys = lambda self, tab, rows: [int(tab.meta["market_index"][r]) for r in rows]
+PerpAdapter.trade_keys = lambda self, tab, rows: [(tab.scope_names[int(tab.scope[r])], int(tab.ts[r])) for r in rows]
+PerpAdapter.window_keys = PerpAdapter.trade_keys
+
+
+def plain_recompute(adapter, tab, ats, group, rule, strict=True):
+    """Hook 2 for one rule: the plain loop's trade set, windows and PF against exact_rule. strict=True raises AuditMismatch on any difference."""
+    ex = exact_rule(tab, ats, group, rule)
+    pl = adapter.plain_trades(tab, ats, group, rule)
+    bad = []
+    ek, pk = adapter.trade_keys(tab, ex["rows"]), pl["keys"]
+    if set(ek) != set(pk) or len(ek) != len(pk):
+        bad.append("trade sets differ: engine %d, plain %d, only-engine %d, only-plain %d" % (len(ek), len(pk), len(set(ek) - set(pk)), len(set(pk) - set(ek))))
+    ps = stats_from_rows(np.array(pl["win"]), np.array(pl["date"]), np.array(pl["net"], dtype=np.float64))
+    for w in range(3):
+        a, b = ex["win"][w], ps["win"][w]
+        if a["n"] != b["n"] or a["days"] != b["days"]:
+            bad.append("W%d n/days engine %d/%d plain %d/%d" % (w + 1, a["n"], a["days"], b["n"], b["days"]))
+        if abs(a["pf"] - b["pf"]) > PLAIN_REL_TOL * max(1.0, abs(a["pf"])) or abs(a["mean"] - b["mean"]) > PLAIN_REL_TOL * max(1.0, abs(a["mean"])) * 10:
+            bad.append("W%d PF engine %.6f plain %.6f (mean %.5f vs %.5f)" % (w + 1, a["pf"], b["pf"], a["mean"], b["mean"]))
+    if strict and bad:
+        raise AuditMismatch("; ".join(bad))
+    return dict(passed=not bad, mismatches=bad, n=[w["n"] for w in ps["win"]], pf=[round(w["pf"], 4) for w in ps["win"]], engine_pf=[round(w["pf"], 4) for w in ex["win"]])
+
+
+def placebo_shuffle(tab, ats, group, rule, perms=None, seed=None, chunk=64):
+    """Hook 1 for one rule: keep the rule's trade selection, shuffle the OUTCOME column (the per-row net of the rows this direction and variant can trade)
+    within blocks of (ticker, UTC date), and rescore. share = fraction of permutations whose pooled PF reaches the observed one; p_plus = (1 + hits) / (1 + perms).
+    It asks whether the rule's picks beat random picks of the same date's outcomes; it is NOT corrected for the many rules the survivor was chosen from."""
+    perms = PLACEBO_PERMS if perms is None else perms
+    seed = PLACEBO_SEED if seed is None else seed
+    rows, net, _ = _prep(tab, group, rule.dir, rule.variant)
+    ex = exact_rule(tab, ats, group, rule)
+    sel_rows = ex["rows"]
+    if len(sel_rows) == 0:
+        return dict(n=0, observed_pf=0.0, share=1.0, p_plus=1.0, perms=perms, passed=False)
+    pos = np.searchsorted(rows, sel_rows)
+    block = tab.scope[rows].astype(np.int64) * (1 << 20) + tab.date[rows]
+    keep_blocks = np.unique(block[pos])
+    sub = np.flatnonzero(np.isin(block, keep_blocks))                       # only blocks that hold a selected row can matter
+    order0 = sub[np.argsort(block[sub], kind="stable")]
+    _, bidx = np.unique(block[order0], return_inverse=True)
+    net_s = net[order0].astype(np.float64)
+    where = np.full(len(rows), -1, dtype=np.int64)
+    where[order0] = np.arange(len(order0))
+    sel_s = where[pos]
+    wsel = tab.win[sel_rows]
+    obs_v = net[pos].astype(np.float64)
+    obs_pf = pf_of(obs_v)
+    obs_min = min(pf_of(obs_v[wsel == w]) for w in range(3))
+    rng = np.random.default_rng(seed)
+    hit = hit_min = done = 0
+    masks = [wsel == w for w in range(3)]
+
+    def pf_cols(V):
+        p_ = np.where(V > 0, V, 0).sum(1)
+        n_ = np.where(V < 0, -V, 0).sum(1)
+        return np.where(n_ > 0, np.minimum(PF_CAP, p_ / np.where(n_ > 0, n_, 1)), np.where(p_ > 0, PF_CAP, 0.0))
+    while done < perms:
+        c = min(chunk, perms - done)
+        K = rng.random((c, len(order0))) + bidx[None, :]
+        order = np.argsort(K, axis=1)
+        V = net_s[order[:, sel_s]]                                          # a random row of the same block at every selected position
+        hit += int((pf_cols(V) >= obs_pf - 1e-12).sum())
+        mins = np.full(c, PF_CAP)
+        for m_ in masks:
+            if m_.any():
+                mins = np.minimum(mins, pf_cols(V[:, m_]))
+        hit_min += int((mins >= obs_min - 1e-12).sum())
+        done += c
+    p_plus = (1 + hit) / (1 + perms)
+    return dict(n=int(len(sel_rows)), observed_pf=round(obs_pf, 4), observed_min_window_pf=round(obs_min, 4), share=hit / perms,
+                share_min_window=hit_min / perms, p_plus=p_plus, perms=perms, seed=seed, passed=p_plus < PLACEBO_ALPHA)
+
+
+def latency_stress(adapter, tab, ats, group, rule, shifts=LATENCY_SHIFTS):
+    """Hook 3 for one rule: the rule is still DECIDED at its own row; the fill is `shift` bars later (Kalshi: look 6 min becomes 5 and 4, a missing quote there is
+    a missed fill; perps: entry and exit one and two minutes later; the one-position rule uses the later exits). PF per window and pooled; passes at pooled PF >= 1.0."""
+    out = {}
+    for j in shifts:
+        pl = adapter.plain_trades(tab, ats, group, rule, shift=j)
+        st = stats_from_rows(np.array(pl["win"]), np.array(pl["date"]), np.array(pl["net"], dtype=np.float64))
+        out["shift_%d" % j] = dict(pf_windows=[round(w["pf"], 3) for w in st["win"]], n_windows=[w["n"] for w in st["win"]], pf_pooled=round(st["all"]["pf"], 3),
+                                   mean_pooled=round(st["all"]["mean"], 3), missed=pl["missed"], passed=st["all"]["pf"] >= 1.0)
+    return out
+
+
+def cluster_dedupe(adapter, tab, ats, group, rules, thr=None):
+    """Hook 4: greedy clusters on the Jaccard overlap of the SET OF TRADED WINDOW IDS (Kalshi: market; perps: ticker and decision time). Survivors are taken in
+    order of their weakest window PF (best first); a survivor joins the first representative whose Jaccard exceeds thr, else starts a cluster. Clusters are
+    not transitive: this counts independent bets conservatively as K, never as N survivors."""
+    thr = CLUSTER_JACCARD if thr is None else thr
+    sets, quality = [], []
+    for r in rules:
+        ex = exact_rule(tab, ats, group, r)
+        sets.append(set(adapter.window_keys(tab, ex["rows"])))
+        quality.append(min(w["pf"] for w in ex["win"]))
+    order = sorted(range(len(rules)), key=lambda i: -quality[i])
+    reps, members = [], []
+    for i in order:
+        for ci, rp in enumerate(reps):
+            u = len(sets[i] | sets[rp])
+            if u and len(sets[i] & sets[rp]) / u > thr:
+                members[ci].append(i)
+                break
+        else:
+            reps.append(i)
+            members.append([i])
+    return dict(survivors=len(rules), independent=len(reps), threshold=thr,
+                clusters=[dict(representative=rp, size=len(m), members=sorted(m), trades=len(sets[rp])) for rp, m in zip(reps, members)])
+
+
+@audit_hook
+def audit_placebo(adapter, tab, ats, group, rules):
+    """A4: placebo shuffle of the outcome within date blocks, per survivor (see placebo_shuffle). Passes at p_plus under 0.05 for every survivor."""
+    res = [placebo_shuffle(tab, ats, group, r) for r in rules]
+    return dict(name="placebo_shuffle", per_rule=res, passed=all(x["passed"] for x in res), max_p_plus=max([x["p_plus"] for x in res] or [0]))
+
+
+@audit_hook
+def audit_plain_loop(adapter, tab, ats, group, rules):
+    """A5: independent plain-python recompute of every survivor's trades and per-window PF; any mismatch fails."""
+    res = []
+    for r in rules:
+        try:
+            res.append(plain_recompute(adapter, tab, ats, group, r, strict=True))
+        except AuditMismatch as e:
+            res.append(dict(passed=False, mismatches=[str(e)]))
+    return dict(name="plain_loop_recompute", per_rule=res, passed=all(x["passed"] for x in res))
+
+
+@audit_hook
+def audit_latency(adapter, tab, ats, group, rules):
+    """A6: latency stress, one and two bars (see latency_stress)."""
+    try:
+        res = [latency_stress(adapter, tab, ats, group, r) for r in rules]
+    except NotImplementedError:
+        return dict(name="latency_stress", passed=None, note="not defined for this adapter")
+    return dict(name="latency_stress", per_rule=res, passed=all(v["passed"] for x in res for v in x.values()))
+
+
+@audit_hook
+def audit_cluster(adapter, tab, ats, group, rules):
+    """A7: cluster dedupe (informational: reports independent survivors and a representative per cluster; no pass or fail)."""
+    d = cluster_dedupe(adapter, tab, ats, group, rules)
+    d.update(name="cluster_dedupe", passed=None)
+    return d
+
+
+def _jsonable(o):
+    if isinstance(o, dict):
+        return {str(k): _jsonable(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [_jsonable(v) for v in o]
+    if isinstance(o, np.integer):
+        return int(o)
+    if isinstance(o, (np.floating, float)):
+        return None if o != o else float(o)
+    if isinstance(o, np.bool_):
+        return bool(o)
+    return o
+
+
+def audit_summary_text(rep):
+    L = ["SCAN AUDIT %s (%s, group %s): %d survivors, development data only, cuts match frozen: %s"
+         % (rep["frozen_id"], rep["adapter"], rep["group"], rep["survivors"], rep["cuts_match"])]
+    for h in rep["hooks"]:
+        extra = ""
+        if h["name"] == "cluster_dedupe":
+            extra = " independent survivors %d of %d (Jaccard > %.1f), representatives %s" % (h["independent"], h["survivors"], h["threshold"], [c["representative"] for c in h["clusters"]])
+        elif h["name"] == "placebo_shuffle":
+            extra = " max p %.4f" % h["max_p_plus"]
+        L.append("  %-22s %s%s" % (h["name"], {True: "PASS", False: "FAIL", None: "n/a "}[h.get("passed")], extra))
+    L.append("overall: %s" % ("FAIL: " + ", ".join(rep["failed"]) if rep["failed"] else "no hook failed"))
+    return "\n".join(L)
+
+
+def audit_frozen(adapter, doc, tab=None, out_dir=None, frozen_id=None, perms=None):
+    """Run every hook on a frozen survivor list (development rows only: build_dev), write workers/SCAN_AUDIT_<id>.json and .txt (out_dir=False writes nothing)."""
+    global PLACEBO_PERMS
+    tab = tab or adapter.build_dev()
+    cuts = {k: v for k, v in doc["cuts"].items() if not k.startswith("_")}
+    own = make_cuts(tab)
+    if tab.meta.get("series_names") is not None:
+        own["_series"] = tab.meta["series_names"]
+    cuts_match = cuts_sha(own) == doc.get("cuts_sha256")
+    ats = AtomSet(tab, cuts)
+    rules = []
+    for sv in doc["survivors"]:
+        ids = [ats.names.index(_name_of(sp)) for sp in sv["atoms"]]
+        rules.append(Rule(tuple(sorted(ids)), sv["dir"], sv["variant"]))
+    old = PLACEBO_PERMS
+    if perms is not None:
+        PLACEBO_PERMS = perms
+    try:
+        hooks = run_audit(adapter, tab, ats, doc["group"], rules)
+    finally:
+        PLACEBO_PERMS = old
+    failed = [h["name"] for h in hooks if h.get("passed") is False] + ([] if cuts_match else ["cuts_sha256_mismatch"])
+    fid = frozen_id or doc.get("frozen_id", "X")
+    rep = _jsonable(dict(frozen_id=fid, adapter=doc["adapter"], group=doc["group"], survivors=len(rules), cuts_match=cuts_match,
+                         table_match=tab.fingerprint() == doc.get("table_sha256"), rules=[describe(tab, ats, r) for r in rules], hooks=hooks, failed=failed,
+                         created=datetime.now(timezone.utc).isoformat()))
+    text = audit_summary_text(rep)
+    if out_dir is not False:
+        od = out_dir or WORKERS
+        json.dump(rep, open(os.path.join(od, "SCAN_AUDIT_%s.json" % fid), "w"), indent=1)
+        open(os.path.join(od, "SCAN_AUDIT_%s.txt" % fid), "w").write(text + "\n")
+    rep["text"] = text
+    return rep
 
 
 def run_audit(adapter, tab, ats, group, rules):
@@ -1086,7 +1629,7 @@ def run(adapter, n_rules, seed, group=None, batch=2000, ledger_dir=None, out_dir
                                   exact={k: ex[k] for k in ("win", "all")}, deflated=bool(ex["all"]["z"] >= zb)))
         summary = dict(adapter=tab.name, group=group, seed=seed, rules_scored=done, seconds=round(dt, 2), rules_per_sec=round(done / max(dt, 1e-9), 1),
                        N_before=N0, N_after=N1, z_bar=round(zb, 4), screen_survivors=len(surv), exact_survivors=len(final),
-                       deflated=sum(1 for f in final if f["deflated"]), cuts_sha256=csha, table_sha256=tab.fingerprint(), survivors=final,
+                       deflated=sum(1 for f in final if f["deflated"]), cuts_sha256=csha, table_sha256=tab.fingerprint(), survivors=final, adapter_opts=getattr(adapter, "opts", {}),
                        top_by_min_window_pf=top, cuts={k: v for k, v in cuts.items()})
         if out_dir is not False:
             od = out_dir or os.path.join(SCAN_DATA, "runs"); os.makedirs(od, exist_ok=True)
@@ -1110,7 +1653,8 @@ def freeze(run_files, frozen_id, out_dir=None):
     surv = [dict(s, adapter=r["adapter"], group=r["group"]) for r in runs for s in r["survivors"]]
     doc = dict(frozen_id=frozen_id, created=datetime.now(timezone.utc).isoformat(), adapter=runs[0]["adapter"], group=runs[0]["group"],
                N_total=max(r["N_after"] for r in runs), z_bar=max(r["z_bar"] for r in runs), bar=BAR, hold_bar=HOLD_BAR,
-               cuts_sha256=runs[0]["cuts_sha256"], cuts=runs[0]["cuts"], table_sha256=runs[0]["table_sha256"], survivors=surv)
+               cuts_sha256=runs[0]["cuts_sha256"], cuts=runs[0]["cuts"], table_sha256=runs[0]["table_sha256"], survivors=surv,
+               adapter_opts=runs[0].get("adapter_opts", {}))
     od = out_dir or WORKERS
     p = os.path.join(od, "SCAN_FROZEN_%s.json" % frozen_id)
     if os.path.exists(p):
@@ -1252,10 +1796,10 @@ def bench(per_key=20_000, n_looks=12, n_feat=12, n_rules=40_000, seed=3, verbose
 
 
 # ------------------------------------------------------------------ CLI
-def _adapter(name, frozen_id=None):
+def _adapter(name, frozen_id=None, extra=False):
     if name not in ADAPTERS:
         raise SystemExit("unknown adapter %s (have %s)" % (name, ", ".join(ADAPTERS)))
-    return ADAPTERS[name](frozen_id=frozen_id)
+    return ADAPTERS[name](frozen_id=frozen_id, extra=extra)
 
 
 def main(argv=None):
@@ -1264,6 +1808,8 @@ def main(argv=None):
     ap.add_argument("--adapter", default="kalshi_fresh"); ap.add_argument("--n", type=int, default=5000); ap.add_argument("--seed", type=int, default=None)
     ap.add_argument("--run", nargs="*"); ap.add_argument("--id"); ap.add_argument("--frozen"); ap.add_argument("--perp-frozen-id", default=None)
     ap.add_argument("--allow-uncommitted", action="store_true")
+    ap.add_argument("--perp-extra", action="store_true", help="perps: add leader returns (BTC, ETH) and minutes-to-funding features (v1.1)")
+    ap.add_argument("--perms", type=int, default=None, help="audit: placebo permutations (default %d)" % PLACEBO_PERMS)
     a = ap.parse_args(argv)
     if a.cmd == "selftest":
         sys.exit(0 if selftest() else 1)
@@ -1278,26 +1824,22 @@ def main(argv=None):
             print(json.dumps({k: v for k, v in u.items() if k != "tickers"}, indent=1, default=str))
         return
     if a.cmd == "run":
-        ad = _adapter(a.adapter, a.perp_frozen_id)
+        ad = _adapter(a.adapter, a.perp_frozen_id, extra=a.perp_extra)
         seed = a.seed if a.seed is not None else 7000 + len([f for f in os.listdir(LEDGER_DIR) if f.endswith(".ids.gz")]) if os.path.isdir(LEDGER_DIR) else 7000
         run(ad, a.n, seed); return
     if a.cmd == "freeze":
         print(freeze(a.run, a.id)); return
     if a.cmd == "holdout":
-        ad = _adapter(a.adapter, a.perp_frozen_id)
+        ad = _adapter(a.adapter, a.perp_frozen_id, extra=bool(a.perp_extra or json.load(open(a.frozen)).get("adapter_opts", {}).get("extra")))
         holdout(ad, a.frozen, require_committed=not a.allow_uncommitted); return
     if a.cmd == "audit":
-        doc = json.load(open(a.frozen))
-        ad = _adapter(a.adapter, a.perp_frozen_id)
-        tab = ad.build_dev(); cuts = make_cuts(tab)
-        ats = AtomSet(tab, {k: v for k, v in cuts.items() if not k.startswith("_")})
-        rules = []
-        for s in doc["survivors"]:
-            ids = [ats.names.index(_name_of(sp)) for sp in s["atoms"]]
-            rules.append(Rule(tuple(sorted(ids)), s["dir"], s["variant"]))
-        for r in run_audit(ad, tab, ats, doc["group"], rules):
-            print(r)
-        return
+        p = a.frozen
+        doc = load_frozen(p, require_committed=False) if os.path.exists(p + ".sha256") else json.load(open(p))
+        opts = doc.get("adapter_opts", {})
+        ad = _adapter(a.adapter, a.perp_frozen_id, extra=bool(a.perp_extra or opts.get("extra")))
+        rep = audit_frozen(ad, doc, perms=a.perms)
+        print(rep["text"])
+        sys.exit(2 if rep["failed"] else 0)
 
 
 def _name_of(sp):
