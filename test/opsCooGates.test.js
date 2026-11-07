@@ -15,7 +15,8 @@ gates.OC1 = () => {
 };
 gates.OC2 = () => {
   assert.ok(/KEEP/.test(agent) && /SLOW DOWN/.test(agent) && /MERGE/.test(agent) && /RETIRE/.test(agent), 'the four routine verdicts');
-  assert.ok(/Limits on your calls/.test(agent) && /only spend LESS/.test(agent) && /At most five calls per run/.test(agent), 'the call limits are written down');
+  assert.ok(/Limits on your calls/.test(agent) && /only spend LESS or point work at something better under the Charter/.test(agent) && /At most five calls per run/.test(agent), 'the call limits are written down');
+  assert.ok(/Research direction \(Charter level 1\)/.test(agent) && /brief checklist/.test(agent) && /at most two/.test(agent), 'research direction is bounded by the Charter checklist');
   assert.ok(/never delete/.test(agent) && /reversible/.test(agent), 'retire means disable, and every call is reversible');
 };
 gates.OC3 = () => {
