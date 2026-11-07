@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-07 01:04 PM CT (19:04Z): Stop headroom redone at the stored base 979.25 (limit-booked)
+
+Owner read kalshiLiveControl/sizing: base 979.2488, cap 14, cum -61.044, hwm 25.1287, pool 3.05, saved 12.5643, reviewedAt Nov 7 12:11Z, appliedTs Nov 6. Stop line 12 percent of base = 117.51 plus add-on at risk (limit-booked figures, as the stop uses). Replay at 979.25 over Nov 1 to Nov 7: lowest daily headroom 61.26 (Nov 6, tool stamp 07:27, which is UTC, so 1:27 AM CT), highest-risk day Nov 3 64.37; headroom now 100.71; next 24h 96 to 117 with no new orders. So the earlier worries (0.03 to 6 dollars at bases 466 to 518) do not describe the live stop: it was never within 60 dollars of tripping IF the base was near 979 then; the base before the Nov 6 apply (appliedTs) is not known, so earlier days are bounds not facts. Conclusions unchanged: no stop or kill near. The 12 contract OICORE order is the ladder working as coded (base above 825). Closes the open sizing base item. Time stamps printed by stop_headroom.py are UTC though labelled CT.
+
 ## 2026-11-07 12:51 PM CT (18:51Z): Owner-approved changes from the 1:1 review (Nov 7)
 
 S-JUMP1 and S-SDIR1 retired (both read at 40 fills on Nov 7, nothing surprising, wake.sh never ran them). Only S-NOFILLADV stays as a running tracker (S-HALFSIZE1, wired Nov 7, is my own measure-only tracker for the half-size idea; I will ask main whether it stays). Before any new tracker: check whether history can already answer the question and start a forward tracker only if it cannot. Before any promotion packet the Verification Analyst re-derives every figure. If trackers are quiet I may ask the COO via main to stretch my check-in to 4 or 6 hours.
