@@ -824,6 +824,11 @@ The daily freshness check found the Start confirmation still saying "OICORE (10 
 
 `.claude/agents/fact-checker.md` (read only: Read, Grep, Glob, Bash; no Edit or Write): give it a claim from the research chat or the refinement chat with its numbers and sources. It splits the claim into checkable statements, checks "what is live" against the code on `origin/main` (never a note, and a merge date is not a deploy date), re-derives each figure from the code, a saved nightly report file, the recorder data and public reads, and answers CONFIRMED, WRONG or CANNOT_CHECK with its own numbers. It looks for the usual defects (look-ahead universes, a read held-out window, overlapping windows, untallied N, limit-booked against fill-booked figures). It never edits, deploys, merges, messages the other chats, prints a secret or judges whether to trade; the main session relays its answer and runs it on any finding that proposes a change or states what is live. Tests FC1 to FC4 in `test/factCheckerGates.test.js`. Agent file only, live on merge.
 
+## The report carries the early sell (Nov 6, 2026, the refinement chat's request, the owner approved)
+
+With `?orders=1` every L1 and slot row also has `exitAt` (ISO time of the early sell, null when none), `exitAvg` (the price it sold at, 0 to 1) and `exitBid` (the bid that triggered it). `runExitWatch` already stored them on the order; the report dropped them, so gold early sells could only be read through a candle proxy. Numbers and a time only, no exit order id; read only. Test R11 in `test/kalshiReportGates.test.js` (R2 and OV3 list the new keys on purpose). Needs `bash functions/deploy-report.sh` (or `deploy-latest.sh`).
+
+
 
 
 ## Recorder bundle (Nov 6, 2026, the owner approved V2's list)
