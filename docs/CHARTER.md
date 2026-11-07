@@ -25,6 +25,7 @@ Build a small, systematic trading business that runs on rules written in advance
 | What to test inside an approved family | Head of Strategy Research | Registers before scoring. |
 | Which live-strategy question to study | Head of Live Strategy Performance | Measure only; proposals go to the owner. |
 | Whether a claim is true | Fact checker | Required before any packet or any claim that something is live. |
+| Whether a pull request is ready | **Release Manager** reviews; **Owner** merges | Reads the diff, runs every gate, checks conflicts and claims, and answers READY, NEEDS CHANGES or NEEDS YOU before the owner sees it. It never merges. |
 | Whether a result was run cleanly | Internal Auditor | Reports faults only. |
 
 If two agents disagree, neither wins: it goes to the owner as a tripwire.
@@ -98,6 +99,7 @@ Once a week the COO reports to the owner in under 20 lines: what it decided and 
 ## Levels
 
 - **Level 1 (now):** agents decide research direction, restarts, closing dead ends, and routine cost cuts, inside this Charter. Everything live, every deploy, merge, spend and Charter change stays with the owner.
+- **Release trial (Nov 7 to Nov 21, 2026):** the Release Manager records, for every pull request, whether it would have merged it under level 2 (docs, agent files and tests only, every gate green, claims supported, and never a change to this Charter or to `.claude/agents/`), and what the owner actually did. On Nov 21 the owner reads that record and decides whether docs-only pull requests may merge themselves. Until then it merges nothing.
 - **Level 2 (only when the owner says):** agents may also open small pull requests for stale text and recorder fixes. The owner still merges and deploys.
 - There is no level where an agent changes a live rule, a size, a stop or a market, spends money or deploys by itself.
 
