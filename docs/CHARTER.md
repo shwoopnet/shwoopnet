@@ -75,6 +75,22 @@ One page, in this order, so the owner can say yes or no in a minute:
 
 The packet is a recommendation. It never goes live by itself.
 
+## Credit watch and the throttle ladder
+
+Autonomy costs credits, so the COO watches burn the way it watches decisions. The platform shows each chat's lifetime usage (a list-price value, not necessarily the bill), its context size, whether the account is on overage, and a limit status of allowed, warning or rejected with a reset time. It does not show a percentage used. So the ladder runs on what is visible.
+
+Every COO run logs, for each chat, the change in usage since the last look, the limit status, and the biggest driver; it reports a daily and a weekly burn rate and the cost per approved brief.
+
+| Step | When | What every agent does |
+|---|---|---|
+| Normal | status allowed, usage inside the budget | Work as usual. |
+| Warning | status shows a warning, or usage has reached 80% of the monthly R&D budget | No new workers. Check-ins skip unless a dated result is due. Reports shorten. The COO says so to the owner once. |
+| Stop | status rejected or the account is on overage | Everything stops and says nothing (the credit guard). |
+
+The monthly R&D credit budget is set by the owner and kept privately by the Controller; its number is not in this file. With no budget set, the ladder runs on the platform's limit status alone.
+
+Biggest levers, in order: wake a chat less often, move a chat with a very large context to a fresh session with a short handoff (the COO proposes it, the chat's head writes the handoff), use lighter models and lower effort for reporting and checks, and cap the number of research workers when a run of tests finds nothing.
+
 ## The weekly scorecard
 
 Once a week the COO reports to the owner in under 20 lines: what it decided and why, what each decision yielded, what circled or closed, spend against yield, and anything it is unsure of. The owner can veto any decision; a vetoed decision is reversed and the reason becomes a line in this Charter.

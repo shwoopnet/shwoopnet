@@ -32,6 +32,12 @@ gates.CH4 = () => {
   assert.ok(/send a chat to a family that has not passed the Charter's brief checklist/.test(coo), 'no unapproved family');
   assert.ok(/Never\*\* approve a brief that needs money/.test(coo), 'money briefs go to the owner');
 };
+gates.CH6 = () => {
+  // The credit watch: a ladder driven by what the platform shows, no invented percentage, budget kept out of the public file.
+  assert.ok(/Credit watch and the throttle ladder/.test(charter) && /It does not show a percentage used/.test(charter), 'the ladder is built on visible figures');
+  assert.ok(/Normal/.test(charter) && /Warning/.test(charter) && /Stop/.test(charter) && /No new workers/.test(charter), 'three steps');
+  assert.ok(/Burn and the throttle ladder/.test(coo) && /no percentage of the session limit used; say so rather than guess/.test(coo), 'the COO logs burn and does not guess a percentage');
+};
 gates.CH5 = () => {
   // Public repo: no personal finance figures, no secrets, no em dashes.
   assert.ok(!/—/.test(charter), 'no em dashes');
