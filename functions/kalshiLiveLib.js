@@ -630,16 +630,32 @@ const totalCash = (balanceBody) => {
   return Number.isFinite(cents) ? cents / 100 : NaN;
 };
 
-// What one filled order made once its market settled, by the one rule used everywhere: the order's worst-case cost (maxCost) is paid in
-// proportion to what filled, and each winning contract pays $1. A win is therefore booked slightly low and a loss slightly high.
+// What a filled order really cost in cash (Nov 7, 2026, the owner: "have the bot's stops read fill-booked (real cash) P/L"). An order is booked at its limit
+// price plus fee (maxCost) when sent; the fill is usually better, so a win was booked low and a loss high, about $30 a week worse than cash. Once the answer carries
+// the average fill price and the per-contract fee, the cost of the contracts that filled is (price of the side bought + fee) x contracts. Kalshi gives averageFillPrice as the YES
+// price, so a NO order pays 1 minus it. Anything unreadable, or a cash figure above the limit booking, falls back to the limit booking (fails closed). An order still OPEN is
+// never booked at cash: it stays at its worst case in the stops. kalshiSlotLib has an identical copy (a test pins them equal on many fixtures) so a slot result and an L1 result stay on one footing.
+function fillCost(t, got, want) {
+  const worst = Number(t.maxCost) * (got / want);
+  if (!(got > 0) || !(want > 0)) return worst;
+  const avg = Number(t.averageFillPrice), fee = Number(t.averageFeePaid);
+  if (t.averageFillPrice === null || t.averageFillPrice === undefined || t.averageFillPrice === "" || !Number.isFinite(avg) || !(avg > 0 && avg < 1)) return worst;
+  if (t.averageFeePaid === null || t.averageFeePaid === undefined || t.averageFeePaid === "" || !Number.isFinite(fee) || !(fee >= 0 && fee < 1)) return worst;
+  const side = t.side === "yes" ? avg : t.side === "no" ? 1 - avg : NaN;
+  if (!Number.isFinite(side) || !Number.isFinite(worst)) return worst;
+  const cash = (side + fee) * got;
+  return cash <= worst + 1e-9 ? cash : worst;
+}
+
+// What one filled order made once its market settled, by the one rule used everywhere: the cost of what filled (the real cash from its average fill price and fee when
+// the order carries them, else its worst-case cost maxCost in proportion; slotLib.fillCost, since Nov 7, 2026), and each winning contract pays $1. Orders settled before that were booked at the worst case: a win slightly low and a loss slightly high.
 // An order the exit watch sold some or all of (exitCount contracts, exitProceeds dollars after the exit fee) pays $1 only on the contracts still held at the close, and the
 // proceeds of the sale are added. An order with no exit has exitCount 0 and is computed exactly as before.
 function settledFields(t, result) {
-  const cost = Number(t.maxCost);
   const want0 = Number(t.count) > 0 ? Number(t.count) : 1, got0 = Math.min(Number(t.fillCount), want0);
   const sold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got0) : 0;
   const proceeds = sold > 0 && Number.isFinite(Number(t.exitProceeds)) ? Number(t.exitProceeds) : 0;
-  return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - cost * (got0 / want0)).toFixed(4)) };
+  return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - fillCost(t, got0, want0)).toFixed(4)) };
 }
 
 // A position the owner closed BY HAND (a manual sell, or Flatten) is not a trade the bot held to the end, but the market's result is all settledFields has to go on, so it booked a win or a loss
@@ -746,7 +762,7 @@ async function botRisk({ store, since, fetchFn, nowMs, orders, keyId, pem, slotO
     const sold = Number(t.exitCount) > 0 ? Math.min(Number(t.exitCount), got) : 0, soldShare = got > 0 ? sold / got : 0;
     const proceeds = sold > 0 && Number.isFinite(Number(t.exitProceeds)) ? Number(t.exitProceeds) : 0;
     if (result === "yes" || result === "no") {
-      net += (result === t.side ? got - sold : 0) + proceeds - paid;
+      net += (result === t.side ? got - sold : 0) + proceeds - fillCost(t, got, want);   // a settled order is read at its real cash cost (an open one, below, stays at its worst case)
       if (result !== t.side) addonAtRisk += addonPaid;   // only a LOST order burned the profit that bought its add-on
     } else { net += proceeds - paid * soldShare; openCost += paid * (1 - soldShare); addonAtRisk += addonPaid * (1 - soldShare); }   // an open order is counted as lost, so its add-on is too
   }
@@ -1346,5 +1362,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, fillCost, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };

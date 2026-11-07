@@ -102,7 +102,7 @@ gates['SW0c the admitted state: OICORE first (EVENT830 second since Nov 3, 2026)
     entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 },
     exit: { holdToSettle: true }, contractsPerOrder: 10,
     scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
-    killRules: { maxConsecutiveLosses: 18, minNet: { afterFills: 40, net: -6 } },
+    killRules: { maxConsecutiveLosses: 24, minNet: { afterFills: 40, net: -6 } },
     forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
   });
   assert.deepStrictEqual(slotLib.validateSlotStrategy(o).ok, true, JSON.stringify(slotLib.validateSlotStrategy(o)));

@@ -14,7 +14,7 @@ The owner (Nov 1, 2026): "each strategy can have different risk, sizing, and sca
 | One sizing base | `sizeBase` comes from L1's review (balance minus skimmed profit); the slot's dollar caps are fractions of that same number (`slotCaps`) | OICORE's caps move with L1's review timing |
 | One size source | OICORE starts at `contractsPerOrder: 10` and steps up by its own record (`SLOT_LADDERS.OICORE`, built in #699) | Linked to its own record and the balance; no link to L1's steps |
 | Profit pool and add-on | L1 only (`foldSkim`, `skimAddon`, `addonCap`) | Correct: leave it that way |
-| Kill rules | OICORE has its own latch (18 losses in a row, net under -$6 after 40 fills); L1 has none | Fine as is, but the dollar floor does not scale with size |
+| Kill rules | OICORE has its own latch (24 losses in a row (18 until Nov 7, 2026), net under -$6 after 40 fills); L1 has none | Fine as is, but the dollar floor does not scale with size |
 
 Deliberately NOT separated (keep shared): the direction lock (an order against another strategy's contracts is a hedge), the exit claim per market, the account balance read and the order size lock's role as a last guard. These are about one account, not about one strategy's risk.
 
@@ -38,7 +38,7 @@ The account backstop stays and covers both: a combined stop (one number above ea
 | Step down | within 2 hours of a lower balance | back to 10 if the last 60 fills net under -$1 a contract |
 | Own stop | 12% of base, L1 orders only | 4% of base (a proposal; live is 12%), OICORE orders only; at 15 contracts and a $540 base a normal 10 loss run can end it, so the kill rules and this stop are close together |
 | Own window cap | 5.5% of base | 2% of base, plus a per-order dollar cap of 1% of base (it would cut the 39c to 50c entries, where the wins came from, at 25 or more contracts) |
-| Kill rules | none (loss stop only) | 18 losses in a row, or net under -$6 after 40 fills (keep both) |
+| Kill rules | none (loss stop only) | 24 losses in a row (18 until Nov 7, 2026), or net under -$6 after 40 fills (keep both) |
 | Account backstop | combined stop 15% of base, combined window cap 6.5% | same two numbers, shared (14% would lose nothing) |
 
 Reviewed facts behind these numbers (live record to Nov 1): L1 gold and Dogecoin 393 fills, 18 losses, largest loss -$9.58, worst 24 hours -$11.30 (1.5% to 2.1% of base), worst streak 2. OICORE 10 fills, 7 losses, largest -$1.70, worst streak 3, order spend median $0.70 and at most $4.50. OICORE shared a window with an L1 fill in 1 of its 10 windows, so today the coupling costs nothing in dollars and the separation matters for later scaling. A step gate of "30 fills net at or above zero" was too weak (a no-edge probe passes it 43% of the time in simulation, a real +5 point edge only 71%), hence 60 fills at +1c and 20% wins.
