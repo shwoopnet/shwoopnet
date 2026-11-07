@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'exitAt', 'exitAvg', 'exitBid', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
@@ -145,6 +145,21 @@ gates.R10 = () => {
   assert.strictEqual(r.slotOrders[0].avgFee, 0.0049);
   const none = lib.buildReport([o({ averageFillPrice: undefined, averageFeePaid: undefined })], NOW, 24, true, []);
   assert.strictEqual(none.orders[0].avgFill, null, 'a missing price stays null, never a made-up value');
+};
+
+// R11: the early sell the exit watch stored on the order is in the report (Nov 6, 2026, the refinement chat could not tell when a gold early sell happened or what it sold for): when, the price sold at and the bid that triggered it, numbers and a time only, no exit order id.
+gates.R11 = () => {
+  const NOW = Date.parse('2026-11-06T12:00:00Z');
+  const base = { ticker: 'KXGOLD15M-26NOV060715-15', side: 'yes', fillCount: 14, count: 14, averageFillPrice: '0.9100', averageFeePaid: '0.0057', ts: NOW - 3600e3, status: 'executed', settled: true, result: 'exit', settledPnl: -9.1 };
+  const sold = Object.assign({}, base, { exitAt: NOW - 3000e3, exitAvg: 0.25, exitBid: 0.25, exitStatus: 'sold', exitOrderId: 'SECRET-EXIT-ID' });
+  const r = lib.buildReport([sold, base], NOW, 24, true, []);
+  const a = r.orders.find((x) => x.exitAt);
+  assert.strictEqual(a.exitAt, new Date(NOW - 3000e3).toISOString());
+  assert.strictEqual(a.exitAvg, 0.25);
+  assert.strictEqual(a.exitBid, 0.25);
+  const b = r.orders.find((x) => !x.exitAt);
+  assert.strictEqual(b.exitAvg, null, 'an order with no early sell stays null');
+  assert.ok(!JSON.stringify(r).includes('SECRET-EXIT-ID'), 'no exit order id');
 };
 
 (async () => {
