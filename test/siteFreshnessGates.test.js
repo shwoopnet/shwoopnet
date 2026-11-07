@@ -80,6 +80,10 @@ gates.SF6 = () => {
   assert.ok(strat, 'OICORE is registered');
   const span = text((menu.match(/<span id="kalRulesSlot">[\s\S]*?<\/span>/) || [''])[0]);
   assert.ok(new RegExp('\\b' + strat.contractsPerOrder + ' contracts').test(span), 'the page says OICORE sends ' + strat.contractsPerOrder + ' contracts, like its registry entry');
+  // The Start box confirms real money, so it must name the ladder's start and its top step (SLOT_LADDERS), not a fixed size.
+  const steps = (slot.SLOT_LADDERS && slot.SLOT_LADDERS.OICORE && slot.SLOT_LADDERS.OICORE.steps) || [strat.contractsPerOrder];
+  const confirm = text((html.match(/<span id="kalL1Confirm"[\s\S]*?<\/span><\/span>/) || [''])[0]);
+  assert.ok(new RegExp('OICORE \\(' + steps[0] + ' contracts to start, up to ' + steps[steps.length - 1] + ' ').test(confirm), 'the Start box names OICORE start ' + steps[0] + ' and top step ' + steps[steps.length - 1]);
   const live1 = live.L1_SERIES.filter((s) => !live.PAUSED_SERIES.includes(s));
   if (!live1.some((s) => live.CAPPED_SERIES.includes(s))) assert.ok(!/At most one crypto order per 15 minute window/.test(text(menu)), 'no live market is under the one-crypto-order rule, so the page must not state it');
 };

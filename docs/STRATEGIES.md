@@ -48,12 +48,12 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 1. Look when 120 to 180 seconds remain, once per market.
 2. Condition: open interest at the candle ending 180 seconds before the close is at least 86,300 contracts higher than at the candle ending 360 seconds before the close (public one minute candles). A missing reading means no order.
 3. Side: the cheaper side, whose price must be 5c to 50c.
-4. Order: 10 contracts, limit 1c above the touch (never past 50c), never more than 25% of the size resting at the touch.
+4. Order: 10 contracts to start (up to 30 by the ladder), limit 1c above the touch (never past 50c), never more than 25% of the size resting at the touch.
 5. Scale-in: at most one more order, same side, at least 30 seconds later, only after the first filled.
 
 **Exit rule.** None: held to settlement (the one reviewed exception to "every exit is before settlement"). It is still sold if it ever becomes a hedge against another strategy's contracts.
 
-**Size rule.** Fixed 10 contracts (5 for the first 15 fills was the plan; you raised it to 10 before any fill). No ladder and no add-on today. A scaling rule is proposed in the separation draft.
+**Size rule.** 10 contracts to start, then 12, 15, 20 and 30, one step at a time, each earned on OICORE's own settled record and a large enough balance (`SLOT_LADDERS` in `functions/kalshiSlotLib.js`; built in #699); down at once after a bad stretch. Up needs at least 20 fills and 7 days at the step, a win rate of 0.20 or more, net of at least $1.00 a contract, profit factor 1.3 or more and a drawdown under $3 a contract, and a balance base of at least 825, 900, 1030 and 1350 for the steps 12, 15, 20 and 30. No add-on.
 
 **Risk rules.**
 - Dollar caps scale with the sizing base: one order 1% (at most $20), one window 2% ($40), all open orders 3% ($60), one day 2% ($20), lifetime 6% ($60).
@@ -107,6 +107,6 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 |---|---|---|---|
 | Win rate | about 92% to 95% | about 28% to 30% | about 19% expected (registration), no live fill yet |
 | Typical win and loss | win about 6c a contract, loss about 66c (early sell) | win about 3 to 4 times cost, loss the whole premium (6c to 50c) | a win pays 1 to 19 times its cost (5c to 50c entries), a loss is the whole premium (at most $0.52 with the fee) |
-| Size | gold: ladder, $43 per contract, +1 per 3 days, add-on, held at 15 / order ceiling 50; Dogecoin: paused | fixed 10 | fixed 1 |
+| Size | gold: ladder, $43 per contract, +1 per 3 days, add-on, held at 15 / order ceiling 50; Dogecoin: paused | 10 to 30 (ladder, earned) | fixed 1 |
 | Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up | shares the slot's one 12% stop with OICORE (`RISK_PROFILES.SECOND` covers both), plus its own kill rules |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) | no (shared 5.5%, slot at most half) |

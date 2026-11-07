@@ -12,7 +12,7 @@ The owner (Nov 1, 2026): "each strategy can have different risk, sizing, and sca
 | One session | The slot tick runs right after the L1 tick and needs the figures it hands over (`shareOut`); with none it skips ("no shared risk figures from the L1 tick") | When L1's stop ends the session, OICORE stops too |
 | One window cap | L1's room is 5.5% of the sizing base minus everything in the window, OICORE's spend counted (`slotWindowSpent`); the slot may use at most half of it (`SLOT_WINDOW_SHARE`) and leaves $1.05 for one L1 contract | OICORE can take room from gold or Dogecoin in the same window, and the reverse |
 | One sizing base | `sizeBase` comes from L1's review (balance minus skimmed profit); the slot's dollar caps are fractions of that same number (`slotCaps`) | OICORE's caps move with L1's review timing |
-| One size source | OICORE's size is the fixed `contractsPerOrder: 10` in its registry entry | No ladder, no step, no link to its own record |
+| One size source | OICORE starts at `contractsPerOrder: 10` and steps up by its own record (`SLOT_LADDERS.OICORE`, built in #699) | Linked to its own record and the balance; no link to L1's steps |
 | Profit pool and add-on | L1 only (`foldSkim`, `skimAddon`, `addonCap`) | Correct: leave it that way |
 | Kill rules | OICORE has its own latch (18 losses in a row, net under -$6 after 40 fills); L1 has none | Fine as is, but the dollar floor does not scale with size |
 
@@ -55,7 +55,7 @@ The backstop numbers were my starting point, not a finding: today's 12% stop and
 ## Build order (each its own pull request, deployed by the owner with `deploy-sizing.sh`)
 1. This design, reviewed with the refinement chat (read only): loss sizes and window use from the live record, for both strategies.
 2. Per-strategy stop and window cap in code with the defaults set so today's behavior does not change (the off-equivalence fixtures must stay byte for byte, and any re-record happens only from main's own code).
-3. OICORE size ladder and step rule, behind the Nov 13 forward read or 30 settled fills, whichever comes later (10 fills and 3 wins so far, and V2's forward reference ledger is 0 for 6).
+3. OICORE size ladder and step rule: BUILT in #699 (Nov 6, 2026): steps 10, 12, 15, 20, 30, each earned on its own record and balance.
 4. L1 step from 1 to 3 per review, after the refinement chat's review.
 5. Page: per-strategy risk meters.
 
