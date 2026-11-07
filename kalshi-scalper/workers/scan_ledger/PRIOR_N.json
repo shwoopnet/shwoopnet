@@ -1,0 +1,6 @@
+{
+ "prior_n": 730489,
+ "as_of": "2026-11-07",
+ "source": "README, PERPGEN registration and PERPGEN_CRYPTOPRICE/CRYPTOCTX entries: 'prior 730,489 plus this slice's 200,000 plus the other workers' ledgers'. This is the lead's running tally BEFORE the PERPGEN ledgers (workers/perpgen_ledger, read back live by scan.n_total) and before any scan ledger line.",
+ "rule": "N = prior_n + lines of workers/perpgen_ledger/*.ids.gz + lines of workers/scan_ledger/*.ids.gz. Edit prior_n only when the lead publishes a new tally of non-ledgered tries; never lower it."
+}
