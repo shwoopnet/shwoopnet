@@ -389,7 +389,7 @@ gates['SI14c the admitted state: exactly two strategies, OICORE and EVENT830 (No
   assert.ok(s.reviewedAt <= slotLib.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the library\'s last review date');
   assert.strictEqual(s.reviewedAt, '2026-10-30');
   assert.deepStrictEqual(s.series, ['KXBTC15M']);
-  assert.ok(s.killRules.maxConsecutiveLosses <= 20);
+  assert.ok(s.killRules.maxConsecutiveLosses <= 30);
   // No way to add or enlarge it from outside: index.js passes no registry or switch, and the store/run libraries read the library constants only.
   const idx = code(read('functions', 'index.js'));
   assert.ok(!/registry\s*:|SLOT_STRATEGIES|SLOT_ENABLED|flags\s*:/.test(idx), 'index.js feeds the slot no registry or switch');

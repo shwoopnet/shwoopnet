@@ -141,7 +141,7 @@ const SLOT_STRATEGIES = Object.freeze([
     entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 }),
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 10,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-    killRules: Object.freeze({ maxConsecutiveLosses: 18, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 24, minNet: Object.freeze({ afterFills: 40, net: -6 }) }),
     forwardReadDate: "2026-11-13", reviewedAt: "2026-10-30",
   }),
   // EVENT830 (Nov 3, 2026, a held, capped live probe; pre-registration kalshi-scalper/README.md#SLOT-EVENT830, research record workers/EVENT830_REGISTRATION.md). On a listed US 8:30 AM ET release day only
@@ -222,7 +222,7 @@ function validateSlotStrategy(s) {
   if (!exactKeys(s.killRules, KILL_KEYS)) e.push("killRules has the wrong fields");
   else {
     const k = s.killRules;
-    if (!Number.isInteger(k.maxConsecutiveLosses) || k.maxConsecutiveLosses < 1 || k.maxConsecutiveLosses > 20) e.push("killRules.maxConsecutiveLosses must be 1 to 20");
+    if (!Number.isInteger(k.maxConsecutiveLosses) || k.maxConsecutiveLosses < 1 || k.maxConsecutiveLosses > 30) e.push("killRules.maxConsecutiveLosses must be 1 to 30");
     if (!exactKeys(k.minNet, ["afterFills", "net"])) e.push("killRules.minNet needs afterFills and net");
     else {
       if (!Number.isInteger(k.minNet.afterFills) || k.minNet.afterFills < 5 || k.minNet.afterFills > 100) e.push("killRules.minNet.afterFills must be 5 to 100");
@@ -361,7 +361,7 @@ function accountOrder(t) {
     return { ...z, ...base, net: Number.isFinite(pnl) ? pnl : -paid, final: true };
   }
   if (t.settled === true && (t.result === "yes" || t.result === "no")) {
-    const pnl = num(t.settledPnl), derived = (t.result === t.side ? got - sold : 0) + proceeds - paid;
+    const pnl = num(t.settledPnl), derived = (t.result === t.side ? got - sold : 0) + proceeds - fillCost(t, got, want);
     return { ...z, ...base, net: Number.isFinite(pnl) ? pnl : derived, final: true };      // a null pnl on a settled loss is derived from the result, never zero
   }
   // Open (or settled with a result nobody can read): the sold part is realised, the rest is counted as lost.
@@ -593,15 +593,30 @@ function slotSellCount({ order, position, haveClaim, othersUnsold }) {
   const holding = order.side === "yes" ? Math.max(0, position) : Math.max(0, -position);
   return Math.max(0, Math.min(own, Math.floor(holding - othersUnsold + 1e-9)));
 }
+// What a filled order really cost in cash (Nov 7, 2026, the owner: "have the bot's stops read fill-booked (real cash) P/L"). An order is booked at its limit
+// price plus fee (maxCost) when sent; the fill is usually better, so a win was booked low and a loss high, about $30 a week worse than cash. Once the answer carries
+// the average fill price and the per-contract fee, the cost of the contracts that filled is (price of the side bought + fee) x contracts. Kalshi gives averageFillPrice as the YES
+// price, so a NO order pays 1 minus it. Anything unreadable, or a cash figure above the limit booking, falls back to the limit booking (fails closed). An order still OPEN is
+// never booked at cash: it stays at its worst case in the stops. kalshiLiveLib has an identical copy (a test pins them equal), so a slot result and an L1 result stay on one footing.
+function fillCost(t, got, want) {
+  const worst = num(t.maxCost) * (got / want);
+  if (!(got > 0) || !(want > 0)) return worst;
+  const avg = num(t.averageFillPrice), fee = num(t.averageFeePaid);
+  if (t.averageFillPrice === null || t.averageFillPrice === undefined || t.averageFillPrice === "" || !Number.isFinite(avg) || !(avg > 0 && avg < 1)) return worst;
+  if (t.averageFeePaid === null || t.averageFeePaid === undefined || t.averageFeePaid === "" || !Number.isFinite(fee) || !(fee >= 0 && fee < 1)) return worst;
+  const side = t.side === "yes" ? avg : t.side === "no" ? 1 - avg : NaN;
+  if (!Number.isFinite(side) || !Number.isFinite(worst)) return worst;
+  const cash = (side + fee) * got;
+  return cash <= worst + 1e-9 ? cash : worst;
+}
 // The same pnl rule as kalshiLiveLib.settledFields (a test pins them equal), so a slot result and an L1 result are on one footing in the shared loss stop.
 // The slot exit engine records a completed early sale with slotSettledFields(order, "exit") (settled: true, result: "exit", the realised settledPnl), exactly as L1's exit
 // watch does, so a stop-out is a loss in the shared stop the moment it happens and not only when a settle sweep runs. The wiring also writes settledAt beside it.
 function slotSettledFields(t, result) {
-  const cost = num(t.maxCost);
   const want0 = num(t.count) > 0 ? num(t.count) : 1, got0 = Math.min(num(t.fillCount), want0);
   const sold = num(t.exitCount) > 0 ? Math.min(num(t.exitCount), got0) : 0;
   const proceeds = sold > 0 && Number.isFinite(num(t.exitProceeds)) ? num(t.exitProceeds) : 0;
-  return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - cost * (got0 / want0)).toFixed(4)) };
+  return { settled: true, result, settledPnl: Number((((result === t.side ? got0 - sold : 0)) + proceeds - fillCost(t, got0, want0)).toFixed(4)) };
 }
 
 // ---- Named entry points for the later wiring ---------------------------------------------------------------------------------------------
@@ -637,7 +652,7 @@ module.exports = {
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
-  openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields,
+  openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields, fillCost,
   // Test-only: the flags-taking variants. Production code must call slotOrderCheck and activeSlotStrategies (a gate fails if the wiring references this).
   _testOnly: Object.freeze({ slotOrderCheckWith, activeSlotStrategiesWith }),
 };

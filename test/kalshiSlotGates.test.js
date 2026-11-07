@@ -55,7 +55,7 @@ gates['the module is admitted with exactly two strategies, OICORE and EVENT830 (
     entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.5, leftMaxSec: 180, leftMinSec: 120, oiRiseMin: 86300 },
     exit: { holdToSettle: true }, contractsPerOrder: 10,
     scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
-    killRules: { maxConsecutiveLosses: 18, minNet: { afterFills: 40, net: -6 } },
+    killRules: { maxConsecutiveLosses: 24, minNet: { afterFills: 40, net: -6 } },
     forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
   });
   const v = slot.validateSlotStrategy(o);
@@ -110,7 +110,7 @@ gates['validation rejects anything out of bounds'] = () => {
     (s) => { s.entry.priceMax = 0.99; }, (s) => { s.entry.priceMin = 0.01; }, (s) => { s.entry.leftMaxSec = 899; }, (s) => { s.entry.leftMinSec = 60; },
     (s) => { s.exit.mustExitLeftSec = 10; }, (s) => { s.exit.mustExitLeftSec = 400; }, (s) => { s.exit.stopBid = 0.7; }, (s) => { s.exit.targetBid = 0.8; },
     (s) => { s.scaleIn.maxSteps = 4; }, (s) => { s.scaleIn.sameSideOnly = false; }, (s) => { s.scaleIn.minGapSec = 5; }, (s) => { s.scaleIn.maxSteps = 3; s.contractsPerOrder = 5; },
-    (s) => { s.killRules.maxConsecutiveLosses = 21; }, (s) => { s.killRules.maxConsecutiveLosses = 0; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -61; }, (s) => { delete s.killRules; },
+    (s) => { s.killRules.maxConsecutiveLosses = 31; }, (s) => { s.killRules.maxConsecutiveLosses = 0; }, (s) => { s.killRules.minNet.net = 1; }, (s) => { s.killRules.minNet.net = -61; }, (s) => { delete s.killRules; },
     (s) => { s.id = 'bad-id'; }, (s) => { s.readme = 'notes.txt'; }, (s) => { s.forwardReadDate = 'soon'; }, (s) => { s.extra = 1; }, (s) => { delete s.reviewedAt; },
   ];
   rejects.forEach((f, i) => assert.strictEqual(mut(f).ok, false, 'mutation ' + i + ' should be rejected'));

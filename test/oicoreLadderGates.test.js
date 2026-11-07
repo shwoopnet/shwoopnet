@@ -106,7 +106,7 @@ gates.LD8 = () => {
 gates.LD9 = () => {
   // The drawdown stop: from a best result of +$20, a fall of $50 (5 x 10 contracts) refuses every new order.
   const up = [ord(10, 1), ord(10, 2)];
-  const down = Array.from({ length: 5 }, (_, k) => ord(-10, 3 + k * 0.01));   // five losses (not 50 small ones, which would trip the 18 in a row kill first)
+  const down = Array.from({ length: 5 }, (_, k) => ord(-10, 3 + k * 0.01));   // five losses (not 50 small ones, which would trip the 24 in a row kill first)
   const r = chk(up.concat(down), 800);
   assert.ok(!r.allowed && /drawdown stop/.test(r.reasons.join(' ')), 'a $50 fall from the best result stops new orders: ' + JSON.stringify(r.reasons));
   const ok = chk(up.concat(down.slice(0, 4)), 800);
