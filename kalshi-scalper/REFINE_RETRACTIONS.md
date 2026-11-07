@@ -42,7 +42,7 @@ Source: /home/user/shwoopnet/kalshi-scalper/REFINE_STATUS.md (read only). Times 
 
 10. Original: W-FILLGOLD1 and W-FILLPRICE1 "bound, not a measurement" (Nov 6 10:30) and the understatement bounds (OICORE 0 to 4.36, gold 0 to 9.83), plus the claim that settledPnl books cost at the limit (W-DAYLOSS2 side finding, freshness entry 10:26).
    Tempered by: W-AVGFILL1 (Nov 6 10:31) and W-COSTGAP1 (10:56).
-   Truth now: avgFill is null only because of a report field-name mismatch (the real fill is stored); the bounds can be settled exactly from a Copy all orders export or the fixed report (#729, merged, not yet deployed). Measured cost gap: gold 0.33c, OICORE 0.62c per contract (a third to a half of gold's history margin).
+   Truth now: avgFill is null only because of a report field-name mismatch (the real fill is stored); the bounds can be settled exactly from a Copy all orders export or the fixed report (#729, merged, not yet deployed; SUPERSEDED Nov 7: deployed Nov 6, avgFill and avgFee populated on Nov 7 data). Measured cost gap: gold 0.33c, OICORE 0.62c per contract (a third to a half of gold's history margin).
 
 11. Original: W-DAYLOSS1 (Nov 6 10:11, shadow report's daily-loss gain) and the report that disagreed.
    Clarified by: W-DAYLOSS1 follow up (Nov 6 10:12).
