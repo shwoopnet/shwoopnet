@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-07 06:34 AM CT (12:34Z): Watch 6:33 AM CT Nov 7 and OI cache health (nothing actionable)
+
+OICORE 59 fills, 11 wins, net +24.29 recorded, PF 1.41, loss streak 9 (kill 18), 26.04 below its own peak of +50.33 (own-peak stop 50, about 24 of room), net +24.24 at real fills on 44 fills in the worker basis; EVENT830 5 fills 0 wins net -1.46; S-HALFSIZE1 13 of 40 under-0.10 fills, 0 wins, -7.21; stop headroom 34.63 or more over 24h at all bases; gold closed for the weekend, no unexplained silence. OI cache was 6 hours stale (06:30Z) before a refresh test on a copy (24 windows added, 0 failures); 14 sim triggers since the skip log went live, each with an order (13) or a skip (1), none unexplained; trigger rate nearer 17 a day than 7 to 8. Run sheet updated with the refresh note.
+
 ## 2026-11-07 03:35 AM CT (09:35Z): Watch Nov 7 3:33 AM CT and C9 refresh (nothing actionable)
 
 OICORE 57 settled, loss streak 7 (kill 18), net +29.10 recorded and +42.48 at real fills (worker recomputation), 14.89 below its real-fill peak against the own-peak stop of 50 at 10 contracts. EVENT830 5 fills, all lost, net -1.46 recorded (-0.85 real). Stop headroom 39.75 at base 466, 45.99 at 518. S-HALFSIZE1 12 of 40 under-0.10 fills. Gold closed for the weekend, last order Fri 4:54 PM CT. Correction to times: the stop low I quoted as 07:27 CT on Nov 6 is 07:27Z, which is 1:27 AM CT (the tool prints UTC); the base 466 low was -0.33 there. C9 silver unchanged at 105 in-band windows, 10 lost (9.5 percent), net -1.91c per contract (SE 2.70c); registered wording at 200 windows (about 1 AM CT Nov 11): kill if lost share above 12 percent or net below -2.0c; net is 0.09c above the line. Chance of the net kill at 200 by a simple binomial on the remaining 95 windows (win +6.9c, loss -85.6c): 42 percent at the forward rate, 9 percent at the history rate (earlier 60 and 13). Lost share kill 3.5 percent forward.
