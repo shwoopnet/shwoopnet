@@ -1,3 +1,4 @@
 slot_ts,poll_ts,series_polled,refs_polled,calls_kalshi,calls_ref,n429,n_errors,parse_failures,quote_rows,ref_rows,result_rows
 1794096000,1794101390,9,9,18,17,0,0,3,222,159,0
 1794124800,1794128866,9,9,18,17,0,0,3,222,156,8
+1794153600,1794156250,9,9,18,17,0,0,4,222,156,0
