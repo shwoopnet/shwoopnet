@@ -1,0 +1,2 @@
+slot_ts,poll_ts,server_date_header,clock_skew_s,series_polled,calls,n429,n_errors,quote_rows,result_rows
+1794096000,1794097496,"Sun, 08 Nov 2026 00:26:00 GMT",-63.8,53,104,0,0,277,90
