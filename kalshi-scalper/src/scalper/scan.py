@@ -27,7 +27,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
 from statistics import NormalDist
 
 import numpy as np
@@ -1018,6 +1018,158 @@ _POOL = ("e3b", "alts2", "alts3", "alts4", "rep", "fresh", "l1b", "book", "five"
 COMBO2 = KalshiSpec("kalshi_combo_crypto", _POOL, CRYPTO_SERIES, dev_hi=COMBO_HOLD_TS, hold_lo=COMBO_HOLD_TS, ask_lo=0.03, ask_hi=0.30, db_dir=DATA)
 COMBO3 = KalshiSpec("kalshi_combo_cross", _POOL, CROSS_A + CROSS_B, dev_hi=COMBO_HOLD_TS, hold_lo=COMBO_HOLD_TS, ask_lo=0.03, ask_hi=0.30, db_dir=DATA)
 
+# ---- NFLPC1 (Nov 8, 2026, workers/NFLPC1_PROTOCOL.md + Amendment 1): same-game NFL pair legs, QB passing yards (A) with the game total or the spread (B), both YES, one costed trade.
+NFLPC_FEATS = ["a_ask", "a_bid", "a_spread", "a_d1", "b_ask", "b_bid", "b_spread", "b_d1", "askdiff", "a_rank", "b_rank", "a_strike", "b_strike", "wk"]
+NFLPC_DIRS = ("yy",)
+
+
+class NflPairAdapter(Adapter):
+    """Reads data/nflpc1.sqlite (built by nflpc1.py). Rows = (game, QB leg, other leg). Dev = the first 2/3 of games by date (thirds of its dates are W1 to W3),
+    held out = the last third (guarded, read once). Decision instant per game T = floor((QB leg close_time - 4 h) / 3600) * 3600; every leg uses its last
+    hourly candle ending at or before T with a valid two-sided quote."""
+    groups = ("ALL",)
+
+    def __init__(self, path=None, fee_contracts=10, hold_frac=2 / 3, kind="high", stress=1.2, ask_lo=0.03, ask_hi=0.30):
+        self.name = "nfl_pairs_" + kind
+        self.path = path or os.path.join(DATA, "nflpc1.sqlite")
+        self.c, self.hold_frac, self.kind, self.stress, self.ask_lo, self.ask_hi = fee_contracts, hold_frac, kind, stress, ask_lo, ask_hi
+        self.markets = []
+
+    def _games(self):
+        db = sqlite3.connect("file:%s?mode=ro" % self.path, uri=True)
+        ch = {r[0] for r in db.execute("SELECT ticker FROM chosen WHERE kind=?", (self.kind,))}
+        km = {}
+        for tk, ser, game, subj, strike, cl, res in db.execute("SELECT ticker, series, game, subj, strike, close_ts, result FROM km"):
+            if tk in ch:
+                km[tk] = (ser, game, subj, strike, cl, res)
+        cs = {}
+        for tk, e, b, a in db.execute("SELECT ticker, end_ts, bid_c, ask_c FROM candle"):
+            if tk in km:
+                cs.setdefault(tk, {})[e] = (b, a)
+        db.close()
+        games = {}
+        for tk, (ser, game, subj, strike, cl, res) in km.items():
+            if tk in cs:
+                games.setdefault(game, []).append((tk, ser, subj, strike, cl, res, cs[tk]))
+        return games
+
+    @staticmethod
+    def _quote(cands, T, t_cut=None):
+        best = None
+        for e, (b, a) in cands.items():
+            if e <= T and (t_cut is None or e <= t_cut) and b is not None and a is not None and a >= b and a - b <= 0.10 and a < 0.999:
+                if best is None or e > best[0]:
+                    best = (e, b, a)
+        return best
+
+    def _rows(self, games, t_cut_fn=None):
+        rows = []
+        for game, legs in games.items():
+            qbs = [l for l in legs if l[1] == "KXNFLPASSYDS"]
+            others = [l for l in legs if l[1] in ("KXNFLTOTAL", "KXNFLSPREAD")]
+            if not qbs or not others:
+                continue
+            by_qb = {}
+            for l in qbs:
+                by_qb.setdefault(l[2], []).append(l)
+            for subj, lst in by_qb.items():
+                lst.sort(key=lambda x: -(x[3] or 0))
+                for ri, A in enumerate(lst):
+                    T = (A[4] - 4 * 3600) // 3600 * 3600
+                    qa = self._quote(A[6], T, t_cut_fn(T) if t_cut_fn else None)
+                    if qa is None:
+                        continue
+                    da = self._d1(A[6], qa[0], t_cut_fn(T) if t_cut_fn else None)
+                    grp = {}
+                    for B in others:
+                        grp.setdefault((B[1], B[2]), []).append(B)
+                    for (bser, bsubj), blst in grp.items():
+                        blst.sort(key=lambda x: -(x[3] or 0))
+                        for bi, B in enumerate(blst):
+                            qb = self._quote(B[6], T, t_cut_fn(T) if t_cut_fn else None)
+                            if qb is None:
+                                continue
+                            db_ = self._d1(B[6], qb[0], t_cut_fn(T) if t_cut_fn else None)
+                            rows.append(dict(game=game, A=A, B=B, T=T, qa=qa, qb=qb, da=da, db=db_, ra=ri + 1, rb=bi + 1, pair=0 if bser == "KXNFLTOTAL" else 1))
+        return rows
+
+    @staticmethod
+    def _d1(cands, e, t_cut=None):
+        prev = [k for k in cands if k < e and (t_cut is None or k <= t_cut) and cands[k][0] is not None]
+        if not prev or cands.get(e, (None,))[0] is None:
+            return float("nan")
+        return cands[e][0] - cands[max(prev)][0]
+
+    def _table(self, rows, stage, win_by_date=None):
+        sp_c = self.c
+        n = len(rows)
+        X = np.full((len(NFLPC_FEATS), n), np.nan, dtype=np.float32)
+        meta = np.zeros((n, 7))
+        for i, r in enumerate(rows):
+            qa, qb = r["qa"], r["qb"]
+            d0 = datetime.fromtimestamp(r["T"], timezone.utc)
+            wk = float((d0.date() - date(2025, 9, 1)).days // 7)
+            X[:, i] = [qa[2], qa[1], qa[2] - qa[1], r["da"], qb[2], qb[1], qb[2] - qb[1], r["db"], qa[2] - qb[2], r["ra"], r["rb"], r["A"][3] or np.nan, r["B"][3] or np.nan, wk]
+            meta[i] = [qa[2], qb[2], 1.0 if r["A"][5] == "yes" else 0.0, 1.0 if r["B"][5] == "yes" else 0.0, r["T"], r["A"][4], r["pair"]]
+        aa, ba, wa, wb, T, close, pair = (meta[:, i] for i in range(7))
+        T = T.astype(np.int64); close = close.astype(np.int64)
+        date_ = (close // 86400).astype(np.int32)
+        if stage == "dev":
+            ud = np.unique(date_); parts = np.array_split(ud, 3)
+            wmap = {int(d): w for w, p in enumerate(parts) for d in p}
+            win = np.array([wmap[int(d)] for d in date_], dtype=np.int8)
+        else:
+            win = np.full(n, 3, dtype=np.int8)
+        ok = (aa >= self.ask_lo - 1e-9) & (aa <= self.ask_hi + 1e-9) & (ba >= self.ask_lo - 1e-9) & (ba <= self.ask_hi + 1e-9)
+        net = (kalshi_net_cents(wa, aa, sp_c) + kalshi_net_cents(wb, ba, sp_c)).astype(np.float32)
+        nets = (kalshi_net_cents(wa, aa, sp_c, self.stress) + kalshi_net_cents(wb, ba, sp_c, self.stress)).astype(np.float32)
+        hod4 = ((T % 86400) // 14400).astype(np.int16)
+        dow = (((T // 86400) + 3) % 7).astype(np.int16)
+        cats = {"series": pair.astype(np.int16), "hod4": hod4, "dow": dow}
+        rows_ok = np.flatnonzero(ok)
+
+        def outcome(dir_, variant, group):
+            return rows_ok, net[rows_ok], nets[rows_ok]
+
+        unit = np.array([abs(hash(r["game"])) % (2 ** 31) for r in rows], dtype=np.int64)
+        return Table(self.name + ("" if stage == "dev" else ":holdout"), ["ALL"], NFLPC_FEATS, X, cats, T, date_, win, np.zeros(n, dtype=np.int16), ["ALL"],
+                     NFLPC_DIRS, (0,), outcome, unit, meta=dict(series_names=["total", "spread"], rows=rows, close=close, games=[r["game"] for r in rows]))
+
+    def _split(self, games):
+        order = sorted(games, key=lambda g: min(l[4] for l in games[g]))
+        k = int(len(order) * self.hold_frac)
+        return {g: games[g] for g in order[:k]}, {g: games[g] for g in order[k:]}
+
+    def build_dev(self):
+        dev, _ = self._split(self._games())
+        rows = self._rows(dev)
+        self.rows_dev = rows
+        return self._table(rows, "dev")
+
+    def build_holdout(self, frozen_id, cuts):
+        guard_check(frozen_id, self.name)
+        guard_record(frozen_id, self.name)
+        _, hold = self._split(self._games())
+        return self._table(self._rows(hold), "holdout")
+
+    def unseen(self):
+        _, hold = self._split(self._games())
+        return dict(adapter=self.name, holdout_games=len(hold), note="last third of games by date, behind the guard")
+
+    def truncation_test(self, tab, n=200, seed=0):
+        rng = random.Random(seed)
+        rows = tab.meta["rows"]
+        idx = rng.sample(range(len(rows)), min(n, len(rows)))
+        bad = 0
+        for i in idx:
+            r = rows[i]
+            T = r["T"]
+            qa = self._quote(r["A"][6], T, T); qb = self._quote(r["B"][6], T, T)
+            same = qa == r["qa"] and qb == r["qb"] and (self._d1(r["A"][6], qa[0], T) == r["da"] or (np.isnan(r["da"]) and np.isnan(self._d1(r["A"][6], qa[0], T))))
+            bad += 0 if same else 1
+        return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
+
+
 # ---- Perps candles (data/perpgen through perpdata)
 FEATS_P = ["r5", "r15", "r60", "r240", "r1440", "vol60", "vol240", "rng60", "rng240", "sp", "spr", "vlr15", "vlr60", "doi60", "doi240",
            "dhi240", "dlo240", "dhi1440", "dlo1440", "pir1440", "tvm", "fr_last", "fr_chg", "fr_avg3"]
@@ -1396,6 +1548,7 @@ ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "combo_metals": lambda **k: PairAdapter(COMBO),
             "combo_crypto": lambda **k: PairAdapter(COMBO2, pairs=COMBO2_PAIRS),
             "combo_cross": lambda **k: PairAdapter(COMBO3, pairs=COMBO3_PAIRS),
+            "nfl_pairs": lambda **k: NflPairAdapter(),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
