@@ -16,13 +16,13 @@ import importlib.util, json
 spec = importlib.util.spec_from_file_location('ig', ${JSON.stringify(scriptPath)}); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
 ${src}`], { encoding: 'utf8' }));
 
-// IG1: it can never trade or sign anything, and it reads only the three NBA game series.
+// IG1: it can never trade or sign anything, and it reads only the game, spread and total series of the NBA, NHL and NFL.
 gates.IG1 = () => {
   const hosts = [...code.matchAll(/https?:\/\/[^"'\s/]+/g)].map((x) => x[0]);
   assert.deepStrictEqual([...new Set(hosts)], ['https://external-api.kalshi.com'], 'the only host is Kalshi public market data');
   assert.ok(!/PRIVATE|SECRET|Authorization|ACCESS[-_]?KEY|SIGNATURE|method\s*=\s*["'](POST|PUT|DELETE)|data\s*=\s*b?["']/i.test(code), 'no key, no auth header, no signing, no write call');
   assert.ok(!/\/portfolio|\/orders\b|order_id|create_order/.test(code), 'no account or order endpoint');
-  assert.deepStrictEqual([...new Set([...code.matchAll(/KX[A-Z0-9]+/g)].map((x) => x[0]))].sort(), ['KXNBAGAME', 'KXNBASPREAD', 'KXNBATOTAL']);
+  assert.deepStrictEqual([...new Set([...code.matchAll(/KX[A-Z0-9]+/g)].map((x) => x[0]))].sort(), ['KXNBAGAME', 'KXNBASPREAD', 'KXNBATOTAL', 'KXNFLGAME', 'KXNFLSPREAD', 'KXNFLTOTAL', 'KXNHLGAME', 'KXNHLSPREAD', 'KXNHLTOTAL']);
   assert.ok(!/^\s*(from|import)\s+[^\n]*functions/m.test(script), 'imports nothing from functions/');
   const fnDir = path.join(root, 'functions');
   assert.deepStrictEqual(fs.readdirSync(fnDir).filter((f) => f.endsWith('.js')).filter((f) => /record_ingame|record-ingame/.test(fs.readFileSync(path.join(fnDir, f), 'utf8'))), [], 'nothing in functions/ mentions it');

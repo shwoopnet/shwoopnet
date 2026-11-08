@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """In-game recorder (Nov 8, 2026, research only; V2's INGAMELAG1 and SERIESLAG1 spec, owner approved the build).
-Records, for every open NBA game, the moneyline (both teams) and the two spread and two total markets nearest 50c at the first poll (fixed for the game), at about 20 seconds during
+Records, for every open NBA, NHL and NFL game, the moneyline (both teams) and the two spread and two total markets nearest 50c at the first poll (fixed for the game), at about 20 seconds during
 play (about 2 minutes before), so a lag between related markets after a big in-play move can be measured at a resolution Kalshi's 1 minute candles cannot give.
 Public data only: no key, no auth header, no order; one request stream with at least 0.5 s between calls and a doubling wait after a 429. Rows go to CSV files in the folder given
 (the workflow pushes them gzipped to the `sports-data` branch, never to main). It stops by itself on 2027-01-31 and after one cycle (up to the next 4 hour boundary)."""
@@ -14,7 +14,7 @@ import urllib.error
 import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2"
-GROUPS = {"NBA": ("KXNBAGAME", "KXNBASPREAD", "KXNBATOTAL")}
+GROUPS = {"NBA": ("KXNBAGAME", "KXNBASPREAD", "KXNBATOTAL"), "NHL": ("KXNHLGAME", "KXNHLSPREAD", "KXNHLTOTAL"), "NFL": ("KXNFLGAME", "KXNFLSPREAD", "KXNFLTOTAL")}
 GAP_S = 0.5
 BACKOFF_S = 2.0
 BACKOFF_MAX_S = 30.0
