@@ -71,7 +71,7 @@ def fetch(url):
     if '/events?' in url:
         s = url.split('series_ticker=')[1].split('&')[0]
         return 200, {'events': [{'event_ticker': s + '-26NOV08LALDET'}]}, 'Sun, 08 Nov 2026 23:44:06 GMT'
-    if 'KXNBAGAME' in url:
+    if 'GAME-' in url:
         return 200, {'markets': [{'ticker': 'G-LAL', 'yes_bid_dollars': '0.40', 'yes_ask_dollars': '0.42'}, {'ticker': 'G-DET', 'yes_bid_dollars': '0.58', 'yes_ask_dollars': '0.60'}]}, 'D'
     pre = 'S' if 'SPREAD' in url else 'T'
     ms = [{'ticker': pre + '%d' % i, 'floor_strike': i, 'yes_bid_dollars': '%.2f' % (0.1 * i), 'yes_ask_dollars': '%.2f' % (0.1 * i + 0.02)} for i in range(1, 9)]
@@ -93,7 +93,7 @@ print(json.dumps({'hdr': rows[0], 'n': len(rows) - 1, 'tickers': sorted({r[4] fo
   assert.ok(r.n > 0 && r.ev >= 3 && r.mk >= 3, JSON.stringify(r));
   assert.deepStrictEqual(r.kinds, ['ml', 'spread', 'total']);
   assert.ok(r.tickers.includes('G-LAL') && r.tickers.includes('G-DET'), 'both moneyline teams recorded');
-  assert.strictEqual(r.tickers.filter((t) => /^[ST]\d$/.test(t)).length, 4, 'two spread and two total markets are followed, not all eight');
+  assert.strictEqual(r.tickers.filter((t) => /^[ST]\d$/.test(t)).length, 4, 'two spread and two total markets are followed, not all eight (the same chosen set for every sport)');
   assert.ok(r.cov.length === 1 && Number(r.cov[0][1]) >= 3, 'a coverage row for the game');
 };
 
