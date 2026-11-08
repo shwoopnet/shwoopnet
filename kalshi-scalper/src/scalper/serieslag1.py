@@ -79,6 +79,7 @@ def do_match():
                 db.execute("INSERT OR REPLACE INTO game VALUES(?,?,?,?,?,?)", (ge, e, sser, G, w, i))
             nm += 1; ng += len(games)
         print(sser, "series events", len(sev), "with 2 markets matched", nm, "games matched", ng)
+    db.commit()
 
 
 def do_fetch(mx):
