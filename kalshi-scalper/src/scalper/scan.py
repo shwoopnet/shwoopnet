@@ -911,7 +911,12 @@ def combo_leg(cs, close_ts, L, t_cut=None):
 
 
 class PairAdapter(KalshiAdapter):
-    """Rows are (pair, close, look); direction = side combo; outcome = sum of the two legs' nets (fee on each). Series slot = pair id."""
+    """Rows are (pair, close, look); direction = side combo; outcome = sum of the two legs' nets (fee on each). Series slot = pair id.
+    `pairs` (default COMBO_PAIRS) fixes which two series form a pair; leg A is the first of each tuple."""
+
+    def __init__(self, spec=COMBO, pairs=None, **kw):
+        super().__init__(spec, **kw)
+        self.pairs = list(pairs) if pairs is not None else list(COMBO_PAIRS)
 
     def _pairs_index(self, mk):
         byclose = {}
@@ -933,7 +938,7 @@ class PairAdapter(KalshiAdapter):
         self.markets = mk if stage == "dev" else self.markets
         cols, meta = [], []
         for close_ts, bys in sorted(self._byclose.items()):
-            for pi, (sa, sb) in enumerate(COMBO_PAIRS):
+            for pi, (sa, sb) in enumerate(self.pairs):
                 if sa not in bys or sb not in bys:
                     continue
                 ia, ib = bys[sa], bys[sb]
@@ -977,7 +982,7 @@ class PairAdapter(KalshiAdapter):
 
         return Table(sp.name + ("" if stage == "dev" else ":holdout"), ["ALL"], FEATS_PAIR, X, cats, t, date, win, np.zeros(n, dtype=np.int16), ["ALL"],
                      COMBO_DIRS, sp.looks, outcome, close,
-                     meta=dict(series_names=["%s/%s" % p for p in COMBO_PAIRS], ia=ia_.astype(np.int64), ib=ib_.astype(np.int64), look=looka, close=close))
+                     meta=dict(series_names=["%s/%s" % p for p in self.pairs], ia=ia_.astype(np.int64), ib=ib_.astype(np.int64), look=looka, close=close))
 
     def build_holdout(self, frozen_id, cuts):
         sp = self.spec
@@ -1003,6 +1008,15 @@ class PairAdapter(KalshiAdapter):
             bad += 0 if same else 1
         return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
 
+
+CRYPTO_SERIES = ("KXBTC15M", "KXETH15M", "KXSOL15M", "KXXRP15M", "KXDOGE15M", "KXBNB15M", "KXHYPE15M", "KXZEC15M", "KXNEAR15M")
+COMBO2_PAIRS = [(a, b) for i, a in enumerate(CRYPTO_SERIES) for b in CRYPTO_SERIES[i + 1:]]
+CROSS_A = ("KXGOLD15M", "KXSILVER15M", "KXCOPPER15M", "KXWTI15M")
+CROSS_B = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M")
+COMBO3_PAIRS = [(a, b) for a in CROSS_A for b in CROSS_B]
+_POOL = ("e3b", "alts2", "alts3", "alts4", "rep", "fresh", "l1b", "book", "five")
+COMBO2 = KalshiSpec("kalshi_combo_crypto", _POOL, CRYPTO_SERIES, dev_hi=COMBO_HOLD_TS, hold_lo=COMBO_HOLD_TS, ask_lo=0.03, ask_hi=0.30, db_dir=DATA)
+COMBO3 = KalshiSpec("kalshi_combo_cross", _POOL, CROSS_A + CROSS_B, dev_hi=COMBO_HOLD_TS, hold_lo=COMBO_HOLD_TS, ask_lo=0.03, ask_hi=0.30, db_dir=DATA)
 
 # ---- Perps candles (data/perpgen through perpdata)
 FEATS_P = ["r5", "r15", "r60", "r240", "r1440", "vol60", "vol240", "rng60", "rng240", "sp", "spr", "vlr15", "vlr60", "doi60", "doi240",
@@ -1380,6 +1394,8 @@ ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "hist_lad_cheap": lambda **k: LadderAdapter(HIST_LAD),
             "coinrace_cheap": lambda **k: CoinRaceAdapter(COINRACE),
             "combo_metals": lambda **k: PairAdapter(COMBO),
+            "combo_crypto": lambda **k: PairAdapter(COMBO2, pairs=COMBO2_PAIRS),
+            "combo_cross": lambda **k: PairAdapter(COMBO3, pairs=COMBO3_PAIRS),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
