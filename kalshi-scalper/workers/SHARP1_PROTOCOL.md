@@ -1,0 +1,18 @@
+# SHARP1 PROTOCOL (registered Nov 8, 2026, before any Kalshi soccer price or result is joined to a bookmaker line)
+
+Research only. No trading code, no key, no order. Free data only: football-data.co.uk season CSVs (downloaded to data/fd/, git-ignored, no key) and Kalshi public `/historical`.
+**Not a rule scan: ONE pre-registered rule, one try.** Mechanism (owner directive via main, Nov 8: cross-venue price gaps, sharp lines): Kalshi soccer match markets (home / tie / away, one YES market per outcome) are priced by retail takers and a few makers; the bookmaker consensus closing line is a better estimate of the true probability. Counterparty: the retail buyer or maker who sells a cheap outcome (draw or underdog) below its consensus value. Overlap check: SOCCER1/SOCCERELO1 tested soccer against an Elo model, never against a bookmaker line; PRICEMATCH1/XI1/PM1 were Polymarket; ENTER1 used a reference-implied cheap side for other series. Not a reworded crossed-off idea.
+
+## Data (counts only looked at)
+football-data.co.uk, leagues E0 (EPL), SP1 (La Liga), D1 (Bundesliga), I1 (Serie A), F1 (Ligue 1), seasons 2025/26 and 2026/27. Fair probability source = AVERAGE CLOSING odds (columns AvgCH, AvgCD, AvgCA), de-vigged by proportional normalisation: q = (1/odds) / sum of the three (Pinnacle's own closing odds stop on 2026-01-14 in the files, so Pinnacle is information only for Aug 2025 to Jan 2026). Games with kickoff dates 2025-08-15 to 2026-09-07 (the /historical cutoff is 2026-09-08): 1,898 games with AvgC. Kickoff = Date plus Time in UK local time (Europe/London), converted to UTC. **Cuts by kickoff date: development = before 2026-03-07 (about 1,265 games), W1/W2/W3 = thirds of its dates; held out = 2026-03-07 on (about 633 games), read ONCE.**
+Kalshi side: series KXEPLGAME, KXLALIGAGAME, KXBUNDESLIGAGAME, KXSERIEAGAME, KXLIGUE1GAME; markets matched to a game by league, date (within one day) and the two team names (fuzzy name match with a printed alias table); unmatched games are dropped and counted. Which Kalshi markets are fetched is decided from the bookmaker line only: outcomes with q at most 0.32 (the cheap candidates), never from a Kalshi price.
+
+## The rule (fixed)
+Entry quote = the last 1 minute candle ending at least 5 minutes before kickoff with a valid two-sided quote. Buy ONE contract of YES of an outcome with q at most 0.32 at that candle's ask, only if the ask is 3c to 30c AND q minus ask minus fee/100 is at least 0.04 (4c; 2c and 6c are information only). Held to settlement on Kalshi's result. Fee = `ceil(0.07 x C x p x (1-p) x 100 - 1e-9)` cents per order at C = 10 contracts, divided by 10 (the standing convention; C = 1 shown as information), stress x1.2.
+
+## Judging (fixed now)
+Unit = game (clustered z by game). `NOT_ENOUGH_DATA`: fewer than 150 development trades. `FALSIFIED`: PF under 1.5 in any development third, or mean net under +2.0c, or game-clustered z under 2.5. Otherwise `NOT_YET_FALSIFIED`, which additionally needs PF at least 1.2 at fees x1.2; only then the held-out is read once (labels FALSIFIED / NOT_ENOUGH_DATA / LEAD / CANDIDATE as in the harness). Information: Brier of q and of the Kalshi mid at the entry candle on the candidate outcomes, ask minus q by price bucket, PF at 2c and 6c thresholds, C = 1 fee.
+N: +1 (the primary rule). No variants after the result.
+
+## Prediction (before anything is joined)
+Kalshi soccer cheap outcomes are priced close to the consensus line (makers use it): PF 0.8 to 1.1, mean net negative, 100 to 400 trades. Prior of a pass 5%. Zero edge closes soccer-vs-bookmaker on this feed. No promote verb.
