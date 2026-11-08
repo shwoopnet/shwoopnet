@@ -9084,3 +9084,6 @@ Registered first (`workers/HISTBTC1_PROTOCOL.md`), before any rule was scored. H
 
 ## Registration: HISTETH1 (ETH replication of HISTBTC1; real Kalshi ETH 15 minute candle quotes, cheap side, /historical May 31 to Aug 5 2026; 2026-11-08)
 Registered first (`workers/HISTETH1_PROTOCOL.md`), before any rule was scored. Adapter `hist_eth_cheap` (6,267 markets); dev closes before 2026-07-15 (45 dates, 23,675 cheap-side rows), held out 2026-07-15 on (2,079 markets, read once). 30,000 rules (seeds 81201 to 81203), N about 1,350,505, z bar about 5.38. Prediction: zero survivors (about 85%). Quote-regime caveat. No promote verb.
+
+### Result: HISTETH1 (2026-11-08): FALSIFIED on development, zero survivors; held-out untouched (registered in a1f8f3f)
+30,000 rules in 3 runs (seeds 81201 to 81203) on 23,675 cheap-side rows (Kalshi /historical ETH 15 minute, May 31 to Jul 14 2026, real asks 3c to 30c, 45 dates): zero screen survivors, zero exact survivors, zero deflated. Best minimum-window PF 1.166, then 1.115 and 1.099, all below 1.5. N 1,350,505, z bar 5.381. Prediction (zero survivors, about 85%) held. Nothing frozen or audited; the 2,079 held-out markets (Jul 15 on) stay unread. With HISTBTC1 this closes the 15 minute BTC and ETH cheap-side candle-rule family on the Jun to Aug 2026 /historical feed; quote-regime caveat stands. No promote verb.
