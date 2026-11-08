@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-08 01:02 PM CT (19:02Z): S-OICHEAPSKIP1 clock starts 18:57:10Z Nov 8
+
+Main confirmed the minute bot runs commit de0e72a (PR 742), booted 2026-11-08 18:57:10Z. DEPLOY_TS written. Read at the first 40 skipped signals (about 10 days): keep the skip at 1 win or fewer, drop it at 4 or more, else extend to 80. Side is inferred from candles until PR 743 is merged and the report is deployed. Cash record at deploy: OICORE 71 fills, net +27.15, streak 7 of 24.
+
 ## 2026-11-08 12:27 PM CT (18:27Z): W-GOLDEDGES1: gold band edges (0.84 to 0.88, 0.97 to 0.99): nothing passes
 
 Registered first (S/w_goldedges); candle model (2001 windows Oct 7 to Nov 6, halves split Oct 22, raw candle ask, 25c exit, fee ceil(0.07*C*p*(1-p)) at C=10), pessimistic = 1c worse fill. Current band (0.88 to 0.97): model 558 windows, loss 5.7 percent, +1.61c nominal, +0.68c pessimistic, PF 1.33 / 1.14; live gold fills with avgFill 0.88 to 0.97 (116 fills, fill-booked): -0.59c per contract size-weighted, +0.56c plain per-order mean, 8 losses (the model flatters live by roughly 1 to 2c; live is near break-even per contract on this basis). Slices, pessimistic net c per contract by half (H1 / H2) and loss rate [90 percent CI]: 0.84 to 0.88 (n 90/93) -0.95 / -0.41, 14.2 percent [10.1, 19.2], break-even about 14.5 percent; 0.85 to 0.88 (65/69) -0.89 / -1.11, 14.2 percent; 0.97 to 0.985 (51/65) -2.66 / +1.06, 1.7 percent [0.3, 5.3]; 0.97 to 0.99 (79/89) -2.82 / +0.79, 1.8 percent [0.5, 4.6]. Above the band a win pays 3c at most and a loss 97c or more (break-even loss rate about 2 to 3 percent); the H2 gain is a quiet stretch (H1 3.8 percent loss, 3 of 79; H2 0 of 89), not an edge. Bar (net above +0.5c in both halves, at least 60 windows per half) fails: the lower slices on negative net in both halves, the upper slices on H1. 16 cells here, about 36 with earlier gold splits; slices are nested, not independent. Nothing adopted, no forward test flagged.
