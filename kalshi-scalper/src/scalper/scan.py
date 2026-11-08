@@ -433,11 +433,19 @@ class KalshiSpec:
     win_cuts: tuple | None = None            # two close_ts cuts; None = thirds of the dev UTC dates
     contracts: int = 1
     looks: tuple = LEFTS
+    ask_lo: float | None = None              # cheap-side filter (None = off): only rows with ask_lo <= ask <= ask_hi are ever built
+    ask_hi: float | None = None
+    db_dir: str | None = None                # alternative database folder (None = data/)
 
 
 FRESH = KalshiSpec("kalshi15_fresh", ("fresh",), None, dev_hi=HOLD_FROM_TS, hold_lo=HOLD_FROM_TS)
 SELFTEST_GOLD = KalshiSpec("kalshi15_selftest_gold", ("alts2", "alts3", "alts4", "book", "l1b", "e3b"), ("KXGOLD15M",),
                            dev_hi=1791248400, hold_lo=None, win_cuts=(1788634800, 1791248400), looks=(360,))
+# HIST_BTC (Nov 8, 2026, workers/HISTBTC1_PROTOCOL.md): Kalshi /historical BTC 15 minute markets, Jun 3 to Aug 5 2026 (data/hist15, 65 dates, 6,023 markets).
+# dev = close dates before 2026-07-15 (43 dates, W1/W2/W3 thirds of those dates), held-out = 2026-07-15 on (22 dates, behind the guard). Cheap side only: ask 3c to 30c.
+HISTBTC_HOLD_TS = 1784073600
+HIST_BTC = KalshiSpec("kalshi15_histbtc_cheap", ("KXBTC15M",), None, dev_hi=HISTBTC_HOLD_TS, hold_lo=HISTBTC_HOLD_TS, ask_lo=0.03, ask_hi=0.30,
+                      db_dir=os.path.join(DATA, "hist15"))
 FEATS_K = ["ask", "bid", "spread", "d1", "d2", "d3", "d5", "rng5", "vol", "doi", "nprev", "hour"]
 CATS_K = ["series", "hod4", "dow"]
 
@@ -478,7 +486,7 @@ class KalshiAdapter(Adapter):
 
     def __init__(self, spec: KalshiSpec = FRESH, db_dir=None, fee_mult_stress=1.2):
         self.spec, self.name = spec, spec.name
-        self.db_dir = db_dir or DATA
+        self.db_dir = db_dir or spec.db_dir or DATA
         self.stress = fee_mult_stress
         self.markets = []
 
@@ -529,6 +537,8 @@ class KalshiAdapter(Adapter):
                     if r is None:
                         continue
                     ask, f, t = r
+                    if sp.ask_lo is not None and not (sp.ask_lo - 1e-9 <= ask <= sp.ask_hi + 1e-9):
+                        continue
                     won = (res == "yes") == bool(side)
                     cols.append(f)
                     meta.append((mi, close_ts, L, side, sid.get(series, -1), won, ask, t))
@@ -986,6 +996,7 @@ class SyntheticAdapter(Adapter):
 
 
 ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
+            "hist_btc_cheap": lambda **k: KalshiAdapter(HIST_BTC),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
