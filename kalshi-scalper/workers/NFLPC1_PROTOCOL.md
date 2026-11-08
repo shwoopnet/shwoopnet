@@ -10,3 +10,6 @@ Scan: the harness (`scan.py`) grammar and bar (PF 1.5 in each of W1, W2, W3, flo
 
 ## Prediction (before anything is fetched)
 Zero survivors (about 95%); likely NOT_ENOUGH_DATA on the game floor (one season, about 150 development games, of which only a share have both legs cheap). Even a pass could only be a LEAD, never a CANDIDATE, at this sample. Closes NFL prop pairs for this season of data. No promote verb.
+
+## Amendment 1 (Nov 8, 2026, before any NFL prop candle was fetched; only listings were read)
+Census from listings: KXNFLPASSYDS 229 games, KXNFLTOTAL 350, KXNFLSPREAD 350; 228 games have all three. Pairs need two series, so only those 228 games are fetched (the protocol's selection rule is unchanged inside them: PASSYDS 4 highest strikes per QB, TOTAL 6 highest, SPREAD 6 highest per team). This cuts the fetch from 12,553 to about 5,900 markets. Decision time, stated plainly (the first text was muddled): each leg is quoted at the last hourly candle ending at or before (market close_time minus 4 hours); the same instant for every leg of a game; a leg with no two-sided quote there is dropped. Development = first 2/3 of the 228 games by date, held out = last third (read once).
