@@ -664,6 +664,37 @@ gates['the engine is wired only into functions/index.js (behind SLOT_ON, step B3
   for (const f of walk(root).filter((x) => /\.(js|json|yml|yaml|sh|html)$/.test(x) && !/[\\/]test[\\/]|kalshiSlotRunLib\.js$|functions[\\/]index\.js$/.test(x))) assert.ok(!/kalshiSlotRunLib/.test(fs.readFileSync(f, 'utf8')), path.relative(root, f) + ' must not import the engine');
 };
 
+// OICORE skips its very cheapest entries (Nov 8, 2026). Consequence: a signal whose cheap side is priced under 8c sends NO order and says why (cheap_skipped, with the price); 8c and above trade exactly as before; nothing is ever added or enlarged.
+gates['OICORE cheap skip: a cheap side under 8c sends nothing and is logged cheap_skipped; 8c and dearer trade as before'] = async () => {
+  assert.deepStrictEqual(Object.assign({}, slot.SLOT_SKIP_BELOW), { OICORE: 0.08 }, 'frozen table, OICORE only');
+  assert.ok(Object.isFrozen(slot.SLOT_SKIP_BELOW), 'frozen');
+  const sk = (id, p) => slot.slotSkipsPrice({ id }, p);
+  assert.strictEqual(sk('OICORE', 0.07), true); assert.strictEqual(sk('OICORE', 0.0799), true);
+  assert.strictEqual(sk('OICORE', 0.08), false, '8c exactly trades'); assert.strictEqual(sk('OICORE', 0.18), false);
+  assert.strictEqual(sk('EVENT830', 0.05), false, 'no other strategy is touched'); assert.strictEqual(sk('OICORE', NaN), false); assert.strictEqual(sk(undefined, 0.05), false);
+  assert.ok(slot.SLOT_SKIP_BELOW_MAX <= 0.2, 'a reviewed ceiling on the table');
+  const OI = () => R({ enabled: true, registry: [slot.SLOT_STRATEGIES[0]], everUsed: true });
+  const closeMs = NOW + 150000, closeSec = Math.round(closeMs / 1000);
+  const world = async (bid, ask) => {
+    const db = makeDb(), ex = makeExchange(db, { market: { close_time: iso(closeMs), yes_bid_dollars: bid, yes_ask_dollars: ask, yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00' } });
+    const inner = ex.fetchFn;
+    ex.fetchFn = async (url, init) => {
+      if (url.includes('/candlesticks')) { ex.calls.push({ url, method: init.method, body: null }); return { status: 200, text: async () => JSON.stringify({ candlesticks: [{ end_period_ts: closeSec - 360, open_interest_fp: '1000000.00' }, { end_period_ts: closeSec - 180, open_interest_fp: '1090000' }] }) }; }
+      return inner(url, init);
+    };
+    const skips = [];
+    const t = tickArgs(db, ex, { args: { quotes: QUOTES({ close_time: iso(closeMs) }), fetchFn: ex.fetchFn, recordSkip: async (d) => { skips.push(d); } } });
+    const out = await OI().runSlotTick(t.args);
+    return { ex, out, skips };
+  };
+  const cheap = await world('0.0500', '0.0600');
+  assert.strictEqual(cheap.ex.posts.length, 0, 'a 6c cheap side: no order');
+  assert.ok(cheap.skips.some((r) => r.reason === 'cheap_skipped' && r.detail && Math.abs(r.detail.price - 0.06) < 1e-9 && Math.abs(r.detail.min - 0.08) < 1e-9), 'the skip is logged with its price: ' + JSON.stringify(cheap.skips));
+  assert.strictEqual((await world('0.0700', '0.0800')).ex.posts.length, 1, 'an 8c cheap side trades');
+  assert.strictEqual((await world('0.1700', '0.1800')).ex.posts.length, 1, 'an 18c cheap side trades as before');
+  assert.strictEqual((await world('0.9400', '0.9500')).ex.posts.length, 0, 'the NO side at 6c is skipped too (YES at 94 to 95c)');
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {
