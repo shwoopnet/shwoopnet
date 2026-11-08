@@ -763,6 +763,125 @@ class LadderAdapter(KalshiAdapter):
         return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
 
 
+# ---- COINRACE1 (Nov 8, 2026, workers/COINRACE1_PROTOCOL.md): five-way Coin Race KXCRYPTOLEAD15M, cheap side, cross-sectional quote features.
+COINRACE_HOLD_TS = 1791158400                     # 2026-10-05 00:00Z (F1); dev = closes before, held out = closes from
+COIN_TOKENS = ("BTC", "ETH", "HYPE", "SOL", "XRP")
+COINRACE = KalshiSpec("kalshi_coinrace_cheap", ("candles",), ("KXCRYPTOLEAD15M",), dev_hi=COINRACE_HOLD_TS, hold_lo=COINRACE_HOLD_TS, ask_lo=0.03, ask_hi=0.30,
+                      db_dir=os.path.join(DATA, "newh15"))
+FEATS_C = FEATS_K + ["rank", "askshare", "askgap", "overround", "nq"]
+
+
+def coin_cross(asks, own):
+    """Cross-sectional features of one token from the YES asks of the quoted tokens of the same event at the same candle (`asks`: token -> ask)."""
+    a = asks[own]
+    tot = sum(asks.values())
+    others = [v for k, v in asks.items() if k != own]
+    rank = 1 + sum(1 for v in others if v > a)
+    gap = a - (sum(others) / len(others)) if others else float("nan")
+    return [float(rank), a / tot if tot > 0 else float("nan"), gap, tot - 1.0, float(len(asks))]
+
+
+class CoinRaceAdapter(KalshiAdapter):
+    """Series slot = token (BTC, ETH, HYPE, SOL, XRP). Cross features use every quoted token of the event at the decision candle only."""
+
+    def __init__(self, spec=COINRACE, db_dir=None, **kw):
+        super().__init__(spec, db_dir=db_dir, **kw)
+        self._ev = {}
+
+    @staticmethod
+    def _tok(tk):
+        return tk.rsplit("-", 1)[1]
+
+    @staticmethod
+    def _evid(tk):
+        return tk.rsplit("-", 1)[0]
+
+    def _index(self, mk):
+        self._ev = {}
+        for i, m in enumerate(mk):
+            self._ev.setdefault(self._evid(m[0]), []).append(i)
+
+    def row(self, mk, mi, L, side, t_cut=None):
+        tk, series, close_ts, res, cs = mk[mi]
+        t = close_ts - L
+
+        def cut(c):
+            return c if t_cut is None else {k: v for k, v in c.items() if k <= t_cut}
+        r = kalshi_row(cut(cs), close_ts, L, side)
+        if r is None:
+            return None
+        ask, f, t = r
+        asks = {}
+        for j in self._ev[self._evid(tk)]:
+            q = cut(mk[j][4]).get(t)
+            if q is not None and _valid_quote(q[0], q[1]):
+                asks[self._tok(mk[j][0])] = q[1]
+        if self._tok(tk) not in asks:
+            return None
+        return ask, f + coin_cross(asks, self._tok(tk)), t
+
+    def _table(self, mk, stage, cuts=None):
+        sp = self.spec
+        self._index(mk)
+        sid = {s: i for i, s in enumerate(COIN_TOKENS)}
+        cols, meta = [], []
+        self.markets = mk if stage == "dev" else self.markets
+        for mi, (tk, series, close_ts, res, cs) in enumerate(mk):
+            if self._tok(tk) not in sid:
+                continue
+            for L in sp.looks:
+                for side in (1, 0):
+                    r = self.row(mk, mi, L, side)
+                    if r is None:
+                        continue
+                    ask, f, t = r
+                    if not (sp.ask_lo - 1e-9 <= ask <= sp.ask_hi + 1e-9):
+                        continue
+                    won = (res == "yes") == bool(side)
+                    cols.append(f)
+                    meta.append((mi, close_ts, L, side, sid[self._tok(tk)], won, ask, t))
+        n = len(meta)
+        X = np.array(cols, dtype=np.float32).reshape(n, len(FEATS_C)).T.copy()
+        M = np.array(meta, dtype=np.float64).reshape(n, 8)
+        mi_, close, look, side, ser, won, ask, t = (M[:, i] for i in range(8))
+        close = close.astype(np.int64); t = t.astype(np.int64)
+        date = (close // 86400).astype(np.int32)
+        if stage == "dev":
+            ud = np.unique(date); parts = np.array_split(ud, 3)
+            wmap = {int(d): w for w, p in enumerate(parts) for d in p}
+            win = np.array([wmap[int(d)] for d in date], dtype=np.int8)
+        else:
+            win = np.full(n, 3, dtype=np.int8)
+        net = kalshi_net_cents(won, ask, sp.contracts).astype(np.float32)
+        nets = kalshi_net_cents(won, ask, sp.contracts, self.stress).astype(np.float32)
+        hod4 = ((t % 86400) // 14400).astype(np.int16)
+        dow = (((t // 86400) + 3) % 7).astype(np.int16)
+        cats = {"series": ser.astype(np.int16), "hod4": hod4, "dow": dow}
+        sidea, looka = side.astype(np.int8), look.astype(np.int32)
+
+        def outcome(dir_, variant, group):
+            rows_ = np.flatnonzero((sidea == (1 if dir_ == "yes" else 0)) & (looka == variant))
+            return rows_, net[rows_], nets[rows_]
+
+        return Table(sp.name + ("" if stage == "dev" else ":holdout"), ["ALL"], FEATS_C, X, cats, t, date, win, np.zeros(n, dtype=np.int16), ["ALL"],
+                     ("yes", "no"), sp.looks, outcome, mi_.astype(np.int64),
+                     meta=dict(series_names=list(COIN_TOKENS), market_index=mi_.astype(np.int64), look=looka, side=sidea, close=close, won=won, ask=ask))
+
+    def truncation_test(self, tab, n=200, seed=0):
+        rng = random.Random(seed)
+        idx = rng.sample(range(tab.n), min(n, tab.n))
+        bad = 0
+        for i in idx:
+            mi = int(tab.meta["market_index"][i]); L = int(tab.meta["look"][i]); side = int(tab.meta["side"][i])
+            close_ts = self.markets[mi][2]
+            r = self.row(self.markets, mi, L, side)
+            r2 = self.row(self.markets, mi, L, side, t_cut=close_ts - L)
+            same = r is not None and r2 is not None and r[0] == r2[0] and np.allclose(np.array(r[1], dtype=np.float32), np.array(r2[1], dtype=np.float32), equal_nan=True) \
+                and np.allclose(np.array(r[1], dtype=np.float32), tab.X[:, i], equal_nan=True)
+            bad += 0 if same else 1
+        return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
+
+
 # ---- Perps candles (data/perpgen through perpdata)
 FEATS_P = ["r5", "r15", "r60", "r240", "r1440", "vol60", "vol240", "rng60", "rng240", "sp", "spr", "vlr15", "vlr60", "doi60", "doi240",
            "dhi240", "dlo240", "dhi1440", "dlo1440", "pir1440", "tvm", "fr_last", "fr_chg", "fr_avg3"]
@@ -1137,6 +1256,7 @@ ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "hist_btc_cheap": lambda **k: KalshiAdapter(HIST_BTC),
             "hist_eth_cheap": lambda **k: KalshiAdapter(HIST_ETH),
             "hist_lad_cheap": lambda **k: LadderAdapter(HIST_LAD),
+            "coinrace_cheap": lambda **k: CoinRaceAdapter(COINRACE),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
