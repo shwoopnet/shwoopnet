@@ -627,6 +627,142 @@ class KalshiAdapter(Adapter):
         return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
 
 
+# ---- HISTLAD1 (Nov 8, 2026, workers/HISTLAD1_PROTOCOL.md): hourly Bitcoin ladder KXBTCD, cheap tails, plus two Binance-derived features (zk, fvgap).
+HISTLAD_HOLD_TS = 1787097600                      # 2026-08-19 00:00Z; dev = closes before, held out = closes from
+LAD_LOOKS = (2700, 1800, 900, 600)
+HIST_LAD = KalshiSpec("kalshi_ladder_btc_cheap", ("KXBTCD",), None, dev_hi=HISTLAD_HOLD_TS, hold_lo=HISTLAD_HOLD_TS, ask_lo=0.03, ask_hi=0.30,
+                      db_dir=os.path.join(DATA, "hist15"), looks=LAD_LOOKS)
+FEATS_L = FEATS_K + ["zk", "fvgap"]
+
+
+def _phi(x):
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
+
+
+def lad_fair(spot, t, strike, L, side):
+    """Binance-derived features at decision time t (the candle end): S = close of the 1 minute bar ending at t, sigma = stdev of the last 60 one
+    minute log returns ending there, tau = minutes left + 1/3 (60 second settlement averaging). Uses spot bars with open ts <= t - 60 ONLY.
+    Returns (fair probability of the side bought, zk) or (nan, nan)."""
+    closes = []
+    for j in range(61):
+        c = spot.get(t - 60 - 60 * j)
+        if c is None:
+            return float("nan"), float("nan")
+        closes.append(c)
+    closes.reverse()
+    rets = [math.log(closes[i + 1] / closes[i]) for i in range(60)]
+    m = sum(rets) / 60.0
+    sd = math.sqrt(sum((r - m) ** 2 for r in rets) / 59.0)
+    if sd <= 0 or strike is None or strike <= 0:
+        return float("nan"), float("nan")
+    tau = L / 60.0 + 1.0 / 3.0
+    d = math.log(closes[-1] / strike) / (sd * math.sqrt(tau))
+    pyes = _phi(d)
+    return (pyes if side else 1.0 - pyes), abs(d)
+
+
+class LadderAdapter(KalshiAdapter):
+    """KXBTCD cheap tails. Strikes come from the market table (`market.strike`); `spot` maps Binance 1 minute bar open ts (s) -> close."""
+
+    def __init__(self, spec=HIST_LAD, db_dir=None, spot=None, **kw):
+        super().__init__(spec, db_dir=db_dir, **kw)
+        self._spot = spot
+        self._strike = {}
+
+    def spot(self):
+        if self._spot is None:
+            from histbinance import load as _load
+            self._spot = {r[0]: r[4] for r in _load("BTCUSDT", "spot_1m")}
+        return self._spot
+
+    def _strikes(self):
+        out = {}
+        for f in self.spec.files:
+            p = os.path.join(self.db_dir, f + ".sqlite")
+            if os.path.exists(p):
+                db = sqlite3.connect("file:%s?mode=ro" % p, uri=True)
+                out.update({t: k for t, k in db.execute("SELECT ticker, strike FROM market")})
+                db.close()
+        return out
+
+    def row(self, tk, cs, close_ts, L, side, spot=None):
+        r = kalshi_row(cs, close_ts, L, side)
+        if r is None:
+            return None
+        ask, f, t = r
+        sp = self.spot() if spot is None else spot
+        fair, zk = lad_fair(sp, t, self._strike.get(tk), L, side)
+        fvgap = fair - ask if fair == fair else float("nan")
+        return ask, f + [zk, fvgap], t
+
+    def _table(self, mk, stage, cuts=None):
+        sp = self.spec
+        self._strike = self._strikes()
+        series_names = sorted({m[1] for m in mk}) if cuts is None else cuts["_series"]
+        sid = {s: i for i, s in enumerate(series_names)}
+        cols, meta = [], []
+        self.markets = mk if stage == "dev" else self.markets
+        for mi, (tk, series, close_ts, res, cs) in enumerate(mk):
+            for L in sp.looks:
+                for side in (1, 0):
+                    r = self.row(tk, cs, close_ts, L, side)
+                    if r is None:
+                        continue
+                    ask, f, t = r
+                    if sp.ask_lo is not None and not (sp.ask_lo - 1e-9 <= ask <= sp.ask_hi + 1e-9):
+                        continue
+                    won = (res == "yes") == bool(side)
+                    cols.append(f)
+                    meta.append((mi, close_ts, L, side, sid.get(series, -1), won, ask, t))
+        n = len(meta)
+        X = np.array(cols, dtype=np.float32).reshape(n, len(FEATS_L)).T.copy()
+        M = np.array(meta, dtype=np.float64).reshape(n, 8)
+        mi_, close, look, side, ser, won, ask, t = (M[:, i] for i in range(8))
+        close = close.astype(np.int64); t = t.astype(np.int64)
+        date = (close // 86400).astype(np.int32)
+        if stage == "dev":
+            ud = np.unique(date); parts = np.array_split(ud, 3)
+            wmap = {int(d): w for w, p in enumerate(parts) for d in p}
+            win = np.array([wmap[int(d)] for d in date], dtype=np.int8)
+        else:
+            win = np.full(n, 3, dtype=np.int8)
+        net = kalshi_net_cents(won, ask, sp.contracts).astype(np.float32)
+        nets = kalshi_net_cents(won, ask, sp.contracts, self.stress).astype(np.float32)
+        hod4 = ((t % 86400) // 14400).astype(np.int16)
+        dow = (((t // 86400) + 3) % 7).astype(np.int16)
+        cats = {"series": ser.astype(np.int16), "hod4": hod4, "dow": dow}
+        sidea, looka = side.astype(np.int8), look.astype(np.int32)
+
+        def outcome(dir_, variant, group):
+            rows_ = np.flatnonzero((sidea == (1 if dir_ == "yes" else 0)) & (looka == variant))
+            return rows_, net[rows_], nets[rows_]
+
+        # the hourly event a row belongs to is its close time: the unit for the "independent hours" count
+        return Table(sp.name + ("" if stage == "dev" else ":holdout"), ["ALL"], FEATS_L, X, cats, t, date, win, np.zeros(n, dtype=np.int16), ["ALL"],
+                     ("yes", "no"), sp.looks, outcome, mi_.astype(np.int64),
+                     meta=dict(series_names=series_names, market_index=mi_.astype(np.int64), look=looka, side=sidea, close=close, won=won, ask=ask))
+
+    def hours_with_rows(self, tab):
+        return int(len(np.unique(tab.meta["close"])))
+
+    def truncation_test(self, tab, n=200, seed=0):
+        rng = random.Random(seed)
+        idx = rng.sample(range(tab.n), min(n, tab.n))
+        sp_all = self.spot()
+        bad = 0
+        for i in idx:
+            mi = int(tab.meta["market_index"][i]); L = int(tab.meta["look"][i]); side = int(tab.meta["side"][i])
+            tk, series, close_ts, res, cs = self.markets[mi]
+            t = close_ts - L
+            r = self.row(tk, cs, close_ts, L, side)
+            # delete every candle and every Binance bar after the decision, recompute
+            r2 = self.row(tk, {k: v for k, v in cs.items() if k <= t}, close_ts, L, side, spot={k: v for k, v in sp_all.items() if k <= t - 60})
+            same = r is not None and r2 is not None and r[0] == r2[0] and np.allclose(np.array(r[1], dtype=np.float32), np.array(r2[1], dtype=np.float32), equal_nan=True) \
+                and np.allclose(np.array(r[1], dtype=np.float32), tab.X[:, i], equal_nan=True)
+            bad += 0 if same else 1
+        return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
+
+
 # ---- Perps candles (data/perpgen through perpdata)
 FEATS_P = ["r5", "r15", "r60", "r240", "r1440", "vol60", "vol240", "rng60", "rng240", "sp", "spr", "vlr15", "vlr60", "doi60", "doi240",
            "dhi240", "dlo240", "dhi1440", "dlo1440", "pir1440", "tvm", "fr_last", "fr_chg", "fr_avg3"]
@@ -1000,6 +1136,7 @@ class SyntheticAdapter(Adapter):
 ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "hist_btc_cheap": lambda **k: KalshiAdapter(HIST_BTC),
             "hist_eth_cheap": lambda **k: KalshiAdapter(HIST_ETH),
+            "hist_lad_cheap": lambda **k: LadderAdapter(HIST_LAD),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
