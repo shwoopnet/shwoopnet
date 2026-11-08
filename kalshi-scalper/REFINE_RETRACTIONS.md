@@ -80,3 +80,5 @@ Source: /home/user/shwoopnet/kalshi-scalper/REFINE_STATUS.md (read only). Times 
 - Freshness check (Nov 6 10:26): four stale doc lines remain, EVENT830 scale understated.
 
 Count: 15 claims corrected, withdrawn or tempered; 11 items still provisional or open.
+
+16. S-LIM1-LIVE "fired" at 22 tagged (net -3.82, Nov 7 interim) and 30 tagged (net -19.83, Nov 8 watch) was a bookkeeping error in lim_review.py, not a result: once the report carried avgFill, the script used avgFill as the price paid for NO orders without flipping it (NO avgFill is in YES terms), so every NO fill read about 0.8 to 0.9 above its ask and was tagged. Corrected (paid = 1 - avgFill for NO): 1 tagged fill, net -1.38; the review at 20 tagged cannot be run; the registered revert condition is not met. The Nov 6 figures (28 tagged, +17.62) could not be reproduced either. Fixed in lim_review.py Nov 8.
