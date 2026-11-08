@@ -199,6 +199,8 @@ function makeRunners(flags) {
         if (oiRise === null) { skip(job, "no_oi_candle", { http: cr.status }); results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
         if (oiRise < s.entry.oiRiseMin) { skip(job, "oi_below", { oiRise, min: s.entry.oiRiseMin }); results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
       }
+      // A strategy that skips its very cheapest entries (SLOT_SKIP_BELOW; OICORE under 8c): the signal passed every other test, so the skip is logged with the price and nothing is sent.
+      if (slotLib.slotSkipsPrice(s, sidePrice)) { skip(job, "cheap_skipped", { price: sidePrice, min: slotLib.SLOT_SKIP_BELOW[s.id] }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", under the " + slotLib.SLOT_SKIP_BELOW[s.id].toFixed(2) + " this strategy skips"); continue; }
       // The taker flow condition (FLOW1; public trade tape, no key): flow on the side bought over 360 to 180 s before the close, at most FLOW_PAGES pages. Unreadable means no order.
       let flow = null;
       if (Object.prototype.hasOwnProperty.call(s.entry, "flowMax")) {

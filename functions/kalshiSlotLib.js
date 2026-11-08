@@ -39,6 +39,17 @@ function slotCaps(sizingBase) {
 // at most 1c a contract worse. Never past the strategy's own priceMax. A reviewed edit; at most 2c for any strategy.
 const SLOT_LIMIT_SLIP = Object.freeze({ OICORE: 0.01 });
 const SLOT_LIMIT_SLIP_MAX = 0.02;
+// OICORE skips its very cheap entries (Nov 8, 2026, the owner approved designing small tests of the refinement chat's lead; skip-only, no new strategy). Live fills paid under 8c won
+// 1 in 27 and a forward group under 10c 0 in 17, while the simulation says about break-even, so this is a bet that live beats the simulation. It only REMOVES orders (a skipped signal is
+// logged as cheap_skipped with its price, and public settlements say what it would have made), never adds or enlarges one. Decision rule, written before the first skip: after 40 skipped
+// signals keep it if at most 1 would have won, drop it if 4 or more would, else read to 80. A reviewed edit; the price can be at most 20c.
+const SLOT_SKIP_BELOW = Object.freeze({ OICORE: 0.08 });
+const SLOT_SKIP_BELOW_MAX = 0.2;
+function slotSkipsPrice(strategy, sidePrice) {
+  const raw = SLOT_SKIP_BELOW[strategy && strategy.id];
+  if (!isNum(raw) || !(raw > 0) || raw > SLOT_SKIP_BELOW_MAX + 1e-9 || !isNum(sidePrice)) return false;
+  return sidePrice < raw - 1e-9;
+}
 function slotLimitFor(strategy, sidePrice) {
   const raw = SLOT_LIMIT_SLIP[strategy && strategy.id];
   const slip = isNum(raw) && raw > 0 && raw <= SLOT_LIMIT_SLIP_MAX + 1e-9 ? raw : 0;
@@ -646,7 +657,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 module.exports = {
   validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
-  SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor,
+  SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor, SLOT_SKIP_BELOW, SLOT_SKIP_BELOW_MAX, slotSkipsPrice,
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
