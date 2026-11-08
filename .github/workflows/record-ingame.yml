@@ -1,0 +1,56 @@
+# Nov 8, 2026 (the owner approved V2's INGAMELAG1 and SERIESLAG1 recorder spec; research only, nothing trades): records every open NBA game's moneyline (both teams) and the two spread and
+# two total markets nearest 50c at the first poll, about every 20 seconds during play (2 minutes before), one public request per event, so a lag between related markets after a big in-play
+# move can be measured at a resolution Kalshi's 1 minute candles cannot give. Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped CSV to the
+# `sports-data` branch (under ingame/), never to main. Triggered every 15 minutes under one concurrency group that never cancels a running job; each job records up to the next 4 hour
+# boundary. It stops by itself after 2027-01-31 (checked in the first step and in the script). Stop it sooner by deleting this file.
+name: record-ingame
+on:
+  schedule:
+    - cron: "7,37 * * * *"
+    - cron: "22,52 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-ingame
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin sports-data; then git checkout -q -b sports-data FETCH_HEAD; else git checkout -q --orphan sports-data; fi
+      - name: Record every open game up to the next 4 hour boundary
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/ingame/$STAMP"
+          python3 code/scripts/record_ingame.py "data/ingame/$STAMP" --cycle-hours 4
+          gzip -9 -f data/ingame/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "ingame-recorder"
+          git config user.email "ingame-recorder@users.noreply.github.com"
+          gzip -9 -f ingame/*/*/*.csv 2>/dev/null || true
+          git add ingame
+          git commit -q -m "ingame $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin sports-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin sports-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1
