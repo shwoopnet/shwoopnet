@@ -15,6 +15,7 @@ function is `kalshi_fee_cents`, N is `n_total()`, the bar is `z_bar(N)`."""
 from __future__ import annotations
 
 import argparse
+import dataclasses
 import gzip
 import hashlib
 import json
@@ -882,6 +883,127 @@ class CoinRaceAdapter(KalshiAdapter):
         return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
 
 
+# ---- COMBO1 (Nov 8, 2026, workers/COMBO1_PROTOCOL.md): two cheap-side legs in two metal markets that close together, one trade, fee on both legs.
+COMBO_HOLD_TS = 1791158400                        # 2026-10-05 00:00Z (F1); dev = closes before
+COMBO_HOLD_END = 1793145600                       # 2026-10-28 00:00Z (F2): never loaded
+COMBO_SERIES = ("KXGOLD15M", "KXSILVER15M", "KXCOPPER15M", "KXPLATINUM15M", "KXPALLADIUM15M")
+COMBO_PAIRS = [(a, b) for i, a in enumerate(COMBO_SERIES) for b in COMBO_SERIES[i + 1:]]
+COMBO_DIRS = ("yy", "yn", "ny", "nn")             # side of leg A then leg B
+COMBO = KalshiSpec("kalshi_combo_metals", ("alts2", "alts3", "rep", "fresh", "l1b", "book", "five"), COMBO_SERIES,
+                   dev_hi=COMBO_HOLD_TS, hold_lo=COMBO_HOLD_TS, ask_lo=0.03, ask_hi=0.30, db_dir=DATA)
+FEATS_PAIR = ["a_ask", "b_ask", "a_bid", "b_bid", "a_spread", "b_spread", "a_d1", "a_d3", "b_d1", "b_d3", "a_rng5", "b_rng5", "askdiff", "d3diff"]
+
+
+def combo_leg(cs, close_ts, L, t_cut=None):
+    """YES-side quote features of one leg from candles ending at or before the decision t = close - L (`t_cut` deletes later candles for the truncation test).
+    Returns (yes_ask, yes_bid, spread, d1, d3, rng5) or None without a valid two sided quote."""
+    t = close_ts - L
+    g = (lambda k: cs.get(k)) if t_cut is None else (lambda k: cs.get(k) if k <= t_cut else None)
+    q = g(t)
+    if q is None or not _valid_quote(q[0], q[1]):
+        return None
+    def dbid(lag):
+        p = g(t - lag)
+        return q[0] - p[0] if p is not None and p[0] is not None else float("nan")
+    path = [g(t - 60 * j)[0] for j in range(6) if g(t - 60 * j) is not None and g(t - 60 * j)[0] is not None]
+    rng5 = (max(path) - min(path)) if len(path) >= 2 else float("nan")
+    return q[1], q[0], q[1] - q[0], dbid(60), dbid(180), rng5
+
+
+class PairAdapter(KalshiAdapter):
+    """Rows are (pair, close, look); direction = side combo; outcome = sum of the two legs' nets (fee on each). Series slot = pair id."""
+
+    def _pairs_index(self, mk):
+        byclose = {}
+        for i, m in enumerate(mk):
+            byclose.setdefault(m[2], {})[m[1]] = i
+        self._byclose = byclose
+
+    def _row(self, mk, ia, ib, L, t_cut=None):
+        a = combo_leg(mk[ia][4], mk[ia][2], L, t_cut)
+        b = combo_leg(mk[ib][4], mk[ib][2], L, t_cut)
+        if a is None or b is None:
+            return None
+        f = [a[0], b[0], a[1], b[1], a[2], b[2], a[3], a[4], b[3], b[4], a[5], b[5], a[0] - b[0], a[4] - b[4]]
+        return a, b, f
+
+    def _table(self, mk, stage, cuts=None):
+        sp = self.spec
+        self._pairs_index(mk)
+        self.markets = mk if stage == "dev" else self.markets
+        cols, meta = [], []
+        for close_ts, bys in sorted(self._byclose.items()):
+            for pi, (sa, sb) in enumerate(COMBO_PAIRS):
+                if sa not in bys or sb not in bys:
+                    continue
+                ia, ib = bys[sa], bys[sb]
+                ra, rb = mk[ia][3], mk[ib][3]
+                for L in sp.looks:
+                    r = self._row(mk, ia, ib, L)
+                    if r is None:
+                        continue
+                    a, b, f = r
+                    cols.append(f)
+                    meta.append((ia, ib, pi, close_ts, L, a[0], a[1], b[0], b[1], 1.0 if ra == "yes" else 0.0, 1.0 if rb == "yes" else 0.0, close_ts - L))
+        n = len(meta)
+        X = np.array(cols, dtype=np.float32).reshape(n, len(FEATS_PAIR)).T.copy()
+        M = np.array(meta, dtype=np.float64).reshape(n, 12)
+        ia_, ib_, pid, close, look, aay, aby, bay, bby, resa, resb, t = (M[:, i] for i in range(12))
+        close = close.astype(np.int64); t = t.astype(np.int64)
+        date = (close // 86400).astype(np.int32)
+        if stage == "dev":
+            ud = np.unique(date); parts = np.array_split(ud, 3)
+            wmap = {int(d): w for w, p in enumerate(parts) for d in p}
+            win = np.array([wmap[int(d)] for d in date], dtype=np.int8)
+        else:
+            win = np.full(n, 3, dtype=np.int8)
+        net = np.zeros((n, 4), dtype=np.float32); nets = np.zeros((n, 4), dtype=np.float32); ok = np.zeros((n, 4), dtype=bool)
+        for ci, c in enumerate(COMBO_DIRS):
+            ya, yb = c[0] == "y", c[1] == "y"
+            ask_a = aay if ya else np.round(1 - aby, 4); ask_b = bay if yb else np.round(1 - bby, 4)
+            won_a = (resa == 1.0) == ya; won_b = (resb == 1.0) == yb
+            ok[:, ci] = (ask_a >= sp.ask_lo - 1e-9) & (ask_a <= sp.ask_hi + 1e-9) & (ask_b >= sp.ask_lo - 1e-9) & (ask_b <= sp.ask_hi + 1e-9)
+            net[:, ci] = kalshi_net_cents(won_a, ask_a, sp.contracts) + kalshi_net_cents(won_b, ask_b, sp.contracts)
+            nets[:, ci] = kalshi_net_cents(won_a, ask_a, sp.contracts, self.stress) + kalshi_net_cents(won_b, ask_b, sp.contracts, self.stress)
+        looka = look.astype(np.int32)
+        hod4 = ((t % 86400) // 14400).astype(np.int16)
+        dow = (((t // 86400) + 3) % 7).astype(np.int16)
+        cats = {"series": pid.astype(np.int16), "hod4": hod4, "dow": dow}
+
+        def outcome(dir_, variant, group):
+            ci = COMBO_DIRS.index(dir_)
+            rows_ = np.flatnonzero((looka == variant) & ok[:, ci])
+            return rows_, net[rows_, ci], nets[rows_, ci]
+
+        return Table(sp.name + ("" if stage == "dev" else ":holdout"), ["ALL"], FEATS_PAIR, X, cats, t, date, win, np.zeros(n, dtype=np.int16), ["ALL"],
+                     COMBO_DIRS, sp.looks, outcome, close,
+                     meta=dict(series_names=["%s/%s" % p for p in COMBO_PAIRS], ia=ia_.astype(np.int64), ib=ib_.astype(np.int64), look=looka, close=close))
+
+    def build_holdout(self, frozen_id, cuts):
+        sp = self.spec
+        guard_check(frozen_id, self.name)
+        guard_record(frozen_id, self.name)
+        old = self.spec
+        self.spec = dataclasses.replace(old, hold_lo=None)          # read only [hold_lo, COMBO_HOLD_END): F2's line is never loaded
+        try:
+            mk = self._read(old.hold_lo, COMBO_HOLD_END)
+        finally:
+            self.spec = old
+        return self._table(mk, "holdout", cuts=cuts)
+
+    def truncation_test(self, tab, n=200, seed=0):
+        rng = random.Random(seed)
+        idx = rng.sample(range(tab.n), min(n, tab.n))
+        bad = 0
+        for i in idx:
+            ia, ib, L = int(tab.meta["ia"][i]), int(tab.meta["ib"][i]), int(tab.meta["look"][i])
+            close_ts = self.markets[ia][2]
+            r2 = self._row(self.markets, ia, ib, L, t_cut=close_ts - L)
+            same = r2 is not None and np.allclose(np.array(r2[2], dtype=np.float32), tab.X[:, i], equal_nan=True)
+            bad += 0 if same else 1
+        return dict(name="truncation", checked=len(idx), mismatches=bad, passed=bad == 0)
+
+
 # ---- Perps candles (data/perpgen through perpdata)
 FEATS_P = ["r5", "r15", "r60", "r240", "r1440", "vol60", "vol240", "rng60", "rng240", "sp", "spr", "vlr15", "vlr60", "doi60", "doi240",
            "dhi240", "dlo240", "dhi1440", "dlo1440", "pir1440", "tvm", "fr_last", "fr_chg", "fr_avg3"]
@@ -1257,6 +1379,7 @@ ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "hist_eth_cheap": lambda **k: KalshiAdapter(HIST_ETH),
             "hist_lad_cheap": lambda **k: LadderAdapter(HIST_LAD),
             "coinrace_cheap": lambda **k: CoinRaceAdapter(COINRACE),
+            "combo_metals": lambda **k: PairAdapter(COMBO),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
