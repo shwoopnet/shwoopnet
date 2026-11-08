@@ -446,6 +446,8 @@ SELFTEST_GOLD = KalshiSpec("kalshi15_selftest_gold", ("alts2", "alts3", "alts4",
 HISTBTC_HOLD_TS = 1784073600
 HIST_BTC = KalshiSpec("kalshi15_histbtc_cheap", ("KXBTC15M",), None, dev_hi=HISTBTC_HOLD_TS, hold_lo=HISTBTC_HOLD_TS, ask_lo=0.03, ask_hi=0.30,
                       db_dir=os.path.join(DATA, "hist15"))
+HIST_ETH = KalshiSpec("kalshi15_histeth_cheap", ("KXETH15M",), None, dev_hi=HISTBTC_HOLD_TS, hold_lo=HISTBTC_HOLD_TS, ask_lo=0.03, ask_hi=0.30,
+                      db_dir=os.path.join(DATA, "hist15"))
 FEATS_K = ["ask", "bid", "spread", "d1", "d2", "d3", "d5", "rng5", "vol", "doi", "nprev", "hour"]
 CATS_K = ["series", "hod4", "dow"]
 
@@ -997,6 +999,7 @@ class SyntheticAdapter(Adapter):
 
 ADAPTERS = {"kalshi_fresh": lambda **k: KalshiAdapter(FRESH),
             "hist_btc_cheap": lambda **k: KalshiAdapter(HIST_BTC),
+            "hist_eth_cheap": lambda **k: KalshiAdapter(HIST_ETH),
             "perps_crypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("CRYPTO", frozen_id, extra=extra),
             "perps_noncrypto": lambda frozen_id=None, extra=False, **k: PerpAdapter("NONCRYPTO", frozen_id, extra=extra)}
 
