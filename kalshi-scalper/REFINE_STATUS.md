@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:30 AM CT (16:30Z): W-GOLDCAL1: gold calendar and session effects, no skip candidate (noise)
+
+Registered first, 9 cells, N about 536. Candle PF (n) / live cash PF (n): month-end 1.53 (221) / 1.06 (53); FOMC Sep 16 and Oct 28 0.89 (47) / all wins (13); London open 2.16 (81) / 4.87 (25); London close 0.83 (125) / 2.40 (29); 08:00-09:30 ET 3.11 (79) / 1.07 (20); US cash open 1.33 (94); 15:00-16:00 ET 0.75 (43) / all wins (10); Asia 1.36 (424) / 1.14 (101); Fri 16-17 CT n8. 0 of 9 pass. FOMC removal lifts candle both halves but live net +8.81, fails. CPI/NFP/PPI dates not verifiable (bls.gov denied), 08:30 ET slot used as stand-in. No roll in the 15 minute market. run.py per-half cell/rest display bug (pass logic fine).
+
 ## 2026-11-09 10:28 AM CT (16:28Z): W-GOLDMIX1: weekday and hour mix does not explain Nov 1-9 (FAIL)
 
 Registered first, 42 cells added (N about 527, z bar about 5.2). Candle PF 1.26 (1298), halves 1.13/1.41. Live P1 4.41, P2 1.24, P3 0.89. Reweighting to P3 mix: live P1 2.91, P2 1.97 (weekday alone 0.89); candle P1 1.44, P2 1.00 vs P3 1.22. Cells sparse (about 2 live trades). 4 of 33 skip cells pass technically (each about 3 percent of trades), expected by chance, gains +0.03 to +0.1 PF. Verdict FAIL, noise.
