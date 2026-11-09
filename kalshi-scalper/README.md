@@ -9126,3 +9126,8 @@ Registered first (`workers/SERIESLAG1_PROTOCOL.md`), before any series or game c
 
 ## Registration: INGAMELAG1 (inside an NBA game, do the spread and total markets lag a big moneyline jump; FORWARD, recorder PR 744; 2026-11-08)
 Registered first (`workers/INGAMELAG1_PROTOCOL.md`), before any recorder row. Event = moneyline mid move of 8c or more in 3 minutes; slope fitted on the first 40 percent of events, development the next 30 percent, held out the last 30 percent (read once); buy the moving team's spread YES if it moved under half the expected amount and its ask is 3c to 30c, exit 10 minutes later; 10-contract fees both sides; NOT_ENOUGH_DATA under 150 trades or 60 games. Prediction: NOT_ENOUGH_DATA or FALSIFIED (about 96 percent); the catch-up time is the deliverable. 1 try. No promote verb.
+
+### SERIESLAG1 result (Nov 9, 2026, development only, holdout unread)
+568 of 568 windows fetched. Development: 37 series, 182 games, 314 quoted team-windows, 44 rule trades (series 21).
+Lag profile (share of the eventual game-market jump already priced in the series market, n 25 events with a clean jump): +1 min median 0.50, +3 min 0.62, +5 min 0.73, +10 min 0.90, +30 min 1.00. The series market catches up inside about 10 minutes, so any lag edge lives in the first 1 to 5 minutes, below what 1 minute candles can resolve.
+Registered rule: n 44, mean -12.97c, PF 0.212, series-clustered z -1.26. Verdict by the registered words: NOT_ENOUGH_DATA (n 44 under 150). The point estimate is also negative, so it is not a near miss. No holdout read. INGAMELAG1 (forward recorder, tick data) is the right test for a seconds-scale lag; N unchanged.
