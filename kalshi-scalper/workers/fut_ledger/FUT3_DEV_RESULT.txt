@@ -1,0 +1,18 @@
+roots loaded 22 of 22: ES,NQ,RTY,YM,GC,SI,HG,PL,CL,NG,HO,RB,ZN,ZB,ZF,6E,6J,6B,6A,ZC,ZS,ZW
+dates 2010-06-07 to 2026-11-05; development 2010-06-07 to 2021-05-19 (3404 days), holdout 1703 days UNREAD
+futures ledger N = 170, p bar 0.00029
+variant     costs     W1mean  W1shp  W1pf |  W2mean  W2shp  W2pf |  x2shp       p | verdict
+TSMOM:60    primary   0.0128   0.18  1.03 |  0.0160   0.22  1.04 |  -0.19  0.2649 | falsified
+TSMOM:60    perp     -0.2423  -3.34  0.54 | -0.2548  -3.49  0.54 |  -3.42  1.0000 | falsified
+TSMOM:120   primary  -0.0162  -0.24  0.96 | -0.0070  -0.10  0.98 |  -0.58  0.7411 | falsified
+TSMOM:120   perp     -0.2656  -3.92  0.48 | -0.2804  -3.96  0.49 |  -3.94  1.0000 | falsified
+TSMOM:250   primary  -0.0166  -0.29  0.95 | -0.0068  -0.10  0.98 |  -0.56  0.7691 | falsified
+TSMOM:250   perp     -0.2310  -3.94  0.47 | -0.2517  -3.54  0.54 |  -3.70  1.0000 | falsified
+CARRY       primary   0.0279   0.61  1.11 | -0.0493  -0.94  0.85 |  -0.77  0.7936 | falsified
+CARRY       perp     -0.2042  -4.37  0.47 | -0.2912  -5.48  0.39 |  -4.94  1.0000 | falsified
+XSMOM:120   primary  -0.0307  -0.57  0.90 | -0.0301  -0.49  0.92 |  -1.00  0.9775 | falsified
+XSMOM:120   perp     -0.2599  -4.71  0.44 | -0.2879  -4.61  0.45 |  -4.65  1.0000 | falsified
+LONG        primary  -0.0325  -0.39  0.93 |  0.0357   0.42  1.08 |  -0.18  0.4748 | control
+LONG        perp     -0.2036  -2.45  0.64 | -0.1560  -1.85  0.72 |  -2.15  1.0000 | control
+(means in percent per day)
+SURVIVORS (dev, all conditions): none

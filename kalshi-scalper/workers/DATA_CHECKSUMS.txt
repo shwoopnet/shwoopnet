@@ -25,3 +25,7 @@ bb722f4e11906968 4578724 GC__glbx-mdp3-20240101-20241231.ohlcv-1m.csv.zst
 e9b5e0d35c1b4815 4940635 GC__glbx-mdp3-20250101-20251231.ohlcv-1m.csv.zst
 a309d82847bc8fa7 4395002 GC__glbx-mdp3-20260101-20261105.ohlcv-1m.csv.zst
 GC 1-min rows 2395385, 2020-01-01 18:00:00 to 2026-11-05 18:59:00 ET, contract ids 35
+
+# FUT3 Databento files (Nov 9 2026; raw in data/fut/db3, git-ignored): daily bars, 22 roots, .v.0 and .v.1, 2010-06-06 to 2026-11-06
+rank 0: 198 monthly files, 2418834 bytes, combined sha256 d03c364e1b23060d
+rank 1: 198 monthly files, 2192332 bytes, combined sha256 a3b654cf2bc1c48a
