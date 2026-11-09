@@ -10,12 +10,14 @@
 // in a reviewed edit (as EVENT830's markets were), not here.
 // WEEK 1 (Nov 9, 2026; the weekly candidate list from the refinement chat, pre-registration kalshi-scalper/README.md#SHADOW-WEEK1). Four rules, each on a market the bot already quotes, 1 contract, log only.
 // Every one is a SHADOW candidate, never a pass (N about 670 on top of about 540; no counterparty named for any). Shadow rows assume a fill at the touch (an upper bound): read `wouldFill`.
-const RULE = (id, series, entry) => Object.freeze({ id, readme: "kalshi-scalper/README.md#SHADOW-WEEK1", series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
+const RULE = (id, series, entry, anchor = "SHADOW-WEEK1") => Object.freeze({ id, readme: "kalshi-scalper/README.md#" + anchor, series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
 const SHADOW_RULES = Object.freeze([
   RULE("ETHNO6", "KXETH15M", { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
   RULE("BTCHI6", "KXBTC15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
   RULE("XRPYES10", "KXXRP15M", { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }),
   RULE("ETHL1", "KXETH15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  // GOLDALL (Nov 9, 2026, the refinement chat's forward test of the gold momentum lead, kalshi-scalper/README.md#SHADOW-GOLDALL): L1's own entry on gold, logged for EVERY signal ordered or not, so the 3 minute move (rise3) can be read from public candles at read time and the pre-registered split (|rise3| at least 0.05, "moving") scored against the unfiltered baseline on the same rows.
+  RULE("GOLDALL", "KXGOLD15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "SHADOW-GOLDALL"),
 ]);
 
 const OPEN = ["open", "active"];
