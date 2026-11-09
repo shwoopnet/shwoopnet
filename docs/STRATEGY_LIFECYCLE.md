@@ -12,17 +12,36 @@ Owner priority, Nov 9, 2026: full time algo trading with a system that constantl
 | 3 Live | A slot or L1 strategy at its size ladder, inside the slot and account caps | the account's caps | owner merges |
 | 4 Retired | Latched off; its orders still settle and are sold if open; its record stays in the report | none | automatic (kill rule) or owner |
 
-## 2. Pass rules (promotion)
-_To be filled from V2's input (minimum trades, cash PF, held-out half, deflation count and z bar by number tried, minimum days)._
+## 2. Pass rules (promotion), from the research chat (V2), 10 contract fees, cash PF
 
-## 3. How much evidence each stage needs
-_To be filled from V2's input (fills needed to tell PF 1.5 from 1.0 at 80% power, cheap tail versus favourite, which strategy classes are judgeable in days)._
+| Step | Rule |
+|---|---|
+| Shadow (paper, no money) | at least 150 fills, at least 10 days, PF 1.3 or better net, held out third untouched |
+| Shadow to incubator (1 contract, cap $20) | at least 400 fills for a cheap tail strategy or 600 for a favourite strategy, at least 20 days, PF 1.5 or better on the held out half, deflated one sided z at or above the quantile for 0.05 divided by N tried (z 4.3 at N 5,000; z 5.4 at N 1.5 million, our count today) |
+| Incubator to live | at least 300 more incubator fills at PF 1.3 or better and a positive sum after fees; size steps up only on new evidence (+300 fills per step) |
+| Live kill (stated here, calibrated in section 4) | trailing 100 fills PF under 0.9, or cumulative loss over the stage cap; latch off, no automatic restart |
+
+## 3. How much evidence each stage needs (V2)
+
+Fills needed to tell a true PF 1.5 from a null PF 1.0 at 80% power, by entry price (win rate: 15% at a 10c entry; 29% at 20c; 95.6% at 93c; 93.6% at 90c):
+
+| Bar (z) | tail 10c | tail 20c | favourite 93c | favourite 90c |
+|---|---|---|---|---|
+| alpha 0.05 | 388 | 222 | 610 | 439 |
+| deflated 3.1 (p 0.001) | 970 | 555 | 1,526 | 1,099 |
+| 4.0 | 1,471 | 841 | 2,314 | 1,667 |
+| 5.4 | 2,446 | 1,399 | 3,846 | 2,771 |
+
+At today's live rates (gold about 9 fills a day, all 15 minute markets about 30 a day), 388 fills is 43 days on gold alone and 13 days across all 15 minute markets. **Fast to judge:** 15 minute and hourly crypto, metals and indices (days to two weeks for 400 fills across markets). **Slow:** sports (game days only; the NFL pair had 12 dates, a season is about 17 per team). **Slowest:** daily strategies (one decision a day; PF 1.5 needs about two years).
 
 ## 4. Kill and demotion rules, capital rules
 _To be filled from Refinement's input (rolling N PF floor, consecutive loss latch, drawdown, the gold tripwire decay test; false kills against real failures on gold and OICORE; size per stage; step up rules)._
 
-## 5. Multiple testing control for a rotating system
-_To be filled from V2's input (promotion budget per quarter, alpha spending, how a retired strategy's record counts toward N)._
+## 5. Multiple testing control for a rotating system (V2)
+
+Total alpha 0.05 per year; a budget of 4 promotions per quarter (each spends alpha 0.05 divided by 16, about 0.003, ahead of its z bar). Every hypothesis ever scored stays in N forever: a retired strategy's whole search counts, not only its winner. No re-scoring a failed candidate on the same data. Held out thirds are read once.
+
+**Honest read on our own record (V2).** Fed with what we had, the rules would have PROMOTED on in sample PF: gold L1 (PF 4.28 over its first 97 fills), OICORE (PF 2.28 in discovery, 1.85 in validation), and Bitcoin, Dogecoin and XRP L1. Live: gold 1.21 over 307 fills but 4.28, then 1.26, then 0.88 across periods; OICORE 1.11 (77 fills); Bitcoin 0.72; Dogecoin 0.82; XRP 0.41; all settled L1 PF 0.94 (-$24.40 on 1,008 fills). A kill rule of trailing 100 fills PF under 1.0 would have retired XRP, Dogecoin and Bitcoin in about 4 to 12 days and saved most of -$49.99. But with only 1 of 8 live markets positive, automatic rotation mostly rotates fees: expect a false positive rate near 80% of promotions at our evidence levels.
 
 ## 6. What can be automated, and what the Charter would have to allow
 
