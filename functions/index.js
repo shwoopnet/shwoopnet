@@ -702,6 +702,15 @@ exports.kalshiLiveArmed = onSchedule(
         if (shadowLib.SHADOW_RULES.length) {
           try { await shadowLib.runShadowTick({ now, quotes: market.quotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen }); }
           catch (e) { /* log only */ }
+          // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and a 15 s time guard; every error swallowed.
+          if (Math.floor(now / 60000) % 5 === 0) {
+            try {
+              await shadowLib.settleShadowRows({ now, max: 6, budgetMs: 15000, clock: Date.now,
+                readOpen: async () => (await db.collection(shadowLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
+                update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
+                market: (ticker) => kalshiMarketApi().market(ticker) });
+            } catch (e) { /* log only */ }
+          }
         }
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
@@ -920,6 +929,9 @@ exports.kalshiNightlyReport = onRequest(
     readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's orders (OICORE), read the same way, so the report covers every strategy.
     readDeploys: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(deployStamp.COLLECTION).get()).docs.map((d) => d.data()); },
+    // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
+    readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
+    shadowRules: () => shadowLib.SHADOW_RULES,
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },

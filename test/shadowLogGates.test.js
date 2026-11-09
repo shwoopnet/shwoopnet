@@ -65,7 +65,8 @@ gates.SH3 = async () => {
 };
 gates.SH4 = () => {
   const lib = code(read('functions', 'kalshiShadowLib.js'));
-  assert.ok(!/fetch|liveRequest|submitOrder|\/orders|keyId|pem|process\.env|secret|runTransaction|\.update\(|\.delete\(|\.set\(/.test(lib), 'the shadow library places no order, makes no request, reads no key or secret and only creates log rows');
+  const own = lib.replace(/args\.(update|record|market|readOpen)\(/g, 'inject(');   // the library only calls what the minute function injects
+  assert.ok(!/fetch|liveRequest|submitOrder|\/orders|keyId|pem|process\.env|secret|runTransaction|\.update\(|\.delete\(|\.set\(/.test(own), 'the shadow library places no order, makes no request of its own, reads no key or secret and only creates log rows (settlement uses injected public readers)');
   const idx = code(read('functions', 'index.js'));
   assert.ok(/if \(shadowLib\.SHADOW_RULES\.length\)/.test(idx) && /rules: shadowLib\.SHADOW_RULES/.test(idx), 'index.js passes only the constant registry, and only when it is not empty');
   assert.ok(!/args\.rules|request\.data[^;]*shadow|shadowRules\s*=/i.test(idx), 'nothing from a request or storage can supply a rule');
@@ -75,7 +76,9 @@ gates.SH4 = () => {
   const m = rules.match(/match \/kalshiShadowRows\/\{id\} \{([\s\S]*?)\}/);
   assert.ok(m && /allow read: if isAdmin\(\)/.test(m[1]) && /allow write: if false/.test(m[1]), 'the log is admin read and no client write');
   assert.ok(!/kalshiShadowRows/.test(read('index.html')), 'the page does not read the shadow log (the scorer will, in a later pull request)');
-  for (const f of ['kalshiLiveLib.js', 'kalshiSlotLib.js', 'kalshiSlotRunLib.js', 'kalshiReportLib.js']) assert.ok(!/kalshiShadowRows|kalshiShadowLib/.test(read('functions', f)), f + ' knows nothing of the shadow log: nothing that decides an order can read it');
+  for (const f of ['kalshiLiveLib.js', 'kalshiSlotLib.js', 'kalshiSlotRunLib.js']) assert.ok(!/kalshiShadowRows|kalshiShadowLib/.test(read('functions', f)), f + ' knows nothing of the shadow log: nothing that decides an order can read it');
+  const rep = code(read('functions', 'kalshiReportLib.js'));
+  assert.ok(/require\("\.\/kalshiShadowLib"\)/.test(rep) && !/fetch|liveRequest|collection\(|\.create\(|runTransaction|firebase|getFirestore/.test(rep), 'the report may SCORE the log (rows are handed in by index.js) but still sends nothing and writes nothing itself');
 };
 gates.SH5 = async () => {
   // Week 1 (Nov 9, 2026): exactly four registered shadow rules, each valid against the markets the bot quotes, 1 contract, and pointing at a pre-registration that exists.
@@ -98,5 +101,65 @@ gates.SH5 = async () => {
   const ten = sh.shadowSignals(rules, [quote('KXXRP15M', { close_time: new Date(NOW + 600000).toISOString() })], NOW);
   assert.deepStrictEqual(ten.map((r) => r.rule), ['XRPYES10'], 'XRP at 10 minutes left');
   assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXGOLD15M')], NOW), [], 'a market no rule names (gold) is never logged');
+};
+gates.SC1 = async () => {
+  // Settlement and scoring (lifecycle spec (c)): a shadow row is settled from the public market result; PF is per contract on the cash basis with the 10 contract fee; the verdict follows the written rules.
+  assert.strictEqual(sh.shadowFee(0.93), 0.005, 'a 0.93 contract: 7% x 10 x 0.93 x 0.07 = 4.56c on ten, rounded up to 5c, so 0.5c a contract');
+  assert.strictEqual(sh.shadowFee(0.5), 0.018, 'a 0.50 contract: 7% x 10 x 0.25 = 17.5c on ten, rounded up to 18c, so 1.8c a contract');
+  const win = sh.shadowOutcome({ side: 'yes', price: 0.9 }, 'yes'), loss = sh.shadowOutcome({ side: 'yes', price: 0.9 }, 'no'), noWin = sh.shadowOutcome({ side: 'no', price: 0.12 }, 'no');
+  assert.ok(win.won && win.pnl > 0.09 && win.pnl < 0.1, 'a win at 0.90 makes about 9.4c a contract: ' + win.pnl);
+  assert.ok(!loss.won && loss.pnl < -0.9 && loss.pnl > -0.92, 'a loss at 0.90 costs about 90.6c: ' + loss.pnl);
+  assert.ok(noWin.won && noWin.pnl > 0.8, 'a NO win at 0.12 is about 88c');
+  assert.strictEqual(sh.shadowOutcome({ side: 'yes', price: 0.9 }, ''), null, 'no result yet is no outcome');
+  assert.strictEqual(sh.shadowOutcome({ side: 'maybe', price: 0.9 }, 'yes'), null);
+  // The sweep: only rows whose market closed 2+ minutes ago, at most `max` reads, each error swallowed.
+  const rows = [{ rule: 'R1', ticker: 'A', side: 'yes', price: 0.9, settled: false, closeMs: NOW - 600000 }, { rule: 'R1', ticker: 'B', side: 'yes', price: 0.9, settled: false, closeMs: NOW - 60000 }, { rule: 'R1', ticker: 'C', side: 'yes', price: 0.9, settled: false, closeMs: NOW - 900000 }];
+  const updates = [], asked = [];
+  const r = await sh.settleShadowRows({ now: NOW, max: 12, readOpen: async () => rows, update: async (id, p) => { updates.push([id, p]); },
+    market: async (t) => { asked.push(t); if (t === 'C') throw new Error('boom'); return { result: 'yes' }; } });
+  assert.deepStrictEqual(asked.sort(), ['A', 'C'], 'B closed under 2 minutes ago and is not asked');
+  assert.deepStrictEqual([r.checked, r.settled, updates.length, updates[0][0]], [2, 1, 1, 'R1_A'], 'a failing read is skipped and the next run tries again');
+  assert.ok(updates[0][1].settled === true && updates[0][1].won === true && Number.isFinite(updates[0][1].pnl));
+  let tclock = 0;
+  const slow = await sh.settleShadowRows({ now: NOW, max: 12, budgetMs: 1000, clock: () => (tclock += 600), readOpen: async () => rows.map((x, i) => Object.assign({}, x, { ticker: 'S' + i, closeMs: NOW - 900000 })).concat(rows.map((x, i) => Object.assign({}, x, { ticker: 'T' + i, closeMs: NOW - 900000 }))), update: async () => {}, market: async () => ({ result: 'yes' }) });
+  assert.ok(slow.checked < 6, 'the time guard stops the sweep and leaves the rest for the next run: ' + JSON.stringify(slow));
+  const bad = await sh.settleShadowRows({ now: NOW, readOpen: async () => { throw new Error('x'); }, update: async () => {}, market: async () => ({}) });
+  assert.deepStrictEqual(bad, { checked: 0, settled: 0 }, 'an unreadable list never throws');
+};
+gates.SC2 = () => {
+  const rule = { id: 'R1' };
+  const mk = (n, over) => Array.from({ length: n }, (_, i) => Object.assign({ rule: 'R1', atMs: NOW - (n - i) * 3600000, settled: true, wouldFill: true, pnl: i % 10 === 9 ? -0.9 : 0.09 }, over && over(i)));
+  // 150 signals over 6.25 days: 90% wins of 9c and 10% losses of 90c is PF 1.0, so it is not ready.
+  const flat = sh.shadowReport([rule], mk(150), NOW)[0];
+  assert.deepStrictEqual([flat.signals, flat.fillable, flat.pfFillable], [150, 150, 0.9], JSON.stringify(flat));
+  assert.strictEqual(flat.status, 'collecting', 'under 14 days and under PF 1.3: still collecting');
+  // A clean 150 signals over 20 days at PF 1.5 and a steady second half passes.
+  const good = sh.shadowReport([rule], Array.from({ length: 160 }, (_, i) => ({ rule: 'R1', atMs: NOW - (160 - i) * 3 * 3600000, settled: true, wouldFill: true, pnl: i % 8 === 7 ? -0.9 : 0.2 })), NOW)[0];
+  assert.ok(good.pfFillable >= 1.3 && good.days >= 14, JSON.stringify(good));
+  assert.ok(/^ready/.test(good.status), 'the written pass rule: ' + JSON.stringify(good));
+  // A kill: net under -1c per contract after 50 fillable signals.
+  const dead = sh.shadowReport([rule], mk(60, () => ({ pnl: i => -0.5 })).map((d) => Object.assign(d, { pnl: d.pnl === -0.9 ? -0.9 : -0.1 })), NOW)[0];
+  assert.ok(/^kill/.test(dead.status), 'a net under -1c per contract after 50 signals is a kill: ' + JSON.stringify(dead));
+  // Retire: 30+ days old with under 40 signals in the last 30.
+  const old = sh.shadowReport([rule], [{ rule: 'R1', atMs: NOW - 40 * 86400000, settled: true, wouldFill: true, pnl: 0.1 }, { rule: 'R1', atMs: NOW - 10 * 86400000, settled: true, wouldFill: true, pnl: 0.1 }], NOW)[0];
+  assert.ok(/^retire/.test(old.status), JSON.stringify(old));
+  assert.deepStrictEqual(sh.shadowReport([rule], [], NOW)[0].signals, 0, 'no rows: a row of zeros, never a crash');
+  assert.deepStrictEqual(sh.shadowReport(null, null, NOW), [], 'garbage in, empty out');
+  assert.ok(!/ticker|rule_/.test(JSON.stringify(good).replace('"rule"', '')) , 'no ticker or document id in the score');
+};
+gates.SC3 = async () => {
+  const rep = require('../functions/kalshiReportLib.js');
+  const calls = [];
+  const req = { method: 'GET', headers: { authorization: 'Bearer ' + 'x'.repeat(30) }, query: {} };
+  const res = { headers: {}, set(k, v) { this.headers[k] = v; }, status(c) { this.code = c; return this; }, json(b) { this.body = b; } };
+  const deps = (extra) => Object.assign({ getToken: () => 'x'.repeat(30), now: () => NOW, readOrders: async () => [], logError: (e) => calls.push(String(e && e.message)) }, extra || {});
+  await rep.makeReportHandler(deps({ readShadowRows: async () => [{ rule: 'ETHNO6', atMs: NOW - 3600000, settled: true, wouldFill: true, pnl: 0.09 }], shadowRules: () => [{ id: 'ETHNO6' }] }))(req, res);
+  assert.ok(res.code === 200 && res.body.shadow && res.body.shadow.rules[0].rule === 'ETHNO6' && res.body.shadow.rules[0].signals === 1, JSON.stringify(res.body.shadow));
+  const res2 = Object.assign({}, res, { code: null, body: null });
+  await rep.makeReportHandler(deps({ readShadowRows: async () => { throw new Error('boom'); }, shadowRules: () => [] }))(req, res2);
+  assert.ok(res2.code === 200 && res2.body.shadow === undefined, 'a failing shadow read leaves the field out and never blanks the report');
+  const res3 = Object.assign({}, res, { code: null, body: null });
+  await rep.makeReportHandler(deps())(req, res3);
+  assert.ok(res3.code === 200 && res3.body.shadow === undefined, 'without the optional reader the report is exactly what it was');
 };
 (async () => { for (const [n, f] of Object.entries(gates)) { await f(); console.log('ok   ' + n); } })().catch((e) => { console.error(e); process.exit(1); });
