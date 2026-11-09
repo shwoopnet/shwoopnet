@@ -34,21 +34,34 @@ def load(m):
     return d.sort_index()
 
 
-def roll_returns(d):
-    """Per-unit roll-adjusted daily price change and a roll-day flag. Fixed rule in the protocol."""
+ROLL_WINDOW = {"CL": (17, 27, 0), "NG": (24, 31, 5)}  # (first day, last day, shift days); at most ONE roll per month
+
+
+def roll_returns(d, m="CL"):
+    """Per-unit roll-adjusted daily price change and a roll-day flag (Amendment 2: one roll per calendar
+    month, inside the market's expiry window; the first version flagged 28% of days and was wrong)."""
     c1, c2 = d["c1"].values, d["c2"].values
     n = len(d)
     ret = np.zeros(n)
     roll = np.zeros(n, dtype=bool)
+    lo, hi, shift = ROLL_WINDOW[m]
+    best = {}
     for t in range(1, n):
         same = abs(c1[t] - c1[t - 1])
         sw = abs(c1[t] - c2[t - 1])
         wide = abs(c2[t - 1] - c1[t - 1]) > DEADBAND * c1[t - 1]
-        if sw < same and wide:
-            roll[t] = True
-            ret[t] = c1[t] - c2[t - 1]
-        else:
-            ret[t] = c1[t] - c1[t - 1]
+        ts = d.index[t] + pd.Timedelta(days=shift)
+        day = ts.day if shift == 0 else d.index[t].day
+        in_win = (lo <= d.index[t].day <= hi) if shift == 0 else (d.index[t].day >= lo or d.index[t].day <= 4)
+        gain = same - sw
+        if wide and in_win and gain > 0:
+            key = (ts.year, ts.month)
+            if key not in best or gain > best[key][0]:
+                best[key] = (gain, t)
+    for _, t in best.values():
+        roll[t] = True
+    for t in range(1, n):
+        ret[t] = (c1[t] - c2[t - 1]) if roll[t] else (c1[t] - c1[t - 1])
     return ret, roll
 
 
@@ -137,14 +150,14 @@ def month_boot_p(x, months, rng):
 
 def score():
     names = variants()
-    N = len(MARKETS) * len(names) + len(MARKETS)  # variants x markets, plus 2 combined (set in the protocol)
+    N = 2 * (len(MARKETS) * len(names) + len(MARKETS))  # Amendment 2: the invalid first run counts too
     bar_p = 0.05 / N
     print("N (futures ledger) = %d, p bar %.5f" % (N, bar_p))
     rng = random.Random(SEED)
     allpnl = {}
     for m in MARKETS:
         d = load(m)
-        ret, roll = roll_returns(d)
+        ret, roll = roll_returns(d, m)
         n = len(d)
         dev_end = (2 * n) // 3        # last third is never touched here
         half = dev_end // 2
@@ -181,8 +194,8 @@ def selftest():
     c2 = np.full(n, 52.0)
     c1[30:] = 52.0  # after expiry the old C2 (52) is today's C1
     c2[30:] = 54.0
-    d = pd.DataFrame({"c1": c1, "c2": c2, "c3": c2, "c4": c2}, index=pd.date_range("2020-01-01", periods=n))
-    ret, roll = roll_returns(d)
+    d = pd.DataFrame({"c1": c1, "c2": c2, "c3": c2, "c4": c2}, index=pd.date_range("2020-01-18", periods=n))
+    ret, roll = roll_returns(d, 'CL')
     assert roll[30] and roll.sum() == 1, (roll.sum(), np.where(roll))
     assert abs(ret[30]) < 1e-9, ret[30]          # no fake +2 jump
     # 2) costs: flat position costs nothing; a flip costs two sides.
@@ -195,11 +208,11 @@ def selftest():
     rng = np.random.default_rng(1)
     c = 50 + np.cumsum(rng.normal(0, 1, 400))
     d1 = pd.DataFrame({"c1": c, "c2": c + 0.5, "c3": c + 1, "c4": c + 1.5}, index=pd.date_range("2020-01-01", periods=400))
-    r1, _ = roll_returns(d1)
+    r1, _ = roll_returns(d1, 'CL')
     p1 = signals(d1, r1, "TSMOM:60")
     d2 = d1.copy()
     d2.iloc[300:] *= 1.5
-    r2, _ = roll_returns(d2)
+    r2, _ = roll_returns(d2, 'CL')
     p2 = signals(d2, r2, "TSMOM:60")
     assert np.array_equal(p1[:299], p2[:299])
     # 4) stats sanity
