@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 11:38 AM CT (17:38Z): Kill and return tables sent to main (lifecycle, PR 748 redesign)
+
+Owner directive Nov 9: 1 new live strategy per week, kill and return conditions for all strategies. Sent kill rows (gold tripwire and 12 percent stop, OICORE existing kills plus net -1c at 50 alert, EVENT830 -5 dollar latch, shadow/probe/incubator rules), return rule (cash PF 1.3 over 100 shadow fills, held-out half 1.2, 14 days, owner approves), per-market shadow time to 100 fills (XRP 3.3 wk, Bitcoin 3, Ethereum 4, Dogecoin 10 days, AUD/USD 4, USD/CAD 5, natgas 7), incubator dollar kills (order cap 5, demote -10, latch -20), fast-path caps (total 40, max 2 incubators, daily loss 10). Flagged: slot caps are shared across the slot so incubators need per-strategy caps (code change); no shadow-row writer exists; dollar kills untested on history.
+
 ## 2026-11-09 11:30 AM CT (17:30Z): W-KILLCAL2: kill calibration rerun on cash basis, conclusions changed
 
 Same registered grid, only the basis changed. Cash PF (n): gold 1.40 (307), OICORE 1.32 (77), XRP 0.49 (86), Bitcoin 0.84 (155), Ethereum 1.17 (113), Dogecoin 1.01 (204); gold candle 1.26 (1298). R5 on Bitcoin: -1c@50 fires at trade 60 (Oct 11), saves only 4.51 (was 20+); -0.5c@100 saves 2.46; -0.5c@100 and -2c@50 false kills; Bitcoin is a small loser. R5 on XRP: fires at trade 50 (Oct 25), saves 0.21, next-50 PF 0.95. R1 rolling-60 under 0.7: gold fires once at trade 285 (Nov 6), next-50 PF 99, false in spirit; XRP trade 60 later net -1.15; Bitcoin 91 false; Ethereum 88 later +0.28; Dogecoin 198 false. R1 detects nothing useful on now-neutral series. OICORE streak L3 15 fires, 3 false; L6 first fire trade 38 (Nov 5), next-50 PF 0.48. Files w_killcal2.
