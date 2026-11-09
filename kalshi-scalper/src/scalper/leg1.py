@@ -13,6 +13,7 @@ SOURCES = [  # (file, market table, time column, result column, candle table)
     ("sports1.sqlite", "market", "close_ts", "result", "candle"),
     ("nflcombo1.sqlite", "km", "close_ts", "result", "candle"),
     ("nflpc1.sqlite", "km", "close_ts", "result", "candle"),
+    ("newser1.sqlite", "km", "close_ts", "result", "candle"),
 ]
 LEAD = 4 * 3600
 OPEN_MODE = False
