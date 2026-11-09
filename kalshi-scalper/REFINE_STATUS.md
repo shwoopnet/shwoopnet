@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 03:21 PM CT (21:21Z): W-DECK3: XRP and Ethereum on-deck grids rerun, nothing qualifies
+
+Same registered 40-cell grid, N not changed. XRP: puller had stopped at 1,848 of 5,696 markets (about 2.8 weeks); only flagged cell F4 favourite 0.97-0.98 at 2m PF inf (86) / inf (69) is degenerate (no losing trade because win and loss are one cent apart; not an edge); F1 0.80-0.88 6m 1.38 (186) / 0.91 (156) fails. Ethereum: pull slow (about 5 s per call); 175 usable windows (about 0.3 weeks), no cell reaches n 40 per half: untested, not failed. On-deck list unchanged.
+
 ## 2026-11-09 03:04 PM CT (21:04Z): OICORE ROOM WITHIN 25 PERCENT OF STOP: 6.87 of 50 (13.7 percent); ladder stepped down to 10
 
 Replay of the real slotLadderState (origin/main, offline, order docs rebuilt from report rows; assumptions settledAt = ts + 15 min, maxCost = count x avgFill): after the 15:57Z loss (-2.78) drawdown since the step began about 40.4 exceeded the down trigger 3 x 12 = 36, so the ladder stepped down to 10 (bottom step). Stop = min(5 x 10, 117.51, 150) = 50; booked drawdown from own peak 43.13 (peak 50.33, cum 7.20); room 6.87 (13.7 percent, 0.7 percent of base). About 2.5 to 3 average losses (2.10 at 12, 2.73 at the last 10-contract order). Order size trimmed to the remaining room near the stop. Stop refuses new orders until a reviewed edit moves reviewedAt. My earlier 16.87 of 60 figure assumed 12 contracts and was wrong; main corrected at once. nightly.py takes the stop from the last order count (10), consistent. Cash: PF 1.27 all, 0.51 last 40.
