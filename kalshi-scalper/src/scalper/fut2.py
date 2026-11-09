@@ -17,8 +17,9 @@ SPEC = {
 }
 SLIP_TICKS = 1.0
 BOOT = 2000
+BOOT_HI = 20000
 SEED = 90902
-N_PRIOR = 60          # futures ledger before FUT2
+N_PRIOR = 110         # futures ledger before the FUT2 rerun (60 + 50 void run), Amendment 6
 BARS_MIN_DAYS = 300   # floor: trading days per window
 
 
@@ -80,14 +81,19 @@ def atr_daily(d1, n=14):
 
 
 def trade_exit(m, i0, i_end, entry, direction, stop, target, exit_i):
-    """From bar i0+1 on: stop first (conservative), then target; else exit at exit_i close. Returns exit price."""
+    """From bar i0+1 on: a stop is filled at the worse of the stop and the bar open (gap through), stop before target in a bar,
+    a target is credited only at its level. Else exit at exit_i close."""
     for i in range(i0 + 1, exit_i):
         if direction > 0:
+            if m.o[i] <= stop:
+                return m.o[i]
             if m.l[i] <= stop:
                 return stop
             if target is not None and m.h[i] >= target:
                 return target
         else:
+            if m.o[i] >= stop:
+                return m.o[i]
             if m.h[i] >= stop:
                 return stop
             if target is not None and m.l[i] <= target:
@@ -118,7 +124,7 @@ def orb(m, days, window, stop_mode, target_r, exit_min, stress=1.0):
                 out[dn] = px * sp["pv"] - 2 * side
                 break
             direction = 1 if up else -1
-            entry = orh if up else orl
+            entry = max(orh, m.o[i]) if up else min(orl, m.o[i])
             if stop_mode == "opp":
                 stop = orl if up else orh
             else:
@@ -206,7 +212,7 @@ def volbreak(m, days, d1atr, prior_close, k, stress=1.0):
                 break
             if u or d_:
                 direction = 1 if u else -1
-                entry = up if u else dn_lvl
+                entry = max(up, m.o[i]) if u else min(dn_lvl, m.o[i])
                 out[dn] = (m.c[exit_i - 1] - entry) * direction * sp["pv"] - 2 * side
                 break
     return out
@@ -308,7 +314,8 @@ def stats(x):
     return dict(n=n, mean=x.mean(), sharpe=(x.mean() / sd * math.sqrt(252)) if sd > 0 else 0.0, pf=(w / l) if l > 0 else (99.0 if w > 0 else 0.0))
 
 
-def month_boot_p(x, months, rng):
+def month_boot_p(x, months, rng, boot=None):
+    boot = boot or BOOT
     obs = x.mean()
     cen = x - obs
     groups = {}
@@ -316,11 +323,11 @@ def month_boot_p(x, months, rng):
         groups.setdefault(mo, []).append(v)
     arrs = [np.array(g) for g in groups.values()]
     cnt = 0
-    for _ in range(BOOT):
+    for _ in range(boot):
         tot = np.concatenate([arrs[rng.randrange(len(arrs))] for _ in range(len(arrs))])
         if tot.mean() >= obs:
             cnt += 1
-    return (cnt + 1) / (BOOT + 1)
+    return (cnt + 1) / (boot + 1)
 
 
 def build_inputs(tag):
@@ -351,7 +358,7 @@ def run_variant(name, kind, kw, tag, spec, m, days, d1, d1atr, prior_close, prio
         out = {}
         for smin in (570, 840, 1200):      # NY AM 09:30, NY PM 14:00, Asia 20:00 ET
             for dn, v in odc(m, smin, 25.0, 38.0, kw["timeout"], stress).items():
-                out[dn * 10 + {570: 1, 840: 2, 1200: 3}[smin]] = v
+                out[int(dn)] = out.get(int(dn), 0.0) + v
         return out
     if kind == "donch":
         return donchian(d1, kw["n"], spec, stress)
@@ -370,11 +377,7 @@ def run_variant(name, kind, kw, tag, spec, m, days, d1, d1atr, prior_close, prio
 
 def to_series(pnl_by_day, all_days):
     """Daily P&L over all session days (zero when no trade). ODC keys are day*10+session: aggregated by day."""
-    agg = {}
-    for k, v in pnl_by_day.items():
-        dn = k // 10 if k > 10 ** 6 else k
-        agg[dn] = agg.get(dn, 0.0) + v
-    return np.array([agg.get(dn, 0.0) for dn in all_days])
+    return np.array([pnl_by_day.get(dn, 0.0) for dn in all_days])
 
 
 def score(tags=("NQ", "GC")):
@@ -402,9 +405,10 @@ def score(tags=("NQ", "GC")):
             pnl2 = run_variant(name, kind, kw, tag, spec, m, days_dev, d1, d1atr, prior_close, prior_inst, stress=2.0)
             x, x2 = to_series(pnl, dev_days), to_series(pnl2, dev_days)
             w1, w2, s2 = stats(x[:half]), stats(x[half:]), stats(x2)
-            p = month_boot_p(x, mon, rng)
-            ok = (w1["n"] >= BARS_MIN_DAYS and w2["n"] >= BARS_MIN_DAYS and w1["sharpe"] >= 0.5 and w2["sharpe"] >= 0.5
-                  and w1["pf"] >= 1.5 and w2["pf"] >= 1.5 and p < bar_p)
+            ok0 = (w1["n"] >= BARS_MIN_DAYS and w2["n"] >= BARS_MIN_DAYS and w1["sharpe"] >= 0.5 and w2["sharpe"] >= 0.5
+                   and w1["pf"] >= 1.5 and w2["pf"] >= 1.5)
+            p = month_boot_p(x, mon, rng, BOOT_HI if ok0 else None)
+            ok = ok0 and p < bar_p
             if ok:
                 survivors.append((tag, name))
             print("%-18s %7.0f %6.2f %5.2f | %7.0f %6.2f %5.2f | %6.2f %7.4f | %s" % (
