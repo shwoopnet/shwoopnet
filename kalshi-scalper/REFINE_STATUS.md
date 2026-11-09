@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 03:04 PM CT (21:04Z): OICORE ROOM WITHIN 25 PERCENT OF STOP: 6.87 of 50 (13.7 percent); ladder stepped down to 10
+
+Replay of the real slotLadderState (origin/main, offline, order docs rebuilt from report rows; assumptions settledAt = ts + 15 min, maxCost = count x avgFill): after the 15:57Z loss (-2.78) drawdown since the step began about 40.4 exceeded the down trigger 3 x 12 = 36, so the ladder stepped down to 10 (bottom step). Stop = min(5 x 10, 117.51, 150) = 50; booked drawdown from own peak 43.13 (peak 50.33, cum 7.20); room 6.87 (13.7 percent, 0.7 percent of base). About 2.5 to 3 average losses (2.10 at 12, 2.73 at the last 10-contract order). Order size trimmed to the remaining room near the stop. Stop refuses new orders until a reviewed edit moves reviewedAt. My earlier 16.87 of 60 figure assumed 12 contracts and was wrong; main corrected at once. nightly.py takes the stop from the last order count (10), consistent. Cash: PF 1.27 all, 0.51 last 40.
+
 ## 2026-11-09 02:32 PM CT (20:32Z): Registered reads at 40 fills: S-JUMP1, S-SDIR1, S-OIRLOW1 (information only)
 
 Cash basis, bootstrap 90 percent (5000 draws, seed 1). S-JUMP1 (61 OICORE fills): PF 1.27 dollar, 1.33 per contract, net +20.53 (-30.4 to +72.9); band 86300-106000 27 fills 6 wins PF 1.62 (1.74 per contract) +18.63; 106000 and over 34 fills 6 wins PF 1.04 (1.06) +1.90. Prediction (high band wins more, 27.2 vs 17.5 percent) did NOT hold (18 vs 22 percent); intervals overlap heavily: no band effect. S-SDIR1: sdir >= -0.09 27 fills 6 wins PF 1.04 (1.13) +1.69; sdir < -0.09 34 fills 6 wins PF 1.60 (1.59) +18.84; prediction held weakly on win rate, in cash terms the kept group is weaker; no surprise. S-OIRLOW1: 43 simulated windows, 8 wins, PF 1.26, +2.40c per contract (-5.7 to +10.3); rule needs positive net and PF at least 1.5: not shown, not a warning; inconclusive, information only for Nov 13. History cannot adopt a filter; N unchanged.
