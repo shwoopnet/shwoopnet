@@ -1,3 +1,4 @@
 slot_ts,poll_ts,server_date_header,clock_skew_s,cities_due,calls,n429,n_errors,ens_rows,nws_rows,quote_rows,result_rows,obs_rows,ens_low_rows,nws_low_rows,quote_low_rows,result_low_rows,obs_low_rows
 1794182400,1794185589,,,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 1794186000,1794186880,,,0,56,0,0,0,0,0,84,14,0,0,0,84,14
+1794207600,1794211056,,,0,28,0,0,0,0,0,0,0,0,0,0,0,0
