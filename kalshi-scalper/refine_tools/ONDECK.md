@@ -9,6 +9,6 @@ Status key: READY (registered, in PR/merged), DRAFT (registration text exists), 
 | XRPYES10 | XRP YES 0.88-0.97, 10m | READY | 1.71 (52) | 2.43/1.36 | about 13 | low |
 | ETHL1 | Ethereum L1 re-shadow, 6m | READY | 1.24 overall (113) | not split | about 26 | low-medium |
 | GOLDALL | gold L1 ungated; rise3 split read offline | DRAFT | live 1.40 (307) | rise3 moving 2.28 (132) vs still 0.57 (64) live; no replication on history (1.04 vs 1.04 before Oct 22) | about 65 | low-medium |
-| F1-F5 families (mid favourite, longshot, near-even, late favourite, spread-gated) | structurally different from the five above | HUNTING (W-DECK1 gold/BTC/ETH, W-DECK2 XRP) | pending | pending | pending | pending |
+| F1-F5 families (mid favourite, longshot, near-even, late favourite, spread-gated) | structurally different from the five above | W-DECK1 done for gold and BTC: none qualify (best PF about 1.0 to 1.07); ETH and XRP pending W-DECK2 | none >= 1.3 | n/a | up to 70 | none worth a slot |
 
 Structurally different from the on-deck five: the F2 longshot (cheap side 0.03-0.12), F3 near-even (0.40-0.60) and F4 late favourite (0.97-0.99, 2-3 min look) families; F1 and F5 are variants of the 0.88-0.97 favourite family. Needs another market quoted: none yet (logger sees gold, Bitcoin, Ethereum, XRP).

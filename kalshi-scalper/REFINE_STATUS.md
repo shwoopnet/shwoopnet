@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 12:33 PM CT (18:33Z): W-DECK1: gold and Bitcoin families, none qualify
+
+Registered first (S/w_deck1). 40 cells each on gold (4,339 windows) and Bitcoin (about 6,375) over about 9.9 weeks; ETH cache only 495 windows and XRP none: their 80 cells counted in N (about 760) but unscored. Model: look candle ask plus 1c slip, 1 contract, fee ceil(0.07*p*(1-p)), hold to settlement, halves by date. No cell reached PF 1.3 in both halves. Above 1.0 in both: gold favourite 0.75-0.82 at 6m PF 1.03 (339) / 1.05 (324), 67 signals a week; Bitcoin spread-gated favourite 0.88-0.97 at 10m (spread at most 0.02) 1.07 (287) / 1.01 (391), 70 a week. Longshots (F2), near-even (F3), late 0.97-0.99 (F4): below 1.0 in at least one half, fee and slip eat the edge. No near-even favourite below 0.50 (empty cells). Structurally different families show no edge; F1 and F5 are PF about 1.0. Prior: none worth a shadow slot.
+
 ## 2026-11-09 12:32 PM CT (18:32Z): On-deck list started; W-DECK1/W-DECK2 hunting structurally different shadow families
 
 Owner: keep adding to the on-deck list continuously, batches of 3 or more registrations, one small PR per batch, at most one extra merge and deploy a week. Created kalshi-scalper/refine_tools/ONDECK.md (current list: ETHNO6, BTCHI6, XRPYES10, ETHL1 ready; GOLDALL draft; F1-F5 families hunting). W-DECK1 grids gold/BTC/ETH candle history, W-DECK2 fetches XRP candles and runs the same grid. Registered first, N about 600.
