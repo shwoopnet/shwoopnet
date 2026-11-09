@@ -95,14 +95,12 @@ async function runShadowTick(args) {
     const rules = activeShadowRules(args.rules, args.allowedSeries);
     if (!rules.length) return { skipped: "no shadow rule" };
     const rows = shadowSignals(rules, args.quotes, args.now);
-    let written = 0;
     const seen = args.seen instanceof Set ? args.seen : new Set();
-    for (const d of rows) {
-      const key = d.rule + "|" + d.ticker;
-      if (seen.has(key)) continue;
-      seen.add(key);
-      try { await args.record(d); written += 1; } catch (e) { /* already logged this window, or a failed write: log only */ }
-    }
+    const fresh = [];
+    for (const d of rows) { const key = d.rule + "|" + d.ticker; if (seen.has(key)) continue; seen.add(key); fresh.push(d); }
+    // In parallel, so a slow write never delays the rest of the minute by more than one round trip; each one is swallowed on its own.
+    const results = await Promise.all(fresh.map(async (d) => { try { await args.record(d); return 1; } catch (e) { return 0; } }));   // already logged this window, or a failed write: log only
+    const written = results.reduce((a, b) => a + b, 0);
     if (seen.size > 5000) seen.clear();
     return { signals: rows.length, written };
   } catch (e) { return { skipped: "shadow failed" }; }
