@@ -136,7 +136,10 @@ async function settleShadowRows(args) {
   try {
     const max = Number.isInteger(args.max) && args.max > 0 ? Math.min(args.max, 20) : 12;
     const rows = (await args.readOpen()).filter((r) => r && r.settled === false && Number.isFinite(Number(r.closeMs)) && Number(r.closeMs) + 120000 <= args.now).sort((a, b) => Number(a.closeMs) - Number(b.closeMs)).slice(0, max);
+    const started = typeof args.clock === "function" ? args.clock() : Date.now(), budgetMs = Number.isFinite(args.budgetMs) ? args.budgetMs : 15000;
     for (const r of rows) {
+      // A time guard (security review note): the reads are one after another at the end of a minute function with a hard timeout, so stop after the budget and leave the rest for the next run.
+      if ((typeof args.clock === "function" ? args.clock() : Date.now()) - started > budgetMs) break;
       out.checked += 1;
       try {
         const m = await args.market(String(r.ticker));

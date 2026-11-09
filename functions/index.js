@@ -702,10 +702,10 @@ exports.kalshiLiveArmed = onSchedule(
         if (shadowLib.SHADOW_RULES.length) {
           try { await shadowLib.runShadowTick({ now, quotes: market.quotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen }); }
           catch (e) { /* log only */ }
-          // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 12 reads; every error swallowed.
+          // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and a 15 s time guard; every error swallowed.
           if (Math.floor(now / 60000) % 5 === 0) {
             try {
-              await shadowLib.settleShadowRows({ now, max: 12,
+              await shadowLib.settleShadowRows({ now, max: 6, budgetMs: 15000, clock: Date.now,
                 readOpen: async () => (await db.collection(shadowLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
                 update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
                 market: (ticker) => kalshiMarketApi().market(ticker) });

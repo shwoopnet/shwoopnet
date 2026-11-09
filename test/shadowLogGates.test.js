@@ -120,6 +120,9 @@ gates.SC1 = async () => {
   assert.deepStrictEqual(asked.sort(), ['A', 'C'], 'B closed under 2 minutes ago and is not asked');
   assert.deepStrictEqual([r.checked, r.settled, updates.length, updates[0][0]], [2, 1, 1, 'R1_A'], 'a failing read is skipped and the next run tries again');
   assert.ok(updates[0][1].settled === true && updates[0][1].won === true && Number.isFinite(updates[0][1].pnl));
+  let tclock = 0;
+  const slow = await sh.settleShadowRows({ now: NOW, max: 12, budgetMs: 1000, clock: () => (tclock += 600), readOpen: async () => rows.map((x, i) => Object.assign({}, x, { ticker: 'S' + i, closeMs: NOW - 900000 })).concat(rows.map((x, i) => Object.assign({}, x, { ticker: 'T' + i, closeMs: NOW - 900000 }))), update: async () => {}, market: async () => ({ result: 'yes' }) });
+  assert.ok(slow.checked < 6, 'the time guard stops the sweep and leaves the rest for the next run: ' + JSON.stringify(slow));
   const bad = await sh.settleShadowRows({ now: NOW, readOpen: async () => { throw new Error('x'); }, update: async () => {}, market: async () => ({}) });
   assert.deepStrictEqual(bad, { checked: 0, settled: 0 }, 'an unreadable list never throws');
 };
