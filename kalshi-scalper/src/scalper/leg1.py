@@ -166,3 +166,70 @@ if __name__ == "__main__":
         sl = cmd_score()
         if "--holdout" in sys.argv and sl:
             cmd_holdout(sl)
+
+
+# ------------------------------------------------------------------ SINGLELEG3: conditional cells (pooled by sport group)
+GROUPS = [("NBA", ("KXNBA",)), ("NHL", ("KXNHL",)), ("NFLGAMELINES", ("KXNFLGAME", "KXNFLSPREAD", "KXNFLTOTAL", "KXNFL1H")),
+          ("NFLPROPS", ("KXNFLPASS", "KXNFLREC", "KXNFLRSH", "KXNFLANYTD")), ("TENNIS", ("KXATP", "KXWTA")),
+          ("NCAAF", ("KXNCAAF",)), ("MLB", ("KXMLB",)), ("OTHER", ("",))]
+
+
+def group_of(series):
+    for g, pre in GROUPS:
+        if any(series.startswith(p) for p in pre if p):
+            return g
+    return "OTHER"
+
+
+def conditions(t, b, a):
+    import datetime
+    d = datetime.datetime.fromtimestamp(t - 5 * 3600)       # US Eastern-ish (UTC-5), fixed offset, registered
+    return ["dow%d" % d.weekday(), "tod%d" % (d.hour // 6), "spr%s" % ("tight" if a - b <= 0.02 else "wide")]
+
+
+def cmd_cond():
+    rows = load_markets()
+    cut = split_time(rows)
+    from statistics import NormalDist
+    pot = len(GROUPS) * 2 * len(BANDS) * (7 + 4 + 2)
+    N = N_PRIOR + N_EXTRA + pot
+    zb = NormalDist().inv_cdf(1 - 0.05 / N)
+    print("SINGLELEG3 potential cells %d, N %d, z bar %.2f" % (pot, N, zb))
+
+    def build(sel):
+        cells = defaultdict(list)
+        for ser, tk, ev, t, b, a, res in rows:
+            if not sel(ser, t):
+                continue
+            g = group_of(ser)
+            for side, price, won in (("yes", a, res == "yes"), ("no", 1 - b, res == "no")):
+                for lo, hi in BANDS:
+                    if lo <= price < hi:
+                        net = (1.0 if won else 0.0) - price - float(fee_per_contract(price))
+                        for c in conditions(t, b, a):
+                            cells[(g, side, (lo, hi), c)].append((ev, net))
+        return cells
+    dev = build(lambda s, t: t <= cut[s])
+    short, allc = [], []
+    for k, v in dev.items():
+        if len(v) < MIN_MARKETS:
+            continue
+        n, ncl, mean, z = clustered(v)
+        allc.append((mean, k, n, ncl, z))
+        if ncl >= MIN_CLUSTERS and mean >= EDGE_MIN and z >= zb:
+            short.append((mean, k, n, ncl, z))
+    allc.sort(reverse=True)
+    print("cells with 100+ dev markets:", len(allc))
+    for mean, k, n, ncl, z in allc[:12]:
+        print("  %-12s %-3s %.2f-%.2f %-8s n %5d events %4d net %+0.3f z %.2f" % (k[0], k[1], k[2][0], k[2][1], k[3], n, ncl, mean, z))
+    print("SHORTLIST:", len(short))
+    for mean, k, n, ncl, z in sorted(short, reverse=True):
+        print("  ", k, n, ncl, round(mean, 4), round(z, 2))
+    return short
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "cond":
+    for a in sys.argv[2:]:
+        if a.startswith("--prior="):
+            N_EXTRA = int(a.split("=", 1)[1])
+    cmd_cond()
