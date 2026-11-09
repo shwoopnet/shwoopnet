@@ -18,7 +18,7 @@ def monthly(m):
     d = fut1.load(m)
     ret, roll = fut1.roll_returns(d, m)
     spec = fut1.MARKETS[m]
-    side = fut1.cost_side(spec)
+    side = fut1.FEE + fut1.SLIP_TICKS * spec["tick"]
     s = pd.Series(ret * spec["mult"], index=d.index)
     rl = pd.Series(roll, index=d.index)
     g = s.groupby([d.index.year, d.index.month]).sum()
