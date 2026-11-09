@@ -210,7 +210,7 @@ gates['K6 the nightly report carries the last 7 days of skips as counts per reas
   assert.deepStrictEqual(s.byReason, { shard_short: 2, stale_tick: 1, unknown: 1 });
   assert.ok(!JSON.stringify(s).includes('should-not-pass') && !JSON.stringify(s).includes('<b>'), 'no id, no odd text');
   assert.deepStrictEqual(s.rows.find((r) => r.ticker.startsWith('KXEURUSD')).detail, { shard: 0, avail: 0.12, need: 1 }, 'numbers only');
-  assert.deepStrictEqual(Object.keys(s.rows[0]).sort(), ['at', 'atMs', 'detail', 'reason', 'secondsLeft', 'strategy', 'ticker']);
+  assert.deepStrictEqual(Object.keys(s.rows[0]).sort(), ['at', 'atMs', 'detail', 'reason', 'secondsLeft', 'side', 'strategy', 'ticker']);
   const token = 'x'.repeat(32);
   const call = async (deps) => {
     const res = { code: 0, body: null, set() {}, status(c) { this.code = c; return this; }, json(b) { this.body = b; } };
@@ -229,6 +229,18 @@ gates['K7 deploy-latest offers the minute function for this change and says how 
   const sh = read('functions', 'deploy-latest.sh');
   assert.ok(/kalshiS\[l\]ot\[A-Za-z\]\*Lib/.test(sh), 'a slot library change selects deploy-sizing.sh');
   assert.ok(/\^firestore\\\.rules\$/.test(sh) && /firestore:rules/.test(sh), 'a rules change is named with its deploy command');
+};
+
+// A price skip says which side it would have bought (Nov 8, 2026, the refinement chat's S-OICHEAPSKIP1 read). Consequence: the report row carries side "yes" or "no" and the price, so a skipped signal can be scored without guessing the side; anything else in the note is dropped.
+gates['K8 the report row of a price skip carries the side (yes or no only) and its price'] = () => {
+  const NOWR = NOW;
+  const ok = report.skipSection([
+    { strategy: 'OICORE', ticker: 'KXBTC15M-26NOV081000-00', reason: 'cheap_skipped', atMs: NOWR - 1000, secondsLeft: 150, detail: { price: 0.06, min: 0.08 }, note: 'no' },
+    { strategy: 'OICORE', ticker: 'KXBTC15M-26NOV081015-15', reason: 'cheap_skipped', atMs: NOWR - 900, secondsLeft: 150, detail: { price: 0.05, min: 0.08 }, note: 'a free text note with a secret' },
+    { strategy: 'OICORE', ticker: 'KXBTC15M-26NOV081030-30', reason: 'oi_below', atMs: NOWR - 800, secondsLeft: 150, detail: null, note: 'yes' }], NOWR);
+  assert.strictEqual(ok.rows[0].side, 'no'); assert.deepStrictEqual(ok.rows[0].detail, { price: 0.06, min: 0.08 });
+  assert.strictEqual(ok.rows[1].side, null, 'free text is dropped, never echoed');
+  assert.strictEqual(ok.rows[2].side, 'yes');
 };
 
 (async () => {

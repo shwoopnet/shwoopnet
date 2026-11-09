@@ -137,7 +137,8 @@ function skipSection(docs, nowMs) {
     const detail = {};
     if (d.detail && typeof d.detail === "object") for (const [k, v] of Object.entries(d.detail)) if (/^[A-Za-z]{1,20}$/.test(k) && typeof v === "number" && Number.isFinite(v)) detail[k] = v;
     return { at: new Date(Number(d.atMs)).toISOString(), atMs: Number(d.atMs), strategy: word(d.strategy, 40), ticker: typeof d.ticker === "string" && /^[A-Z0-9-]{1,60}$/.test(d.ticker) ? d.ticker : null,
-      reason: word(d.reason, 40) || "unknown", secondsLeft: num(d.secondsLeft), detail: Object.keys(detail).length ? detail : null };
+      reason: word(d.reason, 40) || "unknown", secondsLeft: num(d.secondsLeft), detail: Object.keys(detail).length ? detail : null,
+      side: d.note === "yes" || d.note === "no" ? d.note : null };   // the side a skipped signal would have bought (the skip's note holds it for price skips); only "yes" or "no", never free text
   }).sort((a, b) => a.atMs - b.atMs);
   const byReason = {};
   rows.forEach((r) => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
