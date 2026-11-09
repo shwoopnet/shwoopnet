@@ -9171,3 +9171,6 @@ Registered `workers/FUT3_PROTOCOL.md` with Amendment 1 (eda5022) and the scorer 
 
 ### COMSEAS1 result (Nov 9, 2026; registered 2961da2 before any month was scored; N 218; holdout years unread)
 Calendar-month seasonality in WTI crude (26 development years, 1985 to 2010) and Henry Hub gas (20, 1994 to 2013) futures, 48 market-month-direction cells, one round trip per month at 2.50 + 1 tick per side. Zero shortlisted cells: the best is crude long in March (+$1,146 a contract a year, t 2.65, 26 years) against a bar of about t 4; crude long in April (t 1.52) and short in November (t 1.66) follow; gas has no cell above t 1.5. Verdict: FALSIFIED on development; the 2011 on (crude) and 2014 on (gas) years stay unread. A single t 2.65 in 48 cells is what chance gives.
+
+### LADDOW1 result (Nov 9, 2026; registered dff5cc9 before any outcome; N 4,920, z bar 4.26; holdout unread)
+Hourly Bitcoin ladder, quote 45 minutes before close, C=10, 220 potential cells (6-hour close block or weekday x side x band), 69 readable. Zero shortlisted. Highest z: Saturday NO at 90c to 97c +3.6c (z 3.28, a favourite-side cell, which the standing ban excludes as a trade anyway), Eastern-hours block 12 to 18 YES at 80c to 90c +5.1c (z 2.15), block 18 to 24 NO at 70c to 80c +7.1c (102 events, z 1.91). All below the bar of 4.26. Verdict: FALSIFIED on development; holdout unread.
