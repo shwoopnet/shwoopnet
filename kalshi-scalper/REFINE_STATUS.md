@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:37 AM CT (16:37Z): S-OICONF1: ETH OI confirmation for OICORE FAILS
+
+Registered first. History-rebuilt OICORE triggers (not live cash fills) PF 1.80 n 495 of 499. Skip worst ETH OI-change tercile: PF 1.80 n 375, net +25.88 vs +35.32. First half base 2.22 keep 2.35 (skipped 34 percent, net 16.50 vs 23.42); second half held out base 1.47 keep 1.46 (skipped 15 percent, net 9.39 vs 11.90). Held-out PF flat, net falls both halves, skipped trades PF 1.79 (not worse). Only ETH OI change scored (registration ambiguous); ETH price direction untested; live cash not scored. N about 451 plus. Data now cached in oi/eth.jsonl.
+
 ## 2026-11-09 10:31 AM CT (16:31Z): W-SEPNEW1: early-sell separation on new features, noise
 
 Registered first, 9 cuts, N 536, z bar about 5.2. Candle 464 (H2 held out from 2026-10-22), live 305 fills, 16 early sells. Baseline PF H1/H2/live 1.58/1.24/1.21. PF with skip (H2/live): gold 60m dir 2.69/1.69 (ties at 0, skips about 70 percent), 240m dir 1.05/1.05, bid slope 1.11/1.30, dips below 0.80 1.26/1.21 (skipped 15 percent, live net down), BTC OI 1.24/1.00, OICORE same window 1.14/1.17 (live n=7), prior favourite lost 1.00/0.91 (skipped bucket PF 4 to 10, opposite), prior window loss untestable (1 to 2 events), silver 60m dir 2.20/2.04 (skips 70 percent). All fail. OICORE worst 8 losses (5 with BTC history): prior 60m dir +0.40 vs +0.10 all fills, 240m -0.40 vs -0.45: nothing separates, n too small.
