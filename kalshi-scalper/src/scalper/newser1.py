@@ -81,7 +81,12 @@ def do_fetch(mx, low=False):
     print(len(todo), "markets still to fetch", flush=True)
     t0 = time.time(); n = 0
     for tk, c in todo[:mx]:
-        d = h.get(f"/historical/markets/{tk}/candlesticks", {"start_ts": c - 30 * 3600, "end_ts": c, "period_interval": 60})
+        try:
+            d = h.get(f"/historical/markets/{tk}/candlesticks", {"start_ts": c - 30 * 3600, "end_ts": c, "period_interval": 60})
+        except Exception as e:          # a market the endpoint refuses (HTTP 400): record it as done with no candles, never stop the run
+            print("skipped", tk, str(e)[:60], flush=True)
+            db.execute("INSERT OR REPLACE INTO done VALUES(?,?)", (tk, 0)); db.commit()
+            continue
         if d is None:
             continue
         rows = []
