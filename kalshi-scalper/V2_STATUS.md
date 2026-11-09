@@ -267,3 +267,10 @@
 - 2026-10-30 08:05 CT | LADFADE FALSIFIED on the unread NEWH9 holdout: 105 trades, 41.9% won, PF 1.01 at C=10, 0.99 at fees x1.2. The overshoot closes within one minute (signal ask 0.341, next-candle fill 0.401, ladder 0.405). Forward candidate LADFADE_BTC kept as a dead reference. N about 627,846.
 - 2026-10-30 07:40 CT | NEWH9 done (6 tries, N about 627,845): LADLOCK BTC and gold NOT_ENOUGH_DATA (0 and 1 fillable locks, ladder arbitrage closed); LADLEAN FALSIFIED (val PF 0.95); ASIAGOLD FALSIFIED (0.79); NYGOLD FALSIFIED (0.88); BTC10AM NOT_ENOUGH_DATA (74 disc trades, PF 0.54). Holdout Oct 18 to 30 unread. Post-hoc observation: Bitcoin 15m mid after minute 1 overshoots the hourly ladder by 3c to 5c; LADFADE to be registered on the unread holdout plus forward.
 - 2026-10-30 06:10 CT | SHORTLIST 2 sent to main: no new candidate cleared; OI core in forward (OICORE 0 entries, OIDRIFT 1 entry, 0 settled); NEWH7, NEWH8, GEN8 FALSIFIED; LIQ1 dropped; GOLDPYTH-H NOT_RUNNABLE; GEN9 still fetching; brief A (Pyth key) awaits the owner.
+
+## Handoff Nov 9, 4:20 PM CT
+Finished since the 16:20Z note: REGIME1 (one lead, folded into main's GOLDALL shadow, PR 752: pass = 150 signals with at least 50 moving, moving cash PF 1.3+, second half 1.2+, 14 days; kill moving net under -1c per contract after 50 moving), lifecycle and fast-path designs, SHADOW_CANDIDATES_W1 and W2, NEWSER1 (no shortlist: 684 of 2,723 markets had a usable quote, no cell reached 100 dev markets), XVENUE1 step 1 (zero clean Kalshi/Polymarket pairs).
+On deck: L1-AUDUSD, L1-ETH, XMET1-PALLADIUM, LAD45. GOLD-MOM1 is NOT separate (inside GOLDALL).
+Running jobs: none. Wakes: hourly check-in, weekly Sunday 6:41 PM CT supply list (first Nov 15).
+Next: register Deribit implied vs realized or a release-window test on newser1.sqlite (thin data, low prior), first-hour new-listing pricing (needs a fetch), INGAMELAG1 when about 60 NBA games exist (about Nov 22). Candidates needing a quote beyond gold/BTC/ETH/XRP: send main the series ticker and fields first.
+Ledger N: Kalshi harness about 1,500,514; single-leg about 5,130; futures 170.
