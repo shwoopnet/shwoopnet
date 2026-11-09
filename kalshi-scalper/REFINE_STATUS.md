@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 12:28 PM CT (18:28Z): W-OIR3: OICORE rise3 moving vs still on history, FAIL (watch forward only)
+
+Registered first (S/w_oir3), rule fixed from gold (abs rise3 >= 0.05, no retuning). Rebuilt triggers n 514, cash PF 10 contracts 1c slip: H1 moving 1.71 (191) vs still 2.16 (66): still better; H2 moving 1.51 (196) vs still 0.76 (61); all moving 1.60 (387) vs still 1.34 (127), base 1.53; skipped about 25 percent. Misses both-halves bar (H1 reversal). Live 77 settled fills with rise3 recomputed from candles: moving 1.65 (55) vs still 0.83 (22), agrees with H2, small. Do not adopt; at most watch forward.
+
 ## 2026-11-09 12:27 PM CT (18:27Z): W-R4CANDLE: gold R4 momentum split does NOT replicate on history
 
 Registered first (S/w_r4candle). Exact live rise3 definition (cache has bid and ask closes); candle model 10 contracts, ceil fee, 1c slip, exit at 25c. Moving vs still PF (n): pre-Oct-22 (never saw live rise3) 1.04 (763) vs 1.04 (243), halves 0.88 vs 0.95 and 1.27 vs 1.16; post-Oct-22 1.40 (183) vs 1.07 (51), halves 1.11 vs 0.79 and 1.88 vs 1.71; all 1.09 (946) vs 1.04 (294). Pre segment shows no gap, bar fails; post leans the live way but the bootstrap interval on the difference spans zero. Still share 22 to 25 percent. 942 rises and 4 falls: moving is almost entirely a rise. History mean PF about 1.1 vs live 2.28 and 0.57, noisy. 1240 rows, none missing rise3.
