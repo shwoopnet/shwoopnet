@@ -118,6 +118,10 @@ service cloud.firestore {
       allow read: if isAdmin();
       allow write: if false;
     }
+    match /kalshiShadowRows/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
 
     // The paper tracker's records (what L1's rule WOULD have bought on candidate markets, no money). Written only by the keyless scheduled function, readable only by the admin.
     match /kalshiPaperOrders/{id} {

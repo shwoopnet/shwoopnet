@@ -55,6 +55,8 @@ const shardAlertLib = require("./kalshiShardAlertLib");
 const slotLib = require("./kalshiSlotLib");
 const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
+const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
+const shadowSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
@@ -695,6 +697,11 @@ exports.kalshiLiveArmed = onSchedule(
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
+        }
+        // Shadow rules (Nov 9, 2026, stage 1 of docs/STRATEGY_LIFECYCLE.md): log only, after everything that can trade has run. With the registry empty this makes no call and no write.
+        if (shadowLib.SHADOW_RULES.length) {
+          try { await shadowLib.runShadowTick({ now, quotes: market.quotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen }); }
+          catch (e) { /* log only */ }
         }
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
