@@ -24,3 +24,14 @@ The scorer lists 14 variants per market (4 TSMOM, 1 CARRY, 3 TC, 5 long-only con
 
 ## Amendment 2 (Nov 9, after a first, INVALID development run; holdout still unread)
 The first development run (scorer ff6f90d) showed Sharpe 2 to 3 on carry and trend on crude, which is not believable. Cause found: my roll detector flagged 28% of days as rolls (1,923 of about 6,800 on crude), not the roughly 5% a monthly contract implies, and a false roll uses the C1-minus-C2 gap as a return, which correlates with the carry sign and manufactures carry profit. The first run's survivors are VOID and are not reported as results. Fix, fixed before the rerun: at most ONE roll per calendar month, inside the market's expiry window (crude: days 17 to 27 of the month; natural gas: day 24 on to day 4 of the next month), choosing the day where contract identity fits best, and only where the C2-C1 spread is wide (0.2% of price). Check before scoring: crude 438 rolls and gas 337 rolls in 36 and 30 years (median 11 per year). Because the invalid run was scored, N doubles: N = 2 x 30 = 60, p bar 0.05/60. Scorer rerun commit is the one cited in the result.
+
+## Amendment 3 (Nov 9, before any GC or NQ data exists and before any GC or NQ scoring): priority markets and families
+Owner priority: GC (gold) and NQ (Nasdaq 100 futures) are the first targets once data lands (export spec: workers/FUT_EXPORT_SPEC.md). Contract facts to verify before scoring: GC 100 oz, tick 0.10 = $10; MGC 10 oz, tick $1; NQ $20 per point, tick 0.25 = $5; MNQ $2 per point, tick $0.50. Costs per contract per side (assumptions, stress x2): full size 2.50 fees + 1 tick slippage; micro 0.75 fees + 1 tick. Roll: unadjusted front month, contract identity as in the crude/gas rule (one roll per quarter or month inside the expiry window, tie not a roll), costs include one extra side at each roll.
+Families (each pre-registered when the data lands, with its exact parameter grid and N counted before scoring; futures ledger continues from N 60):
+1. Opening range breakout (first 15/30/60 minutes of the regular session, stop at the other side, exit at close).
+2. Trend (Donchian 20/55/100, daily; moving-average cross).
+3. Session mean reversion (fade the move away from session VWAP; overnight-to-open reversal).
+4. Overnight drift (long close to open vs open to close, NQ).
+5. Volatility breakout (ATR multiple from the prior close).
+6. Gap fade (opening gap vs prior settle).
+Each: costs per contract per side, windows W1/W2 by thirds of the development period, held-out last third read once, bar Sharpe 0.5 and PF 1.5 in W1 and W2 after costs and the deflated p bar, long-only/passive control must be beaten, vendor script rules tested exactly as written on dates they were not tuned on. Predicted before scoring: most families fail costs on 1-minute rules; the best honest prior for any pass is below 10% per family.
