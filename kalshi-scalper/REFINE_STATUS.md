@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:28 AM CT (16:28Z): W-GOLDMIX1: weekday and hour mix does not explain Nov 1-9 (FAIL)
+
+Registered first, 42 cells added (N about 527, z bar about 5.2). Candle PF 1.26 (1298), halves 1.13/1.41. Live P1 4.41, P2 1.24, P3 0.89. Reweighting to P3 mix: live P1 2.91, P2 1.97 (weekday alone 0.89); candle P1 1.44, P2 1.00 vs P3 1.22. Cells sparse (about 2 live trades). 4 of 33 skip cells pass technically (each about 3 percent of trades), expected by chance, gains +0.03 to +0.1 PF. Verdict FAIL, noise.
+
 ## 2026-11-09 10:27 AM CT (16:27Z): W-GOLDVOL1: gold vs trailing volatility FAILS
 
 Registered first. Terciles of 30 and 60 min sd and 5 min range, cut on first half. Worst bucket was the middle one (F30, R5) or low (F60): not monotonic. Candle PF first/second half 1.56/1.23 (n 229 each). Skip rule: candle net falls in first half for all three; R5 fails live (1.21 to 1.13); F30 skips 34 to 39 percent. N tried about 485, bar z about 5.2. No shadow.
