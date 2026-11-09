@@ -15,7 +15,8 @@ const GOOD = () => ({ id: 'SHTEST', readme: 'kalshi-scalper/README.md#SHADOW-SHT
 const q = (series, ticker, over) => ({ series, m: Object.assign({ ticker, status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.1100', yes_ask_dollars: '0.1200', yes_ask_size_fp: '50.00', yes_bid_size_fp: '40.00' }, over || {}) });
 
 gates.SH1 = () => {
-  assert.ok(Object.isFrozen(sh.SHADOW_RULES) && sh.SHADOW_RULES.length === 0, 'the registry is a frozen list in code and starts empty: nothing changes until a reviewed edit adds a rule');
+  assert.ok(Object.isFrozen(sh.SHADOW_RULES), 'the registry is a frozen list in code: nothing changes until a reviewed edit adds a rule');
+  assert.ok(sh.SHADOW_RULES.every((r) => Object.isFrozen(r) && Object.isFrozen(r.entry) && Object.isFrozen(r.series)), 'every level of every rule is frozen');
   assert.strictEqual(sh.validateShadowRule(GOOD(), ALLOWED).ok, true);
   for (const [why, mut] of [['a market the bot does not quote', (r) => { r.series = ['KXSOL15M']; }], ['an exit field (a shadow rule has none)', (r) => { r.exit = {}; }], ['price outside 0.01 to 0.99', (r) => { r.entry.priceMax = 1; }],
     ['a window under 60 s', (r) => { r.entry.leftMinSec = 30; }], ['more than 10 contracts', (r) => { r.contracts = 11; }], ['a bad id', (r) => { r.id = 'bad id'; }], ['no readme', (r) => { r.readme = 'x'; }]]) {
@@ -75,5 +76,27 @@ gates.SH4 = () => {
   assert.ok(m && /allow read: if isAdmin\(\)/.test(m[1]) && /allow write: if false/.test(m[1]), 'the log is admin read and no client write');
   assert.ok(!/kalshiShadowRows/.test(read('index.html')), 'the page does not read the shadow log (the scorer will, in a later pull request)');
   for (const f of ['kalshiLiveLib.js', 'kalshiSlotLib.js', 'kalshiSlotRunLib.js', 'kalshiReportLib.js']) assert.ok(!/kalshiShadowRows|kalshiShadowLib/.test(read('functions', f)), f + ' knows nothing of the shadow log: nothing that decides an order can read it');
+};
+gates.SH5 = async () => {
+  // Week 1 (Nov 9, 2026): exactly four registered shadow rules, each valid against the markets the bot quotes, 1 contract, and pointing at a pre-registration that exists.
+  const rules = sh.SHADOW_RULES;
+  assert.deepStrictEqual(rules.map((r) => r.id), ['ETHNO6', 'BTCHI6', 'XRPYES10', 'ETHL1']);
+  for (const r of rules) { assert.strictEqual(sh.validateShadowRule(r, live.L1_SERIES).ok, true, r.id); assert.strictEqual(r.contracts, 1, r.id + ' is one contract'); }
+  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 4, 'the production registry passes the same validation');
+  const by = (id) => rules.find((r) => r.id === id);
+  assert.deepStrictEqual({ ...by('ETHNO6').entry }, { sideRule: 'no', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
+  assert.deepStrictEqual({ ...by('BTCHI6').entry }, { sideRule: 'favourite', priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
+  assert.deepStrictEqual({ ...by('XRPYES10').entry }, { sideRule: 'yes', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, 'the 10 minute look');
+  assert.deepStrictEqual({ ...by('ETHL1').entry }, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "L1's own entry on Ethereum");
+  const readme = read('kalshi-scalper', 'README.md');
+  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1'), 'the pre-registration is in the README before the first row');
+  // A signal only inside its own window and band: an Ethereum favourite at 0.93 with 6 minutes left is a signal for ETHL1 (and ETHNO6 only if its NO side is the one in band).
+  const quote = (series, over) => ({ series, m: Object.assign({ ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' }, over || {}) });
+  const rows = sh.shadowSignals(rules, [quote('KXETH15M'), quote('KXBTC15M'), quote('KXXRP15M')], NOW);
+  const ids = rows.map((r) => r.rule).sort();
+  assert.deepStrictEqual(ids, ['BTCHI6', 'ETHL1'], 'at 6 minutes left: Bitcoin 0.93 and the Ethereum favourite qualify; XRP needs the 10 minute look; the Ethereum NO side is 0.08 (outside 0.88 to 0.97): ' + ids);
+  const ten = sh.shadowSignals(rules, [quote('KXXRP15M', { close_time: new Date(NOW + 600000).toISOString() })], NOW);
+  assert.deepStrictEqual(ten.map((r) => r.rule), ['XRPYES10'], 'XRP at 10 minutes left');
+  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXGOLD15M')], NOW), [], 'a market no rule names (gold) is never logged');
 };
 (async () => { for (const [n, f] of Object.entries(gates)) { await f(); console.log('ok   ' + n); } })().catch((e) => { console.error(e); process.exit(1); });

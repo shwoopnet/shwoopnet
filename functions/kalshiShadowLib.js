@@ -8,7 +8,15 @@
 //
 // Quote source: the market list the bot's minute function already holds (the L1 markets: gold, Bitcoin, Ethereum, XRP), so a shadow rule costs zero extra requests. Another market needs its quote read added
 // in a reviewed edit (as EVENT830's markets were), not here.
-const SHADOW_RULES = Object.freeze([]);
+// WEEK 1 (Nov 9, 2026; the weekly candidate list from the refinement chat, pre-registration kalshi-scalper/README.md#SHADOW-WEEK1). Four rules, each on a market the bot already quotes, 1 contract, log only.
+// Every one is a SHADOW candidate, never a pass (N about 670 on top of about 540; no counterparty named for any). Shadow rows assume a fill at the touch (an upper bound): read `wouldFill`.
+const RULE = (id, series, entry) => Object.freeze({ id, readme: "kalshi-scalper/README.md#SHADOW-WEEK1", series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
+const SHADOW_RULES = Object.freeze([
+  RULE("ETHNO6", "KXETH15M", { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  RULE("BTCHI6", "KXBTC15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  RULE("XRPYES10", "KXXRP15M", { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }),
+  RULE("ETHL1", "KXETH15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+]);
 
 const OPEN = ["open", "active"];
 const RULE_KEYS = ["id", "readme", "series", "entry", "contracts", "registeredAt", "forwardReadDate"];
