@@ -2,7 +2,10 @@
 
 Each strategy below has: what it is, the exact rules as the code runs them today, its record, and what is not known. Rules are read from `functions/kalshiLiveLib.js` and `functions/kalshiSlotLib.js`; stats are dated and sourced. Nothing here changes a rule: proposed changes are in `docs/STRATEGY_RISK_SEPARATION.md`. All times US Central.
 
-## L1 "Closing buy" (gold; Dogecoin paused)
+## L1 "Closing buy" (gold only; Dogecoin removed from the bot on 2026-11-09)
+
+> **Update 2026-11-09:** Dogecoin is removed from the bot entirely (off the market, size and paused lists; any order for it is refused). Its earlier orders and reports stay for research. The paragraphs below describe it as it was while paused.
+
 
 **What it is.** About 6 minutes before a 15 minute Kalshi market closes, buy the side that is already priced 88c to 97c (the heavy favourite) and hold it to settlement, selling early only if the side's bid falls to 25c. It collects the last few cents of a nearly settled market. Wins are small, a loss is large, so it only works at a high win rate.
 

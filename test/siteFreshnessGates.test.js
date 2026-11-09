@@ -27,7 +27,7 @@ gates.SF2 = () => {
   assert.ok(new RegExp('at most ' + (live.L1_WINDOW_CAP_FRACTION * 100) + '% of the balance in one 15 minute window').test(t), 'the one window limit');
   assert.ok(new RegExp('down ' + (live.L1_SIZED_STOP_FRACTION * 100) + '% of the balance').test(t) && new RegExp('stop at ' + (live.L1_SIZED_STOP_FRACTION * 100) + '% of the balance').test(t), 'the loss stop, in the rules and in the Start confirmation');
   assert.ok(new RegExp('Exit at ' + Math.round(live.EXIT_THRESHOLD * 100) + 'c').test(t) && new RegExp('falls to ' + Math.round(live.EXIT_THRESHOLD * 100) + 'c').test(t), 'the exit line');
-  assert.ok(live.PAUSED_SERIES.includes('KXDOGE15M') && live.FIXED_CONTRACTS.KXDOGE15M === 5, 'Dogecoin is paused in code (its fixed 5 waits for a reviewed resume)');
+  assert.ok(!live.L1_SERIES.includes('KXDOGE15M') && !live.PAUSED_SERIES.includes('KXDOGE15M') && live.FIXED_CONTRACTS.KXDOGE15M === undefined, 'Dogecoin is removed from the bot entirely (Nov 9, 2026)');
   assert.ok(/Gold grows with the account/.test(t) && /except gold, whose size scales with the account/.test(t) && !/Dogecoin[^.]*(contracts|grow)/.test(t), 'the page says gold scales and does not give Dogecoin a size while it is paused');
   assert.ok(!/Ethereum 1\b/.test(t) && live.PAUSED_SERIES.includes('KXETH15M'), 'Ethereum is paused and no longer listed with a size');
   assert.ok(new RegExp('at most a quarter of the base size').test(t) && live.ADDON_MAX_FRACTION === 0.25, 'the add-on cap is a quarter of the base');
@@ -69,7 +69,7 @@ gates.SF5 = () => {
   const watch = /var KAL_WATCH = (\[[\s\S]*?\]);\s*\n/.exec(html);
   assert.ok(watch, 'KAL_WATCH is found');
   const entries = [...watch[1].matchAll(/\{ name: '([^']+)'([^}]*)\}/g)].map((m) => ({ name: m[1], paused: /paused: true/.test(m[2]) }));
-  const byName = { Gold: 'KXGOLD15M', XRP: 'KXXRP15M', Dogecoin: 'KXDOGE15M', 'AUD/USD': 'KXAUDUSD15M', 'USD/CAD': 'KXUSDCAD15M', 'Natural gas': 'KXNATGAS15M' };
+  const byName = { Gold: 'KXGOLD15M', XRP: 'KXXRP15M', 'AUD/USD': 'KXAUDUSD15M', 'USD/CAD': 'KXUSDCAD15M', 'Natural gas': 'KXNATGAS15M' };
   entries.forEach((e) => { assert.ok(byName[e.name], e.name + ' is a new silent-market entry: map it in this test'); assert.strictEqual(e.paused, live.PAUSED_SERIES.includes(byName[e.name]), 'the silent-market warning treats ' + e.name + (e.paused ? ' as paused' : ' as live') + ', like the bot'); });
 };
 

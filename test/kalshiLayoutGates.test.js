@@ -494,7 +494,7 @@ gates.Y20 = () => {
 gates.Y31 = () => {
   const lib = require('../functions/kalshiLib.js');
   assert.deepStrictEqual(lib.KALSHI_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the list the live bot and recorder read is unchanged');
-  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES.slice(0, 6), ['KXETH15M', 'KXXRP15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the L1 extras keep their place');
+  assert.deepStrictEqual(lib.KALSHI_EXTRA_SERIES.slice(0, 5), ['KXETH15M', 'KXXRP15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the L1 extras keep their place (Dogecoin left the list on Nov 9, 2026)');
   // Nov 5, 2026: every market any strategy can hold (L1 and every second-slot strategy) has a price on the relay, so its open position can draw a chance and a chart
   const slot = require('../functions/kalshiSlotLib.js'), live = require('../functions/kalshiLiveLib.js');
   const onRelay = lib.KALSHI_SERIES.concat(lib.KALSHI_EXTRA_SERIES);

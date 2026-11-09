@@ -2,7 +2,7 @@
 const assert = require('assert');
 const lib = require('../functions/kalshiReportLib');
 const NOW = Date.parse('2026-10-29T00:00:00Z');
-const ord = (o) => Object.assign({ ticker: 'KXDOGE15M-26OCT28-T1', side: 'yes', count: 3, fillCount: 3, avgFill: 0.93, status: 'filled', settled: true, result: 'yes', settledPnl: 0.1, ts: NOW - 3600000, entryLead: '6m', orderId: 'SECRET-ORDER-ID', clientOrderId: 'L1-SECRET' }, o);
+const ord = (o) => Object.assign({ ticker: 'KXXRP15M-26OCT28-T1', side: 'yes', count: 1, fillCount: 1, avgFill: 0.93, status: 'filled', settled: true, result: 'yes', settledPnl: 0.1, ts: NOW - 3600000, entryLead: '6m', orderId: 'SECRET-ORDER-ID', clientOrderId: 'L1-SECRET' }, o);
 const gates = {};
 
 gates.OV1 = () => {

@@ -698,7 +698,7 @@ gates.X3 = async () => {
   assert.ok(eth && Number(eth.count) <= 3, 'a 3 contract cap holds for Ethereum too: ' + (eth && eth.count));
 };
 gates.X4 = () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'GOLD FIRST, then XRP, Bitcoin, Dogecoin and Ethereum (the later ones yield when a window is full); Solana is not on it; the three probe markets left the list on Oct 30, 2026');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXETH15M'], 'GOLD FIRST, then XRP, Bitcoin and Ethereum (Dogecoin was removed Nov 9, 2026; the later ones yield when a window is full); Solana is not on it; the three probe markets left the list on Oct 30, 2026');
   assert.ok(live.PROBE_SERIES.every((x) => !live.L1_SERIES.includes(x) && live.PAUSED_SERIES.includes(x)), 'the probe markets are not on the tick and are still paused, so putting one back in the list is not enough to trade it');
   assert.deepStrictEqual(live.LIVE_SERIES, ['KXBTC15M', 'KXGOLD15M'], 'the older single-order path is untouched');
   assert.ok(!('EXTRA_LIVE_SERIES' in live) && !('extraLiveCounts' in live), 'no separate Ethereum switch is left in the library');
@@ -714,7 +714,7 @@ gates.PR1 = async () => {
   assert.ok(!aud, 'a probe market no longer trades: it left L1_SERIES on Oct 30, 2026 (the owner), even when its quotes are handed to the tick and nothing is paused');
 };
 gates.PR2 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold, then the four capped markets; no probe markets');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXETH15M'], 'gold, then the three capped markets; no probe markets and no Dogecoin (removed Nov 9, 2026)');
   assert.deepStrictEqual(live.PROBE_SERIES, ['KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'the probe list is kept (the drop rule and the alerts name them), but it is not on the tick');
   // a window already at its combined limit still takes no new order (the probe market used to be the one that showed it; Bitcoin stands in)
   const w = world({ session: wsess({}), balance: rich });
@@ -927,9 +927,9 @@ gates.RL1 = async () => {
   assert.ok(order.indexOf('POST orders') < order.findIndex((x) => /candlesticks/.test(x)), 'the candles are read AFTER the order is sent, never before');
   // a 6 minute order carries it too (the research session reads the lead on every order).
   const w6 = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
-  await tick(w6, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
+  await tick(w6, { quotes: [quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-06')] });
   assert.strictEqual(w6.posts.length, 1);
-  const rec6 = w6.docs.get('L1-KXDOGE15M-26OCT071415-06');
+  const rec6 = w6.docs.get('L1-KXGOLD15M-26OCT071415-06');
   assert.ok(rec6.entryLead === '6m' && Math.abs(rec6.rise3 - 0.1) < 1e-9, 'a 6 minute order carries the rise too: ' + rec6.rise3);
   // a market that was not entered (not in the band) reads no candles.
   const wn = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs, fresh: { 'KXETH15M-26OCT071415-07': { yes_bid_dollars: '0.5000', yes_ask_dollars: '0.5100' } } });
@@ -1017,8 +1017,8 @@ gates.SM2 = async () => {
     const thrown = await run(series, ticker, undefined, { candlesThrow: true });
     assert.strictEqual(thrown.posts.length, 0, series + ': a failed read places nothing (fails closed)');
   }
-  // Nothing else is affected: gold, XRP, Dogecoin and the probes never read the path before ordering, and still order on a rough path.
-  for (const [series, ticker, close] of [['KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000], ['KXXRP15M', XRP10, NOW + 600000]]) {
+  // Nothing else is affected: gold and XRP (and the probes) never read the path before ordering, and still order on a rough path.
+  for (const [series, ticker, close] of [['KXGOLD15M', 'KXGOLD15M-26OCT071415-06', NOW + 360000], ['KXXRP15M', XRP10, NOW + 600000]]) {
     const w = world({ session: { active: true, ordersSent: 0, startCash: 100 }, fresh: { [ticker]: { close_time: iso(close) } }, candles: rough });
     await tick(w, { quotes: [quote({ close_time: iso(close) }, series, ticker)] });
     assert.strictEqual(w.posts.length, 1, series + ' is not gated');
@@ -1040,17 +1040,16 @@ gates.GF1 = async () => {
   assert.ok(!live.CAPPED_SERIES.includes('KXGOLD15M') && !live.CAPPED_SERIES.some((x) => live.PROBE_SERIES.includes(x)), 'gold is not capped, and a market is in at most one of the two lists');
   const base = { sizing: true, sizeCap: 12, sizeAddon: 8, sizeBase: 500, sizePool: 7.4, sizeSaved: 5, sizeNextReview: NOW + 86400000 };
   const rich = { balance_breakdown: [{ balance: '600.0000', exchange_index: 0 }, { balance: '400.0000', exchange_index: 0 }] };
-  const w = world({ session: base, balance: rich, fresh: { 'KXBTC15M-26OCT091500-00': { exchange_index: 0 }, 'KXXRP15M-26OCT091500-00': { exchange_index: 0 }, 'KXDOGE15M-26OCT091500-00': { exchange_index: 0 }, [ETH]: { exchange_index: 0 } } });
-  await tick(w, { quotes: [quote({}, 'KXBTC15M', 'KXBTC15M-26OCT091500-00'), quote({}, 'KXETH15M', ETH), quote({}, 'KXXRP15M', 'KXXRP15M-26OCT091500-00'), quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT091500-00'), gq()],
+  const w = world({ session: base, balance: rich, fresh: { 'KXBTC15M-26OCT091500-00': { exchange_index: 0 }, 'KXXRP15M-26OCT091500-00': { exchange_index: 0 }, [ETH]: { exchange_index: 0 } } });
+  await tick(w, { quotes: [quote({}, 'KXBTC15M', 'KXBTC15M-26OCT091500-00'), quote({}, 'KXETH15M', ETH), quote({}, 'KXXRP15M', 'KXXRP15M-26OCT091500-00'), gq()],
     sizingState: { cap: 12, base: 500, reviewedAt: NOW - 1000, pool: 7.4, saved: 5, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
   const by = (frag) => w.posts.filter((p) => p.ticker.includes(frag));
   assert.ok(by('KXGOLD').length === 1 && Number(by('KXGOLD')[0].count) > 2, 'gold takes the ladder size: ' + by('KXGOLD').map((p) => p.count));
   // One crypto order per window: of the four capped markets sharing this window only the first in list order (XRP since Oct 23, 2026) is sent, at its fixed size.
-  const doge = w.posts.filter((p) => p.ticker.includes('KXDOGE'));
-  assert.ok(doge.length === 1 && Number(doge[0].count) > 2, 'Dogecoin follows the gold ladder, as the same strategy: ' + doge.map((p) => p.count));
-  const crypto = w.posts.filter((p) => !p.ticker.includes('KXGOLD') && !p.ticker.includes('KXDOGE'));
+  assert.ok(!w.posts.some((p) => p.ticker.includes('KXDOGE')), 'Dogecoin is removed from the bot (Nov 9, 2026): no order even with a quote');
+  const crypto = w.posts.filter((p) => !p.ticker.includes('KXGOLD'));
   assert.ok(crypto.length === 1 && crypto[0].ticker.includes('KXXRP') && Number(crypto[0].count) === 1, 'one capped market per window, the first in list order (XRP since Oct 23, 2026) at its fixed size, never the ladder or the pool: ' + crypto.map((p) => p.ticker + 'x' + p.count));
-  for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD') || p.ticker.includes('KXDOGE')), 'a capped market never carries reinvested profit: ' + p.ticker); }
+  for (const p of w.posts) { const rec = w.docs.get('L1-' + p.ticker); assert.ok(rec.strategy === 'L1' && (!rec.addon || p.ticker.includes('KXGOLD')), 'a capped market never carries reinvested profit: ' + p.ticker); }
 };
 gates.GF2 = async () => {
   // Gold is sent first whatever order the quotes arrive in: it takes its full size even when a capped market is listed ahead of it and the window's limit is tight.
@@ -1341,14 +1340,14 @@ gates.RL3 = async () => {
 // FS1 to FS3: fixed order sizes (Oct 23, 2026, the owner: "yeah build", on the research session's sizing proposal at a $500 balance). XRP and Dogecoin trade 3 contracts, natural gas 2; Bitcoin and Ethereum stay at 1.
 // Consequence: the larger size reaches only the three markets the history supports, and never grows through the ladder, the profit add-on, a stored value or a second crypto order in the window.
 gates.FS1 = async () => {
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'exactly these markets, at exactly these sizes (Dogecoin is back to a fixed 5 on Nov 3, 2026)');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2 }, 'exactly these markets, at exactly these sizes (Dogecoin was removed from the bot on Nov 9, 2026)');
   const one = async (series, ticker, closeAt) => {
     const w = world({ session: wsess({}), balance: rich, fresh: { [ticker]: { exchange_index: 0, close_time: iso(closeAt) } } });
     await tick(w, { quotes: [quote({ close_time: iso(closeAt) }, series, ticker)], sizingState: { cap: 40, base: 1000, reviewedAt: NOW - 1000, pool: 50, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
     return w;
   };
   const doge = await one('KXDOGE15M', 'KXDOGE15M-26OCT071415-06', NOW + 360000);
-  assert.ok(doge.posts.length === 1 && Number(doge.posts[0].count) === 5, 'Dogecoin takes a fixed 5 again (Nov 3, 2026), whatever the ladder or the pool say: ' + doge.posts.map((p) => p.count));
+  assert.strictEqual(doge.posts.length, 0, 'Dogecoin was removed from the bot (Nov 9, 2026): it places nothing, whatever the ladder or the pool say');
   const xrp = await one('KXXRP15M', XRP10, NOW + 600000);
   assert.strictEqual(xrp.posts.length === 1 && Number(xrp.posts[0].count), 1, 'XRP takes 1 contract (back from 3 on Oct 25, 2026)');
   const gas = await one('KXNATGAS15M', 'KXNATGAS15M-26OCT071415-10', NOW + 600000);
@@ -1362,28 +1361,23 @@ gates.FS1 = async () => {
   for (const w of [xrp]) { const rec = w.docs.get('L1-' + w.posts[0].ticker); assert.ok(!rec.addon && !rec.addonCost, 'no reinvested profit goes into a fixed size, however full the pool is'); }
 };
 gates.FS2 = async () => {
-  // The window limit still holds: with a base too small to afford 3 Dogecoin contracts in one window the order is cut, and it is never cut below the first contract.
-  const tiny = { sizing: true, sizeCap: 1, sizeAddon: 0, sizeBase: 20, sizeNextReview: NOW + 86400000 };
-  const w = world({ session: tiny, balance: rich, fresh: { 'KXDOGE15M-26OCT071415-06': { exchange_index: 0 } } });
-  await tick(w, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')], sizingState: { cap: 1, base: 20, reviewedAt: NOW - 1000, pool: 0, saved: 0, appliedTs: NOW - 1000, lastStopAt: null }, setSizingState: async () => {} });
-  const n = w.posts.length === 1 ? Number(w.posts[0].count) : 0;
-  assert.ok(n >= 1 && n <= 3, 'a small base cuts the larger size down to what the window limit allows: ' + n);
+  // One crypto order per window still holds with the fixed sizes (Dogecoin's tiny base case went with Dogecoin, Nov 9, 2026).
   const w2 = world({ session: wsess({}), balance: rich, fresh: { 'KXETH15M-26OCT071415-06': { exchange_index: 0 }, 'KXXRP15M-26OCT071415-06': { exchange_index: 0 } } });
   await tick(w2, { quotes: [quote({}, 'KXETH15M', 'KXETH15M-26OCT071415-06'), quote({}, 'KXXRP15M', 'KXXRP15M-26OCT071415-06')], sizingState: wstate, setSizingState: async () => {} });
   assert.strictEqual(w2.posts.length, 1, 'still one crypto order per window, so 3 and 3 never stack');
 };
 gates.FS3 = () => {
   const src = fnSrcLib();
-  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
+  assert.ok(/const FIXED_CONTRACTS = \{ KXXRP15M: 1, KXNATGAS15M: 2 \};/.test(src) && /count = sizing && FIXED_CONTRACTS\[c\.series\] \? FIXED_CONTRACTS\[c\.series\] : 1/.test(src), 'the sizes are a hard list in code and apply only when sizing is on');
   const idx = require('fs').readFileSync(require('path').join(__dirname, '..', 'functions', 'index.js'), 'utf8');
   assert.ok(!/FIXED_CONTRACTS|request\.data\.(ticker|price|count|side)/.test(idx), 'no callable or stored value can change an order size');
 };
 
 // OS1: series order (Oct 23, 2026, the owner's reorder after the research session's question). Consequence: when two capped crypto markets qualify in the same tick, the 3 contract market (XRP over Bitcoin, Dogecoin over Ethereum) gets the one crypto order of the window, and nothing else about the order changes.
 gates.OS1 = async () => {
-  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXDOGE15M', 'KXETH15M'], 'gold first, XRP before Bitcoin, Dogecoin before Ethereum; no probes');
+  assert.deepStrictEqual(live.L1_SERIES, ['KXGOLD15M', 'KXXRP15M', 'KXBTC15M', 'KXETH15M'], 'gold first, XRP before Bitcoin before Ethereum; no Dogecoin (removed Nov 9, 2026), no probes');
   assert.deepStrictEqual(live.CAPPED_SERIES.slice().sort(), ['KXBTC15M', 'KXETH15M', 'KXXRP15M'], 'the capped list is three markets');
-  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2, KXDOGE15M: 5 }, 'sizes unchanged');
+  assert.deepStrictEqual(live.FIXED_CONTRACTS, { KXXRP15M: 1, KXNATGAS15M: 2 }, 'sizes unchanged');
   const run = async (list, lead) => {
     const close = NOW + (lead === '10m' ? 600000 : 360000);
     const fresh = {}, quotes = [];
@@ -1397,12 +1391,12 @@ gates.OS1 = async () => {
   assert.strictEqual(ten.posts.length, 1, 'one crypto order in the window');
   assert.ok(ten.posts[0].ticker.includes('KXXRP') && Number(ten.posts[0].count) === 1, 'XRP (1 contract) is the only one with a 10 minute look: ' + ten.posts.map((p) => p.ticker + 'x' + p.count));
   const six = await run([['KXETH15M', 'KXETH15M-26OCT071415-06'], ['KXDOGE15M', 'KXDOGE15M-26OCT071415-06']], '6m');
-  assert.strictEqual(six.posts.length, 2, 'Dogecoin is on the ladder and outside the one-crypto-order rule, so Ethereum is no longer blocked by it');
+  assert.ok(six.posts.length === 1 && six.posts[0].ticker.includes('KXETH'), 'Dogecoin is removed (Nov 9, 2026): a Dogecoin quote places nothing and Ethereum is not blocked by it');
   // Bitcoin and Ethereum still trade when their pair partner has no qualifying market (the order only decides ties).
   const btc = await run([['KXBTC15M', 'KXBTC15M-26OCT071415-06']], '6m');
   assert.ok(btc.posts.length === 1 && btc.posts[0].ticker.includes('KXBTC') && Number(btc.posts[0].count) === 1, 'Bitcoin alone still trades, at one contract');
   const src = fnSrcLib();
-  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXDOGE15M", "KXETH15M"\];/.test(src), 'the order is a hard list in code');
+  assert.ok(/const L1_SERIES = \["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXETH15M"\];/.test(src), 'the order is a hard list in code');
 };
 
 
@@ -1428,14 +1422,14 @@ gates.TS2 = async () => {
   const closeSec = (NOW + 360000) / 1000;
   const cs = [candle(closeSec - 600, 0.89, 0.91), candle(closeSec - 480, 0.90, 0.92), candle(closeSec - 360, 0.91, 0.93)];
   const withLog = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: cs });
-  await tick(withLog, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
+  await tick(withLog, { quotes: [quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-06')] });
   const without = world({ session: { active: true, ordersSent: 0, startCash: 100 }, candles: 'none' });
-  await tick(without, { quotes: [quote({}, 'KXDOGE15M', 'KXDOGE15M-26OCT071415-06')] });
+  await tick(without, { quotes: [quote({}, 'KXGOLD15M', 'KXGOLD15M-26OCT071415-06')] });
   assert.strictEqual(withLog.posts.length, 1);
   assert.deepStrictEqual(withLog.posts, without.posts, 'the order sent is byte for byte the same with or without the log');
-  const rec = withLog.docs.get('L1-KXDOGE15M-26OCT071415-06');
+  const rec = withLog.docs.get('L1-KXGOLD15M-26OCT071415-06');
   assert.deepStrictEqual([rec.ask10, rec.side10, rec.inBand10, rec.ask8, rec.inBand8, rec.ask6, rec.inBand6, rec.twoStageLeft], [0.91, 'yes', true, 0.92, true, 0.93, true, 600], 'the order record carries the three looks and the earliest in band');
-  assert.strictEqual(without.docs.get('L1-KXDOGE15M-26OCT071415-06').twoStageLeft, undefined, 'no candles, nothing logged, the order is as it was');
+  assert.strictEqual(without.docs.get('L1-KXGOLD15M-26OCT071415-06').twoStageLeft, undefined, 'no candles, nothing logged, the order is as it was');
 };
 gates.TS3 = async () => {
   // A 10 minute order (XRP) has no 8 or 6 minute candle yet: only the 10 minute look is written.
@@ -1452,7 +1446,7 @@ gates.TS3 = async () => {
 
 // PX1 and PX2: XRP is paused in the bot's code (the owner, Oct 28, 2026): profit factor 0.49 over 65 live fills against 1.32 in the history, read on 2026-11-12. It fails closed: no date resumes it.
 gates.PX1 = async () => {
-  assert.deepStrictEqual(live.PAUSED_SERIES, ['KXXRP15M', 'KXBTC15M', 'KXETH15M', 'KXDOGE15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'XRP, Bitcoin, Ethereum, Dogecoin (Nov 3, 2026) and the three probe markets');
+  assert.deepStrictEqual(live.PAUSED_SERIES, ['KXXRP15M', 'KXBTC15M', 'KXETH15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'], 'XRP, Bitcoin, Ethereum and the three probe markets (Dogecoin left the bot entirely on Nov 9, 2026)');
   assert.ok(live.L1_SERIES.includes('KXBTC15M'), 'Bitcoin stays in the list too (its name, quotes and alerts keep working, and the exit watch still sells an open position)');
   assert.ok(live.L1_SERIES.includes('KXXRP15M'), 'it stays in the list (its name, quotes and alerts keep working)');
   // A perfect XRP setup at its 10 minute look sends NOTHING with the real default, and the other series still trade.
@@ -1464,7 +1458,7 @@ gates.PX1 = async () => {
   await tick(w2, { pausedSeries: undefined, quotes: [q10('KXNATGAS15M', NG)] });
   assert.strictEqual(w2.posts.length, 0, 'natural gas is a paused probe too (Oct 28, 2026, the owner)');
   const src = fs.readFileSync(path.join(root, 'functions', 'kalshiLiveLib.js'), 'utf8');
-  assert.ok(/^const PAUSED_SERIES = \["KXXRP15M", "KXBTC15M", "KXETH15M", "KXDOGE15M", \.\.\.PROBE_SERIES\];/.test(src.slice(src.indexOf('const PAUSED_SERIES'), src.indexOf('const PAUSED_SERIES') + 120)), 'a plain list with no resume date');
+  assert.ok(/^const PAUSED_SERIES = \["KXXRP15M", "KXBTC15M", "KXETH15M", \.\.\.PROBE_SERIES\];/.test(src.slice(src.indexOf('const PAUSED_SERIES'), src.indexOf('const PAUSED_SERIES') + 120)), 'a plain list with no resume date');
 };
 gates.PX2 = () => {
   // Nothing outside the library can unpause it: index.js never passes pausedSeries.

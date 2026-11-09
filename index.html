@@ -1493,7 +1493,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (8c to 50c; an entry priced under 8c is skipped, a small test), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts to start, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, Dogecoin, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (8c to 50c; an entry priced under 8c is skipped, a small test), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts to start, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026).</div>
                 <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -1660,6 +1660,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 9</div>
                 <ul class="changelog-list">
+                  <li>Trading: Dogecoin is removed from the bot entirely (it was paused since Nov 3): it is off the market list, the size lists and the paused list, so any order for it is refused; the Dogecoin review warning and its price feed are gone. Its past orders, results and reports stay</li>
                   <li>Rules and limits now says OICORE skips an entry priced under 8c (the page still said 5c); the freshness check now reads that number from the bot's code</li>
                 </ul>
                 <div class="changelog-day">Nov 8</div>
@@ -3299,27 +3300,6 @@
     }
     return t;
   }
-  // Dogecoin went back to a fixed 5 on Nov 3, 2026 (the owner), which is what this rule said to do, so only orders before KAL_DOGE_LADDER_TO count and the warning stays quiet for good.
-  // Dogecoin's review rule (the owner, Oct 30, 2026, when Dogecoin moved onto gold's size ladder): go back to a fixed size of 5 if its LAST 100 settled orders at ladder size lose more than 8%
-  // or net under +0.5c a contract. This is a prompt for the owner to decide, never a change: nothing here touches the bot. Only orders from the ladder's start count, early sells that lost are losses,
-  // and hand-closed orders are not the bot's. Under 100 settled orders it only tracks (state 'tracking'), so a thin sample never raises an alarm.
-  var KAL_DOGE_LADDER_FROM = Date.parse('2026-10-30T20:24:00Z'), KAL_DOGE_LADDER_TO = Date.parse('2026-11-03T14:00:00Z'), KAL_DOGE_REVIEW_N = 100, KAL_DOGE_LOSS_LINE = 0.08, KAL_DOGE_NET_LINE_C = 0.5;
-  function kalshiDogeReview(orders){
-    var rows = (orders || []).filter(function(o){
-      return o && o.strategy === 'L1' && (o.series === 'KXDOGE15M' || String(o.ticker || '').indexOf('KXDOGE15M') === 0) && Number(o.ts) >= KAL_DOGE_LADDER_FROM && Number(o.ts) < KAL_DOGE_LADDER_TO &&
-        !(o.settled === true && o.result === 'hand') && kalshiOrderPnl(o) !== null;
-    }).sort(function(p, q){ return Number(q.ts) - Number(p.ts); });
-    var out = { settled: rows.length, n: Math.min(rows.length, KAL_DOGE_REVIEW_N), state: 'tracking', lossShare: null, netCents: null, latest: rows.length ? Number(rows[0].ts) : null, reasons: [] };
-    if(rows.length < KAL_DOGE_REVIEW_N){ return out; }
-    var last = rows.slice(0, KAL_DOGE_REVIEW_N), losses = 0, net = 0, contracts = 0;
-    last.forEach(function(o){ var p = kalshiOrderPnl(o); if(p < 0){ losses++; } net += p; contracts += Number(o.fillCount); });
-    out.lossShare = losses / last.length; out.netCents = contracts > 0 ? net / contracts * 100 : null; out.state = 'ok';
-    if(out.lossShare > KAL_DOGE_LOSS_LINE){ out.reasons.push('lost ' + Math.round(out.lossShare * 100) + '% (the line is ' + Math.round(KAL_DOGE_LOSS_LINE * 100) + '%)'); }
-    if(out.netCents !== null && out.netCents < KAL_DOGE_NET_LINE_C){ out.reasons.push('netted ' + out.netCents.toFixed(1) + 'c a contract (the line is +' + KAL_DOGE_NET_LINE_C + 'c)'); }
-    if(out.reasons.length){ out.state = 'warn'; }
-    return out;
-  }
-  function kalshiDogeReviewText(r){ return 'Dogecoin\'s last 100 settled orders at ladder size ' + r.reasons.join(' and ') + '. Your rule says go back to a fixed size of 5. Nothing has changed; this is for you to decide.'; }
   function kalshiNotifFeed(events, orders, now, money){
     var out = [], day = 86400000, name = function(tk){ return kalshiMarketName({ ticker: tk, series: String(tk || '').split('-')[0] }); };
     (events || []).forEach(function(e){
@@ -3355,8 +3335,6 @@
         out.push({ id: 'i:' + (o.clientOrderId || o.ticker), ts: Number(o.ts), level: 'critical', title: 'Check the bot: ' + kalshiMarketName(o) + ' order needs a look', body: String(o.error || o.exitStatus || o.status).slice(0, 160) });
       }
     });
-    var dr = kalshiDogeReview(orders);
-    if(dr.state === 'warn' && Number.isFinite(dr.latest)){ out.push({ id: 'doge-review', ts: dr.latest, level: 'warning', title: 'Dogecoin review line crossed', body: kalshiDogeReviewText(dr) }); }
     out.sort(function(a, b){ return b.ts - a.ts; });
     var seen = {};
     return out.filter(function(x){ if(seen[x.id]){ return false; } seen[x.id] = true; return true; }).slice(0, 80);
@@ -3491,7 +3469,7 @@
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'Dogecoin', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3755,8 +3733,6 @@
       var silentEscaped = silent.map(function(x){ return escapeHtml(x); }).join('</div><div class="kal-note">');
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + silentEscaped + '</div><div class="kal-note">Check the bot note above and the money on each Kalshi shard.</div></div>');
     }
-    var dogeRev = kalshiOrdersLoaded ? kalshiDogeReview(orders) : null;
-    if(dogeRev && dogeRev.state === 'warn'){ sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + escapeHtml(kalshiDogeReviewText(dogeRev)) + '</div></div>'); }
     var allOrders = kalshiResolveOrders(kalshiAllOrders(), a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
     var m = kalshiRiskMeter(allOrders, s, now);
     rEl.innerHTML = !kalshiOrdersLoaded ? '<div class="kal-empty">Reading the orders...</div>' :
