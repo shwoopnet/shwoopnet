@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 11:30 AM CT (17:30Z): W-KILLCAL2: kill calibration rerun on cash basis, conclusions changed
+
+Same registered grid, only the basis changed. Cash PF (n): gold 1.40 (307), OICORE 1.32 (77), XRP 0.49 (86), Bitcoin 0.84 (155), Ethereum 1.17 (113), Dogecoin 1.01 (204); gold candle 1.26 (1298). R5 on Bitcoin: -1c@50 fires at trade 60 (Oct 11), saves only 4.51 (was 20+); -0.5c@100 saves 2.46; -0.5c@100 and -2c@50 false kills; Bitcoin is a small loser. R5 on XRP: fires at trade 50 (Oct 25), saves 0.21, next-50 PF 0.95. R1 rolling-60 under 0.7: gold fires once at trade 285 (Nov 6), next-50 PF 99, false in spirit; XRP trade 60 later net -1.15; Bitcoin 91 false; Ethereum 88 later +0.28; Dogecoin 198 false. R1 detects nothing useful on now-neutral series. OICORE streak L3 15 fires, 3 false; L6 first fire trade 38 (Nov 5), next-50 PF 0.48. Files w_killcal2.
+
 ## 2026-11-09 11:30 AM CT (17:30Z): BASIS ERROR found: workers used stored settledPnl for wins/losses (limit-booked pre PR 741); scorer fixed
 
 Gold L1 whole record: cash (win/loss recomputed from avgFill and avgFee, exits corrected) PF 1.40, +60.93 (n 307); stored settledPnl PF 1.21, +31.71. W-GOLDDECAY, W-KILLCAL, W-GOLDVOL, W-GOLDMIX, W-GOLDCAL, W-SEPNEW and the scorer first run used stored for non-exit rows, so their PFs read about 0.2 low on pre-741 rows (period P1 and P2 most; P3 mostly post-741 so close). Corrected scorer (cash): gold 1.40 (307) +60.93 r60 now 0.89 min 0.61; OICORE 1.32 (77) +25.09; Dogecoin 1.01 (204); Bitcoin 0.84 (155) -11.83; Ethereum 1.17 (113) +5.17; XRP 0.49 (86) -11.05. goldtrip.py already used the cash recompute (r60 latest 0.89, min 0.61), so the tripwire is on the right basis. Pass/fail verdicts of the filter studies are relative (skip vs baseline on one basis) and the nulls stand, but absolute PFs quoted today are low. Kill calibration (W-KILLCAL) must be rerun on the cash basis: Ethereum and Bitcoin are less bad on cash.
