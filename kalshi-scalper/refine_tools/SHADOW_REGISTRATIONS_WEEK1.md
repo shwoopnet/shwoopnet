@@ -26,3 +26,29 @@ Rule: Ethereum 15 minute, the L1 rule without the smooth-climb gate (favourite 0
 
 ## Not expressible today
 AUD/USD resume (KXAUDUSD15M): its quotes are not held by the bot (the shadow lib allows only series the bot quotes), so it needs a quote read added first; live history cash PF 1.37 per contract (n 59), first half 1.28, so it is below the shortlist bar anyway.
+
+---
+# Batch 2 (Nov 9, 2026), found by re-running the 120-cell on-deck grids on the corrected fee model (retraction 18)
+
+Registered before any forward row exists. Same basis, pass and kill rules as batch 1. These are the best of 120 cells (N about 760): selection bias is likely, so they are SHADOW candidates only. Candle model, unrounded per-contract fee (matches live avgFee), PF per contract, halves by date. The +1c rows are the cautious ones; +0c rows are optimistic (ask with no slip).
+
+```js
+{ id: "XRPFAV6", series: ["KXXRP15M"], entry: { sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#XRPFAV6" },
+{ id: "GOLDHI6S", series: ["KXGOLD15M"], entry: { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#GOLDHI6S" },
+{ id: "BTCHI10", series: ["KXBTC15M"], entry: { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#BTCHI10" },
+{ id: "XRPFAV10", series: ["KXXRP15M"], entry: { sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 640, leftMinSec: 570 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#XRPFAV10" }
+```
+
+## XRPFAV6
+XRP favourite 0.88 to 0.92 at the 6m look, spread at most 2c. Candle PF per contract at +1c slip: 1.31 (136) / 1.34 (108), 88 signals a week; the only cell that clears the bar at +1c on the corrected fee model. Prior low.
+
+## GOLDHI6S
+Gold favourite 0.92 to 0.97 at the 6m look, spread at most 2c. +0c only: PF 1.47 (342) / 1.59 (373), 72 a week; fails the bar at +1c. Prior low.
+
+## BTCHI10
+Bitcoin favourite 0.92 to 0.97 at the 10m look. +0c only: PF 1.37 (94) / 1.82 (157), 26 a week. Prior low.
+
+## XRPFAV10
+XRP favourite 0.88 to 0.92 at the 10m look. +0c only: PF 1.64 (81) / 1.36 (95), 63 a week. Prior low.
+
+Not expressible: XRP F4 0.97-0.98 at 2m (a 120 s look, below the 180 to 840 s window the registry allows; entry floor is 60 s but the look is not live-lookable) ; silver (quotes not held; candle PF 1.19 at +1c with halves 1.28 / 1.11, 1.39 at +0c; already tracked by the C9 read).
