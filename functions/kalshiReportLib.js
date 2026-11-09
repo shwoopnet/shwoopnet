@@ -42,9 +42,12 @@ function finish(t) {
 
 // Orders bigger than today's code could ever size them (Oct 29, 2026: a 12 contract Dogecoin order appeared where the code only sends 3). Zero is the normal value. Series, count, the most that series may have and the
 // time only, never an id. The limit comes from maxContractsFor, a code constant, so nothing stored can move it.
+// Dogecoin left the bot on Nov 9, 2026, so maxContractsFor is 0 for it; its orders from before that (it was paused after Nov 3) are history, not oversize. An order of its placed AFTER the cutoff still shows.
+const REMOVED_SERIES_BEFORE = { KXDOGE15M: Date.parse('2026-11-09T00:00:00Z') };
 function oversizeRows(rows) {
   return rows.map((o) => {
     const series = seriesOf(o), n = Math.max(num(o.count) || 0, num(o.fillCount) || 0), max = maxContractsFor(series);
+    if (REMOVED_SERIES_BEFORE[series] && Number(o.ts) < REMOVED_SERIES_BEFORE[series]) return null;
     return n > max ? { ts: new Date(Number(o.ts)).toISOString(), series, count: n, max } : null;
   }).filter(Boolean).sort((a, b) => a.ts < b.ts ? -1 : 1);
 }

@@ -17,6 +17,13 @@ gates.OV2 = () => {
   assert.strictEqual(lib.buildReport([ord({ ticker: 'KXXRP15M-26OCT28-T1', count: undefined, fillCount: 12 })], NOW, 24, false).oversize.count, 1, 'a filled size counts when the intended size is missing');
   assert.strictEqual(lib.buildReport([ord({ ticker: 'KXXRP15M-26OCT28-T1', ts: NOW - 99 * 3600000, count: 12, fillCount: 12 })], NOW, 24, false).oversize.count, 0, 'only the window asked for');
 };
+gates.OV4 = () => {
+  // Dogecoin was removed on Nov 9, 2026: its older orders (any size) are history and never show as oversize; one placed after the cutoff would.
+  const old = lib.buildReport([ord({ ticker: 'KXDOGE15M-26NOV02-T1', count: 13, fillCount: 13, ts: Date.parse('2026-11-02T15:00:00Z') })], Date.parse('2026-11-09T12:00:00Z'), 24 * 10, false);
+  assert.strictEqual(old.oversize.count, 0, 'an old Dogecoin order is not an oversize alarm');
+  const fresh = lib.buildReport([ord({ ticker: 'KXDOGE15M-26NOV10-T1', count: 5, fillCount: 5, ts: Date.parse('2026-11-10T15:00:00Z') })], Date.parse('2026-11-10T16:00:00Z'), 24, false);
+  assert.strictEqual(fresh.oversize.count, 1, 'a Dogecoin order after the removal is flagged (the size lock allows 0)');
+};
 gates.OV3 = () => {
   const a = lib.buildReport([ord({})], NOW, 24, true), b = lib.buildReport([ord({})], NOW, 24, false);
   for (const k of Object.keys(b)) if (k !== 'oversize') assert.ok(k in a, k + ' unchanged');
