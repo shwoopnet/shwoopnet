@@ -47,7 +47,7 @@ gates.FL4 = () => {
 };
 gates.FL5 = () => {
   const html = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
-  assert.ok(/var KAL_SLOT_REGISTERED = \['OICORE', 'EVENT830'\];/.test(html) && !/kalRulesSlotFlow/.test(html), 'the Bot page no longer lists FLOW1 as running');
+  assert.ok(/var KAL_SLOT_REGISTERED = \['OICORE', 'EVENT830', 'GOLDHOLD'\];/.test(html) && !/kalRulesSlotFlow/.test(html), 'the Bot page no longer lists FLOW1 as running');
   assert.ok(/FLOW1: \{ name: 'Seller flow \(removed\)'/.test(html), 'its past orders keep a label');
 };
 let failed = 0;

@@ -2916,3 +2916,19 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 **Money.** EUR/USD, GBP/USD and USD/JPY are on exchange shard 0 (Nov 3, 2026 public market list); the bot's markets are on shard 2. An order needs money on its own shard, so the three FX markets send nothing until shard 0 holds at least about $1 (they are skipped with "only $X on its shard", never an error).
 
 **Deploy, IN THIS ORDER (the owner runs them; the page change goes live on merge).** (1) `bash functions/deploy-push.sh` FIRST: the exit watch must know EVENT830 is registered and held to settlement. An exit watch from before this change treats a slot order whose strategy it does not know with the fallback exit (sell at a bid of 25c or less, and always 60 s before the close), which would sell almost every EVENT830 position at once. (2) `bash functions/deploy-sizing.sh` (the minute function `kalshiLiveArmed`, which reads the eight markets and runs the slot tick). Both before 13:27 UTC on 2026-11-05 to catch the first window.
+
+## SLOT-GOLDHOLD: gold held to settlement, 1 contract (registered 2026-11-09, before its first order; the owner: "cost GOLDHOLD first")
+
+**What it is.** The gold L1 entry, held to settlement with NO 25c sell: gold only (`KXGOLD15M`), the favourite side priced 0.88 to 0.97, 400 to 330 seconds before the close (L1's own look), an immediate-or-cancel order at the touch, 1 contract, never more than one open. **It is favourite-and-hold, which the owner banned for live trading; merging this entry is the owner lifting that ban for this one strategy, capped as below.** It is a cheap option on one question (does holding beat selling at 25c?), not a profit idea.
+
+**Evidence (refinement chat, one cash basis: fill price plus fee).** Gold, 306 fills since Oct 7: hold PF 1.43 against 1.39 actual, net +$65.00 against +$59.99. The 16 early sells alone: hold -$133.79 against actual -$138.80, a gain of +$5.01 with a 90% interval of -21.7 to +37.3; holding was better on 3 of 16 and the first 13 sells went the other way. Gold plus Dogecoin, 510 fills: hold PF 1.39 against 1.28 (30 sells, +$21.85, interval -22 to +70). Every interval spans zero. BELOW the research bar; no counterparty is claimed beyond the generic one for L1.
+
+**Size and caps.** 1 contract (scale-in maxSteps 1). Slot caps at the $979.25 base: $9.79 an order, $19.59 a window and a day, $29.38 open, $58.76 lifetime. Worst single loss about $0.89 to $0.98 including the fee. It counts in the slot's own loss stop and the shared 12% stop, and its dollars count in the 5.5% window limit.
+
+**Kill rules (written before the first order).** Latch off at 3 straight losses, or net under -$1.50 after 30 fills. The validator cannot express the keep rule; read by hand: keep only at 400 or more slot fills with net above $0, PF 1.2 or better, and hold minus sell above 0 with the whole 90% interval above 0; drop on a latch, a negative point estimate, or a loss rate above 7% over the last 150 fills. Forward read 2027-01-04 (8 weeks; gold has about 70 fills a week, so a one contract slot adds booking realism, not statistical power).
+
+**Cost if it does nothing.** About $0.70 a week in fees (1c a contract) against about +$1.30 a week expected on history, which is not a promise. At a 2c fee the PF falls from 1.42 to 1.19, so rounding matters at this size.
+
+**L1 interaction.** Same market, same window, same side. L1's 25c sell takes the per-ticker claim and sells at most its own unsold fill (the account holding minus the slot's unsold), so it cannot sell slot contracts; the slot sells only a hedge (and then latches off); the direction lock and the position read refuse the opposite side. The slot can still enter when L1 skips.
+
+**Deploy, IN THIS ORDER (the owner runs them).** `bash functions/deploy-latest.sh` picks them: `deploy-push.sh` FIRST (the exit watch must know GOLDHOLD is registered and held to settlement), then `deploy-sizing.sh`.

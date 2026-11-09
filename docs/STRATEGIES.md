@@ -110,3 +110,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 | Size | gold: ladder, $43 per contract, +1 per 3 days, add-on, held at 15 / order ceiling 50; Dogecoin: paused | 10 to 30 (ladder, earned) | fixed 1 |
 | Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up | shares the slot's one 12% stop with OICORE (`RISK_PROFILES.SECOND` covers both), plus its own kill rules |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) | no (shared 5.5%, slot at most half) |
+
+## GOLDHOLD (second slot, 2026-11-09)
+
+Gold L1's entry held to settlement with no 25c sell, 1 contract, capped (worst loss about $0.98). Favourite-and-hold: merged only with the owner lifting that ban for this one strategy. Kill: 3 straight losses or net under -$1.50 after 30 fills. Details: `kalshi-scalper/README.md#SLOT-GOLDHOLD`.
