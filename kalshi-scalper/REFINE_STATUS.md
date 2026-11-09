@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 03:30 PM CT (21:30Z): OICORE re-arm mechanics written (facts only)
+
+kalshi-scalper/refine_tools/OICORE_REARM_MECHANICS.md: stop is a per-tick refusal with no latch; re-arm resets ladder, peak, drawdown, streak and net windows from D, not the shared stop or caps; forward read must keep the whole record; PR text and pins listed; owner decides.
+
 ## 2026-11-09 03:21 PM CT (21:21Z): W-DECK3: XRP and Ethereum on-deck grids rerun, nothing qualifies
 
 Same registered 40-cell grid, N not changed. XRP: puller had stopped at 1,848 of 5,696 markets (about 2.8 weeks); only flagged cell F4 favourite 0.97-0.98 at 2m PF inf (86) / inf (69) is degenerate (no losing trade because win and loss are one cent apart; not an edge); F1 0.80-0.88 6m 1.38 (186) / 0.91 (156) fails. Ethereum: pull slow (about 5 s per call); 175 usable windows (about 0.3 weeks), no cell reaches n 40 per half: untested, not failed. On-deck list unchanged.
