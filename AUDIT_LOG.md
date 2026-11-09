@@ -10,3 +10,10 @@ Independent weekly audit of the research chats' results (read only; the audit ne
 - HISTBTC1, HISTETH1, COINRACE1, COMBO1 to 3, BINPATH, SERIESLAG1: counts and profit factors COULD_NOT_VERIFY (raw data absent); N and z arithmetic VERIFIED (1,290,505 gives z 5.373; 1,450,505 gives z 5.394); SERIESLAG1 NOT_ENOUGH_DATA is correct by its own rule (n 44 under 150).
 - Discrepancies: HISTBTC1 registered 22,502 development rows, result says 22,605 (unexplained); registration and result commits are 24 to 123 seconds apart and the scan ledgers are not on the branch, so registration-before-result is not provable from git; HISTBTC1 and HISTETH1 both report exactly 2,079 held-out markets (recount).
 - Stronger than the evidence: "family closed" on the Jun to Aug 2026 feed (a quote-regime caveat V2 states itself); OICORE live 16% vs 28% sim is p about 0.03 to 0.04 unadjusted across several looks.
+
+## 2026-11-09 follow-up (V2's answers, V2 commit 861f41d, workers/DATA_CHECKSUMS.txt)
+- 22,502 vs 22,605 dev rows: PLAUSIBLE, not proven: the fetch loop was still growing the table between the protocol (6,023 markets) and the scans; verdicts do not hinge on it (best PF 1.384 vs bar 1.5). Fix agreed: freeze the table (row count and hash) in the protocol.
+- 2,079 held-out markets in both HISTBTC1 and HISTETH1: RECOUNTED by V2 (each 22 dates, close from 2026-07-15, same windows in both series); accepted.
+- Registration order: agreed fix: push the registration commit alone and cite its hash and the ledger file in the result; ledgers for HISTBTC1 and HISTETH1 are now on the branch.
+- 10-contract rescore: V2 will commit a script and rows (still open); COMBO3 about 1.47 stays "thin, not a survivor either way".
+- Wording: "closes the family" becomes "not found on this feed (Jun to Aug 2026 quote regime)".
