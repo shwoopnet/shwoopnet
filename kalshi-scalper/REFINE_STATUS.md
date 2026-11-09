@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 12:32 PM CT (18:32Z): On-deck list started; W-DECK1/W-DECK2 hunting structurally different shadow families
+
+Owner: keep adding to the on-deck list continuously, batches of 3 or more registrations, one small PR per batch, at most one extra merge and deploy a week. Created kalshi-scalper/refine_tools/ONDECK.md (current list: ETHNO6, BTCHI6, XRPYES10, ETHL1 ready; GOLDALL draft; F1-F5 families hunting). W-DECK1 grids gold/BTC/ETH candle history, W-DECK2 fetches XRP candles and runs the same grid. Registered first, N about 600.
+
 ## 2026-11-09 12:28 PM CT (18:28Z): W-OIR3: OICORE rise3 moving vs still on history, FAIL (watch forward only)
 
 Registered first (S/w_oir3), rule fixed from gold (abs rise3 >= 0.05, no retuning). Rebuilt triggers n 514, cash PF 10 contracts 1c slip: H1 moving 1.71 (191) vs still 2.16 (66): still better; H2 moving 1.51 (196) vs still 0.76 (61); all moving 1.60 (387) vs still 1.34 (127), base 1.53; skipped about 25 percent. Misses both-halves bar (H1 reversal). Live 77 settled fills with rise3 recomputed from candles: moving 1.65 (55) vs still 0.83 (22), agrees with H2, small. Do not adopt; at most watch forward.
