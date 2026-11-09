@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 11:24 AM CT (17:24Z): Lifecycle spec inputs: kill calibration and code inventory sent to main
+
+W-KILLCAL (registered first): R5 net kill under -1c per contract after 50 fills caught Bitcoin at fill 58 (Oct 10, about $13 of $21.5 saved) and XRP at 50 (Oct 25), 0 false kills, silent on gold live and OICORE. R1/R4 rolling-60 PF under 0.7 caught XRP (60, Oct 26), Bitcoin (60, Oct 11), Ethereum (81, Oct 21), once on gold live (trade 280, Nov 6); candle model 4 fires all false. Noise: streak latches, loss rate, dollar drawdown, N40, N100 under 1.0. Cash PF (n): gold live 1.22 (307), OICORE 1.11 (77), gold candle 1.26 (1298), XRP 0.41 (86), Bitcoin 0.72 (155), Ethereum 0.94 (113). W-LIFECODE: reusable killCheck, slotCaps, validator, skip rows, report block; missing nightly per-strategy scorer fields, auto admit/retire, zero-money incubator. Also W-SEPNEW1, W-GOLDCAL1 sent.
+
 ## 2026-11-09 10:37 AM CT (16:37Z): S-OICONF1: ETH OI confirmation for OICORE FAILS
 
 Registered first. History-rebuilt OICORE triggers (not live cash fills) PF 1.80 n 495 of 499. Skip worst ETH OI-change tercile: PF 1.80 n 375, net +25.88 vs +35.32. First half base 2.22 keep 2.35 (skipped 34 percent, net 16.50 vs 23.42); second half held out base 1.47 keep 1.46 (skipped 15 percent, net 9.39 vs 11.90). Held-out PF flat, net falls both halves, skipped trades PF 1.79 (not worse). Only ETH OI change scored (registration ambiguous); ETH price direction untested; live cash not scored. N about 451 plus. Data now cached in oi/eth.jsonl.
