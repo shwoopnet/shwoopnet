@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 12:49 PM CT (18:49Z): W-DECK2: XRP families, none qualify (sample about 8 days, pull continues)
+
+Used W-DECK1 grid and cash model exactly (40 cells, N about 640 plus, about 760 counted overall). S/oi/xrp.jsonl holds 773 settled markets of 5,696 listed (about 8 days); puller xrp_pull.py runs at about 45 markets a minute, about 2 more hours for 60 days. PF first half / second half: F1 best 0.80-0.88 at 6m 1.73 (94) / 0.98 (67); F2 all 0.00 to 0.97; F3 favourite 0.50-0.60 at 10m 0.88 (94) / 1.38 (70); F4 0.07 to 0.20 (0.97-0.98 infinite PF is an artifact of no gain after fee and slip); F5 spread-gated 0.88-0.92 6m 2.43 (59) / 1.12 (54), 10m 0.88-0.97 1.08 (43) / 4.19 (60), all lopsided. No cell clears 1.3 in both halves. Signals a week 60 to 240. Not a verdict (8 days). Rerun an_xrp.py when xrp.jsonl is complete.
+
 ## 2026-11-09 12:33 PM CT (18:33Z): W-DECK1: gold and Bitcoin families, none qualify
 
 Registered first (S/w_deck1). 40 cells each on gold (4,339 windows) and Bitcoin (about 6,375) over about 9.9 weeks; ETH cache only 495 windows and XRP none: their 80 cells counted in N (about 760) but unscored. Model: look candle ask plus 1c slip, 1 contract, fee ceil(0.07*p*(1-p)), hold to settlement, halves by date. No cell reached PF 1.3 in both halves. Above 1.0 in both: gold favourite 0.75-0.82 at 6m PF 1.03 (339) / 1.05 (324), 67 signals a week; Bitcoin spread-gated favourite 0.88-0.97 at 10m (spread at most 0.02) 1.07 (287) / 1.01 (391), 70 a week. Longshots (F2), near-even (F3), late 0.97-0.99 (F4): below 1.0 in at least one half, fee and slip eat the edge. No near-even favourite below 0.50 (empty cells). Structurally different families show no edge; F1 and F5 are PF about 1.0. Prior: none worth a shadow slot.
