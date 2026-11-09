@@ -15,12 +15,14 @@ SOURCES = [  # (file, market table, time column, result column, candle table)
     ("nflpc1.sqlite", "km", "close_ts", "result", "candle"),
 ]
 LEAD = 4 * 3600
+OPEN_MODE = False
 MAX_SPREAD = 0.05
 BANDS = [(0.05, 0.10), (0.10, 0.20), (0.20, 0.30), (0.30, 0.40), (0.40, 0.50), (0.50, 0.60), (0.60, 0.70), (0.70, 0.80), (0.80, 0.90), (0.90, 0.971)]
 MIN_MARKETS = 100
 MIN_CLUSTERS = 30
 EDGE_MIN = 0.02       # dollars per contract after fee
 N_PRIOR = 160
+N_EXTRA = 0          # SINGLELEG2: hypotheses already counted before this run (600 after SINGLELEG1, plus earlier leads)
 
 
 def fee_per_contract(p, c=10):
@@ -40,7 +42,10 @@ def load_markets():
         for tk, ser, t, res in rows:
             if tk in seen:
                 continue
-            r = db.execute("select bid_c, ask_c from %s where ticker=? and end_ts<=? order by end_ts desc limit 1" % ct, (tk, t - LEAD)).fetchone()
+            if OPEN_MODE:
+                r = db.execute("select bid_c, ask_c from %s where ticker=? and end_ts<? and bid_c>0 and ask_c<1 and ask_c-bid_c<=? order by end_ts asc limit 1" % ct, (tk, t, MAX_SPREAD)).fetchone()
+            else:
+                r = db.execute("select bid_c, ask_c from %s where ticker=? and end_ts<=? order by end_ts desc limit 1" % ct, (tk, t - LEAD)).fetchone()
             if not r or r[0] is None or r[1] is None:
                 continue
             b, a = float(r[0]), float(r[1])
@@ -105,12 +110,12 @@ def cmd_score():
     cut = split_time(rows)
     dev = cells_of(rows, lambda s, t: t <= cut[s])
     pot = len({r[0] for r in rows}) * 2 * len(BANDS)
-    N = N_PRIOR + pot
+    N = N_PRIOR + N_EXTRA + pot
     z_bar = {1000: 3.72}.get(1000)
     # one-sided normal quantile for alpha = 0.05 / N
     from statistics import NormalDist
     z_bar = NormalDist().inv_cdf(1 - 0.05 / N)
-    print("N = %d (160 prior + %d cells), z bar %.2f" % (N, pot, z_bar))
+    print("N = %d (160 prior + %d earlier + %d cells), z bar %.2f" % (N, N_EXTRA, pot, z_bar))
     short = []
     allc = []
     for k, v in dev.items():
@@ -146,6 +151,15 @@ def cmd_holdout(shortlist):
 
 if __name__ == "__main__":
     c = sys.argv[1] if len(sys.argv) > 1 else "cells"
+    for a in sys.argv[2:]:
+        if a.startswith("--lead="):
+            v = a.split("=", 1)[1]
+            if v == "open":
+                OPEN_MODE = True
+            else:
+                LEAD = int(v)
+        if a.startswith("--prior="):
+            N_EXTRA = int(a.split("=", 1)[1])
     if c == "cells":
         cmd_cells()
     elif c == "score":
