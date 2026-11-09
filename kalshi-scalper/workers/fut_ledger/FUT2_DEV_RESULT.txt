@@ -1,0 +1,59 @@
+futures ledger N = 160 (60 prior + 50), p bar 0.00031
+
+NQ: 1709 session days, dev 2020-01-02 to 2024-07-23 (1139 days, holdout 570 days unread)
+variant             W1mean  W1shp  W1pf |  W2mean  W2shp  W2pf |  x2shp       p | verdict
+ORB:15:opp:EOD           1   0.01  1.00 |     175   1.20  1.21 |   0.51  0.0885 | falsified
+ORB:30:opp:EOD           7   0.05  1.01 |     266   1.85  1.34 |   0.85  0.0275 | falsified
+ORB:60:opp:EOD          64   0.47  1.08 |     191   1.48  1.27 |   0.85  0.0240 | falsified
+PUBORB:15:opp:1.0R     -62  -0.64  0.91 |      71   0.72  1.11 |  -0.11  0.4798 | falsified
+PUBORB:15:opp:1.5R     -38  -0.34  0.95 |      81   0.71  1.11 |   0.06  0.3438 | falsified
+PUBORB:15:q25:1.0R     -17  -0.32  0.95 |     -59  -1.19  0.82 |  -1.03  0.9650 | falsified
+PUBORB:15:q25:1.5R      32   0.49  1.10 |     -41  -0.69  0.88 |  -0.31  0.5802 | falsified
+PUBORB:30:opp:1.0R     -45  -0.40  0.94 |     163   1.52  1.25 |   0.40  0.1289 | falsified
+PUBORB:30:opp:1.5R     -36  -0.30  0.95 |     188   1.56  1.26 |   0.51  0.1084 | falsified
+PUBORB:30:q25:1.0R      -0  -0.00  1.00 |      -1  -0.01  1.00 |  -0.24  0.4963 | falsified
+PUBORB:30:q25:1.5R      -3  -0.04  0.99 |      30   0.40  1.08 |  -0.02  0.3488 | falsified
+PUBODC:30              -11  -0.37  0.93 |     -46  -1.63  0.74 |  -1.30  0.9815 | falsified
+PUBODC:60               -8  -0.26  0.95 |     -51  -1.81  0.72 |  -1.32  0.9870 | falsified
+DONCH:20               -24  -0.10  0.98 |      61   0.25  1.04 |   0.07  0.4378 | falsified
+DONCH:55               -93  -0.38  0.94 |      -3  -0.01  1.00 |  -0.20  0.6597 | falsified
+DONCH:100               22   0.09  1.02 |     106   0.43  1.07 |   0.26  0.3083 | falsified
+MR:60m:0.15ATR          10   0.09  1.02 |    -143  -1.32  0.73 |  -0.68  0.9165 | falsified
+MR:60m:0.30ATR           1   0.01  1.01 |     -79  -1.62  0.42 |  -0.76  0.9575 | falsified
+MR:120m:0.15ATR        -38  -0.34  0.92 |     -90  -0.91  0.81 |  -0.68  0.8811 | falsified
+MR:120m:0.30ATR        -28  -0.40  0.83 |     -35  -0.65  0.79 |  -0.55  0.8686 | falsified
+ONIGHT:long            130   0.89  1.17 |       8   0.06  1.01 |   0.38  0.1209 | falsified
+OPENCLOSE:long          53   0.27  1.05 |      96   0.47  1.08 |   0.30  0.1589 | falsified
+VOLBRK:0.25ATR          74   0.39  1.07 |      12   0.06  1.01 |   0.15  0.2769 | falsified
+VOLBRK:0.50ATR          96   0.60  1.12 |      82   0.48  1.09 |   0.47  0.0815 | falsified
+GAPFADE:0.10ATR        -53  -0.30  0.95 |    -117  -0.67  0.89 |  -0.55  0.8821 | falsified
+GAPFADE:0.25ATR        -44  -0.30  0.93 |     -39  -0.26  0.95 |  -0.33  0.7336 | falsified
+
+GC: 1742 session days, dev 2020-01-02 to 2024-07-26 (1161 days, holdout 581 days unread)
+variant             W1mean  W1shp  W1pf |  W2mean  W2shp  W2pf |  x2shp       p | verdict
+ORB:15:opp:EOD         -17  -0.29  0.95 |       3   0.06  1.01 |  -0.55  0.5862 | falsified
+ORB:30:opp:EOD         -55  -0.94  0.86 |      12   0.22  1.04 |  -0.80  0.8136 | falsified
+ORB:60:opp:EOD         -33  -0.54  0.91 |      10   0.18  1.03 |  -0.62  0.6797 | falsified
+PUBORB:15:opp:1.0R     -41  -1.06  0.86 |     -23  -0.57  0.92 |  -1.45  0.9760 | falsified
+PUBORB:15:opp:1.5R     -37  -0.85  0.88 |     -22  -0.50  0.93 |  -1.24  0.9325 | falsified
+PUBORB:15:q25:1.0R     -54  -2.71  0.62 |     -41  -1.79  0.73 |  -3.39  1.0000 | falsified
+PUBORB:15:q25:1.5R     -62  -2.87  0.58 |     -55  -2.24  0.65 |  -3.61  1.0000 | falsified
+PUBORB:30:opp:1.0R     -78  -1.71  0.78 |      10   0.23  1.04 |  -1.33  0.9425 | falsified
+PUBORB:30:opp:1.5R     -71  -1.43  0.81 |      -7  -0.16  0.98 |  -1.33  0.9690 | falsified
+PUBORB:30:q25:1.0R     -61  -2.48  0.65 |     -28  -1.05  0.84 |  -2.71  0.9995 | falsified
+PUBORB:30:q25:1.5R     -56  -2.01  0.69 |     -37  -1.32  0.79 |  -2.54  1.0000 | falsified
+DONCH:20              -106  -0.84  0.86 |     -53  -0.47  0.92 |  -0.67  0.9265 | falsified
+DONCH:55               -38  -0.30  0.95 |      14   0.13  1.02 |  -0.10  0.6152 | falsified
+DONCH:100              -12  -0.10  0.98 |     -28  -0.25  0.96 |  -0.17  0.6567 | falsified
+MR:60m:0.15ATR          22   0.67  1.30 |     -38  -1.18  0.66 |  -0.42  0.7231 | falsified
+MR:60m:0.30ATR           4   0.23  1.25 |     -13  -1.09  0.39 |  -0.38  0.7711 | falsified
+MR:120m:0.15ATR         17   0.53  1.15 |     -17  -0.50  0.86 |  -0.32  0.4848 | falsified
+MR:120m:0.30ATR         -1  -0.04  0.98 |     -20  -0.84  0.63 |  -0.66  0.8141 | falsified
+ONIGHT:long             19   0.22  1.04 |      12   0.16  1.03 |  -0.11  0.2984 | falsified
+OPENCLOSE:long         -13  -0.16  0.97 |     -46  -0.56  0.91 |  -0.66  0.8311 | falsified
+VOLBRK:0.25ATR          67   0.86  1.16 |      -5  -0.07  0.99 |   0.08  0.1929 | falsified
+VOLBRK:0.50ATR          46   0.68  1.15 |       9   0.13  1.03 |   0.13  0.2024 | falsified
+GAPFADE:0.10ATR        -95  -1.26  0.79 |     -30  -0.43  0.92 |  -1.14  0.9590 | falsified
+GAPFADE:0.25ATR        -88  -1.36  0.73 |       9   0.16  1.04 |  -0.86  0.8936 | falsified
+
+SURVIVORS (dev, all conditions): none
