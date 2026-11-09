@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:31 AM CT (16:31Z): W-SEPNEW1: early-sell separation on new features, noise
+
+Registered first, 9 cuts, N 536, z bar about 5.2. Candle 464 (H2 held out from 2026-10-22), live 305 fills, 16 early sells. Baseline PF H1/H2/live 1.58/1.24/1.21. PF with skip (H2/live): gold 60m dir 2.69/1.69 (ties at 0, skips about 70 percent), 240m dir 1.05/1.05, bid slope 1.11/1.30, dips below 0.80 1.26/1.21 (skipped 15 percent, live net down), BTC OI 1.24/1.00, OICORE same window 1.14/1.17 (live n=7), prior favourite lost 1.00/0.91 (skipped bucket PF 4 to 10, opposite), prior window loss untestable (1 to 2 events), silver 60m dir 2.20/2.04 (skips 70 percent). All fail. OICORE worst 8 losses (5 with BTC history): prior 60m dir +0.40 vs +0.10 all fills, 240m -0.40 vs -0.45: nothing separates, n too small.
+
 ## 2026-11-09 10:30 AM CT (16:30Z): W-GOLDCAL1: gold calendar and session effects, no skip candidate (noise)
 
 Registered first, 9 cells, N about 536. Candle PF (n) / live cash PF (n): month-end 1.53 (221) / 1.06 (53); FOMC Sep 16 and Oct 28 0.89 (47) / all wins (13); London open 2.16 (81) / 4.87 (25); London close 0.83 (125) / 2.40 (29); 08:00-09:30 ET 3.11 (79) / 1.07 (20); US cash open 1.33 (94); 15:00-16:00 ET 0.75 (43) / all wins (10); Asia 1.36 (424) / 1.14 (101); Fri 16-17 CT n8. 0 of 9 pass. FOMC removal lifts candle both halves but live net +8.81, fails. CPI/NFP/PPI dates not verifiable (bls.gov denied), 08:30 ET slot used as stand-in. No roll in the 15 minute market. run.py per-half cell/rest display bug (pass logic fine).
