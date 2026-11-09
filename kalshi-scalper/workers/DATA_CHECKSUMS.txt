@@ -1,0 +1,9 @@
+# Data checksums and counts, Nov 9 2026 (raw sqlite is git-ignored; counts reproduce from a fresh /historical fetch, hashes only match this snapshot)
+c1889df1343daa62 22936KB data/hist15/KXBTC15M.sqlite
+670c518e5e047b40 22192KB data/hist15/KXETH15M.sqlite
+a4f92a6537f22bd7 105916KB data/hist15/KXBTCD.sqlite
+5d17ae233d7c411b 8112KB data/nflpc1.sqlite
+c01a88782c5e054e 6200KB data/nflcombo1.sqlite
+191aaed31aaa3d05 6048KB data/serieslag1.sqlite
+HISTBTC1 held-out (close_ts>=1784073600, with candles): 2079 markets, 22 dates; HISTETH1: 2079 markets, 22 dates (recounted Nov 9, equal)
+HISTBTC1 dev markets with candles now 4106; dev rows now 23486 (registered 22502, run 22605: DB grew while fetch ran)
