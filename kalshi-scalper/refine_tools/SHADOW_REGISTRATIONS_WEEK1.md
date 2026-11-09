@@ -5,12 +5,12 @@ Registered BEFORE any forward shadow row exists. Basis: cash, PF per contract (e
 Common pass rule (from the lifecycle spec): 150 forward shadow signals, cash PF at least 1.3 per contract, second half at least 1.2, at least 14 days, no single day above 30 percent of net. Common kill: net under -1c per contract after 50 shadow signals, or under 40 signals in 30 days (retire). Counterparty: none named for any of the three. Return path after a pass: incubator ($20 cap, $5 per order), then ladder step 1, owner approves.
 
 ```js
-{ id: "ETHNO6", series: ["KXETH15M"], entry: { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "ETHNO6" },
-{ id: "BTCHI6", series: ["KXBTC15M"], entry: { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "BTCHI6" },
-{ id: "XRPYES10", series: ["KXXRP15M"], entry: { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "XRPYES10" },
-{ id: "ETHL1", series: ["KXETH15M"], entry: { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "ETHL1" }
+{ id: "ETHNO6", series: ["KXETH15M"], entry: { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#ETHNO6" },
+{ id: "BTCHI6", series: ["KXBTC15M"], entry: { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#BTCHI6" },
+{ id: "XRPYES10", series: ["KXXRP15M"], entry: { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#XRPYES10" },
+{ id: "ETHL1", series: ["KXETH15M"], entry: { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, contracts: 1, registeredAt: "2026-11-10", forwardReadDate: "2026-12-14", readme: "kalshi-scalper/refine_tools/SHADOW_REGISTRATIONS_WEEK1.md#ETHL1" }
 ```
-(the `readme` value is whatever string the validator expects; if it must be a README anchor, use the anchor of the section below.)
+(readme anchors point at the sections below; GitHub lowercases them, the validator accepts \w and - in the anchor, so keep ids as written and confirm at merge that the anchor text matches your README convention.)
 
 ## ETHNO6
 Rule: Ethereum 15 minute, buy NO when NO is priced 0.88 to 0.97 at the 6 minute look (330 to 400 s left), hold, 1 contract. History (live orders, cash, per contract): PF 2.59, n 53, halves 2.70 (26) and 2.48 (27); skips 53 percent of Ethereum fills; about 16 signals a week. No candle history to check it. Prediction: cash PF at least 1.3 forward. Prior low to medium: best of 121 cells, selection bias likely.
