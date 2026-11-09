@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 11:30 AM CT (17:30Z): BASIS ERROR found: workers used stored settledPnl for wins/losses (limit-booked pre PR 741); scorer fixed
+
+Gold L1 whole record: cash (win/loss recomputed from avgFill and avgFee, exits corrected) PF 1.40, +60.93 (n 307); stored settledPnl PF 1.21, +31.71. W-GOLDDECAY, W-KILLCAL, W-GOLDVOL, W-GOLDMIX, W-GOLDCAL, W-SEPNEW and the scorer first run used stored for non-exit rows, so their PFs read about 0.2 low on pre-741 rows (period P1 and P2 most; P3 mostly post-741 so close). Corrected scorer (cash): gold 1.40 (307) +60.93 r60 now 0.89 min 0.61; OICORE 1.32 (77) +25.09; Dogecoin 1.01 (204); Bitcoin 0.84 (155) -11.83; Ethereum 1.17 (113) +5.17; XRP 0.49 (86) -11.05. goldtrip.py already used the cash recompute (r60 latest 0.89, min 0.61), so the tripwire is on the right basis. Pass/fail verdicts of the filter studies are relative (skip vs baseline on one basis) and the nulls stand, but absolute PFs quoted today are low. Kill calibration (W-KILLCAL) must be rerun on the cash basis: Ethereum and Bitcoin are less bad on cash.
+
 ## 2026-11-09 11:29 AM CT (17:29Z): S-OIETH2: OICORE ETH price direction FAILS
 
 Registered first. Skip worst tercile of ETH mid change (close-360 to close-180, signed by BTC bought side), cut on first half. History (495 of 499): H1 base PF 2.22 (n247, +23.42) keep 2.08 (n164, +14.19), skipped 2.52; H2 held out base 1.47 (n248, +11.90) keep 1.46 (n155, +7.62), skipped 1.50. Skipped share 34 and 38 percent (H2 over the 35 percent bar). Live cash fills (51 of 83 with ETH candles): base PF 1.35 (+22.10), keep 1.52 (n30, +19.02), skip 1.12 (n21, +3.09): PF up, net down, n too small. Skipped tercile not worse in history, live rise is noise. N about 452 OICORE, about 540 total, z bar about 5.2. No rule.

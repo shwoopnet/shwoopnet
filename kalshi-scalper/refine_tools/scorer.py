@@ -10,6 +10,9 @@ def trade(o):
     c=o['count'];y=o['side']=='yes'
     paid=o['avgFill'] if y else 1-o['avgFill']
     pnl=o['settledPnl'];ex=o.get('result')=='exit'
+    fee0=(o.get('avgFee') or 0)*c
+    # cash basis: win or loss recomputed from the fill (stored settledPnl is limit-booked before PR 741; found Nov 9)
+    if o.get('result') in('yes','no'): pnl=(c*(1-paid)-fee0) if o['result']==o['side'] else (-c*paid-fee0)
     if ex and o.get('limit') is not None:
         pnl+=c*((o['limit'] if y else 1-o['limit'])-paid)
     slip=None
