@@ -42,3 +42,10 @@ Falsification-first registration, deflation counting (ledger), fee modeling with
 
 ## 6. Recommendation
 Scope ONE market first: futures (micro index and a few commodities), starting free daily data only. Why: no PDT rule, lowest friction, longest honest history, defined tax treatment, fits slow low-capacity rules where our harness (registration, deflation, holdout) is strongest, and nothing in it requires fast infrastructure. First deliverable (research only): a futures adapter for scan.py with real roll handling and a contract-level fee model, one registered trend-following family, zero accounts. Honest expectation: a small, slow edge at best, no income soon; an unfunded passing backtest here proves little until forward data confirms it. Keep Kalshi research and the live bot running in parallel.
+
+## Futures feasibility pass, source check (Nov 9, 2026, 01:10Z, from the sandbox)
+- FRED (fred.stlouisfed.org/graph/fredgraph.csv): REACHABLE. Daily, free. WTI spot from 1986, Henry Hub gas, S&P 500 index level (about 10 years), Treasury yields. SPOT or index series, NOT futures: no roll, no carry, no contract.
+- Yahoo chart (ES=F, GC=F): HTTP 429 on two tries 20 s apart. Not worked around.
+- Stooq: connection reset (blocked). Not worked around.
+- Nasdaq Data Link CHRIS: 403. CFTC COT file: 403. CME FTP: unreachable.
+- Consequence: no deep free FUTURES contract series is reachable from this sandbox today. Carry and roll cannot be tested on FRED spot data. Costs per contract per side and back-adjusted vs spliced construction can be written into the protocol now, but scoring waits for a futures source. Micro contracts only exist since 2019 anyway, so full-size contract history (ES, NQ, CL, GC) is the only way to get a decade.
