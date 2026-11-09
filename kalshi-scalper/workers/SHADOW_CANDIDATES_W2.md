@@ -21,3 +21,6 @@ Not candidates. 8 tries added to the Kalshi ledger (N about 1,500,513).
 
 ## What I cannot supply yet
 Anything outside gold, Bitcoin, Ethereum, XRP needs a quote read. NEWSER1 (macro series, hourly lead) is still fetching; its cells score after it finishes, and those would need a new quote read (not 15 minute, hourly or slower).
+
+## Update (Nov 9, main): GOLD-MOM1 is NOT registered separately
+Covered by the merged GOLDALL shadow (PR 752, README#SHADOW-GOLDALL). The |rise3| >= 0.05 split is read there: 150 signals with at least 50 moving, moving cash PF 1.3+, second half 1.2+, 14 days, kill if moving net is under -1c per contract after 50 moving signals. No second N entry. Structurally different candidates that need a quote beyond gold, Bitcoin, Ethereum, XRP: send main the series ticker and fields first.
