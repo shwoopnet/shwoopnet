@@ -2,6 +2,8 @@
 
 Owner priority, Nov 9, 2026: full time algo trading with a system that constantly rotates strategies in and out by pre-set pass rules and kill rules, instead of one slow read every 90 days. This file is a SPEC. It changes no trading code and nothing in it is live. Sections 2, 3 and 5 come from the research chat (V2) and 4 from the live refinement chat; the code plan, the automation line and the Charter change are the chief of staff's. Profit factor (PF) means gross wins over gross losses, net of fees, on a cash basis (fill price plus fee), per the owner's Nov 9 format directive.
 
+> **Basis correction (Nov 9, 2026, caught in review).** The first draft of sections 4 and 5 used the nightly report's stored `settledPnl` for wins and losses, which is limit booked before PR 741 and understates wins. On the cash basis (fill price plus fee, exits corrected), whole record, PF (trades): gold 1.40 (307, +$60.93), OICORE 1.32 (77, +$25.09), Dogecoin 1.01 (204), Ethereum 1.17 (113, +$5.17), Bitcoin 0.84 (155, -$11.83), XRP 0.49 (86, -$11.05). The earlier numbers (gold 1.21, OICORE 1.11, Bitcoin 0.72, Ethereum 0.92, Dogecoin 0.82, XRP 0.41) are the limit booked ones and should not be used. The kill calibration in section 4 and V2's honest read in section 5 are being re-run on the cash basis; **treat their thresholds and fire dates as provisional until section 4 is re-stamped.** The pass rules and evidence sizes (sections 2 and 3) do not depend on the booking basis.
+
 ## 1. Stages
 
 | Stage | What runs | Money at risk | Who moves it |
