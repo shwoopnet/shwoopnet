@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 02:31 PM CT (20:31Z): OICORE slide since Nov 5: headroom check (no trigger within 25 percent; drawdown stop 28 percent of room left)
+
+Cash basis, 78 settled fills since Oct 30, 13 wins: all PF 1.27 [0.58, 2.27] net +22.35; last 40 PF 0.51 net -30.49; last 30 PF 0.46; last 20 PF 0.53; since Nov 5 (n42) PF 0.50 [0.09, 1.21] net -31.68; since Nov 8 (n6) PF 0.68; before Nov 5 (n36) PF 3.86 [1.50, 8.05] net +54.03. Rolling-60 latest 0.92 (its minimum). Headroom (code counts booked P&L, booked cumulative +7.20): net kill (under -6 after 40 fills) 13.20 away booked, 28.35 cash; streak kill 24, current 5; drawdown stop min(5x12, 12 percent of base, 150) = 60, booked drawdown 43.13, 16.87 left (28 percent of room); daily cap 65 percent used (last 24h -12.72 of 19.59). Slide by price band since Nov 5: under 0.08 18 fills 0 wins -9.76; 0.08-0.10 1 fill -0.91; 0.10-0.34 19 fills 3 wins -12.68; 0.35 and up 4 fills 1 win -8.32. The 0.08 cheap skip blocks only the first row. Under 0.08 was +17.64 before Nov 5. Every day since Nov 5 negative except Nov 6.
+
 ## 2026-11-09 01:33 PM CT (19:33Z): wake.sh fast again; tracker table (1:30 PM CT)
 
 wake.sh now 14.6 s cached, 75 s cold (was over 300 s); report fetched once, per-section 60 s cap, STATUS block per tracker. Trackers, none at read point, no rule changed: HALFSIZE1 19/40 (under 0.10: 0 wins -5.29c per contract; 0.10+: -8.27c); HOLDVSSELL 0/30; OIBANDS1 A 2/40 (0 wins), B 4/20 (1 win); ESFEAT1 0/20 early sells (19 of 300 fills); OICHEAPSKIP1 4 settled signals 0 wins (keep at 1 win or fewer); NOFILLADV 4/20; LIM1-LIVE 2 tagged fills of 20, net -4.16 (revert only at 20 if net below zero); gold tripwire 2/100, cumulative PF inf, latest rolling-60 0.90, OK.
