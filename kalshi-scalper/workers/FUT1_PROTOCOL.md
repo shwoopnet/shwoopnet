@@ -18,3 +18,6 @@ Windows: dev covers the first two thirds of each market's dates split W1/W2 of e
 Predictions (stated before scoring): zero survivors (about 80%); if any, TSMOM on gas or carry on crude; equity-style trend profits since 2014 are weak. Verdict words: NOT_ENOUGH_DATA, FALSIFIED, NOT_YET_FALSIFIED (needs holdout), never a promote.
 ## Timeline
 Scorer takes a day to write and test on synthetic data; first dev read within 24 hours of this commit.
+
+## Amendment 1 (before scoring, Nov 9): variant count
+The scorer lists 14 variants per market (4 TSMOM, 1 CARRY, 3 TC, 5 long-only controls of TSMOM and CARRY, 1 long-only TC:60), not 13, so N = 2 x 14 + 2 = 30 (stricter than the 28 written above). The exact list is workers/fut_ledger/FUT1_VARIANTS.txt, committed before the first score. Scorer: src/scalper/fut1.py (selftest passes: roll detection, costs, no lookahead).
