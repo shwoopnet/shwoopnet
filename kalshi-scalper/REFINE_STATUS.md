@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:27 AM CT (16:27Z): W-GOLDVOL1: gold vs trailing volatility FAILS
+
+Registered first. Terciles of 30 and 60 min sd and 5 min range, cut on first half. Worst bucket was the middle one (F30, R5) or low (F60): not monotonic. Candle PF first/second half 1.56/1.23 (n 229 each). Skip rule: candle net falls in first half for all three; R5 fails live (1.21 to 1.13); F30 skips 34 to 39 percent. N tried about 485, bar z about 5.2. No shadow.
+
 ## 2026-11-09 10:26 AM CT (16:26Z): Gold decay diagnosis Oct 7-20 vs Nov 1-9 (cash PF)
 
 PF 4.41 (n100, 2 losses) / 1.24 (n115) / 0.89 (n92); 90% CIs overlap, only first vs last borderline (p 0.05). Driver is loss rate 2.0 / 7.0 / 8.7 percent (all early sells but 2); about 85 percent of the log-PF drop is loss rate, 15 percent loss size, none from win payoff or fees. Market candle loss rate flat 5.0 / 5.4 / 5.2 percent, volatility, fill rate, band, slip, spread, depth flat. Read: P1 lucky, true PF near 1.2 (inferred). Unmeasurable: other-side makers, queue, buyer identity, intrabar highs and lows. Candidates c/d/e: nothing passes (c OICORE ask+2c fails half 1; shadow log offered). Files in scratchpad w_golddecay, w_cand_c.
