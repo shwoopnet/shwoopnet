@@ -83,7 +83,7 @@ function shadowSignals(rules, quotes, nowMs) {
         // The size resting at the touch we would hit (buying YES meets the YES ask size, buying NO meets the YES bid size); the book carries only the top level.
         const depth = num(side === "yes" ? q.m.yes_ask_size_fp : q.m.yes_bid_size_fp);
         out.push({ rule: r.id, ticker: String(q.m.ticker), series: String(q.series), side, price, size: r.contracts, depth: Number.isFinite(depth) ? depth : null,
-          wouldFill: Number.isFinite(depth) ? depth >= r.contracts : null, bid, ask, spread, secondsLeft: Math.round(left), closeTime: String(q.m.close_time), atMs: nowMs });
+          wouldFill: Number.isFinite(depth) ? depth >= r.contracts : null, bid, ask, spread, secondsLeft: Math.round(left), closeTime: String(q.m.close_time), closeMs, settled: false, atMs: nowMs });
       } catch (e) { /* one bad market never stops the rest */ }
     }
   }
@@ -114,4 +114,74 @@ async function runShadowTick(args) {
   } catch (e) { return { skipped: "shadow failed" }; }
 }
 
-module.exports = { SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowWriter, runShadowTick, COLLECTION };
+// ---- Settlement and scoring (lifecycle spec (c)) ---------------------------------------------------------------------------------------------------------------
+// A shadow row is settled from the PUBLIC market answer (no key, no order): once the market has a result, the row gets result, won and pnl, the dollars one contract of it would have made on the CASH
+// basis (the side's price plus the fee; the fee is the 10 contract fee the research uses, 7% of P x (1 - P) per contract rounded up to the cent on 10 contracts, so every number is comparable with the
+// research record and with a real 10 contract order). It assumes a fill at the touch, which is an upper bound; `wouldFill` says whether the touch could cover the size.
+function shadowFee(price) {
+  const p = Number(price);
+  if (!(p > 0 && p < 1)) return NaN;
+  return Math.ceil(0.07 * 10 * p * (1 - p) * 100 - 1e-9) / 100 / 10;
+}
+function shadowOutcome(row, result) {
+  if (!row || (result !== "yes" && result !== "no")) return null;
+  const fee = shadowFee(row.price);
+  if (!Number.isFinite(fee) || (row.side !== "yes" && row.side !== "no")) return null;
+  const won = row.side === result;
+  return { result, won, fee, pnl: Math.round((won ? 1 - row.price - fee : -(row.price + fee)) * 10000) / 10000 };
+}
+// Settle at most `max` unsettled rows whose market closed at least 2 minutes ago. Public reads only, every error swallowed, one row at a time so a slow answer costs one round trip.
+async function settleShadowRows(args) {
+  const out = { checked: 0, settled: 0 };
+  try {
+    const max = Number.isInteger(args.max) && args.max > 0 ? Math.min(args.max, 20) : 12;
+    const rows = (await args.readOpen()).filter((r) => r && r.settled === false && Number.isFinite(Number(r.closeMs)) && Number(r.closeMs) + 120000 <= args.now).sort((a, b) => Number(a.closeMs) - Number(b.closeMs)).slice(0, max);
+    for (const r of rows) {
+      out.checked += 1;
+      try {
+        const m = await args.market(String(r.ticker));
+        const result = m && typeof m.result === "string" ? m.result.toLowerCase() : "";
+        const o = shadowOutcome(r, result);
+        if (!o) continue;
+        await args.update(String(r.rule) + "_" + String(r.ticker), { settled: true, result: o.result, won: o.won, fee: o.fee, pnl: o.pnl, settledAtMs: args.now });
+        out.settled += 1;
+      } catch (e) { /* the next run tries again */ }
+    }
+  } catch (e) { /* log only */ }
+  return out;
+}
+
+// The nightly scorer's read of the shadow log: per rule, signals, settled, wins, cash PF per contract (all signals, and only those the touch could fill), net cents per contract, days, signals in the
+// last 30 days, and the lifecycle verdict against the written rules (docs/STRATEGY_LIFECYCLE.md section 3 and 4). Numbers and short labels only: no ticker, no document id.
+const DAY = 86400000;
+function pfOf(rows) {
+  let w = 0, l = 0;
+  for (const r of rows) { if (r.pnl > 0) w += r.pnl; else if (r.pnl < 0) l += -r.pnl; }
+  return { gw: Math.round(w * 10000) / 10000, gl: Math.round(l * 10000) / 10000, pf: l > 0 ? Math.round((w / l) * 100) / 100 : null, n: rows.length, net: Math.round((w - l) * 10000) / 10000 };
+}
+function shadowReport(rules, docs, nowMs) {
+  const all = (Array.isArray(docs) ? docs : []).filter((d) => d && typeof d.rule === "string" && Number.isFinite(Number(d.atMs)));
+  return (Array.isArray(rules) ? rules : []).map((rule) => {
+    const mine = all.filter((d) => d.rule === rule.id).sort((a, b) => Number(a.atMs) - Number(b.atMs));
+    const settled = mine.filter((d) => d.settled === true && Number.isFinite(Number(d.pnl))).map((d) => ({ pnl: Number(d.pnl), wouldFill: d.wouldFill === true, atMs: Number(d.atMs) }));
+    const fill = settled.filter((d) => d.wouldFill);
+    const a = pfOf(settled), f = pfOf(fill);
+    const first = mine.length ? Number(mine[0].atMs) : null, last = mine.length ? Number(mine[mine.length - 1].atMs) : null;
+    const days = first === null ? 0 : Math.round(((nowMs - first) / DAY) * 10) / 10;
+    const half = fill.length >= 2 ? pfOf(fill.slice(Math.floor(fill.length / 2))) : null;
+    const byDay = {};
+    for (const d of fill) { const k = new Date(d.atMs).toISOString().slice(0, 10); byDay[k] = (byDay[k] || 0) + d.pnl; }
+    const topDay = f.net > 0 ? Math.max(...Object.values(byDay)) / f.net : null;
+    const netCents = fill.length ? Math.round((f.net / fill.length) * 1000) / 10 : null;
+    const last30 = mine.filter((d) => Number(d.atMs) >= nowMs - 30 * DAY).length;
+    // Verdict, in the order the written rules apply: a kill first, then a retire for too few signals, then the pass to incubator, else collecting.
+    let status = "collecting";
+    if (fill.length >= 50 && netCents !== null && netCents < -1) status = "kill: net under -1c per contract after 50 signals";
+    else if (days >= 30 && last30 < 40) status = "retire: under 40 signals in 30 days";
+    else if (fill.length >= 150 && days >= 14 && f.pf !== null && f.pf >= 1.3 && half && half.pf !== null && half.pf >= 1.2 && topDay !== null && topDay <= 0.3) status = "ready: meets the shadow pass rule, owner packet next";
+    return { rule: rule.id, signals: mine.length, settled: settled.length, fillable: fill.length, wins: settled.filter((d) => d.pnl > 0).length, pf: a.pf, pfFillable: f.pf, netFillableDollars: f.net, netCentsPerContract: netCents,
+      secondHalfPf: half ? half.pf : null, topDayShareOfNet: topDay === null ? null : Math.round(topDay * 100) / 100, days, signalsLast30d: last30, status };
+  });
+}
+
+module.exports = { SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
