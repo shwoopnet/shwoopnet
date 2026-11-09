@@ -6,13 +6,18 @@ days of 150+ and positive net profit; request min(50% of balance, 2,000) (50K St
 annual Sharpe and daily dollar vol (a stand-in for a diversified micro portfolio). Not a model of a real strategy; real P&L is fatter-tailed and serially dependent."""
 import numpy as np, sys
 rng = np.random.default_rng(7)
+DF = None      # None = normal; an integer df >= 3 = Student-t scaled to the same sd (fat tails)
+def draw(mu, sd):
+    if DF is None:
+        return rng.normal(mu, sd)
+    return mu + sd * rng.standard_t(DF) / np.sqrt(DF / (DF - 2.0))
 MONTH = 21
 FEE_M, RESET, ACT = 49.0, 49.0, 149.0
 def combine(mu, sd, maxd=250):
     bal, mll, best, days = 50000.0, 48000.0, 0.0, 0
     prof = 0.0
     while days < maxd:
-        x = rng.normal(mu, sd)
+        x = draw(mu, sd)
         days += 1
         # intraday breach approximated by closing balance (optimistic) plus an intraday-low penalty
         low = bal + x - abs(rng.normal(0, sd * 0.5))      # intraday adverse excursion proxy
@@ -27,7 +32,7 @@ def combine(mu, sd, maxd=250):
 def xfa(mu, sd, maxd=250):
     bal, mll, wins, days = 0.0, -2000.0, 0, 0
     while days < maxd:
-        x = rng.normal(mu, sd)
+        x = draw(mu, sd)
         days += 1
         low = bal + x - abs(rng.normal(0, sd * 0.5))
         if low <= mll:
@@ -58,7 +63,14 @@ def run(sharpe, sd, n=4000):
     res = [trial(sharpe, sd) for _ in range(n)]
     got = np.array([r[0] for r in res]); pay = np.array([r[1] for r in res]); fees = np.array([r[2] for r in res]); dd = np.array([r[3] for r in res])
     return got.mean(), np.median(fees[got]) if got.any() else np.nan, fees.mean(), (pay - fees).mean(), np.median(dd[got]) / 21 if got.any() else np.nan
-if __name__ == "__main__":
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "fat":
+    DF = 3
+    print("FAT TAILS (Student-t df 3, same sd). sd/day  Sharpe  P(payout)  median fees  mean fees  mean net  median months")
+    for sd in (300.0, 600.0):
+        for s_ in (0.0, 0.5, 1.0, 1.5):
+            p, mf, af, net, mo = run(s_, sd)
+            print("%6.0f  %5.1f   %.3f   $%7.0f   $%7.0f   $%7.0f   %5.1f" % (sd, s_, p, mf, af, net, mo))
+elif __name__ == "__main__":
     print("sd/day  Sharpe  P(first payout within 20 combines)  median fees to payout  mean fees  mean net (first payout - fees)  median months")
     for sd in (300.0, 600.0):
         for s in (0.0, 0.5, 1.0, 1.5):
