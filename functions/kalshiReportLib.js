@@ -4,6 +4,7 @@
 const crypto = require("crypto");
 const { maxContractsFor } = require("./kalshiLiveLib");
 const deployStampLib = require("./deployStampLib");
+const shadowLib = require("./kalshiShadowLib");   // read only: the shadow rules' score; this library still sends nothing to Kalshi and writes nothing
 
 const MAX_HOURS = 24 * 90;
 const MAX_ORDER_ROWS = 2000;
@@ -129,6 +130,7 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
 // Second-slot skip reasons (Nov 5, 2026, the owner: "Save skip reasons"): the last SKIP_DAYS of the slot's skip documents, as a count per reason code and one row per document. The document holds
 // strategy, ticker, a short fixed code, a few numbers and the minute; the row keeps those (numbers only in detail, a code that is not a short plain word is dropped) and never the document id.
 const SKIP_DAYS = 7;
+const SHADOW_DAYS = 90;
 const MAX_SKIP_ROWS = 500;
 function skipSection(docs, nowMs) {
   const since = nowMs - SKIP_DAYS * 86400000;
@@ -176,9 +178,13 @@ function makeReportHandler(deps) {
       // The second slot's skip reasons, last SKIP_DAYS whatever `hours` says. Optional, read only; a failure leaves the field out and never blanks the report.
       let skips;
       if (typeof deps.readSkips === "function") { try { skips = skipSection(await deps.readSkips(now - SKIP_DAYS * 86400000), now); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      // The shadow rules' score (lifecycle spec (c)): per rule, signals, cash PF per contract and the verdict against the written pass and kill rules. Optional, read only; a failure leaves the field out.
+      let shadow;
+      if (typeof deps.readShadowRows === "function" && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), await deps.readShadowRows(now - SHADOW_DAYS * 86400000), now) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
       if (deploys !== undefined) report.deploys = deploys;
       if (skips !== undefined) report.skips = skips;
+      if (shadow !== undefined) report.shadow = shadow;
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.

@@ -55,6 +55,8 @@ const shardAlertLib = require("./kalshiShardAlertLib");
 const slotLib = require("./kalshiSlotLib");
 const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
+const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
+const shadowSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
@@ -696,6 +698,20 @@ exports.kalshiLiveArmed = onSchedule(
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
         }
+        // Shadow rules (Nov 9, 2026, stage 1 of docs/STRATEGY_LIFECYCLE.md): log only, after everything that can trade has run. With the registry empty this makes no call and no write.
+        if (shadowLib.SHADOW_RULES.length) {
+          try { await shadowLib.runShadowTick({ now, quotes: market.quotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen }); }
+          catch (e) { /* log only */ }
+          // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and a 15 s time guard; every error swallowed.
+          if (Math.floor(now / 60000) % 5 === 0) {
+            try {
+              await shadowLib.settleShadowRows({ now, max: 6, budgetMs: 15000, clock: Date.now,
+                readOpen: async () => (await db.collection(shadowLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
+                update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
+                market: (ticker) => kalshiMarketApi().market(ticker) });
+            } catch (e) { /* log only */ }
+          }
+        }
       }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
@@ -913,6 +929,9 @@ exports.kalshiNightlyReport = onRequest(
     readOrders: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's orders (OICORE), read the same way, so the report covers every strategy.
     readDeploys: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(deployStamp.COLLECTION).get()).docs.map((d) => d.data()); },
+    // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
+    readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
+    shadowRules: () => shadowLib.SHADOW_RULES,
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },

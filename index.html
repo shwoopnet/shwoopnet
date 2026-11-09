@@ -1660,6 +1660,10 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 9</div>
                 <ul class="changelog-list">
+
+                  <li>Bot: the shadow rules are now scored: each signal is settled from the public market result and the nightly report shows, per rule, cash profit factor, signals, days and the verdict against the written pass and kill rules (read only, no order, no money)</li>
+                  <li>Bot: four shadow rules registered (Ethereum NO, Bitcoin favourite at 0.92 or more, XRP YES at the 10 minute look, Ethereum like gold): they only log what they would have bought, 1 contract, no order and no money, to collect forward evidence for the strategy lifecycle</li>
+                  <li>Bot: the first piece of the strategy lifecycle, a shadow logger: a candidate rule can be registered to only LOG what it would have bought (no order, no money, no extra request), so new ideas can collect forward evidence; the list of rules starts empty, so nothing changes today</li>
                   <li>Docs: a draft strategy lifecycle spec (stages, pass and kill rules in numbers, evidence needed, what can be automated, a four step build plan); nothing in it is live</li>
                   <li>Rules and limits now says OICORE skips an entry priced under 8c (the page still said 5c); the freshness check now reads that number from the bot's code</li>
                 </ul>
