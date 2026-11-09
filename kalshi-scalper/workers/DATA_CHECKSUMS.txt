@@ -7,3 +7,21 @@ c01a88782c5e054e 6200KB data/nflcombo1.sqlite
 191aaed31aaa3d05 6048KB data/serieslag1.sqlite
 HISTBTC1 held-out (close_ts>=1784073600, with candles): 2079 markets, 22 dates; HISTETH1: 2079 markets, 22 dates (recounted Nov 9, equal)
 HISTBTC1 dev markets with candles now 4106; dev rows now 23486 (registered 22502, run 22605: DB grew while fetch ran)
+
+# Databento files (Nov 9 2026; raw in data/fut/db, git-ignored). sha256 first 16, bytes, rows
+1b7b430f1dd27b2c 5352391 NQ__glbx-mdp3-20200101-20201231.ohlcv-1m.csv.zst
+3556bcef9882ac08 5363893 NQ__glbx-mdp3-20210101-20211231.ohlcv-1m.csv.zst
+edb7d093aa3fdbaa 5598647 NQ__glbx-mdp3-20220101-20221231.ohlcv-1m.csv.zst
+3dc1769180d4cfea 5382454 NQ__glbx-mdp3-20230101-20231231.ohlcv-1m.csv.zst
+7373ef18ed17bfba 5495776 NQ__glbx-mdp3-20240101-20241231.ohlcv-1m.csv.zst
+eb59d0e3f3fba746 5604975 NQ__glbx-mdp3-20250101-20251231.ohlcv-1m.csv.zst
+2d640f842fe502db 4945834 NQ__glbx-mdp3-20260101-20261105.ohlcv-1m.csv.zst
+NQ 1-min rows 2419672, 2020-01-01 18:00:00 to 2026-11-05 18:59:00 ET, contract ids 28
+90da8bd9b38ef582 4600458 GC__glbx-mdp3-20200101-20201231.ohlcv-1m.csv.zst
+f337e5cdd9819a24 4359413 GC__glbx-mdp3-20210101-20211231.ohlcv-1m.csv.zst
+6c8a71bc40fcac21 4408161 GC__glbx-mdp3-20220101-20221231.ohlcv-1m.csv.zst
+d30206001b9c33b3 4304875 GC__glbx-mdp3-20230101-20231231.ohlcv-1m.csv.zst
+bb722f4e11906968 4578724 GC__glbx-mdp3-20240101-20241231.ohlcv-1m.csv.zst
+e9b5e0d35c1b4815 4940635 GC__glbx-mdp3-20250101-20251231.ohlcv-1m.csv.zst
+a309d82847bc8fa7 4395002 GC__glbx-mdp3-20260101-20261105.ohlcv-1m.csv.zst
+GC 1-min rows 2395385, 2020-01-01 18:00:00 to 2026-11-05 18:59:00 ET, contract ids 35
