@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 01:29 PM CT (19:29Z): W-OIGAP: OICORE live vs rebuilt history gap is mostly period, within chance
+
+Registered first (S/w_oigap, N about 600). Cash, PF per dollar: history all 1.53 (515); live 1.27 (78, +22.4); history on live-period windows only 1.09 (85, +8); matched windows (61): history 0.91, live 1.27. So most of the gap is period, not execution. (a) 24 history windows had no filled live order, PF 1.50 (+13.5): 13 no-fill, 3 cheap_skipped (PF 0, -3.3), 1 cap, 7 no skip record (PF 2.5). (b) live paid 15.1c vs history 18.2c (-3.0c), fees equal; re-pricing matched history at live paid lifts 0.91 to 1.17 (explains about 0.26 of the 0.36 difference). (c) live sends 161 to 177 s before close (median 176); history uses c-120 ask; latency not measurable (ms fields null). (d) 17 live-only fills PF 1.24 (+1.8). (e) bootstrap to n=78: 28 percent of draws at or below 1.27 (69 percent from live-period windows); consecutive 78-blocks 18 percent: within chance; sample size and window drift not separable.
+
 ## 2026-11-09 12:49 PM CT (18:49Z): W-DECK2: XRP families, none qualify (sample about 8 days, pull continues)
 
 Used W-DECK1 grid and cash model exactly (40 cells, N about 640 plus, about 760 counted overall). S/oi/xrp.jsonl holds 773 settled markets of 5,696 listed (about 8 days); puller xrp_pull.py runs at about 45 markets a minute, about 2 more hours for 60 days. PF first half / second half: F1 best 0.80-0.88 at 6m 1.73 (94) / 0.98 (67); F2 all 0.00 to 0.97; F3 favourite 0.50-0.60 at 10m 0.88 (94) / 1.38 (70); F4 0.07 to 0.20 (0.97-0.98 infinite PF is an artifact of no gain after fee and slip); F5 spread-gated 0.88-0.92 6m 2.43 (59) / 1.12 (54), 10m 0.88-0.97 1.08 (43) / 4.19 (60), all lopsided. No cell clears 1.3 in both halves. Signals a week 60 to 240. Not a verdict (8 days). Rerun an_xrp.py when xrp.jsonl is complete.
