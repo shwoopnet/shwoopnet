@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:26 AM CT (16:26Z): Gold decay diagnosis Oct 7-20 vs Nov 1-9 (cash PF)
+
+PF 4.41 (n100, 2 losses) / 1.24 (n115) / 0.89 (n92); 90% CIs overlap, only first vs last borderline (p 0.05). Driver is loss rate 2.0 / 7.0 / 8.7 percent (all early sells but 2); about 85 percent of the log-PF drop is loss rate, 15 percent loss size, none from win payoff or fees. Market candle loss rate flat 5.0 / 5.4 / 5.2 percent, volatility, fill rate, band, slip, spread, depth flat. Read: P1 lucky, true PF near 1.2 (inferred). Unmeasurable: other-side makers, queue, buyer identity, intrabar highs and lows. Candidates c/d/e: nothing passes (c OICORE ask+2c fails half 1; shadow log offered). Files in scratchpad w_golddecay, w_cand_c.
+
 ## 2026-11-09 10:23 AM CT (16:23Z): GOLD PF TRIPWIRE set (owner plan, Nov 9)
 
 Start 2026-11-09T16:22Z. Rule (a): gold cash PF below 1.0 over the next 100 settled gold trades; rule (b): any rolling 60 window ending after the start with PF below 0.7. Trip sends main a size-cut approval item (PF at size 15 vs half, dollars a week, regime). Count now 0/100. Latest rolling-60 PF 0.89 (history min 0.61 ending Nov 6, informational only). Tool: refine_tools/goldtrip.py, wake.sh GOLDTRIP section.
