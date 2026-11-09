@@ -80,6 +80,9 @@ gates.SF6 = () => {
   assert.ok(strat, 'OICORE is registered');
   const span = text((menu.match(/<span id="kalRulesSlot">[\s\S]*?<\/span>/) || [''])[0]);
   assert.ok(new RegExp('\\b' + strat.contractsPerOrder + ' contracts').test(span), 'the page says OICORE sends ' + strat.contractsPerOrder + ' contracts, like its registry entry');
+  // The Rules text names the cheap-side floor, which is the bot's own skip line (SLOT_SKIP_BELOW, Nov 8, 2026): it said 5c for a day after the 8c skip went live.
+  const skipBelow = slot.SLOT_SKIP_BELOW && slot.SLOT_SKIP_BELOW.OICORE;
+  if (skipBelow) assert.ok(new RegExp(Math.round(skipBelow * 100) + 'c to ' + Math.round(strat.entry.priceMax * 100) + 'c').test(span), 'the Rules text names the ' + Math.round(skipBelow * 100) + 'c floor of OICORE\'s skip, not the registry band edge');
   // The Start box confirms real money, so it must name the ladder's start and its top step (SLOT_LADDERS), not a fixed size.
   const steps = (slot.SLOT_LADDERS && slot.SLOT_LADDERS.OICORE && slot.SLOT_LADDERS.OICORE.steps) || [strat.contractsPerOrder];
   const confirm = text((html.match(/<span id="kalL1Confirm"[\s\S]*?<\/span><\/span>/) || [''])[0]);
