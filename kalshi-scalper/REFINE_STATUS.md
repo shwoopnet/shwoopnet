@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 11:39 AM CT (17:39Z): NEW STANDING DUTY: weekly candidate supply (Sunday evening CT)
+
+Owner approved lifecycle direction Nov 9. Every Sunday evening CT hand main 3 to 5 live-structure candidates for shadow or incubator (execution, size, entry-window, per-market variants, tradeable markets), each with exact rule, cash-basis history PF and n, held-out status, N tried, code needs, honest prior. Trigger trig_01DCtYPSDKdKM3o8o5Sdm2Sb, first fire Sun Nov 15 7:17 PM CT. Kill and return tables already sent (first priority). Workers started: W-SUPPLY1 (scan untested public series with L1/OICORE structures, cash basis) and W-SUPPLY2 (cash replay of gold and OICORE sizing rules: add-on cap, fixed sizes, ladder, tripwire half-size). Tripwire and watches continue. Standing basis rule: recompute wins and losses from avgFill and avgFee.
+
 ## 2026-11-09 11:38 AM CT (17:38Z): Kill and return tables sent to main (lifecycle, PR 748 redesign)
 
 Owner directive Nov 9: 1 new live strategy per week, kill and return conditions for all strategies. Sent kill rows (gold tripwire and 12 percent stop, OICORE existing kills plus net -1c at 50 alert, EVENT830 -5 dollar latch, shadow/probe/incubator rules), return rule (cash PF 1.3 over 100 shadow fills, held-out half 1.2, 14 days, owner approves), per-market shadow time to 100 fills (XRP 3.3 wk, Bitcoin 3, Ethereum 4, Dogecoin 10 days, AUD/USD 4, USD/CAD 5, natgas 7), incubator dollar kills (order cap 5, demote -10, latch -20), fast-path caps (total 40, max 2 incubators, daily loss 10). Flagged: slot caps are shared across the slot so incubators need per-strategy caps (code change); no shadow-row writer exists; dollar kills untested on history.
