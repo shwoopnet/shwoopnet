@@ -1,97 +1,106 @@
-# Strategy lifecycle spec (draft, Nov 9, 2026)
+# Strategy lifecycle spec (Nov 9, 2026; rebuilt for the fast path)
 
-Owner priority, Nov 9, 2026: full time algo trading with a system that constantly rotates strategies in and out by pre-set pass rules and kill rules, instead of one slow read every 90 days. This file is a SPEC. It changes no trading code and nothing in it is live. Sections 2, 3 and 5 come from the research chat (V2) and 4 from the live refinement chat; the code plan, the automation line and the Charter change are the chief of staff's. Profit factor (PF) means gross wins over gross losses, net of fees, on a cash basis (fill price plus fee), per the owner's Nov 9 format directive.
+Owner priority, Nov 9, 2026: full time algo trading; a goal of **at least one new live strategy per week**; kill conditions and return conditions for **every** strategy; quick scaling, quick turnover, quick returns and a constant R&D cycle. The owner judged the first draft's gates (400 to 600 fills, 20 or more days, then 300 more live fills) too slow ("we'll never get to live honestly"), so this version puts money behind **fast kills and tiny caps instead of slow gates**, and says plainly what that costs. This file is a SPEC; the four build pull requests that implement it are separate and each needs the owner's "merge". Profit factor (PF) means gross wins over gross losses, net of fees, on the **cash basis** (fill price plus fee, exits at the exit price and fee). All figures were reproduced by both chats on that basis; the nightly report's stored `settledPnl` is limit booked before PR 741 and must not be used for PF.
 
-> **Basis correction (Nov 9, 2026, caught in review).** The first draft of sections 4 and 5 used the nightly report's stored `settledPnl` for wins and losses, which is limit booked before PR 741 and understates wins. On the cash basis (fill price plus fee, exits corrected), whole record, PF (trades): gold 1.40 (307, +$60.93), OICORE 1.32 (77, +$25.09), Dogecoin 1.01 (204), Ethereum 1.17 (113, +$5.17), Bitcoin 0.84 (155, -$11.83), XRP 0.49 (86, -$11.05). The earlier numbers (gold 1.21, OICORE 1.11, Bitcoin 0.72, Ethereum 0.92, Dogecoin 0.82, XRP 0.41) are the limit booked ones and should not be used. Section 4 has been recalibrated on the cash basis (below). V2's honest read in section 5 has been re-run on cash too. The pass rules and evidence sizes (sections 2 and 3) do not depend on the booking basis.
+## 1. The honest frame
 
-## 1. Stages
+- **Supply, not gates, is the bottleneck.** After 1.5 million rules tried there are 0 rules above PF 1.3 with n over 200. Near misses only: NFL pair PF 1.73 (225 trades, 12 dates), tennis Monday 1.57 (116), Bitcoin ladder rule 1.43, NBA total NO 1.26 (261). A weekly launch needs 4 to 8 candidates in shadow at any time, so the pipeline is fed every week; expect 0 to 1 real edge a month and the rest to be information purchases.
+- **The record we are rotating:** all L1 on cash PF 1.12, 1,008 trades, net +$43.14; gold 1.40 (307, +$61.02) but fading by period (4.91, 1.49, 1.01); OICORE 1.32 (77, +$25.09); Ethereum 1.18; Dogecoin 1.01; Bitcoin 0.84; XRP 0.49. Of six strategies a screen would have passed, 2 were clear live winners, 2 flat, 2 losers: **false positive share 33% to 50%**.
+- **The cost of speed is stated, not hidden.** A shadow gate of 150 fills passes 12% (tail) to 23% (favourite) of zero edge ideas and 2% to 8% of losers, and passes only about 70% of true PF 1.5 ideas: it screens, it cannot prove. A failed incubator costs about $1.0 to $4.4 after 150 fills and $2.7 to $11.9 after 400 (a tail loss is $0.11, a favourite loss $0.94, so the $20 cap rarely binds). At one launch a week (about 13 a quarter, 8 to 10 of them failing) that is **about $30 to $70 a quarter expected, $260 worst case** (13 x $20), paid for a live, forward PF on 150 real fills per idea, the only evidence that survives decay.
+
+## 2. Stages
 
 | Stage | What runs | Money at risk | Who moves it |
 |---|---|---|---|
 | 0 Research | History scans, registered before scoring, last third held out and read once | none | research chat |
-| 1 Shadow | The rule runs on live quotes and only LOGS (what it would have bought, a `wouldFill` flag); no order | none | research or refinement chat adds a logger (a code edit, owner merges) |
-| 2 Incubator | A slot strategy at tiny size (1 contract), a hard max loss each and one total cap for all incubator strategies | capped, a few dollars to tens of dollars | owner merges the registry edit (today) |
-| 3 Live | A slot or L1 strategy at its size ladder, inside the slot and account caps | the account's caps | owner merges |
-| 4 Retired | Latched off; its orders still settle and are sold if open; its record stays in the report | none | automatic (kill rule) or owner |
+| 1 Shadow | The rule runs on live quotes and only LOGS (rule, ticker, side, price, size, `wouldFill`, the quote); no order | none | owner merges the shadow registration |
+| 2 Incubator | A slot strategy: 1 contract or $5 an order, its own dollar caps | at most $20 each, $40 total, 2 at once | owner merges the registry edit |
+| 3 Live | The slot size ladder step 1, then steps; or a ladder market | the existing slot caps | owner merges |
+| 4 Retired / killed | Latched off; open orders still settle and are sold; the record stays in the report | none | automatic (kill rule) |
 
-## 2. Pass rules (promotion), from the research chat (V2), 10 contract fees, cash PF
+## 3. Fast path: PASS rules
 
-| Step | Rule |
+| Step | Rule (cash PF, 10 contract fees) |
 |---|---|
-| Shadow (paper, no money) | at least 150 fills, at least 10 days, PF 1.3 or better net, held out third untouched |
-| Shadow to incubator (1 contract, cap $20) | at least 400 fills for a cheap tail strategy or 600 for a favourite strategy, at least 20 days, PF 1.5 or better on the held out half, deflated one sided z at or above the quantile for 0.05 divided by N tried (z 4.3 at N 5,000; z 5.4 at N 1.5 million, our count today) |
-| Incubator to live | at least 300 more incubator fills at PF 1.3 or better and a positive sum after fees; size steps up only on new evidence (+300 fills per step) |
-| Live kill (stated here, calibrated in section 4) | trailing 100 fills PF under 0.9, or cumulative loss over the stage cap; latch off, no automatic restart |
+| Registration | exact rule, market, size, counterparty or "none named", numeric prediction and kill criteria, written and committed before the first shadow row |
+| Shadow to incubator | 150 shadow fills, at least 7 days, PF 1.3 or better, a held-out second half at 1.2 or better, no single day over 30% of net, owner merge on the promotion packet |
+| Incubator to ladder step 1 | 150 incubator fills with PF 1.3 or better, cumulative net above $0, at least 7 days; then a second 150 at PF 1.2 or better before the first size step (300 fills, two windows) |
+| Each later size step | +300 fills at PF 1.2 or better on cash, inside the base needed for that step |
 
-## 3. How much evidence each stage needs (V2)
+**Time at those fills:** one 15 minute market (about 9 fills a day) takes 17 days per 150 (34 for two windows); a pooled basket of 8 markets (about 30 a day) 5 to 10 days; an hourly series (one entry an hour) about 6 days per 150; sports and daily strategies are weeks to a season, not weekly. So a weekly launch rate is sustainable only with several candidates in shadow at once (shadow costs nothing but needs a row writer, which does not exist yet; PR (a) below).
 
-Fills needed to tell a true PF 1.5 from a null PF 1.0 at 80% power, by entry price (win rate: 15% at a 10c entry; 29% at 20c; 95.6% at 93c; 93.6% at 90c):
+Deflation still applies to the research stage: every hypothesis ever scored stays in N forever (a retired strategy's whole search counts, not only its winner), no re scoring a failed candidate on the same data, held out thirds read once; total alpha 0.05 a year; **a budget of 4 incubator promotions a quarter in the formal count, with extra launches allowed as labelled information purchases** that are never presented as findings.
 
-| Bar (z) | tail 10c | tail 20c | favourite 93c | favourite 90c |
+## 4. KILL conditions, every strategy (cash basis; [existing] = in code today)
+
+| Strategy or stage | Metric | Threshold | Window | Action |
 |---|---|---|---|---|
-| alpha 0.05 | 388 | 222 | 610 | 439 |
-| deflated 3.1 (p 0.001) | 970 | 555 | 1,526 | 1,099 |
-| 4.0 | 1,471 | 841 | 2,314 | 1,667 |
-| 5.4 | 2,446 | 1,399 | 3,846 | 2,771 |
+| Gold L1 (PF 1.40, n 307) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
+| Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only (it fired once, Nov 6, and the next 50 trades were PF 99: a false kill as a latch) |
+| Account (all strategies) | shared 12% stop ($117.51 at base $979.25) and 5.5% window limit | breached | rolling 24 h | latch off [existing] |
+| OICORE (PF 1.32, n 77) | streak 24 or net under -$6 after 40 fills | trips | settled order history | latch off [existing] |
+| OICORE | net under -1c per contract | after 50 fills | | ALERT |
+| EVENT830 (5 trades, 0 wins, -$0.85) | its [existing] rules need 40 fills, unreachable at 1 trade a week | add: cumulative -$5 | any time | latch off |
+| Probe (1 contract or $5 an order) | net | under -$5 | any time | latch off |
+| Probe | PF | under 1.0 | after 100 fills | demote to shadow |
+| Incubator | cumulative loss | -$10 | any time | demote to shadow |
+| Incubator | cumulative loss | -$20 (the cap) | any time, checked after every settlement | latch off, no restart |
+| Incubator | early cash PF | under 0.7 | after 40 fills | demote to shadow |
+| Shadow | signals | under 40 in 30 days | | retire (not enough to judge) |
+| Shadow | net | under -1c per contract | after 50 shadow fills | retire |
+| Paused markets (XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas; Dogecoin removed) | stay paused | shadow cash PF under 1.0 after 100 fills, or net under -1c per contract after 50 | | stay paused and drop the candidate |
 
-At today's live rates (gold about 9 fills a day, all 15 minute markets about 30 a day), 388 fills is 43 days on gold alone and 13 days across all 15 minute markets. **Fast to judge:** 15 minute and hourly crypto, metals and indices (days to two weeks for 400 fills across markets). **Slow:** sports (game days only; the NFL pair had 12 dates, a season is about 17 per team). **Slowest:** daily strategies (one decision a day; PF 1.5 needs about two years).
+**Rolling 60 PF under 0.7 is an alert, not a kill, everywhere.** On the cash record it caught nothing useful (XRP only, and XRP's loss was small). Streak latches, loss rate tests, dollar drawdown for live strategies, 40 fill PF floors and a trailing 100 fill PF under 1.0 (net effect +$0.80 on +$43.14) are noise and are not adopted. **All thresholds are defaults untested on more than one real failure; re-check after each rotation.** Not measured: false kills the dollar kills would cause (no incubator history exists) and the shadow versus live fill gap per market (a candle shadow overstates live; live fill rate is about 65%), so the incubator is the real test.
 
-## 4. Kill and demotion rules, capital rules, live realities (refinement chat, cash PF, rules registered before scoring, no tuning on the full record)
+## 5. RETURN conditions, every killed or paused strategy
 
-**Kill rules, recalibrated on the CASH basis (replaces the first draft; same registered grid, only the basis changed).** Cash PF (trades): gold 1.40 (307), OICORE 1.32 (77), Dogecoin 1.01 (204), Ethereum 1.17 (113), Bitcoin 0.84 (155), XRP 0.49 (86). With cash numbers **no simple rolling rule gave a clearly useful early kill on the real record**:
-- R5 net kill (net under -1c per contract after 50 fills): Bitcoin fires at trade 60 (Oct 11) but saves only $4.51 (not $13); XRP fires at trade 50 (Oct 25) and saves $0.21. Never fired on live gold or OICORE.
-- R1 rolling 60 fill PF under 0.7: fires once on live gold (trade 285, Nov 6) and the next 50 trades were PF 99 (+$24), so a FALSE kill; the Bitcoin and Dogecoin fires were false; Ethereum and XRP made about zero afterwards.
-- OICORE streak latch (3 straight losses): 15 fires, 3 false. Streak latches, loss rate tests, dollar drawdown (never fires), 40 fill PF floors and a 100 fill PF under 1.0 are noise; do not adopt.
-- Bitcoin is a small loser (-$11.83), not a dying strategy; Ethereum is a small winner; XRP (PF 0.49, -$11.05) is the only real failure and its loss was small.
+**General rule (all):** after a kill, a **14 day cool off**, then a fresh shadow of **100 to 150 fills at cash PF 1.3 or better**, a held out second half at **1.2 or better**, at least 14 days, no single day over 30% of net, then the owner's approval by promotion packet. Re entry path: shadow, then incubator ($20 hard cap, 1 contract or $5 an order, 100 to 150 fills), then ladder step 1; a step up needs 100 to 300 more fills at PF 1.2 to 1.3 on cash. Only a reviewed edit (moving `reviewedAt`) re arms a latched strategy.
 
-**So the spec uses the rules as safety nets, not as a precision instrument:** (a) the net kill (net under -1c per contract after 50 fills) as an automatic latch, because it saves something and has not false fired on a live winner; (b) the rolling 60 fill PF under 0.7 as an ALERT for review (an approval item to the owner, like the gold tripwire), not an automatic kill, because it false fired on gold; (c) the dollar caps per strategy and the shared 12% stop remain the real brakes. V2's simpler default (trailing 100 fills PF under 0.9, or cumulative loss over the stage cap) is the fallback. **All thresholds are untested on more than one real failure; re-check them after each rotation.** Detection takes 50 to 80 fills (gold about 1 week, OICORE about 6 days), and for a thin edge a kill rule mostly rotates fees.
+| Market | Cash PF (n) | Fills a week | 100 shadow fills takes | Note |
+|---|---|---|---|---|
+| XRP | 0.49 (86) | 30 | 3.3 weeks | first read Nov 12 (FLOOR1 and THIN1) |
+| Bitcoin | 0.84 (155) | 33 | 3 weeks | |
+| Ethereum | 1.17 (113) | 26 | 4 weeks | the smooth climb rule removes about 95% of windows |
+| Dogecoin (removed) | 1.01 (204) | 72 | 10 days | return would be a reviewed edit of the three lists |
+| AUD/USD | 1.37 (59) | 24 | 4 weeks | |
+| USD/CAD | 1.00 (46) | 19 | 5 weeks | |
+| Natural gas | 0.64 (38) | 14 | 7 weeks | |
 
-**Capital today (sizing base $979.25):** slot per order $9.79, window $19.59, open $29.38, day $19.59, lifetime $58.75; shared stop 12% ($117.51); window limit 5.5% ($53.86); add on up to 25% of the base count; ceiling 50 contracts. OICORE's ladder is 10, 12, 15, 20, 30 contracts by minimum base, up after 20 fills and 7 days, down on drawdown, win rate or net.
+Gold and OICORE if killed return by the same rule. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
 
-**Suggested stage sizes:** shadow is zero money (rows only); probe is 1 contract or $5 an order, under 1% of the base; a slot ladder starts at step 1 only, inside the existing caps; a step up needs 100 fills with cash PF of at least 1.3 and a held out half; gold size L1 only after a registered 150 fill read. Totals stay under the shared 12% stop and the sum of open slot dollars under 3% of the base.
+## 6. Capital rules and the fast path's safety limits
 
-**Live realities:** gold about 65 trades a week, fill rate 64 to 66%, fees about 7.8% of gross wins (an edge of about PF 1.2). OICORE about 10 fills a day, fees 63% of its net. EVENT830 about 1 trade a week (5 of 11 filled), so its stages take months. A 100 fill gate is about 2 weeks for a gold or OICORE type strategy, and **no stage is shorter than 14 days.**
+- Today's slot caps at base $979.25 are SHARED across the slot (order $9.79, window $19.59, open $29.38, day $19.59, lifetime $58.75), so one incubator could eat OICORE's room. **That needs a code change: per strategy caps.**
+- Incubator: order cap $5 (worst loss about $5), demote to shadow at -$10 cumulative, hard latch at -$20, checked after every settlement.
+- **Fast path safety:** total incubator money at risk $40 (2 x $20), at most 2 incubators at once, a daily loss limit across all incubators of $10, open incubator dollars inside the slot open cap and counted as lost in the shared 12% stop and the 5.5% window limit (already true for slot orders), the direction lock applies, one entry gate.
+- Step sizes: shadow zero money; probe 1 contract or $5 an order, under 1% of the base; ladder step 1 inside the existing caps; sums of open slot dollars stay under 3% of the base.
 
-**Reusable in code today:** `killCheck` (sticky, latch off only, re-armed by a code edit moving `reviewedAt`), `slotCaps` scaling with the base, `validateSlotStrategy`, the slot skip rows, per strategy `ownResults`, the report's `secondSlot` block, the shared stop and window cap, the direction lock.
+## 7. What can be automated, and what stays human
 
-**Missing for a nightly scorer:** per strategy rolling PF windows, fills per week, fill rate (there is no submitted denominator), fee share, slip, early sell counts outside the tallies, cash reconciliation to Kalshi's fills, outcomes of the skip rows, and kill or ladder status on the page (the latch is not readable by the browser). **Missing for rotation:** any automated admit, retire or re-arm, and any zero money incubator (the paper tracker is off and skip rows keep only the latest reason). The registry is a frozen array in code, so admit or retire is a reviewed edit and a deploy.
+The line the code already draws, and this spec keeps: **nothing stored can add a strategy or enlarge one.** The registry (`SLOT_STRATEGIES`, `SLOT_HOLD_ALLOWED`) is a hard list in code; a stored value can only switch things off. So:
 
-**Fail closed rules the spec keeps:** nothing stored or typed on the page may add or loosen a strategy or a cap; stored data can only switch things off; no agent changes a live rule or deploys (Charter: promotion packet to the owner). So "constant rotation" means automatic KILL (the latch, already built) and PROMOTION as a reviewed edit.
+- **Automatic and safe: KILL and DEMOTE inside the caps.** The sticky latch (`kalshiSlotControl/killed`, `killCheck`) already exists; the new part is the dollar kills, the early PF demotion and shadow retirement. They only reduce exposure.
+- **Alerts, not actions:** rolling 60 PF under 0.7 and the gold tripwire go to the owner as approval items.
+- **Human: PROMOTE (shadow to incubator to ladder).** A promotion is a registry or size edit in code. The system does everything up to the merge: a nightly scorer produces the promotion packet and the chief of staff drafts the pull request; the owner types "merge N" and runs the deploy. **No Charter change is asked.** A safe speed up that does not need one: batch a week's promotions into one pull request and one deploy.
 
-## 5. Multiple testing control for a rotating system (V2)
+## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
-Total alpha 0.05 per year; a budget of 4 promotions per quarter (each spends alpha 0.05 divided by 16, about 0.003, ahead of its z bar). Every hypothesis ever scored stays in N forever: a retired strategy's whole search counts, not only its winner. No re-scoring a failed candidate on the same data. Held out thirds are read once.
+What already exists: the registry and validator, per strategy kill rules and the sticky latch, slot caps scaling with the base, the shared 12% stop and 5.5% window limit, per strategy stop meters on the page, the skip log (`kalshiSlotSkips`, report `skips`), order records and the nightly report with `slotOrders`. Missing, in build order:
 
-**Honest read on our own record (V2), CASH basis (fill price plus fee; exits at the exit price and fee).** Cash PF (trades): gold 1.40 (307), OICORE 1.32 (77), Dogecoin 1.01 (204), Ethereum 1.18 (113), Bitcoin 0.84 (155), XRP 0.49 (86); all L1 together PF 1.12, 1,008 trades, net +$43.14 (the first draft's -$24.40 was limit booked and wrong in sign).
-- **Would the rules have promoted them?** On in sample PF, all six would have passed shadow. Live cash result: 2 clear positives (gold PF 1.40, +$61.02; OICORE 1.32, +$25.09), 2 flat or slightly positive (Ethereum 1.18, +$5.18; Dogecoin 1.01, +$0.90), 2 losers (Bitcoin 0.84, -$11.82; XRP 0.49, -$11.02). **False positive share about 33% to 50% depending on how flat is counted (not 80% as first drafted).** Fees burned are inside these nets.
-- **Gold decay on cash:** PF 4.91 (Oct 7 to 21, 97 trades, +$33.01), 1.49 (Oct 21 to Nov 1, 118, +$27.08), 1.01 (Nov 1 to 9, 92, +$0.93): still fading, now at break even, not below it.
-- **Kill replay, trailing 100 fills PF under 1.0:** Dogecoin trips at fill 196 (Nov 3; avoids -$3.25); Bitcoin trips at fill 100 (Oct 14) but made +$2.45 afterwards; gold trips at fill 296 (Nov 9; forgoes +$9.76); XRP (86 fills), Ethereum and OICORE never trip. Net effect of the rule +$0.80 on $43.14, so a 100 fill window is too slow to protect against XRP's -$11.02 in 86 fills. V2's alternative: PF under 0.7 after 40 fills as an early kill (XRP would trip) and PF under 1.0 only at 100 or more fills. **The two chats disagree on the early rule:** the refinement chat's rolling 60 fill PF under 0.7 false-killed gold at trade 285, so section 4 keeps it as an ALERT; V2's 40 fill version trips XRP but has not been replayed on gold's early history. Both are provisional; decide by replaying both on the same cash record before any code.
+1. **(a) Shadow logger and stage field.** A log only path in the slot tick for rules registered as `stage: shadow` (rule, ticker, side, price, size, `wouldFill`, quote), written to a new collection after the minute's orders, never an order, every error swallowed; a `stage` field in the registry. Inert until a shadow rule is registered; the off equivalence fixtures stay byte identical.
+2. **(b) Per strategy caps, incubator limits and the new kill rules.** Per strategy dollar caps in code (order $5, kills at -$10 demote and -$20 latch, total incubator $40, at most 2, daily $10), the probe and EVENT830 dollar kills, the early PF demotion, shadow retirement.
+3. **(c) Nightly scorer.** A read only function (no Kalshi key, no write except its own report document) that computes cash PF per strategy and window, fills a week, fill rate and fee share, runs the pass and kill tables above and writes a lifecycle report (who passes, who is near a kill, who is dead) plus the promotion packet text. It never changes a strategy.
+4. **(d) Lifecycle table on the Bot page.** Stage, trades, cash PF, distance to kill; percentages and PF only, Privacy view safe.
 
-## 6. What can be automated, and what the Charter would have to allow
+Deploy order as always: exit watch (`deploy-push.sh`), then the minute function (`deploy-sizing.sh`), then the report (`deploy-report.sh`); `deploy-latest.sh` picks them.
 
-The line the code already draws, and the spec keeps: **nothing stored can add a strategy or enlarge one.** The registry (`SLOT_STRATEGIES`, `SLOT_HOLD_ALLOWED`) is a hard list in code (`functions/kalshiSlotLib.js`); a stored value cannot add or loosen anything, and CLAUDE.md treats that as a safety rule, not a convenience. So:
+## 9. The candidate supply loop
 
-- **Automatic and safe (pre-authorize): KILL and DEMOTE inside caps.** A strategy that trips its numeric kill rule is latched off with no human step. This already exists for the slot (`killRules`, the sticky latch `kalshiSlotControl/killed`, `killCheck`; only a reviewed edit that moves `reviewedAt` re-arms it). It can only reduce exposure. The new part is more rules (rolling N PF floor, decay test) and a demotion that lowers size by a step before it latches off.
-- **Automatic but must stay human (do not pre-authorize): PROMOTE.** A promotion means a registry or size edit in code. The spec makes the system do everything up to the merge: a nightly scorer that decides a strategy has met its pass rules writes a promotion packet and opens the pull request, and the owner's "merge" plus the deploy is the final step. This keeps "the owner is the one final say on whether anything goes live" (Charter, "The goal").
-- **A middle option the Charter could allow, if the owner wants more speed:** the owner pre-approves, in advance and in writing, a bounded class of promotion: stage 1 to stage 2 only, 1 contract, hard max loss under a stated dollar figure each, one total incubator cap, a fixed number of promotions per quarter. The chief of staff may then merge that class of pull request on the nightly scorer's packet (the standing merge permission already exists for "merge" said to the Executive Assistant; this widens it to a pre-approved class) and the owner still runs the deploy. Anything above incubator size, any change to a live rule, size ladder, stop or market, and any favourite and hold structure stays with the owner each time. This is a Charter change and only the owner can make it.
+V2 and Refinement each hand the chief of staff, **every Sunday at 6:41 PM Central (first Nov 15)**, 3 to 5 pre registered shadow candidates: exact rule, market, size, cash PF and n at 10 contract fees, held out status, counterparty, the code it needs, an honest prior, ranked by PF x n (fewer than 3 qualify means it says so and lists near misses), plus at least 2 new registered scans a week to keep the pipeline filling. The chief of staff turns accepted candidates into shadow registrations (one pull request a week, owner merge).
 
-## 7. Code needed on the existing slot framework
+## 10. Honest risks
 
-What already exists (read from origin/main, nothing to build): the registry and validator (`validateSlotStrategy`), per strategy kill rules and the sticky latch, slot dollar caps scaled to the sizing base (`slotCaps`), the shared 12% stop and 5.5% window limit, per strategy stop meters on the page (`kalshiOwnStops`), the skip log for strategies inside their entry span (`kalshiSlotSkips`, report `skips`), the order records and the nightly report with `slotOrders` rows. Missing, in build order:
-
-1. **Shadow logger for any registered rule** (stage 1). A log only entry in the slot tick: for a rule that is registered as `stage: shadow`, write what it would have bought (ticker, side, price, size, `wouldFill`) to a new collection, never an order. Reuses the skip writer pattern; no new secret or endpoint.
-2. **Stage field and incubator cap in code.** `stage` per strategy (shadow, incubator, live) in the registry, and one total incubator cap in code (a constant, never stored), checked in `slotOrderCheck` beside the existing per order, window, daily and lifetime caps.
-3. **More kill rules.** Extend `killRules` with a rolling N PF floor and a decay test (the gold tripwire as code), and a demotion step (size down one step) before the latch. Each is a validator checked field with bounds in code.
-4. **Nightly scorer.** A read only function (no Kalshi key, no write except its own report document) that reads the order rows, computes cash PF per strategy and window, runs the pass and kill rules and writes a lifecycle report: who passes, who is near a kill, who is dead. It never changes a strategy; a promotion proposal is a pull request drafted by the chief of staff from its output.
-5. **Page.** A Lifecycle table on the Bot page (stage, trades, cash PF, distance to kill), percentages and PF only, Privacy view safe.
-6. **Deploy order.** As always: exit watch (`deploy-push.sh`) before the minute function (`deploy-sizing.sh`), then the report (`deploy-report.sh`); `deploy-latest.sh` picks them.
-
-**Pull request plan (four small PRs, each its own merge, so one bad hour ties to one change):** (a) shadow logger and `stage` field, inert; (b) incubator cap and extended kill rules with tests; (c) nightly scorer and report section; (d) Lifecycle table on the page. Each ships with a gate test stating the consequence (for example: "a strategy that trips its rolling PF floor is latched off and no order follows"), and the off equivalence fixtures must stay byte identical until a strategy is admitted.
-
-## 8. Honest risks
-
-- **More rotation means more false positives.** At a bar of PF 1.5 and a hundred rules tried, something clears it by chance; the Charter's own record says 17,500 generated strategies produced none at the bar. The control is the promotion budget and the deflation count in section 5, and every retired strategy counts toward N.
-- **More rotation means more fees.** A one contract favourite slot is mostly fee (a 1c fee on an 8c win); an incubator that spends fees on ten candidates burns about $1 to $3 each for a read that is mostly noise. Budget fees as the price of a test.
-- **Fast markets judge fast and also lie fast.** A 15 minute market gives hundreds of fills a month, but a favourite strategy with a 7% loss rate needs hundreds of fills to tell a 1.2 from a 1.0 (gold's own PF ran 4.4, 1.2, 0.9 in three periods on luck). Section 3 says how many fills each class really needs.
-- **Auto kill can kill a good strategy on a bad draw.** The rules are calibrated on gold and OICORE's real histories (section 4) and a killed strategy can be re-armed only by a reviewed edit.
-- **The limit is the edge, not the machinery.** Nothing we tested has PF 1.5 after deflation. A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.
+- **More rotation means more false positives and more fees.** At a bar of PF 1.5 and a million rules tried something clears it by chance; the 33% to 50% false positive share above is on strategies that were already chosen. The control is the deflation count, the promotion budget and the dollar caps.
+- **A fast kill can kill a good strategy on a bad draw** (gold's rolling 60 rule fired once and the next 50 trades were PF 99); that is why the rolling rule is only an alert and the kills that act are dollar based.
+- **Fast markets judge fast and also lie fast.** Gold went PF 4.91, 1.49, 1.01 across three periods on a loss rate of 2.0%, 7.0%, 8.7% (breakeven about 7.5%), mostly luck.
+- **The limit is the edge, not the machinery.** A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.
