@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 04:30 PM CT (22:30Z): W-STOPSIM: OICORE drawdown stop fire probability
+
+Registered first (S/w_stopsim). 20,000 paths each, iid and block-5, 7 fills a day, resampled per-contract booked P&L scaled to 10 contracts; state 79 fills, cum 14.46, peak 50.33, drawdown 35.87, stop 50. Win rate 17.7 percent; per-contract PF 1.19 all 79 and 0.57 last 40. P(stop) before Nov 13 15Z (26 fills): 0.25-0.27 if future looks like all 79, 0.70-0.74 if like the last 40; at 100 total fills 0.22-0.24 / 0.59-0.65; by Nov 19 (70 more fills) 0.40-0.43 / 0.96-0.98. Days to stop given it fires: median 1.6-2.9, 10th percentile about 1, 90th 2.6-7.6. Expected fills before stop 12-14 at the Nov 13 horizon. Net kill effectively never fires first; streak kill under 0.1 percent short, up to 2.3 percent at 70 fills. Limits: n 79 and 40, resampling cannot create unseen tails.
+
 ## 2026-11-09 03:30 PM CT (21:30Z): OICORE re-arm mechanics written (facts only)
 
 kalshi-scalper/refine_tools/OICORE_REARM_MECHANICS.md: stop is a per-tick refusal with no latch; re-arm resets ladder, peak, drawdown, streak and net windows from D, not the shared stop or caps; forward read must keep the whole record; PR text and pins listed; owner decides.
