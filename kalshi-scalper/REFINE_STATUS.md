@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 01:33 PM CT (19:33Z): wake.sh fast again; tracker table (1:30 PM CT)
+
+wake.sh now 14.6 s cached, 75 s cold (was over 300 s); report fetched once, per-section 60 s cap, STATUS block per tracker. Trackers, none at read point, no rule changed: HALFSIZE1 19/40 (under 0.10: 0 wins -5.29c per contract; 0.10+: -8.27c); HOLDVSSELL 0/30; OIBANDS1 A 2/40 (0 wins), B 4/20 (1 win); ESFEAT1 0/20 early sells (19 of 300 fills); OICHEAPSKIP1 4 settled signals 0 wins (keep at 1 win or fewer); NOFILLADV 4/20; LIM1-LIVE 2 tagged fills of 20, net -4.16 (revert only at 20 if net below zero); gold tripwire 2/100, cumulative PF inf, latest rolling-60 0.90, OK.
+
 ## 2026-11-09 01:29 PM CT (19:29Z): W-OIGAP: OICORE live vs rebuilt history gap is mostly period, within chance
 
 Registered first (S/w_oigap, N about 600). Cash, PF per dollar: history all 1.53 (515); live 1.27 (78, +22.4); history on live-period windows only 1.09 (85, +8); matched windows (61): history 0.91, live 1.27. So most of the gap is period, not execution. (a) 24 history windows had no filled live order, PF 1.50 (+13.5): 13 no-fill, 3 cheap_skipped (PF 0, -3.3), 1 cap, 7 no skip record (PF 2.5). (b) live paid 15.1c vs history 18.2c (-3.0c), fees equal; re-pricing matched history at live paid lifts 0.91 to 1.17 (explains about 0.26 of the 0.36 difference). (c) live sends 161 to 177 s before close (median 176); history uses c-120 ask; latency not measurable (ms fields null). (d) 17 live-only fills PF 1.24 (+1.8). (e) bootstrap to n=78: 28 percent of draws at or below 1.27 (69 percent from live-period windows); consecutive 78-blocks 18 percent: within chance; sample size and window drift not separable.
