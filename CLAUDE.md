@@ -878,3 +878,7 @@ Why: the refinement chat found the bot's books about $30 a week worse than cash 
 ## The report's skip rows carry the side (Nov 8, 2026, the refinement chat's request for S-OICHEAPSKIP1)
 
 `skipSection` (`functions/kalshiReportLib.js`) adds `side` to each skip row: `"yes"` or `"no"` taken from the skip's note (price skips such as `cheap_skipped` store the side there), else null; free text is never echoed. The price was already in `detail.price`. Read only; no order, no write. Test K8 in `test/slotSkipReasonGates.test.js`. Needs `bash functions/deploy-report.sh` (the report function only).
+
+## Rules text names OICORE's 8c floor (Nov 9, 2026, the weekly sweep)
+
+The Bot page's Rules and limits line for OICORE said it buys the cheaper side "5c to 50c" a day after the under-8c skip (`SLOT_SKIP_BELOW`) went live; it now says 8c to 50c with the skip named. Gate SF6 reads `SLOT_SKIP_BELOW` so the page cannot drift from the bot's own floor again. Page only, live on merge.
