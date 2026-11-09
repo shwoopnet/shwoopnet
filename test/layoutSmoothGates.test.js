@@ -13,7 +13,7 @@ const gates = {};
 const grab = (name) => { const m = new RegExp('(    function ' + name + '\\([^)]*\\)\\{[\\s\\S]*?\\n    \\})\\n').exec(iife); assert.ok(m, 'missing ' + name); return m[1]; };
 const grabLine = (re) => { const m = re.exec(iife); assert.ok(m, 'missing ' + re); return m[0]; };
 // Nov 5, 2026 (resizable cards): the layout is version 3, widths are spans of 12 columns and heights are pixels, so the size constants are lifted too.
-const consts = [/var OPTIONAL = [^\n]*/, /var CARDS = [^\n]*/, /var SPANS = [^\n]*/, /var H_STEP = [^\n]*/, /var NO_HEIGHT = [^\n]*/, /var VERSION = 3, KEY = [^\n]*/, /var OLD_DOM = [^\n]*/].map(grabLine).join('\n');
+const consts = [/var OPTIONAL = [^\n]*/, /var CARDS = [^\n]*/, /var SPANS = [^\n]*/, /var H_STEP = [^\n]*/, /var NO_HEIGHT = [^\n]*/, /var APPEND_LAST = [^\n]*/, /var VERSION = 3, KEY = [^\n]*/, /var OLD_DOM = [^\n]*/].map(grabLine).join('\n');
 const pure = new Function(consts + '\n' + ['fresh', 'isOptional', 'complete', 'migrateOrder', 'normalize', 'nextSpan', 'snapSpan', 'snapHeight', 'nextHeight'].map(grab).join('\n') + '\nreturn { fresh: fresh, normalize: normalize, isOptional: isOptional, nextSpan: nextSpan, snapSpan: snapSpan, snapHeight: snapHeight, nextHeight: nextHeight, SPANS: SPANS };')();
 
 // L1: the account card can never be hidden. Consequence if it fails: the Running pill (Start, Pause, Flatten) could vanish from the page while the bot trades real money.
@@ -28,17 +28,18 @@ gates.L1 = () => {
 
 // L2: an old saved layout migrates instead of being thrown away. Consequence: an owner who arranged the page before Nov 5 sees the same order after the update.
 gates.L2 = () => {
+  // Nov 9, 2026: the Strategy board is the sixth card; a saved layout that predates it gets it appended last (APPEND_LAST), so the saved order is kept and the board follows it.
   // The old code dealt the markup order (rail: account, status, positions; main: pnl, trades) into the slots rail, rail, main, rail, main.
   const def = pure.normalize({ cols: 'auto', hidden: {}, order: ['account', 'status', 'positions', 'pnl', 'trades'] });
-  assert.deepStrictEqual(def.order, ['account', 'status', 'pnl', 'positions', 'trades'], 'the old default reads as the default look');
+  assert.deepStrictEqual(def.order, ['account', 'status', 'pnl', 'positions', 'trades', 'board'], 'the old default reads as the default look');
   const moved = pure.normalize({ cols: '3', hidden: { trades: true }, order: ['positions', 'account', 'status', 'trades', 'pnl'] });
-  assert.deepStrictEqual(moved.order, ['positions', 'account', 'trades', 'status', 'pnl'], 'an old custom order lands where the old page showed it');
+  assert.deepStrictEqual(moved.order, ['positions', 'account', 'trades', 'status', 'pnl', 'board'], 'an old custom order lands where the old page showed it');
   assert.deepStrictEqual(moved.hidden, { trades: true }, 'a hidden card stays hidden');
   assert.ok(!('cols' in moved) && moved.v === 3, 'the dead column count is dropped and the copy carries the new version');
   const partial = pure.normalize({ order: ['status', 'nope'] });
-  assert.deepStrictEqual(partial.order.slice().sort(), ['account', 'pnl', 'positions', 'status', 'trades'], 'a partial or corrupt old order still yields every card exactly once');
+  assert.deepStrictEqual(partial.order.slice().sort(), ['account', 'board', 'pnl', 'positions', 'status', 'trades'], 'a partial or corrupt old order still yields every card exactly once');
   const v2 = pure.normalize({ v: 2, order: ['trades', 'account', 'status', 'pnl', 'positions'], width: { status: 'full', pnl: 'wide' }, folded: { pnl: true, x: true } });
-  assert.deepStrictEqual(v2.order, ['trades', 'account', 'status', 'pnl', 'positions'], 'a new copy keeps its order as saved');
+  assert.deepStrictEqual(v2.order, ['trades', 'account', 'status', 'pnl', 'positions', 'board'], 'a new copy keeps its order as saved');
   assert.deepStrictEqual(v2.width, { status: 12 }, 'a version 2 Full reads as a span of 12, and a width that never existed is dropped (changed Nov 5, 2026: widths are spans now)');
   assert.deepStrictEqual(v2.folded, { pnl: true }, 'only known cards fold');
   assert.ok(/if\(migrated\)\{ save\(true\); \}/.test(iife), 'the migrated copy is written back in the new shape');
@@ -76,14 +77,14 @@ gates.L4 = () => {
   assert.ok(/@media \(max-width:900px\)\{ \.kal-move \[data-width\], \.kal-move \[data-height\], \.kal-resize\{ display:none; \}/.test(css), 'the size controls are not offered where they mean nothing');
   assert.ok(/\.kal-console > \[data-card\]\[data-w="12"\]\{ grid-column:1 \/ -1; \}/.test(css) && !/grid-auto-flow:row dense/.test(css), 'on a wide screen a full width card spans every column, and there is no dense packing to reorder cards behind the owner\'s back');
   // The defaults reproduce the look before the rebuild.
-  assert.ok(/var WIDTHS = \{ account: 12, status: 6, pnl: 6, positions: 12, trades: 12 \};/.test(iife), 'default widths');
+  assert.ok(/var WIDTHS = \{ account: 12, status: 6, pnl: 6, positions: 12, trades: 12, board: 12 \};/.test(iife), 'default widths (board added Nov 9, 2026)');
   for (const [k, w] of [['account', '12'], ['status', '6'], ['pnl', '6'], ['positions', '12'], ['trades', '12']]) assert.ok(new RegExp('data-w="' + w + '" data-card="' + k + '"').test(html), k + ' starts at a span of ' + w + ' in the markup, so the first paint already has the right shape');
 };
 
 // L5: Cancel restores the layout from before editing, Done keeps it, and nothing is saved while editing. Consequence: a slip in Edit layout can always be taken back.
 gates.L5 = () => {
   const make = () => new Function(
-    'var layout = { v: 3, order: ["account", "status", "pnl", "positions", "trades"], hidden: {}, width: {}, height: {}, folded: {} };' +
+    'var layout = { v: 3, order: ["account", "status", "pnl", "positions", "trades", "board"], hidden: {}, width: {}, height: {}, folded: {} };' +
     'var editing = false, before = null, undo = [], drag = null, size = null, saves = 0, KEY = "k";' +
     'var bar = { hidden: true }, undoBtn = { disabled: true };' +
     'var document = { getElementById: function(){ return { focus: function(){}, blur: function(){}, open: true }; } };' +
@@ -99,7 +100,7 @@ gates.L5 = () => {
   assert.strictEqual(t.saves(), 0, 'nothing is saved while editing');
   assert.strictEqual(t.undo(), 3, 'each change can be undone, a resize included');
   t.end(false);
-  assert.deepStrictEqual(t.get().order, ['account', 'status', 'pnl', 'positions', 'trades'], 'Cancel puts the order back');
+  assert.deepStrictEqual(t.get().order, ['account', 'status', 'pnl', 'positions', 'trades', 'board'], 'Cancel puts the order back');
   assert.deepStrictEqual(t.get().width, {}, 'and the widths');
   assert.deepStrictEqual(t.get().height, {}, 'and the heights (Cancel restores sizes)');
   assert.strictEqual(t.saves(), 0, 'and saves nothing');
@@ -107,7 +108,7 @@ gates.L5 = () => {
   t.start();
   t.change(() => { t.get().order.reverse(); });
   t.end(true);
-  assert.deepStrictEqual(t.get().order, ['trades', 'positions', 'pnl', 'status', 'account'], 'Done keeps the change');
+  assert.deepStrictEqual(t.get().order, ['board', 'trades', 'positions', 'pnl', 'status', 'account'], 'Done keeps the change');
   assert.strictEqual(t.saves(), 1, 'and saves it once');
   t = make();
   t.change(() => { t.get().folded.pnl = true; });
@@ -161,7 +162,7 @@ gates.L9 = () => {
 gates.L10 = () => {
   const old = { v: 2, order: ['trades', 'account', 'status', 'pnl', 'positions'], hidden: { status: true }, width: { status: 'full', positions: 'half', pnl: 'half' }, folded: { trades: true } };
   const n = pure.normalize(old);
-  assert.deepStrictEqual(n.order, old.order, 'the order is kept as saved (no re-dealing)');
+  assert.deepStrictEqual(n.order, old.order.concat('board'), 'the order is kept as saved (no re-dealing), and the Strategy board (Nov 9, 2026) goes last');
   assert.deepStrictEqual(n.width, { status: 12, positions: 6, pnl: 6 }, 'half is 6 and full is 12');
   assert.deepStrictEqual(n.hidden, old.hidden, 'hidden cards stay hidden');
   assert.deepStrictEqual(n.folded, old.folded, 'folded cards stay folded');
@@ -169,7 +170,7 @@ gates.L10 = () => {
   assert.strictEqual(n.v, 3, 'the copy is rewritten as version 3');
   // On the 12 column grid a span of 6 is exactly the old half: 6c + 5g with c = (W - 11g) / 12 is W/2 - g/2, the old (W - g) / 2.
   for (const W of [800, 1384, 2000]) { const g = 18, c = (W - 11 * g) / 12; assert.ok(Math.abs((6 * c + 5 * g) - (W - g) / 2) < 1e-9, 'span 6 is the old half at ' + W + 'px'); assert.ok(Math.abs((12 * c + 11 * g) - W) < 1e-9, 'span 12 is the full width'); }
-  assert.ok(/next\.order = \(l\.v === 2 \|\| l\.v === VERSION\) \? complete\(order, CARDS\) : migrateOrder\(order\);/.test(iife), 'a version 2 order is not dealt again like a pre version copy');
+  assert.ok(/next\.order = \(l\.v === 2 \|\| l\.v === VERSION\) \? complete\(order, CARDS\) : complete\(migrateOrder\(order\), CARDS\);/.test(iife), '(a pre version copy is completed too, Nov 9, 2026, so the Strategy board is in its order) a version 2 order is not dealt again like a pre version copy');
 };
 
 // L11: on a phone every size is ignored. Consequence: a quarter width or a short card set on a desktop never squeezes into a phone screen or hides its body behind a scroll.

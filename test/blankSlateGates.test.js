@@ -44,7 +44,7 @@ gates.B2 = () => {
     'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveBaseline', 'kalshiOrdersSince',   // one admin-read query for the account result line's long ranges (Oct 24, 2026)
    
     'kalshiPushKey', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe',      // the phone alerts (Oct 20, 2026): the owner's own functions, admin only
-    'onAuthChange', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
+    'onAuthChange', 'readKalshiShadowRows', 'resetPassword', 'saveUserSettings', 'setKalshiHalt', 'shapeUserSettings', 'signIn', 'signOutUser',
     'watchKalshiBot', 'watchKalshiLive', 'watchKalshiLiveControl', 'watchKalshiLiveEvents', 'watchKalshiSlot', 'watchMarketTape', 'watchSharedMarketSnapshot', 'watchUserDoc',
   ], 'the Firebase surface the page can reach');
   // No exit, pool or size setter: the exit is fixed at 50c and the pool rebuilds after every win, in the server code.

@@ -962,6 +962,18 @@
   /* The result chart takes the height the Bot status card beside it gives the row (the owner, Nov 1, 2026: "big gap below account results"). The box keeps the chart's own shape as its minimum (aspect-ratio set in the markup) and grows past it; the drawing stretches with it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
   .kal-console [data-card="pnl"] #kalPnlBody{ flex:1 1 auto; display:flex; flex-direction:column; }
   .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
+  /* Strategy board (Nov 9, 2026): one row per strategy, the profit factor largest, plain text with signs (no green or red, calm view). Rows stack on a narrow card by its own width, so a phone never scrolls sideways. */
+  .kal-console [data-card="board"]{ align-self:start; }
+  .kal-bd-grp{ margin:0 0 18px; } .kal-bd-grp:last-child{ margin-bottom:0; }
+  .kal-bd-h{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; padding-bottom:6px; } .kal-bd-h span{ font-weight:500; letter-spacing:0; text-transform:none; }
+  /* Board styles live in these few rules only, so the look is easy to change later: .kal-bd-row (layout), .kal-bd-pf (the big PF on the left), .kal-bd-main (name, rule, kill lines), .kal-bd-bar (the ON DECK progress). */
+  .kal-bd-row{ display:grid; grid-template-columns:96px minmax(0,1fr); gap:4px 16px; padding:12px 0; border-top:1px solid var(--border); min-width:0; align-items:start; }
+  .kal-bd-pf{ display:flex; flex-direction:column; } .kal-bd-pf b{ font-size:28px; line-height:1.05; font-variant-numeric:tabular-nums; } .kal-bd-pf span{ font-size:11px; color:var(--muted); }
+  .kal-bd-main{ min-width:0; display:flex; flex-direction:column; gap:2px; } .kal-bd-main > b{ font-size:15px; } .kal-bd-rule{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
+  .kal-bd-bar{ height:4px; border-radius:2px; background:var(--border); margin:6px 0 2px; overflow:hidden; } .kal-bd-bar i{ display:block; height:100%; background:var(--paper); }
+  .kal-bd-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; } .kal-bd-sub > div + div{ margin-top:2px; }
+  .kal-bd-row.kal-bd-flat{ grid-template-columns:minmax(0,1fr); }
+  @media (max-width:420px){ .kal-bd-row{ grid-template-columns:76px minmax(0,1fr); gap:4px 12px; } .kal-bd-pf b{ font-size:24px; } }
   .kal-console [data-card="positions"]{ align-self:start; }
   .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
@@ -1270,6 +1282,22 @@
     kalshiBooks: function(){
       return kalshiBooksFn({}).then(function(res){ return res.data; });
     },
+    // The shadow log (admin read only, written only by the server), newest first in pages of 2,000, at most 3 pages, from a time on: the Strategy board's ON DECK rows. A read, never a write; a refused read rejects and the board says so.
+    readKalshiShadowRows: function(sinceMs){
+      var all = [], seen = {}, cursor = null, pages = 0;
+      function next(){
+        var q = cursor === null ? query(collection(db, 'kalshiShadowRows'), where('atMs', '>=', sinceMs), orderBy('atMs', 'desc'), limit(2000)) : query(collection(db, 'kalshiShadowRows'), where('atMs', '>=', sinceMs), where('atMs', '<=', cursor), orderBy('atMs', 'desc'), limit(2000));
+        return getDocs(q).then(function(snap){
+          var rows = snap.docs.map(function(d){ return d.data(); }), fresh = 0;
+          rows.forEach(function(r){ var k = String(r.rule) + '|' + String(r.ticker); if(!seen[k]){ seen[k] = true; fresh++; all.push({ rule: r.rule, side: r.side, price: r.price, size: r.size, wouldFill: r.wouldFill, settled: r.settled, pnl: r.pnl, atMs: r.atMs, closeMs: r.closeMs }); } });
+          pages++;
+          if(rows.length < 2000 || fresh === 0 || pages >= 3 || !isFinite(Number(rows[rows.length - 1].atMs))){ return all; }
+          cursor = Number(rows[rows.length - 1].atMs);
+          return next();
+        });
+      }
+      return next();
+    },
     // Every order the bot sent from a time on (admin read only), for the account result line's longer ranges. Read once per range and kept for ten minutes, never on a timer.
     // Read in pages of 5,000 (the owner's screen, Oct 29, 2026: the single 20,000 read was refused with invalid-argument, so every range past the live 1,000 orders showed a partial total). Each page starts at the last
     // time seen (>=, so orders sharing a millisecond are never skipped) and repeats are dropped by order id; at most 5 pages, 25,000 orders.
@@ -1528,6 +1556,10 @@
         <div class="kal-tr kal-tr-head"><span>Opened and closed</span><span>Market</span><span>Trade</span><span class="kal-tr-p">P/L</span><span class="kal-tr-s">From</span></div>
         <div id="kalBotClosed"></div>
       </div>
+      <div class="kal-card" data-w="12" data-card="board">
+        <div class="kal-card-title">Strategy board</div>
+        <div id="kalBoard"></div>
+      </div>
     </div>
   </main>
 
@@ -1660,6 +1692,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 9</div>
                 <ul class="changelog-list">
+                  <li>Bot: a Strategy board card (Live, On deck, Retired) with each strategy's cash profit factor first, its kill status and, for shadow rules, how far they are from 150 signals; page only, no order</li>
                   <li>Bot: a fifth shadow rule, GOLDALL, logs every gold signal (ordered or not) so the idea that gold does better after the price already moved 5c in the last 3 minutes can be tested forward; log only, no order, no money</li>
 
                   <li>Bot: the shadow rules are now scored: each signal is settled from the public market result and the nightly report shows, per rule, cash profit factor, signals, days and the verdict against the written pass and kill rules (read only, no order, no money)</li>
@@ -2886,6 +2919,7 @@
     renderKalshiStatus();
     renderKalshiStrategies();
     renderKalshiPnl();
+    renderKalshiBoard();
     renderKalshiNotifications();
     kalshiSoundCheck();
     var a = kalshiLiveAcct;
@@ -3972,6 +4006,183 @@ kalshiStatusTick();
     });
     tbl.innerHTML = kalshiStrategiesTableHtml(rows, escapeHtml, kalshiMoney, { rangeLabel: rangeLabel, age: age, partial: partial, slotError: kalshiSlotError });     // hidden is the Layout menu's to set, never this render's
   }
+  // ---------- Strategy board (Nov 9, 2026, the owner: a one glance, phone readable board of every strategy in three groups, LIVE, ON DECK and RETIRED; profit factor first, always on the CASH basis) ----------
+  // Page only: it reads the orders the page already holds and, once per page load (kept 10 minutes), the shadow log; it writes nothing and has no timer. Dollars go through money (Privacy view masks them); PF and counts are never masked.
+  // The cash rule is a port of fillCost in the bot's kalshiLiveLib (a test pins the port to it on fixtures); the kill constants and the shadow rule ids are copies (tests fail if they drift from the bot's code).
+  var KAL_BOARD_TRIPWIRE = { from: Date.UTC(2026, 10, 9, 16, 22), trades: 100, pfFloor: 1.0, rollingN: 60, rollingFloor: 0.7, fromText: 'Nov 9 10:22 AM Central' };   // 10:22 AM Central (UTC-6 after Nov 1) is 16:22 UTC
+  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -6, from: Date.UTC(2026, 9, 30) }, EVENT830: { proposedNet: -5 } };   // OICORE: the bot's killRules and reviewedAt (2026-10-30); EVENT830: -$5 is only PROPOSED, the bot's own rule is net under 0 after 40 fills
+  var KAL_BOARD_LIVE = [
+    { id: 'L1', name: 'Closing buy', rule: 'Gold: the favourite side at 88c to 97c, about 6 minutes before the close' },
+    { id: 'OICORE', name: 'Open interest jump', rule: 'Bitcoin: the cheaper side at 5c to 50c after an open interest jump, held to settlement' },
+    { id: 'EVENT830', name: 'Release day longshot', rule: 'Release mornings: the cheaper side at 5c to 50c in the 8:30 window, held to settlement' }
+  ];
+  var KAL_BOARD_SHADOW = [   // ids copy the bot's SHADOW_RULES; the text is the rule in one line
+    { id: 'ETHNO6', rule: 'Ethereum: buy NO at 88c to 97c, 6 minutes left' },
+    { id: 'BTCHI6', rule: 'Bitcoin: the favourite side at 92c to 97c, 6 minutes left' },
+    { id: 'XRPYES10', rule: 'XRP: buy YES at 88c to 97c, 10 minutes left' },
+    { id: 'ETHL1', rule: 'Ethereum: the favourite side at 88c to 97c, 6 minutes left' },
+    { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' }
+  ];
+  var KAL_BOARD_RETIRED = { asOf: 'Nov 9', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
+    { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },
+    { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 }
+  ] };
+  var KAL_BOARD_DAY = 86400000;
+  // The cost of the contracts that filled in cash: a port of fillCost (kalshiLiveLib). averageFillPrice is the YES price, so a NO order pays 1 minus it; anything unreadable, or a cash figure above the worst case, falls back to maxCost in proportion.
+  function kalshiBoardFillCost(t, got, want){
+    var worst = Number(t.maxCost) * (got / want);
+    if(!(got > 0) || !(want > 0)){ return worst; }
+    var avg = Number(t.averageFillPrice), fee = Number(t.averageFeePaid);
+    if(t.averageFillPrice === null || t.averageFillPrice === undefined || t.averageFillPrice === '' || !isFinite(avg) || !(avg > 0 && avg < 1)){ return worst; }
+    if(t.averageFeePaid === null || t.averageFeePaid === undefined || t.averageFeePaid === '' || !isFinite(fee) || !(fee >= 0 && fee < 1)){ return worst; }
+    var side = t.side === 'yes' ? avg : t.side === 'no' ? 1 - avg : NaN;
+    if(!isFinite(side) || !isFinite(worst)){ return worst; }
+    var cash = (side + fee) * got;
+    return cash <= worst + 1e-9 ? cash : worst;
+  }
+  // One settled order's result in cash dollars, or null when it has none (open, no fill, closed by hand, unreadable). An order sold early keeps its stored settledPnl.
+  function kalshiBoardCash(o){
+    if(!o || o.settled !== true || !(Number(o.fillCount) > 0) || o.result === 'hand'){ return null; }
+    if(o.result === 'exit' || Number(o.exitCount) > 0){ var s = Number(o.settledPnl); return o.settledPnl === null || o.settledPnl === undefined || !isFinite(s) ? null : s; }
+    if(o.result !== 'yes' && o.result !== 'no'){ return null; }
+    var want = Number(o.count) > 0 ? Number(o.count) : 1, got = Math.min(Number(o.fillCount), want), cost = kalshiBoardFillCost(o, got, want);
+    if(!isFinite(cost)){ var f = Number(o.settledPnl); return o.settledPnl === null || o.settledPnl === undefined || !isFinite(f) ? null : f; }
+    return Math.round(((o.result === o.side ? got : 0) - cost) * 10000) / 10000;
+  }
+  // The cash results of a set of orders, oldest first: [{ ts, p }].
+  function kalshiBoardRows(orders){
+    var out = [];
+    (orders || []).forEach(function(o){ var p = kalshiBoardCash(o); if(p !== null && isFinite(Number(o.ts))){ out.push({ ts: Number(o.ts), p: p }); } });
+    return out.sort(function(a, b){ return a.ts - b.ts; });
+  }
+  function kalshiBoardPf(rows){
+    var gw = 0, gl = 0;
+    rows.forEach(function(r){ if(r.p > 0){ gw += r.p; } else if(r.p < 0){ gl += -r.p; } });
+    return { n: rows.length, pf: gl > 0 ? Math.round(gw / gl * 100) / 100 : null, noLoss: gl === 0 && gw > 0, net: Math.round((gw - gl) * 10000) / 10000 };
+  }
+  // Three windows of one strategy: the last 7 days, the last 30 days and everything since it started.
+  function kalshiBoardWindows(orders, now){
+    var rows = kalshiBoardRows(orders);
+    return { d7: kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 7 * KAL_BOARD_DAY; })), d30: kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; })), all: kalshiBoardPf(rows) };
+  }
+  function kalshiBoardPfText(w){ return !w || w.n === 0 ? 'n/a' : (w.pf === null ? (w.noLoss ? 'no losses' : 'n/a') : w.pf.toFixed(2)); }
+  // Kill status, one set of lines per strategy. money is kalshiMoney (or a stand-in); a figure is never typed into the text without it.
+  function kalshiBoardKill(id, orders, now, money){
+    var rows = kalshiBoardRows(orders);
+    if(id === 'L1'){
+      var T = KAL_BOARD_TRIPWIRE, since = rows.filter(function(r){ return r.ts >= T.from; }), roll = rows.slice(-T.rollingN), sp = kalshiBoardPf(since), rp = kalshiBoardPf(roll);
+      return { count: since.length, pf: sp.pf, rolling: roll.length >= T.rollingN ? rp.pf : null, lines: [
+        'Tripwire: next ' + T.trades + ' trades from ' + T.fromText + '; PF under ' + T.pfFloor.toFixed(1) + ' proposes a size cut; rolling ' + T.rollingN + ' under ' + T.rollingFloor.toFixed(1) + ' is an alert',
+        'Now: ' + since.length + ' of ' + T.trades + ' trades, PF ' + kalshiBoardPfText(sp) + '; rolling ' + T.rollingN + ' PF ' + (roll.length >= T.rollingN ? kalshiBoardPfText(rp) : 'n/a (' + roll.length + ' trades)')
+      ] };
+    }
+    if(id === 'OICORE'){
+      var K = KAL_BOARD_KILL.OICORE, mine = rows.filter(function(r){ return r.ts >= K.from; }), streak = 0, net = 0;
+      mine.forEach(function(r){ net += r.p; streak = r.p < 0 ? streak + 1 : 0; });
+      net = Math.round(net * 10000) / 10000;
+      return { streak: streak, fills: mine.length, net: net, lines: [
+        'Streak ' + streak + ' of ' + K.streak + '; net floor ' + money(K.net) + ' after ' + K.afterFills + ' fills',
+        'Now: ' + mine.length + ' fills, net ' + (net >= 0 ? '+' : '-') + money(Math.abs(net))
+      ] };
+    }
+    var wins = rows.filter(function(r){ return r.p > 0; }).length;
+    return { trades: rows.length, wins: wins, lines: [
+      'Net ' + money(KAL_BOARD_KILL.EVENT830.proposedNet) + ' kill proposed, not coded yet; ' + rows.length + ' trades',
+      wins + ' wins of ' + rows.length
+    ] };
+  }
+  // The shadow log scored for the board: the same arithmetic as shadowReport in the bot's kalshiShadowLib (a test runs both on one fixture), plus the first signal time and the earliest date the next stage could be reached.
+  function kalshiBoardShadow(rules, docs, now){
+    var DAYMS = KAL_BOARD_DAY;
+    function pfOf(rows){
+      var w = 0, l = 0;
+      rows.forEach(function(r){ if(r.pnl > 0){ w += r.pnl; } else if(r.pnl < 0){ l += -r.pnl; } });
+      return { gw: Math.round(w * 10000) / 10000, gl: Math.round(l * 10000) / 10000, pf: l > 0 ? Math.round((w / l) * 100) / 100 : null, n: rows.length, net: Math.round((w - l) * 10000) / 10000 };
+    }
+    var all = (Array.isArray(docs) ? docs : []).filter(function(d){ return d && typeof d.rule === 'string' && isFinite(Number(d.atMs)); });
+    return (Array.isArray(rules) ? rules : []).map(function(rule){
+      var mine = all.filter(function(d){ return d.rule === rule.id; }).sort(function(a, b){ return Number(a.atMs) - Number(b.atMs); });
+      var settled = mine.filter(function(d){ return d.settled === true && isFinite(Number(d.pnl)); }).map(function(d){ return { pnl: Number(d.pnl), wouldFill: d.wouldFill === true, atMs: Number(d.atMs) }; });
+      var fill = settled.filter(function(d){ return d.wouldFill; });
+      var a = pfOf(settled), f = pfOf(fill);
+      var first = mine.length ? Number(mine[0].atMs) : null;
+      var days = first === null ? 0 : Math.round(((now - first) / DAYMS) * 10) / 10;
+      var half = fill.length >= 2 ? pfOf(fill.slice(Math.floor(fill.length / 2))) : null;
+      var byDay = {}, topDay = null;
+      fill.forEach(function(d){ var k = new Date(d.atMs).toISOString().slice(0, 10); byDay[k] = (byDay[k] || 0) + d.pnl; });
+      if(f.net > 0){ topDay = Math.max.apply(null, Object.keys(byDay).map(function(k){ return byDay[k]; })) / f.net; }
+      var netCents = fill.length ? Math.round((f.net / fill.length) * 1000) / 10 : null;
+      var last30 = mine.filter(function(d){ return Number(d.atMs) >= now - 30 * DAYMS; }).length;
+      var status = 'collecting';
+      if(fill.length >= 50 && netCents !== null && netCents < -1){ status = 'kill: net under -1c per contract after 50 signals'; }
+      else if(days >= 30 && last30 < 40){ status = 'retire: under 40 signals in 30 days'; }
+      else if(fill.length >= 150 && days >= 14 && f.pf !== null && f.pf >= 1.3 && half && half.pf !== null && half.pf >= 1.2 && topDay !== null && topDay <= 0.3){ status = 'ready: meets the shadow pass rule, owner packet next'; }
+      // Earliest next stage: both 150 fillable signals and 14 days, at the signal rate so far; nothing is guessed before 10 signals.
+      var eta = null;
+      if(mine.length >= 10 && fill.length >= 1 && first !== null){
+        var rate = fill.length / Math.max(days, 0.1), need = fill.length >= 150 ? 0 : (150 - fill.length) / rate;
+        eta = Math.max(first + 14 * DAYMS, now + need * DAYMS);
+      }
+      return { rule: rule.id, signals: mine.length, settled: settled.length, fillable: fill.length, wins: settled.filter(function(d){ return d.pnl > 0; }).length, pf: a.pf, pfFillable: f.pf, netFillableDollars: f.net, netCentsPerContract: netCents,
+        secondHalfPf: half ? half.pf : null, topDayShareOfNet: topDay === null ? null : Math.round(topDay * 100) / 100, days: days, signalsLast30d: last30, status: status, firstAtMs: first, etaMs: eta };
+    });
+  }
+  function kalshiBoardDate(ms){ return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric' }).format(new Date(ms)); }
+  // The three groups as markup. model: { live: [{ id, name, rule, w, kill }], deck: { state: 'ok' | 'loading' | 'unreadable', rows: [{ id, rule, rep }] }, retired }. Every value is escaped or numeric.
+  function kalshiBoardHtml(model, esc, money){
+    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
+    var row = function(name, rule, pfBig, pfLabel, sub, lines, bar){
+      return '<div class="kal-bd-row"><div class="kal-bd-pf"><b>' + esc(pfBig) + '</b><span>' + esc(pfLabel) + '</span></div><div class="kal-bd-main"><b>' + esc(name) + '</b><span class="kal-bd-rule">' + esc(rule) + '</span>' +
+        (bar === undefined ? '' : '<div class="kal-bd-bar" role="img" aria-label="' + esc(bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, bar.pct)).toFixed(1) + '%"></i></div>') +
+        '<div class="kal-bd-sub">' + sub + (lines || []).map(function(l){ return '<div>' + esc(l) + '</div>'; }).join('') + '</div></div></div>';
+    };
+    var live = model.live.map(function(s){
+      var w = s.w;
+      return row(s.name, s.rule, kalshiBoardPfText(w.d30), '30 day PF, n ' + w.d30.n, '<div>7 day PF ' + esc(kalshiBoardPfText(w.d7)) + ' (n ' + w.d7.n + ') · since start ' + esc(kalshiBoardPfText(w.all)) + ' (n ' + w.all.n + ')</div><div>30 day net ' + esc(sg(w.d30.net)) + '</div>', s.kill.lines);
+    }).join('');
+    var deck = '';
+    if(model.deck.state !== 'ok'){
+      deck = model.deck.rows.map(function(r){ return '<div class="kal-bd-row kal-bd-flat"><div class="kal-bd-main"><b>' + esc(r.id) + '</b><span class="kal-bd-rule">' + esc(r.rule) + '</span></div><div class="kal-bd-sub">' + (model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet') + '</div></div>'; }).join('');
+    } else {
+      deck = model.deck.rows.map(function(r){
+        var p = r.rep, pf = p.pfFillable, pfText = p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2));
+        var next = p.etaMs === null ? 'Earliest next stage: not enough rows yet' : 'Earliest next stage: ' + kalshiBoardDate(p.etaMs);
+        return row(r.id, r.rule, pfText, 'cash PF, n ' + p.fillable, '<div>' + p.fillable + ' of 150 fillable signals · ' + p.signals + ' logged · day ' + Math.floor(p.days) + ' of 14</div>',
+          ['Status: ' + p.status.split(':')[0] + (p.netCentsPerContract === null ? '' : ', net ' + (p.netCentsPerContract >= 0 ? '+' : '') + p.netCentsPerContract.toFixed(1) + 'c a contract (kill under -1.0c after 50)'), next], { pct: p.fillable / 150 * 100, label: p.fillable + ' of 150 signals' });
+      }).join('');
+    }
+    var ret = model.retired.rows.map(function(r){ return row(r.name, r.note ? '(' + r.note + ')' : 'Stopped', r.pf.toFixed(2), 'cash PF, n ' + r.n, '', ['Comes back when: ' + model.retired.back]); }).join('');
+    return '<div class="kal-bd-grp"><div class="kal-bd-h">Live</div>' + live + '</div>' +
+      '<div class="kal-bd-grp"><div class="kal-bd-h">On deck <span>shadow only, no money</span></div>' + deck + '</div>' +
+      '<div class="kal-bd-grp"><div class="kal-bd-h">Retired <span>as of ' + esc(model.retired.asOf) + '</span></div>' + ret + '</div>';
+  }
+  var kalshiShadowCache = { at: 0, rows: null, error: '' }, kalshiShadowLoading = false;
+  var KAL_SHADOW_TTL = 600000;
+  // The shadow log is read once when the card is first drawn and again only after ten minutes and a redraw (never on a timer). A refused read (the Firestore rule may not be published yet) is kept as the answer for the same ten minutes, so a redraw never retries in a loop.
+  function kalshiShadowEnsure(){
+    var api = window.__shwoopAPI;
+    if(kalshiShadowLoading || !api || !api.readKalshiShadowRows || !currentUserIsAdmin){ return; }
+    if(kalshiShadowCache.at && Date.now() - kalshiShadowCache.at < KAL_SHADOW_TTL){ return; }
+    kalshiShadowLoading = true; kalshiShadowCache.at = Date.now();
+    var done = function(){ kalshiShadowLoading = false; renderKalshiBoard(); };
+    try { api.readKalshiShadowRows(Date.now() - 45 * KAL_BOARD_DAY).then(function(rows){ kalshiShadowCache.rows = rows; kalshiShadowCache.error = ''; done(); }, function(err){ kalshiShadowCache.rows = null; kalshiShadowCache.error = String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60); done(); }); }
+    catch(e){ kalshiShadowLoading = false; kalshiShadowCache.error = 'read'; }
+  }
+  function renderKalshiBoard(){
+    var el = document.getElementById('kalBoard'), card = document.querySelector('[data-card="board"]');
+    if(!el || !card || card.hidden){ return; }
+    var now = Date.now(), all = kalshiAllOrders();
+    var live = KAL_BOARD_LIVE.map(function(s){
+      var mine = all.filter(function(o){ return kalshiStrategyOf(o) === s.id && (s.id !== 'L1' || kalshiIsActive(o)); });
+      return { id: s.id, name: s.name, rule: s.rule, w: kalshiBoardWindows(mine, now), kill: kalshiBoardKill(s.id, mine, now, kalshiMoney) };
+    });
+    var rows = kalshiShadowCache.rows;
+    var state = rows ? 'ok' : (kalshiShadowCache.error ? 'unreadable' : 'loading');
+    var rep = rows ? kalshiBoardShadow(KAL_BOARD_SHADOW, rows, now) : [];
+    var deck = { state: state, rows: KAL_BOARD_SHADOW.map(function(r, i){ return { id: r.id, rule: r.rule, rep: rep[i] }; }) };
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, retired: KAL_BOARD_RETIRED }, escapeHtml, kalshiMoney);
+    kalshiShadowEnsure();
+  }
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
   var kalshiSlotUnsub = null;
@@ -4145,12 +4356,13 @@ kalshiStatusTick();
   // below which its body scrolls. Both are set in Edit layout by dragging the card's bottom right corner or with its buttons, and both are ignored on a phone (one column, every card at its own height).
   // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades']];
-    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades' };
-    var CARDS = ['account', 'status', 'pnl', 'positions', 'trades'];   // the default order, which is the look the page had before the rebuild
-    var WIDTHS = { account: 12, status: 6, pnl: 6, positions: 12, trades: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
+    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['board', 'Strategy board']];
+    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades', board: 'Strategy board' };
+    var CARDS = ['account', 'status', 'pnl', 'positions', 'trades', 'board'];   // the default order, which is the look the page had before the rebuild
+    var WIDTHS = { account: 12, status: 6, pnl: 6, positions: 12, trades: 12, board: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
     var SPANS = [3, 4, 6, 8, 12], SPAN_TEXT = { 3: '1/4', 4: '1/3', 6: '1/2', 8: '2/3', 12: 'Full' }, SPAN_WORDS = { 3: 'a quarter of the width', 4: 'a third of the width', 6: 'half the width', 8: 'two thirds of the width', 12: 'the full width' };
     var H_STEP = 40, H_MIN_BODY = 120, H_MAX = 3000, H_STEPS = [240, 360, 480, 600];   // a set height snaps to 40px and never goes below the head plus 120px of body (or the card's own height, if that is less)
+    var APPEND_LAST = { board: true };   // a card added after a layout was saved goes last, not beside its default neighbour (Nov 9, 2026: the Strategy board)
     var NO_HEIGHT = { account: true };   // the Account card's Start, Pause and Flatten menu hangs below its head, so a set height could cut it off: that card only changes width
     var VERSION = 3, KEY = 'kalBotLayout';
     function fresh(){ return { v: VERSION, order: CARDS.slice(), hidden: {}, width: {}, height: {}, folded: {} }; }
@@ -4158,7 +4370,7 @@ kalshiStatusTick();
     // A saved order with unknown names dropped and duplicates removed; a card it does not mention (one added after it was saved) goes right after the card that precedes it by default, not to the end.
     function complete(list, def){
       var want = list.filter(function(k, i, a){ return def.indexOf(k) > -1 && a.indexOf(k) === i; });
-      def.forEach(function(k, i){ if(want.indexOf(k) < 0){ var prev = i > 0 ? want.indexOf(def[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
+      def.forEach(function(k, i){ if(want.indexOf(k) < 0){ if(APPEND_LAST[k]){ want.push(k); return; } var prev = i > 0 ? want.indexOf(def[i - 1]) : -1; want.splice(prev + 1, 0, k); } });
       return want;
     }
     // A layout saved before Nov 5, 2026 (no version) listed the cards in markup order, the rail's cards (account, status, positions) then the main column's (pnl, trades), and the page dealt them into
@@ -4176,7 +4388,7 @@ kalshiStatusTick();
       if(!l || typeof l !== 'object'){ return next; }
       if(Array.isArray(l.order)){
         var order = l.order.filter(function(k){ return typeof k === 'string'; });
-        next.order = (l.v === 2 || l.v === VERSION) ? complete(order, CARDS) : migrateOrder(order);
+        next.order = (l.v === 2 || l.v === VERSION) ? complete(order, CARDS) : complete(migrateOrder(order), CARDS);
       }
       OPTIONAL.forEach(function(o){ if(l.hidden && l.hidden[o[0]] === true){ next.hidden[o[0]] = true; } });
       CARDS.forEach(function(k){
