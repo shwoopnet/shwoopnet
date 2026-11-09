@@ -1660,6 +1660,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 9</div>
                 <ul class="changelog-list">
+                  <li>Bot: a fifth shadow rule, GOLDALL, logs every gold signal (ordered or not) so the idea that gold does better after the price already moved 5c in the last 3 minutes can be tested forward; log only, no order, no money</li>
 
                   <li>Bot: the shadow rules are now scored: each signal is settled from the public market result and the nightly report shows, per rule, cash profit factor, signals, days and the verdict against the written pass and kill rules (read only, no order, no money)</li>
                   <li>Bot: four shadow rules registered (Ethereum NO, Bitcoin favourite at 0.92 or more, XRP YES at the 10 minute look, Ethereum like gold): they only log what they would have bought, 1 contract, no order and no money, to collect forward evidence for the strategy lifecycle</li>

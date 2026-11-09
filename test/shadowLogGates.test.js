@@ -83,16 +83,18 @@ gates.SH4 = () => {
 gates.SH5 = async () => {
   // Week 1 (Nov 9, 2026): exactly four registered shadow rules, each valid against the markets the bot quotes, 1 contract, and pointing at a pre-registration that exists.
   const rules = sh.SHADOW_RULES;
-  assert.deepStrictEqual(rules.map((r) => r.id), ['ETHNO6', 'BTCHI6', 'XRPYES10', 'ETHL1']);
+  assert.deepStrictEqual(rules.map((r) => r.id), ['ETHNO6', 'BTCHI6', 'XRPYES10', 'ETHL1', 'GOLDALL']);
   for (const r of rules) { assert.strictEqual(sh.validateShadowRule(r, live.L1_SERIES).ok, true, r.id); assert.strictEqual(r.contracts, 1, r.id + ' is one contract'); }
-  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 4, 'the production registry passes the same validation');
+  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 5, 'the production registry passes the same validation');
   const by = (id) => rules.find((r) => r.id === id);
   assert.deepStrictEqual({ ...by('ETHNO6').entry }, { sideRule: 'no', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
   assert.deepStrictEqual({ ...by('BTCHI6').entry }, { sideRule: 'favourite', priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
   assert.deepStrictEqual({ ...by('XRPYES10').entry }, { sideRule: 'yes', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, 'the 10 minute look');
   assert.deepStrictEqual({ ...by('ETHL1').entry }, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "L1's own entry on Ethereum");
   const readme = read('kalshi-scalper', 'README.md');
-  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1'), 'the pre-registration is in the README before the first row');
+  assert.deepStrictEqual({ ...by('GOLDALL').entry }, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "L1's own entry on gold, every signal logged");
+  assert.ok(readme.includes('## SHADOW-GOLDALL') && by('GOLDALL').readme === 'kalshi-scalper/README.md#SHADOW-GOLDALL' && /\|rise3\| >= 0\.05/.test(readme), 'the momentum split is pre-registered before the first row');
+  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.filter((r) => r.id !== 'GOLDALL').every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1'), 'the pre-registration is in the README before the first row');
   // A signal only inside its own window and band: an Ethereum favourite at 0.93 with 6 minutes left is a signal for ETHL1 (and ETHNO6 only if its NO side is the one in band).
   const quote = (series, over) => ({ series, m: Object.assign({ ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' }, over || {}) });
   const rows = sh.shadowSignals(rules, [quote('KXETH15M'), quote('KXBTC15M'), quote('KXXRP15M')], NOW);
@@ -100,7 +102,8 @@ gates.SH5 = async () => {
   assert.deepStrictEqual(ids, ['BTCHI6', 'ETHL1'], 'at 6 minutes left: Bitcoin 0.93 and the Ethereum favourite qualify; XRP needs the 10 minute look; the Ethereum NO side is 0.08 (outside 0.88 to 0.97): ' + ids);
   const ten = sh.shadowSignals(rules, [quote('KXXRP15M', { close_time: new Date(NOW + 600000).toISOString() })], NOW);
   assert.deepStrictEqual(ten.map((r) => r.rule), ['XRPYES10'], 'XRP at 10 minutes left');
-  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXGOLD15M')], NOW), [], 'a market no rule names (gold) is never logged');
+  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXSOL15M')], NOW), [], 'a market no rule names is never logged');
+  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXGOLD15M')], NOW).map((r) => r.rule), ['GOLDALL'], 'a gold favourite inside the look is logged for every signal, ordered or not');
 };
 gates.SC1 = async () => {
   // Settlement and scoring (lifecycle spec (c)): a shadow row is settled from the public market result; PF is per contract on the cash basis with the 10 contract fee; the verdict follows the written rules.
