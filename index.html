@@ -995,7 +995,6 @@
   .sp-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
   .sp-ladder{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:10px; flex-wrap:wrap; }
   .sp-ladder b{ font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; }
-  .sp-steps{ display:inline-flex; gap:4px; } .sp-steps i{ width:12px; height:12px; border-radius:3px; border:1px dashed var(--muted); display:block; }
   .kal-bd-rules{ font-size:12px; color:var(--muted); } .kal-bd-rules > summary{ cursor:pointer; font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:11px; min-height:28px; display:flex; align-items:center; } .kal-bd-rules > summary::after{ content:'\25BE'; margin-left:6px; } .kal-bd-rules[open] > summary::after{ content:'\25B4'; } .kal-bd-rules > div{ margin-top:4px; overflow-wrap:anywhere; }
   .sp-ret{ margin-top:18px; border-top:1px solid var(--border); padding-top:12px; } .sp-ret > summary{ cursor:pointer; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); min-height:32px; display:flex; align-items:center; } .sp-ret[open] > summary{ margin-bottom:8px; }
   .sp-ret .sp-sub + .sp-sub{ margin-top:3px; }
@@ -1728,7 +1727,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 10</div>
                 <ul class="changelog-list">
-                  <li>New Strategies page (admin only, a fourth entry in the navigation, beside Bot): a lifecycle of Shadow, Live and Retired with each strategy as a chip, then one tile per strategy with its cash profit factor first, a trend line (rolling 30 trade cash PF for the live ones, cumulative cash PF by signal for the shadow rules), a kill distance gauge (OICORE's drawdown room, the gold tripwire count, EVENT830's losing streak), signals out of 150 for the shadow rules, a Sizing ladder row that reads Not set yet, and an expandable Rules line with how it is implemented, what kills it automatically and what must be true for it to return (EVENT830's return rule is shown as not written yet); Retired is one collapsed line; page only, no order, Privacy view masks the dollars</li>
+                  <li>New Strategies page (admin only, a fourth entry in the navigation, beside Bot): a lifecycle of Shadow, Live and Retired with each strategy as a chip, then one tile per strategy with its cash profit factor first, a trend line (rolling 30 trade cash PF for the live ones, cumulative cash PF by signal for the shadow rules), a kill distance gauge (OICORE's drawdown room, the gold tripwire count, EVENT830's losing streak), signals out of 150 for the shadow rules, a Sizing ladder row with the owner's static label per strategy (gold: balance ladder held at 15; OICORE: own ladder, step 10 of 10, 12, 15, 20, 30; EVENT830: 1 contract; shadow rules: next 3 contracts as a probe), and an expandable Rules line with how it is implemented, what kills it automatically and what must be true for it to return (EVENT830's return rule is shown as not written yet); Retired is one collapsed line; page only, no order, Privacy view masks the dollars</li>
                   <li>Bot: two more shadow rules registered (XRP favourite at the 6 minute look and gold favourite at 0.92 or more, both with a tight spread); three week 1 rules (both Ethereum ones and the Bitcoin one) were retired before they logged anything: they only log what they would have bought, 1 contract, no order and no money, to collect forward evidence</li>
                 </ul>
                 <div class="changelog-day">Nov 9</div>
@@ -4074,6 +4073,8 @@ kalshiStatusTick();
     { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 },
     { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }
   ] };
+  // The Sizing ladder row of each tile: static labels, no figure computed (the owner, Nov 10, 2026: new probes start at 3 contracts inside today's caps, stepping up per the ladder rules; gold and OICORE sizing stay as they are; XRPYES10 stays at 1 contract). The sizes themselves are decided in the bot's code, not here.
+  var KAL_BOARD_LADDER = { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '1 contract', shadow: 'Next: 3 contracts as a probe' };
   var KAL_BOARD_DAY = 86400000;
   // The cost of the contracts that filled in cash: a port of fillCost (kalshiLiveLib). averageFillPrice is the YES price, so a NO order pays 1 minus it; anything unreadable, or a cash figure above the worst case, falls back to maxCost in proportion.
   function kalshiBoardFillCost(t, got, want){
@@ -4250,21 +4251,21 @@ kalshiStatusTick();
       var arc = kalshiStratArc(g.frac);
       return '<div class="sp-gauge"><svg viewBox="0 0 120 66" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="var(--border)" stroke-width="8" stroke-linecap="round"/>' + (arc ? '<path d="' + arc + '" fill="none" stroke="var(--paper)" stroke-width="8" stroke-linecap="round"/>' : '') + '</svg><div class="sp-gauge-big">' + esc(g.big) + '</div><div class="sp-gauge-cap">' + esc(g.cap) + '</div></div>';
     };
-    var ladder = '<div class="sp-ladder"><b>Sizing ladder</b><span class="sp-steps" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Not set yet</span></div>';
+    var ladderOf = function(id){ return '<div class="sp-ladder"><b>Sizing ladder</b><span>' + esc(KAL_BOARD_LADDER[id] || KAL_BOARD_LADDER.shadow) + '</span></div>'; };
     var tile = function(o){
       return '<article class="kal-card sp-tile"><div class="sp-th"><div><span class="sp-name">' + esc(o.name) + '</span>' + (o.name === o.id ? '' : '<span class="sp-id">' + esc(o.id) + '</span>') + '</div><span class="sp-pill">' + esc(o.stage) + '</span></div>' +
         '<div class="sp-rule">' + esc(o.rule) + '</div>' +
         '<div class="sp-main"><div class="sp-pf"><b>' + esc(o.pf) + '</b><span>' + esc(o.pfLabel) + '</span></div>' + gaugeHtml(o.gauge) + '</div>' +
         (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) +
         (o.bar === undefined ? '' : '<div><div class="sp-bar" role="img" aria-label="' + esc(o.bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, o.bar.pct)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(o.bar.label) + '</span><span>' + esc(o.bar.right) + '</span></div></div>') +
-        '<div class="sp-sub">' + esc(o.status) + '</div>' + ladder + rulesHtml(o.rules) + '</article>';
+        '<div class="sp-sub">' + esc(o.status) + '</div>' + ladderOf(o.id) + rulesHtml(o.rules) + '</article>';
     };
     var live = model.live.map(function(s){
       return tile({ id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: kalshiStratGauge(s.id, s.kill, money), spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules });
     }).join('');
     var deck = '';
     if(model.deck.state !== 'ok'){
-      deck = model.deck.rows.map(function(r){ return '<article class="kal-card sp-tile"><div class="sp-th"><div><span class="sp-name">' + esc(r.id) + '</span></div><span class="sp-pill">Shadow</span></div><div class="sp-rule">' + esc(r.rule) + '</div><div class="sp-sub">' + (model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet') + '</div><div class="sp-ladder"><b>Sizing ladder</b><span class="sp-steps" aria-hidden="true"><i></i><i></i><i></i><i></i></span><span>Not set yet</span></div></article>'; }).join('');
+      deck = model.deck.rows.map(function(r){ return '<article class="kal-card sp-tile"><div class="sp-th"><div><span class="sp-name">' + esc(r.id) + '</span></div><span class="sp-pill">Shadow</span></div><div class="sp-rule">' + esc(r.rule) + '</div><div class="sp-sub">' + (model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet') + '</div>' + ladderOf(r.id) + '</article>'; }).join('');
     } else {
       deck = model.deck.rows.map(function(r){
         var p = r.rep, pf = p.pfFillable, pfText = p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2));

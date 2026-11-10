@@ -26,8 +26,8 @@ function fn(name) {
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + names.map(fn).join('\n');
-const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED };')(Math, Number, Array, isFinite);
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const mask = (x) => (x < 0 ? '-' : '') + '****';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -114,7 +114,12 @@ gates.SP5 = () => {
   assert.ok(/\$10\.67/.test(plain) && /drawdown room of \$50\.00/.test(plain), 'and with it off the room is shown');
   assert.strictEqual((plain.match(/class="kal-card sp-tile"/g) || []).length, 3 + P.KAL_BOARD_SHADOW.length, 'one tile per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, 7, 'every tile has the Sizing ladder row');
-  assert.strictEqual((plain.match(/<span>Not set yet<\/span>/g) || []).length, 7, 'and it reads Not set yet (the owner has not approved a ladder)');
+  const L = P.KAL_BOARD_LADDER;
+  assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '1 contract', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  for (const id of ['L1', 'OICORE', 'EVENT830']) assert.ok(plain.includes('<b>Sizing ladder</b><span>' + L[id] + '</span>') || plain.includes('<b>Sizing ladder</b><span>' + esc(L[id]) + '</span>'), id + ' shows its label');
+  assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 3, 'the other three shadow rules say next 3 contracts');
+  assert.strictEqual((plain.match(/<span>1 contract<\/span>/g) || []).length, 2, 'EVENT830 and XRPYES10 say 1 contract');
+  assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok(/<svg class="sp-arrow"/.test(plain) && (plain.match(/sp-arrow/g) || []).length === 2 && (plain.match(/class="sp-stage(?: sp-on)?"/g) || []).length === 3, 'a lifecycle of three stages and two arrows');
   assert.ok((plain.match(/<path d="M 10 60 A 50 50 0 0 1 110 60"/g) || []).length === 3, 'a gauge on each live tile');
   assert.ok((plain.match(/<summary>Rules<\/summary>/g) || []).length === 3 + P.KAL_BOARD_SHADOW.length, 'every tile has its Rules');
