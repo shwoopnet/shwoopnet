@@ -965,19 +965,20 @@
   /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). All of it lives in these few rules (prefix sp-), so the look is easy to change later: .sp-flow (the lifecycle), .sp-tile (one strategy), .sp-pf (the big profit factor), .sp-gauge (the kill distance), .sp-spark (the trend line), .sp-bar (the shadow progress), .sp-ladder (the sizing placeholder). */
   #page-strategies .sp-lede{ font-size:12px; color:var(--muted); margin:0 0 16px; overflow-wrap:anywhere; }
   /* Flow board (Nov 10, 2026, the owner: cards on a Shadow, Live, Retired board with connecting lines and status badges). Same black and white tokens and .kal-card windows; lines are strokes in var(--border) and var(--muted), badges are outlines (hot is the one inverted fill). Phone first: the lanes stack with a short arrow between them; at 900px and up they sit side by side and the board's svg draws the curves. */
-  .sp-board{ position:relative; display:flex; flex-direction:column; gap:0; }
-  .sp-links{ display:none; }
-  .sp-lane{ display:flex; flex-direction:column; gap:14px; min-width:0; position:relative; z-index:1; }
+  .sp-wrap{ container-type:inline-size; container-name:sp; max-width:1500px; margin:0 auto; }
+  .sp-board{ position:relative; display:grid; grid-template-columns:minmax(0,1fr); gap:22px; align-items:start; }
+  .sp-lane{ display:flex; flex-direction:column; gap:12px; min-width:0; position:relative; z-index:1; }
+  .sp-cards{ display:grid; grid-template-columns:minmax(0,1fr); gap:12px; min-width:0; }
   .sp-lane-h{ display:flex; align-items:baseline; gap:8px; padding:2px 2px 0; min-height:40px; align-items:center; }
   .sp-lane-t{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; } .sp-lane-n{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; } .sp-lane-note{ font-size:11px; color:var(--muted); }
   .sp-lane-live .sp-lane-h{ border-bottom:2px solid var(--paper); }
   .sp-lane-shadow .sp-lane-h, .sp-lane-retired .sp-lane-h{ border-bottom:1px solid var(--border); }
-  .sp-down{ display:flex; justify-content:center; padding:6px 0; } .sp-down svg{ width:20px; height:34px; fill:none; stroke:var(--muted); stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
-  .sp-ln{ fill:none; stroke:var(--muted); stroke-width:1.6; stroke-linecap:round; vector-effect:non-scaling-stroke; }
-  .sp-ln-side{ stroke:var(--paper); stroke-width:2; } .sp-ln-trunk{ stroke-dasharray:5 4; } .sp-dot{ fill:var(--muted); }
+  /* Two columns of cards from a 640px board, Live and Shadow side by side from 1100px (container queries on .sp-wrap, so the side navigation never matters); the retired list is a collapsed row under both. These breakpoints are kalshiBoardCols, tested against this text. */
+  @container sp (min-width:640px){ .sp-cards{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
+  @container sp (min-width:1100px){ .sp-board{ grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; } .sp-lane-retired{ grid-column:1 / -1; } }
   .sp-badge{ flex:none; font-size:10.5px; font-weight:700; letter-spacing:.06em; border:1px solid var(--border); border-radius:999px; padding:2px 9px; white-space:nowrap; }
   .sp-b-ok{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); }
-  .sp-feed{ font-size:11px; color:var(--muted); border-left:2px solid var(--paper); padding:2px 0 2px 8px; overflow-wrap:anywhere; margin-top:-2px; }
+  .sp-chip{ display:inline-block; margin-left:8px; font-size:10px; font-weight:700; letter-spacing:.04em; border:1px solid var(--border); border-radius:999px; padding:0 7px; color:var(--paper); white-space:nowrap; }
   .sp-rlist{ list-style:none; margin:0; padding:0; border:1px solid var(--border); border-radius:12px; }
   .sp-rrow{ display:grid; grid-template-columns:minmax(0,1fr) 64px 56px; gap:0 12px; align-items:center; padding:11px 14px; border-top:1px solid var(--border); font-size:14px; line-height:1.3; min-width:0; } .sp-rrow:first-child{ border-top:0; }
   .sp-rhead{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:9px; padding-bottom:9px; } .sp-rhead span:nth-child(n+2), .sp-rpfv, .sp-rn{ text-align:right; }
@@ -986,25 +987,25 @@
   .sp-ret-t{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
   .sp-lane-retired > label.sp-lane-h{ cursor:pointer; min-height:44px; } .sp-lane-retired > label.sp-lane-h::after{ content:'\25BE'; margin-left:auto; color:var(--muted); } .sp-ret-t:checked + label.sp-lane-h::after{ content:'\25B4'; }
   .sp-ret-t:focus-visible + label.sp-lane-h{ outline:2px solid var(--paper); outline-offset:2px; }
-  .sp-lane-b{ display:flex; flex-direction:column; gap:14px; min-width:0; } .sp-ret-t:not(:checked) ~ .sp-lane-b{ display:none; } .sp-back{ margin-top:2px; }
-  @media (min-width:900px){
-    .sp-board{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); column-gap:72px; align-items:start; padding-top:22px; }
-    .sp-down{ display:none; } .sp-links{ display:block; position:absolute; left:0; top:0; width:100%; height:100%; overflow:visible; pointer-events:none; z-index:0; }
-  }
+  .sp-lane-b{ display:flex; flex-direction:column; gap:14px; min-width:0; max-width:760px; } .sp-ret-t:not(:checked) ~ .sp-lane-b{ display:none; } .sp-back{ margin-top:2px; }
   /* Ring dial (Nov 10, 2026, polish round 1): the profit factor inside a circle, arc on a 0 to 2 scale, tick at 1.0. Grey and white only. */
   .sp-top{ display:flex; align-items:center; gap:14px; min-width:0; } .sp-who{ display:flex; flex-direction:column; gap:4px; min-width:0; flex:1; }
-  .sp-ring{ position:relative; width:88px; height:88px; flex:none; } .sp-ring svg{ width:100%; height:100%; display:block; overflow:visible; }
+  .sp-ringw{ --rd:84px; flex:none; display:flex; flex-direction:column; align-items:center; gap:3px; width:var(--rd); }
+  .sp-ring{ position:relative; width:var(--rd); height:var(--rd); flex:none; } .sp-ring svg{ width:100%; height:100%; display:block; overflow:visible; }
   .sp-ring-bg{ fill:none; stroke:var(--border); stroke-width:8; } .sp-ring-fg{ fill:none; stroke:var(--paper); stroke-width:8; stroke-linecap:round; } .sp-ring-tick{ stroke:var(--muted); stroke-width:2.5; }
-  .sp-ring b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:26px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-ring-t b{ font-size:13px; text-align:center; }
+  .sp-ring b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:calc(var(--rd) * var(--k, .3)); line-height:1; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .sp-ring-cap{ font-size:10.5px; color:var(--muted); line-height:1.1; text-align:center; white-space:nowrap; }
   .sp-pfl{ font-size:11px; color:var(--muted); }
-  .sp-compact.kal-card{ padding:12px 14px; gap:8px; } .sp-compact .sp-ring{ width:60px; height:60px; } .sp-compact .sp-ring b{ font-size:15px; } .sp-compact .sp-ring-t b{ font-size:10px; } .sp-compact .sp-ring-bg, .sp-compact .sp-ring-fg{ stroke-width:9; } .sp-compact .sp-top{ gap:12px; }
-  .sp-kill{ min-width:0; } .sp-kill-h{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px; } .sp-kill-h b{ font-size:15px; font-variant-numeric:tabular-nums; } .sp-kill-h span{ font-size:11px; color:var(--muted); text-align:right; overflow-wrap:anywhere; } .sp-killbar{ height:8px; border-radius:4px; }
+  .sp-compact.kal-card{ padding:14px 16px; gap:10px; background:var(--panel); } .sp-compact .sp-top{ gap:14px; align-items:flex-start; }
+  .sp-rule1{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .sp-pfl{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .sp-thin{ min-width:0; } .sp-full{ display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--muted); overflow-wrap:anywhere; } .sp-full b{ color:var(--paper); font-size:10.5px; letter-spacing:.06em; }
+  .sp-kill{ min-width:0; } .sp-kill-h{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px; } .sp-kill-h b{ font-size:15px; font-variant-numeric:tabular-nums; } .sp-kill-h b{ flex:none; } .sp-kill-h span{ font-size:11px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .sp-killbar{ height:6px; border-radius:3px; }
   .sp-det-pre{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .kal-bd-rules{ list-style:none; margin:0; padding:0; font-size:12px; color:var(--muted); } .kal-bd-rules li{ margin-top:4px; overflow-wrap:anywhere; } .kal-bd-rules b{ color:inherit; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; margin-right:4px; }
   .sp-h{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin:22px 0 10px; } .sp-h span{ font-weight:500; letter-spacing:0; text-transform:none; }
   .sp-tile.kal-card{ margin-bottom:0; padding:16px 16px 14px; min-width:0; display:flex; flex-direction:column; gap:10px; }
-  .sp-th{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .sp-name{ font-size:15px; font-weight:700; overflow-wrap:anywhere; }
+  .sp-th{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; }
+  .sp-name{ font-size:15px; font-weight:700; overflow-wrap:anywhere; min-width:0; flex:1 1 90px; }
   .sp-id{ display:inline-block; margin-left:6px; font-size:10.5px; font-weight:700; letter-spacing:.04em; border:1px solid var(--border); border-radius:999px; padding:1px 7px; vertical-align:2px; }
   .sp-rule{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; margin-top:-4px; }
   .sp-spark{ min-width:0; } .sp-spark svg{ width:100%; height:48px; display:block; overflow:visible; }
@@ -1028,14 +1029,11 @@
   .sp-tl-d{ font-weight:700; font-variant-numeric:tabular-nums; } .sp-tl-l{ min-width:0; overflow-wrap:anywhere; } .sp-tl-w{ grid-column:2; font-size:11px; color:var(--muted); } .sp-past{ opacity:.6; }
   .sp-act li{ padding:9px 0; border-top:1px solid var(--border); min-width:0; } .sp-act li:first-child{ border-top:0; padding-top:0; } .sp-act-t{ font-size:13px; font-weight:700; overflow-wrap:anywhere; } .sp-act li.sp-act-critical .sp-act-t::before{ content:'! '; }
   @media (min-width:700px){ .sp-sum.kal-card{ flex-direction:row; align-items:center; gap:28px; } .sp-sum .sp-sum-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); flex:1; } .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-pf b{ font-size:60px; } }
-  @media (max-width:420px){ .sp-ring{ width:76px; height:76px; } .sp-ring b{ font-size:22px; } .sp-compact .sp-ring{ width:56px; height:56px; } }
+  @media (max-width:420px){ .sp-ringw{ --rd:72px; } }
   /* Strategies page animation (Nov 10, 2026, the owner: animated visuals). One shot, only while #page-strategies carries sp-play (JS adds it for about 1.9 s when the page is shown, never under reduced motion): the gauges and lines draw by stroke-dashoffset, the bars and chips move by transform and opacity. No layout property is animated. */
   @keyframes spBar{ from{ transform:scaleX(0); } to{ transform:none; } }
   #page-strategies.sp-play .sp-ring-fg{ animation: spRing 900ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
   #page-strategies.sp-play .sp-spk{ stroke-dasharray:1; animation: lineDraw 900ms ease-out 250ms backwards; }
-  #page-strategies.sp-play .sp-ln{ stroke-dasharray:1; animation: lineDraw 900ms ease-out 500ms backwards; }
-  #page-strategies.sp-play .sp-dot{ animation: spDot 300ms ease-out 1300ms backwards; }
-  @keyframes spDot{ from{ opacity:0; } to{ opacity:1; } }
   @keyframes spRing{ from{ stroke-dashoffset:1; } }
   #page-strategies.sp-play .sp-bar i{ transform-origin:left center; animation: spBar 800ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
   .kal-console [data-card="positions"]{ align-self:start; }
@@ -1097,7 +1095,7 @@
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
     #page-strategies.sp-play .sp-ring-fg{ animation: none; }
-    #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i, #page-strategies.sp-play .sp-ln, #page-strategies.sp-play .sp-dot{ animation: none; stroke-dasharray:none; }
+    #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
@@ -1119,6 +1117,8 @@
   .bg-slogan p:nth-child(even){ margin-left:-260px; }
   @media (max-width:900px){ .bg-slogan{ font-size:44px; } }
   [data-reduce-motion="true"] .bg-slogan{ display:none; }
+  /* The slogan wallpaper is quieter behind this page and its cards are opaque, so no text sits on the lettering (the owner, Nov 10, 2026). */
+  body:has(#page-strategies:not([hidden])) .bg-slogan{ opacity:.3; } #page-strategies .kal-card{ background:var(--panel); }
   /* The same slogan wallpaper behind the sign-in screen (the owner, Oct 25, 2026), just as faint. It sits inside the gate, which is its own fixed layer above the page, so it needs its own copy. */
   .gate-slogan{ position:fixed; inset:-40px; z-index:-1; pointer-events:none; transform:rotate(-8deg); overflow:hidden; font-family:'Titan One','Public Sans',sans-serif; font-size:74px; line-height:1.35; color:rgba(255,255,255,.025); user-select:none; }
   .gate-slogan p{ margin:0; white-space:nowrap; }
@@ -1138,7 +1138,7 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-ring-fg{ animation: none; }
-  [data-reduce-motion="true"] #page-strategies.sp-play .sp-spk, [data-reduce-motion="true"] #page-strategies.sp-play .sp-bar i, [data-reduce-motion="true"] #page-strategies.sp-play .sp-ln, [data-reduce-motion="true"] #page-strategies.sp-play .sp-dot{ animation: none; stroke-dasharray:none; }
+  [data-reduce-motion="true"] #page-strategies.sp-play .sp-spk, [data-reduce-motion="true"] #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
   [data-reduce-motion="true"] .kal-foldbtn > i{ transition: none; }
   [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
@@ -1776,6 +1776,7 @@
                   <li>Strategies page animation (the owner asked for a little more life): when you open the page the kill gauges and the signals bars fill, the profit factor figures count up from 0.00 to their true value in under a second, the Shadow, Live and Retired chips slide along the arrows, and the trend lines draw in, once each time you open it and never on the minute's refresh. It is off under reduced motion (the true figures show at once), black and white, and changes no number.</li>
                   <li>Strategies page: a summary bar on top (blended profit factor, net cash, today, 7 days, money at risk now and open positions), a Details button under each strategy (a cumulative cash line, win rate, average win and loss, fees, best and worst day and the last 8 trades; a smaller panel for the shadow rules), and a timeline of the reads still to come with recent warnings, stops and session starts</li>
                   <li>New Strategies page (admin only, a fourth entry in the navigation, beside Bot): a lifecycle of Shadow, Live and Retired with each strategy as a chip, then one tile per strategy with its cash profit factor first, a trend line (rolling 30 trade cash PF for the live ones, cumulative cash PF by signal for the shadow rules), a kill distance gauge (OICORE's drawdown room, the gold tripwire count, EVENT830's losing streak), signals out of 150 for the shadow rules, a Sizing ladder row with the owner's static label per strategy (gold: balance ladder held at 15; OICORE: own ladder, step 10 of 10, 12, 15, 20, 30; EVENT830: 1 contract; shadow rules: next 3 contracts as a probe), and an expandable Rules line with how it is implemented, what kills it automatically and what must be true for it to return (EVENT830's return rule is shown as not written yet); Retired is one collapsed line; page only, no order, Privacy view masks the dollars</li>
+                  <li>Strategies page, responsive pass (the owner, from a wide screenshot): cards are compact (ring, name once, badge, a one line rule, a thin kill or signals bar; everything else is under Details), the profit factor is always the big fitted number in the ring (no losses shows an infinity sign with the words under the ring, n/a a dash), Live and Shadow sit side by side in two columns on a wide screen and the board is centred at about 1500px, the long connector arc is gone (a small from shadow or feeds live chip marks a twin), and the slogan wallpaper is quieter behind this page.</li>
                   <li>Trading: a third small probe in the second strategy slot, XRPYES10 (the owner granted the favourite-and-hold exception for it on Nov 10; it trades when merged and deployed): 3 contracts of XRP YES at 88c to 97c about 10 minutes before the close, held to settlement, with its own stop of 3 losses in a row or a $15 net loss</li>
                   <li>Docs: the rule for OICORE after its drawdown stop is written before it can fire: it never restarts by itself, only the owner re-arms it by a reviewed edit (no live change)</li>
                   <li>Bot: two more shadow rules registered (XRP favourite at the 6 minute look and gold favourite at 0.92 or more, both with a tight spread); three week 1 rules (both Ethereum ones and the Bitcoin one) were retired before they logged anything: they only log what they would have bought, 1 contract, no order and no money, to collect forward evidence</li>
@@ -4406,44 +4407,32 @@ kalshiStatusTick();
     var t = String(pfText), pf = /^\d{1,3}\.\d{2}$/.test(t) ? parseFloat(t) : (t === 'no losses' ? 2 : 0);
     return { frac: Math.max(0, Math.min(1, pf / 2)), tick: { x1: 50, y1: 84, x2: 50, y2: 96 } };
   }
-  // Stable order for a lane: cards whose id is in firstIds (the ones with a twin in the other lane) go to the top, so the side link between the lanes is short.
+  // What goes INSIDE a ring and BELOW it (the owner, Nov 10, 2026: "no losses" overflowed the ring). The figure is always the big number: a plain profit factor is shown as is, "no losses" is a short glyph in the ring (the infinity sign) with the words as a caption under the ring, and "n/a" is a dash with "n/a" under the ring. k is the font size as a share of the ring's diameter, fitted so the text is never wider than 82% of the ring's inner circle (the inner circle is 72% of the box; a digit is about 0.58 em wide) and never taller than 34% of the ring. Pure.
+  function kalshiStratRingText(pfText){
+    var t = String(pfText), glyph = t, cap = '', len;
+    if(t === 'no losses'){ glyph = '∞'; cap = 'no losses'; } else if(!/^\d{1,3}\.\d{2}$/.test(t)){ glyph = '–'; cap = 'n/a'; }
+    len = Math.max(1, glyph.length);
+    var wide = /^\d/.test(glyph) ? 0.58 : 0.7;
+    return { glyph: glyph, cap: cap, k: Math.round(Math.min(0.34, 0.72 * 0.82 / (len * wide)) * 1000) / 1000, num: /^\d/.test(glyph) };
+  }
+  // The one line a compact card shows for a rule (full text is in Details): cut at a word boundary at or before max characters and ended with an ellipsis; a rule that already fits is returned as is. Pure.
+  function kalshiStratOneLine(text, max){
+    var t = String(text == null ? '' : text).replace(/\s+/g, ' ').trim(), m = Math.max(8, max || 64);
+    if(t.length <= m){ return t; }
+    var cut = t.slice(0, m - 1), sp = cut.lastIndexOf(' ');
+    if(sp >= m * 0.5){ cut = cut.slice(0, sp); }
+    return cut.replace(/[\s,;:.\-]+$/, '') + '…';
+  }
+  // Stable order for a lane: cards whose id is in firstIds (the ones with a twin in the other lane) go to the top, so the twins are the first card of each lane.
   function kalshiStratTwinFirst(items, idOf, firstIds){
     var f = [], r = [];
     (items || []).forEach(function(x){ ((firstIds || []).indexOf(idOf(x)) >= 0 ? f : r).push(x); });
     return f.concat(r);
   }
-  // The links of the board, now lanes Live, Shadow, Retired from left to right: a shadow rule and a live strategy with the same id are one SIDE link (shadow card to its live twin); ONE trunk joins the Live lane to the Retired list (a single line, not one per retired strategy) when anything is retired. from and to are data-fk keys of the markup.
-  function kalshiFlowLinks(liveIds, shadowIds, retiredRows){
-    var links = [];
-    (shadowIds || []).forEach(function(id){ if((liveIds || []).indexOf(id) >= 0){ links.push({ from: 'shadow:' + id, to: 'live:' + id, kind: 'side' }); } });
-    if((retiredRows || []).length){ links.push({ from: 'head:live', to: 'head:retired', kind: 'trunk' }); }
-    return links;
-  }
-  // A cubic curve from the LEFT middle of rectangle a (the shadow card) to the RIGHT middle of rectangle b (its live twin), both { x, y, w, h } in the board's own pixels; '' when either is unreadable.
-  function kalshiFlowPath(a, b){
-    var ok = function(r){ return r && isFinite(r.x) && isFinite(r.y) && isFinite(r.w) && isFinite(r.h); };
-    if(!ok(a) || !ok(b)){ return ''; }
-    var r1 = function(v){ return Math.round(v * 10) / 10; };
-    var x1 = a.x, y1 = a.y + Math.min(a.h / 2, 44), x2 = b.x + b.w, y2 = b.y + Math.min(b.h / 2, 44), dx = Math.max(12, (x1 - x2) / 2);
-    return 'M ' + r1(x1) + ' ' + r1(y1) + ' C ' + r1(x1 - dx) + ' ' + r1(y1) + ' ' + r1(x2 + dx) + ' ' + r1(y2) + ' ' + r1(x2) + ' ' + r1(y2);
-  }
-  // The single trunk: up out of the top of the Live lane's header, across above the Shadow lane (10px over the headers) and down into the Retired header. Rectangles are the two lane headers. '' when unreadable or the Retired lane is not to the right of Live.
-  function kalshiFlowTrunk(a, b){
-    var ok = function(r){ return r && isFinite(r.x) && isFinite(r.y) && isFinite(r.w) && isFinite(r.h); };
-    if(!ok(a) || !ok(b) || b.x <= a.x + a.w){ return ''; }
-    var r1 = function(v){ return Math.round(v * 10) / 10; }, k = 8;
-    var x1 = a.x + a.w / 2, x2 = b.x + b.w / 2, y1 = a.y, y2 = b.y, yt = Math.min(y1, y2) - 12;
-    return 'M ' + r1(x1) + ' ' + r1(y1) + ' L ' + r1(x1) + ' ' + r1(yt + k) + ' Q ' + r1(x1) + ' ' + r1(yt) + ' ' + r1(x1 + k) + ' ' + r1(yt) + ' L ' + r1(x2 - k) + ' ' + r1(yt) + ' Q ' + r1(x2) + ' ' + r1(yt) + ' ' + r1(x2) + ' ' + r1(yt + k) + ' L ' + r1(x2) + ' ' + r1(y2);
-  }
-  // All the paths of a board from the measured rectangles (by key), each with the point its dot sits on; links whose ends are not both measured are left out.
-  function kalshiFlowGeometry(links, rects){
-    return (links || []).map(function(l){
-      var a = rects && rects[l.from], b = rects && rects[l.to];
-      var d = l.kind === 'trunk' ? kalshiFlowTrunk(a, b) : kalshiFlowPath(a, b);
-      if(!d){ return null; }
-      var end = l.kind === 'trunk' ? { x: Math.round((b.x + b.w / 2) * 10) / 10, y: Math.round(b.y * 10) / 10 } : { x: Math.round((b.x + b.w) * 10) / 10, y: Math.round((b.y + Math.min(b.h / 2, 44)) * 10) / 10 };
-      return { d: d, kind: l.kind, from: l.from, to: l.to, end: end };
-    }).filter(Boolean);
+  // How many card columns a lane gets at a board width in px (the same breakpoints as the CSS container queries, kept here so they are tested): one column under 640, two from 640, and from 1100 Live and Shadow sit side by side, two columns each. Pure.
+  function kalshiBoardCols(w){
+    w = Number(w) || 0;
+    return { cols: w >= 640 ? 2 : 1, sideBySide: w >= 1100 };
   }
   // The three groups as markup. model: { live: [{ id, name, rule, rules, w, kill, spark }], deck: { state: 'ok' | 'loading' | 'unreadable', rows: [{ id, rule, rep, spark }] }, retired }. Every value is escaped or numeric; money masks dollars.
   function kalshiBoardHtml(model, esc, money){
@@ -4460,32 +4449,31 @@ kalshiStatusTick();
       if(!g){ return ''; }
       return '<div class="sp-kill" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><div class="sp-kill-h"><b>' + esc(g.big) + '</b><span>' + esc(g.cap) + '</span></div><div class="sp-bar sp-killbar"><i style="width:' + Math.max(0, Math.min(100, (isFinite(g.frac) ? g.frac : 0) * 100)).toFixed(1) + '%"></i></div></div>';
     };
-    // The ring dial: the cash profit factor in the middle (the figure the count up plays on), a filled arc on a 0 to 2 scale and a tick at 1.0.
+    // The ring dial: the cash profit factor in the middle, fitted to the ring (kalshiStratRingText), a filled arc on a 0 to 2 scale and a tick at 1.0; "no losses" and "n/a" put a glyph in the ring and their words under it.
     var ringHtml = function(pf, label, esc2){
-      var r = kalshiStratRing(pf), n = /^\d{1,3}\.\d{2}$/.test(pf);
-      return '<div class="sp-ring' + (n ? '' : ' sp-ring-t') + '"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '<line class="sp-ring-tick" x1="' + r.tick.x1 + '" y1="' + r.tick.y1 + '" x2="' + r.tick.x2 + '" y2="' + r.tick.y2 + '"/></svg><b' + kalshiStratPfAttr(pf, esc2) + '>' + esc2(pf) + '</b></div>';
+      var r = kalshiStratRing(pf), tx = kalshiStratRingText(pf);
+      return '<div class="sp-ringw"><div class="sp-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '<line class="sp-ring-tick" x1="' + r.tick.x1 + '" y1="' + r.tick.y1 + '" x2="' + r.tick.x2 + '" y2="' + r.tick.y2 + '"/></svg><b style="--k:' + tx.k + '"' + (tx.num ? kalshiStratPfAttr(pf, esc2) : ' role="img" aria-label="' + esc2('Cash profit factor ' + (tx.cap || pf)) + '"') + '>' + esc2(tx.glyph) + '</b></div>' + (tx.cap ? '<div class="sp-ring-cap">' + esc2(tx.cap) + '</div>' : '') + '</div>';
     };
     var ladderOf = function(id, shadow){ return '<div class="sp-ladder"><b>Sizing ladder</b><span>' + esc(shadow ? KAL_BOARD_LADDER.shadow : (KAL_BOARD_LADDER[id] || KAL_BOARD_LADDER.shadow)) + '</span></div>'; };
     var openSet = model.open || {};
-    // One card. Always visible: the ring dial, name, badge and the kill gauge (live) or the signals bar (shadow). A shadow card is compact and keeps its rule and status for the expanded part. Details holds the rest: trend line, sizing ladder, Implement, Kill, Return and the evidence panel.
+    // One compact card (the owner, Nov 10, 2026: cards were tall and text heavy). Always visible: the ring dial, the name once, the badge, a one line rule (cut with an ellipsis, the full text is in Details), a connector chip when a shadow rule and a live strategy are the same one, and the kill gauge (live) or the signals bar (shadow) as a thin bar with its one line caption. Details holds the rest: the id, the full rule, the status, the trend line, the sizing ladder, Implement, Kill, Return and the evidence panel.
     var tile = function(o){
       var bd = o.badge || { text: o.stage.toUpperCase(), tone: 'idle' }, compact = o.stage === 'Shadow';
-      var barHtml = o.bar === undefined ? '' : '<div><div class="sp-bar" role="img" aria-label="' + esc(o.bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, o.bar.pct)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(o.bar.label) + '</span><span>' + esc(o.bar.right) + '</span></div></div>';
-      var inner = (compact ? '<div class="sp-rule">' + esc(o.rule) + '</div><div class="sp-sub">' + esc(o.status) + '</div>' : '') + (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) + ladderOf(o.id, compact) + rulesHtml(o.rules) + (o.detail || '');
-      return '<article class="kal-card sp-tile' + (compact ? ' sp-compact' : '') + '" data-fk="' + esc(o.stage.toLowerCase() + ':' + o.id) + '"><div class="sp-top">' + ringHtml(o.pf, o.pfLabel, esc) + '<div class="sp-who"><div class="sp-th"><div><span class="sp-name">' + esc(o.name) + '</span>' + (o.name === o.id ? '' : '<span class="sp-id">' + esc(o.id) + '</span>') + '</div><span class="sp-badge sp-b-' + esc(bd.tone) + '">' + esc(bd.text) + '</span></div><div class="sp-pfl">' + esc(o.pfLabel) + '</div>' +
-        (compact ? '' : '<div class="sp-rule">' + esc(o.rule) + '</div>') + '</div></div>' +
-        (o.feed ? '<div class="sp-feed">' + esc(o.feed) + '</div>' : '') + killHtml(o.gauge) + (compact ? barHtml : '<div class="sp-sub">' + esc(o.status) + '</div>') +
+      var barHtml = o.bar === undefined ? '' : '<div class="sp-thin"><div class="sp-bar" role="img" aria-label="' + esc(o.bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, o.bar.pct)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(o.bar.label) + '</span><span>' + esc(o.bar.right) + '</span></div></div>';
+      var chip = o.chip ? '<span class="sp-chip" title="' + esc(o.chip.tip) + '">' + esc(o.chip.text) + '</span>' : '';
+      var inner = '<div class="sp-full"><b>' + esc(o.id) + '</b><span>' + esc(o.rule) + '</span></div>' + (o.chip ? '<div class="sp-sub">' + esc(o.chip.tip) + '</div>' : '') + '<div class="sp-sub">' + esc(o.status) + '</div>' + (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) + ladderOf(o.id, compact) + rulesHtml(o.rules) + (o.detail || '');
+      return '<article class="kal-card sp-tile sp-compact" data-fk="' + esc(o.stage.toLowerCase() + ':' + o.id) + '" title="' + esc(o.id) + '"><div class="sp-top">' + ringHtml(o.pf, o.pfLabel, esc) + '<div class="sp-who"><div class="sp-th"><span class="sp-name">' + esc(o.name) + '</span><span class="sp-badge sp-b-' + esc(bd.tone) + '">' + esc(bd.text) + '</span></div><div class="sp-rule1" title="' + esc(o.rule) + '">' + esc(kalshiStratOneLine(o.rule, 64)) + '</div><div class="sp-pfl">' + esc(o.pfLabel) + chip + '</div></div></div>' +
+        killHtml(o.gauge) + barHtml +
         '<details class="sp-det" data-k="' + esc(o.stage + o.id) + '"' + (openSet[o.stage + o.id] ? ' open' : '') + '><summary>Details</summary><div class="sp-det-pre">' + inner + '</div></details></article>';
     };
     var ids = model.live.map(function(s){ return s.id; }), sids = model.deck.rows.map(function(r){ return r.id; });
-    var links = kalshiFlowLinks(ids, sids, model.retired.rows);
     var twinOf = function(id){ return ids.indexOf(id) >= 0 && sids.indexOf(id) >= 0; };
     var pfOfRep = function(p){ var pf = p.pfFillable; return p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2)); };
     var shadowPf = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowPf[r.id] = r.rep; }); }
     var live = kalshiStratTwinFirst(model.live, function(s){ return s.id; }, sids).map(function(s){
       var g = kalshiStratGauge(s.id, s.kill, money), twin = twinOf(s.id) && shadowPf[s.id];
       return tile({ id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: g, spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules, detail: s.detail ? kalshiStratDetailHtml(s.detail, esc, money, model.timeText || String) : '',
-        badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), feed: twin ? 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' : '' });
+        badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
     }).join('');
     var deck = '';
     if(model.deck.state !== 'ok'){
@@ -4495,7 +4483,7 @@ kalshiStatusTick();
         var p = r.rep, pfText = pfOfRep(p);
         return tile({ id: r.id, name: r.id, stage: 'Shadow', rule: r.rule, pf: pfText, pfLabel: 'cash PF, n ' + p.fillable, spark: r.spark || [], sparkLabel: 'Cumulative cash PF by signal',
           bar: { pct: p.fillable / 150 * 100, label: p.fillable + ' of 150 signals', right: 'day ' + Math.floor(p.days) + ' of 14' }, status: p.status.split(':')[0], rules: KAL_BOARD_SHADOW_RULES, detail: r.detail ? kalshiStratShadowDetailHtml(r.detail, esc) : '',
-          badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), feed: twinOf(r.id) ? 'Feeds the live strategy of the same name' : '' });
+          badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), chip: twinOf(r.id) ? { text: 'feeds live', tip: 'Feeds the live strategy of the same name' } : null });
       }).join('');
     }
     // Easy to read (the owner, Nov 10, 2026: "make easily readable"): a headed list, one strategy per row, the name and why it ended on the left and the cash PF and trade count in their own right hand columns, larger text and room between rows.
@@ -4504,9 +4492,8 @@ kalshiStatusTick();
     }).join('') + '</ul>';
     var stages = kalshiStratLifecycle(ids, sids, model.retired.rows.map(function(r){ return r.name; }));
     var lane = function(key, st, body, extra){
-      return '<section class="sp-lane sp-lane-' + key + '" data-fk="lane:' + key + '" aria-label="' + esc(st.label) + '"><div class="sp-lane-h" data-fk="head:' + key + '"><span class="sp-lane-t">' + esc(st.label) + '</span><span class="sp-lane-n">' + st.count + '</span><span class="sp-lane-note">' + esc(st.note) + '</span></div>' + (extra || '') + body + '</section>';
+      return '<section class="sp-lane sp-lane-' + key + '" data-fk="lane:' + key + '" aria-label="' + esc(st.label) + '"><div class="sp-lane-h" data-fk="head:' + key + '"><span class="sp-lane-t">' + esc(st.label) + '</span><span class="sp-lane-n">' + st.count + '</span><span class="sp-lane-note">' + esc(st.note) + '</span></div>' + (extra || '') + '<div class="sp-cards">' + body + '</div></section>';
     };
-    var down = '<div class="sp-down" aria-hidden="true"><svg viewBox="0 0 24 34"><path class="sp-ln" pathLength="1" d="M12 2 V32"/></svg></div>';
     var retOpen = model.open && model.open.retired;
     var retired = '<section class="sp-lane sp-lane-retired" data-fk="lane:retired" aria-label="Retired"><input type="checkbox" class="sp-ret-t" id="spRetT"' + (retOpen ? ' checked' : '') + '><label class="sp-lane-h" for="spRetT" data-fk="head:retired"><span class="sp-lane-t">Retired</span><span class="sp-lane-n">' + stages[2].count + '</span><span class="sp-lane-note">off</span></label><div class="sp-lane-b">' + ret + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div></div></section>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
@@ -4515,22 +4502,8 @@ kalshiStatusTick();
       return '<li class="sp-act-' + esc(x.level) + '"><div class="sp-act-t">' + esc(x.title) + '</div>' + (x.body ? '<div class="sp-sub">' + esc(x.body) + '</div>' : '') + '<div class="sp-sub">' + esc((model.timeText || String)(x.ts)) + '</div></li>'; }).join('') + '</ul>' : '<div class="sp-sub">No kills or promotions recorded.</div>';
     var tail = !model.timeline ? '' : '<div class="sp-h">Timeline <span>reads still to come</span></div><div class="kal-card"><ul class="sp-tl">' + tl + '</ul></div>' +
       '<div class="sp-h">Recent activity <span>warnings, stops and session starts, last 7 days</span></div><div class="kal-card">' + act + '</div>';
-    var board = '<div class="sp-board" id="spBoard" data-links="' + esc(JSON.stringify(links)) + '" role="group" aria-label="Live, then shadow, then retired"><svg class="sp-links" aria-hidden="true"></svg>' +
-      lane('live', stages[1], live) + down + lane('shadow', stages[0], deck) + down + retired + '</div>';
-    return summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail;
-  }
-  // Draws the connector lines of the board from the measured card rectangles (desktop, where the lanes sit side by side; on a phone the lanes stack and the arrows between them do the job). Reads layout only; writes only the board's own svg.
-  function kalshiFlowDraw(){
-    var board = document.getElementById('spBoard'); if(!board){ return; }
-    var svg = board.querySelector('.sp-links'); if(!svg){ return; }
-    var lanes = board.querySelectorAll('.sp-lane'), links;
-    svg.innerHTML = '';
-    if(lanes.length < 3 || lanes[0].getBoundingClientRect().left >= lanes[1].getBoundingClientRect().left - 10){ return; }
-    try{ links = JSON.parse(board.getAttribute('data-links') || '[]'); }catch(e){ return; }
-    var b = board.getBoundingClientRect(), rects = {};
-    board.querySelectorAll('[data-fk]').forEach(function(n){ var r = n.getBoundingClientRect(); rects[n.getAttribute('data-fk')] = { x: r.left - b.left, y: r.top - b.top, w: r.width, h: r.height }; });
-    svg.setAttribute('viewBox', '0 0 ' + Math.round(b.width) + ' ' + Math.round(b.height));
-    svg.innerHTML = kalshiFlowGeometry(links, rects).map(function(g){ return '<path class="sp-ln sp-ln-' + g.kind + '" pathLength="1" d="' + g.d + '"/><circle class="sp-dot" r="3.5" cx="' + g.end.x + '" cy="' + g.end.y + '"/>'; }).join('');
+    var board = '<div class="sp-board" id="spBoard" role="group" aria-label="Live, then shadow, then retired">' + lane('live', stages[1], live) + lane('shadow', stages[0], deck) + retired + '</div>';
+    return '<div class="sp-wrap">' + summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail + '</div>';
   }
   var kalshiShadowCache = { at: 0, rows: null, error: '' }, kalshiShadowLoading = false;
   var KAL_SHADOW_TTL = 600000;
@@ -4608,12 +4581,11 @@ kalshiStatusTick();
     var timeline = kalshiStratTimeline(KAL_STRAT_TIMELINE, now, l1 && l1.kill ? l1.kill.count : NaN, kalDayKey);
     el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, retired: KAL_BOARD_RETIRED, summary: summary, timeline: timeline, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
-    kalshiFlowDraw();
     kalshiStratAnimStop(page);
     if(kalshiStratAnim.pending && (kalshiShadowCache.rows || kalshiShadowCache.error)){ kalshiStratAnim.pending = false; kalshiStratAnimStart(page); }
     kalshiShadowEnsure();
   }
-  (function(){ var body = document.getElementById('stratBody'); if(body){ body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && d.classList.contains('sp-det') && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; kalshiFlowDraw(); } }, true); body.addEventListener('change', function(e){ var c = e.target; if(c && c.id === 'spRetT'){ kalshiStratOpen.retired = c.checked; } }); window.addEventListener('resize', kalshiFlowDraw); } })();
+  (function(){ var body = document.getElementById('stratBody'); if(body){ body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && d.classList.contains('sp-det') && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; } }, true); body.addEventListener('change', function(e){ var c = e.target; if(c && c.id === 'spRetT'){ kalshiStratOpen.retired = c.checked; } }); } })();
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
   var kalshiSlotUnsub = null;
