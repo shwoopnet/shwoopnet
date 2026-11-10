@@ -9,7 +9,7 @@ Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by s
 | 5 | Weekly jobless claims ladders (KXJOBLESSCLAIMS) vs persistence on FRED ICSA (FRED reachable) | free, about 300 requests | 8% | register after 1 to 3 | untested |
 | 6 | USGS earthquake ladders (KXBIGGESTQUAKEH hourly, KXBIGGESTQUAKE daily): Poisson base rate from the public USGS feed | free; check overlap with WXOTHER1 first | 6% | read WXOTHER1_CENSUS.json, register | untested |
 | 7 | Spotify daily chart ladders (KXSPOTIFY*D) vs public chart counts (reachability unchecked) | free if readable, forward only | 6% | probe reachability | untested |
-| 8 | Deribit implied digital vs KXBTCD/KXETHD hourly ladders | free, forward only, 2 weeks of polls | 5% | build poller | untested |
+| 8 | SKIPPED by the owner Nov 10 (cost vs a 5% prior; no recorder). Was: Deribit implied digital vs KXBTCD/KXETHD hourly ladders | free, forward only, 2 weeks of polls | 5% | build poller | untested |
 | 9 | Rotten Tomatoes score ladders | free if page readable, forward only, 3 weeks | 5% | probe one request | untested |
 | 10 | Daily flight-count ladders (FLIGHTLAX, FLIGHTJFK) vs weekday seasonality from Kalshi's own settled history | free, about 600 requests | 5% | register after 1 to 3 | untested |
 | 11 | CLOSED Nov 10: AAASPREAD1 FALSIFIED (0 of 8 quoted pairs positive, best -0.10c). Was: same-observation cross-frequency spread: the AAA price on a Monday is the settlement of BOTH the weekly (KXAAAGASW) and the daily (KXAAAGASD) ladder on that date; at a shared strike, YES(daily) + NO(weekly) below 1 minus fees is a locked profit. Reuses the AAAGAS1 candles; free | 8% | after AAAGAS1 fetch finishes: add the weekly candles, register, run | untested (added Nov 10 PM) |

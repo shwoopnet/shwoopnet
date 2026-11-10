@@ -9215,3 +9215,6 @@ Ten fixed series (7 commodity, 3 foreign-index); only 497 settled markets exist 
 
 ## AAASPREAD1 result (Nov 10, 2026, 5:10 PM CT, run once, no outcome used): FALSIFIED
 Daily (KXAAAGASD) and weekly (KXAAAGASW) AAA gas ladders carry the identical rule and close on Mondays, so a YES in one plus a NO in the other at a shared strike is a locked pair. 105 shared-strike pairs on 19 Monday dates from the AAAGAS1 universe; only 8 pairs on 6 dates had a two-sided quote (spread <= 5c) at 12 hours before the close in BOTH markets. Locked profit after both fees: 0 of 8 positive; best -0.10c, median -1.40c, mean -1.44c per pair (5 pairs with a cheap leg, 0 positive). Pass needed 30 positive pairs on 10 dates with mean >= 1c. Prediction (falsified) held: when both ladders are quoted they agree to within the fees, and most of the time one of them is not quoted. Script `src/scalper/aaaspread1.py`. N counted: 1.
+
+## DERIBIT1: SKIPPED (owner decision via main, Nov 10, 2026, 2:10 PM CT)
+Recorder, pilot and workflow are not built: cost against a 5% prior. The draft in `workers/drafts/` is not to be copied into `scripts/` or `.github/workflows/`. No N counted (nothing was scored).
