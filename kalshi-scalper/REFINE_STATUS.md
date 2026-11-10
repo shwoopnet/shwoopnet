@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 07:28 PM CT (01:28Z): W-DOLLARKILL: incubator dollar kills replayed on real cash record
+
+Registered first (S/w_dollarkill). k = floor(cap / price paid), scaled P&L = per-contract cash result x k, kills on the continuous path from the first order. Base ( cap, demote -10, latch -20), PF first: gold 1.57 n311 +38.5, no kill; OICORE 1.41 n79 +138.4: demote at trade 2 (Oct 30 -10.6), latch at trade 6 (Oct 31 cum -21.4), FALSE KILL (next 73 trades net about +160; buys about 5c so one loss is about -5 and a 28 percent win rate makes a 6-trade run normal; never reaches 150 signals); XRP 0.63 n86 -17.7: demote at trade 34 (Oct 23), latch at trade 81 (Oct 27, -20.1), a true but late kill; Bitcoin 1.09, Ethereum 1.26, Dogecoin 1.45 no kill. Gold, Dogecoin, Bitcoin survive 150-trade windows (0 of 217 starts latch). Sensitivity (0 cap, -20, -40): same events; OICORE latches at trade 6 (-43.0); XRP at trade 68 (-41.9). Conclusion: a fixed dollar latch false-kills a low-price high-variance strategy; per-contract kills or a latch scaled to price paid fit better. Cannot show fill rate, shadow vs fill, slippage at tiny size.
+
 ## 2026-11-09 06:42 PM CT (00:42Z): W-OIETH3: OICORE mechanism on Ethereum, NOT_ENOUGH_DATA
 
 Registered first (S/w_oieth3), N +2 (about 760 total). Threshold: Bitcoin 86,300 is the 0.6976 quantile of Bitcoin first-half OI rises; same quantile of ETH first-half rises = 15,933. Cash model unrounded fee, entry at c-120 ask. ETH 857 windows over 9 days: H1 PF 0.59 (+0c) / 0.52 (+1c) n19; H2 held out PF 1.31 / 1.26 n10; triggers 4.2 a day in H1, 2.2 in H2; 40 H2 triggers needs about 18 more days. Prior low (Bitcoin OICORE is not at the research bar; ETH H1 lost). Slot need: series allowed-list edit only; do not admit now; re-read in 2 to 3 weeks.
