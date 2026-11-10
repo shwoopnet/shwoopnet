@@ -25,8 +25,8 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml', 'kalshiStratBlocks', 'kalshiStratTextBar', 'kalshiStratHealth', 'kalshiStratDayKeys', 'kalshiStratHeat', 'kalshiStratTape'];
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_STRAT_BLOCKS') + names.map(fn).join('\n');
 const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const mask = (x) => (x < 0 ? '-' : '') + '****';
@@ -110,10 +110,10 @@ const deckModel = (state) => ({ state, rows: P.KAL_BOARD_SHADOW.map((r) => ({ id
 gates.SP5 = () => {
   const h = P.kalshiBoardHtml({ live: liveModel(mask), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, mask);
   // The Rules text holds fixed policy numbers (a $50 stop, a $5 slot), not account figures; every figure that comes from the account is masked.
-  assert.ok(!/\$\d/.test(h.replace(/<details class="kal-bd-rules">[\s\S]*?<\/details>/g, '')) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
+  assert.ok(!/\$\d/.test(h.replace(/<div class="kal-bd-rules">(?:<div>[\s\S]*?<\/div>){3}<\/div>/g, '')) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.ok(/\$10\.67/.test(plain) && /drawdown room of \$50\.00/.test(plain), 'and with it off the room is shown');
-  assert.strictEqual((plain.match(/class="kal-card sp-tile"/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'one tile per live strategy and per shadow rule');
+  assert.strictEqual((plain.match(/<details class="sp-row"/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'one table row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every tile has the Sizing ladder row');
   const L = P.KAL_BOARD_LADDER;
   assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
@@ -123,7 +123,7 @@ gates.SP5 = () => {
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok(/<svg class="sp-arrow"/.test(plain) && (plain.match(/sp-arrow/g) || []).length === 2 && (plain.match(/class="sp-stage(?: sp-on)?"/g) || []).length === 3, 'a lifecycle of three stages and two arrows');
   assert.ok((plain.match(/<path d="M 10 60 A 50 50 0 0 1 110 60"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a gauge on each live tile');
-  assert.ok((plain.match(/<summary>Rules<\/summary>/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every tile has its Rules');
+  assert.ok((plain.match(/<b>Implement<\/b>/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length && (plain.match(/<b>Kill<\/b>/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every row opens into its Implement, Kill and Return');
   assert.ok((plain.match(/class="sp-bar"/g) || []).length === P.KAL_BOARD_SHADOW.length && /41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
   const few = P.kalshiBoardHtml({ live: liveModel(money).map((s) => Object.assign(s, { spark: [1] })), deck: deckModel('unreadable'), retired: P.KAL_BOARD_RETIRED }, esc, money);
@@ -163,8 +163,8 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratTimeline', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
-const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STRAT_TIMELINE') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
+const names2 = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratTimeline', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml', 'kalshiStratBlocks', 'kalshiStratTextBar', 'kalshiStratHealth', 'kalshiStratDayKeys', 'kalshiStratHeat', 'kalshiStratTape'];
+const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_STRAT_BLOCKS') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STRAT_TIMELINE') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
 const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_STRAT_TIMELINE, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 const NOW = Date.UTC(2026, 10, 10, 18, 0), HR = 3600000;
@@ -262,10 +262,10 @@ gates.SP14 = () => {
   const evil = Q.kalshiStratDetailHtml(Q.kalshiStratDetail([W(NOW)], () => '<b onmouseover=1>', CT, 8), esc, money, () => '<i>');
   assert.ok(!/<b onmouseover|<i>/.test(evil), 'market name and time are escaped');
   const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, open: { LiveL1: true } }, esc, money);
-  assert.ok(/<details class="sp-det" data-k="LiveL1" open><summary>Details<\/summary>/.test(open), 'an open Details stays open across a redraw');
+  assert.ok(/<details class="sp-row" data-k="LiveL1" open>/.test(open), 'an open Details stays open across a redraw');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // The three groups as markup.')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');
-  const css = html.slice(html.indexOf('.sp-sum.kal-card{'), html.indexOf('@media (max-width:420px){ .sp-pf'));
+  const css = html.slice(html.indexOf('.sp-sum.kal-card{'), html.indexOf('@media (max-width:420px){ .sp-main'));
   assert.ok(!/green|\bred\b|#0f0|var\(--(gain|loss|win)/i.test(css), 'black and white only');
   const mine = body + css;
   assert.ok(!mine.includes(String.fromCharCode(8212)), 'no em dash in the new code or styles');

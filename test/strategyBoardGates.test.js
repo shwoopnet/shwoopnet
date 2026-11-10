@@ -28,8 +28,8 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml', 'kalshiStratBlocks', 'kalshiStratTextBar', 'kalshiStratHealth', 'kalshiStratDayKeys', 'kalshiStratHeat', 'kalshiStratTape'];
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + varLine('KAL_STRAT_BLOCKS') + names.map(fn).join('\n');
 const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -173,9 +173,9 @@ gates.SB13 = () => {
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/<summary>Rules<\/summary>/g) || []).length, 4, 'four live strategies have a Rules line');
+  assert.strictEqual((h.match(/<b>Implement<\/b>/g) || []).length, 4, 'four live strategies have their rules');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((ok.match(/<summary>Rules<\/summary>/g) || []).length, 4, 'every shadow rule has a Rules line');
+  assert.strictEqual((ok.match(/<b>Implement<\/b>/g) || []).length, 4, 'every shadow rule has its rules');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
 };
 gates.SB12 = () => {
@@ -186,7 +186,7 @@ gates.SB12 = () => {
   const mod = html.slice(html.indexOf('readKalshiShadowRows'), html.indexOf('readKalshiShadowRows') + 1500);
   assert.ok(/collection\(db, 'kalshiShadowRows'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'a plain read of the shadow log');
   assert.ok(/match \/kalshiShadowRows\/\{id\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'admin read, no client write');
-  assert.ok(/\.sp-grid\{ display:grid; grid-template-columns:repeat\(auto-fill,minmax\(min\(100%,300px\),1fr\)\)/.test(html) && /\.sp-main\{ display:grid; grid-template-columns:minmax\(0,1fr\) 112px/.test(html), 'tiles are a grid that shrinks, so a phone never scrolls sideways');
+  assert.ok(/\.sp-sr\{ display:grid; grid-template-columns:54px minmax\(0,1fr\) minmax\(0,92px\)/.test(html) && /\.sp-main\{ display:grid; grid-template-columns:minmax\(0,1fr\) 112px/.test(html), 'tiles are a grid that shrinks, so a phone never scrolls sideways');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }

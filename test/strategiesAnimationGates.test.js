@@ -38,7 +38,7 @@ gates.SA3 = () => {
 };
 // SA4: the markup holds the true text at rest, the figure is escaped.
 gates.SA4 = () => {
-  assert.ok(/<b' \+ kalshiStratPfAttr\(o\.pf, esc\) \+ '>' \+ esc\(o\.pf\) \+ '<\/b>/.test(html), 'tile figure: attribute and escaped true text');
+  assert.ok(/<b class="sp-c-pf"' \+ kalshiStratPfAttr\(o\.pf, esc\) \+ '>' \+ esc\(o\.pf\) \+ '<\/b>/.test(html), 'tile figure: attribute and escaped true text');
   assert.ok(/<b' \+ kalshiStratPfAttr\(pf, esc\) \+ '>' \+ esc\(pf\) \+ '<\/b>/.test(html), 'summary figure likewise');
   assert.strictEqual((html.match(/data-pf=/g) || []).length, 1, 'data-pf is written in one helper only, which both Strategies figures call');
 };
