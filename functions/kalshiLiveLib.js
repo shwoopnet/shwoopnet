@@ -336,6 +336,9 @@ async function runArmedTick(args) {
 // The rule is L1 exactly as pre-registered: about 6 minutes before the close, buy ONE contract of the side whose fresh
 // price is 88c to 97c, at the touch, immediate-or-cancel, held to settlement. Nothing is tuned and nothing reads a result.
 const L1_BAND = [0.88, 0.97];
+// Gold buys only 92c to 97c (the owner, Nov 10, 2026: "YES draft the gold band change"). Why: gold's live cash PF by price paid was 2.13 on 174 orders at 92c to 97c (2.3% early sells) against 1.13 on 116 at 88c to 92c (9.5% early sells), and the independent Aug 13 to Sep 1 window gave the 92c to 97c cell PF 1.68 (n 265). It only removes orders (about 40% of gold's entries); size, stops, the exit and every other market are unchanged. Nothing stored can change it.
+const L1_GOLD_BAND = [0.92, 0.97];
+const bandFor = (m) => (m && typeof m.ticker === "string" && m.ticker.startsWith("KXGOLD15M") ? L1_GOLD_BAND : L1_BAND);
 const L1_WINDOW_MS = [330000, 400000];     // time left at which a market is eligible: about 6 minutes
 // Early entry probes (the research session's FWD7, the owner: "live probes at 10 minutes", Oct 21, 2026). XRP and natural gas are entered about 10 minutes before the close INSTEAD of 6, one contract, to test whether
 // entering earlier beats the 6 minute rule (the 69 day history says it might; it has not been tested live). It is the same rule on the same market, never a second position: both entries use the client
@@ -599,7 +602,7 @@ const L1_LOSS_STOP = 10.0;                 // dollars the bot's own trades may b
 function l1Pick(m) {
   const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
   if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) return null;
-  const lo = L1_BAND[0] - 1e-9, hi = L1_BAND[1] + 1e-9;
+  const band = bandFor(m), lo = band[0] - 1e-9, hi = band[1] + 1e-9;
   const r4 = (x) => Math.round(x * 10000) / 10000;
   if (r4(ask) >= lo && r4(ask) <= hi) {
     const limit = Math.ceil(r4(ask) * 100 - 1e-9) / 100;
@@ -1012,7 +1015,7 @@ async function runL1Tick(args) {
     const lead = entryLead(c.series, left);
     if (!["active", "open"].includes(m.status) || !lead) { results.push(ticker + ": not open in its entry window"); continue; }
     const pick = l1Pick(m);
-    if (!pick) { results.push(ticker + ": no side is priced 88c to 97c"); continue; }
+    if (!pick) { results.push(ticker + ": no side is priced inside its band (gold 92c to 97c, others 88c to 97c)"); continue; }
     // Bitcoin and Ethereum only on a smooth climb (see SMOOTH_SERIES). Read after the band check so the candles are only fetched for a market that would otherwise be bought.
     if (SMOOTH_SERIES.includes(c.series)) {
       const sg = await smoothGate({ fetchFn, series: c.series, ticker, side: pick.side, nowMs: now });
@@ -1063,7 +1066,7 @@ async function runL1Tick(args) {
 
     const cid = "L1-" + ticker;
     const record = {
-      accountId: DEFAULT_ACCOUNT_ID, ticker, series: c.series, side: pick.side, band: "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
+      accountId: DEFAULT_ACCOUNT_ID, ticker, series: c.series, side: pick.side, band: ticker.startsWith("KXGOLD15M") ? "92-97c" : "88-97c", strategy: "L1", entryLead: lead, count, addon: addonUsed, addonCost: Number((cost * addonUsed / count).toFixed(4)), price: pick.price, limit: pick.limit,
       exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, clientOrderId: cid, status: "sending", ts: now,
       mode: "live", maxCost: Number(cost.toFixed(2)),
       // Written false so the settle sweep can ask for "filled and not settled" and read a handful of documents each minute instead of every order ever filled (a Firestore read is billed).
@@ -1362,5 +1365,5 @@ module.exports = {
   flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
   liveOrderBody, availableFor, runLiveTest, runArmedTick, ARM_MS, signRequest, loadQuotes,
-  botRisk, RISK_PROFILES, settleOpenOrders, settledFields, fillCost, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
+  botRisk, RISK_PROFILES, L1_GOLD_BAND, settleOpenOrders, settledFields, fillCost, closedByHand, l1Count, maxContractsFor, reviewSizing, foldSkim, skimAddon, addonCap, ADDON_MAX_FRACTION, SKIM_REINVEST, scaleTarget, SCALE_FALL_CONFIRM_MS, L1_SIZE_CEILING, L1_ORDER_CEILING, SCALE_DOLLARS_PER_CONTRACT, SCALE_REVIEW_MS, L1_SIZE_MAX, L1_SIZE_FRACTION, L1_SIZED_STOP_FRACTION, L1_BAND, L1_WINDOW_MS, L1_MAX_ORDERS, L1_WINDOW_DAY_MS, L1_LOSS_STOP, l1Pick, totalCash, runL1Tick, riseFromCandles, EARLY_PROBE_SERIES, EARLY_WINDOW_MS, entryLead, makeRecentOrderReader, L1_OLDER_AFTER_MS, L1_OLDER_REFRESH_MS, windowKey, L1_WINDOW_CAP_FRACTION, PROBE_DROP_WINDOW, probeRingUpdate, probeNet, probeDropped,
 };

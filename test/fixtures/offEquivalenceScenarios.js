@@ -114,8 +114,8 @@ async function runAll(libPath) {
     sizingState: { cap: 5, base: 100, saved: 0, pool: 0, cum: 0, hwm: 0, reviewedAt: NOW - 1000, appliedTs: NOW - 5000 },
     setSizingState: async (s) => { out.push({ name: 'setSizingState (gold sizing)', ret: s, threw: null, log: [] }); },
     updateProbeRecord: async (fn) => fn({}).record,
-  }, [q('KXGOLD15M', GT)]);
-  await tickScenario('l1 two markets one window', {}, {}, [q('KXBTC15M', T), q('KXGOLD15M', GT)]);
+  }, [q('KXGOLD15M', GT, { yes_bid_dollars: '0.9300', yes_ask_dollars: '0.9400' })]);   // inside gold's 92c to 97c band (Nov 10, 2026)
+  await tickScenario('l1 two markets one window', {}, {}, [q('KXBTC15M', T), q('KXGOLD15M', GT, { yes_bid_dollars: '0.9300', yes_ask_dollars: '0.9400' })]);
 
   // botRisk
   {
