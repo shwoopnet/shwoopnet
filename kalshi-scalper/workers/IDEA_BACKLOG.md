@@ -2,7 +2,7 @@
 Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by state/city (138 series), KXTSA daily, KXBIGGESTQUAKEH hourly and KXBIGGESTQUAKE daily, KXJOBLESSCLAIMS weekly, KXSPOTIFY*D daily (187 series), KXFLIGHTLAX/JFK daily, 429 mention series.
 | # | idea | cost | prior | next step | status |
 |---|---|---|---|---|---|
-| 1 | AAA gas daily/weekly ladders vs EIA persistence | free, EIA reachable, about 1,000 requests | 8% | AAAGAS1 protocol | running Nov 10 |
+| 1 | AAA gas daily ladder vs persistence (built from the ladders themselves, no EIA needed) | done | 8% | AAAGAS1: FALSIFIED, M0 PF 0.49 n 82, M1 0.47 n 86 | closed Nov 10 |
 | 2 | Mentions markets: calibration by series group | free, about 1,200 requests | 10% | MENT1 protocol | running Nov 10 |
 | 3 | Cheap wings of monthly/weekly commodity and foreign-index ladders (Kalshi-only) | free, about 1,500 requests | 5% | WING1 protocol | running Nov 10 |
 | 4 | TSA daily checkpoint ladders (KXTSA) vs weekday seasonality of public TSA throughput | free if tsa.gov table reachable (unchecked), history from Kalshi | 8% | probe reachability, register | untested |
