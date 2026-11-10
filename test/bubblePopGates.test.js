@@ -70,7 +70,10 @@ gates.P2 = () => {
     assert.ok(m, name + ' exists');
     assert.ok(!/(content|font-size|width|height|top|left|margin|padding)\s*:/.test(m[1].replace(/animation-timing-function[^;]*;/g, '')), name + ' only moves transform, opacity or the stroke');
   }
-  assert.ok(!/requestAnimationFrame[\s\S]{0,300}textContent|countUp|count-up|\btween\b/i.test(html), 'no number counts up');
+  // ON PURPOSE (Nov 10, 2026, the owner): the Strategies page's profit factor figures count up. That one block is fenced by STRAT-ANIM markers in index.html and its scope is pinned by strategiesAnimationGates.test.js; everywhere else in the page the rule still holds.
+  const rest = html.replace(/\/\* STRAT-ANIM-BEGIN[\s\S]*?STRAT-ANIM-END \*\//, '');
+  assert.ok(rest.length < html.length, 'the fenced block exists');
+  assert.ok(!/requestAnimationFrame[\s\S]{0,300}textContent|countUp|count-up|\btween\b/i.test(rest), 'no number counts up outside the Strategies page block');
 };
 
 // A page's entrance plays once per show: the class is taken off after the animation, so the minute's re-render of a chart or a card never replays it, and nothing is added when motion is reduced.

@@ -41,6 +41,7 @@ function main() {
     var window = { scrollTo: function(x, y){ SCROLL_CALLS.push([x, y]); } };
     var history = { replaceState: function(){} };
     function kalshiOnShow(){}
+    var kalshiStratAnim = { pending: false }; function kalshiStratAnimStop(){}
     function kalshiOnHide(){}
     function renderDataCenter(){}
     var kalshiWatching = false;
