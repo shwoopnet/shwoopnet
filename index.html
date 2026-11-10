@@ -979,8 +979,10 @@
   .sp-b-ok{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); }
   .sp-feed{ font-size:11px; color:var(--muted); border-left:2px solid var(--paper); padding:2px 0 2px 8px; overflow-wrap:anywhere; margin-top:-2px; }
   .sp-rlist{ list-style:none; margin:0; padding:0; border:1px solid var(--border); border-radius:12px; }
-  .sp-rrow{ display:grid; grid-template-columns:auto minmax(0,1fr) auto; gap:0 10px; align-items:baseline; padding:8px 12px; border-top:1px solid var(--border); font-size:12px; min-width:0; } .sp-rrow:first-child{ border-top:0; }
-  .sp-rname{ font-weight:700; white-space:nowrap; } .sp-rnote{ color:var(--muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; min-width:0; } .sp-rpf{ color:var(--muted); white-space:nowrap; font-variant-numeric:tabular-nums; } .sp-rpf b{ color:inherit; font-weight:700; }
+  .sp-rrow{ display:grid; grid-template-columns:minmax(0,1fr) 64px 56px; gap:0 12px; align-items:center; padding:11px 14px; border-top:1px solid var(--border); font-size:14px; line-height:1.3; min-width:0; } .sp-rrow:first-child{ border-top:0; }
+  .sp-rhead{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:9px; padding-bottom:9px; } .sp-rhead span:nth-child(n+2), .sp-rpfv, .sp-rn{ text-align:right; }
+  .sp-rwho{ display:flex; flex-direction:column; gap:2px; min-width:0; } .sp-rname{ font-weight:700; font-size:15px; } .sp-rnote{ color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
+  .sp-rpfv{ font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; } .sp-rn{ color:var(--muted); font-variant-numeric:tabular-nums; }
   .sp-ret-t{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
   .sp-lane-retired > label.sp-lane-h{ cursor:pointer; min-height:44px; } .sp-lane-retired > label.sp-lane-h::after{ content:'\25BE'; margin-left:auto; color:var(--muted); } .sp-ret-t:checked + label.sp-lane-h::after{ content:'\25B4'; }
   .sp-ret-t:focus-visible + label.sp-lane-h{ outline:2px solid var(--paper); outline-offset:2px; }
@@ -4520,8 +4522,9 @@ kalshiStatusTick();
           badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), feed: twinOf(r.id) ? 'Feeds the live strategy of the same name' : '' });
       }).join('');
     }
-    var ret = '<ul class="sp-rlist">' + model.retired.rows.map(function(r){
-      return '<li class="sp-rrow"' + (r.note ? ' title="' + esc(r.note) + '"' : '') + '><span class="sp-rname">' + esc(r.name) + '</span><span class="sp-rnote">' + esc(r.note || '') + '</span><span class="sp-rpf">' + (typeof r.pf === 'number' ? 'PF <b>' + esc(r.pf.toFixed(2)) + '</b> n ' + esc(String(r.n)) : 'no cash record') + '</span></li>';
+    // Easy to read (the owner, Nov 10, 2026: "make easily readable"): a headed list, one strategy per row, the name and why it ended on the left and the cash PF and trade count in their own right hand columns, larger text and room between rows.
+    var ret = '<ul class="sp-rlist"><li class="sp-rrow sp-rhead" aria-hidden="true"><span>Strategy</span><span>Cash PF</span><span>Trades</span></li>' + model.retired.rows.map(function(r){
+      return '<li class="sp-rrow"><span class="sp-rwho"><span class="sp-rname">' + esc(r.name) + '</span>' + (r.note ? '<span class="sp-rnote">' + esc(r.note) + '</span>' : '') + '</span><span class="sp-rpfv">' + (typeof r.pf === 'number' ? esc(r.pf.toFixed(2)) : 'n/a') + '</span><span class="sp-rn">' + (typeof r.pf === 'number' ? esc(String(r.n)) : '-') + '</span></li>';
     }).join('') + '</ul>';
     var stages = kalshiStratLifecycle(ids, sids, model.retired.rows.map(function(r){ return r.name; }));
     var lane = function(key, st, body, extra){
