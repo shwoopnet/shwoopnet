@@ -37,7 +37,7 @@ gates['EV1 the registry entry is exactly the registered probe: eight L1-free mar
     forwardReadDate: '2026-12-07', reviewedAt: '2026-11-05',
   });
   assert.ok(slot.validateSlotStrategy(ev).ok, JSON.stringify(slot.validateSlotStrategy(ev).errors));
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-05');
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-10');
   assert.ok(SERIES.every((s) => !live.L1_SERIES.includes(s)), 'none of its markets is an L1 market, so it can never sit against an L1 position');
   assert.ok(!(slot.SLOT_LIMIT_SLIP && Object.prototype.hasOwnProperty.call(slot.SLOT_LIMIT_SLIP, 'EVENT830')), 'no slip: the limit is the price it sees, never above 50c');
   const readme = fs.readFileSync(path.join(root, 'kalshi-scalper', 'README.md'), 'utf8');
@@ -109,7 +109,7 @@ gates['EV5 one contract: whatever is asked for, one contract is the most the gat
 };
 
 gates['EV6 holding to settlement and the eight markets are this id\'s alone: another strategy copying them is refused'] = () => {
-  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830']);
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'XRPYES10']);
   const copy = (o) => Object.assign(JSON.parse(JSON.stringify(ev)), o);
   assert.ok(slot.validateSlotStrategy(copy({})).ok);
   assert.ok(!slot.validateSlotStrategy(copy({ id: 'EVENT831' })).ok, 'another id may not hold, use the eight markets or the calendar');
