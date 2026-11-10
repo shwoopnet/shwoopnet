@@ -19,3 +19,12 @@ Lifetime cost, change since Nov 6 evening: main $1,102.86 (+$89.91, context 294k
 Output tokens lifetime: V2 11.2M, Refinement 3.3M, main 10.2M (no earlier entry to difference).
 What it bought since Nov 6 (from the chats' own reports): V2 closed SINGLELEG1/2/3, NFLPC1, HISTLAD1, LADCONV1 and the GC/NQ FUT2 run (all zero survivors, holdouts unread), plus the futures cost spec and prop firm memo; Refinement ran nightly reviews and hourly watches, no actionable finding. Biggest habit: Refinement is at 697k context and woken hourly (each wake re-reads it); its handoff file is current, so a fresh session is cheap to propose before the 784k compaction.
 Calls: none (0 of 5). The Nov 7 directive says do not slow research; both research chats have full queues, so no idle chat to redirect and no brief to approve.
+
+## 2026-11-10 morning US Central (COO run in main, 7:40 AM)
+Rate limit: allowed, not on overage, all chats.
+Lifetime cost, change since Nov 9 morning: main $1,147.88 (+$45.02, context 316k of 1M); V2 $969.71 (+$21.67, context 330k, was 578k, so it compacted); Refinement $457.35 (+$63.40, context 668k of the 784k threshold, was 697k).
+Output tokens lifetime, change: main 10.49M (+0.30M), V2 11.42M (+0.22M), Refinement 4.05M (+0.75M). Flat plan per the Nov 7 directive: logged, not a reason to slow.
+What it bought since Nov 9: V2 closed CHEAPEXIT1 (falsified, 8 cells PF 0.42 to 0.66), OPEN1H (46 of 600 dev markets quotable, shortlist 0) and the scoreboard census (no untested family), and ran regime and independent-window checks; Refinement ran independent windows for the shadows and OICORE (27 triggers, PF 1.59, NOT_ENOUGH_DATA) and the gold exit vs hold test (hold 1.60 vs 25c line 1.51). Five shadow rules were retired before their first row (ETHL1, ETHNO6, BTCHI6, BTCHI10, XRPFAV10) in PR 753.
+Biggest habit: Refinement at 668k context woken hourly re-reads it each time; its handoff file is current, so a fresh session is cheap to propose before the 784k compaction (recommend, not done).
+Idle chat check: V2 closed all four directions sent (a to d) empty and has no workers; no untested family on the census. It holds two dated items (Nov 15 list, NBA lag about Nov 22). Not redirected: the Nov 7 directive says keep the hourly check-in, and no brief passes the checklist to approve.
+Calls: none (0 of 5). Nothing for the owner from this run.
