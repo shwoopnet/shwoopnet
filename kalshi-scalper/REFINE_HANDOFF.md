@@ -37,3 +37,9 @@ State: hourly check-in trigger trig_017HTDZNKWfyBephf72bqcaG (hourly again). OIC
 - CASH BASIS: recompute wins and losses from avgFill and avgFee (stored settledPnl is limit-booked before PR 741). refine_tools/scorer.py does this; retraction 17.
 - Weekly CANDIDATE SUPPLY to main, Sunday evening CT (trigger trig_01DCtYPSDKdKM3o8o5Sdm2Sb): 3 to 5 live-structure candidates, cash PF and n, held-out, N, code needs, prior.
 - Kill and return tables for the lifecycle spec were sent Nov 9 (REFINE_STATUS entry 11:38 AM CT).
+
+## Nov 10, 2026 (1:35 AM CT) additions
+- PR 753 registry: ETHNO6 (low prior), BTCHI6, XRPYES10, GOLDALL, XRPFAV6, GOLDHI6S. ETHL1, BTCHI10 and XRPFAV10 dropped. RULE from main: resend gated or new shadow rules only after a rerun on a window NOT used to pick the cell (V2's Jun to Aug hist15 data is the independent window for Bitcoin and gold; not in this checkout).
+- Candle model: use UNROUNDED fee 0.07*p*(1-p) and +0c entry (matches live fills; +1c is harsher than live). Retractions 17 (stored settledPnl is limit-booked) and 18 (fee rounding) in REFINE_RETRACTIONS.md.
+- OICORE: ladder stepped to 10, stop $50, room $14.13 at 04:27Z; README entry draft (re-arm options A and B) in refine_tools/OICORE_README_ENTRY_DRAFT.md, mechanics in OICORE_REARM_MECHANICS.md; owner decides.
+- Tools in refine_tools/: scorer.py, nightly.py, goldtrip.py, shadow_read.py, rise3_split.py. Scheduled: nightly review 06:17Z, EVENT830 recheck 11:05Z and CPI read 13:50Z (Nov 10), weekly candidate supply Sundays 7:17 PM CT (trig_01DCtYPSDKdKM3o8o5Sdm2Sb). Candle pullers (S/w_pull/pull.py, detached, 3 h cap) die when the session worker restarts: check `pgrep -fa pull.py` and restart.
