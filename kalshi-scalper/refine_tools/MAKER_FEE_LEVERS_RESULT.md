@@ -11,3 +11,6 @@ CHEAPEST FIRST TEST (shadow only, no order): R6 replay on gold, one rule: rest a
 
 ## W-MAKERREPLAY1 outcome (Nov 10)
 Shadow replay, 13 days of R6 gold, 148 signals: taker PF 1.27 (+0c) and 1.08 (+1c); maker-filled 1.16 at 25 percent maker fee; missed set 3.45; fill rate 66.9 percent. FAIL on all three registered bars. Adverse selection visible. Do not build resting entries for gold.
+
+## W-BAND945 outcome (Nov 10)
+KILL for floors 0.945 and 0.93. The live 94.5 to 97c PF 2.71 is a live-only slice that does not repeat in history. A 0.945 floor loses net dollars in every period (history IND 1.60 to 1.13 PF, 0.945 floor given-up contracts still earn PF 1.14 to 1.54). Both fee levers (resting entries, price floor) are closed.
