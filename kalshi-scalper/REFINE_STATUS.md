@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 08:59 AM CT (14:59Z): W-POSTREL: post-release 8:45 ET window, NOT_ENOUGH_DATA; all-weekday lead added to backlog
+
+Registered first (S/w_postrel), N +4. 703 usable windows Oct 11 to Nov 10, EDT/EST-aware; release days with data Nov 5, 6, 10 only. Cheap side, 6m look, unrounded fee, PF (n) +0c / +1c: POST release days 0.86 (17) / 0.81: NOT_ENOUGH_DATA; POST other weekdays 1.49 (109) / 1.40; control windows (8:15, 9:00, 9:15 ET) release days 0.74 (65), other weekdays 0.93 (353). Bootstrap 95 percent interval of mean P/L difference at +0c: POST vs control non-release -0.007 to +0.176 (includes zero); release POST vs non-release POST -0.28 to +0.12. Favourite comparison: release POST inf (6), other POST 0.62 (38). 8:45 ET windows look better than controls everywhere but the interval includes zero; other weekdays contain unlisted October releases. Needs about 3 more release days. Backlog item 13 added (all-weekday 8:45 ET cheap side, independent window next).
+
 ## 2026-11-10 08:34 AM CT (14:34Z): IDEA_BACKLOG.md created (12 ranked ideas, one file)
 
 kalshi-scalper/refine_tools/IDEA_BACKLOG.md: ranked backlog per the owner's standing rule (at least 3 new pre-registered ideas a week, one file, top up when under 10 untested): maker entries (R6 replay from Nov 14), post-release window (data pull running), gold spot-gap filter (Kraken PAXG one-minute), silver L1 shadow, volume-surge analogue of OICORE, Kalshi vs Polymarket spread, gold 15m vs hourly ladder, ETH-scaled OICORE (re-read about Dec 1), fee batching, calendar regime at n 50, V2 event markets, settlement-edge.
