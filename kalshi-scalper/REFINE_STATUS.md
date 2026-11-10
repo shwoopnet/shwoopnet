@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 10:41 AM CT (16:41Z): W-POSTREL2: 8:45 ET cheap-side lead FAILS on an independent window
+
+Registered first (S/w_postrel2), N +2 (about 800). PF (n) POST 8:45 ET vs CONTROL (8:15, 9:00, 9:15 pooled): +0c 0.68 (143) vs 0.66 (452), mean P/L -0.057 vs -0.065, difference interval -0.061 to +0.081; +1c 0.64 vs 0.62. Bar PF 1.3, n 40, interval above zero: PF and interval miss. Coverage: weekdays before 2026-10-11 (silver, copper, WTI, HYPE, BNB from 2026-08-28; EURUSD, GBPUSD, USDJPY from 2026-09-24; windows after 2026-09-11 from the live endpoint, historical cutoff 2026-09-11); 2 h cap stopped at 760 of 1,836 windows. Control PF below 1 too: these markets lose on the cheap side generally. Backlog item 13 closed.
+
 ## 2026-11-10 10:28 AM CT (16:28Z): W-VOLSURGE: NOT_ENOUGH_DATA (volume not stored in the cached candle files)
 
 Registered V1 to V4 first (N +4, about 798): surge = vol(c-180) + vol(c-120), thresholds p95 and p90 of the first half by date, cheaper side 0.08 to 0.50, held-out half and the Jun to Jul independent window. btc.jsonl keeps only e, oi, ac, bc per candle and w_indep4/oi.jsonl only [oi, bid, ask] (pull.py line 44 discards volume), so no PF was computed. Next step: re-pull the Bitcoin candles and the Jun to Jul window with the volume field, then run the registration unchanged. Backlog item 5 updated.
