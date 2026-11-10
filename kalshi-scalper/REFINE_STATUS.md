@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 12:21 AM CT (06:21Z): Nightly every-trade review, CT Nov 9 (cash basis)
+
+PF cash (n, net): gold L1 day 1.78 (24, +10.02), 7d 0.90 (85, -9.24), 30d 1.29 (281, +48.41), since start 1.36 (318, +59.34); OICORE day 0.95 (5, -0.41), 7d 1.01 (62, +0.61), 30d 1.35 (80, +28.99), since start 1.35; EVENT830 5 trades 0 wins -0.85. Flags: 1 gold early sell (22:09 CT GOLD 2315 NO x17 paid 0.860, exit pnl -12.83: the 25c line at gold size, a loss over 5 dollars, not a rule breach); no oversize order; 9 no-fills (gold 7, OICORE 2); cheap_skipped 2 (price 0.06 and 0.05, floor 0.08). Gold tripwire 11 of 100, cumulative cash PF 0.88 (-1.59), latest rolling-60 0.87, windows below 0.7 since start 0. OICORE headroom (booked, 80 fills): drawdown from peak 36.49, stop 50, room 13.51 (27 percent), net kill room about 19.8, streak small. Trades: 24 gold (23 wins, 1 early sell) and 5 OICORE (1 win +7.27, 4 losses).
+
 ## 2026-11-10 12:12 AM CT (06:12Z): W-INDEP: BTCHI6 on an independent Jun to Jul window (public historical endpoints)
 
 Registered first (S/w_indep): 16 pre-chosen UTC dates (June 3, 7, 10, 14, 17, 21, 24, 28; July 5, 7, 12, 14, 19, 21, 26, 28), sample rule fixed before outcomes; corrected unrounded fee; hold to settlement (25c exit not modelled). 608 of 1,536 markets pulled so far (40 percent, balanced across the 16 dates; the pull continues, restart command in S/w_indep/STATUS.md). BTCHI6 (favourite 0.92 to 0.97, 6m look): +0c PF 1.416 (n 137, 132 wins, net +1.43c per contract); +1c PF 1.143 (n 137, +0.5c). BTCHI10: +0c 0.751 (n 27), +1c 0.62: fails again, n below 40. BTCHI6 clears PF 1.3 and n 40 only at +0c; thin (5 losses at +0c). N unchanged.
