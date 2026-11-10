@@ -678,7 +678,8 @@ exports.kalshiLiveArmed = onSchedule(
           // they go into a copy of the list, never into what runL1Tick read. On every other minute this adds no read. One series failing is skipped, never allowed to stop the rest.
           let slotQuotes = market.quotes;
           try {
-            const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).filter((x) => !market.quotes.some((q) => q && q.series === x));
+            // AUDFAV6 (Nov 10, 2026) trades every window on a market L1 does not read: its series joins the same list, only in the minute or two before its entry span, and only if not already read (slotRollingSeriesDue).
+            const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).concat(slotLib.slotRollingSeriesDue(slotLib.activeSlotStrategies(), now)).filter((x, i, a) => a.indexOf(x) === i).filter((x) => !market.quotes.some((q) => q && q.series === x));
             if (due.length) {
               slotQuotes = market.quotes.slice();
               for (const series of due) {

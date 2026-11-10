@@ -117,3 +117,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 ## XRPYES10 (draft, Nov 10, 2026)
 
 A third second-slot probe, the owner granted the favourite-and-hold exception for it on Nov 10 (live when merged and deployed): XRP 15 minute markets, buy YES at 88c to 97c about 10 minutes before the close, 3 contracts, held to settlement, stops itself after 3 losses in a row or a net loss of $15 from 20 fills. Full pre-registration in `kalshi-scalper/README.md#SLOT-XRPYES10`.
+
+## AUDFAV6 (Nov 10, 2026)
+
+A fourth second-slot probe, the owner granted the favourite-and-hold exception for it on Nov 10 (live when merged and deployed): AUD/USD 15 minute markets, buy the favourite side at 88c to 97c about 6 minutes before the close, 3 contracts, held to settlement, stops itself after 3 losses in a row or a net loss of $15 from 20 settled trades. Below the research bar (59 cash trades, PF 1.37, no counterparty, best of several probe markets). AUD/USD stays off L1. It needs money on exchange shard 0; without it the bot sends nothing. Pre-registration: `kalshi-scalper/README.md#SLOT-AUDFAV6`.
