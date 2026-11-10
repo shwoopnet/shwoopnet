@@ -29,7 +29,7 @@ function fn(name) {
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + names.map(fn).join('\n');
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + names.map(fn).join('\n');
 const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -165,6 +165,19 @@ gates.SB11 = () => {
   const body = fn('renderKalshiBoard');
   assert.ok(/kalshiMoney/.test(body) && !/toFixed\(2\)[^;]*\$|'\$'/.test(fn('kalshiBoardHtml') + fn('kalshiBoardKill')), 'no dollar sign typed into the board text');
   assert.ok(/kalshiShadowCache\.error \? 'unreadable'/.test(body), 'a failed read is a state, not an exception');
+};
+gates.SB13 = () => {
+  // the owner's standing rule (Nov 10, 2026): every strategy shows IMPLEMENT, KILL and RETURN; a strategy without a written one says so instead of hiding the gap
+  assert.ok(P.KAL_BOARD_LIVE.every((s) => Array.isArray(s.rules) && s.rules.length === 3), 'every live strategy carries three rules');
+  assert.ok(/Never automatic/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'OICORE').rules[2]), 'OICORE return is the owner choice A');
+  assert.ok(/Not written yet/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'the missing EVENT830 return rule is shown as a gap');
+  const now = Date.UTC(2026, 10, 10, 18, 0);
+  const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
+  const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
+  assert.strictEqual((h.match(/<summary>Rules<\/summary>/g) || []).length, 3, 'three live strategies have a Rules line');
+  const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
+  assert.strictEqual((ok.match(/<summary>Rules<\/summary>/g) || []).length, 4, 'every shadow rule has a Rules line');
+  assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
 };
 gates.SB12 = () => {
   // no timer, no write, no storage: the board only reads, and the shadow read is cached for ten minutes without a retry loop
