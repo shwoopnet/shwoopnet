@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 01:06 AM CT (07:06Z): W-INDEP2 (interim): XRP shadow rules on an independent earlier window
+
+Registered first (S/w_indep2): 12 UTC dates (2026-09-05; 08-26, 08-19, 08-12, 08-05; 07-26, 07-19, 07-12, 07-05; 06-26, 06-19, 06-12), XRP history exists back to at least 2026-04-04. Scored at 401 of 1,152 windows; fetch order is by time of day so closes are only 00:00 to 08:15 UTC (time-of-day skew). PF (n) 0c / +1c: XRPYES10 1.62 (20) / 1.41 (20) n under 40, undecided; XRPFAV6 0.99 (42) / 0.88 (42) FAILS the 1.3 bar, does not hold on independent data; XRPFAV10 2.00 (20) / 1.78 (20) n too small. Pull continues (restart command in S/w_indep2/STATUS.md); rescore with python3 -I score.py. N unchanged.
+
 ## 2026-11-10 12:21 AM CT (06:21Z): Nightly every-trade review, CT Nov 9 (cash basis)
 
 PF cash (n, net): gold L1 day 1.78 (24, +10.02), 7d 0.90 (85, -9.24), 30d 1.29 (281, +48.41), since start 1.36 (318, +59.34); OICORE day 0.95 (5, -0.41), 7d 1.01 (62, +0.61), 30d 1.35 (80, +28.99), since start 1.35; EVENT830 5 trades 0 wins -0.85. Flags: 1 gold early sell (22:09 CT GOLD 2315 NO x17 paid 0.860, exit pnl -12.83: the 25c line at gold size, a loss over 5 dollars, not a rule breach); no oversize order; 9 no-fills (gold 7, OICORE 2); cheap_skipped 2 (price 0.06 and 0.05, floor 0.08). Gold tripwire 11 of 100, cumulative cash PF 0.88 (-1.59), latest rolling-60 0.87, windows below 0.7 since start 0. OICORE headroom (booked, 80 fills): drawdown from peak 36.49, stop 50, room 13.51 (27 percent), net kill room about 19.8, streak small. Trades: 24 gold (23 wins, 1 early sell) and 5 OICORE (1 win +7.27, 4 losses).
