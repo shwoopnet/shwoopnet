@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 05:07 AM CT (11:07Z): EVENT830 CPI forex recheck (5:07 AM CT Nov 10)
+
+KXEURUSD15M, KXGBPUSD15M and KXUSDJPY15M 26NOV100830-30 now exist (status initialized, close 2026-11-10T13:30:00Z, no quotes yet, like silver and BNB). Nothing found that would stop EVENT830 firing at 13:27Z. CPI read at 13:50Z.
+
 ## 2026-11-10 03:53 AM CT (09:53Z): W-INDEP4 update: OICORE independent window 1,200 of 1,536 markets
 
 Triggers at 86,300: n=20 (need 40): PF 1.07, win 20 percent, +1.09c per contract at +0c; PF 0.95, -0.76c at +1c (n=22). OI rise median 39.4k, p90 92k, p99 150k. Exploratory p95-equivalent threshold 113.8k: 5 triggers PF 6.43 (noise). Earlier interim (14 triggers, PF 0.74) moved to flat as n grew. NOT_ENOUGH_DATA; the full 1,536 would give about 25 triggers.
