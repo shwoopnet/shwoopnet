@@ -1771,6 +1771,7 @@
                 <div class="changelog-day">Nov 10</div>
                 <ul class="changelog-list">
                   <li>Trading: a fourth small probe in the second strategy slot, KESTREL (the owner granted the favourite-and-hold exception for it on Nov 10; it trades when merged and deployed): 3 contracts of the AUD/USD favourite at 88c to 97c about 6 minutes before the close, held to settlement, with its own stop of 3 losses in a row or a $15 net loss; it needs money on exchange shard 0</li>
+                  <li>Bot: a sixth shadow rule, LANTERN, logs what L1's rule would buy on Ethereum at the 6 minute look with no smooth gate (the owner: Ethereum comes back through shadow first; a pass is not expected, the candle recheck found it under 1.0 at +1c); log only, no order, no money</li>
                   <li>Strategies page is now a flow board (the owner: the tiles were bland): strategies are cards in three lanes, Shadow then Live then Retired, with lines joining a shadow rule to the live strategy it became (XRPYES10) and retired cards back to where they ended, plus a status badge on every card (COLLECTING, HEALTHY, WATCH, NEAR KILL, ARMED, RETIRED). Each card keeps the cash profit factor, the kill gauge, the trend line and the Details and Rules. On a phone the lanes stack, with Retired folded. Page only, no change to any number or to the bot.</li>
                   <li>Strategies flow board, polish round 1 (the owner): the lanes now read Live, Shadow, Retired (left to right on a desktop, top to bottom on a phone); every card opens with a ring dial for the cash profit factor (the figure inside, an arc filling on a 0 to 2 scale, a tick at 1.0) and a kill gauge, and Details holds the trend line, sizing ladder and Implement, Kill and Return; shadow cards are compact (ring, name, badge, signals bar); one line joins a shadow rule to its live twin and one trunk joins Live to Retired, which is a compact list folded by default.</li>
                   <li>Trading: gold now has a coded kill and return (the owner, Nov 10; draft until merged and deployed). It switches gold off by itself, with no automatic restart, if gold falls $58.75 (fixed, 6% of the $979.25 base when written) below its own peak or is down $20 after 40 trades; three early warnings (a weak run of 60 or 100 trades, three early sells in 40) only tell you. An open gold position is still sold at the 25c line, and only a reviewed edit brings gold back</li>
@@ -4104,7 +4105,8 @@ kalshiStatusTick();
     { id: 'XRPYES10', rule: 'XRP: buy YES at 88c to 97c, 10 minutes left' },
     { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' },
     { id: 'XRPFAV6', rule: 'XRP: the favourite side at 88c to 92c, 6 minutes left, spread 2c or less' },
-    { id: 'GOLDHI6S', rule: 'Gold: the favourite side at 92c to 97c, 6 minutes left, spread 2c or less' }
+    { id: 'GOLDHI6S', rule: 'Gold: the favourite side at 92c to 97c, 6 minutes left, spread 2c or less' },
+    { id: 'LANTERN', rule: 'Ethereum: the favourite side at 88c to 97c, 6 minutes left, no smooth gate' }
   ];
   var KAL_BOARD_RETIRED = { asOf: 'Nov 10', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
     { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },

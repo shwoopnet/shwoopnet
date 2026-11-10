@@ -155,7 +155,7 @@ gates.SB11 = () => {
   const model = (state) => ({ live: lv, deck: { state, rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED });
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
-  assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
+  assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 5, 'every ON DECK rule says the log is not readable');
   assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /class="sp-bar"/.test(P.kalshiBoardHtml(model('ok'), esc, money)) && !/class="sp-bar"/.test(masked), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
@@ -175,7 +175,7 @@ gates.SB13 = () => {
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 5, 'five live strategies have Implement, Kill and Return');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
+  assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 5, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
 };
 gates.SB12 = () => {
