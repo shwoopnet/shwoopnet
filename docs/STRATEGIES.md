@@ -113,4 +113,4 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 
 ## XRPYES10 (draft, Nov 10, 2026)
 
-A third second-slot probe, not live until the owner approves an explicit favourite-and-hold exception: XRP 15 minute markets, buy YES at 88c to 97c about 10 minutes before the close, 1 contract, held to settlement, stops itself after 3 losses in a row or a net loss of $5 from 20 fills. Full pre-registration in `kalshi-scalper/README.md#SLOT-XRPYES10`.
+A third second-slot probe, the owner granted the favourite-and-hold exception for it on Nov 10 (live when merged and deployed): XRP 15 minute markets, buy YES at 88c to 97c about 10 minutes before the close, 3 contracts, held to settlement, stops itself after 3 losses in a row or a net loss of $15 from 20 fills. Full pre-registration in `kalshi-scalper/README.md#SLOT-XRPYES10`.

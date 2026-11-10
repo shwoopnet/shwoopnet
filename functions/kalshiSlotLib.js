@@ -169,15 +169,15 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 40, net: 0 }) }),
     forwardReadDate: "2026-12-07", reviewedAt: "2026-11-05",
   }),
-  // XRPYES10 (Nov 10, 2026, DRAFT: live only after the owner's explicit favourite-and-hold exception; pre-registration kalshi-scalper/README.md#SLOT-XRPYES10). XRP 15 minute markets: buy YES when it is 88c to 97c,
-  // 9.5 to 10.7 minutes (640 to 570 s) before the close, never NO, 1 contract, held to settlement (no 25c stop). BELOW the research bar: selected from about 120 cells, no forward signal yet, and live XRP under L1 was
-  // profit factor 0.49 over 86 fills. Kill rules: 3 losses in a row, or net under -$5 at any point from 20 settled fills. Worst single loss about $0.97.
+  // XRPYES10 (Nov 10, 2026, the owner granted the favourite-and-hold exception for this strategy only on Nov 10, 2026; it goes live when this is merged and deployed, there is no other switch; pre-registration kalshi-scalper/README.md#SLOT-XRPYES10). XRP 15 minute markets: buy YES when it is 88c to 97c,
+  // 9.5 to 10.7 minutes (640 to 570 s) before the close, never NO, 3 contracts (the owner chose 3 on Nov 10, inside today's caps), held to settlement (no 25c stop). BELOW the research bar: selected from about 120 cells, no forward signal yet, and live XRP under L1 was
+  // profit factor 0.49 over 86 fills. Kill rules: 3 losses in a row, or net under -$15 at any point from 20 settled fills (3 contracts: about -$2.9 a loss). Worst single loss about $2.92.
   Object.freeze({
     id: "XRPYES10", readme: "kalshi-scalper/README.md#SLOT-XRPYES10", series: Object.freeze(["KXXRP15M"]),
     entry: Object.freeze({ sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }),
-    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 1,
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
-    killRules: Object.freeze({ maxConsecutiveLosses: 3, minNet: Object.freeze({ afterFills: 20, net: -5 }) }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 3, minNet: Object.freeze({ afterFills: 20, net: -15 }) }),
     forwardReadDate: "2026-12-14", reviewedAt: "2026-11-10",
   }),
   // FLOW1 (seller-flow probe, live Nov 4, 2026) was REMOVED the same day after the research session's FLOW1 history test (2,568 windows, low-flow PF 1.13 to 1.23, low minus high -3.6c,

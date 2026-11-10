@@ -1,7 +1,7 @@
 'use strict';
-// XR1 to XR6: XRPYES10, a capped probe in the second slot (Nov 10, 2026; kalshi-scalper/README.md#SLOT-XRPYES10; DRAFT, live only after the owner's explicit favourite-and-hold exception).
-// Each gate states the consequence: it buys only XRP YES at 88c to 97c in the 570 to 640 s before the close, never NO, one contract, holds to settlement with no 25c stop, latches itself
-// off on 3 losses in a row or a net under -$5 from 20 fills, shares every cap with L1 and the rest of the slot, and nothing stored can enlarge it or lend its permissions to another id.
+// XR1 to XR6: XRPYES10, a capped probe in the second slot (Nov 10, 2026; kalshi-scalper/README.md#SLOT-XRPYES10; the owner's explicit favourite-and-hold exception).
+// Each gate states the consequence: it buys only XRP YES at 88c to 97c in the 570 to 640 s before the close, never NO, three contracts (the owner's choice, Nov 10), holds to settlement with no 25c stop, latches itself
+// off on 3 losses in a row or a net under -$15 from 20 fills, shares every cap with L1 and the rest of the slot, and nothing stored can enlarge it or lend its permissions to another id.
 const assert = require('assert');
 const crypto = require('crypto');
 const fs = require('fs');
@@ -32,9 +32,9 @@ gates['XR1 the registry entry is exactly the registered probe, valid, frozen, on
   assert.deepStrictEqual(JSON.parse(JSON.stringify(xr)), {
     id: 'XRPYES10', readme: 'kalshi-scalper/README.md#SLOT-XRPYES10', series: ['KXXRP15M'],
     entry: { sideRule: 'yes', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 },
-    exit: { holdToSettle: true }, contractsPerOrder: 1,
+    exit: { holdToSettle: true }, contractsPerOrder: 3,
     scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true },
-    killRules: { maxConsecutiveLosses: 3, minNet: { afterFills: 20, net: -5 } },
+    killRules: { maxConsecutiveLosses: 3, minNet: { afterFills: 20, net: -15 } },
     forwardReadDate: '2026-12-14', reviewedAt: '2026-11-10',
   });
   assert.ok(slot.validateSlotStrategy(xr).ok, JSON.stringify(slot.validateSlotStrategy(xr).errors));
@@ -62,9 +62,9 @@ gates['XR2 it fires only for XRP YES at 88c to 97c inside 570 to 640 s before th
   assert.strictEqual(slot.slotOrderCheck(input({ ticker: 'KXGOLD15M-26NOV101000-00' })).allowed, false, 'not gold');
 };
 
-gates['XR3 one contract: whatever is asked for, one is the most; it holds to settlement, with no stop, target or 25c line'] = () => {
-  for (const wanted of [1, 2, 5, 10]) { const r = slot.slotOrderCheck(input({ wanted })); assert.strictEqual(r.allowed, true); assert.strictEqual(r.count, 1, 'asked ' + wanted); }
-  assert.ok(slot.slotOrderCheck(input({ limit: 0.97 })).cost <= 1.0, 'the worst single loss is about $1 (97c plus the fee)');
+gates['XR3 three contracts: whatever is asked for, three is the most; it holds to settlement, with no stop, target or 25c line'] = () => {
+  for (const wanted of [1, 3, 5, 10]) { const r = slot.slotOrderCheck(input({ wanted })); assert.strictEqual(r.allowed, true); assert.strictEqual(r.count, Math.min(wanted, 3), 'asked ' + wanted); }
+  assert.ok(slot.slotOrderCheck(input({ limit: 0.97, wanted: 3 })).cost <= 3.0, 'the worst single loss is about $3 (three contracts at 97c plus the fee)');
   assert.deepStrictEqual(Object.keys(xr.exit), ['holdToSettle']);
   assert.strictEqual(xr.exit.holdToSettle, true);
   assert.ok(!('stopBid' in xr.exit) && !('targetBid' in xr.exit) && !('mustExitLeftSec' in xr.exit));
@@ -74,16 +74,16 @@ gates['XR3 one contract: whatever is asked for, one is the most; it holds to set
   assert.ok(!/EXIT_THRESHOLD|0\.25/.test(src.slice(src.indexOf('async function runSlotExits'), src.indexOf('async function slotExitIdle'))), 'the slot exit pass carries no 25c line');
 };
 
-gates['XR4 the kill rules latch it off: 3 losses in a row, or a net under -$5 from 20 fills; a win resets the streak; a late win never un-kills'] = () => {
-  const o = (k, pnl) => ({ strategy: 'SLOT', slotId: 'XRPYES10', ticker: 'KXXRP15M-26NOV11' + (1000 + k) + '-00', series: 'KXXRP15M', side: 'yes', step: 1, count: 1, fillCount: '1', maxCost: 0.95, status: 'filled', settled: true, result: pnl < 0 ? 'no' : 'yes', settledPnl: pnl, ts: Date.parse('2026-11-11T00:00:00Z') + k });
-  const loss = (k) => o(k, -0.95), win = (k) => o(k, 0.05);
+gates['XR4 the kill rules latch it off: 3 losses in a row, or a net under -$15 from 20 fills; a win resets the streak; a late win never un-kills'] = () => {
+  const o = (k, pnl) => ({ strategy: 'SLOT', slotId: 'XRPYES10', ticker: 'KXXRP15M-26NOV11' + (1000 + k) + '-00', series: 'KXXRP15M', side: 'yes', step: 1, count: 3, fillCount: '3', maxCost: 2.9, status: 'filled', settled: true, result: pnl < 0 ? 'no' : 'yes', settledPnl: pnl, ts: Date.parse('2026-11-11T00:00:00Z') + k });
+  const loss = (k) => o(k, -2.9), win = (k) => o(k, 0.15);
   assert.strictEqual(slot.killCheck(xr, [loss(1), loss(2)], null).killed, false);
   assert.strictEqual(slot.killCheck(xr, [loss(1), loss(2), loss(3)], null).killed, true, 'three in a row');
   assert.strictEqual(slot.killCheck(xr, [loss(1), loss(2), win(3), loss(4), loss(5)], null).killed, false, 'a win resets the streak');
   assert.strictEqual(slot.killCheck(xr, [loss(1), loss(2), loss(3), win(4)], null).killed, true, 'a late win never un-kills');
   // 20 fills: 18 wins at +0.05 = +0.90 and 2 spread losses at -0.95 is -1.00, under the floor only with more losses: 6 losses of 20 with no 3 in a row, 14 wins.
   const seq = []; for (let k = 0; k < 20; k++) seq.push(k % 3 === 2 ? loss(k) : win(k));   // 7 losses, 13 wins: -6.65 + 0.65 = -6.00
-  assert.strictEqual(slot.killCheck(xr, seq, null).killed, true, 'net under -$5 after 20 fills');
+  assert.strictEqual(slot.killCheck(xr, seq, null).killed, true, 'net under -$15 after 20 fills');
   assert.strictEqual(slot.killCheck(xr, seq.slice(0, 19), null).killed, false, 'the net rule needs 20 fills');
   assert.strictEqual(slot.killCheck(xr, [], { killedAt: Date.parse('2026-11-12T00:00:00Z') }).killed, true, 'a latch newer than reviewedAt blocks');
   assert.strictEqual(slot.killCheck(xr, [], { killedAt: Date.parse('2026-11-09T00:00:00Z') }).killed, false, 'only a later reviewedAt re-arms');
@@ -129,7 +129,7 @@ gates['XR6 nothing stored can enlarge it: no other id may hold or copy it, the l
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) { try { await fn(); console.log('ok   ' + name.split(' ')[0] + ' ' + name.slice(name.indexOf(' ') + 1)); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
-  // XR2b end to end: through the real tick on a fake exchange, XRP YES in the band sends one YES buy of 1 contract at the price seen.
+  // XR2b end to end: through the real tick on a fake exchange, XRP YES in the band sends one YES buy of 3 contracts at the price seen.
   try {
     const db = { slot: new Map(), locks: new Map(), latches: {}, queue: Promise.resolve() };
     db.tx = (fn) => { const p = db.queue.then(fn); db.queue = p.catch(() => {}); return p; };
@@ -169,7 +169,7 @@ gates['XR6 nothing stored can enlarge it: no other id may hold or copy it, the l
     const good = mk({}, 600);
     await R.runSlotTick(good.args);
     assert.strictEqual(good.posts.length, 1, 'one order');
-    assert.strictEqual(Number(good.posts[0].count), 1); assert.strictEqual(good.posts[0].side, 'bid', 'a YES buy');
+    assert.strictEqual(Number(good.posts[0].count), 3); assert.strictEqual(good.posts[0].side, 'bid', 'a YES buy');
     assert.ok(Math.abs(Number(good.posts[0].price) - 0.92) < 1e-9, 'the limit is the price seen: ' + good.posts[0].price);
     const d = [...db.slot.values()][0];
     assert.strictEqual(d.slotId, 'XRPYES10'); assert.strictEqual(db.locks.get(T).by, 'SLOT:XRPYES10');
