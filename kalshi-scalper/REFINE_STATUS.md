@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 09:33 AM CT (15:33Z): W-SPOTGOLD1: gold spot-gap filter (PAXG) PASSES the pre-registered bar; stress test started
+
+Registered first (S/w_spotgold), N +2. Spot = Coinbase PAXG-USD 60 s candles (Kraken returns only the latest 720). Coverage: 5,704 gold windows, 16 without a usable quote; of 1,679 GOLDALL favourites 803 had no usable PAXG history (gap over 5 minutes, forward-fill up to 5) so 876 scored. Proxy check: correlation of d with the Kalshi YES mid at the 6m look 0.72 (n 5,113); sign(d) matches the settled result 76 percent of the time. PF (n) per half at +0c, [+1c]: S1 (side = sign(d), model probability minus ask at least 0.02) H1 3.15 (123) [2.71], H2 4.20 (112) [3.59]; ALL H1 1.06 (438) [0.91], H2 1.54 (438) [1.31]; S2 H1 0.74 (271) [0.63], H2 1.07 (279) [0.91]. S1 clears PF 1.3 with n 40 per half at both slips and beats S2 and ALL. Caveats: ranking by spot gap, not a deployable rule; thin loss counts; missing-data bias unchecked. Stress test (W-SPOTGOLD2): missing-data bias, look-ahead audit, weekly and permutation checks, live record join, independent portion before Sep 1.
+
 ## 2026-11-10 09:27 AM CT (15:27Z): Gold tripwire closing (rolling-60 0.73); live paid-band split supports GOLDHI6S
 
 10:26 AM CT Nov 10: gold tripwire 18 of 100 trades, cumulative cash PF 0.71 (-7.16), latest rolling-60 PF 0.73, none below 0.7 yet. Today 2 gold early sells (-12.83 at 22:09 CT Nov 9 GOLD 2315 NO x17 paid 0.860; -12.21 at 08:24 UTC-labelled GOLD 0930 YES x18 paid 0.850). Gold live cash PF by price paid (n, exits): under 0.88 1.44 (26, 3); 0.88-0.92 1.13 (116, 11 exits, 9.5 percent); 0.92-0.97 2.13 (174, 4 exits, 2.3 percent); 0.97+ n 9 no loss. Fill slip: slip at or below -2c PF 2.68 (n36) vs 1.30 (n284): not adverse selection. The 0.92-0.97 live record is the same band as the GOLDHI6S shadow (independent Aug window 1.68 / 1.35). N +4 (four bands), descriptive.
