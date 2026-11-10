@@ -6,7 +6,7 @@ The owner's decision (Nov 10, 2026): gold L1 gets a coded KILL and RETURN. This 
 
 **KILL (hard latch, cash basis, fees included).** Gold L1 stops placing new orders, with no automatic restart, when either rule fires, measured on gold's own settled orders since the re-arm date (`GOLD_KILL.rearmAt`, first value 2026-11-10 00:00 UTC):
 
-1. drawdown from gold's own cash peak of **6% of the sizing base** ($58.75 at the $979.25 base; the peak starts at 0), or
+1. drawdown from gold's own cash peak of **$58.75, a fixed dollar line** (6% of the $979.25 base when written; re-set only by a reviewed code edit when the base grows; the peak starts at 0), or
 2. cash net under **-$20** once **40 trades** have settled since the re-arm.
 
 **ALERT ONLY (no latch, no order change).** Each writes a `gold alert` event (the Bot page notification center shows it as a warning): rolling-60 cash profit factor under 0.7, rolling-100 under 1.0, 3 early sells in the last 40 trades. An alert that stays on is written once, not every minute.
@@ -30,18 +30,18 @@ The owner's decision (Nov 10, 2026): gold L1 gets a coded KILL and RETURN. This 
 
 - **Replay, not stored state.** The checker re-derives the verdict from the orders every minute (the way OICORE's ladder is replayed), so two instances agree and the cache can always be rebuilt. The stored value is only a cache the tick can read for free.
 - **Carrier.** `kalshiLiveControl/sizing.goldKill` = `{ tripped, rearmAt, rule, trippedAt, detail, alerts, half }`. The tick reads the sizing document at the top of every tick already, and its `setSizingState` writes `{...state}` back whole, so the field survives. `runL1Tick` adds no read and no write: `goldKillActive(args.sizingState, series)` is a pure look at what it received.
-- **Sticky.** Within the replay the first breach trips for good, and a stored latch is never cleared by the checker, even if the base later changes so the replay would not trip. The only write that ever clears one is a new generation (a later `rearmAt` in code).
+- **Sticky.** Within the replay the first breach trips for good, and a stored latch is never cleared by the checker. The line is a constant and the replay never reads the sizing base, so a latch lost to a clobber is re-derived identically by the next minute's replay on every instance. The only write that ever clears one is a new generation (a later `rearmAt` in code).
 - **Cash basis.** A win or loss at the close is re-derived with `settledFields` (real fill and fee through `fillCost`); an early sell keeps its stored `settledPnl`; hand-closed and unfilled orders are skipped.
 - **Order of effects.** The latch is written first, the event second, so a failed event write can never leave gold trading.
-- **Read cost.** The checker reuses `makeRecentOrderReader`: the older part of the order list is read once every 15 minutes, then only the last block each minute.
+- **Read cost.** The checker reuses `makeRecentOrderReader` with a fixed start, the re-arm date: orders since `rearmAt` only (never a 30 day read), and the three alerts are computed from that same set (so they need 60 or 100 trades since the re-arm). The older part is read once every 15 minutes, then only the last 30 minutes of orders each minute. Gold places roughly 10 to 15 orders a day, so a 15 minute refresh reads about 100 to 150 documents in the first ten days and about 400 by day 30; with 96 refreshes a day plus a few documents each other minute, the expected read count is about 10,000 a day early on, rising to about 40,000 a day at 30 days (about $0.02 a day at $0.06 per 100K). It only grows until the next re-arm date moves the start forward.
 
 ### Known gaps of D (stated, not hidden)
 
-1. **A clobber race.** If the checker writes the latch between the tick's sizing read and the tick's `setSizingState`, the tick's stale full write can erase it. The next checker run (at most about a minute later) writes it again, because the replay still trips; at most one more gold order could be sent in that gap. The tick only writes sizing when the state changed (a settled order, the weekly review), so it is rare. Making `setSizingState` a merge would close it but would change the fixtures, so it was not done.
+1. **A clobber race (closed in effect).** If the checker writes the latch between the tick's sizing read and the tick's `setSizingState`, the tick's stale full write can erase it. Because the drawdown line is a fixed dollar constant and the replay does not read the base, the next checker run (at most about a minute later) derives the same trip and writes it again, whatever the base is by then; at most one more gold order could be sent in that gap. Making `setSizingState` a merge would close the gap itself but would change the fixtures, so it was not done.
 2. **Lag.** An order settles in the tick (or the exit watch), then the checker sees it within a minute. A gold order placed in that gap is possible but is bounded by the 12% stop, the window cap and the 15 contract size.
 3. **No phone push.** The latch writes a `gold kill` event (critical in the notification center and in the bell) but does not push to the phone; adding it means `kalshiPushLib` and a deploy of the push functions. The Bot page's silent-market warning will also say gold has gone quiet.
-4. **Base.** The 6% line uses the sizing base at check time (`sizing.base`). If it is unreadable the drawdown rule is skipped for that minute and the net rule still runs.
-5. **First value of the re-arm date.** 2026-11-10 00:00 UTC, so gold's earlier trades set no peak.
+4. **The line does not follow the balance.** $58.75 is fixed; if the base grows a lot the line becomes a smaller share of it until a reviewed edit re-sets it. A missing or unreadable base no longer matters (the old fail-open note is gone).
+5. **First value of the re-arm date.** 2026-11-10 00:00 UTC, so gold's earlier trades set no peak and raise no alert.
 6. **Thresholds are untested on a real failure.** Whether 6% and -$20 would have fired on past gold stretches was not replayed here; the lifecycle doc's own warning applies (a Nov 6 rolling-60 dip was followed by 50 trades at PF 99, which is why that rule is an alert, not a latch).
 
 ## Deploy

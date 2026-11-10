@@ -19,11 +19,13 @@ const GOLD_KILL = Object.freeze({
   // Set true in the same edit that re-arms after a KILL (not for the first arming): the first halfSizeFills gold trades after the re-arm go out at half size.
   rearmIsReturn: false,
   halfSizeFills: 30,
-  drawdownFraction: 0.06,        // of the sizing base, measured from gold's own cash peak since rearmAt (the peak starts at 0)
+  // A FIXED dollar line, not a fraction of the moving sizing base: 6% of the $979.25 base when it was written. A line that depends on sizing.base could be loosened by a base that rises
+  // (or is missing) between a trip and a re-derivation, and the tick's full write of the sizing document can erase a fresh latch; with a constant, the next replay re-derives the same trip
+  // on every instance. When the base grows, re-set it by a reviewed code edit. Measured from gold's own cash peak since rearmAt (the peak starts at 0).
+  drawdownDollars: 58.75,
   netFloor: -20,                 // dollars, cash net since rearmAt ...
   netAfterTrades: 40,            // ... once at least this many trades have settled since rearmAt
   alertPf60: 0.7, alertPf100: 1.0, alertEarlySells: 3, alertEarlyWindow: 40,   // ALERT ONLY: they never latch and never change an order
-  historyMs: 30 * 24 * 3600 * 1000,   // how far back the alerts look (the kill reads from rearmAt)
 });
 
 // Is the stored latch in force for this series? Pure; takes the sizing document the tick already read. A latch recorded for an older generation (rearmAt before the code's) is
@@ -60,21 +62,20 @@ function profitFactor(rows) {
   return l > 0 ? w / l : Infinity;   // no losses: not a failing figure
 }
 
-// Replay. orders: any order documents (other series are ignored). base: the sizing base now (null when unreadable: the drawdown rule is then skipped and the net rule still runs).
-function evaluateGold({ orders, base, cfg = GOLD_KILL }) {
+// Replay. orders: any order documents (other series are ignored). Nothing here reads the sizing base: the drawdown line is the fixed GOLD_KILL.drawdownDollars.
+function evaluateGold({ orders, cfg = GOLD_KILL }) {
   const rows = (orders || []).map(goldResult).filter(Boolean).sort((a, b) => a.ts - b.ts);
   const since = rows.filter((r) => r.ts >= cfg.rearmAt);
-  const limit = Number.isFinite(base) && base > 0 ? cfg.drawdownFraction * base : null;
+  const limit = cfg.drawdownDollars;
   let cum = 0, peak = 0, trip = null;
   since.forEach((r, i) => {
     cum += r.pnl; peak = Math.max(peak, cum);
     if (trip) return;   // sticky within the replay: a later win never un-trips
-    if (limit !== null && peak - cum >= limit - 1e-9) trip = { rule: "drawdown", at: r.ts, detail: "gold is $" + (peak - cum).toFixed(2) + " below its own peak since the last re-arm, which reaches the " + (cfg.drawdownFraction * 100) + "% line ($" + limit.toFixed(2) + ")" };
+    if (peak - cum >= limit - 1e-9) trip = { rule: "drawdown", at: r.ts, detail: "gold is $" + (peak - cum).toFixed(2) + " below its own peak since the last re-arm, which reaches the fixed $" + limit.toFixed(2) + " line" };
     else if (i + 1 >= cfg.netAfterTrades && cum < cfg.netFloor - 1e-9) trip = { rule: "net", at: r.ts, detail: "gold is $" + (-cum).toFixed(2) + " down after " + (i + 1) + " trades since the last re-arm, under the -$" + Math.abs(cfg.netFloor) + " line" };
   });
-  // Alerts look at gold's own last trades whatever the re-arm date (they inform, they never act).
-  const all = rows.filter((r) => r.ts >= cfg.rearmAt - cfg.historyMs);
-  const last = (n) => all.slice(-n);
+  // Alerts look at the same bounded set (gold's settled trades since the re-arm; they inform, they never act), so the read is never wider than the kill's own.
+  const last = (n) => since.slice(-n);
   const alerts = {
     pf60: last(60).length >= 60 && profitFactor(last(60)) < cfg.alertPf60,
     pf100: last(100).length >= 100 && profitFactor(last(100)) < cfg.alertPf100,
@@ -91,16 +92,16 @@ const ALERT_TEXT = {
 };
 
 // The checker. All I/O is injected, every failure leaves the stored record as it was (a failed read never trips and never clears). Order of effects: the record is written FIRST, then the
-// event, so a failed event write can never leave the latch unset.
+// event, so a failed event write can never leave the latch unset. A latch erased by the tick's full sizing write is re-derived by the next replay (the line is a constant).
 // io: { now, readOrders(since) -> orders, readSizing() -> doc|null, writeGoldKill(obj) (merge into the sizing doc's goldKill), logEvent(e) }
 async function runGoldKillCheck(io, cfg = GOLD_KILL) {
   const { now } = io;
   let orders, sizing;
-  try { orders = await io.readOrders(Math.min(cfg.rearmAt, now - cfg.historyMs)); sizing = await io.readSizing(); }
+  // bounded: only orders since the re-arm date are read
+  try { orders = await io.readOrders(cfg.rearmAt); sizing = await io.readSizing(); }
   catch (e) { return { skipped: "unreadable" }; }
   if (!Array.isArray(orders)) return { skipped: "unreadable" };
-  const base = sizing && Number.isFinite(Number(sizing.base)) ? Number(sizing.base) : null;
-  const ev = evaluateGold({ orders, base, cfg });
+  const ev = evaluateGold({ orders, cfg });
   const stored = sizing && sizing.goldKill && typeof sizing.goldKill === "object" ? sizing.goldKill : null;
   const sameGen = Boolean(stored && Number(stored.rearmAt) === cfg.rearmAt);
   const active = goldKillActive(sizing, cfg.series, cfg);

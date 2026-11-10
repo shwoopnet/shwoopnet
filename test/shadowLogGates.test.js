@@ -75,7 +75,8 @@ gates.SH4 = () => {
   const rules = read('firestore.rules');
   const m = rules.match(/match \/kalshiShadowRows\/\{id\} \{([\s\S]*?)\}/);
   assert.ok(m && /allow read: if isAdmin\(\)/.test(m[1]) && /allow write: if false/.test(m[1]), 'the log is admin read and no client write');
-  assert.ok(!/kalshiShadowRows/.test(read('index.html')), 'the page does not read the shadow log (the scorer will, in a later pull request)');
+  // Changed Nov 9, 2026 on purpose: the Strategy board's ON DECK rows read the log (read only, admin rule). It may only READ it: no write call on the collection.
+  assert.ok(!/(setDoc|updateDoc|addDoc|deleteDoc)\([^)]*kalshiShadowRows/.test(read('index.html')), 'the page may read the shadow log but never write it');
   for (const f of ['kalshiLiveLib.js', 'kalshiSlotLib.js', 'kalshiSlotRunLib.js']) assert.ok(!/kalshiShadowRows|kalshiShadowLib/.test(read('functions', f)), f + ' knows nothing of the shadow log: nothing that decides an order can read it');
   const rep = code(read('functions', 'kalshiReportLib.js'));
   assert.ok(/require\("\.\/kalshiShadowLib"\)/.test(rep) && !/fetch|liveRequest|collection\(|\.create\(|runTransaction|firebase|getFirestore/.test(rep), 'the report may SCORE the log (rows are handed in by index.js) but still sends nothing and writes nothing itself');

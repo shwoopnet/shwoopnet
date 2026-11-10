@@ -10,7 +10,7 @@ const NOW = Date.parse('2026-11-12T14:00:00Z');
 const iso = (ms) => new Date(ms).toISOString();
 const pem = crypto.generateKeyPairSync('ed25519').privateKey.export({ type: 'pkcs8', format: 'pem' });
 const R = gk.GOLD_KILL.rearmAt;
-const BASE = 979.25, LIMIT = 0.06 * BASE;   // 58.755
+const BASE = 979.25, LIMIT = 58.75;   // the fixed dollar line (6% of the $979.25 base when written)
 const gates = {};
 
 let n = 0;
@@ -65,7 +65,7 @@ gates.K3 = async () => {
   await gk.runGoldKillCheck(w.io);   // later minutes
   assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
   assert.ok(w.wrote.every((p) => p.tripped !== false), 'nothing ever writes the latch off');
-  // even if the base later grows so the replay alone would not trip, the stored latch holds
+  // even if the replay alone would not trip, the stored latch holds
   const w2 = checker([loss(-1, at(0))], { base: BASE, goldKill: { tripped: true, rearmAt: R } });
   await gk.runGoldKillCheck(w2.io);
   assert.ok(gk.goldKillActive(w2.state.sizing, 'KXGOLD15M'));
@@ -128,8 +128,8 @@ gates.K5 = async () => {
 // K6: alerts never block an order or write a latch.
 gates.K6 = async () => {
   const rows = [];
-  // Trades from the 30 days BEFORE the re-arm date: alerts read them (they only inform), the kill does not count them.
-  for (let i = 0; i < 100; i++) rows.push(i % 2 === 0 ? loss(-1.2, R - 86400000 + i * 60000) : win(R - 86400000 + i * 60000));   // PF 0.58 over the last 60 and 50 early sells
+  // Trades since the re-arm date (the read never goes further back): alerts inform, the kill rules do not fire on them.
+  for (let i = 0; i < 100; i++) rows.push(i % 2 === 0 ? loss(-1.05, R + 3600000 + i * 60000) : win(R + 3600000 + i * 60000));   // PF 0.67 over the last 60, 50 early sells, net -17.5 (inside both kill lines)
   const w = checker(rows);
   const r = await gk.runGoldKillCheck(w.io);
   assert.ok(!r.tripped, 'an alert is not a kill');
@@ -222,6 +222,38 @@ gates.K11 = () => {
   const fn = idx.slice(idx.indexOf('exports.kalshiGoldKillCheck'), idx.indexOf('exports.kalshiPaperTick'));
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets/.test(fn), 'no secret on the checker');
   assert.ok(/deploy-sizing|kalshiGoldKillCheck/.test(fs.readFileSync(path.join(root, 'functions', 'deploy-sizing.sh'), 'utf8')));
+};
+
+// K12: the drawdown line is a fixed dollar constant. A base that rises, is tiny or is missing cannot loosen or disable it, and a latch the tick's full sizing write erased is re-derived by the next replay.
+gates.K12 = async () => {
+  assert.strictEqual(gk.GOLD_KILL.drawdownDollars, 58.75);
+  const rows = [win(at(0)), loss(-(LIMIT + 0.01), at(1))];
+  for (const sz of [{ base: 5000 }, { base: 1 }, {}, null]) {
+    const w = checker(rows, sz);
+    assert.strictEqual((await gk.runGoldKillCheck(w.io)).tripped, 'drawdown', 'same trip whatever the base says: ' + JSON.stringify(sz));
+  }
+  // a clobber: the latch was written, then the tick wrote the sizing document back without it; the next minute re-derives and writes it again
+  const w = checker(rows, { base: BASE });
+  await gk.runGoldKillCheck(w.io);
+  assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
+  w.state.sizing = { base: BASE * 3 };   // the stale full write, with a base that has since risen
+  assert.ok(!gk.goldKillActive(w.state.sizing, 'KXGOLD15M'));
+  await gk.runGoldKillCheck(w.io);
+  assert.ok(gk.goldKillActive(w.state.sizing, 'KXGOLD15M'), 're-derived identically');
+};
+
+// K13: the read is bounded: only orders since the re-arm date are asked for, and trades before it count for neither the kill nor the alerts.
+gates.K13 = async () => {
+  const asked = [];
+  const old = Array.from({ length: 100 }, (_, i) => (i % 2 === 0 ? loss(-1.2, R - 86400000 + i * 60000) : win(R - 86400000 + i * 60000)));
+  const w = checker(old);
+  w.io.readOrders = async (since) => { asked.push(since); return old; };
+  const r = await gk.runGoldKillCheck(w.io);
+  assert.deepStrictEqual(asked, [R], 'one read, starting at the re-arm date, never 30 days back');
+  assert.deepStrictEqual(r.alerts, [], 'pre-re-arm trades raise no alert');
+  assert.ok(!r.tripped);
+  const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
+  assert.ok(!/historyMs/.test(fs.readFileSync(path.join(root, 'functions', 'kalshiGoldKillLib.js'), 'utf8')) && /goldOrderReader/.test(idx));
 };
 
 (async () => {
