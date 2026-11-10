@@ -173,7 +173,7 @@ gates.SB13 = () => {
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/<summary>Rules<\/summary>/g) || []).length, 3, 'three live strategies have a Rules line');
+  assert.strictEqual((h.match(/<summary>Rules<\/summary>/g) || []).length, 4, 'four live strategies have a Rules line');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/<summary>Rules<\/summary>/g) || []).length, 4, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
