@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 02:31 AM CT (08:31Z): W-INDEP3: gold shadow rules on an independent Aug 13 to Sep 1 window
+
+Registered first (S/w_indep3). Pull hit the 2 h cap: 1,358 of 2,153 listed pre-2026-09-01 windows (1,350 readable), covering Aug 13 to Sep 1; Aug 6 to 12 and the earlier gold windows not reached (restart in S/w_indep3/STATUS.md). Fee 0.07*p*(1-p), hold to settlement, PF (n) at +0c / +1c: GOLDALL (same signal as the unfiltered L1 baseline) 1.60 (439) / 1.36 (439); GOLDHI6S 1.68 (265) / 1.35 (265). Both clear PF 1.3, n 40 at both slips; +1c is close. Exploratory, GOLDALL by abs rise3 (live definition, 0.05 cut): at least 0.05 1.78 (334) / 1.52; under 0.05 1.21 (105) / 1.03. Sample over 100 signals but about 3 weeks. Rules were picked on Sep to Nov data so this window is independent of the picking. Net thin: +1.5c a contract for GOLDALL and +1.0c for GOLDHI6S at +1c. N unchanged.
+
 ## 2026-11-10 02:30 AM CT (08:30Z): OICORE stop room within 25 percent: 10.67 of 50 (21 percent) at 02:30 CT Nov 10
 
 Booked net +11.00 (was +13.84), drawdown from own peak 39.33 (peak 50.33), stop 50 at step 10, room 10.67. Net kill about 17 away. Told main; options unchanged (leave, or pre-decide re-arm rule A or B). Independent pulls: BTC 661 of 1,536, XRP 1,147 of 1,152, gold 1,358 rows; pullers had died, restart per STATUS.md.
