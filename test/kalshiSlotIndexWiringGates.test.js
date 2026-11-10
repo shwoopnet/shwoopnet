@@ -74,7 +74,7 @@ gates['SI1 index.js: SLOT_ON comes only from the slot library, every slot call s
   const before = ['KALSHI_WATCHDOG_URL', 'KALSHI_STOP_ALERT_URL', 'KALSHI_LIVE_KEY_ID', 'KALSHI_LIVE_PRIVATE_KEY', 'KALSHI_LIVE_ENABLED', 'KALSHI_PUSH_VAPID_PRIVATE', 'KALSHI_REPORT_TOKEN'];
   assert.deepStrictEqual([...c.matchAll(/define(?:Secret|String)\("([A-Z_]+)"/g)].map((m) => m[1]).sort(), before.slice().sort(), 'no new secret or parameter');
   const exported = [...c.matchAll(/^exports\.(\w+)/gm)].map((m) => m[1]).sort();
-  assert.deepStrictEqual(exported, ['kalshiBookRecorder', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveArmed', 'kalshiLiveBaseline', 'kalshiLiveExit', 'kalshiNightlyReport', 'kalshiPaperTick',
+  assert.deepStrictEqual(exported, ['kalshiBookRecorder', 'kalshiBooks', 'kalshiFlattenAll', 'kalshiGoldKillCheck', 'kalshiL1Session', 'kalshiLiveAccount', 'kalshiLiveArmed', 'kalshiLiveBaseline', 'kalshiLiveExit', 'kalshiNightlyReport', 'kalshiPaperTick',
     'kalshiPushKey', 'kalshiPushOrder', 'kalshiPushSession', 'kalshiPushSlotOrder', 'kalshiPushSubscribe', 'kalshiPushUnsubscribe', 'kalshiTape', 'marketTapeTick'].sort(), 'no new scheduled function, callable or endpoint');
   assert.ok(!/_testForce/.test(src), 'the real caller never sets the test hook');
   // The slot tick runs after L1 and cannot fail it; the slot exits run after the L1 exit watch and cannot stop it.
