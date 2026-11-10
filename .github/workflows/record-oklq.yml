@@ -1,0 +1,59 @@
+# DRAFT, NOT ACTIVE: lives on claude/refine-live only; schedules run only from the default branch, merge needs the owner and a security review.
+# Nov 10, 2026 (the owner approved the research session's backlog row 55). Records OKX's public liquidation feed for the Bitcoin perpetual swaps (BTC-USDT-SWAP, BTC-USD-SWAP):
+# time, side, size, bankruptcy price. OKX keeps only about 17 hours of it, so it cannot be fetched later. Research data only.
+# Public data only: no key, no secret, no order, no auth header. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under oklq/), never to main.
+# Each run is a short job (under a minute once caught up). Triggered 24 times a day (two sets, each every two hours, offset by 90 minutes) under one concurrency group that
+# never cancels a running job: jobs never overlap. A pass reads back to the newest row already on the data branch (minus 5 minutes) or 16 hours, so the longest safe gap
+# between two passes that land is 12 hours (see kalshi-scalper/refine_tools/OKLQ_LOGGER_NOTE.md).
+# It stops by itself: from 2026-12-31 23:59 UTC every run exits at once (checked in the first step and in the script). Stop it sooner by deleting this file.
+name: record-oklq
+on:
+  schedule:
+    - cron: "7 */2 * * *"
+    - cron: "37 1-23/2 * * *"   # a second set an hour and a half off the first: a dropped start costs about an hour, not two
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-oklq
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Stop for good after the end date (2026-12-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2026-12-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record one pass
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/oklq/$STAMP"
+          python3 code/scripts/record_oklq.py "data/oklq/$STAMP" --seen data/oklq
+          gzip -9 -f data/oklq/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "oklq-recorder"
+          git config user.email "oklq-recorder@users.noreply.github.com"
+          gzip -9 -f oklq/*/*/*.csv 2>/dev/null || true
+          git add oklq
+          git commit -q -m "oklq $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin quote-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin quote-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s
+          exit 1
