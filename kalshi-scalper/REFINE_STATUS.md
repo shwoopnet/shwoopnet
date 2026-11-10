@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 10:29 PM CT (04:29Z): OICORE README entry draft (re-arm rule options A and B) written; cash line added
+
+kalshi-scalper/refine_tools/OICORE_README_ENTRY_DRAFT.md: corrections (streak 24, 8c floor, ladder current step 10, stop $50), record (booked: 79 fills, PF 1.15, net +14.46, peak 50.33, drawdown 35.87, stop room 14.13; cash PF about 1.27 added by me), sample for the Nov 13 read (whole record plus each reviewedAt segment), re-arm options A (never automatic) and B (once, 3 days after, bottom step, whole-record booked PF at least 1.0), what it does not change. Owner picks.
+
 ## 2026-11-09 10:24 PM CT (04:24Z): W-BTCHI10: reconciliation with V2 REGIME-B2: period difference, not the spread gate
 
 My first guess (missing maxSpread in the BTCHI10 and XRPFAV10 registrations) was WRONG: the spread gate 0.02 changes nothing (in-band favourites already have spread 2c or less; every cell identical with and without it). Look candle also not it (a 600 s candle and V2's latest candle 570 to 640 s left give identical results on my file); fee unrounded in both; V2 has no slip. Real difference: data period. My Bitcoin file S/oi/btc.jsonl covers 2026-09-02 to 11-09 (68 days): BTCHI10 PF 1.62 (n251), halves 1.37 (94) / 1.82 (157) at +0c; +1c 1.34, halves 1.14 / 1.50. V2's regime_b2.py reads data/hist15/KXBTC15M.sqlite, the Jun to Aug quote feed (65 dates; 63 days): PF 0.90, n289, halves 0.90 / 0.90. Two disjoint periods disagree: V2's is an out-of-sample earlier period and BTCHI10 fails it. XRP .88-.92 10m on S/oi/xrp.jsonl (09-10 to 10-05, 25 days): PF 1.95 (n230), halves 2.25 / 1.73 at +0c, 1.74 at +1c; V2's reproduction of XRPFAV6 and XRPFAV10 used the same candles the cells were picked from, so it is not independent (selection, best of about 120 cells). I could not re-run V2's file (data/hist15 not in this checkout).
