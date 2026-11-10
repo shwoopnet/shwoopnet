@@ -43,3 +43,10 @@ State: hourly check-in trigger trig_017HTDZNKWfyBephf72bqcaG (hourly again). OIC
 - Candle model: use UNROUNDED fee 0.07*p*(1-p) and +0c entry (matches live fills; +1c is harsher than live). Retractions 17 (stored settledPnl is limit-booked) and 18 (fee rounding) in REFINE_RETRACTIONS.md.
 - OICORE: ladder stepped to 10, stop $50, room $14.13 at 04:27Z; README entry draft (re-arm options A and B) in refine_tools/OICORE_README_ENTRY_DRAFT.md, mechanics in OICORE_REARM_MECHANICS.md; owner decides.
 - Tools in refine_tools/: scorer.py, nightly.py, goldtrip.py, shadow_read.py, rise3_split.py. Scheduled: nightly review 06:17Z, EVENT830 recheck 11:05Z and CPI read 13:50Z (Nov 10), weekly candidate supply Sundays 7:17 PM CT (trig_01DCtYPSDKdKM3o8o5Sdm2Sb). Candle pullers (S/w_pull/pull.py, detached, 3 h cap) die when the session worker restarts: check `pgrep -fa pull.py` and restart.
+
+## Nov 10, 2026 (3:30 AM CT) state
+- Independent-window results (Kalshi public /historical, dates fixed before outcomes, fee unrounded, hold): gold Aug 13 to Sep 1: GOLDALL 1.60 (n439) / 1.36 at +1c, GOLDHI6S 1.68 (n265) / 1.35 (hold). XRP June to early Sept (1,147 windows): XRPFAV6 1.645 (n137), XRPYES10 1.91 (n70), XRPFAV10 1.71 (n70) (hold). Bitcoin (1,206 of 1,536): BTCHI6 1.13 / 0.91 (fails), BTCHI10 1.27. OICORE live rule June to July: 14 triggers PF 0.74 (NOT_ENOUGH_DATA, leans negative; S/w_indep4, pull continues). Ethereum 4.3 weeks: ETHNO6 and ETHL1 fail (retired).
+- PR 753 registry after main's edits: XRPYES10, GOLDALL, XRPFAV6, GOLDHI6S.
+- OICORE: booked net +11.00, drawdown 39.33 from peak 50.33, stop $50 at step 10, room $10.67 (21 percent): main told; owner options leave or pre-decide re-arm (A or B). Gold tripwire 12 of 100, cumulative cash PF 0.92, rolling-60 0.85.
+- Scheduled: EVENT830 forex recheck 11:05Z, CPI read 13:50Z (Nov 10), weekly supply Sunday 7:17 PM CT. Background pullers (S/w_indep, w_indep4, w_pull) die on session worker restart: check pgrep, restart per STATUS.md.
+- Context was about 617k of 784k at this note.
