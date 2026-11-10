@@ -4,7 +4,7 @@ Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by s
 |---|---|---|---|---|---|
 | 1 | AAA gas daily ladder vs persistence (built from the ladders themselves, no EIA needed) | done | 8% | AAAGAS1: FALSIFIED, M0 PF 0.49 n 82, M1 0.47 n 86 | closed Nov 10 |
 | 2 | Mentions markets: calibration by series group | done | 10% | MENT1: NOT_ENOUGH_DATA (45 of 333 dev markets had a usable quote 1 h before close; no cell n >= 20) | closed Nov 10; variant at a shorter lead is idea 15 |
-| 3 | Cheap wings of monthly/weekly commodity and foreign-index ladders (Kalshi-only) | free, about 1,500 requests | 5% | WING1 protocol | running Nov 10 |
+| 3 | Cheap wings of monthly/weekly commodity and foreign-index ladders (Kalshi-only) | done | 5% | WING1: NOT_ENOUGH_DATA (14 usable of 124 dev markets; the series are young, 497 settled markets in total) | closed Nov 10 |
 | 4 | TSA daily checkpoint ladders (KXTSA) vs weekday seasonality of public TSA throughput | free if tsa.gov table reachable (unchecked), history from Kalshi | 8% | probe reachability, register | untested |
 | 5 | Weekly jobless claims ladders (KXJOBLESSCLAIMS) vs persistence on FRED ICSA (FRED reachable) | free, about 300 requests | 8% | register after 1 to 3 | untested |
 | 6 | USGS earthquake ladders (KXBIGGESTQUAKEH hourly, KXBIGGESTQUAKE daily): Poisson base rate from the public USGS feed | free; check overlap with WXOTHER1 first | 6% | read WXOTHER1_CENSUS.json, register | untested |
