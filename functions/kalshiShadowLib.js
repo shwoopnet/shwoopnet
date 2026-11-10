@@ -12,12 +12,15 @@
 // Every one is a SHADOW candidate, never a pass (N about 670 on top of about 540; no counterparty named for any). Shadow rows assume a fill at the touch (an upper bound): read `wouldFill`.
 const RULE = (id, series, entry, anchor = "SHADOW-WEEK1") => Object.freeze({ id, readme: "kalshi-scalper/README.md#" + anchor, series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
 const SHADOW_RULES = Object.freeze([
-  RULE("ETHNO6", "KXETH15M", { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
-  RULE("BTCHI6", "KXBTC15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  // ETHNO6 was retired before its first row (Nov 10, 2026): on 4.3 weeks of Ethereum candles (2,609 windows) it fails, PF 1.04 / 0.72 at +0c; its live PF 2.59 (n 53) was its only support. See kalshi-scalper/README.md#SHADOW-WEEK2.
+  // BTCHI6 was retired before its first row (Nov 10, 2026): on an independent window (Jun to Sep, 1,206 windows) it is PF 1.13 at +0c and 0.91 at +1c, under the 1.3 bar. See kalshi-scalper/README.md#SHADOW-WEEK2.
   RULE("XRPYES10", "KXXRP15M", { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }),
-  RULE("ETHL1", "KXETH15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  // ETHL1 was retired before its first row (Nov 10, 2026): the refinement chat's candle recheck found it under 1.0 in both halves at +1c (0.92 / 1.10 at +0c); see kalshi-scalper/README.md#SHADOW-WEEK2.
   // GOLDALL (Nov 9, 2026, the refinement chat's forward test of the gold momentum lead, kalshi-scalper/README.md#SHADOW-GOLDALL): L1's own entry on gold, logged for EVERY signal ordered or not, so the 3 minute move (rise3) can be read from public candles at read time and the pre-registered split (|rise3| at least 0.05, "moving") scored against the unfiltered baseline on the same rows.
   RULE("GOLDALL", "KXGOLD15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "SHADOW-GOLDALL"),
+  // WEEK 2 (Nov 10, 2026; the refinement chat's batch 2 after the fee fix, kalshi-scalper/README.md#SHADOW-WEEK2). Best of 120 cells, so selection bias is likely: SHADOW candidates only, prior low on both. BTCHI10 and XRPFAV10 were dropped before merge (BTCHI10 fails an earlier out of sample period, PF 0.90 on Jun to Aug against 1.62 on Sep to Nov; XRPFAV10 is the same low prior XRP selection). XRPFAV6 and GOLDHI6S use the optional maxSpread (YES spread at most 2c).
+  RULE("XRPFAV6", "KXXRP15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, "SHADOW-WEEK2"),
+  RULE("GOLDHI6S", "KXGOLD15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, "SHADOW-WEEK2"),
 ]);
 
 const OPEN = ["open", "active"];
