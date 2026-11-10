@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 12:12 AM CT (06:12Z): W-INDEP: BTCHI6 on an independent Jun to Jul window (public historical endpoints)
+
+Registered first (S/w_indep): 16 pre-chosen UTC dates (June 3, 7, 10, 14, 17, 21, 24, 28; July 5, 7, 12, 14, 19, 21, 26, 28), sample rule fixed before outcomes; corrected unrounded fee; hold to settlement (25c exit not modelled). 608 of 1,536 markets pulled so far (40 percent, balanced across the 16 dates; the pull continues, restart command in S/w_indep/STATUS.md). BTCHI6 (favourite 0.92 to 0.97, 6m look): +0c PF 1.416 (n 137, 132 wins, net +1.43c per contract); +1c PF 1.143 (n 137, +0.5c). BTCHI10: +0c 0.751 (n 27), +1c 0.62: fails again, n below 40. BTCHI6 clears PF 1.3 and n 40 only at +0c; thin (5 losses at +0c). N unchanged.
+
 ## 2026-11-09 10:32 PM CT (04:32Z): W-RERUN3: ETH and XRP shadow candle checks on larger files
 
 Registered first (S/w_rerun3), copies of the files, no new cells, N unchanged. Corrected fee, look-candle ask, hold, PF (n) half 1 / half 2, +0c then +1c: ETHNO6 1.04 (47) / 1.73 (45); 0.88 (47) / 1.49 (45). ETHL1 0.92 (99) / 1.10 (92); 0.78 (99) / 0.94 (92). XRPYES10 2.91 (102) / 2.28 (107); 2.54 / 2.00. XRPFAV6 1.57 (177) / 1.36 (155); 1.40 / 1.21 (below 1.3 bar). XRPFAV10 2.32 (112) / 1.89 (132); 2.08 / 1.68. Excluding 51 ETH live-overlap windows: ETHNO6 1.07 (32) / 1.53 (41) at +0c, 0.91 / 1.31 at +1c; ETHL1 0.82 (63) / 1.17 (80), 0.70 / 1.00. ETH grid: 1 of 40 passes, only at +0c (favourite 0.88-0.97 10m spread at most 0.02: 1.30 (51) / 3.07 (74)). Dates: ETH 676 settled windows 10-11 to 10-18 (about 1 week, not 30 days; 495 rows have no result), split 10-14; XRP 2,483 windows 09-10 to 10-06, split 09-23. Candle PF contradicts ETHL1 (both halves under 1.0 at +1c) and ETHNO6 half 1 (0.88 at +1c, n47). XRP rules pass the bar at both slip levels except XRPFAV6 half 2 at +1c (1.21); XRP window is Sep 10 to Oct 6, the same data the cells were picked from.
