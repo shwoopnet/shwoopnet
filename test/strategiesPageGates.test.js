@@ -25,7 +25,7 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
+const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiFlowLinks', 'kalshiFlowPath', 'kalshiFlowTrunk', 'kalshiStratRing', 'kalshiStratTwinFirst', 'kalshiFlowGeometry', 'kalshiFlowDraw', 'kalshiBoardHtml'];
 const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
 const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
@@ -74,12 +74,10 @@ gates.SP2 = () => {
 };
 gates.SP3 = () => {
   // gauge fractions are the real kill distances, and the arc geometry holds at the ends
-  assert.strictEqual(P.kalshiStratArc(0), '');
-  assert.strictEqual(P.kalshiStratArc(-1), '');
-  assert.strictEqual(P.kalshiStratArc('x'), '');
-  assert.strictEqual(P.kalshiStratArc(0.5), 'M 10 60 A 50 50 0 0 1 60 10', 'half is the top of the half circle');
-  assert.strictEqual(P.kalshiStratArc(1), 'M 10 60 A 50 50 0 0 1 110 60', 'full is the whole half circle');
-  assert.strictEqual(P.kalshiStratArc(7), P.kalshiStratArc(1), 'clamped to full');
+  const R = P.kalshiStratRing;
+  assert.strictEqual(R('0.00').frac, 0); assert.strictEqual(R('n/a').frac, 0); assert.strictEqual(R('1.00').frac, 0.5, 'a profit factor of 1.0 is half the ring on the 0 to 2 scale');
+  assert.strictEqual(R('2.40').frac, 1, 'clamped to a full ring'); assert.strictEqual(R('no losses').frac, 1);
+  assert.deepStrictEqual(R('1.30').tick, { x1: 50, y1: 84, x2: 50, y2: 96 }, 'the 1.0 tick is at the bottom of the ring, where half way ends');
   const oi = P.kalshiStratGauge('OICORE', { drawdown: 39.33, room: 10.67 }, money);
   assert.ok(Math.abs(oi.frac - 39.33 / 50) < 1e-9 && oi.big === '$10.67' && oi.cap === 'drawdown room of $50.00', 'OICORE: room of the $50 stop, as the bot counts it: ' + JSON.stringify(oi));
   const l1 = P.kalshiStratGauge('L1', { count: 18 }, money);
@@ -110,10 +108,10 @@ const deckModel = (state) => ({ state, rows: P.KAL_BOARD_SHADOW.map((r) => ({ id
 gates.SP5 = () => {
   const h = P.kalshiBoardHtml({ live: liveModel(mask), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, mask);
   // The Rules text holds fixed policy numbers (a $50 stop, a $5 slot), not account figures; every figure that comes from the account is masked.
-  assert.ok(!/\$\d/.test(h.replace(/<details class="kal-bd-rules">[\s\S]*?<\/details>/g, '')) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
+  assert.ok(!/\$\d/.test(h.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '')) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.ok(/\$10\.67/.test(plain) && /drawdown room of \$50\.00/.test(plain), 'and with it off the room is shown');
-  assert.strictEqual((plain.match(/class="kal-card sp-tile"/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'one tile per live strategy and per shadow rule');
+  assert.strictEqual((plain.match(/class="kal-card sp-tile(?: sp-compact)?"/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'one tile per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every tile has the Sizing ladder row');
   const L = P.KAL_BOARD_LADDER;
   assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
@@ -121,9 +119,11 @@ gates.SP5 = () => {
   assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 4, 'all four shadow rules say next 3 contracts (XRPYES10 is also live, at 3)');
   assert.strictEqual((plain.match(/<span>1 contract<\/span>/g) || []).length, 1, 'EVENT830 says 1 contract');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
-  assert.ok(/<svg class="sp-arrow"/.test(plain) && (plain.match(/sp-arrow/g) || []).length === 2 && (plain.match(/class="sp-stage(?: sp-on)?"/g) || []).length === 3, 'a lifecycle of three stages and two arrows');
-  assert.ok((plain.match(/<path d="M 10 60 A 50 50 0 0 1 110 60"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a gauge on each live tile');
-  assert.ok((plain.match(/<summary>Rules<\/summary>/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every tile has its Rules');
+  assert.ok((plain.match(/class="sp-lane sp-lane-(?:shadow|live|retired)"/g) || []).length === 3 && (plain.match(/class="sp-down"/g) || []).length === 2 && /id="spBoard"/.test(plain), 'a board of three lanes (Live, Shadow, Retired) and two joints between them');
+  assert.ok(plain.indexOf('sp-lane-live') < plain.indexOf('sp-lane-shadow') && plain.indexOf('sp-lane-shadow') < plain.indexOf('sp-lane-retired'), 'in the order Live, Shadow, Retired (left to right on a desktop, top to bottom on a phone)');
+  assert.ok((plain.match(/class="sp-bar sp-killbar"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill gauge on each live tile');
+  assert.ok((plain.match(/<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg"/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'a ring dial on every card');
+  assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length && (plain.match(/<b>Implement<\/b>/g) || []).length === P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every card has Implement, Kill and Return inside its Details');
   assert.ok((plain.match(/class="sp-bar"/g) || []).length === P.KAL_BOARD_SHADOW.length && /41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
   const few = P.kalshiBoardHtml({ live: liveModel(money).map((s) => Object.assign(s, { spark: [1] })), deck: deckModel('unreadable'), retired: P.KAL_BOARD_RETIRED }, esc, money);
@@ -163,7 +163,7 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratTimeline', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
+const names2 = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratTimeline', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiFlowLinks', 'kalshiFlowPath', 'kalshiFlowTrunk', 'kalshiStratRing', 'kalshiStratTwinFirst', 'kalshiFlowGeometry', 'kalshiFlowDraw', 'kalshiBoardHtml'];
 const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STRAT_TIMELINE') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
 const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_STRAT_TIMELINE, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
@@ -265,7 +265,7 @@ gates.SP14 = () => {
   assert.ok(/<details class="sp-det" data-k="LiveL1" open><summary>Details<\/summary>/.test(open), 'an open Details stays open across a redraw');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // The three groups as markup.')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');
-  const css = html.slice(html.indexOf('.sp-sum.kal-card{'), html.indexOf('@media (max-width:420px){ .sp-pf'));
+  const css = html.slice(html.indexOf('.sp-sum.kal-card{'), html.indexOf('@media (max-width:420px){ .sp-ring'));
   assert.ok(!/green|\bred\b|#0f0|var\(--(gain|loss|win)/i.test(css), 'black and white only');
   const mine = body + css;
   assert.ok(!mine.includes(String.fromCharCode(8212)), 'no em dash in the new code or styles');
@@ -277,6 +277,65 @@ gates.SP14 = () => {
   assert.ok(/summary bar/i.test(html.slice(top, top + 4000)), 'the changelog says so');
 };
 
+
+// FB1 to FB6: the flow board (Nov 10, 2026, the owner: cards on Shadow, Live, Retired lanes with connecting lines and status badges). Consequence: a line joins a shadow rule only to the live strategy it became, a badge never reads healthy for a strategy with no trades or near its kill, and no dollar figure or raw value reaches the board.
+gates.FB1 = () => {
+  const L = P.kalshiFlowLinks(['L1', 'OICORE', 'XRPYES10'], ['XRPYES10', 'GOLDALL'], [{ name: 'XRP', pf: 0.5, n: 9 }, { name: 'ETHL1', note: 'shadow, never traded' }]);
+  assert.deepStrictEqual(L.filter((l) => l.kind === 'side'), [{ from: 'shadow:XRPYES10', to: 'live:XRPYES10', kind: 'side' }], 'only a rule with a live twin is joined, as a side link from the shadow card');
+  assert.deepStrictEqual(L.filter((l) => l.kind === 'trunk'), [{ from: 'head:live', to: 'head:retired', kind: 'trunk' }], 'ONE trunk joins the Live lane to the Retired list, however many strategies are retired (not one line each)');
+  assert.strictEqual(P.kalshiFlowLinks(['L1'], [], []).filter((l) => l.kind === 'trunk').length, 0, 'no retired strategy, no trunk');
+  const real = P.kalshiFlowLinks(P.KAL_BOARD_LIVE.map((s) => s.id), P.KAL_BOARD_SHADOW.map((s) => s.id), P.KAL_BOARD_RETIRED.rows);
+  assert.strictEqual(real.filter((l) => l.kind === 'side').length, 1, 'XRPYES10 is the one shadow rule that is also live'); assert.strictEqual(real.length, 2, 'one side link and one trunk, nothing more');
+  assert.deepStrictEqual(P.kalshiStratTwinFirst([{ id: 'A' }, { id: 'B' }, { id: 'C' }, { id: 'D' }], (x) => x.id, ['C', 'B']).map((x) => x.id), ['B', 'C', 'A', 'D'], 'a card with a twin goes to the top of its lane, the rest keep their order');
+};
+gates.FB2 = () => {
+  const sh = { x: 300, y: 10, w: 100, h: 40 }, lv = { x: 0, y: 100, w: 100, h: 40 };
+  assert.strictEqual(P.kalshiFlowPath(sh, lv), 'M 300 30 C 200 30 200 120 100 120', 'from the left middle of the shadow card to the right middle of its live twin');
+  assert.strictEqual(P.kalshiFlowPath(sh, null), ''); assert.strictEqual(P.kalshiFlowPath(sh, { x: NaN, y: 0, w: 1, h: 1 }), '');
+  const h1 = { x: 0, y: 40, w: 100, h: 40 }, h3 = { x: 600, y: 40, w: 100, h: 40 };
+  const trunk = P.kalshiFlowTrunk(h1, h3);
+  assert.ok(/^M 50 40 L 50 20 Q 50 28 58 28 L 642 28 Q 650 28 650 36 L 650 40$/.test(trunk) || /^M 50 40 L 50 36 Q 50 28 58 28 L 642 28 Q 650 28 650 36 L 650 40$/.test(trunk), 'up out of the Live header, across 12px above the headers, down into the Retired header: ' + trunk);
+  assert.strictEqual(P.kalshiFlowTrunk(h3, h1), '', 'a Retired lane that is not to the right gives no trunk'); assert.strictEqual(P.kalshiFlowTrunk(h1, null), '');
+  const g = P.kalshiFlowGeometry([{ from: 'a', to: 'b', kind: 'side' }, { from: 'a', to: 'missing', kind: 'side' }, { from: 'h1', to: 'h3', kind: 'trunk' }], { a: sh, b: lv, h1, h3 });
+  assert.strictEqual(g.length, 2, 'a link whose end was not measured is left out'); assert.deepStrictEqual(g[0].end, { x: 100, y: 120 }); assert.deepStrictEqual(g[1].end, { x: 650, y: 40 });
+};
+gates.FB3 = () => {
+  const B = (l, x) => P.kalshiStratBadge(l, x).text;
+  assert.strictEqual(B('live', { n: 0 }), 'ARMED'); assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.2, useFrac: true }), 'HEALTHY');
+  assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.5, useFrac: true }), 'WATCH'); assert.strictEqual(B('live', { n: 20, pf: 0.9, frac: 0.1, useFrac: true }), 'WATCH');
+  assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.8, useFrac: true }), 'NEAR KILL');
+  assert.strictEqual(B('live', { n: 20, pf: 1.4, frac: 0.95, useFrac: false }), 'HEALTHY', 'the gold tripwire count is a count of trades, not distance to a kill');
+  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 5 }), 'COLLECTING'); assert.strictEqual(B('shadow', { state: 'ok', status: 'kill: net', fillable: 60 }), 'KILL');
+  assert.strictEqual(B('shadow', { state: 'ok', status: 'ready: meets', fillable: 150 }), 'READY'); assert.strictEqual(B('shadow', { state: 'loading' }), 'WAITING');
+  assert.strictEqual(B('shadow', { state: 'ok', status: 'collecting', fillable: 40, netCents: -0.5 }), 'NEAR KILL'); assert.strictEqual(B('retired'), 'RETIRED');
+};
+gates.FB4 = () => {
+  const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
+  assert.strictEqual((plain.match(/class="sp-badge /g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'a status badge on every live and shadow card');
+  assert.strictEqual((plain.match(/class="sp-rrow"/g) || []).length, P.KAL_BOARD_RETIRED.rows.length, 'one compact line per retired strategy');
+  assert.ok(plain.indexOf('data-fk="live:XRPYES10"') < plain.indexOf('data-fk="live:L1"') && plain.indexOf('data-fk="shadow:XRPYES10"') < plain.indexOf('data-fk="shadow:' + P.KAL_BOARD_SHADOW.filter((r) => r.id !== 'XRPYES10')[0].id + '"'), 'the twin sits first in both lanes');
+  assert.strictEqual((plain.match(/class="sp-compact|kal-card sp-tile sp-compact/g) || []).length, P.KAL_BOARD_SHADOW.length, 'shadow cards are compact');
+  assert.ok(/data-fk="head:live"/.test(plain) && /data-fk="head:retired"/.test(plain), 'the trunk ends are the two lane headers');
+  assert.ok(/data-fk="live:XRPYES10"/.test(plain) && /data-fk="shadow:XRPYES10"/.test(plain) && /Promoted from its shadow rule/.test(plain) && /Feeds the live strategy of the same name/.test(plain), 'the twin cards carry the chip that explains the line');
+  assert.ok(/data-links="\[/.test(plain) && /trunk/.test(plain), 'the board carries its links for the drawing step');
+  const mask = P.kalshiBoardHtml({ live: liveModel((x) => '****'), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, (x) => '****');
+  assert.ok(!/\$\d/.test(mask.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '')), 'no dollar figure with the mask on, board included');
+  assert.ok(/class="sp-ret-t" id="spRetT"/.test(plain) && !/id="spRetT" checked/.test(plain), 'Retired starts collapsed on a phone');
+  assert.ok(/id="spRetT" checked/.test(P.kalshiBoardHtml({ live: [], deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED, open: { retired: true } }, esc, money)), 'and its choice is kept across a redraw');
+};
+gates.FB5 = () => {
+  const evil = P.kalshiBoardHtml({ live: [], deck: { state: 'unreadable', rows: [] }, retired: { asOf: 'x', back: 'y', rows: [{ name: '"><img src=x onerror=1>', pf: 1, n: 1, note: '<b>shadow' }] } }, esc, money);
+  assert.ok(!/<img/.test(evil) && !evil.includes('"><img'), 'a retired name cannot break out of its attribute or its card');
+  assert.ok(/data-links="[^"]*"/.test(evil) && !/data-links="[^"]*<img/.test(evil), 'the links attribute is escaped too');
+};
+gates.FB6 = () => {
+  // reads layout, writes only the board's own svg; the phone arrows are CSS, and everything stays inside the animation scope
+  const draw = fn('kalshiFlowDraw');
+  assert.ok(!/setInterval|setTimeout|localStorage|fetch\(|setDoc|updateDoc|addDoc/.test(draw), 'the drawing step has no timer, storage, network or write');
+  assert.ok(/\.sp-links\{ display:none; \}/.test(html) && /@media \(min-width:900px\)\{[^]*?\.sp-links\{ display:block/.test(html), 'connector lines only where the lanes sit side by side');
+  assert.ok(/#page-strategies\.sp-play \.sp-ln\{[^}]*lineDraw/.test(html), 'the connectors draw in once under sp-play');
+  assert.ok(!html.slice(html.indexOf('function kalshiStratBadge'), html.indexOf('// The three groups as markup')).includes(String.fromCharCode(8212)), 'no em dash in the flow code');
+};
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
 if (failed) process.exit(1);
