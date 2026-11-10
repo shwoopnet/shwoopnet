@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 06:28 PM CT (00:28Z): shadow_read.py added; shadow report gap noted
+
+refine_tools/shadow_read.py computes per-rule signals, per week, wouldFill share, PF per contract, halves, pass and kill checks from rows (demo mode labelled). origin/main report has report.shadow.rules aggregates only (signals, settled, PF, pfFillable, netCents, secondHalfPf, topDay, days, status), no rows; a rows export (?shadow=1) or Firestore read of kalshiShadowRows is missing for halves and per-day checks. Batch 2 rules (XRPFAV6, GOLDHI6S, BTCHI10, XRPFAV10) are not in main's SHADOW_RULES and maxSpread is unused there. Logger writes pnl itself, else public GET /markets/<ticker> market.result.
+
 ## 2026-11-09 05:30 PM CT (23:30Z): W-FEEFIX: grids rerun on corrected fee model; batch 2 shadow registrations
 
 Registered first, N unchanged (about 760), model (2) unrounded fee fixed because live avgFee matches it. Clears the bar at +1c: XRP favourite .88-.92 6m spread at most 2c PF 1.31 (136) / 1.34 (108), 88 a week (failed under the old model). +0c adds: gold F5 .92-.97 6m spread 2c 1.47 (342) / 1.59 (373) 72 a week; gold .92-.97 10m 1.31 (73) / 2.74 (94) 17 a week; Bitcoin .92-.97 10m 1.37 (94) / 1.82 (157) 26 a week; XRP .88-.92 10m 1.64 (81) / 1.36 (95) 63 a week; XRP F4 .97-.99 2m (degenerate, 120 s look). Corrected candle PF at +1c / +0c (old +1c): BTCHI6 0.93 / 1.16 (0.76) 115 a week; GOLDALL 1.06 / 1.24 (0.95) 126; XRPYES10 1.87 / 2.14 (1.72) 55 (halves 1.74 / 1.98); ETHNO6 0.69 / 0.80 (0.61) 92; ETHL1 0.80 / 0.95 (0.71) 195; silver L1 1.19 / 1.39 (1.07), halves 1.28 / 1.11 at +1c. Gold and Bitcoin still zero at +1c. Batch 2 registrations appended to SHADOW_REGISTRATIONS_WEEK1.md.
