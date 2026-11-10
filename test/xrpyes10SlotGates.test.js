@@ -116,7 +116,7 @@ gates['XR6 nothing stored can enlarge it: no other id may hold or copy it, the l
   assert.ok(!slot.validateSlotStrategy(copy({ exit: { stopBid: 0.1, targetBid: 0.99, mustExitLeftSec: 600 } })).ok, 'a stop based exit must end before the entry floor');
   assert.ok(!slot.validateSlotStrategy(copy({ entry: Object.assign({}, xr.entry, { priceMax: 0.98 }) })).ok, 'a band above 97c');
   assert.ok(!slot.validateSlotStrategy(copy({ entry: Object.assign({}, xr.entry, { leftMaxSec: 900 }) })).ok, 'a window above 840 s');
-  assert.deepStrictEqual(slot.activeSlotStrategies().map((s) => s.id), ['OICORE', 'EVENT830', 'XRPYES10', 'AUDFAV6']);
+  assert.deepStrictEqual(slot.activeSlotStrategies().map((s) => s.id), ['OICORE', 'EVENT830', 'XRPYES10', 'KESTREL']);
   const only = slot._testOnly.activeSlotStrategiesWith({ enabled: true, registry: [xr, xr] });
   assert.deepStrictEqual(only, [], 'a repeated id refuses the whole registry');
   assert.deepStrictEqual(slot._testOnly.activeSlotStrategiesWith({ enabled: false, registry: [xr] }), [], 'the switch off means nothing runs');

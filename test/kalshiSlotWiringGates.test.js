@@ -95,7 +95,7 @@ gates['SW0c the admitted state: OICORE first (EVENT830 second since Nov 3, 2026)
   assert.strictEqual(slotLib.SLOT_ENABLED, true); assert.strictEqual(slotLib.SLOT_EVER_USED, true);
   assert.strictEqual(slotLib.slotActive(), true); assert.strictEqual(slotLib.slotWatch(), true);
   assert.ok(Object.isFrozen(slotLib.SLOT_STRATEGIES));
-  assert.deepStrictEqual(slotLib.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10', 'AUDFAV6']);
+  assert.deepStrictEqual(slotLib.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10', 'KESTREL']);
   const o = slotLib.SLOT_STRATEGIES[0];
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o)), {
     id: 'OICORE', readme: 'kalshi-scalper/README.md#SLOT-OICORE', series: ['KXBTC15M'],
@@ -106,7 +106,7 @@ gates['SW0c the admitted state: OICORE first (EVENT830 second since Nov 3, 2026)
     forwardReadDate: '2026-11-13', reviewedAt: '2026-10-30',
   });
   assert.deepStrictEqual(slotLib.validateSlotStrategy(o).ok, true, JSON.stringify(slotLib.validateSlotStrategy(o)));
-  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10', 'AUDFAV6']);
+  assert.deepStrictEqual(slotLib.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10', 'KESTREL']);
   assert.strictEqual(o.contractsPerOrder, 10); assert.ok(o.contractsPerOrder <= slotLib.SLOT_MAX_CONTRACTS_PER_ORDER);
   assert.strictEqual(o.exit.holdToSettle, true); assert.ok(slotLib.SLOT_HOLD_ALLOWED.includes(o.id));
   assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slotLib.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET);

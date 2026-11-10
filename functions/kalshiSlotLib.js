@@ -20,9 +20,9 @@ const SLOT_ENABLED = true;                            // phase A: off. Turning i
 // None of them is an L1 market, so a position there can never sit against an L1 position.
 const EVENT830_SERIES = Object.freeze(["KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M"]);
 // KXXRP15M added Nov 10, 2026 for XRPYES10 (a capped probe, kalshi-scalper/README.md#SLOT-XRPYES10). XRP is paused for L1 in code, so no L1 order can sit against a slot order there.
-// KXAUDUSD15M added Nov 10, 2026 for AUDFAV6 (a capped probe, kalshi-scalper/README.md#SLOT-AUDFAV6) and RESERVED to it. It is NOT an L1 market (it stays off L1_SERIES and on PAUSED_SERIES, so the L1 size lock refuses any L1 order there and no L1 position can sit against a slot one).
+// KXAUDUSD15M added Nov 10, 2026 for KESTREL (a capped probe, kalshi-scalper/README.md#SLOT-KESTREL) and RESERVED to it. It is NOT an L1 market (it stays off L1_SERIES and on PAUSED_SERIES, so the L1 size lock refuses any L1 order there and no L1 position can sit against a slot one).
 const SLOT_SERIES_ALLOWED = Object.freeze(["KXBTC15M", "KXETH15M", "KXGOLD15M", "KXXRP15M"].concat(EVENT830_SERIES, ["KXAUDUSD15M"]));
-const SLOT_SERIES_RESERVED = Object.freeze(Object.assign(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}), { KXAUDUSD15M: "AUDFAV6" }));
+const SLOT_SERIES_RESERVED = Object.freeze(Object.assign(EVENT830_SERIES.reduce((o, x) => { o[x] = "EVENT830"; return o; }, {}), { KXAUDUSD15M: "KESTREL" }));
 const SLOT_MAX_CONTRACTS_PER_ORDER = 10;
 const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold contracts in one ticker, all strategies together
 const SLOT_MAX_SCALE_STEPS = 3;
@@ -134,7 +134,7 @@ function slotCalendarSeriesDue(strategies, now) {
 }
 
 // The series whose quotes the minute function must read NOW for an EVERY-WINDOW strategy (no calendar) because the 15 minute window it trades is inside its entry span (plus the lead). Used for a market that is not in L1's own
-// list (AUDFAV6's AUD/USD); the caller drops any series already read. Empty outside that span, so it is about one public market read in the minute or two before the entry, never on other minutes. Pure: clock and strategies are passed in.
+// list (KESTREL's AUD/USD); the caller drops any series already read. Empty outside that span, so it is about one public market read in the minute or two before the entry, never on other minutes. Pure: clock and strategies are passed in.
 const SLOT_WINDOW_SEC = 900;
 function slotRollingSeriesDue(strategies, now) {
   const out = [];
@@ -195,11 +195,11 @@ const SLOT_STRATEGIES = Object.freeze([
     killRules: Object.freeze({ maxConsecutiveLosses: 3, minNet: Object.freeze({ afterFills: 20, net: -15 }) }),
     forwardReadDate: "2026-12-14", reviewedAt: "2026-11-10",
   }),
-  // AUDFAV6 (Nov 10, 2026, the owner's explicit favourite-and-hold exception for THIS id only; option A; pre-registration kalshi-scalper/README.md#SLOT-AUDFAV6). AUD/USD 15 minute markets: L1's own entry shape on a market L1 does not trade,
+  // KESTREL (Nov 10, 2026, the owner's explicit favourite-and-hold exception for THIS id only; option A; pre-registration kalshi-scalper/README.md#SLOT-KESTREL). AUD/USD 15 minute markets: L1's own entry shape on a market L1 does not trade,
   // the favourite side priced 88c to 97c about 6 minutes before the close (400 to 330 s), 3 contracts, no slip, held to settlement (no 25c stop). BELOW the research bar: 59 cash trades (PF 1.37), best of several probe markets, no counterparty named.
   // Kill rules: 3 losses in a row, or net under -$15 from 20 settled fills. Worst single loss about $2.70 plus the fee. AUD/USD is on exchange shard 0: with no money there it sends nothing and logs shard_short.
   Object.freeze({
-    id: "AUDFAV6", readme: "kalshi-scalper/README.md#SLOT-AUDFAV6", series: Object.freeze(["KXAUDUSD15M"]),
+    id: "KESTREL", readme: "kalshi-scalper/README.md#SLOT-KESTREL", series: Object.freeze(["KXAUDUSD15M"]),
     entry: Object.freeze({ sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
     exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 3,
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
@@ -221,8 +221,8 @@ const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
 // the edge. It stays a loss of at most the order's cost (counted as lost in the shared stop from the moment it exists). Every other strategy keeps the time rule. Adding an id here is a reviewed edit.
-// AUDFAV6 added 2026-11-10: the owner's explicit favourite-and-hold exception for this one id only (kalshi-scalper/README.md#SLOT-AUDFAV6).
-const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "XRPYES10", "AUDFAV6"]);   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
+// KESTREL added 2026-11-10: the owner's explicit favourite-and-hold exception for this one id only (kalshi-scalper/README.md#SLOT-KESTREL).
+const SLOT_HOLD_ALLOWED = Object.freeze(["OICORE", "EVENT830", "XRPYES10", "KESTREL"]);   // FLOW1 was on this list Nov 4, 2026 and left it with its removal the same day   // EVENT830 added Nov 3, 2026: its registration holds every trade to settlement
 const SCALE_KEYS = ["maxSteps", "minGapSec", "sameSideOnly", "requirePriorFilled"];
 const KILL_KEYS = ["maxConsecutiveLosses", "minNet"];
 const TOP_KEYS = ["id", "readme", "series", "entry", "exit", "contractsPerOrder", "scaleIn", "killRules", "forwardReadDate", "reviewedAt"];

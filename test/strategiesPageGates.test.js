@@ -114,7 +114,7 @@ gates.SP5 = () => {
   assert.strictEqual((plain.match(/class="kal-card sp-tile(?: sp-compact)?"/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'one tile per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, P.KAL_BOARD_LIVE.length + P.KAL_BOARD_SHADOW.length, 'every tile has the Sizing ladder row');
   const L = P.KAL_BOARD_LADDER;
-  assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', AUDFAV6: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
+  assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', KESTREL: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   for (const id of ['L1', 'OICORE', 'EVENT830']) assert.ok(plain.includes('<b>Sizing ladder</b><span>' + L[id] + '</span>') || plain.includes('<b>Sizing ladder</b><span>' + esc(L[id]) + '</span>'), id + ' shows its label');
   assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 4, 'all four shadow rules say next 3 contracts (XRPYES10 is also live, at 3)');
   assert.strictEqual((plain.match(/<span>1 contract<\/span>/g) || []).length, 1, 'EVENT830 says 1 contract');
@@ -232,7 +232,7 @@ gates.SP11 = () => {
 gates.SP12 = () => {
   // the timeline is a fixed list with the dates the owner named, shown in order with a plain when; the gold line carries its own count
   const t = Q.KAL_STRAT_TIMELINE, has = (d, re) => t.some((x) => x.date === d && re.test(x.label));
-  assert.ok(has('2026-11-09', /Gold tripwire/) && has('2026-11-13', /OICORE/) && has('2026-11-24', /XRPFAV6/) && has('2026-12-09', /checkpoint/) && has('2026-12-14', /XRPYES10/) && has('2026-12-22', /AUDFAV6/) && has('2026-12-14', /Shadow week 1 and 2/));
+  assert.ok(has('2026-11-09', /Gold tripwire/) && has('2026-11-13', /OICORE/) && has('2026-11-24', /XRPFAV6/) && has('2026-12-09', /checkpoint/) && has('2026-12-14', /XRPYES10/) && has('2026-12-22', /KESTREL/) && has('2026-12-14', /Shadow week 1 and 2/));
   const out = Q.kalshiStratTimeline(t, NOW, 18, CT);
   assert.deepStrictEqual(out.map((x) => x.date), ['Nov 9', 'Nov 13', 'Nov 24', 'Dec 9', 'Dec 14', 'Dec 14', 'Dec 22']);
   assert.strictEqual(out[1].when, 'in 3 days'); assert.strictEqual(out[4].when, 'in 34 days');
