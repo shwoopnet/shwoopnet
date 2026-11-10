@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 05:30 AM CT (11:30Z): ONDECK.md refreshed; Sunday supply draft written
+
+ONDECK.md current (registry XRPYES10, GOLDALL, XRPFAV6, GOLDHI6S; retired ETHNO6, ETHL1, BTCHI6, BTCHI10 with reasons; closed families). SUNDAY_SUPPLY_DRAFT.md: only the 4 registered rules qualify, fewer than 3 new candidates; needs-data list included. Signals per week are candle-model figures; priors are judgment.
+
 ## 2026-11-10 05:28 AM CT (11:28Z): Independent June to July windows COMPLETE: OICORE and BTCHI6 / BTCHI10
 
 Both pulls complete (OICORE w_indep4 1,536 of 1,536; BTC w_indep 1,535 of 1,536). OICORE live rule (86,300 OI rise, cheaper side 0.08-0.50, c-180 ask, fee unrounded, hold): 27 triggers (need 40): PF 1.59, win 25.9 percent, +7.63c per contract at +0c; PF 1.41 (n29), +5.52c at +1c. OI rise median 41.4k, p90 94.2k, p99 154k. Exploratory p95-equivalent threshold 114.5k: 7 triggers PF 10.5 (noise). The interim readings moved 0.74 (n14), 1.07 (n20), 1.59 (n27): small-n swings. NOT_ENOUGH_DATA (27 under 40) but no sign of failure on independent data. Bitcoin favourite rules full window: BTCHI6 PF 1.053 (n338, net +0.24c) at +0c, 0.846 at +1c: fails; BTCHI10 PF 1.584 (n83) at +0c, 1.304 at +1c: now clears 1.3, but V2's Jun to Aug run had 0.90 (n289) on overlapping months, so BTCHI10 is contested; main already dropped it, do not re-add on this alone.
