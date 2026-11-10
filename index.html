@@ -972,6 +972,7 @@
   .kal-bd-main{ min-width:0; display:flex; flex-direction:column; gap:2px; } .kal-bd-main > b{ font-size:15px; } .kal-bd-rule{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; }
   .kal-bd-bar{ height:4px; border-radius:2px; background:var(--border); margin:6px 0 2px; overflow:hidden; } .kal-bd-bar i{ display:block; height:100%; background:var(--paper); }
   .kal-bd-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; } .kal-bd-sub > div + div{ margin-top:2px; }
+  .kal-bd-ret{ border-top:1px solid var(--border); padding-top:12px; } .kal-bd-ret > summary{ cursor:pointer; font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); } .kal-bd-ret[open] > summary{ margin-bottom:8px; } .kal-bd-ret .kal-bd-sub + .kal-bd-sub{ margin-top:4px; }
   .kal-bd-row.kal-bd-flat{ grid-template-columns:minmax(0,1fr); }
   @media (max-width:420px){ .kal-bd-row{ grid-template-columns:76px minmax(0,1fr); gap:4px 12px; } .kal-bd-pf b{ font-size:24px; } }
   .kal-console [data-card="positions"]{ align-self:start; }
@@ -1557,7 +1558,7 @@
         <div id="kalBotClosed"></div>
       </div>
       <div class="kal-card" data-w="12" data-card="board">
-        <div class="kal-card-title">Strategy board</div>
+        <div class="kal-card-title">Strategy pipeline</div>
         <div id="kalBoard"></div>
       </div>
     </div>
@@ -1692,11 +1693,12 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 10</div>
                 <ul class="changelog-list">
+                  <li>Bot page: a Strategy pipeline card, one compact line per strategy with its cash profit factor first, then its market, how it trades and a short status (kill distance for live ones, OICORE's drawdown room of $50, and signals out of 150 for the shadow rules); Retired is one collapsed line; page only, no order</li>
                   <li>Bot: two more shadow rules registered (XRP favourite at the 6 minute look and gold favourite at 0.92 or more, both with a tight spread); three week 1 rules (both Ethereum ones and the Bitcoin one) were retired before they logged anything: they only log what they would have bought, 1 contract, no order and no money, to collect forward evidence</li>
                 </ul>
                 <div class="changelog-day">Nov 9</div>
                 <ul class="changelog-list">
-                  <li>Bot: a Strategy board card (Live, On deck, Retired) with each strategy's cash profit factor first, its kill status and, for shadow rules, how far they are from 150 signals; page only, no order</li>
+                  
                   <li>Bot: a fifth shadow rule, GOLDALL, logs every gold signal (ordered or not) so the idea that gold does better after the price already moved 5c in the last 3 minutes can be tested forward; log only, no order, no money</li>
 
                   <li>Bot: the shadow rules are now scored: each signal is settled from the public market result and the nightly report shows, per rule, cash profit factor, signals, days and the verdict against the written pass and kill rules (read only, no order, no money)</li>
@@ -4014,22 +4016,22 @@ kalshiStatusTick();
   // Page only: it reads the orders the page already holds and, once per page load (kept 10 minutes), the shadow log; it writes nothing and has no timer. Dollars go through money (Privacy view masks them); PF and counts are never masked.
   // The cash rule is a port of fillCost in the bot's kalshiLiveLib (a test pins the port to it on fixtures); the kill constants and the shadow rule ids are copies (tests fail if they drift from the bot's code).
   var KAL_BOARD_TRIPWIRE = { from: Date.UTC(2026, 10, 9, 16, 22), trades: 100, pfFloor: 1.0, rollingN: 60, rollingFloor: 0.7, fromText: 'Nov 9 10:22 AM Central' };   // 10:22 AM Central (UTC-6 after Nov 1) is 16:22 UTC
-  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -6, from: Date.UTC(2026, 9, 30) }, EVENT830: { proposedNet: -5 } };   // OICORE: the bot's killRules and reviewedAt (2026-10-30); EVENT830: -$5 is only PROPOSED, the bot's own rule is net under 0 after 40 fills
+  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -6, ddStop: 50, from: Date.UTC(2026, 9, 30) }, EVENT830: { streak: 20 } };   // OICORE: the bot's killRules, reviewedAt (2026-10-30) and its drawdown stop (5 x 10 contracts = $50 at the bottom step; SLOT_LADDERS); EVENT830: the bot's streak kill
   var KAL_BOARD_LIVE = [
     { id: 'L1', name: 'Closing buy', rule: 'Gold: the favourite side at 88c to 97c, about 6 minutes before the close' },
     { id: 'OICORE', name: 'Open interest jump', rule: 'Bitcoin: the cheaper side at 5c to 50c after an open interest jump, held to settlement' },
     { id: 'EVENT830', name: 'Release day longshot', rule: 'Release mornings: the cheaper side at 5c to 50c in the 8:30 window, held to settlement' }
   ];
   var KAL_BOARD_SHADOW = [   // ids copy the bot's SHADOW_RULES; the text is the rule in one line
-    { id: 'ETHNO6', rule: 'Ethereum: buy NO at 88c to 97c, 6 minutes left' },
-    { id: 'BTCHI6', rule: 'Bitcoin: the favourite side at 92c to 97c, 6 minutes left' },
     { id: 'XRPYES10', rule: 'XRP: buy YES at 88c to 97c, 10 minutes left' },
-    { id: 'ETHL1', rule: 'Ethereum: the favourite side at 88c to 97c, 6 minutes left' },
-    { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' }
+    { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' },
+    { id: 'XRPFAV6', rule: 'XRP: the favourite side at 88c to 92c, 6 minutes left, spread 2c or less' },
+    { id: 'GOLDHI6S', rule: 'Gold: the favourite side at 92c to 97c, 6 minutes left, spread 2c or less' }
   ];
-  var KAL_BOARD_RETIRED = { asOf: 'Nov 9', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
+  var KAL_BOARD_RETIRED = { asOf: 'Nov 10', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
     { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },
-    { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 }
+    { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 },
+    { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }
   ] };
   var KAL_BOARD_DAY = 86400000;
   // The cost of the contracts that filled in cash: a port of fillCost (kalshiLiveLib). averageFillPrice is the YES price, so a NO order pays 1 minus it; anything unreadable, or a cash figure above the worst case, falls back to maxCost in proportion.
@@ -4076,23 +4078,26 @@ kalshiStatusTick();
     if(id === 'L1'){
       var T = KAL_BOARD_TRIPWIRE, since = rows.filter(function(r){ return r.ts >= T.from; }), roll = rows.slice(-T.rollingN), sp = kalshiBoardPf(since), rp = kalshiBoardPf(roll);
       return { count: since.length, pf: sp.pf, rolling: roll.length >= T.rollingN ? rp.pf : null, lines: [
-        'Tripwire: next ' + T.trades + ' trades from ' + T.fromText + '; PF under ' + T.pfFloor.toFixed(1) + ' proposes a size cut; rolling ' + T.rollingN + ' under ' + T.rollingFloor.toFixed(1) + ' is an alert',
-        'Now: ' + since.length + ' of ' + T.trades + ' trades, PF ' + kalshiBoardPfText(sp) + '; rolling ' + T.rollingN + ' PF ' + (roll.length >= T.rollingN ? kalshiBoardPfText(rp) : 'n/a (' + roll.length + ' trades)')
+        'Tripwire ' + since.length + ' of ' + T.trades + ' trades, PF ' + kalshiBoardPfText(sp) + ' (cut under ' + T.pfFloor.toFixed(1) + ') · rolling ' + T.rollingN + ' PF ' + (roll.length >= T.rollingN ? kalshiBoardPfText(rp) : 'n/a') + ' (alert under ' + T.rollingFloor.toFixed(1) + ')'
       ] };
     }
     if(id === 'OICORE'){
-      var K = KAL_BOARD_KILL.OICORE, mine = rows.filter(function(r){ return r.ts >= K.from; }), streak = 0, net = 0;
-      mine.forEach(function(r){ net += r.p; streak = r.p < 0 ? streak + 1 : 0; });
-      net = Math.round(net * 10000) / 10000;
-      return { streak: streak, fills: mine.length, net: net, lines: [
-        'Streak ' + streak + ' of ' + K.streak + '; net floor ' + money(K.net) + ' after ' + K.afterFills + ' fills',
-        'Now: ' + mine.length + ' fills, net ' + (net >= 0 ? '+' : '-') + money(Math.abs(net))
+      // The drawdown room is counted the way the bot's own stop counts it (the stored settled result of each order since reviewedAt, peak to now); an order still open counts at its worst case in the bot and not here, so the bot's own count is the one that stops it.
+      var K = KAL_BOARD_KILL.OICORE, mine = rows.filter(function(r){ return r.ts >= K.from; }), streak = 0;
+      mine.forEach(function(r){ streak = r.p < 0 ? streak + 1 : 0; });
+      var res = (orders || []).filter(function(o){ return o && o.settled === true && Number(o.fillCount) > 0 && o.result !== 'hand' && isFinite(Number(o.ts)) && Number(o.ts) >= K.from && o.settledPnl !== null && o.settledPnl !== undefined && isFinite(Number(o.settledPnl)); })
+        .sort(function(a, b){ return Number(a.ts) - Number(b.ts); });
+      var cum = 0, peak = 0;
+      res.forEach(function(o){ cum += Number(o.settledPnl); if(cum > peak){ peak = cum; } });
+      var dd = Math.max(0, peak - cum), room = Math.max(0, K.ddStop - dd);
+      return { streak: streak, fills: mine.length, drawdown: Math.round(dd * 100) / 100, room: Math.round(room * 100) / 100, lines: [
+        'Drawdown room ' + money(room) + ' of ' + money(K.ddStop) + ' · streak ' + streak + ' of ' + K.streak
       ] };
     }
-    var wins = rows.filter(function(r){ return r.p > 0; }).length;
-    return { trades: rows.length, wins: wins, lines: [
-      'Net ' + money(KAL_BOARD_KILL.EVENT830.proposedNet) + ' kill proposed, not coded yet; ' + rows.length + ' trades',
-      wins + ' wins of ' + rows.length
+    var wins = rows.filter(function(r){ return r.p > 0; }).length, lossRun = 0;
+    rows.forEach(function(r){ lossRun = r.p < 0 ? lossRun + 1 : 0; });
+    return { trades: rows.length, wins: wins, streak: lossRun, lines: [
+      rows.length + ' trades, ' + wins + ' won · losing streak ' + lossRun + ' of ' + KAL_BOARD_KILL.EVENT830.streak
     ] };
   }
   // The shadow log scored for the board: the same arithmetic as shadowReport in the bot's kalshiShadowLib (a test runs both on one fixture), plus the first signal time and the earliest date the next stage could be reached.
@@ -4134,15 +4139,14 @@ kalshiStatusTick();
   function kalshiBoardDate(ms){ return new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric' }).format(new Date(ms)); }
   // The three groups as markup. model: { live: [{ id, name, rule, w, kill }], deck: { state: 'ok' | 'loading' | 'unreadable', rows: [{ id, rule, rep }] }, retired }. Every value is escaped or numeric.
   function kalshiBoardHtml(model, esc, money){
-    var sg = function(v){ return (v >= 0 ? '+' : '-') + money(Math.abs(v)); };
-    var row = function(name, rule, pfBig, pfLabel, sub, lines, bar){
+    // One compact line per strategy: cash PF big on the left, then the name and market, how it trades, and one short status line.
+    var row = function(name, rule, pfBig, pfLabel, status, bar){
       return '<div class="kal-bd-row"><div class="kal-bd-pf"><b>' + esc(pfBig) + '</b><span>' + esc(pfLabel) + '</span></div><div class="kal-bd-main"><b>' + esc(name) + '</b><span class="kal-bd-rule">' + esc(rule) + '</span>' +
         (bar === undefined ? '' : '<div class="kal-bd-bar" role="img" aria-label="' + esc(bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, bar.pct)).toFixed(1) + '%"></i></div>') +
-        '<div class="kal-bd-sub">' + sub + (lines || []).map(function(l){ return '<div>' + esc(l) + '</div>'; }).join('') + '</div></div></div>';
+        '<div class="kal-bd-sub">' + esc(status) + '</div></div></div>';
     };
     var live = model.live.map(function(s){
-      var w = s.w;
-      return row(s.name, s.rule, kalshiBoardPfText(w.d30), '30 day PF, n ' + w.d30.n, '<div>7 day PF ' + esc(kalshiBoardPfText(w.d7)) + ' (n ' + w.d7.n + ') · since start ' + esc(kalshiBoardPfText(w.all)) + ' (n ' + w.all.n + ')</div><div>30 day net ' + esc(sg(w.d30.net)) + '</div>', s.kill.lines);
+      return row(s.name, s.rule, kalshiBoardPfText(s.w.d30), '30 day cash PF, n ' + s.w.d30.n, s.kill.lines.join(' '));
     }).join('');
     var deck = '';
     if(model.deck.state !== 'ok'){
@@ -4150,15 +4154,14 @@ kalshiStatusTick();
     } else {
       deck = model.deck.rows.map(function(r){
         var p = r.rep, pf = p.pfFillable, pfText = p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2));
-        var next = p.etaMs === null ? 'Earliest next stage: not enough rows yet' : 'Earliest next stage: ' + kalshiBoardDate(p.etaMs);
-        return row(r.id, r.rule, pfText, 'cash PF, n ' + p.fillable, '<div>' + p.fillable + ' of 150 fillable signals · ' + p.signals + ' logged · day ' + Math.floor(p.days) + ' of 14</div>',
-          ['Status: ' + p.status.split(':')[0] + (p.netCentsPerContract === null ? '' : ', net ' + (p.netCentsPerContract >= 0 ? '+' : '') + p.netCentsPerContract.toFixed(1) + 'c a contract (kill under -1.0c after 50)'), next], { pct: p.fillable / 150 * 100, label: p.fillable + ' of 150 signals' });
+        return row(r.id, r.rule, pfText, 'cash PF, n ' + p.fillable, p.fillable + ' of 150 signals · day ' + Math.floor(p.days) + ' of 14 · ' + p.status.split(':')[0],
+          { pct: p.fillable / 150 * 100, label: p.fillable + ' of 150 signals' });
       }).join('');
     }
-    var ret = model.retired.rows.map(function(r){ return row(r.name, r.note ? '(' + r.note + ')' : 'Stopped', r.pf.toFixed(2), 'cash PF, n ' + r.n, '', ['Comes back when: ' + model.retired.back]); }).join('');
+    var ret = model.retired.rows.map(function(r){ return '<div class="kal-bd-sub">' + esc(r.name) + ' · ' + (typeof r.pf === 'number' ? 'cash PF ' + r.pf.toFixed(2) + ' (n ' + r.n + ')' : '') + (r.note ? (typeof r.pf === 'number' ? ', ' : '') + esc(r.note) : '') + '</div>'; }).join('');
     return '<div class="kal-bd-grp"><div class="kal-bd-h">Live</div>' + live + '</div>' +
       '<div class="kal-bd-grp"><div class="kal-bd-h">On deck <span>shadow only, no money</span></div>' + deck + '</div>' +
-      '<div class="kal-bd-grp"><div class="kal-bd-h">Retired <span>as of ' + esc(model.retired.asOf) + '</span></div>' + ret + '</div>';
+      '<details class="kal-bd-ret"><summary>Retired (' + model.retired.rows.length + ')</summary>' + ret + '<div class="kal-bd-sub">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div></details>';
   }
   var kalshiShadowCache = { at: 0, rows: null, error: '' }, kalshiShadowLoading = false;
   var KAL_SHADOW_TTL = 600000;
@@ -4360,8 +4363,8 @@ kalshiStatusTick();
   // below which its body scrolls. Both are set in Edit layout by dragging the card's bottom right corner or with its buttons, and both are ignored on a phone (one column, every card at its own height).
   // The account card can be moved and folded but never hidden: its Running pill holds Start, Pause and Flatten, which must always be on screen. Saved in this browser and to the account.
   (function(){
-    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['board', 'Strategy board']];
-    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades', board: 'Strategy board' };
+    var OPTIONAL = [['status', 'Bot status'], ['positions', 'Open positions'], ['trades', 'Recent trades'], ['board', 'Strategy pipeline']];
+    var LABELS = { account: 'Account', status: 'Bot status', pnl: 'Account result', positions: 'Open positions', trades: 'Recent trades', board: 'Strategy pipeline' };
     var CARDS = ['account', 'status', 'pnl', 'positions', 'trades', 'board'];   // the default order, which is the look the page had before the rebuild
     var WIDTHS = { account: 12, status: 6, pnl: 6, positions: 12, trades: 12, board: 12 };   // the default spans: the same look as the old Half (6) and Full (12)
     var SPANS = [3, 4, 6, 8, 12], SPAN_TEXT = { 3: '1/4', 4: '1/3', 6: '1/2', 8: '2/3', 12: 'Full' }, SPAN_WORDS = { 3: 'a quarter of the width', 4: 'a third of the width', 6: 'half the width', 8: 'two thirds of the width', 12: 'the full width' };

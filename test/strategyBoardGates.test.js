@@ -1,5 +1,5 @@
 'use strict';
-// SB1 to SB12: the Strategy board card (Nov 9, 2026, the owner: a one glance, phone readable board of every strategy, profit factor first, always on the cash basis).
+// SB1 to SB12: the Strategy pipeline card (Nov 9, 2026, the owner: a one glance, phone readable board of every strategy, profit factor first, always on the cash basis).
 // Consequence: a profit factor shown on the board is the one the bot's own cash arithmetic gives; a kill line or a shadow rule that drifts from the bot's code fails here; an unreadable shadow log never breaks the page; and no dollar figure escapes Privacy view.
 const assert = require('assert');
 const fs = require('fs');
@@ -81,7 +81,7 @@ gates.SB4 = () => {
   const before = exits([1, 1, 1], Date.parse('2026-11-09T15:00:00Z')), after = exits([2, -1, 1], Date.parse('2026-11-09T16:30:00Z'));
   const k = P.kalshiBoardKill('L1', before.concat(after), 0, money);
   assert.strictEqual(k.count, 3, 'only trades from the tripwire time count'); assert.strictEqual(k.pf, 3); assert.strictEqual(k.rolling, null);
-  assert.ok(/next 100 trades from Nov 9 10:22 AM Central/.test(k.lines[0]) && /under 1\.0 proposes a size cut/.test(k.lines[0]) && /rolling 60 under 0\.7 is an alert/.test(k.lines[0]));
+  assert.ok(/^Tripwire 3 of 100 trades, PF 3\.00 \(cut under 1\.0\) · rolling 60 PF n\/a \(alert under 0\.7\)$/.test(k.lines[0]), k.lines[0]); assert.strictEqual(k.lines.length, 1, 'one short status line');
   const many = exits(Array.from({ length: 60 }, (_, i) => (i % 3 === 2 ? -1 : 1)), Date.parse('2026-11-09T17:00:00Z'));
   assert.strictEqual(P.kalshiBoardKill('L1', many, 0, money).rolling, 2, 'rolling 60 PF: 40 wins over 20 losses');
 };
@@ -91,10 +91,10 @@ gates.SB5 = () => {
   const o = exits([1, -1, -1], from).concat(exits([5], Date.UTC(2026, 9, 1)));
   let seen = 0; const m = (x) => { seen++; return money(x); };
   const k = P.kalshiBoardKill('OICORE', o, 0, m);
-  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.net, -1);
-  assert.ok(/^Streak 2 of 24; net floor -\$6\.00 after 40 fills$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 2, 'money used for the floor and the net');
+  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.drawdown, 2, 'peak +1 down to -1 is a drawdown of 2'); assert.strictEqual(k.room, 48);
+  assert.ok(/^Drawdown room \$48\.00 of \$50\.00 · streak 2 of 24$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 2, 'money used for the room and the stop'); assert.strictEqual(k.lines.length, 1);
   const e = P.kalshiBoardKill('EVENT830', exits([-0.5, -0.5, -0.5, -0.5, -0.5]), 0, money);
-  assert.ok(/^Net -\$5\.00 kill proposed, not coded yet; 5 trades$/.test(e.lines[0]), e.lines[0]); assert.strictEqual(e.wins, 0);
+  assert.ok(/^5 trades, 0 won · losing streak 5 of 20$/.test(e.lines[0]), e.lines[0]); assert.strictEqual(e.wins, 0);
 };
 gates.SB6 = () => {
   // the copied kill constants equal the bot's code: a change to the bot's kill rule that the board does not follow fails here
@@ -104,7 +104,8 @@ gates.SB6 = () => {
   assert.strictEqual(P.KAL_BOARD_KILL.OICORE.net, reg.OICORE.killRules.minNet.net);
   assert.strictEqual(P.KAL_BOARD_KILL.OICORE.from, Date.parse(reg.OICORE.reviewedAt + 'T00:00:00Z'));
   assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1'].concat(slot.SLOT_STRATEGIES.map((s) => s.id)), 'the live strategies are L1 and every registered slot strategy');
-  assert.ok(reg.EVENT830.killRules.minNet.net > P.KAL_BOARD_KILL.EVENT830.proposedNet, 'the -$5 line is only a proposal, below the bot\'s own rule');
+  assert.strictEqual(P.KAL_BOARD_KILL.EVENT830.streak, reg.EVENT830.killRules.maxConsecutiveLosses, 'the EVENT830 streak kill is the bot\'s');
+  const L = slot.SLOT_LADDERS.OICORE; assert.strictEqual(P.KAL_BOARD_KILL.OICORE.ddStop, L.stopPerContract * L.steps[0], 'the drawdown stop is the bot\'s at the bottom step (5 x 10 contracts)');
 };
 const SH = (rule, atMs, o) => Object.assign({ rule, atMs, closeMs: atMs + 360000, side: 'yes', price: 0.9, size: 1, wouldFill: true, settled: true, pnl: 0.07 }, o);
 const shFixture = (now) => {
@@ -140,8 +141,8 @@ gates.SB9 = () => {
 };
 gates.SB10 = () => {
   // the card: in the layout (last, optional, full width), with its container; a saved layout without it still gets it appended
-  assert.ok(/data-card="board"/.test(html) && /id="kalBoard"/.test(html) && />Strategy board</.test(html));
-  assert.ok(html.includes("['trades', 'Recent trades'], ['board', 'Strategy board']];"), 'board is an optional card');
+  assert.ok(/data-card="board"/.test(html) && /id="kalBoard"/.test(html) && />Strategy pipeline</.test(html));
+  assert.ok(html.includes("['trades', 'Recent trades'], ['board', 'Strategy pipeline']];"), 'board is an optional card');
   assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades', 'board'\]/.test(html), 'board is the last default card, so an older saved layout gets it appended');
   assert.ok(/board: 12 \}/.test(html), 'default width is full');
   const comp = new Function('APPEND_LAST', fn('complete').replace('function complete', 'return function complete'))({ board: true });
@@ -155,7 +156,7 @@ gates.SB11 = () => {
   const model = (state) => ({ live: lv, deck: { state, rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED });
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
-  assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 5, 'every ON DECK rule says the log is not readable');
+  assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
   assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /kal-bd-bar/.test(P.kalshiBoardHtml(model('ok'), esc, money)) && !/kal-bd-bar/.test(masked), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
