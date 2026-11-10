@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 08:29 PM CT (02:29Z): W-SIZESLIP: order size does not degrade fills; edge per contract unchanged within noise
+
+Registered first (S/w_sizeslip), about 6 cells. Gold cash PF by size (under 8 / 8-12 / 13+): 2.68 / 1.40 / 1.31, net per contract 4.2 / 1.9 / 1.6c, permutation p 0.64, intervals overlap; early-sell rate 2 / 5 / 7 percent; fill rate 66 / 60 / 68 percent; partial fills 1 of 311; slip -0.47 / -0.58 / -0.80c (fills beat first-seen ask). Add-on orders earn 1.64c per contract vs 2.75c without (p 0.67). OICORE: size 10 PF 1.79, size 12 PF 0.58 (n 18), p 0.19; fill rate 83 / 86 percent; slip -1.30 / -1.25c. Depth share logged only for gold. Sizing changes dollars at risk, not the edge; no rule proposed.
+
 ## 2026-11-09 07:28 PM CT (01:28Z): W-DOLLARKILL: incubator dollar kills replayed on real cash record
 
 Registered first (S/w_dollarkill). k = floor(cap / price paid), scaled P&L = per-contract cash result x k, kills on the continuous path from the first order. Base ( cap, demote -10, latch -20), PF first: gold 1.57 n311 +38.5, no kill; OICORE 1.41 n79 +138.4: demote at trade 2 (Oct 30 -10.6), latch at trade 6 (Oct 31 cum -21.4), FALSE KILL (next 73 trades net about +160; buys about 5c so one loss is about -5 and a 28 percent win rate makes a 6-trade run normal; never reaches 150 signals); XRP 0.63 n86 -17.7: demote at trade 34 (Oct 23), latch at trade 81 (Oct 27, -20.1), a true but late kill; Bitcoin 1.09, Ethereum 1.26, Dogecoin 1.45 no kill. Gold, Dogecoin, Bitcoin survive 150-trade windows (0 of 217 starts latch). Sensitivity (0 cap, -20, -40): same events; OICORE latches at trade 6 (-43.0); XRP at trade 68 (-41.9). Conclusion: a fixed dollar latch false-kills a low-price high-variance strategy; per-contract kills or a latch scaled to price paid fit better. Cannot show fill rate, shadow vs fill, slippage at tiny size.
