@@ -18,6 +18,11 @@ const SHADOW_RULES = Object.freeze([
   RULE("ETHL1", "KXETH15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
   // GOLDALL (Nov 9, 2026, the refinement chat's forward test of the gold momentum lead, kalshi-scalper/README.md#SHADOW-GOLDALL): L1's own entry on gold, logged for EVERY signal ordered or not, so the 3 minute move (rise3) can be read from public candles at read time and the pre-registered split (|rise3| at least 0.05, "moving") scored against the unfiltered baseline on the same rows.
   RULE("GOLDALL", "KXGOLD15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "SHADOW-GOLDALL"),
+  // WEEK 2 (Nov 10, 2026; the refinement chat's batch 2 after the fee fix, kalshi-scalper/README.md#SHADOW-WEEK2). Best of 120 cells, so selection bias is likely: SHADOW candidates only, prior low on all four. XRPFAV6 and GOLDHI6S use the optional maxSpread (YES spread at most 2c).
+  RULE("XRPFAV6", "KXXRP15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, "SHADOW-WEEK2"),
+  RULE("GOLDHI6S", "KXGOLD15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330, maxSpread: 0.02 }, "SHADOW-WEEK2"),
+  RULE("BTCHI10", "KXBTC15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, "SHADOW-WEEK2"),
+  RULE("XRPFAV10", "KXXRP15M", { sideRule: "favourite", priceMin: 0.88, priceMax: 0.92, leftMaxSec: 640, leftMinSec: 570 }, "SHADOW-WEEK2"),
 ]);
 
 const OPEN = ["open", "active"];
