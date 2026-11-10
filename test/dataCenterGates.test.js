@@ -62,8 +62,8 @@ gates.PL1 = () => {
 gates.D6 = () => {
   const calls = [];
   const page = () => ({ hidden: true, classList: { add() {}, remove() {}, toggle() {} }, querySelectorAll: () => [], offsetWidth: 1 });
-  const pages = { 'page-brief': page(), 'page-kalshi': page(), 'page-settings': page() };
-  const f = new Function('document', 'window', 'history', 'calls', 'var currentUserIsAdmin = true; var kalshiWatching = false; var pageEnterTimer = null;\nfunction kalshiOnShow(){ calls.push("show"); } function kalshiOnHide(){ calls.push("hide"); } function renderDataCenter(){} function pageEnter(){} var currentPageName; function setPageTitle(){}\n' + fnSource('showPage') + '; return showPage;')(
+  const pages = { 'page-brief': page(), 'page-kalshi': page(), 'page-strategies': page(), 'page-settings': page() };
+  const f = new Function('document', 'window', 'history', 'calls', 'var currentUserIsAdmin = true; var kalshiStratAnim = { pending: false }; function kalshiStratAnimStop(){}; var kalshiWatching = false; var pageEnterTimer = null;\nfunction kalshiOnShow(){ calls.push("show"); } function kalshiOnHide(){ calls.push("hide"); } function renderDataCenter(){} function pageEnter(){} var currentPageName; function setPageTitle(){}\n' + fnSource('showPage') + '; return showPage;')(
     { getElementById: (id) => pages[id] || null, querySelectorAll: () => [], querySelector: () => null }, { scrollTo() {} }, { replaceState() {} }, calls);
   f('kalshi'); f('kalshi');
   assert.deepStrictEqual(calls, ['show'], 'one start for the Bot page however often it is shown');

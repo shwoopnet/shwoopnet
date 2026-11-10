@@ -40,7 +40,9 @@ gates.SF3 = () => {
   assert.ok(/Bitcoin only/.test(slotSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(slotSpan), 'the slot sentence names Bitcoin and nothing else');
   const flowSpan = (menu.match(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(!flowSpan || (/Bitcoin only/.test(flowSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(flowSpan)), 'the FLOW1 sentence names Bitcoin and nothing else (Nov 4, 2026)');
-  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, ''));
+  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/, ''));
+  const xrpSpan = (menu.match(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(/XRPYES10/.test(xrpSpan) && /trades only XRP/.test(xrpSpan) && !/Ethereum|gold|Dogecoin|Bitcoin|AUD|CAD|natural gas/i.test(xrpSpan), 'the XRPYES10 sentence names XRP and nothing else (Nov 10, 2026)');
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(rest), 'the Account card and its rules never name ' + n + ' as anything but paused'));
   const open = text((html.match(/id="kalL1Confirm"[\s\S]*?<\/span>/) || [''])[0]);
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(open), 'the Start confirmation does not mention paused ' + n));

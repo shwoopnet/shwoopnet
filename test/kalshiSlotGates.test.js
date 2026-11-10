@@ -40,14 +40,14 @@ function walk(dir) {
   return out;
 }
 
-gates['the module is admitted with exactly two strategies, OICORE and EVENT830 (Nov 3, 2026), fixed in code, and nothing stored can add or enlarge it; nothing else imports it'] = () => {
+gates['the module is admitted with exactly three strategies, OICORE, EVENT830 and XRPYES10 (Nov 10, 2026), fixed in code, and nothing stored can add or enlarge it; nothing else imports it'] = () => {
   assert.strictEqual(slot.SLOT_ENABLED, true);
   assert.strictEqual(slot.SLOT_EVER_USED, true, 'once admitted, watching is never set back');
   assert.strictEqual(slot.slotActive(), true);
   assert.strictEqual(slot.slotWatch(), true);
-  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-05');
+  assert.strictEqual(slot.SLOT_LAST_REVIEWED_ON, '2026-11-10');
   assert.ok(Object.isFrozen(slot.SLOT_STRATEGIES));
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830'], 'exactly two strategies are admitted (FLOW1 was removed Nov 4, 2026)');
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10'], 'exactly three strategies are admitted (FLOW1 was removed Nov 4, 2026)');
   const o = slot.SLOT_STRATEGIES[0];
   assert.ok(Object.isFrozen(o) && Object.isFrozen(o.entry) && Object.isFrozen(o.exit) && Object.isFrozen(o.killRules) && Object.isFrozen(o.killRules.minNet) && Object.isFrozen(o.scaleIn) && Object.isFrozen(o.series), 'every level is frozen');
   assert.deepStrictEqual(JSON.parse(JSON.stringify(o)), {
@@ -64,11 +64,11 @@ gates['the module is admitted with exactly two strategies, OICORE and EVENT830 (
   assert.ok(o.contractsPerOrder <= slot.SLOT_MAX_CONTRACTS_PER_ORDER, 'never above the per-order ceiling');
   assert.strictEqual(o.exit.holdToSettle, true);
   assert.ok(slot.SLOT_HOLD_ALLOWED.includes(o.id), 'holding to settlement is only for reviewed ids');
-  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830']);
+  assert.deepStrictEqual([...slot.SLOT_HOLD_ALLOWED], ['OICORE', 'EVENT830', 'XRPYES10']);
   assert.ok(o.scaleIn.maxSteps * o.contractsPerOrder <= slot.SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, 'all steps together fit the open contracts ceiling');
   assert.ok(o.reviewedAt <= slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt is not after the last reviewed date');
   assert.ok(o.series.every((x) => slot.SLOT_SERIES_ALLOWED.includes(x)));
-  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830'], 'the production lookup returns exactly the registry entries');
+  assert.deepStrictEqual(slot.activeSlotStrategies().map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10'], 'the production lookup returns exactly the registry entries');
   assert.strictEqual(slot.activeSlotStrategies.length, 0, 'the production lookup takes no flags');
   assert.strictEqual(slot.slotOrderCheck.length, 1);
   // A hand-built or unregistered strategy still cannot enter, whatever it claims.
@@ -88,10 +88,10 @@ gates['the module is admitted with exactly two strategies, OICORE and EVENT830 (
 };
 gates['a switch on alone does nothing: the switch needs a valid registered strategy, and a stored value cannot add one'] = () => {
   // Admitted state: the production switch is on, so the "switch alone" property is proved through the injected-flags path, which is how the gate always proved it.
-  assert.deepStrictEqual(AS({ enabled: true }).map((x) => x.id), ['OICORE', 'EVENT830'], 'with no registry given the only strategies are the shipped ones');
+  assert.deepStrictEqual(AS({ enabled: true }).map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10'], 'with no registry given the only strategies are the shipped ones');
   assert.deepStrictEqual(AS({ enabled: true, registry: [] }), []);
   assert.deepStrictEqual(AS({ enabled: false, registry: [GOOD()] }), [], 'a registry with the switch off is nothing');
-  assert.deepStrictEqual(AS({ enabled: true, registry: slot.SLOT_STRATEGIES }).map((x) => x.id), ['OICORE', 'EVENT830'], 'the shipped registry passes the same validation');
+  assert.deepStrictEqual(AS({ enabled: true, registry: slot.SLOT_STRATEGIES }).map((x) => x.id), ['OICORE', 'EVENT830', 'XRPYES10'], 'the shipped registry passes the same validation');
   assert.strictEqual(W({ enabled: true }, input()).allowed, false);
   assert.strictEqual(W({ enabled: false, registry: [GOOD()] }, input()).allowed, false);
   assert.ok(!/data\(\)|\.get\(|localStorage|request\.data/.test(code(libSrc)));
@@ -106,7 +106,7 @@ gates['validation rejects anything out of bounds'] = () => {
   assert.ok(slot.validateSlotStrategy(GOOD()).ok, slot.validateSlotStrategy(GOOD()).errors.join('; '));
   const mut = (f) => { const s = GOOD(); f(s); return slot.validateSlotStrategy(s); };
   const rejects = [
-    (s) => { s.series = ['KXXRP15M']; }, (s) => { s.series = []; }, (s) => { s.contractsPerOrder = 0; }, (s) => { s.contractsPerOrder = 11; }, (s) => { s.contractsPerOrder = 2.5; },
+    (s) => { s.series = ['KXSOL15M']; }, (s) => { s.series = []; }, (s) => { s.contractsPerOrder = 0; }, (s) => { s.contractsPerOrder = 11; }, (s) => { s.contractsPerOrder = 2.5; },
     (s) => { s.entry.priceMax = 0.99; }, (s) => { s.entry.priceMin = 0.01; }, (s) => { s.entry.leftMaxSec = 899; }, (s) => { s.entry.leftMinSec = 60; },
     (s) => { s.exit.mustExitLeftSec = 10; }, (s) => { s.exit.mustExitLeftSec = 400; }, (s) => { s.exit.stopBid = 0.7; }, (s) => { s.exit.targetBid = 0.8; },
     (s) => { s.scaleIn.maxSteps = 4; }, (s) => { s.scaleIn.sameSideOnly = false; }, (s) => { s.scaleIn.minGapSec = 5; }, (s) => { s.scaleIn.maxSteps = 3; s.contractsPerOrder = 5; },
@@ -263,7 +263,7 @@ gates['the mirrored constants and the settlement rule stay equal to the live one
   const reserved = Object.keys(slot.SLOT_SERIES_RESERVED);
   assert.ok(slot.SLOT_SERIES_ALLOWED.filter((s) => !reserved.includes(s)).every((s) => live.L1_SERIES.includes(s)));
   assert.ok(reserved.every((s) => !live.L1_SERIES.includes(s)), 'no reserved market is an L1 market');
-  assert.deepStrictEqual(slot.SLOT_SERIES_ALLOWED, ['KXBTC15M', 'KXETH15M', 'KXGOLD15M', 'KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M']);
+  assert.deepStrictEqual(slot.SLOT_SERIES_ALLOWED, ['KXBTC15M', 'KXETH15M', 'KXGOLD15M', 'KXXRP15M', 'KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M']);
   assert.deepStrictEqual(reserved.map((s) => slot.SLOT_SERIES_RESERVED[s]), reserved.map(() => 'EVENT830'), 'reserved for EVENT830 only');
 };
 gates['the L1 exit watch and settle sweep still read only L1 orders, and the live library has not been edited to know about the slot'] = () => {

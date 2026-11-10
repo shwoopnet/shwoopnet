@@ -96,7 +96,7 @@ gates.EA9 = () => {   // wiring: no key, no order, no new secret, endpoint or sc
   const lib = fs.readFileSync(path.join(root, 'functions', 'kalshiExitAlarmLib.js'), 'utf8');
   assert.ok(!/require\(|fetch\(|liveRequest|KALSHI_LIVE|pem|keyId|\/portfolio|\.set\(|\.add\(/.test(lib.replace(/^\/\/.*$/gm, '')), 'the library imports nothing, calls nothing and writes nothing itself');
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
-  assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['marketTapeTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiPaperTick', 'kalshiBookRecorder'], 'no new scheduled function');
+  assert.deepStrictEqual([...idx.matchAll(/exports\.(\w+) = onSchedule\(/g)].map((x) => x[1]), ['marketTapeTick', 'kalshiLiveExit', 'kalshiLiveArmed', 'kalshiGoldKillCheck', 'kalshiPaperTick', 'kalshiBookRecorder'], 'no new scheduled function');
   const armed = idx.slice(idx.indexOf('exports.kalshiLiveArmed = onSchedule('), idx.indexOf('exports.kalshiPaperTick') > 0 ? idx.indexOf('// ---- The paper tracker') : undefined);
   const call = armed.slice(armed.indexOf('exitAlarm.runExitAlarm('));
   assert.ok(call.length > 0 && /try \{[\s\S]{0,200}exitAlarm\.runExitAlarm/.test(armed), 'called from the minute function, inside its own try');
