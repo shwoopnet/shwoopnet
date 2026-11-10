@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 03:16 AM CT (09:16Z): W-INDEP2 and W-INDEP rescore: XRP full window, Bitcoin 78 percent
+
+XRP independent window (June to early Sept, 12 pre-registered dates) 1,147 of 1,152 windows, PF (n) at +0c / +1c: XRPYES10 1.91 (70) / 1.66; XRPFAV6 1.645 (137, 129 wins) / 1.46, net 3.4c per contract; XRPFAV10 1.71 (70) / 1.53. The interim XRPFAV6 0.99 (n42) was the time-of-day skew (closes 00:00 to 08:15 UTC only); on the full window it clears the bar at both slips. Bitcoin independent window 1,206 of 1,536 windows: BTCHI6 1.13 (268) at +0c, 0.91 at +1c (net +0.55c / -0.38c per contract): fails the 1.3 bar (interim 1.42 on n137 did not hold); BTCHI10 1.27 (66) / 1.05. Gold independent window done earlier (GOLDALL 1.60 / 1.36, GOLDHI6S 1.68 / 1.35).
+
 ## 2026-11-10 02:31 AM CT (08:31Z): W-INDEP3: gold shadow rules on an independent Aug 13 to Sep 1 window
 
 Registered first (S/w_indep3). Pull hit the 2 h cap: 1,358 of 2,153 listed pre-2026-09-01 windows (1,350 readable), covering Aug 13 to Sep 1; Aug 6 to 12 and the earlier gold windows not reached (restart in S/w_indep3/STATUS.md). Fee 0.07*p*(1-p), hold to settlement, PF (n) at +0c / +1c: GOLDALL (same signal as the unfiltered L1 baseline) 1.60 (439) / 1.36 (439); GOLDHI6S 1.68 (265) / 1.35 (265). Both clear PF 1.3, n 40 at both slips; +1c is close. Exploratory, GOLDALL by abs rise3 (live definition, 0.05 cut): at least 0.05 1.78 (334) / 1.52; under 0.05 1.21 (105) / 1.03. Sample over 100 signals but about 3 weeks. Rules were picked on Sep to Nov data so this window is independent of the picking. Net thin: +1.5c a contract for GOLDALL and +1.0c for GOLDHI6S at +1c. N unchanged.
