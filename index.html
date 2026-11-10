@@ -1013,6 +1013,18 @@
   .sp-act li{ padding:9px 0; border-top:1px solid var(--border); min-width:0; } .sp-act li:first-child{ border-top:0; padding-top:0; } .sp-act-t{ font-size:13px; font-weight:700; overflow-wrap:anywhere; } .sp-act li.sp-act-critical .sp-act-t::before{ content:'! '; }
   @media (min-width:700px){ .sp-sum.kal-card{ flex-direction:row; align-items:center; gap:28px; } .sp-sum .sp-sum-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); flex:1; } .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-pf b{ font-size:60px; } }
   @media (max-width:420px){ .sp-pf b{ font-size:38px; } .sp-main{ grid-template-columns:minmax(0,1fr) 104px; } .sp-gauge svg{ width:104px; height:58px; } .sp-flow{ grid-template-columns:minmax(0,1fr) 14px minmax(0,1fr) 14px minmax(0,1fr); } .sp-arrow{ width:14px; } .sp-stage{ padding:10px 6px 12px; } }
+  /* Strategies page animation (Nov 10, 2026, the owner: animated visuals). One shot, only while #page-strategies carries sp-play (JS adds it for about 1.9 s when the page is shown, never under reduced motion): the gauges and lines draw by stroke-dashoffset, the bars and chips move by transform and opacity. No layout property is animated. */
+  @keyframes spBar{ from{ transform:scaleX(0); } to{ transform:none; } }
+  @keyframes spChip{ from{ opacity:0; transform:translateX(var(--sp-from,-24px)); } to{ opacity:1; transform:none; } }
+  @keyframes spArrow{ from{ opacity:.15; transform:translateX(-5px); } to{ opacity:1; transform:none; } }
+  #page-strategies.sp-play .sp-arc{ stroke-dasharray:1; animation: lineDraw 700ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
+  #page-strategies.sp-play .sp-spk{ stroke-dasharray:1; animation: lineDraw 900ms ease-out 250ms backwards; }
+  #page-strategies.sp-play .sp-bar i{ transform-origin:left center; animation: spBar 800ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
+  #page-strategies.sp-play .sp-stage:nth-child(1) .sp-chip{ animation: spChip 450ms ease-out backwards; }
+  #page-strategies.sp-play .sp-stage:nth-child(3) .sp-chip{ --sp-from:-60px; animation: spChip 450ms ease-out 350ms backwards; }
+  #page-strategies.sp-play .sp-stage:nth-child(5) .sp-chip{ --sp-from:-60px; animation: spChip 450ms ease-out 700ms backwards; }
+  #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(2){ animation: spArrow 350ms ease-out 250ms backwards; }
+  #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(4){ animation: spArrow 350ms ease-out 600ms backwards; }
   .kal-console [data-card="positions"]{ align-self:start; }
   .kal-console [data-card="trades"]{ align-self:start; }
   /* The Account card (the owner, Oct 26, 2026, option A): the balance is the hero with the day's result under it, and stake, pool and loss stop are three soft tiles beside it. The server-rendered pieces keep their own elements;
@@ -1071,6 +1083,7 @@
   .page.enter .kal-chart svg path[pathLength]{ stroke-dasharray:1; animation: lineDraw 1.2s ease-out .2s backwards; }
   .page.enter .kal-chart svg rect[data-mark]{ transform-box: fill-box; transform-origin: center; animation: markPop .5s cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 18ms + 150ms); }
   @media (prefers-reduced-motion: reduce){
+    #page-strategies.sp-play .sp-arc, #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i, #page-strategies.sp-play .sp-stage:nth-child(1) .sp-chip, #page-strategies.sp-play .sp-stage:nth-child(3) .sp-chip, #page-strategies.sp-play .sp-stage:nth-child(5) .sp-chip, #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(2), #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(4){ animation: none; stroke-dasharray:none; }
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
@@ -1110,6 +1123,7 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg path[pathLength]{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies.sp-play .sp-arc, [data-reduce-motion="true"] #page-strategies.sp-play .sp-spk, [data-reduce-motion="true"] #page-strategies.sp-play .sp-bar i, [data-reduce-motion="true"] #page-strategies.sp-play .sp-stage:nth-child(1) .sp-chip, [data-reduce-motion="true"] #page-strategies.sp-play .sp-stage:nth-child(3) .sp-chip, [data-reduce-motion="true"] #page-strategies.sp-play .sp-stage:nth-child(5) .sp-chip, [data-reduce-motion="true"] #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(2), [data-reduce-motion="true"] #page-strategies.sp-play .sp-flow > .sp-arrow:nth-child(4){ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
   [data-reduce-motion="true"] .kal-foldbtn > i{ transition: none; }
   [data-reduce-motion="true"] .tape-set + .tape-set{ display:none; }
@@ -1742,6 +1756,7 @@
                 <div class="changelog-day">Nov 10</div>
                 <ul class="changelog-list">
                   <li>Trading: gold now has a coded kill and return (the owner, Nov 10; draft until merged and deployed). It switches gold off by itself, with no automatic restart, if gold falls $58.75 (fixed, 6% of the $979.25 base when written) below its own peak or is down $20 after 40 trades; three early warnings (a weak run of 60 or 100 trades, three early sells in 40) only tell you. An open gold position is still sold at the 25c line, and only a reviewed edit brings gold back</li>
+                  <li>Strategies page animation (the owner asked for a little more life): when you open the page the kill gauges and the signals bars fill, the profit factor figures count up from 0.00 to their true value in under a second, the Shadow, Live and Retired chips slide along the arrows, and the trend lines draw in, once each time you open it and never on the minute's refresh. It is off under reduced motion (the true figures show at once), black and white, and changes no number.</li>
                   <li>Strategies page: a summary bar on top (blended profit factor, net cash, today, 7 days, money at risk now and open positions), a Details button under each strategy (a cumulative cash line, win rate, average win and loss, fees, best and worst day and the last 8 trades; a smaller panel for the shadow rules), and a timeline of the reads still to come with recent warnings, stops and session starts</li>
                   <li>New Strategies page (admin only, a fourth entry in the navigation, beside Bot): a lifecycle of Shadow, Live and Retired with each strategy as a chip, then one tile per strategy with its cash profit factor first, a trend line (rolling 30 trade cash PF for the live ones, cumulative cash PF by signal for the shadow rules), a kill distance gauge (OICORE's drawdown room, the gold tripwire count, EVENT830's losing streak), signals out of 150 for the shadow rules, a Sizing ladder row with the owner's static label per strategy (gold: balance ladder held at 15; OICORE: own ladder, step 10 of 10, 12, 15, 20, 30; EVENT830: 1 contract; shadow rules: next 3 contracts as a probe), and an expandable Rules line with how it is implemented, what kills it automatically and what must be true for it to return (EVENT830's return rule is shown as not written yet); Retired is one collapsed line; page only, no order, Privacy view masks the dollars</li>
                   <li>Trading: a third small probe in the second strategy slot, XRPYES10 (the owner granted the favourite-and-hold exception for it on Nov 10; it trades when merged and deployed): 3 contracts of XRP YES at 88c to 97c about 10 minutes before the close, held to settlement, with its own stop of 3 losses in a row or a $15 net loss</li>
@@ -4355,7 +4370,7 @@ kalshiStatusTick();
     var sg = function(x){ return (x > 0 ? '+' : '') + money(x); };
     var cell = function(label, val){ return '<div class="sp-sum-c"><span>' + esc(label) + '</span><b>' + esc(val) + '</b></div>'; };
     var pf = kalshiBoardPfText(s.w30);
-    return '<div class="kal-card sp-sum"><div class="sp-sum-pf"><b>' + esc(pf) + '</b><span>All strategies, cash PF over 30 days, n ' + s.w30.n + '</span></div><div class="sp-sum-grid">' +
+    return '<div class="kal-card sp-sum"><div class="sp-sum-pf"><b' + kalshiStratPfAttr(pf, esc) + '>' + esc(pf) + '</b><span>All strategies, cash PF over 30 days, n ' + s.w30.n + '</span></div><div class="sp-sum-grid">' +
       cell('Net cash', sg(s.net)) + cell('Today', sg(s.today)) + cell('Last 7 days', sg(s.d7)) + cell('At risk now', money(s.atRisk)) + cell('Open positions', String(s.open)) + '</div></div>';
   }
   var kalshiStratDayText = function(k){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(k)); return m ? new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : ''; };
@@ -4389,12 +4404,12 @@ kalshiStatusTick();
     var sparkHtml = function(vals, label){
       var sp = kalshiStratSpark(vals, 300, 48);
       if(!sp){ return '<div class="sp-spark"><div class="sp-spark-cap"><span>' + esc(label) + '</span><span>not enough trades yet</span></div></div>'; }
-      return '<div class="sp-spark"><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc(label + ', ' + sp.n + ' points, last ' + vals[vals.length - 1].toFixed(2)) + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="sp-spark-cap"><span>' + esc(label) + '</span><span>dashed line is 1.0</span></div></div>';
+      return '<div class="sp-spark"><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc(label + ', ' + sp.n + ' points, last ' + vals[vals.length - 1].toFixed(2)) + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path class="sp-spk" pathLength="1" d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="sp-spark-cap"><span>' + esc(label) + '</span><span>dashed line is 1.0</span></div></div>';
     };
     var gaugeHtml = function(g){
       if(!g){ return '<div></div>'; }
       var arc = kalshiStratArc(g.frac);
-      return '<div class="sp-gauge"><svg viewBox="0 0 120 66" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="var(--border)" stroke-width="8" stroke-linecap="round"/>' + (arc ? '<path d="' + arc + '" fill="none" stroke="var(--paper)" stroke-width="8" stroke-linecap="round"/>' : '') + '</svg><div class="sp-gauge-big">' + esc(g.big) + '</div><div class="sp-gauge-cap">' + esc(g.cap) + '</div></div>';
+      return '<div class="sp-gauge"><svg viewBox="0 0 120 66" preserveAspectRatio="xMidYMax meet" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><path d="M 10 60 A 50 50 0 0 1 110 60" fill="none" stroke="var(--border)" stroke-width="8" stroke-linecap="round"/>' + (arc ? '<path class="sp-arc" pathLength="1" d="' + arc + '" fill="none" stroke="var(--paper)" stroke-width="8" stroke-linecap="round"/>' : '') + '</svg><div class="sp-gauge-big">' + esc(g.big) + '</div><div class="sp-gauge-cap">' + esc(g.cap) + '</div></div>';
     };
     var ladderOf = function(id, shadow){ return '<div class="sp-ladder"><b>Sizing ladder</b><span>' + esc(shadow ? KAL_BOARD_LADDER.shadow : (KAL_BOARD_LADDER[id] || KAL_BOARD_LADDER.shadow)) + '</span></div>'; };
     var openSet = model.open || {};
@@ -4402,7 +4417,7 @@ kalshiStatusTick();
     var tile = function(o){
       return '<article class="kal-card sp-tile"><div class="sp-th"><div><span class="sp-name">' + esc(o.name) + '</span>' + (o.name === o.id ? '' : '<span class="sp-id">' + esc(o.id) + '</span>') + '</div><span class="sp-pill">' + esc(o.stage) + '</span></div>' +
         '<div class="sp-rule">' + esc(o.rule) + '</div>' +
-        '<div class="sp-main"><div class="sp-pf"><b>' + esc(o.pf) + '</b><span>' + esc(o.pfLabel) + '</span></div>' + gaugeHtml(o.gauge) + '</div>' +
+        '<div class="sp-main"><div class="sp-pf"><b' + kalshiStratPfAttr(o.pf, esc) + '>' + esc(o.pf) + '</b><span>' + esc(o.pfLabel) + '</span></div>' + gaugeHtml(o.gauge) + '</div>' +
         (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) +
         (o.bar === undefined ? '' : '<div><div class="sp-bar" role="img" aria-label="' + esc(o.bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, o.bar.pct)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(o.bar.label) + '</span><span>' + esc(o.bar.right) + '</span></div></div>') +
         '<div class="sp-sub">' + esc(o.status) + '</div>' + ladderOf(o.id, o.stage === 'Shadow') + (o.detail ? detailsOf(o.stage + o.id, o.detail) : '') + rulesHtml(o.rules) + '</article>';
@@ -4450,6 +4465,48 @@ kalshiStatusTick();
     try { api.readKalshiShadowRows(Date.now() - 45 * KAL_BOARD_DAY).then(function(rows){ kalshiShadowCache.rows = rows; kalshiShadowCache.error = ''; done(); }, function(err){ kalshiShadowCache.rows = null; kalshiShadowCache.error = String((err && (err.code || err.message)) || 'unknown').replace(/[^\w\/ .-]/g, '').slice(0, 60); done(); }); }
     catch(e){ kalshiShadowLoading = false; kalshiShadowCache.error = 'read'; }
   }
+  /* STRAT-ANIM-BEGIN
+     Strategies page animation (Nov 10, 2026, the owner's explicit exception to "no count-up on a figure", limited to this page's profit factor figures).
+     Everything that animates a figure lives between these two markers, and test/strategiesAnimationGates.test.js SA1 to SA12 pins the scope: only #stratBody, only
+     elements marked data-pf. The text of such a figure is the TRUE value before the animation, after it and in the markup; aria-label carries it too. Nothing starts
+     under reduced motion. One requestAnimationFrame loop for 700 ms and one timeout; no interval, no storage, no network. */
+  var KAL_STRAT_COUNT_MS = 700, KAL_STRAT_PLAY_MS = 1900;
+  var kalshiStratAnim = { pending: false, raf: 0, timer: 0 };
+  // Ease out cubic: 0 at 0 and 1 at 1, clamped.
+  function kalshiStratEase(t){ var x = Math.max(0, Math.min(1, Number(t) || 0)); return 1 - Math.pow(1 - x, 3); }
+  // Attributes for a profit factor figure that may count up: only a plain number like 1.23 counts; "n/a" and "no losses" never animate.
+  function kalshiStratPfAttr(text, esc){
+    var t = String(text);
+    return /^\d{1,3}\.\d{2}$/.test(t) ? ' data-pf="' + esc(t) + '" role="img" aria-label="' + esc('Cash profit factor ' + t) + '"' : '';
+  }
+  // The text shown t of the way through the count: the figure's own digits, never a value past the true one.
+  function kalshiStratCountText(trueText, t){ var v = parseFloat(trueText); return t >= 1 || !isFinite(v) ? String(trueText) : (v * kalshiStratEase(t)).toFixed(2); }
+  function kalshiStratAnimStop(page){
+    if(kalshiStratAnim.raf){ cancelAnimationFrame(kalshiStratAnim.raf); kalshiStratAnim.raf = 0; }
+    if(kalshiStratAnim.timer){ clearTimeout(kalshiStratAnim.timer); kalshiStratAnim.timer = 0; }
+    if(page){
+      page.classList.remove('sp-play');
+      var b = page.querySelectorAll('#stratBody [data-pf]');
+      for(var i = 0; i < b.length; i++){ b[i].textContent = b[i].getAttribute('data-pf'); }
+    }
+  }
+  // Start the one-shot play: gauges, bars and lines draw by CSS, the figures count up by one animation frame loop, then everything is cleared.
+  function kalshiStratAnimStart(page){
+    kalshiStratAnimStop(page);
+    if(!page || motionReduced()){ return; }
+    var figs = page.querySelectorAll('#stratBody [data-pf]'), t0 = 0;
+    page.classList.remove('sp-play'); void page.offsetWidth; page.classList.add('sp-play');
+    kalshiStratAnim.timer = setTimeout(function(){ kalshiStratAnim.timer = 0; page.classList.remove('sp-play'); }, KAL_STRAT_PLAY_MS);
+    var step = function(now){
+      if(!t0){ t0 = now; }
+      var f = Math.min(1, (now - t0) / KAL_STRAT_COUNT_MS);
+      for(var i = 0; i < figs.length; i++){ figs[i].textContent = kalshiStratCountText(figs[i].getAttribute('data-pf'), f); }
+      kalshiStratAnim.raf = f < 1 ? requestAnimationFrame(step) : 0;
+    };
+    for(var j = 0; j < figs.length; j++){ figs[j].textContent = kalshiStratCountText(figs[j].getAttribute('data-pf'), 0); }
+    kalshiStratAnim.raf = requestAnimationFrame(step);
+  }
+  /* STRAT-ANIM-END */
   function renderStrategiesPage(){
     var el = document.getElementById('stratBody'), page = document.getElementById('page-strategies');
     if(!el || !page || page.hidden){ return; }
@@ -4471,6 +4528,9 @@ kalshiStatusTick();
     var l1 = live.filter(function(x){ return x.id === 'L1'; })[0];
     var timeline = kalshiStratTimeline(KAL_STRAT_TIMELINE, now, l1 && l1.kill ? l1.kill.count : NaN, kalDayKey);
     el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, retired: KAL_BOARD_RETIRED, summary: summary, timeline: timeline, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
+    // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
+    kalshiStratAnimStop(page);
+    if(kalshiStratAnim.pending && (kalshiShadowCache.rows || kalshiShadowCache.error)){ kalshiStratAnim.pending = false; kalshiStratAnimStart(page); }
     kalshiShadowEnsure();
   }
   (function(){ var body = document.getElementById('stratBody'); if(body){ body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && d.classList.contains('sp-det') && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; } }, true); } })();
@@ -5213,7 +5273,7 @@ kalshiStatusTick();
     document.getElementById('page-brief').hidden = (name !== 'brief');
     document.getElementById('page-kalshi').hidden = (name !== 'kalshi');
     document.getElementById('page-strategies').hidden = (name !== 'strategies');
-    if(name === 'strategies'){ renderStrategiesPage(); }
+    if(name === 'strategies'){ kalshiStratAnim.pending = true; renderStrategiesPage(); } else { kalshiStratAnim.pending = false; kalshiStratAnimStop(document.getElementById('page-strategies')); }
     var appEl = document.querySelector('.app'); if(appEl){ appEl.classList.toggle('app-wide', name === 'kalshi'); }
     document.getElementById('page-settings').hidden = (name !== 'settings');
     document.querySelectorAll('.nav-item[data-page]').forEach(function(item){
