@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 02:30 AM CT (08:30Z): OICORE stop room within 25 percent: 10.67 of 50 (21 percent) at 02:30 CT Nov 10
+
+Booked net +11.00 (was +13.84), drawdown from own peak 39.33 (peak 50.33), stop 50 at step 10, room 10.67. Net kill about 17 away. Told main; options unchanged (leave, or pre-decide re-arm rule A or B). Independent pulls: BTC 661 of 1,536, XRP 1,147 of 1,152, gold 1,358 rows; pullers had died, restart per STATUS.md.
+
 ## 2026-11-10 01:31 AM CT (07:31Z): W-RERUN4: Ethereum shadow rules on 4.3 weeks of candles, ETHNO6 fails
 
 Registered first (S/w_rerun4), same cells as W-RERUN3, N unchanged. Copy 3,108 rows, 2,609 settled windows, 10-11 to 11-10 (4.3 weeks), halves split 10-26, 98 windows overlap live fills. PF (n) half 1 / half 2: ETHNO6 +0c 1.04 (181) / 0.72 (189), live excluded 0.84 (139) / 0.72 (189); +1c 0.89 / 0.61 (excluded 0.72 / 0.61). ETHL1 +0c 0.90 (361) / 0.75 (383), +1c 0.77 / 0.64. ETH F5 cell (favourite 0.88-0.97 10m spread at most 0.02) +0c 1.07 (240) / 1.04 (177), +1c 0.92 / 0.90: the W-RERUN3 +0c pass (1.30 / 3.07) is gone. Portion unseen by W-RERUN3 (windows from 10-19, 1,923 to 11-10; no usable windows before 10-11, earlier rows have empty candles): ETHNO6 +0c PF 0.76 (n 277), +1c 0.64; excluding live fills 0.68 (254) / 0.58 (254). Does not hold on its own.
