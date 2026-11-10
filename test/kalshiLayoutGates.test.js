@@ -20,9 +20,9 @@ gates.Y2 = () => {
   assert.ok(/if\(!editing \|\| drag \|\|/.test(iife) && /grid\.classList\.contains\('kal-unlocked'\)/.test(iife), 'dragging, the arrows and the width toggle do nothing outside Edit layout');
   assert.ok(!/draggable/.test(iife) && /data-move/.test(iife) && /addEventListener\('pointerdown'/.test(iife), 'pointer drag (mouse and touch), with arrows for the keyboard');
   assert.ok(/def\.indexOf\(k\) > -1/.test(iife), 'an unknown card name in a saved order is ignored');
-  assert.ok(/def\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ if\(APPEND_LAST\[k\]\)\{ want\.push\(k\); return; \} var prev = i > 0 \? want\.indexOf\(def\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end (except a card in APPEND_LAST, the Strategy board of Nov 9, 2026, which goes last)');
+  assert.ok(/def\.forEach\(function\(k, i\)\{ if\(want\.indexOf\(k\) < 0\)\{ var prev = i > 0 \? want\.indexOf\(def\[i - 1\]\) : -1; want\.splice\(prev \+ 1, 0, k\); \}/.test(iife), 'a card the saved order does not mention keeps its place: right after the card before it by default, not at the end');
   assert.ok(!/OPTIONAL = \[\['strategies'/.test(html), 'Strategies is part of the Account card now, so it is not a hideable card of its own');
-  assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades', 'board'\];/.test(html), 'account, status, result line, positions, trades, then the Strategy board (added Nov 9, 2026) is the default order');
+  assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades'\];/.test(html), 'account, status, result line, positions, trades is the default order');
   assert.ok(!/OPTIONAL = \[[^\]]*'account'/.test(html), 'the account card still cannot be hidden, only moved');
 };
 
@@ -59,7 +59,7 @@ gates.Y5 = () => {
   // Nov 5, 2026: the rail and main wrappers are gone; the cards are one list on one grid, in the default order (the owner: "i don't have much say in where each card goes").
   assert.ok(!/class="kal-rail"|class="kal-main"/.test(seg), 'no rail or main wrapper');
   const names = (t) => [...t.matchAll(/data-card="(\w+)"/g)].map((m) => m[1]);
-  assert.deepStrictEqual(names(seg), ['account', 'status', 'pnl', 'positions', 'trades', 'board'], 'one list (the Strategy board, Nov 9, 2026, is last): the account strip (with the Strategies table), the bot status (with the loss stop), the result line, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
+  assert.deepStrictEqual(names(seg), ['account', 'status', 'pnl', 'positions', 'trades'], 'one list: the account strip (with the Strategies table), the bot status (with the loss stop), the result line, the positions and the trades (the market list left the Bot page on Oct 23, 2026; the Performance card on Oct 21, 2026)');
   const rail = [null, seg]; const main = seg.slice(seg.indexOf('data-card="pnl"'));
   const acct = /data-card="account">([\s\S]*?)\n      <div class="kal-card kal-compact" data-w="6" data-card="status">/.exec(seg)[1];   // data-w is a span of 12 columns since Nov 5, 2026 (6 is the old Half)
   for (const id of ['kalL1Pill', 'kalL1Start', 'kalBotHalt', 'kalFlatten', 'kalL1Status']) assert.ok(acct.indexOf('id="' + id + '"') > -1, id + ' lives in the account card, so start, pause and flatten are always one click away');
@@ -427,7 +427,7 @@ gates.Y17 = () => {
   const admin = html.slice(html.indexOf('function applyAdminUI(){'), html.indexOf("document.getElementById('generateInviteBtn')"));
   assert.ok(/currentUserIsAdmin && landingKalshiPending/.test(admin) && /!briefPage\.hidden && Date\.now\(\) - landingLoadedAt < 20000/.test(admin) && /showPage\('kalshi'\)/.test(admin), 'the move happens only for the admin, only if still on the first screen, and only within 20 seconds of loading');
   assert.ok(/pref === 'kalshi' && currentUserIsAdmin \? 'kalshi' : 'brief'/.test(html), 'the logo takes the admin home to Kalshi too, and anyone else to the brief');
-  assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi page, whatever is saved');
+  assert.ok(/if\(\(name === 'kalshi' \|\| name === 'strategies'\) && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(html), 'a non-admin can never be shown the Kalshi or the Strategies page (Nov 10, 2026), whatever is saved');
 };
 
 // The Account card says what one order risks right now (contracts times the latest order's cost per contract), and the profit tile is named so it cannot be mistaken for it.

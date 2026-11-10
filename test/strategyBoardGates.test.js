@@ -1,5 +1,5 @@
 'use strict';
-// SB1 to SB12: the Strategy pipeline card (Nov 9, 2026, the owner: a one glance, phone readable board of every strategy, profit factor first, always on the cash basis).
+// SB1 to SB13: the Strategy pipeline card (Nov 9, 2026; on its own Strategies page since Nov 10, 2026, the owner: "an entirely new page"; the card is gone from the Bot page, the owner: a one glance, phone readable board of every strategy, profit factor first, always on the cash basis).
 // Consequence: a profit factor shown on the board is the one the bot's own cash arithmetic gives; a kill line or a shadow rule that drifts from the bot's code fails here; an unreadable shadow log never breaks the page; and no dollar figure escapes Privacy view.
 const assert = require('assert');
 const fs = require('fs');
@@ -28,7 +28,7 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiBoardHtml'];
+const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratSpark', 'kalshiStratArc', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiBoardHtml'];
 const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + names.map(fn).join('\n');
 const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
@@ -140,14 +140,13 @@ gates.SB9 = () => {
   assert.ok(done.fillable >= 100 && done.etaMs >= now - 1);
 };
 gates.SB10 = () => {
-  // the card: in the layout (last, optional, full width), with its container; a saved layout without it still gets it appended
-  assert.ok(/data-card="board"/.test(html) && /id="kalBoard"/.test(html) && />Strategy pipeline</.test(html));
-  assert.ok(html.includes("['trades', 'Recent trades'], ['board', 'Strategy pipeline']];"), 'board is an optional card');
-  assert.ok(/var CARDS = \['account', 'status', 'pnl', 'positions', 'trades', 'board'\]/.test(html), 'board is the last default card, so an older saved layout gets it appended');
-  assert.ok(/board: 12 \}/.test(html), 'default width is full');
-  const comp = new Function('APPEND_LAST', fn('complete').replace('function complete', 'return function complete'))({ board: true });
-  assert.ok(comp(['account', 'status', 'pnl', 'positions', 'trades'], ['account', 'status', 'pnl', 'positions', 'trades', 'board']).slice(-1)[0] === 'board', 'a layout saved before the card existed gets it last');
-  assert.ok(/renderKalshiPnl\(\);\s*renderKalshiBoard\(\);/.test(html), 'redrawn by the existing Bot page render, no timer of its own');
+  // Nov 10, 2026: the card became a page. It is NOT on the Bot page any more (no card, no layout entry, no render call), and a saved layout that still lists it is cleaned by complete().
+  assert.ok(!/data-card="board"/.test(html) && !/id="kalBoard"/.test(html) && !/renderKalshiBoard/.test(html), 'the Bot page has no Strategy pipeline card any more');
+  assert.ok(!/\['board', 'Strategy pipeline'\]/.test(html) && /var CARDS = \['account', 'status', 'pnl', 'positions', 'trades'\];/.test(html), 'and the Bot layout lists five cards');
+  assert.ok(/id="page-strategies"/.test(html) && /id="stratBody"/.test(html), 'the page and its container exist');
+  const comp = new Function(fn('complete').replace('function complete', 'return function complete'))();
+  assert.deepStrictEqual(comp(['account', 'board', 'status', 'pnl', 'positions', 'trades'], ['account', 'status', 'pnl', 'positions', 'trades']), ['account', 'status', 'pnl', 'positions', 'trades'], 'a layout saved while the card existed drops it');
+  assert.ok(/renderStrategiesPage\(\);/.test(fn('showPage')) && /renderStrategiesPage\(\); \}/.test(fn('kalshiFeedRender')), 'drawn when the page is shown and on each feed change, no timer of its own');
 };
 gates.SB11 = () => {
   // every dollar goes through money, every value is escaped, and an unreadable shadow log shows the fallback instead of breaking the page
@@ -157,12 +156,12 @@ gates.SB11 = () => {
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
-  assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /kal-bd-bar/.test(P.kalshiBoardHtml(model('ok'), esc, money)) && !/kal-bd-bar/.test(masked), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
+  assert.ok(/Comes back when: a 14 day cool off/.test(masked) && /sp-bar/.test(P.kalshiBoardHtml(model('ok'), esc, money)) && !/sp-bar/.test(masked), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
   assert.ok(!/<img|<script/.test(evil) && evil.includes('&#60;b&#62;') && evil.includes('&#60;i&#62;') && evil.includes('&#60;u&#62;'), 'every value is escaped');
-  const body = fn('renderKalshiBoard');
+  const body = fn('renderStrategiesPage');
   assert.ok(/kalshiMoney/.test(body) && !/toFixed\(2\)[^;]*\$|'\$'/.test(fn('kalshiBoardHtml') + fn('kalshiBoardKill')), 'no dollar sign typed into the board text');
   assert.ok(/kalshiShadowCache\.error \? 'unreadable'/.test(body), 'a failed read is a state, not an exception');
 };
@@ -181,13 +180,13 @@ gates.SB13 = () => {
 };
 gates.SB12 = () => {
   // no timer, no write, no storage: the board only reads, and the shadow read is cached for ten minutes without a retry loop
-  const code = [fn('renderKalshiBoard'), fn('kalshiShadowEnsure'), fn('kalshiBoardHtml'), fn('kalshiBoardShadow')].join('\n');
+  const code = [fn('renderStrategiesPage'), fn('kalshiShadowEnsure'), fn('kalshiBoardHtml'), fn('kalshiBoardShadow')].join('\n');
   assert.ok(!/setInterval|setTimeout|localStorage|setDoc|updateDoc|addDoc|syncUserSetting/.test(code), 'no timer, storage or write in the board code');
   assert.ok(/KAL_SHADOW_TTL = 600000/.test(html) && /kalshiShadowCache\.at = Date\.now\(\)/.test(fn('kalshiShadowEnsure')), 'the attempt time is stamped before the read, so a refusal is not retried until the cache expires');
   const mod = html.slice(html.indexOf('readKalshiShadowRows'), html.indexOf('readKalshiShadowRows') + 1500);
   assert.ok(/collection\(db, 'kalshiShadowRows'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'a plain read of the shadow log');
   assert.ok(/match \/kalshiShadowRows\/\{id\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/.test(fs.readFileSync(path.join(root, 'firestore.rules'), 'utf8')), 'admin read, no client write');
-  assert.ok(/id="kalBoard"/.test(html) && /@media/.test(html) && /\.kal-bd-row\{ display:grid; grid-template-columns:96px minmax\(0,1fr\)/.test(html), 'rows are a grid that shrinks, so a phone never scrolls sideways');
+  assert.ok(/\.sp-grid\{ display:grid; grid-template-columns:repeat\(auto-fill,minmax\(min\(100%,300px\),1fr\)\)/.test(html) && /\.sp-main\{ display:grid; grid-template-columns:minmax\(0,1fr\) 112px/.test(html), 'tiles are a grid that shrinks, so a phone never scrolls sideways');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
