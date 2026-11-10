@@ -35,21 +35,21 @@ def do_list():
             if not cur or not d.get("markets"): break
         print(src, db.execute("select count(*) from mk where src=?", (src,)).fetchone()[0], flush=True)
 def values(db):
-    """v_D per day from the settled ladder: midpoint of the highest YES-settled and the lowest NO-settled strike."""
+    """v_D per day = floor + 0.01 of the single YES -B bracket (Amendment 1)."""
     out = {}
     days = collections.defaultdict(list)
-    for tk, day, k, c, res in db.execute("select ticker,day,strike,close_ts,result from mk"): days[(c, day)].append((k, res))
+    for tk, day, k, c, res in db.execute("select ticker,day,strike,close_ts,result from mk where ticker like '%-B%'"): days[(c, day)].append((k, res))
     for (c, day), v in days.items():
-        ys = [k for k, r in v if r == "yes"]; ns = [k for k, r in v if r == "no"]
-        if ys and ns and max(ys) < min(ns): out[c] = (max(ys) + min(ns)) / 2
+        ys = [k for k, r in v if r == "yes"]
+        if len(ys) == 1: out[c] = ys[0] + 0.01
     return dict(sorted(out.items()))
 def universe(db):
     vals = values(db); keys = list(vals)
     rows = []
     for i in range(1, len(keys)):
         c = keys[i]; vprev = vals[keys[i - 1]]
-        for tk, k in db.execute("select ticker,strike from mk where close_ts=?", (c,)):
-            if c >= START_TS and vprev - 0.020 - 1e-9 <= k <= vprev + 0.100 + 1e-9: rows.append((tk, c))
+        for tk, k in db.execute("select ticker,strike from mk where close_ts=? and ticker like '%-B%'", (c,)):
+            if c >= START_TS and abs(k + 0.01 - vprev) <= 0.10 + 1e-9: rows.append((tk, c))
     return vals, keys, rows
 def do_fetch(mx):
     db = con(); vals, keys, rows = universe(db)
@@ -101,7 +101,7 @@ def do_score():
         ts, b, a = max(q)
         if b <= 0 or a >= 1 or a <= b or a - b > 0.05 or not (0.03 <= a <= 0.30): continue
         for name, mean in (("M0", v1),):
-            p = 1 - Phi((strike[tk] - mean) / sd)
+            p = Phi((strike[tk] + 0.025 - mean) / sd) - Phi((strike[tk] - 0.005 - mean) / sd)
             if p > a + fee(a) + 0.02:
                 out[name].append((c, (1.0 if res[tk] == "yes" else 0.0) - a - fee(a)))
     for name, v in out.items():
