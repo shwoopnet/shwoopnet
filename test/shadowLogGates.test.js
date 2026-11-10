@@ -83,17 +83,16 @@ gates.SH4 = () => {
 gates.SH5 = async () => {
   // Week 1 (Nov 9, 2026): exactly four registered shadow rules, each valid against the markets the bot quotes, 1 contract, and pointing at a pre-registration that exists.
   const rules = sh.SHADOW_RULES;
-  assert.deepStrictEqual(rules.map((r) => r.id), ['ETHNO6', 'BTCHI6', 'XRPYES10', 'GOLDALL', 'XRPFAV6', 'GOLDHI6S']);
+  assert.deepStrictEqual(rules.map((r) => r.id), ['BTCHI6', 'XRPYES10', 'GOLDALL', 'XRPFAV6', 'GOLDHI6S']);
   for (const r of rules) { assert.strictEqual(sh.validateShadowRule(r, live.L1_SERIES).ok, true, r.id); assert.strictEqual(r.contracts, 1, r.id + ' is one contract'); }
-  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 6, 'the production registry passes the same validation');
+  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 5, 'the production registry passes the same validation');
   const by = (id) => rules.find((r) => r.id === id);
-  assert.deepStrictEqual({ ...by('ETHNO6').entry }, { sideRule: 'no', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
   assert.deepStrictEqual({ ...by('BTCHI6').entry }, { sideRule: 'favourite', priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 });
   assert.deepStrictEqual({ ...by('XRPYES10').entry }, { sideRule: 'yes', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, 'the 10 minute look');
   const readme = read('kalshi-scalper', 'README.md');
   assert.deepStrictEqual({ ...by('GOLDALL').entry }, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "L1's own entry on gold, every signal logged");
   assert.ok(readme.includes('## SHADOW-GOLDALL') && by('GOLDALL').readme === 'kalshi-scalper/README.md#SHADOW-GOLDALL' && /\|rise3\| >= 0\.05/.test(readme), 'the momentum split is pre-registered before the first row');
-  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.filter((r) => ['ETHNO6', 'BTCHI6', 'XRPYES10'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1') && readme.includes('## SHADOW-WEEK2') && rules.filter((r) => ['XRPFAV6', 'GOLDHI6S'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK2'), 'the pre-registration is in the README before the first row');
+  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.filter((r) => ['BTCHI6', 'XRPYES10'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1') && readme.includes('## SHADOW-WEEK2') && rules.filter((r) => ['XRPFAV6', 'GOLDHI6S'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK2'), 'the pre-registration is in the README before the first row');
   // A signal only inside its own window and band: an Ethereum favourite at 0.93 with 6 minutes left is a signal for ETHL1 (and ETHNO6 only if its NO side is the one in band).
   const quote = (series, over) => ({ series, m: Object.assign({ ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' }, over || {}) });
   const rows = sh.shadowSignals(rules, [quote('KXETH15M'), quote('KXBTC15M'), quote('KXXRP15M')], NOW);

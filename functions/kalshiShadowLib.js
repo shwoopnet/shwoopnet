@@ -12,7 +12,7 @@
 // Every one is a SHADOW candidate, never a pass (N about 670 on top of about 540; no counterparty named for any). Shadow rows assume a fill at the touch (an upper bound): read `wouldFill`.
 const RULE = (id, series, entry, anchor = "SHADOW-WEEK1") => Object.freeze({ id, readme: "kalshi-scalper/README.md#" + anchor, series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
 const SHADOW_RULES = Object.freeze([
-  RULE("ETHNO6", "KXETH15M", { sideRule: "no", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
+  // ETHNO6 was retired before its first row (Nov 10, 2026): on 4.3 weeks of Ethereum candles (2,609 windows) it fails, PF 1.04 / 0.72 at +0c; its live PF 2.59 (n 53) was its only support. See kalshi-scalper/README.md#SHADOW-WEEK2.
   RULE("BTCHI6", "KXBTC15M", { sideRule: "favourite", priceMin: 0.92, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }),
   RULE("XRPYES10", "KXXRP15M", { sideRule: "yes", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }),
   // ETHL1 was retired before its first row (Nov 10, 2026): the refinement chat's candle recheck found it under 1.0 in both halves at +1c (0.92 / 1.10 at +0c); see kalshi-scalper/README.md#SHADOW-WEEK2.
