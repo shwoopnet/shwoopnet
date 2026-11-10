@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 01:31 AM CT (07:31Z): W-RERUN4: Ethereum shadow rules on 4.3 weeks of candles, ETHNO6 fails
+
+Registered first (S/w_rerun4), same cells as W-RERUN3, N unchanged. Copy 3,108 rows, 2,609 settled windows, 10-11 to 11-10 (4.3 weeks), halves split 10-26, 98 windows overlap live fills. PF (n) half 1 / half 2: ETHNO6 +0c 1.04 (181) / 0.72 (189), live excluded 0.84 (139) / 0.72 (189); +1c 0.89 / 0.61 (excluded 0.72 / 0.61). ETHL1 +0c 0.90 (361) / 0.75 (383), +1c 0.77 / 0.64. ETH F5 cell (favourite 0.88-0.97 10m spread at most 0.02) +0c 1.07 (240) / 1.04 (177), +1c 0.92 / 0.90: the W-RERUN3 +0c pass (1.30 / 3.07) is gone. Portion unseen by W-RERUN3 (windows from 10-19, 1,923 to 11-10; no usable windows before 10-11, earlier rows have empty candles): ETHNO6 +0c PF 0.76 (n 277), +1c 0.64; excluding live fills 0.68 (254) / 0.58 (254). Does not hold on its own.
+
 ## 2026-11-10 01:06 AM CT (07:06Z): W-INDEP2 (interim): XRP shadow rules on an independent earlier window
 
 Registered first (S/w_indep2): 12 UTC dates (2026-09-05; 08-26, 08-19, 08-12, 08-05; 07-26, 07-19, 07-12, 07-05; 06-26, 06-19, 06-12), XRP history exists back to at least 2026-04-04. Scored at 401 of 1,152 windows; fetch order is by time of day so closes are only 00:00 to 08:15 UTC (time-of-day skew). PF (n) 0c / +1c: XRPYES10 1.62 (20) / 1.41 (20) n under 40, undecided; XRPFAV6 0.99 (42) / 0.88 (42) FAILS the 1.3 bar, does not hold on independent data; XRPFAV10 2.00 (20) / 1.78 (20) n too small. Pull continues (restart command in S/w_indep2/STATUS.md); rescore with python3 -I score.py. N unchanged.
