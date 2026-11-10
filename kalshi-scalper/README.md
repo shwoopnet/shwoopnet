@@ -2959,6 +2959,16 @@ SHADOW rules (`functions/kalshiShadowLib.js`), 1 contract, no order, no money, f
 Dropped before merge: BTCHI10 fails an earlier out of sample period (research chat's Jun to Aug candles: PF 0.90, n 289, halves 0.90 / 0.90, against 1.62 on the refinement chat's Sep to Nov file; the spread gate changes nothing, a first guess that it did was withdrawn), and XRPFAV10 is the same low prior XRP cell picked from the same candles (best of about 120). Neither is registered. Retired before its first row: **ETHL1** (week 1). The refinement chat's candle recheck on the larger files (corrected fee) found it under 1.0 in both halves at +1c (0.92 / 1.10 at +0c, 0.78 / 0.94 at +1c, n 99 / 92). **BTCHI6 is retired too** (independent window Jun to Sep, 1,206 windows: PF 1.13 at +0c and 0.91 at +1c, under the 1.3 bar). **ETHNO6 is retired too**: on 4.3 weeks of Ethereum candles (2,609 settled windows, 2026-10-11 to 11-10, unrounded fee) it fails, PF 1.04 (n 181) / 0.72 (n 189) at +0c and 0.89 / 0.61 at +1c; on the part never seen by the earlier rerun 0.76 at +0c. Its live PF 2.59 (n 53) was its only support. Not expressible: XRP at 2 minutes (below the look window the registry allows) and silver (quotes not held).
 
 
+## SHADOW-LANTERN: L1's rule on Ethereum, logged (registered 2026-11-10, before its first row; the owner's decision Nov 10)
+
+Formerly named ETHL1B in the PR draft.
+
+A SHADOW rule (`functions/kalshiShadowLib.js`), 1 contract, no order, no money. **Rule:** `KXETH15M`, the favourite side priced 0.88 to 0.97, 400 to 330 s before the close (the 6 minute look), no smooth gate (the smooth climb split can be computed by the reader from public candles at read time (not built here)). Why: Ethereum's live cash PF was 1.18 over 113 orders; the owner decided it comes back through shadow first and returns live only at cash PF 1.3 or better over the shadow sample, 150 forward signals, a held out second half at 1.2 or better, at least 14 days. ETHL1 (the same entry) was registered and retired on Nov 10 after the refinement chat's candle recheck found it under 1.0 in both halves at +1c (0.92 / 1.10 at +0c); this re-registers it against that recheck, so **a pass is not expected (prior low)**.
+- **Counterparty:** none named.
+- **Numeric prediction:** cash PF under 1.3 over the shadow sample.
+- **Kill:** PF under 1.0 after 100 signals retires it.
+- **ETA:** about 150 signals needs roughly 4 to 6 weeks, so the forward read is about 2026-12-22 (not before the 14 day minimum).
+
 ### SLOT-OICORE update and pre-committed re-arm rule (dated 2026-11-10, written before the drawdown stop has fired)
 
 **1. Corrections to the text above (code on main, cadae52e).** Streak kill is 24 settled losses in a row (not 18; kill rule 2). Entry band is 8c to 50c: `SLOT_SKIP_BELOW` is 0.08 for OICORE, so a cheaper side under 8c places no order (the registered 5c floor in `priceMin` stays, the skip sits above it). Size ladder is 10, 12, 15, 20, 30 contracts; the current step is 10 (it stepped to 12 and came back down). The drawdown stop is 5 dollars per contract of the current step (also capped at 12 percent of base and 150): $50 at step 10. It refuses new OICORE entries only; it writes no kill latch, and open orders are held to settlement. `reviewedAt` is still 2026-10-30 and `SLOT_LAST_REVIEWED_ON` is 2026-11-05.
