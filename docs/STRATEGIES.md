@@ -110,3 +110,7 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 | Size | gold: ladder, $43 per contract, +1 per 3 days, add-on, held at 15 / order ceiling 50; Dogecoin: paused | 10 to 30 (ladder, earned) | fixed 1 |
 | Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up | shares the slot's one 12% stop with OICORE (`RISK_PROFILES.SECOND` covers both), plus its own kill rules |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) | no (shared 5.5%, slot at most half) |
+
+## XRPYES10 (draft, Nov 10, 2026)
+
+A third second-slot probe, not live until the owner approves an explicit favourite-and-hold exception: XRP 15 minute markets, buy YES at 88c to 97c about 10 minutes before the close, 1 contract, held to settlement, stops itself after 3 losses in a row or a net loss of $5 from 20 fills. Full pre-registration in `kalshi-scalper/README.md#SLOT-XRPYES10`.
