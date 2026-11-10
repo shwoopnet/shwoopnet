@@ -95,7 +95,7 @@ def demo(S):
             if .88 <= ac <= .97: side, price = "yes", ac
             elif .88 <= 1 - bc <= .97: side, price = "no", 1 - bc
             else: continue
-            cs = [{"end_period_ts": k["e"], "yes_bid": {"close_dollars": k["bc"]}, "yes_ask": {"close_dollars": k["ac"]}} for k in r["k"] if k.get("ac") and k.get("bc")]
+            cs = [{"end_period_ts": k["e"], "yes_bid": {"close_dollars": k["bc"]}, "yes_ask": {"close_dollars": k["ac"]}} for k in r["k"] if k.get("ac") and k.get("bc") and k["e"] <= look]
             rows.append(({"rule": "GOLDALL_DEMO", "ticker": r["t"], "series": "KXGOLD15M", "side": side, "price": round(price, 2), "result": r["r"], "atMs": look * 1000, "wouldFill": True}, cs))
     return rows
 

@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 08:29 PM CT (02:29Z): rise3_split.py built (forward read of GOLDALL, read time rise3)
+
+refine_tools/rise3_split.py: per rule signals, moving/still n, PF and net c per contract, halves, pass and kill text; public GET only, 0.5 s spacing, cached per ticker, backoff on 429, unscored rows reported not imputed. Network path untested; demo ran offline (labelled). Demo on 1240 gold candle rows: unrounded rise matches an.py exactly (moving 946, still 294, rises 942); with the live 4-decimal rounding (default, faithful to logRise) 952 / 288 and 948 rises: six rows sit at a float edge of 0.05 and flip to moving, so the live definition counts them.
+
 ## 2026-11-09 08:29 PM CT (02:29Z): W-SIZESLIP: order size does not degrade fills; edge per contract unchanged within noise
 
 Registered first (S/w_sizeslip), about 6 cells. Gold cash PF by size (under 8 / 8-12 / 13+): 2.68 / 1.40 / 1.31, net per contract 4.2 / 1.9 / 1.6c, permutation p 0.64, intervals overlap; early-sell rate 2 / 5 / 7 percent; fill rate 66 / 60 / 68 percent; partial fills 1 of 311; slip -0.47 / -0.58 / -0.80c (fills beat first-seen ask). Add-on orders earn 1.64c per contract vs 2.75c without (p 0.67). OICORE: size 10 PF 1.79, size 12 PF 0.58 (n 18), p 0.19; fill rate 83 / 86 percent; slip -1.30 / -1.25c. Depth share logged only for gold. Sizing changes dollars at risk, not the edge; no rule proposed.
