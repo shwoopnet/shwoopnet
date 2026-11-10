@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 05:07 AM CT (11:07Z): W-INDEP5: gold hold vs 25c exit on the independent Aug 13 to Sep 1 window
+
+Registered first (S/w_indep5), replication of the closed exit-line scan, no tuning. 438 of 439 GOLDALL signals (entry at the 6m look ask, 19 settlement losses), unrounded fee. HOLD PF 1.598 (+2.40c per contract). Exit on bid CLOSE: 1.512 (+2.15c) at 0c slip, 1.498 at 1c; 17 exits, 3 would have won at settlement, 5 settlement losses never touched 25c; avoided 135c of losses, gave up 242c of wins, net -107c. Exit on bid LOW (generous trigger): 1.325 (+1.53c) at 0c, 1.311 at 1c; 22 exits, 9 regret, 6 untouched losses; avoided 308c, gave up 687c, net -379c. Excluding the last candle same ordering. The exit does not beat hold. Caveats: live exit sells on the bid seen at 10 s, not a candle fill; 25c line not tuned. Consistent with EXIT1 (hold beats exit); the live record has 16 early sells since Oct 7 at -140 cash. S-HOLDVSSELL (0/30) remains the registered live test.
+
 ## 2026-11-10 05:07 AM CT (11:07Z): EVENT830 CPI forex recheck (5:07 AM CT Nov 10)
 
 KXEURUSD15M, KXGBPUSD15M and KXUSDJPY15M 26NOV100830-30 now exist (status initialized, close 2026-11-10T13:30:00Z, no quotes yet, like silver and BNB). Nothing found that would stop EVENT830 firing at 13:27Z. CPI read at 13:50Z.
