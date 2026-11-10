@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 09:27 AM CT (15:27Z): Gold tripwire closing (rolling-60 0.73); live paid-band split supports GOLDHI6S
+
+10:26 AM CT Nov 10: gold tripwire 18 of 100 trades, cumulative cash PF 0.71 (-7.16), latest rolling-60 PF 0.73, none below 0.7 yet. Today 2 gold early sells (-12.83 at 22:09 CT Nov 9 GOLD 2315 NO x17 paid 0.860; -12.21 at 08:24 UTC-labelled GOLD 0930 YES x18 paid 0.850). Gold live cash PF by price paid (n, exits): under 0.88 1.44 (26, 3); 0.88-0.92 1.13 (116, 11 exits, 9.5 percent); 0.92-0.97 2.13 (174, 4 exits, 2.3 percent); 0.97+ n 9 no loss. Fill slip: slip at or below -2c PF 2.68 (n36) vs 1.30 (n284): not adverse selection. The 0.92-0.97 live record is the same band as the GOLDHI6S shadow (independent Aug window 1.68 / 1.35). N +4 (four bands), descriptive.
+
 ## 2026-11-10 08:59 AM CT (14:59Z): W-POSTREL: post-release 8:45 ET window, NOT_ENOUGH_DATA; all-weekday lead added to backlog
 
 Registered first (S/w_postrel), N +4. 703 usable windows Oct 11 to Nov 10, EDT/EST-aware; release days with data Nov 5, 6, 10 only. Cheap side, 6m look, unrounded fee, PF (n) +0c / +1c: POST release days 0.86 (17) / 0.81: NOT_ENOUGH_DATA; POST other weekdays 1.49 (109) / 1.40; control windows (8:15, 9:00, 9:15 ET) release days 0.74 (65), other weekdays 0.93 (353). Bootstrap 95 percent interval of mean P/L difference at +0c: POST vs control non-release -0.007 to +0.176 (includes zero); release POST vs non-release POST -0.28 to +0.12. Favourite comparison: release POST inf (6), other POST 0.62 (38). 8:45 ET windows look better than controls everywhere but the interval includes zero; other weekdays contain unlisted October releases. Needs about 3 more release days. Backlog item 13 added (all-weekday 8:45 ET cheap side, independent window next).
