@@ -30,7 +30,7 @@ function fakePage() {
 }
 
 function main() {
-  const pages = { 'page-brief': fakePage(), 'page-settings': fakePage(), 'page-kalshi': fakePage(), 'page-data': fakePage() };
+  const pages = { 'page-brief': fakePage(), 'page-settings': fakePage(), 'page-kalshi': fakePage(), 'page-strategies': fakePage(), 'page-data': fakePage() };
   const scrollCalls = [];
   const src = `
     var document = {
@@ -71,7 +71,7 @@ function main() {
   console.log('G3 PASS a removed page name (an old #trades link) lands on the brief');
 
   // The Kalshi page is the owner's: anyone else asking for it gets the brief.
-  const guestPages = { 'page-brief': fakePage(), 'page-settings': fakePage(), 'page-kalshi': fakePage(), 'page-data': fakePage() };
+  const guestPages = { 'page-brief': fakePage(), 'page-settings': fakePage(), 'page-kalshi': fakePage(), 'page-strategies': fakePage(), 'page-data': fakePage() };
   const guestShow = new Function('PAGES', 'SCROLL_CALLS', 'IS_ADMIN', src)(guestPages, [], false);
   guestShow('kalshi');
   assert.strictEqual(guestPages['page-kalshi'].hidden, true, 'a non-admin account never sees the Kalshi page');

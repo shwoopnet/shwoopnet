@@ -94,7 +94,7 @@ gates.G11 = () => {
 // The page is hidden for non-admins and showPage refuses to open it for them.
 gates.G12 = () => {
   assert.ok(/data-page="kalshi"[^>]*\bhidden\b/.test(src), 'nav button must start hidden');
-  assert.ok(/if\(name === 'kalshi' && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(src), 'showPage must refuse non-admins');
+  assert.ok(/if\(\(name === 'kalshi' \|\| name === 'strategies'\) && !currentUserIsAdmin\)\{ name = 'brief'; \}/.test(src), 'showPage must refuse non-admins (the Strategies page too, Nov 10, 2026)');
   assert.ok(!/data-page="data"/.test(src), 'there is no Data page nav button any more');
   assert.ok(/kalNav\.hidden = !currentUserIsAdmin/.test(src), 'applyAdminUI must toggle the nav button');
 };

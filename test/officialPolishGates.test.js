@@ -28,9 +28,9 @@ gates.O2 = () => {
 
 // The tab says which page you are on once you are signed in, and the signed-out visitor keeps the full title.
 gates.O3 = () => {
-  const m = html.match(/names = \{ brief: '([^']+)', kalshi: '([^']+)', data: '([^']+)', settings: '([^']+)' \};\s*document\.title = gate && !gate\.hasAttribute\('hidden'\) \? DEFAULT_PAGE_TITLE : \(names\[currentPageName\] \|\| 'Market Brief'\) \+ ' \| Shwoop Financials';/);
+  const m = html.match(/names = \{ brief: '([^']+)', kalshi: '([^']+)', strategies: '([^']+)', data: '([^']+)', settings: '([^']+)' \};\s*document\.title = gate && !gate\.hasAttribute\('hidden'\) \? DEFAULT_PAGE_TITLE : \(names\[currentPageName\] \|\| 'Market Brief'\) \+ ' \| Shwoop Financials';/);
   assert.ok(m, 'setPageTitle names every page and falls back to the tagline while the sign-in box is up');
-  assert.deepStrictEqual(m.slice(1), ['Market Brief', 'Bot', 'Data', 'Settings']);
+  assert.deepStrictEqual(m.slice(1), ['Market Brief', 'Bot', 'Strategies', 'Data', 'Settings']);
   assert.ok(html.indexOf('currentPageName = name; setPageTitle();') > html.indexOf("if(name !== 'brief' && name !== 'kalshi'"), 'showPage sets it after an unknown name has been sent to the brief, so the title always matches the page shown');
   assert.ok(/authGateEl\.setAttribute\('hidden', ''\); setPageTitle\(\);/.test(html) && /authGateEl\.removeAttribute\('hidden'\); setPageTitle\(\);/.test(html), 'signing in and out refresh it');
 };
