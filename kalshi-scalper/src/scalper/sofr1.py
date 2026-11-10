@@ -25,7 +25,7 @@ def do_list():
             d = h.get(ep, p)
             if d is None: time.sleep(20); continue
             for m in d.get("markets", []):
-                if m.get("result") in ("yes", "no"):
+                if m.get("result") in ("yes", "no") and "-T" in m["ticker"]:
                     tk = m["ticker"]; x = float(tk.split("-T")[-1])
                     kind = "ge" if m.get("floor_strike") is not None else "le"
                     db.execute("INSERT OR IGNORE INTO mk VALUES(?,?,?,?,?,?,?)", (tk, tk.split("-")[1], x, kind, h.ts(m.get("close_time")), m["result"], src))
