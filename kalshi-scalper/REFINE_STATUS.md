@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 10:28 AM CT (16:28Z): W-VOLSURGE: NOT_ENOUGH_DATA (volume not stored in the cached candle files)
+
+Registered V1 to V4 first (N +4, about 798): surge = vol(c-180) + vol(c-120), thresholds p95 and p90 of the first half by date, cheaper side 0.08 to 0.50, held-out half and the Jun to Jul independent window. btc.jsonl keeps only e, oi, ac, bc per candle and w_indep4/oi.jsonl only [oi, bid, ask] (pull.py line 44 discards volume), so no PF was computed. Next step: re-pull the Bitcoin candles and the Jun to Jul window with the volume field, then run the registration unchanged. Backlog item 5 updated.
+
 ## 2026-11-10 10:10 AM CT (16:10Z): Gold kill and return proposal written (proposal only)
 
 File kalshi-scalper/refine_tools/GOLD_KILL_RETURN_PROPOSAL.md. Gold cash PF 1.30 dollar (1.46 per contract), +53.77 on 325 trades; PF 4.74 before Oct 20, 1.13 last 3 weeks. Every kill rule that fired in the replay was a false kill. Proposed (nothing built): hard latch at 6 percent of base (8.75) own-peak drawdown plus net under -20 after 40 trades; alerts only for rolling-60, rolling-100, 3 early sells in 40; return at shadow PF 1.0 over 60 trades and 7 days, owner approves, half size for 30 trades. Sent to main as a 6 line summary.
