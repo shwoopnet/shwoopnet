@@ -6,3 +6,6 @@ Test: decision quote = last candle ending within 1 hour of open_ts; both sides q
 Potential cells: 4 sources x 2 sides x 3 bands = 24. Single-leg ledger N about 5,130, so N about 5,154, z bar about 4.30. Count 24.
 Prediction (honest, before running): fails. Earlier single-leg calibrations (SINGLELEG1 to 3, NEWSER1) found nothing, and the first-hour spread filter will drop most markets, as in NEWSER1. Prior of a shortlist: 5%.
 Cost: about 1,200 historical candle requests, at the same slow rate as NEWSER1 (about 40 minutes per 800).
+
+## Amendment 1 (Nov 10, 2026, before any candle was fetched)
+`sports.sqlite` has no open_ts column, so it is dropped: 3 sources (newser1, nflpc1, sports1), 900 markets, cells 3 x 2 x 3 = 18, N about 5,148, z bar about 4.30. Count 18, not 24. Requests about 900.
