@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 09:29 PM CT (03:29Z): W-CANDLEVALID2: OICORE live vs history trade by trade
+
+Registered first (S/w_candlevalid2). 79 settled live fills; 62 match a history trigger by ticker, 17 (22 percent) do not. PF on the 62 matched windows (unrounded fee): history c-120 +0c 1.08, +1c 0.97; history c-180 +0c 1.15, +1c 1.06; live 1.43. Side agrees 61 of 62; win rate 19 percent history vs 21 percent live. Price bias (live paid minus history entry, mean c): c-120 +0c -2.6 (MAE 13.1), c-120 +1c -3.6, c-180 +0c -1.3 (MAE 2.1), c-180 +1c -2.3: live sends 161 to 177 s before the close (median 176), so the c-180 candle matches; the c-120 candle is noisy (median +3.5c). Live-only fills: 16 of 17 were just under the 5c floor on the c-180 candle (1c to 4.8c), 1 near the OI cutoff (86,988 vs 86,300) at 3.9c; live paid 2.6c to 7.1c. 41 of 79 live fills paid under 0.08; none above 0.50. c-180 closes about half the 3c gap; +0c fits live better than +1c; PF on the same windows moves 1.08 to 1.15, still short of live 1.43. Candle closes are not fills. Implication: earlier rebuilt-history OICORE PFs (about 1.5 to 1.8 at c-120) overstate the live-like look; use c-180 +0c as the proxy.
+
 ## 2026-11-09 08:29 PM CT (02:29Z): rise3_split.py built (forward read of GOLDALL, read time rise3)
 
 refine_tools/rise3_split.py: per rule signals, moving/still n, PF and net c per contract, halves, pass and kill text; public GET only, 0.5 s spacing, cached per ticker, backoff on 429, unscored rows reported not imputed. Network path untested; demo ran offline (labelled). Demo on 1240 gold candle rows: unrounded rise matches an.py exactly (moving 946, still 294, rises 942); with the live 4-decimal rounding (default, faithful to logRise) 952 / 288 and 948 rises: six rows sit at a float edge of 0.05 and flip to moving, so the live definition counts them.
