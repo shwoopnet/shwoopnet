@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 08:34 AM CT (14:34Z): IDEA_BACKLOG.md created (12 ranked ideas, one file)
+
+kalshi-scalper/refine_tools/IDEA_BACKLOG.md: ranked backlog per the owner's standing rule (at least 3 new pre-registered ideas a week, one file, top up when under 10 untested): maker entries (R6 replay from Nov 14), post-release window (data pull running), gold spot-gap filter (Kraken PAXG one-minute), silver L1 shadow, volume-surge analogue of OICORE, Kalshi vs Polymarket spread, gold 15m vs hourly ladder, ETH-scaled OICORE (re-read about Dec 1), fee batching, calendar regime at n 50, V2 event markets, settlement-edge.
+
 ## 2026-11-10 08:33 AM CT (14:33Z): W-SPOT1: spot-implied probability filter on Bitcoin favourites, FAIL (direction visible)
 
 Registered first (S/w_spot), N +2 (about 780). Reference = Coinbase close at window start (no strike in cached markets); spot at the look; z = d / (sigma sqrt 6), sigma from previous 60 one-minute returns; Coinbase covers 6,460 of 6,468 BTC windows over 9.8 weeks. PF (n) H1 / H2: S1 spot-cheap (model probability minus ask at least 0.02): +0c 1.33 (264) / 1.10 (185); +1c 1.13 / 0.93. S2 market richer than spot: +0c 1.09 (547) / 0.85 (633); +1c 0.94 / 0.73. All favourites: +0c 1.12 (959) / 0.93 (941); +1c 0.96 / 0.79. Direction S1 > ALL > S2 visible but half 2 below the 1.3 bar and not tradable after 1c slip. Signals about 46 a week (S1), 195 a week (ALL).

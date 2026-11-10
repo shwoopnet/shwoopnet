@@ -1,0 +1,20 @@
+# Refinement idea backlog (live side), one ranked list. Nov 10, 2026
+
+Rules: every idea is registered before it is scored (rule, universe, pass bar PF 1.3 on the unrounded fee in both halves, n 40 per half), no favourite-and-hold as a NEW live strategy, universe fixed before entry, N counted (about 780 tried). Topped up whenever fewer than 10 untested items. "Prior" is judgment, not a measurement. Columns: rank, idea, cost to test, who loses, prior, next step, status.
+
+| # | Idea | Cost | Who loses | Prior | Next step | Status |
+|---|---|---|---|---|---|---|
+| 1 | Resting (maker) entries for the cheap side (lower maker fee; fees are 63 percent of OICORE's net) | free replay on R6 book and tape data (quote-data branch, book15r6/, ends 2026-11-13); a live probe only after a pass | impatient takers | low-medium | replay with a queue model on R6 data from Nov 14 | scheduled |
+| 2 | Post-release window (first 15 min window after the 8:30 ET print) cheap side, EVENT830's sister | free public candles for the 8 series, releases Nov 5, 6, 10 then calendar dates | fade traders | low | pull 8:30 to 9:15 ET windows for 30 days, compare release vs ordinary days | running |
+| 3 | Gold spot-gap filter: the spot-versus-quote gap ranked Bitcoin favourite quality (W-SPOT1 S1 > ALL > S2); need a keyless minute gold price (Kraken PAXG/USD one-minute candles track gold) | free public candles, small script | slow quote setters | low-medium | check PAXG tracks gold at one-minute, then replay GOLDALL with the gap | untested |
+| 4 | Silver L1 as a shadow: candle PF 1.19 (+1c) / 1.39 (+0c), 123 signals a week, in C9 already | free; logger must hold silver quotes (code) | favourite buyers' counterparties | low-medium | independent window via /historical for silver (listed since about Oct) | untested |
+| 5 | Volume surge instead of open interest (OICORE analogue; candles carry volume) | free, cached candles | late takers | low | register one rule (volume rise at p90 over c-360 to c-180), cheaper side 0.08 to 0.50, Bitcoin, halves | untested |
+| 6 | Kalshi 15 minute BTC versus Polymarket hourly or 15 minute up/down price spread (other venue) | free public API read; recorder to log both | slower venue's makers | low | one-day recorder pilot, then a lag test (V2's XVENUE1 is the nearest work: check before building) | untested |
+| 7 | Cross-contract gold: 15 minute favourite versus the hourly gold ladder strike near spot when both close at the hour | recorder must sample from 10 minutes out (current ladder recorder sees only the last 150 s) | ladder makers | low | extend the recorder (public, keyless) and register the spread rule | untested |
+| 8 | ETH-scaled OICORE (threshold 15,933): second half 1.31 on n10 | free, cached; needs about 18 more days of ETH windows | late takers | low | re-read about Dec 1 | waiting on data |
+| 9 | Per-order size and fee: 10 plus contracts pay about 0.36c vs 0.46c fee per contract (live avgFee); fee per contract is the cost, so a batching rule that sizes into fewer, larger orders | free arithmetic on live fees | none (cost) | low | quantify on live avgFee by count bucket | untested |
+| 10 | Calendar: OICORE and gold L1 by hour of the Kalshi quote regime (R2 clock, R3 weekday) once n reaches 50 per state | free | n/a | low | read OICORE R2 night at 50 (about Nov 20) | waiting on data |
+| 11 | In-game and other event markets at the same cost (V2's recorder owns this) | recorder exists | casual bettors | unknown | ask V2 for the cheapest readable test | V2 |
+| 12 | Settlement-edge effects: the last 2 minutes (the 60 s average index) versus the 6 minute look; entry at 3 minutes was tested for gold (candle mark 120/240 failed) | free | slow setters | low | skip unless a new data source appears | parked |
+
+Done and closed this week (do not repeat): hourly ladders (data), longshots, near-even, late favourites, cross-asset confirmation (W-XASSET1 failed), spot filter on Bitcoin (W-SPOT1, direction only), ETH rules (W-RERUN4), BTCHI6/BTCHI10, 120-cell grids on the corrected fee, series scan 0 of 54.
