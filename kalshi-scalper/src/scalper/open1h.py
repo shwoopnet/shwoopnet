@@ -46,6 +46,8 @@ def do_fetch(mx):
     for tk, o in todo[:mx]:
         try:
             d = h.get(f"/historical/markets/{tk}/candlesticks", {"start_ts": o, "end_ts": o + 3 * 3600, "period_interval": 60})
+        except h.Stop:
+            raise                      # rate limited: stop the run, do not record the market as done
         except Exception as e:
             print("skipped", tk, str(e)[:60], flush=True)
             db.execute("INSERT OR REPLACE INTO done VALUES(?,?)", (tk, 0)); db.commit(); continue
