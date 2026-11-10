@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 03:53 AM CT (09:53Z): W-INDEP4 update: OICORE independent window 1,200 of 1,536 markets
+
+Triggers at 86,300: n=20 (need 40): PF 1.07, win 20 percent, +1.09c per contract at +0c; PF 0.95, -0.76c at +1c (n=22). OI rise median 39.4k, p90 92k, p99 150k. Exploratory p95-equivalent threshold 113.8k: 5 triggers PF 6.43 (noise). Earlier interim (14 triggers, PF 0.74) moved to flat as n grew. NOT_ENOUGH_DATA; the full 1,536 would give about 25 triggers.
+
 ## 2026-11-10 03:29 AM CT (09:29Z): OICORE owner decision brief written (one page)
 
 kalshi-scalper/refine_tools/OICORE_OWNER_BRIEF.md: booked PF 1.11 on 81 fills net +11.00, drawdown 39.33, stop room 10.67 of 50; cash PF 1.30 net +26.15 (recomputed), rolling-60 0.86; independent window 15 triggers PF 0.99 NOT_ENOUGH_DATA; options A to E; refinement chat's view: leave it (stop is the control); would change if the independent window reaches 40 triggers with PF under 1.0. Owner's decision.
