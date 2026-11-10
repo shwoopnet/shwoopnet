@@ -47,8 +47,8 @@ gates.SA5 = () => {
   assert.ok(fenced.length > 500, 'fenced block exists');
   const outside = html.replace(fenced, '');
   assert.ok(!/requestAnimationFrame[\s\S]{0,400}data-pf|data-pf[\s\S]{0,400}requestAnimationFrame/.test(outside), 'no frame loop outside the fenced block touches a figure');
-  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => /sp-play|spBar|spChip|spArrow/.test(m[1] + m[2]));
-  assert.ok(rules.length >= 8);
+  const rules = [...css.matchAll(/([^{}]+)\{([^{}]*)\}/g)].filter((m) => /sp-play|spBar|spDot/.test(m[1] + m[2]));
+  assert.ok(rules.length >= 6);
   rules.forEach((m) => { if (!/^\s*@keyframes/.test(m[1])) assert.ok(/#page-strategies\.sp-play/.test(m[1]), 'animation selector scoped to the Strategies page: ' + m[1].trim()); });
   const pagesJs = fenced.match(/querySelectorAll\('([^']+)'\)/g);
   pagesJs.forEach((q) => assert.ok(/#stratBody \[data-pf\]/.test(q), 'the count only reads #stratBody [data-pf]: ' + q));
@@ -59,7 +59,7 @@ gates.SA6 = () => {
   const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(css)[1];
   const attr = css.split('\n').filter((l) => l.includes('[data-reduce-motion="true"]')).join('\n');
   const uniq = [...new Set(sels)];
-  assert.ok(uniq.length >= 8);
+  assert.ok(uniq.length >= 5);
   uniq.forEach((s) => { assert.ok(media.includes(s), 'prefers-reduced-motion disables ' + s); assert.ok(attr.includes(s), 'the Settings switch disables ' + s); });
   assert.ok(/if\(!page \|\| motionReduced\(\)\)\{ return; \}/.test(fenced), 'start returns before touching anything when motion is reduced');
 };
@@ -112,12 +112,12 @@ gates.SA11 = () => {
   assert.ok(!/setInterval/.test(fenced), 'no setInterval');
   assert.strictEqual((fenced.match(/requestAnimationFrame\(/g) || []).length, 2, 'the frame loop only');
   assert.ok(!/localStorage|fetch\(|XMLHttpRequest|addEventListener|onSnapshot/.test(fenced), 'no storage, network or listener');
-  for (const name of ['spBar', 'spChip', 'spArrow']) {
+  for (const name of ['spBar', 'spDot']) {
     const m = new RegExp('@keyframes ' + name + '\\{([\\s\\S]*?)\\}\\s*(?=@|#|\\.|\\n)').exec(css);
     assert.ok(m, name); assert.ok(!/(content|font-size|width|height|top|left|margin|padding)\s*:/.test(m[1]), name + ' moves only transform or opacity');
   }
   assert.ok(/#page-strategies\.sp-play \.sp-arc\{[^}]*lineDraw/.test(css) && /#page-strategies\.sp-play \.sp-spk\{[^}]*lineDraw/.test(css), 'gauges and lines use the stroke draw');
-  assert.ok(!/(black|white|rgba?\(|#[0-9a-f]{3,6}|box-shadow|glow)/i.test(css.slice(css.indexOf('@keyframes spBar'), css.indexOf('@keyframes spArrow') + 200)), 'no colour or glow in the animation');
+  assert.ok(!/(black|white|rgba?\(|#[0-9a-f]{3,6}|box-shadow|glow)/i.test(css.slice(css.indexOf('@keyframes spBar'), css.indexOf('@keyframes spDot') + 200)), 'no colour or glow in the animation');
 };
 // SA12: gauge dash math. The arc is drawn with pathLength 1 so lineDraw (dashoffset 1 to 0) draws exactly the value arc; the arc ends where the fraction says.
 gates.SA12 = () => {
