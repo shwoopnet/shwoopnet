@@ -21,6 +21,7 @@
 const crypto = require("crypto");
 const bot = require("./kalshiSignalLib");
 const slotLib = require("./kalshiSlotLib");
+const goldKill = require("./kalshiGoldKillLib");   // gold's kill latch (Nov 10, 2026): runL1Tick only LOOKS at the value it already receives
 
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). Every line below that mentions it sits behind slotOn(...). Two locks on one door: a caller must pass a `slot` hook bag AND the slot library's own
 // constants must say the slot is being WATCHED (slotWatch: entries are allowed, or a slot order has ever existed, so turning entries off never orphans a live position). Nothing stored, requested
@@ -980,7 +981,10 @@ async function runL1Tick(args) {
   }
   // `args.pausedSeries` exists only so the older gates can keep using XRP as their example market; the real caller (functions/index.js) never passes it, and gate PX2 fails if it ever does.
   const paused = Array.isArray(args.pausedSeries) ? args.pausedSeries : PAUSED_SERIES;
-  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x) && !inQuietHours(x, now));
+  // Gold's kill latch (docs/GOLD_KILL_LATCH.md): a value cached on the sizing document the tick ALREADY read, written by kalshiGoldKillCheck, never by this function. It only removes gold from
+  // the list; the exit watch does not look at it and still sells an open gold position.
+  const goldLatched = goldKill.goldKillActive(args.sizingState, goldKill.GOLD_SERIES);
+  const tradable = L1_SERIES.filter((x) => !dropped.includes(x) && !paused.includes(x) && !inQuietHours(x, now) && !(goldLatched && x === goldKill.GOLD_SERIES));
   // In list order (Bitcoin, gold, Ethereum): when the window's room runs short it is the later series that goes without.
   const candidates = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status)
     && entryLead(q.series, Date.parse(q.m.close_time) - now) !== null)
@@ -989,7 +993,7 @@ async function runL1Tick(args) {
     // When the next entry window opens, so the page can say so: a market closing in 3 minutes is past its window and the next one is not yet in it.
     const opens = (quotes || []).filter((q) => tradable.includes(q.series) && ["active", "open"].includes(q.m.status))
       .map((q) => Date.parse(q.m.close_time) - (EARLY_PROBE_SERIES.includes(q.series) ? EARLY_WINDOW_MS[1] : L1_WINDOW_MS[1])).filter((t) => t > now);
-    await note("Watching. Orders go in about 6 minutes before a close (10 for Bitcoin, XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
+    await note(goldLatched ? "Gold is switched off by its own kill latch (see the Bot page events). L1 places no new order until a reviewed edit re-arms it; an open position is still sold at the 25c line." : "Watching. Orders go in about 6 minutes before a close (10 for Bitcoin, XRP and natural gas), and no market is at that point right now.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)), nextLookAt: opens.length ? Math.min(...opens) : null });
     return { skipped: "no market in the window" };
   }
 
@@ -1027,6 +1031,9 @@ async function runL1Tick(args) {
     let addonUsed = sizing ? Math.max(0, count - l1Count(cashLeft, cost1, sizeCap, 0)) : 0;
     // A probe market is one contract, always: no ladder step and no reinvested profit goes into a market that has not earned it.
     if (PROBE_SERIES.includes(c.series) || CAPPED_SERIES.includes(c.series) || FIXED_CONTRACTS[c.series]) { count = sizing && FIXED_CONTRACTS[c.series] ? FIXED_CONTRACTS[c.series] : 1; addonUsed = 0; }
+    // After a RE-ARM of gold's kill latch (a reviewed edit that sets rearmIsReturn), the first gold trades go out at half size. It can only lower the count, and the add-on is zeroed
+    // so the loss stop counts the whole order against the account (fails closed). Off (and a no-op) until such an edit.
+    if (sizing && goldKill.goldHalfSize(args.sizingState, c.series) && count > 1) { count = Math.max(1, Math.floor(count / 2)); addonUsed = 0; }
     // The combined cap: these markets close together and move together, so what one window may put at risk is held to one number across
     // all of them. Only the account's own money counts (the add-on is profit, which the loss stop already treats separately), and orders
     // from earlier ticks in the same window count too. The loss stop is 12% of the base and a window may use 5.5% (6% and 5.5% from Oct 20, 2026, the stop 12% from the same night), so one window alone cannot reach it.

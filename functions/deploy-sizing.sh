@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 ENV_FILE=functions/.env
 PROJECT=shwoopnet
-ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
+ONLY=functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck   # kalshiLiveAccount reports the order switch to the Bot page: left out, it kept an old value (Nov 2, 2026)
 
 run() { if [ "${DRY_RUN:-}" = "1" ]; then echo "[dry run] $*"; else "$@"; fi; }
 
