@@ -1,0 +1,16 @@
+# IDEA_BACKLOG (V2), ranked by chance x speed. Updated Nov 10, 2026, 9:50 AM CT. Charter: cheap side only (ask 3c to 30c), universe fixed before entry, register before scoring, no favourite-and-hold. Priors are guesses. Rule from main (Nov 10): at least 3 NEW ideas a week, topped up whenever fewer than 10 are untested.
+Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by state/city (138 series), KXTSA daily, KXBIGGESTQUAKEH hourly and KXBIGGESTQUAKE daily, KXJOBLESSCLAIMS weekly, KXSPOTIFY*D daily (187 series), KXFLIGHTLAX/JFK daily, 429 mention series.
+| # | idea | cost | prior | next step | status |
+|---|---|---|---|---|---|
+| 1 | AAA gas daily/weekly ladders vs EIA persistence | free, EIA reachable, about 1,000 requests | 8% | AAAGAS1 protocol | running Nov 10 |
+| 2 | Mentions markets: calibration by series group | free, about 1,200 requests | 10% | MENT1 protocol | running Nov 10 |
+| 3 | Cheap wings of monthly/weekly commodity and foreign-index ladders (Kalshi-only) | free, about 1,500 requests | 5% | WING1 protocol | running Nov 10 |
+| 4 | TSA daily checkpoint ladders (KXTSA) vs weekday seasonality of public TSA throughput | free if tsa.gov table reachable (unchecked), history from Kalshi | 8% | probe reachability, register | untested |
+| 5 | Weekly jobless claims ladders (KXJOBLESSCLAIMS) vs persistence on FRED ICSA (FRED reachable) | free, about 300 requests | 8% | register after 1 to 3 | untested |
+| 6 | USGS earthquake ladders (KXBIGGESTQUAKEH hourly, KXBIGGESTQUAKE daily): Poisson base rate from the public USGS feed | free; check overlap with WXOTHER1 first | 6% | read WXOTHER1_CENSUS.json, register | untested |
+| 7 | Spotify daily chart ladders (KXSPOTIFY*D) vs public chart counts (reachability unchecked) | free if readable, forward only | 6% | probe reachability | untested |
+| 8 | Deribit implied digital vs KXBTCD/KXETHD hourly ladders | free, forward only, 2 weeks of polls | 5% | build poller | untested |
+| 9 | Rotten Tomatoes score ladders | free if page readable, forward only, 3 weeks | 5% | probe one request | untested |
+| 10 | Daily flight-count ladders (FLIGHTLAX, FLIGHTJFK) vs weekday seasonality from Kalshi's own settled history | free, about 600 requests | 5% | register after 1 to 3 | untested |
+Overlap with Refinement's list (main, Nov 10): none on markets; Refinement's five are 15 minute favourite filters or maker entries. My #8 is conceptually near their spot-implied filter (README LAG2: PF 0.99 on 238 trades).
+Done and falsified this week (not in the queue): OPEN1H (first-hour listing, 46 usable of 600), CHEAPEXIT1 (PF 0.42 to 0.66), NEWSER1, XVENUE1, REGIME-B2.
