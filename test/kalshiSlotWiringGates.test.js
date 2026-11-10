@@ -121,7 +121,7 @@ gates['SW0c the admitted state: OICORE first (EVENT830 second since Nov 3, 2026)
 };
 gates.SW1 = () => {
   const c = code(liveSrc);
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"crypto"', '"./kalshiSignalLib"', '"./kalshiSlotLib"'], 'the only slot module the live library requires is the pure one');
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"crypto"', '"./kalshiSignalLib"', '"./kalshiSlotLib"', '"./kalshiGoldKillLib"'], 'the only slot module the live library requires is the pure one');
   assert.ok(!/kalshiSlotRunLib|SLOT_ENABLED|SLOT_STRATEGIES|_testOnly/.test(c));
   // Every line of code that names the slot sits in a guarded or slot-only construct.
   const allowed = /require\("\.\/kalshiSlotLib"\)|slotOn\(|slotLive|slotOrders|slotIgnoreIds|slotLib\.|args\.slot|slot\.afterFlatten|ignoreOrderIds|slot\b.*=>|\{ slot \}|, slot \}|slot: *slotLive|slotUsed|created ===|createTestLocked|\bslot\b|slotHeld|leased/;

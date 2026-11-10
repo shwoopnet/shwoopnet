@@ -36,7 +36,10 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | Strategy or stage | Metric | Threshold | Window | Action |
 |---|---|---|---|---|
 | Gold L1 (PF 1.40, n 307) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
-| Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only (it fired once, Nov 6, and the next 50 trades were PF 99: a false kill as a latch) |
+| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed (6% of the $979.25 base when written) | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
+| Gold L1 | cash net since the re-arm | under -$20 after 40 trades | | **latch gold off** (same code) |
+| Gold L1 | rolling 100 cash PF; 3 early sells in 40 trades | under 1.0; 3 or more | | ALERT only (event in the notification center), same code |
+| Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades were PF 99: a false kill as a latch) |
 | Account (all strategies) | shared 12% stop ($117.51 at base $979.25) and 5.5% window limit | breached | rolling 24 h | latch off [existing] |
 | OICORE (PF 1.32, n 77) | streak 24 or net under -$6 after 40 fills | trips | settled order history | latch off [existing] |
 | OICORE | net under -1c per contract | after 50 fills | | ALERT |
@@ -66,7 +69,7 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | USD/CAD | 1.00 (46) | 19 | 5 weeks | |
 | Natural gas | 0.64 (38) | 14 | 7 weeks | |
 
-Gold and OICORE if killed return by the same rule. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
+**Gold (coded Nov 10, 2026, the owner):** a killed gold returns only by a reviewed edit that moves `GOLD_KILL.rearmAt`, after the shadow GOLDALL rows show PF 1.3 or better over at least 60 trades and 7 days with the second half at 1.3 or better, and the owner approves; the first 30 trades after the re-arm go at half size. Refinement warned this bar is stricter than gold's long run record (PF 1.40 on 307 trades) and may keep a normal gold out; the cost of that is idle gold, not lost money. OICORE if killed returns by the general rule above. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
 
 ## 6. Capital rules and the fast path's safety limits
 

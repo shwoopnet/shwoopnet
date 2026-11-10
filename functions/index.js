@@ -48,6 +48,7 @@ const { onSchedule } = require("firebase-functions/v2/scheduler");
 const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
 const exitAlarm = require("./kalshiExitAlarmLib");
+const goldKillLib = require("./kalshiGoldKillLib");
 const shardAlertLib = require("./kalshiShardAlertLib");
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). SLOT_ON comes from the slot library's own constants and nothing else: no stored document, request or page can feed it. It is "watching" (entries are
 // allowed, or a slot order has ever existed), which is wider than "entering", so switching entries off never orphans a live slot position. While it is false
@@ -767,6 +768,33 @@ exports.kalshiLiveArmed = onSchedule(
     }
     await watchdog.sendAll(fetch, watchdog.pingsFor({ base: KALSHI_WATCHDOG_URL.value(), ok: !failure, reason: failure && failure.message }));
     if (failure) throw failure;
+  }
+);
+
+// Gold's kill latch (the owner, Nov 10, 2026; docs/GOLD_KILL_LATCH.md). A separate process from the minute tick on purpose: it REPLAYS gold's settled orders since the code's re-arm date
+// (cash basis) and caches the verdict on the sizing document (`goldKill`), which kalshiLiveArmed already reads, so the tick gains no read and no write. It holds no Kalshi key, sends nothing
+// to Kalshi and places no order; its only writes are that field and an event in kalshiLiveEvents. Every failure leaves the stored record as it was. One reader per instance (the older part
+// of the list is read once every 15 minutes, as for the tick).
+const goldOrderReader = live.makeRecentOrderReader(async (ts) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })));
+exports.kalshiGoldKillCheck = onSchedule(
+  { schedule: "every 1 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const db = getFirestore();
+      const sizingRef = db.collection("kalshiLiveControl").doc("sizing");
+      const now = Date.now();
+      const r = await goldKillLib.runGoldKillCheck({
+        now,
+        readOrders: (since) => goldOrderReader(since, now),
+        readSizing: async () => { const s = await sizingRef.get(); return s.exists ? s.data() : null; },
+        writeGoldKill: (patch) => sizingRef.set({ goldKill: patch }, { merge: true }),
+        logEvent: (e) => db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e }),
+      });
+      if (r && (r.tripped || (r.alerts && r.alerts.length))) console.log("kalshiGoldKillCheck: " + JSON.stringify({ tripped: r.tripped || null, alerts: r.alerts || [] }));
+    } catch (e) {
+      console.error("kalshiGoldKillCheck failed: " + String((e && e.message) || e).slice(0, 160));
+    }
   }
 );
 
