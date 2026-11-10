@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 06:28 AM CT (12:28Z): W-INDEP6: OICORE price bands on the independent window and Sep to Nov (supports the 0.08 floor)
+
+Registered first (S/w_indep6), rule 86,300 rise, cheaper side by c-180 ask, cap 0.50, no floor. Independent Jun to Jul, PF (n, win, net per contract) +0c then +1c: under 0.08 1.32 (180, 2 percent, +0.5c) then 0.79 (-0.6c); 0.08-0.10 3.23 (8, 25 percent, +15.5c) then 2.87; 0.10-0.35 1.27 (15, 20 percent, +3.6c) then 1.18; 0.35+ 1.31 (4, 50 percent, +7.1c) then 1.26. Rebuilt Sep to Nov (2,473 triggers): under 0.08 0.98 (2,099, -0.0c) then 0.60 (-1.1c); 0.08-0.10 1.03 (62) then 0.91; 0.10-0.35 2.11 (241, 35 percent, +14.3c) then 1.97; 0.35+ 1.23 (71) then 1.18. The 27 live-rule triggers are the 8 + 15 + 4 at 0.08 and over; without the floor there are 180 more priced near 0. n tiny above 0.08, no band is a rule. For the trackers: under 0.08 is break-even at +0c and negative at +1c in both windows, which supports the floor (live since Nov 8) without proving it; the 0.08-0.10 band has too few (8) to speak to the under-0.10 split. N +3.
+
 ## 2026-11-10 05:30 AM CT (11:30Z): ONDECK.md refreshed; Sunday supply draft written
 
 ONDECK.md current (registry XRPYES10, GOLDALL, XRPFAV6, GOLDHI6S; retired ETHNO6, ETHL1, BTCHI6, BTCHI10 with reasons; closed families). SUNDAY_SUPPLY_DRAFT.md: only the 4 registered rules qualify, fewer than 3 new candidates; needs-data list included. Signals per week are candle-model figures; priors are judgment.
