@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 08:28 AM CT (14:28Z): W-USDATA: gold 08:00 to 09:30 ET block on the independent window, NOT_ENOUGH_DATA
+
+Registered first (S/w_usdata), N +2. Block = weekday closes 08:00 to 09:30 ET (7 closes), DST-aware; GOLDALL hold, unrounded fee. PF (n) block vs rest of weekday: independent Aug 13 to Sep 1 +0c 2.47 (33) vs 1.76 (376); +1c 2.12 vs 1.49; net difference 95 percent interval [-5.8, +6.1]c includes 0. Rest of history Sep 1 to Nov 9 +0c 3.31 (91) vs 1.15 (1120); +1c 2.84 vs 0.99; interval [+0.19, +7.0]c (this is the cell W-GOLDCAL selected: context only). Before Nov 1 (EDT) 5.90 (79); after Nov 1 (EST) 0.86 (12), too thin. Direction held on the independent window but cannot be confirmed (n 33 under 40). Release-day list not verifiable. A shadow needs about 40 or more block signals, roughly 3 to 4 more weeks; GOLDALL rows carry timestamps so the cut is read offline.
+
 ## 2026-11-10 08:28 AM CT (14:28Z): W-XASSET1: cross-asset confirmation, all three rules FAIL
 
 Registered first (S/w_xasset), N +8 (about 780). Joint window ETH 4.3 weeks (from 2026-10-11, 2,581 windows), XRP 6.6 weeks. PF (n) H1 / H2, +0c then +1c: X1 ETH confirmed by BTC 0.90 (159) / 0.91 (160); 0.74 / 0.76; unconfirmed 0.88 (198) / 0.69 (217); about 75 signals a week; fails. X2 XRP confirmed by BTC 1.45 (261) / 1.01 (250); 1.21 / 0.85; unconfirmed 1.05 (488) / 1.55 (393); confirmed not better in H2; fails; about 77 a week. X3 ETH follower lag 1.34 (26) / 0.43 (32) at +0c, 14 signals a week: NOT_ENOUGH_DATA (n under 40) and H2 poor; would need about 6 more weeks (about 2026-12-22). Historical candle reads, live-fill overlap not checked.
