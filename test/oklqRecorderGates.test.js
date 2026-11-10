@@ -46,7 +46,7 @@ gates.OL2 = () => {
   assert.ok(!/pip install|npm install|curl |wget /.test(wf), 'installs nothing: the script uses the standard library only');
   assert.ok(/ref: main/.test(wf) && /python3 code\/scripts\/record_oklq\.py "data\/oklq\/\$STAMP" --seen data\/oklq/.test(wf), 'the script comes from main, the data goes under oklq/');
   assert.ok(!/pull_request_target|github\.event\.(issue|pull_request|comment|head_commit)/.test(wf));
-  assert.ok(/cron: "7 \*\/2 \* \* \*"/.test(wf) && /cron: "37 1-23\/2 \* \* \*"/.test(wf), 'two interleaved two hourly sets, far inside the 17 hour history');
+  assert.ok(/cron: "7 0,12 \* \* \*"/.test(wf) && /cron: "7 3,15 \* \* \*"/.test(wf), 'two interleaved sets, 4 starts a day, longest planned gap 9 h and 12 h if one start drops, inside the 17 hour history');
 };
 
 // OL3: neither the workflow nor the script is published with the site.

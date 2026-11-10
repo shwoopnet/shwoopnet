@@ -9,8 +9,8 @@
 name: record-oklq
 on:
   schedule:
-    - cron: "7 */2 * * *"
-    - cron: "37 1-23/2 * * *"   # a second set an hour and a half off the first: a dropped start costs about an hour, not two
+    - cron: "7 0,12 * * *"
+    - cron: "7 3,15 * * *"      # Nov 10: 4 starts a day (owner limit 250 min a month), the second set 3 h after the first: gaps of 3 and 9 h, a dropped start still leaves at most 12 h, inside OKX's 17 h
   workflow_dispatch: {}
 permissions:
   contents: write

@@ -16,3 +16,7 @@ Two cron sets, `7 */2` and `37 1-23/2`: 24 triggers a day, a start every hour on
 
 ## Stop and results
 Nothing is recorded from 2026-12-31 23:59 UTC (checked in the first workflow step and in the script); delete the workflow to stop sooner. Readable in January 2027 (about 8 weeks, the row 55 spec's roughly 100 events at the 98th percentile of a trailing week). Not covered here: the Kalshi window join (do it in the analysis from the existing 15 minute book recorder), ETH, per-contract notional (needs ctVal from /public/instruments; the analysis can fix it at 0.01 BTC for USDT swaps, to be confirmed).
+
+
+## Nov 10 change (main, owner limit 250 min a month)
+Switched to 4 starts a day: crons `7 0,12` and `7 3,15` (gaps 3 h and 9 h; one dropped start leaves at most 12 h, inside the 17 h OKX keeps). About 4 x 1 min x 30 = 120 billed minutes a month, under 250. The 24 a day figures above are superseded. Requests drop to about 20 to 40 GETs a day plus extra pages after a long gap.
