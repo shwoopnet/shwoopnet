@@ -86,6 +86,10 @@ The line the code already draws, and this spec keeps: **nothing stored can add a
 - **Alerts, not actions:** rolling 60 PF under 0.7 and the gold tripwire go to the owner as approval items.
 - **Human: PROMOTE (shadow to incubator to ladder).** A promotion is a registry or size edit in code. The system does everything up to the merge: a nightly scorer produces the promotion packet and the chief of staff drafts the pull request; the owner types "merge N" and runs the deploy. **No Charter change is asked.** A safe speed up that does not need one: batch a week's promotions into one pull request and one deploy.
 
+## 7b. The weekly rotation owner (Nov 10, 2026, the owner)
+
+The Refinement chat (Head of Live Strategy Performance) is the weekly **rotation owner**. Every week, Monday morning US Central, it reviews EVERY strategy (live, probe, shadow and retired) against its IMPLEMENT, KILL and RETURN rules on the cash basis and sends ONE short rotation recommendation: keep, watch, size step, kill, return, or which shadow rule to promote, with profit factor first. The owner approves each item by popup. It also flags any strategy that is missing one of the three rules. It only recommends: nothing changes without the owner, a promotion is still a reviewed edit in code, and the owner still says "merge N" and runs the deploys. The first recommendation is due Monday Nov 16, 2026.
+
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
 What already exists: the registry and validator, per strategy kill rules and the sticky latch, slot caps scaling with the base, the shared 12% stop and 5.5% window limit, per strategy stop meters on the page, the skip log (`kalshiSlotSkips`, report `skips`), order records and the nightly report with `slotOrders`. Missing, in build order:
