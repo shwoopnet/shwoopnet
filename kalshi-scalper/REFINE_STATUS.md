@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-09 06:42 PM CT (00:42Z): W-OIETH3: OICORE mechanism on Ethereum, NOT_ENOUGH_DATA
+
+Registered first (S/w_oieth3), N +2 (about 760 total). Threshold: Bitcoin 86,300 is the 0.6976 quantile of Bitcoin first-half OI rises; same quantile of ETH first-half rises = 15,933. Cash model unrounded fee, entry at c-120 ask. ETH 857 windows over 9 days: H1 PF 0.59 (+0c) / 0.52 (+1c) n19; H2 held out PF 1.31 / 1.26 n10; triggers 4.2 a day in H1, 2.2 in H2; 40 H2 triggers needs about 18 more days. Prior low (Bitcoin OICORE is not at the research bar; ETH H1 lost). Slot need: series allowed-list edit only; do not admit now; re-read in 2 to 3 weeks.
+
 ## 2026-11-09 06:28 PM CT (00:28Z): shadow_read.py added; shadow report gap noted
 
 refine_tools/shadow_read.py computes per-rule signals, per week, wouldFill share, PF per contract, halves, pass and kill checks from rows (demo mode labelled). origin/main report has report.shadow.rules aggregates only (signals, settled, PF, pfFillable, netCents, secondHalfPf, topDay, days, status), no rows; a rows export (?shadow=1) or Firestore read of kalshiShadowRows is missing for halves and per-day checks. Batch 2 rules (XRPFAV6, GOLDHI6S, BTCHI10, XRPFAV10) are not in main's SHADOW_RULES and maxSpread is unused there. Logger writes pnl itself, else public GET /markets/<ticker> market.result.
