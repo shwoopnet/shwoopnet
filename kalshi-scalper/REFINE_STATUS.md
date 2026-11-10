@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 03:23 AM CT (09:23Z): W-INDEP4 (interim): OICORE live rule on an independent June to July window, NOT_ENOUGH_DATA, leans negative
+
+Registered first (S/w_indep4). Scored on 697 of 1,536 registered markets (same 16 pre-chosen dates). OI rise median 39.9k, p90 94k, p99 162k (scale like Sep to Nov). Triggers at 86,300: 14 (need 40). PF at +0c 0.74, win 14.3 percent, -4.35c per contract; at +1c PF 0.67 (15 triggers), win 13.3 percent, -5.6c per contract. Exploratory only: p95-equivalent threshold 120k (about 3 triggers) PF 2.4, noise. Trigger rate about 2 percent, so the full 1,536 would give about 30 triggers, still under 40. Puller continues (restart in S/w_indep4/STATUS.md). N unchanged.
+
 ## 2026-11-10 03:16 AM CT (09:16Z): W-INDEP2 and W-INDEP rescore: XRP full window, Bitcoin 78 percent
 
 XRP independent window (June to early Sept, 12 pre-registered dates) 1,147 of 1,152 windows, PF (n) at +0c / +1c: XRPYES10 1.91 (70) / 1.66; XRPFAV6 1.645 (137, 129 wins) / 1.46, net 3.4c per contract; XRPFAV10 1.71 (70) / 1.53. The interim XRPFAV6 0.99 (n42) was the time-of-day skew (closes 00:00 to 08:15 UTC only); on the full window it clears the bar at both slips. Bitcoin independent window 1,206 of 1,536 windows: BTCHI6 1.13 (268) at +0c, 0.91 at +1c (net +0.55c / -0.38c per contract): fails the 1.3 bar (interim 1.42 on n137 did not hold); BTCHI10 1.27 (66) / 1.05. Gold independent window done earlier (GOLDALL 1.60 / 1.36, GOLDHI6S 1.68 / 1.35).
