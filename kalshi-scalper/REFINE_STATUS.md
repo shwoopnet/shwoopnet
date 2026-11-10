@@ -2,6 +2,10 @@
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-10 08:33 AM CT (14:33Z): W-SPOT1: spot-implied probability filter on Bitcoin favourites, FAIL (direction visible)
+
+Registered first (S/w_spot), N +2 (about 780). Reference = Coinbase close at window start (no strike in cached markets); spot at the look; z = d / (sigma sqrt 6), sigma from previous 60 one-minute returns; Coinbase covers 6,460 of 6,468 BTC windows over 9.8 weeks. PF (n) H1 / H2: S1 spot-cheap (model probability minus ask at least 0.02): +0c 1.33 (264) / 1.10 (185); +1c 1.13 / 0.93. S2 market richer than spot: +0c 1.09 (547) / 0.85 (633); +1c 0.94 / 0.73. All favourites: +0c 1.12 (959) / 0.93 (941); +1c 0.96 / 0.79. Direction S1 > ALL > S2 visible but half 2 below the 1.3 bar and not tradable after 1c slip. Signals about 46 a week (S1), 195 a week (ALL).
+
 ## 2026-11-10 08:28 AM CT (14:28Z): W-USDATA: gold 08:00 to 09:30 ET block on the independent window, NOT_ENOUGH_DATA
 
 Registered first (S/w_usdata), N +2. Block = weekday closes 08:00 to 09:30 ET (7 closes), DST-aware; GOLDALL hold, unrounded fee. PF (n) block vs rest of weekday: independent Aug 13 to Sep 1 +0c 2.47 (33) vs 1.76 (376); +1c 2.12 vs 1.49; net difference 95 percent interval [-5.8, +6.1]c includes 0. Rest of history Sep 1 to Nov 9 +0c 3.31 (91) vs 1.15 (1120); +1c 2.84 vs 0.99; interval [+0.19, +7.0]c (this is the cell W-GOLDCAL selected: context only). Before Nov 1 (EDT) 5.90 (79); after Nov 1 (EST) 0.86 (12), too thin. Direction held on the independent window but cannot be confirmed (n 33 under 40). Release-day list not verifiable. A shadow needs about 40 or more block signals, roughly 3 to 4 more weeks; GOLDALL rows carry timestamps so the cut is read offline.
