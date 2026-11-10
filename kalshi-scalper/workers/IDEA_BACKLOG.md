@@ -3,7 +3,7 @@ Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by s
 | # | idea | cost | prior | next step | status |
 |---|---|---|---|---|---|
 | 1 | AAA gas daily ladder vs persistence (built from the ladders themselves, no EIA needed) | done | 8% | AAAGAS1: FALSIFIED, M0 PF 0.49 n 82, M1 0.47 n 86 | closed Nov 10 |
-| 2 | Mentions markets: calibration by series group | free, about 1,200 requests | 10% | MENT1 protocol | running Nov 10 |
+| 2 | Mentions markets: calibration by series group | done | 10% | MENT1: NOT_ENOUGH_DATA (45 of 333 dev markets had a usable quote 1 h before close; no cell n >= 20) | closed Nov 10; variant at a shorter lead is idea 15 |
 | 3 | Cheap wings of monthly/weekly commodity and foreign-index ladders (Kalshi-only) | free, about 1,500 requests | 5% | WING1 protocol | running Nov 10 |
 | 4 | TSA daily checkpoint ladders (KXTSA) vs weekday seasonality of public TSA throughput | free if tsa.gov table reachable (unchecked), history from Kalshi | 8% | probe reachability, register | untested |
 | 5 | Weekly jobless claims ladders (KXJOBLESSCLAIMS) vs persistence on FRED ICSA (FRED reachable) | free, about 300 requests | 8% | register after 1 to 3 | untested |
@@ -16,5 +16,6 @@ Series facts (Kalshi public /series list, Nov 10): KXAAAGASD* daily AAA gas by s
 | 12 | Same-observation spreads as a family: census of series pairs whose settlement observation coincides (gas daily/weekly/monthly, Spotify daily/weekly, flights, TSA); Kalshi-only | 6% | series-list census, then register per pair | untested |
 | 13 | Weekly post-count ladders (KXTRUTHSOCIAL, KXIMFTWEETS, KXWEFTWEETS weekly): mid-week run-rate model vs the ladder; Kalshi history only (about 1,000 requests) | 5% | register after 1 to 3 | untested |
 | 14 | Other venue as information source: Metaculus/Manifold community forecast vs Kalshi YES tails on one-off politics/science markets; free API, forward only, 2 to 4 weeks | 5% | probe reachability of the APIs, match 20 markets by hand-free text rule | untested |
+| 15 | Mentions markets at a short lead (5 to 20 minutes before the event ends) on the large earnings-call series only; a quote exists later in the event | 6% | register a lead and a series list from the census first | untested (added Nov 10) |
 Overlap with Refinement's list (main, Nov 10): none on markets; Refinement's five are 15 minute favourite filters or maker entries. My #8 is conceptually near their spot-implied filter (README LAG2: PF 0.99 on 238 trades).
 Done and falsified this week (not in the queue): OPEN1H (first-hour listing, 46 usable of 600), CHEAPEXIT1 (PF 0.42 to 0.66), NEWSER1, XVENUE1, REGIME-B2.
