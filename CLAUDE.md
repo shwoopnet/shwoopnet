@@ -915,7 +915,7 @@ A fifth log only rule in `SHADOW_RULES` (`kalshi-scalper/README.md#SHADOW-GOLDAL
 
 ## ETHL1B shadow rule (Nov 10, 2026, the owner's decision on Ethereum)
 
-`ETHL1B` is the sixth shadow rule (`functions/kalshiShadowLib.js`, pre-registration `kalshi-scalper/README.md#SHADOW-ETHL1B`): Ethereum 15 minute favourite at 0.88 to 0.97, 6 minute look, no smooth gate (that is logged at read time from public candles), 1 contract, log only, forward read about 2026-12-22. Ethereum (live cash PF 1.18, n 113) comes back live only at cash PF 1.3+ over 150 shadow signals, held out second half 1.2, at least 14 days. ETHL1 was retired earlier the same day on the candle recheck (under 1.0 in both halves at +1c), so a pass is not expected. Page and log only; nothing that places an order changed. Tests SH5. Needs `bash functions/deploy-sizing.sh`.
+`ETHL1B` is the sixth shadow rule (`functions/kalshiShadowLib.js`, pre-registration `kalshi-scalper/README.md#SHADOW-ETHL1B`): Ethereum 15 minute favourite at 0.88 to 0.97, 6 minute look, no smooth gate (the smooth split can be computed by the reader from public candles at read time; that code is not built here), 1 contract, log only, forward read about 2026-12-22. Ethereum (live cash PF 1.18, n 113) comes back live only at cash PF 1.3+ over 150 shadow signals, held out second half 1.2, at least 14 days. ETHL1 was retired earlier the same day on the candle recheck (under 1.0 in both halves at +1c), so a pass is not expected. Page and log only; nothing that places an order changed. Tests SH5. Needs `bash functions/deploy-sizing.sh`.
 
 ## Week 2 shadow rules registered (Nov 10, 2026, the refinement chat's batch 2 after the fee fix)
 
