@@ -695,6 +695,72 @@ gates['OICORE cheap skip: a cheap side under 8c sends nothing and is logged chea
   assert.strictEqual((await world('0.9400', '0.9500')).ex.posts.length, 0, 'the NO side at 6c is skipped too (YES at 94 to 95c)');
 };
 
+// ---- RETIRED favourite-late strategies (Nov 11, 2026, the owner: "existing duplicates should be killed") ---------------------------------------
+// XRPYES10 and KESTREL left the registry, but an order of either that was already open when the deploy landed must still be sold or settled, counted in the shared stop and window cap, and never stranded.
+// With its strategy gone an order gets FALLBACK_EXIT: held while the bid is above 25c and more than 60 s remain, sold at the 25c stop, or sold at the bid 60 s before the close (hold to settlement is NOT kept).
+const RETIRED = [['XRPYES10', 'KXXRP15M-26NOV111015-15', 'KXXRP15M', 'yes'], ['KESTREL', 'KXAUDUSD15M-26NOV111015-15', 'KXAUDUSD15M', 'no']];
+const retiredWorld = (id, tk, series, side, mk, extra) => {
+  const flags = { enabled: true, registry: slot.SLOT_STRATEGIES, everUsed: true };
+  const w = exitWorld(Object.assign({ flags, order: { id: 'S-' + id + '-' + tk + '-1', slotId: id, ticker: tk, series, side, count: 3, fillCount: '3', maxCost: 2.9, price: 0.93 }, ex: { market: Object.assign({ ticker: tk }, mk), positions: { [tk]: side === 'yes' ? 3 : -3 } } }, extra || {}));
+  return w;
+};
+gates['RET1 an open order of a retired strategy is not stranded: the real engine holds it above the 25c line, sells it at 25c or at 60 s before the close, and settles it when the market closes'] = async () => {
+  assert.ok(!slot.SLOT_STRATEGIES.some((x) => x.id === 'XRPYES10' || x.id === 'KESTREL'), 'neither is registered, so the real registry gives them the fallback exit');
+  for (const [id, tk, series, side] of RETIRED) {
+    const bidYes = side === 'yes' ? ['0.9000', '0.9200'] : ['0.0800', '0.1000'];           // our side's bid is 90c either way
+    const lowYes = side === 'yes' ? ['0.2000', '0.2200'] : ['0.7800', '0.8000'];           // our side's bid is 20c
+    let w = retiredWorld(id, tk, series, side, { yes_bid_dollars: bidYes[0], yes_ask_dollars: bidYes[1] });
+    await run.runSlotExits(w.args);
+    assert.strictEqual(w.ex.posts.length, 0, id + ': a healthy favourite with time to spare is held');
+    assert.strictEqual(w.db.slot.get('S-' + id + '-' + tk + '-1').settled, false);
+    w = retiredWorld(id, tk, series, side, { yes_bid_dollars: lowYes[0], yes_ask_dollars: lowYes[1] });
+    await run.runSlotExits(w.args);
+    assert.strictEqual(w.ex.posts.length, 1, id + ': the 25c fallback stop sells it'); assert.strictEqual(w.ex.posts[0].count, '3');
+    const d = w.db.slot.get('S-' + id + '-' + tk + '-1');
+    assert.ok(d.settled === true && d.result === 'exit' && d.exitWhy === 'stop', id + ': sold and settled as an exit: ' + JSON.stringify(d));
+    w = retiredWorld(id, tk, series, side, { yes_bid_dollars: bidYes[0], yes_ask_dollars: bidYes[1], close_time: iso(NOW + 50000) });
+    await run.runSlotExits(w.args);
+    assert.strictEqual(w.ex.posts.length, 1, id + ': 60 s before the close the fallback sells it (hold to settlement is not kept once the strategy is gone)');
+    assert.strictEqual(w.db.slot.get('S-' + id + '-' + tk + '-1').exitWhy, 'time');
+    assert.strictEqual(w.db.latches[id], undefined, 'a removed strategy has no kill latch to write');
+    // The market closed before any sell: the settle sweep books it, so it stops counting as open in the shared stop.
+    w = retiredWorld(id, tk, series, side, { status: 'finalized', result: side });
+    const sw = await run.runSlotSettle({ store: w.store, fetchFn: w.ex.fetchFn, keyId: 'k', pem, now: NOW });
+    assert.strictEqual(sw.settled, 1, id + ': ' + JSON.stringify(sw));
+    assert.strictEqual(w.db.slot.get('S-' + id + '-' + tk + '-1').settled, true);
+    assert.strictEqual(await run.slotExitIdle({ store: retiredWorld(id, tk, series, side, {}).store, now: NOW }), false, id + ': the exit loop stays awake while it is open');
+  }
+};
+gates['RET2 an open order of a retired strategy still counts in the shared loss stop and the window cap'] = async () => {
+  for (const [id, tk, series, side] of RETIRED) {
+    const open = slotOrder({ id: 'S-' + id + '-' + tk + '-1', slotId: id, ticker: tk, series, side, count: 3, fillCount: '3', maxCost: 2.9, ts: NOW - 60000 });
+    const r = slot.slotRiskForBotRisk([open], NOW - 86400000);
+    assert.ok(r.openCost > 0 && r.worst < 0, id + ': open money is counted as lost in the stop: ' + JSON.stringify(r));
+    assert.ok(slot.slotWindowSpent([open], tk) > 0, id + ': and in the window cap');
+    const done = Object.assign({}, open, { settled: true, result: 'exit', settledPnl: -1.2, exitCount: 3, exitProceeds: 1.7, settledAt: NOW });
+    assert.ok(slot.slotRiskForBotRisk([done], NOW - 86400000).trades === 1, id + ': a settled one stays in the record');
+  }
+};
+gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, the hold list, the allowed or reserved series, or the ticker shape; the real tick sends nothing for their markets'] = async () => {
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830']);
+  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830']);
+  assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && !slot.SLOT_SERIES_ALLOWED.includes('KXAUDUSD15M') && !('KXAUDUSD15M' in slot.SLOT_SERIES_RESERVED));
+  assert.strictEqual(typeof slot.slotRollingSeriesDue, 'undefined', 'the rolling quote read for a non-L1 market is gone');
+  for (const [id, tk, series, side] of RETIRED) {
+    const r = slot.slotOrderCheck({ strategyId: id, ticker: tk, side, limit: 0.93, step: 1, depthAtTouch: 1000, slotOrders: [], l1Orders: [], slotOrdersComplete: true, lockTxn: true, lock: null, position: 0, sizingBase: 800, windowCapFraction: 0.055, killLatch: null, secondsLeft: 600, now: NOW });
+    assert.ok(!r.allowed, id + ' is refused by the entry gate: ' + JSON.stringify(r));
+    const copy = { id, readme: 'kalshi-scalper/README.md#SLOT-' + id, series: [series], entry: { sideRule: side === 'yes' ? 'yes' : 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, exit: { holdToSettle: true }, contractsPerOrder: 3,
+      scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }, killRules: { maxConsecutiveLosses: 3, minNet: { afterFills: 20, net: -15 } }, forwardReadDate: '2026-12-14', reviewedAt: '2026-11-10' };
+    assert.ok(!slot.validateSlotStrategy(copy).ok, id + ': even re-adding the old entry is refused until the lists are edited on purpose');
+    const db = makeDb(), ex = makeExchange(db);
+    for (const left of [600, 365]) {
+      const q = [{ series, m: { ticker: tk, status: 'active', close_time: iso(NOW + left * 1000), yes_bid_dollars: '0.9000', yes_ask_dollars: '0.9200' } }];
+      await run.runSlotTick(tickArgs(db, ex, { args: { quotes: q } }).args);
+    }
+    assert.strictEqual(ex.posts.length, 0, id + ': the real tick sends no order for its market at either look'); assert.strictEqual(db.slot.size, 0); assert.strictEqual(db.locks.size, 0);
+  }
+};
+
 (async () => {
   let failed = 0;
   for (const [name, fn] of Object.entries(gates)) {

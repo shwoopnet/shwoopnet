@@ -124,6 +124,9 @@ function makeRunners(flags) {
 
     // From here on every market in `jobs` is inside its strategy's entry span, so a market that ends this tick without an order gets a skip record (the latest reason wins).
     const skips = new Map();
+    // Qualified signals (Nov 11, 2026, the owner: "P3"; LOG ONLY). Once a market's open interest condition has passed, the facts a later filter would need (the open interest rise, the side and the price it would
+    // have bought) are kept here, and any skip that follows carries them with qualified: true, so every trigger can be scored whether or not an order went out. A market that never triggered gets no such fields.
+    const qualified = new Map();
     const skip = (job, reason, detail, note) => {
       try {
         const closeMs = Date.parse(job.closeTime);
@@ -132,6 +135,8 @@ function makeRunners(flags) {
         for (const [k, v] of Object.entries(detail || {})) if (typeof v === "number" && Number.isFinite(v)) d[k] = v;
         skips.set(job.s.id + "|" + job.ticker, { strategy: job.s.id, ticker: job.ticker, reason, detail: Object.keys(d).length ? d : null,
           note: note ? String(note).slice(0, SKIP_NOTE_MAX) : null, atMs: at, secondsLeft: Number.isFinite(closeMs) ? Math.round((closeMs - at) / 1000) : null });
+        const q = qualified.get(job.s.id + "|" + job.ticker);
+        if (q) Object.assign(skips.get(job.s.id + "|" + job.ticker), q);
       } catch (e) { /* log only */ }
     };
     const skipAll = (reason, note) => { for (const j of jobs) skip(j, reason, null, note); };
@@ -162,6 +167,7 @@ function makeRunners(flags) {
     } catch (e) { skipAll("preconditions_unreadable"); return done({ skipped: "the slot's preconditions could not be read" }); }
 
     const results = [];
+    const bookLog = [];                            // slot orders the exchange answered this minute, for the decision-time book snapshot (Nov 11, 2026, "P2"; log only)
     const committed = {};                          // dollars this tick has already committed on each shard
     const sinceMs = Number.isFinite(sh.since) ? sh.since : now - 24 * 3600 * 1000;
     const seenInShared = new Set((sh.recentList || []).map((t) => t.id || t.clientOrderId));
@@ -199,6 +205,7 @@ function makeRunners(flags) {
         if (oiRise === null) { skip(job, "no_oi_candle", { http: cr.status }); results.push(ticker + ": the open interest could not be read, nothing sent"); continue; }
         if (oiRise < s.entry.oiRiseMin) { skip(job, "oi_below", { oiRise, min: s.entry.oiRiseMin }); results.push(ticker + ": open interest rose " + oiRise + ", under " + s.entry.oiRiseMin + ", no signal"); continue; }
       }
+      if (oiRise !== null) { const qn = (x) => (typeof x === "number" && Number.isFinite(x) ? x : null); qualified.set(s.id + "|" + ticker, { qualified: true, oiRise: qn(oiRise), side: side === "yes" || side === "no" ? side : null, price: qn(sidePrice) }); }
       // A strategy that skips its very cheapest entries (SLOT_SKIP_BELOW; OICORE under 8c): the signal passed every other test, so the skip is logged with the price and nothing is sent.
       if (slotLib.slotSkipsPrice(s, sidePrice)) { skip(job, "cheap_skipped", { price: sidePrice, min: slotLib.SLOT_SKIP_BELOW[s.id] }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", under the " + slotLib.SLOT_SKIP_BELOW[s.id].toFixed(2) + " this strategy skips"); continue; }
       // The taker flow condition (FLOW1; public trade tape, no key): flow on the side bought over 360 to 180 s before the close, at most FLOW_PAGES pages. Unreadable means no order.
@@ -304,6 +311,7 @@ function makeRunners(flags) {
           ...(d.status ? { kalshiStatus: String(d.status).slice(0, 24) } : {}), answeredAtMs: Date.now() };   // log only (Nov 4, 2026): why an order did not fill; nothing reads it
         await store.updateSlotOrder(cid, patch);
         Object.assign(rec, patch);
+        bookLog.push({ cid, ticker });
         await log("slot order", s.id + " " + side + " " + rec.count + " at " + (sidePrice * 100).toFixed(0) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
         results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
         continue;
@@ -332,6 +340,10 @@ function makeRunners(flags) {
       await writeLast({ status: "error", error: "HTTP " + res.status + " " + short(res.body) });
       return done(Object.assign(out, { results }));
     }
+    // After every order of the minute was sent: one public book read per answered order, in parallel, every error swallowed (live.logBook), and the whole wait capped at 1.8 s (live.boundBookWrites). The skip records are
+    // written afterwards, inside done() (flushSkips), not at the same time: they add their own write time, which this comment does not bound.
+    const bookWrites = typeof live.logBook === "function" ? bookLog.map((b) => live.logBook({ fetchFn, ticker: b.ticker, write: (patch) => store.updateSlotOrder(b.cid, patch) })) : [];
+    if (typeof live.boundBookWrites === "function") await live.boundBookWrites(bookWrites); else await Promise.all(bookWrites);
     return done({ ok: true, results });
   }
 
