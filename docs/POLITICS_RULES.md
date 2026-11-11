@@ -53,7 +53,18 @@ These are caps, not permission. A probe starts only after the owner approves its
 - **Resolution-rule edge cases:** flagged to the owner with the rule text, never automatic.
 - **News fade:** pre-register three delays (15 minutes, 1 hour, 4 hours), all counted in the deflation.
 
-## 5. What is not decided
+## 5. Nothing happens, budget and proof (owner popups 29 to 40, Nov 11, 2026)
+
+- **Nothing happens (NO side of "will X happen by date"):** only markets within 14 days; NO bought at 60c to 88c; 1 contract; at most $5 at risk per market; ONE market per story.
+- **Budget:** politics and parlay probes may use up to **$200 lifetime in total** (the owner chose this over the recommended $60). Each live probe still needs its own owner popup.
+- **Shard:** confirm which Kalshi shard politics singles use and the smallest amount to move there. The owner moves the money themselves; the page and the bot cannot.
+- **Reporting:** politics and parlays are reported only on a real result or a decision.
+- **Proof:** the same bar as everything else, PF 1.3 or better over 100 fills in 2 of 3 windows.
+- **Economics releases:** in as their own family. Run both the overshoot fade and the official-components idea, counted together in the deflation.
+- **EVENT830:** left to its own kill rule.
+- **Weather singles:** yes, on NWS data, the day-end rounding idea first.
+
+## 6. What is not decided
 
 - No code places any politics or parlay order, and the second slot registry (`functions/kalshiSlotLib.js`) holds none. Admitting one is a separate reviewed pull request and the owner's own popup.
 - The exact meaning of "10c per dollar after fees" is left to each probe spec to define and the owner to approve.
