@@ -64,7 +64,15 @@ These are caps, not permission. A probe starts only after the owner approves its
 - **EVENT830:** left to its own kill rule.
 - **Weather singles:** yes, on NWS data, the day-end rounding idea first.
 
-## 6. What is not decided
+## 6. Other families (owner popups 41 to 44, Nov 11, 2026)
+
+- **Sports singles:** calibration only, on Kalshi's own settled markets. No outside sports data.
+- **Market making:** stays on zero-fee series, not sports. The questions on first-live details (popups 45 to 48) were not answered; they are asked only if the Nov 24 read passes.
+- **Entertainment:** Kalshi's own history only. Awards combos by price consistency.
+- **App Store and Steam charts:** yes, a small test on the permitted official APIs.
+- **Clinical trials (new family, owner, Nov 11):** a census of Kalshi's FDA approval, drug and trial readout, PDUFA and health markets first; any source (ClinicalTrials.gov, openFDA, FDA advisory calendar, Drugs@FDA) has its terms read before any automated read.
+
+## 7. What is not decided
 
 - No code places any politics or parlay order, and the second slot registry (`functions/kalshiSlotLib.js`) holds none. Admitting one is a separate reviewed pull request and the owner's own popup.
 - The exact meaning of "10c per dollar after fees" is left to each probe spec to define and the owner to approve.
