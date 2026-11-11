@@ -1,0 +1,10 @@
+# SWEEP1 protocol (V2, Nov 11, 2026, registered before any score). Owner order via main: mass backtest sweep on data held, many mechanisms, every test counted.
+Card: SWEEP1 | feature sweep, cheap side | risk class win rate 10 to 30%, loss = the cheap price | stage Idea (a survivor goes to the uniqueness test, four checks and the declined list before anything else)
+Data: hist15 BTC, ETH; alts2 XRP, DOGE, HYPE, BNB (15 minute candles, 15 per market). Pooled across the 6 series (series split is descriptive only).
+Entry: cheap side only (ask 0.04 to 0.30, spread <= 0.03) at the candle 10 minutes (570 to 640 s) or 6 minutes (330 to 400 s) before close. One contract. Fee 0.07 p (1-p) unrounded, on the sale too when sold early.
+Exits (2): HOLD to settlement; TP = sell when the side's bid reaches entry + 0.15 on any later candle high (optimistic, fills at the threshold). If TP fails, it fails everywhere.
+Mechanisms (feature of the bought side's path from candles; bins fixed now):
+ F1 3 minute momentum of the side's mid (<-0.02, mid, >+0.02) | F2 range max-min over the window so far (<0.04, 0.04 to 0.12, >0.12) | F3 spread (0.01, 0.02, 0.03) | F4 volume of last 3 candles over earlier ones (<0.5, 0.5 to 2, >2) | F5 side agrees with the previous window's result in the same series (yes, no) | F6 US Central hour block (0 to 6, 6 to 12, 12 to 18, 18 to 24; fixed UTC-6) | F7 weekday or weekend | F8 drift since the first candle (<-0.10, mid, >+0.10) | F9 side agrees with the direction of BTC's (ETH's for BTC) yes mid over the last 3 minutes (agree, against) | F10 price band control (0.04 to 0.10, 0.10 to 0.20, 0.20 to 0.30).
+Cells: 28 bins x 2 leads x 2 exits = 112 tests. N after = 5,207 + 112 = 5,319; Bonferroni z bar = inv_cdf(1 - 0.05/5319) about 4.4.
+Split: closes sorted per pool, first 2/3 development, last 1/3 held out, read ONCE and only for cells that pass development.
+Survive = development cash PF >= 1.3, n >= 100 events, event-clustered z above the bar. Counts of tests and survivors are reported whatever they are.
