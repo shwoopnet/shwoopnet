@@ -31,7 +31,7 @@ Development gate (a cell is a dev survivor): cash PF >= 1.5 AND n >= 100 AND z >
 | TAIL1 | 3c, 10m, rounded fee 100 / 10 contracts | 89 | 1.42 / 1.38 | +0.0128 / +0.0119 | +0.62 / +0.58 | 38 |
 | TAIL1 | 2c, 6m, hold (largest tail cell) | 718 | 0.58 | -0.0088 | -1.78 | 72 |
 | WINPOS1 | :00, mid underdog, 6m, hold | 2,758 | 0.98 | -0.0052 | -0.62 | 77 |
-| WINPOS1 | :45, mid, 10m, hold | 4,714 | 0.93 | -0.0147 | -2.41 | n/a |
+| WINPOS1 | :45, mid, 10m, hold | 4,714 | 0.93 | -0.0172 | -2.41 | 77 |
 | OPENQ1 | FADE, d 0.2 to 0.3, first candle 840 s, hold | 4,570 | 0.93 | n/a | -1.94 | n/a |
 | OPENQ1 | FADE, d 0 to 0.1, 720 s, hold | 12,921 | 0.91 | n/a | -5.25 | n/a |
 | OPENQ1 | FADE, d 0.3+, 840 s, hold (smallest-n tail bin) | 1,062 | 0.89 | -0.0167 | -1.35 | 76 |
