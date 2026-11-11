@@ -192,14 +192,23 @@ print(json.dumps({"n": len(rows), "w": len(m.COVER_COLS), "g": dict(zip(m.COVER_
   assert.strictEqual(out.n, 5, 'one row per series per window, whatever happened');
   assert.strictEqual(out.w, 18);
   assert.deepStrictEqual([out.g.series, out.g.polls, out.g.ok_polls, out.g.note], ['KXGOLD15M', 0, 0, 'no open market']);
-  assert.ok(/out\.write\("coverage", \[coverage_row\(win\.close_time, win\.tally\[s\], win\.batching\.fallback\) for s in SERIES\]\)/.test(code), 'every series is written, found or not');
+  assert.ok(/out\.write\("coverage", \[coverage_row\(win\.close_time, win\.tally\[s\], win\.batching\.fallback\) for s in win\.series\]\)/.test(code), 'every series is written, found or not');
 };
 
 // FB10: it stops by itself after 14 days, in the workflow and in the script.
+// FB13: from 2026-11-13 23:59 UTC only Bitcoin and Ethereum are recorded (the owner, Nov 11, 2026: the spot-lead test needs more windows); before it, all five.
+gates.FB13 = () => {
+  const out = py(`print(json.dumps([list(m.series_for(m.FULL_END_EPOCH - 900)), list(m.series_for(m.FULL_END_EPOCH + 900)), list(m.series_for(m.FULL_END_EPOCH + 1800)), list(m.EXT_SERIES)]))`);
+  assert.deepStrictEqual(out[0], ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXDOGE15M', 'KXXRP15M'], 'a window opening before the cut records all five');
+  assert.deepStrictEqual(out[1], ['KXBTC15M', 'KXETH15M'], 'a window opening at the cut records only Bitcoin and Ethereum');
+  assert.deepStrictEqual(out[2], ['KXBTC15M', 'KXETH15M']);
+  assert.deepStrictEqual(out[3], ['KXBTC15M', 'KXETH15M'], 'no series is ever added by the extension');
+};
+
 gates.FB10 = () => {
   const out = py(`print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH), len(m.owned_closes(m.END_EPOCH - 1800, m.END_EPOCH + 7200))]))`);
-  assert.deepStrictEqual(out, ['2026-11-13T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
-  assert.ok(/date -u -d '2026-11-13T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
+  assert.deepStrictEqual(out, ['2026-11-20T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
+  assert.ok(/date -u -d '2026-11-20T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
   const steps = wf.split(/\n      - name: /).slice(2);
   assert.ok(steps.length === 4 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(now\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code), 'the script exits at once after the end date');

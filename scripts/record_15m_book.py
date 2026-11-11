@@ -46,7 +46,9 @@ SWEEP_BUDGET_S = 540         # the last sweep of a job must end within this long
 DISCOVER_EVERY_S = 2.0
 DISCOVER_FOR_S = 30.0
 TAPE_PAGES_PER_WINDOW_EST = 75   # the spec's measured 50 to 75 pages a window over the five markets
-END_UTC = "2026-11-13T23:59:00Z"  # 14 days: nothing is recorded from here on
+FULL_END_UTC = "2026-11-13T23:59:00Z"  # the first 14 days: all five series. Windows opening at or after this record only EXT_SERIES.
+EXT_SERIES = ("KXBTC15M", "KXETH15M")  # Nov 11, 2026 (the owner): spot-lead needs more Bitcoin and Ethereum windows, so only those two continue, to END_UTC
+END_UTC = "2026-11-20T23:59:00Z"  # nothing is recorded from here on
 UA = {"User-Agent": "shwoopnet-research-recorder"}
 
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "series", "close_time"] \
@@ -63,6 +65,12 @@ def epoch_of(iso_s):
 
 
 END_EPOCH = epoch_of(END_UTC)
+FULL_END_EPOCH = epoch_of(FULL_END_UTC)
+
+
+def series_for(close_epoch):
+    """The series recorded for the window closing at close_epoch: all five while it opens before FULL_END_UTC, then only Bitcoin and Ethereum."""
+    return SERIES if close_epoch - WINDOW_S < FULL_END_EPOCH else EXT_SERIES
 
 
 def iso(epoch):
@@ -340,7 +348,8 @@ class Window:
         self.open = close_epoch - WINDOW_S
         self.close_time = iso(close_epoch)
         self.markets = {}                      # ticker -> (series, close_time), filled as discovery finds them
-        self.tally = {s: Tally(s) for s in SERIES}
+        self.series = series_for(close_epoch)
+        self.tally = {s: Tally(s) for s in self.series}
         self.batching = Batching()
         self.lock = threading.Lock()
 
@@ -349,7 +358,7 @@ def discover(stream, win):
     """Find each series' market closing at this window's close. Every series not yet found is asked once a round; rounds repeat every 2 seconds for up to 30 seconds
     (a new market can take a moment to be listed). Gold is closed at weekends and in its daily break: it is then simply not found, and its coverage row says so."""
     end = time.time() + DISCOVER_FOR_S
-    missing = list(SERIES)
+    missing = list(win.series)
     while missing and time.time() < end:
         round_start = time.time()
         for s in list(missing):
@@ -418,7 +427,7 @@ def finish_window(stream, win, out, deadline):
                 if isinstance(m, dict) and m.get("ticker") in markets:
                     tally = win.tally[markets[m["ticker"]][0]]
                     tally.volume, tally.result = m.get("volume_fp", ""), m.get("result", "")
-    out.write("coverage", [coverage_row(win.close_time, win.tally[s], win.batching.fallback) for s in SERIES])
+    out.write("coverage", [coverage_row(win.close_time, win.tally[s], win.batching.fallback) for s in win.series])
     out.flush()
 
 
