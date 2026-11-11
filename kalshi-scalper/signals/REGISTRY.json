@@ -1,0 +1,27 @@
+{
+  "_about": "Registry for scripts/record_signals.py (Nov 11, 2026, research only). Reviewed edits only: an entry is added by a pull request that also carries its pre-registration (readme) and the four uniqueness checks of docs/STRATEGY_LIFECYCLE.md section 7d. The script ignores any entry that fails validation and records nothing for an entry whose enabled is not true.",
+  "_template": {
+    "id": "2 to 12 capitals or digits, e.g. WXHIGH1",
+    "readme": "kalshi-scalper/README.md#<pre-registration anchor> (a pointer, at most 120 characters)",
+    "url": "https://<host on the script's ALLOWLIST>/<path>  (a host not on the list is a code edit in scripts/record_signals.py)",
+    "parse": "{\"type\": \"json\", \"path\": [\"key\", 0, \"key\"]} or {\"type\": \"csv\", \"column\": 3, \"row\": \"last\"}  (row: first, last or a number)",
+    "kalshi": "{\"ticker\": \"KXBTC15M-...\"} or {\"series\": \"KXBTC15M\"} (the open market that closes soonest)",
+    "cadence": "run (every start) or day (only the first start of the UTC day)",
+    "stopDate": "YYYY-MM-DD, not later than 2027-02-28",
+    "enabled": "false until the owner approves the entry; the logger records nothing for it otherwise",
+    "example": "true marks a documentation entry"
+  },
+  "entries": [
+    {
+      "id": "EXAMPLE1",
+      "readme": "kalshi-scalper/signals/REGISTRY.json (example only, not a hypothesis)",
+      "url": "https://api.coinbase.com/v2/prices/BTC-USD/spot",
+      "parse": { "type": "json", "path": ["data", "amount"] },
+      "kalshi": { "series": "KXBTC15M" },
+      "cadence": "day",
+      "stopDate": "2026-12-31",
+      "enabled": false,
+      "example": true
+    }
+  ]
+}

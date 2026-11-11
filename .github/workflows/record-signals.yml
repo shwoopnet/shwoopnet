@@ -1,0 +1,54 @@
+# Nov 11, 2026 (the owner: "EXTERNAL-SIGNAL SHADOW LOGGER: APPROVED"). Logs any REGISTERED public signal (kalshi-scalper/signals/REGISTRY.json) next to the Kalshi quote at that moment,
+# so non-price shadow candidates can be tested forward without a new recorder each time. Research data only: public GETs, no key, no secret, no order, no Firebase.
+# The built-in GITHUB_TOKEN pushes gzipped CSV to the `quote-data` branch under signals/<date>/<HHMM>.csv.gz, never to main.
+# 4 starts a day, 6 hours apart (11 minutes past 01, 07, 13, 19 UTC), about 1 billed minute each: 4 x 31 = 124 minutes a month at most (with the OKX recorder about 244, under the 250 limit).
+# Nothing is recorded until an entry in the registry has enabled true (the shipped example is off). It stops by itself: from 2027-02-28 23:59 UTC every run exits at once.
+name: record-signals
+on:
+  schedule:
+    - cron: "11 1,7,13,19 * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-signals
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Stop for good after the end date (2027-02-28 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+      - name: Record one pass
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          DAY="$(date -u +%Y-%m-%d)"; HM="$(date -u +%H%M)"
+          python3 code/scripts/record_signals.py "data/signals/$DAY/$HM.csv" --registry code/kalshi-scalper/signals/REGISTRY.json
+          gzip -9 -f "data/signals/$DAY/$HM.csv" 2>/dev/null || true
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "signals-recorder"
+          git config user.email "signals-recorder@users.noreply.github.com"
+          [ -d signals ] || { echo "nothing recorded"; exit 0; }
+          git add signals
+          git commit -q -m "signals $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin quote-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin quote-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s
+          exit 1
