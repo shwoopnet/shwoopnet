@@ -114,10 +114,14 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 | Own stop | yes, 12% of L1's own orders (`RISK_PROFILES.L1`) | yes, 12% of its own orders (`RISK_PROFILES.SECOND`) plus kill rules; the combined 12% account stop backs both up | shares the slot's one 12% stop with OICORE (`RISK_PROFILES.SECOND` covers both), plus its own kill rules |
 | Own window cap | no (shared 5.5%) | no (shared 5.5%, slot at most half) | no (shared 5.5%, slot at most half) |
 
-## XRPYES10 (draft, Nov 10, 2026)
+## XRPYES10 (draft, Nov 10, 2026; RETIRED Nov 11, 2026)
+
+**Retired Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): it repeated gold L1's favourite-late mechanism. No new order can be sent; an order already open is sold at the 25c fallback, sold 60 seconds before the close, or settled. Return rule in `kalshi-scalper/README.md#SLOT-XRPYES10`.** The original text follows.
 
 A third second-slot probe, the owner granted the favourite-and-hold exception for it on Nov 10 (live when merged and deployed): XRP 15 minute markets, buy YES at 88c to 97c about 10 minutes before the close, 3 contracts, held to settlement, stops itself after 3 losses in a row or a net loss of $15 from 20 fills. Full pre-registration in `kalshi-scalper/README.md#SLOT-XRPYES10`.
 
-## KESTREL (Nov 10, 2026)
+## KESTREL (Nov 10, 2026; RETIRED Nov 11, 2026)
+
+**Retired Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): it repeated gold L1's favourite-late mechanism on AUD/USD. No new order can be sent; an order already open is sold at the 25c fallback, sold 60 seconds before the close, or settled. Return rule in `kalshi-scalper/README.md#SLOT-KESTREL`.** The original text follows.
 
 A fourth second-slot probe, the owner granted the favourite-and-hold exception for it on Nov 10 (live when merged and deployed): AUD/USD 15 minute markets, buy the favourite side at 88c to 97c about 6 minutes before the close, 3 contracts, held to settlement, stops itself after 3 losses in a row or a net loss of $15 from 20 settled trades. Below the research bar (59 cash trades, PF 1.37, no counterparty, best of several probe markets). AUD/USD stays off L1. It needs money on exchange shard 0; without it the bot sends nothing. Pre-registration: `kalshi-scalper/README.md#SLOT-KESTREL`.

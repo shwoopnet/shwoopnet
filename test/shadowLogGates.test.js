@@ -82,26 +82,25 @@ gates.SH4 = () => {
   assert.ok(/require\("\.\/kalshiShadowLib"\)/.test(rep) && !/fetch|liveRequest|collection\(|\.create\(|runTransaction|firebase|getFirestore/.test(rep), 'the report may SCORE the log (rows are handed in by index.js) but still sends nothing and writes nothing itself');
 };
 gates.SH5 = async () => {
-  // Week 1 (Nov 9, 2026): exactly four registered shadow rules, each valid against the markets the bot quotes, 1 contract, and pointing at a pre-registration that exists.
+  // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): all four shadow rules (XRPYES10, GOLDALL, XRPFAV6, LANTERN) were the favourite-late
+  // mechanism gold L1 already runs, so the registry is EMPTY again. Empty must behave exactly like the registry that shipped before any rule existed: nothing is logged, written, read or requested.
   const rules = sh.SHADOW_RULES;
-  assert.deepStrictEqual(rules.map((r) => r.id), ['XRPYES10', 'GOLDALL', 'XRPFAV6', 'GOLDHI6S', 'LANTERN']);
-  for (const r of rules) { assert.strictEqual(sh.validateShadowRule(r, live.L1_SERIES).ok, true, r.id); assert.strictEqual(r.contracts, 1, r.id + ' is one contract'); }
-  assert.strictEqual(sh.activeShadowRules(undefined, live.L1_SERIES).length, 5, 'the production registry passes the same validation');
-  const by = (id) => rules.find((r) => r.id === id);
-  assert.deepStrictEqual({ ...by('XRPYES10').entry }, { sideRule: 'yes', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 640, leftMinSec: 570 }, 'the 10 minute look');
+  assert.deepStrictEqual(rules.map((r) => r.id), [], 'no shadow rule is registered: a new one must be a different mechanism (docs/STRATEGY_LIFECYCLE.md section 7c)');
+  assert.deepStrictEqual(sh.activeShadowRules(undefined, live.L1_SERIES), [], 'the production registry is empty');
+  const quote = (series) => ({ series, m: { ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' } });
+  for (const s of ['KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXBTC15M']) assert.deepStrictEqual(sh.shadowSignals(rules, [quote(s)], NOW), [], s + ': no signal from the registry');
+  const writes = [];
+  const out = await sh.runShadowTick({ now: NOW, quotes: [quote('KXGOLD15M'), quote('KXXRP15M')], rules, allowedSeries: live.L1_SERIES, record: async (d) => { writes.push(d); } });
+  assert.deepStrictEqual(out, { skipped: 'no shadow rule' }, 'an empty registry skips the whole run');
+  assert.deepStrictEqual(writes, [], 'and writes nothing');
+  // The score the nightly report carries has no rule to score, so it is an empty list, never an error.
+  assert.deepStrictEqual(sh.shadowReport(rules, [{ rule: 'GOLDALL', atMs: NOW, settled: true, pnl: 0.1, wouldFill: true }], NOW), [], 'rows logged by a retired rule stay in the collection and are not scored');
+  // The minute function does not even call the shadow run, or its settle sweep, while the registry is empty.
+  const idx = read('functions', 'index.js');
+  assert.ok(/if \(shadowLib\.SHADOW_RULES\.length\) \{\s*\n\s*try \{ await shadowLib\.runShadowTick/.test(idx), 'index.js guards the shadow tick and the settle sweep on the registry being non-empty');
+  // None of the four retired ids can come back by a stored value: the registry is a frozen list in code, and the pre-registration sections stay in the README with their retired notes.
   const readme = read('kalshi-scalper', 'README.md');
-  assert.deepStrictEqual({ ...by('GOLDALL').entry }, { sideRule: 'favourite', priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }, "L1's own entry on gold, every signal logged");
-  assert.ok(readme.includes('## SHADOW-GOLDALL') && by('GOLDALL').readme === 'kalshi-scalper/README.md#SHADOW-GOLDALL' && /\|rise3\| >= 0\.05/.test(readme), 'the momentum split is pre-registered before the first row');
-  assert.ok(readme.includes('## SHADOW-WEEK1') && rules.filter((r) => ['XRPYES10'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK1') && readme.includes('## SHADOW-WEEK2') && rules.filter((r) => ['XRPFAV6', 'GOLDHI6S'].includes(r.id)).every((r) => readme.includes(r.id) && r.readme === 'kalshi-scalper/README.md#SHADOW-WEEK2'), 'the pre-registration is in the README before the first row');
-  // A signal only inside its own window and band: an Ethereum favourite at 0.93 with 6 minutes left is a signal for ETHL1 (and ETHNO6 only if its NO side is the one in band).
-  const quote = (series, over) => ({ series, m: Object.assign({ ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' }, over || {}) });
-  const rows = sh.shadowSignals(rules, [quote('KXETH15M'), quote('KXBTC15M'), quote('KXXRP15M')], NOW);
-  const ids = rows.map((r) => r.rule).sort();
-  assert.deepStrictEqual(ids, ['LANTERN'], 'LANTERN (Ethereum favourite, no smooth gate) is the only one that qualifies at 6 minutes left; at 6 minutes left: Bitcoin 0.93 and the Ethereum favourite no longer qualify (BTCHI6, ETHL1, ETHNO6 are retired); XRP needs the 10 minute look; the Ethereum NO side is 0.08 (outside 0.88 to 0.97): ' + ids);
-  const ten = sh.shadowSignals(rules, [quote('KXXRP15M', { close_time: new Date(NOW + 600000).toISOString() })], NOW);
-  assert.deepStrictEqual(ten.map((r) => r.rule), ['XRPYES10'], 'XRP at 10 minutes left');
-  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXSOL15M')], NOW), [], 'a market no rule names is never logged');
-  assert.deepStrictEqual(sh.shadowSignals(rules, [quote('KXGOLD15M')], NOW).map((r) => r.rule), ['GOLDALL', 'GOLDHI6S'], 'a gold favourite inside the look is logged for every signal, ordered or not');
+  for (const id of ['XRPYES10', 'GOLDALL', 'XRPFAV6', 'LANTERN']) assert.ok(readme.includes('Retired Nov 11, 2026 (' + id), id + ' carries its Nov 11 retired note in the README');
 };
 gates.SC1 = async () => {
   // Settlement and scoring (lifecycle spec (c)): a shadow row is settled from the public market result; PF is per contract on the cash basis with the 10 contract fee; the verdict follows the written rules.
