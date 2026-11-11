@@ -107,6 +107,8 @@ gates.SB6 = () => {
   assert.strictEqual(P.KAL_BOARD_KILL.EVENT830.streak, reg.EVENT830.killRules.maxConsecutiveLosses, 'the EVENT830 streak kill is the bot\'s');
   const L = slot.SLOT_LADDERS.OICORE; assert.strictEqual(P.KAL_BOARD_KILL.OICORE.ddStop, L.stopPerContract * L.steps[0], 'the drawdown stop is the bot\'s at the bottom step (5 x 10 contracts)');
 };
+// The board still draws shadow cards for the next rule a reviewed edit registers; these four are fixtures (the real list is empty), not registered rules.
+const SHADOW_FIX = [{ id: 'SHA', rule: 'fixture shadow rule A' }, { id: 'SHB', rule: 'fixture shadow rule B' }, { id: 'SHC', rule: 'fixture shadow rule C' }, { id: 'SHD', rule: 'fixture shadow rule D' }];
 const SH = (rule, atMs, o) => Object.assign({ rule, atMs, closeMs: atMs + 360000, side: 'yes', price: 0.9, size: 1, wouldFill: true, settled: true, pnl: 0.07 }, o);
 const shFixture = (now) => {
   const D = 86400000, rows = [];
@@ -118,7 +120,7 @@ const shFixture = (now) => {
 };
 gates.SB7 = () => {
   // the page's shadow scoring is the bot's shadowReport: the same fixture through both gives the same numbers, so the board never reads a different PF or status than the nightly report
-  const now = Date.UTC(2026, 10, 20, 12, 0), rows = shFixture(now), ids = shadow.SHADOW_RULES;
+  const now = Date.UTC(2026, 10, 20, 12, 0), rows = shFixture(now), ids = [{ id: 'ETHL1' }, { id: 'GOLDALL' }, { id: 'BTCHI6' }, { id: 'XRPYES10' }];   // the registry is empty since Nov 11, 2026: the scoring is checked on the fixture's own rule names
   const a = shadow.shadowReport(ids, rows, now), b = P.kalshiBoardShadow(ids.map((r) => ({ id: r.id })), rows, now);
   assert.strictEqual(a.length, b.length);
   a.forEach((x, i) => { for (const k of Object.keys(x)) assert.deepStrictEqual(b[i][k], x[k], x.rule + '.' + k); });
@@ -127,6 +129,7 @@ gates.SB7 = () => {
 gates.SB8 = () => {
   // the ON DECK ids are the bot's registry, in order: a rule added or removed in the bot without the board fails here
   assert.deepStrictEqual(P.KAL_BOARD_SHADOW.map((r) => r.id), shadow.SHADOW_RULES.map((r) => r.id));
+  assert.deepStrictEqual(shadow.SHADOW_RULES.map((r) => r.id), [], 'both are empty since Nov 11, 2026 (the owner retired the four favourite-late shadow rules)');
   P.KAL_BOARD_SHADOW.forEach((r) => assert.ok(r.rule && r.rule.length < 80, 'one line of rule text for ' + r.id));
 };
 gates.SB9 = () => {
@@ -152,7 +155,7 @@ gates.SB11 = () => {
   // every dollar goes through money, every value is escaped, and an unreadable shadow log shows the fallback instead of breaking the page
   const now = Date.UTC(2026, 10, 9, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, w: P.kalshiBoardWindows(exits([1, -1, 2]), now), kill: P.kalshiBoardKill(s.id, exits([1, -1, 2]), now, (x) => 'MASK') }));
-  const model = (state) => ({ live: lv, deck: { state, rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED });
+  const model = (state) => ({ live: lv, deck: { state, rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED });
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
@@ -172,9 +175,9 @@ gates.SB13 = () => {
   assert.ok(/Not written yet/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'the missing EVENT830 return rule is shown as a gap');
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
-  const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 5, 'five live strategies have Implement, Kill and Return');
-  const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: P.KAL_BOARD_SHADOW.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
+  const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
+  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 3, 'three live strategies have Implement, Kill and Return (XRPYES10 and KESTREL retired Nov 11, 2026)');
+  const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
 };
