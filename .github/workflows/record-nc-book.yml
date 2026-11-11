@@ -1,15 +1,16 @@
 # Nov 11, 2026 (the owner approved, popup: "QUOTE READ on the bot's non-crypto markets"). R6's twin for the bot's NON-crypto 15 minute series (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M,
 # KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M): the best 5 YES and 5 NO bids with sizes every 2 seconds in one batched public read, every public trade
 # of each window after its close (de-duplicated, ids not stored), a coverage row per window and an hourly clock check. Research data only: no order, no key, no Firestore.
-# Public data only: no secret. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under nc15/), never to main.
-# Scheduled starts run late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running waits, so jobs
-# never overlap, and a dropped trigger costs at most 30 minutes. Each job records up to the next 4 hour boundary (about 4 hours) and stops.
+# Public data only: no secret. The built-in GITHUB_TOKEN pushes gzipped files to the `nc-data` branch (under nc15/), never to main. It has its OWN branch because `quote-data` is already about 726 MB and every job fetches its whole branch; the first run creates `nc-data` as an orphan branch.
+# Scheduled starts run late or are dropped, so it is triggered every 15 minutes (two cron pairs) under one concurrency group that never cancels a running job: a run that finds a job running waits, so jobs
+# never overlap, and a dropped trigger costs at most 15 minutes. Each job records up to the next 4 hour boundary (about 4 hours) and stops.
 # It is a continuous recorder like R6 (about 43,000 runner minutes a month, free on a public repo; the owner's merge accepts that, see CLAUDE.md).
 # It stops by itself: from 2026-12-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-nc-book
 on:
   schedule:
     - cron: "5,35 * * * *"
+    - cron: "20,50 * * * *"   # a second pair 15 minutes after the first (as R6 after Oct 31): GitHub sometimes drops scheduled starts for hours. Extra triggers queue behind a running job (one pending at most) and never overlap it.
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -37,7 +38,7 @@ jobs:
           mkdir data && cd data
           git init -q
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
-          if git fetch -q --depth 1 origin quote-data; then git checkout -q -b quote-data FETCH_HEAD; else git checkout -q --orphan quote-data; fi
+          if git fetch -q --depth 1 origin nc-data; then git checkout -q -b nc-data FETCH_HEAD; else git checkout -q --orphan nc-data; fi
       - name: Record every window up to the next 4 hour boundary
         if: steps.gate.outputs.go == 'true'
         run: |
@@ -54,5 +55,5 @@ jobs:
           gzip -9 -f nc15/*/*/*.csv 2>/dev/null || true
           git add nc15
           git commit -q -m "nc15 $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
-          for i in 1 2 3 4 5 6; do git push -q origin quote-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin quote-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          for i in 1 2 3 4 5 6; do git push -q origin nc-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin nc-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1

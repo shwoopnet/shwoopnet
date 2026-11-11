@@ -38,10 +38,12 @@ gates.FB1 = () => {
 
 // FB2: the workflow pushes only the data branch, uses only the built-in token, and each job fits inside the 6 hour limit.
 gates.FB2 = () => {
-  assert.ok(/cron: "5,35 \* \* \* \*"/.test(wf) && (wf.match(/- cron:/g) || []).length === 1 && /--cycle-hours 4/.test(wf), 'triggered every 30 minutes (:05, :35), 4 hour jobs');
+  assert.ok(/cron: "5,35 \* \* \* \*"/.test(wf) && /cron: "20,50 \* \* \* \*"/.test(wf) && (wf.match(/- cron:/g) || []).length === 2 && /--cycle-hours 4/.test(wf), 'a start every 15 minutes (:05, :20, :35, :50, as R6), 4 hour jobs');
   assert.ok(/timeout-minutes: 330/.test(wf), 'a job fits inside the 6 hour limit');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf), 'the only secret it touches is the built-in token');
-  assert.ok(/git push -q origin quote-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes the data branch only, never main');
+  assert.ok(/git push -q origin nc-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes its own data branch only, never main');
+  assert.ok(!/quote-data/.test(wf.replace(/#[^\n]*/g, '')), 'it never touches quote-data (already large; every job fetches a whole branch)');
+  assert.ok(/git fetch -q --depth 1 origin nc-data; then git checkout -q -b nc-data FETCH_HEAD; else git checkout -q --orphan nc-data/.test(wf), 'the first run creates nc-data as an orphan branch');
   assert.deepStrictEqual([...wf.matchAll(/git add ([^\n]+)/g)].map((x) => x[1].trim()), ['nc15'], 'it adds its own folder and nothing wider');
   assert.ok(/^permissions:\s*\n\s*contents: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and nothing wider');
   assert.ok(/concurrency:\s*\n\s*group: record-nc-book\s*\n\s*cancel-in-progress: false/.test(wf), 'one group, a running job is never cancelled, so runs never overlap');
@@ -213,6 +215,28 @@ gates.FB11 = () => {
   assert.ok(fs.existsSync(path.join(root, 'scripts', 'record_15m_book.py')) && fs.existsSync(path.join(root, '.github', 'workflows', 'record-15m-book.yml')), 'R6 stays');
   assert.ok(!/espn|nhl|mlb|nba\.com/i.test(script + wf));
   assert.ok(/nc15\/\$STAMP/.test(wf) && !/book15r6/.test(wf + script), 'its own folder on the data branch');
+};
+
+// FB12: a redirect is never followed (the host check is on the URL we build), and urlopen is gone.
+gates.FB12 = () => {
+  assert.ok(!/urlopen/.test(code), 'urllib.request.urlopen (which follows redirects) is no longer used');
+  assert.ok(/_NoRedirect/.test(code) && /build_opener\(_NoRedirect\)/.test(code) && /_OPENER\.open\(/.test(code), 'the redirect-refusing opener is used');
+  const r = py(`
+import threading, http.server
+class T(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def do_GET(self):
+        if self.path == "/a":
+            self.send_response(302); self.send_header("Location", "http://127.0.0.1:%d/b" % self.server.other); self.end_headers()
+        else:
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.end_headers(); self.wfile.write(b'{"x":"INTERNAL"}')
+b = http.server.HTTPServer(("127.0.0.1", 0), T); b.other = 0
+a = http.server.HTTPServer(("127.0.0.1", 0), T); a.other = b.server_address[1]
+for srv in (a, b): threading.Thread(target=srv.serve_forever, daemon=True).start()
+st, body, date = m.http_get("http://127.0.0.1:%d/a" % a.server_address[1])
+print(json.dumps({"status": st, "body": body is not None}))`);
+  assert.strictEqual(r.status, 302, 'the 3xx answer is the failed read, not followed');
+  assert.strictEqual(r.body, false, 'nothing from the redirect target is read');
 };
 
 let failed = 0;

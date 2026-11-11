@@ -116,10 +116,20 @@ class Stream:
         return st, body, date, t_send, t_recv
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect is never followed: the one allowed host is checked on the URL we build, so a redirect could leave it. A 3xx answer is a failed read (its status is returned)."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
 def http_get(url):
-    """(status, decoded json or None, Date header or ''). Never raises: a failed read is a status, so one bad second cannot end the run."""
+    """(status, decoded json or None, Date header or ''). Never raises: a failed read is a status, so one bad second cannot end the run. Redirects are refused."""
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=10) as r:
+        with _OPENER.open(urllib.request.Request(url, headers=UA), timeout=10) as r:
             return r.status, json.load(r), r.headers.get("Date", "")
     except urllib.error.HTTPError as e:
         return e.code, None, ""
