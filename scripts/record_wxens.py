@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-"""Ensemble temperature recorder (WXENS1, Nov 3, 2026, research only).
+"""NWS weather recorder (WXENS1 data, Nov 3, 2026; moved to NWS only Nov 11, 2026; research only).
 
-For the registered forward test kalshi-scalper/workers/WXENS1_REGISTRATION.md: at the registered looks (07:00 and 10:00 local STANDARD time of each watched city) this records,
-for each city's target days, (1) every member of the Open-Meteo ensemble daily maximum temperature, (2) the NWS point forecast high, (3) the Kalshi quote of every open bracket of
-the target day's KXHIGH event; every few hours it also records each newly settled market's result and the IEM daily observed maximum. Nothing is scored here.
-WXLOW1 (workers/WXLOW1_REGISTRATION.md) adds the same for the daily LOW: the ensemble `temperature_2m_min` members (in the SAME ensemble call), the NWS night temperature (from the same
-forecast body), the quotes of the KXLOWT event, its result and the IEM `min_tmpf`, in tables named `<table>_low` beside the highs. The highs tables and columns are unchanged.
+The ensemble forecast vendor's hosted API is non-commercial only and the account holder is an LLC, so that read was removed. NWS has no ensemble product, so this
+now records what api.weather.gov does offer, at the registered looks (07:00 and 10:00 local STANDARD time of each watched city), for each city's target days: (1) the NWS point forecast
+high, (2) the NWS gridpoint raw forecast (max, min and hourly temperature, in Celsius as NWS gives them), (3) the latest NWS station observation, (4) the Kalshi quote of every open
+bracket of the target day's KXHIGH event; every few hours it also records each newly settled market's result and the IEM daily observed maximum. Nothing is scored here.
+WXLOW1 adds the same for the daily LOW (tables named `<table>_low`). Ensemble tables (`ens`, `ens_low`) are no longer written; rows already on the branch stay.
 
-Public GET endpoints only: no key, no signing, no account, no order, no environment variable. A run is idempotent: output files are named for the UTC hour slot they fall in, so
-a re-run of the same hour overwrites the same file; results, events and observations are written once per key. The server's Date header is kept on every row.
-Cities and models come from kalshi-scalper/workers/WXENS1_WATCHLIST.json; this script names no ticker of its own."""
+Public GET endpoints only: no key, no signing, no account, no order, no environment variable. Redirects are refused and every request host is pinned (NWS, Kalshi, IEM). A run is
+idempotent: output files are named for the UTC hour slot they fall in, so a re-run of the same hour overwrites the same file; results, events and observations are written once per key.
+It records nothing after STOP_DATE. The server's Date header is kept on every row. Cities come from kalshi-scalper/workers/WXENS1_WATCHLIST.json; this script names no ticker of its own."""
 import argparse
 import csv
 import glob
@@ -20,46 +20,62 @@ import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone
 
 KALSHI = "https://external-api.kalshi.com/trade-api/v2"
-OPENMETEO = "https://ensemble-api.open-meteo.com/v1/ensemble"
 NWS = "https://api.weather.gov"
 IEM = "https://mesonet.agron.iastate.edu/api/1/daily.json"
-UA = {"User-Agent": "shwoopnet-research-recorder", "Accept": "application/json"}
+UA = {"User-Agent": "shwoopnet-research-recorder", "Accept": "application/geo+json, application/json"}
+ALLOWED_HOSTS = ("api.weather.gov", "external-api.kalshi.com", "mesonet.agron.iastate.edu")
+# Same stop date as the WXENS1 reader (STOP_DATE in wxens1.py): a recorder that nobody remembers to turn off must end by itself.
+STOP_DATE = "2027-02-28"
 GAP_S = 0.5
 MAX_PAGES = 4
 ROOT = "wxens"
 
 COLS = {
-    "ens": ["slot_ts", "poll_ts", "server_date_header", "city", "look", "target_date", "model", "member_key", "tmax_f"],
     "nws": ["slot_ts", "poll_ts", "server_date_header", "city", "look", "target_date", "nws_high_f", "period_start", "period_name", "grid"],
+    "nwsgrid": ["slot_ts", "poll_ts", "server_date_header", "city", "look", "target_date", "variable", "valid_start", "valid_hours", "value_c", "grid"],
+    "nwsobs": ["slot_ts", "poll_ts", "server_date_header", "city", "look", "station", "obs_time", "temp_c", "max_c_24h_field", "grid"],
     "quotes": ["slot_ts", "poll_ts", "server_date_header", "city", "look", "target_date", "series", "ticker", "event_ticker", "close_time", "strike_type", "floor_strike",
                "cap_strike", "yes_bid", "yes_ask", "last", "volume", "status"],
     "events": ["event_ticker", "city", "series", "target_date", "close_time", "rules_primary", "seen_ts"],
     "results": ["ticker", "event_ticker", "city", "target_date", "result", "expiration_value", "close_time", "seen_ts"],
     "obs": ["city", "target_date", "station", "iem_max_tmpf", "seen_ts"],
-    "runs": ["slot_ts", "poll_ts", "server_date_header", "clock_skew_s", "cities_due", "calls", "n429", "n_errors", "ens_rows", "nws_rows", "quote_rows", "result_rows", "obs_rows"],
+    "runs": ["slot_ts", "poll_ts", "server_date_header", "clock_skew_s", "cities_due", "calls", "n429", "n_errors", "grid_rows", "nws_rows", "quote_rows", "result_rows", "obs_rows"],
 }
 
 # WXLOW1: the same tables for the daily low, named with a _low suffix (the highs files are never touched)
-COLS["ens_low"] = [c if c != "tmax_f" else "tmin_f" for c in COLS["ens"]]
 COLS["nws_low"] = ["slot_ts", "poll_ts", "server_date_header", "city", "look", "target_date", "nws_low_f", "role", "period_start", "period_name", "grid"]
 COLS["quotes_low"] = COLS["quotes"]
 COLS["events_low"] = COLS["events"]
 COLS["results_low"] = COLS["results"]
 COLS["obs_low"] = ["city", "target_date", "station", "iem_min_tmpf", "seen_ts"]
-COLS["runs"] = COLS["runs"] + ["ens_low_rows", "nws_low_rows", "quote_low_rows", "result_low_rows", "obs_low_rows"]
-LOW_TABLES = ("ens_low", "nws_low", "quotes_low", "events_low", "results_low", "obs_low")
+COLS["runs"] = COLS["runs"] + ["nwsobs_rows", "nws_low_rows", "quote_low_rows", "result_low_rows", "obs_low_rows"]
+LOW_TABLES = ("nws_low", "quotes_low", "events_low", "results_low", "obs_low")
 
 _sleep = time.sleep      # replaced in tests
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect is never followed, so a pinned host cannot hand the request to another one."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
 def http_get(url):
-    """(status, decoded json or None, Date header). Never raises."""
+    """(status, decoded json or None, Date header). Never raises. Only https on a pinned host."""
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=UA), timeout=25) as r:
+        parts = urllib.parse.urlsplit(url)
+        if parts.scheme != "https" or parts.hostname not in ALLOWED_HOSTS:
+            return 0, None, ""
+        with _OPENER.open(urllib.request.Request(url, headers=UA), timeout=25) as r:
             return r.status, json.load(r), r.headers.get("Date", "")
     except urllib.error.HTTPError as e:
         return e.code, None, ""
@@ -129,21 +145,25 @@ def event_date(event_ticker):
         return None
 
 
-def parse_ensemble(obj, dates, var="temperature_2m_max"):
-    """Open-Meteo ensemble body for ONE location -> [(model, member_key, target_date, tmax_f)]. Any daily key that starts with temperature_2m_max is a member or the control;
-    the model is the key with its 'memberNN' part and the variable prefix removed (a bare key is kept only when it is the only one). Dates not in `dates` and null values are dropped."""
+def parse_grid(body, off_h, dates):
+    """NWS gridpoint body -> [(variable, valid_start_iso, valid_hours, value_c)] for maxTemperature, minTemperature and temperature (hourly) whose period STARTS on a local STANDARD
+    time date in `dates`. validTime is 'ISO/PT6H' or 'ISO/P1DT6H'; the duration is kept as hours. Null values are dropped."""
     out = []
-    daily = (obj or {}).get("daily") or {}
-    days = daily.get("time") or []
-    for key, vals in daily.items():
-        if not key.startswith(var) or not isinstance(vals, list):
-            continue
-        model = re.sub(r"_?member\d+", "", key)[len(var):].lstrip("_") or "single"
-        for d, v in zip(days, vals):
-            if d in dates and num(v) is not None:
-                out.append((model, key, d, float(v)))
-    if any(m != "single" for m, _, _, _ in out):
-        out = [r for r in out if r[0] != "single"]      # a bare key beside suffixed models cannot be assigned to a model
+    props = (body or {}).get("properties") or {}
+    for var in ("maxTemperature", "minTemperature", "temperature"):
+        for e in (props.get(var) or {}).get("values") or []:
+            v = num(e.get("value"))
+            vt = str(e.get("validTime", ""))
+            if v is None or "/" not in vt:
+                continue
+            start, dur = vt.split("/", 1)
+            t0 = parse_iso(start)
+            if t0 is None:
+                continue
+            m = re.match(r"P(?:(\d+)D)?T?(?:(\d+)H)?", dur)
+            hours = (int(m.group(1) or 0) * 24 + int(m.group(2) or 0)) if m else 0
+            if local_std(t0, off_h).date().isoformat() in dates:
+                out.append((var, start, hours, v))
     return out
 
 
@@ -226,11 +246,12 @@ def write_gz(path, cols, rows):
 
 def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, kinds=("high", "low"), redo=False):
     """One snapshot. Returns the run summary row. `due_hours` defaults to the watchlist's (7, 10); `results` True/False forces the results step, None = UTC hours 01, 07, 13, 19.
-    `kinds` ("high", "low"): the WXLOW1 lows ride in the same ensemble call and the same NWS forecast body as the highs, so they add one Kalshi listing per due city and no other request."""
+    `kinds` ("high", "low"): the WXLOW1 lows ride in the same NWS forecast body as the highs, so they add one Kalshi listing per due city and no other NWS request."""
     now = time.time() if now is None else now
+    if time.strftime("%Y-%m-%d", time.gmtime(now)) > STOP_DATE:
+        return None
     w = load_watchlist(watchlist)
     due_hours = set(due_hours or w.get("due_local_hours") or (7, 10))
-    models = w["ensemble_models"]
     want_low = "low" in kinds
     slot = slot_of(now)
     day, hh = time.strftime("%Y-%m-%d", time.gmtime(slot)), time.strftime("%H", time.gmtime(slot))
@@ -240,39 +261,13 @@ def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, 
     plan = [(c, t) for c, t in plan if t]
     # Already-done guard (RECPATCH1): the workflow has a second start 30 minutes after the first. One run records every due city of the UTC hour, so if this hour's
     # snapshot files are already on the branch a second run must not overwrite them (the reader wants the FIRST poll at or after the look). It logs a row with no due city.
-    if plan and not redo and any(os.path.exists(os.path.join(data_dir, ROOT, n, day, hh + ".csv.gz")) for n in ("ens", "quotes")):
+    if plan and not redo and any(os.path.exists(os.path.join(data_dir, ROOT, n, day, hh + ".csv.gz")) for n in ("nwsgrid", "quotes")):
         plan = []
     t = {k: [] for k in COLS}
     calls = n429 = errs = 0
     hdr0 = ""
 
-    # 1. ensemble: one batched call for every due city (daily maximum and, for WXLOW1, daily minimum)
-    if plan:
-        url = "%s?latitude=%s&longitude=%s&daily=%s&models=%s&temperature_unit=fahrenheit&timezone=auto&forecast_days=3" % (
-            OPENMETEO, ",".join(str(c["lat"]) for c, _ in plan), ",".join(str(c["lon"]) for c, _ in plan),
-            "temperature_2m_max,temperature_2m_min" if want_low else "temperature_2m_max", ",".join(models))
-        st, body, hdr = http_get(url)
-        calls += 1
-        hdr0 = hdr or hdr0
-        if st == 429:
-            n429 += 1
-        if st != 200 or body is None:
-            errs += 1
-        else:
-            locs = body if isinstance(body, list) else [body]
-            for (c, tg), loc in zip(plan, locs):
-                dates = {d for _, d in tg}
-                rows = parse_ensemble(loc, dates)
-                lrows = parse_ensemble(loc, dates, "temperature_2m_min") if want_low and c.get("low_series") else []
-                for look, d in tg:
-                    for model, key, dd, v in rows:
-                        if dd == d:
-                            t["ens"].append([slot, ts, hdr, c["key"], look, d, model, key, v])
-                    for model, key, dd, v in lrows:
-                        if dd == d:
-                            t["ens_low"].append([slot, ts, hdr, c["key"], look, d, model, key, v])
-
-    # 2. NWS point forecast and 3. Kalshi quotes, per due city
+    # 1. NWS point forecast, gridpoint data and station observation, and 2. Kalshi quotes, per due city
     seen_events = known(data_dir, "events", "event_ticker")
     seen_events_low = known(data_dir, "events_low", "event_ticker")
     for c, tg in plan:
@@ -299,6 +294,34 @@ def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, 
         else:
             errs += 1
             n429 += 1 if st == 429 else 0
+        pp = (pts or {}).get("properties") or {} if st == 200 else {}
+        grid = "%s/%s,%s" % (pp.get("gridId"), pp.get("gridX"), pp.get("gridY"))
+        gurl = pp.get("forecastGridData")
+        if gurl and gurl.startswith(NWS + "/"):
+            _sleep(GAP_S)
+            st3, gb, hdr = http_get(gurl)
+            calls += 1
+            if st3 == 200:
+                for var, start, hrs, v in parse_grid(gb, c["std_offset_h"], dates):
+                    for look, d in tg:
+                        t["nwsgrid"].append([slot, ts, hdr, c["key"], look, d, var, start, hrs, v, grid])
+            else:
+                errs += 1
+                n429 += 1 if st3 == 429 else 0
+        # the latest reading of the airport or park station named in the market's rules, so the morning's temperature is on file beside the forecast
+        _sleep(GAP_S)
+        st4, ob, hdr = http_get("%s/stations/%s/observations/latest" % (NWS, c["station"]))
+        calls += 1
+        if st4 == 200 and isinstance(ob, dict):
+            op = ob.get("properties") or {}
+            tv = num((op.get("temperature") or {}).get("value"))
+            mv = num((op.get("maxTemperatureLast24Hours") or {}).get("value"))
+            if tv is not None or mv is not None:
+                for look, d in tg:
+                    t["nwsobs"].append([slot, ts, hdr, c["key"], look, c["station"], op.get("timestamp"), "" if tv is None else tv, "" if mv is None else mv, grid])
+        else:
+            errs += 1
+            n429 += 1 if st4 == 429 else 0
         _sleep(GAP_S)
         jobs = [(c["series"], "quotes", "events", seen_events)]
         if want_low and c.get("low_series"):
@@ -356,7 +379,7 @@ def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, 
                         seen_obs.add((c["key"], d))
                         t[otab].append([c["key"], d, c["station"], v, ts])
 
-    for name in ("ens", "nws", "quotes", "events", "results", "obs") + LOW_TABLES:
+    for name in ("nwsgrid", "nwsobs", "nws", "quotes", "events", "results", "obs") + LOW_TABLES:
         if t[name]:
             write_gz(os.path.join(data_dir, ROOT, name, day, hh + ".csv.gz"), COLS[name], t[name])
     skew = ""
@@ -366,8 +389,8 @@ def run(watchlist, data_dir, now=None, due_hours=None, results=None, only=None, 
             skew = round(now - parsedate_to_datetime(hdr0).timestamp(), 1)
         except Exception:
             skew = ""
-    summary = [slot, ts, hdr0, skew, len(plan), calls, n429, errs, len(t["ens"]), len(t["nws"]), len(t["quotes"]), len(t["results"]), len(t["obs"]),
-               len(t["ens_low"]), len(t["nws_low"]), len(t["quotes_low"]), len(t["results_low"]), len(t["obs_low"])]
+    summary = [slot, ts, hdr0, skew, len(plan), calls, n429, errs, len(t["nwsgrid"]), len(t["nws"]), len(t["quotes"]), len(t["results"]), len(t["obs"]),
+               len(t["nwsobs"]), len(t["nws_low"]), len(t["quotes_low"]), len(t["results_low"]), len(t["obs_low"])]
     runs = os.path.join(data_dir, ROOT, "runs", day + ".csv")
     os.makedirs(os.path.dirname(runs), exist_ok=True)
     new = not os.path.exists(runs)

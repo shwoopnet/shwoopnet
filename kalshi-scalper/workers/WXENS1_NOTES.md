@@ -49,3 +49,7 @@ From `kalshi-scalper`: `cd src && python -m scalper.wxens1 snapshot ../data/wxen
 ## Time to 150 trades
 
 Registered prediction: 0.5 trades per city-day over 8 cities, about 4 a day, so **150 trades about 38 days after the first primary look (range 19 to 94 days), 300 about 75 days (range 38 to 188)**. If the recorder starts on 2026-11-05, 150 trades is about 2026-12-13 (range 2026-11-24 to 2027-02-07) and 300 is about 2027-01-19 (range 2026-12-13 to 2027-05-12, so the 2027-02-28 stop date may come first). The `count` command replaces this guess with the measured rate after the first week.
+
+## Nov 11, 2026: Open-Meteo stopped
+
+The Open-Meteo ensemble read above was removed (its hosted API is non-commercial only; the account holder is an LLC). The recorder now writes NWS tables only (`nwsgrid`, `nwsobs`, `nws`) beside the quotes, results and IEM observations. No new `ens` rows are written; those already on the branch stay. How to turn it off is unchanged: delete the workflow.

@@ -26,7 +26,7 @@ gates.W1 = () => {
   const code = strip(script);
   assert.ok(!/os\.environ|getenv/.test(code), 'the recorder reads no environment variable, so no secret');
   const hosts = new Set((code.match(/https:\/\/[a-z0-9.-]+/g) || []));
-  assert.deepStrictEqual([...hosts].sort(), ['https://api.weather.gov', 'https://ensemble-api.open-meteo.com', 'https://external-api.kalshi.com', 'https://mesonet.agron.iastate.edu']);
+  assert.deepStrictEqual([...hosts].sort(), ['https://api.weather.gov', 'https://external-api.kalshi.com', 'https://mesonet.agron.iastate.edu']);
 };
 
 // W2: the workflow pushes only the data branch, uses only the built-in token, and cannot overlap itself.
@@ -51,7 +51,7 @@ gates.W3 = () => {
     assert.ok(Number.isInteger(c.std_offset_h) && c.std_offset_h <= -5 && c.std_offset_h >= -8, c.key);
     assert.ok(Math.abs(c.lat) < 90 && Math.abs(c.lon) < 180);
   }
-  assert.deepStrictEqual(watch.ensemble_models, ['gfs_seamless', 'ecmwf_ifs025', 'icon_seamless']);
+  assert.strictEqual(watch.ensemble_models, undefined, 'no ensemble model list: Open-Meteo is gone');
   assert.deepStrictEqual(watch.due_local_hours, [7, 10]);
 };
 
@@ -92,15 +92,14 @@ gates.W6 = () => {
   assert.ok(/Open-Meteo/.test(reg) && /how to turn it off/i.test(reg));
 };
 
-// W7 (WXLOW1): the lows ride in the same ensemble call, every low table is named with a _low suffix beside the highs, and the lows watchlist names only KXLOWT series.
+// W7 (WXLOW1): the lows ride in the same NWS forecast body, every low table is named with a _low suffix beside the highs, and the lows watchlist names only KXLOWT series.
 gates.W7 = () => {
   assert.ok(watch.cities.every((c) => /^KXLOWT[A-Z]+$/.test(c.low_series)), 'every city has a KXLOWT series in the watchlist');
   assert.strictEqual(new Set(watch.cities.map((c) => c.low_series)).size, 14);
   assert.ok(!/KX[A-Z0-9]{2,}/.test(strip(script)), 'the script still names no ticker');
   const code = strip(script);
-  assert.ok(/daily=%s/.test(code) && /temperature_2m_max,temperature_2m_min/.test(code), 'one ensemble request carries both variables');
-  assert.strictEqual((code.match(/OPENMETEO,/g) || []).length, 1, 'one ensemble call site');
-  for (const t of ['ens_low', 'nws_low', 'quotes_low', 'events_low', 'results_low', 'obs_low']) assert.ok(code.includes('"' + t + '"'), t);
+  assert.strictEqual((code.match(/parse_nws_low\(/g) || []).length, 2, 'the lows are read from the forecast body already fetched (definition plus one call site)');
+  for (const t of ['nws_low', 'quotes_low', 'events_low', 'results_low', 'obs_low']) assert.ok(code.includes('"' + t + '"'), t);
 };
 
 // W8 (RECPATCH1): a second hourly start (30 minutes later) must not record the same UTC hour twice: when the hour's files exist the run makes no call and logs no due city; `redo` overrides.
@@ -114,12 +113,51 @@ m.http_get = lambda url: (calls.append(url), (500, None, ""))[1]
 m.due_targets = lambda c, now, h: [("x", "y")]
 now = 1_800_000_000
 day, hh = m.time.strftime("%Y-%m-%d", m.time.gmtime(now)), m.time.strftime("%H", m.time.gmtime(m.slot_of(now)))
-p = os.path.join(d, "wxens", "ens", day); os.makedirs(p); open(os.path.join(p, hh + ".csv.gz"), "wb").write(b"x")
+p = os.path.join(d, "wxens", "nwsgrid", day); os.makedirs(p); open(os.path.join(p, hh + ".csv.gz"), "wb").write(b"x")
 r1 = m.run(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'WXENS1_WATCHLIST.json'))}, d, now=now, results=False)
 n1 = len(calls)
 r2 = m.run(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'WXENS1_WATCHLIST.json'))}, d, now=now, results=False, redo=True)
 print(json.dumps([r1[4], n1, r2[4] > 0, len(calls) > 0]))`));
   assert.deepStrictEqual(out, [0, 0, true, true]);
+};
+
+// W9 (Nov 11, 2026): NWS only. Every request host is pinned, redirects are refused, no ensemble tables are written, it stops by itself, and it writes only under wxens/ of a data branch.
+gates.W9 = () => {
+  const code = strip(script);
+  assert.ok(!/open-?meteo|ensemble-api/i.test(script), 'no Open-Meteo anywhere in the recorder, comments included');
+  assert.ok(/_NoRedirect/.test(code) && /redirect_request[\s\S]*return None/.test(code) && /build_opener\(_NoRedirect\)/.test(code), 'redirects are refused');
+  assert.ok(/ALLOWED_HOSTS = \("api\.weather\.gov", "external-api\.kalshi\.com", "mesonet\.agron\.iastate\.edu"\)/.test(code), 'the host pin');
+  assert.ok(!/"ens"|"ens_low"/.test(code), 'no ensemble table is written');
+  assert.ok(/STOP_DATE = "2027-02-28"/.test(code) && /> STOP_DATE/.test(code), 'it stops by itself');
+  assert.ok(!/@|mailto|contact/i.test(script.match(/UA = \{[^}]*\}/)[0]), 'a generic User-Agent with no personal contact details');
+  const out = JSON.parse(py(`
+calls = []
+def fake(url):
+    calls.append(url); return (200, {}, "")
+m.urllib.request.OpenerDirector.open = lambda self, *a, **k: (_ for _ in ()).throw(AssertionError("network"))
+r = [m.http_get("https://evil.example.com/x"), m.http_get("http://api.weather.gov/x"), m.http_get("https://ensemble-api.open-meteo.com/v1/ensemble")]
+import tempfile
+d = tempfile.mkdtemp()
+m.http_get = lambda u: (calls.append(u), (500, None, ""))[1]
+late = m.run(${JSON.stringify(path.join(root, 'kalshi-scalper', 'workers', 'WXENS1_WATCHLIST.json'))}, d, now=1_900_000_000, results=True)
+print(json.dumps([r, late, len(calls)]))`));
+  assert.deepStrictEqual(out[0], [[0, null, ''], [0, null, ''], [0, null, '']], 'an unlisted host or plain http is never requested');
+  assert.strictEqual(out[1], null, 'after the stop date a run records nothing');
+  assert.strictEqual(out[2], 0, 'and makes no call');
+  assert.ok(/git add wxens/.test(wf) && /git push -q origin quote-data/.test(wf), 'writes only to the data branch');
+};
+
+// W10: the NWS gridpoint parser keeps the local STANDARD time date and drops nulls; the observation and forecast calls are NWS only.
+gates.W10 = () => {
+  const out = JSON.parse(py(`
+body = {"properties": {"maxTemperature": {"values": [{"validTime": "2026-11-12T12:00:00+00:00/PT12H", "value": 18.3}, {"validTime": "2026-11-13T12:00:00+00:00/PT12H", "value": 5}]},
+  "minTemperature": {"values": [{"validTime": "2026-11-12T00:00:00+00:00/PT12H", "value": None}]},
+  "temperature": {"values": [{"validTime": "2026-11-12T03:00:00+00:00/PT1H", "value": 9.0}]}}}
+print(json.dumps(m.parse_grid(body, -6, {"2026-11-12"})))`));
+  // 03:00 UTC on Nov 12 is 21:00 on Nov 11 in a UTC-6 city, so the hourly point belongs to Nov 11 and is dropped
+  assert.deepStrictEqual(out, [['maxTemperature', '2026-11-12T12:00:00+00:00', 12, 18.3]]);
+  const code = strip(script);
+  assert.ok(/observations\/latest/.test(code) && /forecastGridData/.test(code), 'the station observation and the gridpoint read');
 };
 
 for (const [name, fn] of Object.entries(gates)) { fn(); console.log('ok   ' + name); }
