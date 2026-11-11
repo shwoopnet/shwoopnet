@@ -28,6 +28,8 @@ Before any work, every idea passes the four uniqueness checks of `docs/STRATEGY_
 
 **Who judges (owner, Nov 11, 2026).** An independent check, the Verification Analyst (the fact-checker agent), scores the four checks. A candidate is added to the shadow list only when that check says it passes all four AND the owner approves the entry. The proposing chat never scores its own candidate.
 
+**Liquidity provision (owner, Nov 11, 2026, popup: YES).** A no-signal liquidity-provision family (market making: P&L from the spread and queue position, time-flatten exit) counts as unique, classified by entry mechanism and exit style; its signal check is NOT APPLICABLE. It must still pass correlation under 0.3 against every live strategy, the declined list and the cash PF 1.3 bar, and any live version needs its own owner popup (section 7). See lifecycle 7f rule 6.
+
 Then ONE LINE of registration, with the pre-registered bar, before anything is tested. No line, no test.
 
 ### What counts as "on the shadow list"
