@@ -101,6 +101,27 @@ An owner popup is REQUIRED (owner, Nov 11, 2026) for: any strategy going live, e
 
 Each stop is applied by the COO (`.claude/agents/ops-coo.md`) or the head of the chat, and reported once.
 
+## 9. Roster and division of labour (owner, Nov 11, 2026: "more productive, more work, better results")
+
+| Role | Does | Never does |
+|---|---|---|
+| **Owner** | Decides every popup in section 7, types "merge N", does every deploy. | |
+| **EA** | Relays the owner's decisions and questions, keeps the Team Roster and Desk artifacts. | Edits trading code or merges. |
+| **Main (Chief of Staff and Head of Engineering)** | Builds and reviews pull requests with the security agent, merges only on the owner's typed word, relays between the chats, keeps the single ranked queue, allocates the shared Kalshi request budget, writes the throughput line. | Deploys, places orders, or merges without the owner's word. |
+| **Idea Desk A** (structure and cross-market) and **Idea Desk B** (events and information, incl. politics, clinical, weather, combos) | WRITE cards and protocols: at least 12 pre-registered cards each, then the top 3 deepened into ready-to-run protocols. | Run tests, call Kalshi (unless Main allocates part of the budget), open pull requests (unless Main asks), place orders. |
+| **V2** (research) | TESTS cards from the queue, writes the weekly research note. | Skip pre-registration or read a held-out twice. |
+| **Refinement** (live performance) | Weekly rotation report, live performance, and TESTS calibration and event cards from the queue. | Change a live rule. |
+| **Verification Analyst** | Re-checks any pass (every figure) before it reaches the owner, and scores the four intake checks. | |
+| **Security agent** | Reviews every pull request that touches `functions/`, workflows, recorders, rules or sign-in code. | Merges or deploys. |
+
+**One ranked queue.** Main keeps `RND_QUEUE.md` on the branch `rnd-queue` (not main, so it changes without a pull request): cards ready to test in rank order (by speed to a verdict), cards waiting on data with the date they unblock, and who holds each. A tester that finishes takes the top ready card at once; a desk never waits on a tester and a tester never waits on a desk. A card enters the queue only with its pre-registration complete (source and terms clause, family, uniqueness result, cheapest test, prediction, kill criteria, counterparty, time to verdict, lock-up per dollar-year).
+
+**Kalshi request budget.** The shared bucket is 12 requests a minute. Main sets the split by priority each hour and records who holds it at the top of `RND_QUEUE.md`; nobody exceeds their share, and a 429 is never retried in a loop. The Idea Desks hold zero.
+
+**Throughput line.** Every 6 hour report from Main carries: cards written, tests finished, tests waiting, and desks or workers idle and why.
+
+Section 4's limits (2 concurrent tests, one per family) are the default. The owner has authorised extra workers for the Friday sweep (Nov 11, 2026); that is recorded here, not a change to section 4.
+
 ## Numbers the owner may change
 
 2 concurrent tests (was 3); the version takeover test in lifecycle 7g (0.10 profit factor margin, 60 signals); at most 1 test per family; 3 favourite-late shadow rules (1 per underlying); 8 shadow rules in total for other mechanisms; 3 falsified tests to decline a family for good, and 2 NOT_ENOUGH_DATA from one source to close it; 20 overlapping days and Pearson under 0.3 for the correlation check; 5 unique candidates a week on the shadow list; 250 runner minutes a month (the Charter's).
