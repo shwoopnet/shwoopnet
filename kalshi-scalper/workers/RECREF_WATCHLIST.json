@@ -4,7 +4,6 @@
   "refs": [
     {"id": "rt_page", "adapter": "rt", "per_event": {"title_regex": "^(.*?) Rotten Tomatoes score", "sep": "_", "url": "https://www.rottentomatoes.com/m/{slug}"}, "max_targets": 8},
     {"id": "mc_page", "adapter": "mc", "per_event": {"title_regex": "^(.*?) Metacritic score", "sep": "-", "url": "https://www.metacritic.com/game/{slug}/"}, "max_targets": 6},
-    {"id": "xt_trump_day", "adapter": "xtracker", "params": {"handle": "realDonaldTrump"}, "per_close": {"hours": 24}, "max_targets": 3},
     {"id": "kworb_us_daily", "adapter": "kworb", "params": {"url": "https://kworb.net/spotify/country/us_daily.html", "top": 40}},
     {"id": "kworb_us_weekly", "adapter": "kworb", "params": {"url": "https://kworb.net/spotify/country/us_weekly.html", "top": 40}},
     {"id": "billboard_hot100", "adapter": "billboard", "params": {"url": "https://www.billboard.com/charts/hot-100/", "top": 25}},
@@ -18,7 +17,6 @@
   "series": [
     {"series": "KXRT", "family": "rotten_tomatoes", "refs": ["rt_page"], "rule_source": "Tomatometer score of the film's Rotten Tomatoes page at 10:00 AM ET on the close day; threshold markets above N. Closes in under 7 days."},
     {"series": "KXMC", "family": "metacritic", "refs": ["mc_page"], "rule_source": "Metascore of the game's Metacritic page seven days after release at 10:00 AM ET; threshold markets."},
-    {"series": "KXTRUTHSOCIALD", "family": "post_count", "refs": ["xt_trump_day"], "rule_source": "Number of Donald Trump Truth Social posts on one calendar day (ET); count brackets. Reference: Polymarket xtracker posts for the 24 hours before the close."},
     {"series": "KXTOPSONG", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Which song is #1 on the Billboard Hot 100 for the chart dated the coming Saturday. Billboard's current chart is the last week; kworb's Spotify US weekly and daily lists are the in-week streams."},
     {"series": "KXBILLBOARDRUNNERUPSONG", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Which song is #2 on the Billboard Hot 100 for the coming chart."},
     {"series": "KXBBSINGLE", "family": "billboard_hot100", "refs": ["billboard_hot100", "kworb_us_weekly", "kworb_us_daily"], "rule_source": "Rank bucket (for example No. 7 to 10) of one song on the coming Billboard Hot 100."},

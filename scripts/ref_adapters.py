@@ -107,26 +107,6 @@ def mc_parse(p, bodies):
     return [[1, "metascore", _num(m.group(1)), _num(m.group(2)), "critic_reviews"]] if m else []
 
 
-# ---- Polymarket xtracker post counts (a window of one account's posts) --------------------------------------------------------------------------------
-XT = "https://xtracker.polymarket.com/api"
-
-
-def xtracker_url(handle, start_iso, end_iso):
-    return "%s/users/%s/posts?startDate=%s&endDate=%s" % (XT, quote(handle), quote(start_iso), quote(end_iso))
-
-
-def xtracker_parse(p, bodies):
-    """The number of posts in the window (one row). A count at the API's page size would be a cut-off, so it is marked."""
-    try:
-        posts = json.loads(bodies[0])["data"]
-    except (ValueError, KeyError, TypeError):
-        return []
-    if not isinstance(posts, list):
-        return []
-    last = max([x.get("createdAt") or "" for x in posts] or [""])
-    return [[1, "posts_in_window", len(posts), None, "last_post=%s%s" % (last, ";maybe_truncated" if len(posts) >= 1000 else "")]]
-
-
 # ---- Billboard chart page (Hot 100 or Billboard 200: the chart as last published) ----------------------------------------------------------------------
 def billboard_urls(p):
     return [p["url"]]
@@ -210,7 +190,6 @@ ADAPTERS = {
     "apple": (apple_urls, apple_parse),
     "rt": (rt_urls, rt_parse),
     "mc": (mc_urls, mc_parse),
-    "xtracker": (None, xtracker_parse),          # the URL comes from the market's own close time (see record_ref.targets_for)
     "billboard": (billboard_urls, billboard_parse),
     "steam": (steam_urls, steam_parse),
     "yahoo1m": (None, yahoo1m_parse),            # the URL comes from the symbol and the range (see record_ref.run_standalone)

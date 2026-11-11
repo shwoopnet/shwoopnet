@@ -66,10 +66,10 @@ gates.R4 = () => {
     if (u) { assert.ok(u.startsWith('https://'), r.id); hosts.add(u.split('/')[2]); }
   }
   for (const h of hosts) assert.ok(['kworb.net', 'www.billboard.com', 'store.steampowered.com', 'www.rottentomatoes.com', 'www.metacritic.com'].includes(h), h);
-  assert.ok(/XT = "https:\/\/xtracker\.polymarket\.com\/api"/.test(adapters));
+  assert.ok(!/polymarket/i.test(script + adapters + fs.readFileSync(path.join(__dirname, '..', 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json', ), 'utf8')), 'Nov 11, 2026: no Polymarket host or adapter (its terms bar scraping and API use by an LLC)');
   const code = strip(script + adapters);
   const urls = new Set((code.match(/https?:\/\/[a-z0-9.-]+/g) || []).map((x) => x.split('//')[1]));
-  for (const h of urls) assert.ok(['external-api.kalshi.com', 'xtracker.polymarket.com'].includes(h), 'no other host is named in the code: ' + h);
+  for (const h of urls) assert.ok(h === 'external-api.kalshi.com', 'no other host is named in the code: ' + h);
 };
 
 // R5: rows have one value per column; a market is kept only inside its window; a re-run of a slot is idempotent; slot is 2 hours.
