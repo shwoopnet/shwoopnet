@@ -2,6 +2,8 @@
 
 **Status: DRAFT (Nov 11, 2026). It binds nobody until the owner merges it.** Once merged it binds the research chat (V2) and the live-performance chat (Refinement). It sits under `docs/CHARTER.md`, which only the owner changes; where they differ, the Charter wins. The owner made four decisions in a popup on Nov 11, 2026 (pace, concurrency, closing a family, the owner gate); they are written in below. Written at the owner's request: "i think we need to define stuff for the R&D team otherwise they're going to get carried away."
 
+**Politics and parlays:** the owner's Nov 11, 2026 answers (probe sizes, loss caps, kill and return rules, the 14 day cap) are in `docs/POLITICS_RULES.md`.
+
 ## 1. Mission
 
 Find strategies that clear the owner's bar, not variants of what we already run.
