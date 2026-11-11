@@ -10,3 +10,16 @@ Paper-edge test (needs all): cash per dollar >= +0.10, both date halves of the d
 Split: events ordered by earliest market close; development = first two thirds; held-out last third read ONCE and only if some development scenario passes the test above (same test, same scenario).
 Bars: z 5.34 (shared N about 1,100,000 plus this count) and 4.39 (N 9,009), reported next to z; a verdict above NOT_YET_FALSIFIED needs z over the bar too.
 Prediction: words in one call are positively correlated, so the gap is positive for buyers at h = 0; but cheap-leg overpricing (MENT1: cheap sides lose) may offset it. Prior for passing at h = 10%: 15%.
+
+## Result (Nov 11, 2026): FALSIFIED on development; held-out never read. Script src/scalper/mentcombo1.py, output data/mentcombo1_result.txt
+## development (first two thirds of events)
+| legs | haircut | n combos | n events | joint rate | mean product | gap | cash/$ | event z | top event share of net |
+|---|---|---|---|---|---|---|---|---|---|
+| 2 | 0% | 13293 | 300 | 0.1956 | 0.2596 | -0.0640 | -0.288 | -8.87 | nan |
+| 2 | 10% | 13293 | 300 | 0.1956 | 0.2596 | -0.0640 | -0.207 | -5.74 | nan |
+| 2 | 20% | 13293 | 300 | 0.1956 | 0.2596 | -0.0640 | -0.105 | -2.60 | nan |
+| 3 | 0% | 32234 | 296 | 0.0938 | 0.1369 | -0.0431 | -0.366 | -7.25 | nan |
+| 3 | 10% | 32234 | 296 | 0.0938 | 0.1369 | -0.0431 | -0.292 | -5.20 | nan |
+| 3 | 20% | 32234 | 296 | 0.0938 | 0.1369 | -0.0431 | -0.199 | -3.15 | nan |
+
+Every scenario negative in both halves (best: 2 legs, 20% haircut, -0.105 per dollar). Independence gap is NEGATIVE (-6.4c at 2 legs, -4.3c at 3): joint YES rate is below the product of asks, so single-leg asks already overprice the words; combining multiplies the overpricing. Positive within-call correlation exists but is smaller than the overpricing. Simulation only; no combo was priced. The 'top event share' column is nan because net is negative.
