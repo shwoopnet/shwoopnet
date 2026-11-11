@@ -40,7 +40,7 @@ gates.X1 = () => {
   assert.ok(/href="https:\/\/example\.com\/a\?x=1&amp;y=&quot;2&quot;"/.test(out), 'a real link is kept, attribute-escaped');
   assert.ok(/Up 5% &amp; rising/.test(out));
   render([]);
-  assert.ok(/No headlines available/.test(doc.els.marketNewsList.innerHTML), 'no headlines says so, rather than leaving the last list up');
+  assert.ok(/No news source yet/.test(doc.els.marketNewsList.innerHTML), 'no headlines says so, rather than leaving the last list up');
 };
 
 gates.X2 = () => {

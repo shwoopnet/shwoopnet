@@ -516,23 +516,22 @@ exports.kalshiFlattenAll = onCall(
   }
 );
 
-// ---- The market tape: prices for the ticker strip and the Brief, and a few headlines -------------------------------------------------------
-// Every 5 minutes, around the clock, with NO secrets: public Yahoo chart prices and the public CNBC and MarketWatch RSS feeds (marketTapeLib.js), written to the one document
-// shared/marketTape that every signed-in account reads. It places no order and holds no key. It replaces the Brief's dependence on shwoop-server (prices only between 08:00 and 17:00
-// Eastern, news behind a paid key). Quotes are merged into the stored document one symbol at a time, so a symbol or feed that fails keeps its older value with its own asOf
-// and the page says how old it is; `errors` names what failed on the last run.
+// ---- The market tape: the few figures this site may read by machine -------------------------------------------------------------------------
+// Every 60 minutes, with NO secrets (marketTapeLib.js): Treasury's daily 10 and 30 year yields (they change once a day, so more often is wasted cost) and alternative.me's public crypto fear and greed,
+// written to the one document shared/marketTape that every signed-in account reads. Everything else is written as noPrice and the page says "No price" (Nov 11, 2026, the owner: Yahoo's terms forbid
+// automated reads, so Yahoo and the news feeds were removed). It places no order and holds no key. The document is replaced whole (buildTapeDoc), keeping an older quote only for a permitted source
+// that failed this run, so a failure shows the old close with its own date and nothing a removed source wrote can linger. `errors` names what failed on the last run.
 exports.marketTapeTick = onSchedule(
-  { schedule: "every 15 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },   // every 5 minutes until Oct 26, 2026, when the owner asked for fewer runs to cut cost; the Brief chart is now a week, so a quarter hour is fresh enough
+  { schedule: "every 60 minutes", timeoutSeconds: 60, retryCount: 0, memory: "256MiB" },   // every 5 minutes until Oct 26, 2026, every 15 until Nov 11, 2026: the sources only change daily
   async () => {
     ensureDefaultAdminApp();
     const db = getFirestore();
+    const ref = db.collection("shared").doc("marketTape");
     const r = await marketTape.readTape({ fetchFn: fetch, now: Date.now() });
-    const patch = { updatedAt: Date.now(), errors: r.errors };
-    if (Object.keys(r.quotes).length) patch.quotes = r.quotes;
-    if (r.news) patch.news = r.news;
-    if (r.mood) patch.mood = r.mood;
-    await db.collection("shared").doc("marketTape").set(patch, { merge: true });
-    console.log("marketTapeTick: quotes=" + Object.keys(r.quotes).length + " news=" + (r.news ? r.news.length : 0) + " errors=" + r.errors.length);
+    let prev = null;
+    try { const snap = await ref.get(); prev = snap.exists ? snap.data() : null; } catch (e) { /* no older quote to keep */ }
+    await ref.set(marketTape.buildTapeDoc(prev, r, Date.now()));
+    console.log("marketTapeTick: quotes=" + Object.keys(r.quotes).length + " mood=" + (r.mood ? "yes" : "no") + " errors=" + r.errors.length);
   }
 );
 

@@ -97,3 +97,19 @@ The tape currently reads CNBC, MarketWatch, WSJ World, CoinDesk and Cointelegrap
 5. **Treasury endpoint:** OK to read one more page (Treasury Site Policies, FiscalData dataset page) to confirm 10Y and 30Y.
 
 Uncertainty: several fetches were summarised by a small model, so quoted clauses should be checked against the live page before a build. Terms change; this is a Nov 11, 2026 reading.
+
+## Nov 11 confirmation (Treasury endpoint, and the switch)
+
+Owner decision, Nov 11, 2026: the Brief and the header strip move to the permitted set with no spend, and every symbol without a permitted source says "No price". No request was sent to any Yahoo host. The pages below were read with a fetch tool that summarises them, so the quoted clauses are short and should be checked against the live pages.
+
+**Endpoint CONFIRMED to answer (daily 10 and 30 year).** `https://home.treasury.gov/resource-center/data-chart-center/interest-rates/pages/xml?data=daily_treasury_yield_curve&field_tdr_date_value_month=YYYYMM` returned an Atom/OData feed titled "DailyTreasuryYieldCurveRateData", last updated 2026-11-11, one entry per trading day with `NEW_DATE`, `BC_10YEAR` and `BC_30YEAR` (for example 2026-11-10: 4.98 and 5.35). The page that documents the feed is `home.treasury.gov/developer-notice-xml-changes`; it gives the all-years form (`field_tdr_date_value=all`, paged) and a daily file `https://home.treasury.gov/sites/default/files/interest-rates/yield.xml`. It states no rate limit and no terms. The tape reads one month per run (two when the month has fewer than two rows).
+
+**Terms: NOT an explicit grant.** The Site Policies and Notices page (`home.treasury.gov/subfooter/site-policies-and-notices`) was read: it has no clause on automated access, scraping, caching, copyright or reuse. Its only third party text is "Non-federal websites do not necessarily operate under the same laws, regulations, and policies as federal websites." The rate statistics page has no terms text either. So: no ban found, no permission sentence found. The only explicit permission quoted in section 2 is FiscalData's ("free, without restriction") and it covers FiscalData datasets, not this feed. The data is a US government publication, but treat the terms question as open and re-read before relying on it for more than a once an hour GET. FiscalData itself has no daily par yield dataset that was found (the dataset search page named none).
+
+**Cadence.** The yields change once a day, so `marketTapeTick` now runs hourly instead of every 15 minutes (a one line change, a quarter of the runs). alternative.me updates about every 5 minutes and allows 60 requests a minute; one an hour is far inside it.
+
+**What the page shows now.** 10Y and 30Y yield: the close of the latest day, labelled "close of <date>". Crypto fear and greed with "Crypto fear and greed index data from alternative.me" directly under it. Everything else (S&P 500, Nasdaq 100, Dow, Russell 2000, VIX, gold, crude, Bitcoin, Ethereum, SPY, QQQ, DIA): "No price". Charts: "No chart: no permitted source yet". Market News: "No news source yet". The CNN stocks reading and every RSS feed are dropped until their terms are read. The strip's "Long bonds" (TLT, an ETF with no source) became the 30Y yield.
+
+**Adding a source later.** One reader in `READERS` plus its host in `ALLOWED_HOSTS` (and the exact list in `test/noYahooMarketTapeGates.test.js`), then the symbol's `source` in `SYMBOLS`. Bitcoin and Ethereum wait for the owner's reading of the exchange's market data terms.
+
+Not changed: the research recorders under `scripts/` and `.github/workflows/` still name Yahoo hosts (the perps cash price saver and the reference recorder). They are outside the site's functions and were not part of this switch; the owner should decide them separately.
