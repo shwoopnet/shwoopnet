@@ -32,3 +32,5 @@ Done and falsified this week (not in the queue): OPEN1H (first-hour listing, 46 
 
 ## Uniqueness relabel (Nov 11, 2026, owner hard rule: a favourite-late variant is a duplicate; rank by uniqueness first, then prior)
 None of the backlog ideas is a favourite-late variant. Relabel: ideas 19, 20, 22 (cheap tails on other hourly ladders) are DUPLICATES of the cheap-tail calibration mechanism (TAIL10, HISTLAD1) on different markets: parked, not to get test time unless the owner approves. Ideas 5, 13 and 7 (persistence or run-rate models on one outside series) are variants of the same persistence-versus-ladder mechanism that AAAGAS1, TNOTE1 and SOFR1 closed: parked. Idea 14 (other venue as information) stays. The five new mechanisms with the uniqueness check are in workers/FIVE_DIFFERENT_MECHANISMS.md (INGAMELAG1, MMSIM1, THREELEG1, PERPCARRY1, CFRTI1); they now rank above everything else here.
+
+INGAMELAG1 (Nov 11): BLOCKED by source terms, not falsified: no free keyless live-score source is clearly permitted (workers/INGAMELAG1_SOURCE_PROBE.md). Unblocking needs a licensed feed and an owner decision.
