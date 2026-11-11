@@ -48,9 +48,9 @@ Keyword check of the V2 README (1.77 MB) and both workers folders for each card 
 - **Closest existing:** PARLAY1, MVE1 (price against the product), POLPARITY1 and ARB2 to ARB5 (locks inside one event). Differs: a lock between a combo and a single, on the upper Frechet bound, never scanned.
 - **U1** different market type (combo) and different field (leg structure). **U2** paired within its own position, hold. **U3** not measured, expected 0. **U4** not on the list; not a favourite hold (the pair pays $1 in every state).
 - **Data and terms:** Kalshi public API only (combo market objects carry `mve_selected_legs` and the combo's bid and ask; the legs' single markets). Owner rule for sports combos is met: price consistency only, against Kalshi's own singles, no outside sports data.
-- **Cheapest test:** a census, no outcome needed. Step 0 offline: V2 already holds combo leg lists (`workers/scan_ledger/kalshi_combo_cross_ALL_RUN81701.ids.gz`, `POLCOMBO1_CENSUS.json`, PARLAY1's 254 combos); count combos whose legs are nested by ticker rule (same team or player stem, ordered strikes; same city ordered temperature strikes). Step 1: for the nested ones, read combo and strongest-leg quotes (2 requests each). **Sample:** every nested combo found; the bar is a COUNT: at least 20 combo-timestamps with combo ask + single NO ask + both fees under $0.99 and displayed size of 5 or more on both. Under 20 in 14 days = CLOSED.
-- **Time to settlement:** same day (NBA, weather) to Nov 2027 (futures legs; the owner's mixed-combo exception applies and the spec must say the money is held). **Time to verdict:** step 0 in hours, step 1 one day of budget (about 100 requests).
-- **Tries:** N +2. **Probability:** 6% that 20 real locks exist; 15% that at least one does.
+- **Cheapest test:** a census, no outcome needed. **Corrected the same day:** there is no offline step. The combo files V2 holds are rule ids from the 15 minute pair scans, not combo leg lists, and `POLCOMBO1_CENSUS.json` has only leg-prefix counts. Step 1 (about 25 requests): list open combos and count those whose legs are nested by ticker rule (same team or player stem, ordered strikes; same city ordered temperature strikes). Step 2: for the nested ones, read the strongest leg's quote. **Second correction:** PARLAY1 found only 30 of 254 open combos with a real resting ask; most combos are quoted on request, and asking for a quote is an account action research may not take. So the public test sees only resting asks and past prints. Full protocol: `workers/IDEA_DESK_B_PROTOCOLS.md`. **Sample:** every nested combo found; the bar is a COUNT: at least 20 combo-timestamps with combo ask + single NO ask + both fees under $0.99 and displayed size of 5 or more on both. Under 20 in 14 days = CLOSED.
+- **Time to settlement:** same day (NBA, weather) to Nov 2027 (futures legs; the owner's mixed-combo exception applies and the spec must say the money is held). **Time to verdict:** the structure count in an hour of budget (about 25 requests); the 7 day lock count about 210 to 630 requests.
+- **Tries:** N +2. **Probability:** 4% that 20 real resting locks exist (lowered from 6% after the corrections); 12% that at least one does.
 
 ### 2. ECONLAG: after a scheduled print, the slow macro markets lag the fast one
 
@@ -132,9 +132,9 @@ Keyword check of the V2 README (1.77 MB) and both workers folders for each card 
 - **Closest existing:** WXPRIOR and WXENS1 (single brackets against a forecast, FAIL direction, PF 0.76), MVE1 (cheap combos against the product, n 11). Differs: it takes NO view on any leg's probability (the legs' own Kalshi prices are the marginals); the only claim is the dependence between legs. The owner's combo rule asks for "same city, linked days or brackets first"; this is cross-city, so it is the second in line behind card 8 unless the census shows only cross-city collections exist.
 - **U1** combo market, dependence as the signal. **U2** hold, different entry rules. **U3** not measured. **U4** not on the list.
 - **Data and terms:** our own `quote-data` branch `wxens/` (NWS forecast high and observed high for 14 cities since Nov 3; PERMITTED NWS data already recorded) for the correlation; Kalshi combo and leg quotes for the price.
-- **Cheapest test and sample:** Part A, zero Kalshi calls: measure the error correlation by pair from the recorder (30 days x 6 to 10 near pairs by Dec 3; report the 90% interval). Part B: a census of what the 35 KXCITIESWEATHER collections allow and 10 days of combo quotes (about 60 requests a day at 2 looks). **Minimum 60 combo-days per half, clustered by day.**
+- **Cheapest test and sample:** Part A, zero Kalshi calls: measure the error correlation by pair from the recorder. **First partial read, Nov 11: NOT_ENOUGH_DATA** (15 near pair-days on 5 days, pooled 0.34, not distinguishable from zero or from 0.45; the recorder gives about 2 near pair-days a day on only 5 near pairs, so 150 pair-days arrive in late January, not Dec 3; table in `workers/IDEA_DESK_B_PROTOCOLS.md`). Part B: a census of what the 35 KXCITIESWEATHER collections allow and 10 days of combo quotes (about 60 requests a day at 2 looks). **Minimum 60 combo-days per half, clustered by day.**
 - **Kill:** measured near-pair error correlation under 0.15, or the median combo ask already at or above the copula fair value, or PF under 1.0.
-- **Time to settlement:** same day. **Time to verdict:** Part A on Dec 3; Part B about 30 trading days after the census. **Tries:** N +2 (2 leg and 3 leg). **Probability:** 6%.
+- **Time to settlement:** same day. **Time to verdict:** Part A in late January at the recorder's present yield; Part B about 30 trading days after the census. **Tries:** N +2 (2 leg and 3 leg). **Probability:** 5%.
 
 ### 8. WXCOMBO-PERSIST (combo): the same city on linked days
 
@@ -145,7 +145,7 @@ Keyword check of the V2 README (1.77 MB) and both workers folders for each card 
 - **Entry, who loses, data:** as card 7 with "consecutive days" for "neighbouring cities". This is the owner's stated first priority for weather combos ("same city, linked days or brackets first").
 - **Blocker, stated plainly:** it is UNVERIFIED that Kalshi lists a combo across two different days of one city; the collections are called "cities weather". If none exists this card is simulation only and gives the correlation number for a future spec.
 - **Cheapest test:** the same Part A measurement as card 7 (zero Kalshi calls; the lag-one error correlation per city from the recorder), then the census. **Minimum 60 combo-days per half.**
-- **Time to verdict:** Dec 3 for the measurement. **Tries:** N +1. **Probability:** 3% (smaller correlation, and the product may not exist).
+- **Time to verdict:** late January for the measurement (same recorder yield as card 7). **Tries:** N +1. **Probability:** 3% (smaller correlation, and the product may not exist).
 
 ### 9. MOVPARITY: the winner market against the margin ladder of the same race
 
@@ -247,11 +247,11 @@ By speed to a first honest verdict, then by how different the card is from what 
 
 | Rank | Card | First verdict | Needs from the shared Kalshi budget | Different from the failures because | Probability |
 |---|---|---|---|---|---|
-| 1 | 1 NESTCOMBO | hours (offline count), then 1 day | 0, then about 100 | no model: a logical bound between a combo and a single | 6% |
-| 2 | 2 ECONLAG | 3 days | about 350 | time exit; one Kalshi market prices another; n about 100 | 8% |
-| 3 | 3 BALLOTNO | 2 to 3 days | about 124 | independent events with a known base rate; inside the nothing-happens rule | 7% |
+| 1 | 1 NESTCOMBO | 1 hour of budget for the structure count, 7 days for the lock count | about 25, then 210 to 630 | no model: a logical bound between a combo and a single | 4% |
+| 2 | 2 ECONLAG | 3 days | about 385 | time exit; one Kalshi market prices another; n about 100 | 8% |
+| 3 | 3 BALLOTNO | 2 to 3 days | about 160 | independent events with a known base rate; inside the nothing-happens rule | 7% |
 | 4 | 4 UNRATEROUND | 2 days (descriptive) | about 40 | rounding position of a published number, no forecast | 7% / 3% |
-| 5 | 7 WXCOMBO-XCITY | Dec 3 (part A, zero calls) | 0, then about 60 a day | takes the legs' prices as given; only the dependence is claimed | 6% |
+| 5 | 7 WXCOMBO-XCITY | late January (part A, zero calls; first partial read Nov 11 was NOT_ENOUGH_DATA) | 0, then about 60 a day | takes the legs' prices as given; only the dependence is claimed | 5% |
 | 6 | 10 PRESENTQ | 1 day (offline) | 0, then about 25 | a forward queue, not a base rate | 8% / 3% |
 | 7 | 12 CPIARITH | 3 days | about 60 | ladder against ladder | 5% |
 | 8 | 13 ROLLOFF | 2 days (proxy check) | about 70 | model for POL-b2, not a new slot | 5% |
@@ -260,11 +260,11 @@ By speed to a first honest verdict, then by how different the card is from what 
 | 11 | 14 IMPLY1 | Nov 25 | 0 | cross-series lock | 3% |
 | 12 | 11 TARIFFDTS | 1 day model, a year for trades | 1 | queues with row 77 | 4% |
 | 13 | 5 FAANOTICE | BLOCKED until a person reads the FAA terms; then 3 to 4 weeks (existence) | 0 (recorder already quotes) | most unusual source on the list | 5% |
-| 14 | 8 WXCOMBO-PERSIST | Dec 3 | 0, then a census | product may not exist | 3% |
+| 14 | 8 WXCOMBO-PERSIST | late January | 0, then a census | product may not exist | 3% |
 | 15 | 6 SCOTUSAUTH | July 2027 | about 30 | seasonal, n-limited | 5% |
 | 16 | 16 SWEEPSIM | 2 days | about 150 | a measurement only | 2% |
 
-**Top 5:** NESTCOMBO, ECONLAG, BALLOTNO, UNRATEROUND, WXCOMBO-XCITY. **Most unusual:** FAANOTICE and SCOTUSAUTH (both slow).
+**Top 5:** NESTCOMBO, ECONLAG, BALLOTNO, UNRATEROUND, WXCOMBO-XCITY. Ready-to-run protocols for the first three: `workers/IDEA_DESK_B_PROTOCOLS.md`. **Most unusual:** FAANOTICE and SCOTUSAUTH (both slow).
 
 **Combos (4):** cards 1, 7, 8 and 16, each with its leg-correlation assumption written above before any price is read: 1.0 by logic; 0.45 (0.30 to 0.60) forecast-error correlation for near city pairs; 0.25 (0.10 to 0.40) lag-one; 0.5 (0.3 to 0.7) national swing.
 
