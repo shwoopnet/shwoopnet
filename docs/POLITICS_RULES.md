@@ -53,7 +53,7 @@ These are caps, not permission. A probe starts only after the owner approves its
 - **Resolution-rule edge cases:** flagged to the owner with the rule text, never automatic.
 - **News fade:** pre-register three delays (15 minutes, 1 hour, 4 hours), all counted in the deflation.
 
-## 6. What is not decided
+## 5. What is not decided
 
 - No code places any politics or parlay order, and the second slot registry (`functions/kalshiSlotLib.js`) holds none. Admitting one is a separate reviewed pull request and the owner's own popup.
 - The exact meaning of "10c per dollar after fees" is left to each probe spec to define and the owner to approve.
