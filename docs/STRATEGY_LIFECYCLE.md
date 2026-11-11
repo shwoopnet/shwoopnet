@@ -90,6 +90,23 @@ The line the code already draws, and this spec keeps: **nothing stored can add a
 
 The Refinement chat (Head of Live Strategy Performance) is the weekly **rotation owner**. Every week, Monday morning US Central, it reviews EVERY strategy (live, probe, shadow and retired) against its IMPLEMENT, KILL and RETURN rules on the cash basis and sends ONE short rotation recommendation: keep, watch, size step, kill, return, or which shadow rule to promote, with profit factor first. The owner approves each item by popup. It also flags any strategy that is missing one of the three rules. It only recommends: nothing changes without the owner, a promotion is still a reviewed edit in code, and the owner still says "merge N" and runs the deploys. The first recommendation is due Monday Nov 16, 2026.
 
+## 7c. The favourite-late shadow cap (Nov 11, 2026, the owner)
+
+Favourite-late rules (buy the favourite side at 88c to 97c in the last minutes) are the same bet on different markets and bands, and they were filling the shadow list. The cap:
+
+- **At most 3 favourite-late shadow rules at once, and at most ONE per underlying market.** Count by market, not by rule name: two rule names on gold are two rules on one market.
+- **New shadow slots go to a DIFFERENT mechanism** unless a favourite-late variant states a distinct reason: a new underlying, a new look time or new information.
+- **A favourite-late shadow is retired when it passes or fails its read**, which frees the slot.
+- First use: GOLDHI6S (0.92 to 0.97 at 6 minutes) was a subset of GOLDALL's signals (0.88 to 0.97 at the same look), so it was folded into GOLDALL and is read there as a split by price band. The registry is now XRPYES10, GOLDALL, XRPFAV6 and LANTERN. Rows already logged stay in `kalshiShadowRows`.
+
+Ready non-favourite candidates for the next shadow slots, in priority order. Several are not expressible as a shadow rule in the registry today (they need outside data or fields the registry does not read), so they are read at read time instead of being logged by the minute function:
+
+1. **Polymarket Bitcoin lead filter on OICORE:** a forward, read time join of public Polymarket history; no logger.
+2. **OICORE book imbalance:** `bidSize` and `askSize` are already logged on every order; read at read time.
+3. **Ethereum open interest confirmation:** re-read Dec 3.
+4. **Rain:** the RAINCAL recorder is already recording.
+5. **Liquidation cascades:** the OKX logger is merged.
+
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
 What already exists: the registry and validator, per strategy kill rules and the sticky latch, slot caps scaling with the base, the shared 12% stop and 5.5% window limit, per strategy stop meters on the page, the skip log (`kalshiSlotSkips`, report `skips`), order records and the nightly report with `slotOrders`. Missing, in build order:

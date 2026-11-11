@@ -1768,6 +1768,10 @@
               <div class="settings-row-title">Changelog</div>
               <div class="settings-row-desc">What changed on the site and the bot, newest first. The numbers are the pull requests on GitHub.</div>
               <details class="changelog-details"><summary>Show what changed</summary>
+                <div class="changelog-day">Nov 11</div>
+                <ul class="changelog-list">
+                  <li>Process: a cap on favourite-late shadow rules (the owner, Nov 11): at most 3 at once and at most one per market, new shadow slots go to a different mechanism, and a favourite-late rule is retired when it passes or fails its read. GOLDHI6S is folded into GOLDALL (it was a subset of GOLDALL's signals, so it is read there as a split by price band); the shadow list is now XRPYES10, GOLDALL, XRPFAV6 and LANTERN. Logging only, nothing trades</li>
+                </ul>
                 <div class="changelog-day">Nov 10</div>
                 <ul class="changelog-list">
                   <li>Research: a recorder for OKX's public Bitcoin liquidation feed (OKX keeps only about 17 hours, so it logs forward), 4 starts a day, data to the quote-data branch only, stops 2026-12-31; no key, no order, nothing trades</li>
@@ -4107,13 +4111,12 @@ kalshiStatusTick();
     { id: 'XRPYES10', rule: 'XRP: buy YES at 88c to 97c, 10 minutes left' },
     { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' },
     { id: 'XRPFAV6', rule: 'XRP: the favourite side at 88c to 92c, 6 minutes left, spread 2c or less' },
-    { id: 'GOLDHI6S', rule: 'Gold: the favourite side at 92c to 97c, 6 minutes left, spread 2c or less' },
     { id: 'LANTERN', rule: 'Ethereum: the favourite side at 88c to 97c, 6 minutes left, no smooth gate' }
   ];
   var KAL_BOARD_RETIRED = { asOf: 'Nov 10', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
     { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },
     { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 },
-    { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }
+    { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }, { name: 'GOLDHI6S', note: 'folded into GOLDALL (a split by price band), Nov 11' }
   ] };
   // The Sizing ladder row of each tile: static labels, no figure computed (the owner, Nov 10, 2026: new probes start at 3 contracts inside today's caps, stepping up per the ladder rules; gold and OICORE sizing stay as they are; XRPYES10 stays at 1 contract). The sizes themselves are decided in the bot's code, not here.
   var KAL_BOARD_LADDER = { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', KESTREL: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' };
