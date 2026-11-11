@@ -22,7 +22,7 @@ Find strategies that clear the owner's bar, not variants of what we already run.
 
 Before any work, every idea passes the four uniqueness checks of `docs/STRATEGY_LIFECYCLE.md` section 7d:
 1. The SIGNAL is different: a different data source or a different market type. Timing structure or price zone alone does not make it different. Kalshi's own data counts as a different source from price only if it is a different FIELD with different logic (open interest, book depth, trade flow count); the same price band at a different time does not (owner, Nov 11, 2026).
-2. The EXIT is different: time-based, a target or scaling, or paired within its own position; hold to settlement also counts when the entry rules are different and the strategy will not hedge or interfere with another market or strategy. Signal and exit must both differ, and the entry rules too (this replaces "2 of 4 axes").
+2. The EXIT is different: time-based, a target or scaling, or paired within its own position (the same strategy's own legs only, never a hedge against another strategy or market; decided, owner, Nov 11, 2026); hold to settlement also counts when the entry rules are different and the strategy will not hedge or interfere with another market or strategy. Signal and exit must both differ, and the entry rules too (this replaces "2 of 4 axes").
 3. Correlation under 0.3 with EVERY live strategy on the cash basis: daily cash P&L, Pearson r, at least 20 overlapping days, applied at the first read. A correlation of 0.3 or more is a FAIL: the candidate is REJECTED as a duplicate and put on the declined list with the correlation number, the live strategy it matched and the dates of the window (owner, Nov 11, 2026).
 4. Not on the DECLINED list.
 
@@ -62,6 +62,7 @@ Strategies move through five stages: Idea, Shadow, Probe, Live, Retired. Family 
 
 ## 5. Outputs
 
+- **Top priority (owner, Nov 11, 2026): a replacement for gold L1**, which is a Probe under review and keeps trading under its existing kill (lifecycle 7f). Both Monday reports LEAD with progress on it, naming the candidates that pass the four uniqueness checks and how close each is to the proven bar.
 - **Monday morning, US Central, Refinement:** the weekly rotation report (lifecycle section 7b): keep, watch, size step, kill, return, promote. Every strategy is listed with its mechanism family, profit factor first, on the cash basis.
 - **Monday morning, V2:** a weekly research note of verdicts and the backlog.
 - **Each week:** five unique candidates on the shadow list (see section 3 for what counts), each with the four intake checks filled in. A short week is reported as short.
