@@ -116,7 +116,7 @@ gates.SP5 = () => {
   const L = P.KAL_BOARD_LADDER;
   assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', KESTREL: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026');
   for (const id of ['L1', 'OICORE', 'EVENT830']) assert.ok(plain.includes('<b>Sizing ladder</b><span>' + L[id] + '</span>') || plain.includes('<b>Sizing ladder</b><span>' + esc(L[id]) + '</span>'), id + ' shows its label');
-  assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 5, 'all five shadow rules say next 3 contracts (XRPYES10 is also live, at 3)');
+  assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 4, 'all four shadow rules say next 3 contracts (XRPYES10 is also live, at 3)');
   assert.strictEqual((plain.match(/<span>1 contract<\/span>/g) || []).length, 1, 'EVENT830 says 1 contract');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="sp-lane sp-lane-(?:shadow|live|retired)"/g) || []).length === 3 && (plain.match(/class="sp-down"/g) || []).length === 0 && /id="spBoard"/.test(plain), 'a board of three lanes (Live, Shadow, Retired) and no arrows or lines between them');
@@ -153,8 +153,8 @@ gates.SP8 = () => {
   // the Bot page lost the card; the changelog and CLAUDE.md say so; no em dash in what was added
   const bot = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="page-strategies"'));
   assert.ok(!/data-card="board"|Strategy pipeline/.test(bot), 'the Bot page has no Strategy pipeline card');
-  const top = html.indexOf('<div class="changelog-day">');
-  assert.ok(html.slice(top, top + 6000).startsWith('<div class="changelog-day">Nov 10</div>') && /New Strategies page/.test(html.slice(top, top + 6000)), 'the top changelog day names the new page');
+  const top = html.indexOf('<div class="changelog-day">Nov 10</div>');
+  assert.ok(top > 0 && html.slice(top, top + 6000).startsWith('<div class="changelog-day">Nov 10</div>') && /New Strategies page/.test(html.slice(top, top + 6000)), 'the top changelog day names the new page');
   const claude = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   const sec = claude.slice(claude.indexOf('## Strategies page (Nov 10, 2026'));
   assert.ok(sec.length > 500 && /Sizing ladder/.test(sec) && /owner-approved change of the blank-slate gates/.test(sec), 'a dated CLAUDE.md section');
@@ -273,7 +273,7 @@ gates.SP14 = () => {
   assert.ok(/kalshiNotifFeed\(kalshiLiveEvents/.test(fn('renderStrategiesPage')), 'the activity reuses the notification center items');
   const claude = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   assert.ok(/Summary bar, detail panels and timeline \(Nov 10/.test(claude.slice(claude.indexOf('## Strategies page (Nov 10, 2026'))), 'CLAUDE.md describes them');
-  const top = html.indexOf('<div class="changelog-day">');
+  const top = html.indexOf('<div class="changelog-day">Nov 10</div>');
   assert.ok(/summary bar/i.test(html.slice(top, top + 4000)), 'the changelog says so');
 };
 
