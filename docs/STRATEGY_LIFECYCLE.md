@@ -107,6 +107,22 @@ Ready non-favourite candidates for the next shadow slots, in priority order. Sev
 4. **Rain:** the RAINCAL recorder is already recording.
 5. **Liquidation cascades:** the OKX logger is merged.
 
+## 7d. The uniqueness check (Nov 11, 2026, the owner, a HARD RULE)
+
+The owner, frustrated, after saying it many times: "how many times have i told you to continue finding unique strategies?" The rule, in force for every chat that proposes, ranks or admits a strategy:
+
+1. **Every new candidate passes a UNIQUENESS CHECK before it gets a shadow slot or any test time.** It states its ENTRY reasoning, its MANAGEMENT and its EXIT, and names the existing mechanism it is closest to and why it is different. A candidate that cannot do this in a few plain lines does not get a slot.
+2. **A favourite-late variant is REJECTED as a duplicate unless the owner approves it.** Same 88c to 97c late-window logic on a different market, look time or size is a duplicate, not a new strategy (this tightens the "distinct reason" exception in 7c: that exception now needs the owner's approval, not just a stated reason).
+3. **The backlog is ranked by uniqueness first, then by prior.** Entries that are favourite-late variants are relabelled as duplicates, not left looking like fresh ideas.
+4. **The weekly rotation review (7b) shows the mechanism family of every strategy**, so a list that is mostly one family is visible at a glance.
+5. **V2 and Refinement each propose five genuinely different mechanisms** when asked for candidates, not variants of each other or of what is live. Different means a different information source, timing structure, market type, exit logic (scaling, time exits, hedges), relative value, an event or calendar setup, or another venue.
+6. **Never answer "menu empty".** If the bot's own markets are exhausted, say what data or venue would be needed to test a different mechanism and what it would cost, so the owner can decide.
+7. **The mechanism families today:**
+   - **Favourite-late:** gold L1, XRPYES10 and KESTREL (live); GOLDALL, XRPFAV6 and LANTERN (shadow).
+   - **Cheap-side open interest:** OICORE.
+   - **Event or calendar:** EVENT830.
+   - Every live strategy except gold holds to settlement, so there is no real exit or management diversity yet: no scaling, no time exit, no hedge. That gap is itself a place to look for unique mechanisms.
+
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
 What already exists: the registry and validator, per strategy kill rules and the sticky latch, slot caps scaling with the base, the shared 12% stop and 5.5% window limit, per strategy stop meters on the page, the skip log (`kalshiSlotSkips`, report `skips`), order records and the nightly report with `slotOrders`. Missing, in build order:
