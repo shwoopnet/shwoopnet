@@ -9,6 +9,7 @@
 - **Scheduled events first.** Votes, confirmations, shutdowns and deadlines are tested before the other politics families.
 - **Forward shadow recording.** The thin politics series are recorded forward (`record-politics.yml`, branch `pol-data`) so history accrues. The 14 day cap applies.
 - **14 day maximum hold** to settlement for every politics or parlay position. Longer markets go on a "later only" list and are not scored.
+- **Mixed combos are an explicit exception to the 14 day cap (owner, Nov 11, 2026: "allow them").** Combos with a politics leg inside Kalshi's cross-category combos (mostly sports legs, closing as late as Nov 2027) are allowed. They stay under every parlay rule: 2 to 5 legs (so the 30-leg listed ones do not qualify; a qualifying one must be found or built), $2 per parlay, $40 total stop, 10c per dollar paper edge first, and the owner's own popup before any live probe. **Each spec must say plainly that the money is held until settlement, up to Nov 2027.**
 - **Parlays are in.** 2 to 5 legs. Work is on weather, mentions and sports (NBA, NFL) combos, on Kalshi's own prices only. Whether any politics combo market exists is still being checked; if none does, politics parlays are simulation only.
 - **Linked legs are allowed.** The link between legs must be stated in writing before the test runs.
 - **"Nothing happens"** (the NO arm of dramatic "will X happen by date" markets) is allowed as a politics family, distinct from the declined favourite-late gold hold (different market, different data). Paper first.
