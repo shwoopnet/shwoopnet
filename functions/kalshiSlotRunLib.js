@@ -340,9 +340,10 @@ function makeRunners(flags) {
       await writeLast({ status: "error", error: "HTTP " + res.status + " " + short(res.body) });
       return done(Object.assign(out, { results }));
     }
-    // After every order of the minute was sent: one public book read per answered order, in parallel, bounded, every error swallowed (live.logBook); the skip records go out at the same time.
+    // After every order of the minute was sent: one public book read per answered order, in parallel, every error swallowed (live.logBook), and the whole wait capped at 1.8 s (live.boundBookWrites). The skip records are
+    // written afterwards, inside done() (flushSkips), not at the same time: they add their own write time, which this comment does not bound.
     const bookWrites = typeof live.logBook === "function" ? bookLog.map((b) => live.logBook({ fetchFn, ticker: b.ticker, write: (patch) => store.updateSlotOrder(b.cid, patch) })) : [];
-    await Promise.all(bookWrites);
+    if (typeof live.boundBookWrites === "function") await live.boundBookWrites(bookWrites); else await Promise.all(bookWrites);
     return done({ ok: true, results });
   }
 

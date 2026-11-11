@@ -201,7 +201,7 @@ gates['BK8 nothing that decides an order reads the new fields or the skip additi
 };
 gates['BK9 the book and the skip additions are written only after the orders: no new secret, endpoint, callable or rule'] = () => {
   const src = code(read('functions', 'kalshiLiveLib.js'));
-  const post = src.indexOf('path: "/portfolio/events/orders", body, nowMs: sentAtMs'), bw = src.indexOf('const bookWrites');
+  const post = src.indexOf('path: "/portfolio/events/orders", body, nowMs: sentAtMs'), bw = src.indexOf('const bookDone');
   assert.ok(post > 0 && bw > post && bw > src.indexOf('bookLog.push'), 'the L1 snapshot starts after the order loop (the last statement of which is the order POST path)');
   assert.ok(src.slice(post, bw).indexOf('for (const t of') === -1 || true);
   const slot = code(read('functions', 'kalshiSlotRunLib.js'));
@@ -237,6 +237,53 @@ gates['BK11 both order exports on the page carry the book columns'] = () => {
   const csvFn = new Function('return ' + html.slice(html.indexOf('function kalshiDiagnosticsCsv'), html.indexOf('// Privacy view on or off')).trim().replace(/\}\s*$/, '}'))();
   const out = csvFn([{ ts: 1, ticker: 'T', bookYes5: [{ p: 0.72, q: 12 }, { p: 0.7, q: 3 }], bookNo5: [{ p: 0.27, q: 30 }], bookReadMs: 5 }, { ts: 2, ticker: 'U' }], 10).split('\n');
   assert.ok(out[0].endsWith('bookYes5,bookNo5,bookReadMs')); assert.ok(out[2].endsWith('0.72:12|0.7:3,0.27:30,5')); assert.ok(out[1].endsWith(',,,'));
+};
+
+// ---- latency: the snapshot may never hold the tick back (security review, Nov 11, 2026) ----
+const hang = () => new Promise(() => {});   // never answers and ignores the abort signal, the worst case
+const keepAlive = () => setTimeout(() => {}, 5000);   // AbortSignal.timeout does not keep node alive by itself; the test must
+gates['BK13 a book read that never answers delays the L1 return by no more than about 2 seconds, and the order and return are unchanged'] = async () => {
+  const base = await l1Run(okBook);
+  const ka = keepAlive();
+  const t0 = Date.now();
+  const r = await l1Run(hang);
+  const took = Date.now() - t0;
+  clearTimeout(ka);
+  assert.ok(took < 2300, 'returned in ' + took + ' ms');
+  const posts = (w) => w.r.log.filter((x) => x.kind === 'fetch' && x.method === 'POST').map((x) => JSON.stringify(x.body));
+  assert.deepStrictEqual(posts(r.w), posts(base.w), 'the same order body sent');
+  assert.deepStrictEqual(r.ret, base.ret, 'the same return');
+  assert.strictEqual(bookWrites(r.w).length, 0);
+};
+gates['BK14 a book read that never answers delays the slot return by no more than about 2 seconds, and the order is unchanged'] = async () => {
+  const base = slotWorld({});
+  await runner().runSlotTick(base.args);
+  const ka = keepAlive();
+  const a = slotWorld({ book: hang });
+  const t0 = Date.now();
+  await runner().runSlotTick(a.args);
+  const took = Date.now() - t0;
+  clearTimeout(ka);
+  assert.ok(took < 2300, 'returned in ' + took + ' ms');
+  assert.deepStrictEqual(a.posts, base.posts, 'the same order body');
+};
+gates['BK15 a 429 on the book read is not retried (one read, nothing written, no 1.2 s wait), in both engines'] = async () => {
+  const t0 = Date.now();
+  const r = await l1Run(() => ({ status: 429, text: async () => '{}' }));
+  assert.strictEqual(r.w.r.log.filter((x) => x.kind === 'fetch' && isBook(x.url)).length, 1, 'L1: one read only');
+  assert.strictEqual(bookWrites(r.w).length, 0);
+  const a = slotWorld({ book: () => ({ status: 429, text: async () => '{}' }) });
+  await runner().runSlotTick(a.args);
+  assert.strictEqual(a.db.log.filter((x) => x.k === 'book').length, 1, 'slot: one read only');
+  assert.ok(!a.db.log.some((x) => x.k === 'update' && x.patch.bookYes5));
+  assert.ok(Date.now() - t0 < 1200, 'no retry wait');
+};
+gates['BK16 the timing constants and the single-wait rule hold: 1.5 s abort, 1.8 s cap, no new setTimeout in the live module'] = () => {
+  assert.strictEqual(live.BOOK_READ_TIMEOUT_MS, 1500); assert.strictEqual(live.BOOK_TOTAL_MS, 1800);
+  const src = code(read('functions', 'kalshiLiveLib.js'));
+  assert.strictEqual((src.match(/setTimeout/g) || []).length, 1, 'only the single GET retry wait');
+  assert.ok(/noRetry: true/.test(src) && /args\.noRetry === true/.test(src));
+  assert.ok(/boundBookWrites\(bookLog/.test(src) && /boundBookWrites\(bookWrites\)/.test(code(read('functions', 'kalshiSlotRunLib.js'))), 'both engines race the writes');
 };
 
 // ---- the off-equivalence record ----
