@@ -88,6 +88,8 @@ function parseFearGreedCrypto(json) {
 }
 
 // https only, no redirect followed (a redirect would send the read to a host this file has not pinned), a timeout, and a host that must be on the allowlist.
+const MAX_BODY_CHARS = 2000000;
+
 async function getText(fetchFn, url) {
   const u = new URL(url);
   if (u.protocol !== "https:" || !ALLOWED_HOSTS.includes(u.hostname)) throw new Error("host not allowed");
@@ -96,7 +98,10 @@ async function getText(fetchFn, url) {
   try {
     const res = await fetchFn(url, { headers: { "user-agent": UA, accept: "*/*" }, redirect: "manual", signal: ctl ? ctl.signal : undefined });
     if (!res.ok) throw new Error("HTTP " + res.status);
-    return await res.text();
+    const text = await res.text();
+    // A real answer is tens of kilobytes. A body this large is not one, and the regex readers below are quadratic on junk (security review): treat it as no answer.
+    if (text.length > MAX_BODY_CHARS) throw new Error("body too large");
+    return text;
   } finally {
     if (timer) clearTimeout(timer);
   }

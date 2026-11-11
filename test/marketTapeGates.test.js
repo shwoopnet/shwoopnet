@@ -75,6 +75,7 @@ gates.T3b = async () => {
   assert.ok(calls.every(([u, o]) => /^https:\/\//.test(u) && o.redirect === 'manual' && o.headers['user-agent'] === 'shwoopnet-market-tape'), 'https only, no redirect followed, a generic client name');
   await assert.rejects(() => lib.getText(async () => ok(''), 'https://evil.example/x'), /host not allowed/, 'a host off the allowlist is never contacted');
   await assert.rejects(() => lib.getText(async () => ok(''), 'http://home.treasury.gov/x'), /host not allowed/, 'plain http is refused');
+  await assert.rejects(() => lib.getText(async () => ok('x'.repeat(2000001)), 'https://home.treasury.gov/x'), /body too large/, 'an oversized body is no answer (the readers are regex based)');
 };
 
 // The stored document: a failure keeps the older close with its own date, a noPrice symbol never carries a number, and nothing a removed source wrote survives.
