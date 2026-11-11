@@ -48,3 +48,5 @@ INGAMELAG1 (Nov 11, owner decision via main): PARKED. Reason: no free licensed s
 Backlog count after the top-up: 27 numbered or named ideas; closed or falsified 14; parked as duplicates or variants 8 (19, 20, 22, 5, 7, 13, HLAD2 itself, INGAMELAG1); active untested 10 (12, 14, 15, THREELEG1, PERPCARRY1, CFRTI1, OI1, LIQ1, OPT1, REL1) plus MMSIM1 running.
 
 PERPCARRY1 (Nov 11): NOT_FEASIBLE as a carry (see workers/PERPCARRY1_FEASIBILITY.md): Kalshi perps are equity perps, funding is zero 88% of the time and at most 0.085% a day, and there is no equity hedge venue. Re-read 2026-12-06.
+
+OI1 (Nov 11): FALSIFIED on development (cheap side after an open-interest surge: BTC 0.75/0.83, ETH 0.75/0.80, XRP 0.64/0.70; the surge is present in almost every row so it adds nothing; the baseline cheap side loses 2c to 5.5c, the longshot bias). Held-out unread. See workers/OI1_PROTOCOL.md.
