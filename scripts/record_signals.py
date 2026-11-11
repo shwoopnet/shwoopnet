@@ -200,10 +200,20 @@ def extract(spec, body_bytes):
         return None
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """A redirect is never followed: the host allowlist is checked on the registry URL only, so a redirect could leave it (an open redirect or a compromised endpoint on an allowlisted host). A 3xx answer is a failed read."""
+
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
+
+
+_OPENER = urllib.request.build_opener(_NoRedirect)
+
+
 def http_get(url, headers):
-    """(status, body bytes or None, Date header). Never raises. A body over MAX_BYTES is a failure (status -1)."""
+    """(status, body bytes or None, Date header). Never raises. A body over MAX_BYTES is a failure (status -1). Redirects are refused."""
     try:
-        with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=15) as r:
+        with _OPENER.open(urllib.request.Request(url, headers=headers), timeout=15) as r:
             b = r.read(MAX_BYTES + 1)
             if len(b) > MAX_BYTES:
                 return -1, None, ""

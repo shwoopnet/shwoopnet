@@ -29,6 +29,8 @@ print(json.dumps({"good": v(), "binance": v(url="https://api.binance.com/x"), "h
   for (const k of ['binance', 'http', 'userinfo', 'port', 'lookalike']) assert.notStrictEqual(r[k], '', k + ' is rejected');
   assert.ok(!r.allow.includes('api.binance.com'), 'binance is not allowed');
   for (const h of ['api.weather.gov', 'www.okx.com', 'www.deribit.com', 'api.coinbase.com', 'api.kraken.com']) assert.ok(r.allow.includes(h), h);
+  assert.deepStrictEqual(r.allow, ['api.coinbase.com', 'api.kraken.com', 'api.weather.gov', 'ensemble-api.open-meteo.com', 'mesonet.agron.iastate.edu', 'www.deribit.com', 'www.okx.com'], 'the allowlist is EXACTLY this set; adding a host is a reviewed edit of this line too');
+  assert.ok(!r.allow.some((h) => /espn|polymarket|(^|\.)(nhl|mlb|nba)\./i.test(h)), 'no sports or other terms-restricted host');
   const hosts = [...code.matchAll(/https?:\/\/[^"'\s/%]+/g)].map((x) => x[0]);
   assert.deepStrictEqual([...new Set(hosts)].filter((h) => h !== 'https://github.com').sort(), ['https://external-api.kalshi.com'], 'the only literal host in the code is the Kalshi quote host; signal hosts come from the allowlist');
 };
@@ -150,6 +152,26 @@ gates.SG7 = () => {
   assert.ok(startsPerDay * 2 * daysInMonth <= 400, 'even at two billed minutes a start it stays bounded');
   const budget = Number(/TIME_BUDGET_S = (\d+)/.exec(script)[1]);
   assert.ok(budget <= 45, 'the time budget keeps a run near one billed minute');
+};
+
+// SG9: a redirect is never followed, so a host on the allowlist cannot send the runner anywhere else (an open redirect or a compromised endpoint).
+gates.SG9 = () => {
+  const r = py(`
+import threading, http.server
+class T(http.server.BaseHTTPRequestHandler):
+    def log_message(self, *a): pass
+    def do_GET(self):
+        if self.path == "/a":
+            self.send_response(302); self.send_header("Location", "http://127.0.0.1:%d/b" % self.server.other); self.end_headers()
+        else:
+            self.send_response(200); self.end_headers(); self.wfile.write(b'{"x":"INTERNAL"}')
+b = http.server.HTTPServer(("127.0.0.1", 0), T); b.other = 0
+a = http.server.HTTPServer(("127.0.0.1", 0), T); a.other = b.server_address[1]
+for srv in (a, b): threading.Thread(target=srv.serve_forever, daemon=True).start()
+st, body, date = m.http_get("http://127.0.0.1:%d/a" % a.server_address[1], {})
+print(json.dumps({"status": st, "body": body is not None}))`);
+  assert.strictEqual(r.status, 302, 'the redirect answer is returned, not followed');
+  assert.strictEqual(r.body, false, 'no body from the redirect target is ever read');
 };
 
 // SG8: it touches nothing under functions/ or firestore.rules, the site and the page never mention it, and scripts, .github and kalshi-scalper are excluded from Pages.
