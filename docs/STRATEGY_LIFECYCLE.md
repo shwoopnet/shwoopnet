@@ -98,10 +98,11 @@ Favourite-late rules (buy the favourite side at 88c to 97c in the last minutes) 
 
 - **At most 3 favourite-late shadow rules at once, and at most ONE per underlying market.** Count by market, not by rule name: two rule names on gold are two rules on one market.
 - **New shadow slots go to a DIFFERENT mechanism** unless a favourite-late variant states a distinct reason: a new underlying, a new look time or new information.
+- **The cap counts DISTINCT strategies, not versions (7g).** A v2 of a favourite-late shadow rule replaces its parent and does not take a second slot.
 - **A favourite-late shadow is retired when it passes or fails its read**, which frees the slot.
 - First use: GOLDHI6S (0.92 to 0.97 at 6 minutes) was a subset of GOLDALL's signals (0.88 to 0.97 at the same look), so it was folded into GOLDALL and is read there as a split by price band. The registry is now XRPYES10, GOLDALL, XRPFAV6 and LANTERN. Rows already logged stay in `kalshiShadowRows`.
 
-Ready non-favourite candidates for the next shadow slots, in priority order. Several are not expressible as a shadow rule in the registry today (they need outside data or fields the registry does not read), so they are read at read time instead of being logged by the minute function:
+Ready non-favourite candidates for the next shadow slots, in priority order. (Items 1 to 3 are REFINEMENTS, so under 7g they are candidate versions of OICORE, not new strategies, and take no slot; see 7f.) Several are not expressible as a shadow rule in the registry today (they need outside data or fields the registry does not read), so they are read at read time instead of being logged by the minute function:
 
 1. **Polymarket Bitcoin lead filter on OICORE:** a forward, read time join of public Polymarket history; no logger.
 2. **OICORE book imbalance:** `bidSize` and `askSize` are already logged on every order; read at read time.
@@ -132,7 +133,7 @@ The owner, frustrated, after saying it many times: "how many times have i told y
 
    **How "paired or hedged exit" and "must not hedge or interfere" fit together:** a paired or hedged exit is allowed only inside the strategy's OWN position (for example, its own two legs closed together, or its own time or scale exit). It may never take a position in another market, or against another live strategy's position, to cover it; the direction lock (a slot or L1 order may never sit on the opposite side of another order in the same market) stays as it is. FOLLOW-UP QUESTION for the owner: confirm that "paired" means legs of the same strategy, not a hedge against another strategy.
 9. **Every candidate, probe and owner popup shows the four checks** (pass, fail or not yet measured, each with one line of evidence). A popup that asks for an exception quotes the earlier NO it exempts.
-10. **Filters are not strategies.** A rule that only filters or sizes an existing strategy (for example a Polymarket lead, book imbalance or open interest confirmation on OICORE) is judged as a refinement of that strategy by the rotation review, and takes no shadow slot as a new strategy.
+10. **Filters are not strategies (7g).** A rule that only filters, tunes or sizes an existing strategy (for example a Polymarket lead, book imbalance or open interest confirmation on OICORE, or a gold spot-gap filter) is a REFINEMENT, so it is a VERSION of its parent that replaces it (v2 replaces v1), tested beside the parent. It takes no shadow slot, never counts as a new strategy or as unique, and is governed by section 7g.
 
 ## 7e. The declined list (Nov 11, 2026, the owner)
 
@@ -183,8 +184,8 @@ The owner's popup answers on how to classify strategies. Four rules.
 
 | NAME | Family (entry + exit) | Risk class | Stage |
 |---|---|---|---|
-| Gold L1 | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | Live. FLAG: recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) would NOT meet the new 1.3 proven bar. The owner should decide whether to reclassify it Probe |
-| OICORE | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
+| Gold L1 (parent; candidate v2: gold spot-gap filter) | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | Live. FLAG: recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) would NOT meet the new 1.3 proven bar. The owner should decide whether to reclassify it Probe |
+| OICORE (parent; candidate versions: Polymarket Bitcoin lead filter, book imbalance, Ethereum open interest confirmation) | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
 | EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin: 5 fills |
 | XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe |
 | KESTREL | Favourite-late (AUD/USD); hold | see rotation report; group A | Retired by PR 772; never deployed |
@@ -192,11 +193,58 @@ The owner's popup answers on how to classify strategies. Four rules.
 
 **Idea stage (registered or named, untested).** RAINCAL (rain and weather forecast prior), options-implied probability on the hourly Bitcoin ladder (Deribit recorder), INGAMELAG1 (in-game lag), OKX liquidation cascades, PERPCARRY1 (perps carry). Each stays Idea until it is pre-registered with the four uniqueness checks (7d) and a classification card.
 
+**Pending refinements are VERSIONS, not Ideas (7g).** They are listed here so they are not mistaken for new strategies. None takes a shadow slot, counts toward the weekly five or the cap, or needs the uniqueness check; each needs the declined-list check and names its parent.
+
+| Candidate version | Version of | Note |
+|---|---|---|
+| Gold spot-gap filter | Gold L1 (candidate v2) | Replaces Gold L1 only if it passes the 7g takeover test |
+| Polymarket Bitcoin lead filter | OICORE (candidate version) | Read-time join of public Polymarket history |
+| OICORE book imbalance | OICORE (candidate version) | `bidSize` and `askSize` are already logged on every order |
+| Ethereum open interest confirmation | OICORE (candidate version) | A MARKET EXTENSION: see the 7g follow-up question (extend the parent or replace it); re-read Dec 3 |
+
 **Strategies page follow-up (not built).** A follow-up page PR would:
 - show a stage chip on every card, with the five stages;
+- show a candidate version under its parent's card, labelled `NAME v2` (7g), not as a second strategy;
 - add a family tag: "entry mechanism + exit style";
 - add a risk tag: win-rate class, loss shape, $ per order, $ per day, correlation group;
 - give the flow board Idea and Probe lanes, so the lanes become Idea, Shadow, Probe, Live, Retired.
+
+## 7g. Versions, refinements and sharing a market (Nov 11, 2026, the owner)
+
+The owner's popup answers, Nov 11, 2026. They settle what is a new strategy and what is only a better version of one we already have.
+
+**The version rule.**
+1. **A filter or improvement to an existing strategy is a REFINEMENT, and a refinement is a VERSION.** Examples: a gold spot-gap filter, the Polymarket Bitcoin lead on OICORE. Version 2 (v2) REPLACES version 1 (v1). The same strategy goes on, in a better form. It is never a new strategy and never counts as unique.
+2. **A parameter tweak is treated the same way:** a different price band, look time or size, or the same logic on another market. It is a version of its parent and replaces it.
+3. **When v2 takes over, v1 is retired with its whole record kept:** it goes on the Retired list (7f) with its written return rule (section 5), and nothing is deleted.
+4. **A version never takes a shadow slot of its own** and never counts as a new strategy for the weekly five (R&D charter section 3) or for the cap in 7c. The cap counts DISTINCT strategies (at most 3 favourite-late shadows, one per underlying), never versions.
+5. **A version never needs the uniqueness check (7d).** It DOES need the declined-list check (7e), and its registration must say WHICH PARENT it replaces. A version that is really a declined idea under a new name is rejected.
+
+**How to test a version.**
+- It runs in shadow BESIDE the live parent, named `NAME v2` (for example `Gold L1 v2`). It is shown under the parent's card as a candidate version, not as a second strategy.
+- It runs on the SAME days and the SAME signals: the parent's own orders, and a replay of the version's subset or changed rule on those same signals.
+- It takes over only if, on that same window, ALL of these hold:
+  1. its cash profit factor beats the parent's by at least 0.10;
+  2. its net cash dollars per contract-week are NOT lower than the parent's (the owner's earlier lesson: the 94.5c price floor raised profit factor on paper and lost net dollars, and was killed);
+  3. its second half is not worse than its first half or than the parent's second half;
+  4. it has at least 60 version signals.
+- If it passes on profit factor but fails the dollars test, or the reverse, it is a TRADE-OFF and the owner decides by popup. The popup states both numbers. Nothing is promoted automatically, and the takeover is still a reviewed edit in code.
+- Numbers proposed (see "Numbers the owner may change"): 0.10 profit factor margin, dollars per contract-week not lower, second half not worse, 60 signals.
+
+**FOLLOW-UP QUESTION for the owner:** when a parameter tweak is a NEW MARKET with the same logic (for example OICORE on Ethereum), does it replace the parent on the old market, or EXTEND the parent's coverage to the new market as v2? Recommended: EXTEND. The old market's record stays under v1 until the owner retires it.
+
+**Sharing a market.** Two strategies MAY trade the same underlying market if their ENTRY logic and SIGNAL differ and they do not interfere. The interference rule has three parts:
+1. **No opposite sides in the same market.** The existing direction lock stands.
+2. **No stacking.** Same-side orders from both strategies in one market and window count against the SAME per-market open-contract cap, the same 5.5% window cap and the same 12% stop. Two strategies do not get two budgets.
+3. **Each engine sells only its own contracts,** under the shared claim, so the later strategy never sells the other's.
+
+**Regime tag.** A strategy that only works in one regime (for example only on high volatility days) is its OWN strategy, carrying a REGIME TAG.
+- It counts as unique if its signal and exit differ (7d), like any other strategy.
+- It switches on and off by the regime signal. Its correlation check (7d check 3) is measured on its ON days.
+- The regime signal is a REGISTERED INPUT with a named data source.
+- It fails closed: when the regime reading is missing or stale, the strategy is OFF.
+
+**Numbers the owner may change:** 0.10 profit factor margin for a version to take over; net cash dollars per contract-week not lower than the parent's; second half not worse; at least 60 version signals.
 
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
