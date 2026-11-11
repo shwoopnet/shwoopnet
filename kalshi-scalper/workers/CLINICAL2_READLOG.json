@@ -1,0 +1,168 @@
+{
+ "reads": [
+  {
+   "n": 1,
+   "path": "/series?category=Science%20and%20Technology",
+   "status": "200",
+   "at": "2026-11-11T22:16:36.592277Z"
+  },
+  {
+   "n": 2,
+   "path": "/markets?series_ticker=KXFDANOM&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:17:06.991030Z"
+  },
+  {
+   "n": 3,
+   "path": "/historical/markets?series_ticker=KXFDANOM&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:17:37.327990Z"
+  },
+  {
+   "n": 4,
+   "path": "/markets?series_ticker=KXFDAAPPROVE&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:18:07.727324Z"
+  },
+  {
+   "n": 5,
+   "path": "/historical/markets?series_ticker=KXFDAAPPROVE&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:18:37.962527Z"
+  },
+  {
+   "n": 6,
+   "path": "/markets?series_ticker=KXFDAANNOUNCE&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:19:08.298769Z"
+  },
+  {
+   "n": 7,
+   "path": "/markets?series_ticker=KXFDAANNOUNCE&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:23:31.376014Z"
+  },
+  {
+   "n": 8,
+   "path": "/markets?series_ticker=KXFDAANNOUNCE&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:31:44.769988Z"
+  },
+  {
+   "n": 9,
+   "path": "/markets?series_ticker=KXFDAANNOUNCE&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:36:38.296273Z"
+  },
+  {
+   "n": 10,
+   "path": "/historical/markets?series_ticker=KXFDAANNOUNCE&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:37:38.607910Z"
+  },
+  {
+   "n": 11,
+   "path": "/markets?series_ticker=KXNEWDRUGAPPNTLA&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:38:38.953040Z"
+  },
+  {
+   "n": 12,
+   "path": "/historical/markets?series_ticker=KXNEWDRUGAPPNTLA&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:39:39.287206Z"
+  },
+  {
+   "n": 13,
+   "path": "/historical/markets?series_ticker=KXNEWDRUGAPPNTLA&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:50:35.961933Z"
+  },
+  {
+   "n": 14,
+   "path": "/markets?series_ticker=KXNEWDRUGAPPCMPS&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:51:06.114456Z"
+  },
+  {
+   "n": 15,
+   "path": "/markets?series_ticker=KXNEWDRUGAPPCMPS&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:56:17.842001Z"
+  },
+  {
+   "n": 16,
+   "path": "/historical/markets?series_ticker=KXNEWDRUGAPPCMPS&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:56:48.154007Z"
+  },
+  {
+   "n": 17,
+   "path": "/markets?series_ticker=KXNEWDRUGAPPBEAM&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:57:18.472606Z"
+  },
+  {
+   "n": 18,
+   "path": "/historical/markets?series_ticker=KXNEWDRUGAPPBEAM&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T22:57:48.793855Z"
+  },
+  {
+   "n": 19,
+   "path": "/markets?series_ticker=KXEBOLACOUNTRY&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T22:58:19.109058Z"
+  },
+  {
+   "n": 20,
+   "path": "/markets?series_ticker=KXEBOLACOUNTRY&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:03:32.669280Z"
+  },
+  {
+   "n": 21,
+   "path": "/historical/markets?series_ticker=KXEBOLACOUNTRY&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:04:03.013878Z"
+  },
+  {
+   "n": 22,
+   "path": "/markets?series_ticker=KXMEASLES&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:04:33.354418Z"
+  },
+  {
+   "n": 23,
+   "path": "/historical/markets?series_ticker=KXMEASLES&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T23:05:03.658505Z"
+  },
+  {
+   "n": 24,
+   "path": "/historical/markets?series_ticker=KXMEASLES&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:10:15.829888Z"
+  },
+  {
+   "n": 25,
+   "path": "/markets?series_ticker=KXH5N1COUNT&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:10:46.176026Z"
+  },
+  {
+   "n": 26,
+   "path": "/historical/markets?series_ticker=KXH5N1COUNT&limit=1000",
+   "status": "429",
+   "at": "2026-11-11T23:11:16.494271Z"
+  },
+  {
+   "n": 27,
+   "path": "/historical/markets?series_ticker=KXH5N1COUNT&limit=1000",
+   "status": "200",
+   "at": "2026-11-11T23:16:25.076333Z"
+  }
+ ],
+ "stopped": "HTTP 429 on /historical/markets?series_ticker=KXH5N1COUNT&limit=1000",
+ "note": "Read 0 (GET /series?category=Health, 200) made before logging began. 429 at 22:19:08Z on read 6 (live KXFDAANNOUNCE); waited 4 minutes, resumed with no retry loop; cached reads not repeated."
+}

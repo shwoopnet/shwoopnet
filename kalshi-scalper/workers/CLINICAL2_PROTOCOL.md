@@ -39,3 +39,31 @@ Step 1: exactly 20 reads (5 minutes). Step 3: at most 200 candle reads (50 minut
 
 ## Disclosure
 No Kalshi read was made writing this file. Held-data counts in CLINICAL1_CARDS.md (the 45 settled markets, the 12 series, the medians) were computed before and are used only for the prediction.
+
+## RESULT (run Nov 11, 2026, 22:16Z to 23:25Z; research only, nothing live)
+Verdict: **NOT_ENOUGH_DATA**, and the card CLOSES under the registered kill rule (gate count under 100 AND r under 2 per month). Prediction held.
+
+Reads: 20 successful (1 listing for Health, 1 for Science and Technology, 18 market reads), plus 7 reads refused with 429 on the shared bucket (the run paused at least 4 minutes after each, resumed once each time, no loop; log in `CLINICAL2_READLOG.json`, scratch cache not committed). No cursor was returned on any read. The candle step used 0 reads (see Amendment 1). The listing kept 74 series by keyword; 65 beyond the fixed nine are COUNTED and NOT read, queued for a second run only after a dated amendment. KXNEWDRUGAPPCMPS (fixed list) returned 0 markets; the listing shows its real ticker is KXNEWDRUGAPPLICATIONCMPS (not read).
+
+Census (merged /markets and /historical/markets by ticker; "within 90" = settled markets with open-to-close of 90 days or less):
+
+| series | listed | settled | open | yes/no | events | within 90d | median days open-close | median volume |
+|---|---|---|---|---|---|---|---|---|
+| KXFDANOM | 11 | 11 | 0 | 1/10 | 1 | 4 | 98 | 457 |
+| KXFDAAPPROVE | 35 | 19 | 16 | 12/7 | 5 | 14 | 48 | 1,488 |
+| KXFDAANNOUNCE | 6 | 5 | 1 | 0/5 | 1 | 2 | 98 | 20,817 |
+| KXNEWDRUGAPPNTLA | 6 | 6 | 0 | 5/1 | 1 | 0 | 168 | 2,021 |
+| KXNEWDRUGAPPCMPS | 0 | 0 | 0 | - | 0 | 0 | - | - |
+| KXNEWDRUGAPPBEAM | 6 | 3 | 3 | 0/3 | 1 | 0 | 191 | 4,469 |
+| KXEBOLACOUNTRY | 52 | 35 | 17 | 3/32 | 3 | 17 | 91 | 4,705 |
+| KXMEASLES | 51 | 45 | 6 | 29/16 | 4 | 14 | 160 | 18,108 |
+| KXH5N1COUNT | 8 | 2 | 6 | 2/0 | 1 | 0 | 170 | 1,815 |
+| total | 175 | 126 | 49 | 52/74 | 17 | 51 | | |
+
+Classes (rule text, by the Step 2 keywords): FDAAPPROVE, NEWDRUGAPP* = A; no TYPE M series exists (rule B NOT RUN, no market); EBOLA, MEASLES, H5N1 = C; FDANOM, FDAANNOUNCE = N.
+
+Gate: events with a usable quote at L = 30 days cannot exceed the 17 distinct settled events in the pooled A/M/C/N markets (many of these markets are strikes of the same event: 126 markets, 17 events). 17 is an upper bound, far under 100. Monthly new settled events, Nov 2025 to Oct 2026: 0,0,0,0,1,1,2,1,4,1,2,2; median r = 1 per month (mean 1.17). Date formula: today + (100 - 17) / 1 = 83 months, about October 2033 (using the upper bound 17; fewer usable quotes make it later). With r under 2 the kill rule closes the card. No rule A or C was scored, no outcome beyond counts was read, no price was read. First honest number: 17 events against a need of 100.
+
+Amendment 1 (written before any candle read; no candle was read): the protocol said to run the candle step if the census shows at least 30 settled markets (126 do). It is skipped because the gate is on distinct EVENTS and the census already bounds that at 17 (an event with no usable quote only lowers the count), so candle reads could not change the verdict and would spend about 126 reads of the shared bucket. Candles would be run only if the card is re-opened by a registered RETURN condition (a new source or series family, or 100 events).
+
+Owner rulebook context only (health markets up to 90 days, 1 contract, at most 3 open, $200 budget): not exercised; nothing placed, nothing live. Note for context: 75 of 126 settled markets took over 90 days from open to close, so most of this family does not fit the 90 day hold at all.
