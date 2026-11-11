@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reference-value recorder (RECREF, Nov 3, 2026, research only).
 
-Kalshi lists thousands of entertainment and tech markets that settle on a public number (a Spotify chart, a Rotten Tomatoes or Metacritic score, an App Store rank, a post
+Kalshi lists thousands of entertainment and tech markets that settle on a public number (a game chart, an App Store rank, a post
 count). The public sources show only their CURRENT value, so there is no history to test "does the live reference already imply the outcome at the look". This records,
 every 2 hours, the Kalshi quotes of the watched series together with the current reference value from the public source, each with its own timestamp, so the test can
 be run later on what was on file at the look.
@@ -137,7 +137,7 @@ def list_markets(series, status, extra=""):
 
 def targets_for(ref, markets):
     """The reads one reference needs. A fixed reference is one read. A per-event one is derived from the OPEN markets themselves:
-    per_event: the event's title gives a page slug (a Rotten Tomatoes film, a Metacritic game);
+    per_event: the event's title gives a page slug (a title page);
     Returns {event_ticker: (key, url)} for per-event references and {"": (key, url)} for a fixed one. At most `max_targets` events."""
     p = ref.get("params") or {}
     if ref.get("per_event"):
