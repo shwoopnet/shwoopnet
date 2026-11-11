@@ -7,8 +7,8 @@
 ## 1. Research rules
 
 - **Scheduled events first.** Votes, confirmations, shutdowns and deadlines are tested before the other politics families.
-- **Forward shadow recording.** The thin politics series are recorded forward (`record-politics.yml`, branch `pol-data`) so history accrues. The 14 day cap applies.
-- **14 day maximum hold** to settlement for every politics or parlay position. Longer markets go on a "later only" list and are not scored.
+- **Forward shadow recording.** The thin politics series are recorded forward (`record-politics.yml`, branch `pol-data`) so history accrues. The recorder's hold cap follows the rule below (30 days since Nov 11, 2026).
+- **Hold window (owner, Nov 11, 2026, later popups).** Politics and elections singles and nothing-happens may hold up to **30 days** to settlement (it was 14). Limits: 3 contracts per market, and at most 5 positions open at once that settle beyond 14 days, inside the 10 open total and the $200 lifetime budget. **Economics and weather stay at 14 days.** **Clinical trials and health markets may hold up to 90 days** (to cover late entry in the last 3 months of the typical 99 to 255 day market): 1 contract per market, at most 3 clinical positions open at once, counted inside the $200 budget, and every return figure for that family is quoted **per dollar-year**. The mixed-combo exception below is unchanged. Longer markets go on a "later only" list and are not scored. Each live probe still needs its own owner popup.
 - **Mixed combos are an explicit exception to the 14 day cap (owner, Nov 11, 2026: "allow them").** Combos with a politics leg inside Kalshi's cross-category combos (mostly sports legs, closing as late as Nov 2027) are allowed. They stay under every parlay rule: at most 30 legs (see the leg cap below), $2 per parlay, $40 total stop, 10c per dollar paper edge first, and the owner's own popup before any live probe. **Each spec must say plainly that the money is held until settlement, up to Nov 2027.**
 - **Parlays are in.** 2 to 30 legs (owner, Nov 11, 2026: up to 30 legs "at small $ amount if you pick and manage"; it was 2 to 5 before). Work is on weather, mentions and sports (NBA, NFL) combos, on Kalshi's own prices only. Politics-leg combos exist inside Kalshi's cross-category collections, mixed with sports legs; a politics-only combo does not, so politics-only parlays are simulation only.
 - **Many-leg combos (owner, Nov 11, 2026):** the leg cap is raised from 5 to 30 for small-dollar combos; the $2 per parlay and the $40 total stop are unchanged. The research team PICKS candidates and brings each to the owner as a popup with the exact legs, the price, the estimated win chance and the lock-up. Nothing is placed by the EA or by research; any live placement is by the owner by hand, or by reviewed bot code after the owner's popup. **Each spec must be honest about the win chance of a many-leg combo** (it falls fast with legs) **and about how the 10c per dollar paper edge is estimated when legs are correlated** (an independence product misstates it; say which assumption was used and show the sensitivity).
@@ -31,7 +31,7 @@ These are caps, not permission. A probe starts only after the owner approves its
 | Open positions at once | up to 10 politics or parlay positions |
 | Side | either side, whichever the test supports |
 | Entry price | 10c to 90c |
-| Hold | 14 days at most to settlement |
+| Hold | 30 days at most for politics singles and nothing-happens (at most 5 open beyond 14 days); 14 days for economics and weather; 90 days for clinical trials (1 contract, at most 3 open) |
 
 ## 3. Kill and return
 
@@ -49,7 +49,7 @@ These are caps, not permission. A probe starts only after the owner approves its
 - **Poll sources:** only those whose terms were read and allow it. Today that is the Wikipedia polling tables via its API.
 - **Attention signals (Wikipedia pageviews, GDELT):** test both directions, pre-registered.
 - **Trump approval and generic ballot:** run the calibration test on both now (the fastest real politics verdict).
-- **Foreign politics:** only markets settling within 14 days.
+- **Foreign politics:** only markets settling within the politics hold window (30 days).
 - **Activity counts (executive orders, bills signed):** base rates plus the count so far this week, via GovInfo.
 - **Mention base rates:** Kalshi's own settled mention history.
 - **Resolution-rule edge cases:** flagged to the owner with the rule text, never automatic.
@@ -57,7 +57,7 @@ These are caps, not permission. A probe starts only after the owner approves its
 
 ## 5. Nothing happens, budget and proof (owner popups 29 to 40, Nov 11, 2026)
 
-- **Nothing happens (NO side of "will X happen by date"):** only markets within 14 days; NO bought at 60c to 88c; 1 contract; at most $5 at risk per market; ONE market per story.
+- **Nothing happens (NO side of "will X happen by date"):** only markets within the politics hold window (30 days; it was 14); NO bought at 60c to 88c; 1 contract; at most $5 at risk per market; ONE market per story.
 - **Budget:** politics and parlay probes may use up to **$200 lifetime in total** (the owner chose this over the recommended $60). Each live probe still needs its own owner popup.
 - **Shard:** confirm which Kalshi shard politics singles use and the smallest amount to move there. The owner moves the money themselves; the page and the bot cannot.
 - **Reporting:** politics and parlays are reported only on a real result or a decision.

@@ -1,5 +1,5 @@
 'use strict';
-// Politics shadow recorder (Nov 11, 2026, research only): quotes of open politics markets that settle within 14 days, results after they settle, a daily count of what the 14 day cap left out.
+// Politics shadow recorder (Nov 11, 2026, research only): quotes of open politics markets that settle within 14 days, results after they settle, a daily count of what the hold cap (30 days since Nov 11, 2026, 14 before) left out.
 // It reads public data, holds no secret, places no order, writes no Firestore, writes only to its own data branch, is not published with the site and stops by itself on 2027-02-28.
 const assert = require('assert');
 const fs = require('fs');
@@ -96,7 +96,7 @@ print(json.dumps({"three": m.within_cap(mk(-4, 3), now), "twenty": m.within_cap(
 // PR6: the series list comes from the committed JSON, is capped, and a bad list is refused.
 gates.PR6 = () => {
   const cfg = JSON.parse(fs.readFileSync(listPath, 'utf8'));
-  assert.ok(cfg.series.length >= 17 && cfg.series.length <= 60 && cfg.max_series <= 60 && cfg.max_requests_per_run > 0 && cfg.cap_days === 14);
+  assert.ok(cfg.series.length >= 17 && cfg.series.length <= 60 && cfg.max_series <= 60 && cfg.max_requests_per_run > 0 && cfg.cap_days === 30);
   assert.ok(cfg.series.every((s) => /^[A-Z0-9]{2,40}$/.test(s)) && new Set(cfg.series).size === cfg.series.length);
   for (const must of ['KXTRUMPAPPROVE', 'KXVHGCB', 'KXTRUMPACT', 'KXHORMUZWEEKLY', 'KXTRUTHSOCIAL', 'KXACTBLUETOP', 'KXBABELMANDEBWEEKLY', 'KXHORMUZPEAK', 'KXTRUMPENDORSEMENTS', 'KXAPRPOTUS']) assert.ok(cfg.series.includes(must), must);
   assert.ok(!cfg.series.some((s) => cfg.later_only.includes(s)), 'a later-only series is not recorded');
