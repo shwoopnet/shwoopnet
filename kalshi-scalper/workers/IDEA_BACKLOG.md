@@ -36,3 +36,5 @@ None of the backlog ideas is a favourite-late variant. Relabel: ideas 19, 20, 22
 INGAMELAG1 (Nov 11): BLOCKED by source terms, not falsified: no free keyless live-score source is clearly permitted (workers/INGAMELAG1_SOURCE_PROBE.md). Unblocking needs a licensed feed and an owner decision.
 
 MMSIM1 (Nov 11): SIMULATION dev result PF 1.28 at the 0.0175 maker bound (1.41 at 0), 168 events, NOT_YET_FALSIFIED, held-out read 2026-11-17 or later (see workers/MMSIM1_PROTOCOL.md). Live version needs a separate owner popup (Charter item 5).
+
+INGAMELAG1 (Nov 11, owner decision via main): PARKED. Reason: no free licensed source (ESPN, NHL, MLB, NBA.com terms forbid automation or restrict use; a licensed API is $40 to $150 a month, the owner declined to spend). It returns only if a free licensed source appears. record-ingame.yml stays (Kalshi's own API only). Next: MMSIM1 held-out read on or after Nov 17; THREELEG1 when the credit status reads allowed; weather, options-implied and liquidation candidates (no paid feed).
