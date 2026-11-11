@@ -107,6 +107,36 @@ Ready non-favourite candidates for the next shadow slots, in priority order. Sev
 4. **Rain:** the RAINCAL recorder is already recording.
 5. **Liquidation cascades:** the OKX logger is merged.
 
+## 7e. The declined list (Nov 11, 2026, the owner)
+
+Trigger: after an audit the owner said "we have multiple duplicates that I hard killed and said NO to very clearly and somehow they made it to live?". A NO from the owner was not written down anywhere a later candidate would be checked against it, so the same idea came back under a new name. This list is that place.
+
+**Rules**
+
+1. Every candidate, every shadow slot, every popup to the owner and every pull request that adds or widens a strategy is checked against this list FIRST. The check is written in the candidate's uniqueness note, naming the rows it was compared with.
+2. A renamed or near-identical version (same mechanism, band, market or look time) counts as the declined idea, whatever it is called.
+3. Any popup asking the owner to make an exception must QUOTE the earlier NO and name exactly what it exempts.
+4. The Release Manager checks this list on every strategy pull request, and the weekly rotation review (7b) lists it.
+5. Only the owner removes an entry.
+
+A Charter line making the check explicit is proposed for the owner. `docs/CHARTER.md` says only the owner changes it, so it is not edited here.
+
+**The list**
+
+| Idea | Date | The owner's words or source | Status | Names it must not return under |
+|---|---|---|---|---|
+| Gold L1 band narrowed to 92c to 97c | Nov 10, 2026 | PR 756, closed unmerged; the owner: "kill". GOLDHI6S was merged as a shadow before the kill and folded into GOLDALL on Nov 11 | Declined | GOLDHI6S, gold-band, any gold favourite narrowed above 0.92 |
+| XRP as an L1 market | Oct 28, 2026 | The owner, on the research session's read; paused in code (`PAUSED_SERIES`), resume only by a reviewed edit | Declined (paused). XRPYES10 was a later, named owner exception on Nov 10 and covers only that strategy | KXXRP15M under L1, any XRP favourite rule other than the excepted XRPYES10 |
+| Probe markets AUD/USD, USD/CAD, natural gas | Oct 28, 2026 | The owner: "yeah we can" | Declined (paused). KESTREL AUD/USD was a later owner decision on Nov 10 and covers only that strategy | The three probe series under L1, any other rule on them |
+| Bitcoin as L1 | Oct 29, 2026 | The owner: "we can kill bitcoin i guess" | Declined (paused). Bitcoin trades only as OICORE, a different mechanism | KXBTC15M under L1, any Bitcoin favourite or smooth-climb rule |
+| Ethereum as L1 | Oct 30, 2026 | Paused in code | Declined (paused) | KXETH15M under L1 |
+| Dogecoin | Nov 9, 2026 | The owner: "remove Dogecoin entirely" | Declined (removed from the bot) | KXDOGE15M, any Dogecoin strategy |
+| Gold ladder cap and half-size rule | Oct 28, 2026 | The owner: "we need to achieve more profit % per win instead of just scaling up or down" | Declined | Any cap, step down or size rule whose point is only to scale the gold ladder |
+| Favourite-and-hold for NEW live strategies | Charter | `docs/CHARTER.md` brief checklist item 5 | Banned unless the owner grants a named exception in writing: XRPYES10 (Nov 10), KESTREL (Nov 10) | Any buy-the-favourite-and-hold rule without a written exception |
+| Maker or resting entries on gold | Nov 10, 2026 | W-MAKERREPLAY1 | Closed by evidence (not an owner NO) | Gold resting-entry variants |
+| Gold 94.5c price floor | Nov 10, 2026 | W-BAND945 | Closed by evidence (not an owner NO) | Gold price-floor variants near 0.945 |
+| GOLDHOLD | Nov 11, 2026 | Name given in an owner message Nov 11 | Name given in an owner message Nov 11; no definition found in the repo: the owner or the EA must supply it | GOLDHOLD, and anything the owner or EA defines it as |
+
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
 What already exists: the registry and validator, per strategy kill rules and the sticky latch, slot caps scaling with the base, the shared 12% stop and 5.5% window limit, per strategy stop meters on the page, the skip log (`kalshiSlotSkips`, report `skips`), order records and the nightly report with `slotOrders`. Missing, in build order:
