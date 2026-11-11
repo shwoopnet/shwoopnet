@@ -50,3 +50,5 @@ Backlog count after the top-up: 27 numbered or named ideas; closed or falsified 
 PERPCARRY1 (Nov 11): NOT_FEASIBLE as a carry (see workers/PERPCARRY1_FEASIBILITY.md): Kalshi perps are equity perps, funding is zero 88% of the time and at most 0.085% a day, and there is no equity hedge venue. Re-read 2026-12-06.
 
 OI1 (Nov 11): FALSIFIED on development (cheap side after an open-interest surge: BTC 0.75/0.83, ETH 0.75/0.80, XRP 0.64/0.70; the surge is present in almost every row so it adds nothing; the baseline cheap side loses 2c to 5.5c, the longshot bias). Held-out unread. See workers/OI1_PROTOCOL.md.
+
+THREELEG1 (Nov 11): NOT_FEASIBLE (workers/THREELEG1_FEASIBILITY.md): the hourly range brackets (100 dollar grid) and the above-ladder strikes (250 dollar grid) share no edge, so there is no exact lock.
