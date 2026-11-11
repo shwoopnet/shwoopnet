@@ -1,0 +1,24 @@
+POL-c2 NO arm: events with an entry 23 (series 9)
+  TRAIN n=7 wins=7 mean 31.6c PF inf
+  VALIDATE n=7 wins=4 mean -15.2c PF 0.4
+  HELDOUT n=9 (frozen, not scored)
+  TRAIN+VALID pooled n=14 PF 1.65 mean 8.2c; se 9.9c
+  LIVE@3 (train+valid fills 14): net after first 20 fills $3.45 (all 14 fills $3.45), longest loss streak 3, kill fired: no, max open 2 (cap 10)
+POL-c2 YES arm: events with an entry 25 (series 10)
+  TRAIN n=8 wins=0 mean -35.3c PF 0.0
+  VALIDATE n=8 wins=4 mean 16.1c PF 2.27
+  HELDOUT n=9 (frozen, not scored)
+  TRAIN+VALID pooled n=16 PF 0.6 mean -9.6c; se 10.4c
+  LIVE@3 (train+valid fills 16): net after first 20 fills $-4.60 (all 16 fills $-4.60), longest loss streak 12, kill fired: 5 losses in a row at fill 5, max open 2 (cap 10)
+POL-k1 NO arm: events with an entry 7 (series 7)
+  TRAIN n=2 wins=1 mean -23.8c PF 0.26
+  VALIDATE n=2 wins=0 mean -61.2c PF 0.0
+  HELDOUT n=3 (frozen, not scored)
+  TRAIN+VALID pooled n=4 PF 0.09 mean -42.5c; se 17.3c
+  LIVE@3 (train+valid fills 4): net after first 20 fills $-5.10 (all 4 fills $-5.10), longest loss streak 3, kill fired: no, max open 3 (cap 10)
+POL-k1 YES arm: events with an entry 8 (series 8)
+  TRAIN n=2 wins=0 mean -16.9c PF 0.0
+  VALIDATE n=2 wins=2 mean 53.3c PF inf
+  HELDOUT n=4 (frozen, not scored)
+  TRAIN+VALID pooled n=4 PF 3.15 mean 18.2c; se 17.7c
+  LIVE@3 (train+valid fills 4): net after first 20 fills $2.18 (all 4 fills $2.18), longest loss streak 2, kill fired: no, max open 3 (cap 10)
