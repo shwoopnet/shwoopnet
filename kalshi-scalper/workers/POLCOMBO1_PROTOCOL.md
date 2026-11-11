@@ -1,0 +1,23 @@
+# POLCOMBO1 protocol (registered Nov 11, 2026, before any combo or leg market is read for this card). DESIGN ONLY: nothing live, nothing built live.
+Owner rulebook for politics (relayed Nov 11): scheduled events first; max hold 14 days to settlement; parlays are in, 2 to 5 legs; simulation first, small live probes only later under the same gates.
+Card: workers/POLCOMBO1_CARD.md. Closest closed row: PARLAY1 (5+ legs, 254 combos, none clears). This card covers the 2 to 5 leg, politics-only angle.
+
+## Census rules (public Kalshi API only, GET, 1 request per 2 seconds, STOP at the first 429 and write what was read, no retry, no workaround)
+1. Combo universe: open markets of series KXMVECROSSCATEGORY, KXMVESPORTSMULTIGAMEEXTENDED, KXMVENFLMULTIGAME, KXMVENBAMULTIGAMEEXTENDED, KXMVENFLSINGLEGAME, plus any other series whose ticker starts with KXMVE found via GET /series if one read allows. Legs come from custom_strike "Associated Markets" and "Associated Market Sides" (as PARLAY1). At most 3 pages of 100 per series.
+2. A combo is POLITICS-ONLY when every leg's event has category Politics or Elections (GET /events/{event_ticker}, cached, at most 150 event reads), or, if the category is unreadable, the leg's series prefix is on this fixed list: KXPRES, KXSEN, KXHOUSE, KXGOV, KXELECT, KXTRUMP, KXCONGRESS, KXBILL, KXSHUTDOWN, KXFED (nominations), KXLEAVE, KXSCOTUS, KXCABINET, KXPOLL, KXAPPROVAL. Unreadable and off list = not politics.
+3. In scope = 2 to 5 legs, every leg politics, every leg close_time within 14 days of the read. Counts reported by leg count 2,3,4,5, and the near misses (6+ legs, or a leg past 14 days) as a separate line.
+4. Pricing per in-scope combo: leg mids (two-sided quotes only); independence value P_ind = product of leg probabilities (NO legs use 1 - mid); Frechet lower = max(0, sum - (n-1)), upper = min of leg probs; combo bid and ask; haircut = ask over P_ind. Fee on the combo price p: ceil to the cent of 0.07 * p * (1 - p) per contract (the same fee function as parlay1.py), labelled the standard taker formula; the combo-specific fee is stated only if the market object or the public fee schedule shows one; third-party claims (maker half fee, 3.1% markup, 10 to 26.5% vig) are labelled UNVERIFIED.
+5. Edge (fixed): edge = joint-probability lower bound minus combo ask minus fee, a YES buy only (selling a combo as a taker is not available to us). The lower bound is P_ind ONLY when the legs are judged positively correlated by a fixed rule (same party direction, same race, same bill, same election night, written down per combo before looking at ask); otherwise the lower bound is the Frechet lower and the combo cannot be a candidate. Candidate threshold: edge >= 0.02. Ask 3c to 85c, spread <= 0.05. N counted: 1 for the census, plus the number of combos scored.
+6. Shard note: only what a market object or public doc shows is stated; otherwise labelled unverified.
+
+## Settled history (question 3)
+Count settled MVE combos with 2 to 5 legs where every leg is politics (GET /markets status=settled with the KXMVE series, at most 3 pages each, resolved by the same rule 2). Calibration (combo price at the last trade or last price vs outcome, by leg count) only if n >= 100 politics combos; else NOT_ENOUGH_DATA with the weeks or combos needed.
+
+## Pre-registered test (DESIGN ONLY; nothing runs until the owner approves a build)
+Development = combos listed before date D, held-out = after D, split by listing date, held-out read once. Unit = one combo, 1 contract, buy YES at the ask, hold to settlement (max 14 days), cash P&L = payout minus ask minus fee. Pass: cash PF >= 1.5, n >= 100, both halves PF >= 1.2, no single event over 30% of net, z bar for the deflated count: N about 1,100,000 (main family count) plus this card's count gives about 5.34; with the small count N 9,009 about 4.39 (the bar actually applied is stated before a read). Correlation with live strategies under 0.3 is a FAIL otherwise (lifecycle doc check 3).
+Live-probe skeleton (not built):
+- IMPLEMENT: shadow log of every in-scope combo with the candidate rule above; Stage 2 incubator only after 150 shadow fills PF 1.3, held-out 1.2, owner merge.
+- KILL: incubator cumulative -$10 demote, -$20 latch off; early cash PF under 0.7 after 40 fills; any day the combo money shard is unfunded is a skip not a loss.
+- RETURN: a retired card returns only on a new registration with a new leg-correlation rule.
+- Order cap $5 an order (lifecycle incubator), 1 contract or the cap, whichever is less; max hold 14 days; direction lock and shared 12% stop apply.
+Prior: 4%. Verdicts allowed: CLOSED by census, NOT_ENOUGH_DATA (with the count needed), FALSIFIED, PASS-TO-SHADOW.
