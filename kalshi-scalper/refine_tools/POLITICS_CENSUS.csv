@@ -1,0 +1,227 @@
+series,title,tags,frequency,series_volume,events,markets,settled_markets,settled_events,settled_events_with_vol,open_markets,open_interest,med_spread,n_spread,med_open_to_close_d,frac_le14d,frac_le7d,n_le14d,n_le7d,sources
+KXFEDCHAIRNOM,Fed Chair nominee,Trump,custom,216970762.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress; the President of the United States
+KXGOVSHUTLENGTH,Number of days of government shutdown?,Congress,custom,120044322.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Office of Personnel Management
+KXGOVSHUT,Government shutdown,Congress,custom,68855964.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Office of Personnel Management
+KXHORMUZNORM,When will traffic at the Strait of Hormuz return to normal?,International,one_off,48764150.00,1,18,2,1,1,16,3154210,0.01,16,161.666,0.0,0.0,0,0,IMF PortWatch
+KXGOVTSHUTDOWN,Will the government shut down?,Congress,one_off,31129485.00,2,2,1,1,1,1,139387,0.01,1,113.713,0.0,0.0,0,0,Office of Management and Budget; United States Office of Personnel Management
+KXUSAIRANAGREEMENT,US Iran nuclear deal,Iran,custom,24404800.00,1,10,2,1,1,8,1180209,0.015,8,148.471,0.0,0.0,0,0,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; Bloomberg News; The Info
+KXGOVTSHUTLENGTH,How long will the next government shutdown last?,Congress,one_off,22717749.00,1,1,0,0,0,1,6468,0.08,1,,,,0,0,Office of Management and Budget; United States Office of Personnel Management
+KXTRUMPAPPROVE,Trump approval rating,Recurring|Trump,daily,18748071.00,70,630,612,68,68,18,13003,0.04,10,1.124,1.0,1.0,612,612,RealClearPolitics
+KXDHSFUND,When will Congress fund DHS again?,Congress,one_off,18502610.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; Library of Congress
+KXNOBELPEACE,Nobel Peace Prize,International,custom,17701842.00,2,79,50,1,1,29,9521,0.007,29,14.609,0.26,0.26,13,13,Nobel Prize organization
+KXTRUMPUFC,Trump attend another UFC event this year,Trump,one_off,16388541.00,5,5,3,3,3,2,48650,0.025,2,61.917,0.0,0.0,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXSAVEACT,Will the SAVE Act become law?,Congress,one_off,16058426.00,1,1,0,0,0,1,4619907,0.004,1,,,,0,0,White House; Library of Congress
+KXCABOUT,Next Cabinet memeber out,Trump,custom,16032631.00,2,50,25,1,1,25,22957,0.098,25,168.042,0.0,0.0,0,0,White House; The New York Times
+KXATTENDSOTU,Who will attend the State of the Union?,SOTU,one_off,15535513.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXEOWEEK,EO this week?,Recurring,weekly,14391621.00,11,45,30,8,8,15,146682,0.04,5,13.048,0.633,0.133,19,4,Federal Register
+KXTRUMPADMINLEAVE,Who will leave the Trump administration,Trump,annual,13477522.00,3,114,3,1,1,109,2236003,0.05,109,325.541,0.0,0.0,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXTRUMPOUT27,Trump out as President?,Trump,one_off,12945358.00,1,3,0,0,0,3,3207382,0.01,3,,,,0,0,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KXSECAG,Next Attorney General,,custom,12672827.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXNEXTPRESSECPERM,Next permanent White House Press Secretary,Trump,one_off,12561137.00,1,85,0,0,0,85,7380488,0.01,7,,,,0,0,White House; the New York Times
+KXSECDEF,New Secretary of Defense,,custom,12475893.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXSECHHS,Next Secretary of Health and Human Services,,custom,12146553.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXNEXTAG,Next AG,Trump,one_off,11840742.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Fox News; MSNBC; White House; The Wall Street Journal; Semafor; Bloomberg N
+KXBIDENPARDON,Biden pardon Hunter,Trump,one_off,11480444.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; New York Times
+KXEPSTEIN,Epstein documents,Recurring|Trump,weekly,11253033.00,3,3,2,2,2,1,948,0.03,1,30.514,0.0,0.0,0,0,White House; the second Trump administration; The New York Times
+KXTRUMPATTEND,Will Trump attend event,Trump,one_off,10983355.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXTRUMPPARDON,Trump pardons,Trump,custom,10630351.00,1,37,0,0,0,37,298695,0.03,37,,,,0,0,White House; New York Times
+KXCRYPTOSTRUCTURE,Crypto market structure,Congress,custom,10340080.00,1,9,2,1,1,6,952508,0.04,5,95.43,0.0,0.0,0,0,White House; Library of Congress
+KXLEAVEPOWELL,Powell leaving,,custom,10328412.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXAPRPOTUS,President RCP approval rating this week,Recurring|Trump,weekly,10226674.00,11,89,72,9,9,8,47915,0.01,6,6.958,1.0,0.889,72,64,RealClearPolitics
+KXTRUMPOUT,Trump Out As President,,one_off,10171202.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KXFEDCHAIRCONFIRM,Who will be confirmed as fed chair?,Congress,one_off,9751421.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXTRUMPPHOTO,Trump photos,Recurring,weekly,8020572.00,13,71,59,10,10,4,13850,0.03,4,7.417,1.0,0.339,59,20,Getty Images
+KXTRUTHSOCIAL,Number of Trump Truth Social posts this week?,Recurring|Trump,weekly,7972642.00,11,115,105,10,10,10,82385,0.01,10,6.999,1.0,1.0,105,105,Roll Call
+KXIMPEACH,President impeached,Trump,custom,7944336.00,2,11,0,0,0,11,2406584,0.01,11,,,,0,0,Library of Congress
+KXHORMUZWEEKLY,Traffic through the Strait of Hormuz,Iran,weekly,7854047.00,11,115,106,10,10,9,88208,0.01,8,10.854,1.0,0.028,106,3,IMF PortWatch
+KXGREENLAND,Greenland purchase,International|Trump,one_off,7847460.00,1,2,0,0,0,2,695645,0.015,2,,,,0,0,The New York Times
+KXLAGODAYS,Mar-a-Lago trips,Recurring|Trump,monthly,7603251.00,2,11,11,2,2,0,0,,0,29.984,0.0,0.0,0,0,White House
+KXPRESNOMFEDCHAIR,Fed Chair nom,Trump,custom,7589459.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Axios; Bloomberg News; CBS; CNN; Fox News; MSNBC; NBC; Politico; Reuters; S
+KXMJSCHEDULE,MJ schedule,Trump,custom,7513320.00,1,6,0,0,0,6,306281,0.045,6,,,,0,0,ABC; Fox News; the Federal Register; MSNBC; The Wall Street Journal; the United 
+KXNEXTPRESSEC,Who will be Trump's next Press Secretary?,Trump,one_off,7305028.00,1,56,56,1,1,0,0,,0,43.413,0.071,0.054,4,3,The New York Times
+KXCLOSEHORMUZ,Strait of Hormuz,Iran,custom,7299924.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Al Jazeera; BBC; Bloomberg News; CNN; Financial Times; IMF Port Monitor; Re
+KXGOLDCARDS,Gold cards sold,Trump,custom,7002272.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+CABINETMUSK,Elon Musk nominated to the cabinet,,custom,6808311.00,0,0,0,0,0,0,0,,0,,,,0,0,Office of the Presidency
+KXLEAVEWALZ,Tim Walz out as Governor of Minnesota?,Local,one_off,6751213.00,1,1,0,0,0,1,254003,0.01,1,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXSENMAJORITY,Senate Majority leader,,custom,6603809.00,0,0,0,0,0,0,0,,0,,,,0,0,United States Congress
+KXSHUTDOWNBY,Shutdown this year?,Congress,annual,6537238.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Office of Personnel Management
+KXVOTERFK,Senators voting for RFK,Congress,custom,6397515.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXVENEZUELALEADER,Who will be the head of state of Venezuela on date?,International elections|International,one_off,6368322.00,1,18,0,0,0,18,1343615,0.014,10,,,,0,0,the Federal Register; official organizational website where role is housed; or c
+KXLEAVEADMIN,Leaving Admin,,custom,6194174.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+KXBONDIOUT,Pam Bondi out as Attorney General?,,one_off,6117472.00,0,0,0,0,0,0,0,,0,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXEOCOUNTDAY1,Day 1 executive orders,,custom,6051640.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXSECTREASURY,Next Secretary of the Treasury,,custom,5794102.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXDNI,Next DNI,,custom,5775465.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXINAUG,Inauguration attendees,,custom,5665793.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times
+KXEOCOUNTDAY1B,Day 1 executive orders MORE STRIKES,,custom,5600731.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXDJTVOSTARIFFS,Tariffs case,SCOTUS & courts,custom,5508751.00,0,0,0,0,0,0,0,,0,,,,0,0,Supreme Court
+KXTARIFFCHECKS,Will Americans receive tariff dividends in 2025?,Trump,one_off,5321903.00,1,1,0,0,0,1,496972,0.002,1,,,,0,0,The Verge; ABC; Fox News; The Wall Street Journal; The Guardian; Bloomberg News;
+KXVOTETULSI,Senators voting for Tulsi Gabbard,Congress,custom,4886569.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXWLEADER,World leaders President meets,,custom,4723854.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times; White House
+KXGOVTFUND,When will the US government be fully funded?,Congress,one_off,4618708.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; Library of Congress
+KXGREENTERRITORY,Greenland acquisition,International|Trump,custom,4505442.00,1,2,0,0,0,2,446527,0.01,2,,,,0,0,The New York Times
+KXRETIREMM,Mitch McConnell resigning,Congress,custom,4380713.00,1,1,1,1,1,0,0,,0,681.593,0.0,0.0,0,0,Library of Congress
+KXELECTIONBILL,Will proof of citizenship be required for federal voter registration?,Congress,one_off,4324571.00,1,6,2,1,1,4,406434,0.02,3,95.159,0.0,0.0,0,0,White House; Library of Congress
+KXTRUMPMEET,Who will Trump meet?,Recurring|Trump,monthly,4273466.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; official social media accounts verified by the platform; official press rel
+KXHEGSETHOUT,Hegseth out by...?,Trump,one_off,4248315.00,1,12,2,1,1,10,1546725,0.01,10,48.978,0.0,0.0,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXGOVREOPEN2025,Will the US Federal government reopen in 2025?,Congress,one_off,4205749.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Office of Personnel Management
+KXLEAVESTARMER,Keir Starmer out?,International,one_off,4166544.00,0,0,0,0,0,0,0,,0,,,,0,0,The Washington Post; Fox News; MSNBC; The Wall Street Journal; Semafor; The Info
+KXTRUMPOFFICIAL,People in Trump Admin,,custom,4125812.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXDOED,DOE eliminated,Trump,custom,4076103.00,1,1,0,0,0,1,27601,0.042,1,,,,0,0,the Department of Education; White House; United States Congress; The New York T
+KX538APPROVE,President 538 approval rating this week,,weekly,4039425.00,1,9,0,0,0,0,0,,0,,,,0,0,FiveThirtyEight
+KXFEDCHAIRCONFIRMED,Will Trump's Fed Chair pick be confirmed?,Congress,one_off,3902672.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXEOCOUNTDAY2,Day 2 executive orders ,,one_off,3896884.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXFBI,Director of FBI,,custom,3869800.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXTRUMPNBAFINALS,Trump NBA finals,Trump,one_off,3604308.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+CABINETRFK,RFK nominated to cabinet,,custom,3492893.00,0,0,0,0,0,0,0,,0,,,,0,0,Office of the Presidency
+KXGAMBLINGREPEAL,Gambling Repeal,Congress,one_off,3226047.00,1,5,0,0,0,5,157677,0.07,5,,,,0,0,White House; Library of Congress
+KXBTCRESERVE,Bitcoin Reserve,Bitcoin|Crypto|Trump|BTC,one_off,3179998.00,1,1,0,0,0,1,60272,0.014,1,,,,0,0,The New York Times; White House
+KXGABBARDOUT,Tulsi Gabbard out as DNI?,Trump,one_off,3130942.00,0,0,0,0,0,0,0,,0,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXEPSTEINBILL,Epstein transparency bill,Congress,one_off,3079100.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; Library of Congress
+KXVOTEPATEL,Senators voting for Kash Patel,Congress,custom,3034138.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXSPEAKER,Speaker of the House,,custom,2980553.00,0,0,0,0,0,0,0,,0,,,,0,0,United States Congress
+KXKASHOUT,Kash Patel out as FBI Director?,Trump,one_off,2881307.00,1,10,2,1,1,8,58825,0.055,8,95.02,0.0,0.0,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXFEDERALCHARGE,Who will be charged with a federal crime,SCOTUS & courts,annual,2726543.00,1,46,0,0,0,46,965936,0.009,46,,,,0,0,Bloomberg; ABC; Fox News; The Information; MSNBC; the U.S. Department of Justice
+KXARREST,ARRESTS,SCOTUS & courts,one_off,2676560.00,1,26,0,0,0,26,496421,0.018,26,,,,0,0,law enforcement agency with jurisdiction over the location where the arrest occu
+KXZACHARIAOUT,Katie Zacharia out as White House Press Secretary?,Trump,one_off,2673214.00,1,9,9,1,1,0,0,,0,4.287,1.0,1.0,9,9,Associated Press; the White House; Reuters
+KXEPSTEINLIST,Epstein list,Trump,custom,2645710.00,1,18,11,1,1,7,5624,0.076,7,235.211,0.0,0.0,0,0,Fox News; The Information; MSNBC; Bloomberg News; The Wall Street Journal; ABC; 
+KXTRUMPACT,Will Trump do anything today?,Recurring|Trump,weekly,2628519.00,11,117,107,10,10,10,66195,0.01,10,6.917,1.0,1.0,107,107,the White House
+KXLEAVELISACOOK,Will lisa cook leave office,Trump,one_off,2444179.00,1,5,0,0,0,5,25610,0.08,5,,,,0,0,The Washington Post; Fox News; MSNBC; The Wall Street Journal; Semafor; The Info
+KXREDISTRICTING,Redistricting,Local,custom,2431395.00,2,38,25,1,1,13,4935,0.08,13,428.895,0.0,0.0,0,0,geography Secretary of State; any court with jurisdiction over congressional red
+KXVOTEHEGSETH,Senators voting for Pete Hegseth,Congress,custom,2363018.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXPRESVISIT,Foreign trips by the POTUS,,custom,2353114.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXDEBATES24,How many presidential debates in 2024?,,custom,2352425.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times
+KXACAEXT,ACA Credit extension,Congress,one_off,2316148.00,1,2,0,0,0,2,68005,0.024,2,,,,0,0,White House; Library of Congress
+KXPAHLAVIVISITA,Will Reza Pahlavi enter Iran before September?,Iran,one_off,2302533.00,1,1,0,0,0,1,743072,0.005,1,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXSHUTDOWNBYDATE,Shutdown by DATE,Congress,custom,2280430.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Office of Personnel Management
+KXPAHLAVIHEAD,Will Pahlavi lead Iran?,Iran,one_off,2054012.00,1,1,0,0,0,1,560687,0.01,1,,,,0,0,The Washington Post; ESPN; NBC; TechCrunch; The Information; MSNBC; The Wall Str
+KXGABBARDCOUNT,Gabbard Senate yeas,Congress,custom,2036501.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXSTATE51,51st state ,Trump,custom,2006195.00,1,8,0,0,0,8,756834,0.001,8,,,,0,0,Library of Congress
+KXWHVISIT,White House visitors,Trump,annual,1973516.00,1,25,3,1,1,22,27931,0.035,22,290.137,0.0,0.0,0,0,ABC; Fox News; MSNBC; White House; The Wall Street Journal; Semafor; Office of t
+KXDEPORTCOUNT,DEPORTCOUNT,Trump,custom,1946586.00,0,0,0,0,0,0,0,,0,,,,0,0,ICE
+KXFTACOUNTRIES,Countries FTAs,Trump|International,custom,1913435.00,1,9,0,0,0,9,5939,0.05,9,,,,0,0,Library of Congress
+KXCABCOUNT,Cabinet members confirmed,,custom,1856470.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXDCEIL,Debt ceiling hike,,custom,1822947.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXGREENLANDPRICE,How much will Greenland be acquired for?,Trump,one_off,1802921.00,1,8,0,0,0,8,641190,0.017,8,,,,0,0,The New York Times
+KXDHSFUNDING,When will DHS receive full-year funding?,Congress,one_off,1765516.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; Library of Congress
+KXTARIFFSC,Tariffs on countries,,custom,1755456.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times; White House
+KXINSURRECTION,Insurrection,Trump,custom,1736521.00,1,4,0,0,0,4,200377,0.01,4,,,,0,0,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KX14AMENDCASE,Trump birthright citizenship case,SCOTUS & courts|Trump,custom,1713273.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+KXTRUMPIRAN,Will Trump visit Iran?,Iran|Trump,one_off,1711652.00,1,2,0,0,0,2,185232,0.007,2,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXSENATEREC,When will the Senate pass a reconciliation bill?,Congress,one_off,1694036.00,1,4,2,1,1,2,4132,0.08,1,114.306,0.0,0.0,0,0,White House; Library of Congress
+KXATTENDUFC250,Who will attend UFC Freedom 250?,Trump,one_off,1688060.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXRECNCH,Reconciliation bill passes the House,Congress,custom,1665509.00,1,4,2,1,1,2,3827,0.01,1,114.305,0.0,0.0,0,0,Library of Congress
+KXBILLSCOUNT,Bills signed monthly,Recurring|Trump,monthly,1665127.00,1,11,11,1,1,0,0,,0,29.987,0.0,0.0,0,0,White House; Library of Congress
+KXNEWPARTYMUSK,Musk new party,,custom,1655431.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Fox News; ; official party websites; MSNBC; The Wall Street Journal; Semafo
+KXFISAEXTEND,Will Congress reauthorize FISA before it expires?,Congress,one_off,1630592.00,1,4,1,1,1,3,14736,0.045,2,93.693,0.0,0.0,0,0,White House; Library of Congress
+KXTRUMPPUTIN,Who will attend the Trump-Putin meeting?,,one_off,1526603.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXTRUMPSCOTUSVOTE,Vote on Trump tariffs case,SCOTUS & courts,one_off,1507926.00,0,0,0,0,0,0,0,,0,,,,0,0,Supreme Court
+KXMUSKDOGE,Musk DOGE,,custom,1507088.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times
+KXTRUMPCHINA,When will Trump visit China?,Trump|International,one_off,1502518.00,1,2,0,0,0,2,14428,0.065,2,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXVOTEHUBTRUMPUPDOWN,Trump approval up or down this week,Recurring|Trump,weekly,1482224.00,2,2,0,0,0,0,0,,0,,,,0,0,VoteHub
+KXTRUMPFOOTBALL,Trump attend football game,,one_off,1472175.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXRFKCOUNT,Kennedy Senate yeas,Congress,custom,1471989.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXSECSTATE,Next Secretary of State,,custom,1466324.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXEOCOUNTDAY3,EO count day 3,,one_off,1447919.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXNOEMOUT,Kristi Noem out as DHS secretary?,Trump,one_off,1441270.00,0,0,0,0,0,0,0,,0,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXNEXTODNI,Next DNI,Trump,one_off,1430736.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Fox News; MSNBC; White House; The Wall Street Journal; Semafor; Bloomberg N
+KXTRUMPWORLDCUP,Trump world cup games,People,one_off,1418969.00,0,0,0,0,0,0,0,,0,,,,0,0,person; event official website and social media accounts; official event broadca
+CABINETTULSI,Tulsi Gabbard cabinet nomination,,custom,1390634.00,0,0,0,0,0,0,0,,0,,,,0,0,Office of the Presidency
+KXALITOOUT,Will Justice Alito retire?,SCOTUS & courts,one_off,1363343.00,1,2,0,0,0,2,238967,0.008,2,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXZELENSKYYPUTINMEET,Will Zelenskyy meet with Putin this year?,,one_off,1360093.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; official social media accounts verified by the platform; official press rel
+KXHORMUZPEAK,Peak traffic through the Strait of Hormuz?,Iran,weekly,1337739.00,12,83,75,11,11,8,34853,0.01,8,10.833,1.0,0.093,75,7,IMF PortWatch
+KXRUBIO,Marco Rubio replacement,,custom,1335214.00,0,0,0,0,0,0,0,,0,,,,0,0,Governor of Florida
+KXCLARITYVOTE,Will the Senate vote on the Clarity Act?,Congress,one_off,1323244.00,1,2,2,1,1,0,0,,0,39.921,0.0,0.0,0,0,United States Congress; Congressional Record
+KXWARSHNOM,When will the Senate receive Warsh's nomination?,Congress,one_off,1317462.00,0,0,0,0,0,0,0,,0,,,,0,0,the Statistical Review of World Energy
+KXBABELMANDEBWEEKLY,Traffic through the Bab el-Mandeb Strait,International,weekly,1302341.00,11,88,77,10,10,11,10919,0.01,11,10.875,1.0,0.039,77,3,IMF PortWatch
+KXEXPAND,"Greenland, Panama, Canada control",,custom,1297570.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times
+KXPRESLEAVESK,South Korean President leaving,,custom,1289399.00,0,0,0,0,0,0,0,,0,,,,0,0,AP; The New York Times
+KX250DOLLARBILL,Trump-faced $250 bill by 2027?,Congress,one_off,1287854.00,1,1,0,0,0,1,342019,0.01,1,,,,0,0,White House; Library of Congress
+KXHORMUZTRAFFICW,Traffic through the Strait of Homuz?,Iran,one_off,1285938.00,0,0,0,0,0,0,0,,0,,,,0,0,the statistical agency or entity responsible for the calculation and/or release 
+KXOTEEPSTEIN,Epstein vote,Congress,one_off,1250350.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXRECOGPERSONIRAN,Recognize Reza Pahlavi,Iran,custom,1193182.00,1,1,0,0,0,1,218343,0.005,1,,,,0,0,ABC; Axios; BBC; Bloomberg News; CBS; CNN; foreign ministry of country_1; Fox Ne
+KXRECNCBILL,Reconcilliation bill becoming law,Congress,custom,1174206.00,1,6,1,1,1,5,454,0.08,5,70.752,0.0,0.0,0,0,White House; Library of Congress
+KXPATELCOUNT,Patel Senate yeas,Congress,custom,1171428.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXSWALWELLOUT,Will Eric Swalwell leave the House?,,one_off,1151866.00,0,0,0,0,0,0,0,,0,,,,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXRECNC,Reconciliation bill passes the Senate,,custom,1150738.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXOMARCITIZENSHIP,Will Ilhan Omar's citizenship be revoked?,Trump,custom,1143456.00,1,1,0,0,0,1,605449,0.02,1,,,,0,0,Bloomberg; the New York Times; U.S. Citizenship and Immigration Services; MSNBC;
+KXTRUMPENDORSEMENTS,How many people will Trump endorse this week?,Recurring,weekly,1122442.00,11,80,74,10,10,6,18955,0.02,6,6.0,1.0,1.0,74,74,Truth Social
+KXSCOURT,Next SCOTUS justice,SCOTUS & courts,custom,1111374.00,1,42,0,0,0,41,464965,0.005,30,,,,0,0,Library of Congress
+KXPANAMAWEEKLY,Traffic through the Panama Canal,International,weekly,1087665.00,9,70,61,8,8,9,23062,0.01,9,10.875,1.0,0.082,61,5,IMF PortWatch
+KXDIAZOUT,Miguel Díaz-Canel out?,International,one_off,1085899.00,1,3,2,1,1,1,3228,0.04,1,55.221,0.0,0.0,0,0,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KXVHGCB,VoteHub GCB,Recurring,daily,1085361.00,41,367,367,41,40,0,0,,0,1.294,1.0,1.0,367,367,VoteHub
+KXLARGETARIFF,Trump tariffs,,custom,1060180.00,0,0,0,0,0,0,0,,0,,,,0,0,FRED
+KXFBUSTER,Filibuster change this year?,Congress,annual,1059764.00,1,9,0,0,0,9,39586,0.01,9,,,,0,0,U.S. Senate; Library of Congress
+KXLEAVEPOWELLGOV,jerome powell leave as Fed governor,Trump,one_off,1059704.00,1,8,2,1,1,6,83296,0.048,6,168.812,0.0,0.0,0,0,The Washington Post; Fox News; MSNBC; The Wall Street Journal; Semafor; The Info
+KXBILLS,Bills become law this year?,Congress,annual,1052715.00,1,30,0,0,0,30,222437,0.037,30,,,,0,0,White House; Library of Congress
+KXJAN6PARDONDAY1,January 6th pardons day 1,,one_off,1044957.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXELECTIONEMERGENCY,Will Trump declare an election emergency?,Trump,one_off,1036095.00,1,2,1,1,1,1,222598,0.01,1,243.583,0.0,0.0,0,0,the White House; Federal Register; the President of the United States
+KXAPRPOTUSEOY,President RCP approval rating at end of year,,one_off,1034003.00,0,0,0,0,0,0,0,,0,,,,0,0,RealClearPolitics
+KXACTBLUETOP,Top ActBlue fundraiser?,Recurring,weekly,1014659.00,12,78,78,12,12,0,0,,0,6.895,1.0,1.0,78,78,ActBlue
+KXTRUMPREMOVE,Trump removed,Trump,custom,1009193.00,1,3,0,0,0,3,309733,0.03,3,,,,0,0,U.S. Senate
+KXHEGSETHCOUNT,Hegseth Senate Yeas,Congress,custom,997955.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXPUBLICBIDEN,biden seen in public,,one_off,990465.00,0,0,0,0,0,0,0,,0,,,,0,0,The Washington Post; the New York Times; NBC; Fox News; Bloomberg; The Informati
+KXARRESTJOHNBOLTON,Will John Bolton be arrested this year?,,one_off,969995.00,0,0,0,0,0,0,0,,0,,,,0,0,law enforcement agency with jurisdiction over the location where the arrest occu
+KXCABLEAVE,Cabinet member leaving,Trump,annual,955346.00,2,12,4,1,1,8,427,0.05,8,165.76,0.0,0.0,0,0,Associated Press; White House; New York Times; Bloomberg; Axios; Reuters; Politi
+KXNEWTARIFFS,New tariffs this month?,Recurring,monthly,948005.00,3,3,2,2,2,1,3871,0.09,1,16.196,0.5,0.0,1,0,the White House; Federal Register; the President of the United States
+KXTRUMPCOUNTRIES,What countries will Trump visit this year?,Trump|International,annual,944174.00,1,22,0,0,0,22,214680,0.013,21,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXTRUMPPRESS,Trump Press Secretary,,custom,905666.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXCORPTAXCUT,Corporate tax cut,Congress|Trump,custom,893984.00,1,1,0,0,0,1,19195,0.041,1,,,,0,0,Library of Congress
+KXTRUMPNUMSTATES,How many states will Trump visit?,Trump,monthly,888726.00,3,38,31,3,3,7,16553,0.03,7,29.983,0.065,0.065,2,2,the statistical agency or entity responsible for the calculation and/or release 
+KXDJTATTACKWARSH,Will Trump publicly criticize Kevin Warsh?,Trump,one_off,885278.00,1,6,3,1,1,3,360042,0.01,3,14.468,0.333,0.333,1,1,Save America PAC; Donald Trump; ABC; Fox News; MSNBC; The Wall Street Journal; S
+KXHEGSETHIMPEACH,Will Pete Hegseth be impeached?,Trump|Congress,one_off,881247.00,1,4,0,0,0,4,270866,0.02,4,,,,0,0,Office of the Clerk of the U.S. House of Representatives; U.S. House of Represen
+KXINAUGVIEWS,Inauguration viewership,,one_off,875597.00,0,0,0,0,0,0,0,,0,,,,0,0,Nielsen
+KXUSAEXPANDTERRITORY,Will the US acquire new territory?,International|Trump,one_off,871684.00,1,3,0,0,0,3,93005,0.024,3,,,,0,0,The New York Times
+KXNGUARDCITY,Which Cities will Trump deploy the national guard in,Trump,one_off,871016.00,1,6,0,0,0,5,6308,0.024,5,,,,0,0,the New York Times
+KXTRUMPKIDSSOTUCOMBO,Will all of Trump's children attend the SOTU?,SOTU,one_off,866739.00,0,0,0,0,0,0,0,,0,,,,0,0,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXSECCHAIR,Next SEC Chair,Trump,custom,861996.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXHOUSEEPSTEIN,How many House votes will the bill to unseal Epstein records receive?,Congress,one_off,859885.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXBORDERBILL,Border bill,,custom,852101.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXTRUMPTIME,Will Trump post this hour?,Recurring,one_off,846826.00,0,0,0,0,0,0,0,,0,,,,0,0,Truth Social
+KXSUEZWEEKLY,Traffic through the Suez Canal,International,weekly,845289.00,11,72,64,10,10,8,4280,0.085,8,10.875,1.0,0.031,64,2,IMF PortWatch
+KXSECENERGY,Next Secretary of Energy,,custom,841124.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXMAMDANIEO,Will Mamdani sign an executive order?,NYC,weekly,802052.00,11,11,10,10,10,1,1089,0.03,1,6.999,1.0,1.0,10,10,NYC Mayor's Office
+KXMAXSHIPSHORMUZ,Maximum daily count of ships through the Strait of Hormuz?,Iran,monthly,801389.00,3,28,18,3,3,10,3530,0.21,10,33.041,0.222,0.0,4,0,the statistical agency or entity responsible for the calculation and/or release 
+KXSECAGRO,Next Secretary of Agriculture,,custom,789351.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXSPEAKERVOTE,Speaker votes,,custom,786547.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress; The New York Times
+KXTRUMPRESIGN,Trump resign,Trump,one_off,781477.00,1,1,0,0,0,1,316063,0.01,1,,,,0,0,Office of the Presidency
+KXHORMUZMAX,Maximum traffic through the Strait of Hormuz?,Iran,weekly,780726.00,11,77,49,7,7,7,9669,0.01,7,10.854,1.0,0.0,49,0,IMF PortWatch
+ADAMS,Eric Adams leaves office,,custom,777836.00,0,0,0,0,0,0,0,,0,,,,0,0,Office of the Mayor of New York City; The New York Times; Office of the Governor
+KXTRUMPUFC322,Trump attends UFC 322,Trump,one_off,773160.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXHORMUZTRAFFIC,Ship volume through the Strait of Hormuz?,Iran,one_off,756713.00,0,0,0,0,0,0,0,,0,,,,0,0,the statistical agency or entity responsible for the calculation and/or release 
+KXVISITIRAN,Who will visit Iran?,Iran|International,one_off,755172.00,0,0,0,0,0,0,0,,0,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXEXPELSWALWELLVOTES,How many House votes to expel Eric Swalwell?,Congress,one_off,746201.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXTARIFFSNEW,trump any new tariffs,,one_off,736369.00,0,0,0,0,0,0,0,,0,,,,0,0,The New York Times; White House
+KXVOTESHUTDOWNS,Shutdown vote Senate,Congress,custom,727730.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXVOTECHAVEZDEREMER,Senators voting for Lori Chavez-DeRemer,Congress,custom,724223.00,0,0,0,0,0,0,0,,0,,,,0,0,U.S. Senate
+KXACASUBSIDYBILL,obamacare subsidy extend,Congress,one_off,712598.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; Library of Congress
+KXTIPTAX,No tax on tips,,custom,696129.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXMAMDANISWEARING,Who will attend Mamdani's swearing-in ceremony?,,one_off,694097.00,0,0,0,0,0,0,0,,0,,,,0,0,USA Today; ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Informati
+KXALITOANNOUNCERETIRE,Alito announces retirement,SCOTUS & courts,one_off,692056.00,1,6,1,1,1,5,79167,0.01,5,92.529,0.0,0.0,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXSECLABOR,Next Secretary of Labor,,custom,684581.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXJFKFILES,JFK files,,custom,676971.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXTRUMPNOMNUM,How many nominations will Trump send to the Senate?,Recurring,weekly,673925.00,10,41,36,9,9,5,41611,0.01,5,7.0,1.0,0.889,36,32,the White House
+KXTARIFFREFUND,Tariff refund,SCOTUS & courts|Trump,custom,657792.00,0,0,0,0,0,0,0,,0,,,,0,0,ABC; Axios; CBS; CNN; Fox News; MSNBC; PACER; Politico; Reuters; the Associated 
+KXCAGOAT,California goat herder wage obligations,,one_off,655736.00,1,1,1,1,1,0,0,,0,49.768,0.0,0.0,0,0,California
+KXPREEMPT,Preemptive pardons,,custom,652115.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXSCOTUSN,New Supreme Court Justice,SCOTUS & courts,annual,647464.00,1,5,1,1,1,4,107249,0.025,4,92.904,0.0,0.0,0,0,Library of Congress
+KXGOVTFUNDSVOTES,Government funding bill Senate votes,Congress,one_off,640883.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXTRUMPMEETING,Who will Trump meet this year?,Trump,annual,631118.00,1,16,1,1,1,15,87517,0.028,15,63.992,0.0,0.0,0,0,Deutsche Welle; The White House; Associated Press; The Wall Street Journal; Bloo
+KXCANAL,Panama Canal retaken,Trump|International,custom,626603.00,1,1,0,0,0,1,100310,0.004,1,,,,0,0,The New York Times
+KXZELENSKYPUTIN,Zelensky and Putin in Trump's term,International,one_off,616528.00,1,3,0,0,0,3,91145,0.03,3,,,,0,0,ABC; official social media accounts verified by the platform; official press rel
+KXMARALAGO,Who will visit Mar-a-Lago this year? ,Trump,annual,613235.00,1,11,0,0,0,11,19728,0.048,11,,,,0,0,The New York Times
+KXVANCE,J.D. Vance replacement,US Elections,custom,599534.00,0,0,0,0,0,0,0,,0,,,,0,0,Governor of Ohio
+KXHFHOUSING,Bill taxing/banning hedge funds owning single-family homes,Trump,custom,593618.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXVACCINERECS,Vaccine recs ended,Trump,custom,591373.00,0,0,0,0,0,0,0,,0,,,,0,0,CDC
+KXTARIFFRATEPRC,Tariff rate China,Trump|International,custom,589327.00,1,6,0,0,0,6,3458,0.77,6,,,,0,0,ABC; Fox News; MSNBC; White House; The Wall Street Journal; the United States Co
+KXVISITVENEZUELA,Who will visit Venezuela?,International,one_off,587112.00,0,0,0,0,0,0,0,,0,,,,0,0,official representatives or offices of ; ABC; Fox News; official social media ac
+KXMAXWELLPARDON,Maxwell pardon,Trump,one_off,573024.00,0,0,0,0,0,0,0,,0,,,,0,0,White House; New York Times
+KXDEBATE,Debate topics,,custom,566815.00,0,0,0,0,0,0,0,,0,,,,0,0,CNN
+KXSECHUD,Secretary of Housing and Urban Development,,custom,557495.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXSECCOM,Next Secretary of Commerce,,custom,554923.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXVOTEFUNDING,when will congress vote on funding bill,Congress,one_off,552825.00,0,0,0,0,0,0,0,,0,,,,0,0,United States Congress; Congressional Record
+KXHEGSETHANNOUNCEOUT,Hegseth announces he's leaving as Secretary of Defense,Trump,one_off,545310.00,1,11,2,1,1,9,232993,0.02,9,48.978,0.0,0.0,0,0,person; The Wall Street Journal; Bloomberg News; The Washington Post; Fox News; 
+KXFDA,Next FDA Administrator,Trump,custom,536389.00,0,0,0,0,0,0,0,,0,,,,0,0,Library of Congress
+KXJAN6PARDON,January 6th pardons,,custom,535646.00,0,0,0,0,0,0,0,,0,,,,0,0,White House
+KXTARIFFDECISIONRELEASE,When will the Supreme Court release its tariff decision?,SCOTUS & courts,one_off,533040.00,0,0,0,0,0,0,0,,0,,,,0,0,entity; ABC; any official website or platform operated by entity; The Informatio
+KXTRUMPAPPROVALBELOW,How low will Trump's approval get this year?,Trump,annual,526732.00,2,15,1,1,1,14,124836,0.03,14,294.96,0.0,0.0,0,0,
