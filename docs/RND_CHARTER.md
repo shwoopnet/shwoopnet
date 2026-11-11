@@ -39,6 +39,10 @@ A bare idea does not count. A favourite-late variant never counts.
 
 **Honest limits.** The shadow registry (`functions/kalshiShadowLib.js`) only carries Kalshi price rules (yes, no, favourite or cheap side, a band, a look window, a spread cap) on the bot's four quoted markets. So most unique candidates are recorder-backed or read-time joins. Five a week is supported in the first week by recorders already running (rain and weather forecast, Deribit options, OKX liquidations, in-game lag, perps carry). After that it needs a new recorder (runner minutes, an owner popup) or a build of a generic external-signal shadow logger (proposed, needs an owner popup). If fewer than five unique candidates exist in a week, the report says so and names the missing data or venue. It never pads with variants.
 
+### Classification and stages (lifecycle 7f, Nov 11, 2026)
+
+Strategies move through five stages: Idea, Shadow, Probe, Live, Retired. Family is the entry mechanism plus the exit style; risk class is the win-rate class, loss shape, dollars per order, dollars per day and correlation group. The proven bar, cash PF 1.3 or better over 100 fills in 2 of 3 windows, is the Probe to Live bar. Every candidate registration includes its one-line classification card: `NAME | family | risk class | stage`.
+
 ## 4. Limits
 
 - At most 2 concurrent tests at once (owner, Nov 11, 2026; it was 3).
