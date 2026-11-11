@@ -1,0 +1,351 @@
+series,title,tags,frequency,series_volume,events,markets,settled_markets,settled_events,distinct_close_dates,distinct_dates_with_vol,first_close,last_close,open_markets,open_interest,med_spread,n_spread,med_open_to_close_d,frac_le14d,frac_le7d,n_le14d,n_le7d,dates_checked,dates_usable_10_90,sources
+PRES,Presidential elections,US Elections,custom,535948943.00,2,8,8,2,2,1,2025-01-20,2025-11-05,0,0,,0,108.201,0.0,0.0,0,0,,,Office of the Presidency
+KXPRESNOMD,Democratic Primary winner,2028|US Elections,custom,286253877.00,1,60,0,0,0,0,,,60,189882498,0.001,41,,,,0,0,,,Republican Party; Democratic Party
+CONTROLH,House winner,US Elections,custom,210382636.00,3,6,4,2,2,2,2025-02-01,2026-11-04,2,25088,0.02,2,434.767,0.0,0.0,0,0,,,Library of Congress
+SENATETX,Texas Senate race,Senate,custom,191559860.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,394.441,0.0,0.0,0,0,,,United States Congress
+KXBALANCEPOWERCOMBO,Congress balance of power combo,Senate|House|Mixed Combos|US Elections|Election Combos,one_off,166458888.00,1,4,4,1,1,1,2026-11-04,2026-11-04,0,0,,0,327.586,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXMAYORLA,LA,US Elections|Other US Elections,one_off,146340851.00,2,18,10,1,3,3,2026-06-08,2026-11-05,8,11,0.088,8,302.635,0.0,0.0,0,0,3,2,relevant county clerk or board of elections; Attorney General of the United Stat
+POPVOTEMOV,Popular vote margin of victory,2028,custom,135352758.00,2,38,18,1,1,1,2025-01-06,2025-01-06,20,239439,0.01,20,91.281,0.0,0.0,0,0,,,United States Congress
+KXMAYORNYCPARTY,Mayor of NYC party winner,,custom,121642553.00,1,5,5,1,1,1,2025-11-07,2025-11-07,0,0,,0,137.097,0.0,0.0,0,0,,,Office of the Mayor of New York City
+CONTROLS,Senate winner,US Elections,custom,117423744.00,3,6,4,2,2,2,2025-02-01,2026-11-04,2,66682,0.01,2,434.761,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYTX,Texas Governor,Governor,custom,105870459.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.556,0.0,0.0,0,0,,,US State Governments
+KXPRESPERSON,Pres person,2028|US Elections,custom,97381074.00,1,52,0,0,0,0,,,52,68392709,0.001,45,,,,0,0,,,Office of the Presidency
+KXPRESNOMR,Republican Primary winner,2028|US Elections,custom,90980300.00,1,52,0,0,0,0,,,52,61115435,0.001,42,,,,0,0,,,Republican Party; Democratic Party
+ECMOV,Electoral college margin of victory,2028,custom,86346276.00,2,30,16,1,1,1,2025-01-06,2025-01-06,14,21250,0.035,14,91.284,0.0,0.0,0,0,,,United States Congress
+POPVOTEMOVSMALL,Popular vote margin of victory small,,custom,84757997.00,1,18,18,1,1,1,2025-01-06,2025-01-06,0,0,,0,59.833,0.0,0.0,0,0,,,United States Congress
+SENATEMI,Michigan Senate race,Senate,custom,82337217.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,394.514,0.0,0.0,0,0,,,United States Congress
+POPVOTE,Popular vote winner,US Elections,custom,81933515.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.293,0.0,0.0,0,0,,,United States Congress
+KXGOVCA,California Governor's race,US Elections|Governor,custom,78855368.00,1,25,25,1,2,2,2026-06-09,2026-11-04,0,0,,0,389.412,0.0,0.0,0,0,,,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; Bloomberg News; The Info
+KXGOVFLNOMR,Florida Governor Republican nominee,Primaries,custom,71017463.00,1,9,9,1,1,1,2026-08-19,2026-08-19,0,0,,0,539.255,0.0,0.0,0,0,,,Republican Party
+KXKHAMENEIOUT,Ali Khamenei out?,Iran,one_off,54513052.00,1,5,1,1,1,1,2026-02-01,2026-02-01,0,0,,0,23.583,0.0,0.0,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KXHOUSERACE,House Race Winner?,House|US Elections,one_off,53502774.00,794,1594,702,348,8,8,2026-06-30,2026-11-11,890,8673823,0.05,890,301.109,0.0,0.0,0,0,8,6,Library of Congress
+KXMIDTERMMOV,Midterm margin of victory,US Elections,one_off,45838956.00,634,5731,729,132,10,10,2026-06-09,2026-11-11,4992,16410628,0.429,1685,182.765,0.177,0.066,129,48,10,6,official election authority responsible for certifying results in 
+GOVPARTYFL,Florida Governor,Governor,custom,43983928.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.467,0.0,0.0,0,0,,,US State Governments
+SENATEMS,Mississippi Senate race,Senate,custom,42085215.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,17554763,0.001,2,65.264,0.0,0.0,0,0,,,United States Congress
+SENATEAK,Alaska Senate race,Senate,custom,39385540.00,2,4,0,0,0,0,,,4,24812287,0.006,4,,,,0,0,,,United States Congress
+POPVOTEMOVSMALLER,Popular vote margin of victory small,,custom,37209372.00,1,13,13,1,1,1,2025-01-06,2025-01-06,0,0,,0,52.908,0.0,0.0,0,0,,,United States Congress
+SENATEAZ,Arizona Senate race,Senate,custom,35517402.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,8524,0.01,2,88.337,0.0,0.0,0,0,,,United States Congress
+SENATEME,Maine Senate race,Senate,custom,32230113.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,700.628,0.0,0.0,0,0,,,United States Congress
+KXBRPRES,Brazil Presidency,International elections|Brazil,custom,31977154.00,1,14,14,1,2,2,2026-10-05,2026-10-26,0,0,,0,303.218,0.0,0.0,0,0,,,AP
+KXSENATEMID,MID,Primaries,one_off,31496913.00,2,18,9,1,1,1,2026-08-05,2026-08-05,0,0,,0,495.002,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXVOTEPRIMARY,Vote percentages in primaries,Primaries,one_off,29841281.00,119,957,941,117,24,24,2026-06-04,2026-09-21,0,0,,0,20.367,0.302,0.017,284,16,12,5,official government website of 
+POWER,Party power,2028,custom,29016520.00,2,16,8,1,1,1,2025-02-01,2025-02-01,8,303898,0.009,8,117.115,0.0,0.0,0,0,,,United States Congress
+PRESPARTYFULL,Popular vote/Electoral College winner,US Elections,custom,28921006.00,1,4,4,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.283,0.0,0.0,0,0,,,United States Congress
+KXDSENATESEATS,Democratic Senate seats,Senate|Senate Combos|Election Combos,one_off,26262889.00,2,24,0,0,0,0,,,24,15086407,0.01,20,,,,0,0,,,United States Congress
+CLOSESTSTATE,Closest state ,US Elections,custom,25934826.00,1,17,17,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.284,0.0,0.0,0,0,,,United States Congress
+KXSCRSENS,South Carolina Special Republican primary,Primaries,one_off,25724483.00,1,11,11,1,2,2,2026-08-12,2026-08-26,0,0,,0,30.317,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+RSENATESEATS,Republican senate seats,Senate|Senate Combos|Election Combos,custom,22375233.00,2,23,8,1,1,1,2025-02-01,2025-02-01,15,11305889,0.01,2,107.833,0.0,0.0,0,0,,,United States Congress
+SENATESC,South Carolina Senate race,Senate,custom,22073512.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,14563,0.065,2,700.529,0.0,0.0,0,0,,,United States Congress
+KXKY4R,Kentucky 4 Republican primary,Primaries|US Elections,one_off,21982848.00,1,4,4,1,1,1,2026-05-19,2026-05-19,0,0,,0,256.206,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXPRIMARYMOV,Primary margins of victory,Primaries,one_off,21887809.00,66,680,636,61,32,32,2026-05-14,2026-09-17,0,0,,0,29.032,0.142,0.002,90,1,11,3,official election authority responsible for certifying results in 
+GOVPARTYNJ,New Jersey Governor,Governor,custom,21640003.00,1,2,2,1,1,1,2025-11-07,2025-11-07,0,0,,0,364.513,0.0,0.0,0,0,,,US State Governments
+SENATENE,Nebraska Senate race,Senate,custom,20541185.00,2,5,5,2,2,2,2025-01-03,2026-11-04,0,0,,0,420.694,0.0,0.0,0,0,,,United States Congress
+PRESPARTYGA,Georgia presidential winner,US Elections,custom,19884204.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.293,0.0,0.0,0,0,,,Library of Congress
+SENATEIA,Iowa Senate race,Senate,custom,18581824.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,1286,0.045,2,700.569,0.0,0.0,0,0,,,United States Congress
+SENATEOHS,Special Senate election in Ohio,Senate,custom,18356107.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,699.552,0.0,0.0,0,0,,,United States Congress
+KXSENATETXR,Texas Republican Senate nominee,Primaries,custom,18353657.00,1,5,5,1,2,2,2026-03-06,2026-05-27,0,0,,0,456.585,0.0,0.0,0,0,,,Republican Party; Democratic Party
+GOVPARTYOH,Ohio Governor,Governor,custom,17653287.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.538,0.0,0.0,0,0,,,US State Governments
+KXELECTIONMOVZOHRAN,Zohran MOV,,one_off,17309615.00,1,10,10,1,1,1,2025-12-03,2025-12-03,0,0,,0,111.489,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+PRESPARTYPA,Pennsylvania presidential winner,US Elections,custom,17042008.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.312,0.0,0.0,0,0,,,Library of Congress
+KXMAYORNYCNOMD,New York City mayoral nominations,,custom,16963803.00,1,22,22,1,1,1,2025-07-01,2025-07-01,0,0,,0,235.132,0.0,0.0,0,0,,,New York Times
+SENATEMN,Minnesota Senate race,Senate,custom,16718120.00,2,4,4,2,2,1,2025-11-03,2026-11-04,0,0,,0,517.296,0.0,0.0,0,0,,,United States Congress
+KXGOVWINOMD,Gov WI Nom D,Primaries,one_off,16392343.00,1,11,11,1,1,1,2026-08-12,2026-08-12,0,0,,0,308.888,0.0,0.0,0,0,,,Republican Party
+HOUSEMOV,House margin of victory,US Elections,custom,16252923.00,1,8,8,1,1,1,2025-02-01,2025-02-01,0,0,,0,117.115,0.0,0.0,0,0,,,United States Congress
+SENATEKS,Kansas Senate race,Senate,custom,14699485.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,5153,0.04,2,700.561,0.0,0.0,0,0,,,United States Congress
+KXSENATETXD,Texas Democratic Senate nominee,Primaries,custom,14628756.00,1,12,12,1,1,1,2026-03-04,2026-03-04,0,0,,0,455.021,0.083,0.083,1,1,,,Republican Party; Democratic Party
+PRESPARTYMI,Michigan presidential winner,US Elections,custom,14548325.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.3,0.0,0.0,0,0,,,Library of Congress
+POPVOTEMOVPA,Pennsylvania margin of victory,US Elections,custom,14254350.00,1,20,20,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.332,0.0,0.0,0,0,,,United States Congress
+KXBLUEWAVECOMBO,Will there be a blue wave?,Senate|House|Mixed Combos|US Elections|Other US Elections|Election Combos,one_off,13832642.00,1,1,0,0,0,0,,,1,6651148,0.003,1,,,,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXELECTIONMOVNJGOV,NJ Governor Margin of Victory,,one_off,13432598.00,2,19,18,2,2,1,2025-12-04,2025-12-22,0,0,,0,101.802,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXCANADAPM,Canada PM,Foreign Elections,custom,13061085.00,1,6,6,1,1,1,2025-05-27,2025-05-27,0,0,,0,204.06,0.0,0.0,0,0,,,CBC
+PRESPARTYIA,Iowa presidential winner,US Elections,custom,12930686.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,85.248,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYNY,New York Governor,Governor,custom,12449796.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.465,0.0,0.0,0,0,,,US State Governments
+PRESPARTYNC,North Carolina presidential winner,US Elections,custom,12233384.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.299,0.0,0.0,0,0,,,Library of Congress
+SENATEFLS,Special Senate election in Florida,Senate,custom,11591259.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,699.445,0.0,0.0,0,0,,,United States Congress
+KXDHOUSESEATS,Democratic House seats,House|House Combos|Election Combos,one_off,11247914.00,1,12,0,0,0,0,,,12,5902261,0.002,4,,,,0,0,,,United States Congress
+KXPLATNERDROPOUT,Graham platner drop out,US Elections,one_off,10929333.00,2,9,9,2,4,4,2026-01-01,2026-07-09,0,0,,0,2.221,0.778,0.778,7,7,4,1,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; CBS; The New York Times;
+KXCAGOVPRIMARY1ST,Who will finish first in the California Governor primary?,Primaries|US Elections,one_off,10892317.00,1,8,8,1,2,2,2026-06-10,2026-07-11,0,0,,0,125.048,0.0,0.0,0,0,,,official election authority responsible for certifying results in geography
+KXISRAELPM,Who will be the Prime Minister of Israel after their election?,International elections,one_off,10888163.00,1,21,0,0,0,0,,,21,4316255,0.01,4,,,,0,0,,,parliament or legislature of ; official government gazette or equivalent officia
+GOVPARTYCA,California Governor,Governor,custom,10768796.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,662.547,0.0,0.0,0,0,,,US State Governments
+KXNEXTPOPE,Next Pope,International elections,custom,10618819.00,1,37,37,1,1,1,2025-05-08,2025-05-08,0,0,,0,10.174,0.541,0.432,20,16,,,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; Bloomberg News; The Info
+PRESPARTYNV,Nevada presidential winner,US Elections,custom,10607466.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.321,0.0,0.0,0,0,,,Library of Congress
+KXRHOUSESEATS,Republican house seats,House|House Combos|Election Combos,one_off,10481782.00,1,11,0,0,0,0,,,11,6721833,0.002,4,,,,0,0,,,United States Congress
+KXMOVVAREDISTRICT,Virginia redistricting referendum margin of victory?,US Elections,one_off,10477470.00,1,8,8,1,1,1,2026-05-16,2026-05-16,0,0,,0,60.203,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXSWINGSTATES24DJT,Donald Trump swing states,,custom,10231804.00,1,8,8,1,1,1,2025-01-06,2025-01-06,0,0,,0,73.21,0.0,0.0,0,0,,,United States Congress
+KXNEXTIRANLEADER,Who will be Khamenei's successor?,Iran,one_off,9946642.00,1,15,15,1,1,1,2026-03-08,2026-03-08,0,0,,0,61.281,0.2,0.0,3,0,,,The New York Times
+KXLAMAYORMATCHUP,Los Angeles mayor matchup,Primaries|US Elections|Other US Elections,one_off,9913873.00,1,10,10,1,2,2,2026-06-03,2026-06-09,0,0,,0,54.602,0.0,0.0,0,0,,,Federal Reserve Board of Governors
+KXPERUPRES,Peru Presidency,International elections|Peru,one_off,9912008.00,1,21,21,1,2,2,2026-05-15,2026-07-03,0,0,,0,112.953,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXLEADERSOUT,World leaders out this year?,International elections|International,annual,9731710.00,1,43,6,1,6,6,2026-01-04,2026-08-08,36,1246827,0.019,36,201.11,0.0,0.0,0,0,6,3,The Washington Post; Fox News; MSNBC; The Wall Street Journal; Semafor; The Info
+KXDSENATESEATSH,Democratic Senate seats (higher strikes),Senate|Senate Combos|Election Combos,one_off,9149579.00,1,7,0,0,0,0,,,7,4695695,0.004,6,,,,0,0,,,United States Congress
+GOVPARTYGA,Georgia Governor,Governor,custom,9121618.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.477,0.0,0.0,0,0,,,US State Governments
+KXMADUROOUT,Maduro out  in November,,one_off,9106895.00,2,6,6,2,2,2,2025-12-01,2026-01-04,0,0,,0,23.428,0.0,0.0,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+SENATEMOV,Senate margin of victory,US Elections,custom,9085904.00,1,10,10,1,1,1,2025-02-01,2025-02-01,0,0,,0,117.115,0.0,0.0,0,0,,,United States Congress
+HOUSECA13,House CA 13,House,one_off,8816746.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,277.725,0.0,0.0,0,0,,,Library of Congress
+PRESPARTYVA,Virginia presidential winner,US Elections,custom,8810367.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,85.239,0.0,0.0,0,0,,,Library of Congress
+PRESPARTYNY,New York presidential winner,US Elections,custom,8701986.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.311,0.0,0.0,0,0,,,Library of Congress
+KXGOVCAPRIMARY,CA primary,Primaries,one_off,8482481.00,1,15,15,1,2,2,2026-06-06,2026-06-10,0,0,,0,244.338,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+KXHOUSEPOPVOTEMARGIN,National House popular vote margin?,House|House Combos|US Elections|Election Combos,one_off,8481091.00,1,10,0,0,0,0,,,10,4317253,0.007,4,,,,0,0,,,the statistical agency or entity responsible for the calculation and/or release 
+POPVOTEMOVAZ,Arizona margin of victory,US Elections,custom,8201089.00,1,14,14,1,1,1,2025-01-06,2025-01-06,0,0,,0,90.343,0.0,0.0,0,0,,,United States Congress
+SENATENC,North Carolina Senate race,Senate,custom,7781946.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,21347,0.02,2,700.439,0.0,0.0,0,0,,,United States Congress
+SENATEGA,Georgia Senate race,Senate,custom,7324477.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,1842,0.025,2,700.416,0.0,0.0,0,0,,,United States Congress
+PRESPARTYAZ,Arizona presidential winner,US Elections,custom,7245158.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.296,0.0,0.0,0,0,,,Library of Congress
+PRESPARTYWI,Wisconsin presidential winner,US Elections,custom,7213622.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.313,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYMA,Massachusetts Governor,Governor,custom,7011823.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.425,0.0,0.0,0,0,,,US State Governments
+KXLEADEROUT,Leader Out,,one_off,6815704.00,2,27,27,2,2,2,2025-08-01,2026-01-01,0,0,,0,73.0,0.111,0.074,3,2,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+PRESPARTYFL,Florida presidential winner,US Elections,custom,6745504.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.312,0.0,0.0,0,0,,,Library of Congress
+KXMISENATE,Michigan Senate winner? (Person),US Elections,one_off,6665460.00,1,4,4,1,2,2,2026-10-15,2026-11-04,0,0,,0,172.479,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+GOVPARTYNV,Nevada Governor,Governor,custom,6656317.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.798,0.0,0.0,0,0,,,US State Governments
+KXLAMAYORADVANCE,Who will advance in the LA mayoral election?,US Elections|Other US Elections,one_off,6622630.00,1,3,3,1,2,2,2026-06-03,2026-06-09,0,0,,0,28.275,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXSENATEMED,MED,Primaries,one_off,6220621.00,1,9,9,1,1,1,2026-06-10,2026-06-10,0,0,,0,412.048,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXSTATEDEEPDJT,Trump winning deep blue state,US Elections,custom,6143975.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,73.284,0.0,0.0,0,0,,,United States Congress
+KXCUOMODROPOUT,Drop out Cuomo Mayor,US Elections,custom,6128407.00,1,3,3,1,2,2,2025-09-28,2025-11-04,0,0,,0,112.301,0.0,0.0,0,0,,,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; CBS; The New York Times;
+KXCANCOALITION,Canadian coalition,,custom,5848174.00,1,6,6,1,1,1,2025-05-27,2025-05-27,0,0,,0,125.049,0.0,0.0,0,0,,,country; Politico
+KXVIRGINIAREDISTRICTING,Will the Virginia Redistricting Referendum pass?,US Elections,one_off,5679342.00,1,1,1,1,1,1,2026-04-22,2026-04-22,0,0,,0,94.345,0.0,0.0,0,0,,,BBC News; The Wall Street Journal; Bloomberg News; NBC News; official electoral 
+GOVPARTYVA,Virginia Governor,Governor,custom,5610201.00,1,2,2,1,1,1,2025-11-07,2025-11-07,0,0,,0,364.418,0.0,0.0,0,0,,,US State Governments
+GOVPARTYIA,Iowa Governor,Governor,custom,5607678.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.553,0.0,0.0,0,0,,,US State Governments
+KXPRESROMANIA24,2025 Romanian presidential election,Foreign Elections,one_off,5567445.00,1,9,9,1,1,1,2025-05-19,2025-05-19,0,0,,0,163.412,0.0,0.0,0,0,,,Politico
+POPVOTEKHNM,Kamala New Mexico,US Elections,one_off,5518133.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,66.261,0.0,0.0,0,0,,,United States Congress
+KXVOTEPERCENTMAMDANI,mamdani vote percent,,one_off,5511432.00,1,6,6,1,1,1,2025-12-03,2025-12-03,0,0,,0,82.468,0.0,0.0,0,0,,,official government website of 
+KXFLPRIMARY,Florida Primary Winners,Primaries,one_off,5492389.00,44,228,228,44,6,6,2026-08-14,2026-08-27,0,0,,0,91.43,0.031,0.031,7,7,6,5,Republican Party; Democratic Party
+KXTXSENDPRIMARYMOV,Margin of victory in the first round of the Texas Senate Democratic pr,Primaries|US Elections,one_off,5475015.00,1,11,11,1,1,1,2026-03-20,2026-03-20,0,0,,0,55.371,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+SENATENV,Nevada Senate race,Senate,custom,5438473.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,682,0.035,2,88.337,0.0,0.0,0,0,,,United States Congress
+KXVOTEGENERAL,Vote percentages in US general elections,US Elections,one_off,5297323.00,1045,9406,305,33,2,2,2026-11-10,2026-11-11,9087,3646826,0.81,994,60.472,0.01,0.01,3,3,,,official government website of 
+KXMETXCOMBO,ME-TX Combo,Senate|US Elections|Senate Combos|Election Combos,one_off,5264998.00,1,6,6,1,1,1,2026-11-04,2026-11-04,0,0,,0,156.379,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXAKSENATE,Who will win the Alaska Senate race?,US Elections,one_off,5155073.00,1,7,0,0,0,0,,,7,3715462,0.003,2,,,,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXNYCMAYOR2ND,NYC MAyor ,,one_off,5152964.00,1,7,7,1,1,1,2025-12-02,2025-12-02,0,0,,0,174.286,0.0,0.0,0,0,,,official election authority responsible for certifying results in ; The Source A
+RHOUSESEATSSMALL,Republican House seats breakdown,House|House Combos|Election Combos,custom,4956663.00,1,13,13,1,1,1,2025-02-01,2025-02-01,0,0,,0,81.0,0.0,0.0,0,0,,,United States Congress
+HOUSENY17,House NY 17,House,one_off,4877431.00,1,2,2,1,1,1,2026-11-06,2026-11-06,0,0,,0,492.258,0.0,0.0,0,0,,,Library of Congress
+RHOUSESEATS,Republican House seats,House|House Combos|Election Combos,custom,4858670.00,1,11,11,1,1,1,2025-02-01,2025-02-01,0,0,,0,92.042,0.0,0.0,0,0,,,United States Congress
+KXSENATEMAD,MAD,Primaries,one_off,4851143.00,1,4,4,1,1,1,2026-09-02,2026-09-02,0,0,,0,384.399,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXELECTIONMOVVAGOV,virginia margin of victory,,one_off,4814953.00,2,10,10,2,1,1,2025-12-02,2025-12-02,0,0,,0,85.427,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXCAWEALTHTAX,Will the California billionaire wealth tax initiative pass?,US Elections|Other US Elections,one_off,4803093.00,1,1,1,1,1,1,2026-11-10,2026-11-10,0,0,,0,315.506,0.0,0.0,0,0,,,BBC News; The Wall Street Journal; Bloomberg News; NBC News; official electoral 
+KXHONDURASPRES,Honduras president,Foreign Elections,custom,4682819.00,1,5,5,1,1,1,2025-12-25,2025-12-25,0,0,,0,267.51,0.0,0.0,0,0,,,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+PRESPARTYTX,Texas presidential winner,US Elections,custom,4654059.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.321,0.0,0.0,0,0,,,Library of Congress
+PRESPARTYNH,New Hampshire presidential winner,US Elections,custom,4649224.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,84.247,0.0,0.0,0,0,,,Library of Congress
+HOUSETX15,House TX 15,House,one_off,4619739.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,490.361,0.0,0.0,0,0,,,Library of Congress
+KXPRIMARYPLACE,Election place in primaries,Primaries,one_off,4516965.00,19,78,78,19,11,11,2026-06-01,2026-08-27,0,0,,0,31.376,0.41,0.077,32,6,11,5,official election authority responsible for certifying results in geography
+KXTXSENCOMBO,Texas Senate matchup,Primaries,one_off,4337357.00,1,6,6,1,2,2,2026-03-06,2026-05-27,0,0,,0,85.585,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXTXSENATEDEMTURNOUT,Voter turnout in the Texas Senate Democratic primary?,Primaries|US Elections,one_off,4301904.00,1,22,22,1,1,1,2026-03-20,2026-03-20,0,0,,0,27.522,0.0,0.0,0,0,,,the relevant election commission of the country in which  takes place
+SENATENH,New Hampshire Senate race,Senate,custom,4276160.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,1214,0.035,2,700.438,0.0,0.0,0,0,,,United States Congress
+KXMEDNOMJUL,Maine Democratic nominee,Primaries,one_off,4247514.00,1,21,21,1,1,1,2026-07-31,2026-07-31,0,0,,0,24.719,0.0,0.0,0,0,,,ABC; Associated Press; The Wall Street Journal; Semafor; The Information; Bloomb
+KXMESENATEPERSON,Maine Senate winner? (Person),US Elections,one_off,4228929.00,1,16,16,1,1,1,2026-11-04,2026-11-04,0,0,,0,120.457,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+PRESPARTYNJ,New Jersey presidential winner,US Elections,custom,4152324.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,85.234,0.0,0.0,0,0,,,Library of Congress
+KXTXRSENRUNOFFMOV,Texas Republican Senate Runoff: Margin of Victory,Primaries|US Elections,one_off,4065573.00,1,10,10,1,1,1,2026-06-12,2026-06-12,0,0,,0,94.282,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXDEMSWEEP,Democrats sweep in 2025,,one_off,3999435.00,1,1,1,1,1,1,2025-11-07,2025-11-07,0,0,,0,51.123,0.0,0.0,0,0,,,the United Nations Electoral Assistance Division; the official election authorit
+KXVPRESNOMD,Democratic VP nom,2028|US Elections,custom,3932045.00,1,55,0,0,0,0,,,55,2797746,0.002,53,,,,0,0,,,Republican Party; Democratic Party
+SENATEPA,Pennsylvania Senate race,Senate,custom,3928525.00,2,5,2,1,1,1,2025-01-03,2025-01-03,3,4788,0.04,3,88.337,0.0,0.0,0,0,,,United States Congress
+GOVPARTYKS,Kansas Governor,Governor,custom,3913491.00,1,2,0,0,0,0,,,2,1364577,0.002,2,,,,0,0,,,US State Governments
+SENATEMT,Montana Senate race,Senate,custom,3895578.00,2,5,5,2,2,2,2025-01-03,2026-11-04,0,0,,0,291.707,0.0,0.0,0,0,,,United States Congress
+KXLAMAYOR1R,Los Angeles mayor 1st Round,Other US Elections,one_off,3848745.00,1,5,5,1,2,2,2026-06-09,2026-06-27,0,0,,0,42.213,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+KXBLUETSUNAMICOMBO,Will there be a blue tsunami?,Senate|House|Mixed Combos|US Elections|Other US Elections|Election Combos,one_off,3813971.00,1,1,0,0,0,0,,,1,1578786,0.003,1,,,,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXGOVOKNOMR,Gov OK Nom R,Primaries,one_off,3628071.00,1,7,7,1,2,2,2026-06-17,2026-08-26,0,0,,0,348.518,0.0,0.0,0,0,,,Republican Party
+KXCOLOMBIAPRES,Colombia presidency,International elections,one_off,3597405.00,1,12,12,1,2,2,2026-06-01,2026-06-24,0,0,,0,258.744,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXWISCOTUS,WI State Supreme Court,,custom,3571663.00,1,2,2,1,1,1,2025-04-02,2025-04-02,0,0,,0,101.958,0.0,0.0,0,0,,,The New York Times
+POPVOTEMOVNC,North Carolina margin of victory,US Elections,custom,3527770.00,1,14,14,1,1,1,2025-01-06,2025-01-06,0,0,,0,90.345,0.0,0.0,0,0,,,United States Congress
+KXNEXTHUNGARYPM,next prime minister of hungary,Hungary,one_off,3519056.00,1,2,2,1,1,1,2026-05-09,2026-05-09,0,0,,0,240.161,0.0,0.0,0,0,,,parliament or legislature of ; official government gazette or equivalent officia
+KXCLOSESTSENATE,closest senate race,Senate|Senate Combos|Election Combos,one_off,3500694.00,1,20,0,0,0,0,,,20,2317646,0.01,3,,,,0,0,,,CBS News; Fox News; official state or local election division websites; ABC; The
+KXFRENCHPRES,French presidential election,International elections,custom,3498571.00,1,31,0,0,0,0,,,31,2172258,0.001,31,,,,0,0,,,the government of France; Fox News; MSNBC; The Wall Street Journal; Semafor; ABC
+KXGA14S,Who will win the GA-14 special election?,US Elections,one_off,3435371.00,1,29,29,1,2,2,2026-03-13,2026-04-08,0,0,,0,110.912,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+POPVOTEMOVGA,Georgia margin of victory,US Elections,custom,3391469.00,1,14,14,1,1,1,2025-01-06,2025-01-06,0,0,,0,90.347,0.0,0.0,0,0,,,United States Congress
+TIPPINGPOINT,Tipping point jurisdiction,US Elections,custom,3388121.00,1,20,20,1,1,1,2025-01-06,2025-01-06,0,0,,0,91.284,0.0,0.0,0,0,,,United States Congress
+KXMI13D,MI-13 Democratic nominee,Primaries|US Elections,one_off,3385207.00,1,5,5,1,1,1,2026-08-05,2026-08-05,0,0,,0,217.963,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXSENATELA,Who will win the Senate race in Louisiana?,Senate,one_off,3307387.00,3,6,6,3,2,1,2025-12-22,2026-11-04,0,0,,0,173.19,0.0,0.0,0,0,,,United States Congress
+HOUSECA45,House California 45th,House,custom,3257474.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,277.487,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYAZ,Arizona Governor,Governor,custom,3235567.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.712,0.0,0.0,0,0,,,US State Governments
+PRESPARTYCA,California presidential winner,US Elections,custom,3183054.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.222,0.0,0.0,0,0,,,Library of Congress
+KXSENATEDEMLEAD,Who will win the next Senate Democratic Leader election?,Senate|Congress,one_off,3099423.00,1,15,0,0,0,0,,,15,2491307,0.005,6,,,,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXGOVSCNOMR,South Carolina Republican nominee,Primaries,custom,3087237.00,1,6,6,1,2,2,2026-06-10,2026-06-23,0,0,,0,271.469,0.0,0.0,0,0,,,Republican Party
+GOVPARTYWI,Wisconsin Governor,Governor,custom,2930471.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.562,0.0,0.0,0,0,,,US State Governments
+KXATTYGENVA,Atty Gen Virginia,US Elections|Other US Elections,custom,2847040.00,1,2,2,1,1,1,2025-11-07,2025-11-07,0,0,,0,320.514,0.0,0.0,0,0,,,the relevant electoral authority governing 
+KXCAPRIMARY,Who will advance in the CA primary?,Primaries,one_off,2825966.00,95,529,529,95,12,12,2026-06-03,2026-07-11,0,0,,0,83.428,0.0,0.0,0,0,12,8,Washington Secretary of State
+KXPRIMARYTURNOUT,Turnout in primaries,Primaries,one_off,2811752.00,12,95,95,12,10,10,2026-06-04,2026-09-17,0,0,,0,43.721,0.274,0.032,26,3,10,5,the relevant election commission of the country in which  takes place
+KXPCTVOTEMAM,Mamdani Vote,,one_off,2750377.00,1,1,1,1,1,1,2025-12-02,2025-12-02,0,0,,0,139.206,0.0,0.0,0,0,,,official government website of 
+SENATEOH,Ohio Senate race,Senate,custom,2744339.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,4681,0.015,2,88.337,0.0,0.0,0,0,,,United States Congress
+KXSTATELEG,State legislature winners,US Elections|Other US Elections,one_off,2615428.00,39,78,72,36,2,2,2026-11-06,2026-11-09,6,187973,0.01,5,198.434,0.0,0.0,0,0,,,The New York Times
+PRESPARTYMN,Minnesota presidential winner,US Elections,custom,2607519.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,85.221,0.0,0.0,0,0,,,Library of Congress
+KXMAYORSEATTLE,Seattle Mayoral election,,custom,2600292.00,1,9,9,1,1,1,2025-11-16,2025-11-16,0,0,,0,121.708,0.0,0.0,0,0,,,The New York Times
+HOUSETN7S,TN 7 special,House,one_off,2584615.00,1,2,2,1,1,1,2025-12-04,2025-12-04,0,0,,0,140.048,0.0,0.0,0,0,,,Library of Congress
+KXTXSENGOVCOMBO,Texas Governor-Senate combo,Senate|Mixed Combos|US Elections|Governor|Election Combos,one_off,2581272.00,1,4,4,1,1,1,2026-11-04,2026-11-04,0,0,,0,41.107,0.0,0.0,0,0,,,Texas Secretary of State
+KXGOVOHNOMR,OHIO Governor Republican nominee,Primaries,custom,2561750.00,1,6,6,1,1,1,2026-05-05,2026-05-05,0,0,,0,455.255,0.0,0.0,0,0,,,Republican Party
+KXATTYGENNY,AG race NY,US Elections|Other US Elections,one_off,2515562.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,488.65,0.0,0.0,0,0,,,the relevant electoral authority governing 
+GOVPARTYPA,Pennsylvania Governor,Governor,custom,2446068.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.426,0.0,0.0,0,0,,,US State Governments
+POPVOTEMOVNV,Nevada margin of victory,US Elections,custom,2436110.00,2,28,28,2,2,1,2025-01-06,2025-11-05,0,0,,0,241.229,0.0,0.0,0,0,,,United States Congress
+KXGENERALMOV,General election margins of victory,Senate|US Elections|Governor,one_off,2434495.00,15,170,67,15,3,3,2026-11-04,2026-11-11,103,1081870,0.03,19,11.579,0.94,0.0,63,0,3,3,official election authority responsible for certifying results in 
+GOVPARTYTN,Tennessee Governor,Governor,custom,2358606.00,1,3,3,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.617,0.0,0.0,0,0,,,US State Governments
+GOVPARTYOR,Oregon Governor,Governor,custom,2347029.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.749,0.0,0.0,0,0,,,US State Governments
+GOVPARTYAL,Alabama Governor,Governor,custom,2295815.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.721,0.0,0.0,0,0,,,US State Governments
+KXGOVGANOMD,Georgia Governor Democratic nominee,Primaries,custom,2295599.00,1,9,9,1,1,1,2026-05-20,2026-05-20,0,0,,0,478.498,0.0,0.0,0,0,,,Republican Party
+KXCAGOVPRIMARYTOP3,CA Gov: Top 3,Primaries,one_off,2271077.00,1,24,24,1,3,3,2026-06-09,2026-07-11,0,0,,0,9.166,0.833,0.0,20,0,3,0,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXGOVGANOMR,Georgia Governor Republican nominee,Primaries,custom,2261055.00,1,6,6,1,2,2,2026-05-20,2026-06-17,0,0,,0,305.345,0.0,0.0,0,0,,,Republican Party
+KXGOVIANOMR,Gov IA Nom R,Primaries,one_off,2260503.00,1,7,7,1,1,1,2026-06-03,2026-06-03,0,0,,0,334.664,0.0,0.0,0,0,,,Republican Party
+KXNJ11SD,Who will be the Democratic nominee for NJ-11 special?,Primaries|US Elections,one_off,2250361.00,1,12,12,1,1,1,2026-02-14,2026-02-14,0,0,,0,88.183,0.0,0.0,0,0,,,Republican Party; Democratic Party
+POPVOTEMOVWI,Wisconsin margin of victory,US Elections,custom,2226470.00,1,14,14,1,1,1,2025-01-06,2025-01-06,0,0,,0,90.345,0.0,0.0,0,0,,,United States Congress
+KXPRESCHILE,Chile Presidential election,Foreign Elections,custom,2226141.00,1,12,12,1,1,1,2025-12-15,2025-12-15,0,0,,0,291.555,0.0,0.0,0,0,,,AP
+KXSENATELAR,LAR,Primaries,one_off,2205757.00,1,8,8,1,2,2,2026-05-17,2026-06-28,0,0,,0,239.939,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXREDWAVECOMBO,Red wave in 2026?,Senate|House|Mixed Combos|US Elections,one_off,2147770.00,1,1,0,0,0,0,,,1,1544545,0.01,1,,,,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+GOVPARTYMN,Minnesota Governor,Governor,custom,2144571.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.593,0.0,0.0,0,0,,,US State Governments
+KXNYCMAYORDROUND,NYC Mayor rounds,,custom,2125738.00,1,12,12,1,1,1,2025-07-23,2025-07-23,0,0,,0,29.141,0.0,0.0,0,0,,,ABC; Fox News; The Wall Street Journal; Semafor; Bloomberg News; The Information
+KXBOLIVIAPRES,Bolivia presidential election,Foreign Elections,custom,2122886.00,1,11,11,1,1,1,2025-11-08,2025-11-08,0,0,,0,305.358,0.0,0.0,0,0,,,AP
+POPVOTEMOVMI,Wisconsin margin of victory,US Elections,custom,2076409.00,1,14,14,1,1,1,2025-01-06,2025-01-06,0,0,,0,90.344,0.0,0.0,0,0,,,United States Congress
+KXGOVSDNOMR,Gov SD Nom r,Primaries,one_off,2006245.00,1,4,4,1,2,2,2026-06-03,2026-07-29,0,0,,0,362.871,0.0,0.0,0,0,,,Republican Party
+KXGOVMNNOMR,Who will be the Republican nominee for Governor in Minnesota,Primaries,one_off,1996771.00,1,8,8,1,1,1,2026-08-12,2026-08-12,0,0,,0,302.562,0.0,0.0,0,0,,,Republican Party
+KXSENATEALR,ALR,Primaries,one_off,1987899.00,1,8,8,1,2,2,2026-05-20,2026-06-17,0,0,,0,315.327,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXCAGOVMATCHUP,California governor matchup,Primaries,one_off,1982527.00,1,20,20,1,2,2,2026-06-06,2026-06-10,0,0,,0,57.461,0.0,0.0,0,0,,,Federal Reserve Board of Governors
+KXPARTYWINNL,Netherlands election,,custom,1979060.00,1,15,13,1,1,1,2025-11-10,2025-11-10,0,0,,0,157.611,0.0,0.0,0,0,,,ABC; Al Jazeera; Axios; BBC; Bloomberg News; CBS; CNN; constitutional court or s
+KXNEXTCANADAPM,Next Canada PM,,custom,1928432.00,1,8,8,1,1,1,2025-03-10,2025-03-10,0,0,,0,62.897,0.0,0.0,0,0,,,The New York Times
+KXPRESPOLAND,Polish presidential election,Foreign Elections,custom,1925805.00,1,8,8,1,1,1,2025-06-02,2025-06-02,0,0,,0,180.185,0.0,0.0,0,0,,,Politico
+KXVPRESNOMR,Republican VP nom,2028|US Elections,custom,1909553.00,1,25,0,0,0,0,,,25,1141556,0.003,22,,,,0,0,,,Republican Party; Democratic Party
+KXGOVCAPRIMARYPARTY,Who will advance from the CA Governor primary? (Party),Primaries|US Elections,one_off,1903097.00,1,3,3,1,2,2,2026-06-06,2026-06-10,0,0,,0,182.087,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+SENATEID,Idaho Senate race,Senate,custom,1872750.00,2,5,3,1,1,1,2026-11-04,2026-11-04,2,449,0.042,2,700.655,0.0,0.0,0,0,,,United States Congress
+GOVPARTYVT,Vermont Governor,Governor,custom,1860875.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,7563,0.055,2,646.609,0.0,0.0,0,0,,,US State Governments
+KXVOTEPERCENTCUOMO,cuomo vote percent,,one_off,1858900.00,1,7,7,1,1,1,2025-12-03,2025-12-03,0,0,,0,82.464,0.0,0.0,0,0,,,official government website of 
+KXSENATESEATSD,Democratic Senate seat count,Senate,one_off,1829517.00,2,28,0,0,0,0,,,28,728832,0.01,28,,,,0,0,,,United States Congress
+KXSENATEGAR,Georgia Republican Senate nominee,Primaries,custom,1761819.00,1,9,9,1,2,2,2026-05-20,2026-06-17,0,0,,0,407.162,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXWICOURTMOV,WI Court margin,US Elections,custom,1757073.00,1,22,22,1,1,1,2025-05-16,2025-05-16,0,0,,0,49.022,0.0,0.0,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Information; CBS; Ax
+KXMEGATSUNAMICOMBO,Will there be a mega tsunami?,Senate|House|Mixed Combos|US Elections|Other US Elections|Election Combos,one_off,1734687.00,1,1,0,0,0,0,,,1,430824,0.01,1,,,,0,0,,,United States Senate; United States House of Representatives
+KXVOTEPERCENTSLIWA,sliwa vote percent,,one_off,1721261.00,1,6,6,1,1,1,2025-12-03,2025-12-03,0,0,,0,82.463,0.0,0.0,0,0,,,official government website of 
+KXPORTUGALPRES,Portugal Presidency,,one_off,1714918.00,1,8,8,1,1,1,2026-02-13,2026-02-13,0,0,,0,159.316,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXNEWZEALANDPARLI,New Zealand election,International elections,one_off,1698968.00,1,7,0,0,0,0,,,7,866824,0.025,2,,,,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+PRESPARTYME,Maine presidential winner,US Elections,custom,1697186.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,84.223,0.0,0.0,0,0,,,Library of Congress
+KXGOVMINOMR,Michigan Governor Republican nominee,Primaries,custom,1644710.00,1,15,15,1,1,1,2026-08-05,2026-08-05,0,0,,0,555.496,0.0,0.0,0,0,,,Republican Party
+KXCOPRIMARY,Colorado Primary Winners,Primaries,one_off,1626593.00,6,12,12,6,1,1,2026-07-01,2026-07-01,0,0,,0,52.043,0.0,0.0,0,0,,,Republican Party; Democratic Party
+HOUSEAZ2,House AZ 2,House,one_off,1620804.00,1,2,2,1,1,1,2026-11-09,2026-11-09,0,0,,0,495.885,0.0,0.0,0,0,,,Library of Congress
+KXCLACTONBYELECTION,Clacton by-election winner,International elections,one_off,1601585.00,1,5,5,1,1,1,2026-08-14,2026-08-14,0,0,,0,37.788,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+GOVPARTYMI,Michigan Governor,Governor,custom,1571131.00,1,3,3,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.721,0.0,0.0,0,0,,,US State Governments
+KXTN7SMOV,Margin of victory in the TN-07 Special Election?,,one_off,1564809.00,1,7,7,1,1,1,2025-12-07,2025-12-07,0,0,,0,30.357,0.0,0.0,0,0,,,The Source Agencies are; the official government website of ; The Wall Street Jo
+SENATELA,Senate races,Senate,custom,1539094.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,323,0.035,2,700.473,0.0,0.0,0,0,,,United States Congress
+SENATEMA,Massachusetts Senate race,Senate,custom,1515357.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,700.425,0.0,0.0,0,0,,,United States Congress
+KXMAYORMINN,MINNE,US Elections,one_off,1504148.00,1,5,5,1,1,1,2025-11-07,2025-11-07,0,0,,0,107.331,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+HOUSEMT1,House MT 1,House,one_off,1502808.00,1,2,2,1,1,1,2026-11-05,2026-11-05,0,0,,0,491.838,0.0,0.0,0,0,,,Library of Congress
+SENATEWI,Wisconsin Senate race,Senate,custom,1486613.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,3734,0.03,2,88.337,0.0,0.0,0,0,,,United States Congress
+KXSENATEILD,ILD,Primaries,one_off,1482903.00,1,14,14,1,1,1,2026-03-18,2026-03-18,0,0,,0,351.007,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXMO01D,MO-01 democratic nominee,Primaries|US Elections,one_off,1470663.00,1,2,2,1,1,1,2026-08-05,2026-08-05,0,0,,0,299.48,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXNEXTUKPM,Next UK PM,International elections,custom,1465281.00,1,21,21,1,1,1,2026-07-20,2026-07-20,0,0,,0,307.013,0.0,0.0,0,0,,,The New York Times
+KXGOVCONOMR,Gov CO Nom R,Primaries,one_off,1443367.00,1,8,8,1,1,1,2026-07-09,2026-07-09,0,0,,0,217.346,0.0,0.0,0,0,,,Republican Party
+KXELECTIONDAYS,AP calling the election,,custom,1431987.00,1,15,15,1,1,1,2024-11-07,2024-11-07,0,0,,0,10.312,1.0,0.0,15,0,,,AP
+KXGOVAK,Alaska governor,US Elections|Governor,custom,1385148.00,1,16,0,0,0,0,,,16,612451,0.002,2,,,,0,0,,,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; Bloomberg News; The Info
+KXSKPRES,Next South Korean president,,custom,1377511.00,1,9,9,1,1,1,2025-06-03,2025-06-03,0,0,,0,53.061,0.0,0.0,0,0,,,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+KXLASTSTATECALL24,Last state called in 2024,,one_off,1342383.00,1,15,15,1,1,1,2024-11-11,2024-11-11,0,0,,0,10.006,1.0,0.0,15,0,,,AP
+SENATEFL,Florida Senate race,Senate,custom,1333447.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,2299,0.035,2,88.337,0.0,0.0,0,0,,,United States Congress
+GOVPARTYNH,New Hampshire Governor,Governor,custom,1319956.00,2,4,4,2,2,2,2025-01-10,2026-11-04,0,0,,0,285.889,0.0,0.0,0,0,,,US State Governments
+KXBRPRES1R,Brazil Presidential election: first round winner?,International elections|Brazil,one_off,1319034.00,1,8,8,1,1,1,2026-10-05,2026-10-05,0,0,,0,193.89,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KX2028DRUN,2028 D running,2028|US Elections,one_off,1309658.00,1,45,0,0,0,0,,,45,548844,0.03,45,,,,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+SENATEAR,Arkansas Senate race,Senate,custom,1309253.00,2,4,2,1,1,1,2026-11-04,2026-11-04,2,1015,0.082,2,700.531,0.0,0.0,0,0,,,United States Congress
+KXSTATESHIFTRIGHT,States shifting right,US Elections,custom,1306461.00,1,5,5,1,1,1,2025-01-06,2025-01-06,0,0,,0,70.212,0.0,0.0,0,0,,,United States Congress
+GOVPARTYOK,Oklahoma Governor,Governor,custom,1303310.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.59,0.0,0.0,0,0,,,US State Governments
+KXCANLIBSEATS,Liberal seats in Canada,Foreign Elections,custom,1286907.00,1,10,10,1,1,1,2025-05-27,2025-05-27,0,0,,0,66.095,0.0,0.0,0,0,,,CBC
+KXMAKERFIELDBY,Makerfield by-election winner,International elections,one_off,1284889.00,1,6,6,1,1,1,2026-06-19,2026-06-19,0,0,,0,35.333,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXNY12D,ny 12 democratic primary,Primaries|US Elections,one_off,1276837.00,1,20,20,1,1,1,2026-06-24,2026-06-24,0,0,,0,291.507,0.0,0.0,0,0,,,Republican Party; Democratic Party
+HOUSEME2,House Maine 2nd,House,custom,1271153.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,472426,0.003,2,64.264,0.0,0.0,0,0,,,Library of Congress
+KXSENMAJ,120th Congress: Who will be elected Senate Majority Leader?,US Elections,one_off,1259893.00,1,7,0,0,0,0,,,7,972233,0.01,4,,,,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+KXNY13D,NY-13 Democratic nominee,Primaries|US Elections,one_off,1233563.00,1,8,8,1,1,1,2026-06-24,2026-06-24,0,0,,0,183.486,0.0,0.0,0,0,,,Republican Party; Democratic Party
+HOUSEAKAL,House Alaska at-large,House,custom,1229086.00,2,5,2,1,1,1,2025-01-03,2025-01-03,3,475640,0.006,2,64.264,0.0,0.0,0,0,,,Library of Congress
+KXMIDTERMVOTETURN,Midterm Voter Turnout,US Elections,one_off,1228632.00,502,5062,99,10,2,2,2026-11-10,2026-11-11,4963,817085,0.89,445,187.312,0.01,0.0,1,0,,,the relevant election commission of the country in which  takes place
+KXGOVRINOMD,Gov RI Nom D,Primaries,one_off,1220026.00,1,3,3,1,1,1,2026-09-10,2026-09-10,0,0,,0,433.473,0.0,0.0,0,0,,,Republican Party
+POPVOTEMOVFL,Florida margin of victory,US Elections,custom,1217439.00,1,9,9,1,1,1,2025-01-06,2025-01-06,0,0,,0,70.263,0.0,0.0,0,0,,,United States Congress
+KXMAYORJERSEY,Jersey City mayoral election,,custom,1207634.00,1,6,6,1,1,1,2025-12-05,2025-12-05,0,0,,0,253.216,0.0,0.0,0,0,,,The New York Times
+KXSENATENHD,New Hampshire Democratic Senate nominee,Primaries,custom,1178223.00,1,6,6,1,1,1,2026-09-09,2026-09-09,0,0,,0,529.425,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXSENATEMND,Minnesota Democratic Senate nominee,Primaries,custom,1159938.00,1,10,10,1,2,2,2026-05-03,2026-08-12,0,0,,0,501.563,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXNH1D,New Hampshire 1 Democratic primary,Primaries|US Elections,one_off,1143975.00,1,3,3,1,1,1,2026-09-09,2026-09-09,0,0,,0,433.944,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXCAELECTION,California general elections ,House|US Elections,one_off,1142245.00,8,16,14,7,5,5,2026-11-04,2026-11-11,2,123924,0.01,1,127.938,0.0,0.0,0,0,5,3,the California Secretary of State
+KXIL9D,IL 9 Democratic primary,Primaries|US Elections,one_off,1137379.00,1,11,11,1,1,1,2026-03-18,2026-03-18,0,0,,0,33.755,0.0,0.0,0,0,,,Republican Party; Democratic Party
+SENATESD,South Dakota Senate race,Senate,custom,1134235.00,2,5,3,1,1,1,2026-11-04,2026-11-04,2,1098,0.027,2,700.651,0.0,0.0,0,0,,,United States Congress
+KXVENEZUELALEADER2,Who will be the head of state of Venezuela on date?,International,one_off,1127761.00,1,15,15,1,1,1,2026-06-01,2026-06-01,0,0,,0,140.958,0.0,0.0,0,0,,,the Federal Register; official organizational website where role is housed; or c
+KXMAPRIMARY,Massachusetts Primary Winners,Primaries,one_off,1091029.00,7,23,16,6,1,1,2026-09-02,2026-09-02,0,0,,0,105.541,0.0,0.0,0,0,,,Republican Party; Democratic Party
+PRESPARTYNM,New Mexico presidential winner,US Elections,custom,1055105.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,84.24,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYIL,Illinois Governor,Governor,custom,1048661.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.423,0.0,0.0,0,0,,,US State Governments
+ECDJTBLOWOUT,Trump blowout,2028,one_off,1040016.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,66.281,0.0,0.0,0,0,,,United States Congress
+KXCOLOMBIAPRESR1,Who will win the first round of the Colombian presidential election?,International elections,one_off,1021462.00,1,5,5,1,1,1,2026-06-01,2026-06-01,0,0,,0,87.909,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXSENATECOD,COD,Primaries,one_off,1016755.00,1,4,4,1,1,1,2026-07-01,2026-07-01,0,0,,0,363.402,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXENDORSECUOMO,CUOMO,US Elections,one_off,1006483.00,1,6,6,1,4,4,2025-10-23,2025-11-04,0,0,,0,88.7,0.0,0.0,0,0,4,3,official social media accounts controlled by ; ABC; The Wall Street Journal; off
+KXMAYORMIA,Miami election,,custom,985950.00,1,2,2,1,1,1,2025-12-12,2025-12-12,0,0,,0,336.134,0.0,0.0,0,0,,,The New York Times
+KXGOVPARTYAK,Alaska Governor,Governor,one_off,980736.00,1,2,0,0,0,0,,,2,370338,0.002,2,,,,0,0,,,US State Governments
+KXSENATESCR,SCR,Primaries,one_off,977821.00,1,4,4,1,1,1,2026-06-10,2026-06-10,0,0,,0,342.386,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXGOVTNNOMR,TN Gov Nom R,Primaries,one_off,975693.00,2,5,5,2,2,1,2025-12-22,2026-08-07,0,0,,0,172.253,0.0,0.0,0,0,,,Republican Party
+KXDROPOUTPRIMARY,Which primary candidates will drop out?,US Elections,one_off,974584.00,1,17,17,1,10,10,2026-04-13,2026-08-18,0,0,,0,7.364,0.588,0.471,10,8,10,7,Fox News; MSNBC; The Wall Street Journal; Semafor; ABC; CBS; The New York Times;
+KXTXSENOUTCOME,Texas Senate outcome combo,Senate|US Elections|Senate Combos|Election Combos,one_off,957365.00,1,4,4,1,2,2,2026-05-27,2026-11-04,0,0,,0,148.032,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+HOUSEVA1,House VA 1,House,one_off,953451.00,1,2,2,1,1,1,2026-11-05,2026-11-05,0,0,,0,420.131,0.0,0.0,0,0,,,Library of Congress
+KXNY7D,Who will be the Democratic nominee for NY-7?,Primaries|US Elections,one_off,943022.00,1,9,9,1,1,1,2026-06-24,2026-06-24,0,0,,0,210.438,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXIRELANDPARTY,Irish election winner,Foreign Elections,custom,939423.00,1,8,8,1,1,1,2024-12-03,2024-12-03,0,0,,0,39.07,0.0,0.0,0,0,,,Irish Times
+KXGOVMENOMD,Maine Governor Democratic nominee,Primaries,custom,918319.00,1,11,11,1,1,1,2026-06-19,2026-06-19,0,0,,0,447.939,0.0,0.0,0,0,,,Republican Party
+HOUSENC1,House NC 1,House,one_off,914488.00,2,4,4,2,2,2,2025-01-03,2026-11-05,0,0,,0,278.198,0.0,0.0,0,0,,,Library of Congress
+KXGOVCONOMD,Gov CO Nom d,Primaries,one_off,911539.00,1,3,3,1,1,1,2026-07-01,2026-07-01,0,0,,0,208.457,0.0,0.0,0,0,,,Republican Party
+KXCANCONSEATS,Conservative seats in Canada,Foreign Elections,custom,909154.00,1,10,10,1,1,1,2025-05-27,2025-05-27,0,0,,0,69.078,0.0,0.0,0,0,,,CBC
+KXGOVNJNOMD,New Jersey Governor Democratic nominee,Primaries,custom,893627.00,1,8,8,1,1,1,2025-06-12,2025-06-12,0,0,,0,215.417,0.0,0.0,0,0,,,Republican Party
+KXTAIPEIMAYOR,Taipei mayoral election winner,International elections|Local,one_off,887594.00,1,6,0,0,0,0,,,6,598924,0.01,2,,,,0,0,,,Central Election Commission of Taiwan
+KXNEXTSPEAKER,Next House speaker,House,custom,881222.00,1,8,0,0,0,0,,,8,559191,0.002,5,,,,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; U.S. Hou
+SENATEWV,West Virginia Senate race,Senate,custom,881054.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,700.456,0.0,0.0,0,0,,,United States Congress
+KXHOUSENC11,House NC 11,House,one_off,872322.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,405.498,0.0,0.0,0,0,,,Library of Congress
+KXENDORSEMAM,Mamdani,US Elections,one_off,862484.00,1,9,9,1,4,4,2025-09-15,2025-11-04,0,0,,0,96.648,0.0,0.0,0,0,4,4,official social media accounts controlled by ; ABC; The Wall Street Journal; off
+KXDEMVASWEEP,Dems win all 3 statewide races in Virginia,,one_off,858789.00,1,1,1,1,1,1,2025-11-07,2025-11-07,0,0,,0,31.139,0.0,0.0,0,0,,,the United Nations Electoral Assistance Division; the official election authorit
+KXSTATEBALLOTMEASURE,Which state ballot measures will pass?,Referendums|US Elections|Other US Elections,one_off,850274.00,39,126,124,39,5,5,2026-09-22,2026-11-10,2,5845,0.22,1,85.246,0.0,0.0,0,0,5,4,official state election websites
+KXTX33D,Who will be the Democratic nominee for TX-33?,Primaries|US Elections,one_off,844054.00,1,3,3,1,2,2,2026-04-20,2026-05-27,0,0,,0,168.532,0.0,0.0,0,0,,,Republican Party; Democratic Party
+GOVPARTYCO,Colorado Governor,Governor,custom,830611.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.466,0.0,0.0,0,0,,,US State Governments
+KXGOVWYNOMR,Gov WY Nom R,Primaries,one_off,827213.00,1,5,5,1,1,1,2026-08-19,2026-08-19,0,0,,0,239.434,0.0,0.0,0,0,,,Republican Party
+GOVPARTYNE,Nebraska Governor,Governor,one_off,814579.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,488.751,0.0,0.0,0,0,,,US State Governments
+KXDJTFLAK,Trump Florida Alaska,US Elections,one_off,814184.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,66.285,0.0,0.0,0,0,,,United States Congress
+KXMIPRIMARY,Michigan Primary Winners,Primaries,one_off,813191.00,12,36,36,12,2,2,2026-08-05,2026-08-06,0,0,,0,77.929,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXUSTURNOUT,Turnout in US elections,US Elections,one_off,810051.00,2,20,8,1,1,1,2026-05-16,2026-05-16,12,3894,0.31,7,44.494,0.0,0.0,0,0,,,the relevant election commission of the country in which  takes place
+KXPRESPARTY,Party winning presidency,2028,custom,809347.00,2,4,0,0,0,0,,,4,393685,0.02,4,,,,0,0,,,Office of the Presidency
+KXMESENOUTCOME,Maine Senate: Exact outcome,Senate|Senate Combos|Election Combos,one_off,797471.00,1,4,4,1,2,2,2026-06-10,2026-11-04,0,0,,0,144.352,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXGOVAKPRIMARY,AK primary,Primaries,one_off,792209.00,1,16,16,1,4,4,2026-08-19,2026-09-01,0,0,,0,333.047,0.0,0.0,0,0,4,4,relevant county clerk or board of elections; Attorney General of the United Stat
+KXDEMCOREFOURSENATESWEEP,Will Democrats sweep the Core Four senate races in 2026?,Senate|Senate Combos|Election Combos,one_off,790301.00,1,1,1,1,1,1,2026-11-04,2026-11-04,0,0,,0,294.697,0.0,0.0,0,0,,,the United Nations Electoral Assistance Division; the official election authorit
+KXNY10D,NY-10 democratic nominee,Primaries|US Elections,one_off,785075.00,1,5,5,1,1,1,2026-06-24,2026-06-24,0,0,,0,238.465,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXCLOSEST2025,Closest race of 2025,US Elections,one_off,776198.00,1,6,6,1,1,1,2025-12-12,2025-12-12,0,0,,0,66.871,0.0,0.0,0,0,,,CBS News; Fox News; official state or local election division websites; ABC; The
+HOUSEIA1,House IA 1,House,one_off,776082.00,2,5,5,2,2,2,2025-01-03,2026-11-04,0,0,,0,64.264,0.0,0.0,0,0,,,Library of Congress
+KXMOVNJ11SPECIAL,NJ-11 special election MOV?,US Elections,one_off,769052.00,1,7,7,1,1,1,2026-05-14,2026-05-14,0,0,,0,85.187,0.0,0.0,0,0,,,official election authority responsible for certifying results in 
+KXSTATEDEEPKH,Kamala winning deep red state,US Elections,custom,764623.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,73.284,0.0,0.0,0,0,,,United States Congress
+KXMAMDANINYC,Will Mamdani outperform the polls in the 2025 NYC Mayoral race,,one_off,753112.00,1,1,1,1,1,1,2025-12-02,2025-12-02,0,0,,0,53.288,0.0,0.0,0,0,,,or equivalent electoral authority of the relevant ; the formal proclamation by t
+SENATETN,Tennessee Senate race,Senate,custom,748918.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,382.914,0.0,0.0,0,0,,,United States Congress
+KXPLATNERREPLACE,How will Platner's replacement be chosen?,Senate,one_off,747717.00,1,6,6,1,2,2,2026-07-10,2026-07-27,0,0,,0,19.817,0.167,0.167,1,1,,,The Verge; ABC; Fox News; The Wall Street Journal; The Guardian; Bloomberg News;
+GOVPARTYMD,Maryland Governor,Governor,custom,739371.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.426,0.0,0.0,0,0,,,US State Governments
+HOUSEPA1,House PA 1,House,one_off,729772.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,490.362,0.0,0.0,0,0,,,Library of Congress
+PRESPARTYOH,Ohio presidential winner,US Elections,custom,728599.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.32,0.0,0.0,0,0,,,Library of Congress
+KXTRUMPBULLCASECOMBO,Trump's year: Bull (dream) case?,House|Mixed Combos|Trump|US Elections|Election Combos,annual,724274.00,1,1,1,1,1,1,2026-11-08,2026-11-08,0,0,,0,325.467,0.0,0.0,0,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXHOUSEWINSTATE,How many seats will party win in state?,House|House Combos|US Elections|Election Combos,one_off,714913.00,18,102,89,15,6,6,2026-11-04,2026-11-11,13,42942,0.055,6,78.141,0.0,0.0,0,0,6,4,official electoral commission or electoral authority responsible for 
+GOVPARTYSC,South Carolina Governor,Governor,custom,702389.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.614,0.0,0.0,0,0,,,US State Governments
+KXTNPRIMARY,Tennessee Primary Winners,Primaries,one_off,699714.00,13,52,52,13,1,1,2026-08-07,2026-08-07,0,0,,0,79.492,0.019,0.019,1,1,,,Republican Party; Democratic Party
+GOVPARTYNM,New Mexico Governor,Governor,custom,697687.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.533,0.0,0.0,0,0,,,US State Governments
+KXMIDTERMHAPPEN,Will the midterms occur?,US Elections,one_off,695146.00,1,1,1,1,1,1,2026-11-03,2026-11-03,0,0,,0,160.157,0.0,0.0,0,0,,,The Washington Post; Fox News; the Federal Election Commission; the New York Tim
+HOUSECO3,House CO 3,House,one_off,693675.00,1,2,2,1,1,1,2026-11-06,2026-11-06,0,0,,0,492.843,0.0,0.0,0,0,,,Library of Congress
+KX2028RRUN,2028 R running,2028|US Elections,one_off,684127.00,1,42,0,0,0,0,,,42,284221,0.036,41,,,,0,0,,,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; Bloomberg News; The Info
+KXTALARICOPRIMARYCOUNTIES,Which counties will James Talarico win in the Texas Dem primary?,Primaries|US Elections,one_off,681136.00,1,7,7,1,1,1,2026-03-20,2026-03-20,0,0,,0,25.338,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+PRESPARTYHI,Hawaii presidential winner,US Elections,custom,676959.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,84.24,0.0,0.0,0,0,,,Library of Congress
+GOVPARTYCT,Connecticut Governor,Governor,custom,675135.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,646.497,0.0,0.0,0,0,,,US State Governments
+PRESPARTYAK,Alaska presidential winner,US Elections,custom,664044.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,84.247,0.0,0.0,0,0,,,Library of Congress
+KXJULYCHARTER26,Will the Bangladesh July Charter referendum pass?,Foreign Elections,one_off,661389.00,1,1,1,1,1,1,2026-02-16,2026-02-16,0,0,,0,32.309,0.0,0.0,0,0,,,BBC News; The Wall Street Journal; Bloomberg News; NBC News; official electoral 
+KXLOSEPRIMARYSENATER,How many Senate Republicans will lose their primary?,Primaries,one_off,649237.00,1,5,5,1,3,3,2026-05-17,2026-08-28,0,0,,0,216.785,0.0,0.0,0,0,3,2,ABC; Fox News; MSNBC; The Wall Street Journal; Semafor; The Information; CBS; Th
+KXROMANIAMOV,Romania presidential election MOV,,custom,648464.00,1,8,8,1,1,1,2025-05-19,2025-05-19,0,0,,0,8.477,1.0,0.0,8,0,,,ABC; Axios; CBS; CNN; Fox News; MSNBC; Politico; Reuters; Semafor; the Associate
+KXMAMDANIBOROUGHS,Mamdani Boroughs,,one_off,648390.00,1,5,5,1,1,1,2025-12-02,2025-12-02,0,0,,0,118.288,0.0,0.0,0,0,,,City & State New York; CNN; Fox News; Gothamist; MSNBC; New York Daily News; New
+KXBRPRES2MOV,Brazil Presidential Election Runoff: Margin of Victory,International elections|Brazil,one_off,634883.00,1,8,8,1,1,1,2026-10-26,2026-10-26,0,0,,0,20.245,0.0,0.0,0,0,,,Tribunal Superior Eleitoral (TSE)
+KXGOVMNNOMD,Minnesota Democratic nominee for Governor,Primaries,one_off,631289.00,1,10,10,1,1,1,2026-08-12,2026-08-12,0,0,,0,224.579,0.0,0.0,0,0,,,Republican Party
+KXTXPRIMARY,Texas Primary Winners,Primaries|US Elections,one_off,628093.00,53,192,192,53,4,4,2026-03-06,2026-06-11,0,0,,0,22.581,0.0,0.0,0,0,4,3,Republican Party; Democratic Party
+KXSNPMAJORITY,Will the SNP win a majority in the Scottish Parliament election?,International elections,one_off,610375.00,1,4,4,1,1,1,2026-05-15,2026-05-15,0,0,,0,106.749,0.0,0.0,0,0,,,official electoral commission or electoral authority responsible for 
+KXPRESCHILER1,Chile presidential election first round,,one_off,605615.00,1,8,8,1,1,1,2025-12-15,2025-12-15,0,0,,0,67.596,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXGAPRIMARY,GA Primary Winners,Primaries,one_off,599823.00,18,72,64,17,2,2,2026-05-20,2026-06-17,0,0,,0,52.027,0.0,0.0,0,0,,,Republican Party; Democratic Party
+PRESPARTYIL,Illinois presidential winner,US Elections,custom,595225.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,87.307,0.0,0.0,0,0,,,Library of Congress
+KXTEXASGOP1ROUND,Texas GOP primary won in 1 round,Primaries|US Elections,one_off,595133.00,1,1,1,1,1,1,2026-03-06,2026-03-06,0,0,,0,143.624,0.0,0.0,0,0,,,official electoral authority conducting election; Fox News; The Wall Street Jour
+PRESPARTYCO,Colorado presidential winner,US Elections,custom,591608.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,85.221,0.0,0.0,0,0,,,Library of Congress
+HOUSEVA2,VA-02,House,one_off,591556.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,490.339,0.0,0.0,0,0,,,Library of Congress
+KXPA3D,PA 3 Democratic primary,Primaries|US Elections,one_off,578980.00,1,7,7,1,1,1,2026-05-20,2026-05-20,0,0,,0,321.54,0.0,0.0,0,0,,,Republican Party; Democratic Party
+KXCANADAPARTY,Canadian election winner,Foreign Elections,custom,576147.00,1,6,6,1,1,1,2025-05-27,2025-05-27,0,0,,0,214.065,0.0,0.0,0,0,,,CBC
+KXSTATEFLIPKH,Kamala flips a Trump state,US Elections,custom,574484.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,73.284,0.0,0.0,0,0,,,United States Congress
+HOUSEPA8,House Pennslyvania 8th,House,custom,574330.00,2,4,4,2,2,2,2025-01-03,2026-11-04,0,0,,0,277.42,0.0,0.0,0,0,,,Library of Congress
+KXGOVWINS,Who will hold more governorships after the midterms?,Governor Combos|Governor|Election Combos,one_off,571393.00,1,3,3,1,1,1,2026-11-04,2026-11-04,0,0,,0,231.782,0.0,0.0,0,0,,,official state or local election division websites; National Governors Associati
+HOUSEMI7,House Michigan 7th,House,custom,564537.00,2,5,5,2,2,2,2025-01-03,2026-11-04,0,0,,0,64.264,0.0,0.0,0,0,,,Library of Congress
+SENATENJ,New Jersey Senate race,Senate,custom,561622.00,1,2,2,1,1,1,2026-11-04,2026-11-04,0,0,,0,700.424,0.0,0.0,0,0,,,United States Congress
+KXNYCFINALMARGIN,NYC first round margin,,custom,559622.00,1,7,7,1,1,1,2025-07-23,2025-07-23,0,0,,0,59.554,0.0,0.0,0,0,,,New York Post; The New York Times; Reuters; the Associated Press
+KXPRIMARYMOVD,Primary margins of victory,Primaries,one_off,558908.00,10,73,73,10,4,4,2026-08-29,2026-09-17,0,0,,0,12.762,0.877,0.137,64,10,4,4,official election authority responsible for certifying results in 
+KXAFDPERCENT,AFD %,,custom,555637.00,1,6,6,1,1,1,2025-02-24,2025-02-24,0,0,,0,65.318,0.0,0.0,0,0,,,Federal Returning Officer of Germany
+KXLAPRIMARY,Louisiana Primary Winners,Primaries|US Elections,one_off,546025.00,9,30,30,9,1,1,2026-11-03,2026-11-03,0,0,,0,250.025,0.0,0.0,0,0,,,Republican Party; Democratic Party
+PRESPARTYNE2,NE-2 presidential winner,US Elections,custom,544034.00,1,2,2,1,1,1,2025-01-06,2025-01-06,0,0,,0,82.284,0.0,0.0,0,0,,,United States Congress
+KXVAPRIMARY,Virginia Primary Winners,Primaries,one_off,543554.00,12,58,58,12,3,3,2026-05-28,2026-08-05,0,0,,0,77.441,0.103,0.0,6,0,3,1,Republican Party; Democratic Party
+KXSWINGSWEEP24,Swing state sweep 24,US Elections,one_off,538948.00,1,1,1,1,1,1,2025-01-06,2025-01-06,0,0,,0,66.215,0.0,0.0,0,0,,,United States Congress
+KXCA11PERSON,CA-11 House winner? (Person),US Elections,one_off,536197.00,1,5,5,1,2,2,2026-06-03,2026-11-06,0,0,,0,50.023,0.0,0.0,0,0,,,relevant county clerk or board of elections; Attorney General of the United Stat
+SENATEMD,Maryland Senate race,Senate,custom,532011.00,2,4,2,1,1,1,2025-01-03,2025-01-03,2,543,0.073,2,88.337,0.0,0.0,0,0,,,United States Congress
+KXLAMAYORPRIMARYEXACT,LA Mayor: Exact place,Primaries|Other US Elections,one_off,523694.00,1,6,6,1,2,2,2026-06-09,2026-06-27,0,0,,0,10.007,0.667,0.0,4,0,,,Bureau of Labor Statistics; Bureau of Labor Statistics; Federal Reserve Board of
+KXHUNGARYPARLIPARTY,Which party will win the Hungary parliamentary elections?,International elections|Hungary,one_off,522501.00,1,4,4,1,1,1,2026-04-12,2026-04-12,0,0,,0,87.368,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXAKPRIMARY,AK-AL primary advancers,Primaries,one_off,512079.00,1,5,5,1,4,4,2026-08-19,2026-09-01,0,0,,0,100.449,0.0,0.0,0,0,4,2,official election authority responsible for certifying results in 
+KXPERUPRESMATCHUP,Peru presidential matchup,International elections|Peru,one_off,507629.00,1,15,15,1,1,1,2026-05-15,2026-05-15,0,0,,0,36.022,0.0,0.0,0,0,,,Federal Reserve Board of Governors
+KXNEPALHOUSE,Nepal House of Representatives winner,Foreign Elections,one_off,495798.00,1,8,8,1,1,1,2026-03-17,2026-03-17,0,0,,0,60.061,0.0,0.0,0,0,,,"the official electoral commission, constitutional court, or equivalent electoral"
+KXCANADAELECT,Canadian election called,,custom,490339.00,1,1,1,1,1,1,2025-03-23,2025-03-23,0,0,,0,79.202,0.0,0.0,0,0,,,The New York Times
