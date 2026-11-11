@@ -24,7 +24,7 @@ import urllib.request
 from urllib.parse import urlsplit, quote
 
 KALSHI = "https://external-api.kalshi.com/trade-api/v2"
-# Hosts of the feeds the repo's other recorders already read, plus a few named public ones. Sports score sites (ESPN, NHL, MLB, NBA.com) are NOT on it: their terms forbid automated collection (V2's INGAMELAG1 source probe, Nov 11, 2026). Adding a host is a code edit and a review.
+# Hosts of the feeds the repo's other recorders already read, plus a few named public ones. Sports league and broadcaster score sites are NOT on it (test/noSportsScoreSitesGates.test.js): their terms forbid automated collection (V2's INGAMELAG1 source probe, Nov 11, 2026). Adding a host is a code edit and a review.
 ALLOWLIST = frozenset({
     "api.weather.gov", "ensemble-api.open-meteo.com", "mesonet.agron.iastate.edu",
     "www.okx.com", "www.deribit.com", "api.coinbase.com", "api.kraken.com",
