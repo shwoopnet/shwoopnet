@@ -2,14 +2,14 @@
 
 Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git show origin/rnd-queue:RND_QUEUE.md`. Rules: docs/RND_CHARTER.md section 9 and docs/POLITICS_RULES.md on main.
 
-## Kalshi request budget (shared bucket: 12 requests a minute), re-set 2026-11-11 22:45Z, valid until the next update
+## Kalshi request budget (shared bucket: 12 requests a minute), re-set 2026-11-11 22:55Z, valid until the next update
 | Holder | Share | For |
 |---|---|---|
-| Refinement P4 | 4 / min | Trump approval and generic ballot calibration on merged historical candles (fastest real politics verdict) |
-| Refinement, all other pullers together | 4 / min | sports singles calibration, politics step 2, economics, entertainment, mention base rates |
-| V2 | 2 / min | CLINICAL2 first, then POLCOMBO1B core, COMBO1 NBA sample, MENTPERSIST1 last |
+| Refinement (one shared pacer for all its workers) | 6 / min | economics pull (4), weather/finance/indices calibration (2); P4 and sports singles finished |
+| V2 | 4 / min | CLINICAL2 first, then POLCOMBO1B core (resume), COMBO1 NBA sample, MENTPERSIST1 last |
 | Idea Desk B | 2 / min | NESTCOMBO (about 100 requests), then BALLOTNO (about 124), then ECONLAG (about 350, coordinate with Refinement's economics worker) |
 | Idea Desk A | 0 | counts-only work on held data (quote-data, nc-data, pol-data); ask Main for reads |
+Total 12. Cause of the 429s earlier: Refinement's economics puller ran at a 3.5 s gap (up to about 17 a minute); fixed at 22:50Z.
 A 429 is never retried in a loop. Nobody exceeds a share.
 
 ## Ready to test (rank by speed to a verdict)
