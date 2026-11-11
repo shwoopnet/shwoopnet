@@ -1,0 +1,27 @@
+series,events_with_history,median_days_open,events_per_year,why
+KXTRUMPAPPROVE,70,1.0,283.9,daily; Trump approval rating; active
+KXVHGCB,41,1,166.3,daily; VoteHub GCB; settled in last 120d
+KXACTBLUETOP,20,6.0,60.8,weekly; Top ActBlue fundraiser?; settled in last 120d
+KXBABELMANDEBWEEKLY,15,10,52.1,weekly; Traffic through the Bab el-Mandeb Strait; active
+KXSUEZWEEKLY,15,10,52.1,weekly; Traffic through the Suez Canal; active
+KXMAMDANIEO,32,6.0,52.1,weekly; Will Mamdani sign an executive order?; active
+KXTRUMPENDORSEMENTS,30,6.0,51.9,weekly; How many people will Trump endorse this week?; active
+KXHORMUZPEAK,17,10,51.7,weekly; Peak traffic through the Strait of Hormuz?; active
+KXAPRPOTUS,263,6,51.6,weekly; President RCP approval rating this week; active
+KXTRUTHSOCIAL,39,6,51.6,weekly; Number of Trump Truth Social posts this week?; active
+KXTRUMPVH,22,6.0,50.8,weekly; Trump Votehub approval rating; active
+KXHORMUZWEEKLY,28,10.0,50.3,weekly; Traffic through the Strait of Hormuz; active
+KXTRUMPACT,38,6.0,49.7,weekly; Will Trump do anything today?; active
+KXTRUMPNOMNUM,15,7,48.5,weekly; How many nominations will Trump send to the S; active
+KXEOWEEK,54,12.0,46.1,weekly; EO this week?; active
+KXPANAMAWEEKLY,13,10,45.2,weekly; Traffic through the Panama Canal; active
+KXTRUMPPHOTO,26,7.0,45.0,weekly; Trump photos; active
+KXHORMUZMAX,13,10,38.6,weekly; Maximum traffic through the Strait of Hormuz?; active
+KXTRUMPNUMSTATES,8,29.5,13.7,monthly; How many states will Trump visit?; active
+KXNEWTARIFFS,10,17.5,12.2,monthly; New tariffs this month?; active
+KXLAGODAYS,20,30.0,10.9,monthly; Mar-a-Lago trips; settled in last 120d
+KXEPSTEIN,19,21,10.4,weekly; Epstein documents; active
+KXTRUMPMEET,13,29,10.3,monthly; Who will Trump meet?; settled in last 120d
+KXBILLSCOUNT,11,30,6.0,monthly; Bills signed monthly; settled in last 120d
+KXTRUMPTIME,19,7,33.0,one_off; Will Trump post this hour?; settled in last 120d
+KXCABLEAVE,6,28.0,3.5,annual; Cabinet member leaving; active
