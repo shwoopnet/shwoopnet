@@ -21,9 +21,9 @@ Find strategies that clear the owner's bar, not variants of what we already run.
 ## 3. Intake gate
 
 Before any work, every idea passes the four uniqueness checks of `docs/STRATEGY_LIFECYCLE.md` section 7d:
-1. A different information source from the live strategies.
-2. At least 2 of 4 axes differ: signal source, market type, timing structure, exit logic.
-3. Low correlation with the live strategies on the cash basis: daily cash P&L, Pearson under 0.3, at least 20 overlapping days, applied at the first read.
+1. The SIGNAL is different: a different data source or a different market type. Timing structure or price zone alone does not make it different.
+2. The EXIT is different: time-based, a target or scaling, or paired within its own position; hold to settlement also counts when the entry rules are different and the strategy will not hedge or interfere with another market or strategy. Signal and exit must both differ, and the entry rules too (this replaces "2 of 4 axes").
+3. Correlation under 0.3 with EVERY live strategy on the cash basis: daily cash P&L, Pearson r, at least 20 overlapping days, applied at the first read.
 4. Not on the DECLINED list.
 
 Then ONE LINE of registration, with the pre-registered bar, before anything is tested. No line, no test.
