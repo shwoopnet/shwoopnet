@@ -38,7 +38,22 @@ These are caps, not permission. A probe starts only after the owner approves its
 - **Return after a kill:** a 14 day cool-off, then a shadow PF of 1.3 or better, then the owner approves. Nothing resumes on a date alone.
 - **Scheduled events:** trading around a scheduled event is allowed only if the strategy was built and tested for that window.
 
-## 4. What is not decided
+## 4. Further rules (owner popups 17 to 28, Nov 11, 2026)
+
+- **Weather combos:** same city, linked days or brackets first.
+- **Mention combos:** words in the same speech or call first.
+- **Sports combos:** price consistency only, against Kalshi's own single markets. No outside sports data.
+- **Conflicts:** the first strategy in holds the market; the other skips it.
+- **Poll sources:** only those whose terms were read and allow it. Today that is the Wikipedia polling tables via its API.
+- **Attention signals (Wikipedia pageviews, GDELT):** test both directions, pre-registered.
+- **Trump approval and generic ballot:** run the calibration test on both now (the fastest real politics verdict).
+- **Foreign politics:** only markets settling within 14 days.
+- **Activity counts (executive orders, bills signed):** base rates plus the count so far this week, via GovInfo.
+- **Mention base rates:** Kalshi's own settled mention history.
+- **Resolution-rule edge cases:** flagged to the owner with the rule text, never automatic.
+- **News fade:** pre-register three delays (15 minutes, 1 hour, 4 hours), all counted in the deflation.
+
+## 6. What is not decided
 
 - No code places any politics or parlay order, and the second slot registry (`functions/kalshiSlotLib.js`) holds none. Admitting one is a separate reviewed pull request and the owner's own popup.
 - The exact meaning of "10c per dollar after fees" is left to each probe spec to define and the owner to approve.
