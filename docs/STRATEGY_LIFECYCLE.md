@@ -18,6 +18,8 @@ Owner priority, Nov 9, 2026: full time algo trading; a goal of **at least one ne
 | 3 Live | The slot size ladder step 1, then steps; or a ladder market | the existing slot caps | owner merges |
 | 4 Retired / killed | Latched off; open orders still settle and are sold; the record stays in the report | none | automatic (kill rule) |
 
+**Five-stage names (Nov 11, 2026, see 7f).** Idea (registered, untested; before Stage 1), Shadow (Stage 1), Probe (Stage 2, the incubator), Live (Stage 3, the proven bar of 7f applies), Retired (Stage 4).
+
 ## 3. Fast path: PASS rules
 
 | Step | Rule (cash PF, 10 contract fees) |
@@ -161,6 +163,40 @@ A Charter line making the check explicit is proposed for the owner. `docs/CHARTE
 | Maker or resting entries on gold | Nov 10, 2026 | W-MAKERREPLAY1 | Closed by evidence (not an owner NO) | Gold resting-entry variants |
 | Gold 94.5c price floor | Nov 10, 2026 | W-BAND945 | Closed by evidence (not an owner NO) | Gold price-floor variants near 0.945 |
 | GOLDHOLD | Nov 11, 2026 | Name given in an owner message Nov 11 | Name given in an owner message Nov 11; no definition found in the repo: the owner or the EA must supply it | GOLDHOLD, and anything the owner or EA defines it as |
+
+## 7f. Classifying strategies (Nov 11, 2026, the owner)
+
+The owner's popup answers on how to classify strategies. Four rules.
+
+1. **Family is the ENTRY MECHANISM plus the EXIT STYLE.** It is not the data source or the market type for the label. Data source and market type still matter for the uniqueness test (7d check 1).
+2. **Risk class** is four things together: the win-rate class and loss shape, the dollars at risk per order and per day, and the correlation group.
+3. **Five stages:** Idea, Shadow, Probe, Live, Retired. Idea is a visible stage for registered, untested candidates. Probe is a small live test (the incubator of section 2). Live means proven.
+4. **The proven bar (Probe to Live):** cash PF 1.3 or better over at least 100 fills, in 2 of 3 windows.
+
+**"In 2 of 3 windows" (PROPOSED definition, for the owner to confirm).** Split the strategy's fills by time into three consecutive windows of equal fill count. At least 2 of the 3 windows have cash PF 1.3 or better AND the whole run is 1.3 or better. Cash basis as everywhere in this doc (fill price plus fee, early sells included).
+
+**One-line classification card (every candidate registration carries one):**
+
+`NAME | family (entry mechanism + exit style) | risk class (win-rate class, loss shape, $ per order, $ per day cap, correlation group) | stage`
+
+**Current strategies, classified.** Figures are only those already in the repo; otherwise "see rotation report".
+
+| NAME | Family (entry + exit) | Risk class | Stage |
+|---|---|---|---|
+| Gold L1 | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | Live. FLAG: recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) would NOT meet the new 1.3 proven bar. The owner should decide whether to reclassify it Probe |
+| OICORE | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
+| EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin: 5 fills |
+| XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe |
+| KESTREL | Favourite-late (AUD/USD); hold | see rotation report; group A | Retired by PR 772; never deployed |
+| GOLDALL, XRPFAV6, LANTERN | Favourite-late shadow rules | no money at risk | Retired shadow rules (PR 772) |
+
+**Idea stage (registered or named, untested).** RAINCAL (rain and weather forecast prior), options-implied probability on the hourly Bitcoin ladder (Deribit recorder), INGAMELAG1 (in-game lag), OKX liquidation cascades, PERPCARRY1 (perps carry). Each stays Idea until it is pre-registered with the four uniqueness checks (7d) and a classification card.
+
+**Strategies page follow-up (not built).** A follow-up page PR would:
+- show a stage chip on every card, with the five stages;
+- add a family tag: "entry mechanism + exit style";
+- add a risk tag: win-rate class, loss shape, $ per order, $ per day, correlation group;
+- give the flow board Idea and Probe lanes, so the lanes become Idea, Shadow, Probe, Live, Retired.
 
 ## 8. Code plan (four small pull requests, each its own "merge", stacked; one deploy at the end)
 
