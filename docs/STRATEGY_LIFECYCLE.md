@@ -131,7 +131,7 @@ The owner, frustrated, after saying it many times: "how many times have i told y
    3. **Correlation under 0.3 with EVERY live strategy on the cash basis.** In shadow, its daily cash P&L (US Central day, 1 contract, fill price plus fee, early sells included) has Pearson r under 0.3 against each live strategy, measured over at least 20 overlapping days; the 90% interval and the share of its signals in the same 15 minute window as a live order are reported alongside (information, not extra gates). **A correlation of 0.3 or more with a live strategy is a FAIL: the candidate is REJECTED as a duplicate of that strategy and goes on the declined list (7e) WITH the correlation number** (owner popup, Nov 11, 2026; 7e rule 6 says what the entry records). Before that data exists the status is NOT YET MEASURED: checks 1, 2 and 4 are applied at registration and check 3 at the first read.
    4. **Not on the declined list (7e).** A renamed or near-identical version counts as the declined idea.
 
-   **How "paired or hedged exit" and "must not hedge or interfere" fit together:** a paired or hedged exit is allowed only inside the strategy's OWN position (for example, its own two legs closed together, or its own time or scale exit). It may never take a position in another market, or against another live strategy's position, to cover it; the direction lock (a slot or L1 order may never sit on the opposite side of another order in the same market) stays as it is. FOLLOW-UP QUESTION for the owner: confirm that "paired" means legs of the same strategy, not a hedge against another strategy.
+   **How "paired or hedged exit" and "must not hedge or interfere" fit together:** a paired or hedged exit is allowed only inside the strategy's OWN position (DECIDED, owner, Nov 11, 2026): "paired" means the SAME strategy's own legs, closed together, or its own time or scale exit. It is never a hedge against another strategy or another market, and may never take a position in another market, or against another live strategy's position, to cover it; the direction lock (a slot or L1 order may never sit on the opposite side of another order in the same market) stays as it is.
 9. **Every candidate, probe and owner popup shows the four checks** (pass, fail or not yet measured, each with one line of evidence). A popup that asks for an exception quotes the earlier NO it exempts.
 10. **Filters are not strategies (7g).** A rule that only filters, tunes or sizes an existing strategy (for example a Polymarket lead, book imbalance or open interest confirmation on OICORE, or a gold spot-gap filter) is a REFINEMENT, so it is a VERSION of its parent that replaces it (v2 replaces v1), tested beside the parent. It takes no shadow slot, never counts as a new strategy or as unique, and is governed by section 7g.
 11. **Who judges (the owner, Nov 11, 2026, popup).** Each of the four checks is scored by an INDEPENDENT check, the Verification Analyst (the fact-checker agent), who did not propose the candidate. A candidate is added to the shadow list only when that independent check says it passes all four AND the owner approves the entry. Both are needed: the check alone adds nothing, and the owner approves from the scored checks, not from the proposer's own claim.
@@ -169,12 +169,13 @@ A Charter line making the check explicit is proposed for the owner. `docs/CHARTE
 
 ## 7f. Classifying strategies (Nov 11, 2026, the owner)
 
-The owner's popup answers on how to classify strategies. Four rules.
+The owner's popup answers on how to classify strategies. Five rules.
 
 1. **Family is the ENTRY MECHANISM plus the EXIT STYLE.** It is not the data source or the market type for the label. Data source and market type still matter for the uniqueness test (7d check 1).
 2. **Risk class** is four things together: the win-rate class and loss shape, the dollars at risk per order and per day, and the correlation group.
 3. **Five stages:** Idea, Shadow, Probe, Live, Retired. Idea is a visible stage for registered, untested candidates. Probe is a small live test (the incubator of section 2). Live means proven.
 4. **The proven bar (Probe to Live):** cash PF 1.3 or better over at least 100 fills, in 2 of 3 windows.
+5. **A replacement for gold is the TOP research priority** for V2 and Refinement (owner, Nov 11, 2026), so the account does not go idle if gold is pulled. The Monday report and V2's weekly note LEAD with progress on it: the candidates that pass the four uniqueness checks (7d) and how close each is to the proven bar.
 
 **"In 2 of 3 windows" (PROPOSED definition, for the owner to confirm).** Split the strategy's fills by time into three consecutive windows of equal fill count. At least 2 of the 3 windows have cash PF 1.3 or better AND the whole run is 1.3 or better. Cash basis as everywhere in this doc (fill price plus fee, early sells included).
 
@@ -186,7 +187,7 @@ The owner's popup answers on how to classify strategies. Four rules.
 
 | NAME | Family (entry + exit) | Risk class | Stage |
 |---|---|---|---|
-| Gold L1 (parent; candidate v2: gold spot-gap filter) | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | Live. FLAG: recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) would NOT meet the new 1.3 proven bar. The owner should decide whether to reclassify it Probe |
+| Gold L1 (parent; candidate v2: gold spot-gap filter) | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | **Probe (under review).** Against the proven bar its recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) does not meet it. Not pulled: it keeps trading under its existing kill and stops (owner, Nov 11, 2026: "if we are ready to pull this then we can, but I just would rather have a replacement before our account goes idle"). Any pull is the owner's call by popup |
 | OICORE (parent; candidate versions: Polymarket Bitcoin lead filter, book imbalance, Ethereum open interest confirmation) | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
 | EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin: 5 fills |
 | XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe. XRPYES10 and KESTREL were the same hold-to-settlement favourite mechanism as the declined GOLDHOLD (7e), allowed only as owner exceptions |
@@ -231,7 +232,6 @@ The owner's popup answers, Nov 11, 2026. They settle what is a new strategy and 
   3. its second half is not worse than its first half or than the parent's second half;
   4. it has at least 60 version signals.
 - If it passes on profit factor but fails the dollars test, or the reverse, it is a TRADE-OFF and the owner decides by popup. The popup states both numbers. Nothing is promoted automatically, and the takeover is still a reviewed edit in code.
-- Numbers proposed (see "Numbers the owner may change"): 0.10 profit factor margin, dollars per contract-week not lower, second half not worse, 60 signals.
 
 **FOLLOW-UP QUESTION for the owner:** when a parameter tweak is a NEW MARKET with the same logic (for example OICORE on Ethereum), does it replace the parent on the old market, or EXTEND the parent's coverage to the new market as v2? Recommended: EXTEND. The old market's record stays under v1 until the owner retires it.
 
@@ -239,18 +239,16 @@ The owner's popup answers, Nov 11, 2026. They settle what is a new strategy and 
 
 **What INTERFERENCE means (the owner, Nov 11, 2026, popup).** Exactly two things:
 - **(a) Opposite sides of the same market at once** (YES against NO on the same contract). The existing direction lock stands.
-- **(b) Sharing a loss cap or stop,** so that one strategy's loss can trip another's.
+- **(b) Sharing a loss cap or stop,** so that one strategy's loss can trip another's. The account-level 12% stop and 5.5% window cap are NOT counted here (see the decided wording below).
 
 Stacking same-side exposure in one market and window, and competing for order book depth, are NOT interference. The open-contract cap per market and the 5.5% window cap remain as RISK CAPS that still apply to every order; they are not part of the interference test. Each engine still sells only its own contracts, under the shared claim, so the later strategy never sells the other's.
 
 **How the shared stops fit today, from the code (honest).**
-- The account backstop, one combined 12% stop over all orders and the 5.5% window cap, is shared by EVERY strategy, and an L1 stop ends the whole session, which also stops the slot strategies.
-- OICORE and EVENT830 share ONE slot stop budget (`RISK_PROFILES.SECOND`). Under (b) those two interfere today, and gold L1 interferes with both through the account backstop.
+- The account backstop (one combined 12% stop and the 5.5% window cap) is shared by EVERY strategy, and an L1 stop ends the whole session, which also stops the slot strategies. It is the account's safety net, not interference.
+- OICORE and EVENT830 share ONE slot stop budget (`RISK_PROFILES.SECOND`). Under (b) those two interfere today.
 - No two current strategies trade the same underlying market (gold; Bitcoin; EVENT830's eight silver, copper, oil, forex, HYPE and BNB markets), so the market-sharing rule is not triggered today.
 
-**PROPOSED WORDING (A), recommended.** The account level backstop is the ACCOUNT's safety net, not a strategy cap, so it does NOT count as sharing a stop. Each strategy needs its OWN stop and window budget before it may share a market with another. L1 has one; OICORE and EVENT830 would need separate budgets first.
-
-**OPEN QUESTION for the owner (owner popup pending): wording B.** Full isolation: no shared stop of any kind, not even the account backstop. That is a code change that removes the only cross-strategy brake, and it is NOT recommended. Until the owner answers, A is the proposed wording and nothing is built.
+**DECIDED wording (owner, Nov 11, 2026).** The account-level 12% stop and 5.5% window cap are the ACCOUNT's safety net and do NOT count as strategy interference. Each strategy needs its OWN stop and window budget before it may share a market with another. L1 has one; OICORE and EVENT830 would need separate budgets first. Full isolation (no shared brake of any kind) was considered and not chosen.
 
 **Regime tag.** A strategy that only works in one regime (for example only on high volatility days) is its OWN strategy, carrying a REGIME TAG.
 - It counts as unique if its signal and exit differ (7d), like any other strategy.
