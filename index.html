@@ -927,22 +927,8 @@
   .kal-st-head .kal-hb{ margin:0; font-size:13px; }
   .kal-st-healthtile .kal-ecg-wrap{ margin:0; flex:1; display:flex; }
   .kal-st-healthtile .kal-ecg{ flex:1; height:auto; min-height:150px; }
-  .kal-st-bottom{ display:grid; grid-template-columns:minmax(0,1.7fr) minmax(0,1fr); gap:12px; }
-  .kal-st-prices{ margin-bottom:0; display:flex; flex-direction:column; } .kal-st-foot{ margin-top:auto; padding-top:10px; }
-  .kal-st-drow{ padding:7px 0; border-top:1px solid var(--border); } .kal-st-drow:first-of-type{ border-top:0; padding-top:10px; }
-  .kal-st-drow .kal-st-pname{ display:inline; margin-right:8px; } .kal-st-drow .kal-st-scale{ height:6px; margin:6px 0 4px; }
-  .kal-st-dbig{ display:inline; font-size:16px; font-weight:800; font-variant-numeric:tabular-nums; } .kal-st-dbig .kal-st-dim{ font-size:12px; font-weight:600; }
-  .kal-st-fill{ position:absolute; top:0; bottom:0; left:0; background:rgba(255,255,255,.5); border-radius:999px; }
-  .kal-st-pgrid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:14px; margin-top:10px; }
-  .kal-st-pcell{ min-width:0; }
-  .kal-st-pname{ font-size:13px; font-weight:800; } .kal-st-dim{ color:var(--muted); font-weight:600; }
-  .kal-st-pbig{ font-size:28px; font-weight:800; font-variant-numeric:tabular-nums; letter-spacing:-.02em; margin:6px 0; line-height:1; }
-  .kal-st-scale{ position:relative; height:8px; border-radius:999px; background:rgba(255,255,255,.07); margin:8px 0; }
-  .kal-st-band{ position:absolute; top:0; bottom:0; background:rgba(255,255,255,.35); border-radius:2px; }
-  .kal-st-pt{ position:absolute; top:-3px; width:3px; height:14px; background:var(--paper); border-radius:2px; }
-  @container (max-width:760px){ .kal-st-bottom{ grid-template-columns:1fr; } }
   @container (max-width:520px){ .kal-st-top{ grid-template-columns:1fr; } }
-  @media (max-width:520px){ .kal-st-top, .kal-st-bottom{ grid-template-columns:1fr; } }
+  @media (max-width:520px){ .kal-st-top{ grid-template-columns:1fr; } }
   .kal-ecg-wrap{ border:1px solid var(--border); border-radius:10px; background:rgba(0,0,0,.25); overflow:hidden; margin:0 0 10px; }
   .kal-ecg-wrap.flash{ animation:ecgFlash .9s ease-out; }
   @keyframes ecgFlash{ 0%{ box-shadow:0 0 0 1px rgba(15,157,88,.9), 0 0 18px rgba(15,157,88,.45); border-color:rgba(15,157,88,.9); } 100%{ box-shadow:0 0 0 0 rgba(15,157,88,0); } }
@@ -1583,7 +1569,7 @@
               <div id="kalL1Status" class="kal-note" style="white-space:pre-line">Not running.</div>
               <div class="kal-actions">
                 <button class="kal-btn" id="kalL1Start" type="button">Start bot</button>
-          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause). L1 trades nothing except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review). OICORE (10 contracts to start, up to 30 as its own record earns it) EVENT830 (1 contract) and two more small probes (3 contracts each) run with it.</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
+          <span id="kalL1Confirm" hidden><span class="kal-note">Start it? The server will place REAL orders by itself, around the clock until you pause it or a stop ends it (this also lifts a pause). L1 trades nothing except gold, whose size scales with the account in code (one contract per $43 of balance, up to 15, raised one step every 3 days at most; stop at 12% of the balance at the last review). OICORE (10 contracts to start, up to 30 as its own record earns it) and EVENT830 (1 contract) run with it.</span> <label class="kal-note"><input type="checkbox" id="kalL1Trailing"> Stop follows the high point (ends the session if the bot gives back the stop amount from its best settled result, so gains are protected too)</label> <button class="kal-btn" id="kalL1Yes" type="button">Yes, start it</button> <button class="kal-btn" id="kalL1No" type="button">Cancel</button></span>
                 <button class="kal-btn kal-btn-ghost" id="kalBotHalt" type="button" hidden></button>
                 <button class="kal-btn kal-btn-danger" id="kalFlatten" type="button">Flatten all</button>
                 <span id="kalFlattenConfirm" hidden><span class="kal-note">Pauses the bot, then SELLS every open position in the account (the bot's and any you opened by hand) at whatever the book pays right now. Real money, takes the loss at the bid. Do it?</span> <button class="kal-btn kal-btn-danger" id="kalFlattenYes" type="button">Yes, flatten everything</button> <button class="kal-btn" id="kalFlattenNo" type="button">Cancel</button></span>
@@ -1592,7 +1578,7 @@
               <div class="kal-note" id="kalL1Msg"></div>
               <span class="kal-note" id="kalBotHaltMsg"></span>
               <details class="kal-fold"><summary class="kal-lbl">Rules and limits</summary>
-                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (8c to 50c; an entry priced under 8c is skipped, a small test), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts to start, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesSlotXrp">XRPYES10, a small probe (3 contracts), trades only XRP: it buys YES when YES costs 88c to 97c, about 10 minutes before the close (9.5 to 10.7 minutes), never NO, held to settlement; it stops itself after 3 losses in a row or a net loss of $15 from 20 settled trades.</span> <span id="kalRulesSlotAud">KESTREL, a small probe (3 contracts), trades only AUD/USD: it buys the side priced 88c to 97c about 6 minutes before the close (5.5 to 6.7 minutes), held to settlement; it stops itself after 3 losses in a row or a net loss of $15 from 20 settled trades. It needs money on its own exchange shard (shard 0) and sends nothing without it.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026). Gold also has its own kill latch: it stops placing new orders, and stays off until a reviewed edit re-arms it, if it falls 6% of the balance base below its own peak or is down $20 after 40 trades; an open position is still sold at the 25c line.</div>
+                <div class="kal-note">Buys the side priced 88c to 97c about 6 minutes before a 15 minute market closes, then holds to settlement. <span id="kalRulesLive">Markets trading now: gold.</span> <span id="kalRulesSlot">OICORE, the second strategy, trades Bitcoin only: it buys the cheaper side (8c to 50c; an entry priced under 8c is skipped, a small test), with a limit 1c above the price it sees, 3 to 2 minutes before the close when open interest jumped by 86,300 or more, 10 contracts to start, held to settlement. Its size can step up to 12, 15, 20 and 30 contracts only as its own settled record earns each step and the balance can carry it, and steps back down at once after a bad stretch.</span> <span id="kalRulesSlotEvent">EVENT830, a small probe, trades only on the listed US 8:30 AM Eastern data release days of Nov and Dec 2026 (jobs, CPI, PPI, retail sales, GDP and PCE, weekly jobless claims): in the window that closes at the release (7:30 AM Central) it buys the cheaper side (5c to 50c, never above 50c) of silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE and BNB 3 to 2 minutes before the close, 1 contract, held to settlement.</span> <span id="kalRulesPaused">Paused in code: XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas.</span> Gold trades around the clock (the 8 PM to midnight pause was lifted Oct 30, 2026). Gold also has its own kill latch: it stops placing new orders, and stays off until a reviewed edit re-arms it, if it falls 6% of the balance base below its own peak or is down $20 after 40 trades; an open position is still sold at the 25c line.</div>
                 <div class="kal-note"><b>Size.</b> Gold grows with the account (one contract per $43 of balance, held at 15 contracts since Nov 3, plus extra contracts from profit, at most a quarter of the base size). At most $2.00 a contract, and at most 5.5% of the balance in one 15 minute window.</div>
                 <div class="kal-note"><b>Stop.</b> If its trades over the last 24 hours are down 12% of the balance (otherwise $10), or any order goes wrong, it stops itself and stays off until you start it. Each strategy is judged on its own orders, with the combined account stop at the same 12% behind both. Manual trades do not count.</div>
                 <div class="kal-note"><b>Exit at 25c (fixed, always on).</b> If a position's price falls to 25c, the bot sells it.</div>
@@ -1771,6 +1757,15 @@
                 <div class="changelog-day">Nov 11</div>
                 <ul class="changelog-list">
                   <li>Research: an external-signal shadow logger (the owner approved Nov 11): a registry of public signals that logs each one next to the Kalshi quote at that moment, so weather, score or options candidates can be tested forward without a new recorder; 4 starts a day, about 124 runner minutes a month, data to the quote-data branch only, records nothing until an entry is enabled; no key, no order, nothing trades</li>
+                  <li>Bot status: the prices tile (each market's price against the band a strategy buys) and the depth tile (book size against our order size) are gone (the owner, Nov 11: "this can probably go too"). The countdown ring, the health line and "Needs a look" stay, and Open positions still gets its price and chart from the same market read</li>
+                  <li>Bot: two log-only additions (the owner approved P3 and P2): a skipped OICORE signal that had already passed its open interest test now also records the open interest rise, the side and the price it would have bought, and after each minute's orders the bot saves the best 5 bids on each side of the book at the time of the order (gold and the second strategy). Nothing that decides an order reads either; Copy all orders, Copy order diagnostics and the nightly report carry the new columns. Needs deploy-sizing and deploy-report</li>
+                  <li>Trading: the duplicate favourite-late strategies are retired (the owner, Nov 11: "existing duplicates should be killed. Why are we running multiple of the same strategies?"). Gold L1 stays the single favourite-late strategy, with OICORE and EVENT830 beside it. The live probes XRPYES10 and KESTREL no longer enter, and the four shadow rules (XRPYES10, GOLDALL, XRPFAV6, LANTERN) stopped logging; the Strategies page lists all five under Retired with the rule for returning. A position either probe still holds when this deploys is sold at its 25c stop, or 60 seconds before the close, or settles, and still counts in the stops</li>
+                  <li>Process: a DRAFT R&amp;D operating charter for the research and live-performance chats (the owner, Nov 11): mission, scope, an intake gate, limits, weekly outputs, a definition of done and the automatic stops for getting carried away. It binds nobody until the owner merges it. Docs only, nothing trades</li>
+                  <li>Process: a uniqueness check for every new strategy candidate (the owner, Nov 11: "how many times have i told you to continue finding unique strategies?"). A candidate must state its entry, management and exit and name the closest existing mechanism before it gets a shadow slot; a favourite-late variant is rejected as a duplicate unless the owner approves; the backlog is ranked by uniqueness first. Docs only.</li>
+                  <li>Process: a declined list (the owner, Nov 11): every idea the owner said no to, or that evidence closed, is written down with the names it must not return under, and every candidate, shadow slot, popup and strategy pull request is checked against it first. Docs only.</li>
+                  <li>Process: versions and sharing a market (the owner, Nov 11): a filter or parameter tweak to an existing strategy is a version that replaces its parent, never a new strategy, and is tested beside the parent before it takes over; two strategies may trade the same market if their signal and entry differ and they do not interfere. Docs only.</li>
+                  <li>Process: the owner's popup answers on strategy rules (Nov 11): interference means opposite sides of one market or a shared loss cap or stop, Kalshi's own data is a different source only if it is a different field, the fact-checker scores the four checks and the owner approves each shadow entry, a correlation of 0.3 or more is a rejected duplicate on the declined list, and the gold hold test is declined. Docs only.</li>
+                  <li>Process: strategies are classified (the owner, Nov 11): family is the entry mechanism plus the exit style, a risk class, five stages (Idea, Shadow, Probe, Live, Retired), and Live needs cash profit factor 1.3 or better over 100 fills in 2 of 3 windows. Docs only.</li>
                   <li>Process: a cap on favourite-late shadow rules (the owner, Nov 11): at most 3 at once and at most one per market, new shadow slots go to a different mechanism, and a favourite-late rule is retired when it passes or fails its read. GOLDHI6S is folded into GOLDALL (it was a subset of GOLDALL's signals, so it is read there as a split by price band); the shadow list is now XRPYES10, GOLDALL, XRPFAV6 and LANTERN. Logging only, nothing trades</li>
                 </ul>
                 <div class="changelog-day">Nov 10</div>
@@ -2447,7 +2442,12 @@
   // The bot's order records as CSV, for working out why orders did not fill. Prices, sizes and ids only (no keys or secrets); newest first, at
   // most `limit` rows. A field a record does not have is left empty, never filled in. Commas and quotes in a text field are escaped.
   function kalshiDiagnosticsCsv(orders, limit){
-    var cols = ['time', 'ticker', 'series', 'entryLead', 'side', 'band', 'count', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'avgFee', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error'];
+    var cols = ['time', 'ticker', 'series', 'entryLead', 'side', 'band', 'count', 'decisionPrice', 'limit', 'sentSide', 'sentPrice', 'status', 'fillCount', 'remaining', 'avgFill', 'avgFee', 'seenBid', 'seenAsk', 'bidSize', 'askSize', 'seenAt', 'exchangeIndex', 'error', 'bookYes5', 'bookNo5', 'bookReadMs'];
+    // The decision-time book the bot saved on an order (Nov 11, 2026): the best 5 bids of a side as 'price:size|price:size', best first; empty when the order has none.
+    var bookCell = function(v){
+      if(!Array.isArray(v)){ return ''; }
+      return v.filter(function(l){ return l && Number.isFinite(l.p) && Number.isFinite(l.q); }).map(function(l){ return l.p + ':' + l.q; }).join('|');
+    };
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -2456,7 +2456,7 @@
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return b.ts - a.ts; }).slice(0, limit || 150).map(function(o){
       var seen = o.seen || {};
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.entryLead, o.side, o.band, o.count, o.price, o.limit, o.sentSide, o.sentPrice, o.status, o.fillCount, o.remainingCount,
-        o.averageFillPrice, o.averageFeePaid, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error].map(cell).join(',');
+        o.averageFillPrice, o.averageFeePaid, seen.bid, seen.ask, seen.bidSize, seen.askSize, seen.at, o.exchangeIndex, o.error, bookCell(o.bookYes5), bookCell(o.bookNo5), o.bookReadMs].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
@@ -2478,7 +2478,12 @@
   // Every order the BOT ever sent, with its result, as CSV (the owner, Oct 20, 2026: to line each trade up with what was changed when). The bot's own order documents only: a manual trade never has
   // one, so it is not in here. Columns are the stored fields, read as they are (the P/L is the one the bot's own record saved, empty while open or unfilled).
   function kalshiAllOrdersCsv(orders){
-    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'minStep', 'climb', 'smooth', 'flips', 'flips0', 'earlierCandles', 'askAtDecision', 'depthAtLimit', 'shareOfDepth', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6'];
+    var cols = ['time', 'ticker', 'series', 'side', 'price', 'count', 'fillCount', 'maxCost', 'status', 'settled', 'result', 'pnl', 'addon', 'exitStatus', 'exitCount', 'exitBid', 'exitAvg', 'exitProceeds', 'strategy', 'seenBid', 'seenAsk', 'entryLead', 'avgFill', 'avgFee', 'bidSize', 'askSize', 'rise3', 'rng5', 'minStep', 'climb', 'smooth', 'flips', 'flips0', 'earlierCandles', 'askAtDecision', 'depthAtLimit', 'shareOfDepth', 'twoStageLeft', 'ask10', 'side10', 'inBand10', 'ask8', 'side8', 'inBand8', 'ask6', 'side6', 'inBand6', 'bookYes5', 'bookNo5', 'bookReadMs'];
+    // The decision-time book the bot saved on an order (Nov 11, 2026): the best 5 bids of a side as 'price:size|price:size', best first; empty when the order has none.
+    var bookCell = function(v){
+      if(!Array.isArray(v)){ return ''; }
+      return v.filter(function(l){ return l && Number.isFinite(l.p) && Number.isFinite(l.q); }).map(function(l){ return l.p + ':' + l.q; }).join('|');
+    };
     var cell = function(v){
       if(v === undefined || v === null){ return ''; }
       var t = String(v);
@@ -2486,7 +2491,7 @@
     };
     var rows = (orders || []).filter(function(o){ return o; }).slice().sort(function(a, b){ return a.ts - b.ts; }).map(function(o){
       return [Number.isFinite(o.ts) ? new Date(o.ts).toISOString() : '', o.ticker, o.series, o.side, o.price, o.count, o.fillCount, o.maxCost, o.status, o.settled === true ? 'yes' : '', o.result, kalshiOrderPnl(o),
-        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.minStep, o.climb, o.smooth, o.flips, o.flips0, o.earlierCandles, o.askAtDecision, o.depthAtLimit, o.shareOfDepth, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6].map(cell).join(',');
+        o.addon, o.exitStatus, o.exitCount, o.exitBid, o.exitAvg, o.exitProceeds, o.strategy, (o.seen || {}).bid, (o.seen || {}).ask, o.entryLead, o.averageFillPrice, o.averageFeePaid, (o.seen || {}).bidSize, (o.seen || {}).askSize, o.rise3, o.rng5, o.minStep, o.climb, o.smooth, o.flips, o.flips0, o.earlierCandles, o.askAtDecision, o.depthAtLimit, o.shareOfDepth, o.twoStageLeft, o.ask10, o.side10, o.inBand10, o.ask8, o.side8, o.inBand8, o.ask6, o.side6, o.inBand6, bookCell(o.bookYes5), bookCell(o.bookNo5), o.bookReadMs].map(cell).join(',');
     });
     return [cols.join(',')].concat(rows).join('\n');
   }
@@ -2727,7 +2732,6 @@
     var st = document.getElementById('kalStatus');
     kalshiBooksLast = data || null;
     renderKalshiPositions();
-    kalshiRenderPrices();
     if(data){ kalshiReads.push(Date.now()); while(kalshiReads.length > 20){ kalshiReads.shift(); } }
     st.textContent = data && Number.isFinite(data.fetchedAt) ? 'Updated ' + kalTime(data.fetchedAt) + ' CT' : '';
   }
@@ -3623,36 +3627,6 @@
   }
   // Gold has no weekend: closed from Friday 17:00 to Sunday 18:00 Central (the same window the silent-market warning uses); Dogecoin and Bitcoin trade all week.
   function kalshiGoldClosed(now){ var wm = kalshiCtWeekMinute(now); return wm >= 7200 + 1020 || wm < 1080; }
-  // Prices right now against what each strategy buys (the owner, Oct 31, 2026: "all unique and helpful"; nothing else on the page shows this, and it answers "why is nothing trading"). From the market relay the page already reads: for the open
-  // 15 minute market of each series, the price to BUY the favourite side (gold buys 88c to 97c; Dogecoin is paused and not shown) or the cheaper side (the Bitcoin open interest strategy buys 5c to 50c). The Bitcoin strategy also needs an open interest jump, which the relay
-  // does not carry, so that row says where the price sits and no more. Pure: relay markets and the clock in, rows out.
-  var KAL_PRICE_WATCH = [
-    { name: 'Gold', series: 'KXGOLD15M', kind: 'fav', lo: 0.88, hi: 0.97, gold: true },
-    { name: 'Bitcoin', series: 'KXBTC15M', kind: 'cheap', lo: 0.05, hi: 0.50 }
-  ];
-  function kalshiPriceWatch(markets, now){
-    return KAL_PRICE_WATCH.map(function(w){
-      var out = { name: w.name, kind: w.kind, lo: w.lo, hi: w.hi, state: 'none', price: null, depth: null, closeAt: null, pos: 0, bandLeft: 0, bandWidth: 0 };
-      if(w.gold && kalshiGoldClosed(now)){ out.state = 'closed'; return out; }
-      var m = (markets || []).filter(function(x){ return x && x.series === w.series && Date.parse(x.closeTime) > now; }).sort(function(p, q){ return Date.parse(p.closeTime) - Date.parse(q.closeTime); })[0];
-      if(!m || !(m.yesAsk > 0) || !(m.yesBid >= 0)){ return out; }
-      var yes = m.yesAsk, no = 1 - m.yesBid, p = w.kind === 'fav' ? Math.max(yes, no) : Math.min(yes, no);
-      var from = w.kind === 'fav' ? 0.5 : 0, span = w.kind === 'fav' ? 0.5 : 0.5;
-      // Contracts resting at the touch we would hit: buying YES meets the YES ask size, buying NO meets the YES bid size (a YES bid is a NO ask). The relay carries only the top level of the book.
-      var buyYes = w.kind === 'fav' ? yes >= no : yes <= no, sz = buyYes ? m.yesAskSz : m.yesBidSz;
-      out.depth = Number.isFinite(sz) && sz >= 0 ? sz : null;
-      out.price = p; out.closeAt = Date.parse(m.closeTime);
-      out.state = p < w.lo ? 'below' : (p > w.hi ? 'above' : 'in');
-      out.pos = Math.max(0, Math.min(1, (p - from) / span)); out.bandLeft = (w.lo - from) / span; out.bandWidth = (w.hi - w.lo) / span;
-      return out;
-    });
-  }
-  // The next release window the Release day longshot (EVENT830) can still enter: the first listed close at least 2 minutes away (it enters 3 to 2 minutes before the close). Null after the last listed date. Pure: the clock in.
-  function kalshiEventNext(now){
-    var l = KAL_LOOKS.filter(function(x){ return x.closes; })[0]; if(!l){ return null; }
-    for(var i = 0; i < l.closes.length; i++){ var c = Date.parse(l.closes[i]); if(c - 120000 > now){ return { at: c - 180000, close: c, kind: l.kinds[i] || '', inMs: c - 180000 - now }; } }
-    return null;
-  }
   function kalshiDurationText(ms){
     var m = Math.round(ms / 60000);
     return m < 90 ? m + ' minutes' : (m < 2880 ? Math.round(m / 60) + ' hours' : Math.round(m / 1440) + ' days');
@@ -3853,7 +3827,7 @@
     var beatsBefore = kalshiBeats.length;
     kalshiBeatNote(kalshiBeats, s && s.active === true ? s.lastTickAt : NaN);
     var newBeat = kalshiBeats.length !== beatsBefore && beatsBefore > 0;
-    // Redone twice (the owner, Oct 31, 2026): the countdown as a ring beside a tall animated health line (style B), and under them only what appears nowhere else on the page: the prices right now against each strategy's buying band. The latest-order, order-count and the
+    // Redone twice (the owner, Oct 31, 2026): the countdown as a ring beside a tall animated health line (style B), and nothing under them but "Needs a look" (the prices and depth tiles that sat there were removed Nov 11, 2026). The latest-order, order-count and the
     // win rate rows are gone from this card (the Strategies table has them), no folds, and the card covers every strategy. "Needs a look" shows only when something is wrong. The ids the one second tick and the ECG use are kept.
     var hbText = line + (hb.ageSec !== null && running ? '. Last check ' + kalshiAgeText(hb.ageSec) : '');
     var RING = 402;
@@ -3863,9 +3837,8 @@
       '<text id="kalNextIn" x="75" y="84" text-anchor="middle" fill="#fff" font-weight="800" font-size="32">&mdash;</text></svg>' +
       (running ? '<div class="kal-st-ringtext"><b id="kalNextName">&mdash;</b><div class="kal-st-sub" id="kalNextWhat"></div><div class="kal-st-sub" id="kalNextThen"></div></div>' : '<div class="kal-st-ringtext"><div class="kal-st-sub">Not running</div></div>') + '</div>' +
       '<div class="kal-st-tile kal-st-healthtile"><div class="kal-st-head"><div class="kal-st-lbl">Health</div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div><div id="kalEcg" class="kal-ecg-wrap"></div></div></div>' +
-      '<div class="kal-st-bottom"><div class="kal-st-tile kal-st-prices" id="kalPrices"></div><div class="kal-st-tile kal-st-depth" id="kalDepth"></div></div><div id="kalWork"></div>' +
+      '<div id="kalWork"></div>' +
       (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
-    kalshiRenderPrices();
     if(running && kalshiOrdersLoaded){
       var work = kalshiTodayWork(kalshiAllOrders(), now);
       if(work.problem){ document.getElementById('kalWork').insertAdjacentHTML('beforeend', '<div class="kal-warn"><b>Needs a look</b><div class="kal-note">' + String(work.problem) + (work.problem === 1 ? ' order whose answer was lost or refused' : ' orders whose answer was lost or refused') + '</div></div>'); }
@@ -3911,53 +3884,6 @@ kalshiStatusTick();
       }
     }
   }
-  // The price tile, redrawn each time the market relay is read (every few seconds) and with the card; it only reads kalshiBooksLast.
-  function kalshiEscapedPriceCell(r){   // one market's cell; every piece of text goes through escapeHtml, the rest is numbers formatted here
-
-      var pc = r.price === null ? '' : Math.round(r.price * 100) + 'c', band = Math.round(r.lo * 100) + 'c to ' + Math.round(r.hi * 100) + 'c';
-      if(r.state === 'closed'){ return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + '</div><div class="kal-st-pbig kal-st-dim">Closed</div><div class="kal-st-sub">Back Sun 6 PM Central</div></div>'; }
-      if(r.state === 'none'){ return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + '</div><div class="kal-st-pbig kal-st-dim">&mdash;</div><div class="kal-st-sub">No quote yet</div></div>'; }
-      var verdict = r.state === 'in' ? 'Inside the ' + band + ' band' : (r.state === 'below' ? 'Below the ' + band + ' band' : 'Above the ' + band + ' band'), side = r.kind === 'fav' ? 'favourite side' : 'cheaper side';
-      return '<div class="kal-st-pcell"><div class="kal-st-pname">' + escapeHtml(r.name) + ' <span class="kal-st-dim">&middot; ' + side + '</span></div><div class="kal-st-pbig' + (r.state === 'in' ? '' : ' kal-st-dim') + '">' + escapeHtml(pc) + '</div>' +
-        '<div class="kal-st-scale"><i class="kal-st-band" style="left:' + (r.bandLeft * 100).toFixed(1) + '%;width:' + (r.bandWidth * 100).toFixed(1) + '%"></i><i class="kal-st-pt" style="left:calc(' + (r.pos * 100).toFixed(1) + '% - 1px)"></i></div>' +
-        '<div class="kal-st-sub">' + escapeHtml(verdict) + '. Closes ' + escapeHtml(kalTime(r.closeAt)) + '</div></div>';
-  }
-  // The size of the bot's most recent order in each market (ordered contracts, both strategies), for the depth tile.
-  // The Release day longshot's cell in the price tile: it trades only on listed release days, so the cell says when the next window is (the relay does not read its eight markets).
-  function kalshiEscapedEventCell(ev, now){
-    var head = '<div class="kal-st-pname">Release day longshot <span class="kal-st-dim">&middot; cheaper side</span></div>';
-    if(!ev){ return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig kal-st-dim">&mdash;</div><div class="kal-st-sub">No listed release window left</div></div>'; }
-    var day = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', month: 'short', day: 'numeric' }).format(new Date(ev.close));
-    var soon = ev.inMs <= 0 ? 'Looking now' : (ev.inMs < 86400000 ? 'In ' + kalshiDurationText(ev.inMs) : day);
-    return '<div class="kal-st-pcell">' + head + '<div class="kal-st-pbig">' + escapeHtml(soon) + '</div><div class="kal-st-sub">Next window ' + escapeHtml(day) + ', 7:27 AM Central (' + escapeHtml(ev.kind) + '). 5c to 50c, 8 markets</div></div>';
-  }
-  function kalshiLastOrderSizes(orders){
-    var latest = {};
-    (orders || []).forEach(function(o){
-      if(!o || (o.strategy !== 'L1' && o.strategy !== 'SLOT') || !Number.isFinite(Number(o.ts)) || !(Number(o.count) > 0)){ return; }
-      var n = kalshiMarketName(o); if(!latest[n] || Number(o.ts) > latest[n].ts){ latest[n] = { ts: Number(o.ts), count: Number(o.count) }; }
-    });
-    return latest;
-  }
-  // One market's row in the depth tile: how many contracts rest at the price we would hit, and what share of it the last order was. Every piece of text goes through escapeHtml.
-  function kalshiEscapedDepthRow(r, last){
-    var name = '<div class="kal-st-pname">' + escapeHtml(r.name) + '</div>';
-    if(r.state === 'closed'){ return '<div class="kal-st-drow">' + name + '<div class="kal-st-sub">Closed</div></div>'; }
-    if(r.state === 'none' || r.depth === null){ return '<div class="kal-st-drow">' + name + '<div class="kal-st-sub">No book yet</div></div>'; }
-    var big = r.depth >= 1000 ? Math.round(r.depth / 100) / 10 + 'k' : String(Math.round(r.depth)), share = last && r.depth > 0 ? last.count / r.depth : null;
-    var line = share === null ? 'Our last order: none yet' : 'Our last order was ' + Math.round(last.count) + ', ' + Math.round(share * 100) + '% of it';
-    return '<div class="kal-st-drow">' + name + '<div class="kal-st-dbig">' + escapeHtml(big) + ' <span class="kal-st-dim">resting</span></div>' +
-      (share === null ? '' : '<div class="kal-st-scale"><i class="kal-st-fill" style="width:' + Math.min(100, share * 100).toFixed(1) + '%"></i></div>') + '<div class="kal-st-sub">' + escapeHtml(line) + (share !== null && share >= 0.3 ? '. A big share of the book' : '') + '</div></div>';
-  }
-  function kalshiEscapedDepthRows(rows, sizes){ return rows.map(function(r){ return kalshiEscapedDepthRow(r, sizes[r.name]); }).join(''); }
-  function kalshiRenderPrices(){
-    var el = document.getElementById('kalPrices'); if(!el){ return; }
-    var now = Date.now(), data = kalshiBooksLast, rows = kalshiPriceWatch(data && data.markets, now);
-    var depthEl = document.getElementById('kalDepth');
-    if(depthEl){ var sizes = kalshiLastOrderSizes(kalshiAllOrders()); depthEl.innerHTML = '<div class="kal-st-lbl">Depth at the touch, against our order size</div>' + kalshiEscapedDepthRows(rows, sizes) + '<div class="kal-st-sub" style="margin-top:8px">Top of the book only. A big share of it is where orders tend to miss.</div>'; }
-    el.innerHTML = '<div class="kal-st-lbl">Prices right now, against what each strategy buys</div><div class="kal-st-pgrid">' + rows.map(kalshiEscapedPriceCell).join('') + kalshiEscapedEventCell(kalshiEventNext(now), now) + '</div>' +
-      '<div class="kal-st-sub kal-st-foot">' + (data && Number.isFinite(data.fetchedAt) ? 'Read ' + escapeHtml(kalshiAgeText(Math.max(0, Math.round((now - data.fetchedAt) / 1000)))) + '. The Bitcoin strategy also needs an open interest jump.' : 'Reading the markets...') + '</div>';
-  }
   var kalshiStatusTimer = null, kalshiBeats = [], kalshiReads = [];
 
   function renderKalshiL1(){
@@ -3993,14 +3919,14 @@ kalshiStatusTick();
   // Every order the bot placed, L1's and the second slot's: used to RECOGNISE the bot's fills, so a slot fill is never shown as a manual trade or an unmatched position.
   function kalshiAllOrders(){ return (kalshiLiveOrders || []).concat(kalshiSlotOrders || []); }
   // The second-slot strategies registered in the bot's code (SLOT_STRATEGIES in the bot's slot library), so the Strategies module lists them before a first order. A test compares this list with the registry. Labels only.
-  var KAL_SLOT_REGISTERED = ['OICORE', 'EVENT830', 'XRPYES10', 'KESTREL'];
+  var KAL_SLOT_REGISTERED = ['OICORE', 'EVENT830'];
   // What each strategy is, in words (a test compares the L1 markets with the bot's live list and the others with the registry).
   var KAL_STRATEGY_INFO = {
     L1: { name: 'Closing buy', markets: 'Gold', note: '' },
     OICORE: { name: 'Open interest jump', markets: 'Bitcoin', note: '' },
     EVENT830: { name: 'Release day longshot', markets: 'Silver, Copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE, BNB', note: '' },
-    XRPYES10: { name: 'XRP yes at 10 minutes', markets: 'XRP', note: '' },
-    KESTREL: { name: 'AUD/USD favourite at 6 minutes', markets: 'AUD/USD', note: '' },
+    XRPYES10: { name: 'XRP yes at 10 minutes (retired)', markets: 'XRP', note: '' },   // XRPYES10 and KESTREL were retired Nov 11, 2026 (duplicates of gold L1); a past or still open order keeps its label, like FLOW1
+    KESTREL: { name: 'AUD/USD favourite at 6 minutes (retired)', markets: 'AUD/USD', note: '' },
     FLOW1: { name: 'Seller flow (removed)', markets: 'Bitcoin', note: '' }   // the strategy notes are no longer shown under the table; the size and kill rule live in the README and the bot's code
   };
   function kalshiSlotIds(slot){
@@ -4013,7 +3939,7 @@ kalshiStatusTick();
   // The label of the strategy an order came from: 'L1', or the second-slot strategy's id.
   function kalshiStrategyOf(o){ return o && o.strategy === 'SLOT' && typeof o.slotId === 'string' && o.slotId ? o.slotId.slice(0, 40) : 'L1'; }
   // Each strategy's OWN loss stop used (Nov 2, 2026, since the bot judges L1 and the second strategy each on its own orders): the same meter as the account's, fed one strategy's orders at a time. Percentages only.
-  // Since Nov 10, 2026 the slot holds four strategies (OICORE, EVENT830, XRPYES10 and KESTREL) and the bot's second stop (RISK_PROFILES.SECOND) is ONE budget over every slot order, so the page shows it as one figure named after all of them, not one per strategy.
+  // Since Nov 11, 2026 the slot holds two strategies (OICORE and EVENT830; XRPYES10 and KESTREL were retired) and the bot's second stop (RISK_PROFILES.SECOND) is ONE budget over every slot order, so the page shows it as one figure named after all of them, not one per strategy.
   function kalshiOwnStops(orders, st, now){
     var l1 = (orders || []).filter(function(o){ return kalshiStrategyOf(o) === 'L1'; });
     var slot = (orders || []).filter(function(o){ return kalshiStrategyOf(o) !== 'L1'; });
@@ -4094,33 +4020,29 @@ kalshiStatusTick();
   // Page only: it reads the orders the page already holds and, once per page load (kept 10 minutes), the shadow log; it writes nothing and has no timer. Dollars go through money (Privacy view masks them); PF and counts are never masked.
   // The cash rule is a port of fillCost in the bot's kalshiLiveLib (a test pins the port to it on fixtures); the kill constants and the shadow rule ids are copies (tests fail if they drift from the bot's code).
   var KAL_BOARD_TRIPWIRE = { from: Date.UTC(2026, 10, 9, 16, 22), trades: 100, pfFloor: 1.0, rollingN: 60, rollingFloor: 0.7, fromText: 'Nov 9 10:22 AM Central' };   // 10:22 AM Central (UTC-6 after Nov 1) is 16:22 UTC
-  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -6, ddStop: 50, from: Date.UTC(2026, 9, 30) }, EVENT830: { streak: 20 }, XRPYES10: { streak: 3, afterFills: 20, net: -15 }, KESTREL: { streak: 3, afterFills: 20, net: -15 } };   // OICORE: the bot's killRules, reviewedAt (2026-10-30) and its drawdown stop (5 x 10 contracts = $50 at the bottom step; SLOT_LADDERS); EVENT830: the bot's streak kill
+  var KAL_BOARD_KILL = { OICORE: { streak: 24, afterFills: 40, net: -6, ddStop: 50, from: Date.UTC(2026, 9, 30) }, EVENT830: { streak: 20 } };   // OICORE: the bot's killRules, reviewedAt (2026-10-30) and its drawdown stop (5 x 10 contracts = $50 at the bottom step; SLOT_LADDERS); EVENT830: the bot's streak kill
   var KAL_BOARD_LIVE = [
     { id: 'L1', name: 'Closing buy', rule: 'Gold: the favourite side at 88c to 97c, about 6 minutes before the close',
       rules: ['Gold only; size follows the balance (one contract per $43), held at 15 contracts; at most 5.5% of the balance in one window', 'Automatic: 12% stop over 24 hours, the 25c exit, and a gold kill (off for good when gold is $58.75 below its own peak, fixed, or $20 down after 40 trades; only a reviewed edit brings it back; draft until deployed). The tripwire (PF under 1.0 over 100 trades proposes a size cut; rolling 60 under 0.7 alerts) is a watch, not code', 'After a stop it stays off until the owner starts it; a size cut is reversed only by the owner\'s review'] },
     { id: 'OICORE', name: 'Open interest jump', rule: 'Bitcoin: the cheaper side at 5c to 50c after an open interest jump, held to settlement',
       rules: ['10 contracts to start, up to 30 as its own settled record earns each step', 'Automatic: drawdown stop of $50 from its own peak, 24 losses in a row, or net under -$6 after 40 fills', 'Never automatic: only a reviewed edit by the owner re-arms it (owner choice A, Nov 10)'] },
     { id: 'EVENT830', name: 'Release day longshot', rule: 'Release mornings: the cheaper side at 5c to 50c in the 8:30 window, held to settlement',
-      rules: ['1 contract, only on the listed US 8:30 AM release mornings of Nov and Dec', 'Automatic: 20 losses in a row, or net under $0 after 40 fills (a -$5 stop is proposed, not coded)', 'Not written yet'] },
-    { id: 'XRPYES10', name: 'XRP yes at 10 minutes', rule: 'XRP: buy YES at 88c to 97c about 10 minutes before the close, 3 contracts, held to settlement',
-      rules: ['3 contracts, XRP 15 minute markets only, never NO; the owner\'s favourite-and-hold exception for this strategy only (Nov 10)', 'Automatic: 3 losses in a row, or net under -$15 from 20 settled fills', 'Not written yet'] },
-    { id: 'KESTREL', name: 'AUD/USD favourite at 6 minutes', rule: 'AUD/USD: the favourite side at 88c to 97c, about 6 minutes before the close, 3 contracts, held to settlement',
-      rules: ['3 contracts, AUD/USD 15 minute markets only; the owner\'s favourite-and-hold exception for this strategy only (Nov 10); needs money on exchange shard 0', 'Automatic: 3 losses in a row, or net under -$15 from 20 settled fills', 'Not written yet'] }
+      rules: ['1 contract, only on the listed US 8:30 AM release mornings of Nov and Dec', 'Automatic: 20 losses in a row, or net under $0 after 40 fills (a -$5 stop is proposed, not coded)', 'Not written yet'] }
   ];
   var KAL_BOARD_SHADOW_RULES = ['After 150 fillable signals at PF 1.3+ (second half 1.2+), 14 days and the owner\'s merge: an incubator slot at 1 contract, $5 an order', 'Retire at net under -1c a contract after 50 signals, or under 40 signals in 30 days', 'After a retire: a 14 day cool off, then a fresh shadow run at the same bar'];
-  var KAL_BOARD_SHADOW = [   // ids copy the bot's SHADOW_RULES; the text is the rule in one line
-    { id: 'XRPYES10', rule: 'XRP: buy YES at 88c to 97c, 10 minutes left' },
-    { id: 'GOLDALL', rule: 'Gold: the favourite side at 88c to 97c, every signal logged' },
-    { id: 'XRPFAV6', rule: 'XRP: the favourite side at 88c to 92c, 6 minutes left, spread 2c or less' },
-    { id: 'LANTERN', rule: 'Ethereum: the favourite side at 88c to 97c, 6 minutes left, no smooth gate' }
-  ];
-  var KAL_BOARD_RETIRED = { asOf: 'Nov 10', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
+  var KAL_BOARD_SHADOW = [];   // EMPTY since Nov 11, 2026: the owner retired all four shadow rules (duplicates of gold L1); it copies the bot's SHADOW_RULES, which is empty too (a test compares them). A new rule must be a different mechanism.
+  var KAL_BOARD_RETIRED = { asOf: 'Nov 11', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
     { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },
     { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 },
-    { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }, { name: 'GOLDHI6S', note: 'folded into GOLDALL (a split by price band), Nov 11' }
+    { name: 'ETHL1', note: 'shadow, never traded' }, { name: 'ETHNO6', note: 'shadow, never traded' }, { name: 'BTCHI6', note: 'shadow, never traded' }, { name: 'GOLDHI6S', note: 'folded into GOLDALL (a split by price band), Nov 11' },
+    { name: 'XRPYES10', note: 'retired Nov 11, a duplicate of gold L1 (live probe). Return rule: a 14 day cool off, then a fresh shadow run of 100 fills at cash PF 1.3+, second half 1.2+, and owner approval' },
+    { name: 'KESTREL', note: 'retired Nov 11, a duplicate of gold L1 (live probe). Return rule: a reviewed edit after a forward read at cash PF 1.3+ over 40 fills, and owner approval' },
+    { name: 'GOLDALL', note: 'retired Nov 11, a duplicate of gold L1 (shadow). Return rule: a 14 day cool off, then a fresh shadow run at the shadow bar (150 signals, cash PF 1.3+, second half 1.2+)' },
+    { name: 'XRPFAV6', note: 'retired Nov 11, a duplicate of gold L1 (shadow). Return rule: a 14 day cool off, then a fresh shadow run at the shadow bar (150 signals, cash PF 1.3+, second half 1.2+)' },
+    { name: 'LANTERN', note: 'retired Nov 11, a duplicate of gold L1 (shadow). Return rule: live only at cash PF 1.3+ over 150 forward signals, second half 1.2+, at least 14 days' }
   ] };
-  // The Sizing ladder row of each tile: static labels, no figure computed (the owner, Nov 10, 2026: new probes start at 3 contracts inside today's caps, stepping up per the ladder rules; gold and OICORE sizing stay as they are; XRPYES10 stays at 1 contract). The sizes themselves are decided in the bot's code, not here.
-  var KAL_BOARD_LADDER = { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', XRPYES10: '3 contracts, held to settlement', KESTREL: '3 contracts, held to settlement', shadow: 'Next: 3 contracts as a probe' };
+  // The Sizing ladder row of each tile: static labels, no figure computed (the owner, Nov 10, 2026: new probes start at 3 contracts inside today's caps, stepping up per the ladder rules; gold and OICORE sizing stay as they are). The sizes themselves are decided in the bot's code, not here.
+  var KAL_BOARD_LADDER = { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', shadow: 'Next: 3 contracts as a probe' };
   var KAL_BOARD_DAY = 86400000;
   // The cost of the contracts that filled in cash: a port of fillCost (kalshiLiveLib). averageFillPrice is the YES price, so a NO order pays 1 minus it; anything unreadable, or a cash figure above the worst case, falls back to maxCost in proportion.
   function kalshiBoardFillCost(t, got, want){
@@ -4266,7 +4188,7 @@ kalshiStatusTick();
     var frac = function(x, of){ return of > 0 && isFinite(x) ? Math.max(0, Math.min(1, x / of)) : 0; };
     if(id === 'L1' && isFinite(kill.count)){ return { frac: frac(kill.count, KAL_BOARD_TRIPWIRE.trades), big: kill.count + ' of ' + KAL_BOARD_TRIPWIRE.trades, cap: 'trades since the tripwire started' }; }
     if(id === 'OICORE' && isFinite(kill.room) && isFinite(kill.drawdown)){ return { frac: frac(kill.drawdown, KAL_BOARD_KILL.OICORE.ddStop), big: money(kill.room), cap: 'drawdown room of ' + money(KAL_BOARD_KILL.OICORE.ddStop) }; }
-    if((id === 'EVENT830' || id === 'XRPYES10' || id === 'KESTREL') && isFinite(kill.streak)){ return { frac: frac(kill.streak, KAL_BOARD_KILL[id].streak), big: kill.streak + ' of ' + KAL_BOARD_KILL[id].streak, cap: 'losses in a row' }; }
+    if(id === 'EVENT830' && isFinite(kill.streak)){ return { frac: frac(kill.streak, KAL_BOARD_KILL[id].streak), big: kill.streak + ' of ' + KAL_BOARD_KILL[id].streak, cap: 'losses in a row' }; }
     return null;
   }
   // The lifecycle: three stages with a count and the strategies on each (the retired ones show at most four names and a count of the rest).
@@ -4343,11 +4265,7 @@ kalshiStatusTick();
   var KAL_STRAT_TIMELINE = [
     { date: '2026-11-09', label: 'Gold tripwire: the next 100 trades from Nov 9', tripwire: true },
     { date: '2026-11-13', label: 'OICORE forward read' },
-    { date: '2026-11-24', label: 'XRPFAV6 shadow data read' },
-    { date: '2026-12-09', label: 'December 9 checkpoint' },
-    { date: '2026-12-14', label: 'XRPYES10 first forward read' },
-    { date: '2026-12-22', label: 'KESTREL first forward read' },
-    { date: '2026-12-14', label: 'Shadow week 1 and 2 reads' }
+    { date: '2026-12-09', label: 'December 9 checkpoint' }
   ];
   // The list with a plain "when" for each: a calendar date in Central, and today, in N days, or N days ago. tripwireCount is the gold tripwire's trades so far.
   function kalshiStratTimeline(list, now, tripwireCount, dayOf){
@@ -4489,7 +4407,9 @@ kalshiStatusTick();
         badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
     }).join('');
     var deck = '';
-    if(model.deck.state !== 'ok'){
+    if(!model.deck.rows.length){
+      deck = '<div class="sp-sub">None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.</div>';
+    } else if(model.deck.state !== 'ok'){
       deck = kalshiStratTwinFirst(model.deck.rows, function(r){ return r.id; }, ids).map(function(r){ return tile({ id: r.id, name: r.id, stage: 'Shadow', rule: r.rule, pf: 'n/a', pfLabel: 'no data yet', status: model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet', badge: { text: 'WAITING', tone: 'idle' } }); }).join('');
     } else {
       deck = kalshiStratTwinFirst(model.deck.rows, function(r){ return r.id; }, ids).map(function(r){

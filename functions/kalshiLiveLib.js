@@ -127,12 +127,12 @@ function assertLive(url) {
 // exit watch's 10 second loop, and a single refused read made the account card say "could not be read". A read has no effect, so asking twice is safe; a second 429 comes back as is.
 async function liveRequest(args) {
   const first = await liveRequestOnce(args);
-  if (first.status !== 429 || args.method !== "GET") return first;
+  if (first.status !== 429 || args.method !== "GET" || args.noRetry === true) return first;   // noRetry: a log-only read (the book snapshot) never takes the 1.2 s wait
   await new Promise((r) => setTimeout(r, RATE_LIMIT_RETRY_MS));
   return liveRequestOnce({ ...args, nowMs: args.nowMs === undefined ? undefined : args.nowMs + RATE_LIMIT_RETRY_MS });
 }
 const RATE_LIMIT_RETRY_MS = 1200;
-async function liveRequestOnce({ fetchFn, keyId, pem, method, path, params, body, nowMs }) {
+async function liveRequestOnce({ fetchFn, keyId, pem, method, path, params, body, nowMs, timeoutMs }) {
   const url = LIVE_BASE + path + (params ? "?" + new URLSearchParams(params).toString() : "");
   assertLive(url);
   const headers = { Accept: "application/json", "User-Agent": "shwoopnet-live/1.0" };
@@ -145,7 +145,7 @@ async function liveRequestOnce({ fetchFn, keyId, pem, method, path, params, body
   }
   try {
     const res = await fetchFn(url, {
-      method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(15000),
+      method, headers, body: body !== undefined ? JSON.stringify(body) : undefined, signal: AbortSignal.timeout(Number.isFinite(timeoutMs) && timeoutMs > 0 ? timeoutMs : 15000),
     });
     const text = await res.text();
     let parsed;
@@ -482,6 +482,45 @@ async function logRise({ fetchFn, store, cid, series, ticker, side, nowMs, ask, 
       ...(shape ? { flips: shape.flips, flips0: shape.flips0, earlierCandles: shape.earlierCandles, minStep: shape.minStep, climb: shape.climb, smooth: shape.smooth, ...(Number.isFinite(ask) ? { askAtDecision: ask } : {}) } : {}),
       ...(two || {}),
     });
+    return true;
+  } catch (e) { return false; }      // logging only: never allowed to affect a trade
+}
+
+// Decision-time book snapshot, LOGGING ONLY (Nov 11, 2026, the owner: "P2"). After a minute's orders are all sent, one public read of the order book per ordered market (GET /markets/{ticker}/orderbook, no key, no
+// order) is written onto that order as bookYes5 and bookNo5 (the best 5 YES bids and best 5 NO bids, best first, each a map {p: price in dollars, q: size}; Firestore refuses an array inside an array, so not a pair) and
+// bookReadMs (the wall clock when the read answered). Nothing that decides an order reads these fields. A failed, slow (BOOK_READ_TIMEOUT_MS) or empty read leaves the order exactly as it was, every error is swallowed, and
+// the reads of one minute run in parallel so the next minute is never held up by them. Latency (security review, Nov 11, 2026): order latency matters (a late send fills worse), and this runs before the tick returns, so
+// the whole snapshot is bounded twice: each read aborts after BOOK_READ_TIMEOUT_MS (1.5 s) and is NEVER retried on a 429 (a 429 simply writes nothing), and boundBookWrites cuts the wait for the minute's reads AND writes at
+// BOOK_TOTAL_MS (1.8 s) from the moment they start. The cut-off uses AbortSignal.timeout, not a second setTimeout, so the module keeps exactly one wait (gate L10: the single GET retry). A write still running after the
+// cut-off is left to finish or fail on its own; logBook never rejects, so nothing can become an unhandled rejection.
+const BOOK_LEVELS = 5, BOOK_READ_TIMEOUT_MS = 1500, BOOK_TOTAL_MS = 1800;
+function boundBookWrites(writes) {
+  const all = Promise.all(writes.map((p) => Promise.resolve(p).catch(() => false))).then(() => true, () => true);
+  const sig = AbortSignal.timeout(BOOK_TOTAL_MS);
+  const cut = new Promise((resolve) => { sig.addEventListener("abort", () => resolve(false), { once: true }); });
+  return Promise.race([all, cut]);
+}
+function bookTop5(body) {
+  const ob = (body && typeof body === "object" && (body.orderbook_fp || body.orderbook)) || {};
+  const side = (raw) => {
+    const out = [];
+    for (const row of Array.isArray(raw) ? raw : []) {
+      const p = num(row && row[0]), q = num(row && row[1]);
+      if (Number.isFinite(p) && Number.isFinite(q)) out.push({ p, q });
+    }
+    return out.sort((a, b) => b.p - a.p).slice(0, BOOK_LEVELS);   // best bid first
+  };
+  const yes = side(ob.yes_dollars), no = side(ob.no_dollars);
+  return yes.length || no.length ? { bookYes5: yes, bookNo5: no } : null;
+}
+async function logBook({ fetchFn, ticker, write }) {
+  try {
+    // The read's own abort (timeoutMs, 1.5 s, and no 429 retry) is the first bound; boundBookWrites is the overall one.
+    const res = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) + "/orderbook", timeoutMs: BOOK_READ_TIMEOUT_MS, noRetry: true });
+    if (!res || res.status !== 200) return false;
+    const snap = bookTop5(res.body);
+    if (!snap) return false;
+    await write({ ...snap, bookReadMs: Date.now() });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
 }
@@ -998,6 +1037,7 @@ async function runL1Tick(args) {
   }
 
   const results = [];
+  const bookLog = [];   // orders the exchange answered this minute, for the decision-time book snapshot (log only)
   const riseLog = [];   // every order of this minute, to log the 3 minute rise on after all of them are sent
   const shardShort = [];   // markets skipped this minute for lack of money on their own exchange shard, for the phone alert (kalshiShardAlertLib); reported only when there is one
   let ordersSent = sent;
@@ -1125,6 +1165,7 @@ async function runL1Tick(args) {
         averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,
       });
       ordersSent += 1;
+      bookLog.push({ cid, ticker });
       await setSession({ ordersSent });
       await log("order", pick.side + " " + count + " at " + (pick.price * 100).toFixed(1) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
       results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
@@ -1144,7 +1185,9 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
+  const bookDone = boundBookWrites(bookLog.map((b) => logBook({ fetchFn, ticker: b.ticker, write: (patch) => store.updateTest(b.cid, patch) })));   // started now, in parallel; the 1.8 s cap runs from here; awaited after the rise log
   for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask, closeSec: r.closeSec });
+  await bookDone;
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
   return { ok: true, results, ...(shardShort.length ? { shardShort } : {}) };
 }
@@ -1364,7 +1407,7 @@ async function flattenAll({ fetchFn, keyId, pem, now, store, slot }) {
 const DEFAULT_ACCOUNT_ID = "main";
 
 module.exports = {
-  flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
+  logBook, boundBookWrites, bookTop5, BOOK_READ_TIMEOUT_MS, BOOK_TOTAL_MS, flipsOf, pathShape, sideMids, twoStageFromCandles, SMOOTH_SERIES, smoothGate,
   DEFAULT_ACCOUNT_ID,
   flattenAll, claimClose, CLOSE_CLAIM_MS, ORDERS_PATH, runExitWatch, EXIT_LOOKBACK_MS, exitWatchIdle, EXIT_BUY_MINUTES, exitBody, EXIT_THRESHOLD, EXIT_MAX_TRIES, L1_SERIES, QUIET_HOURS_CT, inQuietHours, PAUSED_SERIES, PROBE_SERIES, CAPPED_SERIES, FIXED_CONTRACTS,
   LIVE_BASE, LIVE_CAP, LIVE_SERIES, MAX_PER_DAY, MAX_EVER, MOVE_TOLERANCE, NotLive, assertLive, liveRequest, livePlan,
