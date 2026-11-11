@@ -3,8 +3,8 @@
 events, most weekly series only 8 to 12 events old), so this records FORWARD: the quote of every open market of the listed series every 30 minutes, and the result of each market after it
 settles, so history accrues for the research chats.
 
-The series come from kalshi-scalper/workers/POLREC_SERIES.json (at most max_series, names checked), so a list edit is a reviewed change. The owner's 14 day cap holds: a market is
-recorded only if it closes within 14 days of now AND its open-to-close span is at most 14 days (within_cap). Markets past the cap are counted, not recorded, and the count is written once a
+The series come from kalshi-scalper/workers/POLREC_SERIES.json (at most max_series, names checked), so a list edit is a reviewed change. The hold cap (cap_days in the series file: 14 days until Nov 11, 2026, then 30 days by the owner's decision) holds: a market is
+recorded only if it closes within cap_days of now AND its open-to-close span is at most cap_days (within_cap). Markets past the cap are counted, not recorded, and the count is written once a
 day (daily.csv) so we know what was left out.
 
 It reads PUBLIC Kalshi market data only: no key, no signing, no auth header, no account path, no order, no Firestore. One request stream with at least 5 seconds between calls (at most 12 a
@@ -41,7 +41,7 @@ UA = {"User-Agent": "shwoopnet-research-recorder"}
 QUOTE_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "series", "ticker", "event_ticker", "open_time", "close_time", "yes_bid", "yes_ask", "no_bid", "no_ask",
               "yes_bid_size", "yes_ask_size", "last_price", "volume", "open_interest"]
 RESULT_COLS = ["t_recv_ms", "series", "ticker", "event_ticker", "close_time", "result", "expiration_value", "last_price", "volume"]
-DAILY_COLS = ["date", "series", "open_markets", "recorded", "skipped_by_14_day_cap", "skipped_no_close_time"]
+DAILY_COLS = ["date", "series", "open_markets", "recorded", "skipped_by_cap", "skipped_no_close_time"]
 
 
 def epoch_of(iso_s):
