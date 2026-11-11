@@ -28,3 +28,11 @@ What it bought since Nov 9: V2 closed CHEAPEXIT1 (falsified, 8 cells PF 0.42 to 
 Biggest habit: Refinement at 668k context woken hourly re-reads it each time; its handoff file is current, so a fresh session is cheap to propose before the 784k compaction (recommend, not done).
 Idle chat check: V2 closed all four directions sent (a to d) empty and has no workers; no untested family on the census. It holds two dated items (Nov 15 list, NBA lag about Nov 22). Not redirected: the Nov 7 directive says keep the hourly check-in, and no brief passes the checklist to approve.
 Calls: none (0 of 5). Nothing for the owner from this run.
+
+## 2026-11-11 morning US Central (COO run in main, 7:40 AM)
+Rate limit: seven day window status allowed_warning, not on overage, all chats (resets 1794585600). Per the credit guard: no new worker or direction calls; burn logged only.
+Lifetime cost, change since Nov 10 morning: main $1,217.57 (+$69.69, context 450k of 1M); V2 $989.17 (+$19.46, context 675k of the 784k threshold, was 330k); Refinement $521.23 (+$63.88, context 499k, was 668k, so it compacted).
+Output tokens lifetime: main 11.25M, V2 11.59M (+0.17M), Refinement 4.88M (+0.83M).
+Biggest habit: V2 context grew 330k to 675k in a day and is near the 784k compaction; HLAD2 is held on the warning with a 16:28Z wake. Recommend (not done): its head writes a short handoff before it compacts.
+Idle chat check: no redirect (warning step: no new directions). V2 holds HLAD2 and the Nov 15 list; Refinement has the weather pull, OKX logger, family map and rotation role.
+Calls: none (0 of 5). Nothing for the owner from this run beyond the warning already reported.
