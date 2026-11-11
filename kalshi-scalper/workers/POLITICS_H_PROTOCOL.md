@@ -1,0 +1,15 @@
+# POLITICS_H protocol: multi-outcome consistency in Kalshi politics (written 2026-11-11 before any violation was counted)
+
+Research only. Public data already held, no new API call, no order, no live code. Sub-family (h) of the politics program. Prior: ARB2 (full sets and crossed ladders) and ARB3 (deadline ladders) scanned every open event 12 times on 2026-10-28/29 and found zero opportunities (README "Results: ARB2, ARB3, ARB4"). This study asks only whether POLITICS and ELECTIONS events differ, using those stored scans and the held settled-market candles. Expected answer: CLOSED (zero).
+
+## Universe (fixed now)
+Politics = category in {Politics, Elections} in `data/theta1.sqlite` (market), `data/flb1.sqlite` (market) and `data/newlist1.sqlite` (mk, with `cd` candles). An ARB2/ARB3 row is politics if its event ticker appears as `event` for a Politics or Elections market in any of those three tables (join on event, then on ticker stem before the first '-' if no exact match).
+
+## Tests
+- **H1 (live scans, ARB2 full set and crossed ladder, ARB3 deadline pairs, all 12 scans each).** Per scan, count politics rows with lock > 0 and with the registered opportunity bar (lock at least 0.01 and cap at least 10). Report best lock, median lock, and count of distinct politics events. Fees in the rows are the stored rounded C=10 fees.
+- **H2 (held hourly candles, exclusive sets).** For each event with at least 3 politics markets whose settled results sum to exactly 1 (YES count = 1, so the set is observed mutually exclusive and exhaustive among the listed markets) and for which EVERY listed market has a candle at the same end_ts: buy-all lock = 1 - sum(ask) - sum(0.07 p(1-p)); sell-all lock = sum(bid) - 1 - sum(0.07 p(1-p)) with p the leg's YES price used (unrounded fee, per leg, 1 contract, cash basis). Events with a missing leg quote are counted as not testable, never as lock. A violation = lock > 0. Report per event best lock, size (min of legs: none held in candles, so size = unknown and stated), count of testable event-timestamps and violations.
+- **H3 (held hourly candles, monotone date ladders).** Pairs of markets in the same event, same ticker stem except the final segment, close_ts differing, with candles at one common end_ts and both before the earlier close. Executable violation: bid(earlier) - ask(later) - fee(earlier at bid price) - fee(later at ask price) > 0 where later >= earlier in "by date" meaning. Also count SETTLED-result inversions (earlier YES and later NO) as a rules signal for (j).
+- **Spread note.** Spread is paid by construction (asks to buy, bids to sell); no mid pricing anywhere.
+
+## Verdict rule (fixed)
+CLOSED if H1 shows zero opportunity rows and H2 and H3 show zero executable violations (lock > 0) after fee and spread. NOT_ENOUGH_DATA if under 20 testable event-timestamps in H2 and under 20 testable pairs in H3 (then the answer rests on H1 alone and says so). Any positive lock is reported as a lead only with its size unknown and needs a forward book recorder before anything else. No parameter is tuned; no multiple-testing deflation is needed for a zero.
