@@ -1,0 +1,13 @@
+# W-CAT-SPORTS1 PLAN (written before any scoring, Nov 11 2026)
+Data: Kalshi public API only (series list, settled markets live + /historical, hourly candlesticks). No outside sports data, no Polymarket, no score sites. No KXMVE* (combos).
+SERIES (27, singles only, fixed now): {NBA,NFL,NHL,MLB,NCAAMB,NCAAF} x {GAME,SPREAD,TOTAL} = 18; tennis KXATPMATCH, KXWTAMATCH, KXATPCHALLENGERMATCH; soccer KXEPLGAME, KXUCLGAME, KXLALIGAGAME, KXSERIEAGAME, KXBUNDESLIGAGAME, KXMLSGAME. (Census check: 1,122 GAME/SPREAD/TOTAL/MATCH series listed; these are the top by Kalshi volume.)
+TYPE (3): ML (GAME + MATCH winner), SPREAD, TOTAL.
+SAMPLING (disclosed): settled markets listed live (up to 4 pages) + historical (up to 2 pages) per series; events with result known and volume>0; a seeded random sample per series (cap 250 events for the big ML series, 120 for spread/total/soccer/challenger), round-robin across series so a partial pull stays balanced; per event the top 3 markets by final volume (2 for a two-way ML). Selection is on final volume (mild post-hoc, disclosed, bounds requests only).
+LOOKS (fixed instants before close_time; sports close_time is shortly after the game ends, so 1-6 h can be in-game): 48 h (>24 h), 12 h (6-24 h), 3 h (1-6 h). Quote = last hourly candle ending at/before the look, market must have a candle within 2 h before the look. YES buy at yes_ask close; NO buy at 1-yes_bid close; need 0<ask<1, bid<ask.
+BUCKETS of the side bought: 0.05-0.15, 0.15-0.35, 0.35-0.65, 0.65-0.87 (0.88-0.97 NOT scored: no favourite-late variants).
+GRID: 3 types x 4 buckets x 3 looks x 2 sides = 72 cells. Exploratory only (counted as extra tries): sport group (NBA, NFL, NHL, MLB, NCAAMB, NCAAF, tennis, soccer) x type x bucket x look x side, those with train n>=60; max 8x3x24=576.
+BASIS: cash at ask, +0c and +1c, fee 0.07*p*(1-p) unrounded, hold to settlement. One observation per event per cell (the market nearest 0.5 by mid). Event-clustered bootstrap (2000) 90% interval of mean c/contract at +1c.
+SPLITS: chronological thirds by event close date over all events pulled; cuts saved in frozen.json. TRAIN and VALIDATE scored; HELD-OUT (last third) NOT scored (heldout.py written, not run).
+PASS BAR: train n>=60 and validate n>=60 events, PF@+1c >=1.3 in TRAIN and VALIDATE, event-clustered lo90>0 in VALIDATE; best <=2 by validation lo90 freeze. KILL: no cell passes -> one plain line. 
+DEFLATION: shared ~7,950 plus 72 (+ exploratory cells) ; Bonferroni z ~4.5; naive z>=2 counts reported as exploratory, never a pass. Held-out read once by lead: PF>=1.2, n>=40, mean>0 = shadow candidate only.
+Calibration table (plain): per type x bucket (all looks pooled and by look): n, mean price, win rate, win rate minus price (bias), mean net c at ask with fee.
