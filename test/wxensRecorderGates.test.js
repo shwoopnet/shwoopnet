@@ -147,6 +147,23 @@ print(json.dumps([r, late, len(calls)]))`));
   assert.ok(/git add wxens/.test(wf) && /git push -q origin quote-data/.test(wf), 'writes only to the data branch');
 };
 
+// W11: a valid-JSON body that is not an object (a list, a string) is no answer and never aborts the run (security review of this PR).
+gates.W11 = () => {
+  const out = JSON.parse(py(`
+import io, tempfile
+class R(io.BytesIO):
+    status = 200
+    headers = {"Date": ""}
+    def __enter__(self): return self
+    def __exit__(self, *a): return False
+res = []
+for raw in (b'["bad"]', b'"text"', b'123', b'{"ok": 1}'):
+    m._OPENER.open = lambda req, timeout=0, raw=raw: R(raw)
+    res.append(m.http_get("https://api.weather.gov/points/1,2")[1])
+print(json.dumps(res))`));
+  assert.deepStrictEqual(out, [null, null, null, { ok: 1 }], 'only a JSON object is an answer');
+};
+
 // W10: the NWS gridpoint parser keeps the local STANDARD time date and drops nulls; the observation and forecast calls are NWS only.
 gates.W10 = () => {
   const out = JSON.parse(py(`

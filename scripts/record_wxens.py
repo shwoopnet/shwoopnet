@@ -76,7 +76,9 @@ def http_get(url):
         if parts.scheme != "https" or parts.hostname not in ALLOWED_HOSTS:
             return 0, None, ""
         with _OPENER.open(urllib.request.Request(url, headers=UA), timeout=25) as r:
-            return r.status, json.load(r), r.headers.get("Date", "")
+            body = json.load(r)
+            # A valid JSON body that is not an object (an outage page, an API change) is treated as no answer, so one bad city never aborts the run.
+            return r.status, (body if isinstance(body, dict) else None), r.headers.get("Date", "")
     except urllib.error.HTTPError as e:
         return e.code, None, ""
     except Exception:
