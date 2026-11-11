@@ -90,6 +90,69 @@ def episodes(snaps):
     return out
 def eligible(snaps, last_t):
     return sorted(ct for ct in snaps if ms(ct) <= last_t - 1800 * 1000)  # event closed and data ran on past it
+def split(snaps, last_t):
+    el = eligible(snaps, last_t)
+    inwin = [ct for ct in el if any(WIN_LO <= ms(ct) - t <= WIN_HI for t, _ in snaps[ct])]
+    n = len(inwin); return inwin[:(2 * n) // 3], inwin[(2 * n) // 3:]
+def fetch(cts, evt):
+    path = SCR + "/bfly2_true.json"; got = json.load(open(path)) if os.path.exists(path) else {}
+    for ct in cts:
+        if ct in got: continue
+        url = "https://api.elections.kalshi.com/trade-api/v2/events/%s?with_nested_markets=true" % evt[ct]
+        try: d = json.load(urllib.request.urlopen(urllib.request.Request(url, headers={"User-Agent": "research-readonly"}), timeout=30))
+        except urllib.error.HTTPError as e:
+            print("HTTP", e.code, "at", ct, "stopping, resume later"); break
+        except Exception as e:
+            print("error", e, "stopping"); break
+        got[ct] = {m["ticker"]: dict(result=m.get("result"), status=m.get("status"), floor=m.get("floor_strike"), exp=m.get("expiration_value")) for m in d["event"]["markets"]}
+        json.dump(got, open(path, "w")); time.sleep(3.0)
+    return got
+
+def cp_upper(k, n, alpha=0.05):
+    """one-sided exact upper bound for a binomial rate (bisection)"""
+    if k >= n: return 1.0
+    lo, hi = 0.0, 1.0
+    for _ in range(60):
+        m = (lo + hi) / 2
+        cdf = sum(math.comb(n, i) * m ** i * (1 - m) ** (n - i) for i in range(k + 1))
+        if cdf > alpha: lo = m
+        else: hi = m
+    return hi
+def score(cts, snaps, evt, got, label):
+    ep = episodes({c: snaps[c] for c in cts}); rows = []; excl = 0; mism = []
+    for ct in cts:
+        if ct not in got: excl += 1; continue
+        tru = got[ct]; e = ep.get(ct)
+        # inferred vs true over the last snapshot's strikes
+        S = snaps[ct][-1][1]
+        for k, (bids, nbs, tk) in S.items():
+            tr = tru.get(tk, {}).get("result")
+            inf = True if bids[0][0] >= 0.85 else (False if 1 - nbs[0][0] <= 0.15 else None)
+            if tr in ("yes", "no") and inf is not None and (tr == "yes") != inf: mism.append((ct, tk, tr, inf))
+        if not e: continue
+        r = [tru.get(t, {}).get("result") for t in e["tk"]]
+        if any(x not in ("yes", "no") for x in r): excl += 1; continue
+        y = [1 if x == "yes" else 0 for x in r]
+        pay = y[0] - 2 * y[1] + y[2]
+        rows.append(dict(ct=ct, pay=pay, cash_r=e["net_r"] + pay, cash_u=e["net_u"] + pay, cash_nh=e["nohair"] + pay, hc=e["haircut_available"], K=e["K"], dec=e["dec"]))
+    n = len(rows); print("==", label, "events in split", len(cts), "with an episode", len(ep), "scored", n, "excluded (no true result)", excl)
+    for key in ("cash_r", "cash_u", "cash_nh"):
+        c = [x[key] for x in rows]
+        if not c: continue
+        w = sum(v for v in c if v > 0); l = -sum(v for v in c if v < 0); losses = [v for v in c if v < 0]
+        pf = w / l if l else float("inf"); mean = statistics.mean(c)
+        sd = statistics.stdev(c) if n > 1 else float("nan"); t = mean / (sd / math.sqrt(n)) if sd else float("inf")
+        wins = [v for v in c if v > 0]; be = None
+        if losses and wins: mw = statistics.mean(wins); ml = -statistics.mean(losses); be = mw / (mw + ml)
+        ub = cp_upper(len(losses), n)
+        print("%s: mean %.4f total %.2f PF %.2f t %.2f | losing events %d worst %.3f worst-loss share of gross loss %s | loss rate %.4f upper95 %.4f break-even loss rate %s | mean win %.4f" % (
+            key, mean, sum(c), pf, t, len(losses), min(c), ("%.2f" % (-min(c) / l)) if l else "n/a", len(losses) / n, ub, ("%.4f" % be) if be else "n/a", statistics.mean(wins) if wins else 0))
+    print("payoff counts", collections.Counter(x["pay"] for x in rows), "| decision-net (no haircut, rounded) mean %.4f | haircut unavailable %d" % (statistics.mean(x["dec"] for x in rows) if rows else 0, sum(1 for x in rows if not x["hc"])))
+    print("inferred vs true outcome mismatches over all strikes of the last snapshots:", len(mism), mism[:10])
+    print("by day:", {d: round(sum(x["cash_r"] for x in rows if x["ct"][:10] == d), 2) for d in sorted({x["ct"][:10] for x in rows})})
+    print("losing events:", [(x["ct"], x["K"], round(x["cash_r"], 3)) for x in rows if x["cash_r"] < 0])
+    return rows
+
 if __name__ == "__main__":
     mode = sys.argv[1]
     snaps, evt, last_t = load()
@@ -102,3 +165,7 @@ if __name__ == "__main__":
         print("strike gaps in first snapshots", sp.most_common(4))
         n = len(inwin); print("two thirds index", (2 * n) // 3, "cutoff event", inwin[(2 * n) // 3 - 1], "first held-out event", inwin[(2 * n) // 3])
         print("last 12 events", inwin[-12:])
+    if mode == "fetchdev":
+        dev, ho = split(snaps, last_t); g = fetch(dev, evt); print("dev events", len(dev), "fetched", sum(1 for c in dev if c in g))
+    if mode == "scoredev":
+        dev, ho = split(snaps, last_t); g = json.load(open(SCR + "/bfly2_true.json")); score(dev, snaps, evt, g, "DEVELOPMENT")
