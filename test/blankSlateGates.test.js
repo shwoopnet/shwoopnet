@@ -97,14 +97,14 @@ gates.B6 = () => {
   assert.strictEqual(stored['shwoopnet:landingPref'], 'kalshi');
 };
 
-// The Brief draws only what the market tape gave it. A symbol that has not arrived is a dash, never a number it was not given, and a quote with a day series draws a line.
+// The Brief draws only what the market tape gave it. A symbol that has not arrived says No price, never a number it was not given, and a quote with a day series draws a line.
 gates.B7 = () => {
   const src = ['pct', 'kalTime', 'kalDate', 'chartNiceStep', 'chartValueTicks', 'chartPctLabel', 'chartCtOffset', 'chartTimeTicks', 'briefChartFigures', 'briefChartHtml'].map(fnSource).join('\n');
   const f = new Function('escapeHtml', "var KAL_TZ = 'America/Chicago'; var briefChartQuotes = {};\n" + src + '\nreturn briefChartHtml;')((x) => String(x));
   const missing = f({ sym: 'BTC-USD', name: 'Bitcoin' }, undefined);
-  assert.ok(/&mdash;/.test(missing) && !/<svg|%/.test(missing), 'no quote: a dash and no line, no percentage');
+  assert.ok(/No price/.test(missing) && /No chart/.test(missing) && !/<svg|%/.test(missing), 'no quote: No price and no line, no percentage');
   const half = f({ sym: 'BTC-USD', name: 'Bitcoin' }, { price: 68000, prevClose: 0 });
-  assert.ok(/&mdash;/.test(half) && !/%/.test(half), 'a half quote states nothing');
+  assert.ok(/No price/.test(half) && !/%/.test(half), 'a half quote states nothing');
   const full = f({ sym: 'SPY', name: 'S&P 500 (SPY)' }, { price: 510, prevClose: 500, series: [500, 505, 510] });
   assert.ok(/2\.00%/.test(full) && /<polyline/.test(full) && /class="brief-chart-chg up"/.test(full), 'a quote shows its change and draws its line');
   const flat = f({ sym: 'SPY', name: 'SPY' }, { price: 510, prevClose: 500, series: [] });
