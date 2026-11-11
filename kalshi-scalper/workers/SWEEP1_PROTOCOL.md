@@ -8,3 +8,6 @@ Mechanisms (feature of the bought side's path from candles; bins fixed now):
 Cells: 28 bins x 2 leads x 2 exits = 112 tests. N after = 5,207 + 112 = 5,319; Bonferroni z bar = inv_cdf(1 - 0.05/5319) about 4.4.
 Split: closes sorted per pool, first 2/3 development, last 1/3 held out, read ONCE and only for cells that pass development.
 Survive = development cash PF >= 1.3, n >= 100 events, event-clustered z above the bar. Counts of tests and survivors are reported whatever they are.
+
+## Result (development only, Nov 11, 2026): 0 survivors of 110 tests, held-out unread
+110 cells populated (2 of the 112 had no rows); 100 had n >= 100. Cash PF >= 1.0 in 1 of 110 (a 6 trade cell); PF >= 1.3 with n >= 100: 0. Best z +0.20 on n 6; the large cells are all below 1: price band control 0.04 to 0.30 PF 0.91 (n 2,569), previous-window agreement, volume, momentum, drift, hour block, weekday, cross-series, TP exit (optimistic) all below 1.0. Reading: the cheap side loses on these 6 crypto series whatever the path feature, so no mechanism of this kind is hiding in the candles; the favourite side is where the live edge is. N now 5,319. Script `src/scalper/sweep1.py`.
