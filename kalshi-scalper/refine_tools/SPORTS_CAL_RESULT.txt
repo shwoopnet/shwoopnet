@@ -33,3 +33,4 @@ CALIBRATION (TRAIN+VALID pooled, per type x bucket x side-agnostic): n, mean p, 
   TOTAL 0.15-0.35 n 816 p 0.293 wr 0.252 bias -4.1c net0 -5.50c
   TOTAL 0.35-0.65 n 843 p 0.508 wr 0.493 bias -1.5c net0 -3.21c
   TOTAL 0.65-0.87 n 830 p 0.711 wr 0.700 bias -1.1c net0 -2.47c
+ERRATA (Nov 11, audit): verdict NO SURVIVOR. Spread and total sample was capped at 60 events per series (plan said 120), so SPREAD 0.05 to 0.15 YES sits at n 56 and 57, under the floor of 60 (PF 1.62 / 1.45, lower bound negative). Pulling all SPREAD events is a cheap follow-up. Shared N is 9,459 (z 4.55).

@@ -27,3 +27,5 @@ non-empty cells with train and valid obs: 81 ; with n>=30 both: 0
      ALL_APPR 1d 0.25-0.40 Y n16/15 PF 0.64/0.76 mean(tr)-9.5 mean(va)-5.4 va90[-23.9,+13.9] z-0.94 | live3: n31 net20 $-0.03 streak10 killY maxopen3 tot $-7.12
 
 Top 10 by validation lower bound with n>=20 both (exploratory):
+
+ERRATA (Nov 11, audit): label is UNDERPOWERED, not FAIL. No cell reached n 30 in both thirds; only 8 of 263 KXAPRPOTUS and 0 of 143 KX538APPROVE events had candles. Deflation N here was about 8,190; the shared figure is now 9,459 (z 4.55).

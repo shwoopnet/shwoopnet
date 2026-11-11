@@ -32,3 +32,5 @@ Candidate words (persistent history) number about 780 in TRAIN+VALIDATE; a candl
 
 ## Card 84 result (Nov 11, sampled 50 percent, thirds 0 and 1 only; held-out third 2 never pulled or scored; no frozen survivor)
 See score84.out. Entries (after price filter, cap 3 per call): TRAIN n 36 in 29 calls, VALIDATE n 44 in 36 calls (below the n 60 floor). PF at +0c / +1c: TRAIN 0.62 / 0.58, VALIDATE 0.38 / 0.36. Call-clustered 90 percent interval of mean net per contract at +1c: TRAIN (-0.200, -0.001), VALIDATE (-0.282, -0.087). Kill bar hit (PF under 1.0 in both, VALIDATE interval entirely below 0): FAIL. Persistence rule loses; if anything the history sign is a weak fade, not tested (would be a second try).
+
+ERRATA (Nov 11, audit): card 74 is 0 of 20 city-days tradable (NYC 9, LAX 9, DEN 2, DAL 0 pulled), not 0 of 40; the other 20 were not pulled. Card 84 FAIL confirmed.
