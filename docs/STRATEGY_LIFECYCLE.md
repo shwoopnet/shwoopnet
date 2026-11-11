@@ -126,14 +126,15 @@ The owner, frustrated, after saying it many times: "how many times have i told y
    - **Event or calendar:** EVENT830.
    - Every live strategy except gold holds to settlement, so there is no real exit or management diversity yet: no scaling, no time exit, no hedge. That gap is itself a place to look for unique mechanisms.
 8. **The measurable test (the owner, Nov 11, 2026, popups: ADOPT, then the owner's definition of UNIQUE).** A candidate counts as unique only if ALL FOUR hold:
-   1. **The SIGNAL is different:** a DIFFERENT DATA SOURCE or a DIFFERENT MARKET TYPE. Timing structure or price zone alone does NOT make it different (an 88c to 97c rule at another look time or on another market of the same type is the same signal).
-   2. **The EXIT is different:** time-based, a target or scaling, or paired within its own position; AND "hold to settlement" also counts as a different exit when the ENTRY RULES are different and the strategy will NOT hedge or interfere with another market or strategy (owner: "4 counts as different if it's different entry rules and won't hedge or interfere with another market or strategy"). Signal and exit logic are the two that must differ (the owner: "primarily signal and exit logic should be different"), and the ENTRY rules must be different too. This replaces the earlier "2 of 4 axes" wording.
-   3. **Correlation under 0.3 with EVERY live strategy on the cash basis.** In shadow, its daily cash P&L (US Central day, 1 contract, fill price plus fee, early sells included) has Pearson r under 0.3 against each live strategy, measured over at least 20 overlapping days; the 90% interval and the share of its signals in the same 15 minute window as a live order are reported alongside (information, not extra gates). Before that data exists the status is NOT YET MEASURED: checks 1, 2 and 4 are applied at registration and check 3 at the first read.
+   1. **The SIGNAL is different:** a DIFFERENT DATA SOURCE or a DIFFERENT MARKET TYPE. Timing structure or price zone alone does NOT make it different (an 88c to 97c rule at another look time or on another market of the same type is the same signal). **Kalshi's own data counts as a different data source from price ONLY if it is a DIFFERENT FIELD with different logic** (open interest, book depth, trade flow count; owner popup, Nov 11, 2026). The same price band read at a different time is NOT a different source.
+   2. **The EXIT is different:** time-based, a target or scaling, or paired within its own position; AND "hold to settlement" also counts as a different exit when the ENTRY RULES are different and the strategy will NOT hedge or interfere with another market or strategy (interference is defined in 7g: opposite sides of one market, or sharing a loss cap or stop; owner: "4 counts as different if it's different entry rules and won't hedge or interfere with another market or strategy"). Signal and exit logic are the two that must differ (the owner: "primarily signal and exit logic should be different"), and the ENTRY rules must be different too. This replaces the earlier "2 of 4 axes" wording.
+   3. **Correlation under 0.3 with EVERY live strategy on the cash basis.** In shadow, its daily cash P&L (US Central day, 1 contract, fill price plus fee, early sells included) has Pearson r under 0.3 against each live strategy, measured over at least 20 overlapping days; the 90% interval and the share of its signals in the same 15 minute window as a live order are reported alongside (information, not extra gates). **A correlation of 0.3 or more with a live strategy is a FAIL: the candidate is REJECTED as a duplicate of that strategy and goes on the declined list (7e) WITH the correlation number** (owner popup, Nov 11, 2026; 7e rule 6 says what the entry records). Before that data exists the status is NOT YET MEASURED: checks 1, 2 and 4 are applied at registration and check 3 at the first read.
    4. **Not on the declined list (7e).** A renamed or near-identical version counts as the declined idea.
 
    **How "paired or hedged exit" and "must not hedge or interfere" fit together:** a paired or hedged exit is allowed only inside the strategy's OWN position (for example, its own two legs closed together, or its own time or scale exit). It may never take a position in another market, or against another live strategy's position, to cover it; the direction lock (a slot or L1 order may never sit on the opposite side of another order in the same market) stays as it is. FOLLOW-UP QUESTION for the owner: confirm that "paired" means legs of the same strategy, not a hedge against another strategy.
 9. **Every candidate, probe and owner popup shows the four checks** (pass, fail or not yet measured, each with one line of evidence). A popup that asks for an exception quotes the earlier NO it exempts.
 10. **Filters are not strategies (7g).** A rule that only filters, tunes or sizes an existing strategy (for example a Polymarket lead, book imbalance or open interest confirmation on OICORE, or a gold spot-gap filter) is a REFINEMENT, so it is a VERSION of its parent that replaces it (v2 replaces v1), tested beside the parent. It takes no shadow slot, never counts as a new strategy or as unique, and is governed by section 7g.
+11. **Who judges (the owner, Nov 11, 2026, popup).** Each of the four checks is scored by an INDEPENDENT check, the Verification Analyst (the fact-checker agent), who did not propose the candidate. A candidate is added to the shadow list only when that independent check says it passes all four AND the owner approves the entry. Both are needed: the check alone adds nothing, and the owner approves from the scored checks, not from the proposer's own claim.
 
 ## 7e. The declined list (Nov 11, 2026, the owner)
 
@@ -146,6 +147,7 @@ Trigger: after an audit the owner said "we have multiple duplicates that I hard 
 3. Any popup asking the owner to make an exception must QUOTE the earlier NO and name exactly what it exempts.
 4. The Release Manager checks this list on every strategy pull request, and the weekly rotation review (7b) lists it.
 5. Only the owner removes an entry.
+6. **A correlation rejection is recorded (owner popup, Nov 11, 2026).** A candidate rejected under 7d check 3 (Pearson r of 0.3 or more with a live strategy) is added as a row with: the correlation number, the live strategy it matched, the dates of the overlapping window, and the status "Declined (duplicate)". The names it must not return under are its own name and the live strategy's mechanism.
 
 A Charter line making the check explicit is proposed for the owner. `docs/CHARTER.md` says only the owner changes it, so it is not edited here.
 
@@ -163,7 +165,7 @@ A Charter line making the check explicit is proposed for the owner. `docs/CHARTE
 | Favourite-and-hold for NEW live strategies | Charter | `docs/CHARTER.md` brief checklist item 5 | Banned unless the owner grants a named exception in writing: XRPYES10 (Nov 10), KESTREL (Nov 10) | Any buy-the-favourite-and-hold rule without a written exception |
 | Maker or resting entries on gold | Nov 10, 2026 | W-MAKERREPLAY1 | Closed by evidence (not an owner NO) | Gold resting-entry variants |
 | Gold 94.5c price floor | Nov 10, 2026 | W-BAND945 | Closed by evidence (not an owner NO) | Gold price-floor variants near 0.945 |
-| GOLDHOLD | Nov 11, 2026 | Name given in an owner message Nov 11 | Name given in an owner message Nov 11; no definition found in the repo: the owner or the EA must supply it | GOLDHOLD, and anything the owner or EA defines it as |
+| Favourite held to settlement (GOLDHOLD) | Nov 7 to 8, 2026 | A proposal to run gold's favourite entry HELD TO SETTLEMENT instead of the 25c early sell (a live test of holding gold to the end). The owner answered no, find something else (Desk item i30) and chose "skip gold hold live test"; PR 747 was closed | Declined. Note: XRPYES10 and KESTREL were the same hold-to-settlement favourite mechanism on other markets, approved only as owner exceptions to the favourite-and-hold ban and retired Nov 11 (PR 772) | GOLDHOLD, gold hold, any favourite held to settlement |
 
 ## 7f. Classifying strategies (Nov 11, 2026, the owner)
 
@@ -187,7 +189,7 @@ The owner's popup answers on how to classify strategies. Four rules.
 | Gold L1 (parent; candidate v2: gold spot-gap filter) | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | Live. FLAG: recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) would NOT meet the new 1.3 proven bar. The owner should decide whether to reclassify it Probe |
 | OICORE (parent; candidate versions: Polymarket Bitcoin lead filter, book imbalance, Ethereum open interest confirmation) | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
 | EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin: 5 fills |
-| XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe |
+| XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe. XRPYES10 and KESTREL were the same hold-to-settlement favourite mechanism as the declined GOLDHOLD (7e), allowed only as owner exceptions |
 | KESTREL | Favourite-late (AUD/USD); hold | see rotation report; group A | Retired by PR 772; never deployed |
 | GOLDALL, XRPFAV6, LANTERN | Favourite-late shadow rules | no money at risk | Retired shadow rules (PR 772) |
 
@@ -233,10 +235,22 @@ The owner's popup answers, Nov 11, 2026. They settle what is a new strategy and 
 
 **FOLLOW-UP QUESTION for the owner:** when a parameter tweak is a NEW MARKET with the same logic (for example OICORE on Ethereum), does it replace the parent on the old market, or EXTEND the parent's coverage to the new market as v2? Recommended: EXTEND. The old market's record stays under v1 until the owner retires it.
 
-**Sharing a market.** Two strategies MAY trade the same underlying market if their ENTRY logic and SIGNAL differ and they do not interfere. The interference rule has three parts:
-1. **No opposite sides in the same market.** The existing direction lock stands.
-2. **No stacking.** Same-side orders from both strategies in one market and window count against the SAME per-market open-contract cap, the same 5.5% window cap and the same 12% stop. Two strategies do not get two budgets.
-3. **Each engine sells only its own contracts,** under the shared claim, so the later strategy never sells the other's.
+**Sharing a market.** Two strategies MAY trade the same underlying market if their ENTRY logic and SIGNAL differ and they do not interfere.
+
+**What INTERFERENCE means (the owner, Nov 11, 2026, popup).** Exactly two things:
+- **(a) Opposite sides of the same market at once** (YES against NO on the same contract). The existing direction lock stands.
+- **(b) Sharing a loss cap or stop,** so that one strategy's loss can trip another's.
+
+Stacking same-side exposure in one market and window, and competing for order book depth, are NOT interference. The open-contract cap per market and the 5.5% window cap remain as RISK CAPS that still apply to every order; they are not part of the interference test. Each engine still sells only its own contracts, under the shared claim, so the later strategy never sells the other's.
+
+**How the shared stops fit today, from the code (honest).**
+- The account backstop, one combined 12% stop over all orders and the 5.5% window cap, is shared by EVERY strategy, and an L1 stop ends the whole session, which also stops the slot strategies.
+- OICORE and EVENT830 share ONE slot stop budget (`RISK_PROFILES.SECOND`). Under (b) those two interfere today, and gold L1 interferes with both through the account backstop.
+- No two current strategies trade the same underlying market (gold; Bitcoin; EVENT830's eight silver, copper, oil, forex, HYPE and BNB markets), so the market-sharing rule is not triggered today.
+
+**PROPOSED WORDING (A), recommended.** The account level backstop is the ACCOUNT's safety net, not a strategy cap, so it does NOT count as sharing a stop. Each strategy needs its OWN stop and window budget before it may share a market with another. L1 has one; OICORE and EVENT830 would need separate budgets first.
+
+**OPEN QUESTION for the owner (owner popup pending): wording B.** Full isolation: no shared stop of any kind, not even the account backstop. That is a code change that removes the only cross-strategy brake, and it is NOT recommended. Until the owner answers, A is the proposed wording and nothing is built.
 
 **Regime tag.** A strategy that only works in one regime (for example only on high volatility days) is its OWN strategy, carrying a REGIME TAG.
 - It counts as unique if its signal and exit differ (7d), like any other strategy.
