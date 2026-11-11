@@ -1,0 +1,13 @@
+sector,n,mean_quote_mid,mean_prior_yes_rate,mean_gap
+Business_Tech_Fed,10,0.316,0.427,-0.111
+Earnings:Autos_Transport,2,0.995,0.391,0.604
+Earnings:Finance,5,0.507,0.739,-0.232
+Earnings:Restaurants_Leisure,1,0.43,0.36,0.07
+Earnings:Retail_Consumer,7,0.321,0.497,-0.177
+Earnings:Tech,34,0.572,0.502,0.07
+Entertainment,13,0.503,0.352,0.151
+News_TV,40,0.395,0.347,0.048
+Other,4,0.265,0.433,-0.168
+Other_US_politics,48,0.362,0.47,-0.108
+Sports,53,0.38,0.444,-0.064
+Trump_speeches,18,0.559,0.388,0.171

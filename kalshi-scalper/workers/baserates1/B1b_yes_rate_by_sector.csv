@@ -1,0 +1,15 @@
+sector,series,calls,markets,yes_rate,ci90_lo,ci90_hi
+Business_Tech_Fed,8,19,319,0.386,0.342,0.431
+Earnings:Autos_Transport,4,11,149,0.403,0.339,0.47
+Earnings:Finance,5,17,228,0.592,0.538,0.644
+Earnings:Industrials_Defense,5,10,134,0.493,0.422,0.563
+Earnings:Restaurants_Leisure,7,19,260,0.435,0.385,0.486
+Earnings:Retail_Consumer,13,30,371,0.523,0.48,0.565
+Earnings:Tech,20,64,950,0.542,0.515,0.569
+Entertainment,5,42,686,0.383,0.353,0.414
+News_TV,11,205,2982,0.387,0.372,0.402
+Other,10,21,280,0.393,0.346,0.442
+Other_US_politics,11,180,3346,0.411,0.397,0.425
+Sports,11,116,1962,0.435,0.416,0.453
+Trump_speeches,4,390,10521,0.425,0.417,0.433
+ALL,114,1124,22188,0.425,0.42,0.431

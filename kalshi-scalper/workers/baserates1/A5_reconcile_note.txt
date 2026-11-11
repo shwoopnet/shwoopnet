@@ -1,0 +1,1 @@
+EXECSUM (workers/EXECSUM_PROTOCOL.md): EO counts reproduce 96 of 96 Kalshi 'above N' markets; public laws by approved date reproduce 90 of 94 bills markets, misses KXBILLSCOUNT Mar 2026 (Kalshi 4, public laws 2) and Jul 2026 (Kalshi 0, public laws 2).
