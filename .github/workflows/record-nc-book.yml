@@ -5,7 +5,7 @@
 # Scheduled starts run late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running waits, so jobs
 # never overlap, and a dropped trigger costs at most 30 minutes. Each job records up to the next 4 hour boundary (about 4 hours) and stops.
 # It is a continuous recorder like R6 (about 43,000 runner minutes a month, free on a public repo; the owner's merge accepts that, see CLAUDE.md).
-# It stops by itself: from 2027-02-28 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+# It stops by itself: from 2026-12-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-nc-book
 on:
   schedule:
@@ -21,10 +21,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 330
     steps:
-      - name: Stop for good after the end date (2027-02-28 23:59 UTC)
+      - name: Stop for good after the end date (2026-12-31 23:59 UTC)
         id: gate
         run: |
-          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2026-12-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
         if: steps.gate.outputs.go == 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2

@@ -1,6 +1,6 @@
 'use strict';
 // Recorder NC15 (Nov 11, 2026, research only): the whole-window book and trade tape of the eleven non-crypto 15 minute markets the bot trades. It reads public data, holds no secret, places no
-// order, writes no Firestore, changes nothing under functions/, writes only to a data branch, is not published with the site and stops by itself on 2027-02-28.
+// order, writes no Firestore, changes nothing under functions/, writes only to a data branch, is not published with the site and stops by itself on 2026-12-31.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -179,7 +179,7 @@ print(json.dumps({"b": b, "sleeps": calls, "n429": s.n429, "gaps": [m.BOOK_GAP_S
   assert.ok(out.b.peak_per_min <= 100, 'at most 100 a minute at the peak: ' + out.b.peak_per_min);
   assert.deepStrictEqual(out.sleeps, [2, 4, 8, 0.5], 'a 429 waits 2 s, then 4, then 8; a good answer resets the wait and the next call keeps the 0.5 s gap');
   assert.strictEqual(out.n429, 4, 'every refusal is counted');
-  assert.ok(out.gaps[0] >= 0.5 && out.gaps[1] >= 0.5 && out.gaps[2] >= 2 && out.gaps[3] <= 30 && out.gaps[4] === 2);
+  assert.ok(out.gaps[0] >= 0.5 && out.gaps[1] >= 0.5 && out.gaps[2] >= 2 && out.gaps[3] <= 30 && out.gaps[4] === 5);
   assert.strictEqual(out.bad, 'refused', 'a stream faster than 0.5 s between calls cannot be made');
   assert.strictEqual((code.match(/\bStream\(/g) || []).length, 2, 'only two streams are made');
   assert.ok(!/time\.sleep\(0(\.0+)?\)|while True:\s*\n\s*http_get/.test(code));
@@ -198,11 +198,11 @@ print(json.dumps({"n": len(rows), "w": len(m.COVER_COLS), "g": dict(zip(m.COVER_
   assert.ok(/out\.write\("coverage", \[coverage_row\(win\.close_time, win\.tally\[s\], win\.batching\.fallback\) for s in SERIES\]\)/.test(code), 'every series is written, found or not');
 };
 
-// FB10: it stops by itself on 2027-02-28, in the workflow and in the script.
+// FB10: it stops by itself on 2026-12-31, in the workflow and in the script.
 gates.FB10 = () => {
   const out = py(`print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH), len(m.owned_closes(m.END_EPOCH - 1800, m.END_EPOCH + 7200))]))`);
-  assert.deepStrictEqual(out, ['2027-02-28T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
-  assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
+  assert.deepStrictEqual(out, ['2026-12-31T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
+  assert.ok(/date -u -d '2026-12-31T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
   const steps = wf.split(/\n      - name: /).slice(2);
   assert.ok(steps.length === 4 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(now\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code), 'the script exits at once after the end date');

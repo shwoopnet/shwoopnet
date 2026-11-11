@@ -4,7 +4,7 @@ pointed at the bot's NON-crypto 15 minute series, for the research chats' mass b
 
 For these eleven 15 minute series (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M, fixed in
 code; gold and the five R6 crypto series are already recorded by R6 and are NOT here) it records, for the WHOLE window of every market:
-  - the order book every 2 seconds: one batched public read for all open markets, the best 5 YES and 5 NO bids with sizes, the server's Date header, the send and receive
+  - the order book every 5 seconds: one batched public read for all open markets, the best 5 YES and 5 NO bids with sizes, the server's Date header, the send and receive
     time (book.csv). If the batched read fails 3 polls in a row, that window falls back to one public read per market (logged in coverage);
   - about 60 seconds after each close, every public trade of that window, following the cursor until it is empty, de-duplicated by trade id; the id is NOT stored (trades.csv);
   - one coverage row per window per series, written even for a window with no good poll, so a missed window is counted, not silent (coverage.csv);
@@ -13,7 +13,7 @@ code; gold and the five R6 crypto series are already recorded by R6 and are NOT 
 It reads PUBLIC Kalshi market data only: no key, no signing, no auth header, no account path, no order, no Firestore. At most 2 request streams (the book, and the tape plus
 housekeeping), each with at least 0.5 seconds between calls (1.5 between tape pages); a 429 waits 2 seconds, doubling up to 30, and is never asked again at once.
 
-It stops by itself: no window opening at or after END_UTC (2027-02-28 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
+It stops by itself: no window opening at or after END_UTC (2026-12-31 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
 
 Rows are written exactly as the exchange returns them (levels re-ordered best first, prices and sizes as numbers, nothing computed). A missing level is empty, never zero."""
 import argparse
@@ -32,7 +32,7 @@ import urllib.request
 BASE = "https://external-api.kalshi.com/trade-api/v2"
 SERIES = ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M")
 WINDOW_S = 15 * 60
-BOOK_EVERY_S = 2.0
+BOOK_EVERY_S = 5.0
 DEPTH = 5
 BATCH_FAILS_TO_FALLBACK = 3
 BOOK_GAP_S = 0.5             # the book stream: at least this long between calls
@@ -46,7 +46,7 @@ SWEEP_BUDGET_S = 540         # the last sweep of a job must end within this long
 DISCOVER_EVERY_S = 2.0
 DISCOVER_FOR_S = 30.0
 TAPE_PAGES_PER_WINDOW_EST = 25   # an estimate: one page a market, a few more for the busy ones (these markets trade far less than Bitcoin)
-END_UTC = "2027-02-28T23:59:00Z"  # nothing is recorded from here on
+END_UTC = "2026-12-31T23:59:00Z"  # nothing is recorded from here on
 UA = {"User-Agent": "shwoopnet-research-recorder"}
 
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "series", "close_time"] \
