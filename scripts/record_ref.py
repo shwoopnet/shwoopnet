@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Reference-value recorder (RECREF, Nov 3, 2026, research only).
 
-Kalshi lists thousands of entertainment and tech markets that settle on a public number (a Spotify chart, a Rotten Tomatoes or Metacritic score, an App Store rank, a post
+Kalshi lists thousands of entertainment and tech markets that settle on a public number (a game chart, an App Store rank, a post
 count). The public sources show only their CURRENT value, so there is no history to test "does the live reference already imply the outcome at the look". This records,
 every 2 hours, the Kalshi quotes of the watched series together with the current reference value from the public source, each with its own timestamp, so the test can
 be run later on what was on file at the look.
@@ -137,8 +137,7 @@ def list_markets(series, status, extra=""):
 
 def targets_for(ref, markets):
     """The reads one reference needs. A fixed reference is one read. A per-event one is derived from the OPEN markets themselves:
-    per_event: the event's title gives a page slug (a Rotten Tomatoes film, a Metacritic game);
-    per_close: the account's posts in the hours before the market's close (a post-count market).
+    per_event: the event's title gives a page slug (a title page);
     Returns {event_ticker: (key, url)} for per-event references and {"": (key, url)} for a fixed one. At most `max_targets` events."""
     p = ref.get("params") or {}
     if ref.get("per_event"):
@@ -151,13 +150,6 @@ def targets_for(ref, markets):
                 slug = ad.slugify(mt.group(1), pe.get("sep", "_"))
                 out[ev] = (slug, pe["url"].replace("{slug}", slug))
         return dict(list(out.items())[: ref.get("max_targets", 8)])
-    if ref.get("per_close"):
-        hours, out = ref["per_close"]["hours"], {}
-        for m in markets:
-            ev, c = m.get("event_ticker") or "", parse_iso(m.get("close_time") or "")
-            if ev and ev not in out and c is not None:
-                out[ev] = ("close" + (m.get("close_time") or "")[:13], ad.xtracker_url(p["handle"], iso(c - hours * 3600), iso(c)))
-        return dict(list(out.items())[: ref.get("max_targets", 4)])
     urls_fn = ad.ADAPTERS[ref["adapter"]][0]
     return {"": ("", urls_fn(p)[0])}
 
@@ -280,7 +272,7 @@ def run(watchlist, data_dir, now=None):
                 rows, c2, n2, failed = poll_target(ref, key, url, slot, int(_clock()))
                 cr, n429, fails = cr + c2, n429 + n2, fails + (1 if failed else 0)
                 vrows += rows
-        fixed = [r for r in (e.get("refs") or []) if not (refs[r].get("per_event") or refs[r].get("per_close"))]
+        fixed = [r for r in (e.get("refs") or []) if not (refs[r].get("per_event"))]
         qrows += [quote_row(slot, ts, date, e, m, "|".join(fixed + keysby.get(m.get("event_ticker") or "", []))) for m in kept]
         sm, c, n, bad, _d = list_markets(e["series"], "settled", "&min_close_ts=%d" % int(now - 3 * 86400))
         ck, n429, errs = ck + c, n429 + n, errs + (1 if bad else 0)

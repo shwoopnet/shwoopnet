@@ -45,10 +45,10 @@ gates.R2 = () => {
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg) && /- kalshi-scalper/.test(cfg), 'none of it is published with the site');
 };
 
-// R3: what is polled comes from the watchlist alone: no ticker in the code, 8 to 12 series, no live 15 minute series, every reference used.
+// R3: what is polled comes from the watchlist alone: no ticker in the code, 1 to 12 series, no live 15 minute series, every reference used.
 gates.R3 = () => {
   for (const src of [script, adapters]) assert.ok(!/KX[A-Z0-9]{2,}/.test(strip(src)), 'the code names no Kalshi ticker');
-  assert.ok(watch.series.length >= 8 && watch.series.length <= 12, 'between 8 and 12 series');
+  assert.ok(watch.series.length >= 1 && watch.series.length <= 12, 'at most 12 series (Nov 11, 2026: only Steam is left, the other sources are parked pending a terms check)');
   for (const e of watch.series) {
     assert.ok(!/15M$/.test(e.series), e.series + ' is a 15 minute series (the live bot and the other recorders cover those)');
     assert.ok(e.rule_source && e.refs.length > 0, e.series + ' names its settlement source and its references');
@@ -65,11 +65,13 @@ gates.R4 = () => {
     const u = (r.params && r.params.url) || (r.per_event && r.per_event.url);
     if (u) { assert.ok(u.startsWith('https://'), r.id); hosts.add(u.split('/')[2]); }
   }
-  for (const h of hosts) assert.ok(['kworb.net', 'www.billboard.com', 'store.steampowered.com', 'www.rottentomatoes.com', 'www.metacritic.com'].includes(h), h);
-  assert.ok(/XT = "https:\/\/xtracker\.polymarket\.com\/api"/.test(adapters));
+  for (const h of hosts) assert.ok(['store.steampowered.com'].includes(h), h + ' (Nov 11, 2026: only sources whose terms allow automated reads; the others are parked, see noSportsScoreSitesGates)');
+  assert.ok(!/rottentomatoes|fandango|metacritic|billboard|kworb/i.test(script + adapters + JSON.stringify(watch.refs) + JSON.stringify(watch.series)), 'no parked source in the recorder or its watchlist');
+  for (const k of ['rt', 'mc', 'billboard', 'kworb']) assert.ok(!new RegExp('"' + k + '":').test(adapters), 'adapter ' + k + ' is removed');
+  assert.ok(!/polymarket/i.test(script + adapters + fs.readFileSync(path.join(__dirname, '..', 'kalshi-scalper', 'workers', 'RECREF_WATCHLIST.json', ), 'utf8')), 'Nov 11, 2026: no Polymarket host or adapter (its terms bar scraping and API use by an LLC)');
   const code = strip(script + adapters);
   const urls = new Set((code.match(/https?:\/\/[a-z0-9.-]+/g) || []).map((x) => x.split('//')[1]));
-  for (const h of urls) assert.ok(['external-api.kalshi.com', 'xtracker.polymarket.com'].includes(h), 'no other host is named in the code: ' + h);
+  for (const h of urls) assert.ok(h === 'external-api.kalshi.com', 'no other host is named in the code: ' + h);
 };
 
 // R5: rows have one value per column; a market is kept only inside its window; a re-run of a slot is idempotent; slot is 2 hours.
@@ -95,26 +97,9 @@ gates.R6 = () => {
 m._sleep = lambda x: None
 m.http_get = lambda url: (429, None, "")
 ms, calls, n429, bad, date = m.list_markets("S", "open")
-rows, c, n, failed = m.poll_target({"id": "x", "adapter": "mc"}, "", "https://www.metacritic.com/game/x/", 1, 1)
+rows, c, n, failed = m.poll_target({"id": "x", "adapter": "steam"}, "", "https://store.steampowered.com/search/results/?filter=topsellers&json=1", 1, 1)
 print(json.dumps([ms, calls, n429, bad, rows, failed]))`));
   assert.deepStrictEqual(out, [[], 3, 3, true, [], true]);
-};
-
-// R9 (RECPATCH1): a Rotten Tomatoes page with no score yet is "no_score_yet", not a parse failure; an unreadable page is still a failure; a page with a score is unchanged.
-gates.R9 = () => {
-  const out = JSON.parse(py(`
-import ref_adapters as ad
-noscore = '<script id="media-hero-json" type="application/json">{}</script><rt-text>Tomatometer</rt-text>'
-scored = '"aggregateRating":{"@type":"AggregateRating","name":"Tomatometer","ratingCount":67,"ratingValue":"90","reviewCount":67}'
-print(json.dumps([ad.rt_parse({}, [noscore]), ad.rt_parse({}, ["<html>blocked</html>"]), ad.rt_parse({}, [scored])]))`));
-  assert.deepStrictEqual(out, [[[1, 'tomatometer', null, null, 'no_score_yet']], [], [[1, 'tomatometer', 90, 67, 'percent;critic_reviews']]]);
-  const out2 = JSON.parse(py(`
-m._sleep = lambda x: None
-page = '<script id="media-hero-json" type="application/json">{}</script><rt-text>Tomatometer</rt-text>'
-m.http_get = lambda url: (200, page, "")
-rows, c, n, failed = m.poll_target({"id": "rt_page", "adapter": "rt"}, "k", "https://www.rottentomatoes.com/m/k", 1, 1)
-print(json.dumps([len(rows), failed, rows[0][8], rows[0][10]]))`));
-  assert.deepStrictEqual(out2, [1, false, '', 'no_score_yet']);
 };
 
 // R10 (RECBUILD1): the Yahoo 1 minute adapter keeps bars with a close, drops what is already on file, and returns [] for a body that is not a chart (a counted failure, never a made-up value).
