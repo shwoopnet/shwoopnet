@@ -1,0 +1,56 @@
+# Nov 11, 2026 (the owner approved). Politics shadow recorder: every 30 minutes the quote of every open market of the series in kalshi-scalper/workers/POLREC_SERIES.json that settles within
+# 14 days (the owner's hold cap), plus an hourly read of results, plus a daily count of what the cap left out. Research data only: public Kalshi market data, no key, no secret, no order, no Firestore.
+# The built-in GITHUB_TOKEN pushes gzipped files to its OWN `pol-data` branch (under polrec/), never to main; `quote-data` is already large and every job fetches its whole branch. The first run creates `pol-data` as an orphan branch.
+# An hourly start (minute 7) runs about 35 minutes and polls twice (minutes 0 and 30), about 32 requests a poll (a few more for paging) at 5 seconds apart, so about 1 request a minute on average and never more than 12. About 840 runner minutes a day, free on a public repo.
+# One concurrency group that never cancels: a run that finds a job running waits, so jobs never overlap, and a dropped start costs at most an hour of quotes.
+# It stops by itself: from 2027-02-28 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+name: record-politics
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-politics
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Stop for good after the end date (2027-02-28 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin pol-data; then git checkout -q -b pol-data FETCH_HEAD; else git checkout -q --orphan pol-data; fi
+      - name: Poll every 30 minutes (two polls a job)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/polrec/$STAMP"
+          python3 code/scripts/record_politics.py "data/polrec/$STAMP" --minutes 35
+          gzip -9 -f data/polrec/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "polrec-recorder"
+          git config user.email "polrec-recorder@users.noreply.github.com"
+          gzip -9 -f polrec/*/*/*.csv 2>/dev/null || true
+          git add polrec
+          git commit -q -m "polrec $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin pol-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin pol-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1

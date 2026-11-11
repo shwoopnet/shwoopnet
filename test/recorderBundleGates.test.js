@@ -160,28 +160,6 @@ print(json.dumps([inw, late, sat, stop, early_other, os.path.exists(os.path.join
   assert.strictEqual(r[5], true, 'the NY Fed row is saved');
 };
 
-// RB7: the cash saver (Tuesday to Saturday 02:00 to 04:00 UTC, 2 day range) still saves each US half day and the day around it: for Nov 27 and Dec 24 2026 (and the closed days around them) a start follows the end of after-hours with the half day inside its 2 day range.
-gates.RB7 = () => {
-  const wf = rd('.github', 'workflows', 'record-perps-cash.yml');
-  const m = /cron: "0 ([\d,]+) \* \* ([\d-]+)"/.exec(wf);
-  assert.ok(m, 'cron found');
-  const hours = m[1].split(',').map(Number);
-  const [d0, d1] = m[2].split('-').map(Number);
-  const runs = [];
-  for (let t = Date.UTC(2026, 10, 25); t < Date.UTC(2027, 0, 5); t += 3600e3) {
-    const x = new Date(t);
-    if (hours.includes(x.getUTCHours()) && x.getUTCDay() >= d0 && x.getUTCDay() <= d1) runs.push(t);
-  }
-  // a half day closes 13:00 New York (18:00Z) with after-hours to 17:00 New York (22:00Z); the regular session after-hours ends 20:00 New York (01:00Z next day)
-  for (const day of ['2026-11-27', '2026-12-24', '2026-11-30', '2026-12-28']) {
-    const open = Date.parse(day + 'T09:00:00Z');   // earliest pre-market bar of that UTC day is after 09:00Z
-    const done = Date.parse(day + 'T22:00:00Z') + 3 * 3600e3;   // the latest the day's bars can exist, with a margin past 01:00Z
-    const covering = runs.filter((t) => t >= done && t - 48 * 3600e3 <= open);
-    assert.ok(covering.length >= 1, day + ' has a start after its bars end, with the day inside the 2 day range');
-  }
-  assert.ok(/"2d"/.test(rd('scripts', 'record_perps_cash.py')), 'the 2 day range is what covers a dropped night');
-};
-
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

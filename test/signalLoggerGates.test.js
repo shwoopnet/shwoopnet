@@ -29,7 +29,7 @@ print(json.dumps({"good": v(), "binance": v(url="https://api.binance.com/x"), "h
   for (const k of ['binance', 'http', 'userinfo', 'port', 'lookalike']) assert.notStrictEqual(r[k], '', k + ' is rejected');
   assert.ok(!r.allow.includes('api.binance.com'), 'binance is not allowed');
   for (const h of ['api.weather.gov', 'www.okx.com', 'www.deribit.com', 'api.coinbase.com', 'api.kraken.com']) assert.ok(r.allow.includes(h), h);
-  assert.deepStrictEqual(r.allow, ['api.coinbase.com', 'api.kraken.com', 'api.weather.gov', 'ensemble-api.open-meteo.com', 'mesonet.agron.iastate.edu', 'www.deribit.com', 'www.okx.com'], 'the allowlist is EXACTLY this set; adding a host is a reviewed edit of this line too');
+  assert.deepStrictEqual(r.allow, ['api.coinbase.com', 'api.kraken.com', 'api.weather.gov', 'mesonet.agron.iastate.edu', 'www.deribit.com', 'www.okx.com'], 'the allowlist is EXACTLY this set; adding a host is a reviewed edit of this line too');
   assert.ok(!r.allow.some((h) => /espn|polymarket|(^|\.)(nhl|mlb|nba)\./i.test(h)), 'no sports or other terms-restricted host');
   const hosts = [...code.matchAll(/https?:\/\/[^"'\s/%]+/g)].map((x) => x[0]);
   assert.deepStrictEqual([...new Set(hosts)].filter((h) => h !== 'https://github.com').sort(), ['https://external-api.kalshi.com'], 'the only literal host in the code is the Kalshi quote host; signal hosts come from the allowlist');
@@ -174,11 +174,9 @@ print(json.dumps({"status": st, "body": body is not None}))`);
   assert.strictEqual(r.body, false, 'no body from the redirect target is ever read');
 };
 
-// SG8: it touches nothing under functions/ or firestore.rules, the site and the page never mention it, and scripts, .github and kalshi-scalper are excluded from Pages.
+// SG8: nothing in functions/ mentions it, the site and the page never mention it, and scripts, .github and kalshi-scalper are excluded from Pages.
 gates.SG8 = () => {
-  const changed = execFileSync('git', ['diff', '--name-only', 'origin/main'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean)
-    .concat(execFileSync('git', ['ls-files', '--others', '--exclude-standard'], { cwd: root, encoding: 'utf8' }).split('\n').filter(Boolean));
-  assert.deepStrictEqual(changed.filter((f) => f.startsWith('functions/') || f === 'firestore.rules'), [], 'functions/ and firestore.rules are untouched');
+  // Nov 11, 2026: the 'functions/ is untouched' diff against origin/main was true only for the PR that added the logger and failed every later PR that edits functions/ for its own reasons. What matters stays asserted below: nothing in functions/ mentions the logger.
   const fnDir = path.join(root, 'functions');
   assert.deepStrictEqual(fs.readdirSync(fnDir).filter((f) => f.endsWith('.js')).filter((f) => /record_signals|record-signals/.test(fs.readFileSync(path.join(fnDir, f), 'utf8'))), [], 'nothing in functions/ mentions it');
   assert.ok(!/record_signals|record-signals/.test(fs.readFileSync(path.join(root, 'index.html'), 'utf8')), 'the page does not mention it');
