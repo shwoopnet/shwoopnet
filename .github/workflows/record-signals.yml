@@ -1,12 +1,12 @@
 # Nov 11, 2026 (the owner: "EXTERNAL-SIGNAL SHADOW LOGGER: APPROVED"). Logs any REGISTERED public signal (kalshi-scalper/signals/REGISTRY.json) next to the Kalshi quote at that moment,
 # so non-price shadow candidates can be tested forward without a new recorder each time. Research data only: public GETs, no key, no secret, no order, no Firebase.
 # The built-in GITHUB_TOKEN pushes gzipped CSV to the `quote-data` branch under signals/<date>/<HHMM>.csv.gz, never to main.
-# 6 starts a day, 4 hours apart (11 minutes past 01, 05, 09, 13, 17, 21 UTC), about 1 billed minute each: 6 x 31 = 186 minutes a month at most, under the 250 limit.
+# 4 starts a day, 6 hours apart (11 minutes past 01, 07, 13, 19 UTC), about 1 billed minute each: 4 x 31 = 124 minutes a month at most (with the OKX recorder about 244, under the 250 limit).
 # Nothing is recorded until an entry in the registry has enabled true (the shipped example is off). It stops by itself: from 2027-02-28 23:59 UTC every run exits at once.
 name: record-signals
 on:
   schedule:
-    - cron: "11 1,5,9,13,17,21 * * *"
+    - cron: "11 1,7,13,19 * * *"
   workflow_dispatch: {}
 permissions:
   contents: write
