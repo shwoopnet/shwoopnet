@@ -175,7 +175,7 @@ gates.SP8 = () => {
   // the Bot page lost the card; the changelog and CLAUDE.md say so; no em dash in what was added
   const bot = html.slice(html.indexOf('id="page-kalshi"'), html.indexOf('id="page-strategies"'));
   assert.ok(!/data-card="board"|Strategy pipeline/.test(bot), 'the Bot page has no Strategy pipeline card');
-  const top = html.indexOf('<div class="changelog-day">Nov 10</div>');
+  const top = html.indexOf('<div class="changelog-day">Nov 10</div>');   // the Nov 10 day (a newer day may sit above it)
   assert.ok(top > 0 && html.slice(top, top + 6000).startsWith('<div class="changelog-day">Nov 10</div>') && /New Strategies page/.test(html.slice(top, top + 6000)), 'the top changelog day names the new page');
   const claude = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   const sec = claude.slice(claude.indexOf('## Strategies page (Nov 10, 2026'));
@@ -296,7 +296,7 @@ gates.SP14 = () => {
   const claude = fs.readFileSync(path.join(root, 'CLAUDE.md'), 'utf8');
   assert.ok(/Summary bar, detail panels and timeline \(Nov 10/.test(claude.slice(claude.indexOf('## Strategies page (Nov 10, 2026'))), 'CLAUDE.md describes them');
   const top = html.indexOf('<div class="changelog-day">Nov 10</div>');
-  assert.ok(/summary bar/i.test(html.slice(top, top + 4000)), 'the changelog says so');
+  assert.ok(top > 0 && /summary bar/i.test(html.slice(top, top + 4000)), 'the changelog says so');
 };
 
 

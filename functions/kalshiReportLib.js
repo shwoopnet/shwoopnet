@@ -67,11 +67,22 @@ function timing(o) {
     answerMs: ok(s) && ok(a) ? a - s : null,
   };
 }
+function bookPairs(v) {
+  if (!Array.isArray(v)) return null;
+  const out = [];
+  for (const l of v.slice(0, 5)) {
+    const p = l && typeof l === "object" ? num(l.p) : null, q = l && typeof l === "object" ? num(l.q) : null;
+    if (p !== null && q !== null && Number.isFinite(p) && Number.isFinite(q)) out.push([p, q]);
+  }
+  return out.length ? out : null;
+}
 function context(o) {
   const seen = o && typeof o.seen === "object" && o.seen ? o.seen : {};
   return {
     orderedCount: num(o.count), price: num(o.price), limit: num(o.limit), seenBid: num(seen.bid), seenAsk: num(seen.ask), bidSize: num(seen.bidSize), askSize: num(seen.askSize),
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
+    // Decision-time book (Nov 11, 2026, "P2"): the best 5 YES and 5 NO bids as [price, size] pairs, numbers only, best first; null when the order carries none.
+    bookYes5: bookPairs(o.bookYes5), bookNo5: bookPairs(o.bookNo5), bookReadMs: o.bookReadMs === undefined || o.bookReadMs === null ? null : num(o.bookReadMs),
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
     // Kalshi's own status for the order (Nov 4, 2026, the refinement chat's no-fill table; logged on the order since #712): a short word such as "canceled" or "executed", letters and underscores only, null when not logged.
     // The early sell the exit watch stored on the order (Nov 6, 2026, the refinement chat: it could not tell when a gold early sell happened or what it sold for): exitAt is when, exitAvg is the price it sold at (0 to 1, null for no fill), exitBid the bid that triggered it. Numbers only; no exit order id.
@@ -143,7 +154,9 @@ function skipSection(docs, nowMs) {
     if (d.detail && typeof d.detail === "object") for (const [k, v] of Object.entries(d.detail)) if (/^[A-Za-z]{1,20}$/.test(k) && typeof v === "number" && Number.isFinite(v)) detail[k] = v;
     return { at: new Date(Number(d.atMs)).toISOString(), atMs: Number(d.atMs), strategy: word(d.strategy, 40), ticker: typeof d.ticker === "string" && /^[A-Z0-9-]{1,60}$/.test(d.ticker) ? d.ticker : null,
       reason: word(d.reason, 40) || "unknown", secondsLeft: num(d.secondsLeft), detail: Object.keys(detail).length ? detail : null,
-      side: d.note === "yes" || d.note === "no" ? d.note : null };   // the side a skipped signal would have bought (the skip's note holds it for price skips); only "yes" or "no", never free text
+      side: d.side === "yes" || d.side === "no" ? d.side : (d.note === "yes" || d.note === "no" ? d.note : null),
+      // A skip that happened after the strategy's trigger had passed (Nov 11, 2026, "P3"): qualified, the open interest rise and the price it would have bought, numbers and a flag only. Null on a skip that never triggered.
+      qualified: d.qualified === true ? true : null, oiRise: d.qualified === true ? num(d.oiRise) : null, price: d.qualified === true ? num(d.price) : null };   // the side a skipped signal would have bought (the skip's note holds it for price skips); only "yes" or "no", never free text
   }).sort((a, b) => a.atMs - b.atMs);
   const byReason = {};
   rows.forEach((r) => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
