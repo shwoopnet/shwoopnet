@@ -22,3 +22,21 @@ SETTLELAG1 (descriptive, no strategy, not counted). From quote-data results.csv.
 ## Counts and bars
 Tests added N = 140 + 16 + 18 + 16 + 24 = 214. Shared N = 1,100,000 + 214 = 1,100,214 (z bar inv_cdf(1 - 0.05/N), about 5.33, computed in code); the smaller ledger N = 8,795 (+214 = 9,009, z about 4.39) is also reported.
 Development gate (a cell is a dev survivor): cash PF >= 1.5 AND n >= 100 AND z >= the bar. Held-out (last third, read ONCE, only for dev survivors at z >= 4.39): cash PF >= 1.5, n >= 50 and positive mean; a SURVIVOR passes development at the strict bar (5.33), held-out, and pooled dev + held-out z at least the bar. Counts of tests and survivors are reported whatever they are. Verdict words: FALSIFIED, NOT_YET_FALSIFIED, NOT_ENOUGH_DATA, basis named next to every figure (cash, unrounded fee unless stated). Script `src/scalper/angles1.py`, committed after this file and before the first score.
+
+## Result (development only, Nov 11, 2026, CASH basis, unrounded fee unless stated): 0 survivors of 214, held-out unread
+88,848 settled markets with candles, 17 series; development = first two thirds per series. 214 tests all populated, 194 with n >= 100. Cash PF >= 1.0 in 3 of 214 (all TAIL1 3c cells, n 89, below n 100); PF >= 1.5 with n >= 100: 0. Bars: z 5.34 at N 1,100,214, 4.39 at N 9,009; best z of any cell with n >= 30 is +0.63. Held-out file never read (no dev survivor). Prediction (zero survivors) held.
+| Card | Cell | n | cash PF | mean | z | days |
+|---|---|---|---|---|---|---|
+| TAIL1 | 3c, 10m, hold, unrounded | 89 | 1.42 | +0.0129 | +0.63 | 38 |
+| TAIL1 | 3c, 10m, rounded fee 100 / 10 contracts | 89 | 1.42 / 1.38 | +0.0128 / +0.0119 | +0.62 / +0.58 | 38 |
+| TAIL1 | 2c, 6m, hold (largest tail cell) | 718 | 0.58 | -0.0088 | -1.78 | 72 |
+| WINPOS1 | :00, mid underdog, 6m, hold | 2,758 | 0.98 | -0.0052 | -0.62 | 77 |
+| WINPOS1 | :45, mid, 10m, hold | 4,714 | 0.93 | -0.0147 | -2.41 | n/a |
+| OPENQ1 | FADE, d 0.2 to 0.3, first candle 840 s, hold | 4,570 | 0.93 | n/a | -1.94 | n/a |
+| OPENQ1 | FADE, d 0 to 0.1, 720 s, hold | 12,921 | 0.91 | n/a | -5.25 | n/a |
+| OPENQ1 | FADE, d 0.3+, 840 s, hold (smallest-n tail bin) | 1,062 | 0.89 | -0.0167 | -1.35 | 76 |
+| PRICECLUSTER1 | ask 50c, 10m, hold | 864 | 0.94 | -0.0152 | -0.98 | 76 |
+| PRICECLUSTER1 | ask 25c, 10m, hold | 930 | 0.89 | -0.0223 | -1.69 | 74 |
+| ACTIVITY1 | middle tercile, mid underdog, 6m, hold | 3,364 | 0.94 | n/a | -1.95 | n/a |
+Verdicts: OPENQ1 FALSIFIED (FOLLOW time exits all below 1 as well; the first quote is not mispriced in a tradable way; best FADE PF 0.93). WINPOS1 FALSIFIED (no quarter-hour position above PF 0.98). TAIL1 FALSIFIED for 1c and 2c (PF 0.58 at 2c, n 718); the 3c cells are the only PF above 1 (1.42, n 89, z +0.63, below n 100 and far from either bar) and are NOT_ENOUGH_DATA, not a finding; the rounded per-order fee at 10 and 100 contracts barely moves them (1.38, 1.42). PRICECLUSTER1 FALSIFIED (contrast of a round level over its neighbours: seven of eight contrasts within z 1.1, one at -2.43, 25c 6m, wrong direction; no round-number anchor that pays). ACTIVITY1 FALSIFIED (all 24 cells PF below 0.95).
+SETTLELAG1 (descriptive; recorder results.csv.gz from the 99 files held in the session scratchpad, 2026-10-26 to 2026-11-05; ticker minimum of seen_ms minus close_time): median 84 to 86 s, quartiles 81 s and 92 s, 99th percentile 95 s, minimum 75.2 s, share seen within 5 s or 30 s: 0 percent, for BTC, ETH, SOL, XRP and gold (DOGE, ETH, SOL, XRP have a few outliers up to 337 to 367 s). Read: seen_ms is the recorder's poll time, so it is an UPPER bound on the exchange's posting lag, and the lag floor of 75 s says the recorder polls results about 75 to 95 s after the close; it does not show an outcome determinable before the book clears. No strategy, no quote-state check (NOT_ENOUGH_DATA for any lag edge). Script `src/scalper/angles1.py`, output `workers/ANGLES1_dev.json`.
