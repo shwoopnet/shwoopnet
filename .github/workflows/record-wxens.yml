@@ -1,5 +1,5 @@
-# Nov 3, 2026 (research only, WXENS1): records the Open-Meteo ensemble members, the NWS point forecast and the Kalshi quotes of the daily high temperature markets of 14 US cities at the registered looks (07:00 and 10:00 local standard time), and each market's result and the IEM observed maximum after it settles.
-# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch under wxens/, never to main. Which cities and models: kalshi-scalper/workers/WXENS1_WATCHLIST.json.
+# Nov 3, 2026 (research only, WXENS1); Nov 11, 2026: Open-Meteo reads removed (non-commercial terms), NWS only. Records the NWS point forecast, gridpoint data and station observation and the Kalshi quotes of the daily high temperature markets of 14 US cities at the registered looks (07:00 and 10:00 local standard time), and each market's result and the IEM observed maximum after it settles.
+# Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch under wxens/, never to main. Which cities: kalshi-scalper/workers/WXENS1_WATCHLIST.json.
 # Scheduled runs are often late or dropped, so each run writes files named for its UTC hour (a re-run of the hour overwrites) and every row carries its own timestamp; the reader takes the first poll at or after the 10:00 look.
 name: record-wxens
 on:

@@ -4,10 +4,6 @@
   "refs": [
     {"id": "steam_top_sellers", "adapter": "steam", "params": {"url": "https://store.steampowered.com/search/results/?filter=topsellers&json=1&cc=us&count=25", "top": 25}}
   ],
-  "standalone_refs": [
-    {"id": "yahoo_1m", "adapter": "yahoo1m", "params": {"symbols": ["EURUSD=X", "GBPUSD=X", "JPY=X", "AUDUSD=X", "CAD=X", "CL=F", "NG=F", "SI=F"], "range": "1d", "backfill_range": "7d"},
-     "_what": "RECBUILD1 (2026-11-04, the owner approved collector 2): Yahoo's public 1 minute chart for EUR/USD, GBP/USD, USD/JPY, AUD/USD, USD/CAD, WTI, natural gas and silver futures, no Kalshi series attached. Yahoo keeps only about 7 days of 1 minute bars, so the first run backfills 7d and later runs add only bars newer than the high-water mark in ref/yahoo1m_state.json (rows go to ref/bars/<date>/<poll second>.csv.gz with the refvals columns: rank = unix second, name = symbol, value = close, value2 = volume, note = o/h/l). Fed to FXREF1, HRLYFX1 and COMDAY1 once registered."}
-  ],
   "series": [
     {"series": "KXSTEAMTOPSELLER", "family": "steam_chart", "refs": ["steam_top_sellers"], "rule_source": "Rank on Steam's USA Weekly Top Sellers (top 100 by revenue) for the week. The reference is the store's current top sellers list, a proxy, not the same list."}
   ],
