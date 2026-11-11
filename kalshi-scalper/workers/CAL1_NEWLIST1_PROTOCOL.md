@@ -28,3 +28,19 @@ Shared N about 1,100,000 + 20 registered here: z about 5.34; on the N 8,795 + 20
 
 ## Procedure
 Code `scripts/cal1_newlist1_score.py`, one run, refuses a second (`data/cal1_newlist1_score.json`). Nothing in this file changes after the first outcome; later changes are amendments appended below with their reason. Registered in git before the script is written or run.
+
+## RESULT (scored once, Nov 11, 2026; `scripts/cal1_newlist1_score.py`, output `data/cal1_newlist1_score.json`; held-out not read for any test, no survivor)
+**CAL1: NOT_ENOUGH_DATA for the index structure, 0 pairs for I2 and G2, no survivor, no lock found.**
+- I2 (identical strike KXINX greater vs KXINXU): 0 pairs. The 20 KXINX "greater" markets sit at one extreme strike per day and none matches a KXINXU strike at the same close. Not testable on held data.
+- G2 (gold daily vs weekly): 0 pairs. The held gold daily and weekly ladders never share a close date (weekly closes on Fridays, the held daily markets skip those Fridays). Not testable.
+- I3 (bracket = above(lo) - above(hi), 3 legs, index): 230 listed bracket triples, 147 in development over 13 dates. Scored (all three legs quoted within 15 minutes before the look) in development: 42 at 60 min, 36 at 30 min, 29 at 10 min; locks with profit above 0 after three fees: 1, 1, 2 (best 1.72c, 0.96c, 0.51c). Far under 100 scored pairs, so NOT_ENOUGH_DATA, and the signs say FALSIFIED if more existed (3 of 107 scored lock; two of the three under 1c). The sparse KXINX candles (3 to 4 per market) are the limit; a 1 minute read of the KXINX ladder would be needed, about 600 markets x 1 request, not run. Settlement consistency check: 0 mismatches (index), so the same-instant assumption held. Silver, Nasdaq 100, oil, natural gas: not held (NOT_ENOUGH_DATA, nothing counted). Counted tests: 8 registered, 3 scored.
+**NEWLIST1B: FALSIFIED, all 12 tests, development only (held-out count only: 272 to 509 entries, unread).** Development n 733 to 902 per cell, net per contract:
+| side | look | X1 time exit mean, PF | X2 target exit mean, PF |
+|---|---|---|---|
+| cheap 0.04 to 0.30 | 1 h | -7.85c, 0.04 | -7.92c, 0.06 |
+| cheap | 3 h | -7.61c, 0.03 | -6.99c, 0.11 |
+| cheap | 6 h | -8.58c, 0.04 | -8.50c, 0.07 |
+| mid 0.30 to 0.88 | 1 h | -34.80c, 0.02 | -33.72c, 0.03 |
+| mid | 3 h | -29.06c, 0.02 | -28.30c, 0.03 |
+| mid | 6 h | -24.35c, 0.02 | -24.92c, 0.03 |
+All z between -10 and -23. The cause is the spread: in a market's first hours the average quoted spread is 57c in the mid band (bid 0.26, ask 0.61 on average, hourly candle closes), so a taker pays the ask of a book with no maker yet. Win rate in the mid band (44.7% at mid 50.6%) is only about 6 points under the mid, but crossing the spread costs far more. Best cell by category was not flagged (no cell near the bar); category cells are in the JSON as information. Prediction held in direction (FALSIFIED), but PF is far below the predicted band. A resting (maker) entry in a new book would be a different, untested rule and is NOT registered here. Disclosure: hourly candles only, so the first 10 minutes of a listing are not tested.
