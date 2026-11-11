@@ -21,17 +21,19 @@ Find strategies that clear the owner's bar, not variants of what we already run.
 ## 3. Intake gate
 
 Before any work, every idea passes the four uniqueness checks of `docs/STRATEGY_LIFECYCLE.md` section 7d:
-1. The SIGNAL is different: a different data source or a different market type. Timing structure or price zone alone does not make it different.
+1. The SIGNAL is different: a different data source or a different market type. Timing structure or price zone alone does not make it different. Kalshi's own data counts as a different source from price only if it is a different FIELD with different logic (open interest, book depth, trade flow count); the same price band at a different time does not (owner, Nov 11, 2026).
 2. The EXIT is different: time-based, a target or scaling, or paired within its own position; hold to settlement also counts when the entry rules are different and the strategy will not hedge or interfere with another market or strategy. Signal and exit must both differ, and the entry rules too (this replaces "2 of 4 axes").
-3. Correlation under 0.3 with EVERY live strategy on the cash basis: daily cash P&L, Pearson r, at least 20 overlapping days, applied at the first read.
+3. Correlation under 0.3 with EVERY live strategy on the cash basis: daily cash P&L, Pearson r, at least 20 overlapping days, applied at the first read. A correlation of 0.3 or more is a FAIL: the candidate is REJECTED as a duplicate and put on the declined list with the correlation number, the live strategy it matched and the dates of the window (owner, Nov 11, 2026).
 4. Not on the DECLINED list.
+
+**Who judges (owner, Nov 11, 2026).** An independent check, the Verification Analyst (the fact-checker agent), scores the four checks. A candidate is added to the shadow list only when that check says it passes all four AND the owner approves the entry. The proposing chat never scores its own candidate.
 
 Then ONE LINE of registration, with the pre-registered bar, before anything is tested. No line, no test.
 
 ### What counts as "on the shadow list"
 
 The owner's pace (Nov 11, 2026): "5 must make it onto the shadow list per week." That means five UNIQUE candidates, each passing the four checks above and not on the declined list. A candidate counts only when ALL of these hold:
-- (a) it is pre-registered: the four checks passed, the bar and N written down;
+- (a) it is pre-registered, scored by the Verification Analyst and approved by the owner: the four checks passed, the bar and N written down;
 - (b) a named data source is ALREADY collecting for it: a registry shadow rule, a recorder, or a read-time join on data we hold (candles, order documents, recorder branches);
 - (c) it has a read date and an N target.
 
@@ -77,7 +79,7 @@ Strategies move through five stages: Idea, Shadow, Probe, Live, Retired. Family 
 
 ## 7. Escalation
 
-An owner popup is REQUIRED (owner, Nov 11, 2026) for: any strategy going live, even a 1 contract probe; any exception to a ban or a rule; any spend or new recorder (anything over the Charter's 250 runner minutes a month); any account or key; any change to this charter or to the Charter. Everything else is decided inside the team and logged.
+An owner popup is REQUIRED (owner, Nov 11, 2026) for: any strategy going live, even a 1 contract probe; any exception to a ban or a rule; any spend or new recorder (anything over the Charter's 250 runner minutes a month); any account or key; any change to this charter or to the Charter; and the owner's approval of EACH candidate's entry onto the shadow list, after the Verification Analyst has scored the four checks (section 3). Everything else is decided inside the team and logged.
 
 ## 8. What "carried away" looks like, and the automatic stop
 
@@ -87,6 +89,7 @@ An owner popup is REQUIRED (owner, Nov 11, 2026) for: any strategy going live, e
 | Chasing the best cell of many | The result is void unless deflated for all the cells. |
 | A test extended past its registered budget or N | Stopped and logged; a new registration is needed. |
 | Re-running a closed family without new data | Stopped; the family stays closed (3 falsified tests means declined for good). |
+| A candidate with a correlation of 0.3 or more with a live strategy | Rejected as a duplicate and put on the declined list with the correlation number. |
 | Padding the weekly five with variants | Not counted; the report names the missing data or venue instead. |
 | Repeating a withdrawn figure | Stopped; counts against the chat that repeated it. |
 | Spending usage on a test whose only possible answer is NOT_ENOUGH_DATA | Stopped; the cut is amended before any read, or the test is dropped. |
