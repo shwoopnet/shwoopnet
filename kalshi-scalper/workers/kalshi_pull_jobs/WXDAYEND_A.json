@@ -1,0 +1,286 @@
+{
+ "job_id": "WXDAYEND_A",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/WXDAYEND_REGISTRATION.md",
+ "purpose": "Card 74 finish, part A: final 2 hours of 1 minute candles of the winning bracket for 18 city-days (Dallas and Denver, Nov 1 to 9) plus the settled market lists of the 4 Nov 10 events (to find the winners).",
+ "heldout": "none (a development existence count; no held-out data exists or is read)",
+ "allowed_endpoints": [
+  {
+   "name": "batch_candles",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  },
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "event_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXHIGHNY",
+  "KXHIGHLAX",
+  "KXHIGHDEN",
+  "KXHIGHTDAL"
+ ],
+ "ticker_allowlist": [
+  "KXHIGHDEN-26NOV01-T65",
+  "KXHIGHDEN-26NOV02-B52.5",
+  "KXHIGHDEN-26NOV03-B55.5",
+  "KXHIGHDEN-26NOV04-B56.5",
+  "KXHIGHDEN-26NOV05-B58.5",
+  "KXHIGHDEN-26NOV06-B60.5",
+  "KXHIGHDEN-26NOV07-B65.5",
+  "KXHIGHDEN-26NOV08-B67.5",
+  "KXHIGHDEN-26NOV09-B72.5",
+  "KXHIGHTDAL-26NOV01-B79.5",
+  "KXHIGHTDAL-26NOV02-B85.5",
+  "KXHIGHTDAL-26NOV03-B76.5",
+  "KXHIGHTDAL-26NOV04-B75.5",
+  "KXHIGHTDAL-26NOV05-B81.5",
+  "KXHIGHTDAL-26NOV06-B72.5",
+  "KXHIGHTDAL-26NOV07-B68.5",
+  "KXHIGHTDAL-26NOV08-B69.5",
+  "KXHIGHTDAL-26NOV09-B71.5"
+ ],
+ "max_requests": 22,
+ "notes": "One request each, no paging. Candle windows are the 2 hours ending at the market close; the last hour is after the standard-time climate day ends.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "c01_KXHIGHTDAL-26NOV01-B79.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV01-B79.5",
+    "start_ts": 1793595600,
+    "end_ts": 1793602800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c02_KXHIGHTDAL-26NOV02-B85.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV02-B85.5",
+    "start_ts": 1793682000,
+    "end_ts": 1793689200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c03_KXHIGHTDAL-26NOV03-B76.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV03-B76.5",
+    "start_ts": 1793768400,
+    "end_ts": 1793775600,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c04_KXHIGHTDAL-26NOV04-B75.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV04-B75.5",
+    "start_ts": 1793854800,
+    "end_ts": 1793862000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c05_KXHIGHTDAL-26NOV05-B81.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV05-B81.5",
+    "start_ts": 1793941200,
+    "end_ts": 1793948400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c06_KXHIGHTDAL-26NOV06-B72.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV06-B72.5",
+    "start_ts": 1794027600,
+    "end_ts": 1794034800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c07_KXHIGHTDAL-26NOV07-B68.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV07-B68.5",
+    "start_ts": 1794114000,
+    "end_ts": 1794121200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c08_KXHIGHTDAL-26NOV08-B69.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV08-B69.5",
+    "start_ts": 1794200400,
+    "end_ts": 1794207600,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c09_KXHIGHTDAL-26NOV09-B71.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV09-B71.5",
+    "start_ts": 1794286800,
+    "end_ts": 1794294000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c10_KXHIGHDEN-26NOV01-T65",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV01-T65",
+    "start_ts": 1793599200,
+    "end_ts": 1793606400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c11_KXHIGHDEN-26NOV02-B52.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV02-B52.5",
+    "start_ts": 1793685600,
+    "end_ts": 1793692800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c12_KXHIGHDEN-26NOV03-B55.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV03-B55.5",
+    "start_ts": 1793772000,
+    "end_ts": 1793779200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c13_KXHIGHDEN-26NOV04-B56.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV04-B56.5",
+    "start_ts": 1793858400,
+    "end_ts": 1793865600,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c14_KXHIGHDEN-26NOV05-B58.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV05-B58.5",
+    "start_ts": 1793944800,
+    "end_ts": 1793952000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c15_KXHIGHDEN-26NOV06-B60.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV06-B60.5",
+    "start_ts": 1794031200,
+    "end_ts": 1794038400,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c16_KXHIGHDEN-26NOV07-B65.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV07-B65.5",
+    "start_ts": 1794117600,
+    "end_ts": 1794124800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c17_KXHIGHDEN-26NOV08-B67.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV08-B67.5",
+    "start_ts": 1794204000,
+    "end_ts": 1794211200,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c18_KXHIGHDEN-26NOV09-B72.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV09-B72.5",
+    "start_ts": 1794290400,
+    "end_ts": 1794297600,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "l01_KXHIGHTDAL-26NOV10",
+   "path": "/markets",
+   "params": {
+    "event_ticker": "KXHIGHTDAL-26NOV10",
+    "status": "settled",
+    "limit": 100
+   }
+  },
+  {
+   "id": "l02_KXHIGHDEN-26NOV10",
+   "path": "/markets",
+   "params": {
+    "event_ticker": "KXHIGHDEN-26NOV10",
+    "status": "settled",
+    "limit": 100
+   }
+  },
+  {
+   "id": "l03_KXHIGHNY-26NOV10",
+   "path": "/markets",
+   "params": {
+    "event_ticker": "KXHIGHNY-26NOV10",
+    "status": "settled",
+    "limit": 100
+   }
+  },
+  {
+   "id": "l04_KXHIGHLAX-26NOV10",
+   "path": "/markets",
+   "params": {
+    "event_ticker": "KXHIGHLAX-26NOV10",
+    "status": "settled",
+    "limit": 100
+   }
+  }
+ ]
+}
