@@ -84,6 +84,7 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |
 | `TESTING_LISTS_BUNDLE` | Testing Desk (MAIN) | 133, up to 347 pages (361) | 20 to 40 (estimate) | TIE3_LISTS, WXDAYEND_A (with its 18 one-market candle windows) and POLCOST (the open-markets lists of 79 Politics series) in one file, ids prefixed t3_ wx_ pc_; split with `workers/testing/bundle.py split` |
 | `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists, its own job (the heavy part) |
+| `MAPBREAK_LISTS` | Testing Desk (MAIN) | 16, up to 100 pages (114) | about 65 (estimate, uncertain by 2x; its own run) | `MAPBREAK_REGISTRATION.md`; 12 series settled lists before the held-out date plus 4 fee reads |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
