@@ -1,12 +1,14 @@
 """CFRTI-K-TX (the time exit), Idea Desk A, Nov 12 2026. ONE new try, registered in workers/CFRTI_K_TX_REGISTRATION.md BEFORE any exit price was read. DEVELOPMENT only (closes 2026-09-12 to before 2026-11-05); label "selected on development: it can falsify, not support".
 The entry is CFRTI-K's exactly (cfrti_k_vectors.explain: same windows, look, band, spread, edge). The exit: sell at the BID of the candle ending close minus 60 s; both fees rounded up as charged for 1 contract; a missing or zero exit bid means HELD TO SETTLEMENT, counted that way.
   python3 -I cfrti_k_tx.py selftest
-  python3 -I cfrti_k_tx.py dev <lists dir> <binary candles dir> <perp candles dir> [--r6 <root holding book15r6/>]
+  python3 -I cfrti_k_tx.py dev <lists dir> <binary candles dir> <perp candles dir>                  (candle read only)
+  python3 -I cfrti_k_tx.py r6 <lists dir> <binary candles dir> <perp candles dir> <root holding book15r6/> --depth1-result <DEPTH1 result file>     (ADDENDUM: refuses before 2026-11-14T00:00Z and without DEPTH1's result file)
 ORDER (fixed): 1) cost screen from prices only, no result touched: median round trip (entry ask minus mid, plus mid minus exit bid, plus both fees) over the trades with a valid exit bid; above 0.05 the try CLOSES UNREAD (0 tries) and the script stops before any result is read; 2) only then the results: cash PF, mean per contract and day-clustered z for the exit version BESIDE the hold version on the identical fills, and the difference with a paired test clustered by day (one-sided z over per-day sums of exit minus hold, fixed bar 1.645); the exit version 'helps' only if its mean per contract is higher AND the paired z is at least 1.645, else 'hold stays'."""
 import sys, os, math, collections, datetime, statistics as st
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import cfrti_k as K, cfrti_k_vectors as V
 RT_KILL = 0.05; Z_BAR = 1.645
+DEPTH1_READ_NOT_BEFORE = __import__("calendar").timegm((2026, 11, 14, 0, 0, 0))     # the R6 book line never runs before DEPTH1 has been read
 def fee_up(p): return math.ceil(0.07 * p * (1 - p) * 100 - 1e-9) / 100.0
 def pf(v):
     w = sum(x for x in v if x > 0); l = -sum(x for x in v if x < 0); return (w / l) if l > 0 else float("inf") if w else float("nan")
@@ -101,6 +103,11 @@ if __name__ == "__main__":
     a = sys.argv[1:]
     if a[:1] == ["selftest"]: selftest()
     elif a[:1] == ["dev"] and len(a) >= 4:
+        if "--r6" in a: sys.exit("REFUSED: the R6 book line is a separate command (r6) that runs only after DEPTH1's read (Head, Nov 12)")
         mks = K.load_markets(a[1]); binary = K.load_binary(a[2]); perp = K.load_perp(a[3]); core(mks, binary, perp)
-        if "--r6" in a: r6_line(mks, binary, perp, a[a.index("--r6") + 1])
+    elif a[:1] == ["r6"] and len(a) >= 5:                                  # r6 <lists> <candles> <perp> <R6 root> --depth1-result <DEPTH1_RESULT.md or depth1_result.txt>
+        import time as _t
+        if _t.time() < DEPTH1_READ_NOT_BEFORE: sys.exit("REFUSED: the R6 book line runs only on or after 2026-11-14T00:00Z, after DEPTH1's read")
+        if "--depth1-result" not in a or not os.path.isfile(a[a.index("--depth1-result") + 1]): sys.exit("REFUSED: DEPTH1's read marker (its result file) must exist: pass --depth1-result <path>")
+        mks = K.load_markets(a[1]); binary = K.load_binary(a[2]); perp = K.load_perp(a[3]); r6_line(mks, binary, perp, a[4])
     else: sys.exit(__doc__)
