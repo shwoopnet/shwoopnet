@@ -3461,8 +3461,8 @@
    }
   }
  ],
- "notes": "One batched request per game, 3 to 6 tickers, about 4 to 5 hours of 1 minute candles ending at the market's close. ONE run, one answer: this job replaces the 35 request version and is not to be rebuilt on a longer list. The batched candle endpoint has not been seen to answer for sports markets; if the first three requests fail the run stops by the script's own rule.",
- "status": "active",
+ "notes": "One batched request per game, 3 to 6 tickers, about 4 to 5 hours of 1 minute candles ending at the market's close. ONE run, one answer: this job replaces the 35 request version and is not to be rebuilt on a longer list. The batched candle endpoint has not been seen to answer for sports markets; if the first three requests fail the run stops by the script's own rule. RETIRED Nov 12, 2026: one 215 request job of 1 minute candles risked the 200 MB a run size cap (SPREADCELL1 hit it). Replaced by INGAMELAG_M1A and INGAMELAG_M1B, the same fixed list of 215 games split in two, one redundant moneyline ticker dropped per game. Removed from the workflow choices.",
+ "status": "retired",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,
