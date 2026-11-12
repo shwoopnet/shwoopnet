@@ -1,0 +1,241 @@
+{
+ "job": {
+  "job_id": "ROLLOFF_PROXY",
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/IDEA_DESK_B_NOV11.md",
+  "purpose": "Rank 3, ROLLOFF proxy check (card 13): settled daily approval markets and the series rules text, to test whether a poll table rebuilt from public polls reproduces the settled value. No price is read.",
+  "heldout": "none (markets in the last third of event dates are listed but flagged by the reader and not used in the proxy fit)",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXTRUMPAPPROVE",
+   "KXAPRPOTUS"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 12,
+  "requests": [
+   {
+    "id": "live_KXTRUMPAPPROVE",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXTRUMPAPPROVE",
+     "status": "settled",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "hist_KXTRUMPAPPROVE",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXTRUMPAPPROVE",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXAPRPOTUS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXAPRPOTUS",
+     "status": "settled",
+     "limit": 1000
+    },
+    "max_pages": 1
+   },
+   {
+    "id": "hist_KXAPRPOTUS",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXAPRPOTUS",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "series_KXTRUMPAPPROVE",
+    "path": "/series/KXTRUMPAPPROVE",
+    "params": {}
+   },
+   {
+    "id": "series_KXAPRPOTUS",
+    "path": "/series/KXAPRPOTUS",
+    "params": {}
+   }
+  ],
+  "notes": "Six requests, at most 9 pages; the cap is 12. Fields the reader keeps: ticker, event_ticker, close_time, result, floor_strike, cap_strike, rules_primary, settlement_sources.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1450Z",
+ "finished": "2026-11-12T1450Z",
+ "status": "complete",
+ "requests_sent": 7,
+ "bytes_stored": 4523448,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXTRUMPAPPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1019515,
+   "t_send_ms": 1794495053760,
+   "t_recv_ms": 1794495053957,
+   "server_date": "Thu, 12 Nov 2026 14:50:53 GMT",
+   "file": "0001.json.gz",
+   "sha256": "38d65753eec1bc4bb08a95d3ee34172b6c4a0f62f4b74d3ac4573dcdff8eaf66",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "hist_KXTRUMPAPPROVE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 169427,
+   "t_send_ms": 1794495054760,
+   "t_recv_ms": 1794495054901,
+   "server_date": "Thu, 12 Nov 2026 14:50:54 GMT",
+   "file": "0002.json.gz",
+   "sha256": "51419bddc6013d1b42879e32d24a81ef55df97f9b684b619aeba5af7466b4ee4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXAPRPOTUS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 122942,
+   "t_send_ms": 1794495055760,
+   "t_recv_ms": 1794495055880,
+   "server_date": "Thu, 12 Nov 2026 14:50:55 GMT",
+   "file": "0003.json.gz",
+   "sha256": "6a743b0b0d9dd5e3128cd796dac7e45a3bee76f8cf3b8f649b6dff5b25cc0404",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "hist_KXAPRPOTUS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1659026,
+   "t_send_ms": 1794495056760,
+   "t_recv_ms": 1794495056921,
+   "server_date": "Thu, 12 Nov 2026 14:50:56 GMT",
+   "file": "0004.json.gz",
+   "sha256": "f8f7faf1e88ccddea49a99a7b517e43831f275262ea967c6413dc67fd42498be",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "hist_KXAPRPOTUS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1550795,
+   "t_send_ms": 1794495057760,
+   "t_recv_ms": 1794495057937,
+   "server_date": "Thu, 12 Nov 2026 14:50:57 GMT",
+   "file": "0005.json.gz",
+   "sha256": "0f41c1f74e982a63e06d13a7a0899fa29081b876e68feb118b2c441f19e30b08",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "series_KXTRUMPAPPROVE",
+   "path": "/series/KXTRUMPAPPROVE",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 902,
+   "t_send_ms": 1794495058760,
+   "t_recv_ms": 1794495058840,
+   "server_date": "Thu, 12 Nov 2026 14:50:58 GMT",
+   "file": "0006.json.gz",
+   "sha256": "177206b3531b578b3fe2729c6f3812375a53aadbca426671ced46d764d3099f1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "series_KXAPRPOTUS",
+   "path": "/series/KXAPRPOTUS",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 841,
+   "t_send_ms": 1794495059760,
+   "t_recv_ms": 1794495059827,
+   "server_date": "Thu, 12 Nov 2026 14:50:59 GMT",
+   "file": "0007.json.gz",
+   "sha256": "a071fba4225fcfcc90bc01aa6b359c4085f08e041cf54e26fbe219fe4274cfa2",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
