@@ -1181,12 +1181,13 @@ FLOOR1 (XRP fills priced under 0.905) and THIN1 (ask size under 20) now sit with
 
 The day cap on real runs of `scripts/kalshi_pull.py` goes from 6 to 12 (`MAX_RUNS_PER_DAY`), and nothing else changes. The owner wants the research queue to run back to back, and six a day was the only thing holding it. Dry runs still do not count. Every per-run limit is exactly as it was: 1 request a second, 1,200 requests a run, three 429s in a row end the run, 5 MB an answer, 200 MB a run, one pinned host table, GET only, no key, no redirects, the concurrency group and the end date 2027-02-28. The runner is otherwise byte-identical. If the first 429 ever appears, drop back to 6 at once (a one line edit of the same constant). Gates: `test/kalshiPullGates.test.js` KP18 (pins 12) and KP18b (every other limit unchanged). Docs: `docs/KALSHI_PULL.md`.
 
-## kalshi-pull jobs v5: the in-game job in two files (Nov 12, 2026, Desk B)
-
-`INGAMELAG_M1` (one job of 215 requests of 1 minute candles) is retired: its answers risked the 200 MB a run size cap that stopped SPREADCELL1. The same fixed list of 215 games now runs as `INGAMELAG_M1A` (108 requests, cap 123) and `INGAMELAG_M1B` (107, cap 122), copied from Desk B's branch (`claude/idea-desk-b`, c368a17) with one redundant moneyline ticker dropped per game. They are ONE measurement, read once, after both are complete, and run A then B. Each file carries 15 requests of headroom for 429 retries and no other job has any (gate KP14b). The cap is not raised. The runner and the day limit are unchanged. Gate KP14d.
-
 ## kalshi-pull: the family census listing (Nov 12, 2026, Desk B, the Head of R&D)
 
 `CENSUS_LISTING` (`kalshi-scalper/workers/kalshi_pull_jobs/CENSUS_LISTING.json`, 40 requests, at most 88 pages, cap 100, about 120 MB by Desk B's estimate, plan in `kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md`) is a LISTING only: Kalshi's full series list and every non-combo market that settled on Nov 10, 2026 UTC, hour by hour, for counts and volume by family. No candle, no test and no rule is scored from it. Same host, pace and stop rules as every other job; the runner is unchanged. Gate KP27. Dispatch order from research: first, then the in-game pair (PR 822), then the approval-calibration candles (PR 823).
 
 `WXDAYEND_A` (Testing Desk, Nov 12, 2026; `kalshi-scalper/workers/kalshi_pull_jobs/WXDAYEND_A.json`, owner field MAIN because the runner's owner list has no Testing Desk) rides in the same pull request: 22 requests (18 one-market candle windows for Dallas and Denver, Nov 1 to 9, and the 4 settled-market lists of the Nov 10 events), development only, registered in `kalshi-scalper/workers/testing/WXDAYEND_REGISTRATION.md` before any answer. Gate KP28.
+
+## kalshi-pull jobs v5: the in-game job in two files (Nov 12, 2026, Desk B)
+
+`INGAMELAG_M1` (one job of 215 requests of 1 minute candles) is retired: its answers risked the 200 MB a run size cap that stopped SPREADCELL1. The same fixed list of 215 games now runs as `INGAMELAG_M1A` (108 requests, cap 123) and `INGAMELAG_M1B` (107, cap 122), copied from Desk B's branch (`claude/idea-desk-b`, c368a17) with one redundant moneyline ticker dropped per game. They are ONE measurement, read once, after both are complete, and run A then B. Each file carries 15 requests of headroom for 429 retries and no other job has any (gate KP14b). The cap is not raised. The runner and the day limit are unchanged. Gate KP14d.
+
