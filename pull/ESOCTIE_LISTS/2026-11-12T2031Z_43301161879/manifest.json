@@ -1,0 +1,640 @@
+{
+ "job": {
+  "job_id": "ESOCTIE_LISTS",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md",
+  "purpose": "ESOCTIE stage 1 (History Miner): settled lists of KXESOCCERGAME, development closes 2026-09-12 to before 2026-10-23 only, in three date slices to keep each answer small; plus the series fee fields.",
+  "heldout": "none read: nothing closing on or after 2026-10-23T00:00Z is listed (every slice carries max_close_ts at most 1792713599); held-out is ESOCTIE's own block 2026-10-23 to 2026-11-13, pulled only on the Head of R&D's go",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXESOCCERGAME"
+  ],
+  "ticker_allowlist": [],
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "series_KXESOCCERGAME",
+    "path": "/series/KXESOCCERGAME",
+    "params": {}
+   },
+   {
+    "id": "dev_a",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXESOCCERGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1790467199
+    },
+    "max_pages": 25
+   },
+   {
+    "id": "dev_b",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXESOCCERGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1790467200,
+     "max_close_ts": 1791417599
+    },
+    "max_pages": 25
+   },
+   {
+    "id": "dev_c",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXESOCCERGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1791417600,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 30
+   }
+  ],
+  "notes": "Expected about 18,000 events x 3 markets = about 54,000 markets, about 55 pages at about 2.2 KB a market (about 120 MB). A slice that hits its page cap is reported as cut and its lower bound stated; it is never re-asked without a new job. Only ticker, event, times, settlement time and result are used; the result is read only by the scorer, as registered.",
+  "max_requests": 90
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T2031Z",
+ "finished": "2026-11-12T2032Z",
+ "status": "complete",
+ "requests_sent": 25,
+ "bytes_stored": 51653326,
+ "rows": [
+  {
+   "index": 1,
+   "id": "series_KXESOCCERGAME",
+   "path": "/series/KXESOCCERGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1878,
+   "t_send_ms": 1794515504451,
+   "t_recv_ms": 1794515504557,
+   "server_date": "Thu, 12 Nov 2026 20:31:44 GMT",
+   "file": "0001.json.gz",
+   "sha256": "b6f3d1a9c1082df0db2266e5bec3092bf08b7050f66bea4196434205a2642b5b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "dev_a",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1790467199
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794515505451,
+   "t_recv_ms": 1794515505568,
+   "server_date": "Thu, 12 Nov 2026 20:31:45 GMT",
+   "file": "0002.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "dev_b",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1790467200,
+    "max_close_ts": 1791417599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794515506451,
+   "t_recv_ms": 1794515506543,
+   "server_date": "Thu, 12 Nov 2026 20:31:46 GMT",
+   "file": "0003.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2418797,
+   "t_send_ms": 1794515507452,
+   "t_recv_ms": 1794515507664,
+   "server_date": "Thu, 12 Nov 2026 20:31:47 GMT",
+   "file": "0004.json.gz",
+   "sha256": "fbd711105b35f0653b36515bdc8be4926fe4c573178f3281afc4bdca0c1eb32e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2419912,
+   "t_send_ms": 1794515508452,
+   "t_recv_ms": 1794515508779,
+   "server_date": "Thu, 12 Nov 2026 20:31:48 GMT",
+   "file": "0005.json.gz",
+   "sha256": "19a5b80944b8b4e59576e0c22838980586755e985e52af4d64a6b6eab55fc6a2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2418718,
+   "t_send_ms": 1794515509452,
+   "t_recv_ms": 1794515509673,
+   "server_date": "Thu, 12 Nov 2026 20:31:49 GMT",
+   "file": "0006.json.gz",
+   "sha256": "5aee3efffcd6942f9c5d4051db4d8d3c7060655532bdb472bf2e99c171a9d671",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2417419,
+   "t_send_ms": 1794515510452,
+   "t_recv_ms": 1794515510654,
+   "server_date": "Thu, 12 Nov 2026 20:31:50 GMT",
+   "file": "0007.json.gz",
+   "sha256": "14c08873bde5b42adb5c9efc1ddfed78c3a95e4d213b0eb57a23e39cc74b3475",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2421358,
+   "t_send_ms": 1794515511452,
+   "t_recv_ms": 1794515511661,
+   "server_date": "Thu, 12 Nov 2026 20:31:51 GMT",
+   "file": "0008.json.gz",
+   "sha256": "987624627153ddb92044d1e9b41e5f62097f1f44b5409a72b645a0f57a98ff63",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2418952,
+   "t_send_ms": 1794515512452,
+   "t_recv_ms": 1794515512725,
+   "server_date": "Thu, 12 Nov 2026 20:31:52 GMT",
+   "file": "0009.json.gz",
+   "sha256": "0f90ddd2f01ac5cd6bf0e758db8de0c006f7a27f0d306f333b45253f24970b67",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 2418692,
+   "t_send_ms": 1794515513452,
+   "t_recv_ms": 1794515513845,
+   "server_date": "Thu, 12 Nov 2026 20:31:53 GMT",
+   "file": "0010.json.gz",
+   "sha256": "93569b8077ade2fcb8fdf9a93f2a82ba2c764f251ccefd7a4621ff65ee2f940c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 8,
+   "status": 200,
+   "bytes": 2418191,
+   "t_send_ms": 1794515514452,
+   "t_recv_ms": 1794515514643,
+   "server_date": "Thu, 12 Nov 2026 20:31:54 GMT",
+   "file": "0011.json.gz",
+   "sha256": "39c055f532b44cd40deef28c335fa39870e066f9e930d67fda1fe17d80cdd141",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 9,
+   "status": 200,
+   "bytes": 2419045,
+   "t_send_ms": 1794515515452,
+   "t_recv_ms": 1794515515634,
+   "server_date": "Thu, 12 Nov 2026 20:31:55 GMT",
+   "file": "0012.json.gz",
+   "sha256": "c9e4fa3ad82e812cf4534fd6578e3bccf5b8fafa2d6db1b35526352cc0231bb4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 10,
+   "status": 200,
+   "bytes": 2421034,
+   "t_send_ms": 1794515516453,
+   "t_recv_ms": 1794515516656,
+   "server_date": "Thu, 12 Nov 2026 20:31:56 GMT",
+   "file": "0013.json.gz",
+   "sha256": "604e6dddd1f7538543bcf480c527e7db49137edf7059b1ba4dce3035a80b4666",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 11,
+   "status": 200,
+   "bytes": 2419276,
+   "t_send_ms": 1794515517453,
+   "t_recv_ms": 1794515517637,
+   "server_date": "Thu, 12 Nov 2026 20:31:57 GMT",
+   "file": "0014.json.gz",
+   "sha256": "b1a054f21e1e0606a168630f7cdeaad65861b3d7c5d7147ec349edf7216fc288",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 12,
+   "status": 200,
+   "bytes": 2417466,
+   "t_send_ms": 1794515518453,
+   "t_recv_ms": 1794515518669,
+   "server_date": "Thu, 12 Nov 2026 20:31:58 GMT",
+   "file": "0015.json.gz",
+   "sha256": "3450508e8fd2f8567b092ce2a8f168116cb38d5b2576446a1cd17b9a64b193da",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 13,
+   "status": 200,
+   "bytes": 2420066,
+   "t_send_ms": 1794515519453,
+   "t_recv_ms": 1794515519823,
+   "server_date": "Thu, 12 Nov 2026 20:31:59 GMT",
+   "file": "0016.json.gz",
+   "sha256": "89e271fab6ac621232c90afb9072e0e323bebf0ff9e4918b2ce4ff23682278de",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 14,
+   "status": 200,
+   "bytes": 2419167,
+   "t_send_ms": 1794515520453,
+   "t_recv_ms": 1794515520634,
+   "server_date": "Thu, 12 Nov 2026 20:32:00 GMT",
+   "file": "0017.json.gz",
+   "sha256": "8b92d77555f25c5fc0004641e580cf71abc926efaec6b7e577ca48e223035940",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 15,
+   "status": 200,
+   "bytes": 2414902,
+   "t_send_ms": 1794515521453,
+   "t_recv_ms": 1794515521929,
+   "server_date": "Thu, 12 Nov 2026 20:32:01 GMT",
+   "file": "0018.json.gz",
+   "sha256": "2a276da6794d3dbace330fd73c75f372c98450917d1719fd59ffd6e80569560e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 16,
+   "status": 200,
+   "bytes": 2420002,
+   "t_send_ms": 1794515522454,
+   "t_recv_ms": 1794515522592,
+   "server_date": "Thu, 12 Nov 2026 20:32:02 GMT",
+   "file": "0019.json.gz",
+   "sha256": "1bceef403bd36dfa1bf61fbd1e3b0eb8c1330936e77c26e4e61ee296de2c5309",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 17,
+   "status": 200,
+   "bytes": 2416377,
+   "t_send_ms": 1794515523454,
+   "t_recv_ms": 1794515523638,
+   "server_date": "Thu, 12 Nov 2026 20:32:03 GMT",
+   "file": "0020.json.gz",
+   "sha256": "357d33b772bcd4360a9d9c0cfc6098aa4b051cf2318dd7807086059c09a13462",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 18,
+   "status": 200,
+   "bytes": 2416098,
+   "t_send_ms": 1794515524454,
+   "t_recv_ms": 1794515524700,
+   "server_date": "Thu, 12 Nov 2026 20:32:04 GMT",
+   "file": "0021.json.gz",
+   "sha256": "31a2d40da6bc7bd6683e7448c0369a73c74f68d8f961a7da5f0eaf28c6833942",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 19,
+   "status": 200,
+   "bytes": 2416029,
+   "t_send_ms": 1794515525454,
+   "t_recv_ms": 1794515525725,
+   "server_date": "Thu, 12 Nov 2026 20:32:05 GMT",
+   "file": "0022.json.gz",
+   "sha256": "26d2c257fa1d8aaf1d94041c619bfe3596f9ba57af2bdc851f082c7e433cf221",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 20,
+   "status": 200,
+   "bytes": 2415976,
+   "t_send_ms": 1794515526454,
+   "t_recv_ms": 1794515526747,
+   "server_date": "Thu, 12 Nov 2026 20:32:06 GMT",
+   "file": "0023.json.gz",
+   "sha256": "b2393cb8eeaf90539d0c7a0db6431af79d1346777f873048c5693cd6f7b79271",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 21,
+   "status": 200,
+   "bytes": 2416026,
+   "t_send_ms": 1794515527454,
+   "t_recv_ms": 1794515527691,
+   "server_date": "Thu, 12 Nov 2026 20:32:07 GMT",
+   "file": "0024.json.gz",
+   "sha256": "f345222444e8ccd588ece286a438f28093879d104d9c2f333d91a96819960043",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "dev_c",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791417600,
+    "max_close_ts": 1792713599
+   },
+   "page": 22,
+   "status": 200,
+   "bytes": 867891,
+   "t_send_ms": 1794515528454,
+   "t_recv_ms": 1794515528650,
+   "server_date": "Thu, 12 Nov 2026 20:32:08 GMT",
+   "file": "0025.json.gz",
+   "sha256": "69459a69126c7a6bbb928eeb2e1411158f00f75372c6559225c873dd199cb028",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
