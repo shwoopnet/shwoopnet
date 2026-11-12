@@ -21,7 +21,7 @@ def main(series_path, folder, outdir):
     for f in S["families_ranked_by_events"]:
         lo, hi = iso_ts(f["development"]["closes_from"]), iso_ts(f["development"]["closes_before"]); clock = f["in_play"] == "clock"
         items = sorted(((t, c) for t, (s, c, o) in mk.items() if s in f["series"] and lo <= c < hi and not t.endswith("-TIE")), key=lambda x: (x[1], x[0]))
-        def start(t, c): return (clock_start(t) - 70 * 60) if clock and clock_start(t) else (mk[t][2] or c - 20 * 3600)       # Amendment 2: no window anchored on the close; tennis from the market open
+        def start(t, c): return (clock_start(t) - (70 * 60 if f["family"] == "TABLE_TENNIS" else 0)) if clock and clock_start(t) else (mk[t][2] or c - 20 * 3600)       # Amendment 2: no window anchored on the close; tennis from the market open
         cur = []
         for it in items:
             trial = cur + [it]; s0 = min(start(t, c) for t, c in trial); span = (trial[-1][1] - s0) / 60
