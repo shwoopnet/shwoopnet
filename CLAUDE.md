@@ -1329,3 +1329,7 @@ Six candle job files, job files and gates only (runner and workflow unchanged): 
 
 `docs/ROTATION_LANE.md` v1.2 corrects section 4's arithmetic after the Verification Analyst reproduced it with its own code: the single-block luck table is now at 10 contracts (with the 3 contract figures for probation seats in a sentence), the "no edge" definition is stated (a rule in a fairly priced market loses about one fee an order; a rule that exactly breaks even is its own line), and the cost of a fake rule is stated as fees paid. No rule changed. The block conditions and the worst-day and worst-week figures are labelled as not independently checked. Docs only.
 
+## kalshi-pull jobs v17: the WHEEL0 candle jobs (Nov 12, 2026, Forensics, the owner's ordered test)
+
+`WHEEL0_CANDLES_XRP`, `_DOGE` (246 requests each), `_GOLD` (179) and `_ETH` (187): batched one minute candles of the markets in the `WHEEL0_LISTS` answer (858 requests in all, caps equal to the request counts, each request under the 10,000 minutes x tickers limit, 24 fifteen minute markets and about 6 hours a request). Rule (h): the Ethereum file ends before 2026-10-29 (gate KP34); Bitcoin is not requested; gold is pulled whole by the Head's ruling and the scorer refuses to read before 2026-11-14 00:00Z. Size guide from Forensics: about 0.17 MB a request on this kind of market, so about 42 MB for the largest file; if the first comes back far larger, stop and split the rest. Job files and a gate only; runner and workflow unchanged. Nothing has run.
+
