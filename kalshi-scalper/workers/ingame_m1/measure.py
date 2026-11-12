@@ -18,7 +18,7 @@ minutes before it, a length shorter than any game of that sport, so every candle
 play. Candles outside that stretch are dropped before anything is computed. It reads no result
 field and prints no price, no pre-game figure and no outcome: only counts and shares of a move.
 
-Usage: python3 measure.py <folder of one pull run (manifest.json, 0001.json.gz ...)> <games.json>
+Usage: python3 measure.py <games.json> <folder of pull run A> [<folder of pull run B> ...]
 """
 import re
 import glob
@@ -104,13 +104,14 @@ def in_play(ml, sport):
 
 
 def main():
-    run, games = sys.argv[1], json.load(open(sys.argv[2]))
+    games = json.load(open(sys.argv[1]))
     cand = {}
-    for f in sorted(glob.glob(os.path.join(run, "[0-9]*.json.gz"))):
-        try:
-            walk(json.load(gzip.open(f, "rt")), cand)
-        except (ValueError, OSError):
-            continue
+    for run in sys.argv[2:]:
+        for f in sorted(glob.glob(os.path.join(run, "[0-9]*.json.gz"))):
+            try:
+                walk(json.load(gzip.open(f, "rt")), cand)
+            except (ValueError, OSError):
+                continue
     events, no_clean, games_used, games_missing = [], 0, 0, 0
     for g in games:
         a, b = g["ml"]                                    # the two moneyline tickers
