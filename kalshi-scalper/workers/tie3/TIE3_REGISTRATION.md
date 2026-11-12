@@ -86,3 +86,9 @@ A separate registration, before any result of the price block is read: the rule 
 ## Note, Nov 12, 2026, 19:05Z, before any data (after the Forensics audit of another registration)
 
 The start check in "The instant", step 2, uses the close of the game's first-period market, a time AFTER the entry instant. At this stage no result of a priced game is read, so it cannot bias a result: it only removes games whose start cannot be trusted (a postponement, a market left open). **If a cell survives and a rule is registered, that check becomes a family-level check** (the share of games passing it is printed and a cell under 80% is "start not derivable"), so that no later time decides which bets exist.
+
+## Dated amendment, Nov 12, 2026, 19:15Z, before any candle of these markets was requested (Head of R&D, 18:58Z, on the Forensics desk's finding)
+
+**The start check's lower bound is raised from 20 to 30 minutes.** "The instant", step 2, now reads: the game's first-period market must have closed between **30** and 120 minutes after the derived start. Reason: Forensics showed that with the 20 minute bound the pricing instant could fall into play in games whose derived start is late. This is still a zero-try measurement that reads no result of a priced game; the note of 19:05Z stands (in any rule registration this becomes a family-level check).
+
+Lists result, as given by the Head (not counted by this desk): 821 priced events in the price block (NHL periods 1, 2, 3 and regulation 114 each, NFL quarters 120, soccer first halves 245); base block 2,036; the ticker-suffix assumption held.
