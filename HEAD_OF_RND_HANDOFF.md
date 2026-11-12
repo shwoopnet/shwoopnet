@@ -23,7 +23,7 @@ Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief o
 
 ## FRIDAY FOCUS (owner, Nov 12 18:13Z)
 
-"we still have the friday deadline of 5 strategies, so... do whatever you NEED to do to get to that point and nothing else until then". See the section of that name at the top of RND_QUEUE.md: five candidates only (stock S2 long leg, TIE3, CFRTI-K, approval NO side, PERPBIN1), everything else paused, and an open question to the owner on whether "5" means five on the shadow list (deliverable) or five live or probe-ready (not deliverable honestly).
+"we still have the friday deadline of 5 strategies, so... do whatever you NEED to do to get to that point and nothing else until then". See the section of that name at the top of RND_QUEUE.md: five candidates only (stock S2 long leg, TIE3, CFRTI-K, approval NO side, PERPBIN1), everything else paused, and the owner's answer at 18:19Z: "5 live, keep the bar" (no orders before evidence, bar unchanged, goal is live strategies). Report each Friday read to the EA as it lands, one line. One-page shadow packets from each desk are due Fri Nov 13 16:00Z.
 
 ## Standing rules I set or enforce
 
