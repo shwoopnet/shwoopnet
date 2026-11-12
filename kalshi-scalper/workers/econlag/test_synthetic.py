@@ -58,12 +58,15 @@ def daily(ticker, start, end):
 
 
 def minute(ticker, start, end, jumps, slow):
-    t_print = start + 600
+    span = end - start
+    t_print = start + (1800 if span == 3300 else 600)     # the wide window (CPI and jobs prints) starts 30 minutes before the print
     j = (0.12 if h("s", t_print) % 2 else -0.12) if (jumps and h("j", t_print) % 2 == 0) else 0.0
     fail = h("f", t_print) % 8 == 0                       # one in eight: the slow market goes the other way
     out = []
     for e in range(start - start % 60 + 60, end + 1, 60):
-        if not slow:
+        if jumps == "fade" and not slow:                  # a 20c shock in the first minutes, half given back by minute 15
+            v = 0.50 + (0.0 if e <= t_print else (0.20 if e <= t_print + 600 else 0.10))
+        elif not slow:
             v = 0.55 + (j if e > t_print + 30 else 0.0)
         else:
             v = 0.50 + (0.0 if e <= t_print + 1800 else (-0.3 * j if fail else j))
@@ -86,12 +89,12 @@ def world(jumps):
     d = datetime(2024, 10, 1, tzinfo=timezone.utc)
     while d < datetime(2026, 11, 1, tzinfo=timezone.utc):
         for s, dom in (("KXCPI", 12), ("KXPAYROLLS", 5), ("KXPCECORE", 27)):
-            t = d.replace(day=dom, hour=12, minute=30)
+            t = d.replace(day=dom, hour=12 if 3 < d.month < 11 else 13, minute=25)
             ev = "%s-%s" % (s, t.strftime("%y%b").upper())
             for k in ("T1", "T2"):
                 lists[s]["hist" if t < cut else "live"].append({"ticker": ev + "-" + k, "event_ticker": ev, "open_time": iso(t - timedelta(days=30)), "close_time": iso(t)})
         d = (d.replace(day=1) + timedelta(days=32)).replace(day=1)
-    m = datetime(2024, 11, 7, 19, 0, tzinfo=timezone.utc)
+    m = datetime(2024, 11, 7, 19, 0, tzinfo=timezone.utc)   # 14:00 Eastern in winter; summer meetings in this made-up world are an hour off the clock and are dropped by design
     while m < datetime(2026, 11, 1, tzinfo=timezone.utc):
         ev = "KXFEDDECISION-%s" % m.strftime("%y%b%d").upper()
         for k in ("H0", "C25", "C26"):
@@ -114,6 +117,7 @@ def world(jumps):
     jb = json.load(open(os.path.join(out, "ECONLAG_B.json")))
     write_run(os.path.join(root, "b"), [(q, answer(q, jumps)) for q in jb["requests"]])
     run("scan", out, os.path.join(root, "b"))
+    run("fade-count", out, os.path.join(root, "b"))
     import csv
     trigs = list(csv.DictReader(open(os.path.join(out, "triggers.csv"))))
     meets = sorted({(int(r["t_meeting"]), r["event"]) for r in csv.DictReader(open(os.path.join(out, "meetings.csv")))})
@@ -134,6 +138,6 @@ def world(jumps):
 
 
 if __name__ == "__main__":
-    for name, jumps in (("WORLD 1: jumps on half the prints, slow market half an hour late", True), ("WORLD 2: no jumps", False)):
+    for name, jumps in (("WORLD 1: jumps on half the prints, slow market half an hour late", True), ("WORLD 2: no jumps", False), ("WORLD 3: a 20c shock and a 10c retrace on every print", "fade")):
         print("=====", name)
         print("\n".join(world(jumps)))

@@ -335,3 +335,30 @@ Sources: Kalshi's public market data only (the print calendar is taken from Kals
 2. **The beta needs at least 20 paired daily changes** inside the 60 trading days before the print; with fewer, the slow market is skipped for that print. Protocol 2 named the 60 days and not a minimum.
 
 **Not built yet, on purpose:** the part C job builder (slow markets on trigger days). It is only needed if the scan clears 30 trigger days, and the Head of R&D has ruled that nothing is pulled past the scan otherwise. `score` already takes any plan of slow markets, and was tested with one. **Not computed in the first read:** the placebo (the same rule a week earlier), which needs its own candles; it is asked for only if the card is listed.
+
+## ECONFADE count, on ECONLAG's own pull (registered Nov 12, 2026, before any ECONLAG or ECONFADE read; zero tries)
+
+Rank 1 of the re-open ranking (`workers/REOPEN_RANKING_NOV12.md`). The card is Refinement's (row 87 of its Nov 11 cards); the protocol is Desk A's (`IDEA_DESK_A_PROTOCOLS2.md`, Q3 on `claude/idea-desk-a`), which fixed every open detail and wrote a count step with a stop rule. Neither was run: the count needed about 70 requests and there was no read budget. ECONLAG's part B already asks for one-minute candles around the same prints, so the count is taken from the same pull.
+
+`ECONFADE | family: overshoot fade after a scheduled print, entry at minute 20, hold or six hour exit | risk class: mid price (10c to 60c), 1 contract, about 24 events a year | stage Idea`
+
+**What is done now: step 0 only, a count. No entry is priced, no outcome is read, no try is spent.** Constants are Desk A's, copied into `workers/econlag/econlag.py` (`fade-count`):
+
+| Item | Value |
+|---|---|
+| Events | CPI and Employment Situation releases with a print time from 2024-10-01 to 2026-10-31 (ECONLAG's pinned range and calendar) |
+| Market | of the next scheduled Fed meeting after the print, the one whose YES mid was nearest 50c at the previous day's daily close (Desk A's choice; ECONLAG's F is the highest mid, so the two can differ and both are asked for) |
+| Reference | the last one-minute candle ending at or before the release second; its mid must be 10c to 90c |
+| Shock | among candles ending 1 to 10 minutes after the release, the largest move of the mid from the reference in one direction is 15c or more |
+| Retrace | at the candle ending 20 minutes after the release, the mid is 4c or more back from the extreme toward the reference |
+| **Stop rule (Desk A's, unchanged)** | **fewer than 40 events with a confirmed retrace: NOT_ENOUGH_DATA, the card ends before any outcome is read** |
+
+**Two differences from Desk A's text, stated:** the range starts at 2024-10-01 and not at "as far back as Kalshi serves candles, at most 2024-01", because it rides on ECONLAG's range (about 50 CPI and jobs prints, not about 70); and only the Fed decision series is used, not the rate-level series (`KXFED`), whose market list is not in ECONLAG's pull. Both can only lower the count. If the count is under 40 here it would also have had to find 40 minus the count in the fifteen earlier prints and the second series, which Desk A itself did not expect ("well under 40"). If it lands between 25 and 39 I will say so and the Head of R&D decides whether the wider count is worth about 40 more requests.
+
+**Cost:** no extra pull. Part B's window on CPI and jobs prints becomes T minus 30 to T plus 25 minutes, and the nearest-50c market is asked for when it is not F: at most about 50 extra requests in part B, whose cap moves from 100 to 150. Worst case spent by the end of the scan: 10 + 90 + 150 = 250.
+
+**If the count clears 40:** nothing is scored by this desk without a new word from the Head of R&D; step 2 is Desk A's protocol (two tries, development and held-out by release date).
+
+## ECONLAG amendment 3 (Nov 12, before any read): the print time is the scheduled minute, checked against the market's close
+
+Amendment 1 took the print time T as the close time of the Kalshi event that resolves on the print. A market can close a few minutes BEFORE its release, and a T that is five minutes early would move both scans. So T is now the scheduled release minute in US Eastern time on the day the market closed (8:30 for CPI, the Employment Situation and PCE; 2:00 PM for the Fed statement), and an event whose market closed more than one hour from that minute is dropped and counted, not guessed. This also drops a release that was moved to another time of day. The cross-check against V2's 2026 calendar file is replaced by this rule, which needs no outside file.

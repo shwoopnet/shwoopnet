@@ -8,6 +8,7 @@ Stages (each reads only kalshi-pull answer folders: manifest.json plus 0001.json
   calendar  <stage 1 run> <out>            print calendar, count of print days, job part A
   build-b   <out> <part A run>             choose F for each print, job part B
   scan      <out> <part B run>             the TRIGGER SCAN: a count, no outcome is read
+  fade-count <out> <part B run>            the ECONFADE count on the same pull (zero tries, no outcome)
   score     <out> <plan.json> <runs...>    the one read against the paper screen
 
 Stop rules (amendment 2): under 30 print days after `calendar`, or under 30 print days with a
@@ -22,6 +23,7 @@ import os
 import sys
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 # ---- pinned constants (the registration carries the same values) ----
 RANGE_START = "2024-10-01T00:00:00Z"
@@ -38,6 +40,14 @@ ASK_MIN, ASK_MAX, SPREAD_MAX = 0.10, 0.80, 0.03
 SLIP = 0.01
 EXIT_A_S, EXIT_B_S, EXIT_LOOKBACK_S = 4 * 3600, 24 * 3600, 1800
 MIN_EVENTS = 30
+RELEASE_CLOCK = {"KXCPI": (8, 30), "KXPAYROLLS": (8, 30), "KXPCECORE": (8, 30), "KXFEDDECISION": (14, 0)}   # US Eastern, the scheduled minute
+CLOCK_TOLERANCE_S = 3600                 # a market whose close is further than this from the scheduled minute is not used
+# ECONFADE count (Refinement row 87, Desk A protocol Q3), counted on the same pull: counts only, zero tries
+FADE_SERIES = ("KXCPI", "KXPAYROLLS")
+FADE_SHOCK, FADE_RETRACE, FADE_SHOCK_S, FADE_RETRACE_S = 0.15, 0.04, 600, 1200
+FADE_BAND = (0.10, 0.90)
+FADE_MIN_EVENTS = 40
+WIDE_BEFORE_S, WIDE_AFTER_S = 1800, 1500 # the wider window asked for on CPI and jobs prints
 PF_BAR = 1.3
 DROP_MAX = 0.10
 LABEL_ORDER = {"S1": 0, "S2": 1, "S3": 2, "S4": 3}
@@ -51,6 +61,14 @@ def ts(iso):
 
 def day(t):
     return datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%d")
+
+
+def scheduled(series, t_close):
+    """The scheduled release second on the Eastern date the market closed, or None if the close is not near it."""
+    hh, mm = RELEASE_CLOCK[series]
+    et = datetime.fromtimestamp(t_close, ZoneInfo("America/New_York"))
+    t = int(et.replace(hour=hh, minute=mm, second=0, microsecond=0).timestamp())
+    return t if abs(t - t_close) <= CLOCK_TOLERANCE_S else None
 
 
 def fee(p):
@@ -174,19 +192,24 @@ def cmd_calendar(run, out):
             e = events[(series, m.get("event_ticker", ""))]
             e["closes"][t] += 1
             e["markets"][m["ticker"]] = (m.get("open_time") or "", t, row["id"].startswith("hist_") or t < cut)
-    prints, meetings = [], []
+    prints, meetings, off_clock = [], [], []
     for (series, ev), e in sorted(events.items()):
         t = e["closes"].most_common(1)[0][0]
         if series == FAST_SERIES:
             for tk, (op, c, hist) in sorted(e["markets"].items()):
                 meetings.append([ev, t, tk, op, int(hist)])
         if lo <= t <= hi:
-            prints.append([series, ev, t, datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), day(t)])
+            t_rel = scheduled(series, t)
+            if t_rel is None:
+                off_clock.append((series, ev))
+                continue
+            prints.append([series, ev, t_rel, datetime.fromtimestamp(t_rel, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), day(t_rel)])
     prints.sort(key=lambda r: r[2])
     write_csv(os.path.join(out, "prints.csv"), ["series", "event", "t", "iso", "day"], prints)
     write_csv(os.path.join(out, "meetings.csv"), ["event", "t_meeting", "ticker", "open_time", "hist"], meetings)
     days = sorted({r[4] for r in prints})
     print(f"prints in the pinned range {len(prints)} {dict(Counter(r[0] for r in prints))} | print days {len(days)} | Fed decision markets {len(meetings)}")
+    print(f"events dropped because the market's close is more than an hour from the scheduled release minute: {len(off_clock)} {dict(Counter(x[0] for x in off_clock))}")
     if len(days) < MIN_EVENTS:
         print(f"STOP: no evidence at n = {len(days)} (under {MIN_EVENTS} print days); nothing more is pulled")
         return
@@ -239,17 +262,23 @@ def cmd_build_b(out, run_a):
             no_f += 1
             continue
         pid = "%s_%s" % (p["series"], p["event"])
-        rows.append([pid, p["series"], p["event"], t, p["day"], nxt[0][1], choice[1], int(choice[2])])
-        reqs.append(candle_req("m_%s" % pid, choice[1], choice[2], t - 600, t + 900, 1))
+        fade = p["series"] in FADE_SERIES
+        near = min(quoted, key=lambda q: (abs(q[0] - 0.5), q[1])) if fade else None       # ECONFADE's market: nearest 50c the day before
+        rows.append([pid, p["series"], p["event"], t, p["day"], nxt[0][1], choice[1], int(choice[2]), near[1] if near else ""])
+        lo_s, hi_s = (WIDE_BEFORE_S, WIDE_AFTER_S) if fade else (600, 900)
+        reqs.append(candle_req("m_%s" % pid, choice[1], choice[2], t - lo_s, t + hi_s, 1))
         tickers.append(choice[1])
-    write_csv(os.path.join(out, "f_choice.csv"), ["print", "series", "event", "t", "day", "f_meeting", "f_ticker", "hist"], rows)
+        if near and near[1] != choice[1]:
+            reqs.append(candle_req("e_%s" % pid, near[1], near[2], t - lo_s, t + hi_s, 1))
+            tickers.append(near[1])
+    write_csv(os.path.join(out, "f_choice.csv"), ["print", "series", "event", "t", "day", "f_meeting", "f_ticker", "hist", "fade_ticker"], rows)
     j = job("ECONLAG_B", "ECONLAG part B (paper screen, try 1): one read of one-minute candles around each print for the fast market F, for the trigger scan. A count only; no outcome is read.",
-            "ECONLAG amendment 2: prints from 2024-10-01 to 2026-10-31 only (pinned cutoff)", CANDLE_EPS, [FAST_SERIES], sorted(set(tickers)), reqs, min(100, len(reqs) + 5),
-            "One request per print, T minus 10 minutes to T plus 15 minutes. Built by workers/econlag/econlag.py build-b.")
+            "ECONLAG amendment 2: prints from 2024-10-01 to 2026-10-31 only (pinned cutoff)", CANDLE_EPS, [FAST_SERIES], sorted(set(tickers)), reqs, min(150, len(reqs) + 5),
+            "One request per print, T minus 10 minutes to T plus 15 minutes; on CPI and jobs prints the window is T minus 30 to T plus 25 minutes and the market nearest 50c is also asked for when it is not F, so the same pull answers the ECONFADE count. Built by workers/econlag/econlag.py build-b.")
     json.dump(j, open(os.path.join(out, "ECONLAG_B.json"), "w"), indent=1)
     print(f"prints with a fast market chosen {len(rows)} | prints with none (no settled next meeting, or no quote the day before) {no_f} | job ECONLAG_B: {len(reqs)} requests (cap {j['max_requests']})")
-    if len(reqs) > 100:
-        print("OVER THE 100 CAP for part B: do not send; report the count to the Head of R&D first")
+    if len(reqs) > 150:
+        print("OVER THE 150 CAP for part B: do not send; report the count to the Head of R&D first")
 
 
 # ---------------------------------------------------------------- stage 3: the trigger scan (a count)
@@ -277,6 +306,42 @@ def cmd_scan(out, run_b):
         print(f"STOP: no evidence at n = {len(days)} (under {MIN_EVENTS} print days with the trigger; a day without it cannot have a trade). Nothing more is pulled.")
     else:
         print("The scan clears the stop rule: part C (the slow markets on trigger days) may be built and reviewed.")
+
+
+# ---------------------------------------------------------------- ECONFADE count (zero tries; no outcome is read)
+def cmd_fade_count(out, run_b):
+    """How many CPI and jobs prints show a 15c shock in ten minutes and a 4c retrace by minute 20, on the market
+    nearest 50c the day before. Desk A's protocol Q3, step 0. Under 40 confirmed retraces ends the card here."""
+    store = candle_store([run_b])
+    events = shocks = retraces = in_band = 0
+    for r in read_csv(os.path.join(out, "f_choice.csv")):
+        if r["series"] not in FADE_SERIES or not r.get("fade_ticker"):
+            continue
+        events += 1
+        t, series = int(r["t"]), store.get((r["fade_ticker"], 1), {})
+        ref = mid(at_or_before(series, t, 300))               # the last candle ending at or before the release second
+        if ref is None or not (FADE_BAND[0] <= ref <= FADE_BAND[1]):
+            continue
+        in_band += 1
+        moves = [(mid(series[e]) - ref, e) for e in sorted(series) if t < e <= t + FADE_SHOCK_S and mid(series[e]) is not None]
+        if not moves:
+            continue
+        up, down = max(moves), min(moves)
+        ext = up if abs(up[0]) >= abs(down[0]) else down      # the largest move in one direction
+        if abs(ext[0]) < FADE_SHOCK - 1e-9:
+            continue
+        shocks += 1
+        m20 = mid(at_or_before(series, t + FADE_RETRACE_S, 120))
+        if m20 is None:
+            continue
+        back = (ref + ext[0] - m20) if ext[0] > 0 else (m20 - (ref + ext[0]))
+        if back >= FADE_RETRACE - 1e-9:
+            retraces += 1
+    print(f"ECONFADE count: CPI and jobs prints {events} | with a reference mid of 10c to 90c {in_band} | with a 15c shock in ten minutes {shocks} | with a 4c retrace by minute 20 {retraces}")
+    if retraces < FADE_MIN_EVENTS:
+        print(f"ECONFADE: NOT_ENOUGH_DATA at n = {retraces} confirmed retraces (the protocol's floor is {FADE_MIN_EVENTS}). No outcome was read. The card ends here.")
+    else:
+        print("ECONFADE: the count clears its floor. Nothing is scored here; step 2 needs its own registration read and the Head of R&D's word.")
 
 
 # ---------------------------------------------------------------- stage 4: the one read against the screen
@@ -400,6 +465,8 @@ def main():
         cmd_build_b(a[1], a[2])
     elif len(a) >= 3 and a[0] == "scan":
         cmd_scan(a[1], a[2])
+    elif len(a) >= 3 and a[0] == "fade-count":
+        cmd_fade_count(a[1], a[2])
     elif len(a) >= 4 and a[0] == "score":
         cmd_score(a[1], a[2], a[3:])
     else:
