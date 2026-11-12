@@ -218,7 +218,7 @@ class Cutoff:
         now = time.time() if now is None else now
         if self.not_before is not None and now < self.not_before:
             raise RuntimeError("refused: before the registered read date")
-        if "READ ON" in self.marker_line():
+        if re.search(r"READ ON \d{4}-\d{2}-\d{2}", self.marker_line()):          # a filled-in marker, not the template text "READ ON <date>"
             raise RuntimeError("refused: the marker says this was already read once: " + self.marker_line())
         for t in trades:
             late = t["ts"] >= self.cutoff

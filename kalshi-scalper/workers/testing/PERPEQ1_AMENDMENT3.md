@@ -11,3 +11,5 @@
 Rule, bars (100 trades, 30 trading-date clusters, PF 1.5 in each half, net above 0 in both halves, PF 1.2 at fee x1.2, trigger better than control, day-clustered z 5.27), cost assumption and its 2 tries (fade and control) are unchanged.
 
 Added by the Head of R&D's ruling (Nov 12): the result is reported with "perp candle freshness assumed, not measured"; cash PF with n by cluster; under 100 trades the label is "no evidence at n = x"; the output goes to the Verification Analyst through Main before any figure travels. The scorer carries the cutoffs as date constants and refuses to run before 2026-12-22; it is written and tested on synthetic rows only, with no perp candle opened.
+
+READ-ONCE MARKER: not yet read; first development read allowed on or after 2026-12-22; held-out read allowed on or after 2027-02-02 only after a LEAD; after each read: READ ON <date>, commit <hash>

@@ -49,7 +49,7 @@ zc = k.cluster_z(mk(400, .1, 8)); assert zc["clusters"] == 8
 
 # guard
 with tempfile.TemporaryDirectory() as d:
-    f = os.path.join(d, "REG.md"); open(f, "w").write("x\nREAD-ONCE MARKER: not yet read; first read on or after 2026-12-22\n")
+    f = os.path.join(d, "REG.md"); open(f, "w").write("x\nREAD-ONCE MARKER: not yet read; first read on or after 2026-12-22; after the read: READ ON <date>, commit <hash>\n")   # template text must NOT count as read
     g = k.Cutoff(5000, f, not_before=2000)
     tr = [{"event": "a", "ts": 1000}]
     for args, why in (((tr, 1999), "before the registered read date"),):
