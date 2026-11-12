@@ -53,3 +53,5 @@ More closes. At about 4 in-band trigger windows a day, 100 need about 25 days of
 ## Caveats
 
 About 1.2% of windows in the list's date range were not examined by the open interest cache and count as "other" here. The cheap side and its price are taken from the book at 178 seconds; the bot's own decision price comes from a different read. Ten days of books with gaps. Not checked by the Verification Analyst.
+
+**Correction (same day, from the Head of R&D):** the recorder was extended today and now records Bitcoin (and gold) to Dec 15, not Nov 20. At about 4 in-band trigger windows a day that is about 100 by early December on books alone. Closes from Nov 5 stay untouched for rule scoring until the CFRTI sitting on Nov 20 and are free for this comparison after it.
