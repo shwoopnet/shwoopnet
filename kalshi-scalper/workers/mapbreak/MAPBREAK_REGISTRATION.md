@@ -95,3 +95,48 @@ A separate registration and a new go from the Head, before any match result is r
 2. **The pre-match minute needs three contracts two-sided together:** the map-1 winner's match contract and BOTH map-1 contracts, in the same minute. One minute serves the model and the placebo, so the gap share and the placebo share are measured on the same matches. It can lower the pre-match fill rate; the reader also counts the matches lost only because the map-1 contracts were never two-sided in the same minute as the match contract, and that count is reported beside each title's result. The rule is not changed after data whatever that count is.
 3. **Round trip at the look** is computed per match contract (both teams' contracts, spread plus two fees at that contract's mid), median over contracts, for the cost kill. **On the gap line, "spread 4c or less" means the spread of the contract being bought,** the cheaper side's own match contract.
 4. The reader was tested to be blind to the match result and to the results of maps 2 and 3 (every other such result flipped, identical output).
+
+## AMENDMENT 1, Nov 12, 2026, 18:40Z, before any list or candle of these markets has landed: MAPBREAK is registered as a RULE, 1 try
+
+**Why (Head of R&D, 18:26Z, on the owner's Friday deadline):** the deadline is a read against the bar, not a measurement. So the first pull's output is BOTH the measurement and the development read. The held-out third is pulled and read once, only on the Head's go. Everything above stands except where this section says otherwise; where they differ, this section is right.
+
+**Tries: 1** for the card (the titles that pass their kill lines are pooled into the one rule). It is added to the shared count (about 2,113,000 tries; bar: one-sided z 5.46).
+
+### The rule
+
+At the look (the first whole minute at or after map-1 close + 120 seconds, forward to + 5 minutes if not two-sided), take the cheaper side as defined above. **If its gap is 8c or more and the spread of its own match contract is 4c or less: buy 1 contract.** One bet a match. Hold to the end of the match.
+
+- **Price paid:** the ask at the look plus 1c (a limit one cent through the ask, booked as filled there; the Forensics desk measured a 59% to 73% fill at the price seen and 76% to 86% with one more cent on other markets, nothing on esports).
+- **Fee:** 0.07 x price x (1 minus price), rounded UP to the next whole cent, as one contract pays it.
+- **Result:** the match market's own result, read ONLY for matches where the rule fired. Win pays 1 minus the price paid minus the fee; loss costs the price paid plus the fee.
+
+### Order of the read (fixed, so there is no choosing after the fact)
+
+1. Per title, with no match result read: the counts, the cost line, the gap share and the placebo share, exactly as registered above.
+2. **A title is OUT of the rule** if it has under 150 matches filled at the look, or its median round trip is above 5c, or its gap share is under 10%, or its gap share is under twice the placebo's. These are the kill conditions. If every title is out, the card is CLOSED and no match result is read at all.
+3. The rule is scored on the titles that are in, pooled, each title also shown alone.
+
+### Samples (date constants)
+
+- **Development:** every best-of-three match whose match market closed from 2026-09-12 to before 2026-10-23 00:00 UTC. **The cap of 1,500 matches is REMOVED** (it was there to save requests on a measurement; bets are now what count).
+- **Held-out:** closes from 2026-10-23 00:00 UTC to before 2026-11-13 00:00 UTC. Not pulled until the Head's go; read once.
+
+### What is reported for the rule (counts first)
+
+Bets; wins; mean price paid; cash profit factor; net cents a contract; the same for each half of development by date and for each title; the largest share of the net carried by one day; a one-sided z with days as the cluster.
+
+### Verdict on development, fixed now
+
+- Under 100 bets: NOT_ENOUGH_DATA at n = x.
+- 100 or more bets and cash PF under 1.0, overall or in either half: FALSIFIED.
+- Cash PF 1.5 or better with both halves above 1.0: "development bar met"; I ask the Head for the held-out pull the same hour.
+- Anything else: "bar not met".
+- **The research bar itself:** cash PF 1.5 or better on development AND on the held-out, and a one-sided z of 5.46 or more on the two together. Nothing short of that is reported as a pass.
+
+### Can it reach about 1,000 bets? Said plainly
+
+About 78 matches a day on the one day I have seen (a Tuesday, a lower bound): about 3,200 in development and about 1,600 in the held-out. If the rule fires on 10% of matches that is about 320 and 160 bets; at 20%, about 640 and 320. **So on the 61 days the live endpoint holds, it reaches about 1,000 bets only if it fires on about one match in five. At one in ten it does not, and the read would then be "not enough to meet the bar" however good the profit factor looks.** The only way to more events is the history endpoint (matches before 2026-09-12), which needs its own list read first and one candle request a contract; that is a separate amendment on the Head's word, not part of this one.
+
+### Requests after this amendment
+
+Lists: unchanged (16 requests, at most 100 pages). Candles for development: about 3,200 matches at four contracts each; matches sharing a scheduled start share a request: my estimate 250 to 450 requests, one run. The exact count comes from the lists. Held-out candles: about half that, on the Head's go.
