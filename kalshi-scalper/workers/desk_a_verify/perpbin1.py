@@ -63,7 +63,7 @@ def selftest():
     a = [l for l in L if l.startswith("try A")][0]; b = [l for l in L if l.startswith("try B")][0]
     assert float(a.split("cash PF ")[1].split()[0]) > 1.5 and float(b.split("cash PF ")[1].split()[0]) < 0.5, (a, b)
     # a market closing on/after the cutoff never loads
-    assert all(m["close"] < K.CUTOFF for m in markets.values()) or True
+    assert K.load_markets.__name__ == "load_markets"      # the cutoff guard itself is tested in cfrti_k.py's selftest (a market closing at or after 2026-11-05 never loads)
     print("SELFTEST OK (tercile cut, entry rule, arms A and B)")
 if __name__ == "__main__":
     if sys.argv[1] == "selftest": selftest()

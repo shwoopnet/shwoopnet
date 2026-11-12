@@ -35,7 +35,7 @@ def load_markets(folder):
         for m in (b.get("markets", []) if isinstance(b, dict) else []):
             if m.get("ticker", "").startswith("KXBTC15M-") and m.get("result") in ("yes", "no") and m.get("floor_strike") is not None:
                 c = iso(m["close_time"])
-                if c < CUTOFF: out[m["ticker"]] = dict(close=c, strike=float(m["floor_strike"]), yes=m["result"] == "yes", rules=(m.get("rules_primary") or "")[:400])
+                if c < CUTOFF: out[m["ticker"]] = dict(tk=m["ticker"], close=c, strike=float(m["floor_strike"]), yes=m["result"] == "yes", rules=(m.get("rules_primary") or "")[:400])
     return out
 def load_binary(folder):
     out = collections.defaultdict(dict)   # ticker -> end_ts -> (bid, ask)
@@ -88,7 +88,7 @@ def decide(mk, cands, perp, nxt_key=None):
     win = mk["yes"] == (side == "yes")
     n = cands.get(t0 + 60)       # the NEXT 1 minute candle (ending at close minus 60 s)
     ran = None if not n else ((n[1] if side == "yes" else 1 - n[0]) >= p + 0.01 - 1e-9)
-    return dict(ran=ran, close=mk["close"], day=datetime.datetime.fromtimestamp(mk["close"], datetime.timezone.utc).date(), p=p, win=win, pnl=(1 if win else 0) - p - fee(p)), "trade"
+    return dict(ran=ran, side=side, tk=mk.get("tk"), close=mk["close"], day=datetime.datetime.fromtimestamp(mk["close"], datetime.timezone.utc).date(), p=p, win=win, pnl=(1 if win else 0) - p - fee(p)), "trade"
 def thirds(trades):
     days = sorted({t["day"] for t in trades}); n = len(days); k = [0, math.ceil(n / 3), math.ceil(2 * n / 3), n]
     return [[t for t in trades if t["day"] in set(days[k[i]:k[i + 1]])] for i in range(3)]
@@ -208,4 +208,13 @@ if __name__ == "__main__":
         if len(sys.argv) > 5: kr = {int(r["ts"]): float(r["price"]) for r in csv.DictReader(open(sys.argv[5]))}
         mk_ = {tk: m for tk, m in load_markets(sys.argv[2]).items() if m["close"] > DEV_FROM}
         print("\n".join(report(mk_, load_binary(sys.argv[3]), load_perp(sys.argv[4]), kr)[0]))
+    elif sys.argv[1] == "rows":     # python3 -I cfrti_k.py rows <lists> <candles> <perp> <out.csv>: the development trade rows closing 2026-10-29T22:15Z to before 2026-11-05, NO outcome column (for the 6 s book replay)
+        mk_ = {tk: m for tk, m in load_markets(sys.argv[2]).items() if m["close"] > DEV_FROM}
+        b_, p_ = load_binary(sys.argv[3]), load_perp(sys.argv[4]); lo_ = calendar.timegm(time.strptime("2026-10-29T22:15:00Z", "%Y-%m-%dT%H:%M:%SZ"))
+        out_ = [["form", "t0_utc", "ticker", "side", "ask_seen"]]
+        for tk, m in sorted(mk_.items(), key=lambda kv: kv[1]["close"]):
+            if m["close"] < lo_: continue
+            t, w = decide(m, b_.get(tk, {}), p_)
+            if t: out_.append(["cfrti_k", time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(m["close"] - 120)), tk, t["side"], "%.4f" % t["p"]])
+        csv.writer(open(sys.argv[5], "w", newline="")).writerows(out_); print("wrote", len(out_) - 1, "rows (no outcome column)")
     else: sys.exit(__doc__)
