@@ -66,7 +66,7 @@ Every recorder file holds what happened after the entry: the result field, and p
 |---|---|---|
 | REMATCH stage 1 reader (`rematch/stage1_measure.py`) | this desk | Yes for the decision inputs: it reads minute candles keyed by the minute's end, which is the shape of `candles.csv.gz` after a small loader. The scorer and the fill check are not built yet; they are built with this file format in mind. |
 | MAPBREAK (`breakplay.py`, `scorekit.py`) | Testing Desk | **Confirmed by the Testing Desk, 20:06Z:** yes with a loader only, and with no loader at all if the candle read and the results list are stored as kalshi-pull style answer files (see the section added below). The rule stays candle-based; the book only adds the fill check, which is about a day's work once a short real sample file exists. |
-| INPLAYJUMP (`desk_a_verify/inplayjump.py`) | Desk A | Not confirmed by me. Same position; it also needs the candle volume, which is why section 4 keeps candles. Desk A must confirm. |
+| INPLAYJUMP (`desk_a_verify/inplayjump.py`) | Desk A | **Confirmed by Desk A, 20:07Z:** yes with a loader only, and with none if candles and results are stored as kalshi-pull style answer files. The rule and the matched placebo then decide exactly as registered. The fill check is a new function, about a day's work with a real sample file. A replay mode switched on by hand is added on the Head's go; its date bounds and held-out refusal stay as they are. |
 | ESOCTIE | History Miner | **Confirmed by the History Miner, 20:06Z:** it decides at S minus 60 seconds on the latest minute where the Tie and both team contracts are two-sided, stepping back no further than S minus 10 minutes, so the FAST tier from S minus 10 minutes covers every look and the fill check. Its engine reads kalshi-pull run folders through the Testing Desk's loaders, so it needs one small loader that yields the same records (markets: ticker, event, open, close, result; candles: time, bid and ask closes); no change to the scorer. |
 
 I am asking the three desks to confirm against this spec and will send Main their answers.
@@ -92,4 +92,12 @@ ITF and challenger markets are open about 18 hours and carry no start clock, so 
    - **Poll rows** (CSV, one row per poll, every poll): poll id, send time, receive time, server Date header, tier, tickers asked, tickers answered, HTTP status.
 3. **Results must include the map-1 and map-2 markets and the match markets** (they are MAPBREAK's states and outcomes). Section 4's list read per series already covers all three series of each title.
 4. **A sample first:** once the recorder has run for an hour, Main sends the Testing Desk a few minutes of one match's files; the Testing Desk builds the loader and the two-poll fill check against it.
+
+## Added 20:08Z (Desk A's answer for INPLAYJUMP). All four engines are now confirmed.
+
+1. **The candle read after the close starts earlier than the fast book tier:** for `KXESOCCERGAME`, `KXLIGAPROMATCH` and `KXEBASKETBALLGAME` the one-minute candle read covers each market from S minus 10 minutes to its close (e-soccer: from the open, for REMATCH). The engine reads the minute before the first in-play minute and the placebo's quiet test reads five minutes back. The FAST book tier for table tennis and e-basketball still starts at S minus 2 minutes; only the candle read is wider, and it costs no extra request.
+2. **Every candle keeps its volume** (the raw answer bodies of the earlier addition do).
+3. **Results are kept AS GIVEN,** listed with status settled and status closed, re-read until a final value or 24 hours. A void or an empty result stays as it is; nothing is filtered to yes and no (the cards' void rule needs them).
+4. **Putting polls on exchange time:** candle ends are exchange time, so the replay shifts each poll by R6's rule (offset = median of the Date header plus 0.5 seconds minus the receive time); that is why every poll row carries the Date header. A poll maps to the last stored book row for that ticker at or before it.
+5. For tennis in phase 2 the results rows also need `open_time` (already in section 4's list).
 
