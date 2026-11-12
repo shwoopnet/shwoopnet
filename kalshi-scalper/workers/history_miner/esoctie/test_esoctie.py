@@ -40,7 +40,7 @@ for i in range(1400):
 # a held-out event must be refused
 Sh = calendar.timegm((2026, 10, 25, 12, 0, 0)); evh = "KXESOCCERGAME-%sHOLD" % key(Sh)
 for suf in ("TIE", "AAA", "BBB"):
-    mk.append({"ticker": "%s-%s" % (evh, suf), "event_ticker": evh, "close_time": iso(Sh + 720), "result": "yes"})
+    mk.append({"ticker": "%s-%s" % (evh, suf), "event_ticker": evh, "close_time": iso(Sh + 720), "open_time": iso(Sh - 3600), "result": "yes"})
 L = folder([{"markets": mk}]); C = folder([{"markets": cdl}])
 rep, rows = E.measure([L], [C])
 assert rep["dropped"]["held-out (refused)"] == 1, rep["dropped"]
@@ -54,4 +54,6 @@ res = E.score([L], [C])
 n = res["rule"]["n"]
 assert 40 <= n <= 60, n
 # 4. results of non-bet events never change the bet list's prices: flip a result of an event after the last bet's S? (base changes are allowed by design); prices stay
+# 5. the guard ignores close time: an event with a wild close but a good open is kept
+assert E.events({"KXESOCCERGAME-26OCT101943AB-%s" % s: {"ticker": "KXESOCCERGAME-26OCT101943AB-%s" % s, "event": "KXESOCCERGAME-26OCT101943AB", "series": "KXESOCCERGAME", "close": calendar.timegm((2026,10,12,0,0,0)), "open": calendar.timegm((2026,10,10,23,0,0)), "result": "no"} for s in ("TIE","AAA","BBB")})[0]
 print("ok", rep["filled_eligible"], n, res["rule"]["registered_verdict"])

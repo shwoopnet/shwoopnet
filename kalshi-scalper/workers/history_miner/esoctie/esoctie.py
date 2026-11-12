@@ -22,7 +22,7 @@ HALF = sk.iso(CFG["blocks"]["development_half_split"])
 EDGES = CFG["strength_buckets_on_f"]
 MIN_BASE = CFG["base_rate_minimum_earlier_events"]
 GAP, SPREAD, COST = CFG["gap_line"], CFG["spread_line"], CFG["cost_kill_round_trip"]
-G_LO, G_HI = [m * 60 for m in CFG["start_guard_minutes"]]
+OPEN_LO, OPEN_HI = [m * 60 for m in CFG["open_guard_minutes_before_S"]]
 PRE_BACK_MAX = 10   # minutes
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on e-soccer"
 MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
@@ -77,7 +77,9 @@ def events(mk):
             drop["outside development"] += 1
             continue
         S = start_of(e)
-        if S is None or not (S + G_LO <= close <= S + G_HI):
+        op = ties[0]["open"]
+        # NOTE 2 guard: decided only by what is known before the decision (the ticker clock and the Tie's open time), never by the close
+        if S is None or op is None or not (OPEN_LO <= S - op <= OPEN_HI):
             drop["start not derivable"] += 1
             continue
         out[e] = {"event": e, "S": S, "close": close, "tie": ties[0]["ticker"], "teams": teams, "tie_result": ties[0]["result"]}
