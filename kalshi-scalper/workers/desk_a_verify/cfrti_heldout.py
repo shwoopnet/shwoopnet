@@ -181,7 +181,7 @@ if MODE == "export":
 if "--r6" in sys.argv:
     R6 = sys.argv[sys.argv.index("--r6") + 1]
     for nm, rs in (("three venues", sel3), ("kraken only", selK)):
-        tot, have, stale, frozen = r6_stale(rs, R6)
+        tot, have, stale, frozen = r6_stale(rs, R6, freeze=(("9999", "9999") if MODE == "heldout" else ("2026-11-09", "2026-11-13")))
         print("STALE-ASK COUNT, %s: %d signal rows | %d with an R6 book at the decision | %d of those show a book ask more than 1c above the ask seen (\"ask not on the book\") | %d rows not opened (DEPTH1 freeze, closes Nov 9 to 13)" % (nm, tot, have, stale, frozen))
 else:
     print("STALE-ASK COUNT: not computed (no --r6 <root holding book15r6/>).")
