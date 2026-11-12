@@ -114,3 +114,10 @@ The guard in "The instants and prices" point 1 used the event's own close time, 
 ## NOTE 7, Nov 12, 2026, 19:40Z, before any data (Head of R&D)
 
 NOTE 6 is withdrawn (its text and code are removed): the Head made NOTE 4's void booking the standard for every hold-to-settlement card, so no side-by-side booking is printed. NOTE 4 stands unchanged. `esoctie.py` is back to the audited file (sha256 57801716...d833).
+
+## NOTE 8, Nov 12, 2026, 19:45Z, before any data (Head of R&D's standing rule (h), shared held-out windows)
+
+1. The held-out block of KXESOCCERGAME (closes 2026-10-23 to before 2026-11-13) is shared by three cards: ESOCTIE, REMATCH (Desk B) and INPLAYJUMP's e-soccer family. No list or candle request may cover it until every one of them has finished its development read, has its scorer frozen by commit and sha256 recorded on `rnd-queue`, and has a committed read-once marker line (a card that failed development blocks nobody). Then one joint pull, on the Head's go, into a folder whose name starts `HELDOUT_`, read once by each card on its own go.
+2. **2026-11-10 is DROPPED from ESOCTIE's held-out block:** its results already sit in a landed file (the Nov 10 census listing). The held-out block is closes 2026-10-23 00:00 UTC to before 2026-11-13 00:00 UTC except those closing on 2026-11-10 (UTC).
+3. "The held-out pull is asked of the Head the same hour" now reads: asked the same hour; granted when the other two cards are frozen or out.
+4. `esoctie.py` refuses any folder whose name starts `HELDOUT_` by default (test 7). This changed the file's sha256; both auditors are asked to re-run only that check.

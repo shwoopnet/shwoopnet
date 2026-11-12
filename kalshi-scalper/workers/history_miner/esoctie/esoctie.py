@@ -30,6 +30,13 @@ FRESH = "candle freshness measured on Bitcoin 15 minute only, not on e-soccer"
 MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
 
 
+def refuse_heldout_folders(folders):
+    """Standing rule (h), NOTE 8: any folder whose name starts HELDOUT_ is refused by default."""
+    for f in folders:
+        if os.path.basename(os.path.normpath(f)).startswith("HELDOUT_") or "/HELDOUT_" in os.path.abspath(f):
+            raise SystemExit("refused: %s is a HELDOUT_ folder (rule (h)); it is read only on the Head of R&D's approved go" % f)
+
+
 def check_hashes():
     h = hashlib.sha256(open(os.path.join(HERE, "scorekit.py"), "rb").read()).hexdigest()
     if h != SCOREKIT_SHA:
@@ -170,6 +177,7 @@ def q(xs, p):
 
 
 def measure(lists, cands):
+    refuse_heldout_folders(list(lists) + list(cands))
     mk = sk.markets(lists)
     evs, drop = events(mk)
     cd = sk.candles(cands)
@@ -238,6 +246,7 @@ def score(lists, cands):
 
 
 def build_candles(lists, out_path, max_cells=9000, max_tickers=100, span_s=7200):
+    refuse_heldout_folders(lists)
     mk = sk.markets(lists)
     evs, drop = events(mk)
     order = sorted(evs.values(), key=lambda e: (e["S"], e["event"]))

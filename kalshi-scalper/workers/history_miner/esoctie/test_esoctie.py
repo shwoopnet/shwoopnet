@@ -82,4 +82,11 @@ SXd = calendar.timegm((2026, 9, 20, 12, 0, 0)) + 400 * 1200 - 60
 for gap, must_equal in ((180, True), (299, True), (300, False), (400, False)):
     a, _ = mini(SXd - gap, False); b, _ = mini(SXd - gap, True)
     assert (a == b) == must_equal, (gap, a, b)
+# 7. rule (h): a HELDOUT_ folder is refused
+import shutil
+H = os.path.join(tempfile.mkdtemp(), "HELDOUT_ESOC"); shutil.copytree(L, H)
+try:
+    E.measure([H], [C]); raise AssertionError("HELDOUT_ folder was read")
+except SystemExit as e:
+    assert "HELDOUT_" in str(e)
 print("ok", rep["filled_eligible"], n, res["rule"]["registered_verdict"])
