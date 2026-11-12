@@ -3036,4 +3036,5 @@ Context, not advice (simulation, 20,000 paths, resampling the record; true uncer
 - **Uniqueness.** Not yet scored by the Verification Analyst. Known risk: the same market, minute and cheap side as OICORE.
 - **Open before any switch flip.** A person reads the three spot venues' market data terms for commercial use; the reader's response shapes are confirmed against the venues' documentation; the security agent reviews the code; the owner's popup.
 - **Forward read.** 2026-12-15, or when the budget is spent, whichever is first.
+- **Conditional on the research read (the Head of R&D, 2026-11-12).** The first read (Nov 20 to 24, 50 Bitcoin rows, bar profit factor 1.3) is cleared by a rule with no edge about 24% of the time, so a clear means RE-TEST; the honest first-order date is mid December. Under the bar, this draft is dead and the switch stays off. W-SPOTLEAD1 is a version of this probe (lifecycle 7g), not registered and not coded.
 

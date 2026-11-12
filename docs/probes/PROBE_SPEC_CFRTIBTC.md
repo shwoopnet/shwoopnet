@@ -2,7 +2,16 @@
 
 **Status: build-ready DRAFT, Nov 12, 2026. OFF by default. Nothing here is live, approved or deployed.** The code is on branch `claude/probe-desk`; the probe cannot trade until a reviewed edit flips its switch, and that edit is made only after the owner's own popup for this exact probe.
 
-**UNPROVEN.** This is a tiny live test to learn from real fills. It is below the research bar and the research session's own prior is about 1%. It is not presented as an edge anywhere.
+**UNPROVEN.** This is a tiny live test to learn from real fills: an information purchase, not an edge. It is below the research bar and the research session's own prior is about 1%.
+
+**CONDITIONAL ON THE READ (the Head of R&D, Nov 12).** This spec takes effect only if the research read clears, and a clear is not a pass:
+
+| Step | When | What it means |
+|---|---|---|
+| First read | Nov 20 to 24 (50 Bitcoin rows, read once, bar profit factor 1.3) | A rule with NO edge clears this about 24% of the time, so a clear means RE-TEST, never "it works". Under 1.3: this spec is dead and the switch stays off |
+| Re-test | a fresh 50 rows, about Dec 10 to 15 | A second clear is what makes a probe the honest next step |
+| Honest first order | **mid December** | after both, the popup, the activation pull request and two deploys |
+| Faster, only if the owner asks | Nov 26 to 30 after a first-read clear with no re-test; about Nov 17 to 19 before any read | Each is a pre-evidence order: it buys fills, not evidence, and the popup must say so |
 
 ## 1. What it is, in one paragraph
 
@@ -14,7 +23,7 @@ About three minutes before a Bitcoin 15 minute market closes, the bot rebuilds a
 
 | Check (lifecycle 7d) | Desk's reading (the Verification Analyst scores it, not this desk) |
 |---|---|
-| 1. Signal differs | A different data source: trade prices from three spot venues rebuilt into the settlement basis. Not a Kalshi price band. Closest existing idea: the spot-lead test (same family; under 7g that one is a version of this, not a second strategy). |
+| 1. Signal differs | A different data source: trade prices from three spot venues rebuilt into the settlement basis. Not a Kalshi price band. Closest existing idea: the spot-lead test, which is a VERSION of this (section 12), not a second strategy. |
 | 2. Exit differs | Hold to settlement, which counts only when the entry rules differ and it does not interfere. Entry rules differ from OICORE (a model edge, not an open interest jump). It never takes the opposite side of any order (direction lock) and has its own loss budget. |
 | 3. Correlation under 0.3 with every live strategy | NOT YET MEASURED, and a real risk: it buys the cheap side of the same market in the same minute as OICORE. If its daily result tracks OICORE's at 0.3 or more it is a duplicate and goes on the declined list. |
 | 4. Declined list | Checked against every row of 7e on Nov 12. Not a favourite (it never pays more than 30c; the validator refuses a model entry above 50c). Not "Bitcoin as L1". The row "cheap-side price, regime and grammar sweeps without a new data source" does not cover a single pre-registered rule on a new source, but the Analyst should rule on it. |
@@ -102,7 +111,7 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 | One-sided or partial fill | Not possible: one contract, immediate-or-cancel |
 | Stranded position | Held to settlement by design; the settle sweep books it. Worst case is its cost |
 | Deploy order wrong | An exit watch older than the switch flip would give the order the fallback exit (sold at 25c or 60 s before the close). `deploy-push.sh` goes first |
-| The spot venues' terms do not allow this use | **Open.** A person must read each venue's market data terms for commercial use before the switch is flipped. This desk made no request to any of them |
+| The spot venues' terms do not allow this use | **Open, and a hard blocker for the switch.** What must be read, for commercial use by an LLC whose bot trades on ANOTHER venue from the data: (1) Coinbase Exchange's market data terms and API terms for `api.exchange.coinbase.com`; (2) Kraken's API terms for the public REST endpoints of `api.kraken.com`; (3) Bitstamp's API terms for the public endpoints of `www.bitstamp.net`. Who: the Executive Assistant is reading them (Nov 12); the OWNER decides, by popup, whether each is acceptable. The research recorder already reads these venues' public trade feeds for research; live trading on the same model is the new question. If one venue is refused the probe does not run on two: three are required in code. This desk made no request to any of them |
 | The response shapes in the reader are wrong | **Open.** They were written from the venues' public documentation as remembered. The reviewer confirms them against the documentation; a wrong shape fails closed |
 
 ## 9. Tests and gates
@@ -119,18 +128,24 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 
 ## 11. The popup the owner would see
 
+> *(Shown only after the first read clears. If the owner asks for it sooner, the first option changes to "Wait for the research read" and the popup says it is a pre-evidence order.)*
+>
 > **Start a tiny live probe: CFRTIBTC (unproven)?**
 >
 > What it does: about 3 minutes before a Bitcoin 15 minute market closes, if a model built from three spot exchanges says the cheaper side (5c to 30c) is underpriced by 5c or more, the bot buys 1 contract and holds it to the close.
 >
 > Size and loss: 1 contract an order, at most about 32c lost per order. It stops itself for good at $5 lost in total. It also sits inside the second slot's caps and the account's 12% stop.
 >
-> Honest odds: UNPROVEN. In research the rule failed its bar across five coins; Bitcoin alone looked good on 36 trades picked after the fact. Research puts the chance it is real at about 1%. $5 buys about 20 to 60 real fills, which is enough to see whether fills match the simulation, not enough to prove an edge.
+> Honest odds: UNPROVEN. In research the rule failed its bar across five coins; Bitcoin alone looked good on 36 trades picked after the fact. The read that just cleared is cleared by a rule with no edge about one time in four. $5 buys about 20 to 60 real fills, which is enough to see whether fills match the simulation, not enough to prove an edge.
 >
-> Still open before it can start: someone must read the three spot exchanges' data terms; the Verification Analyst must score it (it may turn out to be a duplicate of OICORE).
+> Still open before it can start: your decision on the three spot exchanges' data terms; the Verification Analyst's score (it may turn out to be a duplicate of OICORE).
 >
 > Kill: $5 lost, or 20 losses in a row, or a net loss after 100 fills. Return: 14 days off, then a paper run at profit factor 1.3 over 100 signals, then your approval.
 >
-> - **Wait for the research read (Nov 22 to 24) first (Recommended)**: it is free, and real fills only matter if that read holds up
-> - **Yes, start it at 1 contract with a $5 budget** (after the terms are read and the Analyst scores it)
+> - **Wait for the re-test (about Dec 10 to 15) (Recommended)**: it is free, and one clear is not evidence
+> - **Yes, start it now at 1 contract with a $5 budget**, as a pre-evidence order
 > - **No**
+
+## 12. Variant arm: W-SPOTLEAD1 (a version, not a strategy)
+
+The Chief of Staff's ruling (Nov 12, lifecycle 7g): the spot-lead rule is a VERSION of this probe. It is the same signal (a spot model against the Kalshi quote) in another price band: the 50c to 87c side on a 10c edge, Bitcoin first. It takes no slot of its own, is not registered here, and has no code: the validator on this branch refuses a model entry above 50c on purpose, because above that it is a favourite held to settlement. Turning it on would need its own read to pass (about Nov 21 to 23; it missed its bar once), the owner's written exception to the favourite-and-hold ban for this version only, and a reviewed edit of that bound. Worst loss about $0.89 an order, so the same $5 budget is about six losing orders: too few to learn from, which is a reason not to run it as a probe at all.
