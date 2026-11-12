@@ -17,7 +17,8 @@ gates.R1 = () => {
 };
 
 gates.R2 = () => {
-  assert.ok(/cron: "7 \* \* \* \*"/.test(wf), 'hourly');
+  assert.ok(/cron: "7,37 \* \* \* \*"/.test(wf), "two starts an hour, a freshness step keeps it to one sample an hour");
+  assert.ok(/under 45 minutes old/.test(wf) && /steps\.fresh\.outputs\.sample/.test(wf), "a start 30 minutes after a sample does not add a second one");
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf), 'the only secret it touches is the built-in token');
   assert.ok(/git push -q origin perp-data/.test(wf) && !/git push[^\n]*\bmain\b/.test(wf), 'it pushes the data branch only, never main');
   assert.ok(/permissions:\s*\n\s*contents: write/.test(wf), 'contents write and nothing wider');
