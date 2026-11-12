@@ -56,6 +56,13 @@ A resting (maker) order is a different trade with its own fill and selection que
 - **Timing: only to the grain of the source.** A candle gives one instant a minute; a list quote is up to 11 s old.
 - So quote a paper result as: profit factor and n AFTER the haircut, the limit and delay assumed, and the source of the price.
 
+## 4b. Two rules for every scorer (ruled by the Head of R&D, 2026-11-12, after the scorer audit)
+
+1. **No cut over the whole sample.** No threshold, cut or universe filter may be computed over the whole development sample and then applied to earlier bets, even when it reads no outcome (a tercile of a signal, a "which titles are in" kill line). Either it is a constant written in the registration, or it is walk-forward from earlier data only. Where a registered step order does select on development, the development figure is labelled "selected on development": it can falsify, it cannot support. Only a frozen held-out read can support.
+2. **No haircut from a later value.** A "ran away" or "missed" haircut is never built from a later candle or from any value measured after the decision: near a close, the side whose price rises next is the side that is winning, so such a filter removes rows by the outcome. Use the book replay where a book exists (section 3, rule 1). Where none exists, use a RANDOM drop at the measured miss rate, with the stated caveat that real misses lean toward winners.
+
+The same audit's general test, for anyone writing a scorer: a time or value known only after the bet (a later close or settlement time, a later candle, a sibling market's result before its own close, a result field) must not decide the signal, the price, or WHICH bets exist. A guard that drops a record by how long something lasted afterwards is such a value.
+
 ## 5. Five families where the cost already rules out a taker card
 
 | Family | Measured round trip | Why |
