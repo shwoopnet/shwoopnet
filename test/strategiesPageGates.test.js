@@ -25,9 +25,9 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
-const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_RETIRED_CAUSES, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
+const names = ['kalshiGoldCardState', 'kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
+const src = varLine('KAL_GOLD_READ_TIMEOUT').replace('  var KAL_GOLD_READ_TIMEOUT', 'var KAL_GOLD_READ_TIMEOUT') + varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_GOLD_READ_TIMEOUT, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_RETIRED_CAUSES, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const mask = (x) => (x < 0 ? '-' : '') + '****';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -188,7 +188,7 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
+const names2 = ['kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
 const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varLine('KAL_RETIRED_CAUSES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
 const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_RETIRED_CAUSES, KAL_BOARD_RETIRED, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
@@ -447,13 +447,13 @@ gates.GK6 = () => {
   assert.strictEqual(c.Live, 0); assert.strictEqual(c.Probe, 3); assert.strictEqual(c.Off, 1); assert.ok(!('Building' in c), 'CFRTIK is built (Nov 12, 2026), nothing is only approved');
   const open = Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830', 'CFRTIK'], []);
   assert.strictEqual(open.Live, 1); assert.strictEqual(open.Probe, 3); assert.ok(!('Off' in open), 'nothing off, no Off cell');
-  const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; test' : '' }));
+  const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; test' : '' }));
   const html = Q.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, offIds: ['L1'], registryList: list, registryState: 'ok' }, esc, money);
   const cell = (k) => Number(new RegExp('<b>(\\d+)</b><span>' + k + '</span>').exec(html)[1]);
   const laneN = Number(/sp-lane-t">Live<\/span><span class="sp-lane-n">(\d+)</.exec(html)[1]);
   assert.strictEqual(laneN, cell('Probe') + cell('Live'), 'the Live lane count equals Live plus Probe in the header');
   assert.strictEqual(laneN, 3); assert.strictEqual(cell('Off'), 1); assert.ok(/real money, 1 off/.test(html));
-  assert.ok(/>KILLED</.test(html) && !/>HEALTHY</.test(html.slice(html.indexOf('data-fk="live:L1"'), html.indexOf('data-fk="live:OICORE"'))), 'the gold card says KILLED');
+  assert.ok(/>KILLED</.test(html) && !/>HEALTHY</.test(html.slice(html.indexOf('data-fk="live:L1"'), html.indexOf('data-fk="live:L1"') + 1500)), 'the gold card says KILLED');
   assert.ok(/sp-note">Gold is off: the kill rule tripped/.test(html), 'the plain line is on the card, not hidden in Details');
 };
 gates.GK7 = () => {
@@ -465,7 +465,7 @@ gates.GK7 = () => {
   assert.ok(/doc\(db, 'kalshiLiveControl', 'sizing'\)/.test(mod) && !/setDoc|updateDoc|addDoc/.test(mod), 'one read of the sizing document');
   assert.ok(/match \/kalshiLiveControl\/\{id\} \{\s*allow read: if isAdmin\(\);\s*allow write: if false;/.test(fs.readFileSync(path.join(__dirname, '..', 'firestore.rules'), 'utf8')), 'admin read, no client write');
   const render = fn('renderStrategiesPage');
-  assert.ok(/kalshiGoldEnsure\(\)/.test(render) && /kalshiGoldKillState\(/.test(render) && /state: kalshiGoldCache\.error \? 'unknown' : 'loading'/.test(render), 'a failed read is unknown, a pending one is loading');
+  assert.ok(/kalshiGoldEnsure\(\)/.test(render) && /kalshiGoldCardState\(/.test(render) && /kalshiGoldCardState\(kalshiGoldCache/.test(render), 'the card state comes from the pure state function, which times out to unknown');
 };
 gates.GK8 = () => {
   // The registry: the approval NO side is retired as failed the bar, CFRTIK is the built probation seat (Nov 12, 2026): a Probe with live code, no longer "approved, building".
@@ -486,6 +486,44 @@ gates.OK1 = () => {
   assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR KILL');
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(!/ddStop|drawdown room/i.test(src.replace(/<li>[\s\S]*?<\/li>/g, '')), 'no fixed drawdown gauge code is left on the page');
+};
+gates.AL1 = () => {
+  // Consequence: a read that never answers (the owner's phone) cannot hold the gold card on CHECKING; after the timeout it is "state unknown", and a late answer still wins.
+  const T = P.KAL_GOLD_READ_TIMEOUT, since = 1000000;
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: null, error: '' }, since + 10, T).state, 'loading', 'loading only inside the timeout');
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: null, error: '' }, since + T, T).state, 'unknown', 'a read that never resolves falls back to unknown');
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: null, error: '' }, since + 10 * T, T).state, 'unknown');
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: null, error: 'read' }, since + 10, T).state, 'unknown', 'a failed read is unknown at once');
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: TRIPPED, error: '' }, since + 10 * T, T).state, 'killed', 'a late answer still wins');
+  assert.strictEqual(P.kalshiGoldCardState({ since, res: ARMED, error: '' }, since, T).state, 'armed');
+  assert.ok(T <= 10000, 'a few seconds');
+  const ens = fn('kalshiGoldEnsure');
+  assert.ok(/catch\(e\)\{ fail\(\); \}/.test(ens) && /function\(\)\{ kalshiGoldLoading = false|var done/.test(ens), 'a synchronous throw also ends the loading state');
+};
+gates.AL2 = () => {
+  // Consequence: lanes come from the bot's own state. A kill moves a strategy to Off the moment it trips; second-slot seats and built registry probes are Probation; shadow and unbuilt rows are On deck; only a verdict retires.
+  const L = P.kalshiStratLaneOf;
+  assert.strictEqual(L({ stage: 'Live', drawn: true }), 'live');
+  assert.strictEqual(L({ stage: 'Live', drawn: true, off: true }), 'off', 'a tripped kill leaves Live');
+  assert.strictEqual(L({ stage: 'Probe', drawn: true, slot: true }), 'probation');
+  assert.strictEqual(L({ drawn: true, slot: true }), 'probation', 'a slot seat with no registry row');
+  assert.strictEqual(L({ stage: 'Probe', codeLive: true }), 'probation', 'a built registry probe');
+  assert.strictEqual(L({ stage: 'Probe', codeLive: false }), 'deck', 'approved but not built is not trading');
+  assert.strictEqual(L({ stage: 'Shadow' }), 'deck'); assert.strictEqual(L({ stage: 'Idea' }), 'deck'); assert.strictEqual(L({}), 'deck');
+  assert.strictEqual(L({ stage: 'Retired', drawn: true }), 'retired'); assert.strictEqual(L({ stage: 'Retired', off: true }), 'retired');
+  assert.strictEqual(L({ stage: 'Live', drawn: true, off: false }), 'live', 'back to Live once the latch is clear');
+  assert.strictEqual(L(null), 'deck');
+};
+gates.AL3 = () => {
+  // Consequence: a killed gold sits in its own Off / cooling down group below Live with its return progress; Live and its header count only what trades.
+  const list = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies;
+  const mk = (id, lane, note) => ({ id, lane, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: lane === 'off', count: 5 }, spark: [], detail: null, killState: lane === 'off' ? 'killed' : undefined, note: note || '' });
+  const out = Q.kalshiBoardHtml({ live: [mk('L1', 'off', 'Gold is off. Return record (GOLDOFF shadow): 2 of 60 trades.'), mk('OICORE', 'probation')], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, registryList: list, registryState: 'ok' }, esc, money);
+  const iProb = out.indexOf('data-fk="grp:probation"'), iOff = out.indexOf('data-fk="grp:off"');
+  assert.ok(iProb > 0 && iOff > iProb, 'Probation, then Off / cooling down, below Live');
+  assert.ok(/Off \/ cooling down/.test(out) && out.indexOf('data-fk="live:L1"') > iOff && out.indexOf('data-fk="live:OICORE"') > iProb && out.indexOf('data-fk="live:OICORE"') < iOff);
+  assert.ok(/GOLDOFF shadow/.test(out.slice(iOff)), 'the return progress is on the off card');
+  assert.strictEqual(Number(/sp-lane-t">Live<\/span><span class="sp-lane-n">(\d+)</.exec(out)[1]), 1, 'the Live count is what trades');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
