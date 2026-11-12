@@ -1,0 +1,33 @@
+{
+  "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
+  "frozen": "2026-11-12",
+  "families_ranked_by_events": [
+    {"family": "ESOCCER", "series": ["KXESOCCERGAME"], "contracts": "three an event: two team contracts and one ending in -TIE; the Tie is never bought and never counts as the jumper",
+     "in_play": "clock", "matches_on_nov10": 450,
+     "development": {"closes_from": "2026-10-15T00:00:00Z", "closes_before": "2026-10-23T00:00:00Z"},
+     "held_out": {"closes_from": "2026-10-23T00:00:00Z", "closes_before": "2026-10-27T00:00:00Z"}, "candle_minutes_before_close": 40},
+    {"family": "ITF_TENNIS", "series": ["KXITFMATCH", "KXITFWMATCH"], "contracts": "two an event",
+     "in_play": "alive", "matches_on_nov10": 302,
+     "development": {"closes_from": "2026-10-10T00:00:00Z", "closes_before": "2026-10-23T00:00:00Z"},
+     "held_out": {"closes_from": "2026-10-23T00:00:00Z", "closes_before": "2026-10-30T00:00:00Z"}, "candle_minutes_before_close": 300},
+    {"family": "TABLE_TENNIS", "series": ["KXLIGAPROMATCH"], "contracts": "two an event",
+     "in_play": "clock", "matches_on_nov10": 147,
+     "development": {"closes_from": "2026-10-01T00:00:00Z", "closes_before": "2026-10-23T00:00:00Z"},
+     "held_out": {"closes_from": "2026-10-23T00:00:00Z", "closes_before": "2026-11-03T00:00:00Z"}, "candle_minutes_before_close": 70},
+    {"family": "CHALLENGER_TENNIS", "series": ["KXATPCHALLENGERMATCH", "KXWTACHALLENGERMATCH"], "contracts": "two an event",
+     "in_play": "alive", "matches_on_nov10": 92,
+     "development": {"closes_from": "2026-09-12T00:00:00Z", "closes_before": "2026-10-23T00:00:00Z"},
+     "held_out": {"closes_from": "2026-10-23T00:00:00Z", "closes_before": "2026-11-13T00:00:00Z"}, "candle_minutes_before_close": 300},
+    {"family": "EBASKETBALL", "series": ["KXEBASKETBALLGAME"], "contracts": "two an event",
+     "in_play": "clock", "matches_on_nov10": 84,
+     "development": {"closes_from": "2026-09-15T00:00:00Z", "closes_before": "2026-10-23T00:00:00Z"},
+     "held_out": {"closes_from": "2026-10-23T00:00:00Z", "closes_before": "2026-11-11T00:00:00Z"}, "candle_minutes_before_close": 60}
+  ],
+  "in_play_rules": {
+    "clock": "the ticker key starts with the date and a four-digit clock time (for example 26NOV100722): the scheduled start S, read as US Eastern time. A minute is in play if its candle ends at or after S + 60 seconds. Guard: the market closed between 4 and 90 minutes after S, else the match is dropped and counted.",
+    "alive": "no start time can be read for tennis. A minute t is in play if, among the 20 one-minute steps ending at t - 1, at least 3 had a two-sided mid that moved 2c or more from the minute before. Backward-looking only; nothing after t is used and the close time is never used."
+  },
+  "constants": {"jump": 0.10, "pre_jump_mid_band": [0.15, 0.75], "entry_ask_band": [0.20, 0.85], "entry_spread_max": 0.04, "slip": 0.01,
+                "fee": "0.07 x price x (1 - price), rounded up to the next cent", "cost_kill_round_trip": 0.05, "min_development_bets": 300},
+  "fee_field_reads": ["KXESOCCERGAME", "KXITFMATCH", "KXLIGAPROMATCH", "KXATPCHALLENGERMATCH", "KXEBASKETBALLGAME"]
+}
