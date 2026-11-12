@@ -78,8 +78,8 @@ def build(venues, keep_day, need3=False):
                         except Exception: return None
                         return a if a <= limit + 1e-9 else None
                 return None
-            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d, t0, replay("yes", ya, 2000), replay("yes", ya, 6000)))
-            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d, t0, replay("no", 1 - yb, 2000), replay("no", 1 - yb, 6000)))
+            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d, t0, replay("yes", ya, 2000), replay("yes", ya, 6000), L[i][0]))
+            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d, t0, replay("no", 1 - yb, 2000), replay("no", 1 - yb, 6000), L[i][0]))
     return rows, lost, folders
 
 def rep(name, rs):
@@ -166,10 +166,10 @@ rep("  kept (in both), kraken stats", [K[k] for k in sorted(set(A) & set(K))])
 for nm, rs in (("three venues", sel3), ("kraken only", selK)):
     rep_replay("BOOK-REPLAY +2 s, " + nm, rs, 8); rep_replay("BOOK-REPLAY +6 s, " + nm + " (judges live use)", rs, 9)
 if MODE == "exportall":
-    out = ["form,t0_utc,ticker,side,ask_seen,model_edge_flag"]
+    out = ["form,t0_utc,ticker,side,ask_seen,quote_t_send_ms,edge"]
     for nm, rs in (("three", rows3), ("kraken", rowsK)):
         for r in sorted(rs, key=lambda r: (r[7], r[1])):
-            out.append("%s,%s,%s,%s,%.4f,%d" % (nm, datetime.datetime.fromtimestamp(r[7] / 1000, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), r[1], r[2], r[3], 1 if r[4] - r[3] >= 0.05 else 0))
+            out.append("%s,%s,%s,%s,%.4f,%d,%d" % (nm, datetime.datetime.fromtimestamp(r[7] / 1000, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), r[1], r[2], r[3], r[10], 1 if r[4] - r[3] >= 0.05 else 0))
     open(sys.argv[3], "w").write("\n".join(out) + "\n"); print("wrote", len(out) - 1, "rows (all cheap rows with a model, no outcome column)")
 if MODE == "export":
     import io
