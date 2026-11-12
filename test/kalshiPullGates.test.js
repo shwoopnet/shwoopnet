@@ -329,7 +329,7 @@ print(json.dumps(out))`);
   for (const n of names) assert.ok(/plan: 1006 requests/.test(execFileSync('python3', ['-I', scriptPath, n, '--dry-run'], { encoding: 'utf8' })), n + ': dry run');
 };
 
-// KP29: CFRTI_K_CANDLES (Desk A, live mode, built from the CFRTI_K_LISTS answer) is development only and stays under the endpoint's 10,000 (minutes x tickers) limit: 215 requests, no ticker closes on or after 2026-11-05, each request at most 9,000 minutes x tickers, every ticker inside the allowlist. UNRATE_LISTS (Testing Desk) is four list requests for two series, forward closes before the cutoff only.
+// KP29: CFRTI_K_CANDLES (Desk A, live mode, built from the CFRTI_K_LISTS answer) is development only and stays under the endpoint's 10,000 (minutes x tickers) limit: 215 requests, no ticker closes on or after 2026-11-05, each request at most 9,000 minutes x tickers, every ticker inside the allowlist.
 gates.KP29 = () => {
   const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'CFRTI_K_CANDLES.json'), 'utf8'));
   assert.strictEqual(c.requests.length, 215); assert.strictEqual(c.max_requests, 215); assert.strictEqual(c.status, 'active');
@@ -533,7 +533,7 @@ gates.KP17 = () => {
   assert.deepStrictEqual(fs.readdirSync(fnDir).filter((f) => f.endsWith('.js')).filter((f) => /kalshi_pull|kalshi-pull/.test(fs.readFileSync(path.join(fnDir, f), 'utf8'))), [], 'nothing in functions/ mentions it');
 };
 
-// KP18: it stops by itself on 2027-02-28, in the workflow and in the script, and a real run is limited to 12 a UTC day.
+// KP18: it stops by itself on 2027-02-28, in the workflow and in the script, and a real run is limited to 20 a UTC day.
 gates.KP18 = () => {
   assert.deepStrictEqual(py('print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH)]))'), ['2027-02-28T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
@@ -541,10 +541,10 @@ gates.KP18 = () => {
 d = tempfile.mkdtemp(); now = 1790000000.0
 import time
 day = time.strftime("%Y-%m-%d", time.gmtime(now))
-for i in range(11): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T%02d00Z_1" % i))
+for i in range(19): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T%02d00Z_1" % i))
 os.makedirs(os.path.join(d, "pull", "JOB_B", day + "T0900Z_1")); os.makedirs(os.path.join(d, "pull", "JOB_B", "2020-01-01T0900Z_1"))
 print(json.dumps([m.runs_today(d, "JOB_A", now), m.MAX_RUNS_PER_DAY]))`);
-  assert.deepStrictEqual(day, [12, 12], 'runs of every job count toward the day cap (12 a UTC day since Nov 12, 2026)');
+  assert.deepStrictEqual(day, [20, 20], 'runs of every job count toward the day cap (20 a UTC day since Nov 12, 2026)');
 };
 
 // KP18b: raising the day cap from 6 to 12 changed ONLY that number. Every per-run limit is still what it was.
@@ -552,8 +552,8 @@ gates.KP18b = () => {
   const out = py('print(json.dumps([m.GAP_S, m.BACKOFF_S, m.BACKOFF_MAX_S, m.MAX_429_IN_ROW, m.MAX_FAILS_IN_ROW, m.HARD_MAX_REQUESTS, m.MAX_BODY_BYTES, m.MAX_RUN_BYTES, m.MAX_RUN_SECONDS, m.MAX_JOB_BYTES, m.MAX_PAGES, m.END_UTC, sorted(m.ROUTES.keys()), [m.ROUTES[k][0] for k in sorted(m.ROUTES)]]))');
   assert.deepStrictEqual(out, [1.0, 5.0, 60.0, 3, 3, 1200, 5000000, 200000000, 2400, 2000000, 50, '2027-02-28T23:59:00Z', ['elections', 'perps'], ['api.elections.kalshi.com', 'external-api.kalshi.com']]);
   const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'kalshi_pull.py'), 'utf8');
-  assert.ok(/^MAX_RUNS_PER_DAY = 12 /m.test(src), 'the day cap is 12');
-  assert.ok(/5 MB an answer, 200 MB a run, 12 real runs a UTC day/.test(wf), 'the workflow header says 12');
+  assert.ok(/^MAX_RUNS_PER_DAY = 20 /m.test(src), 'the day cap is 20');
+  assert.ok(/5 MB an answer, 200 MB a run, 20 real runs a UTC day/.test(wf), 'the workflow header says 20');
 };
 
 // KP19: file names on the data branch are counters; a hostile request id or answer cannot create a path outside the run folder.
