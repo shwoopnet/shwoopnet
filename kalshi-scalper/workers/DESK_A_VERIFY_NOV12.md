@@ -55,3 +55,28 @@ Also: 33 of the 443 singles have no bid on their side at the flatten and are boo
 |---|---|---|
 | MMSIM1 development PF 1.41, maker fee 0 | CONFIRMED on 171 events (168 quotable), not 176 | 1.26 with one-contract fee rounding; the 176 event rerun read 5 held-out events; the script's cutoff is not pinned |
 | CFRTI1-BTC PF 2.54, n 36 | CONFIRMED | Independent range PF 2.18 to 2.51 on n 35 to 40; no look-ahead; a picked cell of 36 trades |
+
+---
+
+## 4. BASERATES1 executive order counts (V2): MATCH (added Nov 12)
+
+Asked by Main: check V2's GovInfo count claims, in particular "executive orders per week, mean 1.56 since Sep 2025". Two independent checks, zero Kalshi calls.
+
+**Arithmetic, from V2's held list (`workers/baserates1/eo_list.csv`), with my own week counter (Sunday to Saturday):**
+
+| Claim in BASERATES1_TABLES.md | Mine | Verdict |
+|---|---|---|
+| Since Sep 2025: n 59 weeks, mean 1.56, variance 1.91 | n 59, mean 1.559, variance 1.906, 92 orders | MATCH. The 59 weeks run from the week starting Aug 31, 2025 to the week of Oct 11 to 17, 2026 |
+| Trump II: n 90, mean 2.82, variance 8.24 | n 90, mean 2.822, variance 8.238 | MATCH. Starts with the week of Jan 26, 2025 |
+| Trump I: n 208, mean 1.01, variance 1.67 | n 208, mean 1.014, variance 1.666 | MATCH |
+| "2025 H1": n 31, mean 5.23 | 162 orders over the 31 weeks Jan 26 to Aug 30, 2025, mean 5.226 | MATCH on the number; the LABEL is wrong. It is Jan 26 to Aug 30, 2025 (everything before the "since Sep 2025" block), not the first half of 2025. A true first half (to the week of Jun 22) is 22 weeks, mean 5.82 |
+| Numbers 14147 to 14438, 292 orders, no gaps | 292, no gaps, no duplicates, dates in order | MATCH |
+
+**Source check, my own extraction.** I downloaded GovInfo's Federal Register bulk files for September, October and November 2026 (three zip files, 50 daily issues through the Nov 12 issue; govinfo.gov bulk data, no key, three requests plus two listings) and pulled every Executive Order heading with my own pattern. Result: 17 orders, numbers 14422 to 14438, every number and signing date equal to V2's list; none in the list is missing from the issues and none in the issues is missing from the list.
+
+**Three things a reader of the 1.56 figure should know (none is an error):**
+1. **The inauguration week is excluded.** The week of Jan 19 to 25, 2025 had 38 orders and is left out as a partial week. With it, Trump II is mean 3.21 with variance 21.7 instead of 2.82 and 8.24. The table says "complete weeks only" but does not say what that removes.
+2. **The list is current, not stale.** The newest order in the list is 14438, signed Oct 22. No later order appears in any issue through Nov 12. Publication has been running 3 to 6 days after signing, so the weeks of Oct 25 to 31 and Nov 1 to 7 look like zero-order weeks (the second with a small chance of a late publication). V2 left out the week of Oct 18 to 24 as "possibly not yet published"; it is complete, with 2 orders.
+3. **Extended to today the figure is slightly lower:** adding the weeks of Oct 18 (2 orders), Oct 25 (0) and Nov 1 (0) gives 62 weeks, mean 1.52. The histogram for the 59 weeks starting Sep 7, 2025 is 0 orders in 19 weeks, 1 in 10, 2 in 15, 3 in 11, 4 in 3, 5 in 1.
+
+Not checked: the bills tables (A3, A4), the conditional tables (A2), and the "96 of 96 Kalshi markets reproduced" line, which needs Kalshi results I do not hold.
