@@ -1,0 +1,136 @@
+{
+ "job_id": "ECONLAG_CALENDAR",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_B_PROTOCOLS.md",
+ "purpose": "ECONLAG stage 1 (slow-family paper screen, try 1): settled market lists of the three release series and the Fed decision series, to verify the count of print days (about 70 expected) before any candle is asked for. No candle is read.",
+ "heldout": "none at this stage (lists only; the screen's pinned cutoff is 2026-10-31, in ECONLAG amendment 2)",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXCPI",
+  "KXPAYROLLS",
+  "KXPCECORE",
+  "KXFEDDECISION",
+  "KXRATECUTCOUNT",
+  "KXFED"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 10,
+ "requests": [
+  {
+   "id": "live_KXCPI",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCPI",
+    "status": "settled",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "hist_KXCPI",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCPI",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "live_KXPAYROLLS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPAYROLLS",
+    "status": "settled",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "hist_KXPAYROLLS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPAYROLLS",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "live_KXPCECORE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPCECORE",
+    "status": "settled",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "hist_KXPCECORE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXPCECORE",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "live_KXFEDDECISION",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFEDDECISION",
+    "status": "settled",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "hist_KXFEDDECISION",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXFEDDECISION",
+    "limit": 1000
+   }
+  },
+  {
+   "id": "series_KXRATECUTCOUNT",
+   "path": "/series/KXRATECUTCOUNT",
+   "params": {}
+  },
+  {
+   "id": "series_KXFED",
+   "path": "/series/KXFED",
+   "params": {}
+  }
+ ],
+ "notes": "Ten requests, one page each; the cap is 10. Fields the reader keeps: ticker, event_ticker, open_time, close_time, title. The two series reads only confirm that the names KXRATECUTCOUNT and KXFED exist (a 404 is an answer). Prices and results in the list answers are not used.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

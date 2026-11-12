@@ -1,0 +1,70 @@
+{
+ "job_id": "CFRTI_K_LISTS",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
+ "purpose": "Stage 1 of CFRTI-K: the settled KXBTC15M market lists (ticker, close_time, floor_strike, result) for the development window, so stage 2 can name every market. No price is read. Bounded at the cutoff: nothing on or after 2026-11-05T00:00Z is requested.",
+ "heldout": "CFRTI-K: closes on or after 2026-11-05T00:00:00Z are held-out and are not requested (max_close_ts = 1793836800 on the live list). The historical list has no date filter; the builder drops any market closing at or after the cutoff and the reader never opens it.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBTC15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 30,
+ "notes": "Live list: settled KXBTC15M with close time from 2026-06-01 to before 2026-11-05, newest first, up to 14 pages of 1,000 (about 5,100 live markets after the 2026-09-12 cutover, so about 6 pages). Historical list: up to 14 pages (about 7,900 older markets, about 8 pages). Request count: 2 requests, at most 28 pages, cap 30. Fields the reader keeps: ticker, close_time, floor_strike, cap_strike, result.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "max_pages": 14
+  },
+  {
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "max_pages": 14
+  }
+ ]
+}
