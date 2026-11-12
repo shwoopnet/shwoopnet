@@ -88,7 +88,9 @@ def build_s1(s0):
     for s in ser:
         reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": WINDOW_FROM, "max_close_ts": HELD_OUT_FROM}, "max_pages": 3})
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]}]
-    return job("POLI2_LISTS", "POL-i2 count step, stage 1: settled market lists of the Politics series (time and volume fields only; no price, no result used).", eps, reqs, ser, [])
+    j = job("POLI2_LISTS", "POL-i2 count step, stage 1: settled market lists of the Politics series (time and volume fields only; no price, no result used).", eps, reqs, ser, [])
+    j["max_requests"] = len(reqs) + 21               # 79 lists + 21 slack for a second page; the runner counts pages against the cap. Stage 2 is capped at BUDGET minus the requests actually SENT
+    return j
 
 
 def markets_from(s1):  # only markets closing after the cutover (live endpoints) are listed, so hist below is always empty
@@ -106,7 +108,8 @@ def markets_from(s1):  # only markets closing after the cutover (live endpoints)
 
 
 def build_s2(s1):
-    cap = min(STAGE2_CAP, BUDGET - len(json.load(open(os.path.join(s1, "manifest.json")))["job"]["requests"]))   # AMENDMENT 1: stage 1 + stage 2 together at most BUDGET
+    man = json.load(open(os.path.join(s1, "manifest.json")))
+    cap = min(STAGE2_CAP, BUDGET - int(man.get("requests_sent", len(man["job"]["requests"]))))   # AMENDMENT 1: stage 1 + stage 2 together at most BUDGET
     if cap < 1: raise SystemExit("stage 1 alone is over the budget of %d requests; stop and tell the Head" % BUDGET)
     mk = markets_from(s1)
     ranked = sorted(mk.items(), key=lambda kv: (-kv[1][2], kv[0]))
