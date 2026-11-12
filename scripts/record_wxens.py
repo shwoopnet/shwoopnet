@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """NWS weather recorder (WXENS1 data, Nov 3, 2026; moved to NWS only Nov 11, 2026; research only).
 
-The ensemble forecast vendor's hosted API is non-commercial only and the account holder is an LLC, so that read was removed. NWS has no ensemble product, so this
+The ensemble forecast vendor's hosted API is non-commercial only and the terms are read as for business use, so that read was removed. NWS has no ensemble product, so this
 now records what api.weather.gov does offer, at the registered looks (07:00 and 10:00 local STANDARD time of each watched city), for each city's target days: (1) the NWS point forecast
 high, (2) the NWS gridpoint raw forecast (max, min and hourly temperature, in Celsius as NWS gives them), (3) the latest NWS station observation, (4) the Kalshi quote of every open
 bracket of the target day's KXHIGH event; every few hours it also records each newly settled market's result and the IEM daily observed maximum. Nothing is scored here.

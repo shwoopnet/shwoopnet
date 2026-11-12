@@ -2,7 +2,7 @@
 
 Scoping only. No code was changed. Nothing here is legal advice; where a terms page could not be read the source is treated as barred. No request was sent to any Yahoo host. The strip and Brief keep running on Yahoo until the switch ships.
 
-Why: Yahoo's terms (legal.yahoo.com/us/en/yahoo/terms/otos 2(d)(9), 2(e), 2(d)(10)) forbid automated access and building databases. The page needs a source whose terms allow an LLC to read by machine, store a snapshot and show it on its own site.
+Why: Yahoo's terms (legal.yahoo.com/us/en/yahoo/terms/otos 2(d)(9), 2(e), 2(d)(10)) forbid automated access and building databases. The page needs a source whose terms allow a business to read by machine, store a snapshot and show it on its own site.
 
 ## 1. What the page needs today
 
@@ -27,7 +27,7 @@ Each quote needs: price, previous close, session state, the day's closes (`serie
 
 ## 2. Verdicts
 
-Verdicts are for automated reads by a commercial LLC, plus caching and showing the data on its own site. "NOT READ" means the page failed to load and the source is treated as barred.
+Verdicts are for automated reads by a business, plus caching and showing the data on its own site. "NOT READ" means the page failed to load and the source is treated as barred.
 
 | Source | Verdict | Evidence (URL, clause) | Key | Delay / limits | Covers |
 |---|---|---|---|---|---|
