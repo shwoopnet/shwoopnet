@@ -27,7 +27,7 @@ Research reports to the Head of R&D. Engineering, merges, deploys, recorders, ka
 | 4 | NOSIDE1_CANDLES (W-NO-ARM1) | 1,034 | A first readable development verdict on the approval NO side; what is held leans against | ready on claude/refine-live; runs only after 1 and 2 are on the data branch |
 | retired | COMBO1_OPENBOOK | 0 | Answered for free: the combo recorder's first snapshot on combo-data (2026-11-12 14:35Z) has 400 quote rows, 229 with a NO bid, 37 with a YES bid, 18 two-sided | closed, no read spent |
 
-Between PERPBTC1M and NOSIDE1_CANDLES: Desk B's in-game candle measurement (about 60, zero tries; see the in-game card below). Next after these: ECONLAG_CALENDAR (10), then a count-only trigger scan (at most 165 more) that stops the card at "no evidence at n = x" if under 30 print days or under 30 trigger days. PERPETH1M is not dispatched. Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
+Between PERPBTC1M and NOSIDE1_CANDLES: Desk B's in-game candle measurement and its NHLOT price measurement (about 60 each, zero tries; see the cards below). Next after these: ECONLAG_CALENDAR (10), then a count-only trigger scan (at most 165 more) that stops the card at "no evidence at n = x" if under 30 print days or under 30 trigger days. PERPETH1M is not dispatched. Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
 
 ## Fixed read dates (cutoffs are committed date constants; read once; nobody runs early)
 
@@ -65,6 +65,14 @@ All specs are CONDITIONAL on the registered read. Owner decisions, Nov 12 (throu
 ## In-game lag card (Desk B, Nov 12; nothing scored)
 
 kalshi-scalper/workers/IDEA_DESK_B_INGAME_CARD.md on claude/idea-desk-b (9d6a545). V2's INGAMELAG1 was registered on Nov 8 and never read. Inventory of the sports-data recorder, Nov 8 to Nov 12: 35 games finished inside the recording; live games are polled every 128 seconds at the median, not every 20 (it polls about 107 listed games at one pace); 15.8 of 84.1 hours have no polling. Step 1 is approved: a zero-try measurement on Kalshi's 1 minute candles (about 60 requests) of how much of the spread's 10 minute move is already in one minute after a moneyline jump; if 75 percent is in on 80 percent of events the card closes with no try spent (Desk B: about 60 percent likely). Step 2 (one try, about 400 to 500 requests) is not approved; the family ruling under the three-falsified rule waits for step 1. If step 1 closes the card, the in-game recorder has no registered use and its deletion is recommended to Main.
+
+## NHLOT card (Desk B, Nov 12; nothing scored) and two family rulings
+
+kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md on claude/idea-desk-b (5436c3a): one card from the second wave, not four. Overtime in a tied NHL game is close to a coin flip; overtime is detected from Kalshi's own sibling markets (every total-goals strike goes to about 0c or 100c while the moneyline is near the middle); buy the pre-game underdog at 43c or lower, hold minutes to settlement. About 290 events a year. Approved: a zero-try price measurement (about 60 requests, no outcome read) that closes the card if the underdog is at 43c or lower in under 30 percent of detected overtimes (Desk B: about 75 percent likely; 2 percent that it reaches the bar).
+
+**Ruling: in-play sports is not one family.** Lifecycle 7f defines a family as entry mechanism plus exit style. ESPN1 (outside probability feed, held; FALSIFIED), SWING1 (fade of a 25c fall in Kalshi's own price; FALSIFIED), the in-game lag card (cross-market follow, 10 minute exit) and NHLOT (state reset from sibling markets) are four mechanisms. Two falsified in-play tests remain a prior against both cards.
+
+**Ruling: weather "forecast against market" is closed** under the three-falsified rule (WX1 of Oct 13, WX1 of Oct 22, WX3). WXENS1 and WXLOW1 are retired (source stopped Nov 11). WXDAYEND (decided-fact, a different mechanism with one FALSIFIED, WXDEAD1) finishes its registered count and nothing more. Declined-list row to be requested from Main. RAINCAL (V2 orphan, registered Oct 31) is being inventoried by Desk B.
 
 ## Fill convention for taker rules (Nov 12, from Forensics' FILLHAIRCUT1)
 
