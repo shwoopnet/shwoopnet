@@ -1,6 +1,6 @@
 # Untouched-family census (Idea Desk B with the Forensics desk; started Nov 12, 2026)
 
-**Status (16:55Z, Nov 12, corrected 17:40Z): FIRST CUT of the family list is below, built from V2's Nov 3 sweep files with no new read.** It covers the 337 series those sweeps counted. The fresh listing (`CENSUS_LISTING`, dispatched first by Main, not landed yet) adds the series the sweeps never reached, the fee class and one day of volume. Full table due 16:00Z on Nov 13. Asked for by the owner through the Head of R&D: "find more", breadth and not depth.
+**Status (16:55Z, Nov 12, corrected 17:00Z): FIRST CUT of the family list is below, built from V2's Nov 3 sweep files with no new read.** It covers the 337 series those sweeps counted. The fresh listing (`CENSUS_LISTING`, dispatched first by Main, not landed yet) adds the series the sweeps never reached, the fee class and one day of volume. Full table due 16:00Z on Nov 13. Asked for by the owner through the Head of R&D: "find more", breadth and not depth.
 
 ## What the census is
 
@@ -52,7 +52,7 @@ All three lines are in V2's research README, `kalshi-scalper/README.md` on branc
 
 Built by `workers/census/first_cut.py` from `USWEEP1_SERIES.json`, `USWEEP2_SERIES.json` and `USWEEP3_SERIES.json` (V2's branch, public counts taken 2026-11-03 over 60 days). Per-series rows: `workers/census/first_cut_series.csv` (337 series, each with its family); per-family sums: `workers/census/first_cut_families.csv`.
 
-**Counts (corrected 17:40Z after a second pass over V2's later entries, which moved esports, cricket, rates and Netflix to TOUCHED): 46 families listed (337 series from the sweep files, plus the known families the sweep files do not hold). By state: 30 TOUCHED (a registered test of a mechanism), 9 SWEEP ONLY (only the cheap-tail sweep read it), 7 UNTOUCHED (no series ever read). Untouched or sweep-only with 300 or more independent events a year: 12. Cards written from them: 0 so far.**
+**Counts (corrected 17:00Z after a second pass over V2's later entries, which moved esports, cricket, rates and Netflix to TOUCHED): 46 families listed (337 series from the sweep files, plus the known families the sweep files do not hold). By state: 30 TOUCHED (a registered test of a mechanism), 9 SWEEP ONLY (only the cheap-tail sweep read it), 7 UNTOUCHED (no series ever read). Untouched or sweep-only with 300 or more independent events a year: 12. Cards written from them: 0 so far.**
 
 Three states, because "touched" hides a real difference:
 
