@@ -1295,3 +1295,7 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `docs/WHEEL_ADMIT_LIST.md` (21 places on 6 mechanisms, 12 with a log source; the two DEPTH1 places withdrawn), the new `docs/WHEEL_LEDGER.md` (probation seat 1, CFRTI-K, approved and not live) and `docs/ROTATION_LANE.md` section 5a ("as built for Monday": a net floor of minus $18 per seat; the performance exits wait for the replay controller). The owner also said exits and limit entries are allowed in any rule provided both fees and the real spread on both legs are counted, so future specs may carry a time exit or a stop; today's seat holds to settlement. Docs only.
 
+## kalshi-pull jobs v15: WHEEL0_LISTS (Nov 12, 2026, Forensics, the Head of R&D)
+
+`WHEEL0_LISTS` (owner MAIN, registration `kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md`): 4 requests, at most 32 pages, cap 36: the settled market lists (ticker, close time, result) of KXXRP15M, KXDOGE15M, KXGOLD15M and KXETH15M from 2026-09-12, for the owner's ordered premise test of the rotation lane. Rule (h): the Ethereum request is bounded before 2026-10-29 in the file itself; Bitcoin is not requested. Public lists, GET only, same limits as every job; runner and workflow unchanged. Gate KP33. Step 2 (four candle jobs built from these lists) follows after the lists land.
+
