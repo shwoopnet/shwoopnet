@@ -84,6 +84,14 @@ Measured on recorded Bitcoin 15 minute books, closes Oct 29 to Nov 11, 180 to 12
 
 **Convention:** every taker rule on the 15 minute markets is also reported as a replay on the recorded books at +2 and +6 seconds with its real limit; a miss is no trade; live use and probe gates are judged on the 6 second line. Where only the decision quote exists, apply the haircut above and show the stress that drops the best-outcome signals first. The CFRTI held-out plan carries the replay line (Desk A, 19c2751b and 541e83da on claude/idea-desk-a; no new try).
 
+## A data-quality question on the Bitcoin lead (Nov 12)
+
+Only 28 of the 68 development signal rows of CFRTI1-BTC have a recorded R6 book. On those (no evidence at n = 16 three-venue and n = 12 Kraken-only) the replay figures mean nothing yet. But in 4 of the 16 three-venue rows the R6 book, under 2 seconds before the decision, already showed an ask 4c to 25c above the ask the rule saw. If the quote recorder's ask is stale or skewed against the book, a rule that hunts for underpriced asks selects those rows, and part of the registered edge is a price that was not there. Forensics is measuring it (QUOTEVSBOOK1: quote ask against book ask on all development cheap-side rows, edge rows against non-edge rows, with a clock-offset search; no outcome, zero tries). The held-out script will print, for each version, how many signal rows show an ask that is not on the book. The 6 second book-replay line, which refuses to fill such rows, is the line that judges live use.
+
+## Gold's look: what a paper record can be trusted for (Nov 12, Forensics' GOLDHAIRCUT1)
+
+Recorded gold 15 minute books, closes Oct 29 to Nov 11, 400 to 330 seconds before the close, the 88c to 97c side, 292 windows (claude/forensics-desk, workers/forensics/GOLDHAIRCUT1_RESULT.md, 870de04; no outcome loaded; not yet checked by the Verification Analyst). Trust the PRICE to about 0.2c a contract; do not trust the COUNT. An immediate-or-cancel buy at the ask seen fills 59, 49 and 46 percent at about 2, 6 and 10 seconds; with +1c 94, 83 and 73 percent; 1 and 15 contracts the same. Touch size covers 15 contracts at 95.6 percent of instants, so a "would fill" test on size says almost nothing. Sent to Main for the gold return rule and to Refinement for the rotation report.
+
 ## Desk tasks (none needs a scarce read)
 
 - **Refinement:** commit the SPREADCELL1 middle-outcome label and the read-once scorer before dispatch; update REFINE_HANDOFF.md; Monday rotation report; gold latch watch (message only).
