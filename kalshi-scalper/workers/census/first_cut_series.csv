@@ -1,0 +1,338 @@
+family,series,category,frequency,title,settled_60d,close_dates_60d,capped,median_volume,sweep,sweep_status
+ai_share,KXOPENSOURCESHARE,Science and Technology,one_off,Open weights AI market share,234,26,False,3059,U3,tail rule read
+approval_ballot,KXTRUMPAPPROVE,Politics,daily,Trump approval rating,540,60,False,28716,U2,tail rule read
+approval_ballot,KXVHGCB,Politics,daily,VoteHub GCB,349,39,False,2229,U3,tail rule read
+commodity_ladder,KXBRENTD,Commodities,daily,Brent Oil Daily,670,31,False,2229,U1,tail rule read
+commodity_ladder,KXBRENTW,Commodities,weekly,Brent Oil,160,8,False,1737,U3,tail rule read
+commodity_ladder,KXCOPPERD,Commodities,daily,Daily Copper,1460,32,False,45,U1,tail rule read
+commodity_ladder,KXCOPPERW,Commodities,weekly,Copper Weekly Price,340,8,False,161,U3,tail rule read
+commodity_ladder,KXGOLDD,Commodities,daily,Gold Daily,1280,32,False,398,U1,tail rule read
+commodity_ladder,KXGOLDW,Commodities,weekly,Gold Weekly price ,320,8,False,214,U3,tail rule read
+commodity_ladder,KXNATGASD,Commodities,daily,Natural Gas Daily,2000,24,True,31,U1,tail rule read
+commodity_ladder,KXNATGASW,Commodities,weekly,Natural Gas Weekly,330,8,False,11,U3,tail rule read
+commodity_ladder,KXSILVERD,Commodities,daily,Silver daily,1280,32,False,50,U1,tail rule read
+commodity_ladder,KXWTI,Commodities,daily,WTI oil on day,1000,32,True,3591,U3,tail rule read
+commodity_ladder,KXWTIW,Commodities,weekly,WTI oil weekly range,216,8,False,3078,U3,tail rule read
+cricket,KXT20MATCH,Sports,custom,Men's T20 Cricket Match,1000,50,True,47600,U2,tail rule read
+crypto_ladder,KXSHIBA,Crypto,daily,Shiba range,1716,60,False,0,U1,tail rule read
+crypto_ladder,KXSHIBAD,Crypto,daily,Shiba price Above/below,1716,60,False,0,U1,tail rule read
+esports,KXDOTA2GAME,Sports,custom,Dota 2 Game,1000,50,True,6819,U2,tail rule read
+esports,KXDOTA2MAP,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+esports,KXDOTA2TOTALMAPS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+esports,KXVALORANTMAP,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+fx_ladder,KXAUDUSDAD,Financials,daily,AUDUSD Daily,620,31,False,0,U1,tail rule read
+fx_ladder,KXAUDUSDAW,Financials,weekly,AUDUSD Weekly,170,8,False,7,U3,tail rule read
+fx_ladder,KXEURUSD,Financials,daily,EUR/USD daily range,585,39,False,236,U1,tail rule read
+fx_ladder,KXEURUSDAW,Financials,weekly,EURUSD weekly ,170,8,False,180,U3,tail rule read
+fx_ladder,KXGBPUSDAD,Financials,daily,GBPUSD Daily,630,31,False,0,U1,tail rule read
+fx_ladder,KXGBPUSDAW,Financials,weekly,GBPUSD Weekly,170,8,False,11,U3,tail rule read
+fx_ladder,KXNZDUSDAD,Financials,daily,NZDUSD Daily,630,31,False,0,U1,tail rule read
+fx_ladder,KXUSDBRLAW,Financials,weekly,USDBRL Weekly,280,8,False,25,U3,tail rule read
+fx_ladder,KXUSDCADAW,Financials,weekly,USDCAD Weekly,160,8,False,101,U3,tail rule read
+fx_ladder,KXUSDJPY,Financials,daily,USD/JPY daily range,600,40,False,169,U3,tail rule read
+fx_ladder,KXUSDJPYAW,Financials,weekly,USDJPY Weekly,467,8,False,25,U3,tail rule read
+fx_ladder,KXUSDMXNAW,Financials,weekly,USDMXN Weekly,350,8,False,52,U3,tail rule read
+fx_ladder,KXUSDSEKAW,Financials,weekly,USDSEK Weekly,380,8,False,5,U3,tail rule read
+gas_price,KXAAAGASD,Economics,daily,US gas price up,1090,60,False,7976,U1,tail rule read
+gas_price,KXAAAGASDAK,Economics,daily,Alaska gas price,598,34,False,6,U1,tail rule read
+gas_price,KXAAAGASDAL,Economics,daily,Alabama gas price,469,27,False,101,U1,tail rule read
+gas_price,KXAAAGASDAR,Economics,daily,Arkansas gas price,462,26,False,256,U1,tail rule read
+gas_price,KXAAAGASDAZ,Economics,daily,Arizona gas price,955,55,False,1000,U1,tail rule read
+gas_price,KXAAAGASDCA,Economics,daily,California gas price,1070,60,False,1133,U1,tail rule read
+gas_price,KXAAAGASDCO,Economics,daily,Colorado gas price,1006,48,False,252,U1,tail rule read
+gas_price,KXAAAGASDCT,Economics,daily,Connecticut gas price,697,41,False,1052,U1,tail rule read
+gas_price,KXAAAGASDDE,Economics,daily,Delaware gas price,502,26,False,185,U1,tail rule read
+gas_price,KXAAAGASDFL,Economics,daily,Florida gas price,1400,60,False,1210,U1,tail rule read
+gas_price,KXAAAGASDGA,Economics,daily,Georgia gas price,1140,60,False,1050,U1,tail rule read
+gas_price,KXAAAGASDHI,Economics,daily,Hawaii gas price,452,26,False,16,U1,tail rule read
+gas_price,KXAAAGASDIA,Economics,daily,Iowa gas price,499,27,False,42,U1,tail rule read
+gas_price,KXAAAGASDID,Economics,daily,Idaho gas price,452,26,False,32,U1,tail rule read
+gas_price,KXAAAGASDIL,Economics,daily,Illinois gas price,1200,60,False,1017,U1,tail rule read
+gas_price,KXAAAGASDIN,Economics,daily,Indiana gas price,817,41,False,696,U1,tail rule read
+gas_price,KXAAAGASDKS,Economics,daily,Kansas gas price,618,34,False,25,U1,tail rule read
+gas_price,KXAAAGASDKY,Economics,daily,Kentucky gas price,462,26,False,140,U1,tail rule read
+gas_price,KXAAAGASDLA,Economics,daily,Louisiana gas price,452,26,False,122,U1,tail rule read
+gas_price,KXAAAGASDMA,Economics,daily,Massachusetts gas price,955,55,False,1100,U1,tail rule read
+gas_price,KXAAAGASDMD,Economics,daily,Maryland gas price,886,48,False,975,U1,tail rule read
+gas_price,KXAAAGASDME,Economics,daily,Maine gas price,578,34,False,25,U1,tail rule read
+gas_price,KXAAAGASDMI,Economics,daily,Michigan gas price,1285,55,False,1059,U1,tail rule read
+gas_price,KXAAAGASDMN,Economics,daily,Minnesota gas price,856,48,False,1000,U1,tail rule read
+gas_price,KXAAAGASDMO,Economics,daily,Missouri gas price,717,41,False,494,U1,tail rule read
+gas_price,KXAAAGASDMS,Economics,daily,Mississippi gas price,442,26,False,57,U1,tail rule read
+gas_price,KXAAAGASDMT,Economics,daily,Montana gas price,459,27,False,69,U1,tail rule read
+gas_price,KXAAAGASDNC,Economics,daily,North Carolina gas price,1180,60,False,1112,U1,tail rule read
+gas_price,KXAAAGASDND,Economics,daily,North Dakota gas price,425,25,False,45,U1,tail rule read
+gas_price,KXAAAGASDNE,Economics,daily,Nebraska gas price,445,25,False,100,U1,tail rule read
+gas_price,KXAAAGASDNH,Economics,daily,New Hampshire gas price,459,27,False,101,U1,tail rule read
+gas_price,KXAAAGASDNJ,Economics,daily,New Jersey gas prices,1060,60,False,1176,U1,tail rule read
+gas_price,KXAAAGASDNM,Economics,daily,New Mexico gas price,628,34,False,64,U1,tail rule read
+gas_price,KXAAAGASDNV,Economics,daily,Nevada gas price,717,41,False,414,U1,tail rule read
+gas_price,KXAAAGASDNY,Economics,daily,New York gas price,1020,60,False,1010,U1,tail rule read
+gas_price,KXAAAGASDOH,Economics,daily,Ohio gas price,1540,60,False,1000,U1,tail rule read
+gas_price,KXAAAGASDOK,Economics,daily,Oklahoma gas price,425,25,False,46,U1,tail rule read
+gas_price,KXAAAGASDOR,Economics,daily,Oregon gas price,816,48,False,858,U1,tail rule read
+gas_price,KXAAAGASDPA,Economics,daily,Pennsylvania gas price,1080,60,False,1050,U1,tail rule read
+gas_price,KXAAAGASDRI,Economics,daily,Rhode Island gas price,435,25,False,74,U1,tail rule read
+gas_price,KXAAAGASDSC,Economics,daily,South Carolina gas price,886,48,False,1100,U1,tail rule read
+gas_price,KXAAAGASDSD,Economics,daily,South Dakota gas price,435,25,False,31,U1,tail rule read
+gas_price,KXAAAGASDTN,Economics,daily,Tennessee gas price,985,55,False,1000,U1,tail rule read
+gas_price,KXAAAGASDTX,Economics,daily,TX gas price,1110,60,False,1069,U1,tail rule read
+gas_price,KXAAAGASDUT,Economics,daily,Utah gas price,588,34,False,12,U1,tail rule read
+gas_price,KXAAAGASDVA,Economics,daily,Virginia gas price,955,55,False,1009,U1,tail rule read
+gas_price,KXAAAGASDVT,Economics,daily,Vermont gas price,425,25,False,100,U1,tail rule read
+gas_price,KXAAAGASDWA,Economics,daily,Washington gas price,1020,60,False,1001,U1,tail rule read
+gas_price,KXAAAGASDWI,Economics,daily,Wisconsin gas price,867,41,False,263,U1,tail rule read
+gas_price,KXAAAGASDWV,Economics,daily,West Virginia gas price,425,25,False,100,U1,tail rule read
+gas_price,KXAAAGASDWY,Economics,daily,Wyoming gas price,469,27,False,46,U1,tail rule read
+gas_price,KXAAAGASW,Economics,weekly,US gas price up,252,9,False,21188,U3,tail rule read
+gas_price,KXAAAGASWNJ,Economics,weekly,New Jersey gas price this week,200,9,False,460,U3,tail rule read
+gas_price,KXDIESELD,Economics,daily,Daily Diesel Price,1380,60,False,1139,U1,tail rule read
+gas_price,KXDIESELW,Economics,weekly,diesel price week,259,9,False,3902,U3,tail rule read
+index_ladder,KXDJI,Financials,hourly,DJI Hourly,1000,10,True,10,U3,tail rule read
+index_ladder,KXINX,Financials,daily,S&P 500 range,1230,41,False,0,U1,tail rule read
+index_ladder,KXNASDAQ100,Financials,daily,Nasdaq range,1230,41,False,0,U1,tail rule read
+intl_basketball,KXABASPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXABATOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXBBLSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXBBLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXBSLSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXBSLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXNBLSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXNBLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXVTBSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+intl_basketball,KXVTBTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+macro_release,KXUE,Economics,monthly,Monthly Unemployment,124,10,False,208,U3,tail rule read
+mentions,KXTRUMPMENTION,Mentions,one_off,What will Trump say?,1000,26,True,19601,U2,tail rule read
+mentions,KXTRUMPMENTIONB,Mentions,one_off,Trump Mention B,539,16,False,8661,U3,tail rule read
+mentions,KXTRUMPSAY,Mentions,one_off,What will trump say,340,10,False,16860,U3,tail rule read
+minor_hockey,KXAHLGAME,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+minor_hockey,KXKHLGAME,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+mlb_props,KXMLBHA,Sports,custom,Pro Baseball Hits Allowed,2000,41,True,14,U1,tail rule read
+music_video_charts,KXALBUMEQUIV,Entertainment,weekly,How many album equivalent will album sell,437,9,False,2710,U3,tail rule read
+music_video_charts,KXBILLBOARDRUNNERUPSONG,Entertainment,weekly,Will Song be number 2 on Billboard 100?,263,9,False,50,U3,tail rule read
+music_video_charts,KXPUREALBUMS,Entertainment,weekly,How many pure album sales will album have,350,9,False,100,U3,tail rule read
+music_video_charts,KXTOPSONG,Entertainment,weekly,Billboard Hot 100 #1,265,9,False,100,U3,tail rule read
+music_video_charts,KXYTTOPVIDEO2D,Entertainment,one_off,Runner up Daily Top Music Video,825,55,False,1000,U3,tail rule read
+music_video_charts,KXYTTOPVIDEOG2D,Entertainment,one_off,runner up top music video,825,55,False,1000,U3,tail rule read
+nascar,KXNASCARRACE,Sports,custom,NASCAR Race,864,23,False,10290,U2,tail rule read
+nascar,KXNASCARTOP10,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nascar,KXNASCARTOP3,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nba_mls_periods,KXMLS1H,Sports,custom,1st Half Winner,501,29,False,8853,U2,tail rule read
+nba_mls_periods,KXMLS1HSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nba_mls_periods,KXMLS1HTOTAL,Sports,custom,1st Half Total,501,29,False,11936,U2,tail rule read
+nba_mls_periods,KXMLS2H,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nba_mls_periods,KXMLS2HTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nba_mls_periods,KXNBA1H,Sports,custom,NBA 1st Half Winner,519,29,False,7854,U2,tail rule read
+ncaaf_periods,KXNCAAF1Q,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_periods,KXNCAAF2H,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_periods,KXNCAAF2Q,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_periods,KXNCAAF3Q,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_periods,KXNCAAF4Q,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_periods,KXNCAAFOT,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_props,KXNCAAFFIRSTTDTEAM,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+ncaaf_props,KXNCAAFTEAMRECTD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL1H,Sports,one_off,Pro Football 1st Half Winner,363,33,False,64090,U2,tail rule read
+nfl_periods,KXNFL1HFT,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL1HTOTAL,Sports,custom,Pro Football 1st  Half Total Points,1000,21,True,7538,U2,tail rule read
+nfl_periods,KXNFL1Q,Sports,custom,Pro Football 1st Quarter Winner,363,33,False,15107,U2,tail rule read
+nfl_periods,KXNFL1QSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL1QTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL2H,Sports,custom,Pro Football 2nd Half,363,33,False,11858,U2,tail rule read
+nfl_periods,KXNFL2HTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL2Q,Sports,custom,Pro Football 2nd Quarter Winner,363,33,False,7812,U2,tail rule read
+nfl_periods,KXNFL2QSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL2QTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL3Q,Sports,custom,Pro Football 3rd Quarter Winner,363,33,False,11905,U2,tail rule read
+nfl_periods,KXNFL3QSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL3QTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL4Q,Sports,custom,Pro Football 4th Quarter Winner,363,33,False,7210,U2,tail rule read
+nfl_periods,KXNFL4QSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_periods,KXNFL4QTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLBOTH,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLESCALATORREC,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLESCALATORRECYDS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLFFPTS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLFFPTSLADDER,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLFG,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLFIRSTTDTEAM,Sports,custom,Pro Football First Team to Score a Touchdown,363,33,False,4818,U2,tail rule read
+nfl_props,KXNFLLADDERREC,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLLADDERRECYDS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLLONGREC,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLLONGRSH,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLPASSATT,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLPASSCOMP,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLPASSINT,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLPASSTDS,Sports,custom,Pro Football player Passing Touchdowns,1000,33,True,8475,U2,tail rule read
+nfl_props,KXNFLRRYDS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLRSHATT,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nfl_props,KXNFLTEAMSACK,Sports,custom,Pro Football Team Sacks,1000,27,True,4187,U2,tail rule read
+nfl_props,KXNFLTEAMYDS,Sports,custom,Pro Football Team Yards,1000,27,True,5230,U2,tail rule read
+nfl_props,KXNFLWINMARGIN,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL1P,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL1PSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL1PTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL2P,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL2PSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL2PTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL3P,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL3PSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_periods,KXNHL3PTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+nhl_props,KXNHLSAVE,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+post_counts,KXTRUTHSOCIAL,Politics,weekly,Number of Trump Truth Social posts this week?,105,10,False,22699,U3,tail rule read
+post_counts,KXTRUTHSOCIALD,Politics,daily,Number of Trump Truth Social posts today?,264,33,False,438,U3,tail rule read
+power_demand,KXTXERCOTPEAKD,Economics,daily,Texas ERCOT peak electricity demand,1000,58,True,562,U3,tail rule read
+rates_daily,KX30YMORTW,Economics,weekly,30-year mortgage rate this week,164,8,False,2357,U3,tail rule read
+rates_daily,KXSOFRD,Economics,daily,Daily SOFR,284,40,False,710,U3,tail rule read
+rates_daily,KXUST10A,Financials,daily,UST 10 Year Weekly,150,8,False,674,U3,tail rule read
+rates_daily,KXUST2A,Financials,daily,UST 2 Year Daily,160,8,False,462,U3,tail rule read
+rates_daily,KXUST30A,Financials,daily,UST 30 Year Daily,160,8,False,347,U3,tail rule read
+rates_daily,KXUST5A,Financials,daily,UST 5 Year Daily,140,8,False,300,U3,tail rule read
+rates_daily,KXUST7A,Financials,daily,UST 7 Year Daily,140,8,False,319,U3,tail rule read
+soccer_extras,KXBRASILEIROTEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXBUNDESLIGATEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXEPLCORNERS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXEPLTEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXLALIGACORNERS,Sports,custom,Total Corners,400,31,False,1615,U1,tail rule read
+soccer_extras,KXLALIGATEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXLIGAMXTEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXLIGUE1TEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXMLSTEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXSERIEATEAMTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_extras,KXSERIECBTTS,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_major,KXBUNDESLIGATOTAL,Sports,one_off,Bundesliga Total,480,21,False,22269,U2,tail rule read
+soccer_major,KXEPLSPREAD,Sports,custom,English Premier League Spread,328,24,False,20787,U2,tail rule read
+soccer_major,KXEPLTOTAL,Sports,custom,English Premier League Total Goals,482,24,False,60908,U2,tail rule read
+soccer_major,KXLALIGASPREAD,Sports,custom,La Liga Spread,397,34,False,18189,U2,tail rule read
+soccer_major,KXLALIGATOTAL,Sports,custom,La Liga Total,572,35,False,57698,U2,tail rule read
+soccer_major,KXLIGAMXSPREAD,Sports,custom,Liga MX Game,400,30,False,17779,U2,tail rule read
+soccer_major,KXLIGAMXTOTAL,Sports,custom,Liga MX Total,610,30,False,39378,U2,tail rule read
+soccer_major,KXLIGUE1TOTAL,Sports,custom,Ligue 1 Total,439,27,False,11375,U2,tail rule read
+soccer_major,KXMLSSPREAD,Sports,custom,MLS Spread,800,29,False,9289,U2,tail rule read
+soccer_major,KXMLSTOTAL,Sports,custom,MLS Total,1000,26,True,23735,U2,tail rule read
+soccer_major,KXSERIEASPREAD,Sports,custom,Serie A Spread,386,32,False,12109,U2,tail rule read
+soccer_major,KXSERIEATOTAL,Sports,custom,Serie A Total,577,32,False,41386,U2,tail rule read
+soccer_minor,KXALLSVENSKANSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXALLSVENSKANTOTAL,Sports,custom,Point Total,450,29,False,4352,U2,tail rule read
+soccer_minor,KXAPFDDHTOTAL,Sports,custom,Point Total,315,29,False,5074,U2,tail rule read
+soccer_minor,KXARGNACBGAME,Sports,custom,Argentine Nacional B Game,516,27,False,13165,U2,tail rule read
+soccer_minor,KXARGNACBSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXARGNACBTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXARGPREMDIVGAME,Sports,custom,Argentina Primera Division Game,360,34,False,180606,U2,tail rule read
+soccer_minor,KXARGPREMDIVSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXARGPREMDIVTOTAL,Sports,custom,Argentina Premier Division Total,769,37,False,18705,U2,tail rule read
+soccer_minor,KXBELGIANPLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXBRASILEIROB1H,Sports,custom,1st Half Winner,327,42,False,4161,U2,tail rule read
+soccer_minor,KXBRASILEIROB1HTOTAL,Sports,custom,1st Half Total,327,42,False,7584,U2,tail rule read
+soccer_minor,KXBRASILEIROBGAME,Sports,custom,Brasileiro Serie B Game,345,44,False,82380,U2,tail rule read
+soccer_minor,KXBRASILEIROBSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXBRASILEIROBTOTAL,Sports,custom,Point Total,711,42,False,10363,U2,tail rule read
+soccer_minor,KXBUNDESLIGA2TOTAL,Sports,custom,Point Total,438,20,False,5929,U2,tail rule read
+soccer_minor,KXDENSUPERLIGATOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXDIMAYORGAME,Sports,custom,Liga DIMAYOR Game,330,54,False,168472,U2,tail rule read
+soccer_minor,KXDIMAYORSPREAD,Sports,custom,Spread,481,50,False,4435,U2,tail rule read
+soccer_minor,KXDIMAYORTOTAL,Sports,custom,Point Total,704,51,False,13964,U2,tail rule read
+soccer_minor,KXECULPTOTAL,Sports,custom,Point Total,352,29,False,5732,U2,tail rule read
+soccer_minor,KXEERSTEDIVSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXEERSTEDIVTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXEKSTRAKLASATOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXELITESERIENTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXEREDIVISIESPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXEREDIVISIETOTAL,Sports,custom,Eredivisie Total,515,26,False,6687,U2,tail rule read
+soccer_minor,KXGER3LTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXISRPLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXLALIGA2SPREAD,Sports,custom,Spread,462,39,False,2068,U1,tail rule read
+soccer_minor,KXLALIGA2TOTAL,Sports,custom,Point Total,673,35,False,5796,U2,tail rule read
+soccer_minor,KXLIGAEXPSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXLIGAEXPTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXLIGAPORTUGALTOTAL,Sports,custom,Point Total,384,29,False,8414,U2,tail rule read
+soccer_minor,KXLIGUE2TOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXPERLIGA1SPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXPERLIGA1TOTAL,Sports,custom,Point Total,473,30,False,5343,U2,tail rule read
+soccer_minor,KXSERIEBSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSERIEBTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSERIECGAME,Sports,one_off,Serie C Game,900,36,False,5882,U2,tail rule read
+soccer_minor,KXSERIECSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSERIECTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSRBSLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSUPERLIGSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXSUPERLIGTOTAL,Sports,custom,Point Total,440,26,False,5595,U2,tail rule read
+soccer_minor,KXTFF1LIGSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXTFF1LIGTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXTHAIL1TOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXURYPDSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXURYPDTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXUSLTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+soccer_minor,KXVENFUTVETOTAL,Sports,custom,Point Total,357,20,False,1638,U2,tail rule read
+streaming_charts,KXNETFLIXRANKMOVIE,Entertainment,weekly,Netflix movie ranking,113,9,False,1945,U3,tail rule read
+streaming_charts,KXNETFLIXRANKMOVIEGLOBAL,Entertainment,weekly,Netflix movie ranking,101,9,False,490,U3,tail rule read
+streaming_charts,KXNETFLIXRANKMOVIERUNNERUP,Entertainment,weekly,RUNNER UP NETFLIX MOVIE,113,9,False,835,U3,tail rule read
+streaming_charts,KXNETFLIXRANKSHOW,Entertainment,weekly,Netflix TV ranking,111,9,False,2022,U3,tail rule read
+streaming_charts,KXNETFLIXRANKSHOWGLOBAL,Entertainment,weekly,Netflix TV ranking,101,9,False,475,U3,tail rule read
+streaming_charts,KXNETFLIXRANKSHOWGLOBAL2,Entertainment,weekly,RUNNER UP SHOW NETFLIX SHOW GLOBAL,100,9,False,156,U3,tail rule read
+streaming_charts,KXNETFLIXRANKSHOWRUNNERUP,Entertainment,weekly,RUNNER UP NETFLIX SHOW,111,9,False,799,U3,tail rule read
+tennis,KXATPCHALLENGERDOUBLES,Sports,custom,ATP Challenger Doubles Match,1000,42,True,5353,U2,tail rule read
+tennis,KXATPDOUBLES,Sports,custom,ATP Doubles Tennis Match,474,45,False,27881,U2,tail rule read
+tennis,KXATPGSPREAD,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+tennis,KXATPGTOTAL,Sports,custom,ATP Total Games,1000,30,True,4845,U2,tail rule read
+tennis,KXATPMATCH,Sports,custom,ATP Tennis Match,1000,40,True,798018,U2,tail rule read
+tennis,KXWTACHALLENGERMATCH,Sports,custom,Challenger WTA,1000,36,True,239859,U2,tail rule read
+tennis,KXWTAGTOTAL,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+tennis,KXWTAMATCH,Sports,custom,WTA Tennis Match,1000,35,True,511269,U2,tail rule read
+truflation,KXTRUEV,Economics,daily,Truflation EV,630,42,False,339,U3,tail rule read
+us_game_winner,KXMLBGAME,Sports,custom,Professional Baseball Game,724,48,False,1327324,U1,tail rule read
+us_game_winner,KXMLSGAME,Sports,custom,Major League Soccer Game,501,29,False,268554,U2,tail rule read
+us_game_winner,KXNBAGAME,Sports,custom,NBA Game,348,28,False,1513379,U2,tail rule read
+us_game_winner,KXNCAAFGAME,Sports,custom,College Football Game,1000,22,True,298918,U2,tail rule read
+us_game_winner,KXNHLGAME,Sports,custom,NHL Game,588,43,False,272256,U2,tail rule read
+volleyball,KXNCAAWVMATCH,Sports?,,,300+,20+,,100+,U2,"eligible, never read"
+wx_daily_temp,KXHIGHAUS,Climate and Weather,daily,Highest temperature in Austin,360,60,False,9288,U1,tail rule read
+wx_daily_temp,KXHIGHCHI,Climate and Weather,daily,Highest temperature in Chicago,360,60,False,13332,U1,tail rule read
+wx_daily_temp,KXHIGHDEN,Climate and Weather,daily,Highest temperature in Denver,360,60,False,6423,U1,tail rule read
+wx_daily_temp,KXHIGHLAX,Climate and Weather,daily,Highest temperature in Los Angeles,354,59,False,59344,U1,tail rule read
+wx_daily_temp,KXHIGHMIA,Climate and Weather,daily,Highest temperature in Miami,360,60,False,23896,U1,tail rule read
+wx_daily_temp,KXHIGHNY,Climate and Weather,daily,Highest temperature in NYC,360,60,False,23478,U1,tail rule read
+wx_daily_temp,KXHIGHPHIL,Climate and Weather,daily,Highest temperature in Philadelphia,360,60,False,5353,U1,tail rule read
+wx_daily_temp,KXHIGHTATL,Climate and Weather,daily,Atlanta Max Temperature,360,60,False,5683,U1,tail rule read
+wx_daily_temp,KXHIGHTBOS,Climate and Weather,daily,Boston Maximum Daily Temperature,360,60,False,3637,U1,tail rule read
+wx_daily_temp,KXHIGHTDAL,Climate and Weather,daily,Dallas Maximum Temperature,360,60,False,5010,U1,tail rule read
+wx_daily_temp,KXHIGHTDC,Climate and Weather,daily,Washington DC Daily Max Temp,360,60,False,2886,U1,tail rule read
+wx_daily_temp,KXHIGHTEWR,Climate and Weather,daily,"Newark, NJ (EWR) Daily Max Temp",360,60,False,371,U1,tail rule read
+wx_daily_temp,KXHIGHTHOU,Climate and Weather,daily,Daily High Temperature Houston,360,60,False,4016,U1,tail rule read
+wx_daily_temp,KXHIGHTLV,Climate and Weather,daily,Las Vegas Max Daily Temperature,354,59,False,3692,U1,tail rule read
+wx_daily_temp,KXHIGHTMIN,Climate and Weather,daily,Minneapolis Daily High Temperature,354,59,False,3922,U1,tail rule read
+wx_daily_temp,KXHIGHTNOLA,Climate and Weather,daily,New Orleans Max temp Daily,360,60,False,1757,U1,tail rule read
+wx_daily_temp,KXHIGHTOKC,Climate and Weather,daily,Oklahoma City Maximum High Temperature,360,60,False,3411,U1,tail rule read
+wx_daily_temp,KXHIGHTPHX,Climate and Weather,daily,Phoenix High Temperature Daily,360,60,False,7462,U1,tail rule read
+wx_daily_temp,KXHIGHTSAN,Climate and Weather,daily,High Temperature San Diego,348,58,False,622,U1,tail rule read
+wx_daily_temp,KXHIGHTSATX,Climate and Weather,daily,San Antonio Daily Maximum Temperature,360,60,False,1894,U1,tail rule read
+wx_daily_temp,KXHIGHTSDF,Climate and Weather,daily,HIGHEST Temperature SATX,360,60,False,250,U1,tail rule read
+wx_daily_temp,KXHIGHTSEA,Climate and Weather,daily,Seattle Maximum Temperature Daily,354,59,False,4790,U1,tail rule read
+wx_daily_temp,KXHIGHTSFO,Climate and Weather,daily,San Francisco High Temperature Daily,354,59,False,7676,U1,tail rule read
+wx_daily_temp,KXHIGHTTTN,Climate and Weather,daily,"Trenton, NJ Daily Max Temp",360,60,False,301,U1,tail rule read
+wx_daily_temp,KXLOWTATL,Climate and Weather,daily,Low Temperature Atlanta,360,60,False,654,U1,tail rule read
+wx_daily_temp,KXLOWTAUS,Climate and Weather,daily,Lowest temperature in Austin,360,60,False,1132,U1,tail rule read
+wx_daily_temp,KXLOWTBOS,Climate and Weather,daily,Low Temperature Boston,360,60,False,577,U1,tail rule read
+wx_daily_temp,KXLOWTCHI,Climate and Weather,daily,Lowest Temperature Chicago,360,60,False,1000,U1,tail rule read
+wx_daily_temp,KXLOWTDAL,Climate and Weather,daily,Lowest temperature Dallas,360,60,False,549,U1,tail rule read
+wx_daily_temp,KXLOWTDC,Climate and Weather,daily,Lowest Temperature DC ,354,59,False,523,U1,tail rule read
+wx_daily_temp,KXLOWTDEN,Climate and Weather,daily,Lowest temperature in Denver,360,60,False,1326,U1,tail rule read
+wx_daily_temp,KXLOWTEWR,Climate and Weather,daily,"Newark, NJ (EWR) Daily Low Temp",360,60,False,263,U1,tail rule read
+wx_daily_temp,KXLOWTHOU,Climate and Weather,daily,Low Temperature Houston,360,60,False,514,U1,tail rule read
+wx_daily_temp,KXLOWTLAX,Climate and Weather,daily,Lowest Temperature in LA,354,59,False,999,U1,tail rule read
+wx_daily_temp,KXLOWTLV,Climate and Weather,daily,Las Vegas Daily Low Temperature,354,59,False,588,U1,tail rule read
+wx_daily_temp,KXLOWTMIA,Climate and Weather,daily,Lowest temperature in Miami,360,60,False,1159,U1,tail rule read
+wx_daily_temp,KXLOWTMIN,Climate and Weather,daily,Low  temperature Minnesota,354,59,False,739,U1,tail rule read
+wx_daily_temp,KXLOWTNOLA,Climate and Weather,daily,NOLA Low Temperature,360,60,False,433,U1,tail rule read
+wx_daily_temp,KXLOWTNYC,Climate and Weather,daily,Lowest temperature in NYC,360,60,False,2563,U1,tail rule read
+wx_daily_temp,KXLOWTOKC,Climate and Weather,daily,Low Temperature Oklahoma City,354,59,False,669,U1,tail rule read
+wx_daily_temp,KXLOWTPHIL,Climate and Weather,daily,Lowest temperature in Philadelphia,360,60,False,577,U1,tail rule read
+wx_daily_temp,KXLOWTPHX,Climate and Weather,daily,Low Temperature Phoenix,360,60,False,884,U1,tail rule read
+wx_daily_temp,KXLOWTSAN,Climate and Weather,daily,Low Temperature San Diego,348,58,False,254,U1,tail rule read
+wx_daily_temp,KXLOWTSATX,Climate and Weather,daily,Lowest Temperature SATX,360,60,False,392,U1,tail rule read
+wx_daily_temp,KXLOWTSDF,Climate and Weather,daily,Lowest Temperature SDX,360,60,False,167,U1,tail rule read
+wx_daily_temp,KXLOWTSEA,Climate and Weather,daily,Low Temperature Seattle,354,59,False,423,U1,tail rule read
+wx_daily_temp,KXLOWTSFO,Climate and Weather,daily,Lowest Temperature San Francisco,354,59,False,529,U1,tail rule read
+wx_daily_temp,KXLOWTTTN,Climate and Weather,daily,Trenton Daily low temp ,360,60,False,222,U1,tail rule read
+wx_hazard,KXBIGGESTQUAKE,Climate and Weather,daily,Biggest earthquake,559,61,False,847,U1,tail rule read
+wx_rain,KXRAIN,Climate and Weather,daily,Where will it rain daily,1763,60,False,13945,U1,tail rule read
+wx_rain,KXRAINWKND,Climate and Weather,weekly,Where will it rain this weekend?,231,9,False,4609,U3,tail rule read
