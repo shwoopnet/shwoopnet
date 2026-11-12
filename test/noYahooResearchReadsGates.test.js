@@ -1,6 +1,6 @@
 'use strict';
 // Nov 11, 2026 (owner): no automated reads from Yahoo on the research side. Yahoo's terms (legal.yahoo.com/us/en/yahoo/terms/otos, clauses 2(d)(9), 2(e), 2(d)(10)) forbid automated access, scraping and building databases without express permission, with no research exemption. The REF recorder's Yahoo adapter and the perps cash saver were removed; this keeps a Yahoo host from coming back unnoticed.
-// functions/ (the Brief's market strip, marketTapeTick) is covered by test/noYahooMarketTapeGates.test.js, which bans every Yahoo host there with comments stripped (the strip moved off Yahoo the same day).
+// functions/ (the Brief's market strip, marketTapeTick) is NOT covered here on purpose: on Nov 12, 2026 the owner chose to restore the Yahoo-based strip and accepted the terms risk knowingly (PR reverting #783). The research side stays off Yahoo.
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');

@@ -1510,7 +1510,7 @@
         </div>
       </div>
       <div class="brief-win brief-mood">
-        <div class="brief-eyebrow">Crypto sentiment</div>
+        <div class="brief-eyebrow">Market sentiment</div>
         <div id="briefMood"><div class="news-placeholder">Waiting for the market data.</div></div>
       </div>
     </div>
@@ -1756,12 +1756,12 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>The market strip and the Brief are back on their previous price and news sources (the owner, Nov 12). The switch to permitted sources left most prices as "No price"; Yahoo's terms still bar automated reads, so this is an owner-accepted risk and the source switch stays an open item. Research recorders stay off Yahoo.</li>
                   <li>Research: a check of every saved final test set found nine tests whose final set could slip as new data arrived. A rule now fixes each cutoff as a date written in advance, and the owners are pinning them before any more runs. Nothing trades.</li>
                   <li>Research: six more ideas that tests have now closed (lock scans, an ex-dividend short, tie premiums, minute clustering, order-size flow, and cheap-side grammar rules) were added to the list of ideas not to retry. Nothing trades.</li>
                 </ul>
                 <div class="changelog-day">Nov 11</div>
                 <ul class="changelog-list">
-                  <li>Market strip and Brief: they now read only sources whose terms allow it (the owner, Nov 11). Yahoo's terms forbid automated reads, so only the Treasury 10 and 30 year yields (a once a day close, labelled with its date) and the crypto fear and greed index (from alternative.me) show data. Every other price says No price, the charts say No chart, and Market News says No news source yet until a permitted source is added</li>
                   <li>Research: a new recorder (the owner, Nov 11) watches Kalshi politics markets every 30 minutes so a history builds up: prices, volume and close times for markets that settle within 14 days, and their results afterwards. Public data only, no orders, no key, and it stops on Feb 28, 2027. Nothing changes in the bot or this page.</li>
                   <li>Research: the weather recorder no longer reads Open-Meteo (the owner, Nov 11). Its hosted service is free for non-commercial use only and Shwoop Financials is an LLC, so it now records only the US National Weather Service (forecast, gridpoint data and the latest station reading) beside the Kalshi quotes. The ensemble forecast is gone, so the ensemble test cannot add new days. Data already collected stays; a gate keeps the host out. No orders, nothing changes in the bot or this page.</li>
                   <li>Research: the recorders no longer read Yahoo Finance (the owner, Nov 11). Yahoo's terms bar automated access and building databases from it, so the Yahoo reference bars and the perps cash price saver are stopped and their code and schedule deleted. The Brief's market strip still reads Yahoo until a replacement source is chosen. Data already collected stays; a test keeps Yahoo hosts out of the research recorders. Nothing trades.</li>
@@ -5662,51 +5662,39 @@ kalshiStatusTick();
         watchlist.push({ sym: sym, price: q.price, prevClose: q.prevClose });
       }
     });
-    renderMarketNews(tapeNews());
+    renderMarketNews(tapeNews() || data.news);
   }
 
   // ---------- The market tape (strip on every page, index cards, headlines, "as of") ----------
-  // Prices here come from shared/marketTape, written hourly by a keyless function. The page makes no market-data call of its own. Since Nov 11, 2026 (the owner: Yahoo's terms forbid automated reads) only the Treasury 10 and 30 year
-  // yields have a permitted source, and they are a once a day close; every other symbol says "No price". A quote with no `source`, or marked noPrice, is never shown: that keeps an old Yahoo quote still sitting in the document from appearing.
+  // Prices here come from shared/marketTape, written every 15 minutes around the clock by a keyless function. The page makes no market-data call of its own.
   var TAPE_ITEMS = [
     { sym:'^GSPC', name:'S&P 500', kind:'index' }, { sym:'^NDX', name:'Nasdaq 100', kind:'index' }, { sym:'^DJI', name:'Dow', kind:'index' },
-    { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'UST10Y', name:'10Y yield', kind:'yield' }, { sym:'UST30Y', name:'30Y yield', kind:'yield' },
+    { sym:'^RUT', name:'Russell 2000', kind:'index' }, { sym:'^TNX', name:'10Y yield', kind:'yield' }, { sym:'TLT', name:'Long bonds', kind:'etf' },
     { sym:'^VIX', name:'VIX', kind:'index' }, { sym:'GC=F', name:'Gold', kind:'future' }, { sym:'BTC-USD', name:'Bitcoin', kind:'crypto' }
   ];
-  var TAPE_STALE_MS = 3 * 3600 * 1000;   // the tape is written hourly (every 15 minutes until Nov 11, 2026), so three missed runs before the page says the feed may be down
+  var TAPE_STALE_MS = 45 * 60 * 1000;   // the tape is written every 15 minutes (it was every 5 until Oct 26, 2026), so three missed runs before the page says the feed may be down
   var marketTapeData = null;
-  function tapeUsableQuotes(quotes){
-    var out = {};
-    Object.keys(quotes || {}).forEach(function(k){ var q = quotes[k]; if(q && !q.noPrice && q.source && q.price > 0 && q.prevClose > 0){ out[k] = q; } });
-    return out;
-  }
-  function tapeCloseText(date){
-    var d = /^\d{4}-\d{2}-\d{2}$/.test(String(date || '')) ? new Date(date + 'T12:00:00Z') : null;
-    return d && isFinite(d.getTime()) ? 'close of ' + d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' }) : '';
-  }
-  // Headlines are shown only when the document names a permitted news source (`newsSource`). The server writes none today (Nov 11, 2026: the feeds' terms were unread), and an old document that still holds headlines has no such marker.
-  function tapeNews(){ return marketTapeData && marketTapeData.newsSource && marketTapeData.news && marketTapeData.news.length ? marketTapeData.news : null; }
+  function tapeNews(){ return marketTapeData && marketTapeData.news && marketTapeData.news.length ? marketTapeData.news : null; }
+  function tapeStateWord(s){ return s === 'pre' ? 'Pre-market' : (s === 'post' ? 'After hours' : (s === 'closed' ? 'Market closed' : 'Market open')); }
   function tapeAsOfText(data, now){
     var upd = data && Number(data.updatedAt);
     if(!Number.isFinite(upd) || upd <= 0){ return { text: '', stale: false }; }
-    var y = data.quotes && data.quotes.UST10Y;
-    var close = y && y.daily ? tapeCloseText(y.closeDate) : '';
-    var word = close ? 'Yields: ' + close + '. ' : '';
-    if(now - upd > TAPE_STALE_MS){ return { text: word + 'Last checked ' + kalDate(upd) + ' ' + kalTime(upd) + ' CT. The feed may be down.', stale: true }; }
-    return { text: word + 'Checked ' + kalTime(upd) + ' CT', stale: false };
+    var spy = data.quotes && (data.quotes['^GSPC'] || data.quotes.SPY);
+    var word = spy && spy.state ? tapeStateWord(spy.state) + '. ' : '';
+    if(now - upd > TAPE_STALE_MS){ return { text: word + 'Prices last updated ' + kalDate(upd) + ' ' + kalTime(upd) + ' CT. The feed may be down.', stale: true }; }
+    return { text: word + 'Updated ' + kalTime(upd) + ' CT', stale: false };
   }
   function tapeItemHtml(item, q){
     var money = function(v){ var d = v >= 1000 && item.kind === 'crypto' ? 0 : 2; return v.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }); };
     if(!q || !(q.price > 0) || !(q.prevClose > 0)){
-      return '<span class="tape-item"><span class="tape-name">' + item.name + '</span><span class="tape-asof">No price</span></span>';
+      return '<span class="tape-item"><span class="tape-name">' + item.name + '</span><span class="tape-px mono">&mdash;</span></span>';
     }
     var d = item.kind === 'yield' ? (q.price - q.prevClose) * 100 : pct(q.price, q.prevClose);
     var up = d >= 0;
     var shown = item.kind === 'yield' ? q.price.toFixed(2) + '%' : money(q.price);
     var chg = Math.abs(d).toFixed(item.kind === 'yield' ? 1 : 2) + (item.kind === 'yield' ? ' bp' : '%');
     return '<span class="tape-item"><span class="tape-name">' + item.name + '</span><span class="tape-px mono">' + shown + '</span>' +
-      '<span class="tape-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + chg + '</span>' +
-      (q.daily && tapeCloseText(q.closeDate) ? '<span class="tape-asof">' + tapeCloseText(q.closeDate) + '</span>' : '') + '</span>';
+      '<span class="tape-chg ' + (up ? 'up' : 'down') + '">' + (up ? '\u25B2' : '\u25BC') + ' ' + chg + '</span></span>';
   }
   function renderMarketTape(){
     var el = document.getElementById('marketTape');
@@ -5739,8 +5727,7 @@ kalshiStatusTick();
   var briefChartQuotes = {};
   function briefChartHtml(it, q){
     if(!q || !(q.price > 0) || !(q.prevClose > 0)){
-      briefChartQuotes[it.sym] = null;
-      return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">No price</div><div class="news-placeholder">No chart: no permitted source yet</div></div>';
+      return '<div class="brief-chart"><div class="brief-chart-hd"><span class="brief-chart-name">' + escapeHtml(it.name) + '</span></div><div class="brief-chart-px mono">&mdash;</div></div>';
     }
     var raw = Array.isArray(q.series) ? q.series : [];
     var ser = raw.filter(function(v){ return typeof v === 'number' && isFinite(v); });
@@ -5837,10 +5824,10 @@ kalshiStatusTick();
     host.addEventListener('pointercancel', clear);
     host.addEventListener('pointerup', function(e){ if(e.pointerType !== 'mouse'){ clear(); } });
   })();
-  // The risk mood (the owner: "risk mood + maybe fear/greed index"): crypto fear and greed from alternative.me (shown with its attribution, a condition of its commercial use) and the 10 year yield from Treasury. The VIX and the stocks fear and greed
-  // reading have no permitted source (Nov 11, 2026), so they say "No price" and are not drawn. Anything that has not arrived is said plainly, never a made-up number.
-  // The Brief's sentiment card (the owner, Oct 23, 2026: back to the fear and greed index and market sentiment, but "as little panic-y as possible"). The reading is alternative.me's crypto fear and greed score (the stocks reading was dropped Nov 11, 2026: no permitted source).
-  // It is shown with calm words (Cautious to Optimistic), plain white and grey (never red or green, since this is a mood and not a verdict), a short reassuring line, and yesterday's reading as a quiet marker.
+  // The risk mood (the owner: "risk mood + maybe fear/greed index"): a one word read of the VIX, the VIX, the 10 year yield and long bonds, and the two fear and greed indexes (stocks from CNN, crypto from alternative.me). All of it
+  // comes from the tape; anything that has not arrived is a dash, never a made-up number.
+  // The Brief's sentiment card (the owner, Oct 23, 2026: back to the fear and greed index and market sentiment, but "as little panic-y as possible"). The two readings (stocks, crypto) are CNN's and alternative.me's public fear and greed
+  // scores. They are shown with calm words (Cautious to Optimistic), plain white and grey (never red or green, since this is a mood and not a verdict), a short reassuring line, and yesterday's reading as a quiet marker.
   // A rule of thumb for the words: under 25 very cautious, under 45 cautious, to 55 neutral, to 75 optimistic, above that very optimistic.
   function briefSentiment(score){
     if(!Number.isFinite(score)){ return null; }
@@ -5872,14 +5859,15 @@ kalshiStatusTick();
     var ok = function(x){ return x && x.price > 0 && x.prevClose > 0; };
     var kv = function(l, v){ return '<div class="mood-kv"><span>' + escapeHtml(l) + '</span><b>' + v + '</b></div>'; };
     var chg = function(d, unit){ return ' <span class="tape-chg ' + (d >= 0 ? 'up' : 'down') + '">' + (d >= 0 ? '\u25B2' : '\u25BC') + ' ' + Math.abs(d).toFixed(unit === 'bp' ? 1 : 2) + (unit === 'bp' ? ' bp' : '%') + '</span>'; };
-    var overall = mood.crypto && Number.isFinite(mood.crypto.score) ? briefSentiment(mood.crypto.score) : null;
+    var scores = [mood.stocks, mood.crypto].filter(function(x){ return x && Number.isFinite(x.score); }).map(function(x){ return x.score; });
+    var overall = scores.length ? briefSentiment(scores.reduce(function(a, x){ return a + x; }, 0) / scores.length) : null;
     var vixWord = ok(q['^VIX']) ? briefMoodWord(q['^VIX'].price) : null;
-    var expected = ok(q['^VIX']) ? kv('Expected daily move, S&P 500', '&plusmn;' + (q['^VIX'].price / Math.sqrt(252)).toFixed(2) + '%') : kv('Expected daily move, S&P 500', 'No price');
-    var vol = vixWord ? kv('Volatility', escapeHtml(vixWord)) : kv('Volatility', 'No price');
-    var tnx = ok(q.UST10Y) ? kv('10 year yield', q.UST10Y.price.toFixed(2) + '%' + chg((q.UST10Y.price - q.UST10Y.prevClose) * 100, 'bp') + (q.UST10Y.daily && tapeCloseText(q.UST10Y.closeDate) ? ' <span class="tape-asof">' + escapeHtml(tapeCloseText(q.UST10Y.closeDate)) + '</span>' : '')) : kv('10 year yield', 'No price');
-    // The attribution sits directly under the crypto reading it credits: alternative.me allows commercial use only with it "right next to the display of the data".
+    var expected = ok(q['^VIX']) ? kv('Expected daily move, S&P 500', '&plusmn;' + (q['^VIX'].price / Math.sqrt(252)).toFixed(2) + '%') : kv('Expected daily move, S&P 500', '&mdash;');
+    var vol = vixWord ? kv('Volatility', escapeHtml(vixWord)) : kv('Volatility', '&mdash;');
+    var tnx = ok(q['^TNX']) ? kv('10 year yield', q['^TNX'].price.toFixed(2) + '%' + chg((q['^TNX'].price - q['^TNX'].prevClose) * 100, 'bp')) : kv('10 year yield', '&mdash;');
     el.innerHTML = '<div class="mood-word">' + (overall ? escapeHtml(overall.word) : '&mdash;') + '</div>' + (overall ? '<div class="mood-sub">' + escapeHtml(overall.line) + '</div>' : '') +
-      briefGaugeHtml('Crypto', mood.crypto) + '<div class="mood-src">Crypto fear and greed index data from alternative.me</div>' + expected + vol + tnx;
+      briefGaugeHtml('Stocks', mood.stocks) + briefGaugeHtml('Crypto', mood.crypto) + expected + vol + tnx +
+      '<div class="mood-src">The stock and crypto readings are the public fear and greed indexes.</div>';
   }
   function renderBriefCharts(){
     var el = document.getElementById('briefCharts');
@@ -5893,10 +5881,10 @@ kalshiStatusTick();
   function renderBriefPage(){ renderBriefMood(); renderBriefCharts(); }
 
   function handleMarketTapeUpdate(data){
-    marketTapeData = data ? Object.assign({}, data, { quotes: tapeUsableQuotes(data.quotes) }) : null;
+    marketTapeData = data || null;
     if(data && data.quotes){
       ['SPY', 'QQQ', 'DIA'].forEach(function(sym){
-        var q = marketTapeData.quotes[sym];
+        var q = data.quotes[sym];
         if(!q || !(q.price > 0) || !(q.prevClose > 0)) return;
         var existing = findQuote(sym);
         if(existing){ existing.price = q.price; existing.prevClose = q.prevClose; existing.tapeAsOf = Number(q.asOf) || 0; }
@@ -5905,7 +5893,7 @@ kalshiStatusTick();
             }
     renderMarketTape();
     renderBriefPage();
-    renderMarketNews(tapeNews());
+    if(tapeNews()){ renderMarketNews(tapeNews()); }
   }
 
   // ---------- Market News & Earnings Calendar (signed-in accounts only) ----------
@@ -5913,7 +5901,7 @@ kalshiStatusTick();
     var el = document.getElementById('marketNewsList');
     if(!el) return;
     if(!articles || !articles.length){
-      el.innerHTML = '<div class="news-placeholder">No news source yet.</div>';
+      el.innerHTML = '<div class="news-placeholder">No headlines available right now.</div>';
       return;
     }
     // EVERY FIELD HERE IS THIRD-PARTY TEXT, and this is the only surface in
