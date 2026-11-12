@@ -1,0 +1,182 @@
+{
+ "id": "DESKA_WXDAYEND_A",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/refine_tools/CARDS_74_84_REGISTRATION_AND_RESULT.md",
+ "purpose": "final 2 hours of 1 minute candles for the winning bracket of the unread city-days of card 74 (Dallas, Denver Nov 1 to 9) and the Nov 10 results for 4 cities",
+ "heldout": "none",
+ "max_requests": 22,
+ "requests": [
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV01-B79.5",
+   "start_ts": 1793595600,
+   "end_ts": 1793602800,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV02-B85.5",
+   "start_ts": 1793682000,
+   "end_ts": 1793689200,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV03-B76.5",
+   "start_ts": 1793768400,
+   "end_ts": 1793775600,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV04-B75.5",
+   "start_ts": 1793854800,
+   "end_ts": 1793862000,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV05-B81.5",
+   "start_ts": 1793941200,
+   "end_ts": 1793948400,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV06-B72.5",
+   "start_ts": 1794027600,
+   "end_ts": 1794034800,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV07-B68.5",
+   "start_ts": 1794114000,
+   "end_ts": 1794121200,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV08-B69.5",
+   "start_ts": 1794200400,
+   "end_ts": 1794207600,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHTDAL",
+   "ticker": "KXHIGHTDAL-26NOV09-B71.5",
+   "start_ts": 1794286800,
+   "end_ts": 1794294000,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV01-T65",
+   "start_ts": 1793599200,
+   "end_ts": 1793606400,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV02-B52.5",
+   "start_ts": 1793685600,
+   "end_ts": 1793692800,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV03-B55.5",
+   "start_ts": 1793772000,
+   "end_ts": 1793779200,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV04-B56.5",
+   "start_ts": 1793858400,
+   "end_ts": 1793865600,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV05-B58.5",
+   "start_ts": 1793944800,
+   "end_ts": 1793952000,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV06-B60.5",
+   "start_ts": 1794031200,
+   "end_ts": 1794038400,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV07-B65.5",
+   "start_ts": 1794117600,
+   "end_ts": 1794124800,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV08-B67.5",
+   "start_ts": 1794204000,
+   "end_ts": 1794211200,
+   "period": 1
+  },
+  {
+   "ep": "candles",
+   "series": "KXHIGHDEN",
+   "ticker": "KXHIGHDEN-26NOV09-B72.5",
+   "start_ts": 1794290400,
+   "end_ts": 1794297600,
+   "period": 1
+  },
+  {
+   "ep": "markets_list",
+   "event": "KXHIGHTDAL-26NOV10",
+   "status": "settled",
+   "limit": 100,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "event": "KXHIGHDEN-26NOV10",
+   "status": "settled",
+   "limit": 100,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "event": "KXHIGHNY-26NOV10",
+   "status": "settled",
+   "limit": 100,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "event": "KXHIGHLAX-26NOV10",
+   "status": "settled",
+   "limit": 100,
+   "max_pages": 1
+  }
+ ]
+}
