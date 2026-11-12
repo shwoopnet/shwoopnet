@@ -48,6 +48,8 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 
 - STOCKS (17:00Z): ten cards written, first wave S1, S2, S7 plus four screens, costed about $12.75; the owner ruled at 17:04Z "Treat it as personal use" (personal Databento account, owner-accepted terms risk; named lists only, NO all-symbols requests, $25 cap); named-list pulls may start (pilot, S1, 8 ETF minute bars); the one bounded ranking pull ($0.59, May 2018 only, hard stop above $1) is allowed (the EA confirmed "no all symbols" was its wording, not the owner's); nothing scored until registrations are in shwoopnet/shwoopnet-private. Nothing derived from Databento goes in the repo.
 
+- STOCKS (17:10Z update): S1 to S5 and S7 RETIRED UNREAD (PF 1.5 on an every-day rule is an annual Sharpe near 2.6; published anomalies net about 0.05 a trade). Only S6, S8, S9 (forced-flow cards) remain; the desk owes per-event arithmetic by 20:00Z. The paid pull route is refused by the desk session's permission check; with the EA and Main. The statistics schema close is "last trade", not proven to be the auction print: the pilot must show SPY 2026-08-27 = 771.10.
+
 ## Owed to me at the time of writing
 
 - Desk B: the RE-OPEN RANKING (18:30Z); top 3 registered (21:30Z); the untouched-family census first cut (about 22:00Z, slipped by the usage limit) and ten new cards this week, the first three by Nov 13 16:00Z.

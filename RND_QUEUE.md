@@ -177,6 +177,14 @@ kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md and census/ on claude/idea-desk-b 
 - **Card rules set:** cost row first (Forensics' table) or a zero-try cost stage; a sports card's public fact must come from Kalshi's own related markets or a source whose terms allow it (score sites are banned hosts); no lock or parity scan under a new name; not all ten in sports; fewer than ten honest cards beats ten.
 - **Limits:** no fee class, spread or depth yet; nothing on series created since Nov 3; those wait for CENSUS_LISTING.
 
+### Stocks: six cards RETIRED UNREAD by arithmetic (Nov 12, 17:10Z; spend $0; nothing scored) [research]
+
+PF 1.5 needs a net mean over standard deviation of about 0.162 a trade. For a rule that trades every day that is an annual Sharpe ratio near 2.6. The desk's arithmetic, with effect sizes from memory of the published work (so assumptions): S1 overnight index ETFs net about 0.05 (PF about 1.13); S2 single-name overnight clientele net negative after about 6.7bp a day of costs (PF about 0.9); S7 first 30 minutes predicting the last 30 net about 0.04 (PF about 1.1). No every-day rule on liquid US stocks built from a published anomaly can reach the bar after costs, and the bar does not change.
+
+- **RETIRED UNREAD, cannot clear the bar after costs by arithmetic:** S1, S2, S7. **RETIRED UNREAD with them:** S3, S4, S5 (screens that could not pass). No data bought, no try spent. The 500-name universe and the one-month ranking pull are not bought; that exception lapses unused. This supersedes the first-wave ruling in the section below.
+- **Left, the only cards with a forced counterparty and a possibly large per-event effect:** S6 (leveraged-ETF rebalance on big-move days), S8 (closing auction imbalance), S9 (opening cross). Due 20:00Z from the desk: the same honest per-event arithmetic for each, what verdict the events $25 buys can support, exact pulls and estimates, and "test" or "efficient, move on". If none can clear, the stocks search is reported as finding no card worth its data.
+- **Price definition is not established:** Databento's statistics schema documents its close as "the last trade price", not the auction print. The pilot's first assertion: SPY on 2026-08-27 must read 771.10 (the official print measured in CLAUDE.md). Until proved per venue, every card trading "the official open or close" is blocked.
+
 ### Stock cards, first wave ruled (Nov 12, 16:57Z; spend $0; nothing scored)
 
 The Stocks Desk wrote ten pre-registered mechanisms (local commit 993187ec, not on a remote: the push blocker stands) and dropped six with a one-line reason (turn of month, January tax-loss, pre-FOMC, MAX short, ETF-constituent arbitrage, dividend capture). Bar arithmetic it uses: PF 1.5 is about 0.162 standard deviations an event, so about 1,141 independent events at z 5.46. [research]
