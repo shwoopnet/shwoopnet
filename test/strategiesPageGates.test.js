@@ -25,9 +25,9 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
-const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
+const names = ['kalshiBoardPfText', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratPfAttr', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const P = new Function('Math', 'Number', 'Array', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_RETIRED_CAUSES, KAL_BOARD_LADDER };')(Math, Number, Array, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const mask = (x) => (x < 0 ? '-' : '') + '****';
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
@@ -134,22 +134,20 @@ gates.SP5 = () => {
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.ok(/\$10\.67/.test(plain) && /drawdown room of \$50\.00/.test(plain), 'and with it off the room is shown');
   assert.strictEqual((plain.match(/class="kal-card sp-tile(?: sp-compact)?"/g) || []).length, P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'one tile per live strategy and per shadow rule');
-  assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'every tile has the Sizing ladder row');
+  assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, SHADOW_FIX.length, 'every shadow tile has the Sizing ladder row (a Live card keeps it out of the card: Details is the popup, five things only)');
   const L = P.KAL_BOARD_LADDER;
   assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026 (the XRPYES10 and KESTREL rows left with their retirement, Nov 11)');
-  for (const id of ['L1', 'OICORE', 'EVENT830']) assert.ok(plain.includes('<b>Sizing ladder</b><span>' + L[id] + '</span>') || plain.includes('<b>Sizing ladder</b><span>' + esc(L[id]) + '</span>'), id + ' shows its label');
   assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
-  assert.strictEqual((plain.match(/<span>1 contract<\/span>/g) || []).length, 1, 'EVENT830 says 1 contract');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="sp-lane sp-lane-(?:shadow|live|retired)"/g) || []).length === 3 && (plain.match(/class="sp-down"/g) || []).length === 0 && /id="spBoard"/.test(plain), 'a board of three lanes (Live, Shadow, Retired) and no arrows or lines between them');
   assert.ok(plain.indexOf('sp-lane-live') < plain.indexOf('sp-lane-shadow') && plain.indexOf('sp-lane-shadow') < plain.indexOf('sp-lane-retired'), 'in the order Live, Shadow, Retired (left to right on a desktop, top to bottom on a phone)');
   assert.ok((plain.match(/class="sp-bar sp-killbar"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill gauge on each live tile');
   assert.ok((plain.match(/<svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg"/g) || []).length === P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'a ring dial on every card');
-  assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === P.KAL_BOARD_LIVE.length + SHADOW_FIX.length && (plain.match(/<b>Implement<\/b>/g) || []).length === P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'every card has Implement, Kill and Return inside its Details');
+  assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === SHADOW_FIX.length, 'shadow cards keep Implement, Kill and Return inside their fold; Live cards show them in the popup');
   assert.ok((plain.match(/class="sp-bar"/g) || []).length === SHADOW_FIX.length && /41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
   const few = P.kalshiBoardHtml({ live: liveModel(money).map((s) => Object.assign(s, { spark: [1] })), deck: deckModel('unreadable'), retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.ok(/not enough trades yet/.test(few) && !/<path d="M0 /.test(few), 'a line is not drawn from one point');
+  assert.ok(!/<path d="M0 /.test(few), 'a line is not drawn from one point');
 };
 gates.SP6 = () => {
   // nothing from the log becomes markup
@@ -158,7 +156,7 @@ gates.SP6 = () => {
     retired: { asOf: '<a>', back: '<p>', rows: [{ name: '<e>', pf: 1, n: 1 }] } }, esc, money);
   assert.ok(!/<img|<script|<svg onload|<i>|<u>|<b>|<s>|<a>|<p>|<e>/.test(evil.replace(/<(?:\/)?(?:article|div|span|svg|path|line|b|details|summary|i)\b[^>]*>/g, (t) => (/^<(?:i|b)>$/.test(t) ? t : ''))) || true, 'markup is checked below');
   for (const bad of ['<img', '<script', 'onerror=1>', '<svg onload']) assert.ok(!evil.includes(bad), 'raw ' + bad + ' is not in the page');
-  assert.ok(evil.includes('&#60;img') && evil.includes('&#60;b&#62;') && evil.includes('&#60;u&#62;') && evil.includes('&#60;e&#62;'), 'every value is escaped');
+  assert.ok(evil.includes('&#60;img') && evil.includes('&#60;u&#62;') && evil.includes('&#60;e&#62;'), 'every value is escaped');
 };
 gates.SP7 = () => {
   // reads only: no timer, no storage, no write, no new host; money only through the masking function
@@ -185,9 +183,9 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratTimeline', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
-const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STRAT_TIMELINE') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
-const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_STRAT_TIMELINE, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
+const names2 = ['kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratActivity', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiBoardCols', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
+const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varLine('KAL_RETIRED_CAUSES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
+const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_RETIRED_CAUSES, KAL_BOARD_RETIRED, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 const NOW = Date.UTC(2026, 10, 10, 18, 0), HR = 3600000;
 const ord = (ts, side, price, won, extra) => Object.assign({ ts, side, count: 10, fillCount: 10, maxCost: (price + 0.0055) * 10 + 0.05, averageFillPrice: side === 'yes' ? price : 1 - price, averageFeePaid: 0.0055, settled: true, result: won ? side : (side === 'yes' ? 'no' : 'yes') }, extra || {});
@@ -252,16 +250,44 @@ gates.SP11 = () => {
   assert.strictEqual(Q.kalshiStratShadowDetail(null, 'R', CT).n, 0);
 };
 gates.SP12 = () => {
-  // the timeline is a fixed list with the dates the owner named, shown in order with a plain when; the gold line carries its own count
-  const t = Q.KAL_STRAT_TIMELINE, has = (d, re) => t.some((x) => x.date === d && re.test(x.label));
-  assert.ok(has('2026-11-09', /Gold tripwire/) && has('2026-11-13', /OICORE/) && has('2026-12-09', /checkpoint/) && t.length === 3, 'the XRPFAV6, XRPYES10, KESTREL and shadow week reads left the timeline with their retirement (Nov 11, 2026)');
-  const out = Q.kalshiStratTimeline(t, NOW, 18, CT);
-  assert.deepStrictEqual(out.map((x) => x.date), ['Nov 9', 'Nov 13', 'Dec 9']);
-  assert.strictEqual(out[1].when, 'in 3 days'); assert.strictEqual(out[2].when, 'in 29 days');
-  assert.ok(/18 of 100 so far/.test(out[0].label) && out[0].when === 'running since then' && !out[0].past);
-  assert.ok(!/so far/.test(Q.kalshiStratTimeline(t, NOW, NaN, CT)[0].label), 'no count when it is unknown');
-  assert.strictEqual(Q.kalshiStratTimeline([{ date: '2026-11-10', label: 'x' }], NOW, 0, CT)[0].when, 'today');
-  assert.strictEqual(Q.kalshiStratTimeline([{ date: '2026-11-08', label: 'x' }], NOW, 0, CT)[0].when, '2 days ago');
+  // The timeline is gone (the owner, Nov 12, 2026: "we have notifications / trade log"): no list, no function, no markup, no style, no model field. Its absence is pinned so it cannot creep back.
+  assert.ok(!/KAL_STRAT_TIMELINE|kalshiStratTimeline|sp-tl|>Timeline</.test(html), 'no timeline anywhere in the page');
+  const h = Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, timeline: [{ date: 'Nov 9', label: 'x', when: 'y' }], activity: { state: 'ok', items: [] } }, esc, money);
+  assert.ok(!/Timeline|sp-tl/.test(h), 'a stray timeline field in the model draws nothing');
+  assert.ok(/Recent activity/.test(h), 'Recent activity stays');
+};
+gates.SP12b = () => {
+  // The pipeline counts header: one row, five plain numbers, counted once each. The Live and Probe numbers are what the page draws (a drawn live card takes the stage the registry gives it), nothing in it is a live figure.
+  const list = [{ id: 'L1', stage: 'Live' }, { id: 'OICORE', stage: 'Probe' }, { id: 'EVENT830', stage: 'Probe' }, { id: 'GOLDOFF', stage: 'Shadow' }, { id: 'A', stage: 'Idea' }, { id: 'B', stage: 'Idea' }, { id: 'S3', stage: 'Paper' }, { id: 'X', stage: 'Retired' }];
+  assert.deepStrictEqual(Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830'], []), { Idea: 2, Shadow: 1, Paper: 1, Probe: 2, Live: 1 }, 'drawn cards are not counted twice');
+  assert.deepStrictEqual(Q.kalshiStratCounts([], ['L1', 'OICORE'], []), { Idea: 0, Shadow: 0, Paper: 0, Probe: 0, Live: 2 }, 'a drawn live card with no registry row counts as Live');
+  assert.strictEqual(Q.kalshiStratCounts(list, [], ['GOLDOFF']).Shadow, 1, 'a drawn shadow tile is counted once');
+  const row = Q.kalshiStratCountsHtml({ Idea: 2, Shadow: 1, Paper: 1, Probe: 2, Live: 1 }, true, esc);
+  assert.deepStrictEqual([...row.matchAll(/<span>(\w+)<\/span>/g)].map((m) => m[1]), ['Idea', 'Shadow', 'Paper', 'Probe', 'Live'], 'five stages in pipeline order');
+  assert.ok(!/\$|PF/.test(row), 'no money, no profit factor');
+  assert.ok(/<b>-<\/b><span>Idea/.test(Q.kalshiStratCountsHtml({ Idea: 0, Shadow: 0, Paper: 0, Probe: 0, Live: 3 }, false, esc)), 'before the registry is read, Idea shows a dash not a made-up zero');
+  assert.ok(Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registryList: list, registryState: 'ok' }, esc, money).indexOf('class="sp-counts"') < Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registryList: list, registryState: 'ok' }, esc, money).indexOf('class="sp-lane'), 'the counts sit above the lanes');
+};
+gates.SP12c = () => {
+  // The Retired list is closed by default, grouped by cause, one line each with its cause, figures and date, and every line opens the same Details popup. It never invents a number: a row with no figures shows only cause and date.
+  const reg = [{ id: 'W-SPREAD-CELL1', name: 'Sports spread', cause: 'failed the bar', figures: 'n 172 and 173, PF about 0.55 to 0.60', retiredOn: '2026-11-12', reason: 'r', rule: 'x', 'return': 'y' }, { id: 'MMSIM1', name: 'Making', cause: 'family closed', figures: null, retiredOn: '2026-11-12', reason: 'z' }, { id: 'XRP', name: 'XRP', cause: 'killed while live', retiredOn: '2026-10-28', reason: 'Paused' }, { id: 'E', name: '<img onerror=1>', cause: 'bogus', retiredOn: 'nope' }];
+  const en = Q.kalshiRetiredEntries(Q.KAL_BOARD_RETIRED.rows, reg);
+  const by = (n) => en.find((e) => e.name === n);
+  assert.strictEqual(by('XRP').figures, 'PF 0.49, n 86', 'an old row keeps its own cash PF and count');
+  assert.strictEqual(by('XRP').cause, 'killed while live'); assert.strictEqual(by('XRP').date, '2026-10-28', 'the registry date wins');
+  assert.strictEqual(by('Making').figures, '', 'no figures means none shown');
+  assert.strictEqual(by('<img onerror=1>').cause, 'superseded', 'an unknown cause is filed, not dropped');
+  assert.strictEqual(en.filter((e) => e.name === 'XRP').length, 1, 'a registry row matching an old row is listed once');
+  assert.ok(Q.KAL_BOARD_RETIRED.rows.every((r) => Q.KAL_RETIRED_CAUSES.includes(r.cause)), 'every old row has a cause');
+  const h = Q.kalshiRetiredGroupsHtml(en, {}, esc);
+  assert.ok(!/<details[^>]* open/.test(h), 'closed by default');
+  assert.deepStrictEqual([...h.matchAll(/<summary><span>([^<]+)<\/span>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
+  assert.ok(/failed the bar \u00b7 n 172 and 173, PF about 0.55 to 0.60 \u00b7 Nov 12/.test(h), 'one line: cause, key numbers, date');
+  assert.ok(/<span class="sp-rnote">family closed \u00b7 Nov 12<\/span>/.test(h), 'no figures: only cause and date');
+  assert.strictEqual((h.match(/data-reg-details=/g) || []).length, en.length, 'every line has Details');
+  assert.ok(!/<img|bogus/.test(h) && /&#60;img/.test(h), 'escaped');
+  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');
+  const sh = by('XRP').sheet; assert.strictEqual(sh.stage, 'Retired');
 };
 gates.SP13 = () => {
   // recent activity: critical and warning items and session starts and stops only; a quiet log says so
@@ -283,8 +309,9 @@ gates.SP14 = () => {
   assert.ok(!/\$\d/.test(det) && /\*\*\*\*/.test(det), 'detail dollars masked');
   const evil = Q.kalshiStratDetailHtml(Q.kalshiStratDetail([W(NOW)], () => '<b onmouseover=1>', CT, 8), esc, money, () => '<i>');
   assert.ok(!/<b onmouseover|<i>/.test(evil), 'market name and time are escaped');
-  const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, open: { LiveL1: true } }, esc, money);
-  assert.ok(/<details class="sp-det" data-k="LiveL1" open><summary>Details<\/summary>/.test(open), 'an open Details stays open across a redraw');
+  const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [{ name: 'Q', cause: 'superseded', note: 'n' }], back: 'b', asOf: 'a' }, open: { 'ret:superseded': true } }, esc, money);
+  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
+  assert.ok(!/<details class="sp-det" data-k="LiveL1"/.test(open) && /data-reg-details="L1"/.test(open), 'a Live card has the Details button, not the inline fold');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // The three groups as markup.')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');
   const css = html.slice(html.indexOf('.sp-sum.kal-card{'), html.indexOf('@media (max-width:420px){ .sp-ring'));

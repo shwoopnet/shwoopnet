@@ -30,7 +30,9 @@
     "live": "L1"
    },
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "OICORE",
@@ -55,7 +57,9 @@
     "slot": "OICORE"
    },
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "EVENT830",
@@ -80,7 +84,9 @@
     "slot": "EVENT830"
    },
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "GOLDOFF",
@@ -104,7 +110,9 @@
     "shadow": "GOLDOFF"
    },
    "roomTarget": 60,
-   "roomWhat": "trades toward the 60 the return rule needs"
+   "roomWhat": "trades toward the 60 the return rule needs",
+   "cause": null,
+   "figures": null
   },
   {
    "id": "W-SPREAD-CELL1",
@@ -124,7 +132,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "failed the bar",
+   "figures": "n 172 and 173, PF about 0.55 to 0.60"
   },
   {
    "id": "W-NO-ARM1",
@@ -144,7 +154,9 @@
    "notes": [],
    "code": {},
    "roomTarget": 30,
-   "roomWhat": "paper fills toward the first read, per arm"
+   "roomWhat": "paper fills toward the first read, per arm",
+   "cause": null,
+   "figures": null
   },
   {
    "id": "W-SPOTLEAD1",
@@ -164,7 +176,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "CFRTI-K",
@@ -187,7 +201,9 @@
    ],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "S3",
@@ -209,7 +225,9 @@
    ],
    "code": {},
    "roomTarget": 100,
-   "roomWhat": "settled combos toward the first 100"
+   "roomWhat": "settled combos toward the first 100",
+   "cause": null,
+   "figures": null
   },
   {
    "id": "NC15DEPTH1",
@@ -231,7 +249,9 @@
    "code": {},
    "return": "A 14 day cool-off, then a paper record at cash PF 1.3+, owner approval",
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": null,
+   "figures": null
   },
   {
    "id": "MMSIM1",
@@ -251,7 +271,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "family closed",
+   "figures": null
   },
   {
    "id": "XRP",
@@ -271,7 +293,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "BTC",
@@ -291,7 +315,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "ETH",
@@ -311,7 +337,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "DOGE",
@@ -331,7 +359,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "AUDUSD",
@@ -351,7 +381,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "USDCAD",
@@ -371,7 +403,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "NATGAS",
@@ -391,7 +425,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "killed while live",
+   "figures": null
   },
   {
    "id": "W-DERIBIT1",
@@ -411,7 +447,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "family closed",
+   "figures": null
   },
   {
    "id": "WEATHER",
@@ -431,7 +469,9 @@
    "notes": [],
    "code": {},
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "family closed",
+   "figures": null
   },
   {
    "id": "ROLLOFF",
@@ -451,7 +491,9 @@
    "code": {},
    "return": "None written",
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "failed the bar",
+   "figures": null
   },
   {
    "id": "RAINCAL",
@@ -471,7 +513,9 @@
    "code": {},
    "return": "None written",
    "roomTarget": null,
-   "roomWhat": null
+   "roomWhat": null,
+   "cause": "family closed",
+   "figures": null
   }
  ]
 }
