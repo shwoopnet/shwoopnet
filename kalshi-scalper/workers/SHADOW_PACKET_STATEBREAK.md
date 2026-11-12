@@ -1,8 +1,8 @@
 # Shadow packet: the stopped-play state family, two venues, NHLOT and MAPBREAK (Idea Desk B, written Nov 12, 2026; due Nov 13, 16:00Z)
 
 **MEASUREMENT RESULTS (top lines, filled in the hour each lands):**
-- **NHLOT price measurement: not landed yet.** Lists run after 00:00Z on Nov 13; the candle job is built from them the same hour.
-- **MAPBREAK gap measurement: not landed yet.** Lists run right after NHLOT's; the candle stage needs the Head of R&D's go.
+- **NHLOT price measurement: prices not landed yet.** Lists landed Nov 12, 19:07Z (run 43286908004): 357 games listed, the 150 most recently closed kept as registered (closes Oct 21 to Nov 12). The candle job (86 requests, 1,988 tickers) was built the same half hour and is with Main.
+- **MAPBREAK gap measurement: prices not landed yet.** Lists landed Nov 12, 19:19Z (run 43289005222). Best-of-three matches in the development window by the registered test, counted from tickers, strikes and close times only (`mapbreak/count_lists.py`): CS2 1,525, Dota 2 387, Valorant 90, League of Legends 78, total 2,080 (my estimate had been about 3,200). So about 3,000 looks in development and about 1,500 in the held-out: about 675 bets over both at a 15% firing share, about 450 at 10%. History before Sep 12 holds 10,415 or more match events (CS2's list hit its page cap); best-of-three there is not yet countable; one candle request a contract. The candle stage is the Testing Desk's build and needs the Head of R&D's go.
 
 One packet, two venues, ONE candidate for the owner's count (Head of R&D, Nov 12, 18:18Z). For the Verification Analyst to score. NHLOT: card 17 in `IDEA_DESK_B_WAVE3.md`, scripts in `nhlot/`. MAPBREAK: `mapbreak/MAPBREAK_REGISTRATION.md`, `mapbreak/MAPBREAK_SERIES.json`, card 20 in `CENSUS_CARDS_NOV12.md`.
 
