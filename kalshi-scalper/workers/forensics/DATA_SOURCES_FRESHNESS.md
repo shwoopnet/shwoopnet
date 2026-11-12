@@ -30,3 +30,13 @@ Asked for by the Head of R&D after QUOTEVSBOOK1. Written from the recorder scrip
 ## Rule added 2026-11-12 (LADDERSTATE1, accepted by the Head of R&D)
 
 **Two list quotes read in the same second are not simultaneous.** Markets returned in one market-list response refresh at different times (on the hourly ladder file, in 70% of poll cycles some strikes had changed and some had not; in none had all changed). Each market's copy has its own age between 0 and about 11 seconds. So a lock, parity or cross-market comparison built on list quotes can show gaps that never existed at one instant, and must be confirmed on order book reads before it is believed. `ladder.csv` is now MEASURED as a list copy (changes every 10.2 to 10.3 s at the median), no longer "by the same endpoint, assumed".
+
+## Format fact added 2026-11-12 (asked by Desk B for the INPLAYJUMP hourly pre-pass)
+
+**A candle's bid and ask open is the quote standing at the start of the period, not the first change inside it.** Checked on two pulls already on `kalshi-pull-data` (format only: no result read, nothing scored), script `candle_open_vs_prev_close.py`:
+
+- Hourly candles, historical endpoint, politics markets (28 files sampled from the NOSIDE1 pull): open equals the previous candle's close in 538 of 538 adjacent pairs and in 236 of 236 pairs across missing hours (bid and ask counted separately).
+- One minute candles, batch endpoint, Bitcoin 15 minute (5 files of the CFRTI-K pull, closes before Nov 5): open equals the previous close in 3,580 of 3,590 pairs; in the other 10 the previous close is inside the candle's low to high.
+- So in 4,364 pairs the previous close was never outside the next candle's low to high: a move across a period boundary shows inside the later candle's range.
+- Hours with no change are OMITTED from the answer (236 gaps in the hourly sample); a bid low of 0.0000 or an ask high near 1 marks a moment with one side missing.
+- Not checked: hourly candles from the batch endpoint, tennis or any sports market. A range test that also includes the previous candle's close does not need this fact at all.
