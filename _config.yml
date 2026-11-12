@@ -6,6 +6,8 @@ exclude:
   - .claude
   - .github
   - scripts
+  - stocks_desk
+  - tests_stocks
   - CLAUDE.md
   - firestore.rules
   - firebase.json
