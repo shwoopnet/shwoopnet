@@ -1,0 +1,216 @@
+{
+ "job": {
+  "job_id": "NHLOT_LISTS",
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md",
+  "purpose": "NHLOT price measurement (zero tries), stage 1: settled market lists of the NHL game and total-goals series, for the tickers and close times, and the two series reads for the rules text. No candle is read and no result is used.",
+  "heldout": "none (a price measurement; no outcome is read and no rule is scored)",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXNHLGAME",
+   "KXNHLTOTAL"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 10,
+  "requests": [
+   {
+    "id": "live_KXNHLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNHLGAME",
+     "status": "settled",
+     "limit": 1000
+    },
+    "max_pages": 2
+   },
+   {
+    "id": "live_KXNHLTOTAL",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXNHLTOTAL",
+     "status": "settled",
+     "limit": 1000
+    },
+    "max_pages": 5
+   },
+   {
+    "id": "series_KXNHLGAME",
+    "path": "/series/KXNHLGAME",
+    "params": {}
+   },
+   {
+    "id": "series_KXNHLTOTAL",
+    "path": "/series/KXNHLTOTAL",
+    "params": {}
+   }
+  ],
+  "notes": "Four requests, at most 9 pages; the cap is 10. Fields the reader keeps: ticker, event_ticker, close_time, the settlement time fields and rules_primary. The result and price fields in the list answers are NOT used by the measurement.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1907Z",
+ "finished": "2026-11-12T1907Z",
+ "status": "complete",
+ "requests_sent": 7,
+ "bytes_stored": 8872371,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXNHLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLGAME",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1392145,
+   "t_send_ms": 1794510468951,
+   "t_recv_ms": 1794510469114,
+   "server_date": "Thu, 12 Nov 2026 19:07:49 GMT",
+   "file": "0001.json.gz",
+   "sha256": "6ffd61129237e90124a0d5951a8e7d438657e9a3131fd59d81c237540d382db4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "live_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2136298,
+   "t_send_ms": 1794510469951,
+   "t_recv_ms": 1794510470123,
+   "server_date": "Thu, 12 Nov 2026 19:07:50 GMT",
+   "file": "0002.json.gz",
+   "sha256": "aac23a635454d62bd1e8631ac573731912d4d39ccf61ad566eae972b45de673a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2136476,
+   "t_send_ms": 1794510470952,
+   "t_recv_ms": 1794510471285,
+   "server_date": "Thu, 12 Nov 2026 19:07:51 GMT",
+   "file": "0003.json.gz",
+   "sha256": "4943c00b1f79351175ddefa7a1dc319a223546b1ec78c4ca952bdd82ca08b716",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "live_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2134953,
+   "t_send_ms": 1794510471952,
+   "t_recv_ms": 1794510472115,
+   "server_date": "Thu, 12 Nov 2026 19:07:52 GMT",
+   "file": "0004.json.gz",
+   "sha256": "965b60bfde88f79f30603da2e5c2d753016f2d7717a5d5abdab5fe73203fa267",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "live_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 1069376,
+   "t_send_ms": 1794510472952,
+   "t_recv_ms": 1794510473109,
+   "server_date": "Thu, 12 Nov 2026 19:07:53 GMT",
+   "file": "0005.json.gz",
+   "sha256": "4d990fb488063ebf3edd63b32f3dbc3a340bd7f94b82f94674699f1f9d152c3a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "series_KXNHLGAME",
+   "path": "/series/KXNHLGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1569,
+   "t_send_ms": 1794510473952,
+   "t_recv_ms": 1794510474129,
+   "server_date": "Thu, 12 Nov 2026 19:07:54 GMT",
+   "file": "0006.json.gz",
+   "sha256": "74ef10f894ffd015dbe9125645d5e42e7520ce0fda7bb76c1b75193d01b6ae81",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "series_KXNHLTOTAL",
+   "path": "/series/KXNHLTOTAL",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 1554,
+   "t_send_ms": 1794510474952,
+   "t_recv_ms": 1794510475055,
+   "server_date": "Thu, 12 Nov 2026 19:07:55 GMT",
+   "file": "0007.json.gz",
+   "sha256": "82b4c46ebe66dad0ea69c8aef675117202104685055b79c5db2cab703dfa52ab",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
