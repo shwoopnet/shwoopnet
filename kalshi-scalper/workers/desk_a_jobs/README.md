@@ -16,3 +16,6 @@ Two follow-on jobs cannot be written exactly until their first part has answered
 How the winning weather brackets in job A were found without a Kalshi read: the weather recorder's own results files on `quote-data` (`wxens/results/`), which list each settled market's result and close time. Nov 10 was not in them yet, hence the 4 list reads.
 
 Not written, on purpose: no job for PERPBIN1, MMMAP1 or RESIL1 (they need no reads), none for ORHARVEST1 or RACEMAKE1 (parked behind MMSIM1, and what they need is a recorder, not a pull), and none for the queue rows this desk does not own (Refinement's and V2's pulls are theirs to write).
+
+## CFRTI-K pull (Nov 12, 2026; owner: Desk A; for Main's jobs PR)
+`CFRTI_K_LISTS.json` (stage 1, 2 requests, up to 28 pages, cap 30) passes `scripts/kalshi_pull.py --dry-run`. Stage 2 is built from its answer, offline, by `build_cfrti_k_candles.py` (`live`: batched 55 tickers a request for markets closing after 2026-09-12; `hist <offset>`: one request per older market, 1,000 a file). Dry-run checked on a synthetic answer. Bounded at the cutoff: no market closing on or after 2026-11-05T00:00Z is listed or requested.

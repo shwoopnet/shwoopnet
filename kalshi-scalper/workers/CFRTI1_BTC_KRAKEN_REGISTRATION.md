@@ -79,3 +79,6 @@ Printed beside each version's lines in the one sitting, no new try, no change to
 
 ## Amendment (Nov 12, 2026, ruling of the Head of R&D): the R6 freeze at the held-out read
 At the held-out read (Nov 20 or later, the one sitting), the script MAY open the R6 books for closes 2026-11-09 to 2026-11-13, for the replay lines and the stale-ask count only: it reads quotes at CFRTI's own signal instants and no outcome of any depth rule. Before the read those folders stay unopened for CFRTI, as every held-out folder does. Development and selftest modes keep the freeze (`desk_a_verify/cfrti_heldout.py`).
+
+## Amendment (Nov 12, 2026, ruling of the Head of R&D after QUOTEVSBOOK1, `claude/forensics-desk` 836d9fa; before any held-out folder is opened): what the registered lines mean
+The quote recorder reads the market LIST endpoint, a copy refreshed about every 11 seconds (0 to 11 s old, about 5.5 on average). The Nov 20 read still happens once as registered, but its meaning is fixed now: **the registered lines (three-venue and Kraken-only, priced at the quote recorder's ask) are reported as "priced at a stale copy, not tradable". The 6 second book-replay line and the stale-ask count are the only lines that can support anything.** Labels from the registered line are unchanged; none of them can support live use.
