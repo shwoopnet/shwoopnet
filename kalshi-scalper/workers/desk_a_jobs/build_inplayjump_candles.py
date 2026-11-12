@@ -29,7 +29,7 @@ def read_lists(folder):
     return mk
 def skip_start(hours, tickers, open_ts, close_ts):
     """Amendment 5 (Desk B, 774889fd; Amendment 3 and 4 wording withdrawn). Hourly candles from the open. For each contract and hour H: bid range = max(bid high, bid open, last present bid close before H) minus min(bid low, bid open, last present bid close before H);
-    ask range the same. Skip H iff, for EVERY contract, bid range + ask range < 0.04 - 1e-9. An hour with NO hourly candle for a contract is dead for that contract (contributes nothing); an hour with no candle for any contract is a dead hour and is skipped.
+    ask range the same. Skip H iff, for EVERY contract, bid range + ask range < 0.04 - 3e-9 (Amendment 6). An hour with NO hourly candle for a contract is dead for that contract (contributes nothing); an hour with no candle for any contract is a dead hour and is skipped.
     The first hour uses its own open and can be skipped like any other. (An hour's open lies inside [low, high], so it adds nothing to a range; scorekit candles carry no open field.) A present candle with a missing high, low or close price is NOT skipped.
     hours: {ticker: [(end_ts, bid_high, bid_low, bid_close, ask_high, ask_low, ask_close)]} hourly candles (end_ts the hour's END). Returns the START ts of the minute window: 30 minutes before the first hour that is not skipped (None if every hour is skipped)."""
     by = {tk: {h[0]: h for h in hours.get(tk, [])} for tk in tickers}
@@ -42,7 +42,7 @@ def skip_start(hours, tickers, open_ts, close_ts):
             if h is None: continue                                                   # dead for this contract
             if None in (h[1], h[2], h[3], h[4], h[5], h[6]): skip = False; break
             bv = [h[1], h[2]] + ([lastc[tk][0]] if lastc[tk][0] is not None else []); av = [h[4], h[5]] + ([lastc[tk][1]] if lastc[tk][1] is not None else [])
-            if (max(bv) - min(bv)) + (max(av) - min(av)) >= 0.04 - 1e-9: skip = False; break
+            if (max(bv) - min(bv)) + (max(av) - min(av)) >= 0.04 - 3e-9: skip = False; break
         for tk in tickers:
             h = by[tk].get(e)
             if h is not None and h[3] is not None and h[6] is not None: lastc[tk] = (h[3], h[6])
