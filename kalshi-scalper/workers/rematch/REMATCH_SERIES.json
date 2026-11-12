@@ -19,7 +19,7 @@
   "held_out": {
     "closes_from": "2026-10-23T00:00:00Z",
     "closes_before": "2026-11-13T00:00:00Z",
-    "note": "not listed and not pulled until the Head's go"
+    "note": "not listed and not pulled until the joint held-out pull under standing rule (h); closes from 2026-11-10T00:00:00Z to before 2026-11-11T00:00:00Z are dropped (census day)"
   },
   "constants": {
     "gap_minutes_between_scheduled_starts": [
@@ -47,7 +47,8 @@
     "z_clusters": [
       "UTC day (verdict)",
       "player-pair and day (printed)"
-    ]
+    ],
+    "earlier_match_time_field": "close_time (latest over the earlier match's markets); settlement_ts and expiration fields are never used; missing close_time drops the pair"
   },
   "amendments": "the registration file's dated amendments override this file where they differ"
 }

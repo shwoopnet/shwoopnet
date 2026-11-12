@@ -107,3 +107,14 @@ Where this section and anything above differ, this section is right.
 2. Point 1 of Amendment 1 and point 7 of Amendment 2 (the e-soccer skip clauses) fall away with the family.
 3. **Requests:** approved by the Head up to 500 in total, on the condition that PREMOVE never delays another rule's candles. The wider window (from S minus 70 minutes) applies to table tennis (with INPLAYJUMP's clock pull) and to the esports match contracts (with MAPBREAK's pull). If folding it in would push either parent job over one run, PREMOVE's extra minutes go as their OWN job, sent after the MAPBREAK and INPLAYJUMP candle jobs. Candles for esports matches that are not best-of-three wait for the lists and the Head's go.
 4. Events, restated for two families (lower bounds from one Tuesday): esports about 3,200 development matches, table tennis about 3,200. Everything else in the registration and Amendment 2 stands (one-way cost kill, tradeability count, placebo, void rule, labels).
+
+## Amendment 4 (Nov 12, 2026, 19:26Z): WITHDRAWN UNREAD by its author, 0 tries
+
+The Head of R&D gave the author the choice (19:21Z): keep PREMOVE registered, last in the pull order, with odds under 1%, or withdraw it unread. **I withdraw it.** No list, candle, price or result of it was ever requested or read; no try is spent.
+
+Why, plainly:
+1. Idea Desk C's reading of the published work (`idea_desk_c/DIRECTION_EVIDENCE_NOV12.md`, commit 338ebbde on `claude/idea-desk-c`; 26 sources, 9 verified from full text) finds the evidence AGAINST this direction: pre-match line moves use up their information by the close (NBA spreads), line changes partly reverse (3,681 MLB games), and a shortening price beats its close only when insiders drive it. My own registration said the same risk first. Honest odds are under 1%.
+2. It could not be read before the owner's Friday deadline (last in the order), and the owner's direction is to do only what serves that deadline.
+3. Its up to 500 requests and its scorer and audit time are better spent on the cards that are ahead of it.
+
+It may be registered again later as a falsification test, with later dates as its held-out (standing rule (h), point 4), if the Head wants the row closed by a read. Until then this file is a record, not a live registration. Desk A's PREDRIFT was ruled the same rule and stays closed with it. The wider candle windows asked of the Testing Desk and Desk A for PREMOVE are no longer needed.

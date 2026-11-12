@@ -55,5 +55,6 @@
     "tradeability_floor_matches": 300
   },
   "amendments": "Amendment 3 (Nov 12): families are ESPORTS and TABLE_TENNIS only, 2 tries; the registration file's dated amendments override this file where they differ",
-  "tries": 2
+  "tries": 0,
+  "status": "WITHDRAWN unread by its author on 2026-11-12 (Amendment 4), 0 tries"
 }

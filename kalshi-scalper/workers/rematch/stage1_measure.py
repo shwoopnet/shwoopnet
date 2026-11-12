@@ -74,7 +74,7 @@ def main():
     quotes = {tk: {int(c["end_period_ts"]): (price(c.get("yes_bid")), price(c.get("yes_ask"))) for c in cs} for tk, cs in found.items()}
 
     n = dict(pairs=len(pairs), a_winner=0, a_closed_in_time=0, before_two_sided=0, tradeable_before=0, after_two_sided=0, state=0, quiet=0, state_entry=0, quiet_entry=0)
-    costs, days = [], set()
+    costs, days, late = [], set(), []
     in_span = [e for e in events.values() if ts(STAGE1_FROM) <= e["close"] < ts(STAGE1_BEFORE)]
     start_ok = sum(1 for e in in_span if 4 * 60 <= e["close"] - e["S"] <= 90 * 60)
     for p in pairs:
@@ -108,6 +108,7 @@ def main():
             n[kind + "_entry"] += 1
             if kind == "state":
                 costs.append(q2[1] - (q2[0] + q2[1]) / 2 + fee(q2[1] + SLIP))
+                late.append((b["close"] - b["S"]) / 60.0)   # diagnostic only, never a filter (Amendment 3, point 5)
 
     print("REMATCH stage 1: counts and cost only. No bet is scored. " + LABEL + ".")
     print("Every line below is 'selected on development': it can close the card, it cannot support it.")
@@ -125,6 +126,10 @@ def main():
         print(f"one-way entry cost at qualifying entries: median {100 * med:.1f}c over {len(costs)} (above {100 * COST_KILL_ONE_WAY:.0f}c closes on cost)")
     else:
         print("one-way entry cost: no qualifying entry")
+    if late:
+        late.sort()
+        print(f"diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 {late[len(late) // 10]:.0f} median {late[len(late) // 2]:.0f} p90 {late[(9 * len(late)) // 10]:.0f} | "
+              f"closed under 9 minutes after the clock (14 after the entry): {sum(1 for x in late if x < 9)} of {len(late)}")
     closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < 600 or (costs and statistics.median(costs) > COST_KILL_ONE_WAY + 1e-9) or not costs
     print("STAGE 1 LINE: " + ("CLOSED at stage 1, no try spent" if closed else "open: stage 2 may be asked for"))
 

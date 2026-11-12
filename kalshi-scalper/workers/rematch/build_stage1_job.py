@@ -42,6 +42,8 @@ def main():
                 continue
         groups.append({"rows": [r], "start": r["start_ts"], "end": r["end_ts"], "n": 2})
     print(f"e-soccer events in the lists {len(events)} | pairs qualifying by schedule inside the stage 1 slice {len(rows)} | requests needed {len(groups)} (cap {MAX_REQUESTS})")
+    if any(g["end"] >= hi for g in groups):
+        sys.exit("REFUSED: a request would end at or after the held-out cut (standing rule (h): development pulls are bounded by date in the job)")
     if len(groups) > MAX_REQUESTS:
         print("OVER THE CAP: no job written. The sample is not cut; the count goes to the Head of R&D.")
         return
