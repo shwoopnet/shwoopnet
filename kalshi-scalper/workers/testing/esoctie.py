@@ -152,8 +152,17 @@ def score(spec, list_folders, candle_folders):
     tot = sum(byday.values())
     out.update({"bets": len(tr), "wins": wins, "mean_price_paid": round(sum(t["price"] for t in tr) / len(tr), 4), "halves": halves, "by_bucket": {i: k.stats([t for t in tr if t["bk"] == i]) for i in sorted({t["bk"] for t in tr})},
                 "largest_day_share_of_net": None if tot <= 0 else round(max(byday.values()) / tot, 3), "void_bets_booked_as_fee_loss": sum(1 for t in tr if t["void"]), "void_note": "NOTE 5: price refunded, fee kept is an ASSUMPTION about how Kalshi settles a voided market, not a measurement; if the fee is also refunded this booking is slightly conservative",
+                "info_voids_refunded_not_counted": self_refunded(tr, out),
                 "registered_verdict": verdict(len(tr), out["all"]["pf"], [h["pf"] for h in halves if h["n"]]) + " (selected on development: can falsify, cannot support)"})
     return {"measurement": rep, "rule": out}
+
+
+def self_refunded(tr, out):
+    """NOTE 6 (reporting only): if void bets exceed 1% of fired bets, also print the result with the voids refunded and not counted (all and 3 windows), labelled info only; the registered booking stays the verdict."""
+    nv = sum(1 for t in tr if t["void"])
+    if not tr or nv <= 0.01 * len(tr): return None
+    rest = [t for t in tr if not t["void"]]
+    return {"label": "INFO ONLY, not the verdict: voids refunded (fee too) and not counted", "voids": nv, "bets": len(rest), "all": k.stats(rest), "windows": [k.stats(w) for w in k.windows(rest, 3)]}
 
 
 def build_candles(spec, list_folders, max_cells=9000, max_tickers=100, span_s=7200):

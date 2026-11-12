@@ -165,4 +165,9 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     c_ow, c_rt = bp.VenueConfig("x", "bo3", cost_mode="one_way"), bp.VenueConfig("y", "bo3", cost_mode="round_trip")
     assert abs(bp.cost_of(cand, c_ow) - (0.02 + bp.fee_up(0.41))) < 1e-9 and bp.cost_of(cand, c_rt) == 0.07 and c_ow.cost_max == 0.04 and c_rt.cost_max == 0.05
     assert m.CFG.cost_mode == "one_way" and "one-way" in m.measure(spec, [dl], [dsr])["titles"]["DOTA2"]["cost_line_used"]
+    # standing rule: a void (no yes/no result) is a fee-only loss, counted in n, PF and z, with the count printed
+    calls_ms, _c = m.matches(spec, [dl]); void_keys = {r["key"] for r in calls_ms[:5]}
+    ov = bp.score_rule2(calls_ms, [dsr], m.CFG, lambda rec: None if rec["key"] in void_keys else True)
+    assert ov["counts"]["void_booked_as_fee_loss"] >= 5 and ov["bets"] == ov["counts"]["fired"] and ov["all"]["wins"] < ov["bets"], ov["counts"]
+    vt = [x for x in ov["by_look"].values()]
 print("mapbreak synthetic tests passed")

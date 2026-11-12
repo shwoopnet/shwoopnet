@@ -78,6 +78,12 @@ j, c = E.build_candles(spec, [L]); kp.check_job(j); assert j["requests"] and len
 # verdict wording
 assert E.verdict(99, 3, [3, 3]).startswith("no evidence at n = 99") and E.verdict(100, 0.9, [2, 2]) == "FALSIFIED" and E.verdict(100, 1.6, [2, 1.2]).startswith("development bar met") and E.verdict(100, 1.2, [2, 1.2]).startswith("below the bar")
 
+# NOTE 6: voids over 1% of fired bets -> an info-only line with the voids refunded and not counted; at or under 1% nothing
+import scorekit as _k
+mk_t = lambda i, v: {"event": "e%d" % i, "cluster": "d", "ts": i, "price": 0.3, "fee": 0.02, "win": i % 4 == 0, "net": (-0.02 if v else (0.68 if i % 4 == 0 else -0.32)), "bk": 0, "void": v}
+tr_ = [mk_t(i, i < 3) for i in range(100)]; ir = E.self_refunded(tr_, {})
+assert ir and ir["voids"] == 3 and ir["bets"] == 97 and "INFO ONLY" in ir["label"] and len(ir["windows"]) == 3
+assert E.self_refunded([mk_t(i, i == 0) for i in range(100)], {}) is None
 ref = os.environ.get("ESOCTIE_REF")
 if ref:                                                           # cross-check: the History Miner's reference reader on the SAME input
     sys.path.insert(0, ref); import importlib.util

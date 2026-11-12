@@ -270,7 +270,7 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
     if not inn:
         out["verdict"] = "CLOSED: every title and look is out on its kill lines; no match result was read"; out["bets"] = 0; return out
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
-    trades, cnt = [], {"fired": 0, "no_result": 0, "no_pre": 0, "no_look": 0, "no_signal": 0}
+    trades, cnt = [], {"fired": 0, "void_booked_as_fee_loss": 0, "no_pre": 0, "no_look": 0, "no_signal": 0}
     for rec in recs:
         r = prepare(idx, rec, cfg)
         if r == "no_pre": cnt["no_pre"] += 1; continue
@@ -281,9 +281,11 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
             c = rr["cand"][rr["best"]]
             if not (c["gap"] >= cfg.edge and c["spread"] <= cfg.spread_max): cnt["no_signal"] += 1; continue
             res = result_fn(rec); out["result_fn_calls"] += 1; cnt["fired"] += 1
-            if res is None: cnt["no_result"] += 1; continue
+            if res is None:                    # Head's standing rule (Nov 12): a void is booked as price refunded, fee kept, a fee-only loss, counted in n, PF and z, with the count printed
+                t = amend_trade(rec, rr, no, False); t["net"] = -t["fee"]; t["void"] = True; trades.append(t); cnt["void_booked_as_fee_loss"] = cnt.get("void_booked_as_fee_loss", 0) + 1; continue
             trades.append(amend_trade(rec, rr, no, res if rr["best"] == "up" else (not res)))
     trades.sort(key=lambda t: (t["ts"], t["event"]))
+    out["void_note"] = "price refunded, fee kept is an ASSUMPTION about how Kalshi settles a voided market, not a measurement"
     out["counts"] = cnt; out["bets"] = len(trades); out["distinct_matches_in_n"] = len({t["match"] for t in trades})
     if not trades: out["verdict"] = "NOT_ENOUGH_DATA at n = 0"; return out
     halves = k.windows(trades, 2)
