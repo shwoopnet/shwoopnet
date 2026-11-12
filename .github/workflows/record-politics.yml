@@ -6,6 +6,10 @@
 # Per poll: about 45 requests (42 series, a few pages), 5 seconds apart, so never more than 12 a minute; the hourly results read (first run of each hour, started before minute 20) adds about 45 more. About 2 requests a minute on average at most, no more than before.
 # About 400 runner minutes a day (polls, results reads, and the short skipped runs), free on a public repo. Folder names carry the run id and attempt, so two runs can never write the same file.
 # One concurrency group that never cancels: a run that finds a job running waits, so jobs never overlap.
+# Self-chaining (Nov 12, 2026): GitHub dropped most scheduled starts (3 pushed runs since Nov 11 against 48 a day intended). After the poll and the push, a final step (if: always(), so a failed poll still chains)
+# sleeps to the next :00 or :30 UTC that is at least 20 minutes after this run started, then re-dispatches this same workflow on main with the built-in token (a workflow_dispatch started by GITHUB_TOKEN does create a run, the documented exception).
+# A run skipped by the freshness step, or past the end date, does NOT chain: another chain or a cron start already exists. The cron stays as the restart path if the chain ever dies. Needs `actions: write` for the dispatch; nothing else was widened.
+# Runner minutes: about 48 chained runs a day, each up to ~50 billed minutes (poll ~4 plus a sleep to the next half hour), so ~2,000 a day, a chain keeps one runner busy. Free on a public repo, but far over the Charter's 250 a month guideline: flagged for the owner.
 # It stops by itself: from 2027-02-28 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-politics
 on:
@@ -14,13 +18,14 @@ on:
   workflow_dispatch: {}
 permissions:
   contents: write
+  actions: write
 concurrency:
   group: record-politics
   cancel-in-progress: false
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
     steps:
       - name: Stop for good after the end date (2027-02-28 23:59 UTC)
         id: gate
@@ -68,3 +73,21 @@ jobs:
           git commit -q -m "polrec $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin pol-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin pol-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
           exit 1
+      - name: Chain the next run (sleep to the next half hour, then re-dispatch on main)
+        if: always() && steps.gate.outputs.go == 'true' && steps.fresh.outputs.poll == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RUN_START: ${{ github.run_started_at }}
+        run: |
+          END="$(date -u -d '2027-02-28T23:59:00Z' +%s)"
+          START="$(date -u -d "$RUN_START" +%s)"
+          NOW="$(date -u +%s)"
+          EARLIEST=$(( START + 1200 ))
+          [ "$EARLIEST" -lt "$NOW" ] && EARLIEST="$NOW"
+          TARGET=$(( (EARLIEST + 1799) / 1800 * 1800 ))
+          if [ "$TARGET" -ge "$END" ]; then echo "next run would pass the end date: not chaining"; exit 0; fi
+          echo "sleeping $(( TARGET - NOW )) s to the next half hour"
+          sleep $(( TARGET - NOW ))
+          if [ "$(date -u +%s)" -ge "$END" ]; then echo "past the end date: not chaining"; exit 0; fi
+          gh workflow run record-politics.yml --ref main
