@@ -67,10 +67,19 @@ Every recorder file holds what happened after the entry: the result field, and p
 | REMATCH stage 1 reader (`rematch/stage1_measure.py`) | this desk | Yes for the decision inputs: it reads minute candles keyed by the minute's end, which is the shape of `candles.csv.gz` after a small loader. The scorer and the fill check are not built yet; they are built with this file format in mind. |
 | MAPBREAK (`breakplay.py`, `scorekit.py`) | Testing Desk | Not confirmed by me. It reads minute candles and lists, so the candle and results files should fit after a loader; the fill check on the book file is new code. The Testing Desk must confirm. |
 | INPLAYJUMP (`desk_a_verify/inplayjump.py`) | Desk A | Not confirmed by me. Same position; it also needs the candle volume, which is why section 4 keeps candles. Desk A must confirm. |
-| ESOCTIE | History Miner | Not confirmed by me; the History Miner must also say which minute its look is, so the tier that covers it is right. |
+| ESOCTIE | History Miner | **Confirmed by the History Miner, 20:06Z:** it decides at S minus 60 seconds on the latest minute where the Tie and both team contracts are two-sided, stepping back no further than S minus 10 minutes, so the FAST tier from S minus 10 minutes covers every look and the fill check. Its engine reads kalshi-pull run folders through the Testing Desk's loaders, so it needs one small loader that yields the same records (markets: ticker, event, open, close, result; candles: time, bid and ask closes); no change to the scorer. |
 
 I am asking the three desks to confirm against this spec and will send Main their answers.
 
 ## Phase 2: tennis
 
 ITF and challenger markets are open about 18 hours and carry no start clock, so "from a set time before the start" cannot be written. Two honest options: (a) SLOW from the open for every market (about 600 tickers a minute at once, 6 batched reads a minute) and FAST once the recorder's own slow rows show three 2c moves inside 20 minutes, which is the rule's own in-play test and uses only the past; or (b) leave tennis out until INPLAYJUMP's tennis screen has passed its validation pull. **I recommend (b):** tennis sits on another shard, is the costliest family and may yet be dropped from the card.
+
+## Added 20:06Z (Head of R&D's rulings of 20:06Z; the History Miner's needs)
+
+1. **The per-poll row is what proves the second look,** so it always carries the poll's own send and receive time and the server's Date header (accepted by the Head with change-only book rows).
+2. **The candle read after each close is bounded to that market and its recorded window.** It is never a held-out pull: it asks only for tickers the recorder itself has just watched close, on the day they close, and for no earlier date. No recorder request ever covers a card's registered held-out window.
+3. **The wheel's record is fill-checked on a real book.** The engines decide from the minute candle exactly as registered; the book file is used for the fill check. A record from candles alone is not a wheel record.
+4. **Every event is recorded, not only ones a rule might bet** (ESOCTIE's walk-forward base rate needs each past event's team prices at its own decision minute). The results rows must keep, per market: \`open_time\` (ESOCTIE's universe guard is "the Tie opened 10 to 240 minutes before S"), \`close_time\`, \`settlement_ts\` (its base rate admits a result only 300 seconds after the close), \`result\` and \`exchange_index\`. All five are already in section 4's list.
+5. Tennis is phase 2 (agreed by the Head).
+
