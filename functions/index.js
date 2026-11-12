@@ -1014,9 +1014,9 @@ exports.kalshiNightlyReport = onRequest(
     // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
     readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     shadowRules: () => shadowLib.SHADOW_RULES,
-    // The long-hold paper rows (Nov 12, 2026): compact, read only; an empty registry reads nothing.
+    // The long-hold paper rows (Nov 12, 2026): compact, read only; an empty registry reads nothing. Newest 2000 rows (it TRUNCATES older ones, in a stable order).
     longholdRules: () => longholdLib.activeLongholdRules(),
-    readLongholdRows: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(longholdLib.COLLECTION).limit(2000).get()).docs.map((d) => d.data()); },
+    readLongholdRows: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(longholdLib.COLLECTION).orderBy("atMs", "desc").limit(2000).get()).docs.map((d) => d.data()); },
     // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
     readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },

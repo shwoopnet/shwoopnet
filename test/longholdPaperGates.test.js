@@ -159,6 +159,24 @@ gates.LH11 = () => {
   assert.ok(!/kalshiLongholdRows|kalshiLongholdControl/.test(read('firestore.rules')) || /allow (read|write): if false/.test(read('firestore.rules')), 'no client rule opens the collections');
 };
 
+gates.LH13 = async () => {
+  // Consequence: slow reads cannot hold the minute function. Past the code-constant deadline no further read is started, rows already written stay, and an unsafe event id is skipped and counted, never written.
+  const many = []; for (let i = 0; i < 6; i++) many.push(mk('M' + i, '0.2000', '0.2200', { event_ticker: 'EV' + i, ticker: 'KXTRUMPAPPROVE-EV' + i + '-X' }));
+  let when = NOW; while (lh.longholdSeriesDue([RULE], when)[0].series !== 'KXTRUMPAPPROVE') when += 60000;
+  let t = 0, singles = 0; const wrote = [];
+  const r = await lh.runLongholdTick({ now: when, rules: [RULE], seen: new Set(), clock: () => t, readLatch: async () => ({}), listMarkets: async () => { t += 8000; return many; },
+    market: async (k) => { singles++; t += 9000; return many.find((m) => m.ticker === k); }, record: async (row) => { wrote.push(row); } });
+  assert.ok(lh.LIMITS.tickDeadlineMs <= 20000);
+  assert.strictEqual(r.timedOut, true);
+  assert.ok(singles <= 2, 'reads stop at the deadline: ' + singles);
+  assert.strictEqual(wrote.length, singles, 'what was priced before the deadline is still recorded');
+  const bad = [mk('Z', '0.2000', '0.2200', { event_ticker: 'KXTRUMPAPPROVE/../x' })];
+  const w2 = []; const r2 = await lh.runLongholdTick({ now: when, rules: [RULE], seen: new Set(), readLatch: async () => ({}), listMarkets: async () => bad, market: async (k) => bad[0], record: async (row) => { w2.push(row); } });
+  assert.deepStrictEqual([r2.unsafe >= 1, w2.length], [true, 0]);
+  const idx = code(read('functions', 'index.js'));
+  assert.ok(/orderBy\("atMs", "desc"\)\.limit\(2000\)/.test(idx), 'the report read is newest-first and bounded');
+};
+
 gates.LH12 = () => {
   // Consequence: with the registry empty the report adds no field and the minute function takes no new branch.
   const rep = code(read('functions', 'kalshiReportLib.js'));

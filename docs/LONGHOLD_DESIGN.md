@@ -12,7 +12,7 @@ What is read each minute, once a rule is registered (public GETs, no key, inject
 - at most 1 series list read (`GET /markets?series_ticker=...&status=open`), round robin over every (rule, series) pair, only to CHOOSE;
 - at most 3 single-market reads (`GET /markets/{ticker}`) to PRICE the chosen markets;
 - every 5th minute (offset 2), at most 3 single-market reads to settle closed rows.
-So at most 4 requests in a normal minute and 7 in a settle minute, and none while an armed test order is on. L1 makes none of these reads, and a failed or slow read changes nothing else in the minute (the block is the very last step and swallows every error). With no rule, zero requests.
+The tick stops starting reads 20 seconds after it began (`LIMITS.tickDeadlineMs`, checked before every read), and the settle sweep keeps its 8 second guard. An event id with a slash or other unsafe character is skipped and counted, never written. So at most 4 requests in a normal minute and 7 in a settle minute, and none while an armed test order is on. L1 makes none of these reads, and a failed or slow read changes nothing else in the minute (the block is the very last step and swallows every error). With no rule, zero requests.
 
 Choice: per event and arm, among the event's open markets inside the look window (the first 15 minutes at or under `lookMinHours`) whose side price is in the arm's band, the market whose YES mid is nearest 0.5, ties by ticker. Not chosen by result. The row is then priced from the single-market read, never the list read (the Forensics audit found the list read is a copy up to about 11 seconds old): quote seen (YES bid and ask), the touch, the would-be price (touch plus `limitSlip`), `wouldFill` (the size at the touch covers the contracts), and `source: "single-market"`. A fresh quote that left the band records nothing.
 
@@ -22,7 +22,7 @@ Latch: `armVerdict` replays settled, fillable rows per arm from the rule's `rear
 
 Return: reported by the nightly report as numbers (`fillsSinceRearm`, `pfSinceRearm`, `statsMet`), with `ownerApprovalNeeded: true` always. The cool-off is the reviewed edit's job.
 
-Nightly report: `longhold.rules[].arms[]` with counts, PF, net, days, latch state and the return numbers. No ticker, event or id. Present only when a rule is registered.
+Nightly report (reads the newest 2000 rows, so it truncates older ones): `longhold.rules[].arms[]` with counts, PF, net, days, latch state and the return numbers. No ticker, event or id. Present only when a rule is registered.
 
 Registry row: the Strategies registry (`strategies-registry.json`) has no row because no rule is registered. A first configuration adds one Shadow row in the same pull request.
 

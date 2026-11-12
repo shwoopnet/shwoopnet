@@ -23,6 +23,7 @@ const LIMITS = Object.freeze({
   maxSettleReadsPerSweep: 3,      // single-market reads per settle sweep (every 5th minute)
   maxSeriesPerRule: 8,
   maxRules: 4,
+  tickDeadlineMs: 20000,          // the tick stops starting reads this long after it began (each read can take 8 s on each of 2 hosts; the minute function times out at 55 s and a watchdog ping follows it)
   freshHours: 0.25,               // the look is taken in the first 15 minutes at or under lookMinHours before the close (the hourly snapshot of the registrations, "the last one at least N hours before")
 });
 
@@ -176,7 +177,10 @@ const armLatched = (rule, arm, latchDoc) => { const s = latchDoc && latchDoc[rul
 // Order of cheapness and caution: at most one list read; choices; drop what this instance already did; at most maxPriceReadsPerMinute single reads; the latch is read ONLY when a row is about to be written, and
 // an unreadable latch writes nothing (fail closed). Returns counts only. Every error is swallowed.
 async function runLongholdTick(args) {
-  const out = { listReads: 0, priceReads: 0, written: 0 };
+  const out = { listReads: 0, priceReads: 0, written: 0, unsafe: 0, timedOut: false };
+  const clock = typeof args.clock === "function" ? args.clock : Date.now, started = clock();
+  // Checked before EVERY read (list, price, latch): past the deadline nothing more is started, whatever was already written stays.
+  const late = () => { if (clock() - started > LIMITS.tickDeadlineMs) { out.timedOut = true; return true; } return false; };
   try {
     const rules = activeLongholdRules(args.rules);
     if (!rules.length) return { skipped: "no long-hold rule", listReads: 0, priceReads: 0, written: 0 };
@@ -184,16 +188,19 @@ async function runLongholdTick(args) {
     const due = longholdSeriesDue(rules, args.now);
     let markets;
     for (const d of due) {
+      if (late()) return out;
       try { out.listReads += 1; markets = await args.listMarkets(d.series); } catch (e) { return out; }
       const cands = longholdCandidates(d.rule, d.series, markets, args.now).filter((c) => !seen.has(c.rule + "|" + c.arm + "|" + c.event));
       let latch;
       for (const c of cands) {
-        if (out.priceReads >= LIMITS.maxPriceReadsPerMinute) break;
+        if (out.priceReads >= LIMITS.maxPriceReadsPerMinute || late()) break;
+        // The event becomes part of a document id: anything outside capitals, digits, dash and underscore (a slash, a dot) is skipped and counted, never written.
+        if (!/^[A-Z0-9_-]{3,80}$/.test(c.event)) { out.unsafe += 1; continue; }
         try {
           out.priceReads += 1;
           const row = longholdRow(d.rule, c, await args.market(c.ticker), args.now);
           if (!row) continue;
-          if (latch === undefined) latch = (await args.readLatch()) || {};      // a throw lands in the catch below: nothing is written
+          if (latch === undefined) { if (late()) break; latch = (await args.readLatch()) || {}; }      // a throw lands in the catch below: nothing is written
           if (armLatched(d.rule, c.arm, latch)) continue;
           seen.add(c.rule + "|" + c.arm + "|" + c.event);
           try { await args.record(row); out.written += 1; } catch (e) { /* already logged by the other process, or a failed write: log only */ }
