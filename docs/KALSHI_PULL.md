@@ -50,6 +50,8 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | 4 | `COMBO1_OPENBOOK` | 3 | retired: its reads were made and COMBO1 is closed |
 | 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | `PERPBTC1M` ready, not run; `PERPETH1M` paused for later (no registered test uses it; the runner refuses it) |
 
+| 6 | `POLAPPR1_CANDLES`, `POLAPPR1_CANDLES_P2`, `POLAPPR1_CANDLES_P3` (W-POL-APPR1 full pull, development markets only) | 1,006 each, 3,018 in all, one historical single-market candle request per market, about 17 minutes each | active, not run; run in order, part 1 first |
+
 Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two retired jobs are kept from running. Every change to a job file is security-relevant (it names the exact URLs the runner may send) and needs a security look.
 
 Stage 1 of the NO-side pull asks for market lists, not events, because the cuts file holds event tickers only. Stage 2 uses the registered rules: development events only (the oldest two thirds of each series, the held-out third is never requested), round robin over the series, hourly candles from two days before the close.

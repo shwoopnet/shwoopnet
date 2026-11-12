@@ -53,7 +53,7 @@ gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
   // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS').sort(), 'the choices are the job files except the retired lists job');
-  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\)/.test(wf));
+  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|POLAPPR1_CANDLES\|POLAPPR1_CANDLES_P2\|POLAPPR1_CANDLES_P3\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -245,7 +245,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
   assert.ok(!jobs.some((f) => /ECONLAG|BALLOTNO/i.test(f)), 'ECONLAG and BALLOTNO are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -269,12 +269,12 @@ gates.KP14 = () => {
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "POLAPPR1_CANDLES", "POLAPPR1_CANDLES_P2", "POLAPPR1_CANDLES_P3"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused' });
-  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -512,6 +512,44 @@ print(json.dumps({"listed": t(",".join(ts)), "unlisted": t(",".join(ts[:5] + ["K
   assert.strictEqual(out.listed, 'ok');
   for (const k of ['unlisted', 'one_unlisted', 'empty_part']) assert.strictEqual(out[k], 'refused', k);
   assert.strictEqual(out.over100, 'refused', 'more than 100 tickers is refused');
+};
+
+// KP26: the three politics approval candle jobs (W-POL-APPR1 full pull, Nov 12, 2026): 1,006 requests each, 3,018 in all, one historical single-market candle request per market and no market asked twice
+// across the parts. Each request is one ticker inside its own allowlist and its own safe-character pattern, the window is the registered 8.5 days plus 1 hour at hourly bars, the only endpoint shapes are
+// the two allowlisted ones, the host is the elections host, and the three request lists are disjoint (a market pulled twice would spend the budget and double-count in the scorer).
+gates.KP26 = () => {
+  const names = ['POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3'];
+  const seen = new Set();
+  for (const n of names) {
+    const job = JSON.parse(fs.readFileSync(path.join(jobDir, n + '.json'), 'utf8'));
+    assert.strictEqual(job.status, 'active', n + ': active');
+    assert.strictEqual(job.host, 'api.elections.kalshi.com'); assert.strictEqual(job.base_path, '/trade-api/v2');
+    assert.strictEqual(job.max_requests, 1006, n + ': cap'); assert.strictEqual(job.requests.length, 1006, n + ': requests');
+    assert.deepStrictEqual(job.allowed_endpoints.map((e) => e.name).sort(), ['hist_market_candlesticks', 'markets_candlesticks_batch']);
+    assert.ok(job.requests.every((r) => /^\/historical\/markets\/[A-Z0-9][A-Z0-9._-]{0,63}\/candlesticks$/.test(r.path)), n + ': only the single-market historical candle shape is requested');
+    assert.ok(job.ticker_allowlist.every((t) => /^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(t)) && new Set(job.ticker_allowlist).size === 1006, n + ': allowlist is safe and has no repeats');
+    const allow = new Set(job.ticker_allowlist);
+    for (const r of job.requests) {
+      const t = /^\/historical\/markets\/([^/]+)\/candlesticks$/.exec(r.path)[1];
+      assert.ok(allow.has(t), n + ': ticker inside its allowlist ' + t);
+      assert.ok(!seen.has(t), 'a market is asked for in only one part ' + t); seen.add(t);
+      assert.deepStrictEqual(Object.keys(r.params).sort(), ['end_ts', 'period_interval', 'start_ts']);
+      assert.strictEqual(r.params.period_interval, 60);
+      assert.strictEqual(r.params.end_ts - r.params.start_ts, 8.5 * 86400 + 3600, n + ': window is 8.5 days plus 1 hour');
+    }
+    assert.strictEqual(new Set(job.requests.map((r) => r.id)).size, 1006, n + ': request ids unique');
+  }
+  assert.strictEqual(seen.size, 3018, 'the three parts are disjoint and cover 3,018 markets');
+  // every URL the runner would build is the elections host, https, a single historical candle read (the runner's own build_url), and the dry run passes (it prints only the first 10)
+  const urls = py(`
+out = []
+for n in ${JSON.stringify(names)}:
+    job = json.load(open(os.path.join(m.JOB_DIR, n + ".json"))); m.check_job(job)
+    out += [m.build_url(job, r["path"], r.get("params", {})) for r in job["requests"]]
+print(json.dumps(out))`);
+  assert.strictEqual(urls.length, 3018);
+  assert.ok(urls.every((u) => u.startsWith('https://api.elections.kalshi.com/trade-api/v2/historical/markets/') && /\/candlesticks\?start_ts=\d+&end_ts=\d+&period_interval=60$/.test(u)), 'every URL is the elections host');
+  for (const n of names) assert.ok(/plan: 1006 requests/.test(execFileSync('python3', ['-I', scriptPath, n, '--dry-run'], { encoding: 'utf8' })), n + ': dry run');
 };
 
 let failed = 0;
