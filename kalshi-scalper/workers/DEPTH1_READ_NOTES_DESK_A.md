@@ -1,0 +1,4 @@
+# DEPTH1 read notes (Idea Desk A, runner; written Nov 12, 2026, before the read)
+Read ONCE as registered (V2's `depth1.py`, frozen features, block C as holdout, on or after 2026-11-14 00:00Z), nothing changed. Report against the registered z 5.27 with z 5.46 beside it.
+**Printed beside the result, a description with no label (Head of R&D, from the Verification Analyst's check that every R6 level's size changes every 2 seconds even at level 5):** how much each size-based feature moves between consecutive 2 second polls at the look, for example the share of looks where the five-level imbalance changes sign within 4 seconds, and for each of the other size-based features the share of looks where its sign differs between the decision poll and the next two polls. It scores nothing and changes no label.
+READ-ONCE MARKER: not yet read.

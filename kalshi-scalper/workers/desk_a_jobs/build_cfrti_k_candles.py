@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Stage 2 of CFRTI-K: builds the candle job from the stage 1 answers (CFRTI_K_LISTS). Offline: it sends no request.
   python3 -I build_cfrti_k_candles.py <stage 1 run folder> live            > CFRTI_K_CANDLES.json        (batched, markets closing after 2026-09-12)
+  python3 -I build_cfrti_k_candles.py <stage 1 run folder> all             > CFRTI_K_CANDLES.json        (batched for EVERY market: only if CFRTI_K_PROBE shows the batch endpoint answers before the cutover)
   python3 -I build_cfrti_k_candles.py <stage 1 run folder> hist <offset>   > CFRTI_K_CANDLES_H<offset>.json  (one request per older market, 1,000 a file)
 Rules: settled markets with result yes/no that close before the cutoff 2026-11-05T00:00:00Z (a later market is dropped, never requested), 1 minute candles,
 window = 3,600 s before the close to the close. live: up to 55 tickers a request on /markets/candlesticks, tickers in close-time order, the window of a batch is
@@ -30,8 +31,8 @@ def job(reqs, tickers, endpoints, name):
             "base_path": "/trade-api/v2", "pacing_seconds": 1.0, "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3, "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"}, "requests": reqs}
 def main(folder, part, offset=0):
     mk = read_markets(folder)
-    if part == "live":
-        mk = [x for x in mk if x[1] > CUTOVER]
+    if part in ("live", "all"):
+        mk = [x for x in mk if x[1] > CUTOVER] if part == "live" else mk
         reqs = []
         for i in range(0, len(mk), BATCH):
             b = mk[i:i + BATCH]
