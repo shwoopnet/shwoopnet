@@ -109,3 +109,13 @@ No call flips to a pass. Three are labelled stronger than their n supports (the 
 | P8 MMMAP1 | measurement | R6 done; NC15 from about Nov 15 | Yes (a map, not a PF) | Keep: R6 part done today |
 
 After this, the desk's live list is: MMMAP1 on the non-crypto books (Nov 15), the two parked market-making cards, and RESIL1 on hold. PERPBIN1 waits on Main's word. Everything else of mine is closed or retired.
+
+## 6. Rulings received (Main, Nov 12, 02:30Z), recorded so this file is not read as open questions
+
+- Queue rows 1, 4, 5, 6, 9, 10: no reads; forward politics logging only. Row 3: the overshoot fade gets one falsification run through the pull route when it is approved; the official-components half is retired as a PF test. Row 2: the sports SPREAD cheap cell is the next best use of reads after the approval NO-arm pull, as ONE cell with cuts fixed first and the 2% caveat written in; Refinement owns it.
+- MMSIM1 outcome labels adopted as in section 3 (PF 1.3 or better with a positive day mean = lead confirmed, keep recording to about 1,900 events; PF under 1.0 on about 400 = FALSIFIED; otherwise no call). V2 commits them and pins the cutoff constant before Nov 24. V2's own power file (`workers/POWER2_QUEUE.md` on its branch) adds a warning this file does not make: the 1.3 line sits above its shrunk estimate of 1.14, so a pass is unlikely.
+- CFRTI1-BTC: "lead" or "falsified" only; a pass means re-test. The R6 Bitcoin extension past Nov 20 goes to the owner.
+- FALSIFIED needs about 100 trades; below that the wording is "no evidence at n = x".
+- PERPBIN1: held, the try is not spent. AUCTION1: retired as a PF test. CRONCLUSTER1 and RETAILFRAC1 stage B: retired (V2 POWER2).
+- Also retired by V2's POWER2 (not this desk's cards, listed so nobody here spends on them): AVG1, STALE1, EARLYCLOSE1, TIECOND1 arm B, CLINICAL2, COMBO1 as a resting-ask test, POLCOMBO1B, MENTPERSIST1 fetching, the per-series cells of NC15DEPTH1. Kept: MMSIM1, MMHOUR1, MMMAP1, CFRTI1-BTC, NC15DEPTH1 pooled.
+- This desk's next job: MMMAP1 on the non-crypto books when 3 days exist (about Nov 15). Idle until then.

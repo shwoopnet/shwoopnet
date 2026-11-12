@@ -6,15 +6,16 @@ Desk angle: market structure and cross-market mechanisms (pricing relationships 
 
 | Card | Status | Why |
 |---|---|---|
-| 1 CRONCLUSTER1 | CLOSED by V2, 0 tries | No clustering: peak 0.87 to 1.11 against the 1.3 gate |
+| 1 CRONCLUSTER1 | CLOSED by V2, 0 tries; RETIRED (V2 POWER2); re-derived and confirmed by this desk Nov 12 (`DESK_A_HELD_DATA_NOV12.md`) | No clustering: peak 0.87 to 1.11 against the 1.3 gate |
 | 2 TIECOND1 | CLOSED by V2, 0 tries | 13 cells; best tie rate lower bound 1.96% against the 6% gate |
 | 3 EXDIV1 | CLOSED by V2 at gate 0, 0 tries | Dividends pass through to perp holders as cash |
-| 7 RETAILFRAC1 | CLOSED at stage A | No two crowds; stage B not run (Main's ruling). Descriptive only: dollar-typed takers pay 12c to 14c less per contract than whole-number takers, probably the longshot lean of small orders |
+| 7 RETAILFRAC1 | CLOSED at stage A; stage B RETIRED (V2 POWER2); stage A re-derived and confirmed Nov 12 | No two crowds; stage B not run (Main's ruling). Descriptive only: dollar-typed takers pay 12c to 14c less per contract than whole-number takers, probably the longshot lean of small orders |
 | 8 BASEFX1, 10 TWINLOCK1 | OUT, not run | Main ruled the lock and parity family CLOSED under the 3-falsified rule (ARB2 to ARB5, LADBFLY1, XSER1). Draft declined-list rows are in `IDEA_DESK_A_PROTOCOLS.md`, section P7 |
 | 4 ORHARVEST1 | Protocol written (P5) | Main's ruling: MMSIM1 family for the one-test-per-family rule, so its scored stage queues behind MMSIM1's Nov 24 read; the counts-only stage can run now |
 | 5 RACEMAKE1 | Protocol written (P6) | Same family; queues behind MMSIM1 |
 | 6 RESIL1 | Held | Order-flow family is at 2 FALSIFIED; with RETAILFRAC1 closed at stage A (no try), a FALSIFIED here would close the family for good. Not recommended |
-| 9 PERPBIN1, 11 AUCTION1 | Open, untested | Low priors (2%, 3%); AUCTION1 is slow |
+| 9 PERPBIN1 | HELD (Main, Nov 12 02:30Z) | Testable on held data with zero reads, but the try is not spent now: prior 2% and it raises the deflation floor |
+| 11 AUCTION1 | RETIRED as a PF test (Main, Nov 12) | About 80 events a year against about 920 needed (`DESK_A_POWER_NOV12.md`) |
 
 Desk worker count: 0 subagents (one session).
 
