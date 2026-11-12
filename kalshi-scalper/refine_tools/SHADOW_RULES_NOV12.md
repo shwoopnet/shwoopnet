@@ -8,7 +8,7 @@ Owner order: put the nearest leads on the shadow list as forward records. A shad
 - Kill: after 20 paper fills net under -$15 at 3 contracts, or 5 losses in a row: stop recording that arm. Return: 14 day cool-off, shadow PF 1.3 or better at +1c on at least 30 fills and the owner's approval.
 - Read point: the first read when each arm has 30 paper fills; live-probe graduation needs PF 1.3 or better over 100 paper fills in 2 of 3 windows (owner rule).
 
-## S2. Sports SPREAD cell (W-SPREAD-CELL1 lead)
+## S2. Sports SPREAD cell (W-SPREAD-CELL1 lead): CLOSED Nov 12, 2026: the registered read FAILED on both lines (n 172 and 173, PF about 0.6 at +1c); NOT STARTED, no forward shadow, the daily spread logging job is never built.
 - Rule: for each event in the six spread series (KXMLBSPREAD, KXNBASPREAD, KXNCAAFSPREAD, KXNCAAMBSPREAD, KXNFLSPREAD, KXNHLSPREAD), at the first hourly snapshot more than 24 h before close, pick the market whose YES mid is nearest 0.5; if its YES ask is in [0.05, 0.15], record one paper buy of 1 YES at ask plus 1c, fee 0.07*p*(1-p), hold to settlement.
 - Logging: a daily list of open spread markets closing in 24 to 48 h with bid and ask at the list time (about 6 to 12 reads a day through kalshi-pull), and the result from the settled list. Without this logging there is no shadow.
 - Kill: after 100 shadow fills with PF below 1.2 at +1c, or lower 90 percent bound below 0 at 100: drop. Return: none (a new registration is needed).
