@@ -5,3 +5,8 @@ Held-out plan: the same rule, the same constants, BTC only, rows from days on or
 
 ## Amendment 1 (Nov 12, 2026, committed BEFORE the held-out read; from Desk A's verification 8f0fb88)
 Desk A reproduced the development figure from raw held data (BTC n 36, PF 2.54; 2.18 to 2.51 across eight readings of the same rule). TIMESTAMPS: the three venues (Coinbase, Kraken, Bitstamp) write three timestamp formats in `spot.csv.gz`; a first pass that parsed the exchange time silently lost two venues and gave n 55 to 60. The read uses the RECEIVE time (`t_recv_ms`) for every venue, as `src/scalper/cfrti1.py` does; the run-folder rules, constants (0.05 edge, 10 s window, sigma scale), pass bar (cash PF >= 1.3, positive mean, n >= 50 held-out rows, one try) and single read at about Nov 22 are unchanged. The run must assert that all three venues contribute trades in each run folder before scoring.
+
+## Amendment 2 (Nov 12, 2026, committed before the held-out read; integrity fixes after Desk A's audit)
+CUTOFF CONSTANT: first held-out day 2026-11-05 (`HELDOUT_FIRST_DAY` in `src/scalper/cfrti1.py`). Development = run folders dated before it; held-out = on or after it. The old cut was two thirds of whatever days existed when the script ran, which moves as data grows.
+`python3 -I src/scalper/cfrti1.py heldout-btc` (with `QROOT` set): Bitcoin only; refuses until 50 held-out BTC edge rows (edge >= 0.05) exist; uses `t_recv_ms` for every venue; stops if any run folder has fewer than 3 Bitcoin venues contributing; refuses a second run by reading the COMMITTED marker line below (`src/scalper/readonce.py`). Nothing is scored on a refusal.
+READ-ONCE MARKER: not yet read; CFRTI1-BTC first read allowed on or after 2026-11-20; after the read: READ ON <date>, commit <hash>
