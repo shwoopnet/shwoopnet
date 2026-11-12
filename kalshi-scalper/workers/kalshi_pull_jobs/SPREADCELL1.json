@@ -1,0 +1,22 @@
+{
+ "job_id": "SPREADCELL1",
+ "owner": "REFINEMENT",
+ "registration": "kalshi-scalper/refine_tools/SPORTS_SPREAD_CELL_REGISTRATION.md",
+ "purpose": "Rank 2, W-SPREAD-CELL1: one batched candle request (55 tickers each) over the 1,041 SPREAD events never scored, 274 requests in all.",
+ "heldout": "W-SPREAD-CELL1: one pooled out-of-sample block read once after the pull is complete; the 360 events of W-CAT-SPORTS1 are excluded and its newest third stays unread",
+ "allowed_endpoints": [],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 274,
+ "requests": [],
+ "status": "awaiting_event_list",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "notes": "NOT RUNNABLE. The registration requires SPREAD_CELL1_EVENTS.json (the fixed event list) to be committed before the first request, and that list is not in this repository yet. A reviewed edit adds the 274 requests, the batch endpoint /markets/candlesticks (params market_tickers, start_ts, end_ts, period_interval, 55 tickers each) and the ticker allowlist, then sets status to active."
+}
