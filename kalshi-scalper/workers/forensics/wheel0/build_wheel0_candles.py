@@ -12,6 +12,12 @@ BEFORE = calendar.timegm(time.strptime("2026-11-13", "%Y-%m-%d"))
 ETH_BEFORE = calendar.timegm(time.strptime("2026-10-29", "%Y-%m-%d"))
 SERIES = {"KXXRP15M": ("XRP", BEFORE), "KXDOGE15M": ("DOGE", BEFORE), "KXGOLD15M": ("GOLD", BEFORE), "KXETH15M": ("ETH", ETH_BEFORE)}
 LIMIT, LEAD_S, TAIL_S = 9000, 900, 120
+HELDOUT_LINE = {
+    "KXETH15M": "no Ethereum market closing on or after 2026-10-29T00:00Z is in the allowlist, and no request ends at or after that instant.",
+    "KXGOLD15M": "gold's recorded windows of 2026-10-30 to 2026-11-13 are DEPTH1's, read once from 2026-11-14T00:00Z. By the Head of R&D's ruling of 2026-11-12 20:21Z gold is pulled whole, to before 2026-11-13 (rule (h) point 7: the recorder branches already carry these results), and the protection is in the scorer: wheel0.py refuses to read before 2026-11-14T00:00Z and until DEPTH1's read is marked as made. Nobody joins an outcome to these candles before that.",
+    "KXXRP15M": "no card known to the Head of R&D or to Forensics on 2026-11-12 holds this series' recorded dates; closes to before 2026-11-13.",
+    "KXDOGE15M": "no card known to the Head of R&D or to Forensics on 2026-11-12 holds this series' recorded dates; closes to before 2026-11-13.",
+}
 REG = "kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md"
 
 
@@ -61,10 +67,10 @@ def job(series, mk):
     short, before = SERIES[series]; reqs = pack(mk)
     return {"job_id": "WHEEL0_CANDLES_" + short, "owner": "MAIN", "registration": REG,
             "purpose": "WHEEL0 stage 2 (the owner's ordered premise test of the rotation lane): 1 minute candles of the settled %s markets closing 2026-09-12 to before %s, from 15 minutes before each batch's first close to 2 minutes before its last." % (series, time.strftime("%Y-%m-%d", time.gmtime(before))),
-            "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): %s" % ("no Ethereum market closing on or after 2026-10-29T00:00Z is in the allowlist." if series == "KXETH15M" else "this series is held out by no card (Head of R&D, 2026-11-12 19:53Z)."),
+            "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): %s" % HELDOUT_LINE[series],
             "allowed_endpoints": [{"name": "markets_candlesticks_batch", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
             "series_allowlist": [series], "ticker_allowlist": sorted(t for t, _ in mk), "max_requests": len(reqs), "status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
-            "notes": "Written by the Forensics desk for the Head of R&D's order; owner is MAIN because the runner's owner list has no Forensics entry. Built by build_wheel0_candles.py from the WHEEL0_LISTS answers: every listed market, none dropped by result. %d markets, %d requests." % (len(mk), len(reqs)),
+            "notes": "Written by the Forensics desk for the Head of R&D's order; owner is MAIN because the runner's owner list has no Forensics entry. Built by build_wheel0_candles.py from the WHEEL0_LISTS answers: every listed market, none dropped by result. %d markets, %d requests. SIZE GUIDE USED: CFRTI_K_CANDLES, the same endpoint, packing and kind of market (24 fifteen minute markets and a 6 hour range a request), measured 37 MB for 215 requests, about 0.17 MB a request; at that rate this file is about %d MB, far under the 200 MB cap. (MAPBREAK's 1.2 MB a request was for match markets with hours of candles each; a 15 minute market has about 15.)" % (len(mk), len(reqs), round(len(reqs) * 0.172)),
             "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3, "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"},
             "requests": reqs}
 
