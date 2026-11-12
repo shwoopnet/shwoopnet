@@ -5,7 +5,7 @@ Owner priority, Nov 9, 2026: full time algo trading; a goal of **at least one ne
 ## 1. The honest frame
 
 - **Supply, not gates, is the bottleneck.** After 1.5 million rules tried there are 0 rules above PF 1.3 with n over 200. Near misses only: NFL pair PF 1.73 (225 trades, 12 dates), tennis Monday 1.57 (116), Bitcoin ladder rule 1.43, NBA total NO 1.26 (261). A weekly launch needs 4 to 8 candidates in shadow at any time, so the pipeline is fed every week; expect 0 to 1 real edge a month and the rest to be information purchases.
-- **The record we are rotating:** all L1 on cash PF 1.12, 1,008 trades, net +$43.14; gold 1.40 (307, +$61.02) but fading by period (4.91, 1.49, 1.01); OICORE 1.32 (77, +$25.09); Ethereum 1.18; Dogecoin 1.01; Bitcoin 0.84; XRP 0.49. Of six strategies a screen would have passed, 2 were clear live winners, 2 flat, 2 losers: **false positive share 33% to 50%**.
+- **The record we are rotating:** all L1 on cash PF just above 1; gold the best and fading by period; OICORE positive; Ethereum modestly positive; Dogecoin about flat; Bitcoin and XRP below 1 [live figures removed, ask Main]. Of six strategies a screen would have passed, 2 were clear live winners, 2 flat, 2 losers: **false positive share 33% to 50%**.
 - **The cost of speed is stated, not hidden.** A shadow gate of 150 fills passes 12% (tail) to 23% (favourite) of zero edge ideas and 2% to 8% of losers, and passes only about 70% of true PF 1.5 ideas: it screens, it cannot prove. A failed incubator costs about $1.0 to $4.4 after 150 fills and $2.7 to $11.9 after 400 (a tail loss is $0.11, a favourite loss $0.94, so the $20 cap rarely binds). At one launch a week (about 13 a quarter, 8 to 10 of them failing) that is **about $30 to $70 a quarter expected, $260 worst case** (13 x $20), paid for a live, forward PF on 150 real fills per idea, the only evidence that survives decay.
 
 ## 2. Stages
@@ -37,15 +37,15 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 
 | Strategy or stage | Metric | Threshold | Window | Action |
 |---|---|---|---|---|
-| Gold L1 (PF 1.40, n 307) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
-| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed (6% of the $979.25 base when written) | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
+| Gold L1 (long run PF above 1.3) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
+| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
 | Gold L1 | cash net since the re-arm | under -$20 after 40 trades | | **latch gold off** (same code) |
 | Gold L1 | rolling 100 cash PF; 3 early sells in 40 trades | under 1.0; 3 or more | | ALERT only (event in the notification center), same code |
-| Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades were PF 99: a false kill as a latch) |
-| Account (all strategies) | shared 12% stop ($117.51 at base $979.25) and 5.5% window limit | breached | rolling 24 h | latch off [existing] |
-| OICORE (PF 1.32, n 77) | streak 24 or net under -$6 after 40 fills | trips | settled order history | latch off [existing] |
+| Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades recovered strongly: a false kill as a latch) |
+| Account (all strategies) | shared 12% stop (of the sizing base) and 5.5% window limit | breached | rolling 24 h | latch off [existing] |
+| OICORE | streak 24 or net under -$6 after 40 fills | trips | settled order history | latch off [existing] |
 | OICORE | net under -1c per contract | after 50 fills | | ALERT |
-| EVENT830 (5 trades, 0 wins, -$0.85) | its [existing] rules need 40 fills, unreachable at 1 trade a week | add: cumulative -$5 | any time | latch off |
+| EVENT830 (a handful of trades, none won) | its [existing] rules need 40 fills, unreachable at 1 trade a week | add: cumulative -$5 | any time | latch off |
 | Probe (1 contract or $5 an order) | net | under -$5 | any time | latch off |
 | Probe | PF | under 1.0 | after 100 fills | demote to shadow |
 | Incubator | cumulative loss | -$10 | any time | demote to shadow |
@@ -55,7 +55,7 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | Shadow | net | under -1c per contract | after 50 shadow fills | retire |
 | Paused markets (XRP, Bitcoin, Ethereum, AUD/USD, USD/CAD, natural gas; Dogecoin removed) | stay paused | shadow cash PF under 1.0 after 100 fills, or net under -1c per contract after 50 | | stay paused and drop the candidate |
 
-**Rolling 60 PF under 0.7 is an alert, not a kill, everywhere.** On the cash record it caught nothing useful (XRP only, and XRP's loss was small). Streak latches, loss rate tests, dollar drawdown for live strategies, 40 fill PF floors and a trailing 100 fill PF under 1.0 (net effect +$0.80 on +$43.14) are noise and are not adopted. **All thresholds are defaults untested on more than one real failure; re-check after each rotation.** Not measured: false kills the dollar kills would cause (no incubator history exists) and the shadow versus live fill gap per market (a candle shadow overstates live; live fill rate is about 65%), so the incubator is the real test.
+**Rolling 60 PF under 0.7 is an alert, not a kill, everywhere.** On the cash record it caught nothing useful (XRP only, and XRP's loss was small). Streak latches, loss rate tests, dollar drawdown for live strategies, 40 fill PF floors and a trailing 100 fill PF under 1.0 (net effect close to zero) are noise and are not adopted. **All thresholds are defaults untested on more than one real failure; re-check after each rotation.** Not measured: false kills the dollar kills would cause (no incubator history exists) and the shadow versus live fill gap per market (a candle shadow overstates live; live fill rate is about 65%), so the incubator is the real test.
 
 ## 5. RETURN conditions, every killed or paused strategy
 
@@ -71,11 +71,11 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | USD/CAD | 1.00 (46) | 19 | 5 weeks | |
 | Natural gas | 0.64 (38) | 14 | 7 weeks | |
 
-**Gold (coded Nov 10, 2026, the owner):** a killed gold returns only by a reviewed edit that moves `GOLD_KILL.rearmAt`, after the shadow GOLDALL rows show PF 1.3 or better (GOLDALL was retired Nov 11, 2026 with the other favourite-late shadow rules, so this evidence needs a fresh GOLDALL shadow run under its return rule, a reviewed edit, or the owner naming another source) over at least 60 trades and 7 days with the second half at 1.3 or better, and the owner approves; the first 30 trades after the re-arm go at half size. Refinement warned this bar is stricter than gold's long run record (PF 1.40 on 307 trades) and may keep a normal gold out; the cost of that is idle gold, not lost money. OICORE if killed returns by the general rule above. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
+**Gold (coded Nov 10, 2026, the owner):** a killed gold returns only by a reviewed edit that moves `GOLD_KILL.rearmAt`, after the shadow GOLDALL rows show PF 1.3 or better (GOLDALL was retired Nov 11, 2026 with the other favourite-late shadow rules, so this evidence needs a fresh GOLDALL shadow run under its return rule, a reviewed edit, or the owner naming another source) over at least 60 trades and 7 days with the second half at 1.3 or better, and the owner approves; the first 30 trades after the re-arm go at half size. Refinement warned this bar is stricter than gold's long run record and may keep a normal gold out; the cost of that is idle gold, not lost money. OICORE if killed returns by the general rule above. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
 
 ## 6. Capital rules and the fast path's safety limits
 
-- Today's slot caps at base $979.25 are SHARED across the slot (order $9.79, window $19.59, open $29.38, day $19.59, lifetime $58.75), so one incubator could eat OICORE's room. **That needs a code change: per strategy caps.**
+- Today's slot caps (fractions of the sizing base: order 1%, window 2%, open 3%, day 2%, lifetime 6%) are SHARED across the slot, so one incubator could eat OICORE's room. **That needs a code change: per strategy caps.**
 - Incubator: order cap $5 (worst loss about $5), demote to shadow at -$10 cumulative, hard latch at -$20, checked after every settlement.
 - **Fast path safety:** total incubator money at risk $40 (2 x $20), at most 2 incubators at once, a daily loss limit across all incubators of $10, open incubator dollars inside the slot open cap and counted as lost in the shared 12% stop and the 5.5% window limit (already true for slot orders), the direction lock applies, one entry gate.
 - Step sizes: shadow zero money; probe 1 contract or $5 an order, under 1% of the base; ladder step 1 inside the existing caps; sums of open slot dollars stay under 3% of the base.
@@ -197,8 +197,8 @@ The owner's popup answers on how to classify strategies. Five rules.
 | NAME | Family (entry + exit) | Risk class | Stage |
 |---|---|---|---|
 | Gold L1 (parent; candidate v2: gold spot-gap filter) | Favourite-late: buys the 88c to 97c side about 6 minutes before the close; 25c early sell, else hold | High win rate, rare large losses; order size held at 15 plus add-on up to 18 contracts; shared 12% stop and 5.5% window cap; $ per day: see rotation report; group A (favourite-late, 15 minute grid) | **Probe (under review).** Against the proven bar its recent cash PF (rolling-60 1.05, rolling-100 0.94, Refinement Nov 10) does not meet it. Not pulled: it keeps trading under its existing kill and stops (owner, Nov 11, 2026: "if we are ready to pull this then we can, but I just would rather have a replacement before our account goes idle"). Any pull is the owner's call by popup |
-| OICORE (parent; candidate versions: Polymarket Bitcoin lead filter, book imbalance, Ethereum open interest confirmation) | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: live cash PF 1.30 on 82 fills is under the 100 fill bar |
-| EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin: 5 fills |
+| OICORE (parent; candidate versions: Polymarket Bitcoin lead filter, book imbalance, Ethereum open interest confirmation) | Open interest jump: cheap side 8c to 50c, Bitcoin, 3 to 2 minutes before the close; hold to settlement | Low win rate (about 20%), frequent small losses; 10 contracts (ladder step); own drawdown stop $50 and daily cap; group B (cheap-side flow) | Probe: its live fill count is under the 100 fill bar |
+| EVENT830 | Calendar: cheap side 5c to 50c in release-day windows, 8 markets; hold | 1 contract; win-rate and daily cap: see rotation report; group C (calendar) | Probe, thin sample |
 | XRPYES10 | Favourite-late (XRP, 10 minute look); hold | see rotation report; group A | Retired by PR 772, pending its merge and deploy; until then a live Probe. XRPYES10 and KESTREL were the same hold-to-settlement favourite mechanism as the declined GOLDHOLD (7e), allowed only as owner exceptions |
 | KESTREL | Favourite-late (AUD/USD); hold | see rotation report; group A | Retired by PR 772; never deployed |
 | GOLDALL, XRPFAV6, LANTERN | Favourite-late shadow rules | no money at risk | Retired shadow rules (PR 772) |
@@ -286,6 +286,6 @@ V2 and Refinement each hand the chief of staff, **every Sunday at 6:41 PM Centra
 ## 10. Honest risks
 
 - **More rotation means more false positives and more fees.** At a bar of PF 1.5 and a million rules tried something clears it by chance; the 33% to 50% false positive share above is on strategies that were already chosen. The control is the deflation count, the promotion budget and the dollar caps.
-- **A fast kill can kill a good strategy on a bad draw** (gold's rolling 60 rule fired once and the next 50 trades were PF 99); that is why the rolling rule is only an alert and the kills that act are dollar based.
-- **Fast markets judge fast and also lie fast.** Gold went PF 4.91, 1.49, 1.01 across three periods on a loss rate of 2.0%, 7.0%, 8.7% (breakeven about 7.5%), mostly luck.
+- **A fast kill can kill a good strategy on a bad draw** (gold's rolling 60 rule fired once and the next 50 trades recovered strongly); that is why the rolling rule is only an alert and the kills that act are dollar based.
+- **Fast markets judge fast and also lie fast.** Gold's profit factor fell across three periods as its loss rate rose past break-even (about 7.5%), mostly luck. [live figures removed, ask Main]
 - **The limit is the edge, not the machinery.** A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.

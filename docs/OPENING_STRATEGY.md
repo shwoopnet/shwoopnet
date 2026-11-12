@@ -40,15 +40,15 @@ What to take from it:
 
 **Lane U.** There is no counterparty here, and the history says you are it. L1 earns its small edge from the people who buy flips, because the flip buyer is on the other side of the favourite it buys. When you buy a 25c flip by hand you take the trade L1 collects from. The lane exists so you can watch that instinct get scored without paying for the scoreboard.
 
-**What a flip costs, in dollars.** At 25c the measured cost is -3.9c a contract, about 15% of the stake (plausible range 8% to 23%, two standard errors). A $25 flip costs about $3.90 on average; $10 costs $1.56; $50 costs $7.80. It wins about once in 4.5 tries (22.5%), which is the feeling you like and the reason it is expensive. L1's expected profit at current size is roughly $1 to $2 a day (+0.5c to +0.9c a contract on 7 to 10 contracts and about 25 fills a day), so one $25 flip a day is expected to cost two to four times what L1 earns in a day.
+**What a flip costs, in dollars.** At 25c the measured cost is -3.9c a contract, about 15% of the stake (plausible range 8% to 23%, two standard errors). A $25 flip costs about $3.90 on average; $10 costs $1.56; $50 costs $7.80. It wins about once in 4.5 tries (22.5%), which is the feeling you like and the reason it is expensive. L1's expected profit at the size it traded then was small (+0.5c to +0.9c a contract on a handful of contracts and a few dozen fills a day), so one $25 flip a day is expected to cost two to four times what L1 earns in a day.
 
 ## Where the average win can and cannot come from
 
-Your numbers: 101 settled, 96 wins and 5 losses, average win +$0.37, average loss -$8.13, profit factor 0.87, net -$5.13.
+Your numbers (early live sample): [live figures removed, ask Main] [live figures removed, ask Main]
 
-- **The break-even win rate is 95.6%** (8.13 / (8.13 + 0.37)). You are at 95.05%. That gap is one loss. It sits 0.3 standard deviations below break-even and 0.7 below what L1's measured edge predicts, so a profit factor of 0.87 over 101 trades is well inside the noise for a strategy that should be near 1.0 to 1.1.
-- **Bitcoin 4 losses in 60, Ethereum 1 in 4, gold 0 in 37.** Gold's 37 of 37 is what a 95% win rate does 15% of the time. It is not evidence that gold is safer.
-- **Average win per trade is the price premium times the contract count.** At about 7.7 contracts and 5c a contract it is $0.37. There are only two ways to raise it: a lower entry price, which lowers the win rate by about the same amount (the table above), or more contracts, which raises the average loss in step. At $1.00 an average win you would need about 20 contracts, an average loss of about $22, and a single loss would be about 4.4% of $500 against a 5% stop. The size ladder and the stop are built to forbid exactly that.
+- **The break-even win rate is close to 95.6%** at that sample's average win and loss. The gap to the actual win rate was about one loss, which sits well inside the noise for a strategy that should be near 1.0 to 1.1.
+- **The losses were mostly Bitcoin; gold had none in that early sample.** A run of wins with no loss is what a 95% win rate does often. It is not evidence that gold is safer. [live counts removed, ask Main]
+- **Average win per trade is the price premium times the contract count.** At a few contracts and about 5c a contract it is a few tens of cents. There are only two ways to raise it: a lower entry price, which lowers the win rate by about the same amount (the table above), or more contracts, which raises the average loss in step. At $1.00 an average win you would need about 20 contracts, an average loss of about $22, and a single loss would be about 4.4% of $500 against a 5% stop. The size ladder and the stop are built to forbid exactly that.
 - **What would be free** is a better probability estimate than the market's. That is what the strategy search in this README looked for (2,591 variants tried, none passed), and none found it.
 
 So I do not have a way to get "a lot larger wins at a similar win rate", and I would distrust any rule that claims to. The honest options, in the order I would take them:

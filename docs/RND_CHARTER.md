@@ -17,6 +17,7 @@ Find strategies that clear the owner's bar, not variants of what we already run.
 - any new spend;
 - any new venue, or any new recorder or anything that would take the month over the Charter limit of 250 runner minutes;
 - any account, key or credential;
+- committing live trading figures (results, order details, balances, sizing figures of our real account) to the repo or any branch, in a doc, a comment, a changelog line, a test fixture or a research file; live numbers go in messages and on the owner's private pages (owner rule, Nov 12, 2026; `test/noLiveFiguresGates.test.js`). Research results on public data are fine;
 - any edit to trading code;
 - anything on the DECLINED list (lifecycle section 7d).
 

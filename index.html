@@ -1756,6 +1756,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Process: a standing rule (the owner, Nov 12): no live trading figures (results, balances, sizes of our own account) in the public repo, the changelog or any branch; live numbers stay in messages and on the owner's private pages. Past mentions were removed from the docs and this page, and history is not rewritten. Docs only.</li>
                   <li>An hourly balance snapshot (the owner, Nov 12): once an hour the server saves the account's total cash and the cash on each shard, nothing else, kept 90 days and added to the nightly report. It only reads. It exists to compare the real balance change over a window with no deposits against what the orders booked.</li>
                   <li>The market strip and the Brief are back on their previous price and news sources (the owner, Nov 12). The switch to permitted sources left most prices as "No price"; Yahoo's terms still bar automated reads, so this is an owner-accepted risk and the source switch stays an open item. Research recorders stay off Yahoo.</li>
                   <li>Research: a check of every saved final test set found nine tests whose final set could slip as new data arrived. A rule now fixes each cutoff as a date written in advance, and the owners are pinning them before any more runs. Nothing trades.</li>
@@ -1794,7 +1795,7 @@
                   <li>Bot: a sixth shadow rule, LANTERN, logs what L1's rule would buy on Ethereum at the 6 minute look with no smooth gate (the owner: Ethereum comes back through shadow first; a pass is not expected, the candle recheck found it under 1.0 at +1c); log only, no order, no money</li>
                   <li>Strategies page is now a flow board (the owner: the tiles were bland): strategies are cards in three lanes, Shadow then Live then Retired, with lines joining a shadow rule to the live strategy it became (XRPYES10) and retired cards back to where they ended, plus a status badge on every card (COLLECTING, HEALTHY, WATCH, NEAR KILL, ARMED, RETIRED). Each card keeps the cash profit factor, the kill gauge, the trend line and the Details and Rules. On a phone the lanes stack, with Retired folded. Page only, no change to any number or to the bot.</li>
                   <li>Strategies flow board, polish round 1 (the owner): the lanes now read Live, Shadow, Retired (left to right on a desktop, top to bottom on a phone); every card opens with a ring dial for the cash profit factor (the figure inside, an arc filling on a 0 to 2 scale, a tick at 1.0) and a kill gauge, and Details holds the trend line, sizing ladder and Implement, Kill and Return; shadow cards are compact (ring, name, badge, signals bar); one line joins a shadow rule to its live twin and one trunk joins Live to Retired, which is a compact list folded by default.</li>
-                  <li>Trading: gold now has a coded kill and return (the owner, Nov 10; draft until merged and deployed). It switches gold off by itself, with no automatic restart, if gold falls $58.75 (fixed, 6% of the $979.25 base when written) below its own peak or is down $20 after 40 trades; three early warnings (a weak run of 60 or 100 trades, three early sells in 40) only tell you. An open gold position is still sold at the 25c line, and only a reviewed edit brings gold back</li>
+                  <li>Trading: gold now has a coded kill and return (the owner, Nov 10; draft until merged and deployed). It switches gold off by itself, with no automatic restart, if gold falls $58.75 (fixed) below its own peak or is down $20 after 40 trades; three early warnings (a weak run of 60 or 100 trades, three early sells in 40) only tell you. An open gold position is still sold at the 25c line, and only a reviewed edit brings gold back</li>
                   <li>Strategies page animation (the owner asked for a little more life): when you open the page the kill gauges and the signals bars fill, the profit factor figures count up from 0.00 to their true value in under a second, the Shadow, Live and Retired chips slide along the arrows, and the trend lines draw in, once each time you open it and never on the minute's refresh. It is off under reduced motion (the true figures show at once), black and white, and changes no number.</li>
                   <li>Strategies page: a summary bar on top (blended profit factor, net cash, today, 7 days, money at risk now and open positions), a Details button under each strategy (a cumulative cash line, win rate, average win and loss, fees, best and worst day and the last 8 trades; a smaller panel for the shadow rules), and a timeline of the reads still to come with recent warnings, stops and session starts</li>
                   <li>New Strategies page (admin only, a fourth entry in the navigation, beside Bot): a lifecycle of Shadow, Live and Retired with each strategy as a chip, then one tile per strategy with its cash profit factor first, a trend line (rolling 30 trade cash PF for the live ones, cumulative cash PF by signal for the shadow rules), a kill distance gauge (OICORE's drawdown room, the gold tripwire count, EVENT830's losing streak), signals out of 150 for the shadow rules, a Sizing ladder row with the owner's static label per strategy (gold: balance ladder held at 15; OICORE: own ladder, step 10 of 10, 12, 15, 20, 30; EVENT830: 1 contract; shadow rules: next 3 contracts as a probe), and an expandable Rules line with how it is implemented, what kills it automatically and what must be true for it to return (EVENT830's return rule is shown as not written yet); Retired is one collapsed line; page only, no order, Privacy view masks the dollars</li>
@@ -1824,7 +1825,7 @@
                 <div class="changelog-day">Nov 7</div>
                 <ul class="changelog-list">
                   <li>Bot page, Edit layout: on a folded card the Drag handle and its buttons no longer sit on top of the title</li>
-                  <li>Bot: the loss stop and the kill rules now count a settled trade at the cash it really cost (its fill price and fee), not its limit price, which read about $30 a week worse than the account. An open order stays at its worst case. OICORE's streak kill goes from 18 to 24 losses in a row</li>
+                  <li>Bot: the loss stop and the kill rules now count a settled trade at the cash it really cost (its fill price and fee), not its limit price, which read worse than the account. An open order stays at its worst case. OICORE's streak kill goes from 18 to 24 losses in a row</li>
                   <li>Team changes from the owner's 1:1 review: the research director folds into the COO, the auditor merges into the Verification Analyst, the Release Manager works with Security and the Site Accuracy Editor (now weekly), and research becomes backtest first with data held out for survivors</li>
                   <li>A Release Manager agent now reviews every pull request (diff, all gates, conflicts, claims) before it reaches the owner; it never merges. Two week trial of docs-only self-merging is recorded, not enabled</li>
                   <li>Efficiency rules for tokens as well as credits are now in the Charter (read once, ask narrowly, fresh short sessions over big warm ones); the COO measures tokens per research verdict</li>
@@ -1870,7 +1871,7 @@
                   <li>Trading: OICORE's limit sits 1c above the price it sees, so it stops missing fills when the price ticks up a cent (at most 1c a contract more)</li>
                   <li>Trading: OICORE gets a size ladder (10, 12, 15, 20, 30 contracts), each step earned on its own record and the balance, with a daily loss cap and a drawdown stop that grow with its size</li>
                   <li>Trading: gold's base size is held at 15 contracts (it was allowed to grow to 40 with the balance); the profit add-on and everything else are unchanged</li>
-                  <li>Trading: Dogecoin is paused in code (no new orders, no resume date; an open one is still sold). At gold's ladder size it had 7 early sells in 57 fills, and the last 24 hours lost $36.92. Gold is the only market L1 trades now (#697)</li>
+                  <li>Trading: Dogecoin is paused in code (no new orders, no resume date; an open one is still sold). At gold's ladder size it had a run of early sells, and the last 24 hours lost money. Gold is the only market L1 trades now (#697)</li>
                   <li>Settings: this changelog is now grouped under the right days, and a test keeps its newest day in step with the notes; stale lines in the strategy docs were corrected</li>
                   <li>Bot page: the Order switch row and the loading note no longer print on top of each other in the Account card, and the Rules text now says each strategy has its own stop</li>
                 </ul>
@@ -1905,7 +1906,7 @@
                   <li>Page: browser zoom (Cmd minus and plus) now zooms the page properly on a desktop; the big-screen scale-up follows the screen instead of the window width, so zooming out no longer switches it on and cancels the zoom</li>
                   <li>Bot page: the Rules text now says the Bitcoin probe (OICORE) sends 10 contracts, not 5, and no longer lists a one-crypto-order-per-window limit that no live market is under</li>
                   <li>Notes: corrected the project note about which Kalshi shard each market trades on (every live market is on shard 2; gold was wrongly listed on shard 0)</li>
-                  <li>Trading: the 8 PM to midnight pause is lifted for gold and Dogecoin, so both trade around the clock again (it cost about 30 fills a week)</li>
+                  <li>Trading: the 8 PM to midnight pause is lifted for gold and Dogecoin, so both trade around the clock again (the pause cost a meaningful share of orders)</li>
                   <li>Deploys: one command, bash functions/deploy-latest.sh, now works out which deploys the latest merges need, runs the tests, shows the plan and asks before running anything</li>
                   <li>Nightly report: each order row now also carries the price, limit, the quote seen, the depth at the touch and the share of it the order took, so no-fill orders can be studied from the report alone</li>
                   <li>Nightly report: now includes the second strategy (OICORE) in its own section and in an all strategies total; the L1 figures are unchanged</li>
@@ -1948,13 +1949,13 @@
                   <li>Account result card: the 1M, 3M, YTD and All lines now use the live orders for everything recent (they were a ten minute old copy, so the total could lag), and say so when older trades cannot be read</li>
                   <li>"Got questions?" panel: a fourth question, "Want to work with us?", for future partners, with an email link</li>
                   <li>Signed-out page: a "Got questions?" bubble in the bottom right opens a small panel of fixed answers, with an email link for anything else; the page itself is unchanged</li>
-                  <li>Dogecoin orders go from 3 to 5 contracts (live record: 131 settled, 125 won, +2.66c a contract, both halves positive)</li>
+                  <li>Dogecoin orders go from 3 to 5 contracts (live record positive in both halves)</li>
                   <li>Research recorder R6: the whole 15 minute order book (best 5 prices a side, every 2 seconds) and every public trade for gold, Bitcoin, Ethereum, Dogecoin and XRP, public data only, stops by itself on Nov 13; it replaces the Bitcoin, Ethereum and gold recorder (#621)</li>
                   <li>Bot status: win rate by price paid is now five price bands (each against the average price paid in it) with the one-row-per-cent list folded underneath</li>
                   <li>Bot status: win rate by price paid (88c, 89c, up to 97c entries), with the win rate each price needs to break even</li>
                   <li>Open positions: the chance chart now runs the whole 0 to 100% with a target price line across the middle (50%, where it flips), and each position says the price that decides it ("Wins if it closes at or above $4,013.48"), both taken from the market itself</li>
                   <li>Gold places no new orders from 8 PM to midnight Central (history and live both weaker in that block); an open gold position is still sold by the exit watch</li>
-                  <li>Bitcoin is paused in the bot's code (live profit factor 0.72 over 155 orders); an open Bitcoin position is still sold by the exit watch</li>
+                  <li>Bitcoin is paused in the bot's code (live profit factor below 1); an open Bitcoin position is still sold by the exit watch</li>
                   <li>Brief charts: one unbroken line across the nights and weekends when a market is closed, instead of short scraps (#616)</li>
                   <li>The profit add-on (extra contracts bought with reinvested profit) is capped at a quarter of the base size, so a long win streak cannot push a gold order far above its base and the next loss lands at a smaller size (#615)</li>
                   <li>Settings: chats can run safe tools without asking; deploys, merging pull requests and the live env file stay blocked (#614)</li>
@@ -1975,7 +1976,7 @@
                   <li>Layout: moving cards on the Bot page works again (each card was pinned to its own spot, so the arrows and dragging changed nothing) (#601)</li>
                   <li>Tools menu: removed the order book snapshot download and its recorder warning (the recorder has been off since Oct 21, so it said it had stopped) (#601)</li>
                   <li>Brief charts: the overnight and weekend gaps in stock, gold and oil weeks are drawn as small breaks instead of blank stretches, and the week has a date label every two days (#600)</li>
-                  <li>XRP is paused in the bot until the owner says, after the Nov 12 forward reads (profit factor 0.49 over 65 live fills); the silent-market warning no longer names it (#598)</li>
+                  <li>XRP is paused in the bot until the owner says, after the Nov 12 forward reads (live profit factor below 1); the silent-market warning no longer names it (#598)</li>
                 </ul>
                 <div class="changelog-day">Oct 27</div>
                 <ul class="changelog-list">
@@ -2020,7 +2021,7 @@
                   <li>The notification bell fills on every page, not only the Bot page (#563)</li>
                   <li>Notification bell in the top navigation, left of Brief (#561)</li>
                   <li>Gold and crude oil keep a chart when their markets are closed, using the last session (#557)</li>
-                  <li>XRP back to 1 contract after 4 losses in 24 fills (#560)</li>
+                  <li>XRP back to 1 contract after a run of losses (#560)</li>
                   <li>Copy all orders carries the smooth climb and two-stage fields (#559)</li>
                   <li>Phone tap targets made big enough on every control (#558)</li>
                   <li>Notification center with a red unread bubble, Mark all as read and a red banner for the worst cases (#556)</li>
