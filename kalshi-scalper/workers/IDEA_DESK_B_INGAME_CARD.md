@@ -119,3 +119,43 @@ Source: `kalshi-scalper/workers/forensics/DATA_SOURCES_FRESHNESS.md` on branch `
 - **The in-game recorder's quotes are a delayed copy.** Kalshi's market LIST read returned the same quote for about 11 seconds at a time when Forensics measured it on the Bitcoin 15 minute market (72,012 polls, 4,360 distinct states). The in-game recorder reads market objects from an event list, so its quotes are assumed to be delayed the same way (not measured on sports). Together with the two-minute polling found in section 2, the recorder cannot support any claim about a lag finer than its own spacing, and even at 20 seconds a poll it could not have supported one finer than about 10 to 20 seconds.
 - **That is why the measurement uses one-minute candles and not the recorder.** A one-minute bot cannot use a finer lag anyway.
 - **One open check on the candles themselves.** Whether a candle's closing bid and ask are the book at the end of the minute has not been measured yet (Forensics, CANDLEVSBOOK1). If they are not, the Head of R&D will say so before any of this measurement's data is read, and the reading waits for that.
+
+## 11. Step 1 result (Nov 12, 2026, read once at 17:25Z; zero tries)
+
+Pulls `INGAMELAG_M1A` (108 requests) and `INGAMELAG_M1B` (107), both complete, on `kalshi-pull-data`. Read with the committed `ingame_m1/measure.py` and `games.json`. In-play candles only; no result field, no pre-game price. The script's output, whole:
+
+```
+games in the list 215 | used (decided inside the data, in-play candles present) 214 | not used 1
+candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim
+in-play market-minutes with a usable two-sided quote 131774 | with a candle but no usable quote (thin or one-sided, not filled in) 189 | with no candle at all 13257
+trigger events with a clean spread move 627 | trigger events where the spread did not move 0.03 the expected way 132 | trigger events where no spread market had a usable quote at every minute needed 11
+  share of the ten minute move already in after 1 min: median 0.88 | quartiles 0.65 to 1.02 | events at 75% or more: 420 of 627
+  share of the ten minute move already in after 2 min: median 0.89 | quartiles 0.66 to 1.00 | events at 75% or more: 431 of 627
+  share of the ten minute move already in after 3 min: median 0.90 | quartiles 0.66 to 1.00 | events at 75% or more: 431 of 627
+  share of the ten minute move already in after 5 min: median 0.93 | quartiles 0.71 to 1.00 | events at 75% or more: 458 of 627
+  NBA: events 180 | at 75% or more after 1 min: 92
+  NHL: events 339 | at 75% or more after 1 min: 268
+  NFL: events 108 | at 75% or more after 1 min: 60
+VERDICT: SURVIVES step 1 (67% of events had 75% of the move in after one minute; the bar to close was 80%)
+```
+
+(The first run printed the verdict lines only. The freshness line, the count of thin minutes and the split of the 143 "no clean move" events into 132 and 11 were added to the script's printing after the Head's conditions of 16:49Z and the script was run again; the eight verdict lines are identical in both runs. The first output is kept in the desk's scratch folder.)
+
+**Verdict by the registered rule: the card SURVIVES step 1.** 420 of 627 events (67%) had 75% of the ten minute move in after one minute; the card closed at 80%. By sport: NHL 79% (268 of 339), NFL 56% (60 of 108), NBA 51% (92 of 180).
+
+**What that does and does not show, said plainly.**
+
+1. **Surviving the kill rule is not evidence of a lag.** The rule asked whether nearly all of the ten minute move is in after a minute. But the game goes on for those ten minutes: later scoring moves the spread again, and it would do so in a market with no lag at all. So a market with zero lag would not score 100% here either, and I did not work out what it would score before fixing 80%. That is a fault in my kill rule, found after the read.
+2. **Two selections in my own script push the share down.** Only events whose spread ended 3c or more the expected way are kept (132 others were not), and of each game's four spread markets the one that had moved MOST by minute ten is used. Both favour events where something more happened later.
+3. **The time pattern points away from a lag of minutes.** If quotes were catching up over a few minutes, the share would climb between minute 1 and minute 3. It is flat: median 0.88, 0.89, 0.90 at 1, 2 and 3 minutes, and the events at 75% or more go 420, 431, 431. Whatever catching up there is happens inside the first minute, which is the part a one-minute bot cannot see.
+4. **NHL is at the kill line (79%) and its spread is too costly anyway** (Forensics: round trip 6.4c to 6.9c).
+
+**My reading: do not spend step 2 as written** (400 to 500 requests and one try). The data lean against the card even though the letter of the kill rule did not fire.
+
+### Amendment proposed, NOT computed (needs the Head's ruling)
+
+One more zero-try number from the candles already pulled would settle it, with no new request. It was not in the registered script, so it is defined here before anyone computes it:
+
+- For every trigger event (all of them, with no condition on where the spread ends) and every spread market of that game with a usable quote at minute 1 and minute 10 after the signal: drift = the spread's mid at minute 10 minus its mid at minute 1, signed the way the moneyline jumped. Average over the game's spread markets (no picking), then over events. Reported per sport: events, mean drift in cents, standard error with games as the cluster.
+- **Rule, fixed now: the card is CLOSED if the mean drift is under that sport's round-trip cost in every sport** (4.5c for NBA and NFL, 6.4c for NHL, Forensics' figures). A sport whose mean drift is above its cost would go to step 2 alone.
+- A drift near zero is what a market with no lag gives. I expect well under 1c.

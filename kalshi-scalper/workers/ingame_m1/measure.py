@@ -73,16 +73,20 @@ def walk(node, found, hint=None):
             walk(v, found, hint)
 
 
-def minute_mids(candles):
+THIN = {}   # ticker -> set of minutes whose candle had no usable two-sided quote (counted, never filled in)
+
+
+def minute_mids(candles, ticker=None):
     """minute -> YES mid. A quote wider than 20c is not a price, unless the market is plainly decided (ask at or under 5c, or bid at or over 95c)."""
     out = {}
     for c in candles:
         b, a = price(c.get("yes_bid")), price(c.get("yes_ask"))
         b = 0.0 if b is None else b
-        if a is None or not (0 < a <= 1) or a < b:
-            continue
-        if (a - b) <= 0.20 or a <= 0.05 or b >= 0.95:
+        ok = not (a is None or not (0 < a <= 1) or a < b) and ((a - b) <= 0.20 or a <= 0.05 or b >= 0.95)
+        if ok:
             out[int(c["end_period_ts"]) // 60] = (a + b) / 2.0
+        elif ticker is not None:
+            THIN.setdefault(ticker, set()).add(int(c["end_period_ts"]) // 60)
     return out
 
 
@@ -112,21 +116,27 @@ def main():
                 walk(json.load(gzip.open(f, "rt")), cand)
             except (ValueError, OSError):
                 continue
-    events, no_clean, games_used, games_missing = [], 0, 0, 0
+    events, no_clean, no_minutes, games_used, games_missing = [], 0, 0, 0, 0
+    used_min, thin_min, absent_min = 0, 0, 0
     for g in games:
         a, b = g["ml"]                                    # the two moneyline tickers
-        ml = minute_mids(cand.get(a, []))
+        ml = minute_mids(cand.get(a, []), a)
         span = in_play(ml, g["sport"]) if ml else None
         if span is None:
             games_missing += 1
             continue
         keep = lambda series: {m: v for m, v in series.items() if span[0] <= m <= span[1]}   # the guard: in-play minutes only
         ml = keep(ml)
-        spreads = {t: keep(minute_mids(cand.get(t, []))) for t in g["spread"]}
+        spreads = {t: keep(minute_mids(cand.get(t, []), t)) for t in g["spread"]}
         if len(ml) < 30 or not any(len(v) >= 30 for v in spreads.values()):
             games_missing += 1
             continue
         games_used += 1
+        for tk, s in [(a, ml)] + list(spreads.items()):       # counts only: how many in-play minutes had a usable quote
+            thin = sum(1 for m in THIN.get(tk, ()) if span[0] <= m <= span[1])
+            used_min += len(s)
+            thin_min += thin
+            absent_min += max(0, (span[1] - span[0] + 1) - len(s) - thin)
         last = None
         for t in sorted(ml):
             if t - LOOKBACK_MIN not in ml or (last is not None and t - last < GAP_MIN):
@@ -138,11 +148,12 @@ def main():
                 continue
             last = t
             mover = team(a) if move > 0 else team(b)      # the team whose moneyline rose
-            best = None
+            best, had_minutes = None, False
             for tk, s in spreads.items():
                 need = [t - LOOKBACK_MIN, t + HORIZON_MIN] + [t + k for k in LAGS]
                 if any(m not in s for m in need):
                     continue
+                had_minutes = True
                 sign = 1.0 if team(tk) == mover else -1.0
                 full = sign * (s[t + HORIZON_MIN] - s[t - LOOKBACK_MIN])
                 if full < CLEAN_MOVE:
@@ -151,12 +162,17 @@ def main():
                 if best is None or full > best[0]:
                     best = (full, shares)                # one spread market per event: the one that moved most
             if best is None:
-                no_clean += 1
+                if had_minutes:
+                    no_clean += 1
+                else:
+                    no_minutes += 1                       # no spread market had a usable quote at every minute needed
                 continue
             events.append({"sport": g["sport"], "game": g["game"], "minute": t, "ml_move": move, "spread_move": best[0], "shares": best[1]})
     n = len(events)
     print(f"games in the list {len(games)} | used (decided inside the data, in-play candles present) {games_used} | not used {games_missing}")
-    print(f"trigger events with a clean spread move {n} | trigger events where the spread did not move {CLEAN_MOVE:.2f} the expected way {no_clean}")
+    print("candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim")
+    print(f"in-play market-minutes with a usable two-sided quote {used_min} | with a candle but no usable quote (thin or one-sided, not filled in) {thin_min} | with no candle at all {absent_min}")
+    print(f"trigger events with a clean spread move {n} | trigger events where the spread did not move {CLEAN_MOVE:.2f} the expected way {no_clean} | trigger events where no spread market had a usable quote at every minute needed {no_minutes}")
     if n:
         for k in LAGS:
             v = sorted(e["shares"][k] for e in events)
