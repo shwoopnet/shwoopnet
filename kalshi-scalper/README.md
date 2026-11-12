@@ -3022,3 +3022,18 @@ Context, not advice (simulation, 20,000 paths, resampling the record; true uncer
 
 **5. What this entry does not change.** No live rule: not the entry, size, ladder, drawdown stop, kill rules, caps, the shared 12 percent stop, window cap, direction lock, or `reviewedAt`. No deploy. A re-arm happens only through a later reviewed pull request, "OICORE re-arm: reviewedAt to YYYY-MM-DD (owner decision, recorded in README first)", merged and deployed by the owner.
 
+## SLOT-CFRTIBTC: a probe CANDIDATE, DRAFT, switched off (written 2026-11-12 by the Probe Engineering Desk; NOT registered for trading, no order has been or can be sent)
+
+**DRAFT. This section becomes a pre-registration only when the owner approves this exact probe by popup; the edit that flips `SLOT_PROBE_SWITCH.CFRTIBTC` removes the word DRAFT and records the owner's words and date here.** Full spec: `docs/probes/PROBE_SPEC_CFRTIBTC.md`. Research record: `workers/CFRTI1_PROTOCOL.md` and `workers/WATCH_CFRTI1_BTC.md` on the research branch; independent re-derivation `workers/DESK_A_VERIFY_NOV12.md` on `claude/idea-desk-a`.
+
+- **Rule.** `KXBTC15M` only. 180 to 120 seconds before the close, when the YES spread is 3c or less and the cheaper side costs 5c to 30c, and a three-venue spot model (`functions/kalshiSpotIndexLib.js`: fresh-venue mean index, sample standard deviation of sixty 10 second log changes, normal chance against Kalshi's own strike) puts that side's chance at least 5c above its price: buy 1 contract at the price seen, immediate-or-cancel, hold to settlement.
+- **Size and caps.** 1 contract an order (about $0.32 at most). Its own lifetime loss budget of $5, open orders counted as lost, sticky. Inside the slot's caps, the slot's own stop, the shared 12% stop and the 5.5% window cap. The direction lock applies.
+- **Kill.** The $5 budget; 20 losses in a row; net below $0 at any point from 100 settled fills; by reviewed edit, a research held-out read under 1.0 or a measured correlation of 0.3 or more with OICORE.
+- **Return.** A 14 day cool-off, then a paper or shadow run at cash profit factor 1.3 or better over 100 signals (second half 1.2 or better, no day over 30% of net), then the owner's approval; re-arming is a reviewed edit that moves `reviewedAt`.
+- **Prediction, written before any live order.** It loses slowly: the live look is about a minute earlier than the research look, one contract pays a rounded fee, and the lead is 36 picked trades after the pooled five-asset rule failed its bar (profit factor 1.14 against 1.3). [research] Prior that the edge is real: about 1% (the research session's own figure after the fail). The probe is an information purchase: do real fills at the quoted cheap price happen, and at what price.
+- **Counterparty.** None named.
+- **Number tried.** One rule, no parameter scan; the research ledger already counts CFRTI1 and its per-series cells.
+- **Uniqueness.** Not yet scored by the Verification Analyst. Known risk: the same market, minute and cheap side as OICORE.
+- **Open before any switch flip.** A person reads the three spot venues' market data terms for commercial use; the reader's response shapes are confirmed against the venues' documentation; the security agent reviews the code; the owner's popup.
+- **Forward read.** 2026-12-15, or when the budget is spent, whichever is first.
+

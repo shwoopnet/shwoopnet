@@ -56,6 +56,8 @@ const shardAlertLib = require("./kalshiShardAlertLib");
 const slotLib = require("./kalshiSlotLib");
 const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
+// The spot index reader for a probe candidate (kalshiSlotLib.SLOT_PROBE_SWITCH, all off): public trade lists, no key. The slot engine calls it only for a registered strategy with a modelEdgeMin entry, and none is registered.
+const spotIndexLib = require("./kalshiSpotIndexLib");
 const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
 const shadowSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
@@ -695,6 +697,8 @@ exports.kalshiLiveArmed = onSchedule(
               sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
               // Log only (Nov 5, 2026): why a strategy inside its entry span sent nothing. Called after the minute's orders, every error swallowed in runSlotTick; nothing that decides an order reads it.
               recordSkip: slotStoreLib.slotSkipWriter(db),
+              // Probe candidates only (all switched off): the spot model reading, public data, its own pinned hosts and time limits; null on any failure, and null is no order.
+              spotModel: (q) => spotIndexLib.modelForMarket({ ...q, fetchFn: fetch }),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }

@@ -76,6 +76,7 @@ function checkReasonCode(text) {
   if (/entry time window/.test(t)) return "outside_window";
   if (/entry band/.test(t)) return "price_out_of_band";
   if (/open interest/.test(t)) return "oi_below";
+  if (/model edge/.test(t)) return "model_edge_below";
   if (/spread/.test(t)) return "spread_wide";
   if (/release window/.test(t)) return "not_listed";
   if (/step|scaling in/.test(t)) return "scale_in";
@@ -208,6 +209,23 @@ function makeRunners(flags) {
       if (oiRise !== null) { const qn = (x) => (typeof x === "number" && Number.isFinite(x) ? x : null); qualified.set(s.id + "|" + ticker, { qualified: true, oiRise: qn(oiRise), side: side === "yes" || side === "no" ? side : null, price: qn(sidePrice) }); }
       // A strategy that skips its very cheapest entries (SLOT_SKIP_BELOW; OICORE under 8c): the signal passed every other test, so the skip is logged with the price and nothing is sent.
       if (slotLib.slotSkipsPrice(s, sidePrice)) { skip(job, "cheap_skipped", { price: sidePrice, min: slotLib.SLOT_SKIP_BELOW[s.id] }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", under the " + slotLib.SLOT_SKIP_BELOW[s.id].toFixed(2) + " this strategy skips"); continue; }
+      // The spot model condition (a probe candidate, Nov 12, 2026; off unless a registered strategy has modelEdgeMin). The reading comes from args.spotModel (index.js hands over
+      // kalshiSpotIndexLib.modelForMarket: public trade lists of three spot venues, no key). No reader, a reading that is null, throws or is not a chance between 0 and 1, or an edge under the
+      // strategy's line: no order. The look is the wall clock at the read, never the start of the minute, so the model sees every trade up to the moment it is asked.
+      let modelEdge = null, modelLog = null;
+      if (Object.prototype.hasOwnProperty.call(s.entry, "modelEdgeMin")) {
+        let r = null;
+        if (typeof args.spotModel === "function") {
+          let lookAt = Number(clock()); if (!Number.isFinite(lookAt)) lookAt = now;
+          try { r = await args.spotModel({ series, market: m, side, now: lookAt }); } catch (e) { r = null; }
+        }
+        const pSide = r && typeof r.pSide === "number" && Number.isFinite(r.pSide) && r.pSide >= 0 && r.pSide <= 1 ? r.pSide : null;
+        if (pSide === null) { skip(job, "model_unreadable"); results.push(ticker + ": the spot model could not be read, nothing sent"); continue; }
+        modelEdge = r4(pSide - sidePrice);
+        if (modelEdge < s.entry.modelEdgeMin - 1e-9) { skip(job, "model_edge_below", { edge: modelEdge, min: s.entry.modelEdgeMin, price: sidePrice }, side); results.push(ticker + ": model edge " + modelEdge.toFixed(3) + ", under " + s.entry.modelEdgeMin + ", no signal"); continue; }
+        const f = (x) => (typeof x === "number" && Number.isFinite(x) ? Number(x.toPrecision(8)) : null);
+        modelLog = { pSide: r4(pSide), index: f(r.index), sigma: f(r.sigma), steps: f(r.steps), venues: f(r.venues), strike: f(r.strike) };
+      }
       // The taker flow condition (FLOW1; public trade tape, no key): flow on the side bought over 360 to 180 s before the close, at most FLOW_PAGES pages. Unreadable means no order.
       let flow = null;
       if (Object.prototype.hasOwnProperty.call(s.entry, "flowMax")) {
@@ -253,7 +271,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, modelEdge, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -279,6 +297,7 @@ function makeRunners(flags) {
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         if (flow !== null) record.flow = Number(flow.toFixed(4));
+        if (modelEdge !== null) { record.modelEdge = modelEdge; record.model = modelLog; }   // log only: what the model said when the order was decided
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };
       // The same decision, with the refusal kept for the skip log. It changes nothing decide returns: the store sees exactly decideNow's verdict.

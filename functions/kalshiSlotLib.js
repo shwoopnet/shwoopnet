@@ -132,6 +132,39 @@ function slotCalendarSeriesDue(strategies, now) {
   return out;
 }
 
+// ---- Probe candidates (Nov 12, 2026, the Probe Engineering Desk; docs/probes/PROBE_SPEC_CFRTIBTC.md). OFF BY DEFAULT. --------------------------------------
+// A candidate is a complete, validated registry entry that is NOT in SLOT_STRATEGIES until its own switch below is exactly true. Flipping a switch is a reviewed code edit
+// made only after the owner's own popup for that exact probe; nothing stored, requested or typed on the page can flip one. While every switch is false SLOT_STRATEGIES is
+// exactly the entries written in it, so the deployed functions make the reads, writes and orders they made before (the off-equivalence fixtures are untouched).
+// Every candidate is UNPROVEN: a tiny live test to learn from real fills. Three limits apply to a candidate on top of every slot rule, all in code:
+//   - SLOT_PROBE_MAX_CONTRACTS: never more than this many contracts in one order, whatever its entry says;
+//   - SLOT_PROBE_BUDGET: a lifetime loss budget in dollars on its OWN orders since reviewedAt, open orders counted as lost. Once any point of its settled record is at or
+//     under minus the budget it never enters again until a reviewed edit moves reviewedAt (sticky, like the kill rules). No budget in code means no order;
+//   - SLOT_PROBE_HOLD: the candidates that may hold to settlement once switched on (the hold list SLOT_HOLD_ALLOWED itself is unchanged while they are off).
+// This is also the strategy's OWN stop that docs/STRATEGY_LIFECYCLE.md 7g asks for before two strategies share a market (CFRTIBTC shares Bitcoin with OICORE).
+const SLOT_PROBE_SWITCH = Object.freeze({ CFRTIBTC: false });
+const SLOT_PROBE_MAX_CONTRACTS = 1;
+const SLOT_PROBE_BUDGET_MAX = 20;                      // no candidate may be given more than the lifecycle's incubator cap
+const SLOT_PROBE_BUDGET = Object.freeze({ CFRTIBTC: 5 });
+const SLOT_PROBE_HOLD = Object.freeze(["CFRTIBTC"]);
+// CFRTIBTC: the research session's CFRTI1 Bitcoin cell (kalshi-scalper/README.md#SLOT-CFRTIBTC). Bitcoin 15 minute market only, 180 to 120 s before the close: when the
+// YES spread is 3c or less and the CHEAPER side costs 5c to 30c, and a three-venue spot model (kalshiSpotIndexLib) puts that side's chance at least 5c above its price,
+// buy 1 contract at the price seen and hold to settlement. Worst loss about $0.32 an order. BELOW the research bar: the pooled five-asset rule failed its registered bar and
+// the Bitcoin cell is 36 picked trades; the registration's own prior is about 1%. Kill rules: 20 losses in a row, or a net below $0 at any point from 100 settled fills
+// (profit factor under 1.0), and the $5 budget above, which binds first. reviewedAt is a placeholder: the edit that flips the switch sets it and SLOT_LAST_REVIEWED_ON to that day.
+const SLOT_PROBE_CANDIDATES = Object.freeze([
+  Object.freeze({
+    id: "CFRTIBTC", readme: "kalshi-scalper/README.md#SLOT-CFRTIBTC", series: Object.freeze(["KXBTC15M"]),
+    entry: Object.freeze({ sideRule: "cheap", priceMin: 0.05, priceMax: 0.3, leftMaxSec: 180, leftMinSec: 120, maxSpread: 0.03, modelEdgeMin: 0.05 }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 1,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 100, net: 0 }) }),
+    forwardReadDate: "2026-12-15", reviewedAt: "2026-11-10",
+  }),
+]);
+const SLOT_PROBE_IDS = Object.freeze(SLOT_PROBE_CANDIDATES.map((c) => c.id));
+const probesSwitchedOn = () => SLOT_PROBE_CANDIDATES.filter((c) => Object.prototype.hasOwnProperty.call(SLOT_PROBE_SWITCH, c.id) && SLOT_PROBE_SWITCH[c.id] === true);
+
 // ---- The registry. EMPTY in phase A. An entry is admitted only by a reviewed edit of this array. -----------------------------------------
 // Shape of an entry (every field required, unknown fields rejected):
 //   id            2 to 10 capitals or digits (it goes into the client order id)
@@ -175,6 +208,8 @@ const SLOT_STRATEGIES = Object.freeze([
   // order whose strategy is gone gets FALLBACK_EXIT in the slot engine (a 25c stop and always out 60 seconds before the close). See kalshi-scalper/README.md#SLOT-XRPYES10 and #SLOT-KESTREL for their return rules.
   // FLOW1 (seller-flow probe, live Nov 4, 2026) was REMOVED the same day after the research session's FLOW1 history test (2,568 windows, low-flow PF 1.13 to 1.23, low minus high -3.6c,
   // p 0.49) and the refinement chat's second out-of-sample block both found no reliable edge. The flowMax entry field and flowFromTrades stay in code; a re-admission is a reviewed edit.
+  // Probe candidates whose own switch is exactly true (SLOT_PROBE_SWITCH above). None is, so this adds nothing.
+  ...probesSwitchedOn(),
 ]);
 
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
@@ -184,6 +219,11 @@ const ENTRY_KEYS_OI = ENTRY_KEYS.concat(["oiRiseMin"]);
 const ENTRY_KEYS_CAL = ENTRY_KEYS.concat(["maxSpread", "calendar"]);
 // Optional (Nov 4, 2026, FLOW1): taker flow on the side bought over the 3 minutes before the look must be at or below this (net selling). A missing or unreadable flow means no order.
 const ENTRY_KEYS_FLOW = ENTRY_KEYS.concat(["flowMax"]);
+// Optional (Nov 12, 2026, the CFRTIBTC probe candidate): modelEdgeMin, how far a spot model's chance for the side bought must sit above its price (with maxSpread). A missing or
+// unreadable model reading means no order. A model entry may only buy the cheap side at 50c or less: above that it would be a favourite held to settlement, which needs the
+// owner's written exception and a reviewed edit of this bound.
+const ENTRY_KEYS_MODEL = ENTRY_KEYS.concat(["maxSpread", "modelEdgeMin"]);
+const SLOT_MODEL_PRICE_MAX = 0.5;
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
@@ -205,12 +245,16 @@ function validateSlotStrategy(s) {
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
   if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
   if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW)) e.push("entry has the wrong fields");
+  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW) && !exactKeys(s.entry, ENTRY_KEYS_MODEL)) e.push("entry has the wrong fields");
   else {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
     if (Object.prototype.hasOwnProperty.call(x, "flowMax") && !(isNum(x.flowMax) && x.flowMax >= -1 && x.flowMax <= 0)) e.push("entry.flowMax must be a share from -1 to 0 (net selling)");
+    if (Object.prototype.hasOwnProperty.call(x, "modelEdgeMin")) {
+      if (!(isNum(x.modelEdgeMin) && x.modelEdgeMin >= 0.02 && x.modelEdgeMin <= 0.5)) e.push("entry.modelEdgeMin must be 0.02 to 0.50");
+      if (x.sideRule !== "cheap" || !(isNum(x.priceMax) && x.priceMax <= SLOT_MODEL_PRICE_MAX + 1e-9)) e.push("a model entry may only buy the cheap side at " + SLOT_MODEL_PRICE_MAX + " or less");
+    }
     if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
     if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(x.calendar === s.id && Object.prototype.hasOwnProperty.call(SLOT_CALENDARS, x.calendar) && SLOT_CALENDARS[x.calendar].length > 0)) e.push("entry.calendar must name this strategy's own frozen calendar in SLOT_CALENDARS");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > SLOT_MAX_PRICE || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside " + SLOT_MIN_PRICE + " to " + SLOT_MAX_PRICE + " with priceMin below priceMax");
@@ -218,7 +262,7 @@ function validateSlotStrategy(s) {
   }
   if (isObj(s.exit) && Object.prototype.hasOwnProperty.call(s.exit, "holdToSettle")) {
     if (!(exactKeys(s.exit, ["holdToSettle"]) && s.exit.holdToSettle === true)) e.push("exit.holdToSettle must be the only exit field, and true");
-    if (!SLOT_HOLD_ALLOWED.includes(s.id)) e.push("this strategy is not on the reviewed list that may hold to settlement");
+    if (!SLOT_HOLD_ALLOWED.includes(s.id) && !SLOT_PROBE_HOLD.includes(s.id)) e.push("this strategy is not on the reviewed list that may hold to settlement");
   } else if (!exactKeys(s.exit, EXIT_KEYS)) e.push("exit has the wrong fields");
   else if (isObj(s.entry) && isNum(s.entry.priceMin)) {
     const x = s.exit;
@@ -508,6 +552,20 @@ function slotLadderState(strategy, slotOrders, sizingBase) {
   return { laddered: true, step: idx, size, fillsAtStep: at.length, drawdown, ddStop, dailyCap };
 }
 
+// A probe candidate's own budget, replayed from its own orders (pure; null for a strategy that is not a candidate). `spent` is sticky: true if ANY point of its settled record since
+// reviewedAt was at or under minus the budget, or if its record with every open order counted as lost is there now. `room` is what one more order may cost.
+function probeState(strategy, slotOrders) {
+  if (!strategy || !SLOT_PROBE_IDS.includes(strategy.id)) return null;
+  const raw = Object.prototype.hasOwnProperty.call(SLOT_PROBE_BUDGET, strategy.id) ? SLOT_PROBE_BUDGET[strategy.id] : NaN;
+  if (!(isNum(raw) && raw > 0 && raw <= SLOT_PROBE_BUDGET_MAX)) return { spent: true, room: 0, net: 0, budget: 0 };
+  const { rows, openWorst } = ownResults(strategy, slotOrders);
+  let cum = 0, low = 0;
+  for (const x of rows) { cum += x.net; low = Math.min(low, cum); }
+  const worst = cum + (isNum(openWorst) ? openWorst : -raw);
+  const spent = low <= -raw + 1e-9 || worst <= -raw + 1e-9;
+  return { spent, room: spent ? 0 : Math.max(0, raw + Math.min(worst, 0)), net: cum, budget: raw };
+}
+
 // ---- The one gate every slot order passes ----------------------------------------------------------------------------------------------
 // Returns { allowed, count, reasons, cost, cid }. `count` is the wanted count cut down to whatever every cap allows; allowed is false when that is under 1.
 // Never throws on bad input. Inputs: strategyId, ticker, side, limit (price of the side bought), step, wanted (optional, default contractsPerOrder), depthAtTouch (size resting at the
@@ -528,6 +586,7 @@ function slotOrderCheckWith(flags, input) {
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "flowMax") && !(isNum(i.flow) && i.flow >= -1 && i.flow <= strategy.entry.flowMax + 1e-12)) return no("the taker flow is missing or above " + strategy.entry.flowMax);
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "oiRiseMin") && !(isNum(i.oiRise) && i.oiRise >= strategy.entry.oiRiseMin)) return no("the open interest rise is missing or below " + strategy.entry.oiRiseMin + " contracts");
   // A calendar strategy enters only the window that closes at a listed release (the close Kalshi reports and the ticker's window code must both match one frozen row); a spread rule refuses a missing or wide spread.
+  if (Object.prototype.hasOwnProperty.call(strategy.entry, "modelEdgeMin") && !(isNum(i.modelEdge) && i.modelEdge <= 1 && i.modelEdge >= strategy.entry.modelEdgeMin - 1e-9)) return no("the model edge is missing or below " + strategy.entry.modelEdgeMin);
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "calendar") && !slotCalendarRow(strategy, i.ticker, i.closeTime)) return no("this market's window is not a listed release window");
   if (Object.prototype.hasOwnProperty.call(strategy.entry, "maxSpread") && !(isNum(i.spread) && i.spread >= 0 && i.spread <= strategy.entry.maxSpread + 1e-9)) return no("the spread is missing or wider than " + strategy.entry.maxSpread);
   if (!Array.isArray(i.slotOrders) || !Array.isArray(i.l1Orders) || i.slotOrdersComplete !== true) return no("the order books were not read in full, so the caps cannot be checked");
@@ -535,6 +594,9 @@ function slotOrderCheckWith(flags, input) {
   if (i.lockTxn !== true) return no("no proof that the direction lock was taken in the same transaction as the order");
   const k = killCheck(strategy, i.slotOrders, i.killLatch === undefined ? null : i.killLatch);
   if (k.killed) return no("killed: " + k.reason);
+  // A probe candidate trades only inside its own lifetime loss budget (sticky; open orders counted as lost). No budget in code, or a budget already spent, is no order.
+  const probe = probeState(strategy, i.slotOrders);
+  if (probe && probe.spent) return no("killed: the probe's own loss budget is spent or missing ($" + probe.budget.toFixed(2) + ")");
   const e = strategy.entry;
   if (!isNum(i.limit) || i.limit < e.priceMin - 1e-9 || i.limit > e.priceMax + 1e-9) return no("the price is outside the strategy's entry band");
   if (!isNum(i.secondsLeft) || i.secondsLeft > e.leftMaxSec || i.secondsLeft < e.leftMinSec) return no("not inside the strategy's entry time window");
@@ -569,6 +631,7 @@ function slotOrderCheckWith(flags, input) {
   const wanted = Number.isInteger(i.wanted) ? i.wanted : sizeNow;
   const reasons = [];
   let n = Math.min(wanted, sizeNow, lad.laddered ? SLOT_LADDER_MAX_CONTRACTS : SLOT_MAX_CONTRACTS_PER_ORDER);
+  if (probe) n = Math.min(n, SLOT_PROBE_MAX_CONTRACTS);
   const openHere = risk.openContractsByTicker[i.ticker] || 0;
   const openLimit = lad.laddered ? Math.min(Math.max(SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, sizeNow), SLOT_LADDER_MAX_CONTRACTS) : SLOT_MAX_OPEN_CONTRACTS_PER_MARKET;
   n = Math.min(n, openLimit - openHere, Math.floor(i.depthAtTouch * SLOT_DEPTH_SHARE + 1e-9));
@@ -583,7 +646,7 @@ function slotOrderCheckWith(flags, input) {
   const dailyRoom = caps.daily + risk.day.worst, lifeRoom = lad.laddered ? lad.ddStop - lad.drawdown : caps.lifetime + risk.lifetime.worst;
   while (n >= 1) {
     const c = costOf(n);
-    if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;
+    if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9 && (!probe || c <= probe.room + 1e-9)) break;
     n -= 1;
   }
   if (n < 1) return no("no whole contract fits the caps (per order, per market, depth share, window, total, the shared window limit, or what is left of the daily and lifetime loss caps)");
@@ -666,6 +729,7 @@ module.exports = {
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
+  SLOT_PROBE_SWITCH, SLOT_PROBE_CANDIDATES, SLOT_PROBE_IDS, SLOT_PROBE_BUDGET, SLOT_PROBE_BUDGET_MAX, SLOT_PROBE_MAX_CONTRACTS, SLOT_PROBE_HOLD, SLOT_MODEL_PRICE_MAX, probeState,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields, fillCost,
