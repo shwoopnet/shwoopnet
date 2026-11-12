@@ -17,3 +17,10 @@ Source of the idea: in W-CAT-SPORTS1 (SPORTS_CAL_REGISTRATION.md, SPORTS_CAL_RES
 - NOT STARTED. Waiting for Main's go.
 
 READ-ONCE MARKER: NEW HELD-OUT BLOCK NOT READ as of 2026-11-12.
+
+## Outcome labels (added Nov 12, 2026, BEFORE SPREADCELL1 is dispatched; Head of R&D request)
+- PASS: n of 100 or more events in the cell, PF at +1c of 1.5 or more, event-clustered 90 percent lower bound above 0, one-sided z of 3.1 or more.
+- FAIL: n of 100 or more and (PF at +1c under 1.2 or lower 90 percent bound below 0).
+- LEAD (the middle): n of 100 or more and neither PASS nor FAIL. A LEAD is not a pass: no probe, no popup; the forward shadow S2 (SHADOW_RULES_NOV12.md) continues to a stated n of 100 shadow fills and is read once.
+- UNDERPOWERED: n under 100, reported as 'no evidence at n = x', never FAIL.
+- One command prints the read (spread_cell1_score.py); it prints nothing but 'pull incomplete' until the pull is marked complete.
