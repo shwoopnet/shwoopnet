@@ -5,7 +5,7 @@ Asked by Main: ready-to-run protocols for WXDAYEND (card 74), the economics rele
 Status of the three:
 - **Q1 WXDAYEND: do not write a second test. It already has a registration and a FAIL on the Refinement branch.** What is below is only a zero-call way to finish the half of the sample that was never pulled.
 - **Q2 POL-n1 Wikipedia attention: full protocol below.**
-- **Q3 Economics release fade: waiting on Refinement** for card 87's rule text (the row is redacted on the branch tip) and for what its economics worker has already pulled. I will not guess a rule for someone else's card. A short frame of the points the protocol must fix is at the end.
+- **Q3 Economics release fade (card 87): full protocol below**, written after Refinement sent the card's rule text (Nov 12). Which card is the "official-components idea" is still open; see the note in Q3.
 
 ---
 
@@ -67,14 +67,32 @@ Source card: `refine_tools/POLITICS_CARDS_NOV11.md`, row POL-n1 (Refinement). Ow
 
 ---
 
-## Q3. Economics release fade (card 87, with the official-components idea): frame only, pending Refinement
+## Q3. Economics release fade (card 87, with the official-components idea): frame ## Q3. ECONFADE (card 87): fade a rate-market shock after a CPI or payrolls print
 
-I asked Refinement (Nov 12) for card 87's rule text and for what its economics worker has pulled. Until that arrives I will not write a rule for it. The points the protocol has to fix, so the reply can be turned into one quickly:
+Source card: row 87 of `refine_tools/CARDS_NOV11_ROWS_74_93.md` (Refinement). The row is redacted on the branch tip; Refinement sent me the rule text on Nov 12 and confirmed the card was registered only, never scored, with no 1 minute candles pulled. Refinement's economics worker (W-CAT-ECON1) holds hourly candles on 66 other economics series and nothing on these two, so no pull here duplicates it.
 
-1. **Event list, frozen first:** the release days and times, from the official schedules (BLS for CPI and payrolls; the Fed for decisions), keyed by hand like EVENT830's calendar. No date found after the fact.
-2. **Markets:** which series the fade trades (the card's ranking line says the Fed meeting series) and which strike of it (the one nearest 50c at the last candle before the release, fixed before the print).
-3. **Shock definition without look-ahead:** the move from the last candle that closed BEFORE the release second to the candle closing 10 minutes after; a shock is 15c or more. The reference candle must end before the release, not at it.
-4. **Entry and exit:** the side against the move, at the ask of the candle closing at minute 10; a TIME exit at the bid of the candle closing at minute 20 (this is the first card in the queue with a real time exit, which the lifecycle notes as a gap). Entry and exit fees both count.
-5. **Counted together:** the fade and the official-components idea share one deflation count (owner, popups 29 to 40). The official-components rule has to be stated by its own card before either is scored.
-6. **Sample honesty:** about 12 CPI and 12 payroll prints a year and 8 Fed decisions; three years is under 100 events before the shock filter, so NOT_ENOUGH_DATA is the expected first verdict and the protocol must say when n 40 per half could exist.
-7. **No duplicate pulls:** use whatever candles Refinement's economics worker already holds; list the gaps as a `kalshi-pull` job, not a second crawl.
+**The card's rule, as sent.** Markets: `KXFEDDECISION` and `KXFED` only (the Fed meeting and rate-level markets). Events: CPI and payrolls prints at 8:30 ET. Shock: a bracket's mid moves at least 15c in the first 10 minutes after the print. Entry: buy the side that the move went AGAINST, only if the move has retraced at least 4c by minute 20; price 10c to 60c; one entry per event. Exit: hold to settlement; a second arm exits after 6 hours. Kill bar on the card: PF 1.3 in both halves, n 40 per half.
+
+**What the card leaves open, fixed here before any candle is read:**
+- **Event list.** Every CPI and Employment Situation release with its actual release date and time, keyed by hand from the BLS release archive (not the planned calendar: a release moved by a shutdown or holiday enters at the time it really came out). One CSV committed first: `event_id, kind, release_utc, source line`. Range: as far back as Kalshi serves 1 minute candles for these two series (counted in step 0), at most from 2024-01.
+- **Which markets at each event.** Those of the two series whose event is the NEXT scheduled Fed meeting (for `KXFED`, the rate level after that meeting) and whose YES mid at the reference candle is 0.10 to 0.90. Chosen from the reference candle only.
+- **Reference.** The last 1 minute candle that ENDS at or before the release second (for 8:30:00 ET, the candle ending 8:30:00, which covers 8:29:00 to 8:29:59). Mid = (YES bid + YES ask) / 2 at its close. A candle that ends after the release is never the reference.
+- **Shock.** Among candles ending 1 to 10 minutes after the release, the largest move of the mid from the reference in one direction is at least 0.15. Its extreme mid is `E`, its direction `d` (+1 if YES rose).
+- **Retrace.** At the candle ending 20 minutes after the release the mid is at least 0.04 back from `E` toward the reference.
+- **One per event.** If several markets qualify, take the one with the largest shock; ties go to the higher volume over the previous day. (The choice uses the shock itself, which is the trigger, and nothing after minute 20.)
+- **Entry.** At the close of the minute 20 candle, buy 1 contract of the side the move went against (NO if YES rose) at that side's ask (NO ask = 1 minus YES bid), only if that ask is 0.10 to 0.60. No two-sided quote: skip and count.
+- **Arm H:** hold to settlement. **Arm T:** sell at that side's bid at the close of the candle 6 hours after entry. Two tries.
+- **Fees.** Taker fee on entry, and on the sale in arm T. Report every figure twice: unrounded, and with the fee rounded up to the cent as a real one-contract order pays (the MMSIM1 check showed the difference can be a tenth of a point of PF).
+
+**Step 0, counts only (one small pull).** For each event, 1 minute candles from 30 minutes before to 25 minutes after the release for the single market of the next meeting nearest 50c at the previous day's close: one request an event, about 70 requests, one `kalshi-pull` job or a tester's budget. Count the events with a shock and with a confirmed retrace. **Stop as NOT_ENOUGH_DATA, before any outcome is read, if fewer than 40 events show a confirmed retrace.** With about 70 prints in three years and a 15c trigger on a rate market, I expect well under 40, so I expect this card to end here and move to a forward log. Say the count.
+
+**Step 2, scored once, only if step 0 clears.** Pull the remaining markets and the 6 hour paths (the gaps only). Cuts: events by release time, first two thirds development, last third held out and read once. Bars: the card's (PF 1.3 in both development halves, n 40 per half) is the screen for a forward shadow; the research bar (PF 1.5 on development and held-out, deflated) applies to anything beyond that. FALSIFIED if development PF is under 1.0 at n 40 or more. Baselines beside each arm: the same entry with no retrace condition, and the follow side (with the move).
+
+**Counted together.** The owner's rule counts this fade and "the official-components idea" in one deflation count. Refinement has no card by that name. The two candidates I can see are Desk B's UNRATEROUND (an official arithmetic prior from an already published number) and Refinement's row 77 (retail gasoline to the CPI gasoline component). Main should say which is meant; whichever it is, its tries are added to this card's two before either is scored.
+
+**Limits a live version would hit (said now).**
+- **Hold length.** The rulebook keeps economics positions to 14 days to settlement. A Fed meeting can be six weeks after a print, so arm H is inside the rule only when the meeting is within 14 days of the print. Score all events for research and report the within-14-days subset separately; arm T (6 hours) has no such problem but is a time exit, which the rulebook's "hold to settlement" line does not cover without the owner's say.
+- **Overlap with Desk B's ECONLAG** (a 4 hour time exit on the slower macro market after the same prints). Different signal (a lag between markets, not a shock in one), same event days, similar candles. The two should share one candle pull and the Verification Analyst should look at their correlation before both go forward.
+- **Sample.** About 24 prints a year. A forward log reaches 40 confirmed retraces in years, not months, unless the trigger is loosened, and loosening it after seeing the count is a new registration.
+
+**What would make the result a lie.** (1) A reference candle that includes the release second. (2) Choosing the market by anything after minute 20. (3) Using the planned release time for a release that was moved. (4) Counting a market's two sides as two events. (5) Reading the held-out third to decide whether to keep the retrace condition.
