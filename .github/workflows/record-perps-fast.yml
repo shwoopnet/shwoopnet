@@ -1,10 +1,16 @@
 # Samples Kalshi's PUBLIC perpetual markets every 30 seconds around the US stock open and close (research only, Nov 5, 2026, the owner: "Faster data, then 10 to 20 tests").
 # No secret is used or needed: plain GETs of a public endpoint; the built-in GITHUB_TOKEN only pushes gzipped CSV to the `perp-data` branch (under perps30/), never to main.
-# Started every 20 minutes on weekdays; the script itself records only inside the two New York time windows and exits at once otherwise. Stops by itself after 2027-02-26.
+# Nov 12, 2026: in its first week GitHub ran 9 of the roughly 165 scheduled starts (the old "*/20 12-22" cron) and none landed inside a window, so only one close file exists. Starts are now packed into the windows:
+# every 10 minutes from 13:02 to 15:22 UTC (the 09:10 to 10:30 New York open, both daylight saving offsets) and 19:42 to 21:52 UTC (the 15:40 to 17:00 close), 29 starts a day against 33 before, so a dropped start is covered by the next.
+# The script records only inside the two New York windows (to the window end, so a late start only records less) and exits at once otherwise; one group never cancels, so a later start queues behind a running one and finds the window already recorded or over.
+# Stops by itself after 2027-02-26.
 name: record-perps-fast
 on:
   schedule:
-    - cron: "*/20 12-22 * * 1-5"
+    - cron: "2,12,22,32,42,52 13,14 * * 1-5"
+    - cron: "2,12,22 15 * * 1-5"
+    - cron: "42,52 19 * * 1-5"
+    - cron: "2,12,22,32,42,52 20,21 * * 1-5"
   workflow_dispatch: {}
 permissions:
   contents: write
