@@ -73,6 +73,13 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 
 **Gold (coded Nov 10, 2026, the owner):** a killed gold returns only by a reviewed edit that moves `GOLD_KILL.rearmAt`, after the shadow GOLDALL rows show PF 1.3 or better (GOLDALL was retired Nov 11, 2026 with the other favourite-late shadow rules, so this evidence needs a fresh GOLDALL shadow run under its return rule, a reviewed edit, or the owner naming another source) over at least 60 trades and 7 days with the second half at 1.3 or better, and the owner approves; the first 30 trades after the re-arm go at half size. Refinement warned this bar is stricter than gold's long run record and may keep a normal gold out; the cost of that is idle gold, not lost money. OICORE if killed returns by the general rule above. The banned structures stay banned: no favourite and hold, no expensive entry long hold (GOLDHOLD was declined Nov 9).
 
+## 5b. Gold is off until a shadow proves it (Nov 12, 2026, the owner)
+
+1. **When the gold kill latch trips, gold STAYS OFF** until a shadow record proves it. It returns only by the written rule: shadow profit factor 1.3 or better (at least 60 trades, at least 7 days, second half 1.3 or better), then the owner re-arms by a reviewed edit at half size for the first 30 trades. No date is promised and nothing restarts automatically.
+2. **While gold is off, OICORE and EVENT830 are left to their own kill rules, small.** Nothing new goes live until it earns it.
+3. **Exact latch rules today** (`functions/kalshiGoldKillLib.js`, cash basis, fees included, gold's own settled orders since 2026-11-10 00:00 UTC): drawdown from gold's own cash peak reaching the fixed $58.75 line, or cash net under -$20 once 40 trades have settled. Sticky; the checker never clears a latch; alerts never latch.
+4. **Finding (investigation, Nov 12):** after a trip nothing records gold's would-be orders. The tick drops gold before it looks at quotes, the shadow registry is empty (GOLDALL retired Nov 11, its older rows stay in `kalshiShadowRows`), and the public quote recorder only covers the last 150 seconds, not gold's 6 minute look. So rule 1's evidence cannot accumulate yet. The smallest fix is one log-only shadow rule on gold (a reviewed edit of `SHADOW_RULES`, `bash functions/deploy-sizing.sh`), allowed as a written exception to the 7c cap while gold is latched off, because it is the return evidence for a LIVE strategy that is off and not a duplicate of anything running. Details: `docs/GOLD_KILL_LATCH.md`, section "After the trip". Not built yet.
+
 ## 6. Capital rules and the fast path's safety limits
 
 - Today's slot caps (fractions of the sizing base: order 1%, window 2%, open 3%, day 2%, lifetime 6%) are SHARED across the slot, so one incubator could eat OICORE's room. **That needs a code change: per strategy caps.**
@@ -150,6 +157,8 @@ Trigger: after an audit the owner said "we have multiple duplicates that I hard 
 4. The Release Manager checks this list on every strategy pull request, and the weekly rotation review (7b) lists it.
 5. Only the owner removes an entry.
 6. **A correlation rejection is recorded (owner popup, Nov 11, 2026).** A candidate rejected under 7d check 3 (Pearson r of 0.3 or more with a live strategy) is added as a row with: the correlation number, the live strategy it matched, the dates of the overlapping window, and the status "Declined (duplicate)". The names it must not return under are its own name and the live strategy's mechanism.
+
+**Slow-family paper list (Nov 12, 2026, owner).** A slow family (fewer than about 52 independent events a year) may be listed on PAPER only by the lower screen in `docs/POLITICS_RULES.md` section 8. A listing is labelled unproven, is not a shadow-list entry and permits no live order; the declined list above is checked first, as for every candidate.
 
 A Charter line making the check explicit is proposed for the owner. `docs/CHARTER.md` says only the owner changes it, so it is not edited here.
 

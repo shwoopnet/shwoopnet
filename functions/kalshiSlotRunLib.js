@@ -275,7 +275,7 @@ function makeRunners(flags) {
         if (!Number.isFinite(avail)) return { allowed: false, code: "balance_unreadable", reason: "the balance came back in a shape this code does not recognise" };
         if (avail < c.cost + BALANCE_MARGIN) return { allowed: false, code: "shard_short", detail: { shard: Number(m.exchange_index), avail: Number(avail.toFixed(2)), need: Number((c.cost + BALANCE_MARGIN).toFixed(2)) }, reason: "only $" + avail.toFixed(2) + " on its shard" };
         const record = slotLib.slotOrderRecord({ strategyId: s.id, ticker, side, step, count: c.count, limit: touch, maxCost: Number(c.cost.toFixed(2)), ts: now });
-        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise,
+        Object.assign(record, { accountId: live.DEFAULT_ACCOUNT_ID, series, price: sidePrice, exchangeIndex: m.exchange_index === undefined ? null : m.exchange_index, mode: "live", oiRise: typeof oiRise === "number" && Number.isFinite(oiRise) ? oiRise : null,
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         if (flow !== null) record.flow = Number(flow.toFixed(4));
