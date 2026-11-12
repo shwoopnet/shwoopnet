@@ -121,11 +121,11 @@ def run_family(fam, K, markets, candles, bounds):
     plb = []
     for e, tks, c in matches:
         d = placebo_decision(c, tks, cand, kind, K, drops)
-        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] == "void", into_play=d["into_play"], day=day(c)))
+        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] == "void", nores=markets[d["ticker"]]["result"] not in ("yes", "no", "void"), into_play=d["into_play"], day=day(c)))
     bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
     pb = collections.defaultdict(list)
     for p in plb:
-        pb[bucket(p["price"])].append(-fee_up(p["price"]) if p["void"] else net_of(p["price"], p["win"]))
+        pb[bucket(p["price"])].append(-fee_up(p["price"]) if (p["void"] or p["nores"]) else net_of(p["price"], p["win"]))      # same booking as the rule arm: void and no-result are fee-only losses, counted
     mix = collections.Counter(bucket(b["price"]) for b in bets); wsum = 0.0; pnet = 0.0; var = 0.0
     for bkt, cnt in mix.items():
         v = pb.get(bkt)
@@ -246,6 +246,11 @@ def selftest():
     try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("held-out window not refused")
     except SystemExit as ex: assert "REFUSED" in str(ex)
     DEV_BOUNDS = (0, 10 ** 12)
+    mk, cd = fam(200, 0.80, seed=8)
+    for tk in list(mk)[:40]: mk[tk]["result"] = None                                     # no result, not a void: both arms book a fee-only loss
+    L8, b8 = run_family(FAMILY, K, mk, cd, far); assert any("not voids (fee-only loss, counted): 20" in x for x in L8) and len(b8) == 200 and all(abs(b["net"] + fee_up(b["price"])) < 1e-9 for b in b8 if b.get("nores")), L8
+    pm = [{"price": 0.54, "win": False, "void": False, "nores": True}]
+    assert -fee_up(0.54) == (-fee_up(pm[0]["price"]) if (pm[0]["void"] or pm[0]["nores"]) else net_of(0.54, False))
     # the pilot never reads a result: strip them and it still runs
     mk, cd = fam(60, 0.8, seed=7)
     for m in mk.values(): m.pop("result")
