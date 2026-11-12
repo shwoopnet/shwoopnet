@@ -1,0 +1,15 @@
+recorder files end 2026-11-12 21:56Z | open markets inside the 30 day cap: 140
+family | series with an open market | open markets | events | closing in 7 days: markets, EVENTS | two-sided in 14 d | in 30 d | spread 4c or less in 14 d | in 30 d | events with a tight market in 30 d | weeks to 60 EVENT signals at 10/25/50%
+activity counts (orders, posts, acts, endorsements, nominations) | 8 | 58 | 10 | 40, 6 | 26 | 38 | 26 | 33 | 8 | 100/40/20
+shipping and straits counts (foreign) | 6 | 52 | 6 | 52, 6 | 50 | 50 | 41 | 41 | 5 | 100/40/20
+approval | 3 | 27 | 4 | 27, 4 | 21 | 21 | 15 | 15 | 4 | 150/60/30
+scheduled-event politics (votes, bills, deadlines, confirmations) | 3 | 3 | 3 | 1, 1 | 1 | 3 | 1 | 2 | 2 | 600/240/120
+ALL recorded families pooled: events closing in 7 days 17 | weeks to 60 event signals at 10/25/50%: 35/14/7
+series in the family map 45 | with an open market inside the cap 20
+
+Notes for the reader (Idea Desk B, Nov 12, 22:10Z; a first cut, the full answer is due Nov 13):
+- The unit that matters is the EVENT. Almost every series here is a ladder: one event with 5 to 15 strikes on the same count or level, so its markets are not independent signals.
+- "Events closing in 7 days" undercounts a daily series that lists only a day or two ahead (the approval series KXTRUMPAPPROVE settles an event a day, about 7 a week, with 2 listed at once).
+- 25 of the 45 listed series had no open market inside the 30 day cap at this moment.
+- Mention markets (nightly news shows, speeches) are NOT in the politics recorder. On the Nov 10 census day four political mention events settled with 51 word markets (a lower bound, one Tuesday).
+- Election settlement markets were a post-midterm burst on Nov 10 (313 markets that day), not a weekly rate.
