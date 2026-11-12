@@ -65,7 +65,7 @@ Every recorder file holds what happened after the entry: the result field, and p
 | Engine | Owner | Can it read the recorder's files? |
 |---|---|---|
 | REMATCH stage 1 reader (`rematch/stage1_measure.py`) | this desk | Yes for the decision inputs: it reads minute candles keyed by the minute's end, which is the shape of `candles.csv.gz` after a small loader. The scorer and the fill check are not built yet; they are built with this file format in mind. |
-| MAPBREAK (`breakplay.py`, `scorekit.py`) | Testing Desk | Not confirmed by me. It reads minute candles and lists, so the candle and results files should fit after a loader; the fill check on the book file is new code. The Testing Desk must confirm. |
+| MAPBREAK (`breakplay.py`, `scorekit.py`) | Testing Desk | **Confirmed by the Testing Desk, 20:06Z:** yes with a loader only, and with no loader at all if the candle read and the results list are stored as kalshi-pull style answer files (see the section added below). The rule stays candle-based; the book only adds the fill check, which is about a day's work once a short real sample file exists. |
 | INPLAYJUMP (`desk_a_verify/inplayjump.py`) | Desk A | Not confirmed by me. Same position; it also needs the candle volume, which is why section 4 keeps candles. Desk A must confirm. |
 | ESOCTIE | History Miner | **Confirmed by the History Miner, 20:06Z:** it decides at S minus 60 seconds on the latest minute where the Tie and both team contracts are two-sided, stepping back no further than S minus 10 minutes, so the FAST tier from S minus 10 minutes covers every look and the fill check. Its engine reads kalshi-pull run folders through the Testing Desk's loaders, so it needs one small loader that yields the same records (markets: ticker, event, open, close, result; candles: time, bid and ask closes); no change to the scorer. |
 
@@ -82,4 +82,14 @@ ITF and challenger markets are open about 18 hours and carry no start clock, so 
 3. **The wheel's record is fill-checked on a real book.** The engines decide from the minute candle exactly as registered; the book file is used for the fill check. A record from candles alone is not a wheel record.
 4. **Every event is recorded, not only ones a rule might bet** (ESOCTIE's walk-forward base rate needs each past event's team prices at its own decision minute). The results rows must keep, per market: `open_time` (ESOCTIE's universe guard is "the Tie opened 10 to 240 minutes before S"), `close_time`, `settlement_ts` (its base rate admits a result only 300 seconds after the close), `result` and `exchange_index`. All five are already in section 4's list.
 5. Tennis is phase 2 (agreed by the Head).
+
+## Added 20:07Z (the Testing Desk's answer for MAPBREAK)
+
+1. **Correction to section 2, map markets:** `KXCS2MAP` and `KXDOTA2MAP`, maps 1 AND 2, BOTH teams' contracts of each map, are recorded SLOW from S minus 45 minutes (not from S) until that map market is no longer open. MAPBREAK's placebo needs the two map-1 contracts' pre-match candles, and its "state known" count needs the map-2 contracts in the minutes before map 2 closes.
+2. **File shapes, so the engines load them unchanged:**
+   - **Candles and results are stored as the raw answer bodies,** gzipped JSON with Kalshi's own keys, plus a small manifest naming each file, its request path and parameters and its status: the same shape as a kalshi-pull run folder (`manifest.json` and `NNNN.json.gz`). The Testing Desk's loaders, which MAPBREAK and ESOCTIE use, then read them with no new code.
+   - **Book rows** (CSV, one row per contract per stored poll): poll id, send time and receive time in milliseconds, server Date header, tier, ticker, then YES bid price and size for levels 1 to 5 and NO bid price and size for levels 1 to 5 (empty where a level is absent).
+   - **Poll rows** (CSV, one row per poll, every poll): poll id, send time, receive time, server Date header, tier, tickers asked, tickers answered, HTTP status.
+3. **Results must include the map-1 and map-2 markets and the match markets** (they are MAPBREAK's states and outcomes). Section 4's list read per series already covers all three series of each title.
+4. **A sample first:** once the recorder has run for an hour, Main sends the Testing Desk a few minutes of one match's files; the Testing Desk builds the loader and the two-poll fill check against it.
 
