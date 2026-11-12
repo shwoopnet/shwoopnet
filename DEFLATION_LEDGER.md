@@ -18,7 +18,8 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | W-SPREAD-CELL1, line 1 (registered) and line 2 (known-in-advance look) | Refinement | 2 | registered, not read |
 | CFRTI1-BTC, Kraken-only, plus two disclosed unregistered looks (Coinbase alone, Bitstamp alone) | Desk A | 3 | development read done Nov 12: no evidence at n = 32 (Kraken); carried to the held-out read |
 | CFRTI-K (Kalshi perpetual in place of outside spot) | Desk A | 1 | to be registered before scoring |
-| QUOTE2B | Desk A (was V2) | as registered Oct 29, no new try | cutoff being pinned; development read next |
+| QUOTE2B | Desk A (was V2) | as registered Oct 29, no new try | development read done Nov 12: cash PF 0.00 on 131 hours, FALSIFIED on development (registration asked for 300 hours); held-out Nov 24 |
+| Refinement's hand-registered cells of Nov 11 to 12, as itemised by Refinement on Nov 12: W-NO-ARM1 6; W-SPOTLEAD1 16; W-CAT-ECON1 36; W-CAT-SPORTS1 72; weather 36; W-POL-APPR1 240; politics screens 3 | Refinement | 409 | read (news fade: 36 cells registered, not run, not counted yet). Some of these may already sit inside the 12,600 above; the overlap is not resolved, so the total stays "about" |
 | ROLLOFF proxy check | Desk B | 0 (a measurement; 30 window candidates fitted on fit days, kill rule read once on check days) | scorer committed, verdict due |
 
 ---
