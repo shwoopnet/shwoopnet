@@ -281,6 +281,80 @@ def score(trades, cfg=None):
     return out
 
 
+# ---------- EXITS AND RESTING ORDERS (standing rule (i), Head Nov 12: an exit or a limit entry is part of the rule; a different one is a NEW TRY) ----------
+def fee_rounded(p, mult=1.0):
+    """One contract's fee, rounded UP to the next whole cent (the 1-contract convention of the amended cards)."""
+    return math.ceil(round(0.07 * mult * p * (1 - p) * 100, 6)) / 100
+
+
+def round_trip_cost(bid, ask, rounded=True):
+    """The ROUND TRIP cost of a taker entry at the ask and a taker exit at the bid: spread plus the two fees at the entry and exit prices. A rule WITH an exit is killed on this above 5c (hold-to-settlement rules use the one-way entry cost, 4c)."""
+    f = fee_rounded if rounded else fee
+    return (ask - bid) + f(ask) + f(bid)
+
+
+def exit_bid(series, ts, polls=None):
+    """The bid a taker exit sells at in the exit minute `ts` (a candle end): the first book poll at or after the minute when a book exists (polls from r6_book: best YES bid = highest of yes_bids), else the candle's BID CLOSE of that minute. None if there is no such bid: the caller fails closed (no exit, count it)."""
+    if polls:
+        import bisect
+        j = bisect.bisect_left([p["t"] for p in polls], ts)
+        if j < len(polls) and polls[j]["yes_bids"]: return max(px for px, _ in polls[j]["yes_bids"])
+        return None
+    c = next((x for x in series if x["ts"] == ts), None)
+    return None if c is None else c["bid"]
+
+
+def taker_exit_net(entry_price, exit_price, rounded=True):
+    """Net cash of ONE contract bought at entry_price (what was paid, ask plus any slip) and sold at exit_price (a bid), both legs paying the fee. Win/loss at settlement is not involved."""
+    f = fee_rounded if rounded else fee
+    return exit_price - entry_price - f(entry_price) - f(exit_price)
+
+
+def stop_exit(series, t_from, stop, polls=None):
+    """A STOP (sell when the bid falls to `stop` or below) on a long YES position, from the minute after t_from. It fills at the FIRST bid at or after the minute it is crossed, however far through; NEVER at the stop level.
+    Candles (no book): the crossing minute is the first with bid_low <= stop (bid close if no low); the fill is the minute's bid close if that is at or below the stop, else the minute's bid LOW (a conservative stand-in for the unknown path: the close recovered, the stop still triggered inside the minute). With a book: the first poll after t_from whose best YES bid is <= stop, filled at that bid.
+    Returns (ts, price) or None (never crossed)."""
+    if polls:
+        for p in polls:
+            if p["t"] > t_from and p["yes_bids"]:
+                b = max(px for px, _ in p["yes_bids"])
+                if b <= stop + 1e-12: return p["t"], b
+        return None
+    for c in series:
+        if c["ts"] <= t_from: continue
+        low = c.get("bid_low") if c.get("bid_low") is not None else c["bid"]
+        if low is not None and low <= stop + 1e-12:
+            return c["ts"], (c["bid"] if (c["bid"] is not None and c["bid"] <= stop + 1e-12) else low)
+    return None
+
+
+def resting_order(side, price, size, t0, tape, size_ahead=0.0):
+    """A RESTING limit order scored by the THROUGH-PRICE rule; needs a tape (a book alone is not enough). side 'buy' (a bid at `price` for YES) or 'sell' (an offer at `price`).
+    tape: [{ts, price, count, taker}] sorted by ts, taker 'sell'/'buy' = the aggressor. A buy fills when a taker SELL prints strictly BELOW the price (through it), for up to that print's count; at the price itself only after `size_ahead` contracts at that price have traded (aggressor on our side of the book), then the rest of those prints fill us.
+    A print with taker None is NOT counted at the price (fail closed). Returns dict(side, price, size, filled, unfilled, fills[(ts, count)]); the caller prints filled AND unfilled orders both."""
+    fills, rem, ahead = [], float(size), float(size_ahead)
+    want = "sell" if side == "buy" else "buy"
+    for t in tape:
+        if t["ts"] < t0 or rem <= 1e-12: continue
+        through = t["price"] < price - 1e-12 if side == "buy" else t["price"] > price + 1e-12
+        at = abs(t["price"] - price) <= 1e-12 and t.get("taker") == want
+        n = float(t["count"])
+        if through: take = min(rem, n)
+        elif at:
+            used = min(ahead, n); ahead -= used; n -= used
+            take = min(rem, n)
+        else: continue
+        if take > 1e-12: fills.append((t["ts"], take)); rem -= take
+    filled = float(size) - rem
+    return {"side": side, "price": price, "size": float(size), "filled": filled, "unfilled": rem, "fills": fills}
+
+
+def resting_report(orders):
+    """Counts first: orders, filled in full, partly, not at all. Both filled and unfilled are printed (an unfilled order is a missed trade, not a skipped one)."""
+    full = sum(1 for o in orders if o["unfilled"] <= 1e-12); none = sum(1 for o in orders if o["filled"] <= 1e-12)
+    return {"orders": len(orders), "filled_in_full": full, "filled_in_part": len(orders) - full - none, "not_filled": none, "contracts_filled": sum(o["filled"] for o in orders), "contracts_unfilled": sum(o["unfilled"] for o in orders)}
+
+
 # ---------- GUARD ----------
 class Cutoff:
     """A held-out cutoff as a date constant plus a committed read-once marker line. Usage: Cutoff(CUTOFF_TS, 'REGISTRATION.md', 'READ-ONCE MARKER').
