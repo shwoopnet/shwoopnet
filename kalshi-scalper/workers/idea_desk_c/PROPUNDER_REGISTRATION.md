@@ -85,3 +85,20 @@ A market that settles with the price refunded is a void: the fee is kept, so it 
 ## Amendment 2 (Nov 12, 2026, Head of R&D note 1, before any data)
 
 The reader prints the verdict line (PF in each window, z) twice. The first line includes every settled row, including did-not-play rows and last-fair-price rows, and **is the registered verdict**. The second line excludes those rows, so that nobody mistakes an injury-report effect for a pricing effect. The early-exit NO wins are printed separately, as Amendment 1 says. If Desk B rules this card a DUPLICATE of PROPS1 or a CLOSED ROW, the card closes unread and the try is removed.
+
+## Amendment 3 (Nov 12, 2026, Desk B's check, before any data)
+
+**Closest work, added to section 6: F7 (Oct 26, V2 README).**
+- F7's rule: every game-total ladder market (NBA, NFL, NHL, first-half totals) with a YES mid of 0.40 to 0.60 and a spread of 3c or less; buy NO at the ask and hold.
+- F7's result: 1,788 games over 43 days, win 50.8% against a price of 50.7%, net -1.56c. It failed on cost.
+- PROPUNDER uses the same band and spread line on a different ladder: one NBA player's points instead of a game total. The named other side is fans who buy a named player to reach a round number, which a game total does not have.
+- That makes it F7's rule on a new venue. Whether that counts as a new card or a venue of F7 is the Head of R&D's ruling. F7's failure is the base expectation here.
+
+**Start field (to be confirmed).** All 389 KXNBAPTS markets in the Nov 10 listing carry `occurrence_datetime`. On basketball game markets Desk B found it to be 180 minutes after the listed start, so tip = `occurrence_datetime` minus 180 minutes. The Testing Desk confirms this on the first lists answer, before any candle or result is read, as section 1 requires.
+
+**Counts (Desk B, from the Nov 10 listing, times and tickers only).**
+- 108 player-games on 8 games.
+- A median of 4 strikes a player, in 5 point steps.
+- 373 of 389 markets traded.
+- With 5 point steps the nearest strike often falls outside 40c to 60c, so Desk B estimates 4 to 6 bets a game, 700 to 1,000 in all, on about 25 game days.
+- The z is clustered by game day, so **5.46 is out of reach this season: this read can FALSIFY, not pass.** Stated plainly, as the Head asked.
