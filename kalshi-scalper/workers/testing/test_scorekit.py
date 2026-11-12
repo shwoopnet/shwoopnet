@@ -113,4 +113,10 @@ print("scorekit fixture-shaped tests passed")
 with tempfile.TemporaryDirectory() as d2:
     mkrun(d2, [("l", {"markets": [{"ticker": "KXS-1", "event_ticker": "KXS", "close_time": "2026-11-05T12:00:00Z", "settlement_ts": "2026-11-05T12:04:10Z", "result": "yes"}, {"ticker": "KXS-2", "event_ticker": "KXS", "close_time": "2026-11-05T12:00:00Z", "settlement_ts": 1793880250, "result": "no"}]})])
     mm = k.markets(d2); assert mm["KXS-1"]["settlement_ts"] == 1793880250 and mm["KXS-2"]["settlement_ts"] == 1793880250 and mm["KXS-1"]["settlement_ts"] - mm["KXS-1"]["close"] == 250
+with tempfile.TemporaryDirectory() as d3:
+    hd = os.path.join(d3, "HELDOUT_X", "run1"); os.makedirs(hd); mkrun(hd, [("l", {"markets": []})])
+    for fn in (lambda: list(k.iter_answers(hd)), lambda: k.manifest(hd), lambda: k.markets(hd), lambda: k.candles(hd)):
+        try: fn(); raise AssertionError("a HELDOUT_ folder must be refused")
+        except SystemExit as e: assert "HELDOUT_" in str(e)
+    assert list(k.iter_answers(hd, allow_heldout=True)) is not None            # only with the explicit flag, on the Head's go
 print("scorekit synthetic tests passed")

@@ -25,8 +25,15 @@ HAIRCUT_LINES = {"at the price seen (about a third)": 1 / 3.0, "slow arrival 5 t
 
 
 # ---------- LOAD ----------
-def iter_answers(folder):
-    """Yield (row, parsed body) for every stored 200 answer of one kalshi-pull run folder, in request order."""
+def refuse_heldout(folder, allow=False):
+    """Standing rule (h), Head Nov 12 19:22Z: a folder whose path has a component starting HELDOUT_ is a joint held-out pull; every scorer refuses it by default (default-closed). Reading one needs allow=True AND an approved read, passed by the caller on the Head's go."""
+    if not allow and any(p.startswith("HELDOUT_") for p in os.path.abspath(folder).split(os.sep)):
+        raise SystemExit("refused: %s is a HELDOUT_ folder; it is read once, on the Head's go, with allow_heldout=True" % folder)
+
+
+def iter_answers(folder, allow_heldout=False):
+    """Yield (row, parsed body) for every stored 200 answer of one kalshi-pull run folder, in request order. A HELDOUT_ folder is refused unless allow_heldout."""
+    refuse_heldout(folder, allow_heldout)
     m = json.load(open(os.path.join(folder, "manifest.json")))
     for row in m["rows"]:
         if row.get("status") == 200 and row.get("file") and not row.get("truncated"):
@@ -34,6 +41,7 @@ def iter_answers(folder):
 
 
 def manifest(folder):
+    refuse_heldout(folder)
     return json.load(open(os.path.join(folder, "manifest.json")))
 
 
