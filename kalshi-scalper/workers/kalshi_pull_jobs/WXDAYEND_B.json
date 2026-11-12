@@ -1,0 +1,96 @@
+{
+ "job_id": "WXDAYEND_B",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/WXDAYEND_REGISTRATION.md",
+ "purpose": "Card 74 finish, part B: final 2 hours of 1 minute candles of the winning bracket of the 4 Nov 10 events found by part A.",
+ "heldout": "none (a development existence count; no held-out data exists or is read)",
+ "allowed_endpoints": [
+  {
+   "name": "batch_candles",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  },
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "event_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXHIGHNY",
+  "KXHIGHLAX",
+  "KXHIGHDEN",
+  "KXHIGHTDAL"
+ ],
+ "ticker_allowlist": [
+  "KXHIGHDEN-26NOV10-B69.5",
+  "KXHIGHLAX-26NOV10-B84.5",
+  "KXHIGHNY-26NOV10-B61.5",
+  "KXHIGHTDAL-26NOV10-B78.5"
+ ],
+ "max_requests": 4,
+ "notes": "One request each, no paging. Candle windows are the 2 hours ending at the market close; the last hour is after the standard-time climate day ends.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "c_KXHIGHDEN-26NOV10-B69.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHDEN-26NOV10-B69.5",
+    "start_ts": 1794376800,
+    "end_ts": 1794384000,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c_KXHIGHLAX-26NOV10-B84.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHLAX-26NOV10-B84.5",
+    "start_ts": 1794380400,
+    "end_ts": 1794387600,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c_KXHIGHNY-26NOV10-B61.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHNY-26NOV10-B61.5",
+    "start_ts": 1794369600,
+    "end_ts": 1794376800,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c_KXHIGHTDAL-26NOV10-B78.5",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXHIGHTDAL-26NOV10-B78.5",
+    "start_ts": 1794373200,
+    "end_ts": 1794380400,
+    "period_interval": 1
+   }
+  }
+ ]
+}
