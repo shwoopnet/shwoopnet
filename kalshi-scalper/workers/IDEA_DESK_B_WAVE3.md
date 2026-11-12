@@ -79,8 +79,8 @@ So a mid-priced bet needs about 9 to 12 points of error in the market's price, e
 
 | Item | Requests through kalshi-pull | Tries |
 |---|---|---|
-| In-game lag, step 1 (measurement) | about 60 | 0 |
-| In-game lag, step 2 (only if step 1 survives) | about 400 to 500 | 1 |
+| In-game lag, step 1 (measurement) | 215 used (two runs) | 0. CARD CLOSED Nov 12: no drift after the first minute |
+| In-game lag, step 2 | not run | 0 (its try was not spent) |
 | NHLOT price measurement | about 60 | 0 |
 | NHLOT test (only if the measurement survives) | not known until the historical endpoint is probed; at worst about 3,000 | 1 |
 | ECONLAG (already registered) | 10, then at most 380 with stop rules | 1 against the paper screen |

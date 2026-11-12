@@ -7,7 +7,7 @@ Asked for by the Head of R&D: ten new cards this week from untouched families wi
 ## The filter every candidate went through first
 
 1. **The cheap side and crowd biases are out.** V2's pooled calibration (CALIB1, 16,041 cheap-side entries, 3,535 events) loses in every price bucket. And at the research bar a mid-priced bet held to settlement needs the market's price to be wrong by about 9 to 12 points (`IDEA_DESK_B_WAVE3.md`, the table at the top). A bias of 1 to 3 points cannot get there.
-2. **In play is a race we lose,** unless play is stopped. A bot that looks once a minute cannot beat people watching the game. The two in-play cards already written (the lag measurement and NHLOT) are the only two shapes that survive this, and the same shape on another sport is a version of them (lifecycle 7g), not a new card.
+2. **In play is a race we lose,** unless play is stopped. A bot that looks once a minute cannot beat people watching the game. This is now measured, not assumed: the in-game lag card was CLOSED on Nov 12 (215 games, 770 moneyline jumps: after the first full minute the spread drifts -1.1c, -2.0c and +0.1c over the next nine in the NBA, NFL and NHL, against a cost of 4.5c to 6.4c; `IDEA_DESK_B_INGAME_CARD.md` sections 11 and 12). The one in-play shape left is a change of game state while play is stopped (NHLOT, card 17), and the same shape on another sport is a version of it (lifecycle 7g), not a new card.
 3. **Score sites are barred,** so for sports the only information is Kalshi's own sibling markets, or a permitted outside fact (weather).
 4. **Declined list checked** (lifecycle 7e, read in full on Nov 12). Rows each card was compared with are named in the card.
 
@@ -93,7 +93,7 @@ What is left after the filter is narrow: a contract that the market may price ba
 
 | Pool family | Why there is no card | The one number, where one exists |
 |---|---|---|
-| Small-league soccer totals and spreads (30 series never read) | Before the game these are two-way prices with no outside fact we may read; any rule is a calibration rule (filter 1). In play they are a venue for the lag card, which is a version of it, not a new card. Their first-half Tie contracts are inside TIE3 | CALIB1: sports cheap side at 5c to 10c, +1.8c, interval -2.1c to +6.2c, 186 events; pooled cheap side negative in every bucket |
+| Small-league soccer totals and spreads (30 series never read) | Before the game these are two-way prices with no outside fact we may read; any rule is a calibration rule (filter 1). In play they would be a venue for the lag card, which closed on Nov 12. Their first-half Tie contracts are inside TIE3 | CALIB1: sports cheap side at 5c to 10c, +1.8c, interval -2.1c to +6.2c, 186 events; pooled cheap side negative in every bucket |
 | Foreign basketball totals and spreads (10 series) | Same: two-way, no permitted fact, no third outcome | none of its own; never read |
 | Minor hockey, AHL and KHL winners (2 series) | Same. A rest-and-travel rule from the schedule is worth about 3 points of win chance in the big leagues, far under the 9 to 12 needed | none of its own; never read |
 | College volleyball match (1 series) | Same, and seasonal | none of its own; never read |
