@@ -59,3 +59,6 @@ Gate (FINDING needs peak 1.3 or more with an interval clear of 1, AND touch dept
 ## Verdicts
 - P3 stage A: kill gate did not fire; the registered two-crowds rule is not met (classes look alike in size and direction, they differ in price paid). Stage B is NOT justified under the rule as registered; no stage B was registered or run. Ledger count unchanged (0 tests added). The card stays open at Idea; whether the 12 to 14 cent price-paid gap is a reason to spend a family-budget try is a call for the parent, not made here.
 - P4 stage A: NO CLUSTER (closed, 0 tries).
+
+## Rulings (Nov 12, 2026, 00:15Z, from main): both cards CLOSED
+RETAILFRAC1: closed as NO TWO CROWDS; stage B was not run (the registered two-crowds rule failed, and a stage B try would be +1 in the ledger; the flow family already has FLOW1 and TAPEFLOW1 falsified). CRONCLUSTER1: closed as NO CLUSTER. DESCRIPTION ONLY (not a signal): fractional takers pay 12 to 14 cents less per contract for the side they buy (about 0.36 to 0.41 against 0.50 to 0.56 for whole-number takers); the most likely reading is composition (small dollar-typed orders buy cheaper contracts, the known longshot lean), not a second signal.
