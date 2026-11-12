@@ -96,7 +96,7 @@ A separate registration and a new go from the Head, before any match result is r
 3. **Round trip at the look** is computed per match contract (both teams' contracts, spread plus two fees at that contract's mid), median over contracts, for the cost kill. **On the gap line, "spread 4c or less" means the spread of the contract being bought,** the cheaper side's own match contract.
 4. The reader was tested to be blind to the match result and to the results of maps 2 and 3 (every other such result flipped, identical output).
 
-## AMENDMENT 1, Nov 12, 2026, 18:40Z, before any list or candle of these markets has landed: MAPBREAK is registered as a RULE, 1 try
+## AMENDMENT 1, Nov 12, 2026, 18:28Z, before any list or candle of these markets has landed: MAPBREAK is registered as a RULE, 1 try
 
 **Why (Head of R&D, 18:26Z, on the owner's Friday deadline):** the deadline is a read against the bar, not a measurement. So the first pull's output is BOTH the measurement and the development read. The held-out third is pulled and read once, only on the Head's go. Everything above stands except where this section says otherwise; where they differ, this section is right.
 
@@ -140,3 +140,21 @@ About 78 matches a day on the one day I have seen (a Tuesday, a lower bound): ab
 ### Requests after this amendment
 
 Lists: unchanged (16 requests, at most 100 pages). Candles for development: about 3,200 matches at four contracts each; matches sharing a scheduled start share a request: my estimate 250 to 450 requests, one run. The exact count comes from the lists. Held-out candles: about half that, on the Head's go.
+
+## AMENDMENT 2, Nov 12, 2026, 18:32Z, before any list or candle of these markets has landed: a second look, the break before map 3
+
+**Why:** the deadline needs bets. A best-of-three that stands at one map each has a second stopped-play break, before the deciding map, and the same pre-match price values it with no extra input. It adds about 45% more looks from the same matches and the same pull (my estimate of how often a best-of-three goes to a third map; not measured).
+
+**The second look.** When the map-2 market closes and the match market does NOT close within 10 minutes of it, the match stands at one map each (a team that wins map 2 after winning map 1 ends the match, and then the match market closes with it). No result of map 2 is read: the state is taken from the two close times alone. The look is the first whole minute at or after (map-2 close + 120 seconds), forward to + 5 minutes if not two-sided, as for the first look. **Guard:** the match market must close at least 15 minutes after map 2 closed; if it closes between 10 and 15 minutes after, the match is dropped from the second look and counted.
+
+**Value at the second look:** the match is now one map. For the team that won map 1, the value is **q**, its per-map chance from the pre-match price (the same q as above); for the other team, 1 minus q. Gap, cheaper side, the 8c and 4c lines, price paid, fee and result are exactly as in Amendment 1.
+
+**Known leans at this look:** the deciding map is usually picked by neither team, so the map-pick lean is smaller here than at the first look. The learning lean remains (one map each says the teams are closer than the pre-match price said, so the model OVERVALUES the pre-match favourite here). The placebo is unchanged: it measures the model against the map-1 market before the match.
+
+**How it joins the rule.** One bet per look, so a match can give two bets (after map 1, and before map 3), never two at the same look. The kill lines are computed per title for each look separately (150 filled, cost, 10% gap share, twice the placebo); a title can be in at one look and out at the other. The rule's read pools all bets from the looks and titles that are in, and shows each look and each title alone.
+
+**Tries: 2 for the card** (one for each look), counted that way to be safe; the Head may rule it one.
+
+**Events, said plainly:** about 3,200 development matches give about 3,200 first looks and about 1,400 second looks, 4,600 in all; the held-out about 2,300. At a firing share of 10% that is about 460 development bets and 230 held-out; at 15%, about 690 and 345, **which reaches about 1,000 bets over the two samples together.** At 10% it does not.
+
+**Requests:** the lists are unchanged (map-2 close times are already in the map list). The candle window of a match that went to a third map runs to map-2 close + 5 minutes, about 60 more candles on each of two contracts; the request count rises by perhaps a fifth.
