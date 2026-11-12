@@ -68,7 +68,13 @@ kalshi-scalper/workers/IDEA_DESK_B_INGAME_CARD.md on claude/idea-desk-b (9d6a545
 
 ## Fill convention for taker rules (Nov 12, from Forensics' FILLHAIRCUT1)
 
-Measured on recorded Bitcoin 15 minute books, 180 to 120 seconds before the close, cheap side, 430 windows (claude/forensics-desk, workers/forensics/FILLHAIRCUT1_RESULT.md, 7ca3aeb; not yet checked by the Verification Analyst): an immediate-or-cancel buy at the ask seen fills about 67 percent of the time at 2 to 10 seconds; with a +1c limit 85 percent at 2 s and 77 percent at 6 s; 1 and 10 contracts are the same. The misses are the rows where the price then ran (mid 5.4c higher 30 seconds later). **Convention:** every taker rule on the 15 minute markets is also reported as a replay on the recorded books at +2 and +6 seconds with its real limit, a miss is no trade, and live use and probe gates are judged on the 6 second line. Where only the decision quote exists: keep the price, drop 15 percent (+1c, 2 s) or 23 percent (6 s), and show the stress that drops the best-outcome signals first. The CFRTI held-out plan is being amended to carry the replay line (no new try).
+Measured on recorded Bitcoin 15 minute books, closes Oct 29 to Nov 11, 180 to 120 seconds before the close, cheap side 5c to 30c: 9,527 decision instants in 544 windows (claude/forensics-desk, workers/forensics/FILLHAIRCUT1_RESULT.md, 448f5e2; no outcome loaded, zero tries; not yet checked by the Verification Analyst). Share of immediate-or-cancel buys filled in full at about 6 and 10 seconds: at the ask seen 66 percent; at +1c 76 and 73 percent; at +2c 82 and 78 percent. 1 and 10 contracts are the same. Fills are slightly cheaper than the ask seen, so no cents are added.
+
+**The haircut at a live-like 5 to 10 seconds:** drop about 34 percent of simulated fills at the ask seen, 24 to 27 percent at +1c, 18 to 23 percent at +2c; keep the ask seen as the price.
+
+**Two warnings.** The miss rate is not a constant (Nov 9 to 11 filled 4 to 7 points less). The dropped fills are not random: missed orders see the mid 8c to 11c higher 30 seconds later, filled ones 2c to 3c lower. For a rule whose signal predicts the next seconds these figures are a FLOOR.
+
+**Convention:** every taker rule on the 15 minute markets is also reported as a replay on the recorded books at +2 and +6 seconds with its real limit; a miss is no trade; live use and probe gates are judged on the 6 second line. Where only the decision quote exists, apply the haircut above and show the stress that drops the best-outcome signals first. The CFRTI held-out plan carries the replay line (Desk A, 19c2751b and 541e83da on claude/idea-desk-a; no new try).
 
 ## Desk tasks (none needs a scarce read)
 
