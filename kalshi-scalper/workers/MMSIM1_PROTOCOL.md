@@ -35,3 +35,11 @@ MMSIM2, MMHOUR1 and MMPOWER1 now cut development by the same timestamp constant 
 
 ## WARNING written before the read (Nov 12, 2026; POWER2, workers/POWER2_QUEUE.md)
 The registered bar (PF 1.3 at the maker bound, n 300 events) sits ABOVE the selection-shrunk development PF of about 1.14 (halved estimate). Power at the expected n: 0.46 unshrunk and 0.19 shrunk, and power FALLS as events accumulate (0.02 at 1,600 events), so waiting longer does not help. A pass is unlikely. A FAIL at the Nov 24 read therefore says the shrunk estimate was right, not that the idea was close; a pass would be a prompt to confirm on a forward sample, not a deployment decision. The gold correlation (r under 0.3) needs about 32 overlapping days (Nov 29) to resolve.
+
+## Amendment 2 (Nov 12, 2026, committed BEFORE the read; Desk A's power work, adopted by main): outcome labels for the Nov 24 read
+- PF 1.3 or better (at the registered bound, 1 contract unrounded) WITH a positive day mean at the read = LEAD CONFIRMED: keep recording and read again at about 1,900 events (late January).
+- PF under 1.0 on about 400 events = FALSIFIED.
+- Anything between = NO CALL.
+- Nov 24 CANNOT be a research-bar pass: the bar needs about 1,900 events and Nov 24 gives about 400.
+- The cutoff is the date constant PINNED_CUTOFF in `src/scalper/mmsim1.py` (2026-11-07T15:00:00Z) and the read-once marker is a committed line (Amendment 1 and `readonce.py`).
+- Report beside the PF the FRACTIONAL-SIZE SHARE of the fills behind the P&L (development and held-out separately; fractional = non-integer contract count): a maker filled by a fractional taker keeps +0.25c to +0.43c at one minute, by a whole-number taker zero or less (Desk A, development data).

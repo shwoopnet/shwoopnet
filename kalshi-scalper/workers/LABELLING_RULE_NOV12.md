@@ -1,0 +1,2 @@
+# Labelling rule (Nov 12, 2026, from Desk A via main; applies to every V2 result file from now)
+FALSIFIED needs about 100 trades (or the registered n). Below that, write 'no evidence at n = x' and say what n would be needed. Earlier V2 labels that rested on fewer than about 100 trades are to be read as 'no evidence at n = x' (examples: CMD3 zero events, EXECSUM bills variants n 13 and 17, TAPEFLOW1 15 minute only n 126 is above the line, MENTPERSIST1 R2 n 20). Where a result file already states its n, the number controls, not the verdict word.

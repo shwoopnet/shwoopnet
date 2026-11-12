@@ -61,6 +61,9 @@ Gate (FINDING needs peak 1.3 or more with an interval clear of 1, AND touch dept
 - P4 stage A: NO CLUSTER (closed, 0 tries).
 
 ## Rulings (Nov 12, 2026, 00:15Z, from main): both cards CLOSED
-RETAILFRAC1: closed as NO TWO CROWDS; stage B was not run (the registered two-crowds rule failed, and a stage B try would be +1 in the ledger; the flow family already has FLOW1 and TAPEFLOW1 falsified). CRONCLUSTER1: closed as NO CLUSTER. DESCRIPTION ONLY (not a signal): fractional takers pay 12 to 14 cents less per contract for the side they buy (about 0.36 to 0.41 against 0.50 to 0.56 for whole-number takers); the most likely reading is composition (small dollar-typed orders buy cheaper contracts, the known longshot lean), not a second signal.
+RETAILFRAC1: closed as NO TWO CROWDS; stage B was not run (the registered two-crowds rule failed, and a stage B try would be +1 in the ledger; the flow family already has FLOW1 and TAPEFLOW1 falsified). CRONCLUSTER1: closed as NO CLUSTER. DESCRIPTION ONLY (not a signal): fractional takers pay less for the side they buy (CORRECTED Nov 12 by Desk A: the 12 to 14 cents is contract-weighted; per TRADE the difference is 4 to 7 cents); the most likely reading is composition (small dollar-typed orders buy cheaper contracts, the known longshot lean), not a second signal.
 
 ## RETIRED (Nov 12, 2026, POWER2 + main): RETAILFRAC1 stage B retired: not justified (no two crowds); CRONCLUSTER1 closed as NO CLUSTER.
+
+## Correction (Nov 12, 2026, Desk A via main)
+The "fractional takers pay 12 to 14 cents less" figure is CONTRACT-WEIGHTED; per trade it is 4 to 7 cents. Description only; composition, not a signal.

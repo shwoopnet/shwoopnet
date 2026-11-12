@@ -51,3 +51,6 @@ Earliest run: **2026-11-15** (NC15 needs 3 full UTC dates: Nov 12, 13, 14, since
 
 CUTOFF CONSTANT: 2026-11-07T15:00:00Z (`HOURLY_CUTOFF_MS` in `src/scalper/mmmap1.py`; matches MMSIM1's `PINNED_CUTOFF`). Hourly events closing at or after it are dropped before anything is computed.
 READ-ONCE MARKER: not yet read; MMMAP1 reads no hourly held-out event and no outcome, so it has no held-out read of its own; the held-out hourly set is MMSIM1's (marker in workers/MMSIM1_PROTOCOL.md, first read allowed on or after 2026-11-24); after the read: READ ON <date>, commit <hash>
+
+## Note (Nov 12, 2026, before any real-data run; Desk A via main): report the fractional-size share
+Report, per series, the share of taker contracts that are fractional-size next to the realized-spread table (a maker filled by a fractional taker keeps +0.25c to +0.43c at one minute, by a whole-number taker zero or less; Desk A, development data). It is an added reported column, not a qualification gate.
