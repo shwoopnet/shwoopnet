@@ -34,7 +34,7 @@ def plain(text):
 
 
 def end_date(text, sec_month, sec_year):
-    text = plain(text).replace("–", "-").replace("—", "-")
+    text = plain(text).replace("\u2013", "-").replace("\u2014", "-")
     last = text.split("-")[-1].strip()
     m = re.match(r"(?:([A-Z][a-z]+)\s+)?(\d{1,2})(?:,\s*(\d{4}))?$", last)
     if not m:
