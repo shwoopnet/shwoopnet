@@ -77,6 +77,7 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `CFRTI_K_LISTS` | Desk A | 2, up to 28 pages (30) | up to 1 | `CFRTI_K_REGISTRATION.md`; development markets only, closes before 2026-11-05 |
 | `INGAMELAG_M1` | Desk B | 215 (235) | about 4 | `IDEA_DESK_B_INGAME_CARD.md`; the rebuilt 215 game list |
 | `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
+| `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
 Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two other reads; (2) `CFRTI_K_LISTS` and `CFRTI_K_PROBE`; (3) the CFRTI-K candle job, built later from the lists answer; (4) `INGAMELAG_M1` and `NHLOT_LISTS`; (5) `NOSIDE1_CANDLES` (already here); (6) `ECONLAG_CALENDAR`.

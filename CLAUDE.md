@@ -1180,3 +1180,8 @@ FLOOR1 (XRP fills priced under 0.905) and THIN1 (ask size under 20) now sit with
 ## kalshi-pull: 12 real runs a UTC day (Nov 12, 2026, the owner, asked for by the Head of R&D)
 
 The day cap on real runs of `scripts/kalshi_pull.py` goes from 6 to 12 (`MAX_RUNS_PER_DAY`), and nothing else changes. The owner wants the research queue to run back to back, and six a day was the only thing holding it. Dry runs still do not count. Every per-run limit is exactly as it was: 1 request a second, 1,200 requests a run, three 429s in a row end the run, 5 MB an answer, 200 MB a run, one pinned host table, GET only, no key, no redirects, the concurrency group and the end date 2027-02-28. The runner is otherwise byte-identical. If the first 429 ever appears, drop back to 6 at once (a one line edit of the same constant). Gates: `test/kalshiPullGates.test.js` KP18 (pins 12) and KP18b (every other limit unchanged). Docs: `docs/KALSHI_PULL.md`.
+
+## kalshi-pull: the family census listing (Nov 12, 2026, Desk B, the Head of R&D)
+
+`CENSUS_LISTING` (`kalshi-scalper/workers/kalshi_pull_jobs/CENSUS_LISTING.json`, 40 requests, at most 88 pages, cap 100, about 120 MB by Desk B's estimate, plan in `kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md`) is a LISTING only: Kalshi's full series list and every non-combo market that settled on Nov 10, 2026 UTC, hour by hour, for counts and volume by family. No candle, no test and no rule is scored from it. Same host, pace and stop rules as every other job; the runner is unchanged. Gate KP27. Dispatch order from research: first, then the in-game pair (PR 822), then the approval-calibration candles (PR 823).
+
