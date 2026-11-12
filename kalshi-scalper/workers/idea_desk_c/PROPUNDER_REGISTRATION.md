@@ -60,3 +60,24 @@ A market that settles with the price refunded is a void: the fee is kept, so it 
 
 - **Evidence:** a practitioner figure for NFL season-long props (60% to 63%). A check of whether any data file backs it is running and is added here by amendment.
 - **Odds:** 2% to pass; about 85% that it closes at the cost kill or in development.
+
+## Amendment 1 (Nov 12, 2026, before any PROPUNDER price, list or result was read)
+
+**Rules text (replaces the void assumption in section 3).** Kalshi's public contract terms for NBA player stats (https://kalshi-public-docs.s3.amazonaws.com/contract_terms/NBAPTS.pdf, the generic BASKETBALLENTITYSTAT terms, PDF dated 2026-10-05) say:
+- "If a given <entity> or <player> withdraws prior to the commencement of <basketball game>, the markets ... will resolve to the last fair price as determined by the Exchange in its sole discretion." So a player who does not play is NOT refunded at cost. The market settles at a price the exchange chooses.
+- "If a given <entity> or <player> retires or is injured during <basketball game>, the markets ... will settle based on the end-of-game statistics if <entity> or <player> have played for at least one (1) second."
+- Corrections made after the game do not count.
+
+**What the reader does.**
+- A market settled at a "last fair price" (anything other than 0 or 1) is booked at that settlement value, minus the fee. It is printed as its own count with its own sum, beside the rest, and PF is shown with and without those rows.
+- The reader also prints how many NO wins came from a player who left the game early. This cannot be told from Kalshi data alone, so it reports the count of NO wins at a settled points total far below the strike (under half of it) as a proxy, labelled as a proxy.
+- Before any result is read, the reader quotes the `rules_primary` and `rules_secondary` text of the first market in the lists answer, and states whether it matches the clauses above. A CFTC redline for a different contract (who-leads-a-stat) changes "at least one second" to "entered" the game, so the live wording may differ.
+
+**One mechanical reason for the under, now written down.** An injury exit settles on the stats at that moment, which only ever helps NO. This is a small, real, one-directional effect. It is NOT evidence of a crowd bias.
+
+**Evidence check (replaces section 8's first line).**
+- The 60% to 63% figure is 4for4's: NFL SEASON-LONG player props at the closing line, 604 props over 2021 and 2022 (unders 61%). The article has tables but no data file, and one line of its text ("60% in 2020") contradicts its own tables.
+- PFF states no sample and no win rate (units only).
+- No counted sample exists for single-game NBA prop unders. The nearest counted figure is NBA week 1 GAME totals going under 58.2% (Girdner and co-authors, Journal of Prediction Markets, 2013), a game-total figure, not props, and the authors found the market otherwise efficient.
+
+**Odds cut from 2% to 1% to pass.** The card stands on one practitioner table for a different product and season length.

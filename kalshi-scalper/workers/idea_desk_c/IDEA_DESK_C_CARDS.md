@@ -17,4 +17,4 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
 - **If it survives: 1 try,** date constants, older games development, a held-out block from a pinned close date, cluster by game.
 - **Uniqueness (7d) and declined list.** Signal: the mid strike of a prop ladder, a market type no live or shadow rule uses. Not favourite-and-hold (40c to 60c), not cheap-side, not a lock or parity scan, not taker flow, not market making, not in-game. Closest: PROPS1 (cheap side), FAMSPORTS (a totals model, falsified). Desk B's filter says a crowd bias is worth 1 to 3 points; this card exists only because the one published prop number is far larger, and it says so.
 - **Data and terms.** Kalshi public data only.
-- **Odds.** 2% to reach the bar; about 85% that the measurement closes it.
+- **Odds.** 1% to reach the bar (cut from 2% after the evidence check, registration Amendment 1); about 85% that it closes at the cost kill or in development.
