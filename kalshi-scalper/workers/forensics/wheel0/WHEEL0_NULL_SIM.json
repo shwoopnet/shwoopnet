@@ -1,0 +1,32 @@
+{
+ "what": "WHEEL0: how often is a block HOT by luck alone, per band, under the lane's growing-block rule? Made-up fair bets only; no market data, no outcome.",
+ "blocks_simulated_per_band": 40000,
+ "seed": 20261112,
+ "hot_share_by_luck": {
+  "05-20": 0.0932,
+  "20-35": 0.0648,
+  "35-50": 0.0571,
+  "50-65": 0.0693,
+  "65-80": 0.0867,
+  "80-88": 0.068,
+  "88-97": 0.0385
+ },
+ "median_block_length": {
+  "05-20": 88,
+  "20-35": 60,
+  "35-50": 60,
+  "50-65": 60,
+  "65-80": 60,
+  "80-88": 60,
+  "88-97": 150
+ },
+ "p90_block_length": {
+  "05-20": 127,
+  "20-35": 60,
+  "35-50": 60,
+  "50-65": 60,
+  "65-80": 60,
+  "80-88": 82,
+  "88-97": 165
+ }
+}

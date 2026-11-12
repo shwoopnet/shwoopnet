@@ -1,0 +1,345 @@
+{
+ "what": "WHEEL0 random-drop table for the candle read (Head of R&D's ruling 4, 2026-11-12 20:02Z): the share of signals at the look that pass the fill check (10 contracts, ask + 1c, first poll within 4 s, walking levels), per template, measured on R6 order books with NO outcome loaded (wheel0_count.py; closes 2026-10-29T22:15Z to 2026-11-12T12:00Z). Fixed before any outcome is joined.",
+ "gold_xrp_doge": [
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 692,
+   "filled": 564,
+   "fill_share": 0.815
+  },
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 380,
+   "filled": 288,
+   "fill_share": 0.758
+  },
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 288,
+   "filled": 204,
+   "fill_share": 0.708
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 252,
+   "filled": 171,
+   "fill_share": 0.679
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 376,
+   "filled": 245,
+   "fill_share": 0.652
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 233,
+   "filled": 165,
+   "fill_share": 0.708
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 673,
+   "filled": 565,
+   "fill_share": 0.84
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 928,
+   "filled": 802,
+   "fill_share": 0.864
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 597,
+   "filled": 473,
+   "fill_share": 0.792
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 542,
+   "filled": 422,
+   "fill_share": 0.779
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 496,
+   "filled": 376,
+   "fill_share": 0.758
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 588,
+   "filled": 459,
+   "fill_share": 0.781
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 366,
+   "filled": 321,
+   "fill_share": 0.877
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 782,
+   "filled": 711,
+   "fill_share": 0.909
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 732,
+   "filled": 655,
+   "fill_share": 0.895
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 921,
+   "filled": 747,
+   "fill_share": 0.811
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 896,
+   "filled": 697,
+   "fill_share": 0.778
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 835,
+   "filled": 629,
+   "fill_share": 0.753
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 908,
+   "filled": 706,
+   "fill_share": 0.778
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 399,
+   "filled": 344,
+   "fill_share": 0.862
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 466,
+   "filled": 417,
+   "fill_share": 0.895
+  }
+ ],
+ "xrp_doge": [
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 506,
+   "filled": 410,
+   "fill_share": 0.81
+  },
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 276,
+   "filled": 212,
+   "fill_share": 0.768
+  },
+  {
+   "L": 180,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 203,
+   "filled": 144,
+   "fill_share": 0.709
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 176,
+   "filled": 120,
+   "fill_share": 0.682
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 278,
+   "filled": 173,
+   "fill_share": 0.622
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 168,
+   "filled": 122,
+   "fill_share": 0.726
+  },
+  {
+   "L": 180,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 487,
+   "filled": 400,
+   "fill_share": 0.821
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 707,
+   "filled": 614,
+   "fill_share": 0.868
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 434,
+   "filled": 351,
+   "fill_share": 0.809
+  },
+  {
+   "L": 360,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 391,
+   "filled": 308,
+   "fill_share": 0.788
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 351,
+   "filled": 279,
+   "fill_share": 0.795
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 435,
+   "filled": 341,
+   "fill_share": 0.784
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 269,
+   "filled": 239,
+   "fill_share": 0.888
+  },
+  {
+   "L": 360,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 603,
+   "filled": 544,
+   "fill_share": 0.902
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "05-20",
+   "signals_at_look": 564,
+   "filled": 508,
+   "fill_share": 0.901
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "20-35",
+   "signals_at_look": 693,
+   "filled": 558,
+   "fill_share": 0.805
+  },
+  {
+   "L": 600,
+   "side": "cheap",
+   "band": "35-50",
+   "signals_at_look": 654,
+   "filled": 515,
+   "fill_share": 0.787
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "50-65",
+   "signals_at_look": 605,
+   "filled": 456,
+   "fill_share": 0.754
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "65-80",
+   "signals_at_look": 680,
+   "filled": 527,
+   "fill_share": 0.775
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "80-88",
+   "signals_at_look": 311,
+   "filled": 261,
+   "fill_share": 0.839
+  },
+  {
+   "L": 600,
+   "side": "fav",
+   "band": "88-97",
+   "signals_at_look": 362,
+   "filled": 324,
+   "fill_share": 0.895
+  }
+ ],
+ "use": "gold, XRP and Dogecoin take gold_xrp_doge; Bitcoin and Ethereum take xrp_doge (their books are not read: standing rule (h)).",
+ "note_on_price": "On books an order that fills pays on average 0.1c to 2.5c LESS than the ask seen (results/WHEEL0_COUNT.json, mean_fill_minus_ask), because it fills when the price has moved against the buyer. The candle read does not credit that: it pays the ask seen, since a random drop cannot reproduce the selection that produces the improvement."
+}

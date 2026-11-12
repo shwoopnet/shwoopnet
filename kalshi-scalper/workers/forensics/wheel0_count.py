@@ -61,16 +61,16 @@ for tk, (i0, i1) in starts.items():
     for L in LOOKS:
         k = int(np.searchsorted(t, T - L * 1000, side="left"))
         if k >= len(t) or t[k] > T - L * 1000 + LOOK_TOL_S * 1000:
-            rows.append((ser, day, tk, L, "no_look", "", "")); continue
+            rows.append((ser, day, tk, L, "no_look", "", "", np.nan)); continue
         r = i0 + k
         yb, nb = px[r, 0], px[r, 5]
         if not (yb == yb and nb == nb and yb > 0 and nb > 0):
-            rows.append((ser, day, tk, L, "one_sided", "", "")); continue
+            rows.append((ser, day, tk, L, "one_sided", "", "", np.nan)); continue
         ya, na = 1.0 - nb, 1.0 - yb
         if ya - yb > SPREAD_MAX + EPS:
-            rows.append((ser, day, tk, L, "spread_wide", "", "")); continue
+            rows.append((ser, day, tk, L, "spread_wide", "", "", np.nan)); continue
         if abs(ya - na) < EPS:
-            rows.append((ser, day, tk, L, "equal_asks", "", "")); continue
+            rows.append((ser, day, tk, L, "equal_asks", "", "", np.nan)); continue
         sides = {"cheap": ("yes", ya) if ya < na else ("no", na), "fav": ("yes", ya) if ya > na else ("no", na)}
         # fill poll: the first poll AFTER the look and within 4 s of it
         j = k + 1
@@ -79,13 +79,13 @@ for tk, (i0, i1) in starts.items():
             band = next((b[0] for b in BANDS[kind] if inband(ask, b[1], b[2], b[3])), None)
             if band is None and kind == "fav" and inband(ask, FAV_HI[1], FAV_HI[2], FAV_HI[3]): band = FAV_HI[0]
             if band is None:
-                rows.append((ser, day, tk, L, "out_of_band", kind, "")); continue
+                rows.append((ser, day, tk, L, "out_of_band", kind, "", np.nan)); continue
             if fill_row is None:
-                rows.append((ser, day, tk, L, "no_fill_poll", kind, band)); continue
+                rows.append((ser, day, tk, L, "no_fill_poll", kind, band, np.nan)); continue
             cols = slice(5, 10) if side == "yes" else slice(0, 5)           # buying YES takes NO bids, buying NO takes YES bids
             avg = walk(px[fill_row, cols], sz[fill_row, cols], ask + SLIP)
-            rows.append((ser, day, tk, L, "filled" if avg is not None else "missed", kind, band))
-df = pd.DataFrame(rows, columns=["series", "day", "ticker", "L", "status", "kind", "band"])
+            rows.append((ser, day, tk, L, "filled" if avg is not None else "missed", kind, band, (avg - ask) if avg is not None else np.nan))
+df = pd.DataFrame(rows, columns=["series", "day", "ticker", "L", "status", "kind", "band", "slip"])
 out = {"note": "books only; no result loaded; nothing scored", "series": SERIES, "closes_before": str(BEFORE), "first_close": str(cov["close_ts"].min()), "last_close": str(cov["close_ts"].max()),
        "days_with_a_window": int(cov["close_ts"].dt.strftime("%Y-%m-%d").nunique()), "counts": cnt, "flag": "LOOK_TOL_S = %d s is this desk's addition" % LOOK_TOL_S,
        "windows_by_series": cov["series"].value_counts().to_dict(), "status_by_series_L": {}, "templates": [], "fav_88_97": []}
@@ -100,9 +100,16 @@ for (ser, L, kind, band), g in sig.groupby(["series", "L", "kind", "band"]):
     if band == FAV_HI[0]: out["fav_88_97"].append(row)
     else:
         out["templates"].append(row); tot_blocks += row["blocks_of_60"]; tot_pairs += row["pairs"]
+# the drop table for the candle read: per template, pooled over the three series (fill share and the mean walked price minus the ask seen), no outcome involved
+out["drop_table_pooled"] = []
+for (L, kind, band), g in sig.groupby(["L", "kind", "band"]):
+    f = g[g["status"] == "filled"]
+    out["drop_table_pooled"].append({"L": int(L), "side": kind, "band": band, "signals_at_look": int(len(g)), "filled": int(len(f)), "fill_share": round(len(f) / len(g), 3),
+                                     "mean_fill_minus_ask": round(float(f["slip"].mean()), 4) if len(f) else None, "share_filled_at_the_ask_or_better": round(float((f["slip"] <= 1e-9).mean()), 3) if len(f) else None})
 out["total_blocks_18_templates_x_3_series"] = tot_blocks; out["total_pairs"] = tot_pairs
 out["hot_pairs_if_8_percent_of_first_blocks_are_hot"] = round(0.08 * tot_pairs, 1)
 json.dump(out, open(OUT, "w"), indent=1)
 print(json.dumps({k: v for k, v in out.items() if k not in ("templates", "fav_88_97", "status_by_series_L")}, indent=1))
 t = pd.DataFrame(out["templates"]); print(t.to_string(index=False))
 print(pd.DataFrame(out["fav_88_97"]).to_string(index=False))
+print(pd.DataFrame(out["drop_table_pooled"]).to_string(index=False))
