@@ -19,7 +19,7 @@ Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief o
 - Verification Analyst (under Main, not research): session_01PSWvZqX5pfCnCJfvqJpDCL
 - Retired or stopped Nov 12: V2 (session_01PSWvZpN1MLodfM5W2dqtii; handoff kalshi-scalper/V2_HANDOFF_NOV12.md on claude/epic-ptolemy-0amjd9), Probe Engineering (session_01PSWvZnv28Wm8fCqua9FMzq; handoff docs/probes/HANDOFF_PROBE_DESK_NOV12.md on claude/probe-desk).
 - Testing Desk (created Nov 12 16:44Z by Main): session_01PSWvZoWZGK1VYgdMTA25vo (branch claude/testing-desk). First task WXDAYEND's remaining count.
-- Stocks Desk: session_01PSWvZm6Fiw2pwNzcbUhudN (branch claude/stocks-desk), created by Main at about 17:04Z Nov 12 to replace session_01PSWvZkxSgedtJBD4vHPwcs, which could not push and has stopped. Databento under the owner's $25 cap.
+- Stocks Desk: session_01PSWvZm6Fiw2pwNzcbUhudN (branch claude/stocks-desk), created by Main at about 17:04Z Nov 12 to replace session_01PSWvZkxSgedtJBD4vHPwcs, which could not push and has stopped. Databento under the owner's $25 cap. A third stock session, session_01PSWvZo2zpvsQRUqdZwnNoW (push to shwoopnet-private works), appeared at 17:16Z; Main was asked which one is the desk; check the queue for the answer.
 
 ## Standing rules I set or enforce
 
