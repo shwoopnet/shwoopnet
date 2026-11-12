@@ -1,7 +1,11 @@
 """MENTPERSIST1 (workers/MENTPERSIST1_PROTOCOL.md). plan | fetch | score.
 plan : offline, builds b (R1, R2), PREV, pool order (md5) -> scratch plan.json. No outcome of a target is used for selection.
 fetch: candle reads, 1 per 15 s, 429 -> pause 300 s, retry once, second 429 -> stop (cursor kept). Resumable.
-score: development first; held-out only with --heldout and only for a rule that passed development."""
+score: development first; held-out only with --heldout and only for a rule that passed development.
+commit-cut [--cap N]: when the reads STOP (cursor_index == pool length, or reads >= cap), writes the cut (close time of the first held-out
+  new market) and a READ-ONCE MARKER into workers/MENTPERSIST1_PROTOCOL.md and commits it. `score --heldout` REFUSES unless that committed
+  line exists, the cursor still equals the committed one, and the committed marker still says not yet read (Nov 12, 2026 integrity fix:
+  the old cut was two thirds of whatever had been read when scoring ran, which moves while reads continue)."""
 import os, sys, json, math, sqlite3, hashlib, bisect, collections, time, urllib.request, urllib.error, urllib.parse, datetime
 from statistics import NormalDist
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".."))
@@ -9,6 +13,21 @@ DB = os.path.join(ROOT, "data", "ment1.sqlite")
 SCR = "/tmp/claude-0/-home-user-shwoopnet/026f6e8f-6dc4-5e3b-8c3b-e0089b12fb94/scratchpad/mp1"
 READLOG = os.path.join(ROOT, "workers", "MENTPERSIST1_READLOG.json")
 QCSV = os.path.join(ROOT, "workers", "MENTPERSIST1_QUOTES.csv")
+PROTO_REL = "workers/MENTPERSIST1_PROTOCOL.md"
+PROTO = os.path.join(ROOT, PROTO_REL)
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import readonce
+CUT_PREFIX = "COMMITTED CUT:"
+def committed_cut():
+    """(cut_ts, cursor_index) from the COMMITTED protocol file, or None."""
+    import re, subprocess
+    r = subprocess.run(["git", "-C", ROOT, "show", "HEAD:kalshi-scalper/" + PROTO_REL], capture_output=True)
+    if r.returncode != 0: return None
+    for l in r.stdout.decode().splitlines():
+        if l.startswith(CUT_PREFIX):
+            m = re.search(r"ts=(\d+); cursor_index=(\d+)", l)
+            if m: return int(m.group(1)), int(m.group(2))
+    return None
 BASE = "https://api.elections.kalshi.com/trade-api/v2"
 LOOK = 6 * 3600
 md5 = lambda s: hashlib.md5(s.encode()).hexdigest()
@@ -176,7 +195,32 @@ def stats(rows, feef):
     return dict(n=n, calls=len(by), pf=(w / l if l > 0 else 99.0), mean=mean, z=(mean / se if se > 0 else 0.0), net=net,
                 maxcall=(max(by.values()) / net if net > 0 else None), maxser=(max(bs.values()) / net if net > 0 else None))
 
+def cmd_commit_cut(cap):
+    if committed_cut(): raise SystemExit("refused: a COMMITTED CUT line already exists in " + PROTO_REL)
+    if os.system("cd %s && git diff --quiet HEAD -- %s" % (ROOT, PROTO_REL)) != 0: raise SystemExit("refused: uncommitted edits in " + PROTO_REL)
+    info, _ = build(); plan = json.load(open(os.path.join(SCR, "plan.json"))); log = json.load(open(READLOG))
+    cur, n_pool = log["cursor_index"], len(plan["pool"])
+    if not (cur == n_pool or log["reads"] >= cap):   # the pull must be COMPLETE: whole pool read, or the registered cap reached
+        raise SystemExit("refused: pull incomplete (cursor_index %d of %d, reads %d, cap %d)" % (cur, n_pool, log["reads"], cap))
+    nr = sorted(plan["pool"][:cur], key=lambda t: info[t]["c"])
+    if len(nr) < 3: raise SystemExit("refused: too few markets read to cut")
+    cut_ts = info[nr[2 * len(nr) // 3]]["c"]
+    today = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
+    iso = datetime.datetime.fromtimestamp(cut_ts, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    with open(PROTO, "a") as f:
+        f.write("\n## Committed cut (%s; written by `mentpersist1.py commit-cut` when the reads stopped; no outcome was used)\n" % today)
+        f.write("%s ts=%d; cursor_index=%d; pool=%d; reads=%d; new markets read %d; development new = close time before %s, held-out new = on or after it\n" % (CUT_PREFIX, cut_ts, cur, n_pool, log["reads"], len(nr), iso))
+        f.write("READ-ONCE MARKER: not yet read; MENTPERSIST1 first read allowed on or after %s; after the read: READ ON <date>, commit <hash>\n" % today)
+    os.system("cd %s && git add %s && git commit -q -m 'MENTPERSIST1 committed cut %s' -m 'Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>' -m 'Claude-Session: https://claude.ai/code/session_01PSWvZpN1MLodfM5W2dqtii'" % (ROOT, PROTO_REL, iso))
+    print("cut committed:", iso, "-- push the branch before scoring held-out")
+
 def cmd_score(heldout):
+    cc = committed_cut()
+    if heldout:
+        if not cc: raise SystemExit("refused: no committed cut line; run `commit-cut` when the reads stop, commit it, then score --heldout")
+        readonce.require_unread(PROTO_REL, "MENTPERSIST1")
+        if json.load(open(READLOG))["cursor_index"] != cc[1]: raise SystemExit("refused: cursor_index moved since the cut was committed")
+        print("After this read, replace the marker line in %s with 'READ-ONCE MARKER: MENTPERSIST1 READ ON <date>, commit <hash>' and commit it." % PROTO_REL)
     info, res = build(); plan = json.load(open(os.path.join(SCR, "plan.json"))); db = sqlite3.connect(DB)
     done = set(r[0] for r in db.execute("select ticker from done where n>0"))
     cur = json.load(open(READLOG))["cursor_index"]
@@ -184,8 +228,9 @@ def cmd_score(heldout):
     newq = [tk for tk in newread if tk in done]
     newq.sort(key=lambda t: info[t]["c"])
     # split NEW by call date: earliest 2/3 dev, last third held-out (of the new markets read, quoted or not)
-    nr = sorted(newread, key=lambda t: info[t]["c"]); cut = 2 * len(nr) // 3
-    devnew = set(nr[:cut]); honew = set(nr[cut:])
+    nr = sorted(newread, key=lambda t: info[t]["c"])
+    if cc and cc[1] == cur: devnew = {t for t in nr if info[t]["c"] < cc[0]}; honew = {t for t in nr if info[t]["c"] >= cc[0]}   # committed cut
+    else: cut = 2 * len(nr) // 3; devnew = set(nr[:cut]); honew = set(nr[cut:])   # no committed cut yet: development printing only, heldout is refused above
     print("new read", len(nr), "dev new", len(devnew), "held-out new", len(honew), "held500 with PREV", len(plan["held"]))
     skipped = sum(1 for t in nr if not quote_for(db, t, info[t]["c"]))
     print("new markets read with no usable quote:", skipped)
@@ -217,4 +262,5 @@ if __name__ == "__main__":
     c = sys.argv[1]
     if c == "plan": cmd_plan()
     elif c == "fetch": cmd_fetch(int(sys.argv[sys.argv.index("--cap") + 1]) if "--cap" in sys.argv else 1600)
+    elif c == "commit-cut": cmd_commit_cut(int(sys.argv[sys.argv.index("--cap") + 1]) if "--cap" in sys.argv else 1600)
     elif c == "score": cmd_score("--heldout" in sys.argv)
