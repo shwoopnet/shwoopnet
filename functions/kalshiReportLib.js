@@ -135,7 +135,8 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
     // Slot rows are listed apart from L1's so the L1 row shape does not change; the strategy id replaces any order id.
     out.slotOrders = slotRows.slice().sort((a, b) => a.ts - b.ts).slice(-MAX_ORDER_ROWS).map((o) => ({
       ts: new Date(Number(o.ts)).toISOString(), strategy: typeof o.slotId === "string" ? o.slotId.slice(0, 40) : null, ticker: o.ticker || null, side: o.side || null, count: num(o.fillCount), avgFill: num(o.averageFillPrice != null ? o.averageFillPrice : o.avgFill), avgFee: num(o.averageFeePaid != null ? o.averageFeePaid : o.avgFee),
-      status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), ...context(o),
+      // The open interest rise the signal fired on (Nov 12, 2026, "oiRise" log): a number, or null on an order that carries none. Slot rows only; the L1 row shape is unchanged.
+      status: o.status || null, result: o.result || null, settledPnl: settledPnl(o), oiRise: num(o.oiRise), ...context(o),
     }));
   }
   return out;
@@ -146,7 +147,10 @@ function buildReport(orders, nowMs, hours, withOrders, slotOrders) {
 const SKIP_DAYS = 7;
 const SHADOW_DAYS = 90;
 const MAX_SKIP_ROWS = 500;
-function skipSection(docs, nowMs) {
+// NEAR_MISS_CONTRACTS: an oi_below skip whose rise was within this many contracts under the strategy's line is a near miss (Nov 12, 2026; reporting only, it is not a rule and nothing reads it back).
+const NEAR_MISS_CONTRACTS = 10000;
+// `results` (optional) maps a market ticker to "yes" or "no", read from rows this report already has (settled shadow rows). The report makes no Kalshi call, so a market with no such row has result null.
+function skipSection(docs, nowMs, results) {
   const since = nowMs - SKIP_DAYS * 86400000;
   const word = (v, n) => (typeof v === "string" && /^[A-Za-z0-9_]{1,40}$/.test(v) ? v.slice(0, n) : null);
   const rows = (Array.isArray(docs) ? docs : []).filter((d) => d && Number(d.atMs) >= since).map((d) => {
@@ -158,9 +162,35 @@ function skipSection(docs, nowMs) {
       // A skip that happened after the strategy's trigger had passed (Nov 11, 2026, "P3"): qualified, the open interest rise and the price it would have bought, numbers and a flag only. Null on a skip that never triggered.
       qualified: d.qualified === true ? true : null, oiRise: d.qualified === true ? num(d.oiRise) : null, price: d.qualified === true ? num(d.price) : null };   // the side a skipped signal would have bought (the skip's note holds it for price skips); only "yes" or "no", never free text
   }).sort((a, b) => a.atMs - b.atMs);
+  // The open interest join (Nov 12, 2026): per skip, the rise it was judged on (oiSeen: from the oi_below detail, or from the qualified fields), the line, how far under it (shortBy, only for oi_below)
+  // and the market's result when a settled row for that ticker is on hand. All numbers or null; a missing rise stays null.
+  const known = results && typeof results === "object" ? results : {};
+  rows.forEach((r) => {
+    const det = r.detail || {};
+    const below = r.reason === "oi_below";
+    r.oiSeen = below ? num(det.oiRise) : r.oiRise;
+    r.oiMin = below ? num(det.min) : null;
+    r.shortBy = below && r.oiSeen !== null && r.oiMin !== null ? Math.max(0, r.oiMin - r.oiSeen) : null;
+    const res = r.ticker !== null && Object.prototype.hasOwnProperty.call(known, r.ticker) ? known[r.ticker] : null;
+    r.result = res === "yes" || res === "no" ? res : null;
+  });
+  const oi = { belowLine: 0, nearMissLimit: NEAR_MISS_CONTRACTS, nearMisses: 0, nearMissByResult: { yes: 0, no: 0, unknown: 0 }, belowByResult: { yes: 0, no: 0, unknown: 0 } };
+  rows.forEach((r) => {
+    if (r.reason !== "oi_below") return;
+    const k = r.result === null ? "unknown" : r.result;
+    oi.belowLine += 1; oi.belowByResult[k] += 1;
+    if (r.shortBy !== null && r.shortBy > 0 && r.shortBy <= NEAR_MISS_CONTRACTS) { oi.nearMisses += 1; oi.nearMissByResult[k] += 1; }
+  });
   const byReason = {};
   rows.forEach((r) => { byReason[r.reason] = (byReason[r.reason] || 0) + 1; });
-  return { days: SKIP_DAYS, count: rows.length, byReason: Object.fromEntries(Object.keys(byReason).sort().map((k) => [k, byReason[k]])), rows: rows.slice(-MAX_SKIP_ROWS) };
+  return { days: SKIP_DAYS, count: rows.length, byReason: Object.fromEntries(Object.keys(byReason).sort().map((k) => [k, byReason[k]])), openInterest: oi, rows: rows.slice(-MAX_SKIP_ROWS) };
+}
+
+// ticker -> "yes" | "no" from settled shadow rows (the public market answer the shadow settler already stored). Nothing is asked of Kalshi here.
+function resultsFromRows(rows) {
+  const out = {};
+  (Array.isArray(rows) ? rows : []).forEach((r) => { if (r && r.settled === true && typeof r.ticker === "string" && (r.result === "yes" || r.result === "no")) out[r.ticker] = r.result; });
+  return out;
 }
 
 // Hourly balance snapshots (Nov 12, 2026): the whole asked window, at most one row an hour for 90 days. Only ts, total and per-shard cash survive; anything else on the document is dropped.
@@ -202,11 +232,14 @@ function makeReportHandler(deps) {
       let deploys;
       if (typeof deps.readDeploys === "function") { try { deploys = deployStampLib.summarize(await deps.readDeploys()); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The second slot's skip reasons, last SKIP_DAYS whatever `hours` says. Optional, read only; a failure leaves the field out and never blanks the report.
+      let shadowRows = null;
+      if (typeof deps.readShadowRows === "function") { try { shadowRows = await deps.readShadowRows(now - SHADOW_DAYS * 86400000); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       let skips;
-      if (typeof deps.readSkips === "function") { try { skips = skipSection(await deps.readSkips(now - SKIP_DAYS * 86400000), now); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      if (typeof deps.readSkips === "function") { try { skips = skipSection(await deps.readSkips(now - SKIP_DAYS * 86400000), now, resultsFromRows(shadowRows)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The shadow rules' score (lifecycle spec (c)): per rule, signals, cash PF per contract and the verdict against the written pass and kill rules. Optional, read only; a failure leaves the field out.
       let shadow;
       if (typeof deps.readShadowRows === "function" && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), await deps.readShadowRows(now - SHADOW_DAYS * 86400000), now).map((x) => (x.rule === "GOLDOFF" ? Object.assign({}, x, { returnRule: shadowLib.returnRule(x) }) : x)) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      if (shadowRows !== null && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), shadowRows, now) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The hourly balance history over the asked window. Optional, read only; a failure leaves the field out, an empty history is an empty list.
       let balanceHistory;
       if (typeof deps.readBalances === "function") { try { balanceHistory = balanceSection(await deps.readBalances(now - hours * 3600000)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
@@ -224,4 +257,4 @@ function makeReportHandler(deps) {
   };
 }
 
-module.exports = { buildReport, makeReportHandler, sameToken, skipSection, balanceSection, MAX_BALANCE_ROWS, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };
+module.exports = { buildReport, resultsFromRows, NEAR_MISS_CONTRACTS, makeReportHandler, sameToken, skipSection, balanceSection, MAX_BALANCE_ROWS, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };
