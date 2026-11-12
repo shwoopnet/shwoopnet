@@ -41,6 +41,8 @@ Next after these: ECONLAG (about 390, after Desk B pins its cutoff as a date con
 
 Each read is re-checked by the Verification Analyst before a figure reaches the owner.
 
+The two conditional specs are in PROBE_SPECS.md on this branch (sent to the EA Nov 12). There is no third: nothing else has a rule with evidence behind it.
+
 ## Probe pipeline (leads ranked by days to a first tiny live order; every one UNPROVEN; each needs the owner's own popup)
 
 All specs are CONDITIONAL on the registered read. Owner decisions, Nov 12 (through the EA): NO pre-evidence orders; Main builds, switched off, the order path for a 1 contract order on a non-15-minute market. Head of R&D's estimate of an earned new live probe before December: about 1 in 20, nearly all of it the sports SPREAD cell. A sports single is covered by no existing budget; the popup must name one (proposed: $20 lifetime).
