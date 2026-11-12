@@ -1,0 +1,22 @@
+# Which recorded files are a delayed copy, and which read the order book (2026-11-12)
+
+Asked for by the Head of R&D after QUOTEVSBOOK1. Written from the recorder scripts on `origin/main` (`scripts/record_*.py`), so it says what each recorder READS; only the first line of each group below was measured. Public data only, no live account figure.
+
+**Measured.** Kalshi's market LIST read (`/markets?tickers=...`) returned the same quote for about 11 seconds at a time on the Bitcoin 15 minute market (72,012 polls, 4,360 distinct states; `QUOTEVSBOOK1_RESULT.md`). The ORDER BOOK read (`/markets/orderbooks?tickers=...`) was never the same from one 2 second poll to the next. So a price taken from a market object in a list is 0 to about 11 seconds old, about 5.5 on average; a price taken from the order book is current to the poll.
+
+| Price is from | Recorder and folder | What it means for use |
+|---|---|---|
+| **The order book** (current) | R6, `book15r6/` on `quote-data` (five 15 minute series, 2 s) | Safe to price from. The freshness above was measured on this one. |
+| | NC15, `nc15/` on `nc-data` (eleven non-crypto 15 minute series, 5 s) | Same endpoint as R6; not separately measured. |
+| | Hourly Bitcoin ladder book, `book/` on `quote-data` (7 strikes, 3 s) | Per-strike order book: treat as current. Its choice of WHICH strikes to follow comes from a market list (a delayed mid), which matters only at the moment a strike is picked. |
+| | Combo recorder, the `book` part on `combo-data` (best 5 levels of the 40 tightest) | Order book: current. |
+| **Market objects in a list** (a copy up to about 11 s old) | Quote recorder, `quotes/` on `quote-data`: `quotes.csv` (15 minute crypto and gold, last 150 s) and `ladder.csv` (hourly and gold ladders) | NOT a price at the stamped second. This is the one that was measured. Do not price a rule from it or form a seconds-level signal on it. |
+| | In-game recorder, `ingame/` on `sports-data` (moneyline, spread, total every 20 s) | Market objects from an event list. Assumed delayed the same way (not measured: 20 s polls cannot show an 11 s refresh). Any lag test finer than about 10 to 20 seconds on it is in doubt; whether markets of one event share one copy age is unknown. |
+| | Daily (`daily/`), reference (`ref/`), weather (`wxens/`), rain (`raincal/`) on `quote-data`; politics on `pol-data`; the combo `quotes` part on `combo-data` | Market objects from a series list. A delay of seconds is harmless for markets read every 30 minutes or more. |
+| **Not known** | The single-market read (`/markets/{ticker}`), used by the signal logger (`signals/`) and by the bot for its decision price | Not measured here. Refinement is checking it from order rows that hold both the quote seen and a book snapshot. |
+| | Perps (`/margin/markets`), `perps30/`, `perps10/`, hourly on `perp-data` | A different list endpoint. Not measured. Its 10 and 30 second samples should not be trusted to the second until it is. |
+| | Kalshi's 1 minute candles | Not a recorder file; whether the candle's ask close equals the book at the minute's end is the next measurement (CANDLEVSBOOK1). |
+| **Not a quote** | The trade tape (`trades.csv` in R6, NC15, the hourly book and combo) | Each trade carries the exchange's own time, so it is exact whenever it is fetched. Safe as a record of prices paid. |
+| | Deribit (`deribit/`) and OKX liquidations (`oklq/`) | Other venues; not covered by this note. |
+
+**Rule of thumb.** Price from `book15r6/`, `nc15/`, `book/` or a tape. Treat any `yes_bid` or `yes_ask` that came out of a `/markets?...` list as "what the market looked like some seconds ago".
