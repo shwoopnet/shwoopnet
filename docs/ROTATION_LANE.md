@@ -1,4 +1,4 @@
-# Rotation lane, "the wheel" (v1.1, approved by the owner Nov 12, 2026)
+# Rotation lane, "the wheel" (v1.2, approved by the owner Nov 12, 2026)
 
 **Status: APPROVED by the owner on Nov 12, 2026 (popup, through the EA: "Approve as written", with the decisions listed in section 0). These are the rules of the rotation lane from that date.** Written by the Head of R&D; home `docs/ROTATION_LANE.md` on main (docs only, opened by the Chief of Staff), with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It does not edit `docs/CHARTER.md`, which only the owner changes.
 
@@ -6,7 +6,7 @@
 
 Every number in this file is a rule, a threshold or arithmetic on made-up coin flips (scripts in `lane_arith/` on the `rnd-queue` branch). No live account figure is in it. [design]
 
-v1.1 is v1.0 (draft v0.4 as approved, with gold's guard and the Chief of Staff's cap facts) plus the owner's later popup of the same day: probation seats (section 0.10 and section 5a). Drafts v0.1 to v0.4 are in this branch's history.
+v1.2 corrects the arithmetic table of section 4 after the Verification Analyst's independent check (the 50c figure was the 3 contract one; "no edge" is now defined) and changes no rule. v1.1 is v1.0 (draft v0.4 as approved, with gold's guard and the Chief of Staff's cap facts) plus the owner's later popup of the same day: probation seats (section 0.10 and section 5a). Drafts v0.1 to v0.4 are in this branch's history.
 
 ## 0. Decided by the owner (popups, Nov 12, 2026, through the EA)
 
@@ -65,17 +65,19 @@ The owner, Nov 12, 2026 (popups, through the EA): "remember we're building for c
 6. **Seats:** a qualified rule takes a seat at once; there is no maximum number of seats. (If the owner ever sets one, the rule with the longest record goes first, never the one with the highest number: picking the highest number picks the luckiest.)
 7. A rule that would buy the same market, side and minute as a live strategy does not take a seat while that strategy is live.
 
-**Why the bar is built this way, on coin flips with the real fee (the shares below barely move with the size):**
+**Why the bar is built this way, on coin flips with the real fee.** "No edge" here means a rule in a fairly priced market: it wins exactly as often as its price says, so it loses one fee an order. (Checked independently by the Verification Analyst on Nov 12, with its own code: match, with the two corrections now in this table.)
 
-| A rule with no edge at all clears "1.3 over 60" | at 20c | at 50c | at 90c |
+| How often a rule with no edge clears "1.3 over 60", at 10 contracts | at 20c | at 50c | at 90c |
 |---|---|---|---|
-| on one block, the bare rule | 13 percent | 8 percent | 27 percent |
-| sooner or later within 300 signals, if the window is re-read as it rolls | 67 percent | 49 percent | 91 percent |
-| sooner or later within 300 signals, blocks that do not overlap, both halves at 1.0 | 39 percent | 30 percent | not admitted |
-| the same, with the 30 signal confirmation | 18 percent | 13 percent | not admitted |
-| on its first block, with the confirmation | 4 percent | 3 percent | not admitted |
+| on one block, the bare rule | 13 percent | 12 percent | 27 percent |
+| sooner or later within 300 signals, if the window is re-read as it rolls | 68 percent | 65 percent | about 9 in 10 |
+| sooner or later within 300 signals, blocks that do not overlap, both halves at 1.0 | 40 percent | 40 percent | see the favourites rule |
+| the same, with the 30 signal confirmation | 17 percent | 20 percent | see the favourites rule |
+| on its first block, with the confirmation | 4 percent | 4 percent | 5 percent under the favourites rule |
 
-A rule that truly has 1.3 clears its first block about 42 percent of the time (about 30 percent with the confirmation). So the bar lets a real rule in about ten times as easily as a dead one, no better, and **with 30 rules watching, some will clear by luck every month: about 3 a month on the bare rule, about 1 a month with the confirmation.** That is why the confirmation is part of the bar, and why the protection is each rule's own kill lines, the account stop and the scorecard, not the entry statistics.
+At 3 contracts, the probation size, the fee is a little larger per contract and the mid-price figures are lower: 7 percent on one bare block at 50c and 3 percent on a first block with the confirmation. **A rule that exactly breaks even after its fees, which is a rule with a small real edge the size of the fee, clears more often:** about 19 to 20 percent on one bare block and about 6 to 8 percent on a first block with the confirmation. Such a rule costs about nothing to seat, on average; it also earns nothing.
+
+A rule that truly has 1.3 clears its first block about 42 percent of the time (about 30 percent with the confirmation). So the bar lets a real rule in about seven to ten times as easily as a dead one, no better, and **with 30 rules watching, some will clear by luck every month: about 3 to 4 a month on the bare rule, about 1 to 1.5 a month with the confirmation.** That is why the confirmation is part of the bar, and why the protection is each rule's own kill lines, the account stop and the scorecard, not the entry statistics.
 
 ## 5. A seat
 
@@ -124,7 +126,7 @@ What lines 1 to 3 do on coin flips at 10 contracts: a rule with no edge leaves a
 ## 9. Not just picking lucky shadows
 
 1. Sections 3 and 4: forward signals only, a dated admit list, one set of parameters, blocks that do not overlap, the confirmation, fill-checked rows. **Seats per market multiply the looks:** thirty places on a dozen mechanisms are not thirty independent ideas, and two markets of one rule can look hot together because they share a cause. The ledger therefore counts every market place as its own row, and the notice for a seat names the sibling markets of the same rule and how they stand.
-2. **A lane ledger** on the `rnd-queue` branch, kept by the Head of R&D: every rule ever admitted, every block read, cleared or failed. Each time a rule takes a seat the owner's notice says how many blocks the wheel has read so far and how many lucky seats that many blocks would produce with no edge anywhere (blocks times about 0.035). With 30 shadows that is about one lucky seat a month.
+2. **A lane ledger** on the `rnd-queue` branch, kept by the Head of R&D: every rule ever admitted, every block read, cleared or failed. Each time a rule takes a seat the owner's notice says how many blocks the wheel has read so far and how many lucky seats that many blocks would produce with no edge anywhere (blocks times about 0.04, or 0.05 for a favourite at 88c or above). With 30 shadows that is about one to one and a half lucky seats a month.
 3. **The lane scorecard is the real test of the wheel's premise**, which is that a good recent record says something about the next few weeks. After 150 wheel fills in total the wheel's combined cash profit factor is read once; under 1.0 the owner is told at once and decides. Nothing pauses by itself, since he chose no lane-wide pause. It is reported every Monday, profit factor first, with n.
 4. A wheel record is never quoted as a research-bar pass or as proven. Any size above 10 contracts needs the proven bar on live fills and the owner's popup.
 5. **The premise test comes before the first seat (the owner, section 0.7).** WHEEL0, one registered test with its templates, blocks and verdict lines fixed before any outcome is joined: when a block is hot, what do the next 60 signals show, against blocks that were not hot? It is run by the Forensics desk on the recorded order books, with public one-minute candles over the longer window for power, since two weeks of books hold only a handful of hot blocks; the label is "premise supported", "premise not supported" or "no evidence at n = x hot pairs", and no seat is taken before it is read. Everything in this file depends on the answer.
@@ -133,7 +135,7 @@ What lines 1 to 3 do on coin flips at 10 contracts: a rule with no edge leaves a
 
 **One order.** At 10 contracts a rule that truly has 1.3 earns about 37c to 65c an order (most at mid prices, least near the ends). A losing order costs about $2 at 20c, about $5 at 50c and about $8 at 80c.
 
-**One lucky fake.** A rule with no edge that reaches a seat costs about $10 to $13 before its own lines turn it out (one time in twenty, $50 to $60).
+**One lucky fake.** A rule with no edge that reaches a seat costs about $10 to $13 before its own lines turn it out (one time in twenty, $50 to $60). That cost is the fees it pays; a rule that breaks even after fees costs about nothing on average.
 
 **The wheel.** 30 shadows, no seat maximum, 10 contracts, each rule seeing about 4 signals a day with 70 percent fillable, on coin flips with the real fee:
 
