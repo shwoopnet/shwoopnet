@@ -125,3 +125,13 @@ NOTE 6 is withdrawn (its text and code are removed): the Head made NOTE 4's void
 ## NOTE 9, Nov 12, 2026, 19:50Z, before any data (Forensics' rule (h) check)
 
 The HELDOUT_ refusal also resolves symlinks (an innocently named link to a HELDOUT_ folder is refused, test 8), and it now sits in the readers too: the pinned `scorekit.py` is updated to the Testing Desk's 512ffe0d copy, whose readers refuse HELDOUT_ folders (sha256 2b36fdae...6557), and `rematch_count.py` refuses them before opening anything. No rule, constant or output changed.
+
+## NOTE 10, Nov 12, 2026, 20:40Z, after the lists landed and before any price or result is read
+
+**What the lists showed (counts and times only; no price was read and no result was printed, counted or summarised; the reader holds the result field in memory as every list reader does):** KXESOCCERGAME has no settled market before 2026-10-08 (the two earliest slices, closes 2026-09-12 to 2026-10-07, came back empty; the first close is 2026-10-08T01:55Z). Development therefore holds 7,120 events (7,083 after the open-time guard; 37 "start not derivable"), about 470 a day over 15 days, not the 18,000 estimated from the 41 day window.
+
+**Amendment, because the registered constant is now degenerate:** the development halves were split at 2026-10-03, which puts every event in the second half. The split moves to **2026-10-15T12:00:00Z**, the middle of the development data. Nothing else changes.
+
+**Said plainly:** the first part of development is spent building the base rate (300 earlier events in a bucket before any bet), so the number of bets in development will be well under the earlier estimate; at a 3% firing share, under about 200. The development read can falsify; it cannot reach the research bar alone.
+
+**Candle job:** 240 requests built by `esoctie.py build-candles` from the landed lists, split into `ESOCTIE_CANDLES_P1` to `P4` (60 each) only to stay under the 200 MB a run cap.

@@ -9,7 +9,7 @@
   "blocks": {
     "development_closes_from": "2026-09-12T00:00:00Z",
     "development_closes_before": "2026-10-23T00:00:00Z",
-    "development_half_split": "2026-10-03T00:00:00Z",
+    "development_half_split": "2026-10-15T12:00:00Z",
     "held_out_from": "2026-10-23T00:00:00Z",
     "held_out_before": "2026-11-13T00:00:00Z"
   },
