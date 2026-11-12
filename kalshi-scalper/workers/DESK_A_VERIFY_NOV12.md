@@ -83,31 +83,6 @@ Not checked: the bills tables (A3, A4), the conditional tables (A2), and the "96
 
 ---
 
-## 5. Gold latch numbers (Refinement): MATCH (added Nov 12)
+## 5. Gold latch numbers (Refinement)
 
-Asked by Main: re-derive gold's cash figures since the re-arm (2026-11-10 00:00 UTC) per `docs/GOLD_KILL_LATCH.md`. The order documents are not on a branch, so Refinement sent me its 30 order rows from the nightly report pulled at 2026-11-11 23:14 UTC (ticker, side, count, ordered count, price, average fill, average fee, result, stored result, early-sell time and price, order time; no ids). I asked for no per-row cash figures and computed them myself. The order rows themselves are not committed here.
-
-| Figure | Refinement | Desk A | |
-|---|---|---|---|
-| Settled gold trades since the re-arm | 30 | 30 (25 wins, 5 early sells) | MATCH |
-| Cumulative cash net | -$33.96 | -$33.96 | MATCH |
-| Cash peak | +$4.07 | +$4.07 (after the 4th trade) | MATCH |
-| Drawdown from the peak | $38.03 | $38.03 | MATCH |
-| Room to the $58.75 line (rule 1) | | $20.72 | |
-| Rule 2 (net under -$20 once 40 trades have settled) | not yet at 40 | 30 of 40 trades; net already -$33.96 | see below |
-
-**How I computed it.** A trade settled at the close: contracts filled x (1 minus price paid minus fee per contract) for a win, minus contracts x (price paid plus fee) for a loss, with the price paid taken from the average fill (which is a YES price, so a NO order pays 1 minus it). All 25 equal the stored result to the cent. An early sell keeps its stored result under the latch rule; I also rebuilt each of the 5 from scratch (contracts x the price sold at, minus the sale fee rounded up to the cent, minus what the contracts cost) and all 5 equal the stored figure to the cent. So the stored results are on the cash basis, at the real sale price, not at the 25c line. The one partial fill (10 of 18 contracts) is booked on 10.
-
-**Independent check of the rows against public data.** For 23 of the 30 markets the 15 minute recorder on `quote-data` holds the public result; every one agrees with the row (0 mismatches). The other 7 fall in recorder gaps and could not be checked.
-
-**What the numbers imply, by arithmetic only (not a forecast):**
-- **Rule 2 is close to certain to trip at trade 40.** The net has to be back above -$20 when the 40th trade settles, which needs +$13.96 over the next 10 trades. The average win in these 30 trades is $1.13, so ten wins out of ten at that size add $11.32 and leave the net near -$22.6. Gold avoids rule 2 only with ten straight wins at larger than average size (about $1.40 a win, which means entries nearer 88c to 90c than 95c).
-- **Rule 1 has room for about one more early sell.** The five early sells cost $9.12 to $15.01 each. From a drawdown of $38.03, two more of typical size with few wins between them cross $58.75.
-- **The early-sell alert condition is already met:** 5 early sells in the last 30 trades against the alert line of 3 in 40.
-- Loss rate since the re-arm is 5 in 30 (16.7%) against a break-even near 7.5%. Cash profit factor 0.45.
-
-**Two details for whoever reads the early sells:**
-- The sale price was below the bid that triggered the sale in 4 of the 5 (bid 16c sold 10c; 22c sold 15c; 21c sold 10c; 14c sold 6.4c) and above it once (25c sold 34c). On average the sale filled about 4.5c a contract under the trigger bid.
-- From the public results, one of the three early sells I could check (the market closing 11:00 ET on Nov 11, booked at -$15.01) would have won if held to the close; the other two would have lost. This is information only: holding gold to settlement is on the declined list.
-
-**Limit of this check.** It verifies the arithmetic and the cash basis on the rows Refinement exported, and 23 of the 30 outcomes against public data. It does not verify that the export contains every gold order (I cannot read the order store), nor whether the latch function is deployed.
+Checked on Nov 12 and reported privately to Main. The detail was removed from this file the same day: this repository is public and the owner's standing rule is that no live trading history goes in it.
