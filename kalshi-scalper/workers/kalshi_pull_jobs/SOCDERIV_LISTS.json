@@ -1,0 +1,891 @@
+{
+ "job_id": "SOCDERIV_LISTS",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md",
+ "purpose": "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).",
+ "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXAPFDDHBTTS",
+  "KXAPFDDHGAME",
+  "KXAPFDDHTEAMTOTAL",
+  "KXAPFDDHTOTAL",
+  "KXBRASILEIROBTTS",
+  "KXBRASILEIROGAME",
+  "KXBRASILEIROTEAMTOTAL",
+  "KXBRASILEIROTOTAL",
+  "KXBUNDESLIGABTTS",
+  "KXBUNDESLIGAGAME",
+  "KXBUNDESLIGATEAMTOTAL",
+  "KXBUNDESLIGATOTAL",
+  "KXCOPADELREYBTTS",
+  "KXCOPADELREYGAME",
+  "KXCOPADELREYTEAMTOTAL",
+  "KXCOPADELREYTOTAL",
+  "KXEERSTEDIVBTTS",
+  "KXEERSTEDIVGAME",
+  "KXEERSTEDIVTEAMTOTAL",
+  "KXEERSTEDIVTOTAL",
+  "KXEFLTROPHYBTTS",
+  "KXEFLTROPHYBTTS",
+  "KXEFLTROPHYGAME",
+  "KXEFLTROPHYTEAMTOTAL",
+  "KXEFLTROPHYTOTAL",
+  "KXEPLBTTS",
+  "KXEPLBTTS",
+  "KXEPLGAME",
+  "KXEPLGAME",
+  "KXEPLTEAMTOTAL",
+  "KXEPLTOTAL",
+  "KXLALIGABTTS",
+  "KXLALIGAGAME",
+  "KXLALIGATEAMTOTAL",
+  "KXLALIGATOTAL",
+  "KXLIGAMXBTTS",
+  "KXLIGAMXGAME",
+  "KXLIGAMXTEAMTOTAL",
+  "KXLIGAMXTOTAL",
+  "KXLIGAPORTUGALBTTS",
+  "KXLIGAPORTUGALGAME",
+  "KXLIGAPORTUGALTEAMTOTAL",
+  "KXLIGAPORTUGALTOTAL",
+  "KXLIGUE1BTTS",
+  "KXLIGUE1GAME",
+  "KXLIGUE1TEAMTOTAL",
+  "KXLIGUE1TOTAL",
+  "KXLVAVIRBTTS",
+  "KXLVAVIRGAME",
+  "KXLVAVIRTEAMTOTAL",
+  "KXLVAVIRTOTAL",
+  "KXMLSBTTS",
+  "KXMLSGAME",
+  "KXMLSTEAMTOTAL",
+  "KXMLSTOTAL",
+  "KXSERIEABTTS",
+  "KXSERIEAGAME",
+  "KXSERIEATEAMTOTAL",
+  "KXSERIEATOTAL",
+  "KXSERIECBTTS",
+  "KXSERIECGAME",
+  "KXSERIECTEAMTOTAL",
+  "KXSERIECTOTAL",
+  "KXUCLWBTTS",
+  "KXUCLWGAME",
+  "KXUCLWTEAMTOTAL",
+  "KXUCLWTOTAL"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 131,
+ "notes": "TIE3 measurement",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXEPLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEPLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEPLBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEPLTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPLTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLALIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLALIGATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLALIGABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLALIGATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLALIGATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIEAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIEATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIEABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIEATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIEATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBUNDESLIGAGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGAGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBUNDESLIGATOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGATOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBUNDESLIGABTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGABTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBUNDESLIGATEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGATEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGUE1GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGUE1TOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1TOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGUE1BTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1BTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGUE1TEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGUE1TEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXMLSGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXMLSTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXMLSBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXMLSTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMLSTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAMXGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAMXTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAMXBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAMXTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAMXTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBRASILEIROGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBRASILEIROTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBRASILEIROBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXBRASILEIROTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEFLTROPHYGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEFLTROPHYTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEFLTROPHYBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEFLTROPHYTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHYTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXCOPADELREYGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXCOPADELREYTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXCOPADELREYBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXCOPADELREYTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPADELREYTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXUCLWGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXUCLWTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXUCLWBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXUCLWTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUCLWTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXAPFDDHGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXAPFDDHTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXAPFDDHBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXAPFDDHTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPFDDHTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEERSTEDIVGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEERSTEDIVTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEERSTEDIVBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXEERSTEDIVTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEERSTEDIVTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAPORTUGALGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAPORTUGALTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAPORTUGALBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLIGAPORTUGALTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGALTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLVAVIRGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLVAVIRTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLVAVIRBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXLVAVIRTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVAVIRTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIECGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIECTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIECBTTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECBTTS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXSERIECTEAMTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSERIECTEAMTOTAL",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "fee_KXEPLGAME",
+   "path": "/series/KXEPLGAME"
+  },
+  {
+   "id": "fee_KXEPLBTTS",
+   "path": "/series/KXEPLBTTS"
+  },
+  {
+   "id": "fee_KXEFLTROPHYBTTS",
+   "path": "/series/KXEFLTROPHYBTTS"
+  }
+ ]
+}

@@ -83,6 +83,10 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `WXDAYEND_A` | Testing Desk (owner field MAIN) | 22 (22) | under 1 | `WXDAYEND_REGISTRATION.md`; part A of a registered count: 18 one-market candle windows and 4 settled lists |
 | `CFRTI_K_CANDLES` | Desk A | 215 (215) | about 55 (estimate) | `CFRTI_K_REGISTRATION.md`; live mode (the probe answered empty for pre-cutover markets), built from the `CFRTI_K_LISTS` answer; closes 2026-09-12 to 2026-11-04 only |
 | `UNRATE_LISTS` | Testing Desk (owner field MAIN) | 4, up to 8 pages (8) | under 1 | `UNRATEROUND_REGISTRATION.md`; settled lists of KXU3 and KXUE, live and historical |
+| `POLI2_LISTS` | Testing Desk (MAIN) | 79, up to 237 pages (237) | about 5 | one live list per Politics series (count step) |
+| `TIE3_LISTS` | Testing Desk (MAIN) | 32, up to 88 pages (88) | about 3 | live and history lists plus fee reads |
+| `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists |
+| `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
