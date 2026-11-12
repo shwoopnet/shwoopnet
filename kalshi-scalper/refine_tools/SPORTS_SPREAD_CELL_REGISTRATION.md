@@ -24,3 +24,6 @@ READ-ONCE MARKER: NEW HELD-OUT BLOCK NOT READ as of 2026-11-12.
 - LEAD (the middle): n of 100 or more and neither PASS nor FAIL. A LEAD is not a pass: no probe, no popup; the forward shadow S2 (SHADOW_RULES_NOV12.md) continues to a stated n of 100 shadow fills and is read once.
 - UNDERPOWERED: n under 100, reported as 'no evidence at n = x', never FAIL.
 - One command prints the read (spread_cell1_score.py); it prints nothing but 'pull incomplete' until the pull is marked complete.
+
+## Clarification of the look and bucket (Nov 12, 2026, before dispatch)
+- The scorer reproduces the original W-CAT-SPORTS1 definition exactly: the 'more than 24 h before close' look is the last hourly candle at or before close minus 48 hours, no more than 2 hours old (the original scorer's gt24h bucket is 48 hours); the YES ask bucket is 0.05 up to but not including 0.15; the bucket filter is applied before choosing the market nearest 0.5 mid. Under n 100 the scorer prints only the label ('no evidence at n = x'), no PF, mean, bound or z.
