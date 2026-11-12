@@ -41,7 +41,7 @@ gates.P3 = () => {
 gates.P4 = () => {
   const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
   const size = (f) => { const b = fs.readFileSync(path.join(root, f)); assert.strictEqual(b.slice(1, 4).toString(), 'PNG', f + ' is a PNG'); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
-  assert.ok(html.includes('content="https://shwoopnet.github.io/og-image.png"'), 'the preview image is named by absolute address');
+  assert.ok(html.includes('content="https://shwoopnet.github.io/shwoopnet/og-image.png"'), 'the preview image is named by absolute address');
   assert.deepStrictEqual(size('og-image.png'), [1200, 630], 'the preview image is 1200 by 630');
   const man = JSON.parse(fs.readFileSync(path.join(root, 'manifest.webmanifest'), 'utf8'));
   for (const i of man.icons) assert.deepStrictEqual(size(i.src).join('x'), i.sizes, i.src + ' is the size the manifest claims');
