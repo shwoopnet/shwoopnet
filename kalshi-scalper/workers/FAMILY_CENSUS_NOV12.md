@@ -129,7 +129,7 @@ Three states, because "touched" hides a real difference:
 
 The first version of this table was built from the level-two "Result:" headings of V2's README only and missed tests filed under other heading styles (ESPORT1, ESPORTM1, VIRT1, CRICT20, SOFR1, TNOTE1, MORTGAGE1, SPOTD1, CHART1, EQUAKE1, FAMSPORTS, NPBKBO1). A second pass searched the whole file by family keyword. For the seven UNTOUCHED families the search found no test of any kind: no entry names an NHL period, a college football quarter, a foreign basketball league, the AHL or KHL, volleyball, corners or both-teams-to-score, and the only soccer totals entry is about US leagues. Desk A's and Refinement's records are still to be searched the same way before the full table.
 
-### Rows added after the first cut (Nov 12, 17:15Z)
+### Rows added after the first cut (Nov 12, 17:05Z)
 
 Families that are not in the sweep files and were missing from the table above; they go into the full table.
 

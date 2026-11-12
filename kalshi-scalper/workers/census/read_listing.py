@@ -28,7 +28,7 @@ def num(x):
 def main():
     run, out = sys.argv[1], sys.argv[2]
     man = json.load(open(os.path.join(run, "manifest.json")))
-    series, day = {}, defaultdict(lambda: {"markets": 0, "events": set(), "volume": 0.0, "oi": 0.0, "with_volume": 0})
+    series, day = {}, defaultdict(lambda: {"markets": 0, "events": set(), "volume": 0.0, "oi": 0.0, "with_volume": 0, "tie": 0})
     last_page, cut_hours, hours_read, truncated_lists = {}, [], set(), 0
     for row in man.get("rows", []):
         if row.get("status") != 200 or "file" not in row:
@@ -55,6 +55,7 @@ def main():
                 continue
             d = day[tk.split("-")[0]]
             d["markets"] += 1
+            d["tie"] += 1 if tk.rsplit("-", 1)[-1].upper() in ("TIE", "DRAW") else 0   # shape of the market only, from the ticker
             d["events"].add(m.get("event_ticker", ""))
             v = num(m.get("volume_fp", m.get("volume")))
             d["volume"] += v
@@ -62,12 +63,20 @@ def main():
             d["oi"] += num(m.get("open_interest_fp", m.get("open_interest")))
     cut_hours = sorted(h for h, cut in last_page.items() if cut)
     os.makedirs(out, exist_ok=True)
-    cols = ["series", "category", "frequency", "fee_type", "fee_multiplier", "title", "settled_markets_day", "settled_events_day", "markets_with_volume", "volume_day", "open_interest_day", "in_series_list"]
+    cols = ["series", "category", "frequency", "fee_type", "fee_multiplier", "title", "settled_markets_day", "settled_events_day", "markets_with_volume", "volume_day", "open_interest_day", "in_series_list",
+            "markets_per_event", "tie_markets", "family_first_cut", "sweep_status"]
+    first = {}
+    fc = os.path.join(os.path.dirname(os.path.abspath(__file__)), "first_cut_series.csv")
+    if os.path.exists(fc):
+        for r in csv.DictReader(open(fc)):
+            first[r["series"]] = (r["family"], r["sweep_status"])
     rows = []
     for tk in sorted(set(series) | set(day)):
         s, d = series.get(tk, {}), day.get(tk)
         rows.append([tk, s.get("category", ""), s.get("frequency", ""), s.get("fee_type", ""), s.get("fee_multiplier", ""), (s.get("title") or "")[:80],
-                     d["markets"] if d else 0, len(d["events"]) if d else 0, d["with_volume"] if d else 0, round(d["volume"], 2) if d else 0, round(d["oi"], 2) if d else 0, int(tk in series)])
+                     d["markets"] if d else 0, len(d["events"]) if d else 0, d["with_volume"] if d else 0, round(d["volume"], 2) if d else 0, round(d["oi"], 2) if d else 0, int(tk in series),
+                     round(d["markets"] / max(1, len(d["events"])), 2) if d else 0, d["tie"] if d else 0,
+                     first.get(tk, ("", ""))[0], first.get(tk, ("", "not in V2's sweep files"))[1]])
     with open(os.path.join(out, "series_day.csv"), "w", newline="") as f:
         w = csv.writer(f)
         w.writerow(cols)
@@ -84,6 +93,10 @@ def main():
     print("category | series | series settling that day | markets | events | volume")
     for k, c in sorted(cat.items(), key=lambda kv: -kv[1][4]):
         print(f"{k} | {c[0]} | {c[1]} | {c[2]} | {c[3]} | {c[4]:.0f}")
+    new = [r for r in rows if r[15] == "not in V2's sweep files" and r[7] >= 3 and r[8] > 0]
+    print(f"series with 3 or more events settled that day and some volume that V2's sweep files do not hold: {len(new)}")
+    for r in sorted(new, key=lambda r: -r[7])[:60]:
+        print("  ", r[0], "|", r[1], "|", r[2], "|", r[7], "|", r[6], "|", r[9], "| per event", r[12], "| tie", r[13])
     print("top series by events settled that day (series, category, frequency, events, markets, volume):")
     for r in sorted(rows, key=lambda r: -r[7])[:25]:
         print("  ", r[0], "|", r[1], "|", r[2], "|", r[7], "|", r[6], "|", r[9])
@@ -91,3 +104,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
