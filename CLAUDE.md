@@ -1060,3 +1060,7 @@ The owner upgraded R&D: two Idea Desks (A: structure and cross-market; B: events
 ## Politics hold window 30 days, clinical trials 90 days (Nov 11, 2026, the owner)
 
 The owner opened the politics hold window from 14 to **30 days** to settlement (politics and elections singles and nothing-happens): 3 contracts per market, at most 5 positions open at once that settle beyond 14 days, inside the 10 open total and the $200 lifetime budget. **Economics and weather stay at 14 days; clinical trials and health markets may hold up to 90 days** (1 contract per market, at most 3 open at once, inside the $200 budget, returns quoted per dollar-year); the mixed-combo exception is unchanged and each live probe still needs the owner's own popup. The politics shadow recorder's cap is now `cap_days: 30` in `kalshi-scalper/workers/POLREC_SERIES.json` (the series list is now 42: Refinement's 26 ranked under the 30 day window plus the open scheduled-event series kept on purpose so their history accrues; the daily count column is now `skipped_by_cap`). Rules in `docs/POLITICS_RULES.md`. Nothing live changed.
+
+## Declined list: six rows added (Nov 12, 2026, closed by evidence)
+
+`docs/STRATEGY_LIFECYCLE.md` 7e gains six rows closed by evidence (not owner NOs): lock and parity scans, the ex-dividend short on stock perps, the conditional tie premium, second-of-minute taker clustering, fractional-size flow, and cheap-side price, regime and grammar sweeps on the 15 minute series. Each cites the test that closed it. Only the owner removes an entry. Nothing live changed.
