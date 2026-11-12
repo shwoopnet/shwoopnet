@@ -166,6 +166,17 @@ kalshi-scalper/workers/forensics/STALE_QUOTE_AUDIT_NOV12.md on claude/forensics-
 - **BLOCKER:** the Stocks Desk session cannot push (repo attach refused; 403 on claude/stocks-desk). Its plan is a local commit only. Nobody pushes for it; reported to Main and the EA. Every paid pull is held until it is fixed.
 - **With the owner (through the EA):** derived results in the public repo (recommended no); keep or raise $25 (recommended keep); an Alpaca data key (recommended no); account type; automated EDGAR reads (only if the owner accepts the contact header EDGAR asks for). No automated read of S&P or Russell sites (terms unread).
 
+### Untouched-family census, first cut (Desk B, Nov 12 17:00Z; from V2's Nov 3 sweep files, no new read)
+
+kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md and census/ on claude/idea-desk-b (7523154). [research]
+
+- **Counts:** 46 families listed; 26 touched; 13 read only by the cheap-tail sweep; 7 untouched; 14 untouched or sweep-only with 300 or more independent events a year; cards written 0.
+- **The honest size of the untouched ground:** the "13,856 series never tested" figure (V2's README, line 8363 at 79724f0) counts series NAMES, most of them dead. 174 series met the activity rule; 107 are still unread, and all 107 are sports sub-markets; about a dozen non-sports families had only one crowd-bias rule run on them. The owner is told that wording, not 13,856.
+- **Card pool:** never read: NHL periods, college football quarters and halves, small-league soccer totals and spreads, soccer team totals and corners, foreign basketball, AHL and KHL winners, college volleyball. Sweep only: NBA and MLS halves, esports maps, T20 cricket, Texas power daily peak, Truflation daily, daily top music video. Near miss on count: daily Treasury yields and SOFR.
+- **Efficient, move on, for the cheap side everywhere:** V2's pooled calibration (16,041 cheap-side entries, 3,535 events, read once Nov 3) loses in every price bucket. No new card is a cheap-side or crowd-bias rule.
+- **Card rules set:** cost row first (Forensics' table) or a zero-try cost stage; a sports card's public fact must come from Kalshi's own related markets or a source whose terms allow it (score sites are banned hosts); no lock or parity scan under a new name; not all ten in sports; fewer than ten honest cards beats ten.
+- **Limits:** no fee class, spread or depth yet; nothing on series created since Nov 3; those wait for CENSUS_LISTING.
+
 ### Stock cards, first wave ruled (Nov 12, 17:15Z; spend $0; nothing scored)
 
 The Stocks Desk wrote ten pre-registered mechanisms (local commit 993187ec, not on a remote: the push blocker stands) and dropped six with a one-line reason (turn of month, January tax-loss, pre-FOMC, MAX short, ETF-constituent arbitrage, dividend capture). Bar arithmetic it uses: PF 1.5 is about 0.162 standard deviations an event, so about 1,141 independent events at z 5.46. [research]
