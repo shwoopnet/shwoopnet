@@ -259,7 +259,7 @@ def run(out_dir, minutes, fetch=None):
         write_csv(os.path.join(out_dir, "quotes.csv"), QUOTE_COLS, rows)
         if failed:
             print("poll %d: no answer for %s" % (i, ",".join(failed)), flush=True)
-        if i == 0:
+        if i == 0 and time.gmtime(now).tm_min < 20:   # the results read is hourly: only the first run of an hour (started before minute 20) does it; a missed hour is caught by the 48 hour lookback
             res = []
             poll_results(stream, series_list, now, res, seen)
             write_csv(os.path.join(out_dir, "results.csv"), RESULT_COLS, res)
@@ -274,7 +274,7 @@ def run(out_dir, minutes, fetch=None):
 def main(argv):
     ap = argparse.ArgumentParser()
     ap.add_argument("out_dir")
-    ap.add_argument("--minutes", type=float, default=35, help="poll every 30 minutes for this long (35 gives polls at 0 and 30)")
+    ap.add_argument("--minutes", type=float, default=0, help="poll every 30 minutes for this long (0, the workflow default, is one poll; 35 gives polls at 0 and 30)")
     a = ap.parse_args(argv)
     if past_end(time.time()):
         print("past the end date %s: nothing to record" % END_UTC)
