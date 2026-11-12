@@ -2,15 +2,16 @@
 
 Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git show origin/rnd-queue:RND_QUEUE.md`. Rules: docs/RND_CHARTER.md section 9 and docs/POLITICS_RULES.md on main.
 
-## Kalshi request budget (shared bucket: 12 requests a minute), re-set 2026-11-11 22:55Z, valid until the next update
-| Holder | Share | For |
-|---|---|---|
-| Refinement (one shared pacer for all its workers) | 6 / min | economics pull (4), weather/finance/indices calibration (2); P4 and sports singles finished |
-| V2 | 4 / min | CLINICAL2 first, then POLCOMBO1B core (resume), COMBO1 NBA sample, MENTPERSIST1 last |
-| Idea Desk B | 2 / min | NESTCOMBO (about 100 requests), then BALLOTNO (about 124), then ECONLAG (about 350, coordinate with Refinement's economics worker) |
-| Idea Desk A | 0 | counts-only work on held data (quote-data, nc-data, pol-data); ask Main for reads |
-Total 12. Cause of the 429s earlier: Refinement's economics puller ran at a 3.5 s gap (up to about 17 a minute); fixed at 22:50Z.
+## Kalshi request budget, re-set 2026-11-12 02:30Z (owner directive via EA), valid until the next update
+The shared address allows about 25 Kalshi reads an hour in total (about 3 a minute at best). Spend them on the single highest-value pull: Refinement's approval NO-side pull (150 s gap, 429 backs off up to 10 minutes). Everything else runs on data already held. Paused: Refinement calibration pull, the extra hlists pull, V2 fetching, Desk A reads. Exception, approved: Desk B BALLOTNO (113 reads) at 1 request a minute from 08:00Z, 5-refusal cap. The separate kalshi-pull route is not built and waits on a person reading Kalshi's Developer Agreement and Terms of Use. First job on approval: V2 COMBO1_OPENBOOK (3 reads).
 A 429 is never retried in a loop. Nobody exceeds a share.
+
+## Retired by power analysis (POWER2, V2, 2026-11-12): do not spend reads
+AVG1, STALE1, EARLYCLOSE1, TIECOND1 arm B, CLINICAL2 incl. its remainder pull, COMBO1 as a resting-ask test (historical walk and candle pricing; COMBO1_OPENBOOK 3-read look is the only exception), POLCOMBO1B (reopen only on a live two-sided politics-leg combo quote or 100 settled), RETAILFRAC1 stage B, CRONCLUSTER1, NC15DEPTH1 per-series cells, MENTPERSIST1 fetching (held 500 scored offline as development: NOT_ENOUGH_DATA, closed). Desk B retired: UNRATEROUND, FAANOTICE, SCOTUSAUTH, PRESENTQ, TARIFFDTS, CPIARITH, WIKIEDIT, SWEEPSIM, IMPLY1, both weather combo cards, NESTCOMBO (closed). Parked: MOVPARITY arm A, BALLOTNO after its one read. Demoted: ECONLAG (one falsification run only, through the separate route). Row 75 WXREVISE dropped by its own existence rule (3 of 30 city-days with a 2 F revision). Treasury FiscalData rows 78, 79, 80 BLOCKED (terms unread; row 78 also needs a FRED key).
+KEPT: MMSIM1 held-out (about Nov 24; warning: its 1.3 bar sits above the shrunk PF 1.14, a pass is unlikely), MMHOUR1 two leads (Nov 24), MMMAP1 (Nov 15), CFRTI1-BTC (Nov 22 to 24; a pass means re-test), NC15DEPTH1 pooled cell (forward only, 3c effect is an assumption), ROLLOFF (12-read proxy check, needs approval).
+
+## Owner decisions recorded 2026-11-12 (docs/POLITICS_RULES.md section 7, PR 791)
+Combo house side: measure on paper; $2 live probes only after a paper edge, each with its own popup and spec. ORHARVEST1: paper only, YES priced 35c to 88c. Combo book recorder: approved (PR 793, widened to any posted bid or ask at any price or any volume; waits on 'merge 793'). Open for the owner: monthly and seasonal event families cannot reach a PASS for years under the current bar (screen or drop).
 
 ## Ready to test (rank by speed to a verdict)
 1. Trump approval and generic ballot calibration, 3 contracts, 10c to 90c, either side, hold within 30 days: Refinement P4, running.
