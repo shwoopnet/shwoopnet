@@ -39,3 +39,24 @@ Added: in the SAME single sitting the Kraken-only figure is computed on the same
 ## 5. Limits
 
 Kraken alone is one venue of the several the settlement index averages, so its last trade is a noisier and sometimes staler estimate of the index than the three-venue mean; fewer decisions will have a trade inside 10 s. Receive time is the recorder's clock. 14 development days is one regime.
+
+---
+## Result (Nov 12, 2026; development only, run once after the registration commit 870f36a; no held-out folder opened)
+
+Script `workers/desk_a_verify/cfrti_kraken.py` (`python3 -I cfrti_kraken.py <folder holding quotes/>`; it opens only run folders dated before 2026-11-05). 61 run folders, 14 days, Bitcoin only.
+
+| Index built from | Cheap rows with a model | Edge trades (n) | Cash PF | Mean per trade | Win rate (wins) | Mean ask | PF by halves |
+|---|---|---|---|---|---|---|---|
+| Three venues, as registered (the check that the script is right: matches n 36, PF 2.54) | 222 | 36 | 2.54 | +15.65c | 33.3% (12) | 0.168 | 3.31 / 1.90 |
+| **Kraken only (the one registered try)** | 215 | **32** | **1.33** | **+4.31c** | **21.9% (7)** | 0.166 | 1.12 / 1.56 |
+
+- Of the 36 three-venue trades, Kraken only **keeps 22**, drops 14 and adds 10 new ones.
+- The 22 kept: PF 1.71, mean +9.0c, 6 wins. The 14 dropped: PF 5.27, mean +26.1c, 6 wins. The 10 added: PF 0.54, mean -6.0c, 1 win.
+- Decisions lost for want of Kraken data: 3 cheap rows with no Kraken trade in the last 10 s, 9 with under 30 changes (5 are lost that way with three venues too).
+- Baseline (every cheap row, no model): PF 0.99 on 215.
+
+**Label by section 3: carried to the held-out read. It is not a pass.** Plainly: on Kraken alone the lead mostly goes. Half of the three-venue wins sat in the trades Kraken alone does not take, and the trades it adds lose. 7 wins in 32 at a mean ask of 16.6c is about one and a half wins above break-even (break-even is about 17.6% with the fee); a rule with no edge shows 7 or more wins in 32 about one time in three. So development gives **no evidence of an edge on Kraken alone, and no evidence against one at n = 32.**
+
+**Two looks beyond the registration, disclosed.** The script also printed the same rule on Coinbase alone and on Bitstamp alone, which section 2 did not list. They are information about where the signal comes from, on two venues the owner has barred, and cannot become a rule here: Coinbase only n 55, PF 2.94, mean +17.1c, 18 wins; Bitstamp only n 32, PF 2.07, mean +10.2c, 8 wins (Bitstamp has too few trades for the volatility step on 90 cheap rows). Reading: the signal is mostly Coinbase's. If the Head of R&D counts these, N is +3 for this file, not +1.
+
+**What follows.** A live probe on Kraken alone would rest on a development figure that is indistinguishable from nothing. The held-out read (from Nov 20) reports both figures as amended in section 4; the Kraken-only one will probably have under 50 rows when the three-venue count reaches 50 (it produced 32 against 36 here), so expect "no call at n = x" and a forward shadow.

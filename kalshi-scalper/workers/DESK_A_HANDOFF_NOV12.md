@@ -1,5 +1,7 @@
 # Idea Desk A handoff (written Nov 12, 2026, about 16:20Z, for a fresh Desk A session)
 
+**READ SECTION 11 FIRST: rulings made after this file was first written change task 3 (no design pass; QUOTE2B instead) and add CFRTI1 Kraken-only and CFRTI-K.**
+
 The first Desk A session is large; the Head of R&D asked for this handoff so a fresh session carries the open work. Read this file, then `docs/RND_CHARTER.md`, `docs/STRATEGY_LIFECYCLE.md` (sections 3, 6, 7b to 7g) and `docs/POLITICS_RULES.md` on main. Session ids are not written here (public repo); the Head of R&D gives them in the opening message.
 
 ## 1. Who you are and the rules that never bend
@@ -124,3 +126,24 @@ For every read: count the events or rows first without computing a result; if th
 ## 10. State of the repaired-rule registration (task 3) at handoff
 
 NOT registered. Nothing scored. No variant has been tried on any data, development included: the only numbers that exist are for the ONE registered MMSIM1 rule under five ways of counting its fills. Two rulings are awaited from the Head of R&D before the registration is written: (1) whether the family's falsified count restarts at the owner's Nov 11 approval of MMSIM1 (section 5), and (2) whether QUOTE2B stays unread until Nov 24 and whether its quoting rule becomes one of the four variants.
+
+## 11. Rulings of the Head of R&D after this file was first written (Nov 12, about 15:00Z). These SUPERSEDE task 3 in section 4, and sections 8 and 10 where they differ
+
+**a. No repaired-rule design pass.** By the strict count two-sided market making had three FALSIFIED before MMSIM1 (H5, MAKER1, MAKER4) and MMSIM1 under honest fills is heading for a fourth. The Head of R&D does not restart the count. A new try in this family needs the owner's word; the recommendation going to the owner is the declined list unless QUOTE2B says otherwise. **Do not register or score any new market-making variant.** The design notes in section 4 are kept only as a record.
+
+**b. YOUR FIRST JOB: finish QUOTE2B** (`workers/Q2B_REGISTRATION.md` and `src/scalper/quote2b.py` on `claude/epic-ptolemy-0amjd9`; registered Oct 29, never read; hourly Bitcoin ladder, honest through-price fills, re-quoting at each boundary). Finishing a registered test is not a new try. In this order:
+1. Read the registration, its amendment and the script end to end. Its split is "usable hours in close-time order split into thirds, last third holdout": a MOVING cut.
+2. Commit an amendment FIRST (on this branch, naming the file it amends): pinned cutoff, the SAME constant as MMSIM1: events closing before `2026-11-07T15:00:00Z` are development; at or after are held-out. Nothing else in the rule changes.
+3. Then its DEVELOPMENT read may run ONCE, development events only (drop later rows at load; the script as committed reads the holdout in its single run, so it needs a development-only path or a copy that has one; check for a refuse-second-run marker before running anything).
+4. Its held-out is read once on Nov 24 beside MMSIM1's, not before.
+5. **If QUOTE2B's development cash PF is under 1.0 the family is FALSIFIED again and the Head of R&D closes it.** Report n, PF and the verdict by the registration's own rules; the result goes to the Verification Analyst through Main before any figure reaches the owner.
+
+**c. Shadow bar:** the lifecycle's shadow gate (300 forward events or 150 signals as the lifecycle states for the unit, 14 days, cash PF 1.3, second half 1.2, no day above 30% of net), NOT the z 2.13 in V2's draft. Applies to task 5.
+
+**d. CFRTI1-BTC, Kraken only: DONE by the old session.** The owner barred Bitstamp and Coinbase from any live probe. Registration, held-out amendment and development result: `workers/CFRTI1_BTC_KRAKEN_REGISTRATION.md`; script `workers/desk_a_verify/cfrti_kraken.py` (development only, no held-out mode). Development: three venues n 36, PF 2.54 (reproduced); **Kraken only n 32, cash PF 1.33, mean +4.3c, 7 wins; keeps 22 of the 36.** Label: carried to the held-out read; no evidence of an edge on Kraken alone at n = 32. For the Nov 20 read you must add a held-out path that prints BOTH figures in one sitting (section 4 of that file); any live use is judged on Kraken only.
+
+**e. NEW, for you to register before any scoring: CFRTI-K**, a Kalshi-only rebuild of the same idea. Kalshi's own Bitcoin perpetual (`KXBTCPERP`: public 1 minute candles and a reference price) replaces outside spot as the strike-distance input at close minus 2 minutes. It is a NEW rule and a NEW try (N +1), with the same `2026-11-05` cutoff. The Head of R&D is asking Main for the perp candle pull; check first what `perp-data` already holds (`kalshi1m/` has 1 minute candles for Equities and Indices perps only; the hourly and 30 second perps files carry `reference_price` for every perp, Bitcoin included, but only hourly or inside two weekday windows). Write down before scoring: which price field is the index, how volatility is built from 1 minute data (the registered rule uses 10 second steps, which 1 minute candles cannot give: this must be a stated change, not a silent one), and the labels. It is NOT the PERPBIN1 card (premium and open interest terciles), which stays held.
+
+**f. Retired, not to be read:** MENTPERSIST1, BOOKCH1F, SOFR1. **Not now:** PERPBIN1, RESIL1.
+
+**Order of work for the fresh session:** QUOTE2B (b), then CFRTI-K registration (e), then the dated reads (MMMAP1 Nov 15, NC15DEPTH1 counts before Nov 19, CFRTI1-BTC from Nov 20 with both figures, MMSIM1 with QUOTE2B's held-out on Nov 24), then the two shadows of task 5.
