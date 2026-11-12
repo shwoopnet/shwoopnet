@@ -27,6 +27,7 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | INPLAYJUMP (follow a one-minute in-play jump; five families, one direction) | Desk B, built by Desk A | 5 | REGISTERED Nov 12 (4f7dace6 on claude/idea-desk-b); unscored; third and last look at the family after SC1 and SWING1 |
 | ESOCTIE (the e-soccer Tie against a walk-forward base rate) | History Miner, built by the Testing Desk | 1 | REGISTERED Nov 12 (6e9fe28a on claude/history-miner); unscored; one candidate with TIE3 |
 | POL-i2 count step | Testing Desk | 0 | CLOSED on cost Nov 12 (politics median round trip 9.4c against a 5c line fixed beforehand); nothing scored |
+| PREMOVE (follow a pre-match move of 6c in the hour before the scheduled start; four families) | Desk B | 4 | REGISTERED Nov 12 (453aa8cc on claude/idea-desk-b); unscored |
 | W-SPREAD-CELL1, line 1 (registered) and line 2 (known-in-advance look) | Refinement | 2 | read once Nov 12 on 1,041 fresh events: FAIL on both lines (n 172 and 173; PF 0.553 and 0.592 by the Verification Analyst, 0.596 and 0.636 as first printed, fee handling differs); reproduced Nov 12 |
 | CFRTI1-BTC, Kraken-only, plus two disclosed unregistered looks (Coinbase alone, Bitstamp alone) | Desk A | 3 | development read done Nov 12: no evidence at n = 32 (Kraken); carried to the held-out read |
 | CFRTI-K (Kalshi perpetual in place of outside spot) | Desk A | 1 | registered Nov 12 (workers/CFRTI_K_REGISTRATION.md, 9bb9c0f2 on claude/idea-desk-a), one specification, not scored; waits on the perp candle pull |

@@ -22,6 +22,12 @@ Run once each as frozen on the landed candles (5,127 development windows, closes
 - **Forensics' scorer audit (after those reads):** cfrti_k.py CLEAN by synthetic leak test; perpbin1.py has the defect its registration discloses (a whole-sample tercile cut, so later windows decide earlier entries). Ruled: the falsification stands; the cut must be a frozen constant in any later use.
 - **Friday count:** of the original five, FOUR are read and closed (CFRTI-K, PERPBIN1, the approval NO side, the stock test). Remaining on the Friday path: TIE3 (measurement), MAPBREAK, the History Miner's soccer half-time and e-soccer Tie rules, INPLAYJUMP (being registered). Nothing has cleared the bar.
 
+## New cards tonight (the owner's "find more ideas"), as they arrive [research]
+
+- **PREMOVE (Desk B, card 1 of up to 5; 453aa8cc on claude/idea-desk-b; 4 tries; registered 19:01Z before any price):** follow a pre-match move. If a contract's mid 5 minutes before the scheduled start (ticker clock) is 6c or more above its mid 65 minutes before, buy it at the next minute's ask plus 1c (ask 20c to 85c, spread 4c or less), hold to settlement; one bet a match. Families: esports, e-soccer, table tennis, e-basketball, about 3,200 to 3,600 development matches each. Named other side: resting orders and slower bettors who priced the match earlier. Its author's odds: about 3 percent that any family meets the development bar. Costs no requests of its own if MAPBREAK's and INPLAYJUMP's candle windows start 70 minutes before the scheduled start (approved). Cost kill is the one-way entry cost, as for every hold rule.
+- **INPLAYJUMP, Amendment 1 (ordered 19:04Z, before any candle):** the candle window starts at a time known at the decision (ticker clock or market open) and runs forward, so "the first jump" cannot depend on when the match ended; a fired bet with no result is counted; the placebo is taken at a matched in-play minute. This corrects an earlier ruling of the Head of R&D that a close-anchored window was fine for retrieval.
+- **ESOCTIE, NOTE 3 (History Miner, ec26e394, before any data):** a result enters the base rate only 300 seconds after that game's close (both auditors found it); one-way cost kill; void counts reported.
+
 ## When more becomes readable: the season calendar (History Miner, Nov 12 19:02Z, 444014b9, SEASON_CALENDAR.md) [research]
 
 Independent events (games; periods clustered by game), estimates from the Nov 10 census, V2's counts and schedules. These are events, not bets: a rule firing on 10 percent needs ten times as many.
