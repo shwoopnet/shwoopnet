@@ -1,0 +1,2306 @@
+{
+ "job": {
+  "job_id": "CENSUS_LISTING",
+  "owner": "DESK_B",
+  "registration": "kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md",
+  "purpose": "Untouched-family census, the fresh listing: Kalshi's full series list (category, frequency, fee type) and every non-combo market that settled on one full day, Nov 10, 2026 UTC, for counts and volume by family. No candle, no test, no rule scored.",
+  "heldout": "none (a listing: counts, volume and descriptive fields only; no test is scored from it)",
+  "allowed_endpoints": [
+   {
+    "name": "series_list",
+    "method": "GET",
+    "path_pattern": "/series",
+    "params_allowed": [
+     "limit",
+     "category"
+    ]
+   },
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "status",
+     "min_close_ts",
+     "max_close_ts",
+     "limit",
+     "mve_filter",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [],
+  "ticker_allowlist": [],
+  "max_requests": 100,
+  "requests": [
+   {
+    "id": "series_all",
+    "path": "/series",
+    "params": {
+     "limit": 20000
+    }
+   },
+   {
+    "id": "settled_1110_h00",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794268800,
+     "max_close_ts": 1794272399,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h01",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794272400,
+     "max_close_ts": 1794275999,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h02",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794276000,
+     "max_close_ts": 1794279599,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h03",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794279600,
+     "max_close_ts": 1794283199,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h04",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794283200,
+     "max_close_ts": 1794286799,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h05",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794286800,
+     "max_close_ts": 1794290399,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h06",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794290400,
+     "max_close_ts": 1794293999,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h07",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794294000,
+     "max_close_ts": 1794297599,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h08",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794297600,
+     "max_close_ts": 1794301199,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h09",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794301200,
+     "max_close_ts": 1794304799,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h10",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794304800,
+     "max_close_ts": 1794308399,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h11",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794308400,
+     "max_close_ts": 1794311999,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h12",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794312000,
+     "max_close_ts": 1794315599,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h13",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794315600,
+     "max_close_ts": 1794319199,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h14",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794319200,
+     "max_close_ts": 1794322799,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h15",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794322800,
+     "max_close_ts": 1794326399,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h16",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794326400,
+     "max_close_ts": 1794329999,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h17",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794330000,
+     "max_close_ts": 1794333599,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h18",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794333600,
+     "max_close_ts": 1794337199,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h19",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794337200,
+     "max_close_ts": 1794340799,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h20",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794340800,
+     "max_close_ts": 1794344399,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h21",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794344400,
+     "max_close_ts": 1794347999,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h22",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794348000,
+     "max_close_ts": 1794351599,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "settled_1110_h23",
+    "path": "/markets",
+    "params": {
+     "status": "settled",
+     "min_close_ts": 1794351600,
+     "max_close_ts": 1794355199,
+     "limit": 1000,
+     "mve_filter": "exclude"
+    },
+    "max_pages": 3
+   },
+   {
+    "id": "series_Politics",
+    "path": "/series",
+    "params": {
+     "category": "Politics"
+    }
+   },
+   {
+    "id": "series_Economics",
+    "path": "/series",
+    "params": {
+     "category": "Economics"
+    }
+   },
+   {
+    "id": "series_Sports",
+    "path": "/series",
+    "params": {
+     "category": "Sports"
+    }
+   },
+   {
+    "id": "series_Crypto",
+    "path": "/series",
+    "params": {
+     "category": "Crypto"
+    }
+   },
+   {
+    "id": "series_Financials",
+    "path": "/series",
+    "params": {
+     "category": "Financials"
+    }
+   },
+   {
+    "id": "series_Entertainment",
+    "path": "/series",
+    "params": {
+     "category": "Entertainment"
+    }
+   },
+   {
+    "id": "series_Elections",
+    "path": "/series",
+    "params": {
+     "category": "Elections"
+    }
+   },
+   {
+    "id": "series_World",
+    "path": "/series",
+    "params": {
+     "category": "World"
+    }
+   },
+   {
+    "id": "series_Health",
+    "path": "/series",
+    "params": {
+     "category": "Health"
+    }
+   },
+   {
+    "id": "series_Companies",
+    "path": "/series",
+    "params": {
+     "category": "Companies"
+    }
+   },
+   {
+    "id": "series_Transportation",
+    "path": "/series",
+    "params": {
+     "category": "Transportation"
+    }
+   },
+   {
+    "id": "series_Mentions",
+    "path": "/series",
+    "params": {
+     "category": "Mentions"
+    }
+   },
+   {
+    "id": "series_Commodities",
+    "path": "/series",
+    "params": {
+     "category": "Commodities"
+    }
+   },
+   {
+    "id": "series_Culture",
+    "path": "/series",
+    "params": {
+     "category": "Culture"
+    }
+   },
+   {
+    "id": "series_Social",
+    "path": "/series",
+    "params": {
+     "category": "Social"
+    }
+   }
+  ],
+  "notes": "Order matters: the whole series list first, then 24 hourly windows of settled markets (combos left out, at most 3 pages of 1,000 an hour, so about 120 MB at 1.7 KB a market, under the 200 MB run cap), then the series list again by single-word category as a fallback in case the whole list is cut at the 5 MB answer cap. The /series call with limit 20000 and the /markets call with mve_filter=exclude and close-time bounds are the calls V2's sweep used (src/scalper/usweep2.py). The category parameter on /series is the one call not seen in that code: it is placed LAST so that a refusal cannot stop anything before it. An hour with more than 3,000 settled markets is cut and shows a cursor on its last page: the reader reports it as a lower bound.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1703Z",
+ "finished": "2026-11-12T1704Z",
+ "status": "complete",
+ "requests_sent": 87,
+ "bytes_stored": 175322598,
+ "rows": [
+  {
+   "index": 1,
+   "id": "series_all",
+   "path": "/series",
+   "params": {
+    "limit": 20000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 5000000,
+   "t_send_ms": 1794503013477,
+   "t_recv_ms": 1794503013924,
+   "server_date": "Thu, 12 Nov 2026 17:03:33 GMT",
+   "file": "0001.json.gz",
+   "sha256": "cced5f9bd3f8004457a916c5e0d170e1555a29723c5ab1390416b6f565cfbc73",
+   "truncated": true,
+   "body_kind": "not_object"
+  },
+  {
+   "index": 2,
+   "id": "settled_1110_h00",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794268800,
+    "max_close_ts": 1794272399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2159041,
+   "t_send_ms": 1794503014477,
+   "t_recv_ms": 1794503014618,
+   "server_date": "Thu, 12 Nov 2026 17:03:34 GMT",
+   "file": "0002.json.gz",
+   "sha256": "a13c12525c4650cdafcbb85af1797729c2d1ccc50bad03627e92cfc464790e58",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "settled_1110_h00",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794268800,
+    "max_close_ts": 1794272399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2021363,
+   "t_send_ms": 1794503015478,
+   "t_recv_ms": 1794503015574,
+   "server_date": "Thu, 12 Nov 2026 17:03:35 GMT",
+   "file": "0003.json.gz",
+   "sha256": "5124757be7b15cd29dffd47999131e466a5ac8dbffcd2bd7164816911b7abc1a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "settled_1110_h00",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794268800,
+    "max_close_ts": 1794272399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2017135,
+   "t_send_ms": 1794503016478,
+   "t_recv_ms": 1794503016602,
+   "server_date": "Thu, 12 Nov 2026 17:03:36 GMT",
+   "file": "0004.json.gz",
+   "sha256": "1388b525293f1dfacf5505861a6e9feb9f30726270b264d4ba2c10c0a13f9345",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "settled_1110_h01",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794272400,
+    "max_close_ts": 1794275999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2233591,
+   "t_send_ms": 1794503017478,
+   "t_recv_ms": 1794503017612,
+   "server_date": "Thu, 12 Nov 2026 17:03:37 GMT",
+   "file": "0005.json.gz",
+   "sha256": "a6ffd7cea43c87bd47c3be1aa04a369a24f7e29ed23d339b14a1b93895605f6b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "settled_1110_h01",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794272400,
+    "max_close_ts": 1794275999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2057456,
+   "t_send_ms": 1794503018478,
+   "t_recv_ms": 1794503018577,
+   "server_date": "Thu, 12 Nov 2026 17:03:38 GMT",
+   "file": "0006.json.gz",
+   "sha256": "be8326d86196766aa957aef2c5626aedccd8a367d4d9cad76dc83ee81825bc12",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "settled_1110_h01",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794272400,
+    "max_close_ts": 1794275999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2037254,
+   "t_send_ms": 1794503019478,
+   "t_recv_ms": 1794503019613,
+   "server_date": "Thu, 12 Nov 2026 17:03:39 GMT",
+   "file": "0007.json.gz",
+   "sha256": "8447cbaee78ee890607d2c7916adeeb4779cfc0c3c0639980726087b06d34e5e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "settled_1110_h02",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794276000,
+    "max_close_ts": 1794279599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2452415,
+   "t_send_ms": 1794503020478,
+   "t_recv_ms": 1794503020645,
+   "server_date": "Thu, 12 Nov 2026 17:03:40 GMT",
+   "file": "0008.json.gz",
+   "sha256": "fca7472f8d2772e3f9ddf39d35fe38c47887436ab5f27281963329827deef373",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "settled_1110_h02",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794276000,
+    "max_close_ts": 1794279599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2441481,
+   "t_send_ms": 1794503021478,
+   "t_recv_ms": 1794503021632,
+   "server_date": "Thu, 12 Nov 2026 17:03:41 GMT",
+   "file": "0009.json.gz",
+   "sha256": "f3bb1805faf0f53bacdedc446367ec5f1ca8a102264fc666ab6bccf12d52c65f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "settled_1110_h02",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794276000,
+    "max_close_ts": 1794279599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2256629,
+   "t_send_ms": 1794503022478,
+   "t_recv_ms": 1794503022618,
+   "server_date": "Thu, 12 Nov 2026 17:03:42 GMT",
+   "file": "0010.json.gz",
+   "sha256": "8ca994e72f7f0873a605fbb7505eafd86bb74bab462eacfbd238712e4dc0f810",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "settled_1110_h03",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794279600,
+    "max_close_ts": 1794283199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2305443,
+   "t_send_ms": 1794503023479,
+   "t_recv_ms": 1794503023602,
+   "server_date": "Thu, 12 Nov 2026 17:03:43 GMT",
+   "file": "0011.json.gz",
+   "sha256": "f05ddd1ff53157749a5ce14060b788665dddb7744d850f8ca3cf6128d64753b6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "settled_1110_h03",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794279600,
+    "max_close_ts": 1794283199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2447760,
+   "t_send_ms": 1794503024479,
+   "t_recv_ms": 1794503024652,
+   "server_date": "Thu, 12 Nov 2026 17:03:44 GMT",
+   "file": "0012.json.gz",
+   "sha256": "c59228bcdadb58919515f3e0f292ddab1a80d0d6fb7425e10d12baf1a3bd147b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "settled_1110_h03",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794279600,
+    "max_close_ts": 1794283199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2365025,
+   "t_send_ms": 1794503025479,
+   "t_recv_ms": 1794503025582,
+   "server_date": "Thu, 12 Nov 2026 17:03:45 GMT",
+   "file": "0013.json.gz",
+   "sha256": "53b5727ac7482710b511181a222842e855b509d3babcad3f4f9cce31ded61ef4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "settled_1110_h04",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794283200,
+    "max_close_ts": 1794286799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1725441,
+   "t_send_ms": 1794503026479,
+   "t_recv_ms": 1794503026571,
+   "server_date": "Thu, 12 Nov 2026 17:03:46 GMT",
+   "file": "0014.json.gz",
+   "sha256": "a371e0ddb830c504fa0ccc7ad1b88a6d6bd37fd0fe2e1a214b43eca2af1f4625",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "settled_1110_h04",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794283200,
+    "max_close_ts": 1794286799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2405653,
+   "t_send_ms": 1794503027479,
+   "t_recv_ms": 1794503027589,
+   "server_date": "Thu, 12 Nov 2026 17:03:47 GMT",
+   "file": "0015.json.gz",
+   "sha256": "c131542951bbeb0fddd53c9f88aac9e046732dc16be090b97c8b1e62028404a9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "settled_1110_h04",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794283200,
+    "max_close_ts": 1794286799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 3308651,
+   "t_send_ms": 1794503028479,
+   "t_recv_ms": 1794503028594,
+   "server_date": "Thu, 12 Nov 2026 17:03:48 GMT",
+   "file": "0016.json.gz",
+   "sha256": "a3cb12619b3c89758789505c516b99896a1940e953b5a5ba13d1081c283ae75b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "settled_1110_h05",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794286800,
+    "max_close_ts": 1794290399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2490749,
+   "t_send_ms": 1794503029479,
+   "t_recv_ms": 1794503029595,
+   "server_date": "Thu, 12 Nov 2026 17:03:49 GMT",
+   "file": "0017.json.gz",
+   "sha256": "bc63da59b01ab6a98e5db6a3e0cb998d699d515d1dfb9cc9a0dbb563d09d6bc0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "settled_1110_h05",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794286800,
+    "max_close_ts": 1794290399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2276585,
+   "t_send_ms": 1794503030479,
+   "t_recv_ms": 1794503030576,
+   "server_date": "Thu, 12 Nov 2026 17:03:50 GMT",
+   "file": "0018.json.gz",
+   "sha256": "47ad36c797a6e08e37032f7a39401ff65d59cdb8c59a0bab03c1aba9fab9620c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "settled_1110_h05",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794286800,
+    "max_close_ts": 1794290399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2242626,
+   "t_send_ms": 1794503031480,
+   "t_recv_ms": 1794503031586,
+   "server_date": "Thu, 12 Nov 2026 17:03:51 GMT",
+   "file": "0019.json.gz",
+   "sha256": "f429c6af475993065ef8a2daa526257d16d31ae6ab0e54b5b4bd01f22ee5ca8a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "settled_1110_h06",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794290400,
+    "max_close_ts": 1794293999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2157590,
+   "t_send_ms": 1794503032480,
+   "t_recv_ms": 1794503032605,
+   "server_date": "Thu, 12 Nov 2026 17:03:52 GMT",
+   "file": "0020.json.gz",
+   "sha256": "21cb51864193754a862feae75706d3e450d4137abedf144f8bfec633e94a7000",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "settled_1110_h06",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794290400,
+    "max_close_ts": 1794293999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2063648,
+   "t_send_ms": 1794503033480,
+   "t_recv_ms": 1794503033584,
+   "server_date": "Thu, 12 Nov 2026 17:03:53 GMT",
+   "file": "0021.json.gz",
+   "sha256": "10a7eb7b48731aa302114889dc1cf5b32885e339b72e8a7c6367697845f77194",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "settled_1110_h06",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794290400,
+    "max_close_ts": 1794293999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2070407,
+   "t_send_ms": 1794503034480,
+   "t_recv_ms": 1794503034592,
+   "server_date": "Thu, 12 Nov 2026 17:03:54 GMT",
+   "file": "0022.json.gz",
+   "sha256": "4845b965cbb718fd94b680ecdffe4784b9769b5935a74cc603b602008b5bcead",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "settled_1110_h07",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794294000,
+    "max_close_ts": 1794297599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2110824,
+   "t_send_ms": 1794503035480,
+   "t_recv_ms": 1794503035622,
+   "server_date": "Thu, 12 Nov 2026 17:03:55 GMT",
+   "file": "0023.json.gz",
+   "sha256": "746b5db81d85d1756bc0ac6814a814a16c8470a15e196f3a211632027f86b1f8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "settled_1110_h07",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794294000,
+    "max_close_ts": 1794297599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2076591,
+   "t_send_ms": 1794503036480,
+   "t_recv_ms": 1794503036610,
+   "server_date": "Thu, 12 Nov 2026 17:03:56 GMT",
+   "file": "0024.json.gz",
+   "sha256": "8191884a3c9a1fd7ea7370cea9d87e68cd398077197cb76dd0fd3d937df6ebb8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "settled_1110_h07",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794294000,
+    "max_close_ts": 1794297599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2068897,
+   "t_send_ms": 1794503037480,
+   "t_recv_ms": 1794503037659,
+   "server_date": "Thu, 12 Nov 2026 17:03:57 GMT",
+   "file": "0025.json.gz",
+   "sha256": "8495bab7d7ecc5c85fc4662869f8b22b2daa7fb2a57eff296c96484854a6ba11",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "settled_1110_h08",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794297600,
+    "max_close_ts": 1794301199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2160073,
+   "t_send_ms": 1794503038481,
+   "t_recv_ms": 1794503038588,
+   "server_date": "Thu, 12 Nov 2026 17:03:58 GMT",
+   "file": "0026.json.gz",
+   "sha256": "bde6f57a137a0609f7c36fbbd33be044879d4dbca5fc372a85f41f9bd4ec9cf5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "settled_1110_h08",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794297600,
+    "max_close_ts": 1794301199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2015723,
+   "t_send_ms": 1794503039481,
+   "t_recv_ms": 1794503039617,
+   "server_date": "Thu, 12 Nov 2026 17:03:59 GMT",
+   "file": "0027.json.gz",
+   "sha256": "fe1b4ae40d9b122563b3ee31354cf284c0ee945e0d8c3e3906574514d84410aa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "settled_1110_h08",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794297600,
+    "max_close_ts": 1794301199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2027033,
+   "t_send_ms": 1794503040481,
+   "t_recv_ms": 1794503040642,
+   "server_date": "Thu, 12 Nov 2026 17:04:00 GMT",
+   "file": "0028.json.gz",
+   "sha256": "c06188e850284d0894c17c8c7b0584e8fe508e896be399036b4aa0f42ef458ca",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "settled_1110_h09",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794301200,
+    "max_close_ts": 1794304799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2167400,
+   "t_send_ms": 1794503041481,
+   "t_recv_ms": 1794503041601,
+   "server_date": "Thu, 12 Nov 2026 17:04:01 GMT",
+   "file": "0029.json.gz",
+   "sha256": "bd46dab7e5b819ef86df3625fbb4203004b47c31b624ec9aca312bb770c4ac78",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "settled_1110_h09",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794301200,
+    "max_close_ts": 1794304799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2039570,
+   "t_send_ms": 1794503042481,
+   "t_recv_ms": 1794503042573,
+   "server_date": "Thu, 12 Nov 2026 17:04:02 GMT",
+   "file": "0030.json.gz",
+   "sha256": "3283af4f10ccdf463b8e6b400145903f73240b863960bdb928162d47a4cc0697",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "settled_1110_h09",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794301200,
+    "max_close_ts": 1794304799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2048577,
+   "t_send_ms": 1794503043481,
+   "t_recv_ms": 1794503043638,
+   "server_date": "Thu, 12 Nov 2026 17:04:03 GMT",
+   "file": "0031.json.gz",
+   "sha256": "8ba6ba7f0e83851fe1d9f043f9df758d3b32590017e1527bab07b791f4486ddc",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "settled_1110_h10",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794304800,
+    "max_close_ts": 1794308399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2189113,
+   "t_send_ms": 1794503044481,
+   "t_recv_ms": 1794503044581,
+   "server_date": "Thu, 12 Nov 2026 17:04:04 GMT",
+   "file": "0032.json.gz",
+   "sha256": "7d652dff115aa316da3ffa84caf50721f7e9edbb7a92d8ce13c1fcf6e285068e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "settled_1110_h10",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794304800,
+    "max_close_ts": 1794308399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2007089,
+   "t_send_ms": 1794503045482,
+   "t_recv_ms": 1794503045576,
+   "server_date": "Thu, 12 Nov 2026 17:04:05 GMT",
+   "file": "0033.json.gz",
+   "sha256": "0599edbd9e555323bbdbb74f6495919c657258ad339f81dc496dcc489eccfe51",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "settled_1110_h10",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794304800,
+    "max_close_ts": 1794308399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2018171,
+   "t_send_ms": 1794503046482,
+   "t_recv_ms": 1794503046573,
+   "server_date": "Thu, 12 Nov 2026 17:04:06 GMT",
+   "file": "0034.json.gz",
+   "sha256": "0c461f4e803beefdee6468de387b4df2c267583a1d419cc1e48ce46dd2ecf155",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "settled_1110_h11",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794308400,
+    "max_close_ts": 1794311999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2184508,
+   "t_send_ms": 1794503047482,
+   "t_recv_ms": 1794503047586,
+   "server_date": "Thu, 12 Nov 2026 17:04:07 GMT",
+   "file": "0035.json.gz",
+   "sha256": "d2aeeac1b6e40ec7ae62c28e2d90c11d601acdba093ee6028c1906c7f91d4a37",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "settled_1110_h11",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794308400,
+    "max_close_ts": 1794311999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2007595,
+   "t_send_ms": 1794503048482,
+   "t_recv_ms": 1794503048678,
+   "server_date": "Thu, 12 Nov 2026 17:04:08 GMT",
+   "file": "0036.json.gz",
+   "sha256": "258f0937458724bdb6685324cfed841d4ce0c1404f338e433dc0e369672402c2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "settled_1110_h11",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794308400,
+    "max_close_ts": 1794311999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2016793,
+   "t_send_ms": 1794503049482,
+   "t_recv_ms": 1794503049604,
+   "server_date": "Thu, 12 Nov 2026 17:04:09 GMT",
+   "file": "0037.json.gz",
+   "sha256": "3ad04e9dcfb6d9736ae7f78aaba3b62059d4940825babac8d4374c0ccaadd26f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "settled_1110_h12",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794312000,
+    "max_close_ts": 1794315599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2203803,
+   "t_send_ms": 1794503050482,
+   "t_recv_ms": 1794503050647,
+   "server_date": "Thu, 12 Nov 2026 17:04:10 GMT",
+   "file": "0038.json.gz",
+   "sha256": "62122d1a699be07c6b6fded5cc7a339825cf9ebcb1b9dd05e6c02fd59cbf97f4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "settled_1110_h12",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794312000,
+    "max_close_ts": 1794315599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2007279,
+   "t_send_ms": 1794503051482,
+   "t_recv_ms": 1794503051602,
+   "server_date": "Thu, 12 Nov 2026 17:04:11 GMT",
+   "file": "0039.json.gz",
+   "sha256": "b1e8279d07df08edf1c2b58f6168af29262dc0436d5fb865985713201edbb94b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "settled_1110_h12",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794312000,
+    "max_close_ts": 1794315599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2016523,
+   "t_send_ms": 1794503052483,
+   "t_recv_ms": 1794503052578,
+   "server_date": "Thu, 12 Nov 2026 17:04:12 GMT",
+   "file": "0040.json.gz",
+   "sha256": "02ad2e5a0be6e92798e42f613acc65ec63949dc83eab37795586118c222d79c2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "settled_1110_h13",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794315600,
+    "max_close_ts": 1794319199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2395666,
+   "t_send_ms": 1794503053483,
+   "t_recv_ms": 1794503053596,
+   "server_date": "Thu, 12 Nov 2026 17:04:13 GMT",
+   "file": "0041.json.gz",
+   "sha256": "b38b8cb30c316a7dffed63e4051ae7654e5f8ad5c93bd339f43ba981013bc7a8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "settled_1110_h13",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794315600,
+    "max_close_ts": 1794319199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2044372,
+   "t_send_ms": 1794503054483,
+   "t_recv_ms": 1794503054568,
+   "server_date": "Thu, 12 Nov 2026 17:04:14 GMT",
+   "file": "0042.json.gz",
+   "sha256": "36cb753715f559e1cdd748b858e7bdbcab7283f11593727a589c5892981b097f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "settled_1110_h13",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794315600,
+    "max_close_ts": 1794319199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1994667,
+   "t_send_ms": 1794503055483,
+   "t_recv_ms": 1794503055582,
+   "server_date": "Thu, 12 Nov 2026 17:04:15 GMT",
+   "file": "0043.json.gz",
+   "sha256": "c7447a2157ed547cf97c8abee7005b40325007f9e18f13b66982ff4568c97129",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "settled_1110_h14",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794319200,
+    "max_close_ts": 1794322799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2346307,
+   "t_send_ms": 1794503056483,
+   "t_recv_ms": 1794503056801,
+   "server_date": "Thu, 12 Nov 2026 17:04:16 GMT",
+   "file": "0044.json.gz",
+   "sha256": "f40962d21636f4ff85e2b07c82a26860bd4c7ccba7d7b63525f2ecc9a31d4cfe",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "settled_1110_h14",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794319200,
+    "max_close_ts": 1794322799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2006699,
+   "t_send_ms": 1794503057483,
+   "t_recv_ms": 1794503057628,
+   "server_date": "Thu, 12 Nov 2026 17:04:17 GMT",
+   "file": "0045.json.gz",
+   "sha256": "5f02b55114b8cbf659e2f1bbaa303ca779aa40a7bd9b5f58f0c127cc076e7d67",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "settled_1110_h14",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794319200,
+    "max_close_ts": 1794322799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2011627,
+   "t_send_ms": 1794503058483,
+   "t_recv_ms": 1794503058619,
+   "server_date": "Thu, 12 Nov 2026 17:04:18 GMT",
+   "file": "0046.json.gz",
+   "sha256": "82e38a28f4d09cd5dd42039bb4621e428a0dde1391f228c5f7e481fe8f940c23",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "settled_1110_h15",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794322800,
+    "max_close_ts": 1794326399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2289972,
+   "t_send_ms": 1794503059483,
+   "t_recv_ms": 1794503059585,
+   "server_date": "Thu, 12 Nov 2026 17:04:19 GMT",
+   "file": "0047.json.gz",
+   "sha256": "8f01b95a158d1e569856df701d15d5e642a7f5b74647955548c906a4cea7e0b0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "settled_1110_h15",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794322800,
+    "max_close_ts": 1794326399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2016885,
+   "t_send_ms": 1794503060483,
+   "t_recv_ms": 1794503060703,
+   "server_date": "Thu, 12 Nov 2026 17:04:20 GMT",
+   "file": "0048.json.gz",
+   "sha256": "243ed3874a150bf6feb0f4dccd74576d61c1e3c12a815372eec9972588012217",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "settled_1110_h15",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794322800,
+    "max_close_ts": 1794326399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1974953,
+   "t_send_ms": 1794503061484,
+   "t_recv_ms": 1794503061571,
+   "server_date": "Thu, 12 Nov 2026 17:04:21 GMT",
+   "file": "0049.json.gz",
+   "sha256": "1cc41fc3ec614cec292de262aab90952979c03af5ab38030341ce1ec9aa6536c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "settled_1110_h16",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794326400,
+    "max_close_ts": 1794329999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2234315,
+   "t_send_ms": 1794503062484,
+   "t_recv_ms": 1794503062637,
+   "server_date": "Thu, 12 Nov 2026 17:04:22 GMT",
+   "file": "0050.json.gz",
+   "sha256": "2baadf762b9952783325bb2470e794359e77201c28faad9a10e1d553943f9095",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 51,
+   "id": "settled_1110_h16",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794326400,
+    "max_close_ts": 1794329999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2003094,
+   "t_send_ms": 1794503063484,
+   "t_recv_ms": 1794503063591,
+   "server_date": "Thu, 12 Nov 2026 17:04:23 GMT",
+   "file": "0051.json.gz",
+   "sha256": "1cc1d06845a48fe424a05f7a8dec40f47fbd8fabf56028ec2c57c2ca2aaefc36",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 52,
+   "id": "settled_1110_h16",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794326400,
+    "max_close_ts": 1794329999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1990059,
+   "t_send_ms": 1794503064484,
+   "t_recv_ms": 1794503064573,
+   "server_date": "Thu, 12 Nov 2026 17:04:24 GMT",
+   "file": "0052.json.gz",
+   "sha256": "0e7499bd8ec644ae27d717cdf382d22690368b46c2529c039cae2586dad3a1b0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 53,
+   "id": "settled_1110_h17",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794330000,
+    "max_close_ts": 1794333599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2242161,
+   "t_send_ms": 1794503065484,
+   "t_recv_ms": 1794503065589,
+   "server_date": "Thu, 12 Nov 2026 17:04:25 GMT",
+   "file": "0053.json.gz",
+   "sha256": "e5cebd7b2d38335363e3a44f97c861abeb3ab00de9a9fb8816ecf1c0a5b87ae7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 54,
+   "id": "settled_1110_h17",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794330000,
+    "max_close_ts": 1794333599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2005159,
+   "t_send_ms": 1794503066484,
+   "t_recv_ms": 1794503066863,
+   "server_date": "Thu, 12 Nov 2026 17:04:26 GMT",
+   "file": "0054.json.gz",
+   "sha256": "8841761dc6abac1239873df67862e8b3c98a6d2630320ad6216a7fe8a7c44e36",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 55,
+   "id": "settled_1110_h17",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794330000,
+    "max_close_ts": 1794333599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1988519,
+   "t_send_ms": 1794503067484,
+   "t_recv_ms": 1794503067590,
+   "server_date": "Thu, 12 Nov 2026 17:04:27 GMT",
+   "file": "0055.json.gz",
+   "sha256": "8214925b8a4453837a4bf4484f68ed190873efee44d95883d3b8b9886c285887",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 56,
+   "id": "settled_1110_h18",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794333600,
+    "max_close_ts": 1794337199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2402654,
+   "t_send_ms": 1794503068484,
+   "t_recv_ms": 1794503068596,
+   "server_date": "Thu, 12 Nov 2026 17:04:28 GMT",
+   "file": "0056.json.gz",
+   "sha256": "9fe167fd1ddcb346cc59f8471132aa9d46c1a969501e8842944fd45e9763129e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 57,
+   "id": "settled_1110_h18",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794333600,
+    "max_close_ts": 1794337199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2025996,
+   "t_send_ms": 1794503069484,
+   "t_recv_ms": 1794503069592,
+   "server_date": "Thu, 12 Nov 2026 17:04:29 GMT",
+   "file": "0057.json.gz",
+   "sha256": "c5806437c3b8f596b4af7e7b3ae11d90fae4f4bb23d1a097a1babdb3d9fd51b6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 58,
+   "id": "settled_1110_h18",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794333600,
+    "max_close_ts": 1794337199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1951891,
+   "t_send_ms": 1794503070484,
+   "t_recv_ms": 1794503070587,
+   "server_date": "Thu, 12 Nov 2026 17:04:30 GMT",
+   "file": "0058.json.gz",
+   "sha256": "322bfb4b6bddb0bfce9dd592fe8b89e1f9a04dc9f01bc17d52ac963e43b67f84",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 59,
+   "id": "settled_1110_h19",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794337200,
+    "max_close_ts": 1794340799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2388635,
+   "t_send_ms": 1794503071485,
+   "t_recv_ms": 1794503071587,
+   "server_date": "Thu, 12 Nov 2026 17:04:31 GMT",
+   "file": "0059.json.gz",
+   "sha256": "0c2f5e33aaae830c4ff5c3a7a4a3219d8d1af77eaf18f24286c3d90ec7d48946",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 60,
+   "id": "settled_1110_h19",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794337200,
+    "max_close_ts": 1794340799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2052687,
+   "t_send_ms": 1794503072485,
+   "t_recv_ms": 1794503072584,
+   "server_date": "Thu, 12 Nov 2026 17:04:32 GMT",
+   "file": "0060.json.gz",
+   "sha256": "25ac4edd414582cdce934d0f0101e6309a90c0615fd83b82579a7ee659629d69",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 61,
+   "id": "settled_1110_h19",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794337200,
+    "max_close_ts": 1794340799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1994407,
+   "t_send_ms": 1794503073485,
+   "t_recv_ms": 1794503073663,
+   "server_date": "Thu, 12 Nov 2026 17:04:33 GMT",
+   "file": "0061.json.gz",
+   "sha256": "724d5400fdaeba270c90a87c2ff66e73d07a5ec7d22a4242a7ddfd19f9884352",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 62,
+   "id": "settled_1110_h20",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794340800,
+    "max_close_ts": 1794344399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2238397,
+   "t_send_ms": 1794503074485,
+   "t_recv_ms": 1794503074635,
+   "server_date": "Thu, 12 Nov 2026 17:04:34 GMT",
+   "file": "0062.json.gz",
+   "sha256": "4835c89ca9d706b90c5723b1572a969c64f127e7f92c585b0ebf17233493b0e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 63,
+   "id": "settled_1110_h20",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794340800,
+    "max_close_ts": 1794344399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2029566,
+   "t_send_ms": 1794503075485,
+   "t_recv_ms": 1794503075601,
+   "server_date": "Thu, 12 Nov 2026 17:04:35 GMT",
+   "file": "0063.json.gz",
+   "sha256": "e299c8a4d63d46a84326a0d13514943f561d6d1b04cfd0a96d934422951883a6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 64,
+   "id": "settled_1110_h20",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794340800,
+    "max_close_ts": 1794344399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1951771,
+   "t_send_ms": 1794503076485,
+   "t_recv_ms": 1794503076651,
+   "server_date": "Thu, 12 Nov 2026 17:04:36 GMT",
+   "file": "0064.json.gz",
+   "sha256": "88a1a3665f98bb7d30ce9219fd91149b5cb372d9c36cd69daa5e86cf0faf5c6a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 65,
+   "id": "settled_1110_h21",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794344400,
+    "max_close_ts": 1794347999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2425443,
+   "t_send_ms": 1794503077485,
+   "t_recv_ms": 1794503077645,
+   "server_date": "Thu, 12 Nov 2026 17:04:37 GMT",
+   "file": "0065.json.gz",
+   "sha256": "2a83866853080e9dd9e238f14f2f9efba77bf42e0f36cf51f8a403afeed01bab",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 66,
+   "id": "settled_1110_h21",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794344400,
+    "max_close_ts": 1794347999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2039121,
+   "t_send_ms": 1794503078485,
+   "t_recv_ms": 1794503078611,
+   "server_date": "Thu, 12 Nov 2026 17:04:38 GMT",
+   "file": "0066.json.gz",
+   "sha256": "4434e4b49da60204fac0e175a792dffce34d0b21e7058bff626233e9da3838c6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 67,
+   "id": "settled_1110_h21",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794344400,
+    "max_close_ts": 1794347999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1976062,
+   "t_send_ms": 1794503079485,
+   "t_recv_ms": 1794503079623,
+   "server_date": "Thu, 12 Nov 2026 17:04:39 GMT",
+   "file": "0067.json.gz",
+   "sha256": "3b351c347d44947249da46f395e87ae700998a7e608ca181520be842259e539a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 68,
+   "id": "settled_1110_h22",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794348000,
+    "max_close_ts": 1794351599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2179825,
+   "t_send_ms": 1794503080486,
+   "t_recv_ms": 1794503080635,
+   "server_date": "Thu, 12 Nov 2026 17:04:40 GMT",
+   "file": "0068.json.gz",
+   "sha256": "ad9583313d418fe3bf7dc2e65dd7cfa89c0670742b83dfdca7161a2e5a5480d1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 69,
+   "id": "settled_1110_h22",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794348000,
+    "max_close_ts": 1794351599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1900330,
+   "t_send_ms": 1794503081486,
+   "t_recv_ms": 1794503081632,
+   "server_date": "Thu, 12 Nov 2026 17:04:41 GMT",
+   "file": "0069.json.gz",
+   "sha256": "60c237923e0bb09144fbf2da475d3542ed84f6d80b2ec1a655812fca67ca5ce2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 70,
+   "id": "settled_1110_h23",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794351600,
+    "max_close_ts": 1794355199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2224321,
+   "t_send_ms": 1794503082486,
+   "t_recv_ms": 1794503082589,
+   "server_date": "Thu, 12 Nov 2026 17:04:42 GMT",
+   "file": "0070.json.gz",
+   "sha256": "56624c76c7da32c631ad47a919674d2179c5413d507ddb8075fc1000c5e57607",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 71,
+   "id": "settled_1110_h23",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794351600,
+    "max_close_ts": 1794355199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1964537,
+   "t_send_ms": 1794503083486,
+   "t_recv_ms": 1794503083588,
+   "server_date": "Thu, 12 Nov 2026 17:04:43 GMT",
+   "file": "0071.json.gz",
+   "sha256": "d75ff642ae2cfbcacc4a0963bec7f5ab89f18633003ee60350baeb895eb59c7e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 72,
+   "id": "settled_1110_h23",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794351600,
+    "max_close_ts": 1794355199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2014472,
+   "t_send_ms": 1794503084486,
+   "t_recv_ms": 1794503084659,
+   "server_date": "Thu, 12 Nov 2026 17:04:44 GMT",
+   "file": "0072.json.gz",
+   "sha256": "f64332258208264432f959a5a88423157c69d592ca9a59562cc0a53df0a056db",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 73,
+   "id": "series_Politics",
+   "path": "/series",
+   "params": {
+    "category": "Politics"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2982500,
+   "t_send_ms": 1794503085486,
+   "t_recv_ms": 1794503085645,
+   "server_date": "Thu, 12 Nov 2026 17:04:45 GMT",
+   "file": "0073.json.gz",
+   "sha256": "c39f445bfb0dac826a69f2d25cd7412186ebc645a29533b0a3452d0ae1333b8c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 74,
+   "id": "series_Economics",
+   "path": "/series",
+   "params": {
+    "category": "Economics"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 842522,
+   "t_send_ms": 1794503086486,
+   "t_recv_ms": 1794503086582,
+   "server_date": "Thu, 12 Nov 2026 17:04:46 GMT",
+   "file": "0074.json.gz",
+   "sha256": "cb0b2a81a17a1db764118f604fd56cb1dceaeeef7369326ac58f452445fb3028",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 75,
+   "id": "series_Sports",
+   "path": "/series",
+   "params": {
+    "category": "Sports"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 5000000,
+   "t_send_ms": 1794503087486,
+   "t_recv_ms": 1794503087656,
+   "server_date": "Thu, 12 Nov 2026 17:04:47 GMT",
+   "file": "0075.json.gz",
+   "sha256": "802ad0279ba977c34f24b55cc6e2c25fbf7bf6800dc82d8827e95ecdbaddd84c",
+   "truncated": true,
+   "body_kind": "not_object"
+  },
+  {
+   "index": 76,
+   "id": "series_Crypto",
+   "path": "/series",
+   "params": {
+    "category": "Crypto"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 263688,
+   "t_send_ms": 1794503088486,
+   "t_recv_ms": 1794503088509,
+   "server_date": "Thu, 12 Nov 2026 17:04:48 GMT",
+   "file": "0076.json.gz",
+   "sha256": "96aa387f44b826f606305ae9aa2d1e584b33a8ac54c37ee870268ea67baa40ac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 77,
+   "id": "series_Financials",
+   "path": "/series",
+   "params": {
+    "category": "Financials"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1223303,
+   "t_send_ms": 1794503089486,
+   "t_recv_ms": 1794503089596,
+   "server_date": "Thu, 12 Nov 2026 17:04:49 GMT",
+   "file": "0077.json.gz",
+   "sha256": "017bcb99e28a60cf2592004352512a7f77d6a405de407c0eb6beca8097f3dfd9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 78,
+   "id": "series_Entertainment",
+   "path": "/series",
+   "params": {
+    "category": "Entertainment"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2480170,
+   "t_send_ms": 1794503090487,
+   "t_recv_ms": 1794503090646,
+   "server_date": "Thu, 12 Nov 2026 17:04:50 GMT",
+   "file": "0078.json.gz",
+   "sha256": "7def7786638ab3d79bb40df5a8aaf99cacb2d2de72ab34e1d468eb50654a4581",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 79,
+   "id": "series_Elections",
+   "path": "/series",
+   "params": {
+    "category": "Elections"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 4073134,
+   "t_send_ms": 1794503091487,
+   "t_recv_ms": 1794503091707,
+   "server_date": "Thu, 12 Nov 2026 17:04:51 GMT",
+   "file": "0079.json.gz",
+   "sha256": "baa8c0b5d6fc73b1357f0e05073169e1f820909bad561ccf0570e99c29382967",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 80,
+   "id": "series_World",
+   "path": "/series",
+   "params": {
+    "category": "World"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 134973,
+   "t_send_ms": 1794503092487,
+   "t_recv_ms": 1794503092545,
+   "server_date": "Thu, 12 Nov 2026 17:04:52 GMT",
+   "file": "0080.json.gz",
+   "sha256": "ddc5ac0e7c717be71db53dd99e4b67e12122f8623d18757ea94d7207ffa369ee",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 81,
+   "id": "series_Health",
+   "path": "/series",
+   "params": {
+    "category": "Health"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 76960,
+   "t_send_ms": 1794503093487,
+   "t_recv_ms": 1794503093544,
+   "server_date": "Thu, 12 Nov 2026 17:04:53 GMT",
+   "file": "0081.json.gz",
+   "sha256": "24b520d3bbb81156317248dfb109ae5441e973cc5af5387ec50c0b22b7ce599d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 82,
+   "id": "series_Companies",
+   "path": "/series",
+   "params": {
+    "category": "Companies"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 236742,
+   "t_send_ms": 1794503094487,
+   "t_recv_ms": 1794503094557,
+   "server_date": "Thu, 12 Nov 2026 17:04:54 GMT",
+   "file": "0082.json.gz",
+   "sha256": "7c7aa8a07f1792cb927898b600983d3e193f7387735615fcc9442e5ad32c671a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 83,
+   "id": "series_Transportation",
+   "path": "/series",
+   "params": {
+    "category": "Transportation"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 30660,
+   "t_send_ms": 1794503095487,
+   "t_recv_ms": 1794503095539,
+   "server_date": "Thu, 12 Nov 2026 17:04:55 GMT",
+   "file": "0083.json.gz",
+   "sha256": "fb9566d43a53b4505c6c5290e09b80ed684a94b7ff1d56fa35bd80091e08fdb0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 84,
+   "id": "series_Mentions",
+   "path": "/series",
+   "params": {
+    "category": "Mentions"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 527324,
+   "t_send_ms": 1794503096487,
+   "t_recv_ms": 1794503096552,
+   "server_date": "Thu, 12 Nov 2026 17:04:56 GMT",
+   "file": "0084.json.gz",
+   "sha256": "c011f7cc8d411c5d740e7eee7bb4c8203a6753ca9fecc35558c40a25b7c3cc26",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 85,
+   "id": "series_Commodities",
+   "path": "/series",
+   "params": {
+    "category": "Commodities"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 162336,
+   "t_send_ms": 1794503097487,
+   "t_recv_ms": 1794503097546,
+   "server_date": "Thu, 12 Nov 2026 17:04:57 GMT",
+   "file": "0085.json.gz",
+   "sha256": "cea433fbf77acc0dc532fc38628979f224f9f4a4806fbfbf3bde030ffe4ebefc",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 86,
+   "id": "series_Culture",
+   "path": "/series",
+   "params": {
+    "category": "Culture"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 4305,
+   "t_send_ms": 1794503098487,
+   "t_recv_ms": 1794503098570,
+   "server_date": "Thu, 12 Nov 2026 17:04:58 GMT",
+   "file": "0086.json.gz",
+   "sha256": "f24308693cf1fef1ec61a383b8c998f36af67f63da5c9cbef1116e7f3cd7370f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 87,
+   "id": "series_Social",
+   "path": "/series",
+   "params": {
+    "category": "Social"
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 77906,
+   "t_send_ms": 1794503099487,
+   "t_recv_ms": 1794503099541,
+   "server_date": "Thu, 12 Nov 2026 17:04:59 GMT",
+   "file": "0087.json.gz",
+   "sha256": "d024ed6dfc8c69b15217c6b1181b11c2cfcfc9e99fc95281aaaf95473cee4b64",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
