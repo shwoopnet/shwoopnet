@@ -1247,3 +1247,10 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 ## kalshi-pull jobs v11: ESOCTIE_LISTS (Nov 12, 2026, History Miner, the Head of R&D)
 
 `ESOCTIE_LISTS` (History Miner, owner field MAIN; file from `claude/history-miner`): a LISTING of 4 requests, at most 81 pages (about 55 expected, about 120 MB): the `/series/KXESOCCERGAME` read and settled `/markets` lists of that series with closes from 2026-09-12 to 2026-10-22T23:59:59Z, never the held-out days; registration `workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md`. Listings only, no candles. The cap is 90, the page budget (81) plus 9 spare for 429 retries (the security review's note: a cap equal to the budget would end the run early after one retry). HISTDEPTH_A and HISTDEPTH_B were sent with it and WITHDRAWN the same hour (duplicates of history lists the TIE3 lists job already pulls, and a dropped rule), so they are not in the repo. Runner unchanged. Gate KP30.
+
+
+
+## kalshi-pull jobs v12: TIE3_CANDLES with WXDAYEND_B (Nov 12, 2026, Testing Desk, the Head of R&D)
+
+`TIE3_CANDLES` (Testing Desk, owner field MAIN, registration `kalshi-scalper/workers/testing/TIE3_MEASUREMENT.md`; the Head of R&D approved the candle stage and the guard lower bound of 30 minutes before the data): 54 batched one-minute candle requests on the one `/markets/candlesticks` endpoint, 825 tickers (50 TIE3 windows, ids `t3c_`, and the 4 WXDAYEND_B windows of the Nov 10 winners, ids `wxb_`), cap 54 (no retry slack, as registered: one 429 retry would end the run one request short), every request under the endpoint's 10,000 (minutes x tickers) limit, nothing from 2026-11-13T00:00Z on. Split after landing with `python3 kalshi-scalper/workers/testing/bundle.py split-candles`. Runner unchanged. Gate KP31.
+
