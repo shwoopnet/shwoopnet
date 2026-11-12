@@ -176,7 +176,7 @@ def main(argv):
         return 0
     TH = thirds(cuts)
     ob = load(path, TH)
-    print("NOSIDE1 development verdict (TRAIN and VALIDATE only; held-out not read). N = 9,465, Bonferroni z %.3f" % BONF_Z)
+    print("NOSIDE1 development verdict (TRAIN and VALIDATE only; held-out not read). Header note Nov 12: research bar is z 5.46 on shared N about 2.1 million (strict ledger); N 9,465 / z %.3f is the retired ledger, information only" % BONF_Z)
     for arm in ARMS:
         for f in ("APPR", "GCB", "ALL"):
             cell = [o for (e, a), o in ob.items() if a == arm and (f == "ALL" or fam(o["s"]) == f)]
