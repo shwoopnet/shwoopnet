@@ -6,6 +6,8 @@ Asked by the Head of R&D on the owner's instruction. Read-only: no test was re-r
 
 **The falsified results stand because the stale quote flattered them and they failed anyway.**
 
+**After the re-scores (`RESCORE_GEN4_RECORD1_RESULT.md`, commit 313a509, accepted):** the GEN4 forward figures on `quotes.csv` and RECORD1's positive mean are WITHDRAWN. The GEN4 forward ledger is CLOSED (no row met its own flag; its tries stay counted). The three rows that stayed above 1 on the book (B05, B06, B11) are labelled "no evidence at n = 92" and folded into W-SPOTLEAD1's question; nothing was registered from them. **After CANDLEVSBOOK1 (a87b5c4, accepted):** candle-priced tests are cleared of the stale-copy problem for `KXBTC15M`; other series are "assumed, not measured".
+
 **Background.** `QUOTEVSBOOK1` and `TAPECLOCK1` (this folder) showed that Kalshi's market LIST endpoint returns a copy refreshed about every 11 seconds, so a quote read from it is 0 to 11 seconds old (about 5.5 on average) and about 7 seconds behind the trade tape. The order book endpoint is current. `LADDERSTATE1` (this folder, new today) shows the hourly ladder file has the same staircase: `ladder.csv` strikes change every 10.2 to 10.3 seconds at the median (middle half 9.6 to 12.8 s) although they are polled every 3.2 s, and strikes inside ONE poll cycle refresh at different times (in 70% of cycles some strikes changed and some did not, in 0% all changed). So two list quotes read in the same second are not simultaneous either.
 
 ## Counts
