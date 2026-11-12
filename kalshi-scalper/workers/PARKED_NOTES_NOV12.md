@@ -33,3 +33,15 @@ This desk has no further card tonight that is real. These are its best parked or
 **Needs only time, nothing bought:** the three-way first-half market in college basketball (a TIE3 venue, dropped by ruling because existing history is under 1,000 bets). 16 games a day carried it on Nov 10, the first week of the season; if a cell of TIE3 survives its measurement, the season itself supplies the events by about mid-January (a guess from the schedule, not a count). About 100 requests then.
 
 **Not on the menu, because data is not what closed it:** the multi-outcome sum (closed as a duplicate of OVERROUND1 and of the lock and parity row), the pre-match move (withdrawn on published evidence), the under on player props (a version of F7, which failed on cost). No source would reopen these; only a counted sample showing the effect exists would.
+
+## Order toolkit (standing rule (i)): what this desk answered, and two variants approved in principle (20:12Z)
+
+The owner's reminder, relayed by the Head of R&D: limit orders, profit targets, stops and time exits may be used; exits and limit entries are allowed in any rule provided every test counts both fees and the real spread on both legs. A different exit or entry on a registered rule is a NEW try, registered before data, one variant a rule.
+
+**The arithmetic that decides it for these rules:** at mid prices a taker exit costs 5.5c or more a round trip (two spreads on a 1c tick, two fees of 1.75c at a 50c price, 2c each as one contract pays them). That is over the 5c round-trip cost line, and four times the largest published follow-through after an in-play jump (about 1.4c at a 50c price at 2 minutes). So taker exits close on their own cost line; only resting orders are left, and those can be scored only where a book and a trade tape exist, which the new book recorder will give.
+
+**Answer for each rule (accepted by the Head, 20:12Z): hold stays** for MAPBREAK, INPLAYJUMP, REMATCH, TIE3, NHLOT and SOCDERIV. Nothing is registered tonight.
+
+**Approved in principle, to be registered once the recorder has a week of files and BEFORE any of it is read, one try each, each printing the filled AND the unfilled orders, each only if its parent's development read is not under 1.0:**
+1. MAPBREAK with a resting profit target at the model's own value V (above V the rule has nothing to hold for), else hold to settlement.
+2. REMATCH with a resting limit entry at the bid of the decision minute in place of crossing the spread. Stated risk: resting fills come on the losers.
