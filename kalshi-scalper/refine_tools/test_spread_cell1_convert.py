@@ -29,7 +29,7 @@ def answer(tickers):
          "price": {"close_dollars": None}, "volume_fp": "0.00"}]} for t in tickers]}
 
 
-def mkrun(root, name, rows, status="complete"):
+def mkrun(root, name, rows, status="complete", jid="SPREADCELL1"):
     d = os.path.join(root, name); os.makedirs(d)
     out = []
     for i, (rid, st, tickers, badsha) in enumerate(rows, 1):
@@ -40,7 +40,7 @@ def mkrun(root, name, rows, status="complete"):
         sha = hashlib.sha256(body).hexdigest()
         out.append({"index": i, "id": rid, "status": st, "bytes": len(body), "file": fn,
                     "sha256": "0" * 64 if badsha else sha})
-    json.dump({"job": {"job_id": "SPREADCELL1"}, "status": status, "rows": out}, open(os.path.join(d, "manifest.json"), "w"))
+    json.dump({"job": {"job_id": jid}, "status": status, "rows": out}, open(os.path.join(d, "manifest.json"), "w"))
     open(os.path.join(d, "STATUS"), "w").write(status)
 
 
@@ -74,6 +74,18 @@ class T(unittest.TestCase):
         self.assertEqual([r["_e"] for r in recs], [e[1] for e in EVENTS])
         self.assertEqual(recs[1]["h"]["KXNBASPREAD-26NOV11CCCDDD-CCC5"], [])  # 404 = no candles
         self.assertEqual(recs[0]["h"][TICK[0][0]], [[100, "0.2500", "0.2400", None, "0.00"]])
+
+    def test_b2_rest_job_merges_by_request_id(self):
+        # the second run is a cut job SPREADCELL1_REST holding only the missing requests (same ids)
+        mkrun(self.runs, "2026-11-12T1534Z_1", [("b000", 200, TICK[0], 0), ("b001", 200, TICK[1], 0)], "stopped_size")
+        mkrun(self.runs, "2026-11-13T0100Z_2", [("b002", 200, TICK[2], 0)], "complete", jid="SPREADCELL1_REST")
+        self.assertTrue(self.run_c())
+        self.assertEqual(open(os.path.join(self.out, C.MARKER)).read(), "3")
+
+    def test_b3_other_job_is_ignored(self):
+        mkrun(self.runs, "2026-11-12T1534Z_1", [("b000", 200, TICK[0], 0), ("b001", 200, TICK[1], 0)], "stopped_size")
+        mkrun(self.runs, "2026-11-13T0100Z_2", [("b002", 200, TICK[2], 0)], "complete", jid="SOMETHING_ELSE")
+        self.assertFalse(self.run_c())
 
     def test_c_bad_sha_refuses(self):
         mkrun(self.runs, "r1", [("b000", 200, TICK[0], 1), ("b001", 200, TICK[1], 0), ("b002", 200, TICK[2], 0)])

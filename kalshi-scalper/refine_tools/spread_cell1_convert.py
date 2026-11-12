@@ -58,7 +58,8 @@ def collect(runs, job_id, valid_ids):
         with open(os.path.join(run, "manifest.json")) as f:
             man = json.load(f)
         jid = (man.get("job") or {}).get("job_id")
-        if jid is not None and jid != job_id:
+        # the second run may be a cut job with only the missing requests (job_id + '_REST', same ids and params)
+        if jid is not None and jid not in (job_id, job_id + "_REST"):
             continue
         used.append(run)
         for row in man.get("rows", []):
