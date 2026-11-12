@@ -2,6 +2,10 @@
 
 Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git show origin/rnd-queue:RND_QUEUE.md`. Rules: docs/RND_CHARTER.md and docs/POLITICS_RULES.md on main. No live account figure goes in this file or on any branch; live numbers travel by message only. Every figure below is a research result on public data, a rule or a cap. [research]
 
+## Sports SPREAD cell: READ, FAIL on both lines (Nov 12, 16:44Z; Verification Analyst reproduction pending)
+
+W-SPREAD-CELL1, read once on the 1,041 never-scored events after all 274 requests landed. Line 1 (the registered look): n 172, cash PF 0.596 at +1c. Line 2 (the known-in-advance look): n 173, cash PF 0.636. FAIL by its committed labels: not probe-eligible, no popup, no forward shadow; the daily logging job is not built; the conditional 12,000 request history block is closed. The lead (the best of about 58 cells at z 1.59) did not replicate. Output committed with its marker on claude/refine-live (SPREADCELL1_READ_OUTPUT.txt). Not reported to the owner until the analyst has reproduced it. **With this, no lead with a date this week is left standing; CFRTI-K and CFRTI-B (Nov 20 sitting) are what remains of the Bitcoin idea.**
+
 ## The honest state (Nov 12, 2026)
 
 - Probe-ready count: **0**. Nothing has passed the research bar (cash PF 1.5 in three windows, after fees, deflated). Nothing is proven (PF 1.3 over 100 fills in 2 of 3 windows).

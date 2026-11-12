@@ -15,7 +15,7 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 
 | Test | Desk | N | State |
 |---|---|---|---|
-| W-SPREAD-CELL1, line 1 (registered) and line 2 (known-in-advance look) | Refinement | 2 | registered, not read |
+| W-SPREAD-CELL1, line 1 (registered) and line 2 (known-in-advance look) | Refinement | 2 | read once Nov 12 on 1,041 fresh events: FAIL on both lines (n 172, PF 0.596; n 173, PF 0.636); analyst reproduction pending |
 | CFRTI1-BTC, Kraken-only, plus two disclosed unregistered looks (Coinbase alone, Bitstamp alone) | Desk A | 3 | development read done Nov 12: no evidence at n = 32 (Kraken); carried to the held-out read |
 | CFRTI-K (Kalshi perpetual in place of outside spot) | Desk A | 1 | registered Nov 12 (workers/CFRTI_K_REGISTRATION.md, 9bb9c0f2 on claude/idea-desk-a), one specification, not scored; waits on the perp candle pull |
 | EXITREPLAY1 and ENTRYREPLAY1 (the 25c early sell and a resting entry replayed on R6 books) | Live-Data Forensics | 4 | read Nov 12: no new strategy; resting-entry saving is a possible version of OICORE's entry, parked |
