@@ -53,7 +53,7 @@ gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
   // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS').sort(), 'the choices are the job files except the retired lists job');
-  assert.ok(/case "\$JOB" in NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
+  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -244,7 +244,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'SPREADCELL1']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
   assert.ok(!jobs.some((f) => /ECONLAG|BALLOTNO/i.test(f)), 'ECONLAG and BALLOTNO are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -260,18 +260,20 @@ gates.KP14 = () => {
   assert.strictEqual(j.NOSIDE1_CANDLES.requests.length, 1034);
   assert.strictEqual(j.SPREADCELL1.max_requests, 274);
   assert.strictEqual(j.SPREADCELL1.requests.length, 274);
+  assert.strictEqual(j.SPREADLISTS.max_requests, 11);
+  assert.strictEqual(j.SPREADLISTS.requests.length, 11);
   assert.strictEqual(j.ROLLOFF_PROXY.max_requests, 12);
   assert.strictEqual(j.COMBO1_OPENBOOK.max_requests, 3);
   assert.strictEqual(j.COMBO1_OPENBOOK.status, 'retired');
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "ROLLOFF_PROXY"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "SPREADLISTS", "ROLLOFF_PROXY"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', ROLLOFF_PROXY: 'ok' });
-  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'ROLLOFF_PROXY']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -294,6 +296,8 @@ gates.KP14b = () => {
       for (const k of Object.keys(r.params || {})) assert.ok(ep.params.has(k), job.job_id + ': param ' + k + ' allowed');
       const p = (r.params || {});
       if (p.market_tickers) for (const t of p.market_tickers.split(',')) assert.ok(tk.has(t), job.job_id + ': ticker allowlisted ' + t);
+      // the runner checks market_tickers against the allowlist but not 'tickers', so this gate does
+      if (p.tickers) for (const t of p.tickers.split(',')) assert.ok(tk.has(t), job.job_id + ': ticker allowlisted ' + t);
       if (p.series_ticker) assert.ok(sr.has(p.series_ticker), job.job_id + ': series allowlisted');
       const m = /\/historical\/markets\/([^/]+)\/candlesticks$/.exec(r.path);
       if (m) assert.ok(tk.has(m[1]), job.job_id + ': ticker allowlisted ' + m[1]);

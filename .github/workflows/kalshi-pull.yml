@@ -13,6 +13,7 @@ on:
         required: true
         type: choice
         options:
+          - SPREADLISTS
           - NOSIDE1_CANDLES
           - SPREADCELL1
           - ROLLOFF_PROXY
@@ -41,7 +42,7 @@ jobs:
       - name: Check the inputs and the end date (2027-02-28 23:59 UTC)
         id: gate
         run: |
-          case "$JOB" in NOSIDE1_CANDLES|SPREADCELL1|ROLLOFF_PROXY|COMBO1_OPENBOOK) ;; *) echo "bad job id"; exit 1 ;; esac
+          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|SPREADCELL1|ROLLOFF_PROXY|COMBO1_OPENBOOK) ;; *) echo "bad job id"; exit 1 ;; esac
           case "$DRY_RUN" in true|false) ;; *) echo "bad dry_run"; exit 1 ;; esac
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the pull script and the job file from main

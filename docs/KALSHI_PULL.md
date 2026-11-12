@@ -44,6 +44,7 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | Rank | Job | Requests (cap) | State |
 |---|---|---|---|
 | 1 | `NOSIDE1_CANDLES` (the approval NO-side pull, W-NO-ARM1, development events only) | 1,034 requests, about 18 minutes at 1 a second | active; the lists stage `NOSIDE1_LISTS` is retired because the universe is frozen in `NO_ARM_CUTS.json` |
+| 2a | `SPREADLISTS` (W-SPREAD-CELL1, time fields only) | 11 requests, `GET /markets?tickers=` of up to 100 tickers each; run first. Whether Kalshi accepts 100 tickers a request is unverified; the runner cannot batch smaller, so a short answer leaves those events without a time | active |
 | 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, up to 55 tickers each, about 5 minutes | active; runs first in rank |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
 | 4 | `COMBO1_OPENBOOK` | 3 | retired: its reads were made and COMBO1 is closed |
