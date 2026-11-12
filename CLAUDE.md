@@ -1201,3 +1201,7 @@ Three job files for W-POL-APPR1's full pull were copied from Refinement's branch
 
 **Databento: an OWNER-ACCEPTED TERMS RISK, in plain words.** The Databento account was opened under the owner personally, not the LLC. The owner chose "treat it as personal use" (stocks would trade in the owner's own name for their own use, like the Kalshi account) and accepted the terms question as a risk. This is not a finding that the use is allowed. Limits: a $25 total cap, every pull a named symbol list with its free cost estimate recorded first, no "all symbols" request; the User Agreement's clause 1.5(e) defines redistribution to include "other information derived from the same", so NOTHING derived from Databento data goes into the public repo, only into `shwoopnet-private` or by message; no raw Databento data in any repo. Registrations, scripts and try counts may be public. Spend so far: $0. A live use of any stock strategy still needs the owner's own popup.
 
+## Declined list: taker order-flow family closed (Nov 12, 2026, Head of R&D)
+
+The family of taker order-flow signals on the 15 minute tape (FLOW1, TAPEFLOW1, RESIL1 and their variants) is closed by evidence under the owner's three-falsified rule and added to the declined list (`docs/STRATEGY_LIFECYCLE.md` 7e). RESIL1's development read (n 1,061, cash PF 0.90) was reproduced by the Verification Analyst independently. OICORE's open-interest trigger is a different field and is not covered. Docs only, no change to the bot.
+
