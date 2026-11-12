@@ -700,32 +700,6 @@ exports.kalshiLiveArmed = onSchedule(
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }
         }
       }
-      // Shadow rules (Nov 9, 2026, stage 1 of docs/STRATEGY_LIFECYCLE.md): log only, after everything that can trade has run. With the registry empty this makes no call and no write.
-      // Since Nov 12, 2026 (GOLDOFF, the owner: "Make sure gold keeps a shadow record after the latch trips") it runs whenever the minute function runs and no armed test order is on, NOT only while a bot session is on:
-      // a loss stop or a stop by hand leaves the session off, and gold's return evidence must not stop with it. With the session on it uses the quotes the tick already holds (no new request). With the session off it makes one
-      // PUBLIC market read per rule series, only in the minute or two around an entry window (shadowSeriesDue): no key, no signing, no order. Every error is swallowed.
-      if (shadowLib.SHADOW_RULES.length && !armedOn) {
-        try {
-          let shadowQuotes = sessionOn && market ? market.quotes : null;
-          if (!shadowQuotes) {
-            shadowQuotes = [];
-            for (const series of shadowLib.shadowSeriesDue(shadowLib.SHADOW_RULES, now)) {
-              try { for (const m of await kalshiMarketApi().markets(series)) shadowQuotes.push({ series, m }); }
-              catch (e) { console.error("kalshiLiveArmed: " + series + " shadow quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
-            }
-          }
-          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen });
-        } catch (e) { /* log only */ }
-        // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and a 15 s time guard; every error swallowed.
-        if (Math.floor(now / 60000) % 5 === 0) {
-          try {
-            await shadowLib.settleShadowRows({ now, max: 6, budgetMs: 15000, clock: Date.now,
-              readOpen: async () => (await db.collection(shadowLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
-              update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
-              market: (ticker) => kalshiMarketApi().market(ticker) });
-          } catch (e) { /* log only */ }
-        }
-      }
       // Settle finished trades whether or not a session is running (see settleOpenOrders). After the tick and after its own guard, so it can never fail or
       // delay the tick: a bad read is logged and the next minute tries again.
       // The hand-sold repair pass re-reads every order marked hand, which is no longer needed every minute: once every 10 minutes is enough for something that only ever looks back.
@@ -774,6 +748,32 @@ exports.kalshiLiveArmed = onSchedule(
         if (note === "alerted" || /^error|failed/.test(note)) console.warn("kalshiLiveArmed: exit watch alarm: " + note);
       } catch (e) {
         console.error("kalshiLiveArmed: exit watch alarm failed: " + String((e && e.message) || e).slice(0, 160));
+      }
+      // Shadow rules (Nov 9, 2026, stage 1 of docs/STRATEGY_LIFECYCLE.md): log only, after everything that can trade, settle or alarm has run (the last step of the minute: nothing shadow related may delay anything that decides, settles or alarms; a public read can take up to 16 s). With the registry empty this makes no call and no write.
+      // Since Nov 12, 2026 (GOLDOFF, the owner: "Make sure gold keeps a shadow record after the latch trips") it runs whenever the minute function runs and no armed test order is on, NOT only while a bot session is on:
+      // a loss stop or a stop by hand leaves the session off, and gold's return evidence must not stop with it. With the session on it uses the quotes the tick already holds (no new request). With the session off it makes one
+      // PUBLIC market read per rule series, only in the minute or two around an entry window (shadowSeriesDue): no key, no signing, no order. Every error is swallowed.
+      if (shadowLib.SHADOW_RULES.length && !armedOn) {
+        try {
+          let shadowQuotes = sessionOn && market ? market.quotes : null;
+          if (!shadowQuotes) {
+            shadowQuotes = [];
+            for (const series of shadowLib.shadowSeriesDue(shadowLib.SHADOW_RULES, now)) {
+              try { for (const m of await kalshiMarketApi().markets(series)) shadowQuotes.push({ series, m }); }
+              catch (e) { console.error("kalshiLiveArmed: " + series + " shadow quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
+            }
+          }
+          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen });
+        } catch (e) { /* log only */ }
+        // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and an 8 s time guard checked before each read; every error swallowed.
+        if (Math.floor(now / 60000) % 5 === 0) {
+          try {
+            await shadowLib.settleShadowRows({ now, max: 6, budgetMs: 8000, clock: Date.now,
+              readOpen: async () => (await db.collection(shadowLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
+              update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
+              market: (ticker) => kalshiMarketApi().market(ticker) });
+          } catch (e) { /* log only */ }
+        }
       }
     } catch (e) {
       failure = e;

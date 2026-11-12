@@ -97,7 +97,7 @@ function shadowSignals(rules, quotes, nowMs) {
 }
 
 // When the session is OFF the minute function holds no quotes, so index.js reads the rules' own series (public, no key). Those markets close on the quarter hour, so a read is only worth making in the minute or
-// two around a rule's entry window; this pure gate (30 s of slack each side) keeps it to about two reads per 15 minutes instead of fifteen. It only decides WHETHER to look; the signal still tests the real close time.
+// two around a rule's entry window; this pure gate (30 s of slack each side) keeps it to 2 to 3 reads per 15 minutes instead of fifteen. It only decides WHETHER to look; the signal still tests the real close time.
 function shadowSeriesDue(rules, nowMs) {
   const out = [];
   try {

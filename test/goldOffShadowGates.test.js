@@ -22,12 +22,12 @@ const rule = () => sh.SHADOW_RULES.find(ONLY);
 const gates = {};
 
 // Runs kalshiLiveArmed once at `clock` against the in-memory database and a scripted exchange; returns the whole record. `rules` replaces the registry for the run only and is always restored.
-async function runArmed({ seed, markets, rules, clock = DUE }) {
+async function runArmed({ seed, markets, rules, clock = DUE, over }) {
   const real = sh.SHADOW_RULES;
   if (rules) sh.SHADOW_RULES = rules;
   const h = harness.load(indexPath, seed);
   const realFetch = global.fetch, realNow = Date.now, realTimeout = global.setTimeout;
-  global.fetch = harness.exchange(h.log, { '/markets': { markets: markets || [] } });
+  global.fetch = harness.exchange(h.log, Object.assign({ '/markets': { markets: markets || [] } }, over || {}));
   Date.now = () => clock;
   global.setTimeout = (f) => realTimeout(f, 0);
   let threw = null;
@@ -39,7 +39,8 @@ const SESSION_ON = { 'kalshiLiveControl/session': { active: true, since: DUE - 6
 const LATCHED = (seed) => Object.assign({}, seed, { 'kalshiLiveControl/sizing': Object.assign({}, seed['kalshiLiveControl/sizing'], { goldKill: { tripped: true, rearmAt: gk.GOLD_KILL.rearmAt, rule: 'drawdown' } }) });
 const touchesShadow = (e) => /kalshiShadowRows/.test(JSON.stringify(e));
 const isShadowMarketRead = (e) => e[0] === 'fetch' && /\/markets/.test(e[2]) && /series_ticker=KXGOLD15M/.test(e[2]);
-const live_ = (log) => log.filter((e) => !touchesShadow(e));
+const isShadowSettleRead = (e) => e[0] === 'fetch' && /\/markets\/KXGOLD15M-26NOV121345-00$/.test(e[2]);
+const live_ = (log) => log.filter((e) => !touchesShadow(e) && !isShadowSettleRead(e));
 
 gates.GO1 = async () => {
   // The rule is the return evidence for gold L1 itself: one frozen, valid rule on gold's own entry window, dated today, with a README entry.
@@ -117,15 +118,22 @@ gates.GO5 = async () => {
 gates.GO6 = async () => {
   // THE CONSEQUENCE THAT MATTERS: the rule changes no live decision. For each state of the bot (session on, session on and gold latched, session off), everything the minute function does other than
   // the shadow log (every read, write, request and console line) is identical with and without the rule, in the entry window and with a tradable gold quote.
-  for (const [name, seed] of [['session on', SESSION_ON], ['session on, gold latched', LATCHED(SESSION_ON)], ['session off', {}]]) {
-    const withRule = await runArmed({ seed, markets: [gold()] });
-    const without = await runArmed({ seed, markets: [gold()], rules: [] });
+  const SWEEP = Date.parse('2026-11-12T14:10:00Z');      // floor(now/60000) % 5 === 0: the settle sweep also runs; 5 minutes before a 14:15 close is outside the entry window, so a stale open row is what it reads
+  assert.strictEqual(Math.floor(SWEEP / 60000) % 5, 0);
+  const OLD = { rule: 'GOLDOFF', ticker: 'KXGOLD15M-26NOV121345-00', side: 'yes', price: 0.94, settled: false, closeMs: SWEEP - 1500000, atMs: SWEEP - 2400000 };
+  for (const [clock, tag] of [[DUE, ''], [SWEEP, ' (sweep minute)']]) for (const [name0, seed0] of [['session on', SESSION_ON], ['session on, gold latched', LATCHED(SESSION_ON)], ['session off', {}]]) {
+    const name = name0 + tag, seed = tag ? Object.assign({}, seed0, { ['kalshiShadowRows/GOLDOFF_' + OLD.ticker]: OLD }) : seed0;
+    const mk = tag ? [gold({ close_time: new Date(clock + 360000).toISOString() })] : [gold()];
+    const over = { ['/markets/' + OLD.ticker]: { market: { ticker: OLD.ticker, status: 'finalized', result: 'yes' } } };
+    const withRule = await runArmed({ seed, markets: mk, clock, over });
+    const without = await runArmed({ seed, markets: mk, rules: [], clock, over });
     assert.strictEqual(withRule.threw, null); assert.strictEqual(without.threw, null);
-    const a = live_(withRule.log).filter((e) => !isShadowMarketRead(e) || name !== 'session off');
+    const a = live_(withRule.log).filter((e) => !isShadowMarketRead(e) || name0 !== 'session off');
     const b = live_(without.log);
     assert.deepStrictEqual(a, b, name + ': a decision, order, read or write other than the shadow log differs with the rule registered');
-    assert.strictEqual(without.rows.length, 0, name + ': an empty registry writes no shadow row');
-    if (name === 'session off') assert.strictEqual(without.log.filter(isShadowMarketRead).length, 0, 'an empty registry makes no extra market read');
+    assert.strictEqual(without.rows.filter((x) => x.settled === true || x.atMs > SWEEP - 1000).length, 0, name + ': an empty registry writes and settles no shadow row');
+    if (tag) assert.ok(withRule.rows.some((x) => x.ticker === OLD.ticker && x.settled === true), name + ': the sweep really ran and settled the old row');
+    if (name0 === 'session off') assert.strictEqual(without.log.filter(isShadowMarketRead).length, 0, 'an empty registry makes no extra market read');
     else assert.deepStrictEqual(withRule.log.filter(isShadowMarketRead).length, without.log.filter(isShadowMarketRead).length, name + ': with the session on the rule makes no market request of its own');
   }
 };
@@ -135,7 +143,9 @@ gates.GO7 = () => {
   const idx = code(read('functions', 'index.js'));
   const blockStart = idx.indexOf('if (shadowLib.SHADOW_RULES.length && !armedOn)');
   assert.ok(blockStart > idx.indexOf('slotRun.runSlotTick'), 'after everything that can trade');
-  const block = idx.slice(blockStart, idx.indexOf('await live.settleOpenOrders', blockStart));
+  for (const step of ['live.settleOpenOrders', 'exitAlarm.runExitAlarm', 'accRef']) assert.ok(blockStart > idx.indexOf(step), 'after ' + step + ': nothing shadow related may delay a settle, a snapshot or an alarm');
+  assert.ok(/budgetMs: 8000/.test(idx.slice(blockStart)), 'the settle sweep budget is 8 s');
+  const block = idx.slice(blockStart, idx.indexOf('failure = e', blockStart));
   assert.ok(block.length > 200 && block.length < 3000, 'the block was found');
   assert.ok(!/submit|liveRequest|keyId|pem|KALSHI_LIVE_KEY|KALSHI_LIVE_PRIVATE|\.runTransaction|POST/.test(block), 'the shadow block touches no key and sends no order');
   assert.ok(/shadowSeriesDue\(shadowLib\.SHADOW_RULES, now\)/.test(block) && /rules: shadowLib\.SHADOW_RULES/.test(block), 'only the constant registry is ever passed');
