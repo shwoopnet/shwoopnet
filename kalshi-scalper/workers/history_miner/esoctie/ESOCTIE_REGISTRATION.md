@@ -97,3 +97,10 @@ The guard in "The instants and prices" point 1 used the event's own close time, 
 3. **Universe guard** is NOTE 2's (ticker clock and the Tie's open time); NOTE 2 already removed the guard on the close time that Auditor B also flagged.
 4. **Reported beside the result:** the count of eligible events whose Tie result is neither yes nor no (void or unsettled); they are not booked.
 5. The round-trip line stays in the report as information only.
+
+## NOTE 4, Nov 12, 2026, 19:25Z, before any price or result is read (Forensics' audit notes)
+
+1. **A fired bet whose Tie market has no yes or no result** (void or unsettled) is booked, by a rule fixed now, as a loss of the entry fee only (price refunded, fee kept), and its count is reported. No fired bet is dropped by how its game ended.
+2. **Label:** the development figure is reported as "selected on development": it can falsify, it cannot support; only the frozen held-out read can.
+3. **Settlement allowance:** the 300 seconds of NOTE 3 is the Head's ruled constant (Forensics suggested 10 minutes as an example; 300 s is above the measured settle delay of about 4 minutes on the e-soccer events seen in the census listing).
+4. Haircut: no "ran away" haircut from a later candle is used; the scorer prints the random-drop table of `HOW_TO_PRICE_A_PAPER_TRADE.md` with its caveat that real misses lean toward winners.

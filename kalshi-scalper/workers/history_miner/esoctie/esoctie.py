@@ -208,11 +208,15 @@ def score(lists, cands):
         return {"measurement": rep, "rule": "NOT SCORED: a kill line closed the card", "kill": rep["kill"]}
     trades = []
     for r in rows:
-        if r["b"] is None or r["gap"] < GAP or r["spread"] > SPREAD or r["tie_result"] not in ("yes", "no"):
+        if r["b"] is None or r["gap"] < GAP or r["spread"] > SPREAD:
             continue
         p = round(min(r["ask"] + 0.01, 0.99), 4)
         fe = fee_up(p)
         win = r["tie_result"] == "yes"
+        if r["tie_result"] not in ("yes", "no"):
+            # NOTE 4: a fired bet with no yes or no result is booked as a loss of the fee only (price refunded, fee kept), and counted
+            trades.append({"event": r["event"], "cluster": time.strftime("%Y-%m-%d", time.gmtime(r["S"])), "ts": r["ts"], "price": p, "win": False, "net": round(-fe, 4), "k": r["k"], "void": True})
+            continue
         trades.append({"event": r["event"], "cluster": time.strftime("%Y-%m-%d", time.gmtime(r["S"])), "ts": r["ts"], "price": p, "win": win, "net": round((1 - p - fe) if win else (-p - fe), 4), "k": r["k"]})
     out = sk.score(trades, {"name": "ESOCTIE (development only)", "price_source": "minute-end candle close, two-sided, ask plus 1c", "freshness": FRESH})
     out["halves"] = [sk.stats([t for t in trades if t["ts"] < HALF]), sk.stats([t for t in trades if t["ts"] >= HALF])]
@@ -228,7 +232,8 @@ def score(lists, cands):
         verdict = "development bar met (ask the Head for the held-out pull)"
     else:
         verdict = "below the bar at n = %d, PF %s" % (n, pf_all)
-    out["registered_verdict"] = verdict
+    out["registered_verdict"] = verdict + " (selected on development: this figure can falsify, it cannot support; only the frozen held-out read can)"
+    out["void_bets_booked_as_fee_loss"] = sum(1 for t in trades if t.get("void"))
     return {"measurement": rep, "rule": out}
 
 
