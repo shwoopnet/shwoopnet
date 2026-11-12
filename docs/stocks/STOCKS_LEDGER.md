@@ -17,3 +17,14 @@ Floor for prior tries: at least 8 scored strategy variants (1+1+1+1+4), window r
 
 ## This desk, registered Nov 12, 2026 (none scored)
 S1 1, S2 2, S3 2, S4 2, S5 2, S6 2, S7 1 (first wave, scripts and synthetic tests written), S8 2, S9 1, S10 1 (deferred). Total 16, scored 0.
+
+## Retired unread, Nov 12, 2026 (Head of R&D ruling; tries scored 0, no data bought)
+| Card | Reason |
+|---|---|
+| S1 overnight vs intraday, index ETFs | arithmetic: net d about 0.03 to 0.06, PF about 1.04 to 1.13, cannot clear 1.5 |
+| S2 clientele (long leg and long-short) | gross about 4 to 13 bp a night against about 3 to 6.7 bp assumed cost; long-short net PF about 0.9 |
+| S3 one-week reversal, illiquid | screen only, cannot pass; spread (15 bp each way) consumes it |
+| S4 opening gap fade | screen only, cannot pass |
+| S5 post-gap drift | screen only, cannot pass |
+| S7 first 30 predicts last 30 | net d about 0.04 to 0.05, PF about 1.05 to 1.1 |
+Registered tries counted: still 16 registered, 0 scored. Left: S6, S8, S9 (blocked on price definition and the Head's ruling), S10 deferred.
