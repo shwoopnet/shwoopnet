@@ -1284,3 +1284,7 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `docs/ROTATION_LANE.md` is v1.0, APPROVED by the owner as written, with `docs/WHEEL_ADMIT_LIST.md` (batch 1, a list of places, not an order to trade). The approval is not a go-live: each seat still needs the WHEEL0 read, a reviewed build and security pass, a check of the second slot caps and the account stop, and the owner's popup with its exact spec. The owner also added a 10-loss guard to gold's return rule (text in `docs/GOLD_KILL_LATCH.md` and `docs/STRATEGY_LIFECYCLE.md`); the code that reads that rule is a separate PR. Docs only.
 
+## Rotation lane v1.1: probation seats (Nov 12, 2026, the owner)
+
+`docs/ROTATION_LANE.md` is v1.1 (and `docs/WHEEL_ADMIT_LIST.md` refreshed): the owner chose probation seats, up to 5 candidates live at 3 contracts (at most $3 an order) with an $18 net floor each, stepping to 10 contracts only on the 60 plus 30 record, target Monday morning. Engineering view: a probation seat is an ordinary second-slot strategy (registry entry, hold-list entry, allowed series, kill rules), the slot loss caps must count per strategy before more than one non-laddered seat fits, and a seat that needs a new field (reference price, book state, base-rate state) is extra code. Nothing is armed by this text; every seat still needs the owner's popup with its exact spec. Docs only.
+
