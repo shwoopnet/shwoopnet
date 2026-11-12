@@ -128,3 +128,30 @@ Three states, because "touched" hides a real difference:
 ### How the touched column was checked, and what is still open
 
 The first version of this table was built from the level-two "Result:" headings of V2's README only and missed tests filed under other heading styles (ESPORT1, ESPORTM1, VIRT1, CRICT20, SOFR1, TNOTE1, MORTGAGE1, SPOTD1, CHART1, EQUAKE1, FAMSPORTS, NPBKBO1). A second pass searched the whole file by family keyword. For the seven UNTOUCHED families the search found no test of any kind: no entry names an NHL period, a college football quarter, a foreign basketball league, the AHL or KHL, volleyball, corners or both-teams-to-score, and the only soccer totals entry is about US leagues. Desk A's and Refinement's records are still to be searched the same way before the full table.
+
+### Rows added after the first cut (Nov 12, 17:15Z)
+
+Families that are not in the sweep files and were missing from the table above; they go into the full table.
+
+| Family | State | Events a year | Tests and verdicts |
+|---|---|---|---|
+| Non-crypto 15 minute series (oil, silver, copper, gas, forex pairs, HYPE, BNB) | TOUCHED | about 35,000 windows a series | EVENT1, TODSEAS1, VOLSLOT1 FALSIFIED, FXUSD, the 15 minute grammar sweeps (closed, declined list); one live probe |
+| College basketball game winner | TOUCHED | 5,283 events last season (V2's census) | BOOKNCAA1 not enough data (0 treated of 1,081); its sportsbook source is now barred. Spreads, totals and halves: not known until the listing |
+| NBA and WNBA player props | TOUCHED | 1,230 NBA games | PROPS1 not enough data (9 treated; control cheap side PF 0.68, n 397) |
+| Weekly official counts: shipping transits, executive orders | TOUCHED | 52 weeks a series. SLOW | GOVCOUNT1 duplicate, not runnable; PHYSCOUNT1 not enough data; TSA1 FALSIFIED (weekly passenger counts) |
+
+### Cost, settlement speed and data kind (Forensics desk)
+
+Forensics measured these from recorded public data and wrote them under this desk's family names: `kalshi-scalper/workers/forensics/FAMILY_COSTS_NOV12.md` on branch `claude/forensics-desk`, section "The same figures under Desk B's family names". The full table will carry the columns; until then that section is the source. Its "too costly, move on" flags, each closing a family or part of one before any card:
+
+| Family (or part) | Spread | Round trip | Note |
+|---|---|---|---|
+| Daily city LOW temperature | 10c | 11.5c | the HIGH side is 1c and 3.3c |
+| Currency daily and weekly ladders | 8c to 16c | 10.6c to 17.2c | volume 0 to 32 a strike |
+| Index ladders, S&P 500 and Nasdaq 100 | 9c and 15c | 10.5c and 16.4c | zero volume at the median strike |
+| Daily Treasury yields | 8c to 18c | 9.7c to 20c | SOFR is cheap (2.1c) but two-sided on 31% of quotes |
+| NHL spread and total | 3c to 4c | 6.4c to 6.9c | NBA and NFL are 4.5c |
+| Monthly one-touch, smaller coins | 4c to 10c | 5c to 13c | 12 events a year |
+| Combos as a two-way trade | 3.4c on the 4.5% that are two-sided | not measurable | buy and hold or nothing |
+
+Data kind, in Forensics' words: candles are current (measured on the Bitcoin 15 minute series only); order book reads are current; market-list quotes are a copy up to about 11 seconds old and not simultaneous across markets. No recorder, so no cost row at all: the 107 unread sports sub-market series, tennis, soccer, esports, cricket, gas prices, hazards, power demand, Truflation, charts, earnings, mentions, long-dated politics.

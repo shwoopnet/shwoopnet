@@ -2,7 +2,7 @@
 
 Asked for by the Head of R&D: ten new cards this week from untouched families with 300 or more independent events a year and enough volume to fill one contract, the first three by 16:00Z on Nov 13, and where a family is simply efficient, "efficient, move on" with the one number that shows it. Fewer than ten is fine; no padding.
 
-**Count so far: pool families examined 12; cards written 2 (both start with a zero-try price measurement); families closed with a reason 8; families waiting for the listing 2. Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
+**Count so far: pool families examined 12, plus the two rates groups the Head named; cards written 2 (both start with a zero-try cost and price measurement); families closed with a reason 10; waiting for the listing 2. Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
 
 ## The filter every candidate went through first
 
@@ -17,6 +17,7 @@ What is left after the filter is narrow: a contract that the market may price ba
 
 `TIE3 | family: a listed third outcome priced under its base rate; entry before the game on the Tie contract, hold to the end of the period (under 3 hours) | risk class: mid price (about 20c to 45c), 1 contract, thousands of period-events a year, no link to any live strategy | stage Idea`
 
+- **Source of the fact (first, as ruled):** Kalshi's own markets only. The base rate comes from Kalshi's own earlier settlements of the same series; the price is the Tie contract's own quote. No outside host, no score site.
 - **Mechanism in one line.** Period, quarter and half "winner" markets are three-way: team A, team B, Tie. A hockey period ends level about 4 times in 10 and a soccer first half more often than that. If buyers come for a team and the Tie contract is left to whoever quotes it, the Tie may sit under its base rate by more than the fee.
 - **How I know the markets are three-way without a read.** V2's Nov 3 counts: the NFL first-half and each NFL quarter series settled exactly 363 markets on 33 dates, which is 3 a game for 121 games; MLS first half 501 against 167 games; NBA first half 519 against 173 games. The NHL period and college quarter series were never read; the listing will show whether they have the same shape. If they do not, they drop out of this card.
 - **Who is on the other side, and why they might lose.** Team buyers, and a maker who prices the two team contracts off the full-game line and leaves the third wide. Honest counter: sportsbooks have priced "60 minute" and period three-way lines for decades, and any maker here can copy them. I expect the Tie to be priced within a few cents of its base rate where there is a real maker, and to have no usable quote where there is none.
@@ -34,10 +35,25 @@ What is left after the filter is narrow: a contract that the market may price ba
 - **Time to settlement:** under 3 hours. **Time to a verdict:** two days for the measurement after the pull. **Probability:** 4% that it reaches the bar; about 80% that the measurement closes it.
 - **Families from the pool it covers:** NHL periods, college football periods, NBA and MLS halves (first halves in soccer only), and the first-half series inside the small-league soccer group.
 
+**The card in the Head's required lines (added Nov 12 after the 16:58Z rulings):**
+
+| Line | TIE3 |
+|---|---|
+| Counterparty | Team buyers, and a maker who prices the two team contracts off the game line and leaves the third wide. Named, not shown: the measurement does not identify who quotes |
+| Entry | Before the game, YES on Tie at the ask when the ask is 10c or more under the base rate, spread 4c or less |
+| Exit | Hold to settlement (the end of the period, quarter or half) |
+| Cost from data | **No cost row exists** for any period, quarter or half market (Forensics, `FAMILY_COSTS_NOV12.md`). Nearest rows: NHL moneyline spread 2c, round trip 5.5c, 800 contracts a market; NHL spread and total 3c to 4c wide and flagged too costly. So I expect the NHL cells to fail on the spread condition and the NFL and MLS cells (median volume 8,000 to 15,000 in V2's count) to be the ones that can be measured. Stage 1 below IS the zero-try cost measurement: it reports the spread and the share of two-sided quotes before any price gap. Held to settlement, the cost is half the spread plus one fee (about 1.5c at these prices), not a round trip |
+| Events a year | NHL 3,936 period-events; NFL 1,140 quarter-events; college football about 3,600 quarter-events; MLS and small-league first halves, count from the listing |
+| Events needed at z 5.46 | about 1,200 bets near 30c for a true PF of 1.5; about 400 for a true PF of 2 |
+| Date constants | Base block: closes before 2026-10-20 00:00 UTC. Price block (measurement, prices only): closes 2026-10-20 to 2026-11-12. Held-out for the one try: closes from 2026-11-13 00:00 UTC on, never read before the development read is filed |
+| Requests | about 25 for lists, 80 to 150 for candles, one run |
+| Tries it adds | 0 for the measurement; 1 if it survives |
+
 ## Card 19. SOCDERIV: soccer extras against their own sibling markets
 
 `SOCDERIV | family: a derived contract priced away from what its liquid siblings imply, by a model that can be wrong; entry before kickoff, hold to settlement (2 hours) | risk class: mid price (about 35c to 65c), 1 contract, about 2,800 big-league games a year, no link to any live strategy | stage Idea`
 
+- **Source of the fact (first, as ruled):** Kalshi's own related markets only: the same game's winner prices and total-goals ladder are the state. No outside host, no score site, no sportsbook line.
 - **Mechanism in one line.** "Both teams to score" and "team total over 1.5" are functions of the two teams' expected goals. The same game's winner prices and total-goals ladder, which trade 10 to 100 times more, already pin those two numbers down. If the thin contract is quoted by someone who does not tie it to the siblings, it can drift from what they imply.
 - **Who is on the other side.** A casual maker or a resting order on a contract with a median volume near 1,600, in a game whose main markets trade 20,000 to 180,000. Honest counter: sportsbooks price these from exactly this arithmetic, and a maker who copies a sportsbook has done the work already. Where the gap looks large it may be MY model that is wrong, not the market.
 - **The sibling-implied value, written out.** Fit two goal rates (home, away) to the game's three winner prices and its total-goals ladder by least squares, goals treated as independent counts. Then both-teams-to-score is (1 minus the chance home scores none) times (1 minus the chance away scores none), and a team total follows from that team's rate alone. Known weakness: real scores have slightly more draws and low scores than independent counts give, which moves both-teams-to-score by about a point. Corners are NOT covered: nothing in the siblings implies them.
@@ -53,6 +69,21 @@ What is left after the filter is narrow: a contract that the market may price ba
 - **Power line.** About 2,800 big-league games a year. If one game in ten qualifies, that is about 280 bets a year near 50c. The bar needs about 950 bets at a true PF of 1.5 and about 320 at a true PF of 2. So within a year it is reachable only if the true PF is 2 or better. Small leagues would add games only if their extras are listed, which the listing will show.
 - **Time to settlement:** about 2 hours. **Time to a verdict:** two to three days for the measurement. **Probability:** 2% that it reaches the bar; about 85% that the measurement closes it.
 - **Families from the pool it covers:** soccer extras (team totals and both-teams-to-score).
+- **Why it is not a lock scan under a new name (the Head's rule 2c).** A lock scan looks for a set of contracts that cannot lose together. This rule buys ONE contract that loses about half the time; the siblings only say what it is worth on average, through a model with a stated weakness. If the measurement finds no gap, there is no trade; it never looks for a riskless set.
+
+**The card in the Head's required lines (added Nov 12 after the 16:58Z rulings):**
+
+| Line | SOCDERIV |
+|---|---|
+| Counterparty | A casual maker or resting order on the thin contract. Named, not shown |
+| Entry | At least 30 minutes before kickoff, the side whose ask is 8c or more under the sibling-implied value, spread 4c or less |
+| Exit | Hold to settlement (about 2 hours) |
+| Cost from data | **No cost row exists** for any soccer market (Forensics holds no soccer recorder). V2's count gives a median volume near 1,600 for the one extras series it read, against 22,000 for big-league totals. Stage 1 IS the zero-try cost measurement: spread and share of two-sided quotes come first, the gap second. Cost when held: half the spread plus about 1.7c of fee near 50c |
+| Events a year | about 2,800 big-league games; about 280 bets if one game in ten qualifies |
+| Events needed at z 5.46 | about 950 bets near 50c for a true PF of 1.5; about 320 for a true PF of 2 |
+| Date constants | Measurement: games closing 2026-09-12 to 2026-11-12 (the live endpoint's range), prices only. Development for the one try: the same games' results, read once. Held-out: closes from 2026-11-13 00:00 UTC on |
+| Requests | about 40 for lists, 100 to 200 for candles, one or two runs |
+| Tries it adds | 0 for the measurement; 1 if it survives |
 
 ## Pool families with no card, and why
 
@@ -63,9 +94,11 @@ What is left after the filter is narrow: a contract that the market may price ba
 | Minor hockey, AHL and KHL winners (2 series) | Same. A rest-and-travel rule from the schedule is worth about 3 points of win chance in the big leagues, far under the 9 to 12 needed | none of its own; never read |
 | College volleyball match (1 series) | Same, and seasonal | none of its own; never read |
 | College football props (2 series) | The only outside fact that moves football props and may be read is wind (NWS). About 1 game in 8 outdoors is windy: about 100 games a year across the NFL and college. Under the 300 line on events that the rule would trade, and the best known weather effect in football betting. Considered and dropped, not carded | none |
-| Texas power daily peak | A public forecast or a running peak against a bracket is the weather mechanism again (forecast against market: closed, three falsified; already-decided fact: WXDEAD1 and RAINFACT1 FALSIFIED). The same logic on a new market is a version of a closed family | USWEEP3: no lead. WXDEAD1: 612 of 612 events, quotes follow the fact |
-| Truflation daily index | A slow daily index against a ladder is the persistence mechanism | GAS2 control PF 0.15 (n 2,310); TNOTE1: no bracket was ever quoted cheap enough to trade; SOFR1: 1 trade in 44 days |
+| Texas power daily peak (source terms NOT read; none needed, since no card names it) | A public forecast or a running peak against a bracket is the weather mechanism again (forecast against market: closed, three falsified; already-decided fact: WXDEAD1 and RAINFACT1 FALSIFIED). The same logic on a new market is a version of a closed family | USWEEP3: no lead. WXDEAD1: 612 of 612 events, quotes follow the fact |
+| Truflation daily index (source terms NOT read; none needed, since no card names it) | A slow daily index against a ladder is the persistence mechanism | GAS2 control PF 0.15 (n 2,310); TNOTE1: no bracket was ever quoted cheap enough to trade; SOFR1: 1 trade in 44 days |
 | Daily top music video | Yesterday's number one against today's ladder is favourite-and-hold, and the chart sources are barred or unread | SPOTD1 (the song version): model worse than the market |
+| Daily Treasury yields (the Head asked for one card here if a mechanism exists) | **Too costly, move on.** Not in the 300 pool (about 250 days), and the cost closes it before any mechanism | Forensics: spread 8c to 18c, round trip 9.7c to 20c, volume 100 to 510 a market |
+| Daily SOFR (same request) | No card. SOFR1 already tested the last print plus calendar effects, and its own result says why nothing can trade: about 2 strikes a day near the last rate, 1 qualifying trade in 44 days. The one mechanism I can name that is not SOFR1 (month-end and tax-date jumps bought at a mid price) IS SOFR1's calendar term at another price. About 250 days a year with a two-sided quote on 31% of reads leaves under 80 tradable days against about 950 needed | Forensics: round trip 2.1c, two-sided on 31% of quotes. SOFR1: 1 trade in 44 days |
 
 **Waiting for the listing (no judgement yet):** NHL periods beyond the Tie contract (period totals and spreads), and any category the sweeps never counted. If the listing shows a non-sports family with 300 or more events a year that is not in the table, it gets a card or a line here.
 
