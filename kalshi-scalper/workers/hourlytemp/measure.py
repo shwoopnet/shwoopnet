@@ -14,11 +14,11 @@ the two-sided strikes within two ranks of the money is above 5c at every look in
 
 Usage: python3 measure.py <markets.json> <folder of the HOURLYTEMP_LISTS run> <folder of the candle run> [...]
 """
-import glob, gzip, json, os, sys
+import glob, gzip, json, math, os, sys
 
 LOOKS = (55, 30, 10)        # minutes before the hour (the market opens 60 minutes before it)
 NEAR = 2                    # ranks either side of the money that count as near the money
-COST_BAR = 0.05
+COST_BAR = 0.04            # ONE-WAY entry cost near the money: half the spread plus the entry fee as charged (Head of R&D, Nov 12, 19:02Z and 19:38Z)
 FEE = 0.07
 
 
@@ -73,12 +73,28 @@ def main():
     for m in markets:
         events.setdefault((m["series"], m["event"]), []).append(m)
     print("candle freshness measured on Bitcoin 15 minute only, not on this family; one-minute resolution, no seconds-level claim")
+    # Step one (Head of R&D, Nov 12, 19:38Z): the settlement source, quoted from the series' own rules text in the lists answer.
+    try:
+        man = json.load(open(os.path.join(lists_run, "manifest.json")))
+        seen = set()
+        for row in man.get("rows", []):
+            if row.get("status") != 200 or not str(row.get("id", "")).startswith("settled_"):
+                continue
+            body = json.load(gzip.open(os.path.join(lists_run, row["file"]), "rt"))
+            for m in body.get("markets", []) if isinstance(body, dict) else []:
+                sname = m.get("ticker", "").split("-")[0]
+                if sname and sname not in seen:
+                    seen.add(sname)
+                    for k in ("rules_primary", "rules_secondary"):
+                        print("SETTLEMENT SOURCE, %s %s: %s" % (sname, k, " ".join(str(m.get(k) or "(empty)").split())[:700]))
+    except (OSError, ValueError, KeyError):
+        print("SETTLEMENT SOURCE: the lists answer could not be read for the rules text")
     print(f"markets in the fixed list {len(markets)} | events (a city and an hour) {len(events)} | markets with any candle {sum(1 for m in markets if m['ticker'] in cand)}")
     costly = True
     for series in sorted({s for s, _ in events}):
         for look in LOOKS:
             quoted = two = 0
-            spreads, trips, near_trips, decided, traded_min, all_min = [], [], [], 0, 0, 0
+            spreads, trips, near_trips, near_one, decided, traded_min, all_min = [], [], [], [], 0, 0, 0
             side_ask = {1: [], 2: [], 3: []}
             for (s, ev), ms in events.items():
                 if s != series:
@@ -112,13 +128,15 @@ def main():
                     r = abs(i - k0)
                     if r <= NEAR:
                         near_trips.append((a - b) + 2 * FEE * mid * (1 - mid))
+                        pay = min(0.99, a + 0.01)
+                        near_one.append((a - b) / 2 + math.ceil(FEE * pay * (1 - pay) * 100 - 1e-9) / 100.0)
                     if r >= 1:
                         side_ask[min(r, 3)].append(a if i < k0 else 1 - b)   # the nearer-certain side: YES below the money, NO above it
-            nt = med(near_trips)
-            if nt is not None and nt <= COST_BAR:
+            nt, no = med(near_trips), med(near_one)
+            if no is not None and no <= COST_BAR:
                 costly = False
             print(f"{series} {look:2d} min before the hour: strikes with a candle {quoted} | two-sided {two} ({fmt(two / quoted if quoted else None, False)}) | median spread {fmt(med(spreads))}"
-                  f" | median round trip {fmt(med(trips))} | near the money (n {len(near_trips)}) {fmt(nt)} | priced 95c or 5c and beyond {fmt(decided / two if two else None, False)}"
+                  f" | median round trip {fmt(med(trips))} | near the money (n {len(near_trips)}) round trip {fmt(nt)}, ONE-WAY entry cost {fmt(no)} | priced 95c or 5c and beyond {fmt(decided / two if two else None, False)}"
                   f" | ask of the nearer-certain side at rank 1, 2, 3+: {fmt(med(side_ask[1]))}, {fmt(med(side_ask[2]))}, {fmt(med(side_ask[3]))}")
         if all_min:
             print(f"{series}: market-minutes with a candle {all_min // len(LOOKS)} | with a trade {fmt(traded_min / all_min, False)}")
@@ -143,8 +161,8 @@ def main():
     if not any(m["ticker"] in cand for m in markets):
         print("VERDICT: no candles read")
         return
-    print("VERDICT: " + ("CLOSED as too costly (median round trip near the money above 5c at every look in every city)" if costly
-                        else "NOT closed on cost: at least one city and look has a median round trip near the money of 5c or less. Nothing beyond this measurement is approved."))
+    print("VERDICT: " + ("CLOSED as too costly (median one-way entry cost near the money above 4c at every look in every city)" if costly
+                        else "NOT closed on cost: at least one city and look has a median one-way entry cost near the money of 4c or less. Nothing beyond this measurement is approved."))
 
 
 if __name__ == "__main__":

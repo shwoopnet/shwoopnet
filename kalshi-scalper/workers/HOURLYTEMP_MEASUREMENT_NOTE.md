@@ -65,3 +65,12 @@ Order: after TIE3 and SOCDERIV, and only if the Head wants it run; the job file 
 | `hourlytemp/measure.py` | the reader. Never reads a result field. Prints the candle freshness line |
 
 The whole chain (lists, builder, candle job check, reader) was run end to end on made-up data before any pull. Kalshi requests in all: about 93. Tries: 0.
+
+## Dated amendment, Nov 12, 2026, 19:39Z, before any list or candle of these series was pulled (Head of R&D, 19:38Z: UN-PAUSED as a cost and settlement-source measurement, 0 tries, behind tonight's built reads and REMATCH stage 1)
+
+1. **Step one is the settlement source, quoted.** The reader prints `rules_primary` and `rules_secondary` of each series from the lists answer before anything else. What this desk has already read, in the Nov 10 census listing: the rules text names Synoptic Data, "calculated in accordance with the Kalshi Weather Index Methodology". Idea Desk C reports a Kalshi help page naming The Weather Company. The series' own rules text decides; if the two differ the file says so.
+2. **If it settles on a source we may not read,** a card may still exist with the NWS station reading (permitted) as a PROXY signal, but it must say so, and the gap between the proxy and Kalshi's settled strike becomes the first thing measured, before any rule.
+3. **The cost line is one-way** (the rule would buy and hold for under an hour): half the spread plus the entry fee as charged at the ask plus 1c, rounded up. The family is CLOSED as too costly if the median one-way entry cost near the money is above 4c at every look in every city (it was: round trip above 5c). The round trip is still printed as information. Changed before any price was read, for the reason given in the Head's 19:02Z ruling for every hold-to-settlement rule.
+4. **The Head's ruling on the declined list:** a rule driven by the last station READING on an HOURLY market is outside the row "weather forecast against market on daily temperature brackets" (a different market and different information), and the owner's weather rule allows singles on NWS data.
+5. Only after the source and the cost line: a card, registered before any outcome. Standing rule (h) applies to its held-out from the start: the seven days the lists job covers already carry results in the landed file, so the held-out will be later dates.
+
