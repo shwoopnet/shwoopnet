@@ -1,0 +1,136 @@
+{
+ "job": {
+  "job_id": "COMBO1_OPENBOOK",
+  "owner": "V2",
+  "registration": "kalshi-scalper/workers/COMBO1_PROTOCOL.md",
+  "purpose": "Rank 4, COMBO1 open book: one page of 100 OPEN combos in each of 3 collections. Does any open combo show a real two-sided quote now? Zero quoted combos closes COMBO1.",
+  "heldout": "none",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXMVENBASINGLEGAME",
+   "KXMVENFLSINGLEGAME",
+   "KXMVESPORTSMULTIGAMEEXTENDED"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 3,
+  "requests": [
+   {
+    "id": "open_KXMVENBASINGLEGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMVENBASINGLEGAME",
+     "status": "open",
+     "limit": 100
+    }
+   },
+   {
+    "id": "open_KXMVENFLSINGLEGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMVENFLSINGLEGAME",
+     "status": "open",
+     "limit": 100
+    }
+   },
+   {
+    "id": "open_KXMVESPORTSMULTIGAMEEXTENDED",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXMVESPORTSMULTIGAMEEXTENDED",
+     "status": "open",
+     "limit": 100
+    }
+   }
+  ],
+  "notes": "Three requests, the cursor is not followed (no max_pages).",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  }
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1451Z",
+ "finished": "2026-11-12T1451Z",
+ "status": "complete",
+ "requests_sent": 3,
+ "bytes_stored": 100196,
+ "rows": [
+  {
+   "index": 1,
+   "id": "open_KXMVENBASINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENBASINGLEGAME",
+    "status": "open",
+    "limit": 100
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794495070477,
+   "t_recv_ms": 1794495070600,
+   "server_date": "Thu, 12 Nov 2026 14:51:10 GMT",
+   "file": "0001.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "open_KXMVENFLSINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENFLSINGLEGAME",
+    "status": "open",
+    "limit": 100
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 27,
+   "t_send_ms": 1794495071477,
+   "t_recv_ms": 1794495071590,
+   "server_date": "Thu, 12 Nov 2026 14:51:11 GMT",
+   "file": "0002.json.gz",
+   "sha256": "50699ea1db13415ea46ec367dcfa58decd9660083271c5dc061561f38337fbac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "open_KXMVESPORTSMULTIGAMEEXTENDED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVESPORTSMULTIGAMEEXTENDED",
+    "status": "open",
+    "limit": 100
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 100142,
+   "t_send_ms": 1794495072478,
+   "t_recv_ms": 1794495072633,
+   "server_date": "Thu, 12 Nov 2026 14:51:12 GMT",
+   "file": "0003.json.gz",
+   "sha256": "1525d1c712d04927781df09e7469bb5d76e9aad88e9a70d2e9b8008b8541932a",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
