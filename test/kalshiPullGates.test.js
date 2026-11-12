@@ -54,6 +54,8 @@ gates.KP4 = () => {
   // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS').sort(), 'the choices are the job files except the retired lists job');
   assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|POLAPPR1_CANDLES\|POLAPPR1_CANDLES_P2\|POLAPPR1_CANDLES_P3\)/.test(wf));
+  assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS' && n !== 'INGAMELAG_M1').sort(), 'the choices are the job files except the two retired jobs with no choice');
+  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|NOSIDE1_CANDLES_P1\|NOSIDE1_CANDLES_P2\|NOSIDE1_CANDLES_P3\|SPREADCELL1\|SPREADCELL1_REST\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|CFRTI_K_LISTS\|CFRTI_K_PROBE\|CFRTI_K_R6SLICE\|ECONLAG_CALENDAR\|NHLOT_LISTS\|INGAMELAG_M1A\|INGAMELAG_M1B\|CENSUS_LISTING\|WXDAYEND_A\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -247,6 +249,8 @@ gates.KP14 = () => {
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
   assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
   assert.ok(!jobs.some((f) => /ECONLAG|BALLOTNO/i.test(f)), 'ECONLAG and BALLOTNO are not included');
+  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'WXDAYEND_A']);
+  assert.ok(!jobs.some((f) => /BALLOTNO|ECONLAG_CANDLES|NHLOT_CANDLES|CFRTI_K_CANDLES/i.test(f)), 'BALLOTNO and the not-yet-built candle stages are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
     assert.ok(Number.isInteger(job.max_requests) && job.max_requests >= 1 && job.max_requests <= 1200, id + ': cap');
@@ -261,11 +265,22 @@ gates.KP14 = () => {
   assert.strictEqual(j.NOSIDE1_CANDLES.requests.length, 1034);
   assert.strictEqual(j.SPREADCELL1.max_requests, 274);
   assert.strictEqual(j.SPREADCELL1.requests.length, 274);
+  assert.strictEqual(j.SPREADCELL1_REST.max_requests, 36);
+  assert.strictEqual(j.SPREADCELL1_REST.requests.length, 36);
+  assert.deepStrictEqual(['NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3'].map((n) => j[n].requests.length), [345, 345, 344]);
   assert.strictEqual(j.SPREADLISTS.max_requests, 11);
   assert.strictEqual(j.SPREADLISTS.requests.length, 11);
   assert.strictEqual(j.ROLLOFF_PROXY.max_requests, 12);
   assert.strictEqual(j.COMBO1_OPENBOOK.max_requests, 3);
   assert.strictEqual(j.COMBO1_OPENBOOK.status, 'retired');
+  // jobs v3 (Nov 12): the counts each job was registered with
+  const v3 = { CFRTI_K_LISTS: [2, 30], CFRTI_K_PROBE: [1, 1], CFRTI_K_R6SLICE: [20, 20], ECONLAG_CALENDAR: [10, 10], NHLOT_LISTS: [4, 10], INGAMELAG_M1A: [108, 123], INGAMELAG_M1B: [107, 122] };
+  for (const [id, [n, cap]] of Object.entries(v3)) { assert.strictEqual(j[id].status, 'active', id); assert.strictEqual(j[id].requests.length, n, id + ': requests'); assert.strictEqual(j[id].max_requests, cap, id + ': cap'); }
+  // INGAMELAG_M1 (one 215 request job) is retired: it risked the 200 MB a run cap, so the same fixed list runs as M1A and M1B
+  assert.strictEqual(j.INGAMELAG_M1.status, 'retired');
+  assert.ok(/INGAMELAG_M1A/.test(j.INGAMELAG_M1.notes) && /INGAMELAG_M1B/.test(j.INGAMELAG_M1.notes), 'the retired job points to M1A and M1B');
+  // development dates only: the CFRTI-K lists stop before the 2026-11-05 held-out cutoff (max_close_ts 1793836800)
+  assert.ok(j.CFRTI_K_LISTS.requests.some((r) => r.params && r.params.max_close_ts === 1793836800), 'CFRTI_K_LISTS live list bounded at the cutoff');
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
@@ -275,7 +290,48 @@ for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", 
 print(json.dumps(out))`);
   assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok' });
   for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "NOSIDE1_CANDLES_P1", "NOSIDE1_CANDLES_P2", "NOSIDE1_CANDLES_P3", "SPREADCELL1", "SPREADCELL1_REST", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "CFRTI_K_LISTS", "CFRTI_K_PROBE", "CFRTI_K_R6SLICE", "ECONLAG_CALENDAR", "NHLOT_LISTS", "INGAMELAG_M1", "INGAMELAG_M1A", "INGAMELAG_M1B", "CENSUS_LISTING", "WXDAYEND_A"):
+    try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
+    except m.Refused as e: out[n] = "refused"
+print(json.dumps(out))`);
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', NOSIDE1_CANDLES_P1: 'ok', NOSIDE1_CANDLES_P2: 'ok', NOSIDE1_CANDLES_P3: 'ok', SPREADCELL1: 'ok', SPREADCELL1_REST: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', CFRTI_K_LISTS: 'ok', CFRTI_K_PROBE: 'ok', CFRTI_K_R6SLICE: 'ok', ECONLAG_CALENDAR: 'ok', NHLOT_LISTS: 'ok', INGAMELAG_M1: 'refused', INGAMELAG_M1A: 'ok', INGAMELAG_M1B: 'ok', CENSUS_LISTING: 'ok', WXDAYEND_A: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'ECONLAG_CALENDAR', 'NHLOT_LISTS', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'CENSUS_LISTING', 'WXDAYEND_A']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
+};
+
+// KP14c: SPREADCELL1_REST is exactly the 36 requests run 43249300663 did not reach (b119_0 to b136_1), equal to the matching SPREADCELL1 entries (no id asked twice across the two jobs, none dropped), and
+// the three NOSIDE1_CANDLES parts are exactly the original's 1,034 requests, in order, no overlap and no gap, each at most 400. The 200 MB cap is not raised for either.
+// KP27: the census listing is a read-only listing: series list and settled non-combo markets by hour, nothing else, and its answer size is estimated at about 120 MB (under the 200 MB cap).
+gates.KP27 = () => {
+  const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'CENSUS_LISTING.json'), 'utf8'));
+  assert.strictEqual(c.requests.length, 40); assert.strictEqual(c.max_requests, 100); assert.strictEqual(c.status, 'active');
+  for (const r of c.requests) { assert.ok(r.path === '/series' || r.path === '/markets', r.id); assert.ok(!r.path.includes('candlesticks')); }
+  assert.ok(c.requests.filter((r) => r.path === '/markets').every((r) => r.params.status === 'settled' && r.params.mve_filter === 'exclude' && (r.max_pages || 1) <= 3), 'markets: settled, no combos, at most 3 pages an hour');
+};
+
+// KP28: WXDAYEND_A is a development existence count: 22 requests, 18 one-market candle windows and 4 settled-market lists, the 18 city-days already named in the registration, nothing else.
+gates.KP28 = () => {
+  const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'WXDAYEND_A.json'), 'utf8'));
+  assert.strictEqual(c.requests.length, 22); assert.strictEqual(c.max_requests, 22); assert.strictEqual(c.owner, 'MAIN');
+  assert.strictEqual(c.requests.filter((r) => r.path === '/markets/candlesticks').length, 18);
+  assert.strictEqual(c.requests.filter((r) => r.path === '/markets').length, 4);
+  assert.ok(c.requests.filter((r) => r.path === '/markets/candlesticks').every((r) => !r.params.market_tickers.includes(',')), 'one market per candle request');
+};
+
+gates.KP14c = () => {
+  const rd = (n) => JSON.parse(fs.readFileSync(path.join(jobDir, n + '.json'), 'utf8'));
+  const sc = rd('SPREADCELL1'), rest = rd('SPREADCELL1_REST');
+  const missing = []; for (let b = 119; b <= 136; b++) { missing.push('b' + String(b).padStart(3, '0') + '_0', 'b' + String(b).padStart(3, '0') + '_1'); }
+  assert.strictEqual(missing.length, 36);
+  assert.deepStrictEqual(rest.requests.map((r) => r.id), missing, 'exactly the missing ids, in order');
+  assert.deepStrictEqual(rest.requests, sc.requests.filter((r) => missing.includes(r.id)), 'equal to the SPREADCELL1 entries');
+  for (const k of ['host', 'base_path', 'pacing_seconds', 'stop_rules', 'allowed_endpoints', 'series_allowlist', 'ticker_allowlist', 'owner', 'registration', 'heldout']) assert.deepStrictEqual(rest[k], sc[k], 'same ' + k);
+  assert.strictEqual(rest.max_requests, 36);
+  assert.ok(/completes SPREADCELL1/i.test(rest.notes) && /request id/.test(rest.notes));
+  const whole = rd('NOSIDE1_CANDLES'), parts = [1, 2, 3].map((i) => rd('NOSIDE1_CANDLES_P' + i));
+  assert.deepStrictEqual([].concat(...parts.map((p) => p.requests)), whole.requests, 'the parts are the original requests, in order, no gap, no overlap');
+  for (const p of parts) { assert.ok(p.requests.length <= 400 && p.max_requests === p.requests.length, p.job_id + ': at most 400 and cap equals count'); assert.deepStrictEqual(p.stop_rules, whole.stop_rules); assert.strictEqual(p.host, whole.host); }
+  assert.ok(whole.status === 'active' && whole.requests.length === 1034, 'the original stays intact');
 };
 
 // KP14b: every ACTIVE job's requests all match its own allowed endpoints and ticker or series allowlist, none is a denied path, and the count equals the cap (at most 1,200).
@@ -286,7 +342,9 @@ gates.KP14b = () => {
     // a job with paged requests (ROLLOFF_PROXY) is capped by its page budget; one without must use its cap exactly
     const budget = job.requests.reduce((n, r) => n + (r.max_pages || 1), 0);
     assert.ok(job.max_requests <= 1200 && budget <= job.max_requests, job.job_id + ': page budget within the cap, cap within 1,200');
-    if (job.requests.every((r) => !r.max_pages || r.max_pages === 1)) assert.strictEqual(job.requests.length, job.max_requests, job.job_id + ': count equals the cap');
+    // INGAMELAG_M1 is registered with 20 requests of headroom for 429 retries (retries count against the cap): 215 requests, cap 235. Any other headroom is a failure.
+    const headroom = { INGAMELAG_M1A: 15, INGAMELAG_M1B: 15 }[job.job_id] || 0;
+    if (job.requests.every((r) => !r.max_pages || r.max_pages === 1)) assert.strictEqual(job.requests.length + headroom, job.max_requests, job.job_id + ': count equals the cap' + (headroom ? ' less its registered headroom' : ''));
     const eps = job.allowed_endpoints.map((e) => ({ rx: new RegExp('^(?:' + e.path_pattern.replace(/\(\?P</g, '(?<') + ')$'), params: new Set(e.params_allowed) }));
     const tk = new Set(job.ticker_allowlist);
     const sr = new Set(job.series_allowlist);
@@ -304,6 +362,68 @@ gates.KP14b = () => {
       if (m) assert.ok(tk.has(m[1]), job.job_id + ': ticker allowlisted ' + m[1]);
     }
   }
+};
+
+// KP14c: the batched candle endpoint counts (window minutes x tickers) against a limit of 10,000 and answers HTTP 400 above it, so no batched request may exceed 9,000 minutes x tickers. The probe is 24 consecutive tickers in 1 request, the R6 slice is 20 requests covering all 407 windows once.
+gates.KP14c = () => {
+  for (const id of ['CFRTI_K_PROBE', 'CFRTI_K_R6SLICE']) {
+    const job = JSON.parse(fs.readFileSync(path.join(jobDir, id + '.json'), 'utf8'));
+    const seen = [];
+    for (const r of job.requests) {
+      const p = r.params, n = p.market_tickers.split(',').length, minutes = (p.end_ts - p.start_ts) / 60;
+      assert.ok(minutes * n <= 9000, id + ' ' + r.id + ': minutes x tickers ' + minutes * n + ' is at most 9,000 (the endpoint refuses above 10,000)');
+      seen.push(...p.market_tickers.split(','));
+    }
+    assert.strictEqual(new Set(seen).size, seen.length, id + ': no ticker requested twice');
+    assert.strictEqual(seen.length, job.ticker_allowlist.length, id + ': every allowlisted ticker is requested once');
+  }
+  const probe = JSON.parse(fs.readFileSync(path.join(jobDir, 'CFRTI_K_PROBE.json'), 'utf8'));
+  assert.strictEqual(probe.ticker_allowlist.length, 24);
+  assert.strictEqual(probe.requests.length, 1);
+  const slice = JSON.parse(fs.readFileSync(path.join(jobDir, 'CFRTI_K_R6SLICE.json'), 'utf8'));
+  assert.strictEqual(slice.ticker_allowlist.length, 407);
+  assert.strictEqual(slice.requests.length, 20);
+  // the offline builder packs the same way: here 700 consecutive quarter hours, every batch within 9,000 (about 24 tickers a request, so the real lists come to about 216 requests in live mode and about 624 in all mode, each under the 1,200 cap)
+  const out = JSON.parse(execFileSync('python3', ['-I', '-c', `
+import importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('b', ${JSON.stringify(path.join(jobDir, 'build_cfrti_k_candles.py'))}); b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
+import calendar, time
+t0 = calendar.timegm(time.strptime("2026-10-01", "%Y-%m-%d"))
+mk = [("KXBTC15M-%d" % i, t0 + 900 * i) for i in range(700)]
+b.read_markets = lambda f: mk
+import io, contextlib
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): b.main("x", "all")
+j = json.loads(buf.getvalue())
+print(json.dumps([[len(r["params"]["market_tickers"].split(",")) * (r["params"]["end_ts"] - r["params"]["start_ts"]) / 60 for r in j["requests"]], j["max_requests"], len(j["ticker_allowlist"])]))`], { encoding: 'utf8' }));
+  assert.ok(out[0].every((x) => x <= 9000), 'the builder never packs a batch above 9,000 minutes x tickers');
+  assert.strictEqual(out[2], 700);
+  assert.ok(out[1] >= 700 / 25 && out[1] <= 1200, 'about 24 tickers a request, far under the 1,200 cap');
+};
+
+// KP14d: INGAMELAG_M1A and M1B are ONE measurement of a fixed list of 215 games, split only for the 200 MB a run cap. Consequence if this breaks: a game read twice or not at all, or a run refused for a ticker its own file did not allow.
+gates.KP14d = () => {
+  const load = (n) => JSON.parse(fs.readFileSync(path.join(jobDir, n + '.json'), 'utf8'));
+  const a = load('INGAMELAG_M1A'), b = load('INGAMELAG_M1B'), old = load('INGAMELAG_M1');
+  const ids = (job) => job.requests.map((r) => r.id);
+  const idsA = new Set(ids(a)), idsB = new Set(ids(b));
+  assert.strictEqual(idsA.size, a.requests.length, 'M1A request ids are unique');
+  assert.strictEqual(idsB.size, b.requests.length, 'M1B request ids are unique');
+  assert.deepStrictEqual([...idsA].filter((i) => idsB.has(i)), [], 'M1A and M1B request ids are disjoint');
+  assert.deepStrictEqual([...idsA, ...idsB].sort(), ids(old).sort(), 'together they are exactly the 215 games of the retired job');
+  assert.strictEqual(a.requests.length + b.requests.length, 215);
+  for (const job of [a, b]) {
+    const used = job.requests.flatMap((r) => r.params.market_tickers.split(','));
+    assert.deepStrictEqual([...job.ticker_allowlist].sort(), [...new Set(used)].sort(), job.job_id + ': the ticker allowlist is exactly its tickers');
+    assert.strictEqual(new Set(used).size, used.length, job.job_id + ': no ticker is asked twice');
+    assert.ok(job.max_requests >= job.requests.length, job.job_id + ': cap is not below its request count');
+    assert.ok(used.every((t) => /^[A-Z0-9-]+$/.test(t)), job.job_id + ': safe ticker characters');
+    assert.strictEqual(job.host, 'api.elections.kalshi.com');
+    assert.deepStrictEqual(job.allowed_endpoints.map((e) => e.path_pattern), ['/markets/candlesticks']);
+  }
+  const ta = new Set(a.ticker_allowlist);
+  assert.ok(b.ticker_allowlist.every((t) => !ta.has(t)), 'no ticker is in both jobs');
+  assert.ok(a.max_requests >= a.requests.length && b.max_requests >= b.requests.length);
 };
 
 // KP15: the stage 2 builder takes development events only, round robin, never the held-out third, and never passes the registered total.
@@ -354,7 +474,7 @@ gates.KP17 = () => {
   assert.deepStrictEqual(fs.readdirSync(fnDir).filter((f) => f.endsWith('.js')).filter((f) => /kalshi_pull|kalshi-pull/.test(fs.readFileSync(path.join(fnDir, f), 'utf8'))), [], 'nothing in functions/ mentions it');
 };
 
-// KP18: it stops by itself on 2027-02-28, in the workflow and in the script, and a real run is limited to 6 a UTC day.
+// KP18: it stops by itself on 2027-02-28, in the workflow and in the script, and a real run is limited to 12 a UTC day.
 gates.KP18 = () => {
   assert.deepStrictEqual(py('print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH)]))'), ['2027-02-28T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
@@ -362,10 +482,19 @@ gates.KP18 = () => {
 d = tempfile.mkdtemp(); now = 1790000000.0
 import time
 day = time.strftime("%Y-%m-%d", time.gmtime(now))
-for i in range(5): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T0%d00Z_1" % i))
+for i in range(11): os.makedirs(os.path.join(d, "pull", "JOB_A", day + "T%02d00Z_1" % i))
 os.makedirs(os.path.join(d, "pull", "JOB_B", day + "T0900Z_1")); os.makedirs(os.path.join(d, "pull", "JOB_B", "2020-01-01T0900Z_1"))
 print(json.dumps([m.runs_today(d, "JOB_A", now), m.MAX_RUNS_PER_DAY]))`);
-  assert.deepStrictEqual(day, [6, 6], 'runs of every job count toward the day cap');
+  assert.deepStrictEqual(day, [12, 12], 'runs of every job count toward the day cap (12 a UTC day since Nov 12, 2026)');
+};
+
+// KP18b: raising the day cap from 6 to 12 changed ONLY that number. Every per-run limit is still what it was.
+gates.KP18b = () => {
+  const out = py('print(json.dumps([m.GAP_S, m.BACKOFF_S, m.BACKOFF_MAX_S, m.MAX_429_IN_ROW, m.MAX_FAILS_IN_ROW, m.HARD_MAX_REQUESTS, m.MAX_BODY_BYTES, m.MAX_RUN_BYTES, m.MAX_RUN_SECONDS, m.MAX_JOB_BYTES, m.MAX_PAGES, m.END_UTC, sorted(m.ROUTES.keys()), [m.ROUTES[k][0] for k in sorted(m.ROUTES)]]))');
+  assert.deepStrictEqual(out, [1.0, 5.0, 60.0, 3, 3, 1200, 5000000, 200000000, 2400, 2000000, 50, '2027-02-28T23:59:00Z', ['elections', 'perps'], ['api.elections.kalshi.com', 'external-api.kalshi.com']]);
+  const src = fs.readFileSync(path.join(__dirname, '..', 'scripts', 'kalshi_pull.py'), 'utf8');
+  assert.ok(/^MAX_RUNS_PER_DAY = 12 /m.test(src), 'the day cap is 12');
+  assert.ok(/5 MB an answer, 200 MB a run, 12 real runs a UTC day/.test(wf), 'the workflow header says 12');
 };
 
 // KP19: file names on the data branch are counters; a hostile request id or answer cannot create a path outside the run folder.

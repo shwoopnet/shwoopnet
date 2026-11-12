@@ -512,14 +512,30 @@ function bookTop5(body) {
   const yes = side(ob.yes_dollars), no = side(ob.no_dollars);
   return yes.length || no.length ? { bookYes5: yes, bookNo5: no } : null;
 }
-async function logBook({ fetchFn, ticker, write }) {
+// Update stamps (Nov 12, 2026, log only): whichever top-level fields of a Kalshi object are named like an update time, kept as short scalars (at most 4), so a later read can tell how old the quote was. Missing is {}.
+function updateFields(obj) {
+  const out = {};
+  try {
+    if (!obj || typeof obj !== "object") return out;
+    for (const k of Object.keys(obj)) {
+      if (Object.keys(out).length >= 4) break;
+      const v = obj[k];
+      if (/updated|update_ts|update_time/i.test(k) && (typeof v === "string" || typeof v === "number")) out[k.slice(0, 40)] = typeof v === "string" ? v.slice(0, 40) : v;
+    }
+  } catch (e) { /* logging only */ }
+  return out;
+}
+// bookReadWhen is always "after_send": this read is made after the order's POST has been answered, never before, so it is the book as it stood shortly AFTER the send and must not be mistaken for the book the order met.
+// bookReadAfterSendMs is the read's answer time minus the send time (null when the send time is not known to the caller).
+async function logBook({ fetchFn, ticker, write, sentAtMs }) {
   try {
     // The read's own abort (timeoutMs, 1.5 s, and no 429 retry) is the first bound; boundBookWrites is the overall one.
     const res = await liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) + "/orderbook", timeoutMs: BOOK_READ_TIMEOUT_MS, noRetry: true });
     if (!res || res.status !== 200) return false;
     const snap = bookTop5(res.body);
     if (!snap) return false;
-    await write({ ...snap, bookReadMs: Date.now() });
+    const readAt = Date.now(), bu = updateFields(res.body);
+    await write({ ...snap, bookReadMs: readAt, bookReadWhen: "after_send", bookReadAfterSendMs: Number.isFinite(sentAtMs) ? readAt - sentAtMs : null, ...(Object.keys(bu).length ? { bookUpdate: bu } : {}) });
     return true;
   } catch (e) { return false; }      // logging only: never allowed to affect a trade
 }
@@ -1118,6 +1134,8 @@ async function runL1Tick(args) {
       // explained afterwards: thin size at the touch, or a price that moved away.
       seen: bookSeen(m),
     };
+    // Update stamps the market object carried (log only, Nov 12, 2026): beside the seen quote; nothing reads it, an object without them adds nothing.
+    { const su = updateFields(m); if (Object.keys(su).length) record.seenUpdate = su; }
     // Depth log (the research session's request, the owner: "2", Oct 25, 2026): how big this order is against what rests at the touch it hits, so a size cap shows before slippage shows in P&L. LOGGING ONLY: it reads two numbers already in hand and nothing that decides an order reads them. Kalshi's market object carries ONLY the top level of the book, so depthAtLimit is the size at the best price on the side being hit (a YES buy meets the YES ask, a NO buy meets the YES bid), not a sum over levels, and depthLevels says so.
     const depthTop = pick.side === "yes" ? record.seen.askSize : record.seen.bidSize;
     record.depthAtLimit = Number.isFinite(depthTop) && depthTop > 0 ? depthTop : null;
@@ -1164,7 +1182,7 @@ async function runL1Tick(args) {
         averageFeePaid: d.average_fee_paid || null, sentSide: body.side, sentPrice: body.price,
       });
       ordersSent += 1;
-      bookLog.push({ cid, ticker });
+      bookLog.push({ cid, ticker, sentAtMs });
       await setSession({ ordersSent });
       await log("order", pick.side + " " + count + " at " + (pick.price * 100).toFixed(1) + "c on " + ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
       results.push(ticker + ": " + (filledCount > 0 ? "filled" : "no fill"));
@@ -1184,7 +1202,7 @@ async function runL1Tick(args) {
     await store.updateTest(cid, { status: "error", error: "HTTP " + res.status + " " + short(res.body) });
     return end("attempted", "Kalshi refused the order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
   }
-  const bookDone = boundBookWrites(bookLog.map((b) => logBook({ fetchFn, ticker: b.ticker, write: (patch) => store.updateTest(b.cid, patch) })));   // started now, in parallel; the 1.8 s cap runs from here; awaited after the rise log
+  const bookDone = boundBookWrites(bookLog.map((b) => logBook({ fetchFn, ticker: b.ticker, sentAtMs: b.sentAtMs, write: (patch) => store.updateTest(b.cid, patch) })));   // started now, in parallel; the 1.8 s cap runs from here; awaited after the rise log
   for (const r of riseLog) await logRise({ fetchFn, store, cid: r.cid, series: r.series, ticker: r.ticker, side: r.side, nowMs: now, ask: r.ask, closeSec: r.closeSec });
   await bookDone;
   await note(results.join("; ") || "Nothing to do.", { cash, botNet: Number(risk.net.toFixed(2)), botOpen: Number(risk.openCost.toFixed(2)) });
