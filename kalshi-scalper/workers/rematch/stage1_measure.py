@@ -16,7 +16,7 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import (A_CLOSE_PLUS_S, ASK_BAND, BEFORE_S, COST_KILL_ONE_WAY, DECISION_S, DEV_DAYS, DROPS, ENTRY_S, FALL, HELDOUT_FROM, LABEL, QUIET,  # noqa: E402
+from common import (A_CLOSE_PLUS_S, ASK_BAND, BEFORE_S, COST_KILL_ONE_WAY, DECISION_S, DEV_DAYS, DROPS, ENTRY_S, FALL, HELDOUT_FROM, LABEL, QUIET, STAGE1_BETS_FLOOR,  # noqa: E402
                     SLIP, SPREAD_MAX, STAGE1_BEFORE, STAGE1_FROM, fee, quote_at, read_events, refuse_heldout, ts)
 
 
@@ -138,7 +138,7 @@ def main():
         print(f"{label}: {n[k]}")
     nd = max(1, len(days))
     proj_bets, proj_trade = n["state_entry"] / nd * DEV_DAYS, n["tradeable_before"] / nd * DEV_DAYS
-    print(f"days in the slice with a later match: {len(days)} | projected development bets over {DEV_DAYS} days: {proj_bets:.0f} (under 600 closes the card) | projected tradeable pairs: {proj_trade:.0f} (under 300 closes on tradeability)")
+    print(f"days in the slice with a later match: {len(days)} | projected development bets over {DEV_DAYS} days: {proj_bets:.0f} (under {STAGE1_BETS_FLOOR} closes the card) | projected tradeable pairs: {proj_trade:.0f} (under 300 closes on tradeability)")
     if costs:
         med = statistics.median(costs)
         print(f"one-way entry cost at qualifying entries: median {100 * med:.1f}c over {len(costs)} (above {100 * COST_KILL_ONE_WAY:.0f}c closes on cost)")
@@ -149,7 +149,7 @@ def main():
         late.sort()
         print(f"diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 {late[len(late) // 10]:.0f} median {late[len(late) // 2]:.0f} p90 {late[(9 * len(late)) // 10]:.0f} | "
               f"closed under 9 minutes after the clock (14 after the entry): {sum(1 for x in late if x < 9)} of {len(late)}")
-    closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < 600 or (costs and statistics.median(costs) > COST_KILL_ONE_WAY + 1e-9) or not costs
+    closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < STAGE1_BETS_FLOOR or (costs and statistics.median(costs) > COST_KILL_ONE_WAY + 1e-9) or not costs
     print("STAGE 1 LINE: " + ("CLOSED at stage 1, no try spent" if closed else "open: stage 2 may be asked for"))
 
 

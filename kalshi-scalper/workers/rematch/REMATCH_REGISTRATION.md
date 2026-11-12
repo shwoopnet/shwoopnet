@@ -127,3 +127,15 @@ Where this section and anything above differ, this section is right. Tries uncha
 3. **No silent drops:** events left out because they do not have exactly two team codes, have no clock in the ticker, or have a market with no close time are printed as three counts.
 4. **What the stage 1 candle file holds, said on the page:** one request has one time range for all its tickers, so the landed file also carries minutes after some matches' starts. The stage 1 reader takes only its three instants and never a later candle. Nobody is to look at that file before the stage 2 score, and the stage 2 scorer takes the same three instants only (the Forensics desk tests that).
 5. **Added 19:34Z, before any data (Forensics, after its second clean run, 11 of 11):** a carried entry price is the ask of a candle up to 5 minutes old, payable only if a missing candle means the quote did not change. That was measured on hourly politics candles (236 of 236 gaps) and NOT on one-minute candles of a quiet e-soccer market. So stage 1 prints how many entries came from the exact minute, and stage 2 prints the profit factor on exact-minute entries beside the full figure and says on the page that carried entries rest on that assumption. The registered verdict is the full figure.
+
+## Amendment 5 (Nov 12, 2026, 20:35Z; before any price was read or any result joined): the series is younger than this file assumed
+
+**A fact from lists, schedule and tickers only (the History Miner's independent count from the ESOCTIE lists answer, 20:34Z; its counter reproduces this desk's Nov 10 figures exactly):** `KXESOCCERGAME` began on 2026-10-08. Nothing settled from Sep 12 to Oct 7. From Oct 8 to Oct 22 there were 7,120 matches (445 a day) between 250 pairs, and **5,219 qualifying pairs** by this card's schedule test (326 a day, range 274 to 398).
+
+What that changes, all of it before data:
+1. **The development sample is 15 days, not 41:** closes from 2026-10-08 to before 2026-10-23, about 5,200 qualifying pairs, not about 12,000. The date constants are unchanged (the window simply holds nothing before Oct 8). The held-out (2026-10-23 to before 2026-11-13, less Nov 10) is about 20 days, about 6,500 pairs.
+2. **Bets, restated:** at a 10% firing share about 520 development bets and about 650 held-out; at 5%, about 260 and 325.
+3. **The stage 1 projection uses 15 days** (the slice is 8 of them), and **the stage 1 floor is 300 projected development bets, not 600.** Reason: 600 was half of what a 10% share would give on the 12,000 pairs I wrongly expected; 300 is this card's own registered minimum for a verdict, so stage 1 now closes the card exactly when the development read could not give one. The change is made on a count of matches alone.
+4. **Stage 2 is smaller:** only Oct 8 to Oct 14 remains to list and pull: about 10 list pages and about 110 candle requests, not about 490.
+5. **Plainly:** with about 500 development bets and about 650 held-out at a 10% share, this card can falsify or show a lead, and it reaches about 1,000 bets over both only if the share is near 10% or higher. The day-clustered z has 15 development days to work with.
+

@@ -20,7 +20,8 @@ ASK_BAND, SPREAD_MAX, SLIP = (0.20, 0.80), 0.04, 0.01
 COST_KILL_ONE_WAY = 0.04
 STAGE1_FROM, STAGE1_BEFORE = "2026-10-15T00:00:00Z", "2026-10-23T00:00:00Z"
 HELDOUT_FROM = "2026-10-23T00:00:00Z"
-DEV_DAYS = 41                                 # development window, 2026-09-12 to before 2026-10-23
+DEV_DAYS = 15                                 # the series began 2026-10-08, so development is Oct 8 to before Oct 23 (Amendment 5)
+STAGE1_BETS_FLOOR = 300                       # projected development bets under this close the card at stage 1 (Amendment 5; the verdict's own minimum)
 LABEL = "candle freshness measured on Bitcoin 15 minute only, not on sports"
 
 

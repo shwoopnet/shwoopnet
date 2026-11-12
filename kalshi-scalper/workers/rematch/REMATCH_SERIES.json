@@ -14,7 +14,8 @@
   },
   "development": {
     "closes_from": "2026-09-12T00:00:00Z",
-    "closes_before": "2026-10-23T00:00:00Z"
+    "closes_before": "2026-10-23T00:00:00Z",
+    "note": "the series began 2026-10-08, so the window holds 15 days (Amendment 5)"
   },
   "held_out": {
     "closes_from": "2026-10-23T00:00:00Z",
@@ -38,7 +39,7 @@
     "entry_spread_max": 0.04,
     "slip": 0.01,
     "fee": "0.07 x price x (1 - price), rounded up to the next cent",
-    "stage_1_projected_bets_floor": 600,
+    "stage_1_projected_bets_floor": 300,
     "min_development_bets": 300,
     "cost_kill_one_way": 0.04,
     "tradeability_floor_bets": 300,
