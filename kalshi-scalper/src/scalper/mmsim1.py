@@ -2,6 +2,7 @@
 import csv, gzip, io, subprocess, sys, collections, math, datetime as dt
 REPO = "/home/user/shwoopnet"
 def git(*a): return subprocess.run(["git", "-C", REPO] + list(a), capture_output=True, check=True).stdout
+PINNED_CUTOFF = "2026-11-07T15:00:00Z"   # close_time strings compare lexically; events closing at or after this are the held-out set
 def pf(x):
     w = sum(v for v in x if v > 0); l = -sum(v for v in x if v < 0); return w / l if l > 0 else 99.0
 def parse_ms(s): return int(dt.datetime.fromisoformat(s.replace("Z", "+00:00")).timestamp() * 1000)
@@ -62,10 +63,15 @@ def simulate(books, trades, maker_coef):
 if __name__ == "__main__":
     books, trades = load()
     ev = sorted({ct for ct, _ in books})
-    cut = ev[2 * len(ev) // 3]
+    # PINNED (amendment 1, Nov 12, 2026): the cutoff is a fixed time, NOT two thirds of whatever events are on the branch.
+    # Without this a re-run would score held-out events as development. Held-out mode is refused before 2026-11-24.
+    cut = PINNED_CUTOFF
+    HELD = len(sys.argv) > 1 and sys.argv[1] == "heldout"
+    if HELD and dt.datetime.now(dt.timezone.utc) < dt.datetime(2026, 11, 24, tzinfo=dt.timezone.utc):
+        raise SystemExit("held-out read refused before 2026-11-24 (single read; see MMSIM1_PROTOCOL.md Amendment 1)")
     print("events", len(ev), "dev events", len([c for c in ev if c < cut]), "(held-out third unread)", "tickers", len(books), "trade tickers", len(trades))
     for coef in (0.0, 0.0175):
-        res = [r for r in simulate(books, trades, coef) if r[0] < cut]
+        res = [r for r in simulate(books, trades, coef) if (r[0] >= cut if HELD else r[0] < cut)]
         x = [r[1] for r in res]; n = len(x)
         strikes = sum(r[2] for r in res)
         days = len({r[0][:10] for r in res})
