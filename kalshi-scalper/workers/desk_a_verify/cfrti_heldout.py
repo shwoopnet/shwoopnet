@@ -90,9 +90,8 @@ def rep_replay(name, rs, k):
 
 
 def r6_replay(rows, R6, freeze=None):
-    """TRUE book replay: each signal row is filled from the R6 order book at the first poll at or after t0 + delay (within 30 s), limit = the ask seen (a lower ask fills at that ask),
-    at least 1 contract displayed at the ask; a vanished ask is no trade. Rows with no R6 book at the decision are counted as 'no book' and never scored.
-    (The quote recorder's list rows are NOT used: a list quote 2 to 6 s later is often the same cached copy, QUOTEVSBOOK1.) Returns {delay: [(row, fill price or None)]}, n_nobook."""
+    """TRUE book replay with the fixed convention (cfrti_b.fill_ioc): an immediate-or-cancel buy of 1 contract walking the book's levels at or below the limit (the ask seen), the first poll within 4 s after
+    t0 + delay only. Rows with no R6 book at the decision are counted as 'no book' and never scored. The quote recorder's list rows are NOT used (QUOTEVSBOOK1). Returns {delay: [(row, avg price or None)]}, n_nobook."""
     sys.path.insert(0, HERE); import cfrti_b
     cfrti_b.load_book(R6); book = cfrti_b.book
     out = {2: [], 6: []}; nobook = 0
@@ -101,13 +100,7 @@ def r6_replay(rows, R6, freeze=None):
         B = book.get(tk); times = [p[0] for p in B] if B else []
         i = bisect.bisect_right(times, t0 - 0.25) - 1
         if not B or i < 0 or t0 - 0.25 - times[i] > 4: nobook += 1; continue        # an R6 poll must exist just before the decision
-        for d in (2, 6):
-            j = bisect.bisect_left(times, t0 + d)
-            fill = None
-            if j < len(times) and times[j] - t0 - d <= 30:
-                a, sz = cfrti_b.side_ask(B[j], side)
-                if a is not None and sz is not None and sz >= 1 and a <= ask + 1e-9: fill = a
-            out[d].append((r, fill))
+        for d in (2, 6): out[d].append((r, cfrti_b.fill_ioc(B, side, ask, t0, d)))
     return out, nobook
 def rep_r6(name, rs, rep6):
     res, nobook = rep6
@@ -159,16 +152,23 @@ def r6_stale(rows, root, freeze=("2026-11-09", "2026-11-13")):
         if ask > seen + 0.01 + 1e-9: stale += 1
     return tot, have, stale, frozen
 
-if MODE == "replaytest":      # synthetic book: the R6 replay fills at the first poll >= t0 + delay when the ask is at or below the ask seen, else no trade; no book is counted, never scored
+if MODE == "replaytest":      # synthetic book: IOC walk of up to 5 levels, first poll within 4 s only, no-book rows counted
     sys.path.insert(0, HERE); import cfrti_b
     t0 = 1_000_000.0
-    cfrti_b.load_book = lambda root: (cfrti_b.book.clear(), cfrti_b.book.update({"KXBTC15M-T": [(t0 - 1.0, 0.18, 5.0, 0.76, 5.0), (t0 + 1.9, 0.18, 5.0, 0.76, 5.0), (t0 + 2.1, 0.19, 5.0, 0.77, 5.0), (t0 + 5.9, 0.18, 5.0, 0.80, 5.0), (t0 + 6.1, 0.18, 5.0, 0.79, 0.5), (t0 + 8.0, 0.18, 5.0, 0.76, 5.0)]}))
+    L = lambda yb, nb: (tuple(yb), tuple(nb))
+    # polls: (t, yb1, ybs1, nb1, nbs1, yes_bid_levels, no_bid_levels); a YES buy meets NO bids: ask = 1 - NO bid price
+    polls = [(t0 - 1.0, 0.18, 5.0, 0.76, 5.0, ((0.18, 5.0),), ((0.76, 5.0),)),
+             (t0 + 2.1, 0.19, 5.0, 0.78, 0.4, ((0.19, 5.0),), ((0.78, 0.4), (0.77, 5.0))),      # best ask 0.22 shows 0.4, next 0.23: walks to 0.4 @ 0.22 + 0.6 @ 0.23 = 0.228
+             (t0 + 6.1, 0.18, 5.0, 0.70, 0.5, ((0.18, 5.0),), ((0.70, 0.5), (0.69, 0.4))),     # 0.30 and 0.31 asks, only 0.9 contracts in all, and above the 0.24 limit anyway
+             (t0 + 11.0, 0.18, 5.0, 0.76, 5.0, ((0.18, 5.0),), ((0.76, 5.0),))]
+    cfrti_b.load_book = lambda root: (cfrti_b.book.clear(), cfrti_b.book.update({"KXBTC15M-T": polls}))
     row = lambda tk, ask: (None, tk, "yes", ask, 0, True, None, t0 * 1000, None, None, None)
     res, nb = r6_replay([row("KXBTC15M-T", 0.24), row("KXBTC15M-NOBOOK", 0.24)], "x")
     assert nb == 1 and len(res[2]) == 1, (nb, res)
-    assert abs(res[2][0][1] - 0.23) < 1e-9, res[2]        # first poll >= t0+2 s (t0+2.1): YES ask = 1 - 0.77 = 0.23 <= 0.24
-    assert res[6][0][1] is None, res[6]                   # first poll >= t0+6 s (t0+6.1): ask 0.21 but only 0.5 contracts shown -> no trade
-    print("REPLAYTEST OK (R6 replay: fill at the first poll after the delay, size test, no-book rows counted)"); sys.exit(0)
+    assert abs(res[2][0][1] - (0.4 * 0.22 + 0.6 * 0.23)) < 1e-9, res[2]     # walks two levels
+    assert res[6][0][1] is None, res[6]                                       # the poll at +6.1 s has asks above the limit
+    assert cfrti_b.fill_ioc(polls, "yes", 0.24, t0, 6.5) is None             # first poll after t0 + 6.5 s is at +11 s: 4.5 s late, so no trade
+    print("REPLAYTEST OK (IOC walk across levels, 4 s poll rule, no-book rows counted)"); sys.exit(0)
 if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
 keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY, "exportall": lambda d: d < HELDOUT_FIRST_DAY,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,

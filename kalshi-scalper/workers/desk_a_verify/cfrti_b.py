@@ -25,8 +25,25 @@ def load_book(R6):
       if not offs: continue
       off = median(offs)
       for x in rows:
-          book[x["ticker"]].append((int(x["t_recv_ms"]) / 1000 + off, fl(x["yes_bid_px_1"]), fl(x["yes_bid_sz_1"]), fl(x["no_bid_px_1"]), fl(x["no_bid_sz_1"])))
+          lv = lambda pre: tuple((fl(x["%s_px_%d" % (pre, i)]), fl(x["%s_sz_%d" % (pre, i)])) for i in range(1, 6) if fl(x["%s_px_%d" % (pre, i)]) is not None and fl(x["%s_sz_%d" % (pre, i)]) is not None)
+          book[x["ticker"]].append((int(x["t_recv_ms"]) / 1000 + off, fl(x["yes_bid_px_1"]), fl(x["yes_bid_sz_1"]), fl(x["no_bid_px_1"]), fl(x["no_bid_sz_1"]), lv("yes_bid"), lv("no_bid")))
   for t in book: book[t] = sorted(set(book[t]))
+def fill_ioc(B, side, limit, t0, delay):
+    """THE BOOK-REPLAY CONVENTION (ruling of the Head of R&D, Nov 12, fixed before any held-out row is opened): an immediate-or-cancel buy of 1 contract in total, walking the book's levels
+    (up to 5) at or below the limit; only the FIRST poll within 4 s after t0 + delay counts (no poll in that span is no trade); not enough size at or below the limit is no trade.
+    Returns the average price paid, or None. B = polls sorted by time, each (t, yb1, ybs1, nb1, nbs1, yes_bid_levels, no_bid_levels)."""
+    times = [p[0] for p in B]
+    j = bisect.bisect_left(times, t0 + delay)
+    if j >= len(B) or times[j] - t0 - delay > 4: return None
+    p = B[j]
+    lv = p[6] if side == "yes" else p[5]                  # a YES buy meets the NO bids (ask = 1 - NO bid price); a NO buy meets the YES bids
+    asks = sorted(((1 - px, sz) for px, sz in lv), key=lambda x: x[0])
+    need, cost = 1.0, 0.0
+    for a, sz in asks:
+        if a > limit + 1e-9: break
+        take = min(need, sz); cost += take * a; need -= take
+        if need <= 1e-12: return cost / 1.0
+    return None
 def side_ask(p, side):
     # YES ask = 1 - best NO bid (size = that NO bid's size); NO ask = 1 - best YES bid
     return ((1 - p[3], p[4]) if side == "yes" else (1 - p[1], p[2])) if (p[3] is not None if side == "yes" else p[1] is not None) else (None, None)
@@ -78,11 +95,7 @@ def build(Q, venues, keep_day, lo, hi):
             ask = ya if side == "yes" else 1 - yb
             chance = py if side == "yes" else 1 - py
             win = (r["result"] == "yes") == (side == "yes")
-            def fill(delay):
-                j = bisect.bisect_left(ts, t0 + delay)
-                if j >= len(ts) or ts[j] - t0 - delay > 30: return None
-                a, sz = side_ask(B[j], side)
-                return a if a is not None and sz is not None and sz >= 1 and a <= ask + 1e-9 else None
+            fill = lambda delay: fill_ioc(B, side, ask, t0, delay)
             out.append(dict(day=day, tk=tk, side=side, ask=ask, edge=chance - ask, win=win, f2=fill(2), f6=fill(6)))
     return out, lost
 def pf(v):
