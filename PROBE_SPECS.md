@@ -1,6 +1,6 @@
 # Conditional probe specs (Head of R&D, Nov 12, 2026)
 
-**State on Nov 12, 17:28Z: ONE conditional spec is left (Spec 2, CFRTI-K). Spec 1 is WITHDRAWN: its read failed.** This file was written as two specs, not three, because a third would have been padding; it is now one, for the same reason.
+**State on Nov 12, 18:52Z: NO conditional spec is left. Spec 2 (CFRTI-K) is WITHDRAWN: its development read on Nov 12 showed no tradable edge (n 601, cash PF 1.07; with the rows a real order would miss removed, PF 0.16 on 435). Spec 1 was withdrawn earlier the same day.** (Earlier state, 17:28Z: one conditional spec left, Spec 2; Spec 1 WITHDRAWN: its read failed.) This file was written as two specs, not three, because a third would have been padding; it is now one, for the same reason.
 
 Every spec here is UNPROVEN and CONDITIONAL. The owner ruled on Nov 12: no pre-evidence orders. So neither spec can be approved as an order today. Each has a gate; the popup is put to the owner only after the gate is met and the Verification Analyst has re-checked the read. A probe is a tiny live test to learn from real fills. No live account figure is in this file. [research]
 

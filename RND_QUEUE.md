@@ -6,6 +6,14 @@ Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git sh
 
 W-SPREAD-CELL1, read once on the 1,041 never-scored events after all 274 requests landed. Line 1 (the registered look): n 172, cash PF 0.596 at +1c. Line 2 (the known-in-advance look): n 173, cash PF 0.636. FAIL by its committed labels: not probe-eligible, no popup, no forward shadow; the daily logging job is not built; the conditional 12,000 request history block is closed. The lead (the best of about 58 cells at z 1.59) did not replicate. Output committed with its marker on claude/refine-live (SPREADCELL1_READ_OUTPUT.txt). The Verification Analyst reproduced the label and both counts; its figures apply the registered fee on every fill and are lower (line 1 PF 0.553, z -2.78; line 2 PF 0.592, z -2.46); Refinement is correcting the fee handling in its printout; FAIL either way. Reported to the owner through the EA at 16:48Z. **With this, no lead with a date this week is left standing; CFRTI-K and CFRTI-B (Nov 20 sitting) are what remains of the Bitcoin idea.**
 
+## Two Friday reads landed Nov 12 18:50Z: neither stands (Desk A, 5f6690b6; analyst reproduction requested) [research]
+
+Run once each as frozen on the landed candles (5,127 development windows, closes 2026-09-12 to 11-04).
+
+- **CFRTI-K: not falsified on its registered line, NO TRADABLE EDGE.** n 601 trades on 54 days; cash PF 1.07, mean +0.94c, win 17.0 percent, day-clustered z 0.60 against 5.46; thirds 0.95 / 1.19 / 1.07; haircut median PF 1.08. The stress line: 27.6 percent of rows "ran" (the next minute's ask was 1c or more above the ask seen); the other 435 rows read cash PF 0.16, mean -12.5c. The whole registered edge sits in rows a real order would miss. Block P is not met and is never pulled; no live use; no reader is built in the bot; the Nov 20 held-out keeps its date for the record. The perpetual does not lag Kraken (correlation 0.938 at lag 0).
+- **PERPBIN1: FALSIFIED on development, both tries.** Try A n 963, cash PF 0.91; try B n 971, cash PF 0.93. Open-interest change carries no direction. Held-out not read.
+- **Friday count after these:** of the five, two closed; the approval NO side leans against; the stock test is running; TIE3 is a measurement. Desk A now builds a History Miner venue on the generic break engine. Forensics audits every remaining Friday scorer for look-ahead and price source before its data lands; Desk B sweeps the listing for every family with a market that closes mid-event.
+
 ## FULL PUSH (owner, relayed by the EA, Nov 12 18:24Z) [research]
 
 The owner, verbatim: "i dont care what you need to do (add more agents, replace agents, remove agents, whatever), or more background tasks, LITERALLY WHATEVER. in order to find me more deployable strategies. PLEASE & THANK YOU. by friday as our deadline. go". The bar is unchanged and there are no orders before evidence (his popup: "5 live, keep the bar").
