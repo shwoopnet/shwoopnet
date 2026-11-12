@@ -19,7 +19,7 @@ const GOLD_KILL = Object.freeze({
   // Set true in the same edit that re-arms after a KILL (not for the first arming): the first halfSizeFills gold trades after the re-arm go out at half size.
   rearmIsReturn: false,
   halfSizeFills: 30,
-  // A FIXED dollar line, not a fraction of the moving sizing base: 6% of the sizing base when it was written. A line that depends on sizing.base could be loosened by a base that rises
+  // A FIXED dollar line, not a fraction of the moving sizing base: set from the sizing base when it was written. A line that depends on sizing.base could be loosened by a base that rises
   // (or is missing) between a trip and a re-derivation, and the tick's full write of the sizing document can erase a fresh latch; with a constant, the next replay re-derives the same trip
   // on every instance. When the base grows, re-set it by a reviewed code edit. Measured from gold's own cash peak since rearmAt (the peak starts at 0).
   drawdownDollars: 58.75,
