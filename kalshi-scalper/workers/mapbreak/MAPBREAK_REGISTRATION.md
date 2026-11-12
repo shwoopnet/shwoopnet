@@ -166,3 +166,17 @@ Lists: unchanged (16 requests, at most 100 pages). Candles for development: abou
 3. **Four history list calls are added to the lists job** (`/historical/markets` for the four match series; the job is now 20 requests). They only count how many best-of-three matches exist before 2026-09-12. If there are thousands, I send the Head the candle request count for a history stage and the Head rules.
 4. **Any older matches join DEVELOPMENT only.** The held-out block stays the matches closing from 2026-10-23 to before 2026-11-13 and is not enlarged.
 5. For a history stage the same rules apply unchanged (best-of-three from the total-maps market, start from the ticker's clock with its guard, the pre-match minute, both looks). If the history endpoint does not hold the map or total-maps markets of older matches, those matches cannot be used and are counted as such; nothing is guessed.
+
+## AMENDMENT 4, Nov 12, 2026, 19:00Z, before any list or candle has landed: two look-ahead defects removed (found by the Forensics desk's audit)
+
+The Forensics desk audited the venue code before the read and found two places where a close time known only AFTER the look decided which bets exist. Both were in my registration text, not in the build. Both are removed here. Where this section and anything above differ, this section is right.
+
+1. **First look: no guard on a later time.** The sentence "the map-2 market must close at least 15 minutes after map 1 closed; otherwise the match is dropped" is DELETED for the first look. A very short map 2 is a stomp or a forfeit and is tied to who wins; the look is 2 to 5 minutes after map 1 and cannot know it. Every best-of-three match with a derivable start gets a first look. (How many had a map 2 that closed under 15 minutes after map 1 is printed as a count and changes nothing.)
+
+2. **Second look: the state comes from the map-2 market's own result, not from the match market's close.** Amendment 2 read "one map each" from the match market staying open more than 10 minutes after map 2. That is a time after the look, and an inexact stand-in. It is replaced: **the match stands at one map each when the map-2 market's result names the team that LOST map 1.** That result is public at the map-2 close exactly as map 1's is at its own close, and it is the state, so it is read. The 10 to 15 minute band and every use of the match market's close time are DELETED. The match result and map 3's result are still never read before scoring.
+
+3. **A check of the assumption the card rests on, added as a count from data known at the look:** for each look, whether the winning team's own map contract had a bid of 0.90 or more in its last two-sided candle before that map market closed. If the map market's close is when the map ended, that share should be near all. It is printed per title and look. Kalshi posts a map's result about three minutes after its close, a minute or so after the look; a live bot would read the winner from that last quote, and this count says how often it could.
+
+4. **On the result page:** the number of bets AND the number of distinct matches they come from. Two looks of one match are two bets in n and in the profit factor and one cluster in z (Amendment 3).
+
+Nothing else changes: the look times, the model, the placebo, the kill lines, the samples, the tries (2).
