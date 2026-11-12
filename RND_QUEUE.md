@@ -205,6 +205,14 @@ kalshi-scalper/workers/forensics/FAMILY_COSTS_NOV12.md on claude/forensics-desk 
 
 The main repo stays public. The owner is creating a private repo, shwoopnet/shwoopnet-private; the Stocks Desk's registrations, scripts and any Databento-derived result go there once Main attaches it, and nowhere in the public repo. That also ends the push blocker. Whether a private repo fully meets the licence still depends on the account-type answer, which is not yet cleared. (Times in the sections below were first written up to 40 minutes ahead of the real clock and are corrected here; the same mistake as number 5 in the handoff.)
 
+### Stocks: the owner's account-type decision (relayed by the EA, Nov 12 17:04Z)
+
+The Databento account is the owner's personal account, not the LLC's. The owner chose "Treat it as personal use" as an owner-accepted terms risk. Pulls may start within the $25 cap, each a named list with its free estimate recorded first, and **no "all symbols" requests**. Nothing derived from Databento goes into the public repo; it goes only to the private repo once attached, or by message. Main is asked to record the terms risk in CLAUDE.md.
+
+- **My one-month all-symbols exception is WITHDRAWN** (the owner's words rule it out). The $0.59 ranking pull is put to the owner as a question; until answered the 500-stock universe and S2, S3, S4, S5 wait; the desk prepares a typed-list alternative and states its bias.
+- **Allowed now, named lists only, estimate re-run just before each, stop if 25 percent above the recorded one:** the schema pilot ($0.30), S1's index ETF data ($0.03), then the 1 minute bars for 8 named ETFs ($6.83) once the pilot confirms the schema.
+- **Nothing is scored** until registrations and scripts are in the private repo and readable by the Head of R&D or the Verification Analyst (the sha256 values above fix the registration time). Raw data stays in the desk's scratch space only, never in any repo. The account-type gate above is closed by this decision.
+
 ### Verification Analyst verdicts and the recorder ranking (Nov 12, 17:02Z)
 
 - **Analyst (through Main):** the stale-quote audit spot-check MATCHES on what it tested (its tally of the 31 rows: 11 void, 11 stand, 4 re-score, 4 change-before-read, 1 unclassifiable; it confirmed that both live engines price from the single-market read, whose freshness is unmeasured); CANDLEVSBOOK1 MATCHES on the verdict and every headline figure (caveats to carry: six days, one series, 80 percent at one minute left, the CFRTI-K read must carry the fill haircut); the haircut tables MATCH. Next for it: RESIL1.
