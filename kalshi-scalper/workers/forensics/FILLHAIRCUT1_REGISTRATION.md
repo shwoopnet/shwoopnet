@@ -13,3 +13,12 @@ Asked for by the Head of R&D (message, Nov 12, 2026). A measurement, not a searc
 **Part 3, the haircut.** An immediate-or-cancel buy of Q = 1 and Q = 10 contracts, decided at the instant, arriving at the first usable poll at least d seconds later (d = 1, 2, 5, 10), with a limit of a0 and, separately, a0 + 1c: it takes the levels at or below the limit at that poll, best first. Reported per bucket and pooled: share filled in full, share filled at all, mean price paid minus a0 on the filled contracts, and the mean move of the mid from the instant to 30 seconds later for filled against missed orders (a no-outcome measure of which signals a limit loses). The stated haircut is (a) the share of simulated fills to drop and (b) the cents to add to the price of the rest. A cell with under about 100 windows is labelled "no evidence at n = x".
 
 **What it cannot measure, said in advance.** The books are 2 second snapshots, so nothing under about 2 seconds is resolved by the book (the tape in Part 2 is the only sub-second evidence); hidden or flash liquidity between polls is invisible; our own order's effect on the book is not modelled; and the value of a missed fill (whether the missed signals win more) needs settlement results, which this measurement does not read (ENTRYREPLAY1 has the one read of that on the baseline, and it was not stable).
+
+## Amendment 1 (2026-11-12, committed BEFORE the added rows were fetched or anything new was computed)
+
+Asked for by the Head of R&D (message, Nov 12): a third limit and the later days. Two additions, nothing else changed, still zero tries and no settlement result loaded.
+
+1. **A third limit, a0 + 2c**, simulated order by order exactly like the other two (Part 3), for 1 and 10 contracts at 1, 2, 5 and 10 seconds. (The first result read the +2c figure off the move distribution; this replaces that.)
+2. **A second period: closes from 2026-11-09T00:00:00Z up to and including 2026-11-11T23:59:59Z.** The Head of R&D ruled that a measurement that reads no outcome may use these days. Reported beside the first period (closes 2026-10-29 to 2026-11-08) and pooled; the first period's tables stand as published. No result column is loaded for any close, and nothing here joins a result for a close on or after 2026-11-05 (the held-out block of CFRTI1-BTC and CFRTI-K).
+
+Also noted: the shared strict count is now about 2,113,000 and the research bar z 5.46 (Head of R&D, Nov 12; `DEFLATION_LEDGER.md` on `rnd-queue`); the "about 1.1 million, z 5.34" quoted in this desk's earlier files is withdrawn.
