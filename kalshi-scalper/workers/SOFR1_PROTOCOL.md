@@ -13,3 +13,9 @@ Prediction before running: fails (prior 8%): the ladder is priced by makers who 
 - SOFR is published to 2 decimals, so P(YES) for "at least x" = 1 - Phi((x - 0.005 - mean)/sd) and for "at most x" = Phi((x + 0.005 - mean)/sd).
 - Universe: both kinds, strikes with |x - mean| <= 0.15 percentage points, days from 2026-07-01 (earlier days only supply the sd). Entry, fee, scoring, pass bar and N unchanged (1 cell).
 - Tickers with an -E suffix (exact-value markets, e.g. KXSOFRD-26SEP10-E3.65) are not part of the ladder and are excluded; only -T tickers are used (a structural rule, no outcome used).
+
+## Amendment 2 (Nov 12, 2026): spent events and the cut as a constant
+`do_score` was run once on Nov 10, 2026 (result NOT_ENOUGH_DATA, 1 trade). It scored the development two thirds of settlement days: 44 of the 67 then in the universe (119 markets), every KXSOFRD event closing before the timestamp constant below. Those events are SPENT: they were scored once and are not available as held-out or forward data for any later SOFR test. The 23 later settlement days (closing on or after the constant) were not read.
+CUTOFF CONSTANT: 2026-10-08T11:59:00Z (epoch 1791460740, `DEV_CUT_TS` in `src/scalper/sofr1.py`). The script no longer takes two thirds of whatever days exist when it runs.
+The forward registration (workers/SOFR1_REGISTRATION.md) is separate: it scores only events closing on or after 2026-11-10 (UTC), is forward only, and has no held-out read before its registered dates. Its sentence that "nothing in history is scored" is about that registration; this protocol's script did score history on Nov 10, as recorded here.
+READ-ONCE MARKER: READ ON 2026-11-10 (development two thirds only, SOFR1 NOT_ENOUGH_DATA); the last third of this protocol's history split has NOT been read and is not to be read before a development survivor exists (none does).

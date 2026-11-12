@@ -64,6 +64,10 @@ def do_fetch(mx):
             if x.get("end_period_ts") is not None: rs.append((tk, int(x["end_period_ts"]), h.fl(b), h.fl(a)))
         db.executemany("INSERT OR REPLACE INTO candle VALUES(?,?,?,?)", rs); db.execute("INSERT OR REPLACE INTO done VALUES(?,?)", (tk, len(rs))); db.commit(); n += 1
     print("fetched", n)
+# PINNED (Nov 12, 2026): the development cut the Nov 10 run used (44 of 67 settlement days, 119 markets then), as a timestamp constant.
+# The old rule took two thirds of whatever days existed when the script ran. Events closing before it are SPENT (scored once, Nov 10);
+# events on or after it were not read. The forward registration (SOFR1_REGISTRATION.md) scores only events closing on or after 2026-11-10.
+DEV_CUT_TS = 1791460740   # 2026-10-08T11:59:00Z
 def fee(p): return math.ceil(0.07 * 10 * p * (1 - p) * 100 - 1e-9) / 10 / 100
 def do_score():
     db = con(); U = universe(db); Phi = NormalDist().cdf
@@ -71,7 +75,7 @@ def do_score():
     cs = collections.defaultdict(list)
     for tk, ts, b, a in db.execute("select ticker,end_ts,bid_c,ask_c from candle"): cs[tk].append((ts, b, a))
     N = 5186; zb = NormalDist().inv_cdf(1 - 0.05 / N); print("N %d z bar %.2f universe %d" % (N, zb, len(U)))
-    days = sorted({c for _, c in U}); cut = days[2 * len(days) // 3]; print("dev days", len([d for d in days if d < cut]), "of", len(days))
+    days = sorted({c for _, c in U}); cut = DEV_CUT_TS; print("dev days", len([d for d in days if d < cut]), "of", len(days))
     tr = []
     for tk, c in U:
         if c >= cut or not cs.get(tk): continue
