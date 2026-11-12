@@ -223,3 +223,16 @@ Smaller but relevant: overtime markets (NBA, NHL, college basketball: "will the 
 
 - **Fee and frequency fields for sports and weather series:** one small read a series (`/series/{ticker}`), about 60 for the pool series. Changes the fee-class column only.
 - **A spread read on open markets, at most 10 families** (the Head's limit). The ones where a spread would change a ranking: NHL periods, NFL quarters, NBA quarters and halves, college basketball first half and totals, soccer first halves, soccer both-teams-to-score and team totals, overtime markets, ITF tennis, tennis set winner, hourly city temperature. Both cards' first stage measures spread from candles for their own families, so this job is only needed for families with no card.
+
+### Settlement speed by family (from the listing's own time fields; added 17:20Z)
+
+`census/settle_speed.py` takes, for every settled market in the listing, the minutes from the market's close to the time Kalshi settled it. Full table: `census/listing_nov10/settle_speed.csv`. Times only. It fills the sports rows Forensics could not (no sports book or result recorder).
+
+| Settles within | Families (median minutes from close to settled) |
+|---|---|
+| Under 1 minute | 15 minute series (0.3) |
+| 2 to 6 minutes | every sports family: NHL periods (1.8), US game winners, spreads and totals (1.8), NFL periods (2.0), ITF and tour tennis (2.0), NBA quarters, halves and props (2.5), college basketball (2.5), esports (3.0), virtual sports, foreign basketball, overtime markets (4.0), soccer (4.0 to 6.0; one in ten takes about 8 hours); also index intraday (2.1), crypto hourly and daily ladders (2.7), hourly commodity ladders (5.4) |
+| 30 to 90 minutes | mentions (36), approval (36), post counts (32), earnings mentions (30), AHL and KHL (31), hourly Treasury rates (62), currency ladders (62), index ladders (66), macro releases (68), hourly city temperature (71), official counts (81), commodity daily ladders (91) |
+| 2.5 to 17 hours | daily Treasury yields (2.6 hours), hazards (3.9), daily city temperature (6.2), gas prices (7.3), rain (7.5), Texas power (8.1), Truflation (8.9), Steam (10.5), music video charts (12.9), Netflix (16.5) |
+
+One day only; a family with few markets that day (under 30) is a single reading, not a median to lean on.
