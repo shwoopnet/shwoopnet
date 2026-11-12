@@ -1756,6 +1756,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Trading (the owner, Nov 12): gold's would-be entries are now logged to a shadow record even while gold is switched off by its kill rule, and even when the bot is stopped, so the written rule for gold's return (60 shadow trades, 7 days, profit factor 1.3 or better) can be checked at all. It only writes a log row, never an order, and changes no live decision. The record starts from the moment of the deploy</li>
                   <li>A combo book recorder (the owner, Nov 12): every 30 minutes it saves the quotes, the order book depth and the trades of Kalshi combo markets with any posted price to its own data branch, so a test of buying either side can be priced with real depth. Public data only, no key, no orders, at most 10 requests a minute, stops by itself on Jan 31, 2027.</li>
                   <li>Process (the owner, Nov 12): details of one old order-size incident and the account balance used as a simulation input were taken out of the public text and code comments; the lesson and every rule stay.</li>
                   <li>Rules recorded (the owner, Nov 12): combos may be measured on paper by buying NO on high-priced combos and holding, as a written exception for combos only; weather brackets are allowed on paper in a middle price range only; a combo book recorder is approved to build. Docs only, no order of any kind.</li>
@@ -4052,7 +4053,7 @@ kalshiStatusTick();
       rules: ['1 contract, only on the listed US 8:30 AM release mornings of Nov and Dec', 'Automatic: 20 losses in a row, or net under $0 after 40 fills (a -$5 stop is proposed, not coded)', 'Not written yet'] }
   ];
   var KAL_BOARD_SHADOW_RULES = ['After 150 fillable signals at PF 1.3+ (second half 1.2+), 14 days and the owner\'s merge: an incubator slot at 1 contract, $5 an order', 'Retire at net under -1c a contract after 50 signals, or under 40 signals in 30 days', 'After a retire: a 14 day cool off, then a fresh shadow run at the same bar'];
-  var KAL_BOARD_SHADOW = [];   // EMPTY since Nov 11, 2026: the owner retired all four shadow rules (duplicates of gold L1); it copies the bot's SHADOW_RULES, which is empty too (a test compares them). A new rule must be a different mechanism.
+  var KAL_BOARD_SHADOW = [];   // EMPTY since Nov 11, 2026: the owner retired all four shadow rules (duplicates of gold L1); it copies the bot's SHADOW_RULES except GOLDOFF (gold's return evidence, Nov 12: scored by the report's returnRule, not drawn here; a test compares them). A new rule must be a different mechanism.
   var KAL_BOARD_RETIRED = { asOf: 'Nov 11', back: 'a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval', rows: [
     { name: 'XRP', pf: 0.49, n: 86 }, { name: 'Bitcoin', pf: 0.84, n: 155 }, { name: 'Ethereum', pf: 1.18, n: 113 }, { name: 'Dogecoin', pf: 1.01, n: 204, note: 'removed' },
     { name: 'AUD/USD', pf: 1.37, n: 59 }, { name: 'USD/CAD', pf: 1.00, n: 46 }, { name: 'Natural gas', pf: 0.64, n: 38 },

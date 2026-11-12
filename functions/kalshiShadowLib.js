@@ -17,6 +17,11 @@ const SHADOW_RULES = Object.freeze([
   // ALL FOUR SHADOW RULES WERE RETIRED ON NOV 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"). XRPYES10 (shadow twin of the live probe), GOLDALL, XRPFAV6 and LANTERN
   // were all the favourite-late mechanism gold L1 already runs live (the same 88c to 97c favourite at a 6 or 10 minute look, on gold, XRP or Ethereum), so each was a duplicate of L1 rather than a different bet. Gold L1 is the single
   // favourite-late strategy. Rows already logged stay in kalshiShadowRows; each one's return rule is in kalshi-scalper/README.md (their own sections). A new shadow rule must be a DIFFERENT mechanism (docs/STRATEGY_LIFECYCLE.md section 7c).
+  // GOLDOFF (Nov 12, 2026, the owner: "Make sure gold keeps a shadow record after the latch trips"): the ONE written exception to 7c. It is NOT a candidate and not a duplicate of a live strategy that is running: it is the RETURN EVIDENCE for gold
+  // L1 itself. Once gold's kill latch trips, runL1Tick drops gold before it reads a quote, so no order and no row would exist and the return rule (shadow PF 1.3 or better over 60 trades and 7 days, second half 1.3, then a reviewed
+  // re-arm at half size) could never be met. This logs gold's own entry (the favourite side at 88c to 97c, 330 to 400 s left) whether or not gold is latched, whether or not a session is on (index.js reads gold's public quotes itself then).
+  // Pre-registration: kalshi-scalper/README.md#SHADOW-GOLDOFF. forwardReadDate is the earliest return review: 7 days after the first row; the review waits for 60 settled fillable rows if the count is not there yet.
+  Object.freeze({ id: "GOLDOFF", readme: "kalshi-scalper/README.md#SHADOW-GOLDOFF", series: Object.freeze(["KXGOLD15M"]), entry: Object.freeze({ sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }), contracts: 1, registeredAt: "2026-11-12", forwardReadDate: "2026-11-19" }),
 ]);
 
 const OPEN = ["open", "active"];
@@ -88,6 +93,19 @@ function shadowSignals(rules, quotes, nowMs) {
       } catch (e) { /* one bad market never stops the rest */ }
     }
   }
+  return out;
+}
+
+// When the session is OFF the minute function holds no quotes, so index.js reads the rules' own series (public, no key). Those markets close on the quarter hour, so a read is only worth making in the minute or
+// two around a rule's entry window; this pure gate (30 s of slack each side) keeps it to about two reads per 15 minutes instead of fifteen. It only decides WHETHER to look; the signal still tests the real close time.
+function shadowSeriesDue(rules, nowMs) {
+  const out = [];
+  try {
+    const left = 900 - ((nowMs / 1000) % 900);
+    for (const r of Array.isArray(rules) ? rules : []) {
+      if (left >= r.entry.leftMinSec - 30 && left <= r.entry.leftMaxSec + 30) for (const s of r.series) if (!out.includes(s)) out.push(s);
+    }
+  } catch (e) { return []; }
   return out;
 }
 
@@ -188,4 +206,12 @@ function shadowReport(rules, docs, nowMs) {
   });
 }
 
-module.exports = { SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
+// The gold RETURN rule (GOLDOFF, kalshi-scalper/README.md#SHADOW-GOLDOFF), read from a shadowReport row WITHOUT touching the lifecycle thresholds above (150 signals, 14 days, second half 1.2):
+// 60 settled fillable rows, 7 days, profit factor 1.3 or better, second half 1.3 or better. It only says whether the written bar is met; the re-arm is still a reviewed edit and the owner's call.
+function returnRule(row) {
+  const r = row || {};
+  const met = Number(r.fillable) >= 60 && Number(r.days) >= 7 && Number(r.pfFillable) >= 1.3 && Number(r.secondHalfPf) >= 1.3;
+  return { met, fillable: Number(r.fillable) || 0, need: 60, days: Number(r.days) || 0, needDays: 7, pf: r.pfFillable === undefined ? null : r.pfFillable, secondHalfPf: r.secondHalfPf === undefined ? null : r.secondHalfPf, needPf: 1.3 };
+}
+
+module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
