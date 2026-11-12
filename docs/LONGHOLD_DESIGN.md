@@ -24,7 +24,7 @@ Return: reported by the nightly report as numbers (`fillsSinceRearm`, `pfSinceRe
 
 Nightly report: `longhold.rules[].arms[]` with counts, PF, net, days, latch state and the return numbers. No ticker, event or id. Present only when a rule is registered.
 
-Registry row: the Strategies registry (`strategies-registry.json`, on `claude/strategy-registry`, not on main yet) has no row because no rule is registered. A first configuration adds one Shadow row in the same pull request.
+Registry row: the Strategies registry (`strategies-registry.json`) has no row because no rule is registered. A first configuration adds one Shadow row in the same pull request.
 
 ## Phase 2: the switched-off order path (design only, NOT built)
 

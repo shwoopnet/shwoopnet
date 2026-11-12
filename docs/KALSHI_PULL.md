@@ -16,7 +16,7 @@ A workflow a person starts by hand from the Actions tab. It reads one job file f
 | Other failures | three in a row (5xx, a redirect, no answer) end the run; a 404 is an answer |
 | Answer size | 5 MB an answer, 200 MB a run |
 | Run time | 40 minutes in the script, 50 in the workflow |
-| Runs a day | 12 real runs per UTC day (it was 6 until Nov 12, 2026; counted from the folders already on the data branch); a dry run does not count |
+| Runs a day | 20 real runs per UTC day (it was 6 until Nov 12, 2026, then 12 the same day; counted from the folders already on the data branch); a dry run does not count |
 | Runner minutes | about 2 for 60 requests, about 6 for 300, about 25 to 30 for the full 1,200 (checkout and push add under a minute); free on a public repository |
 | Stop date | 2027-02-28 23:59 UTC, checked in the workflow and in the script |
 
@@ -80,7 +80,10 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `INGAMELAG_M1B` | Desk B | 107 (122) | about 2 | the second half; M1A and M1B are one measurement, read once |
 | `INGAMELAG_M1` | Desk B | 215 (235) | n/a | retired Nov 12: one job of 1 minute candles risked the 200 MB a run cap; replaced by M1A and M1B, no workflow choice |
 | `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
-| `WXDAYEND_A` | Testing Desk (owner field MAIN) | 22 (22) | under 1 | `WXDAYEND_REGISTRATION.md`; part A of a registered count: 18 one-market candle windows and 4 settled lists |
+| `CFRTI_K_CANDLES` | Desk A | 215 (215) | about 55 (estimate) | `CFRTI_K_REGISTRATION.md`; live mode (the probe answered empty for pre-cutover markets), built from the `CFRTI_K_LISTS` answer; closes 2026-09-12 to 2026-11-04 only |
+| `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |
+| `TESTING_LISTS_BUNDLE` | Testing Desk (MAIN) | 133, up to 347 pages (361) | 20 to 40 (estimate) | TIE3_LISTS, WXDAYEND_A (with its 18 one-market candle windows) and POLCOST (the open-markets lists of 79 Politics series) in one file, ids prefixed t3_ wx_ pc_; split with `workers/testing/bundle.py split` |
+| `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists, its own job (the heavy part) |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 

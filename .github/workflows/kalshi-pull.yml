@@ -2,7 +2,7 @@
 # no pull request. A person starts it from the Actions tab with a job id, and it defaults to a DRY RUN (checks the job file, prints the URLs, sends nothing, pushes nothing).
 # It reads one job file from main (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json), sends GET requests to ONE of two hard-coded hosts (api.elections.kalshi.com, or external-api.kalshi.com/trade-api/v2/margin for the KXBTCPERP and KXETHPERP candlesticks only; the job names the pair by key, scripts/kalshi_pull.py holds the table), at most ONE a second, no key, no auth header, no redirects, no other
 # address; three 429s in a row end the run. The built-in token pushes gzipped answers to its OWN `kalshi-pull-data` branch (under pull/), never to main; the first real run creates it as an orphan branch.
-# Rate and size: at most 1 request a second, at most 1,200 requests a run (each job file sets its own lower cap), 5 MB an answer, 200 MB a run, 12 real runs a UTC day, about 25 to 30 runner minutes for a full 1,200.
+# Rate and size: at most 1 request a second, at most 1,200 requests a run (each job file sets its own lower cap), 5 MB an answer, 200 MB a run, 20 real runs a UTC day, about 25 to 30 runner minutes for a full 1,200.
 # One concurrency group that never cancels: two pulls never overlap, so the pace is one a second for the whole repository. It stops by itself from 2027-02-28 23:59 UTC. Stop it sooner by deleting this file.
 name: kalshi-pull
 on:
@@ -30,10 +30,13 @@ on:
           - ECONLAG_CALENDAR
           - NHLOT_LISTS
           - CENSUS_LISTING
-          - WXDAYEND_A
           - POLAPPR1_CANDLES
           - POLAPPR1_CANDLES_P2
           - POLAPPR1_CANDLES_P3
+          - CFRTI_K_CANDLES
+          - HOURLYTEMP_LISTS
+          - TESTING_LISTS_BUNDLE
+          - SOCDERIV_LISTS
           - INGAMELAG_M1A
           - INGAMELAG_M1B
       dry_run:
@@ -60,7 +63,7 @@ jobs:
       - name: Check the inputs and the end date (2027-02-28 23:59 UTC)
         id: gate
         run: |
-          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|NOSIDE1_CANDLES_P1|NOSIDE1_CANDLES_P2|NOSIDE1_CANDLES_P3|SPREADCELL1|SPREADCELL1_REST|ROLLOFF_PROXY|COMBO1_OPENBOOK|PERPBTC1M|PERPETH1M|CFRTI_K_LISTS|CFRTI_K_PROBE|CFRTI_K_R6SLICE|ECONLAG_CALENDAR|NHLOT_LISTS|INGAMELAG_M1A|INGAMELAG_M1B|CENSUS_LISTING|WXDAYEND_A|POLAPPR1_CANDLES|POLAPPR1_CANDLES_P2|POLAPPR1_CANDLES_P3) ;; *) echo "bad job id"; exit 1 ;; esac
+          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|NOSIDE1_CANDLES_P1|NOSIDE1_CANDLES_P2|NOSIDE1_CANDLES_P3|SPREADCELL1|SPREADCELL1_REST|ROLLOFF_PROXY|COMBO1_OPENBOOK|PERPBTC1M|PERPETH1M|CFRTI_K_LISTS|CFRTI_K_PROBE|CFRTI_K_R6SLICE|ECONLAG_CALENDAR|NHLOT_LISTS|INGAMELAG_M1A|INGAMELAG_M1B|CENSUS_LISTING|POLAPPR1_CANDLES|POLAPPR1_CANDLES_P2|POLAPPR1_CANDLES_P3|CFRTI_K_CANDLES|HOURLYTEMP_LISTS|TESTING_LISTS_BUNDLE|SOCDERIV_LISTS) ;; *) echo "bad job id"; exit 1 ;; esac
           case "$DRY_RUN" in true|false) ;; *) echo "bad dry_run"; exit 1 ;; esac
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the pull script and the job file from main

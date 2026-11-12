@@ -957,6 +957,11 @@
   .sp-cards{ display:grid; grid-template-columns:minmax(0,1fr); gap:12px; min-width:0; }
   .sp-lane-h{ display:flex; align-items:baseline; gap:8px; padding:2px 2px 0; min-height:40px; align-items:center; }
   .sp-lane-t{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; } .sp-lane-n{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; } .sp-lane-note{ font-size:11px; color:var(--muted); }
+  .sp-detbtn{ align-self:flex-start; margin-top:10px; background:none; border:1px solid var(--border); color:var(--paper); border-radius:999px; padding:8px 16px; min-height:40px; font:inherit; font-size:12.5px; cursor:pointer; } .sp-detbtn:hover{ border-color:var(--paper); }
+  .sp-pop{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; padding:16px; } .sp-pop[hidden]{ display:none; }
+  .sp-pop-sheet{ width:min(420px,100%); max-height:90vh; overflow:auto; background:var(--panel-raised, #141414); border:1px solid var(--border); border-radius:16px; padding:20px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  .sp-pop-h{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px; } .sp-pop-f{ display:grid; grid-template-columns:60px minmax(0,1fr); gap:8px; font-size:12px; margin:8px 0; } .sp-pop-f b, .sp-pop-room b{ color:var(--muted); font-weight:600; } .sp-pop-room{ margin-top:12px; font-size:12px; display:grid; gap:6px; }
+  .sp-reg{ gap:8px; } .sp-reg .sp-th{ flex-wrap:wrap; }
   .sp-lane-live .sp-lane-h{ border-bottom:2px solid var(--paper); }
   .sp-lane-shadow .sp-lane-h, .sp-lane-retired .sp-lane-h{ border-bottom:1px solid var(--border); }
   /* Two columns of cards from a 640px board, Live and Shadow side by side from 1100px (container queries on .sp-wrap, so the side navigation never matters); the retired list is a collapsed row under both. These breakpoints are kalshiBoardCols, tested against this text. */
@@ -1757,6 +1762,10 @@
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
                   <li>Long-hold paper log (Nov 12): groundwork for logging, with no money, what a rule that buys hours before a non-15-minute market closes and holds to settlement would have made. Nothing is switched on and no rule is set up, so nothing changes in the bot and no order is possible from it. Design notes only for anything beyond the log.</li>
+                  <li>Research pull jobs (Nov 12): four more small listing jobs for the manual data pull (politics, tie-game, soccer and hourly temperature market lists), public data only, same limits, nothing trades and none has run.</li>
+                  <li>Research pull jobs (Nov 12): two more jobs for the manual data pull, the one-minute price histories for the Bitcoin lead and lag study (215 requests, development period only). Public data, same limits. Nothing trades and neither has run.</li>
+                  <li>Strategies page: one registry for every strategy and its stage (the owner, Nov 12: the page should keep rotating as strategies are added and removed). A committed list, with no figures in it, holds Idea, Shadow, Paper, Probe, Live and Retired rows; the Shadow lane now shows the rule on the shadow list (gold's return record) and the research ideas and paper rows (the sports spread cell, the approval NO side, spot lead, the Bitcoin model versions, the combo house side) instead of Shadow 0, each labelled UNPROVEN, with a Details button that opens a small popup of what it does, its kill rule, its return rule, room left and one small chart (the owner picked this layout from three). Adding a shadow rule in the bot without a row in the list now fails a test. Page only, nothing trades</li>
+                  <li>Research (Nov 12): the manual data pull may now run up to 20 times a day (it was 12; the owner said yes). Pace, size and every per-run limit are unchanged; if the data source ever refuses a request it drops back. Nothing trades.</li>
                   <li>Rules recorded (research, Nov 12): rules that trade on the direction or persistence of other traders' orders on the 15 minute markets are closed by evidence (three tests failed, the last re-run by an independent check) and added to the declined list. Notes only, no change to the bot.</li>
                   <li>Notes (Nov 12): the project now keeps stock research and anything licensed in a separate private repository; this public one stays as it is. Databento (stock data) is recorded as an accepted terms risk with a $25 cap. The research team list is brought up to date. Docs only, nothing trades.</li>
                   <li>Research pull jobs (Nov 12): three more jobs for the approval-rating study, 3,018 hourly price histories in all (1,006 each), ready to start by hand. Same limits as before, public data only, nothing trades and nothing has run.</li>
@@ -4415,6 +4424,41 @@ kalshiStatusTick();
     return { cols: w >= 640 ? 2 : 1, sideBySide: w >= 1100 };
   }
   // The three groups as markup. model: { live: [{ id, name, rule, rules, w, kill, spark }], deck: { state: 'ok' | 'loading' | 'unreadable', rows: [{ id, rule, rep, spark }] }, retired }. Every value is escaped or numeric; money masks dollars.
+  // ---- Strategy registry (Nov 12, 2026, the owner: the page should be "a constant rotating thing whenever we add or remove strategies"). ONE committed list, strategies-registry.json at the site root, fetched once per page load (same origin, one GET, no figures in it): every strategy and its stage (Idea, Shadow, Paper, Probe, Live, Retired). Adding a shadow rule or a slot strategy in the bot's code without a row there fails test/strategyRegistryGates.test.js. The page merges it with what it computes from the private data: it never replaces a computed card, it adds the rows the code cannot know about. ----
+  var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];
+  var kalshiRegistry = { state: 'loading', list: [] }, kalshiRegData = {};   // state: loading, ok, unreadable
+  function kalshiRegistryNorm(json){
+    var list = json && Array.isArray(json.strategies) ? json.strategies : null;
+    if(!list){ return null; }
+    return list.filter(function(x){ return x && typeof x.id === 'string' && typeof x.name === 'string' && KAL_REG_STAGES.indexOf(x.stage) >= 0; });
+  }
+  // The registry's rows that are not already drawn from computed data: pipeline stages (everything between Idea and Probe) not already a shadow tile, and retired rows whose name is not already in the retired list.
+  function kalshiRegistrySplit(list, shadowIds, retiredNames){
+    var low = function(t){ return String(t).toLowerCase(); }, have = retiredNames.map(low);
+    return {
+      pipeline: (list || []).filter(function(x){ return ['Idea', 'Shadow', 'Paper', 'Probe'].indexOf(x.stage) >= 0 && shadowIds.indexOf(x.id) < 0; }),
+      retired: (list || []).filter(function(x){ return x.stage === 'Retired' && have.indexOf(low(x.name)) < 0 && have.indexOf(low(x.id)) < 0; })
+    };
+  }
+  // One registry card (the owner picked option A, Nov 12, 2026: "i like. A"): the name, the stage, the UNPROVEN label, one line of what it does, and a Details button that opens a small popup (kalshiRegistrySheetHtml). The popup shows only five things: what it does in one line, the kill rule, the return rule, room left and one small chart. No ring, no gauge, no figure from the file.
+  function kalshiRegistryCardHtml(x, esc){
+    return '<article class="kal-card sp-tile sp-compact sp-reg" data-fk="reg:' + esc(x.id) + '"><div class="sp-who"><div class="sp-th"><span class="sp-name">' + esc(x.name) + '</span><span class="sp-badge sp-b-idle">' + esc(x.stage.toUpperCase()) + '</span>' + (x.label ? '<span class="sp-badge sp-b-hot">' + esc(x.label) + '</span>' : '') + '</div><div class="sp-rule1" title="' + esc(x.id) + '">' + esc(x.id) + (x.rule ? ': ' + esc(kalshiStratOneLine(x.rule, 90)) : '') + '</div></div>' +
+      '<button type="button" class="sp-detbtn" data-reg-details="' + esc(x.id) + '">Details</button></article>';
+  }
+  // The popup body. data comes from the page's own private reads when it has any ({ n, spark }); the file holds no figure, so a row with no data says so instead of drawing one. Room left is a count toward a target written in the file (roomTarget, in words in roomWhat).
+  function kalshiRegistrySheetHtml(x, data, esc){
+    var d = data || {}, tgt = x.roomTarget, have = typeof d.n === 'number' ? d.n : null, sp = d.spark ? kalshiStratSpark(d.spark, 300, 48) : null;
+    var room = !tgt ? '<div class="sp-sub">No count to wait for: ' + esc(x.nextReadText || 'no read date yet') + '</div>' :
+      '<div class="sp-bar" role="img" aria-label="' + esc(have === null ? 'not measured yet' : Math.max(0, tgt - have) + ' of ' + tgt + ' to go') + '"><i style="width:' + (have === null ? 0 : Math.max(0, Math.min(100, have / tgt * 100))).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(x.roomWhat) + '</span><span>' + (have === null ? 'not measured yet' : esc(Math.max(0, tgt - have) + ' to go')) + '</span></div>';
+    var chart = sp ? '<div class="sp-spark"><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc('Cumulative cash profit factor, ' + sp.n + ' points') + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="sp-spark-cap"><span>Cumulative cash PF by signal</span><span>dashed line is 1.0</span></div></div>' :
+      '<div class="sp-spark"><div class="sp-spark-cap"><span>Chart</span><span>no trades to draw yet</span></div></div>';
+    var f = function(k, v){ return '<div class="sp-pop-f"><b>' + esc(k) + '</b><span>' + esc(v || 'Not written yet') + '</span></div>'; };
+    return '<div class="sp-pop-h"><span class="sp-name">' + esc(x.name) + '</span><span class="sp-badge sp-b-idle">' + esc(x.stage.toUpperCase()) + '</span>' + (x.label ? '<span class="sp-badge sp-b-hot">' + esc(x.label) + '</span>' : '') + '</div>' +
+      f('Does', kalshiStratOneLine(x.rule, 140)) + f('Kill', x.kill) + f('Return', x['return']) + '<div class="sp-pop-room"><b>Room left</b>' + room + '</div>' + chart;
+  }
+  function kalshiRegistryRetiredRow(x){
+    return { name: x.name, note: [x.reason, x['return'] ? 'Return: ' + x['return'] : ''].filter(Boolean).join('. ') };
+  }
   function kalshiBoardHtml(model, esc, money){
     var rulesHtml = function(rules){
       return !Array.isArray(rules) || rules.length !== 3 ? '' : '<ul class="kal-bd-rules"><li><b>Implement</b> ' + esc(rules[0]) + '</li><li><b>Kill</b> ' + esc(rules[1]) + '</li><li><b>Return</b> ' + esc(rules[2]) + '</li></ul>';
@@ -4456,8 +4500,9 @@ kalshiStatusTick();
         badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
     }).join('');
     var deck = '';
+    var regSplit = model.registry || { pipeline: [], retired: [] };
     if(!model.deck.rows.length){
-      deck = '<div class="sp-sub">None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.</div>';
+      deck = regSplit.pipeline.length ? '' : '<div class="sp-sub">' + (model.registryState === 'loading' ? 'Reading the strategy list...' : model.registryState === 'ok' ? 'None on the list. A new shadow rule must be a different mechanism.' : 'None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.' + (model.registryState === 'unreadable' ? ' The strategy list could not be read.' : '')) + '</div>';
     } else if(model.deck.state !== 'ok'){
       deck = kalshiStratTwinFirst(model.deck.rows, function(r){ return r.id; }, ids).map(function(r){ return tile({ id: r.id, name: r.id, stage: 'Shadow', rule: r.rule, pf: 'n/a', pfLabel: 'no data yet', status: model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet', badge: { text: 'WAITING', tone: 'idle' } }); }).join('');
     } else {
@@ -4468,11 +4513,14 @@ kalshiStatusTick();
           badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), chip: twinOf(r.id) ? { text: 'feeds live', tip: 'Feeds the live strategy of the same name' } : null });
       }).join('');
     }
+    deck += regSplit.pipeline.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join('');
     // Easy to read (the owner, Nov 10, 2026: "make easily readable"): a headed list, one strategy per row, the name and why it ended on the left and the cash PF and trade count in their own right hand columns, larger text and room between rows.
     var ret = '<ul class="sp-rlist"><li class="sp-rrow sp-rhead" aria-hidden="true"><span>Strategy</span><span>Cash PF</span><span>Trades</span></li>' + model.retired.rows.map(function(r){
       return '<li class="sp-rrow"><span class="sp-rwho"><span class="sp-rname">' + esc(r.name) + '</span>' + (r.note ? '<span class="sp-rnote">' + esc(r.note) + '</span>' : '') + '</span><span class="sp-rpfv">' + (typeof r.pf === 'number' ? esc(r.pf.toFixed(2)) : 'n/a') + '</span><span class="sp-rn">' + (typeof r.pf === 'number' ? esc(String(r.n)) : '-') + '</span></li>';
     }).join('') + '</ul>';
-    var stages = kalshiStratLifecycle(ids, sids, model.retired.rows.map(function(r){ return r.name; }));
+    var allRetired = model.retired.rows.concat(regSplit.retired.map(kalshiRegistryRetiredRow));
+    ret = ret.replace('</ul>', regSplit.retired.map(function(x){ var r = kalshiRegistryRetiredRow(x); return '<li class="sp-rrow"><span class="sp-rwho"><span class="sp-rname">' + esc(r.name) + '</span><span class="sp-rnote">' + esc(r.note) + '</span></span><span class="sp-rpfv">n/a</span><span class="sp-rn">-</span></li>'; }).join('') + '</ul>');
+    var stages = kalshiStratLifecycle(ids, sids.concat(regSplit.pipeline.map(function(x){ return x.id; })), allRetired.map(function(r){ return r.name; }));
     var lane = function(key, st, body, extra){
       return '<section class="sp-lane sp-lane-' + key + '" data-fk="lane:' + key + '" aria-label="' + esc(st.label) + '"><div class="sp-lane-h" data-fk="head:' + key + '"><span class="sp-lane-t">' + esc(st.label) + '</span><span class="sp-lane-n">' + st.count + '</span><span class="sp-lane-note">' + esc(st.note) + '</span></div>' + (extra || '') + '<div class="sp-cards">' + body + '</div></section>';
     };
@@ -4486,6 +4534,16 @@ kalshiStatusTick();
       '<div class="sp-h">Recent activity <span>warnings, stops and session starts, last 7 days</span></div><div class="kal-card">' + act + '</div>';
     var board = '<div class="sp-board" id="spBoard" role="group" aria-label="Live, then shadow, then retired">' + lane('live', stages[1], live) + lane('shadow', stages[0], deck) + retired + '</div>';
     return '<div class="sp-wrap">' + summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail + '</div>';
+  }
+  // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
+  var kalshiRegistryLoading = false;
+  function kalshiRegistryEnsure(){
+    if(kalshiRegistryLoading || kalshiRegistry.state !== 'loading' || typeof fetch !== 'function'){ return; }
+    kalshiRegistryLoading = true;
+    fetch('strategies-registry.json', { cache: 'no-cache' }).then(function(r){ if(!r.ok){ throw new Error('http'); } return r.json(); }).then(function(j){
+      var l = kalshiRegistryNorm(j); if(!l){ throw new Error('shape'); }
+      kalshiRegistry = { state: 'ok', list: l };
+    }).catch(function(){ kalshiRegistry = { state: 'unreadable', list: [] }; }).then(function(){ kalshiRegistryLoading = false; renderStrategiesPage(); });
   }
   var kalshiShadowCache = { at: 0, rows: null, error: '' }, kalshiShadowLoading = false;
   var KAL_SHADOW_TTL = 600000;
@@ -4561,12 +4619,30 @@ kalshiStatusTick();
     var activity = { state: kalshiOrdersLoaded ? 'ok' : 'loading', items: kalshiOrdersLoaded ? kalshiStratActivity(kalshiNotifFeed(kalshiLiveEvents, resolved, now, kalshiMoney), 8) : [] };
     var l1 = live.filter(function(x){ return x.id === 'L1'; })[0];
     var timeline = kalshiStratTimeline(KAL_STRAT_TIMELINE, now, l1 && l1.kill ? l1.kill.count : NaN, kalDayKey);
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, retired: KAL_BOARD_RETIRED, summary: summary, timeline: timeline, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
+    kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
+    var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, timeline: timeline, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     kalshiStratAnimStop(page);
     if(kalshiStratAnim.pending && (kalshiShadowCache.rows || kalshiShadowCache.error)){ kalshiStratAnim.pending = false; kalshiStratAnimStart(page); }
-    kalshiShadowEnsure();
+    kalshiShadowEnsure(); kalshiRegistryEnsure();
   }
+  // The Details popup lives outside #stratBody so the minute's redraw never closes it. One sheet, built from the registry row on click; Close, a tap outside or Escape closes it and focus goes back to the button.
+  (function(){
+    var body = document.getElementById('stratBody'), last = null;
+    if(!body){ return; }
+    var pop = document.createElement('div'); pop.id = 'spPop'; pop.className = 'sp-pop'; pop.hidden = true;
+    pop.innerHTML = '<div class="sp-pop-sheet" role="dialog" aria-modal="true" aria-label="Strategy details"><div id="spPopBody"></div><button type="button" class="sp-detbtn" id="spPopClose">Close</button></div>';
+    document.body.appendChild(pop);
+    var close = function(){ pop.hidden = true; if(last && last.focus){ last.focus(); } };
+    pop.addEventListener('click', function(e){ if(e.target === pop || e.target.id === 'spPopClose'){ close(); } });
+    document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !pop.hidden){ close(); } });
+    body.addEventListener('click', function(e){
+      var b = e.target && e.target.closest ? e.target.closest('[data-reg-details]') : null; if(!b){ return; }
+      var id = b.getAttribute('data-reg-details'), x = kalshiRegistry.list.filter(function(r){ return r.id === id; })[0]; if(!x){ return; }
+      last = b; document.getElementById('spPopBody').innerHTML = kalshiRegistrySheetHtml(x, kalshiRegData[id], escapeHtml); pop.hidden = false; document.getElementById('spPopClose').focus();
+    });
+  })();
   (function(){ var body = document.getElementById('stratBody'); if(body){ body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && d.classList.contains('sp-det') && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; } }, true); body.addEventListener('change', function(e){ var c = e.target; if(c && c.id === 'spRetT'){ kalshiStratOpen.retired = c.checked; } }); } })();
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;

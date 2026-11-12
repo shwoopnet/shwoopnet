@@ -62,7 +62,7 @@ gates.SC10 = () => {
   assert.ok(!/Prices right now, against what each strategy buys|Depth at the touch, against our order size/.test(html), 'neither tile title is on the page');
   const status = fn('renderKalshiStatus');
   assert.ok(/id="kalWork"/.test(status), 'the Needs a look block still has its place');
-  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ['fetch(location.pathname'], 'the only fetch is the page freshness HEAD check: removing tiles added no request');
+  assert.deepStrictEqual(html.match(/fetch\([^,)]*/g), ["fetch('strategies-registry.json'", 'fetch(location.pathname'], 'the only fetches are the page freshness HEAD check and the committed strategy list (same origin, no figures): removing tiles added no request');
 };
 // What stays: the ring and the health line, and the relay read that Open positions still needs.
 gates.SC11 = () => {
