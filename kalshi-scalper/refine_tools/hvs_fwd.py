@@ -35,6 +35,6 @@ if n:
 if n<30: print('NOT AT READ POINT n/30: %d/30'%n)
 else:
     if pc<0: v='CLOSE: point estimate negative, keep the 25c exit'
-    elif lo>0: v='PROMOTION PACKET IDEA to main: per contract diff above 0 with 90%% CI above 0 (note the exit watch protects the tail: worst day -36.32 with exit vs -27.46 held on history)'
+    elif lo>0: v='PROMOTION PACKET IDEA to main: per contract diff above 0 with 90%% CI above 0'
     else: v='EXTEND by 30 new sells: interval includes 0'
     print('READ POINT n/30 reached (%d): %s'%(n,v))

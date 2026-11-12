@@ -81,7 +81,8 @@ below = [r for r in roll[max(0, len(roll) - len([1 for ts, _ in g if ts >= START
 print('\nGOLD TRIPWIRE: n since %sZ %d of 100, cumulative cash PF %s net $%.2f, latest rolling-60 PF %s, windows below 0.7 since start %d' % (START[:16], len(gs), fp(pf(gs)) if gs else 'na', sum(gs), fp(roll[-1]) if roll else 'na', len(below)))
 # ---- OICORE headroom (booked settledPnl, as the code books it)
 o = sorted([x for x in d.get('slotOrders', []) if x.get('strategy') == 'OICORE' and x.get('status') == 'filled' and x.get('settledPnl') is not None], key=lambda x: x['ts'])
-BASE = 979.25
+import os
+BASE = float(os.environ.get("SIZING_BASE", "0"))  # live figure removed, ask Main
 cts = o[-1]['count'] if o else 10
 stop = min(5 * cts, 0.12 * BASE, 150)
 cum = pk = streak = ms = 0.0; mdd = 0.0; killn = None

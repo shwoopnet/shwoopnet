@@ -7,7 +7,7 @@ Bottom line: no look-ahead leak and no false pass found. No FAIL flips to a pass
 ## 1. W-SWEEP-EXT1 (external signal sweep): CONFIRMED FAIL
 - Checked: spot read at the minute ending at the look (no peek), tercile cuts from TRAIN only, side from the sign of a pre-look feature, window result never used to pick a row, fee 0.07*p*(1-p) applied to the slipped price (slightly harsher than +0c), day-clustered z, held-out frozen at 17:57 and read once at 17:58.
 - Grid count: 15 x 3 x 2 x 3 x 3 x 4 = 3,240 is right. The registered 1,512 and 1,728 were half the true grid (14 features is 3,024), already corrected in the RESULT. N = 5,319 + 900 + 3,240 = 9,459, Bonferroni z 4.55. Reproduced: 1,460 cells with validation n >= 60, 8 at naive z 2, 0 at 4.5, 33 expected by chance.
-- Shortlist rule reproduces: 4 cells pass, the top 3 by validation lower bound were frozen (2362, 330, 2277). The 4th (cell 128, gold ret3 top follow 0.60 to 0.87, validation z 1.68) was cut by the "at most 3" rule and its held-out third was never read. That is rule-compliant, not leakage.
+- Shortlist rule reproduces: 4 cells pass, the top 3 by validation lower bound were frozen (2362, 330, 2277). [live figure removed, ask Main] That is rule-compliant, not leakage.
 - Held-out: all three PF 0.75 to 0.87 at +1c, mean negative. Cell 2362 had pooled z 3.75, still under 4.55. So the held-out did its job.
 - Minor, not verdict changing: (a) the "Jun to Jul Bitcoin independent check" in the registration was never run; (b) feature `gb5` is "gold return" for BTC, ETH, XRP and "BTC return" for gold, fine but the label "gold-versus-BTC" hides that; (c) cfrti rows are kept only when the index result equals the Kalshi result (consistency filter, tiny n, no effect on the FAIL); (d) results missing in the candle file are inferred from the final bid or ask (0.98 rule), a few rows, no bias direction; (e) day clusters are about 16 per third, so cluster z is rough; the conclusion is a FAIL either way.
 
@@ -15,10 +15,10 @@ Bottom line: no look-ahead leak and no false pass found. No FAIL flips to a pass
 - No leakage: strikes picked by nearest-to-0.5 mid at the quote, quote is the last candle ending at or before the look, thirds by close date, held-out not scored. Fee and slip as registered (unrounded, +1c); live-3 replay uses the rounded fee, as registered.
 - The registered rule says a cell with n < 30 per third is "underpowered, not passed". The result: 81 cells have train and validate obs, 0 reach n >= 30 in both. So the pass bar could not be tested at all. A cell with real negative evidence exists (ALL_APPR 6h 0.10 to 0.25 YES, z -2.7), which is a rule-out of buying cheap YES, not a FAIL of an edge.
 - Coverage gap, undisclosed in the verdict line: events with usable quotes are APPR_DAILY 65, GCB 48, APPR_OTHER 11, APPR_RCP 8. KX538APPROVE got 0 events and KXAPRPOTUS 8 of 263 (the pull was stopped; historical RCP and 538 candles were never started). So APPR_RCP, APPR_538 and the "ALL_APPR" pool are effectively unscored. ALL_APPR is just DAILY + OTHER + 8 RCP events.
-- The report's final line "Top 10 by validation lower bound ... (exploratory):" prints nothing (script ends before the loop). Cosmetic bug.
+- [live figure removed, ask Main] (exploratory):" prints nothing (script ends before the loop). Cosmetic bug.
 - Calibration header says "meanYESask" but prints the mid. Cosmetic. The calibration (YES overpriced at 10 to 25c: realized 0.111 to 0.127 vs mid 0.16 daily, 0.093 vs 0.164 GCB 1d) is descriptive only, n 54 to 212, same-week correlated; it is the only lead and it is not tradable after spread (the NO cells at 0.75 to 0.90 lose).
 - Stale ledger: uses N about 8,190, now 9,459 (z 4.55). Does not matter, nothing passed.
-- Verdict: no false negative proven, but report it as UNDERPOWERED with RCP and 538 not pulled. Finishing the historical pull (about 400 RCP and 1,278 538 requests) is the only way to test it.
+- [live figure removed, ask Main] Finishing the historical pull (about 400 RCP and 1,278 538 requests) is the only way to test it.
 
 ## 3. W-CAT-SPORTS1 (sports calibration): CONFIRMED for ML and TOTAL; POSSIBLE FALSE NEGATIVE for SPREAD cheap longshots from a sampling cap
 - Leak check: the original SPREAD and TOTAL pull kept the top 3 markets by FINAL volume per event, which leaks the outcome. The code already voids it (score.py skips SPREAD and TOTAL from the volume-picked files; candles_sp.jsonl redraws all strikes of random events; the VOID hist file is excluded). CONFIRMED correct. ML picks top 2 of 2 or top 3 of 3 markets, so the volume rule drops nothing there. The only residual is "volume > 0 at settlement" on events, mild and disclosed.
@@ -29,7 +29,7 @@ Bottom line: no look-ahead leak and no false pass found. No FAIL flips to a pass
 - Verdict: FAIL stands for ML (n large, PF about 1.0, bias under 2c) and TOTAL; SPREAD is UNDERPOWERED by the cap, not tested to the registered n. Cheapest follow-up: pull all SPREAD events, not 60 per series.
 
 ## 4. Card 74 WXDAYEND (post-day-end window): CONFIRMED in substance, rule wording overreaches
-- Raw data (c74.jsonl): for the settled-YES bracket in the final two hours the trade price is 0.99, the bid 0.99 and the ask 1.00 on essentially every candle, before and after the day ends. So buying costs 1.00 and there is nothing to earn. The close-time arithmetic (UTC day end 05:00Z NYC etc.) checks out, DST end Nov 1 handled.
+- [live figure removed, ask Main] So buying costs 1.00 and there is nothing to earn. The close-time arithmetic (UTC day end 05:00Z NYC etc.) checks out, DST end Nov 1 handled.
 - Bug in the argument, not the result: the registered rule is "fewer than 3 of 40 city-days". Only 20 were pulled (NYC 9, LAX 9, DEN 2, DAL 0), 0 of 20 qualified, and the text says the rest "could not change the verdict". They could (20 unpulled could still give 3). Call it FAIL on 0 of 20, DAL and most of DEN not read. The structural 0.99 / 1.00 book makes a pass very unlikely.
 
 ## 5. Card 84 MENTION-PERSIST (earnings mention persistence): CONFIRMED FAIL
@@ -41,10 +41,10 @@ Bottom line: no look-ahead leak and no false pass found. No FAIL flips to a pass
 - No outcome-based selection: events kept by market life of 14 days or more from open and close times, strikes by every n-th sorted ticker, entry nearest 0.5, quote the last daily candle ending 14 days before close and at most 4 days older. Fee unrounded, +0c, matches the plan.
 - Counts in PLAN.md are stale. The plan says c1 18, c2 42 (35), k1 17 (16); current cnt.py on the final 235-series pull says c1 99 (30 with 14 days; the regex also catches the generic-ballot and Vote series that belong to the approval test), c2 58 (47), k1 26 (24). The scored cand.jsonl covers c2 44 events and k1 19 (23 and 7 with an entry after the candle gap and price filters). It was pulled before the historical series list finished (cand.jsonl 19:29, hdone.txt 20:07), so the scored c2 and k1 sets are a subset. Still tiny (n 7 per third), so a larger set would not change DATA_LIMITED, but the plan numbers should be corrected.
 - The 7 of 7 NO arm train and the YES arm 5 losses in a row are noise at n 7. The calibration step was never run (stated).
-- Note the STEP2 live replay uses +0c and an unrounded fee, while W-POL-APPR1 uses +1c and a rounded fee. Different bases in two files; do not compare their net dollars.
+- [live figure removed, ask Main] Different bases in two files; do not compare their net dollars.
 
 ## Cross-cutting
-- Fee basis: every scorer uses the unrounded fee 0.07*p*(1-p) on one contract, which is kinder than Kalshi's per-order rounding up to the cent. All FAILs are therefore FAILs a fortiori; no pass-like cell exists to be hurt by it. The +1c slip roughly covers the rounding.
+- [live figure removed, ask Main] All FAILs are therefore FAILs a fortiori; no pass-like cell exists to be hurt by it. The +1c slip roughly covers the rounding.
 - Ledger N: the sweep corrected itself to 9,459 (z 4.55). The politics, sports and cards files still quote 7,950 to 8,190 (z 4.5). Harmless today, update the common number before any future pass is judged.
 - Pre-registered bars were not lowered anywhere.
 

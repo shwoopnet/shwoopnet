@@ -1,6 +1,1 @@
-cell 2362 gb5 XRP look 600 top fade band [0.3, 0.6] | HELD-OUT n 104 PF+0c 0.88 PF+1c 0.84 mean+1c -4.07c [-12.24, 3.94] z -0.87 -> not advanced
-   gold L1 daily corr (train+valid+read third): {'overlap_days': 14, 'corr': 0.46852369483397976}
-cell 330 ret5 GOLD look 180 bottom follow band [0.1, 0.3] | HELD-OUT n 51 PF+0c 0.93 PF+1c 0.87 mean+1c -2.11c [-10.23, 6.14] z -0.43 -> not advanced
-   gold L1 daily corr (train+valid+read third): {'overlap_days': 21, 'corr': -0.011865642655032359}
-cell 2277 gb5 GOLD look 180 bottom fade band [0.1, 0.3] | HELD-OUT n 68 PF+0c 0.80 PF+1c 0.75 mean+1c -4.19c [-11.89, 3.66] z -0.90 -> not advanced
-   gold L1 daily corr (train+valid+read third): {'overlap_days': 19, 'corr': 0.2658858372206544}
+[live figure removed, ask Main]
