@@ -22,6 +22,14 @@ Run once each as frozen on the landed candles (5,127 development windows, closes
 - **Forensics' scorer audit (after those reads):** cfrti_k.py CLEAN by synthetic leak test; perpbin1.py has the defect its registration discloses (a whole-sample tercile cut, so later windows decide earlier entries). Ruled: the falsification stands; the cut must be a frozen constant in any later use.
 - **Friday count:** of the original five, FOUR are read and closed (CFRTI-K, PERPBIN1, the approval NO side, the stock test). Remaining on the Friday path: TIE3 (measurement), MAPBREAK, the History Miner's soccer half-time and e-soccer Tie rules, INPLAYJUMP (being registered). Nothing has cleared the bar.
 
+## "Find more ideas" (owner, relayed by the EA, Nov 12 18:56Z)
+
+The owner, verbatim: "find more ideas and strategies to bring". The EA created **Idea Desk C (outside research)**, reporting to the Head of R&D: it mines published research and trader write-ups for documented prediction-market mispricings, maps them to Kalshi families with enough history, and sends its top five cards within three hours (session id requested from the EA; it must be given the closed-family list and the event counts before it writes).
+
+- **Desks A and B:** up to five new pre-registered cards each tonight, in families with 1,200 or more independent events in the cheap history window (closes from about 2026-09-07), a mechanism outside every closed family with a named other side, registered as a rule before any price is read. The owner's own rule from the morning still applies ("no padding: if a family is efficient, say so and move on"); the honest number is reported. An idea that is an existing card on another venue is a venue, not a card.
+- **Stocks Desk, new lane until Saturday: SCORER AUDITOR B.** It reads the new Kalshi scorers on the public branches and reports by message (its session cannot push to the public repo): INPLAYJUMP, soccer half time, the e-soccer Tie. Forensics audits the break engine, MAPBREAK, TIE3 and the approval scorer. A defect found before data lands is fixed by a dated amendment; found after, the read is void.
+- **No further desk asked for.**
+
 ## THE STOCKS SEARCH IS FINISHED (Nov 12, 18:57Z)
 
 Ten stock tests registered; 1 read (S2 long leg, below the bar, closed, held-out never opened), 8 retired unread on arithmetic, 1 deferred. The Stocks Desk's answer to "is there any stock test worth the remaining allowance": none. Databento spend ends at about $2.70 of $25. The desk closed its ledger and cards in the private repo (private commit 7ac5da1; cards f1c9c2123248af10a7fb0a8e61bc12f32c24a7ec7ad346583c4e691cec17aa22, ledger 5172edb2a468920dfad7e1f0816fcf9732f057751446ef25b53f3a332534cff3) and stands by with no traffic; both stock sessions can be archived once the stocks Verification Analyst has reproduced the one read. The owner has been told.
