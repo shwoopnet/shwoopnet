@@ -34,6 +34,7 @@ Every spec here is UNPROVEN and CONDITIONAL. The owner ruled on Nov 12: no pre-e
   2. The held-out read (first allowed Nov 20, one sitting with the other two versions) clears its bar: cash PF 1.3 or better with a positive mean on 50 or more rows.
   3. A re-test on the next 50 rows clears it again (a rule with no edge clears one such read about 24 percent of the time).
   4. The Verification Analyst reproduces each read.
+  4b. The gate is judged on the book-replay line at 6 seconds (the same signals priced at the first recorded quote 6 seconds after the decision, a vanished ask is no trade), not on the figure that assumes every signal fills at the ask seen.
   5. Correlation with OICORE under 0.3 on daily cash results. This is at risk: same market, same cheap side, same minutes.
   6. PR 799 merged so the recorder that supplies the rows runs to Dec 15.
   7. A reader for the perpetual reviewed and merged by Main, switched off. The three-venue code on claude/probe-desk is dormant and cannot be activated.
