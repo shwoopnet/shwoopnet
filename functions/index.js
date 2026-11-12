@@ -58,6 +58,8 @@ const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
 const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
 const shadowSeen = new Set();
+const longholdLib = require("./kalshiLongholdLib");   // long-hold PAPER log (Nov 12, 2026): log only, empty registry, no order
+const longholdSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
 // The owner asked for everything to be shut off (Oct 10, 2026) and turned it back on (Oct 12, 2026, with $500 in the account). While this is true NO live order is sent by the bot, whatever the
 // session or the server switch say, and the bot cannot be started. It is a code change on purpose: it holds even if a session document says "on". Setting it back to true, in review and
@@ -775,6 +777,27 @@ exports.kalshiLiveArmed = onSchedule(
           } catch (e) { /* log only */ }
         }
       }
+      // Long-hold paper log (Nov 12, 2026, docs/LONGHOLD_DESIGN.md): the very last step, after the shadow block. LONGHOLD_RULES is EMPTY, so today this makes no call and no write. When a reviewed edit adds a rule:
+      // at most ONE public series list read a minute (to choose) and at most 3 public single-market reads (to price), no key, no order; rows go to kalshiLongholdRows only. Every error is swallowed.
+      if (!armedOn && longholdLib.activeLongholdRules().length) {
+        const ctlRef = db.collection(longholdLib.CONTROL_COLLECTION).doc(longholdLib.LATCH_DOC);
+        const readLatch = async () => { const d = await ctlRef.get(); return d.exists ? d.data() : null; };
+        try {
+          await longholdLib.runLongholdTick({ now, rules: longholdLib.LONGHOLD_RULES, seen: longholdSeen, readLatch,
+            listMarkets: (series) => kalshiMarketApi().markets(series), market: (ticker) => kalshiMarketApi().market(ticker),
+            record: (row) => db.collection(longholdLib.COLLECTION).doc(longholdLib.rowId(row)).create(row) });
+        } catch (e) { /* log only */ }
+        if (Math.floor(now / 60000) % 5 === 2) {
+          try {
+            await longholdLib.settleLongholdRows({ now, rules: longholdLib.LONGHOLD_RULES, budgetMs: 8000, clock: Date.now, readLatch,
+              readOpen: async () => (await db.collection(longholdLib.COLLECTION).where("settled", "==", false).limit(100).get()).docs.map((d) => d.data()),
+              readSettled: async (ruleId) => (await db.collection(longholdLib.COLLECTION).where("rule", "==", ruleId).where("settled", "==", true).limit(1000).get()).docs.map((d) => d.data()),
+              update: (id, patch) => db.collection(longholdLib.COLLECTION).doc(id).set(patch, { merge: true }),
+              writeLatch: (patch) => ctlRef.set(patch, { merge: true }),
+              market: (ticker) => kalshiMarketApi().market(ticker) });
+          } catch (e) { /* log only */ }
+        }
+      }
     } catch (e) {
       failure = e;
     }
@@ -991,6 +1014,9 @@ exports.kalshiNightlyReport = onRequest(
     // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
     readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     shadowRules: () => shadowLib.SHADOW_RULES,
+    // The long-hold paper rows (Nov 12, 2026): compact, read only; an empty registry reads nothing. Newest 2000 rows (it TRUNCATES older ones, in a stable order).
+    longholdRules: () => longholdLib.activeLongholdRules(),
+    readLongholdRows: async () => { ensureDefaultAdminApp(); return (await getFirestore().collection(longholdLib.COLLECTION).orderBy("atMs", "desc").limit(2000).get()).docs.map((d) => d.data()); },
     // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
     readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
