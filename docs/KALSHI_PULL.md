@@ -36,7 +36,7 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 
 ## How to run a job
 
-1. Actions tab, `kalshi-pull`, Run workflow, choose the job. The default is a DRY RUN: it checks the job file, prints the URLs to the run summary and sends nothing.
+1. Actions tab, `kalshi-pull`, Run workflow, type the job id (the file name in `kalshi-scalper/workers/kalshi_pull_jobs/` without `.json`, e.g. `SPREADLISTS`; there is no list to pick from since Nov 12, so a job file never needs a workflow edit). The workflow refuses an id that does not match `^[A-Z][A-Z0-9_]{2,60}$` or has no job file on main; the runner still refuses a job that is not active, has an unknown owner or limits it does not accept. The default is a DRY RUN: it checks the job file, prints the URLs to the run summary and sends nothing.
 2. Read the dry run. Run again with `dry_run` set to `false` to send the requests. Dispatch is for the owner or Main, one pull at a time (the concurrency group never overlaps two).
 
 ## The first jobs, in rank order
@@ -78,7 +78,7 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `CFRTI_K_LISTS` | Desk A | 2, up to 28 pages (30) | up to 1 | `CFRTI_K_REGISTRATION.md`; development markets only, closes before 2026-11-05 |
 | `INGAMELAG_M1A` | Desk B | 108 (123) | about 2 | `IDEA_DESK_B_INGAME_CARD.md`; first half of the rebuilt 215 game list |
 | `INGAMELAG_M1B` | Desk B | 107 (122) | about 2 | the second half; M1A and M1B are one measurement, read once |
-| `INGAMELAG_M1` | Desk B | 215 (235) | n/a | retired Nov 12: one job of 1 minute candles risked the 200 MB a run cap; replaced by M1A and M1B, no workflow choice |
+| `INGAMELAG_M1` | Desk B | 215 (235) | n/a | retired Nov 12: one job of 1 minute candles risked the 200 MB a run cap; replaced by M1A and M1B, no job to run |
 | `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
 | `CFRTI_K_CANDLES` | Desk A | 215 (215) | about 55 (estimate) | `CFRTI_K_REGISTRATION.md`; live mode (the probe answered empty for pre-cutover markets), built from the `CFRTI_K_LISTS` answer; closes 2026-09-12 to 2026-11-04 only |
 | `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |

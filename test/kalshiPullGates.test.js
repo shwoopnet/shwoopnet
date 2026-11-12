@@ -48,13 +48,26 @@ gates.KP3 = () => {
   assert.ok(!/^\s*(from|import)\s+(?!argparse|calendar|gzip|hashlib|json|os|re|sys|time|urllib)/m.test(code), 'the script imports only the standard library it needs');
 };
 
-// KP4: the job id is a fixed choice, double checked in the first step, and every choice has a job file.
+// KP4 (Nov 12, 2026, the owner): the job id is a free string, so a pull request that only adds a job file never edits the workflow. The consequence: a bad id, or an id with no job file on main, stops the run before anything is sent, and the id never reaches a shell as code.
 gates.KP4 = () => {
-  const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
-  // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
-  assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS' && n !== 'INGAMELAG_M1').sort(), 'the choices are the job files except the two retired jobs with no choice');
-  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|NOSIDE1_CANDLES_P1\|NOSIDE1_CANDLES_P2\|NOSIDE1_CANDLES_P3\|SPREADCELL1\|SPREADCELL1_REST\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|CFRTI_K_LISTS\|CFRTI_K_PROBE\|CFRTI_K_R6SLICE\|ECONLAG_CALENDAR\|NHLOT_LISTS\|INGAMELAG_M1A\|INGAMELAG_M1B\|CENSUS_LISTING\|POLAPPR1_CANDLES\|POLAPPR1_CANDLES_P2\|POLAPPR1_CANDLES_P3\|CFRTI_K_CANDLES\|HOURLYTEMP_LISTS\|TESTING_LISTS_BUNDLE\|SOCDERIV_LISTS\|MAPBREAK_LISTS\|ESOCTIE_LISTS\|TIE3_CANDLES\)/.test(wf));
-  assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
+  const job = wfCode.match(/^ {6}job:\n((?: {8}.*\n)+)/m)[1];
+  assert.ok(/^ {8}type: string$/m.test(job) && !/options:|type: choice/.test(job), 'the job input is a plain string with no choice list');
+  assert.ok(!/case "\$JOB"/.test(wfCode), 'no hard-coded list of job names in a case guard');
+  assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf), 'both inputs reach the steps only through env');
+  assert.strictEqual((wfCode.match(/inputs\.job/g) || []).length, 1, 'inputs.job appears once, as the env assignment');
+  const bodies = [...wfCode.matchAll(/run: \|\n((?: {10}.*\n?)+)/g)].map((x) => x[1]).join('\n');
+  assert.ok(!/inputs\./.test(bodies) && !/\$\{\{/.test(bodies), 'no expression is interpolated into any run: script');
+  assert.ok(wfCode.includes('[[ "$JOB" =~ ^[A-Z][A-Z0-9_]{2,60}$ ]] || { echo "bad job id"; exit 1; }'), 'the exact id pattern is checked in the first step, through env');
+  assert.ok(wfCode.indexOf('bad job id') < wfCode.indexOf('uses: actions/checkout'), 'the id is validated before anything is checked out');
+  const ex = wfCode.indexOf('test -f "code/kalshi-scalper/workers/kalshi_pull_jobs/$JOB.json"');
+  assert.ok(ex > wfCode.indexOf('uses: actions/checkout') && ex < wfCode.indexOf('kalshi_pull.py'), 'the job file is required in the checkout of main, before the runner is called');
+  assert.ok(/ref: main\n\s+path: code/.test(wfCode) && (wfCode.match(/ref:/g) || []).length === 1, 'the only checkout is of main, so a job cannot run from another branch');
+  assert.ok(!/\.\.|\*/.test(wfCode.slice(ex, ex + 160).split('\n')[0]), 'no globbing and no .. in the existence test');
+  // the pattern itself, as bash reads it: a newline, a path, a lowercase or a short id is refused
+  const ok = (v) => { try { execFileSync('bash', ['-c', '[[ "$JOB" =~ ^[A-Z][A-Z0-9_]{2,60}$ ]]'], { env: { JOB: v } }); return true; } catch (e) { return false; } };
+  assert.deepStrictEqual(['SPREADLISTS', 'AB', 'abc', 'A../B', 'ABC\nx', 'ABC DEF', 'A' + 'B'.repeat(60), 'A' + 'B'.repeat(61)].map(ok), [true, false, false, false, false, false, true, false]);
+  // every job file's id fits the pattern, so none is locked out
+  for (const f of jobs) assert.ok(/^[A-Z][A-Z0-9_]{2,60}$/.test(f.replace('.json', '')), f + ': the id fits the workflow pattern');
 };
 
 // KP5: one host, pinned in code, https only, no other URL anywhere in the script.
@@ -530,7 +543,7 @@ gates.KP16 = () => {
   assert.ok(/if: always\(\) && steps\.gate\.outputs\.go == 'true' && env\.DRY_RUN == 'false'/.test(wf), 'the data is pushed even when the run stopped early, and never on a dry run');
   // every later step is skipped on a dry run except the dry run itself
   const steps = wf.split(/\n      - name: /).slice(1);
-  assert.strictEqual(steps.length, 6);
+  assert.strictEqual(steps.length, 7);
   assert.strictEqual(steps.filter((x) => /env\.DRY_RUN == 'false'/.test(x)).length, 3, 'the open, pull and push steps are real-run only');
   assert.strictEqual(steps.filter((x) => /env\.DRY_RUN == 'true'/.test(x)).length, 1, 'one dry-run step');
 };

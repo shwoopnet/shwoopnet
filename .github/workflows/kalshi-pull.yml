@@ -9,39 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       job:
-        description: "Job file to pull (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json on main)"
+        description: "The id of a job file in kalshi-scalper/workers/kalshi_pull_jobs/ on main, e.g. SPREADLISTS"
         required: true
-        type: choice
-        options:
-          - SPREADLISTS
-          - NOSIDE1_CANDLES
-          - SPREADCELL1
-          - SPREADCELL1_REST
-          - NOSIDE1_CANDLES_P1
-          - NOSIDE1_CANDLES_P2
-          - NOSIDE1_CANDLES_P3
-          - ROLLOFF_PROXY
-          - COMBO1_OPENBOOK
-          - PERPBTC1M
-          - PERPETH1M
-          - CFRTI_K_LISTS
-          - CFRTI_K_PROBE
-          - CFRTI_K_R6SLICE
-          - ECONLAG_CALENDAR
-          - NHLOT_LISTS
-          - CENSUS_LISTING
-          - POLAPPR1_CANDLES
-          - POLAPPR1_CANDLES_P2
-          - POLAPPR1_CANDLES_P3
-          - CFRTI_K_CANDLES
-          - HOURLYTEMP_LISTS
-          - TESTING_LISTS_BUNDLE
-          - SOCDERIV_LISTS
-          - MAPBREAK_LISTS
-          - ESOCTIE_LISTS
-          - TIE3_CANDLES
-          - INGAMELAG_M1A
-          - INGAMELAG_M1B
+        type: string
       dry_run:
         description: "true = check the job and print the URLs only; false = send the requests"
         required: true
@@ -66,7 +36,7 @@ jobs:
       - name: Check the inputs and the end date (2027-02-28 23:59 UTC)
         id: gate
         run: |
-          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|NOSIDE1_CANDLES_P1|NOSIDE1_CANDLES_P2|NOSIDE1_CANDLES_P3|SPREADCELL1|SPREADCELL1_REST|ROLLOFF_PROXY|COMBO1_OPENBOOK|PERPBTC1M|PERPETH1M|CFRTI_K_LISTS|CFRTI_K_PROBE|CFRTI_K_R6SLICE|ECONLAG_CALENDAR|NHLOT_LISTS|INGAMELAG_M1A|INGAMELAG_M1B|CENSUS_LISTING|POLAPPR1_CANDLES|POLAPPR1_CANDLES_P2|POLAPPR1_CANDLES_P3|CFRTI_K_CANDLES|HOURLYTEMP_LISTS|TESTING_LISTS_BUNDLE|SOCDERIV_LISTS|MAPBREAK_LISTS|ESOCTIE_LISTS|TIE3_CANDLES) ;; *) echo "bad job id"; exit 1 ;; esac
+          [[ "$JOB" =~ ^[A-Z][A-Z0-9_]{2,60}$ ]] || { echo "bad job id"; exit 1; }
           case "$DRY_RUN" in true|false) ;; *) echo "bad dry_run"; exit 1 ;; esac
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the pull script and the job file from main
@@ -75,6 +45,10 @@ jobs:
         with:
           ref: main
           path: code
+      - name: Require the job file on main
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          test -f "code/kalshi-scalper/workers/kalshi_pull_jobs/$JOB.json" || { echo "no such job file on main"; exit 1; }
       - name: Dry run (checks the job file, prints the URLs, sends nothing)
         if: steps.gate.outputs.go == 'true' && env.DRY_RUN == 'true'
         run: |
