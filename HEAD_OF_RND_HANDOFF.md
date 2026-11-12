@@ -16,7 +16,8 @@ Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief o
 - Live-Data Forensics: session_01PSWvZn9mqpQ8DM1QEXpyVo (branch claude/forensics-desk)
 - Verification Analyst (under Main, not research): session_01PSWvZqX5pfCnCJfvqJpDCL
 - Retired or stopped Nov 12: V2 (session_01PSWvZpN1MLodfM5W2dqtii; handoff kalshi-scalper/V2_HANDOFF_NOV12.md on claude/epic-ptolemy-0amjd9), Probe Engineering (session_01PSWvZnv28Wm8fCqua9FMzq; handoff docs/probes/HANDOFF_PROBE_DESK_NOV12.md on claude/probe-desk).
-- Being created by Main, ids not yet known at the time of writing: a Testing Desk (branch claude/testing-desk) and a Stocks Desk (branch claude/stocks-desk). Ask Main for their ids.
+- Testing Desk (created Nov 12 16:44Z by Main): session_01PSWvZoWZGK1VYgdMTA25vo (branch claude/testing-desk). First task WXDAYEND's remaining count.
+- Stocks Desk (created Nov 12 16:44Z by Main): session_01PSWvZkxSgedtJBD4vHPwcs (branch claude/stocks-desk). Data plan first, Databento under the owner's $25 cap.
 
 ## Standing rules I set or enforce
 
