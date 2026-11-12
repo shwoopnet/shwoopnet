@@ -2,7 +2,7 @@
 
 Mechanism 5 of FIVE_MECHANISMS_NOV11.md. No money, no trading code. Shadow candidate at most.
 
-Data: R6 book15r6 (quote-data) for KXBTC15M and KXETH15M, windows with at least 100 good polls and a result in coverage.csv (about 920 per asset, Oct 29 22:15Z to Nov 11 16:00Z). [live figure removed, ask Main] 1 minute Coinbase candles for the reference and the volatility.
+Data: R6 book15r6 (quote-data) for KXBTC15M and KXETH15M, windows with at least 100 good polls and a result in coverage.csv (about 920 per asset, Oct 29 22:15Z to Nov 11 16:00Z). Spot ticks: Kraken public Trades (XBTUSD, ETHUSD), from 200 s before each close, fetched per window. 1 minute Coinbase candles for the reference and the volatility.
 
 Rule, fixed here:
 1. Look L = close minus 180 s. Decide once per window per asset, using only data at or before L.
@@ -10,10 +10,10 @@ Rule, fixed here:
 3. Spot S = price of the last Kraken tick at or before L.
 4. sigma = standard deviation of the 60 most recent 1 minute Coinbase log returns whose candle closed at or before L; sd_remaining = sigma * sqrt(180/60) (tau 180 s, no drift, no averaging adjustment).
 5. p_yes = Phi(ln(S/K) / sd_remaining), p_no = 1 - p_yes.
-6. Book: asks from the R6 2 second book. YES ask = 1 - best NO bid; NO ask = 1 - best YES bid. Execution row = the last book row received (t_recv) at or before L + 2 s (main) or L + 10 s (variant). [live figure removed, ask Main]
+6. Book: asks from the R6 2 second book. YES ask = 1 - best NO bid; NO ask = 1 - best YES bid. Execution row = the last book row received (t_recv) at or before L + 2 s (main) or L + 10 s (variant). Fill one contract at that ask, depth ignored (level 1 size reported, not required).
 7. Buy the side with edge = p_side - ask_side >= 0.10, only if its ask is in [0.50, 0.87] (the 88c to 97c favourite band is excluded on purpose). One trade per window per asset at most; if both sides qualify, the larger edge.
-8. Hold to settlement, outcome = Kalshi's recorded result. [live figure removed, ask Main]
-9. [live figure removed, ask Main] Otherwise: FAIL if PF < 1.0 at +0c; DATA_LIMITED if the point is above 1.0 but the bar is not met or n < 80.
+8. Hold to settlement, outcome = Kalshi's recorded result. Cash basis: paid = ask, win pays 1; fee = 0.07 * paid * (1 - paid) per contract, unrounded; slip +0c and +1c added to paid.
+9. Pass bar (set now): at +1c slip with the +2 s delay, pooled BTC and ETH profit factor >= 1.3 on n >= 80 trades, first half and second half (by close time, split at the median trade) both PF > 1.0, and still PF > 1.0 with the +10 s delay. Otherwise: FAIL if PF < 1.0 at +0c; DATA_LIMITED if the point is above 1.0 but the bar is not met or n < 80.
 10. Sensitivities (counted, none can rescue a miss): edge 0.05 and 0.15; look 120 s; sd x1.5; BTC alone, ETH alone. N counted for this test = 8 variants x 2 assets, added to the project's try count.
 11. Descriptive only: proxy agreement sign(final spot - K) vs result; daily P/L correlation with gold L1 cash P/L if 10 or more overlap days.
 
@@ -21,3 +21,7 @@ Windows held: about 920 per asset, so n for the rule is whatever fires; if fewer
 
 ## Deviation note (written after the first main score, which was run in the mode below)
 Kraken tick pulls ran at about 12 requests a minute (2.6 hours for all windows), so the MAIN score uses the Coinbase 1 minute candle that ends exactly at L (close minus 180 s, minute aligned) as spot S. This is the price at L to within the Coinbase tick, so for a single look at a minute boundary it loses little, but the sub-minute path is not used (resolution limit). Kraken ticks are used only as a cross-check on the subset pulled. First main result (+2 s, +0c) n58 PF 1.58; the rule was not altered after seeing it.
+
+## Re-read date and n, committed Nov 12, 2026 (restored file: the privacy scrub had removed the bar and execution rows; they are public R6 research rules, restored from 22d61267)
+- REGISTERED BAR = item 9 above (pooled BTC and ETH PF 1.3 or more at +1c with the +2 s delay on n of 80 or more, both halves PF above 1.0, PF above 1.0 with the +10 s delay). V2's draft bar, if different, is not the registered one.
+- RE-READ: once, when n of 80 firings is reached or when the R6 recorder (extended to Dec 15) has ended and its last day is in (2026-12-16), whichever comes first. The first read (Nov 4) stays DATA_LIMITED. Held-out: none; this is a shadow candidate only.
