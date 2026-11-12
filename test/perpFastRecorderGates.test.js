@@ -69,6 +69,25 @@ print(json.dumps([a, len(rows) - 1, calls[0], b, c, os.listdir(d)]))`);
   assert.deepStrictEqual(r[5], ['2026-11-05'], 'nothing else was written');
 };
 
+// PF5: starts are packed into the two windows (both daylight saving offsets), not spread over the day: GitHub drops most scheduled starts, so each window needs several.
+// Consequence: a dropped start must not leave a window with no start at all.
+gates.PF5 = () => {
+  const crons = [...wf.matchAll(/^\s+- cron: "([^"]+)"/gm)].map((m) => m[1]);
+  const starts = [];
+  for (const c of crons) {
+    const [mi, hr, , , dow] = c.split(' ');
+    assert.strictEqual(dow, '1-5', 'weekdays only');
+    for (const h of hr.split(',')) for (const m of mi.split(',')) starts.push(Number(h) * 60 + Number(m));
+  }
+  assert.ok(starts.length <= 33, 'no more starts a day than the old */20 12-22 schedule (33)');
+  const windows = { 'open EDT': [13 * 60 + 10, 14 * 60 + 30], 'open EST': [14 * 60 + 10, 15 * 60 + 30], 'close EDT': [19 * 60 + 40, 21 * 60], 'close EST': [20 * 60 + 40, 22 * 60] };
+  for (const [n, [a, b]] of Object.entries(windows)) {
+    const inside = starts.filter((s) => s >= a && s < b).length;
+    assert.ok(inside >= 7, n + ' has ' + inside + ' starts inside it; needs at least 7');
+  }
+  assert.ok(/cancel-in-progress: false/.test(wf) && /STOP_DATE|2027-02-26/.test(wf + script), 'stop date and queueing kept');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

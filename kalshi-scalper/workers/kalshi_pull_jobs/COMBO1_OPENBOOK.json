@@ -53,8 +53,8 @@
    }
   }
  ],
- "notes": "Three requests, the cursor is not followed (no max_pages).",
- "status": "active",
+ "notes": "Three requests, the cursor is not followed (no max_pages). RETIRED Nov 12, 2026 by the Head of R&D: the 3 reads were made and COMBO1 is closed. The runner refuses a job that is not active, so this file cannot run again.",
+ "status": "retired",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,

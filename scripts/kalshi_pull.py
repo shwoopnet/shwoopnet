@@ -210,10 +210,10 @@ def check_request(r, eps, tk, sr):
         if isinstance(v, bool) or not isinstance(v, (str, int)):
             raise Refused("param %s must be a string or an integer" % k)
         s = str(v)
-        if k == "market_tickers":
+        if k in ("market_tickers", "tickers"):
             parts = s.split(",")
             if not 1 <= len(parts) <= 100 or not all(TICKER_RE.fullmatch(p) and p in tk for p in parts):
-                raise Refused("market_tickers must be 1 to 100 allowlisted tickers")
+                raise Refused("%s must be 1 to 100 allowlisted tickers" % k)
         elif BAD_CHARS.search(s) or not s:
             raise Refused("param %s has a forbidden character" % k)
         if k == "status" and s not in STATUS_VALUES:

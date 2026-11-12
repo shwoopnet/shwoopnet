@@ -1,13 +1,16 @@
 # Nov 11, 2026 (the owner approved). Politics shadow recorder: every 30 minutes the quote of every open market of the series in kalshi-scalper/workers/POLREC_SERIES.json that settles within
 # 14 days (the owner's hold cap), plus an hourly read of results, plus a daily count of what the cap left out. Research data only: public Kalshi market data, no key, no secret, no order, no Firestore.
 # The built-in GITHUB_TOKEN pushes gzipped files to its OWN `pol-data` branch (under polrec/), never to main; `quote-data` is already large and every job fetches its whole branch. The first run creates `pol-data` as an orphan branch.
-# An hourly start (minute 7) runs about 35 minutes and polls twice (minutes 0 and 30), about 32 requests a poll (a few more for paging) at 5 seconds apart, so about 1 request a minute on average and never more than 12. About 840 runner minutes a day, free on a public repo.
-# One concurrency group that never cancels: a run that finds a job running waits, so jobs never overlap, and a dropped start costs at most an hour of quotes.
+# GitHub dropped most hourly starts (3 successful runs in 19 hours), so a start now comes every 15 minutes (minutes 7, 22, 37, 52) and each run does ONE poll, about 4 minutes, then ends.
+# A freshness step skips a poll when the newest polrec folder on the data branch is under 25 minutes old, so a full set of starts still gives about one poll per 30 minutes (at most 48 a day) and a dropped start is covered by the next one.
+# Per poll: about 45 requests (42 series, a few pages), 5 seconds apart, so never more than 12 a minute; the hourly results read (first run of each hour, started before minute 20) adds about 45 more. About 2 requests a minute on average at most, no more than before.
+# About 400 runner minutes a day (polls, results reads, and the short skipped runs), free on a public repo. Folder names carry the run id and attempt, so two runs can never write the same file.
+# One concurrency group that never cancels: a run that finds a job running waits, so jobs never overlap.
 # It stops by itself: from 2027-02-28 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-politics
 on:
   schedule:
-    - cron: "7 * * * *"
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch: {}
 permissions:
   contents: write
@@ -17,7 +20,7 @@ concurrency:
 jobs:
   record:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 30
     steps:
       - name: Stop for good after the end date (2027-02-28 23:59 UTC)
         id: gate
@@ -36,12 +39,23 @@ jobs:
           git init -q
           git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
           if git fetch -q --depth 1 origin pol-data; then git checkout -q -b pol-data FETCH_HEAD; else git checkout -q --orphan pol-data; fi
-      - name: Poll every 30 minutes (two polls a job)
+      - name: Skip when a poll is under 25 minutes old (a start the schedule did not drop)
+        id: fresh
         if: steps.gate.outputs.go == 'true'
         run: |
-          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          LAST="$(ls -d data/polrec/*/* 2>/dev/null | sort | tail -1)"
+          if [ -n "$LAST" ]; then
+            D="$(basename "$(dirname "$LAST")")"; T="$(basename "$LAST" | cut -c1-4)"
+            THEN="$(date -u -d "$D ${T:0:2}:${T:2:2}" +%s 2>/dev/null || echo 0)"
+            if [ $(( $(date -u +%s) - THEN )) -lt 1500 ]; then echo "last poll $LAST is under 25 minutes old: skipping"; echo "poll=false" >> "$GITHUB_OUTPUT"; exit 0; fi
+          fi
+          echo "poll=true" >> "$GITHUB_OUTPUT"
+      - name: Poll once
+        if: steps.gate.outputs.go == 'true' && steps.fresh.outputs.poll == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
           mkdir -p "data/polrec/$STAMP"
-          python3 code/scripts/record_politics.py "data/polrec/$STAMP" --minutes 35
+          python3 code/scripts/record_politics.py "data/polrec/$STAMP" --minutes 0
           gzip -9 -f data/polrec/$STAMP/*.csv
       - name: Commit and push the data branch
         if: always() && steps.gate.outputs.go == 'true'

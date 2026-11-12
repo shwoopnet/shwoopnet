@@ -68,7 +68,7 @@ gates.SH4 = () => {
   const own = lib.replace(/args\.(update|record|market|readOpen)\(/g, 'inject(');   // the library only calls what the minute function injects
   assert.ok(!/fetch|liveRequest|submitOrder|\/orders|keyId|pem|process\.env|secret|runTransaction|\.update\(|\.delete\(|\.set\(/.test(own), 'the shadow library places no order, makes no request of its own, reads no key or secret and only creates log rows (settlement uses injected public readers)');
   const idx = code(read('functions', 'index.js'));
-  assert.ok(/if \(shadowLib\.SHADOW_RULES\.length\)/.test(idx) && /rules: shadowLib\.SHADOW_RULES/.test(idx), 'index.js passes only the constant registry, and only when it is not empty');
+  assert.ok(/if \(shadowLib\.SHADOW_RULES\.length && !armedOn\)/.test(idx) && /rules: shadowLib\.SHADOW_RULES/.test(idx), 'index.js passes only the constant registry, and only when it is not empty');
   assert.ok(!/args\.rules|request\.data[^;]*shadow|shadowRules\s*=/i.test(idx), 'nothing from a request or storage can supply a rule');
   const tickPos = idx.indexOf('slotRun.runSlotTick'), shadowPos = idx.indexOf('shadowLib.runShadowTick');
   assert.ok(tickPos > 0 && shadowPos > tickPos, 'the shadow run comes AFTER everything that can trade has run');
@@ -82,23 +82,25 @@ gates.SH4 = () => {
   assert.ok(/require\("\.\/kalshiShadowLib"\)/.test(rep) && !/fetch|liveRequest|collection\(|\.create\(|runTransaction|firebase|getFirestore/.test(rep), 'the report may SCORE the log (rows are handed in by index.js) but still sends nothing and writes nothing itself');
 };
 gates.SH5 = async () => {
-  // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): all four shadow rules (XRPYES10, GOLDALL, XRPFAV6, LANTERN) were the favourite-late
-  // mechanism gold L1 already runs, so the registry is EMPTY again. Empty must behave exactly like the registry that shipped before any rule existed: nothing is logged, written, read or requested.
-  const rules = sh.SHADOW_RULES;
-  assert.deepStrictEqual(rules.map((r) => r.id), [], 'no shadow rule is registered: a new one must be a different mechanism (docs/STRATEGY_LIFECYCLE.md section 7c)');
-  assert.deepStrictEqual(sh.activeShadowRules(undefined, live.L1_SERIES), [], 'the production registry is empty');
+  // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): the four favourite-late shadow rules were retired. Nov 12, 2026 (the owner: "Make sure gold
+  // keeps a shadow record after the latch trips"): ONE rule, GOLDOFF, is registered on purpose as gold's return evidence (test/goldOffShadowGates.test.js). Nothing else is: the registry is exactly that one id, and an
+  // EMPTY registry (forced here, as the off-equivalence gates do) still behaves exactly like the registry that shipped before any rule existed: nothing is logged, written, read or requested.
+  assert.deepStrictEqual(sh.SHADOW_RULES.map((r) => r.id), ['GOLDOFF'], 'only the written GOLDOFF exception is registered: a new rule must be a different mechanism (docs/STRATEGY_LIFECYCLE.md section 7c)');
+  const rules = [];
+  assert.deepStrictEqual(sh.activeShadowRules(rules, live.L1_SERIES), [], 'an empty registry is empty');
   const quote = (series) => ({ series, m: { ticker: series + '-26NOV101115-00', status: 'open', close_time: new Date(NOW + 360000).toISOString(), yes_bid_dollars: '0.9200', yes_ask_dollars: '0.9300', yes_ask_size_fp: '100.00', yes_bid_size_fp: '100.00' } });
-  for (const s of ['KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXBTC15M']) assert.deepStrictEqual(sh.shadowSignals(rules, [quote(s)], NOW), [], s + ': no signal from the registry');
+  for (const s of ['KXGOLD15M', 'KXETH15M', 'KXXRP15M', 'KXBTC15M']) assert.deepStrictEqual(sh.shadowSignals(rules, [quote(s)], NOW), [], s + ': no signal from an empty registry');
+  const real = sh.SHADOW_RULES.filter((r) => r.id === 'GOLDOFF').length;
+  for (const s of ['KXETH15M', 'KXXRP15M', 'KXBTC15M']) assert.deepStrictEqual(sh.shadowSignals(sh.SHADOW_RULES, [quote(s)], NOW), [], s + ': the one registered rule looks at gold only');
+  assert.strictEqual(real, 1);
   const writes = [];
   const out = await sh.runShadowTick({ now: NOW, quotes: [quote('KXGOLD15M'), quote('KXXRP15M')], rules, allowedSeries: live.L1_SERIES, record: async (d) => { writes.push(d); } });
   assert.deepStrictEqual(out, { skipped: 'no shadow rule' }, 'an empty registry skips the whole run');
   assert.deepStrictEqual(writes, [], 'and writes nothing');
-  // The score the nightly report carries has no rule to score, so it is an empty list, never an error.
   assert.deepStrictEqual(sh.shadowReport(rules, [{ rule: 'GOLDALL', atMs: NOW, settled: true, pnl: 0.1, wouldFill: true }], NOW), [], 'rows logged by a retired rule stay in the collection and are not scored');
   // The minute function does not even call the shadow run, or its settle sweep, while the registry is empty.
   const idx = read('functions', 'index.js');
-  assert.ok(/if \(shadowLib\.SHADOW_RULES\.length\) \{\s*\n\s*try \{ await shadowLib\.runShadowTick/.test(idx), 'index.js guards the shadow tick and the settle sweep on the registry being non-empty');
-  // None of the four retired ids can come back by a stored value: the registry is a frozen list in code, and the pre-registration sections stay in the README with their retired notes.
+  assert.ok(/if \(shadowLib\.SHADOW_RULES\.length && !armedOn\) \{\s*\n\s*try \{[\s\S]*?await shadowLib\.runShadowTick/.test(idx), 'index.js guards the shadow tick and the settle sweep on the registry being non-empty');
   const readme = read('kalshi-scalper', 'README.md');
   for (const id of ['XRPYES10', 'GOLDALL', 'XRPFAV6', 'LANTERN']) assert.ok(readme.includes('Retired Nov 11, 2026 (' + id), id + ' carries its Nov 11 retired note in the README');
 };
