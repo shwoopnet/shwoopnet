@@ -1,0 +1,20 @@
+{
+  "registration": "kalshi-scalper/workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md",
+  "frozen": "2026-11-12",
+  "series": ["KXESOCCERGAME"],
+  "event_shape": "three markets an event: two team markets and one whose ticker ends in -TIE (YES means the game ended level)",
+  "start_rule": "S = the date and four-digit clock time at the front of the event key (for example 26NOV091943), read as US Eastern time",
+  "start_guard_minutes": [5, 30],
+  "blocks": {
+    "development_closes_from": "2026-09-12T00:00:00Z",
+    "development_closes_before": "2026-10-23T00:00:00Z",
+    "development_half_split": "2026-10-03T00:00:00Z",
+    "held_out_from": "2026-10-23T00:00:00Z",
+    "held_out_before": "2026-11-13T00:00:00Z"
+  },
+  "strength_buckets_on_f": [0.0, 0.45, 0.55, 0.65, 0.75, 1.0],
+  "base_rate_minimum_earlier_events": 300,
+  "gap_line": 0.10,
+  "spread_line": 0.04,
+  "cost_kill_round_trip": 0.05
+}

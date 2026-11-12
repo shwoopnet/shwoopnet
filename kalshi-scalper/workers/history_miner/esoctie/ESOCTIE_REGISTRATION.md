@@ -1,0 +1,78 @@
+# ESOCTIE: the listed Tie in e-soccer match markets, against its base rate (registration, Nov 12, 2026)
+
+**Registered before any price or result of these markets was read by this desk.** Written by the R&D History Miner on the Head of R&D's brief of Nov 12 (item 3, "the TIE3 idea on a venue with enough events to read"). Frozen series and constants: `esoctie/ESOCTIE_SERIES.json`. Research on public data only; no live account figure here. [research]
+
+`ESOCTIE | family: a listed third outcome priced under its base rate (TIE3's mechanism, a new venue: a VERSION of TIE3 under lifecycle 7g, ruled by the Head) | entry before the game on the Tie contract, hold to the end of the game (about 10 to 15 minutes) | risk class: mid price (about 15c to 35c), 1 contract, hundreds of events a day, no market or clock shared with any live strategy | stage Idea`
+
+## What has been seen so far
+
+Only shape and times, from the Nov 10 census listing (`CENSUS_LISTING` on `kalshi-pull-data`): tickers, event keys, open, close, occurrence and settlement times of a handful of KXESOCCERGAME events. No price field and no result field was printed or used. Seen: three markets an event (two team markets named by club and gamer tag, and `-TIE`, "Game ends in a tie"); the key reads date and Eastern clock time (26NOV091943 is Nov 9, 19:43 ET); the market closes about 12 minutes after that time and settles about 4 minutes after the close; `occurrence_datetime` is the key time plus 3 hours and is NOT used.
+
+## Rulings and checks it rests on
+
+1. **Mechanism is TIE3's** (Desk B card 18, `tie3/TIE3_REGISTRATION.md` on `claude/idea-desk-b`): team buyers come for a player; the Tie is left to whoever quotes it. The Head's 18:24Z note said "E-soccer does not join TIE3's frozen cells"; this is therefore its own registration, a version on a new venue, counted as its own try. The Head rules whether it counts toward the owner's five as one candidate with TIE3.
+2. **Declined list (lifecycle 7e), compared row by row.** TIECOND1 ("tie or frozen-source YES rules"): that row is the 15 minute price markets where an unchanged price settles YES, a rare edge case; this is a listed sports-style Tie that happens perhaps 20% to 30% of the time. Different market, contract and reason; the word "tie" is in that row, so the Head rules, as for TIE3. Favourite-and-hold: not a favourite (the Tie is bought at about 15c to 35c). Cheap-side sweeps: not the 15 minute series and not a sweep; one rule, fixed now. In-game lag: entry is before the game. Lock and parity: not a lock; it can lose.
+3. **Closest earlier test:** VIRT1 (V2, Nov 7) read the cheap side of the TEAM contracts of the same series against a player rating: NOT_ENOUGH_DATA at 15 trades, every sign on the falsified side. It never read the Tie contract as a base-rate bet. It is a prior against this venue's makers being careless, not a test of this rule.
+4. **Data:** Kalshi's own public markets only, through kalshi-pull. No outside site.
+
+## The instants and prices (pinned)
+
+1. **Scheduled start S:** the key's date and four-digit clock time read as US Eastern time. **Guard:** the event's markets must close between S + 5 and S + 30 minutes; otherwise the event is dropped and counted "start not derivable".
+2. **Pre-match instant:** the one-minute candle ending at S minus 1 minute. All three contracts (both teams and the Tie) must be two-sided at that candle's close (0 < bid < ask < 1). If not, step back a minute at a time to S minus 10 minutes; if none, the event is "not filled" and counted. Nothing is filled in from another minute.
+3. **Strength f:** the larger of the two team contracts' mids at the pre-match instant. Bucket edges on f: 0, 0.45, 0.55, 0.65, 0.75, 1.0.
+4. **Base rate b:** the share of EARLIER development events (market close strictly before this event's S) in the same f bucket that settled Tie. It needs at least 300 such earlier events; until a bucket has 300 the event is "base-building" and no bet is placed. Base-building events are counted and never re-entered.
+
+## The rule (1 try)
+
+At the pre-match instant, **if b minus the Tie's ask is 10c or more and the Tie's spread is 4c or less: buy 1 Tie contract.** One bet an event. Hold to settlement.
+
+- **Price paid:** the Tie's ask plus 1c (a limit one cent through the ask, booked filled there). Fee: 0.07 x price x (1 minus price), rounded UP to the next whole cent. The fill haircut table of `HOW_TO_PRICE_A_PAPER_TRADE.md` (claude/forensics-desk) is shown beside the result: drop 15% (2 s) and 23% (6 s) of bets, worst-case first and at random.
+- **Result:** the Tie market's own result, read for every development event in time order (it builds b) and booked for bets.
+- **Direction is fixed:** if the Tie turns out OVERPRICED against b, the card closes; it is not turned round.
+
+**Known leans, stated before data.** (a) The base rate pools all player pairs in a bucket; pairs that tie more or less often are priced by makers who know them, so b is cruder than the price and a gap can be b's own error, against us. (b) f is measured from the same quotes the bet uses; a stale Tie quote alongside fresh team quotes would show up as a gap and may be the real thing, or one contract deep. (c) Candle freshness was measured on Bitcoin 15 minute only, not on e-soccer.
+
+## The placebo (what noise alone looks like)
+
+The same statistics for the mirror line: the share of filled events where the Tie's BID is 10c or more ABOVE b (spread 4c or less). With no edge and symmetric noise the two shares should be close. Reported beside the real line.
+
+## Kill rules, read first, before any bet is booked (fixed now)
+
+1. Under 150 filled non-base-building events: "no evidence at n = x".
+2. **Closed on cost** if the median round trip on the Tie at the pre-match instant (spread plus two fees at the mid) is above 5c.
+3. **Closed, "efficient, move on"** (the 90th percentile of b minus ask as the one number) unless the share of filled events with a gap of 10c or more and a spread of 4c or less is at least 3% AND at least twice the placebo's share.
+4. If any of these closes the card, no bet is scored.
+
+## Samples (date constants)
+
+- **Development:** events whose markets closed from 2026-09-12 00:00 UTC to before 2026-10-23 00:00 UTC. Halves split at 2026-10-03 00:00 UTC.
+- **Held-out:** closes from 2026-10-23 00:00 UTC to before 2026-11-13 00:00 UTC, about the most recent third of what the live endpoint holds. **Not listed and not pulled** until the Head's go after the development read; read once. Its base rate uses only events closed before each held-out bet's S (development plus earlier held-out events).
+
+## What is reported (counts first)
+
+Events listed; start derivable; filled; base-building; filled and eligible; median spread and round trip; gap median, quartiles and 90th percentile; the 10c and 4c share and the placebo share, each per f bucket. For the rule: bets; wins; mean price paid; cash PF; net cents a contract; each half; each f bucket; the largest share of net from one day; one-sided z with the day as the cluster; the haircut lines.
+
+## Verdicts (fixed now)
+
+- Under 100 bets: "no evidence at n = x".
+- 100 or more bets and cash PF under 1.0, overall or in either half: FALSIFIED.
+- Cash PF 1.5 or better with both halves above 1.0: "development bar met"; the held-out pull is asked of the Head the same hour.
+- Otherwise: "below the bar at n = x, PF y".
+- **The research bar:** cash PF 1.5 or better on development AND held-out, one-sided z 5.46 or more on the two together (shared count about 2,113,000 tries). Nothing short of that is called a pass.
+
+## Events and power, said plainly
+
+Nov 10 (a Tuesday, a lower bound): about 450 e-soccer events. Development (41 days) about 18,000 events, held-out about 9,000. If the rule fires on 3% of eligible events that is about 500 development bets; at 5%, about 900. A true PF of 1.5 near 25c needs about 1,000 to 1,200 bets for z 5.46 over both samples, so the read can decide the question only if the rule fires on about 3% or more.
+
+## Prediction (numeric, before data)
+
+Median gap (b minus ask) within plus or minus 3c; the 10c share under 3% (the card closes as "efficient, move on", my probability about 75%); if it does fire, cash PF 0.8 to 1.1. **Probability it reaches the research bar: 1 to 2%.**
+
+## Tries
+
+**1** (one rule, buckets are reported, not separate rules). Added to the deflation ledger through the Head before any bet is scored.
+
+## Requests
+
+- **Lists (`ESOCTIE_LISTS`, written):** 4 requests, at most 81 pages (expected about 55, about 120 MB), development closes only, three date slices, plus the series fee fields.
+- **Candles (built from the lists, a reviewed job before it runs):** per event the three contracts from S minus 10 minutes to S, packed by S (window minutes x tickers at most 9,000): estimate 1,000 to 2,000 requests, one or two runs. The exact count comes from the lists.
