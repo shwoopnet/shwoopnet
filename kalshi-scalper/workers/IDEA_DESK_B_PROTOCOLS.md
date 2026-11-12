@@ -326,3 +326,12 @@ Asked for by the Head of R&D. ECONLAG is the first card to be read against the s
 **8. Forward kill, if it is ever listed.** Paper trades after 2026-10-31 are logged with the same rule. The listing is removed if the forward paper net is below zero after 10 forward trades, or if 3 forward trades in a row are dropped for having no bid.
 
 Sources: Kalshi's public market data only (the print calendar is taken from Kalshi's own event close times). No outside host.
+
+**ECONLAG scripts committed before the calendar pull (Nov 12, about 16:10Z).** `workers/econlag/econlag.py` holds every stage: `calendar` (print calendar, count of print days, builds the part A job), `build-b` (chooses F for each print from the day-before daily candle, builds the part B job), `scan` (the trigger scan, a count that reads no outcome, with the stop rule) and `score` (the one read against the paper screen, with a read-once marker file). `workers/econlag/test_synthetic.py` runs the whole chain on made-up data: a world with late-following slow markets ends "on the paper list (unproven)", a world with no jumps is stopped by the scan, and a second `score` is refused.
+
+**Two details fixed now, before any read:**
+
+1. **Part B's cap is 100 requests, not 75.** Twenty-five months hold about 75 monthly releases plus about 17 Fed meetings, about 92 prints, one request each. "About 70 print days" in protocol 2 was low. Worst case spent by the end of the scan: 10 + 90 + 100 = 200 requests (it was stated as 175).
+2. **The beta needs at least 20 paired daily changes** inside the 60 trading days before the print; with fewer, the slow market is skipped for that print. Protocol 2 named the 60 days and not a minimum.
+
+**Not built yet, on purpose:** the part C job builder (slow markets on trigger days). It is only needed if the scan clears 30 trigger days, and the Head of R&D has ruled that nothing is pulled past the scan otherwise. `score` already takes any plan of slow markets, and was tested with one. **Not computed in the first read:** the placebo (the same rule a week earlier), which needs its own candles; it is asked for only if the card is listed.
