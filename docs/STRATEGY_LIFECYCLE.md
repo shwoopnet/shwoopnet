@@ -303,3 +303,5 @@ V2 and Refinement each hand the chief of staff, **every Sunday at 6:41 PM Centra
 - **A fast kill can kill a good strategy on a bad draw** (gold's rolling 60 rule fired once and the next 50 trades recovered strongly); that is why the rolling rule is only an alert and the kills that act are dollar based.
 - **Fast markets judge fast and also lie fast.** Gold's profit factor fell across three periods as its loss rate rose past break-even (about 7.5%), mostly luck. [live figures removed, ask Main]
 - **The limit is the edge, not the machinery.** A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.
+
+**Rotation lane (Nov 12, 2026, DRAFT, not in force):** small-size live seats that enter and leave by a replayed shadow record are described in `docs/ROTATION_LANE.md`. It binds nobody until the owner approves it.
