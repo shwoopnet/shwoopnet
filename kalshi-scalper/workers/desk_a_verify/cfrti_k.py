@@ -34,7 +34,7 @@ def load_markets(folder):
         for m in (b.get("markets", []) if isinstance(b, dict) else []):
             if m.get("ticker", "").startswith("KXBTC15M-") and m.get("result") in ("yes", "no") and m.get("floor_strike") is not None:
                 c = iso(m["close_time"])
-                if c < CUTOFF: out[m["ticker"]] = dict(close=c, strike=float(m["floor_strike"]), yes=m["result"] == "yes")
+                if c < CUTOFF: out[m["ticker"]] = dict(close=c, strike=float(m["floor_strike"]), yes=m["result"] == "yes", rules=(m.get("rules_primary") or "")[:400])
     return out
 def load_binary(folder):
     out = collections.defaultdict(dict)   # ticker -> end_ts -> (bid, ask)
@@ -77,7 +77,10 @@ def decide(mk, cands, perp, nxt_key=None):
     if len(lr) < 6: return None, "under 6 changes"
     m = sum(lr) / len(lr); sd = math.sqrt(sum((x - m) ** 2 for x in lr) / (len(lr) - 1)) * math.sqrt(4 / 3)
     if sd <= 0 or not xs[0]: return None, "no volatility"
-    py = Phi(math.log(xs[0] / mk["strike"]) / sd)
+    p_open = perp.get(mk["close"] - 900)        # the perp mark at the window's opening minute (the candle ending at close - 900 s)
+    if not p_open: return None, "no opening minute"
+    index = mk["strike"] * (xs[0] / p_open)      # section 12: the perp's own RETURN since the open applied to the strike; a constant basis cancels
+    py = Phi(math.log(index / mk["strike"]) / sd)
     p = ask if side == "yes" else 1 - bid
     chance = py if side == "yes" else 1 - py
     if chance - p < EDGE: return None, "no edge"
@@ -123,6 +126,8 @@ def report(markets, binary, perp, kraken=None):
         if t: trades.append(t)
     trades.sort(key=lambda t: t["close"])
     L = ["CFRTI-K DEVELOPMENT | markets %d | decisions: %s" % (len(markets), dict(why))]
+    rs = next((m["rules"] for m in markets.values() if m.get("rules")), "")
+    L.append("rules text of the first market (the strike is taken to be the index at the window's open; if this says otherwise, STOP and tell the Head of R&D): %s" % (rs or "(no rules_primary in the list answer)"))
     pn = [t["pnl"] for t in trades]; n = len(trades)
     if not n: L.append("no trades"); return L, trades
     th = thirds(trades); tpf = [pf([t["pnl"] for t in x]) for x in th]
@@ -154,7 +159,7 @@ def synth(days=60, edge=True, seed=7):
         p *= math.exp(rng.gauss(0, 0.0005)); perp[t0 + 60 * m] = p
     vol = 0.0005 * math.sqrt(2)      # the true two-minute volatility of the synthetic walk
     for q in range(1, days * 96):
-        close = t0 + 900 * q; strike = perp[close - 900] * (1 + rng.uniform(-0.0015, 0.0015))
+        close = t0 + 900 * q; strike = perp[close - 900]   # the strike is the index at the open (section 12)
         final = perp[close]; yes = final > strike
         fair = Phi(math.log(perp[close - 120] / strike) / (vol * math.sqrt(1.0)))
         ask = fair - 0.08 if (edge and rng.random() < 0.3) else fair + 0.02
@@ -168,6 +173,7 @@ def selftest():
     # 1. hand-checked arithmetic on one trade
     mk = dict(close=10_000_000, strike=100.0, yes=True)
     perp = {mk["close"] - 120 - 60 * k: 101.0 + (0.05 if k % 2 else -0.05) for k in range(11)}
+    perp[mk["close"] - 900] = 100.0                 # opening-minute mark: index = strike * 101/100
     cands = {mk["close"] - 120: (0.10, 0.12)}
     t, w = decide(mk, cands, perp)
     assert t and w == "trade" and abs(t["p"] - 0.12) < 1e-12 and t["win"] and abs(t["pnl"] - (1 - 0.12 - fee(0.12))) < 1e-12, (t, w)
@@ -177,6 +183,9 @@ def selftest():
     assert decide(mk, {mk["close"] - 120: (0.10, 0.16)}, perp)[1] == "spread over 3c or crossed"
     assert decide(mk, {mk["close"] - 90: (0.10, 0.12)}, perp)[1] == "no decision candle"
     assert decide(mk, cands, {k: v for k, v in perp.items() if k < mk["close"] - 120 - 300})[1] in ("under 6 changes",)
+    assert decide(mk, cands, {k: v for k, v in perp.items() if k != mk["close"] - 900})[1] == "no opening minute"       # missing opening candle: dropped and counted
+    mk_far = dict(mk, strike=50.0)                   # a constant basis (the strike's level) does not enter: same decision whatever the strike
+    assert decide(mk_far, cands, perp)[0]["p"] == t["p"] and decide(mk_far, cands, perp)[0]["win"] == t["win"]
     assert pf([0.9, -0.3, -0.3]) == 1.5 and abs(thirds([dict(day=i, pnl=1) for i in range(7)] and [dict(day=i, pnl=1) for i in range(7)])[0][-1]["day"] - 2) == 0
     # 2. end to end on synthetic candles with a planted edge, and without
     for edge in (True, False):
