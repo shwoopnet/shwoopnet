@@ -20,6 +20,7 @@ def main(argv=None):
     daily = load(a.daily, ["date"]); minute = load(a.minute, ["ts"]) if a.minute else None
     if a.heldout:
         C.read_heldout_once(a.card)
+        # Keep earlier rows as lookback (signals need history, all of it is in the past); the PNL is cut to W3 below.
     else:
         daily = daily[daily["date"] < C.HELDOUT_START]
         if minute is not None: minute = minute[minute["ts"] < C.HELDOUT_START]
@@ -28,6 +29,8 @@ def main(argv=None):
             "S3": lambda: S.s3_reversal(daily), "S4": lambda: S.s4_gap_fade(daily), "S5": lambda: S.s5_post_gap(daily),
             "S6": lambda: S.s6_lev_etf(minute, spy), "S7": lambda: S.s7_first30_last30(minute, spy)}
     pnl, meta = runs[a.card]()
+    if a.heldout:
+        pnl = pnl[pnl.index >= C.HELDOUT_START]     # score ONLY the held-out window
     win = C.per_window(pnl.values, pnl.index)
     print(json.dumps(C.report(a.card, win, a.card in JUDGED, meta), default=str, indent=1))
 

@@ -144,5 +144,26 @@ class S6S7(unittest.TestCase):
         m, d = make_minute(10, first_ret=-0.003, final=0.002)
         p, _ = S.s7_first30_last30(m, d); self.assertAlmostEqual(p.iloc[0], -20 - 1.206, delta=0.5)
 
+class RunCardHeldout(unittest.TestCase):
+    def test_heldout_scores_only_w3_and_dev_excludes_w3(self):
+        import io, json, contextlib
+        from stocks_desk import run_card as R
+        d = make_daily(4, start="2023-01-02", end="2025-03-31", seed=11)
+        with tempfile.TemporaryDirectory() as t:
+            f = os.path.join(t, "d.csv"); d.to_csv(f, index=False)
+            old = os.getcwd(); os.chdir(t)
+            try:
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf): R.main(["S1", "--daily", f])
+                dev = json.loads(buf.getvalue())["windows"]
+                self.assertEqual(dev["W3"]["n"], 0)
+                buf = io.StringIO()
+                with contextlib.redirect_stdout(buf): R.main(["S1", "--daily", f, "--heldout"])
+                ho = json.loads(buf.getvalue())["windows"]
+                self.assertEqual(ho["W1"]["n"] + ho["W2"]["n"], 0)
+                self.assertGreater(ho["W3"]["n"], 100)
+            finally:
+                os.chdir(old)
+
 if __name__ == "__main__":
     unittest.main()
