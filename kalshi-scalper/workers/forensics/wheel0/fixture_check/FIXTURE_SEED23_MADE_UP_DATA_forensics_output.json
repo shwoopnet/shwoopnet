@@ -1,0 +1,476 @@
+{
+ "test": "WHEEL0",
+ "tries": 1,
+ "go": "made-up fixture seed 23 from the Testing Desk",
+ "drop_table_sha256": "f5f629704c29e8d0c98a78db2f784cefc63556a87f8d739accc1bfec4839bb74",
+ "scorer_sha256": "10a7b3630be5807aaf31cdd18f50537e547ffc6e9d1732b72322b4d049a10cf4",
+ "markets": 8326,
+ "market_counts": {
+  "rule_h_dropped_KXETH15M": 1337,
+  "rule_h_dropped_KXBTC15M": 1337
+ },
+ "candle_signal_counts": {
+  "dropped_at_random": 8806,
+  "no_signal_quote": 4085,
+  "no_candle_at_look": 727,
+  "out_of_band": 276
+ },
+ "MAIN_candle_read": {
+  "source": "CANDLE READ: 1 minute candles, random drop at the measured fill share, price = the ask seen; candle freshness measured on Bitcoin 15 minute only; real misses lean toward winners, so this read is generous",
+  "orders_dropped_from_both_reads_for_no_chance_value": 0,
+  "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.",
+  "p_note": "Two p values are printed for D. The day bootstrap was found by Auditor B to be mildly generous on made-up no-effect data (p at or under 0.05 in 7.5 percent of runs). The null-calibrated p is the rank of the observed D among D from made-up no-effect results at the real orders and prices.",
+  "orders": 31250,
+  "void_orders_booked_as_fee_only_loss": 165,
+  "primary_pooled": {
+   "blocks": 411,
+   "hot_blocks": 19,
+   "hot_blocks_expected_by_luck": 29.5,
+   "pairs": 323,
+   "hot_pairs": 16,
+   "orders_after_hot": 1014,
+   "orders_after_not_hot": 18864,
+   "pf_after_hot": 0.877,
+   "pf_after_not_hot": 0.864,
+   "mean_cash_per_order_after_hot": -0.248,
+   "mean_cash_per_order_after_not_hot": -0.296,
+   "D_dollars_per_order_of_10": 0.0481,
+   "D_one_sided_p_day_bootstrap": 0.3218,
+   "D_interval_95": [
+    -0.1511,
+    0.2859
+   ],
+   "median_block_length_by_band": {
+    "05-20": 81,
+    "20-35": 60,
+    "35-50": 60,
+    "50-65": 60,
+    "65-80": 60,
+    "80-88": 60
+   },
+   "blocks_by_band": {
+    "05-20": 46,
+    "20-35": 89,
+    "35-50": 89,
+    "50-65": 72,
+    "65-80": 82,
+    "80-88": 33
+   },
+   "null_calibration": {
+    "reps": 500,
+    "D_null_calibrated_p": 0.3433,
+    "null_D_mean": -0.0058,
+    "null_D_sd": 0.1469,
+    "null_pf_after_hot_mean": 0.868,
+    "what": "made-up results drawn at each market's own YES mid, the real orders and prices kept; the share of such runs whose D is at least the observed D"
+   }
+  },
+  "verdict": "no evidence at n = 16 HOT pairs",
+  "verdict_rule_needs_both_p": true,
+  "primary_by_market": {
+   "KXBTC15M": {
+    "blocks": 37,
+    "hot_blocks": 4,
+    "hot_blocks_expected_by_luck": 2.6,
+    "pairs": 20,
+    "hot_pairs": 3,
+    "orders_after_hot": 180,
+    "orders_after_not_hot": 1048,
+    "pf_after_hot": 0.765,
+    "pf_after_not_hot": 0.893,
+    "mean_cash_per_order_after_hot": -0.5542,
+    "mean_cash_per_order_after_not_hot": -0.2459,
+    "D_dollars_per_order_of_10": -0.3083,
+    "D_one_sided_p_day_bootstrap": 0.8714,
+    "D_interval_95": [
+     -0.8488,
+     0.2166
+    ],
+    "median_block_length_by_band": {
+     "05-20": 88,
+     "20-35": 60,
+     "35-50": 60,
+     "50-65": 60,
+     "65-80": 60,
+     "80-88": 65
+    },
+    "blocks_by_band": {
+     "05-20": 4,
+     "20-35": 7,
+     "35-50": 9,
+     "50-65": 8,
+     "65-80": 7,
+     "80-88": 2
+    },
+    "verdict_shaped_label": "no evidence at n = 3 HOT pairs",
+    "label_note": "per market, descriptive; the verdict is the pooled line"
+   },
+   "KXDOGE15M": {
+    "blocks": 113,
+    "hot_blocks": 7,
+    "hot_blocks_expected_by_luck": 8.1,
+    "pairs": 95,
+    "hot_pairs": 7,
+    "orders_after_hot": 474,
+    "orders_after_not_hot": 5348,
+    "pf_after_hot": 0.878,
+    "pf_after_not_hot": 0.862,
+    "mean_cash_per_order_after_hot": -0.2389,
+    "mean_cash_per_order_after_not_hot": -0.3008,
+    "D_dollars_per_order_of_10": 0.062,
+    "D_one_sided_p_day_bootstrap": 0.3846,
+    "D_interval_95": [
+     -0.2929,
+     0.5375
+    ],
+    "median_block_length_by_band": {
+     "05-20": 81,
+     "20-35": 60,
+     "35-50": 60,
+     "50-65": 60,
+     "65-80": 60,
+     "80-88": 60
+    },
+    "blocks_by_band": {
+     "05-20": 12,
+     "20-35": 24,
+     "35-50": 25,
+     "50-65": 21,
+     "65-80": 22,
+     "80-88": 9
+    },
+    "verdict_shaped_label": "no evidence at n = 7 HOT pairs",
+    "label_note": "per market, descriptive; the verdict is the pooled line"
+   },
+   "KXETH15M": {
+    "blocks": 37,
+    "hot_blocks": 1,
+    "hot_blocks_expected_by_luck": 2.6,
+    "pairs": 20,
+    "hot_pairs": 0,
+    "orders_after_hot": 0,
+    "orders_after_not_hot": 1200,
+    "pf_after_hot": null,
+    "pf_after_not_hot": 0.88,
+    "mean_cash_per_order_after_hot": null,
+    "mean_cash_per_order_after_not_hot": -0.2751,
+    "D_dollars_per_order_of_10": null,
+    "D_one_sided_p_day_bootstrap": null,
+    "D_interval_95": [
+     null,
+     null
+    ],
+    "median_block_length_by_band": {
+     "05-20": 128,
+     "20-35": 60,
+     "35-50": 60,
+     "50-65": 60,
+     "65-80": 60,
+     "80-88": 75
+    },
+    "blocks_by_band": {
+     "05-20": 3,
+     "20-35": 9,
+     "35-50": 9,
+     "50-65": 6,
+     "65-80": 8,
+     "80-88": 2
+    },
+    "verdict_shaped_label": "no evidence at n = 0 HOT pairs",
+    "label_note": "per market, descriptive; the verdict is the pooled line"
+   },
+   "KXGOLD15M": {
+    "blocks": 112,
+    "hot_blocks": 3,
+    "hot_blocks_expected_by_luck": 8.0,
+    "pairs": 94,
+    "hot_pairs": 3,
+    "orders_after_hot": 180,
+    "orders_after_not_hot": 5665,
+    "pf_after_hot": 1.014,
+    "pf_after_not_hot": 0.849,
+    "mean_cash_per_order_after_hot": 0.0271,
+    "mean_cash_per_order_after_not_hot": -0.3262,
+    "D_dollars_per_order_of_10": 0.3533,
+    "D_one_sided_p_day_bootstrap": 0.0563,
+    "D_interval_95": [
+     -0.1024,
+     0.8313
+    ],
+    "median_block_length_by_band": {
+     "05-20": 87,
+     "20-35": 60,
+     "35-50": 60,
+     "50-65": 60,
+     "65-80": 60,
+     "80-88": 64
+    },
+    "blocks_by_band": {
+     "05-20": 12,
+     "20-35": 24,
+     "35-50": 24,
+     "50-65": 20,
+     "65-80": 23,
+     "80-88": 9
+    },
+    "verdict_shaped_label": "no evidence at n = 3 HOT pairs",
+    "label_note": "per market, descriptive; the verdict is the pooled line"
+   },
+   "KXXRP15M": {
+    "blocks": 112,
+    "hot_blocks": 4,
+    "hot_blocks_expected_by_luck": 8.1,
+    "pairs": 94,
+    "hot_pairs": 3,
+    "orders_after_hot": 180,
+    "orders_after_not_hot": 5603,
+    "pf_after_hot": 0.87,
+    "pf_after_not_hot": 0.871,
+    "mean_cash_per_order_after_hot": -0.2408,
+    "mean_cash_per_order_after_not_hot": -0.2748,
+    "D_dollars_per_order_of_10": 0.034,
+    "D_one_sided_p_day_bootstrap": 0.4203,
+    "D_interval_95": [
+     -0.3108,
+     0.3735
+    ],
+    "median_block_length_by_band": {
+     "05-20": 66,
+     "20-35": 60,
+     "35-50": 60,
+     "50-65": 60,
+     "65-80": 60,
+     "80-88": 60
+    },
+    "blocks_by_band": {
+     "05-20": 15,
+     "20-35": 25,
+     "35-50": 22,
+     "50-65": 17,
+     "65-80": 22,
+     "80-88": 11
+    },
+    "verdict_shaped_label": "no evidence at n = 3 HOT pairs",
+    "label_note": "per market, descriptive; the verdict is the pooled line"
+   }
+  },
+  "sister_templates_hot_together": {
+   "KXBTC15M": {
+    "hot_share_of_all_blocks": 0.1081,
+    "sister_also_hot": {
+     "all sisters": {
+      "pairs_looked_at": 60,
+      "also_hot": 6,
+      "share": 0.1
+     },
+     "mirror side, same look": {
+      "pairs_looked_at": 10,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "other": {
+      "pairs_looked_at": 20,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side and look, another band": {
+      "pairs_looked_at": 8,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side, another look": {
+      "pairs_looked_at": 22,
+      "also_hot": 6,
+      "share": 0.2727
+     }
+    }
+   },
+   "KXDOGE15M": {
+    "hot_share_of_all_blocks": 0.0619,
+    "sister_also_hot": {
+     "all sisters": {
+      "pairs_looked_at": 118,
+      "also_hot": 12,
+      "share": 0.1017
+     },
+     "mirror side, same look": {
+      "pairs_looked_at": 20,
+      "also_hot": 2,
+      "share": 0.1
+     },
+     "other": {
+      "pairs_looked_at": 42,
+      "also_hot": 4,
+      "share": 0.0952
+     },
+     "same side and look, another band": {
+      "pairs_looked_at": 14,
+      "also_hot": 2,
+      "share": 0.1429
+     },
+     "same side, another look": {
+      "pairs_looked_at": 42,
+      "also_hot": 4,
+      "share": 0.0952
+     }
+    }
+   },
+   "KXETH15M": {
+    "hot_share_of_all_blocks": 0.027,
+    "sister_also_hot": {
+     "all sisters": {
+      "pairs_looked_at": 14,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "mirror side, same look": {
+      "pairs_looked_at": 3,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "other": {
+      "pairs_looked_at": 4,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side and look, another band": {
+      "pairs_looked_at": 2,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side, another look": {
+      "pairs_looked_at": 5,
+      "also_hot": 0,
+      "share": 0.0
+     }
+    }
+   },
+   "KXGOLD15M": {
+    "hot_share_of_all_blocks": 0.0268,
+    "sister_also_hot": {
+     "all sisters": {
+      "pairs_looked_at": 51,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "mirror side, same look": {
+      "pairs_looked_at": 9,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "other": {
+      "pairs_looked_at": 18,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side and look, another band": {
+      "pairs_looked_at": 6,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side, another look": {
+      "pairs_looked_at": 18,
+      "also_hot": 0,
+      "share": 0.0
+     }
+    }
+   },
+   "KXXRP15M": {
+    "hot_share_of_all_blocks": 0.0357,
+    "sister_also_hot": {
+     "all sisters": {
+      "pairs_looked_at": 65,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "mirror side, same look": {
+      "pairs_looked_at": 12,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "other": {
+      "pairs_looked_at": 21,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side and look, another band": {
+      "pairs_looked_at": 8,
+      "also_hot": 0,
+      "share": 0.0
+     },
+     "same side, another look": {
+      "pairs_looked_at": 24,
+      "also_hot": 0,
+      "share": 0.0
+     }
+    }
+   }
+  },
+  "secondary_wheel_rule": {
+   "confirmed": {
+    "hot_blocks_with_90_more_signals": 7,
+    "seat_orders": 420,
+    "seat_pf": 0.771,
+    "seat_mean_cash_per_order": -0.5281
+   },
+   "not_confirmed": {
+    "hot_blocks_with_90_more_signals": 9,
+    "seat_orders": 540,
+    "seat_pf": 0.956,
+    "seat_mean_cash_per_order": -0.0831
+   }
+  },
+  "third_line_favourites_88_97": {
+   "blocks": 9,
+   "hot_blocks": 0,
+   "pairs": 0,
+   "hot_pairs": 0,
+   "pf_after_hot": null,
+   "pf_after_not_hot": null,
+   "orders_after_hot": 0,
+   "orders_after_not_hot": 0,
+   "median_block_length": 150,
+   "label": "favourites 88c to 97c, reported apart and never pooled; no evidence at n = 0 HOT pairs"
+  },
+  "all_orders_pf": 0.861
+ },
+ "sensitivity_no_drop": {
+  "orders": 40056,
+  "primary_pooled": {
+   "blocks": 542,
+   "hot_blocks": 21,
+   "hot_blocks_expected_by_luck": 38.7,
+   "pairs": 452,
+   "hot_pairs": 18,
+   "orders_after_hot": 1100,
+   "orders_after_not_hot": 26717,
+   "pf_after_hot": 0.948,
+   "pf_after_not_hot": 0.865,
+   "mean_cash_per_order_after_hot": -0.1057,
+   "mean_cash_per_order_after_not_hot": -0.2939,
+   "D_dollars_per_order_of_10": 0.1882,
+   "D_one_sided_p_day_bootstrap": 0.1886,
+   "D_interval_95": [
+    -0.2216,
+    0.5412
+   ],
+   "median_block_length_by_band": {
+    "05-20": 80,
+    "20-35": 60,
+    "35-50": 60,
+    "50-65": 60,
+    "65-80": 60,
+    "80-88": 60
+   },
+   "blocks_by_band": {
+    "05-20": 52,
+    "20-35": 115,
+    "35-50": 119,
+    "50-65": 100,
+    "65-80": 112,
+    "80-88": 44
+   }
+  },
+  "verdict": "no evidence at n = 18 HOT pairs"
+ }
+}
