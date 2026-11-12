@@ -21,6 +21,10 @@ Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief o
 - Testing Desk (created Nov 12 16:44Z by Main): session_01PSWvZoWZGK1VYgdMTA25vo (branch claude/testing-desk). First task WXDAYEND's remaining count.
 - Stocks Desk: session_01PSWvZo2zpvsQRUqdZwnNoW (third session, confirmed by Main about 17:18Z Nov 12; private repo attached; public branch claude/stocks-desk). Earlier: session_01PSWvZm6Fiw2pwNzcbUhudN (second, handed over and stopped) and session_01PSWvZkxSgedtJBD4vHPwcs (first; the owner typed the Databento allowance there; it runs the registered $0.30 pilot once, reports, and stops). Databento under the owner's $25 cap.
 
+## FRIDAY FOCUS (owner, Nov 12 18:13Z)
+
+"we still have the friday deadline of 5 strategies, so... do whatever you NEED to do to get to that point and nothing else until then". See the section of that name at the top of RND_QUEUE.md: five candidates only (stock S2 long leg, TIE3, CFRTI-K, approval NO side, PERPBIN1), everything else paused, and an open question to the owner on whether "5" means five on the shadow list (deliverable) or five live or probe-ready (not deliverable honestly).
+
 ## Standing rules I set or enforce
 
 1. Registration and scoring script are committed BEFORE data lands; every pull is scored within the hour it finishes; a held-out cutoff is a date constant and its read-once marker is a committed line.

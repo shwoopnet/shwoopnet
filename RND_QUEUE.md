@@ -6,6 +6,24 @@ Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git sh
 
 W-SPREAD-CELL1, read once on the 1,041 never-scored events after all 274 requests landed. Line 1 (the registered look): n 172, cash PF 0.596 at +1c. Line 2 (the known-in-advance look): n 173, cash PF 0.636. FAIL by its committed labels: not probe-eligible, no popup, no forward shadow; the daily logging job is not built; the conditional 12,000 request history block is closed. The lead (the best of about 58 cells at z 1.59) did not replicate. Output committed with its marker on claude/refine-live (SPREADCELL1_READ_OUTPUT.txt). The Verification Analyst reproduced the label and both counts; its figures apply the registered fee on every fill and are lower (line 1 PF 0.553, z -2.78; line 2 PF 0.592, z -2.46); Refinement is correcting the fee handling in its printout; FAIL either way. Reported to the owner through the EA at 16:48Z. **With this, no lead with a date this week is left standing; CFRTI-K and CFRTI-B (Nov 20 sitting) are what remains of the Bitcoin idea.**
 
+## FRIDAY FOCUS (owner, relayed by the EA, Nov 12 18:13Z) [research]
+
+The owner, verbatim: "we still have the friday deadline of 5 strategies, so... do whatever you NEED to do to get to that point and nothing else until then". Every desk works only on what can produce a registered, readable candidate by Friday Nov 13 to 14; everything with a later read date that does not feed that is PAUSED (POL-i1, W-CAT-POLENT1, hourly temperature, SOCDERIV beyond its queued lists, the census polish, the perps list re-read, MMMAP1 and record-read preparation; dated reads keep their dates).
+
+**Told to the owner plainly: nothing will have cleared the research bar by Friday, bar one long shot.** The five fastest:
+1. Stock overnight test, S2 long leg: full read possible Friday (about 2,150 past trading days); the desk's odds 3 to 8 percent; blocked on the owner's Databento allowance typed in the Stocks Desk chat.
+2. TIE3: measurement Friday to Saturday; a surviving cell would be registered and read on history about Nov 17 to 18; 4 percent; needs PR 826 and a candle run.
+3. CFRTI-K: development read Friday (PR 826); held-out fixed at Nov 20; about 50 trades, so its own registered bar at best; low single digits.
+4. Approval NO side: development verdict Friday; then 30 paper fills per arm, weeks.
+5. PERPBIN1: development read Friday on the same candles; odds low.
+Spares for a shadow-list count: the combo house side (Nov 26), PERPEQ1 (Dec 22).
+
+**Orders before evidence (the owner's call; declined on Nov 12):** only ONE candidate has an exact written rule and a way to place an order by Friday, the approval NO side; the others lack model code in the bot, a measured price rule, a permitted live source or a brokerage account. Five cannot honestly be named.
+
+**Question put to the owner:** if "5 by Friday" means the charter's five on the SHADOW list (unique, pre-registered, collecting, with a read date and N, scored by the Verification Analyst and approved by the owner), five packets can be delivered by Friday; if it means five live or probe-ready strategies, the truthful answer is no. Each desk was also asked for at most three more rules readable on held data by Saturday, or "none" (due 19:30Z).
+
+**Pull order for the 00:00Z reset, tightened:** CFRTI_K_CANDLES, NOSIDE1_CANDLES, TESTING_LISTS_BUNDLE, NHLOT_LISTS, then TIE3_CANDLES as soon as it is approved; the rest behind.
+
 ## The shadow list as told to the owner (Nov 12, 17:14Z) [research]
 
 In the bot's code the shadow registry is empty (since Nov 11). Research's shadow list is paper records scored from recorder data at a fixed date; no separate shadow logger was built. Six leads were put on it on the morning of Nov 12 (Refinement's and V2's SHADOW_RULES_NOV12.md files). **Three remain:** the approval and generic-ballot NO side (waits on its development pull, then 30 paper fills per arm); the combo house side (paper; first read Nov 26); the spot-lead (re-read on unseen windows about Nov 20; missed its own bar at n = 58; not live-able as written). **Three were knocked out on Nov 12:** the sports spread cell (FAILED, reproduced); the market-making shadow (family closed); the Bitcoin settlement-index lead as written (priced on a delayed copy; replaced by the Kalshi-only rebuild, read from Nov 20). The owner confirmed typing the Databento allowance into the former Stocks Desk's session, so that session runs the registered $0.30 pilot once and stops.
