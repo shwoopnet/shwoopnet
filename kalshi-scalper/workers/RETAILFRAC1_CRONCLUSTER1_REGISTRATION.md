@@ -22,3 +22,40 @@ Tests added to the shared ledger (about 1,100,000, z about 5.34; lenient N 8,795
 
 ## One pass
 The script writes a marker file; a second scored run refuses. Results are appended below.
+
+---
+# Results (one pass, run Nov 12, 2026)
+
+Script `RETAILFRAC1_CRONCLUSTER1_stageA.py`, full output `RETAILFRAC1_CRONCLUSTER1_stageA.json`. Data: all 74 hour folders of `book15r6` (Oct 29 to Nov 11), 296 files. One crash before any output (a timestamp-format error in the parser, no result produced); fixed the parser and ran once. Windows kept by the protocol filter: BTC 956 of 956, ETH 955 of 956, XRP 959 of 961, DOGE 975 of 976, gold 627 of 629. Joined-late windows kept (stage A).
+
+## P3 stage A
+| Series | Trades whole / frac | Frac share of trades | Frac share of contracts | Median size whole / frac | p90 whole / frac | YES share whole / frac | Mean price paid whole / frac | corr(net frac, net whole), (T-600,T-360] |
+|---|---|---|---|---|---|---|---|---|
+| Bitcoin | 9.42M / 30.02M | 76.1% | 65.5% | 19 / 9.1 | 263 / 134 | .501 / .509 | .530 / .409 | +0.63 |
+| Ethereum | 2.25M / 2.58M | 53.4% | 50.9% | 10 / 8.3 | 125 / 96 | .505 / .520 | .525 / .390 | +0.27 |
+| XRP | 1.68M / 1.72M | 50.5% | 53.5% | 7 / 8.6 | 99 / 92 | .508 / .515 | .495 / .364 | +0.55 |
+| Dogecoin | 1.38M / 1.05M | 43.1% | 51.0% | 7 / 8.6 | 50 / 62 | .505 / .513 | .503 / .376 | +0.26 |
+| Gold | 1.23M / 3.09M | 71.5% | 64.0% | 17 / 11.9 | 250 / 126 | .500 / .520 | .556 / .410 | +0.38 |
+
+Fractional share of contracts by minutes to close (bucket 14 down to 0, in the json) is flat at 45% to 65% with a higher share in the first and last minute (Bitcoin 75% in the last-minute bucket; the json lists all 15). By UTC 4 hour block the share moves by under 8 points (lowest 08:00 to 12:00 UTC in every series).
+
+Kill gate (CLOSED if fractional share under 2% or over 98% in every series, or correlation above +0.8 in every series): did NOT fire (shares 43% to 76%; highest correlation +0.63).
+
+Two-crowds reading (fixed above before the run): correlation below +0.5 in 3 of 5 series (ETH, DOGE, gold) PASSES; fractional share 5% to 95% in all 5 PASSES; classes differ by p90 size ratio of 3 or more OR YES-share gap of 5 points or more: best p90 ratio 1.96 (Bitcoin), largest YES gap 2.0 points (gold): FAILS. Under the rule as registered, the two classes are not "clearly different crowds" by size or direction. One difference does stand out and was not in the rule: fractional takers pay on average 12 to 14 cents less per contract for the side they buy (0.36 to 0.41 against 0.50 to 0.56), i.e. they buy the cheaper side more often. That is descriptive only; no outcome was read, so it says nothing about who wins.
+
+## P4 stage A (CRONCLUSTER1)
+| Series | peak, all windows (95% interval) | peak, 6 to 7 min to close | peak, 2 to 3 min to close | touch depth after / before, all (95%) | 6 to 7 min | 2 to 3 min |
+|---|---|---|---|---|---|---|
+| Bitcoin | 1.01 (0.995 to 1.02) | 1.04 (1.01 to 1.07) | 0.87 (0.84 to 0.90) | 1.13 (1.09 to 1.16) | 0.98 (0.95 to 1.01) | 1.16 (0.97 to 1.35) |
+| Ethereum | 1.03 (1.01 to 1.05) | 1.10 (1.05 to 1.16) | 0.98 (0.94 to 1.03) | 1.08 (1.06 to 1.11) | 1.03 (0.99 to 1.07) | 1.21 (1.10 to 1.34) |
+| XRP | 1.03 (1.01 to 1.05) | 1.21 (1.16 to 1.27) | 1.10 (1.04 to 1.16) | 1.09 (1.06 to 1.13) | 1.04 (0.96 to 1.12) | 1.20 (1.07 to 1.35) |
+| Dogecoin | 1.05 (1.02 to 1.07) | 1.17 (1.11 to 1.24) | 1.13 (1.07 to 1.20) | 1.10 (1.06 to 1.13) | 1.04 (0.94 to 1.14) | 1.44 (1.25 to 1.67) |
+| Gold | 0.97 (0.95 to 0.99) | 1.11 (1.06 to 1.17) | 0.80 (0.75 to 0.86) | 0.96 (0.93 to 0.99) | 1.03 (0.98 to 1.11) | 0.95 (0.87 to 1.07) |
+
+Spread at the touch is the same before and after the boundary (for example Bitcoin 0.0077 against 0.0076). Boundary pairs: 8,394 (gold) to 12,690 (Dogecoin).
+
+Gate (FINDING needs peak 1.3 or more with an interval clear of 1, AND touch depth lower after the boundary): did NOT fire. Gold at 6 to 7 minutes (where L1 buys) has peak 1.11 (interval clear of 1 but far under 1.3) and depth after slightly higher (1.03, interval includes 1). Bitcoin at 2 to 3 minutes (OICORE) has peak 0.87, below 1. Only the last-minute bucket and the first seconds of Ethereum, XRP and Dogecoin lean early (second 0 alone is 1.2 to 1.3 times flat) but the 0 to 9 second window does not reach 1.3. Verdict: NO CLUSTER, closed, no try counted. No send-time candidate for Refinement.
+
+## Verdicts
+- P3 stage A: kill gate did not fire; the registered two-crowds rule is not met (classes look alike in size and direction, they differ in price paid). Stage B is NOT justified under the rule as registered; no stage B was registered or run. Ledger count unchanged (0 tests added). The card stays open at Idea; whether the 12 to 14 cent price-paid gap is a reason to spend a family-budget try is a call for the parent, not made here.
+- P4 stage A: NO CLUSTER (closed, 0 tries).
