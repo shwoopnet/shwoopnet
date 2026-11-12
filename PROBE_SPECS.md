@@ -1,10 +1,12 @@
 # Conditional probe specs (Head of R&D, Nov 12, 2026)
 
-Two specs, not three. A third would be padding: nothing else has a rule with any evidence behind it today.
+**State on Nov 12, 17:28Z: ONE conditional spec is left (Spec 2, CFRTI-K). Spec 1 is WITHDRAWN: its read failed.** This file was written as two specs, not three, because a third would have been padding; it is now one, for the same reason.
 
 Every spec here is UNPROVEN and CONDITIONAL. The owner ruled on Nov 12: no pre-evidence orders. So neither spec can be approved as an order today. Each has a gate; the popup is put to the owner only after the gate is met and the Verification Analyst has re-checked the read. A probe is a tiny live test to learn from real fills. No live account figure is in this file. [research]
 
-## Spec 1. SPREADCHEAP (sports spread, cheap side)
+## Spec 1. SPREADCHEAP (sports spread, cheap side): WITHDRAWN Nov 12
+
+**The one read of W-SPREAD-CELL1 FAILED on both lines on Nov 12 (n 172 and 173, cash PF about 0.55 to 0.64 at +1c against a bar of 1.5; reproduced by the Verification Analyst). Gate item 1 is not met and cannot be met: no popup, no probe, no forward shadow. The text below is kept only as the record of what was specified before the read.**
 
 - **One line:** buy 1 YES contract on a sports spread market priced 5c up to 15c, two days before the game, and hold to settlement.
 - **Gate, all of it, before the popup:**
@@ -50,10 +52,17 @@ Every spec here is UNPROVEN and CONDITIONAL. The owner ruled on Nov 12: no pre-e
 - **Earliest first order:** mid December.
 - **Honest odds:** low single digits that it ever reaches a popup.
 
+## Changes to Spec 2 since it was written (Nov 12)
+
+- Forensics' CANDLEVSBOOK1 (confirmed by the Verification Analyst) found the 1 minute candle's bid and ask on the Bitcoin 15 minute series is the book at the minute's end, so the candle-priced rebuild has a current price; its development read waits only on its candle sample. The fill haircut still applies and the gate is still judged on the 6 second line.
+- The book-replay convention for the Nov 20 sitting is fixed in writing (walk the levels to the limit for 1 contract, first poll within 4 s after the delay, no poll is no trade).
+- The recorder that supplies the held-out rows (R6) stops on Nov 20 as merged; a re-test on a further 50 rows (gate item 3) would need an extension, which is asked of the owner only if the Nov 20 read clears.
+
 ## Why there is no Spec 3
 
 - Two-sided market making: closed on Nov 12 (five failures; the last two confirmed or being confirmed by the Verification Analyst).
 - ROLLOFF: closed on Nov 12 (the proxy matched the settled value on 0 of 33 days).
-- Approval NO side: what is held leans against it; the development pull has not run.
+- Approval NO side: what is held leans against it; the development pull has not been scored.
+- In-game lag: closed Nov 12 (no lag at one minute resolution). Stocks: nine of ten registered tests retired unread or deferred, one held behind a schema pilot. Census cards TIE3 and SOCDERIV: zero-try measurements only, odds 4 and 2 percent by their own author.
 - Combo house side: paper first by the owner's rule; one qualifying combo in the first snapshot of 400; first read Nov 26.
 - Spot-lead: missed its own bar at n 58; its re-read is judged only on unseen windows; it would also need the owner's written exception to the favourite-and-hold ban.
