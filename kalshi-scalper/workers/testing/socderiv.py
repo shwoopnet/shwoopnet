@@ -1,201 +1,245 @@
 #!/usr/bin/env python3
 """SOCDERIV (Desk B card 19) MEASUREMENT reader, job builders and scorer on scorekit. Testing Desk, Nov 12, 2026.
-Research only: reads files, sends nothing. ZERO TRIES: scores no rule and adds no try. No outcome is read (settled lists are the only way to list finished games; their `result` field is never used here).
-Built against synthetic data; Desk B's registration and the frozen cells file must exist before any data is opened.
-Head's conditions, enforced in code:
-  - prices from minute-end candles only, never a list quote; EVERY leg at the SAME minute (a winner x3, the total-goals ladder strikes, both-teams-to-score, the team totals): that minute must have a two-sided quote
-    on every leg; thin, one-sided or missing minutes are COUNTED, not filled; the instant is the LAST such minute at or before kickoff minus 30 minutes, scanning back at most 60 minutes;
-  - if fewer than SAME_MINUTE_SHARE (30 percent, the Head's suggestion, fixed now) of the games meet the same-minute condition, the measurement stops: "cannot be measured at minute resolution";
-  - cutoffs are date constants: games closing from CUTOVER (2026-09-12, the live endpoint's range) to HELD_OUT_FROM (2026-11-13T00:00Z, never listed or requested);
-  - cells fixed before data: the cells file sha256 must equal CELLS_SHA256 (None = not frozen, the code refuses to build jobs).
-Cells file (socderiv_cells.json), one object per league: {"league","winner_series","total_series","btts_series","teamtotal_series","total_strikes":[1.5,2.5,3.5],"teamtotal_strike":1.5,
-  "kickoff_rule":{...as tie3: field | ticker_local | close_offset}}. A game is the same suffix after the series prefix in each series' event ticker (ASSUMED, verify on the first list answer).
-Model (Desk B's card): two independent Poisson goal rates fitted by least squares to the winner mids and the total ladder mids; implied BTTS yes = (1-e^-lh)(1-e^-la); implied team total over k = P(Poisson(l) > k).
-Commands: build-lists <cells> | games <cells> <lists...> | build-candles <cells> <lists...> | measure <cells> <lists...> --candles <folders...>
+Built to Desk B's REGISTRATION (kalshi-scalper/workers/socderiv/SOCDERIV_REGISTRATION.md at 9b37bd6, claude/idea-desk-b; the registration wins over the card) and its frozen leagues file
+(socderiv_series_frozen.json here, byte for byte SOCDERIV_SERIES.json, sha256 below). Research only: reads files, sends nothing. ZERO TRIES: no rule scored, NO RESULT READ AT ALL (the `result` field is never used).
+Enforced in code: sample = the 60 most recently settled games of each league with closes from 2026-09-12 to before 2026-11-13T00:00Z, never extended; held-out (from 2026-11-13) never listed or requested;
+leagues file must match CELLS_SHA256; prices only from minute-end candles, EVERY leg read at the SAME minute, thin or one-sided minutes counted not filled.
+Instant: kickoff = the GAME (winner) market's occurrence_datetime minus 180 min; GUARD: that market closed 100 to 135 minutes after kickoff, else 'kickoff not derivable'. From kickoff minus 30 step back a minute at a time to
+kickoff minus 90; take the FIRST minute at which the three winner markets, at least three total-goals strikes and the target contract are all two-sided at the close; otherwise the target is 'not filled'.
+Model: two independent Poisson goal rates (team 1 = the lower team code of the winner tickers, team 2 = the other) fitted by least squares to the winner mids and every two-sided total strike mid at the instant;
+both-teams-to-score = (1 - e^-l1)(1 - e^-l2); team total over k.5 = P(count > k.5). PLACEBO: refit with the total strike nearest 50c left out and report the same gap statistics for that strike.
+Team-total markets are used only where floor_strike is given and the team is readable from the ticker's last segment (a prefix equal to a team code of the game); else counted 'unreadable'.
+Kill (registration): under 150 filled games in a group and target type = 'no evidence at n = x'; group CLOSED on cost if the median round trip of its targets is above 5c; 'not tradable' if under half of the games with a derivable kickoff are filled;
+'efficient, move on' (with the 90th percentile gap) unless the share of targets with a gap of 8c or more and spread 4c or less is at least 10 percent AND at least twice the placebo's share.
+Commands: build-lists | games <lists...> | build-candles <lists...> | measure <lists...> --candles <folders...>
 """
 import calendar, hashlib, json, math, os, statistics as st, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 import tie3
 
-CUTOVER, HELD_OUT_FROM = tie3.CUTOVER, tie3.HELD_OUT_FROM
-CELLS_SHA256 = None
-GAP, SPREAD_MAX, SAME_MINUTE_SHARE, MIN_GAMES, EDGE_SHARE, TWO_SIDED_SHARE = 0.08, 0.04, 0.30, 150, 0.10, 0.50
-BEFORE_S, SCAN_S, PACK_SPAN_S, PACK_LIMIT = 30 * 60, 60 * 60, 3 * 3600, 9000
+HERE = os.path.dirname(os.path.abspath(__file__))
+CELLS_FILE = os.path.join(HERE, "socderiv_series_frozen.json")
+CELLS_SHA256 = "01b7febcd1466f880aeac1d567a259e5803d42b0b72e16a72331fd11c6d031d2"     # SOCDERIV_SERIES.json at 9b37bd6 (Desk B, frozen 2026-11-12)
+WIN_FROM = calendar.timegm((2026, 9, 12, 0, 0, 0)); HELD_OUT_FROM = calendar.timegm((2026, 11, 13, 0, 0, 0))
+SAMPLE, OFFSET_S, START_BACK, SCAN_BACK = 60, 180 * 60, 30 * 60, 90 * 60
+GUARD_LO, GUARD_HI = 100 * 60, 135 * 60
+GAP, SPREAD_MAX, MIN_FILLED, EDGE_SHARE, COST_MAX, PACK_LIMIT, PACK_SPAN_S = 0.08, 0.04, 150, 0.10, 0.05, 9000, 3 * 3600
+SUFFIXES = {"winner": "GAME", "total": "TOTAL", "btts": "BTTS", "teamtotal": "TEAMTOTAL"}
 REG = "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md"
-GROUPS = ("winner", "total", "btts", "teamtotal")
+FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
 
 
-def load_cells(path, require_frozen=True):
-    if require_frozen and CELLS_SHA256 is None:
-        raise SystemExit("refused: CELLS_SHA256 is not set; the cells are not frozen (Desk B's registration must carry the hash)")
+def load_cells(path=CELLS_FILE, sha=None):
     raw = open(path, "rb").read()
-    if require_frozen and hashlib.sha256(raw).hexdigest() != CELLS_SHA256:
-        raise SystemExit("refused: the cells file does not match the frozen sha256")
+    if hashlib.sha256(raw).hexdigest() != (CELLS_SHA256 if sha is None else sha):
+        raise SystemExit("refused: the leagues file does not match the frozen sha256")
     return json.loads(raw)
 
 
-def series_of(c): return {g: c[g + "_series"] for g in GROUPS}
+def leagues(spec): return [(g, lg) for g, ls in spec["groups"].items() for lg in ls]
+def series_of(lg): return {n: "KX" + lg + sfx for n, sfx in SUFFIXES.items()}
 
 
-def build_lists(cells):
-    reqs, series = [], sorted({s for c in cells for s in series_of(c).values()})
-    for s in series:
-        reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": CUTOVER, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": 6})
-    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]}]
-    j = tie3.job("SOCDERIV_LISTS", "SOCDERIV measurement stage 1: settled lists of the soccer winner, total-goals, both-teams-to-score and team-total series (time and strike fields; no result used).", eps, reqs, series, [])
-    j["registration"] = REG; return j
+def build_lists(spec):
+    """16 leagues x 4 series = 64 live lists plus the 3 fee-field reads = 67 requests (registered)."""
+    reqs, series = [], []
+    for g, lg in leagues(spec):
+        for n, s in series_of(lg).items():
+            series.append(s)
+            reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": WIN_FROM, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": 2})
+    for s in spec["fee_field_reads"]:
+        reqs.append({"id": "fee_" + s, "path": "/series/" + s})
+    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
+           {"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}]
+    j = tie3.job("SOCDERIV_LISTS", "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).", eps, reqs, series + list(spec["fee_field_reads"]), [])
+    j["registration"] = REG; j["max_requests"] = len(reqs) + 33         # 67 registered, about 80 pages; the runner counts pages against the cap
+    return j
 
 
-def games(cells, list_folders):
-    """-> [ {league, game, kickoff, legs: {ticker: leg}} ] and counts. legs hold group, strike_type, floor, cap, side; NO result field is kept."""
+def game_key(event): return event.split("-", 1)[1] if "-" in event else event
+def code(ticker): return ticker.rsplit("-", 1)[-1]
+
+
+def games(spec, list_folders):
+    """-> (games, counts). games: [ {group, league, game, kickoff, winner:[3 tickers], team1, team2, totals:{ticker: strike}, btts:[tickers], teamtotals:{ticker: (team, strike)}} ]. NO result field."""
     ms = k.markets(list_folders)
     by = {}
-    for t, m in ms.items():
-        by.setdefault((m["series"], m["event"].split("-", 1)[1] if "-" in m["event"] else m["event"]), []).append(m)
-    out, counts = [], {"games_seen": 0, "missing_group": 0, "no_kickoff": 0, "held_out_dropped": 0}
-    for c in cells:
-        ser = series_of(c); suffixes = {g: {gm for (s, gm) in by if s == ser[g]} for g in GROUPS}
-        for gm in sorted(suffixes["winner"]):
-            counts["games_seen"] += 1
-            if not all(gm in suffixes[g] for g in GROUPS):
-                counts["missing_group"] += 1; continue
-            legs, allm = {}, []
-            for g in GROUPS:
-                for m in by[(ser[g], gm)]:
-                    allm.append(m)
-                    legs[m["ticker"]] = {"group": g, "type": m["type"], "floor": m["floor"], "cap": m["cap"], "title": m["title"], "close": m["close"], "ticker": m["ticker"]}
-            if max(m["close"] for m in allm if m["close"]) >= HELD_OUT_FROM:
-                counts["held_out_dropped"] += 1; continue
-            ko = tie3.start_ts(gm, allm, c.get("kickoff_rule"))
-            if ko is None:
-                counts["no_kickoff"] += 1; continue
-            keep = {t: l for t, l in legs.items() if l["group"] in ("winner", "btts", "teamtotal") or (l["group"] == "total" and l["floor"] in set(c.get("total_strikes", [])))}
-            out.append({"league": c["league"], "game": gm, "kickoff": ko, "legs": keep, "teamtotal_strike": c.get("teamtotal_strike", 1.5)})
+    for t, m in ms.items(): by.setdefault((m["series"], game_key(m["event"])), []).append(m)
+    out = []
+    counts = {"leagues_no_such_series": 0, "games_in_window": 0, "sampled": 0, "kickoff_not_derivable": 0, "no_btts_leg": 0, "teamtotal_unreadable_markets": 0}
+    listed = {m["series"] for m in ms.values()}
+    for g, lg in leagues(spec):
+        ser = series_of(lg)
+        counts["leagues_no_such_series"] += sum(1 for s in ser.values() if s not in listed)
+        cand = []
+        for (s, gk), mk in by.items():
+            if s != ser["winner"]: continue
+            close = max(m["close"] for m in mk if m["close"])
+            if WIN_FROM <= close < HELD_OUT_FROM: cand.append((close, gk, mk))
+        counts["games_in_window"] += len(cand)
+        for close, gk, mk in sorted(cand, key=lambda x: (-x[0], x[1]))[:SAMPLE]:          # the 60 most recently settled, never extended
+            counts["sampled"] += 1
+            occ = [k.iso((m.get("times") or {}).get("occurrence_datetime") or "") for m in mk]
+            if len(mk) != 3 or None in occ or max(occ) != min(occ):
+                counts["kickoff_not_derivable"] += 1; continue
+            ko = occ[0] - OFFSET_S
+            if not (GUARD_LO <= close - ko <= GUARD_HI): counts["kickoff_not_derivable"] += 1; continue
+            teams = sorted(code(m["ticker"]) for m in mk if not m["ticker"].endswith("-TIE"))
+            if len(teams) != 2: counts["kickoff_not_derivable"] += 1; continue
+            tot = {m["ticker"]: m["floor"] for m in by.get((ser["total"], gk), []) if m["floor"] is not None}
+            btts = [m["ticker"] for m in by.get((ser["btts"], gk), [])]
+            if not btts: counts["no_btts_leg"] += 1
+            tts = {}
+            for m in by.get((ser["teamtotal"], gk), []):
+                tm = next((c for c in teams if code(m["ticker"]).startswith(c)), None)
+                if tm is None or m["floor"] is None: counts["teamtotal_unreadable_markets"] += 1; continue
+                tts[m["ticker"]] = (tm, m["floor"])
+            winner = sorted(m["ticker"] for m in mk)
+            out.append({"group": g, "league": lg, "game": gk, "kickoff": ko, "winner": winner, "team1": teams[0], "team2": teams[1], "totals": tot, "btts": btts, "teamtotals": tts})
     return out, counts
 
 
-def build_candles(cells, list_folders):
-    gs, counts = games(cells, list_folders)
-    items = sorted(((g["kickoff"], t) for g in gs for t in g["legs"]), key=lambda x: x[0])
+def build_candles(spec, list_folders):
+    gs, counts = games(spec, list_folders)
+    items = sorted(((g["kickoff"], t) for g in gs for t in g["winner"] + list(g["totals"]) + g["btts"] + list(g["teamtotals"])), key=lambda x: x[0])
+    win = SCAN_BACK - START_BACK + 60
     packs, cur = [], []
     for ko, t in items:
         trial = cur + [(ko, t)]
-        span = trial[-1][0] - trial[0][0] + BEFORE_S + SCAN_S + 120
-        if cur and (span > PACK_SPAN_S + BEFORE_S + SCAN_S or span / 60 * len(trial) > PACK_LIMIT):
+        span = trial[-1][0] - trial[0][0] + win
+        if cur and (span > PACK_SPAN_S + win or span / 60 * len(trial) > PACK_LIMIT or len(trial) > 100):
             packs.append(cur); cur = [(ko, t)]
         else:
             cur = trial
     if cur: packs.append(cur)
-    reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for _, t in p), "start_ts": p[0][0] - BEFORE_S - SCAN_S - 60, "end_ts": p[-1][0] - BEFORE_S + 60, "period_interval": 1}} for i, p in enumerate(packs)]
+    reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for _, t in p), "start_ts": p[0][0] - SCAN_BACK - 60, "end_ts": p[-1][0] - START_BACK, "period_interval": 1}} for i, p in enumerate(packs)]
     eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
-    j = tie3.job("SOCDERIV_CANDLES", "SOCDERIV measurement stage 2: one minute candles of every leg of each game, the 90 minutes before kickoff minus 30 minutes.", eps, reqs, {s for c in cells for s in series_of(c).values()}, [t for _, t in items])
+    j = tie3.job("SOCDERIV_CANDLES", "SOCDERIV measurement stage 2: one minute candles of every leg of the sampled games, the 61 minutes ending at kickoff minus 30.", eps, reqs, {t.split("-")[0] for _, t in items}, [t for _, t in items])
     j["registration"] = REG; return j, counts
 
 
-def pois(l, n):
-    return math.exp(-l) * l ** n / math.factorial(n)
+def pois(l, n): return math.exp(-l) * l ** n / math.factorial(n)
+def over(lam, strike): return 1 - sum(pois(lam, n) for n in range(0, int(strike) + 1))        # strike x.5: count > x.5
+_FACT = [math.factorial(n) for n in range(0, 13)]
 
 
-def p_total_over(lh, la, strike):
-    lam = lh + la; return 1 - sum(pois(lam, n) for n in range(0, int(strike) + 1))        # strike x.5: total > x.5 is total >= x+1
-
-
-def p_winner(lh, la, N=14):
-    h = a = d = 0.0
-    for i in range(N):
-        for j in range(N):
-            p = pois(lh, i) * pois(la, j)
-            if i > j: h += p
-            elif i == j: d += p
-            else: a += p
+def p_winner(l1, l2, N=12):
+    """(team1 wins, draw, team2 wins) for independent Poisson counts, O(N)."""
+    e1, e2 = math.exp(-l1), math.exp(-l2)
+    p1 = [e1 * l1 ** n / _FACT[n] for n in range(N)]; p2 = [e2 * l2 ** n / _FACT[n] for n in range(N)]
+    c2, run = [], 0.0
+    for x in p2: run += x; c2.append(run)
+    h = sum(p1[i] * c2[i - 1] for i in range(1, N)); d = sum(p1[i] * p2[i] for i in range(N)); a = max(0.0, sum(p1) * sum(p2) - h - d)
     return h, d, a
 
 
 def fit(win_mid, total_mid):
-    """Least squares over a coarse then a fine grid of (lh, la). win_mid = (home, draw, away) mids; total_mid = {strike: mid of 'over strike'}. Returns (lh, la, rmse)."""
-    s = sum(win_mid); wm = [x / s for x in win_mid] if s > 0 else win_mid
-    def err(lh, la):
-        h, d, a = p_winner(lh, la)
-        e = [(h - wm[0]) ** 2, (d - wm[1]) ** 2, (a - wm[2]) ** 2] + [(p_total_over(lh, la, kk) - v) ** 2 for kk, v in total_mid.items()]
-        return sum(e)
-    best = min(((err(lh / 20, la / 20), lh / 20, la / 20) for lh in range(2, 81, 2) for la in range(2, 81, 2)))
-    e0, lh0, la0 = best
-    best = min(((err(lh0 + i / 200, la0 + j / 200), lh0 + i / 200, la0 + j / 200) for i in range(-10, 11) for j in range(-10, 11) if lh0 + i / 200 > 0.02 and la0 + j / 200 > 0.02))
-    n = 3 + len(total_mid)
-    return best[1], best[2], (best[0] / n) ** 0.5
+    """Least squares by a coarse-to-fine grid over the two rates (step 0.2, then 0.04, then 0.01). win_mid = (team1, draw, team2); total_mid = {strike: mid of 'over strike'}. Returns (l1, l2, rmse over the fitted legs)."""
+    s = sum(win_mid); wm = [x / s for x in win_mid] if s > 0 else list(win_mid)
+    tm = list(total_mid.items())
+    def err(a, b):
+        h, d, c = p_winner(a, b); lam = a + b; e = math.exp(-lam); cdf, run, ov = {}, 0.0, {}
+        for n in range(0, 9): run += e * lam ** n / math.factorial(n); cdf[n] = run
+        return (h - wm[0]) ** 2 + (d - wm[1]) ** 2 + (c - wm[2]) ** 2 + sum((1 - cdf[int(kk)] - v) ** 2 for kk, v in tm)
+    best = (1e9, 1.0, 1.0)
+    for step, span, lo in ((0.2, 20, 0.1), (0.04, 5, None), (0.01, 4, None)):
+        if lo is not None: cand = [(lo + i * step, lo + j * step) for i in range(span) for j in range(span)]
+        else: cand = [(best[1] + i * step, best[2] + j * step) for i in range(-span, span + 1) for j in range(-span, span + 1)]
+        best = min((err(a, b), a, b) for a, b in cand if a > 0.02 and b > 0.02)
+    return best[1], best[2], (best[0] / (3 + len(tm))) ** 0.5
 
 
-def implied(lh, la, tt_strike):
-    return {"btts_yes": (1 - math.exp(-lh)) * (1 - math.exp(-la)), "home_tt_over": 1 - sum(pois(lh, n) for n in range(0, int(tt_strike) + 1)), "away_tt_over": 1 - sum(pois(la, n) for n in range(0, int(tt_strike) + 1))}
-
-
-def quote(by_ts, ts):
-    c = by_ts.get(ts)
+def two(idx, t, ts):
+    c = idx.get(t, {}).get(ts)
     if not c or c["bid"] is None or c["ask"] is None or not (0 < c["bid"] < c["ask"] < 1): return None
     return c["bid"], c["ask"]
 
 
-def measure(cells, list_folders, candle_folders):
-    gs, counts = games(cells, list_folders)
-    cs = k.candles(candle_folders)
-    idx = {t: {c["ts"]: c for c in v} for t, v in cs.items()}
-    n_games, n_same, priced, gaps_all, two_thin = 0, 0, 0, [], 0
-    thin_quoted, edge_hits, per_league = 0, 0, {}
+def gap(value, b, a): return max(value - a, b - value)          # YES at the ask, or NO at 1 - bid: the cheaper side
+
+
+def stats(rows):
+    if not rows: return None
+    gs = [r["gap"] for r in rows]; sp = [r["spread"] for r in rows]; fire = sum(1 for r in rows if r["gap"] >= GAP and r["spread"] <= SPREAD_MAX)
+    qs = st.quantiles(gs, n=10, method="inclusive") if len(gs) > 2 else None
+    q4 = st.quantiles(gs, n=4, method="inclusive") if len(gs) > 2 else None
+    return {"n": len(rows), "median_spread": round(st.median(sp), 4), "median_round_trip": round(st.median([r["round_trip"] for r in rows]), 4),
+            "gap_quartiles_p90": None if not q4 else [round(q4[0], 4), round(st.median(gs), 4), round(q4[2], 4), round(qs[8], 4)], "share_gap_ge_8c_spread_le_4c": round(fire / len(rows), 3)}
+
+
+def measure(spec, list_folders, candle_folders):
+    gs, counts = games(spec, list_folders)
+    idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
+    rows = {}              # (group, type) -> list of target rows ; placebo rows kept alongside
+    cache = {}
+    games_by_group = {}
+    resid = []
     for g in gs:
-        n_games += 1; L = per_league.setdefault(g["league"], {"games": 0, "same_minute": 0})
-        L["games"] += 1
-        last = g["kickoff"] - BEFORE_S
-        found = None
-        for m in range(0, SCAN_S // 60 + 1):                  # the last minute at or before kickoff - 30 min with EVERY leg two-sided
-            ts = last - 60 * m
-            if all(quote(idx.get(t, {}), ts) for t in g["legs"]): found = ts; break
-        if found is None: continue
-        n_same += 1; L["same_minute"] += 1
-        mid = lambda t: sum(quote(idx[t], found)) / 2
-        legs = g["legs"]
-        win = {l["title"]: t for t, l in legs.items() if l["group"] == "winner"}
-        wt = [t for t, l in legs.items() if l["group"] == "winner"]
-        if len(wt) != 3: continue
-        # winner legs sorted by their 'yes_sub_title' is unknown here; require exactly home, tie, away by ticker suffix order: TIE is the draw, the others ordered by ticker
-        draw = [t for t in wt if t.endswith("-TIE")]
-        if len(draw) != 1: continue
-        teams = sorted(t for t in wt if t not in draw)
-        totals = {l["floor"]: mid(t) for t, l in legs.items() if l["group"] == "total" and l["floor"] is not None}
-        if not totals: continue
-        lh, la, rmse = fit((mid(teams[0]), mid(draw[0]), mid(teams[1])), totals)
-        imp = implied(lh, la, g["teamtotal_strike"])
-        priced += 1
-        for t, l in legs.items():
-            if l["group"] == "btts": key = "btts_yes"
-            elif l["group"] == "teamtotal": key = "home_tt_over" if t == (sorted(x for x, y in legs.items() if y["group"] == "teamtotal")[0]) else "away_tt_over"
-            else: continue
-            b, a = quote(idx[t], found)
-            if a - b > SPREAD_MAX: continue
-            thin_quoted += 1
-            yes_gap, no_gap = imp[key] - a, (1 - imp[key]) - (1 - b)       # YES at the ask; NO at 1 - bid
-            gap = max(yes_gap, no_gap); gaps_all.append(gap)
-            if gap >= GAP: edge_hits += 1
-    share_same = n_same / n_games if n_games else 0
-    res = {"counts_first": counts, "games_with_all_four_groups_and_a_kickoff": n_games, "games_with_every_leg_two_sided_in_one_minute": n_same, "share_same_minute": round(share_same, 3), "games_priced": priced,
-           "contracts_quoted_spread_le_4c": thin_quoted, "contracts_with_gap_ge_8c": edge_hits, "share_with_gap_ge_8c": round(edge_hits / thin_quoted, 3) if thin_quoted else None,
-           "gap_q1_median_q3_p90": (lambda q: [round(x, 4) for x in q])([st.quantiles(gaps_all, n=4, method="inclusive")[0], st.median(gaps_all), st.quantiles(gaps_all, n=4, method="inclusive")[2], st.quantiles(gaps_all, n=10, method="inclusive")[8]]) if len(gaps_all) > 2 else None,
-           "per_league": per_league, "tries_added": 0, "rule_scored": False, "outcome_read": False,
-           "price_source": "1 minute candle bid/ask close, every leg in the same minute (not a list quote); freshness assumed on these series (CANDLEVSBOOK1 measured KXBTC15M only)",
-           "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about a point (Desk B's own note); a gap may be the model's, not the market's"}
-    if n_games and share_same < SAME_MINUTE_SHARE: res["verdict"] = "STOPPED: cannot be measured at minute resolution (%.0f%% of games have every leg two-sided in one minute, under the fixed %.0f%%)" % (100 * share_same, 100 * SAME_MINUTE_SHARE)
-    elif priced < MIN_GAMES: res["verdict"] = "no evidence at n = %d priced games (under %d)" % (priced, MIN_GAMES)
-    elif priced and n_same / max(1, n_games) < TWO_SIDED_SHARE: res["verdict"] = "CLOSED: not tradable (under half of the games have a two-sided quote on the thin contracts)"
-    elif thin_quoted and edge_hits / thin_quoted < EDGE_SHARE: res["verdict"] = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (res["gap_q1_median_q3_p90"] and res["gap_q1_median_q3_p90"][3])
-    else: res["verdict"] = "SURVIVES the measurement: at least 10 percent of quoted contracts show an ask 8c or more under the implied value; the registered try is separate (1 try, date constants, read once)"
-    return res
+        G = games_by_group.setdefault(g["group"], {"derivable": 0, "btts": {"derivable": 0, "filled": 0}, "teamtotal": {"derivable": 0, "filled": 0}})
+        G["derivable"] += 1
+        targets = [("btts", t, None) for t in g["btts"]] + [("teamtotal", t, v) for t, v in g["teamtotals"].items()]
+        for typ in ("btts", "teamtotal"):
+            if any(x[0] == typ for x in targets): G[typ]["derivable"] += 1
+        got = {"btts": False, "teamtotal": False}
+        for typ, tk, tt in targets:
+            found = None
+            for m in range(0, (SCAN_BACK - START_BACK) // 60 + 1):
+                ts = g["kickoff"] - START_BACK - 60 * m
+                if not all(two(idx, w, ts) for w in g["winner"]): continue
+                tot = {kk: two(idx, t, ts) for t, kk in g["totals"].items() if two(idx, t, ts)}
+                if len(tot) < 3 or not two(idx, tk, ts): continue
+                found = (ts, tot); break
+            if found is None: continue
+            ts, tot = found
+            wm = {w: sum(two(idx, w, ts)) / 2 for w in g["winner"]}
+            tie = [w for w in g["winner"] if w.endswith("-TIE")]
+            t1 = [w for w in g["winner"] if code(w) == g["team1"]]; t2 = [w for w in g["winner"] if code(w) == g["team2"]]
+            if len(tie) != 1 or len(t1) != 1 or len(t2) != 1: continue
+            totm = {kk: sum(v) / 2 for kk, v in tot.items()}
+            ck = (g["game"], g["league"], ts)
+            if ck not in cache: cache[ck] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), totm)
+            l1, l2, rmse = cache[ck]; resid.append(rmse)
+            b, a = two(idx, tk, ts)
+            if typ == "btts": val = (1 - math.exp(-l1)) * (1 - math.exp(-l2))
+            else: val = over(l1 if tt[0] == g["team1"] else l2, tt[1])
+            mid = (a + b) / 2
+            row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid)}
+            rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
+            # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
+            near = min(totm, key=lambda kk: abs(totm[kk] - 0.5)); rest = {kk: v for kk, v in totm.items() if kk != near}
+            if len(rest) >= 2:
+                pk = ck + (near,)
+                if pk not in cache: cache[pk] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
+                p1, p2, _ = cache[pk]
+                tkk = [t for t, kk in g["totals"].items() if kk == near][0]; pb, pa = tot[near]
+                rows[(g["group"], typ)]["placebo"].append({"gap": gap(over(p1 + p2, near), pb, pa), "spread": pa - pb, "round_trip": (pa - pb) + 2 * 0.07 * ((pa + pb) / 2) * (1 - (pa + pb) / 2)})
+            got[typ] = True
+        for typ in ("btts", "teamtotal"):
+            if got[typ]: G[typ]["filled"] += 1
+    out = {"counts_first": counts, "fit_residual_rmse_median": None if not resid else round(st.median(resid), 4), "groups": {}, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": FRESH,
+           "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"}
+    for grp, G in games_by_group.items():
+        out["groups"][grp] = {"games_with_derivable_kickoff": G["derivable"]}
+        for typ in ("btts", "teamtotal"):
+            R = rows.get((grp, typ), {"targets": [], "placebo": []}); filled = G[typ]["filled"]; der = G[typ]["derivable"]
+            s_t, s_p = stats(R["targets"]), stats(R["placebo"])
+            share_filled = None if not der else round(filled / der, 3)
+            if filled < MIN_FILLED: verdict = "no evidence at n = %d filled games" % filled
+            elif s_t["median_round_trip"] > COST_MAX: verdict = "CLOSED on cost: median round trip %.1fc is above 5c" % (100 * s_t["median_round_trip"])
+            elif share_filled is not None and share_filled < 0.5: verdict = "CLOSED: not tradable (under half of the derivable-kickoff games are filled)"
+            elif s_t["share_gap_ge_8c_spread_le_4c"] >= EDGE_SHARE and s_t["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
+            else: verdict = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (s_t["gap_quartiles_p90"] and s_t["gap_quartiles_p90"][3])
+            out["groups"][grp][typ] = {"games_with_a_target": der, "filled": filled, "share_filled": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
+    return out
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     if not a: print(__doc__)
-    elif a[0] == "build-lists": print(json.dumps(build_lists(load_cells(a[1])), indent=1))
-    elif a[0] == "games": print(json.dumps(games(load_cells(a[1]), a[2:])[1], indent=1))
-    elif a[0] == "build-candles": j, c = build_candles(load_cells(a[1]), a[2:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
-    elif a[0] == "measure":
-        i = a.index("--candles"); print(json.dumps(measure(load_cells(a[1]), a[2:i], a[i + 1:]), indent=1, default=str))
+    else:
+        spec = load_cells()
+        if a[0] == "build-lists": print(json.dumps(build_lists(spec), indent=1))
+        elif a[0] == "games": print(json.dumps(games(spec, a[1:])[1], indent=1))
+        elif a[0] == "build-candles": j, c = build_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))

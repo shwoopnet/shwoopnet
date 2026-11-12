@@ -1,40 +1,39 @@
 #!/usr/bin/env python3
 """TIE3 (Desk B card 18) MEASUREMENT reader, job builders and scorer on scorekit. Testing Desk, Nov 12, 2026.
-Research only: reads files, sends nothing. ZERO TRIES: this stage scores no rule and adds no try. Built against synthetic data; the registration (Desk B) and the frozen cells file must exist before any data is opened.
-Head's conditions, enforced in code:
-  - base rates use ONLY settlements dated strictly before the price block (base block: events closing before BASE_END); the price block never carries a result field (test asserts it);
-  - prices come from minute-end candles at one stated instant (never a list quote); a thin, one-sided or stale minute is COUNTED, not filled;
-  - cutoffs are date constants: BASE_END 2026-10-20T00:00Z, HELD_OUT_FROM 2026-11-13T00:00Z (nothing closing on or after it is listed, requested or counted);
-  - cells are fixed before data: the cells file is a committed JSON and its sha256 must match the constant in the registration (CELLS_SHA256, set when Desk B freezes it; None = not frozen, the code refuses to build jobs).
-Cells file (tie3_cells.json), one object per cell: {"league","period","series","tie_suffix":"TIE","start_rule":{...}}; start_rule (Desk B decides, the card is silent):
-  {"kind":"ticker_local","tz":"America/New_York","offset_s":3600}  parse YYMMMDDHHMM from the event ticker, instant = start - offset_s;
-  {"kind":"field","name":"<market field>","offset_s":N}              instant = that market field (ISO time) minus offset_s (N may be negative);
-  {"kind":"close_offset","offset_s":N}                                 instant = the market's own close minus N, fixed per series before data (Head's ruling; no outside schedule site);
-  no derivable start = the event is SKIPPED and counted; a series with no unambiguous rule is dropped from the cells and the count reported.
-Commands: build-lists <cells.json> | events <cells.json> <lists folders...> | build-candles <cells.json> <lists folders...> | measure <cells.json> <lists folders...> <candle folders...>
+Built to Desk B's REGISTRATION (kalshi-scalper/workers/tie3/TIE3_REGISTRATION.md, commit 9b37bd6 on claude/idea-desk-b; the registration wins over the card) and its frozen cells file
+(tie3_series_frozen.json here, byte for byte TIE3_SERIES.json at 9b37bd6, sha256 below). Research only: reads files, sends nothing. ZERO TRIES: no rule scored, no outcome of a priced game read.
+Enforced in code: base block = events closing before 2026-10-27T00:00Z (results read there for one count); price block = 2026-10-27T00:00Z to before 2026-11-13T00:00Z, carries NO result field (tested);
+held-out from 2026-11-13T00:00Z is never listed or requested; the cells file must match CELLS_SHA256; prices only from the one-minute candle ENDING at T (never a list quote); thin, one-sided or missing minutes counted, not filled.
+Instant (registration): start = the Tie market's occurrence_datetime minus 180 minutes; GUARD: the game's first-period market (cell field first_period_series; the Tie market itself where the cell says 'same series') must have closed
+20 to 120 minutes after that start, else 'start not derivable'; T = start minus 30 minutes; if the minute ending at T is missing or one-sided, step back one minute at a time to T minus 30 minutes, take the first two-sided minute, else 'not two-sided'.
+A game = the suffix after the series prefix of the event ticker, the same in each series of one game (ASSUMED; the first lists answer must confirm, else games are dropped and counted).
+Commands: build-lists | events <lists folders...> | build-candles <lists folders...> | measure <lists folders...> --candles <candle folders...>
 """
-import calendar, hashlib, json, os, re, statistics as st, sys, time
+import calendar, hashlib, json, os, statistics as st, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 
-BASE_END = calendar.timegm((2026, 10, 20, 0, 0, 0))
+HERE = os.path.dirname(os.path.abspath(__file__))
+CELLS_FILE = os.path.join(HERE, "tie3_series_frozen.json")
+CELLS_SHA256 = "dc177a9da637fc9be0a5a8582d6073f9d2ffad8e5f8dc7b6778b8d0cb142e3ef"      # TIE3_SERIES.json at 9b37bd6 (Desk B, frozen 2026-11-12)
+BASE_END = calendar.timegm((2026, 10, 27, 0, 0, 0))
 HELD_OUT_FROM = calendar.timegm((2026, 11, 13, 0, 0, 0))
-CUTOVER = calendar.timegm((2026, 9, 12, 0, 0, 0))
-CELLS_SHA256 = None            # set to the sha256 of tie3_cells.json when Desk B freezes the cells (the registration carries the same value)
-MIN_BASE, MIN_PRICED, EDGE, SPREAD_MAX, PACK_MIN_X_TICKERS, PACK_SPAN_S = 150, 40, 0.08, 0.04, 9000, 3 * 3600
-REG = "kalshi-scalper/workers/testing/TIE3_MEASUREMENT.md"      # my build note; Desk B's registration text is the authority and is cited inside it
+OFFSET_S, BEFORE_S, STEP_BACK = 180 * 60, 30 * 60, 30
+GUARD_LO, GUARD_HI = 20 * 60, 120 * 60
+MIN_BASE, MIN_PRICED, EDGE, SPREAD_MAX, RULE_EDGE = 150, 40, 0.08, 0.04, 0.10
+PACK_LIMIT, PACK_SPAN_S = 9000, 3 * 3600
+HISTORY_SERIES = {"KXNHL1P", "KXNHL2P", "KXNHL3P", "KXNHLOT", "KXNFL1Q", "KXNFL2Q", "KXNFL3Q", "KXNFL4Q"}       # the 8 series Desk B lists on /historical too
+REG = "kalshi-scalper/workers/testing/TIE3_MEASUREMENT.md"
+FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
 RUN = {"status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
        "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3, "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"}}
-MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}
 
 
-def load_cells(path, require_frozen=True):
-    if require_frozen and CELLS_SHA256 is None:
-        raise SystemExit("refused: CELLS_SHA256 is not set; the cells are not frozen (Desk B's registration must carry the hash)")
+def load_cells(path=CELLS_FILE, sha=None):
     raw = open(path, "rb").read()
-    if require_frozen:
-        if hashlib.sha256(raw).hexdigest() != CELLS_SHA256:
-            raise SystemExit("refused: the cells file does not match the frozen sha256")
+    want = CELLS_SHA256 if sha is None else sha
+    if hashlib.sha256(raw).hexdigest() != want:
+        raise SystemExit("refused: the cells file does not match the frozen sha256")
     return json.loads(raw)
 
 
@@ -46,145 +45,137 @@ def job(job_id, purpose, eps, reqs, series, tickers):
     return j
 
 
-def build_lists(cells, require_frozen=True):
-    """Lists job: for every cell series one live list (closes after the cutover) and one /historical list (older). Closes are bounded above by HELD_OUT_FROM - 1."""
-    reqs, series = [], sorted({c["series"] for c in cells})
-    for s in series:
-        reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": CUTOVER, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": 6})
-        reqs.append({"id": "hist_" + s, "path": "/historical/markets", "params": {"series_ticker": s, "limit": 1000}, "max_pages": 6})
+def all_series(spec): return sorted({s for c in spec["cells"] for s in c["series"]} | {c["first_period_series"] for c in spec["cells"] if c["first_period_series"] != "same series"})
+
+
+def build_lists(spec):
+    """Registered: each series' settled markets on the live endpoint, the 8 NHL and NFL series also on /historical, and the fee-field read /series/{ticker} for the 4 listed series. 32 requests."""
+    reqs = []
+    for s in all_series(spec):
+        reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": 3})
+        if s in HISTORY_SERIES:
+            reqs.append({"id": "hist_" + s, "path": "/historical/markets", "params": {"series_ticker": s, "limit": 1000}, "max_pages": 3})
+    for s in spec["fee_field_reads"]:
+        reqs.append({"id": "fee_" + s, "path": "/series/" + s})
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
-           {"name": "hist_markets_list", "method": "GET", "path_pattern": "/historical/markets", "params_allowed": ["series_ticker", "limit", "cursor"]}]
-    return job("TIE3_LISTS", "TIE3 measurement stage 1: settled lists of the three-way period series (times, results of the base block only are used; no price).", eps, reqs, series, [])
+           {"name": "hist_markets_list", "method": "GET", "path_pattern": "/historical/markets", "params_allowed": ["series_ticker", "limit", "cursor"]},
+           {"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}]
+    j = job("TIE3_LISTS", "TIE3 measurement stage 1: settled lists of the three-way period series and the fee fields (times and, for the base block only, results are used; no price).", eps, reqs, all_series(spec), [])
+    j["max_requests"] = len(reqs) + 28            # 32 requests registered, about 50 pages: the runner counts pages against the cap, so the cap leaves slack for them
+    return j
 
 
-def iso(s): return k.iso(s) if s else None
+def game_key(event): return event.split("-", 1)[1] if "-" in event else event
 
 
-def start_ts(event, markets, rule):
-    """Instant for the price: start minus offset, or None (skip and count).
-    Head's ruling (Nov 12, 17:16Z): no outside schedule site (banned hosts). Where a start cannot be fixed from Kalshi fields or the ticker, the pre-game instant is a FIXED OFFSET BEFORE THE MARKET'S CLOSE,
-    stated per series before data: {"kind": "close_offset", "offset_s": N}. A series where even that is ambiguous is dropped from the cells and the count is reported (rule None = skipped and counted)."""
-    if not rule:
-        return None
-    if rule["kind"] == "close_offset":
-        cl = [m["close"] for m in markets if m.get("close")]
-        return (min(cl) - rule["offset_s"]) if cl else None
-    if rule["kind"] == "field":
-        for m in markets:
-            t = iso((m.get("times") or {}).get(rule["name"]) or "")
-            if t:
-                return t - rule.get("offset_s", 0)
-        return None
-    if rule["kind"] == "ticker_local":
-        m = re.fullmatch(r"[A-Z0-9]+-(\d\d)([A-Z]{3})(\d\d)(\d\d)(\d\d)[A-Z0-9]*", event)
-        if not m or m.group(2) not in MONTHS:
-            return None
-        from datetime import datetime
-        from zoneinfo import ZoneInfo
-        d = datetime(2000 + int(m.group(1)), MONTHS[m.group(2)], int(m.group(3)), int(m.group(4)), int(m.group(5)), tzinfo=ZoneInfo(rule.get("tz", "America/New_York")))
-        return int(d.timestamp()) - rule.get("offset_s", 0)
-    return None
-
-
-def events(cells, list_folders):
-    """-> {cell_key: {"base": [ {event, close, level} ], "price": [ {event, close, tie_ticker, instant} ]}}, counts.
-    Base block: events closing before BASE_END, with the Tie result (level = Tie settled yes). Price block: events closing in [BASE_END, HELD_OUT_FROM): NO RESULT FIELD is kept."""
+def events(spec, list_folders):
+    """-> ({cell: {"base": [..], "price": [..]}}, counts). Price-block records carry NO result field."""
     ms = k.markets(list_folders)
     by = {}
-    counts = {"events_listed": 0, "dropped_not_three_settled": 0, "dropped_no_tie": 0, "held_out_dropped": 0, "no_start": 0}
     for t, m in ms.items():
-        by.setdefault((m["series"], m["event"]), []).append(m)
+        by.setdefault((m["series"], game_key(m["event"])), []).append(m)
+    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0}
+    listed = {m["series"] for m in ms.values()}
+    counts["no_such_series"] = sum(1 for s in all_series(spec) if s not in listed)
     out = {}
-    for c in cells:
-        key = "%s|%s" % (c["league"], c["period"]); out[key] = {"base": [], "price": []}
-    cell_of = {c["series"]: c for c in cells}
-    for (series, ev), mk in by.items():
-        c = cell_of.get(series)
-        if not c:
-            continue
-        counts["events_listed"] += 1
-        close = max(m["close"] for m in mk if m["close"])
-        if close >= HELD_OUT_FROM:
-            counts["held_out_dropped"] += 1; continue
-        ties = [m for m in mk if m["ticker"].endswith("-" + c.get("tie_suffix", "TIE"))]
-        if len(mk) != 3 or any(m["result"] not in ("yes", "no") for m in mk):
-            counts["dropped_not_three_settled"] += 1; continue
-        if len(ties) != 1:
-            counts["dropped_no_tie"] += 1; continue
-        key = "%s|%s" % (c["league"], c["period"])
-        if close < BASE_END:
-            out[key]["base"].append({"event": ev, "close": close, "level": ties[0]["result"] == "yes"})
-        else:
-            inst = start_ts(ev, mk, c.get("start_rule"))
-            if inst is None:
-                counts["no_start"] += 1; continue
-            out[key]["price"].append({"event": ev, "close": close, "tie_ticker": ties[0]["ticker"], "instant": inst})       # no result key: never read for this block
+    for c in spec["cells"]:
+        out[c["cell"]] = {"base": [], "price": []}
+        reg = c["cell"] == "NHL_REG"
+        need = 1 if reg else 3
+        for s in c["series"]:
+            for (ser, gk), mk in by.items():
+                if ser != s: continue
+                counts["events_listed"] += 1
+                close = max(m["close"] for m in mk if m["close"])
+                if close >= HELD_OUT_FROM: counts["held_out_dropped"] += 1; continue
+                if len(mk) != need or any(m["result"] not in ("yes", "no") for m in mk): counts["dropped_not_all_settled"] += 1; continue
+                tie = [m for m in mk if (m["ticker"].endswith("-1") if reg else m["ticker"].endswith("-TIE"))]
+                if len(tie) != 1: counts["dropped_no_tie_market"] += 1; continue
+                tie = tie[0]
+                key = s if c["cell"] in ("NFL_Q", "SOC_1H") else c["cell"]            # base rate per quarter (series) in NFL_Q and per series in SOC_1H
+                if close < BASE_END:
+                    out[c["cell"]]["base"].append({"event": gk, "key": key, "level": tie["result"] == "yes"})
+                else:
+                    occ = iso_(tie, "occurrence_datetime")
+                    start = None if occ is None else occ - OFFSET_S
+                    fp = tie if c["first_period_series"] == "same series" else next(iter(by.get((c["first_period_series"], gk), [])), None)
+                    if start is None or fp is None or not fp.get("close") or not (GUARD_LO <= fp["close"] - start <= GUARD_HI):
+                        counts["start_not_derivable"] += 1; continue
+                    out[c["cell"]]["price"].append({"event": gk, "key": key, "tie_ticker": tie["ticker"], "T": start - BEFORE_S})          # no result key
     return out, counts
 
 
-def build_candles(cells, list_folders):
-    """Candle job: 1 minute candles around each price-block instant, packed by time (span at most 3 hours, minutes x tickers at most 9,000), live endpoint only (closes after the cutover);
-    older price-block events (closing 2026-10-20 or later are all after the cutover) so no /historical call is needed."""
-    ev, counts = events(cells, list_folders)
-    items = sorted(((e["instant"], e["tie_ticker"]) for v in ev.values() for e in v["price"]), key=lambda x: x[0])
+def iso_(m, name):
+    return k.iso((m.get("times") or {}).get(name) or "")
+
+
+def build_candles(spec, list_folders):
+    """The Tie contract only, the 31 minutes ending at T, batched by T (span at most 3 hours, minutes x tickers at most 9,000). Live endpoint (price block closes after the 2026-09-12 cutover)."""
+    ev, counts = events(spec, list_folders)
+    items = sorted(((e["T"], e["tie_ticker"]) for v in ev.values() for e in v["price"]), key=lambda x: x[0])
     packs, cur = [], []
-    for inst, t in items:
-        trial = cur + [(inst, t)]
-        span = trial[-1][0] - trial[0][0] + 360
-        if cur and (span > PACK_SPAN_S or span / 60 * len(trial) > PACK_MIN_X_TICKERS):
-            packs.append(cur); cur = [(inst, t)]
+    for T, t in items:
+        trial = cur + [(T, t)]
+        span = trial[-1][0] - trial[0][0] + (STEP_BACK + 1) * 60
+        if cur and (span > PACK_SPAN_S + (STEP_BACK + 1) * 60 or span / 60 * len(trial) > PACK_LIMIT):
+            packs.append(cur); cur = [(T, t)]
         else:
             cur = trial
     if cur: packs.append(cur)
-    reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for _, t in p), "start_ts": p[0][0] - 300, "end_ts": p[-1][0] + 60, "period_interval": 1}} for i, p in enumerate(packs)]
+    reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for _, t in p), "start_ts": p[0][0] - STEP_BACK * 60 - 60, "end_ts": p[-1][0], "period_interval": 1}} for i, p in enumerate(packs)]
     eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
-    return job("TIE3_CANDLES", "TIE3 measurement stage 2: one minute candles of each Tie contract around its pre-game instant, price block only.", eps, reqs, {c["series"] for c in cells}, [t for _, t in items]), counts
+    return job("TIE3_CANDLES", "TIE3 measurement stage 2: the one minute candles of each Tie contract for the 31 minutes ending at T, price block only.", eps, reqs, all_series(spec), [t for _, t in items]), counts
 
 
-def quartiles(xs):
+def q(xs):
     if len(xs) < 2: return None
-    q = st.quantiles(xs, n=4, method="inclusive"); return [round(q[0], 4), round(st.median(xs), 4), round(q[2], 4)]
+    a = st.quantiles(xs, n=4, method="inclusive"); return [round(a[0], 4), round(st.median(xs), 4), round(a[2], 4)]
 
 
-def measure(cells, list_folders, candle_folders):
-    ev, counts = events(cells, list_folders)
-    cs = k.candles(candle_folders)
+def measure(spec, list_folders, candle_folders):
+    ev, counts = events(spec, list_folders)
+    idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
     res = {}
-    for cell in cells:
-        key = "%s|%s" % (cell["league"], cell["period"]); b, p = ev[key]["base"], ev[key]["price"]
-        nb = len(b); rate = (sum(1 for e in b if e["level"]) / nb) if nb else None
-        se = (rate * (1 - rate) / nb) ** 0.5 if nb else None
-        gaps, spreads, two, stale = [], [], 0, 0
+    for c in spec["cells"]:
+        b, p = ev[c["cell"]]["base"], ev[c["cell"]]["price"]
+        rates = {}
+        for key in sorted({e["key"] for e in b} | {e["key"] for e in p}):
+            bb = [e for e in b if e["key"] == key]; n = len(bb)
+            r = sum(1 for e in bb if e["level"]) / n if n else None
+            rates[key] = {"n": n, "rate": None if r is None else round(r, 4), "se": None if not n else round((r * (1 - r) / n) ** 0.5, 4)}
+        gaps, spreads, fires, two = [], [], 0, 0
         for e in p:
-            series = cs.get(e["tie_ticker"], [])
-            ok = [c for c in series if e["instant"] - 120 <= c["ts"] <= e["instant"]]       # the last candle ending at or just before the instant, no older than 2 minutes
-            if not ok: stale += 1; continue
-            c = ok[-1]
-            if c["bid"] is None or c["ask"] is None or not (0 < c["bid"] < c["ask"] < 1): continue
-            two += 1; spreads.append(c["ask"] - c["bid"])
-            if rate is not None: gaps.append(rate - c["ask"])
-        npriced = len(p)
-        res[key] = {"n_base_events": nb, "base_rate": None if rate is None else round(rate, 4), "base_rate_se": None if se is None else round(se, 4), "n_priced_games": npriced, "no_candle_in_window": stale,
-                    "n_two_sided": two, "share_two_sided": None if not npriced else round(two / npriced, 3), "gap_q1_median_q3": quartiles(gaps), "median_spread": None if not spreads else round(st.median(spreads), 4),
-                    "cell_status": "no evidence" if (nb < MIN_BASE or npriced < MIN_PRICED) else "measured"}
-    meas = [r for r in res.values() if r["cell_status"] == "measured"]
-    survive = [r for r in meas if r["gap_q1_median_q3"] and r["gap_q1_median_q3"][1] >= EDGE and r["median_spread"] is not None and r["median_spread"] <= SPREAD_MAX]
-    nothing_to_buy = meas and all((r["share_two_sided"] or 0) < 0.5 for r in meas)
-    if survive: verdict = "SURVIVES the measurement in %d cell(s): the registered try is then separate (1 try, date constants, base rate from earlier games only)" % len(survive)
-    elif nothing_to_buy: verdict = "CLOSED: under half of the games have a two-sided Tie quote in every measured cell (nothing to buy)"
-    elif meas: verdict = "CLOSED: efficient, move on. The one number is the median gap per cell, above"
-    else: verdict = "no evidence: no cell has %d base events and %d priced games" % (MIN_BASE, MIN_PRICED)
-    return {"counts_first": counts, "cells": res, "verdict": verdict, "tries_added": 0, "rule_scored": False,
-            "price_source": "1 minute candle ask close at the last minute ending at or before the instant (not a list quote); candle freshness measured on KXBTC15M only (CANDLEVSBOOK1), assumed elsewhere",
-            "direction": "fixed: a Tie priced OVER its base rate closes the card; it is not turned round"}
+            r = rates[e["key"]]["rate"]; series = idx.get(e["tie_ticker"], {}); got = None
+            for j in range(0, STEP_BACK + 1):
+                cd = series.get(e["T"] - 60 * j)
+                if cd and cd["bid"] is not None and cd["ask"] is not None and 0 < cd["bid"] < cd["ask"] < 1: got = cd; break
+            if got is None: continue
+            two += 1; sp = got["ask"] - got["bid"]; spreads.append(sp)
+            if r is not None:
+                gaps.append(r - got["ask"])
+                if r - got["ask"] >= RULE_EDGE and sp <= SPREAD_MAX: fires += 1
+        nb, npd = len(b), len(p)
+        res[c["cell"]] = {"base_events": nb, "base_rates_by_key": rates, "price_block_games_with_derivable_start": npd, "two_sided": two, "share_two_sided": None if not npd else round(two / npd, 3),
+                          "median_spread": None if not spreads else round(st.median(spreads), 4), "gap_q1_median_q3": q(gaps), "share_two_sided_games_with_ask_10c_under_and_spread_le_4c": None if not two else round(fires / two, 3),
+                          "status": "no evidence at n = %d base events / %d two-sided games" % (nb, two) if (nb < MIN_BASE or two < MIN_PRICED) else "measured"}
+    meas = {n: r for n, r in res.items() if r["status"] == "measured"}
+    survive = [n for n, r in meas.items() if r["gap_q1_median_q3"] and r["gap_q1_median_q3"][1] >= EDGE and r["median_spread"] is not None and r["median_spread"] <= SPREAD_MAX]
+    if survive: verdict = "SURVIVES the measurement in %d cell(s) %s: a separate registration, tries = surviving cells" % (len(survive), survive)
+    elif meas and all((r["share_two_sided"] or 0) < 0.5 for r in meas.values()): verdict = "CLOSED: nothing to buy (under half of the price-block games are two-sided in every measured cell)"
+    elif meas:
+        best = max((r["gap_q1_median_q3"][1] for r in meas.values() if r["gap_q1_median_q3"]), default=None)
+        verdict = "CLOSED: efficient, move on. The one number: the best cell's median gap %s" % best
+    else: verdict = "no evidence: no cell has %d base events and %d two-sided games" % (MIN_BASE, MIN_PRICED)
+    return {"counts_first": counts, "cells": res, "verdict": verdict, "tries_added": 0, "rule_scored": False, "result_of_priced_game_read": False, "freshness": FRESH,
+            "direction": "fixed: a Tie OVERPRICED closes the card; it is not turned round"}
 
 
 if __name__ == "__main__":
     a = sys.argv[1:]
     if not a: print(__doc__)
-    elif a[0] == "build-lists": print(json.dumps(build_lists(load_cells(a[1])), indent=1))
-    elif a[0] == "events": print(json.dumps(events(load_cells(a[1]), a[2:])[1], indent=1))
-    elif a[0] == "build-candles": j, c = build_candles(load_cells(a[1]), a[2:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
-    elif a[0] == "measure":
-        cells = load_cells(a[1]); i = next(n for n, x in enumerate(a) if n > 1 and x == "--candles")
-        print(json.dumps(measure(cells, a[2:i], a[i + 1:]), indent=1))
+    else:
+        spec = load_cells()
+        if a[0] == "build-lists": print(json.dumps(build_lists(spec), indent=1))
+        elif a[0] == "events": print(json.dumps(events(spec, a[1:])[1], indent=1))
+        elif a[0] == "build-candles": j, c = build_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))

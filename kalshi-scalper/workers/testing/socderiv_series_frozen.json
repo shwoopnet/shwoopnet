@@ -1,0 +1,19 @@
+{
+  "registration": "kalshi-scalper/workers/socderiv/SOCDERIV_REGISTRATION.md",
+  "frozen": "2026-11-12",
+  "legs": {
+    "GAME": "three markets an event: two team markets and one ending in -TIE",
+    "TOTAL": "a ladder; each market's floor_strike is the goals line (over floor_strike)",
+    "BTTS": "one market an event: both teams to score",
+    "TEAMTOTAL": "a ladder per team; used only where the market object gives floor_strike and the team can be read from the ticker or title, else counted as unreadable"
+  },
+  "kickoff_rule": "kickoff = occurrence_datetime of the GAME market minus 180 minutes; check: the GAME market closed between 100 and 135 minutes after it, else the game is dropped and counted",
+  "window": {"closes_from": "2026-09-12T00:00:00Z", "closes_before": "2026-11-13T00:00:00Z", "held_out_from": "2026-11-13T00:00:00Z"},
+  "sample": "the 60 most recently settled games of each league inside the window, never extended",
+  "groups": {
+    "A_big": ["EPL", "LALIGA", "SERIEA", "BUNDESLIGA", "LIGUE1", "MLS", "LIGAMX", "BRASILEIRO"],
+    "B_small": ["EFLTROPHY", "COPADELREY", "UCLW", "APFDDH", "EERSTEDIV", "LIGAPORTUGAL", "LVAVIR", "SERIEC"]
+  },
+  "series_name_rule": "KX + league + GAME | TOTAL | BTTS | TEAMTOTAL; a ticker that returns no market is counted as 'no such series'",
+  "fee_field_reads": ["KXEPLGAME", "KXEPLBTTS", "KXEFLTROPHYBTTS"]
+}
