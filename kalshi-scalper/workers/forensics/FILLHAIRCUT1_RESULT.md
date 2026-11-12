@@ -91,3 +91,65 @@ Mid 30 seconds after the decision, filled against missed (limit a0 + 1c, 2 secon
 - CFRTI1 buys when a spot-built model is above the quote. If the quote is simply behind spot, it will move in the seconds after the signal, and the misses will be the model's best rows. The unconditional 15% here is therefore a floor for that rule, not an estimate. The honest figure needs CFRTI1's own signal rows (time, ticker, side, ask seen) replayed on the books at +2 seconds; that reads no outcome and I can run it on the development rows if they are passed.
 - Disclosure: this desk's ENTRYREPLAY1 read the settlement outcome of the cheap-side Bitcoin BASELINE (no model, 178 seconds, 8c to 50c) for closes Nov 5 to 8, which overlaps the first days of CFRTI1's held-out period. CFRTI1's rule is frozen and none of its rows were formed or scored here, but whoever reads its held-out result should know the baseline figure for those days is already public in `FORENSICS_RESULT_NOV12.md`.
 - Ten days, one regime, recorder gaps (735 of about 967 possible windows). Bitcoin only: the other four 15 minute series are far thinner and would need their own run (the data is held).
+
+## Amendment 1 result (2026-11-12): the full grid, with a +2c limit and closes to Nov 11
+
+Registered first (commit 1786f56). Period A = closes Oct 29 to Nov 8 (the tables above; raw `results/FILLHAIRCUT1_A.json`, and the first cut kept as `results/FILLHAIRCUT1_first_cut.json`). Period B = closes Nov 9 to 11 (`_B.json`: 217 windows used, 114 with instants, 1,940 instants, 141,006 taker trades). Both = `_AB.json` (952 windows used, 544 with instants, 9,527 instants, 643,149 taker trades). No settlement result loaded for any close.
+
+**How to read the delay columns.** Polls are 2 seconds apart. "1 s" is the next poll (median 2.0 s). "2 s" is the first poll at least 2.0 s later, a mix of 2 and 4 seconds (median 2.07 s). "5 s" is median 6.0 s and "10 s" is median 10.06 s. The bot's orders leave several seconds after the minute, so the 5 and 10 second columns are where a live order lives.
+
+**Share of immediate-or-cancel buys filled in full, both periods (the MISS rate is 100 minus this).** 1 contract; the 10 contract figure is the same to within 0.3 points in every cell.
+
+| Bucket (instants / windows) | Limit | 1 s | 2 s | 5 s | 10 s |
+|---|---|---|---|---|---|
+| All (9,527 / 544) | ask seen | 67.1% (66.0 to 68.3) | 66.4% | 65.5% (63.8 to 67.0) | 65.8% (63.7 to 67.8) |
+| | +1c | 84.2% (83.2 to 85.2) | 81.7% | **75.9% (74.3 to 77.5)** | **72.8% (70.8 to 74.9)** |
+| | +2c | 90.5% (89.6 to 91.3) | 88.0% | **81.8% (80.3 to 83.2)** | **77.5% (75.8 to 79.4)** |
+| 5c to 10c (3,565 / 353) | ask seen | 64.8% | 65.6% | 66.0% | 67.4% |
+| | +1c | 88.4% | 86.5% | 80.2% | 76.8% |
+| | +2c | 94.2% | 92.5% | 86.5% | 82.9% |
+| 10c to 20c (3,372 / 356) | ask seen | 70.8% | 69.3% | 68.1% | 68.0% |
+| | +1c | 84.8% | 81.7% | 76.6% | 73.8% |
+| | +2c | 90.7% | 88.0% | 82.0% | 77.5% |
+| 20c to 30c (2,941 / 317) | ask seen | 66.1% | 64.1% | 61.7% | 61.2% |
+| | +1c | 78.5% | 75.7% | 69.6% | 66.6% |
+| | +2c | 85.5% | 82.5% | 75.8% | 70.7% |
+
+**Price paid against the ask seen, on the filled contracts, both periods (negative = cheaper than the ask seen).**
+
+| Bucket | Limit | 1 s | 2 s | 5 s | 10 s |
+|---|---|---|---|---|---|
+| All | ask seen | -1.2c | -1.6c | -2.5c | -3.7c |
+| | +1c | -0.8c | -1.1c | -2.1c | -3.2c |
+| | +2c | -0.7c | -0.9c | -1.8c | -2.9c |
+| 5c to 10c | +1c / +2c | -0.4c / -0.3c | -0.6c / -0.5c | -1.1c / -1.0c | -1.8c / -1.5c |
+| 10c to 20c | +1c / +2c | -0.9c / -0.7c | -1.3c / -1.0c | -2.3c / -2.0c | -3.5c / -3.2c |
+| 20c to 30c | +1c / +2c | -1.3c / -1.1c | -1.8c / -1.5c | -3.3c / -2.8c | -5.1c / -4.7c |
+
+**Which signals a limit loses** (mid 30 seconds after the decision, both periods, 10 contracts): +1c limit at 5 s, filled -2.1c, missed +7.9c (6.4 to 9.6); at 10 s, filled -3.3c, missed +10.0c (8.4 to 11.6). +2c limit at 5 s, filled -1.8c, missed +9.6c (7.8 to 11.3); at 10 s, filled -2.9c, missed +11.4c (9.7 to 13.1).
+
+**The two periods beside each other (all buckets, share filled in full, 1 contract).**
+
+| Limit | Period | 1 s | 2 s | 5 s | 10 s |
+|---|---|---|---|---|---|
+| ask seen | A (Oct 29 to Nov 8) | 67.5% | 66.9% | 66.4% | 66.8% |
+| | B (Nov 9 to 11) | 65.8% | 64.7% | 61.6% | 61.8% |
+| +1c | A | 85.1% | 82.7% | 77.2% | 74.1% |
+| | B | 80.8% | 78.1% | 70.9% (67.5 to 74.2) | 67.7% (63.7 to 71.8) |
+| +2c | A | 91.2% | 89.0% | 83.2% | 78.8% |
+| | B | 87.6% | 84.0% | 76.4% (73.4 to 79.5) | 72.5% (68.7 to 76.3) |
+
+Period B filled 4 to 7 points less at every limit and delay, so the miss rate is not a constant: it moves with how fast the market is. Period B's buckets have 65 to 80 windows each, under the 100 line: by bucket, B alone is "no evidence at n = 65 to 80 windows"; pooled over buckets (114 windows) it is usable.
+
+**The haircut to carry, restated for a live-like delay of 5 to 10 seconds.**
+
+| Limit | Drop this share of simulated fills | Price on the rest |
+|---|---|---|
+| ask seen | about 34% (period B: 38%) | keep the ask seen (the fills are cheaper on average, by 2.5c to 3.7c) |
+| +1c | 24% to 27% (period B: 29% to 32%) | keep the ask seen |
+| +2c | 18% to 23% (period B: 24% to 28%) | keep the ask seen |
+
+- 1 and 10 contracts: the same row.
+- The dropped ones are the signals the market moved WITH: the mid of a missed order is 8c to 11c higher half a minute later, the mid of a filled one 2c to 3c lower. Dropping fills at random understates the cost for any rule whose signal predicts the next seconds. For such a rule the replay on its own instants is the only honest figure.
+- The first cut's "+2c fills about 90% at 2 seconds" (read off the move distribution) is confirmed by the order-by-order figure, 90.5% at the next poll and 88.0% at 2 to 4 seconds. Its "+4c fills about 95%" was not simulated and stays an estimate.
+- A wider limit buys back less than it seems at live delays: going from +1c to +2c recovers about 5 to 6 points of fills at 5 to 10 seconds, and the ones still missed have moved the most.

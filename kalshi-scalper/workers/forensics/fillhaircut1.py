@@ -4,7 +4,7 @@ Registration: FILLHAIRCUT1_REGISTRATION.md (committed before anything was comput
 A measurement: no rule is scored, no settlement result is loaded, zero tries.
 Public recorded market data only (R6 books and tape). No network, no account data.
 
-usage: python3 -I fillhaircut1.py <data_root> <out_json>
+usage: python3 -I fillhaircut1.py <data_root> <out_json> [A|B|AB]
 """
 import sys, os, glob, json
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -14,7 +14,11 @@ import r6load as R
 
 ROOT, OUT = sys.argv[1], sys.argv[2]
 SERIES = "KXBTC15M"
-FROM, BEFORE = pd.Timestamp("2026-10-29T00:00:00Z"), pd.Timestamp("2026-11-09T00:00:00Z")
+# Period constants (registration and Amendment 1): A = closes Oct 29 to Nov 8; B = closes Nov 9 to Nov 11; AB = both.
+PERIODS = {"A": ("2026-10-29T00:00:00Z", "2026-11-09T00:00:00Z"), "B": ("2026-11-09T00:00:00Z", "2026-11-12T00:00:00Z"),
+           "AB": ("2026-10-29T00:00:00Z", "2026-11-12T00:00:00Z")}
+PERIOD = sys.argv[3] if len(sys.argv) > 3 else "A"
+FROM, BEFORE = (pd.Timestamp(x) for x in PERIODS[PERIOD])
 SPAN = (120.0, 180.0)                 # seconds before the close
 BAND = (0.05, 0.30)
 BUCKETS = [("05-10c", 0.05, 0.10), ("10-20c", 0.10, 0.20), ("20-30c", 0.20, 0.30 + 1e-9)]
@@ -95,7 +99,7 @@ for tk, g in books.groupby("ticker", sort=False):
             row["ask_%d" % h] = float(pxh[0])
             row["szle_%d" % h] = float(szh[pxh <= a0 + EPS].sum())
             row["lag_%d" % h] = (t[j] - t[i]) / 1000.0
-            for lim_name, lim in (("L0", a0), ("L1", a0 + 0.01)):
+            for lim_name, lim in (("L0", a0), ("L1", a0 + 0.01), ("L2", a0 + 0.02)):
                 ok = pxh <= lim + EPS
                 avail = szh[ok]; apx = pxh[ok]
                 for Q in (1, 10):
@@ -191,7 +195,7 @@ def part2_share(G):
 
 def part3(G):
     o = {}
-    for lim in ("L0", "L1"):
+    for lim in ("L0", "L1", "L2"):
         for Q in (1, 10):
             for d in HS:
                 fc, pc = "fill_%s_Q%d_d%d" % (lim, Q, d), "px_%s_Q%d_d%d" % (lim, Q, d)
@@ -206,7 +210,7 @@ def part3(G):
                 if "mid30" in g:
                     x["mid_move_30s_if_full"] = cl_mean(g.loc[full, "mid30"].to_numpy(), g.loc[full, "w"])
                     x["mid_move_30s_if_not_full"] = cl_mean(g.loc[~full, "mid30"].to_numpy(), g.loc[~full, "w"]) if (~full).any() else None
-                o["%s_Q%d_d%d" % ({"L0": "limit_a0", "L1": "limit_a0_plus_1c"}[lim], Q, d)] = x
+                o["%s_Q%d_d%d" % ({"L0": "limit_a0", "L1": "limit_a0_plus_1c", "L2": "limit_a0_plus_2c"}[lim], Q, d)] = x
     return o
 
 
@@ -226,7 +230,7 @@ def part2_slip(X):
     return o
 
 
-out = {"test": "FILLHAIRCUT1", "series": SERIES, "closes_from": str(FROM), "closes_before": str(BEFORE), "span_s_before_close": SPAN, "band": BAND,
+out = {"test": "FILLHAIRCUT1", "period": PERIOD, "series": SERIES, "closes_from": str(FROM), "closes_before": str(BEFORE), "span_s_before_close": SPAN, "band": BAND,
        "note": "dollars per contract (0.01 = 1 cent); [value, 2.5%, 97.5%] by resampling whole windows; no settlement result loaded",
        "counts": {"windows_listed": int(n_listed), "windows_used": int(books["ticker"].nunique()), "instants": int(len(I)), "windows_with_instants": int(I["w"].nunique()),
                   "taker_trades": int(len(TR))}}
