@@ -235,3 +235,39 @@ What it says, plainly:
 4. **No new cell is proposed from this table.** Picking the best bucket after the read would be chasing one cell of about thirty on one cluster.
 
 **Status: PARKED, as decided in the power analysis.** The next cluster of any size is November 2028 (under 20 measures in 2027). Nothing further is read for this card; the held-out set stays unread so it is still clean if the card is ever reopened. The frozen tags are in `workers/ballotno/BALLOTNO_TAGS_2026-11-03.csv`.
+
+## Protocol 4: ROLLOFF proxy check (registered Nov 12, 2026, before the settled history is opened)
+
+`ROLLOFF | family: outside composition arithmetic, entry the day before resolution, hold | risk class: mid price, 3 contracts, daily events, group D | stage Idea`. Card 13. Main bar, not the slow-family screen (about 365 events a year).
+
+**What is tested now.** Only the feasibility gate on the card: can a simple window average rebuilt from the Wikipedia poll table reproduce the value Kalshi settles the daily approval market (`KXTRUMPAPPROVE`) on? No price is read and no trade is scored at this stage.
+
+**Step 0, the settlement source, read first.** The pull `ROLLOFF_PROXY` (12 public reads, dispatched by Main through kalshi-pull, branch `kalshi-pull-data` under `pull/ROLLOFF_PROXY/`) holds the series' rules text. The rules text is read before any settled value. **If the source is a weighted or model average (pollster ratings, recency or sample weights, house-effect adjustment, a trend line) and not a simple average of recent polls, the card dies on that fact alone** and the scorer is not run for a verdict. If the rules text does not say how the average is built, that is reported as "source method not stated" and the scorer decides. The source's own site is not read (barred).
+
+**Scorer.** `workers/rolloff/rolloff_proxy.py`, committed with this text. Inputs: the Wikipedia poll table as read on Nov 12, 2026 (Wikimedia API, permitted), and one settled value per day from the pull. The quantity (approve share, disapprove share or net) is the one the rules text names.
+
+**Pinned constants (the script carries the same values).**
+
+| Item | Value |
+|---|---|
+| Settled days used | event dates 2026-09-01 to 2026-11-11 inclusive |
+| Fit days (the proxy's window is chosen here) | 2026-09-01 to 2026-10-09 |
+| Check days (the kill rule is read here, once) | 2026-10-10 to 2026-11-11 |
+| Candidate proxies | window 7, 10, 14, 21 or 30 days by field end date; latest poll per pollster or every poll; a poll usable 0, 1 or 2 days after its field end: 30 candidates, the one with the lowest mean absolute error on the FIT days is used |
+| Fewer than 3 polls in the window | no proxy for that day, counted as a miss |
+| Offset or scaling | none is fitted |
+| **Kill rule (as on the card)** | **KILLED if the proxy is within 0.3 points of the settled value on fewer than 80% of the check days** |
+| Minimum | 20 check days, otherwise NOT_ENOUGH_DATA |
+
+**Read once.** The check days are read one time. The marker is the result line added to this file in the same commit as the result.
+
+**Honest limits, stated before the read.**
+
+1. The poll table is the table as it stands on Nov 12, not as it stood on each day. A poll released late is in our window for a day on which the source could not have had it. This favours the proxy, so a KILL is solid and a SURVIVE is optimistic. If the proxy survives, the forward shadow uses the table as read each day, which removes this.
+2. The sources that publish these averages choose which pollsters to include. Wikipedia's table is a wider list. No pollster filter is fitted here.
+3. Thirty candidates are fitted on the fit days; the check days are untouched by that choice. This is a fit of a measuring tool, not a trade rule, and it adds no try to the deflation count; the trade test, if it is ever reached, is the card's one try.
+4. Seen before this registration: ONE settled value (the Nov 11 event, from one politics recorder snapshot, while checking that the recorder carries the field). Nothing else of the settled history has been read.
+
+**If the proxy survives.** ROLLOFF's forward shadow is registered as a read-time join on `pol-data` (one row a day: the proxy for tomorrow's value from that day's table, and the recorder's quotes), with its bar, in a separate registration before any forward row is scored. It stays on the main bar.
+
+**If it is killed.** Card 13 is closed, and POL-b2's use of the same table as a level model is flagged to the Head of R&D.
