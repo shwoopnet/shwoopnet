@@ -13,3 +13,6 @@ LINE 2 (look from expected_expiration_time, else occurrence_datetime, minus 48 h
 LABEL: FAIL
 events with no Line 2 observation (no time, or look outside the pulled candles): 562
 probe-eligible only if LINE 2 is PF 1.3 or more at +1c with n 100 or more: NO
+
+ADDENDUM (Nov 12, 2026, after the Verification Analyst's reproduction; the printed output above is unedited):
+TIE-BREAK. The registration did not state a tie-break for 'nearest 0.5 mid'. The scorer's rule was: among an event's qualifying markets, the first market in the candle answer's order wins and a later market replaces it only if STRICTLY nearer 0.5 (so exact ties keep the first in answer order, which is not alphabetical and not registered). The Verification Analyst broke exact ties alphabetically by ticker. Of the 172 line-1 events, 153 are identical and the 19 that differ are all exact-mid ties (two complementary strikes with identical YES ask and bid); 5 of those 19 tie picks change the result (15 winners against 16). The label (FAIL) and the n (172 and 173) are the same under both rules. For any future cell a tie-break must be registered (alphabetical by ticker is proposed). The fee is as registered (0.07*p*(1-p) unrounded on the ask, average 0.785c); no fee discrepancy.
