@@ -82,5 +82,5 @@
   }
  ],
  "notes": "Expected about 18,000 events x 3 markets = about 54,000 markets, about 55 pages at about 2.2 KB a market (about 120 MB). A slice that hits its page cap is reported as cut and its lower bound stated; it is never re-asked without a new job. Only ticker, event, times, settlement time and result are used; the result is read only by the scorer, as registered.",
- "max_requests": 81
+ "max_requests": 90
 }
