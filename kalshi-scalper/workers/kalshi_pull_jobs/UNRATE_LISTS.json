@@ -1,0 +1,89 @@
+{
+ "job_id": "UNRATE_LISTS",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/UNRATEROUND_REGISTRATION.md",
+ "purpose": "UNRATEROUND stages 0 and 1: settled market lists of the candidate unemployment series KXU3 and KXUE (strikes, close times, results, titles; no price).",
+ "heldout": "none read; nothing closing on or after 2026-11-05T00:00Z is requested (forward only)",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXU3",
+  "KXUE"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 4,
+ "notes": "UNRATEROUND paper-screen read",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXU3",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXU3",
+    "status": "settled",
+    "limit": 1000,
+    "max_close_ts": 1793836799
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXU3",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXU3",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXUE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUE",
+    "status": "settled",
+    "limit": 1000,
+    "max_close_ts": 1793836799
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXUE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXUE",
+    "limit": 1000
+   },
+   "max_pages": 2
+  }
+ ]
+}

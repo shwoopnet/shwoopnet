@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """UNRATEROUND (Desk B card 4) against the slow-family paper screen (docs/POLITICS_RULES.md section 8). Testing Desk, Nov 12, 2026.
-Research only: reads files, sends nothing. PROPOSED registration: kalshi-scalper/workers/testing/UNRATEROUND_REGISTRATION.md (not registered until the Head says so).
-Commands: build-s0 | build-s1 <s0 folder> | events <s1 folder> | build-s2 <s1 folder> <bls_levels.csv> | score <s1 folder> <s2 folder(s)> <bls_levels.csv>
+Research only: reads files, sends nothing. REGISTERED Nov 12, 2026 (Head of R&D ruling): kalshi-scalper/workers/testing/UNRATEROUND_REGISTRATION.md.
+Commands: build-lists | events <s1 folder> | build-s2 <s1 folder> <bls_levels.csv> | score <s1 folder> <s2 folder(s)> <bls_levels.csv>
 bls_levels.csv: year,month,unemployed,labor_force (BLS LNS13000000 and LNS11000000, thousands), supplied from a public BLS read.
 """
 import calendar, csv, gzip, json, math, os, re, sys, time
@@ -37,10 +37,16 @@ def job(job_id, purpose, eps, reqs, series, tickers):
     return j
 
 
-def build_s0():
-    return job("UNRATE_SERIES", "UNRATEROUND stage 0: does the unemployment series exist under KXU3 or KXUE (a 404 is an answer).",
-               [{"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}],
-               [{"id": "series_" + s, "path": "/series/" + s} for s in SERIES], SERIES, [])
+def build_lists():
+    """Stage 0 and 1 in one job (Head's ruling Nov 12): the settled lists of both candidate series, live and historical. 4 requests, at most 8 with paging.
+    An empty or 404 answer for the series that is not unemployment is an answer. No price is used from these lists."""
+    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "max_close_ts"]},
+           {"name": "hist_markets_list", "method": "GET", "path_pattern": "/historical/markets", "params_allowed": ["series_ticker", "limit", "cursor"]}]
+    reqs = []
+    for s in SERIES:
+        reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "max_close_ts": CUTOFF - 1}, "max_pages": 2})
+        reqs.append({"id": "hist_" + s, "path": "/historical/markets", "params": {"series_ticker": s, "limit": 1000}, "max_pages": 2})
+    return job("UNRATE_LISTS", "UNRATEROUND stages 0 and 1: settled market lists of the candidate unemployment series KXU3 and KXUE (strikes, close times, results, titles; no price).", eps, reqs, SERIES, [])
 
 
 def answers(folder):
@@ -50,24 +56,6 @@ def answers(folder):
             yield row, json.load(gzip.open(os.path.join(folder, row["file"])))
 
 
-def found_series(s0):
-    for row, body in answers(s0):
-        s = body.get("series") if isinstance(body, dict) else None
-        if isinstance(s, dict) and s.get("ticker") and re.search(r"unemploy", json.dumps(s).lower()):
-            return s["ticker"]
-    return None
-
-
-def build_s1(s0):
-    s = found_series(s0)
-    if not s: raise SystemExit("neither KXU3 nor KXUE is an unemployment series in the stage 0 answer; stop and tell the Head")
-    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "max_close_ts"]},
-           {"name": "hist_markets_list", "method": "GET", "path_pattern": "/historical/markets", "params_allowed": ["series_ticker", "limit", "cursor"]}]
-    reqs = [{"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "max_close_ts": CUTOFF - 1}, "max_pages": 3},
-            {"id": "hist_" + s, "path": "/historical/markets", "params": {"series_ticker": s, "limit": 1000}, "max_pages": 3}]
-    return job("UNRATE_LISTS", "UNRATEROUND stage 1: settled market lists of the unemployment series (strikes, close times, results; no price).", eps, reqs, [s], [])
-
-
 def event_month(event):
     m = re.fullmatch(r"[A-Z0-9]+-(\d\d)([A-Z]{3})(\d\d)?", event)
     return (2000 + int(m.group(1)), MONTHS[m.group(2)]) if m and m.group(2) in MONTHS else None
@@ -75,8 +63,11 @@ def event_month(event):
 
 def events_from(s1):
     ev = {}
-    for row, body in answers(s1):
+    pages = [b for _, b in answers(s1)]
+    unemp = {m.get("ticker", "").split("-")[0] for b in pages if isinstance(b, dict) for m in b.get("markets", []) if re.search(r"unemploy", json.dumps(m).lower())}
+    for body in pages:
         for m in body.get("markets", []) if isinstance(body, dict) else []:
+            if m.get("ticker", "").split("-")[0] not in unemp: continue          # only the series whose markets say unemployment (KXU3 or KXUE, whichever it is)
             c = iso(m.get("close_time", "")); et = m.get("event_ticker", "")
             if not c or c >= CUTOFF or m.get("result") not in ("yes", "no") or not event_month(et): continue
             ev.setdefault(et, []).append({"ticker": m["ticker"], "close": c, "result": m["result"], "type": m.get("strike_type"), "floor": num(m.get("floor_strike")), "cap": num(m.get("cap_strike"))})
@@ -86,7 +77,7 @@ def events_from(s1):
 def events_report(s1):
     ev = events_from(s1)
     n = len(ev)
-    return {"events_excluding_january_before_cutoff": n, "label": ("no evidence at n = %d (under 30 independent events; no candle is pulled, nothing scored)" % n) if n < MIN_EVENTS else "n = %d events: enough to read once against the screen" % n}
+    return {"events_excluding_january_before_cutoff": n, "label": ("no evidence at n = %d (under 30 independent events; no candle is pulled, nothing scored)" % n) if n < MIN_EVENTS else "n = %d events: enough to read once against the screen (the haircut line is n = %.1f)" % (n, 0.66 * n)}
 
 
 def levels(path):
@@ -207,14 +198,13 @@ def score(s1, s2s, bls):
     else: label = "off the list (failed the screen)"
     ge8 = [t for t in trs if t["edge"] >= EDGE8]
     return {"label": label, "events": len(ev), "trades": n, "skipped": skipped, "sd": round(sd, 4), "sd_from_changes": nch, "all_events_rule": s0, "plus_1c": s1_, "first_half": a, "second_half": b,
-            "original_rule_subset_edge_ge_8c": stats(ge8), "haircut_line": "after a 34 percent fill drop the expected n is %.1f against the screen's 30" % (0.66 * n),
-            "price_source": "hourly candle close, not yet cleared against the order book (Forensics CANDLEVSBOOK1)", "tries_against_the_screen": "this read is try 2 of the UNRATEROUND card; the Head states the running count"}
+            "original_rule_subset_edge_ge_8c": stats(ge8), "haircut_line": "after a 34 percent fill drop the expected n is %.1f against the screen's 30%s" % (0.66 * n, "" if 0.66 * n >= MIN_EVENTS else ": on this line the label is 'no evidence at n = %.0f', whatever the headline shows" % (0.66 * n)),
+            "price_source": "hourly candle, freshness not measured on this series", "tries_against_the_screen": "this read is try 2 of the UNRATEROUND card; the Head states the running count"}
 
 
 if __name__ == "__main__":
     c = sys.argv[1] if len(sys.argv) > 1 else ""
-    if c == "build-s0": print(json.dumps(build_s0(), indent=1))
-    elif c == "build-s1": print(json.dumps(build_s1(sys.argv[2]), indent=1))
+    if c == "build-lists": print(json.dumps(build_lists(), indent=1))
     elif c == "events": print(json.dumps(events_report(sys.argv[2]), indent=1))
     elif c == "build-s2": print(json.dumps(build_s2(sys.argv[2], sys.argv[3]), indent=1))
     elif c == "score": print(json.dumps(score(sys.argv[2], sys.argv[3].split(","), sys.argv[4]), indent=1))

@@ -4,6 +4,8 @@ Table only. Nothing was run, scored, pulled or re-registered. Read from `claude/
 
 ## RULED Nov 12 (Head of R&D, messages of 16:53Z and 16:50Z; this block is the record, the table below is the evidence)
 
+- **ABSORB-F (row 21): RETIRED UNREAD, final** (buys the closing favourite and holds; owner-closed Oct 28, declined list; no exception requested; its scheduled task is already switched off by the EA; tries stay counted).
+- **Not rows (Head, 17:05Z):** REV1 and P6F are V2's closing-buy forward reads, RETIRED UNREAD by the owner's popup on Nov 12. FLOOR1, THIN1 and FLIP1 read the owner's own live-fill export and stay with Refinement (live performance), not research. Left alone.
 - **The set is the 20 found, plus ABSORB-F as the 21st** (the "11" was Desk B's summary figure, with no source file). All 44 tries stay counted (ABSORB-F's are not counted here).
 - **RETIRED UNREAD, source closed (10), final:** CASHCLOSE1, CASHGAP1, CASHOPEN1, CASHCLOSE2, CASHGAP2, CASHOPEN2, SPLAG1, SPAUCT1, SPLIQ1, SPHALT1. Not FALSIFIED.
 - **RETIRED UNREAD, cannot reach its bar by its read date (8), final:** PERPEQ2, PERPEQ3, PERPEQ4, SPFUND1, SPW1, EARNPERP1, EARNPERP2, EARNPERP3. No earnings row is kept; an earnings card from the Stocks Desk is a new registration with its own tries.

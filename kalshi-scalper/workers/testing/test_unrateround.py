@@ -12,7 +12,7 @@ def mkrun(d, job, bodies):
             rows.append({"id": r["id"], "status": 200, "file": f})
     json.dump({"job": job, "rows": rows, "status": "complete"}, open(os.path.join(d, "manifest.json"), "w"))
 
-kp.check_job(u.build_s0())
+jl = u.build_lists(); kp.check_job(jl); assert len(jl['requests']) == 4 and sum(r['max_pages'] for r in jl['requests']) == 8
 random.seed(1)
 with tempfile.TemporaryDirectory() as t:
     bls = os.path.join(t, "bls.csv"); lvl = 5.0
@@ -27,9 +27,7 @@ with tempfile.TemporaryDirectory() as t:
     mk = lambda ty, f, c: {"type": ty, "floor": f, "cap": c}
     ps = u.p_yes(mk("less", None, 4.3), 4.35, 0.1) + u.p_yes(mk("between", 4.3, 4.4), 4.35, 0.1) + u.p_yes(mk("greater", 4.4, None), 4.35, 0.1)
     assert abs(ps - 1) < 1e-9, ps
-    s0 = {"series": {"ticker": "KXU3", "title": "Unemployment rate"}}
-    d0 = os.path.join(t, "s0"); os.mkdir(d0); mkrun(d0, u.build_s0(), {"series_KXU3": s0}); assert u.found_series(d0) == "KXU3"
-    j1 = u.build_s1(d0); kp.check_job(j1)
+    j1 = jl
     # 40 events Feb 2023 .. (skip Jan), each with 3 markets around u0; the real outcome is drawn from the model
     markets = []; res_by_event = {}
     cl = lambda y, m: calendar.timegm((y, m, 5, 12, 30, 0))
@@ -42,8 +40,8 @@ with tempfile.TemporaryDirectory() as t:
         for ty, fl, cp in (("less", None, round(hl - 0.05, 1)), ("between", round(hl - 0.05, 1), round(hl + 0.05, 1)), ("greater", round(hl + 0.05, 1), None)):
             yes = (ty == "less" and head < cp) or (ty == "between" and fl <= head <= cp) or (ty == "greater" and head > fl)
             markets.append({"ticker": "%s-%s%s" % (e, ty[0].upper(), fl if ty != "less" else cp), "event_ticker": e, "close_time": f(close), "result": "yes" if yes else "no",
-                            "strike_type": ty, "floor_strike": fl, "cap_strike": cp})
-    d1 = os.path.join(t, "s1"); os.mkdir(d1); mkrun(d1, j1, {"live_KXU3": {"markets": markets}, "hist_KXU3": {"markets": []}})
+                            "strike_type": ty, "floor_strike": fl, "cap_strike": cp, "title": "Unemployment rate above"})
+    d1 = os.path.join(t, "s1"); os.mkdir(d1); mkrun(d1, j1, {"live_KXU3": {"markets": markets}, "hist_KXU3": {"markets": []}, "live_KXUE": {"markets": []}, "hist_KXUE": {"markets": []}})
     ev = u.events_from(d1); assert all(u.event_month(e)[1] != 1 for e in ev)          # Januaries 2023 to 2026 excluded: 4
     assert len(ev) == len(evs) - 4, (len(ev), len(evs))
     assert u.events_report(d1)["label"].startswith("n = ")
@@ -63,7 +61,7 @@ with tempfile.TemporaryDirectory() as t:
     d1b = os.path.join(t, "s1b"); os.mkdir(d1b); mkrun(d1b, j1, {"live_KXU3": {"markets": markets[:30]}, "hist_KXU3": {"markets": []}})
     assert u.events_report(d1b)["label"].startswith("no evidence at n = ")
     # held-out: a market closing on or after the cutoff is never an event
-    late = dict(markets[0], event_ticker="KXU3-26NOV", close_time=f(u.CUTOFF + 86400)); d1c = os.path.join(t, "s1c"); os.mkdir(d1c); mkrun(d1c, j1, {"live_KXU3": {"markets": [late]}})
+    late = dict(markets[0], title='Unemployment rate', event_ticker="KXU3-26NOV", close_time=f(u.CUTOFF + 86400)); d1c = os.path.join(t, "s1c"); os.mkdir(d1c); mkrun(d1c, j1, {"live_KXU3": {"markets": [late]}})
     assert u.events_from(d1c) == {}
     # stats: win/loss arithmetic
     s = u.stats([{"price": 0.5, "win": True}, {"price": 0.5, "win": False}]); assert abs(s["net"] + 2 * u.fee(0.5)) < 1e-3 and abs(s["pf"] - (0.5 - u.fee(0.5)) / (0.5 + u.fee(0.5))) < 1e-3
