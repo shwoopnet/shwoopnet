@@ -9,6 +9,8 @@ buy 1 at ask + 0.01; fee 0.07 p (1-p) rounded UP to the cent; hold. Cost kill BE
 Placebo: the first in-play minute at which neither contract's mid moved 0.05 or more over the previous 5 minutes; buy the contract with the higher mid at ask + 0.01 (same band and spread) at the NEXT minute's close
 (my reading, as for the rule; Desk B to confirm); grouped by price paid in 10c buckets and re-weighted to the rule's own price mix."""
 import sys, os, math, json, statistics as st, collections, calendar, time, hashlib
+DEV_BOUNDS = None                                   # set by dev() to the family's development window; a window outside it is refused
+ONE_WAY_KILL = 0.04                                 # Head's ruling Nov 12 (hold to settlement): median one-way entry cost above 4c closes the family; Desk B writes the dated amendment
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on these markets"
 def two_sided(c): return c is not None and c.get("bid") is not None and c.get("ask") is not None and 0 < c["bid"] < c["ask"] < 1
 def mid(c): return (c["bid"] + c["ask"]) / 2
@@ -30,12 +32,12 @@ def alive_in_play(by_ts, t):
     return n >= 3
 def in_play(kind, by_ts, t, S):
     return (t >= S + 60) if kind == "clock" else alive_in_play(by_ts, t)
-def match_decision(ev_close, tickers, candles, kind, K, drops):
+def match_decision(ev_close, tickers, candles, kind, K, drops, costs=None):
     """-> dict(kind of outcome..) for ONE match: the first qualifying jump and its entry, or None. candles: {ticker: {ts: candle}}. Uses nothing after the entry minute."""
     S = None
     if kind == "clock":
         S = clock_start(tickers[0])
-        if S is None or not (4 * 60 <= ev_close - S <= 90 * 60): drops["start not derivable or close outside 4 to 90 minutes of S"] += 1; return None
+        if S is None: drops["start not derivable from the ticker"] += 1; return None      # Amendment 1: no per-match close guard; the family-level share is printed in run_family
     cs = {tk: candles.get(tk, {}) for tk in tickers}
     all_ts = sorted({t for d in cs.values() for t in d})
     for t in all_ts:
@@ -49,27 +51,28 @@ def match_decision(ev_close, tickers, candles, kind, K, drops):
         if len(q) > 1: drops["two contracts qualified in the same minute"] += 1; return None
         tk = q[0]; e = cs[tk].get(t + 60)
         if not two_sided(e): drops["entry minute not two-sided"] += 1; return None
+        if costs is not None: costs.append((e["ask"] - mid(e)) + fee_up(round(e["ask"] + K["slip"], 6)))      # one-way cost at EVERY qualifying decision with a two-sided entry minute, before the band and spread filters
         lo, hi = K["entry_ask_band"]
         if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: drops["entry ask or spread outside the band"] += 1; return None
         price = round(e["ask"] + K["slip"], 6)
-        rt = (e["ask"] - e["bid"]) + 2 * fee_up(mid(e))
-        return dict(ticker=tk, t=t, price=price, round_trip=rt, mid=mid(e), early=(ev_close - t) > 6 * 3600)
+        ow = (e["ask"] - mid(e)) + fee_up(price)                          # one-way entry cost (Head's ruling, hold to settlement): ask minus mid plus the fee as charged
+        return dict(ticker=tk, t=t, price=price, one_way=ow, mid=mid(e), early=(ev_close - t) > 6 * 3600, into_play=(t - S) / 60.0 if S else None)
     return None
 def placebo_decision(ev_close, tickers, candles, kind, K, drops):
     S = None
     if kind == "clock":
         S = clock_start(tickers[0])
-        if S is None or not (4 * 60 <= ev_close - S <= 90 * 60): return None
+        if S is None: return None
     cs = {tk: candles.get(tk, {}) for tk in tickers}
     for t in sorted({t for d in cs.values() for t in d}):
         if not all(two_sided(cs[tk].get(t)) and two_sided(cs[tk].get(t - 300)) for tk in tickers): continue
         if not all(in_play(kind, cs[tk], t, S) for tk in tickers): continue
         if any(abs(mid(cs[tk][t]) - mid(cs[tk][t - 300])) >= 0.05 - 1e-9 for tk in tickers): continue
-        tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)
+        tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t)       # registration: "at that minute", the ask at the quiet minute's own close (Desk B to confirm; the rule enters one minute after its decision because the jump is only seen at its close)
         if not two_sided(e): return None
         lo, hi = K["entry_ask_band"]
         if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: return None
-        return dict(ticker=tk, t=t, price=round(e["ask"] + K["slip"], 6))
+        return dict(ticker=tk, t=t, price=round(e["ask"] + K["slip"], 6), into_play=(t - S) / 60.0 if S else None)
     return None
 def net_of(price, win):
     f = fee_up(price); return (1 - price - f) if win else (-price - f)
@@ -78,6 +81,7 @@ def pf(v):
 def day(ts): return time.strftime("%Y-%m-%d", time.gmtime(ts))
 def run_family(fam, K, markets, candles, bounds):
     """markets: scorekit.markets() dict; candles: {ticker: [candle]}; bounds: (closes_from, closes_before) epoch. Returns the report lines. The result of a match is read ONLY for matches with a bet."""
+    if DEV_BOUNDS is not None and not (DEV_BOUNDS[0] <= bounds[0] and bounds[1] <= DEV_BOUNDS[1]): raise SystemExit("REFUSED: the window is not inside the development window; the held-out is read only on the Head's go (no code path reads it)")
     cand = {tk: {c["ts"]: c for c in cs} for tk, cs in candles.items()}
     kind = {"clock": "clock", "alive": "alive"}[fam["in_play"]]
     ev = collections.OrderedDict()
@@ -85,30 +89,40 @@ def run_family(fam, K, markets, candles, bounds):
         if m["series"] in fam["series"] and bounds[0] <= (m["close"] or 0) < bounds[1] and not tk.endswith("-TIE"): ev.setdefault(m["event"], []).append(tk)
     drops = collections.Counter(); matches = [(e, tks, markets[tks[0]]["close"]) for e, tks in ev.items()]
     L = ["== %s | %s" % (fam["family"], FRESH), "matches listed in the window: %d" % len(matches)]
-    dec = []
+    if kind == "clock" and matches:                                                    # Amendment 1: the share is printed once per family; under 80% the start is not derivable and nothing of it is read
+        ok = sum(1 for _, tks, c in matches if clock_start(tks[0]) is not None and 4 * 60 <= c - clock_start(tks[0]) <= 90 * 60); share = ok / len(matches)
+        L.append("start check: %.1f%% of matches closed 4 to 90 minutes after the ticker's start (%d of %d)" % (100 * share, ok, len(matches)))
+        if share < 0.80: L.append("START NOT DERIVABLE for this family; no result of it is read"); return L, None
+    dec = []; costs = []
     for e, tks, c in matches:
-        d = match_decision(c, tks, cand, kind, K, drops)
+        d = match_decision(c, tks, cand, kind, K, drops, costs)
         if d: dec.append((e, c, d))
     L.append("matches with a qualifying jump and an entry that passes: %d | not a bet and why: %s" % (len(dec), dict(drops)))
+    if not costs: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
+    ow = st.median(costs)
+    L.append("COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over %d qualifying decisions = %.3f (kill above %.2f); bets made more than 6 hours before the close: %d; median minutes into play of the bet: %s" % (len(costs), ow, ONE_WAY_KILL, sum(d["early"] for _, _, d in dec), "%.1f" % st.median(d["into_play"] for _, _, d in dec) if (kind == "clock" and dec) else "n/a"))
+    if ow > ONE_WAY_KILL + 1e-9: L.append("FAMILY CLOSED ON COST; no result of it is read"); return L, None
     if not dec: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
-    rt = st.median(d["round_trip"] for _, _, d in dec)
-    L.append("COST LINE (no result read): median round trip over %d entries = %.3f (kill above %.2f); bets made more than 6 hours before the close: %d" % (len(dec), rt, K["cost_kill_round_trip"], sum(d["early"] for _, _, d in dec)))
-    if rt > K["cost_kill_round_trip"] + 1e-9: L.append("FAMILY CLOSED ON COST; no result of it is read"); return L, None
-    bets = []
+    bets = []; voids = 0
     for e, c, d in dec:                                                  # results are read here, for matches with a bet only
-        win = markets[d["ticker"]]["result"] == "yes"; bets.append(dict(event=e, close=c, price=d["price"], win=win, net=net_of(d["price"], win), day=day(c)))
+        r = markets[d["ticker"]]["result"]
+        if r not in ("yes", "no"): voids += 1; bets.append(dict(event=e, close=c, price=d["price"], win=False, net=0.0, day=day(c), void=True)); continue   # fixed rule, same for the placebo: no yes or no result = refund, net 0, counted and printed
+        win = r == "yes"; bets.append(dict(event=e, close=c, price=d["price"], win=win, net=net_of(d["price"], win), day=day(c)))
+    if voids: L.append("bets with no yes or no result (booked as a refund, net 0): %d" % voids)
     n = len(bets); nets = [b["net"] for b in bets]; bets.sort(key=lambda b: b["close"]); h = n // 2
     byday = collections.defaultdict(float)
     for b in bets: byday[b["day"]] += b["net"]
     ds = list(byday.values()); z = (st.mean(ds) / (st.stdev(ds) / math.sqrt(len(ds)))) if len(ds) > 2 and st.stdev(ds) > 0 else None
+    zm = (st.mean(nets) / (st.stdev(nets) / math.sqrt(n))) if n > 2 and st.stdev(nets) > 0 else None
+    zmin = min(x for x in (z, zm) if x is not None) if (z is not None or zm is not None) else None
     topshare = max(byday.values()) / sum(nets) if sum(nets) > 0 else None
     plb = []
     for e, tks, c in matches:
         d = placebo_decision(c, tks, cand, kind, K, drops)
-        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", day=day(c)))
+        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] not in ("yes", "no"), into_play=d["into_play"], day=day(c)))
     bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
     pb = collections.defaultdict(list)
-    for p in plb: pb[bucket(p["price"])].append(net_of(p["price"], p["win"]))
+    for p in plb: pb[bucket(p["price"])].append(0.0 if p["void"] else net_of(p["price"], p["win"]))
     mix = collections.Counter(bucket(b["price"]) for b in bets); wsum = 0.0; pnet = 0.0; var = 0.0
     for bkt, cnt in mix.items():
         v = pb.get(bkt)
@@ -119,15 +133,25 @@ def run_family(fam, K, markets, candles, bounds):
     rule_mean = st.mean(nets); rse = st.stdev(nets) / math.sqrt(n) if n > 1 else 0
     diff = (rule_mean - pnet) if pnet is not None else None; dse = math.sqrt(rse ** 2 + (se or 0) ** 2)
     h1, h2 = pf(nets[:0] or [b["net"] for b in bets[:h]]), pf([b["net"] for b in bets[h:]])
-    L.append("bets %d | wins %d | mean price paid %.3f | cash PF %s | net %+.2fc a contract | halves by date PF %s / %s | share paid 70c to 85c %.1f%% | largest day share of net %s | z (days) %s" %
-             (n, sum(b["win"] for b in bets), st.mean(b["price"] for b in bets), "%.2f" % pf(nets), 100 * rule_mean, h1 and "%.2f" % h1, h2 and "%.2f" % h2, 100 * sum(1 for b in bets if b["price"] >= 0.70) / n, topshare and "%.0f%%" % (100 * topshare), z and "%.2f" % z))
-    L.append("PLACEBO (same entry at a matched no-jump minute): %d placebo bets; net at the rule's price mix %s; difference %s (se %s)" % (len(plb), "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
+    L.append("bets %d | wins %d | mean price paid %.3f | cash PF %s | net %+.2fc a contract | halves by date PF %s / %s | share paid 70c to 85c %.1f%% | largest day share of net %s | z (days) %s | z (matches, one bet each) %s | the smaller is used: %s" %
+             (n, sum(b["win"] for b in bets), st.mean(b["price"] for b in bets), "%.2f" % pf(nets), 100 * rule_mean, h1 and "%.2f" % h1, h2 and "%.2f" % h2, 100 * sum(1 for b in bets if b["price"] >= 0.70) / n, topshare and "%.0f%%" % (100 * topshare), z and "%.2f" % z, zm and "%.2f" % zm, zmin and "%.2f" % zmin))
+    L.append("PLACEBO (registered: first quiet in-play minute, the higher-mid contract): %d placebo bets; median minutes into play %s (rule %s); net at the rule's price mix %s; difference %s (se %s)" % (len(plb), ("%.1f" % st.median(p["into_play"] for p in plb)) if plb and kind == "clock" else "n/a", ("%.1f" % st.median(d["into_play"] for _, _, d in dec)) if kind == "clock" else "n/a", "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
     p = pf(nets)
     if n < K["min_development_bets"]: lab = "NOT_ENOUGH_DATA at n = %d" % n
     elif p < 1.0 or (h1 is not None and h1 < 1.0) or (h2 is not None and h2 < 1.0): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
     elif p >= 1.5 and h1 > 1.0 and h2 > 1.0 and diff is not None and diff >= 2 * dse: lab = "development bar met (held-out asked for the same hour; NOT the research bar)"
     else: lab = "bar not met"
     L.append("LABEL: " + lab); return L, bets
+def pilot(fam, K, markets, candles, bounds):
+    """Head-approved pilot: cost and tradeability only. markets' results are NEVER touched (a market with a 'result' key is read for event and close only)."""
+    cand = {tk: {c["ts"]: c for c in cs} for tk, cs in candles.items()}; kind = fam["in_play"]
+    ev = collections.OrderedDict()
+    for tk, m in sorted(markets.items()):
+        if m["series"] in fam["series"] and bounds[0] <= (m["close"] or 0) < bounds[1] and not tk.endswith("-TIE"): ev.setdefault(m["event"], []).append(tk)
+    drops = collections.Counter(); costs = []; ok = 0; nm = 0
+    for e, tks in ev.items():
+        nm += 1; before = len(costs); d = match_decision(markets[tks[0]]["close"], tks, cand, kind, K, drops, costs); ok += 1 if d else 0
+    return ["PILOT %s | %s | matches %d | qualifying decisions with a two-sided entry minute %d | of them passing ask band and spread <= 4c %d (%.0f%%) | median one-way cost %s | not a bet and why: %s | NO result read" % (fam["family"], FRESH, nm, len(costs), ok, 100 * ok / len(costs) if costs else 0, "%.3f" % st.median(costs) if costs else "n/a", dict(drops))]
 # ---------------------------------------------------------------- synthetic tests
 def synth_event(i, S, jump_at=None, rng=None, tie=False, edge=0.0, size=0.12, start_mid=0.5):
     import random
@@ -157,7 +181,7 @@ def selftest():
     assert match_decision(close, [A, B], build(jumper_mid_before=0.80, jump=0.10)[3], "clock", K, d) is None          # mid before outside 0.15 to 0.75
     assert match_decision(close, [A, B], build(jump=0.09)[3], "clock", K, d) is None                                   # jump under 0.10
     assert match_decision(close, [A, B], build(entry_spread=0.06)[3], "clock", K, d) is None                           # entry spread above 0.04
-    assert match_decision(S + 100 * 60 + 60, [A, B], build()[3], "clock", K, d) is None and any("start" in k for k in d)  # market closed more than 90 minutes after S: dropped, counted
+    assert match_decision(S + 100 * 60 + 60, [A, B], build()[3], "clock", K, d) is not None       # Amendment 1: a late close no longer drops a match; the close is never used
     # before S + 60 s the minute is not in play: a jump at k = 0 or 1 does not count
     A2, B2, T2, c2 = build(); 
     for tk in (A2, B2): pass
@@ -185,7 +209,7 @@ def selftest():
         tc["X"][t] = dict(ts=t, bid=round(m - .01, 4), ask=round(m + .01, 4), volume=5.0)
     assert alive_in_play(tc["X"], 100000 + 60 * 25) is True and alive_in_play(tc["X"], 100000 + 60 * 5) is False
     # round trip and cost kill
-    assert abs(r["round_trip"] - (0.02 + 2 * fee_up(0.52))) < 1e-9
+    assert abs(r["one_way"] - (0.01 + fee_up(0.54))) < 1e-9, r["one_way"]
     # family level: a synthetic family where the jumper wins 80% (an edge) and one where it wins 50%; the cost kill; NOT_ENOUGH_DATA below 300 bets
     import random
     def fam(n, win_p, spread=0.01, seed=1):
@@ -202,17 +226,39 @@ def selftest():
         return mk, cd
     FAMILY = dict(family="ESOCCER", series=["KXESOCCERGAME"], in_play="clock")
     far = (0, 10 ** 12)
-    mk, cd = fam(400, 0.80); L, bets = run_family(FAMILY, K, mk, cd, far); assert bets and len(bets) == 400 and "development bar met" not in L[-1] and "FALSIFIED" not in L[-1] or True
+    mk, cd = fam(400, 0.80); L, bets = run_family(FAMILY, K, mk, cd, far); assert bets and len(bets) == 400
     print("\n".join(L))
     mk, cd = fam(400, 0.50, seed=2); L2, b2 = run_family(FAMILY, K, mk, cd, far); assert "FALSIFIED" in L2[-1], L2[-1]
     mk, cd = fam(120, 0.80, seed=3); L3, b3 = run_family(FAMILY, K, mk, cd, far); assert "NOT_ENOUGH_DATA at n = 120" in L3[-1], L3[-1]
-    mk, cd = fam(400, 0.80, spread=0.04, seed=4); L4, b4 = run_family(FAMILY, K, mk, cd, far); assert b4 is None and "CLOSED ON COST" in L4[-1], L4
+    mk, cd = fam(400, 0.80, spread=0.06, seed=4); L4, b4 = run_family(FAMILY, K, mk, cd, far); assert b4 is None and "CLOSED ON COST" in L4[-1], L4     # entry spread 6c: one-way 5c > 4c, killed before any result
+    mk, cd = fam(200, 0.80, seed=5)
+    for tk in list(mk)[:40]: mk[tk]["result"] = "void"
+    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("refund" in x for x in L5) and any(b.get("void") for b in b5), L5
+    mk, cd = fam(100, 0.80, seed=6)
+    for tk, m in mk.items(): m["close"] += 3 * 3600                                      # every close 3 h after its start: start not derivable
+    L6, b6 = run_family(FAMILY, K, mk, cd, far); assert b6 is None and "START NOT DERIVABLE" in L6[-1], L6
+    global DEV_BOUNDS
+    DEV_BOUNDS = (0, 100)
+    try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("held-out window not refused")
+    except SystemExit as ex: assert "REFUSED" in str(ex)
+    DEV_BOUNDS = None
+    # the pilot never reads a result: strip them and it still runs
+    mk, cd = fam(60, 0.8, seed=7)
+    for m in mk.values(): m.pop("result")
+    P = pilot(FAMILY, K, mk, cd, far); assert "NO result read" in P[0] and "median one-way cost 0.0" in P[0], P
+    # placebo is the registered one: a quiet in-play minute, the higher-mid contract, priced at that minute
+    _S = clock_start("KXESOCCERGAME-26OCT100722AAABBB-AAA"); _A, _B = "KXESOCCERGAME-26OCT100722AAABBB-AAA", "KXESOCCERGAME-26OCT100722AAABBB-BBB"; pc = {_A: {}, _B: {}}
+    for k in range(0, 12):
+        t = _S + 60 * k
+        for tk, m in ((_A, 0.60), (_B, 0.40)): pc[tk][t] = dict(ts=t, bid=round(m - .01, 4), ask=round(m + .01, 4), volume=3.0)
+    pd = placebo_decision(_S + 1800, [_A, _B], pc, "clock", K, collections.Counter()); assert pd and pd["ticker"] == _A and pd["t"] == _S + 300 and abs(pd["price"] - 0.62) < 1e-9, pd
     print("SELFTEST OK (fee rounded up, Eastern clock with DST, in-play start, jump rules, entry band and spread, tie never, no look-ahead, alive rule, round trip)")
 def dev(series_path, family, lists, candles_dirs, scorekit_dir):
     sys.path.insert(0, scorekit_dir); import scorekit
     S = json.load(open(series_path)); K = S["constants"]; fam = next(f for f in S["families_ranked_by_events"] if f["family"] == family)
     iso = scorekit.iso; b = (iso(fam["development"]["closes_from"].replace("T00:00:00Z", "T00:00:00Z")), iso(fam["development"]["closes_before"]))
     print("series file sha256", hashlib.sha256(open(series_path, "rb").read()).hexdigest()[:16], "| development window", fam["development"])
+    global DEV_BOUNDS; DEV_BOUNDS = b
     L, bets = run_family(fam, K, scorekit.markets(lists), scorekit.candles(candles_dirs), b); print("\n".join(L))
 if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "selftest": selftest()
