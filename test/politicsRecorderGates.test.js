@@ -60,7 +60,7 @@ gates.PR3 = () => {
   assert.ok(!/quote-data|nc-data/.test(wf.replace(/#[^\n]*/g, '')), 'it never touches the other data branches');
   assert.ok(/git fetch -q --depth 1 origin pol-data; then git checkout -q -b pol-data FETCH_HEAD; else git checkout -q --orphan pol-data/.test(wf), 'the first run creates pol-data as an orphan branch');
   assert.deepStrictEqual([...wf.matchAll(/git add ([^\n]+)/g)].map((x) => x[1].trim()), ['polrec']);
-  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and nothing wider');
+  assert.ok(/^permissions:\s*\n\s*contents: write\s*\n\s*actions: write\s*\n(?!\s+\w)/m.test(wf), 'contents write and actions write (the chain dispatch) and nothing wider');
   assert.ok(/concurrency:\s*\n\s*group: record-politics\s*\n\s*cancel-in-progress: false/.test(wf), 'a running job is never cancelled');
   const uses = [...wf.matchAll(/uses:\s*([^\s#]+)/g)].map((x) => x[1]);
   assert.ok(uses.length && uses.every((u) => /@[0-9a-f]{40}$/.test(u)), 'every action pinned by commit SHA');
@@ -78,7 +78,7 @@ gates.PR4 = () => {
   assert.deepStrictEqual(out, ['2027-02-28T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
   const steps = wf.split(/\n      - name: /).slice(2);
-  assert.ok(steps.length === 5 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
+  assert.ok(steps.length === 6 && steps.every((s) => /if: "?(always\(\) && |!cancelled\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(time\.time\(\)\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code) && /if past_end\(now\):\s*\n\s*break/.test(code), 'the script exits at once, and no poll starts after it');
 };
 
@@ -199,6 +199,21 @@ gates.PR10 = () => {
   const polls = 24 * 60 / 30; // at most about this many polls a day
   assert.ok(polls * perRun / 1440 <= 4, 'about 4 requests a minute on average at the very most');
   assert.ok(/tm_min < 20/.test(code), 'the results read is hourly, not every run');
+};
+
+// PR11: self-chaining (Nov 12, 2026): the last step runs even after a failed poll, sleeps, checks the end date, dispatches only this workflow on main, and the cron stays as the restart path.
+gates.PR11 = () => {
+  const chain = wf.split(/\n      - name: /).pop();
+  assert.ok(/^Chain the next run/.test(chain));
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'"/.test(chain), 'chains after a failed poll (but a manual cancel stops the chain), never from a skipped or past-end run');
+  assert.ok(/2027-02-28T23:59:00Z/.test(chain) && (chain.match(/not chaining/g) || []).length >= 2, 'the end date is checked before and after the sleep');
+  assert.ok(chain.indexOf('sleep $((') > -1 && chain.indexOf('sleep $((') < chain.indexOf('gh workflow run'), 'it sleeps before it dispatches');
+  assert.ok(/START \+ 1200/.test(chain) && /1800/.test(chain), 'at least 20 minutes after the start, on a half hour');
+  const disp = [...wf.matchAll(/gh workflow run ([^\n]+)/g)].map((x) => x[1].trim());
+  assert.deepStrictEqual(disp, ['record-politics.yml --ref main'], 'only this workflow, only on main');
+  assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf));
+  assert.deepStrictEqual([...wf.matchAll(/cron:\s*"([^"]+)"/g)].map((x) => x[1]), ['7,22,37,52 * * * *'], 'cron stays as the restart path');
+  assert.ok(/timeout-minutes: 60/.test(wf) && /cancel-in-progress: false/.test(wf));
 };
 
 let failed = 0;
