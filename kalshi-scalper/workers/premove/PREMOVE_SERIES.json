@@ -22,21 +22,6 @@
       }
     },
     {
-      "family": "ESOCCER",
-      "series": [
-        "KXESOCCERGAME"
-      ],
-      "contracts": "three an event; the contract ending in -TIE is never the riser and never bought",
-      "development": {
-        "closes_from": "2026-10-15T00:00:00Z",
-        "closes_before": "2026-10-23T00:00:00Z"
-      },
-      "held_out": {
-        "closes_from": "2026-10-23T00:00:00Z",
-        "closes_before": "2026-10-27T00:00:00Z"
-      }
-    },
-    {
       "family": "TABLE_TENNIS",
       "series": [
         "KXLIGAPROMATCH"
@@ -49,21 +34,6 @@
       "held_out": {
         "closes_from": "2026-10-23T00:00:00Z",
         "closes_before": "2026-11-03T00:00:00Z"
-      }
-    },
-    {
-      "family": "EBASKETBALL",
-      "series": [
-        "KXEBASKETBALLGAME"
-      ],
-      "contracts": "two an event",
-      "development": {
-        "closes_from": "2026-09-15T00:00:00Z",
-        "closes_before": "2026-10-23T00:00:00Z"
-      },
-      "held_out": {
-        "closes_from": "2026-10-23T00:00:00Z",
-        "closes_before": "2026-11-11T00:00:00Z"
       }
     }
   ],
@@ -84,5 +54,6 @@
     "cost_kill_one_way": 0.04,
     "tradeability_floor_matches": 300
   },
-  "amendments": "the registration file's dated amendments override this file where they differ"
+  "amendments": "Amendment 3 (Nov 12): families are ESPORTS and TABLE_TENNIS only, 2 tries; the registration file's dated amendments override this file where they differ",
+  "tries": 2
 }

@@ -26,7 +26,6 @@
       20,
       120
     ],
-    "earlier_settled_minutes_before_later_start": 12,
     "before_instant": "candle ending at the EARLIER match's S minus 2 minutes, in the LATER match's market",
     "after_instant": "candle ending at the later match's S minus 6 minutes",
     "entry_instant": "close of the candle ending at the later match's S minus 5 minutes",
@@ -42,7 +41,13 @@
     "stage_1_projected_bets_floor": 600,
     "min_development_bets": 300,
     "cost_kill_one_way": 0.04,
-    "tradeability_floor_bets": 300
+    "tradeability_floor_bets": 300,
+    "earlier_close_plus_seconds_at_or_before_decision_minute": 300,
+    "decision_minute": "candle ending at the later match's S minus 6 minutes",
+    "z_clusters": [
+      "UTC day (verdict)",
+      "player-pair and day (printed)"
+    ]
   },
   "amendments": "the registration file's dated amendments override this file where they differ"
 }
