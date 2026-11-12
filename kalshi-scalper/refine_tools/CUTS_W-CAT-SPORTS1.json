@@ -1,0 +1,15 @@
+{
+ "test": "W-CAT-SPORTS1",
+ "cuts_unix": [
+  1791195907,
+  1793328799
+ ],
+ "cuts_iso": [
+  "2026-10-05T10:25:07Z",
+  "2026-10-30T02:53:19Z"
+ ],
+ "rule": "TRAIN close<cut1; VALIDATE cut1<=close<cut2; HELD-OUT close>=cut2. Constants, not recomputed from data present.",
+ "n_events_or_markets_when_cut": "3266 events",
+ "universe_note": "tertiles of close time over all 3,266 events pulled when the cuts were first written (frozen_cuts.json); singles only, 27 series per SPORTS_CAL_REGISTRATION.md",
+ "read_once_marker": "HELD-OUT NOT READ as of 2026-11-12"
+}

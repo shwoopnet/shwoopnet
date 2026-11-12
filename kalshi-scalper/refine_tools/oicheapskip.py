@@ -49,11 +49,12 @@ for r in rows:
     G.append((p,rs==sd))
 n=len(G);w=sum(1 for _,x in G if x)
 n5=sum(book(x,p,5) for p,x in G); n12=sum(book(x,p,12) for p,x in G)
+# No peeking (Desk A audit, 2026-11-12): nothing about wins, net or outcomes is printed until the registered 40 settled signals exist.
+if n<NEED[0]:
+    print('n signals so far: %d of %d (hidden until %d)'%(n,NEED[0],NEED[0])); sys.exit(0)
 print('CHEAPSKIP since %s (deploy date %s; OICORE streak/kill/ladder inputs change from this day)'%(ts,ts[:10]))
 print(' skip records %d | settled+side known %d | unsettled %d | side unknown %d'%(len(rows),n,pend,unk))
 print(' wins %d of %d | net at 5 contracts $%.2f | at 12 contracts (information) $%.2f'%(w,n,n5,n12))
-if n<NEED[0]: print(' NO READ: %d of %d settled signals needed (read points 40 and 80).'%(n,NEED[0]))
-else:
-    if n>=NEED[1]: v='PERMANENT SKIP' if w<=3 else ('DROP THE SKIP' if w>=8 else 'no rule at 80: report')
-    else: v='PERMANENT SKIP' if w<=1 else ('DROP THE SKIP' if w>=4 else 'EXTEND TO 80 (weak test)')
-    print(' VERDICT:',v)
+if n>=NEED[1]: v='PERMANENT SKIP' if w<=3 else ('DROP THE SKIP' if w>=8 else 'no rule at 80: report')
+else: v='PERMANENT SKIP' if w<=1 else ('DROP THE SKIP' if w>=4 else 'EXTEND TO 80 (weak test)')
+print(' VERDICT:',v)

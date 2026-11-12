@@ -1,0 +1,1145 @@
+{
+ "test": "W-POL-APPR1",
+ "rule": "TRAIN ct<cut1; VALIDATE cut1<=ct<cut2; HELD-OUT ct>=cut2 (unix seconds, market close_time). Cuts are constants; events not listed are in no third.",
+ "cuts": {
+  "ALL_APPR": [
+   1790701140,
+   1792515540
+  ],
+  "APPR_DAILY": [
+   1790614740,
+   1792515540
+  ],
+  "APPR_OTHER": [
+   1790344740,
+   1792159140
+  ],
+  "APPR_RCP": [
+   1790953200,
+   1792767600
+  ],
+  "GCB": [
+   1791493440,
+   1792703040
+  ]
+ },
+ "events": {
+  "ALL_APPR": [
+   {
+    "event": "KXTRUMPAPPROVE-26SEP07",
+    "close_ts": 1788800340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP08",
+    "close_ts": 1788886740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP09",
+    "close_ts": 1788973140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP10",
+    "close_ts": 1789059540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPVH-26SEP11",
+    "close_ts": 1789135140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP11",
+    "close_ts": 1789145940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP12",
+    "close_ts": 1789232340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP13",
+    "close_ts": 1789318740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP14",
+    "close_ts": 1789405140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP15",
+    "close_ts": 1789491540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP16",
+    "close_ts": 1789577940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP17",
+    "close_ts": 1789664340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPVH-26SEP18",
+    "close_ts": 1789739940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXAPRPOTUS-26SEP18",
+    "close_ts": 1789743600,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP18",
+    "close_ts": 1789750740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP19",
+    "close_ts": 1789837140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP20",
+    "close_ts": 1789923540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXNYTTRUMPAPPROVAL-26DEC31",
+    "close_ts": 1790006364,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP21",
+    "close_ts": 1790009940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP22",
+    "close_ts": 1790096340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP23",
+    "close_ts": 1790182740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP24",
+    "close_ts": 1790269140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPVH-26SEP25",
+    "close_ts": 1790344740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXAPRPOTUS-26SEP25",
+    "close_ts": 1790348400,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP25",
+    "close_ts": 1790355540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP26",
+    "close_ts": 1790441940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP27",
+    "close_ts": 1790528340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP28",
+    "close_ts": 1790614740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP29",
+    "close_ts": 1790701140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP30",
+    "close_ts": 1790787540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT01",
+    "close_ts": 1790873940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT02",
+    "close_ts": 1790949540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVALBELOW-26DEC31",
+    "close_ts": 1790949750,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT02",
+    "close_ts": 1790953200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT02",
+    "close_ts": 1790960340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT03",
+    "close_ts": 1791046740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT04",
+    "close_ts": 1791133140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT05",
+    "close_ts": 1791219540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT06",
+    "close_ts": 1791305940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT07",
+    "close_ts": 1791392340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT08",
+    "close_ts": 1791478740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT09",
+    "close_ts": 1791554340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT09",
+    "close_ts": 1791558000,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT09",
+    "close_ts": 1791565140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT10",
+    "close_ts": 1791651540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT11",
+    "close_ts": 1791737940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT12",
+    "close_ts": 1791824340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT13",
+    "close_ts": 1791910740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT14",
+    "close_ts": 1791997140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT15",
+    "close_ts": 1792083540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT16",
+    "close_ts": 1792159140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT16",
+    "close_ts": 1792162800,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT16",
+    "close_ts": 1792169940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT17",
+    "close_ts": 1792256340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT18",
+    "close_ts": 1792342740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT19",
+    "close_ts": 1792429140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT20",
+    "close_ts": 1792515540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT21",
+    "close_ts": 1792601940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT22",
+    "close_ts": 1792688340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT23",
+    "close_ts": 1792763940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT23",
+    "close_ts": 1792767600,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT23",
+    "close_ts": 1792774740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT24",
+    "close_ts": 1792861140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT25",
+    "close_ts": 1792947540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT26",
+    "close_ts": 1793033940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT27",
+    "close_ts": 1793120340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT28",
+    "close_ts": 1793206740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT29",
+    "close_ts": 1793293140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT30",
+    "close_ts": 1793368740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT30",
+    "close_ts": 1793372400,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT30",
+    "close_ts": 1793379540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT31",
+    "close_ts": 1793465940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV01",
+    "close_ts": 1793555940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV02",
+    "close_ts": 1793642340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV03",
+    "close_ts": 1793728740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV04",
+    "close_ts": 1793815140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV05",
+    "close_ts": 1793901540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26NOV06",
+    "close_ts": 1793977140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXAPRPOTUS-26NOV06",
+    "close_ts": 1793980800,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV06",
+    "close_ts": 1793987940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV07",
+    "close_ts": 1794074340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV08",
+    "close_ts": 1794160740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV09",
+    "close_ts": 1794247140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV10",
+    "close_ts": 1794333540,
+    "third": "HELD-OUT"
+   }
+  ],
+  "APPR_DAILY": [
+   {
+    "event": "KXTRUMPAPPROVE-26SEP07",
+    "close_ts": 1788800340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP08",
+    "close_ts": 1788886740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP09",
+    "close_ts": 1788973140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP10",
+    "close_ts": 1789059540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP11",
+    "close_ts": 1789145940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP12",
+    "close_ts": 1789232340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP13",
+    "close_ts": 1789318740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP14",
+    "close_ts": 1789405140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP15",
+    "close_ts": 1789491540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP16",
+    "close_ts": 1789577940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP17",
+    "close_ts": 1789664340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP18",
+    "close_ts": 1789750740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP19",
+    "close_ts": 1789837140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP20",
+    "close_ts": 1789923540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP21",
+    "close_ts": 1790009940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP22",
+    "close_ts": 1790096340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP23",
+    "close_ts": 1790182740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP24",
+    "close_ts": 1790269140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP25",
+    "close_ts": 1790355540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP26",
+    "close_ts": 1790441940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP27",
+    "close_ts": 1790528340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP28",
+    "close_ts": 1790614740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP29",
+    "close_ts": 1790701140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26SEP30",
+    "close_ts": 1790787540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT01",
+    "close_ts": 1790873940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT02",
+    "close_ts": 1790960340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT03",
+    "close_ts": 1791046740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT04",
+    "close_ts": 1791133140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT05",
+    "close_ts": 1791219540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT06",
+    "close_ts": 1791305940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT07",
+    "close_ts": 1791392340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT08",
+    "close_ts": 1791478740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT09",
+    "close_ts": 1791565140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT10",
+    "close_ts": 1791651540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT11",
+    "close_ts": 1791737940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT12",
+    "close_ts": 1791824340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT13",
+    "close_ts": 1791910740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT14",
+    "close_ts": 1791997140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT15",
+    "close_ts": 1792083540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT16",
+    "close_ts": 1792169940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT17",
+    "close_ts": 1792256340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT18",
+    "close_ts": 1792342740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT19",
+    "close_ts": 1792429140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT20",
+    "close_ts": 1792515540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT21",
+    "close_ts": 1792601940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT22",
+    "close_ts": 1792688340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT23",
+    "close_ts": 1792774740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT24",
+    "close_ts": 1792861140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT25",
+    "close_ts": 1792947540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT26",
+    "close_ts": 1793033940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT27",
+    "close_ts": 1793120340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT28",
+    "close_ts": 1793206740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT29",
+    "close_ts": 1793293140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT30",
+    "close_ts": 1793379540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26OCT31",
+    "close_ts": 1793465940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV01",
+    "close_ts": 1793555940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV02",
+    "close_ts": 1793642340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV03",
+    "close_ts": 1793728740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV04",
+    "close_ts": 1793815140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV05",
+    "close_ts": 1793901540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV06",
+    "close_ts": 1793987940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV07",
+    "close_ts": 1794074340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV08",
+    "close_ts": 1794160740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV09",
+    "close_ts": 1794247140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV10",
+    "close_ts": 1794333540,
+    "third": "HELD-OUT"
+   }
+  ],
+  "APPR_OTHER": [
+   {
+    "event": "KXTRUMPVH-26SEP11",
+    "close_ts": 1789135140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPVH-26SEP18",
+    "close_ts": 1789739940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXNYTTRUMPAPPROVAL-26DEC31",
+    "close_ts": 1790006364,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPVH-26SEP25",
+    "close_ts": 1790344740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT02",
+    "close_ts": 1790949540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVALBELOW-26DEC31",
+    "close_ts": 1790949750,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT09",
+    "close_ts": 1791554340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT16",
+    "close_ts": 1792159140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT23",
+    "close_ts": 1792763940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26OCT30",
+    "close_ts": 1793368740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPVH-26NOV06",
+    "close_ts": 1793977140,
+    "third": "HELD-OUT"
+   }
+  ],
+  "APPR_RCP": [
+   {
+    "event": "KXAPRPOTUS-26SEP18",
+    "close_ts": 1789743600,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXAPRPOTUS-26SEP25",
+    "close_ts": 1790348400,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT02",
+    "close_ts": 1790953200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT09",
+    "close_ts": 1791558000,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT16",
+    "close_ts": 1792162800,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT23",
+    "close_ts": 1792767600,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXAPRPOTUS-26OCT30",
+    "close_ts": 1793372400,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXAPRPOTUS-26NOV06",
+    "close_ts": 1793980800,
+    "third": "HELD-OUT"
+   }
+  ],
+  "GCB": [
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26SEP11",
+    "close_ts": 1789135140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26SEP25",
+    "close_ts": 1790344740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP25",
+    "close_ts": 1790355540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP26",
+    "close_ts": 1790442240,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP27",
+    "close_ts": 1790534040,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP28",
+    "close_ts": 1790620440,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP29",
+    "close_ts": 1790706840,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26SEP30",
+    "close_ts": 1790793240,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT01",
+    "close_ts": 1790879640,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26OCT02",
+    "close_ts": 1790949540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT02",
+    "close_ts": 1790966040,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT03",
+    "close_ts": 1791061440,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT04",
+    "close_ts": 1791147840,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT05",
+    "close_ts": 1791234240,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT06",
+    "close_ts": 1791320640,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT07",
+    "close_ts": 1791407040,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT08",
+    "close_ts": 1791493440,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26OCT09",
+    "close_ts": 1791554340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT09",
+    "close_ts": 1791579840,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT10",
+    "close_ts": 1791666240,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT11",
+    "close_ts": 1791752640,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT12",
+    "close_ts": 1791839040,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT13",
+    "close_ts": 1791925440,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT14",
+    "close_ts": 1792011840,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT15",
+    "close_ts": 1792098240,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26OCT16",
+    "close_ts": 1792159140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT16",
+    "close_ts": 1792184640,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT17",
+    "close_ts": 1792271040,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT18",
+    "close_ts": 1792357440,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT19",
+    "close_ts": 1792443840,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT20",
+    "close_ts": 1792530240,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT21",
+    "close_ts": 1792616640,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXVHGCB-26OCT22",
+    "close_ts": 1792703040,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26OCT23",
+    "close_ts": 1792763940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT23",
+    "close_ts": 1792789440,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT24",
+    "close_ts": 1792875840,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT25",
+    "close_ts": 1792962240,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT26",
+    "close_ts": 1793048640,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT27",
+    "close_ts": 1793135040,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT28",
+    "close_ts": 1793221440,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT29",
+    "close_ts": 1793307840,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26OCT30",
+    "close_ts": 1793368740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT30",
+    "close_ts": 1793394240,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26OCT31",
+    "close_ts": 1793480640,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26NOV01",
+    "close_ts": 1793570640,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26NOV02",
+    "close_ts": 1793657040,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXVHGCB-26NOV03",
+    "close_ts": 1793743440,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXGENERICBALLOTVOTEHUB-26NOV06",
+    "close_ts": 1793977140,
+    "third": "HELD-OUT"
+   }
+  ]
+ },
+ "event_counts": {
+  "ALL_APPR": {
+   "TRAIN": 28,
+   "VALIDATE": 28,
+   "HELD-OUT": 28
+  },
+  "APPR_DAILY": {
+   "TRAIN": 21,
+   "VALIDATE": 22,
+   "HELD-OUT": 22
+  },
+  "APPR_OTHER": {
+   "TRAIN": 3,
+   "VALIDATE": 4,
+   "HELD-OUT": 4
+  },
+  "APPR_RCP": {
+   "TRAIN": 2,
+   "VALIDATE": 3,
+   "HELD-OUT": 3
+  },
+  "GCB": {
+   "TRAIN": 16,
+   "VALIDATE": 16,
+   "HELD-OUT": 16
+  }
+ }
+}

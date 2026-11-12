@@ -11,3 +11,7 @@ DEFLATION: shared ~7,950 (Bonferroni z ~4.5); family exploratory cells (series f
 SHORTLIST: train n>=60 and val n>=60 (events), PF@+1c >=1.3 in train and val, val clustered lo90>0; best <=2 by val lo90. Held-out read once by lead: PF>=1.2, n>=40, mean>0 = shadow candidate only.
 
 RESULT (Nov 12): 66 series, 3,559 events; 26 cells with n 60+ in both train and validate; best cells negative; Bonferroni (deflation 9,459, z 4.55) passes 0; positive cells have validation n 9 to 10 (DATA_LIMITED). No shortlist, held-out untouched. Fed, CPI and payroll series did not reach 30 events in the window.
+
+## AMENDMENT (2026-11-12T01:11Z, Desk A held-out audit; no rule changed)
+Thirds were "cut dates from the fetched events, saved in frozen.json". Cut dates are now constants in `CUTS_W-CAT-ECON1.json` and in the script: cut1 = 1790395140 (2026-09-26T03:59Z), cut2 = 1792641540 (2026-10-22T03:59Z), tertiles of event close over the 3,175 events with candle observations. TRAIN = close before cut1, VALIDATE = cut1 up to cut2, HELD-OUT = cut2 or later. Later pulls may not move them.
+HELD-OUT NOT READ as of 2026-11-12T01:11Z.

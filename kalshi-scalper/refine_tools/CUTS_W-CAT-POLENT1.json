@@ -1,0 +1,468 @@
+{
+ "test": "W-CAT-POLENT1",
+ "rule": "per family; TRAIN close<cut1; VALIDATE cut1<=close<cut2; HELD-OUT close>=cut2 (unix s, event close). Tertiles of event close over events with candles in candles.jsonl as of 2026-11-12. Cuts are constants; events not listed are in no third.",
+ "cuts": {
+  "Entertainment": [
+   1793545200,
+   1794150000
+  ],
+  "Mentions": [
+   1793651613,
+   1794062768
+  ],
+  "Politics": [
+   1793987940,
+   1794338069
+  ]
+ },
+ "events": {
+  "Entertainment": [
+   {
+    "event": "KXYTVIEWSD-TAY26SEP21",
+    "close_ts": 1790141410,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-YOU26SEP21",
+    "close_ts": 1790141411,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-ARI26SEP24",
+    "close_ts": 1790386211,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-DRA26SEP24",
+    "close_ts": 1790386213,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-TAY26SEP24",
+    "close_ts": 1790386216,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-YOU26SEP24",
+    "close_ts": 1790386217,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXYTVIEWSD-TAY26SEP27",
+    "close_ts": 1790652601,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXALBUMEQUIV-WAT26OCT29",
+    "close_ts": 1793541600,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXPUREALBUMS-WAT26OCT29",
+    "close_ts": 1793541600,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXALBUMEQUIV-HEAVYCROWN26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXALBUMEQUIV-MUSE26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXALBUMEQUIV-PRESSPLAY26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXPUREALBUMS-HEAVYCROWN26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXPUREALBUMS-MUSE26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXPUREALBUMS-PRESSPLAY26OCT29",
+    "close_ts": 1793545200,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXYTVIEWSW-JUS26NOV08",
+    "close_ts": 1793904897,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXYTVIEWSW-FUT26NOV08",
+    "close_ts": 1793925906,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXYTVIEWSW-FUE26NOV08",
+    "close_ts": 1794072958,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXYTVIEWSW-KAT26NOV08",
+    "close_ts": 1794074717,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXYTVIEWSW-OLI26NOV08",
+    "close_ts": 1794076514,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXALBUMEQUIV-BLEACH26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXALBUMEQUIV-EVE26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXALBUMEQUIV-FOR26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXALBUMEQUIV-HOW26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXPUREALBUMS-BLEACH26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXPUREALBUMS-EVE26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXPUREALBUMS-FOR26NOV05",
+    "close_ts": 1794150000,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSW-MOR26NOV08",
+    "close_ts": 1794176720,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSW-KEN26NOV08",
+    "close_ts": 1794251734,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-WEE26DEC",
+    "close_ts": 1794359208,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-POS26DEC",
+    "close_ts": 1794359231,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-MOR26DEC",
+    "close_ts": 1794359262,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-KEN26DEC",
+    "close_ts": 1794359294,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-JUS26DEC",
+    "close_ts": 1794359315,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-FUT26DEC",
+    "close_ts": 1794359359,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXYTVIEWSHIGH-BAD26DEC",
+    "close_ts": 1794396090,
+    "third": "HELD-OUT"
+   }
+  ],
+  "Mentions": [
+   {
+    "event": "KXTRUMPMENTION-26OCT28",
+    "close_ts": 1793242006,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPMENTION-26OCT29",
+    "close_ts": 1793309273,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPMENTION-26OCT30",
+    "close_ts": 1793454694,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPMENTION-26NOV01",
+    "close_ts": 1793623468,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPMENTION-26NOV02",
+    "close_ts": 1793651613,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV02",
+    "close_ts": 1793670644,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV03",
+    "close_ts": 1793750679,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV04",
+    "close_ts": 1793846305,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV05",
+    "close_ts": 1793923804,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV06",
+    "close_ts": 1794062768,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPMENTION-26NOV06",
+    "close_ts": 1794062800,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUMPMENTION-26NOV08",
+    "close_ts": 1794241480,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV09",
+    "close_ts": 1794269390,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXWORLDNEWSMENTION-26NOV10",
+    "close_ts": 1794369812,
+    "third": "HELD-OUT"
+   }
+  ],
+  "Politics": [
+   {
+    "event": "KXVHGCB-26OCT28",
+    "close_ts": 1793221440,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT29",
+    "close_ts": 1793307840,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT30",
+    "close_ts": 1793394240,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26OCT31",
+    "close_ts": 1793480640,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26NOV01",
+    "close_ts": 1793570640,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26NOV02",
+    "close_ts": 1793657040,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXVHGCB-26NOV03",
+    "close_ts": 1793743440,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV04",
+    "close_ts": 1793815140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV04",
+    "close_ts": 1793854740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV05",
+    "close_ts": 1793901540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV05",
+    "close_ts": 1793941140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV06",
+    "close_ts": 1793987940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXHOUSERACE-SC01-26",
+    "close_ts": 1794009545,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV06",
+    "close_ts": 1794027540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV07",
+    "close_ts": 1794074340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV07",
+    "close_ts": 1794113940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV08",
+    "close_ts": 1794160740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV08",
+    "close_ts": 1794200340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV09",
+    "close_ts": 1794247140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXHOUSERACE-FL26-26",
+    "close_ts": 1794260244,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXHOUSERACE-WA05-26",
+    "close_ts": 1794274866,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV09",
+    "close_ts": 1794286740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXTRUMPAPPROVE-26NOV10",
+    "close_ts": 1794333540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "KXHOUSERACE-FL07-26",
+    "close_ts": 1794338069,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXHOUSERACE-FL09-26",
+    "close_ts": 1794338126,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXHOUSERACE-FL27-26",
+    "close_ts": 1794351685,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-FL27D",
+    "close_ts": 1794359452,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SCSEND",
+    "close_ts": 1794359584,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SC03R",
+    "close_ts": 1794359788,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SCGOVR",
+    "close_ts": 1794359848,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SC04R",
+    "close_ts": 1794360468,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SC06D",
+    "close_ts": 1794360735,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXMIDTERMMOV-SC05R",
+    "close_ts": 1794360841,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXTRUTHSOCIALD-26NOV10",
+    "close_ts": 1794373140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KXHOUSERACE-SC02-26",
+    "close_ts": 1794413713,
+    "third": "HELD-OUT"
+   }
+  ]
+ },
+ "event_counts": {
+  "Entertainment": {
+   "TRAIN": 9,
+   "VALIDATE": 11,
+   "HELD-OUT": 16
+  },
+  "Mentions": {
+   "TRAIN": 4,
+   "VALIDATE": 5,
+   "HELD-OUT": 5
+  },
+  "Politics": {
+   "TRAIN": 11,
+   "VALIDATE": 12,
+   "HELD-OUT": 12
+  }
+ }
+}

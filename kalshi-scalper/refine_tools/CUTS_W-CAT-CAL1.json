@@ -1,0 +1,15 @@
+{
+ "test": "W-CAT-CAL1",
+ "cuts_unix": [
+  1790492400,
+  1792476000
+ ],
+ "cuts_iso": [
+  "2026-09-27T07:00:00Z",
+  "2026-10-20T06:00:00Z"
+ ],
+ "rule": "TRAIN close<cut1; VALIDATE cut1<=close<cut2; HELD-OUT close>=cut2. Constants, not recomputed from data present.",
+ "n_events_or_markets_when_cut": "11,016 markets with candles of 377,066 listed (28,344 events listed)",
+ "universe_note": "Amendment B rule: tertiles of close time of markets that HAVE candle data (weather, finance, indices); candle pull stopped Nov 11 20:38 UTC. The listed-universe tertiles (1789495200, 1792087140) are NOT used.",
+ "read_once_marker": "HELD-OUT NOT READ as of 2026-11-12"
+}
