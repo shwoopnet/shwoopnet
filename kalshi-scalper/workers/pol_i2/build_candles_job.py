@@ -49,7 +49,7 @@ def main():
            "allowed_endpoints": [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
            "series_allowlist": [], "ticker_allowlist": sorted(m["ticker"] for m in kept), "max_requests": MAX_REQUESTS, "requests": reqs,
            "notes": "DISPATCH ORDER (Head of R&D, Nov 12): after TIE3, before SOCDERIV. Built by workers/pol_i2/build_candles_job.py from the POLI2_LISTS answers: most traded first, at most 600 markets, six a request.",
-           "status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
+           "status": "superseded", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
            "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3,
                           "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"}}
     os.makedirs(out, exist_ok=True)

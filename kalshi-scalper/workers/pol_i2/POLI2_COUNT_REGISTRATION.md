@@ -1,3 +1,5 @@
+> **SUPERSEDED on Nov 12, 2026, minutes after it was written. Do not run.** The Head of R&D had already handed POL-i2 to the Testing Desk, whose count step is the registration of record (commit 60e0d2a5 on `claude/testing-desk`: universe of 79 daily, weekly or monthly Politics series, ceiling 400 requests). My message and the Head's crossed. This file, the job `desk_b_jobs/POLI2_LISTS.json` (status set to superseded, so the pull script will not run it) and the two scripts in this folder are kept only as notes for the Testing Desk. Nothing here was sent to Main and no price was read.
+
 # POL-i2, overnight gaps in politics markets: COUNT registration (zero tries)
 
 **Registered Nov 12, 2026, before any price of these markets was read by this desk.** Card: Refinement's POL-i2 (`refine_tools/POLITICS_CARDS_NOV11.md` on `claude/refine-live`, row POL-i2), never run and with no reason recorded. Re-opened by the Head of R&D's ruling on `REOPEN_RANKING_NOV12.md` (the count step only, after the census first cut). Written by Idea Desk B.

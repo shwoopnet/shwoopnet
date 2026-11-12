@@ -1366,8 +1366,8 @@
    "max_pages": 2
   }
  ],
- "notes": "DISPATCH ORDER (Head of R&D, Nov 12): after TIE3, before SOCDERIV. 122 requests, at most 244 pages. The hourly candle job (at most 100 requests) is built from these answers by workers/pol_i2/build_candles_job.py.",
- "status": "active",
+ "notes": "SUPERSEDED Nov 12, 2026: POL-i2 belongs to the Testing Desk (60e0d2a5 on claude/testing-desk). Not to be dispatched. DISPATCH ORDER (Head of R&D, Nov 12): after TIE3, before SOCDERIV. 122 requests, at most 244 pages. The hourly candle job (at most 100 requests) is built from these answers by workers/pol_i2/build_candles_job.py.",
+ "status": "superseded",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,
