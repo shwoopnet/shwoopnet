@@ -157,6 +157,7 @@ def markets(folders):
                     out[m["ticker"]] = {"ticker": m["ticker"], "event": m.get("event_ticker", ""), "series": m["ticker"].split("-")[0], "open": iso(m.get("open_time", "")), "close": iso(m.get("close_time", "")),
                                         "result": m.get("result"), "type": m.get("strike_type"), "floor": _f(m.get("floor_strike")), "cap": _f(m.get("cap_strike")),
                                         "volume": _f(m.get("volume_fp", m.get("volume"))), "title": m.get("title", ""),
+                                        "settlement_ts": (int(m["settlement_ts"]) if isinstance(m.get("settlement_ts"), (int, float)) else iso(m["settlement_ts"])) if m.get("settlement_ts") else None,          # when the result is public (about 4 minutes after close); None when absent: a scorer must FAIL CLOSED on None, never fall back to close_time
                                         "times": {n: m.get(n) for n in ("open_time", "close_time", "expected_expiration_time", "occurrence_datetime", "expiration_time", "latest_expiration_time", "created_time") if m.get(n)}}
     return out
 

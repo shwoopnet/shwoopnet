@@ -15,6 +15,7 @@ with tempfile.TemporaryDirectory() as d:
               ("l", {"markets": [{"ticker": "KXA-26NOV-T4", "event_ticker": "KXA-26NOV", "open_time": "2026-11-01T00:00:00Z", "close_time": "2026-11-05T12:00:00Z", "result": "yes", "strike_type": "greater", "floor_strike": 4.4, "volume_fp": "900", "title": "x"}]}),
               ("ob", {"orderbook": {"yes": [[40, 5], [45, 9]], "no": [[50, 7]]}, "ts": 7})])
     cs = k.candles(d); assert [x["ts"] for x in cs["T-1"]] == [100, 160] and abs(cs["T-1"][0]["ask"] - .42) < 1e-9 and cs["T-2"][0]["ask"] == .2 and cs["T-1"][0]["bid_low"] == .39   # cents and dollars both read
+    ms0 = k.markets(d); assert ms0["KXA-26NOV-T4"]["settlement_ts"] is None          # absent = None: scorers fail closed
     ms = k.markets(d); assert ms["KXA-26NOV-T4"]["close"] == 1793880000 and ms["KXA-26NOV-T4"]["floor"] == 4.4 and ms["KXA-26NOV-T4"]["series"] == "KXA"
     bk = k.books(d); assert bk["ob"][0]["yes_bids"][0] == (0.45, 9.0) and bk["ob"][0]["no_bids"] == [(0.5, 7.0)]
     assert len(list(k.iter_answers(d))) == 4              # the 429 row is skipped
@@ -109,4 +110,7 @@ with tempfile.TemporaryDirectory() as d:
     ob = {"orderbooks": [{"ticker": "T-1", "orderbook_fp": {"yes_dollars": [["0.40", "5"], ["0.45", "9"]], "no_dollars": [["0.50", "7"]]}}]}
     mkrun(d, [("o1", ob)]); bk = k.books(d)["T-1"][0]; assert bk["yes_bids"][0] == (0.45, 9.0) and bk["no_bids"] == [(0.5, 7.0)]
 print("scorekit fixture-shaped tests passed")
+with tempfile.TemporaryDirectory() as d2:
+    mkrun(d2, [("l", {"markets": [{"ticker": "KXS-1", "event_ticker": "KXS", "close_time": "2026-11-05T12:00:00Z", "settlement_ts": "2026-11-05T12:04:10Z", "result": "yes"}, {"ticker": "KXS-2", "event_ticker": "KXS", "close_time": "2026-11-05T12:00:00Z", "settlement_ts": 1793880250, "result": "no"}]})])
+    mm = k.markets(d2); assert mm["KXS-1"]["settlement_ts"] == 1793880250 and mm["KXS-2"]["settlement_ts"] == 1793880250 and mm["KXS-1"]["settlement_ts"] - mm["KXS-1"]["close"] == 250
 print("scorekit synthetic tests passed")
