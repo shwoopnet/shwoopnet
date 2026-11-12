@@ -210,7 +210,7 @@ gates['K6 the nightly report carries the last 7 days of skips as counts per reas
   assert.deepStrictEqual(s.byReason, { shard_short: 2, stale_tick: 1, unknown: 1 });
   assert.ok(!JSON.stringify(s).includes('should-not-pass') && !JSON.stringify(s).includes('<b>'), 'no id, no odd text');
   assert.deepStrictEqual(s.rows.find((r) => r.ticker.startsWith('KXEURUSD')).detail, { shard: 0, avail: 0.12, need: 1 }, 'numbers only');
-  assert.deepStrictEqual(Object.keys(s.rows[0]).sort(), ['at', 'atMs', 'detail', 'oiRise', 'price', 'qualified', 'reason', 'secondsLeft', 'side', 'strategy', 'ticker']);
+  assert.deepStrictEqual(Object.keys(s.rows[0]).sort(), ['at', 'atMs', 'detail', 'oiMin', 'oiRise', 'oiSeen', 'price', 'qualified', 'reason', 'result', 'secondsLeft', 'shortBy', 'side', 'strategy', 'ticker']);
   const token = 'x'.repeat(32);
   const call = async (deps) => {
     const res = { code: 0, body: null, set() {}, status(c) { this.code = c; return this; }, json(b) { this.body = b; } };
