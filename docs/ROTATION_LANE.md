@@ -1,12 +1,12 @@
-# Rotation lane, "the wheel" (v1.0, approved by the owner Nov 12, 2026)
+# Rotation lane, "the wheel" (v1.1, approved by the owner Nov 12, 2026)
 
 **Status: APPROVED by the owner on Nov 12, 2026 (popup, through the EA: "Approve as written", with the decisions listed in section 0). These are the rules of the rotation lane from that date.** Written by the Head of R&D; home `docs/ROTATION_LANE.md` on main (docs only, opened by the Chief of Staff), with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It does not edit `docs/CHARTER.md`, which only the owner changes.
 
-**Approval of the rules is not an order to trade.** No rule takes a live seat until all four of these are true: the premise test (section 9.5) has been read; the rotation controller and its logging are built and have passed the Chief of Staff's security review; the Chief of Staff has checked the second slot's caps and the account stop against the wheel's sizes (sections 5 and 8); and the rule has been admitted by the owner's own popup with its exact spec.
+**Approval of the rules is not an order to trade.** A full seat (10 contracts) is taken only when all four of these are true: the premise test (section 9.5) has been read; the rotation controller and its logging are built and have passed the Chief of Staff's security review; the Chief of Staff has checked the second slot's caps and the account stop against the wheel's sizes (sections 5 and 8); and the rule has been admitted by the owner's own popup with its exact spec. A probation seat (section 5a) needs the last three of those, not the first.
 
 Every number in this file is a rule, a threshold or arithmetic on made-up coin flips (scripts in `lane_arith/` on the `rnd-queue` branch). No live account figure is in it. [design]
 
-v1.0 is draft v0.4 as approved, plus the owner's ninth decision (gold's return rule) and the Chief of Staff's facts about the second slot's caps. Drafts v0.1 to v0.4 are in this branch's history.
+v1.1 is v1.0 (draft v0.4 as approved, with gold's guard and the Chief of Staff's cap facts) plus the owner's later popup of the same day: probation seats (section 0.10 and section 5a). Drafts v0.1 to v0.4 are in this branch's history.
 
 ## 0. Decided by the owner (popups, Nov 12, 2026, through the EA)
 
@@ -20,8 +20,11 @@ v1.0 is draft v0.4 as approved, plus the owner's ninth decision (gold's return r
 7. **The premise test comes first.** "Does a hot 60 predict the next 60" is run on recorded data before any seat (section 9.5; registered as WHEEL0).
 8. **Favourites at 88c or above are allowed only with 150 signals and at least 10 losses in the record.**
 9. **Gold's own return rule gets the same guard** ("Yes, add the 10-loss guard"): the record that brings gold back must hold at least 10 losses, not only 60 trades at 1.3. Gold stays outside the wheel under its own latch (`docs/GOLD_KILL_LATCH.md`, which the Chief of Staff updates).
+10. **Probation seats.** His words: "im giving you full permissions on the strategy rotation ideas & deployments, with the one rule -- we need to hit our live minimum ASAP. by ASAP i mean probably before Monday morning. We should fill our on deck/shadow list up by end of next week. we should have it full functioning (rotating) by end of next week as well." He then chose "Probation seats, 3 contracts": up to 5 candidates go live without a forward record at 3 contracts, at most $3 an order, each with an $18 drawdown kill, and step up to 10 contracts only after earning the 60 plus 30 record. This reverses his earlier "no orders before evidence" for probation seats only (section 5a).
+11. **The favourite-late copies retired by name on Nov 11 stay declined.**
+12. **The second slot's caps go to their ceilings** ($20 an order, $20 a day, $60 in a rule's lifetime); 10 contract orders wait for a bigger account, so today's seats run at 3 contracts.
 
-Not yet answered, and flagged in section 12: the account stop as the wheel's only total limit (the Chief of Staff sets the real figure against the wheel's worst-case numbers before any admission); and whether the favourite-late copies he retired by name on Nov 11 may come back as wheel shadows under decisions 6 and 8, or stay on the declined list (these rules assume they stay until he says otherwise).
+Not yet answered, and flagged in section 12: the account stop as the wheel's only total limit (the Chief of Staff sets the real figure against the wheel's worst-case numbers before any admission).
 
 ## Why
 
@@ -79,6 +82,19 @@ A rule that truly has 1.3 clears its first block about 42 percent of the time (a
 1. **10 contracts, fixed, at most $10 of cost an order (the owner, section 0).** No ladder, no profit add-on, no reinvestment. The registered exit cannot be changed while live. The second slot's existing caps still apply to each rule and scale with the sizing base; the smaller cap always wins. In code today (the Chief of Staff, Nov 12) those caps are fractions of the sizing base with fixed ceilings: 1 percent an order (ceiling $20), 2 percent a window ($40), 3 percent open in total ($60), 2 percent a day ($20), 6 percent in a rule's lifetime ($60). So an order that costs more than 1 percent of the base is refused, which means a full $10 order needs a base of $1,000 or more; the daily ceiling is two full $10 losses; and the lifetime ceiling equals the $60 kill, so at a smaller base the lifetime cap stops a rule before its kill line can be reached. The Chief of Staff checks all of this against the real figures before any admission (no account figure is written here).
 2. **Live against shadow, first 20 live orders:** fewer than 60 percent filled, or an average fill more than 1c worse than the shadow's price for the same windows, and the rule leaves its seat with its shadow record marked overstated.
 3. Label everywhere it is shown: "rotating (unproven)".
+
+## 5a. Probation seats (the owner, section 0.10) [design]
+
+A probation seat is a live seat taken WITHOUT a forward record. It exists because the owner wants the live minimum of 5 reached before the wheel's own records can exist. It is his decision and an exception to "no orders before evidence", for these seats only.
+
+1. **At most 5 probation seats.** 3 contracts, at most $3 of cost an order.
+2. **Who may take one:** a rule with a written registration (entry, side, band, look, limit, exit fixed before any outcome), that is not on the declined list, is not closed, and whose registered research read, where one has been made, is not under 1.0. A rule whose read comes back under 1.0 while it holds a probation seat leaves the seat that day. Favourites at 88c or above do not take probation seats: his rule for them is a record of 150 signals with 10 losses.
+3. **Each one needs the owner's own popup with its exact spec** (market, side, band, look, limit, size, exit, kill), then the Chief of Staff's build, merge and security review, the check of the exchange shard that market trades on (an order needs money on its own shard), and the slot caps. Nothing here places an order by itself.
+4. **Kill: an $18 drawdown from its own peak**, six times the most one order can lose, latched; return only by his popup. The two performance exits of section 6 apply as written (net under minus 1c a contract at 50 fills; the last 60 under 1.0), after which it goes to the shadow list like any other rule.
+4a. **As built for Monday Nov 16 (the Chief of Staff, Nov 12):** a probation seat is an ordinary second-slot strategy. Its kill is a NET FLOOR of minus $18 (what the slot offers today), not a drawdown from its peak: the money a seat can lose from its start is capped at $18 either way, but a seat that first earns and then gives it back is not stopped until its net is minus $18. The two performance exits are not slot features and do not apply to probation seats until the replay controller exists; until then the net floor, the slot caps and the shared account stop are the protection.
+5. **Stepping up to 10 contracts** happens only on the record every full seat needs: 60 fills at 1.3 with both halves at 1.0 and 10 of the rarer outcome, in non-overlapping blocks, then 30 more at 1.0, counted on its own live fills, which are fill-checked by nature. Until then it stays at 3.
+6. **Labels.** Everywhere it is shown: "probation (no record)". Its fills are never research evidence, never quoted as a pass, and never used to choose a direction, a cut or a parameter of a research test that has not been read.
+7. **What to expect, plainly.** A probation rule is chosen on reasoning and at best a development read on candles, not on a forward record; the published evidence read on Nov 12 supports none of the registered directions strongly. With no edge it loses about the fee, roughly 2c a contract an order, until its own lines turn it out: about $3 on average at this size, at most $18. Five seats can lose at most $90 before all five are killed. What they buy is live fill data and the start of a real record.
 
 ## 6. Leaving a seat [design]
 
@@ -143,7 +159,7 @@ Shadowing a rule costs no money, only logger reads (free for the four markets th
 
 | Candidate | What exists | Earliest a seat is possible after admission |
 |---|---|---|
-| DEPTH1 (book-state rule, Bitcoin and Ethereum 15 minute markets) | scorer frozen and audited; first read on recorded books from Nov 14 00:00Z | about 2 to 3 weeks |
+| DEPTH1 (20 registered tries: 10 book features on the gold and Bitcoin 15 minute markets; not yet a rule) | scorer frozen and audited; first read on recorded books from Nov 14 00:00Z; a rule exists only if one try clears, which its author does not expect | about 2 to 3 weeks after a clear, Bitcoin only |
 | The four rules registered Nov 12 (esports break, in-play price jump, e-soccer rematch, e-soccer tie) | registered and audited; development reads on candles in the next days; they need a forward quote shadow and the non-15-minute order path that exists switched off | the e-soccer rules could fill a block and its confirmation in about one to two weeks; esports and tennis slower |
 | CFRTI-K (Kalshi-only Bitcoin cheap side with a model edge) | development read under 1.3; a book replay too small to say anything | about 3 to 4 weeks; it buys the same market, side and minute as OICORE, so rule 4.7 may keep it off a seat |
 | Spot-lead | missed its own bar; reads venues no live rule may read without the owner's popup | not live-able as written |
@@ -155,8 +171,7 @@ Shadowing a rule costs no money, only logger reads (free for the four markets th
 ## 12. Still open for the owner (defaults in force until he answers)
 
 1. **The account stop as the wheel's only total limit** (section 8.3): the Chief of Staff sets the real stop figure against the wheel's worst-day numbers and the slot caps before any admission.
-2. **The favourite-late copies retired on Nov 11** (the XRP, AUD/USD and gold shadow variants on the declined list): decisions 6 and 8 let favourites and market versions ride the wheel in general, but those rows were declined by name. Default: they stay declined; only he removes a row.
-3. **A third exit.** His popup, as he decided; research recommends retiring a rule with three exits inside 90 days.
+2. **A third exit.** His popup, as he decided; research recommends retiring a rule with three exits inside 90 days.
 
 ## 13. Build (the Chief of Staff's plan, for reference)
 
