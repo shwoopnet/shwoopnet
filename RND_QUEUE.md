@@ -94,6 +94,8 @@ kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md on claude/idea-desk-b (5436c3a): one
 
 ## Order-flow family closed (Nov 12)
 
+**Verification Analyst, Nov 12 17:39Z (through Main): RESIL1 development MATCH on the verdict.** Its own scorer from the registration text: registered arm n 1,071 against 1,061, cash PF 0.90 against 0.90; refilled arm PF 0.94 against 0.95; read literally on a missing second poll, n 1,054 and PF 0.89. FALSIFIED on development at n over 1,000, the family closure stands, the held-out was never opened. Desk A is to state which missing-poll rule it used. Main is putting the declined-list row (taker order-flow signals) into 7e as a docs-only pull request. [research]
+
 RESIL1 (after a sweep on the tape, buy when the swept side's touch price does not return within 6 seconds; a taker rule on R6 books and tape) was registered and scripted before any event and read once on development: n 1,061, cash PF 0.90, mean -2.11c; the descriptive refilled arm PF 0.95. FALSIFIED. With FLOW1 (Nov 4) and TAPEFLOW1 (Nov 11) that is three, so taker order-flow signals on the 15 minute tape are closed under the three-falsified rule. Verification Analyst re-run and the declined-list row are requested from Main. OICORE's open-interest trigger is a different field and is not covered.
 
 ## OICORE's trigger is partly a price proxy (Nov 12, Forensics, public data)
