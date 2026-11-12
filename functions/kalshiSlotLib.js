@@ -148,7 +148,7 @@ const SLOT_PROBE_BUDGET_MAX = 20;                      // no candidate may be gi
 const SLOT_PROBE_BUDGET = Object.freeze({ CFRTIBTC: 5 });
 const SLOT_PROBE_HOLD = Object.freeze(["CFRTIBTC"]);
 // CFRTIBTC: the research session's CFRTI1 Bitcoin cell (kalshi-scalper/README.md#SLOT-CFRTIBTC). Bitcoin 15 minute market only, 180 to 120 s before the close: when the
-// YES spread is 3c or less and the CHEAPER side costs 5c to 30c, and a three-venue spot model (kalshiSpotIndexLib) puts that side's chance at least 5c above its price,
+// YES spread is 3c or less and the CHEAPER side costs 5c to 30c, and a spot model (kalshiSpotIndexLib; NOT ACTIVATABLE as built, it returns no reading until research registers a form on allowed data) puts that side's chance at least 5c above its price,
 // buy 1 contract at the price seen and hold to settlement. Worst loss about $0.32 an order. BELOW the research bar: the pooled five-asset rule failed its registered bar and
 // the Bitcoin cell is 36 picked trades; the registration's own prior is about 1%. Kill rules: 20 losses in a row, or a net below $0 at any point from 100 settled fills
 // (profit factor under 1.0), and the $5 budget above, which binds first. reviewedAt is a placeholder: the edit that flips the switch sets it and SLOT_LAST_REVIEWED_ON to that day.

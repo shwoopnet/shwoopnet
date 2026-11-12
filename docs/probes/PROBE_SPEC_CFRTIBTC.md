@@ -4,14 +4,16 @@
 
 **UNPROVEN.** This is a tiny live test to learn from real fills: an information purchase, not an edge. It is below the research bar and the research session's own prior is about 1%.
 
-**CONDITIONAL ON THE READ (the Head of R&D, Nov 12).** This spec takes effect only if the research read clears, and a clear is not a pass:
+**NOT ACTIVATABLE AS BUILT (the owner's ruling, Nov 12, relayed by the Head of R&D and the Chief of Staff).** No live probe may read two of the three spot venues the research rule uses (one needs a signed data licence for commercial use, one's terms are unread). The registered rule needs three venues; the code may now read one, so the reader returns no reading and makes no request, and the probe cannot trade even with its switch flipped (`VENUES_REQUIRED = 3`, `VENUES_ALLOWED = ["kraken"]`, test CB6). Section 13 says what the two forms that COULD run would need. Neither is registered, and no code changes until research has a result for one of them.
+
+**CONDITIONAL ON THE READ (the Head of R&D, Nov 12). The owner has ruled out pre-evidence orders, so there is no route before the read.** This spec takes effect only if the research read clears, and a clear is not a pass:
 
 | Step | When | What it means |
 |---|---|---|
 | First read | Nov 20 to 24 (50 Bitcoin rows, read once, bar profit factor 1.3) | A rule with NO edge clears this about 24% of the time, so a clear means RE-TEST, never "it works". Under 1.3: this spec is dead and the switch stays off |
 | Re-test | a fresh 50 rows, about Dec 10 to 15 | A second clear is what makes a probe the honest next step |
 | Honest first order | **mid December** | after both, the popup, the activation pull request and two deploys |
-| Faster, only if the owner asks | Nov 26 to 30 after a first-read clear with no re-test; about Nov 17 to 19 before any read | Each is a pre-evidence order: it buys fills, not evidence, and the popup must say so |
+| Faster, only if the owner asks | Nov 26 to 30 after a first-read clear with no re-test | It buys fills, not evidence, and the popup must say so. An order before any read is ruled out |
 
 ## 1. What it is, in one paragraph
 
@@ -65,7 +67,7 @@ About three minutes before a Bitcoin 15 minute market closes, the bot rebuilds a
 - **Size lock.** L1's size lock (`maxContractsFor`) is not involved: this is a slot order, and the slot's own gate is the only way in. Bitcoin stays paused for L1.
 - **Direction lock.** It can never buy the side opposite an L1 or slot order in the same market.
 - **Exit watch.** The L1 exit watch iterates L1's own order documents only. The slot exit pass looks the strategy up by id: registered, it is held; if it is ever removed from the registry, an open order gets the fallback exit (25c stop, out 60 s before the close), so nothing is stranded.
-- **The key.** The spot reader is handed the public `fetch`, the market, the side and the clock. It is never handed the Kalshi key, the store or the session, reaches three pinned hosts only, refuses redirects and sends no credential.
+- **The key.** The spot reader is handed the public `fetch`, the market, the side and the clock. It is never handed the Kalshi key, the store or the session, reaches one pinned host only, refuses redirects and sends no credential.
 - **Interference (7g).** OICORE and EVENT830 share one slot stop. The $5 budget is this probe's OWN stop, so its losses stop it long before they could move the shared one.
 
 ## 5. Kill
@@ -89,7 +91,7 @@ Probe to Live needs cash profit factor 1.3 or better over at least 100 fills in 
 
 | Piece | What | Status |
 |---|---|---|
-| `functions/kalshiSpotIndexLib.js` | The reader and the model. Pure functions plus three bounded public GET readers | written |
+| `functions/kalshiSpotIndexLib.js` | The reader and the model. Pure functions plus one bounded public GET reader of the one allowed venue. Returns no reading as built | written |
 | `functions/kalshiSlotLib.js` | The candidate, its switch (`SLOT_PROBE_SWITCH.CFRTIBTC: false`), the budget, the one-contract cap, a `modelEdgeMin` entry field | written |
 | `functions/kalshiSlotRunLib.js` | Asks the reader only for a strategy with a model line; logs `modelEdge` and the model inputs on the order; two new skip codes | written |
 | `functions/index.js` | One line handing the reader to the slot tick | written |
@@ -101,7 +103,7 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 
 | What can go wrong | What happens |
 |---|---|
-| A venue is down, slow, rate limited, redirects or changes its response shape | The reading is null and no order is sent; a `model_unreadable` skip is logged. Three venues are required |
+| A venue is down, slow, rate limited, redirects or changes its response shape | The reading is null and no order is sent; a `model_unreadable` skip is logged. The registered rule needs three venues and one is allowed, so today every reading is null |
 | The trade list does not reach back ten minutes inside the page cap | Null, no order |
 | The reads are slow | Each request aborts at 1.5 s, all of them at 5 s; the engine refuses any order more than 20 s after the minute began |
 | The model is wrong | Bounded by 1 contract and $5 |
@@ -111,12 +113,12 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 | One-sided or partial fill | Not possible: one contract, immediate-or-cancel |
 | Stranded position | Held to settlement by design; the settle sweep books it. Worst case is its cost |
 | Deploy order wrong | An exit watch older than the switch flip would give the order the fallback exit (sold at 25c or 60 s before the close). `deploy-push.sh` goes first |
-| The spot venues' terms do not allow this use | **Open, and a hard blocker for the switch.** What must be read, for commercial use by an LLC whose bot trades on ANOTHER venue from the data: (1) Coinbase Exchange's market data terms and API terms for `api.exchange.coinbase.com`; (2) Kraken's API terms for the public REST endpoints of `api.kraken.com`; (3) Bitstamp's API terms for the public endpoints of `www.bitstamp.net`. Who: the Executive Assistant is reading them (Nov 12); the OWNER decides, by popup, whether each is acceptable. The research recorder already reads these venues' public trade feeds for research; live trading on the same model is the new question. If one venue is refused the probe does not run on two: three are required in code. This desk made no request to any of them |
-| The response shapes in the reader are wrong | **Open.** They were written from the venues' public documentation as remembered. The reviewer confirms them against the documentation; a wrong shape fails closed |
+| The spot venues' terms | **Ruled, Nov 12:** no live probe may read two of the three venues; the third's terms are not stated. Before ANY form is switched on, the owner decides by popup on each source it reads, from the terms as read by the Executive Assistant. The research recorder's reads of these venues for research are a separate question and are not changed here |
+| The response shape in the reader is wrong | Checked Nov 12 against Kraken's public documentation page for recent trades (the page only; no market data request): `error` array, `result` with the pair key and a string `last`, each row `[price, volume, time, ...]`, at most 1,000 rows a call. These match the reader. NOT stated in the documentation: the unit of `since` and of `time`, and the row order; the reader sends `since` in seconds (as the documented example does) and sorts the rows itself. A wrong shape fails closed |
 
 ## 9. Tests and gates
 
-`node test/cfrtiProbeGates.test.js`: CB1 off by default and the production gate refuses it; CB2 the candidate's shape and the validator's bounds; CB3 the gate; CB4 the budget (reached, sticky, open counted as lost, room); CB5 the model against an independent recomputation; CB6 pinned hosts, GET only, no credential, bounded; CB7 fails closed; CB8 and CB9 the engine end to end; CB10 no call with the switch off. The off-equivalence fixtures are untouched. Before a merge: the full suite, `/pre-ship`, the freshness gate, the security scan, and the security agent's review.
+`node test/cfrtiProbeGates.test.js`: CB1 off by default and the production gate refuses it; CB2 the candidate's shape and the validator's bounds; CB3 the gate; CB4 the budget (reached, sticky, open counted as lost, room); CB5 the model against an independent recomputation; CB6 not activatable as built (no reading, no request, no ruled-out venue named in the server code); CB7 the one venue reader: pinned host, GET only, no credential, bounded, fails closed; CB8 and CB9 the engine end to end; CB10 no call with the switch off. The off-equivalence fixtures are untouched. Before a merge: the full suite, `/pre-ship`, the freshness gate, the security scan, and the security agent's review.
 
 ## 10. Activation checklist (a separate pull request, only after the owner's popup)
 
@@ -128,17 +130,17 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 
 ## 11. The popup the owner would see
 
-> *(Shown only after the first read clears. If the owner asks for it sooner, the first option changes to "Wait for the research read" and the popup says it is a pre-evidence order.)*
+> *(Shown only after the first read clears, and only for a form that reads allowed data. There is no popup before the read.)*
 >
 > **Start a tiny live probe: CFRTIBTC (unproven)?**
 >
-> What it does: about 3 minutes before a Bitcoin 15 minute market closes, if a model built from three spot exchanges says the cheaper side (5c to 30c) is underpriced by 5c or more, the bot buys 1 contract and holds it to the close.
+> What it does: about 3 minutes before a Bitcoin 15 minute market closes, if a model built from [the data source of the registered form] says the cheaper side (5c to 30c) is underpriced by 5c or more, the bot buys 1 contract and holds it to the close.
 >
 > Size and loss: 1 contract an order, at most about 32c lost per order. It stops itself for good at $5 lost in total. It also sits inside the second slot's caps and the account's 12% stop.
 >
 > Honest odds: UNPROVEN. In research the rule failed its bar across five coins; Bitcoin alone looked good on 36 trades picked after the fact. The read that just cleared is cleared by a rule with no edge about one time in four. $5 buys about 20 to 60 real fills, which is enough to see whether fills match the simulation, not enough to prove an edge.
 >
-> Still open before it can start: your decision on the three spot exchanges' data terms; the Verification Analyst's score (it may turn out to be a duplicate of OICORE).
+> Still open before it can start: your decision on the data source this form reads; the Verification Analyst's score (it may turn out to be a duplicate of OICORE).
 >
 > Kill: $5 lost, or 20 losses in a row, or a net loss after 100 fills. Return: 14 days off, then a paper run at profit factor 1.3 over 100 signals, then your approval.
 >
@@ -149,3 +151,20 @@ No new function, secret, endpoint, collection or rule. **Cost:** about 96 window
 ## 12. Variant arm: W-SPOTLEAD1 (a version, not a strategy)
 
 The Chief of Staff's ruling (Nov 12, lifecycle 7g): the spot-lead rule is a VERSION of this probe. It is the same signal (a spot model against the Kalshi quote) in another price band: the 50c to 87c side on a 10c edge, Bitcoin first. It takes no slot of its own, is not registered here, and has no code: the validator on this branch refuses a model entry above 50c on purpose, because above that it is a favourite held to settlement. Turning it on would need its own read to pass (about Nov 21 to 23; it missed its bar once), the owner's written exception to the favourite-and-hold ban for this version only, and a reviewed edit of that bound. Worst loss about $0.89 an order, so the same $5 budget is about six losing orders: too few to learn from, which is a reason not to run it as a probe at all.
+
+## 13. The two forms that could run (design only; nothing is coded, registered or scored by this desk)
+
+Both keep everything in sections 3 to 5 (market, time, band, 1 contract, hold, the $5 budget, the kills). Only the model's input changes. **Either is a NEW rule for research purposes:** its development figure, its registration and its read are its own, and the 36 trade Bitcoin cell does not carry over.
+
+| | Kraken-only | Kalshi-only, "CFRTI-K" |
+|---|---|---|
+| Input | One venue's public trade list (the reader on this branch) | Kalshi's own Bitcoin perpetual on the public margin market list: bid, ask and reference price |
+| Requests at decision time | 1 to 3 public GETs to one outside host | ONE public GET to Kalshi (the host the bot already uses); no outside host at all |
+| Index at the look | That venue's last price if it traded in the last 10 s | The perpetual's reference price (or its mid; research must say which) |
+| Volatility | As now: sixty 10 second changes over ten minutes, from the trade list | Needs ten minutes of history. One decision-time GET gives one price, so the history must come from the perpetual's public one minute candles (a second public GET, and then the volatility is ten 1 minute changes, not sixty 10 second ones), or from a rolling record kept by the minute function. Research must register which; they are not the same number |
+| Code change | Two constants (`VENUES_REQUIRED` to 1 with the registration that says so). The reader, the gates and the engine are unchanged | A second small reader beside this one (pinned to the Kalshi host through the bot's existing public request helper), the candle-based volatility, and a registry constant choosing the form. About 1 build day with tests |
+| Honest weakness | One venue is not the settlement index: the settlement value averages several venues, so a one-venue model is noisier and a single bad print moves it fully. The three-venue minimum was the registered guard against exactly that | The perpetual is a Kalshi price, not spot: its reference price is itself built from an index, with its own lag and funding premium. If it lags spot it carries no information the 15 minute market does not already have |
+| Terms | The owner must still rule on this venue (its terms are "not stated") | None outside Kalshi |
+
+**Recommendation:** CFRTI-K is the only form with no terms question and no outside host, so it is the one worth building IF research shows a result for it. Until then the code stays as it is: dormant, and unable to trade.
+

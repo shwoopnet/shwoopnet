@@ -88,7 +88,7 @@ gates['CB4 the $5 budget: reached means no more orders, it is sticky after a lat
 // A synthetic three-venue tape: one trade a second per venue for 11 minutes, prices on a slow deterministic wave.
 function tape(t0, shift) {
   const out = {};
-  for (const [v, off] of [['coinbase', 0], ['kraken', 3], ['bitstamp', -2]]) {
+  for (const [v, off] of [['venueA', 0], ['kraken', 3], ['venueC', -2]]) {
     out[v] = [];
     for (let s = 660; s >= 0; s--) out[v].push({ t: t0 - s * 1000, p: 100000 + (shift || 0) + off + 40 * Math.sin(s / 37) + 15 * Math.cos(s / 11) });
   }
@@ -120,67 +120,66 @@ gates['CB5 the model is the research rule: fresh-venue mean index, sample sd of 
   for (const bad of [0, -1, NaN, undefined]) assert.strictEqual(spot.modelYes({ venues: V, t: NOW, strike: bad, secondsLeft: 120 }), null);
 };
 
-// A fake of the three venues' public trade lists, in the shapes the reader expects.
+// A fake of the one allowed venue's public trade list, in the documented shape (error array, result with the pair key and `last`, rows of [price, volume, time, ...]).
 function venueFetch(V, o = {}) {
   const calls = [];
   const fn = async (url, init) => {
     calls.push({ url, init });
-    const u = new URL(url), reply = (body, status) => ({ status: status || 200, headers: {}, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
-    if (o.throwOn === u.hostname) throw new Error('network down');
-    if (o.status && o.status[u.hostname]) return reply({}, o.status[u.hostname]);
-    if (u.hostname === 'api.exchange.coinbase.com') {
-      const all = V.coinbase.map((x, i) => ({ time: new Date(x.t).toISOString(), trade_id: i + 1, price: String(x.p), size: '0.01', side: 'buy' })).reverse();   // newest first
-      const after = Number(u.searchParams.get('after') || Infinity), per = o.coinbasePage || 1000;
-      return reply(all.filter((x) => x.trade_id < after).slice(0, per));
-    }
-    if (u.hostname === 'api.kraken.com') return reply(o.krakenBody || { error: [], result: { XXBTZUSD: V.kraken.map((x) => [String(x.p), '0.01', x.t / 1000, 'b', 'm', '', 1]), last: '1' } });
-    if (u.hostname === 'www.bitstamp.net') return reply(V.bitstamp.map((x) => ({ date: String(Math.floor(x.t / 1000)), tid: '1', price: String(x.p), type: '0', amount: '0.01' })).reverse());
-    throw new Error('unexpected host ' + u.hostname);
+    const u = new URL(url), reply = (body, status, len) => ({ status: status || 200, headers: { get: (h) => (h === 'content-length' && len ? String(len) : null) }, text: async () => (typeof body === 'string' ? body : JSON.stringify(body)) });
+    if (o.throws) throw new Error('network down');
+    if (o.status) return reply({}, o.status);
+    if (o.declared) return reply({}, 200, o.declared);
+    if (u.hostname !== 'api.kraken.com') throw new Error('unexpected host ' + u.hostname);
+    return reply(o.body || { error: [], result: { XXBTZUSD: V.kraken.map((x) => [String(x.p), '0.01', x.t / 1000, 'b', 'm', '', 1]), last: '1' } });
   };
   return { fn, calls };
 }
 const market = (extra) => Object.assign({ ticker: T, status: 'active', close_time: new Date(CLOSE).toISOString(), floor_strike: 99990, strike_type: 'greater_or_equal' }, extra || {});
-gates['CB6 the reader: three pinned public hosts, GET only, no credential, redirects refused, bounded; it returns the chance of the side asked for'] = async () => {
+gates['CB6 NOT ACTIVATABLE as built: one allowed venue against a rule that needs three, so the production reader returns null and makes no request; no other venue is named anywhere in the server code'] = async () => {
   const V = tape(NOW), f = venueFetch(V);
+  assert.deepStrictEqual(spot.SPOT_HOSTS.slice(), ['api.kraken.com'], 'the only host the reader may reach');
+  assert.deepStrictEqual(spot.VENUES_ALLOWED.slice(), ['kraken']); assert.strictEqual(spot.VENUES_REQUIRED, 3, 'the registered rule needs three venues');
+  assert.ok(Object.isFrozen(spot.SPOT_HOSTS) && Object.isFrozen(spot.VENUES_ALLOWED));
   const r = await spot.modelForMarket({ fetchFn: f.fn, series: 'KXBTC15M', market: market(), side: 'yes', now: NOW });
-  assert.ok(r && r.venues === 3 && r.pSide === r.pYes && r.pYes > 0.5 && r.pYes < 1, JSON.stringify(r));
-  const no = await spot.modelForMarket({ fetchFn: venueFetch(V).fn, series: 'KXBTC15M', market: market(), side: 'no', now: NOW });
-  assert.ok(Math.abs(no.pSide - (1 - r.pYes)) < 1e-12, 'the NO chance is one minus the YES chance');
-  assert.deepStrictEqual(spot.SPOT_HOSTS.slice().sort(), ['api.exchange.coinbase.com', 'api.kraken.com', 'www.bitstamp.net']);
-  assert.ok(f.calls.length >= 3 && f.calls.length <= 10);
-  for (const c of f.calls) {
-    const u = new URL(c.url);
-    assert.ok(u.protocol === 'https:' && spot.SPOT_HOSTS.includes(u.hostname), c.url);
-    assert.strictEqual(c.init.method, 'GET'); assert.strictEqual(c.init.redirect, 'error'); assert.ok(c.init.signal, 'every request has an abort timer');
-    assert.ok(!Object.keys(c.init.headers).some((h) => /auth|key|cookie|token|sign/i.test(h)), 'no header that could carry a credential');
-    assert.ok(!/kalshi/i.test(c.url) && c.init.body === undefined);
+  assert.strictEqual(r, null, 'no reading, so no order, even if the probe switch were flipped'); assert.strictEqual(f.calls.length, 0, 'and not one request is made');
+  for (const file of ['functions/kalshiSpotIndexLib.js', 'functions/kalshiSlotLib.js', 'functions/kalshiSlotRunLib.js', 'functions/index.js']) {
+    assert.ok(!/coinbase|bitstamp/i.test(read(file)), file + ' must not name a venue the owner has ruled out for live probes');
   }
-  assert.strictEqual(await spot.spotGet(f.fn, 'https://evil.example/products/BTC-USD/trades'), null, 'any other host is refused before a request');
-  assert.strictEqual(await spot.spotGet(f.fn, 'http://api.kraken.com/0/public/Trades'), null, 'plain http is refused');
-  assert.strictEqual(await spot.spotGet(f.fn, 'https://user:pw@api.kraken.com/0/public/Trades'), null, 'a URL carrying a login is refused');
   const src = read('functions/kalshiSpotIndexLib.js').replace(/\/\/.*$/gm, '');
   assert.ok(!/require\(|process\.env|setTimeout|setInterval|Date\.now|Math\.random|firestore|portfolio|\.pem|keyId/.test(src), 'no import, environment, timer, clock, randomness, database, account path or key');
-  assert.ok(spot.SPOT_TIMEOUT_MS <= 2000 && spot.SPOT_TOTAL_MS <= 6000 && spot.SPOT_MAX_PAGES.coinbase <= 8, 'bounded well inside the engine\'s 20 s stale limit');
+  assert.ok(/const modelForMarket = \(args\) => modelWith\(VENUES_REQUIRED, args\);/.test(src), 'the production entry point cannot be handed a lower venue count');
+  assert.ok(!/modelWith|_testOnly/.test(read('functions/index.js')) && !/modelWith|_testOnly\.krakenTrades/.test(read('functions/kalshiSlotRunLib.js')), 'the wiring uses only the production entry point');
+  assert.ok(spot.SPOT_TIMEOUT_MS <= 2000 && spot.SPOT_TOTAL_MS <= 6000 && spot.SPOT_MAX_PAGES.kraken <= 4, 'bounded well inside the engine\'s 20 s stale limit');
 };
 
-gates['CB7 the reader fails closed: a venue down, refused, malformed or not read back far enough, a strike it does not understand, or another series is null, never a guess or a throw'] = async () => {
-  const V = tape(NOW), go = (o, m, extra) => spot.modelForMarket(Object.assign({ fetchFn: venueFetch(V, o).fn, series: 'KXBTC15M', market: m || market(), side: 'yes', now: NOW }, extra || {}));
-  for (const h of spot.SPOT_HOSTS) {
-    assert.strictEqual(await go({ throwOn: h }), null, h + ' throwing');
-    assert.strictEqual(await go({ status: { [h]: 429 } }), null, h + ' refusing');
-    assert.strictEqual(await go({ status: { [h]: 301 } }), null, h + ' redirecting');
+gates['CB7 the venue reader itself: one pinned public host, GET, no credential, redirects refused, both abort timers, and null on anything it cannot read'] = async () => {
+  const V = tape(NOW), K = spot._testOnly.krakenTrades, overall = AbortSignal.timeout(5000);
+  const f = venueFetch(V), got = await K(f.fn, NOW - 600000, NOW, overall);
+  assert.ok(got && got.complete === true && got.trades.length > 600 && got.trades[0].t < got.trades[1].t, 'the ten minutes are read, oldest first');
+  assert.strictEqual(f.calls.length, 1);
+  const c = f.calls[0], u = new URL(c.url);
+  assert.ok(u.protocol === 'https:' && u.hostname === 'api.kraken.com' && u.pathname === '/0/public/Trades' && u.searchParams.get('pair') === 'XBTUSD', c.url);
+  assert.strictEqual(c.init.method, 'GET'); assert.strictEqual(c.init.redirect, 'error'); assert.ok(c.init.signal, 'an abort timer on the request'); assert.strictEqual(c.init.body, undefined);
+  assert.ok(!Object.keys(c.init.headers).some((h) => /auth|key|cookie|token|sign/i.test(h)), 'no header that could carry a credential');
+  assert.ok(/since=" \+ encodeURIComponent\(since\), overall\)/.test(read('functions/kalshiSpotIndexLib.js')), 'the venue call shares the overall abort timer');
+  assert.ok(got.trades.every((x) => x.t <= NOW), 'nothing after the look');
+  const cut = await K(venueFetch(V).fn, NOW - 900000, NOW - 300000, overall);
+  assert.ok(cut.trades.every((x) => x.t <= NOW - 300000), 'trades after the look are dropped, so the model can never see its own future');
+  for (const o of [{ throws: true }, { status: 429 }, { status: 301 }, { declared: spot.SPOT_MAX_BYTES + 1 }, { body: { error: ['EGeneral:Too many requests'], result: {} } },
+    { body: { error: [], result: { XXBTZUSD: [['abc', '1', 'x']], last: '1' } } }, { body: { error: [], result: { last: '1' } } }, { body: 'not json' }, { body: [] }]) {
+    assert.strictEqual(await K(venueFetch(V, o).fn, NOW - 600000, NOW, overall), null, JSON.stringify(o).slice(0, 60));
   }
-  assert.strictEqual(await go({ coinbasePage: 50 }), null, 'six pages of 50 trades do not reach back ten minutes: partial history is no reading');
-  assert.strictEqual(await go({ krakenBody: { error: ['EGeneral:Too many requests'], result: {} } }), null);
-  assert.strictEqual(await go({ krakenBody: { error: [], result: { XXBTZUSD: [['abc', '1', 'x']], last: '1' } } }), null, 'a row it cannot parse');
-  for (const m of [market({ strike_type: 'between' }), market({ strike_type: undefined }), market({ floor_strike: null }), market({ floor_strike: 0 }), market({ close_time: 'x' })]) assert.strictEqual(await go({}, m), null);
-  assert.strictEqual(await go({}, null, { series: 'KXETH15M' }), null, 'Bitcoin only');
-  assert.strictEqual(await go({}, null, { side: 'maybe' }), null);
+  assert.strictEqual(await spot.spotGet(f.fn, 'https://evil.example/0/public/Trades'), null, 'any other host is refused before a request');
+  assert.strictEqual(await spot.spotGet(f.fn, 'http://api.kraken.com/0/public/Trades'), null, 'plain http is refused');
+  assert.strictEqual(await spot.spotGet(f.fn, 'https://user:pw@api.kraken.com/0/public/Trades'), null, 'a URL carrying a login is refused');
+  // The model on a caller-chosen venue count (test only): it reads the market and the side as documented, and still fails closed.
+  const M = spot._testOnly.modelWith, go = (m, extra, o) => M(1, Object.assign({ fetchFn: venueFetch(V, o).fn, series: 'KXBTC15M', market: m || market(), side: 'yes', now: NOW }, extra || {}));
+  const y = await go(), n = await go(null, { side: 'no' });
+  assert.ok(y && y.venues === 1 && y.pYes > 0.5 && y.pYes < 1 && Math.abs(n.pSide - (1 - y.pYes)) < 1e-12, JSON.stringify(y));
+  for (const m of [market({ strike_type: 'between' }), market({ strike_type: undefined }), market({ floor_strike: null }), market({ floor_strike: 0 }), market({ close_time: 'x' })]) assert.strictEqual(await go(m), null);
+  assert.strictEqual(await go(null, { series: 'KXETH15M' }), null, 'Bitcoin only'); assert.strictEqual(await go(null, { side: 'maybe' }), null);
+  assert.strictEqual(await go(null, null, { throws: true }), null); assert.strictEqual(await M(0, {}), null); assert.strictEqual(await M(2, { fetchFn: f.fn }), null, 'more venues than are allowed: null');
   assert.strictEqual(await spot.modelForMarket(null), null); assert.strictEqual(await spot.modelForMarket({}), null);
-  const future = await go({}, null, { now: NOW - 300000 });
-  const Vcut = {}; for (const k of Object.keys(V)) Vcut[k] = V[k].filter((x) => x.t <= NOW - 300000);
-  const same = await spot.modelForMarket({ fetchFn: venueFetch(Vcut).fn, series: 'KXBTC15M', market: market(), side: 'yes', now: NOW - 300000 });
-  assert.ok(future && same && Math.abs(future.pYes - same.pYes) < 1e-12, 'trades after the look are never used');
 };
 
 // ---- the engine end to end, on a fake exchange and a fake store (the same shape as test/event830SlotGates.test.js) ----

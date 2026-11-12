@@ -1,32 +1,34 @@
 "use strict";
-// The spot index reader for the CFRTIBTC probe (Nov 12, 2026, the Probe Engineering Desk; docs/probes/PROBE_SPEC_CFRTIBTC.md). INERT until a reviewed edit flips
-// the probe's own switch in the second strategy's registry: nothing calls modelForMarket unless a registered strategy has a modelEdgeMin entry, and none does while the switch is off.
+// The spot index reader for the CFRTIBTC probe candidate (Nov 12, 2026, the Probe Engineering Desk; docs/probes/PROBE_SPEC_CFRTIBTC.md).
 //
-// What it does: rebuilds a three-venue Bitcoin spot index from PUBLIC trade lists (no key, no account, no auth header) and turns it into a model chance that a Kalshi
-// 15 minute market settles YES, the research rule of kalshi-scalper/workers/CFRTI1_PROTOCOL.md (research branch). It decides nothing and sends nothing: the slot engine
-// compares the chance with the quoted price and its one entry gate does the rest.
+// NOT ACTIVATABLE AS BUILT (the owner's ruling on spot venues, Nov 12, 2026: no live probe may read two of the three venues the research rule uses). The registered rule
+// needs THREE venues (VENUES_REQUIRED); this file may read ONE (VENUES_ALLOWED). So modelForMarket returns null, without making a single request, and null is no order:
+// even with the probe's own switch flipped, the probe cannot trade. It stays that way until research registers a form that uses only allowed data (one venue, or Kalshi's
+// own Bitcoin perpetual) and a reviewed edit changes the constants below with that registration. Nothing here is a strategy decision.
+//
+// What it is: the model of kalshi-scalper/workers/CFRTI1_PROTOCOL.md (research branch) as pure functions (index, volatility, horizon, normal chance), and one bounded
+// reader of one venue's PUBLIC trade list (no key, no account, no auth header). It decides nothing and sends nothing: the second strategy's engine compares the chance with
+// the quoted price and its one entry gate does the rest.
 //
 // What it will not do, by construction (each is a test in test/cfrtiProbeGates.test.js):
-//   - reach any host but the three below, follow a redirect, send a header that could carry a credential, or read more than a fixed number of pages and bytes;
+//   - reach any host but the one below, follow a redirect, send a header that could carry a credential, or read more than a fixed number of pages and bytes;
 //   - guess: a venue that cannot be read back over the whole look-back span, a strike it does not understand, too few index changes, or a zero volatility is NO reading
 //     (null), and no reading is no order;
-//   - throw or hang: every failure is null and every request has its own abort timer (AbortSignal.timeout, as the book snapshot uses, so this file holds no timer of its own).
-//
-// UNVERIFIED AT THE TIME OF WRITING (the security review and a person must confirm before the switch is flipped): the three venues' response shapes below are written
-// from their public documentation as remembered, not from a live read (this desk made no request to them), and their market data terms for commercial use have not been
-// read by a person. A shape this code does not recognise is null, so a wrong assumption fails closed.
+//   - throw or hang: every failure is null and every request has its own abort timer and shares one overall timer (AbortSignal.timeout, as the book snapshot uses, so
+//     this file holds no timer of its own).
 
-const SPOT_HOSTS = Object.freeze(["api.exchange.coinbase.com", "api.kraken.com", "www.bitstamp.net"]);
+const SPOT_HOSTS = Object.freeze(["api.kraken.com"]);          // the only host this file may reach; adding one is a reviewed edit after the owner rules on that venue's terms
 const SPOT_TIMEOUT_MS = 1500;                 // per request
-const SPOT_TOTAL_MS = 5000;                   // all three venues together: past this every request still in flight is aborted and the reading is null
+const SPOT_TOTAL_MS = 5000;                   // all requests of one reading together: past this every request still in flight is aborted and the reading is null
 const SPOT_MAX_BYTES = 3 * 1024 * 1024;       // per response; a longer body is no reading
-const SPOT_MAX_PAGES = Object.freeze({ coinbase: 6, kraken: 3, bitstamp: 1 });
+const SPOT_MAX_PAGES = Object.freeze({ kraken: 3 });
 const LOOKBACK_MS = 600 * 1000;               // the research rule: 60 ten-second index changes
 const STEP_MS = 10 * 1000;
 const FRESH_MS = 10 * 1000;                   // a venue counts at an instant only if it traded in the 10 s before it
 const MIN_CHANGES = 30;                       // the research code needs at least 30 of the 60 changes
 const AVG_SEC = 60;                           // the settlement value is a 60 s average
-const VENUES_REQUIRED = 3;                    // the research held-out read refuses a run with fewer than three venues; so does this
+const VENUES_REQUIRED = 3;                    // the REGISTERED rule: the research held-out read refuses a run with fewer than three venues; so does this
+const VENUES_ALLOWED = Object.freeze(["kraken"]);   // the venues the owner allows a live probe to read (Nov 12, 2026). Fewer than VENUES_REQUIRED: no reading, no request
 const MODEL_SERIES = Object.freeze({ KXBTC15M: "BTC" });   // Bitcoin only: the pooled five-asset rule failed its bar and only the Bitcoin cell is a lead
 const isNum = (x) => typeof x === "number" && Number.isFinite(x);
 
@@ -37,6 +39,9 @@ async function spotGet(fetchFn, url, overall) {
     if (u.protocol !== "https:" || !SPOT_HOSTS.includes(u.hostname) || u.username || u.password) return null;
     const res = await fetchFn(u.toString(), { method: "GET", redirect: "error", headers: { accept: "application/json", "user-agent": "spot-index-reader" }, signal: overall ? AbortSignal.any([overall, AbortSignal.timeout(SPOT_TIMEOUT_MS)]) : AbortSignal.timeout(SPOT_TIMEOUT_MS) });
     if (!res || res.status !== 200) return null;
+    // A declared length over the cap is refused before the body is read; an undeclared one is still checked after.
+    const declared = Number(res.headers && typeof res.headers.get === "function" ? res.headers.get("content-length") : NaN);
+    if (Number.isFinite(declared) && declared > SPOT_MAX_BYTES) return null;
     const text = await res.text();
     if (typeof text !== "string" || text.length > SPOT_MAX_BYTES) return null;
     return { json: JSON.parse(text), headers: res.headers };
@@ -51,29 +56,11 @@ function tidy(rows, fromMs, toMs) {
   out.sort((a, b) => a.t - b.t);
   return out;
 }
-async function coinbaseTrades(fetchFn, fromMs, toMs, overall) {
-  const rows = [];
-  let after = "", oldest = Infinity;
-  for (let page = 0; page < SPOT_MAX_PAGES.coinbase; page++) {
-    const r = await spotGet(fetchFn, "https://api.exchange.coinbase.com/products/BTC-USD/trades?limit=1000" + (after ? "&after=" + encodeURIComponent(after) : ""), overall);
-    if (!r || !Array.isArray(r.json)) return null;
-    if (!r.json.length) return { trades: tidy(rows, fromMs, toMs), complete: true };
-    let minId = Infinity;
-    for (const x of r.json) {
-      const t = Date.parse(x && x.time), p = Number(x && x.price), id = Number(x && x.trade_id);
-      if (!Number.isFinite(t) || !Number.isFinite(p) || !Number.isInteger(id)) return null;
-      rows.push({ t, p }); oldest = Math.min(oldest, t); minId = Math.min(minId, id);
-    }
-    if (oldest <= fromMs - FRESH_MS) return { trades: tidy(rows, fromMs, toMs), complete: true };
-    after = String(minId);                    // the next page is the trades older than the oldest one read
-  }
-  return { trades: tidy(rows, fromMs, toMs), complete: false };
-}
 async function krakenTrades(fetchFn, fromMs, toMs, overall) {
   const rows = [];
   let since = String(Math.floor((fromMs - FRESH_MS) / 1000));
   for (let page = 0; page < SPOT_MAX_PAGES.kraken; page++) {
-    const r = await spotGet(fetchFn, "https://api.kraken.com/0/public/Trades?pair=XBTUSD&since=" + encodeURIComponent(since));
+    const r = await spotGet(fetchFn, "https://api.kraken.com/0/public/Trades?pair=XBTUSD&since=" + encodeURIComponent(since), overall);
     const res = r && r.json && Array.isArray(r.json.error) && r.json.error.length === 0 && r.json.result && typeof r.json.result === "object" ? r.json.result : null;
     if (!res) return null;
     const key = Object.keys(res).find((k) => k !== "last" && Array.isArray(res[k]));
@@ -89,18 +76,7 @@ async function krakenTrades(fetchFn, fromMs, toMs, overall) {
   }
   return { trades: tidy(rows, fromMs, toMs), complete: false };
 }
-async function bitstampTrades(fetchFn, fromMs, toMs, overall) {
-  const r = await spotGet(fetchFn, "https://www.bitstamp.net/api/v2/transactions/btcusd/?time=hour", overall);
-  if (!r || !Array.isArray(r.json)) return null;
-  const rows = [];
-  for (const x of r.json) {
-    const t = Number(x && x.date) * 1000, p = Number(x && x.price);
-    if (!Number.isFinite(t) || !Number.isFinite(p)) return null;
-    rows.push({ t, p });
-  }
-  return { trades: tidy(rows, fromMs, toMs), complete: true };   // the venue's last hour, which always covers the ten minute span
-}
-const VENUE_READERS = Object.freeze({ coinbase: coinbaseTrades, kraken: krakenTrades, bitstamp: bitstampTrades });
+const VENUE_READERS = Object.freeze({ kraken: krakenTrades });
 
 // ---- The model (pure). `venues` is { name: [{ t, p }] sorted by t }. ---------------------------------------------------------------------------------
 // The index at an instant: the mean, over the venues that traded in the 10 s before it, of each venue's last price. No such venue: null.
@@ -150,8 +126,10 @@ function modelYes({ venues, t, strike, secondsLeft }) {
 
 // ---- The one entry point the slot engine is handed. Returns { pSide, pYes, index, sigma, venues } or null. Never throws. ---------------------------------
 // args: { fetchFn, series, market (Kalshi's market object, already read by the engine), side ("yes" | "no"), now (ms, the look) }
-async function modelForMarket(args) {
+async function modelWith(required, args) {
   try {
+    const names = VENUES_ALLOWED.filter((n) => Object.prototype.hasOwnProperty.call(VENUE_READERS, n));
+    if (!Number.isInteger(required) || required < 1 || names.length < required) return null;   // the allowed venues cannot satisfy the rule: no request is made
     const a = args || {};
     if (!Object.prototype.hasOwnProperty.call(MODEL_SERIES, a.series) || (a.side !== "yes" && a.side !== "no") || !isNum(a.now) || typeof a.fetchFn !== "function") return null;
     const m = a.market || {};
@@ -161,21 +139,24 @@ async function modelForMarket(args) {
     const closeMs = Date.parse(m.close_time), secondsLeft = (closeMs - a.now) / 1000;
     if (!Number.isFinite(secondsLeft)) return null;
     const fromMs = a.now - LOOKBACK_MS;
-    const names = Object.keys(VENUE_READERS);
     const overall = AbortSignal.timeout(SPOT_TOTAL_MS);
     const got = await Promise.all(names.map((n) => VENUE_READERS[n](a.fetchFn, fromMs, a.now, overall).catch(() => null)));
     const venues = {};
     let ok = 0;
     names.forEach((n, i) => { const g = got[i]; if (g && g.complete === true && Array.isArray(g.trades) && g.trades.length) { venues[n] = g.trades; ok += 1; } });
-    if (ok < VENUES_REQUIRED) return null;
+    if (ok < required) return null;
     const r = modelYes({ venues, t: a.now, strike, secondsLeft });
     if (!r) return null;
     return { pSide: a.side === "yes" ? r.pYes : 1 - r.pYes, pYes: r.pYes, index: r.index, sigma: r.sigma, steps: r.steps, venues: ok, strike };
   } catch (e) { return null; }
 }
 
+// The production entry point: no argument can lower the number of venues the registered rule needs.
+const modelForMarket = (args) => modelWith(VENUES_REQUIRED, args);
+
 module.exports = {
   modelForMarket, modelYes, indexAt, sigma10, horizonSteps, phi, spotGet,
-  SPOT_HOSTS, SPOT_TIMEOUT_MS, SPOT_TOTAL_MS, SPOT_MAX_BYTES, SPOT_MAX_PAGES, LOOKBACK_MS, STEP_MS, FRESH_MS, MIN_CHANGES, VENUES_REQUIRED, MODEL_SERIES,
-  _testOnly: Object.freeze({ coinbaseTrades, krakenTrades, bitstampTrades }),
+  SPOT_HOSTS, SPOT_TIMEOUT_MS, SPOT_TOTAL_MS, SPOT_MAX_BYTES, SPOT_MAX_PAGES, LOOKBACK_MS, STEP_MS, FRESH_MS, MIN_CHANGES, VENUES_REQUIRED, VENUES_ALLOWED, MODEL_SERIES,
+  // Test-only: the reader on its own, and the model with a caller-chosen venue count (production code must call modelForMarket).
+  _testOnly: Object.freeze({ krakenTrades, modelWith }),
 };
