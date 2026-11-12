@@ -70,6 +70,16 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert D["filled_at_the_look"] == NM and D["filled_pre_match"] == NM and D["median_minutes_map1_close_to_look"] == 2.0
     assert D["look"]["share_gap_ge_8c_spread_le_4c"] == 1.0 and D["look"]["share_when_team_up"] == 1.0 and D["placebo"]["share_gap_ge_8c_spread_le_4c"] == 0.0 and D["verdict"].startswith("SURVIVES"), D
     assert surv["titles"]["CS2"]["verdict"].startswith("no evidence at n = 20") and abs(D["median_spread_at_look"] - 0.01) < 1e-9
+    assert D["dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute"] == 0
+    # map-1 contracts never two-sided while the match contract is: every match is dropped at the pre-match step and COUNTED (Desk B's added count)
+    def nomap1(**kw):
+        body = candles(**kw)
+        for b in body.values():
+            for mk_ in b["markets"]:
+                if "MAP-" in mk_["market_ticker"] or "MAP" in mk_["market_ticker"].split("-")[0]: mk_["candlesticks"] = []
+        return body
+    dn = os.path.join(dc, "nm"); os.mkdir(dn); mkrun(dn, jc, nomap1(look_edge=0.12, half=0.005)); nm = m.measure(spec, [dl], [dn])["titles"]["DOTA2"]
+    assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute"] == NM, nm
     # efficient: ask at the value (gap 0 on the cheaper side but the other team 1c under)
     eff = run("e", look_edge=0.0, half=0.005); assert eff["titles"]["DOTA2"]["verdict"].startswith("CLOSED: efficient"), eff["titles"]["DOTA2"]["verdict"]
     # cost: spread 12c

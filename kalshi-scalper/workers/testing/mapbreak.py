@@ -159,14 +159,17 @@ def measure(spec, list_folders, candle_folders):
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
     per = {}
     for m in ms:
-        P = per.setdefault(m["cell"], {"sampled": 0, "pre": [], "look": [], "placebo": [], "minutes": [], "contract_rt": [], "contract_spread": [], "pre_filled": 0, "look_filled": 0})
+        P = per.setdefault(m["cell"], {"sampled": 0, "pre": [], "look": [], "placebo": [], "minutes": [], "contract_rt": [], "contract_spread": [], "pre_filled": 0, "look_filled": 0, "pre_dropped_match_ok_but_map1_not_same_minute": 0})
         P["sampled"] += 1
         need = [m["match"][m["up"]], m["map1"][m["up"]], m["map1"][m["down"]]]
         pre = None
         for back in range(PRE_BACK, PRE_MAX_BACK + 1, 60):
             ts = m["S"] - back
             if all(two(idx, t, ts) for t in need): pre = ts; break
-        if pre is None: continue
+        if pre is None:
+            # Desk B's added COUNT: dropped at the pre-match step although the match contract itself was two-sided at some minute of S-40..S-10 (what the placebo requirement cost)
+            if any(two(idx, m["match"][m["up"]], m["S"] - b) for b in range(PRE_BACK, PRE_MAX_BACK + 1, 60)): P["pre_dropped_match_ok_but_map1_not_same_minute"] += 1
+            continue
         P["pre_filled"] += 1
         pm = sum(two(idx, m["match"][m["up"]], pre)) / 2; q = solve_q(pm)
         for team, val in ((m["up"], q), (m["down"], 1 - q)):
@@ -194,7 +197,7 @@ def measure(spec, list_folders, candle_folders):
         elif s_l["share_gap_ge_8c_spread_le_4c"] >= EDGE_SHARE and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
         else: v = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % s_l["gap_p90"]
         verdicts.append(v)
-        out["titles"][cell] = {"sampled_matches": P["sampled"], "filled_pre_match": P["pre_filled"], "filled_at_the_look": n, "median_minutes_map1_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2),
+        out["titles"][cell] = {"sampled_matches": P["sampled"], "filled_pre_match": P["pre_filled"], "dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute": P["pre_dropped_match_ok_but_map1_not_same_minute"], "filled_at_the_look": n, "median_minutes_map1_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2),
                                "median_spread_at_look": None if not P["contract_spread"] else round(st.median(P["contract_spread"]), 4), "median_round_trip_at_look": medrt, "look": s_l, "placebo": s_p, "verdict": v}
     out["card"] = "CLOSED: every title is closed or has no evidence" if verdicts and all(not v.startswith("SURVIVES") for v in verdicts) else ("a title survives the measurement" if verdicts else "no title measured")
     return out
