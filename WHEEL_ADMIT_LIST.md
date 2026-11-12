@@ -23,9 +23,20 @@ Rules: `ROTATION_LANE.md` on this branch (v1.0, approved by the owner Nov 12, 20
 | 11 | REMATCH, fade the previous loser's fall when the same two players meet again (Desk B, Amendments to 4) | e-soccer | as rows 6 to 8 | no log source yet |
 | 12 | ESOCTIE, the e-soccer tie against its walk-forward base rate (History Miner, NOTES to 8; scorers frozen) | e-soccer | as rows 6 to 8 | no log source yet |
 
+## Batch 1b, dated 2026-11-12 (written 20:03Z)
+
+| # | Rule | Market | Log source | State |
+|---|---|---|---|---|
+| 13 to 23 | The NC15 depth cell as a lane shadow: top-5 size imbalance of 0.50 or more at the last poll at or before 600 seconds to the close, buy at the ask between 10c and 90c, hold (Desk A confirms it has no series-specific parameter) | one place each on silver, copper, WTI oil, EUR/USD, GBP/USD, USD/JPY, HYPE, BNB, AUD/USD, USD/CAD and natural gas 15 minute | replay of the NC15 book recorder, running to Dec 31 | logging can start at once; about 9 in-band signals a day a series on average, far fewer on the thin ones (AUD/USD may never fill a block) |
+
+These eleven places are lane shadows only. **They are not reads of the registered NC15DEPTH1 cell**, whose registration says pooled, never split by series; its pooled read (n 3,400, window from Nov 19) is untouched and no try is spent on it here. Eight of the eleven markets are reserved in the bot to EVENT830; a seat there would need the Chief of Staff to resolve that first.
+
+**23 places on 7 mechanisms. 14 have a log source today (3 to Nov 20, 11 to Dec 31).** The owner approved a new public book recorder for the nine sports and esports places on Nov 12 ("Yes, build it"); the Chief of Staff builds it from Desk B's spec.
+
+Shards (an order needs money on its own shard; the owner moves money by hand): the e-soccer series reads exchange 0 on every listed market; CS2 and Dota 2 read exchange 0; the crypto 15 minute markets are on the shard the bot trades today.
+
 Valorant and League of Legends are not admitted for MAPBREAK: they sit under its registered 150 match minimum.
 
-**12 places on 6 mechanisms. Only the three Bitcoin and Ethereum places have a log source today, and only to Nov 20.**
 
 ## Next, as their rules are written or their owners confirm (not admitted yet)
 
