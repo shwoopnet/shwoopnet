@@ -38,6 +38,7 @@ assert big_good["label"].startswith("PASS"), big_good["label"]
 assert len(big_good["windows"]) == 3 and sum(w["n"] for w in big_good["windows"]) == 4000
 bad = k.score(mk(300, -.15), {}); assert bad["label"].startswith("FALSIFIED"), bad["label"]
 mid = k.score(mk(300, .02), {"registered_bar": {"pf": 1.0, "z": 0.0}}); assert mid["label"].startswith(("cleared its registered bar", "NO SURVIVOR", "FALSIFIED")), mid["label"]
+assert set(small["haircut_table_no_book"]) >= {"+1c limit, 2 s arrival", "+1c limit, 6 s arrival"} and small["haircut_table_no_book"]["+1c limit, 2 s arrival"]["n_after_drop"] == 51.0
 assert "NOT STATED" in bad["price_source"] and "NOT PROVIDED" in bad["book_replay_line"]
 assert "11 seconds" in k.score(mk(10, 0), {"price_source": "market list quote"})["warning"]
 # slow screen: 2 windows, 30 events, PF 1.3, both halves positive
@@ -68,4 +69,44 @@ with tempfile.TemporaryDirectory() as d:
     open(f, "w").write("nothing\n")
     try: g.check(tr, 2000); raise SystemExit("missing marker passed")
     except RuntimeError as e: assert "no marker line" in str(e)
+
+# ---- fixture-shaped tests, one per verified format (keys copied from landed files; values made up) ----
+import csv
+with tempfile.TemporaryDirectory() as d:
+    # perp candle PULL answer (PERPBTC1M shape): {'candlesticks': [{'ask': {...}, 'bid': {...}, 'end_period_ts': int, 'price': {...None}, ...}], 'ticker': 'KXAAAPERP'}; absolute levels, never divided by 100
+    pc = {"ticker": "KXAAPLPERP", "candlesticks": [{"ask": {"close": "6.8332", "high": "6.8354", "low": "6.8271", "open": "6.8271"}, "bid": {"close": "6.8295", "high": "6.8304", "low": "6.8234", "open": "6.8234"},
+          "end_period_ts": 1794182400, "open_interest": "355838.00", "open_interest_notional_value_dollars": "1", "price": {"close": None, "high": None, "low": None, "mean": None, "open": None, "previous": None}, "volume": "750.00", "volume_notional_value_dollars": "5"}]}
+    mkrun(d, [("KXAAPLPERP_2026-11-09", pc)]); r = k.candles(d)["KXAAPLPERP"][0]
+    assert r["bid"] == 6.8295 and r["ask"] == 6.8332 and r["ts"] == 1794182400 and r["price"] is None and r["bid_low"] == 6.8234     # NOT 0.068
+    # binary candle PULL answer (SPREADCELL1 / R6SLICE shape): yes_bid and yes_ask objects with *_dollars strings, volume_fp, open_interest_fp, int end_period_ts
+    bc = {"markets": [{"candlesticks": [{"end_period_ts": 100, "open_interest_fp": "10.00", "price": {"close_dollars": "0.4000"}, "volume_fp": "5.00",
+          "yes_ask": {"close_dollars": "0.4200", "high_dollars": "0.43", "low_dollars": "0.41", "open_dollars": "0.42"}, "yes_bid": {"close_dollars": "0.4000", "high_dollars": "0.41", "low_dollars": "0.39", "open_dollars": "0.40"}}], "market_ticker": "T-1"}]}
+    mkrun(d, [("b000_0", bc)]); r = k.candles(d)["T-1"][0]; assert r["bid"] == .4 and r["ask"] == .42 and r["volume"] == 5.0 and r["oi"] == 10.0 and r["ask_low"] == .41
+    # settled list PULL answer: market objects with these key names (BTC15M had floor_strike and no cap_strike: cap stays None, unverified for 'less' and 'between')
+    ml = {"cursor": "", "markets": [{"ticker": "KXBTC15M-26OCT291815-15", "event_ticker": "KXBTC15M-26OCT291815", "open_time": "2026-10-29T18:00:00Z", "close_time": "2026-10-29T18:15:00Z", "result": "yes",
+          "strike_type": "greater", "floor_strike": 100.5, "volume_fp": "12.00", "title": "t", "yes_ask_dollars": "0.40", "yes_bid_dollars": "0.38"}]}
+    mkrun(d, [("live_KXBTC15M", ml)]); m = k.markets(d)["KXBTC15M-26OCT291815-15"]; assert m["floor"] == 100.5 and m["cap"] is None and m["type"] == "greater" and m["close"] - m["open"] == 900 and m["volume"] == 12.0
+    # perp-data csv (kalshi1m/<date>.csv.gz): header copied from the landed file
+    hdr = "ticker,end_period_ts,bid_open,bid_high,bid_low,bid_close,ask_open,ask_high,ask_low,ask_close,price_open,price_high,price_low,price_close,price_mean,price_previous,open_interest,volume"
+    pcsv = os.path.join(d, "p.csv.gz"); gzip.open(pcsv, "wt").write(hdr + "\nKXAAPLPERP,1794182400,6.8234,6.8304,6.8234,6.8295,6.8271,6.8354,6.8271,6.8332,,,,,,,355838.00,750.00\n")
+    r = k.perp_csv(pcsv)["KXAAPLPERP"][0]; assert r["bid"] == 6.8295 and r["ask"] == 6.8332 and r["price"] is None and r["volume"] == 750.0
+    # R6 recorder book file: header copied from the landed file; empty level cells are skipped
+    h6 = "t_send_ms,t_recv_ms,server_date_header,ticker,series,close_time," + ",".join("yes_bid_px_%d" % i for i in range(1, 6)) + "," + ",".join("yes_bid_sz_%d" % i for i in range(1, 6)) + "," + ",".join("no_bid_px_%d" % i for i in range(1, 6)) + "," + ",".join("no_bid_sz_%d" % i for i in range(1, 6))
+    def row(t_ms, yes, no):
+        pad = lambda lv, j: [str(x[j]) if i < len(lv) else "" for i, x in enumerate(lv + [(0, 0)] * (5 - len(lv)))]
+        return ",".join([str(t_ms - 40), str(t_ms), '"Thu, 29 Oct 2026 22:04:00 GMT"', "KXBTC15M-X", "KXBTC15M", "2026-10-29T22:15:00Z"] + pad(yes, 0) + pad(yes, 1) + pad(no, 0) + pad(no, 1))
+    r6 = os.path.join(d, "book.csv.gz")
+    gzip.open(r6, "wt").write(h6 + "\n" + row(10000, [(.29, 3928.4), (.28, 3093.7)], [(.70, 0.5), (.69, 5000)]) + "\n" + row(11000, [(.30, 10)], [(.69, 4000)]) + "\n")
+    B = k.r6_book(r6)["KXBTC15M-X"]; assert len(B) == 2 and B[0]["t"] == 10.0 and B[0]["yes_bids"] == [(.29, 3928.4), (.28, 3093.7)] and B[0]["no_bids"][0] == (.7, .5)
+    # fill_ioc, the company convention: 1 contract, walk up to 5 levels at or below the limit, first poll within 4 s after t0 + delay, no poll = no trade, short size = no trade
+        # YES buy meets NO bids: asks are 1 - .70 = .30 (size .5) and 1 - .69 = .31 (size 5000): 0.5 at .30 + 0.5 at .31 = .305
+    assert abs(k.fill_ioc(B, "yes", 0.31, 9.0, 1.0) - 0.305) < 1e-9
+    assert k.fill_ioc(B, "yes", 0.30, 9.0, 1.0) is None     # not enough size at or below .30 (only 0.5)
+    assert k.fill_ioc(B, "yes", 0.50, 20.0, 1.0) is None                                # no poll within 4 s after t0 + delay
+    assert k.fill_ioc(B, "yes", 0.50, 9.0, 1.0) is not None and k.fill_ioc(B, "no", 0.80, 9.0, 1.0) is not None
+    assert k.fill_ioc(B, "yes", 0.50, 4.0, 1.0) is None                                 # first poll at or after 5.0 s is t=10.0: 5 s late, over the 4 s allowance
+    # recorder-style batch order book (UNVERIFIED shape, from the recorder's parser)
+    ob = {"orderbooks": [{"ticker": "T-1", "orderbook_fp": {"yes_dollars": [["0.40", "5"], ["0.45", "9"]], "no_dollars": [["0.50", "7"]]}}]}
+    mkrun(d, [("o1", ob)]); bk = k.books(d)["T-1"][0]; assert bk["yes_bids"][0] == (0.45, 9.0) and bk["no_bids"] == [(0.5, 7.0)]
+print("scorekit fixture-shaped tests passed")
 print("scorekit synthetic tests passed")

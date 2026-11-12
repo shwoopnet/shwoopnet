@@ -17,8 +17,11 @@ Basis rules enforced here, from the Head's standing rules: z bar 5.46 at N about
 import gzip, json, math, os, re, statistics as st, time
 
 Z_BAR, N_SHARED, PF_BAR, MIN_N, SLOW_MIN_N = 5.46, 2113000, 1.5, 100, 30
-HAIRCUT_DROP = 0.34          # share of orders at the ask seen that do not fill at a live-like delay (Forensics FILLHAIRCUT1 / FAMILY_COSTS: fills 59% to 73% at the ask, 76% to 86% at +1c)
-HAIRCUT_DROP_PLUS1C = 0.25   # roughly 24 to 27 percent at +1c
+# Haircut table: Forensics' HOW_TO_PRICE_A_PAPER_TRADE.md (722ef2d) section 3, rule 2 (no book recorded: cut the COUNT, and add 1c to the price paid on the rest as the worst case).
+HAIRCUT_DROP = 0.34          # limit at the price seen, a slow 5 to 10 s arrival: about a third (0.34)
+HAIRCUT_DROP_PLUS1C = 0.25   # limit +1c, slow arrival (5 to 10 s)
+HAIRCUT_LINES = {"at the price seen (about a third)": 1 / 3.0, "slow arrival 5 to 10 s, at the price seen": 0.34, "+1c limit, 2 s arrival": 0.15, "+1c limit, 6 s arrival": 0.23, "+1c limit, slow arrival": 0.25}
+# Where an order book IS recorded, do not use these: replay with fill_ioc (the company convention) at 2 s and 6 s and report both lines.
 
 
 # ---------- LOAD ----------
@@ -34,8 +37,10 @@ def manifest(folder):
     return json.load(open(os.path.join(folder, "manifest.json")))
 
 
-def price(node, key):
-    """Dollars from a price object ('<key>_dollars' string, or cents). None if absent."""
+def price(node, key, absolute=False):
+    """A price from a candle price object. VERIFIED shapes (Nov 12, against landed pull answers): binary-market candles carry '<key>_dollars' strings (open_dollars, high_dollars, low_dollars, close_dollars);
+    perp candles carry plain 'open','high','low','close' strings that are ABSOLUTE price levels (AAPL perp about 6.8, never cents): pass absolute=True and no cents rule is applied.
+    The cents fallback below ('<key>' as cents when above 1.0) is for the /historical endpoint and is UNVERIFIED (no historical candle answer has landed). None if absent."""
     if not isinstance(node, dict):
         return None
     for k in (key + "_dollars", key):
@@ -43,7 +48,7 @@ def price(node, key):
             v = float(node[k])
         except (KeyError, TypeError, ValueError):
             continue
-        return v / 100.0 if (k == key and v > 1.0) else v
+        return v / 100.0 if (k == key and v > 1.0 and not absolute) else v
     return None
 
 
@@ -72,11 +77,67 @@ def candles(folders):
                     except (KeyError, TypeError, ValueError):
                         continue
                     vol = c.get("volume_fp", c.get("volume"))
-                    out.setdefault(t, {})[ts] = {"ts": ts, "bid": price(c.get("yes_bid"), "close"), "ask": price(c.get("yes_ask"), "close"),
-                                                 "bid_low": price(c.get("yes_bid"), "low"), "ask_low": price(c.get("yes_ask"), "low"),
-                                                 "bid_high": price(c.get("yes_bid"), "high"), "ask_high": price(c.get("yes_ask"), "high"),
-                                                 "price": price(c.get("price"), "close"), "volume": _f(vol), "oi": _f(c.get("open_interest_fp", c.get("open_interest")))}
+                    perp = "bid" in c and "yes_bid" not in c          # perp candle: {'bid': {...}, 'ask': {...}} absolute levels
+                    bn, an = (c.get("bid"), c.get("ask")) if perp else (c.get("yes_bid"), c.get("yes_ask"))
+                    out.setdefault(t, {})[ts] = {"ts": ts, "bid": price(bn, "close", perp), "ask": price(an, "close", perp),
+                                                 "bid_low": price(bn, "low", perp), "ask_low": price(an, "low", perp),
+                                                 "bid_high": price(bn, "high", perp), "ask_high": price(an, "high", perp),
+                                                 "price": price(c.get("price"), "close", perp), "volume": _f(vol), "oi": _f(c.get("open_interest_fp", c.get("open_interest")))}
     return {t: [d[k] for k in sorted(d)] for t, d in out.items()}
+
+
+def perp_csv(path):
+    """{ticker: [candle]} from a perp-data `kalshi1m/<date>.csv.gz` file (VERIFIED header: ticker,end_period_ts,bid_open,bid_high,bid_low,bid_close,ask_open,...,ask_close,price_open..price_previous,open_interest,volume).
+    Same candle dict as candles(); prices are absolute levels. end_period_ts is the END of the minute (Head, from Forensics' descriptive check)."""
+    import csv
+    op = gzip.open if str(path).endswith(".gz") else open
+    out = {}
+    with op(path, "rt") as fh:
+        for r in csv.DictReader(fh):
+            ts = int(r["end_period_ts"])
+            out.setdefault(r["ticker"], {})[ts] = {"ts": ts, "bid": _f(r.get("bid_close")), "ask": _f(r.get("ask_close")), "bid_low": _f(r.get("bid_low")), "ask_low": _f(r.get("ask_low")),
+                                                   "bid_high": _f(r.get("bid_high")), "ask_high": _f(r.get("ask_high")), "price": _f(r.get("price_close")), "volume": _f(r.get("volume")), "oi": _f(r.get("open_interest"))}
+    return {t: [d[k] for k in sorted(d)] for t, d in out.items()}
+
+
+def r6_book(path, offset_s=0.0):
+    """{ticker: [poll]} from a recorder book file (`book15r6/<date>/<HHMM>/book.csv.gz`, VERIFIED header: t_send_ms,t_recv_ms,server_date_header,ticker,series,close_time,
+    yes_bid_px_1..5,yes_bid_sz_1..5,no_bid_px_1..5,no_bid_sz_1..5). poll = dict(t (t_recv_ms/1000 + offset_s, the recorder's clock offset from clock.csv if the card applies it), yes_bids, no_bids) with
+    levels as (price dollars, size) best first; empty cells (missing levels) are skipped, never read as zero. A YES buy meets the NO bids (ask = 1 - no bid price)."""
+    import csv
+    op = gzip.open if str(path).endswith(".gz") else open
+    out = {}
+    with op(path, "rt") as fh:
+        for r in csv.DictReader(fh):
+            def lv(pre):
+                res = []
+                for i in range(1, 6):
+                    p, z = _f(r.get("%s_px_%d" % (pre, i))), _f(r.get("%s_sz_%d" % (pre, i)))
+                    if p is not None and z is not None:
+                        res.append((p, z))
+                return res
+            out.setdefault(r["ticker"], []).append({"t": int(r["t_recv_ms"]) / 1000.0 + offset_s, "yes_bids": lv("yes_bid"), "no_bids": lv("no_bid")})
+    return {t: sorted(v, key=lambda p: p["t"]) for t, v in out.items()}
+
+
+def fill_ioc(polls, side, limit, t0, delay):
+    """THE company book-replay convention (Desk A's, e1a034f9 on claude/idea-desk-a, Head's ruling Nov 12; this is the same rule, not a second one): an immediate-or-cancel buy of 1 contract in total,
+    walking up to 5 levels at or below `limit`; only the FIRST poll at or after t0 + delay counts, and only if it is within 4 s of that instant (no poll in that span is no trade); not enough size at or
+    below the limit is no trade. Returns the average price paid, or None. side 'yes' meets the NO bids (ask = 1 - no bid price); side 'no' meets the YES bids. polls from r6_book (sorted by t)."""
+    import bisect
+    times = [p["t"] for p in polls]
+    j = bisect.bisect_left(times, t0 + delay)
+    if j >= len(polls) or times[j] - t0 - delay > 4:
+        return None
+    lv = polls[j]["no_bids"] if side == "yes" else polls[j]["yes_bids"]
+    need, cost = 1.0, 0.0
+    for a, sz in sorted(((1 - px, sz) for px, sz in lv), key=lambda x: x[0]):
+        if a > limit + 1e-9:
+            break
+        take = min(need, sz); cost += take * a; need -= take
+        if need <= 1e-12:
+            return cost
+    return None
 
 
 def _f(v):
@@ -100,22 +161,25 @@ def markets(folders):
 
 
 def books(folders):
-    """{ticker: [snapshot]} from order book answers: snapshot = dict(ts, yes_bids=[(price, size)] best first, no_bids=[(price, size)] best first, ts from the manifest row's server date if the body has none).
-    SHAPE ASSUMED from the documented {'orderbook': {'yes': [[cents, size]], 'no': [...]}} and {'orderbook_fp': {'yes_dollars': [[price, size]], ...}} forms; confirm against the first real answer before a card relies on it."""
+    """{ticker: [snapshot]} from kalshi-pull ORDER BOOK answers: snapshot = dict(ts, yes_bids, no_bids) levels (price dollars, size) best first.
+    SHAPE: taken from the recorder's own parser (scripts/record_15m_book.py: batch answer {'orderbooks': [{'ticker', 'orderbook_fp': {'yes_dollars': [[price, size]], 'no_dollars': [...]}}]}, or one market
+    {'orderbook_fp': {...}}). NOT VERIFIED against a landed pull answer: no pull answer of this kind has landed yet (COMBO1_OPENBOOK holds market lists only). For book files the recorder already wrote, use r6_book()."""
     out = {}
     for f in ([folders] if isinstance(folders, str) else folders):
         for row, body in iter_answers(f):
-            ob = body.get("orderbook_fp") or body.get("orderbook") if isinstance(body, dict) else None
-            if not isinstance(ob, dict):
+            if not isinstance(body, dict):
                 continue
-            def lv(k):
-                a = ob.get(k + "_dollars") or ob.get(k) or []
-                res = []
-                for p, s in a:
-                    p = float(p)
-                    res.append((p / 100.0 if p > 1.0 else p, float(s)))
-                return sorted(res, key=lambda x: -x[0])
-            out.setdefault(row["id"], []).append({"ts": int(body.get("ts", 0) or 0), "yes_bids": lv("yes"), "no_bids": lv("no")})
+            items = body.get("orderbooks") if isinstance(body.get("orderbooks"), list) else [dict(body, ticker=body.get("ticker", row["id"]))]
+            for it in items:
+                ob = it.get("orderbook_fp") or it.get("orderbook") if isinstance(it, dict) else None
+                if not isinstance(ob, dict):
+                    continue
+                def lv(key):
+                    res = []
+                    for p, z in ob.get(key + "_dollars") or ob.get(key) or []:
+                        p = float(p); res.append((p / 100.0 if p > 1.0 else p, float(z)))
+                    return sorted(res, key=lambda x: -x[0])
+                out.setdefault(it.get("ticker") or row["id"], []).append({"ts": int(body.get("ts", 0) or 0), "yes_bids": lv("yes"), "no_bids": lv("no")})
     return out
 
 
@@ -190,7 +254,9 @@ def score(trades, cfg=None):
         if rb and p is not None and p >= rb.get("pf", 0) and (cz["z"] or 0) >= rb.get("z", 0):
             return "cleared its registered bar (NOT the research bar)"
         return "NO SURVIVOR / not cleared (cash PF %s, z %s)" % (p, None if cz["z"] is None else round(cz["z"], 2))
+    lines = {name: {"n_after_drop": round(n * (1 - d), 1), "label": label(n * (1 - d))} for name, d in HAIRCUT_LINES.items()}
     out = {"name": cfg.get("name", ""), "n": n, "windows": by_win, "all": allst, "plus_1c": plus1, "cluster_z": cz, "label": label(n),
+           "haircut_table_no_book": lines, "haircut_note": "the missed trades are NOT random: a limit keeps the signals the market moved against and loses the ones it moved with (Forensics, section 3 point 3); dropping at random may still be generous. Add 1c to the price paid on the rest as the worst case.",
            "haircut_line": {"n_after_drop": round(n_h, 1), "label_on_this_line": label(n_h) if n_h < min_n else "n %.0f after a %d percent fill drop (headline label stands only if this line also clears %d)" % (n_h, round(100 * HAIRCUT_DROP), min_n), "drop": HAIRCUT_DROP, "drop_at_plus_1c": HAIRCUT_DROP_PLUS1C},
            "book_replay_line": cfg.get("book_replay") or "NOT PROVIDED: no book replay for this card; the haircut line above stands in and a live view needs the 6 second book line",
            "price_source": cfg.get("price_source", "NOT STATED: say which book, tape or cleared source the price came from"), "freshness": cfg.get("freshness", "NOT STATED"),

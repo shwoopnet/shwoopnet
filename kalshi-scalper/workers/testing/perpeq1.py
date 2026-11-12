@@ -10,7 +10,7 @@ Universe (19): the 21 of PERPEQ_COMMON minus the two index perps. Calendar (Amen
 Dates are date constants: development 2026-11-09 to 2026-12-21; halves D1 = to 2026-11-30, D2 = from 2026-12-01; HELD OUT from 2026-12-22 (never loaded here: any later date is dropped before scoring and counted);
 the scorer REFUSES to run before 2026-12-22 21:00Z (after the close). Held-out read: 2027-02-02 or later, only after a LEAD, once.
 Result carries: 'perp candle freshness assumed, not measured'; under 100 trades 'no evidence at n = x'; output goes to the Verification Analyst through Main before any figure travels.
-Usage: python3 -W ignore perpeq1.py <candle run folder> [<more folders>] <costmap.csv>      (folders = kalshi-pull style; the candles are fetched through a job file, never by this script)
+Usage: python3 -W ignore perpeq1.py <candle run folder> [<more folders>] <costmap.csv>      (a folder = kalshi-pull run folder of perp candle answers; a .csv.gz file = a perp-data kalshi1m day file; the candles are fetched through a job file, never by this script)
 """
 import calendar, csv, math, os, statistics as st, sys, time
 from datetime import date, datetime, timedelta
@@ -130,7 +130,10 @@ def run(folders, costmap_path, now=None):
     guard = k.Cutoff(CUTOFF_TS, MARKER_FILE, not_before=NOT_BEFORE)
     now = time.time() if now is None else now
     guard.check([], now)                                    # refuses before 2026-12-22 21:00Z and if the marker already says READ ON
-    cs = k.candles(folders)
+    cs = {}
+    for f in folders:
+        for t, v in (k.perp_csv(f) if str(f).endswith((".csv", ".csv.gz")) else k.candles(f)).items():
+            d = {c["ts"]: c for c in cs.get(t, [])}; d.update({c["ts"]: c for c in v}); cs[t] = [d[x] for x in sorted(d)]
     trades, controls, counts = events(cs, costmap(costmap_path))
     guard.check(trades, now)                                # belt and braces: no trade at or after the cutoff
     v, info = verdict(trades, controls)
