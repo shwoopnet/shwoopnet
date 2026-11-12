@@ -25,3 +25,7 @@ Idea Desk A, on the Head of R&D's job order (cell registration, counts only, due
 - Cleared its registered bar: n of 3,400 or more; cash PF 1.5 or better pooled and in each third by close date; both halves above 1.0; mean net above 0 at fee x1.2; date-clustered z of 5.46 or more (one-sided; the shared strict N is about 2,113,000 per the Head of R&D's ledger). Never called a research-bar pass.
 - FALSIFIED: cash PF under 1.0 pooled with n of 1,000 or more. Below about 100 trades: "no evidence at n = x". Anything between: keep recording.
 - **Try count: N +1** (one cell, one look, one feature, one pooled figure). No other look, threshold or series split will be tried.
+
+## Counts so far (Nov 12, 2026, about 16:00Z; book columns only, `desk_a_held/nc15depth1_counts.py`, committed after the registration)
+
+Data on `nc-data` is 14 hours (files 2026-11-11 19:32Z to 2026-11-12 about 14:00Z): 509 windows over 11 series, all with a look poll; **112 in the cell (22%), 89 with the entry ask in the band (17.5%)**; per series 0 (AUD/USD) to 19 (copper) in the cell. At the coverage note's about 570 windows a day, in-band cell trades run about 100 a day, so 3,400 forward trades from 2026-11-19 are reached around 2026-12-23, about 8 days before the recorder's stop (2026-12-31). A dropped job or a quieter weekend pushes that past the stop; the read would then be taken on what exists and could not clear the 3,400 minimum. AUD/USD and GBP/USD almost never enter the cell. Nothing was scored; no outcome was read.
