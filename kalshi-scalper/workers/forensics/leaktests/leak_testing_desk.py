@@ -85,6 +85,11 @@ oW = bets(base, cfolder(base), lambda r: True); oL = bets(base, cfolder(base), l
 check("breakplay: match result flipped -> same number of bets and same prices, only the P&L moves", oW["bets"] == oL["bets"] and oW["all"]["mean_price_paid"] == oL["all"]["mean_price_paid"] and oW["all"]["wins"] != oL["all"]["wins"])
 _idx = {t: {c["ts"]: c for c in v} for t, v in k.candles([cfolder(base)]).items()}; _r = bp.prepare(_idx, base[0], cfg); _t = bp.amend_trade(base[0], _r, 1, True)
 check("breakplay: price booked is the ask close plus 1c, fee rounded up to the cent", abs(_t["price"] - (_r["cand"][_r["best"]]["ask"] + 0.01)) < 1e-9 and bp.fee_up(0.50) == 0.02 and abs(_t["net"] - (1 - _t["price"] - bp.fee_up(_t["price"]))) < 1e-9)
+_seen = []
+def _one_void(r):
+    _seen.append(1); return None if len(_seen) == 1 else True
+oV = bets(base, cfolder(base), _one_void)
+check("breakplay: a fired bet with no yes or no result is COUNTED as a fee-only loss, not dropped", oV["bets"] == oW["bets"] and oV["counts"].get("void_booked_as_fee_loss") == 1 and oV["all"]["wins"] == oW["all"]["wins"] - 1, "bets %d = %d, void %s" % (oV["bets"], oW["bets"], oV["counts"].get("void_booked_as_fee_loss")))
 eff = bp.score_rule2(base, [cfolder(base, look_edge=0.0)], cfg, lambda r: calls.append(1) or True)
 check("breakplay: every title out on its kill lines -> no match result is read", eff["bets"] == 0 and calls == [])
 held = [dict(base[0], state_close=m.HELD_OUT_FROM + 100)]
