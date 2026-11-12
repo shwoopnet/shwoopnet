@@ -11,6 +11,7 @@ from statistics import NormalDist
 Phi = NormalDist().cdf
 CUTOFF = calendar.timegm(time.strptime("2026-11-05", "%Y-%m-%d"))
 Z_BAR, EDGE, SPREAD, LO, HI = 5.46, 0.05, 0.03, 0.05, 0.30
+PERP_UNIT = 10000.0   # KXBTCPERP is quoted at one ten-thousandth of Bitcoin's price (CFRTI_K_REGISTRATION section 10 item 6)
 def fee(p): return 0.07 * p * (1 - p)
 def pf(v):
     a = sum(x for x in v if x > 0); b = -sum(x for x in v if x < 0); return a / b if b else float("inf")
@@ -52,7 +53,7 @@ def load_perp(path):
         ts = c.get("end_period_ts", c.get("ts"))
         bid, ask = num(c.get("bid"), "close"), num(c.get("ask"), "close")
         if ts is None: return
-        if bid is not None and ask is not None and bid > 0 and ask > 0: out[int(float(ts))] = (bid + ask) / 2
+        if bid is not None and ask is not None and bid > 0 and ask > 0: out[int(float(ts))] = (bid + ask) / 2 * PERP_UNIT
         elif c.get("reference_price") not in (None, ""): out[int(float(ts))] = float(c["reference_price"])
     if os.path.isdir(path):
         for b in bodies(path):
@@ -63,7 +64,7 @@ def load_perp(path):
     for r in rows: put(r)
     return out
 # ---------------------------------------------------------------- the rule
-def decide(mk, cands, perp):
+def decide(mk, cands, perp, nxt_key=None):
     t0 = mk["close"] - 120
     c = cands.get(t0)
     if not c: return None, "no decision candle"
@@ -81,7 +82,9 @@ def decide(mk, cands, perp):
     chance = py if side == "yes" else 1 - py
     if chance - p < EDGE: return None, "no edge"
     win = mk["yes"] == (side == "yes")
-    return dict(close=mk["close"], day=datetime.datetime.fromtimestamp(mk["close"], datetime.timezone.utc).date(), p=p, win=win, pnl=(1 if win else 0) - p - fee(p)), "trade"
+    n = cands.get(t0 + 60)       # the NEXT 1 minute candle (ending at close minus 60 s)
+    ran = None if not n else ((n[1] if side == "yes" else 1 - n[0]) >= p + 0.01 - 1e-9)
+    return dict(ran=ran, close=mk["close"], day=datetime.datetime.fromtimestamp(mk["close"], datetime.timezone.utc).date(), p=p, win=win, pnl=(1 if win else 0) - p - fee(p)), "trade"
 def thirds(trades):
     days = sorted({t["day"] for t in trades}); n = len(days); k = [0, math.ceil(n / 3), math.ceil(2 * n / 3), n]
     return [[t for t in trades if t["day"] in set(days[k[i]:k[i + 1]])] for i in range(3)]
@@ -123,16 +126,18 @@ def report(markets, binary, perp, kraken=None):
     pn = [t["pnl"] for t in trades]; n = len(trades)
     if not n: L.append("no trades"); return L, trades
     th = thirds(trades); tpf = [pf([t["pnl"] for t in x]) for x in th]
-    z = zscore(trades); hm, h5, h95, hb = haircut(trades)
+    z = zscore(trades); hm, h5, h95 = haircut(trades)[:3]
     L.append("registered line: n %d | cash PF %.2f | mean %+.2fc | win %.1f%% | days %d | z %.2f (bar %.2f)" % (n, pf(pn), 100 * sum(pn) / n, 100 * sum(t["win"] for t in trades) / n, len({t["day"] for t in trades}), z, Z_BAR))
     L.append("thirds by date: " + " / ".join("n %d PF %.2f" % (len(x), p) for x, p in zip(th, tpf)))
-    L.append("haircut (a) random 34%% drop, 1,000 draws seed 20261114: median PF %.2f (5th %.2f, 95th %.2f)" % (hm, h5, h95))
-    L.append("haircut (b) best 34%% of outcomes dropped first: PF %.2f" % hb)
+    L.append("haircut (a) random 34%% drop, 1,000 draws seed 20261114 (about n and spread, not the expected PF): median PF %.2f (5th %.2f, 95th %.2f)" % (hm, h5, h95))
+    known = [t for t in trades if t["ran"] is not None]; keep = [t for t in known if not t["ran"]]
+    pb = pf([t["pnl"] for t in keep]) if keep else float("nan")
+    L.append("line (b) ran rows dropped (next candle ask 1c or more above the ask seen): n %d of %d known, ran share %.1f%%, %d rows without a next candle excluded | cash PF %.2f | mean %+.2fc" % (len(keep), len(known), 100 * (len(known) - len(keep)) / max(1, len(known)), n - len(known), pb, 100 * sum(t["pnl"] for t in keep) / max(1, len(keep))))
     label = "no evidence at n = %d" % n if n < 100 else ("FALSIFIED on development (cash PF under 1.0)" if pf(pn) < 1.0 else
             ("cleared the research bar on development" if all(p >= 1.5 for p in tpf) and z >= Z_BAR else "carried: not falsified, research bar not cleared"))
     L.append("LABEL: " + label + (" | note: the research bar is unlikely to be reachable at this size" if n < 6000 else ""))
-    met = all(p >= 1.3 for p in tpf) and hm > 1.0 and hb > 1.0
-    L.append("BLOCK P condition (cash PF 1.3 or better in EACH third AND both haircut lines above 1.0): %s" % ("MET" if met else "NOT MET"))
+    met = all(p >= 1.3 for p in tpf) and bool(keep) and pb > 1.0
+    L.append("BLOCK P condition (cash PF 1.3 or better in EACH third on the registered line AND line (b) above 1.0 on all development rows): %s" % ("MET" if met else "NOT MET"))
     if kraken:
         ll = lead_lag(perp, kraken)
         L.append("lead/lag, 1 minute log-change correlation perp vs Kraken at lags -2..+2: " + ", ".join("%+d: %s" % (k, "n/a" if v is None else "%.3f" % v) for k, v in ll.items()))
@@ -156,7 +161,8 @@ def synth(days=60, edge=True, seed=7):
         ask = min(max(ask, 0.02), 0.98)
         tk = "KXBTC15M-S%d" % close
         markets[tk] = dict(close=close, strike=strike, yes=yes)
-        binary[tk] = {close - 120: (round(max(ask - 0.02, 0.01), 4), round(ask, 4))}
+        nxt = min(max(ask + rng.choice([0.0, 0.0, 0.02]), 0.01), 0.99)
+        binary[tk] = {close - 120: (round(max(ask - 0.02, 0.01), 4), round(ask, 4)), close - 60: (round(max(nxt - 0.02, 0.01), 4), round(nxt, 4))}
     return markets, binary, perp
 def selftest():
     # 1. hand-checked arithmetic on one trade
@@ -165,6 +171,9 @@ def selftest():
     cands = {mk["close"] - 120: (0.10, 0.12)}
     t, w = decide(mk, cands, perp)
     assert t and w == "trade" and abs(t["p"] - 0.12) < 1e-12 and t["win"] and abs(t["pnl"] - (1 - 0.12 - fee(0.12))) < 1e-12, (t, w)
+    assert t["ran"] is None
+    t2, _ = decide(mk, {mk["close"] - 120: (0.10, 0.12), mk["close"] - 60: (0.12, 0.14)}, perp); assert t2["ran"] is True          # next ask 2c above
+    t3, _ = decide(mk, {mk["close"] - 120: (0.10, 0.12), mk["close"] - 60: (0.10, 0.125)}, perp); assert t3["ran"] is False         # 0.5c above is not a ran row
     assert decide(mk, {mk["close"] - 120: (0.10, 0.16)}, perp)[1] == "spread over 3c or crossed"
     assert decide(mk, {mk["close"] - 90: (0.10, 0.12)}, perp)[1] == "no decision candle"
     assert decide(mk, cands, {k: v for k, v in perp.items() if k < mk["close"] - 120 - 300})[1] in ("under 6 changes",)

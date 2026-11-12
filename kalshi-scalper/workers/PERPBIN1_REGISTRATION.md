@@ -19,3 +19,5 @@ Kalshi's Bitcoin perpetual as a field for Kalshi's 15 minute Bitcoin binary. Ide
 - **Tries: N +2.** Script: `desk_a_verify/perpbin1.py`, committed and self-tested before the candles are scored.
 
 (Correction before any scoring, same day: the first draft of the entry sentence said "the side whose ask is in band, if both the YES side", which contradicted the parenthetical that each try needs its own side's ask in band; the per-try wording above is the rule. The script was written to the per-try wording after its first selftest caught the mismatch.)
+
+**Read order, stated:** the development read of PERPBIN1 waits for CANDLEVSBOOK1's answer, exactly as CFRTI-K's does, because its entry price is a binary candle ask. The perp files are opened for it only after that answer.
