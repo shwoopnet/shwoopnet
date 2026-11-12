@@ -27,7 +27,7 @@ Research reports to the Head of R&D. Engineering, merges, deploys, recorders, ka
 | 4 | NOSIDE1_CANDLES (W-NO-ARM1) | 1,034 | A first readable development verdict on the approval NO side; what is held leans against | ready on claude/refine-live; runs only after 1 and 2 are on the data branch |
 | retired | COMBO1_OPENBOOK | 0 | Answered for free: the combo recorder's first snapshot on combo-data (2026-11-12 14:35Z) has 400 quote rows, 229 with a NO bid, 37 with a YES bid, 18 two-sided | closed, no read spent |
 
-Next after these: ECONLAG_CALENDAR (10), then a count-only trigger scan (at most 165 more) that stops the card at "no evidence at n = x" if under 30 print days or under 30 trigger days. PERPETH1M is not dispatched. Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
+Between PERPBTC1M and NOSIDE1_CANDLES: Desk B's in-game candle measurement (about 60, zero tries; see the in-game card below). Next after these: ECONLAG_CALENDAR (10), then a count-only trigger scan (at most 165 more) that stops the card at "no evidence at n = x" if under 30 print days or under 30 trigger days. PERPETH1M is not dispatched. Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
 
 ## Fixed read dates (cutoffs are committed date constants; read once; nobody runs early)
 
@@ -61,6 +61,10 @@ All specs are CONDITIONAL on the registered read. Owner decisions, Nov 12 (throu
 - **Kraken-only (run Nov 12, registered first at 870f36a, result 2a95106 on claude/idea-desk-a): no evidence at n = 32.** Development: n 32, cash PF 1.33, 7 wins, against the three-venue n 36, PF 2.54. A no-edge rule shows 7 or more wins in 32 about one time in three. Two unregistered looks the script also printed are disclosed and counted: Coinbase alone n 55, PF 2.94; Bitstamp alone n 32, PF 2.07. The signal sits mostly in Coinbase's trades, a barred venue. Carried to the held-out read by its registration; the read reports both versions and live use is judged on Kraken-only. A Kraken-only probe is not worth building.
 - So the lead lives only if Coinbase's market data terms are read and allow commercial use (unread today; a licence would be a spend and the owner's call), or if CFRTI-K works.
 - **CFRTI-K (Kalshi-only):** the 15 minute market object carries no live index before the close, but KXBTCPERP is public with a reference price and 1 minute candles from June. A new rule and a new try, to be registered before scoring with the same 2026-11-05 cutoff; waits on Main's pull of the perp candles. Prior: low single digits.
+
+## In-game lag card (Desk B, Nov 12; nothing scored)
+
+kalshi-scalper/workers/IDEA_DESK_B_INGAME_CARD.md on claude/idea-desk-b (9d6a545). V2's INGAMELAG1 was registered on Nov 8 and never read. Inventory of the sports-data recorder, Nov 8 to Nov 12: 35 games finished inside the recording; live games are polled every 128 seconds at the median, not every 20 (it polls about 107 listed games at one pace); 15.8 of 84.1 hours have no polling. Step 1 is approved: a zero-try measurement on Kalshi's 1 minute candles (about 60 requests) of how much of the spread's 10 minute move is already in one minute after a moneyline jump; if 75 percent is in on 80 percent of events the card closes with no try spent (Desk B: about 60 percent likely). Step 2 (one try, about 400 to 500 requests) is not approved; the family ruling under the three-falsified rule waits for step 1. If step 1 closes the card, the in-game recorder has no registered use and its deletion is recommended to Main.
 
 ## Fill convention for taker rules (Nov 12, from Forensics' FILLHAIRCUT1)
 
