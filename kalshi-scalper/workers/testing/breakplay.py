@@ -86,6 +86,16 @@ def look_minute(idx, rec, cfg, state_close=None):
     return None
 
 
+def state_known(idx, rec):
+    """Forensics' check (Nov 12): was the state public by the state market's close_time? True if the up team's own state-market contract (placebo[up]) had a bid of 0.90 or more in its LAST two-sided candle at or before state_close. None if no such candle. Uses data known at the look only."""
+    series = idx.get(rec["placebo"][rec["up"]], {})
+    last = None
+    for ts in sorted(series):
+        if ts > rec["state_close"]: break
+        if two(idx, rec["placebo"][rec["up"]], ts): last = series[ts]
+    return None if last is None else last["bid"] >= 0.90
+
+
 def prepare(idx, rec, cfg, look_no=1):
     """-> dict(pre, look, V, placebo gaps, per-side candidate gaps) or a reason string. No result is touched.
     look_no 1: the state is `up` one map ahead (value V / 1-V). look_no 2 (a record with state_close2): one map each, value q for `up` (the map-1 winner), 1-q for `down`; the look follows state_close2."""
@@ -133,6 +143,8 @@ def measure(records, candle_folders, cfg):
             if rec.get("state_close2"): per.setdefault(rec["cell"] + SECOND, new())["sampled"] += 1
             continue
         P["pre"] += 1; P["placebo"].append(r["placebo"]); plc_all.setdefault(rec["cell"], []).append(r["placebo"])
+        kn = state_known(idx, rec)
+        if kn is not None: P["state_known_n"] = P.get("state_known_n", 0) + 1; P["state_known_hi"] = P.get("state_known_hi", 0) + (1 if kn else 0)
         if r["look"] is not None:
             P["look_filled"] += 1; P["minutes"].append((r["look"] - rec["state_close"]) / 60)
             for s in ("up", "down"): P["rts"].append(r["cand"][s]["rt"]); P["spreads"].append(r["cand"][s]["spread"])
@@ -156,7 +168,8 @@ def measure(records, candle_folders, cfg):
         verdicts.append(v)
         titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
                         "median_minutes_state_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2), "median_spread_at_look": None if not P["spreads"] else round(st.median(P["spreads"]), 4),
-                        "median_round_trip_at_look": medrt, "look": s_l, "placebo": s_p, "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (DIFFERENT SETS: the second look covers third-map matches only, the placebo all the title's matches)" if cell.endswith(SECOND) else ""), "verdict": v}
+                        "median_round_trip_at_look": medrt, "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
+                        "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (DIFFERENT SETS: the second look covers third-map matches only, the placebo all the title's matches)" if cell.endswith(SECOND) else ""), "verdict": v}
     return {"titles": titles, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": cfg.freshness,
             "card": "CLOSED: every cell is closed or has no evidence" if verdicts and all(not v.startswith("SURVIVES") for v in verdicts) else ("a cell survives the measurement" if verdicts else "no cell measured")}
 
@@ -257,7 +270,7 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
             if res is None: cnt["no_result"] += 1; continue
             trades.append(amend_trade(rec, rr, no, res if rr["best"] == "up" else (not res)))
     trades.sort(key=lambda t: (t["ts"], t["event"]))
-    out["counts"] = cnt; out["bets"] = len(trades)
+    out["counts"] = cnt; out["bets"] = len(trades); out["distinct_matches_in_n"] = len({t["match"] for t in trades})
     if not trades: out["verdict"] = "NOT_ENOUGH_DATA at n = 0"; return out
     halves = k.windows(trades, 2)
     out["all"] = _sum(trades); out["halves_by_date"] = [_sum(h) for h in halves]

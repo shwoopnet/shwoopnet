@@ -144,18 +144,19 @@ def measure(spec, list_folders, candle_folders):
             r = sum(1 for e in bb if e["level"]) / n if n else None
             rates[key] = {"n": n, "rate": None if r is None else round(r, 4), "se": None if not n else round((r * (1 - r) / n) ** 0.5, 4)}
         gaps, spreads, fires, two = [], [], 0, 0
+        games_two = set()
         for e in p:
             r = rates[e["key"]]["rate"]; series = idx.get(e["tie_ticker"], {}); got = None
             for j in range(0, STEP_BACK + 1):
                 cd = series.get(e["T"] - 60 * j)
                 if cd and cd["bid"] is not None and cd["ask"] is not None and 0 < cd["bid"] < cd["ask"] < 1: got = cd; break
             if got is None: continue
-            two += 1; sp = got["ask"] - got["bid"]; spreads.append(sp)
+            two += 1; games_two.add(e["event"]); sp = got["ask"] - got["bid"]; spreads.append(sp)
             if r is not None:
                 gaps.append(r - got["ask"])
                 if r - got["ask"] >= RULE_EDGE and sp <= SPREAD_MAX: fires += 1
         nb, npd = len(b), len(p)
-        res[c["cell"]] = {"base_events": nb, "base_rates_by_key": rates, "price_block_games_with_derivable_start": npd, "two_sided": two, "share_two_sided": None if not npd else round(two / npd, 3),
+        res[c["cell"]] = {"base_events": nb, "base_rates_by_key": rates, "price_block_games_with_derivable_start": npd, "two_sided": two, "distinct_games_two_sided": len(games_two), "distinct_games_price_block": len({e["event"] for e in p}), "share_two_sided": None if not npd else round(two / npd, 3),
                           "median_spread": None if not spreads else round(st.median(spreads), 4), "gap_q1_median_q3": q(gaps), "share_two_sided_games_with_ask_10c_under_and_spread_le_4c": None if not two else round(fires / two, 3),
                           "status": "no evidence at n = %d base events / %d two-sided games" % (nb, two) if (nb < MIN_BASE or two < MIN_PRICED) else "measured"}
     meas = {n: r for n, r in res.items() if r["status"] == "measured"}
