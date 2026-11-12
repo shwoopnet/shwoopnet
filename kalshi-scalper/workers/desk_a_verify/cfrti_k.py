@@ -2,8 +2,7 @@
 Kalshi-only: KXBTC15M 1 minute candles for the decision price, PERPBTC1M reference price for the index. DEVELOPMENT only: closes before 2026-11-05T00:00:00Z.
   python3 -I cfrti_k.py selftest                                  synthetic candles with a planted edge; checks the arithmetic and prints every line
   python3 -I cfrti_k.py dev <lists dir> <binary candles dir> <perp candles file> [<kraken minute csv>]
-        <lists dir>/<binary candles dir>: kalshi-pull run folders (manifest.json + gz bodies); <perp candles file>: json/csv, one row per minute with
-        end_period_ts (or ts) and reference_price (else close); <kraken minute csv>: ts,price per whole minute for the lead/lag line (optional).
+        <lists dir>/<binary candles dir>: kalshi-pull run folders (manifest.json + gz bodies); <perp candles>: the PERPBTC1M kalshi-pull run folder (index = mid of bid and ask close, CFRTI_K_REGISTRATION section 9) or a json/csv file; <kraken minute csv>: ts,price per whole minute for the lead/lag line (optional).
 Rules fixed in the registration: decision candle = end_period_ts == close - 120 s; ask = yes_ask close, bid = yes_bid close, spread <= 0.03, cheap side band 0.05 to 0.30;
 index = perp reference at close-120 s and the 10 earlier whole minutes, >= 6 log changes, sample sd * sqrt(4/3); model chance Phi(ln(index/strike)/sd); edge >= 0.05;
 1 contract held to settlement, fee 0.07 p (1-p) unrounded. Thirds = three contiguous groups of UTC close days. z = day-clustered mean/se (bar 5.46)."""
@@ -46,13 +45,22 @@ def load_binary(folder):
                 if bid is not None and ask is not None: out[tk][int(c["end_period_ts"])] = (bid, ask)
     return out
 def load_perp(path):
+    """a kalshi-pull run folder (PERPBTC1M: manifest.json + gz bodies, candlesticks with bid/ask/open_interest) or a json/csv file with end_period_ts and a mark.
+    The index is the MIDDLE of bid close and ask close (CFRTI_K_REGISTRATION section 9); a minute missing either is a missing mark."""
+    out = {}
+    def put(c):
+        ts = c.get("end_period_ts", c.get("ts"))
+        bid, ask = num(c.get("bid"), "close"), num(c.get("ask"), "close")
+        if ts is None: return
+        if bid is not None and ask is not None and bid > 0 and ask > 0: out[int(float(ts))] = (bid + ask) / 2
+        elif c.get("reference_price") not in (None, ""): out[int(float(ts))] = float(c["reference_price"])
+    if os.path.isdir(path):
+        for b in bodies(path):
+            for c in (b.get("candlesticks", []) if isinstance(b, dict) else []): put(c)
+        return out
     rows = json.load(open(path)) if path.endswith(".json") else list(csv.DictReader(open(path)))
     if isinstance(rows, dict): rows = rows.get("candlesticks", rows.get("rows", []))
-    out = {}
-    for r in rows:
-        ts = r.get("end_period_ts", r.get("ts")); v = r.get("reference_price", r.get("close"))
-        if isinstance(v, dict): v = num(v, "close")
-        if ts is not None and v not in (None, ""): out[int(float(ts))] = float(v)
+    for r in rows: put(r)
     return out
 # ---------------------------------------------------------------- the rule
 def decide(mk, cands, perp):
