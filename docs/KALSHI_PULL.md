@@ -43,12 +43,12 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 
 | Rank | Job | Requests (cap) | State |
 |---|---|---|---|
-| 1 | `NOSIDE1_LISTS` then `NOSIDE1_CANDLES` (the approval NO-side pull, W-NO-ARM1) | stage 1 at most 56; stage 2 gets the rest of the registered 1,200 total | stage 1 ready; stage 2 is built from stage 1's answers by `build_noside1_candles.py` and reviewed before it can run |
-| 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, 55 tickers each | NOT RUNNABLE yet: the registration needs its fixed event list committed first, and it is not in the repository |
+| 1 | `NOSIDE1_CANDLES` (the approval NO-side pull, W-NO-ARM1, development events only) | 1,034 requests, about 18 minutes at 1 a second | active; the lists stage `NOSIDE1_LISTS` is retired because the universe is frozen in `NO_ARM_CUTS.json` |
+| 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, up to 55 tickers each, about 5 minutes | active; runs first in rank |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
-| 4 | `COMBO1_OPENBOOK` | 3 | ready |
+| 4 | `COMBO1_OPENBOOK` | 3 | retired: its reads were made and COMBO1 is closed |
 
-Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two waiting jobs are kept from running.
+Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two retired jobs are kept from running. Every change to a job file is security-relevant (it names the exact URLs the runner may send) and needs a security look.
 
 Stage 1 of the NO-side pull asks for market lists, not events, because the cuts file holds event tickers only. Stage 2 uses the registered rules: development events only (the oldest two thirds of each series, the held-out third is never requested), round robin over the series, hourly candles from two days before the close.
 

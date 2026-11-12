@@ -51,8 +51,9 @@ gates.KP3 = () => {
 // KP4: the job id is a fixed choice, double checked in the first step, and every choice has a job file.
 gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
-  assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).sort(), 'the choices are exactly the job files');
-  assert.ok(/case "\$JOB" in NOSIDE1_LISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
+  // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
+  assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS').sort(), 'the choices are the job files except the retired lists job');
+  assert.ok(/case "\$JOB" in NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -69,6 +70,7 @@ def t(j):
     try: m.check_job(j); return "ok"
     except m.Refused: return "refused"
 j = json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json")))
+j["status"] = "active"
 print(json.dumps([t(j), t(dict(j, host="example.com")), t(dict(j, base_path="/other"))]))`);
   assert.deepStrictEqual(bad, ['ok', 'refused', 'refused']);
 };
@@ -81,6 +83,7 @@ gates.KP6 = () => {
   assert.ok(!/portfolio|\/orders\b|firebase|firestore/.test(code.replace(/DENY_PATH = [^\n]*/, '')), 'no account or order path outside the deny list');
   const denied = py(`
 j = json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json")))
+j["status"] = "active"
 def t(path, params):
     j2 = json.loads(json.dumps(j)); j2["allowed_endpoints"].append({"name": "x", "method": "GET", "path_pattern": ".*", "params_allowed": ["series_ticker", "api_key", "status", "limit"]})
     j2["requests"][0] = {"id": "X", "path": path, "params": params}
@@ -123,6 +126,7 @@ gates.KP9 = () => {
   assert.deepStrictEqual(py('print(json.dumps([m.GAP_S, m.MAX_429_IN_ROW, m.HARD_MAX_REQUESTS]))'), [1.0, 3, 1200]);
   const out = py(`
 j = json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json")))
+j["status"] = "active"
 try: m.check_job(dict(j, pacing_seconds=0.5)); fast = "ok"
 except m.Refused: fast = "refused"
 clock = [1000.0]; starts = []
@@ -218,6 +222,7 @@ print(json.dumps({"list": go(b"[1,2,3]"), "text": go(b"not json"), "null": go(b"
 gates.KP13 = () => {
   const out = py(`
 base = json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json")))
+base["status"] = "active"   # COMBO1_OPENBOOK is retired; these checks use its shape as a known-good plan
 def t(req=None, **top):
     j = json.loads(json.dumps(base)); j.update(top)
     if req is not None: j["requests"] = [req]
@@ -249,26 +254,51 @@ gates.KP14 = () => {
     assert.ok(Array.isArray(job.allowed_endpoints) && Array.isArray(job.series_allowlist) && Array.isArray(job.ticker_allowlist), id + ': allowlists');
     assert.ok(job.requests.length <= job.max_requests, id + ': requests within the cap');
   }
-  // rank 1: the approval NO-side pull, lists plus candles inside the registered 1,200 total
-  assert.ok(j.NOSIDE1_LISTS.max_requests + j.NOSIDE1_CANDLES.max_requests <= 1200);
-  assert.strictEqual(j.NOSIDE1_LISTS.max_requests, 56);
-  assert.ok(j.NOSIDE1_LISTS.series_allowlist.length === 7 && j.NOSIDE1_LISTS.requests.every((r) => r.path === '/markets' || r.path === '/historical/markets'));
-  // rank 2: 274 batched candle requests (list not yet committed, so it cannot run)
+  // rank 1: the approval NO-side candle pull (the lists stage is retired: the universe is frozen), rank 2: the spread cell
+  assert.strictEqual(j.NOSIDE1_LISTS.status, 'retired');
+  assert.strictEqual(j.NOSIDE1_CANDLES.max_requests, 1034);
+  assert.strictEqual(j.NOSIDE1_CANDLES.requests.length, 1034);
   assert.strictEqual(j.SPREADCELL1.max_requests, 274);
-  // rank 3 and 4
+  assert.strictEqual(j.SPREADCELL1.requests.length, 274);
   assert.strictEqual(j.ROLLOFF_PROXY.max_requests, 12);
   assert.strictEqual(j.COMBO1_OPENBOOK.max_requests, 3);
-  assert.strictEqual(j.COMBO1_OPENBOOK.requests.length, 3);
-  // the two that wait for a list are refused by the script, not run
-  const refused = py(`
+  assert.strictEqual(j.COMBO1_OPENBOOK.status, 'retired');
+  // the runner refuses a retired job (a job that is not active never runs) and passes the rest
+  const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_CANDLES", "SPREADCELL1"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "ROLLOFF_PROXY"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(refused, { NOSIDE1_CANDLES: 'refused', SPREADCELL1: 'refused' });
-  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', ROLLOFF_PROXY: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'ROLLOFF_PROXY']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
+};
+
+// KP14b: every ACTIVE job's requests all match its own allowed endpoints and ticker or series allowlist, none is a denied path, and the count equals the cap (at most 1,200).
+gates.KP14b = () => {
+  for (const f of jobs) {
+    const job = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
+    if (job.status !== 'active') continue;
+    // a job with paged requests (ROLLOFF_PROXY) is capped by its page budget; one without must use its cap exactly
+    const budget = job.requests.reduce((n, r) => n + (r.max_pages || 1), 0);
+    assert.ok(job.max_requests <= 1200 && budget <= job.max_requests, job.job_id + ': page budget within the cap, cap within 1,200');
+    if (job.requests.every((r) => !r.max_pages || r.max_pages === 1)) assert.strictEqual(job.requests.length, job.max_requests, job.job_id + ': count equals the cap');
+    const eps = job.allowed_endpoints.map((e) => ({ rx: new RegExp('^(?:' + e.path_pattern.replace(/\(\?P</g, '(?<') + ')$'), params: new Set(e.params_allowed) }));
+    const tk = new Set(job.ticker_allowlist);
+    const sr = new Set(job.series_allowlist);
+    for (const r of job.requests) {
+      assert.ok(!/portfolio|account|\/orders|order_group|\/fills|\/positions|api_key|api-key|subaccount|communications|login|logout|\/rfq|\/quotes|\/margin|\/exchange/i.test(r.path), job.job_id + ': denied path ' + r.path);
+      const ep = eps.find((e) => e.rx.test(r.path));
+      assert.ok(ep, job.job_id + ': path matches an allowed endpoint ' + r.path);
+      for (const k of Object.keys(r.params || {})) assert.ok(ep.params.has(k), job.job_id + ': param ' + k + ' allowed');
+      const p = (r.params || {});
+      if (p.market_tickers) for (const t of p.market_tickers.split(',')) assert.ok(tk.has(t), job.job_id + ': ticker allowlisted ' + t);
+      if (p.series_ticker) assert.ok(sr.has(p.series_ticker), job.job_id + ': series allowlisted');
+      const m = /\/historical\/markets\/([^/]+)\/candlesticks$/.exec(r.path);
+      if (m) assert.ok(tk.has(m[1]), job.job_id + ': ticker allowlisted ' + m[1]);
+    }
+  }
 };
 
 // KP15: the stage 2 builder takes development events only, round robin, never the held-out third, and never passes the registered total.
