@@ -16,7 +16,7 @@ day0 = datetime(2026, 10, 30, 15, tzinfo=timezone.utc).timestamp()
 for ser in D.UNIVERSE:
     for i in range(N_PER):
         close = int(day0 + (i // 22) * 86400 + (i % 22) * 900 + (0 if ser == D.GOLD else 450)); dt = datetime.fromtimestamp(close, timezone.utc)
-        run = f"book15r6/{dt:%Y-%m-%d}/0000"; res = rng.choice(["yes", "no"]); tk = f"{ser}-{i}"
+        run = f"book15r6/{dt:%Y-%m-%d}/0000"; res = rng.choice(["yes", "no"]) if rng.random() >= float(os.environ.get("NORES", "0")) else rng.choice(["", "void"]); tk = f"{ser}-{i}"
         rows = files.setdefault(run, {"book": [], "trades": []})
         mid = rng.uniform(0.3, 0.7)
         for k in range(0, 440):
@@ -32,17 +32,31 @@ for ser in D.UNIVERSE:
 def blob(path):
     run, name = path.rsplit("/", 1)
     return files.get(run, {}).get("book" if name.startswith("book") else "trades", [])
+import importlib.util
+wrapper = None
+if os.environ.get("WRAP"):
+    spec = importlib.util.spec_from_file_location("w", str(Path(__file__).with_name("depth1_wrapper.py"))); wrapper = importlib.util.module_from_spec(spec); spec.loader.exec_module(wrapper)
 with tempfile.TemporaryDirectory() as d:
     D.RESULT_TXT, D.RESULT_MD, D.MARKER = Path(d) / "r.txt", Path(d) / "r.md", Path(d) / "started"
+    wrapper_state = wrapper.install(D) if wrapper else None
     D._blob = blob; D._oicore_held = lambda tk: {t: False for t in tk}
     def history(): raise RuntimeError("history check skipped in the dry run")
     D.history_check = history
     D._coverage = lambda: {(int(R6._ts(r["close_time"])), r["series"]): (run, r) for run, r in cov}
     for h in (D.R6,): pass
     out = io.StringIO()
-    with contextlib.redirect_stdout(out): v = D.run(now=D.READ_NOT_BEFORE + 7200)
+    try:
+        with contextlib.redirect_stdout(out): v = D.run(now=D.READ_NOT_BEFORE + 7200)
+    except SystemExit as ex: print(out.getvalue()[:600]); print("STOPPED:", str(ex)[:300]); sys.exit(0)
     print("verdict:", v); print("\n".join(out.getvalue().splitlines()[:6])[:1500])
     out2 = io.StringIO()
     with contextlib.redirect_stdout(out2): v2 = D.run(now=D.READ_NOT_BEFORE + 7300)
     assert v2 is None and "Refusing to run again" in out2.getvalue(); print("second run refused: OK")
     assert D.MARKER.exists() and D.RESULT_TXT.exists()
+    if wrapper:
+        T = D.RESULT_TXT.read_text(); print("\n".join(l[:200] for l in T.splitlines() if "SEPARATELY" in l or ("f6_thin" in l or "f7_sweep" in l) and l.startswith("  ")))
+        nr = [w for w in wrapper_state["scored"] if w.get("nores")]
+        for w in nr[:3]:
+            for sd, f in w["fill"].items():
+                if f: assert abs(f["pnl"] + D.order_fee(0.07, 1, f["px"])) < 1e-9, f
+        print("fee-only booking verified on", len(nr), "no-result windows")
