@@ -97,11 +97,11 @@ gates.RG5 = () => {
   const list = P.kalshiRegistryNorm(reg);
   assert.strictEqual(list.length, reg.strategies.length);
   assert.strictEqual(P.kalshiRegistryNorm({ nope: 1 }), null, 'a wrong shape is refused');
-  const split = P.kalshiRegistrySplit(list, ['OICORE', 'EVENT830'], ['XRP', 'Bitcoin', 'Ethereum', 'Dogecoin', 'AUD/USD', 'USD/CAD', 'Natural gas']);
-  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['CFRTI-K', 'GOLDOFF', 'NC15DEPTH1', 'S3', 'W-NO-ARM1', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL, CFRTI-B and the spot-version lead are folded into CFRTI-K)');
+  const split = P.kalshiRegistrySplit(list, ['OICORE', 'EVENT830', 'CFRTIK'], ['XRP', 'Bitcoin', 'Ethereum', 'Dogecoin', 'AUD/USD', 'USD/CAD', 'Natural gas']);
+  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['GOLDOFF', 'NC15DEPTH1', 'S3', 'W-NO-ARM1', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL; CFRTI-K became the live probation seat CFRTIK on Nov 12, 2026, so it is a Live-lane card now, not a pipeline row)');
   assert.ok(split.retired.some((x) => x.id === 'MMSIM1') && split.retired.some((x) => x.id === 'W-SPREAD-CELL1') && !split.retired.some((x) => x.name === 'XRP'), 'only retired rows not already listed are added');
   const out = split.pipeline.map((x) => P.kalshiRegistryCardHtml(x, esc)).join('');
-  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 6, 'every unproven card says UNPROVEN');
+  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 5, 'every unproven card says UNPROVEN');
   assert.ok(!/Kill|Return|Room left/.test(out), 'the card itself is condensed: the rules are in Details');
   // The Details sheet shows ONLY: what it does, kill, return, room left, one chart.
   const g = list.find((x) => x.id === 'GOLDOFF');
@@ -131,7 +131,7 @@ gates.RG6 = () => {
   assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiRegistrySheetHtml\(x, kalshiStratSheetData\(/.test(html), 'the popup reuses the one sheet builder, with its data built when it opens');
   assert.ok(/kalshiStratPop\.refresh\(\)/.test(fn('renderStrategiesPage')), 'a redraw or the Privacy switch re-masks an open popup');
   const list = reg.strategies;
-  for (const id of ['L1', 'OICORE', 'EVENT830']) {
+  for (const id of ['L1', 'OICORE', 'EVENT830', 'CFRTIK']) {
     assert.ok(P.KAL_BOARD_LIVE.some((x) => x.id === id), id + ' is a live card');
     const row = P.kalshiStratSheetRow(id, list, P.KAL_BOARD_LIVE);
     assert.ok(row && row.kill && row['return'] && row.rule, id + ' has a row with rule, kill and return');
@@ -152,7 +152,7 @@ gates.RG6 = () => {
   const masked = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, mask), esc);
   assert.ok(/\*\*\*\*/.test(masked) && !/\$10\.67|\$39/.test(masked), 'with Privacy on the popup shows no live dollar figure of the account');
   // no private data: say so, draw nothing
-  for (const id of ['L1', 'OICORE', 'EVENT830']) {
+  for (const id of ['L1', 'OICORE', 'EVENT830', 'CFRTIK']) {
     const r = P.kalshiStratSheetRow(id, list, P.KAL_BOARD_LIVE);
     for (const d of [{ live: true }, { live: true, kill: null, spark: [] }, { live: true, spark: [1] }]) {
       const h = P.kalshiRegistrySheetHtml(r, P.kalshiStratSheetData(id, d, money), esc);
