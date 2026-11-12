@@ -1,0 +1,278 @@
+{
+ "stage0": {
+  "KXEURUSD15M": {
+   "group": "FX",
+   "windows": 660,
+   "pairs": 655,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXGBPUSD15M": {
+   "group": "FX",
+   "windows": 660,
+   "pairs": 655,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXUSDJPY15M": {
+   "group": "FX",
+   "windows": 660,
+   "pairs": 655,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXSILVER15M": {
+   "group": "metals",
+   "windows": 4087,
+   "pairs": 4063,
+   "agree": 0.9997538764459759,
+   "ties_settling_no": 0
+  },
+  "KXWTI15M": {
+   "group": "energy",
+   "windows": 4147,
+   "pairs": 4123,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXNATGAS15M": {
+   "group": "energy",
+   "windows": 2611,
+   "pairs": 2598,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXCOPPER15M": {
+   "group": "metals",
+   "windows": 2550,
+   "pairs": 2536,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXPLATINUM15M": {
+   "group": "metals",
+   "windows": 987,
+   "pairs": 973,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXPALLADIUM15M": {
+   "group": "metals",
+   "windows": 987,
+   "pairs": 973,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  },
+  "KXGOLD15M": {
+   "group": "metals",
+   "windows": 4408,
+   "pairs": 4376,
+   "agree": 1.0,
+   "ties_settling_no": 0
+  }
+ },
+ "cells": [
+  {
+   "group": "FX",
+   "pred": "q8",
+   "bin": 0,
+   "n": 599,
+   "ties": 15,
+   "rate": 0.025041736227045076,
+   "lo": 0.015233187463540182,
+   "hi": 0.040903615305213664
+  },
+  {
+   "group": "FX",
+   "pred": "q8",
+   "bin": 1,
+   "n": 549,
+   "ties": 10,
+   "rate": 0.018214936247723135,
+   "lo": 0.009923406180312955,
+   "hi": 0.03320214732362018
+  },
+  {
+   "group": "FX",
+   "pred": "q8",
+   "bin": 2,
+   "n": 697,
+   "ties": 9,
+   "rate": 0.01291248206599713,
+   "lo": 0.006807832328456738,
+   "hi": 0.024356984371921783
+  },
+  {
+   "group": "FX",
+   "pred": "ties4",
+   "bin": 0,
+   "n": 1716,
+   "ties": 28,
+   "rate": 0.016317016317016316,
+   "lo": 0.01131302819591231,
+   "hi": 0.02348180407236169
+  },
+  {
+   "group": "FX",
+   "pred": "ties4",
+   "bin": 1,
+   "n": 118,
+   "ties": 4,
+   "rate": 0.03389830508474576,
+   "lo": 0.01325961911756434,
+   "hi": 0.08392886166404062
+  },
+  {
+   "group": "FX",
+   "pred": "ties4",
+   "bin": 2,
+   "n": 11,
+   "ties": 2,
+   "rate": 0.18181818181818182,
+   "lo": 0.05136660067100062,
+   "hi": 0.4769861375782449
+  },
+  {
+   "group": "energy",
+   "pred": "q8",
+   "bin": 0,
+   "n": 1984,
+   "ties": 51,
+   "rate": 0.025705645161290324,
+   "lo": 0.019605079966940282,
+   "hi": 0.033639403899379854
+  },
+  {
+   "group": "energy",
+   "pred": "q8",
+   "bin": 1,
+   "n": 1996,
+   "ties": 38,
+   "rate": 0.01903807615230461,
+   "lo": 0.013901569506077665,
+   "hi": 0.026022392471710985
+  },
+  {
+   "group": "energy",
+   "pred": "q8",
+   "bin": 2,
+   "n": 2449,
+   "ties": 31,
+   "rate": 0.012658227848101266,
+   "lo": 0.008931869485969576,
+   "hi": 0.017911119478340228
+  },
+  {
+   "group": "energy",
+   "pred": "ties4",
+   "bin": 0,
+   "n": 5986,
+   "ties": 102,
+   "rate": 0.017039759438690277,
+   "lo": 0.014057362397687524,
+   "hi": 0.020641652013645158
+  },
+  {
+   "group": "energy",
+   "pred": "ties4",
+   "bin": 1,
+   "n": 412,
+   "ties": 15,
+   "rate": 0.03640776699029126,
+   "lo": 0.022185463016138204,
+   "hi": 0.05919552435982418
+  },
+  {
+   "group": "energy",
+   "pred": "ties4",
+   "bin": 2,
+   "n": 31,
+   "ties": 3,
+   "rate": 0.0967741935483871,
+   "lo": 0.033464036094643976,
+   "hi": 0.2490028999817704
+  },
+  {
+   "group": "metals",
+   "pred": "q8",
+   "bin": 0,
+   "n": 3866,
+   "ties": 21,
+   "rate": 0.005431971029487843,
+   "lo": 0.0035556362228314994,
+   "hi": 0.00829022330795653
+  },
+  {
+   "group": "metals",
+   "pred": "q8",
+   "bin": 1,
+   "n": 4349,
+   "ties": 4,
+   "rate": 0.0009197516670498966,
+   "lo": 0.0003577239863714268,
+   "hi": 0.002362705812865927
+  },
+  {
+   "group": "metals",
+   "pred": "q8",
+   "bin": 2,
+   "n": 3971,
+   "ties": 3,
+   "rate": 0.0007554772097708386,
+   "lo": 0.00025695829330964567,
+   "hi": 0.002219014585710238
+  },
+  {
+   "group": "metals",
+   "pred": "ties4",
+   "bin": 0,
+   "n": 12075,
+   "ties": 26,
+   "rate": 0.0021532091097308487,
+   "lo": 0.0014698747580703508,
+   "hi": 0.003153217575552105
+  },
+  {
+   "group": "metals",
+   "pred": "ties4",
+   "bin": 1,
+   "n": 108,
+   "ties": 2,
+   "rate": 0.018518518518518517,
+   "lo": 0.005093117606642764,
+   "hi": 0.06502032855292575
+  },
+  {
+   "group": "metals",
+   "pred": "ties4",
+   "bin": 2,
+   "n": 3,
+   "ties": 0,
+   "rate": 0.0,
+   "lo": 0.0,
+   "hi": 0.5615060804490177
+  }
+ ],
+ "exist": {
+  "FX": {
+   "all": 10747,
+   "break_21utc": 423,
+   "weekend": 231,
+   "columbus_oct12": 480
+  },
+  "metals": {
+   "all": 16316,
+   "break_21utc": 422,
+   "weekend": 590,
+   "labor_day_sep7": 288,
+   "columbus_oct12": 441
+  },
+  "energy": {
+   "all": 8201,
+   "break_21utc": 336,
+   "weekend": 400,
+   "labor_day_sep7": 192,
+   "columbus_oct12": 192
+  }
+ }
+}

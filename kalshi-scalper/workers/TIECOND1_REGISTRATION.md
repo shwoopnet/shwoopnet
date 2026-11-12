@@ -20,3 +20,6 @@ Per series, order by close_ts. Consecutive pair = close_ts(t+1) - close_ts(t) = 
 
 ## Ledger
 Adds 1 test (the kill gate). Deflation N 1,100,001 (z about 5.34) and 8,796 (z about 4.39). Nothing here claims an edge.
+
+## Result (run after the push of this registration)
+Script `workers/tiecond1_run.py`, tables `workers/TIECOND1_RESULT.json`. Deviation: the rates series (KX2YR/5YR/10YR/30YRRATE15M, in `rep`) close only on or after 10-05 so they have zero development windows; rates group is empty. Stage 0: agreement 99.98% (silver) to 100% on all 10 series, 0 ties settle NO, none dropped. Stage 1: 13 cells with n >= 300; best by lower bound: energy, q8 lowest tercile, n 1,984, tie rate 2.57%, Wilson lower 1.96%. Highest rate: FX ties4 = 2 or more, 18.2% (2 of 11, lower 5.1%), n under 300. No cell reaches the 6% lower bound: **CLOSED** (1 try). Existence counts (listed windows): break hour 21 UTC FX 423, metals 422, energy 336; weekend FX 231, metals 590, energy 400; Sep 7 metals 288, energy 192 (FX not listed yet); Oct 12 FX 480, metals 441, energy 192. So windows exist during holidays and breaks: arm B has something to test.
