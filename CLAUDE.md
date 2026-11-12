@@ -1160,3 +1160,7 @@ Docs only, in `docs/STRATEGY_LIFECYCLE.md`. (1) Declined list 7e: weather foreca
 ## XRP forward read moved to the Nov 14 export (Nov 12, 2026, Refinement)
 
 FLOOR1 (XRP fills priced under 0.905) and THIN1 (ask size under 20) now sit with Refinement, who reads each ONCE on or after the Nov 14 export of live fills, by message only with the verdict word and no live figure. The earlier line saying they settle on 2026-11-12 is stale and was corrected in place. XRP stays paused whatever the read says, unless the owner decides. Docs only, no change to the bot.
+
+## kalshi-pull: 12 real runs a UTC day (Nov 12, 2026, the owner, asked for by the Head of R&D)
+
+The day cap on real runs of `scripts/kalshi_pull.py` goes from 6 to 12 (`MAX_RUNS_PER_DAY`), and nothing else changes. The owner wants the research queue to run back to back, and six a day was the only thing holding it. Dry runs still do not count. Every per-run limit is exactly as it was: 1 request a second, 1,200 requests a run, three 429s in a row end the run, 5 MB an answer, 200 MB a run, one pinned host table, GET only, no key, no redirects, the concurrency group and the end date 2027-02-28. The runner is otherwise byte-identical. If the first 429 ever appears, drop back to 6 at once (a one line edit of the same constant). Gates: `test/kalshiPullGates.test.js` KP18 (pins 12) and KP18b (every other limit unchanged). Docs: `docs/KALSHI_PULL.md`.
