@@ -163,6 +163,16 @@ function skipSection(docs, nowMs) {
   return { days: SKIP_DAYS, count: rows.length, byReason: Object.fromEntries(Object.keys(byReason).sort().map((k) => [k, byReason[k]])), rows: rows.slice(-MAX_SKIP_ROWS) };
 }
 
+// Hourly balance snapshots (Nov 12, 2026): the whole asked window, at most one row an hour for 90 days. Only ts, total and per-shard cash survive; anything else on the document is dropped.
+const MAX_BALANCE_ROWS = 2160;
+function balanceSection(docs) {
+  const rows = (Array.isArray(docs) ? docs : []).filter((d) => d && Number.isFinite(Number(d.ts)) && Number.isFinite(Number(d.total))).map((d) => ({
+    ts: new Date(Number(d.ts)).toISOString(), total: Number(d.total),
+    shards: (Array.isArray(d.shards) ? d.shards : []).slice(0, 10).filter((s) => s && Number.isFinite(Number(s.dollars))).map((s) => ({ shard: Number(s.shard), dollars: Number(s.dollars) })),
+  })).sort((a, b) => (a.ts < b.ts ? -1 : a.ts > b.ts ? 1 : 0)).slice(-MAX_BALANCE_ROWS);
+  return { count: rows.length, rows };
+}
+
 // Constant-time compare of two secrets of any length (hash both first so the lengths match).
 function sameToken(a, b) {
   const x = crypto.createHash("sha256").update(String(a)).digest(), y = crypto.createHash("sha256").update(String(b)).digest();
@@ -197,10 +207,14 @@ function makeReportHandler(deps) {
       // The shadow rules' score (lifecycle spec (c)): per rule, signals, cash PF per contract and the verdict against the written pass and kill rules. Optional, read only; a failure leaves the field out.
       let shadow;
       if (typeof deps.readShadowRows === "function" && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), await deps.readShadowRows(now - SHADOW_DAYS * 86400000), now) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      // The hourly balance history over the asked window. Optional, read only; a failure leaves the field out, an empty history is an empty list.
+      let balanceHistory;
+      if (typeof deps.readBalances === "function") { try { balanceHistory = balanceSection(await deps.readBalances(now - hours * 3600000)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       const report = buildReport(orders, now, hours, String((req.query && req.query.orders) || "") === "1", slotOrders);
       if (deploys !== undefined) report.deploys = deploys;
       if (skips !== undefined) report.skips = skips;
       if (shadow !== undefined) report.shadow = shadow;
+      if (balanceHistory !== undefined) report.balanceHistory = balanceHistory;
       res.status(200).json(report);
     } catch (e) {
       // The caller learns nothing about why. The log gets the error's name and a short message (no token, no order data) so the owner can find the cause.
@@ -210,4 +224,4 @@ function makeReportHandler(deps) {
   };
 }
 
-module.exports = { buildReport, makeReportHandler, sameToken, skipSection, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };
+module.exports = { buildReport, makeReportHandler, sameToken, skipSection, balanceSection, MAX_BALANCE_ROWS, MAX_HOURS, MAX_ORDER_ROWS, SKIP_DAYS };

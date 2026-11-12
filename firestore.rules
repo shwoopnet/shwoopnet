@@ -136,6 +136,12 @@ service cloud.firestore {
       allow write: if false;
     }
 
+    // Hourly balance snapshots (Nov 12, 2026): total and per-shard cash only, written by the server, read by the admin.
+    match /kalshiBalanceSnaps/{id} {
+      allow read: if isAdmin();
+      allow write: if false;
+    }
+
     // What the live bot did (armed, disarmed, scan ended), shown on the Bot tab. Written only by the server.
     match /kalshiLiveEvents/{id} {
       allow read: if isAdmin();
