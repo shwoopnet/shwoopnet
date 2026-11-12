@@ -1257,3 +1257,7 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `INPLAYJUMP_LISTS` (Desk A, registration `kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md`; file from `claude/idea-desk-a`): 14 requests, at most 71 pages, cap 73: series reads and settled `/markets` lists of the in-play families (tennis challenger and ITF matches, e-basketball, e-soccer, Liga Pro and similar), every list call carrying a `max_close_ts` at the end of its family's development window (nothing at or after 2026-10-23), so no held-out market is listed. Public market lists only, no candles, no decision data. Runner unchanged. Gate KP30. Dispatch order from the Head: after the lists in line.
 
+## Rotation lane draft (Nov 12, 2026, the Head of R&D, DRAFT)
+
+`docs/ROTATION_LANE.md` (v0.2) is a DRAFT for the owner's OK, with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It binds nobody and nothing goes live under it. Engineering facts it relies on: shadow rules and the second slot already exist; the rolling per-rule report (PR 837), the shared quote budget, the open interest and calendar fields and the 4 second second look (PR 838) are the logger pieces; the lane-wide cap, one reviewed registry entry per rule and the hold-list entry are built and reviewed with the live wiring, and in or out is replayed from rows, never stored. `docs/CHARTER.md` is not touched. Docs only.
+
