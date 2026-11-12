@@ -159,3 +159,25 @@ One more zero-try number from the candles already pulled would settle it, with n
 - For every trigger event (all of them, with no condition on where the spread ends) and every spread market of that game with a usable quote at minute 1 and minute 10 after the signal: drift = the spread's mid at minute 10 minus its mid at minute 1, signed the way the moneyline jumped. Average over the game's spread markets (no picking), then over events. Reported per sport: events, mean drift in cents, standard error with games as the cluster.
 - **Rule, fixed now: the card is CLOSED if the mean drift is under that sport's round-trip cost in every sport** (4.5c for NBA and NFL, 6.4c for NHL, Forensics' figures). A sport whose mean drift is above its cost would go to step 2 alone.
 - A drift near zero is what a market with no lag gives. I expect well under 1c.
+
+## 12. The post-read addition, computed once (Nov 12, 17:30Z), and the card's end
+
+Allowed by the Head of R&D at 17:25Z, exactly as defined in section 11, with the minute 0 to minute 1 drift added for comparison (named by the Head before it was computed). Script `ingame_m1/drift_addition.py`, committed before its first run. **It is labelled as it must be: a post-read addition, not in the registration. It can close the card; it is not evidence for it. Zero tries. Nothing else was computed from these candles and nothing else will be.** Output, whole:
+
+```
+POST-READ ADDITION, NOT IN THE REGISTRATION. It can close the card; it is not evidence for it. Zero tries.
+candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim
+trigger events 770 | with no spread market quoted at minute 1 and minute 10 4
+NBA: events 244 | games 53 | mean drift minute 1 to 10: -1.07c (cluster standard error 0.64c) | round-trip cost 4.5c | comparison, minute 0 to 1: events 244, games 53, mean -0.09c (standard error 0.31c)
+NFL: events 141 | games 24 | mean drift minute 1 to 10: -1.99c (cluster standard error 1.09c) | round-trip cost 4.5c | comparison, minute 0 to 1: events 141, games 24, mean +0.47c (standard error 0.36c)
+NHL: events 381 | games 125 | mean drift minute 1 to 10: +0.11c (cluster standard error 0.41c) | round-trip cost 6.4c | comparison, minute 0 to 1: events 385, games 125, mean +1.55c (standard error 0.13c)
+RESULT: CARD CLOSED: no lag at one minute resolution; whatever catching up exists is inside the first minute
+```
+
+**The card is CLOSED.** After the first full minute the spread does not keep moving the way the moneyline jumped: the average drift over the next nine minutes is -1.1c in the NBA, -2.0c in the NFL and +0.1c in the NHL, each against a round-trip cost of 4.5c to 6.4c, and two of the three are the wrong sign. In the NHL there is a real move inside the first minute (+1.55c, standard error 0.13c), which is the catching up a one-minute bot cannot reach and is a quarter of the cost even if it could.
+
+**Recorded as the Head ruled:** "no lag at one minute resolution; whatever catching up exists is inside the first minute". The in-game family at minute resolution is done. Step 2 is not run and its try is not spent. A seconds-level version would need the 20 second recorder rows and its own card; none is proposed.
+
+**For the record, both results stand side by side:** the registered step 1 verdict was SURVIVES (67% against a close line of 80%); the card was closed by a number defined after that read and before its own computation, because the registered kill rule could not tell a lag from the game simply going on. The fault in the kill rule was mine.
+
+Totals for this card: 215 Kalshi requests through kalshi-pull, 0 tries.
