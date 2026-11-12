@@ -173,8 +173,8 @@
    "max_pages": 4
   }
  ],
- "notes": "At most 56 requests (7 series x 2 lists x 4 pages). Stage 2 (NOSIDE1_CANDLES) has the rest of the registered 1,200 total, so lists plus candles never pass 1,200.",
- "status": "active",
+ "notes": "At most 56 requests (7 series x 2 lists x 4 pages). Stage 2 (NOSIDE1_CANDLES) has the rest of the registered 1,200 total, so lists plus candles never pass 1,200. RETIRED Nov 12, 2026: the universe is frozen (454 events in NO_ARM_CUTS.json, registration amendment 2), so no list reads are needed. Removed from the workflow choices.",
+ "status": "retired",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,

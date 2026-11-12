@@ -184,6 +184,43 @@ print(json.dumps({"books": books, "calls": s.calls, "trades": [u.split("ticker="
   assert.ok(out.calls <= 90);
 };
 
+// CB13: the quote rows carry the leg tickers (Nov 12, 2026) as a LAST column `leg_tickers` ("ticker:side" joined by "|"), read from the market object already listed: no extra request, every older column keeps its
+// place, the string is bounded and says when it was cut, and only the first MAX_LEG_ROWS rows carry it (size).
+gates.CB13 = () => {
+  const out = py(`
+import tempfile
+leg = lambda t, s: {"event_ticker": "E", "market_ticker": t, "side": s}
+mk = {"ticker": "KXMVE-A", "mve_selected_legs": [leg("KXA-1", "yes"), leg("KXB-2", "no"), "KXC-3", {"event_ticker": "E"}]}
+long = {"ticker": "KXMVE-L", "mve_selected_legs": [leg("KXLONGLEGTICKER-%03d" % i, "yes") for i in range(60)]}
+cols = m.QUOTE_COLS
+short = m.quote_row(1, "D", mk); lng = m.quote_row(1, "D", long)
+urls = []
+def fake(u):
+    urls.append(u)
+    if "/orderbook" in u: return 200, {"orderbook_fp": {"yes_dollars": [["0.1000", "5.00"]], "no_dollars": []}}, "D"
+    if "/trades" in u: return 200, {"trades": []}, "D"
+    return 200, {"markets": [dict(mk, ticker="T%03d" % i, yes_bid_dollars="0.1000", yes_ask_dollars="%.4f" % (0.11 + i * 0.001)) for i in range(300)]}, "D"
+s = m.Stream(m.BUDGET, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
+d = tempfile.mkdtemp(); m.poll(s, 1.0e9 + 3600, d)
+import csv, os
+rows = list(csv.reader(open(os.path.join(d, "quotes.csv"))))
+print(json.dumps({"cols": cols, "short": short[-2:], "n": len(short), "long": lng[-2:], "nolegs": m.quote_row(1, "D", {"ticker": "X"})[-2:], "off": m.quote_row(1, "D", mk, False)[-2:],
+  "filled": sum(1 for r in rows[1:] if r[-1]), "rows": len(rows) - 1, "hdr": rows[0][-2:], "calls": s.calls, "cap": m.LEGS_MAX_CHARS, "legrows": m.MAX_LEG_ROWS, "marker": m.LEGS_MARKER}))`);
+  assert.deepStrictEqual(out.cols.slice(0, 18), ['t_send_ms', 't_recv_ms', 'server_date_header', 'ticker', 'event_ticker', 'exchange_index', 'open_time', 'close_time', 'yes_bid', 'yes_ask', 'no_bid', 'no_ask', 'yes_bid_size', 'yes_ask_size', 'last_price', 'volume', 'open_interest', 'legs'], 'older columns keep their order');
+  assert.strictEqual(out.cols[18], 'leg_tickers');
+  assert.strictEqual(out.cols.length, 19, 'the new column is the last');
+  assert.deepStrictEqual(out.short, [4, 'KXA-1:yes|KXB-2:no|KXC-3'], 'the true count stays; a leg with no ticker is skipped');
+  assert.ok(out.long[1].length <= out.cap && out.long[1].endsWith(out.marker) && out.long[0] === 60, 'bounded, marked, true count kept');
+  assert.ok(/^(KXLONGLEGTICKER-\d{3}:yes\|)+\.\.\.$/.test(out.long[1].replace(/\|\.\.\.$/, '|...')) || /:yes\|\.\.\.$/.test(out.long[1]), 'cut at a whole leg');
+  assert.deepStrictEqual(out.nolegs, ['', ''], 'no legs list: both empty, never zero');
+  assert.strictEqual(out.off[1], '');
+  assert.strictEqual(out.filled, out.legrows, 'only the first rows carry leg tickers');
+  assert.deepStrictEqual(out.hdr, ['legs', 'leg_tickers']);
+  assert.ok(out.cap <= 600 && out.legrows <= 100);
+  assert.strictEqual(out.calls, 1 + 40 + 0, 'no request was added for the legs: one list page and the 40 books');
+  assert.ok(!/mve_selected_legs[^\n]*(Stream|\.get\()/.test(code), 'the legs are read from the listing, never asked for');
+};
+
 // CB8: rows are as the exchange returns them; a missing field is empty, never zero; an empty book is no row; levels run best first.
 gates.CB8 = () => {
   const out = py(`

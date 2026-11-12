@@ -1,5 +1,5 @@
 {
-  "comment": "Series the politics shadow recorder (scripts/record_politics.py) reads. First 26: Refinement's Nov 11, 2026 ranking under the 30 day hold window (merged historical and live markets, at least 5 settled events, median days open 30 or less, active in the last 120 days; refine_tools/POLITICS_RECORDER_LIST_30D.csv). The rest are open scheduled-event series (votes, bills, confirmations, shutdown, deadlines) kept on purpose because the owner wants scheduled events first and they have little settled history, so forward recording is how it accrues; markets past cap_days are skipped one by one. Editing this list is a reviewed change; the script refuses more than max_series and a name that is not an uppercase Kalshi series ticker. later_only is only a note of series left out on purpose; nothing reads it for recording.",
+  "comment": "Series the politics shadow recorder (scripts/record_politics.py) reads. First 26: Refinement's Nov 11, 2026 ranking under the 30 day hold window (merged historical and live markets, at least 5 settled events, median days open 30 or less, active in the last 120 days; refine_tools/POLITICS_RECORDER_LIST_30D.csv). The rest are open scheduled-event series (votes, bills, confirmations, shutdown, deadlines) kept on purpose because the owner wants scheduled events first and they have little settled history, so forward recording is how it accrues; markets past cap_days are skipped one by one. Nov 12, 2026: three Refinement additions (KXAPRPOTUSD, KXGENERICBALLOTVOTEHUB, KXVOTEHUBTRUMPUPDOWN); KXGENERICBALLOT is left out on purpose (one event in all history). Editing this list is a reviewed change; the script refuses more than max_series and a name that is not an uppercase Kalshi series ticker. later_only is only a note of series left out on purpose; nothing reads it for recording.",
   "max_series": 60,
   "max_requests_per_run": 600,
   "cap_days": 30,
@@ -45,7 +45,10 @@
     "KXRECNCH",
     "KXFISAEXTEND",
     "KX250DOLLARBILL",
-    "KXRECNCBILL"
+    "KXRECNCBILL",
+    "KXAPRPOTUSD",
+    "KXGENERICBALLOTVOTEHUB",
+    "KXVOTEHUBTRUMPUPDOWN"
   ],
   "later_only": [
     "KXFEDCHAIRNOM",
