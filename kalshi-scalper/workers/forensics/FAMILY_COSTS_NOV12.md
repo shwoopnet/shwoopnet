@@ -136,3 +136,15 @@ Not held by this desk (no recorder, or not measured in this cut): mentions, Stea
 - Sports rows mix pre-game and in-play instants and include games listed days ahead.
 - Combos: one snapshot. Politics: three snapshots over 14 hours. NC15: 20 hours. Mentions and any family with no recorder: nothing held.
 - Not checked by the Verification Analyst.
+
+## Added 2026-11-12 evening: cost lines for the two Friday measurement cards (lists landed, candles not yet)
+
+Asked by the Head of R&D. Source: the `MAPBREAK_LISTS`, `NHLOT_LISTS` and `TESTING_LISTS_BUNDLE` runs on `kalshi-pull-data`. Only the series fee fields were read for this; no result.
+
+| Card | Series | Fee class (read from the series answer) | Spread level held by this desk | What the cost line is |
+|---|---|---|---|---|
+| MAPBREAK | CS2, Dota 2, League of Legends, Valorant match winner | `quadratic`, multiplier 1: taker 0.07 x p x (1 - p), no maker fee | **None.** The landed lists are SETTLED markets, whose quotes are final (0 or 1); no recorder follows esports; the Nov 10 census listing is settled too | The engine's own one-way entry cost at the look, from the candle ask and bid (kill above 4c). At a 1c spread it is 0.5c plus a fee rounded up to 2c = 2.5c; at a 4c spread 4c. So the card closes on cost wherever the median spread at the look is above 4c, and survives only on tight markets |
+| TIE3 | NHL first period and overtime, NFL first quarter, MLS first half (the four read); the other period and first-half series were not read | `quadratic`, multiplier 1 for the four read | **None.** Same reason: settled lists only | The same one-way line, from the TIE3 candles when they land. A Tie contract priced 15c to 35c pays a fee of 0.9c to 1.6c unrounded, 1c to 2c rounded at one contract |
+
+Both lines are therefore **"no cost data held"** until the candles land; nothing here is a list copy of a spread. For scale only, the nearest measured sports lines on this page are NBA and NFL lines at 2.1c to 2.4c to hold and NHL spread and total at 3.2c to 3.5c; esports and period markets are thinner than those, so expect worse, not better. NHL game (moneyline) is `quadratic_with_maker_fees`: a resting order there pays a fee.
+
