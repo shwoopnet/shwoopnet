@@ -9,6 +9,7 @@ buy 1 at ask + 0.01; fee 0.07 p (1-p) rounded UP to the cent; hold. Cost kill BE
 Placebo: the first in-play minute at which neither contract's mid moved 0.05 or more over the previous 5 minutes; buy the contract with the higher mid at ask + 0.01 (same band and spread) at the NEXT minute's close
 (my reading, as for the rule; Desk B to confirm); grouped by price paid in 10c buckets and re-weighted to the rule's own price mix."""
 import sys, os, math, json, statistics as st, collections, calendar, time, hashlib
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 DEV_BOUNDS = None                                   # set by dev() to the family's development window; a window outside it is refused
 ONE_WAY_KILL = 0.04                                 # Head's ruling Nov 12 (hold to settlement): median one-way entry cost above 4c closes the family; Desk B writes the dated amendment
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on these markets"
@@ -324,8 +325,8 @@ def selftest():
     except SystemExit as ex: assert "REFUSED" in str(ex)
     print("SELFTEST OK (fee rounded up, Eastern clock with DST, in-play start, jump rules, entry band and spread, tie never, no look-ahead, alive rule, round trip)")
 def dev(series_path, family, lists, candles_dirs, scorekit_dir):
-    for d_ in list(lists) + list(candles_dirs):                                # standing rule (h): a HELDOUT_ folder is refused by default
-        if os.path.basename(os.path.normpath(d_)).startswith("HELDOUT_"): raise SystemExit("REFUSED: %s is a held-out folder; each card reads it once on the Head's own go (standing rule h)" % d_)
+    import heldout_guard                                                        # standing rule (h): any component of the path or the real path starting HELDOUT_ is refused (plain, nested, relative, symlink)
+    for d_ in list(lists) + list(candles_dirs): heldout_guard.refuse_heldout(d_, "inplayjump.dev")
     sys.path.insert(0, scorekit_dir); import scorekit
     S = json.load(open(series_path)); K = S["constants"]; fam = next(f for f in S["families_ranked_by_events"] if f["family"] == family)
     iso = scorekit.iso; b = (iso(fam["development"]["closes_from"].replace("T00:00:00Z", "T00:00:00Z")), iso(fam["development"]["closes_before"]))

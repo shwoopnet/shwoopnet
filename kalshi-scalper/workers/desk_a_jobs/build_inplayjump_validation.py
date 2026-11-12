@@ -8,7 +8,7 @@ import json, os, sys, hashlib, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import build_inplayjump_candles as B
 def main(series_path, folder, outdir):
-    if os.path.basename(os.path.normpath(folder)).startswith("HELDOUT_"): sys.exit("REFUSED: held-out folder (standing rule h)")
+    import heldout_guard; heldout_guard.refuse_heldout(folder, "validation builder")
     S = json.load(open(series_path)); mk = B.read_lists(folder); reqs, per = [], collections.Counter()
     for f, items in B.families(S, mk, False):
         ev = collections.defaultdict(list)

@@ -10,7 +10,7 @@ def iso_ts(s):
     try: return calendar.timegm(time.strptime(re.sub(r"\.\d+Z$", "Z", s), "%Y-%m-%dT%H:%M:%SZ"))
     except Exception: return None
 def main(series_path, folder, outdir):
-    if os.path.basename(os.path.normpath(folder)).startswith("HELDOUT_"): sys.exit("REFUSED: held-out folder (standing rule h)")
+    import heldout_guard; heldout_guard.refuse_heldout(folder, "pilot builder")
     S = json.load(open(series_path)); man = json.load(open(os.path.join(folder, "manifest.json"))); mk = {}
     for row in man["rows"]:
         if row.get("status") != 200 or "file" not in row: continue
