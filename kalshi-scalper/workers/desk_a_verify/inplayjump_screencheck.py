@@ -19,13 +19,13 @@ def check_match_set(matches, K, mins, hours):
     for e, tks, o, c in matches:
         st = B.skip_start({tk: hours.get(tk, []) for tk in tks}, tks, o, c); starts[e] = st
         scr.update({tk: ({t: x for t, x in mins.get(tk, {}).items() if st is not None and t >= st}) for tk in tks})
-        if st is None: continue
+        lim = float("inf") if st is None else st + 1800                             # screen skipped EVERY hour: the step check covers every minute
         # a 2c step inside a skipped hour (the leading hours up to the start + 30 minutes)
         for tk in tks:
             d = mins.get(tk, {})
             for t, x in d.items():
                 y = d.get(t - 60)
-                if t <= st + 1800 and J.two_sided(x) and J.two_sided(y) and abs(J.mid(x) - J.mid(y)) >= 0.02 - 1e-9: bad.append("2c step inside a skipped hour: %s at %d" % (tk, t))
+                if t <= lim and J.two_sided(x) and J.two_sided(y) and abs(J.mid(x) - J.mid(y)) >= 0.02 - 1e-9: bad.append("2c step inside a skipped hour: %s at %d" % (tk, t))
     dec = {}
     for e, tks, o, c in matches:
         d1 = J.match_decision(c, tks, mins, "alive", K, collections.Counter()); d2 = J.match_decision(c, tks, scr, "alive", K, collections.Counter())
@@ -69,6 +69,14 @@ def selftest():
     mins2[matches[0][1][0]][t1] = dict(ts=t1, bid=0.52, ask=0.54, volume=5.0); mins2[matches[0][1][0]][t1 + 60] = dict(ts=t1 + 60, bid=0.49, ask=0.51, volume=5.0)
     # hourly built from a DIFFERENT (quiet) source so the screen skips the hour that really holds a 2c step
     bad2 = check_match_set(matches, K, mins2, hours); assert any("2c step inside a skipped hour" in b for b in bad2), bad2[:3]
+    # the screen skips EVERY hour (flat hourly feed) while a real minute step of 2c exists: caught by the step check too
+    flatm = {"A-A": {t: dict(ts=t, bid=0.49, ask=0.51, volume=1.0) for t in range(base + 660, base + 660 + 3 * 3600, 60)}}
+    flatm["A-B"] = {t: dict(ts=t, bid=0.49, ask=0.51, volume=1.0) for t in flatm["A-A"]}
+    mm = [("EF", ["A-A", "A-B"], base + 600, base + 600 + 3 * 3600)]
+    assert check_match_set(mm, K, flatm, hourly_from_minutes(flatm)) == []
+    flatm["A-A"][base + 3600] = dict(ts=base + 3600, bid=0.51, ask=0.53, volume=1.0)                       # a +2c step at one minute, hidden in a flat hourly feed built from the quiet data
+    quiet_hours = hourly_from_minutes({"A-A": {t: dict(ts=t, bid=0.49, ask=0.51, volume=1.0) for t in flatm["A-A"]}, "A-B": flatm["A-B"]})
+    badf = check_match_set(mm, K, flatm, quiet_hours); assert any("2c step" in b for b in badf), badf
     print("SCREENCHECK SELFTEST OK (identical bets, in-play set and placebo on 10 synthetic tennis matches; a planted 2c step in a skipped hour voids the screen)")
 def run(series_path, lists, minute_dirs, hourly_dirs, scorekit_dir):
     import heldout_guard
