@@ -111,3 +111,11 @@ If the family is drawn as "in play on Kalshi prices" whatever the exit, it has t
 - **By entry mechanism plus exit style (lifecycle 7f), this card's cell is empty:** a sibling market's move as the signal, with a time exit. It is not barred.
 - **On the broader reading, "in play on Kalshi prices", this would be the THIRD try** after SC1 and SWING1, both FALSIFIED, and the last one the three-falsified rule allows.
 - If step 1 survives, the Head of R&D puts both readings to the owner before anything is registered.
+
+## 10. How fresh the two data sources are (added Nov 12, before the data landed; from the Forensics desk)
+
+Source: `kalshi-scalper/workers/forensics/DATA_SOURCES_FRESHNESS.md` on branch `claude/forensics-desk`.
+
+- **The in-game recorder's quotes are a delayed copy.** Kalshi's market LIST read returned the same quote for about 11 seconds at a time when Forensics measured it on the Bitcoin 15 minute market (72,012 polls, 4,360 distinct states). The in-game recorder reads market objects from an event list, so its quotes are assumed to be delayed the same way (not measured on sports). Together with the two-minute polling found in section 2, the recorder cannot support any claim about a lag finer than its own spacing, and even at 20 seconds a poll it could not have supported one finer than about 10 to 20 seconds.
+- **That is why the measurement uses one-minute candles and not the recorder.** A one-minute bot cannot use a finer lag anyway.
+- **One open check on the candles themselves.** Whether a candle's closing bid and ask are the book at the end of the minute has not been measured yet (Forensics, CANDLEVSBOOK1). If they are not, the Head of R&D will say so before any of this measurement's data is read, and the reading waits for that.
