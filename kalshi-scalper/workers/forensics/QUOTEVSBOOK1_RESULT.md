@@ -76,3 +76,16 @@ Edge rows minus the others:
 **What this supports.** Reading (c): the quote recorder shows asks the book does not, more often on the rows the model picked. The registered CFRTI development figure is priced at those asks and is not a tradable figure. The book replay is the line that means something: of the 16 three-venue edge rows with a book, 9 fill at the ask seen about 2 to 4 seconds later (`results/CFRTI_DEV_REPLAY_GRID.csv`).
 
 **For the held-out read.** Price every held-out row from the R6 book at arrival, never from the quote recorder's ask; and form the signal from the book too if that is possible, because a signal formed on an 11 second old quote and then filled at the book is a different rule from the one registered: it selects rows on a stale price and then pays the real one. Whether that changed rule has any edge is exactly what the held-out read would then measure, once, and it should be registered as such before Nov 20.
+
+### Band note (added 2026-11-12, after Desk A said its cheap-side band is 3c to 30c)
+
+The Part 2 tables above use every row in Desk A's file, which is its rule's own band, 3c to 30c (88 of the 437 rows are under 5c, 6 of them edge rows). Restricted to the 5c to 30c band this desk registered:
+
+| | Three-venue | Kraken-only |
+|---|---|---|
+| Edge rows / other rows with a book | 15 / 71 | 10 / 72 |
+| Quote 2c or more below the book (bracket): edge rows against the others | 26.7% against 7.0% | 30.0% against 6.9% |
+| Difference in that share | +19.6 points (-1.8 to +43.9) | +23.1 points (-2.8 to +54.4) |
+| Difference in the mean gap | -3.8c (-8.0 to -1.2) | -1.8c (-3.8 to +0.3) |
+
+Same direction and nearly the same size, but with one or two fewer edge rows the interval of the share difference now includes zero in both forms; the mean-gap difference for the three-venue form still does not. So the edge-row concentration stays "no evidence at n = 15 and n = 10" as a rate, direction as predicted, and the conclusion rests on Part 1's mechanism rather than on these few rows. Counted on the same rows, "stale" in the earlier replay note (4 of 16 three-venue rows with the book 4c or more above the ask seen) and here (5 of 16 at 2c or more, 4 of 16 at 4c or more; Kraken-only 4 of 12 and 3 of 12) agree with Desk A's own count of 5 of 16 and 4 of 12.
