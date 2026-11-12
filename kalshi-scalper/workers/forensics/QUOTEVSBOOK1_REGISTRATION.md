@@ -1,0 +1,19 @@
+# QUOTEVSBOOK1 registration: does the quote recorder's ask agree with the R6 book's ask, and less so on the rows the CFRTI model picked? (2026-11-12, committed BEFORE any quote-recorder file was fetched or anything computed)
+
+Asked for by the Head of R&D (message, Nov 12). A measurement: no rule scored, NO settlement result loaded (the quote recorder's `results.csv.gz` is not fetched), zero tries. Public recorded data only, zero Kalshi requests, nothing about the live account. Script `quotevsbook1.py`.
+
+**Why.** In the CFRTI development replay, 4 of 16 three-venue rows had an R6 book ask 4c to 25c above the ask the rule saw, less than 2 seconds before the decision. The two recorders read different things: the quote recorder (`scripts/record_quotes.py`) stores `yes_bid` and `yes_ask` of the MARKET object, R6 (`scripts/record_15m_book.py`) stores the ORDER BOOK. If the market object's quote lags or differs from the book, a model that looks for underpriced asks will pick the stale ones.
+
+**Constants.** `KXBTC15M`. Windows whose close is from 2026-10-29T22:15:00Z up to but not including 2026-11-05T00:00:00Z (development days on which both recorders exist). Nothing closing on or after 2026-11-05 is read from the quote recorder. The asked span is 180 to 120 seconds before the close; the quote recorder only records the last 150 seconds of a window, so the PRIMARY span is 150 to 120 seconds, and a SECONDARY span, 120 to 30 seconds, is shown separately (it is used for the clock-offset estimate, where more rows help). Quote rows with `status` not open or active, or without both prices, are dropped.
+
+**Part 1, every quote row.** Cheaper side from the quote row itself (YES ask = `yes_ask`, NO ask = 1 - `yes_bid`; equal asks dropped), its ask q in [0.05, 0.30]. Book ask of the same side: (i) the last usable R6 poll received at or before the quote row's `t_recv_ms` (no more than 4 s earlier), (ii) the first usable poll after it (no more than 4 s later). d = q minus the book ask (negative = the quote shows a cheaper ask than the book). Reported for (i), for (ii) and for the "bracket" (0 when q lies between the two book asks, else the signed distance to the nearer one): share with |d| at or under 1c; shares with d at or below -2c, -4c, -10c and at or above +2c, +4c, +10c; mean and median. Intervals 95% by resampling whole windows.
+
+**Clock.** The same statistics after shifting the quote rows' time by k seconds, k = -3 to +3: the k with the smallest mean |d| against the nearest poll is reported, with the curve. Beside it: R6's own clock error from its server Date header (median of header time + 0.5 s minus `t_recv_ms`) and the quote recorder's SNTP offsets from its `clock.csv.gz`.
+
+**Part 2, the model's rows.** Desk A supplies the decision instants of all development cheap-side rows of CFRTI1-BTC with an edge flag and no outcome. For each: its ask_seen against the book ask at (i) and (ii) and the bracket, as in Part 1. Reported separately for edge = 1 and edge = 0, with the difference between the two groups (mean d, and the share with d at or below -2c) and its interval. Under about 100 rows in a group: "no evidence at n = x".
+
+**Reading rule, fixed now.**
+- (a) "the recorders agree": at the best clock shift, at least 90% of primary-span rows are within 1c on the bracket measure, and the edge rows do not differ from the non-edge rows (the interval of the difference includes 0).
+- (b) "a clock offset explains it": a non-zero shift lowers the mean |d| by 30% or more and (a)'s 90% holds after it.
+- (c) "the quote shows asks the book does not, concentrated on edge rows": after the best shift, the share of rows with the quote 2c or more below the book (bracket measure) is higher on edge rows than on non-edge rows with the interval of the difference above 0.
+- Otherwise: say which parts hold and that the rest is "no evidence at n = x".
