@@ -196,17 +196,21 @@ print(json.dumps({"n": len(rows), "w": len(m.COVER_COLS), "g": dict(zip(m.COVER_
 };
 
 // FB10: it stops by itself after 14 days, in the workflow and in the script.
-// FB13: from 2026-11-13 23:59 UTC only Bitcoin and Ethereum are recorded (the owner, Nov 11, 2026: the spot-lead test needs more windows); before it, all five.
+// FB13: from 2026-11-13 23:59 UTC only Bitcoin, Ethereum and gold are recorded (the owner, Nov 11, 2026: the spot-lead test needs more windows; gold added Nov 12 so its return evidence outlives the bot's kill latch); before it, all five.
 gates.FB13 = () => {
-  const out = py(`print(json.dumps([list(m.series_for(m.FULL_END_EPOCH - 900)), list(m.series_for(m.FULL_END_EPOCH + 900)), list(m.series_for(m.FULL_END_EPOCH + 1800)), list(m.EXT_SERIES), list(m.series_for(m.ETH_END_EPOCH - 900)), list(m.series_for(m.ETH_END_EPOCH + 900)), list(m.series_for(m.END_EPOCH))]))`);
+  const out = py(`print(json.dumps([list(m.series_for(m.FULL_END_EPOCH - 900)), list(m.series_for(m.FULL_END_EPOCH + 900)), list(m.series_for(m.FULL_END_EPOCH + 1800)), list(m.EXT_SERIES), list(m.series_for(m.ETH_END_EPOCH - 900)), list(m.series_for(m.ETH_END_EPOCH + 900)), list(m.series_for(m.END_EPOCH - 900)), list(m.series_for(m.END_EPOCH))]))`);
+  const ext = ['KXBTC15M', 'KXETH15M', 'KXGOLD15M'];
   assert.deepStrictEqual(out[0], ['KXGOLD15M', 'KXBTC15M', 'KXETH15M', 'KXDOGE15M', 'KXXRP15M'], 'a window opening before the cut records all five');
-  assert.deepStrictEqual(out[1], ['KXBTC15M', 'KXETH15M'], 'a window opening at the cut records only Bitcoin and Ethereum');
-  assert.deepStrictEqual(out[2], ['KXBTC15M', 'KXETH15M']);
-  assert.deepStrictEqual(out[3], ['KXBTC15M', 'KXETH15M'], 'no series is ever added by the extension');
-  // Nov 12, 2026 (the owner): Ethereum still stops on Nov 20; Bitcoin alone continues to Dec 15.
-  assert.deepStrictEqual(out[4], ['KXBTC15M', 'KXETH15M'], 'the last window opening before Nov 20 23:59 still records Ethereum');
-  assert.deepStrictEqual(out[5], ['KXBTC15M'], 'a window opening at or after Nov 20 23:59 records Bitcoin only');
-  assert.deepStrictEqual(out[6], ['KXBTC15M']);
+  assert.deepStrictEqual(out[1], ext, 'a window opening at the cut records only Bitcoin, Ethereum and gold');
+  assert.deepStrictEqual(out[2], ext);
+  assert.deepStrictEqual(out[3], ext, 'the extension adds no series beyond Bitcoin, Ethereum and gold');
+  // Nov 12, 2026: Ethereum still stops on Nov 20; Bitcoin and gold continue to Dec 15.
+  assert.deepStrictEqual(out[4], ext, 'the last window opening before Nov 20 23:59 still records Ethereum');
+  assert.deepStrictEqual(out[5], ['KXBTC15M', 'KXGOLD15M'], 'a window opening at or after Nov 20 23:59 records Bitcoin and gold only (no Ethereum)');
+  assert.deepStrictEqual(out[6], ['KXBTC15M', 'KXGOLD15M'], 'gold is still recorded in the last window before Dec 15');
+  assert.deepStrictEqual(out[7], ['KXBTC15M', 'KXGOLD15M']);
+  const stop = py(`print(json.dumps([m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH)]))`);
+  assert.deepStrictEqual(stop, [false, true], 'gold stops at Dec 15 23:59 UTC with the rest: the end check is unchanged and fails closed');
 };
 
 gates.FB10 = () => {

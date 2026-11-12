@@ -4,8 +4,8 @@
 # Public data only: no key, no secret, no order. The built-in GITHUB_TOKEN pushes gzipped files to the `quote-data` branch (under book15r6/), never to main. It replaces R2 (record-book15).
 # Scheduled starts run hours late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running
 # waits, so jobs never overlap, and a dropped trigger costs at most 30 minutes instead of 4 hours (15 since Oct 31, 2026: the triggers run at :05, :20, :35 and :50, because GitHub dropped a whole run of them for about 5 hours). Each job records up to the next 4 hour boundary (about 4 hours) and stops.
-# Nov 11, 2026 (the owner): from 2026-11-13 23:59 UTC only the Bitcoin and Ethereum markets are recorded, until 2026-11-20 23:59 UTC (research session's spot-lead needs more windows).
-# Nov 12, 2026 (the owner): Bitcoin alone continues from 2026-11-20 23:59 UTC until 2026-12-15 23:59 UTC. Ethereum still stops on Nov 20; no series or host is added.
+# Nov 11, 2026 (the owner): from 2026-11-13 23:59 UTC only the Bitcoin, Ethereum and gold markets are recorded, until 2026-11-20 23:59 UTC (research session's spot-lead needs more windows).
+# Nov 12, 2026 (the owner): Bitcoin continues from 2026-11-20 23:59 UTC until 2026-12-15 23:59 UTC, and gold (KXGOLD15M) with it, added at the Head of R&D's request. Ethereum still stops on Nov 20; no host is added.
 # It stops by itself after that: from 2026-12-15 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-15m-book
 on:

@@ -12,7 +12,7 @@ For the five 15 minute series the bot trades (KXGOLD15M, KXBTC15M, KXETH15M, KXD
 It reads PUBLIC endpoints only: no key, no signing, no auth header, no account path, no order. At most 2 request streams (the book, and the tape plus housekeeping), each with
 at least 0.5 seconds between calls; a 429 waits 2 seconds, doubling up to 30, and is never asked again at once.
 
-It stops by itself: no window opening at or after END_UTC (2026-12-15 23:59 UTC, Bitcoin only from 2026-11-20 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
+It stops by itself: no window opening at or after END_UTC (2026-12-15 23:59 UTC, Bitcoin and gold only from 2026-11-20 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
 It replaces R2 (record_book15.py, Bitcoin, Ethereum and gold only), as the spec says.
 
 Rows are written exactly as the exchange returns them (levels re-ordered best first, prices and sizes as numbers, nothing computed). A missing level is empty, never zero."""
@@ -47,9 +47,9 @@ DISCOVER_EVERY_S = 2.0
 DISCOVER_FOR_S = 30.0
 TAPE_PAGES_PER_WINDOW_EST = 75   # the spec's measured 50 to 75 pages a window over the five markets
 FULL_END_UTC = "2026-11-13T23:59:00Z"  # the first 14 days: all five series. Windows opening at or after this record only EXT_SERIES.
-EXT_SERIES = ("KXBTC15M", "KXETH15M")  # Nov 11, 2026 (the owner): spot-lead needs more Bitcoin and Ethereum windows, so only those two continue, to ETH_END_UTC
+EXT_SERIES = ("KXBTC15M", "KXETH15M", "KXGOLD15M")  # Nov 11, 2026 (the owner): spot-lead needs more Bitcoin and Ethereum windows, so only those continue, to ETH_END_UTC. Gold added Nov 12, 2026 (Head of R&D)
 ETH_END_UTC = "2026-11-20T23:59:00Z"  # Ethereum stops here (Nov 11 decision, unchanged). Windows opening at or after this record only BTC_SERIES.
-BTC_SERIES = ("KXBTC15M",)  # Nov 12, 2026 (the owner): Bitcoin alone continues to END_UTC; this adds no series and no host
+BTC_SERIES = ("KXBTC15M", "KXGOLD15M")  # Nov 12, 2026 (the owner): Bitcoin continues to END_UTC; gold added the same day so its return evidence outlives the bot's kill latch; no host is added
 END_UTC = "2026-12-15T23:59:00Z"  # nothing is recorded from here on
 UA = {"User-Agent": "shwoopnet-research-recorder"}
 
@@ -72,7 +72,7 @@ ETH_END_EPOCH = epoch_of(ETH_END_UTC)
 
 
 def series_for(close_epoch):
-    """The series recorded for the window closing at close_epoch: all five while it opens before FULL_END_UTC, then Bitcoin and Ethereum until ETH_END_UTC, then Bitcoin only."""
+    """The series recorded for the window closing at close_epoch: all five while it opens before FULL_END_UTC, then Bitcoin, Ethereum and gold until ETH_END_UTC, then Bitcoin and gold only."""
     opens = close_epoch - WINDOW_S
     if opens < FULL_END_EPOCH:
         return SERIES
