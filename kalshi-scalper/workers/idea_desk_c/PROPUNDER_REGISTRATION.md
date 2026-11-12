@@ -1,5 +1,7 @@
 # PROPUNDER registration (Idea Desk C, Nov 12, 2026)
 
+**CLOSED UNREAD, 0 tries (Head of R&D, Nov 12, 2026, 19:20Z; the try is removed from the ledger).** It is F7's rule (Oct 26: every market with YES mid 0.40 to 0.60 and spread 3c or less, buy NO at the ask, hold; 1,788 games, win rate equal to the price, failed on cost) moved to the player-points ladder. Under the lifecycle rules that makes it a version of a failed parent, not a new strategy. Its one new element (fans buying a named player's over) rests on an uncounted sample, and about 25 game days this season could not reach the bar. It may return only with a new fact: a counted sample showing single-game player-prop unders behave differently from game-total unders. Nothing below was run.
+
 **Registered before any PROPUNDER price, list or result was read.** No Kalshi request has been made by this desk. Rulings applied: the Head of R&D's message of Nov 12, 19:14Z (points 1a to 1g). Card text: `IDEA_DESK_C_CARDS.md`, card C1. [research]
 
 **Tries: 1.** The price-minus-settle gap at the chosen strike is the rule's edge in other units, so reading it against outcomes is the one try (Head of R&D ruling 1a). It is entered in the Head's ledger at this commit.
