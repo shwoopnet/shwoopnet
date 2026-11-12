@@ -20,6 +20,7 @@ Forensics desk's figures).
 Usage: python3 drift_addition.py <games.json> <folder of pull run A> [<run B> ...]
 """
 import glob, gzip, json, math, os, sys
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))   # measure.py sits beside this file
 import measure as M
 
 COST = {"NBA": 0.045, "NFL": 0.045, "NHL": 0.064}
