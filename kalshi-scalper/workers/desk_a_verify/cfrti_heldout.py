@@ -9,6 +9,7 @@ import gzip, csv, glob, math, os, sys, bisect, collections, datetime
 from statistics import NormalDist
 Phi = NormalDist().cdf
 MODE, Q = sys.argv[1], sys.argv[2]
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(Q, "cfrti_heldout")      # standing rule (h)
 DEV_END = "2026-11-05"                      # development = run folders before this day (unchanged: reproduces n 36 / n 32)
 NOTBLIND = ("2026-11-05", "2026-11-09")      # Nov 5 to Nov 8: a baseline for this side and band was printed by Forensics on Nov 12 (Head's ruling, option b): NOT blind, printed SEPARATELY, never in the verdict lines
 HELDOUT_FIRST_DAY = "2026-11-09"             # the held-out window starts here (Head, Nov 12, after Forensics' disclosure); set by this constant, before any held-out row was opened by Desk A
@@ -180,7 +181,8 @@ def print_notblind():
         print("== not blind, kraken only | folders %d | cheap rows with a model %d" % (nfK, len(nrowsK))); rep("  baseline cheap side (not blind)", nrowsK); rep("  model edge >= 0.05 (not blind)", nselK)
 
 if MODE == "notblind_selftest":                                     # tests the NOT BLIND block on a folder whose path contains SYNTHETIC; refuses any other folder (so it cannot open Nov 5 to 8 outcomes)
-    if "SYNTHETIC" not in Q: sys.exit("Refusing: notblind_selftest runs only on a folder whose path contains SYNTHETIC")
+    sig = os.path.join(os.path.realpath(Q), "SYNTHETIC_FIXTURE_SIGNATURE.txt")      # a signature file written only by the fixture generator (fixed content), checked on the REAL path: a symlink to the real quotes folder has none
+    if not os.path.isfile(sig) or open(sig).read().strip() != "CFRTI SYNTHETIC FIXTURE v1 (made-up data, no recorded row)": sys.exit("Refusing: notblind_selftest runs only on a folder holding the fixture signature file written by the synthetic generator")
     print_notblind(); sys.exit(0)
 if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
 keep = {"dev": lambda d: d < DEV_END, "export": lambda d: d < DEV_END, "exportall": lambda d: d < DEV_END,
@@ -196,6 +198,8 @@ sel3 = [r for r in rows3 if r[4] - r[3] >= 0.05]
 DUE = "--due" in sys.argv    # the Head of R&D says the read is due even though three-venue rows are under 50
 if MODE == "heldout" and len(sel3) < NEEDED and not DUE:
     sys.exit("Refusing: %d three-venue Bitcoin edge rows on %d folders with all three venues, %d needed (nothing scored). Use --due only when told the read is due." % (len(sel3), f3, NEEDED))
+if MODE == "heldout":                                                  # the done marker is written BEFORE anything is printed (as DEPTH1 does), so a crash after the held-out folders were opened still leaves a record; the final line below overwrites it
+    open(LOCAL, "w").write("STARTED %s (a crashed run is never quietly repeated; the Head decides)\n" % datetime.datetime.now(datetime.timezone.utc).isoformat())
 rowsK, lostK, fK = build({"kraken"}, keep)
 selK = [r for r in rowsK if r[4] - r[3] >= 0.05]
 tag = {"dev": "DEVELOPMENT", "export": "DEVELOPMENT EXPORT", "exportall": "DEVELOPMENT EXPORT ALL", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
