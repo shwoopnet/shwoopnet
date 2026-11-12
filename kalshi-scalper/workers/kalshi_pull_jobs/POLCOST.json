@@ -1,0 +1,905 @@
+{
+ "job_id": "POLCOST",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/POLI2_COUNT_REGISTRATION.md",
+ "purpose": "Politics cost snapshot (POL-i2 Amendment 4): the OPEN markets of the 79 daily, weekly or monthly Politics series, quotes and sizes only; no result exists for an open market; nothing scored.",
+ "heldout": "none: open markets have no result; a measurement of cost, no rule scored, no try",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "538APPROVE",
+  "APRPOTUS",
+  "ASYLUMCASES",
+  "KX538APPROVE",
+  "KXACTBLUEFIFTH",
+  "KXACTBLUEFOURTH",
+  "KXACTBLUESECOND",
+  "KXACTBLUETHIRD",
+  "KXACTBLUETOP",
+  "KXAPRPOTUS",
+  "KXASYLUMCASES",
+  "KXBABELMANDEBWEEKLY",
+  "KXBILLSCOUNT",
+  "KXBILLSCOUNTWEEKLY",
+  "KXBILLSSIGNED",
+  "KXDCGOLFVISITCOUNT",
+  "KXEOWEEK",
+  "KXEPSTEIN",
+  "KXFRPROTEST",
+  "KXFULLLID8PM",
+  "KXFULLLIDBEFORE630PM",
+  "KXFULLLIDBEFORE8PM",
+  "KXGENERICBALLOTVOTEHUB",
+  "KXHORMUZMAX",
+  "KXHORMUZPEAK",
+  "KXHORMUZWEEKLY",
+  "KXINCOMERATE",
+  "KXJUDGECOUNT",
+  "KXJUDGECOUNTYEAR",
+  "KXJUDGEFIRST",
+  "KXKEVCOUNT",
+  "KXLAGODAYS",
+  "KXLAGOVISITCOUNT",
+  "KXLEADERCOMBOOUT",
+  "KXLEAVECONGRESS",
+  "KXLVL4WARNING",
+  "KXMAMDANIEO",
+  "KXMAXSHIPSHORMUZ",
+  "KXNEWDEAL",
+  "KXNEWTARIFFS",
+  "KXNJGOLFVISITCOUNT",
+  "KXNYCHOT",
+  "KXNYTFULLWIDTH",
+  "KXNYTHEAD",
+  "KXPANAMAWEEKLY",
+  "KXPARDONANYONE",
+  "KXPARDONSTRUMP",
+  "KXPOTUSTWEETS",
+  "KXPRESSBRIEFINGCOUNT",
+  "KXSUEZWEEKLY",
+  "KXSWENCOUNTERS",
+  "KXTORYMPJOINREFORM",
+  "KXTRUMPACT",
+  "KXTRUMPACTD",
+  "KXTRUMPAPPROVE",
+  "KXTRUMPDELETE",
+  "KXTRUMPENDORSEMENTS",
+  "KXTRUMPEOD",
+  "KXTRUMPFAV",
+  "KXTRUMPGAGGLED",
+  "KXTRUMPGOLFD",
+  "KXTRUMPINTERVIEWD",
+  "KXTRUMPMEET",
+  "KXTRUMPMEETM",
+  "KXTRUMPNOMNUM",
+  "KXTRUMPNUMSTATES",
+  "KXTRUMPPHOTO",
+  "KXTRUMPSTATESMON",
+  "KXTRUMPVH",
+  "KXTRUMPVISITGREENLAND",
+  "KXTRUMPVISITWEEK",
+  "KXTRUTHSOCIAL",
+  "KXTRUTHSOCIALD",
+  "KXUKPOLLFIRST",
+  "KXUSCANADATARIFFDOWN",
+  "KXUSCANADATARIFFUP",
+  "KXUSUNSCVETO",
+  "KXVHGCB",
+  "KXVOTEHUBTRUMPUPDOWN"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 79,
+ "notes": "TIE3 measurement",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "open_538APPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "538APPROVE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_APRPOTUS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "APRPOTUS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_ASYLUMCASES",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "ASYLUMCASES",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KX538APPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KX538APPROVE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXACTBLUEFIFTH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXACTBLUEFIFTH",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXACTBLUEFOURTH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXACTBLUEFOURTH",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXACTBLUESECOND",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXACTBLUESECOND",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXACTBLUETHIRD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXACTBLUETHIRD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXACTBLUETOP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXACTBLUETOP",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXAPRPOTUS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXASYLUMCASES",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXASYLUMCASES",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXBABELMANDEBWEEKLY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBABELMANDEBWEEKLY",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXBILLSCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBILLSCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXBILLSCOUNTWEEKLY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBILLSCOUNTWEEKLY",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXBILLSSIGNED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBILLSSIGNED",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXDCGOLFVISITCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDCGOLFVISITCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXEOWEEK",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEOWEEK",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXEPSTEIN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEPSTEIN",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXFRPROTEST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFRPROTEST",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXFULLLID8PM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFULLLID8PM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXFULLLIDBEFORE630PM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFULLLIDBEFORE630PM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXFULLLIDBEFORE8PM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXFULLLIDBEFORE8PM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXGENERICBALLOTVOTEHUB",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGENERICBALLOTVOTEHUB",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXHORMUZMAX",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHORMUZMAX",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXHORMUZPEAK",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHORMUZPEAK",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXHORMUZWEEKLY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHORMUZWEEKLY",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXINCOMERATE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXINCOMERATE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXJUDGECOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXJUDGECOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXJUDGECOUNTYEAR",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXJUDGECOUNTYEAR",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXJUDGEFIRST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXJUDGEFIRST",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXKEVCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXKEVCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXLAGODAYS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLAGODAYS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXLAGOVISITCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLAGOVISITCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXLEADERCOMBOOUT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLEADERCOMBOOUT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXLEAVECONGRESS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLEAVECONGRESS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXLVL4WARNING",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLVL4WARNING",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXMAMDANIEO",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMAMDANIEO",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXMAXSHIPSHORMUZ",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMAXSHIPSHORMUZ",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNEWDEAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNEWDEAL",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNEWTARIFFS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNEWTARIFFS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNJGOLFVISITCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNJGOLFVISITCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNYCHOT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNYCHOT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNYTFULLWIDTH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNYTFULLWIDTH",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXNYTHEAD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNYTHEAD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXPANAMAWEEKLY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPANAMAWEEKLY",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXPARDONANYONE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPARDONANYONE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXPARDONSTRUMP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPARDONSTRUMP",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXPOTUSTWEETS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPOTUSTWEETS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXPRESSBRIEFINGCOUNT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPRESSBRIEFINGCOUNT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXSUEZWEEKLY",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSUEZWEEKLY",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXSWENCOUNTERS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSWENCOUNTERS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTORYMPJOINREFORM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTORYMPJOINREFORM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPACT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPACT",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPACTD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPACTD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPAPPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPDELETE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPDELETE",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPENDORSEMENTS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPENDORSEMENTS",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPEOD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPEOD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPFAV",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPFAV",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPGAGGLED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPGAGGLED",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPGOLFD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPGOLFD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPINTERVIEWD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPINTERVIEWD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPMEET",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMEET",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPMEETM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPMEETM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPNOMNUM",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPNOMNUM",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPNUMSTATES",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPNUMSTATES",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPPHOTO",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPPHOTO",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPSTATESMON",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPSTATESMON",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPVH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPVH",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPVISITGREENLAND",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPVISITGREENLAND",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUMPVISITWEEK",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPVISITWEEK",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUTHSOCIAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUTHSOCIAL",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXTRUTHSOCIALD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUTHSOCIALD",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXUKPOLLFIRST",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUKPOLLFIRST",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXUSCANADATARIFFDOWN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSCANADATARIFFDOWN",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXUSCANADATARIFFUP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSCANADATARIFFUP",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXUSUNSCVETO",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSUNSCVETO",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXVHGCB",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVHGCB",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "open_KXVOTEHUBTRUMPUPDOWN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVOTEHUBTRUMPUPDOWN",
+    "status": "open",
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ]
+}

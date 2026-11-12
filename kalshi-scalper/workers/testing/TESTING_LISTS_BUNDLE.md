@@ -1,6 +1,6 @@
-# TESTING_LISTS_BUNDLE: one run for four of the Testing Desk's small jobs (Testing Desk, Nov 12, 2026; revised 17:50Z at the Head's change)
+# TESTING_LISTS_BUNDLE: one run for four of the Testing Desk's small jobs (Testing Desk, Nov 12, 2026; revised 18:10Z: POLCOST replaces POL-i2's settled lists)
 
-Built at the Head's request because the runner allows 12 real runs a UTC day (all used for Nov 12) and fourteen jobs wait. **Revised: SOCDERIV_LISTS is OUT of the bundle and is its own job again** (the Head, 17:44Z: a size stop cost a second run this morning). `kalshi_pull_jobs/TESTING_LISTS_BUNDLE.json` (built by `bundle.py build`) passes `python3 -I scripts/kalshi_pull.py TESTING_LISTS_BUNDLE --dry-run`. Owner MAIN. Public market data only; nothing closing on or after any held-out constant is requested (TIE3 2026-11-13T00:00Z; POL-i2 2026-11-05T00:00Z); no rule scored, no try.
+Built at the Head's request because the runner allows 12 real runs a UTC day (all used for Nov 12) and fourteen jobs wait. **Revised: SOCDERIV_LISTS is OUT of the bundle and is its own job again** (the Head, 17:44Z: a size stop cost a second run this morning). `kalshi_pull_jobs/TESTING_LISTS_BUNDLE.json` (built by `bundle.py build`) passes `python3 -I scripts/kalshi_pull.py TESTING_LISTS_BUNDLE --dry-run`. Owner MAIN. Public market data only; nothing closing on or after any held-out constant is requested (TIE3 2026-11-13T00:00Z; POLCOST lists open markets, which have no result); no rule scored, no try.
 
 ## Contents (request ids carry the sub-job prefix, so each manifest row says where it belongs)
 
@@ -9,12 +9,12 @@ Built at the Head's request because the runner allows 12 real runs a UTC day (al
 | `t3_` | TIE3_LISTS | 32 | 88 | settled lists of the 20 period series (8 also on `/historical`), 4 fee-field reads |
 | `wx_` | WXDAYEND_A | 22 | 22 | **18 one-market candle windows (the registered finishing count of card 74, already approved) and 4 settled lists**; the only candle requests in the bundle |
 | `ur_` | UNRATE_LISTS | 4 | 8 | settled lists of KXU3 and KXUE, live and historical |
-| `p2_` | POLI2_LISTS | 79 | 237 | one live settled list per Politics series with daily, weekly or monthly frequency |
+| `pc_` | POLCOST (replaces POLI2_LISTS, Head 18:01Z, POL-i2 Amendment 4) | 79 | 237 | one OPEN-markets list per Politics series with daily, weekly or monthly frequency: quotes, sizes, volume, open interest, close time; no result exists, nothing scored |
 | | **Total** | **137** | **355** | job cap 369 (355 pages plus 14 for 429 retries; the runner counts pages against the cap) |
 
 **SOCDERIV_LISTS stays separate:** 67 requests, 131 pages at most, cap 140, as originally built.
 
-Order is the Head's scoring order, so a size stop would fall on the last sub-job (POL-i2).
+Order is the Head's scoring order, so a size stop would fall on the last sub-job (POLCOST).
 
 ## Size, restated
 
@@ -30,7 +30,7 @@ Writes `<out>/<SUB_JOB>/manifest.json` plus the answer files, with the ORIGINAL 
 1. TIE3 lists: `python3 -W ignore kalshi-scalper/workers/testing/tie3.py events $OUT/TIE3_LISTS`; confirm that a game shares its ticker suffix across series and tell the Head at once if it fails.
 2. WXDAYEND count: `wxdayend.py score $OUT/WXDAYEND_A`, then `build-b $OUT/WXDAYEND_A` (4 requests).
 3. UNRATE count: `unrateround.py events $OUT/UNRATE_LISTS`.
-4. POL-i2 stage 1: `poli2_count.py build-s2 $OUT/POLI2_LISTS` builds the stage 2 job and reports the markets dropped by the 400 cap; the kill (fewer than 40 qualifying gaps per half) is applied after the candles.
+4. POLCOST: `python3 -W ignore kalshi-scalper/workers/testing/polcost.py table $OUT/POLCOST --csv politics_cost_table.csv`: overall median round trip at 20c to 80c; above 5c closes POL-i2 on cost; the per-series table goes to Desk B and Forensics.
 SOCDERIV's own lists run: `socderiv.py games <its folder>`.
 Candle stages for TIE3, POL-i2, UNRATE and SOCDERIV wait for the Head's go.
 
