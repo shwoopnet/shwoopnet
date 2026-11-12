@@ -1,0 +1,71 @@
+{
+ "job_id": "CFRTI_K_PROBE",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
+ "purpose": "One request: does the live batched candle endpoint answer for PRE-cutover KXBTC15M markets (24 consecutive windows, closes 2026-08-20T16:15Z to 2026-08-20T21:45Z; 24 tickers x a 375 minute window is under the 10,000 limit)? Decides only how the CFRTI-K development sample is fetched (registration section 8). No outcome is read.",
+ "heldout": "none: the windows close before 2026-09-12 and no outcome is read",
+ "allowed_endpoints": [
+  {
+   "name": "markets_candlesticks_batch",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBTC15M"
+ ],
+ "ticker_allowlist": [
+  "KXBTC15M-26AUG201215-15",
+  "KXBTC15M-26AUG201230-30",
+  "KXBTC15M-26AUG201245-45",
+  "KXBTC15M-26AUG201300-00",
+  "KXBTC15M-26AUG201315-15",
+  "KXBTC15M-26AUG201330-30",
+  "KXBTC15M-26AUG201345-45",
+  "KXBTC15M-26AUG201400-00",
+  "KXBTC15M-26AUG201415-15",
+  "KXBTC15M-26AUG201430-30",
+  "KXBTC15M-26AUG201445-45",
+  "KXBTC15M-26AUG201500-00",
+  "KXBTC15M-26AUG201515-15",
+  "KXBTC15M-26AUG201530-30",
+  "KXBTC15M-26AUG201545-45",
+  "KXBTC15M-26AUG201600-00",
+  "KXBTC15M-26AUG201615-15",
+  "KXBTC15M-26AUG201630-30",
+  "KXBTC15M-26AUG201645-45",
+  "KXBTC15M-26AUG201700-00",
+  "KXBTC15M-26AUG201715-15",
+  "KXBTC15M-26AUG201730-30",
+  "KXBTC15M-26AUG201745-45",
+  "KXBTC15M-26AUG201800-00"
+ ],
+ "max_requests": 1,
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "probe0",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXBTC15M-26AUG201215-15,KXBTC15M-26AUG201230-30,KXBTC15M-26AUG201245-45,KXBTC15M-26AUG201300-00,KXBTC15M-26AUG201315-15,KXBTC15M-26AUG201330-30,KXBTC15M-26AUG201345-45,KXBTC15M-26AUG201400-00,KXBTC15M-26AUG201415-15,KXBTC15M-26AUG201430-30,KXBTC15M-26AUG201445-45,KXBTC15M-26AUG201500-00,KXBTC15M-26AUG201515-15,KXBTC15M-26AUG201530-30,KXBTC15M-26AUG201545-45,KXBTC15M-26AUG201600-00,KXBTC15M-26AUG201615-15,KXBTC15M-26AUG201630-30,KXBTC15M-26AUG201645-45,KXBTC15M-26AUG201700-00,KXBTC15M-26AUG201715-15,KXBTC15M-26AUG201730-30,KXBTC15M-26AUG201745-45,KXBTC15M-26AUG201800-00",
+    "start_ts": 1787241600,
+    "end_ts": 1787263200,
+    "period_interval": 1
+   }
+  }
+ ]
+}
