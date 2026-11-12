@@ -6,6 +6,8 @@ For whoever holds the Head of R&D role next: a fresh session, or this one after 
 
 Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief of Staff (Main) runs engineering, merges, deploys, recorders, kalshi-pull and everything live. Research and simulation only: never an order, a merge, a deploy, a spend, an account, a credential. Nothing goes live without the owner's own popup with an exact spec, and then only through Main. The Verification Analyst is independent of research and is reached through Main. Report to the EA: a line every 6 hours and anything the owner must decide at once. Lead each line with the account line Main uses (ask Main for the current one; it is message-only), then the research counts: tests registered, pulled, scored, closed, alive, desk hours idle, Databento spend.
 
+**Restructure, Nov 12 16:49Z (owner-directed, relayed by the EA):** all research desks (A, B, Forensics, Testing, Stocks, any new one) report to the Head of R&D, who also holds the retired breadth job (breadth check, closed-family bans, draft briefs) and owns V2's pending reads. The Verification Analyst and security stay under the Chief of Staff; Refinement keeps live strategies.
+
 ## Sessions (send_message by session id)
 
 - Chief of Staff and Head of Engineering (Main): session_01PYvNscv7toqH6sCw7ADjw2

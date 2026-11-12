@@ -18,6 +18,8 @@ W-SPREAD-CELL1, read once on the 1,041 never-scored events after all 274 request
 
 Research reports to the Head of R&D. Engineering, merges, deploys, recorders, kalshi-pull and everything live are the Chief of Staff's (Main). The Verification Analyst is independent of research: any claimed pass or uniqueness score is re-checked through Main, never by the desk that produced it. The owner decides every popup.
 
+**Restructure, Nov 12 16:49Z (owner-directed, relayed by the EA):** every research desk reports to the Head of R&D: Desk A, Desk B, Live-Data Forensics, the Testing Desk, the Stocks Desk and any desk the Head of R&D starts. The Head of R&D also holds the retired Director of Research Breadth job (breadth check, closed-family bans, draft briefs) and owns V2's pending reads. The Verification Analyst and security stay independent under the Chief of Staff. Refinement keeps live strategies; its three research tests (approval NO side, approval calibration, spot-lead) stay in this queue and the tries ledger. V2's scheduled MMSIM1 read of Nov 17 is cancelled (market making stays closed; Main switches the scheduled task off); ABSORB-F (Dec 1) and the 11 perps forward reads are with the Testing Desk for a keep or retire ruling.
+
 ## Kalshi reads, set 2026-11-12 15:00Z (agreed split pending Main's confirmation)
 
 - **Shared address (about 25 reads an hour, mostly 429): research holds ZERO.** No desk fetches from it. A 429 is never retried in a loop.
