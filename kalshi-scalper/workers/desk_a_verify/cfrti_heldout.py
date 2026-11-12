@@ -19,6 +19,7 @@ LOCAL = os.path.join(HERE, ".cfrti_heldout_done")
 def rd(p):
     with gzip.open(p, "rt") as f: return list(csv.DictReader(f))
 def fee(p): return 0.07 * p * (1 - p)
+skipped3 = []
 def build(venues, keep_day, need3=False):
     rows = []; lost = collections.Counter(); folders = 0
     for d in sorted(glob.glob(Q + "/quotes/*/*")):
@@ -36,7 +37,7 @@ def build(venues, keep_day, need3=False):
             except Exception: pass
         for v in ser: ser[v].sort()
         if need3 and any(not ser.get(v) for v in ("coinbase", "kraken", "bitstamp")):
-            sys.exit("STOP: run folder %s: not all three venues contributed Bitcoin trades" % d)
+            skipped3.append(d); continue    # three-venue line only: this folder lacks a venue (the Kraken-only line keeps it)
         qb = collections.defaultdict(list)
         for r in qs:
             try: qb[r["ticker"]].append((int(r["t_send_ms"]), r))
@@ -106,12 +107,14 @@ if MODE == "heldout":
         sys.exit("Refusing: the held-out read is already marked done.")
 rows3, lost3, f3 = build(None, keep, need3=(MODE != "dev"))
 sel3 = [r for r in rows3 if r[4] - r[3] >= 0.05]
-if MODE == "heldout" and len(sel3) < NEEDED:
-    sys.exit("Refusing: %d three-venue Bitcoin edge rows, %d needed (nothing scored)." % (len(sel3), NEEDED))
+DUE = "--due" in sys.argv    # the Head of R&D says the read is due even though three-venue rows are under 50
+if MODE == "heldout" and len(sel3) < NEEDED and not DUE:
+    sys.exit("Refusing: %d three-venue Bitcoin edge rows on %d folders with all three venues, %d needed (nothing scored). Use --due only when told the read is due." % (len(sel3), f3, NEEDED))
 rowsK, lostK, fK = build({"kraken"}, keep)
 selK = [r for r in rowsK if r[4] - r[3] >= 0.05]
 tag = {"dev": "DEVELOPMENT", "export": "DEVELOPMENT EXPORT", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
-print("###", tag, "| run folders", f3)
+print("###", tag, "| three-venue line: %d run folders with all three venues (%d folders skipped for a missing venue) | kraken-only line: %d run folders" % (f3, len(skipped3), fK))
+if MODE != "dev" and len(sel3) < NEEDED: print("THREE-VENUE LINE: no evidence at n = %d (under %d rows)" % (len(sel3), NEEDED))
 print("== three venues (as registered) | cheap rows with a model", len(rows3), "| lost:", dict(lost3)); rep("  baseline cheap side", rows3); rep("  model edge >= 0.05", sel3)
 print("== kraken only | cheap rows with a model", len(rowsK), "| lost:", dict(lostK)); rep("  baseline cheap side", rowsK); rep("  model edge >= 0.05", selK)
 A = {(r[6], r[1]): r for r in sel3}; K = {(r[6], r[1]): r for r in selK}

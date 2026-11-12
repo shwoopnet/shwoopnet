@@ -48,3 +48,6 @@ Forensics measured real taker fills on the recorded Bitcoin books at the same lo
 - **Labels are taken from the registered line as registered. Any LIVE use, and any probe gate, is judged on the 6 second replay line** (the bot sends several seconds after the minute).
 - **Adds no try:** same rule, an execution model.
 - **Disclosure:** Forensics' ENTRYREPLAY1 read the no-model cheap-side baseline outcomes for closes Nov 5 to 8, which is public; no CFRTI row was formed from it.
+
+## Amendment (Nov 12, 2026, before any held-out folder is opened): venue loss
+If the owner rules that the research recorder stops reading Bitstamp and Coinbase, later folders hold Kraken only. The one held-out sitting then computes the three-venue line on the folders that hold all three venues and states how many folders and rows that is (under 50 rows = "no evidence at n = x", not a stop); the Kraken-only line and CFRTI-K are computed on every held-out folder. Implemented in `desk_a_verify/cfrti_heldout.py` (`--due` runs the read when the Head of R&D says it is due with under 50 three-venue rows).
