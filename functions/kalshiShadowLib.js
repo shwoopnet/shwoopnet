@@ -27,7 +27,10 @@ const SHADOW_RULES = Object.freeze([
 const OPEN = ["open", "active"];
 const RULE_KEYS = ["id", "readme", "series", "entry", "contracts", "registeredAt", "forwardReadDate"];
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
-const ENTRY_KEYS_SPREAD = ENTRY_KEYS.concat(["maxSpread"]);
+// Optional entry fields (Nov 12, 2026, shadow logger A and B): maxSpread; oiRiseMin (open interest at the candle ending 180 s before the close minus the one ending 360 s before it, the slot's definition; a missing
+// candle means NO row); calendar (a non-empty list of close times in ISO form, like SLOT_CALENDARS: only a market closing at one of them is a signal); secondRead (true: a second public read a few seconds after the row
+// records askAfter and wouldFillAfter). A rule without them behaves exactly as before.
+const ENTRY_KEYS_OPTIONAL = ["maxSpread", "oiRiseMin", "calendar", "secondRead"];
 const SIDE_RULES = ["yes", "no", "favourite", "cheap"];
 const isNum = (x) => typeof x === "number" && Number.isFinite(x);
 const isObj = (x) => x && typeof x === "object" && !Array.isArray(x);
@@ -44,13 +47,16 @@ function validateShadowRule(r, allowedSeries) {
   if (typeof r.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(r.readme)) e.push("readme must point at a pre-registration file");
   const allowed = Array.isArray(allowedSeries) ? allowedSeries : [];
   if (!Array.isArray(r.series) || !r.series.length || new Set(r.series).size !== r.series.length || r.series.some((x) => !allowed.includes(x))) e.push("series must be a non-empty subset of the markets the bot already quotes: " + allowed.join(", "));
-  if (!exactKeys(r.entry, ENTRY_KEYS) && !exactKeys(r.entry, ENTRY_KEYS_SPREAD)) e.push("entry has the wrong fields");
+  if (!isObj(r.entry) || ENTRY_KEYS.some((k) => !Object.prototype.hasOwnProperty.call(r.entry, k)) || Object.keys(r.entry).some((k) => !ENTRY_KEYS.includes(k) && !ENTRY_KEYS_OPTIONAL.includes(k))) e.push("entry has the wrong fields");
   else {
     const x = r.entry;
     if (!SIDE_RULES.includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < 0.01 || x.priceMax > 0.99 || !(x.priceMin < x.priceMax)) e.push("entry price bounds must sit inside 0.01 to 0.99 with priceMin below priceMax");
     if (!isNum(x.leftMaxSec) || !isNum(x.leftMinSec) || x.leftMinSec < 60 || x.leftMaxSec > 840 || !(x.leftMinSec < x.leftMaxSec)) e.push("entry time left must sit inside 60 to 840 seconds");
     if (Object.prototype.hasOwnProperty.call(x, "maxSpread") && !(isNum(x.maxSpread) && x.maxSpread >= 0.01 && x.maxSpread <= 0.2)) e.push("entry.maxSpread must be 0.01 to 0.20");
+    if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
+    if (Object.prototype.hasOwnProperty.call(x, "calendar") && !(Array.isArray(x.calendar) && x.calendar.length > 0 && x.calendar.length <= 100 && x.calendar.every((c) => typeof c === "string" && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(c) && Number.isFinite(Date.parse(c))))) e.push("entry.calendar must be a list of ISO close times");
+    if (Object.prototype.hasOwnProperty.call(x, "secondRead") && x.secondRead !== true) e.push("entry.secondRead must be true when present");
   }
   if (!Number.isInteger(r.contracts) || r.contracts < 1 || r.contracts > 10) e.push("contracts must be a whole number from 1 to 10");
   if (!isDate(r.registeredAt) || !isDate(r.forwardReadDate)) e.push("registeredAt and forwardReadDate must be YYYY-MM-DD");
@@ -78,6 +84,7 @@ function shadowSignals(rules, quotes, nowMs) {
         const closeMs = Date.parse(q.m.close_time);
         const left = (closeMs - nowMs) / 1000;
         if (!(left >= r.entry.leftMinSec && left <= r.entry.leftMaxSec)) continue;
+        if (Object.prototype.hasOwnProperty.call(r.entry, "calendar") && !r.entry.calendar.some((c) => Date.parse(c) === closeMs)) continue;
         const bid = num(q.m.yes_bid_dollars), ask = num(q.m.yes_ask_dollars);
         if (!(bid > 0 && ask > 0 && ask > bid && ask <= 1 && bid < 1)) continue;
         const spread = r4(ask - bid);
@@ -109,6 +116,34 @@ function shadowSeriesDue(rules, nowMs) {
   return out;
 }
 
+// ---- The shared per-minute read budget (Nov 12, 2026, shadow logger A) ---------------------------------------------------------------------------------------------
+// Markets the bot already reads are free. Every OTHER public read a shadow rule needs in a minute (a series list, an open interest candle read, a second look at a row) draws from ONE budget of 3 reads for the whole
+// minute, whatever the number of rules, so adding rules can never raise the request rate. The budget only says no; it never waits, so it can never delay the tick.
+const SHADOW_READS_PER_MINUTE = 3;
+const SECOND_LOOK_MS = 4000;   // the second look at a row comes about 4 seconds after it is logged (pinned by a test)
+function makeReadBudget(cap) {
+  let left = Number.isInteger(cap) && cap >= 0 ? Math.min(cap, SHADOW_READS_PER_MINUTE) : SHADOW_READS_PER_MINUTE;
+  return { take: () => { if (left <= 0) return false; left -= 1; return true; }, left: () => left };
+}
+// Which due series to read first: round robin by the OLDEST last read (never read = oldest), so under a tight budget every series gets its turn. Pure; `lastRead` is a Map the caller keeps (series to ms).
+function planShadowReads(rules, nowMs, lastRead) {
+  const due = shadowSeriesDue(rules, nowMs), seen = lastRead instanceof Map ? lastRead : new Map();
+  return due.map((s, i) => ({ s, i, t: Number(seen.get(s)) || 0 })).sort((a, b) => a.t - b.t || a.i - b.i).map((x) => x.s);
+}
+// The open interest rise as the second strategy slot defines it, repeated on purpose so this log only file imports nothing that trades. Any missing candle is null.
+function oiRiseFromCandles(candles, closeSec) {
+  if (!Array.isArray(candles) || !Number.isFinite(closeSec)) return null;
+  const at = (sec) => { const c = candles.find((x) => x && Number(x.end_period_ts) === sec); const v = c ? num(c.open_interest_fp) : NaN; return Number.isFinite(v) ? v : null; };
+  const a = at(closeSec - 180), b = at(closeSec - 360);
+  return a === null || b === null ? null : Math.round((a - b) * 100) / 100;
+}
+// The side's price in a fresh market answer, by the same rounding the signal uses; null when the quote is unusable.
+function sidePriceOf(m, side) {
+  const bid = num(m && m.yes_bid_dollars), ask = num(m && m.yes_ask_dollars);
+  if (!(bid > 0 && ask > 0 && ask > bid && ask <= 1 && bid < 1)) return null;
+  return side === "yes" ? Math.ceil(r4(ask) * 100 - 1e-9) / 100 : Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
+}
+
 const COLLECTION = "kalshiShadowRows";
 // The first in-band look of each rule and market wins (create fails if the row exists, which is swallowed), so one decision per window is logged and the later minutes of the same window change nothing.
 function shadowWriter(db) {
@@ -121,15 +156,52 @@ async function runShadowTick(args) {
   try {
     const rules = activeShadowRules(args.rules, args.allowedSeries);
     if (!rules.length) return { skipped: "no shadow rule" };
+    const byId = new Map(rules.map((r) => [r.id, r]));
     const rows = shadowSignals(rules, args.quotes, args.now);
     const seen = args.seen instanceof Set ? args.seen : new Set();
+    const budget = args.budget && typeof args.budget.take === "function" ? args.budget : makeReadBudget(SHADOW_READS_PER_MINUTE);
     const fresh = [];
-    for (const d of rows) { const key = d.rule + "|" + d.ticker; if (seen.has(key)) continue; seen.add(key); fresh.push(d); }
+    for (const d of rows) {
+      const key = d.rule + "|" + d.ticker; if (seen.has(key)) continue;
+      const rule = byId.get(d.rule);
+      if (rule && Object.prototype.hasOwnProperty.call(rule.entry, "oiRiseMin")) {
+        // Missing open interest means NO row (and no memory of the look, so a later minute of the window may try again if the budget allows). A rise under the line is no signal.
+        try {
+          if (typeof args.candles !== "function" || !budget.take()) continue;
+          const cs = Math.round(d.closeMs / 1000);
+          const oi = oiRiseFromCandles(await args.candles(d.series, d.ticker, cs), cs);
+          if (oi === null || oi < rule.entry.oiRiseMin) { if (oi !== null) seen.add(key); continue; }
+          d.oiRiseSeen = oi;
+        } catch (e) { continue; }
+      }
+      // A row with no second read keeps askAfter and wouldFillAfter null: never guessed.
+      if (rule && rule.entry.secondRead === true) { d.askAfter = null; d.wouldFillAfter = null; }
+      seen.add(key); fresh.push(d);
+    }
     // In parallel, so a slow write never delays the rest of the minute by more than one round trip; each one is swallowed on its own.
     const results = await Promise.all(fresh.map(async (d) => { try { await args.record(d); return 1; } catch (e) { return 0; } }));   // already logged this window, or a failed write: log only
     const written = results.reduce((a, b) => a + b, 0);
     if (seen.size > 5000) seen.clear();
-    return { signals: rows.length, written };
+    // The second look (opt in per rule): a few seconds after the row, ask the market again and record whether the ask is still at or under the rule's limit. Same budget, a time guard, every error swallowed.
+    let second = 0;
+    try {
+      const wanted = fresh.filter((d, i) => results[i] === 1 && byId.get(d.rule) && byId.get(d.rule).entry.secondRead === true);
+      if (wanted.length && typeof args.market === "function" && typeof args.update === "function") {
+        const t0 = typeof args.clock === "function" ? args.clock() : Date.now();
+        if (typeof args.sleep === "function") await args.sleep(SECOND_LOOK_MS);
+        for (const d of wanted) {
+          if ((typeof args.clock === "function" ? args.clock() : Date.now()) - t0 > 8000 || !budget.take()) break;
+          try {
+            const m = await args.market(d.ticker);
+            const p = sidePriceOf(m, d.side), limit = byId.get(d.rule).entry.priceMax;
+            if (p === null) continue;
+            await args.update(d.rule + "_" + d.ticker, { askAfter: p, wouldFillAfter: p <= limit + 1e-9, secondReadAtMs: typeof args.clock === "function" ? args.clock() : Date.now() });
+            second += 1;
+          } catch (e) { /* log only */ }
+        }
+      }
+    } catch (e) { /* log only */ }
+    return second ? { signals: rows.length, written, second } : { signals: rows.length, written };
   } catch (e) { return { skipped: "shadow failed" }; }
 }
 
@@ -214,4 +286,4 @@ function returnRule(row) {
   return { met, fillable: Number(r.fillable) || 0, need: 60, days: Number(r.days) || 0, needDays: 7, pf: r.pfFillable === undefined ? null : r.pfFillable, secondHalfPf: r.secondHalfPf === undefined ? null : r.secondHalfPf, needPf: 1.3 };
 }
 
-module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
+module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
