@@ -28,8 +28,8 @@ print(json.dumps({"good": v(), "binance": v(url="https://api.binance.com/x"), "h
   assert.strictEqual(r.good, '');
   for (const k of ['binance', 'http', 'userinfo', 'port', 'lookalike']) assert.notStrictEqual(r[k], '', k + ' is rejected');
   assert.ok(!r.allow.includes('api.binance.com'), 'binance is not allowed');
-  for (const h of ['api.weather.gov', 'www.okx.com', 'www.deribit.com', 'api.coinbase.com', 'api.kraken.com']) assert.ok(r.allow.includes(h), h);
-  assert.deepStrictEqual(r.allow, ['api.coinbase.com', 'api.kraken.com', 'api.weather.gov', 'mesonet.agron.iastate.edu', 'www.deribit.com', 'www.okx.com'], 'the allowlist is EXACTLY this set; adding a host is a reviewed edit of this line too');
+  for (const h of ['api.weather.gov', 'www.okx.com', 'api.coinbase.com', 'api.kraken.com']) assert.ok(r.allow.includes(h), h);
+  assert.deepStrictEqual(r.allow, ['api.coinbase.com', 'api.kraken.com', 'api.weather.gov', 'mesonet.agron.iastate.edu', 'www.okx.com'], 'the allowlist is EXACTLY this set; adding a host is a reviewed edit of this line too');
   assert.ok(!r.allow.some((h) => /espn|polymarket|(^|\.)(nhl|mlb|nba)\./i.test(h)), 'no sports or other terms-restricted host');
   const hosts = [...code.matchAll(/https?:\/\/[^"'\s/%]+/g)].map((x) => x[0]);
   assert.deepStrictEqual([...new Set(hosts)].filter((h) => h !== 'https://github.com').sort(), ['https://external-api.kalshi.com'], 'the only literal host in the code is the Kalshi quote host; signal hosts come from the allowlist');
