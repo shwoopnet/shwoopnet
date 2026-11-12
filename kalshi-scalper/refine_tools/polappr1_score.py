@@ -31,9 +31,10 @@ GCB = {"KXVHGCB", "KXGENERICBALLOTVOTEHUB", "KXGENERICBALLOT"}
 LOOKS = [("7d", 7 * 86400, 6 * 3600), ("3d", 3 * 86400, 6 * 3600), ("1d", 86400, 3 * 3600), ("6h", 6 * 3600, 3 * 3600)]
 PB = [(0.10, 0.25), (0.25, 0.40), (0.40, 0.60), (0.60, 0.75), (0.75, 0.9001)]
 FAMILIES = ["ALL_APPR", "APPR_538", "APPR_DAILY", "APPR_OTHER", "APPR_RCP", "GCB"]
-BONF_Z = 4.55          # shared deflation ledger, N about 9,459 (registration errata)
+RESEARCH_Z = 5.46      # the research bar: DEFLATION_LEDGER.md (branch rnd-queue), N about 2,113,000
+INFO_Z = 4.55          # the retired small ledger (N about 9,459), printed for information only
 NO_EVIDENCE_N = 100    # Amendment 3: under this many pooled TRAIN+VALIDATE events a cell gets only the label
-FALSIFY_MIN_CELLS = 3  # Amendment 3: cells with n >= 100 needed before a family may be called FALSIFIED
+NO_SURVIVOR_MIN_CELLS = 3  # Amendment 3: cells with n >= 100 needed before a family reads NO SURVIVOR
 
 
 class Refuse(Exception):
@@ -272,6 +273,24 @@ def calibration(rows, cuts):
     return lines
 
 
+def family_label(n_big, best_pf, supporting, max_n):
+    """Printed family read. n_big = cells with pooled n >= 100; best_pf = cash PF (+1c, after fees) of the best populated cell; supporting = list of cell texts.
+    FALSIFIED is the charter's meaning only: the best populated cell has PF under 1.0. NO SURVIVOR is the weaker outcome."""
+    parts = []
+    if n_big and best_pf is not None and best_pf < 1.0:
+        parts.append("FALSIFIED (the best populated cell, pooled n >= %d, has cash PF %.2f after fees, under 1.0)" % (NO_EVIDENCE_N, best_pf))
+    if supporting:
+        parts.append("SUPPORTING CELLS (exploratory, not an advance): " + "; ".join(supporting))
+    elif n_big >= NO_SURVIVOR_MIN_CELLS:
+        parts.append("NO SURVIVOR at this grid (an edge of about 10c or more ruled out in the populated cells; %d cells with n >= %d; closes the family for new work)" % (n_big, NO_EVIDENCE_N))
+    if not parts:
+        if n_big:
+            parts.append("neither support nor failure (best populated cell PF %.2f; %d cells with n >= %d)" % (best_pf, n_big, NO_EVIDENCE_N))
+        else:
+            parts.append("no evidence at n = %d (largest cell; 0 cells with n >= %d)" % (max_n, NO_EVIDENCE_N))
+    return "; ".join(parts)
+
+
 def report(rows, cuts):
     out = []
     ec = event_closes(rows)
@@ -323,7 +342,7 @@ def report(rows, cuts):
             killed = L[3] or s2[1] <= 0 or wide <= 0
             out.append("PASS %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] week-block[%+.1f,%+.1f] z%.2f %s | live3: n%d net20 $%.2f streak%d kill%s maxopen%d | %s" % (
                 tag, len(tr), len(va), s1[2], s2[2], 100 * s1[1], 100 * s2[1], 100 * lo_, 100 * hi, 100 * wl, 100 * wh, sa[3],
-                "BONFERRONI-PASS" if sa[3] >= BONF_Z else "exploratory (below z %.2f)" % BONF_Z, L[0], L[1], L[2], "Y" if L[3] else "N", L[4],
+                ("PASSES the research bar z %.2f (4.55 info)" % RESEARCH_Z) if sa[3] >= RESEARCH_Z else "exploratory (below the research bar z %.2f; 4.55 of the retired ledger is information only)" % RESEARCH_Z, L[0], L[1], L[2], "Y" if L[3] else "N", L[4],
                 "KILLED" if killed else "survives the kill bar") + ("" if n >= NO_EVIDENCE_N else " | no evidence at n = %d" % n))
         elif n < NO_EVIDENCE_N:
             out.append("     %s no evidence at n = %d (TRAIN %d, VALID %d)" % (tag, n, len(tr), len(va)))
@@ -344,12 +363,8 @@ def report(rows, cuts):
             if st[2] >= 1.3 and lo > 0:
                 sup.append("%s %.2f-%.2f %s n%d PF %.2f lo%+.1f" % (ln, PB[pb][0], PB[pb][1], sd, st[0], st[2], 100 * lo))
         mx = max([len(c[4]) + len(c[5]) for c in cs_] or [0])
-        if sup:
-            v = "SUPPORTING CELLS (exploratory, not an advance): " + "; ".join(sup)
-        elif len(big) >= FALSIFY_MIN_CELLS:
-            v = "FALSIFIED at this grid (no supporting cell among %d cells with n >= %d; rules out edges of about 10c a contract or more, not 5c; see Amendment 3)" % (len(big), NO_EVIDENCE_N)
-        else:
-            v = "no evidence at n = %d (largest cell; %d cells with n >= %d)" % (mx, len(big), NO_EVIDENCE_N)
+        bestpf = max([stats([net(o) for o in tr + va])[2] for _, _, _, _, tr, va in big] or [None], key=lambda x: -1 if x is None else x)
+        v = family_label(len(big), bestpf, sup, mx)
         out.append("  %s: %s" % (f, v))
     out.append("")
     out.append("ADVANCING CELLS: %d (HELD-OUT is not read here; frozen survivors go to the session lead)" % len(adv))

@@ -250,6 +250,26 @@ class T(unittest.TestCase):
                     want = "TRAIN" if e["close_ts"] < a else ("VALIDATE" if e["close_ts"] < b else "HELD-OUT")
                     self.assertEqual(e["third"], want, e["event"])
 
+    def test_family_labels(self):
+        # FALSIFIED: best populated cell PF under 1.0
+        a = S.family_label(4, 0.8, [], 150)
+        self.assertIn("FALSIFIED", a)
+        # NO SURVIVOR: 3 or more populated cells, none supporting, best PF not under 1.0
+        b = S.family_label(3, 1.1, [], 150)
+        self.assertIn("NO SURVIVOR", b)
+        self.assertNotIn("FALSIFIED", b)
+        # neither: PF 1.1 with fewer than 3 populated cells is neither support nor failure
+        c = S.family_label(1, 1.1, [], 120)
+        self.assertIn("neither support nor failure", c)
+        for w in ("FALSIFIED", "NO SURVIVOR", "SUPPORTING"):
+            self.assertNotIn(w, c)
+        self.assertIn("no evidence at n = 90", S.family_label(0, None, [], 90))
+        self.assertIn("SUPPORTING", S.family_label(3, 1.5, ["x"], 150))
+
+    def test_bar_constants(self):
+        self.assertEqual(S.RESEARCH_Z, 5.46)
+        self.assertEqual(S.INFO_Z, 4.55)
+
     # the committed job files
     def test_real_jobs(self):
         paths = sorted(glob.glob(os.path.join(HERE, "jobs", "POLAPPR1_CANDLES*.json")))
