@@ -69,17 +69,8 @@ def build(venues, keep_day, need3=False):
             m = sum(lr) / len(lr); sd = math.sqrt(sum((x - m) ** 2 for x in lr) / (len(lr) - 1)) * math.sqrt(8)
             if sd <= 0: continue
             py = Phi(math.log(p0 / k) / sd); yes_win = r["result"] == "yes"
-            def replay(side, limit, delay):
-                # first recorded quote at least `delay` ms after the decision (within 30 s), status active; limit = the ask seen, no slip
-                for tt, x in L:
-                    if tt >= t0 + delay:
-                        if tt - t0 - delay > 30000 or x["status"] != "active": return None
-                        try: a = float(x["yes_ask"]) if side == "yes" else 1 - float(x["yes_bid"])
-                        except Exception: return None
-                        return a if a <= limit + 1e-9 else None
-                return None
-            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d, t0, replay("yes", ya, 2000), replay("yes", ya, 6000), L[i][0]))
-            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d, t0, replay("no", 1 - yb, 2000), replay("no", 1 - yb, 6000), L[i][0]))
+            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d, t0, None, None, L[i][0]))
+            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d, t0, None, None, L[i][0]))
     return rows, lost, folders
 
 def rep(name, rs):
@@ -96,6 +87,35 @@ def rep_replay(name, rs, k):
     pnl = [((1 if r[5] else 0) - r[k] - fee(r[k])) for r in got]
     gw = sum(x for x in pnl if x > 0); gl = -sum(x for x in pnl if x < 0)
     print("%-34s filled %d of %d | cash PF %.2f | mean %+.2fc | wins %d" % (name, len(got), len(rs), gw / gl if gl else 9, 100 * sum(pnl) / len(pnl), sum(1 for r in got if r[5])))
+
+
+def r6_replay(rows, R6, freeze=None):
+    """TRUE book replay: each signal row is filled from the R6 order book at the first poll at or after t0 + delay (within 30 s), limit = the ask seen (a lower ask fills at that ask),
+    at least 1 contract displayed at the ask; a vanished ask is no trade. Rows with no R6 book at the decision are counted as 'no book' and never scored.
+    (The quote recorder's list rows are NOT used: a list quote 2 to 6 s later is often the same cached copy, QUOTEVSBOOK1.) Returns {delay: [(row, fill price or None)]}, n_nobook."""
+    sys.path.insert(0, HERE); import cfrti_b
+    cfrti_b.load_book(R6); book = cfrti_b.book
+    out = {2: [], 6: []}; nobook = 0
+    for r in rows:
+        tk, side, ask, t0 = r[1], r[2], r[3], r[7] / 1000
+        B = book.get(tk); times = [p[0] for p in B] if B else []
+        i = bisect.bisect_right(times, t0 - 0.25) - 1
+        if not B or i < 0 or t0 - 0.25 - times[i] > 4: nobook += 1; continue        # an R6 poll must exist just before the decision
+        for d in (2, 6):
+            j = bisect.bisect_left(times, t0 + d)
+            fill = None
+            if j < len(times) and times[j] - t0 - d <= 30:
+                a, sz = cfrti_b.side_ask(B[j], side)
+                if a is not None and sz is not None and sz >= 1 and a <= ask + 1e-9: fill = a
+            out[d].append((r, fill))
+    return out, nobook
+def rep_r6(name, rs, rep6):
+    res, nobook = rep6
+    for d, lab in ((2, "+2 s"), (6, "+6 s (judges live use)")):
+        got = [(r, f) for r, f in res[d] if f is not None]; n = len(res[d])
+        pnl = [(1 if r[5] else 0) - f - fee(f) for r, f in got]
+        gw = sum(x for x in pnl if x > 0); gl = -sum(x for x in pnl if x < 0)
+        print("BOOK-REPLAY (R6) %-6s %-22s rows with a book %d, no book %d (not scored) | filled %d | cash PF %s | mean %s | wins %d | no evidence at n = %d" % (lab, name, n, nobook, len(got), ("%.2f" % (gw / gl if gl else 9)) if got else "n/a", ("%+.2fc" % (100 * sum(pnl) / len(pnl))) if got else "n/a", sum(1 for r, f in got if r[5]), len(got)))
 
 def r6_stale(rows, root, freeze=("2026-11-09", "2026-11-13")):
     """Rows with an R6 book at the decision, and of those how many show a book ask more than 1c above the ask the rule saw
@@ -139,6 +159,16 @@ def r6_stale(rows, root, freeze=("2026-11-09", "2026-11-13")):
         if ask > seen + 0.01 + 1e-9: stale += 1
     return tot, have, stale, frozen
 
+if MODE == "replaytest":      # synthetic book: the R6 replay fills at the first poll >= t0 + delay when the ask is at or below the ask seen, else no trade; no book is counted, never scored
+    sys.path.insert(0, HERE); import cfrti_b
+    t0 = 1_000_000.0
+    cfrti_b.load_book = lambda root: (cfrti_b.book.clear(), cfrti_b.book.update({"KXBTC15M-T": [(t0 - 1.0, 0.18, 5.0, 0.76, 5.0), (t0 + 1.9, 0.18, 5.0, 0.76, 5.0), (t0 + 2.1, 0.19, 5.0, 0.77, 5.0), (t0 + 5.9, 0.18, 5.0, 0.80, 5.0), (t0 + 6.1, 0.18, 5.0, 0.79, 0.5), (t0 + 8.0, 0.18, 5.0, 0.76, 5.0)]}))
+    row = lambda tk, ask: (None, tk, "yes", ask, 0, True, None, t0 * 1000, None, None, None)
+    res, nb = r6_replay([row("KXBTC15M-T", 0.24), row("KXBTC15M-NOBOOK", 0.24)], "x")
+    assert nb == 1 and len(res[2]) == 1, (nb, res)
+    assert abs(res[2][0][1] - 0.23) < 1e-9, res[2]        # first poll >= t0+2 s (t0+2.1): YES ask = 1 - 0.77 = 0.23 <= 0.24
+    assert res[6][0][1] is None, res[6]                   # first poll >= t0+6 s (t0+6.1): ask 0.21 but only 0.5 contracts shown -> no trade
+    print("REPLAYTEST OK (R6 replay: fill at the first poll after the delay, size test, no-book rows counted)"); sys.exit(0)
 if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
 keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY, "exportall": lambda d: d < HELDOUT_FIRST_DAY,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,
@@ -163,8 +193,12 @@ print("== kraken only | cheap rows with a model", len(rowsK), "| lost:", dict(lo
 A = {(r[6], r[1]): r for r in sel3}; K = {(r[6], r[1]): r for r in selK}
 print("three-venue trades", len(A), "| kraken-only trades", len(K), "| in both", len(set(A) & set(K)), "| three-venue only", len(set(A) - set(K)), "| kraken-only extra", len(set(K) - set(A)))
 rep("  kept (in both), kraken stats", [K[k] for k in sorted(set(A) & set(K))])
-for nm, rs in (("three venues", sel3), ("kraken only", selK)):
-    rep_replay("BOOK-REPLAY +2 s, " + nm, rs, 8); rep_replay("BOOK-REPLAY +6 s, " + nm + " (judges live use)", rs, 9)
+if "--r6" in sys.argv:
+    R6ROOT = sys.argv[sys.argv.index("--r6") + 1]
+    for nm, rs in (("three venues", sel3), ("kraken only", selK)):
+        rep_r6(nm, rs, r6_replay(rs, R6ROOT))
+else:
+    print("BOOK-REPLAY (R6): not computed (no --r6 <root holding book15r6/>); the quote recorder's own later rows are NOT a book replay and are not printed.")
 if MODE == "exportall":
     out = ["form,t0_utc,ticker,side,ask_seen,quote_t_send_ms,edge"]
     for nm, rs in (("three", rows3), ("kraken", rowsK)):
