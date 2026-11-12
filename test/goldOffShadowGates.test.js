@@ -146,9 +146,9 @@ gates.GO7 = () => {
   for (const step of ['live.settleOpenOrders', 'exitAlarm.runExitAlarm', 'accRef']) assert.ok(blockStart > idx.indexOf(step), 'after ' + step + ': nothing shadow related may delay a settle, a snapshot or an alarm');
   assert.ok(/budgetMs: 8000/.test(idx.slice(blockStart)), 'the settle sweep budget is 8 s');
   const block = idx.slice(blockStart, idx.indexOf('failure = e', blockStart));
-  assert.ok(block.length > 200 && block.length < 3000, 'the block was found');
+  assert.ok(block.length > 200 && block.length < 4500, 'the block was found');
   assert.ok(!/submit|liveRequest|keyId|pem|KALSHI_LIVE_KEY|KALSHI_LIVE_PRIVATE|\.runTransaction|POST/.test(block), 'the shadow block touches no key and sends no order');
-  assert.ok(/shadowSeriesDue\(shadowLib\.SHADOW_RULES, now\)/.test(block) && /rules: shadowLib\.SHADOW_RULES/.test(block), 'only the constant registry is ever passed');
+  assert.ok(/planShadowReads\(shadowLib\.SHADOW_RULES, now, shadowLastRead\)/.test(block) && /rules: shadowLib\.SHADOW_RULES/.test(block), 'only the constant registry is ever passed');
   assert.strictEqual(sh.shadowSeriesDue([rule()], Date.parse('2026-11-12T14:09:00Z')).join(), GOLD);
   assert.strictEqual(sh.shadowSeriesDue([rule()], Date.parse('2026-11-12T14:03:00Z')).length, 0);
   assert.strictEqual(sh.shadowSeriesDue(null, DUE).length, 0, 'garbage in, nothing due');
