@@ -28,7 +28,7 @@ gates['CB1 off by default: the switch is false and frozen, the registry and the 
   const r = slot.slotOrderCheck(input());
   assert.ok(!r.allowed && /not in the registry/.test(r.reasons[0]), 'the production gate knows no such strategy: ' + r.reasons[0]);
   const src = read('functions/kalshiSlotLib.js');
-  assert.ok(/const SLOT_PROBE_SWITCH = Object\.freeze\(\{ CFRTIBTC: false \}\);/.test(src), 'the switch is a literal false in code');
+  assert.ok(/const SLOT_PROBE_SWITCH = Object\.freeze\(\{ CFRTIBTC: false, SPREADCELL: false \}\);/.test(src), 'the switch is a literal false in code');
   assert.ok(/SLOT_PROBE_SWITCH\[c\.id\] === true/.test(src), 'only exactly true switches a candidate on');
   // Nothing stored, requested or in the environment can feed the switch: the library still reads no environment, database or network.
   assert.ok(!/process\.env|firestore|fetch\(|require\("(?!\.\/kalshiSignalLib")/.test(src.replace(/\/\/.*$/gm, '')), 'the slot library stays pure');

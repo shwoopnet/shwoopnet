@@ -681,6 +681,8 @@ exports.kalshiLiveArmed = onSchedule(
           let slotQuotes = market.quotes;
           try {
             const due = slotLib.slotCalendarSeriesDue(slotLib.activeSlotStrategies(), now).filter((x, i, a) => a.indexOf(x) === i).filter((x) => !market.quotes.some((q) => q && q.series === x));
+            // A horizon strategy (SPREADCELL; none is registered while its switch is false) adds its named markets' series on every 5th minute; with none registered this adds nothing and nothing is read.
+            for (const x of slotLib.slotHorizonSeriesDue(slotLib.activeSlotStrategies(), now)) if (!due.includes(x) && !market.quotes.some((q) => q && q.series === x)) due.push(x);
             if (due.length) {
               slotQuotes = market.quotes.slice();
               for (const series of due) {

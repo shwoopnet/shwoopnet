@@ -90,6 +90,21 @@ const SLOT_WINDOW_SHARE = 0.5;                         // the slot may take at m
 const SLOT_L1_RESERVE = 1.05;                          // dollars always left in the window for one more L1 contract (a 97c contract plus its fee)
 const SLOT_LAST_REVIEWED_ON = "2026-11-10";             // no reviewedAt may be later than this; the edit that admits a strategy moves it to that edit's date (the module has no clock)
 const SLOT_TICKER_RE = /^(KXBTC15M|KXETH15M|KXGOLD15M|KXSILVER15M|KXCOPPER15M|KXWTI15M|KXEURUSD15M|KXGBPUSD15M|KXUSDJPY15M|KXHYPE15M|KXBNB15M)-\d{2}[A-Z]{3}\d{6}-\d{2}$/;   // the only ticker shape a slot order may use; anything else is refused, never thrown on
+// ---- Held-to-settlement markets that are NOT 15 minute markets (Nov 12, 2026, the SPREADCELL probe candidate; docs/probes/PROBE_SPEC_SPREADCELL.md). OFF BY DEFAULT. ----
+// A "horizon" entry looks at a market far from its end, so it has its own ticker shape, its own time rule and its own limits, and none of them widens a 15 minute strategy:
+//   - series: an exact allowlist of six sports spread series, usable ONLY by a horizon entry (SLOT_SERIES_ALLOWED, the 15 minute list, is unchanged);
+//   - tickers: a strict shape for those series only, and an entry trades ONLY a ticker named in code (SLOT_HORIZON_NAMED, empty: nothing is discovered, so nothing can trade until the owner names one);
+//   - time: measured from the market's SCHEDULED time (expected_expiration_time, else occurrence_datetime), never from the realised close; missing, past, or too far from close_time is no order;
+//   - one order per named ticker ever (the client order id is fixed), one per event, at most SLOT_HORIZON_MAX_OPEN open, and YES only.
+const SLOT_SPREAD_SERIES = Object.freeze(["KXMLBSPREAD", "KXNBASPREAD", "KXNCAAFSPREAD", "KXNCAAMBSPREAD", "KXNFLSPREAD", "KXNHLSPREAD"]);
+const SLOT_HORIZON_IDS = Object.freeze(["SPREADCELL"]);
+const SLOT_HORIZON_TICKER_RE = /^(KXMLBSPREAD|KXNBASPREAD|KXNCAAFSPREAD|KXNCAAMBSPREAD|KXNFLSPREAD|KXNHLSPREAD)-\d{2}[A-Z]{3}\d{2}(\d{4})?[A-Z0-9]{2,12}-[A-Z0-9]{2,8}$/;
+const SLOT_HORIZON_MIN_SEC = 86400, SLOT_HORIZON_MAX_SEC = 259200;   // hard bounds any horizon entry must sit inside: more than 24 hours, at most 72 hours before the scheduled time
+const SLOT_HORIZON_CLOSE_TOL_MAX_SEC = 14 * 86400;                   // the most a close_time may differ from the scheduled time that an entry can configure
+const SLOT_HORIZON_MAX_OPEN = 5;                                     // open (unsettled) orders of one horizon strategy at once
+const SLOT_HORIZON_LIST_EVERY_MIN = 5;                               // the listing is read on every 5th minute only
+// The named markets, by strategy id. EMPTY: the owner's activation spec names the ticker(s) and a reviewed edit puts them here. Frozen.
+const SLOT_HORIZON_NAMED = Object.freeze({ SPREADCELL: Object.freeze([]) });
 const L1_WINDOW_CAP_FRACTION_MIRROR = 0.055;           // a test pins this to kalshiLiveLib.L1_WINDOW_CAP_FRACTION; the caller passes the live one
 
 // ---- Release calendars (Nov 3, 2026, EVENT830). A strategy whose entry names a calendar may enter ONLY the window that closes at one of these instants. Frozen in code, append only by a reviewed edit
@@ -132,6 +147,55 @@ function slotCalendarSeriesDue(strategies, now) {
   return out;
 }
 
+// The market's scheduled time in ms: expected_expiration_time, else occurrence_datetime. NaN when neither is a readable time (fail closed).
+function slotScheduledMs(m) {
+  for (const k of ["expected_expiration_time", "occurrence_datetime"]) {
+    const v = m && typeof m[k] === "string" && m[k] ? Date.parse(m[k]) : NaN;
+    if (Number.isFinite(v)) return v;
+  }
+  return NaN;
+}
+// Seconds from `now` to the scheduled time when the market passes the time tests of a horizon entry, else null: the scheduled time must be readable and in the future, and the close_time must be
+// readable, no more than 1 hour before it and no more than closeTolSec after it. Pure.
+function slotHorizonLeft(strategy, m, now) {
+  if (!strategy || !isHorizonEntry(strategy.entry) || !isNum(now)) return null;
+  const sched = slotScheduledMs(m), close = m && typeof m.close_time === "string" ? Date.parse(m.close_time) : NaN;
+  if (!Number.isFinite(sched) || !Number.isFinite(close) || sched <= now) return null;
+  if (close < sched - 3600 * 1000 || close > sched + strategy.entry.closeTolSec * 1000) return null;
+  return (sched - now) / 1000;
+}
+// From a market listing, the ONE market per event a horizon strategy may look at this tick: named in code, open, a good two-sided quote, inside the time window, YES ask in the band; of an event's markets
+// the one whose YES mid is nearest 0.5 (ties: the lower ticker). Pure; returns [{ ticker, series, closeTime, scheduledLeft }].
+function slotHorizonPick(strategy, quotes, now, namedOverride) {   // namedOverride: test-only view of the named list; production never passes it
+  if (!strategy || !isHorizonEntry(strategy.entry) || !Array.isArray(quotes)) return [];
+  const named = Array.isArray(namedOverride) ? namedOverride : Object.prototype.hasOwnProperty.call(SLOT_HORIZON_NAMED, strategy.id) ? SLOT_HORIZON_NAMED[strategy.id] : [];
+  const best = {};
+  for (const q of quotes) {
+    const m = q && q.m;
+    if (!m || typeof m.ticker !== "string" || !named.includes(m.ticker) || !SLOT_HORIZON_TICKER_RE.test(m.ticker) || !strategy.series.includes(q.series) || !["active", "open"].includes(m.status)) continue;
+    const left = slotHorizonLeft(strategy, m, now);
+    if (left === null || !(left > strategy.entry.horizonMinSec) || left > strategy.entry.horizonMaxSec) continue;
+    const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
+    if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) continue;
+    const price = Math.ceil(ask * 100 - 1e-9) / 100;
+    if (price < strategy.entry.priceMin - 1e-9 || price > strategy.entry.priceMax + 1e-9) continue;
+    const dist = Math.abs((bid + ask) / 2 - 0.5), ev = windowKey(m.ticker), cur = best[ev];
+    if (!cur || dist < cur.dist - 1e-12 || (Math.abs(dist - cur.dist) <= 1e-12 && m.ticker < cur.ticker)) best[ev] = { dist, ticker: m.ticker, series: q.series, closeTime: m.close_time, scheduledLeft: left };
+  }
+  return Object.keys(best).map((k) => best[k]).map(({ ticker, series, closeTime, scheduledLeft }) => ({ ticker, series, closeTime, scheduledLeft }));
+}
+// The series whose listing the minute function must read NOW for a horizon strategy: only when the strategy names at least one market, and only on every SLOT_HORIZON_LIST_EVERY_MIN-th minute. With the
+// switch off there is no horizon strategy, so this is empty and nothing is read. Pure.
+function slotHorizonSeriesDue(strategies, now) {
+  const out = [];
+  if (!isNum(now) || Math.floor(now / 60000) % SLOT_HORIZON_LIST_EVERY_MIN !== 0) return out;
+  for (const s of strategies || []) {
+    if (!s || !isHorizonEntry(s.entry) || !Object.prototype.hasOwnProperty.call(SLOT_HORIZON_NAMED, s.id) || !SLOT_HORIZON_NAMED[s.id].length) continue;
+    for (const t of SLOT_HORIZON_NAMED[s.id]) { const x = String(t).split("-")[0]; if (s.series.includes(x) && !out.includes(x)) out.push(x); }
+  }
+  return out;
+}
+
 // ---- Probe candidates (Nov 12, 2026, the Probe Engineering Desk; docs/probes/PROBE_SPEC_CFRTIBTC.md). OFF BY DEFAULT. --------------------------------------
 // A candidate is a complete, validated registry entry that is NOT in SLOT_STRATEGIES until its own switch below is exactly true. Flipping a switch is a reviewed code edit
 // made only after the owner's own popup for that exact probe; nothing stored, requested or typed on the page can flip one. While every switch is false SLOT_STRATEGIES is
@@ -142,11 +206,11 @@ function slotCalendarSeriesDue(strategies, now) {
 //     under minus the budget it never enters again until a reviewed edit moves reviewedAt (sticky, like the kill rules). No budget in code means no order;
 //   - SLOT_PROBE_HOLD: the candidates that may hold to settlement once switched on (the hold list SLOT_HOLD_ALLOWED itself is unchanged while they are off).
 // This is also the strategy's OWN stop that docs/STRATEGY_LIFECYCLE.md 7g asks for before two strategies share a market (CFRTIBTC shares Bitcoin with OICORE).
-const SLOT_PROBE_SWITCH = Object.freeze({ CFRTIBTC: false });
+const SLOT_PROBE_SWITCH = Object.freeze({ CFRTIBTC: false, SPREADCELL: false });
 const SLOT_PROBE_MAX_CONTRACTS = 1;
 const SLOT_PROBE_BUDGET_MAX = 20;                      // no candidate may be given more than the lifecycle's incubator cap
-const SLOT_PROBE_BUDGET = Object.freeze({ CFRTIBTC: 5 });
-const SLOT_PROBE_HOLD = Object.freeze(["CFRTIBTC"]);
+const SLOT_PROBE_BUDGET = Object.freeze({ CFRTIBTC: 5, SPREADCELL: 10 });
+const SLOT_PROBE_HOLD = Object.freeze(["CFRTIBTC", "SPREADCELL"]);
 // CFRTIBTC: the research session's CFRTI1 Bitcoin cell (kalshi-scalper/README.md#SLOT-CFRTIBTC). Bitcoin 15 minute market only, 180 to 120 s before the close: when the
 // YES spread is 3c or less and the CHEAPER side costs 5c to 30c, and a three-venue spot model (kalshiSpotIndexLib) puts that side's chance at least 5c above its price,
 // buy 1 contract at the price seen and hold to settlement. Worst loss about $0.32 an order. BELOW the research bar: the pooled five-asset rule failed its registered bar and
@@ -160,6 +224,17 @@ const SLOT_PROBE_CANDIDATES = Object.freeze([
     scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
     killRules: Object.freeze({ maxConsecutiveLosses: 20, minNet: Object.freeze({ afterFills: 100, net: 0 }) }),
     forwardReadDate: "2026-12-15", reviewedAt: "2026-11-10",
+  }),
+  // SPREADCELL: the research session's W-SPREAD-CELL1 lead (sports spread, YES, ask 5c up to but not including 15c, more than 24 h before the scheduled time, hold to settlement, 1 contract). UNPROVEN and
+  // below the research bar until its read passes. It can trade only a ticker named in SLOT_HORIZON_NAMED (empty). priceMax 0.14 is "ask under 15c" in whole cents. forwardReadDate and reviewedAt
+  // are placeholders that the activation edit sets.
+  Object.freeze({
+    id: "SPREADCELL", readme: "docs/probes/PROBE_SPEC_SPREADCELL.md", series: SLOT_SPREAD_SERIES,
+    entry: Object.freeze({ sideRule: "yes", priceMin: 0.05, priceMax: 0.14, horizonMinSec: 86400, horizonMaxSec: 172800, closeTolSec: 604800 }),
+    exit: Object.freeze({ holdToSettle: true }), contractsPerOrder: 1,
+    scaleIn: Object.freeze({ maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }),
+    killRules: Object.freeze({ maxConsecutiveLosses: 30, minNet: Object.freeze({ afterFills: 100, net: 0 }) }),
+    forwardReadDate: "2026-12-31", reviewedAt: "2026-11-10",
   }),
 ]);
 const SLOT_PROBE_IDS = Object.freeze(SLOT_PROBE_CANDIDATES.map((c) => c.id));
@@ -224,6 +299,10 @@ const ENTRY_KEYS_FLOW = ENTRY_KEYS.concat(["flowMax"]);
 // owner's written exception and a reviewed edit of this bound.
 const ENTRY_KEYS_MODEL = ENTRY_KEYS.concat(["maxSpread", "modelEdgeMin"]);
 const SLOT_MODEL_PRICE_MAX = 0.5;
+// Optional (Nov 12, 2026, SPREADCELL): a horizon entry replaces leftMaxSec/leftMinSec with a window measured from the market's scheduled time (see above).
+const ENTRY_KEYS_HORIZON = ["sideRule", "priceMin", "priceMax", "horizonMinSec", "horizonMaxSec", "closeTolSec"];
+const isHorizonEntry = (x) => isObj(x) && Object.prototype.hasOwnProperty.call(x, "horizonMinSec");
+const isHorizonStrategy = (s) => !!s && isHorizonEntry(s.entry);
 const EXIT_KEYS = ["stopBid", "targetBid", "mustExitLeftSec"];
 // The ONE reviewed exception to "every exit is before settlement" (the owner, Oct 30, 2026: "we can remove that rule in this specific instance"): a strategy whose id is listed here may hold to
 // the close (exit is exactly { holdToSettle: true }: no stop, no target, no sale). The research validated the open interest core held to settlement (profit factor 1.85); selling at 60 s kept about half
@@ -243,10 +322,26 @@ function validateSlotStrategy(s) {
   if (!exactKeys(s, TOP_KEYS)) return { ok: false, errors: ["the entry must have exactly these fields: " + TOP_KEYS.join(", ")] };
   if (!/^[A-Z0-9]{2,10}$/.test(s.id)) e.push("id must be 2 to 10 capitals or digits");
   if (typeof s.readme !== "string" || !/^[\w./-]+\.md(#[\w-]+)?$/.test(s.readme)) e.push("readme must point at a pre-registration file");
-  if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !SLOT_SERIES_ALLOWED.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + SLOT_SERIES_ALLOWED.join(", "));
+  const horizon = isHorizonEntry(s.entry);
+  const allowedSeries = horizon ? SLOT_SPREAD_SERIES : SLOT_SERIES_ALLOWED;
+  if (!Array.isArray(s.series) || !s.series.length || s.series.some((x) => !allowedSeries.includes(x)) || new Set(s.series).size !== s.series.length) e.push("series must be a non-empty subset of " + allowedSeries.join(", "));
+  if (horizon && !SLOT_HORIZON_IDS.includes(s.id)) e.push("only a strategy on the reviewed horizon list may use a horizon entry");
   if (Array.isArray(s.series)) for (const x of s.series) if (Object.prototype.hasOwnProperty.call(SLOT_SERIES_RESERVED, x) && SLOT_SERIES_RESERVED[x] !== s.id) e.push(x + " is reserved for " + SLOT_SERIES_RESERVED[x]);
-  if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW) && !exactKeys(s.entry, ENTRY_KEYS_MODEL)) e.push("entry has the wrong fields");
-  else {
+  if (horizon) {
+    const x = s.entry;
+    if (!exactKeys(x, ENTRY_KEYS_HORIZON)) e.push("a horizon entry has the wrong fields");
+    else {
+      if (x.sideRule !== "yes") e.push("a horizon entry only buys yes");
+      if (!isNum(x.priceMin) || !isNum(x.priceMax) || x.priceMin < SLOT_MIN_PRICE || x.priceMax > 0.15 || !(x.priceMin < x.priceMax)) e.push("a horizon entry's price bounds must sit inside " + SLOT_MIN_PRICE + " to 0.15 with priceMin below priceMax");
+      if (!isNum(x.horizonMinSec) || !isNum(x.horizonMaxSec) || x.horizonMinSec < SLOT_HORIZON_MIN_SEC || x.horizonMaxSec > SLOT_HORIZON_MAX_SEC || !(x.horizonMinSec < x.horizonMaxSec)) e.push("a horizon entry's time must sit inside " + SLOT_HORIZON_MIN_SEC + " to " + SLOT_HORIZON_MAX_SEC + " seconds before the scheduled time");
+      if (!isNum(x.closeTolSec) || x.closeTolSec < 0 || x.closeTolSec > SLOT_HORIZON_CLOSE_TOL_MAX_SEC) e.push("closeTolSec must be 0 to " + SLOT_HORIZON_CLOSE_TOL_MAX_SEC);
+    }
+    if (!(isObj(s.exit) && exactKeys(s.exit, ["holdToSettle"]) && s.exit.holdToSettle === true)) e.push("a horizon entry is held to settlement and has no sell path");
+    if (s.contractsPerOrder !== 1) e.push("a horizon entry is one contract");
+    if (isObj(s.scaleIn) && s.scaleIn.maxSteps !== 1) e.push("a horizon entry has one step");
+    if (!SLOT_PROBE_IDS.includes(s.id)) e.push("a horizon entry must be a switched probe candidate with its own budget");
+  } else if (!exactKeys(s.entry, ENTRY_KEYS) && !exactKeys(s.entry, ENTRY_KEYS_OI) && !exactKeys(s.entry, ENTRY_KEYS_CAL) && !exactKeys(s.entry, ENTRY_KEYS_FLOW) && !exactKeys(s.entry, ENTRY_KEYS_MODEL)) e.push("entry has the wrong fields");
+  else if (!horizon) {
     const x = s.entry;
     if (!["yes", "no", "favourite", "cheap"].includes(x.sideRule)) e.push("entry.sideRule must be yes, no, favourite or cheap");
     if (Object.prototype.hasOwnProperty.call(x, "oiRiseMin") && !(isNum(x.oiRiseMin) && x.oiRiseMin >= 1000)) e.push("entry.oiRiseMin must be a number of contracts, at least 1000");
@@ -444,8 +539,10 @@ function slotRiskForBotRisk(slotOrders, since) {
   const from = Number.isFinite(since) ? since : 0;
   let net = 0, openCost = 0, trades = 0;
   for (const t of slotOrders || []) {
-    if (!isSlotOrder(t) || !inRange(t, from)) continue;
+    if (!isSlotOrder(t)) continue;
     const a = accountOrder(t);
+    // A held-to-settlement horizon order can be open far longer than the 24 hour look-back: while it is still open it counts as lost in the shared stop whatever its age (a settled old one drops out as before).
+    if (!inRange(t, from) && !(SLOT_HORIZON_IDS.includes(t.slotId) && a.openCost > 0)) continue;
     if (!a.counted) continue;
     trades += 1; net += a.net; openCost += a.openCost;
   }
@@ -577,7 +674,10 @@ function slotOrderCheckWith(flags, input) {
   const i = input || {};
   const strategy = activeSlotStrategiesWith(flags).find((s) => s.id === i.strategyId);
   if (!strategy) return no("no active slot strategy with that id (the switch is off, or it is not in the registry)");
-  if (typeof i.ticker !== "string" || !SLOT_TICKER_RE.test(i.ticker)) return no("the ticker is not a slot market ticker");
+  const horizon = isHorizonEntry(strategy.entry);
+  if (typeof i.ticker !== "string" || !(horizon ? SLOT_HORIZON_TICKER_RE : SLOT_TICKER_RE).test(i.ticker)) return no("the ticker is not a slot market ticker");
+  const namedList = Array.isArray(flags && flags.named) ? flags.named : (Object.prototype.hasOwnProperty.call(SLOT_HORIZON_NAMED, strategy.id) ? SLOT_HORIZON_NAMED[strategy.id] : []);
+  if (horizon && !namedList.includes(i.ticker)) return no("this market is not named in code for the strategy (nothing is discovered)");
   const series = i.ticker.split("-")[0];
   if (!strategy.series.includes(series)) return no(series + " is not one of this strategy's markets");
   if (i.side !== "yes" && i.side !== "no") return no("the side must be yes or no");
@@ -599,7 +699,14 @@ function slotOrderCheckWith(flags, input) {
   if (probe && probe.spent) return no("killed: the probe's own loss budget is spent or missing ($" + probe.budget.toFixed(2) + ")");
   const e = strategy.entry;
   if (!isNum(i.limit) || i.limit < e.priceMin - 1e-9 || i.limit > e.priceMax + 1e-9) return no("the price is outside the strategy's entry band");
-  if (!isNum(i.secondsLeft) || i.secondsLeft > e.leftMaxSec || i.secondsLeft < e.leftMinSec) return no("not inside the strategy's entry time window");
+  if (horizon) {
+    // secondsLeft is the time to the SCHEDULED time (scheduledLeftSec), never to the close; more than the minimum, at most the maximum.
+    if (!isNum(i.secondsLeft) || !(i.secondsLeft > e.horizonMinSec) || i.secondsLeft > e.horizonMaxSec) return no("not inside the strategy's entry time window");
+    if (!(i.shardKnown === true)) return no("the exchange shard of this market is unknown, so the money on it cannot be checked");
+    const mineAll = i.slotOrders.filter((t) => isSlotOrder(t) && t.slotId === strategy.id);
+    if (mineAll.some((t) => windowKey(normTicker(t.ticker)) === windowKey(i.ticker))) return no("one order per event, and a named market gets one shot only: this event already has an order");
+    if (mineAll.filter((t) => accountOrder(t).openContracts > 0).length >= SLOT_HORIZON_MAX_OPEN) return no("the open position cap of " + SLOT_HORIZON_MAX_OPEN + " is reached");
+  } else if (!isNum(i.secondsLeft) || i.secondsLeft > e.leftMaxSec || i.secondsLeft < e.leftMinSec) return no("not inside the strategy's entry time window");
   const d = directionDecision({ ticker: i.ticker, side: i.side, l1Orders: i.l1Orders, slotOrders: i.slotOrders, lock: i.lock, position: i.position });
   if (!d.allow) return no(d.reason);
   // Scale-in. One attempt per step, ever: a step that failed ('no fill', 'error') is NOT retried under the same id. Step n only while step n-1 is still open, and never
@@ -730,6 +837,7 @@ module.exports = {
   SLOT_LADDERS, SLOT_LADDER_MAX_CONTRACTS, slotLadderState, validLadder,
   SLOT_DEPTH_SHARE, SLOT_OPEN_STATUSES, SLOT_WINDOW_SHARE, SLOT_L1_RESERVE,
   SLOT_PROBE_SWITCH, SLOT_PROBE_CANDIDATES, SLOT_PROBE_IDS, SLOT_PROBE_BUDGET, SLOT_PROBE_BUDGET_MAX, SLOT_PROBE_MAX_CONTRACTS, SLOT_PROBE_HOLD, SLOT_MODEL_PRICE_MAX, probeState,
+  SLOT_SPREAD_SERIES, SLOT_HORIZON_IDS, SLOT_HORIZON_TICKER_RE, SLOT_HORIZON_NAMED, SLOT_HORIZON_MAX_OPEN, SLOT_HORIZON_MIN_SEC, SLOT_HORIZON_MAX_SEC, isHorizonStrategy, slotScheduledMs, slotHorizonLeft, slotHorizonPick, slotHorizonSeriesDue,
   SLOT_LAST_REVIEWED_ON, L1_WINDOW_CAP_FRACTION_MIRROR,
   validateSlotStrategy, activeSlotStrategies, slotActive, slotWatch, SLOT_EVER_USED, slotUnsoldOf, slotIgnoreSet, slotClientOrderId, slotExitClientOrderId, slotOrderDocId, windowKey, directionDecision,
   openAtRisk, slotWindowSpent, slotRiskForBotRisk, slotRiskContract, killCheck, slotSellCount, slotSettledFields, fillCost,

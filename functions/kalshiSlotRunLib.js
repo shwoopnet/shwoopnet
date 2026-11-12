@@ -79,6 +79,9 @@ function checkReasonCode(text) {
   if (/model edge/.test(t)) return "model_edge_below";
   if (/spread/.test(t)) return "spread_wide";
   if (/release window/.test(t)) return "not_listed";
+  if (/named in code|one order per event/.test(t)) return "event_taken";
+  if (/open position cap/.test(t)) return "open_cap";
+  if (/shard/.test(t)) return "shard_unknown";
   if (/step|scaling in/.test(t)) return "scale_in";
   return "gate";
 }
@@ -113,6 +116,11 @@ function makeRunners(flags) {
     for (const s of strategies) {
       // The entry window must open well before the exit floor: an order sent a few seconds late must still be sellable by the time rule. A strategy that does not leave that room never enters.
       if (s.exit.holdToSettle !== true && !(s.entry.leftMinSec - s.exit.mustExitLeftSec >= MAX_STALE_MS / 1000)) { early.push(s.id + ": its entry window ends too close to its exit floor, no entry"); continue; }
+      // A horizon strategy (SPREADCELL, off) looks at named markets measured from their scheduled time; the 15 minute loop below must never see it. With none registered this adds nothing.
+      if (slotLib.isHorizonStrategy(s)) {
+        for (const h of slotLib.slotHorizonPick(s, quotes, now, flags === undefined ? undefined : flags.named)) jobs.push({ s, ticker: h.ticker, series: h.series, closeTime: h.closeTime, horizon: true });
+        continue;
+      }
       for (const q of quotes || []) {
         if (!q || !q.m || !s.series.includes(q.series) || !OPEN_SHORT.includes(q.m.status)) continue;
         const left = (Date.parse(q.m.close_time) - now) / 1000;
@@ -176,11 +184,20 @@ function makeRunners(flags) {
       const { s, ticker, series } = job;
       let verdict = null;                          // the last refusal decide() gave inside the transaction, for the skip code (log only)
       const latch = latches && !latches.unreadable && Object.prototype.hasOwnProperty.call(latches, s.id) ? latches[s.id] : (latches && latches.unreadable ? latches : null);
+      // Horizon only: before any read, a named market gets one shot ever, one order per event, and never more than the open cap (the gate checks all of it again inside the transaction).
+      if (job.horizon) {
+        const own = slotOrders.filter((t) => t && t.slotId === s.id);
+        if (own.some((t) => slotLib.windowKey(t.ticker) === slotLib.windowKey(ticker))) { skip(job, "event_taken"); results.push(ticker + ": this event already has an order"); continue; }
+        if (own.filter((t) => t.settled !== true && (Number(t.fillCount) > 0 || ["sending", "unknown"].includes(String(t.status)))).length >= slotLib.SLOT_HORIZON_MAX_OPEN) { skip(job, "open_cap"); results.push(ticker + ": the open position cap is reached"); continue; }
+      }
       const mk = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
       const m = mk.status === 200 && mk.body && mk.body.market;
       if (!m) { skip(job, "market_unreadable", { http: mk.status }); results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
-      const left = (Date.parse(m.close_time) - now) / 1000;
-      if (!OPEN_SHORT.includes(m.status) || !(left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec)) { skip(job, "not_open"); results.push(ticker + ": not open in the entry window"); continue; }
+      // The time rule: a horizon market is judged on its SCHEDULED time (null when missing, past or too far from the close), every other on the close.
+      const left = job.horizon ? slotLib.slotHorizonLeft(s, m, now) : (Date.parse(m.close_time) - now) / 1000;
+      const inWindow = job.horizon ? (left !== null && left > s.entry.horizonMinSec && left <= s.entry.horizonMaxSec) : (left >= s.entry.leftMinSec && left <= s.entry.leftMaxSec);
+      if (!OPEN_SHORT.includes(m.status) || !inWindow) { skip(job, job.horizon ? "schedule_unusable" : "not_open"); results.push(ticker + ": not open in the entry window"); continue; }
+      if (job.horizon && !Number.isFinite(num(m.exchange_index))) { skip(job, "shard_unknown"); results.push(ticker + ": the exchange shard is unknown, nothing sent"); continue; }
       const bid = num(m.yes_bid_dollars), ask = num(m.yes_ask_dollars);
       if (!bot.validQuote(Number.isFinite(bid) ? bid : null, Number.isFinite(ask) ? ask : null)) { skip(job, "no_quote"); results.push(ticker + ": no two-sided quote"); continue; }
       const spread = r4(ask - bid), closeMs = Date.parse(m.close_time);
@@ -265,13 +282,13 @@ function makeRunners(flags) {
         // The window is judged on the clock at commit time, not at the start of the minute: the slow reads before this (balance, markets, candles, L1's own order) can take many seconds.
         const nowD = Number(clock());
         if (!Number.isFinite(nowD) || nowD - now > MAX_STALE_MS) return { allowed: false, code: "stale_tick", detail: { lateSec: Math.round((nowD - now) / 1000) }, reason: "too long since the minute began (" + Math.round((nowD - now) / 1000) + " s), nothing sent" };
-        const leftD = (Date.parse(m.close_time) - nowD) / 1000;
+        const leftD = job.horizon ? slotLib.slotHorizonLeft(s, m, nowD) : (Date.parse(m.close_time) - nowD) / 1000;   // a horizon market: seconds to the SCHEDULED time, null (refused) when unusable
         const l1Merged = new Map();
         for (const t of l1Fresh) l1Merged.set(t.id || t.clientOrderId, t);
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, modelEdge, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, modelEdge, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, shardKnown: Number.isFinite(num(m.exchange_index)), now });
         if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -355,6 +372,12 @@ function makeRunners(flags) {
         return done(Object.assign(out, { results }));
       }
       await latchOff("Kalshi refused the order for " + ticker);
+      // A horizon probe that is refused (for example the shard holds no money, or does not know the market) switches ITSELF off and says so; it never ends the session, so L1 and the other strategies carry on.
+      if (job.horizon) {
+        await writeLast({ status: "error", error: "HTTP " + res.status + " " + short(res.body) });
+        await log("slot order refused", s.id + " was refused on " + ticker + " (HTTP " + res.status + " " + short(res.body).slice(0, 80) + "); it is switched off until a reviewed edit. The exchange shard may be wrong or short of money.");
+        results.push(ticker + ": refused, probe switched off"); continue;
+      }
       const out = await end("attempted", "Kalshi refused the slot order for " + ticker + ": HTTP " + res.status + " " + short(res.body).slice(0, 80));
       await writeLast({ status: "error", error: "HTTP " + res.status + " " + short(res.body) });
       return done(Object.assign(out, { results }));
@@ -391,6 +414,8 @@ function makeRunners(flags) {
     for (const t of list) {
       const s = registry.find((x) => x.id === t.slotId);
       const rules = s ? s.exit : FALLBACK_EXIT;
+      // A horizon order is held to settlement even if its strategy is removed from the registry: the 25c fallback line would sell a 5c to 15c contract at once.
+      const held = !s && slotLib.SLOT_HORIZON_IDS.includes(t.slotId);
       const want = Number(t.count) > 0 ? Number(t.count) : 1, got = Math.min(Number(t.fillCount), want);
       const sold = Number(t.exitCount) > 0 ? Number(t.exitCount) : 0;
       const remaining = Math.floor(got - sold + 1e-9);
@@ -417,6 +442,7 @@ function makeRunners(flags) {
       const opposite = (x) => x && x.ticker === t.ticker && (x.side === "yes" || x.side === "no") && x.side !== t.side && unsoldOf(x) > 0;
       const later = (x) => !(Number(x.ts) > Number(t.ts)) && !(Number(x.ts) === Number(t.ts) && String(x.id || x.clientOrderId) > String(t.id));
       const hedge = l1.some(opposite) || sl.some((x) => opposite(x) && later(x));
+      if (held && !hedge) continue;
       const why = hedge ? "hedge" : rules.holdToSettle === true ? null : ourBid <= rules.stopBid + 1e-9 ? "stop" : ourBid >= rules.targetBid - 1e-9 ? "target" : leftSec <= rules.mustExitLeftSec + 1e-9 ? "time" : null;
       if (!why) continue;
       const latchOff = async (reason) => { try { if (s && typeof store.killStrategy === "function") await store.killStrategy(s.id, { killedAt: now, reason }); } catch (e) { /* the session end below still stops it */ } };
