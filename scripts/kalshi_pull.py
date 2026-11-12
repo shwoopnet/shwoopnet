@@ -219,7 +219,15 @@ class _NoRedirect(urllib.request.HTTPRedirectHandler):
         return None
 
 
-_OPENER = urllib.request.build_opener(_NoRedirect)    # no ProxyHandler is added on purpose: see the gates
+def _make_opener():
+    """build_opener() adds the environment-proxy handler by default (it reads HTTPS_PROXY), so the opener is assembled by hand with only the handlers a plain direct HTTPS GET needs."""
+    o = urllib.request.OpenerDirector()
+    for h in (urllib.request.HTTPHandler(), urllib.request.HTTPSHandler(), urllib.request.HTTPDefaultErrorHandler(), urllib.request.HTTPErrorProcessor(), _NoRedirect()):
+        o.add_handler(h)
+    return o
+
+
+_OPENER = _make_opener()    # a hand-built opener on purpose: see the gates
 
 
 def http_get(url):

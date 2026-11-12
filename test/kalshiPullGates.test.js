@@ -99,7 +99,7 @@ gates.KP7 = () => {
 
 // KP8: a redirect is never followed (a mocked 302 to a second server is read as a failed request and the target is never asked).
 gates.KP8 = () => {
-  assert.ok(/_NoRedirect/.test(code) && /build_opener\(_NoRedirect\)/.test(code) && !/urlopen/.test(code));
+  assert.ok(/_NoRedirect/.test(code) && /_NoRedirect\(\)/.test(code) && !/build_opener/.test(code) && !/urlopen/.test(code));
   const r = py(`
 import threading, http.server
 hit = []
@@ -361,6 +361,17 @@ gates.KP20 = () => {
   const files = ['scripts/kalshi_pull.py', '.github/workflows/kalshi-pull.yml', 'docs/KALSHI_PULL.md', 'test/kalshiPullGates.test.js'].concat(fs.readdirSync(jobDir).filter((f) => /\.(json|py)$/.test(f)).map((f) => 'kalshi-scalper/workers/kalshi_pull_jobs/' + f));
   for (const f of files) assert.ok(!/\u2014/.test(fs.readFileSync(path.join(root, f), 'utf8')), f + ' has no em dash');
   assert.ok(!/\u2014/.test(sec[0]));
+};
+
+// KP21: the opener has no environment-proxy handler, so a proxy variable on a runner cannot send the requests through another address.
+gates.KP21 = () => {
+  const out = execFileSync('python3', ['-I', '-c', `
+import sys, os, json
+os.environ["HTTPS_PROXY"] = "http://127.0.0.1:9"
+sys.path.insert(0, ${JSON.stringify(path.join(root, 'scripts'))})
+import kalshi_pull as m
+print(json.dumps([type(h).__name__ for h in m._OPENER.handlers]))`], { encoding: 'utf8' });
+  assert.ok(!/Proxy/.test(out), 'no proxy handler in the opener: ' + out);
 };
 
 let failed = 0;
