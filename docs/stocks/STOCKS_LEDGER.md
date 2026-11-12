@@ -32,3 +32,5 @@ Registered tries counted: still 16 registered, 0 scored. Left: S6, S8, S9 (block
 | S6 leveraged-ETF rebalance | retired unread Nov 12 (Amendment 5): net PF about 1.0 to 1.15, about 300 events |
 | S9 opening cross imbalance | retired unread Nov 12 (Amendment 5): PF about 1.0 to 1.2 |
 Held: S2 long leg (after the pilot), S8 (after the cutoff ruling). Deferred: S10. Tries scored 0.
+| S8 closing auction imbalance | retired unread Nov 12 (Amendment 6): registered entry not enterable on NYSE, broker access unknown, about $75 a year at $5,000 a trade |
+Final for now: nine retired unread or deferred, one held (S2 long leg, behind the pilot). Tries scored 0.

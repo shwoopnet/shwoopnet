@@ -69,3 +69,6 @@ Retired unread: S1, S7, S2's long-short line (never judged), and S3, S4, S5 (scr
 
 ## AMENDMENT 5 (Nov 12 ~17:13Z, Head of R&D rulings on the S6/S8/S9 page)
 S6 and S9 are RETIRED UNREAD (S6 net PF about 1.0 to 1.15, chance 1 to 2 percent, about 300 events; S9 PF about 1.0 to 1.2, chance 1 to 3 percent). No data bought, tries scored 0. HELD: S2 long leg (after the pilot) and S8 (after the cutoff check and the Head's ruling; LEAD-only inside $25). State of the ten: S1, S3, S4, S5, S6, S7, S9 retired unread; S2 long leg and S8 held; S10 deferred. Possible spend: pilot $0.30, then at most about $10.
+
+## AMENDMENT 6 (Nov 12, Head of R&D ruling): S8 retired unread
+The registered trade cannot be entered as written on NYSE (ordinary MOC and LOC entry stops at 15:50, the moment the imbalance publishes); access to an offsetting or imbalance-only order for a small account is unknown; money at about $75 a year at $5,000 a trade. No imbalance data is bought. Tries scored 0. State of the ten, final for now: S1, S3, S4, S5, S6, S7, S8, S9 retired unread; S10 deferred; ONE held: S2 long leg, behind the schema pilot (possible further spend about $5.60, only if the pilot proves the auction prints).
