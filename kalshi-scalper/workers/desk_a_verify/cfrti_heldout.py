@@ -96,6 +96,49 @@ def rep_replay(name, rs, k):
     pnl = [((1 if r[5] else 0) - r[k] - fee(r[k])) for r in got]
     gw = sum(x for x in pnl if x > 0); gl = -sum(x for x in pnl if x < 0)
     print("%-34s filled %d of %d | cash PF %.2f | mean %+.2fc | wins %d" % (name, len(got), len(rs), gw / gl if gl else 9, 100 * sum(pnl) / len(pnl), sum(1 for r in got if r[5])))
+
+def r6_stale(rows, root, freeze=("2026-11-09", "2026-11-13")):
+    """Rows with an R6 book at the decision, and of those how many show a book ask more than 1c above the ask the rule saw
+    ('ask not on the book'). The book poll must be at least 0.25 s before t0 and within 4 s (two different machines' clocks).
+    Rows whose close is inside the DEPTH1 freeze (closes 2026-11-09 to 2026-11-13) are not opened and are counted separately."""
+    folders = sorted(glob.glob(root + "/book15r6/*/*"))
+    starts = [(datetime.datetime.strptime(f.split("/")[-2] + f.split("/")[-1], "%Y-%m-%d%H%M").replace(tzinfo=datetime.timezone.utc).timestamp() * 1000, f) for f in folders]
+    cache, tot, have, stale, frozen = {}, 0, 0, 0, 0
+    for r in rows:
+        tot += 1
+        t0, tk, side, seen = r[7], r[1], r[2], r[3]
+        cl = datetime.datetime.strptime(tk.split("-")[1], "%y%b%d%H%M").replace(tzinfo=datetime.timezone.utc) if False else None
+        day = datetime.datetime.fromtimestamp((t0 + 120000) / 1000, datetime.timezone.utc).strftime("%Y-%m-%d")
+        if freeze[0] <= day <= freeze[1]: frozen += 1; continue
+        cand = [f for st, f in starts if st <= t0][-2:]
+        best = None
+        for f in cand:
+            if f not in cache:
+                try:
+                    with gzip.open(f + "/book.csv.gz", "rt") as fh:
+                        rd_ = [x for x in csv.DictReader(fh) if x["series"] == "KXBTC15M"]
+                except Exception: rd_ = []
+                offs = []
+                for x in rd_:
+                    h = x.get("server_date_header")
+                    if h:
+                        try: offs.append(__import__("email.utils").utils.parsedate_to_datetime(h).timestamp() + 0.5 - int(x["t_recv_ms"]) / 1000)
+                        except Exception: pass
+                off = sorted(offs)[len(offs) // 2] if offs else None
+                cache[f] = (off, collections.defaultdict(list))
+                if off is not None:
+                    for x in rd_: cache[f][1][x["ticker"]].append((int(x["t_recv_ms"]) / 1000 + off, x))
+            off, by = cache[f]
+            for tt, x in by.get(tk, []):
+                if t0 / 1000 - 4 <= tt <= t0 / 1000 - 0.25 and (best is None or tt > best[0]): best = (tt, x)
+        if best is None: continue
+        x = best[1]
+        try: ask = (1 - float(x["no_bid_px_1"])) if side == "yes" else (1 - float(x["yes_bid_px_1"]))
+        except Exception: continue
+        have += 1
+        if ask > seen + 0.01 + 1e-9: stale += 1
+    return tot, have, stale, frozen
+
 if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
 keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY, "exportall": lambda d: d < HELDOUT_FIRST_DAY,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,
@@ -135,6 +178,13 @@ if MODE == "export":
         for r in sorted(rs, key=lambda r: (r[7], r[1])):
             out.append("%s,%s,%s,%s,%.4f" % (nm, datetime.datetime.fromtimestamp(r[7] / 1000, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), r[1], r[2], r[3]))
     open(sys.argv[3], "w").write("\n".join(out) + "\n"); print("wrote", len(out) - 1, "rows (no outcome column)")
+if "--r6" in sys.argv:
+    R6 = sys.argv[sys.argv.index("--r6") + 1]
+    for nm, rs in (("three venues", sel3), ("kraken only", selK)):
+        tot, have, stale, frozen = r6_stale(rs, R6)
+        print("STALE-ASK COUNT, %s: %d signal rows | %d with an R6 book at the decision | %d of those show a book ask more than 1c above the ask seen (\"ask not on the book\") | %d rows not opened (DEPTH1 freeze, closes Nov 9 to 13)" % (nm, tot, have, stale, frozen))
+else:
+    print("STALE-ASK COUNT: not computed (no --r6 <root holding book15r6/>).")
 print("CFRTI-K line: not computed here (perp candles not supplied).")
 if MODE == "heldout":
     line = "READ ON %s, three-venue n %d, kraken-only n %d" % (datetime.date.today(), len(sel3), len(selK))
