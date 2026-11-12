@@ -15,7 +15,8 @@
   "development": {
     "closes_from": "2026-09-12T00:00:00Z",
     "closes_before": "2026-10-23T00:00:00Z",
-    "note": "the series began 2026-10-08, so the window holds 15 days (Amendment 5)"
+    "note": "the series began 2026-10-08, so the window holds 15 days (Amendment 5)",
+    "halves_split": "2026-10-15T12:00:00Z"
   },
   "held_out": {
     "closes_from": "2026-10-23T00:00:00Z",
