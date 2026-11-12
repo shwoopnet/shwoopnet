@@ -2,8 +2,8 @@
  "job_id": "TESTING_LISTS_BUNDLE",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/testing/TESTING_LISTS_BUNDLE.md",
- "purpose": "Testing Desk bundle of four small jobs (TIE3 lists, WXDAYEND_A, UNRATE lists, POL-i2 stage 1 lists) so they cost one run; each request id is prefixed t3_, wx_, ur_, p2_.",
- "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3) or 2026-11-05T00:00Z (POL-i2) is requested; measurements and counts only, no rule scored, no try",
+ "purpose": "Testing Desk bundle of four small jobs (TIE3 lists, WXDAYEND_A, UNRATE lists, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, ur_, pc_.",
+ "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3); POLCOST lists open markets, which have no result is requested; measurements and counts only, no rule scored, no try",
  "allowed_endpoints": [
   {
    "name": "markets_list",
@@ -751,950 +751,792 @@
    "max_pages": 2
   },
   {
-   "id": "p2_live_538APPROVE",
+   "id": "pc_open_538APPROVE",
    "path": "/markets",
    "params": {
     "series_ticker": "538APPROVE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_APRPOTUS",
+   "id": "pc_open_APRPOTUS",
    "path": "/markets",
    "params": {
     "series_ticker": "APRPOTUS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_ASYLUMCASES",
+   "id": "pc_open_ASYLUMCASES",
    "path": "/markets",
    "params": {
     "series_ticker": "ASYLUMCASES",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KX538APPROVE",
+   "id": "pc_open_KX538APPROVE",
    "path": "/markets",
    "params": {
     "series_ticker": "KX538APPROVE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXACTBLUEFIFTH",
+   "id": "pc_open_KXACTBLUEFIFTH",
    "path": "/markets",
    "params": {
     "series_ticker": "KXACTBLUEFIFTH",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXACTBLUEFOURTH",
+   "id": "pc_open_KXACTBLUEFOURTH",
    "path": "/markets",
    "params": {
     "series_ticker": "KXACTBLUEFOURTH",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXACTBLUESECOND",
+   "id": "pc_open_KXACTBLUESECOND",
    "path": "/markets",
    "params": {
     "series_ticker": "KXACTBLUESECOND",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXACTBLUETHIRD",
+   "id": "pc_open_KXACTBLUETHIRD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXACTBLUETHIRD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXACTBLUETOP",
+   "id": "pc_open_KXACTBLUETOP",
    "path": "/markets",
    "params": {
     "series_ticker": "KXACTBLUETOP",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXAPRPOTUS",
+   "id": "pc_open_KXAPRPOTUS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXAPRPOTUS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXASYLUMCASES",
+   "id": "pc_open_KXASYLUMCASES",
    "path": "/markets",
    "params": {
     "series_ticker": "KXASYLUMCASES",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXBABELMANDEBWEEKLY",
+   "id": "pc_open_KXBABELMANDEBWEEKLY",
    "path": "/markets",
    "params": {
     "series_ticker": "KXBABELMANDEBWEEKLY",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXBILLSCOUNT",
+   "id": "pc_open_KXBILLSCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXBILLSCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXBILLSCOUNTWEEKLY",
+   "id": "pc_open_KXBILLSCOUNTWEEKLY",
    "path": "/markets",
    "params": {
     "series_ticker": "KXBILLSCOUNTWEEKLY",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXBILLSSIGNED",
+   "id": "pc_open_KXBILLSSIGNED",
    "path": "/markets",
    "params": {
     "series_ticker": "KXBILLSSIGNED",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXDCGOLFVISITCOUNT",
+   "id": "pc_open_KXDCGOLFVISITCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXDCGOLFVISITCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXEOWEEK",
+   "id": "pc_open_KXEOWEEK",
    "path": "/markets",
    "params": {
     "series_ticker": "KXEOWEEK",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXEPSTEIN",
+   "id": "pc_open_KXEPSTEIN",
    "path": "/markets",
    "params": {
     "series_ticker": "KXEPSTEIN",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXFRPROTEST",
+   "id": "pc_open_KXFRPROTEST",
    "path": "/markets",
    "params": {
     "series_ticker": "KXFRPROTEST",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXFULLLID8PM",
+   "id": "pc_open_KXFULLLID8PM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXFULLLID8PM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXFULLLIDBEFORE630PM",
+   "id": "pc_open_KXFULLLIDBEFORE630PM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXFULLLIDBEFORE630PM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXFULLLIDBEFORE8PM",
+   "id": "pc_open_KXFULLLIDBEFORE8PM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXFULLLIDBEFORE8PM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXGENERICBALLOTVOTEHUB",
+   "id": "pc_open_KXGENERICBALLOTVOTEHUB",
    "path": "/markets",
    "params": {
     "series_ticker": "KXGENERICBALLOTVOTEHUB",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXHORMUZMAX",
+   "id": "pc_open_KXHORMUZMAX",
    "path": "/markets",
    "params": {
     "series_ticker": "KXHORMUZMAX",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXHORMUZPEAK",
+   "id": "pc_open_KXHORMUZPEAK",
    "path": "/markets",
    "params": {
     "series_ticker": "KXHORMUZPEAK",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXHORMUZWEEKLY",
+   "id": "pc_open_KXHORMUZWEEKLY",
    "path": "/markets",
    "params": {
     "series_ticker": "KXHORMUZWEEKLY",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXINCOMERATE",
+   "id": "pc_open_KXINCOMERATE",
    "path": "/markets",
    "params": {
     "series_ticker": "KXINCOMERATE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXJUDGECOUNT",
+   "id": "pc_open_KXJUDGECOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXJUDGECOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXJUDGECOUNTYEAR",
+   "id": "pc_open_KXJUDGECOUNTYEAR",
    "path": "/markets",
    "params": {
     "series_ticker": "KXJUDGECOUNTYEAR",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXJUDGEFIRST",
+   "id": "pc_open_KXJUDGEFIRST",
    "path": "/markets",
    "params": {
     "series_ticker": "KXJUDGEFIRST",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXKEVCOUNT",
+   "id": "pc_open_KXKEVCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXKEVCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXLAGODAYS",
+   "id": "pc_open_KXLAGODAYS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXLAGODAYS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXLAGOVISITCOUNT",
+   "id": "pc_open_KXLAGOVISITCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXLAGOVISITCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXLEADERCOMBOOUT",
+   "id": "pc_open_KXLEADERCOMBOOUT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXLEADERCOMBOOUT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXLEAVECONGRESS",
+   "id": "pc_open_KXLEAVECONGRESS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXLEAVECONGRESS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXLVL4WARNING",
+   "id": "pc_open_KXLVL4WARNING",
    "path": "/markets",
    "params": {
     "series_ticker": "KXLVL4WARNING",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXMAMDANIEO",
+   "id": "pc_open_KXMAMDANIEO",
    "path": "/markets",
    "params": {
     "series_ticker": "KXMAMDANIEO",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXMAXSHIPSHORMUZ",
+   "id": "pc_open_KXMAXSHIPSHORMUZ",
    "path": "/markets",
    "params": {
     "series_ticker": "KXMAXSHIPSHORMUZ",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNEWDEAL",
+   "id": "pc_open_KXNEWDEAL",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNEWDEAL",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNEWTARIFFS",
+   "id": "pc_open_KXNEWTARIFFS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNEWTARIFFS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNJGOLFVISITCOUNT",
+   "id": "pc_open_KXNJGOLFVISITCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNJGOLFVISITCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNYCHOT",
+   "id": "pc_open_KXNYCHOT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNYCHOT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNYTFULLWIDTH",
+   "id": "pc_open_KXNYTFULLWIDTH",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNYTFULLWIDTH",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXNYTHEAD",
+   "id": "pc_open_KXNYTHEAD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXNYTHEAD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXPANAMAWEEKLY",
+   "id": "pc_open_KXPANAMAWEEKLY",
    "path": "/markets",
    "params": {
     "series_ticker": "KXPANAMAWEEKLY",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXPARDONANYONE",
+   "id": "pc_open_KXPARDONANYONE",
    "path": "/markets",
    "params": {
     "series_ticker": "KXPARDONANYONE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXPARDONSTRUMP",
+   "id": "pc_open_KXPARDONSTRUMP",
    "path": "/markets",
    "params": {
     "series_ticker": "KXPARDONSTRUMP",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXPOTUSTWEETS",
+   "id": "pc_open_KXPOTUSTWEETS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXPOTUSTWEETS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXPRESSBRIEFINGCOUNT",
+   "id": "pc_open_KXPRESSBRIEFINGCOUNT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXPRESSBRIEFINGCOUNT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXSUEZWEEKLY",
+   "id": "pc_open_KXSUEZWEEKLY",
    "path": "/markets",
    "params": {
     "series_ticker": "KXSUEZWEEKLY",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXSWENCOUNTERS",
+   "id": "pc_open_KXSWENCOUNTERS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXSWENCOUNTERS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTORYMPJOINREFORM",
+   "id": "pc_open_KXTORYMPJOINREFORM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTORYMPJOINREFORM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPACT",
+   "id": "pc_open_KXTRUMPACT",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPACT",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPACTD",
+   "id": "pc_open_KXTRUMPACTD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPACTD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPAPPROVE",
+   "id": "pc_open_KXTRUMPAPPROVE",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPAPPROVE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPDELETE",
+   "id": "pc_open_KXTRUMPDELETE",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPDELETE",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPENDORSEMENTS",
+   "id": "pc_open_KXTRUMPENDORSEMENTS",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPENDORSEMENTS",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPEOD",
+   "id": "pc_open_KXTRUMPEOD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPEOD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPFAV",
+   "id": "pc_open_KXTRUMPFAV",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPFAV",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPGAGGLED",
+   "id": "pc_open_KXTRUMPGAGGLED",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPGAGGLED",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPGOLFD",
+   "id": "pc_open_KXTRUMPGOLFD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPGOLFD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPINTERVIEWD",
+   "id": "pc_open_KXTRUMPINTERVIEWD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPINTERVIEWD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPMEET",
+   "id": "pc_open_KXTRUMPMEET",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPMEET",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPMEETM",
+   "id": "pc_open_KXTRUMPMEETM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPMEETM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPNOMNUM",
+   "id": "pc_open_KXTRUMPNOMNUM",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPNOMNUM",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPNUMSTATES",
+   "id": "pc_open_KXTRUMPNUMSTATES",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPNUMSTATES",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPPHOTO",
+   "id": "pc_open_KXTRUMPPHOTO",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPPHOTO",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPSTATESMON",
+   "id": "pc_open_KXTRUMPSTATESMON",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPSTATESMON",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPVH",
+   "id": "pc_open_KXTRUMPVH",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPVH",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPVISITGREENLAND",
+   "id": "pc_open_KXTRUMPVISITGREENLAND",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPVISITGREENLAND",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUMPVISITWEEK",
+   "id": "pc_open_KXTRUMPVISITWEEK",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUMPVISITWEEK",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUTHSOCIAL",
+   "id": "pc_open_KXTRUTHSOCIAL",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUTHSOCIAL",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXTRUTHSOCIALD",
+   "id": "pc_open_KXTRUTHSOCIALD",
    "path": "/markets",
    "params": {
     "series_ticker": "KXTRUTHSOCIALD",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXUKPOLLFIRST",
+   "id": "pc_open_KXUKPOLLFIRST",
    "path": "/markets",
    "params": {
     "series_ticker": "KXUKPOLLFIRST",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXUSCANADATARIFFDOWN",
+   "id": "pc_open_KXUSCANADATARIFFDOWN",
    "path": "/markets",
    "params": {
     "series_ticker": "KXUSCANADATARIFFDOWN",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXUSCANADATARIFFUP",
+   "id": "pc_open_KXUSCANADATARIFFUP",
    "path": "/markets",
    "params": {
     "series_ticker": "KXUSCANADATARIFFUP",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXUSUNSCVETO",
+   "id": "pc_open_KXUSUNSCVETO",
    "path": "/markets",
    "params": {
     "series_ticker": "KXUSUNSCVETO",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXVHGCB",
+   "id": "pc_open_KXVHGCB",
    "path": "/markets",
    "params": {
     "series_ticker": "KXVHGCB",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   },
   {
-   "id": "p2_live_KXVOTEHUBTRUMPUPDOWN",
+   "id": "pc_open_KXVOTEHUBTRUMPUPDOWN",
    "path": "/markets",
    "params": {
     "series_ticker": "KXVOTEHUBTRUMPUPDOWN",
-    "status": "settled",
-    "limit": 1000,
-    "min_close_ts": 1789171200,
-    "max_close_ts": 1793836800
+    "status": "open",
+    "limit": 1000
    },
    "max_pages": 3
   }
