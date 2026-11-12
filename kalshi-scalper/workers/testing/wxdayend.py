@@ -74,7 +74,7 @@ def job(job_id, purpose, reqs, tickers, cap):
 
 def answers(run_dir):
     """{request id: parsed body} for the answers a run stored."""
-    m = json.load(open(os.path.join(run_dir, "manifest.json")))
+    m = json.load(open(os.path.join(__import__("scorekit").guard(run_dir), "manifest.json")))
     out = {}
     for row in m["rows"]:
         if row.get("status") == 200 and row.get("file"):

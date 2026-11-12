@@ -52,7 +52,7 @@ def build_lists():
 
 
 def answers(folder):
-    m = json.load(open(os.path.join(folder, "manifest.json")))
+    m = json.load(open(os.path.join(__import__("scorekit").guard(folder), "manifest.json")))
     for row in m["rows"]:
         if row.get("status") == 200 and row.get("file"):
             yield row, json.load(gzip.open(os.path.join(folder, row["file"])))

@@ -59,7 +59,7 @@ def build_s0():
 
 
 def answers(folder):
-    m = json.load(open(os.path.join(folder, "manifest.json")))
+    m = json.load(open(os.path.join(__import__("scorekit").guard(folder), "manifest.json")))
     for row in m["rows"]:
         if row.get("status") == 200 and row.get("file") and not row.get("truncated") and row.get("body_kind", "object") == "object":
             yield row, json.load(gzip.open(os.path.join(folder, row["file"])))
@@ -108,7 +108,7 @@ def markets_from(s1):  # only markets closing after the cutover (live endpoints)
 
 
 def build_s2(s1):
-    man = json.load(open(os.path.join(s1, "manifest.json")))
+    man = json.load(open(os.path.join(__import__("scorekit").guard(s1), "manifest.json")))
     cap = min(STAGE2_CAP, BUDGET - int(man.get("requests_sent", len(man["job"]["requests"]))))   # AMENDMENT 1: stage 1 + stage 2 together at most BUDGET
     if cap < 1: raise SystemExit("stage 1 alone is over the budget of %d requests; stop and tell the Head" % BUDGET)
     mk = markets_from(s1)
@@ -269,7 +269,7 @@ def count(folders, lists=None):
     closes = {t: v[0] for t, v in markets_from(lists).items()}
     gaps, seen = [], 0
     for f in folders:
-        man = json.load(open(os.path.join(f, "manifest.json")))
+        man = json.load(open(os.path.join(__import__("scorekit").guard(f), "manifest.json")))
         for row, body in answers(f):
             rid = row["id"]
             hint = None if rid.startswith("b") and re.fullmatch(r"b\d{4}", rid) else rid

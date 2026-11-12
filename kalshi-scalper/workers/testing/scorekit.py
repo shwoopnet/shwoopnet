@@ -27,8 +27,13 @@ HAIRCUT_LINES = {"at the price seen (about a third)": 1 / 3.0, "slow arrival 5 t
 # ---------- LOAD ----------
 def refuse_heldout(folder, allow=False):
     """Standing rule (h), Head Nov 12 19:22Z: a folder whose path has a component starting HELDOUT_ is a joint held-out pull; every scorer refuses it by default (default-closed). Reading one needs allow=True AND an approved read, passed by the caller on the Head's go."""
-    if not allow and any(p.startswith("HELDOUT_") for p in os.path.abspath(folder).split(os.sep)):
+    if not allow and any(p.startswith("HELDOUT_") for path in (os.path.abspath(folder), os.path.realpath(folder)) for p in path.split(os.sep)):          # realpath too: a link with an innocent name to a HELDOUT_ folder is refused
         raise SystemExit("refused: %s is a HELDOUT_ folder; it is read once, on the Head's go, with allow_heldout=True" % folder)
+
+
+def guard(folder):
+    """refuse_heldout(folder) and return the folder: wrap a path at the point where a reader opens its manifest itself."""
+    refuse_heldout(folder); return folder
 
 
 def iter_answers(folder, allow_heldout=False):

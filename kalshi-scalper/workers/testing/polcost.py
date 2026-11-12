@@ -34,7 +34,7 @@ def num(v):
 
 
 def rows_from(folder):
-    man = json.load(open(os.path.join(folder, "manifest.json")))
+    man = json.load(open(os.path.join(__import__("scorekit").guard(folder), "manifest.json")))
     for row in man["rows"]:
         if row.get("status") == 200 and row.get("file") and not row.get("truncated"):
             body = json.load(gzip.open(os.path.join(folder, row["file"])))

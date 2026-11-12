@@ -119,4 +119,9 @@ with tempfile.TemporaryDirectory() as d3:
         try: fn(); raise AssertionError("a HELDOUT_ folder must be refused")
         except SystemExit as e: assert "HELDOUT_" in str(e)
     assert list(k.iter_answers(hd, allow_heldout=True)) is not None            # only with the explicit flag, on the Head's go
+with tempfile.TemporaryDirectory() as d4:
+    hd = os.path.join(d4, "HELDOUT_Y", "run"); os.makedirs(hd); mkrun(hd, [("l", {"markets": []})]); ln = os.path.join(d4, "innocent"); os.symlink(hd, ln)
+    for fn in (lambda: list(k.iter_answers(ln)), lambda: k.manifest(ln), lambda: k.guard(ln)):
+        try: fn(); raise AssertionError("a link to a HELDOUT_ folder must be refused")
+        except SystemExit: pass
 print("scorekit synthetic tests passed")

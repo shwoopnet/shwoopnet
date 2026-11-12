@@ -47,7 +47,7 @@ def build():
 def split(folder, out, order=None):
     """Turn one landed bundle run folder into five answer sets in the layout the readers expect. Returns a report per sub-job; one sub-job's failure never blocks reading the others."""
     ORDER_ = order or ORDER
-    man = json.load(open(os.path.join(folder, "manifest.json")))
+    man = json.load(open(os.path.join(__import__("scorekit").guard(folder), "manifest.json")))
     expected = {p: [r["id"][len(p) + 1:] for r in man["job"]["requests"] if r["id"].startswith(p + "_")] for p, _ in ORDER_}
     known = {r["id"] for r in man["job"]["requests"]}
     report = {"bundle_status": man.get("status"), "requests_sent": man.get("requests_sent"), "bytes_stored": man.get("bytes_stored"), "sub_jobs": {}, "mixed_or_unknown_rows": []}
