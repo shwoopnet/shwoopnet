@@ -39,6 +39,8 @@ Keyword check of the V2 README (1.77 MB) and both workers folders for each card 
 
 ### 1. NESTCOMBO (combo): a combo whose legs are logically nested is worth its strongest leg, not the product
 
+**STATUS (Nov 12): CLOSED, untestable from public data (Chief of Staff's call, on V2's COMBO1 finding).** Combos carry no posted asks: in all 34 sampled combos with candles the ask closes at 1.00 and the bid at 0.00, because combos are quoted on request. So "combo plus NO on the strongest leg for under $1" cannot be priced from the public book whatever the nested count is. This desk's own structure count stopped at its second request (a 429) and found no nested or contradictory legs in the 38 combos V2 had committed. Reopen only if a recorder of the live combo book shows real asks, which is the owner's decision and is not proposed.
+
 `NESTCOMBO | family: structural dominance, combo leg plus the single's NO bought together, held to settlement (paired within its own position) | risk class: no outcome risk if the nesting is real; loss shape = a leg not filled or a rule read wrong; about $1 per set | stage Idea`
 
 - **Mechanism (one line):** when every leg of a listed combo is implied by one leg (team wins the title implies it wins the conference; covers -5.5 implies wins; over 220.5 implies over 215.5; high above 60 implies high above 55), the combo pays exactly when that one leg pays, so combo ask must not sit below that single's bid; when it does, buy the combo and buy NO on the single for under $1 in total.
@@ -247,7 +249,7 @@ By speed to a first honest verdict, then by how different the card is from what 
 
 | Rank | Card | First verdict | Needs from the shared Kalshi budget | Different from the failures because | Probability |
 |---|---|---|---|---|---|
-| 1 | 1 NESTCOMBO | 1 hour of budget for the structure count, 7 days for the lock count | about 25, then 210 to 630 | no model: a logical bound between a combo and a single | 4% |
+| closed | 1 NESTCOMBO | CLOSED Nov 12: untestable from the public book (combos have no posted asks) | 2 used | no model: a logical bound between a combo and a single | 0% as a public test |
 | 2 | 2 ECONLAG | 3 days | about 385 | time exit; one Kalshi market prices another; n about 100 | 8% |
 | 3 | 3 BALLOTNO | 2 to 3 days | about 160 | independent events with a known base rate; inside the nothing-happens rule | 7% |
 | 4 | 4 UNRATEROUND | 2 days (descriptive) | about 40 | rounding position of a published number, no forecast | 7% / 3% |
