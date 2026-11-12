@@ -81,6 +81,8 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `INGAMELAG_M1` | Desk B | 215 (235) | n/a | retired Nov 12: one job of 1 minute candles risked the 200 MB a run cap; replaced by M1A and M1B, no workflow choice |
 | `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
 | `WXDAYEND_A` | Testing Desk (owner field MAIN) | 22 (22) | under 1 | `WXDAYEND_REGISTRATION.md`; part A of a registered count: 18 one-market candle windows and 4 settled lists |
+| `CFRTI_K_CANDLES` | Desk A | 215 (215) | about 55 (estimate) | `CFRTI_K_REGISTRATION.md`; live mode (the probe answered empty for pre-cutover markets), built from the `CFRTI_K_LISTS` answer; closes 2026-09-12 to 2026-11-04 only |
+| `UNRATE_LISTS` | Testing Desk (owner field MAIN) | 4, up to 8 pages (8) | under 1 | `UNRATEROUND_REGISTRATION.md`; settled lists of KXU3 and KXUE, live and historical |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
