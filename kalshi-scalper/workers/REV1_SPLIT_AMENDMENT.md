@@ -25,3 +25,5 @@ Bitcoin candles Aug 6 to Nov 3, dates split in thirds as MECHOI1 does; only W1 (
 | OICORE not fired | 2,550 (1,704) | 20.2% / 17.4% | 1.15 | +1.93c | +1.68 | +1.48 / +2.37c |
 
 Trailing p90: fired 120 entries +12.14c; not fired 2,777 entries +2.22c (z +2.11). The not-fired half is positive but thin (z under 2, W1 z +0.91, W2 z +1.47) and rests on a 3.3c win-rate gap over price paid; most of the pooled rule's mean comes from the fired half. For the both-sides 0.15 to 0.49 reference (REF_BTC_UNDERDOG_180) the not-fired half is **negative** (-0.49c, n 1,667; W1 -1.12c, W2 +0.06c) and all of its pooled +1.24c is the fired half (+20.30c, n 151). Overlap: 252 of 1,956 REV1 windows (13%) also fire OICORE.
+
+READ-ONCE MARKER: REV1 READ ON 2026-11-05 (status taken from the git-ignored data/rev1_result.txt, whose modification time is 2026-11-05 15:27 UTC; the commit that carried the read was not recorded). The scorer refuses a second run while that ignored file exists; this committed line is the durable copy. Do not run it again.

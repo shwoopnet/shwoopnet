@@ -48,3 +48,5 @@ So the rule is QUOTE1's card on gold: at the first recorded poll of a window wit
 **Prediction (unchanged from MM1/QUOTE1).** FALSIFIED once 300 windows exist: the spread on gold's last 150 s is a tick against a fee of at least 1c per order at C = 1, and one-sided fills are adverse.
 
 Run once with `PYTHONPATH=src python -m scalper.mm1 run` from `kalshi-scalper/` (refused a second time). `count` only counts.
+
+READ-ONCE MARKER: not yet read; MM1 scorer first read when 300 scored windows exist; after the read: READ ON <date>, commit <hash>. Status as found on Nov 12, 2026 in the git-ignored data/ folder: data/mm1_result.txt does not exist, so the registered scorer has NOT been run (the Oct 29 'NOT_ENOUGH_DATA / NOT_RUNNABLE' in the README came from the data plan, not from the scorer).

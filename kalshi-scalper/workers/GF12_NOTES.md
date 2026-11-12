@@ -21,3 +21,6 @@ The scorer is `src/scalper/gf12.py` (`count`, `run gf1`, `run gf2`), tested on a
 ## Readiness at writing (2026-10-30 02:15 UTC, `python -m scalper.gf12 count`)
 
 One R6 book file on `quote-data` (the 2026-10-29 22:03 job; the next push is due when the running 4 hour job ends): 35 recorded market windows (gold 6), 18 L1 signals (gold 3, Bitcoin 6, Ethereum 2, Dogecoin 3, XRP 4). An upper bound: coverage, and so usability, is not read before the run. At about 440 market windows a day the pooled count passes 300 signals within a few days; gold alone gets about 3 signals in 6 windows here.
+
+READ-ONCE MARKER (GF1): not yet read; first read allowed on or after 2026-11-14 00:00 UTC (and 300 scored windows with an order); after the read: READ ON <date>, commit <hash>. Status as found on Nov 12, 2026 in the git-ignored data/ folder: no data/gf1_result.txt and no data/gf12_gf1_started, so NOT READ.
+READ-ONCE MARKER (GF2): not yet read; same date and gate. Status as found on Nov 12, 2026: no data/gf2_result.txt and no data/gf12_gf2_started, so NOT READ.
