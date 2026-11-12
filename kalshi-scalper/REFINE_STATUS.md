@@ -56,7 +56,7 @@ Registered first (S/w_xasset), N +8 (about 780). Joint window ETH 4.3 weeks (fro
 
 ## 2026-11-10 07:53 AM CT (13:53Z): EVENT830 CPI release read (Nov 10, 13:30Z), descriptive
 
-Report generated 2026-11-10T13:52Z. [live figure removed, ask Main] Fills: BNB yes x1 at 0.071 (limit 0.08), EURUSD yes 0.12, GBPUSD no (paid 0.05, NO avgFill 0.95 in YES terms), HYPE yes 0.016 (limit 0.07, price improvement), USDJPY yes 0.16 (limit 0.17); mean price paid about 8.3c (baseline 16.3c; registered 14c to 18c); real avgFee populated (0.0012 to 0.0095 per contract). [live figure removed, ask Main] FLAG none. [live figure removed, ask Main]
+Report generated 2026-11-10T13:52Z. [live figure removed, ask Main] Fills and prices paid: [live figure removed, ask Main] [live figure removed, ask Main] FLAG none. [live figure removed, ask Main]
 
 ## 2026-11-10 06:28 AM CT (12:28Z): W-INDEP6: OICORE price bands on the independent window and Sep to Nov (supports the 0.08 floor)
 
@@ -92,7 +92,7 @@ Registered first (S/w_indep4). Scored on 697 of 1,536 registered markets (same 1
 
 ## 2026-11-10 03:16 AM CT (09:16Z): W-INDEP2 and W-INDEP rescore: XRP full window, Bitcoin 78 percent
 
-XRP independent window (June to early Sept, 12 pre-registered dates) 1,147 of 1,152 windows, PF (n) at +0c / +1c: XRPYES10 1.91 (70) / 1.66; XRPFAV6 1.645 (137, 129 wins) / 1.46, net 3.4c per contract; XRPFAV10 1.71 (70) / 1.53. The interim XRPFAV6 0.99 (n42) was the time-of-day skew (closes 00:00 to 08:15 UTC only); on the full window it clears the bar at both slips. Bitcoin independent window 1,206 of 1,536 windows: BTCHI6 1.13 (268) at +0c, 0.91 at +1c (net +0.55c / -0.38c per contract): fails the 1.3 bar (interim 1.42 on n137 did not hold); BTCHI10 1.27 (66) / 1.05. Gold independent window done earlier (GOLDALL 1.60 / 1.36, GOLDHI6S 1.68 / 1.35).
+XRP independent window (June to early Sept, 12 pre-registered dates) 1,147 of 1,152 windows, PF (n) at +0c / +1c for XRPYES10, XRPFAV6 and XRPFAV10: [live figure removed, ask Main] The interim XRPFAV6 read was a time-of-day skew (closes 00:00 to 08:15 UTC only). Bitcoin independent window 1,206 of 1,536 windows: BTCHI6 1.13 (268) at +0c, 0.91 at +1c (net +0.55c / -0.38c per contract): fails the 1.3 bar (interim 1.42 on n137 did not hold); BTCHI10 1.27 (66) / 1.05. Gold independent window done earlier (GOLDALL 1.60 / 1.36, GOLDHI6S 1.68 / 1.35).
 
 ## 2026-11-10 02:31 AM CT (08:31Z): W-INDEP3: gold shadow rules on an independent Aug 13 to Sep 1 window
 
@@ -108,7 +108,7 @@ Registered first (S/w_rerun4), same cells as W-RERUN3, N unchanged. [live figure
 
 ## 2026-11-10 01:06 AM CT (07:06Z): W-INDEP2 (interim): XRP shadow rules on an independent earlier window
 
-Registered first (S/w_indep2): 12 UTC dates (2026-09-05; 08-26, 08-19, 08-12, 08-05; 07-26, 07-19, 07-12, 07-05; 06-26, 06-19, 06-12), XRP history exists back to at least 2026-04-04. [live figure removed, ask Main] PF (n) 0c / +1c: XRPYES10 1.62 (20) / 1.41 (20) n under 40, undecided; XRPFAV6 0.99 (42) / 0.88 (42) FAILS the 1.3 bar, does not hold on independent data; XRPFAV10 2.00 (20) / 1.78 (20) n too small. Pull continues (restart command in S/w_indep2/STATUS.md); rescore with python3 -I score.py. N unchanged.
+Registered first (S/w_indep2): 12 UTC dates (2026-09-05; 08-26, 08-19, 08-12, 08-05; 07-26, 07-19, 07-12, 07-05; 06-26, 06-19, 06-12), XRP history exists back to at least 2026-04-04. [live figure removed, ask Main] PF (n) 0c / +1c for XRPYES10, XRPFAV6 and XRPFAV10: [live figure removed, ask Main] Pull continues (restart command in S/w_indep2/STATUS.md); rescore with python3 -I score.py. N unchanged.
 
 ## 2026-11-10 12:21 AM CT (06:21Z): Nightly every-trade review, CT Nov 9 (cash basis)
 
@@ -120,7 +120,7 @@ Registered first (S/w_indep): 16 pre-chosen UTC dates (June 3, 7, 10, 14, 17, 21
 
 ## 2026-11-09 10:32 PM CT (04:32Z): W-RERUN3: ETH and XRP shadow candle checks on larger files
 
-Registered first (S/w_rerun3), copies of the files, no new cells, N unchanged. Corrected fee, look-candle ask, hold, PF (n) half 1 / half 2, +0c then +1c: ETHNO6 1.04 (47) / 1.73 (45); 0.88 (47) / 1.49 (45). ETHL1 0.92 (99) / 1.10 (92); 0.78 (99) / 0.94 (92). XRPYES10 2.91 (102) / 2.28 (107); 2.54 / 2.00. XRPFAV6 1.57 (177) / 1.36 (155); 1.40 / 1.21 (below 1.3 bar). XRPFAV10 2.32 (112) / 1.89 (132); 2.08 / 1.68. [live figure removed, ask Main] ETHL1 0.82 (63) / 1.17 (80), 0.70 / 1.00. ETH grid: 1 of 40 passes, only at +0c (favourite 0.88-0.97 10m spread at most 0.02: 1.30 (51) / 3.07 (74)). [live figure removed, ask Main] 495 rows have no result), split 10-14; XRP 2,483 windows 09-10 to 10-06, split 09-23. Candle PF contradicts ETHL1 (both halves under 1.0 at +1c) and ETHNO6 half 1 (0.88 at +1c, n47). XRP rules pass the bar at both slip levels except XRPFAV6 half 2 at +1c (1.21); XRP window is Sep 10 to Oct 6, the same data the cells were picked from.
+Registered first (S/w_rerun3), copies of the files, no new cells, N unchanged. Corrected fee, look-candle ask, hold, PF (n) half 1 / half 2, +0c then +1c: ETHNO6 1.04 (47) / 1.73 (45); 0.88 (47) / 1.49 (45). ETHL1 0.92 (99) / 1.10 (92); 0.78 (99) / 0.94 (92). XRPYES10, XRPFAV6, XRPFAV10: [live figure removed, ask Main] [live figure removed, ask Main] ETHL1 0.82 (63) / 1.17 (80), 0.70 / 1.00. ETH grid: 1 of 40 passes, only at +0c (favourite 0.88-0.97 10m spread at most 0.02: 1.30 (51) / 3.07 (74)). [live figure removed, ask Main] 495 rows have no result), split 10-14; XRP 2,483 windows 09-10 to 10-06, split 09-23. Candle PF contradicts ETHL1 (both halves under 1.0 at +1c) and ETHNO6 half 1 (0.88 at +1c, n47). XRP rules: [live figure removed, ask Main] XRP window is Sep 10 to Oct 6, the same data the cells were picked from.
 
 ## 2026-11-09 10:29 PM CT (04:29Z): OICORE README entry draft (re-arm rule options A and B) written; cash line added
 
@@ -128,7 +128,7 @@ Registered first (S/w_rerun3), copies of the files, no new cells, N unchanged. C
 
 ## 2026-11-09 10:24 PM CT (04:24Z): W-BTCHI10: reconciliation with V2 REGIME-B2: period difference, not the spread gate
 
-My first guess (missing maxSpread in the BTCHI10 and XRPFAV10 registrations) was WRONG: the spread gate 0.02 changes nothing (in-band favourites already have spread 2c or less; every cell identical with and without it). Look candle also not it (a 600 s candle and V2's latest candle 570 to 640 s left give identical results on my file); fee unrounded in both; V2 has no slip. Real difference: data period. My Bitcoin file S/oi/btc.jsonl covers 2026-09-02 to 11-09 (68 days): BTCHI10 PF 1.62 (n251), halves 1.37 (94) / 1.82 (157) at +0c; +1c 1.34, halves 1.14 / 1.50. V2's regime_b2.py reads data/hist15/KXBTC15M.sqlite, the Jun to Aug quote feed (65 dates; 63 days): PF 0.90, n289, halves 0.90 / 0.90. Two disjoint periods disagree: V2's is an out-of-sample earlier period and BTCHI10 fails it. XRP .88-.92 10m on S/oi/xrp.jsonl (09-10 to 10-05, 25 days): PF 1.95 (n230), halves 2.25 / 1.73 at +0c, 1.74 at +1c; V2's reproduction of XRPFAV6 and XRPFAV10 used the same candles the cells were picked from, so it is not independent (selection, best of about 120 cells). I could not re-run V2's file (data/hist15 not in this checkout).
+My first guess (missing maxSpread in the BTCHI10 and XRPFAV10 registrations) was WRONG: the spread gate 0.02 changes nothing (in-band favourites already have spread 2c or less; every cell identical with and without it). Look candle also not it (a 600 s candle and V2's latest candle 570 to 640 s left give identical results on my file); fee unrounded in both; V2 has no slip. Real difference: data period. My Bitcoin file S/oi/btc.jsonl covers 2026-09-02 to 11-09 (68 days): BTCHI10 PF 1.62 (n251), halves 1.37 (94) / 1.82 (157) at +0c; +1c 1.34, halves 1.14 / 1.50. V2's regime_b2.py reads data/hist15/KXBTC15M.sqlite, the Jun to Aug quote feed (65 dates; 63 days): PF 0.90, n289, halves 0.90 / 0.90. Two disjoint periods disagree: V2's is an out-of-sample earlier period and BTCHI10 fails it. XRP .88-.92 10m on S/oi/xrp.jsonl: [live figure removed, ask Main] V2's reproduction of XRPFAV6 and XRPFAV10 used the same candles the cells were picked from, so it is not independent (selection, best of about 120 cells). I could not re-run V2's file (data/hist15 not in this checkout).
 
 ## 2026-11-09 09:29 PM CT (03:29Z): W-CANDLEVALID: gold candle model vs live fills trade by trade
 
@@ -148,7 +148,7 @@ Registered first (S/w_sizeslip), about 6 cells. [live figure removed, ask Main] 
 
 ## 2026-11-09 07:28 PM CT (01:28Z): W-DOLLARKILL: incubator dollar kills replayed on real cash record
 
-Registered first (S/w_dollarkill). k = floor(cap / price paid), scaled P&L = per-contract cash result x k, kills on the continuous path from the first order. [live figure removed, ask Main] Bitcoin 1.09, Ethereum 1.26, Dogecoin 1.45 no kill. [live figure removed, ask Main] Conclusion: a fixed dollar latch false-kills a low-price high-variance strategy; per-contract kills or a latch scaled to price paid fit better. Cannot show fill rate, shadow vs fill, slippage at tiny size.
+Registered first (S/w_dollarkill). k = floor(cap / price paid), scaled P&L = per-contract cash result x k, kills on the continuous path from the first order. [live figure removed, ask Main] Per-market replay results: [live figure removed, ask Main] [live figure removed, ask Main] Conclusion: a fixed dollar latch false-kills a low-price high-variance strategy; per-contract kills or a latch scaled to price paid fit better. Cannot show fill rate, shadow vs fill, slippage at tiny size.
 
 ## 2026-11-09 06:42 PM CT (00:42Z): W-OIETH3: OICORE mechanism on Ethereum, NOT_ENOUGH_DATA
 
@@ -160,7 +160,7 @@ refine_tools/shadow_read.py computes per-rule signals, per week, wouldFill share
 
 ## 2026-11-09 05:30 PM CT (23:30Z): W-FEEFIX: grids rerun on corrected fee model; batch 2 shadow registrations
 
-[live figure removed, ask Main] Clears the bar at +1c: XRP favourite .88-.92 6m spread at most 2c PF 1.31 (136) / 1.34 (108), 88 a week (failed under the old model). +0c adds: gold F5 .92-.97 6m spread 2c 1.47 (342) / 1.59 (373) 72 a week; gold .92-.97 10m 1.31 (73) / 2.74 (94) 17 a week; Bitcoin .92-.97 10m 1.37 (94) / 1.82 (157) 26 a week; XRP .88-.92 10m 1.64 (81) / 1.36 (95) 63 a week; XRP F4 .97-.99 2m (degenerate, 120 s look). Corrected candle PF at +1c / +0c (old +1c): BTCHI6 0.93 / 1.16 (0.76) 115 a week; GOLDALL 1.06 / 1.24 (0.95) 126; XRPYES10 1.87 / 2.14 (1.72) 55 (halves 1.74 / 1.98); ETHNO6 0.69 / 0.80 (0.61) 92; ETHL1 0.80 / 0.95 (0.71) 195; silver L1 1.19 / 1.39 (1.07), halves 1.28 / 1.11 at +1c. Gold and Bitcoin still zero at +1c. Batch 2 registrations appended to SHADOW_REGISTRATIONS_WEEK1.md.
+[live figure removed, ask Main] Clears the bar at +1c: XRP favourite .88-.92 6m spread at most 2c ([live figure removed, ask Main]). +0c adds: gold F5 .92-.97 6m spread 2c 1.47 (342) / 1.59 (373) 72 a week; gold .92-.97 10m 1.31 (73) / 2.74 (94) 17 a week; Bitcoin .92-.97 10m 1.37 (94) / 1.82 (157) 26 a week; XRP .88-.92 10m ([live figure removed, ask Main]); XRP F4 .97-.99 2m (degenerate, 120 s look). Corrected candle PF at +1c / +0c (old +1c): BTCHI6 0.93 / 1.16 (0.76) 115 a week; GOLDALL 1.06 / 1.24 (0.95) 126; XRPYES10 [live figure removed, ask Main]; ETHNO6 0.69 / 0.80 (0.61) 92; ETHL1 0.80 / 0.95 (0.71) 195; silver L1 [live figure removed, ask Main]. Gold and Bitcoin still zero at +1c. Batch 2 registrations appended to SHADOW_REGISTRATIONS_WEEK1.md.
 
 ## 2026-11-09 05:29 PM CT (23:29Z): [live figure removed, ask Main]
 
@@ -204,7 +204,7 @@ Registered first (S/w_oigap, N about 600). [live figure removed, ask Main] So mo
 
 ## 2026-11-09 12:49 PM CT (18:49Z): W-DECK2: XRP families, none qualify (sample about 8 days, pull continues)
 
-[live figure removed, ask Main] PF first half / second half: F1 best 0.80-0.88 at 6m 1.73 (94) / 0.98 (67); F2 all 0.00 to 0.97; F3 favourite 0.50-0.60 at 10m 0.88 (94) / 1.38 (70); F4 0.07 to 0.20 (0.97-0.98 infinite PF is an artifact of no gain after fee and slip); F5 spread-gated 0.88-0.92 6m 2.43 (59) / 1.12 (54), 10m 0.88-0.97 1.08 (43) / 4.19 (60), all lopsided. No cell clears 1.3 in both halves. Signals a week 60 to 240. Not a verdict (8 days). Rerun an_xrp.py when xrp.jsonl is complete.
+[live figure removed, ask Main] PF first half / second half: F1 best 0.80-0.88 at 6m 1.73 (94) / 0.98 (67); F2 all 0.00 to 0.97; F3 favourite 0.50-0.60 at 10m 0.88 (94) / 1.38 (70); F4 0.07 to 0.20 (0.97-0.98 infinite PF is an artifact of no gain after fee and slip); F5 spread-gated 0.88-0.92 6m ([live figure removed, ask Main]), 10m 0.88-0.97 1.08 (43) / 4.19 (60), all lopsided. No cell clears 1.3 in both halves. Signals a week 60 to 240. Not a verdict (8 days). Rerun an_xrp.py when xrp.jsonl is complete.
 
 ## 2026-11-09 12:33 PM CT (18:33Z): W-DECK1: gold and Bitcoin families, none qualify
 
@@ -232,7 +232,7 @@ Registered first (N 540 to 594). [live figure removed, ask Main] 1.15/1.00); pal
 
 ## 2026-11-09 11:41 AM CT (17:41Z): Weekly hunt 1: shadow candidates, sizing replay, hourly ladder data check
 
-Registered first (S/w_hunt1, w_supply2, w_hunt2). PF here is PER CONTRACT, equal-weight (hunt) unless stated; dollar-weighted PF is lower for Dogecoin (1.01) because of size mix. W-HUNT1: 121 populated cells, N about 670, every result a shadow candidate. [live figure removed, ask Main] (3) XRP side YES 10m look PF 1.71 n52 (2.43/1.36), no candles, skips 40, about 13 a week, prior low (XRP overall 0.63). [live figure removed, ask Main] Per-contract market PFs: BTC 1.20, ETH 1.24, DOGE 1.48, XRP 0.63, GAS 0.73, CAD 1.00, AUD 1.37. [live figure removed, ask Main] OICORE steps 15/20/30 unsupported. W-HUNT2 hourly ladders: recorder samples only the last 150 s, cannot test a 6 minute entry; needs recording from 10 min out (about 3 weeks for 100 windows). W-SUPPLY1 series scan pending.
+Registered first (S/w_hunt1, w_supply2, w_hunt2). PF here is PER CONTRACT, equal-weight (hunt) unless stated; dollar-weighted PF for Dogecoin is lower because of size mix ([live figure removed, ask Main]). W-HUNT1: 121 populated cells, N about 670, every result a shadow candidate. [live figure removed, ask Main] (3) XRP side YES 10m look: [live figure removed, ask Main] prior low. [live figure removed, ask Main] Per-contract market PFs: [live figure removed, ask Main] [live figure removed, ask Main] OICORE steps 15/20/30 unsupported. W-HUNT2 hourly ladders: recorder samples only the last 150 s, cannot test a 6 minute entry; needs recording from 10 min out (about 3 weeks for 100 windows). W-SUPPLY1 series scan pending.
 
 ## 2026-11-09 11:39 AM CT (17:39Z): NEW STANDING DUTY: weekly candidate supply (Sunday evening CT)
 
@@ -256,7 +256,7 @@ Registered first. Skip worst tercile of ETH mid change (close-360 to close-180, 
 
 ## 2026-11-09 11:24 AM CT (17:24Z): Lifecycle spec inputs: kill calibration and code inventory sent to main
 
-W-KILLCAL (registered first): R5 net kill under -1c per contract after 50 fills caught Bitcoin at fill 58 (Oct 10, about $13 of $21.5 saved) and XRP at 50 (Oct 25), 0 false kills, silent on gold live and OICORE. [live figure removed, ask Main] W-LIFECODE: reusable killCheck, slotCaps, validator, skip rows, report block; missing nightly per-strategy scorer fields, auto admit/retire, zero-money incubator. Also W-SEPNEW1, W-GOLDCAL1 sent.
+W-KILLCAL (registered first): R5 net kill under -1c per contract after 50 fills caught Bitcoin and XRP on their live records ([live figure removed, ask Main]). [live figure removed, ask Main] W-LIFECODE: reusable killCheck, slotCaps, validator, skip rows, report block; missing nightly per-strategy scorer fields, auto admit/retire, zero-money incubator. Also W-SEPNEW1, W-GOLDCAL1 sent.
 
 ## 2026-11-09 10:37 AM CT (16:37Z): S-OICONF1: ETH OI confirmation for OICORE FAILS
 
@@ -292,7 +292,7 @@ Owner declined GOLDHOLD (PR 747 closed, favourite-and-hold ban stays); costing s
 
 ## 2026-11-09 09:51 AM CT (15:51Z): W-CAPACITY1, W-CORR1, W-FEEROUND1 (live structure reads: nothing limiting, nothing to change)
 
-All three registered first (S/w_capacity, S/w_corr, S/w_feeround); report refreshed Nov 9 9:27 to 9:49 AM CT. [live figure removed, ask Main] Slip is negative everywhere so first-seen ask is weak data; only the touch is observed; nothing placed at the upper ladder steps so no evidence for them. Excluded artifacts listed by rule. [live figure removed, ask Main] OICORE loss hours do not line up with gold early-sell hours. [live figure removed, ask Main] (The correlation worker said it found no own-peak stop and a streak kill of 18: stale checkout, both wrong now: own-peak stop is 5 x contracts and the streak kill has been 24 since PR 741.) FEE ROUNDING: avgFee x count equals the unrounded formula (avgFee hides the ceil); settledPnl books the ceil fee at the limit price; the exit fee is charged and sits inside settledPnl for result exit (17 L1 exit rows, total 2.39). [live figure removed, ask Main] Fees are material, rounding is not. Unverified: Kalshi's own fee ledger. No change proposed.
+All three registered first (S/w_capacity, S/w_corr, S/w_feeround); report refreshed Nov 9 9:27 to 9:49 AM CT. [live figure removed, ask Main] Slip is negative everywhere so first-seen ask is weak data; only the touch is observed; nothing placed at the upper ladder steps so no evidence for them. Excluded artifacts listed by rule. [live figure removed, ask Main] OICORE loss hours do not line up with gold early-sell hours. [live figure removed, ask Main] (The correlation worker said it found no own-peak stop and a streak kill of 18: stale checkout, both wrong now: own-peak stop is 5 x contracts and the streak kill has been 24 since PR 741.) FEE ROUNDING: avgFee x count equals the unrounded formula (avgFee hides the ceil); settledPnl books the ceil fee at the limit price; the exit fee is charged and sits inside settledPnl for result exit (L1 exit rows and total: [live figure removed, ask Main]). [live figure removed, ask Main] Fees are material, rounding is not. Unverified: Kalshi's own fee ledger. No change proposed.
 
 ## 2026-11-09 12:28 AM CT (06:28Z): [live figure removed, ask Main]
 
@@ -388,11 +388,11 @@ Title is now Head of Live Strategy Performance; no new rules. Reports findings t
 
 ## 2026-11-07 09:34 AM CT (15:34Z): [live figure removed, ask Main]
 
-Watch 10:33 AM CT: no kill or read point near; [live figure removed, ask Main] Win rate 0.186 is under the 0.20 up-bar but not a down trigger (needs 40 fills under 0.15). [live figure removed, ask Main]
+Watch 10:33 AM CT: no kill or read point near; [live figure removed, ask Main] Win rate ([live figure removed, ask Main]) is under the 0.20 up-bar but not a down trigger (needs 40 fills under 0.15). [live figure removed, ask Main]
 
-## 2026-11-07 09:05 AM CT (15:05Z): W-OICORE-NOV7 (OICORE interim at 59 fills): no kill rule hit; first 12 contract order seen
+## 2026-11-07 09:05 AM CT (15:05Z): W-OICORE-NOV7 (OICORE interim): no kill rule hit; first 12 contract order seen
 
-[live figure removed, ask Main] S-JUMP1 and S-SDIR1 counts 44 fills each (already read at 40). [live figure removed, ask Main] Decision rules unchanged; forward read stays Nov 13.
+[live figure removed, ask Main] S-JUMP1 and S-SDIR1 fill counts [live figure removed, ask Main] (already read at 40). [live figure removed, ask Main] Decision rules unchanged; forward read stays Nov 13.
 
 ## 2026-11-07 06:34 AM CT (12:34Z): Watch 6:33 AM CT Nov 7 and OI cache health (nothing actionable)
 
@@ -400,7 +400,7 @@ Watch 10:33 AM CT: no kill or read point near; [live figure removed, ask Main] W
 
 ## 2026-11-07 03:35 AM CT (09:35Z): Watch Nov 7 3:33 AM CT and C9 refresh (nothing actionable)
 
-[live figure removed, ask Main] Gold closed for the weekend, last order Fri 4:54 PM CT. [live figure removed, ask Main]
+[live figure removed, ask Main] Gold closed for the weekend, last order time [live figure removed, ask Main] [live figure removed, ask Main]
 
 ## 2026-11-07 12:35 AM CT (06:35Z): W-JUMP1-READ and W-SDIR1-READ (registered 40 fill read, early at 41 fills)
 
@@ -412,7 +412,7 @@ Watch 10:33 AM CT: no kill or read point near; [live figure removed, ask Main] W
 
 ## 2026-11-06 08:34 PM CT (02:34Z): [live figure removed, ask Main]
 
-[live figure removed, ask Main] S-GHOLD120 feasibility: runExitWatch stores exitAt, exitBid, exitAvg, exitCount, exitProceeds on the order but the report exports none, so the real sale time is not readable; a public candle proxy says 14 gold early sells since Oct 21, 11 triggered inside the last 120 seconds, hold would have won 1 of those 11 and ended about 7 dollars worse than the recorded exits (descriptive only, read point 15 late exits, 0 forward so far, about 5 to 6 weeks). This conflicts with the earlier W-GOLDCLUSTER1 reading that two of the five recent sells would have settled as wins; the proxy trigger time is not the sale time, so neither is firm. Exporting exitAt (and exitAvg) in the nightly report is a read-only addition and the owner's call.
+[live figure removed, ask Main] S-GHOLD120 feasibility: runExitWatch stores exitAt, exitBid, exitAvg, exitCount, exitProceeds on the order but the report exports none, so the real sale time is not readable; a public candle proxy gives early sell counts, timing and the hold comparison ([live figure removed, ask Main]; descriptive only, read point 15 late exits). This conflicts with the earlier W-GOLDCLUSTER1 reading that two of the five recent sells would have settled as wins; the proxy trigger time is not the sale time, so neither is firm. Exporting exitAt (and exitAvg) in the nightly report is a read-only addition and the owner's call.
 
 ## 2026-11-06 07:44 PM CT (01:44Z): W-BASEFIT1 and W-OICORELADDER1 (measure only)
 
@@ -432,11 +432,11 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 01:33 PM CT (19:33Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0 (w_goldreal/; gr.py applies realfill2's paid and fee rules; fresh report: 290 gold L1 orders, 2,887 contracts; the 16 early sells keep the recorded result since they have no exit avgFill; not the same sample as W-GOLD-MARGIN1, so approximate). [live figure removed, ask Main] Nothing changed.
+- Descriptive, try count 0 (w_goldreal/; gr.py applies realfill2's paid and fee rules; fresh report: [live figure removed, ask Main]; the early sells keep the recorded result since they have no exit avgFill; not the same sample as W-GOLD-MARGIN1, so approximate). [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 01:33 PM CT (19:33Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0 (w_oicorereal/). [live figure removed, ask Main] Reading: [live figure removed, ask Main]43 (it was 1.03 recorded) so the minimum bar (net above 0, PF above 1) is cleared with more room, and 1.5 is within the interval; price improvement is larger on the dearer fills (+3.16c above 0.15) than on the cheapest (+2.12c). Caveat: the kill rules (net under -$6 after 40 fills) use the recorded figures, so they are conservative by the same amount. Nothing changed.
+- Descriptive, try count 0 (w_oicorereal/). [live figure removed, ask Main] Reading: [live figure removed, ask Main] Caveat: the kill rules (net under -$6 after 40 fills) use the recorded figures, so they are conservative by the same amount. Nothing changed.
 
 ## 2026-11-06 12:34 PM CT (18:34Z): [live figure removed, ask Main]
 
@@ -496,7 +496,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 11:19 AM CT (17:19Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] The machine clock is 17:18 UTC = 11:18 AM CT, so 'about 12:15 PM CT' (18:15Z) has not arrived: main's time was probably 11:15 AM CT (17:15Z), or the deploy is still to come; my previous log line mixed this up (I wrote 18:15Z and then argued myself in a circle). [live figure removed, ask Main] Last OICORE order 10:57Z (04:57 CT). [live figure removed, ask Main] To do: re run this check after the deploy stamp changes (not before about 17:30Z). Nothing changed.
+- [live figure removed, ask Main] The machine clock is 17:18 UTC = 11:18 AM CT, so 'about 12:15 PM CT' (18:15Z) has not arrived: main's time was probably 11:15 AM CT (17:15Z), or the deploy is still to come; my previous log line mixed this up (I wrote 18:15Z and then argued myself in a circle). [live figure removed, ask Main] Last OICORE order time [live figure removed, ask Main] [live figure removed, ask Main] To do: re run this check after the deploy stamp changes (not before about 17:30Z). Nothing changed.
 
 ## 2026-11-06 11:18 AM CT (17:18Z): W-LADDER699-1 (what PR #699 does): OICORE size ladder 10 to 30 contracts, steps by its own record, kill dollars not scaled
 
@@ -520,7 +520,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 11:16 AM CT (17:16Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Nov 10 CPI has no stated expectation; descriptively fills run 1 (claims) to 4 (jobs) of 8, so about 1 to 5. Reading: the registered pace (4.8 trades per date, 40 by about Dec 4) is about double the observed 2.5 fills per date, so the Dec 7 interim will probably have about half the fills the registration planned; fills per date is a number to track (an unfilled-order rate of 55% on 11 orders, W-EVENT830-NEXT1, is the gap). Nothing changed.
+- [live figure removed, ask Main] Nov 10 CPI has no stated expectation; descriptively fills run 1 (claims) to 4 (jobs) of 8, so about 1 to 5. Reading: the registered pace (4.8 trades per date, 40 by about Dec 4) is about double the observed fills per date ([live figure removed, ask Main]), so the Dec 7 interim will probably have fewer fills than planned; fills per date is a number to track (the unfilled-order rate, W-EVENT830-NEXT1, is the gap: [live figure removed, ask Main]). Nothing changed.
 
 ## 2026-11-06 11:16 AM CT (17:16Z): [live figure removed, ask Main]
 
@@ -532,7 +532,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 11:15 AM CT (17:15Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0, n = 7 (w_oicoreday2/; an earlier worker wrongly reported OICORE data unavailable, the report's slotOrders list has it). [live figure removed, ask Main] OICORE's two largest gains (Nov 2 and Nov 4) fell on gold's two worst days, but Nov 5 was bad for both and Nov 3 was good for both, so no consistent pattern. [live figure removed, ask Main] Nothing changed.
+- Descriptive, try count 0, n = 7 (w_oicoreday2/; an earlier worker wrongly reported OICORE data unavailable, the report's slotOrders list has it). [live figure removed, ask Main] Day-by-day comparison of OICORE and gold: [live figure removed, ask Main] No consistent pattern. [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 11:15 AM CT (17:15Z): [live figure removed, ask Main]
 
@@ -542,13 +542,13 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - What-if only, not a proposal (the size ladder is the owner's), try count 0 (w_cap15/; gold only rescaled to fixed S contracts from settledPnl/count; [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 11:13 AM CT (17:13Z): W-C9NET1 and W-TRIPODDS2: C9's net kill is a coin flip on the forward rate; the stop trips 3% to 6% a month, all in gold clusters
+## 2026-11-06 11:13 AM CT (17:13Z): W-C9NET1 and W-TRIPODDS2: C9's net kill is a coin flip on the forward rate; the stop trip rate: [live figure removed, ask Main]
 
-- W-C9NET1 (w_c9net/; descriptive, try count 0): the file has 99 forward windows (10 lost, -2.48c), not 97; history 1,104 windows, 72 lost, +1.09c. [live figure removed, ask Main] The kill hinges on whether the forward rate is real: about 13% if the history rate holds, about 60% at the forward rate; the lost share trigger is unlikely either way. [live figure removed, ask Main] Nothing changed.
+- W-C9NET1 (w_c9net/; descriptive, try count 0): C9 forward file window count, losses and net: [live figure removed, ask Main] [live figure removed, ask Main] The kill hinges on whether the forward rate is real: [live figure removed, ask Main] [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 11:13 AM CT (17:13Z): W-C9STATUS1 (silver shadow C9 toward its 200 window kill): 11% to 18% chance of crossing the lost share line
+## 2026-11-06 11:13 AM CT (17:13Z): W-C9STATUS1 (silver shadow C9 toward its 200 window kill): chance of crossing the lost share line [live figure removed, ask Main]
 
-- Descriptive (figures from the 16:26Z log entry plus a binomial calculation; no wake.sh in the worker's checkout). [live figure removed, ask Main] Kill at 200 windows: lost share above 12% (more than 24 losses) or net below -2.0c; at 400: lost share above 10% or net below -1.0c; else extend by 400. [live figure removed, ask Main] Projected date for 200 windows: about Nov 10 15Z at the observed 25.9 windows a day (about Nov 14 at the registered 18 a day). Reading: the lost share line is a roughly 1 in 10 chance on the observed rate, but the net line (below -2.0c) is the one currently breached by the point estimate (-2.71c), so the net kill is the likelier trigger at 200 windows (the bootstrap interval spans it). Nothing changed.
+- Descriptive (figures from the 16:26Z log entry plus a binomial calculation; no wake.sh in the worker's checkout). [live figure removed, ask Main] Kill at 200 windows: lost share above 12% (more than 24 losses) or net below -2.0c; at 400: lost share above 10% or net below -1.0c; else extend by 400. [live figure removed, ask Main] Projected date and reading against the lines: [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 11:12 AM CT (17:12Z): [live figure removed, ask Main]
 
@@ -620,7 +620,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 11:01 AM CT (17:01Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Corrects W-GOLDEXIT180-PESS1 (its conclusion 'survives pessimism' is withdrawn) and tempers W-GOLDEXIT180-1: the gold live exits sold a median 7c below their trigger (W-GOLDEXIT-DEPTH1), so a sell at close-180 would probably be at a similar disadvantage; the forward shadow (S-GOLDEXIT180, sale at the candle bid) is therefore an upper bound and its 0.5c yardstick is the right bar. [live figure removed, ask Main] Nothing changed in the bot.
+- [live figure removed, ask Main] Corrects W-GOLDEXIT180-PESS1 (its conclusion 'survives pessimism' is withdrawn) and tempers W-GOLDEXIT180-1: the gold live exits sold below their trigger (W-GOLDEXIT-DEPTH1; [live figure removed, ask Main]), so a sell at close-180 would probably be at a similar disadvantage; the forward shadow (S-GOLDEXIT180, sale at the candle bid) is therefore an upper bound and its 0.5c yardstick is the right bar. [live figure removed, ask Main] Nothing changed in the bot.
 
 ## 2026-11-06 11:01 AM CT (17:01Z): [live figure removed, ask Main]
 
@@ -656,15 +656,15 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:57 AM CT (16:57Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0, no recommendation (w_gold_margin/; live buckets are thin, 6, 7, 3 and 2 losses). [live figure removed, ask Main] Nothing changed.
+- Descriptive, try count 0, no recommendation (w_gold_margin/; live buckets are thin; [live figure removed, ask Main]). [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 10:57 AM CT (16:57Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0, no recommendation (w_oicore_edge/; samples small: 70 windows, 5 fills). [live figure removed, ask Main]
+- Descriptive, try count 0, no recommendation (w_oicore_edge/; samples small; [live figure removed, ask Main]). [live figure removed, ask Main]
 
 ## 2026-11-06 10:56 AM CT (16:56Z): [live figure removed, ask Main]
 
-- Descriptive, try count 0 (w_costgap/; held to settlement orders only, gold 272 orders 2,669 contracts, 16 exits excluded; gross at the recorded price field since avgFill is null, so part of the gap may be fill slippage rather than fee). [live figure removed, ask Main] Nothing changed.
+- Descriptive, try count 0 (w_costgap/; held to settlement orders only, gold order and contract counts [live figure removed, ask Main]; gross at the recorded price field since avgFill is null, so part of the gap may be fill slippage rather than fee). [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 10:56 AM CT (16:56Z): [live figure removed, ask Main]
 
@@ -676,15 +676,15 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:55 AM CT (16:55Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Reading: live streaks are not longer than the sim's, and an 11 loss streak is ordinary at this win rate; the 18 streak kill needs 7 more, not unusual either (see W-OICORE-STREAK1). Nothing changed.
+- [live figure removed, ask Main] Reading: live streaks are not longer than the sim's ([live figure removed, ask Main]); the 18 streak kill needs 7 more, not unusual either (see W-OICORE-STREAK1). Nothing changed.
 
 ## 2026-11-06 10:55 AM CT (16:55Z): W-GOLDSIZE2 (gold result at fixed sizes): size sensitivity, arithmetic not a forecast
 
 - Descriptive, try count 0, no recommendation (w_goldsize2/; per contract result = settledPnl/count, already after fees, scaled to N; same fills, exit price and outcome at any size; ignores depth, pool and cap changes). [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 10:54 AM CT (16:54Z): W-OICORE-STREAK1 (odds of an 18 loss streak): at a 21% win rate a streak kill of 18 fires 53% of the time over 250 fills
+## 2026-11-06 10:54 AM CT (16:54Z): W-OICORE-STREAK1 (odds of an 18 loss streak): an 18 streak kill fires often over 250 fills at the assumed win rate
 
-- Descriptive, try count 0, independence assumed, exact DP (w_oicore_streak/). [live figure removed, ask Main] Streak length keeping a false kill at or under 10% at n = 250: 21% win rate needs L = 27 (P .080); [live figure removed, ask Main] The registered 18 gives .531 at 21% and .898 at 15%; the validator maximum of 20 gives .368 and .792. Reading: with a 21% win rate and a profit factor above 2 an 18 loss streak is mostly noise, not a signal, so the streak kill mostly measures how long the probe runs, not whether it works (the registered net and PF kills are the ones that read edge). Registration unchanged; any change would be an owner decision made before the kill fires. Nothing changed.
+- Descriptive, try count 0, independence assumed, exact DP (w_oicore_streak/). [live figure removed, ask Main] Streak length keeping a false kill at or under 10% at n = 250: 21% win rate needs L = 27 (P .080); [live figure removed, ask Main] The registered 18 gives .531 at 21% and .898 at 15%; the validator maximum of 20 gives .368 and .792. Reading: at the assumed win rate an 18 loss streak is mostly noise, not a signal, so the streak kill mostly measures how long the probe runs, not whether it works (the registered net and PF kills are the ones that read edge). Registration unchanged; any change would be an owner decision made before the kill fires. Nothing changed.
 
 ## 2026-11-06 10:54 AM CT (16:54Z): [live figure removed, ask Main]
 
@@ -724,7 +724,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:51 AM CT (16:51Z): EVENT830 timing: Dec 7 is an interim read (main's default), kills unchanged; check price paid at about 15 fills
 
-- Main (Nov 6): on Dec 7 report EVENT830 as an INTERIM read (fills, wins, net, price paid vs the registered 14c to 18c, releases left), no pass or fail unless a kill rule has fired, re read at 40 fills; the 40 fill kill and the 20 loss streak stay as registered; main asked whether to rewrite the registration for the 27c fills. [live figure removed, ask Main] At about 15 fills (around Nov 19 to 25) report the mean price paid against 14c to 18c; if it is still above about 20c, ask the owner whether to ADD a stated note (not move the bar) that the 19% win rate applies to a 14c to 18c mix and a dearer mix needs a higher win rate (break even is about the price plus 1c to 2c). Nothing changed in the bot.
+- Main (Nov 6): on Dec 7 report EVENT830 as an INTERIM read (fills, wins, net, price paid vs the registered 14c to 18c, releases left), no pass or fail unless a kill rule has fired, re read at 40 fills; the 40 fill kill and the 20 loss streak stay as registered; main asked whether to rewrite the registration for the live fill prices. [live figure removed, ask Main] At about 15 fills (around Nov 19 to 25) report the mean price paid against 14c to 18c; if it is still above about 20c, ask the owner whether to ADD a stated note (not move the bar) that the 19% win rate applies to a 14c to 18c mix and a dearer mix needs a higher win rate (break even is about the price plus 1c to 2c). Nothing changed in the bot.
 
 ## 2026-11-06 10:51 AM CT (16:51Z): [live figure removed, ask Main]
 
@@ -764,12 +764,12 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:46 AM CT (16:46Z): W-EVENT830-MIX1 (EVENT830 history price mix): not computable from the registration files; live mix is dearer
 
-- Descriptive, try count 0 (w_event830_mix/). [live figure removed, ask Main] The rows would be in the research branch's workers/EVENT1_RESULT.md or can be regenerated with scalper.event1.window_trade (src/scalper/event1.py) on the DATA830 dates. [live figure removed, ask Main] Five fills is too few to call it a difference. [live figure removed, ask Main] Nothing changed.
+- Descriptive, try count 0 (w_event830_mix/). [live figure removed, ask Main] The rows would be in the research branch's workers/EVENT1_RESULT.md or can be regenerated with scalper.event1.window_trade (src/scalper/event1.py) on the DATA830 dates. [live figure removed, ask Main] The live fill count is too few to call it a difference. [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 10:45 AM CT (16:45Z): W-EVENT830-REG1 (EVENT830 registration found): registered average fill 14c to 18c, live fills averaged 27.6c
+## 2026-11-06 10:45 AM CT (16:45Z): W-EVENT830-REG1 (EVENT830 registration found): registered average fill 14c to 18c, live fills compared
 
 - Descriptive, try count 0 (w_event830_reg/ holds copies). [live figure removed, ask Main] Registered: no per band shares or win rates, only a blend: average fill 14c to 18c; expected win rate a blend 17% to 22%, central 19%, about 1c above the fill before fees; payoff 4.5 to 5.8; [live figure removed, ask Main] Research spec: 150 settled trades (about mid March 2027, about 35 a month), 40 trade early check about 2026-12-04 (stop if PF under 1.0); live probe forward read 2026-12-07 at about 40 fills (kill net under $0 at 40 fills or 20 losses in a row).
-- Comparison with live: the 5 live fills averaged 27.6c (0.47, 0.39, 0.05, 0.08, 0.39) against a registered 14c to 18c, and the payoff per win on those fills is 0.53 to 0.95 per $1 staked, about 2.6 on average against the registered 4.5 to 5.8. [live figure removed, ask Main] Nothing changed.
+- Comparison with live fills and payoff: [live figure removed, ask Main] [live figure removed, ask Main] Nothing changed.
 
 ## 2026-11-06 10:45 AM CT (16:45Z): W-OICORE-HIST1 (OICORE sim by price bucket beside live): live sits cheaper than the sim
 
@@ -794,7 +794,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 ## 2026-11-06 10:43 AM CT (16:43Z): [live figure removed, ask Main]
 
 - Descriptive, try count 0 (w_event830_cal/; from README#SLOT-EVENT830, STRATEGIES.md, kalshiSlotLib.js; the original EVENT830_REGISTRATION.md and CALENDAR.md are on the research branch, not checked out). Registered: 15 windows at 13:30Z (Nov 5, 6, 10, 12, 13, 17, 19, 25; [live figure removed, ask Main]
-- Live: 5 fills of 11 orders, all lost (silver YES 0.47, copper YES 0.39, EURUSD YES 0.05, silver NO 0.08, USDJPY NO 0.39; mean 27.6c), all within the registered band and rule. [live figure removed, ask Main] Fills needed: 40 settled for the net kill and the Dec 7 read; at about 2.5 fills per release, about 25 by Dec 7 and about 37 by Dec 23, so 40 may not be reached by Dec 7 (estimate, pace uncertain), meaning the Dec 7 read may need to be an interim or wait to Dec 23. Not checked: real fill prices (avgFill null). Nothing changed.
+- Live fills: [live figure removed, ask Main], all within the registered band and rule. [live figure removed, ask Main] Fills needed: 40 settled for the net kill and the Dec 7 read; fill pace and projected counts: [live figure removed, ask Main], meaning the Dec 7 read may need to be an interim or wait to Dec 23. Not checked: real fill prices (avgFill null). Nothing changed.
 
 ## 2026-11-06 10:43 AM CT (16:43Z): [live figure removed, ask Main]
 
@@ -828,7 +828,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:38 AM CT (16:38Z): W-OICORE-MATCH1 (why OICORE live and the sim triggers differ): rounding and timing, not the rise
 
-- Descriptive, try count 0 (w_oicore_match/). A: 14 live fills with no sim trigger: all 14 pass the rise test (86,988 to 259,206 vs 86,300), all 14 fail the sim band at the close-180 candle. [live figure removed, ask Main]
+- Descriptive, try count 0 (w_oicore_match/). A: live fills with no sim trigger: [live figure removed, ask Main] [live figure removed, ask Main]
 - [live figure removed, ask Main] Note: the maintained oi/btc.jsonl sim (R2) already uses live rounding, so this gap is in the quick comparison script, not the registered sim. Not checked: exact second of each read, sub minute prices, skip reasons, per window depth, cap or kill latch effects. Nothing changed.
 
 ## 2026-11-06 10:37 AM CT (16:37Z): W-GOLDCLUMP1 (do gold losses cluster in time): no evidence beyond chance
@@ -840,7 +840,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 - Descriptive, try count 0 (w_goldstop_next/). [live figure removed, ask Main]
 - [live figure removed, ask Main] Not included: L1 non gold, OICORE and EVENT830, which share the real stop; the stop accounting was approximated, not replayed. [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 10:36 AM CT (16:36Z): W-OICORE-NEXT1 (OICORE live vs sim at 47 fills): consistent, far from both kills, but fragile
+## 2026-11-06 10:36 AM CT (16:36Z): W-OICORE-NEXT1 (OICORE live vs sim): consistent, far from both kills, but fragile
 
 - Descriptive, try count 0 (w_oicore_next/). [live figure removed, ask Main]
 - [live figure removed, ask Main]
@@ -850,7 +850,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - Descriptive, try count 0 (w_event830_next/). [live figure removed, ask Main] Nothing changed.
 
-## 2026-11-06 10:35 AM CT (16:35Z): W-GOLDCLUSTER1 (the five gold early sells since Nov 5): scattered, not one regime
+## 2026-11-06 10:35 AM CT (16:35Z): W-GOLDCLUSTER1 (the recent gold early sells): scattered, not one regime
 
 - Descriptive, try count 0, no rule (w_goldcluster/REGISTRATION.md; about 102 public candle calls). [live figure removed, ask Main]
 - [live figure removed, ask Main] Reading: scattered, not a regime; [live figure removed, ask Main] Gaps: Nov 4 08Z to Nov 5 16:30Z data, intraminute lows, macro calendar, exact exit times. Nothing changed.
@@ -884,14 +884,14 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-06 10:30 AM CT (16:30Z): W-FILLGOLD1 (real gold fill prices from the public tape): a bound, not a measurement
 
-- Worker finished read only (w_fillgold/REGISTRATION.md first; an.py, an2.py; [live figure removed, ask Main] Registered method (earliest bought side taker trades at or below the limit from ts-3 s to ts+10 s): mean gap limit minus estimate 1.04c per contract (count weighted), 0.98c unweighted; the estimate equals the limit in 8 orders, the touch in 9, between in 43. [live figure removed, ask Main]
+- Worker finished read only (w_fillgold/REGISTRATION.md first; an.py, an2.py; [live figure removed, ask Main] Registered method (earliest bought side taker trades at or below the limit from ts-3 s to ts+10 s): gap between limit and estimated fill: [live figure removed, ask Main] [live figure removed, ask Main]
 - [live figure removed, ask Main] Not checked: the actual fill price (avgFill null, no authenticated call), exact send time of older orders, fees. Only the bot's own record can settle this (average_fill_price is in the order POST answer); main has the one line. Until then gold's recorded profit factors are a lower bound; every gold figure in this log is as recorded.
 
 ## 2026-11-06 10:27 AM CT (16:27Z): W-DAYLOSS2 (gold daily loss variants with early sell stops, owner's request): FALSIFIED
 
 - Worker finished read only (w_dayloss2/REGISTRATION.md written first; run2.py, base.py copied unchanged from w_dayloss/run.py, out2.txt; [live figure removed, ask Main] Pass bar fixed in advance: on the held out half the variant must keep net at or above the no rule net AND raise PF AND not skip more winners than it saves in losses, with permutation p under 0.0038; a variant that raises PF but lowers net is not a pass.
 - [live figure removed, ask Main]
-- [live figure removed, ask Main] 18.10 to 17.30): the registered non pass. No variant that actually triggers keeps net at or above the no rule net while raising PF: verdict FALSIFIED. [live figure removed, ask Main]
+- [live figure removed, ask Main] [live figure removed, ask Main] The registered non pass. No variant that actually triggers keeps net at or above the no rule net while raising PF: verdict FALSIFIED. [live figure removed, ask Main]
 - [live figure removed, ask Main] Unverified (avgFill is null); the fill price workers (OICORE running; gold next) estimate real fills from the public tape.
 
 ## 2026-11-06 10:26 AM CT (16:26Z): [live figure removed, ask Main]
@@ -900,21 +900,21 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 - [live figure removed, ask Main] Proposed wordings are in the worker's report (not repeated here); these are main's doc fixes.
 - [live figure removed, ask Main] Not verified (no stored average fill); a public trade tape worker (w_fillprice) will estimate the real fill prices.
 
-## 2026-11-06 10:26 AM CT (16:26Z): W-C9RESTATE1 (what C9 is and its yardstick): the -2.71c is not a kill, the read stays at 200 windows
+## 2026-11-06 10:26 AM CT (16:26Z): W-C9RESTATE1 (what C9 is and its yardstick): C9's figure is not a kill, the read stays at 200 windows
 
 - Worker finished read only (w_c9/REGISTRATION.md, RESULTS.txt; try count 0; appended to interim_40.md; no network). C9 (registered Nov 2, 21:53Z, requested by main at the owner's direction): forward shadow of L1's rule on Silver (KXSILVER15M): settled 15 minute windows closing after 22:00Z Nov 2 (c9_start 1793656800); rule: at 360 s before close buy the side priced 0.88 to 0.97, early sell at a bid of 0.25 or lower, 7% fee on entry and exit; screen: spread under 2c and at least 100 contracts at the touch; it feeds the question of whether Silver could join L1. [live figure removed, ask Main]
-- [live figure removed, ask Main] Dates at the observed 25.9 windows a day: 200 windows about Nov 10 15Z, 400 on Nov 18 (at the registered 18 a day: Nov 14 and Nov 25). The registered kill can fire only at 200 windows and no interim look is registered, so reading earlier would be post hoc: the read stays at 200, and the wake flag matches (200 only). Correction to my line to main earlier today: C9 at -2.71c is not 'already past its kill'; the kill is read at 200 windows and the 97 window interval spans 0. Not checked: no network calls; cache completeness beyond ok records.
+- [live figure removed, ask Main] The registered kill can fire only at 200 windows and no interim look is registered, so reading earlier would be post hoc: the read stays at 200, and the wake flag matches (200 only). Correction to my line to main earlier today: C9 is not 'already past its kill'; the kill is read at 200 windows. Not checked: no network calls; cache completeness beyond ok records.
 
 ## 2026-11-06 10:24 AM CT (16:24Z): [live figure removed, ask Main]
 
 - [live figure removed, ask Main] Tagged net is above zero, so the registered revert condition is not met: no revert. Note the tag is soft (it depends on the ask source) and the untagged net is higher per fill; information, the registered rule stands. The registered review date was about Nov 15; it reached 20 tagged long ago (the tracker flagged at 20; the wake text said Nov 15 because of the rate then).
 - [live figure removed, ask Main] Duplicates: floor05 is a subset of B5; goldfwd, S-GPB1, S-GQH1 and C1 use the same gold fills with different splits.
-- [live figure removed, ask Main] S-FLOW2 (diff -0.77c against a +2c pass bar) and S-FLOWL1 (earliest read about Dec 1); C8 (Dogecoin paused, stale threshold, no tracker in wake); the Dogecoin parts of C1 and C2 and the dash Dogecoin ladder line; floor05 as a duplicate of B5 (keep the group A flag if wanted). [live figure removed, ask Main] C9 net is -2.71c, already below its -2.0c kill, but the flag fires only at 200 windows; [live figure removed, ask Main] Not checked: c8 and flow outputs are from Nov 5 (stale); runtime costs not visible.
+- [live figure removed, ask Main] S-FLOW2 (diff [live figure removed, ask Main] against a +2c pass bar) and S-FLOWL1 (earliest read about Dec 1); C8 (Dogecoin paused, stale threshold, no tracker in wake); the Dogecoin parts of C1 and C2 and the dash Dogecoin ladder line; floor05 as a duplicate of B5 (keep the group A flag if wanted). [live figure removed, ask Main] C9 net [live figure removed, ask Main] the flag fires only at 200 windows; [live figure removed, ask Main] Not checked: c8 and flow outputs are from Nov 5 (stale); runtime costs not visible.
 - Done by me now (my scratchpad only, backup wake.sh.pre_w_inventory): removed the S-FLOW1 tracker (flow_forward.py, falsified and retired) from wake.sh; kept S-FLOW2 and S-FLOWL1 until their registered reads (they are registered questions, not mine to drop without a recorded result) and floor05 (it is its own registered group). The other proposals stay proposals.
 
 ## 2026-11-06 10:24 AM CT (16:24Z): W-AUDIT1 (independent recount of OICORE tallies): matches exactly; correction to W-LIVEBUCKET1
 
-- Worker finished read only (w_audit/REGISTRATION.md written after seeing the row shape and the latch code but before reading any tally; calc.py, slotlib.js copy). [live figure removed, ask Main] Sequence: LLLWLLWWLLLLLWLLWLLWLLLLLWLWLLLWLLLLLLLLLLLWLLL. It matches my tools exactly. [live figure removed, ask Main]
+- Worker finished read only (w_audit/REGISTRATION.md written after seeing the row shape and the latch code but before reading any tally; calc.py, slotlib.js copy). [live figure removed, ask Main] Order sequence: [live figure removed, ask Main] It matches my tools exactly. [live figure removed, ask Main]
 - Bot latch (origin/main kalshiSlotLib.js killCheck, lines 388 to 404): takes final, counted, non hand orders for the slot settled on or after reviewedAt (2026-10-30), sorted by settledAt with a ts fallback; each step is streak = net below 0 ? streak + 1 : 0; the check is streak at least 18, and n at least 40 with net below -6; net is the cumulative settledPnl (derived if null); sticky on any prefix; no fill and unsettled orders are skipped (they neither reset nor interrupt the streak); same as my counting. The report rows have no settledAt, so only the ts fallback was checked; live Firestore settledAt values and the deployed latch document were not checked.
 - [live figure removed, ask Main] No bug found.
 - [live figure removed, ask Main]
@@ -922,7 +922,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 ## 2026-11-06 10:23 AM CT (16:23Z): W-STREAK3 (trade off table for OICORE streak and drawdown kill lines): decision aid only
 
 - Worker finished read only (w_streak3/REGISTRATION.md, run.py; try count 0; no recommendation; [live figure removed, ask Main] A = live bootstrap and B = sim rows (false kill, edge real), C = win rate halved (detection). [live figure removed, ask Main]
-- [live figure removed, ask Main] Where line 18 sits: in the middle: false kill 13% by fill 100 and 25% by fill 150 under A against 4% and 9% under B; detection of a failed edge 61% by fill 100 and 86% by fill 150; moving to 22 roughly halves A's false kills and lowers detection by about 20 points. [live figure removed, ask Main] I did not send this to main (the W-STREAK2 line already said the line is the owner's call); it is here if asked.
+- [live figure removed, ask Main] Where line 18 sits: [live figure removed, ask Main] [live figure removed, ask Main] I did not send this to main (the W-STREAK2 line already said the line is the owner's call); it is here if asked.
 
 ## 2026-11-06 10:22 AM CT (16:22Z): W-STREAK2 (OICORE kill odds from the current state): the 18 loss kill can fire on a real edge
 
@@ -938,9 +938,9 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 - [live figure removed, ask Main] This only sizes the stakes; a bucket picked from history needs its forward test first (S-BUCKET1 is that test). [live figure removed, ask Main]
 - [live figure removed, ask Main] Rule used from kalshiSlotRunLib.js: spread at most 0.10; yesPrice = ceil(ask*100)/100, noPrice = round(1 - floor(bid*100)/100, 2); YES if yesPrice below noPrice else NO; pass if the side price is 0.05 to 0.50; look = the candle ending 180 s before close (proxy). [live figure removed, ask Main]
 
-## 2026-11-06 10:21 AM CT (16:21Z): OICORE interim 40 fill look (done early at 47 settled fills): no kill rule hit
+## 2026-11-06 10:21 AM CT (16:21Z): OICORE interim 40 fill look (done early): no kill rule hit
 
-- Run per interim_40.md (registered Nov 4): fresh report 2026-11-06T16:12Z, oicore_nov13.py. [live figure removed, ask Main] 11 in a row happened since Nov 5 evening), kill at 18, 15 away from current; the W55 warning zone 15 to 17 is not reached. [live figure removed, ask Main] No kill hit, size and rules unchanged. Size of the fill count: the Nov 7 15:00Z trigger will rerun it.
+- Run per interim_40.md (registered Nov 4): fresh report 2026-11-06T16:12Z, oicore_nov13.py. [live figure removed, ask Main] streak status [live figure removed, ask Main]), kill at 18; the W55 warning zone 15 to 17 is not reached. [live figure removed, ask Main] No kill hit, size and rules unchanged. Size of the fill count: the Nov 7 15:00Z trigger will rerun it.
 - [live figure removed, ask Main] No flags fired.
 
 ## 2026-11-06 10:12 AM CT (16:12Z): W-DAYLOSS1 follow up: why the shadow report disagreed (scope)
@@ -956,14 +956,14 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - Worker finished read only (w_bucketexp/REGISTRATION.md, an.py; try count 0; appended to interim_40.md; ran the OI refresh on a copy). [live figure removed, ask Main]
 - [live figure removed, ask Main] I kept the registered rule unchanged (no post hoc change) and wrote the caveat into interim_40.md.
-- [live figure removed, ask Main] B5 live rate 4.2 fills a day since Oct 30, so fill 40 arrives about Nov 14 to 15 (at the registered 3.6 a day about Nov 16). Not checked: candle closes are not live quotes, the sim has no fill failure model, the sim's B5 and floor windows overlap with history.
+- [live figure removed, ask Main] B5 live fill rate and the date fill 40 arrives: [live figure removed, ask Main] Not checked: candle closes are not live quotes, the sim has no fill failure model, the sim's B5 and floor windows overlap with history.
 
 ## 2026-11-06 10:11 AM CT (16:11Z): W-DAYLOSS1 (gold L1 daily loss limit, honest realisation): FALSIFIED
 
 - Worker finished read only (w_dayloss/REGISTRATION.md written before scoring, run.py, out.txt; [live figure removed, ask Main]
 - Key finding: the realisation fix changes nothing for gold. [live figure removed, ask Main] I asked main).
 - [live figure removed, ask Main] Every limit lowers held out net; [live figure removed, ask Main]
-- [live figure removed, ask Main] Verdict FALSIFIED. Not checked: the shadow report's actual rules and base; early sell timing is candle based (6 of the 11 live early sells had no qualifying candle and fall back to the close); intrabar bid touches; Nov 5 history candles; order time lookahead in the shadow report itself. I sent main one line.
+- [live figure removed, ask Main] Verdict FALSIFIED. Not checked: the shadow report's actual rules and base; early sell timing is candle based (some live early sells had no qualifying candle and fall back to the close: [live figure removed, ask Main]); intrabar bid touches; Nov 5 history candles; order time lookahead in the shadow report itself. I sent main one line.
 
 ## 2026-11-06 10:09 AM CT (16:09Z): W-NOFILLINFER1 (can a gold no-fill reason be inferred from stored fields?): no
 
@@ -1088,7 +1088,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-05 10:27 AM CT (16:27Z): W-ORDERTIME1 (OICORE order timing versus no fill): no relation
 
-- Worker finished read only (w_ordertime/REGISTRATION.md, try count 2, bar permutation p under 0.025). [live figure removed, ask Main] Bar not met: no sign that late or slow orders cause no fills (9 no fills could only show a large effect).
+- Worker finished read only (w_ordertime/REGISTRATION.md, try count 2, bar permutation p under 0.025). [live figure removed, ask Main] Bar not met: no sign that late or slow orders cause no fills (the no fill count could only show a large effect: [live figure removed, ask Main]).
 - [live figure removed, ask Main] Not checked: why those timing fields are null on slot rows (they exist on gold), book depth at send. [live figure removed, ask Main]
 
 ## 2026-11-05 10:26 AM CT (16:26Z): W-STALE1 (OICORE trigger robustness to a stale open interest read): fragile, missed windows are good ones
@@ -1120,7 +1120,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - [live figure removed, ask Main]
 - [live figure removed, ask Main]
-- [live figure removed, ask Main] Not checked: why the 8 no order windows had no order (caps, depth, latch); the report says 35 filled while slotOrders has 36, because those orders are stamped after the report generatedAt (15:24Z). [live figure removed, ask Main]
+- [live figure removed, ask Main] Not checked: why the no order windows had no order (caps, depth, latch; count [live figure removed, ask Main]); the report and slotOrders counts differ ([live figure removed, ask Main]) because those orders are stamped after the report generatedAt (15:24Z). [live figure removed, ask Main]
 
 ## 2026-11-05 10:23 AM CT (16:23Z): [live figure removed, ask Main]
 
@@ -1130,7 +1130,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-05 10:23 AM CT (16:23Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak 4 (kill at 18, 14 away). [live figure removed, ask Main] No flags. [live figure removed, ask Main]
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main] No flags. [live figure removed, ask Main]
 
 ## 2026-11-05 10:22 AM CT (16:22Z): [live figure removed, ask Main]
 
@@ -1155,7 +1155,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - [live figure removed, ask Main]
 - Bar met for 20 to 34c only. [live figure removed, ask Main]
-- This is a LEAD, not a finding: it adds about 4 splits to the try count (about 385 in all, Bonferroni threshold about 0.00013, no survivors so far), history cannot count toward adopting a filter, and a rule that skipped 5 to 9c would cut about 63% of live fills. Not checked: execution fills at the limit, fee rounding per order, overlap between history and the live period, sim rows with missing candles.
+- This is a LEAD, not a finding: it adds about 4 splits to the try count (about 385 in all, Bonferroni threshold about 0.00013, no survivors so far), history cannot count toward adopting a filter, and a rule that skipped 5 to 9c would cut a large share of live fills ([live figure removed, ask Main]). Not checked: execution fills at the limit, fee rounding per order, overlap between history and the live period, sim rows with missing candles.
 - PRE-REGISTERED FORWARD SHADOW S-BUCKET1 (registered before any forward fill is read; information only, cannot change an order): group B5 is OICORE fills with price 0.05 to 0.09 placed after this entry's clock time; group B10 is price 0.10 to 0.34 placed after it. Tracked separately, never pooled with fills before this entry: count, wins, net, net per contract after fee, PF. [live figure removed, ask Main] Try count 1. [live figure removed, ask Main]
 
 ## 2026-11-05 10:17 AM CT (16:17Z): [live figure removed, ask Main]
@@ -1189,7 +1189,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 - Worker finished read only (w_oicore_missing/REGISTRATION.md, no try count). [live figure removed, ask Main] The code does what CLAUDE.md says.
 - [live figure removed, ask Main]
-- [live figure removed, ask Main] All unexplained. Ruled out where visible: kill latch, daily and lifetime caps (net positive), L1 window use, depth share (cuts counts, never skips), OI margin (large except Nov 2 17:00, 86,523 vs 86,300). [live figure removed, ask Main] Not actionable yet; a follow up (w_simround) reruns the sim with live rounding.
+- [live figure removed, ask Main] All unexplained. Ruled out where visible: kill latch, daily and lifetime caps (net positive), L1 window use, depth share (cuts counts, never skips), OI margin (large except one window: [live figure removed, ask Main]). [live figure removed, ask Main] Not actionable yet; a follow up (w_simround) reruns the sim with live rounding.
 
 ## 2026-11-05 10:13 AM CT (16:13Z): W-ODDS1 (OICORE kill rule and PF odds, stated in advance)
 
@@ -1231,23 +1231,23 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-05 08:28 AM CT (14:28Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak 3 (kill at 18, 15 away). [live figure removed, ask Main]
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main]
 
 ## 2026-11-05 04:42 AM CT (10:42Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak 2 (kill at 18, 16 away). [live figure removed, ask Main]
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main]
 
 ## 2026-11-04 09:07 PM CT (03:07Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak 1 (kill at 18, 17 away). [live figure removed, ask Main] No flags.
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main] No flags.
 
 ## 2026-11-04 07:12 PM CT (01:12Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak back to 0 (kill at 18, 18 away). [live figure removed, ask Main] No flags.
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main] No flags.
 
 ## 2026-11-04 03:24 PM CT (21:24Z): [live figure removed, ask Main]
 
-- [live figure removed, ask Main] Loss streak 3 (kill at 18, 15 away). [live figure removed, ask Main] No flags. kalshiStatus still not in report rows.
+- [live figure removed, ask Main] Loss streak status [live figure removed, ask Main] (kill at 18). [live figure removed, ask Main] No flags. kalshiStatus still not in report rows.
 
 ## 2026-11-04 02:27 PM CT (20:27Z): [live figure removed, ask Main]
 
@@ -1307,7 +1307,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 05:33 AM CT (11:33Z): W123 gold dry spell was normal
 
-- W123 (descriptive; gold since Oct 7: 390 orders, 253 filled, 137 no fill): weekday gaps between fills (236 gaps): median 1.0h, p90 3.5h, p99 7.5h; longest gaps 93.8h (Oct 16 to 20), 69.8h (Oct 9 to 12), 55.5h (Oct 30 to Nov 1), 50.8h (Oct 23 to 25); longest weekday night gap 21.3h (Oct 15 to 16). [live figure removed, ask Main] Nothing wrong with gold.
+- W123 (descriptive; gold fill gaps): [live figure removed, ask Main] [live figure removed, ask Main] Nothing wrong with gold.
 
 ## 2026-11-04 04:33 AM CT (10:33Z): [live figure removed, ask Main]
 
@@ -1319,7 +1319,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 03:35 AM CT (09:35Z): W118 FLOW1 separated from OICORE in every tracker
 
-- [live figure removed, ask Main] Leaks fixed (backups *.w118bak): lim_review.py counted every slot order (26) and now counts OICORE only (25); the OICORE silence flag in wake.sh and dash.sh's OICORE last order now ignore FLOW1 orders. wake.sh has a new == FLOW1 == section (cum lines plus forward_flow1.py output). test_flags.py adds 6 W118 cases on a synthetic OICORE plus FLOW1 report: all 35 checks PASS, wake.sh runs clean. [live figure removed, ask Main]
+- [live figure removed, ask Main] Leaks fixed (backups *.w118bak): lim_review.py counted every slot order and now counts OICORE only ([live figure removed, ask Main]); the OICORE silence flag in wake.sh and dash.sh's OICORE last order now ignore FLOW1 orders. wake.sh has a new == FLOW1 == section (cum lines plus forward_flow1.py output). test_flags.py adds 6 W118 cases on a synthetic OICORE plus FLOW1 report: all 35 checks PASS, wake.sh runs clean. [live figure removed, ask Main]
 
 ## 2026-11-04 03:35 AM CT (09:35Z): W119 FLOW1 live tracking wired; first order fills far above the shadow price
 
@@ -1448,7 +1448,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 02:24 AM CT (08:24Z): W87 one script for the forward trackers
 
-- [live figure removed, ask Main] OICORE loss streak 5 (longest 5), 13 from the 18 kill and outside the 15-17 warning zone. Thresholds unchanged. Use it each wake in place of the three separate scripts.
+- [live figure removed, ask Main] OICORE loss streak status [live figure removed, ask Main]. Thresholds unchanged. Use it each wake in place of the three separate scripts.
 
 ## 2026-11-04 02:23 AM CT (08:23Z): W86 try ledger (how many splits this log has looked at)
 
@@ -1468,7 +1468,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 02:20 AM CT (08:20Z): W82 C9 Silver status
 
-- [live figure removed, ask Main] Registered rule: prediction over 400 windows is lost share at most 8% and net at least +0.5c; kill at 200 if lost share above 12% or net below -2.0c; kill at 400 if lost share above 10% or net below -1.0c; otherwise inconclusive and extend by 400. Pace 25 windows a day (36 in 1.43 days) against the registered about 18 a day, so the 200-window read is about Nov 10 to 11 (Nov 13 at the registered pace). Silver is not in L1_SERIES on main (gold, XRP, Bitcoin, Dogecoin, Ethereum only), so this is a pure paper tracker. No action.
+- [live figure removed, ask Main] Registered rule: prediction over 400 windows is lost share at most 8% and net at least +0.5c; kill at 200 if lost share above 12% or net below -2.0c; kill at 400 if lost share above 10% or net below -1.0c; otherwise inconclusive and extend by 400. Pace against the registered about 18 a day: [live figure removed, ask Main] Silver is not in L1_SERIES on main (gold, XRP, Bitcoin, Dogecoin, Ethereum only), so this is a pure paper tracker. No action.
 
 ## 2026-11-04 02:19 AM CT (08:19Z): W81 OICORE exit-rule check
 
@@ -1504,7 +1504,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 02:12 AM CT (08:12Z): W74 C1 cell status
 
-- [live figure removed, ask Main] Kill rules: at 80 settled fills dead if net above +1.5c/ct, or loss rate under 4%, or Fisher p (cell vs rest) above 0.30; neither dead nor PASS is INCONCLUSIVE (another 80); early kill at 40 needs zero losses and net above +2.0c. [live figure removed, ask Main] The 40-fill early kill is already impossible. [live figure removed, ask Main] Needs 61 more settled fills; the cell takes Dogecoin fills, and Dogecoin is now paused, so the cell now fills on gold only and the roughly 38 a week registered rate will be lower (about 11 days was the estimate with Dogecoin; expect longer). Fisher not computed. No change.
+- [live figure removed, ask Main] Kill rules: at 80 settled fills dead if net above +1.5c/ct, or loss rate under 4%, or Fisher p (cell vs rest) above 0.30; neither dead nor PASS is INCONCLUSIVE (another 80); early kill at 40 needs zero losses and net above +2.0c. [live figure removed, ask Main] The 40-fill early kill is already impossible. [live figure removed, ask Main] Needs more settled fills ([live figure removed, ask Main]); the cell takes Dogecoin fills, and Dogecoin is now paused, so the cell now fills on gold only and the roughly 38 a week registered rate will be lower (about 11 days was the estimate with Dogecoin; expect longer). Fisher not computed. No change.
 
 ## 2026-11-04 02:11 AM CT (08:11Z): [live figure removed, ask Main]
 
@@ -1561,7 +1561,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 02:04 AM CT (08:04Z): W59 gold no-fill share
 
-- [live figure removed, ask Main] No-fills are not concentrated by time or lateness; a third of gold orders miss at random. Closes the gold no-fill line unless a code change moves it.
+- [live figure removed, ask Main] No-fills are not concentrated by time or lateness; gold orders miss at random ([live figure removed, ask Main]). Closes the gold no-fill line unless a code change moves it.
 
 ## 2026-11-04 02:03 AM CT (08:03Z): W58 OICORE order timing
 
@@ -1599,7 +1599,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 01:58 AM CT (07:58Z): W49 gold in-band windows without a fill
 
-- W49 (descriptive; gold asks Oct 21 to Nov 2 14:30Z only, "in band" = either side's ask 0.88 to 0.97 on the candle ending 6 minutes before close): 767 windows, 207 in band, 115 live filled (56%). [live figure removed, ask Main] This is a lead, not a finding. [live figure removed, ask Main]
+- W49 (descriptive; gold asks Oct 21 to Nov 2 14:30Z only, "in band" = either side's ask 0.88 to 0.97 on the candle ending 6 minutes before close): 767 windows, in band and live filled counts: [live figure removed, ask Main] [live figure removed, ask Main] This is a lead, not a finding. [live figure removed, ask Main]
 
 ## 2026-11-04 01:58 AM CT (07:58Z): W50 OICORE missed windows, refetched
 
@@ -1628,7 +1628,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 ## 2026-11-04 01:55 AM CT (07:55Z): W43 gold 20-24 CT forward, S-GQH1 registered
 
 - [live figure removed, ask Main] Script `w43.py` reruns it.
-- Registered S-GQH1 (forward only, before more data): read once at 40 gold fills in 20-24 CT (now 11) from `w43.py`. [live figure removed, ask Main] Otherwise note and keep watching. [live figure removed, ask Main]
+- Registered S-GQH1 (forward only, before more data): read once at 40 gold fills in 20-24 CT (count so far [live figure removed, ask Main]) from `w43.py`. [live figure removed, ask Main] Otherwise note and keep watching. [live figure removed, ask Main]
 
 ## 2026-11-04 01:55 AM CT (07:55Z): W42 Dogecoin ladder split
 
@@ -1640,7 +1640,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 01:54 AM CT (07:54Z): W40 OICORE win concentration
 
-- [live figure removed, ask Main] Still positive but about a third of net rides on two trades, so the record is thin. Consistent with the Nov 13 read being the real test.
+- [live figure removed, ask Main] Still positive but concentrated in a few trades ([live figure removed, ask Main]), so the record is thin. Consistent with the Nov 13 read being the real test.
 
 ## 2026-11-04 01:54 AM CT (07:54Z): W39 gold by hour block
 
@@ -1652,7 +1652,7 @@ Stop replay tool built (scratchpad w_stophead/stop_headroom.py). [live figure re
 
 ## 2026-11-04 01:53 AM CT (07:53Z): W37 gold loss clustering
 
-- W37 (descriptive): gold, 252 settled orders, 13 losses. [live figure removed, ask Main] Not significant; n too small to say. [live figure removed, ask Main] No change.
+- W37 (descriptive): gold settled orders and losses: [live figure removed, ask Main] [live figure removed, ask Main] Not significant; n too small to say. [live figure removed, ask Main] No change.
 
 ## 2026-11-04 01:52 AM CT (07:52Z): W36 OICORE by order price band
 
@@ -1717,7 +1717,7 @@ W29: the live trades endpoint stops at 2026-09-04 (/historical/cutoff); [live fi
 
 ## 2026-11-03 10:43 PM CT (04:43Z Nov 4): W28 FLOW-DOGE RESULT and the gold plus Dogecoin picture (the combined view is post hoc, not registered)
 
-[live figure removed, ask Main] Loss ratios 2.00 (Sep), 1.68 (Oct), 1.70 all: the registered bar (2 or more in both halves) FAILED on half B; flagged net lower in both halves. [live figure removed, ask Main] Combined with W27 (gold; also failed the bar on its Oct half, ratio 1.78): in all four market-half cells the flagged group has the lower net per contract and the higher loss rate. [live figure removed, ask Main] Direction in line with the OICORE flow lead (a high share of taker buying on the side the bot is buying has the worse result). Neither market passed its own bar, the pooled ratio was computed after seeing the cells (so it is not a pass), the medians were fitted on the September days, and there are 21 losses in total. A weak, consistent lead for L1 early sells. Forward test registered: S-FLOWL1: for every new L1 in-band window of gold and Dogecoin from today (public trades, flow toward the bought side over [close-540, close-360), flagged above the fixed medians gold -0.151 and Dogecoin -0.1245), track loss rate and net per contract by flag; read at 20 early sells per market or 60 days, kill: flagged loss rate not above unflagged by 1.3 times at the read. Needs a tracker script (not built yet).
+[live figure removed, ask Main] Loss ratios 2.00 (Sep), 1.68 (Oct), 1.70 all: the registered bar (2 or more in both halves) FAILED on half B; flagged net lower in both halves. [live figure removed, ask Main] Combined with W27 (gold; also failed the bar on its Oct half, ratio 1.78): in all four market-half cells the flagged group has the lower net per contract and the higher loss rate. [live figure removed, ask Main] Direction in line with the OICORE flow lead (a high share of taker buying on the side the bot is buying has the worse result). Neither market passed its own bar, the pooled ratio was computed after seeing the cells (so it is not a pass), the medians were fitted on the September days, and the total loss count is small ([live figure removed, ask Main]). A weak, consistent lead for L1 early sells. Forward test registered: S-FLOWL1: for every new L1 in-band window of gold and Dogecoin from today (public trades, flow toward the bought side over [close-540, close-360), flagged above the fixed medians gold -0.151 and Dogecoin -0.1245), track loss rate and net per contract by flag; read at 20 early sells per market or 60 days, kill: flagged loss rate not above unflagged by 1.3 times at the read. Needs a tracker script (not built yet).
 
 ## 2026-11-03 10: [live figure removed, ask Main]
 
@@ -2198,7 +2198,7 @@ What I need from the main session: the owner's pick of one candidate to score fo
 
 [live figure removed, ask Main] Streak kill (18) is not near; the forward read stays Nov 13. [live figure removed, ask Main]
 
-[live figure removed, ask Main] No kill rule triggered; it is the number to watch.** Order: seen NO ask 0.093 / bid 0.089 (price 0.911), limit 0.08, add-on 2 (base 11 plus 2), share of touch depth 2.6 (order 13 against 5 at the touch), `rise3` -0.0755 (the bought side had FALLEN 7.6c over the last 3 minutes before the order), `smooth` false. [live figure removed, ask Main]
+[live figure removed, ask Main] No kill rule triggered; it is the number to watch.** Order details (quotes, limit, add-on, depth share, rise3): [live figure removed, ask Main] [live figure removed, ask Main]
 
 [live figure removed, ask Main]
 
@@ -2208,23 +2208,23 @@ What I need from the main session: the owner's pick of one candidate to score fo
 
 [live figure removed, ask Main] Gold closed for the weekend.
 
-[live figure removed, ask Main] So no gold order is expected until Sunday evening, and the quiet-hours block, the afternoon quotes and the weekend together explain every hour of the gap. Not a fault. Dogecoin trades all week; no Dogecoin order since 12:09 AM CT (a no-fill), normal for a quiet overnight stretch. [live figure removed, ask Main]
+[live figure removed, ask Main] So no gold order is expected until Sunday evening, and the quiet-hours block, the afternoon quotes and the weekend together explain every hour of the gap. Not a fault. Dogecoin trades all week; Dogecoin last order time [live figure removed, ask Main], normal for a quiet overnight stretch. [live figure removed, ask Main]
 
-[live figure removed, ask Main] The 12:09 AM no-fill is outside the block. No gold order since 12:09 PM CT yesterday, now through its quiet block and past midnight CT; first post-block gold order not yet seen. [live figure removed, ask Main]
+[live figure removed, ask Main] Last order times [live figure removed, ask Main]. Gold is now through its quiet block and past midnight CT; first post-block gold order not yet seen. [live figure removed, ask Main]
 
-[live figure removed, ask Main] 1 win in 5 is 20% against the pre-registered 28%, within chance (5 orders; the streak kill is 18, nothing near). [live figure removed, ask Main]
+[live figure removed, ask Main] Win count against the pre-registered 28%: [live figure removed, ask Main] (streak kill is 18, nothing near). [live figure removed, ask Main]
 
 [live figure removed, ask Main] So for this order essentially all of the delay was the start, and our own work before the order took under a second. [live figure removed, ask Main] Tally to collect: startLateMs, startToSendMs and answerMs per Dogecoin order from here on; triggers are in REFINE_EARLIER_SEND_PLAN.md.
 
 [live figure removed, ask Main] Timing fields check: first L1 order after 9:20 PM CT not yet seen at 9:22 PM CT; checking each wake.
 
-[live figure removed, ask Main] Item 41 count: 1 order in the block after the lift, 1 fill (read at 30 orders). [live figure removed, ask Main]
+[live figure removed, ask Main] Item 41 count: [live figure removed, ask Main] (read at 30 orders). [live figure removed, ask Main]
 
 **2026-10-30 8:20 PM CT, two owner tasks via the main session.**
 1. **Dogecoin order timing write-up is ready:** `kalshi-scalper/REFINE_TIMING_NOTES.md` (read only, no code changed). [live figure removed, ask Main] After that, Dogecoin also waits for gold's whole order cycle (market read, record write, order, three more writes) because candidates are handled one at a time, gold first. The record has no send time, so the exact cost of each step is unknown. First step (zero risk): log send time on the order. Then keep-warm, parallel reads, moving after-order writes; sending both orders together is the riskiest (window cap and cash accounting are order by order today).
 2. **Item 41 (Dogecoin fills in the 8 PM to midnight CT hours after the block was lifted), registered as forward-only, counts first.** The post-lift clock starts at 8:00 PM CT Oct 30 (01:00 UTC Oct 31). Nothing before it counts. [live figure removed, ask Main] Read at 30 orders in the block (counts and fill rate only; results at 100). [live figure removed, ask Main] Kill: if after 100 block orders net per contract is under -0.5c, or the loss rate is above 8%, say so to the main session.
 
-[live figure removed, ask Main] Two things to note: the price was 50c, the top edge of the registered 5c to 50c band, and the order filled 9 contracts (the first report row with fewer than the 10 asked for; I could not see the ordered count in the slot row, so it may be a partial fill). One win in four is inside the pre-registered 28% rate. The streak kill (18) is not close. [live figure removed, ask Main]
+[live figure removed, ask Main] Order details (price, size, record): [live figure removed, ask Main] The streak kill (18) is not close. [live figure removed, ask Main]
 
 [live figure removed, ask Main] Registered kills: 18 straight losses, or the later reads (Nov 13 forward read; the net and size rules in the README entry SLOT-OICORE). [live figure removed, ask Main]
 
@@ -2238,7 +2238,7 @@ What I need from the main session: the owner's pick of one candidate to score fo
 
 **2026-10-30 2:45 PM CT, spread filter frequency cost (refill-rule item, counts only, 0 tries).** V2's REGIME1 found entries with a spread of 2c or more do worse in history (information only, not a pass). [live figure removed, ask Main] No value in registering a test; closed as information.
 
-[live figure removed, ask Main] Dogecoin at 5 contracts is now about 15 settled with 2 lost (13%), against the kill rule's 8% over the last 100 (needs 100 orders; not readable) and review at 250. [live figure removed, ask Main] Re-check at the nightly report.
+[live figure removed, ask Main] Dogecoin at 5 contracts: settled and lost counts [live figure removed, ask Main], against the kill rule's 8% over the last 100 (needs 100 orders; not readable) and review at 250. [live figure removed, ask Main] Re-check at the nightly report.
 
 [live figure removed, ask Main]
 - [live figure removed, ask Main] Flat, no hour block loses fills.
@@ -2260,7 +2260,7 @@ What I need from the main session: the owner's pick of one candidate to score fo
 - [live figure removed, ask Main] Run by V2's scorer or any copy of it; one read per date.
 - [live figure removed, ask Main]
 - **Kill (stated now):** at 150 entries, net per contract under +0.5c or loss rate above price plus fee: FALSIFIED. Pass requires profit factor 1.5 in each of three windows after deflation; nothing else counts. A pass only earns a registered live probe brief; no promote verb.
-- [live figure removed, ask Main] Read at 100 block entries (about 8 weeks at 13 a week live, about 3 weeks at the candle ceiling of 32). Kill and action as in R3.
+- [live figure removed, ask Main] Read at 100 block entries (about 3 weeks at the candle ceiling of 32; live pace [live figure removed, ask Main]). Kill and action as in R3.
 - **Ask to V2 (via main):** run both scorers on the fresh-day replay when a read date arrives and push aggregates only; outcome columns stay inside the scorer until then. Nothing for the owner.
 
 [live figure removed, ask Main] `depthAtLimit` and `shareOfDepth` are null for slot orders, so size against depth cannot be read yet (the slot path does not log them; that would be a code change for the main session to decide, not a request I am making now).
@@ -2304,7 +2304,7 @@ What I need from the main session: the owner's pick of one candidate to score fo
 
 [live figure removed, ask Main] I read them when they land. [live figure removed, ask Main]
 
-**2026-10-30 2:00 PM CT, report extension is already live; first OICORE and size read. No threshold hit.** The nightly report now carries `secondSlot`, `allStrategies` and `slotOrders` (the extension is deployed, earlier than the main session's last note). [live figure removed, ask Main] Expected win rate is about 28% (price 5c to 50c), so two losses in a row is about a 52% chance by luck; the streak kill is 18, the first read is Nov 13. Nothing to act on. [live figure removed, ask Main] The Dogecoin ladder change has not shown in the orders yet. [live figure removed, ask Main]
+**2026-10-30 2:00 PM CT, report extension is already live; first OICORE and size read. No threshold hit.** The nightly report now carries `secondSlot`, `allStrategies` and `slotOrders` (the extension is deployed, earlier than the main session's last note). [live figure removed, ask Main] Expected win rate is about 28% (price 5c to 50c), so a short losing run is ordinary; the streak kill is 18, the first read is Nov 13. Nothing to act on. [live figure removed, ask Main] The Dogecoin ladder change has not shown in the orders yet. [live figure removed, ask Main]
 
 **2026-10-30 2:00 PM CT, REGISTRATIONS R1 to R4 (owner direction Oct 30 "more research going in both chats"). Written BEFORE any outcome, candle or result row is opened for these tests. Nothing run yet.**
 
@@ -2399,7 +2399,7 @@ Live, per market (dollars after fees, settled only):
 Rule checks:
 - [live figure removed, ask Main] The kill rule (last 100 at 5 lose more than 8%, or net under +0.5c) cannot be read until 100 exist and the review is at 250 settled; nothing to report. [live figure removed, ask Main]
 - [live figure removed, ask Main]
-- **Gold quiet hours (20:00 to 23:59 CT):** the last gold order in that block is Oct 29 02:54Z (Oct 28 9:54 PM CT), before the Oct 29 live date. No gold order in the block since. [live figure removed, ask Main] Nothing to do.
+- **Gold quiet hours (20:00 to 23:59 CT):** the last gold order in that block was before the Oct 29 live date ([live figure removed, ask Main]). No gold order in the block since. [live figure removed, ask Main] Nothing to do.
 - **Oversize:** none since Oct 29 16:00 CT. [live figure removed, ask Main]
 - **Paused markets:** no new fills on Bitcoin, Ethereum, XRP or the probes since Oct 30 00:00 UTC.
 

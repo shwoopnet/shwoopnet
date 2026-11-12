@@ -154,7 +154,7 @@ The exact rule (shadow only): for each forward gold order that the live exit wat
 
 Data it reads: forward gold orders with an exit, exit time, market result. The close time comes from the ticker's Eastern time (`kalshiCloseFromTicker`).
 
-[live figure removed, ask Main] 9 of 16 had no candle in that window (the trigger came earlier or a candle is missing), so the true share inside 120 seconds is between 5 of 16 (31%) and 14 of 16. [live figure removed, ask Main] Read once at 15, nothing between.
+[live figure removed, ask Main] Candle coverage of the exit sample and the share inside 120 seconds: [live figure removed, ask Main] [live figure removed, ask Main] Read once at 15, nothing between.
 
 [live figure removed, ask Main] [live figure removed, ask Main]
 
@@ -167,7 +167,7 @@ Data it reads: forward gold orders with an exit, exit time, market result. The c
 --------------------------------------------------------------------------- Next, if the owner approves: write each as a `README.md#S-...` entry with the cutoff, a read only script on the model of `goldfwd_forward.py` with a synthetic test, and one wake.sh section. Nothing in `functions/` or `index.html` is touched by any of them.
 
 ## Open discrepancy on S-GHOLD120 (Nov 6 2026)
-The feasibility counts above come from the merge worker's reading of res2.json (7 of 16 with a bid at or below 0.25 in a minute candle, 5 within the last 120 s, about 5 a month). The worker that ran the check reported 3 of the 7 in the last 120 s and about 1 a month, and leaned toward shelving. The two use different readings of the same proxy, so the true share is between about 3 and 14 of 16. Treat the feasibility as unsettled and the idea as slow either way; nothing is started.
+The two workers' feasibility counts disagreed ([live figure removed, ask Main]); they use different readings of the same proxy. Treat the feasibility as unsettled and the idea as slow either way; nothing is started.
 
 ## Update on S-GHOLD120 feasibility (Nov 6 2026, later)
 [live figure removed, ask Main]

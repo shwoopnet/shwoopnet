@@ -47,7 +47,7 @@ Source: /home/user/shwoopnet/kalshi-scalper/REFINE_STATUS.md (read only). Times 
    [live figure removed, ask Main]
 
 15. [live figure removed, ask Main]
-   Tempered by: W-C9RESTATE1. Truth now: -2.71c over 97 windows has a bootstrap interval of -8.95 to +2.53 (spans 0); not a kill, read stays at 200 windows.
+   Tempered by: W-C9RESTATE1. Truth now: [live figure removed, ask Main] Not a kill, read stays at 200 windows.
 
 ## Still marked provisional, open or not settled (as of Nov 6 11:09)
 

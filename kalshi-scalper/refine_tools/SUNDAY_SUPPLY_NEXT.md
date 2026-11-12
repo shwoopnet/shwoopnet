@@ -11,7 +11,7 @@
 ## 2. Shadow candidates (registered, PR 753; none is a pass)
 - [live figure removed, ask Main]
 - [live figure removed, ask Main] Needs deploy-latest.sh (PR 753). Read 2026-12-14.
-- XRPFAV6: 1.645 (137) / 1.46. [live figure removed, ask Main]
+- XRPFAV6: [live figure removed, ask Main]
 - [live figure removed, ask Main] On main. Read 2026-12-14.
 - [live figure removed, ask Main]
 - [live figure removed, ask Main]

@@ -11,7 +11,7 @@ Basis: cash, PF per contract, fee unrounded (matches live avgFee), hold to settl
 | XRPFAV6 | [live figure removed, ask Main] |
 | XRPYES10 | [live figure removed, ask Main] |
 
-Independent means a window not used to pick the rule (gold Aug 13 to Sep 1 covers 1,358 of 2,153 listed windows; Aug 6 to 12 and earlier not reached; [live figure removed, ask Main] XRPFAV6 +3.4c at +0c. [live figure removed, ask Main] [live figure removed, ask Main]
+Independent means a window not used to pick the rule (gold Aug 13 to Sep 1 covers 1,358 of 2,153 listed windows; Aug 6 to 12 and earlier not reached; [live figure removed, ask Main] XRPFAV6 [live figure removed, ask Main] [live figure removed, ask Main] [live figure removed, ask Main]
 
 ## Pass and kill rules (common, from the lifecycle spec, set before any forward row)
 

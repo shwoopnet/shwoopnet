@@ -6,7 +6,7 @@
 2. [live figure removed, ask Main] Code: needs deploy-latest.sh (PR 753). Prior low.
 3. [live figure removed, ask Main] Independent June to early Sept: 1.645 (137) / 1.46. Code: PR 753. [live figure removed, ask Main]
 4. [live figure removed, ask Main] Code: on main. Prior low.
-5. Not offered: Bitcoin (BTCHI6 1.13 / 0.91 independent, BTCHI10 contested 0.90 on V2's Jun to Aug), Ethereum (ETHNO6, ETHL1 fail on 4.3 weeks), silver (candle 1.19 at +1c, halves 1.28 / 1.11, tracked by C9 only, quotes not held), and every longshot, near-even, late-favourite, hourly ladder and 54-series scan family (see ONDECK.md closed lists).
+5. Not offered: Bitcoin (BTCHI6 1.13 / 0.91 independent, BTCHI10 contested 0.90 on V2's Jun to Aug), Ethereum (ETHNO6, ETHL1 fail on 4.3 weeks), silver (candle figures [live figure removed, ask Main], tracked by C9 only, quotes not held), and every longshot, near-even, late-favourite, hourly ladder and 54-series scan family (see ONDECK.md closed lists).
 [live figure removed, ask Main] Shadow rows assume a fill at the touch. [live figure removed, ask Main] [live figure removed, ask Main]
 
 ## Needs data (pull this week to make a new candidate)
