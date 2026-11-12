@@ -1,0 +1,221 @@
+{
+ "test": "RECORD1 re-scored on R6 books, covered part (same test, no new try)",
+ "closes_from": "2026-10-29 22:15:00+00:00",
+ "closes_to": "2026-11-03 21:00:00+00:00",
+ "series": [
+  "KXBTC15M",
+  "KXETH15M",
+  "KXXRP15M",
+  "KXDOGE15M"
+ ],
+ "windows_common": 844,
+ "windows_by_series": {
+  "KXBTC15M": 212,
+  "KXETH15M": 205,
+  "KXXRP15M": 210,
+  "KXDOGE15M": 217
+ },
+ "L0_registered_read_2026-11-03": {
+  "n": 300,
+  "dates": 13,
+  "mean_c": 3.81,
+  "z": 1.6,
+  "note": "all five series, Oct 22 to Nov 3, from V2's README"
+ },
+ "L1_quotes_common": {
+  "n": 88,
+  "dates": 5,
+  "mean_c": -0.4,
+  "z_by_date": -0.11,
+  "pf": 0.968,
+  "wins": 39,
+  "mean_price": 0.4391,
+  "mean_model_gap_c": 17.6,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    41,
+    0.02
+   ],
+   "ETH": [
+    29,
+    -2.95
+   ],
+   "XRP": [
+    18,
+    2.76
+   ]
+  },
+  "by_decision_second": {
+   "60": 75,
+   "45": 10,
+   "30": 3,
+   "15": 0
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA"
+ },
+ "L2_book_same_poll": {
+  "n": 66,
+  "dates": 5,
+  "mean_c": -5.04,
+  "z_by_date": -2.23,
+  "pf": 0.656,
+  "wins": 22,
+  "mean_price": 0.3755,
+  "mean_model_gap_c": 17.25,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    32,
+    -2.4
+   ],
+   "ETH": [
+    22,
+    -14.76
+   ],
+   "XRP": [
+    12,
+    5.73
+   ]
+  },
+  "by_decision_second": {
+   "60": 56,
+   "45": 6,
+   "30": 3,
+   "15": 1
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA"
+ },
+ "L3_book_2s_limit": {
+  "n": 39,
+  "dates": 5,
+  "mean_c": -7.42,
+  "z_by_date": -1.85,
+  "pf": 0.476,
+  "wins": 7,
+  "mean_price": 0.2468,
+  "mean_model_gap_c": 20.41,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    19,
+    -7.89
+   ],
+   "ETH": [
+    11,
+    -15.72
+   ],
+   "XRP": [
+    9,
+    3.73
+   ]
+  },
+  "by_decision_second": {
+   "60": 32,
+   "45": 5,
+   "30": 2,
+   "15": 0
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA",
+  "signals": 66,
+  "fill_share": 0.591
+ },
+ "L3_book_6s_limit": {
+  "n": 37,
+  "dates": 5,
+  "mean_c": -6.48,
+  "z_by_date": -1.59,
+  "pf": 0.457,
+  "wins": 4,
+  "mean_price": 0.1665,
+  "mean_model_gap_c": 20.51,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    19,
+    -4.43
+   ],
+   "ETH": [
+    10,
+    -21.3
+   ],
+   "XRP": [
+    8,
+    7.17
+   ]
+  },
+  "by_decision_second": {
+   "60": 31,
+   "45": 5,
+   "30": 1,
+   "15": 0
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA",
+  "signals": 66,
+  "fill_share": 0.561
+ },
+ "L4_quote_signal_book_price": {
+  "n": 78,
+  "dates": 5,
+  "mean_c": -4.54,
+  "z_by_date": -1.69,
+  "pf": 0.659,
+  "wins": 36,
+  "mean_price": 0.4996,
+  "mean_model_gap_c": 15.97,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    34,
+    -5.88
+   ],
+   "ETH": [
+    29,
+    -6.05
+   ],
+   "XRP": [
+    15,
+    1.42
+   ]
+  },
+  "by_decision_second": {
+   "60": 66,
+   "45": 10,
+   "30": 2,
+   "15": 0
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA",
+  "signals": 88,
+  "fill_share": 0.886,
+  "paid_minus_quote_ask_c_mean": 3.75
+ },
+ "L4_quote_signal_book_price_limit": {
+  "n": 34,
+  "dates": 5,
+  "mean_c": -6.99,
+  "z_by_date": -2.13,
+  "pf": 0.585,
+  "wins": 8,
+  "mean_price": 0.2964,
+  "mean_model_gap_c": 17.21,
+  "by_asset_n_mean_c": {
+   "BTC": [
+    16,
+    -7.48
+   ],
+   "ETH": [
+    13,
+    -7.14
+   ],
+   "XRP": [
+    5,
+    -5.06
+   ]
+  },
+  "by_decision_second": {
+   "60": 29,
+   "45": 4,
+   "30": 1,
+   "15": 0
+  },
+  "verdict_by_v2_judge": "NOT_ENOUGH_DATA",
+  "signals": 88,
+  "fill_share": 0.386,
+  "paid_minus_quote_ask_c_mean": -5.94
+ }
+}

@@ -1,0 +1,3961 @@
+{
+ "test": "GEN4 forward rows re-scored on R6 books (same test, no new try)",
+ "windows_common": 287,
+ "windows_with_quotes_only_dropped": null,
+ "closes_from": "2026-10-30T00:00Z",
+ "closes_to": "2026-11-04T19:30Z",
+ "spot_seconds": 227929,
+ "over_all_rows": {
+  "L0": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 14,
+   "rows_pf1_at_or_above_1.5": 2,
+   "median_pf1": 0.81,
+   "median_n": 106.0
+  },
+  "L1_quotes_common": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 15,
+   "rows_pf1_at_or_above_1.5": 7,
+   "median_pf1": 0.831,
+   "median_n": 86.0
+  },
+  "L2_book_same_poll": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 10,
+   "rows_pf1_at_or_above_1.5": 2,
+   "median_pf1": 0.722,
+   "median_n": 92.0
+  },
+  "L3_book_2s_limit": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 19,
+   "rows_pf1_at_or_above_1.5": 6,
+   "median_pf1": 0.915,
+   "median_n": 44.0
+  },
+  "L3_book_6s_limit": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 24,
+   "rows_pf1_at_or_above_1.5": 4,
+   "median_pf1": 0.976,
+   "median_n": 39.0
+  },
+  "L4_quote_signal_book_price": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 13,
+   "rows_pf1_at_or_above_1.5": 3,
+   "median_pf1": 0.75,
+   "median_n": 85.5
+  },
+  "L4_quote_signal_book_price_limit": {
+   "rows": 52,
+   "rows_pf1_at_or_above_1": 17,
+   "rows_pf1_at_or_above_1.5": 3,
+   "median_pf1": 0.889,
+   "median_n": 39.0
+  }
+ },
+ "rows": {
+  "GEN4_B01": {
+   "id": "GEN4_B01",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "lsz_ask <= 7.779; zd >= -1.585",
+   "L0": {
+    "days": 6,
+    "n": 110,
+    "wins": 74,
+    "pf1": 0.81,
+    "pf10": 0.87
+   },
+   "L1_quotes_common": {
+    "n": 91,
+    "wins": 64,
+    "pf1": 0.848,
+    "pf10": 0.929,
+    "mean1_c": -3.03,
+    "z": -0.67,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 104,
+    "wins": 71,
+    "pf1": 0.7,
+    "pf10": 0.719,
+    "mean1_c": -6.71,
+    "z": -1.51,
+    "dates": 6
+   },
+   "L2_signals": 104,
+   "L1_signals": 91,
+   "L3_book_2s_limit": {
+    "n": 45,
+    "wins": 32,
+    "pf1": 1.059,
+    "pf10": 1.145,
+    "mean1_c": 1.02,
+    "z": 0.16,
+    "fill_share": 0.433
+   },
+   "L3_book_6s_limit": {
+    "n": 41,
+    "wins": 27,
+    "pf1": 0.935,
+    "pf10": 0.952,
+    "mean1_c": -1.25,
+    "z": -0.19,
+    "fill_share": 0.394
+   },
+   "L4_quote_signal_book_price": {
+    "n": 91,
+    "wins": 63,
+    "pf1": 0.805,
+    "pf10": 0.831,
+    "mean1_c": -3.98,
+    "z": -0.87,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 39,
+    "wins": 26,
+    "pf1": 0.919,
+    "pf10": 0.925,
+    "mean1_c": -1.73,
+    "z": -0.23,
+    "fill_share": 0.429
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 91,
+    "mean": -1.06,
+    "share_quote_2c_or_more_below": 0.429
+   }
+  },
+  "GEN4_B02": {
+   "id": "GEN4_B02",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "imb >= -0.4281; zd >= -2.066",
+   "L0": {
+    "days": 6,
+    "n": 111,
+    "wins": 74,
+    "pf1": 0.79,
+    "pf10": 0.84
+   },
+   "L1_quotes_common": {
+    "n": 93,
+    "wins": 66,
+    "pf1": 0.855,
+    "pf10": 0.94,
+    "mean1_c": -2.7,
+    "z": -0.64,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 99,
+    "wins": 65,
+    "pf1": 0.639,
+    "pf10": 0.666,
+    "mean1_c": -8.71,
+    "z": -1.88,
+    "dates": 6
+   },
+   "L2_signals": 99,
+   "L1_signals": 93,
+   "L3_book_2s_limit": {
+    "n": 42,
+    "wins": 31,
+    "pf1": 1.146,
+    "pf10": 1.222,
+    "mean1_c": 2.2,
+    "z": 0.37,
+    "fill_share": 0.424
+   },
+   "L3_book_6s_limit": {
+    "n": 37,
+    "wins": 25,
+    "pf1": 0.934,
+    "pf10": 0.999,
+    "mean1_c": -1.16,
+    "z": -0.18,
+    "fill_share": 0.374
+   },
+   "L4_quote_signal_book_price": {
+    "n": 92,
+    "wins": 64,
+    "pf1": 0.774,
+    "pf10": 0.8,
+    "mean1_c": -4.49,
+    "z": -1.02,
+    "fill_share": 0.989
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 40,
+    "wins": 27,
+    "pf1": 0.874,
+    "pf10": 0.914,
+    "mean1_c": -2.62,
+    "z": -0.37,
+    "fill_share": 0.43
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 93,
+    "mean": -1.64,
+    "share_quote_2c_or_more_below": 0.462
+   }
+  },
+  "GEN4_B03": {
+   "id": "GEN4_B03",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 5,
+   "conds": "dm5 <= 0; sp15 >= -0.1949; zd >= -0.3503",
+   "L0": {
+    "days": 6,
+    "n": 102,
+    "wins": 58,
+    "pf1": 1.2,
+    "pf10": 1.25
+   },
+   "L1_quotes_common": {
+    "n": 84,
+    "wins": 53,
+    "pf1": 1.584,
+    "pf10": 1.671,
+    "mean1_c": 9.63,
+    "z": 1.88,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 79,
+    "wins": 48,
+    "pf1": 1.058,
+    "pf10": 1.263,
+    "mean1_c": 1.06,
+    "z": 0.22,
+    "dates": 6
+   },
+   "L2_signals": 79,
+   "L1_signals": 84,
+   "L3_book_2s_limit": {
+    "n": 43,
+    "wins": 24,
+    "pf1": 1.046,
+    "pf10": 1.099,
+    "mean1_c": 0.86,
+    "z": 0.13,
+    "fill_share": 0.544
+   },
+   "L3_book_6s_limit": {
+    "n": 37,
+    "wins": 17,
+    "pf1": 0.951,
+    "pf10": 0.954,
+    "mean1_c": -0.99,
+    "z": -0.14,
+    "fill_share": 0.468
+   },
+   "L4_quote_signal_book_price": {
+    "n": 80,
+    "wins": 53,
+    "pf1": 1.401,
+    "pf10": 1.467,
+    "mean1_c": 6.29,
+    "z": 1.32,
+    "fill_share": 0.952
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 29,
+    "wins": 17,
+    "pf1": 1.222,
+    "pf10": 1.279,
+    "mean1_c": 3.96,
+    "z": 0.46,
+    "fill_share": 0.345
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 84,
+    "mean": -5.59,
+    "share_quote_2c_or_more_below": 0.524
+   }
+  },
+  "GEN4_B04": {
+   "id": "GEN4_B04",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "ask >= 0.17; lsz_ask <= 8.072; lsz_bid <= 8.053",
+   "L0": {
+    "days": 6,
+    "n": 107,
+    "wins": 76,
+    "pf1": 0.99,
+    "pf10": 1.02
+   },
+   "L1_quotes_common": {
+    "n": 87,
+    "wins": 60,
+    "pf1": 0.894,
+    "pf10": 0.925,
+    "mean1_c": -2.25,
+    "z": -0.46,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 101,
+    "wins": 67,
+    "pf1": 0.665,
+    "pf10": 0.666,
+    "mean1_c": -8.14,
+    "z": -1.75,
+    "dates": 6
+   },
+   "L2_signals": 101,
+   "L1_signals": 87,
+   "L3_book_2s_limit": {
+    "n": 53,
+    "wins": 34,
+    "pf1": 0.776,
+    "pf10": 0.8,
+    "mean1_c": -5.25,
+    "z": -0.82,
+    "fill_share": 0.525
+   },
+   "L3_book_6s_limit": {
+    "n": 44,
+    "wins": 27,
+    "pf1": 0.807,
+    "pf10": 0.834,
+    "mean1_c": -4.57,
+    "z": -0.64,
+    "fill_share": 0.436
+   },
+   "L4_quote_signal_book_price": {
+    "n": 87,
+    "wins": 60,
+    "pf1": 0.854,
+    "pf10": 0.833,
+    "mean1_c": -3.12,
+    "z": -0.63,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 39,
+    "wins": 26,
+    "pf1": 0.986,
+    "pf10": 0.96,
+    "mean1_c": -0.31,
+    "z": -0.04,
+    "fill_share": 0.448
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 87,
+    "mean": -0.98,
+    "share_quote_2c_or_more_below": 0.391
+   }
+  },
+  "GEN4_B05": {
+   "id": "GEN4_B05",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 5,
+   "conds": "sp30 >= 0.5295",
+   "L0": {
+    "days": 6,
+    "n": 92,
+    "wins": 42,
+    "pf1": 1.39,
+    "pf10": 1.46
+   },
+   "L1_quotes_common": {
+    "n": 79,
+    "wins": 40,
+    "pf1": 1.978,
+    "pf10": 2.089,
+    "mean1_c": 10.33,
+    "z": 2.37,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 74,
+    "wins": 34,
+    "pf1": 1.499,
+    "pf10": 1.601,
+    "mean1_c": 5.83,
+    "z": 1.34,
+    "dates": 6
+   },
+   "L2_signals": 74,
+   "L1_signals": 79,
+   "L3_book_2s_limit": {
+    "n": 45,
+    "wins": 17,
+    "pf1": 1.743,
+    "pf10": 1.851,
+    "mean1_c": 7.48,
+    "z": 1.35,
+    "fill_share": 0.608
+   },
+   "L3_book_6s_limit": {
+    "n": 42,
+    "wins": 13,
+    "pf1": 1.424,
+    "pf10": 1.439,
+    "mean1_c": 4.67,
+    "z": 0.8,
+    "fill_share": 0.568
+   },
+   "L4_quote_signal_book_price": {
+    "n": 76,
+    "wins": 40,
+    "pf1": 1.61,
+    "pf10": 1.723,
+    "mean1_c": 6.83,
+    "z": 1.57,
+    "fill_share": 0.962
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 32,
+    "wins": 12,
+    "pf1": 1.813,
+    "pf10": 1.951,
+    "mean1_c": 8.99,
+    "z": 1.24,
+    "fill_share": 0.405
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 79,
+    "mean": -4.45,
+    "share_quote_2c_or_more_below": 0.519
+   }
+  },
+  "GEN4_B06": {
+   "id": "GEN4_B06",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 0,
+   "conds": "sp30 >= 0.5295; spread <= 0.01",
+   "L0": {
+    "days": 6,
+    "n": 122,
+    "wins": 53,
+    "pf1": 1.44,
+    "pf10": 1.49
+   },
+   "L1_quotes_common": {
+    "n": 100,
+    "wins": 47,
+    "pf1": 1.899,
+    "pf10": 1.961,
+    "mean1_c": 9.87,
+    "z": 2.51,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 92,
+    "wins": 42,
+    "pf1": 1.583,
+    "pf10": 1.61,
+    "mean1_c": 7.1,
+    "z": 1.75,
+    "dates": 6
+   },
+   "L2_signals": 92,
+   "L1_signals": 100,
+   "L3_book_2s_limit": {
+    "n": 48,
+    "wins": 22,
+    "pf1": 2.278,
+    "pf10": 2.359,
+    "mean1_c": 13.1,
+    "z": 2.23,
+    "fill_share": 0.522
+   },
+   "L3_book_6s_limit": {
+    "n": 48,
+    "wins": 17,
+    "pf1": 1.507,
+    "pf10": 1.719,
+    "mean1_c": 6.71,
+    "z": 1.09,
+    "fill_share": 0.522
+   },
+   "L4_quote_signal_book_price": {
+    "n": 97,
+    "wins": 46,
+    "pf1": 1.584,
+    "pf10": 1.577,
+    "mean1_c": 6.85,
+    "z": 1.75,
+    "fill_share": 0.97
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 46,
+    "wins": 20,
+    "pf1": 2.533,
+    "pf10": 2.575,
+    "mean1_c": 11.73,
+    "z": 2.27,
+    "fill_share": 0.46
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 100,
+    "mean": -3.23,
+    "share_quote_2c_or_more_below": 0.43
+   }
+  },
+  "GEN4_B07": {
+   "id": "GEN4_B07",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 5,
+   "conds": "sp15 >= 0.3412; vol <= 0.311",
+   "L0": {
+    "days": 6,
+    "n": 70,
+    "wins": 28,
+    "pf1": 1.09,
+    "pf10": 1.15
+   },
+   "L1_quotes_common": {
+    "n": 62,
+    "wins": 27,
+    "pf1": 1.292,
+    "pf10": 1.365,
+    "mean1_c": 3.96,
+    "z": 0.79,
+    "dates": 5
+   },
+   "L2_book_same_poll": {
+    "n": 62,
+    "wins": 27,
+    "pf1": 1.214,
+    "pf10": 1.318,
+    "mean1_c": 2.76,
+    "z": 0.57,
+    "dates": 5
+   },
+   "L2_signals": 62,
+   "L1_signals": 62,
+   "L3_book_2s_limit": {
+    "n": 26,
+    "wins": 8,
+    "pf1": 0.76,
+    "pf10": 0.807,
+    "mean1_c": -3.5,
+    "z": -0.51,
+    "fill_share": 0.419
+   },
+   "L3_book_6s_limit": {
+    "n": 27,
+    "wins": 5,
+    "pf1": 0.372,
+    "pf10": 0.4,
+    "mean1_c": -10.27,
+    "z": -1.8,
+    "fill_share": 0.435
+   },
+   "L4_quote_signal_book_price": {
+    "n": 60,
+    "wins": 26,
+    "pf1": 1.076,
+    "pf10": 1.162,
+    "mean1_c": 1.09,
+    "z": 0.21,
+    "fill_share": 0.968
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 27,
+    "wins": 9,
+    "pf1": 1.155,
+    "pf10": 1.23,
+    "mean1_c": 1.89,
+    "z": 0.27,
+    "fill_share": 0.435
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 62,
+    "mean": -2.75,
+    "share_quote_2c_or_more_below": 0.355
+   }
+  },
+  "GEN4_B08": {
+   "id": "GEN4_B08",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "imb >= -0.4281",
+   "L0": {
+    "days": 6,
+    "n": 118,
+    "wins": 80,
+    "pf1": 0.79,
+    "pf10": 0.84
+   },
+   "L1_quotes_common": {
+    "n": 99,
+    "wins": 68,
+    "pf1": 0.798,
+    "pf10": 0.863,
+    "mean1_c": -4.26,
+    "z": -0.97,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 105,
+    "wins": 67,
+    "pf1": 0.6,
+    "pf10": 0.621,
+    "mean1_c": -10.28,
+    "z": -2.24,
+    "dates": 6
+   },
+   "L2_signals": 105,
+   "L1_signals": 99,
+   "L3_book_2s_limit": {
+    "n": 47,
+    "wins": 33,
+    "pf1": 0.944,
+    "pf10": 0.982,
+    "mean1_c": -1.06,
+    "z": -0.17,
+    "fill_share": 0.448
+   },
+   "L3_book_6s_limit": {
+    "n": 41,
+    "wins": 27,
+    "pf1": 0.999,
+    "pf10": 1.056,
+    "mean1_c": -0.02,
+    "z": -0.0,
+    "fill_share": 0.39
+   },
+   "L4_quote_signal_book_price": {
+    "n": 98,
+    "wins": 67,
+    "pf1": 0.744,
+    "pf10": 0.755,
+    "mean1_c": -5.5,
+    "z": -1.24,
+    "fill_share": 0.99
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 46,
+    "wins": 30,
+    "pf1": 0.804,
+    "pf10": 0.839,
+    "mean1_c": -4.35,
+    "z": -0.65,
+    "fill_share": 0.465
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 99,
+    "mean": -1.18,
+    "share_quote_2c_or_more_below": 0.434
+   }
+  },
+  "GEN4_B09": {
+   "id": "GEN4_B09",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 0,
+   "conds": "sp30 >= -0.06831",
+   "L0": {
+    "days": 6,
+    "n": 114,
+    "wins": 48,
+    "pf1": 1.06,
+    "pf10": 1.09
+   },
+   "L1_quotes_common": {
+    "n": 97,
+    "wins": 45,
+    "pf1": 1.401,
+    "pf10": 1.441,
+    "mean1_c": 5.61,
+    "z": 1.33,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 92,
+    "wins": 40,
+    "pf1": 1.111,
+    "pf10": 1.137,
+    "mean1_c": 1.62,
+    "z": 0.39,
+    "dates": 6
+   },
+   "L2_signals": 92,
+   "L1_signals": 97,
+   "L3_book_2s_limit": {
+    "n": 57,
+    "wins": 21,
+    "pf1": 1.083,
+    "pf10": 1.123,
+    "mean1_c": 1.24,
+    "z": 0.23,
+    "fill_share": 0.62
+   },
+   "L3_book_6s_limit": {
+    "n": 53,
+    "wins": 17,
+    "pf1": 1.417,
+    "pf10": 1.393,
+    "mean1_c": 4.73,
+    "z": 0.93,
+    "fill_share": 0.576
+   },
+   "L4_quote_signal_book_price": {
+    "n": 94,
+    "wins": 45,
+    "pf1": 1.094,
+    "pf10": 1.117,
+    "mean1_c": 1.42,
+    "z": 0.34,
+    "fill_share": 0.969
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 39,
+    "wins": 11,
+    "pf1": 0.98,
+    "pf10": 0.994,
+    "mean1_c": -0.31,
+    "z": -0.05,
+    "fill_share": 0.402
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 97,
+    "mean": -4.63,
+    "share_quote_2c_or_more_below": 0.505
+   }
+  },
+  "GEN4_B10": {
+   "id": "GEN4_B10",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "sp30 <= 2.256; sp5 <= 0.353",
+   "L0": {
+    "days": 6,
+    "n": 105,
+    "wins": 67,
+    "pf1": 0.67,
+    "pf10": 0.72
+   },
+   "L1_quotes_common": {
+    "n": 85,
+    "wins": 56,
+    "pf1": 0.645,
+    "pf10": 0.686,
+    "mean1_c": -7.95,
+    "z": -1.69,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 85,
+    "wins": 55,
+    "pf1": 0.629,
+    "pf10": 0.632,
+    "mean1_c": -8.96,
+    "z": -1.81,
+    "dates": 6
+   },
+   "L2_signals": 85,
+   "L1_signals": 85,
+   "L3_book_2s_limit": {
+    "n": 37,
+    "wins": 25,
+    "pf1": 0.761,
+    "pf10": 0.824,
+    "mean1_c": -4.69,
+    "z": -0.69,
+    "fill_share": 0.435
+   },
+   "L3_book_6s_limit": {
+    "n": 32,
+    "wins": 22,
+    "pf1": 0.947,
+    "pf10": 1.007,
+    "mean1_c": -0.95,
+    "z": -0.13,
+    "fill_share": 0.376
+   },
+   "L4_quote_signal_book_price": {
+    "n": 84,
+    "wins": 55,
+    "pf1": 0.654,
+    "pf10": 0.662,
+    "mean1_c": -8.07,
+    "z": -1.64,
+    "fill_share": 0.988
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 42,
+    "wins": 28,
+    "pf1": 0.833,
+    "pf10": 0.852,
+    "mean1_c": -3.59,
+    "z": -0.51,
+    "fill_share": 0.494
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 85,
+    "mean": 0.39,
+    "share_quote_2c_or_more_below": 0.376
+   }
+  },
+  "GEN4_B11": {
+   "id": "GEN4_B11",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 0,
+   "conds": "imb >= -0.4281; sp30 >= 0.5295",
+   "L0": {
+    "days": 6,
+    "n": 109,
+    "wins": 47,
+    "pf1": 1.31,
+    "pf10": 1.36
+   },
+   "L1_quotes_common": {
+    "n": 88,
+    "wins": 42,
+    "pf1": 1.8,
+    "pf10": 1.864,
+    "mean1_c": 8.66,
+    "z": 2.13,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 92,
+    "wins": 44,
+    "pf1": 1.738,
+    "pf10": 1.768,
+    "mean1_c": 8.36,
+    "z": 2.06,
+    "dates": 6
+   },
+   "L2_signals": 92,
+   "L1_signals": 88,
+   "L3_book_2s_limit": {
+    "n": 44,
+    "wins": 18,
+    "pf1": 1.527,
+    "pf10": 1.58,
+    "mean1_c": 7.0,
+    "z": 1.08,
+    "fill_share": 0.478
+   },
+   "L3_book_6s_limit": {
+    "n": 43,
+    "wins": 17,
+    "pf1": 1.745,
+    "pf10": 1.81,
+    "mean1_c": 8.18,
+    "z": 1.35,
+    "fill_share": 0.467
+   },
+   "L4_quote_signal_book_price": {
+    "n": 86,
+    "wins": 42,
+    "pf1": 1.631,
+    "pf10": 1.685,
+    "mean1_c": 7.21,
+    "z": 1.74,
+    "fill_share": 0.977
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 42,
+    "wins": 19,
+    "pf1": 2.51,
+    "pf10": 2.632,
+    "mean1_c": 12.29,
+    "z": 2.19,
+    "fill_share": 0.477
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 88,
+    "mean": -2.18,
+    "share_quote_2c_or_more_below": 0.409
+   }
+  },
+  "GEN4_B12": {
+   "id": "GEN4_B12",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "bid >= 0.16; lsz_ask <= 7.779; sp5 >= 0.1732",
+   "L0": {
+    "days": 6,
+    "n": 110,
+    "wins": 79,
+    "pf1": 1.04,
+    "pf10": 1.1
+   },
+   "L1_quotes_common": {
+    "n": 91,
+    "wins": 67,
+    "pf1": 1.082,
+    "pf10": 1.125,
+    "mean1_c": 1.47,
+    "z": 0.32,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 84,
+    "wins": 58,
+    "pf1": 0.927,
+    "pf10": 0.97,
+    "mean1_c": -1.48,
+    "z": -0.3,
+    "dates": 6
+   },
+   "L2_signals": 84,
+   "L1_signals": 91,
+   "L3_book_2s_limit": {
+    "n": 34,
+    "wins": 24,
+    "pf1": 1.257,
+    "pf10": 1.325,
+    "mean1_c": 4.14,
+    "z": 0.59,
+    "fill_share": 0.405
+   },
+   "L3_book_6s_limit": {
+    "n": 32,
+    "wins": 20,
+    "pf1": 0.827,
+    "pf10": 0.883,
+    "mean1_c": -3.64,
+    "z": -0.48,
+    "fill_share": 0.381
+   },
+   "L4_quote_signal_book_price": {
+    "n": 88,
+    "wins": 62,
+    "pf1": 0.878,
+    "pf10": 0.925,
+    "mean1_c": -2.36,
+    "z": -0.51,
+    "fill_share": 0.967
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 30,
+    "wins": 19,
+    "pf1": 0.939,
+    "pf10": 0.988,
+    "mean1_c": -1.34,
+    "z": -0.15,
+    "fill_share": 0.33
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 91,
+    "mean": -3.02,
+    "share_quote_2c_or_more_below": 0.549
+   }
+  },
+  "GEN4_B13": {
+   "id": "GEN4_B13",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "ask >= 0.26",
+   "L0": {
+    "days": 6,
+    "n": 129,
+    "wins": 85,
+    "pf1": 0.74,
+    "pf10": 0.8
+   },
+   "L1_quotes_common": {
+    "n": 105,
+    "wins": 70,
+    "pf1": 0.692,
+    "pf10": 0.754,
+    "mean1_c": -6.69,
+    "z": -1.59,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 109,
+    "wins": 74,
+    "pf1": 0.685,
+    "pf10": 0.705,
+    "mean1_c": -7.1,
+    "z": -1.64,
+    "dates": 6
+   },
+   "L2_signals": 109,
+   "L1_signals": 105,
+   "L3_book_2s_limit": {
+    "n": 56,
+    "wins": 38,
+    "pf1": 0.825,
+    "pf10": 0.89,
+    "mean1_c": -3.49,
+    "z": -0.61,
+    "fill_share": 0.514
+   },
+   "L3_book_6s_limit": {
+    "n": 47,
+    "wins": 34,
+    "pf1": 1.168,
+    "pf10": 1.352,
+    "mean1_c": 2.69,
+    "z": 0.46,
+    "fill_share": 0.431
+   },
+   "L4_quote_signal_book_price": {
+    "n": 105,
+    "wins": 70,
+    "pf1": 0.672,
+    "pf10": 0.675,
+    "mean1_c": -7.37,
+    "z": -1.7,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 51,
+    "wins": 34,
+    "pf1": 0.878,
+    "pf10": 0.896,
+    "mean1_c": -2.52,
+    "z": -0.4,
+    "fill_share": 0.486
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 105,
+    "mean": -0.69,
+    "share_quote_2c_or_more_below": 0.4
+   }
+  },
+  "GEN4_B14": {
+   "id": "GEN4_B14",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "imb >= -0.4281; lsz_ask <= 7.779",
+   "L0": {
+    "days": 6,
+    "n": 98,
+    "wins": 71,
+    "pf1": 1.06,
+    "pf10": 1.13
+   },
+   "L1_quotes_common": {
+    "n": 81,
+    "wins": 61,
+    "pf1": 1.149,
+    "pf10": 1.196,
+    "mean1_c": 2.47,
+    "z": 0.54,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 99,
+    "wins": 63,
+    "pf1": 0.633,
+    "pf10": 0.661,
+    "mean1_c": -8.98,
+    "z": -1.94,
+    "dates": 6
+   },
+   "L2_signals": 99,
+   "L1_signals": 81,
+   "L3_book_2s_limit": {
+    "n": 40,
+    "wins": 27,
+    "pf1": 0.888,
+    "pf10": 0.942,
+    "mean1_c": -2.26,
+    "z": -0.32,
+    "fill_share": 0.404
+   },
+   "L3_book_6s_limit": {
+    "n": 40,
+    "wins": 26,
+    "pf1": 0.946,
+    "pf10": 1.001,
+    "mean1_c": -1.05,
+    "z": -0.16,
+    "fill_share": 0.404
+   },
+   "L4_quote_signal_book_price": {
+    "n": 81,
+    "wins": 59,
+    "pf1": 1.056,
+    "pf10": 1.09,
+    "mean1_c": 0.96,
+    "z": 0.21,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 36,
+    "wins": 26,
+    "pf1": 1.291,
+    "pf10": 1.345,
+    "mean1_c": 4.73,
+    "z": 0.68,
+    "fill_share": 0.444
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 81,
+    "mean": -1.2,
+    "share_quote_2c_or_more_below": 0.395
+   }
+  },
+  "GEN4_B15": {
+   "id": "GEN4_B15",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 0,
+   "conds": "ask >= 0.26; sp15 >= -0.01237; spread >= 0.001",
+   "L0": {
+    "days": 6,
+    "n": 100,
+    "wins": 54,
+    "pf1": 0.93,
+    "pf10": 0.95
+   },
+   "L1_quotes_common": {
+    "n": 79,
+    "wins": 48,
+    "pf1": 1.231,
+    "pf10": 1.291,
+    "mean1_c": 4.2,
+    "z": 0.85,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 80,
+    "wins": 47,
+    "pf1": 1.013,
+    "pf10": 1.033,
+    "mean1_c": 0.27,
+    "z": 0.05,
+    "dates": 6
+   },
+   "L2_signals": 80,
+   "L1_signals": 79,
+   "L3_book_2s_limit": {
+    "n": 47,
+    "wins": 25,
+    "pf1": 0.949,
+    "pf10": 0.998,
+    "mean1_c": -1.13,
+    "z": -0.16,
+    "fill_share": 0.588
+   },
+   "L3_book_6s_limit": {
+    "n": 39,
+    "wins": 22,
+    "pf1": 1.491,
+    "pf10": 1.478,
+    "mean1_c": 8.08,
+    "z": 1.14,
+    "fill_share": 0.487
+   },
+   "L4_quote_signal_book_price": {
+    "n": 78,
+    "wins": 47,
+    "pf1": 1.076,
+    "pf10": 1.092,
+    "mean1_c": 1.45,
+    "z": 0.29,
+    "fill_share": 0.987
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 32,
+    "wins": 18,
+    "pf1": 1.259,
+    "pf10": 1.238,
+    "mean1_c": 4.94,
+    "z": 0.59,
+    "fill_share": 0.405
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 79,
+    "mean": -2.11,
+    "share_quote_2c_or_more_below": 0.43
+   }
+  },
+  "GEN4_B16": {
+   "id": "GEN4_B16",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "lsz_ask <= 7.779; spread <= 0.01",
+   "L0": {
+    "days": 6,
+    "n": 113,
+    "wins": 77,
+    "pf1": 0.82,
+    "pf10": 0.88
+   },
+   "L1_quotes_common": {
+    "n": 93,
+    "wins": 65,
+    "pf1": 0.843,
+    "pf10": 0.877,
+    "mean1_c": -3.3,
+    "z": -0.71,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 101,
+    "wins": 67,
+    "pf1": 0.697,
+    "pf10": 0.714,
+    "mean1_c": -7.19,
+    "z": -1.55,
+    "dates": 6
+   },
+   "L2_signals": 101,
+   "L1_signals": 93,
+   "L3_book_2s_limit": {
+    "n": 45,
+    "wins": 31,
+    "pf1": 0.89,
+    "pf10": 0.95,
+    "mean1_c": -2.36,
+    "z": -0.34,
+    "fill_share": 0.446
+   },
+   "L3_book_6s_limit": {
+    "n": 43,
+    "wins": 27,
+    "pf1": 0.817,
+    "pf10": 0.876,
+    "mean1_c": -4.15,
+    "z": -0.59,
+    "fill_share": 0.426
+   },
+   "L4_quote_signal_book_price": {
+    "n": 93,
+    "wins": 63,
+    "pf1": 0.813,
+    "pf10": 0.825,
+    "mean1_c": -3.94,
+    "z": -0.85,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 43,
+    "wins": 28,
+    "pf1": 0.93,
+    "pf10": 0.935,
+    "mean1_c": -1.47,
+    "z": -0.21,
+    "fill_share": 0.462
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 93,
+    "mean": -0.44,
+    "share_quote_2c_or_more_below": 0.398
+   }
+  },
+  "GEN4_B17": {
+   "id": "GEN4_B17",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "imb <= 0.4847; zd >= -2.066",
+   "L0": {
+    "days": 6,
+    "n": 102,
+    "wins": 69,
+    "pf1": 0.8,
+    "pf10": 0.81
+   },
+   "L1_quotes_common": {
+    "n": 82,
+    "wins": 53,
+    "pf1": 0.674,
+    "pf10": 0.69,
+    "mean1_c": -7.9,
+    "z": -1.55,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 88,
+    "wins": 58,
+    "pf1": 0.694,
+    "pf10": 0.709,
+    "mean1_c": -7.58,
+    "z": -1.48,
+    "dates": 6
+   },
+   "L2_signals": 88,
+   "L1_signals": 82,
+   "L3_book_2s_limit": {
+    "n": 51,
+    "wins": 36,
+    "pf1": 0.936,
+    "pf10": 0.964,
+    "mean1_c": -1.33,
+    "z": -0.21,
+    "fill_share": 0.58
+   },
+   "L3_book_6s_limit": {
+    "n": 39,
+    "wins": 26,
+    "pf1": 0.882,
+    "pf10": 0.901,
+    "mean1_c": -2.59,
+    "z": -0.34,
+    "fill_share": 0.443
+   },
+   "L4_quote_signal_book_price": {
+    "n": 82,
+    "wins": 53,
+    "pf1": 0.674,
+    "pf10": 0.653,
+    "mean1_c": -7.99,
+    "z": -1.54,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 47,
+    "wins": 31,
+    "pf1": 0.806,
+    "pf10": 0.796,
+    "mean1_c": -4.45,
+    "z": -0.65,
+    "fill_share": 0.573
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 82,
+    "mean": -0.15,
+    "share_quote_2c_or_more_below": 0.317
+   }
+  },
+  "GEN4_B18": {
+   "id": "GEN4_B18",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "dm5 >= 0; lsz_ask <= 7.779; zd >= -0.6765",
+   "L0": {
+    "days": 6,
+    "n": 107,
+    "wins": 71,
+    "pf1": 0.79,
+    "pf10": 0.84
+   },
+   "L1_quotes_common": {
+    "n": 88,
+    "wins": 60,
+    "pf1": 0.772,
+    "pf10": 0.839,
+    "mean1_c": -4.79,
+    "z": -1.03,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 87,
+    "wins": 58,
+    "pf1": 0.709,
+    "pf10": 0.757,
+    "mean1_c": -6.75,
+    "z": -1.37,
+    "dates": 6
+   },
+   "L2_signals": 87,
+   "L1_signals": 88,
+   "L3_book_2s_limit": {
+    "n": 33,
+    "wins": 20,
+    "pf1": 0.64,
+    "pf10": 0.695,
+    "mean1_c": -7.88,
+    "z": -1.09,
+    "fill_share": 0.379
+   },
+   "L3_book_6s_limit": {
+    "n": 33,
+    "wins": 19,
+    "pf1": 0.49,
+    "pf10": 0.522,
+    "mean1_c": -13.56,
+    "z": -1.75,
+    "fill_share": 0.379
+   },
+   "L4_quote_signal_book_price": {
+    "n": 88,
+    "wins": 59,
+    "pf1": 0.756,
+    "pf10": 0.834,
+    "mean1_c": -5.0,
+    "z": -1.1,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 38,
+    "wins": 23,
+    "pf1": 0.716,
+    "pf10": 0.758,
+    "mean1_c": -6.74,
+    "z": -0.9,
+    "fill_share": 0.432
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 88,
+    "mean": -0.08,
+    "share_quote_2c_or_more_below": 0.477
+   }
+  },
+  "GEN4_B19": {
+   "id": "GEN4_B19",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "ask >= 0.36; imb >= -0.6701",
+   "L0": {
+    "days": 6,
+    "n": 105,
+    "wins": 69,
+    "pf1": 0.78,
+    "pf10": 0.8
+   },
+   "L1_quotes_common": {
+    "n": 85,
+    "wins": 55,
+    "pf1": 0.73,
+    "pf10": 0.757,
+    "mean1_c": -6.41,
+    "z": -1.28,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 94,
+    "wins": 61,
+    "pf1": 0.681,
+    "pf10": 0.661,
+    "mean1_c": -7.93,
+    "z": -1.62,
+    "dates": 6
+   },
+   "L2_signals": 94,
+   "L1_signals": 85,
+   "L3_book_2s_limit": {
+    "n": 44,
+    "wins": 31,
+    "pf1": 0.915,
+    "pf10": 0.944,
+    "mean1_c": -1.75,
+    "z": -0.25,
+    "fill_share": 0.468
+   },
+   "L3_book_6s_limit": {
+    "n": 35,
+    "wins": 26,
+    "pf1": 1.311,
+    "pf10": 1.338,
+    "mean1_c": 5.14,
+    "z": 0.71,
+    "fill_share": 0.372
+   },
+   "L4_quote_signal_book_price": {
+    "n": 85,
+    "wins": 55,
+    "pf1": 0.694,
+    "pf10": 0.676,
+    "mean1_c": -7.43,
+    "z": -1.46,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 43,
+    "wins": 28,
+    "pf1": 0.886,
+    "pf10": 0.861,
+    "mean1_c": -2.53,
+    "z": -0.35,
+    "fill_share": 0.506
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 85,
+    "mean": -1.09,
+    "share_quote_2c_or_more_below": 0.376
+   }
+  },
+  "GEN4_B20": {
+   "id": "GEN4_B20",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "ask >= 0.0742; imb >= -0.4281; sp5 <= 0",
+   "L0": {
+    "days": 6,
+    "n": 92,
+    "wins": 59,
+    "pf1": 0.68,
+    "pf10": 0.73
+   },
+   "L1_quotes_common": {
+    "n": 75,
+    "wins": 51,
+    "pf1": 0.715,
+    "pf10": 0.741,
+    "mean1_c": -6.09,
+    "z": -1.22,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 81,
+    "wins": 56,
+    "pf1": 0.752,
+    "pf10": 0.783,
+    "mean1_c": -5.31,
+    "z": -1.07,
+    "dates": 6
+   },
+   "L2_signals": 81,
+   "L1_signals": 75,
+   "L3_book_2s_limit": {
+    "n": 30,
+    "wins": 23,
+    "pf1": 1.504,
+    "pf10": 1.608,
+    "mean1_c": 6.59,
+    "z": 0.95,
+    "fill_share": 0.37
+   },
+   "L3_book_6s_limit": {
+    "n": 30,
+    "wins": 21,
+    "pf1": 0.952,
+    "pf10": 1.009,
+    "mean1_c": -0.89,
+    "z": -0.12,
+    "fill_share": 0.37
+   },
+   "L4_quote_signal_book_price": {
+    "n": 75,
+    "wins": 50,
+    "pf1": 0.701,
+    "pf10": 0.724,
+    "mean1_c": -6.51,
+    "z": -1.28,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 37,
+    "wins": 24,
+    "pf1": 0.761,
+    "pf10": 0.806,
+    "mean1_c": -5.44,
+    "z": -0.72,
+    "fill_share": 0.493
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 75,
+    "mean": -0.2,
+    "share_quote_2c_or_more_below": 0.44
+   }
+  },
+  "GEN4_B21": {
+   "id": "GEN4_B21",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "imb <= 0.902; lsz_bid >= 7.292",
+   "L0": {
+    "days": 6,
+    "n": 68,
+    "wins": 43,
+    "pf1": 0.62,
+    "pf10": 0.66
+   },
+   "L1_quotes_common": {
+    "n": 60,
+    "wins": 37,
+    "pf1": 0.56,
+    "pf10": 0.596,
+    "mean1_c": -11.36,
+    "z": -1.92,
+    "dates": 5
+   },
+   "L2_book_same_poll": {
+    "n": 79,
+    "wins": 52,
+    "pf1": 0.695,
+    "pf10": 0.735,
+    "mean1_c": -7.17,
+    "z": -1.39,
+    "dates": 6
+   },
+   "L2_signals": 79,
+   "L1_signals": 60,
+   "L3_book_2s_limit": {
+    "n": 33,
+    "wins": 24,
+    "pf1": 1.042,
+    "pf10": 1.106,
+    "mean1_c": 0.73,
+    "z": 0.1,
+    "fill_share": 0.418
+   },
+   "L3_book_6s_limit": {
+    "n": 27,
+    "wins": 18,
+    "pf1": 0.901,
+    "pf10": 0.952,
+    "mean1_c": -1.96,
+    "z": -0.23,
+    "fill_share": 0.342
+   },
+   "L4_quote_signal_book_price": {
+    "n": 60,
+    "wins": 37,
+    "pf1": 0.545,
+    "pf10": 0.561,
+    "mean1_c": -11.95,
+    "z": -2.0,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 36,
+    "wins": 23,
+    "pf1": 0.709,
+    "pf10": 0.749,
+    "mean1_c": -6.81,
+    "z": -0.89,
+    "fill_share": 0.6
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 60,
+    "mean": -0.54,
+    "share_quote_2c_or_more_below": 0.317
+   }
+  },
+  "GEN4_B22": {
+   "id": "GEN4_B22",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "lsz_ask <= 8.456; lsz_bid >= 6.195",
+   "L0": {
+    "days": 6,
+    "n": 116,
+    "wins": 77,
+    "pf1": 0.78,
+    "pf10": 0.8
+   },
+   "L1_quotes_common": {
+    "n": 95,
+    "wins": 61,
+    "pf1": 0.663,
+    "pf10": 0.71,
+    "mean1_c": -8.18,
+    "z": -1.74,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 108,
+    "wins": 71,
+    "pf1": 0.676,
+    "pf10": 0.668,
+    "mean1_c": -7.8,
+    "z": -1.75,
+    "dates": 6
+   },
+   "L2_signals": 108,
+   "L1_signals": 95,
+   "L3_book_2s_limit": {
+    "n": 45,
+    "wins": 30,
+    "pf1": 0.841,
+    "pf10": 0.848,
+    "mean1_c": -3.47,
+    "z": -0.51,
+    "fill_share": 0.417
+   },
+   "L3_book_6s_limit": {
+    "n": 37,
+    "wins": 24,
+    "pf1": 0.911,
+    "pf10": 0.912,
+    "mean1_c": -1.84,
+    "z": -0.25,
+    "fill_share": 0.343
+   },
+   "L4_quote_signal_book_price": {
+    "n": 94,
+    "wins": 60,
+    "pf1": 0.616,
+    "pf10": 0.614,
+    "mean1_c": -9.59,
+    "z": -2.01,
+    "fill_share": 0.989
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 42,
+    "wins": 26,
+    "pf1": 0.728,
+    "pf10": 0.735,
+    "mean1_c": -6.6,
+    "z": -0.91,
+    "fill_share": 0.442
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 95,
+    "mean": -1.22,
+    "share_quote_2c_or_more_below": 0.442
+   }
+  },
+  "GEN4_B23": {
+   "id": "GEN4_B23",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "vol <= 0.311",
+   "L0": {
+    "days": 6,
+    "n": 74,
+    "wins": 49,
+    "pf1": 0.78,
+    "pf10": 0.8
+   },
+   "L1_quotes_common": {
+    "n": 64,
+    "wins": 44,
+    "pf1": 0.815,
+    "pf10": 0.831,
+    "mean1_c": -3.91,
+    "z": -0.71,
+    "dates": 5
+   },
+   "L2_book_same_poll": {
+    "n": 66,
+    "wins": 47,
+    "pf1": 0.789,
+    "pf10": 0.798,
+    "mean1_c": -4.42,
+    "z": -0.8,
+    "dates": 5
+   },
+   "L2_signals": 66,
+   "L1_signals": 64,
+   "L3_book_2s_limit": {
+    "n": 30,
+    "wins": 19,
+    "pf1": 0.745,
+    "pf10": 0.768,
+    "mean1_c": -6.0,
+    "z": -0.7,
+    "fill_share": 0.455
+   },
+   "L3_book_6s_limit": {
+    "n": 26,
+    "wins": 19,
+    "pf1": 1.399,
+    "pf10": 1.663,
+    "mean1_c": 6.04,
+    "z": 0.75,
+    "fill_share": 0.394
+   },
+   "L4_quote_signal_book_price": {
+    "n": 64,
+    "wins": 44,
+    "pf1": 0.725,
+    "pf10": 0.709,
+    "mean1_c": -6.04,
+    "z": -1.07,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 28,
+    "wins": 21,
+    "pf1": 1.317,
+    "pf10": 1.346,
+    "mean1_c": 5.07,
+    "z": 0.63,
+    "fill_share": 0.438
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 64,
+    "mean": -2.3,
+    "share_quote_2c_or_more_below": 0.453
+   }
+  },
+  "GEN4_B24": {
+   "id": "GEN4_B24",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "lsz_bid >= 7.292",
+   "L0": {
+    "days": 6,
+    "n": 98,
+    "wins": 63,
+    "pf1": 0.69,
+    "pf10": 0.7
+   },
+   "L1_quotes_common": {
+    "n": 81,
+    "wins": 52,
+    "pf1": 0.646,
+    "pf10": 0.683,
+    "mean1_c": -8.48,
+    "z": -1.7,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 100,
+    "wins": 65,
+    "pf1": 0.681,
+    "pf10": 0.684,
+    "mean1_c": -7.72,
+    "z": -1.66,
+    "dates": 6
+   },
+   "L2_signals": 100,
+   "L1_signals": 81,
+   "L3_book_2s_limit": {
+    "n": 41,
+    "wins": 30,
+    "pf1": 1.069,
+    "pf10": 1.095,
+    "mean1_c": 1.22,
+    "z": 0.18,
+    "fill_share": 0.41
+   },
+   "L3_book_6s_limit": {
+    "n": 32,
+    "wins": 21,
+    "pf1": 0.934,
+    "pf10": 0.955,
+    "mean1_c": -1.28,
+    "z": -0.17,
+    "fill_share": 0.32
+   },
+   "L4_quote_signal_book_price": {
+    "n": 81,
+    "wins": 52,
+    "pf1": 0.632,
+    "pf10": 0.627,
+    "mean1_c": -8.9,
+    "z": -1.77,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 44,
+    "wins": 29,
+    "pf1": 0.833,
+    "pf10": 0.84,
+    "mean1_c": -3.52,
+    "z": -0.53,
+    "fill_share": 0.543
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 81,
+    "mean": -0.46,
+    "share_quote_2c_or_more_below": 0.37
+   }
+  },
+  "GEN4_B25": {
+   "id": "GEN4_B25",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "sp15 >= -0.1949",
+   "L0": {
+    "days": 6,
+    "n": 95,
+    "wins": 67,
+    "pf1": 0.92,
+    "pf10": 0.97
+   },
+   "L1_quotes_common": {
+    "n": 80,
+    "wins": 57,
+    "pf1": 0.955,
+    "pf10": 1.046,
+    "mean1_c": -0.86,
+    "z": -0.18,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 81,
+    "wins": 57,
+    "pf1": 0.876,
+    "pf10": 0.963,
+    "mean1_c": -2.47,
+    "z": -0.51,
+    "dates": 6
+   },
+   "L2_signals": 81,
+   "L1_signals": 80,
+   "L3_book_2s_limit": {
+    "n": 38,
+    "wins": 22,
+    "pf1": 0.724,
+    "pf10": 0.74,
+    "mean1_c": -7.0,
+    "z": -0.9,
+    "fill_share": 0.469
+   },
+   "L3_book_6s_limit": {
+    "n": 27,
+    "wins": 15,
+    "pf1": 0.815,
+    "pf10": 0.821,
+    "mean1_c": -4.76,
+    "z": -0.49,
+    "fill_share": 0.333
+   },
+   "L4_quote_signal_book_price": {
+    "n": 79,
+    "wins": 56,
+    "pf1": 0.886,
+    "pf10": 0.984,
+    "mean1_c": -2.17,
+    "z": -0.45,
+    "fill_share": 0.988
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 36,
+    "wins": 22,
+    "pf1": 0.732,
+    "pf10": 0.838,
+    "mean1_c": -6.25,
+    "z": -0.83,
+    "fill_share": 0.45
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 80,
+    "mean": -0.81,
+    "share_quote_2c_or_more_below": 0.463
+   }
+  },
+  "GEN4_B26": {
+   "id": "GEN4_B26",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "ask >= 0.36; lsz_bid >= 5.465",
+   "L0": {
+    "days": 6,
+    "n": 109,
+    "wins": 70,
+    "pf1": 0.67,
+    "pf10": 0.71
+   },
+   "L1_quotes_common": {
+    "n": 88,
+    "wins": 55,
+    "pf1": 0.59,
+    "pf10": 0.653,
+    "mean1_c": -10.39,
+    "z": -2.13,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 94,
+    "wins": 61,
+    "pf1": 0.654,
+    "pf10": 0.663,
+    "mean1_c": -8.59,
+    "z": -1.77,
+    "dates": 6
+   },
+   "L2_signals": 94,
+   "L1_signals": 88,
+   "L3_book_2s_limit": {
+    "n": 44,
+    "wins": 30,
+    "pf1": 0.825,
+    "pf10": 0.879,
+    "mean1_c": -3.83,
+    "z": -0.55,
+    "fill_share": 0.468
+   },
+   "L3_book_6s_limit": {
+    "n": 39,
+    "wins": 28,
+    "pf1": 1.165,
+    "pf10": 1.227,
+    "mean1_c": 2.93,
+    "z": 0.42,
+    "fill_share": 0.415
+   },
+   "L4_quote_signal_book_price": {
+    "n": 88,
+    "wins": 55,
+    "pf1": 0.549,
+    "pf10": 0.568,
+    "mean1_c": -11.62,
+    "z": -2.38,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 41,
+    "wins": 25,
+    "pf1": 0.66,
+    "pf10": 0.688,
+    "mean1_c": -8.45,
+    "z": -1.17,
+    "fill_share": 0.466
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 88,
+    "mean": -1.3,
+    "share_quote_2c_or_more_below": 0.42
+   }
+  },
+  "GEN4_B27": {
+   "id": "GEN4_B27",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "vol <= 0.311",
+   "L0": {
+    "days": 6,
+    "n": 74,
+    "wins": 49,
+    "pf1": 0.75,
+    "pf10": 0.79
+   },
+   "L1_quotes_common": {
+    "n": 64,
+    "wins": 44,
+    "pf1": 0.774,
+    "pf10": 0.822,
+    "mean1_c": -4.78,
+    "z": -0.87,
+    "dates": 5
+   },
+   "L2_book_same_poll": {
+    "n": 66,
+    "wins": 47,
+    "pf1": 0.751,
+    "pf10": 0.791,
+    "mean1_c": -5.22,
+    "z": -0.95,
+    "dates": 5
+   },
+   "L2_signals": 66,
+   "L1_signals": 64,
+   "L3_book_2s_limit": {
+    "n": 30,
+    "wins": 19,
+    "pf1": 0.715,
+    "pf10": 0.763,
+    "mean1_c": -6.7,
+    "z": -0.79,
+    "fill_share": 0.455
+   },
+   "L3_book_6s_limit": {
+    "n": 26,
+    "wins": 19,
+    "pf1": 1.346,
+    "pf10": 1.651,
+    "mean1_c": 5.23,
+    "z": 0.66,
+    "fill_share": 0.394
+   },
+   "L4_quote_signal_book_price": {
+    "n": 64,
+    "wins": 44,
+    "pf1": 0.69,
+    "pf10": 0.702,
+    "mean1_c": -6.8,
+    "z": -1.22,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 28,
+    "wins": 21,
+    "pf1": 1.265,
+    "pf10": 1.337,
+    "mean1_c": 4.25,
+    "z": 0.54,
+    "fill_share": 0.438
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 64,
+    "mean": -2.3,
+    "share_quote_2c_or_more_below": 0.453
+   }
+  },
+  "GEN4_B28": {
+   "id": "GEN4_B28",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "dm5 <= 0; lsz_ask <= 7.388",
+   "L0": {
+    "days": 6,
+    "n": 93,
+    "wins": 65,
+    "pf1": 0.92,
+    "pf10": 0.97
+   },
+   "L1_quotes_common": {
+    "n": 77,
+    "wins": 53,
+    "pf1": 0.85,
+    "pf10": 0.918,
+    "mean1_c": -3.21,
+    "z": -0.62,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 85,
+    "wins": 53,
+    "pf1": 0.539,
+    "pf10": 0.597,
+    "mean1_c": -12.25,
+    "z": -2.43,
+    "dates": 6
+   },
+   "L2_signals": 85,
+   "L1_signals": 77,
+   "L3_book_2s_limit": {
+    "n": 38,
+    "wins": 24,
+    "pf1": 0.735,
+    "pf10": 0.778,
+    "mean1_c": -6.11,
+    "z": -0.83,
+    "fill_share": 0.447
+   },
+   "L3_book_6s_limit": {
+    "n": 39,
+    "wins": 22,
+    "pf1": 0.662,
+    "pf10": 0.672,
+    "mean1_c": -8.39,
+    "z": -1.17,
+    "fill_share": 0.459
+   },
+   "L4_quote_signal_book_price": {
+    "n": 76,
+    "wins": 53,
+    "pf1": 0.867,
+    "pf10": 0.909,
+    "mean1_c": -2.75,
+    "z": -0.53,
+    "fill_share": 0.987
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 33,
+    "wins": 22,
+    "pf1": 0.979,
+    "pf10": 1.066,
+    "mean1_c": -0.45,
+    "z": -0.05,
+    "fill_share": 0.429
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 77,
+    "mean": -0.52,
+    "share_quote_2c_or_more_below": 0.403
+   }
+  },
+  "GEN4_B29": {
+   "id": "GEN4_B29",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "imb >= -0.1233",
+   "L0": {
+    "days": 6,
+    "n": 116,
+    "wins": 82,
+    "pf1": 0.91,
+    "pf10": 0.97
+   },
+   "L1_quotes_common": {
+    "n": 97,
+    "wins": 72,
+    "pf1": 1.025,
+    "pf10": 1.071,
+    "mean1_c": 0.44,
+    "z": 0.1,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 105,
+    "wins": 69,
+    "pf1": 0.681,
+    "pf10": 0.72,
+    "mean1_c": -7.29,
+    "z": -1.67,
+    "dates": 6
+   },
+   "L2_signals": 105,
+   "L1_signals": 97,
+   "L3_book_2s_limit": {
+    "n": 46,
+    "wins": 36,
+    "pf1": 1.594,
+    "pf10": 1.657,
+    "mean1_c": 7.72,
+    "z": 1.37,
+    "fill_share": 0.438
+   },
+   "L3_book_6s_limit": {
+    "n": 41,
+    "wins": 29,
+    "pf1": 1.356,
+    "pf10": 1.433,
+    "mean1_c": 5.29,
+    "z": 0.86,
+    "fill_share": 0.39
+   },
+   "L4_quote_signal_book_price": {
+    "n": 96,
+    "wins": 69,
+    "pf1": 0.957,
+    "pf10": 0.974,
+    "mean1_c": -0.77,
+    "z": -0.18,
+    "fill_share": 0.99
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 45,
+    "wins": 31,
+    "pf1": 1.002,
+    "pf10": 1.047,
+    "mean1_c": 0.04,
+    "z": 0.01,
+    "fill_share": 0.464
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 97,
+    "mean": -0.91,
+    "share_quote_2c_or_more_below": 0.423
+   }
+  },
+  "GEN4_B30": {
+   "id": "GEN4_B30",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "lsz_ask >= 7.388; sp15 >= -0.9017; sp30 <= 2.256",
+   "L0": {
+    "days": 6,
+    "n": 90,
+    "wins": 62,
+    "pf1": 0.76,
+    "pf10": 0.81
+   },
+   "L1_quotes_common": {
+    "n": 69,
+    "wins": 47,
+    "pf1": 0.723,
+    "pf10": 0.77,
+    "mean1_c": -5.93,
+    "z": -1.14,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 86,
+    "wins": 63,
+    "pf1": 0.899,
+    "pf10": 0.956,
+    "mean1_c": -1.93,
+    "z": -0.42,
+    "dates": 6
+   },
+   "L2_signals": 86,
+   "L1_signals": 69,
+   "L3_book_2s_limit": {
+    "n": 50,
+    "wins": 36,
+    "pf1": 0.981,
+    "pf10": 1.038,
+    "mean1_c": -0.35,
+    "z": -0.06,
+    "fill_share": 0.581
+   },
+   "L3_book_6s_limit": {
+    "n": 40,
+    "wins": 29,
+    "pf1": 1.281,
+    "pf10": 1.307,
+    "mean1_c": 4.78,
+    "z": 0.7,
+    "fill_share": 0.465
+   },
+   "L4_quote_signal_book_price": {
+    "n": 67,
+    "wins": 45,
+    "pf1": 0.691,
+    "pf10": 0.691,
+    "mean1_c": -7.03,
+    "z": -1.26,
+    "fill_share": 0.971
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 35,
+    "wins": 22,
+    "pf1": 0.771,
+    "pf10": 0.764,
+    "mean1_c": -5.52,
+    "z": -0.68,
+    "fill_share": 0.507
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 69,
+    "mean": -0.49,
+    "share_quote_2c_or_more_below": 0.348
+   }
+  },
+  "GEN4_B31": {
+   "id": "GEN4_B31",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "lsz_bid <= 8.422",
+   "L0": {
+    "days": 6,
+    "n": 126,
+    "wins": 89,
+    "pf1": 0.89,
+    "pf10": 0.94
+   },
+   "L1_quotes_common": {
+    "n": 101,
+    "wins": 68,
+    "pf1": 0.742,
+    "pf10": 0.782,
+    "mean1_c": -5.9,
+    "z": -1.29,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 110,
+    "wins": 74,
+    "pf1": 0.657,
+    "pf10": 0.683,
+    "mean1_c": -8.17,
+    "z": -1.85,
+    "dates": 6
+   },
+   "L2_signals": 110,
+   "L1_signals": 101,
+   "L3_book_2s_limit": {
+    "n": 60,
+    "wins": 39,
+    "pf1": 0.678,
+    "pf10": 0.718,
+    "mean1_c": -7.79,
+    "z": -1.29,
+    "fill_share": 0.545
+   },
+   "L3_book_6s_limit": {
+    "n": 50,
+    "wins": 34,
+    "pf1": 0.957,
+    "pf10": 1.078,
+    "mean1_c": -0.86,
+    "z": -0.14,
+    "fill_share": 0.455
+   },
+   "L4_quote_signal_book_price": {
+    "n": 101,
+    "wins": 68,
+    "pf1": 0.707,
+    "pf10": 0.706,
+    "mean1_c": -6.73,
+    "z": -1.48,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 51,
+    "wins": 35,
+    "pf1": 0.903,
+    "pf10": 0.917,
+    "mean1_c": -2.05,
+    "z": -0.32,
+    "fill_share": 0.505
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 101,
+    "mean": -0.98,
+    "share_quote_2c_or_more_below": 0.386
+   }
+  },
+  "GEN4_B32": {
+   "id": "GEN4_B32",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 30,
+   "conds": "sp15 >= -0.459",
+   "L0": {
+    "days": 6,
+    "n": 98,
+    "wins": 70,
+    "pf1": 1.01,
+    "pf10": 1.08
+   },
+   "L1_quotes_common": {
+    "n": 81,
+    "wins": 60,
+    "pf1": 1.033,
+    "pf10": 1.145,
+    "mean1_c": 0.56,
+    "z": 0.12,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 84,
+    "wins": 62,
+    "pf1": 0.967,
+    "pf10": 1.079,
+    "mean1_c": -0.56,
+    "z": -0.13,
+    "dates": 6
+   },
+   "L2_signals": 84,
+   "L1_signals": 81,
+   "L3_book_2s_limit": {
+    "n": 39,
+    "wins": 26,
+    "pf1": 0.791,
+    "pf10": 0.825,
+    "mean1_c": -4.32,
+    "z": -0.63,
+    "fill_share": 0.464
+   },
+   "L3_book_6s_limit": {
+    "n": 26,
+    "wins": 15,
+    "pf1": 0.802,
+    "pf10": 0.801,
+    "mean1_c": -4.45,
+    "z": -0.5,
+    "fill_share": 0.31
+   },
+   "L4_quote_signal_book_price": {
+    "n": 79,
+    "wins": 59,
+    "pf1": 1.096,
+    "pf10": 1.238,
+    "mean1_c": 1.49,
+    "z": 0.34,
+    "fill_share": 0.975
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 35,
+    "wins": 22,
+    "pf1": 0.887,
+    "pf10": 1.039,
+    "mean1_c": -2.23,
+    "z": -0.31,
+    "fill_share": 0.432
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 81,
+    "mean": -0.05,
+    "share_quote_2c_or_more_below": 0.481
+   }
+  },
+  "GEN4_B33": {
+   "id": "GEN4_B33",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "spread >= 0.001; vol <= 0.311",
+   "L0": {
+    "days": 6,
+    "n": 74,
+    "wins": 48,
+    "pf1": 0.74,
+    "pf10": 0.79
+   },
+   "L1_quotes_common": {
+    "n": 64,
+    "wins": 43,
+    "pf1": 0.745,
+    "pf10": 0.795,
+    "mean1_c": -5.41,
+    "z": -1.0,
+    "dates": 5
+   },
+   "L2_book_same_poll": {
+    "n": 66,
+    "wins": 47,
+    "pf1": 0.737,
+    "pf10": 0.779,
+    "mean1_c": -5.54,
+    "z": -1.01,
+    "dates": 5
+   },
+   "L2_signals": 66,
+   "L1_signals": 64,
+   "L3_book_2s_limit": {
+    "n": 30,
+    "wins": 19,
+    "pf1": 0.694,
+    "pf10": 0.747,
+    "mean1_c": -7.22,
+    "z": -0.86,
+    "fill_share": 0.455
+   },
+   "L3_book_6s_limit": {
+    "n": 26,
+    "wins": 19,
+    "pf1": 1.31,
+    "pf10": 1.619,
+    "mean1_c": 4.72,
+    "z": 0.6,
+    "fill_share": 0.394
+   },
+   "L4_quote_signal_book_price": {
+    "n": 64,
+    "wins": 44,
+    "pf1": 0.676,
+    "pf10": 0.69,
+    "mean1_c": -7.16,
+    "z": -1.28,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 28,
+    "wins": 21,
+    "pf1": 1.231,
+    "pf10": 1.306,
+    "mean1_c": 3.71,
+    "z": 0.47,
+    "fill_share": 0.438
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 64,
+    "mean": -2.3,
+    "share_quote_2c_or_more_below": 0.453
+   }
+  },
+  "GEN4_B34": {
+   "id": "GEN4_B34",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "lsz_bid >= 6.824; spread <= 0.01",
+   "L0": {
+    "days": 6,
+    "n": 115,
+    "wins": 74,
+    "pf1": 0.7,
+    "pf10": 0.71
+   },
+   "L1_quotes_common": {
+    "n": 94,
+    "wins": 59,
+    "pf1": 0.617,
+    "pf10": 0.658,
+    "mean1_c": -9.54,
+    "z": -2.04,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 95,
+    "wins": 62,
+    "pf1": 0.717,
+    "pf10": 0.713,
+    "mean1_c": -6.88,
+    "z": -1.42,
+    "dates": 6
+   },
+   "L2_signals": 95,
+   "L1_signals": 94,
+   "L3_book_2s_limit": {
+    "n": 40,
+    "wins": 31,
+    "pf1": 1.4,
+    "pf10": 1.405,
+    "mean1_c": 6.05,
+    "z": 0.93,
+    "fill_share": 0.421
+   },
+   "L3_book_6s_limit": {
+    "n": 32,
+    "wins": 21,
+    "pf1": 0.914,
+    "pf10": 0.931,
+    "mean1_c": -1.84,
+    "z": -0.23,
+    "fill_share": 0.337
+   },
+   "L4_quote_signal_book_price": {
+    "n": 93,
+    "wins": 59,
+    "pf1": 0.617,
+    "pf10": 0.614,
+    "mean1_c": -9.44,
+    "z": -2.01,
+    "fill_share": 0.989
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 47,
+    "wins": 30,
+    "pf1": 0.751,
+    "pf10": 0.757,
+    "mean1_c": -5.62,
+    "z": -0.87,
+    "fill_share": 0.5
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 94,
+    "mean": -0.75,
+    "share_quote_2c_or_more_below": 0.372
+   }
+  },
+  "GEN4_B35": {
+   "id": "GEN4_B35",
+   "family": "spot momentum toward the side",
+   "side": "DOG",
+   "exit": 0,
+   "conds": "dm5 >= 0; sp15 >= 1.584; spread <= 0.01",
+   "L0": {
+    "days": 6,
+    "n": 95,
+    "wins": 25,
+    "pf1": 1.68,
+    "pf10": 1.75
+   },
+   "L1_quotes_common": {
+    "n": 79,
+    "wins": 24,
+    "pf1": 2.088,
+    "pf10": 2.137,
+    "mean1_c": 11.67,
+    "z": 2.39,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 65,
+    "wins": 14,
+    "pf1": 1.141,
+    "pf10": 1.185,
+    "mean1_c": 1.87,
+    "z": 0.39,
+    "dates": 5
+   },
+   "L2_signals": 65,
+   "L1_signals": 79,
+   "L3_book_2s_limit": {
+    "n": 36,
+    "wins": 7,
+    "pf1": 1.545,
+    "pf10": 1.616,
+    "mean1_c": 5.42,
+    "z": 0.85,
+    "fill_share": 0.554
+   },
+   "L3_book_6s_limit": {
+    "n": 40,
+    "wins": 7,
+    "pf1": 1.349,
+    "pf10": 1.442,
+    "mean1_c": 3.39,
+    "z": 0.61,
+    "fill_share": 0.615
+   },
+   "L4_quote_signal_book_price": {
+    "n": 76,
+    "wins": 22,
+    "pf1": 1.383,
+    "pf10": 1.44,
+    "mean1_c": 4.63,
+    "z": 1.07,
+    "fill_share": 0.962
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 25,
+    "wins": 1,
+    "pf1": 0.248,
+    "pf10": 0.261,
+    "mean1_c": -10.9,
+    "z": -2.3,
+    "fill_share": 0.316
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 79,
+    "mean": -6.1,
+    "share_quote_2c_or_more_below": 0.519
+   }
+  },
+  "GEN4_B36": {
+   "id": "GEN4_B36",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "sp15 >= -0.459",
+   "L0": {
+    "days": 6,
+    "n": 98,
+    "wins": 71,
+    "pf1": 1.02,
+    "pf10": 1.08
+   },
+   "L1_quotes_common": {
+    "n": 81,
+    "wins": 59,
+    "pf1": 1.053,
+    "pf10": 1.164,
+    "mean1_c": 0.92,
+    "z": 0.2,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 84,
+    "wins": 61,
+    "pf1": 0.951,
+    "pf10": 1.055,
+    "mean1_c": -0.87,
+    "z": -0.19,
+    "dates": 6
+   },
+   "L2_signals": 84,
+   "L1_signals": 81,
+   "L3_book_2s_limit": {
+    "n": 39,
+    "wins": 24,
+    "pf1": 0.746,
+    "pf10": 0.796,
+    "mean1_c": -5.58,
+    "z": -0.81,
+    "fill_share": 0.464
+   },
+   "L3_book_6s_limit": {
+    "n": 26,
+    "wins": 15,
+    "pf1": 0.796,
+    "pf10": 0.792,
+    "mean1_c": -4.87,
+    "z": -0.53,
+    "fill_share": 0.31
+   },
+   "L4_quote_signal_book_price": {
+    "n": 79,
+    "wins": 58,
+    "pf1": 1.068,
+    "pf10": 1.199,
+    "mean1_c": 1.1,
+    "z": 0.24,
+    "fill_share": 0.975
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 35,
+    "wins": 22,
+    "pf1": 0.89,
+    "pf10": 1.034,
+    "mean1_c": -2.28,
+    "z": -0.31,
+    "fill_share": 0.432
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 81,
+    "mean": -0.05,
+    "share_quote_2c_or_more_below": 0.481
+   }
+  },
+  "GEN4_B37": {
+   "id": "GEN4_B37",
+   "family": "spot momentum toward the side",
+   "side": "NO",
+   "exit": 30,
+   "conds": "dm30 <= 0.17; sp5 >= 0.353; spread >= 0.001",
+   "L0": {
+    "days": 6,
+    "n": 103,
+    "wins": 43,
+    "pf1": 1.29,
+    "pf10": 1.39
+   },
+   "L1_quotes_common": {
+    "n": 83,
+    "wins": 40,
+    "pf1": 1.871,
+    "pf10": 1.959,
+    "mean1_c": 8.97,
+    "z": 2.22,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 74,
+    "wins": 28,
+    "pf1": 1.075,
+    "pf10": 1.164,
+    "mean1_c": 0.95,
+    "z": 0.23,
+    "dates": 6
+   },
+   "L2_signals": 74,
+   "L1_signals": 83,
+   "L3_book_2s_limit": {
+    "n": 47,
+    "wins": 14,
+    "pf1": 1.311,
+    "pf10": 1.383,
+    "mean1_c": 3.22,
+    "z": 0.64,
+    "fill_share": 0.635
+   },
+   "L3_book_6s_limit": {
+    "n": 45,
+    "wins": 12,
+    "pf1": 1.311,
+    "pf10": 1.336,
+    "mean1_c": 3.15,
+    "z": 0.61,
+    "fill_share": 0.608
+   },
+   "L4_quote_signal_book_price": {
+    "n": 79,
+    "wins": 38,
+    "pf1": 1.315,
+    "pf10": 1.429,
+    "mean1_c": 3.6,
+    "z": 0.92,
+    "fill_share": 0.952
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 28,
+    "wins": 8,
+    "pf1": 1.47,
+    "pf10": 1.605,
+    "mean1_c": 5.39,
+    "z": 0.72,
+    "fill_share": 0.337
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 83,
+    "mean": -5.73,
+    "share_quote_2c_or_more_below": 0.506
+   }
+  },
+  "GEN4_B38": {
+   "id": "GEN4_B38",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "sp5 <= 0.0315",
+   "L0": {
+    "days": 6,
+    "n": 121,
+    "wins": 79,
+    "pf1": 0.69,
+    "pf10": 0.71
+   },
+   "L1_quotes_common": {
+    "n": 100,
+    "wins": 64,
+    "pf1": 0.625,
+    "pf10": 0.632,
+    "mean1_c": -9.54,
+    "z": -2.03,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 104,
+    "wins": 69,
+    "pf1": 0.641,
+    "pf10": 0.637,
+    "mean1_c": -8.85,
+    "z": -1.92,
+    "dates": 6
+   },
+   "L2_signals": 104,
+   "L1_signals": 100,
+   "L3_book_2s_limit": {
+    "n": 51,
+    "wins": 37,
+    "pf1": 1.066,
+    "pf10": 1.094,
+    "mean1_c": 1.18,
+    "z": 0.2,
+    "fill_share": 0.49
+   },
+   "L3_book_6s_limit": {
+    "n": 44,
+    "wins": 27,
+    "pf1": 0.844,
+    "pf10": 0.861,
+    "mean1_c": -3.57,
+    "z": -0.51,
+    "fill_share": 0.423
+   },
+   "L4_quote_signal_book_price": {
+    "n": 99,
+    "wins": 64,
+    "pf1": 0.629,
+    "pf10": 0.628,
+    "mean1_c": -9.22,
+    "z": -1.97,
+    "fill_share": 0.99
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 49,
+    "wins": 31,
+    "pf1": 0.731,
+    "pf10": 0.721,
+    "mean1_c": -6.67,
+    "z": -0.97,
+    "fill_share": 0.49
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 100,
+    "mean": -0.07,
+    "share_quote_2c_or_more_below": 0.39
+   }
+  },
+  "GEN4_B39": {
+   "id": "GEN4_B39",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "sp15 >= -0.01237",
+   "L0": {
+    "days": 6,
+    "n": 118,
+    "wins": 79,
+    "pf1": 0.82,
+    "pf10": 0.87
+   },
+   "L1_quotes_common": {
+    "n": 98,
+    "wins": 66,
+    "pf1": 0.818,
+    "pf10": 0.885,
+    "mean1_c": -3.93,
+    "z": -0.87,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 98,
+    "wins": 70,
+    "pf1": 0.906,
+    "pf10": 0.943,
+    "mean1_c": -1.94,
+    "z": -0.42,
+    "dates": 6
+   },
+   "L2_signals": 98,
+   "L1_signals": 98,
+   "L3_book_2s_limit": {
+    "n": 54,
+    "wins": 36,
+    "pf1": 0.875,
+    "pf10": 0.894,
+    "mean1_c": -2.9,
+    "z": -0.43,
+    "fill_share": 0.551
+   },
+   "L3_book_6s_limit": {
+    "n": 37,
+    "wins": 30,
+    "pf1": 2.57,
+    "pf10": 2.679,
+    "mean1_c": 16.88,
+    "z": 2.63,
+    "fill_share": 0.378
+   },
+   "L4_quote_signal_book_price": {
+    "n": 98,
+    "wins": 66,
+    "pf1": 0.736,
+    "pf10": 0.767,
+    "mean1_c": -5.97,
+    "z": -1.29,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 41,
+    "wins": 30,
+    "pf1": 1.371,
+    "pf10": 1.394,
+    "mean1_c": 6.14,
+    "z": 0.92,
+    "fill_share": 0.418
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 98,
+    "mean": -2.11,
+    "share_quote_2c_or_more_below": 0.48
+   }
+  },
+  "GEN4_B40": {
+   "id": "GEN4_B40",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "imb >= -0.9734",
+   "L0": {
+    "days": 6,
+    "n": 128,
+    "wins": 85,
+    "pf1": 0.74,
+    "pf10": 0.8
+   },
+   "L1_quotes_common": {
+    "n": 104,
+    "wins": 68,
+    "pf1": 0.691,
+    "pf10": 0.721,
+    "mean1_c": -7.07,
+    "z": -1.61,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 109,
+    "wins": 73,
+    "pf1": 0.688,
+    "pf10": 0.706,
+    "mean1_c": -7.13,
+    "z": -1.63,
+    "dates": 6
+   },
+   "L2_signals": 109,
+   "L1_signals": 104,
+   "L3_book_2s_limit": {
+    "n": 55,
+    "wins": 39,
+    "pf1": 1.03,
+    "pf10": 1.101,
+    "mean1_c": 0.53,
+    "z": 0.09,
+    "fill_share": 0.505
+   },
+   "L3_book_6s_limit": {
+    "n": 46,
+    "wins": 33,
+    "pf1": 1.223,
+    "pf10": 1.295,
+    "mean1_c": 3.65,
+    "z": 0.6,
+    "fill_share": 0.422
+   },
+   "L4_quote_signal_book_price": {
+    "n": 104,
+    "wins": 67,
+    "pf1": 0.642,
+    "pf10": 0.642,
+    "mean1_c": -8.39,
+    "z": -1.91,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 48,
+    "wins": 30,
+    "pf1": 0.768,
+    "pf10": 0.775,
+    "mean1_c": -5.34,
+    "z": -0.8,
+    "fill_share": 0.462
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 104,
+    "mean": -0.93,
+    "share_quote_2c_or_more_below": 0.423
+   }
+  },
+  "GEN4_B41": {
+   "id": "GEN4_B41",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "lsz_bid >= 7.733; spread >= 0.01",
+   "L0": {
+    "days": 6,
+    "n": 80,
+    "wins": 53,
+    "pf1": 0.77,
+    "pf10": 0.78
+   },
+   "L1_quotes_common": {
+    "n": 65,
+    "wins": 45,
+    "pf1": 0.868,
+    "pf10": 0.97,
+    "mean1_c": -2.71,
+    "z": -0.49,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 92,
+    "wins": 63,
+    "pf1": 0.793,
+    "pf10": 0.785,
+    "mean1_c": -4.57,
+    "z": -0.96,
+    "dates": 6
+   },
+   "L2_signals": 92,
+   "L1_signals": 65,
+   "L3_book_2s_limit": {
+    "n": 35,
+    "wins": 24,
+    "pf1": 0.916,
+    "pf10": 0.896,
+    "mean1_c": -1.66,
+    "z": -0.22,
+    "fill_share": 0.38
+   },
+   "L3_book_6s_limit": {
+    "n": 32,
+    "wins": 21,
+    "pf1": 0.994,
+    "pf10": 1.013,
+    "mean1_c": -0.13,
+    "z": -0.02,
+    "fill_share": 0.348
+   },
+   "L4_quote_signal_book_price": {
+    "n": 65,
+    "wins": 45,
+    "pf1": 0.846,
+    "pf10": 0.843,
+    "mean1_c": -3.19,
+    "z": -0.58,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 32,
+    "wins": 22,
+    "pf1": 1.046,
+    "pf10": 1.064,
+    "mean1_c": 0.87,
+    "z": 0.11,
+    "fill_share": 0.492
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 65,
+    "mean": -0.52,
+    "share_quote_2c_or_more_below": 0.354
+   }
+  },
+  "GEN4_B42": {
+   "id": "GEN4_B42",
+   "family": "spot momentum toward the side",
+   "side": "DOG",
+   "exit": 5,
+   "conds": "dm5 >= -0.07; imb >= -0.9734; sp15 >= 1.584",
+   "L0": {
+    "days": 6,
+    "n": 98,
+    "wins": 27,
+    "pf1": 1.73,
+    "pf10": 1.83
+   },
+   "L1_quotes_common": {
+    "n": 81,
+    "wins": 25,
+    "pf1": 1.982,
+    "pf10": 2.062,
+    "mean1_c": 10.82,
+    "z": 2.28,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 76,
+    "wins": 17,
+    "pf1": 1.07,
+    "pf10": 1.119,
+    "mean1_c": 0.98,
+    "z": 0.22,
+    "dates": 6
+   },
+   "L2_signals": 76,
+   "L1_signals": 81,
+   "L3_book_2s_limit": {
+    "n": 42,
+    "wins": 7,
+    "pf1": 1.011,
+    "pf10": 1.067,
+    "mean1_c": 0.14,
+    "z": 0.03,
+    "fill_share": 0.553
+   },
+   "L3_book_6s_limit": {
+    "n": 45,
+    "wins": 9,
+    "pf1": 1.321,
+    "pf10": 1.395,
+    "mean1_c": 3.42,
+    "z": 0.64,
+    "fill_share": 0.592
+   },
+   "L4_quote_signal_book_price": {
+    "n": 78,
+    "wins": 23,
+    "pf1": 1.323,
+    "pf10": 1.394,
+    "mean1_c": 3.96,
+    "z": 0.94,
+    "fill_share": 0.963
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 27,
+    "wins": 2,
+    "pf1": 0.397,
+    "pf10": 0.415,
+    "mean1_c": -9.73,
+    "z": -1.67,
+    "fill_share": 0.333
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 81,
+    "mean": -6.31,
+    "share_quote_2c_or_more_below": 0.469
+   }
+  },
+  "GEN4_B43": {
+   "id": "GEN4_B43",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "lsz_ask <= 8.072",
+   "L0": {
+    "days": 6,
+    "n": 119,
+    "wins": 79,
+    "pf1": 0.76,
+    "pf10": 0.81
+   },
+   "L1_quotes_common": {
+    "n": 98,
+    "wins": 63,
+    "pf1": 0.682,
+    "pf10": 0.733,
+    "mean1_c": -7.73,
+    "z": -1.65,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 110,
+    "wins": 75,
+    "pf1": 0.707,
+    "pf10": 0.723,
+    "mean1_c": -6.79,
+    "z": -1.54,
+    "dates": 6
+   },
+   "L2_signals": 110,
+   "L1_signals": 98,
+   "L3_book_2s_limit": {
+    "n": 53,
+    "wins": 35,
+    "pf1": 0.81,
+    "pf10": 0.861,
+    "mean1_c": -4.28,
+    "z": -0.67,
+    "fill_share": 0.482
+   },
+   "L3_book_6s_limit": {
+    "n": 48,
+    "wins": 31,
+    "pf1": 0.903,
+    "pf10": 0.97,
+    "mean1_c": -2.06,
+    "z": -0.31,
+    "fill_share": 0.436
+   },
+   "L4_quote_signal_book_price": {
+    "n": 98,
+    "wins": 63,
+    "pf1": 0.654,
+    "pf10": 0.662,
+    "mean1_c": -8.42,
+    "z": -1.8,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 44,
+    "wins": 27,
+    "pf1": 0.777,
+    "pf10": 0.779,
+    "mean1_c": -5.45,
+    "z": -0.75,
+    "fill_share": 0.449
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 98,
+    "mean": -0.9,
+    "share_quote_2c_or_more_below": 0.429
+   }
+  },
+  "GEN4_B44": {
+   "id": "GEN4_B44",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "sp5 >= 0.353",
+   "L0": {
+    "days": 6,
+    "n": 118,
+    "wins": 85,
+    "pf1": 1.07,
+    "pf10": 1.09
+   },
+   "L1_quotes_common": {
+    "n": 97,
+    "wins": 66,
+    "pf1": 0.863,
+    "pf10": 0.913,
+    "mean1_c": -2.87,
+    "z": -0.63,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 82,
+    "wins": 55,
+    "pf1": 0.785,
+    "pf10": 0.793,
+    "mean1_c": -4.88,
+    "z": -0.95,
+    "dates": 6
+   },
+   "L2_signals": 82,
+   "L1_signals": 97,
+   "L3_book_2s_limit": {
+    "n": 41,
+    "wins": 27,
+    "pf1": 0.91,
+    "pf10": 0.898,
+    "mean1_c": -2.02,
+    "z": -0.27,
+    "fill_share": 0.5
+   },
+   "L3_book_6s_limit": {
+    "n": 31,
+    "wins": 20,
+    "pf1": 1.106,
+    "pf10": 1.186,
+    "mean1_c": 2.06,
+    "z": 0.25,
+    "fill_share": 0.378
+   },
+   "L4_quote_signal_book_price": {
+    "n": 96,
+    "wins": 66,
+    "pf1": 0.734,
+    "pf10": 0.734,
+    "mean1_c": -5.54,
+    "z": -1.25,
+    "fill_share": 0.99
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 29,
+    "wins": 16,
+    "pf1": 0.775,
+    "pf10": 0.732,
+    "mean1_c": -5.45,
+    "z": -0.63,
+    "fill_share": 0.299
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 97,
+    "mean": -3.64,
+    "share_quote_2c_or_more_below": 0.629
+   }
+  },
+  "GEN4_B45": {
+   "id": "GEN4_B45",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 15,
+   "conds": "ask >= 0.0742; lsz_bid >= 6.824",
+   "L0": {
+    "days": 6,
+    "n": 95,
+    "wins": 61,
+    "pf1": 0.7,
+    "pf10": 0.74
+   },
+   "L1_quotes_common": {
+    "n": 78,
+    "wins": 50,
+    "pf1": 0.636,
+    "pf10": 0.683,
+    "mean1_c": -8.41,
+    "z": -1.71,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 90,
+    "wins": 58,
+    "pf1": 0.674,
+    "pf10": 0.691,
+    "mean1_c": -7.74,
+    "z": -1.6,
+    "dates": 6
+   },
+   "L2_signals": 90,
+   "L1_signals": 78,
+   "L3_book_2s_limit": {
+    "n": 37,
+    "wins": 27,
+    "pf1": 1.122,
+    "pf10": 1.191,
+    "mean1_c": 2.01,
+    "z": 0.3,
+    "fill_share": 0.411
+   },
+   "L3_book_6s_limit": {
+    "n": 34,
+    "wins": 25,
+    "pf1": 1.318,
+    "pf10": 1.395,
+    "mean1_c": 4.85,
+    "z": 0.71,
+    "fill_share": 0.378
+   },
+   "L4_quote_signal_book_price": {
+    "n": 78,
+    "wins": 48,
+    "pf1": 0.574,
+    "pf10": 0.592,
+    "mean1_c": -10.49,
+    "z": -2.08,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 36,
+    "wins": 22,
+    "pf1": 0.71,
+    "pf10": 0.736,
+    "mean1_c": -6.58,
+    "z": -0.9,
+    "fill_share": 0.462
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 78,
+    "mean": -1.43,
+    "share_quote_2c_or_more_below": 0.41
+   }
+  },
+  "GEN4_B46": {
+   "id": "GEN4_B46",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "bid >= 0.11; lsz_ask <= 7.388",
+   "L0": {
+    "days": 6,
+    "n": 107,
+    "wins": 75,
+    "pf1": 0.94,
+    "pf10": 0.96
+   },
+   "L1_quotes_common": {
+    "n": 90,
+    "wins": 64,
+    "pf1": 0.971,
+    "pf10": 1.019,
+    "mean1_c": -0.59,
+    "z": -0.12,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 105,
+    "wins": 70,
+    "pf1": 0.705,
+    "pf10": 0.695,
+    "mean1_c": -7.08,
+    "z": -1.54,
+    "dates": 6
+   },
+   "L2_signals": 105,
+   "L1_signals": 90,
+   "L3_book_2s_limit": {
+    "n": 46,
+    "wins": 31,
+    "pf1": 0.952,
+    "pf10": 0.959,
+    "mean1_c": -1.02,
+    "z": -0.15,
+    "fill_share": 0.438
+   },
+   "L3_book_6s_limit": {
+    "n": 43,
+    "wins": 28,
+    "pf1": 1.002,
+    "pf10": 1.05,
+    "mean1_c": 0.05,
+    "z": 0.01,
+    "fill_share": 0.41
+   },
+   "L4_quote_signal_book_price": {
+    "n": 89,
+    "wins": 63,
+    "pf1": 0.915,
+    "pf10": 0.906,
+    "mean1_c": -1.7,
+    "z": -0.36,
+    "fill_share": 0.989
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 41,
+    "wins": 28,
+    "pf1": 0.989,
+    "pf10": 0.994,
+    "mean1_c": -0.22,
+    "z": -0.03,
+    "fill_share": 0.456
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 90,
+    "mean": -1.0,
+    "share_quote_2c_or_more_below": 0.422
+   }
+  },
+  "GEN4_B47": {
+   "id": "GEN4_B47",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "lsz_ask <= 8.072",
+   "L0": {
+    "days": 6,
+    "n": 117,
+    "wins": 78,
+    "pf1": 0.81,
+    "pf10": 0.83
+   },
+   "L1_quotes_common": {
+    "n": 96,
+    "wins": 62,
+    "pf1": 0.728,
+    "pf10": 0.755,
+    "mean1_c": -6.52,
+    "z": -1.37,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 108,
+    "wins": 73,
+    "pf1": 0.726,
+    "pf10": 0.714,
+    "mean1_c": -6.48,
+    "z": -1.42,
+    "dates": 6
+   },
+   "L2_signals": 108,
+   "L1_signals": 96,
+   "L3_book_2s_limit": {
+    "n": 53,
+    "wins": 35,
+    "pf1": 0.837,
+    "pf10": 0.861,
+    "mean1_c": -3.68,
+    "z": -0.57,
+    "fill_share": 0.491
+   },
+   "L3_book_6s_limit": {
+    "n": 48,
+    "wins": 31,
+    "pf1": 0.938,
+    "pf10": 0.976,
+    "mean1_c": -1.31,
+    "z": -0.2,
+    "fill_share": 0.444
+   },
+   "L4_quote_signal_book_price": {
+    "n": 96,
+    "wins": 62,
+    "pf1": 0.693,
+    "pf10": 0.676,
+    "mean1_c": -7.48,
+    "z": -1.56,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 43,
+    "wins": 27,
+    "pf1": 0.85,
+    "pf10": 0.828,
+    "mean1_c": -3.56,
+    "z": -0.48,
+    "fill_share": 0.448
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 96,
+    "mean": -1.07,
+    "share_quote_2c_or_more_below": 0.427
+   }
+  },
+  "GEN4_B48": {
+   "id": "GEN4_B48",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "dm15 >= -0.09; sp30 >= -2.625",
+   "L0": {
+    "days": 6,
+    "n": 97,
+    "wins": 68,
+    "pf1": 0.81,
+    "pf10": 0.86
+   },
+   "L1_quotes_common": {
+    "n": 82,
+    "wins": 57,
+    "pf1": 0.789,
+    "pf10": 0.854,
+    "mean1_c": -4.52,
+    "z": -0.91,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 83,
+    "wins": 59,
+    "pf1": 0.821,
+    "pf10": 0.873,
+    "mean1_c": -3.53,
+    "z": -0.75,
+    "dates": 6
+   },
+   "L2_signals": 83,
+   "L1_signals": 82,
+   "L3_book_2s_limit": {
+    "n": 37,
+    "wins": 20,
+    "pf1": 0.49,
+    "pf10": 0.518,
+    "mean1_c": -13.95,
+    "z": -1.93,
+    "fill_share": 0.446
+   },
+   "L3_book_6s_limit": {
+    "n": 28,
+    "wins": 14,
+    "pf1": 0.584,
+    "pf10": 0.6,
+    "mean1_c": -11.73,
+    "z": -1.31,
+    "fill_share": 0.337
+   },
+   "L4_quote_signal_book_price": {
+    "n": 78,
+    "wins": 55,
+    "pf1": 0.823,
+    "pf10": 0.883,
+    "mean1_c": -3.31,
+    "z": -0.71,
+    "fill_share": 0.951
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 37,
+    "wins": 21,
+    "pf1": 0.624,
+    "pf10": 0.664,
+    "mean1_c": -9.41,
+    "z": -1.28,
+    "fill_share": 0.451
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 82,
+    "mean": 0.3,
+    "share_quote_2c_or_more_below": 0.476
+   }
+  },
+  "GEN4_B49": {
+   "id": "GEN4_B49",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "sp15 >= -0.1949",
+   "L0": {
+    "days": 6,
+    "n": 119,
+    "wins": 82,
+    "pf1": 0.94,
+    "pf10": 0.96
+   },
+   "L1_quotes_common": {
+    "n": 99,
+    "wins": 69,
+    "pf1": 0.951,
+    "pf10": 0.997,
+    "mean1_c": -0.98,
+    "z": -0.22,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 101,
+    "wins": 72,
+    "pf1": 0.926,
+    "pf10": 0.926,
+    "mean1_c": -1.5,
+    "z": -0.33,
+    "dates": 6
+   },
+   "L2_signals": 101,
+   "L1_signals": 99,
+   "L3_book_2s_limit": {
+    "n": 52,
+    "wins": 35,
+    "pf1": 0.925,
+    "pf10": 0.916,
+    "mean1_c": -1.69,
+    "z": -0.25,
+    "fill_share": 0.515
+   },
+   "L3_book_6s_limit": {
+    "n": 38,
+    "wins": 30,
+    "pf1": 2.254,
+    "pf10": 2.292,
+    "mean1_c": 14.82,
+    "z": 2.3,
+    "fill_share": 0.376
+   },
+   "L4_quote_signal_book_price": {
+    "n": 99,
+    "wins": 69,
+    "pf1": 0.861,
+    "pf10": 0.859,
+    "mean1_c": -2.93,
+    "z": -0.64,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 41,
+    "wins": 30,
+    "pf1": 1.469,
+    "pf10": 1.452,
+    "mean1_c": 7.76,
+    "z": 1.13,
+    "fill_share": 0.414
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 99,
+    "mean": -2.05,
+    "share_quote_2c_or_more_below": 0.485
+   }
+  },
+  "GEN4_B50": {
+   "id": "GEN4_B50",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "imb >= -0.4281; sp15 >= -0.1949; zd >= -1.214",
+   "L0": {
+    "days": 6,
+    "n": 90,
+    "wins": 61,
+    "pf1": 0.88,
+    "pf10": 0.9
+   },
+   "L1_quotes_common": {
+    "n": 74,
+    "wins": 50,
+    "pf1": 0.844,
+    "pf10": 0.888,
+    "mean1_c": -3.35,
+    "z": -0.64,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 78,
+    "wins": 52,
+    "pf1": 0.753,
+    "pf10": 0.773,
+    "mean1_c": -5.79,
+    "z": -1.08,
+    "dates": 6
+   },
+   "L2_signals": 78,
+   "L1_signals": 74,
+   "L3_book_2s_limit": {
+    "n": 32,
+    "wins": 21,
+    "pf1": 0.826,
+    "pf10": 0.843,
+    "mean1_c": -4.13,
+    "z": -0.48,
+    "fill_share": 0.41
+   },
+   "L3_book_6s_limit": {
+    "n": 29,
+    "wins": 20,
+    "pf1": 1.318,
+    "pf10": 1.343,
+    "mean1_c": 5.41,
+    "z": 0.68,
+    "fill_share": 0.372
+   },
+   "L4_quote_signal_book_price": {
+    "n": 74,
+    "wins": 50,
+    "pf1": 0.732,
+    "pf10": 0.741,
+    "mean1_c": -6.1,
+    "z": -1.13,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 28,
+    "wins": 20,
+    "pf1": 1.205,
+    "pf10": 1.229,
+    "mean1_c": 3.68,
+    "z": 0.44,
+    "fill_share": 0.378
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 74,
+    "mean": -2.87,
+    "share_quote_2c_or_more_below": 0.473
+   }
+  },
+  "GEN4_B51": {
+   "id": "GEN4_B51",
+   "family": "FAV at 150 s (favourite 50-85c bought at about 2.5 minutes left)",
+   "side": "FAV",
+   "exit": 5,
+   "conds": "dm5 <= 0.04; imb <= 0.4847",
+   "L0": {
+    "days": 6,
+    "n": 115,
+    "wins": 79,
+    "pf1": 0.81,
+    "pf10": 0.86
+   },
+   "L1_quotes_common": {
+    "n": 94,
+    "wins": 62,
+    "pf1": 0.691,
+    "pf10": 0.734,
+    "mean1_c": -7.2,
+    "z": -1.54,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 100,
+    "wins": 65,
+    "pf1": 0.56,
+    "pf10": 0.599,
+    "mean1_c": -11.1,
+    "z": -2.42,
+    "dates": 6
+   },
+   "L2_signals": 100,
+   "L1_signals": 94,
+   "L3_book_2s_limit": {
+    "n": 54,
+    "wins": 38,
+    "pf1": 0.892,
+    "pf10": 0.948,
+    "mean1_c": -2.14,
+    "z": -0.36,
+    "fill_share": 0.54
+   },
+   "L3_book_6s_limit": {
+    "n": 47,
+    "wins": 31,
+    "pf1": 0.787,
+    "pf10": 0.827,
+    "mean1_c": -4.59,
+    "z": -0.71,
+    "fill_share": 0.47
+   },
+   "L4_quote_signal_book_price": {
+    "n": 94,
+    "wins": 62,
+    "pf1": 0.631,
+    "pf10": 0.69,
+    "mean1_c": -8.63,
+    "z": -1.88,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 43,
+    "wins": 28,
+    "pf1": 0.675,
+    "pf10": 0.717,
+    "mean1_c": -7.51,
+    "z": -1.09,
+    "fill_share": 0.457
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 94,
+    "mean": -1.41,
+    "share_quote_2c_or_more_below": 0.426
+   }
+  },
+  "GEN4_REF_FAV150": {
+   "id": "GEN4_REF_FAV150",
+   "family": "",
+   "side": "FAV",
+   "exit": 0,
+   "conds": "",
+   "L0": {
+    "days": 6,
+    "n": 113,
+    "wins": 76,
+    "pf1": 0.81,
+    "pf10": 0.83
+   },
+   "L1_quotes_common": {
+    "n": 92,
+    "wins": 61,
+    "pf1": 0.738,
+    "pf10": 0.767,
+    "mean1_c": -6.05,
+    "z": -1.27,
+    "dates": 6
+   },
+   "L2_book_same_poll": {
+    "n": 94,
+    "wins": 62,
+    "pf1": 0.71,
+    "pf10": 0.696,
+    "mean1_c": -7.06,
+    "z": -1.43,
+    "dates": 6
+   },
+   "L2_signals": 94,
+   "L1_signals": 92,
+   "L3_book_2s_limit": {
+    "n": 46,
+    "wins": 32,
+    "pf1": 0.915,
+    "pf10": 0.943,
+    "mean1_c": -1.78,
+    "z": -0.26,
+    "fill_share": 0.489
+   },
+   "L3_book_6s_limit": {
+    "n": 42,
+    "wins": 30,
+    "pf1": 1.183,
+    "pf10": 1.313,
+    "mean1_c": 3.26,
+    "z": 0.48,
+    "fill_share": 0.447
+   },
+   "L4_quote_signal_book_price": {
+    "n": 92,
+    "wins": 61,
+    "pf1": 0.706,
+    "pf10": 0.69,
+    "mean1_c": -6.92,
+    "z": -1.43,
+    "fill_share": 1.0
+   },
+   "L4_quote_signal_book_price_limit": {
+    "n": 45,
+    "wins": 31,
+    "pf1": 1.007,
+    "pf10": 0.984,
+    "mean1_c": 0.13,
+    "z": 0.02,
+    "fill_share": 0.489
+   },
+   "quote_ask_minus_book_ask_c": {
+    "n": 92,
+    "mean": -0.96,
+    "share_quote_2c_or_more_below": 0.413
+   }
+  }
+ }
+}
