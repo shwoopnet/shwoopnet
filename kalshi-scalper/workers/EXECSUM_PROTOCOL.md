@@ -63,3 +63,6 @@ Held-out for D3, BILLS-D0 and BILLS-D15 was NOT read: none survived development 
 - EOWEEK-D3: FALSIFIED (dev PF 0.62, n 32).
 - BILLS-D0 and BILLS-D15: NOT_ENOUGH_DATA (17 and 13 dev entries, 10 events, 94 settled markets; the bills definition also does not reconcile with the official count).
 - Registered rule overall: fewer than 100 settled markets modelled in every variant (96 EO, 94 BILLS), so the series verdict is NOT_ENOUGH_DATA. EOWEEK adds about 3 modelled markets a week, so 100 exist about 2 weeks after Nov 11, 2026; that does not fix the multiplicity bar: z 5.34 needs a much larger sample than 35 weeks can give at these effect sizes (pooled z is 1.13). BILLS adds about 10 markets a month (one event a month): 100 markets in about 1 month, but 10 events means 100 months of clusters for a cluster-level z.
+
+## Note (Nov 12, 2026, from Desk A's re-check c2165e0): GovInfo publication lag
+GovInfo publishes the Federal Register 3 to 6 days after signing, so any "count so far this week" derived from GovInfo is blind to the current week (the latest weeks Oct 25 and Nov 1 show zero only because they are unpublished). The EXECSUM development and held-out results used weeks whose counts were complete in GovInfo at the time, but they cannot be applied live without a second count source. See BASERATES1_TABLES.md corrections.

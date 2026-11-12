@@ -34,3 +34,9 @@ Limits: persistence and prior bins use all history in sample (no held-out), word
 - A3/A3b and A4 against KXBILLSCOUNT, remembering the definition mismatch above.
 - B1, B2 (word), B4 and B4c as a prior for a live word market (word persistence plus the word's own rate); B3 for call-level correlation across a call's words.
 Not ready: B5 (only a description of old quotes).
+
+## Corrections (Nov 12, 2026, from Desk A's re-check, branch claude/idea-desk-a DESK_A_VERIFY_NOV12.md section 4, c2165e0): counts MATCH, three labels fixed
+Desk A reproduced the executive order counts: MATCH on 59 weeks (mean 1.559, variance 1.906), Trump II 2.822, Trump I 1.014, 292 orders without gaps, and the 17 orders Sep to Nov 2026 equal GovInfo's Federal Register bulk files. Fixes:
+1. The row labelled "2025 H1" (31 weeks, mean 5.23) is really Jan 26 to Aug 30, 2025. A true first half is 22 weeks, mean 5.82.
+2. The inauguration week (Jan 19 to 25, 2025, 38 orders) was EXCLUDED as partial. With it, Trump II is mean 3.21, variance 21.7, not 2.82 and 8.24. Wherever 2.82 / 8.24 appears, read it as "excluding the inauguration week".
+3. IMPORTANT for any live use of the "count so far this week" table: GovInfo publication runs 3 to 6 days BEHIND signing, so the latest weeks (Oct 25, Nov 1) show zero orders only because they are unpublished (no order after 14438, signed Oct 22, in any issue through Nov 12). A conditional "count so far this week" table built from GovInfo is BLIND TO THE CURRENT WEEK; it cannot be used live without another count source. Extended to today the mean is 1.52 over 62 weeks.
