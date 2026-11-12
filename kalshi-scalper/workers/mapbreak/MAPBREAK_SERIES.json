@@ -1,0 +1,20 @@
+{
+  "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
+  "frozen": "2026-11-12",
+  "titles": [
+    {"cell": "CS2", "match_series": "KXCS2GAME", "map_series": "KXCS2MAP", "total_maps_series": "KXCS2TOTALMAPS"},
+    {"cell": "DOTA2", "match_series": "KXDOTA2GAME", "map_series": "KXDOTA2MAP", "total_maps_series": "KXDOTA2TOTALMAPS"},
+    {"cell": "VALORANT", "match_series": "KXVALORANTGAME", "map_series": "KXVALORANTMAP", "total_maps_series": "KXVALORANTTOTALMAPS"},
+    {"cell": "LOL", "match_series": "KXLOLGAME", "map_series": "KXLOLMAP", "total_maps_series": "KXLOLTOTALMAPS"}
+  ],
+  "ticker_shape": {
+    "match_market": "<match_series>-<key>-<TEAM>, two markets an event",
+    "map_market": "<map_series>-<key>-<n>-<TEAM>, two markets a map; n is the map number",
+    "total_maps_market": "<total_maps_series>-<key>-<k>; floor_strike 2.5 marks a best-of-three",
+    "key": "starts with the date and a four-digit clock time, for example 26NOV101300: the scheduled start, read as US Eastern time"
+  },
+  "best_of_three_rule": "a match is in the sample only if its total-maps event has a market with floor_strike 2.5 and none with a higher strike, and map markets numbered 1 and 2 exist for the same key",
+  "window": {"match_closes_from": "2026-09-12T00:00:00Z", "match_closes_before": "2026-10-23T00:00:00Z", "held_out_from": "2026-10-23T00:00:00Z", "max_close_ts_for_lists": 1792713599},
+  "sample": "the 1,500 most recently closed best-of-three matches inside the window, across the four titles together, never extended",
+  "fee_field_reads": ["KXCS2GAME", "KXDOTA2GAME", "KXVALORANTGAME", "KXLOLGAME"]
+}

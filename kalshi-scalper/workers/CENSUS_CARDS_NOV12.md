@@ -89,6 +89,18 @@ What is left after the filter is narrow: a contract that the market may price ba
 | Other venues, same card | The Nov 10 listing shows quarter and half spread and total ladders for the NBA (2,500 to 9,500 contracts a market), the NFL and college basketball. The same measurement applies there with a different sibling model (a quarter's line as a fixed share of the game line, the share taken from Kalshi's own earlier settlements). Under lifecycle 7g that is this card on another market, not a new card; it is counted once and the soccer measurement runs first |
 | Tries it adds | 0 for the measurement; 1 if it survives |
 
+## Card 20. MAPBREAK: the break after map 1 of an esports best-of-three (a second venue of NHLOT's family)
+
+`MAPBREAK | family: a change of game state read from a sibling market while play is stopped; buy the side priced under what the state implies, hold to the end of the match | risk class: mid price, 1 contract, about 78 matches a day | stage Idea, measurement only`
+
+- **Ruled by the Head of R&D on Nov 12 (18:18Z): GO as a zero-try gap measurement. It is the SAME mechanism as NHLOT (card 17), a second venue of that family. For the owner's count NHLOT and MAPBREAK are ONE candidate.** It is run because it has the events NHLOT lacks: about 4,700 matches in the 61 days held.
+- **Source:** Kalshi's own markets only. The state is the map-1 market's own close and result.
+- **Rule being measured:** two minutes after map 1 ends, value the team that is one map up from the pre-match price alone (if the pre-match price is p, the per-map chance q solves p = q x q x (3 minus 2q); one map up is worth 1 minus (1 minus q) squared); the gap is that value minus the ask. A placebo at the pre-match instant shows what the model's own error produces.
+- **Who is on the other side:** resting orders left from before the map ended, and bettors anchored on the pre-match favourite.
+- **Kill:** a title is closed unless 10% or more of matches show a gap of 8c or more at a spread of 4c or less AND at least twice the placebo's share; closed on cost if the median round trip at the look is above 5c.
+- **Registration and frozen series:** `mapbreak/MAPBREAK_REGISTRATION.md`, `mapbreak/MAPBREAK_SERIES.json`. Built by the Testing Desk. About 50 requests for lists, 150 to 250 for candles. Tries: 0 now, 1 if a rule is scored later on a new go.
+- **My probability that it reaches the research bar: 2%.** Priors against: SERIESLAG1 (the same idea on playoff series, 44 trades, PF 0.21, not enough data) and ESPORT1 (FALSIFIED twice).
+
 ## Pool families with no card, and why
 
 | Pool family | Why there is no card | The one number, where one exists |
