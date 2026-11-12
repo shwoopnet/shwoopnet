@@ -69,7 +69,7 @@ All specs are written as CONDITIONAL on the registered read. The owner's Nov 12 
 
 ## Deflation ledger
 
-One file, DEFLATION_LEDGER.md on this branch (being compiled from the per-test registrations; the quoted shared N of about 1.1 million with z 5.34, and the lenient N of 9,009 with z 4.39, are being traced to sources). Every new try is added there before it is scored.
+DEFLATION_LEDGER.md on this branch. **Shared strict N is about 2,113,000 and the research bar is z 5.46** (one-sided). The figure "about 1.1 million, z 5.34" quoted in recent registrations left out 1,000,000 tries and is withdrawn; no verdict changes. The "lenient" count is retired as a bar. A test that clears only its own registered bar is reported as "cleared its registered bar", never as a research-bar pass. Every new try is added there before it is scored.
 
 ## Retired by power analysis (POWER2, V2, 2026-11-12): do not spend reads
 
