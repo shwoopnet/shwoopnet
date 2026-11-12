@@ -12,7 +12,7 @@ PINS (the card is silent or its data cannot give them; all fixed here, before da
   P7 request cap: stage 2 has STAGE2_CAP requests; if more would be needed, markets are dropped by lowest lifetime volume (a settled tally, not a price) and the number dropped is reported.
 Commands: build-s0 | build-s1 <series-list folder: the census pull> | build-s2 <s1 folder> | count <s2 folder> [<more folders>]   (folders are kalshi-pull-data run folders)
 """
-import calendar, gzip, json, os, re, sys, time
+import calendar, gzip, json, os, re, statistics as st, sys, time
 from datetime import datetime, timezone, timedelta
 try:
     from zoneinfo import ZoneInfo
@@ -192,7 +192,10 @@ def count_market(ticker, candles, close_ts):
         if sum(v for ts, v in vol if e - 7 * 86400 < ts <= e) < LIQ:
             continue
         stale = abs(a7 - a6) <= STALE + 1e-9 if up else abs(b7 - b6) <= STALE + 1e-9
-        out.append({"date": d.isoformat(), "series": ticker.split("-")[0], "ticker": ticker, "strict": stale, "loose": True, "within_24h_of_close": close_ts is not None and close_ts <= t07 + 86400})
+        ent_b, ent_a = (b7, a7) if up else (b7, a7)
+        mid7 = (b7 + a7) / 2
+        out.append({"date": d.isoformat(), "series": ticker.split("-")[0], "ticker": ticker, "strict": stale, "loose": True, "within_24h_of_close": close_ts is not None and close_ts <= t07 + 86400,
+                    "spread": a7 - b7, "round_trip": (a7 - b7) + 2 * 0.07 * mid7 * (1 - mid7)})
     return out
 
 
@@ -204,28 +207,58 @@ def candles_of(body, ticker):
             yield t, n["candlesticks"]
 
 
+COST_MAX = 0.05      # AMENDMENT 3: median round trip at the entry hour above 5c closes the card on cost
+
+
 def tally(gaps):
-    def half(lst):
-        lst = sorted(lst, key=lambda g: (g["date"], g["ticker"]))
-        k = len(lst) // 2
-        return lst[:k], lst[k:]
+    """AMENDMENT 3 (Nov 12, Head of R&D, credited to Desk B's wording): the unit of the kill is the SERIES-MORNING (series, date D): several markets of one event moving together count once.
+    CLOSED if fewer than 40 series-mornings with a qualifying gap in either half (halves by date); CLOSED on cost if the median round trip at the entry hour is above 5c. Gaps are still reported beside."""
     res = {}
     for name in ("strict", "loose"):
         sel = [g for g in gaps if g[name]]
-        h1, h2 = half(sel)
-        res[name] = {"gaps": len(sel), "first_half": len(h1), "second_half": len(h2), "clusters_series_date": len({(g["series"], g["date"]) for g in sel}),
-                     "series_with_a_gap": len({g["series"] for g in sel}), "within_24h_of_close": sum(1 for g in sel if g["within_24h_of_close"])}
-    s = res["strict"]; l = res["loose"]
+        mornings = sorted({(g["date"], g["series"]) for g in sel})
+        k = len(mornings) // 2
+        h1, h2 = mornings[:k], mornings[k:]
+        res[name] = {"series_mornings": len(mornings), "first_half": len(h1), "second_half": len(h2), "gaps": len(sel), "series_with_a_gap": len({g["series"] for g in sel}),
+                     "within_24h_of_close": sum(1 for g in sel if g["within_24h_of_close"]),
+                     "median_round_trip_at_entry": round(st.median([g["round_trip"] for g in sel]), 4) if sel else None, "median_spread_at_entry": round(st.median([g["spread"] for g in sel]), 4) if sel else None}
+    s_ = res["strict"]; l_ = res["loose"]
     clears = lambda r: r["first_half"] >= FLOOR and r["second_half"] >= FLOOR
-    if clears(s):
-        verdict = "COUNT CLEARS 40 per half on the strict (proxy) basis; this is a count, not a result"
-    elif clears(l):
-        verdict = "ONLY the loose count clears 40 per half: the Head decides (the proxy is a deviation from the card)"
+    rt = s_["median_round_trip_at_entry"]
+    if rt is not None and rt > COST_MAX:
+        verdict = "CLOSED on cost: the median round trip at the entry hour is %.1fc, above 5c (no further read)" % (100 * rt)
+    elif clears(s_):
+        verdict = "COUNT CLEARS 40 series-mornings per half on the strict (proxy) basis; this is a count, not a result"
+    elif clears(l_):
+        verdict = "ONLY the loose count clears 40 series-mornings per half: the Head decides (the proxy is a deviation from the card)"
     else:
-        verdict = "NOT_ENOUGH_DATA (the card's kill: fewer than 40 qualifying gaps in a half); card closed"
-    n = s["gaps"]
-    label = "no evidence at n = %d gaps" % n if n < 100 else "count only; any scoring needs its own registration and the held-out from 2026-11-05"
-    return {"strict": s, "loose": l, "verdict": verdict, "label": label}
+        verdict = "CLOSED: fewer than 40 series-mornings with a qualifying gap in a half; no further read"
+    n = s_["series_mornings"]
+    label = "no evidence at n = %d series-mornings" % n if n < 100 else "count only; any scoring needs its own registration and the held-out from 2026-11-05"
+    return {"strict": s_, "loose": l_, "verdict": verdict, "label": label,
+            "premise_note": "The card's premise (a quote that has not yet followed) is NOT tested at hourly resolution; what is counted is overnight gaps, with the 06:00-to-07:00 hourly ask proxy"}
+
+
+def cost_screen(quote_files, series_set=None):
+    """AMENDMENT 3 step 4, zero extra requests. Median round trip (the whole spread plus two taker fees 0.07 x mid x (1 - mid), Forensics' definition in HOW_TO_PRICE_A_PAPER_TRADE.md) for two-sided quotes priced 20c to 80c
+    (mid), from politics recorder quote files (`pol-data` polrec/*/quotes.csv.gz, columns series, ticker, yes_bid, yes_ask). A list quote is good enough for a spread LEVEL (up to 11 s old). Reads quotes only; results.csv is never opened.
+    series_set = the 79 series (restrict to them). Why not the lists answer: settled (finalized) markets in a lists answer carry yes_bid 0 and yes_ask 1 (checked on 3,000 of CFRTI_K_LISTS), so they hold no spread."""
+    import csv
+    rts, sps, ms, ser = [], [], set(), set()
+    for f in quote_files:
+        op = gzip.open if f.endswith(".gz") else open
+        with op(f, "rt") as fh:
+            for r in csv.DictReader(fh):
+                if series_set is not None and r["series"] not in series_set: continue
+                b, a = num(r.get("yes_bid")), num(r.get("yes_ask"))
+                if b is None or a is None or not (0 < b < a < 1): continue
+                m = (a + b) / 2
+                if not (0.20 <= m <= 0.80): continue
+                rts.append((a - b) + 2 * 0.07 * m * (1 - m)); sps.append(a - b); ms.add(r["ticker"]); ser.add(r["series"])
+    if not rts: return {"quotes": 0, "verdict": "no two-sided quote priced 20c to 80c: cannot screen"}
+    med = st.median(rts)
+    return {"quotes": len(rts), "distinct_markets": len(ms), "series": len(ser), "median_round_trip": round(med, 4), "median_spread": round(st.median(sps), 4),
+            "verdict": ("CLOSED on cost: median round trip %.1fc is above 5c; stage 2 is never sent" % (100 * med)) if med > COST_MAX else ("under the 5c line (%.1fc): send the stage 2 request count to the Head for a go" % (100 * med))}
 
 
 def count(folders):
@@ -250,4 +283,5 @@ if __name__ == "__main__":
     elif c == "build-s1": print(json.dumps(build_s1(sys.argv[2]), indent=1))
     elif c == "build-s2": print(json.dumps(build_s2(sys.argv[2]), indent=1))
     elif c == "count": print(json.dumps(count(sys.argv[2:]), indent=1))
+    elif c == "cost-screen": print(json.dumps(cost_screen(sys.argv[2:]), indent=1))
     else: print(__doc__)

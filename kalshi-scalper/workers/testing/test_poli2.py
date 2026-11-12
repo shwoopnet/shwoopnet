@@ -57,9 +57,20 @@ with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, t
     thin = [dict(c, volume_fp="1") for c in cs]; assert p.count_market("KXAAA-1", thin, None) == []
     mkrun(d2, j2, {r["id"]: ({"markets": [{"market_ticker": "KXAAA-1", "candlesticks": cs}]} if r["path"] == "/markets/candlesticks" else {"candlesticks": cs}) for r in j2["requests"]})
     out = p.count([d2]); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 1, out
-    t = p.tally([dict(date="2026-0%d-01" % (1 + i // 30), series="S", ticker="T%d" % i, strict=True, loose=True, within_24h_of_close=False) for i in range(100)])
-    assert t["verdict"].startswith("COUNT CLEARS"), t["verdict"]
-    t = p.tally(gaps[:10]); assert t["verdict"].startswith("NOT_ENOUGH_DATA") and "no evidence at n = 10" in t["label"]
+    G = lambda i, ser="S", dm=0.0: dict(date="2026-%02d-%02d" % (10 + i // 28, 1 + i % 28), series="%s%d" % (ser, i), ticker="T%d" % i, strict=True, loose=True, within_24h_of_close=False, spread=0.01 + dm, round_trip=0.045 + dm)
+    t = p.tally([G(i) for i in range(100)])
+    assert t["verdict"].startswith("COUNT CLEARS 40 series-mornings"), t["verdict"]
+    assert t["strict"]["series_mornings"] == 100 and "NOT tested at hourly resolution" in t["premise_note"]
+    # the unit is the series-morning: 100 markets of ONE series on ONE morning count once (several markets of one event moving together)
+    t = p.tally([dict(G(0), ticker="T%d" % i, series="S0") for i in range(100)]); assert t["strict"]["series_mornings"] == 1 and t["strict"]["gaps"] == 100 and t["verdict"].startswith("CLOSED: fewer than 40 series-mornings"), t
+    # 60 series-mornings is 30 per half: closed; the cost kill (median round trip above 5c) closes it even when the count clears
+    assert p.tally([G(i) for i in range(60)])["verdict"].startswith("CLOSED: fewer than 40")
+    assert p.tally([G(i, dm=0.02) for i in range(100)])["verdict"].startswith("CLOSED on cost: the median round trip at the entry hour is 6.5c"), p.tally([G(i, dm=0.02) for i in range(100)])["verdict"]
+    # cost screen from politics recorder quote files, zero requests; lists answers carry no spreads (finalized markets show 0 and 1)
+    qf = os.path.join(d1, "q.csv"); open(qf, "w").write("series,ticker,yes_bid,yes_ask\nKXAAA,A-1,0.48,0.52\nKXAAA,A-2,0.30,0.36\nKXAAA,A-3,0.0,0.05\nKXAAA,A-4,0.90,0.95\nKXOTH,O-1,0.40,0.60\n")
+    cs_ = p.cost_screen([qf], {"KXAAA"}); assert cs_["quotes"] == 2 and cs_["distinct_markets"] == 2 and cs_["verdict"].startswith("CLOSED on cost: median round trip 8.3c") , cs_
+    cs2 = p.cost_screen([qf]); assert cs2["quotes"] == 3
+    assert p.cost_screen([qf], {"KXNONE"})["quotes"] == 0
     # the request cap drops the lowest-volume markets and says so
     big = {"live_KXAAA": {"markets": [mk("KXAAA-%d" % i, live_close + i, live_close - 86400 * 20 + i, 1000 + i) for i in range(10)]}, "live_KXBBB": {"markets": []}}
     p.BUDGET = 6; p.PACK = 1  # each live market alone in a batch
