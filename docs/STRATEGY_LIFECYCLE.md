@@ -151,6 +151,8 @@ Trigger: after an audit the owner said "we have multiple duplicates that I hard 
 5. Only the owner removes an entry.
 6. **A correlation rejection is recorded (owner popup, Nov 11, 2026).** A candidate rejected under 7d check 3 (Pearson r of 0.3 or more with a live strategy) is added as a row with: the correlation number, the live strategy it matched, the dates of the overlapping window, and the status "Declined (duplicate)". The names it must not return under are its own name and the live strategy's mechanism.
 
+**Slow-family paper list (Nov 12, 2026, owner).** A slow family may be listed on PAPER only by the lower screen in `docs/POLITICS_RULES.md` section 8. A listing is labelled unproven, is not a shadow-list entry and permits no live order; the declined list above is checked first, as for every candidate.
+
 A Charter line making the check explicit is proposed for the owner. `docs/CHARTER.md` says only the owner changes it, so it is not edited here.
 
 **The list**
