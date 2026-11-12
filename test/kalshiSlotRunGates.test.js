@@ -645,7 +645,7 @@ gates['unsoldOf reads in-flight and unreadable orders as holding everything (the
 gates['the engine file has no environment, randomness, timers or Firestore, requires only the three libraries, and exposes no switch'] = () => {
   const c = code(runSrc);
   assert.ok(!/process\.env|Math\.random|setTimeout|setInterval|getFirestore|firebase|\.collection\(|eval\(|child_process|\bfs\b/.test(c));
-  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSlotLib"', '"./kalshiLiveLib"']);
+  assert.deepStrictEqual([...c.matchAll(/require\(([^)]*)\)/g)].map((m) => m[1]), ['"./kalshiSignalLib"', '"./kalshiSlotLib"', '"./kalshiLiveLib"', '"./kalshiCfrtiKLib"']);   // CFRTIK's pure decision, Nov 12, 2026
   assert.ok(!/portfolio\/events\/orders/.test(c), 'the order path lives with the other order code');
   assert.strictEqual((c.match(/method: "POST"/g) || []).length, 2, 'two places send an order: the entry and the exit');
   assert.ok(!/time_in_force/.test(c), 'the order bodies come only from liveOrderBody and exitBody, which are immediate-or-cancel');
@@ -742,8 +742,8 @@ gates['RET2 an open order of a retired strategy still counts in the shared loss 
   }
 };
 gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, the hold list, the allowed or reserved series, or the ticker shape; the real tick sends nothing for their markets'] = async () => {
-  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830']);
-  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830']);
+  assert.deepStrictEqual(slot.SLOT_STRATEGIES.map((x) => x.id), ['OICORE', 'EVENT830', 'CFRTIK']);
+  assert.deepStrictEqual(slot.SLOT_HOLD_ALLOWED.slice(), ['OICORE', 'EVENT830', 'CFRTIK']);
   assert.ok(!slot.SLOT_SERIES_ALLOWED.includes('KXXRP15M') && !slot.SLOT_SERIES_ALLOWED.includes('KXAUDUSD15M') && !('KXAUDUSD15M' in slot.SLOT_SERIES_RESERVED));
   assert.strictEqual(typeof slot.slotRollingSeriesDue, 'undefined', 'the rolling quote read for a non-L1 market is gone');
   for (const [id, tk, series, side] of RETIRED) {
@@ -759,6 +759,164 @@ gates['RET3 no new XRPYES10 or KESTREL entry can be sent: not in the registry, t
     }
     assert.strictEqual(ex.posts.length, 0, id + ': the real tick sends no order for its market at either look'); assert.strictEqual(db.slot.size, 0); assert.strictEqual(db.locks.size, 0);
   }
+};
+
+// ---- CFRTIK, the probation seat (Nov 12, 2026): the real engine, the real registry entry, fake exchange and a fake perp candle reader ---------------------------------------------------
+// Consequence: it buys 3 contracts of the cheaper side at the ask seen (no slip) held to settlement ONLY when the perp candle of the decision minute is there, and every refusal says why; it waits a
+// bounded time for that candle and then sends nothing; it never reads the market before the candle; it never delays another strategy's order; and it cannot break the direction lock or the per-market cap.
+const CK = () => R({ enabled: true, registry: slot.SLOT_STRATEGIES.filter((x) => x.id === 'CFRTIK'), everUsed: true });
+const CKBOTH = () => R({ enabled: true, registry: slot.SLOT_STRATEGIES.filter((x) => x.id === 'CFRTIK' || x.id === 'OICORE'), everUsed: true });
+const ckClose = NOW + 118000, ckCloseSec = Math.round(ckClose / 1000);
+// 12 perp candles: the opening minute (close - 900 s) and the decision minute plus ten earlier ones (close - 120 s ... close - 720 s). `drift` moves the decision mark away from the opening mark.
+const perpCandles = (drift, o = {}) => {
+  const out = [];
+  const mk = (sec, p) => ({ end_period_ts: sec, bid: { close: String(p - 0.5) }, ask: { close: String(p + 0.5) } });
+  out.push(mk(ckCloseSec - 900, 100000));
+  for (let k = 0; k <= 10; k++) out.push(mk(ckCloseSec - 120 - 60 * k, (k % 2 === 0 ? 100000 : 100010) + (k === 0 ? drift : 0)));
+  return out.filter((c) => !(o.without || []).includes(c.end_period_ts));
+};
+const ckWorld = async (o = {}) => {
+  const bid = o.bid || '0.1900', ask = o.ask || '0.2000';
+  const db = makeDb(), ex = makeExchange(db, { market: Object.assign({ close_time: iso(ckClose), floor_strike: 100000, yes_bid_dollars: bid, yes_ask_dollars: ask, yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00' }, o.market || {}) });
+  const seq = [];
+  const inner = ex.fetchFn;
+  ex.fetchFn = async (url, init) => { seq.push(init.method + ' ' + url.replace(/^.*\/trade-api\/v2/, '').split('?')[0]); return inner(url, init); };
+  let clockMs = NOW, reads = 0;
+  const skips = [];
+  const readPerpCandles = async (a) => {
+    reads += 1; seq.push('perp');
+    const arrives = o.arrivesAtRead === undefined ? 1 : o.arrivesAtRead;
+    return { status: 200, candles: reads >= arrives ? perpCandles(o.drift === undefined ? 0 : o.drift, o) : perpCandles(0, { without: [ckCloseSec - 120] }) };
+  };
+  const extra = { quotes: QUOTES({ close_time: iso(ckClose) }), fetchFn: ex.fetchFn, clock: () => clockMs, sleep: async (ms) => { clockMs += ms; }, recordSkip: async (d) => { skips.push(d); } };
+  if (o.noReader) delete extra.readPerpCandles; else extra.readPerpCandles = readPerpCandles;
+  if (o.noSleep) delete extra.sleep;
+  const t = tickArgs(db, ex, { args: Object.assign(extra, o.args || {}) });
+  if (o.prep) o.prep(db);
+  const out = await (o.runner || CK)().runSlotTick(t.args);
+  return { db, ex, out, skips, seq, reads: () => reads, clockMs: () => clockMs };
+};
+gates['CK1 the registry entry is exactly the approved spec and the validator keeps the reference model to its own id'] = () => {
+  const c = slot.SLOT_STRATEGIES.find((x) => x.id === 'CFRTIK');
+  assert.ok(c, 'registered');
+  assert.deepStrictEqual(JSON.parse(JSON.stringify(c)), { id: 'CFRTIK', readme: 'kalshi-scalper/README.md#SLOT-CFRTIK', series: ['KXBTC15M'],
+    entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.3, leftMaxSec: 125, leftMinSec: 75, maxSpread: 0.03, refModel: 'CFRTIK', minEdge: 0.05 }, exit: { holdToSettle: true }, contractsPerOrder: 3,
+    scaleIn: { maxSteps: 1, minGapSec: 30, sameSideOnly: true, requirePriorFilled: true }, killRules: { maxConsecutiveLosses: 30, minNet: { afterFills: 5, net: -18 } }, forwardReadDate: '2026-11-20', reviewedAt: '2026-11-12' });
+  assert.ok(slot.validateSlotStrategy(c).ok, JSON.stringify(slot.validateSlotStrategy(c)));
+  assert.strictEqual(c.reviewedAt, slot.SLOT_LAST_REVIEWED_ON, 'reviewedAt matches the last reviewed date');
+  assert.ok(slot.SLOT_HOLD_ALLOWED.includes('CFRTIK') && slot.SLOT_SERIES_ALLOWED.includes('KXBTC15M') && !('KXBTC15M' in slot.SLOT_SERIES_RESERVED), 'hold list entry, and Bitcoin is OICORE\'s open market, not reserved');
+  const copy = (over) => Object.assign(JSON.parse(JSON.stringify(c)), over);
+  assert.ok(!slot.validateSlotStrategy(copy({ id: 'OTHER' })).ok, 'a different id cannot use the reference model (and is not on the hold list)');
+  assert.ok(!slot.validateSlotStrategy(copy({ entry: Object.assign({}, c.entry, { refModel: 'NOPE' }) })).ok, 'an unknown model name is refused');
+  assert.ok(!slot.validateSlotStrategy(copy({ entry: Object.assign({}, c.entry, { minEdge: 0 }) })).ok, 'a zero edge line is refused');
+  const plain = copy({ entry: { sideRule: 'cheap', priceMin: 0.05, priceMax: 0.3, leftMaxSec: 125, leftMinSec: 75 } });
+  assert.ok(!slot.validateSlotStrategy(plain).ok, 'without the reference model nothing may enter below 120 s');
+};
+gates['CK2 with the perp candle present it buys 3 contracts of the cheaper side at the ask seen, no slip, immediate-or-cancel, and records why'] = async () => {
+  const w = await ckWorld({});
+  assert.strictEqual(w.ex.posts.length, 1, JSON.stringify(w.out) + JSON.stringify(w.skips));
+  const b = w.ex.posts[0];
+  assert.strictEqual(b.side, 'bid', 'YES'); assert.strictEqual(Number(b.count), 3); assert.strictEqual(b.time_in_force, 'immediate_or_cancel'); assert.ok(Math.abs(Number(b.price) - 0.2) < 1e-9, 'the ask seen, not ask plus 1c: ' + b.price);
+  const d = [...w.db.slot.values()][0];
+  assert.strictEqual(d.slotId, 'CFRTIK'); assert.strictEqual(d.refModel, 'CFRTIK'); assert.ok(d.refEdge >= 0.05 && d.refChance > 0.2 && d.refAsk === 0.2, JSON.stringify(d));
+  assert.strictEqual(d.perpPresent, 1); assert.strictEqual(d.perpTries, 1); assert.strictEqual(d.perpWaitMs, 0); assert.ok(Number.isFinite(d.perpAgeMs), 'the age of the newest perp candle at the decision is logged');
+  assert.strictEqual(w.db.locks.get(T).by, 'SLOT:CFRTIK');
+  // the quote is read AFTER the candle: the candle read comes first in the call order
+  assert.ok(w.seq.indexOf('perp') >= 0 && w.seq.indexOf('perp') < w.seq.findIndex((x) => x.startsWith('GET /markets/')), w.seq.join(' | '));
+};
+gates['CK3 the NO side: the cheaper side is NO when YES is dear, and a model that expects the price to fall buys it'] = async () => {
+  const w = await ckWorld({ bid: '0.8000', ask: '0.8100', drift: -80 });
+  assert.strictEqual(w.ex.posts.length, 1, JSON.stringify(w.skips));
+  assert.strictEqual(w.ex.posts[0].side, 'ask', 'a NO buy is sent as an ask'); assert.ok(Math.abs(Number(w.ex.posts[0].price) - 0.8) < 1e-9, 'the YES price the NO order goes to: ' + w.ex.posts[0].price);
+  assert.strictEqual([...w.db.slot.values()][0].side, 'no');
+};
+gates['CK4 it waits a bounded time for the decision minute\'s candle, then buys; it never uses an older candle or the live quote in its place'] = async () => {
+  const w = await ckWorld({ arrivesAtRead: 4 });
+  assert.strictEqual(w.ex.posts.length, 1, JSON.stringify(w.skips)); assert.strictEqual(w.reads(), 4);
+  const d = [...w.db.slot.values()][0];
+  assert.strictEqual(d.perpTries, 4); assert.strictEqual(d.perpWaitMs, 3 * 1500, 'three polls of 1.5 s'); assert.strictEqual(d.perpPresent, 1);
+  const never = await ckWorld({ arrivesAtRead: 999 });
+  assert.strictEqual(never.ex.posts.length, 0, 'no candle, no order');
+  assert.ok(never.reads() >= 6 && never.reads() <= 9, 'bounded: ' + never.reads() + ' reads');
+  assert.ok(never.clockMs() - NOW <= 12000, 'the wait never passes 12 s of the minute (the stale gate is 20 s): ' + (never.clockMs() - NOW));
+  const r = never.skips.find((x) => x.reason === 'cfrti_no_perp_candle');
+  assert.ok(r && r.detail && r.detail.perpPresent === 0 && r.detail.perpTries === never.reads() && Number.isFinite(r.detail.perpWaitMs), 'the skip carries presence, tries and wait: ' + JSON.stringify(never.skips));
+  assert.ok(!never.seq.some((x) => x.startsWith('GET /markets/')) && !never.seq.some((x) => x.startsWith('POST')), 'the market is not even read: ' + never.seq.join(' | '));
+  assert.strictEqual(never.db.slot.size, 0); assert.strictEqual(never.db.locks.size, 0);
+};
+gates['CK5 no reader, or no way to wait, or a reader that throws or returns nothing: no order, and it says so'] = async () => {
+  const a = await ckWorld({ noReader: true });
+  assert.strictEqual(a.ex.posts.length, 0); assert.ok(a.skips.some((x) => x.reason === 'cfrti_no_reader'));
+  const b = await ckWorld({ arrivesAtRead: 2, noSleep: true });
+  assert.strictEqual(b.ex.posts.length, 0, 'with no sleep it tries once and stops'); assert.strictEqual(b.reads(), 1);
+  const c = await ckWorld({ args: { readPerpCandles: async () => { throw new Error('boom'); } } });
+  assert.strictEqual(c.ex.posts.length, 0); assert.ok(c.skips.some((x) => x.reason === 'cfrti_no_perp_candle'));
+  const d = await ckWorld({ args: { readPerpCandles: async () => ({ status: 429, candles: null }) } });
+  assert.strictEqual(d.ex.posts.length, 0); assert.ok(d.skips.some((x) => x.reason === 'cfrti_no_perp_candle'));
+  const e = await ckWorld({ without: [ckCloseSec - 900] });
+  assert.strictEqual(e.ex.posts.length, 0, 'no opening minute'); assert.ok(e.skips.some((x) => x.reason === 'cfrti_no_opening_minute'), JSON.stringify(e.skips));
+};
+gates['CK6 every refusal has its own reason code and carries the freshness numbers'] = async () => {
+  const cases = [['no edge', { drift: -80 }, 'cfrti_no_edge'], ['not cheap', { bid: '0.5000', ask: '0.5100' }, 'cfrti_not_cheap'], ['wide', { bid: '0.1500', ask: '0.2000' }, 'cfrti_spread_over_3c_or_crossed'],
+    ['dear ask', { bid: '0.3000', ask: '0.3100' }, 'cfrti_not_cheap']];
+  for (const [name, o, code] of cases) {
+    const w = await ckWorld(o);
+    assert.strictEqual(w.ex.posts.length, 0, name);
+    const r = w.skips.find((x) => x.reason === code);
+    assert.ok(r, name + ': ' + code + ' in ' + JSON.stringify(w.skips));
+    assert.ok(r.detail && r.detail.perpPresent === 1 && Number.isFinite(r.detail.perpAgeMs), name + ': the freshness numbers ride on the skip: ' + JSON.stringify(r));
+  }
+  const edge = (await ckWorld({ drift: -80 })).skips.find((x) => x.reason === 'cfrti_no_edge');
+  assert.ok(edge.detail.edge < 0.05, 'the edge that was judged is on the skip: ' + JSON.stringify(edge));
+};
+gates['CK7 its band, 30c inclusive: an ask of 30c trades, 31c does not; 5c inclusive'] = async () => {
+  assert.strictEqual((await ckWorld({ bid: '0.2900', ask: '0.3000' })).ex.posts.length, 1, '30c');
+  assert.strictEqual((await ckWorld({ bid: '0.3000', ask: '0.3100' })).ex.posts.length, 0, '31c');
+  assert.strictEqual((await ckWorld({ bid: '0.0400', ask: '0.0500' })).ex.posts.length, 1, '5c');
+  assert.strictEqual((await ckWorld({ bid: '0.0300', ask: '0.0400' })).ex.posts.length, 0, '4c');
+};
+gates['CK8 it is evaluated after every other strategy\'s order, so its wait cannot hold one up; the other strategy\'s order is unchanged by it'] = async () => {
+  const T2 = 'KXBTC15M-26NOV031000-00';
+  const oiClose = NOW + 150000, oiSec = Math.round(oiClose / 1000);
+  const db = makeDb(), ex = makeExchange(db, { market: { close_time: iso(ckClose), floor_strike: 100000, yes_bid_dollars: '0.1900', yes_ask_dollars: '0.2000', yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00' } });
+  const seq = [];
+  const inner = ex.fetchFn;
+  ex.fetchFn = async (url, init) => {
+    seq.push(init.method + (url.includes('/candlesticks') ? ' oi' : ''));
+    if (url.includes('/candlesticks')) return { status: 200, text: async () => JSON.stringify({ candlesticks: [{ end_period_ts: oiSec - 360, open_interest_fp: '1000000.00' }, { end_period_ts: oiSec - 180, open_interest_fp: '1090000' }] }) };
+    if (url.includes('/markets/' + T2)) return { status: 200, text: async () => JSON.stringify({ market: { ticker: T2, status: 'active', close_time: iso(oiClose), yes_bid_dollars: '0.1700', yes_ask_dollars: '0.1800', yes_bid_size_fp: '100.00', yes_ask_size_fp: '100.00', exchange_index: 2 } }) };
+    return inner(url, init);
+  };
+  let clockMs = NOW;
+  const t = tickArgs(db, ex, { args: { fetchFn: ex.fetchFn, clock: () => clockMs, sleep: async (ms) => { clockMs += ms; },
+    quotes: [{ series: 'KXBTC15M', m: { ticker: T, status: 'active', close_time: iso(ckClose) } }, { series: 'KXBTC15M', m: { ticker: T2, status: 'active', close_time: iso(oiClose) } }],
+    readPerpCandles: async () => { seq.push('perp'); return { status: 200, candles: perpCandles(0) }; } } });
+  await CKBOTH().runSlotTick(t.args);
+  assert.strictEqual(ex.posts.length, 2, 'both trade: ' + seq.join(' | '));
+  assert.strictEqual(ex.posts[0].ticker, T2, 'OICORE\'s order goes out first');
+  assert.ok(seq.indexOf('POST') < seq.indexOf('perp'), 'the first order is sent before the perp read even starts: ' + seq.join(' | '));
+};
+gates['CK9 sharing Bitcoin with OICORE: the same side stacks only inside the per-market open cap; the other side is a hedge and is refused'] = async () => {
+  const oi = (side, n) => ({ id: 'S-OICORE-' + T + '-1', strategy: 'SLOT', slotId: 'OICORE', ticker: T, series: 'KXBTC15M', side, step: 1, count: n, fillCount: String(n), maxCost: 1.5, price: 0.15, status: 'filled', settled: false, exitCount: 0, exitProceeds: 0, ts: NOW - 60000 });
+  const lock = (side) => (db) => db.locks.set(T, { side, by: 'SLOT:OICORE', ts: NOW - 60000 });
+  const full = await ckWorld({ prep: (db) => { db.slot.set('S-OICORE-' + T + '-1', oi('yes', 10)); lock('yes')(db); } });
+  assert.strictEqual(full.ex.posts.length, 0, 'OICORE already holds the market\'s 10 open contracts: no room for 3 more');
+  assert.ok(full.skips.some((x) => x.reason === 'cap'), JSON.stringify(full.skips));
+  const room = await ckWorld({ prep: (db) => { db.slot.set('S-OICORE-' + T + '-1', oi('yes', 5)); lock('yes')(db); } });
+  assert.strictEqual(room.ex.posts.length, 1, 'the same side with room stacks: ' + JSON.stringify(room.skips));
+  const hedge = await ckWorld({ prep: (db) => { db.slot.set('S-OICORE-' + T + '-1', oi('no', 5)); lock('no')(db); } });
+  assert.strictEqual(hedge.ex.posts.length, 0, 'the opposite side is a hedge');
+  assert.ok(hedge.skips.some((x) => x.reason === 'direction_lock'), JSON.stringify(hedge.skips));
+};
+gates['CK10 its own kill rules: a net below -$18 after 5 settled fills, or 30 losses in a row, latch it off'] = () => {
+  const c = slot.SLOT_STRATEGIES.find((x) => x.id === 'CFRTIK');
+  const lost = (i, pnl) => ({ id: 'S-CFRTIK-' + T + '-' + i, strategy: 'SLOT', slotId: 'CFRTIK', ticker: 'KXBTC15M-26NOV13' + String(1000 + i) + '-15', series: 'KXBTC15M', side: 'yes', step: 1, count: 3, fillCount: '3', maxCost: 0.7, price: 0.2, status: 'filled', settled: true, result: 'no', settledPnl: pnl, settledAt: Date.parse('2026-11-13T00:00:00Z') + i * 1000, ts: Date.parse('2026-11-13T00:00:00Z') + i * 1000 });
+  const net = []; for (let i = 1; i <= 6; i++) net.push(lost(i, -3.2));
+  assert.ok(slot.killCheck(c, net, null).killed, 'six losses of $3.20 are below -$18');
+  const few = []; for (let i = 1; i <= 4; i++) few.push(lost(i, -9));
+  assert.ok(!slot.killCheck(c, few, null).killed, 'under 5 fills the dollar floor does not apply yet');
+  const streak = []; for (let i = 1; i <= 30; i++) streak.push(lost(i, -0.1));
+  assert.ok(slot.killCheck(c, streak, null).killed, '30 losses in a row');
 };
 
 (async () => {

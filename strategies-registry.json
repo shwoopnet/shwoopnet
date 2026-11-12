@@ -181,25 +181,28 @@
    "figures": null
   },
   {
-   "id": "CFRTI-K",
-   "name": "CFRTI-K probation",
+   "id": "CFRTIK",
+   "name": "Perp-model longshot",
    "stage": "Probe",
-   "rule": "Two minutes before a Bitcoin 15 minute market closes, the cheap side (5c to 30c) when a model fed by Kalshi's own Bitcoin perpetual says it is underpriced by 5c or more",
-   "label": "UNPROVEN",
+   "rule": "Bitcoin: once, 2 minutes before the close, the cheaper side at 5c to 30c when a model on the price of Bitcoin's perpetual says it is worth at least 5c more than its price, held to settlement",
+   "label": null,
    "startDate": null,
    "nextRead": "2026-11-20",
-   "nextReadText": "Approved by the owner as a probation seat and being built; not live yet. The held-out windows close on or after 2026-11-05 and are read once, first allowed Nov 20",
+   "nextReadText": "Held-out read of the research rule, once, on or after 2026-11-20. Probation fills are not research evidence",
    "n": null,
-   "nBasis": "Public Kalshi candles only",
-   "kill": "Net under -$6 after 40 settled fills, or 18 losses in a row",
-   "return": "A 14 day cool-off, a paper record at cash PF 1.3+ on 100 rows, the owner's approval",
+   "nBasis": null,
+   "kill": "Code: net under -$18 after 5 settled fills, or 30 losses in a row, plus the shared 12% stop and 5.5% window cap; never re-armed automatically",
+   "return": "None of its own: a reviewed edit and the owner's approval (the general lifecycle: 14 day cool-off, fresh shadow run at the shadow bar)",
    "retiredOn": null,
    "reason": null,
    "notes": [
-    "Probation, approved, building: the owner approved the seat; nothing is live until it is built, deployed and the owner starts it. Honest odds in the spec: low single digits that it reaches a popup",
+    "Probation seat, 3 contracts, shares Bitcoin with OICORE on the same side only; no evidence of an edge at the research bar, a thin development read only",
     "The earlier Bitcoin lead and lag variants (spot version, book version) are folded in here: they stay only as lines in the Nov 20 sitting"
    ],
-   "code": {},
+   "code": {
+    "live": "CFRTIK",
+    "slot": "CFRTIK"
+   },
    "roomTarget": null,
    "roomWhat": null,
    "cause": null,
