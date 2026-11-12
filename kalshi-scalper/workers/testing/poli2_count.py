@@ -61,15 +61,19 @@ def build_s0():
 def answers(folder):
     m = json.load(open(os.path.join(folder, "manifest.json")))
     for row in m["rows"]:
-        if row.get("status") == 200 and row.get("file"):
+        if row.get("status") == 200 and row.get("file") and not row.get("truncated") and row.get("body_kind", "object") == "object":
             yield row, json.load(gzip.open(os.path.join(folder, row["file"])))
 
 
+FREQUENCIES = ("daily", "weekly", "monthly")   # AMENDMENT 2 (Nov 12, before any data): the census answer lists 2,469 Politics series, 93 percent one_off or custom; one list each is 2,469 requests
+
+
 def politics_series(s0):
+    """Politics-category series with a repeating frequency (daily, weekly, monthly), from the series-list answer of the census pull (complete: the category answer was 2.98 MB, not truncated)."""
     out = set()
     for row, body in answers(s0):
         for s in body.get("series", []) if isinstance(body, dict) else []:
-            if isinstance(s, dict) and str(s.get("category", "")).lower() == "politics" and re.fullmatch(r"[A-Z0-9]{2,32}", str(s.get("ticker", ""))):
+            if isinstance(s, dict) and str(s.get("category", "")).lower() == "politics" and s.get("frequency") in FREQUENCIES and re.fullmatch(r"[A-Z0-9]{2,32}", str(s.get("ticker", ""))):
                 out.add(s["ticker"])
     return sorted(out)
 

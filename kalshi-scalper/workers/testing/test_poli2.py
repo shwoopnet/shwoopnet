@@ -14,7 +14,7 @@ def mkrun(d, job, bodies):
     json.dump({"job": job, "rows": rows, "status": "complete"}, open(os.path.join(d, "manifest.json"), "w"))
 
 kp.check_job(p.build_s0())
-s0 = {"series": [{"ticker": "KXAAA", "category": "Politics"}, {"ticker": "KXBBB", "category": "Politics"}, {"ticker": "KXWX", "category": "Climate"}]}
+s0 = {"series": [{"ticker": "KXAAA", "category": "Politics", "frequency": "weekly"}, {"ticker": "KXBBB", "category": "Politics", "frequency": "daily"}, {"ticker": "KXONE", "category": "Politics", "frequency": "one_off"}, {"ticker": "KXWX", "category": "Climate", "frequency": "daily"}]}
 def mk(t, close, open_, vol, res="yes"):
     f = lambda x: datetime.utcfromtimestamp(x).strftime("%Y-%m-%dT%H:%M:%SZ")
     return {"ticker": t, "result": res, "close_time": f(close), "open_time": f(open_), "volume_fp": str(vol)}
