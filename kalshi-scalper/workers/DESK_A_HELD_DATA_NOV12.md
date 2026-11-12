@@ -80,3 +80,21 @@ The same script on books dated 2026-10-30 to 2026-11-03, which this desk has not
 - **C3 (cheap cell).** r_60 per trade for takers paying 0.10 to 0.30 is -0.3c or less in at least 3 of the 4 crypto series.
 
 C1 confirmed makes "dollar-typed flow is the uninformed flow" a fact about these books that maker cards may use. C2 and C3 confirmed says the cheap-side drift was present in both periods (8 days, still one regime); either failing says the 3 day cell was the sample. Nothing here is a strategy test and no try is counted; no settlement result is read.
+
+### Result of the confirmation (run once, after the commit above; 15.4 million taker trades, about 1,480 windows, Oct 30 to Nov 3)
+
+| Series | r_60 per trade, all | Whole-number taker | Fractional taker | Difference | Taker paid 0.70 to 0.90 | Taker paid 0.10 to 0.30 |
+|---|---|---|---|---|---|---|
+| Bitcoin | +0.21 (+0.15, +0.28) | +0.01 (-0.08, +0.10) | +0.28 (+0.21, +0.35) | +0.27 | +0.34 (-0.66, +1.17) | +0.39 (-0.37, +1.04) |
+| Ethereum | +0.06 (-0.03, +0.18) | -0.18 (-0.31, -0.05) | +0.27 (+0.17, +0.36) | +0.45 | -0.10 (-0.93, +0.68) | +0.32 (-0.51, +1.00) |
+| XRP | +0.05 (-0.08, +0.15) | -0.15 (-0.28, -0.00) | +0.25 (+0.13, +0.37) | +0.40 | -0.36 (-1.13, +0.45) | +0.30 (-0.61, +1.06) |
+| Dogecoin | -0.13 (-0.26, -0.01) | -0.38 (-0.54, -0.21) | +0.26 (+0.13, +0.40) | +0.64 | +0.25 (-0.83, +1.39) | -0.43 (-1.41, +0.47) |
+| Gold | +0.25 (+0.14, +0.35) | -0.19 (-0.39, -0.02) | +0.43 (+0.32, +0.55) | +0.62 | +0.40 (-0.64, +1.31) | +0.44 (-0.41, +1.25) |
+
+- **C1: CONFIRMED (5 of 5 series).** Against a fractional taker a maker keeps +0.25c to +0.43c at one minute; against a whole-number taker, zero or less. Eight days, two separate periods, every series. Dollar-typed flow is the uninformed flow on these books.
+- **C2: NOT CONFIRMED (0 of 4).** The favourite cell is +0.34, -0.10, -0.36, +0.25: nothing.
+- **C3: NOT CONFIRMED (1 of 4).**
+
+So the price cells of section 2 were the three day sample, as suspected, and are dropped. The overall line holds in both periods: **no R6 series qualifies** (best: gold +0.25c to +0.28c a trade; Bitcoin +0.18c to +0.21c behind a touch of about 6,800 contracts).
+
+**What C1 is good for, and what it is not.** A maker cannot choose who hits its quote, and the fractional share of contracts moves only between about 45% and 75% across the window, so conditioning a quote on "when dollar-typed flow is high" is worth a few hundredths of a cent: no card. Its use is as a diagnostic for the market-making family: any maker simulation (MMSIM1 and its versions) should report the fractional share of the contracts that filled it. A simulated edge that comes from whole-number fills is suspect; one that comes from fractional fills is the believable kind. This costs nothing and reads no held-out data if it is added to the development run only.
