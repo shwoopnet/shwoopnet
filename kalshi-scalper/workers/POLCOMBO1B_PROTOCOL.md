@@ -60,3 +60,5 @@ Verdict: NOT_ENOUGH_DATA (step 2 PARTIAL: about 28 of up to 60 pages of one coll
 
 ## RETIRED (Nov 11, 2026, 23:15Z, instruction from main): NOT_ENOUGH_DATA under the pre-registered KILL rule
 Two sampled runs found no candidate: no politics-leg combo has a live two-sided quote (run 2: 74 of 75 combos with a politics leg show 0.00/0.00, one 37-leg combo shows 0.00/1.00). The census is STOPPED (it was costing 429s on the shared bucket). Verdict: NOT_ENOUGH_DATA, card retired. The sample was not random (28 of at most 60 pages of one collection, the other two collections unpaged), so this is a retirement by the registered rule, not a proof that none exist. REOPEN CONDITION: a politics-leg combo with a live two-sided quote, or 100 settled politics combos. Files kept: POLCOMBO1B_CENSUS_PARTIAL.csv, POLCOMBO1B_COLLECTIONS.json, POLCOMBO1B_RESUME.json, POLCOMBO1B_READLOG.json.
+
+## RETIRED (Nov 12, 2026, POWER2 + main): Already retired by its KILL rule (Nov 11 23:15Z); POWER2 agrees (power 0, needs a live combo quote that does not exist).
