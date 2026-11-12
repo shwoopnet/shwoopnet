@@ -166,3 +166,25 @@ Written before any outcome or P&L of this test was read. Same family ruling as P
 | Conditional tie premium on the non-crypto 15 minute markets | Nov 12, 2026 | TIECOND1 stage 1, V2: best cell's lower bound 1.96% against 6% | Closed by census | TIECOND1, tie or frozen-source YES rules. The holiday existence check (Nov 26) was an arm of this card and closes with it unless Main keeps it as a watch item |
 | Second-of-minute taker clustering | Nov 12, 2026 | CRONCLUSTER1 stage A, V2: peak 0.87 to 1.11 against 1.3 | Closed by measurement | CRONCLUSTER1, send-second timing rules based on market-wide clustering (our own send-latency work is Refinement's and is separate) |
 | Fractional-size (dollar-typed) flow against whole-number flow | Nov 12, 2026 | RETAILFRAC1 stage A, V2: not two crowds | Closed at stage A, no try | RETAILFRAC1, trade-size-type classifiers |
+
+---
+
+## P8. MMMAP1: where a maker's realized spread is positive, across the 16 recorded 15 minute series (added Nov 12, 2026; a measurement, not a strategy, no try counted)
+
+**Why this and not another card.** After today's closures the one open question in this desk's lane with fresh data behind it is market-making structure. The earlier maker work predicted and found negative markouts on the fast books (Q2B on the hourly Bitcoin ladder: 30 second markout -0.3c to -1.5c; R6T on the 15 minute crypto and gold books: -0.2c to -1.0c). Nobody has measured the slow books, because the non-crypto recorder (NC15: silver, copper, oil, natural gas, five FX pairs, HYPE, BNB) only started on Nov 12. If MMSIM1 passes on Nov 24 the next question is "where else"; if it fails on adverse selection the next question is "is there a slower book with the same spread". This map answers both in advance, with no simulation, no fill model and no settlement outcome. It is an input to the market-making family, in the way FEEROUND1 was an input to sizing.
+
+**Data.** `nc-data:nc15/<date>/<HHMM>/book.csv.gz`, `trades.csv.gz`, `coverage.csv.gz` (same columns as R6: best 5 YES and NO bids with sizes every 5 s; the complete tape per window with microsecond times and taker side) and `quote-data:book15r6/` (gold and the crypto series at 2 s) as the comparison. Public data already recorded; zero API calls.
+
+**Definitions (per taker trade).** `mid0` = the mid of the last book snapshot before the trade (YES ask = 1 - best NO bid). Trade price `x` in YES terms; direction `s` = +1 when the taker bought YES, -1 when the taker bought NO.
+- effective half-spread `e = s * (x - mid0)`;
+- markout at h seconds `m_h = s * (mid_h - mid0)` with `mid_h` from the first snapshot at or after the trade time plus h, for h = 30, 60, 180;
+- realized half-spread `r_h = e - m_h`: what a maker filled at the touch keeps after the price has moved for h seconds.
+Drop trades in the last 60 s of a window (the outcome is nearly decided and the markout is the settlement), trades with no snapshot inside 10 s before them, and windows whose coverage row shows a poll gap above 15 s.
+
+**Tables.** Per series, and per series by UTC 4 hour block and by minutes to close (15 to 10, 10 to 5, 5 to 1): number of taker trades and contracts, quoted half-spread at the snapshots, mean `e`, mean `m_30`, `m_60`, `m_180`, mean `r_60` with an interval from resampling whole windows, the median size resting at the touch, taker contracts an hour, and the share of taker contracts that are fractional (V2's descriptive lead says small dollar-typed orders lean to the cheap side). One line for each R6 series beside them.
+
+**How to read it (fixed now).** A series is worth a market-making simulation only if `r_60` is at least +0.5c with the interval's lower end above zero, on at least 500 taker trades from at least 3 dates, AND the median touch size is under 2,000 contracts (a new order behind tens of thousands of contracts never fills; the R6 header row shows about 12,900 at Bitcoin's best bid). Any series that qualifies becomes a candidate MARKET EXTENSION of MMSIM1 (a version under lifecycle 7g, not a new strategy), to be registered only after MMSIM1's held-out read. If no series qualifies, the write-up says "no slow book pays a maker" and the market-making family has nowhere else to go on recorded data.
+
+**Limits, said plainly.** A realized spread assumes the maker is filled on every taker trade at the touch; queue position can only make it worse, so a positive `r_60` is necessary, not sufficient. Five second books blur `mid0` and the 30 second markout. Three days is a small sample for hour-of-day cells; report the cell counts and leave thin cells blank.
+
+**When.** After 3 full days of NC15 (about Nov 15). About 2 hours of offline work.
