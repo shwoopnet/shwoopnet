@@ -15,3 +15,6 @@ Scorable today: the only release since the stock perps began quoting is COP (11-
 
 ## Count
 N +2 (continuation, control).
+
+CUTOFF CONSTANT: 2027-03-01 (held-out = releases from 2027-03-01 to 2027-05-31; development = releases before it; fixed in EARNPERP_COMMON.md). NO SCORER COMMITTED: the scorer must carry this constant, and this marker, before any held-out read.
+READ-ONCE MARKER: not yet read; first read allowed on or after 2027-06-01; after the read: READ ON <date>, commit <hash>

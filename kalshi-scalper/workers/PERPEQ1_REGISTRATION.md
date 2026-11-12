@@ -20,3 +20,6 @@ As the common file. NOT_ENOUGH_DATA at the read date reports the date the 100 tr
 
 ## Count
 N +2 (fade, control).
+
+CUTOFF CONSTANT: 2026-12-01T00:00:00Z (held-out = everything recorded from this instant; development = before it; fixed in PERPEQ_COMMON.md). NO SCORER COMMITTED: the scorer must carry this constant, and this marker, before any held-out read.
+READ-ONCE MARKER: not yet read; first read allowed on or after 2026-12-30; after the read: READ ON <date>, commit <hash>

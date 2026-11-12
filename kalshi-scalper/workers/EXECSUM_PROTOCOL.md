@@ -66,3 +66,7 @@ Held-out for D3, BILLS-D0 and BILLS-D15 was NOT read: none survived development 
 
 ## Note (Nov 12, 2026, from Desk A's re-check c2165e0): GovInfo publication lag
 GovInfo publishes the Federal Register 3 to 6 days after signing, so any "count so far this week" derived from GovInfo is blind to the current week (the latest weeks Oct 25 and Nov 1 show zero only because they are unpublished). The EXECSUM development and held-out results used weeks whose counts were complete in GovInfo at the time, but they cannot be applied live without a second count source. See BASERATES1_TABLES.md corrections.
+
+## Integrity note (Nov 12, 2026)
+NO SCORER COMMITTED for EOWEEK-D3 and BILLS-D0/D15 (the pull was a one-off scratch script, see "Code" above): the cut is only described as the earlier two thirds of settled markets by close time, which moves as markets settle. Before any further scoring of these variants the cut must be committed as a close-time constant. Held-out for D3, BILLS-D0 and BILLS-D15 is NOT READ. (EOWEEK-D0 held-out was read once: spent.)
+READ-ONCE MARKER: EXECSUM EOWEEK-D0 held-out READ (see table above); EOWEEK-D3, BILLS-D0, BILLS-D15 held-out not yet read and not to be read until a close-time cut constant is committed here.

@@ -19,3 +19,6 @@ As the common file; development read date **2026-12-01** (the first possible tri
 
 ## Count
 N +7 (pooled rule, control, and five per-pair readouts, which are information only).
+
+CUTOFF CONSTANT: 2026-12-01T00:00:00Z (held-out = everything recorded from this instant; development = before it; fixed in PERPEQ_COMMON.md). NO SCORER COMMITTED: the scorer must carry this constant, and this marker, before any held-out read.
+READ-ONCE MARKER: not yet read; first read allowed on or after 2026-12-30; after the read: READ ON <date>, commit <hash>
