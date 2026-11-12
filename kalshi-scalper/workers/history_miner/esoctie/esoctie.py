@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ESOCTIE reader, measurement, candle-job builder and scorer (History Miner, Nov 12, 2026). Research only; sends nothing.
 Registration: ESOCTIE_REGISTRATION.md (this folder). Series and constants: ESOCTIE_SERIES.json (hash-checked below).
-scorekit.py in this folder is a byte copy of claude/testing-desk 512ffe0d workers/testing/scorekit.py (sha256 checked below).
+scorekit.py in this folder is a byte copy of claude/testing-desk 742bc255 workers/testing/scorekit.py (sha256 checked below).
 
 CLI:
   python3 -I esoctie.py build-candles <lists_folder>...            -> writes ESOCTIE_CANDLES.json (a job file for review)
@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import scorekit as sk  # noqa: E402
 
-SCOREKIT_SHA = "2b36fdaef8ae136bc477f9b92da0d70169cbc07a45077e22356bdd0cb5306557"  # claude/testing-desk 512ffe0d (reader-level HELDOUT_ refusal)
+SCOREKIT_SHA = "04bf371f02762d8a9bc52f846568488a146af833c7427a7f27cf09cca4544493"  # claude/testing-desk 742bc255 (reader-level HELDOUT_ refusal, realpath)
 CFG = json.load(open(os.path.join(HERE, "ESOCTIE_SERIES.json")))
 DEV_FROM = sk.iso(CFG["blocks"]["development_closes_from"])
 DEV_BEFORE = sk.iso(CFG["blocks"]["development_closes_before"])
