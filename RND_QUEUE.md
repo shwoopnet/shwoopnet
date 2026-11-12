@@ -181,7 +181,8 @@ kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md and census/ on claude/idea-desk-b 
 
 PF 1.5 needs a net mean over standard deviation of about 0.162 a trade. For a rule that trades every day that is an annual Sharpe ratio near 2.6. The desk's arithmetic, with effect sizes from memory of the published work (so assumptions): S1 overnight index ETFs net about 0.05 (PF about 1.13); S2 single-name overnight clientele net negative after about 6.7bp a day of costs (PF about 0.9); S7 first 30 minutes predicting the last 30 net about 0.04 (PF about 1.1). No every-day rule on liquid US stocks built from a published anomaly can reach the bar after costs, and the bar does not change.
 
-- **RETIRED UNREAD, cannot clear the bar after costs by arithmetic:** S1, S2, S7. **RETIRED UNREAD with them:** S3, S4, S5 (screens that could not pass). No data bought, no try spent. The 500-name universe and the one-month ranking pull are not bought; that exception lapses unused. This supersedes the first-wave ruling in the section below.
+- **RETIRED UNREAD, cannot clear the bar after costs by arithmetic:** S1, S7 and S2's long-short line. **RETIRED UNREAD with them:** S3, S4, S5 (screens that could not pass). No data bought, no try spent. This supersedes the first-wave ruling in the section below.
+- **S2's LONG LEG is HELD, not retired (changed at 17:11Z on the new desk's own prior of 3 to 8 percent):** it runs only if the pilot proves the listing venue's official open and close prints exist per name; cost about $5.60 (the one-month ranking pull, still allowed for this card only, plus daily bars for the 500 by the batch route); reported against a same-universe equal-weight overnight benchmark.
 - **Left, the only cards with a forced counterparty and a possibly large per-event effect:** S6 (leveraged-ETF rebalance on big-move days), S8 (closing auction imbalance), S9 (opening cross). Due 20:00Z from the desk: the same honest per-event arithmetic for each, what verdict the events $25 buys can support, exact pulls and estimates, and "test" or "efficient, move on". If none can clear, the stocks search is reported as finding no card worth its data.
 - **Price definition is not established:** Databento's statistics schema documents its close as "the last trade price", not the auction print. The pilot's first assertion: SPY on 2026-08-27 must read 771.10 (the official print measured in CLAUDE.md). Until proved per venue, every card trading "the official open or close" is blocked.
 
@@ -258,6 +259,16 @@ kalshi-scalper/workers/testing/PERPS_ORPHANS_NOV12.md on claude/testing-desk (4d
 ### Testing Desk, T4 done and T5 under way (Nov 12, 17:08Z)
 
 T4 (b8f53374): the shared scorer's loaders were checked against real landed files, shape only. Two real bugs fixed (perp candles carry absolute price levels, which the old cents rule would have shrunk a hundredfold and silently broken the PERPEQ1 scorer; the perp csv and R6 book files had no loader). One replay rule (Desk A's) and one haircut table (Forensics'). Still unverified: pull-answer order books, cap_strike, /historical candles. The PERPEQ1 scorer is committed (db0b0532), written on synthetic rows only, and refuses to run before 2026-12-22 21:00Z. T5 (20:30Z): the rest of V2's estate, about 28 rows; closing-buy forward reads are one grouped row (retired unread by the owner); the recorder dependency table comes first, for Main.
+
+### The rest of V2's estate: RULED (Nov 12, 17:11Z)
+
+kalshi-scalper/workers/testing/V2_ESTATE_NOV12.md on claude/testing-desk (5997eb4d): 17 rows covering about 45 ids. No KEEP.
+
+- **RETIRED UNREAD, cannot reach its bar:** NOWCAST1-F, FEDIMPL1, BARRIER1-F, SOFR1 (read Nov 10, not enough data), COUNT1D-F, TRUMPTOPIC1. **No lead:** the USWEEP forward read. **Unreadable:** DERIBIT-IMPLIED. **No registered reader:** the OKX liquidation test, the Steam reference series. **Closed families:** GF12 (tape sweep), PIN1 and ROUND1 (no survivor), lock and parity, market making. All tries stay counted.
+- **MMSIM1 and QUOTE2B:** unchanged; the Nov 24 held-out reads run once, by Desk A, for the record.
+- **DEPTH1 and NC15DEPTH1:** Desk A states in writing before Nov 14 whether the entry is resting book state or taker flow; if inside the closed order-flow family the read still runs once, for the record only.
+- **The closing-buy forward reads** (FWD7, FWD10, FLAT2-F, CONC2-F, SQ1, TS1, CW10, HOUR3-F, ENTRY2, FLIPS0X, E3F and the rest): retired unread by the owner on Nov 12. The Testing Desk checks seven doubtful ids (JUMP1, FEAT2-F, FEAT4-F, GOLD1-F, ML1, TIB1, DIP1) against their registered entry definition by 19:00Z.
+- **Recorders with no research reader left** (told to Main): record-daily, record-oklq, record-ref, record-wxens, record-rain, record-signals, record-ingame, the Deribit recorder, and the quote recorder's Kalshi quote and ladder files. Stopping them is Main's and the owner's call; record-politics is the owner's order.
 
 ## Desk tasks, Nov 12 16:00Z to 22:00Z (set after the owner said the first four hours were not enough)
 

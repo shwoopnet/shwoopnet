@@ -48,7 +48,7 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 
 - STOCKS (17:00Z): ten cards written, first wave S1, S2, S7 plus four screens, costed about $12.75; the owner ruled at 17:04Z "Treat it as personal use" (personal Databento account, owner-accepted terms risk; named lists only, NO all-symbols requests, $25 cap); named-list pulls may start (pilot, S1, 8 ETF minute bars); the one bounded ranking pull ($0.59, May 2018 only, hard stop above $1) is allowed (the EA confirmed "no all symbols" was its wording, not the owner's); nothing scored until registrations are in shwoopnet/shwoopnet-private. Nothing derived from Databento goes in the repo.
 
-- STOCKS (17:10Z update): S1 to S5 and S7 RETIRED UNREAD (PF 1.5 on an every-day rule is an annual Sharpe near 2.6; published anomalies net about 0.05 a trade). Only S6, S8, S9 (forced-flow cards) remain; the desk owes per-event arithmetic by 20:00Z. The paid pull route is refused by the desk session's permission check; with the EA and Main. The statistics schema close is "last trade", not proven to be the auction print: the pilot must show SPY 2026-08-27 = 771.10.
+- STOCKS (17:10Z update): S1, S3, S4, S5, S7 RETIRED UNREAD; S2 long leg HELD until the pilot (about $5.60) (PF 1.5 on an every-day rule is an annual Sharpe near 2.6; published anomalies net about 0.05 a trade). Only S6, S8, S9 (forced-flow cards) remain; the desk owes per-event arithmetic by 20:00Z. The paid pull route is refused by the desk session's permission check; with the EA and Main. The statistics schema close is "last trade", not proven to be the auction print: the pilot must show SPY 2026-08-27 = 771.10.
 
 ## Owed to me at the time of writing
 
@@ -61,7 +61,7 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 
 ## Owed by me
 
-- A ruling by Nov 13 on which of V2's tests on the daily recorder (NOWCAST1, FEDIMPL1, BARRIER1, SOFR) survive, so Main knows whether record-daily can be cut.
+- DONE Nov 12 17:11Z: V2's whole estate ruled (no KEEP beyond PERPEQ1 and CASHSPREAD1 part B); Main told which recorders have no research reader. Still owed: a ruling on DEPTH1's family when Desk A's note arrives (before Nov 14), and on the stock cards S6, S8, S9 after the desk's page (20:00Z).
 
 - The six-hour line to the EA at about 21:00Z (3 PM CT): desks, cards added, the stocks data plan, first stock test dates, counts, Databento spend.
 - Rulings on: Desk B's ranking; Desk A's ladder card; any SPREADCELL1 result (wording: "cleared its registered bar, probe-eligible by the owner's popup", and only if line 2 also holds).
