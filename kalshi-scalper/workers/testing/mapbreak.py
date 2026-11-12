@@ -85,7 +85,7 @@ def matches(spec, list_folders):
     for t, m in raw.items():
         parts = t.split("-")
         by.setdefault((parts[0], parts[1] if len(parts) > 1 else ""), []).append((parts, m))
-    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "start_not_derivable": 0, "no_map1_result": 0, "sampled": 0, "second_look_matches": 0, "map2_closed_under_15_min_after_map1_count_only": 0, "map2_won_by_map1_winner_no_second_look": 0, "no_map2_result_no_second_look": 0}
+    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "before_development_history_rows_not_used": 0, "start_not_derivable": 0, "no_map1_result": 0, "sampled": 0, "second_look_matches": 0, "map2_closed_under_15_min_after_map1_count_only": 0, "map2_won_by_map1_winner_no_second_look": 0, "no_map2_result_no_second_look": 0}
     cand = []
     for ti in spec["titles"]:
         keys = {key for (s, key) in by if s == ti["match_series"]}
@@ -94,6 +94,7 @@ def matches(spec, list_folders):
             mm = by[(ti["match_series"], key)]
             close = max(m["close"] for _, m in mm if m["close"])
             if close >= HELD_OUT_FROM: counts["held_out_dropped"] += 1; continue
+            if close < WIN_FROM: counts["before_development_history_rows_not_used"] += 1; continue          # the history lists are COUNTS ONLY (Amendment 3); a match closing before 2026-09-12 is not in this development sample
             tot = by.get((ti["total_maps_series"], key), [])
             floors = [m["floor"] for _, m in tot if m["floor"] is not None]
             maps = by.get((ti["map_series"], key), [])
