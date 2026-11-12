@@ -1,3 +1,4 @@
+import os
 # Read only nightly every-trade review. Usage: python3 -I nightly.py <report.json> [YYYY-MM-DD, a US Central date; default the last full CT day]
 # Cash basis as in scorer.py (win or loss recomputed from avgFill and avgFee, exits corrected to the limit). No network, no token.
 import sys, json, re, datetime as D
@@ -73,25 +74,30 @@ else:
     print('skip rows that day %d (window of report: last %s days); cheap_skipped: %d %s' % (len(sd), d['skips'].get('days'), len(cs), dict(Counter(r['reason'] for r in sd))))
     for r in cs: print('   %s %s left %ss %s' % (T(r['at']).astimezone(CT).strftime('%H:%M'), r['ticker'], r.get('secondsLeft'), json.dumps(r.get('detail'))))
 # ---- gold tripwire (as goldtrip.py)
-START = '2026-11-09T16:22:00'
+START = os.environ.get('GOLD_START', '2026-11-10T00:00:00')  # latch re-arm date (docs/GOLD_KILL_LATCH.md); was 2026-11-09T16:22 for the old tripwire
 g = [(t['ts'], t['pnl']) for t in tr if t['grp'] == 'gold L1' and t['o'].get('result') in ('yes', 'no', 'exit')]
 gs = [p for ts, p in g if ts >= START]
 roll = [pf([p for _, p in g[i:i + 60]]) for i in range(len(g) - 59)]
 below = [r for r in roll[max(0, len(roll) - len([1 for ts, _ in g if ts >= START])):] if r < 0.7] if roll else []
 print('\nGOLD TRIPWIRE: n since %sZ %d of 100, cumulative cash PF %s net $%.2f, latest rolling-60 PF %s, windows below 0.7 since start %d' % (START[:16], len(gs), fp(pf(gs)) if gs else 'na', sum(gs), fp(roll[-1]) if roll else 'na', len(below)))
+gall = [(t['ts'], t['pnl'], t['o'].get('result') == 'exit') for t in tr if t['grp'] == 'gold L1' and t['o'].get('result') in ('yes', 'no', 'exit')]
+r100 = pf([p for _, p, _ in gall[-100:]]) if len(gall) >= 100 else None
+ex40 = sum(1 for _, _, e in gall[-40:] if e)
+print('GOLD ALERTS (no stop): rolling-60 PF %s (alert if under 0.7), rolling-100 PF %s (alert if under 1.0), early sells in last 40 trades %d (alert if 3 or more)' % (fp(roll[-1]) if roll else 'na', fp(r100) if r100 is not None else 'na', ex40))
 # ---- OICORE headroom (booked settledPnl, as the code books it)
 o = sorted([x for x in d.get('slotOrders', []) if x.get('strategy') == 'OICORE' and x.get('status') == 'filled' and x.get('settledPnl') is not None], key=lambda x: x['ts'])
 import os
 BASE = float(os.environ.get("SIZING_BASE", "0"))  # live figure removed, ask Main
 cts = o[-1]['count'] if o else 10
-stop = min(5 * cts, 0.12 * BASE, 150)
+stop = min(5 * cts, 0.12 * BASE, 150) if BASE > 0 else None
 cum = pk = streak = ms = 0.0; mdd = 0.0; killn = None
 for i, x in enumerate(o, 1):
     cum += x['settledPnl']; pk = max(pk, cum); mdd = max(mdd, pk - cum)
     streak = streak + 1 if x['settledPnl'] < 0 else 0; ms = max(ms, streak)
 dd = pk - cum
 print('OICORE HEADROOM (booked settledPnl, %d fills):' % len(o))
-print('  drawdown from peak %.2f (peak %.2f, net %.2f, worst so far %.2f) vs stop min(5 x %d, 12%% x %.2f = %.2f, 150) = %.2f -> room %.2f' % (dd, pk, cum, mdd, cts, BASE, 0.12 * BASE, stop, stop - dd))
+if stop is None: print('  drawdown from peak %.2f (peak %.2f, net %.2f); STOP ROOM NOT SHOWN: SIZING_BASE is not set' % (dd, pk, cum))
+else: print('  drawdown from peak %.2f (peak %.2f, net %.2f, worst so far %.2f) vs stop min(5 x %d, 12%% x %.2f = %.2f, 150) = %.2f -> room %.2f' % (dd, pk, cum, mdd, cts, BASE, 0.12 * BASE, stop, stop - dd))
 print('  net kill: net %.2f after %d fills; kill if under -6.00 once 40 fills -> %s' % (cum, len(o), ('room %.2f' % (cum + 6)) if len(o) >= 40 else 'armed, room %.2f' % (cum + 6)))
 print('  losing streak now %d (worst %d) vs kill at 24 -> room %d' % (streak, ms, 24 - streak))
 # ---- open positions

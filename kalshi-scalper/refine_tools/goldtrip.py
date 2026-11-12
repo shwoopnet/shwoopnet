@@ -1,5 +1,5 @@
 import sys,json,datetime as D
-rep=sys.argv[1]; start=sys.argv[2] if len(sys.argv)>2 else '2026-11-09T16:22:00Z'
+rep=sys.argv[1]; start=sys.argv[2] if len(sys.argv)>2 else '2026-11-10T00:00:00Z'
 d=json.load(open(rep))
 rows=[]
 for o in d['orders']:
