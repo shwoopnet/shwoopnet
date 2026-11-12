@@ -96,8 +96,8 @@ def rep_replay(name, rs, k):
     pnl = [((1 if r[5] else 0) - r[k] - fee(r[k])) for r in got]
     gw = sum(x for x in pnl if x > 0); gl = -sum(x for x in pnl if x < 0)
     print("%-34s filled %d of %d | cash PF %.2f | mean %+.2fc | wins %d" % (name, len(got), len(rs), gw / gl if gl else 9, 100 * sum(pnl) / len(pnl), sum(1 for r in got if r[5])))
-if MODE not in ("dev", "heldout", "selftest", "export"): sys.exit(__doc__)
-keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY,
+if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
+keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY, "exportall": lambda d: d < HELDOUT_FIRST_DAY,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,
         "selftest": lambda d: SELFTEST_FROM <= d < HELDOUT_FIRST_DAY}[MODE]
 if MODE == "heldout":
@@ -112,7 +112,7 @@ if MODE == "heldout" and len(sel3) < NEEDED and not DUE:
     sys.exit("Refusing: %d three-venue Bitcoin edge rows on %d folders with all three venues, %d needed (nothing scored). Use --due only when told the read is due." % (len(sel3), f3, NEEDED))
 rowsK, lostK, fK = build({"kraken"}, keep)
 selK = [r for r in rowsK if r[4] - r[3] >= 0.05]
-tag = {"dev": "DEVELOPMENT", "export": "DEVELOPMENT EXPORT", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
+tag = {"dev": "DEVELOPMENT", "export": "DEVELOPMENT EXPORT", "exportall": "DEVELOPMENT EXPORT ALL", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
 print("###", tag, "| three-venue line: %d run folders with all three venues (%d folders skipped for a missing venue) | kraken-only line: %d run folders" % (f3, len(skipped3), fK))
 if MODE != "dev" and len(sel3) < NEEDED: print("THREE-VENUE LINE: no evidence at n = %d (under %d rows)" % (len(sel3), NEEDED))
 print("== three venues (as registered) | cheap rows with a model", len(rows3), "| lost:", dict(lost3)); rep("  baseline cheap side", rows3); rep("  model edge >= 0.05", sel3)
@@ -122,6 +122,12 @@ print("three-venue trades", len(A), "| kraken-only trades", len(K), "| in both",
 rep("  kept (in both), kraken stats", [K[k] for k in sorted(set(A) & set(K))])
 for nm, rs in (("three venues", sel3), ("kraken only", selK)):
     rep_replay("BOOK-REPLAY +2 s, " + nm, rs, 8); rep_replay("BOOK-REPLAY +6 s, " + nm + " (judges live use)", rs, 9)
+if MODE == "exportall":
+    out = ["form,t0_utc,ticker,side,ask_seen,model_edge_flag"]
+    for nm, rs in (("three", rows3), ("kraken", rowsK)):
+        for r in sorted(rs, key=lambda r: (r[7], r[1])):
+            out.append("%s,%s,%s,%s,%.4f,%d" % (nm, datetime.datetime.fromtimestamp(r[7] / 1000, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), r[1], r[2], r[3], 1 if r[4] - r[3] >= 0.05 else 0))
+    open(sys.argv[3], "w").write("\n".join(out) + "\n"); print("wrote", len(out) - 1, "rows (all cheap rows with a model, no outcome column)")
 if MODE == "export":
     import io
     out = ["form,t0_utc,ticker,side,ask_seen"]
