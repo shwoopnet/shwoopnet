@@ -16,7 +16,9 @@ def s1_overnight_etf(daily, cost_bp=C.COST_BP["index_etf"]):
     ret = (o.shift(-1) / c - 1) * 1e4                      # close t -> open t+1, bp
     net = ret - 2 * cost_bp - C.SEC_SELL_BP                 # buy + sell, SEC on the sell
     pnl = net.mean(axis=1, skipna=True).dropna()            # equal weight across ETFs, one value per day
-    return pnl, {"control_intraday_gross_bp": float(((c / o - 1) * 1e4).mean(axis=1).mean())}
+    per_etf = {k: net[k].dropna() for k in net.columns}     # Amendment 3: each ETF also reported separately
+    return pnl, {"control_intraday_gross_bp": float(((c / o - 1) * 1e4).mean(axis=1).mean()),
+                 "dropped_name_days": int(len(daily) - len(d)), "per_etf_pnl": per_etf}
 
 # ---------- S2 overnight/intraday clientele in single names
 def s2_signal(d, lookback=60):
@@ -46,7 +48,7 @@ def s2_clientele(daily, long_only=False, lookback=60, decile=0.1,
             # short leg: sold at the close (SEC on that sell), covered at the open, one overnight of borrow
             sh = -f[bot].dropna().mean() * 1e4 - 2 * cost_bp - C.SEC_SELL_BP - borrow / 365 * 1e4
             rows[t] = (lg + sh)
-    return pd.Series(rows).dropna(), {"mode": "long" if long_only else "long_short"}
+    return pd.Series(rows).dropna(), {"mode": "long" if long_only else "long_short", "dropped_name_days": int(len(daily) - len(d))}
 
 # ---------- S3 one-week reversal in illiquid names (Friday close to next Friday close)
 def s3_signal(d):
@@ -77,7 +79,7 @@ def s3_reversal(daily, long_short=False, cost_bp=C.COST_BP["illiquid"], borrow=C
         if long_short:
             g += -fwd[sell].dropna().mean() * 1e4 - 2 * cost_bp - C.SEC_SELL_BP - borrow * 7 / 365 * 1e4
         rows[t] = g
-    return pd.Series(rows).dropna(), {"mode": "long_short" if long_short else "long"}
+    return pd.Series(rows).dropna(), {"mode": "long_short" if long_short else "long", "dropped_name_days": int(len(daily) - len(d))}
 
 # ---------- S4 opening gap fade (no-news filter uses only PRIOR-day volume: today's volume is not known at the open)
 def s4_gap_fade(daily, direction="both", thr=0.02, cost_open=C.COST_BP["large_cap"],
@@ -96,7 +98,7 @@ def s4_gap_fade(daily, direction="both", thr=0.02, cost_open=C.COST_BP["large_ca
     pnl = pnl.where(~((side < 0) & ev), pnl - borrow / 365 * 1e4)   # short leg pays borrow (intraday approx 1 day)
     rows = pnl.stack().dropna()
     by_day = rows.groupby(level=0).mean()
-    return by_day, {"name_events": int(len(rows)), "event_days": int(len(by_day))}
+    return by_day, {"name_events": int(len(rows)), "event_days": int(len(by_day)), "dropped_name_days": int(len(daily) - len(d))}
 
 # ---------- S5 post-gap drift: event detected on day t from bars; enter close t+1, exit close t+21
 def s5_post_gap(daily, gap_thr=0.05, vol_mult=3.0, hold=20, cost_bp=C.COST_BP["large_cap"],
@@ -118,10 +120,10 @@ def s5_post_gap(daily, gap_thr=0.05, vol_mult=3.0, hold=20, cost_bp=C.COST_BP["l
             if side < 0: g -= borrow * hold / 252 * 1e4 + C.SEC_SELL_BP
             rows.append((idx[i + 1], sym, g)); busy_until = i + 1 + hold
     df = pd.DataFrame(rows, columns=["date", "symbol", "pnl"])
-    if df.empty: return pd.Series(dtype=float), {"name_events": 0}
+    if df.empty: return pd.Series(dtype=float), {"name_events": 0, "dropped_name_days": int(len(daily) - len(d))}
     wk = df.groupby(df["date"].dt.to_period("W-SUN"))["pnl"].mean()   # cluster: one value per week
     wk.index = wk.index.start_time
-    return wk, {"name_events": int(len(df)), "event_weeks": int(len(wk))}
+    return wk, {"name_events": int(len(df)), "event_weeks": int(len(wk)), "dropped_name_days": int(len(daily) - len(d))}
 
 # ---------- minute helpers for S6 and S7
 def _at(minute, hhmm, col):

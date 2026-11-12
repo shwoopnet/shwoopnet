@@ -102,3 +102,10 @@ def report(card, win, judged, extra=None):
     r = {"card": card, "assumed_costs": True, "windows": win, "label": label(win, judged)}
     if extra: r.update(extra)
     return r
+
+def dev_corr(a, b):
+    """Daily pnl correlation of two cards on DEVELOPMENT dates only (before HELDOUT_START). Amendment 3 item 4:
+    computed before either held-out read."""
+    x = pd.concat([a.rename("a"), b.rename("b")], axis=1).dropna()
+    x = x[x.index < HELDOUT_START]
+    return float(x["a"].corr(x["b"])) if len(x) > 2 else float("nan")

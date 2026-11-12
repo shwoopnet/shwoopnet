@@ -165,5 +165,16 @@ class RunCardHeldout(unittest.TestCase):
             finally:
                 os.chdir(old)
 
+class Amendment3(unittest.TestCase):
+    def test_counts_and_per_etf_and_dev_corr(self):
+        d = make_daily(4, end="2018-12-31", seed=12)
+        pnl, meta = S.s1_overnight_etf(d)
+        self.assertIn("dropped_name_days", meta); self.assertEqual(set(meta["per_etf_pnl"]), {"X000", "X001", "X002", "X003"})
+        _, m2 = S.s2_clientele(make_daily(60, end="2018-12-31", seed=13), long_only=True)
+        self.assertIn("dropped_name_days", m2)
+        a = pd.Series([1.0, 2, 3, 4, 5, 6], index=pd.to_datetime(["2024-06-25", "2024-06-26", "2024-06-27", "2024-06-28", "2024-07-01", "2024-07-02"]))
+        b = pd.Series([1.0, 2, 3, 4, -9, 9], index=a.index)
+        self.assertAlmostEqual(C.dev_corr(a, b), 1.0)      # held-out rows (after cutoff) ignored
+
 if __name__ == "__main__":
     unittest.main()
