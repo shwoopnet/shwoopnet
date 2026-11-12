@@ -33,6 +33,7 @@ def trades_of(mks, binary, perp):
     return out
 def core(mks, binary, perp, out=print):
     T = trades_of(mks, binary, perp); v = [t for t in T if t["xb"] is not None]
+    out("CAVEAT: the exit is a 1 contract sale at the DISPLAYED candle bid with no haircut or slip; candle freshness was measured on the Bitcoin 15 minute market only, not on the perp or on this exit minute.")
     out("CFRTI-K-TX | selected on development (closes %s to before %s): it can falsify, not support | fired trades %d | with a valid exit bid %d | held for want of an exit bid %d" % (datetime.datetime.fromtimestamp(K.DEV_FROM, datetime.timezone.utc).date(), datetime.datetime.fromtimestamp(K.CUTOFF, datetime.timezone.utc).date(), len(T), len(v), len(T) - len(v)))
     if not v: out("COST SCREEN: no trade has an exit bid; nothing to cost. No result read."); return None
     med = st.median(t["rt"] for t in v)
@@ -54,7 +55,8 @@ def core(mks, binary, perp, out=print):
     return dict(n=n, hold=mh, exit=mx, z=zd, helps=helps)
 def r6_line(mks, binary, perp, root, out=print):
     """separate line: exit at the R6 book bid at the first poll at or after close-60 s (within 4 s, else held), entry by the IOC convention at the ask seen, 6 s delay, on the development trades that have an R6 book."""
-    import cfrti_b; cfrti_b.load_book(root); B = cfrti_b.book
+    import heldout_guard; heldout_guard.refuse_heldout(root, "cfrti_k_tx.r6_line")
+    import cfrti_b; cfrti_b.load_book(root, before="2026-11-05"); B = cfrti_b.book                       # only run folders dated before the cutoff are opened
     rows = []
     for t in trades_of(mks, binary, perp):
         mk = mks[t["tk"]]; polls = B.get(t["tk"])

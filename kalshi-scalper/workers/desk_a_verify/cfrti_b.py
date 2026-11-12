@@ -1,7 +1,7 @@
 """CFRTI-B (workers/CFRTI_B_REGISTRATION.md): CFRTI1-BTC's spot model, but signal AND price from the R6 order book. Lines B3 (three-venue index) and BK (Kraken only).
 DEVELOPMENT only: closes from 2026-10-29T22:15Z to before 2026-11-05T00:00Z that have an R6 book. Idea Desk A, Nov 12 2026.
 usage: python3 -I cfrti_b.py <folder holding quotes/> <folder holding book15r6/>"""
-import gzip, csv, glob, math, sys, bisect, collections, datetime
+import os, gzip, csv, glob, math, sys, bisect, collections, datetime
 from email.utils import parsedate_to_datetime
 from statistics import NormalDist, median
 Phi = NormalDist().cdf
@@ -13,9 +13,11 @@ def fee(p): return 0.07 * p * (1 - p)
 def fl(x): return float(x) if x not in (None, "") else None
 # ---- R6 books: ticker -> sorted [(t_exchange_s, yb, ybs, nb, nbs)]
 book = collections.defaultdict(list)
-def load_book(R6):
+def load_book(R6, before=None):
+  sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(R6, "cfrti_b.load_book")      # standing rule (h)
   book.clear()
   for f in sorted(glob.glob(R6 + "/book15r6/*/*/book.csv.gz")):
+      if before and f.split("/")[-3] >= before: continue                                  # folders dated at or after `before` are never opened
       rows = [x for x in rd(f) if x["series"] == "KXBTC15M"]
       offs = []
       for x in rows:
