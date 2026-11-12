@@ -30,10 +30,17 @@ BOOT_N, SEED = 10000, 20261112
 EPS = 1e-9
 def _ts(s): return calendar.timegm(time.strptime(s, "%Y-%m-%dT%H:%M:%SZ"))
 FROM, BEFORE = _ts("2026-09-12T00:00:00Z"), _ts("2026-11-13T00:00:00Z")
-RULE_H_BEFORE = _ts("2026-10-29T00:00:00Z")                # Bitcoin and Ethereum: closes before this only, candles only (standing rule (h))
 SERIES = ("KXBTC15M", "KXETH15M", "KXXRP15M", "KXDOGE15M", "KXGOLD15M")
-RULE_H_SERIES = ("KXBTC15M", "KXETH15M")
-BOOK_SERIES = ("KXGOLD15M", "KXXRP15M", "KXDOGE15M")       # books are never read for Bitcoin or Ethereum
+# Standing rule (h): a series another card holds out on recorded dates is used for closes BEFORE this instant only, from candles only, and no book row of it is kept.
+RULE_H_BEFORE = {"KXBTC15M": _ts("2026-10-29T00:00:00Z"), "KXETH15M": _ts("2026-10-29T00:00:00Z")}
+BOOK_SERIES = ("KXGOLD15M", "KXXRP15M", "KXDOGE15M")       # no book row is kept for a series in RULE_H_BEFORE (asserted below)
+VERDICT_NEEDS_BOTH_P = True                                # Amendment 1, the Head's ruling 2 (20:21Z): SUPPORTED needs the bootstrap p AND the null-calibrated p at or under 0.05
+# Amendment 1, the Head's ruling 1 (20:21Z): DEPTH1 holds the gold R6 windows of Oct 30 to Nov 13 and reads them once from 2026-11-14T00:00Z. WHEEL0 joins gold outcomes
+# on those windows, so the WHEEL0 read is refused before that instant AND until the marker file carries the line that DEPTH1's read has been made.
+NOT_BEFORE = _ts("2026-11-14T00:00:00Z")
+MARKER_FILE = os.path.join(HERE, "WHEEL0_PRECONDITION.md")
+MARKER_RE = r"(?m)^DEPTH1 READ MADE: \S.*$"
+NULL_REPS = 500
 # HOT by luck, per band, on made-up fair bets under the growing-block rule (wheel0_null_sim.py, committed with its output WHEEL0_NULL_SIM.json); fixed before any outcome
 LUCK = json.load(open(os.path.join(HERE, "WHEEL0_NULL_SIM.json")))["hot_share_by_luck"]
 DROP_GROUP = {"KXGOLD15M": "gold_xrp_doge", "KXXRP15M": "gold_xrp_doge", "KXDOGE15M": "gold_xrp_doge", "KXBTC15M": "xrp_doge", "KXETH15M": "xrp_doge"}   # ruling 4
@@ -73,7 +80,7 @@ def read_markets(folders, with_result):
                 c = _iso(m.get("close_time") or "")
                 if c is None: cnt["no_close_time"] += 1; continue
                 if not (FROM <= c < BEFORE): cnt["outside_dates"] += 1; continue
-                if s in RULE_H_SERIES and c >= RULE_H_BEFORE: cnt["rule_h_dropped_%s" % s] += 1; continue
+                if s in RULE_H_BEFORE and c >= RULE_H_BEFORE[s]: cnt["rule_h_dropped_%s" % s] += 1; continue
                 out[m["ticker"]] = {"series": s, "close": c, "result": ((m.get("result") or "").lower() if with_result else None)}
     return out, dict(cnt)
 
@@ -171,8 +178,21 @@ def orders_from_candles(markets, candles, drop, apply_drop=True):
     return out, dict(cnt)
 
 
+def fair_yes(markets, candles):
+    """{ticker: YES mid at the market's LATEST look that has a two-sided quote}: the chance used to draw made-up results in the null calibration. No result is read."""
+    out = {}
+    for t, m in markets.items():
+        cs = candles.get(t) or {}
+        for L in sorted(LOOKS):
+            q = cs.get(m["close"] - L)
+            if q and q[0] is not None and q[1] is not None and 0 < q[0] < q[1] < 1: out[t] = (q[0] + q[1]) / 2.0; break
+    return out
+
+
 def orders_from_books(markets, root):
     """Book mode (gold, XRP, Dogecoin): the look poll within 10 s of close - L, then the FIRST later poll within 4 s must still offer 10 at or under ask + 1c."""
+    refuse_heldout(root)
+    assert not set(BOOK_SERIES) & set(RULE_H_BEFORE), "a series held out under rule (h) is in the book list"
     import numpy as np
     sys.path.insert(0, os.path.dirname(HERE))
     import r6load as R
@@ -292,10 +312,46 @@ def primary(g, series=None):
             "median_block_length_by_band": {b: sorted(v)[len(v) // 2] for b, v in sorted(lens.items()) if v}, "blocks_by_band": {b: len(v) for b, v in sorted(lens.items())}}
 
 
-def verdict(pr):
+def _split(groups):
+    """groups: {(series, tpl): [(cash, win)] in time order}. -> (after HOT cash list, after not-HOT cash list), labelling each block by the block BEFORE it."""
+    ah, an = [], []
+    for (s, tpl), v in groups.items():
+        if tpl[2] == FAV_HI[0]: continue
+        ob = [{"cash": c, "win": w} for c, w in v]; sp = build_blocks(ob, tpl[1], BLOCK); fl = [is_hot(ob[a:e + 1]) for a, e in sp]
+        for i in range(1, len(sp)):
+            (ah if fl[i - 1] else an).extend(c for c, _ in v[sp[i][0]:sp[i][1] + 1])
+    return ah, an
+
+
+def null_calibration(orders, fair, observed_d, reps=None):
+    """Auditor B's calibration (Amendment 1). Keep every order exactly as it is (market, look, side, price), redraw every market's result at random with the chance
+    'fair' (its YES mid at its latest look), rebuild blocks and labels, and compute D. Repeat. No template has an edge or a streak in these made-up results, so the
+    spread of D here is what luck alone gives at the observed signals and prices. -> the rank of the observed D among them."""
+    reps = NULL_REPS if reps is None else reps
+    by = collections.defaultdict(list)
+    for o in sorted(orders, key=lambda o: (o["close"], o["ticker"])):
+        if o["ticker"] not in fair: continue
+        p = o["price"]; f = fee10(p)
+        by[(o["series"], o["tpl"])].append((o["ticker"], o["side"] == "yes", SIZE * (1.0 - p) - f, -SIZE * p - f))
+    tickers = sorted({x[0] for v in by.values() for x in v}); rng = random.Random(SEED + 1); ds, pfs = [], []
+    for _ in range(reps):
+        res = {t: rng.random() < fair[t] for t in tickers}
+        groups = {k: [((cw, True) if res[t] == is_yes else (cl, False)) for t, is_yes, cw, cl in v] for k, v in by.items()}
+        ah, an = _split(groups)
+        if ah and an: ds.append(sum(ah) / len(ah) - sum(an) / len(an)); x = pf(ah); pfs.append(x if x is not None and x != float("inf") else None)
+    if not ds or observed_d is None: return {"reps": len(ds), "D_null_calibrated_p": None}
+    m = sum(ds) / len(ds); sd = (sum((v - m) ** 2 for v in ds) / max(1, len(ds) - 1)) ** 0.5; pfv = [v for v in pfs if v is not None]
+    return {"reps": len(ds), "D_null_calibrated_p": round((1 + sum(1 for v in ds if v >= observed_d - EPS)) / (len(ds) + 1), 4), "null_D_mean": round(m, 4), "null_D_sd": round(sd, 4),
+            "null_pf_after_hot_mean": round(sum(pfv) / len(pfv), 3) if pfv else None,
+            "what": "made-up results drawn at each market's own YES mid, the real orders and prices kept; the share of such runs whose D is at least the observed D"}
+
+
+def verdict(pr, null_p=None):
     n = pr["hot_pairs"]; pfh, d, p = pr["pf_after_hot"], pr["D_dollars_per_order_of_10"], pr["D_one_sided_p_day_bootstrap"]
     if n >= VERDICT_MIN_HOT and pfh is not None and d is not None:
-        if pfh >= VERDICT_PF - EPS and d > 0 and p is not None and p <= VERDICT_P + EPS: return "PREMISE SUPPORTED"
+        p_ok = p is not None and p <= VERDICT_P + EPS
+        if VERDICT_NEEDS_BOTH_P: p_ok = p_ok and null_p is not None and null_p <= VERDICT_P + EPS
+        if pfh >= VERDICT_PF - EPS and d > 0 and p_ok: return "PREMISE SUPPORTED"
         if pfh < 1.0 or d <= 0: return "PREMISE NOT SUPPORTED"
     return "no evidence at n = %d HOT pairs" % n
 
@@ -358,12 +414,16 @@ def counts(orders):
             for s in sorted({r["series"] for r in rows})}, "templates": rows}
 
 
-def report(orders, label):
+def report(orders, label, fair=None):
     void = sum(1 for o in orders if o["win"] is None)
     for o in orders:
         if o["win"] is None: o["win"] = False                      # a void is a fee-only loss and counts as a loss, never as a win
     g = grid(orders); pooled = primary(g)
-    out = {"source": label, "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.", "orders": len(orders), "void_orders_booked_as_fee_only_loss": void, "primary_pooled": pooled, "verdict": verdict(pooled),
+    cal = null_calibration(orders, fair, pooled["D_dollars_per_order_of_10"]) if fair is not None else None
+    if cal is not None: pooled["null_calibration"] = cal
+    npv = None if cal is None else cal.get("D_null_calibrated_p")
+    out = {"source": label, "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.",
+           "p_note": "Two p values are printed for D. The day bootstrap was found by Auditor B to be mildly generous on made-up no-effect data (p at or under 0.05 in 7.5 percent of runs). The null-calibrated p is the rank of the observed D among D from made-up no-effect results at the real orders and prices.", "orders": len(orders), "void_orders_booked_as_fee_only_loss": void, "primary_pooled": pooled, "verdict": verdict(pooled, npv), "verdict_rule_needs_both_p": VERDICT_NEEDS_BOTH_P,
            "primary_by_market": {s: dict(primary(g, s), verdict_shaped_label=verdict(primary(g, s)), label_note="per market, descriptive; the verdict is the pooled line") for s in sorted({k[0] for k in g})},
            "sister_templates_hot_together": sisters(g), "secondary_wheel_rule": secondary(g), "third_line_favourites_88_97": favourites(g),
            "all_orders_pf": (lambda v: None if v is None else round(v, 3))(pf([o["cash"] for o in orders if o["tpl"][2] != FAV_HI[0]]))}
@@ -371,6 +431,14 @@ def report(orders, label):
 
 
 # ---------------------------------------------------------------- commands
+def precondition(now, marker_text):
+    """None if the read may run, else the reason it is refused. Pure, so the selftest can try every case."""
+    import re
+    if now < NOT_BEFORE: return "refused: the WHEEL0 read is not allowed before 2026-11-14T00:00Z (DEPTH1 reads the gold windows first)"
+    if not re.search(MARKER_RE, marker_text or ""): return "refused: WHEEL0_PRECONDITION.md does not carry the line 'DEPTH1 READ MADE: ...' (committed on the Head of R&D's word)"
+    return None
+
+
 def _args(a):
     out = collections.defaultdict(list); key = None
     for x in a:
@@ -379,7 +447,8 @@ def _args(a):
     return out
 
 
-def main(argv):
+def main(argv, _selftest_made_up_data=False):
+    """_selftest_made_up_data is set only by selftest() for its made-up files; no command line value can set it."""
     if not argv or argv[0] not in ("selftest", "count", "run"): print(__doc__); return 2
     if argv[0] == "selftest": return selftest()
     a = _args(argv[1:]); drop, sha = load_drop_table()
@@ -389,11 +458,16 @@ def main(argv):
         print(json.dumps({"note": "candle signals after the random drop; NO result read; nothing scored", "markets": len(mk), "market_counts": c1, "signal_counts": c2, "drop_table_sha256": sha, "counts": counts(od)}, indent=1)); return 0
     if not a["go"] or not a["out"]: raise SystemExit("refused: the read needs --go <the Head of R&D's go line> and --out <file>; it is run once")
     if os.path.exists(a["out"][0]): raise SystemExit("refused: %s exists; WHEEL0 is read once" % a["out"][0])
+    if not _selftest_made_up_data:
+        why = precondition(time.time(), open(MARKER_FILE).read() if os.path.exists(MARKER_FILE) else "")
+        if why: raise SystemExit(why)
     mk, c1 = read_markets(a["lists"], with_result=True); cd = read_candles(a["candles"], mk)
     od, c2 = orders_from_candles(mk, cd, drop)
+    if a["books"]: refuse_heldout(a["books"][0])
+    fair = fair_yes(mk, cd)
     res = {"test": "WHEEL0", "tries": 1, "go": " ".join(a["go"]), "drop_table_sha256": sha, "scorer_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(),
            "markets": len(mk), "market_counts": c1, "candle_signal_counts": c2,
-           "MAIN_candle_read": report(od, "CANDLE READ: 1 minute candles, random drop at the measured fill share, price = the ask seen; candle freshness measured on Bitcoin 15 minute only; real misses lean toward winners, so this read is generous")}
+           "MAIN_candle_read": report(od, "CANDLE READ: 1 minute candles, random drop at the measured fill share, price = the ask seen; candle freshness measured on Bitcoin 15 minute only; real misses lean toward winners, so this read is generous", fair)}
     od0, _ = orders_from_candles(mk, cd, drop, apply_drop=False)
     res["sensitivity_no_drop"] = {k: v for k, v in report(od0, "candle read with NO drop (every signal filled): sensitivity only").items() if k in ("orders", "primary_pooled", "verdict")}
     if a["books"]:
@@ -447,6 +521,14 @@ def selftest():
     g = grid(od); pr = primary(g)
     chk("no persistence planted -> not SUPPORTED, and HOT blocks near the luck count", verdict(pr) != "PREMISE SUPPORTED" and abs(pr["hot_blocks"] - pr["hot_blocks_expected_by_luck"]) < 4 * math.sqrt(pr["hot_blocks_expected_by_luck"] + 1),
         "hot %d, luck %.1f, D %s p %s" % (pr["hot_blocks"], pr["hot_blocks_expected_by_luck"], pr["D_dollars_per_order_of_10"], pr["D_one_sided_p_day_bootstrap"]))
+    chk("no persistence planted -> PF after HOT is within noise of PF after not-HOT (a block labelled by its OWN flag would split them wide apart)",
+        pr["pf_after_hot"] is not None and abs(pr["pf_after_hot"] - pr["pf_after_not_hot"]) < 0.30, "after HOT %s, after not-HOT %s" % (pr["pf_after_hot"], pr["pf_after_not_hot"]))
+    ps = [pr["D_one_sided_p_day_bootstrap"]]
+    for sd_ in (11, 12):
+        mk_, cd_ = _synth(sd_, persist=False); o_, _ = orders_from_candles(mk_, cd_, drop); ps.append(primary(grid(o_))["D_one_sided_p_day_bootstrap"])
+    chk("no persistence planted, three seeds -> the bootstrap p is not tiny and differs from seed to seed (a p forced to zero fails here)", min(ps) > 0.02 and len(set(ps)) == 3, str(ps))
+    nc = null_calibration(od, fair_yes(mk, cd), pr["D_dollars_per_order_of_10"], reps=60)
+    chk("null calibration: on no-effect data the observed D sits inside the made-up null spread (p not small), and the null D is centred near zero", nc["D_null_calibrated_p"] > 0.05 and abs(nc["null_D_mean"]) < 3 * nc["null_D_sd"], json.dumps(nc)[:160])
     mkp, cdp = _synth(2, persist=True, n_days=60); odp, _ = orders_from_candles(mkp, cdp, drop); prp = primary(grid(odp))
     chk("persistence planted (twenty-day regimes) -> D above zero with a small p (the test can see a real effect)", prp["D_dollars_per_order_of_10"] is not None and prp["D_dollars_per_order_of_10"] > 0 and prp["D_one_sided_p_day_bootstrap"] <= 0.05,
         "hot pairs %d, PF after HOT %s, D %s, p %s" % (prp["hot_pairs"], prp["pf_after_hot"], prp["D_dollars_per_order_of_10"], prp["D_one_sided_p_day_bootstrap"]))
@@ -472,7 +554,10 @@ def selftest():
     for p in (h, link):
         try: read_markets([p], False)
         except SystemExit: ref += 1
-    chk("a HELDOUT_ folder is refused, typed or through an innocent link", ref == 2)
+    for pth in (h, link):
+        try: orders_from_books({}, pth)
+        except SystemExit: ref += 1
+    chk("a HELDOUT_ folder is refused, typed or through an innocent link, as lists, candles or the books root", ref == 4)
     chk("the random drop is fixed per signal and near its rate", keep_draw("T", 600, "yes") == keep_draw("T", 600, "yes") and 0.77 < sum(keep_draw("T%d" % i, 360, "no") < 0.8 for i in range(20000)) / 20000 < 0.83)
     fo = [{"series": "S", "tpl": (600, "fav", "88-97"), "ticker": "t%04d" % i, "close": i, "day": "d", "cash": (0.9 if i % 16 else -9.3), "win": bool(i % 16)} for i in range(700)]
     fv = favourites(grid(fo))
@@ -486,16 +571,29 @@ def selftest():
     json.dump({"rows": [{"status": 200, "file": "0001.json.gz"}]}, open(os.path.join(Cf, "manifest.json"), "w"))
     import io, contextlib
     outf = os.path.join(td, "res.json"); buf = io.StringIO()
-    with contextlib.redirect_stdout(buf): rc = main(["run", "--lists", Lf, "--candles", Cf, "--out", outf, "--go", "selftest"])
+    with contextlib.redirect_stdout(buf): rc = main(["run", "--lists", Lf, "--candles", Cf, "--out", outf, "--go", "selftest"], _selftest_made_up_data=True)
     res = json.load(open(outf)); mr = res["MAIN_candle_read"]
     chk("the whole read runs from files and returns one of the three registered labels", rc == 0 and (mr["verdict"] in ("PREMISE SUPPORTED", "PREMISE NOT SUPPORTED") or mr["verdict"].startswith("no evidence at n = ")), mr["verdict"])
     chk("the result carries pooled and per-market numbers, sisters, the wheel rule, the favourites line and block lengths", all(k in mr for k in ("primary_pooled", "primary_by_market", "sister_templates_hot_together", "secondary_wheel_rule", "third_line_favourites_88_97"))
         and "median_block_length_by_band" in mr["primary_pooled"] and len(mr["primary_by_market"]) == 2)
     again = 0
     try:
-        with contextlib.redirect_stdout(io.StringIO()): main(["run", "--lists", Lf, "--candles", Cf, "--out", outf, "--go", "selftest"])
+        with contextlib.redirect_stdout(io.StringIO()): main(["run", "--lists", Lf, "--candles", Cf, "--out", outf, "--go", "selftest"], _selftest_made_up_data=True)
     except SystemExit: again = 1
     chk("a second read into the same result file is refused (read once)", again == 1)
+    good = "x\nDEPTH1 READ MADE: 2026-11-14, recorded by the Head of R&D\n"
+    chk("precondition: refused before 2026-11-14T00:00Z even with the marker; refused after it without the marker; allowed only with both",
+        precondition(NOT_BEFORE - 1, good) is not None and precondition(NOT_BEFORE + 1, "") is not None and precondition(NOT_BEFORE + 1, "DEPTH1 READ MADE:") is not None and precondition(NOT_BEFORE + 1, good) is None)
+    if time.time() < NOT_BEFORE or not os.path.exists(MARKER_FILE):
+        blocked = 0
+        try:
+            with contextlib.redirect_stdout(io.StringIO()): main(["run", "--lists", Lf, "--candles", Cf, "--out", os.path.join(td, "res2.json"), "--go", "x"])
+        except SystemExit as e: blocked = 1 if "refused" in str(e) else 0
+        chk("the real command line cannot run the read today (no flag reaches the selftest's bypass)", blocked == 1 and not os.path.exists(os.path.join(td, "res2.json")))
+    pv = {"hot_pairs": 40, "pf_after_hot": 1.2, "D_dollars_per_order_of_10": 0.3, "D_one_sided_p_day_bootstrap": 0.03}
+    chk("verdict: SUPPORTED needs BOTH p values at or under 0.05 (bootstrap 0.03 with a null p of 0.08, or with none, is not SUPPORTED)",
+        verdict(pv, 0.04) == "PREMISE SUPPORTED" and verdict(pv, 0.08).startswith("no evidence") and verdict(pv, None).startswith("no evidence") and verdict(dict(pv, D_one_sided_p_day_bootstrap=0.06), 0.01).startswith("no evidence")
+        and verdict(dict(pv, pf_after_hot=0.99), 0.01) == "PREMISE NOT SUPPORTED" and verdict(dict(pv, hot_pairs=29), 0.01) == "no evidence at n = 29 HOT pairs")
     buf = io.StringIO()
     with contextlib.redirect_stdout(buf): main(["count", "--lists", Lf, "--candles", Cf])
     cj = json.loads(buf.getvalue())

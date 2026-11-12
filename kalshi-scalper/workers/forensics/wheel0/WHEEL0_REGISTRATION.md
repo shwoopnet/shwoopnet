@@ -2,7 +2,9 @@
 
 **Registered 2026-11-12, before any outcome was joined to any signal of this test.** Ordered by the owner by popup ("run the premise test now"), designed by the Head of R&D (messages of 19:53Z and 19:57Z, rulings of 20:02Z), built by the Forensics desk. Research only: public recorded data, no order, no account figure.
 
-**Tries: 1.** One read, on the Head of R&D's go, after Auditor B's leak audit of `wheel0.py`. The scorer refuses to write a second result.
+**Tries: 1.** One read, on the Head of R&D's go, after Auditor B's leak audit of `wheel0.py`, **not before 2026-11-14T00:00Z and not before DEPTH1's read has been made** (Amendment 1). The scorer refuses to write a second result.
+
+**Amendment 1 (section 15, 2026-11-12 20:30Z, before any outcome was joined) changes sections 5, 7, 8 and 9. Where the two differ, the amendment is right; the sections below are already corrected to match it.**
 
 **Who chose what.** The templates, bands, looks, order, block rule, verdict lines and data bounds are the Head of R&D's. This desk chose none of them, on purpose: it has printed baseline outcomes on these series (section 9). The only numbers this desk supplied are measurements made with no outcome loaded (the fill shares, the luck rates) and they are fixed in files named below.
 
@@ -46,7 +48,7 @@ Blocks therefore differ in length by band. On made-up fair bets the median is 60
 ## 5. Primary numbers, pooled and per market
 
 1. **Cash PF of all orders in next-blocks that follow a HOT block.**
-2. **D** = mean cash result per order (of 10 contracts) in next-blocks after HOT blocks, minus the same after not-HOT blocks. One-sided p from a bootstrap that resamples UTC days, 10,000 draws, seed 20261112. Days are the unit because templates in one market share windows.
+2. **D** = mean cash result per order (of 10 contracts) in next-blocks after HOT blocks, minus the same after not-HOT blocks. Two one-sided p values are printed (Amendment 1): (a) a bootstrap that resamples UTC days, 10,000 draws, seed 20261112 (days are the unit because templates in one market share windows); (b) the null-calibrated p: every order is kept as it is, every market's result is redrawn at random with a chance equal to its YES mid at its latest look, blocks and labels are rebuilt and D recomputed, 500 runs, fixed seed; the p is the share of those runs whose D is at least the observed D.
 3. **How many blocks were HOT against luck.** Luck per band, from `wheel0_null_sim.py` on made-up fair bets under this block rule (`WHEEL0_NULL_SIM.json`): 9.3%, 6.5%, 5.7% (cheap, low to high), 6.9%, 8.7%, 6.8% (favourite, low to high).
 
 Also reported: how often a sister template in the same market is HOT at the same moment as a HOT block (mirror side at the same look; same side at another look; another band), against that market's plain HOT share.
@@ -61,7 +63,7 @@ The owner's rule: a block is at least 150 signals and runs on to its 10th loss; 
 
 On the pooled candle read:
 
-- **PREMISE SUPPORTED** if PF after HOT is 1.15 or better AND D is above 0 with p of 0.05 or less AND there are at least 30 HOT pairs.
+- **PREMISE SUPPORTED** if PF after HOT is 1.15 or better AND D is above 0 with BOTH p values (the day bootstrap and the null-calibrated p) at 0.05 or less AND there are at least 30 HOT pairs.
 - **PREMISE NOT SUPPORTED** if, with at least 30 HOT pairs, PF after HOT is under 1.0 or D is 0 or less.
 - Otherwise **"no evidence at n = x HOT pairs"**.
 
@@ -73,9 +75,11 @@ The book read and the per-market lines are printed with the same three labels fo
 |---|---|---|
 | Bitcoin 15 minute | candles already landed (`CFRTI_K_CANDLES`), results from `CFRTI_K_LISTS` | 2026-09-12 to before 2026-10-29 |
 | Ethereum 15 minute | candles and lists to pull (`WHEEL0_LISTS`, `WHEEL0_CANDLES_ETH`) | 2026-09-12 to before 2026-10-29 |
-| XRP, Dogecoin, gold 15 minute | candles and lists to pull; R6 books for the cross-check | 2026-09-12 to before 2026-11-13; books from 2026-10-29 |
+| XRP, Dogecoin, gold 15 minute | candles and lists to pull; R6 books for the cross-check | 2026-09-12 to before 2026-11-13; books from 2026-10-29. **Gold's recorded windows of Oct 30 to Nov 13 are DEPTH1's: see the precondition below** |
 
-- **Standing rule (h).** Bitcoin and Ethereum are held out by other cards on recorded dates. The scorer drops any Bitcoin or Ethereum market closing on or after 2026-10-29T00:00Z at the reader, on its close time, before anything else sees it, and it never reads a Bitcoin or Ethereum book. The Ethereum pull is bounded by the same date in the job file. Gold, XRP and Dogecoin are held out by no card (Head of R&D, 19:53Z). Any `HELDOUT_` folder is refused, typed or through a link.
+- **Standing rule (h).** Bitcoin and Ethereum are held out by other cards on recorded dates. The scorer drops any Bitcoin or Ethereum market closing on or after 2026-10-29T00:00Z at the reader, on its close time, before anything else sees it, and it keeps no Bitcoin or Ethereum book row (the recorder's book files hold all five series and are filtered by ticker as they are loaded; the candle answers are filtered the same way). The Ethereum pull is bounded by the same date in the job file. Any `HELDOUT_` folder is refused, typed, nested, relative or through a link, for lists, candles and the books root.
+- **Gold and DEPTH1 (Amendment 1).** DEPTH1 is registered on the gold (and Bitcoin) R6 windows of Oct 30 to Nov 13 and reads them once from 2026-11-14T00:00Z. WHEEL0 keeps gold whole, so its read joins gold outcomes on those windows. **Hard precondition, in code:** the scorer refuses to run before 2026-11-14T00:00Z AND until `WHEEL0_PRECONDITION.md` carries the committed line that DEPTH1's read has been made. One read, with gold, after DEPTH1; no early partial read. If DEPTH1's read has not been made by 2026-11-14T06:00Z, the question goes back to the Head of R&D.
+- **XRP and Dogecoin:** no card known to the Head of R&D or to this desk on Nov 12 holds their recorded dates. Checked by this desk in the registrations it can see: Desk A's RESIL1 held out the five R6 series from Nov 5, but it was FALSIFIED on development and is out; the old research team's registrations that name XRP or Dogecoin all have results. That is a statement about what was checked, not about every branch.
 - WHEEL0 has no held-out block of its own: it is one read of everything.
 - Results come from the settled lists. Pull: about 900 requests (lists about 25, candles about 880), public GETs through the pull runner, job files checked by Main.
 
@@ -102,8 +106,22 @@ Expected on candles, scaled from the book signal rates: about 1,150 block pairs 
 
 ## 13. Files and hashes
 
-`wheel0.py` (the scorer; `selftest`: 22 checks on made-up data), `wheel0_null_sim.py`, `WHEEL0_NULL_SIM.json`, `WHEEL0_DROP_TABLE.json`, `WHEEL0_LISTS.json`, `build_wheel0_candles.py`, `../wheel0_count.py`. The sha256 of the scorer, the drop table and the luck table are sent to the Head of R&D for the queue at commit time and printed in the result.
+`wheel0.py` (the scorer; `selftest`: 28 checks on made-up data after Amendment 1), `wheel0_null_sim.py`, `WHEEL0_NULL_SIM.json`, `WHEEL0_DROP_TABLE.json`, `WHEEL0_PRECONDITION.md`, `WHEEL0_LISTS.json`, `build_wheel0_candles.py`, `../wheel0_count.py`. The sha256 of the scorer, the drop table and the luck table are sent to the Head of R&D for the queue at commit time and printed in the result.
 
 ## 14. Read-once marker
 
 `WHEEL0 READ: not yet run.` This line is replaced by the date, the Head's go line and the scorer's sha256 in the commit made immediately BEFORE the read.
+
+## 15. Amendment 1 (2026-11-12 20:30Z; before any outcome was joined; no list or candle of this test had landed)
+
+Cause: Auditor B's leak audit of `wheel0.py` at commit 2281057 (sha256 72b4594d...) and the Head of R&D's rulings of 20:20Z and 20:21Z on it.
+
+1. **One defect, fixed.** The `--books` root had no `HELDOUT_` refusal. It now has one, in `main` and in `orders_from_books`, on the real path.
+2. **Cross-card conflict, ruled.** DEPTH1 holds the gold R6 windows of Oct 30 to Nov 13. Ruling: gold stays whole and the read waits; the precondition of section 8 is now in the scorer (`precondition`, `NOT_BEFORE`, `WHEEL0_PRECONDITION.md`). The sentence "gold is held out by no card" was wrong and is corrected. The list and candle pulls may land earlier: the recorder branches already carry those gold results (rule (h) point 7), and the protection is the precondition, the default-closed guards and the ban on joining before the read.
+3. **Which p carries the verdict, ruled.** Auditor B ran 360 no-effect replicates through this pipeline: D is unbiased, but the day bootstrap gives p at or under 0.05 in 7.5% of them, not 5%. A null-calibrated p is added (section 5). **SUPPORTED now needs both p values at or under 0.05.** NOT SUPPORTED and "no evidence" are unchanged. This can only make SUPPORTED harder.
+4. **Two weak selftests, strengthened.** Two deliberately broken copies of the scorer had passed the selftest: (a) one that labelled a block by its OWN flag in the PF lists only; (b) one whose bootstrap p was forced to zero. New checks kill both: on no-effect data PF after HOT must be within noise of PF after not-HOT; and across three seeds of no-effect data the bootstrap p must not be tiny and must differ. A third new check runs the null calibration on no-effect data. The selftest is now 28 checks.
+5. **Wording.** "Never reads a Bitcoin or Ethereum book" is replaced by what is true: no Bitcoin or Ethereum row is kept; the files are parsed whole and filtered by ticker.
+6. **Calibration numbers for the result page (Auditor B's, on made-up no-effect data: two series, 50 days, drop 0.8):** D mean +0.005 and standard deviation 0.111 dollars per order of 10; 0 of 360 runs SUPPORTED; PF after HOT averages 0.89 under no effect (the fee drag), so a PF after HOT near 0.9 is what "nothing there" looks like, not a sign of harm.
+7. Everything else Auditor B tested was clean, by mutants of this scorer run through its own selftest: the look minute, the drop's independence from the result, the fee rounding, the halves, the block pairing, the label direction, the verdict thresholds at their edges, rule (h) at the reader to the second, and the count path holding no result.
+
+Not changed: the templates, the order, the block rule, the drop table, the luck table, the data bounds, the tries (1).
