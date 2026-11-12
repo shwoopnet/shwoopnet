@@ -25,6 +25,7 @@ const PATTERNS = [
   ['N% of the sizing base tied to a dollar line', /\$\d[\d,.]*[^.\n]{0,40}\d+%\s+of\s+(the\s+)?sizing\s+base/i],
   ['entries with wins and losses counts', /\d+\s+entries\s*\(\d+\s+\w+,\s*\d+\s+\w+\),\s*\d+\s+wins,\s*\d+\s+losses/i],
   ['a single order record', /\b(bitcoin|gold|ethereum|xrp|dogecoin)\s+\d{1,2}:\d{2}\s+(CDT|CT),\s+(YES|NO)\s+(bought\s+)?at\s+0\.\d+/i],
+  ['a base-sized dollar figure', /\$9\d\d\.\d\d\b[^.\n]{0,30}base|base[^.\n]{0,30}\$9\d\d\.\d\d\b/i],
   ['N of N lost', /\b\d+\s+of\s+\d+\s+(fills|settled|orders)\s+(lost|won)/i],
 ];
 const OPT_OUT = /\[(design|research)\]/;

@@ -2935,7 +2935,7 @@ The owner asked for the reinvest pool to restart building on each loss instead o
 
 **Return rule.** After a kill, a 14 day cool off. It returns only if a fresh shadow run of 100 fills shows profit factor 1.3 or better and 1.2 or better in its second half, and the owner approves. Nothing automatic re-arms it.
 
-**Implement rule.** 3 contracts (about $2.7 to $2.9 at risk per order; the $9.79 per order cap, the $19.59 window and day cap and the 10 contract per market cap all hold). A size step would need a separate sizing ladder written, tested and approved first (like OICORE's `SLOT_LADDERS`); none is built, and nothing stored can raise the size. Worst single loss about $2.92, practical worst case before its kill about $15, one order per market window.
+**Implement rule.** 3 contracts (about $2.7 to $2.9 at risk per order; the per order cap, the window and day cap and the 10 contract per market cap all hold). A size step would need a separate sizing ladder written, tested and approved first (like OICORE's `SLOT_LADDERS`); none is built, and nothing stored can raise the size. Worst single loss about $2.92, practical worst case before its kill about $15, one order per market window.
 
 **Deploy, IN THIS ORDER, only after the owner's exception (the owner runs them; the page change goes live on merge).** (1) `bash functions/deploy-push.sh` FIRST: the exit watch must know XRPYES10 is registered and held to settlement; an older exit watch gives an unknown slot order the 25c fallback stop and sells it. (2) `bash functions/deploy-sizing.sh` (the minute function, which runs the slot tick). Note that the ticker shape the slot accepts (`SLOT_TICKER_RE`) now includes `KXXRP15M`.
 

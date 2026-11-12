@@ -42,7 +42,7 @@ The owner's decision (Nov 10, 2026): gold L1 gets a coded KILL and RETURN. This 
 3. **No phone push.** The latch writes a `gold kill` event (critical in the notification center and in the bell) but does not push to the phone; adding it means `kalshiPushLib` and a deploy of the push functions. The Bot page's silent-market warning will also say gold has gone quiet.
 4. **The line does not follow the balance.** $58.75 is fixed; if the base grows a lot the line becomes a smaller share of it until a reviewed edit re-sets it. A missing or unreadable base no longer matters (the old fail-open note is gone).
 5. **First value of the re-arm date.** 2026-11-10 00:00 UTC, so gold's earlier trades set no peak and raise no alert.
-6. **Thresholds are untested on a real failure.** Whether 6% and -$20 would have fired on past gold stretches was not replayed here; the lifecycle doc's own warning applies (a Nov 6 rolling-60 dip was followed by a strong recovery, which is why that rule is an alert, not a latch).
+6. **Thresholds are untested on a real failure.** Whether the drawdown line and -$20 would have fired on past gold stretches was not replayed here; the lifecycle doc's own warning applies (a Nov 6 rolling-60 dip was followed by a strong recovery, which is why that rule is an alert, not a latch).
 
 ## Deploy
 

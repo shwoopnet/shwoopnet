@@ -10,7 +10,7 @@ const NOW = Date.parse('2026-11-12T14:00:00Z');
 const iso = (ms) => new Date(ms).toISOString();
 const pem = crypto.generateKeyPairSync('ed25519').privateKey.export({ type: 'pkcs8', format: 'pem' });
 const R = gk.GOLD_KILL.rearmAt;
-const BASE = 979.25, LIMIT = 58.75;   // the fixed dollar line (6% of the $979.25 base when written)
+const BASE = 1000, LIMIT = 58.75;   // BASE is an invented round number; LIMIT is the fixed dollar line in code
 const gates = {};
 
 let n = 0;
