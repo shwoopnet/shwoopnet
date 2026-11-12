@@ -2,7 +2,7 @@
 
 Asked for by the Head of R&D: ten new cards this week from untouched families with 300 or more independent events a year and enough volume to fill one contract, the first three by 16:00Z on Nov 13, and where a family is simply efficient, "efficient, move on" with the one number that shows it. Fewer than ten is fine; no padding.
 
-**Count so far: pool families examined 12, plus the two rates groups the Head named, plus 12 families the Nov 10 listing added = 26, which is every family in the master table that is not TOUCHED (`FAMILY_TABLE.md`: 62 families, 36 touched, 8 sweep only, 18 never read); cards written 2 (both start with a zero-try cost and price measurement); 5 of the 26 families sit inside the two cards and the other 21 each have a one-line reason below; one question for the Head (hourly temperature). Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
+**Count so far: pool families examined 12, plus the two rates groups the Head named, plus 12 families the Nov 10 listing added = 26, which is every family in the master table that is not TOUCHED (`FAMILY_TABLE.md`: 63 families, 37 touched, 8 sweep only, 18 never read); cards written 2 (both start with a zero-try cost and price measurement); 5 of the 26 families sit inside the two cards and the other 21 each have a one-line reason below; one question for the Head (hourly temperature). Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
 
 ## The filter every candidate went through first
 
