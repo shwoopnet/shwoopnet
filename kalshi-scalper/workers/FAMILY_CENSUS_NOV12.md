@@ -160,7 +160,7 @@ Data kind, in Forensics' words: candles are current (measured on the Bitcoin 15 
 
 Run `pull/CENSUS_LISTING/2026-11-12T1703Z_43265329747` on `kalshi-pull-data`: 87 requests, all answered, complete. Read with the committed `census/read_listing.py`, then grouped with `census/family_day.py`. Count tables: `census/listing_nov10/family_day.csv` (by family), `series_day_active.csv` (the 562 series that settled a market that day), `series_list_counts.csv`. Counts and sums only; no price and no result was read.
 
-**Counts: series in the lists read 11,070; series that settled at least one market on Nov 10 (UTC, a Tuesday) 562; markets read 70,906; families seen that day 57 (46 mapped, the rest one-off groups by category); series seen that V2's sweep files do not hold 254; of those with 3 or more events and some volume 175.**
+**Counts: series in the lists read 11,070; series that settled at least one market on Nov 10 (UTC, a Tuesday) 562; markets read 70,906; families seen that day 56 (50 by ticker pattern, 6 groups of one-offs by category); series seen that V2's sweep files do not hold 369; of those with 3 or more events and some volume 175.**
 
 **Three limits, each a lower bound or a gap:**
 
