@@ -99,4 +99,4 @@ One decision a match, and a 10c one-minute move happens in most tennis matches (
 3. For tennis, "in play" is inferred from the price being alive. A news move before a match (a withdrawal) could be counted; such markets are usually voided, and the count of bets made more than 6 hours before the close is reported so it can be seen.
 4. The Eastern reading of the ticker clock was checked on three families, one market each. The guard drops matches where it fails.
 5. E-soccer and e-basketball are people playing video games for a few minutes; table tennis and ITF tennis are low-tier sport. Whoever moves these prices may know more than a score.
-6. **My odds: about 10% that any one family meets the development bar; about 1% a family that it then passes the research bar; about 4% that any of the five does.**
+6. **My odds: about 2% that any one family meets the development bar (with over a thousand bets, luck alone will not produce a profit factor of 1.5); about 1% a family that it passes the research bar; about 4% that any of the five does. The likely result is FALSIFIED in most families, near the cost.**
