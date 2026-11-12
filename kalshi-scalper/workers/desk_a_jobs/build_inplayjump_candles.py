@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """INPLAYJUMP stage 2 (Amendments 2 and 3): candle job files from the INPLAYJUMP_LISTS answers. Offline: sends nothing. NO window is anchored on the close; nothing is shortened from the end.
-  clock families (e-soccer, table tennis, e-basketball):  window = S forward to the close (table tennis S - 70 minutes, which also serves PREMOVE; S = the ticker's US Eastern start)
+  clock families (e-soccer, table tennis, e-basketball):  window = S - 5 minutes forward to the close (S = the ticker's US Eastern start; PREMOVE withdrawn, Amendment 5)
       python3 -I build_inplayjump_candles.py clock <INPLAYJUMP_SERIES.json> <lists run folder> <outdir>
   tennis (ITF, challenger), pass 1: HOURLY candles from the market's OPEN forward to the close (Amendment 2, point 2)
       python3 -I build_inplayjump_candles.py tennis_hourly <INPLAYJUMP_SERIES.json> <lists run folder> <outdir>
@@ -27,21 +27,37 @@ def read_lists(folder):
             c, o = iso_ts(m.get("close_time") or ""), iso_ts(m.get("open_time") or "")
             if m.get("ticker") and c: mk[m["ticker"]] = dict(series=m["ticker"].split("-")[0], event=m.get("event_ticker", ""), close=c, open=o)     # the result field is NOT read; no list is filtered on it
     return mk
-def skip_start(hours, tickers):
-    """Amendment 4 (Desk B, 6694911d): hourly candles from the open. For each contract and hour H: bid range over {bid high, bid low, bid open of H, bid close of H-1 if any}, ask range the same way. Hour H is SKIPPED only if, for EVERY contract of the match,
-    bid range + ask range <= 0.03 AND every one of those values is present. (The open of an hour lies inside [low, high] by definition, so it adds nothing to a range; a missing high or low means a missing hour. The scorekit candle carries no open field, so an hour is 'present' when
-    its high, low and close are present.) Returns the end_ts of the START of the minute window: 30 minutes before the first hour that may NOT be skipped (None if every hour may be skipped).
-    hours: {ticker: [(end_ts, bid_high, bid_low, bid_close, ask_high, ask_low, ask_close)]} sorted."""
-    ends = sorted({h[0] for hs in hours.values() for h in hs}); by = {tk: {h[0]: h for h in hs} for tk, hs in hours.items()}
-    for i, e in enumerate(ends):
-        ok = True
+def skip_start(hours, tickers, open_ts, close_ts):
+    """Amendment 5 (Desk B, 774889fd; Amendment 3 and 4 wording withdrawn). Hourly candles from the open. For each contract and hour H: bid range = max(bid high, bid open, last present bid close before H) minus min(bid low, bid open, last present bid close before H);
+    ask range the same. Skip H iff, for EVERY contract, bid range + ask range < 0.04 - 1e-9. An hour with NO hourly candle for a contract is dead for that contract (contributes nothing); an hour with no candle for any contract is a dead hour and is skipped.
+    The first hour uses its own open and can be skipped like any other. (An hour's open lies inside [low, high], so it adds nothing to a range; scorekit candles carry no open field.) A present candle with a missing high, low or close price is NOT skipped.
+    hours: {ticker: [(end_ts, bid_high, bid_low, bid_close, ask_high, ask_low, ask_close)]} hourly candles (end_ts the hour's END). Returns the START ts of the minute window: 30 minutes before the first hour that is not skipped (None if every hour is skipped)."""
+    by = {tk: {h[0]: h for h in hours.get(tk, [])} for tk in tickers}
+    first_end = (open_ts // 3600 + 1) * 3600; last_end = -(-close_ts // 3600) * 3600
+    lastc = {tk: (None, None) for tk in tickers}
+    for e in range(first_end, last_end + 1, 3600):
+        skip = True
         for tk in tickers:
-            h = by.get(tk, {}).get(e); p = by.get(tk, {}).get(ends[i - 1]) if i else None
-            if h is None or None in (h[1], h[2], h[3], h[4], h[5], h[6]): ok = False; break
-            bv = [h[1], h[2]] + ([p[3]] if p and p[3] is not None else []); av = [h[4], h[5]] + ([p[6]] if p and p[6] is not None else [])
-            if (max(bv) - min(bv)) + (max(av) - min(av)) > 0.03 + 1e-9: ok = False; break
-        if not ok: return e - 3600 - 1800
+            h = by[tk].get(e)
+            if h is None: continue                                                   # dead for this contract
+            if None in (h[1], h[2], h[3], h[4], h[5], h[6]): skip = False; break
+            bv = [h[1], h[2]] + ([lastc[tk][0]] if lastc[tk][0] is not None else []); av = [h[4], h[5]] + ([lastc[tk][1]] if lastc[tk][1] is not None else [])
+            if (max(bv) - min(bv)) + (max(av) - min(av)) >= 0.04 - 1e-9: skip = False; break
+        for tk in tickers:
+            h = by[tk].get(e)
+            if h is not None and h[3] is not None and h[6] is not None: lastc[tk] = (h[3], h[6])
+        if not skip: return e - 3600 - 1800
     return None
+def screen_checks(hours, minutes):
+    """Amendment 5, point 3, per tennis family from pulled data: (a) minute candles that fall in an hour with no hourly candle; (b) minute closes whose bid or ask lies outside that hour's own low to high.
+    hours: {ticker: {end_ts: (bid_high, bid_low, ask_high, ask_low)}}; minutes: {ticker: [(end_ts, bid_close, ask_close)]}. Either count above zero: that family's screen is void (pull it in full from the open, or drop it under the ceiling)."""
+    a = b = 0
+    for tk, ms in minutes.items():
+        for (e, bc, ac) in ms:
+            he = (e + 3599) // 3600 * 3600; h = hours.get(tk, {}).get(he)
+            if h is None: a += 1; continue
+            if (bc is not None and not (h[1] - 1e-9 <= bc <= h[0] + 1e-9)) or (ac is not None and not (h[3] - 1e-9 <= ac <= h[2] + 1e-9)): b += 1
+    return a, b
 def pack(items, lead_of, reqs, per, fam, period, interval_minutes):
     """items: [(ticker, start_ts, end_ts)] sorted; greedy packs; request window = min start to max end."""
     cur = []
@@ -72,10 +88,10 @@ def main(mode, series_path, folder, outdir, hourly=None, scorekit_dir=None):
     S = json.load(open(series_path)); mk = read_lists(folder); reqs, per, alltk = [], collections.Counter(), set()
     if mode == "clock":
         for f, items in families(S, mk, True):
-            lead = (70 if f["family"] == "TABLE_TENNIS" else 0) * 60                  # Desk B Amendment 3 of PREMOVE (Head 19:20Z): only table tennis widens, to S minus 70; e-soccer and e-basketball stay at S
+            lead = 5 * 60                                                             # PREMOVE withdrawn (Desk B, Amendment 5): windows start at S; 5 minutes before S are kept so the minutes t-1 of the first in-play minute and the placebo's e-5 exist
             its = sorted(((t, (clock_start(t) or m["close"] - 90 * 60) - lead, m["close"]) for t, m in items), key=lambda x: (x[1], x[0]))
             pack(its, None, reqs, per, f["family"], 1, 1); alltk.update(t for t, _, _ in its)
-        name, purpose = "INPLAYJUMP_C", "INPLAYJUMP stage 2: 1 minute candles, window S (table tennis S minus 70 minutes) to the close"
+        name, purpose = "INPLAYJUMP_C", "INPLAYJUMP stage 2: 1 minute candles, window S minus 5 minutes to the close"
     elif mode == "tennis_hourly":
         for f, items in families(S, mk, False):
             its = sorted(((t, m["open"] or m["close"] - 20 * 3600, m["close"]) for t, m in items), key=lambda x: (x[1], x[0]))
@@ -95,7 +111,7 @@ def main(mode, series_path, folder, outdir, hourly=None, scorekit_dir=None):
             its = []
             for e, tks in ev.items():
                 hours = {t: [(c["ts"], c["bid_high"], c["bid_low"], c["bid"], c["ask_high"], c["ask_low"], c["ask"]) for c in hc.get(t, [])] for t in tks}
-                st = skip_start(hours, tks)
+                st = skip_start(hours, tks, min((mk[t]["open"] or mk[t]["close"] - 20 * 3600) for t in tks), max(mk[t]["close"] for t in tks))
                 for t in tks:
                     if st is None: per[f["family"] + " all hours empty (no minute pull)"] += 0; continue
                     its.append((t, st, mk[t]["close"]))
@@ -105,25 +121,33 @@ def main(mode, series_path, folder, outdir, hourly=None, scorekit_dir=None):
     n = write(reqs, outdir, name, purpose)
     print("mode %s | contracts %d | candle requests %d | jobs %d | per family %s" % (mode, len(alltk), len(reqs), n, dict(per)))
 def selftest():
+    H = 3600; O = 10 * H + 600; C = 15 * H + 1200                      # open 10:10, close 15:20: hourly ends from 11:00 to 16:00
     q = lambda e, bh, bl, bc, ah, al, ac: (e, bh, bl, bc, ah, al, ac)
-    flat = lambda e: q(e, .50, .49, .50, .52, .51, .52)          # ranges 0.01 + 0.01 = 0.02 <= 0.03
-    E = [10 * 3600 + 3600 * k for k in range(6)]
+    flat = lambda e: q(e, .50, .49, .50, .52, .51, .52)          # ranges 0.01 + 0.01 = 0.02 < 0.04
+    E = [11 * H + k * H for k in range(6)]
     allflat = {"A": [flat(e) for e in E], "B": [flat(e) for e in E]}
-    assert skip_start(allflat, ["A", "B"]) is None                                                 # every hour may be skipped
-    # hour index 2 moves: hours 0 and 1 skipped, the minute window starts 30 minutes before hour index 2
+    assert skip_start(allflat, ["A", "B"], O, C) is None                                           # every hour skipped
     h2 = {"A": [flat(E[0]), flat(E[1]), q(E[2], .80, .50, .80, .82, .51, .82)] + [flat(e) for e in E[3:]], "B": [flat(e) for e in E]}
-    assert skip_start(h2, ["A", "B"]) == E[2] - 3600 - 1800
-    # the hour starts from a prior close far from its range (prior close 0.30, hour trades at 0.50): the prior close widens the range, NOT skipped
+    assert skip_start(h2, ["A", "B"], O, C) == E[2] - H - 1800                                      # the first hour can be skipped: window starts 30 minutes before hour index 2
+    # an hour that starts from a prior close far from its range is NOT skipped (prior close 0.30, hour 0.49 to 0.50)
     h3 = {"A": [q(E[0], .30, .29, .30, .32, .31, .32), q(E[1], .50, .49, .50, .52, .51, .52)], "B": [flat(E[0]), flat(E[1])]}
-    assert skip_start(h3, ["A", "B"]) == E[1] - 3600 - 1800
-    # a missing value or hour is never skipped
+    assert skip_start(h3, ["A", "B"], O, E[1]) == E[1] - H - 1800
+    # a present candle with a missing price is never skipped
     h4 = {"A": [flat(E[0]), q(E[1], .50, .49, None, .52, .51, .52)], "B": [flat(E[0]), flat(E[1])]}
-    assert skip_start(h4, ["A", "B"]) == E[1] - 3600 - 1800
-    h5 = {"A": [flat(E[0]), flat(E[1]), flat(E[2])], "B": [flat(E[0]), flat(E[2])]}
-    assert skip_start(h5, ["A", "B"]) == E[1] - 3600 - 1800
-    # range exactly 0.03 is skipped, 0.04 is not
-    assert skip_start({"A": [q(E[0], .50, .48, .50, .52, .51, .52)]}, ["A"]) is None
-    assert skip_start({"A": [q(E[0], .50, .47, .50, .52, .51, .52)]}, ["A"]) == E[0] - 3600 - 1800
+    assert skip_start(h4, ["A", "B"], O, E[1]) == E[1] - H - 1800
+    # a dead hour (no candle for any contract) is skipped; a contract missing a candle contributes nothing
+    h5 = {"A": [flat(E[0]), flat(E[2])], "B": [flat(E[0]), flat(E[2])]}
+    assert skip_start(h5, ["A", "B"], O, E[2]) is None
+    h6 = {"A": [flat(E[0]), q(E[1], .80, .50, .80, .82, .51, .82)], "B": [flat(E[0])]}
+    assert skip_start(h6, ["A", "B"], O, E[1]) == E[1] - H - 1800
+    # sum exactly 0.04 is NOT skipped, 0.03 is
+    assert skip_start({"A": [q(E[0], .50, .48, .50, .52, .50, .52)]}, ["A"], O, E[0]) == E[0] - H - 1800
+    assert skip_start({"A": [q(E[0], .50, .48, .50, .51, .50, .51)]}, ["A"], O, E[0]) is None
+    # self-checks: a minute outside its hour's range, and a minute in an hour with no hourly candle
+    hrs = {"A": {E[0]: (.50, .49, .52, .51)}}
+    assert screen_checks(hrs, {"A": [(E[0] - 600, .49, .51)]}) == (0, 0)
+    assert screen_checks(hrs, {"A": [(E[0] - 600, .60, .51)]}) == (0, 1)
+    assert screen_checks(hrs, {"A": [(E[0] + 600, .49, .51)]}) == (1, 0)
     # packing: one range per request
     reqs, per = [], collections.Counter(); pack([("T%d" % i, 1000 + 600 * i, 1000 + 600 * i + 7200) for i in range(30)], None, reqs, per, "F", 1, 1)
     assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in reqs) and sum(len(r["params"]["market_tickers"].split(",")) for r in reqs) == 30

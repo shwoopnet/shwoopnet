@@ -83,10 +83,12 @@ def placebo_try(tickers, candles, kind, K, e_min):
     fip = elapsed_base(cs, tickers, kind, S)
     if fip is None: return None
     t = int(round(fip + e_min * 60))
-    if not all(two_sided(cs[tk].get(t)) and two_sided(cs[tk].get(t - 300)) for tk in tickers): return None
+    if not all(two_sided(cs[tk].get(t)) for tk in tickers): return None
     if not any(in_play(kind, cs[tk], t, S) for tk in tickers) or (kind == "clock" and t < S + 60): return None
     if any(qualifying(cs, tickers, kind, K, S, u) for u in _all_ts(cs) if u <= t): return None
-    if any(abs(mid(cs[tk][t]) - mid(cs[tk][t - 300])) >= 0.05 - 1e-9 for tk in tickers): return None
+    for tk in tickers:                                                          # Amendment 5, point 4: highest mid minus lowest mid over the PRESENT two-sided minutes from e-5 to e, under 5c, each contract; nothing carried forward
+        ms = [mid(cs[tk][u]) for u in range(t - 300, t + 1, 60) if two_sided(cs[tk].get(u))]
+        if max(ms) - min(ms) >= 0.05 - 1e-9: return None
     tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)
     if not two_sided(e): return None
     lo, hi = K["entry_ask_band"]
