@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """ESOCTIE reader, measurement, candle-job builder and scorer (History Miner, Nov 12, 2026). Research only; sends nothing.
 Registration: ESOCTIE_REGISTRATION.md (this folder). Series and constants: ESOCTIE_SERIES.json (hash-checked below).
-scorekit.py in this folder is a byte copy of claude/testing-desk 04af31f1 workers/testing/scorekit.py (sha256 checked below).
+scorekit.py in this folder is a byte copy of claude/testing-desk 512ffe0d workers/testing/scorekit.py (sha256 checked below).
 
 CLI:
   python3 -I esoctie.py build-candles <lists_folder>...            -> writes ESOCTIE_CANDLES.json (a job file for review)
@@ -14,7 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import scorekit as sk  # noqa: E402
 
-SCOREKIT_SHA = "c22d52e1c6df1343ae9691a7dc916464ff7d26e26cc22b27e131ecc11c1fa9d2"
+SCOREKIT_SHA = "2b36fdaef8ae136bc477f9b92da0d70169cbc07a45077e22356bdd0cb5306557"  # claude/testing-desk 512ffe0d (reader-level HELDOUT_ refusal)
 CFG = json.load(open(os.path.join(HERE, "ESOCTIE_SERIES.json")))
 DEV_FROM = sk.iso(CFG["blocks"]["development_closes_from"])
 DEV_BEFORE = sk.iso(CFG["blocks"]["development_closes_before"])
@@ -33,7 +33,8 @@ MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", 
 def refuse_heldout_folders(folders):
     """Standing rule (h), NOTE 8: any folder whose name starts HELDOUT_ is refused by default."""
     for f in folders:
-        if os.path.basename(os.path.normpath(f)).startswith("HELDOUT_") or "/HELDOUT_" in os.path.abspath(f):
+        paths = (os.path.abspath(f), os.path.realpath(f))   # Forensics defect A: a symlink with an innocent name is resolved too
+        if any(part.startswith("HELDOUT_") for p in paths for part in p.split(os.sep)):
             raise SystemExit("refused: %s is a HELDOUT_ folder (rule (h)); it is read only on the Head of R&D's approved go" % f)
 
 

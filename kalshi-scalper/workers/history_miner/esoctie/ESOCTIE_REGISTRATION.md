@@ -121,3 +121,7 @@ NOTE 6 is withdrawn (its text and code are removed): the Head made NOTE 4's void
 2. **2026-11-10 is DROPPED from ESOCTIE's held-out block:** its results already sit in a landed file (the Nov 10 census listing). The held-out block is closes 2026-10-23 00:00 UTC to before 2026-11-13 00:00 UTC except those closing on 2026-11-10 (UTC).
 3. "The held-out pull is asked of the Head the same hour" now reads: asked the same hour; granted when the other two cards are frozen or out.
 4. `esoctie.py` refuses any folder whose name starts `HELDOUT_` by default (test 7). This changed the file's sha256; both auditors are asked to re-run only that check.
+
+## NOTE 9, Nov 12, 2026, 19:50Z, before any data (Forensics' rule (h) check)
+
+The HELDOUT_ refusal also resolves symlinks (an innocently named link to a HELDOUT_ folder is refused, test 8), and it now sits in the readers too: the pinned `scorekit.py` is updated to the Testing Desk's 512ffe0d copy, whose readers refuse HELDOUT_ folders (sha256 2b36fdae...6557), and `rematch_count.py` refuses them before opening anything. No rule, constant or output changed.

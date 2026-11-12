@@ -22,6 +22,9 @@ def S_of(ev):
 
 ev = collections.defaultdict(dict)
 for folder in sys.argv[1:]:
+    # standing rule (h): counting is reading; a HELDOUT_ folder (by its typed or resolved path) is refused
+    if any(part.startswith("HELDOUT_") for p in (os.path.abspath(folder), os.path.realpath(folder)) for part in p.split(os.sep)):
+        sys.exit("refused: %s is a HELDOUT_ folder (rule (h))" % folder)
     m = json.load(open(os.path.join(folder, "manifest.json")))
     for r in m["rows"]:
         if r.get("status") != 200 or not r.get("file"): continue

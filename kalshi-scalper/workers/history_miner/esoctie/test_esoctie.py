@@ -89,4 +89,10 @@ try:
     E.measure([H], [C]); raise AssertionError("HELDOUT_ folder was read")
 except SystemExit as e:
     assert "HELDOUT_" in str(e)
+# 8. Forensics defect A: an innocently named symlink to a HELDOUT_ folder is refused
+lnk = os.path.join(tempfile.mkdtemp(), "plain_name"); os.symlink(H, lnk)
+try:
+    E.measure([lnk], [C]); raise AssertionError("symlink to HELDOUT_ was read")
+except SystemExit as e:
+    assert "HELDOUT_" in str(e)
 print("ok", rep["filled_eligible"], n, res["rule"]["registered_verdict"])
