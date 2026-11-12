@@ -41,3 +41,27 @@ That answers three things without a result: what it costs to trade here, whether
 | Tries | 0 |
 
 Order: after TIE3 and SOCDERIV, and only if the Head wants it run; the job file and reader would go to the Testing Desk in the same way.
+
+## Ruling and final shape (Head of R&D, Nov 12, 17:25Z): Kalshi's own data only
+
+**Approved: the Kalshi-only part, zero tries, LAST in the dispatch order (behind TIE3, POL-i2 and SOCDERIV).** Not approved: any use of an outside reading. The family settles on Synoptic Data, whose terms are unread; a weather service reading would be a proxy for the settling value, and a proxy that did not match the settled value is exactly what closed ROLLOFF on the same day. So the weather service part above is DROPPED, there is no read of Synoptic, and there is no reading-driven card.
+
+**What is measured now**, per city, at 55, 30 and 10 minutes before the hour (the market opens 60 minutes before it):
+
+1. strikes with a two-sided quote, the median spread and the median round trip (spread plus two fees);
+2. the same round trip for strikes within two ranks of the money, where "the money" is the strike whose YES mid is nearest 50c at that look (taken from the quotes alone);
+3. the ask of the nearer-certain side one, two and three or more strikes away from the money, and the share of strikes already priced at 95c or 5c and beyond;
+4. the share of market-minutes with a trade;
+5. the size at the touch on the markets open at the time of the pull (from one open-market list a series: a copy up to about 11 seconds old, a level only).
+
+**Rule fixed now (the Head's line):** the family is CLOSED as too costly, with no need to settle the source question, if the median round trip near the money is above 5c at every look in every city.
+
+**Fixed sample:** the seven UTC days Nov 5 to Nov 11, 2026, never extended.
+
+| File | What |
+|---|---|
+| `desk_b_jobs/HOURLYTEMP_LISTS.json` | 9 requests, at most 17 pages: the settled markets of the four series for the seven days, one open-market list a series, one fee-field read. Passes the pull script's own check |
+| `hourlytemp/build_candles_job.py` | builds `HOURLYTEMP_CANDLES.json` from the lists: two clock hours a request, about 84 requests (cap 110) |
+| `hourlytemp/measure.py` | the reader. Never reads a result field. Prints the candle freshness line |
+
+The whole chain (lists, builder, candle job check, reader) was run end to end on made-up data before any pull. Kalshi requests in all: about 93. Tries: 0.
