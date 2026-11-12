@@ -115,6 +115,16 @@ Forensics' QUOTEVSBOOK1 (claude/forensics-desk, workers/forensics/QUOTEVSBOOK1_R
 
 Recorded gold 15 minute books, closes Oct 29 to Nov 11, 400 to 330 seconds before the close, the 88c to 97c side, 292 windows (claude/forensics-desk, workers/forensics/GOLDHAIRCUT1_RESULT.md, 870de04; no outcome loaded; not yet checked by the Verification Analyst). Trust the PRICE to about 0.2c a contract; do not trust the COUNT. An immediate-or-cancel buy at the ask seen fills 59, 49 and 46 percent at about 2, 6 and 10 seconds; with +1c 94, 83 and 73 percent; 1 and 15 contracts the same. Touch size covers 15 contracts at 95.6 percent of instants, so a "would fill" test on size says almost nothing. Sent to Main for the gold return rule and to Refinement for the rotation report.
 
+## Re-open ranking (Desk B, Nov 12; the owner's instruction)
+
+kalshi-scalper/workers/REOPEN_RANKING_NOV12.md on claude/idea-desk-b (d6f9bb6). 344 rows examined across every desk's cards, queues and registrations. Every class R row and named candidate was checked against its source; the other classes rest on the workers' tables.
+
+- **Almost nothing stopped only for reads:** 3 clean class R rows in about 340, 4 more that are reads-bound but could only be FALSIFIED, 4 never run for a reason nobody wrote down. None is expected to pass. Free reads buy cheap closures, not finds.
+- **Re-opened now:** the ECONFADE count, at zero extra requests on ECONLAG's pull (Desk B). WXDAYEND's last 22 requests (Testing Desk). **Deferred:** POL-i2 (count step) and UNRATEROUND against the paper screen. **Not re-opened:** the approval calibration remainder (already queued as a pull that cannot pass), finance and index calibration slices, the conditional SPREAD block, ESPORTM1.
+- **The named candidates:** AVG1, STALE1, CLINICAL2 and POL-n1 are class P (too few independent events whatever is pulled); EARLYCLOSE1 is class E; COMBO1 is superseded by the combo recorder and S3.
+- **V2's perps program:** 52 named tests registered on Nov 6 and 7 (110 tries) plus the 500,000 rule PERPGEN sweep, against the 10 to 20 tests the owner approved; 35 ran, 17 did not; 5 FALSIFIED, the rest NOT_ENOUGH_DATA, no lead. Its limit is days of history (stock perps began Nov 5), not reads; 15 tests leaned on the Yahoo saver that stopped; 11 forward reads are dated Dec 1 and Dec 22 and have no owner yet.
+- **Where new ground is:** the 13,856 series the old sweep never reached, and the week-old perps. That is the census.
+
 ## Stale-quote audit (Forensics, Nov 12; the owner's instruction)
 
 kalshi-scalper/workers/forensics/STALE_QUOTE_AUDIT_NOV12.md on claude/forensics-desk (4983bcc). 31 rows covering about 75 named tests on every branch. Not yet checked by the Verification Analyst; about 40 code modules were classified from their loader line only.
