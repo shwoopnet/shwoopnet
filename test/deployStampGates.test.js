@@ -44,7 +44,7 @@ gates.DS4 = async () => {
   assert.ok(!('deploys' in (await run({}))), 'no reader, no field (every older caller is unchanged)');
 };
 gates.DS5 = () => {
-  for (const f of ['deploy-push.sh', 'deploy-sizing.sh', 'deploy-report.sh']) {
+  for (const f of ['deploy-push.sh', 'deploy-sizing.sh', 'deploy-report.sh', 'deploy-fastread.sh']) {
     const s = fs.readFileSync(path.join(root, 'functions', f), 'utf8');
     assert.ok(/functions\/deploy-stamp\.json/.test(s) && s.indexOf('deploy-stamp.json') < s.indexOf('deploy --only'), f + ' writes the stamp before it deploys');
     assert.ok(/DRY_RUN:-\}" = "1" \]; then echo "\[dry run\] write functions\/deploy-stamp\.json"/.test(s), f + ': a dry run writes nothing');
