@@ -79,7 +79,7 @@ Near the money the ladder costs the same as the 15 minute market (about 4.4c a r
 | **Weather, daily high** | 14 cities, 74 city-days, Nov 4 to 11, 6 brackets each | 14 x 365 city-days a year; same-day cities move together. First seen settled a median 22 hours after the listed close (an upper bound: the result is looked for a few times a day) | 81% | 1c (2c, 4c); 20c to 80c brackets 2c (3c, 5c) | not recorded | 1.6c; 2.3c near the money | 3.3c; 4.5c near the money | 200 a bracket | Tradable for a holder; no sizes recorded |
 | **Weather, daily low** | same | same | 76% | **10c (17c, 20c)** | not recorded | 5.8c; 10c near the money | **11.5c; 20c near the money** | 35 a bracket | **Too costly for a taker, move on** |
 | **Daily and weekly commodity ladders** (gold, silver, copper, Brent, WTI, natural gas) | Daily watchlist, Nov 5 to 12, 4 to 5 events a series | One event per trading day (about 250 a year) or per week (52). Settled a median 61 to 81 minutes after the close (WTI daily 8 hours; weekly ladders about a day) | 28% to 74% | 1c to 4c (3c to 4c) | not recorded | 2c to 3c | 3.3c to 5.8c; 4.4c to 7.4c near the money | 0 to 2,700 a strike | Half the strikes or more have no two-sided quote |
-| **Daily and weekly forex ladders, index dailies, Treasury auction markets** (EUR/USD, USD/JPY, the AD and AW ladders, S&P 500, Nasdaq 100, Dow, 2 to 30 year auctions) | same watchlist | Daily or weekly. Forex dailies settle 2 minutes after the close; index dailies 3 hours; auctions 2.5 hours | 10% to 98% | **8c to 18c** (Dow 4c) | not recorded | 5c to 10c (Dow 3c) | **10c to 20c** (Dow 6.4c) | 0 to 500 | **Too costly for a taker, move on** |
+| **Daily and weekly forex ladders, index dailies, Treasury yield dailies (the `KXUST` series)** (EUR/USD, USD/JPY, the AD and AW ladders, S&P 500, Nasdaq 100, Dow, 2 to 30 year Treasury yields) | same watchlist | Daily or weekly. Forex dailies settle 2 minutes after the close; index dailies 3 hours; Treasury yields 2.5 hours | 10% to 98% | **8c to 18c** (Dow 4c) | not recorded | 5c to 10c (Dow 3c) | **10c to 20c** (Dow 6.4c) | 0 to 500 | **Too costly for a taker, move on** |
 | Monthly high and low barriers, Bitcoin and Ethereum | 1 event a month each | 12 a year. Settled about 44 hours after the close | 38% to 100% | 1c to 2c (2c to 3c) | not recorded | 1.2c to 2c | 2.4c to 4.0c | Bitcoin 112,000 to 131,000; Ethereum 0 to 19,000 | Cheap to trade, 12 events a year |
 | Monthly barriers, Solana, XRP, Dogecoin, BNB, HYPE | 1 event a month each | 12 a year | 37% to 98% | 4c to 10c | not recorded | 3c to 7c | **5c to 13c** | under 4,000 | **Too costly, and 12 events a year: move on** |
 | CPI and core CPI | 1 event each in the sample | 12 a year. Settled 10 to 73 minutes after the close | 33% to 36% | 1c to 1.5c (1c to 3c) | not recorded | 1.3c | 2.6c to 2.7c; 4.4c to 6.5c near the money | 49,000 to 77,000 | Cheap, 12 events a year |
@@ -89,12 +89,44 @@ Near the money the ladder costs the same as the 15 minute market (about 4.4c a r
 ## Flags: "too costly, move on" (each with its number)
 
 1. **Weather daily LOW brackets**: spread 10c at the median, round trip 11.5c on an 11c price; near the money 20c.
-2. **Daily and weekly forex ladders, S&P 500 and Nasdaq 100 dailies, Treasury auction markets**: spread 8c to 18c, round trip 10c to 20c, volume zero to a few hundred. (The Dow daily is cheaper, 6.4c a round trip, with zero recorded volume.)
+2. **Daily and weekly forex ladders, S&P 500 and Nasdaq 100 dailies, Treasury yield dailies (the `KXUST` series)**: spread 8c to 18c, round trip 10c to 20c, volume zero to a few hundred. (The Dow daily is cheaper, 6.4c a round trip, with zero recorded volume.)
 3. **Monthly barriers on the smaller coins**: round trip 5c to 13c, one event a month.
 4. **NHL spread and total**: round trip 6.4c to 6.9c at the median, 10.7c to 12.5c at the 75th percentile, volume in single contracts to hundreds.
 5. **Combos, as a two-way trade**: 4.5% two-sided in the one snapshot held. (As a buy-and-hold at the posted ask they are not ruled out by this; that is what Desk B's S3 measures.)
 
 Not flagged, but note the floor: on every liquid family the cheapest round trip is about 3c at mid prices because of the fee, and a taker's order misses about a third of the time at the price seen.
+
+## The same figures under Desk B's family names (added 17:10Z, after `FAMILY_CENSUS_NOV12.md`, commit 7523154 on `claude/idea-desk-b`)
+
+One row per census family this desk holds data on. "RT" = round trip for a taker, median. LIST = market-list quotes only (a copy up to about 11 s old). A correction to the first cut: the `KXUST` series are daily Treasury YIELD markets, as the census says; the first cut called them auction markets on a guess from the ticker.
+
+| Census family (Desk B's name) | Volume (recorded) | Settlement speed | Spread median | RT | Depth at the ask | Fill haircut | Data kind | Flag |
+|---|---|---|---|---|---|---|---|---|
+| Crypto 15 minute, hourly and daily ladders: the 15 minute series | 66,000 (Dogecoin) to 3.4 million (Bitcoin) contracts a window | result posted within about a minute in 99.7% or more | 1c | 3.0c | 72 to 3,500 | 62% to 66% at the price seen, 84% to 86% with +1c (2 s) | BOOK and tape (R6); candles cleared on Bitcoin | |
+| same family: gold 15 minute | 500,000 a window | same | 1c | 3.0c | 1,500 | 63% / 84% | BOOK and tape (R6) | |
+| same family: hourly Bitcoin ladder | 100,000 a strike in 55 minutes | not recorded | 1c | 4.4c near the money | 670 | 73% / 86% at 3 s, half an hour out | BOOK and tape (`book/`); Ethereum and gold ladders LIST only | |
+| Non-crypto 15 minute series (not a census row yet): oil, silver, HYPE, BNB | 29,000 to 101,000 a window | within about a minute in 98% or more | 1c | 3.3c to 3.7c | 29 to 177 | 59% to 62% / 76% to 81% at 5 s | BOOK and tape (NC15), 20 hours | |
+| same: forex pairs (EUR, GBP, AUD against USD; USD/JPY) | 5,700 to 7,600 a window | same | 2c | 3.1c to 4.0c | 560 (one maker) | 71% to 73% / 82% to 84% at 5 s | BOOK and tape (NC15) | one-sided a quarter to a third of the time near the close |
+| same: copper, natural gas, USD/CAD | 3,800 to 23,000 a window | same | 2c to 3c | 5.0c to 5.6c | 26 to 180 | 68% to 71% / 80% to 82% at 5 s | BOOK and tape (NC15) | costly |
+| US game winners (NBA, NFL, NHL moneylines) | NBA 81,000, NFL 58,000, NHL 800 a market | not recorded | NBA 2c, NFL 1c, NHL 2c | 4.8c, 4.2c, 5.5c | 660, 5,900, 360 | none possible | LIST (in-game recorder, about every 2 minutes) | NHL thin |
+| US spreads and totals | NBA 26,000 to 36,000; NFL 3,900 to 30,000; NHL 6 to 950 | not recorded | NBA and NFL 1c; NHL 3c to 4c | NBA and NFL 4.5c; **NHL 6.4c to 6.9c** | 240 to 7,900 | none possible | LIST | **NHL: too costly, move on** |
+| Daily city high and low temperature: HIGH | 200 a bracket | first seen settled a median 22 hours after the listed close (upper bound) | 1c; 2c near the money | 3.3c; 4.5c near the money | not recorded | none possible | LIST (three looks a day) | |
+| same family: LOW | 35 a bracket | same | **10c** | **11.5c; 20c near the money** | not recorded | none possible | LIST | **too costly, move on** |
+| Daily and weekend rain | held on `quote-data` (`raincal/`), not measured in this cut | | | | | | LIST | |
+| Commodity daily and weekly ladders (gold, silver, copper, gas, WTI, Brent) | 0 to 2,700 a strike | 61 to 81 minutes after the close (WTI daily 8 hours; weekly about a day) | 1c to 4c | 3.3c to 5.8c; 4.4c to 7.4c near the money | not recorded | none possible | LIST | 26% to 72% of quotes are one-sided |
+| Currency daily and weekly ladders | 0 to 32 a strike | dailies 2 to 48 minutes; weeklies about 23 hours | **8c to 16c** | **10.6c to 17.2c** | not recorded | none possible | LIST | **too costly, move on** |
+| Index ladders: S&P 500, Nasdaq 100, Dow | zero at the median strike | 66 minutes (Dow) to 3 hours | S&P 9c, Nasdaq 15c, Dow 4c | **10.5c, 16.4c**, Dow 6.4c | not recorded | none possible | LIST | **S&P and Nasdaq: too costly, move on** |
+| Rates: Treasury yields daily, SOFR daily | Treasury 100 to 510; SOFR 1,600 | Treasury 2.5 hours; SOFR 110 minutes | **Treasury 8c to 18c**; SOFR 1c | **Treasury 9.7c to 20c**; SOFR 2.1c | not recorded | none possible | LIST | **Treasury: too costly, move on.** SOFR two-sided on only 31% of quotes |
+| Macro releases: CPI and core CPI (the two held) | 49,000 to 77,000 | 10 to 73 minutes after the close | 1c to 1.5c | 2.6c to 2.7c; 4.4c to 6.5c near the money | not recorded | none possible | LIST | two-sided on a third of quotes |
+| Approval and generic ballot, daily (the two approval series held) | 820 to 6,600 a market | not measurable from 3 snapshots | 1c to 3c | 3.1c to 4.3c; 4.1c to 8.9c near the money | 100 to 1,570 | none possible | LIST (politics recorder, half-hourly) | |
+| Truth Social post counts (weekly, the one held) | 10,800 a market | not measurable | 1c | 2.1c; 3.5c near the money | recorded | none possible | LIST | |
+| Weekly shipping and executive-order count markets on the politics recorder (Hormuz, Panama, Bab el-Mandeb, Suez, orders this week; not a census row I could match) | 500 to 14,500 a market | 8 events closed in the 28 hours of result files | 1c (Suez 10c, orders 5c) | 2.5c to 3.4c (Suez 11.7c, orders 6.4c) | recorded | none possible | LIST | Suez: too costly |
+| Monthly one-touch markets: Bitcoin, Ethereum | Bitcoin 112,000 to 131,000; Ethereum 0 to 19,000 | about 44 hours after the close | 1c to 2c | 2.4c to 4.0c | not recorded | none possible | LIST | 12 events a year |
+| same family: Solana, XRP, Dogecoin, BNB, HYPE | under 4,000 | same | 4c to 10c | **5c to 13c** | not recorded | none possible | LIST | **too costly, move on** |
+| Kalshi perpetuals | 24 hour volume: indices 24 to 52 million, oil 15 to 18 million, metals 2.3 million, crypto 0.6 million, stocks 40,000 to 66,000 | none (continuous) | 1, 2, 3, 7 and 13 to 16 basis points of price | fee not known to this desk | recorded | none possible | LIST, freshness not measured (PERPSLIST1: no evidence at n = 4); candles "assumed" | |
+| Combos | 43% of quoted combos have ever traded | days (2.5 to close at the median) | 3.4c on the 4.5% that are two-sided | not measurable | 245 where posted | not measurable (5 book rows, all one-sided) | LIST plus a small BOOK part, one snapshot | exit not available: buy and hold or nothing |
+
+Not held by this desk (no recorder, or not measured in this cut): mentions, Steam top seller (`ref/`, held but not measured), rain, the 107 sports sub-market series, tennis, soccer, esports, cricket, gas prices, hazards, power demand, Truflation, charts, earnings, altcoin ladders, long-dated politics.
 
 ## What this file cannot say
 

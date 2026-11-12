@@ -61,7 +61,7 @@ A resting (maker) order is a different trade with its own fill and selection que
 | Family | Measured round trip | Why |
 |---|---|---|
 | Weather, daily LOW brackets | 11.5c on an 11c price; 20c near the money | Spread 10c at the median |
-| Daily and weekly forex ladders, S&P 500 and Nasdaq 100 dailies, Treasury auction markets | 10c to 20c | Spread 8c to 18c, volume zero to a few hundred |
+| Daily and weekly forex ladders, S&P 500 and Nasdaq 100 dailies, Treasury yield dailies (the `KXUST` series) | 10c to 20c | Spread 8c to 18c, volume zero to a few hundred |
 | Monthly high and low barriers on Solana, XRP, Dogecoin, BNB, HYPE | 5c to 13c | And only 12 events a year |
 | NHL spread and total | 6.4c to 6.9c at the median, 10.7c to 12.5c at the 75th percentile | Thin: volume from single contracts to hundreds |
 | Combos, as a trade you can exit | Not measurable: 4.5% of quoted combos had both sides | Buy and hold at the posted ask, or nothing |
