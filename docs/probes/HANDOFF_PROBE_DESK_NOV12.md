@@ -38,11 +38,11 @@ Checks at handoff: every test file passes (install `functions/` dependencies fir
 ## Open items
 
 1. **Security re-check** of the reworked reader (Main runs it). Its two low findings are fixed: the venue call shares the overall abort timer, and a declared body length over the cap is refused before the body is read.
-2. **Which CFRTI form, if any.** Research (the Head of R&D, Desk A, V2) is scoring a one-venue form and a Kalshi-only form. Change no code until one is registered with a result. Then: one venue is two constants; the Kalshi-only form is a small second reader (spec section 13).
+2. **Which CFRTI form, if any.** The one-venue form is closed (Desk A, Nov 12: no evidence at 32 trades, the signal sat mostly in a barred venue). The only form left is the Kalshi-only one on Kalshi's Bitcoin perpetual, not yet scored. Build nothing for this probe until it is; then it is a small second reader (spec section 13). If it fails, the candidate and the one-venue reader should be removed, not left dormant.
 3. **The CFRTI1-BTC read**, Nov 20 to 24, then a re-test (mid December). Under the bar, the candidate should be removed, not left dormant.
-4. **The sports spread read** (274 requests through kalshi-pull, after "merge 795"). Refinement is fixing the look to a known-in-advance time. On a PASS: one hand-placed order by the owner is the fast route; the named-entry build is the bot route.
+4. **The sports spread read** (274 requests through kalshi-pull; 795 is merged, it now waits on the jobs pull request 804 and Refinement's close-field commit). Refinement registered a second line on the known-in-advance time (expected_expiration_time, else occurrence_datetime, minus 48 hours); a clear is probe-eligible only if that line also holds at profit factor 1.3 on 100 or more. On a PASS: one hand-placed order by the owner is the fast route; the named-entry build is the bot route.
 5. **Uniqueness and the OICORE correlation** for any CFRTI form: the Verification Analyst, through Main.
-6. **A loss budget for a live sports single**: none exists in the rulebook; the popup must name one.
+6. **A loss budget for a live sports single**: none exists in the rulebook; the Head of R&D has proposed $20 lifetime to the owner, to be named in the popup. Not decided.
 7. The first commit on the branch carries a model name in a trailer; the pull request is squash-merge only, which drops it.
 
 ## Things learned the hard way today

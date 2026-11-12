@@ -22,7 +22,7 @@ If gold L1 latches off, the account still has OICORE and EVENT830 as live probes
 ## What is missing for each, exactly
 
 - **Rank 1.** The read (274 requests through kalshi-pull). Then either a hand-placed order (no code; the bot would show it as unmatched account activity, so it needs a manual log line), or the build scoped in `PROBE_SCOPE_SPORTSSPREAD.md`: the second slot cannot hold a two day position today. One check before the read is trusted: which "close" the research look was measured from (see that file, section 2).
-- **Rank 2.** A registered form on allowed data (Kraken only, or Kalshi's Bitcoin perpetual) with its own development figure; the read and the re-test; the uniqueness score (it buys the same cheap side of the same market in the same minute as OICORE, so the 0.3 correlation check may fail); the owner's popup; a small activation pull request; two deploys. Spec: `PROBE_SPEC_CFRTIBTC.md`.
+- **Rank 2.** A registered form on allowed data with its own development figure. The one-venue form was run and closed on Nov 12 (no evidence at 32 trades), so the only form left is the Kalshi-only one on Kalshi's Bitcoin perpetual, not yet scored; the read and the re-test; the uniqueness score (it buys the same cheap side of the same market in the same minute as OICORE, so the 0.3 correlation check may fail); the owner's popup; a small activation pull request; two deploys. Spec: `PROBE_SPEC_CFRTIBTC.md`.
 - **Rank 3.** A paper edge. Then by hand, or new order code (scoped in section 6 of the sports file, the same named-market path, plus fractional counts and the combo exchange shard).
 - **Rank 4.** Evidence, which is pointing the wrong way.
 
