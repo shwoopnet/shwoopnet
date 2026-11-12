@@ -114,6 +114,20 @@ def detect(g, cand):
     return None, True
 
 
+def ot_state(g, cand, minutes):
+    """Cross-check only (added Nov 12 before any NHL pull): what the 'game goes to overtime' market showed in those minutes.
+    'yes' = its YES bid was 0.90 or more in one of them, 'no' = its YES ask was 0.10 or less in all quoted ones, 'open' = neither, 'none' = no quote."""
+    q = quotes(cand.get(g.get("ot", ""), []))
+    seen = [q[m] for m in minutes if m in q and (q[m][0] is not None or q[m][1] is not None)]
+    if not seen:
+        return "none"
+    if any(b is not None and b >= 0.90 for b, a in seen):
+        return "yes"
+    if all(a is not None and a <= 0.10 for b, a in seen):
+        return "no"
+    return "open"
+
+
 def main():
     run, games = sys.argv[1], json.load(open(sys.argv[2]))
     cand = {}
@@ -123,13 +137,22 @@ def main():
         except (ValueError, OSError):
             continue
     usable, hits = 0, []
+    cross = {"detected": {"yes": 0, "no": 0, "open": 0, "none": 0}, "not detected": {"yes": 0, "no": 0, "open": 0, "none": 0}}
     for g in games:
         d, ok = detect(g, cand)
         usable += 1 if ok else 0
         if d:
             hits.append(d)
+            cross["detected"][ot_state(g, cand, [d["minute"], d["minute"] + 1])] += 1
+        elif ok:
+            last = int(g["close_ts"]) // 60
+            cross["not detected"][ot_state(g, cand, range(last - LAST_MIN, last + 1))] += 1
     n = len(hits)
+    print("candle freshness measured on Bitcoin 15 minute only, not on sports; one-minute resolution, no seconds-level claim")
     print(f"games in the list {len(games)} | with moneyline candles {usable} | detections {n}" + (f" ({n / usable:.1%} of usable games)" if usable else ""))
+    for k in ("detected", "not detected"):
+        c = cross[k]
+        print(f"cross-check, the game-goes-to-overtime market in games {k} by the rule: says overtime {c['yes']} | says no overtime {c['no']} | undecided {c['open']} | no quote {c['none']}")
     if n:
         asks = sorted(h["ask"] for h in hits)
         print(f"cheaper side's ask at the detection minute: median {asks[n // 2]:.2f} | quartiles {asks[n // 4]:.2f} to {asks[(3 * n) // 4]:.2f} | lowest {asks[0]:.2f}")

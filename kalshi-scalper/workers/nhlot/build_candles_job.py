@@ -55,12 +55,13 @@ def main():
     for name, g in games.items():
         if len(set(g["ml"])) != 2 or len(set(g["total"])) < 4 or not g["closes"]:
             continue
-        rows.append({"game": name, "ml": sorted(set(g["ml"])), "total": sorted(set(g["total"])), "close_ts": g["closes"].most_common(1)[0][0]})
+        rows.append({"game": name, "ml": sorted(set(g["ml"])), "total": sorted(set(g["total"])), "close_ts": g["closes"].most_common(1)[0][0],
+                     "ot": "KXNHLOT-%s-1" % name})   # the "game goes to overtime" market, built by name (seen in the Nov 10 census listing); a cross-check only
     rows.sort(key=lambda r: (-r["close_ts"], r["game"]))
     rows = rows[:MAX_GAMES]
     groups = []
     for r in rows:                                        # newest first; a group spans at most 30 minutes of close times
-        n = len(r["ml"]) + len(r["total"])
+        n = len(r["ml"]) + len(r["total"]) + 1
         g = groups[-1] if groups else None
         minutes = lambda lo, hi: (hi + AFTER_S - (lo - BEFORE_S)) // 60 + 1
         if (g and len(g["games"]) < GROUP_GAMES and g["tickers"] + n <= GROUP_TICKERS and g["hi"] - r["close_ts"] <= GROUP_SPAN_S
@@ -73,13 +74,13 @@ def main():
     groups = groups[:MAX_REQUESTS]
     kept = [r for g in groups for r in g["games"]]
     reqs = [{"id": "n%03d" % (k + 1), "path": "/markets/candlesticks",
-             "params": {"market_tickers": ",".join(t for r in g["games"] for t in r["ml"] + r["total"]), "start_ts": g["lo"] - BEFORE_S, "end_ts": g["hi"] + AFTER_S, "period_interval": 1}}
+             "params": {"market_tickers": ",".join(t for r in g["games"] for t in r["ml"] + r["total"] + [r["ot"]]), "start_ts": g["lo"] - BEFORE_S, "end_ts": g["hi"] + AFTER_S, "period_interval": 1}}
             for k, g in enumerate(groups)]
     job = {"job_id": "NHLOT_CANDLES", "owner": "DESK_B", "registration": "kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md",
-           "purpose": "NHLOT price measurement (zero tries), stage 2: one minute candles of both moneyline markets and every total-goals strike for the last 50 minutes before each game market closed. No outcome is read by the reader.",
+           "purpose": "NHLOT price measurement (zero tries), stage 2: one minute candles of both moneyline markets, every total-goals strike and the game-goes-to-overtime market for the last 50 minutes before each game market closed. No outcome is read by the reader.",
            "heldout": "none (a price measurement; no outcome is read and no rule is scored)",
            "allowed_endpoints": [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
-           "series_allowlist": [], "ticker_allowlist": sorted({t for r in kept for t in r["ml"] + r["total"]}),
+           "series_allowlist": [], "ticker_allowlist": sorted({t for r in kept for t in r["ml"] + r["total"] + [r["ot"]]}),
            "max_requests": MAX_REQUESTS, "requests": reqs,
            "notes": "Built by workers/nhlot/build_candles_job.py from the NHLOT_LISTS answers: the most recently closed games (at most 150), grouped by close time, at most 5 games a request. The sample is never extended.",
            "status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
