@@ -78,7 +78,7 @@ def main():
 
     n = dict(pairs=len(pairs), a_winner=0, a_closed_in_time=0, before_two_sided=0, tradeable_before=0, after_two_sided=0, state=0, quiet=0, state_entry=0, quiet_entry=0,
              no_candle_before=0, one_sided_before=0, no_candle_decision=0, one_sided_decision=0, no_candle_entry=0, carried=0, exact=0)
-    costs, days, late = [], set(), []
+    costs, days, late, exact_entries = [], set(), [], 0
     in_span = [e for e in events.values() if ts(STAGE1_FROM) <= e["close"] < ts(STAGE1_BEFORE)]
     start_ok = sum(1 for e in in_span if 4 * 60 <= e["close"] - e["S"] <= 90 * 60)
     for p in pairs:
@@ -119,6 +119,7 @@ def main():
             n[kind + "_entry"] += 1
             if kind == "state":
                 costs.append(q2[1] - (q2[0] + q2[1]) / 2 + fee(q2[1] + SLIP))
+                exact_entries += 1 if k2 == "exact" else 0
                 late.append((b["close"] - b["S"]) / 60.0)   # diagnostic only, never a filter (Amendment 3, point 5)
 
     print("REMATCH stage 1: counts and cost only. No bet is scored. " + LABEL + ".")
@@ -143,6 +144,7 @@ def main():
         print(f"one-way entry cost at qualifying entries: median {100 * med:.1f}c over {len(costs)} (above {100 * COST_KILL_ONE_WAY:.0f}c closes on cost)")
     else:
         print("one-way entry cost: no qualifying entry")
+    print(f"entries whose price came from the exact entry minute: {exact_entries} of {n['state_entry']} (a carried price is payable only if a missing candle means an unchanged quote; not measured on these markets)")
     if late:
         late.sort()
         print(f"diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 {late[len(late) // 10]:.0f} median {late[len(late) // 2]:.0f} p90 {late[(9 * len(late)) // 10]:.0f} | "
