@@ -1,0 +1,195 @@
+{
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/HISTDEPTH_PLAN.md",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "allowed_endpoints": [
+  {
+   "name": "historical_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "ticker_allowlist": [],
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "job_id": "HISTDEPTH_B",
+ "purpose": "History Miner depth count, part B: historical settled-market lists for TIE3's twelve soccer first-half series and the four esports match-winner series of MAPBREAK, to count settled events before about 2026-09-07. Listing only.",
+ "heldout": "none: the historical endpoint holds only markets that closed before about 2026-09-07, which is before every registered held-out date of TIE3 (2026-11-13), MAPBREAK (2026-10-23) and NHLOT; a listing, no candle, no rule scored, zero tries",
+ "series_allowlist": [
+  "KXMLS1H",
+  "KXBRASILEIROB1H",
+  "KXLIGAPORTUGAL1H",
+  "KXEPL1H",
+  "KXLALIGA1H",
+  "KXSERIEA1H",
+  "KXBUNDESLIGA1H",
+  "KXLIGUE11H",
+  "KXLIGAMX1H",
+  "KXBRASILEIRO1H",
+  "KXEREDIVISIE1H",
+  "KXEFLTROPHY1H",
+  "KXCS2GAME",
+  "KXDOTA2GAME",
+  "KXVALORANTGAME",
+  "KXLOLGAME"
+ ],
+ "requests": [
+  {
+   "id": "hist_KXMLS1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXMLS1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXBRASILEIROB1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIROB1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXLIGAPORTUGAL1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLIGAPORTUGAL1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXEPL1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXEPL1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXLALIGA1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLALIGA1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXSERIEA1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXSERIEA1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXBUNDESLIGA1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBUNDESLIGA1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXLIGUE11H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLIGUE11H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXLIGAMX1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLIGAMX1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXBRASILEIRO1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBRASILEIRO1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXEREDIVISIE1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXEREDIVISIE1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXEFLTROPHY1H",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXEFLTROPHY1H",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "max_pages": 4
+  }
+ ],
+ "max_requests": 40,
+ "notes": "Same reading as part A. Esports: the match-winner series only (two markets a match) to keep the run small; map and total-maps lists are a later job only if the Head of R&D asks. At most 40 pages, about 90 to 130 MB."
+}
