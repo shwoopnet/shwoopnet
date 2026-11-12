@@ -46,6 +46,7 @@ def fee10(p): return math.ceil(round(0.07 * p * (1 - p) * 10 * 100, 6)) / 100   
 
 
 def drop_hash(ticker, L, side):
+    """Amendment 2 point 1: <side> is the CONTRACT bought, the word 'yes' or 'no' (not cheap/fav)."""
     h = hashlib.sha256(("%d|%s|%d|%s" % (SEED, ticker, L, side)).encode()).digest()
     return int.from_bytes(h[:8], "big") / 2.0 ** 64
 
@@ -97,7 +98,7 @@ def blocks(seq, third=False):
         if n >= min_n and rare >= 10:
             orders = seq[start:i + 1]; nets = [x["net"] for x in orders]; h = len(orders) // 2
             p, p1, p2 = pf(nets), pf(nets[:h]), pf(nets[h:])
-            hot = p is not None and p >= 1.3 and p1 is not None and p1 >= 1.0 and p2 is not None and p2 >= 1.0
+            hot = p is not None and p >= 1.3 - 1e-9 and p1 is not None and p1 >= 1.0 - 1e-9 and p2 is not None and p2 >= 1.0 - 1e-9
             out.append({"start": start, "end": i, "orders": orders, "hot": hot, "end_close": orders[-1]["close"]})
             start, n, rare = i + 1, 0, 0
     return out
@@ -136,25 +137,27 @@ def bootstrap_p(prs, draws=10000, seed=SEED):
     for a, b, _ in prs:
         for o in b["orders"]:
             r = days.setdefault(day_of(o), [0.0, 0, 0.0, 0]); i = 0 if a["hot"] else 2; r[i] += o["net"]; r[i + 1] += 1
-    keys = sorted(days); rng = random.Random(seed); le = valid = 0
+    keys = sorted(days); rng = random.Random(seed); le = valid = 0; ds = []
     for _ in range(draws):
         sh = nh = sn = nn = 0
         for _ in keys:
             r = days[keys[rng.randrange(len(keys))]]; sh += r[0]; nh += r[1]; sn += r[2]; nn += r[3]
         if nh and nn:
-            valid += 1; le += (sh / nh - sn / nn) <= 0
+            valid += 1; le += (sh / nh - sn / nn) <= 0; ds.append(sh / nh - sn / nn)
+    bootstrap_p.last_draws = sorted(ds)
     return None if not valid else le / valid
 
 
-def null_calibrated_p(orders, chance, observed_d, runs=500, seed=SEED, third=False):
-    """Every order is kept; every market's result is redrawn with P(yes) = chance[ticker]; blocks and labels rebuilt; p = share of runs with D >= observed."""
-    rng = random.Random(seed); ge = 0; tickers = sorted({o["ticker"] for o in orders})
+def null_calibrated_p(orders, chance, observed_d, runs=500, seed=SEED + 1, third=False):
+    """Amendment 2 point 6: random.Random(20261113); per run ONE random() per ticker (every ticker with a kept order in any template, third line included) in ascending ticker order, yes if the draw is below the chance; orders keep side and price; no void; blocks/HOT/D rebuilt (third line left out); a run with no order on one side of D is left out; p = (1 + runs with D >= observed - 1e-9) / (runs kept + 1)."""
+    rng = random.Random(seed); ge = kept = 0; tickers = sorted({o["ticker"] for o in orders})
     for _ in range(runs):
         res = {t: ("yes" if rng.random() < chance[t] else "no") for t in tickers}
         sim = [settle(o, res[o["ticker"]]) for o in orders]
         d = d_stat(pairs(sim, third))[0]
-        ge += (d is not None and observed_d is not None and d >= observed_d)
-    return ge / runs
+        if d is None: continue
+        kept += 1; ge += (observed_d is not None and d >= observed_d - 1e-9)
+    return (1 + ge) / (kept + 1)
 
 
 def stats_after(prs):
@@ -164,6 +167,9 @@ def stats_after(prs):
 
 
 def verdict(pf_hot, d, hot_pairs, p_boot, p_null):
+    """Applied to the figures AS PRINTED (Amendment 2 point 7): PF to 3 decimals, D and both p to 4."""
+    r = lambda x, n: x if (x is None or x == float("inf")) else round(x, n)
+    pf_hot, d, p_boot, p_null = r(pf_hot, 3), r(d, 4), r(p_boot, 4), r(p_null, 4)
     if hot_pairs >= 30 and pf_hot is not None and pf_hot >= 1.15 and d is not None and d > 0 and p_boot is not None and p_boot <= 0.05 and p_null is not None and p_null <= 0.05: return "PREMISE SUPPORTED"
     if hot_pairs >= 30 and ((pf_hot is not None and pf_hot < 1.0) or d is None or d <= 0): return "PREMISE NOT SUPPORTED"
     return "no evidence at n = %d HOT pairs" % hot_pairs
@@ -177,30 +183,28 @@ def luck_table(orders, luck):
             for b in blocks(seq, third):
                 r = out.setdefault(key[3], {"blocks": 0, "hot": 0}); r["blocks"] += 1; r["hot"] += b["hot"]
     for band, r in out.items(): r["hot_share"] = r["hot"] / r["blocks"] if r["blocks"] else None; r["luck_share"] = luck.get(band)
-    return out
+    return {"by_band": out, "hot_blocks": sum(r["hot"] for b_, r in out.items() if b_ != "88-97"), "expected_by_luck": sum(r["blocks"] * (luck.get(b_) or 0) for b_, r in out.items() if b_ != "88-97"), "note": "third line (88-97) excluded from the pooled counts"}
 
 
 def sister_lines(orders):
-    """For every HOT block, whether a sister template of the same market has a HOT most-recent-completed block at the block's end time; against the market's plain HOT share. (ambiguity G)"""
+    """Amendment 2 point 8: for a HOT block X its moment is the midpoint of the close times of its first and last order; a sister template (same market, any of the other 17) counts if one of its completed blocks spans that moment (first close <= moment <= last close); that block's HOT flag is tallied. Kinds: mirror side same look; same side another look; same side and look another band; other; all sisters together. The plain HOT share is HOT blocks over blocks of the market."""
     g = group_templates(orders); bl = {key: blocks(seq) for key, seq in g.items()}; res = {}
     for key, blist in bl.items():
         ser, L, side, band = key
         for b in blist:
             if not b["hot"]: continue
-            for kind in ("mirror_side_same_look", "same_side_other_look", "other_band"):
-                tot = hit = 0
-                for k2, bl2 in bl.items():
-                    if k2 == key or k2[0] != ser: continue
-                    ok = {"mirror_side_same_look": k2[1] == L and k2[2] != side, "same_side_other_look": k2[2] == side and k2[1] != L and k2[3] == band, "other_band": k2[3] != band and k2[1] == L and k2[2] == side}[kind]
-                    if not ok: continue
-                    done = [x for x in bl2 if x["end_close"] <= b["end_close"]]
-                    if not done: continue
-                    tot += 1; hit += done[-1]["hot"]
-                r = res.setdefault((ser, kind), {"hot_blocks_checked": 0, "sister_checks": 0, "sister_hot": 0}); r["hot_blocks_checked"] += 1; r["sister_checks"] += tot; r["sister_hot"] += hit
+            moment = (b["orders"][0]["close"] + b["orders"][-1]["close"]) / 2
+            for k2, bl2 in bl.items():
+                if k2 == key or k2[0] != ser: continue
+                kind = "mirror_side_same_look" if (k2[1] == L and k2[2] != side) else ("same_side_another_look" if (k2[2] == side and k2[1] != L) else ("same_side_and_look_another_band" if (k2[2] == side and k2[1] == L) else "other"))
+                for x in bl2:
+                    if x["orders"][0]["close"] <= moment <= x["orders"][-1]["close"]:
+                        for kd in (kind, "all"):
+                            r = res.setdefault((ser, kd), {"sister_blocks_spanning": 0, "sister_hot": 0}); r["sister_blocks_spanning"] += 1; r["sister_hot"] += x["hot"]
     plain = {}
     for key, blist in bl.items():
         r = plain.setdefault(key[0], [0, 0]); r[0] += len(blist); r[1] += sum(1 for b in blist if b["hot"])
-    return {"%s|%s" % kk: dict(v, sister_hot_share=None if not v["sister_checks"] else v["sister_hot"] / v["sister_checks"], market_plain_hot_share=None if not plain[kk[0]][0] else plain[kk[0]][1] / plain[kk[0]][0]) for kk, v in res.items()}
+    return {"%s|%s" % kk: dict(v, sister_hot_share=None if not v["sister_blocks_spanning"] else v["sister_hot"] / v["sister_blocks_spanning"], market_plain_hot_share=None if not plain[kk[0]][0] else plain[kk[0]][1] / plain[kk[0]][0]) for kk, v in res.items()}
 
 
 def secondary(orders):
@@ -216,26 +220,27 @@ def secondary(orders):
     return {"confirmed": {"orders": len(conf), "pf": pf(conf)}, "not_confirmed": {"orders": len(notc), "pf": pf(notc)}}
 
 
-def full_read(markets_with_results, idx, drop_table, luck, boot_draws=10000, null_runs=500):
+def full_read(markets_with_results, idx, drop_table, luck, boot_draws=10000, null_runs=500, no_drop=False):
     """The whole candle read on in-memory data (this is what the guarded reader calls AFTER the preconditions). markets_with_results: [{series, ticker, close, result}]."""
     mk = [m for m in markets_with_results if not (m["series"] in ("KXBTC15M", "KXETH15M") and m["close"] >= BTC_ETH_CUT)]          # rule (h), at the reader, on the close time
     sig = signals(mk, idx); res = {m["ticker"]: m["result"] for m in mk}; kept = []
     for s in sig:
-        if drop_hash(s["ticker"], s["L"], s["side"]) < fill_share(drop_table, s["series"], s["L"], s["side"], s["band"]): kept.append(settle(s, res[s["ticker"]]))
+        if no_drop or drop_hash(s["ticker"], s["L"], "yes" if s["yes"] else "no") < fill_share(drop_table, s["series"], s["L"], s["side"], s["band"]): kept.append(settle(s, res[s["ticker"]]))
     # the null-calibration chance: YES mid at the market's latest look
     chance = {}
     for m in mk:
         for L in (180, 360, 600):
             c = idx.get(m["ticker"], {}).get(m["close"] - L)
             if c and c.get("bid") is not None and c.get("ask") is not None and 0 < c["bid"] < c["ask"] < 1: chance[m["ticker"]] = (c["bid"] + c["ask"]) / 2; break
-    prs = pairs(kept); S = stats_after(prs); counts = {"markets": len(mk), "signals": len(sig), "kept_after_drop": len(kept), "blocks": sum(len(blocks(s)) for s in group_templates(kept).values()), "pairs": S["pairs"], "hot_pairs": S["hot_pairs"]}
+    prs = pairs(kept); S = stats_after(prs); counts = {"markets": len(mk), "signals": len(sig), "kept_after_drop": len(kept), "orders": len(kept), "voids": sum(1 for o in kept if o["void"]), "blocks": sum(len(blocks(s)) for s in group_templates(kept).values()), "pairs": S["pairs"], "hot_pairs": S["hot_pairs"]}
     pb = bootstrap_p(prs, boot_draws); pn = null_calibrated_p([o for o in kept if o["ticker"] in chance], chance, S["D"], null_runs)
-    out = {"counts_first": counts, "primary": dict(S, p_bootstrap=pb, p_null_calibrated=pn), "verdict": verdict(S["pf_after_hot"], S["D"], S["hot_pairs"], pb, pn), "luck": luck_table(kept, luck), "sister": sister_lines(kept), "secondary": secondary(kept),
+    ds = getattr(bootstrap_p, "last_draws", []); iv = None if not ds else [ds[int(0.025 * len(ds))], ds[min(len(ds) - 1, int(0.975 * len(ds)))]]
+    out = {"counts_first": counts, "primary": dict(S, p_bootstrap=pb, p_null_calibrated=pn, D_interval_95=iv), "verdict": verdict(S["pf_after_hot"], S["D"], S["hot_pairs"], pb, pn), "luck": luck_table(kept, luck), "sister": sister_lines(kept), "secondary": secondary(kept),
            "per_market": {}, "caveat": "Real misses lean toward winners: the candle read overstates the LEVEL of every profit factor; D carries the verdict. Candle freshness measured on the Bitcoin 15 minute series only. A PF after HOT near 0.9 is what 'nothing there' looks like (fee drag)."}
     for ser in sorted({o["series"] for o in kept}):
         sub = [o for o in kept if o["series"] == ser]; ps = pairs(sub); s2 = stats_after(ps)
         out["per_market"][ser] = dict(s2, label=verdict(s2["pf_after_hot"], s2["D"], s2["hot_pairs"], None, None), label_note="comparison only; without the two p values only NOT SUPPORTED or no evidence can show")
-    t_orders = [settle(s, res[s["ticker"]]) for s in sig if s["third"] and drop_hash(s["ticker"], s["L"], s["side"]) < fill_share(drop_table, s["series"], s["L"], s["side"], s["band"])]
+    t_orders = [settle(s, res[s["ticker"]]) for s in sig if s["third"] and drop_hash(s["ticker"], s["L"], "yes" if s["yes"] else "no") < fill_share(drop_table, s["series"], s["L"], s["side"], s["band"])]
     pt = pairs(t_orders, True); st3 = stats_after(pt); out["third_line_88_97_apart"] = st3
     return out
 
@@ -292,7 +297,7 @@ def count_read(lists, candles, drop_table_path):
     mk = [m for m in mk if not (m["series"] in ("KXBTC15M", "KXETH15M") and m["close"] >= BTC_ETH_CUT)]
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candles).items()}
     table = json.load(open(drop_table_path)); sig = signals(mk, idx)
-    kept = [s for s in sig if drop_hash(s["ticker"], s["L"], s["side"]) < fill_share(table, s["series"], s["L"], s["side"], s["band"])]
+    kept = [s for s in sig if drop_hash(s["ticker"], s["L"], "yes" if s["yes"] else "no") < fill_share(table, s["series"], s["L"], s["side"], s["band"])]
     by = {}
     for s in kept: by[(s["series"], s["L"], s["side"], s["band"])] = by.get((s["series"], s["L"], s["side"], s["band"]), 0) + 1
     return {"markets": len(mk), "rule_h_dropped": dropped_h, "signals_before_drop": len(sig), "orders_after_drop": len(kept), "orders_by_series": {x: sum(1 for s in kept if s["series"] == x) for x in sorted({s["series"] for s in kept})},

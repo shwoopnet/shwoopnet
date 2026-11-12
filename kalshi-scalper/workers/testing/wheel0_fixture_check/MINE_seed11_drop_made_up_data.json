@@ -1,0 +1,313 @@
+{
+ "counts_first": {
+  "markets": 8326,
+  "signals": 39766,
+  "kept_after_drop": 30835,
+  "orders": 30835,
+  "voids": 108,
+  "blocks": 405,
+  "pairs": 315,
+  "hot_pairs": 22
+ },
+ "primary": {
+  "pairs": 315,
+  "hot_pairs": 22,
+  "pf_after_hot": 0.9303723991186925,
+  "orders_after_hot": 1348,
+  "orders_after_not_hot": 18043,
+  "mean_after_hot": -0.1437091988130564,
+  "mean_after_not_hot": -0.2635842154852297,
+  "D": 0.11987501667217329,
+  "p_bootstrap": 0.1288,
+  "p_null_calibrated": 0.22954091816367264,
+  "D_interval_95": [
+   -0.08619907280508826,
+   0.3222817139756211
+  ]
+ },
+ "verdict": "no evidence at n = 22 HOT pairs",
+ "luck": {
+  "by_band": {
+   "35-50": {
+    "blocks": 91,
+    "hot": 3,
+    "hot_share": 0.03296703296703297,
+    "luck_share": 0.0571
+   },
+   "50-65": {
+    "blocks": 75,
+    "hot": 6,
+    "hot_share": 0.08,
+    "luck_share": 0.0693
+   },
+   "20-35": {
+    "blocks": 86,
+    "hot": 10,
+    "hot_share": 0.11627906976744186,
+    "luck_share": 0.0648
+   },
+   "80-88": {
+    "blocks": 33,
+    "hot": 0,
+    "hot_share": 0.0,
+    "luck_share": 0.068
+   },
+   "65-80": {
+    "blocks": 79,
+    "hot": 5,
+    "hot_share": 0.06329113924050633,
+    "luck_share": 0.0867
+   },
+   "05-20": {
+    "blocks": 41,
+    "hot": 2,
+    "hot_share": 0.04878048780487805,
+    "luck_share": 0.0932
+   },
+   "88-97": {
+    "blocks": 9,
+    "hot": 0,
+    "hot_share": 0.0,
+    "luck_share": 0.0385
+   }
+  },
+  "hot_blocks": 26,
+  "expected_by_luck": 28.8809,
+  "note": "third line (88-97) excluded from the pooled counts"
+ },
+ "sister": {
+  "KXXRP15M|other": {
+   "sister_blocks_spanning": 50,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.08035714285714286
+  },
+  "KXXRP15M|all": {
+   "sister_blocks_spanning": 140,
+   "sister_hot": 18,
+   "sister_hot_share": 0.12857142857142856,
+   "market_plain_hot_share": 0.08035714285714286
+  },
+  "KXXRP15M|same_side_another_look": {
+   "sister_blocks_spanning": 47,
+   "sister_hot": 12,
+   "sister_hot_share": 0.2553191489361702,
+   "market_plain_hot_share": 0.08035714285714286
+  },
+  "KXXRP15M|same_side_and_look_another_band": {
+   "sister_blocks_spanning": 17,
+   "sister_hot": 6,
+   "sister_hot_share": 0.35294117647058826,
+   "market_plain_hot_share": 0.08035714285714286
+  },
+  "KXXRP15M|mirror_side_same_look": {
+   "sister_blocks_spanning": 26,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.08035714285714286
+  },
+  "KXDOGE15M|same_side_another_look": {
+   "sister_blocks_spanning": 30,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.04716981132075472
+  },
+  "KXDOGE15M|all": {
+   "sister_blocks_spanning": 82,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.04716981132075472
+  },
+  "KXDOGE15M|other": {
+   "sister_blocks_spanning": 28,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.04716981132075472
+  },
+  "KXDOGE15M|mirror_side_same_look": {
+   "sister_blocks_spanning": 15,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.04716981132075472
+  },
+  "KXDOGE15M|same_side_and_look_another_band": {
+   "sister_blocks_spanning": 9,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.04716981132075472
+  },
+  "KXGOLD15M|mirror_side_same_look": {
+   "sister_blocks_spanning": 18,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.06363636363636363
+  },
+  "KXGOLD15M|all": {
+   "sister_blocks_spanning": 102,
+   "sister_hot": 4,
+   "sister_hot_share": 0.0392156862745098,
+   "market_plain_hot_share": 0.06363636363636363
+  },
+  "KXGOLD15M|other": {
+   "sister_blocks_spanning": 34,
+   "sister_hot": 2,
+   "sister_hot_share": 0.058823529411764705,
+   "market_plain_hot_share": 0.06363636363636363
+  },
+  "KXGOLD15M|same_side_and_look_another_band": {
+   "sister_blocks_spanning": 13,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.06363636363636363
+  },
+  "KXGOLD15M|same_side_another_look": {
+   "sister_blocks_spanning": 37,
+   "sister_hot": 2,
+   "sister_hot_share": 0.05405405405405406,
+   "market_plain_hot_share": 0.06363636363636363
+  },
+  "KXETH15M|mirror_side_same_look": {
+   "sister_blocks_spanning": 5,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.05263157894736842
+  },
+  "KXETH15M|all": {
+   "sister_blocks_spanning": 26,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.05263157894736842
+  },
+  "KXETH15M|other": {
+   "sister_blocks_spanning": 11,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.05263157894736842
+  },
+  "KXETH15M|same_side_another_look": {
+   "sister_blocks_spanning": 8,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.05263157894736842
+  },
+  "KXETH15M|same_side_and_look_another_band": {
+   "sister_blocks_spanning": 2,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.05263157894736842
+  },
+  "KXBTC15M|mirror_side_same_look": {
+   "sister_blocks_spanning": 9,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.07692307692307693
+  },
+  "KXBTC15M|all": {
+   "sister_blocks_spanning": 48,
+   "sister_hot": 6,
+   "sister_hot_share": 0.125,
+   "market_plain_hot_share": 0.07692307692307693
+  },
+  "KXBTC15M|same_side_another_look": {
+   "sister_blocks_spanning": 17,
+   "sister_hot": 6,
+   "sister_hot_share": 0.35294117647058826,
+   "market_plain_hot_share": 0.07692307692307693
+  },
+  "KXBTC15M|other": {
+   "sister_blocks_spanning": 18,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.07692307692307693
+  },
+  "KXBTC15M|same_side_and_look_another_band": {
+   "sister_blocks_spanning": 4,
+   "sister_hot": 0,
+   "sister_hot_share": 0.0,
+   "market_plain_hot_share": 0.07692307692307693
+  }
+ },
+ "secondary": {
+  "confirmed": {
+   "orders": 540,
+   "pf": 0.8868138339638804
+  },
+  "not_confirmed": {
+   "orders": 480,
+   "pf": 0.7886470305628442
+  }
+ },
+ "per_market": {
+  "KXBTC15M": {
+   "pairs": 21,
+   "hot_pairs": 3,
+   "pf_after_hot": 0.9608465029802591,
+   "orders_after_hot": 180,
+   "orders_after_not_hot": 1101,
+   "mean_after_hot": -0.07955555555555577,
+   "mean_after_not_hot": -0.28649409627611255,
+   "D": 0.20693854072055679,
+   "label": "no evidence at n = 3 HOT pairs",
+   "label_note": "comparison only; without the two p values only NOT SUPPORTED or no evidence can show"
+  },
+  "KXDOGE15M": {
+   "pairs": 88,
+   "hot_pairs": 5,
+   "pf_after_hot": 1.141371227658951,
+   "orders_after_hot": 305,
+   "orders_after_not_hot": 5156,
+   "mean_after_hot": 0.2531147540983606,
+   "mean_after_not_hot": -0.2374728471683475,
+   "D": 0.4905876012667081,
+   "label": "no evidence at n = 5 HOT pairs",
+   "label_note": "comparison only; without the two p values only NOT SUPPORTED or no evidence can show"
+  },
+  "KXETH15M": {
+   "pairs": 20,
+   "hot_pairs": 1,
+   "pf_after_hot": 0.8624690392386912,
+   "orders_after_hot": 60,
+   "orders_after_not_hot": 1140,
+   "mean_after_hot": -0.3516666666666666,
+   "mean_after_not_hot": -0.38507017543859645,
+   "D": 0.033403508771929824,
+   "label": "no evidence at n = 1 HOT pairs",
+   "label_note": "comparison only; without the two p values only NOT SUPPORTED or no evidence can show"
+  },
+  "KXGOLD15M": {
+   "pairs": 92,
+   "hot_pairs": 5,
+   "pf_after_hot": 0.8685986898319568,
+   "orders_after_hot": 300,
+   "orders_after_not_hot": 5387,
+   "mean_after_hot": -0.3075666666666666,
+   "mean_after_not_hot": -0.2584481158344161,
+   "D": -0.049118550832250474,
+   "label": "no evidence at n = 5 HOT pairs",
+   "label_note": "comparison only; without the two p values only NOT SUPPORTED or no evidence can show"
+  },
+  "KXXRP15M": {
+   "pairs": 94,
+   "hot_pairs": 8,
+   "pf_after_hot": 0.8588574976103429,
+   "orders_after_hot": 503,
+   "orders_after_not_hot": 5259,
+   "mean_after_hot": -0.284751491053678,
+   "mean_after_not_hot": -0.263314318311466,
+   "D": -0.021437172742211963,
+   "label": "no evidence at n = 8 HOT pairs",
+   "label_note": "comparison only; without the two p values only NOT SUPPORTED or no evidence can show"
+  }
+ },
+ "caveat": "Real misses lean toward winners: the candle read overstates the LEVEL of every profit factor; D carries the verdict. Candle freshness measured on the Bitcoin 15 minute series only. A PF after HOT near 0.9 is what 'nothing there' looks like (fee drag).",
+ "third_line_88_97_apart": {
+  "pairs": 0,
+  "hot_pairs": 0,
+  "pf_after_hot": null,
+  "orders_after_hot": 0,
+  "orders_after_not_hot": 0,
+  "mean_after_hot": null,
+  "mean_after_not_hot": null,
+  "D": null
+ }
+}
