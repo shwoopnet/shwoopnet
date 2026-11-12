@@ -81,6 +81,7 @@ Strategies move through five stages: Idea, Shadow, Probe, Live, Retired. Family 
 4. Cash basis, after fees.
 5. A verdict of FALSIFIED, NOT_YET_FALSIFIED or NOT_ENOUGH_DATA, with the numbers.
 6. The fact checker confirms every figure before it reaches the owner.
+7. **The cutoff is a constant (Nov 12, 2026, after Desk A's held-out audit).** The registration states the held-out cutoff as a date or timestamp, the script carries that same constant, and the read-once marker is a line committed to the repo (not a scratch or git-ignored file). A cutoff computed as "the last third of whatever data exists when the script runs" is not allowed: on data that keeps growing it silently turns held-out into development. A test whose held-out was touched is reported with and without the touched part. The audit found nine such cases among open tests; they are being pinned.
 
 ## 7. Escalation
 
