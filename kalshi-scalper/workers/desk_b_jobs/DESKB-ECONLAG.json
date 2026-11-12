@@ -1,0 +1,84 @@
+{
+ "id": "DESKB-ECONLAG",
+ "card": "ECONLAG (card 2)",
+ "protocol": "IDEA_DESK_B_PROTOCOLS.md, protocol 2 with amendment 1",
+ "status": "DEMOTED by the power analysis: one falsification run only; NOT to run on the shared address; waits for the separate pull route",
+ "purpose": "1 minute candles around scheduled prints for the next-meeting Fed decision market and up to four slower macro markets; time exit test",
+ "host_allowlist": [
+  "api.elections.kalshi.com"
+ ],
+ "method": "GET",
+ "auth": "none (public market data; no key, no header, no cookie)",
+ "redirects": "refuse",
+ "user_agent": "generic, no personal details",
+ "on_429": "wait 300 seconds and resume; stop the job for good at 5 refusals; never loop",
+ "writes": "only the output folder on a data branch; never main; no Firestore; nothing under functions/",
+ "live_account_data": "none; public market data only",
+ "spacing_seconds": 61,
+ "max_requests": 400,
+ "stage_1_calendar": {
+  "max_requests": 10,
+  "requests": [
+   {
+    "path": "/trade-api/v2/events",
+    "params": {
+     "series_ticker": "KXCPI",
+     "status": "settled",
+     "limit": 200
+    },
+    "also": "/trade-api/v2/historical/markets with the same series_ticker if the event list starts after 2024-10-01"
+   },
+   {
+    "path": "/trade-api/v2/events",
+    "params": {
+     "series_ticker": "KXPAYROLLS",
+     "status": "settled",
+     "limit": 200
+    },
+    "also": "/trade-api/v2/historical/markets with the same series_ticker if the event list starts after 2024-10-01"
+   },
+   {
+    "path": "/trade-api/v2/events",
+    "params": {
+     "series_ticker": "KXPCECORE",
+     "status": "settled",
+     "limit": 200
+    },
+    "also": "/trade-api/v2/historical/markets with the same series_ticker if the event list starts after 2024-10-01"
+   },
+   {
+    "path": "/trade-api/v2/events",
+    "params": {
+     "series_ticker": "KXFEDDECISION",
+     "status": "settled",
+     "limit": 200
+    },
+    "also": "/trade-api/v2/historical/markets with the same series_ticker if the event list starts after 2024-10-01"
+   }
+  ],
+  "output": "print_days.csv (series, event, close_time = print time T)",
+  "check": "Aug to Dec 2026 rows must equal kalshi-scalper/studies/EVENT_CALENDAR_2026.csv on V2's branch to the minute; mismatches are dropped and listed"
+ },
+ "stage_2_candles": {
+  "max_requests": 390,
+  "for_each": "print day in the FIRST TWO THIRDS of print days only",
+  "markets": "F = KXFEDDECISION next meeting, highest YES mid at T-5; S1, S2 = the two later meetings; S3 = the rate cut count series for the year (name confirmed in stage 1); S4 = KXFED last meeting of the year; in each slow series the one market nearest 50c at T-5",
+  "request_template": {
+   "path": "/trade-api/v2/series/{series}/markets/{ticker}/candlesticks  (or /trade-api/v2/historical/markets/{ticker}/candlesticks before the cutoff 2026-09-12)",
+   "params": {
+    "start_ts": "T - 600",
+    "end_ts": "T + 86400 + 600",
+    "period_interval": 1
+   }
+  },
+  "extra": "daily candles (period_interval 1440) for the 60 trading days before each print for the betas: about 20 requests"
+ },
+ "keep_fields": [
+  "end_period_ts",
+  "yes_bid.close",
+  "yes_ask.close",
+  "volume"
+ ],
+ "output_dir": "deskb/econlag/",
+ "heldout_rule": "the last third of print days gets NO candle request until the development result is committed"
+}

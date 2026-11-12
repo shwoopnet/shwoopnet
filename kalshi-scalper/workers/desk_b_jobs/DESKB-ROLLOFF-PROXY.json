@@ -1,0 +1,83 @@
+{
+ "id": "DESKB-ROLLOFF-PROXY",
+ "card": "ROLLOFF (card 13)",
+ "protocol": "card 13 in IDEA_DESK_B_NOV11.md; a protocol file is written and committed before this job runs",
+ "status": "NOT YET APPROVED; proposed as the next and last cheap read",
+ "purpose": "settled daily approval markets and their rules text, to test whether a poll table rebuilt from Wikipedia reproduces Kalshi's settled value (kill: under 80% of days within 0.3 points). No price is read.",
+ "host_allowlist": [
+  "api.elections.kalshi.com"
+ ],
+ "method": "GET",
+ "auth": "none (public market data; no key, no header, no cookie)",
+ "redirects": "refuse",
+ "user_agent": "generic, no personal details",
+ "on_429": "wait 300 seconds and resume; stop the job for good at 5 refusals; never loop",
+ "writes": "only the output folder on a data branch; never main; no Firestore; nothing under functions/",
+ "live_account_data": "none; public market data only",
+ "spacing_seconds": 61,
+ "max_requests": 12,
+ "requests": [
+  {
+   "path": "/trade-api/v2/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "status": "settled",
+    "limit": 1000
+   },
+   "pages": "follow cursor, at most 2"
+  },
+  {
+   "path": "/trade-api/v2/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "limit": 1000
+   },
+   "pages": "at most 2"
+  },
+  {
+   "path": "/trade-api/v2/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "status": "settled",
+    "limit": 1000
+   },
+   "pages": "at most 1"
+  },
+  {
+   "path": "/trade-api/v2/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "limit": 1000
+   },
+   "pages": "at most 2"
+  },
+  {
+   "path": "/trade-api/v2/series/KXTRUMPAPPROVE",
+   "params": {},
+   "note": "settlement source and rules text"
+  },
+  {
+   "path": "/trade-api/v2/series/KXAPRPOTUS",
+   "params": {},
+   "note": "settlement source and rules text"
+  }
+ ],
+ "keep_fields": [
+  "ticker",
+  "event_ticker",
+  "close_time",
+  "result",
+  "floor_strike",
+  "cap_strike",
+  "rules_primary",
+  "settlement_sources"
+ ],
+ "drop_fields": [
+  "yes_bid",
+  "yes_ask",
+  "last_price",
+  "volume (no price is to be read in this job)"
+ ],
+ "output_dir": "deskb/rolloff/markets/",
+ "heldout_rule": "markets closing in the last third of event dates are listed but flagged heldout; their results are not used in the proxy fit"
+}

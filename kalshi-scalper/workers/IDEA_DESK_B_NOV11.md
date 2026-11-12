@@ -2,6 +2,24 @@
 
 Stage of every card: **Idea**. Nothing here was scored. No Kalshi API call was made by this desk (0 requests). No order, no spend, no account, no key. Each card needs its own protocol committed before any outcome is read, the Verification Analyst's score on the four uniqueness checks, and the owner's approval before it can count as "on the shadow list" (`docs/RND_CHARTER.md` section 3).
 
+## Status after the power analysis (Nov 12): 12 of 16 closed or retired
+
+Full reasoning: `workers/IDEA_DESK_B_POWER.md`. The research bar needs about 300 or more independent events even at a true profit factor of 2, so a family with about 12 events a year cannot reach a verdict of PASS in any useful time; and combos carry no posted asks, so no combo card can be priced from public data.
+
+| Card | Status |
+|---|---|
+| 13 ROLLOFF | KEPT (daily events; next step is a 12 read proxy check) |
+| 3 BALLOTNO | description of one election night being finished (113 reads, approved), then PARKED until 2028 |
+| 2 ECONLAG | DEMOTED to one falsification run, only through the separate pull route |
+| 9 MOVPARITY | arm A PARKED, arm B RETIRED |
+| 1 NESTCOMBO, 7 WXCOMBO-XCITY, 8 WXCOMBO-PERSIST | CLOSED: untestable, combos have no posted asks |
+| 4 UNRATEROUND, 5 FAANOTICE, 6 SCOTUSAUTH, 10 PRESENTQ, 11 TARIFFDTS, 12 CPIARITH, 15 WIKIEDIT, 16 SWEEPSIM | RETIRED: cannot reach a verdict (too few events a year; two also blocked on unread terms) |
+| 14 IMPLY1 | RETIRED after a zero-read look: the nearest pair is 25c from a lock |
+
+Second wave on held data: no new card (`workers/IDEA_DESK_B_WAVE2.md`). Job files for the remaining pulls: `workers/desk_b_jobs/`.
+
+The cards below are kept as written on Nov 11, as the record.
+
 ## What was read first, so nothing is repeated
 
 `docs/RND_CHARTER.md`, `docs/STRATEGY_LIFECYCLE.md` (7c to 7g, the declined list), `docs/POLITICS_RULES.md` (main, and the 30 day version on `claude/politics-30day`), Refinement's `refine_tools/POLITICS_CARDS_NOV11.md`, `POLITICS_CENSUS.md`, `ELECTIONS_CENSUS.md`, `CARDS_NOV11_ROWS_74_93.md`, `CARDS_74_84_REGISTRATION_AND_RESULT.md`, `IDEA_BACKLOG.md` rows 1 to 73, `FIVE_MECHANISMS_NOV11.md`, `LITERATURE_NOTE_NOV11.md`; V2's `workers/IDEA_CARDS_NOV11B.md`, `IDEA_CARDS_NOV11C.md`, `POLITICS_CARDS_V2.md`, `POLITICS_CARDS_V2B.md`, `POLITICS_H_J_RESULT.md`, `POLCOMBO1_CARD.md`, `COMBOPRICE1_DESIGN.md`, `COMBO1_CENSUS.md`, `CLINICAL1_CARDS.md`, `CLINICAL1_TERMS.md`, `BASERATES1_TABLES.md`, `LITSCAN_NOV11.md`, `DOCS_CARDS_RESULT.md`, and the result headers of about 30 V2 tests (COUNT1, COUNT2, GOVCOUNT1, TSA1, NOWCAST1, FEDIMPL1, BARRIER1, EARNPR1, CPIMENT, PHYSCOUNT1, RAINFACT1, CALIB1, USWEEP1 to 3, ECONNEW1 and 2, ECONREL1, WXDEAD1, WXNEW1, WXOTHER1, NEWLIST1, MVE1, PARLAY1, TNOTE1, SOFR1).
@@ -28,7 +46,7 @@ Keyword check of the V2 README (1.77 MB) and both workers folders for each card 
 | BLS public API (api.bls.gov) | PERMITTED (on the desk's permitted list) | v1 needs no key; 25 queries a day keyless |
 | NWS API (api.weather.gov) | PERMITTED | already recorded by `record-wxens.yml` |
 | Wikipedia and Wikimedia APIs | PERMITTED | the Wikimedia User-Agent policy asks for a contact in the agent string; the repo rule is "no personal details", so the contact is an owner choice (flagged by Refinement too) |
-| Treasury Fiscal Data API (api.fiscaldata.treasury.gov) | PERMITTED per Refinement's row 79 read (Daily Treasury Statement); NOT re-read by this desk | no key |
+| Treasury Fiscal Data API (api.fiscaldata.treasury.gov) | **AMBIGUOUS (corrected Nov 12): a person must read the terms first.** Refinement's row 79 called it permitted; the Chief of Staff's list puts Treasury among the sources needing a human read, and the stricter reading wins | not read by this desk; card 11 is blocked on it |
 | FAA (tfr.faa.gov list of temporary flight restrictions) | **UNREAD, so BARRED for now.** This desk's one read of the FAA web policies page on Nov 11 was refused (HTTP 403 to an automated reader, no text returned); it was not retried and tfr.faa.gov itself was never fetched | NEW host. A person must read the policy page in a browser and record the verdict; a 403 to an automated client is itself a caution. Only then the signal logger allowlist edit (a code edit and the owner) |
 | supremecourt.gov | AMBIGUOUS (V2: policy page errored) | NOT used; card 6 uses Wikipedia instead |
 | RCP, Silver Bulletin, VoteHub, X, Reddit, Polymarket, Yahoo, ESPN and the other gated hosts | BARRED | never read; where a market settles on one of them, the number is seen only through Kalshi's own settled result |
