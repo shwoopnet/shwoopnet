@@ -1205,3 +1205,7 @@ Three job files for W-POL-APPR1's full pull were copied from Refinement's branch
 
 The family of taker order-flow signals on the 15 minute tape (FLOW1, TAPEFLOW1, RESIL1 and their variants) is closed by evidence under the owner's three-falsified rule and added to the declined list (`docs/STRATEGY_LIFECYCLE.md` 7e). RESIL1's development read (n 1,061, cash PF 0.90) was reproduced by the Verification Analyst independently. OICORE's open-interest trigger is a different field and is not covered. Docs only, no change to the bot.
 
+## kalshi-pull: 20 real runs a UTC day (Nov 12, 2026, the owner, asked for by the Head of R&D)
+
+The day cap on real runs of `scripts/kalshi_pull.py` goes from 12 to 20 (`MAX_RUNS_PER_DAY`), and nothing else changes. Why: on its first day the 12 a day cap bound (a 13th run was refused, because the runner counts every pull folder dated today in UTC, this morning's included) while most runs are small, under 100 requests, so the limit counts folders rather than load. Every per-run limit stays: 1 request a second, 1,200 a run, three 429s in a row end a run, 5 MB an answer, 200 MB a run, the host table, GET only, no key, no redirects, the end date 2027-02-28; at 20 runs the most a day can send is still bounded by those. If the first 429 ever appears, drop back (to 12, then 6). Gate KP18 and KP18b pin 20 and every other limit.
+
