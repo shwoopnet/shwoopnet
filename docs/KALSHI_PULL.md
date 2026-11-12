@@ -86,8 +86,6 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists, its own job (the heavy part) |
 | `MAPBREAK_LISTS` | Testing Desk (MAIN) | 20, up to 140 pages (154) | about 65 (estimate, uncertain by 2x; its own run; a size stop cuts the last requests) | `MAPBREAK_REGISTRATION.md` (Amendments 1 to 3); 12 series settled lists before the held-out date, 4 history lists of the match series (counts only, all before the live/history boundary) and 4 fee reads |
 | `ESOCTIE_LISTS` | History Miner (MAIN) | 4, up to 81 pages (81) | about 120 (estimate; its own run) | `ESOCTIE_REGISTRATION.md`; KXESOCCERGAME series read and settled lists, closes 2026-09-12 to 2026-10-22 |
-| `HISTDEPTH_A` | History Miner (MAIN) | 8, up to 29 pages (29) | 62 to 90 (estimate) | `HISTDEPTH_PLAN.md`; /historical/markets of the NHL period and NFL quarter series (does TIE3 have a pre-Sep-7 season) |
-| `HISTDEPTH_B` | History Miner (MAIN) | 16, up to 40 pages (40) | 90 to 130 (estimate) | `HISTDEPTH_PLAN.md`; /historical/markets of TIE3's 12 soccer first-half series and four esports match series |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
