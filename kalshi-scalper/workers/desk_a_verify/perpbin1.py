@@ -29,7 +29,7 @@ def rows(markets, binary, oi, cut):
         took = False
         for arm, buy_yes in (("A", True), ("B", False)):
             p = ask if buy_yes else 1 - bid
-            if not 0.40 <= p <= 0.60: continue
+            if not 0.40 - 1e-9 <= p <= 0.60 + 1e-9: continue      # cent-inclusive compare
             win = mk["yes"] == buy_yes; took = True
             out[arm].append(dict(close=mk["close"], day=day, p=p, win=win, pnl=(1 if win else 0) - p - K.fee(p)))
         if not took: why["not mid-band"] += 1; continue

@@ -71,7 +71,8 @@ def decide(mk, cands, perp, nxt_key=None):
     if not c: return None, "no decision candle"
     bid, ask = c
     if ask <= bid or ask - bid > SPREAD + 1e-9: return None, "spread over 3c or crossed"
-    side = "yes" if LO <= ask <= HI else ("no" if LO <= 1 - bid <= HI else None)
+    E = 1e-9      # cent-inclusive compare (Verification Analyst, Nov 12): 1 - 0.70 computes as 0.30000000000000004 and must still count as 30c
+    side = "yes" if LO - E <= ask <= HI + E else ("no" if LO - E <= 1 - bid <= HI + E else None)
     if side is None: return None, "not cheap"
     xs = [perp.get(t0 - 60 * k) for k in range(11)]
     lr = [math.log(xs[k] / xs[k + 1]) for k in range(10) if xs[k] and xs[k + 1]]
@@ -84,7 +85,7 @@ def decide(mk, cands, perp, nxt_key=None):
     py = Phi(math.log(index / mk["strike"]) / sd)
     p = ask if side == "yes" else 1 - bid
     chance = py if side == "yes" else 1 - py
-    if chance - p < EDGE: return None, "no edge"
+    if chance - p < EDGE - E: return None, "no edge"
     win = mk["yes"] == (side == "yes")
     n = cands.get(t0 + 60)       # the NEXT 1 minute candle (ending at close minus 60 s)
     ran = None if not n else ((n[1] if side == "yes" else 1 - n[0]) >= p + 0.01 - 1e-9)
