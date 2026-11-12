@@ -23,7 +23,7 @@ Rules: `ROTATION_LANE.md` on this branch (v1.0, approved by the owner Nov 12, 20
 | 11 | REMATCH, fade the previous loser's fall when the same two players meet again (Desk B, Amendments to 4) | e-soccer | as rows 6 to 8 | no log source yet |
 | 12 | ESOCTIE, the e-soccer tie against its walk-forward base rate (History Miner, NOTES to 8; scorers frozen) | e-soccer | as rows 6 to 8 | no log source yet |
 
-## Batch 1b, dated 2026-11-12 (written 20:03Z)
+## Batch 1b, dated 2026-11-12 (written 20:02Z)
 
 | # | Rule | Market | Log source | State |
 |---|---|---|---|---|
