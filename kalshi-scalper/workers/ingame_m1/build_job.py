@@ -1,87 +1,99 @@
 #!/usr/bin/env python3
 """Build the kalshi-pull job for the in-game lag MEASUREMENT (step 1 of the card
-workers/IDEA_DESK_B_INGAME_CARD.md; zero tries; no trade is scored).
+workers/IDEA_DESK_B_INGAME_CARD.md; zero tries; no trade is scored). Rebuilt ONCE on Nov 12, 2026
+at the Head of R&D's direction, from a longer FIXED list, before any candle was pulled.
 
-Reads a checkout of branch sports-data (the in-game recorder's files), finds the games that
-finished inside the recording, and writes:
-  games.json            one row per game: the six tickers the recorder followed and the window
-  INGAMELAG_M1.json     the job file, one batched 1 minute candle request per game
+Source of the list, for tickers and close times ONLY (no price, no result is read from it):
+Refinement's committed files on branch claude/refine-live, kalshi-scalper/refine_tools/
+  SPREAD_CELL1_EVENTS.json   [series, event ticker, close time] of every listed spread event
+  jobs/SPREADCELL1.json      its ticker_allowlist: the market tickers of those events
 
-Only the recorder's own files are read. No network, no key.
-Usage: python3 build_job.py <checkout of sports-data> <out dir>
+Pinned sample: every NBA, NHL and NFL event in that list whose close time is from
+2026-10-20 00:00:00 UTC to 2026-11-11 23:59:59 UTC.
+
+Markets asked for, chosen WITHOUT any price: both moneyline markets, and for each team its two
+lowest spread strikes in the list (the strikes that are live when a game is close).
+
+Usage: python3 build_job.py SPREAD_CELL1_EVENTS.json SPREADCELL1.json <out dir>
 """
-import csv
-import glob
-import gzip
 import json
 import os
 import re
 import sys
+from datetime import datetime, timezone
 
-PLAY_S = {"NBA": int(2.5 * 3600), "NHL": int(2.75 * 3600), "NFL": int(3.25 * 3600)}   # length of the window before the decided minute
-LEAD_S, TAIL_S = 900, 720
-MAX_GAMES = 58                                                                        # the job cap is 60
-
-
-def num(x):
-    try:
-        return float(x)
-    except (TypeError, ValueError):
-        return None
+START_UTC = "2026-10-20T00:00:00Z"
+END_UTC = "2026-11-11T23:59:59Z"
+SERIES = {"KXNBASPREAD": ("NBA", "KXNBAGAME"), "KXNHLSPREAD": ("NHL", "KXNHLGAME"), "KXNFLSPREAD": ("NFL", "KXNFLGAME")}
+PLAY_MIN = {"NBA": 150, "NHL": 165, "NFL": 195}     # a generous game length, minutes
+LATE_CLOSE_MIN = 100                                 # the market can close this long after the game is decided
+TAIL_S = 120
 
 
-def mid(b, a):
-    return (a + b) / 2.0 if (a is not None and b is not None and b > 0 and 0 < a <= 1) else None
+def ts(iso):
+    return int(datetime.fromisoformat(iso.replace("Z", "+00:00")).timestamp())
+
+
+def split(t):
+    m = re.match(r"^(.*?)(\d+)$", t.rsplit("-", 1)[1])
+    return (m.group(1), int(m.group(2))) if m else (None, None)
 
 
 def main():
-    root, out = sys.argv[1], sys.argv[2]
-    games = {}
-    for p in sorted(glob.glob(os.path.join(root, "ingame", "*", "*", "obs.csv.gz"))):
-        for r in csv.DictReader(gzip.open(p, "rt", newline="")):
-            m = re.match(r"KX(NBA|NHL|NFL)(GAME|SPREAD|TOTAL)-(.+)$", r.get("event", ""))
-            if not m:
-                continue
-            g = games.setdefault((m.group(1), m.group(3)), {"GAME": {}, "SPREAD": {}, "TOTAL": {}})
-            g[m.group(2)].setdefault(r["ticker"], []).append((int(r["t_recv_ms"]) / 1000.0, num(r["yes_bid"]), num(r["yes_ask"])))
-    rows = []
-    for (sport, name), g in sorted(games.items()):
-        if len(g["GAME"]) != 2 or not g["SPREAD"]:
+    events = json.load(open(sys.argv[1]))["events"]
+    allow = json.load(open(sys.argv[2]))["ticker_allowlist"]
+    out = sys.argv[3]
+    by_event = {}
+    for t in allow:
+        by_event.setdefault(t.rsplit("-", 1)[0], []).append(t)
+    lo, hi = ts(START_UTC), ts(END_UTC)
+    rows, skipped = [], 0
+    for series, ev, close in sorted(events, key=lambda e: (e[2], e[1])):
+        if series not in SERIES or not (lo <= close <= hi):
             continue
-        ml = sorted(g["GAME"])
-        path = [(t, mid(b, a)) for t, b, a in sorted(g["GAME"][ml[0]])]
-        path = [(t, x) for t, x in path if x is not None]
-        if len(path) < 5 or not (path[-1][1] >= 0.97 or path[-1][1] <= 0.03):
-            continue                                   # not finished inside the recording
-        i = len(path) - 1
-        while i > 0 and (path[i - 1][1] >= 0.97 or path[i - 1][1] <= 0.03):
-            i -= 1
-        end = int(path[i][0])
-        rows.append({"sport": sport, "game": name, "ml": ml, "spread": sorted(g["SPREAD"])[:2], "total": sorted(g["TOTAL"])[:2],
-                     "decided_ts": end, "start_ts": end - PLAY_S[sport] - LEAD_S, "end_ts": end + TAIL_S})
-    rows.sort(key=lambda r: (r["decided_ts"], r["game"]))
-    rows = rows[:MAX_GAMES]
-    tickers = sorted({t for r in rows for t in r["ml"] + r["spread"] + r["total"]})
+        sport, game_series = SERIES[series]
+        name = ev.split("-", 1)[1]
+        strikes = {}
+        for t in by_event.get(ev, []):
+            code, n = split(t)
+            if code:
+                strikes.setdefault(code, []).append((n, t))
+        codes = sorted(strikes)
+        teams = name[7:]                              # after the date, e.g. 26NOV10 + BOSPHI
+        if len(codes) == 1:                           # only one team has spread strikes: the other code is what is left of the name
+            c = codes[0]
+            other = teams[len(c):] if teams.startswith(c) else (teams[:-len(c)] if teams.endswith(c) else None)
+            codes = sorted([c, other]) if other else codes
+        if len(codes) != 2 or teams not in (codes[0] + codes[1], codes[1] + codes[0]):
+            skipped += 1
+            continue
+        spread = [t for c in sorted(strikes) for _n, t in sorted(strikes[c])[:2]]
+        if not spread:
+            skipped += 1
+            continue
+        rows.append({"sport": sport, "game": name, "event": ev, "ml": ["%s-%s-%s" % (game_series, name, c) for c in codes], "spread": spread,
+                     "list_close_ts": close, "start_ts": close - 60 * (PLAY_MIN[sport] + LATE_CLOSE_MIN), "end_ts": close + TAIL_S})
+    tickers = sorted({t for r in rows for t in r["ml"] + r["spread"]})
     reqs = [{"id": "g%03d_%s_%s" % (k + 1, r["sport"], r["game"]), "path": "/markets/candlesticks",
-             "params": {"market_tickers": ",".join(r["ml"] + r["spread"] + r["total"]), "start_ts": r["start_ts"], "end_ts": r["end_ts"], "period_interval": 1}}
+             "params": {"market_tickers": ",".join(r["ml"] + r["spread"]), "start_ts": r["start_ts"], "end_ts": r["end_ts"], "period_interval": 1}}
             for k, r in enumerate(rows)]
     job = {
         "job_id": "INGAMELAG_M1", "owner": "DESK_B",
         "registration": "kalshi-scalper/workers/IDEA_DESK_B_INGAME_CARD.md",
-        "purpose": "In-game lag card, step 1: a MEASUREMENT with zero tries. One minute candles of the six markets the in-game recorder followed in each game that finished inside the recording. No trade is scored.",
-        "heldout": "none (a measurement of quote timing; no outcome is read and no rule is scored)",
+        "purpose": "In-game lag card, step 1: a MEASUREMENT with zero tries. One minute candles of both moneyline markets and four low spread strikes for each NBA, NHL and NFL game of a fixed list (closes 2026-10-20 to 2026-11-11). No trade is scored.",
+        "heldout": "none (a measurement of quote timing; no settlement result is read and no rule is scored). The spread markets are also the unread sample of W-SPREAD-CELL1: the reader uses in-play candles only and prints no pre-game price and no outcome.",
         "allowed_endpoints": [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks",
                                "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
         "series_allowlist": [], "ticker_allowlist": tickers,
-        "max_requests": 60, "requests": reqs,
-        "notes": "One batched request per game (2 moneyline, 2 spread, up to 2 total tickers; about 3 to 4 hours of 1 minute candles). The batched candle endpoint has not been seen to answer for sports markets: if the first three requests fail the run stops by the script's own rule and nothing more is spent; the fallback is one request per market for the moneyline and spread tickers only, as a new reviewed job.",
+        "max_requests": len(reqs) + 20, "requests": reqs,
+        "notes": "One batched request per game, 3 to 6 tickers, about 4 to 5 hours of 1 minute candles ending at the market's close. ONE run, one answer: this job replaces the 35 request version and is not to be rebuilt on a longer list. The batched candle endpoint has not been seen to answer for sports markets; if the first three requests fail the run stops by the script's own rule.",
         "status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
         "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3,
                        "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"}}
     os.makedirs(out, exist_ok=True)
     json.dump(rows, open(os.path.join(out, "games.json"), "w"), indent=1)
     json.dump(job, open(os.path.join(out, "INGAMELAG_M1.json"), "w"), indent=1)
-    print("games", len(rows), {s: sum(1 for r in rows if r["sport"] == s) for s in PLAY_S}, "| tickers", len(tickers), "| requests", len(reqs))
+    print("games", len(rows), {s: sum(1 for r in rows if r["sport"] == s) for s in PLAY_MIN}, "| skipped", skipped, "| tickers", len(tickers), "| requests", len(reqs))
 
 
 if __name__ == "__main__":

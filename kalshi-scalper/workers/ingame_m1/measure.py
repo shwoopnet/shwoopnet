@@ -11,8 +11,16 @@ ten minute move by the end of the first full minute on 80% or more of trigger ev
 is shorter than a one-minute bot's clock and the card is CLOSED. Fewer than 40 trigger events
 with a clean move: NOT_ENOUGH_DATA.
 
+GUARD (Head of R&D, Nov 12): the spread markets in this sample are also the unread sample of
+Refinement's W-SPREAD-CELL1. This script therefore uses IN-PLAY candles only. For each game it
+finds the minute the moneyline was decided and keeps only the candles of the SAFE_PLAY_MIN
+minutes before it, a length shorter than any game of that sport, so every candle it uses is from
+play. Candles outside that stretch are dropped before anything is computed. It reads no result
+field and prints no price, no pre-game figure and no outcome: only counts and shares of a move.
+
 Usage: python3 measure.py <folder of one pull run (manifest.json, 0001.json.gz ...)> <games.json>
 """
+import re
 import glob
 import gzip
 import json
@@ -30,6 +38,8 @@ LAGS = (1, 2, 3, 5)
 SHARE_BAR = 0.75     # share of the move already in at lag 1 ...
 EVENTS_BAR = 0.80    # ... on this share of events closes the card
 MIN_EVENTS = 40
+SAFE_PLAY_MIN = {"NBA": 120, "NHL": 135, "NFL": 170}   # minutes before the decided minute that are certainly in play
+DECIDED = 0.97                                          # a moneyline mid at or beyond this (or 1 minus it) to the end of the data
 
 
 def price(side):
@@ -64,16 +74,33 @@ def walk(node, found, hint=None):
 
 
 def minute_mids(candles):
+    """minute -> YES mid. A quote wider than 20c is not a price, unless the market is plainly decided (ask at or under 5c, or bid at or over 95c)."""
     out = {}
     for c in candles:
         b, a = price(c.get("yes_bid")), price(c.get("yes_ask"))
-        if b is not None and a is not None and b > 0 and 0 < a <= 1 and a >= b:
+        b = 0.0 if b is None else b
+        if a is None or not (0 < a <= 1) or a < b:
+            continue
+        if (a - b) <= 0.20 or a <= 0.05 or b >= 0.95:
             out[int(c["end_period_ts"]) // 60] = (a + b) / 2.0
     return out
 
 
 def team(ticker):
-    return ticker.rsplit("-", 1)[1]
+    """The team code of a moneyline or spread ticker (a spread ticker ends in the code and a number)."""
+    return re.sub(r"\d+$", "", ticker.rsplit("-", 1)[1])
+
+
+def in_play(ml, sport):
+    """(first, last) minute of the stretch that is certainly in play, or None if the game was not decided inside the data."""
+    mins = sorted(ml)
+    if not mins or not (ml[mins[-1]] >= DECIDED or ml[mins[-1]] <= 1 - DECIDED):
+        return None
+    i = len(mins) - 1
+    while i > 0 and (ml[mins[i - 1]] >= DECIDED or ml[mins[i - 1]] <= 1 - DECIDED):
+        i -= 1
+    end = mins[i]
+    return end - SAFE_PLAY_MIN[sport], end
 
 
 def main():
@@ -88,7 +115,13 @@ def main():
     for g in games:
         a, b = g["ml"]                                    # the two moneyline tickers
         ml = minute_mids(cand.get(a, []))
-        spreads = {t: minute_mids(cand.get(t, [])) for t in g["spread"]}
+        span = in_play(ml, g["sport"]) if ml else None
+        if span is None:
+            games_missing += 1
+            continue
+        keep = lambda series: {m: v for m, v in series.items() if span[0] <= m <= span[1]}   # the guard: in-play minutes only
+        ml = keep(ml)
+        spreads = {t: keep(minute_mids(cand.get(t, []))) for t in g["spread"]}
         if len(ml) < 30 or not any(len(v) >= 30 for v in spreads.values()):
             games_missing += 1
             continue
@@ -97,6 +130,8 @@ def main():
         for t in sorted(ml):
             if t - LOOKBACK_MIN not in ml or (last is not None and t - last < GAP_MIN):
                 continue
+            if t + HORIZON_MIN > span[1]:
+                continue                                  # the ten minute horizon would run past the in-play stretch
             before, move = ml[t - LOOKBACK_MIN], ml[t] - ml[t - LOOKBACK_MIN]
             if abs(move) < JUMP or not (BAND[0] <= before <= BAND[1]):
                 continue
@@ -107,7 +142,7 @@ def main():
                 need = [t - LOOKBACK_MIN, t + HORIZON_MIN] + [t + k for k in LAGS]
                 if any(m not in s for m in need):
                     continue
-                sign = 1.0 if team(tk).startswith(mover) else -1.0
+                sign = 1.0 if team(tk) == mover else -1.0
                 full = sign * (s[t + HORIZON_MIN] - s[t - LOOKBACK_MIN])
                 if full < CLEAN_MOVE:
                     continue
@@ -119,7 +154,7 @@ def main():
                 continue
             events.append({"sport": g["sport"], "game": g["game"], "minute": t, "ml_move": move, "spread_move": best[0], "shares": best[1]})
     n = len(events)
-    print(f"games in the list {len(games)} | with candles {games_used} | without {games_missing}")
+    print(f"games in the list {len(games)} | used (decided inside the data, in-play candles present) {games_used} | not used {games_missing}")
     print(f"trigger events with a clean spread move {n} | trigger events where the spread did not move {CLEAN_MOVE:.2f} the expected way {no_clean}")
     if n:
         for k in LAGS:
