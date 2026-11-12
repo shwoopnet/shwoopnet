@@ -1,0 +1,170 @@
+{
+ "job_id": "INPLAYJUMP_LISTS",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md",
+ "purpose": "INPLAYJUMP stage 1: settled match-winner markets of seven in-play series inside each family's DEVELOPMENT window only (close-time floor and ceiling on every call), plus the series fee fields. No price is read.",
+ "heldout": "none requested: every list call carries max_close_ts at the end of the family's development window, so no held-out market is listed",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXESOCCERGAME",
+  "KXITFMATCH",
+  "KXITFWMATCH",
+  "KXLIGAPROMATCH",
+  "KXATPCHALLENGERMATCH",
+  "KXWTACHALLENGERMATCH",
+  "KXEBASKETBALLGAME"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 73,
+ "notes": "14 requests, at most 71 pages in all (pages count toward the cap). Page limits are margins over Desk B's estimates (e-soccer 11 pages, ITF 8, table tennis 7, challenger 8, e-basketball 7). Fields the reader keeps: ticker, event_ticker, open_time, close_time, result, volume.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXESOCCERGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXESOCCERGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1792022400,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 14
+  },
+  {
+   "id": "live_KXITFMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "live_KXITFWMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXITFWMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1791590400,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXLIGAPROMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIGAPROMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1790812800,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 9
+  },
+  {
+   "id": "live_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "live_KXWTACHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTACHALLENGERMATCH",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "live_KXEBASKETBALLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEBASKETBALLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789430400,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 9
+  },
+  {
+   "id": "series_KXESOCCERGAME",
+   "path": "/series/KXESOCCERGAME",
+   "params": {}
+  },
+  {
+   "id": "series_KXITFMATCH",
+   "path": "/series/KXITFMATCH",
+   "params": {}
+  },
+  {
+   "id": "series_KXITFWMATCH",
+   "path": "/series/KXITFWMATCH",
+   "params": {}
+  },
+  {
+   "id": "series_KXLIGAPROMATCH",
+   "path": "/series/KXLIGAPROMATCH",
+   "params": {}
+  },
+  {
+   "id": "series_KXATPCHALLENGERMATCH",
+   "path": "/series/KXATPCHALLENGERMATCH",
+   "params": {}
+  },
+  {
+   "id": "series_KXWTACHALLENGERMATCH",
+   "path": "/series/KXWTACHALLENGERMATCH",
+   "params": {}
+  },
+  {
+   "id": "series_KXEBASKETBALLGAME",
+   "path": "/series/KXEBASKETBALLGAME",
+   "params": {}
+  }
+ ]
+}
