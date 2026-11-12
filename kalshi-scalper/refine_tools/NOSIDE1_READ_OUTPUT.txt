@@ -1,0 +1,33 @@
+NOSIDE1 development verdict (TRAIN and VALIDATE only; held-out not read). N = 9,465, Bonferroni z 4.553
+ARM A price paid [0.75,0.90) family APPR: n TRAIN 63, n VALID 64
+  TRAIN  +0c n63 PF 0.70 mean -5.1c t -1.02
+  TRAIN  +1c n63 PF 0.64 mean -6.1c t -1.22
+  VALID  +0c n64 PF 2.05 mean +7.9c t +2.19
+  VALID  +1c n64 PF 1.91 mean +6.9c t +1.91
+  POOLED +0c n127 PF 1.12 mean +1.4c t +0.46
+  POOLED +1c n127 PF 1.03 mean +0.4c t +0.13
+  VALID +1c event-clustered 90% interval [+0.7,+12.5]c
+  as-if-live 3c TRAIN+VALID: stop rule not fired
+  VERDICT: FAIL
+ARM A price paid [0.75,0.90) family GCB: n TRAIN 9, n VALID 9
+  no evidence at n = 9 (TRAIN) / 9 (VALID); needs 30 in each third
+  VERDICT: NO EVIDENCE
+ARM A price paid [0.75,0.90) family ALL: n TRAIN 72, n VALID 73
+  TRAIN  +0c n72 PF 0.63 mean -6.8c t -1.40
+  TRAIN  +1c n72 PF 0.58 mean -7.8c t -1.61
+  VALID  +0c n73 PF 1.69 mean +6.1c t +1.67
+  VALID  +1c n73 PF 1.57 mean +5.1c t +1.40
+  POOLED +0c n145 PF 0.98 mean -0.3c t -0.09
+  POOLED +1c n145 PF 0.91 mean -1.3c t -0.42
+  VALID +1c event-clustered 90% interval [-0.7,+10.9]c
+  as-if-live 3c TRAIN+VALID: stop rule not fired
+  VERDICT: FAIL
+ARM B price paid [0.10,0.25) family APPR: n TRAIN 11, n VALID 4
+  no evidence at n = 11 (TRAIN) / 4 (VALID); needs 30 in each third
+  VERDICT: NO EVIDENCE
+ARM B price paid [0.10,0.25) family GCB: n TRAIN 1, n VALID 2
+  no evidence at n = 1 (TRAIN) / 2 (VALID); needs 30 in each third
+  VERDICT: NO EVIDENCE
+ARM B price paid [0.10,0.25) family ALL: n TRAIN 12, n VALID 6
+  no evidence at n = 12 (TRAIN) / 6 (VALID); needs 30 in each third
+  VERDICT: NO EVIDENCE

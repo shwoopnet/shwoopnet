@@ -1,5 +1,7 @@
 # SHADOW PACKET: W-NO-ARM1 (approval and generic ballot NO side). One page. Draft Nov 12, 2026; final by Nov 13 16:00Z. No live account figure.
 
+VERDICT (Nov 12 development read, one line): arm A FAIL (APPR: TRAIN n 63 PF 0.64, VALID n 64 PF 1.91, pooled n 127 PF 1.03 at +1c; ALL pooled n 145 PF 0.91; halves disagree in sign); arm B and GCB no evidence (n under 30). Held-out not read.
+
 1. NAME: NOSIDE (W-NO-ARM1; arms A and B).
 2. RULE (two sentences): For each event in the approval and generic-ballot series (KXTRUMPAPPROVE, KXVHGCB, KXAPRPOTUS, KXAPRPOTUSD, KXGENERICBALLOTVOTEHUB, KXVOTEHUBTRUMPUPDOWN), at the last hourly snapshot 24 to 27 hours before close, take the market whose YES mid is nearest 0.5 (ties: alphabetical by ticker). If the NO price paid (1 minus YES bid, plus 1c slip) is 0.75 to 0.90 (arm A) or 0.10 to 0.25 (arm B), record one paper buy of 3 contracts of NO and hold to settlement.
 3. FAMILY: entry = selling the cheap YES longshot in poll-average markets (calibration, information-source markets, Kalshi prices only); exit = hold to settlement (settles within about a week; the 30 day cap never binds); no management.
