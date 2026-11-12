@@ -1,0 +1,65 @@
+{
+ "job_id": "POLCOMBO1B_REOPEN",
+ "status": "inactive",
+ "card": "POLCOMBO1B",
+ "protocol_file": "workers/POLCOMBO1B_PROTOCOL.md",
+ "protocol_commit": "0cd23715",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "stop_rules": {
+  "pause_seconds_on_429": 300,
+  "stop_after_consecutive_429": 2,
+  "stop_after_consecutive_other_failures": 3,
+  "note": "a 429 pauses 5 minutes and the same request is tried once more; a second 429 in a row stops the run with the cursor saved; no retry loop"
+ },
+ "privacy_rules": [
+  "public GET on api.elections.kalshi.com only",
+  "no account, portfolio, order, fill, position or key endpoint (the runner refuses them)",
+  "no Authorization header, no key, no cookie",
+  "no POST",
+  "response bodies go to scratch outside the repository and are never committed; only the status read log is committed"
+ ],
+ "resume_cursor_file": "workers/pulljobs/POLCOMBO1B_REOPEN_CURSOR.json",
+ "readlog_file": "workers/pulljobs/POLCOMBO1B_REOPEN_READLOG.json",
+ "output_dir": "/tmp/pulljobs/POLCOMBO1B_REOPEN",
+ "purpose": "INACTIVE (retired Nov 11 by its KILL rule: two sampled runs found no politics-leg combo with a live two-sided quote; 74 of 75 showed 0.00/0.00). Reopen only on the protocol's REOPEN CONDITION: a politics-leg combo with a live two-sided quote, or 100 settled politics combos. The plan is the census resume from POLCOMBO1B_RESUME.json: the largest collection KXMVESPORTSMULTIGAMEEXTENDED-R at page 29 (28 pages read, cursor in the resume file, not copied here), then the two cross-category collections from page 1, at most 60 pages each and 150 pages in total (about 122 reads left).",
+ "allowed_endpoints": [
+  {
+   "name": "open_markets_by_collection",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "mve_collection_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "ticker_allowlist": [],
+ "series_allowlist": [],
+ "collection_allowlist": [
+  "KXMVESPORTSMULTIGAMEEXTENDED-R",
+  "KXMVECROSSCATEGORY-SHARD1-R",
+  "KXMVECROSSCATEGORY-R"
+ ],
+ "pacing_seconds": 15,
+ "max_requests": 0,
+ "expected_requests": 122,
+ "priority": null,
+ "depends_on": null,
+ "checkpoints": [],
+ "requests": [],
+ "note": "max_requests 0 and no requests on purpose: a cursor-following walk needs a paging feature the runner does not have. To reopen, add it (a dated amendment) and fill the plan; the runner refuses an inactive job.",
+ "fields_to_keep": [
+  "markets[].ticker",
+  "mve_selected_legs",
+  "yes_bid_dollars",
+  "yes_ask_dollars",
+  "close_time",
+  "volume_fp"
+ ],
+ "will_not_decide": [
+  "no combo pricing, no edge, no popup: a census only"
+ ]
+}

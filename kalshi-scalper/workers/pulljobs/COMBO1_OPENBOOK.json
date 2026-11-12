@@ -1,0 +1,98 @@
+{
+ "job_id": "COMBO1_OPENBOOK",
+ "status": "active",
+ "card": "COMBO1 (reopen test only)",
+ "protocol_file": "workers/COMBO1_PROTOCOL.md",
+ "protocol_commit": "f3756e56",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "stop_rules": {
+  "pause_seconds_on_429": 300,
+  "stop_after_consecutive_429": 2,
+  "stop_after_consecutive_other_failures": 3,
+  "note": "a 429 pauses 5 minutes and the same request is tried once more; a second 429 in a row stops the run with the cursor saved; no retry loop"
+ },
+ "privacy_rules": [
+  "public GET on api.elections.kalshi.com only",
+  "no account, portfolio, order, fill, position or key endpoint (the runner refuses them)",
+  "no Authorization header, no key, no cookie",
+  "no POST",
+  "response bodies go to scratch outside the repository and are never committed; only the status read log is committed"
+ ],
+ "resume_cursor_file": "workers/pulljobs/COMBO1_OPENBOOK_CURSOR.json",
+ "readlog_file": "workers/pulljobs/COMBO1_OPENBOOK_READLOG.json",
+ "output_dir": "/tmp/pulljobs/COMBO1_OPENBOOK",
+ "purpose": "REPLACES the 17+ page historical NBA walk and the 300 to 500 candle reads. One page (100) of OPEN combos for each of three collections, to answer the only question the zero-ask finding left: does any open combo show a real two-sided quote (ask between 0.01 and 0.99, bid above 0, ask minus bid at most 0.10) now? NBA is in season, so open NBA combos should exist; the earlier read of the other two found only 37 stale open combos. Zero quoted combos in 3 pages closes COMBO1 for good.",
+ "allowed_endpoints": [
+  {
+   "name": "open_markets_by_series",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit"
+   ]
+  }
+ ],
+ "ticker_allowlist": [],
+ "series_allowlist": [
+  "KXMVENBASINGLEGAME",
+  "KXMVENFLSINGLEGAME",
+  "KXMVESPORTSMULTIGAMEEXTENDED"
+ ],
+ "pacing_seconds": 15,
+ "max_requests": 3,
+ "expected_requests": 3,
+ "priority": 1,
+ "depends_on": null,
+ "checkpoints": [],
+ "requests": [
+  {
+   "id": "open_KXMVENBASINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENBASINGLEGAME",
+    "status": "open",
+    "limit": 100
+   }
+  },
+  {
+   "id": "open_KXMVENFLSINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENFLSINGLEGAME",
+    "status": "open",
+    "limit": 100
+   }
+  },
+  {
+   "id": "open_KXMVESPORTSMULTIGAMEEXTENDED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVESPORTSMULTIGAMEEXTENDED",
+    "status": "open",
+    "limit": 100
+   }
+  }
+ ],
+ "fields_to_keep": [
+  "markets[].ticker",
+  "markets[].event_ticker",
+  "markets[].status",
+  "markets[].yes_bid_dollars",
+  "markets[].yes_ask_dollars",
+  "markets[].no_bid_dollars",
+  "markets[].no_ask_dollars",
+  "markets[].volume_fp",
+  "markets[].close_time",
+  "markets[].open_time",
+  "len(markets[].mve_selected_legs)",
+  "cursor present or not (not followed)"
+ ],
+ "will_not_decide": [
+  "does not price or score any combo (R1, R2, R3 stay unrun)",
+  "does not follow a cursor",
+  "a quoted combo only means the ask/bid test should be re-run with a recorder; it is not an edge"
+ ]
+}

@@ -1,0 +1,41 @@
+{
+ "job_id": "CLINICAL2_REMAINDER",
+ "status": "retired",
+ "card": "CLINICAL2",
+ "protocol_file": "workers/CLINICAL2_PROTOCOL.md",
+ "protocol_commit": "72024226",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "stop_rules": {
+  "pause_seconds_on_429": 300,
+  "stop_after_consecutive_429": 2,
+  "stop_after_consecutive_other_failures": 3,
+  "note": "a 429 pauses 5 minutes and the same request is tried once more; a second 429 in a row stops the run with the cursor saved; no retry loop"
+ },
+ "privacy_rules": [
+  "public GET on api.elections.kalshi.com only",
+  "no account, portfolio, order, fill, position or key endpoint (the runner refuses them)",
+  "no Authorization header, no key, no cookie",
+  "no POST",
+  "response bodies go to scratch outside the repository and are never committed; only the status read log is committed"
+ ],
+ "resume_cursor_file": "workers/pulljobs/CLINICAL2_REMAINDER_CURSOR.json",
+ "readlog_file": "workers/pulljobs/CLINICAL2_REMAINDER_READLOG.json",
+ "output_dir": "/tmp/pulljobs/CLINICAL2_REMAINDER",
+ "purpose": "RETIRE. The card closed under its registered kill rule (Nov 11): at most 17 distinct settled events in the nine fixed series against a gate of 100, median 1 new settled event a month, 83 months to 100. Candle reads (Amendment 1) cannot change that because the gate counts EVENTS, and an event with no quote only lowers the count. The 65 further health series would have to supply 83 more settled events inside a 90 day hold to matter; the listing alone is 130 reads (2 per series) for a family where 75 of 126 settled markets took over 90 days to close. Not written as a runnable plan.",
+ "allowed_endpoints": [],
+ "ticker_allowlist": [],
+ "series_allowlist": [],
+ "pacing_seconds": 15,
+ "max_requests": 0,
+ "expected_requests": 0,
+ "priority": null,
+ "depends_on": null,
+ "checkpoints": [],
+ "requests": [],
+ "reopen_condition": "a registered RETURN: a new source or series family, or 100 events reached. Then the plan would be: 130 listing reads for the 65 series (GET /markets and /historical/markets per series) and up to 126 candle reads for the nine fixed series; write the job file from that new registration.",
+ "fields_to_keep": [],
+ "will_not_decide": [
+  "nothing: retired"
+ ]
+}
