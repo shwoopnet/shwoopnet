@@ -962,6 +962,8 @@
   .sp-pop-sheet{ width:min(420px,100%); max-height:90vh; overflow:auto; background:var(--panel-raised, #141414); border:1px solid var(--border); border-radius:16px; padding:20px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
   .sp-pop-h{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px; } .sp-pop-f{ display:grid; grid-template-columns:60px minmax(0,1fr); gap:8px; font-size:12px; margin:8px 0; } .sp-pop-f b, .sp-pop-room b{ color:var(--muted); font-weight:600; } .sp-pop-room{ margin-top:12px; font-size:12px; display:grid; gap:6px; }
   .sp-reg{ gap:8px; } .sp-reg .sp-th{ flex-wrap:wrap; }
+  .sp-grp{ grid-column:1/-1; display:flex; align-items:baseline; gap:8px; padding:6px 2px 0; border-bottom:1px solid var(--border); }
+  .sp-grp-t{ font-weight:700; font-size:13px; } .sp-grp-n{ color:var(--muted); font-size:12px; }
   .sp-lane-live .sp-lane-h{ border-bottom:2px solid var(--paper); }
   .sp-lane-shadow .sp-lane-h, .sp-lane-retired .sp-lane-h{ border-bottom:1px solid var(--border); }
   /* Two columns of cards from a 640px board, Live and Shadow side by side from 1100px (container queries on .sp-wrap, so the side navigation never matters); the retired list is a collapsed row under both. These breakpoints are kalshiBoardCols, tested against this text. */
@@ -1769,6 +1771,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Strategies page lanes (Nov 12): a strategy now sits in its lane by the bot's own state, with no hand edit: Live trades, Probation holds the small second-slot seats, a strategy whose kill tripped moves itself to Off / cooling down (gold shows its return progress there), On deck is the shadow rules, and only a research verdict retires one. Gold's card no longer sticks on CHECKING: if the kill state is not read within a few seconds it says STATE UNKNOWN.</li>
                   <li>Strategies page accuracy (Nov 12): the gold card now shows the real state of its kill rule (read once from the bot, kept ten minutes; KILLED with the plain return rule and the return record when it has tripped, "not readable" and never HEALTHY when the state cannot be read), and its tripwire counter counts only trades since the rule's own start. The approval NO side moved to Retired (failed the bar), CFRTI-K shows as an approved probation seat that is building, and the counts header and the Live lane now use one definition (Live plus Probe is what is running; a killed card is counted Off).; OICORE's badge and gauge now show room left against the kill that binds first (its loss streak or its net floor, whichever is closer) instead of the fixed drawdown figure. Page only, no order or bot change</li>
                   <li>Shadow logger (Nov 12): log-only shadow rules can now check open interest, a list of release dates and a second look four seconds after a row, with every extra public read held to 3 a minute. No orders, no sizing; nothing changes until a rule uses them.</li>
                   <li>Shadow report (Nov 12): the nightly report now adds, for each shadow rule, a replayed record of its last 60 fillable signals (profit factor, each half, days spanned, biggest day, rarer outcome) with a proposed, not a rule, in or out flag read only at the 60th, 70th, 80th signal and so on. Report only, nothing trades.</li>
@@ -4287,6 +4290,24 @@ kalshiStatusTick();
     if(g.tripped === false && Number(g.rearmAt) === KAL_BOARD_TRIPWIRE.from){ return { state: 'armed' }; }
     return { state: 'unknown' };
   }
+  // The state a gold card DRAWS (Nov 12, 2026, the owner's phone showed CHECKING for good). Loading is allowed only for timeoutMs after the page first wanted the answer (cache.since); after that, or on any failed read, the state is unknown ("STATE UNKNOWN: kill state not readable"), never an endless CHECKING. A late answer still wins (cache.res). Pure.
+  var KAL_GOLD_READ_TIMEOUT = 6000;
+  function kalshiGoldCardState(cache, now, timeoutMs){
+    var c = cache || {};
+    if(c.res){ return kalshiGoldKillState(c.res); }
+    if(c.error){ return { state: 'unknown' }; }
+    if(!c.since || now - c.since < timeoutMs){ return { state: 'loading' }; }
+    return { state: 'unknown' };
+  }
+  // The lane of a strategy from the bot's own state, never from a hand-edited stage for anything that changes (Nov 12, 2026, the owner: "this should all be automated"). facts: { stage (the registry's, or undefined), retired, off (the kill latch tripped), drawn (the page computes a live card for it from real orders), codeLive (registry code.live), slot (a second-slot seat) }. Retired only by a registry verdict; off the moment a latch trips; probation for a small second-slot seat or a registry Probe that is built; live for a running strategy; deck (shadow, idea, paper, not built) for the rest. Pure.
+  function kalshiStratLaneOf(f){
+    f = f || {};
+    if(f.stage === 'Retired' || f.retired === true){ return 'retired'; }
+    if(f.off === true){ return 'off'; }
+    var running = f.drawn === true || (f.codeLive === true && (f.stage === 'Live' || f.stage === 'Probe'));
+    if(running){ return f.slot === true || f.stage === 'Probe' ? 'probation' : 'live'; }
+    return 'deck';
+  }
   // The plain line of a card's kill state. loading: the read has not answered yet. Counts and PF only; no dollars.
   function kalshiGoldKillNote(st, ret, timeText){
     if(st === 'loading'){ return 'Reading the kill state...'; }
@@ -4606,11 +4627,19 @@ kalshiStatusTick();
     var twinOf = function(id){ return ids.indexOf(id) >= 0 && sids.indexOf(id) >= 0; };
     var pfOfRep = function(p){ var pf = p.pfFillable; return p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2)); };
     var shadowPf = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowPf[r.id] = r.rep; }); }
-    var live = kalshiStratTwinFirst(model.live, function(s){ return s.id; }, sids).map(function(s){
+    var liveCard = function(s){
       var g = kalshiStratGauge(s.id, s.kill, money), twin = twinOf(s.id) && shadowPf[s.id];
       return tile({ sheet: true, id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: g, spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules, detail: s.detail ? kalshiStratDetailHtml(s.detail, esc, money, model.timeText || String) : '',
         note: s.note || '', badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
-    }).join('');
+    };
+    // Lanes come from the bot's own state (kalshiStratLaneOf, set on each card by the page): Live and Probation are trading, Off / cooling down is a tripped kill, a retired verdict leaves the card to the Retired list.
+    var laneOfCard = function(s){ return s.lane || 'live'; };
+    var ordered = kalshiStratTwinFirst(model.live, function(s){ return s.id; }, sids);
+    var liveHtml = ordered.filter(function(s){ return laneOfCard(s) === 'live'; }).map(liveCard).join('');
+    var probHtml = ordered.filter(function(s){ return laneOfCard(s) === 'probation'; }).map(liveCard).join('');
+    var offHtml = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).map(liveCard).join('');
+    var probCount = ordered.filter(function(s){ return laneOfCard(s) === 'probation'; }).length;
+    var offCount = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).length;
     var deck = '';
     var regSplit = model.registry || { pipeline: [], retired: [] };
     if(!model.deck.rows.length){
@@ -4625,13 +4654,19 @@ kalshiStatusTick();
           badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), chip: twinOf(r.id) ? { text: 'feeds live', tip: 'Feeds the live strategy of the same name' } : null });
       }).join('');
     }
-    deck += regSplit.pipeline.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join('');
+    // A registry row that is built and running as a small seat (stage Probe with live code) is Probation, not On deck; the rest of the pipeline stays On deck.
+    var regLane = function(x){ return kalshiStratLaneOf({ stage: x.stage, codeLive: Boolean(x.code && x.code.live), slot: Boolean(x.code && x.code.slot) }); };
+    var regProb = regSplit.pipeline.filter(function(x){ return regLane(x) === 'probation'; }), regDeck = regSplit.pipeline.filter(function(x){ return regLane(x) !== 'probation'; });
+    probHtml += regProb.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join(''); probCount += regProb.length;
+    deck += regDeck.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join('');
     // Retired (the owner, Nov 12, 2026): closed by default, grouped by cause, one line each, the same Details popup.
     var retEntries = kalshiRetiredEntries(model.retired.rows, model.regRetired || []);
     var ret = kalshiRetiredGroupsHtml(retEntries, model.open, esc);
-    var offIds = model.offIds || [], runIds = ids.filter(function(id){ return offIds.indexOf(id) < 0; });
-    var stages = kalshiStratLifecycle(runIds, sids.concat(regSplit.pipeline.map(function(x){ return x.id; })), retEntries.map(function(r){ return r.name; }));
-    if(offIds.length){ stages[1].note = 'real money, ' + offIds.length + ' off'; }
+    var offIds = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).map(function(s){ return s.id; }), runIds = ordered.filter(function(s){ var l = laneOfCard(s); return l === 'live' || l === 'probation'; }).map(function(s){ return s.id; }).concat(regProb.map(function(x){ return x.id; }));
+    var stages = kalshiStratLifecycle(runIds, sids.concat(regDeck.map(function(x){ return x.id; })), retEntries.map(function(r){ return r.name; }));
+    stages[1].note = 'real money' + (offCount ? ', ' + offCount + ' off' : '');
+    var grp = function(key, title, note, body){ return body ? '<div class="sp-grp" data-fk="grp:' + key + '"><span class="sp-grp-t">' + esc(title) + '</span><span class="sp-grp-n">' + esc(note) + '</span></div>' + body : ''; };
+    var liveBody = liveHtml + grp('probation', 'Probation', 'small, trading', probHtml) + grp('off', 'Off / cooling down', 'not trading, kill tripped', offHtml);
     var lane = function(key, st, body, extra){
       return '<section class="sp-lane sp-lane-' + key + '" data-fk="lane:' + key + '" aria-label="' + esc(st.label) + '"><div class="sp-lane-h" data-fk="head:' + key + '"><span class="sp-lane-t">' + esc(st.label) + '</span><span class="sp-lane-n">' + st.count + '</span><span class="sp-lane-note">' + esc(st.note) + '</span></div>' + (extra || '') + '<div class="sp-cards">' + body + '</div></section>';
     };
@@ -4641,8 +4676,8 @@ kalshiStatusTick();
     var act = !model.activity ? '' : model.activity.state === 'loading' ? '<div class="sp-sub">Reading the bot\'s events...</div>' : model.activity.items.length ? '<ul class="sp-act">' + model.activity.items.map(function(x){
       return '<li class="sp-act-' + esc(x.level) + '"><div class="sp-act-t">' + esc(x.title) + '</div>' + (x.body ? '<div class="sp-sub">' + esc(x.body) + '</div>' : '') + '<div class="sp-sub">' + esc((model.timeText || String)(x.ts)) + '</div></li>'; }).join('') + '</ul>' : '<div class="sp-sub">No kills or promotions recorded.</div>';
     var tail = !model.activity ? '' : '<div class="sp-h">Recent activity <span>warnings, stops and session starts, last 7 days</span></div><div class="kal-card">' + act + '</div>';
-    var board = '<div class="sp-board" id="spBoard" role="group" aria-label="Live, then shadow, then retired">' + lane('live', stages[1], live) + lane('shadow', stages[0], deck) + retired + '</div>';
-    return '<div class="sp-wrap">' + kalshiStratCountsHtml(kalshiStratCounts(model.registryList || [], ids, sids, offIds), model.registryState === 'ok', esc) + summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail + '</div>';
+    var board = '<div class="sp-board" id="spBoard" role="group" aria-label="Live, then shadow, then retired">' + lane('live', stages[1], liveBody) + lane('shadow', stages[0], deck) + retired + '</div>';
+    return '<div class="sp-wrap">' + kalshiStratCountsHtml(kalshiStratCounts(model.registryList || [], ordered.map(function(s){ return s.id; }), sids, offIds), model.registryState === 'ok', esc) + summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
@@ -4655,15 +4690,22 @@ kalshiStatusTick();
     }).catch(function(){ kalshiRegistry = { state: 'unreadable', list: [] }; }).then(function(){ kalshiRegistryLoading = false; renderStrategiesPage(); });
   }
   // Gold's kill state: read once when the page is first drawn and again only after ten minutes and a redraw (no timer). A failed read is kept as the answer for the same ten minutes and the card says "not readable", never healthy.
-  var kalshiGoldCache = { at: 0, res: null, error: '' }, kalshiGoldLoading = false;
+  // The one-shot deadline redraw, in its own function: armed only while the card is loading, cleared when it fires.
+  function kalshiGoldDeadline(state, now){
+    if(state !== 'loading' || kalshiGoldTimer){ return; }
+    kalshiGoldTimer = setTimeout(function(){ kalshiGoldTimer = 0; renderStrategiesPage(); }, Math.max(100, KAL_GOLD_READ_TIMEOUT - (now - kalshiGoldCache.since) + 50));
+  }
+  var kalshiGoldCache = { at: 0, since: 0, res: null, error: '' }, kalshiGoldLoading = false, kalshiGoldTimer = 0;
   function kalshiGoldEnsure(){
     var api = window.__shwoopAPI;
     if(kalshiGoldLoading || !api || !api.readKalshiGoldKill || !currentUserIsAdmin){ return; }
     if(kalshiGoldCache.at && Date.now() - kalshiGoldCache.at < KAL_SHADOW_TTL){ return; }
     kalshiGoldLoading = true; kalshiGoldCache.at = Date.now();
     var done = function(){ kalshiGoldLoading = false; renderStrategiesPage(); };
-    try { api.readKalshiGoldKill().then(function(res){ kalshiGoldCache.res = res; kalshiGoldCache.error = ''; done(); }, function(){ kalshiGoldCache.res = null; kalshiGoldCache.error = 'read'; done(); }); }
-    catch(e){ kalshiGoldLoading = false; kalshiGoldCache.res = null; kalshiGoldCache.error = 'read'; }
+    // A read that never settles (a phone that is offline or has not finished signing in) must not hold the card on CHECKING: the card falls back to unknown after KAL_GOLD_READ_TIMEOUT (kalshiGoldCardState) and a retry is allowed after a minute, not ten.
+    var fail = function(){ kalshiGoldCache.res = null; kalshiGoldCache.error = 'read'; kalshiGoldCache.at = Date.now() - KAL_SHADOW_TTL + 60000; done(); };
+    try { api.readKalshiGoldKill().then(function(res){ kalshiGoldCache.res = res; kalshiGoldCache.error = ''; done(); }, fail); }
+    catch(e){ fail(); }
   }
   var kalshiShadowCache = { at: 0, rows: null, error: '' }, kalshiShadowLoading = false;
   var KAL_SHADOW_TTL = 600000;
@@ -4725,12 +4767,17 @@ kalshiStatusTick();
     if(!el || !page || page.hidden){ return; }
     var now = Date.now(), all = kalshiAllOrders();
     // Gold's kill state (the latch the bot's checker caches); loading until the one read answers, unknown when it cannot be read.
-    var gold = kalshiGoldCache.res ? kalshiGoldKillState(kalshiGoldCache.res) : { state: kalshiGoldCache.error ? 'unknown' : 'loading' };
+    if(!kalshiGoldCache.since){ kalshiGoldCache.since = now; }
+    var gold = kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT);
+    // One-shot redraw at the deadline so a card still loading then falls back to unknown on its own (the only timer this adds; it is cleared when it fires).
+    kalshiGoldDeadline(gold.state, now);
     var live = KAL_BOARD_LIVE.map(function(s){
       var mine = all.filter(function(o){ return kalshiStrategyOf(o) === s.id && (s.id !== 'L1' || kalshiIsActive(o)); });
       var kill = kalshiBoardKill(s.id, mine, now, kalshiMoney), goldCard = s.id === 'L1';
       if(goldCard){ kill.off = gold.state === 'killed'; kill.unknown = gold.state !== 'killed' && gold.state !== 'armed'; if(kill.off){ kill.lines = ['Gold is off: the kill rule tripped.'].concat(kill.lines); } }
-      return { id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kill,
+      var reg = kalshiRegistry.list.filter(function(x){ return x.id === s.id; })[0] || null;
+      var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: goldCard && gold.state === 'killed', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
+      return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kill,
         killState: goldCard ? gold.state : undefined, note: goldCard ? kalshiGoldKillNote(gold, gold.state === 'killed' ? kalshiGoldReturnProgress(kalshiShadowCache.rows, now) : '', kalDateTime) : '',
         spark: kalshiStratRolling(kalshiBoardRows(mine).map(function(r){ return r.p; }), 30), detail: kalshiStratDetail(mine, kalshiMarketName, kalDayKey, 8) };
     });
@@ -4748,7 +4795,7 @@ kalshiStatusTick();
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
     live.forEach(function(s){ kalshiRegData[s.id] = kalshiOrdersLoaded ? { live: true, kill: s.kill, spark: s.spark } : { live: true }; });
     var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, offIds: gold.state === 'killed' ? ['L1'] : [], registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     kalshiStratAnimStop(page);
     if(kalshiStratAnim.pending && (kalshiShadowCache.rows || kalshiShadowCache.error)){ kalshiStratAnim.pending = false; kalshiStratAnimStart(page); }
