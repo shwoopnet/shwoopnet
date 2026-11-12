@@ -3,7 +3,7 @@
 Asked by Main: ready-to-run protocols for WXDAYEND (card 74), the economics release fade (card 87, counted with the official-components idea) and the Wikipedia attention test (POL-n1). Written before any outcome of these tests was read by this desk. The desk writes protocols; V2 or Refinement runs them. Zero Kalshi calls were made to write this. Conventions as in `IDEA_DESK_A_PROTOCOLS.md` (cash basis, 1 contract, taker fee 0.07 x p x (1-p) unrounded unless stated, development then a held-out part read once, shared deflation count).
 
 Status of the three:
-- **Q1 WXDAYEND: do not write a second test. It already has a registration and a FAIL on the Refinement branch.** What is below is only a zero-call way to finish the half of the sample that was never pulled.
+- **Q1 WXDAYEND: do not write a second test. It already has a registration and a FAIL on the Refinement branch.** What is below is what it takes to finish the half of the sample that was never pulled (20 Kalshi requests; my first draft wrongly said zero).
 - **Q2 POL-n1 Wikipedia attention: full protocol below.**
 - **Q3 Economics release fade (card 87): full protocol below**, written after Refinement sent the card's rule text (Nov 12). Which card is the "official-components idea" is still open; see the note in Q3.
 
@@ -15,12 +15,9 @@ Status of the three:
 
 **The one loose end.** The registered rule was "FAIL if fewer than 3 of 40 city-days show an ask at or under 0.96 after the day ends". The pull stopped at 20 of 40 (New York 9, Los Angeles 9, Denver 2, Dallas 0). By the letter, the 20 unpulled city-days could still hold 3. I do not expect them to, but the verdict as written rests on half the registered sample.
 
-**How to close it with zero Kalshi calls.** The weather recorder (`quote-data:wxens/quotes/` and `quotes_low/`, columns `slot_ts, city, target_date, ticker, event_ticker, close_time, strike_type, floor_strike, cap_strike, yes_bid, yes_ask, last, volume, status`; `results/` with `result` and `expiration_value`) has every bracket of 14 cities twice an hour up to the close since Nov 4.
-1. Universe, fixed here: every city-day (highs and lows apart) with `target_date` from 2026-11-04 on whose event has a result on the branch. About 14 cities x 2 x the days recorded.
-2. For each, the day-end instant is 00:00 local STANDARD time after `target_date` (the watchlist's `std_offset_h`); the close is one hour later. Take the snapshots of the bracket whose `result` is yes with `slot_ts` in [day end, close).
-3. Count city-days with at least one such snapshot where `yes_ask <= 0.96` and `yes_ask > yes_bid` (a real two-sided quote, not an empty book shown as 1.00). Also report how many city-days have no snapshot at all in that hour (two snapshots an hour should give one or two).
-4. Rule, scaled from the registered one (3 of 40 is 7.5%): **FAIL if fewer than 7.5% of city-days with a snapshot show it.** A FAIL closes card 74 for good, on about five times the sample. If it does not fail, nothing is traded: the edge-bracket test that card 74 describes still needs station readings in tenths and a held-out design, and it goes back to Refinement, whose card it is.
-5. This is the registered existence step finished on other data, not a new try. It reads the settled result only to know which bracket to look at, as the registered step did.
+**CORRECTION (Nov 12, same day): it cannot be closed with zero Kalshi calls.** My first draft of this section said the weather recorder holds every bracket "twice an hour up to the close". That was wrong, and I found it when I went to run the check. The recorder starts twice an hour but takes QUOTES only at three fixed morning looks (labels `L0_07`, `L1_07`, `L1_10`). Counted from the files on `quote-data` (36 quote files, 1,248 rows, Nov 4 to Nov 11): the latest quote of any market is 16.5 hours before its close, and no row is within 3 hours of a close. So the recorder has nothing after the day ends and cannot answer the existence question.
+
+**What finishing it takes instead.** The 20 unpulled city-days of Refinement's registered sample (Dallas 10, Denver 8, New York 1, Los Angeles 1), final two hours of 1 minute candles for the winning bracket: 20 Kalshi requests. That is one small `kalshi-pull` job once the workflow exists, or 20 requests from Refinement's share. The rule stays as registered (FAIL if fewer than 3 of the 40 show an ask at or under 0.96 after the day ends). Until then the honest label for card 74 is "FAIL on the half that was pulled, 20 city-days outstanding", not a finished FAIL.
 
 **Flag for whoever reads card 74 later.** Buying a bracket that is already decided at a price under 97c is a favourite-shaped buy. Refinement's registration says card 74 is "edge-bracket only" and has no cell at 88c or above within 6 hours of the close. Any variant that buys the decided bracket in the 88c to 97c band needs the owner's own ruling under lifecycle 7e before it is even measured.
 
