@@ -2,6 +2,10 @@
 
 Asked by the Head of R&D on the owner's instruction. Read-only: no test was re-run for this file, no settlement result was opened, zero Kalshi requests, nothing about the live account. Sources swept: the research README (9,229 lines), `workers/` and `src/scalper/` (501 modules, 15 worker scripts) on `claude/epic-ptolemy-0amjd9`; `claude/refine-live`; `claude/idea-desk-a`; `claude/idea-desk-b`. Three sweeps were run by helpers (code, write-ups, the other three branches); this desk spot-checked the rows that carry a positive figure or a flag against the source lines before writing them here.
 
+**Rulings of the Head of R&D (2026-11-12, after reading this file at commit 4983bcc) are folded in below**: the ten VOID results are WITHDRAWN and may not be quoted; MM1 gold is retired unread (market making was closed today) and its self-running scorer is not to be run, so it moves from RE-SCORE to VOID; the Deribit reads are moot (that recorder was stopped, W-DERIBIT1 is retired); the GEN4 gold run is retired unread; a CFRTI forward shadow is built on R6 or not at all.
+
+**The falsified results stand because the stale quote flattered them and they failed anyway.**
+
 **Background.** `QUOTEVSBOOK1` and `TAPECLOCK1` (this folder) showed that Kalshi's market LIST endpoint returns a copy refreshed about every 11 seconds, so a quote read from it is 0 to 11 seconds old (about 5.5 on average) and about 7 seconds behind the trade tape. The order book endpoint is current. `LADDERSTATE1` (this folder, new today) shows the hourly ladder file has the same staircase: `ladder.csv` strikes change every 10.2 to 10.3 seconds at the median (middle half 9.6 to 12.8 s) although they are polled every 3.2 s, and strikes inside ONE poll cycle refresh at different times (in 70% of cycles some strikes changed and some did not, in 0% all changed). So two list quotes read in the same second are not simultaneous either.
 
 ## Counts
@@ -11,8 +15,8 @@ Asked by the Head of R&D on the owner's instruction. Read-only: no test was re-r
 | **Examined** | **31 rows, covering about 75 named tests** |
 | Flattered by the old quote (a lag, underpricing or lock rule at seconds scale) | 18, plus 4 mildly or in part |
 | Re-scorable from data already held (R6 books, the hourly book recorder, tapes), in full or in part | 11 (rows 1, 3, 5, 10 to 16, 22) |
-| Call: **RE-SCORE** | 5 (2 already done today, 3 to do) |
-| Call: **VOID** (cannot be re-scored for its dates, or superseded; figure withdrawn) | 10 |
+| Call: **RE-SCORE** | 4 (2 already done today; 2 to do: the GEN4 forward rows and RECORD1's covered part) |
+| Call: **VOID** (cannot be re-scored for its dates, superseded, or retired unread; figure withdrawn, not to be quoted) | 11 |
 | Call: **STANDS** (staleness cannot change the verdict) | 11 |
 | Pending reads that must be changed BEFORE they are read | 4 |
 | Cannot be classified by this desk (the bot's own "seen" quote) | 1 |
@@ -34,7 +38,7 @@ Columns: **Priced** = what the list quote supplied (S signal, F fill, both). **E
 | 7 | **LATECAL** (V2; Oct 29). Bitcoin 90 to 60 s left, ask 0.95 to 0.98, "won 61 of 61" | S and F | NOT_ENOUGH_DATA, a lead | FLATTERS mildly: a late favourite drifts toward 1, so an old ask is on average below the real one | No: Oct 22 to 29 | **VOID.** Its candle follow-up already read PF 0.73 / 0.96 (n 31); it is also favourite-and-hold, which is on the declined list |
 | 8 | **BTCAVG** (V2; Oct 29). Averaging-window model against the ask at 45, 30, 15 s | S and F | NOT_ENOUGH_DATA; 7 to 16 trades, net negative | FLATTERS, and still negative | No: Oct 22 to 29 | **VOID** (figures); nothing rested on it |
 | 9 | **QUOTE1** (V2; Oct 28). Resting quotes both sides, last 150 s, Bitcoin and Ethereum | Posting price, queue, flatten price | PF 0.00 at the taker fee, 0.09 at zero maker fee | NOISE on posting and queue; the flatten leg is priced up to 11 s old | No for its dates; the same question on books is MAKER5 (R6) | **VOID, superseded by MAKER5** |
-| 10 | **MM1 / MM1S** (V2; registered Oct 29, gold). Scorer runs itself at 300 gold windows; no result found | Posting price, queue, cross fills, flatten | Pending | Same as QUOTE1; cross fills arrive late | Yes: R6 gold books and tape from Oct 29 | **RE-SCORE**: point the scorer at R6 before it reads |
+| 10 | **MM1 / MM1S** (V2; registered Oct 29, gold). Scorer runs itself at 300 gold windows; no result found | Posting price, queue, cross fills, flatten | Pending | Same as QUOTE1; cross fills arrive late | Yes: R6 gold books and tape from Oct 29 | **VOID: retired unread** (ruling: market making was closed today). Its self-running scorer (`autoscore.py` at 300 gold windows) is NOT to be run |
 | 11 | **GOLDFILL, recorder side table** (V2; Oct 30; 13 signals) | Fill model, no outcome | Information | The immediate fill rate is overstated (the "live" poll 1 s later is usually the same copy) | Yes | **VOID** (side table only). Superseded by GF1, GF2 and GOLDHAIRCUT1, all on R6. The headline (candles plus tape) stands |
 | 12 | **LOCK2** (V2; read Oct 30). 15 minute quote against ladder quote within 1 s | Both legs | FALSIFIED: 1 lock in 25 Bitcoin closes (lasting 0.0 s), 0 in Ethereum | FLATTERS: two copies out of phase can only add false locks | Bitcoin, from R6 plus the hourly book | **STANDS** a fortiori. The one lock is probably the artefact |
 | 13 | **XSER1** (V2; Nov 11). 15 minute quote against the hourly ladder BOOK | 15 minute leg | "A lead at best, below any cost"; 556 violations in 33,090 pairs, "clustered in a few windows" | FLATTERS: an old leg against a live leg makes violations whenever the price moves | Yes, in full (R6 plus hourly book) | **STANDS** as "not a strategy". The violation counts are overstated and should not be quoted |
@@ -49,7 +53,7 @@ Columns: **Priced** = what the list quote supplied (S signal, F fill, both). **E
 |---|---|---|---|
 | 18 | **CFRTI1-BTC held-out read** (first allowed Nov 20). Script `desk_a_verify/cfrti_heldout.py` on `claude/idea-desk-a` | The registered lines are already labelled "not tradable". **But the lines the amendment says "are the only lines that can support anything", printed as "BOOK-REPLAY +2 s / +6 s", are not a book replay**: the `replay()` function (lines 72 to 82) walks later rows of the same `quotes.csv`. Only the `--r6` stale-ask count reads the real book. Checked against the source by this desk | Replace `replay()` with a replay on the R6 book (this desk's `cfrti_dev_replay_grid.py` does exactly that) and re-commit BEFORE Nov 20. Otherwise the sitting prints a stale-copy replay under a "book" label |
 | 19 | **CFRTI1-BTC forward shadow** (V2 `SHADOW_RULES_NOV12.md` section 2; Desk A hand-off task 5; from Nov 23) | Reads `quotes/`, timed by send time, quote "within 3 s" | Rebuild on R6 books (Bitcoin is recorded to Dec 15), or it measures the copy's age |
-| 20 | **GEN4 gold run** (registered on the quote recorder "after Nov 6"; no result found; a status note speaks of R6 instead) | Ambiguous which data it would use | On R6 or not at all |
+| 20 | **GEN4 gold run** (registered on the quote recorder "after Nov 6"; no result found; a status note speaks of R6 instead) | Ambiguous which data it would use | Ruling: retired unread |
 | 21 | **INGAMELAG1** (V2; registered Nov 8, unread; in-game recorder, 20 s polls of the market list) | Its deliverable is "the measured catch-up time" of a side market after a moneyline jump. An 11 s copy on a 20 s poll, with markets of one event refreshing at different times, can make or hide that lag | **VOID as designed.** No sports book is recorded, so it cannot be re-scored. Desk B's candle version (INGAMELAG1-M) is the live form and waits on CANDLEVSBOOK1 |
 
 (Row 21 is counted under VOID above; rows 18 to 20 and row 23 are the four "pending, change first".)
@@ -58,8 +62,8 @@ Columns: **Priced** = what the list quote supplied (S signal, F fill, both). **E
 
 | # | Test (owner) | Priced | Verdict then | Effect | Call |
 |---|---|---|---|---|---|
-| 22 | **W-DERIBIT1** (Refinement; Nov 11). Deribit-implied chance against the Kalshi list ask, 60 to 30 minutes before the hourly Bitcoin close | S and F | DATA_LIMITED, leaning FAIL | Mild FLATTER (the Kalshi quote is up to 11 s older than the Deribit read; my estimate 1c to 2c near the money against a 6c edge) plus noise | **STANDS** (leaning fail in spite of the flatter). Its Dec 1 re-score should price from the hourly book where the strike is covered (7 strikes nearest the money) |
-| 23 | **DERIBIT-IMPLIED** (V2; read refused before 2027-01-01). Same recorder, 5c edge rule | S and F | Pending | Same | **Pending, change first**: price from the hourly book, or widen the edge by the measured staleness |
+| 22 | **W-DERIBIT1** (Refinement; Nov 11). Deribit-implied chance against the Kalshi list ask, 60 to 30 minutes before the hourly Bitcoin close | S and F | DATA_LIMITED, leaning FAIL | Mild FLATTER (the Kalshi quote is up to 11 s older than the Deribit read; my estimate 1c to 2c near the money against a 6c edge) plus noise | **STANDS** (leaning fail in spite of the flatter). Moot by ruling: the recorder was stopped and the test is retired, so there is no Dec 1 re-score |
+| 23 | **DERIBIT-IMPLIED** (V2; read refused before 2027-01-01). Same recorder, 5c edge rule | S and F | Pending | Same | **Pending, change first**: moot by ruling (the recorder was stopped) |
 | 24 | **LADCOH1 daily mode** (V2; 7 half-hourly snapshots, zero locks; re-read Dec 5) | Both legs, one list response | NOT_ENOUGH_DATA | Legs in one response are not simultaneous (LADDERSTATE1), which can only add false locks | **STANDS.** A lock found at the Dec 5 read must be confirmed on a book before it is believed |
 | 25 | **Lock scans on list snapshots**: ARB1 to ARB4, the Oct 23 and Oct 26 structure scans, PARLAY1, ELECT1 (V2), IMPLY1 (Desk B). Nine tests | Both legs | All negative (zero or sub-cost locks) | False locks only | **STANDS** a fortiori. Lock and parity scans are on the declined list |
 | 26 | **Slow looks, V2**: RAINCAL, SPORTS-PRE, WXENS1, WXLOW1, BARRIER1 forward, NOWCAST1 forward, USWEEP1 forward, FEDIMPL1, EVM4, SOFR1, ORHARVEST1 stage 1. Eleven tests | S and F | NOT_ENOUGH_DATA or pending | NONE: the look is hours or a day before the close | **STANDS** |
@@ -88,7 +92,7 @@ Columns: **Priced** = what the list quote supplied (S signal, F fill, both). **E
 
 1. **GEN4 forward rows** (row 5): V2's own evaluator fed R6 book rows in place of `quotes.csv` rows, closes Oct 30 to Nov 4, the spot-momentum rows and the two favourite references side by side with the ledger's figures. Held data only.
 2. **RECORD1** (row 1): the registered rule on R6 books for closes Oct 29 22:15Z to Nov 3, four series. Held data only.
-3. **MM1 gold** (row 10): if time allows; otherwise it goes back to V2 with the instruction "R6, not `quotes.csv`".
+3. MM1 gold (row 10) is NOT re-scored: retired unread by ruling.
 
 No outcome is joined for any Bitcoin 15 minute close on or after 2026-11-05.
 
