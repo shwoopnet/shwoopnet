@@ -103,24 +103,27 @@ An owner popup is REQUIRED (owner, Nov 11, 2026) for: any strategy going live, e
 
 Each stop is applied by the COO (`.claude/agents/ops-coo.md`) or the head of the chat, and reported once.
 
-## 9. Roster and division of labour (owner, Nov 11, 2026: "more productive, more work, better results")
+## 9. Roster and division of labour (owner, Nov 11, 2026: "more productive, more work, better results"; reorganised Nov 12, 2026 with a Head of R&D)
 
 | Role | Does | Never does |
 |---|---|---|
-| **Owner** | Decides every popup in section 7, types "merge N", does every deploy. | |
+| **Owner** | Decides every popup in section 7 and anything live, types "merge N", does every deploy. | |
 | **EA** | Relays the owner's decisions and questions, keeps the Team Roster and Desk artifacts. | Edits trading code or merges. |
-| **Main (Chief of Staff and Head of Engineering)** | Builds and reviews pull requests with the security agent, merges only on the owner's typed word, relays between the chats, keeps the single ranked queue, allocates the shared Kalshi request budget, writes the throughput line. | Deploys, places orders, or merges without the owner's word. |
-| **Idea Desk A** (structure and cross-market) and **Idea Desk B** (events and information, incl. politics, clinical, weather, combos) | WRITE cards and protocols: at least 12 pre-registered cards each, then the top 3 deepened into ready-to-run protocols. | Run tests, call Kalshi (unless Main allocates part of the budget), open pull requests (unless Main asks), place orders. |
-| **V2** (research) | TESTS cards from the queue, writes the weekly research note. | Skip pre-registration or read a held-out twice. |
-| **Refinement** (live performance) | Weekly rotation report, live performance, and TESTS calibration and event cards from the queue. | Change a live rule. |
-| **Verification Analyst** | Re-checks any pass (every figure) before it reaches the owner, and scores the four intake checks. | |
+| **Main (Chief of Staff and Head of Engineering)** | Keeps engineering, merges (only on the owner's typed word), pull requests, security reviews with the security agent, recorders, kalshi-pull, deploy guidance and everything live. Agrees the research split of the Kalshi request budget with the Head of R&D. Arranges the Verification Analyst for any claimed pass or uniqueness score. Writes the throughput line. | Deploys, places orders, merges without the owner's word, or runs research. |
+| **Head of R&D** (session_01PSWvZopXkxCcgaNUnhG9nM) | Runs all research. Owns the ranked queue (`RND_QUEUE.md` on the branch `rnd-queue`), the deflation log, the research split of the Kalshi read budget (agreed with Main), the probe pipeline, the paper and shadow list, and the desks below. | Merges, deploys, places orders, changes a live rule, or verifies its own passes. |
+| **Strategy Research V2** (session_01PSWvZpN1MLodfM5W2dqtii) | TESTS cards from the queue, writes the weekly research note. | Skip pre-registration or read a held-out twice. |
+| **Refinement** (session_01PSWvZpZPD3ULyjU4sQhPcX) | Keeps live monitoring and the rotation report; runs the RESEARCH tests (calibration and event cards) from the queue. | Change a live rule. |
+| **Idea Desk A** (session_01PSWvZpRsGYgz8k99mrZJ8V; structure and cross-market) and **Idea Desk B** (session_01PSWvZpwmrFdTUNmT36ngYQ; events and information, incl. politics, clinical, weather, combos) | WRITE cards and protocols: at least 12 pre-registered cards each, then the top 3 deepened into ready-to-run protocols. | Run tests, call Kalshi (unless the budget split gives them part), open pull requests (unless Main asks), place orders. |
+| **Probe Engineering desk** (session_01PSWvZnv28Wm8fCqua9FMzq) | Writes build-ready specs and off-by-default code for live probes. | Run anything live, or merge. Its code is never live until the owner decides. |
+| **Live-Data Forensics desk** (session_01PSWvZn9mqpQ8DM1QEXpyVo) | Studies the bot's own behaviour and the recorded books. | Touch the live account. It gets live figures by message only, and none go in the repo. |
+| **Verification Analyst** | Re-checks any pass (every figure) and scores the four intake checks. Stays independent of the Head of R&D; Main arranges it. | |
 | **Security agent** | Reviews every pull request that touches `functions/`, workflows, recorders, rules or sign-in code. | Merges or deploys. |
 
-**One ranked queue.** Main keeps `RND_QUEUE.md` on the branch `rnd-queue` (not main, so it changes without a pull request): cards ready to test in rank order (by speed to a verdict), cards waiting on data with the date they unblock, and who holds each. A tester that finishes takes the top ready card at once; a desk never waits on a tester and a tester never waits on a desk. A card enters the queue only with its pre-registration complete (source and terms clause, family, uniqueness result, cheapest test, prediction, kill criteria, counterparty, time to verdict, lock-up per dollar-year).
+**One ranked queue.** The Head of R&D keeps `RND_QUEUE.md` on the branch `rnd-queue` (not main, so it changes without a pull request): cards ready to test in rank order (by speed to a verdict), cards waiting on data with the date they unblock, and who holds each. A tester that finishes takes the top ready card at once; a desk never waits on a tester and a tester never waits on a desk. A card enters the queue only with its pre-registration complete (source and terms clause, family, uniqueness result, cheapest test, prediction, kill criteria, counterparty, time to verdict, lock-up per dollar-year).
 
-**Kalshi request budget.** The shared bucket is 12 requests a minute. Main sets the split by priority each hour and records who holds it at the top of `RND_QUEUE.md`; nobody exceeds their share, and a 429 is never retried in a loop. The Idea Desks hold zero.
+**Kalshi request budget.** The shared bucket is 12 requests a minute. The Head of R&D and Main agree the split by priority each hour; the research share is the Head of R&D's to divide among the desks and testers, and the split is recorded at the top of `RND_QUEUE.md`. Nobody exceeds their share, and a 429 is never retried in a loop. The Idea Desks hold zero.
 
-**Throughput line.** Every 6 hour report from Main carries: cards written, tests finished, tests waiting, and desks or workers idle and why.
+**Throughput line.** Every 6 hour report from Main carries: cards written, tests finished, tests waiting, and desks or workers idle and why. The Head of R&D supplies the research figures.
 
 Section 4's limits (2 concurrent tests, one per family) are the default. The owner has authorised extra workers for the Friday sweep (Nov 11, 2026); that is recorded here, not a change to section 4.
 
