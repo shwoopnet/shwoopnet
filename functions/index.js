@@ -58,6 +58,7 @@ const slotRun = require("./kalshiSlotRunLib");
 const slotStoreLib = require("./kalshiSlotStoreLib");
 const shadowLib = require("./kalshiShadowLib");   // shadow rules (Nov 9, 2026): log only, no order, empty registry until a reviewed edit adds one
 const shadowSeen = new Set();
+const shadowLastRead = new Map();   // series to the last time a shadow rule read it (round robin under the per minute read budget)
 const longholdLib = require("./kalshiLongholdLib");   // long-hold PAPER log (Nov 12, 2026): log only, empty registry, no order
 const longholdSeen = new Set();
 const SLOT_ON = slotLib.slotWatch();
@@ -757,15 +758,23 @@ exports.kalshiLiveArmed = onSchedule(
       // PUBLIC market read per rule series, only in the minute or two around an entry window (shadowSeriesDue): no key, no signing, no order. Every error is swallowed.
       if (shadowLib.SHADOW_RULES.length && !armedOn) {
         try {
+          const shadowBudget = shadowLib.makeReadBudget(shadowLib.SHADOW_READS_PER_MINUTE);
           let shadowQuotes = sessionOn && market ? market.quotes : null;
           if (!shadowQuotes) {
             shadowQuotes = [];
-            for (const series of shadowLib.shadowSeriesDue(shadowLib.SHADOW_RULES, now)) {
+            // ONE shared budget of public reads for the whole shadow step (series lists, candle reads, second looks): the oldest unread series first, never more than 3 a minute whatever the number of rules.
+            for (const series of shadowLib.planShadowReads(shadowLib.SHADOW_RULES, now, shadowLastRead)) {
+              if (!shadowBudget.take()) break;
+              shadowLastRead.set(series, now);
               try { for (const m of await kalshiMarketApi().markets(series)) shadowQuotes.push({ series, m }); }
               catch (e) { console.error("kalshiLiveArmed: " + series + " shadow quotes skipped: " + String((e && e.message) || e).slice(0, 120)); }
             }
           }
-          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen });
+          await shadowLib.runShadowTick({ now, quotes: shadowQuotes, rules: shadowLib.SHADOW_RULES, allowedSeries: live.L1_SERIES, record: shadowLib.shadowWriter(db), seen: shadowSeen,
+            budget: shadowBudget, clock: Date.now, sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
+            update: (id, patch) => db.collection(shadowLib.COLLECTION).doc(id).set(patch, { merge: true }),
+            market: (ticker) => kalshiMarketApi().market(ticker),
+            candles: async (series, ticker, closeSec) => (await kalshiGetJson("/series/" + encodeURIComponent(series) + "/markets/" + encodeURIComponent(ticker) + "/candlesticks?start_ts=" + (closeSec - 480) + "&end_ts=" + (closeSec - 60) + "&period_interval=1")).candlesticks });
         } catch (e) { /* log only */ }
         // Every 5th minute: settle the shadow rows whose market has closed, from the PUBLIC market answer (no key, no order); at most 6 reads and an 8 s time guard checked before each read; every error swallowed.
         if (Math.floor(now / 60000) % 5 === 0) {

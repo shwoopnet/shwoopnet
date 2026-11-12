@@ -1762,6 +1762,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Shadow logger (Nov 12): log-only shadow rules can now check open interest, a list of release dates and a second look four seconds after a row, with every extra public read held to 3 a minute. No orders, no sizing; nothing changes until a rule uses them.</li>
                   <li>Shadow report (Nov 12): the nightly report now adds, for each shadow rule, a replayed record of its last 60 fillable signals (profit factor, each half, days spanned, biggest day, rarer outcome) with a proposed, not a rule, in or out flag read only at the 60th, 70th, 80th signal and so on. Report only, nothing trades.</li>
                   <li>Research pull (Nov 12): the manual data pull now takes a job id typed in, checked against a fixed pattern and against the job files on main, instead of a hard-coded list, so adding a research job no longer changes the workflow. Same limits, public data only, nothing trades.</li>
                   <li>Research pull job (Nov 12): one more job for the manual data pull, one-minute price histories for a tie-game study (54 requests, public data, same limits). Nothing trades and it has not run.</li>
