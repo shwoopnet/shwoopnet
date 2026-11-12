@@ -14,7 +14,7 @@ import r6load as R
 
 R6, CAND, OUT = sys.argv[1], sys.argv[2], sys.argv[3]
 SERIES = "KXBTC15M"
-FROM, BEFORE = pd.Timestamp("2026-10-29T22:15:00Z"), pd.Timestamp("2026-11-12T00:00:00Z")
+FROM, BEFORE = pd.Timestamp("2026-10-29T22:15:00Z"), pd.Timestamp("2026-11-05T00:00:00Z")      # Amendment 1: nothing from the CFRTI-K held-out block
 BANDS = {"3c_to_30c": (0.03, 0.30), "5c_to_30c": (0.05, 0.30)}
 TOL_MS = 4000
 EPS = 1e-9

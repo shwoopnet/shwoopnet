@@ -15,3 +15,7 @@ Asked for by the Head of R&D (message, Nov 12) for the re-specified CFRTI-K, whi
 - "The candle is a delayed or advanced copy": the best shift is 3 s or more from zero, with the agreement at that shift stated.
 - "The candle close is something else": under 90% within 1c at every shift; say how far off and in which direction.
 - Under about 100 windows: "no evidence at n = x".
+
+## Amendment 1 (2026-11-12, before any candle was obtained)
+
+The Head of R&D ruled that candles for closes on or after 2026-11-05 are part of CFRTI-K's held-out block. The window range is therefore closes from 2026-10-29T22:15:00Z up to but NOT including 2026-11-05T00:00:00Z (it was "to 2026-11-11" above). The script's constant is changed to match; a candle for a later close found in the input is dropped on its close time before anything is computed. Candles come from Desk A's own pull as a slice with no result column. Nothing else changes.
