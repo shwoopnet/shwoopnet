@@ -1,6 +1,6 @@
 # QUOTEVSBOOK1 result, Part 1: the quote recorder's ask is a cached quote about 5 to 6 seconds behind the order book (2026-11-12)
 
-Registration: `QUOTEVSBOOK1_REGISTRATION.md` (commit 1539121, before any quote file was fetched). Script `quotevsbook1.py`, raw output `results/QUOTEVSBOOK1.json`. A measurement: no rule scored, no settlement result loaded (the quote recorder's results files were not fetched), zero tries. Public recorded data, zero Kalshi requests, nothing about the live account. **Part 2 (the model's edge rows against its other rows) waits for Desk A's rows and will be added here.**
+Registration: `QUOTEVSBOOK1_REGISTRATION.md` (commit 1539121, before any quote file was fetched). Script `quotevsbook1.py`, raw output `results/QUOTEVSBOOK1.json`. A measurement: no rule scored, no settlement result loaded (the quote recorder's results files were not fetched), zero tries. Public recorded data, zero Kalshi requests, nothing about the live account. **Part 2 (the model's edge rows against its other rows) is at the end of this file.**
 
 **Sample.** `KXBTC15M`, closes 2026-10-29 22:15Z to before 2026-11-05. 415 windows have an R6 book; 153 of them also have quote-recorder rows on the cheaper side at 5c to 30c. Primary span (150 to 120 s before the close): 4,506 quote rows in 130 windows. Secondary span (120 to 30 s): 8,197 rows in 132 windows. d = the quote's ask minus the book's ask; negative means the quote shows a cheaper ask than the book. Intervals 95%, resampling windows.
 
@@ -34,7 +34,7 @@ Shift curve, primary span (mean absolute difference to the nearest poll): -10 s 
 
 - (a) "the recorders agree and the 4 of 16 was chance": **NO.** As stamped, only 57% of rows agree within 1c.
 - (b) "a clock offset explains it": **NOT AS WORDED.** A shift of 5 to 6 seconds lowers the mean absolute difference by 34%, but both clocks check out and only 76% agree within 1c after it (the bar was 90%). It is not an offset; it is a quote served from an 11 second copy, so each row is stale by a different amount between 0 and 11 seconds.
-- (c) "the quote shows asks the book does not, concentrated on edge rows": **the first half is established for ALL rows** (about one row in eight shows an ask 2c or more below the book at that moment, one in thirteen 4c or more, one in thirty 10c or more). The second half, concentration on the model's edge rows, is Part 2 and is not read yet.
+- (c) "the quote shows asks the book does not, concentrated on edge rows": **the first half is established for ALL rows** (about one row in eight shows an ask 2c or more below the book at that moment, one in thirteen 4c or more, one in thirty 10c or more). The second half, concentration on the model's edge rows, is Part 2 below: the direction is as (c) says and the interval is above zero, on 16 and 12 edge rows.
 
 **What follows without waiting for Part 2.** A rule that compares live spot prices with this quote compares "now" with "up to 11 seconds ago". Whatever part of its signal is "the quote has not caught up with spot" is the copy's age, not the market's. Any figure priced at the quote recorder's ask is not a tradable figure; only a replay at the book means anything. That applies to every test built on the `quotes/` files (the 15 minute quotes and, by the same endpoint, the `ladder.csv` strikes), not only CFRTI.
 
@@ -46,3 +46,33 @@ Shift curve, primary span (mean absolute difference to the nearest poll): -10 s 
 ## Caveats
 
 Six days, one series, public unauthenticated reads from GitHub's runners; the copy's refresh time may differ by endpoint, by series, by authentication or over time. The 2 second book polls limit how well any single row can be matched, which is part of why agreement tops out at 76%. Not checked by the Verification Analyst.
+
+## Part 2: the rows the CFRTI model picked against the rows it did not (added 2026-11-12, after Desk A's rows arrived)
+
+Input: `kalshi-scalper/workers/desk_a_verify/cfrti_dev_allcheap.csv` on `claude/idea-desk-a` (437 rows: form, t0_utc, ticker, side, ask_seen, quote_t_send_ms, edge; closes before 2026-11-05; no outcome column, and the script refuses a file that has one). The quote's own send time is used as its time. 105 three-venue rows and 101 Kraken-only rows have an R6 book (the rest are before the recorder began or in its gaps). Every row is its own window. d = ask_seen minus the book ask; negative = the quote the model saw was cheaper than the book.
+
+| | Three-venue: edge rows (16) | not edge (89) | Kraken-only: edge rows (12) | not edge (89) |
+|---|---|---|---|---|
+| Mean d, bracket measure | -2.3c (-5.7 to 0.0) | +1.5c (+0.5 to +2.4) | -0.6c (-2.2 to +1.2) | +1.4c (+0.5 to +2.3) |
+| Quote 2c or more BELOW the book | 31.2% (12.5 to 56.2) | 5.6% (1.1 to 11.2) | 33.3% (8.3 to 58.3) | 5.6% (1.1 to 11.2) |
+| Quote 4c or more below | 25.0% | 2.2% | 25.0% | 2.2% |
+| Quote 2c or more ABOVE the book | 0.0% | 33.7% | 8.3% | 31.5% |
+| Within 1c | 68.8% | 53.9% | 58.3% | 56.2% |
+| Mean d against the poll AFTER the quote | -4.8c (-10.0 to 0.0) | +1.6c | -3.6c (-9.8 to +1.0) | +1.5c |
+
+Edge rows minus the others:
+
+| | Three-venue | Kraken-only |
+|---|---|---|
+| Mean d, bracket | -3.7c (-7.5 to -1.2) | -2.0c (-3.9 to +0.1) |
+| Share with the quote 2c or more below the book | +25.6 points (+3.5 to +50.6) | +27.7 points (+1.6 to +55.0) |
+| Share 4c or more below | +22.8 points (+4.0 to +43.8) | +22.8 points (0.0 to +48.9) |
+| Mean d against the poll after | -6.4c (-12.1 to -1.6) | -5.1c (-11.1 to -0.3) |
+
+**Reading.** On the rows the model did NOT pick, the quote is on average 1.5c ABOVE the book and is 2c or more above it a third of the time: the ordinary effect of an old quote on a side whose price is drifting down. On the rows the model picked it is the other way round: the quote is below the book on average, and 2c or more below it in about a third of them, five to six times as often as on the other rows. That is what a rule that hunts for an underpriced ask does when the ask it reads is up to 11 seconds old: it picks the rows where the old ask is lowest against the present.
+
+**Label.** By this desk's rule, 16 and 12 edge rows are "no evidence at n = 16 and n = 12" as a rate. Said plainly beside that: the direction is the one reading (c) predicts in both forms, the interval of the difference is above zero for the three-venue form and touches zero for the Kraken-only form, and the mechanism that produces it (Part 1, 72,012 polls) is not in doubt.
+
+**What this supports.** Reading (c): the quote recorder shows asks the book does not, more often on the rows the model picked. The registered CFRTI development figure is priced at those asks and is not a tradable figure. The book replay is the line that means something: of the 16 three-venue edge rows with a book, 9 fill at the ask seen about 2 to 4 seconds later (`results/CFRTI_DEV_REPLAY_GRID.csv`).
+
+**For the held-out read.** Price every held-out row from the R6 book at arrival, never from the quote recorder's ask; and form the signal from the book too if that is possible, because a signal formed on an 11 second old quote and then filled at the book is a different rule from the one registered: it selects rows on a stale price and then pays the real one. Whether that changed rule has any edge is exactly what the held-out read would then measure, once, and it should be registered as such before Nov 20.

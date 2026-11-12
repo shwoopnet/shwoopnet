@@ -1262,5 +1262,695 @@
     ]
    }
   }
+ },
+ "part2_model_rows": {
+  "rows_in_file": 437,
+  "time_used": "quote_t_send_ms",
+  "kraken": {
+   "rows_with_book": 101,
+   "edge_1": {
+    "rows": 12,
+    "windows": 12,
+    "against_poll_before": {
+     "rows": 12,
+     "windows": 12,
+     "mean": [
+      -0.00575,
+      -0.02183,
+      0.01217
+     ],
+     "median": 0.0015,
+     "mean_abs": [
+      0.02258,
+      0.01158,
+      0.03417
+     ],
+     "within_1c": [
+      0.58333,
+      0.33333,
+      0.83333
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.33333,
+      0.08333,
+      0.58333
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.08333,
+      0.0,
+      0.25
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.25,
+      0.0,
+      0.5
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.08333,
+      0.0,
+      0.25
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "against_poll_after": {
+     "rows": 12,
+     "windows": 12,
+     "mean": [
+      -0.03625,
+      -0.09767,
+      0.01017
+     ],
+     "median": -0.0,
+     "mean_abs": [
+      0.06575,
+      0.02842,
+      0.11783
+     ],
+     "within_1c": [
+      0.25,
+      0.0,
+      0.5
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.41667,
+      0.16667,
+      0.66667
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.25,
+      0.0,
+      0.5
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.41667,
+      0.16667,
+      0.66667
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.25,
+      0.0,
+      0.5
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.16667,
+      0.0,
+      0.41667
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "bracket": {
+     "rows": 12,
+     "windows": 12,
+     "mean": [
+      -0.00592,
+      -0.02158,
+      0.01175
+     ],
+     "median": 0.0,
+     "mean_abs": [
+      0.02075,
+      0.0095,
+      0.03325
+     ],
+     "within_1c": [
+      0.58333,
+      0.33333,
+      0.83333
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.33333,
+      0.08333,
+      0.58333
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.08333,
+      0.0,
+      0.25
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.25,
+      0.0,
+      0.5
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.08333,
+      0.0,
+      0.25
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "edge_0": {
+    "rows": 89,
+    "windows": 89,
+    "against_poll_before": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.01467,
+      0.00546,
+      0.02443
+     ],
+     "median": 0.006,
+     "mean_abs": [
+      0.02481,
+      0.01709,
+      0.03396
+     ],
+     "within_1c": [
+      0.52809,
+      0.42697,
+      0.62921
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.06742,
+      0.02247,
+      0.1236
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.33708,
+      0.23596,
+      0.4382
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.02247,
+      0.0,
+      0.05618
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.16854,
+      0.10112,
+      0.24719
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.03371
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    },
+    "against_poll_after": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.01516,
+      0.00529,
+      0.025
+     ],
+     "median": 0.01,
+     "mean_abs": [
+      0.02797,
+      0.02002,
+      0.03752
+     ],
+     "within_1c": [
+      0.44944,
+      0.34831,
+      0.55056
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.10112,
+      0.04494,
+      0.16854
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.35955,
+      0.25843,
+      0.46067
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.16854,
+      0.08989,
+      0.24719
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.03371
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    },
+    "bracket": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.0137,
+      0.00467,
+      0.02267
+     ],
+     "median": 0.003,
+     "mean_abs": [
+      0.02174,
+      0.01431,
+      0.03103
+     ],
+     "within_1c": [
+      0.5618,
+      0.46067,
+      0.66292
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.05618,
+      0.01124,
+      0.11236
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.31461,
+      0.22472,
+      0.41573
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.02247,
+      0.0,
+      0.05618
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.14607,
+      0.07865,
+      0.22472
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.03371
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    }
+   },
+   "edge_minus_nonedge": {
+    "mean_d_bracket": [
+     -0.01961,
+     -0.0392,
+     0.00089
+    ],
+    "share_quote_lower_2c_bracket": [
+     0.27715,
+     0.01592,
+     0.54963
+    ],
+    "share_quote_lower_4c_bracket": [
+     0.22753,
+     0.0,
+     0.48876
+    ],
+    "mean_d_before": [
+     -0.02042,
+     -0.03996,
+     -0.00064
+    ],
+    "share_quote_lower_2c_before": [
+     0.26592,
+     0.01592,
+     0.54963
+    ],
+    "mean_d_after": [
+     -0.05141,
+     -0.11055,
+     -0.00283
+    ]
+   }
+  },
+  "three": {
+   "rows_with_book": 105,
+   "edge_1": {
+    "rows": 16,
+    "windows": 16,
+    "against_poll_before": {
+     "rows": 16,
+     "windows": 16,
+     "mean": [
+      -0.02206,
+      -0.05732,
+      0.00082
+     ],
+     "median": 0.0,
+     "mean_abs": [
+      0.03044,
+      0.00987,
+      0.06288
+     ],
+     "within_1c": [
+      0.625,
+      0.375,
+      0.8125
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.3125,
+      0.125,
+      0.5625
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.0625,
+      0.0,
+      0.1875
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.25,
+      0.0625,
+      0.5
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.0625,
+      0.0,
+      0.1875
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "against_poll_after": {
+     "rows": 16,
+     "windows": 16,
+     "mean": [
+      -0.04763,
+      -0.10025,
+      1e-05
+     ],
+     "median": -0.0,
+     "mean_abs": [
+      0.06638,
+      0.02581,
+      0.11825
+     ],
+     "within_1c": [
+      0.4375,
+      0.1875,
+      0.6875
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.375,
+      0.125,
+      0.625
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.125,
+      0.0,
+      0.3125
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.375,
+      0.125,
+      0.625
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.125,
+      0.0,
+      0.3125
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.1875,
+      0.0,
+      0.375
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "bracket": {
+     "rows": 16,
+     "windows": 16,
+     "mean": [
+      -0.02269,
+      -0.0567,
+      -6e-05
+     ],
+     "median": 0.0,
+     "mean_abs": [
+      0.02856,
+      0.00787,
+      0.06082
+     ],
+     "within_1c": [
+      0.6875,
+      0.4375,
+      0.875
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.3125,
+      0.125,
+      0.5625
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.25,
+      0.0625,
+      0.5
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.0625,
+      0.0,
+      0.1875
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.0,
+      0.0,
+      0.0
+     ]
+    }
+   },
+   "edge_0": {
+    "rows": 89,
+    "windows": 89,
+    "against_poll_before": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.01547,
+      0.00634,
+      0.0252
+     ],
+     "median": 0.007,
+     "mean_abs": [
+      0.02567,
+      0.0179,
+      0.03485
+     ],
+     "within_1c": [
+      0.51685,
+      0.41573,
+      0.61798
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.06742,
+      0.02247,
+      0.1236
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.34831,
+      0.24719,
+      0.44944
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.02247,
+      0.0,
+      0.05618
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.17978,
+      0.10112,
+      0.25843
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.03371
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    },
+    "against_poll_after": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.01616,
+      0.00613,
+      0.02634
+     ],
+     "median": 0.01,
+     "mean_abs": [
+      0.02915,
+      0.0212,
+      0.03828
+     ],
+     "within_1c": [
+      0.41573,
+      0.31461,
+      0.51713
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.10112,
+      0.04494,
+      0.16854
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.39326,
+      0.29213,
+      0.49438
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.19101,
+      0.11236,
+      0.2809
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.03371
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    },
+    "bracket": {
+     "rows": 89,
+     "windows": 89,
+     "mean": [
+      0.01458,
+      0.00486,
+      0.02381
+     ],
+     "median": 0.003,
+     "mean_abs": [
+      0.0227,
+      0.01486,
+      0.03269
+     ],
+     "within_1c": [
+      0.53933,
+      0.4382,
+      0.64045
+     ],
+     "quote_lower_by_2c_or_more": [
+      0.05618,
+      0.01124,
+      0.11236
+     ],
+     "quote_higher_by_2c_or_more": [
+      0.33708,
+      0.23596,
+      0.4382
+     ],
+     "quote_lower_by_4c_or_more": [
+      0.02247,
+      0.0,
+      0.05618
+     ],
+     "quote_higher_by_4c_or_more": [
+      0.1573,
+      0.08989,
+      0.23596
+     ],
+     "quote_lower_by_10c_or_more": [
+      0.01124,
+      0.0,
+      0.04494
+     ],
+     "quote_higher_by_10c_or_more": [
+      0.04494,
+      0.01124,
+      0.08989
+     ]
+    }
+   },
+   "edge_minus_nonedge": {
+    "mean_d_bracket": [
+     -0.03727,
+     -0.07481,
+     -0.01178
+    ],
+    "share_quote_lower_2c_bracket": [
+     0.25632,
+     0.03511,
+     0.50632
+    ],
+    "share_quote_lower_4c_bracket": [
+     0.22753,
+     0.04003,
+     0.4375
+    ],
+    "mean_d_before": [
+     -0.03753,
+     -0.07587,
+     -0.01208
+    ],
+    "share_quote_lower_2c_before": [
+     0.24508,
+     0.02388,
+     0.49508
+    ],
+    "mean_d_after": [
+     -0.06378,
+     -0.12146,
+     -0.01624
+    ]
+   }
+  }
  }
 }

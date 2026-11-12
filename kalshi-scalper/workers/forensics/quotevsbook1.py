@@ -185,34 +185,47 @@ for name, (lo, hi) in SPANS.items():
     out[name] = o
 
 if SIG:
-    S = pd.read_csv(SIG)
-    S["t_ms"] = S["quote_ms"].astype("int64") if "quote_ms" in S.columns and S["quote_ms"].notna().all() else R.to_ms(S["t0_utc"])
-    S = S[S["ticker"].isin(close_ms)].reset_index(drop=True)
-    r = [compare(tk, int(tms), sd == "yes", float(q)) for tk, tms, sd, q in zip(S["ticker"], S["t_ms"], S["side"], S["ask_seen"])]
-    S[["d_before", "d_after", "bracket", "near", "age_ms", "lead_ms"]] = pd.DataFrame(r, index=S.index)
-    S = S[S["d_before"].notna() | S["d_after"].notna()]
-    p2 = {"rows_with_book": int(len(S)), "time_used": "quote_ms" if "quote_ms" in S.columns else "t0_utc"}
-    for e in (1, 0):
-        G = S[S["edge"] == e]
-        p2["edge_%d" % e] = {"rows": int(len(G)), "windows": int(G["ticker"].nunique()), "against_poll_before": dist(G["d_before"], G["ticker"]),
-                             "against_poll_after": dist(G["d_after"], G["ticker"]), "bracket": dist(G["bracket"], G["ticker"])}
-    # difference edge minus non-edge, resampling windows within each group
-    def diff(col, f):
+    SA = pd.read_csv(SIG)
+    tcol = next((c for c in ("quote_ms", "quote_t_send_ms") if c in SA.columns and SA[c].notna().all()), None)
+    SA["t_ms"] = SA[tcol].astype("int64") if tcol else R.to_ms(SA["t0_utc"])
+    assert not any(c.lower() in ("result", "outcome", "win", "won", "pnl") for c in SA.columns), "an outcome column is present"
+    n_in = len(SA)
+    SA = SA[SA["ticker"].isin(close_ms)].reset_index(drop=True)
+    r = [compare(tk, int(tms), sd == "yes", float(q)) for tk, tms, sd, q in zip(SA["ticker"], SA["t_ms"], SA["side"], SA["ask_seen"])]
+    SA[["d_before", "d_after", "bracket", "near", "age_ms", "lead_ms"]] = pd.DataFrame(r, index=SA.index)
+    SA = SA[SA["d_before"].notna() | SA["d_after"].notna()]
+
+    def diff(S, col, f):
         a = S[S["edge"] == 1]; b = S[S["edge"] == 0]
         a = a[a[col].notna()]; b = b[b[col].notna()]
         if len(a) == 0 or len(b) == 0:
             return None
         ua, ub = a["ticker"].unique(), b["ticker"].unique()
-        ga = {k: f(v[col].to_numpy()) for k, v in a.groupby("ticker")}; na = a.groupby("ticker").size().to_dict()
-        gb = {k: f(v[col].to_numpy()) for k, v in b.groupby("ticker")}; nb_ = b.groupby("ticker").size().to_dict()
+        ga = {k: f(v[col].to_numpy()).sum() for k, v in a.groupby("ticker")}; na = a.groupby("ticker").size().to_dict()
+        gb = {k: f(v[col].to_numpy()).sum() for k, v in b.groupby("ticker")}; nb_ = b.groupby("ticker").size().to_dict()
         est = f(a[col].to_numpy()).sum() / len(a) - f(b[col].to_numpy()).sum() / len(b)
         bs = []
         for _ in range(2000):
             pa = rng.choice(ua, len(ua)); pb = rng.choice(ub, len(ub))
-            bs.append(sum(ga[k].sum() for k in pa) / sum(na[k] for k in pa) - sum(gb[k].sum() for k in pb) / sum(nb_[k] for k in pb))
+            bs.append(sum(ga[k] for k in pa) / sum(na[k] for k in pa) - sum(gb[k] for k in pb) / sum(nb_[k] for k in pb))
         return [round(float(est), 5), round(float(np.percentile(bs, 2.5)), 5), round(float(np.percentile(bs, 97.5)), 5)]
-    p2["edge_minus_nonedge"] = {"mean_d_bracket": diff("bracket", lambda v: v), "share_quote_lower_2c_bracket": diff("bracket", lambda v: (v <= -0.02 + 1e-6).astype(float)),
-                                "mean_d_before": diff("d_before", lambda v: v), "share_quote_lower_2c_before": diff("d_before", lambda v: (v <= -0.02 + 1e-6).astype(float))}
+
+    p2 = {"rows_in_file": int(n_in), "time_used": tcol or "t0_utc"}
+    forms = sorted(SA["form"].unique()) if "form" in SA.columns else ["all"]
+    for form in forms:
+        S = SA[SA["form"] == form] if "form" in SA.columns else SA
+        o = {"rows_with_book": int(len(S))}
+        for e in (1, 0):
+            G = S[S["edge"] == e]
+            o["edge_%d" % e] = {"rows": int(len(G)), "windows": int(G["ticker"].nunique()), "against_poll_before": dist(G["d_before"], G["ticker"]),
+                                "against_poll_after": dist(G["d_after"], G["ticker"]), "bracket": dist(G["bracket"], G["ticker"])}
+        o["edge_minus_nonedge"] = {"mean_d_bracket": diff(S, "bracket", lambda v: v),
+                                   "share_quote_lower_2c_bracket": diff(S, "bracket", lambda v: (v <= -0.02 + 1e-6).astype(float)),
+                                   "share_quote_lower_4c_bracket": diff(S, "bracket", lambda v: (v <= -0.04 + 1e-6).astype(float)),
+                                   "mean_d_before": diff(S, "d_before", lambda v: v),
+                                   "share_quote_lower_2c_before": diff(S, "d_before", lambda v: (v <= -0.02 + 1e-6).astype(float)),
+                                   "mean_d_after": diff(S, "d_after", lambda v: v)}
+        p2[form] = o
     out["part2_model_rows"] = p2
 json.dump(out, open(OUT, "w"), indent=1, default=float)
 print(json.dumps(out["counts"]), json.dumps(out["clock"]))
