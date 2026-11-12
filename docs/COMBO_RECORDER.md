@@ -21,3 +21,9 @@ Research data only. Nothing here trades, signs or holds a key. It records Kalshi
 | Ends | 2027-01-31 23:59 UTC by itself (workflow and script); sooner by deleting `.github/workflows/record-combo.yml` |
 
 **Honest limits.** Most combos have an empty book (no bids on either side); in the widened trial 10 of the 40 tightest spreads had any depth, and 3,966 of the 5,000 listed combos had a posted price on some side (the 400 quote rows and 40 books are therefore a small slice of the selection). That is a finding about the market, not a fault. Prices are stored as the exchange returns them, nothing is computed. Gates: `test/comboBookRecorderGates.test.js` (CB1 to CB10).
+
+## What it is expected to capture, and the stop rule (added Nov 12, 2026, the EA's note)
+
+An earlier research pass (COMBO1) found no resting ask on any sampled combo, so this recorder may capture little. What it is expected to capture: which combos show any posted bid or ask over time, how often a two-sided quote exists, the spread when it does, the depth of the top 5 levels for the 40 tightest, and the trades that print. It exists to price a paper test of buying NO on high-priced combos with real depth.
+
+**Stop rule, fixed now:** read the data on or after 14 days of recording (not before). If fewer than 20 distinct combos ever showed a two-sided quote with a bid on the side the paper test would buy, or fewer than 100 combo trades printed in total, stop the recorder (delete `record-combo.yml`) and report that combos cannot be priced. The read counts only quote and trade existence; it scores no strategy.
