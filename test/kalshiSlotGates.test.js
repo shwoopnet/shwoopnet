@@ -178,7 +178,7 @@ gates['slot and L1 share one window limit: L1 spend in a window shrinks what the
 gates['hard caps hold: contracts per order, open per market, depth share, dollars per order, window and total'] = () => {
   const big = Object.assign(GOOD(), { contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } });
   const F = { enabled: true, registry: [big] };
-  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 500 })).count, 7, 'cut by the $5 per-order cap (base 500, 1%): 7 contracts at about $0.65');
+  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 250 })).count, 7, 'cut by the $5 window cap (base 250, 2%): 7 contracts at about $0.65');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 20, sizingBase: 500 })).count, 5, 'depth share 25% of 20');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 3, sizingBase: 500 })).allowed, false, '25% of 3 is under one contract');
   assert.strictEqual(W(F, input({ depthAtTouch: null })).allowed, false, 'unknown depth refuses');
@@ -195,17 +195,17 @@ gates['the slot has its own daily and lifetime loss caps on top of the shared st
   const seq = (pnls, endAgo) => pnls.map((p, k) => slotOrder({ ticker: 'KXETH15M-26NOV02' + (1000 + k) + '-15', settled: true, result: p > 0 ? 'yes' : 'no', settledPnl: p, ts: NOW - endAgo - (pnls.length - k) * 1000 }));
   const wide = Object.assign(GOOD(), { killRules: { maxConsecutiveLosses: 5, minNet: { afterFills: 100, net: -60 } } });
   const F = { enabled: true, registry: [wide] };
-  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-3, 0.1, -3], 3600000) })).allowed, false, 'daily: settled losses reach the $5 cap');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-4, 0.1, -4], 3600000) })).allowed, false, 'daily: settled losses reach the $6.25 cap');
   assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-1, 0.1, -1], 3600000) })).allowed, true);
-  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', maxCost: 5.5, count: 8, fillCount: '8' })] })).allowed, false, 'daily: an open order counts as lost');
-  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-4, 0.1, -4, 0.1, -4, 0.1, -4, 0.1], 5 * 86400000) })).allowed, false, 'lifetime cap holds when the daily window is clean');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', maxCost: 7, count: 8, fillCount: '8' })] })).allowed, false, 'daily: an open order counts as lost');
+  assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: seq([-5, 0.1, -5, 0.1, -5, 0.1, -5, 0.1], 5 * 86400000) })).allowed, false, 'lifetime cap holds when the daily window is clean');
   assert.strictEqual(W(F, input({ sizingBase: 250, slotOrders: [], slotOrdersComplete: false })).allowed, false, 'a partial read cannot prove the lifetime figure');
 };
 gates['caps scale with the sizing base, never pass their ceilings, and an unusable base gives no caps and no order'] = () => {
   const keys = Object.keys(slot.SLOT_CAP_FRACTIONS);
   const a = slot.slotCaps(250), d = slot.slotCaps(500);
   for (const k of keys) assert.ok(Math.abs(d[k] - 2 * a[k]) < 1e-9, k + ' doubles when the base doubles (below its ceiling)');
-  assert.deepStrictEqual([a.daily, a.lifetime, a.perOrder], [5, 15, 2.5], 'base 250');
+  assert.deepStrictEqual([a.daily, a.lifetime, a.perOrder], [6.25, 18.75, 6.25], 'base 250');
   assert.deepStrictEqual([slot.slotCaps(400).perWindow, slot.slotCaps(400).openTotal], [8, 12], 'base 400');
   for (const b of [1e3, 1e4, 1e6, 1e12, Number.MAX_VALUE]) for (const k of keys) assert.ok(slot.slotCaps(b)[k] <= slot.SLOT_CAP_CEILINGS[k] + 1e-9, k + ' stays under its ceiling at base ' + b);
   for (const k of keys) assert.strictEqual(slot.slotCaps(1e9)[k], slot.SLOT_CAP_CEILINGS[k], k + ' sits at its ceiling for a huge base');
@@ -316,15 +316,15 @@ gates['H1 one order can never overshoot the daily or lifetime loss cap: its own 
   assert.ok(slot.SLOT_CAP_FRACTIONS.perOrder <= slot.SLOT_CAP_FRACTIONS.daily, 'a single order may not be bigger than the daily cap, at any base');
   for (const b of [50, 250, 1000, 1e4]) assert.ok(slot.slotCaps(b).perOrder <= slot.slotCaps(b).daily + 1e-9 || slot.slotCaps(b).daily === slot.SLOT_CAP_CEILINGS.daily, 'per order never above daily at base ' + b);
   const prior = (p, ago) => [lossAt(ago, p, 1)];
-  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-4.9, 3600000) })).allowed, false, 'a 4.90 loss leaves 0.10 of daily room: no whole contract');
-  const r = W(WF, input({ sizingBase: 250, slotOrders: prior(-4.0, 3600000), limit: 0.75 }));
+  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-6.15, 3600000) })).allowed, false, 'a 6.15 loss leaves 0.10 of daily room: no whole contract');
+  const r = W(WF, input({ sizingBase: 250, slotOrders: prior(-5.25, 3600000), limit: 0.75 }));
   assert.ok(r.allowed && r.cost <= 1.0 + 1e-9, 'only what fits in the last $1.00: cost ' + r.cost);
-  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-14.9, 5 * 86400000) })).allowed, false, 'lifetime: 0.10 left');
-  const l = W(WF, input({ sizingBase: 250, slotOrders: prior(-14.0, 5 * 86400000) }));
+  assert.strictEqual(W(WF, input({ sizingBase: 250, slotOrders: prior(-18.65, 5 * 86400000) })).allowed, false, 'lifetime: 0.10 left');
+  const l = W(WF, input({ sizingBase: 250, slotOrders: prior(-17.75, 5 * 86400000) }));
   assert.ok(l.allowed && l.cost <= 1.0 + 1e-9, 'lifetime room is $1.00');
   // worst case afterwards never passes the caps
   const worstAfter = (orders) => slot.slotRiskContract(orders, NOW).day.worst - W(WF, input({ sizingBase: 250, slotOrders: orders })).cost;
-  assert.ok(worstAfter(prior(-4.0, 3600000)) >= -slot.slotCaps(250).daily - 1e-9);
+  assert.ok(worstAfter(prior(-5.25, 3600000)) >= -slot.slotCaps(250).daily - 1e-9);
 };
 
 gates['H16 the per-order ceiling is never above the daily ceiling, so one order cannot break the daily cap alone at any base'] = () => {
@@ -504,6 +504,15 @@ gates['H15 the wiring checklist and the contract names are in the design doc'] =
   for (const w of ['windowSpent', 'slotRiskForBotRisk', 'lockTxn', 'settledAt', 'othersUnsold', 'Wiring checklist', 'kalshiHandSoldGates', 'closedByHand', 'two-instance'])
     assert.ok(doc.includes(w), 'the design doc must mention ' + w);
   assert.ok(!/slotMayEnter|slotSideRule|windowAtRisk/.test(doc.split('\n').filter((l) => !/removed/i.test(l)).join('\n')), 'the doc no longer advertises the removed names');
+};
+
+gates['loss caps are counted per strategy: one strategy losses never use up another strategy room (Nov 12, 2026)'] = () => {
+  const mk = (id) => Object.assign(GOOD(), { id, killRules: { maxConsecutiveLosses: 20, minNet: { afterFills: 100, net: -18 } } });
+  const A = mk('SEATA'), B = mk('SEATB');
+  const F = { enabled: true, registry: [A, B] };
+  const lossesOfA = [0, 1, 2, 3, 4, 5].map((k) => slotOrder({ slotId: 'SEATA', ticker: 'KXETH15M-26NOV02' + (1000 + k) + '-15', settled: true, result: 'no', settledPnl: -10, ts: NOW - 5 * 86400000 - k * 1000 }));
+  assert.strictEqual(W(F, input({ strategyId: 'SEATA', sizingBase: 800, slotOrders: lossesOfA })).allowed, false, 'seat A has lost its own $60 and is stopped by its own lifetime cap');
+  assert.strictEqual(W(F, input({ strategyId: 'SEATB', sizingBase: 800, slotOrders: lossesOfA })).allowed, true, 'seat B has lost nothing, so seat A\'s losses do not stop it');
 };
 
 (async () => {
