@@ -1,0 +1,478 @@
+{
+ "job": {
+  "job_id": "CFRTI_K_LISTS",
+  "owner": "DESK_A",
+  "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
+  "purpose": "Stage 1 of CFRTI-K: the settled KXBTC15M market lists (ticker, close_time, floor_strike, result) for the development window, so stage 2 can name every market. No price is read. Bounded at the cutoff: nothing on or after 2026-11-05T00:00Z is requested.",
+  "heldout": "CFRTI-K: closes on or after 2026-11-05T00:00:00Z are held-out and are not requested (max_close_ts = 1793836800 on the live list). The historical list has no date filter; the builder drops any market closing at or after the cutoff and the reader never opens it.",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor"
+    ]
+   }
+  ],
+  "series_allowlist": [
+   "KXBTC15M"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 30,
+  "notes": "Live list: settled KXBTC15M with close time from 2026-06-01 to before 2026-11-05, newest first, up to 14 pages of 1,000 (about 5,100 live markets after the 2026-09-12 cutover, so about 6 pages). Historical list: up to 14 pages (about 7,900 older markets, about 8 pages). Request count: 2 requests, at most 28 pages, cap 30. Fields the reader keeps: ticker, close_time, floor_strike, cap_strike, result.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "live_KXBTC15M",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXBTC15M",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1780272000,
+     "max_close_ts": 1793836800
+    },
+    "max_pages": 14
+   },
+   {
+    "id": "hist_KXBTC15M",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXBTC15M",
+     "limit": 1000
+    },
+    "max_pages": 14
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1645Z",
+ "finished": "2026-11-12T1645Z",
+ "status": "complete",
+ "requests_sent": 20,
+ "bytes_stored": 42934333,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2209584,
+   "t_send_ms": 1794501904475,
+   "t_recv_ms": 1794501904580,
+   "server_date": "Thu, 12 Nov 2026 16:45:04 GMT",
+   "file": "0001.json.gz",
+   "sha256": "8de86f4121dc2ff8bbe99c166162844715b030066586a9a209c8edca8c76eea2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2209570,
+   "t_send_ms": 1794501905475,
+   "t_recv_ms": 1794501905575,
+   "server_date": "Thu, 12 Nov 2026 16:45:05 GMT",
+   "file": "0002.json.gz",
+   "sha256": "a9900e8550829871a04fb549d475717a017455b6978f400f2cda9dca11b85f72",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2208300,
+   "t_send_ms": 1794501906475,
+   "t_recv_ms": 1794501906558,
+   "server_date": "Thu, 12 Nov 2026 16:45:06 GMT",
+   "file": "0003.json.gz",
+   "sha256": "094074460f55f2a583e11970bcea45f1136169eb24b4c4b90dda575248df4ad1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2210688,
+   "t_send_ms": 1794501907475,
+   "t_recv_ms": 1794501907592,
+   "server_date": "Thu, 12 Nov 2026 16:45:07 GMT",
+   "file": "0004.json.gz",
+   "sha256": "b3d4f5948ad89ab3efba6dd118b7922167b8789146efe732cff3aca802df0182",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2211668,
+   "t_send_ms": 1794501908475,
+   "t_recv_ms": 1794501908630,
+   "server_date": "Thu, 12 Nov 2026 16:45:08 GMT",
+   "file": "0005.json.gz",
+   "sha256": "39302e813b8f7b9b776d200fd0e2b55697d98b4e847ddb25106fe0a7ffc7b6b9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1780272000,
+    "max_close_ts": 1793836800
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 1328557,
+   "t_send_ms": 1794501909475,
+   "t_recv_ms": 1794501909547,
+   "server_date": "Thu, 12 Nov 2026 16:45:09 GMT",
+   "file": "0006.json.gz",
+   "sha256": "64f0384027847039dcd52f52c2778428262654f58773ee2c9fca29a28a350d5f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2205005,
+   "t_send_ms": 1794501910476,
+   "t_recv_ms": 1794501910592,
+   "server_date": "Thu, 12 Nov 2026 16:45:10 GMT",
+   "file": "0007.json.gz",
+   "sha256": "096e064348a836cf09c8c4b3573e3b9857c571887997661e791cba66f9c73dd9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2203247,
+   "t_send_ms": 1794501911476,
+   "t_recv_ms": 1794501911568,
+   "server_date": "Thu, 12 Nov 2026 16:45:11 GMT",
+   "file": "0008.json.gz",
+   "sha256": "bf6710feac6ec23dab940809d6039f3404192cb4667d84011ace5fd8ab651913",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2203319,
+   "t_send_ms": 1794501912476,
+   "t_recv_ms": 1794501912590,
+   "server_date": "Thu, 12 Nov 2026 16:45:12 GMT",
+   "file": "0009.json.gz",
+   "sha256": "96b00dd0292bf72c8e20668988bf669c2eaefb7571f28dd264c2076723efab26",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2201737,
+   "t_send_ms": 1794501913476,
+   "t_recv_ms": 1794501913613,
+   "server_date": "Thu, 12 Nov 2026 16:45:13 GMT",
+   "file": "0010.json.gz",
+   "sha256": "1b60229fdc7b6800b07718dc2308f033c1749a9a1e95e41086c7d9e8ac5ac987",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2201256,
+   "t_send_ms": 1794501914476,
+   "t_recv_ms": 1794501914555,
+   "server_date": "Thu, 12 Nov 2026 16:45:14 GMT",
+   "file": "0011.json.gz",
+   "sha256": "baec364822e1d0854a0a6bcffcfb38ed10ea6022c19976cc55dd365237a17d9c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2201984,
+   "t_send_ms": 1794501915476,
+   "t_recv_ms": 1794501915573,
+   "server_date": "Thu, 12 Nov 2026 16:45:15 GMT",
+   "file": "0012.json.gz",
+   "sha256": "9ee9e282989732d4152227618a26b9b506eaecd931d24374fe326e6cd2d7d51b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 2199611,
+   "t_send_ms": 1794501916476,
+   "t_recv_ms": 1794501916577,
+   "server_date": "Thu, 12 Nov 2026 16:45:16 GMT",
+   "file": "0013.json.gz",
+   "sha256": "d2a776fa6e8e24a38046a60b25d5200107d2d801f23b88e295682a33ffd1de4d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 8,
+   "status": 200,
+   "bytes": 2200967,
+   "t_send_ms": 1794501917476,
+   "t_recv_ms": 1794501917613,
+   "server_date": "Thu, 12 Nov 2026 16:45:17 GMT",
+   "file": "0014.json.gz",
+   "sha256": "8de74bf27743cc8f6bd9507a6d58630713e28afcf085e79971b258771d8ec9e2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 9,
+   "status": 200,
+   "bytes": 2170014,
+   "t_send_ms": 1794501918477,
+   "t_recv_ms": 1794501918557,
+   "server_date": "Thu, 12 Nov 2026 16:45:18 GMT",
+   "file": "0015.json.gz",
+   "sha256": "9364f8cf81e764a428c006cda7b3d0be10b67c8dc6fe09f8cee21f9465c26904",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 10,
+   "status": 200,
+   "bytes": 2161469,
+   "t_send_ms": 1794501919477,
+   "t_recv_ms": 1794501919574,
+   "server_date": "Thu, 12 Nov 2026 16:45:19 GMT",
+   "file": "0016.json.gz",
+   "sha256": "760f4538661ac3dd4ca341fe83b1fb569b57b7f0107112b95c3efb31290cbf9a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 11,
+   "status": 200,
+   "bytes": 2162674,
+   "t_send_ms": 1794501920477,
+   "t_recv_ms": 1794501920555,
+   "server_date": "Thu, 12 Nov 2026 16:45:20 GMT",
+   "file": "0017.json.gz",
+   "sha256": "11812149b438ad62e1b647435d007223975ca56090e2e53ad21ab27e59d3ecee",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 12,
+   "status": 200,
+   "bytes": 2162739,
+   "t_send_ms": 1794501921477,
+   "t_recv_ms": 1794501921584,
+   "server_date": "Thu, 12 Nov 2026 16:45:21 GMT",
+   "file": "0018.json.gz",
+   "sha256": "957f5278b3eb8d3feeca9adc551588d219e78fc46e800da3826736e9afa23c0c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 13,
+   "status": 200,
+   "bytes": 2156847,
+   "t_send_ms": 1794501922477,
+   "t_recv_ms": 1794501922575,
+   "server_date": "Thu, 12 Nov 2026 16:45:22 GMT",
+   "file": "0019.json.gz",
+   "sha256": "cb7ebdfe71cfe117cd3143b8d1724ba06fafb4fa19d2da4aec1d50c4ee044495",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "hist_KXBTC15M",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "limit": 1000
+   },
+   "page": 14,
+   "status": 200,
+   "bytes": 2125097,
+   "t_send_ms": 1794501923477,
+   "t_recv_ms": 1794501923571,
+   "server_date": "Thu, 12 Nov 2026 16:45:23 GMT",
+   "file": "0020.json.gz",
+   "sha256": "99421bdcfbb66813e20b327f762616cd65ff204e33704b2758f51393c25cd3ca",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
