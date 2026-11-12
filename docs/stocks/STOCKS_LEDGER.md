@@ -22,7 +22,7 @@ S1 1, S2 2, S3 2, S4 2, S5 2, S6 2, S7 1 (first wave, scripts and synthetic test
 | Card | Reason |
 |---|---|
 | S1 overnight vs intraday, index ETFs | arithmetic: net d about 0.03 to 0.06, PF about 1.04 to 1.13, cannot clear 1.5 |
-| S2 clientele (long leg and long-short) | gross about 4 to 13 bp a night against about 3 to 6.7 bp assumed cost; long-short net PF about 0.9 |
+| S2 long-short line | never judged (borrow and dividend upper bound); net PF about 0.9. The S2 LONG LEG is NOT retired: HELD after the pilot (Head ruling Nov 12 ~17:11Z) |
 | S3 one-week reversal, illiquid | screen only, cannot pass; spread (15 bp each way) consumes it |
 | S4 opening gap fade | screen only, cannot pass |
 | S5 post-gap drift | screen only, cannot pass |
