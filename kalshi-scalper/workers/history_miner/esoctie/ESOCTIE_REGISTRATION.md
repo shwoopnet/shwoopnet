@@ -108,3 +108,7 @@ The guard in "The instants and prices" point 1 used the event's own close time, 
 ## NOTE 5, Nov 12, 2026, 19:30Z, wording only, before any data (Auditor B)
 
 "Price refunded, fee kept" for a void is an ASSUMPTION about how Kalshi settles a voided market, not a measurement; if the fee is also refunded, NOTE 4's booking is slightly conservative. The result page says so beside the void count.
+
+## NOTE 6, Nov 12, 2026, 19:35Z, reporting only, before any data (Head of R&D)
+
+Voids are booked differently here (price refunded, fee kept: NOTE 4) and in INPLAYJUMP (refunded, net 0, not counted); both were stated before data. If voids are more than 1 percent of fired bets, the result is also printed with voids refunded and not counted, side by side and labelled information only. The registered booking (NOTE 4) is the verdict.

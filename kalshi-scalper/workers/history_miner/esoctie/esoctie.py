@@ -234,6 +234,10 @@ def score(lists, cands):
         verdict = "below the bar at n = %d, PF %s" % (n, pf_all)
     out["registered_verdict"] = verdict + " (selected on development: this figure can falsify, it cannot support; only the frozen held-out read can)"
     out["void_bets_booked_as_fee_loss"] = sum(1 for t in trades if t.get("void"))
+    # NOTE 6: reporting only; if voids exceed 1% of fired bets, also print the result with voids refunded and not counted (INPLAYJUMP's booking). The registered booking is the verdict.
+    if trades and out["void_bets_booked_as_fee_loss"] > 0.01 * len(trades):
+        alt = [t for t in trades if not t.get("void")]
+        out["alternative_booking_voids_refunded_not_counted"] = {"info_only": True, "all": sk.stats(alt), "windows": [sk.stats(w) for w in sk.windows(alt, 3)] if alt else []}
     return {"measurement": rep, "rule": out}
 
 
