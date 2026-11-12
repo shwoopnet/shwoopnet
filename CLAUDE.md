@@ -1329,3 +1329,7 @@ Six candle job files, job files and gates only (runner and workflow unchanged): 
 
 `docs/ROTATION_LANE.md` v1.2 corrects section 4's arithmetic after the Verification Analyst reproduced it with its own code: the single-block luck table is now at 10 contracts (with the 3 contract figures for probation seats in a sentence), the "no edge" definition is stated (a rule in a fairly priced market loses about one fee an order; a rule that exactly breaks even is its own line), and the cost of a fake rule is stated as fees paid. No rule changed. The block conditions and the worst-day and worst-week figures are labelled as not independently checked. Docs only.
 
+## kalshi-pull: MAPBREAK_CANDLES stopped at the size cap, the rest is MAPBREAK_CANDLES_REST (Nov 12, 2026)
+
+The first run of `MAPBREAK_CANDLES` (2026-11-12T1954Z) answered 166 of its 282 requests (c0000 to c0165, about 199 MB, about 1.2 MB an answer) and stopped cleanly at the 200 MB cap (`stopped_size`, the Pull step exits red but the data is pushed). `MAPBREAK_CANDLES_REST` carries only the remaining 116 requests (c0166 to c0281) byte for byte, cap 116, with the ticker allowlist cut to the tickers it uses; the converter merges the two runs by request id and `MAPBREAK_CANDLES` must not be run again (same pattern as `SPREADCELL1_REST`). Job file and gate only; runner and workflow unchanged.
+
