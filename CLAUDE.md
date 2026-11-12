@@ -1279,3 +1279,8 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 ## Rotation lane draft v0.4 (Nov 12, 2026, the Head of R&D)
 
 `docs/ROTATION_LANE.md` is now v0.4 with the owner's decisions (no seat cap, 10 contracts and at most $10 an order, a separate seat per market for each rule, favourites at 88c or above only with 150 signals and 10 losses, automatic return after performance exits only). The lifecycle pointer says 7g is unchanged outside the wheel. The document is a proposal text; the code that would use it (controller, registry entries, the second slot caps for a $10 order) is not built or approved to run. Docs only; `docs/CHARTER.md` untouched.
+
+## Rotation lane v1.0 approved; gold return needs 10 losses (Nov 12, 2026, the owner)
+
+`docs/ROTATION_LANE.md` is v1.0, APPROVED by the owner as written, with `docs/WHEEL_ADMIT_LIST.md` (batch 1, a list of places, not an order to trade). The approval is not a go-live: each seat still needs the WHEEL0 read, a reviewed build and security pass, a check of the second slot caps and the account stop, and the owner's popup with its exact spec. The owner also added a 10-loss guard to gold's return rule (text in `docs/GOLD_KILL_LATCH.md` and `docs/STRATEGY_LIFECYCLE.md`); the code that reads that rule is a separate PR. Docs only.
+
