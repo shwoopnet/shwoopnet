@@ -1,0 +1,113 @@
+{
+ "rows_given": 65,
+ "rows_with_result": 53,
+ "rows_with_an_r6_book": 53,
+ "paper_at_the_candle_ask_all_rows": {
+  "n": 53,
+  "wins": 8,
+  "pf": 1.056,
+  "mean_c": 0.69,
+  "mean_price": 0.1362
+ },
+ "paper_at_the_candle_ask_rows_with_a_book": {
+  "n": 53,
+  "wins": 8,
+  "pf": 1.056,
+  "mean_c": 0.69,
+  "mean_price": 0.1362
+ },
+ "book_ask_at_the_decision_minus_candle_ask_c": {
+  "mean": 0.65,
+  "share_within_1c": 0.755
+ },
+ "book_replay_2s_limit_at_the_ask_seen": {
+  "n": 37,
+  "wins": 6,
+  "pf": 1.451,
+  "mean_c": 4.43,
+  "mean_price": 0.1112,
+  "filled_of": "37 of 53"
+ },
+ "missed_2s_limit_at_the_ask_seen_paper_result": {
+  "n": 16,
+  "wins": 2,
+  "pf": 0.741,
+  "mean_c": -3.77,
+  "mean_price": 0.1541
+ },
+ "book_replay_2s_limit_plus_1c": {
+  "n": 44,
+  "wins": 6,
+  "pf": 1.208,
+  "mean_c": 2.06,
+  "mean_price": 0.1092,
+  "filled_of": "44 of 53"
+ },
+ "missed_2s_limit_plus_1c_paper_result": {
+  "n": 9,
+  "wins": 2,
+  "pf": 1.052,
+  "mean_c": 0.94,
+  "mean_price": 0.2019
+ },
+ "book_replay_6s_limit_at_the_ask_seen": {
+  "n": 38,
+  "wins": 5,
+  "pf": 1.234,
+  "mean_c": 2.23,
+  "mean_price": 0.1031,
+  "filled_of": "38 of 53"
+ },
+ "missed_6s_limit_at_the_ask_seen_paper_result": {
+  "n": 15,
+  "wins": 3,
+  "pf": 1.348,
+  "mean_c": 4.52,
+  "mean_price": 0.1465
+ },
+ "book_replay_6s_limit_plus_1c": {
+  "n": 40,
+  "wins": 5,
+  "pf": 1.171,
+  "mean_c": 1.63,
+  "mean_price": 0.1025,
+  "filled_of": "40 of 53"
+ },
+ "missed_6s_limit_plus_1c_paper_result": {
+  "n": 13,
+  "wins": 3,
+  "pf": 1.495,
+  "mean_c": 6.69,
+  "mean_price": 0.1552
+ },
+ "book_replay_10s_limit_at_the_ask_seen": {
+  "n": 40,
+  "wins": 6,
+  "pf": 1.606,
+  "mean_c": 5.07,
+  "mean_price": 0.0936,
+  "filled_of": "40 of 53"
+ },
+ "missed_10s_limit_at_the_ask_seen_paper_result": {
+  "n": 13,
+  "wins": 2,
+  "pf": 0.96,
+  "mean_c": -0.56,
+  "mean_price": 0.1509
+ },
+ "book_replay_10s_limit_plus_1c": {
+  "n": 41,
+  "wins": 6,
+  "pf": 1.577,
+  "mean_c": 4.79,
+  "mean_price": 0.0927,
+  "filled_of": "41 of 53"
+ },
+ "missed_10s_limit_plus_1c_paper_result": {
+  "n": 12,
+  "wins": 2,
+  "pf": 0.992,
+  "mean_c": -0.12,
+  "mean_price": 0.1589
+ }
+}
