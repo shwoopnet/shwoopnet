@@ -1,0 +1,396 @@
+{
+ "asOf": "2026-11-12",
+ "note": "The one list of every strategy and its stage. Edit it by a reviewed pull request. It holds no live figures: names, stage, rules in plain words, dates, and an n only when it comes from public data (nBasis says which).",
+ "stages": [
+  "Idea",
+  "Shadow",
+  "Paper",
+  "Probe",
+  "Live",
+  "Retired"
+ ],
+ "strategies": [
+  {
+   "id": "L1",
+   "name": "Gold closing buy",
+   "stage": "Live",
+   "rule": "Gold: the favourite side at 88c to 97c, about 6 minutes before the close",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": "Gold kill latch: off for good at a drawdown of $58.75 from its own peak, or net under -$20 after 40 trades; only a reviewed edit re-arms it",
+   "return": "Shadow profit factor 1.3+ over at least 60 trades and 7 days, second half 1.3+, then a reviewed re-arm at half size for the first 30 trades (GOLDOFF supplies the record)",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: whether the gold kill latch has tripped as of today; the page's live card shows the latch state from the bot, this row only states the rule"
+   ],
+   "code": {
+    "live": "L1"
+   }
+  },
+  {
+   "id": "OICORE",
+   "name": "Open interest jump",
+   "stage": "Live",
+   "rule": "Bitcoin: the cheaper side at 5c to 50c after an open interest jump, held to settlement",
+   "label": null,
+   "startDate": null,
+   "nextRead": "2026-11-13",
+   "nextReadText": "Forward read date in the bot's registry",
+   "n": null,
+   "nBasis": null,
+   "kill": "Drawdown stop of $50 from its own peak, 24 losses in a row, or net under -$6 after 40 fills; never re-armed automatically",
+   "return": "Only a reviewed edit by the owner re-arms it",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: lifecycle section 7f lists OICORE as a Probe (under 100 fills); the page has always shown it in the Live lane"
+   ],
+   "code": {
+    "live": "OICORE",
+    "slot": "OICORE"
+   }
+  },
+  {
+   "id": "EVENT830",
+   "name": "Release day longshot",
+   "stage": "Live",
+   "rule": "Release mornings: the cheaper side at 5c to 50c in the 8:30 window, held to settlement",
+   "label": null,
+   "startDate": null,
+   "nextRead": "2026-12-07",
+   "nextReadText": "Forward read date in the bot's registry",
+   "n": null,
+   "nBasis": null,
+   "kill": "20 losses in a row, or net under $0 after 40 fills",
+   "return": "Not written yet",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: return rule is not written; lifecycle section 7f lists it as a Probe (thin sample)"
+   ],
+   "code": {
+    "live": "EVENT830",
+    "slot": "EVENT830"
+   }
+  },
+  {
+   "id": "GOLDOFF",
+   "name": "Gold return record",
+   "stage": "Shadow",
+   "rule": "Logs gold's own entry (the favourite side at 88c to 97c, 330 to 400 seconds left) whether or not gold is latched off, so gold's return rule can be checked",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-12",
+   "nextRead": "2026-11-19",
+   "nextReadText": "Earliest return review: 7 days after the first row, and only once 60 settled rows exist",
+   "n": null,
+   "nBasis": "Shadow rows the bot logs from public quotes; the count is shown from the private log, not stored here",
+   "kill": "Log only, no order. Nothing to kill; it is the return evidence for gold",
+   "return": "Gold may return only at shadow profit factor 1.3+ over at least 60 trades and 7 days, second half 1.3+, then a reviewed re-arm at half size",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: first-row date (set from the registration date, not the first logged row)"
+   ],
+   "code": {
+    "shadow": "GOLDOFF"
+   }
+  },
+  {
+   "id": "W-SPREAD-CELL1",
+   "name": "Sports spread cheap side",
+   "stage": "Shadow",
+   "rule": "Sports SPREAD markets: one market per event nearest 50c, buy the YES side at 5c to 15c about two days before the game, hold",
+   "label": "UNPROVEN",
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": "One read, after the owner merges PR 804 and the SPREADLISTS then SPREADCELL1 jobs run",
+   "n": null,
+   "nBasis": "Public Kalshi market data only (about 320 observations expected)",
+   "kill": "Net under -$6 after 60 settled fills, or 25 losses in a row",
+   "return": "A 14 day cool-off, then a paper record of 100 fills at cash PF 1.3+, then the owner's approval",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Odds stated in the spec: 3 to 5 percent that it clears its first line. A clear is not a pass of the research bar",
+    "to confirm with the Head of R&D: stage name (the spec calls it a conditional probe spec, the owner lists it as shadow); start date; n"
+   ],
+   "code": {}
+  },
+  {
+   "id": "W-NO-ARM1",
+   "name": "Approval NO side",
+   "stage": "Shadow",
+   "rule": "Approval markets: the NO side; the development pull (NOSIDE1_CANDLES) has not run",
+   "label": "UNPROVEN",
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": "After the candle pull jobs 1 and 2 are on the data branch",
+   "n": null,
+   "nBasis": "Public Kalshi candles; paper observations are small and lean against the idea",
+   "kill": "to confirm with the Head of R&D",
+   "return": "to confirm with the Head of R&D",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: exact rule, n, start date, kill and return rules; the queue says only that what is held leans against it"
+   ],
+   "code": {}
+  },
+  {
+   "id": "W-SPOTLEAD1",
+   "name": "Spot lead",
+   "stage": "Shadow",
+   "rule": "Bitcoin 15 minute market priced from Coinbase one minute candles against the Kalshi book; a read-time shadow",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-13",
+   "nextRead": "2026-11-21",
+   "nextReadText": "Re-read about Nov 21 to 23, judged only on unseen windows",
+   "n": 58,
+   "nBasis": "Development read of public candle data (missed its bar); not the shadow's own count",
+   "kill": "Misses its registered bar on the re-read, or the owner does not accept the venue risk in writing",
+   "return": "Cannot go live as registered: needs the owner's written exception to the favourite-and-hold ban and a ruling on the Coinbase terms",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: exact kill rule and the bar numbers; the venue is barred from live probes by the owner's Nov 12 ruling"
+   ],
+   "code": {}
+  },
+  {
+   "id": "CFRTI-K",
+   "name": "Bitcoin model on Kalshi candles",
+   "stage": "Shadow",
+   "rule": "Two minutes before a Bitcoin 15 minute market closes, the cheap side (5c to 30c) when a model fed by Kalshi's own Bitcoin perpetual says it is underpriced by 5c or more",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-23",
+   "nextRead": "2026-11-23",
+   "nextReadText": "Read-time shadow from Nov 23; the held-out read is first allowed Nov 20; development waits on the perpetual candle pull (PR 810)",
+   "n": null,
+   "nBasis": "Public Kalshi candles only",
+   "kill": "Net under -$6 after 40 settled fills, or 18 losses in a row (if it were ever live)",
+   "return": "A 14 day cool-off, a paper record at cash PF 1.3+ on 100 rows, the owner's approval",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "Honest odds in the spec: low single digits that it reaches a popup",
+    "to confirm with the Head of R&D: the registered start date (Nov 23 is the shadow read-time start in the queue)"
+   ],
+   "code": {}
+  },
+  {
+   "id": "S3",
+   "name": "Combo house side",
+   "stage": "Shadow",
+   "rule": "Combos: NO at about 60c to 90c, held to settlement, on paper first (the owner's written exception to the favourite-and-hold ban)",
+   "label": "UNPROVEN",
+   "startDate": "2026-11-12",
+   "nextRead": "2026-11-26",
+   "nextReadText": "First paper read Nov 26",
+   "n": null,
+   "nBasis": "Public combo quotes recorded to the combo-data branch",
+   "kill": "Stop if fewer than 20 combos ever showed a two-sided quote with a bid, or fewer than 100 trades",
+   "return": "to confirm with the Head of R&D",
+   "retiredOn": null,
+   "reason": null,
+   "notes": [
+    "to confirm with the Head of R&D: the rule is still being registered by Desk B; a $2 probe needs a paper edge of 10c per dollar over 100 settled combos, not before December"
+   ],
+   "code": {}
+  },
+  {
+   "id": "MMSIM1",
+   "name": "Two-sided market making",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "Only with a new fill mechanism or venue (declined list, lifecycle 7e)",
+   "retiredOn": "2026-11-12",
+   "reason": "Closed by evidence: the simulated profit came from a fill rule that left out through-price fills; the registered Nov 24 held-out reads still happen once to complete the record",
+   "notes": [],
+   "code": {}
+  },
+  {
+   "id": "XRP",
+   "name": "XRP",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": "2026-10-28",
+   "reason": "Paused in code Oct 28",
+   "notes": [],
+   "code": {}
+  },
+  {
+   "id": "BTC",
+   "name": "Bitcoin",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": null,
+   "reason": "Paused as an L1 market; trades only as OICORE",
+   "notes": [
+    "to confirm with the Head of R&D: retired date"
+   ],
+   "code": {}
+  },
+  {
+   "id": "ETH",
+   "name": "Ethereum",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": null,
+   "reason": "Paused in code",
+   "notes": [
+    "to confirm with the Head of R&D: retired date"
+   ],
+   "code": {}
+  },
+  {
+   "id": "DOGE",
+   "name": "Dogecoin",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": null,
+   "reason": "Removed from the bot Nov 9",
+   "notes": [
+    "to confirm with the Head of R&D: retired date"
+   ],
+   "code": {}
+  },
+  {
+   "id": "AUDUSD",
+   "name": "AUD/USD",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": "2026-10-28",
+   "reason": "Probe market paused in code",
+   "notes": [],
+   "code": {}
+  },
+  {
+   "id": "USDCAD",
+   "name": "USD/CAD",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": "2026-10-28",
+   "reason": "Probe market paused in code",
+   "notes": [],
+   "code": {}
+  },
+  {
+   "id": "NATGAS",
+   "name": "Natural gas",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "a 14 day cool off, then 150 shadow fills at cash PF 1.3+, second half 1.2+, and owner approval",
+   "retiredOn": "2026-10-28",
+   "reason": "Probe market paused in code",
+   "notes": [],
+   "code": {}
+  },
+  {
+   "id": "DERIBIT",
+   "name": "Deribit",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "to confirm with the Head of R&D",
+   "retiredOn": null,
+   "reason": "Stopped",
+   "notes": [
+    "to confirm with the Head of R&D: what Deribit was, when it stopped, its return rule"
+   ],
+   "code": {}
+  },
+  {
+   "id": "WEATHER",
+   "name": "Weather forecast versus bracket",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
+   "startDate": null,
+   "nextRead": null,
+   "nextReadText": null,
+   "n": null,
+   "nBasis": null,
+   "kill": null,
+   "return": "to confirm with the Head of R&D",
+   "retiredOn": null,
+   "reason": "Closed",
+   "notes": [
+    "to confirm with the Head of R&D: closing date, reason and return rule"
+   ],
+   "code": {}
+  }
+ ]
+}
