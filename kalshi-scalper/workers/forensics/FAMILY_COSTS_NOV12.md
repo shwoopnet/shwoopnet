@@ -131,7 +131,7 @@ Not held by this desk (no recorder, or not measured in this cut): mentions, Stea
 ## What this file cannot say
 
 - **Events a year** beyond the 15 minute and hourly series are from a handful of days and are Desk B's column; the counts here are what the recorder saw.
-- **Sizes** are not recorded for weather or the daily watchlist. **Settlement speed** is not recorded for sports or the hourly ladder and is only an upper bound for weather.
+- **Sizes** are not recorded for weather or the daily watchlist. **Settlement speed** is not recorded for sports or the hourly ladder and is only an upper bound for weather. Desk B has since measured settlement speed for sports and the other unrecorded families from the Nov 10 listing's own close and settlement times (`census/listing_nov10/settle_speed.csv` on `claude/idea-desk-b`: about 2 minutes for US game lines); use that column, not this file, for those.
 - List-quote spreads are a copy up to about 11 s old: fine for a level, useless for a seconds-level claim.
 - Sports rows mix pre-game and in-play instants and include games listed days ahead.
 - Combos: one snapshot. Politics: three snapshots over 14 hours. NC15: 20 hours. Mentions and any family with no recorder: nothing held.

@@ -16,7 +16,7 @@ Rule: a result priced from a list quote at seconds scale is not a tradable figur
 
 ## 2. The fee
 
-Taker fee per contract, per side traded: **0.07 x price x (1 - price)**, rounded up to the cent on the whole order. Settlement is free. A maker fee of zero is an assumption in our work, not a measurement. Check the family's fee class before using this table.
+Taker fee per contract, per side traded: **0.07 x price x (1 - price)**, rounded up to the cent on the whole order. Settlement is free. A maker fee of zero is an assumption in our work, not a measurement, and it is wrong for some families: Desk B's Nov 10 listing shows 32 non-sports series that charge maker fees (CPI, payrolls, Fed, GDP and similar) and 14 with no fee; the fee fields for sports and weather were cut off in that listing and are not known. Check the family's fee class (`FAMILY_TABLE.md` on `claude/idea-desk-b`) before using this table.
 
 | Price | 5c or 95c | 10c or 90c | 20c or 80c | 30c or 70c | 40c or 60c | 50c |
 |---|---|---|---|---|---|---|
