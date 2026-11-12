@@ -79,3 +79,9 @@ Counts first, then: bets, wins, mean price paid, cash profit factor, net cents a
 2. Thin markets may show a two-sided quote with one contract behind it; a candle has no size.
 3. In e-soccer and e-basketball the market opens only about two hours before the start, so S minus 65 can fall in a market's first hour, when quotes are wide; those matches drop out at the two-sided condition and are counted.
 4. **My odds: about 2% a family that the development bar is met; about 1% a family for the research bar; about 3% that any of the four passes.**
+
+## Amendment 1 (Nov 12, 2026, about 19:25 UTC; before any price or result was read)
+
+1. **E-soccer matches in which REMATCH's state is true are left out** (`rematch/REMATCH_REGISTRATION.md`, rule points 2 to 4: the previous loser's contract fell 5c or more after a meeting of the same two players 20 to 120 minutes earlier). That state is known a minute before PREMOVE's entry. Reason: REMATCH buys the faller in those matches and PREMOVE would buy the riser, and this desk does not bet one match both ways. The number left out is printed.
+2. **A plain fact found after registration, from listing times only:** in e-soccer and e-basketball the next match's market is already open while the players' previous match is played (297 of 299 qualifying e-soccer pairs on Nov 10). So in those two families a late move is mostly the market reacting to results that have just come in, not to line-up news. The rule is unchanged; the reader should know what it is testing there.
+3. **The request line is corrected.** One batched candle request has ONE time range for all its tickers, and matches start at staggered times, so a wider window costs requests. My estimate for PREMOVE's own cost is now about 400 to 500 requests on top of INPLAYJUMP's and MAPBREAK's pulls, not none. The exact count comes from the lists.
