@@ -28,6 +28,7 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | CFRTI-K lead/lag measurement | Desk A | 0 | registered before the candles are opened |
 | CFRTI-B: signal and price from the R6 order book; B3 (three-venue spot) and BK (Kraken-only spot) | Desk A | 2 | approved Nov 12, to be registered before Nov 20; read once in the CFRTI sitting |
 | FILLHAIRCUT1, GOLDHAIRCUT1, QUOTEVSBOOK1 (measurements on recorded books and quotes; no outcome loaded) | Live-Data Forensics | 0 | done Nov 12; QUOTEVSBOOK1: the quote recorder's market list is a copy refreshed about every 11 seconds |
+| ENTRYREPLAY1_OI (OICORE's model trigger windows against the no-trigger baseline, on R6 books; public data) | Live-Data Forensics | 1 | read Nov 12: no evidence at n = 14; the trigger fires mostly when the cheap side is at 8c or less |
 | RESIL1 (order-flow resilience after a sweep: touch price returns within 6 seconds; taker rule on R6 books and tape) | Desk A | 1 | registered Nov 12 before any event (RESIL1_REGISTRATION.md, 90d4a5ee on claude/idea-desk-a); a FALSIFIED would be the order-flow family's third |
 | PERPBIN1 (Kalshi's Bitcoin perpetual as a field for the 15 minute market; premium and open-interest-change arms) | Desk A | up to 4, to be confirmed at registration | to be registered with its script before the perp files are opened for it |
 | DEPTH1 (R6 order-book features, gold and Bitcoin; V2, registered Oct 30) | Desk A (was V2) | 20, counted at registration | unread; one read on or after 2026-11-14 |
