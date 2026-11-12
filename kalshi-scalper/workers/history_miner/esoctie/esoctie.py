@@ -21,9 +21,11 @@ DEV_BEFORE = sk.iso(CFG["blocks"]["development_closes_before"])
 HALF = sk.iso(CFG["blocks"]["development_half_split"])
 EDGES = CFG["strength_buckets_on_f"]
 MIN_BASE = CFG["base_rate_minimum_earlier_events"]
-GAP, SPREAD, COST = CFG["gap_line"], CFG["spread_line"], CFG["cost_kill_round_trip"]
+GAP, SPREAD = CFG["gap_line"], CFG["spread_line"]
 OPEN_LO, OPEN_HI = [m * 60 for m in CFG["open_guard_minutes_before_S"]]
 PRE_BACK_MAX = 10   # minutes
+SETTLE_GAP_S = CFG["settle_gap_seconds"]  # NOTE 3
+ONE_WAY_COST_KILL = CFG["cost_kill_one_way_entry"]  # NOTE 3
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on e-soccer"
 MONTHS = {m: i for i, m in enumerate(["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"], 1)}
 
@@ -135,11 +137,12 @@ def walk(evs, cd):
         mid = (tc["bid"] + tc["ask"]) / 2
         filled.append(dict(event=e["event"], S=e["S"], close=e["close"], ts=ts, f=f, k=bucket(f), ask=tc["ask"], bid=tc["bid"], spread=round(tc["ask"] - tc["bid"], 4),
                            rt=round(tc["ask"] - tc["bid"] + 2 * 0.07 * mid * (1 - mid), 4), tie_result=e["tie_result"]))
-    filled.sort(key=lambda r: (r["S"], r["event"]))
+    # NOTE 3: a game's result enters the base rate only if its close + SETTLE_GAP_S is at or before the bet's decision time (ts), so b is strictly point-in-time
+    filled.sort(key=lambda r: (r["ts"], r["event"]))
     done = sorted(filled, key=lambda r: r["close"])
     rows, j, tally = [], 0, {}
     for r in filled:
-        while j < len(done) and done[j]["close"] < r["S"]:
+        while j < len(done) and done[j]["close"] + SETTLE_GAP_S <= r["ts"]:
             d = done[j]
             if d["tie_result"] in ("yes", "no"):
                 t = tally.setdefault(d["k"], [0, 0])
@@ -152,6 +155,7 @@ def walk(evs, cd):
         r["b"] = (t[1] / t[0]) if t[0] >= MIN_BASE else None
         r["gap"] = None if r["b"] is None else round(r["b"] - r["ask"], 4)
         r["mirror"] = None if r["b"] is None else round(r["bid"] - r["b"], 4)
+        r["entry_cost"] = round((r["ask"] - (r["ask"] + r["bid"]) / 2) + fee_up(round(min(r["ask"] + 0.01, 0.99), 4)), 4)
         rows.append(r)
     return rows, nf
 
@@ -182,8 +186,10 @@ def measure(lists, cands):
     kill = []
     if len(elig) < 150:
         kill.append("no evidence at n = %d" % len(elig))
-    if rep["median_round_trip"] is not None and rep["median_round_trip"] > COST:
-        kill.append("closed on cost (median round trip %.3f)" % rep["median_round_trip"])
+    rep["median_one_way_entry_cost"] = q([r["entry_cost"] for r in elig], .5)
+    rep["unsettled_or_void_eligible"] = sum(1 for r in elig if r["tie_result"] not in ("yes", "no"))
+    if rep["median_one_way_entry_cost"] is not None and rep["median_one_way_entry_cost"] > ONE_WAY_COST_KILL:
+        kill.append("closed on cost (median one-way entry cost %.3f over %.2f; a request-saving screen, not the bar)" % (rep["median_one_way_entry_cost"], ONE_WAY_COST_KILL))
     s, pl = rep["share_gap10_spread4"] or 0, rep["placebo_share_mirror"] or 0
     if not (s >= 0.03 and s >= 2 * pl):
         kill.append("efficient, move on (90th percentile gap %s)" % rep["gap"][.9])

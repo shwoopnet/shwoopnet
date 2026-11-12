@@ -56,4 +56,30 @@ assert 40 <= n <= 60, n
 # 4. results of non-bet events never change the bet list's prices: flip a result of an event after the last bet's S? (base changes are allowed by design); prices stay
 # 5. the guard ignores close time: an event with a wild close but a good open is kept
 assert E.events({"KXESOCCERGAME-26OCT101943AB-%s" % s: {"ticker": "KXESOCCERGAME-26OCT101943AB-%s" % s, "event": "KXESOCCERGAME-26OCT101943AB", "series": "KXESOCCERGAME", "close": calendar.timegm((2026,10,12,0,0,0)), "open": calendar.timegm((2026,10,10,23,0,0)), "result": "no"} for s in ("TIE","AAA","BBB")})[0]
+# 6. NOTE 3: a result inside the 300 s settle gap cannot move a decision; one just outside it can
+def mini(close_y, flip):
+    mk2, cd2 = [], []
+    S0b = calendar.timegm((2026, 9, 20, 12, 0, 0))
+    for i in range(400):
+        S = S0b + i * 1200
+        ev = "KXESOCCERGAME-%sQ%04d" % (key(S), i)
+        for suf, res in (("TIE", "yes" if i % 4 == 0 else "no"), ("AAA", "no"), ("BBB", "no")):
+            mk2.append({"ticker": "%s-%s" % (ev, suf), "event_ticker": ev, "close_time": iso(S + 720), "open_time": iso(S - 3600), "result": res})
+        for suf, (b, a) in (("TIE", (.25, .27)), ("AAA", (.49, .51)), ("BBB", (.29, .31))):
+            cd2.append({"market_ticker": "%s-%s" % (ev, suf), "candlesticks": [{"end_period_ts": S - 60, "yes_bid": {"close_dollars": "%.2f" % b}, "yes_ask": {"close_dollars": "%.2f" % a}}]})
+    SX = S0b + 400 * 1200; evx = "KXESOCCERGAME-%sXXXX" % key(SX)
+    SY = ((close_y - 720) // 60) * 60; evy = "KXESOCCERGAME-%sYYYY" % key(SY)
+    for e, S, cl, res in ((evx, SX, SX + 720, "no"), (evy, SY, close_y, ("yes" if flip else "no"))):
+        for suf in ("TIE", "AAA", "BBB"):
+            mk2.append({"ticker": "%s-%s" % (e, suf), "event_ticker": e, "close_time": iso(cl), "open_time": iso(S - 3600), "result": res if suf == "TIE" else "no"})
+        for suf, (b, a) in (("TIE", (.25, .27)), ("AAA", (.49, .51)), ("BBB", (.29, .31))):
+            cd2.append({"market_ticker": "%s-%s" % (e, suf), "candlesticks": [{"end_period_ts": S - 60, "yes_bid": {"close_dollars": "%.2f" % b}, "yes_ask": {"close_dollars": "%.2f" % a}}]})
+    rows, _ = E.walk(E.events(sk_markets([folder([{"markets": mk2}])]))[0], sk_candles([folder([{"markets": cd2}])]))
+    return [r for r in rows if r["event"] == evx][0]["b"], SX - 60
+import scorekit as SK
+sk_markets, sk_candles = SK.markets, SK.candles
+SXd = calendar.timegm((2026, 9, 20, 12, 0, 0)) + 400 * 1200 - 60
+for gap, must_equal in ((180, True), (299, True), (300, False), (400, False)):
+    a, _ = mini(SXd - gap, False); b, _ = mini(SXd - gap, True)
+    assert (a == b) == must_equal, (gap, a, b)
 print("ok", rep["filled_eligible"], n, res["rule"]["registered_verdict"])

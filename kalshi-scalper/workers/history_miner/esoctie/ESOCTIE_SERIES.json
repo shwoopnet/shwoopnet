@@ -24,7 +24,7 @@
   "base_rate_minimum_earlier_events": 300,
   "gap_line": 0.1,
   "spread_line": 0.04,
-  "cost_kill_round_trip": 0.05,
+  "cost_kill_one_way_entry": 0.04, "settle_gap_seconds": 300,
   "open_guard_minutes_before_S": [
     10,
     240
