@@ -48,7 +48,7 @@ MAX_BODY_BYTES = 5 * 1000 * 1000      # one answer
 MAX_RUN_BYTES = 200 * 1000 * 1000     # one run
 MAX_RUN_SECONDS = 40 * 60             # one run (the workflow's own timeout is longer)
 MAX_JOB_BYTES = 2 * 1000 * 1000
-MAX_RUNS_PER_DAY = 12                 # real runs per UTC day, counted from the manifests already on the data branch
+MAX_RUNS_PER_DAY = 20                 # real runs per UTC day, counted from the manifests already on the data branch
 MAX_PAGES = 50
 UA = {"User-Agent": "shwoopnet-research-pull", "Accept": "application/json"}
 
