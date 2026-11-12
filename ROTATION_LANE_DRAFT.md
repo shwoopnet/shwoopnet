@@ -15,7 +15,7 @@ The owner, Nov 12, 2026 (popups, through the EA): "remember we're building for c
 1. The research bar (cash profit factor 1.5 on development and held-out, three windows, after fees, deflated) and the proven bar (1.3 or better over 100 fills in 2 of 3 windows) stay. They are what any size above the wheel's fixed size needs. [design]
 2. The declined list (lifecycle 7e), the no-hedge direction lock, the data-source rules and the shared 12 percent loss stop, 5.5 percent window cap and second-slot caps apply to wheel orders as to any slot order. The wheel never re-admits a row the owner declined.
 3. Gold L1 is not a wheel strategy. It keeps its own kill latch and return rule (`docs/GOLD_KILL_LATCH.md`).
-4. **The owner's popup is still required for every strategy, once, at admission:** each rule joins the wheel only by the owner's popup with its exact spec (market, side, band, look window, limit, exit, size, kill lines), then the Chief of Staff's reviewed merge and security pass. After that the rule takes and leaves a seat by itself. Nothing stored, requested or typed on a page may add, enlarge or re-arm a strategy; the in or out state is replayed from the rule's own rows on every run, like the gold latch.
+4. **The owner's popup is still required for every strategy, once, at admission:** each rule joins the wheel only by the owner's popup with its exact spec (market, side, band, look window, limit, exit, size, kill lines), then the Chief of Staff's reviewed merge and security pass. After that the rule takes and leaves a seat by itself. In code that means one reviewed registry entry per rule in the second slot (and, for a rule that holds to settlement, one reviewed entry on the hold list), written at admission and armed or disarmed only by the replay. Nothing stored, requested or typed on a page may add, enlarge or re-arm a strategy; the in or out state is replayed from the rule's own rows on every run, like the gold latch.
 5. **No favourite-and-hold at 88c or above on the wheel** unless the owner rules otherwise (his standing ban; and see the arithmetic in section 4).
 
 ## 2. The wheel
@@ -33,7 +33,7 @@ The owner, Nov 12, 2026 (popups, through the EA): "remember we're building for c
 
 ## 4. The record and the entry bar [design]
 
-**The record.** Logged by the bot's shadow logger on the quotes of the moment, or replayed from recorded order books. Never market-list quotes and never candles alone. A signal is **fillable** only if a second look within 4 seconds after the decision still shows the wheel's size at or under the registered limit (the touch plus at most 1c); no second look is no trade. Measured on recorded gold books, an immediate order at the price seen filled about half the time a few seconds later, so a shadow that assumes a fill at the touch overstates its count by a quarter to a half. Cash basis, fee rounded up to the cent for 3 contracts.
+**The record.** Logged by the bot's shadow logger on the quotes of the moment, or replayed from recorded order books. Never market-list quotes and never candles alone. A signal is **fillable** only if a second look within 4 seconds after the decision (one extra public read a row; the Chief of Staff confirms it is buildable inside the read budget) still shows the wheel's size at or under the registered limit (the touch plus at most 1c); no second look is no trade. Measured on recorded gold books, an immediate order at the price seen filled about half the time a few seconds later, so a shadow that assumes a fill at the touch overstates its count by a quarter to a half. Cash basis, fee rounded up to the cent for 3 contracts.
 
 **The bar, read once at the end of a block:**
 
@@ -85,7 +85,7 @@ What lines 1 to 3 do on coin flips: a rule with no edge leaves after about 25 to
 ## 8. The total at risk
 
 1. Wheel orders run in the second slot under its existing caps and count in the shared 12 percent stop and the 5.5 percent window cap, and obey the direction lock.
-2. **Lane cap:** if the wheel's combined cash result falls $50 from its own peak (five seats at $10), every wheel entry stops until the owner re-arms it by popup. [design]
+2. **Lane cap:** if the wheel's combined cash result falls $50 from its own peak (five seats at $10), every wheel entry stops until the owner re-arms it by popup. The slot's existing caps are per strategy and scale with the sizing base; a cap across all wheel rules is new code, to be built and reviewed with the live wiring. [design]
 
 ## 9. Not just picking lucky shadows
 
