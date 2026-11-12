@@ -20,3 +20,9 @@ Asked for by the Head of R&D after QUOTEVSBOOK1. Written from the recorder scrip
 | | Deribit (`deribit/`) and OKX liquidations (`oklq/`) | Other venues; not covered by this note. |
 
 **Rule of thumb.** Price from `book15r6/`, `nc15/`, `book/` or a tape. Treat any `yes_bid` or `yes_ask` that came out of a `/markets?...` list as "what the market looked like some seconds ago".
+
+## Added 2026-11-12 after the Verification Analyst's check and TAPECLOCK1
+
+- **Which side is old is now settled with a third clock.** Against the trade tape (the exchange's own time on each trade), the R6 book matches the price takers paid best when read within about a second of the trade (82% within 1c at 150 to 120 s before the close); the market-list quote matches it best only 7 to 8 seconds after the trade, and is within 1c of it at the trade's own time on a third of trades (`TAPECLOCK1_RESULT.md`).
+- **The quote is worse nearer the close than the headline says.** Quote and book agree within 1c on 57% of rows as stamped at 150 to 120 seconds, and on 42% at 120 to 30 seconds; against the tape the quote is within 1c on 20% of trades in the last two minutes.
+- **Book SIZES are not depth truth.** On R6 the size at every level, level 5 included, changes from one 2 second poll to the next (the Verification Analyst's finding), the touch itself has moved within half a second for 71% of trades, and 6% of prints at the touch are larger than the size shown half a second earlier. Use the book for PRICES. Treat a displayed size as "what was shown at that instant", not as what an order arriving later would meet, and never as an upper limit. The tape cannot confirm or refute sizes away from the touch.
