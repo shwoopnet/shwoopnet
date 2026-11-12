@@ -9,7 +9,8 @@ Head's conditions, enforced in code:
 Cells file (tie3_cells.json), one object per cell: {"league","period","series","tie_suffix":"TIE","start_rule":{...}}; start_rule (Desk B decides, the card is silent):
   {"kind":"ticker_local","tz":"America/New_York","offset_s":3600}  parse YYMMMDDHHMM from the event ticker, instant = start - offset_s;
   {"kind":"field","name":"<market field>","offset_s":N}              instant = that market field (ISO time) minus offset_s (N may be negative);
-  no derivable start = the event is SKIPPED and counted.
+  {"kind":"close_offset","offset_s":N}                                 instant = the market's own close minus N, fixed per series before data (Head's ruling; no outside schedule site);
+  no derivable start = the event is SKIPPED and counted; a series with no unambiguous rule is dropped from the cells and the count reported.
 Commands: build-lists <cells.json> | events <cells.json> <lists folders...> | build-candles <cells.json> <lists folders...> | measure <cells.json> <lists folders...> <candle folders...>
 """
 import calendar, hashlib, json, os, re, statistics as st, sys, time
@@ -60,12 +61,17 @@ def iso(s): return k.iso(s) if s else None
 
 
 def start_ts(event, markets, rule):
-    """Instant for the price: start minus offset, or None (skip and count)."""
+    """Instant for the price: start minus offset, or None (skip and count).
+    Head's ruling (Nov 12, 17:16Z): no outside schedule site (banned hosts). Where a start cannot be fixed from Kalshi fields or the ticker, the pre-game instant is a FIXED OFFSET BEFORE THE MARKET'S CLOSE,
+    stated per series before data: {"kind": "close_offset", "offset_s": N}. A series where even that is ambiguous is dropped from the cells and the count is reported (rule None = skipped and counted)."""
     if not rule:
         return None
+    if rule["kind"] == "close_offset":
+        cl = [m["close"] for m in markets if m.get("close")]
+        return (min(cl) - rule["offset_s"]) if cl else None
     if rule["kind"] == "field":
         for m in markets:
-            t = iso(m.get(rule["name"]) or "")
+            t = iso((m.get("times") or {}).get(rule["name"]) or "")
             if t:
                 return t - rule.get("offset_s", 0)
         return None

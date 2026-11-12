@@ -60,9 +60,12 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert len(evs["NHL|P1"]["base"]) == nb and counts["held_out_dropped"] == 1 and counts["dropped_not_three_settled"] == 1, counts
     assert all("result" not in e and "level" not in e for e in evs["NHL|P1"]["price"] + evs["NFL|Q1"]["price"])     # the price block carries no outcome
     assert evs["NHL|P1"]["base"][0]["level"] in (True, False)
+    assert len(evs["NFL|Q1"]["price"]) == npr and evs["NFL|Q1"]["price"][0]["instant"] == price_close + 86400 - 20000 + 7200       # field rule: open_time minus (-7200 s)
+    assert counts["no_start"] == 0, counts
     # start rules: ticker local 19:00 ET on Oct 25 (EDT, UTC-4) minus 3600 s = 22:00Z
     exp = calendar.timegm((2026, 10, 25, 23, 0, 0)) - 3600
     assert evs["NHL|P1"]["price"][0]["instant"] == exp, (evs["NHL|P1"]["price"][0]["instant"], exp)
+    assert t.start_ts("E", [{"close": 10000}, {"close": 10600}], {"kind": "close_offset", "offset_s": 3600}) == 6400 and t.start_ts("E", [], {"kind": "close_offset", "offset_s": 1}) is None
     assert t.start_ts("KXNHLP1-26OCT25", [], cells[0]["start_rule"]) is None and t.start_ts("x", [], None) is None             # date-only ticker or no rule: skipped
     jc, _ = t.build_candles(cells, [dl]); kp.check_job(jc)
     assert all(r["params"]["end_ts"] <= t.HELD_OUT_FROM + 86400 * 5 for r in jc["requests"]) and 1 <= len(jc["requests"]) <= 10 and not any(r["path"].startswith("/historical") for r in jc["requests"])

@@ -156,7 +156,8 @@ def markets(folders):
                 if isinstance(m, dict) and m.get("ticker"):
                     out[m["ticker"]] = {"ticker": m["ticker"], "event": m.get("event_ticker", ""), "series": m["ticker"].split("-")[0], "open": iso(m.get("open_time", "")), "close": iso(m.get("close_time", "")),
                                         "result": m.get("result"), "type": m.get("strike_type"), "floor": _f(m.get("floor_strike")), "cap": _f(m.get("cap_strike")),
-                                        "volume": _f(m.get("volume_fp", m.get("volume"))), "title": m.get("title", "")}
+                                        "volume": _f(m.get("volume_fp", m.get("volume"))), "title": m.get("title", ""),
+                                        "times": {n: m.get(n) for n in ("open_time", "close_time", "expected_expiration_time", "occurrence_datetime", "expiration_time", "latest_expiration_time", "created_time") if m.get(n)}}
     return out
 
 
