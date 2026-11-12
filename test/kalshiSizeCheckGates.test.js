@@ -1,4 +1,4 @@
-// Order size sanity (Oct 29, 2026): a Dogecoin order for 12 contracts reached the account where current code only sends 3. maxContractsFor is a second lock behind the sizing code.
+// Order size sanity (Oct 29, 2026): an order reached the account larger than current code sends. maxContractsFor is a second lock behind the sizing code.
 // Each gate states a consequence for the account, not a mechanism.
 const assert = require('assert');
 const crypto = require('crypto');

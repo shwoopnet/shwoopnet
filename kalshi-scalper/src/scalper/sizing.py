@@ -85,29 +85,33 @@ def main() -> None:
     run(by, days, "weekly $100 + skim 50%, add-on max 2",dpc=100,skim=True,addon_max=2,fixed=0)
     run(by, days, "weekly $85 + skim 50%, add-on max 2 (chosen)",dpc=85,skim=True,addon_max=2,fixed=0)
     run(by, days, "weekly $60 + skim 50%, add-on max 2",dpc=60,skim=True,addon_max=2,fixed=0)
-    print("\nFaster steps and cheaper contracts: 10 weeks, start $344, 60% fills, WITH the live loss stop (10% of the balance at the last review; restart next morning)")
+    print("\nFaster steps and cheaper contracts: 10 weeks, start at the round simulation base, 60% fills, WITH the live loss stop (10% of the balance at the last review; restart next morning)")
     for step in (7, 3):
         for dpc in (100, 85, 70, 60, 50):
-            run(by, days, f"every {step} days, $ {dpc} per contract, skim", dpc=dpc, skim=True, addon_max=2, fixed=0, start=344.0, step_days=step, stop_frac=0.10)
+            run(by, days, f"every {step} days, $ {dpc} per contract, skim", dpc=dpc, skim=True, addon_max=2, fixed=0, start=SIM_BASE, step_days=step, stop_frac=0.10)
+
+
+# Round invented simulation inputs (Nov 12, 2026: the old values were the account's own balance, taken out of the public repo).
+SIM_START, SIM_BASE, SIM_USABLE = 500.0, 340.0, 350.0
 
 
 def current() -> None:
-    """The rule as deployed on 2026-10-08 after the balance reached $504.82 ($348.02 usable on the bot's shard, $156.80 on other shards): cap starts at 3,
-    base $344 at the last review, 3 day steps, $85 a contract, stop 5% of base, add-on bounded only by the pool, one position at most 1% of cash, order
+    """The rule as deployed on 2026-10-08 (simulation inputs below are round invented numbers, not the account): cap starts at 3,
+    base START_BASE at the last review, 3 day steps, $85 a contract, stop 5% of base, add-on bounded only by the pool, one position at most 1% of cash, order
     ceiling 50. Compares sizing on the TOTAL balance (what runL1Tick does) with sizing on the usable shard only."""
     markets, _ = load_markets()
     ents = L.hold_rule(markets, **L.L1)
     by = defaultdict(list)
     for e in ents: by[e["day"]].append(e)
     days = sorted(by)
-    print("10 weeks from $504.82, 60% fills, WITH the loss stop (5% of base, base $344 until the first review)")
-    kw = dict(dpc=85, skim=True, fixed=0, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
+    print("10 weeks from $%.0f, 60%% fills, WITH the loss stop (5%% of base, base $%.0f until the first review)" % (SIM_START, SIM_BASE))
+    kw = dict(dpc=85, skim=True, fixed=0, start=SIM_START, step_days=3, stop_frac=0.05, base0=SIM_BASE, cash_frac=0.01)
     run(by, days, "old: add-on max 2, ceiling 10, total balance", addon_max=2, n_ceiling=10, **kw)
     run(by, days, "now: add-on uncapped, total balance", addon_max=999, n_ceiling=50, **kw)
     run(by, days, "add-on outside the 1% rule (this change)", addon_max=999, n_ceiling=50, addon_outside=True, **kw)
-    run(by, days, "now: add-on uncapped, usable shard only", addon_max=999, n_ceiling=50, usable=348.02, **kw)
+    run(by, days, "now: add-on uncapped, usable shard only", addon_max=999, n_ceiling=50, usable=SIM_USABLE, **kw)
     run(by, days, "now + trailing stop, total balance", addon_max=999, n_ceiling=50, trailing=True, **kw)
-    run(by, days, "cap 3 flat (the old stake), for scale", dpc=100, skim=False, addon_max=0, fixed=3, start=504.82, step_days=3, stop_frac=0.05, base0=344.0, cash_frac=0.01)
+    run(by, days, "cap 3 flat (the old stake), for scale", dpc=100, skim=False, addon_max=0, fixed=3, start=SIM_START, step_days=3, stop_frac=0.05, base0=SIM_BASE, cash_frac=0.01)
 
 
 def base2() -> None:

@@ -79,3 +79,11 @@ These are caps, not permission. A probe starts only after the owner approves its
 - No code places any politics or parlay order, and the second slot registry (`functions/kalshiSlotLib.js`) holds none. Admitting one is a separate reviewed pull request and the owner's own popup.
 - The exact meaning of "10c per dollar after fees" is left to each probe spec to define and the owner to approve.
 - How a parlay would be placed if Kalshi offers no politics combo market is undecided; today it would be a simulation only.
+
+## 7. Three owner decisions (Nov 12, 2026)
+
+- **Combo house side (owner exception).** MEASURE ON PAPER: buy NO on high-priced combos and hold to settlement. This is a written owner exception to the Charter's buy-high-and-hold ban, for combos only; it covers no single market and no other strategy. Small $2 live probes are allowed ONLY IF paper shows an edge, and then only under the parlay rules in section 1 ($2 each, $40 total stop, 10c per dollar paper edge first). Each live probe needs its own owner popup with the exact spec. The spec must say plainly that the money is held until settlement.
+- **Weather brackets (ORHARVEST1).** Allowed on paper with YES priced 35c to 88c ONLY (the NO side 12c to 65c). The 65c to 87c NO legs stay under the ban. The protocol stays behind the MMSIM1 read.
+- **Combo book recorder.** Approved to build: public Kalshi data, no key, no orders, the same safety pattern as the other recorders, with a security pass. It is tracked as a separate pull request.
+
+Nothing here authorizes a live order.
