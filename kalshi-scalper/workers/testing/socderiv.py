@@ -53,6 +53,7 @@ def build_lists(spec):
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
            {"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}]
     j = tie3.job("SOCDERIV_LISTS", "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).", eps, reqs, series + list(spec["fee_field_reads"]), [])
+    j["notes"] = "SOCDERIV zero-try gap measurement stage 1: 64 league series lists and 3 fee-field reads"
     j["registration"] = REG; j["max_requests"] = sum(r.get("max_pages", 1) for r in reqs) + 9         # 67 requests, 131 pages at most; the runner counts pages against the cap (Main raised it to 131)
     return j
 
@@ -116,6 +117,7 @@ def build_candles(spec, list_folders):
     reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for _, t in p), "start_ts": p[0][0] - SCAN_BACK - 60, "end_ts": p[-1][0] - START_BACK, "period_interval": 1}} for i, p in enumerate(packs)]
     eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
     j = tie3.job("SOCDERIV_CANDLES", "SOCDERIV measurement stage 2: one minute candles of every leg of the sampled games, the 61 minutes ending at kickoff minus 30.", eps, reqs, {t.split("-")[0] for _, t in items}, [t for _, t in items])
+    j["notes"] = "SOCDERIV zero-try gap measurement stage 2: candles of every leg of the sampled games"
     j["registration"] = REG; return j, counts
 
 

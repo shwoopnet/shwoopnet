@@ -17,7 +17,7 @@ spec = m.load_cells()
 try: m.load_cells(sha="0" * 64); raise SystemExit("wrong hash passed")
 except SystemExit as e: assert "does not match" in str(e)
 jl = m.build_lists(spec); kp.check_job(jl); ids = [r["id"] for r in jl["requests"]]
-assert len(ids) == 16 and sum(i.startswith("fee_") for i in ids) == 4 and all(r["params"]["max_close_ts"] == 1792713599 and r["params"]["min_close_ts"] == 1789171200 for r in jl["requests"] if "params" in r)
+assert len(ids) == 16 and sum(i.startswith("fee_") for i in ids) == 4 and sum(r.get("max_pages", 1) for r in jl["requests"]) == 96 + 4 and jl["registration"] == "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md" and "TIE3" not in json.dumps(jl) and sum(1 for r in jl["requests"] if r.get("max_pages") == 12) == 4 and all(r["params"]["max_close_ts"] == 1792713599 and r["params"]["min_close_ts"] == 1789171200 for r in jl["requests"] if "params" in r)
 import breakplay as bp
 V_, W_, q_, r_ = bp.model_bo3(0.5); assert abs(q_ - 0.5) < 1e-9 and abs(V_ - 0.75) < 1e-9
 q8 = bp.model_bo3(0.8)[2]; assert abs(q8 ** 2 * (3 - 2 * q8) - 0.8) < 1e-9
@@ -48,9 +48,11 @@ ms, counts = m.matches(spec, [])  if False else (None, None)
 with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     mt, counts = m.matches(spec, [dl])
+    assert counts["lists_truncated_at_the_page_cap"] == []
     assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_too_soon"] == 1 and counts["sampled"] == NM + 20 + 3 - 1 and len(mt) == NM + 20, counts
     assert all(set(x) == {"cell", "key", "S", "state_close", "up", "down", "match", "placebo"} for x in mt)           # no result field of any market in a match record
     g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["up"] == "AAA" and g["S"] == sampled[0]["S"] and g["state_close"] == sampled[0]["c1"]
+    lists["live_KXDOTA2MAP"]["cursor"] = "abc123"; dlt = os.path.join(dc, "lt"); os.mkdir(dlt); mkrun(dlt, jl, lists); assert m.matches(spec, [dlt])[1]["lists_truncated_at_the_page_cap"] == ["live_KXDOTA2MAP"]; del lists["live_KXDOTA2MAP"]["cursor"]
     jc, _ = m.build_candles(spec, [dl]); kp.check_job(jc); assert 1 <= len(jc["requests"]) <= 250 and all(r["params"]["end_ts"] < m.HELD_OUT_FROM + 86400 * 400 for r in jc["requests"])
     assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt)
     def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55):

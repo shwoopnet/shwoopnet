@@ -30,7 +30,7 @@ PRE_BACK, PRE_MAX_BACK, LOOK_AFTER, LOOK_MAX = 10 * 60, 40 * 60, 120, 5 * 60
 PACK_LIMIT, MAX_TICKERS = 9000, 100
 MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}
 NY = ZoneInfo("America/New_York")
-REG = "kalshi-scalper/workers/testing/MAPBREAK_MEASUREMENT.md"
+REG = "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md"          # Desk B's registration (claude/idea-desk-b); my build note is kalshi-scalper/workers/testing/MAPBREAK_MEASUREMENT.md
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on esports"
 
 
@@ -47,13 +47,15 @@ def series_all(spec): return [s for t in spec["titles"] for s in (t["match_serie
 def build_lists(spec):
     """12 series settled with the two close bounds, plus the 4 match-series fee-field reads."""
     reqs = []
-    for s in series_all(spec):
-        reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": WIN_FROM, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": 8})
+    for t in spec["titles"]:                       # page budgets by expected size: map series are the largest (2 markets a map, 2 to 3 maps a match), match and total-maps series about 6,000 markets each
+        for s, pages in ((t["match_series"], 6), (t["map_series"], 12), (t["total_maps_series"], 6)):
+            reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": WIN_FROM, "max_close_ts": HELD_OUT_FROM - 1}, "max_pages": pages})
     for s in spec["fee_field_reads"]:
         reqs.append({"id": "fee_" + s, "path": "/series/" + s})
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
            {"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}]
-    j = tie3.job("MAPBREAK_LISTS", "MAPBREAK measurement stage 1: settled lists of the match, map and total-maps series of four esports titles, closes 2026-09-12 to before 2026-10-23, and 4 fee-field reads (times, strikes and the map-1 result only).", eps, reqs, series_all(spec) + list(spec["fee_field_reads"]), [])
+    j = tie3.job("MAPBREAK_LISTS", "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only.", eps, reqs, series_all(spec) + list(spec["fee_field_reads"]), [])
+    j["notes"] = "MAPBREAK zero-try gap measurement; 16 requests, 96 list pages at most (6 for each match and total-maps series, 12 for each map series) plus 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently."
     j["registration"] = REG; j["heldout"] = "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); a measurement: no rule scored, no try"
     j["max_requests"] = sum(r.get("max_pages", 1) for r in reqs) + 14        # the runner counts pages against the cap
     return j
@@ -69,11 +71,17 @@ def matches(spec, list_folders, with_results=False):
     """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 2 or 3 result: only the map-1 winner (the state).
     with_results=True (the SCORING path only, never the measurement path) adds result_up: whether the team up after map 1 won the match, read from the match market's own result."""
     raw = k.markets(list_folders)
+    trunc = set()
+    for f in ([list_folders] if isinstance(list_folders, str) else list_folders):
+        last = {}
+        for row, body in k.iter_answers(f):
+            last[row["id"]] = body.get("cursor") if isinstance(body, dict) else None           # the LAST page stored for each request
+        trunc |= {i for i, c in last.items() if c}
     by = {}
     for t, m in raw.items():
         parts = t.split("-")
         by.setdefault((parts[0], parts[1] if len(parts) > 1 else ""), []).append((parts, m))
-    counts = {"matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "start_not_derivable": 0, "map2_too_soon": 0, "no_map1_result": 0, "sampled": 0}
+    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "start_not_derivable": 0, "map2_too_soon": 0, "no_map1_result": 0, "sampled": 0}
     cand = []
     for ti in spec["titles"]:
         keys = {key for (s, key) in by if s == ti["match_series"]}
@@ -120,7 +128,7 @@ def build_candles(spec, list_folders):
     """Per match four tickers (two match, two map-1) from S minus 40 minutes to map-1 close plus 5 (the engine packs by scheduled start)."""
     ms, counts = matches(spec, list_folders)
     j = bp.candle_job(ms, CFG, series_all(spec), "MAPBREAK_CANDLES", REG)
-    j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; return j, counts
+    j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; j["notes"] = "MAPBREAK zero-try gap measurement stage 2: candles of the two match and two map-1 contracts of each sampled match"; return j, counts
 
 
 def measure(spec, list_folders, candle_folders):

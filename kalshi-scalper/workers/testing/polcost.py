@@ -21,6 +21,7 @@ def build_job(census_folder):
     reqs = [{"id": "open_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "open", "limit": 1000}, "max_pages": 3} for s in ser]
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor"]}]
     j = tie3.job("POLCOST", "Politics cost snapshot (POL-i2 Amendment 4): the OPEN markets of the 79 daily, weekly or monthly Politics series, quotes and sizes only; no result exists for an open market; nothing scored.", eps, reqs, ser, [])
+    j["notes"] = "POLCOST: open-market cost snapshot of the 79 Politics series (POL-i2 Amendment 4); quotes and sizes only"
     j["registration"] = REG
     j["max_requests"] = sum(r["max_pages"] for r in reqs) + 14        # the runner counts pages against the cap
     j["heldout"] = "none: open markets have no result; a measurement of cost, no rule scored, no try"

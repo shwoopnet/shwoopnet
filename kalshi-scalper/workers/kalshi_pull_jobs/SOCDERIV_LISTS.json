@@ -96,7 +96,7 @@
  ],
  "ticker_allowlist": [],
  "max_requests": 140,
- "notes": "TIE3 measurement",
+ "notes": "SOCDERIV zero-try gap measurement stage 1: 64 league series lists and 3 fee-field reads",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",

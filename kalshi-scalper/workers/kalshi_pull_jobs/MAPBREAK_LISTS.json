@@ -1,8 +1,8 @@
 {
  "job_id": "MAPBREAK_LISTS",
  "owner": "MAIN",
- "registration": "kalshi-scalper/workers/testing/MAPBREAK_MEASUREMENT.md",
- "purpose": "MAPBREAK measurement stage 1: settled lists of the match, map and total-maps series of four esports titles, closes 2026-09-12 to before 2026-10-23, and 4 fee-field reads (times, strikes and the map-1 result only).",
+ "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
+ "purpose": "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only.",
  "heldout": "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); a measurement: no rule scored, no try",
  "allowed_endpoints": [
   {
@@ -45,7 +45,7 @@
  ],
  "ticker_allowlist": [],
  "max_requests": 114,
- "notes": "TIE3 measurement",
+ "notes": "MAPBREAK zero-try gap measurement; 16 requests, 96 list pages at most (6 for each match and total-maps series, 12 for each map series) plus 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
@@ -66,7 +66,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXCS2MAP",
@@ -78,7 +78,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 12
   },
   {
    "id": "live_KXCS2TOTALMAPS",
@@ -90,7 +90,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXDOTA2GAME",
@@ -102,7 +102,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXDOTA2MAP",
@@ -114,7 +114,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 12
   },
   {
    "id": "live_KXDOTA2TOTALMAPS",
@@ -126,7 +126,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXVALORANTGAME",
@@ -138,7 +138,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXVALORANTMAP",
@@ -150,7 +150,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 12
   },
   {
    "id": "live_KXVALORANTTOTALMAPS",
@@ -162,7 +162,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXLOLGAME",
@@ -174,7 +174,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "live_KXLOLMAP",
@@ -186,7 +186,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 12
   },
   {
    "id": "live_KXLOLTOTALMAPS",
@@ -198,7 +198,7 @@
     "min_close_ts": 1789171200,
     "max_close_ts": 1792713599
    },
-   "max_pages": 8
+   "max_pages": 6
   },
   {
    "id": "fee_KXCS2GAME",

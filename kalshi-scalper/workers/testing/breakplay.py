@@ -190,4 +190,5 @@ def candle_job(records, cfg, series, job_id, registration, window_start_back=240
              "end_ts": max(m["state_close"] for m in g) + window_end_after, "period_interval": 1}} for i, g in enumerate(packs)]
     eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
     j = tie3.job(job_id, "break-in-play measurement stage 2: one minute candles of the match and placebo contracts of the sampled matches.", eps, reqs, series, [t for m in ms for t in tk(m)])
+    j["notes"] = "break-in-play zero-try gap measurement stage 2 (%s)" % job_id
     j["registration"] = registration; return j

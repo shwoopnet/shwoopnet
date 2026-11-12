@@ -99,8 +99,8 @@
   "KXVOTEHUBTRUMPUPDOWN"
  ],
  "ticker_allowlist": [],
- "max_requests": 79,
- "notes": "TIE3 measurement",
+ "max_requests": 251,
+ "notes": "POLCOST: open-market cost snapshot of the 79 Politics series (POL-i2 Amendment 4); quotes and sizes only",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
