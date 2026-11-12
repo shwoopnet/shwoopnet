@@ -38,7 +38,7 @@ gates.R2 = () => {
   const text = JSON.stringify(r);
   assert.ok(!/SECRET-ORDER-ID|L1-SECRET|orderId|clientOrderId/.test(text), 'no order id or client order id');
   assert.strictEqual(r.orders.length, 1);
-  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'bookNo5', 'bookReadMs', 'bookYes5', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'exitAt', 'exitAvg', 'exitBid', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
+  assert.deepStrictEqual(Object.keys(r.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'bookNo5', 'bookReadAfterSendMs', 'bookReadMs', 'bookReadWhen', 'bookYes5', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'exitAt', 'exitAvg', 'exitBid', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort());
   assert.ok(!('orders' in lib.buildReport([ord({})], NOW, 24, false)), 'rows only on request');
 };
 
