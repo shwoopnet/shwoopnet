@@ -19,7 +19,7 @@ import tie3
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CELLS_FILE = os.path.join(HERE, "esoctie_series_frozen.json")
-CELLS_SHA256 = "c80cd418844a92c7df693a546baa3c230f800f9f908118cb1cea901c5920728b"
+CELLS_SHA256 = "5c766fdd7e30a2fac038247798b1f81ed4d36e87b9c90ec2ea50b6bda4e10612"
 REG = "kalshi-scalper/workers/history_miner/esoctie/ESOCTIE_REGISTRATION.md"
 NY = ZoneInfo("America/New_York")
 MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}

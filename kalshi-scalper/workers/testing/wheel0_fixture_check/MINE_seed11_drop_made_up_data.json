@@ -1,5 +1,6 @@
 {
  "counts_first": {
+  "orders_dropped_from_both_reads_for_no_chance_value": 0,
   "markets": 8326,
   "signals": 39766,
   "kept_after_drop": 30835,

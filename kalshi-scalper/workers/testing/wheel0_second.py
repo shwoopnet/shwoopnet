@@ -232,8 +232,9 @@ def full_read(markets_with_results, idx, drop_table, luck, boot_draws=10000, nul
         for L in (180, 360, 600):
             c = idx.get(m["ticker"], {}).get(m["close"] - L)
             if c and c.get("bid") is not None and c.get("ask") is not None and 0 < c["bid"] < c["ask"] < 1: chance[m["ticker"]] = (c["bid"] + c["ask"]) / 2; break
-    prs = pairs(kept); S = stats_after(prs); counts = {"markets": len(mk), "signals": len(sig), "kept_after_drop": len(kept), "orders": len(kept), "voids": sum(1 for o in kept if o["void"]), "blocks": sum(len(blocks(s)) for s in group_templates(kept).values()), "pairs": S["pairs"], "hot_pairs": S["hot_pairs"]}
-    pb = bootstrap_p(prs, boot_draws); pn = null_calibrated_p([o for o in kept if o["ticker"] in chance], chance, S["D"], null_runs)
+    nochance = [o for o in kept if o["ticker"] not in chance]; kept = [o for o in kept if o["ticker"] in chance]          # Amendment 2 point 13: dropped from BOTH reads before blocks are built, counted
+    prs = pairs(kept); S = stats_after(prs); counts = {"orders_dropped_from_both_reads_for_no_chance_value": len(nochance), "markets": len(mk), "signals": len(sig), "kept_after_drop": len(kept), "orders": len(kept), "voids": sum(1 for o in kept if o["void"]), "blocks": sum(len(blocks(s)) for s in group_templates(kept).values()), "pairs": S["pairs"], "hot_pairs": S["hot_pairs"]}
+    pb = bootstrap_p(prs, boot_draws); pn = null_calibrated_p(kept, chance, S["D"], null_runs)
     ds = getattr(bootstrap_p, "last_draws", []); iv = None if not ds else [ds[int(0.025 * len(ds))], ds[min(len(ds) - 1, int(0.975 * len(ds)))]]
     out = {"counts_first": counts, "primary": dict(S, p_bootstrap=pb, p_null_calibrated=pn, D_interval_95=iv), "verdict": verdict(S["pf_after_hot"], S["D"], S["hot_pairs"], pb, pn), "luck": luck_table(kept, luck), "sister": sister_lines(kept), "secondary": secondary(kept),
            "per_market": {}, "caveat": "Real misses lean toward winners: the candle read overstates the LEVEL of every profit factor; D carries the verdict. Candle freshness measured on the Bitcoin 15 minute series only. A PF after HOT near 0.9 is what 'nothing there' looks like (fee drag)."}
