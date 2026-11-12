@@ -73,7 +73,7 @@ The same audit's general test, for anyone writing a scorer: a time or value know
 | NHL spread and total | 6.4c to 6.9c at the median, 10.7c to 12.5c at the 75th percentile | Thin: volume from single contracts to hundreds |
 | Combos, as a trade you can exit | Not measurable: 4.5% of quoted combos had both sides | Buy and hold at the posted ask, or nothing |
 
-For comparison, the liquid families cost about 3c (15 minute series), 4.4c (hourly Bitcoin ladder near the money), 4.2c to 4.8c (NBA and NFL lines), 3.3c to 4.5c (weather daily HIGH), 6.3c (politics markets priced 20c to 80c).
+For comparison, the liquid families cost about 3c (15 minute series), 4.4c (hourly Bitcoin ladder near the money), 4.2c to 4.8c (NBA and NFL lines), 3.3c to 4.5c (weather daily HIGH), and for politics markets priced 20c to 80c 9.4c at the median (Testing Desk's wider snapshot: 73 markets in 29 series; this desk's first, thinner cut on the recorder's 20 series said 6.3c). Only 6 of those 29 politics series are at or under 5c, so most politics series belong with the table above for a card that trades out.
 
 ## 6. What each number rests on
 
