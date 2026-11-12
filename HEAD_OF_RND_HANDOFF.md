@@ -73,3 +73,5 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 4. Told the owner "about a third" of picked rows were stale before Forensics' band correction made it "no evidence at n = 15".
 5. Wrote queue header times ahead of the real clock, twice (run `date -u` before writing any time). Stock results go to the private repo shwoopnet/shwoopnet-private once Main attaches it to the Stocks Desk (owner, Nov 12).
 6. Told desks to use workers freely; the account hit its usage limit half an hour later.
+7. Passed a licence sentence to the owner as a Databento term without checking its source; it was from a Nasdaq agreement on Alpaca's site. Ask for the document name and URL of any quoted clause before it travels.
+8. Withdrew a ruling on a relayed phrase ("no all symbols requests") that turned out to be the EA's wording, not the owner's; when an owner instruction contradicts a standing ruling, ask whether the words are verbatim.
