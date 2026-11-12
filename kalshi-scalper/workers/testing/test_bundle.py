@@ -5,8 +5,8 @@ import bundle as b, kalshi_pull as kp, wxdayend as w, tie3 as t, poli2_count as 
 
 job = b.build(); kp.check_job(job)
 ids = [r["id"] for r in job["requests"]]
-assert len(ids) == len(set(ids)) == 204 and job["job_id"] == "TESTING_LISTS_BUNDLE" and job["owner"] == "MAIN" and job["max_requests"] == 486 + b.SLACK
-assert [i.split("_", 1)[0] for i in ids][:32] == ["t3"] * 32 and ids[32].startswith("wx_") and ids[-1].startswith("sd_")          # Head's scoring order, so a size stop falls on the last sub-job
+assert len(ids) == len(set(ids)) == 137 and job["job_id"] == "TESTING_LISTS_BUNDLE" and job["owner"] == "MAIN" and job["max_requests"] == 355 + b.SLACK
+assert [i.split("_", 1)[0] for i in ids][:32] == ["t3"] * 32 and ids[32].startswith("wx_") and not any(i.startswith("sd_") for i in ids) and ids[-1].startswith("p2_")          # Head's scoring order, so a size stop falls on the last sub-job
 for p, name in b.ORDER:                                                    # every sub-job's own requests are inside, unchanged apart from the prefix
     orig = b.load(name)["requests"]; got = [r for r in job["requests"] if r["id"].startswith(p + "_")]
     assert len(orig) == len(got) and all(dict(o, id=p + "_" + o["id"]) == g for o, g in zip(orig, got)), name
@@ -18,7 +18,7 @@ for r in job["requests"]:                                                  # no 
 # a landed bundle: everything answered except UNRATE (one 429 row and one missing) and SOCDERIV cut by the size stop (last 20 requests never sent)
 with tempfile.TemporaryDirectory() as run, tempfile.TemporaryDirectory() as out:
     rows, n = [], 0
-    sent = job["requests"][:-20]
+    sent = job["requests"][:-20]                                   # the last 20 (POL-i2) never sent
     for r in sent:
         n += 1; f = "%04d.json.gz" % n
         if r["id"].startswith("ur_") and r["id"].endswith("hist_KXU3"):
@@ -30,9 +30,9 @@ with tempfile.TemporaryDirectory() as run, tempfile.TemporaryDirectory() as out:
     json.dump({"job": job, "rows": rows, "status": "stopped_size", "requests_sent": len(sent), "bytes_stored": 12345}, open(os.path.join(run, "manifest.json"), "w"))
     rep = b.split(run, out)
     S = rep["sub_jobs"]
-    assert S["TIE3_LISTS"]["state"] == "COMPLETE" and S["WXDAYEND_A"]["state"] == "COMPLETE" and S["POLI2_LISTS"]["state"] == "COMPLETE", S
+    assert S["TIE3_LISTS"]["state"] == "COMPLETE" and S["WXDAYEND_A"]["state"] == "COMPLETE" and set(S) == {"TIE3_LISTS", "WXDAYEND_A", "UNRATE_LISTS", "POLI2_LISTS"}, S
     assert S["UNRATE_LISTS"]["state"] == "PARTIAL" and S["UNRATE_LISTS"]["failed"] == {"hist_KXU3": 429} and S["UNRATE_LISTS"]["missing_ids"] == ["live_KXUE"], S["UNRATE_LISTS"]
-    assert S["SOCDERIV_LISTS"]["state"] == "PARTIAL" and len(S["SOCDERIV_LISTS"]["missing_ids"]) == 20 and rep["bundle_status"] == "stopped_size"
+    assert S["POLI2_LISTS"]["state"] == "PARTIAL" and len(S["POLI2_LISTS"]["missing_ids"]) == 20 and rep["bundle_status"] == "stopped_size"
     assert rep["mixed_or_unknown_rows"] == ["zz_mystery"]
     # the readers' own layout: manifest.json with ORIGINAL ids, answer files beside it, the sub-job's own job definition
     m = json.load(open(os.path.join(out, "WXDAYEND_A", "manifest.json"))); assert m["job"]["job_id"] == "WXDAYEND_A" and len(m["job"]["requests"]) == 22 and m["rows"][0]["id"].startswith("c01_KXHIGHTDAL")
@@ -41,5 +41,4 @@ with tempfile.TemporaryDirectory() as run, tempfile.TemporaryDirectory() as out:
     ev, cnt = t.events(t.load_cells(), [os.path.join(out, "TIE3_LISTS")]); assert cnt["events_listed"] >= 1                         # tie3 reader reads the split folder unchanged
     assert len(list(p2.answers(os.path.join(out, "POLI2_LISTS")))) >= 1
     assert len(ur.events_from(os.path.join(out, "UNRATE_LISTS"))) == 0                                                              # readable (no unemployment titles in the made-up body), not mixed with other sub-jobs
-    assert len(os.listdir(os.path.join(out, "SOCDERIV_LISTS"))) > 1
 print("bundle synthetic tests passed")

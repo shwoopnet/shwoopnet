@@ -53,7 +53,7 @@ def build_lists(spec):
     eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
            {"name": "series", "method": "GET", "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})", "params_allowed": []}]
     j = tie3.job("SOCDERIV_LISTS", "SOCDERIV measurement stage 1: settled lists of the 16 leagues' winner, total-goals, both-teams-to-score and team-total series, and 3 fee-field reads (times and strikes only; no result used).", eps, reqs, series + list(spec["fee_field_reads"]), [])
-    j["registration"] = REG; j["max_requests"] = len(reqs) + 33         # 67 registered, about 80 pages; the runner counts pages against the cap
+    j["registration"] = REG; j["max_requests"] = sum(r.get("max_pages", 1) for r in reqs) + 9         # 67 requests, 131 pages at most; the runner counts pages against the cap (Main raised it to 131)
     return j
 
 

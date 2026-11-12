@@ -95,7 +95,7 @@
   "KXUCLWTOTAL"
  ],
  "ticker_allowlist": [],
- "max_requests": 100,
+ "max_requests": 140,
  "notes": "TIE3 measurement",
  "status": "active",
  "host": "api.elections.kalshi.com",
