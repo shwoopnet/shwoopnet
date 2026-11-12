@@ -158,3 +158,11 @@ Lists: unchanged (16 requests, at most 100 pages). Candles for development: abou
 **Events, said plainly:** about 3,200 development matches give about 3,200 first looks and about 1,400 second looks, 4,600 in all; the held-out about 2,300. At a firing share of 10% that is about 460 development bets and 230 held-out; at 15%, about 690 and 345, **which reaches about 1,000 bets over the two samples together.** At 10% it does not.
 
 **Requests:** the lists are unchanged (map-2 close times are already in the map list). The candle window of a match that went to a third map runs to map-2 close + 5 minutes, about 60 more candles on each of two contracts; the request count rises by perhaps a fifth.
+
+## AMENDMENT 3, Nov 12, 2026, 18:32Z, before any list or candle has landed (Head of R&D's rulings of 18:30Z)
+
+1. **Amendments 1 and 2 are accepted as written. The card counts 2 tries.**
+2. **Reporting:** the two looks are shown as separate lines and pooled. One trade per match and look. **Two looks from one match are not independent: the standard error and the z are computed with the MATCH as the cluster, and also with the day as the cluster; the verdict uses the smaller z of the two.**
+3. **Four history list calls are added to the lists job** (`/historical/markets` for the four match series; the job is now 20 requests). They only count how many best-of-three matches exist before 2026-09-12. If there are thousands, I send the Head the candle request count for a history stage and the Head rules.
+4. **Any older matches join DEVELOPMENT only.** The held-out block stays the matches closing from 2026-10-23 to before 2026-11-13 and is not enlarged.
+5. For a history stage the same rules apply unchanged (best-of-three from the total-maps market, start from the ticker's clock with its guard, the pre-match minute, both looks). If the history endpoint does not hold the map or total-maps markets of older matches, those matches cannot be used and are counted as such; nothing is guessed.
