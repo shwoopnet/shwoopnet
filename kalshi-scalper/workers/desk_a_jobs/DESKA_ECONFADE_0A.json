@@ -1,0 +1,42 @@
+{
+ "id": "DESKA_ECONFADE_0A",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_A_PROTOCOLS2.md",
+ "purpose": "market lists (tickers, open and close times) of the two Fed series, to choose one market per CPI or payrolls print for the step 0 count",
+ "heldout": "none",
+ "max_requests": 16,
+ "requests": [
+  {
+   "ep": "series",
+   "series": "KXFEDDECISION"
+  },
+  {
+   "ep": "series",
+   "series": "KXFED"
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXFEDDECISION",
+   "limit": 1000,
+   "max_pages": 3
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXFED",
+   "limit": 1000,
+   "max_pages": 3
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXFEDDECISION",
+   "limit": 1000,
+   "max_pages": 4
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXFED",
+   "limit": 1000,
+   "max_pages": 4
+  }
+ ]
+}

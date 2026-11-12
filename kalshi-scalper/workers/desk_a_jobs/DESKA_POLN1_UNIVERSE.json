@@ -1,0 +1,130 @@
+{
+ "id": "DESKA_POLN1_UNIVERSE",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_A_PROTOCOLS2.md",
+ "purpose": "market tickers with open and close dates for the ten POL-n1 series (step 1 count only; no price is read)",
+ "heldout": "none",
+ "max_requests": 20,
+ "requests": [
+  {
+   "ep": "markets_list",
+   "series": "KXLEAVEWALZ",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXWALZOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXPOLISOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXMODIOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXLEAVEMERZ",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXBURNHAMOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXCARNEYOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXLEAVETULSIGABBARD",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXTRUMPFIRECOOK",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "markets_list",
+   "series": "KXSCHIFFCHARGE",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXLEAVEWALZ",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXWALZOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXPOLISOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXMODIOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXLEAVEMERZ",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXBURNHAMOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXCARNEYOUT",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXLEAVETULSIGABBARD",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXTRUMPFIRECOOK",
+   "limit": 1000,
+   "max_pages": 1
+  },
+  {
+   "ep": "hist_markets_list",
+   "series": "KXSCHIFFCHARGE",
+   "limit": 1000,
+   "max_pages": 1
+  }
+ ]
+}

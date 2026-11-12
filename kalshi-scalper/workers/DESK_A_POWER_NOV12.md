@@ -66,7 +66,7 @@ Four things follow.
 - the held-out block to Nov 24 is about 400 events, where a TRUE edge of this size is expected to show z about 2.4;
 - development PF is already under 1.5.
 
-So **the Nov 24 read cannot be a research-bar PASS whatever it shows**, and it can show PF under 1.0 by bad luck about 1 time in 6 even if the development figure is the truth. Decide before the read what each outcome will be called. My suggestion: held-out PF 1.3 or better with a positive day-clustered mean = "lead confirmed, keep recording, read again at 1,900 events (about late January; the book recorder has no stop date)"; PF under 1.0 on 400 events = FALSIFIED (that is a fair n); anything between = "not decided, keep recording". And pin the cutoff constant in `mmsim1.py` first (see the audit).
+So **the Nov 24 read cannot be a research-bar PASS whatever it shows.** It is a fair falsification test, though: if the development figure is the truth, 400 events show a negative mean only about 1 time in 100. Decide before the read what each outcome will be called. My suggestion: held-out PF 1.3 or better with a positive day-clustered mean = "lead confirmed, keep recording, read again at 1,900 events (about late January; the book recorder has no stop date)"; PF under 1.0 on 400 events = FALSIFIED (that is a fair n); anything between = "not decided, keep recording". And pin the cutoff constant in `mmsim1.py` first (see the audit).
 
 **CFRTI1-BTC held-out, about Nov 22 at 50 rows.** Development n 36, PF 2.54.
 
@@ -79,7 +79,7 @@ So **the Nov 24 read cannot be a research-bar PASS whatever it shows**, and it c
 | PF 2.0 | 86% | 94% |
 | PF 2.5 | 97% | 99.6% |
 
-A 50 row read fails a truly good (PF 1.5) rule almost half the time and passes a zero-edge rule one time in ten, and this rule was picked from several. 36 + 50 rows cannot reach the deflated z at any plausible edge (about 130 are needed even at a true PF of 2.5 to 3). Suggestion: read at 50 as registered, call it "lead" or "falsified" only (falsified = PF under 1.0), and name 130 held-out rows as the size for a real verdict. The R6 extension to Nov 20 for Bitcoin and Ethereum is what feeds it; after Nov 20 nothing does, so a decision on extending that recorder for Bitcoin is due before Nov 20.
+A 50 row read fails a truly good (PF 1.5) rule almost half the time and passes a zero-edge rule one time in ten, and this rule was picked from several. 36 + 50 = 86 rows reach the deflated z only if the true PF is about 3 or more; at a true PF of 2.5 it takes about 170 rows (80% chance), at 2.0 about 300. Suggestion: read at 50 as registered, call it "lead" or "falsified" only (falsified = PF under 1.0), and name about 170 rows in all as the size for a real verdict. The R6 extension to Nov 20 for Bitcoin and Ethereum is what feeds it; after Nov 20 nothing does, so a decision on extending that recorder for Bitcoin is due before Nov 20.
 
 ## 4. Yesterday's FAIL calls: could any be a wrong fail?
 
@@ -87,11 +87,11 @@ A 50 row read fails a truly good (PF 1.5) rule almost half the time and passes a
 |---|---|---|---|
 | CRONCLUSTER1, RETAILFRAC1 stage A (V2) | 3.8M and 20M+ trades | n/a (measurements) | Re-derived independently, CONFIRMED (`DESK_A_HELD_DATA_NOV12.md`) |
 | Card 84 mentions persistence | 36 and 44 | under 0.01% | Safe FAIL |
-| W-SWEEP-EXT1 held-out, three cells PF 0.75 to 0.87 | not stated in the audit | 5% to 8% a cell at n 40, under 1% at n 80 or more; all three together far less | Safe FAIL if each cell had 80 or more held-out rows; ask Refinement for the three n |
+| W-SWEEP-EXT1 held-out, three cells PF 0.75 to 0.87 | not stated in the audit | 5% to 8% a cell at n 40, 1% to 3% at n 80; all three together far less | Safe FAIL if each cell had 80 or more held-out rows; ask Refinement for the three n |
 | W-POL-APPR1 | no cell with 30 a third | cannot be computed: the bar was never testable | Not a FAIL. UNDERPOWERED, as Refinement's audit says |
 | W-CAT-SPORTS1, spread cells | 56 and 57 a third | the registered floor was 60, so it was not tested | Not a FAIL for SPREAD (queue row 2). FAIL stands for moneyline and totals |
 | Card 74 WXDAYEND | 20 of 40 | a count bar; see queue row 7 | "0 of 20", not FAIL, until the other 20 are read |
-| Politics step 2 | 7 a third | a PF 1.5 rule fails a 7 trade third about 40% of the time | DATA_LIMITED, correctly labelled |
+| Politics step 2 | 7 a third | a PF 1.5 rule shows a losing 7 trade third about a quarter of the time | DATA_LIMITED, correctly labelled |
 | TIECOND1 (V2) | 13 cells of 300 or more windows; best lower bound 1.96% against 6% | a rate bar on large n | Safe closure; not re-derivable here (V2's tables are not on a branch) |
 
 No call flips to a pass. Three are labelled stronger than their n supports (the same three Refinement's audit names), and one (sports SPREAD) is an untested cell with enough clusters in the world to test properly.
@@ -103,9 +103,9 @@ No call flips to a pass. Three are labelled stronger than their n supports (the 
 | 4 ORHARVEST1 | daily (365 a year; 14 cities share weather days) | BLOCKED: the weather recorder holds three morning looks only, nothing near the close | Yes in principle, in about 2 years of days, or sooner as a count | Parked behind MMSIM1 as ruled. Needs a recorder change before any test; not worth a recorder until MMSIM1 reads |
 | 5 RACEMAKE1 | 96 windows a day | BLOCKED: the Coin Race series is in no recorder | Yes, quickly, if recorded | Parked behind MMSIM1. If MMSIM1 holds, adding `KXCRYPTOLEAD15M` to a recorder is the cheapest next step in the family |
 | 6 RESIL1 | thousands of sweeps | held (R6) | Yes | Held by the family rule (a third FALSIFIED closes order flow for good). Unchanged |
-| 9 PERPBIN1 | about 55 windows a week inside the perps sampling hours | held | Needs about 920: 17 weeks, to the recorder's stop date | **Retire.** 2% prior, and the sample only just reaches the floor by February |
-| 11 AUCTION1 | about 70 coupon auctions a year | daily recorder | No (13 years at PF 1.5) | **Retire as a PF test**; keep the mid-December descriptive line only if it is free |
+| 9 PERPBIN1 | 24 windows a day on the hourly perp file (about 450 held before Nov 9) | held (`perp-data`, `quote-data`), zero reads | Can be falsified on what is held; the 920 for a pass arrives about mid December | The one card of mine that fits today's rule (held data, no reads). Prior 2%. It needs a protocol and counts one try; I will write the protocol only if Main wants the try spent |
+| 11 AUCTION1 | about 80 coupon auctions a year | daily recorder | No (over 10 years at PF 1.5) | **Retire as a PF test**; keep the mid-December descriptive line only if it is free |
 | Q2 POL-n1, Q3 ECONFADE | see queue rows 9 and 3 | | | as above |
 | P8 MMMAP1 | measurement | R6 done; NC15 from about Nov 15 | Yes (a map, not a PF) | Keep: R6 part done today |
 
-After this, the desk's live list is: MMMAP1 on the non-crypto books (Nov 15), the two parked market-making cards, and RESIL1 on hold. Everything else of mine is closed or retired.
+After this, the desk's live list is: MMMAP1 on the non-crypto books (Nov 15), the two parked market-making cards, and RESIL1 on hold. PERPBIN1 waits on Main's word. Everything else of mine is closed or retired.
