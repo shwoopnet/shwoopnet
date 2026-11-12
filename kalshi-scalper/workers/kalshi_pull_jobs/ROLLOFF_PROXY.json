@@ -1,0 +1,102 @@
+{
+ "job_id": "ROLLOFF_PROXY",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_B_NOV11.md",
+ "purpose": "Rank 3, ROLLOFF proxy check (card 13): settled daily approval markets and the series rules text, to test whether a poll table rebuilt from public polls reproduces the settled value. No price is read.",
+ "heldout": "none (markets in the last third of event dates are listed but flagged by the reader and not used in the proxy fit)",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXTRUMPAPPROVE",
+  "KXAPRPOTUS"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 12,
+ "requests": [
+  {
+   "id": "live_KXTRUMPAPPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXTRUMPAPPROVE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "live_KXAPRPOTUS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "hist_KXAPRPOTUS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "series_KXTRUMPAPPROVE",
+   "path": "/series/KXTRUMPAPPROVE",
+   "params": {}
+  },
+  {
+   "id": "series_KXAPRPOTUS",
+   "path": "/series/KXAPRPOTUS",
+   "params": {}
+  }
+ ],
+ "notes": "Six requests, at most 9 pages; the cap is 12. Fields the reader keeps: ticker, event_ticker, close_time, result, floor_strike, cap_strike, rules_primary, settlement_sources.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

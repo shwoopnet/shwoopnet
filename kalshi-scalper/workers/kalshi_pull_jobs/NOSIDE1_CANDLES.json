@@ -1,0 +1,22 @@
+{
+ "job_id": "NOSIDE1_CANDLES",
+ "owner": "REFINEMENT",
+ "registration": "kalshi-scalper/refine_tools/NO_ARM_APPROVAL_REGISTRATION.md",
+ "purpose": "Rank 1, stage 2: hourly candles for the development markets of W-NO-ARM1, round robin over the series, within 1,200 minus the stage 1 requests.",
+ "heldout": "W-NO-ARM1: development events only (oldest two thirds of each series); the held-out third is never requested",
+ "allowed_endpoints": [],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 1144,
+ "requests": [],
+ "status": "awaiting_market_lists",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "notes": "NOT RUNNABLE until its request list exists. Build it with kalshi-scalper/workers/kalshi_pull_jobs/build_noside1_candles.py from the stage 1 output on the data branch, review the result in a pull request, and only then set status to active."
+}
