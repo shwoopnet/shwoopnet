@@ -3,14 +3,14 @@
 Card: kalshi-scalper/refine_tools/POLITICS_CARDS_NOV11.md on claude/refine-live, row POL-i2 (unchanged; pins below are declared before any answer exists).
 Count only, no profit claim. The card's kill: fewer than 40 qualifying gaps in either half = NOT_ENOUGH_DATA, card closed.
 PINS (the card is silent or its data cannot give them; all fixed here, before data):
-  P1 universe: every series Kalshi tags category Politics (stage 0, one request), not a hand list. More than MAX_SERIES -> stop and ask the Head.
-  P2 window: markets that CLOSED in [2025-11-05, 2026-11-05). HELD_OUT_FROM = 2026-11-05T00:00Z is a date constant: nothing closing on or after it is listed or requested (kept for the scoring step).
+  P1 universe: every series Kalshi tags category Politics, read from the series-list answer of Desk B's CENSUS_LISTING pull (zero extra requests; stage 0 is NOT dispatched), not a hand list. More than MAX_SERIES -> stop and ask the Head.
+  P2 window (AMENDMENT 1, Nov 12): markets that CLOSED in (2026-09-12, 2026-11-05); halves the sample on purpose to stay within the request budget. HELD_OUT_FROM = 2026-11-05T00:00Z is a date constant: nothing closing on or after it is listed or requested (kept for the scoring step).
   P3 liquid market: lifetime volume >= 200 contracts in the list (pre-filter, to save requests); the card's rule (>= 200 contracts traded in the 7 days before 22:00 ET) is applied on the candles.
   P4 data: HOURLY candles (period 60). The card's 06:30 ET quote does not exist at hourly grain, so "the quote has not followed" is the PROXY |ask(07:00) - ask(06:00)| <= 1c for a YES buy (bid for a NO buy), candles ending 06:00 and 07:00 ET. This is a deviation from the card; the looser count without the proxy is reported beside it. The verdict uses the proxy count; if only the looser count clears 40 per half the Head decides.
   P5 qualifying gap (per market, per ET date D): two-sided closes at the candles ending 22:00 ET on D, 06:00 and 07:00 ET on D+1; |mid(07:00) - mid(22:00)| >= 0.05; the side bought (YES at the ask if the gap is up, NO at 1 - bid if down) priced 0.10 to 0.90 at 07:00; liquid per P3. One per market per day.
   P6 halves: the qualifying gaps in date order, first half = first floor(n/2). A cluster is (series, D); clusters are reported next to gaps.
   P7 request cap: stage 2 has STAGE2_CAP requests; if more would be needed, markets are dropped by lowest lifetime volume (a settled tally, not a price) and the number dropped is reported.
-Commands: build-s0 | build-s1 <s0 folder> | build-s2 <s1 folder> | count <s2 folder> [<more folders>]   (folders are kalshi-pull-data run folders)
+Commands: build-s0 | build-s1 <series-list folder: the census pull> | build-s2 <s1 folder> | count <s2 folder> [<more folders>]   (folders are kalshi-pull-data run folders)
 """
 import calendar, gzip, json, os, re, sys, time
 from datetime import datetime, timezone, timedelta
@@ -21,9 +21,9 @@ except Exception:
     NY = None
 
 HELD_OUT_FROM = calendar.timegm((2026, 11, 5, 0, 0, 0))
-WINDOW_FROM = calendar.timegm((2025, 11, 5, 0, 0, 0))
 CUTOVER = calendar.timegm((2026, 9, 12, 0, 0, 0))     # live endpoints for markets closing after it, /historical before
-MAX_SERIES, STAGE2_CAP, PACK = 400, 600, 9000
+WINDOW_FROM = CUTOVER                                  # AMENDMENT 1 (Nov 12, Head's ruling): only markets closing after 2026-09-12; halves the sample on purpose; no /historical call at all
+MAX_SERIES, STAGE2_CAP, PACK, BUDGET = 400, 600, 9000, 400   # BUDGET: the Head places the count only if stage 1 + stage 2 <= 400 requests
 GAP, LO, HI, STALE, LIQ, FLOOR = 0.05, 0.10, 0.90, 0.01, 200.0, 40
 RUN = {"status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
        "stop_rules": {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3,
@@ -83,13 +83,11 @@ def build_s1(s0):
     reqs = []
     for s in ser:
         reqs.append({"id": "live_" + s, "path": "/markets", "params": {"series_ticker": s, "status": "settled", "limit": 1000, "min_close_ts": WINDOW_FROM, "max_close_ts": HELD_OUT_FROM}, "max_pages": 3})
-        reqs.append({"id": "hist_" + s, "path": "/historical/markets", "params": {"series_ticker": s, "limit": 1000}, "max_pages": 3})
-    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]},
-           {"name": "hist_markets_list", "method": "GET", "path_pattern": "/historical/markets", "params_allowed": ["series_ticker", "limit", "cursor"]}]
+    eps = [{"name": "markets_list", "method": "GET", "path_pattern": "/markets", "params_allowed": ["series_ticker", "status", "limit", "cursor", "min_close_ts", "max_close_ts"]}]
     return job("POLI2_LISTS", "POL-i2 count step, stage 1: settled market lists of the Politics series (time and volume fields only; no price, no result used).", eps, reqs, ser, [])
 
 
-def markets_from(s1):
+def markets_from(s1):  # only markets closing after the cutover (live endpoints) are listed, so hist below is always empty
     seen = {}
     for row, body in answers(s1):
         for m in body.get("markets", []) if isinstance(body, dict) else []:
@@ -104,6 +102,8 @@ def markets_from(s1):
 
 
 def build_s2(s1):
+    cap = min(STAGE2_CAP, BUDGET - len(json.load(open(os.path.join(s1, "manifest.json")))["job"]["requests"]))   # AMENDMENT 1: stage 1 + stage 2 together at most BUDGET
+    if cap < 1: raise SystemExit("stage 1 alone is over the budget of %d requests; stop and tell the Head" % BUDGET)
     mk = markets_from(s1)
     ranked = sorted(mk.items(), key=lambda kv: (-kv[1][2], kv[0]))
     live = [(t, x) for t, x in ranked if x[0] > CUTOVER]
@@ -122,7 +122,7 @@ def build_s2(s1):
     lp = packs(live)
     n_req = len(lp) + len(hist)
     dropped = 0
-    while n_req > STAGE2_CAP and ranked:                # P7: drop the lowest-volume market until under the cap
+    while n_req > cap and ranked:                # P7: drop the lowest-volume market until under the cap
         t, x = ranked.pop()
         dropped += 1
         live = [(a, b) for a, b in live if a != t]; hist = [(a, b) for a, b in hist if a != t]

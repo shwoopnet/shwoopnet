@@ -2,6 +2,15 @@
 
 Table only. Nothing was run, scored, pulled or re-registered. Read from `claude/epic-ptolemy-0amjd9` (registrations, results, scorers by file path), `perp-data` (what has actually recorded) and `REOPEN_RANKING_NOV12.md` on `claude/idea-desk-b`. No live account figure.
 
+## RULED Nov 12 (Head of R&D, messages of 16:53Z and 16:50Z; this block is the record, the table below is the evidence)
+
+- **The set is the 20 found, plus ABSORB-F as the 21st** (the "11" was Desk B's summary figure, with no source file). All 44 tries stay counted (ABSORB-F's are not counted here).
+- **RETIRED UNREAD, source closed (10), final:** CASHCLOSE1, CASHGAP1, CASHOPEN1, CASHCLOSE2, CASHGAP2, CASHOPEN2, SPLAG1, SPAUCT1, SPLIQ1, SPHALT1. Not FALSIFIED.
+- **RETIRED UNREAD, cannot reach its bar by its read date (8), final:** PERPEQ2, PERPEQ3, PERPEQ4, SPFUND1, SPW1, EARNPERP1, EARNPERP2, EARNPERP3. No earnings row is kept; an earnings card from the Stocks Desk is a new registration with its own tries.
+- **KEEP PERPEQ1** (Testing Desk owns it; one read on or after 2026-12-22). Conditions: (a) scorer committed by Nov 14 23:59Z, tested on synthetic rows only, no perp candle opened to write or test it; (b) a dated amendment correcting the stale 2026-12-30 marker line to Amendment 2 (development to 2026-12-21, first read 12-22, held out 12-22 to 2027-02-01 read from 2027-02-02 only after a LEAD), stating it corrects a line and moves no cutoff; the cutoff is a date constant in the scorer and the scorer refuses to run before 12-22; (c) result carries "perp candle freshness assumed, not measured", reports cash PF with n by cluster, and under 100 trades is "no evidence at n = x"; (d) output goes to the Verification Analyst through Main before any figure travels. No new try.
+- **KEEP CASHSPREAD1 part B** (Testing Desk; Dec 1, once). If fewer than 12 development trading days of perps30 files exist by Nov 30 it is RETIRED UNDERPOWERED on Dec 1 without a read. Reported as a cost fact, not a trade rule. File count due to the Head on Nov 20.
+- No scheduled task is touched by this desk; switching any off goes through Main after the Head's ruling.
+
 ## Context for the ruling
 
 V2 registered 52 perps tests (110 tries) and a 500,000 rule sweep on Nov 6 and 7, against the 10 to 20 the owner approved. 35 ran, 17 did not; 5 FALSIFIED; every other read NOT_ENOUGH_DATA; no lead. The default is therefore RETIRE unless a row can actually reach a verdict.
@@ -53,3 +62,13 @@ KEEP 2 (CASHSPREAD1 part B and PERPEQ1, both conditional). RETIRE UNREADABLE 10 
 1. Which 11 you meant, or confirm the 20 as the set.
 2. Your ruling per row. Nothing is run or re-registered until then.
 3. For the KEEPs: a go to commit (before data) a PERPEQ1 scorer and the registration marker fix, or a decision that PERPEQ1 is also retired.
+
+## Row 21, added at the Head's request: ABSORB-F
+
+| id | registered / rule | cutoff | scorer | data, recording? | N | expected vs needed | rec |
+|---|---|---|---|---|---|---|---|
+| ABSORB-F | V2 `scalper.ideas20c` (`kalshi-scalper/src/scalper/ideas20c.py` on `claude/epic-ptolemy-0amjd9`; trigger `trig_01WEAnmq4mCD7XMab6wbiZ9S` in `HANDOFF_V2.md`). ABSORB: previous-minute volume at least 1.5 times the minute before while the mid moved under 3c, then BUY THE L1 FAVOURITE (hold to settlement) on XRP, Dogecoin and gold markets closing from 2026-10-24, against the same series' L1 baseline | date constants in code: `FWD_START` 2026-10-24, `FWD_READ_DATE` 2026-12-01 (refused before it, refused a second time if the result file exists) | committed (`absorb_forward`), pooled with the earlier ABSORB rule | Kalshi minute candles ("fresh" source), no Yahoo; XRP and Dogecoin series are paused or removed from the bot, so the candle history for them may stop | not looked up (not in the files I read) | needs 200 pooled signals (`FWD_MIN_N`), z 2.0, PF 1.3, three series positive; no estimate found in the file | **RETIRE UNREAD** |
+
+**Plainly, is it inside the closed taker order-flow family (FLOW1, TAPEFLOW1, RESIL1)?** I did not open those three registrations, so I rely on the Head's description of them as taker rules on order flow. ABSORB-F is a taker buy triggered by a volume surge with flat price in the minute candles, which is an order-flow signal, so on that reading it sits inside the family or next to it; the candles are not the trade tape, so it is not the same test. That is not the main reason. Its action is **buy the L1 favourite and hold to settlement**, which is the favourite-and-hold idea the owner closed on Oct 28 ("no further research on the buy-the-favourite-and-hold idea"), on a declined-list footing for XRP (paused), Dogecoin (removed) and gold favourites (7e rows). Recommend RETIRE UNREAD on the declined list first, the order-flow family second. If the Head wants it kept, it needs the owner's own word, not a research ruling.
+
+**Also found while looking (not asked, not assigned):** the same `HANDOFF_V2.md` row lists five more L1 forward reads with no owner: REV1, P6F, FLOOR1, THIN1, FLIP1 (GAS1-F is struck by the Head). They are L1 favourite research, closed by the owner on Oct 28 unless he said otherwise; I have not read them. Tell me if you want a row each.

@@ -22,14 +22,14 @@ live_close = calendar.timegm((2026, 10, 1, 0, 0, 0)); old_close = calendar.timeg
 with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
     mkrun(d0, p.build_s0(), {"series_politics": s0})
     assert p.politics_series(d0) == ["KXAAA", "KXBBB"]
-    j1 = p.build_s1(d0); kp.check_job(j1); assert len(j1["requests"]) == 4 and "KXWX" not in j1["series_allowlist"]
+    j1 = p.build_s1(d0); kp.check_job(j1); assert len(j1["requests"]) == 2 and "KXWX" not in j1["series_allowlist"]
     lists = {"live_KXAAA": {"markets": [mk("KXAAA-1", live_close, live_close - 86400 * 30, 5000), mk("KXAAA-LOW", live_close, live_close - 86400, 50),
                                          mk("KXAAA-HELD", calendar.timegm((2026, 11, 6, 0, 0, 0)), live_close, 9000), mk("KXAAA-VOID", live_close, live_close - 86400, 900, "")]},
-             "hist_KXAAA": {"markets": [mk("KXAAA-OLD", old_close, old_close - 86400 * 20, 3000)]}, "live_KXBBB": {"markets": []}, "hist_KXBBB": {"markets": []}}
+             "live_KXBBB": {"markets": []}}
     mkrun(d1, j1, lists)
-    mk_ = p.markets_from(d1); assert sorted(mk_) == ["KXAAA-1", "KXAAA-OLD"], sorted(mk_)    # low volume, held out, unsettled all dropped
+    mk_ = p.markets_from(d1); assert sorted(mk_) == ["KXAAA-1"], sorted(mk_)    # low volume, held out, unsettled all dropped
     j2 = p.build_s2(d1); kp.check_job(j2)
-    assert j2["ticker_allowlist"] == ["KXAAA-1", "KXAAA-OLD"] and any(r["path"].startswith("/historical") for r in j2["requests"]) and any(r["path"] == "/markets/candlesticks" for r in j2["requests"])
+    assert j2["ticker_allowlist"] == ["KXAAA-1"] and not any(r["path"].startswith("/historical") for r in j2["requests"]) and any(r["path"] == "/markets/candlesticks" for r in j2["requests"])
     assert all(r["params"]["end_ts"] < p.HELD_OUT_FROM for r in j2["requests"])
     # candles: hourly from 2026-09-01 on; 22:00 ET quiet at 0.50; next 06:00 ET 0.60/0.62, 07:00 ET 0.60/0.62 (moved up 10c, stale proxy holds)
     from zoneinfo import ZoneInfo; NY = ZoneInfo("America/New_York")
@@ -56,13 +56,13 @@ with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, t
     # liquidity: 7-day volume under 200 -> none
     thin = [dict(c, volume_fp="1") for c in cs]; assert p.count_market("KXAAA-1", thin, None) == []
     mkrun(d2, j2, {r["id"]: ({"markets": [{"market_ticker": "KXAAA-1", "candlesticks": cs}]} if r["path"] == "/markets/candlesticks" else {"candlesticks": cs}) for r in j2["requests"]})
-    out = p.count([d2]); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 2, out
+    out = p.count([d2]); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 1, out
     t = p.tally([dict(date="2026-0%d-01" % (1 + i // 30), series="S", ticker="T%d" % i, strict=True, loose=True, within_24h_of_close=False) for i in range(100)])
     assert t["verdict"].startswith("COUNT CLEARS"), t["verdict"]
     t = p.tally(gaps[:10]); assert t["verdict"].startswith("NOT_ENOUGH_DATA") and "no evidence at n = 10" in t["label"]
     # the request cap drops the lowest-volume markets and says so
-    big = {"live_KXAAA": {"markets": [mk("KXAAA-%d" % i, live_close + i, live_close - 86400 * 400 + i, 1000 + i) for i in range(10)]}}
-    p.STAGE2_CAP = 4; p.PACK = 1  # each live market alone in a batch
+    big = {"live_KXAAA": {"markets": [mk("KXAAA-%d" % i, live_close + i, live_close - 86400 * 20 + i, 1000 + i) for i in range(10)]}, "live_KXBBB": {"markets": []}}
+    p.BUDGET = 6; p.PACK = 1  # each live market alone in a batch
     with tempfile.TemporaryDirectory() as d3:
         mkrun(d3, j1, big); j3 = p.build_s2(d3); assert len(j3["requests"]) <= 4 and "dropped by the request cap: 6" in j3["notes"], j3["notes"]
 print("poli2 synthetic tests passed")

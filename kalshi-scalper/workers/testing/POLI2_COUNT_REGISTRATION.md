@@ -20,7 +20,17 @@ This step is only the first half of the card's own test line ("count qualifying 
 6. **Halves:** the qualifying gaps in date order, first half the first floor(n/2).
 7. **Label:** below 100 gaps "no evidence at n = x". The count is not a result.
 
-## Request count (exact for stage 0; bounded for the rest, because the series count is not known)
+## AMENDMENT 1 (Nov 12, 2026, before any data; the Head of R&D's rulings of 16:55Z; nothing else changes)
+
+1. **No stage 0.** `POLI2_SERIES.json` is deleted from this branch. The Politics series list is read from Desk B's CENSUS_LISTING pull (the whole series list with categories) when it lands, at zero extra requests. `poli2_count.py build-s1` takes that folder.
+2. **Window halved on purpose.** The count uses only markets closing after 2026-09-12 and before the 2026-11-05 held-out constant. This halves the sample on purpose, to fit the request budget; there is no `/historical` call at all now. It also makes pins P2 above read "(2026-09-12, 2026-11-05)".
+3. **Budget.** Stage 1 (one live list per series, at most 3 pages each) plus stage 2 together must be 400 requests or fewer for the Head to place the count in the dispatch order; `build-s2` caps itself at 400 minus the stage 1 request count and drops the lowest-volume markets (reported) rather than exceed it; if stage 1 alone is over 400 it stops. The exact total goes to the Head once the census file lands.
+4. **06:30 ET deviation accepted.** "Not yet followed" = the ask at the 06:00 and 07:00 ET hourly candles within 1c. Strict and loose are both reported, the kill reads strict, and the result states that the registered instant (06:30 ET) does not exist at hourly resolution.
+5. **Count only, no profit figure.** Fewer than 40 qualifying gaps in either half closes the card without a further read.
+
+## Request count (superseded by Amendment 1 above; kept as written)
+
+(exact for stage 0; bounded for the rest, because the series count is not known)
 
 | Stage | Job file | Requests | Basis |
 |---|---|---|---|
