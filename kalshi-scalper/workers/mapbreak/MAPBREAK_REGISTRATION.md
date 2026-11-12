@@ -88,3 +88,10 @@ A separate registration and a new go from the Head, before any match result is r
 3. A candle is one instant a minute and carries no size. An ask two minutes into a break may be one contract deep.
 4. Candle freshness was measured on the Bitcoin 15 minute series only.
 5. **My probability that a title survives the measurement: about 15%. That the card then reaches the research bar: 2% overall.**
+
+## Build confirmations, Nov 12, 2026, 18:25Z, before any data (asked by the Testing Desk, build 8bdbdbce on `claude/testing-desk`)
+
+1. **Lists job:** 16 requests, at most 100 pages (30 to 45 expected), cap 114. The "about 50 requests" above was a page estimate. Every settled list carries the close-time ceiling, so held-out matches are never listed.
+2. **The pre-match minute needs three contracts two-sided together:** the map-1 winner's match contract and BOTH map-1 contracts, in the same minute. One minute serves the model and the placebo, so the gap share and the placebo share are measured on the same matches. It can lower the pre-match fill rate; the reader also counts the matches lost only because the map-1 contracts were never two-sided in the same minute as the match contract, and that count is reported beside each title's result. The rule is not changed after data whatever that count is.
+3. **Round trip at the look** is computed per match contract (both teams' contracts, spread plus two fees at that contract's mid), median over contracts, for the cost kill. **On the gap line, "spread 4c or less" means the spread of the contract being bought,** the cheaper side's own match contract.
+4. The reader was tested to be blind to the match result and to the results of maps 2 and 3 (every other such result flipped, identical output).
