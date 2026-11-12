@@ -106,10 +106,10 @@ def run_family(fam, K, markets, candles, bounds):
     bets = []; voids = 0
     for e, c, d in dec:                                                  # results are read here, for matches with a bet only
         r = markets[d["ticker"]]["result"]
-        if r == "void": voids += 1; continue                       # Head's ruling (b): refund, net 0, NOT in n, PF or z, both arms; the count is printed beside n
+        if r == "void": voids += 1; bets.append(dict(event=e, close=c, price=d["price"], win=False, net=-fee_up(d["price"]), day=day(c), void=True)); continue   # Head's corrected rule (one rule for every hold card): price refunded, FEE KEPT, a fee-only loss, COUNTED in n, PF and z, both arms; the count is printed
         if r not in ("yes", "no"): bets.append(dict(event=e, close=c, price=d["price"], win=False, net=-fee_up(d["price"]), day=day(c), nores=True)); continue   # fired bet with no result that is not a void: fee-only loss, counted
         win = r == "yes"; bets.append(dict(event=e, close=c, price=d["price"], win=win, net=net_of(d["price"], win), day=day(c)))
-    L.append("voided bets (refunded, excluded from n, PF and z): %d | bets with no result that are not voids (fee-only loss, counted): %d" % (voids, sum(1 for b in bets if b.get("nores"))))
+    L.append("voided bets (price refunded, fee kept, counted in n, PF and z): %d | bets with no result that are not voids (fee-only loss, counted): %d" % (voids, sum(1 for b in bets if b.get("nores"))))
     if not bets: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
     n = len(bets); nets = [b["net"] for b in bets]; bets.sort(key=lambda b: b["close"]); h = n // 2
     byday = collections.defaultdict(float)
@@ -125,7 +125,7 @@ def run_family(fam, K, markets, candles, bounds):
     bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
     pb = collections.defaultdict(list)
     for p in plb:
-        if not p["void"]: pb[bucket(p["price"])].append(net_of(p["price"], p["win"]))
+        pb[bucket(p["price"])].append(-fee_up(p["price"]) if p["void"] else net_of(p["price"], p["win"]))
     mix = collections.Counter(bucket(b["price"]) for b in bets); wsum = 0.0; pnet = 0.0; var = 0.0
     for bkt, cnt in mix.items():
         v = pb.get(bkt)
@@ -144,10 +144,6 @@ def run_family(fam, K, markets, candles, bounds):
     elif p < 1.0 or (h1 is not None and h1 < 1.0) or (h2 is not None and h2 < 1.0): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
     elif p >= 1.5 and h1 > 1.0 and h2 > 1.0 and diff is not None and diff >= 2 * dse: lab = "development bar met (held-out asked for the same hour; NOT the research bar)"
     else: lab = "bar not met"
-    fired = n + voids
-    if fired and voids / fired > 0.01 and voids:                      # Head's line: both bookings side by side; the registered one (void excluded) is the verdict
-        alt = nets + [-fee_up(d["price"]) for _, _, d in dec if markets[d["ticker"]]["result"] == "void"]
-        L.append("VOIDS %d of %d fired bets (%.1f%%): registered booking (refund, excluded) n %d PF %s net %+.2fc | ESOCTIE booking (price refunded, fee kept, counted) n %d PF %s net %+.2fc | the registered one is the verdict" % (voids, fired, 100 * voids / fired, n, "%.2f" % pf(nets), 100 * st.mean(nets), len(alt), "%.2f" % pf(alt), 100 * st.mean(alt)))
     L.append("LABEL: " + lab); return L, bets
 def pilot(fam, K, markets, candles, bounds):
     """Head-approved pilot: cost and tradeability only. markets' results are NEVER touched (a market with a 'result' key is read for event and close only)."""
@@ -242,7 +238,7 @@ def selftest():
     mk, cd = fam(400, 0.80, spread=0.06, seed=4); L4, b4 = run_family(FAMILY, K, mk, cd, far); assert b4 is None and "CLOSED ON COST" in L4[-1], L4     # entry spread 6c: one-way 5c > 4c, killed before any result
     mk, cd = fam(200, 0.80, seed=5)
     for tk in list(mk)[:40]: mk[tk]["result"] = "void"
-    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("voided bets (refunded, excluded from n, PF and z): 20" in x for x in L5) and any(x.startswith("VOIDS 20 of 200") for x in L5) and len(b5) == 180, L5
+    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("voided bets (price refunded, fee kept, counted in n, PF and z): 20" in x for x in L5) and len(b5) == 200 and sum(1 for b in b5 if b.get("void")) == 20 and all(abs(b["net"] + fee_up(b["price"])) < 1e-9 for b in b5 if b.get("void")), L5
     mk, cd = fam(100, 0.80, seed=6)
     for tk, m in mk.items(): m["close"] += 3 * 3600                                      # every close 3 h after its start: start not derivable
     L6, b6 = run_family(FAMILY, K, mk, cd, far); assert b6 is None and "START NOT DERIVABLE" in L6[-1], L6
