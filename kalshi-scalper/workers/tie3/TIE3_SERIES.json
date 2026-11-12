@@ -1,0 +1,22 @@
+{
+  "registration": "kalshi-scalper/workers/tie3/TIE3_REGISTRATION.md",
+  "frozen": "2026-11-12",
+  "tie_market_rule": "three markets an event; the Tie market is the one whose ticker ends in -TIE. For the cell NHL_REG the market is the single market of the event (ticker ends in -1) and YES means the game was level after regulation.",
+  "start_rule": "scheduled start = occurrence_datetime of the market minus 180 minutes",
+  "blocks": {
+    "base_closes_before": "2026-10-27T00:00:00Z",
+    "price_block_from": "2026-10-27T00:00:00Z",
+    "price_block_before": "2026-11-13T00:00:00Z",
+    "held_out_from": "2026-11-13T00:00:00Z"
+  },
+  "cells": [
+    {"cell": "NHL_P1", "league": "NHL", "period": "period 1", "series": ["KXNHL1P"], "first_period_series": "KXNHL1P"},
+    {"cell": "NHL_P2", "league": "NHL", "period": "period 2", "series": ["KXNHL2P"], "first_period_series": "KXNHL1P"},
+    {"cell": "NHL_P3", "league": "NHL", "period": "period 3", "series": ["KXNHL3P"], "first_period_series": "KXNHL1P"},
+    {"cell": "NHL_REG", "league": "NHL", "period": "level after regulation", "series": ["KXNHLOT"], "first_period_series": "KXNHL1P"},
+    {"cell": "NFL_Q", "league": "NFL", "period": "quarters 1 to 4, pooled, base rate per quarter", "series": ["KXNFL1Q", "KXNFL2Q", "KXNFL3Q", "KXNFL4Q"], "first_period_series": "KXNFL1Q"},
+    {"cell": "SOC_1H", "league": "soccer", "period": "first half, pooled, base rate per series", "series": ["KXMLS1H", "KXBRASILEIROB1H", "KXLIGAPORTUGAL1H", "KXEPL1H", "KXLALIGA1H", "KXSERIEA1H", "KXBUNDESLIGA1H", "KXLIGUE11H", "KXLIGAMX1H", "KXBRASILEIRO1H", "KXEREDIVISIE1H", "KXEFLTROPHY1H"], "first_period_series": "same series"}
+  ],
+  "fee_field_reads": ["KXNHL1P", "KXNHLOT", "KXNFL1Q", "KXMLS1H"],
+  "not_in_this_card": "college football quarters (base rate near 15%, so a 10c gap would be a cheap-tail contract), NBA and college basketball quarters and halves (Tie under 10%), NFL halves (Tie under 10%), second halves in soccer (one known series)"
+}
