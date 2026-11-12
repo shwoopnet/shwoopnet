@@ -198,3 +198,40 @@ That leaves 23 US series: `KXSTATEBALLOTMEASURE`, `KXCABALLOTMEASURES`, `KXSFBAL
 **BALLOTNO price read, tries 2 and 3 (Nov 12, 00:52Z and 00:58Z): both refused (429)**, the first inside a window when the other research pullers were paused, the second with a batch of 10 markets. So the batch candle endpoint is treated as unusable for now and the read falls back to one market per request (31 seconds apart; after a refusal it waits 5 minutes and resumes; it stops for good at 5 refusals). Requests by this desk so far: 10, of which 5 refused. Still no price read.
 
 **BALLOTNO price read, single-market fallback (Nov 12, 01:03Z to 01:30Z): stopped at the cap of 5 refusals.** 15 requests, 10 markets read (daily candles Oct 1 to Nov 3), 5 refused with 429, 113 markets left. Nothing was scored: 10 of 123 is not a description of anything. The read is resumable from the saved file. Requests by this desk so far: 25, of which 10 refused. At this refusal rate the remaining 113 markets would take about four hours and about forty more refusals, so this desk has STOPPED reading and waits for either a quiet limit or the separate pull route the Chief of Staff has asked the owner about. ECONLAG (about 390 requests) is not started for the same reason.
+
+**BALLOTNO price read, quiet window (Nov 12, 08:01Z to 10:07Z): finished.** One market per request, 61 seconds apart, as allowed by the Chief of Staff for 08:00Z to 11:00Z. 115 requests, 2 refused with 429 (each waited 5 minutes and resumed), 113 markets read. The first run was cut off by the session's 2 hour task limit at 116 markets held and was restarted once for the last 7. All 123 markets of the Nov 3, 2026 development night are now held (daily candles Oct 1 to Nov 3). Requests by this desk in total: 140 public GETs, of which 12 refused. The held-out set (the 22 other US series and future dates) is still unread.
+
+**BALLOTNO result: a DESCRIPTION of one election night, not a verdict (amendment 2).** The registered PF test is NOT_ENOUGH_DATA: one election date is one cluster. Public market data and public results only.
+
+Scored: 107 markets at the 14 day look (15 dropped for a spread over 10c, 1 with no two-sided quote, 1 excluded before the read), 121 at the 1 day look. "Gap" is the realised pass rate minus the mean YES mid; the bracket is a 90% Wilson interval on the pass rate.
+
+| Type | Look | n | Mean YES mid | Passed | 90% interval | Gap | Brier |
+|---|---|---|---|---|---|---|---|
+| Citizen initiative | 14 day | 27 | 0.594 | 0.556 | 0.40 to 0.70 | -3.9c | 0.238 |
+| Citizen initiative | 1 day | 36 | 0.623 | 0.528 | 0.39 to 0.66 | -9.5c | 0.154 |
+| Legislative referral | 14 day | 73 | 0.696 | 0.726 | 0.63 to 0.80 | +3.0c | 0.116 |
+| Legislative referral | 1 day | 75 | 0.700 | 0.733 | 0.64 to 0.81 | +3.4c | 0.110 |
+| Bond | 14 day | 7 | 0.876 | 1.000 | 0.72 to 1.00 | +12.4c | 0.017 |
+| Bond | 1 day | 9 | 0.882 | 0.889 | 0.62 to 0.97 | +0.7c | 0.116 |
+| All | 14 day | 107 | 0.682 | 0.701 | 0.62 to 0.77 | +1.9c | 0.140 |
+| All | 1 day | 121 | 0.692 | 0.686 | 0.61 to 0.75 | -0.6c | 0.123 |
+
+All measures by price bucket at the 14 day look (n, mean mid, passed): 0.10 to 0.25: 6, 0.18, 0.00. 0.25 to 0.40: 5, 0.35, 0.40. 0.40 to 0.60: 19, 0.51, 0.47. 0.60 to 0.75: 26, 0.68, 0.65. 0.75 to 0.90: 36, 0.83, 0.92. 0.90 and up: 14, 0.93, 1.00.
+
+The two registered arms at the 14 day look, fee 0.07 x p x (1 - p), held to the result:
+
+| Arm | Slip | n | Wins | Mean per contract | Cash PF |
+|---|---|---|---|---|---|
+| N: citizen initiative, YES mid 0.12 to 0.40, buy NO at 0.60 to 0.88 | +0c | 3 | 2 | -6.7c | 0.70 |
+| N | +1c | 3 | 2 | -7.7c | 0.67 |
+| Y: legislative referral, YES ask 0.30 to 0.75, buy YES | +0c | 31 | 17 | -9.8c | 0.63 |
+| Y | +1c | 31 | 17 | -10.8c | 0.60 |
+
+What it says, plainly:
+
+1. **The market was close to calibrated on this night.** Over all measures the mean price and the pass rate differ by 2c at 14 days and under 1c the day before.
+2. **The type gaps point the way the card guessed (initiatives a little rich, referrals a little cheap) but every one sits inside its interval.** With 27 to 75 measures from ONE night, sharing one electorate mood, none of it is evidence.
+3. **The arms as registered lost on this night.** Arm N found 3 trades, far too few to mean anything. Arm Y lost about 10c a contract over 31 trades: referrals priced 0.40 to 0.60 passed only 3 of 12, so the cheap referrals were cheap for a reason. The referral gap is all above 0.75, where buying is a favourite hold, which is close to a declined family and is NOT proposed.
+4. **No new cell is proposed from this table.** Picking the best bucket after the read would be chasing one cell of about thirty on one cluster.
+
+**Status: PARKED, as decided in the power analysis.** The next cluster of any size is November 2028 (under 20 measures in 2027). Nothing further is read for this card; the held-out set stays unread so it is still clean if the card is ever reopened. The frozen tags are in `workers/ballotno/BALLOTNO_TAGS_2026-11-03.csv`.
