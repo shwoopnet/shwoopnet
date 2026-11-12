@@ -8,6 +8,7 @@ Expected lucky clears with no edge anywhere: blocks read times about 0.035 (0.05
 |---|---|---|---|---|---|---|
 | 2026-11-12 (batch 1) | 12 | 3 (to Nov 20) | 0 | 0 | 0 | 0 |
 | 2026-11-12 (batch 1b) | 23 | 14 (3 to Nov 20, 11 to Dec 31) | 0 | 0 | 0 | 0 |
+| 2026-11-12 (correction: the two DEPTH1 places withdrawn, it is 20 tries and not a rule) | 21 | 12 (1 to Nov 20, 11 to Dec 31) | 0 | 0 | 0 | 0 |
 
 ## Premise test
 

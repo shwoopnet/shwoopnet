@@ -159,7 +159,7 @@ Shadowing a rule costs no money, only logger reads (free for the four markets th
 
 | Candidate | What exists | Earliest a seat is possible after admission |
 |---|---|---|
-| DEPTH1 (book-state rule, Bitcoin and Ethereum 15 minute markets) | scorer frozen and audited; first read on recorded books from Nov 14 00:00Z | about 2 to 3 weeks |
+| DEPTH1 (20 registered tries: 10 book features on the gold and Bitcoin 15 minute markets; not yet a rule) | scorer frozen and audited; first read on recorded books from Nov 14 00:00Z; a rule exists only if one try clears, which its author does not expect | about 2 to 3 weeks after a clear, Bitcoin only |
 | The four rules registered Nov 12 (esports break, in-play price jump, e-soccer rematch, e-soccer tie) | registered and audited; development reads on candles in the next days; they need a forward quote shadow and the non-15-minute order path that exists switched off | the e-soccer rules could fill a block and its confirmation in about one to two weeks; esports and tennis slower |
 | CFRTI-K (Kalshi-only Bitcoin cheap side with a model edge) | development read under 1.3; a book replay too small to say anything | about 3 to 4 weeks; it buys the same market, side and minute as OICORE, so rule 4.7 may keep it off a seat |
 | Spot-lead | missed its own bar; reads venues no live rule may read without the owner's popup | not live-able as written |
