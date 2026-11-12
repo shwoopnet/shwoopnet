@@ -166,6 +166,18 @@ kalshi-scalper/workers/forensics/STALE_QUOTE_AUDIT_NOV12.md on claude/forensics-
 - **BLOCKER:** the Stocks Desk session cannot push (repo attach refused; 403 on claude/stocks-desk). Its plan is a local commit only. Nobody pushes for it; reported to Main and the EA. Every paid pull is held until it is fixed.
 - **With the owner (through the EA):** derived results in the public repo (recommended no); keep or raise $25 (recommended keep); an Alpaca data key (recommended no); account type; automated EDGAR reads (only if the owner accepts the contact header EDGAR asks for). No automated read of S&P or Russell sites (terms unread).
 
+### Measured costs by family, first cut (Forensics, Nov 12 17:00Z)
+
+kalshi-scalper/workers/forensics/FAMILY_COSTS_NOV12.md on claude/forensics-desk (af5fd4d). Recorded data only, no rule scored, zero tries. [research]
+
+- The fee is most of the cost on every liquid family: about 1.5c to hold at mid prices, about 3c a round trip with a 1c spread.
+- The taker fill haircut is general: a 1 contract order at the price seen fills 59 to 73 percent of the time a few seconds later on every 15 minute series measured (the five R6 series and the eleven non-crypto ones), 76 to 86 percent with a 1c higher limit.
+- Non-crypto 15 minute series (20 hours of one weekday, a first reading): oil and silver trade like crypto (round trip 3.4c to 3.7c); the forex pairs are one maker 2c wide and one-sided a quarter to a third of the time near the close; copper, natural gas and USD/CAD cost 5c or more a round trip.
+- Sports: NBA and NFL lines are tight and deep (round trip 4.2c to 4.8c). Politics: 3.4c overall, 6.3c for markets priced 20c to 80c.
+- **Too costly, move on (five flags):** weather daily LOW brackets (round trip 11.5c on an 11c price); daily and weekly forex ladders, S&P 500 and Nasdaq dailies and Treasury auction markets (10c to 20c); monthly barriers on the smaller coins; NHL spread and total; combos as a two-way trade.
+- Not held: events a year beyond the 15 minute and hourly series, sizes for weather and daily markets, settle speed for sports, anything on mentions.
+- Next from Forensics: a one-page "how to price a paper trade" rule for card writers (18:30Z); whether the perps LIST is a delayed copy, against the perp candles (20:00Z, method registered first).
+
 ### Census listing job and dispatch order (ruled Nov 12, 16:50Z)
 
 Desk B's CENSUS_LISTING.json (claude/idea-desk-b 02be8d3; plan kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md): 40 requests, one run, about 120 MB. It lists every series (category, frequency, fee type) and every non-combo market settled on Tuesday Nov 10 UTC, each hour cut at 3,000 (cut hours are lower bounds). Limits accepted: one Tuesday misses weekly, monthly and weekend families in the settled crawl (their count comes from the stated frequency, labelled as not observed); no open-market spreads in this job. Order for jobs not yet dispatched: (1) CENSUS_LISTING, (2) INGAMELAG_M1A then M1B (PR 822), (3) POLAPPR1 (PR 823). Desk B reports that V2's universe sweeps stopped at the rate limit with most in-scope series never given a registered test; the exact count is not quoted until the Verification Analyst has checked its source.
