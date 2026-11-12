@@ -50,3 +50,6 @@ Zero reads for the table and the held-500 development score. New candle reads: e
 4. Stop rule unchanged: reads stop at the first block of 200 where a rule has total >= 130 trades by the rule, or at 1,600 reads.
 5. Decision-look quote as MENT1 does it: the last candle ending at or before close minus 6 hours with both bid and ask non-null, bid > 0, ask < 1, ask > bid, spread <= 0.05.
 6. Split of the new markets: the earliest two thirds (by close time) of all new markets READ (quoted or not) are development, the last third is held-out.
+
+## STATUS (Nov 12, 2026, run stopped, not a result)
+Reads so far: see `workers/MENTPERSIST1_READLOG.json` (cursor_index into the md5 pool). Observed pace: Kalshi answered 429 about every 2 to 4 requests from the first minute (each followed by the 300 second pause), about 25 reads an hour, so 1,000 reads would take about 40 hours; this worker stopped the fetch process and left the cursor. No outcome of a target has been read or scored. Resume: `python3 -I src/scalper/mentpersist1.py plan` (offline) then `fetch --cap 1600`; score only after the stop rule. No verdict yet (NOT_ENOUGH_DATA is declared only at the 1,600 read cap).

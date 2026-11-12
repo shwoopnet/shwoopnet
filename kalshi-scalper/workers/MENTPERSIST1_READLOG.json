@@ -1,0 +1,48 @@
+{
+ "reads": 5,
+ "log": [
+  {
+   "n": 1,
+   "ticker": "KXTRUMPMENTION-26SEP17-ELEC",
+   "status": 200,
+   "candles": 19,
+   "at": "2026-11-12T00:36:29.650232Z"
+  },
+  {
+   "n": 2,
+   "ticker": "KXTRUMPMENTION-25OCT18-BIDE",
+   "status": 200,
+   "candles": 15,
+   "at": "2026-11-12T00:41:45.404724Z"
+  },
+  {
+   "n": 3,
+   "ticker": "KXTRUMPMENTION-26FEB14-EPST",
+   "status": 200,
+   "candles": 15,
+   "at": "2026-11-12T00:42:00.061715Z"
+  },
+  {
+   "n": 4,
+   "ticker": "KXTRUMPMENTION-26APR30-STOC",
+   "status": 200,
+   "candles": 4,
+   "at": "2026-11-12T00:42:15.059605Z"
+  },
+  {
+   "n": 5,
+   "ticker": "KXTRUMPMENTION-26OCT22-HORM",
+   "status": 200,
+   "candles": 30,
+   "at": "2026-11-12T00:42:30.065685Z"
+  }
+ ],
+ "cursor_index": 5,
+ "pool_md5_order": "ascending md5(ticker) over new markets with PREV, plan.json",
+ "fail_streak": 0,
+ "pauses": 2,
+ "stops429": [
+  "2026-11-12T00:36:44.736500Z",
+  "2026-11-12T00:42:45.066816Z"
+ ]
+}
