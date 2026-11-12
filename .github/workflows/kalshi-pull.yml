@@ -1,0 +1,81 @@
+# Nov 12, 2026 (the owner waived reading Kalshi's terms; see CLAUDE.md, "kalshi-pull"). A MANUAL pull of Kalshi's PUBLIC market data for the research sessions. Nothing triggers it: no schedule, no push,
+# no pull request. A person starts it from the Actions tab with a job id, and it defaults to a DRY RUN (checks the job file, prints the URLs, sends nothing, pushes nothing).
+# It reads one job file from main (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json), sends GET requests to api.elections.kalshi.com ONLY, at most ONE a second, no key, no auth header, no redirects, no other
+# address; three 429s in a row end the run. The built-in token pushes gzipped answers to its OWN `kalshi-pull-data` branch (under pull/), never to main; the first real run creates it as an orphan branch.
+# Rate and size: at most 1 request a second, at most 1,200 requests a run (each job file sets its own lower cap), 5 MB an answer, 200 MB a run, 6 real runs a UTC day, about 25 to 30 runner minutes for a full 1,200.
+# One concurrency group that never cancels: two pulls never overlap, so the pace is one a second for the whole repository. It stops by itself from 2027-02-28 23:59 UTC. Stop it sooner by deleting this file.
+name: kalshi-pull
+on:
+  workflow_dispatch:
+    inputs:
+      job:
+        description: "Job file to pull (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json on main)"
+        required: true
+        type: choice
+        options:
+          - NOSIDE1_LISTS
+          - NOSIDE1_CANDLES
+          - SPREADCELL1
+          - ROLLOFF_PROXY
+          - COMBO1_OPENBOOK
+      dry_run:
+        description: "true = check the job and print the URLs only; false = send the requests"
+        required: true
+        type: choice
+        default: "true"
+        options:
+          - "true"
+          - "false"
+permissions:
+  contents: write
+concurrency:
+  group: kalshi-pull
+  cancel-in-progress: false
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      JOB: ${{ inputs.job }}
+      DRY_RUN: ${{ inputs.dry_run }}
+    steps:
+      - name: Check the inputs and the end date (2027-02-28 23:59 UTC)
+        id: gate
+        run: |
+          case "$JOB" in NOSIDE1_LISTS|NOSIDE1_CANDLES|SPREADCELL1|ROLLOFF_PROXY|COMBO1_OPENBOOK) ;; *) echo "bad job id"; exit 1 ;; esac
+          case "$DRY_RUN" in true|false) ;; *) echo "bad dry_run"; exit 1 ;; esac
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the pull script and the job file from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Dry run (checks the job file, prints the URLs, sends nothing)
+        if: steps.gate.outputs.go == 'true' && env.DRY_RUN == 'true'
+        run: |
+          python3 -I code/scripts/kalshi_pull.py "$JOB" --dry-run | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true' && env.DRY_RUN == 'false'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${REPO}.git"
+          if git fetch -q --depth 1 origin kalshi-pull-data; then git checkout -q -b kalshi-pull-data FETCH_HEAD; else git checkout -q --orphan kalshi-pull-data; fi
+      - name: Pull (one request a second, GET only, public data)
+        if: steps.gate.outputs.go == 'true' && env.DRY_RUN == 'false'
+        run: |
+          python3 -I code/scripts/kalshi_pull.py "$JOB" --data-dir data
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true' && env.DRY_RUN == 'false'
+        run: |
+          cd data
+          git config user.name "kalshi-pull"
+          git config user.email "kalshi-pull@users.noreply.github.com"
+          git add pull
+          git commit -q -m "kalshi-pull $JOB $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin kalshi-pull-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin kalshi-pull-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1
