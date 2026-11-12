@@ -2,7 +2,7 @@
  "job_id": "TESTING_LISTS_BUNDLE",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/testing/TESTING_LISTS_BUNDLE.md",
- "purpose": "Testing Desk bundle of four small jobs (TIE3 lists, WXDAYEND_A, UNRATE lists, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, ur_, pc_.",
+ "purpose": "Testing Desk bundle of three small jobs (TIE3 lists, WXDAYEND_A, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, pc_. UNRATE_LISTS was dropped (Head, 18:03Z: UNRATEROUND retired unread).",
  "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3); POLCOST lists open markets, which have no result is requested; measurements and counts only, no rule scored, no try",
  "allowed_endpoints": [
   {
@@ -145,8 +145,6 @@
   "KXTRUMPVISITWEEK",
   "KXTRUTHSOCIAL",
   "KXTRUTHSOCIALD",
-  "KXU3",
-  "KXUE",
   "KXUKPOLLFIRST",
   "KXUSCANADATARIFFDOWN",
   "KXUSCANADATARIFFUP",
@@ -174,8 +172,8 @@
   "KXHIGHTDAL-26NOV08-B69.5",
   "KXHIGHTDAL-26NOV09-B71.5"
  ],
- "max_requests": 369,
- "notes": "137 requests, 355 pages at most (the runner counts pages against the cap); worst-case size is far above the 200 MB run cap if every page were full (see TESTING_LISTS_BUNDLE.md); sub-jobs are ordered so a size stop falls on the last one",
+ "max_requests": 361,
+ "notes": "133 requests, 347 pages at most (the runner counts pages against the cap); worst-case size is far above the 200 MB run cap if every page were full (see TESTING_LISTS_BUNDLE.md); sub-jobs are ordered so a size stop falls on the last one",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
@@ -709,46 +707,6 @@
     "status": "settled",
     "limit": 100
    }
-  },
-  {
-   "id": "ur_live_KXU3",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXU3",
-    "status": "settled",
-    "limit": 1000,
-    "max_close_ts": 1793836799
-   },
-   "max_pages": 2
-  },
-  {
-   "id": "ur_hist_KXU3",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXU3",
-    "limit": 1000
-   },
-   "max_pages": 2
-  },
-  {
-   "id": "ur_live_KXUE",
-   "path": "/markets",
-   "params": {
-    "series_ticker": "KXUE",
-    "status": "settled",
-    "limit": 1000,
-    "max_close_ts": 1793836799
-   },
-   "max_pages": 2
-  },
-  {
-   "id": "ur_hist_KXUE",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXUE",
-    "limit": 1000
-   },
-   "max_pages": 2
   },
   {
    "id": "pc_open_538APPROVE",

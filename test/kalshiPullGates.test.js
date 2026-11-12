@@ -362,14 +362,14 @@ gates.KP27 = () => {
   assert.ok(c.requests.filter((r) => r.path === '/markets').every((r) => r.params.status === 'settled' && r.params.mve_filter === 'exclude' && (r.max_pages || 1) <= 3), 'markets: settled, no combos, at most 3 pages an hour');
 };
 
-// KP28: TESTING_LISTS_BUNDLE (Testing Desk, owner MAIN) carries four small jobs, TIE3_LISTS (32), WXDAYEND_A (22), UNRATE_LISTS (4) and POLCOST (79: the OPEN-markets lists of the same 79 Politics series, status=open, no close-time bounds, which replaced the settled POL-i2 lists on the Head's ruling of Nov 12), in ONE file: 137 requests, 355 pages at most, cap 369 (the page budget plus 14 for 429 retries). SOCDERIV_LISTS stays its own job (the soccer lists are the heavy part and a size stop would cost a second run). The only candle requests are WXDAYEND_A's own 18 one-market windows; everything else is a listing. Ids carry a prefix (t3_ wx_ ur_ p2_) so each manifest row says its sub-job.
+// KP28: TESTING_LISTS_BUNDLE (Testing Desk, owner MAIN) carries three small jobs, TIE3_LISTS (32), WXDAYEND_A (22) and POLCOST (79: the OPEN-markets lists of the same 79 Politics series, status=open, no close-time bounds, which replaced the settled POL-i2 lists on the Head's ruling of Nov 12), in ONE file: 133 requests, 347 pages at most, cap 361 (the page budget plus 14 for 429 retries; UNRATE_LISTS left the bundle when the Head retired UNRATEROUND unread). SOCDERIV_LISTS stays its own job (the soccer lists are the heavy part and a size stop would cost a second run). The only candle requests are WXDAYEND_A's own 18 one-market windows; everything else is a listing. Ids carry a prefix (t3_ wx_ ur_ p2_) so each manifest row says its sub-job.
 gates.KP28 = () => {
   const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'TESTING_LISTS_BUNDLE.json'), 'utf8'));
-  assert.strictEqual(c.requests.length, 137); assert.strictEqual(c.owner, 'MAIN'); assert.strictEqual(c.status, 'active');
+  assert.strictEqual(c.requests.length, 133); assert.strictEqual(c.owner, 'MAIN'); assert.strictEqual(c.status, 'active');
   const budget = c.requests.reduce((a, r) => a + (r.max_pages || 1), 0);
-  assert.strictEqual(budget, 355); assert.strictEqual(c.max_requests, 369); assert.ok(c.max_requests >= budget && c.max_requests <= 1200);
-  assert.strictEqual(new Set(c.requests.map((r) => r.id)).size, 137, 'request ids are unique');
-  assert.ok(c.requests.every((r) => /^(t3|wx|ur|pc)_/.test(r.id)), 'every id carries its sub-job prefix, none is a soccer list');
+  assert.strictEqual(budget, 347); assert.strictEqual(c.max_requests, 361); assert.ok(c.max_requests >= budget && c.max_requests <= 1200);
+  assert.strictEqual(new Set(c.requests.map((r) => r.id)).size, 133, 'request ids are unique');
+  assert.ok(c.requests.every((r) => /^(t3|wx|pc)_/.test(r.id)), 'every id carries its sub-job prefix, none is a soccer list');
   assert.ok(c.requests.filter((r) => r.id.startsWith('pc_')).every((r) => r.path === '/markets' && r.params.status === 'open' && !('min_close_ts' in r.params) && !('max_close_ts' in r.params)), 'POLCOST: open-market lists only, no close-time bounds');
   assert.strictEqual(c.requests.filter((r) => r.id.startsWith('pc_')).length, 79);
   const candles = c.requests.filter((r) => /candlesticks/.test(r.path));
