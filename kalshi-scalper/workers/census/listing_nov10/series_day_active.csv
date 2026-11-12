@@ -1,0 +1,563 @@
+series,category,frequency,fee_type,fee_multiplier,title,settled_markets_day,settled_events_day,markets_with_volume,volume_day,open_interest_day,in_series_list,markets_per_event,tie_markets,family_first_cut,sweep_status
+KX10YRRATE15M,Financials,fifteen_min,quadratic,1,10-year Treasury yield 15-minute,43,43,43,109534.63,56297.18,1,1.0,0,,not in V2's sweep files
+KX10YRRATEEVENT,Financials,custom,quadratic,1,US 10Y Treasury yield after events,153,3,1,3245.0,3245.0,1,51.0,0,,not in V2's sweep files
+KX10YRRATEH,Financials,hourly,quadratic,1,US 10Y Treasury yield hourly,390,14,6,13.3,13.3,1,27.86,0,,not in V2's sweep files
+KX2YRDIRHM,Financials,monthly,quadratic,1,2Y how high monthly,6,1,2,179.0,179.0,1,6.0,0,,not in V2's sweep files
+KX2YRRATE15M,Financials,fifteen_min,quadratic,1,2-year Treasury yield 15-minute,43,43,43,211192.45,82855.45,1,1.0,0,,not in V2's sweep files
+KX2YRRATEEVENT,Financials,custom,quadratic,1,US 2Y Treasury yield after events,153,3,4,8235.0,8175.0,1,51.0,0,,not in V2's sweep files
+KX2YRRATEH,Financials,hourly,quadratic,1,US 2Y Treasury yield hourly,470,14,8,56.8,56.8,1,33.57,0,,not in V2's sweep files
+KX30YRRATE15M,Financials,fifteen_min,quadratic,1,30-year Treasury yield 15-minute,43,43,43,146479.86,89879.47,1,1.0,0,,not in V2's sweep files
+KX30YRRATEEVENT,Financials,custom,quadratic,1,US 30Y Treasury yield after events,153,3,6,8881.0,8775.0,1,51.0,0,,not in V2's sweep files
+KX30YRRATEH,Financials,hourly,quadratic,1,US 30Y Treasury yield hourly,390,14,10,340.78,340.78,1,27.86,0,,not in V2's sweep files
+KX5YRRATE15M,Financials,fifteen_min,quadratic,1,5-year Treasury yield 15-minute,43,43,43,90646.17,41667.4,1,1.0,0,,not in V2's sweep files
+KX5YRRATEEVENT,Financials,custom,quadratic,1,US 5Y Treasury yield after events,153,3,2,16.61,16.61,1,51.0,0,,not in V2's sweep files
+KX5YRRATEH,Financials,hourly,quadratic,1,US 5Y Treasury yield hourly,470,14,10,57.65,57.65,1,33.57,0,,not in V2's sweep files
+KX7YRRATEH,Financials,hourly,quadratic,1,US 7Y Treasury yield hourly,430,14,6,42.8,42.8,1,30.71,0,,not in V2's sweep files
+KXAAAGASD,Economics,daily,quadratic,1,US gas price up,17,1,13,820289.53,380584.72,1,17.0,0,gas_price,tail rule read
+KXAAAGASDAK,Economics,daily,quadratic,1,Alaska gas price,17,1,5,2834.51,1622.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDAL,Economics,daily,quadratic,1,Alabama gas price,17,1,6,4791.0,3780.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDAR,Economics,daily,quadratic,1,Arkansas gas price,17,1,15,5124.59,4637.06,1,17.0,0,gas_price,tail rule read
+KXAAAGASDAZ,Economics,daily,quadratic,1,Arizona gas price,17,1,8,2832.71,2800.71,1,17.0,0,gas_price,tail rule read
+KXAAAGASDCA,Economics,daily,quadratic,1,California gas price,17,1,15,13058.21,9886.81,1,17.0,0,gas_price,tail rule read
+KXAAAGASDCO,Economics,daily,quadratic,1,Colorado gas price,17,1,0,0.0,0.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDCT,Economics,daily,quadratic,1,Connecticut gas price,17,1,6,2578.02,2578.02,1,17.0,0,gas_price,tail rule read
+KXAAAGASDDE,Economics,daily,quadratic,1,Delaware gas price,17,1,11,3358.64,3293.9,1,17.0,0,gas_price,tail rule read
+KXAAAGASDFL,Economics,daily,quadratic,1,Florida gas price,17,1,11,362.54,315.54,1,17.0,0,gas_price,tail rule read
+KXAAAGASDGA,Economics,daily,quadratic,1,Georgia gas price,17,1,10,5095.27,4349.37,1,17.0,0,gas_price,tail rule read
+KXAAAGASDHI,Economics,daily,quadratic,1,Hawaii gas price,17,1,6,1875.01,1874.01,1,17.0,0,gas_price,tail rule read
+KXAAAGASDIA,Economics,daily,quadratic,1,Iowa gas price,17,1,9,5007.14,4397.77,1,17.0,0,gas_price,tail rule read
+KXAAAGASDID,Economics,daily,quadratic,1,Idaho gas price,17,1,7,3019.01,2778.13,1,17.0,0,gas_price,tail rule read
+KXAAAGASDIL,Economics,daily,quadratic,1,Illinois gas price,17,1,9,4219.24,3747.93,1,17.0,0,gas_price,tail rule read
+KXAAAGASDIN,Economics,daily,quadratic,1,Indiana gas price,17,1,5,1914.4,1906.33,1,17.0,0,gas_price,tail rule read
+KXAAAGASDKS,Economics,daily,quadratic,1,Kansas gas price,17,1,10,1536.0,1536.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDKY,Economics,daily,quadratic,1,Kentucky gas price,17,1,8,2041.65,2020.62,1,17.0,0,gas_price,tail rule read
+KXAAAGASDLA,Economics,daily,quadratic,1,Louisiana gas price,17,1,8,5963.79,5578.81,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMA,Economics,daily,quadratic,1,Massachusetts gas price,17,1,9,8563.95,6127.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMD,Economics,daily,quadratic,1,Maryland gas price,17,1,5,564.24,553.76,1,17.0,0,gas_price,tail rule read
+KXAAAGASDME,Economics,daily,quadratic,1,Maine gas price,17,1,5,133.0,117.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMI,Economics,daily,quadratic,1,Michigan gas price,27,1,20,4094.96,4017.7,1,27.0,0,gas_price,tail rule read
+KXAAAGASDMN,Economics,daily,quadratic,1,Minnesota gas price,17,1,10,4799.01,4778.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMO,Economics,daily,quadratic,1,Missouri gas price,17,1,5,2326.67,2017.03,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMS,Economics,daily,quadratic,1,Mississippi gas price,17,1,7,4471.08,3127.79,1,17.0,0,gas_price,tail rule read
+KXAAAGASDMT,Economics,daily,quadratic,1,Montana gas price,17,1,5,2605.45,2511.87,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNC,Economics,daily,quadratic,1,North Carolina gas price,17,1,5,2146.21,2115.0,1,17.0,0,gas_price,tail rule read
+KXAAAGASDND,Economics,daily,quadratic,1,North Dakota gas price,17,1,11,6998.63,4888.19,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNE,Economics,daily,quadratic,1,Nebraska gas price,17,1,12,4140.76,4139.21,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNH,Economics,daily,quadratic,1,New Hampshire gas price,17,1,7,3027.99,2870.99,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNJ,Economics,daily,quadratic,1,New Jersey gas prices,17,1,13,3858.11,2831.16,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNM,Economics,daily,quadratic,1,New Mexico gas price,17,1,8,4272.46,3605.4,1,17.0,0,gas_price,tail rule read
+KXAAAGASDNV,Economics,daily,quadratic,1,Nevada gas price,27,1,19,6351.88,5991.42,1,27.0,0,gas_price,tail rule read
+KXAAAGASDNY,Economics,daily,quadratic,1,New York gas price,17,1,10,3301.05,2617.08,1,17.0,0,gas_price,tail rule read
+KXAAAGASDOH,Economics,daily,quadratic,1,Ohio gas price,27,1,10,1026.32,1021.32,1,27.0,0,gas_price,tail rule read
+KXAAAGASDOK,Economics,daily,quadratic,1,Oklahoma gas price,17,1,8,3622.59,3389.63,1,17.0,0,gas_price,tail rule read
+KXAAAGASDOR,Economics,daily,quadratic,1,Oregon gas price,17,1,8,3106.19,2718.34,1,17.0,0,gas_price,tail rule read
+KXAAAGASDPA,Economics,daily,quadratic,1,Pennsylvania gas price,17,1,3,590.77,438.43,1,17.0,0,gas_price,tail rule read
+KXAAAGASDRI,Economics,daily,quadratic,1,Rhode Island gas price,17,1,7,4127.92,3534.34,1,17.0,0,gas_price,tail rule read
+KXAAAGASDSC,Economics,daily,quadratic,1,South Carolina gas price,17,1,9,2267.47,1730.03,1,17.0,0,gas_price,tail rule read
+KXAAAGASDSD,Economics,daily,quadratic,1,South Dakota gas price,17,1,7,1537.22,1360.85,1,17.0,0,gas_price,tail rule read
+KXAAAGASDTN,Economics,daily,quadratic,1,Tennessee gas price,17,1,9,5992.01,5480.25,1,17.0,0,gas_price,tail rule read
+KXAAAGASDTX,Economics,daily,quadratic,1,TX gas price,17,1,15,6088.93,5284.61,1,17.0,0,gas_price,tail rule read
+KXAAAGASDUT,Economics,daily,quadratic,1,Utah gas price,17,1,5,1507.89,1444.47,1,17.0,0,gas_price,tail rule read
+KXAAAGASDVA,Economics,daily,quadratic,1,Virginia gas price,17,1,16,12010.34,9670.48,1,17.0,0,gas_price,tail rule read
+KXAAAGASDVT,Economics,daily,quadratic,1,Vermont gas price,17,1,4,1652.38,1390.74,1,17.0,0,gas_price,tail rule read
+KXAAAGASDWA,Economics,daily,quadratic,1,Washington gas price,17,1,5,537.69,528.69,1,17.0,0,gas_price,tail rule read
+KXAAAGASDWI,Economics,daily,quadratic,1,Wisconsin gas price,27,1,17,7932.95,6401.16,1,27.0,0,gas_price,tail rule read
+KXAAAGASDWV,Economics,daily,quadratic,1,West Virginia gas price,17,1,11,4940.99,4496.98,1,17.0,0,gas_price,tail rule read
+KXAAAGASDWY,Economics,daily,quadratic,1,Wyoming gas price,17,1,10,10785.79,7981.89,1,17.0,0,gas_price,tail rule read
+KXAAAGASMINM,Economics,monthly,quadratic,1,US lowest gas price monthly,1,1,1,15709.36,11677.6,1,1.0,0,,not in V2's sweep files
+KXAHLGAME,,,,,,4,2,4,27577.7,22356.7,0,2.0,0,minor_hockey,"eligible, never read"
+KXAIRFARECPI,Economics,monthly,quadratic,1,US airline fares CPI in [month],14,1,14,7943.69,1945.65,1,14.0,0,,not in V2's sweep files
+KXAPFDDHBTTS,,,,,,1,1,1,142163.49,61657.02,0,1.0,0,,not in V2's sweep files
+KXAPFDDHGAME,,,,,,3,1,3,993068.17,527496.65,0,3.0,1,,not in V2's sweep files
+KXAPFDDHSPREAD,,,,,,5,1,5,156411.39,55754.33,0,5.0,0,,not in V2's sweep files
+KXAPFDDHTOTAL,,,,,,6,1,6,567263.44,274351.81,0,6.0,0,soccer_minor,tail rule read
+KXARGLNBGAME,,,,,,4,2,4,21607.66,13878.35,0,2.0,0,,not in V2's sweep files
+KXARTISTSTREAMSY,Entertainment,annual,quadratic,1,Artist Yearly Streams,1,1,1,675.9,428.14,1,1.0,0,,not in V2's sweep files
+KXATP,,,,,,16,1,4,957.26,957.26,0,16.0,0,,not in V2's sweep files
+KXATPCHALLENGERDOUBLES,,,,,,14,7,14,62973.31,49620.87,0,2.0,0,tennis,tail rule read
+KXATPCHALLENGERMATCH,,,,,,168,84,168,96068568.86,46940592.68,0,2.0,0,,not in V2's sweep files
+KXATPDOUBLES,,,,,,4,2,4,75095.19,61194.16,0,2.0,0,tennis,tail rule read
+KXATPEXACTMATCH,,,,,,32,8,27,417482.95,263717.69,0,4.0,0,,not in V2's sweep files
+KXATPGSPREAD,,,,,,24,8,20,229079.21,123029.9,0,3.0,0,tennis,"eligible, never read"
+KXATPGTOTAL,,,,,,24,8,21,454615.42,238796.7,0,3.0,0,tennis,tail rule read
+KXATPMATCH,,,,,,16,8,16,16181695.27,9039743.31,0,2.0,0,tennis,tail rule read
+KXATPSETWINNER,,,,,,32,16,25,2047817.41,1411195.82,0,2.0,0,,not in V2's sweep files
+KXAUDUSD15M,Financials,fifteen_min,quadratic,1,15-minute AUDUSD,71,71,71,392516.61,149732.07,1,1.0,0,,not in V2's sweep files
+KXAUDUSDAD,Financials,daily,quadratic,1,AUDUSD Daily,20,1,0,0.0,0.0,1,20.0,0,fx_ladder,tail rule read
+KXAUDUSDEVENT,Financials,custom,quadratic,1,AUD/USD after economic events,21,1,0,0.0,0.0,1,21.0,0,,not in V2's sweep files
+KXAUTODELQ,Economics,quarterly,quadratic,1,Auto-loan delinquencies in QX?,8,1,7,13089.88,6726.12,1,8.0,0,,not in V2's sweep files
+KXBC2ND,Elections,one_off,quadratic,1,British Columbia general election: 2nd place,5,1,5,22099.01,14590.82,1,5.0,0,,not in V2's sweep files
+KXBC3RD,Elections,one_off,quadratic,1,British Columbia general election: 3rd place,5,1,5,36905.48,17286.56,1,5.0,0,,not in V2's sweep files
+KXBCCONSEATS,Elections,one_off,quadratic,1,British Columbia election: Conservative number of seats,10,1,6,9644.17,5550.07,1,10.0,0,,not in V2's sweep files
+KXBCNDPSEATS,Elections,one_off,quadratic,1,British Columbia election: NDP number of seats,9,1,6,7939.83,2480.43,1,9.0,0,,not in V2's sweep files
+KXBIGGESTQUAKE,,,,,,10,1,10,10622.7,6561.88,0,10.0,0,wx_hazard,tail rule read
+KXBNB,Crypto,hourly,quadratic,1,BNB,40,1,5,102.4,97.72,1,40.0,0,,not in V2's sweep files
+KXBNB15M,Crypto,fifteen_min,quadratic,1,BNB 15 min,71,71,71,2059461.33,959540.78,1,1.0,0,,not in V2's sweep files
+KXBNBD,Crypto,hourly,quadratic,1,BNB Directional,66,2,7,1067.59,1054.59,1,33.0,0,,not in V2's sweep files
+KXBNBMINMON,Crypto,monthly,quadratic,1,BNB Min Monthly,1,1,0,0.0,0.0,1,1.0,0,,not in V2's sweep files
+KXBOLPDIVGAME,,,,,,3,1,3,1766078.98,774184.5,0,3.0,1,,not in V2's sweep files
+KXBOOKERPRIZE,Entertainment,one_off,quadratic,1,who will win the booker prize,7,1,7,1034.14,941.73,1,7.0,1,,not in V2's sweep files
+KXBRENT15M,Commodities,fifteen_min,quadratic,1,Brent 15-minute,72,72,72,655088.4,326871.5,1,1.0,0,,not in V2's sweep files
+KXBRENTD,Commodities,daily,quadratic,1,Brent Oil Daily,40,1,35,51826.57,34243.03,1,40.0,0,commodity_ladder,tail rule read
+KXBTC,Crypto,hourly,quadratic,1,Bitcoin range,305,4,43,245263.22,95363.68,1,76.25,0,,not in V2's sweep files
+KXBTC15M,Crypto,fifteen_min,quadratic,1,BTC 15 min,72,72,72,276334899.48,92471326.22,1,1.0,0,,not in V2's sweep files
+KXBTCD,Crypto,hourly,quadratic,1,Bitcoin price Above/below,1277,10,194,10641964.44,3611400.3,1,127.7,0,,not in V2's sweep files
+KXCABALLOTMEASURES,Elections,one_off,quadratic,1,Which California ballot measures will pass?,4,1,4,22282.17,9538.78,1,4.0,0,,not in V2's sweep files
+KXCAELECTION,Elections,one_off,quadratic,1,California general elections ,2,1,2,74642.27,43108.73,1,2.0,0,,not in V2's sweep files
+KXCAWEALTHTAX,Elections,one_off,quadratic,1,Will the California billionaire wealth tax initiative pass?,1,1,1,4803093.2,1559159.09,1,1.0,0,,not in V2's sweep files
+KXCAWEALTHTAXMOVD,Elections,one_off,quadratic,1,California Proposition 40 margin of victory,8,1,8,48341.56,21932.72,1,8.0,0,,not in V2's sweep files
+KXCLAUDE,,,,,,4,1,4,23025.98,11642.66,0,4.0,0,,not in V2's sweep files
+KXCOPADELREYBTTS,,,,,,3,3,3,121274.53,51068.85,0,1.0,0,,not in V2's sweep files
+KXCOPADELREYGAME,,,,,,9,3,9,1447821.23,1037325.08,0,3.0,3,,not in V2's sweep files
+KXCOPADELREYSPREAD,,,,,,20,3,17,128008.57,78617.15,0,6.67,0,,not in V2's sweep files
+KXCOPADELREYTOTAL,,,,,,25,3,25,703674.69,407841.1,0,8.33,0,,not in V2's sweep files
+KXCOPPER15M,Commodities,fifteen_min,quadratic,1,Copper 15-minute,75,75,75,1097468.93,586900.96,1,1.0,0,,not in V2's sweep files
+KXCOPPERD,Commodities,daily,quadratic,1,Daily Copper,50,1,17,33365.59,10054.82,1,50.0,0,commodity_ladder,tail rule read
+KXCPI,Economics,monthly,quadratic_with_maker_fees,1,CPI,12,1,12,1535119.63,814515.08,1,12.0,0,,not in V2's sweep files
+KXCPICOMBO,Economics,monthly,quadratic,1,CPI Combo,16,1,14,64403.65,32533.49,1,16.0,0,,not in V2's sweep files
+KXCPICORE,Economics,monthly,quadratic,1,CPI core,11,1,11,1160432.42,484030.28,1,11.0,0,,not in V2's sweep files
+KXCPICOREGOODSMOM,Economics,monthly,quadratic,1,Core goods CPI MoM,7,1,7,987.51,416.51,1,7.0,0,,not in V2's sweep files
+KXCPICOREHEADMOM,Economics,monthly,quadratic,1,MoM core CPI above headline CPI in [month],1,1,1,2346.73,2323.32,1,1.0,0,,not in V2's sweep files
+KXCPINDEX,Economics,monthly,quadratic,1,CPI-U index in [month],35,1,29,30044.59,12506.02,1,35.0,0,,not in V2's sweep files
+KXCRWV,Financials,one_off,quadratic,1,Coreweave quarter kpi,12,1,6,3471.78,3173.98,1,12.0,0,,not in V2's sweep files
+KXCRYPTOLEAD15M,Crypto,fifteen_min,quadratic,1,Coin Race 15 minutes,400,80,328,97995.68,45999.41,1,5.0,0,,not in V2's sweep files
+KXCS2GAME,,,,,,84,42,83,1550589.15,926871.82,0,2.0,0,,not in V2's sweep files
+KXCS2MAP,,,,,,80,40,70,428839.1,218262.83,0,2.0,0,,not in V2's sweep files
+KXCS2SPREAD,,,,,,10,5,7,4335.52,4091.66,0,2.0,0,,not in V2's sweep files
+KXCS2TOTALMAPS,,,,,,22,22,19,31059.09,16317.36,0,1.0,0,,not in V2's sweep files
+KXDARTSMATCH,,,,,,26,13,24,22146.19,22019.85,0,2.0,0,,not in V2's sweep files
+KXDCFOIEGRAS,Elections,one_off,quadratic,1,DC foie gras ban initiative,1,1,1,4541.46,3244.19,1,1.0,0,,not in V2's sweep files
+KXDEMSCHUMER,Politics,one_off,quadratic,1,Will a Democratic Senator call for Schumer to step down as leader?,1,1,1,37453.75,25299.35,1,1.0,0,,not in V2's sweep files
+KXDHOUSEWON,Elections,one_off,quadratic,1,Democratic House seats won (media calls),1,1,1,19653.08,16401.33,1,1.0,0,,not in V2's sweep files
+KXDIESELD,Economics,daily,quadratic,1,Daily Diesel Price,21,1,19,121616.64,59521.71,1,21.0,0,gas_price,tail rule read
+KXDIMAYORGAME,,,,,,3,1,3,1454946.76,890488.61,0,3.0,1,soccer_minor,tail rule read
+KXDIMAYORTOTAL,,,,,,1,1,1,46670.65,26329.29,0,1.0,0,soccer_minor,tail rule read
+KXDJI,Financials,hourly,quadratic,1,DJI Hourly,77,1,32,49682.65,40743.79,1,77.0,0,index_ladder,tail rule read
+KXDOGE,Crypto,hourly,quadratic,1,Dogecoin range,474,10,11,2851.76,2842.76,1,47.4,0,,not in V2's sweep files
+KXDOGE15M,Crypto,fifteen_min,quadratic,1,DOGE 15 min,80,80,80,6285177.83,2545254.87,1,1.0,0,,not in V2's sweep files
+KXDOGED,Crypto,hourly,quadratic,1,Dogecoin price Above/below,474,10,15,3163.49,2586.01,1,47.4,0,,not in V2's sweep files
+KXDOTA2GAME,,,,,,38,19,38,827709.45,519733.62,0,2.0,0,esports,tail rule read
+KXDOTA2MAP,,,,,,78,39,74,468159.56,348824.38,0,2.0,0,esports,"eligible, never read"
+KXDOTA2TOTALMAPS,,,,,,19,19,18,6328.11,5138.72,0,1.0,0,esports,"eligible, never read"
+KXEARNINGSMENTIONASTS,Mentions,one_off,quadratic,1,AST SpaceMobile,12,1,12,17171.61,12626.11,1,12.0,0,,not in V2's sweep files
+KXEARNINGSMENTIONETOR,Mentions,one_off,quadratic,1,Etoro,14,1,14,28971.66,25313.97,1,14.0,0,,not in V2's sweep files
+KXEARNINGSMENTIONTTWO,Mentions,one_off,quadratic,1,Take Two Earnings Call,11,1,11,13034.11,10008.38,1,11.0,0,,not in V2's sweep files
+KXEARNINGSMENTIONZETA,Mentions,one_off,quadratic,1,Zeta,13,1,13,22515.72,15155.66,1,13.0,0,,not in V2's sweep files
+KXEBASKETBALLGAME,,,,,,168,84,168,697605.03,414854.9,0,2.0,0,,not in V2's sweep files
+KXECONSTATCPI,Economics,monthly,quadratic,1,month over month inflation,9,1,9,55754.65,22720.01,1,9.0,0,,not in V2's sweep files
+KXECONSTATCPICORE,Economics,monthly,quadratic,1,month over month core inflation,8,1,8,45486.64,17979.92,1,8.0,0,,not in V2's sweep files
+KXEERSTEDIVBTTS,,,,,,1,1,1,26.94,26.94,0,1.0,0,,not in V2's sweep files
+KXEERSTEDIVGAME,,,,,,3,1,3,157696.82,114816.44,0,3.0,1,,not in V2's sweep files
+KXEERSTEDIVSPREAD,,,,,,4,1,4,4343.71,3868.54,0,4.0,0,soccer_minor,"eligible, never read"
+KXEERSTEDIVTOTAL,,,,,,6,1,6,17093.74,16775.93,0,6.0,0,soccer_minor,"eligible, never read"
+KXEFLTROPHYBTTS,,,,,,12,12,12,69841.37,47726.01,0,1.0,0,,not in V2's sweep files
+KXEFLTROPHYGAME,,,,,,36,12,36,1884329.07,1010116.68,0,3.0,12,,not in V2's sweep files
+KXEFLTROPHYSPREAD,,,,,,59,12,55,162771.45,109834.31,0,4.92,0,,not in V2's sweep files
+KXEFLTROPHYTOTAL,,,,,,89,12,80,405298.43,244942.82,0,7.42,0,,not in V2's sweep files
+KXEGGS,Economics,monthly,quadratic_with_maker_fees,1,Egg prices,1,1,1,23669.86,6467.61,1,1.0,0,,not in V2's sweep files
+KXEPLSOA,,,,,,1,1,0,0.0,0.0,0,1.0,0,,not in V2's sweep files
+KXEPOCHSCORE,,,,,,5,1,5,4782.93,4583.68,0,5.0,0,,not in V2's sweep files
+KXEPSTEINFILES,Politics,one_off,quadratic,1,When will the federal government release more Epstein files?,5,1,4,6.79,6.79,1,5.0,0,,not in V2's sweep files
+KXESOCCERGAME,,,,,,1350,450,1350,1548187.18,1130210.89,0,3.0,450,,not in V2's sweep files
+KXETH,Crypto,hourly,quadratic,1,Ethereum range,3026,12,102,36980.63,28287.59,1,252.17,0,,not in V2's sweep files
+KXETH15M,Crypto,fifteen_min,quadratic,1,ETH 15 min,80,80,80,17590834.23,6844389.47,1,1.0,0,,not in V2's sweep files
+KXETHD,Crypto,hourly,quadratic,1,Ethereum price Above/below,3958,15,206,645729.63,354579.9,1,263.87,0,,not in V2's sweep files
+KXETOR,Financials,one_off,quadratic,1,eToro Quarter KPI,7,1,6,13981.57,8453.63,1,7.0,0,,not in V2's sweep files
+KXEUCHLGAME,,,,,,8,4,7,3910.01,2464.26,0,2.0,0,,not in V2's sweep files
+KXEUROCUPGAME,,,,,,16,8,16,602283.8,374755.46,0,2.0,0,,not in V2's sweep files
+KXEUROCUPSPREAD,,,,,,24,8,24,36242.82,24463.08,0,3.0,0,,not in V2's sweep files
+KXEUROCUPTOTAL,,,,,,24,8,24,38816.69,27752.92,0,3.0,0,,not in V2's sweep files
+KXEURUSD,Financials,daily,quadratic,1,EUR/USD daily range,15,1,7,1270.34,997.13,1,15.0,0,fx_ladder,tail rule read
+KXEURUSD15M,Financials,fifteen_min,quadratic,1,15-minute EURUSD,85,85,85,879467.2,367498.39,1,1.0,0,,not in V2's sweep files
+KXEURUSDEVENT,Financials,custom,quadratic,1,EUR/USD after economic events,21,1,13,18731.85,16732.85,1,21.0,0,,not in V2's sweep files
+KXEVLV,Financials,one_off,quadratic,1,Evolv technologies quarter kpi,5,1,3,422.78,413.48,1,5.0,0,,not in V2's sweep files
+KXFIBACHAMPGAME,,,,,,8,4,8,217975.42,131564.36,0,2.0,0,,not in V2's sweep files
+KXFIBACHAMPSPREAD,,,,,,48,4,42,29227.52,21213.2,0,12.0,0,,not in V2's sweep files
+KXFIBACHAMPTOTAL,,,,,,36,4,35,15202.41,12842.41,0,9.0,0,,not in V2's sweep files
+KXFIBAECUPGAME,,,,,,2,1,2,7730.75,6761.37,0,2.0,0,,not in V2's sweep files
+KXFIBAECUPSPREAD,,,,,,12,1,8,3845.49,3529.91,0,12.0,0,,not in V2's sweep files
+KXFIBAECUPTOTAL,,,,,,11,1,6,410.8,410.8,0,11.0,0,,not in V2's sweep files
+KXGBPUSD15M,Financials,fifteen_min,quadratic,1,15-minute GBPUSD,85,85,85,627884.27,246677.97,1,1.0,0,,not in V2's sweep files
+KXGBPUSDAD,Financials,daily,quadratic,1,GBPUSD Daily,20,1,1,2.0,1.0,1,20.0,0,fx_ladder,tail rule read
+KXGBPUSDEVENT,Financials,custom,quadratic,1,GBP/USD after economic events,21,1,0,0.0,0.0,1,21.0,0,,not in V2's sweep files
+KXGOLD15M,Commodities,fifteen_min,quadratic,1,Gold 15-minute,80,80,80,40530813.51,14686814.8,1,1.0,0,,not in V2's sweep files
+KXGOLDD,Commodities,daily,quadratic,1,Gold Daily,40,1,28,178621.36,96727.62,1,40.0,0,commodity_ladder,tail rule read
+KXGOLDH,Commodities,hourly,quadratic,1,Gold Hourly,710,14,275,228444.58,118734.64,1,50.71,0,,not in V2's sweep files
+KXGOPCONFCHAIR120,Elections,one_off,quadratic,1,House Republican Conference Chair (120th Congress),3,1,3,3941.02,2560.09,1,3.0,0,,not in V2's sweep files
+KXGOPWHIP120,Elections,one_off,quadratic,1,House Republican Whip (120th Congress),2,1,2,10233.08,7687.45,1,2.0,0,,not in V2's sweep files
+KXHEGSETHMENTION,Mentions,one_off,quadratic,1,Hegseth,20,1,20,145370.66,120925.28,1,20.0,0,,not in V2's sweep files
+KXHIGHAUS,,,,,,6,1,6,52176.64,36596.7,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHCHI,,,,,,6,1,6,65930.65,51792.55,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHDEN,,,,,,6,1,6,53461.56,33041.41,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHLAX,,,,,,6,1,6,176359.08,121259.28,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHMIA,,,,,,6,1,6,67444.85,55212.38,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHNY,,,,,,6,1,6,154387.16,104583.55,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHPHIL,,,,,,6,1,6,51954.24,38762.9,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTATL,,,,,,6,1,6,18800.97,12744.15,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTBOS,,,,,,6,1,6,24302.35,18694.28,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTDAL,,,,,,6,1,6,28796.85,20143.75,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTDC,,,,,,6,1,6,16225.53,12826.46,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTEWR,,,,,,6,1,6,1966.52,1680.2,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTHOU,,,,,,6,1,6,27118.48,19248.28,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTLV,,,,,,6,1,6,37052.78,27267.91,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTMIN,,,,,,6,1,6,20421.24,15377.02,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTNOLA,,,,,,6,1,6,5178.14,4222.17,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTOKC,,,,,,6,1,6,12171.87,7304.97,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTPHX,,,,,,6,1,6,16398.59,12227.11,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTSAN,,,,,,6,1,6,9665.51,8483.15,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTSATX,,,,,,6,1,6,16030.55,12242.42,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTSDF,,,,,,6,1,6,2208.96,1998.37,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTSEA,,,,,,6,1,6,52132.16,35208.3,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTSFO,,,,,,6,1,6,127429.03,90354.11,0,6.0,0,wx_daily_temp,tail rule read
+KXHIGHTTTN,,,,,,6,1,6,1632.55,1319.84,0,6.0,0,wx_daily_temp,tail rule read
+KXHORMUZMAX,Politics,weekly,quadratic,1,Maximum traffic through the Strait of Hormuz?,7,1,7,92601.33,24532.52,1,7.0,0,,not in V2's sweep files
+KXHORMUZPEAK,Politics,weekly,quadratic,1,Peak traffic through the Strait of Hormuz?,8,1,8,148581.25,59419.35,1,8.0,0,,not in V2's sweep files
+KXHORMUZWEEKLY,Politics,weekly,quadratic,1,Traffic through the Strait of Hormuz,9,1,9,413403.9,152394.99,1,9.0,0,,not in V2's sweep files
+KXHOUSERACE,Elections,one_off,quadratic,1,House Race Winner?,8,4,8,1779439.35,743287.78,1,2.0,0,,not in V2's sweep files
+KXHOUSEWINSTATE,Elections,one_off,quadratic,1,How many seats will party win in state?,9,1,9,16194.85,13782.71,1,9.0,0,,not in V2's sweep files
+KXHURPATHAL,,,,,,1,1,1,79131.23,12338.17,0,1.0,0,,not in V2's sweep files
+KXHYPE,Crypto,hourly,quadratic,1,Hype ,5172,20,93,13945.75,13294.67,1,258.6,0,,not in V2's sweep files
+KXHYPE15M,Crypto,fifteen_min,quadratic,1,HYPE 15 min,86,86,86,3872532.57,1609263.38,1,1.0,0,,not in V2's sweep files
+KXHYPED,Crypto,hourly,quadratic,1,Hype Directional,5740,20,197,67978.76,37915.62,1,287.0,0,,not in V2's sweep files
+KXIDPOTATO,Economics,annual,quadratic,1,Idaho potato production,1,1,1,50641.43,14780.65,1,1.0,0,,not in V2's sweep files
+KXINX,Financials,daily,quadratic,1,S&P 500 range,30,1,13,10155.65,5164.27,1,30.0,0,index_ladder,tail rule read
+KXINX15M,Financials,fifteen_min,quadratic,1,S&P 500 15-minute,25,25,25,1426833.02,487050.87,1,1.0,0,,not in V2's sweep files
+KXINXDUD,Financials,daily,quadratic,1,INXDUD,1,1,1,22916.53,14566.41,1,1.0,0,,not in V2's sweep files
+KXINXHUD,Financials,one_off,quadratic,1,INXHUD,4,4,0,0.0,0.0,1,1.0,0,,not in V2's sweep files
+KXINXU,Financials,hourly,quadratic,1,S&P 500 above/below,629,7,352,1422537.05,1040142.45,1,89.86,0,,not in V2's sweep files
+KXITFDOUBLES,,,,,,118,59,118,425722.5,346664.15,0,2.0,0,,not in V2's sweep files
+KXITFMATCH,,,,,,322,161,322,29242506.54,13759311.67,0,2.0,0,,not in V2's sweep files
+KXITFWDOUBLES,,,,,,94,47,93,325970.96,249668.29,0,2.0,0,,not in V2's sweep files
+KXITFWMATCH,,,,,,282,141,282,31920324.16,15182932.73,0,2.0,0,,not in V2's sweep files
+KXJBLEAGUEGAME,,,,,,6,3,6,201589.31,122719.25,0,2.0,0,,not in V2's sweep files
+KXKBLGAME,,,,,,2,1,2,128913.89,106249.42,0,2.0,0,,not in V2's sweep files
+KXKHLGAME,,,,,,6,3,6,57843.47,42254.67,0,2.0,0,minor_hockey,"eligible, never read"
+KXLAHOUSE1R,Elections,one_off,quadratic,1,Louisiana's 2026 U.S. House elections: which will be won outright?,1,1,1,17706.15,11725.41,1,1.0,0,,not in V2's sweep files
+KXLALIGA2GAME,,,,,,3,1,3,105.12,105.12,0,3.0,1,,not in V2's sweep files
+KXLASTWORDMENTION,Mentions,one_off,quadratic,1,Last Word,5,1,5,50572.4,46660.17,1,5.0,0,,not in V2's sweep files
+KXLIGAFGAME,,,,,,3,1,0,0.0,0.0,0,3.0,1,,not in V2's sweep files
+KXLIGAPORTUGAL1H,,,,,,3,1,0,0.0,0.0,0,3.0,1,,not in V2's sweep files
+KXLIGAPORTUGAL1HBTTS,,,,,,1,1,0,0.0,0.0,0,1.0,0,,not in V2's sweep files
+KXLIGAPORTUGAL1HSPREAD,,,,,,2,1,0,0.0,0.0,0,2.0,0,,not in V2's sweep files
+KXLIGAPORTUGAL1HTOTAL,,,,,,3,1,0,0.0,0.0,0,3.0,0,,not in V2's sweep files
+KXLIGAPORTUGALBTTS,,,,,,1,1,0,0.0,0.0,0,1.0,0,,not in V2's sweep files
+KXLIGAPORTUGALGAME,,,,,,3,1,3,1084.53,957.54,0,3.0,1,,not in V2's sweep files
+KXLIGAPORTUGALSPREAD,,,,,,4,1,1,1854.12,1836.12,0,4.0,0,,not in V2's sweep files
+KXLIGAPORTUGALTOTAL,,,,,,6,1,0,0.0,0.0,0,6.0,0,soccer_minor,tail rule read
+KXLIGAPROMATCH,,,,,,294,147,264,1059593.4,726146.83,0,2.0,0,,not in V2's sweep files
+KXLIGMAGGAME,,,,,,4,2,4,6440.7,4311.36,0,2.0,0,,not in V2's sweep files
+KXLOLGAME,,,,,,4,2,4,359840.96,214389.04,0,2.0,0,,not in V2's sweep files
+KXLOLMAP,,,,,,12,6,12,348257.81,201957.79,0,2.0,0,,not in V2's sweep files
+KXLOLTOTALMAPS,,,,,,4,2,4,48095.97,22828.42,0,2.0,0,,not in V2's sweep files
+KXLOWTATL,,,,,,6,1,6,7672.42,6371.99,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTAUS,,,,,,6,1,6,2290.47,2168.38,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTBOS,,,,,,6,1,6,4327.92,3209.83,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTCHI,,,,,,6,1,6,2416.61,2100.63,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTDAL,,,,,,6,1,6,2422.87,1967.62,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTDC,,,,,,6,1,6,7214.09,5803.45,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTDEN,,,,,,6,1,6,20728.38,15843.23,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTEWR,,,,,,6,1,6,3258.27,2016.9,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTHOU,,,,,,6,1,6,10055.04,8766.93,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTLAX,,,,,,6,1,6,6030.32,5194.36,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTLV,,,,,,6,1,6,7201.16,6271.76,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTMIA,,,,,,6,1,6,7804.95,5875.46,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTMIN,,,,,,6,1,6,3917.89,3582.2,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTNOLA,,,,,,6,1,6,4979.71,3315.12,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTNYC,,,,,,6,1,6,32066.65,16782.07,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTOKC,,,,,,6,1,6,5869.01,4906.51,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTPHIL,,,,,,6,1,6,5507.09,3796.96,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTPHX,,,,,,6,1,6,4299.11,3148.16,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTSAN,,,,,,6,1,6,2780.09,2265.84,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTSATX,,,,,,6,1,6,4522.57,4221.87,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTSDF,,,,,,6,1,6,2519.99,1887.6,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTSEA,,,,,,6,1,6,4902.98,4160.38,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTSFO,,,,,,6,1,6,11410.02,9874.16,0,6.0,0,wx_daily_temp,tail rule read
+KXLOWTTTN,,,,,,6,1,6,4385.67,2691.19,0,6.0,0,wx_daily_temp,tail rule read
+KXLVAVIRBTTS,,,,,,1,1,1,159.61,119.84,0,1.0,0,,not in V2's sweep files
+KXLVAVIRGAME,,,,,,3,1,3,100258.23,42889.29,0,3.0,1,,not in V2's sweep files
+KXLVAVIRSPREAD,,,,,,5,1,5,3143.96,3074.76,0,5.0,0,,not in V2's sweep files
+KXLVAVIRTOTAL,,,,,,6,1,6,8136.66,7245.65,0,6.0,0,,not in V2's sweep files
+KXMAXSHIPSHORMUZ,Politics,monthly,quadratic,1,Maximum daily count of ships through the Strait of Hormuz?,1,1,1,3605.6,813.0,1,1.0,0,,not in V2's sweep files
+KXME,Financials,one_off,quadratic,1,S&P/BMV IPC Index,1,1,1,1421.42,636.24,1,1.0,0,,not in V2's sweep files
+KXMIDTERMMOV,Elections,one_off,quadratic,1,Midterm margin of victory,68,6,59,445265.71,289047.65,1,11.33,0,,not in V2's sweep files
+KXMIDTERMVOTETURN,Elections,one_off,quadratic,1,Midterm Voter Turnout,55,5,40,16534.04,12113.52,1,11.0,0,,not in V2's sweep files
+KXMINLEAD120,Elections,one_off,quadratic,1,House Minority Leader (120th Congress),17,1,17,223849.4,129123.83,1,17.0,0,,not in V2's sweep files
+KXMLBALROTY,,,,,,30,1,29,2218819.8,1534040.59,0,30.0,1,,not in V2's sweep files
+KXMLBBGAME,,,,,,8,4,8,2898.57,2895.57,0,2.0,0,,not in V2's sweep files
+KXMLBNLROTY,,,,,,30,1,30,6239444.24,4383432.26,0,30.0,1,,not in V2's sweep files
+KXMOVKSNESEN,Elections,one_off,quadratic,1,Larger margin of victory: Kansas or Nebraska Senate?,2,1,2,19849.98,6719.44,1,2.0,0,,not in V2's sweep files
+KXNASDAQ100,Financials,daily,quadratic,1,Nasdaq range,30,1,14,4576.76,3488.53,1,30.0,0,index_ladder,tail rule read
+KXNASDAQ100U,Financials,hourly,quadratic,1,Nasdaq above/below,2800,7,1226,941052.59,857922.06,1,400.0,0,,not in V2's sweep files
+KXNASDAQDUD,Financials,daily,quadratic,1,NASDAQDUD,1,1,1,8447.69,2817.71,1,1.0,0,,not in V2's sweep files
+KXNATGAS15M,Commodities,fifteen_min,quadratic,1,Natural Gas 15-minute,90,90,90,3054470.1,1191502.39,1,1.0,0,,not in V2's sweep files
+KXNATGASD,Commodities,daily,quadratic,1,Natural Gas Daily,130,1,114,92849.16,58727.63,1,130.0,0,commodity_ladder,tail rule read
+KXNBA1H,,,,,,18,6,18,418204.62,267810.79,0,3.0,6,nba_mls_periods,tail rule read
+KXNBA1HSPREAD,,,,,,114,6,114,826631.68,529449.48,0,19.0,0,,not in V2's sweep files
+KXNBA1HTEAMTOTAL,,,,,,132,6,117,38064.68,33991.06,0,22.0,0,,not in V2's sweep files
+KXNBA1HTOTAL,,,,,,114,6,114,868904.47,576681.28,0,19.0,0,,not in V2's sweep files
+KXNBA1Q,,,,,,24,8,24,657796.52,460830.57,0,3.0,8,,not in V2's sweep files
+KXNBA1QSPREAD,,,,,,104,8,104,839706.16,579757.98,0,13.0,0,,not in V2's sweep files
+KXNBA1QTOTAL,,,,,,104,8,104,773694.72,496769.95,0,13.0,0,,not in V2's sweep files
+KXNBA2D,,,,,,74,8,69,131249.24,124361.6,0,9.25,0,,not in V2's sweep files
+KXNBA2H,,,,,,21,7,21,170753.61,116263.98,0,3.0,7,,not in V2's sweep files
+KXNBA2HSPREAD,,,,,,133,7,128,372775.11,259710.38,0,19.0,0,,not in V2's sweep files
+KXNBA2HTOTAL,,,,,,133,7,127,92582.65,70000.05,0,19.0,0,,not in V2's sweep files
+KXNBA2Q,,,,,,18,6,18,106068.73,76294.25,0,3.0,6,,not in V2's sweep files
+KXNBA2QSPREAD,,,,,,78,6,78,196202.77,130473.07,0,13.0,0,,not in V2's sweep files
+KXNBA2QTOTAL,,,,,,78,6,78,217665.16,136054.24,0,13.0,0,,not in V2's sweep files
+KXNBA3D,,,,,,27,6,17,80669.91,75956.91,0,4.5,0,,not in V2's sweep files
+KXNBA3PT,,,,,,351,8,327,1055683.76,955004.8,0,43.88,0,,not in V2's sweep files
+KXNBA3PTPROT,,,,,,367,8,116,37460.93,36093.44,0,45.88,0,,not in V2's sweep files
+KXNBA3Q,,,,,,15,5,15,161863.24,116157.09,0,3.0,5,,not in V2's sweep files
+KXNBA3QSPREAD,,,,,,78,6,78,661678.88,378462.45,0,13.0,0,,not in V2's sweep files
+KXNBA3QTOTAL,,,,,,65,5,65,466792.27,273069.16,0,13.0,0,,not in V2's sweep files
+KXNBA4Q,,,,,,21,7,21,284003.88,192526.08,0,3.0,7,,not in V2's sweep files
+KXNBA4QSPREAD,,,,,,91,7,91,866059.63,506276.96,0,13.0,0,,not in V2's sweep files
+KXNBA4QTOTAL,,,,,,91,7,91,223508.0,157161.38,0,13.0,0,,not in V2's sweep files
+KXNBAAST,,,,,,249,8,236,1166168.92,1098543.01,0,31.12,0,,not in V2's sweep files
+KXNBAASTPROT,,,,,,254,8,74,19285.56,19026.41,0,31.75,0,,not in V2's sweep files
+KXNBABLK,,,,,,70,7,63,58140.16,53049.66,0,10.0,0,,not in V2's sweep files
+KXNBAESCALATOR3PT,,,,,,25,6,20,3975.28,3975.28,0,4.17,0,,not in V2's sweep files
+KXNBAESCALATORPTS,,,,,,28,6,27,20300.84,18733.94,0,4.67,0,,not in V2's sweep files
+KXNBAGAME,,,,,,14,7,14,47225512.53,25112874.43,0,2.0,0,us_game_winner,tail rule read
+KXNBAOT,,,,,,7,7,7,21150.3,19847.34,0,1.0,0,,not in V2's sweep files
+KXNBAPRA,,,,,,254,8,243,244401.13,219931.35,0,31.75,0,,not in V2's sweep files
+KXNBAPRAPROT,,,,,,245,8,29,764.9,764.9,0,30.62,0,,not in V2's sweep files
+KXNBAPTS,,,,,,389,8,373,6010254.42,5053576.24,0,48.62,0,,not in V2's sweep files
+KXNBAPTSLEADER,,,,,,84,6,20,5843.82,5607.92,0,14.0,0,,not in V2's sweep files
+KXNBAPTSPROT,,,,,,322,8,161,145364.63,138972.26,0,40.25,0,,not in V2's sweep files
+KXNBARACE,,,,,,46,23,45,47951.38,41131.76,0,2.0,0,,not in V2's sweep files
+KXNBAREB,,,,,,389,8,371,1775103.71,1714293.95,0,48.62,0,,not in V2's sweep files
+KXNBAREBPROT,,,,,,373,8,106,11281.71,11264.46,0,46.62,0,,not in V2's sweep files
+KXNBASPREAD,,,,,,244,7,244,11219546.32,6669511.25,0,34.86,0,,not in V2's sweep files
+KXNBASTL,,,,,,134,8,121,90327.09,89256.42,0,16.75,0,,not in V2's sweep files
+KXNBASTOCK,,,,,,53,7,20,3626.55,3566.54,0,7.57,0,,not in V2's sweep files
+KXNBATEAMTOTAL,,,,,,288,7,278,779414.83,472153.38,0,41.14,0,,not in V2's sweep files
+KXNBATOTAL,,,,,,215,7,215,8019146.92,4294917.25,0,30.71,0,,not in V2's sweep files
+KXNBAWINMARGIN,,,,,,56,7,56,126030.37,100730.9,0,8.0,0,,not in V2's sweep files
+KXNBBGAME,,,,,,8,4,8,101440.18,65968.91,0,2.0,0,,not in V2's sweep files
+KXNCAAFACCREGTOP,,,,,,10,3,6,1693.46,1688.46,0,3.33,0,,not in V2's sweep files
+KXNCAAFCONFMATCHUP,,,,,,54,1,4,400.7,348.38,0,54.0,0,,not in V2's sweep files
+KXNCAAFSEC,,,,,,4,1,4,257237.86,222840.09,0,4.0,0,,not in V2's sweep files
+KXNCAAFSECQ,,,,,,4,1,4,1338.1,1325.88,0,4.0,0,,not in V2's sweep files
+KXNCAAFSECREGTOP,,,,,,5,2,3,2125.32,1732.71,0,2.5,0,,not in V2's sweep files
+KXNCAAMB1H,,,,,,63,21,60,494443.42,335180.0,0,3.0,21,,not in V2's sweep files
+KXNCAAMB1HSPREAD,,,,,,40,3,33,151716.14,80528.76,0,13.33,0,,not in V2's sweep files
+KXNCAAMB1HTOTAL,,,,,,41,3,39,186937.3,97024.79,0,13.67,0,,not in V2's sweep files
+KXNCAAMBGAME,,,,,,46,23,46,13336216.89,8871675.65,0,2.0,0,,not in V2's sweep files
+KXNCAAMBNEXTCOACH,,,,,,25,1,25,1084433.96,559942.54,0,25.0,0,,not in V2's sweep files
+KXNCAAMBOT,,,,,,2,2,2,594.95,520.45,0,1.0,0,,not in V2's sweep files
+KXNCAAMBSPREAD,,,,,,334,25,334,5786683.72,3456298.08,0,13.36,0,,not in V2's sweep files
+KXNCAAMBTOTAL,,,,,,413,25,413,6104896.55,3585751.92,0,16.52,0,,not in V2's sweep files
+KXNCAAWBGAME,,,,,,52,26,52,7254441.9,5368376.6,0,2.0,0,,not in V2's sweep files
+KXNCAAWBSPREAD,,,,,,172,15,164,813573.03,428664.96,0,11.47,0,,not in V2's sweep files
+KXNCAAWBTOTAL,,,,,,334,26,273,1165198.35,621749.37,0,12.85,0,,not in V2's sweep files
+KXNDQHUD,Financials,one_off,quadratic,1,NDQHUD,4,4,0,0.0,0.0,1,1.0,0,,not in V2's sweep files
+KXNEAR15M,Crypto,fifteen_min,quadratic,1,NEAR 15m,90,90,90,3396508.73,1458762.88,1,1.0,0,,not in V2's sweep files
+KXNETFLIXRANKMOVIE,Entertainment,weekly,quadratic,1,Netflix movie ranking,12,1,12,97368.09,87360.84,1,12.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKMOVIEGLOBAL,Entertainment,weekly,quadratic,1,Netflix movie ranking,12,1,12,14472.14,12539.66,1,12.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKMOVIEGLOBAL2,Entertainment,weekly,quadratic,1,RUNNER UP SHOW NETFLIX MOVIE GLOBAL,12,1,4,2593.17,2442.69,1,12.0,0,,not in V2's sweep files
+KXNETFLIXRANKMOVIERUNNERUP,Entertainment,weekly,quadratic,1,RUNNER UP NETFLIX MOVIE,13,1,12,12490.4,10681.52,1,13.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKSHOW,Entertainment,weekly,quadratic,1,Netflix TV ranking,13,1,13,103079.85,71030.08,1,13.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKSHOWGLOBAL,Entertainment,weekly,quadratic,1,Netflix TV ranking,13,1,13,28563.63,25069.62,1,13.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKSHOWGLOBAL2,Entertainment,weekly,quadratic,1,RUNNER UP SHOW NETFLIX SHOW GLOBAL,13,1,13,25141.94,15087.99,1,13.0,0,streaming_charts,tail rule read
+KXNETFLIXRANKSHOWRUNNERUP,Entertainment,weekly,quadratic,1,RUNNER UP NETFLIX SHOW,13,1,13,56026.34,33154.41,1,13.0,0,streaming_charts,tail rule read
+KXNETFLIXTOPVIEWSMOVIE,Entertainment,one_off,quadratic,1,NETFLIX TOP MOVIE VIEW COUNT,11,1,8,1912.72,1455.98,1,11.0,0,,not in V2's sweep files
+KXNETFLIXTOPVIEWSTV,Entertainment,one_off,quadratic,1,NETFLIX TOP SHOW VIEW COUNT,11,1,8,25279.97,18594.5,1,11.0,0,,not in V2's sweep files
+KXNFL1H,,,,,,3,1,3,998061.07,554163.03,0,3.0,1,nfl_periods,tail rule read
+KXNFL1HFT,,,,,,6,1,6,89175.5,80857.44,0,6.0,0,nfl_periods,"eligible, never read"
+KXNFL1HSPREAD,,,,,,15,1,15,2067368.01,1100387.75,0,15.0,0,,not in V2's sweep files
+KXNFL1HTEAMTOTAL,,,,,,22,1,22,206658.78,151499.43,0,22.0,0,,not in V2's sweep files
+KXNFL1HTOTAL,,,,,,14,1,14,1586690.97,836660.48,0,14.0,0,nfl_periods,tail rule read
+KXNFL1Q,,,,,,3,1,3,304843.17,170171.43,0,3.0,1,nfl_periods,tail rule read
+KXNFL1QBTTS,,,,,,1,1,1,16185.58,13870.38,0,1.0,0,,not in V2's sweep files
+KXNFL1QSPREAD,,,,,,10,1,10,533687.16,312088.45,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFL1QTOTAL,,,,,,10,1,10,246902.96,159865.71,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFL2Q,,,,,,3,1,3,167753.75,86482.87,0,3.0,1,nfl_periods,tail rule read
+KXNFL2QBTTS,,,,,,1,1,1,4220.08,3538.25,0,1.0,0,,not in V2's sweep files
+KXNFL2QSPREAD,,,,,,10,1,10,208117.76,131905.28,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFL2QTOTAL,,,,,,10,1,10,114161.65,77981.76,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFL3Q,,,,,,3,1,3,137685.71,87820.3,0,3.0,1,nfl_periods,tail rule read
+KXNFL3QBTTS,,,,,,1,1,1,6373.61,6071.62,0,1.0,0,,not in V2's sweep files
+KXNFL3QSPREAD,,,,,,10,1,10,345635.03,207915.99,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFL3QTOTAL,,,,,,10,1,8,185552.47,103012.2,0,10.0,0,nfl_periods,"eligible, never read"
+KXNFLEQBTTS,,,,,,1,1,1,9448.54,8869.0,0,1.0,0,,not in V2's sweep files
+KXNFLFFPTS,,,,,,14,1,14,140652.6,124336.7,0,14.0,0,nfl_props,"eligible, never read"
+KXNFLFFPTSLADDER,,,,,,6,1,6,14003.31,13549.49,0,6.0,0,nfl_props,"eligible, never read"
+KXNFLFFWEEKLEAD,,,,,,252,5,28,3078.72,2365.57,0,50.4,0,,not in V2's sweep files
+KXNFLFFWEEKTOP,,,,,,167,4,51,6782.56,6651.4,0,41.75,0,,not in V2's sweep files
+KXNFLFG,,,,,,4,1,4,124081.85,99614.18,0,4.0,0,nfl_props,"eligible, never read"
+KXNFLFIRSTTD,,,,,,22,1,22,6115907.2,5673747.2,0,22.0,0,,not in V2's sweep files
+KXNFLFIRSTTDTEAM,,,,,,3,1,3,210337.84,168079.71,0,3.0,0,nfl_props,tail rule read
+KXNFLLONGREC,,,,,,11,1,11,44336.95,38174.75,0,11.0,0,nfl_props,"eligible, never read"
+KXNFLMOSTRECYDS,,,,,,10,1,8,9338.45,8924.54,0,10.0,0,,not in V2's sweep files
+KXNFLNEXTTEAM,,,,,,33,1,33,177491.84,105777.06,0,33.0,0,,not in V2's sweep files
+KXNFLPASSATT,,,,,,1,1,1,10005.27,5726.5,0,1.0,0,nfl_props,"eligible, never read"
+KXNFLPASSCOMP,,,,,,1,1,1,13517.13,13505.73,0,1.0,0,nfl_props,"eligible, never read"
+KXNFLPASSINT,,,,,,3,1,3,156495.92,137059.61,0,3.0,0,nfl_props,"eligible, never read"
+KXNFLPASSTDS,,,,,,1,1,1,226644.14,217436.03,0,1.0,0,nfl_props,tail rule read
+KXNFLPASSTDSPROT,,,,,,1,1,1,10899.32,10795.02,0,1.0,0,,not in V2's sweep files
+KXNFLPASSYDSPRECISE,,,,,,1203,1,177,2700.13,2018.92,0,1203.0,0,,not in V2's sweep files
+KXNFLPASSYDSPROT,,,,,,19,1,17,109344.42,103047.94,0,19.0,0,,not in V2's sweep files
+KXNFLRACE,,,,,,9,3,9,90952.89,73956.73,0,3.0,0,,not in V2's sweep files
+KXNFLREC,,,,,,9,1,9,69856.65,67456.18,0,9.0,0,,not in V2's sweep files
+KXNFLRECPROT,,,,,,79,1,59,55693.26,54187.12,0,79.0,0,,not in V2's sweep files
+KXNFLRECYDS,,,,,,153,1,153,4174179.08,3782011.22,0,153.0,0,,not in V2's sweep files
+KXNFLRECYDSPROT,,,,,,140,1,126,148789.33,142223.85,0,140.0,0,,not in V2's sweep files
+KXNFLRSHATT,,,,,,4,1,4,153698.01,127027.29,0,4.0,0,nfl_props,"eligible, never read"
+KXNFLRSHYDSPROT,,,,,,53,1,40,96772.87,90718.71,0,53.0,0,,not in V2's sweep files
+KXNFLSEASONRSHTD,,,,,,1,1,1,61.46,46.67,0,1.0,0,,not in V2's sweep files
+KXNFLSFTY,,,,,,1,1,1,40756.15,28897.32,0,1.0,0,,not in V2's sweep files
+KXNFLTDPROT,,,,,,47,1,44,497090.73,459087.23,0,47.0,0,,not in V2's sweep files
+KXNFLTEAMFIRSTTD,,,,,,27,2,27,235204.17,210487.76,0,13.5,0,,not in V2's sweep files
+KXNFLTEAMTOTAL,,,,,,4,1,4,41526.76,23543.96,0,4.0,0,,not in V2's sweep files
+KXNFLTOTAL,,,,,,2,1,2,7814.75,7083.46,0,2.0,0,,not in V2's sweep files
+KXNFLTOTALPRECISE,,,,,,152,1,68,5517.0,5407.32,0,152.0,0,,not in V2's sweep files
+KXNFLTRADE,,,,,,3,1,3,316402.27,144709.32,0,3.0,0,,not in V2's sweep files
+KXNFLWEEKGAMEHIGH,,,,,,15,1,15,5089.86,155.2,0,15.0,0,,not in V2's sweep files
+KXNFLWEEKHIGHSCORE,,,,,,30,1,23,9355.2,8004.47,0,30.0,0,,not in V2's sweep files
+KXNFLWEEKMOSTPASSYDS,,,,,,25,1,15,2771.1,2540.18,0,25.0,0,,not in V2's sweep files
+KXNFLWEEKMOSTRECYDS,,,,,,44,1,8,998.28,921.11,0,44.0,0,,not in V2's sweep files
+KXNFLWEEKMOSTRSHYDS,,,,,,28,1,8,764.89,737.91,0,28.0,0,,not in V2's sweep files
+KXNFLWINS,,,,,,2,2,2,45851.18,42157.48,0,1.0,0,,not in V2's sweep files
+KXNFLWINSWEEK,,,,,,2,1,2,725.7,668.8,0,2.0,0,,not in V2's sweep files
+KXNHL1P,,,,,,9,3,9,27016.41,21522.18,0,3.0,3,nhl_periods,"eligible, never read"
+KXNHL1PSPREAD,,,,,,9,3,7,27018.93,25039.23,0,3.0,0,nhl_periods,"eligible, never read"
+KXNHL1PTOTAL,,,,,,15,3,13,154729.55,96792.74,0,5.0,0,nhl_periods,"eligible, never read"
+KXNHL2P,,,,,,6,2,6,15974.69,11829.22,0,3.0,2,nhl_periods,"eligible, never read"
+KXNHL2PSPREAD,,,,,,6,2,4,2361.53,1884.79,0,3.0,0,nhl_periods,"eligible, never read"
+KXNHL2PTOTAL,,,,,,11,3,9,67038.45,34818.52,0,3.67,0,nhl_periods,"eligible, never read"
+KXNHL3P,,,,,,9,3,9,55627.06,42680.5,0,3.0,3,nhl_periods,"eligible, never read"
+KXNHL3PSPREAD,,,,,,10,3,8,11630.84,9528.77,0,3.33,0,nhl_periods,"eligible, never read"
+KXNHL3PTOTAL,,,,,,17,3,15,56977.48,35639.86,0,5.67,0,nhl_periods,"eligible, never read"
+KXNHLAST,,,,,,119,3,103,58902.12,54985.93,0,39.67,0,,not in V2's sweep files
+KXNHLF10G,,,,,,3,3,3,31448.66,20261.31,0,1.0,0,,not in V2's sweep files
+KXNHLFIRSTGOAL,,,,,,75,3,50,55810.21,55586.03,0,25.0,0,,not in V2's sweep files
+KXNHLGAME,,,,,,6,3,6,5131205.05,3657749.69,0,2.0,0,us_game_winner,tail rule read
+KXNHLGOAL,,,,,,188,3,139,361780.49,341234.05,0,62.67,0,,not in V2's sweep files
+KXNHLOT,,,,,,3,3,3,44267.95,30877.24,0,1.0,0,,not in V2's sweep files
+KXNHLPTS,,,,,,149,3,146,213845.15,201264.72,0,49.67,0,,not in V2's sweep files
+KXNHLSAVE,,,,,,6,3,6,9149.38,8605.25,0,2.0,0,nhl_props,"eligible, never read"
+KXNHLSPREAD,,,,,,20,3,20,471254.68,275775.65,0,6.67,0,,not in V2's sweep files
+KXNHLTEAMTOTAL,,,,,,28,3,28,59787.12,42823.36,0,9.33,0,,not in V2's sweep files
+KXNHLTOTAL,,,,,,29,3,29,1222476.55,806090.47,0,9.67,0,,not in V2's sweep files
+KXNRCCCHAIR,Politics,one_off,quadratic,1,Next NRCC Chair,2,1,2,3229.24,2872.24,1,2.0,0,,not in V2's sweep files
+KXNZDUSDAD,Financials,daily,quadratic,1,NZDUSD Daily,20,1,0,0.0,0.0,1,20.0,0,fx_ladder,tail rule read
+KXODIMATCH,,,,,,4,2,4,1673465.86,826691.94,0,2.0,0,,not in V2's sweep files
+KXOER,Economics,monthly,quadratic,1,Owners' equivalent rent for [month],32,1,27,9450.02,7090.5,1,32.0,0,,not in V2's sweep files
+KXOMARVOTE,Politics,one_off,quadratic,1,Will Ilhan Omar cast a recorded House vote,1,1,1,7590.94,3555.42,1,1.0,0,,not in V2's sweep files
+KXOPENSOURCESHARE,,,,,,9,1,9,58795.93,46125.13,0,9.0,0,ai_share,tail rule read
+KXPALLADIUM15M,Commodities,fifteen_min,quadratic,1,Palladium 15-minute,85,85,85,1359125.78,506637.3,1,1.0,0,,not in V2's sweep files
+KXPALLADIUMH,Commodities,hourly,quadratic,1,Palladium Hourly,995,19,163,13579.51,11660.44,1,52.37,0,,not in V2's sweep files
+KXPANAMAWEEKLY,Politics,weekly,quadratic,1,Traffic through the Panama Canal,9,1,9,148074.07,56824.02,1,9.0,0,,not in V2's sweep files
+KXPBAGAME,,,,,,2,1,2,102335.38,54068.77,0,2.0,0,,not in V2's sweep files
+KXPERLIGA1GAME,,,,,,3,1,3,83141.11,50895.24,0,3.0,1,,not in V2's sweep files
+KXPGAR1LEAD,,,,,,1,1,1,23898.93,23898.93,0,1.0,0,,not in V2's sweep files
+KXPGAR2LEAD,,,,,,1,1,0,0.0,0.0,0,1.0,0,,not in V2's sweep files
+KXPGAR3LEAD,,,,,,1,1,0,0.0,0.0,0,1.0,0,,not in V2's sweep files
+KXPGATOUR,,,,,,1,1,1,282926.0,282852.0,0,1.0,0,,not in V2's sweep files
+KXPLATINUM15M,Commodities,fifteen_min,quadratic,1,Platinum 15-minute,85,85,85,981703.51,418379.33,1,1.0,0,,not in V2's sweep files
+KXPLATINUMH,Commodities,hourly,quadratic,1,Platinum Hourly,2068,19,184,7357.59,7031.89,1,108.84,0,,not in V2's sweep files
+KXPOWERKWH,Economics,monthly,quadratic,1,Average US electricity price this month,7,1,6,3673.56,2544.16,1,7.0,0,,not in V2's sweep files
+KXR6GAME,,,,,,10,5,10,99389.79,80148.94,0,2.0,0,,not in V2's sweep files
+KXR6MAP,,,,,,16,8,16,7511.2,7375.13,0,2.0,0,,not in V2's sweep files
+KXRAIN,,,,,,18,1,18,438693.38,211559.89,0,18.0,0,wx_rain,tail rule read
+KXRAINSEAM,,,,,,1,1,1,4.0,4.0,0,1.0,0,,not in V2's sweep files
+KXRECALLED,Elections,custom,quadratic,1,Recalled officials,1,1,0,0.0,0.0,1,1.0,0,,not in V2's sweep files
+KXSCOTUSCERT,Politics,custom,quadratic,1,SCOTUS writs of cert,2,1,2,8860.0,3858.48,1,2.0,0,,not in V2's sweep files
+KXSE,Financials,one_off,quadratic,1,Sea Limited KPI,20,2,11,1847.47,1552.09,1,10.0,0,,not in V2's sweep files
+KXSENDEMLEADRUN,Elections,one_off,quadratic,1,Senate Democratic leader race: who will run?,1,1,1,3734.83,3060.53,1,1.0,0,,not in V2's sweep files
+KXSENGOPLEADRUN,Elections,one_off,quadratic,1,Senate Republican leader race: who will run?,7,1,7,21667.56,17316.86,1,7.0,0,,not in V2's sweep files
+KXSENMIN,Elections,one_off,quadratic,1,Senate Minority Leader,10,1,10,119547.14,72185.45,1,10.0,0,,not in V2's sweep files
+KXSESBLGAME,,,,,,6,3,6,82257.52,53520.6,0,2.0,0,,not in V2's sweep files
+KXSHELTERCPI,Economics,monthly,quadratic,1,US shelter CPI in [month],11,1,9,2914.62,2167.74,1,11.0,0,,not in V2's sweep files
+KXSHIBA,Crypto,daily,quadratic,1,Shiba range,27,1,2,2057.4,2057.4,1,27.0,0,crypto_ladder,tail rule read
+KXSHIBAD,Crypto,daily,quadratic,1,Shiba price Above/below,27,1,0,0.0,0.0,1,27.0,0,crypto_ladder,tail rule read
+KXSILVER15M,Commodities,fifteen_min,quadratic,1,Silver 15-minute,85,85,85,6304996.71,2587777.88,1,1.0,0,,not in V2's sweep files
+KXSILVERD,Commodities,daily,quadratic,1,Silver daily,40,1,26,60883.77,27941.05,1,40.0,0,commodity_ladder,tail rule read
+KXSILVERH,Commodities,hourly,quadratic,1,Silver Hourly,905,18,243,55633.47,28466.66,1,50.28,0,,not in V2's sweep files
+KXSKLGAME,,,,,,2,1,2,3996.62,3268.33,0,2.0,0,,not in V2's sweep files
+KXSOFRD,Economics,daily,quadratic,1,Daily SOFR,8,1,0,0.0,0.0,1,8.0,0,rates_daily,tail rule read
+KXSOL15M,Crypto,fifteen_min,quadratic,1,SOL 15 min,90,90,90,11443281.23,4792325.69,1,1.0,0,,not in V2's sweep files
+KXSOLD,Crypto,hourly,quadratic,1,SOL Directional,5775,20,221,289406.95,146543.38,1,288.75,0,,not in V2's sweep files
+KXSOLE,Crypto,hourly,quadratic,1,SOL Range,6026,21,149,49862.31,38604.27,1,286.95,0,,not in V2's sweep files
+KXSOLMINMON,Crypto,monthly,quadratic,1,SOL Min monthly,1,1,1,953.92,608.0,1,1.0,0,,not in V2's sweep files
+KXSTATEBALLOTMEASURE,Elections,one_off,quadratic,1,Which state ballot measures will pass?,1,1,1,1242.38,457.85,1,1.0,0,,not in V2's sweep files
+KXSTEAMTOPSELLER,Entertainment,one_off,quadratic,1,STEAM Top Sellers,20,1,6,7709.12,6430.92,1,20.0,0,,not in V2's sweep files
+KXSTUB,Financials,one_off,quadratic,1,StubHub quarter kpi,5,1,5,16048.47,4079.84,1,5.0,0,,not in V2's sweep files
+KXSUEZWEEKLY,Politics,weekly,quadratic,1,Traffic through the Suez Canal,8,1,8,185018.23,62345.26,1,8.0,0,,not in V2's sweep files
+KXT20MATCH,,,,,,6,3,6,1491391.33,715141.85,0,2.0,0,cricket,tail rule read
+KXTEMPCHIHS,,,,,,225,21,152,168328.06,117278.7,0,10.71,0,,not in V2's sweep files
+KXTEMPLAXHS,,,,,,232,22,169,124724.39,86724.73,0,10.55,0,,not in V2's sweep files
+KXTEMPMIAH,,,,,,223,22,153,242512.31,162403.62,0,10.14,0,,not in V2's sweep files
+KXTEMPNYCHS,,,,,,220,22,121,185557.04,137834.16,0,10.0,0,,not in V2's sweep files
+KXTESTMATCH,,,,,,3,1,3,429590.29,279619.06,0,3.0,1,,not in V2's sweep files
+KXTHEWEEKNIGHTMENTION,Mentions,one_off,quadratic,1,Weeknight,9,1,9,13962.85,12539.15,1,9.0,0,,not in V2's sweep files
+KXTHUNEELECT,Elections,one_off,quadratic,1,Will John Thune be elected Senate Republican leader on Nov 10?,1,1,1,96624.23,34312.94,1,1.0,0,,not in V2's sweep files
+KXTITLEDTUESDAY,,,,,,101,1,19,16468.2,12824.44,0,101.0,0,,not in V2's sweep files
+KXTITLEDTUESTOP,,,,,,303,3,82,14757.43,13477.85,0,101.0,0,,not in V2's sweep files
+KXTRUEV,Economics,daily,quadratic,1,Truflation EV,15,1,7,1261.59,1261.59,1,15.0,0,truflation,tail rule read
+KXTRUMPACTD,Politics,daily,quadratic,1,Will Trump do anything?,1,1,1,941.78,941.78,1,1.0,0,,not in V2's sweep files
+KXTRUMPAPPROVE,Politics,daily,quadratic,1,Trump approval rating,9,1,9,60139.6,35538.39,1,9.0,0,approval_ballot,tail rule read
+KXTRUMPSAY,Mentions,one_off,quadratic,1,What will trump say,6,1,6,14566.07,12099.22,1,6.0,0,mentions,tail rule read
+KXTRUTHSOCIALD,Politics,daily,quadratic,1,Number of Trump Truth Social posts today?,8,1,8,4799.98,3560.22,1,8.0,0,post_counts,tail rule read
+KXTSAD,Economics,daily,quadratic,1,Daily TSA passenger screenings,15,1,9,3091.04,2321.54,1,15.0,0,,not in V2's sweep files
+KXTXERCOTPEAKD,Economics,daily,quadratic,1,Texas ERCOT peak electricity demand,19,1,5,743.15,443.15,1,19.0,0,power_demand,tail rule read
+KXUCLWBTTS,,,,,,5,5,5,420129.57,224533.87,0,1.0,0,,not in V2's sweep files
+KXUCLWGAME,,,,,,15,5,15,10010555.05,5530428.95,0,3.0,5,,not in V2's sweep files
+KXUCLWSPREAD,,,,,,30,5,29,1074429.52,448365.16,0,6.0,0,,not in V2's sweep files
+KXUCLWTOTAL,,,,,,38,5,36,2729516.15,1416254.1,0,7.6,0,,not in V2's sweep files
+KXUE,Economics,monthly,quadratic,1,Monthly Unemployment,9,1,9,35713.71,5037.8,1,9.0,0,macro_release,tail rule read
+KXUKWEALTHTAX,Politics,one_off,quadratic,1,Which wealth taxes will the UK announce?,1,1,1,641.3,403.15,1,1.0,0,,not in V2's sweep files
+KXUSDBRLAD,Financials,daily,quadratic,1,USDBRL Daily ,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDCAD15M,Financials,fifteen_min,quadratic,1,15-minute USDCAD,92,92,92,601619.07,235790.7,1,1.0,0,,not in V2's sweep files
+KXUSDCADAD,Financials,daily,quadratic,1,USDCAD Daily,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDCADEVENT,Financials,custom,quadratic,1,USD/CAD after economic events,21,1,7,21250.12,20174.87,1,21.0,0,,not in V2's sweep files
+KXUSDCHFAD,Financials,daily,quadratic,1,USDCHF Weekly,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDINRAD,Financials,daily,quadratic,1,USDINR Weekly,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDJPY,Financials,daily,quadratic,1,USD/JPY daily range,15,1,7,538.58,491.04,1,15.0,0,fx_ladder,tail rule read
+KXUSDJPY15M,Financials,fifteen_min,quadratic,1,Fifteen-min USDJPY,92,92,92,710644.85,280023.16,1,1.0,0,,not in V2's sweep files
+KXUSDJPYAD,Financials,daily,quadratic,1,USDJPY Daily,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDJPYEVENT,Financials,custom,quadratic,1,USD/JPY after economic events,42,2,13,12273.0,12273.0,1,21.0,0,,not in V2's sweep files
+KXUSDMXNAD,Financials,daily,quadratic,1,USDMXN Daily,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSDMXNEVENT,Financials,custom,quadratic,1,USD/MXN after economic events,21,1,0,0.0,0.0,1,21.0,0,,not in V2's sweep files
+KXUSDNOKAD,Financials,daily,quadratic,1,USDNOK Daily ,20,1,0,0.0,0.0,1,20.0,0,,not in V2's sweep files
+KXUSEDCARCPI,Economics,monthly,quadratic,1,US used cars and trucks CPI in [month],11,1,11,24539.2,18423.04,1,11.0,0,,not in V2's sweep files
+KXUSGASCPI,Economics,monthly,quadratic,1,US gasoline CPI in [month],21,1,19,80614.12,65143.89,1,21.0,0,,not in V2's sweep files
+KXUST10AD,Financials,one_off,quadratic,1,UST 10 Year Daily,25,1,19,8593.34,6820.65,1,25.0,0,,not in V2's sweep files
+KXUST2AD,Financials,one_off,quadratic,1,UST 2 Year Daily,25,1,22,2905.94,2600.34,1,25.0,0,,not in V2's sweep files
+KXUST30AD,Financials,one_off,quadratic,1,UST 30 Year Daily,15,1,15,702.02,669.02,1,15.0,0,,not in V2's sweep files
+KXUST5AD,Financials,one_off,quadratic,1,UST 5 Year Daily,25,1,20,2374.95,2120.57,1,25.0,0,,not in V2's sweep files
+KXUST7AD,Financials,one_off,quadratic,1,UST 7 Year Daily,25,1,19,8033.43,5584.05,1,25.0,0,,not in V2's sweep files
+KXVALORANTGAME,,,,,,30,15,28,227371.63,178340.29,0,2.0,0,,not in V2's sweep files
+KXVALORANTMAP,,,,,,58,29,37,33097.15,30660.36,0,2.0,0,esports,"eligible, never read"
+KXVALORANTTOTALMAPS,,,,,,15,14,7,215.02,213.01,0,1.07,0,,not in V2's sweep files
+KXVG,Financials,one_off,quadratic,1,Venture global quarter kpi,5,1,5,15123.05,9638.52,1,5.0,0,,not in V2's sweep files
+KXVOICELIMINATION,Entertainment,one_off,quadratic,1,who will be eliminated from the voice,28,1,27,55150.92,41315.99,1,28.0,0,,not in V2's sweep files
+KXVOTEGENERAL,Elections,one_off,quadratic,1,Vote percentages in US general elections,80,8,58,19988.89,13417.15,1,10.0,0,,not in V2's sweep files
+KXVOTEHEGSETHIMPEACH,Politics,one_off,quadratic,1,Will the House vote on impeaching Pete Hegseth?,3,1,3,151023.39,79469.58,1,3.0,0,,not in V2's sweep files
+KXVTBGAME,,,,,,2,1,2,43920.7,40487.06,0,2.0,0,,not in V2's sweep files
+KXVTBSPREAD,,,,,,12,1,12,3839.52,3668.74,0,12.0,0,intl_basketball,"eligible, never read"
+KXVTBTOTAL,,,,,,11,1,11,2993.94,2941.59,0,11.0,0,intl_basketball,"eligible, never read"
+KXWEALTHTAXEFFECT,Elections,one_off,quadratic,1,Will California's wealth tax take effect?,1,1,1,38117.57,16726.56,1,1.0,0,,not in V2's sweep files
+KXWEEKSNUM1,Entertainment,one_off,quadratic,1,how many weeks will album be number 1 ,2,2,2,32820.76,12632.92,1,1.0,0,,not in V2's sweep files
+KXWORLDNEWSMENTION,Mentions,one_off,quadratic,1,World News Mention,17,1,17,121731.0,95903.79,1,17.0,0,,not in V2's sweep files
+KXWT20MATCH,,,,,,6,3,6,1345733.75,509902.94,0,2.0,0,,not in V2's sweep files
+KXWTACHALLENGERMATCH,,,,,,16,8,16,13061934.32,5525740.38,0,2.0,0,tennis,tail rule read
+KXWTADOUBLES,,,,,,4,2,4,488008.99,229797.82,0,2.0,0,,not in V2's sweep files
+KXWTAGTOTAL,,,,,,6,2,6,437640.71,210939.2,0,3.0,0,tennis,"eligible, never read"
+KXWTAMATCH,,,,,,4,2,4,13739121.35,6389872.68,0,2.0,0,tennis,tail rule read
+KXWTASETWINNER,,,,,,8,4,8,2239608.8,1262782.64,0,2.0,0,,not in V2's sweep files
+KXWTI,Commodities,daily,quadratic,1,WTI oil on day,30,1,30,199546.44,93878.69,1,30.0,0,commodity_ladder,tail rule read
+KXWTI15M,Commodities,fifteen_min,quadratic,1,WTI 15-minute,92,92,92,11288855.21,4520582.3,1,1.0,0,,not in V2's sweep files
+KXWTIH,Commodities,hourly,quadratic,1,WTI Hourly,2027,22,337,87300.16,55118.75,1,92.14,0,,not in V2's sweep files
+KXXRP,Crypto,hourly,quadratic,1,XRP Range,1615,22,62,21431.39,15041.14,1,73.41,0,,not in V2's sweep files
+KXXRP15M,Crypto,fifteen_min,quadratic,1,XRP 15 min,92,92,92,15357091.72,7449819.53,1,1.0,0,,not in V2's sweep files
+KXXRPD,Crypto,hourly,quadratic,1,XRP Price above/below,1615,22,89,109420.28,61923.2,1,73.41,0,,not in V2's sweep files
+KXYTDAILYTOPVIDEO,Entertainment,daily,quadratic,1,DAILY TOP YOUTUBE VIDEO,15,1,0,0.0,0.0,1,15.0,0,,not in V2's sweep files
+KXYTDAILYTOPVIDEOG,Entertainment,one_off,quadratic,1,top music video global,15,1,0,0.0,0.0,1,15.0,0,,not in V2's sweep files
+KXYTTOPVIDEO2D,Entertainment,one_off,quadratic,1,Runner up Daily Top Music Video,15,1,0,0.0,0.0,1,15.0,0,music_video_charts,tail rule read
+KXYTTOPVIDEOG2D,Entertainment,one_off,quadratic,1,runner up top music video,15,1,0,0.0,0.0,1,15.0,0,music_video_charts,tail rule read
+KXYTVIEWSHIGH,Entertainment,monthly,quadratic,1,highest daily views in time period,37,3,37,169166.78,130240.02,1,12.33,0,,not in V2's sweep files
+KXZEC15M,Crypto,fifteen_min,quadratic,1,Zcash 15min,92,92,92,4033852.73,1709054.29,1,1.0,0,,not in V2's sweep files
+KXZECMINMON,Crypto,monthly,quadratic,1,Z cash min monthly,12,1,8,2433.73,1343.29,1,12.0,0,,not in V2's sweep files

@@ -155,3 +155,71 @@ Forensics measured these from recorded public data and wrote them under this des
 | Combos as a two-way trade | 3.4c on the 4.5% that are two-sided | not measurable | buy and hold or nothing |
 
 Data kind, in Forensics' words: candles are current (measured on the Bitcoin 15 minute series only); order book reads are current; market-list quotes are a copy up to about 11 seconds old and not simultaneous across markets. No recorder, so no cost row at all: the 107 unread sports sub-market series, tennis, soccer, esports, cricket, gas prices, hazards, power demand, Truflation, charts, earnings, mentions, long-dated politics.
+
+## The Nov 10 listing, scored (pull landed 17:04Z on Nov 12, scored 17:10Z)
+
+Run `pull/CENSUS_LISTING/2026-11-12T1703Z_43265329747` on `kalshi-pull-data`: 87 requests, all answered, complete. Read with the committed `census/read_listing.py`, then grouped with `census/family_day.py`. Count tables: `census/listing_nov10/family_day.csv` (by family), `series_day_active.csv` (the 562 series that settled a market that day), `series_list_counts.csv`. Counts and sums only; no price and no result was read.
+
+**Counts: series in the lists read 11,070; series that settled at least one market on Nov 10 (UTC, a Tuesday) 562; markets read 70,906; families seen that day 57 (46 mapped, the rest one-off groups by category); series seen that V2's sweep files do not hold 254; of those with 3 or more events and some volume 175.**
+
+**Three limits, each a lower bound or a gap:**
+
+1. **23 of the 24 hours hit the 3,000-market page cap.** Every day figure below is a LOWER BOUND, most of all for the ladder families with hundreds of strikes an event. The 15 minute series read 71 to 92 of their 96 windows, which gives a feel for the size of the cut where it is smallest.
+2. **The whole-series list and the Sports list were cut at the 5 MB answer cap.** So the category, frequency and fee fields are known for 11,070 series in the other categories and for NO sports series (and for only 2 weather series: a category name with a space cannot be sent). 308 active series are therefore "not in the list read": nearly all sports.
+3. **One Tuesday.** Weekly, monthly and weekend families are "count from stated frequency, not observed". US evening games of Nov 10 close after midnight UTC, so the NBA, NHL and college games here are mostly Monday's.
+
+### Fee class (from the series lists read)
+
+| Fee class | Series | Which |
+|---|---|---|
+| Standard taker fee, multiplier 1 | 11,024 of 11,070 | every non-sports family in the table |
+| Standard fee plus maker fees | 32 | CPI, inflation, payrolls, unemployment, GDP, Fed funds and Fed meeting, rate-cut count, eggs, monthly gas, S&P and Nasdaq yearly, the Emmys, IPOs, two "when will Bitcoin hit" series, and ten GPU price series. On Nov 10 only CPI and eggs settled |
+| Zero fee (multiplier 0) | 14 | all slow one-offs or annual: Bitcoin and Ethereum end of year, annual GDP, tech layoffs, and ten politics and Iran one-offs. None is a fast family and none settled on Nov 10 |
+| Sports and weather | not known | the lists were cut; a follow-up of one small read a series would fill it (see the end) |
+
+So the fee-class column is "standard" for every non-sports row, with the maker-fee exception on the macro release row. There is no fast zero-fee family.
+
+### The day by family (lower bounds; the 25 largest by events)
+
+| Family | Series settling | Events | Markets | Contracts traded | Contracts a market | State |
+|---|---|---|---|---|---|---|
+| 15 minute series (28 of them, not 16: also Solana, Zcash, NEAR, Brent, platinum, palladium, the S&P 500 and four Treasury rates) | 28 | 2,119 | 2,439 | 410.9 million | 168,000 | TOUCHED, grammar closed |
+| Virtual sports: e-soccer, e-basketball, Liga Pro | 3 | 681 | 1,812 | 3.3 million | 1,800 | TOUCHED (VIRT1, not enough data, negative) |
+| **ITF tennis, singles and doubles** | 4 | 408 | 816 | 61.9 million | 75,900 | **series never read**; tennis mechanisms tested on tour level only |
+| Esports: CS2, Dota 2, Valorant, League of Legends, Rainbow Six | 15 | 267 | 480 | 4.4 million | 9,300 | TOUCHED (ESPORT1, ESPORTM1) |
+| Crypto hourly and daily ladders | 19 | 194 | 35,631 | 12.1 million | 340 | TOUCHED, heavily |
+| **College basketball, men and women: game, spread, total, first half, overtime** | 10 | 168 | 1,520 | 36.4 million | 23,900 | game winner TOUCHED (BOOKNCAA1); **spread, total and first half never read** |
+| NBA player props | 18 | 134 | 3,688 | 10.9 million | 2,900 | TOUCHED (PROPS1, not enough data) |
+| Tennis, tour and challenger | 11 | 132 | 296 | 140.8 million | 475,700 | TOUCHED |
+| **NBA quarters and halves: winner, spread, total, team total** | 19 | 124 | 1,432 | 8.2 million | 5,800 | **never read** (one series by the sweep) |
+| Hourly commodity ladders | 5 | 92 | 6,705 | 0.4 million | 59 | thin; HRLYFX1 not runnable |
+| **Hourly city temperature (4 cities)** | 4 | 87 | 900 | 0.7 million | 800 | **never run**; V2 called it a duplicate of the daily weather tests |
+| Hourly Treasury rate ladders and rate events | 10 | 83 | 2,768 | 21,000 | 8 | DEAD: nobody trades it |
+| Soccer, smaller leagues and cups | 30 | 81 | 399 | 23.9 million | 59,900 | sweep only or never read |
+| Basketball outside the US (EuroCup, FIBA, Japan, Korea, Brazil, Argentina, VTB) | 20 | 62 | 246 | 1.6 million | 6,300 | never read |
+| Gas prices by state | 52 | 52 | 928 | 1.1 million | 1,200 | TOUCHED |
+| NFL props and weekly markets | 36 | 47 | 2,423 | 13.3 million | 5,500 | TOUCHED in part |
+| Elections one-offs | 26 | 45 | 303 | 7.8 million | 25,600 | SLOW |
+| Daily city temperature | 45 | 45 | 270 | 1.0 million | 3,800 | TOUCHED, closed |
+| NBA race, winning margin, team total | 3 | 37 | 390 | 1.0 million | 2,400 | never read |
+| Tennis set winner and exact score | 3 | 28 | 72 | 4.7 million | 65,300 | never read |
+| US spreads and totals | 8 | 26 | 694 | 21.0 million | 30,300 | TOUCHED |
+| Soccer both-teams-to-score (8 leagues and cups) | 8 | 25 | 25 | 0.75 million | 30,100 | never read |
+| Currency ladders | 24 | 25 | 410 | 0.4 million | 890 | TOUCHED, too costly |
+| NHL periods | 9 | 25 | 92 | 0.4 million | 4,500 | never read |
+| Index intraday up or down (S&P 500, Nasdaq 100) | 6 | 24 | 3,439 | 2.4 million | 700 | not in V2's files; a price ladder, grammar closed without a new source |
+
+Smaller but relevant: overtime markets (NBA, NHL, college basketball: "will the game go to overtime", 12 events, 5,500 contracts a market, never read); Texas power peak 39 contracts a market and Truflation 84 (both too thin to matter, whatever the mechanism); NFL periods 54,000 contracts a market on the one game that day.
+
+### What the listing changes
+
+1. **The shape of period markets is confirmed.** NHL periods, NFL quarters, NBA quarters and halves, college basketball first halves and soccer first halves each list three markets an event, one of them a Tie (ticker ending in TIE). That was an inference in card 18; it is now seen.
+2. **Volume on the never-read sports sub-markets is real:** about 3,000 to 6,000 contracts a market on NHL periods, 2,500 to 27,000 on NBA quarters and halves, 4,000 to 24,000 on college basketball, 30,000 on soccer both-teams-to-score. One contract fills. Spread is still unknown for all of them.
+3. **New never-read families the sweeps did not hold** (they started or grew after the sweeps' 60 day window): NBA quarters and halves, college basketball spreads, totals and first halves, ITF tennis, tennis set winner and exact score, overtime markets, NBA race and margin markets, hourly city temperature, index intraday.
+4. **Two pool families drop out on volume alone:** Texas power (39 contracts a market) and Truflation (84).
+5. **Outside sports there is no large fast family left unread.** Every non-sports family with more than a handful of events that day is a price ladder (15 minute, hourly, daily), daily weather or gas, or a slow one-off. The 2,515 election, 2,460 politics, 2,606 entertainment, 193 company, 137 world and 94 health series are almost all one-off or annual: together they settled 45, 16, 23, 0, 0 and 0 events that day.
+
+### Follow-up reads, named and not asked for yet (the Head ruled: first cut first)
+
+- **Fee and frequency fields for sports and weather series:** one small read a series (`/series/{ticker}`), about 60 for the pool series. Changes the fee-class column only.
+- **A spread read on open markets, at most 10 families** (the Head's limit). The ones where a spread would change a ranking: NHL periods, NFL quarters, NBA quarters and halves, college basketball first half and totals, soccer first halves, soccer both-teams-to-score and team totals, overtime markets, ITF tennis, tennis set winner, hourly city temperature. Both cards' first stage measures spread from candles for their own families, so this job is only needed for families with no card.
