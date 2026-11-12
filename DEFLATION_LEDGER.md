@@ -33,6 +33,7 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | PERPBIN1 (the Bitcoin perpetual's 15 minute open-interest change, top tercile, as a signal for the 15 minute market; A buys YES, B buys NO at a 40c to 60c ask; the premium arm dropped because the candles carry no reference price) | Desk A | 2 | registered Nov 12 with its script (PERPBIN1_REGISTRATION.md on claude/idea-desk-a); waits on the binary candles and CANDLEVSBOOK1 |
 | DEPTH1 (R6 order-book features, gold and Bitcoin; V2, registered Oct 30) | Desk A (was V2) | 20, counted at registration | unread; one read on or after 2026-11-14 |
 | RAINCAL (V2, registered Oct 31) | none | 2, counted at registration | RETIRED unread Nov 12 (closed family; recorder coverage about 42 percent) |
+| V2's scheduled closing-buy forward reads (the fwd_reads bundle, HOUR3-F, ENTRY2, FLIPS0-F, P6F, P6R, GAS1-F, ABSORB-F, REV1) | none | as counted at each registration | RETIRED UNREAD Nov 12 by the owner's decision (the Oct 28 rule on the closing-buy family stands) |
 
 ---
 
