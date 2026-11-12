@@ -28,9 +28,9 @@ function fn(name) {
 }
 const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name + ' is in the page'); return m[0]; };
-const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
-const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
-const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
+const names = ['kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardWindows', 'kalshiBoardPfText', 'kalshiBoardKill', 'kalshiBoardShadow', 'kalshiBoardDate', 'kalshiStratPfOf', 'kalshiStratPfAttr', 'kalshiStratSpark', 'kalshiStratGauge', 'kalshiStratLifecycle', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStratTwinFirst', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistryRetiredRow', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml', 'kalshiStratCounts', 'kalshiStratCountsHtml', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData'];
+const src = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_RETIRED_CAUSES') + varLine('KAL_BOARD_DAY') + varLine('KAL_BOARD_LADDER') + names.map(fn).join('\n');
+const P = new Function('Intl', 'Math', 'Date', 'Number', 'Array', 'Object', 'String', 'isFinite', src + '; return { ' + names.join(', ') + ', KAL_BOARD_TRIPWIRE, KAL_BOARD_KILL, KAL_BOARD_LIVE, KAL_BOARD_SHADOW, KAL_BOARD_RETIRED, KAL_RETIRED_CAUSES };')(Intl, Math, Date, Number, Array, Object, String, isFinite);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
 const esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
 
@@ -165,7 +165,7 @@ gates.SB11 = () => {
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
-  assert.ok(!/<img|<script/.test(evil) && evil.includes('&#60;b&#62;') && evil.includes('&#60;i&#62;') && evil.includes('&#60;u&#62;'), 'every value is escaped');
+  assert.ok(!/<img|<script/.test(evil) && evil.includes('&#60;i&#62;') && evil.includes('&#60;u&#62;'), 'every value is escaped');
   const body = fn('renderStrategiesPage');
   assert.ok(/kalshiMoney/.test(body) && !/toFixed\(2\)[^;]*\$|'\$'/.test(fn('kalshiBoardHtml') + fn('kalshiBoardKill')), 'no dollar sign typed into the board text');
   assert.ok(/kalshiShadowCache\.error \? 'unreadable'/.test(body), 'a failed read is a state, not an exception');
@@ -178,7 +178,8 @@ gates.SB13 = () => {
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 3, 'three live strategies have Implement, Kill and Return (XRPYES10 and KESTREL retired Nov 11, 2026)');
+  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, 0, 'Live cards moved Implement, Kill and Return into the Details popup (Nov 12, 2026)');
+  assert.strictEqual((h.match(/data-reg-details=/g) || []).length >= 3, true, 'and each live card has the button');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
