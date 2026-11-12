@@ -996,6 +996,7 @@
   .sp-rule{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; margin-top:-4px; }
   .sp-spark{ min-width:0; } .sp-spark svg{ width:100%; height:48px; display:block; overflow:visible; }
   .sp-spark-cap{ display:flex; justify-content:space-between; gap:8px; font-size:10.5px; color:var(--muted); margin-top:3px; }
+  .sp-latch{ display:flex; flex-direction:column; gap:8px; min-width:0; } .sp-lt-h{ display:flex; justify-content:space-between; gap:8px; align-items:baseline; } .sp-lt-h b{ font-size:10.5px; letter-spacing:.06em; } .sp-lt-h span{ font-size:11px; color:var(--muted); } .sp-lt-r{ min-width:0; } .sp-lt-hot .sp-kill-h b{ text-decoration:underline; } .sp-lt-note{ font-size:11.5px; color:var(--muted); } .sp-lt-note b{ color:var(--paper); }
   .sp-bar{ height:6px; border-radius:3px; background:var(--border); overflow:hidden; } .sp-bar i{ display:block; height:100%; background:var(--paper); }
   .sp-bar-cap{ display:flex; justify-content:space-between; gap:8px; font-size:11px; color:var(--muted); margin-top:4px; }
   .sp-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
@@ -1756,6 +1757,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Strategies page, gold card (the owner, Nov 12): it now shows the real gold kill latch instead of reading only the 100 trade tripwire. It lists the trades toward 40, the net against the -$20 floor and the drawdown against the $58.75 line, says NEAR KILL when the net is within a quarter of its floor (from 30 trades) or the drawdown is within a quarter of its line, and TRIPPED once the latch has fired. Page only: no order, size or rule changed.</li>
                   <li>A combo book recorder (the owner, Nov 12): every 30 minutes it saves the quotes, the order book depth and the trades of Kalshi combo markets with any posted price to its own data branch, so a test of buying either side can be priced with real depth. Public data only, no key, no orders, at most 10 requests a minute, stops by itself on Jan 31, 2027.</li>
                   <li>Process (the owner, Nov 12): details of one old order-size incident and the account balance used as a simulation input were taken out of the public text and code comments; the lesson and every rule stay.</li>
                   <li>Rules recorded (the owner, Nov 12): combos may be measured on paper by buying NO on high-priced combos and holding, as a written exception for combos only; weather brackets are allowed on paper in a middle price range only; a combo book recorder is approved to build. Docs only, no order of any kind.</li>
@@ -4213,6 +4215,48 @@ kalshiStatusTick();
     if(id === 'EVENT830' && isFinite(kill.streak)){ return { frac: frac(kill.streak, KAL_BOARD_KILL[id].streak), big: kill.streak + ' of ' + KAL_BOARD_KILL[id].streak, cap: 'losses in a row' }; }
     return null;
   }
+  // ---- Gold kill latch on the gold card (Nov 12, 2026, the owner: the card read the 100 trade tripwire as HEALTHY while the real latch, functions/kalshiGoldKillLib.js, was close to tripping). Pure: orders in, figures out. ----
+  // The constants are copies of GOLD_KILL in the bot (a test fails if they drift): re-armed 2026-11-10 00:00 UTC, drawdown from gold's own cash peak against a FIXED line, net under the floor once afterTrades have settled. near is the share of the way to a line at which the card says NEAR KILL.
+  var KAL_GOLD_LATCH = { series: 'KXGOLD15M', rearmAt: Date.UTC(2026, 10, 10), drawdown: 58.75, netFloor: -20, afterTrades: 40, nearFrac: 0.75, nearMinTrades: 30 };
+  // The latch is replayed from gold's settled orders since rearmAt, the way the bot replays it. The bot books them on the CASH basis (real fill and fee); orders after Nov 8 store a fill booked settledPnl, so for orders since Nov 10 the stored figure equals cash, and kalshiBoardRows (cash) agrees with the bot here either way. The page never reads the sizing document, so TRIPPED comes from this replay (the same rules over the same orders) or from stored, an optional copy of sizing.goldKill if a caller has one: either one tripped is TRIPPED, and nothing here can clear a latch.
+  // Near: the net is within 25 percent of its floor (at 30 or more trades) or the drawdown is within 25 percent of its line. The page holds only its last orders, so partial says the oldest loaded order is newer than the re-arm while the list is full, and the counts may be short.
+  function kalshiGoldLatch(orders, stored, loadedFull, oldestTs){
+    var C = KAL_GOLD_LATCH;
+    var mine = (orders || []).filter(function(o){ return o && (o.series === C.series || String(o.ticker || '').indexOf(C.series) === 0); });
+    var rows = kalshiBoardRows(mine).filter(function(r){ return r.ts >= C.rearmAt; });
+    var cum = 0, peak = 0, trip = null;
+    rows.forEach(function(r, i){
+      cum += r.p; if(cum > peak){ peak = cum; }
+      if(trip){ return; }
+      if(peak - cum >= C.drawdown - 1e-9){ trip = 'drawdown'; }
+      else if(i + 1 >= C.afterTrades && cum < C.netFloor - 1e-9){ trip = 'net'; }
+    });
+    var net = Math.round(cum * 10000) / 10000, dd = Math.round((peak - cum) * 10000) / 10000, n = rows.length;
+    var storedTrip = !!(stored && stored.tripped === true);
+    var netNear = n >= C.nearMinTrades && net <= C.netFloor * C.nearFrac, ddNear = dd >= C.drawdown * C.nearFrac;
+    return { n: n, net: net, dd: dd, trip: trip || (storedTrip ? String(stored.rule || 'stored') : null), tripped: !!trip || storedTrip, netNear: netNear, ddNear: ddNear, near: netNear || ddNear,
+      partial: !!(loadedFull && isFinite(oldestTs) && oldestTs > C.rearmAt) };
+  }
+  // The badge of the gold card from its latch: TRIPPED, then NEAR KILL, otherwise null so the ordinary rules (HEALTHY, WATCH) decide. Pure.
+  function kalshiGoldLatchBadge(L){
+    if(!L){ return null; }
+    if(L.tripped){ return { text: 'TRIPPED', tone: 'hot' }; }
+    if(L.near){ return { text: 'NEAR KILL', tone: 'hot' }; }
+    return null;
+  }
+  // The latch block on the gold card: trades toward the 40, the net against the floor and the drawdown against the line, each as a bar with its words (the bar never carries the meaning alone). Dollars of our own account go through money; the fixed lines are design constants.
+  function kalshiGoldLatchHtml(L, esc, money){
+    if(!L){ return ''; }
+    var C = KAL_GOLD_LATCH, pct = function(x, of){ return Math.max(0, Math.min(100, of > 0 && isFinite(x) ? x / of * 100 : 0)).toFixed(1); };
+    var row = function(label, big, cap, p, hot){ return '<div class="sp-lt-r' + (hot ? ' sp-lt-hot' : '') + '"><div class="sp-kill-h"><b>' + esc(big) + '</b><span>' + esc(label) + '</span></div><div class="sp-bar" role="img" aria-label="' + esc(label + ': ' + big + ' ' + cap) + '"><i style="width:' + p + '%"></i></div><div class="sp-bar-cap"><span>' + esc(cap) + '</span></div></div>'; };
+    var lines = { drawdown: 'Drawdown line reached', net: 'Net floor reached' };
+    return '<div class="sp-latch" role="group" aria-label="Gold kill latch"><div class="sp-lt-h"><b>Gold kill latch</b><span>since the Nov 10 re-arm</span></div>' +
+      row('trades since the re-arm', L.n + ' of ' + C.afterTrades, 'the net floor starts counting at ' + C.afterTrades + ' trades', pct(L.n, C.afterTrades), false) +
+      row('net', money(L.net), 'floor -$' + Math.abs(C.netFloor) + ' once ' + C.afterTrades + ' trades are in', pct(-L.net, Math.abs(C.netFloor)), L.netNear) +
+      row('drawdown from its peak', money(L.dd), 'line $' + C.drawdown.toFixed(2) + ' from gold\'s own peak', pct(L.dd, C.drawdown), L.ddNear) +
+      (L.tripped ? '<div class="sp-lt-note"><b>Tripped.</b> ' + esc(lines[L.trip] || 'The latch is set') + '. Gold takes no new orders until a reviewed edit re-arms it.</div>' : '') +
+      (L.partial ? '<div class="sp-lt-note">Only the last orders are loaded, so these counts may be short of the real ones.</div>' : '') + '</div>';
+  }
   // The lifecycle: three stages with a count and the strategies on each (the retired ones show at most four names and a count of the rest).
   function kalshiStratLifecycle(liveIds, shadowIds, retiredNames){
     var take = function(a){ return { chips: a.slice(0, 4), more: Math.max(0, a.length - 4) }; };
@@ -4416,7 +4460,7 @@ kalshiStatusTick();
       var chip = o.chip ? '<span class="sp-chip" title="' + esc(o.chip.tip) + '">' + esc(o.chip.text) + '</span>' : '';
       var inner = '<div class="sp-full"><b>' + esc(o.id) + '</b><span>' + esc(o.rule) + '</span></div>' + (o.chip ? '<div class="sp-sub">' + esc(o.chip.tip) + '</div>' : '') + '<div class="sp-sub">' + esc(o.status) + '</div>' + (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) + ladderOf(o.id, compact) + rulesHtml(o.rules) + (o.detail || '');
       return '<article class="kal-card sp-tile sp-compact" data-fk="' + esc(o.stage.toLowerCase() + ':' + o.id) + '" title="' + esc(o.id) + '"><div class="sp-top">' + ringHtml(o.pf, o.pfLabel, esc) + '<div class="sp-who"><div class="sp-th"><span class="sp-name">' + esc(o.name) + '</span><span class="sp-badge sp-b-' + esc(bd.tone) + '">' + esc(bd.text) + '</span></div><div class="sp-rule1" title="' + esc(o.rule) + '">' + esc(kalshiStratOneLine(o.rule, 64)) + '</div><div class="sp-pfl">' + esc(o.pfLabel) + chip + '</div></div></div>' +
-        killHtml(o.gauge) + barHtml +
+        (o.latchHtml || killHtml(o.gauge)) + barHtml +
         '<details class="sp-det" data-k="' + esc(o.stage + o.id) + '"' + (openSet[o.stage + o.id] ? ' open' : '') + '><summary>Details</summary><div class="sp-det-pre">' + inner + '</div></details></article>';
     };
     var ids = model.live.map(function(s){ return s.id; }), sids = model.deck.rows.map(function(r){ return r.id; });
@@ -4425,8 +4469,8 @@ kalshiStatusTick();
     var shadowPf = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowPf[r.id] = r.rep; }); }
     var live = kalshiStratTwinFirst(model.live, function(s){ return s.id; }, sids).map(function(s){
       var g = kalshiStratGauge(s.id, s.kill, money), twin = twinOf(s.id) && shadowPf[s.id];
-      return tile({ id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: g, spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules, detail: s.detail ? kalshiStratDetailHtml(s.detail, esc, money, model.timeText || String) : '',
-        badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
+      return tile({ id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: g, latchHtml: s.latch ? kalshiGoldLatchHtml(s.latch, esc, money) : '', spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules, detail: s.detail ? kalshiStratDetailHtml(s.detail, esc, money, model.timeText || String) : '',
+        badge: kalshiGoldLatchBadge(s.latch) || kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1' }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
     }).join('');
     var deck = '';
     if(!model.deck.rows.length){
@@ -4521,7 +4565,8 @@ kalshiStatusTick();
     var live = KAL_BOARD_LIVE.map(function(s){
       var mine = all.filter(function(o){ return kalshiStrategyOf(o) === s.id && (s.id !== 'L1' || kalshiIsActive(o)); });
       return { id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kalshiBoardKill(s.id, mine, now, kalshiMoney),
-        spark: kalshiStratRolling(kalshiBoardRows(mine).map(function(r){ return r.p; }), 30), detail: kalshiStratDetail(mine, kalshiMarketName, kalDayKey, 8) };
+        spark: kalshiStratRolling(kalshiBoardRows(mine).map(function(r){ return r.p; }), 30), detail: kalshiStratDetail(mine, kalshiMarketName, kalDayKey, 8),
+        latch: s.id === 'L1' ? kalshiGoldLatch(mine, null, all.length >= 1000, Math.min.apply(null, all.map(function(o){ return Number(o.ts); }).filter(isFinite))) : null };
     });
     var rows = kalshiShadowCache.rows;
     var state = rows ? 'ok' : (kalshiShadowCache.error ? 'unreadable' : 'loading');
