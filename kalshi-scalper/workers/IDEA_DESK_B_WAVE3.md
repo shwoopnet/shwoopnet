@@ -32,6 +32,31 @@ So a mid-priced bet needs about 9 to 12 points of error in the market's price, e
 - **Time to settlement:** under 20 minutes. **Time to a verdict:** about 2 days for the price measurement after the pull runs. **Probability:** 2% that it reaches the bar; about 75% that the price measurement closes it at once.
 - **A later version, not a separate card:** extra innings in baseball (the runner-on-second rule), in season from April, if a detection rule from Kalshi's own markets can be found.
 
+### Card 17, added Nov 12 after the Head of R&D's rulings (before any NHL data was pulled)
+
+**Ruling (Head of R&D, Nov 12):** in-play sports is NOT one family; a family is the entry mechanism plus the exit style (lifecycle 7f). The two falsified in-play tests are still a prior against this card. Daily weather "forecast against market" IS closed under the three-falsified rule.
+
+**The earlier in-play tests, one line each** (full table with sources: section 7 of `IDEA_DESK_B_INGAME_CARD.md`):
+
+| Test | Entry mechanism | Exit style | Verdict and n |
+|---|---|---|---|
+| SC1 | the market's own 5c jump in play, follow or fade (tennis) | time exit, 2 or 5 minutes | FALSIFIED, four rules, 62,747 events, about -4.3c a trade |
+| ESPN1 | an outside win-probability feed against the ask, in play | hold to settlement | FALSIFIED, 4 of 4, 1,613 games |
+| SWING1 | buy the faller after its own 25c drop in play | hold to settlement | FALSIFIED, 302 trades, PF 0.99 and 1.06 |
+| INPLAY1 | the outside feed at 3 times the ask, cheap side | hold to settlement | NOT_ENOUGH_DATA, 30 trades, 0 wins |
+| SERIESLAG1 rule | series market after a game ends, fixed coin-flip model | hold to the series result | NOT_ENOUGH_DATA, 44 trades, PF 0.21 |
+| NHLOT (this card) | a change of game STATE read from sibling markets, buy the cheaper side | hold to settlement, minutes | not read |
+
+**The price measurement is APPROVED; nothing beyond it is.** Zero tries, no outcome read.
+
+- **Script:** `workers/nhlot/measure_prices.py`, committed with this section and self-tested on made-up data. **Jobs:** `workers/desk_b_jobs/NHLOT_LISTS.json` (4 requests, at most 9 pages, cap 10, passes the pull script's check) and `NHLOT_CANDLES.json` (cap 50, not runnable until built from the lists). About 60 requests in all.
+- **Three details fixed now, each a small change from the card text above:**
+  1. **The underdog is the side with the lower ask at the detection minute,** not the pre-game underdog. It is the market's own lean in overtime, which is the thing being measured, and it needs no pre-game price.
+  2. **A total strike counts as decided** when its YES bid is 93c or higher or its YES ask is 7c or lower (the card said 96c and 4c; a decided market often shows only one side of its quote, so one side is tested and the line is a little wider). At least 4 strikes must have a quote that minute, none undecided, at least one decided each way, and both moneyline mids between 30c and 70c. Only the last 45 minutes before the game market closed are searched.
+  3. **Sample:** the 150 most recently settled regular-season games, never extended. **Under 30 detections is NOT_ENOUGH_DATA.**
+- **Kill rules, unchanged:** CLOSED if the cheaper side can be bought at 43c or lower (spread 3c or less, at the detection minute or the next) in fewer than 30% of detections; CLOSED if the rule fires in fewer than 12% or more than 35% of games.
+- **What the script never does:** it reads no result field and no minute later than one minute after detection.
+
 ## Not cards: two pointers for the queue
 
 1. **COMBOPRICE1 is an orphan too.** V2 designed a test of a combo's price against the prices of its own legs (`workers/COMBOPRICE1_DESIGN.md` on V2's branch). It needs the leg tickers the combo recorder does not store yet. When Main adds them it can run on `combo-data` with zero reads. It is V2's design, not a new card of mine.

@@ -1,0 +1,22 @@
+{
+ "job_id": "NHLOT_CANDLES",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_B_WAVE3.md",
+ "purpose": "NHLOT price measurement (zero tries), stage 2: one minute candles of both moneyline markets and every total-goals strike for the last 50 minutes before each game market closed, for the 150 most recently settled regular-season games. At most 50 requests.",
+ "heldout": "none (a price measurement; no outcome is read and no rule is scored)",
+ "allowed_endpoints": [],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 50,
+ "requests": [],
+ "notes": "NOT RUNNABLE. Built from the NHLOT_LISTS answers (the tickers are not known before them): the 150 most recently closed games, grouped so that games closing within 30 minutes of each other share one batched request of at most 100 tickers. If 150 games do not fit in 50 requests the list is cut at the most recent games that do fit; it is never extended. Reviewed before it runs.",
+ "status": "awaiting_lists",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
