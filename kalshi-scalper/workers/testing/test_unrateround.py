@@ -2,6 +2,7 @@
 import calendar, csv, gzip, json, os, sys, tempfile, random
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "scripts"))
 import unrateround as u
+u.VINTAGE_FROM = None            # the older tests use synthetic events from 2023; the vintage test at the end sets it
 import kalshi_pull as kp
 
 def mkrun(d, job, bodies):
@@ -65,4 +66,10 @@ with tempfile.TemporaryDirectory() as t:
     assert u.events_from(d1c) == {}
     # stats: win/loss arithmetic
     s = u.stats([{"price": 0.5, "win": True}, {"price": 0.5, "win": False}]); assert abs(s["net"] + 2 * u.fee(0.5)) < 1e-3 and abs(s["pf"] - (0.5 - u.fee(0.5)) / (0.5 + u.fee(0.5))) < 1e-3
+# vintage rule (Desk B's note): only events whose u0 month is 2026-01 or later are admissible, the rest are dropped and counted
+with tempfile.TemporaryDirectory() as dv:
+    mkrun(dv, jl, {"live_KXU3": {"markets": markets}, "hist_KXU3": {"markets": []}, "live_KXUE": {"markets": []}, "hist_KXUE": {"markets": []}})
+    u.VINTAGE_FROM = None; all_n = len(u.events_from(dv)); u.VINTAGE_FROM = (2026, 1); kept = u.events_from(dv)
+    assert all(u.prev(u.event_month(e)) >= (2026, 1) for e in kept) and 0 < len(kept) < all_n and u.events_from.excluded_for_vintage == all_n - len(kept)
+    rep = u.events_report(dv); assert rep["excluded_u0_not_first_published"] == all_n - len(kept) and rep["label"].startswith("no evidence at n = %d" % len(kept)), rep
 print("unrateround synthetic tests passed")

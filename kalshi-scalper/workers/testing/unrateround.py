@@ -11,6 +11,8 @@ CUTOVER = calendar.timegm((2026, 9, 12, 0, 0, 0))
 SERIES = ["KXU3", "KXUE"]                              # candidates; stage 0 says which one exists. Nothing else is pulled.
 MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}
 LO, HI, NEAR, EDGE8, MIN_EVENTS = 0.10, 0.80, 0.35, 0.08, 30
+VINTAGE_FROM = (2026, 1)      # AMENDMENT 1 (Nov 12, 2026, before any data; Desk B's note): u0 must be the rate AS FIRST PUBLISHED. BLS revises the household survey's seasonal factors every January for the past five years, so levels
+                              # pulled now for months before 2026-01 are not what the market saw; months from 2026-01 have not been revised since release. An event whose u0 month is earlier is dropped and COUNTED, unless a first-published source is approved.
 SD_SPANS = [((2010, 1), (2019, 12)), ((2022, 1), (2025, 12))]
 REG = "kalshi-scalper/workers/testing/UNRATEROUND_REGISTRATION.md"
 RUN = {"status": "active", "host": "api.elections.kalshi.com", "base_path": "/trade-api/v2", "pacing_seconds": 1.0,
@@ -71,13 +73,19 @@ def events_from(s1):
             c = iso(m.get("close_time", "")); et = m.get("event_ticker", "")
             if not c or c >= CUTOFF or m.get("result") not in ("yes", "no") or not event_month(et): continue
             ev.setdefault(et, []).append({"ticker": m["ticker"], "close": c, "result": m["result"], "type": m.get("strike_type"), "floor": num(m.get("floor_strike")), "cap": num(m.get("cap_strike"))})
-    return {e: v for e, v in ev.items() if event_month(e)[1] != 1}      # reference month January is excluded (annual population controls)
+    ev = {e: v for e, v in ev.items() if event_month(e)[1] != 1}      # reference month January is excluded (annual population controls)
+    if VINTAGE_FROM is not None:
+        keep = {e: v for e, v in ev.items() if prev(event_month(e)) >= VINTAGE_FROM}
+        events_from.excluded_for_vintage = len(ev) - len(keep)
+        return keep
+    events_from.excluded_for_vintage = 0
+    return ev
 
 
 def events_report(s1):
     ev = events_from(s1)
     n = len(ev)
-    return {"events_excluding_january_before_cutoff": n, "label": ("no evidence at n = %d (under 30 independent events; no candle is pulled, nothing scored)" % n) if n < MIN_EVENTS else "n = %d events: enough to read once against the screen (the haircut line is n = %.1f)" % (n, 0.66 * n)}
+    return {"events_excluding_january_before_cutoff": n, "excluded_u0_not_first_published": getattr(events_from, "excluded_for_vintage", 0), "label": ("no evidence at n = %d (under 30 independent events; no candle is pulled, nothing scored)" % n) if n < MIN_EVENTS else "n = %d events: enough to read once against the screen (the haircut line is n = %.1f)" % (n, 0.66 * n)}
 
 
 def levels(path):

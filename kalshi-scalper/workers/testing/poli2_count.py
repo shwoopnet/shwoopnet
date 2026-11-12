@@ -10,7 +10,7 @@ PINS (the card is silent or its data cannot give them; all fixed here, before da
   P5 qualifying gap (per market, per ET date D): two-sided closes at the candles ending 22:00 ET on D, 06:00 and 07:00 ET on D+1; |mid(07:00) - mid(22:00)| >= 0.05; the side bought (YES at the ask if the gap is up, NO at 1 - bid if down) priced 0.10 to 0.90 at 07:00; liquid per P3. One per market per day.
   P6 halves: the qualifying gaps in date order, first half = first floor(n/2). A cluster is (series, D); clusters are reported next to gaps.
   P7 request cap: stage 2 has STAGE2_CAP requests; if more would be needed, markets are dropped by lowest lifetime volume (a settled tally, not a price) and the number dropped is reported.
-Commands: build-s0 | build-s1 <series-list folder: the census pull> | build-s2 <s1 folder> | count <s2 folder> [<more folders>]   (folders are kalshi-pull-data run folders)
+Commands: build-s1 <series-list folder: the census pull> | build-s2 <s1 folder> | count <s1 lists folder> <s2 candle folders...> | cost-screen <quote files...>   (folders are kalshi-pull-data run folders)
 """
 import calendar, gzip, json, os, re, statistics as st, sys, time
 from datetime import datetime, timezone, timedelta
@@ -194,7 +194,7 @@ def count_market(ticker, candles, close_ts):
         stale = abs(a7 - a6) <= STALE + 1e-9 if up else abs(b7 - b6) <= STALE + 1e-9
         ent_b, ent_a = (b7, a7) if up else (b7, a7)
         mid7 = (b7 + a7) / 2
-        out.append({"date": d.isoformat(), "series": ticker.split("-")[0], "ticker": ticker, "strict": stale, "loose": True, "within_24h_of_close": close_ts is not None and close_ts <= t07 + 86400,
+        out.append({"date": d.isoformat(), "series": ticker.split("-")[0], "ticker": ticker, "strict": stale, "loose": True, "within_24h_of_close": close_ts is not None and close_ts <= t07 + 86400, "no_exit": close_ts is not None and close_ts <= t07 + 86400,
                     "spread": a7 - b7, "round_trip": (a7 - b7) + 2 * 0.07 * mid7 * (1 - mid7)})
     return out
 
@@ -214,6 +214,8 @@ def tally(gaps):
     """AMENDMENT 3 (Nov 12, Head of R&D, credited to Desk B's wording): the unit of the kill is the SERIES-MORNING (series, date D): several markets of one event moving together count once.
     CLOSED if fewer than 40 series-mornings with a qualifying gap in either half (halves by date); CLOSED on cost if the median round trip at the entry hour is above 5c. Gaps are still reported beside."""
     res = {}
+    no_exit = sum(1 for g in gaps if g.get("no_exit"))                     # Desk B's point: a market that closes within 24 hours of the entry has no 24 hour time exit, so it cannot be a gap
+    gaps = [g for g in gaps if not g.get("no_exit")]
     for name in ("strict", "loose"):
         sel = [g for g in gaps if g[name]]
         mornings = sorted({(g["date"], g["series"]) for g in sel})
@@ -235,7 +237,7 @@ def tally(gaps):
         verdict = "CLOSED: fewer than 40 series-mornings with a qualifying gap in a half; no further read"
     n = s_["series_mornings"]
     label = "no evidence at n = %d series-mornings" % n if n < 100 else "count only; any scoring needs its own registration and the held-out from 2026-11-05"
-    return {"strict": s_, "loose": l_, "verdict": verdict, "label": label,
+    return {"strict": s_, "loose": l_, "verdict": verdict, "label": label, "gaps_excluded_no_24h_exit": no_exit,
             "premise_note": "The card's premise (a quote that has not yet followed) is NOT tested at hourly resolution; what is counted is overnight gaps, with the 06:00-to-07:00 hourly ask proxy"}
 
 
@@ -261,9 +263,11 @@ def cost_screen(quote_files, series_set=None):
             "verdict": ("CLOSED on cost: median round trip %.1fc is above 5c; stage 2 is never sent" % (100 * med)) if med > COST_MAX else ("under the 5c line (%.1fc): send the stage 2 request count to the Head for a go" % (100 * med))}
 
 
-def count(folders):
+def count(folders, lists=None):
+    """lists = the stage 1 lists folder (REQUIRED: the market's close time decides whether a 24 hour exit exists)."""
+    if lists is None: raise ValueError("the lists folder is required: a market closing within 24 hours of the entry cannot be a gap (no 24 hour exit)")
+    closes = {t: v[0] for t, v in markets_from(lists).items()}
     gaps, seen = [], 0
-    closes = {}
     for f in folders:
         man = json.load(open(os.path.join(f, "manifest.json")))
         for row, body in answers(f):
@@ -271,7 +275,7 @@ def count(folders):
             hint = None if rid.startswith("b") and re.fullmatch(r"b\d{4}", rid) else rid
             for t, cs in candles_of(body, hint):
                 seen += 1
-                gaps += count_market(t, cs, None)
+                gaps += count_market(t, cs, closes.get(t))
     out = tally(gaps)
     out["markets_read"] = seen
     return out
@@ -282,6 +286,6 @@ if __name__ == "__main__":
     if c == "build-s0": print(json.dumps(build_s0(), indent=1))
     elif c == "build-s1": print(json.dumps(build_s1(sys.argv[2]), indent=1))
     elif c == "build-s2": print(json.dumps(build_s2(sys.argv[2]), indent=1))
-    elif c == "count": print(json.dumps(count(sys.argv[2:]), indent=1))
+    elif c == "count": print(json.dumps(count(sys.argv[3:], sys.argv[2]), indent=1))
     elif c == "cost-screen": print(json.dumps(cost_screen(sys.argv[2:]), indent=1))
     else: print(__doc__)

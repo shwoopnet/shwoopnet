@@ -16,6 +16,12 @@ Everything above stays except: **one trade on EVERY non-January monthly release*
 
 **Taker line (required):** price comes from an hourly candle close, not an order book, and not yet cleared by Forensics' CANDLEVSBOOK1. The book-replay line cannot be produced (no book exists for past months). The haircut line is printed: after the 34 percent fill drop the expected n is 0.66 n against the screen's 30; with about 33 events that is about 22, so even a listing would rest on a count the haircut puts under 30. **Registered now (Head's ruling): a haircut-line n under 30 is reported as "no evidence at n = x" on that line, whatever the headline label shows, and the best possible headline is "on the paper list (unproven)" with the number of cards read stated beside it; this family (about 12 releases a year) can never be a research-bar pass.** The price label on the taker line is "hourly candle, freshness not measured on this series".
 
+## AMENDMENT 1 (Nov 12, 2026, before any data; credited to Idea Desk B's note of 18:00Z): u0 must be the rate AS FIRST PUBLISHED
+
+The market saw the unemployment rate as published at the time, to the unrounded digits through the unemployed and labor-force levels of that release. BLS revises the household survey's seasonal factors every January for the previous five years, so levels pulled now (LNS13000000, LNS11000000) for months before 2026-01 are not what the market saw. **Rule (coded as `VINTAGE_FROM = (2026, 1)` in `unrateround.py`, tested): an event is admissible only if its u0 month is 2026-01 or later** (months from January 2026 have not been revised since release); every earlier event is dropped and COUNTED (`excluded_u0_not_first_published`) unless the Head approves a first-published source (for example real-time vintages) for the earlier months.
+
+**Consequence, stated now because it is arithmetic and needs no data:** with reference months Feb to Sep 2026 (January reference months are excluded; the October release is after the 2026-11-05 cutoff) there are **at most 8 admissible events, against the 30-event floor**. UNRATEROUND therefore reads "**no evidence at n = 8 or fewer**", and under the stage 1 gate no candle request is ever sent. The 4-request lists job (UNRATE_LISTS) can only confirm the number; it cannot change the label. If the Head wants the full history scored, an approved first-published source (and the registration of that source) comes first.
+
 ## Request count (all Kalshi, 1 a second)
 
 | Stage | Job | Requests |

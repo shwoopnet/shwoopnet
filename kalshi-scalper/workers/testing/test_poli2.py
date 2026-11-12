@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, t
     # liquidity: 7-day volume under 200 -> none
     thin = [dict(c, volume_fp="1") for c in cs]; assert p.count_market("KXAAA-1", thin, None) == []
     mkrun(d2, j2, {r["id"]: ({"markets": [{"market_ticker": "KXAAA-1", "candlesticks": cs}]} if r["path"] == "/markets/candlesticks" else {"candlesticks": cs}) for r in j2["requests"]})
-    out = p.count([d2]); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 1, out
+    out = p.count([d2], d1); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 1, out
     G = lambda i, ser="S", dm=0.0: dict(date="2026-%02d-%02d" % (10 + i // 28, 1 + i % 28), series="%s%d" % (ser, i), ticker="T%d" % i, strict=True, loose=True, within_24h_of_close=False, spread=0.01 + dm, round_trip=0.045 + dm)
     t = p.tally([G(i) for i in range(100)])
     assert t["verdict"].startswith("COUNT CLEARS 40 series-mornings"), t["verdict"]
@@ -76,4 +76,9 @@ with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, t
     p.BUDGET = 6; p.PACK = 1  # each live market alone in a batch
     with tempfile.TemporaryDirectory() as d3:
         mkrun(d3, j1, big); j3 = p.build_s2(d3); assert len(j3["requests"]) <= 4 and "dropped by the request cap: 6" in j3["notes"], j3["notes"]
+    # no 24 hour exit: a market closing within 24 hours of the entry is excluded and counted (Desk B's point 4)
+    near = [dict(x, no_exit=True) for x in gaps]
+    tt = p.tally(near + [G(i) for i in range(100)]); assert tt["gaps_excluded_no_24h_exit"] == len(near) and tt["strict"]["series_mornings"] == 100
+    try: p.count([d2]); raise SystemExit("count without the lists passed")
+    except ValueError as e: assert "lists folder is required" in str(e)
 print("poli2 synthetic tests passed")
