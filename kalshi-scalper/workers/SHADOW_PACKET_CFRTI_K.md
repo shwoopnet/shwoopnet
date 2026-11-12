@@ -1,4 +1,4 @@
-**TOP LINE: development read PENDING (waiting on the KXBTC15M candles, `CFRTI_K_CANDLES`, PR 826). Updated the hour it lands.**
+**TOP LINE (Nov 12, 2026): development read DONE, n 601, registered line cash PF 1.07 (not falsified), z 0.60; line (b) "ran rows dropped" PF 0.16 on 435 rows, so NO live use; Block P NOT MET. See `CFRTI_K_DEV_RESULT_NOV12.md`.**
 
 # Shadow packet: CFRTI-K (Idea Desk A, Nov 12, 2026; no live account figure)
 - **Name:** CFRTI-K.

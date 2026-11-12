@@ -24,3 +24,6 @@ Kalshi's Bitcoin perpetual as a field for Kalshi's 15 minute Bitcoin binary. Ide
 
 ## Stated limit (Nov 12, 2026, ruling of the Head of R&D after CANDLEVSBOOK1)
 The binary side is cleared: on `KXBTC15M` the 1 minute candle's bid and ask close is the order book at the minute's end (Forensics, 95.9% within 1c on the primary rows). **The perpetual's candle freshness is NOT measured** (no recorded perp book to compare): the perp candle is assumed current by the same endpoint, not measured, and no seconds-level claim is made from it. PERPBIN1 may proceed on the same candles; its development read is run once as registered.
+
+
+DEVELOPMENT READ ON 2026-11-12 (PERPBIN1, once): try A n 963 PF 0.91, try B n 971 PF 0.93, both FALSIFIED on development. See `PERPBIN1_DEV_RESULT_NOV12.md`.

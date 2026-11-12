@@ -1,4 +1,4 @@
-**TOP LINE: development read PENDING (waiting on the KXBTC15M candles, `CFRTI_K_CANDLES`, PR 826). Updated the hour it lands.**
+**TOP LINE (Nov 12, 2026): development read DONE, BOTH TRIES FALSIFIED: A n 963 cash PF 0.91, B n 971 cash PF 0.93 (about 50% wins each). See `PERPBIN1_DEV_RESULT_NOV12.md`.**
 
 # Shadow packet: PERPBIN1 (Idea Desk A, Nov 12, 2026; no live account figure)
 - **Name:** PERPBIN1 (open-interest arm, Bitcoin only, two tries A and B).
