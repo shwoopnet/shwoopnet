@@ -13,7 +13,7 @@ None.
 
 ## Reads against the screen (tries)
 
-None yet. ECONLAG will be try number 1 when its pull has run.
+None yet. ECONLAG will be try number 1 when its pull has run (registered: ECONLAG amendment 2 in `IDEA_DESK_B_PROTOCOLS.md`, pinned cutoff 2026-10-31, one trade per print day, exit four hours after the print; job files in `desk_b_jobs/`).
 
 | Try | Card | Date read | Events | Cash PF | Both halves positive | Label |
 |---|---|---|---|---|---|---|

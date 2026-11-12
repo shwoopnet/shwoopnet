@@ -2,7 +2,7 @@
  "id": "DESKB-ECONLAG",
  "card": "ECONLAG (card 2)",
  "protocol": "IDEA_DESK_B_PROTOCOLS.md, protocol 2 with amendment 1",
- "status": "DEMOTED by the power analysis: one falsification run only; NOT to run on the shared address; waits for the separate pull route",
+ "status": "SUPERSEDED Nov 12, 2026 by ECONLAG_CALENDAR.json and ECONLAG_CANDLES.json (the kalshi-pull format, ECONLAG amendment 2). Kept as the record; do not run.",
  "purpose": "1 minute candles around scheduled prints for the next-meeting Fed decision market and up to four slower macro markets; time exit test",
  "host_allowlist": [
   "api.elections.kalshi.com"

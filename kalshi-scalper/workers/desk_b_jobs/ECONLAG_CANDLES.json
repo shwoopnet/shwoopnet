@@ -1,0 +1,22 @@
+{
+ "job_id": "ECONLAG_CANDLES",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/IDEA_DESK_B_PROTOCOLS.md",
+ "purpose": "ECONLAG stages 2 to 4 (slow-family paper screen, try 1): daily candles of the Fed decision markets, then 1 minute candles around each print for the trigger scan, then the slow markets on trigger days only. At most 380 requests in all stages together.",
+ "heldout": "ECONLAG amendment 2: one read of every print day from 2024-10-01 to 2026-10-31 (pinned cutoff); no print day after 2026-10-31 is requested",
+ "allowed_endpoints": [],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 380,
+ "requests": [],
+ "notes": "NOT RUNNABLE. The request list is built from the stage 1 answers (the tickers are not known before them) in three parts, each reviewed before it runs and each with its own cap inside the 380: part A daily candles of the KXFEDDECISION markets (at most 90); part B one 1 minute read per print day for the market chosen as F (at most 75); STOP RULE: if fewer than 30 print days show the registered trigger, nothing more is asked and the label is no evidence at n = x; part C daily and 1 minute candles of the slow markets on trigger days only (the rest of the 380; if that is not enough for four slow markets a day, S4 is dropped first, then S3).",
+ "status": "awaiting_calendar",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

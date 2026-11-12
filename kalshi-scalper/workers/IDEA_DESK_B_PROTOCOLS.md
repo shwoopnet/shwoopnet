@@ -281,3 +281,48 @@ What it says, plainly:
 - **Why it failed (description).** The Wikipedia table is not the source's poll list. It has no poll ending in August 2026, 12 in September, 32 in October and 5 in November, and its mix of pollsters runs 2 to 4 points lower than the settled average through mid October. A window average of it cannot stand in for the settled value, in level or in day to day direction.
 - **What follows.** ROLLOFF needed our table to reproduce the settled value; it does not, so there is no forward shadow to register. Any other card that uses the Wikipedia poll table as a LEVEL model of this average (Refinement's POL-b2) has the same problem and is flagged to the Head of R&D. A rule that uses only Kalshi's own prices on these markets (Refinement's S1) is not affected.
 - **Requests:** 0 Kalshi reads by this desk (the pull was run by Main through kalshi-pull, 7 answers). Wikimedia: 4 requests, 3 refused.
+
+## ECONLAG amendment 2 (Nov 12, 2026, before any ECONLAG read): pinned cutoff, the slow-family screen, staged spend
+
+Asked for by the Head of R&D. ECONLAG is the first card to be read against the slow-family paper screen (`docs/POLITICS_RULES.md` section 8). It will be **try number 1** against that screen. Protocol 2 and amendment 1 stand except where this changes them. No ECONLAG request has been made.
+
+**1. The cutoff is a date constant.** The universe is every scheduled print (CPI, Employment Situation, PCE, FOMC statement) with a print time from **2024-10-01 00:00 UTC to 2026-10-31 23:59 UTC**. "The last third of print days" is withdrawn: it is not a constant. Nothing after 2026-10-31 is requested. Prints after that date are the only events a later read may add.
+
+**2. What is claimed, and what is not.** The read is against the paper screen only: cash profit factor 1.3 or better on at least 30 independent events, both halves positive, read once. **No main-bar claim (profit factor 1.5 on development and held-out, deflated) will be made from this read**; the power analysis showed the card cannot reach that bar for years, and the development and held-out split of protocol 2 is withdrawn with it.
+
+**3. One event, one trade.** The independent event is the print DAY (two prints on one day are one event). On each print day at most ONE trade counts: among the slow markets that qualify under rules 1 to 4 of protocol 2, the one with the largest part of the implied move still owed (ties go to S1, then S2, S3, S4). Its result is the net cash of 1 contract, entry at the ask of the T+10 minute candle, **exit arm A only: the bid of the candle ending T+4 hours**, fee on both legs, **+1c slip on both legs**. Arm B (T+24 hours), the other qualifying markets and the placebo are reported as description and are not tries.
+
+**4. The screen, as it will be read.**
+
+| Item | Value |
+|---|---|
+| Events counted | print days in the pinned range with a trade under item 3 |
+| Fewer than 30 | label "no evidence at n = x", not scored further |
+| 30 or more | profit factor = gross cash won on winning days / gross cash lost on losing days; listed "on the paper list (unproven)" only if it is 1.3 or better AND each half is net positive (halves split at the median print date); otherwise "off the list (failed the screen)" |
+| Dropped trades (no bid in the 30 minutes before the exit) | counted; over 10% of trades makes the label "no evidence (data limited)" |
+| Tries | 1, stated beside any listing with the running count in `workers/PAPER_LIST.md` |
+
+**5. Two changes that only save reads (made now, before any read).**
+
+- F and the slow markets are chosen from the **daily candle of the day before the print** (highest YES mid for F; nearest 50c for each slow market), not from the minute five minutes before it. That needs one daily read per market, which the beta calculation needs anyway, in place of a minute read of every market in every series on every print day.
+- Slow markets are only read on print days where F's trigger fired.
+
+**6. Staged spend and stop rules (at most 390 requests in all).**
+
+| Stage | Job file (`workers/desk_b_jobs/`) | Requests | What it settles |
+|---|---|---|---|
+| 1 | `ECONLAG_CALENDAR.json` (complete, passes the pull script's own check) | 10 | the print calendar from Kalshi's own event close times (amendment 1), the count of print days, and that the series names `KXRATECUTCOUNT` and `KXFED` exist |
+| 2 | part A of `ECONLAG_CANDLES.json` | at most 90 | daily candles of the Fed decision markets: which market is F on each print day |
+| 3 | part B | at most 75 | one 1 minute read around each print for F: on how many print days the trigger (a move of 0.08 or more from T-5 to T+10) fired |
+| 4 | part C | the rest | daily and 1 minute candles of the slow markets, on trigger days only |
+
+- **Stop after stage 1** if the calendar holds fewer than 30 print days in the range: label "no evidence at n = x".
+- **Stop after stage 3** if fewer than 30 print days show the trigger. A day without the trigger cannot have a trade, so the screen could not be reached; nothing more is asked and the label is "no evidence at n = x" with x the number of trigger days. Worst case spent by then: 175 requests.
+- If stage 4 cannot cover four slow markets on every trigger day inside the cap, S4 is dropped first, then S3, for every day alike.
+- `ECONLAG_CANDLES.json` is NOT RUNNABLE as committed: its tickers are not known before stage 1. Each part is built from the answers before it and reviewed before it runs.
+
+**7. What I expect, said in advance.** The trigger asks the next-meeting Fed market to move 8c within fifteen minutes of a print. That is a large move. My guess is that it fires on fewer than 30 of about 70 print days, so the most likely outcome of this read is "no evidence at n = x" after stage 3. The stop rule is there so that answer costs at most 175 requests, not 390. Probability that the card is listed: 5%.
+
+**8. Forward kill, if it is ever listed.** Paper trades after 2026-10-31 are logged with the same rule. The listing is removed if the forward paper net is below zero after 10 forward trades, or if 3 forward trades in a row are dropped for having no bid.
+
+Sources: Kalshi's public market data only (the print calendar is taken from Kalshi's own event close times). No outside host.

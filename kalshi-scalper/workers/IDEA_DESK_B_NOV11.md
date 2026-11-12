@@ -10,7 +10,7 @@ Full reasoning: `workers/IDEA_DESK_B_POWER.md`. The research bar needs about 300
 |---|---|
 | 13 ROLLOFF | CLOSED Nov 12: the proxy check was read once and KILLED the card (0 of 33 check days within 0.3 points of the settled value; see the protocols file) |
 | 3 BALLOTNO | description of one election night being finished (113 reads, approved), then PARKED until 2028 |
-| 2 ECONLAG | DEMOTED to one falsification run, only through the separate pull route |
+| 2 ECONLAG | Off the main bar. Registered as try number 1 against the slow-family paper screen (amendment 2 in the protocols file); waits for its pull |
 | 9 MOVPARITY | arm A PARKED, arm B RETIRED |
 | 1 NESTCOMBO, 7 WXCOMBO-XCITY, 8 WXCOMBO-PERSIST | CLOSED. Corrected Nov 12: the first reason given, that combos have no posted asks, was too strong. The combo recorder shows newly created combos do carry quotes. They stay closed because the recorder stores the number of legs, not which legs, so nesting and leg correlation cannot be checked until the leg tickers are recorded |
 | 4 UNRATEROUND, 5 FAANOTICE, 6 SCOTUSAUTH, 10 PRESENTQ, 11 TARIFFDTS, 12 CPIARITH, 15 WIKIEDIT, 16 SWEEPSIM | RETIRED: cannot reach a verdict (too few events a year; two also blocked on unread terms) |
