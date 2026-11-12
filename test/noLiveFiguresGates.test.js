@@ -8,7 +8,7 @@
 // "over N fills", "live PF 1.3", "N settled, N won", "net +$N", a market name followed by a signed dollar
 // figure, "N fills, N losses". It will not catch every leak; the standing rule in CLAUDE.md is what binds.
 // A line that is a research or design figure can carry [research] or [design] to opt out on purpose.
-// History is accepted and not rewritten, so only the tracked files as they are now are scanned.
+// History is accepted and not rewritten, so only the tracked files as they are now are scanned. test/ is not scanned (its fixtures are synthetic); the examples in this file use invented numbers on purpose.
 const fs = require('fs');
 const path = require('path');
 const assert = require('assert');
@@ -61,17 +61,17 @@ gates.NL1 = () => {
 gates.NL2 = () => {
   // The gate must fail on a deliberately bad fixture, so a passing run means something.
   const bad = [
-    'XRP is profit factor 0.49 over 65 fills',
-    'Dogecoin live PF 1.77 so far',
-    'since Oct 20: 131 settled, 125 won',
-    'the account is at net +$14.46',
-    'gold +$28.35 in the first trades',
-    'it had 7 fills, 3 losses',
+    'XRP is profit factor 9.99 over 99 fills',
+    'Dogecoin live PF 9.99 so far',
+    'since Jan 1: 99 settled, 98 won',
+    'the account is at net +$9.99',
+    'gold +$9.99 in the first trades',
+    'it had 9 fills, 8 losses',
   ];
   for (const s of bad) assert.ok(scanText(s, 'fixture').length === 1, 'should flag: ' + s);
   // A temp file goes through the same path as the real scan.
   const dir = fs.mkdtempSync(path.join(require('os').tmpdir(), 'nolive-'));
-  fs.writeFileSync(path.join(dir, 'x.md'), 'ok line\nBitcoin is profit factor 0.72 over 155 orders\n');
+  fs.writeFileSync(path.join(dir, 'x.md'), 'ok line\nBitcoin is profit factor 9.99 over 99 orders\n');
   assert.strictEqual(scanText(fs.readFileSync(path.join(dir, 'x.md'), 'utf8'), 'x.md').length, 1);
   fs.rmSync(dir, { recursive: true, force: true });
 };
@@ -83,7 +83,7 @@ gates.NL3 = () => {
     'drawdown from gold\'s own cash peak of $58.75',
     'research: held profit factor 1.85 on validation',
     'a shadow gate of 150 fills passes 12% of zero edge ideas',
-    'XRP is profit factor 0.49 over 65 fills [research]',
+    'XRP is profit factor 9.99 over 99 fills [research]',
   ];
   for (const s of ok) assert.strictEqual(scanText(s, 'fixture').length, 0, 'should not flag: ' + s);
 };
