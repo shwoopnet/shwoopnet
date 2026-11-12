@@ -408,6 +408,22 @@ print(json.dumps([type(h).__name__ for h in m._OPENER.handlers]))`], { encoding:
   assert.ok(!/Proxy/.test(out), 'no proxy handler in the opener: ' + out);
 };
 
+// KP14c: the runner holds a "tickers" list to the ticker allowlist the same as "market_tickers", so a job file cannot ask the markets list for a ticker it did not name up front.
+gates.KP14c = () => {
+  const out = py(`
+base = json.load(open(os.path.join(m.JOB_DIR, "SPREADLISTS.json")))
+ts = base["requests"][0]["params"]["tickers"].split(",")
+def t(tickers, allow=None):
+    j = json.loads(json.dumps(base)); j["requests"] = [{"id": "A", "path": "/markets", "params": {"tickers": tickers, "limit": 100}}]
+    if allow is not None: j["ticker_allowlist"] = allow
+    try: m.check_job(j); return "ok"
+    except m.Refused: return "refused"
+print(json.dumps({"listed": t(",".join(ts)), "unlisted": t(",".join(ts[:5] + ["KXNOTLISTED-1"])), "one_unlisted": t("KXNOTLISTED-1"), "over100": t(",".join(ts + base["ticker_allowlist"][100:101]) if len(ts) == 100 else ",".join(ts)), "empty_part": t(ts[0] + ",,") }))`);
+  assert.strictEqual(out.listed, 'ok');
+  for (const k of ['unlisted', 'one_unlisted', 'empty_part']) assert.strictEqual(out[k], 'refused', k);
+  assert.strictEqual(out.over100, 'refused', 'more than 100 tickers is refused');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
