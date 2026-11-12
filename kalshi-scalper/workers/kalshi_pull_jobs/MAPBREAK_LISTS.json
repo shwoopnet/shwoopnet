@@ -1,0 +1,266 @@
+{
+ "job_id": "MAPBREAK_LISTS",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
+ "purpose": "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 history match-series lists (counts of older matches) and 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only; a match result is read at scoring only for a bet the rule fires.",
+ "heldout": "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); the registered rule, development read only",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXCS2GAME",
+  "KXCS2GAME",
+  "KXCS2MAP",
+  "KXCS2TOTALMAPS",
+  "KXDOTA2GAME",
+  "KXDOTA2GAME",
+  "KXDOTA2MAP",
+  "KXDOTA2TOTALMAPS",
+  "KXLOLGAME",
+  "KXLOLGAME",
+  "KXLOLMAP",
+  "KXLOLTOTALMAPS",
+  "KXVALORANTGAME",
+  "KXVALORANTGAME",
+  "KXVALORANTMAP",
+  "KXVALORANTTOTALMAPS"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 154,
+ "notes": "MAPBREAK registered rule (Amendments 1 to 3); 20 requests: 12 live lists (6 pages for each match and total-maps series, 12 for each map series), 4 history match-series lists (10 pages each, counts only) and 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "live_KXCS2TOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2TOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXDOTA2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXDOTA2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "live_KXDOTA2TOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2TOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXVALORANTGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXVALORANTMAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTMAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "live_KXVALORANTTOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTTOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXLOLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "live_KXLOLMAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLMAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 12
+  },
+  {
+   "id": "live_KXLOLTOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLTOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "fee_KXCS2GAME",
+   "path": "/series/KXCS2GAME"
+  },
+  {
+   "id": "fee_KXDOTA2GAME",
+   "path": "/series/KXDOTA2GAME"
+  },
+  {
+   "id": "fee_KXVALORANTGAME",
+   "path": "/series/KXVALORANTGAME"
+  },
+  {
+   "id": "fee_KXLOLGAME",
+   "path": "/series/KXLOLGAME"
+  }
+ ]
+}
