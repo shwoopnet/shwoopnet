@@ -21,7 +21,11 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | EXITREPLAY1 and ENTRYREPLAY1 (the 25c early sell and a resting entry replayed on R6 books) | Live-Data Forensics | 4 | read Nov 12: no new strategy; resting-entry saving is a possible version of OICORE's entry, parked |
 | QUOTE2B | Desk A (was V2) | as registered Oct 29, no new try | development read done Nov 12: cash PF 0.00 on 131 hours, FALSIFIED on development (registration asked for 300 hours); held-out Nov 24 |
 | Refinement's hand-registered cells of Nov 11 to 12, as itemised by Refinement on Nov 12: W-NO-ARM1 6; W-SPOTLEAD1 16; W-CAT-ECON1 36; W-CAT-SPORTS1 72; weather 36; W-POL-APPR1 240; politics screens 3 | Refinement | 409 | read (news fade: 36 cells registered, not run, not counted yet). Some of these may already sit inside the 12,600 above; the overlap is not resolved, so the total stays "about" |
-| ROLLOFF proxy check | Desk B | 0 (a measurement; 30 window candidates fitted on fit days, kill rule read once on check days) | scorer committed, verdict due |
+| ROLLOFF proxy check | Desk B | 0 (a measurement; 30 window candidates fitted on fit days, kill rule read once on check days) | read Nov 12: proxy KILLED (0 of 33 check days within 0.3 points), card closed |
+| NC15DEPTH1 pooled cell (11 non-crypto 15 minute series, five-level imbalance 0.50 or more, thin side, look 600 s before close) | Desk A | 1 | registered Nov 12 (c6a97613), forward only from 2026-11-19T00:00Z; bar n 3,400, PF 1.5 pooled and in each third, z 5.46 |
+| S3 combo house side (NO at 60c to 90c, one band) | Desk B | 1 | registered Nov 12 (ed6c0bb); paper; development read on or after Nov 26 |
+| ECONLAG (4 hour exit after a release, one arm; paper screen only) | Desk B | 1 | cutoff pinned; count-only stages first; not read |
+| CFRTI-K lead/lag measurement | Desk A | 0 | registered before the candles are opened |
 
 ---
 

@@ -27,14 +27,14 @@ Research reports to the Head of R&D. Engineering, merges, deploys, recorders, ka
 | 4 | NOSIDE1_CANDLES (W-NO-ARM1) | 1,034 | A first readable development verdict on the approval NO side; what is held leans against | ready on claude/refine-live; runs only after 1 and 2 are on the data branch |
 | retired | COMBO1_OPENBOOK | 0 | Answered for free: the combo recorder's first snapshot on combo-data (2026-11-12 14:35Z) has 400 quote rows, 229 with a NO bid, 37 with a YES bid, 18 two-sided | closed, no read spent |
 
-Next after these: ECONLAG (about 390, after Desk B pins its cutoff as a date constant). Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
+Next after these: ECONLAG_CALENDAR (10), then a count-only trigger scan (at most 165 more) that stops the card at "no evidence at n = x" if under 30 print days or under 30 trigger days. PERPETH1M is not dispatched. Not scheduled: a daily logging job for the spread cell (only after its read), WXDAYEND remainder (22 reads, last).
 
 ## Fixed read dates (cutoffs are committed date constants; read once; nobody runs early)
 
 | Test | First allowed | Size | Cutoff constant | Runner | Outcome labels (committed in advance) |
 |---|---|---|---|---|---|
 | MMMAP1 (measurement) | Nov 15 | needs 3 full NC15 dates | hourly-ladder part: events closing before 2026-11-07T15:00Z | Desk A (was V2) | a measurement, no PF verdict |
-| NC15DEPTH1 pooled cell | registration due before Nov 19 | forward only | to be registered (counts only) | Desk A (was V2) | forward only; the 3c effect is an assumption |
+| NC15DEPTH1 pooled cell | scoring window opens 2026-11-19T00:00Z; n 3,400 expected about Dec 23, recorder stops Dec 31 | forward only | registered c6a97613 on claude/idea-desk-a | Desk A | bar n 3,400, PF 1.5 pooled and in each third, z 5.46; PF under 1.0 at n 1,000 = FALSIFIED; short of 3,400 = no evidence at n = x (the minimum is not lowered) |
 | CFRTI1-BTC held-out | Nov 20, expected Nov 22 to 24 | 50 Bitcoin edge rows | HELDOUT_FIRST_DAY 2026-11-05 (cfrti1.py line 11) | Desk A with V2's committed script and its own | registered: PF 1.3 or better with a positive mean at n 50 = clears (a RE-TEST lead, not a pass); anything else = closed |
 | MMSIM1 and MMHOUR1 held-out | Nov 24 | about 400 hourly events | PINNED_CUTOFF 2026-11-07T15:00:00Z; the 5 events closing Nov 7 15:00Z to 19:00Z are SPENT and reported with and without | Desk A with V2's committed script and its own | Amendment 3 (Desk A, to be committed before the read): reported under BOTH fill rules, JUDGED on price priority. PF 1.3 or better with a positive day mean = LEAD CONFIRMED; under 1.0 = FALSIFIED; else no call. FALSIFIED is expected |
 | Combo house side, first paper read | Nov 26 | stop if fewer than 20 combos ever showed a two-sided quote with a bid, or fewer than 100 trades | to be registered by Desk B before any scoring | Desk B | paper only; 10c per dollar edge over 100 settled combos before any $2 probe |
