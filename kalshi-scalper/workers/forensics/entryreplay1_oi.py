@@ -167,5 +167,14 @@ a, b = Gt["t0"].to_numpy(), Go["t0"].to_numpy()
 bs = [a[rng.integers(0, len(a), len(a))].mean() - b[rng.integers(0, len(b), len(b))].mean() for _ in range(4000)]
 out["part_b_outcome_closes_before_nov5"] = {"trigger": bt, "other": bo,
                                             "trigger_minus_other_T0_mean": [round(float(a.mean() - b.mean()), 5), round(float(np.percentile(bs, 2.5)), 5), round(float(np.percentile(bs, 97.5)), 5)]}
+# Added after the result (asked by Refinement): the same Part B comparison WITHIN price buckets. A finer cut of the same read, descriptive.
+wb = {}
+for nm, lo, hi in (("8c_to_20c", 0.08, 0.20), ("20c_to_35c", 0.20, 0.35), ("35c_to_50c", 0.35, 0.5001)):
+    x, y = Gt[(Gt["a0"] >= lo - EPS) & (Gt["a0"] < hi - EPS)], Go[(Go["a0"] >= lo - EPS) & (Go["a0"] < hi - EPS)]
+    wb[nm] = {"trigger": {"windows": int(len(x)), "mean_ask": round(float(x["a0"].mean()), 4) if len(x) else None, "win_rate": round(float(x["win"].mean()), 4) if len(x) else None,
+                          "taker_T0_mean": cl(x["t0"], x["ticker"]) if len(x) else None},
+              "other": {"windows": int(len(y)), "mean_ask": round(float(y["a0"].mean()), 4) if len(y) else None, "win_rate": round(float(y["win"].mean()), 4) if len(y) else None,
+                        "taker_T0_mean": cl(y["t0"], y["ticker"]) if len(y) else None}}
+out["part_b_outcome_closes_before_nov5"]["within_price_buckets"] = wb
 json.dump(out, open(OUT, "w"), indent=1, default=float)
 print(json.dumps(out, indent=1, default=float))

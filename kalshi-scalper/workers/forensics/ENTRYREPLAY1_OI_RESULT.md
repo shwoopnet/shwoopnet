@@ -55,3 +55,15 @@ More closes. At about 4 in-band trigger windows a day, 100 need about 25 days of
 About 1.2% of windows in the list's date range were not examined by the open interest cache and count as "other" here. The cheap side and its price are taken from the book at 178 seconds; the bot's own decision price comes from a different read. Ten days of books with gaps. Not checked by the Verification Analyst.
 
 **Correction (same day, from the Head of R&D):** the recorder was extended today and now records Bitcoin (and gold) to Dec 15, not Nov 20. At about 4 in-band trigger windows a day that is about 100 by early December on books alone. Closes from Nov 5 stay untouched for rule scoring until the CFRTI sitting on Nov 20 and are free for this comparison after it.
+
+## Within price buckets (added 2026-11-12 after the result, asked by Refinement)
+
+Not in the registration: a finer cut of the same Part B read (closes before 2026-11-05 only, same 14 and 164 windows, same taker pricing at the first look), made AFTER the pooled figure was seen. Descriptive only; whether it counts as a further try is the Head of R&D's call. Mean taker result per contract, held to settlement, [value, 2.5%, 97.5%] by resampling windows.
+
+| Cheap side at the look | Trigger windows | Mean price | Win rate | Mean result | Other windows | Mean price | Win rate | Mean result |
+|---|---|---|---|---|---|---|---|---|
+| 8c to under 20c | 8 | 11.7c | 37.5% | +25.1c (+0.1 to +60.2) | 62 | 13.4c | 21.0% | +6.8c (-2.4 to +17.0) |
+| 20c to under 35c | 5 | 24.0c | 40.0% | +14.7c (-24.8 to +54.3) | 56 | 26.8c | 30.4% | +2.2c (-9.2 to +14.8) |
+| 35c to 50c | 1 | 46.0c | 0.0% | -47.7c | 46 | 42.3c | 52.2% | +8.2c (-6.7 to +22.3) |
+
+**Label: no evidence at n = 8, n = 5 and n = 1.** Inside the 8c to 20c bucket the two groups sit at nearly the same price (11.7c against 13.4c), so the price mix that confounds the pooled comparison is mostly removed there. The trigger rows are higher (three wins in eight against 13 in 62), but three wins in eight cannot be told from two in eight, and one win fewer would put the trigger rows below the others. The lower end of the trigger interval sitting just above zero is what eight rows with three large wins produce; it is not a finding. What can be said: the pooled "+10.6c" was not created by the price mix alone, and there is no sign inside any bucket that the trigger is worse than its neighbours. The first sample that can say more is closes from Nov 5 on, which this desk does not join before the CFRTI held-out read.

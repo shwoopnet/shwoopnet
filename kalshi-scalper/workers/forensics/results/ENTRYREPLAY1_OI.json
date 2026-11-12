@@ -276,6 +276,74 @@
    0.106,
    -0.1443,
    0.37133
-  ]
+  ],
+  "within_price_buckets": {
+   "8c_to_20c": {
+    "trigger": {
+     "windows": 8,
+     "mean_ask": 0.1165,
+     "win_rate": 0.375,
+     "taker_T0_mean": [
+      0.25135,
+      0.00135,
+      0.60164
+     ]
+    },
+    "other": {
+     "windows": 62,
+     "mean_ask": 0.1338,
+     "win_rate": 0.2097,
+     "taker_T0_mean": [
+      0.06789,
+      -0.02386,
+      0.17005
+     ]
+    }
+   },
+   "20c_to_35c": {
+    "trigger": {
+     "windows": 5,
+     "mean_ask": 0.24,
+     "win_rate": 0.4,
+     "taker_T0_mean": [
+      0.14732,
+      -0.24849,
+      0.54313
+     ]
+    },
+    "other": {
+     "windows": 56,
+     "mean_ask": 0.2682,
+     "win_rate": 0.3036,
+     "taker_T0_mean": [
+      0.02175,
+      -0.09224,
+      0.14807
+     ]
+    }
+   },
+   "35c_to_50c": {
+    "trigger": {
+     "windows": 1,
+     "mean_ask": 0.46,
+     "win_rate": 0.0,
+     "taker_T0_mean": [
+      -0.47739,
+      -0.47739,
+      -0.47739
+     ]
+    },
+    "other": {
+     "windows": 46,
+     "mean_ask": 0.4226,
+     "win_rate": 0.5217,
+     "taker_T0_mean": [
+      0.08219,
+      -0.06652,
+      0.22254
+     ]
+    }
+   }
+  }
  }
 }
