@@ -81,3 +81,7 @@ A market that settles with the price refunded is a void: the fee is kept, so it 
 - No counted sample exists for single-game NBA prop unders. The nearest counted figure is NBA week 1 GAME totals going under 58.2% (Girdner and co-authors, Journal of Prediction Markets, 2013), a game-total figure, not props, and the authors found the market otherwise efficient.
 
 **Odds cut from 2% to 1% to pass.** The card stands on one practitioner table for a different product and season length.
+
+## Amendment 2 (Nov 12, 2026, Head of R&D note 1, before any data)
+
+The reader prints the verdict line (PF in each window, z) twice. The first line includes every settled row, including did-not-play rows and last-fair-price rows, and **is the registered verdict**. The second line excludes those rows, so that nobody mistakes an injury-report effect for a pricing effect. The early-exit NO wins are printed separately, as Amendment 1 says. If Desk B rules this card a DUPLICATE of PROPS1 or a CLOSED ROW, the card closes unread and the try is removed.
