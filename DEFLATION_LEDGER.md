@@ -15,6 +15,10 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 
 | Test | Desk | N | State |
 |---|---|---|---|
+| UNRATEROUND version 2 (one trade on every non-January release, paper screen; replaces Desk B's registration, whose 8c rule is reported as a subset) | Testing Desk | 1 (try 2 of the card) | REGISTERED Nov 12 (1af3415e on claude/testing-desk), unscored; slow family, paper list at best |
+| V2 perps forward reads: 20 reads, 44 tries already in the compiled count | Testing Desk (owner from Nov 12) | 0 new | 18 RETIRED UNREAD Nov 12 (10 source closed, 8 cannot reach their bar); PERPEQ1 and CASHSPREAD1 part B kept |
+| POL-i2 count step (count only; restricted to closes after 2026-09-12) | Testing Desk | 0 | prepared Nov 12 (bd8640a2), not dispatched; dispatched only at 400 requests or fewer |
+| Stocks Desk: ten cards (16 tries if all run); prior-tries floor of 8 scored variants from the withdrawn equities and crypto work | Stocks Desk | 0 so far | registered locally Nov 12, not on a remote, nothing scored; tries are added here as each is scored |
 | W-SPREAD-CELL1, line 1 (registered) and line 2 (known-in-advance look) | Refinement | 2 | read once Nov 12 on 1,041 fresh events: FAIL on both lines (n 172 and 173; PF 0.553 and 0.592 by the Verification Analyst, 0.596 and 0.636 as first printed, fee handling differs); reproduced Nov 12 |
 | CFRTI1-BTC, Kraken-only, plus two disclosed unregistered looks (Coinbase alone, Bitstamp alone) | Desk A | 3 | development read done Nov 12: no evidence at n = 32 (Kraken); carried to the held-out read |
 | CFRTI-K (Kalshi perpetual in place of outside spot) | Desk A | 1 | registered Nov 12 (workers/CFRTI_K_REGISTRATION.md, 9bb9c0f2 on claude/idea-desk-a), one specification, not scored; waits on the perp candle pull |

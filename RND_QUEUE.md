@@ -216,6 +216,12 @@ kalshi-scalper/workers/testing/PERPS_ORPHANS_NOV12.md on claude/testing-desk (4d
 - **KEPT (2), owner: Testing Desk.** PERPEQ1 (overnight gap fade on 19 stock perps, perp candles only; about 240 trades expected against 100 needed; read once on or after 2026-12-22; scorer committed by Nov 14 without opening a candle; a dated amendment corrects the stale marker line and moves no cutoff; perp candle freshness labelled as assumed). CASHSPREAD1 part B (a cost fact, no trade; Dec 1, only if 12 development days of the 30 second files exist by Nov 30, else retired unread).
 - ABSORB-F (Dec 1; its scheduled task was switched off by the EA) is being added as a 21st row for a ruling.
 
+### Testing Desk, Task 2 prepared early (Nov 12, 17:20Z)
+
+- **POL-i2 count step** (bd8640a2): no separate series-list pull (the census listing supplies it); restricted to markets closing after 2026-09-12 and before the 2026-11-05 constant; dispatched only if the exact total is 400 requests or fewer; the 06:30 ET instant is replaced by the 06:00 and 07:00 hourly candles within 1c, strict and loose both reported, the kill reads strict.
+- **UNRATEROUND version 2** (1af3415e): REGISTERED as try 2 against the paper screen; slow family (about 12 releases a year), paper list at best; stage 0 and lists only (4 to 8 requests); the candle stage (230 to 360 requests) only after 30 or more qualifying events are counted; BLS levels source decided then (no retry from the shared address).
+- **T3 (21:00Z):** one shared, tested loader and scorer skeleton for the next ten cards (cash PF with n by window, event-clustered z, the haircut line, the read-once marker), synthetic tests only.
+
 ## Desk tasks, Nov 12 16:00Z to 22:00Z (set after the owner said the first four hours were not enough)
 
 Standing order: every test's registration and scoring script are committed BEFORE its data lands; every pull is scored within the hour it finishes; Main dispatches the next job the moment one ends. Desks may use workers (the owner's standing permission); the desk checks their output. Reports lead with counts.
