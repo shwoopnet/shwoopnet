@@ -1,0 +1,8 @@
+76578a15d27ffbe5876a2fa8a144ccf7065b997e10823bfc628c73a062dbbbdb  esoctie.py
+1213982b24bb792ad7ccb8a23fa53bbd421a045b6dcf85ee12711ba23b83151a  test_esoctie.py
+c80cd418844a92c7df693a546baa3c230f800f9f908118cb1cea901c5920728b  ESOCTIE_SERIES.json
+04bf371f02762d8a9bc52f846568488a146af833c7427a7f27cf09cca4544493  scorekit.py
+e82f0bb1f5d43aff38c318e6f74d4aadaa1713f7a1b55bbef5fe620f8efee0c7  ESOCTIE_REGISTRATION.md
+# Independent build (Testing Desk, claude/testing-desk 742bc255, kalshi-scalper/workers/testing), as reported by the Testing Desk Nov 12 19:32Z:
+# esoctie.py ff608094...c798, test_esoctie.py 5880f572...00c2, esoctie_series_frozen.json c80cd418...920728b, scorekit.py 04bf371f...4493
+# Cross-check: AGREE on the shared synthetic fixture. This pair is the candidate to freeze; it is frozen on rnd-queue by the Head of R&D, not here.
