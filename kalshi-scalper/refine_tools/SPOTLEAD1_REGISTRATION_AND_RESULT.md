@@ -31,3 +31,8 @@ Kraken tick pulls ran at about 12 requests a minute (2.6 hours for all windows),
 - The re-read prints TWO lines: (a) the registered pooled figure on all firings; (b) the unseen block only (windows closing after 2026-11-11T16:00:00Z), with its own n.
 - VERDICT is judged on (b) when (b) has 80 firings or more by itself. If (b) has fewer than 80 at the re-read the label is 'no evidence at n = x' for the unseen block, whatever (a) shows.
 - What it trades: it buys the 50c to 87c side (ask in [0.50, 0.87]) and holds to settlement. That is a favourite-side hold: any live probe on this rule needs the owner's written exception to the favourite-and-hold ban, in addition to the owner's popup.
+
+## Which files give the signal and the execution price (committed Nov 12, 2026, before the re-read; Forensics QUOTEVSBOOK1 finding)
+- SIGNAL: the Coinbase 1 minute candles (spot S and the 60 minute volatility) and the strike proxy K (Coinbase open at close minus 900 s). It uses NO Kalshi quote.
+- EXECUTION PRICE: the R6 book (book15r6, the 2 second order book read), both asks (YES ask = 1 minus best NO bid, NO ask = 1 minus best YES bid). The edge test (model probability minus ask) and the fill price both come from the R6 book.
+- The quote recorder (quotes/ files, ladder.csv, the market-list endpoint) is used NOWHERE in this test, so the stale-copy finding (list endpoint refreshed about every 11 s) does not touch it. Only the book-priced figure counts, and it is the registered one.
