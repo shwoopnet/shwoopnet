@@ -185,6 +185,12 @@ if "--r6" in sys.argv:
         print("STALE-ASK COUNT, %s: %d signal rows | %d with an R6 book at the decision | %d of those show a book ask more than 1c above the ask seen (\"ask not on the book\") | %d rows not opened (DEPTH1 freeze, closes Nov 9 to 13)" % (nm, tot, have, stale, frozen))
 else:
     print("STALE-ASK COUNT: not computed (no --r6 <root holding book15r6/>).")
+if "--r6" in sys.argv:
+    sys.path.insert(0, HERE); import cfrti_b
+    lo, hi = (cfrti_b.CUTOFF, 1e12) if MODE == "heldout" else (cfrti_b.FIRST_CLOSE, cfrti_b.CUTOFF)
+    kd = (lambda d: d >= HELDOUT_FIRST_DAY) if MODE == "heldout" else (lambda d: d < HELDOUT_FIRST_DAY)
+    print("\n### CFRTI-B (workers/CFRTI_B_REGISTRATION.md): signal and price from the R6 book; the registered lines above are PRICED AT A STALE COPY, NOT TRADABLE")
+    print("\n".join(cfrti_b.lines(Q, sys.argv[sys.argv.index("--r6") + 1], kd, lo, hi, final=(MODE == "heldout"))))
 print("CFRTI-K line: not computed here (perp candles not supplied).")
 if MODE == "heldout":
     line = "READ ON %s, three-venue n %d, kraken-only n %d" % (datetime.date.today(), len(sel3), len(selK))

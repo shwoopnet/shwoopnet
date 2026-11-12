@@ -5,7 +5,6 @@ import gzip, csv, glob, math, sys, bisect, collections, datetime
 from email.utils import parsedate_to_datetime
 from statistics import NormalDist, median
 Phi = NormalDist().cdf
-Q, R6 = sys.argv[1], sys.argv[2]
 FIRST_CLOSE = datetime.datetime(2026, 10, 29, 22, 15, tzinfo=datetime.timezone.utc).timestamp()
 CUTOFF = datetime.datetime(2026, 11, 5, tzinfo=datetime.timezone.utc).timestamp()
 def rd(p):
@@ -14,26 +13,28 @@ def fee(p): return 0.07 * p * (1 - p)
 def fl(x): return float(x) if x not in (None, "") else None
 # ---- R6 books: ticker -> sorted [(t_exchange_s, yb, ybs, nb, nbs)]
 book = collections.defaultdict(list)
-for f in sorted(glob.glob(R6 + "/book15r6/*/*/book.csv.gz")):
-    rows = [x for x in rd(f) if x["series"] == "KXBTC15M"]
-    offs = []
-    for x in rows:
-        if x.get("server_date_header"):
-            try: offs.append(parsedate_to_datetime(x["server_date_header"]).timestamp() + 0.5 - int(x["t_recv_ms"]) / 1000)
-            except Exception: pass
-    if not offs: continue
-    off = median(offs)
-    for x in rows:
-        book[x["ticker"]].append((int(x["t_recv_ms"]) / 1000 + off, fl(x["yes_bid_px_1"]), fl(x["yes_bid_sz_1"]), fl(x["no_bid_px_1"]), fl(x["no_bid_sz_1"])))
-for t in book: book[t] = sorted(set(book[t]))
+def load_book(R6):
+  book.clear()
+  for f in sorted(glob.glob(R6 + "/book15r6/*/*/book.csv.gz")):
+      rows = [x for x in rd(f) if x["series"] == "KXBTC15M"]
+      offs = []
+      for x in rows:
+          if x.get("server_date_header"):
+              try: offs.append(parsedate_to_datetime(x["server_date_header"]).timestamp() + 0.5 - int(x["t_recv_ms"]) / 1000)
+              except Exception: pass
+      if not offs: continue
+      off = median(offs)
+      for x in rows:
+          book[x["ticker"]].append((int(x["t_recv_ms"]) / 1000 + off, fl(x["yes_bid_px_1"]), fl(x["yes_bid_sz_1"]), fl(x["no_bid_px_1"]), fl(x["no_bid_sz_1"])))
+  for t in book: book[t] = sorted(set(book[t]))
 def side_ask(p, side):
     # YES ask = 1 - best NO bid (size = that NO bid's size); NO ask = 1 - best YES bid
     return ((1 - p[3], p[4]) if side == "yes" else (1 - p[1], p[2])) if (p[3] is not None if side == "yes" else p[1] is not None) else (None, None)
-def build(venues):
+def build(Q, venues, keep_day, lo, hi):
     out, lost, seen_tk = [], collections.Counter(), set()
     for d in sorted(glob.glob(Q + "/quotes/*/*")):
         day = d.split("/")[-2]
-        if day >= "2026-11-05": continue
+        if not keep_day(day): continue
         try: res = {r["ticker"]: r for r in rd(d + "/results.csv.gz")}; spot = rd(d + "/spot.csv.gz"); qs = rd(d + "/quotes.csv.gz")
         except Exception: continue
         strike = {}
@@ -54,7 +55,7 @@ def build(venues):
         for tk, r in res.items():
             if not tk.startswith("KXBTC15M-") or r["result"] not in ("yes", "no") or tk in seen_tk or tk not in strike: continue
             close = datetime.datetime.strptime(r["close_time"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=datetime.timezone.utc).timestamp()
-            if close < FIRST_CLOSE or close >= CUTOFF: continue
+            if close < lo or close >= hi: continue
             B = book.get(tk)
             if not B: lost["no R6 book"] += 1; continue
             t0 = close - 120
@@ -86,13 +87,23 @@ def build(venues):
     return out, lost
 def pf(v):
     a = sum(x for x in v if x > 0); b = -sum(x for x in v if x < 0); return a / b if b else float("inf")
-for name, venues in (("B3 (three-venue spot)", None), ("BK (Kraken-only spot)", {"kraken"})):
-    rows, lost = build(venues)
-    sel = [r for r in rows if r["edge"] >= 0.05]
-    print("==", name, "| cheap rows with an R6 book and a model", len(rows), "| lost:", dict(lost), "| edge rows", len(sel))
-    for lab, k in (("fill +6 s (judges)", "f6"), ("fill +2 s", "f2")):
-        got = [r for r in sel if r[k] is not None]
-        pnl = [(1 if r["win"] else 0) - r[k] - fee(r[k]) for r in got]
-        print("   %-22s filled %2d of %2d | cash PF %.2f | mean %+.2fc | wins %d | no evidence at n = %d" % (lab, len(got), len(sel), pf(pnl) if pnl else 0, 100 * sum(pnl) / len(pnl) if pnl else 0, sum(1 for r in got if r["win"]), len(got)))
-    allp = [(1 if r["win"] else 0) - r["ask"] - fee(r["ask"]) for r in sel]
-    print("   (for scale: the same edge rows at the book ask seen, no delay: n %d, cash PF %.2f)" % (len(sel), pf(allp) if allp else 0))
+def label(n, pfv, mean):
+    if n >= 50 and pfv >= 1.3 and mean > 0: return "RE-TEST lead (not a result)"
+    if n >= 30 and pfv < 1.0: return "FALSIFIED"
+    return "no evidence at n = %d" % n
+def lines(Q, R6, keep_day, lo, hi, final=False):
+    load_book(R6); out = []
+    for name, venues in (("B3 (three-venue spot)", None), ("BK (Kraken-only spot)", {"kraken"})):
+        rows, lost = build(Q, venues, keep_day, lo, hi)
+        sel = [r for r in rows if r["edge"] >= 0.05]
+        out.append("== %s | cheap rows with an R6 book and a model %d | lost: %s | edge rows %d" % (name, len(rows), dict(lost), len(sel)))
+        for lab, k in (("fill +6 s (judges)", "f6"), ("fill +2 s", "f2")):
+            got = [r for r in sel if r[k] is not None]
+            pnl = [(1 if r["win"] else 0) - r[k] - fee(r[k]) for r in got]
+            p_, mean = (pf(pnl) if pnl else 0), (100 * sum(pnl) / len(pnl) if pnl else 0)
+            out.append("   %-22s filled %2d of %2d | cash PF %.2f | mean %+.2fc | wins %d | %s" % (lab, len(got), len(sel), p_, mean, sum(1 for r in got if r["win"]), label(len(got), p_, mean / 100) if (final and k == "f6") else "no evidence at n = %d" % len(got) if not final else "(2 s line, no label)"))
+        allp = [(1 if r["win"] else 0) - r["ask"] - fee(r["ask"]) for r in sel]
+        out.append("   (for scale: the same edge rows at the book ask seen, no delay: n %d, cash PF %.2f)" % (len(sel), pf(allp) if allp else 0))
+    return out
+if __name__ == "__main__":
+    print("\n".join(lines(sys.argv[1], sys.argv[2], lambda d: d < "2026-11-05", FIRST_CLOSE, CUTOFF)))
