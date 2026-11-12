@@ -330,8 +330,8 @@ gates['caps are respected: depth share, per-order dollars, window room, and a ba
   db = makeDb(); ex = makeExchange(db, { market: { yes_ask_size_fp: '2.00' } });
   await R(ON()).runSlotTick(tickArgs(db, ex).args); assert.strictEqual(ex.posts.length, 0, 'a quarter of 2 is not a whole contract');
   db = makeDb(); ex = makeExchange(db);
-  await R(ON({ contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } })).runSlotTick(tickArgs(db, ex).args);
-  assert.ok(ex.posts.length === 1 && Number(ex.posts[0].count) <= 6, 'the 1% per-order cap on a $500 base cuts 10 contracts at 76c to ' + (ex.posts[0] && ex.posts[0].count));
+  await R(ON({ contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } })).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({ sizeBase: 200 }) } }).args);
+  assert.ok(ex.posts.length === 1 && Number(ex.posts[0].count) <= 6, 'the 2.5% per-order cap on a $200 base cuts 10 contracts at 76c to ' + (ex.posts[0] && ex.posts[0].count));
   db = makeDb(); ex = makeExchange(db);
   await R(ON()).runSlotTick(tickArgs(db, ex, { args: { shared: SHARED({ sizeBase: 20 }) } }).args); assert.strictEqual(ex.posts.length, 0, 'a small base leaves the slot no room');
   db = makeDb(); db.l1.set('a', l1Order({ id: 'a', ticker: 'KXGOLD15M-26NOV031015-15', maxCost: 27 })); ex = makeExchange(db);

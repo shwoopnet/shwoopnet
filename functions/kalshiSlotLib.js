@@ -27,7 +27,8 @@ const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold c
 const SLOT_MAX_SCALE_STEPS = 3;
 // Dollar caps SCALE WITH THE SIZING BASE, like L1's own window cap and loss stop (the owner, Oct 29, 2026: the gold ladder makes L1 positions bigger as the account grows, so fixed dollars would be too small
 // for a bigger account and too big for a smaller one). Each cap is a share of the sizing base, never above a hard dollar ceiling, so a wrong base can never lift a cap past the ceiling. Per order is below the daily cap.
-const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.01, perWindow: 0.02, openTotal: 0.03, daily: 0.02, lifetime: 0.06 });
+// Nov 12, 2026 (the owner: "Raise limits to the max", "Yes, per-seat caps"): per order, daily and lifetime fractions raised to 2.5%, 2.5% and 7.5% so the dollar ceilings are reachable at a base of a few hundred dollars and up; the daily and lifetime loss caps are now counted PER STRATEGY (see slotOrderCheckWith), so a seat's own kill binds before another seat's losses can use up its room.
+const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.025, perWindow: 0.02, openTotal: 0.03, daily: 0.025, lifetime: 0.075 });
 const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 20, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
 function slotCaps(sizingBase) {
   const base = isNum(sizingBase) && sizingBase > 0 ? sizingBase : 0;   // an unusable base means every cap is zero: nothing can be sent
@@ -556,13 +557,17 @@ function slotOrderCheckWith(flags, input) {
   if (!(isNum(i.sizingBase) && i.sizingBase > 0) || !(isNum(i.windowCapFraction) && i.windowCapFraction > 0 && i.windowCapFraction <= L1_WINDOW_CAP_FRACTION_MIRROR + 1e-9)) return no("the sizing base or the window cap is not usable");
   if (!isNum(i.now)) return no("no clock");
   const risk = slotRiskContract(i.slotOrders, i.now);
+  // The daily and lifetime loss caps are per STRATEGY (Nov 12, 2026): this strategy's own orders only. The open dollars, windows and open contracts above stay slot-wide.
+  // Fail closed (security review, Nov 12, 2026): a slot order whose slotId is missing or names no strategy in the registry (a retired id) counts against EVERY seat's daily and lifetime figures, so it can never drop out of the loss caps.
+  const regIds = new Set(activeSlotStrategiesWith(flags).map((x) => x.id));
+  const own = slotRiskContract(i.slotOrders.filter((t) => isSlotOrder(t) && (t.slotId === strategy.id || !regIds.has(t.slotId))), i.now);
   const caps = slotCaps(i.sizingBase);
   // A laddered strategy (SLOT_LADDERS) has caps that grow with its contract count: a daily loss cap and a drawdown stop from its own peak, in place of the base-scaled daily and lifetime caps.
   const lad = slotLadderState(strategy, i.slotOrders, i.sizingBase);
   if (lad.laddered) caps.daily = lad.dailyCap;
-  if (risk.day.worst <= -caps.daily + 1e-9) return no("the slot's own daily loss cap is reached");
+  if (own.day.worst <= -caps.daily + 1e-9) return no("the strategy's own daily loss cap is reached");
   if (lad.laddered) { if (lad.drawdown >= lad.ddStop - 1e-9) return no("the strategy's drawdown stop is reached ($" + lad.drawdown.toFixed(2) + " from its best result)"); }
-  else if (risk.lifetime.worst <= -caps.lifetime + 1e-9) return no("the slot's own lifetime loss cap is reached");
+  else if (own.lifetime.worst <= -caps.lifetime + 1e-9) return no("the strategy's own lifetime loss cap is reached");
   // How many contracts every cap allows. Depth is the top of the book only, so unknown depth refuses rather than guesses.
   if (!isNum(i.depthAtTouch) || !(i.depthAtTouch > 0)) return no("the size resting at the touch is unknown");
   const sizeNow = lad.laddered ? lad.size : strategy.contractsPerOrder;
@@ -580,7 +585,7 @@ function slotOrderCheckWith(flags, input) {
   // The slot takes at most half of the shared window cap and always leaves one L1 contract of room, so L1's first order in a window is never starved.
   const windowRoom = Math.min(windowCap - l1Used - slotUsed - SLOT_L1_RESERVE, windowCap * SLOT_WINDOW_SHARE - slotUsed);
   // The new order's own cost must fit under what is left of the daily and lifetime loss caps (worst is zero or negative), so one order can never overshoot them.
-  const dailyRoom = caps.daily + risk.day.worst, lifeRoom = lad.laddered ? lad.ddStop - lad.drawdown : caps.lifetime + risk.lifetime.worst;
+  const dailyRoom = caps.daily + own.day.worst, lifeRoom = lad.laddered ? lad.ddStop - lad.drawdown : caps.lifetime + own.lifetime.worst;
   while (n >= 1) {
     const c = costOf(n);
     if (c <= caps.perOrder + 1e-9 && c <= caps.perWindow - slotUsed + 1e-9 && c <= caps.openTotal - risk.openTotal + 1e-9 && c <= windowRoom + 1e-9 && c <= dailyRoom + 1e-9 && c <= lifeRoom + 1e-9) break;

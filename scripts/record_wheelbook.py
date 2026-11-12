@@ -419,7 +419,7 @@ def tape_page(trades, seen, tally):
 def sweep_tape(stream, ticker, open_epoch, close_epoch, tally, save, max_pages=TAPE_MAX_PAGES):
     """Every public trade of one market, the cursor followed until it is EMPTY (a full 1,000 row page never ends the read). Each page is saved as a raw answer body with the trade ids
     removed. A 429 is waited out by the stream and the same page asked again; three other failures mark the tape incomplete."""
-    seen, cursor, fails = set(), "", 0
+    seen, cursor, fails, n429 = set(), "", 0, 0
     lo = int(open_epoch) if open_epoch else int(close_epoch) - 86400
     while True:
         if tally.pages >= max_pages or stream.exhausted():
@@ -428,6 +428,10 @@ def sweep_tape(stream, ticker, open_epoch, close_epoch, tally, save, max_pages=T
         url = "%s/markets/trades?ticker=%s&min_ts=%d&max_ts=%d&limit=1000%s" % (BASE, ticker, lo, int(close_epoch) + 5, ("&cursor=" + cursor) if cursor else "")
         st, body, _d, _s, t_recv = stream.get(url)
         if st == 429:
+            n429 += 1   # a market that keeps answering 429 ends its tape instead of spending the whole budget (security review, Nov 12, 2026)
+            if n429 >= 5:
+                tally.notes.append("tape ended after repeated 429")
+                return False
             continue
         if st != 200 or not isinstance(body, dict):
             fails += 1
@@ -535,7 +539,7 @@ def parse_markets(body):
     """[(ticker, event_ticker, open_epoch, close_epoch)] from one list answer."""
     out = []
     for m in (body.get("markets") if isinstance(body, dict) else None) or []:
-        if isinstance(m, dict) and m.get("ticker"):
+        if isinstance(m, dict) and isinstance(m.get("ticker"), str) and re.fullmatch(r"[A-Z0-9._-]{3,80}", m["ticker"]):   # a ticker from an answer goes into URLs: only safe characters (security review, Nov 12, 2026)
             out.append((m["ticker"], m.get("event_ticker") or "", parse_t(m.get("open_time")), parse_t(m.get("close_time"))))
     return out
 
