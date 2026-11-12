@@ -27,7 +27,7 @@ KALSHI = "https://external-api.kalshi.com/trade-api/v2"
 # Hosts of the feeds the repo's other recorders already read, plus a few named public ones. Sports league and broadcaster score sites are NOT on it (test/noSportsScoreSitesGates.test.js): their terms forbid automated collection (V2's INGAMELAG1 source probe, Nov 11, 2026). Adding a host is a code edit and a review.
 ALLOWLIST = frozenset({
     "api.weather.gov", "mesonet.agron.iastate.edu",
-    "www.okx.com", "www.deribit.com", "api.coinbase.com", "api.kraken.com",
+    "www.okx.com", "api.coinbase.com", "api.kraken.com",
 })
 END_UTC = "2027-02-28T23:59:00Z"          # nothing is recorded from here on (the workflow checks the same date)
 MAX_STOP_DATE = "2027-02-28"
