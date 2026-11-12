@@ -76,9 +76,9 @@ gates.SB3 = () => {
 };
 const exits = (pnls, t0 = Date.UTC(2026, 10, 9, 17, 0)) => pnls.map((p, i) => ord({ ts: t0 + i * 900000, result: 'exit', settledPnl: p }));
 gates.SB4 = () => {
-  // L1 gold tripwire: counts only trades from Nov 9 10:22 AM Central (16:22 UTC), and the rolling 60 only once 60 trades exist
-  assert.strictEqual(P.KAL_BOARD_TRIPWIRE.from, Date.parse('2026-11-09T16:22:00Z'));
-  const before = exits([1, 1, 1], Date.parse('2026-11-09T15:00:00Z')), after = exits([2, -1, 1], Date.parse('2026-11-09T16:30:00Z'));
+  // L1 gold tripwire: counts only trades from the kill latch's own re-arm time (2026-11-10 00:00 UTC), and the rolling 60 only once 60 trades exist
+  assert.strictEqual(P.KAL_BOARD_TRIPWIRE.from, Date.parse('2026-11-10T00:00:00Z'));
+  const before = exits([1, 1, 1], Date.parse('2026-11-09T23:00:00Z')), after = exits([2, -1, 1], Date.parse('2026-11-10T00:30:00Z'));
   const k = P.kalshiBoardKill('L1', before.concat(after), 0, money);
   assert.strictEqual(k.count, 3, 'only trades from the tripwire time count'); assert.strictEqual(k.pf, 3); assert.strictEqual(k.rolling, null);
   assert.ok(/^Tripwire 3 of 100 trades, PF 3\.00 \(cut under 1\.0\) · rolling 60 PF n\/a \(alert under 0\.7\)$/.test(k.lines[0]), k.lines[0]); assert.strictEqual(k.lines.length, 1, 'one short status line');
