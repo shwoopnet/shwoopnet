@@ -1261,3 +1261,6 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `docs/ROTATION_LANE.md` (v0.2) is a DRAFT for the owner's OK, with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It binds nobody and nothing goes live under it. Engineering facts it relies on: shadow rules and the second slot already exist; the rolling per-rule report (PR 837), the shared quote budget, the open interest and calendar fields and the 4 second second look (PR 838) are the logger pieces; the lane-wide cap, one reviewed registry entry per rule and the hold-list entry are built and reviewed with the live wiring, and in or out is replayed from rows, never stored. `docs/CHARTER.md` is not touched. Docs only.
 
+## Rotation lane draft v0.2.1 (Nov 12, 2026, the Head of R&D, DRAFT)
+
+`docs/ROTATION_LANE.md` is updated to v0.2.1: the $10 drawdown, the live-against-shadow check and the lane cap are KILLS (latched); the other exit lines are performance exits; an automatic return is for a performance exit only, and a return after a kill needs at least 30 days, a fresh record, the owner's popup and a reviewed merge. Still a DRAFT, binds nobody. Docs only.
