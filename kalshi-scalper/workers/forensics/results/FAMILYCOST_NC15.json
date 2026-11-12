@@ -1,0 +1,6023 @@
+{
+ "label": "NC15",
+ "folder": "nc15",
+ "closes_from": "2026-11-11 00:00:00+00:00",
+ "closes_before": "2026-11-13 00:00:00+00:00",
+ "later_poll_tolerance_ms": 6000,
+ "note": "prices in dollars (0.01 = 1 cent); shares as fractions; [share, 2.5%, 97.5%] by resampling whole windows; result values never read",
+ "run_dirs": [
+  "nc15/2026-11-11/1932",
+  "nc15/2026-11-12/0001",
+  "nc15/2026-11-12/0418",
+  "nc15/2026-11-12/0801",
+  "nc15/2026-11-12/1250"
+ ],
+ "series": {
+  "KXAUDUSD15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 63,
+    "distinct_markets": 63,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 14,
+     "2026-11-12 Thu": 49
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      14
+     ],
+     "2026-11-12 Thu": [
+      61,
+      49
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9841,
+    "result_present_n": 62,
+    "volume_contracts_median_per_window": 7253.32,
+    "volume_contracts_p25_p75": [
+     5751.37,
+     9889.9
+    ],
+    "volume_n": 63,
+    "tape_sum_count_median": 7253.32
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 882,
+     "instants_two_sided": 864,
+     "share_two_sided": 0.9796,
+     "instants_yes_bids_only": 14,
+     "instants_no_bids_only": 4,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 63,
+     "windows_with_two_sided": 62,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01788,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.4725,
+     "favourite_price_median_p25_p75": [
+      0.875,
+      0.71,
+      0.94
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 409.1,
+     "fee_at_mid_median": 0.00766,
+     "fee_at_mid_p25_p75": [
+      0.00395,
+      0.01441
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01573,
+      0.0238
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03145,
+      0.04758
+     ],
+     "round_trip_over_cheap_side_price_median": 0.23376,
+     "round_trip_over_favourite_price_median": 0.03641,
+     "haircut": {
+      "both_sides": {
+       "buys": 1728,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1726,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7265,
+         0.6941,
+         0.7598
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8389,
+         0.8087,
+         0.8696
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7202,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8337,
+        "strict_buys_with_any_later_poll": 1728,
+        "strict_filled_at_ask_seen": 0.7263,
+        "strict_filled_at_ask_plus_1c": 0.8385
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1724,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6589,
+         0.6288,
+         0.6897
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7778,
+         0.7414,
+         0.8183
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6537,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7732,
+        "strict_buys_with_any_later_poll": 1728,
+        "strict_filled_at_ask_seen": 0.6586,
+        "strict_filled_at_ask_plus_1c": 0.7772
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 850,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 849,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7597,
+         0.7161,
+         0.7995
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8445,
+         0.8088,
+         0.8824
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7491,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8363,
+        "strict_buys_with_any_later_poll": 850,
+        "strict_filled_at_ask_seen": 0.76,
+        "strict_filled_at_ask_plus_1c": 0.8447
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 848,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6934,
+         0.6405,
+         0.7462
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7854,
+         0.7287,
+         0.8339
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.684,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7771,
+        "strict_buys_with_any_later_poll": 850,
+        "strict_filled_at_ask_seen": 0.6941,
+        "strict_filled_at_ask_plus_1c": 0.7859
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 878,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 877,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6944,
+         0.6545,
+         0.733
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8335,
+         0.7959,
+         0.8726
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6921,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8312,
+        "strict_buys_with_any_later_poll": 878,
+        "strict_filled_at_ask_seen": 0.6936,
+        "strict_filled_at_ask_plus_1c": 0.8326
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 876,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6256,
+         0.5764,
+         0.6715
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7705,
+         0.7271,
+         0.8175
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6244,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7694,
+        "strict_buys_with_any_later_poll": 878,
+        "strict_filled_at_ask_seen": 0.6241,
+        "strict_filled_at_ask_plus_1c": 0.7688
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 398,
+       "windows": 38,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 398,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7889,
+         0.7448,
+         0.8329
+        ],
+        "filled_at_ask_plus_1c": [
+         0.9422,
+         0.9178,
+         0.964
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7889,
+        "filled_at_ask_plus_1c_size_ge_1": 0.9422,
+        "strict_buys_with_any_later_poll": 398,
+        "strict_filled_at_ask_seen": 0.7889,
+        "strict_filled_at_ask_plus_1c": 0.9422
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 398,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.706,
+         0.6472,
+         0.7672
+        ],
+        "filled_at_ask_plus_1c": [
+         0.892,
+         0.854,
+         0.9293
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.706,
+        "filled_at_ask_plus_1c_size_ge_1": 0.892,
+        "strict_buys_with_any_later_poll": 398,
+        "strict_filled_at_ask_seen": 0.706,
+        "strict_filled_at_ask_plus_1c": 0.892
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 585,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 585,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7829,
+         0.7329,
+         0.8268
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8667,
+         0.8263,
+         0.9013
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7675,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8547,
+        "strict_buys_with_any_later_poll": 585,
+        "strict_filled_at_ask_seen": 0.7829,
+        "strict_filled_at_ask_plus_1c": 0.8667
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 585,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7145,
+         0.658,
+         0.7736
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8085,
+         0.7546,
+         0.8602
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7009,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7966,
+        "strict_buys_with_any_later_poll": 585,
+        "strict_filled_at_ask_seen": 0.7145,
+        "strict_filled_at_ask_plus_1c": 0.8085
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 756,
+     "instants_two_sided": 517,
+     "share_two_sided": 0.6839,
+     "instants_yes_bids_only": 114,
+     "instants_no_bids_only": 125,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 63,
+     "windows_with_two_sided": 50,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01973,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.53,
+     "favourite_price_median_p25_p75": [
+      0.89,
+      0.705,
+      0.96
+     ],
+     "touch_size_fav_ask_median": 561.05,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 355.47,
+     "fee_at_mid_median": 0.00685,
+     "fee_at_mid_p25_p75": [
+      0.00269,
+      0.01456
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.0163,
+      0.0247
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03259,
+      0.04939
+     ],
+     "round_trip_over_cheap_side_price_median": 0.30004,
+     "round_trip_over_favourite_price_median": 0.03621,
+     "haircut": {
+      "both_sides": {
+       "buys": 1034,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1008,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6994,
+         0.6602,
+         0.7416
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7956,
+         0.7553,
+         0.8354
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6905,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7847,
+        "strict_buys_with_any_later_poll": 1034,
+        "strict_filled_at_ask_seen": 0.6944,
+        "strict_filled_at_ask_plus_1c": 0.7882
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 986,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6389,
+         0.6036,
+         0.6777
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7363,
+         0.696,
+         0.7778
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6318,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7272,
+        "strict_buys_with_any_later_poll": 1034,
+        "strict_filled_at_ask_seen": 0.6325,
+        "strict_filled_at_ask_plus_1c": 0.7253
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 513,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 500,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.736,
+         0.6875,
+         0.7868
+        ],
+        "filled_at_ask_plus_1c": [
+         0.798,
+         0.749,
+         0.846
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.736,
+        "filled_at_ask_plus_1c_size_ge_1": 0.798,
+        "strict_buys_with_any_later_poll": 513,
+        "strict_filled_at_ask_seen": 0.7427,
+        "strict_filled_at_ask_plus_1c": 0.8031
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 489,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6953,
+         0.6322,
+         0.7591
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7546,
+         0.6938,
+         0.8139
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6953,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7546,
+        "strict_buys_with_any_later_poll": 513,
+        "strict_filled_at_ask_seen": 0.7096,
+        "strict_filled_at_ask_plus_1c": 0.7661
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 521,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 508,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6634,
+         0.6067,
+         0.7199
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7933,
+         0.741,
+         0.8468
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6457,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7717,
+        "strict_buys_with_any_later_poll": 521,
+        "strict_filled_at_ask_seen": 0.6468,
+        "strict_filled_at_ask_plus_1c": 0.7735
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 497,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5835,
+         0.5243,
+         0.6405
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7183,
+         0.6548,
+         0.7762
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5694,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7002,
+        "strict_buys_with_any_later_poll": 521,
+        "strict_filled_at_ask_seen": 0.5566,
+        "strict_filled_at_ask_plus_1c": 0.6852
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 212,
+       "windows": 29,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 212,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6934,
+         0.6255,
+         0.7619
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8349,
+         0.7772,
+         0.892
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6934,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8349,
+        "strict_buys_with_any_later_poll": 212,
+        "strict_filled_at_ask_seen": 0.6934,
+        "strict_filled_at_ask_plus_1c": 0.8349
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 212,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5708,
+         0.4865,
+         0.6514
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7642,
+         0.6946,
+         0.8358
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5708,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7642,
+        "strict_buys_with_any_later_poll": 212,
+        "strict_filled_at_ask_seen": 0.5708,
+        "strict_filled_at_ask_plus_1c": 0.7642
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 271,
+       "windows": 36,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 271,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7232,
+         0.668,
+         0.7756
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7786,
+         0.7201,
+         0.8281
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7232,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7786,
+        "strict_buys_with_any_later_poll": 271,
+        "strict_filled_at_ask_seen": 0.7232,
+        "strict_filled_at_ask_plus_1c": 0.7786
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 271,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6937,
+         0.6095,
+         0.7747
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7417,
+         0.6595,
+         0.8189
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6937,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7417,
+        "strict_buys_with_any_later_poll": 271,
+        "strict_filled_at_ask_seen": 0.6937,
+        "strict_filled_at_ask_plus_1c": 0.7417
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXBNB15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 62,
+    "distinct_markets": 62,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 14,
+     "2026-11-12 Thu": 48
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      14
+     ],
+     "2026-11-12 Thu": [
+      61,
+      48
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9839,
+    "result_present_n": 61,
+    "volume_contracts_median_per_window": 28959.28,
+    "volume_contracts_p25_p75": [
+     22106.6525,
+     37381.8875
+    ],
+    "volume_n": 62,
+    "tape_sum_count_median": 28959.28
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 868,
+     "instants_two_sided": 868,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 62,
+     "windows_with_two_sided": 62,
+     "spread_median_p75": [
+      0.01,
+      0.01
+     ],
+     "spread_mean": 0.01055,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.01,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.385,
+     "favourite_price_median_p25_p75": [
+      0.83,
+      0.685,
+      0.94063
+     ],
+     "touch_size_fav_ask_median": 24.0,
+     "touch_size_cheap_ask_median": 33.89,
+     "touch_size_both_asks_median": 28.955,
+     "touch_size_both_asks_p25": 10.0,
+     "fee_at_mid_median": 0.00988,
+     "fee_at_mid_p25_p75": [
+      0.00391,
+      0.0151
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01641,
+      0.02141
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03281,
+      0.04281
+     ],
+     "round_trip_over_cheap_side_price_median": 0.17748,
+     "round_trip_over_favourite_price_median": 0.03961,
+     "haircut": {
+      "both_sides": {
+       "buys": 1736,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1736,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6112,
+         0.5916,
+         0.6325
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7736,
+         0.7431,
+         0.8041
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6048,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7707,
+        "strict_buys_with_any_later_poll": 1736,
+        "strict_filled_at_ask_seen": 0.6112,
+        "strict_filled_at_ask_plus_1c": 0.7736
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1736,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5536,
+         0.5369,
+         0.572
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7005,
+         0.667,
+         0.7345
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5495,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6993,
+        "strict_buys_with_any_later_poll": 1736,
+        "strict_filled_at_ask_seen": 0.5536,
+        "strict_filled_at_ask_plus_1c": 0.7005
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 866,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 866,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6617,
+         0.6224,
+         0.6998
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8002,
+         0.7604,
+         0.8383
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.657,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7979,
+        "strict_buys_with_any_later_poll": 866,
+        "strict_filled_at_ask_seen": 0.6617,
+        "strict_filled_at_ask_plus_1c": 0.8002
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 866,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.627,
+         0.5795,
+         0.6736
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7413,
+         0.6951,
+         0.7901
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6259,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7402,
+        "strict_buys_with_any_later_poll": 866,
+        "strict_filled_at_ask_seen": 0.627,
+        "strict_filled_at_ask_plus_1c": 0.7413
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 870,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 870,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5609,
+         0.527,
+         0.5913
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7471,
+         0.71,
+         0.7846
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5529,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7437,
+        "strict_buys_with_any_later_poll": 870,
+        "strict_filled_at_ask_seen": 0.5609,
+        "strict_filled_at_ask_plus_1c": 0.7471
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 870,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4805,
+         0.4396,
+         0.5201
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6598,
+         0.6103,
+         0.7112
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4736,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6586,
+        "strict_buys_with_any_later_poll": 870,
+        "strict_filled_at_ask_seen": 0.4805,
+        "strict_filled_at_ask_plus_1c": 0.6598
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 231,
+       "windows": 29,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 231,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5584,
+         0.5,
+         0.6066
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7792,
+         0.7354,
+         0.825
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5584,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7792,
+        "strict_buys_with_any_later_poll": 231,
+        "strict_filled_at_ask_seen": 0.5584,
+        "strict_filled_at_ask_plus_1c": 0.7792
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 231,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4416,
+         0.372,
+         0.5126
+        ],
+        "filled_at_ask_plus_1c": [
+         0.671,
+         0.5976,
+         0.7416
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4372,
+        "filled_at_ask_plus_1c_size_ge_1": 0.671,
+        "strict_buys_with_any_later_poll": 231,
+        "strict_filled_at_ask_seen": 0.4416,
+        "strict_filled_at_ask_plus_1c": 0.671
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 451,
+       "windows": 46,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 451,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6696,
+         0.6253,
+         0.7127
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7916,
+         0.7489,
+         0.8309
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6608,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7894,
+        "strict_buys_with_any_later_poll": 451,
+        "strict_filled_at_ask_seen": 0.6696,
+        "strict_filled_at_ask_plus_1c": 0.7916
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 451,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6341,
+         0.5735,
+         0.6925
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7428,
+         0.6862,
+         0.7984
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6319,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7428,
+        "strict_buys_with_any_later_poll": 451,
+        "strict_filled_at_ask_seen": 0.6341,
+        "strict_filled_at_ask_plus_1c": 0.7428
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 744,
+     "instants_two_sided": 636,
+     "share_two_sided": 0.8548,
+     "instants_yes_bids_only": 33,
+     "instants_no_bids_only": 75,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 62,
+     "windows_with_two_sided": 58,
+     "spread_median_p75": [
+      0.008,
+      0.01
+     ],
+     "spread_mean": 0.00853,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.00775,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.175,
+     "favourite_price_median_p25_p75": [
+      0.9475,
+      0.83375,
+      0.9865
+     ],
+     "touch_size_fav_ask_median": 40.715,
+     "touch_size_cheap_ask_median": 44.0,
+     "touch_size_both_asks_median": 42.02,
+     "touch_size_both_asks_p25": 15.0,
+     "fee_at_mid_median": 0.00348,
+     "fee_at_mid_p25_p75": [
+      0.00093,
+      0.0097
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.00736,
+      0.01641
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.01473,
+      0.03281
+     ],
+     "round_trip_over_cheap_side_price_median": 0.24193,
+     "round_trip_over_favourite_price_median": 0.01526,
+     "haircut": {
+      "both_sides": {
+       "buys": 1272,
+       "windows": 58,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1252,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6006,
+         0.5737,
+         0.6332
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7955,
+         0.7556,
+         0.8378
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5974,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7923,
+        "strict_buys_with_any_later_poll": 1272,
+        "strict_filled_at_ask_seen": 0.5991,
+        "strict_filled_at_ask_plus_1c": 0.7909
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1234,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5454,
+         0.5227,
+         0.5723
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7399,
+         0.6962,
+         0.787
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5397,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7382,
+        "strict_buys_with_any_later_poll": 1272,
+        "strict_filled_at_ask_seen": 0.544,
+        "strict_filled_at_ask_plus_1c": 0.7327
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 634,
+       "windows": 58,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 624,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6875,
+         0.6483,
+         0.7276
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8253,
+         0.7824,
+         0.8627
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6859,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8205,
+        "strict_buys_with_any_later_poll": 634,
+        "strict_filled_at_ask_seen": 0.6924,
+        "strict_filled_at_ask_plus_1c": 0.8281
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 615,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6683,
+         0.6184,
+         0.7168
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7951,
+         0.7413,
+         0.8417
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.665,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7935,
+        "strict_buys_with_any_later_poll": 634,
+        "strict_filled_at_ask_seen": 0.6782,
+        "strict_filled_at_ask_plus_1c": 0.8013
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 638,
+       "windows": 58,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 628,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5143,
+         0.4677,
+         0.5619
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7659,
+         0.7164,
+         0.8183
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5096,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7643,
+        "strict_buys_with_any_later_poll": 638,
+        "strict_filled_at_ask_seen": 0.5063,
+        "strict_filled_at_ask_plus_1c": 0.7539
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 619,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4233,
+         0.3681,
+         0.4739
+        ],
+        "filled_at_ask_plus_1c": [
+         0.685,
+         0.6162,
+         0.7492
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4152,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6834,
+        "strict_buys_with_any_later_poll": 638,
+        "strict_filled_at_ask_seen": 0.4107,
+        "strict_filled_at_ask_plus_1c": 0.6646
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 187,
+       "windows": 32,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 187,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.4385,
+         0.3568,
+         0.5337
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7166,
+         0.66,
+         0.7799
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4385,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7166,
+        "strict_buys_with_any_later_poll": 187,
+        "strict_filled_at_ask_seen": 0.4385,
+        "strict_filled_at_ask_plus_1c": 0.7166
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 187,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.3636,
+         0.2743,
+         0.4709
+        ],
+        "filled_at_ask_plus_1c": [
+         0.5455,
+         0.4627,
+         0.6369
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.3583,
+        "filled_at_ask_plus_1c_size_ge_1": 0.5455,
+        "strict_buys_with_any_later_poll": 187,
+        "strict_filled_at_ask_seen": 0.3636,
+        "strict_filled_at_ask_plus_1c": 0.5455
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 277,
+       "windows": 33,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 277,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.639,
+         0.5888,
+         0.6929
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7292,
+         0.6775,
+         0.7764
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.639,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7256,
+        "strict_buys_with_any_later_poll": 277,
+        "strict_filled_at_ask_seen": 0.639,
+        "strict_filled_at_ask_plus_1c": 0.7292
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 277,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6498,
+         0.574,
+         0.7228
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7184,
+         0.6448,
+         0.7861
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6498,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7184,
+        "strict_buys_with_any_later_poll": 277,
+        "strict_filled_at_ask_seen": 0.6498,
+        "strict_filled_at_ask_plus_1c": 0.7184
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXCOPPER15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 54,
+    "distinct_markets": 54,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 15:45:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 10,
+     "2026-11-12 Thu": 44
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      10
+     ],
+     "2026-11-12 Thu": [
+      61,
+      44
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9815,
+    "result_present_n": 53,
+    "volume_contracts_median_per_window": 15469.955,
+    "volume_contracts_p25_p75": [
+     12106.77,
+     20468.5925
+    ],
+    "volume_n": 54,
+    "tape_sum_count_median": 15469.955
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 756,
+     "instants_two_sided": 745,
+     "share_two_sided": 0.9854,
+     "instants_yes_bids_only": 5,
+     "instants_no_bids_only": 6,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 54,
+     "windows_with_two_sided": 54,
+     "spread_median_p75": [
+      0.03,
+      0.05
+     ],
+     "spread_mean": 0.03266,
+     "spread_p90": 0.05,
+     "spread_median_of_window_medians": 0.035,
+     "spread_p75_of_window_medians": 0.04,
+     "mid_median": 0.43,
+     "favourite_price_median_p25_p75": [
+      0.805,
+      0.675,
+      0.89
+     ],
+     "touch_size_fav_ask_median": 26.03,
+     "touch_size_cheap_ask_median": 25.0,
+     "touch_size_both_asks_median": 25.82,
+     "touch_size_both_asks_p25": 10.3175,
+     "fee_at_mid_median": 0.01099,
+     "fee_at_mid_p25_p75": [
+      0.00685,
+      0.01536
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.02795,
+      0.03641
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.05587,
+      0.07273
+     ],
+     "round_trip_over_cheap_side_price_median": 0.28147,
+     "round_trip_over_favourite_price_median": 0.07207,
+     "haircut": {
+      "both_sides": {
+       "buys": 1490,
+       "windows": 54,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1486,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6857,
+         0.6581,
+         0.7151
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8048,
+         0.7751,
+         0.8361
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.677,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7988,
+        "strict_buys_with_any_later_poll": 1490,
+        "strict_filled_at_ask_seen": 0.6852,
+        "strict_filled_at_ask_plus_1c": 0.804
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1482,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6242,
+         0.5929,
+         0.6604
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7321,
+         0.7008,
+         0.7665
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6181,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7281,
+        "strict_buys_with_any_later_poll": 1490,
+        "strict_filled_at_ask_seen": 0.6235,
+        "strict_filled_at_ask_plus_1c": 0.7309
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 722,
+       "windows": 54,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 720,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6917,
+         0.6517,
+         0.7356
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8069,
+         0.7676,
+         0.8449
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6833,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7972,
+        "strict_buys_with_any_later_poll": 722,
+        "strict_filled_at_ask_seen": 0.6925,
+        "strict_filled_at_ask_plus_1c": 0.8075
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 718,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6532,
+         0.5986,
+         0.7071
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7326,
+         0.6829,
+         0.7796
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6462,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7284,
+        "strict_buys_with_any_later_poll": 722,
+        "strict_filled_at_ask_seen": 0.6551,
+        "strict_filled_at_ask_plus_1c": 0.7341
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 768,
+       "windows": 54,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 766,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6802,
+         0.641,
+         0.7204
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8029,
+         0.7687,
+         0.8465
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.671,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8003,
+        "strict_buys_with_any_later_poll": 768,
+        "strict_filled_at_ask_seen": 0.6784,
+        "strict_filled_at_ask_plus_1c": 0.8008
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 764,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5969,
+         0.5407,
+         0.6452
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7317,
+         0.6883,
+         0.7733
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5916,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7277,
+        "strict_buys_with_any_later_poll": 768,
+        "strict_filled_at_ask_seen": 0.5938,
+        "strict_filled_at_ask_plus_1c": 0.7279
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 200,
+       "windows": 24,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 200,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.72,
+         0.6393,
+         0.8012
+        ],
+        "filled_at_ask_plus_1c": [
+         0.92,
+         0.8671,
+         0.9615
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.71,
+        "filled_at_ask_plus_1c_size_ge_1": 0.915,
+        "strict_buys_with_any_later_poll": 200,
+        "strict_filled_at_ask_seen": 0.72,
+        "strict_filled_at_ask_plus_1c": 0.92
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 200,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.625,
+         0.5315,
+         0.7387
+        ],
+        "filled_at_ask_plus_1c": [
+         0.845,
+         0.7796,
+         0.9151
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.625,
+        "filled_at_ask_plus_1c_size_ge_1": 0.84,
+        "strict_buys_with_any_later_poll": 200,
+        "strict_filled_at_ask_seen": 0.625,
+        "strict_filled_at_ask_plus_1c": 0.845
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 424,
+       "windows": 37,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 424,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6698,
+         0.6326,
+         0.7068
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8208,
+         0.7808,
+         0.8556
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6604,
+        "filled_at_ask_plus_1c_size_ge_1": 0.816,
+        "strict_buys_with_any_later_poll": 424,
+        "strict_filled_at_ask_seen": 0.6698,
+        "strict_filled_at_ask_plus_1c": 0.8208
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 424,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6344,
+         0.5773,
+         0.6859
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7311,
+         0.6789,
+         0.7811
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.625,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7288,
+        "strict_buys_with_any_later_poll": 424,
+        "strict_filled_at_ask_seen": 0.6344,
+        "strict_filled_at_ask_plus_1c": 0.7311
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 648,
+     "instants_two_sided": 542,
+     "share_two_sided": 0.8364,
+     "instants_yes_bids_only": 68,
+     "instants_no_bids_only": 38,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 54,
+     "windows_with_two_sided": 50,
+     "spread_median_p75": [
+      0.03,
+      0.05
+     ],
+     "spread_mean": 0.03044,
+     "spread_p90": 0.059,
+     "spread_median_of_window_medians": 0.025,
+     "spread_p75_of_window_medians": 0.04,
+     "mid_median": 0.135,
+     "favourite_price_median_p25_p75": [
+      0.93,
+      0.83,
+      0.965
+     ],
+     "touch_size_fav_ask_median": 39.525,
+     "touch_size_cheap_ask_median": 36.905,
+     "touch_size_both_asks_median": 38.04,
+     "touch_size_both_asks_p25": 11.4325,
+     "fee_at_mid_median": 0.00456,
+     "fee_at_mid_p25_p75": [
+      0.00236,
+      0.00988
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01801,
+      0.03201
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03599,
+      0.06397
+     ],
+     "round_trip_over_cheap_side_price_median": 0.48773,
+     "round_trip_over_favourite_price_median": 0.03768,
+     "haircut": {
+      "both_sides": {
+       "buys": 1084,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1064,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7293,
+         0.6889,
+         0.7774
+        ],
+        "filled_at_ask_plus_1c": [
+         0.828,
+         0.786,
+         0.866
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.719,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8224,
+        "strict_buys_with_any_later_poll": 1084,
+        "strict_filled_at_ask_seen": 0.7251,
+        "strict_filled_at_ask_plus_1c": 0.822
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1044,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6667,
+         0.625,
+         0.7128
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7759,
+         0.73,
+         0.8262
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.66,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7739,
+        "strict_buys_with_any_later_poll": 1084,
+        "strict_filled_at_ask_seen": 0.6605,
+        "strict_filled_at_ask_plus_1c": 0.7657
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 538,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 528,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7746,
+         0.7275,
+         0.8206
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8333,
+         0.7831,
+         0.88
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7652,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8277,
+        "strict_buys_with_any_later_poll": 538,
+        "strict_filled_at_ask_seen": 0.7788,
+        "strict_filled_at_ask_plus_1c": 0.8364
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 518,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7471,
+         0.6936,
+         0.8054
+        ],
+        "filled_at_ask_plus_1c": [
+         0.805,
+         0.7467,
+         0.8599
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7432,
+        "filled_at_ask_plus_1c_size_ge_1": 0.805,
+        "strict_buys_with_any_later_poll": 538,
+        "strict_filled_at_ask_seen": 0.7565,
+        "strict_filled_at_ask_plus_1c": 0.8123
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 546,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 536,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6847,
+         0.6278,
+         0.7403
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8228,
+         0.7791,
+         0.8659
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6735,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8172,
+        "strict_buys_with_any_later_poll": 546,
+        "strict_filled_at_ask_seen": 0.6722,
+        "strict_filled_at_ask_plus_1c": 0.8077
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 526,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5875,
+         0.5163,
+         0.6483
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7471,
+         0.6839,
+         0.8106
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5779,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7433,
+        "strict_buys_with_any_later_poll": 546,
+        "strict_filled_at_ask_seen": 0.5659,
+        "strict_filled_at_ask_plus_1c": 0.7198
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 267,
+       "windows": 33,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 267,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6592,
+         0.5926,
+         0.7237
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8652,
+         0.8248,
+         0.9022
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6592,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8652,
+        "strict_buys_with_any_later_poll": 267,
+        "strict_filled_at_ask_seen": 0.6592,
+        "strict_filled_at_ask_plus_1c": 0.8652
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 266,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5526,
+         0.4884,
+         0.625
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7707,
+         0.7148,
+         0.8321
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5489,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7707,
+        "strict_buys_with_any_later_poll": 267,
+        "strict_filled_at_ask_seen": 0.5506,
+        "strict_filled_at_ask_plus_1c": 0.7678
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 332,
+       "windows": 37,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 332,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7169,
+         0.659,
+         0.775
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7831,
+         0.7205,
+         0.8409
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7048,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7741,
+        "strict_buys_with_any_later_poll": 332,
+        "strict_filled_at_ask_seen": 0.7169,
+        "strict_filled_at_ask_plus_1c": 0.7831
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 332,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6958,
+         0.6293,
+         0.7595
+        ],
+        "filled_at_ask_plus_1c": [
+         0.75,
+         0.6796,
+         0.8179
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6898,
+        "filled_at_ask_plus_1c_size_ge_1": 0.75,
+        "strict_buys_with_any_later_poll": 332,
+        "strict_filled_at_ask_seen": 0.6958,
+        "strict_filled_at_ask_plus_1c": 0.75
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXEURUSD15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 52,
+    "distinct_markets": 52,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 12,
+     "2026-11-12 Thu": 40
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      12
+     ],
+     "2026-11-12 Thu": [
+      61,
+      40
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9808,
+    "result_present_n": 51,
+    "volume_contracts_median_per_window": 7576.92,
+    "volume_contracts_p25_p75": [
+     5993.555,
+     12481.0675
+    ],
+    "volume_n": 52,
+    "tape_sum_count_median": 7576.92
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 728,
+     "instants_two_sided": 717,
+     "share_two_sided": 0.9849,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 11,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 52,
+     "windows_with_two_sided": 52,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01817,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.39,
+     "favourite_price_median_p25_p75": [
+      0.86,
+      0.775,
+      0.945
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 371.8175,
+     "fee_at_mid_median": 0.00843,
+     "fee_at_mid_p25_p75": [
+      0.00364,
+      0.01221
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01685,
+      0.0224
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03369,
+      0.04478
+     ],
+     "round_trip_over_cheap_side_price_median": 0.25224,
+     "round_trip_over_favourite_price_median": 0.03941,
+     "haircut": {
+      "both_sides": {
+       "buys": 1434,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1432,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.727,
+         0.6892,
+         0.7651
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8331,
+         0.7985,
+         0.8659
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7095,
+        "filled_at_ask_plus_1c_size_ge_1": 0.824,
+        "strict_buys_with_any_later_poll": 1434,
+        "strict_filled_at_ask_seen": 0.7266,
+        "strict_filled_at_ask_plus_1c": 0.8326
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1430,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6615,
+         0.6245,
+         0.7019
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7811,
+         0.7466,
+         0.8189
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6462,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7713,
+        "strict_buys_with_any_later_poll": 1434,
+        "strict_filled_at_ask_seen": 0.6611,
+        "strict_filled_at_ask_plus_1c": 0.7803
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 714,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 713,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.77,
+         0.7223,
+         0.8137
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8555,
+         0.8146,
+         0.8908
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7377,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8373,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.7703,
+        "strict_filled_at_ask_plus_1c": 0.8557
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 712,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7135,
+         0.6571,
+         0.7676
+        ],
+        "filled_at_ask_plus_1c": [
+         0.809,
+         0.7583,
+         0.8532
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.684,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7907,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.7143,
+        "strict_filled_at_ask_plus_1c": 0.8095
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 720,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 719,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6843,
+         0.6388,
+         0.7334
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8108,
+         0.7691,
+         0.8488
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6815,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8108,
+        "strict_buys_with_any_later_poll": 720,
+        "strict_filled_at_ask_seen": 0.6833,
+        "strict_filled_at_ask_plus_1c": 0.8097
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 718,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.61,
+         0.5539,
+         0.6681
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7535,
+         0.6959,
+         0.8034
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6086,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7521,
+        "strict_buys_with_any_later_poll": 720,
+        "strict_filled_at_ask_seen": 0.6083,
+        "strict_filled_at_ask_plus_1c": 0.7514
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 237,
+       "windows": 29,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 237,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7553,
+         0.7061,
+         0.798
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8987,
+         0.8639,
+         0.9314
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7553,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8987,
+        "strict_buys_with_any_later_poll": 237,
+        "strict_filled_at_ask_seen": 0.7553,
+        "strict_filled_at_ask_plus_1c": 0.8987
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 237,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.654,
+         0.5903,
+         0.715
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8312,
+         0.7742,
+         0.8798
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.654,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8312,
+        "strict_buys_with_any_later_poll": 237,
+        "strict_filled_at_ask_seen": 0.654,
+        "strict_filled_at_ask_plus_1c": 0.8312
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 471,
+       "windows": 43,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 471,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7622,
+         0.7197,
+         0.8059
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8408,
+         0.8,
+         0.8766
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7261,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8132,
+        "strict_buys_with_any_later_poll": 471,
+        "strict_filled_at_ask_seen": 0.7622,
+        "strict_filled_at_ask_plus_1c": 0.8408
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 471,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6964,
+         0.637,
+         0.7573
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7856,
+         0.7327,
+         0.8376
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6624,
+        "filled_at_ask_plus_1c_size_ge_1": 0.758,
+        "strict_buys_with_any_later_poll": 471,
+        "strict_filled_at_ask_seen": 0.6964,
+        "strict_filled_at_ask_plus_1c": 0.7856
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 624,
+     "instants_two_sided": 402,
+     "share_two_sided": 0.6442,
+     "instants_yes_bids_only": 78,
+     "instants_no_bids_only": 144,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 52,
+     "windows_with_two_sided": 42,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01888,
+     "spread_p90": 0.03,
+     "spread_median_of_window_medians": 0.0175,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.3925,
+     "favourite_price_median_p25_p75": [
+      0.94,
+      0.76125,
+      0.97
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 244.9125,
+     "fee_at_mid_median": 0.00395,
+     "fee_at_mid_p25_p75": [
+      0.00204,
+      0.01272
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01515,
+      0.02313
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03029,
+      0.04624
+     ],
+     "round_trip_over_cheap_side_price_median": 0.35584,
+     "round_trip_over_favourite_price_median": 0.03424,
+     "haircut": {
+      "both_sides": {
+       "buys": 804,
+       "windows": 42,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 768,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7383,
+         0.6923,
+         0.7895
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8307,
+         0.7805,
+         0.8776
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7292,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8268,
+        "strict_buys_with_any_later_poll": 804,
+        "strict_filled_at_ask_seen": 0.7264,
+        "strict_filled_at_ask_plus_1c": 0.8147
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 744,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6801,
+         0.6338,
+         0.7362
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7876,
+         0.733,
+         0.841
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6774,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7823,
+        "strict_buys_with_any_later_poll": 804,
+        "strict_filled_at_ask_seen": 0.6629,
+        "strict_filled_at_ask_plus_1c": 0.7637
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 402,
+       "windows": 42,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 384,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7943,
+         0.7343,
+         0.8524
+        ],
+        "filled_at_ask_plus_1c": [
+         0.862,
+         0.8116,
+         0.9091
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7917,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8594,
+        "strict_buys_with_any_later_poll": 402,
+        "strict_filled_at_ask_seen": 0.801,
+        "strict_filled_at_ask_plus_1c": 0.8657
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 372,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7984,
+         0.7432,
+         0.8551
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8522,
+         0.8,
+         0.9027
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7957,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8495,
+        "strict_buys_with_any_later_poll": 402,
+        "strict_filled_at_ask_seen": 0.806,
+        "strict_filled_at_ask_plus_1c": 0.8582
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 402,
+       "windows": 42,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 384,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6823,
+         0.6238,
+         0.746
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7995,
+         0.7415,
+         0.8549
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6667,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7943,
+        "strict_buys_with_any_later_poll": 402,
+        "strict_filled_at_ask_seen": 0.6517,
+        "strict_filled_at_ask_plus_1c": 0.7637
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 372,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5618,
+         0.4851,
+         0.6393
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7231,
+         0.6489,
+         0.7926
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5591,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7151,
+        "strict_buys_with_any_later_poll": 402,
+        "strict_filled_at_ask_seen": 0.5199,
+        "strict_filled_at_ask_plus_1c": 0.6692
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 129,
+       "windows": 17,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 129,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6977,
+         0.6154,
+         0.7632
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8682,
+         0.7965,
+         0.9187
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6977,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8682,
+        "strict_buys_with_any_later_poll": 129,
+        "strict_filled_at_ask_seen": 0.6977,
+        "strict_filled_at_ask_plus_1c": 0.8682
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 129,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5504,
+         0.4037,
+         0.6688
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7829,
+         0.6807,
+         0.8561
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5504,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7829,
+        "strict_buys_with_any_later_poll": 129,
+        "strict_filled_at_ask_seen": 0.5504,
+        "strict_filled_at_ask_plus_1c": 0.7829
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 201,
+       "windows": 27,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 200,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.745,
+         0.6737,
+         0.8108
+        ],
+        "filled_at_ask_plus_1c": [
+         0.835,
+         0.7742,
+         0.8929
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.745,
+        "filled_at_ask_plus_1c_size_ge_1": 0.835,
+        "strict_buys_with_any_later_poll": 201,
+        "strict_filled_at_ask_seen": 0.7413,
+        "strict_filled_at_ask_plus_1c": 0.8308
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 199,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7538,
+         0.6717,
+         0.8253
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8191,
+         0.7394,
+         0.89
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7487,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8141,
+        "strict_buys_with_any_later_poll": 201,
+        "strict_filled_at_ask_seen": 0.7463,
+        "strict_filled_at_ask_plus_1c": 0.8109
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXGBPUSD15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 53,
+    "distinct_markets": 53,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 13,
+     "2026-11-12 Thu": 40
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      13
+     ],
+     "2026-11-12 Thu": [
+      61,
+      40
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9811,
+    "result_present_n": 52,
+    "volume_contracts_median_per_window": 5745.74,
+    "volume_contracts_p25_p75": [
+     4485.13,
+     8563.05
+    ],
+    "volume_n": 53,
+    "tape_sum_count_median": 5745.74
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 742,
+     "instants_two_sided": 723,
+     "share_two_sided": 0.9744,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 19,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 53,
+     "windows_with_two_sided": 52,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01956,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.47,
+     "favourite_price_median_p25_p75": [
+      0.8,
+      0.67,
+      0.92
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 410.465,
+     "fee_at_mid_median": 0.0112,
+     "fee_at_mid_p25_p75": [
+      0.00515,
+      0.01548
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01988,
+      0.02497
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03974,
+      0.04993
+     ],
+     "round_trip_over_cheap_side_price_median": 0.21083,
+     "round_trip_over_favourite_price_median": 0.04996,
+     "haircut": {
+      "both_sides": {
+       "buys": 1446,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1444,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7091,
+         0.6765,
+         0.7452
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8241,
+         0.794,
+         0.8551
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7001,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8165,
+        "strict_buys_with_any_later_poll": 1446,
+        "strict_filled_at_ask_seen": 0.7089,
+        "strict_filled_at_ask_plus_1c": 0.8237
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1442,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.654,
+         0.6221,
+         0.69
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7677,
+         0.7325,
+         0.8032
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6449,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7614,
+        "strict_buys_with_any_later_poll": 1446,
+        "strict_filled_at_ask_seen": 0.6535,
+        "strict_filled_at_ask_plus_1c": 0.7669
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 714,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 713,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7489,
+         0.7035,
+         0.794
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8317,
+         0.7941,
+         0.867
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7405,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8289,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.7493,
+        "strict_filled_at_ask_plus_1c": 0.8319
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 712,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7135,
+         0.6629,
+         0.7631
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7949,
+         0.751,
+         0.8396
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7037,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7921,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.7143,
+        "strict_filled_at_ask_plus_1c": 0.7955
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 732,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 731,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6703,
+         0.6342,
+         0.7127
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8167,
+         0.7764,
+         0.8531
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6607,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8044,
+        "strict_buys_with_any_later_poll": 732,
+        "strict_filled_at_ask_seen": 0.6694,
+        "strict_filled_at_ask_plus_1c": 0.8156
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 730,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5959,
+         0.5467,
+         0.644
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7411,
+         0.6925,
+         0.789
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5877,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7315,
+        "strict_buys_with_any_later_poll": 732,
+        "strict_filled_at_ask_seen": 0.5943,
+        "strict_filled_at_ask_plus_1c": 0.7391
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 257,
+       "windows": 26,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 257,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7782,
+         0.7314,
+         0.8255
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8872,
+         0.8327,
+         0.9367
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7782,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8872,
+        "strict_buys_with_any_later_poll": 257,
+        "strict_filled_at_ask_seen": 0.7782,
+        "strict_filled_at_ask_plus_1c": 0.8872
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 257,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6965,
+         0.6277,
+         0.7661
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8327,
+         0.7662,
+         0.8962
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6965,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8327,
+        "strict_buys_with_any_later_poll": 257,
+        "strict_filled_at_ask_seen": 0.6965,
+        "strict_filled_at_ask_plus_1c": 0.8327
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 455,
+       "windows": 41,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 455,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7934,
+         0.7409,
+         0.8442
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8571,
+         0.8174,
+         0.8934
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7846,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8527,
+        "strict_buys_with_any_later_poll": 455,
+        "strict_filled_at_ask_seen": 0.7934,
+        "strict_filled_at_ask_plus_1c": 0.8571
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 455,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7495,
+         0.6793,
+         0.8079
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8198,
+         0.7689,
+         0.8683
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7385,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8154,
+        "strict_buys_with_any_later_poll": 455,
+        "strict_filled_at_ask_seen": 0.7495,
+        "strict_filled_at_ask_plus_1c": 0.8198
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 636,
+     "instants_two_sided": 467,
+     "share_two_sided": 0.7343,
+     "instants_yes_bids_only": 48,
+     "instants_no_bids_only": 121,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 53,
+     "windows_with_two_sided": 43,
+     "spread_median_p75": [
+      0.01,
+      0.02
+     ],
+     "spread_mean": 0.01572,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.01,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.65,
+     "favourite_price_median_p25_p75": [
+      0.91,
+      0.785,
+      0.965
+     ],
+     "touch_size_fav_ask_median": 561.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 378.0,
+     "fee_at_mid_median": 0.00573,
+     "fee_at_mid_p25_p75": [
+      0.00236,
+      0.01181
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01456,
+      0.02103
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.0291,
+      0.04205
+     ],
+     "round_trip_over_cheap_side_price_median": 0.28469,
+     "round_trip_over_favourite_price_median": 0.03129,
+     "haircut": {
+      "both_sides": {
+       "buys": 934,
+       "windows": 43,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 914,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6937,
+         0.6588,
+         0.732
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8118,
+         0.7708,
+         0.8512
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6816,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8053,
+        "strict_buys_with_any_later_poll": 934,
+        "strict_filled_at_ask_seen": 0.6863,
+        "strict_filled_at_ask_plus_1c": 0.8041
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 904,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6217,
+         0.5859,
+         0.6624
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7489,
+         0.7006,
+         0.7951
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.615,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7467,
+        "strict_buys_with_any_later_poll": 934,
+        "strict_filled_at_ask_seen": 0.6135,
+        "strict_filled_at_ask_plus_1c": 0.7388
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 467,
+       "windows": 43,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 457,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7746,
+         0.7263,
+         0.8222
+        ],
+        "filled_at_ask_plus_1c": [
+         0.849,
+         0.8055,
+         0.8913
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7746,
+        "filled_at_ask_plus_1c_size_ge_1": 0.849,
+        "strict_buys_with_any_later_poll": 467,
+        "strict_filled_at_ask_seen": 0.773,
+        "strict_filled_at_ask_plus_1c": 0.8501
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 452,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7677,
+         0.7196,
+         0.8171
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8274,
+         0.7742,
+         0.8795
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7677,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8274,
+        "strict_buys_with_any_later_poll": 467,
+        "strict_filled_at_ask_seen": 0.7666,
+        "strict_filled_at_ask_plus_1c": 0.8287
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 467,
+       "windows": 43,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 457,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6127,
+         0.5601,
+         0.6591
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7746,
+         0.7277,
+         0.8226
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5886,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7615,
+        "strict_buys_with_any_later_poll": 467,
+        "strict_filled_at_ask_seen": 0.5996,
+        "strict_filled_at_ask_plus_1c": 0.758
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 452,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4757,
+         0.423,
+         0.5337
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6704,
+         0.6129,
+         0.7309
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4624,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6659,
+        "strict_buys_with_any_later_poll": 467,
+        "strict_filled_at_ask_seen": 0.4604,
+        "strict_filled_at_ask_plus_1c": 0.6488
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 203,
+       "windows": 27,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 203,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5961,
+         0.5279,
+         0.655
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8276,
+         0.7743,
+         0.873
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5961,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8276,
+        "strict_buys_with_any_later_poll": 203,
+        "strict_filled_at_ask_seen": 0.5961,
+        "strict_filled_at_ask_plus_1c": 0.8276
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 203,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4483,
+         0.3582,
+         0.5317
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7291,
+         0.6649,
+         0.7933
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4483,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7291,
+        "strict_buys_with_any_later_poll": 203,
+        "strict_filled_at_ask_seen": 0.4483,
+        "strict_filled_at_ask_plus_1c": 0.7291
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 276,
+       "windows": 35,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 274,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7701,
+         0.72,
+         0.8214
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8467,
+         0.8077,
+         0.8871
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7701,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8467,
+        "strict_buys_with_any_later_poll": 276,
+        "strict_filled_at_ask_seen": 0.7681,
+        "strict_filled_at_ask_plus_1c": 0.8478
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 274,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7664,
+         0.723,
+         0.8182
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8248,
+         0.7695,
+         0.8782
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7664,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8248,
+        "strict_buys_with_any_later_poll": 276,
+        "strict_filled_at_ask_seen": 0.7645,
+        "strict_filled_at_ask_plus_1c": 0.8261
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXHYPE15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 63,
+    "distinct_markets": 63,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 15,
+     "2026-11-12 Thu": 48
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      15
+     ],
+     "2026-11-12 Thu": [
+      61,
+      48
+     ]
+    },
+    "result_present_at_post_close_read_share": 1.0,
+    "result_present_n": 63,
+    "volume_contracts_median_per_window": 37487.16,
+    "volume_contracts_p25_p75": [
+     26296.69,
+     47071.435
+    ],
+    "volume_n": 63,
+    "tape_sum_count_median": 37487.16
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 882,
+     "instants_two_sided": 882,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 63,
+     "windows_with_two_sided": 63,
+     "spread_median_p75": [
+      0.01,
+      0.02
+     ],
+     "spread_mean": 0.01379,
+     "spread_p90": 0.03,
+     "spread_median_of_window_medians": 0.01,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.44,
+     "favourite_price_median_p25_p75": [
+      0.845,
+      0.69125,
+      0.942
+     ],
+     "touch_size_fav_ask_median": 29.0,
+     "touch_size_cheap_ask_median": 35.0,
+     "touch_size_both_asks_median": 32.2,
+     "touch_size_both_asks_p25": 10.0,
+     "fee_at_mid_median": 0.00917,
+     "fee_at_mid_p25_p75": [
+      0.00382,
+      0.01494
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01728,
+      0.02248
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03454,
+      0.04497
+     ],
+     "round_trip_over_cheap_side_price_median": 0.1947,
+     "round_trip_over_favourite_price_median": 0.04034,
+     "haircut": {
+      "both_sides": {
+       "buys": 1764,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1764,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5901,
+         0.5714,
+         0.6128
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7585,
+         0.7285,
+         0.7897
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5862,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7545,
+        "strict_buys_with_any_later_poll": 1764,
+        "strict_filled_at_ask_seen": 0.5901,
+        "strict_filled_at_ask_plus_1c": 0.7585
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1764,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.551,
+         0.5351,
+         0.5692
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6927,
+         0.6559,
+         0.7285
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5471,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6905,
+        "strict_buys_with_any_later_poll": 1764,
+        "strict_filled_at_ask_seen": 0.551,
+        "strict_filled_at_ask_plus_1c": 0.6927
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 872,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 872,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6296,
+         0.5913,
+         0.6713
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7833,
+         0.7405,
+         0.8244
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6261,
+        "filled_at_ask_plus_1c_size_ge_1": 0.781,
+        "strict_buys_with_any_later_poll": 872,
+        "strict_filled_at_ask_seen": 0.6296,
+        "strict_filled_at_ask_plus_1c": 0.7833
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 872,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6204,
+         0.5727,
+         0.6667
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7271,
+         0.6758,
+         0.7778
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6193,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7259,
+        "strict_buys_with_any_later_poll": 872,
+        "strict_filled_at_ask_seen": 0.6204,
+        "strict_filled_at_ask_plus_1c": 0.7271
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 892,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 892,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5516,
+         0.5197,
+         0.5859
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7343,
+         0.6951,
+         0.7739
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5471,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7287,
+        "strict_buys_with_any_later_poll": 892,
+        "strict_filled_at_ask_seen": 0.5516,
+        "strict_filled_at_ask_plus_1c": 0.7343
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 892,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4832,
+         0.4365,
+         0.5306
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6592,
+         0.6087,
+         0.7149
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4765,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6558,
+        "strict_buys_with_any_later_poll": 892,
+        "strict_filled_at_ask_seen": 0.4832,
+        "strict_filled_at_ask_plus_1c": 0.6592
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 280,
+       "windows": 33,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 280,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5286,
+         0.4886,
+         0.5698
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7643,
+         0.7198,
+         0.808
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5286,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7536,
+        "strict_buys_with_any_later_poll": 280,
+        "strict_filled_at_ask_seen": 0.5286,
+        "strict_filled_at_ask_plus_1c": 0.7643
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 280,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4429,
+         0.3893,
+         0.4964
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6929,
+         0.6385,
+         0.744
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4357,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6893,
+        "strict_buys_with_any_later_poll": 280,
+        "strict_filled_at_ask_seen": 0.4429,
+        "strict_filled_at_ask_plus_1c": 0.6929
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 479,
+       "windows": 48,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 479,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6367,
+         0.5872,
+         0.6886
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7871,
+         0.7387,
+         0.8276
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6326,
+        "filled_at_ask_plus_1c_size_ge_1": 0.785,
+        "strict_buys_with_any_later_poll": 479,
+        "strict_filled_at_ask_seen": 0.6367,
+        "strict_filled_at_ask_plus_1c": 0.7871
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 479,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6472,
+         0.5928,
+         0.6949
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7307,
+         0.6782,
+         0.7816
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6472,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7307,
+        "strict_buys_with_any_later_poll": 479,
+        "strict_filled_at_ask_seen": 0.6472,
+        "strict_filled_at_ask_plus_1c": 0.7307
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 756,
+     "instants_two_sided": 698,
+     "share_two_sided": 0.9233,
+     "instants_yes_bids_only": 37,
+     "instants_no_bids_only": 21,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 63,
+     "windows_with_two_sided": 62,
+     "spread_median_p75": [
+      0.005,
+      0.011
+     ],
+     "spread_mean": 0.00963,
+     "spread_p90": 0.03,
+     "spread_median_of_window_medians": 0.004,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.205,
+     "favourite_price_median_p25_p75": [
+      0.9745,
+      0.88,
+      0.9945
+     ],
+     "touch_size_fav_ask_median": 70.695,
+     "touch_size_cheap_ask_median": 63.085,
+     "touch_size_both_asks_median": 70.0,
+     "touch_size_both_asks_p25": 11.0,
+     "fee_at_mid_median": 0.00174,
+     "fee_at_mid_p25_p75": [
+      0.00038,
+      0.00739
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.0041,
+      0.01504
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.0082,
+      0.03008
+     ],
+     "round_trip_over_cheap_side_price_median": 0.26982,
+     "round_trip_over_favourite_price_median": 0.00834,
+     "haircut": {
+      "both_sides": {
+       "buys": 1396,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1380,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.637,
+         0.6036,
+         0.6708
+        ],
+        "filled_at_ask_plus_1c": [
+         0.837,
+         0.7969,
+         0.8789
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6333,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8348,
+        "strict_buys_with_any_later_poll": 1396,
+        "strict_filled_at_ask_seen": 0.6354,
+        "strict_filled_at_ask_plus_1c": 0.8331
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1368,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5906,
+         0.5608,
+         0.6241
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7946,
+         0.7521,
+         0.8417
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5863,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7917,
+        "strict_buys_with_any_later_poll": 1396,
+        "strict_filled_at_ask_seen": 0.5888,
+        "strict_filled_at_ask_plus_1c": 0.7887
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 698,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 690,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7304,
+         0.6891,
+         0.7778
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8609,
+         0.8151,
+         0.9027
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7275,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8594,
+        "strict_buys_with_any_later_poll": 698,
+        "strict_filled_at_ask_seen": 0.7335,
+        "strict_filled_at_ask_plus_1c": 0.8625
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 684,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7149,
+         0.6662,
+         0.7682
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8392,
+         0.7887,
+         0.8851
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.712,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8392,
+        "strict_buys_with_any_later_poll": 698,
+        "strict_filled_at_ask_seen": 0.7206,
+        "strict_filled_at_ask_plus_1c": 0.8424
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 698,
+       "windows": 62,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 690,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5435,
+         0.4941,
+         0.5974
+        ],
+        "filled_at_ask_plus_1c": [
+         0.813,
+         0.7669,
+         0.8629
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5391,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8101,
+        "strict_buys_with_any_later_poll": 698,
+        "strict_filled_at_ask_seen": 0.5372,
+        "strict_filled_at_ask_plus_1c": 0.8037
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 684,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4664,
+         0.413,
+         0.5239
+        ],
+        "filled_at_ask_plus_1c": [
+         0.75,
+         0.6871,
+         0.8119
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4605,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7442,
+        "strict_buys_with_any_later_poll": 698,
+        "strict_filled_at_ask_seen": 0.457,
+        "strict_filled_at_ask_plus_1c": 0.735
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 148,
+       "windows": 29,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 148,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.3851,
+         0.2857,
+         0.4706
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6622,
+         0.6076,
+         0.7135
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.3784,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6622,
+        "strict_buys_with_any_later_poll": 148,
+        "strict_filled_at_ask_seen": 0.3851,
+        "strict_filled_at_ask_plus_1c": 0.6622
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 148,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.3514,
+         0.2373,
+         0.451
+        ],
+        "filled_at_ask_plus_1c": [
+         0.5135,
+         0.4186,
+         0.5973
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.3514,
+        "filled_at_ask_plus_1c_size_ge_1": 0.5068,
+        "strict_buys_with_any_later_poll": 148,
+        "strict_filled_at_ask_seen": 0.3514,
+        "strict_filled_at_ask_plus_1c": 0.5135
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 211,
+       "windows": 32,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 211,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6161,
+         0.5419,
+         0.6939
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7109,
+         0.6432,
+         0.7861
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6114,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7062,
+        "strict_buys_with_any_later_poll": 211,
+        "strict_filled_at_ask_seen": 0.6161,
+        "strict_filled_at_ask_plus_1c": 0.7109
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 211,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5924,
+         0.5043,
+         0.6783
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6635,
+         0.5758,
+         0.75
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5924,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6635,
+        "strict_buys_with_any_later_poll": 211,
+        "strict_filled_at_ask_seen": 0.5924,
+        "strict_filled_at_ask_plus_1c": 0.6635
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXNATGAS15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 65,
+    "distinct_markets": 65,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 16,
+     "2026-11-12 Thu": 49
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      16
+     ],
+     "2026-11-12 Thu": [
+      61,
+      49
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9846,
+    "result_present_n": 64,
+    "volume_contracts_median_per_window": 22818.06,
+    "volume_contracts_p25_p75": [
+     19230.41,
+     35906.79
+    ],
+    "volume_n": 65,
+    "tape_sum_count_median": 22818.06
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 910,
+     "instants_two_sided": 910,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 65,
+     "windows_with_two_sided": 65,
+     "spread_median_p75": [
+      0.02,
+      0.04
+     ],
+     "spread_mean": 0.02974,
+     "spread_p90": 0.06,
+     "spread_median_of_window_medians": 0.03,
+     "spread_p75_of_window_medians": 0.04,
+     "mid_median": 0.67,
+     "favourite_price_median_p25_p75": [
+      0.775,
+      0.67,
+      0.89
+     ],
+     "touch_size_fav_ask_median": 133.86,
+     "touch_size_cheap_ask_median": 121.47,
+     "touch_size_both_asks_median": 129.6,
+     "touch_size_both_asks_p25": 20.1825,
+     "fee_at_mid_median": 0.01221,
+     "fee_at_mid_p25_p75": [
+      0.00685,
+      0.01548
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.02535,
+      0.03542
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.05069,
+      0.07078
+     ],
+     "round_trip_over_cheap_side_price_median": 0.24394,
+     "round_trip_over_favourite_price_median": 0.07017,
+     "haircut": {
+      "both_sides": {
+       "buys": 1820,
+       "windows": 65,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1820,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7115,
+         0.6835,
+         0.7363
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8176,
+         0.7901,
+         0.844
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7049,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8159,
+        "strict_buys_with_any_later_poll": 1820,
+        "strict_filled_at_ask_seen": 0.7115,
+        "strict_filled_at_ask_plus_1c": 0.8176
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1820,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6396,
+         0.6132,
+         0.6703
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7451,
+         0.7126,
+         0.7764
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6346,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7434,
+        "strict_buys_with_any_later_poll": 1820,
+        "strict_filled_at_ask_seen": 0.6396,
+        "strict_filled_at_ask_plus_1c": 0.7451
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 888,
+       "windows": 65,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 888,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7342,
+         0.6996,
+         0.7706
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8333,
+         0.7986,
+         0.8678
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7309,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8311,
+        "strict_buys_with_any_later_poll": 888,
+        "strict_filled_at_ask_seen": 0.7342,
+        "strict_filled_at_ask_plus_1c": 0.8333
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 888,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6757,
+         0.632,
+         0.7189
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7703,
+         0.7258,
+         0.814
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6745,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7691,
+        "strict_buys_with_any_later_poll": 888,
+        "strict_filled_at_ask_seen": 0.6757,
+        "strict_filled_at_ask_plus_1c": 0.7703
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 932,
+       "windows": 65,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 932,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6899,
+         0.6547,
+         0.7261
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8026,
+         0.7708,
+         0.8358
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6803,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8015,
+        "strict_buys_with_any_later_poll": 932,
+        "strict_filled_at_ask_seen": 0.6899,
+        "strict_filled_at_ask_plus_1c": 0.8026
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 932,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6052,
+         0.5678,
+         0.6419
+        ],
+        "filled_at_ask_plus_1c": [
+         0.721,
+         0.683,
+         0.7597
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5966,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7189,
+        "strict_buys_with_any_later_poll": 932,
+        "strict_filled_at_ask_seen": 0.6052,
+        "strict_filled_at_ask_plus_1c": 0.721
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 240,
+       "windows": 27,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 240,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7875,
+         0.7407,
+         0.831
+        ],
+        "filled_at_ask_plus_1c": [
+         0.925,
+         0.8977,
+         0.9506
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7833,
+        "filled_at_ask_plus_1c_size_ge_1": 0.9208,
+        "strict_buys_with_any_later_poll": 240,
+        "strict_filled_at_ask_seen": 0.7875,
+        "strict_filled_at_ask_plus_1c": 0.925
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 240,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6833,
+         0.6301,
+         0.7383
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8667,
+         0.8247,
+         0.9059
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.675,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8667,
+        "strict_buys_with_any_later_poll": 240,
+        "strict_filled_at_ask_seen": 0.6833,
+        "strict_filled_at_ask_plus_1c": 0.8667
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 564,
+       "windows": 52,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 564,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7376,
+         0.6971,
+         0.7733
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8564,
+         0.8223,
+         0.8869
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7358,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8528,
+        "strict_buys_with_any_later_poll": 564,
+        "strict_filled_at_ask_seen": 0.7376,
+        "strict_filled_at_ask_plus_1c": 0.8564
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 564,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6702,
+         0.622,
+         0.7166
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7943,
+         0.753,
+         0.8319
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6684,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7926,
+        "strict_buys_with_any_later_poll": 564,
+        "strict_filled_at_ask_seen": 0.6702,
+        "strict_filled_at_ask_plus_1c": 0.7943
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 780,
+     "instants_two_sided": 723,
+     "share_two_sided": 0.9269,
+     "instants_yes_bids_only": 39,
+     "instants_no_bids_only": 18,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 65,
+     "windows_with_two_sided": 63,
+     "spread_median_p75": [
+      0.02,
+      0.035
+     ],
+     "spread_mean": 0.02436,
+     "spread_p90": 0.05,
+     "spread_median_of_window_medians": 0.015,
+     "spread_p75_of_window_medians": 0.0325,
+     "mid_median": 0.72,
+     "favourite_price_median_p25_p75": [
+      0.905,
+      0.75,
+      0.955
+     ],
+     "touch_size_fav_ask_median": 145.15,
+     "touch_size_cheap_ask_median": 138.42,
+     "touch_size_both_asks_median": 142.575,
+     "touch_size_both_asks_p25": 25.295,
+     "fee_at_mid_median": 0.00602,
+     "fee_at_mid_p25_p75": [
+      0.00301,
+      0.01313
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01671,
+      0.02893
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03338,
+      0.05779
+     ],
+     "round_trip_over_cheap_side_price_median": 0.31405,
+     "round_trip_over_favourite_price_median": 0.03941,
+     "haircut": {
+      "both_sides": {
+       "buys": 1446,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1434,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6883,
+         0.6608,
+         0.7202
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8138,
+         0.7775,
+         0.8475
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6827,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8124,
+        "strict_buys_with_any_later_poll": 1446,
+        "strict_filled_at_ask_seen": 0.6867,
+        "strict_filled_at_ask_plus_1c": 0.8112
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1422,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6174,
+         0.589,
+         0.646
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7454,
+         0.7083,
+         0.7791
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6111,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7433,
+        "strict_buys_with_any_later_poll": 1446,
+        "strict_filled_at_ask_seen": 0.6155,
+        "strict_filled_at_ask_plus_1c": 0.7414
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 716,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 710,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7366,
+         0.6942,
+         0.7767
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8197,
+         0.7792,
+         0.8603
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7282,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8197,
+        "strict_buys_with_any_later_poll": 716,
+        "strict_filled_at_ask_seen": 0.7388,
+        "strict_filled_at_ask_plus_1c": 0.8212
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 704,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6889,
+         0.6455,
+         0.7363
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7756,
+         0.7282,
+         0.822
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6832,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7727,
+        "strict_buys_with_any_later_poll": 716,
+        "strict_filled_at_ask_seen": 0.6941,
+        "strict_filled_at_ask_plus_1c": 0.7793
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 730,
+       "windows": 63,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 724,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6409,
+         0.6,
+         0.6798
+        ],
+        "filled_at_ask_plus_1c": [
+         0.808,
+         0.7709,
+         0.8442
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6381,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8052,
+        "strict_buys_with_any_later_poll": 730,
+        "strict_filled_at_ask_seen": 0.6356,
+        "strict_filled_at_ask_plus_1c": 0.8014
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 718,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5474,
+         0.504,
+         0.5964
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7159,
+         0.6727,
+         0.7637
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5404,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7145,
+        "strict_buys_with_any_later_poll": 730,
+        "strict_filled_at_ask_seen": 0.5384,
+        "strict_filled_at_ask_plus_1c": 0.7041
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 319,
+       "windows": 39,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 319,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6708,
+         0.6242,
+         0.7138
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8715,
+         0.8306,
+         0.9068
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6677,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8715,
+        "strict_buys_with_any_later_poll": 319,
+        "strict_filled_at_ask_seen": 0.6708,
+        "strict_filled_at_ask_plus_1c": 0.8715
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 319,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5423,
+         0.4866,
+         0.5981
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7774,
+         0.7246,
+         0.8262
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5361,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7774,
+        "strict_buys_with_any_later_poll": 319,
+        "strict_filled_at_ask_seen": 0.5423,
+        "strict_filled_at_ask_plus_1c": 0.7774
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 433,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 433,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7252,
+         0.6759,
+         0.7702
+        ],
+        "filled_at_ask_plus_1c": [
+         0.806,
+         0.7577,
+         0.8526
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7159,
+        "filled_at_ask_plus_1c_size_ge_1": 0.806,
+        "strict_buys_with_any_later_poll": 433,
+        "strict_filled_at_ask_seen": 0.7252,
+        "strict_filled_at_ask_plus_1c": 0.806
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 433,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6813,
+         0.6204,
+         0.7388
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7506,
+         0.6866,
+         0.8073
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6744,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7483,
+        "strict_buys_with_any_later_poll": 433,
+        "strict_filled_at_ask_seen": 0.6813,
+        "strict_filled_at_ask_plus_1c": 0.7506
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXSILVER15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 51,
+    "distinct_markets": 51,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 7,
+     "2026-11-12 Thu": 44
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      7
+     ],
+     "2026-11-12 Thu": [
+      61,
+      44
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9804,
+    "result_present_n": 50,
+    "volume_contracts_median_per_window": 92194.77,
+    "volume_contracts_p25_p75": [
+     73117.465,
+     115381.605
+    ],
+    "volume_n": 51,
+    "tape_sum_count_median": 92194.77
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 714,
+     "instants_two_sided": 714,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 51,
+     "windows_with_two_sided": 51,
+     "spread_median_p75": [
+      0.01,
+      0.01
+     ],
+     "spread_mean": 0.0101,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.01,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.465,
+     "favourite_price_median_p25_p75": [
+      0.7625,
+      0.625,
+      0.92488
+     ],
+     "touch_size_fav_ask_median": 160.0,
+     "touch_size_cheap_ask_median": 200.0,
+     "touch_size_both_asks_median": 176.825,
+     "touch_size_both_asks_p25": 88.5,
+     "fee_at_mid_median": 0.01268,
+     "fee_at_mid_p25_p75": [
+      0.00486,
+      0.01641
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01863,
+      0.02199
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03727,
+      0.04399
+     ],
+     "round_trip_over_cheap_side_price_median": 0.15293,
+     "round_trip_over_favourite_price_median": 0.05014,
+     "haircut": {
+      "both_sides": {
+       "buys": 1428,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1428,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5903,
+         0.5721,
+         0.6099
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7843,
+         0.7486,
+         0.8179
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5889,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7843,
+        "strict_buys_with_any_later_poll": 1428,
+        "strict_filled_at_ask_seen": 0.5903,
+        "strict_filled_at_ask_plus_1c": 0.7843
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1428,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5518,
+         0.5385,
+         0.5651
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7115,
+         0.6786,
+         0.7479
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5497,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7101,
+        "strict_buys_with_any_later_poll": 1428,
+        "strict_filled_at_ask_seen": 0.5518,
+        "strict_filled_at_ask_plus_1c": 0.7115
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 714,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 714,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6317,
+         0.5882,
+         0.6723
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7885,
+         0.7451,
+         0.8249
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6303,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7885,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.6317,
+        "strict_filled_at_ask_plus_1c": 0.7885
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 714,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6232,
+         0.5784,
+         0.6709
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7241,
+         0.675,
+         0.7731
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6204,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7227,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.6232,
+        "strict_filled_at_ask_plus_1c": 0.7241
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 714,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 714,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.549,
+         0.507,
+         0.5896
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7801,
+         0.7409,
+         0.8207
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5476,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7801,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.549,
+        "strict_filled_at_ask_plus_1c": 0.7801
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 714,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4804,
+         0.4342,
+         0.5308
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6989,
+         0.6484,
+         0.7465
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.479,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6975,
+        "strict_buys_with_any_later_poll": 714,
+        "strict_filled_at_ask_seen": 0.4804,
+        "strict_filled_at_ask_plus_1c": 0.6989
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 180,
+       "windows": 19,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 180,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5111,
+         0.4271,
+         0.6087
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8889,
+         0.8441,
+         0.9324
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5111,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8889,
+        "strict_buys_with_any_later_poll": 180,
+        "strict_filled_at_ask_seen": 0.5111,
+        "strict_filled_at_ask_plus_1c": 0.8889
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 180,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4611,
+         0.3695,
+         0.5598
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7667,
+         0.6831,
+         0.8619
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4611,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7667,
+        "strict_buys_with_any_later_poll": 180,
+        "strict_filled_at_ask_seen": 0.4611,
+        "strict_filled_at_ask_plus_1c": 0.7667
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 309,
+       "windows": 31,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 309,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6602,
+         0.6015,
+         0.7117
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8123,
+         0.767,
+         0.8545
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6602,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8123,
+        "strict_buys_with_any_later_poll": 309,
+        "strict_filled_at_ask_seen": 0.6602,
+        "strict_filled_at_ask_plus_1c": 0.8123
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 309,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6472,
+         0.5927,
+         0.6986
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7476,
+         0.6928,
+         0.8061
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6472,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7476,
+        "strict_buys_with_any_later_poll": 309,
+        "strict_filled_at_ask_seen": 0.6472,
+        "strict_filled_at_ask_plus_1c": 0.7476
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 612,
+     "instants_two_sided": 612,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 51,
+     "windows_with_two_sided": 51,
+     "spread_median_p75": [
+      0.006,
+      0.01
+     ],
+     "spread_mean": 0.00748,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.0055,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.43,
+     "favourite_price_median_p25_p75": [
+      0.932,
+      0.77375,
+      0.9875
+     ],
+     "touch_size_fav_ask_median": 160.0,
+     "touch_size_cheap_ask_median": 202.5,
+     "touch_size_both_asks_median": 181.7,
+     "touch_size_both_asks_p25": 114.48,
+     "fee_at_mid_median": 0.00444,
+     "fee_at_mid_p25_p75": [
+      0.00086,
+      0.01225
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.00662,
+      0.01941
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.01324,
+      0.0388
+     ],
+     "round_trip_over_cheap_side_price_median": 0.21083,
+     "round_trip_over_favourite_price_median": 0.01409,
+     "haircut": {
+      "both_sides": {
+       "buys": 1224,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1224,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6144,
+         0.5801,
+         0.6511
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8064,
+         0.7582,
+         0.8505
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6119,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8064,
+        "strict_buys_with_any_later_poll": 1224,
+        "strict_filled_at_ask_seen": 0.6144,
+        "strict_filled_at_ask_plus_1c": 0.8064
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1224,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5817,
+         0.5515,
+         0.6136
+        ],
+        "filled_at_ask_plus_1c": [
+         0.768,
+         0.7206,
+         0.8146
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5809,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7672,
+        "strict_buys_with_any_later_poll": 1224,
+        "strict_filled_at_ask_seen": 0.5817,
+        "strict_filled_at_ask_plus_1c": 0.768
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 611,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 611,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6628,
+         0.6072,
+         0.718
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8101,
+         0.7483,
+         0.8691
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6628,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8101,
+        "strict_buys_with_any_later_poll": 611,
+        "strict_filled_at_ask_seen": 0.6628,
+        "strict_filled_at_ask_plus_1c": 0.8101
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 611,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6416,
+         0.5829,
+         0.6977
+        ],
+        "filled_at_ask_plus_1c": [
+         0.784,
+         0.7119,
+         0.8494
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6416,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7823,
+        "strict_buys_with_any_later_poll": 611,
+        "strict_filled_at_ask_seen": 0.6416,
+        "strict_filled_at_ask_plus_1c": 0.784
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 613,
+       "windows": 51,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 613,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5661,
+         0.5106,
+         0.6144
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8026,
+         0.7541,
+         0.8497
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5612,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8026,
+        "strict_buys_with_any_later_poll": 613,
+        "strict_filled_at_ask_seen": 0.5661,
+        "strict_filled_at_ask_plus_1c": 0.8026
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 613,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.522,
+         0.4673,
+         0.5801
+        ],
+        "filled_at_ask_plus_1c": [
+         0.752,
+         0.6982,
+         0.8059
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5204,
+        "filled_at_ask_plus_1c_size_ge_1": 0.752,
+        "strict_buys_with_any_later_poll": 613,
+        "strict_filled_at_ask_seen": 0.522,
+        "strict_filled_at_ask_plus_1c": 0.752
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 153,
+       "windows": 26,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 153,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.4771,
+         0.3896,
+         0.5539
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7582,
+         0.6923,
+         0.8102
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4706,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7582,
+        "strict_buys_with_any_later_poll": 153,
+        "strict_filled_at_ask_seen": 0.4771,
+        "strict_filled_at_ask_plus_1c": 0.7582
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 153,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.451,
+         0.3416,
+         0.5583
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6471,
+         0.5539,
+         0.7378
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.451,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6471,
+        "strict_buys_with_any_later_poll": 153,
+        "strict_filled_at_ask_seen": 0.451,
+        "strict_filled_at_ask_plus_1c": 0.6471
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 213,
+       "windows": 31,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 213,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6103,
+         0.555,
+         0.6696
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7559,
+         0.6902,
+         0.8168
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6103,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7559,
+        "strict_buys_with_any_later_poll": 213,
+        "strict_filled_at_ask_seen": 0.6103,
+        "strict_filled_at_ask_plus_1c": 0.7559
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 213,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5869,
+         0.5106,
+         0.6667
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7089,
+         0.6274,
+         0.7848
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5869,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7042,
+        "strict_buys_with_any_later_poll": 213,
+        "strict_filled_at_ask_seen": 0.5869,
+        "strict_filled_at_ask_plus_1c": 0.7089
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXUSDCAD15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 60,
+    "distinct_markets": 60,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 15,
+     "2026-11-12 Thu": 45
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      15
+     ],
+     "2026-11-12 Thu": [
+      61,
+      45
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9833,
+    "result_present_n": 59,
+    "volume_contracts_median_per_window": 3783.785,
+    "volume_contracts_p25_p75": [
+     2349.0675,
+     6122.925
+    ],
+    "volume_n": 60,
+    "tape_sum_count_median": 3783.785
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 840,
+     "instants_two_sided": 816,
+     "share_two_sided": 0.9714,
+     "instants_yes_bids_only": 14,
+     "instants_no_bids_only": 10,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 60,
+     "windows_with_two_sided": 59,
+     "spread_median_p75": [
+      0.03,
+      0.06
+     ],
+     "spread_mean": 0.04093,
+     "spread_p90": 0.08,
+     "spread_median_of_window_medians": 0.03,
+     "spread_p75_of_window_medians": 0.065,
+     "mid_median": 0.5,
+     "favourite_price_median_p25_p75": [
+      0.815,
+      0.66375,
+      0.92
+     ],
+     "touch_size_fav_ask_median": 167.63,
+     "touch_size_cheap_ask_median": 211.05,
+     "touch_size_both_asks_median": 180.0,
+     "touch_size_both_asks_p25": 16.0,
+     "fee_at_mid_median": 0.01055,
+     "fee_at_mid_p25_p75": [
+      0.00515,
+      0.01562
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.02497,
+      0.04613
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.04993,
+      0.09213
+     ],
+     "round_trip_over_cheap_side_price_median": 0.30586,
+     "round_trip_over_favourite_price_median": 0.0664,
+     "haircut": {
+      "both_sides": {
+       "buys": 1632,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1632,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6808,
+         0.6489,
+         0.7152
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7953,
+         0.7622,
+         0.8275
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6722,
+        "filled_at_ask_plus_1c_size_ge_1": 0.788,
+        "strict_buys_with_any_later_poll": 1632,
+        "strict_filled_at_ask_seen": 0.6808,
+        "strict_filled_at_ask_plus_1c": 0.7953
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1632,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6299,
+         0.6017,
+         0.6605
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7426,
+         0.7096,
+         0.7778
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6232,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7371,
+        "strict_buys_with_any_later_poll": 1632,
+        "strict_filled_at_ask_seen": 0.6299,
+        "strict_filled_at_ask_plus_1c": 0.7426
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 767,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 767,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6949,
+         0.6475,
+         0.7427
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7836,
+         0.7439,
+         0.8258
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6793,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7705,
+        "strict_buys_with_any_later_poll": 767,
+        "strict_filled_at_ask_seen": 0.6949,
+        "strict_filled_at_ask_plus_1c": 0.7836
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 767,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.648,
+         0.5913,
+         0.702
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7301,
+         0.6779,
+         0.78
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6362,
+        "filled_at_ask_plus_1c_size_ge_1": 0.721,
+        "strict_buys_with_any_later_poll": 767,
+        "strict_filled_at_ask_seen": 0.648,
+        "strict_filled_at_ask_plus_1c": 0.7301
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 865,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 865,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6682,
+         0.6302,
+         0.7065
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8058,
+         0.7711,
+         0.8398
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6659,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8035,
+        "strict_buys_with_any_later_poll": 865,
+        "strict_filled_at_ask_seen": 0.6682,
+        "strict_filled_at_ask_plus_1c": 0.8058
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 865,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6139,
+         0.5676,
+         0.6587
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7538,
+         0.7123,
+         0.7932
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6116,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7514,
+        "strict_buys_with_any_later_poll": 865,
+        "strict_filled_at_ask_seen": 0.6139,
+        "strict_filled_at_ask_plus_1c": 0.7538
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 308,
+       "windows": 30,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 308,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7565,
+         0.7045,
+         0.8077
+        ],
+        "filled_at_ask_plus_1c": [
+         0.9253,
+         0.8961,
+         0.9521
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7565,
+        "filled_at_ask_plus_1c_size_ge_1": 0.9221,
+        "strict_buys_with_any_later_poll": 308,
+        "strict_filled_at_ask_seen": 0.7565,
+        "strict_filled_at_ask_plus_1c": 0.9253
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 308,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6786,
+         0.6194,
+         0.7439
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8636,
+         0.805,
+         0.9125
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6753,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8604,
+        "strict_buys_with_any_later_poll": 308,
+        "strict_filled_at_ask_seen": 0.6786,
+        "strict_filled_at_ask_plus_1c": 0.8636
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 477,
+       "windows": 50,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 477,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7673,
+         0.7184,
+         0.8185
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8428,
+         0.7955,
+         0.8862
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7505,
+        "filled_at_ask_plus_1c_size_ge_1": 0.826,
+        "strict_buys_with_any_later_poll": 477,
+        "strict_filled_at_ask_seen": 0.7673,
+        "strict_filled_at_ask_plus_1c": 0.8428
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 477,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7358,
+         0.6718,
+         0.7901
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8008,
+         0.7451,
+         0.8523
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7254,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7883,
+        "strict_buys_with_any_later_poll": 477,
+        "strict_filled_at_ask_seen": 0.7358,
+        "strict_filled_at_ask_plus_1c": 0.8008
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 720,
+     "instants_two_sided": 522,
+     "share_two_sided": 0.725,
+     "instants_yes_bids_only": 109,
+     "instants_no_bids_only": 89,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 60,
+     "windows_with_two_sided": 47,
+     "spread_median_p75": [
+      0.02,
+      0.05
+     ],
+     "spread_mean": 0.03575,
+     "spread_p90": 0.08,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.05,
+     "mid_median": 0.4775,
+     "favourite_price_median_p25_p75": [
+      0.9,
+      0.71125,
+      0.965
+     ],
+     "touch_size_fav_ask_median": 100.0,
+     "touch_size_cheap_ask_median": 216.13,
+     "touch_size_both_asks_median": 177.5,
+     "touch_size_both_asks_p25": 18.5125,
+     "fee_at_mid_median": 0.0063,
+     "fee_at_mid_p25_p75": [
+      0.00236,
+      0.01438
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.02122,
+      0.0344
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.04245,
+      0.06872
+     ],
+     "round_trip_over_cheap_side_price_median": 0.42071,
+     "round_trip_over_favourite_price_median": 0.05178,
+     "haircut": {
+      "both_sides": {
+       "buys": 1044,
+       "windows": 47,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1030,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.701,
+         0.6593,
+         0.7485
+        ],
+        "filled_at_ask_plus_1c": [
+         0.765,
+         0.7192,
+         0.8098
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6913,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7592,
+        "strict_buys_with_any_later_poll": 1044,
+        "strict_filled_at_ask_seen": 0.6983,
+        "strict_filled_at_ask_plus_1c": 0.7615
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1016,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6555,
+         0.6172,
+         0.6975
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7274,
+         0.6835,
+         0.7726
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6486,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7254,
+        "strict_buys_with_any_later_poll": 1044,
+        "strict_filled_at_ask_seen": 0.6513,
+        "strict_filled_at_ask_plus_1c": 0.7213
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 499,
+       "windows": 47,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 492,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7134,
+         0.6564,
+         0.7757
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7602,
+         0.7037,
+         0.8204
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7134,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7581,
+        "strict_buys_with_any_later_poll": 499,
+        "strict_filled_at_ask_seen": 0.7174,
+        "strict_filled_at_ask_plus_1c": 0.7635
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 485,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6969,
+         0.6287,
+         0.7601
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7361,
+         0.6783,
+         0.793
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6969,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7361,
+        "strict_buys_with_any_later_poll": 499,
+        "strict_filled_at_ask_seen": 0.7054,
+        "strict_filled_at_ask_plus_1c": 0.7435
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 545,
+       "windows": 47,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 538,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6896,
+         0.6463,
+         0.7351
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7695,
+         0.7255,
+         0.8175
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.671,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7602,
+        "strict_buys_with_any_later_poll": 545,
+        "strict_filled_at_ask_seen": 0.6807,
+        "strict_filled_at_ask_plus_1c": 0.7596
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 531,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6177,
+         0.5745,
+         0.6679
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7194,
+         0.6672,
+         0.7726
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6045,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7156,
+        "strict_buys_with_any_later_poll": 545,
+        "strict_filled_at_ask_seen": 0.6018,
+        "strict_filled_at_ask_plus_1c": 0.7009
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 260,
+       "windows": 31,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 259,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7297,
+         0.6692,
+         0.7825
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8301,
+         0.7788,
+         0.8759
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7027,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8185,
+        "strict_buys_with_any_later_poll": 260,
+        "strict_filled_at_ask_seen": 0.7269,
+        "strict_filled_at_ask_plus_1c": 0.8269
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 256,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6289,
+         0.5625,
+         0.6973
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7734,
+         0.7136,
+         0.8304
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6016,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7656,
+        "strict_buys_with_any_later_poll": 260,
+        "strict_filled_at_ask_seen": 0.6192,
+        "strict_filled_at_ask_plus_1c": 0.7615
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 255,
+       "windows": 31,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 255,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6863,
+         0.6154,
+         0.7577
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7451,
+         0.6791,
+         0.8079
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6863,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7412,
+        "strict_buys_with_any_later_poll": 255,
+        "strict_filled_at_ask_seen": 0.6863,
+        "strict_filled_at_ask_plus_1c": 0.7451
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 255,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6902,
+         0.6137,
+         0.7649
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7373,
+         0.6575,
+         0.8077
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6902,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7373,
+        "strict_buys_with_any_later_poll": 255,
+        "strict_filled_at_ask_seen": 0.6902,
+        "strict_filled_at_ask_plus_1c": 0.7373
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXUSDJPY15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 59,
+    "distinct_markets": 59,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 14,
+     "2026-11-12 Thu": 45
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      14
+     ],
+     "2026-11-12 Thu": [
+      61,
+      45
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9831,
+    "result_present_n": 58,
+    "volume_contracts_median_per_window": 6713.08,
+    "volume_contracts_p25_p75": [
+     4693.255,
+     9285.53
+    ],
+    "volume_n": 59,
+    "tape_sum_count_median": 6713.08
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 826,
+     "instants_two_sided": 822,
+     "share_two_sided": 0.9952,
+     "instants_yes_bids_only": 4,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 59,
+     "windows_with_two_sided": 59,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01786,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.02,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.53,
+     "favourite_price_median_p25_p75": [
+      0.81,
+      0.6425,
+      0.945
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 396.0,
+     "fee_at_mid_median": 0.01077,
+     "fee_at_mid_p25_p75": [
+      0.00364,
+      0.01608
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01956,
+      0.02613
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03911,
+      0.05224
+     ],
+     "round_trip_over_cheap_side_price_median": 0.20247,
+     "round_trip_over_favourite_price_median": 0.04957,
+     "haircut": {
+      "both_sides": {
+       "buys": 1644,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1642,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7125,
+         0.6755,
+         0.7479
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8185,
+         0.7838,
+         0.8511
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7028,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8124,
+        "strict_buys_with_any_later_poll": 1644,
+        "strict_filled_at_ask_seen": 0.7123,
+        "strict_filled_at_ask_plus_1c": 0.8181
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1640,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6573,
+         0.6247,
+         0.7004
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7659,
+         0.7274,
+         0.8028
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6518,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7628,
+        "strict_buys_with_any_later_poll": 1644,
+        "strict_filled_at_ask_seen": 0.6569,
+        "strict_filled_at_ask_plus_1c": 0.7652
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 820,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 819,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7509,
+         0.7036,
+         0.7988
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8339,
+         0.7922,
+         0.8749
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7363,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8242,
+        "strict_buys_with_any_later_poll": 820,
+        "strict_filled_at_ask_seen": 0.7512,
+        "strict_filled_at_ask_plus_1c": 0.8341
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 818,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7152,
+         0.6521,
+         0.7702
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7922,
+         0.7454,
+         0.8422
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7066,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7873,
+        "strict_buys_with_any_later_poll": 820,
+        "strict_filled_at_ask_seen": 0.7159,
+        "strict_filled_at_ask_plus_1c": 0.7927
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 824,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 823,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6744,
+         0.6367,
+         0.7188
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8032,
+         0.7643,
+         0.8418
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6695,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8007,
+        "strict_buys_with_any_later_poll": 824,
+        "strict_filled_at_ask_seen": 0.6735,
+        "strict_filled_at_ask_plus_1c": 0.8022
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 822,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5998,
+         0.5522,
+         0.6475
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7397,
+         0.6914,
+         0.7857
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5973,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7384,
+        "strict_buys_with_any_later_poll": 824,
+        "strict_filled_at_ask_seen": 0.5983,
+        "strict_filled_at_ask_plus_1c": 0.7379
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 281,
+       "windows": 28,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 281,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.8185,
+         0.7753,
+         0.8586
+        ],
+        "filled_at_ask_plus_1c": [
+         0.9253,
+         0.8985,
+         0.9488
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.8114,
+        "filled_at_ask_plus_1c_size_ge_1": 0.9253,
+        "strict_buys_with_any_later_poll": 281,
+        "strict_filled_at_ask_seen": 0.8185,
+        "strict_filled_at_ask_plus_1c": 0.9253
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 281,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7189,
+         0.6461,
+         0.7838
+        ],
+        "filled_at_ask_plus_1c": [
+         0.9004,
+         0.8607,
+         0.9371
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7153,
+        "filled_at_ask_plus_1c_size_ge_1": 0.9004,
+        "strict_buys_with_any_later_poll": 281,
+        "strict_filled_at_ask_seen": 0.7189,
+        "strict_filled_at_ask_plus_1c": 0.9004
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 447,
+       "windows": 45,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 447,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.774,
+         0.7233,
+         0.8213
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8702,
+         0.8264,
+         0.91
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7494,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8546,
+        "strict_buys_with_any_later_poll": 447,
+        "strict_filled_at_ask_seen": 0.774,
+        "strict_filled_at_ask_plus_1c": 0.8702
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 447,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7226,
+         0.6484,
+         0.7888
+        ],
+        "filled_at_ask_plus_1c": [
+         0.821,
+         0.7648,
+         0.8727
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7069,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8121,
+        "strict_buys_with_any_later_poll": 447,
+        "strict_filled_at_ask_seen": 0.7226,
+        "strict_filled_at_ask_plus_1c": 0.821
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 708,
+     "instants_two_sided": 532,
+     "share_two_sided": 0.7514,
+     "instants_yes_bids_only": 100,
+     "instants_no_bids_only": 76,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 59,
+     "windows_with_two_sided": 48,
+     "spread_median_p75": [
+      0.02,
+      0.02
+     ],
+     "spread_mean": 0.01763,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.0175,
+     "spread_p75_of_window_medians": 0.02,
+     "mid_median": 0.41,
+     "favourite_price_median_p25_p75": [
+      0.905,
+      0.73,
+      0.965
+     ],
+     "touch_size_fav_ask_median": 562.5,
+     "touch_size_cheap_ask_median": 562.5,
+     "touch_size_both_asks_median": 562.5,
+     "touch_size_both_asks_p25": 395.0,
+     "fee_at_mid_median": 0.00602,
+     "fee_at_mid_p25_p75": [
+      0.00236,
+      0.0138
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01515,
+      0.02347
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03029,
+      0.04692
+     ],
+     "round_trip_over_cheap_side_price_median": 0.28975,
+     "round_trip_over_favourite_price_median": 0.03353,
+     "haircut": {
+      "both_sides": {
+       "buys": 1064,
+       "windows": 48,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1048,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7109,
+         0.6729,
+         0.7536
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8111,
+         0.7702,
+         0.8483
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7013,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8044,
+        "strict_buys_with_any_later_poll": 1064,
+        "strict_filled_at_ask_seen": 0.7077,
+        "strict_filled_at_ask_plus_1c": 0.8064
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1032,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6453,
+         0.6068,
+         0.6879
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7471,
+         0.7063,
+         0.7923
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6395,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7422,
+        "strict_buys_with_any_later_poll": 1064,
+        "strict_filled_at_ask_seen": 0.641,
+        "strict_filled_at_ask_plus_1c": 0.7397
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 529,
+       "windows": 48,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 521,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7774,
+         0.7227,
+         0.8286
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8349,
+         0.7885,
+         0.8797
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7678,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8349,
+        "strict_buys_with_any_later_poll": 529,
+        "strict_filled_at_ask_seen": 0.7807,
+        "strict_filled_at_ask_plus_1c": 0.8374
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 513,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.729,
+         0.6615,
+         0.7866
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7895,
+         0.7337,
+         0.8466
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7232,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7895,
+        "strict_buys_with_any_later_poll": 529,
+        "strict_filled_at_ask_seen": 0.7372,
+        "strict_filled_at_ask_plus_1c": 0.7958
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 535,
+       "windows": 48,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 527,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6452,
+         0.5937,
+         0.6986
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7875,
+         0.7417,
+         0.8339
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6357,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7742,
+        "strict_buys_with_any_later_poll": 535,
+        "strict_filled_at_ask_seen": 0.6355,
+        "strict_filled_at_ask_plus_1c": 0.7757
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 519,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5626,
+         0.5083,
+         0.6218
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7052,
+         0.6473,
+         0.7578
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5568,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6956,
+        "strict_buys_with_any_later_poll": 535,
+        "strict_filled_at_ask_seen": 0.5458,
+        "strict_filled_at_ask_plus_1c": 0.6841
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 202,
+       "windows": 28,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 201,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6517,
+         0.5813,
+         0.7157
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8408,
+         0.7791,
+         0.8894
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6468,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8358,
+        "strict_buys_with_any_later_poll": 202,
+        "strict_filled_at_ask_seen": 0.6485,
+        "strict_filled_at_ask_plus_1c": 0.8366
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 200,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.515,
+         0.4343,
+         0.5945
+        ],
+        "filled_at_ask_plus_1c": [
+         0.73,
+         0.6549,
+         0.7922
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.515,
+        "filled_at_ask_plus_1c_size_ge_1": 0.73,
+        "strict_buys_with_any_later_poll": 202,
+        "strict_filled_at_ask_seen": 0.5099,
+        "strict_filled_at_ask_plus_1c": 0.7228
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 283,
+       "windows": 35,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 283,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.7491,
+         0.6937,
+         0.8062
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8198,
+         0.7578,
+         0.8716
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7491,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8198,
+        "strict_buys_with_any_later_poll": 283,
+        "strict_filled_at_ask_seen": 0.7491,
+        "strict_filled_at_ask_plus_1c": 0.8198
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 283,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.7032,
+         0.6293,
+         0.7807
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7739,
+         0.6964,
+         0.8434
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.7032,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7739,
+        "strict_buys_with_any_later_poll": 283,
+        "strict_filled_at_ask_seen": 0.7032,
+        "strict_filled_at_ask_plus_1c": 0.7739
+       }
+      }
+     }
+    }
+   }
+  },
+  "KXWTI15M": {
+   "events": {
+    "window_slots_recorded": 78,
+    "slots_with_an_open_market": 59,
+    "distinct_markets": 59,
+    "first_close": "2026-11-11 19:45:00+00:00",
+    "last_close": "2026-11-12 16:00:00+00:00",
+    "markets_per_utc_day": {
+     "2026-11-11 Wed": 12,
+     "2026-11-12 Thu": 47
+    },
+    "slots_per_utc_day_recorded_and_open": {
+     "2026-11-11 Wed": [
+      17,
+      12
+     ],
+     "2026-11-12 Thu": [
+      61,
+      47
+     ]
+    },
+    "result_present_at_post_close_read_share": 0.9831,
+    "result_present_n": 58,
+    "volume_contracts_median_per_window": 100582.48,
+    "volume_contracts_p25_p75": [
+     86644.6,
+     117736.51
+    ],
+    "volume_n": 59,
+    "tape_sum_count_median": 100582.48
+   },
+   "looks": {
+    "look_6min_400_330s": {
+     "instants_all": 826,
+     "instants_two_sided": 826,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 59,
+     "windows_with_two_sided": 59,
+     "spread_median_p75": [
+      0.01,
+      0.01
+     ],
+     "spread_mean": 0.00925,
+     "spread_p90": 0.018,
+     "spread_median_of_window_medians": 0.01,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.475,
+     "favourite_price_median_p25_p75": [
+      0.805,
+      0.665,
+      0.91487
+     ],
+     "touch_size_fav_ask_median": 151.0,
+     "touch_size_cheap_ask_median": 167.33,
+     "touch_size_both_asks_median": 160.0,
+     "touch_size_both_asks_p25": 75.1575,
+     "fee_at_mid_median": 0.01099,
+     "fee_at_mid_p25_p75": [
+      0.00545,
+      0.01559
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.01681,
+      0.02173
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.03362,
+      0.04345
+     ],
+     "round_trip_over_cheap_side_price_median": 0.1564,
+     "round_trip_over_favourite_price_median": 0.04127,
+     "haircut": {
+      "both_sides": {
+       "buys": 1652,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1652,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6156,
+         0.5938,
+         0.6374
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8117,
+         0.7857,
+         0.839
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6156,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8111,
+        "strict_buys_with_any_later_poll": 1652,
+        "strict_filled_at_ask_seen": 0.6156,
+        "strict_filled_at_ask_plus_1c": 0.8117
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1652,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5636,
+         0.5448,
+         0.5854
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7409,
+         0.7088,
+         0.7724
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.563,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7409,
+        "strict_buys_with_any_later_poll": 1652,
+        "strict_filled_at_ask_seen": 0.5636,
+        "strict_filled_at_ask_plus_1c": 0.7409
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 826,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 826,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6683,
+         0.6283,
+         0.7107
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8136,
+         0.776,
+         0.8499
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6683,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8123,
+        "strict_buys_with_any_later_poll": 826,
+        "strict_filled_at_ask_seen": 0.6683,
+        "strict_filled_at_ask_plus_1c": 0.8136
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 826,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6308,
+         0.5835,
+         0.678
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7579,
+         0.7107,
+         0.8075
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6295,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7579,
+        "strict_buys_with_any_later_poll": 826,
+        "strict_filled_at_ask_seen": 0.6308,
+        "strict_filled_at_ask_plus_1c": 0.7579
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 826,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 826,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.563,
+         0.5242,
+         0.6041
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8099,
+         0.7796,
+         0.8414
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.563,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8099,
+        "strict_buys_with_any_later_poll": 826,
+        "strict_filled_at_ask_seen": 0.563,
+        "strict_filled_at_ask_plus_1c": 0.8099
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 826,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4964,
+         0.4528,
+         0.54
+        ],
+        "filled_at_ask_plus_1c": [
+         0.724,
+         0.6828,
+         0.7627
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4964,
+        "filled_at_ask_plus_1c_size_ge_1": 0.724,
+        "strict_buys_with_any_later_poll": 826,
+        "strict_filled_at_ask_seen": 0.4964,
+        "strict_filled_at_ask_plus_1c": 0.724
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 210,
+       "windows": 25,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 210,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.4762,
+         0.3834,
+         0.5733
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8714,
+         0.8192,
+         0.9178
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4762,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8714,
+        "strict_buys_with_any_later_poll": 210,
+        "strict_filled_at_ask_seen": 0.4762,
+        "strict_filled_at_ask_plus_1c": 0.8714
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 210,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4048,
+         0.3061,
+         0.5053
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7429,
+         0.6758,
+         0.8115
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4048,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7429,
+        "strict_buys_with_any_later_poll": 210,
+        "strict_filled_at_ask_seen": 0.4048,
+        "strict_filled_at_ask_plus_1c": 0.7429
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 435,
+       "windows": 43,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 435,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6851,
+         0.6323,
+         0.7331
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8092,
+         0.7624,
+         0.8476
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6851,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8069,
+        "strict_buys_with_any_later_poll": 435,
+        "strict_filled_at_ask_seen": 0.6851,
+        "strict_filled_at_ask_plus_1c": 0.8092
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 435,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6529,
+         0.5983,
+         0.7101
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7678,
+         0.7135,
+         0.8197
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6529,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7678,
+        "strict_buys_with_any_later_poll": 435,
+        "strict_filled_at_ask_seen": 0.6529,
+        "strict_filled_at_ask_plus_1c": 0.7678
+       }
+      }
+     }
+    },
+    "look_2to3min_180_120s": {
+     "instants_all": 708,
+     "instants_two_sided": 708,
+     "share_two_sided": 1.0,
+     "instants_yes_bids_only": 0,
+     "instants_no_bids_only": 0,
+     "instants_empty_book": 0,
+     "instants_crossed_or_locked": 0,
+     "windows_with_any_poll": 59,
+     "windows_with_two_sided": 59,
+     "spread_median_p75": [
+      0.005,
+      0.01
+     ],
+     "spread_mean": 0.00767,
+     "spread_p90": 0.02,
+     "spread_median_of_window_medians": 0.005,
+     "spread_p75_of_window_medians": 0.01,
+     "mid_median": 0.405,
+     "favourite_price_median_p25_p75": [
+      0.9325,
+      0.815,
+      0.98113
+     ],
+     "touch_size_fav_ask_median": 150.0,
+     "touch_size_cheap_ask_median": 159.955,
+     "touch_size_both_asks_median": 150.14,
+     "touch_size_both_asks_p25": 84.435,
+     "fee_at_mid_median": 0.00441,
+     "fee_at_mid_p25_p75": [
+      0.0013,
+      0.01055
+     ],
+     "hold_cost_half_spread_plus_fee_median_p75": [
+      0.00661,
+      0.01649
+     ],
+     "round_trip_spread_plus_two_fees_median_p75": [
+      0.01321,
+      0.03298
+     ],
+     "round_trip_over_cheap_side_price_median": 0.20247,
+     "round_trip_over_favourite_price_median": 0.01421,
+     "haircut": {
+      "both_sides": {
+       "buys": 1416,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 1416,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6144,
+         0.5883,
+         0.6427
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8284,
+         0.7945,
+         0.8637
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6137,
+        "filled_at_ask_plus_1c_size_ge_1": 0.827,
+        "strict_buys_with_any_later_poll": 1416,
+        "strict_filled_at_ask_seen": 0.6144,
+        "strict_filled_at_ask_plus_1c": 0.8284
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 1416,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.5685,
+         0.5501,
+         0.5883
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7655,
+         0.7224,
+         0.8072
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5685,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7648,
+        "strict_buys_with_any_later_poll": 1416,
+        "strict_filled_at_ask_seen": 0.5685,
+        "strict_filled_at_ask_plus_1c": 0.7655
+       }
+      },
+      "cheap_side_ask_le_50c": {
+       "buys": 706,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 706,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.704,
+         0.6667,
+         0.7415
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8527,
+         0.813,
+         0.892
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.704,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8527,
+        "strict_buys_with_any_later_poll": 706,
+        "strict_filled_at_ask_seen": 0.704,
+        "strict_filled_at_ask_plus_1c": 0.8527
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 706,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6955,
+         0.6473,
+         0.7458
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8074,
+         0.76,
+         0.8517
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6955,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8074,
+        "strict_buys_with_any_later_poll": 706,
+        "strict_filled_at_ask_seen": 0.6955,
+        "strict_filled_at_ask_plus_1c": 0.8074
+       }
+      },
+      "favourite_side_ask_gt_50c": {
+       "buys": 710,
+       "windows": 59,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 710,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.5254,
+         0.4845,
+         0.562
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8042,
+         0.7605,
+         0.8461
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.5239,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8014,
+        "strict_buys_with_any_later_poll": 710,
+        "strict_filled_at_ask_seen": 0.5254,
+        "strict_filled_at_ask_plus_1c": 0.8042
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 710,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4423,
+         0.3933,
+         0.4916
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7239,
+         0.6676,
+         0.7825
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4423,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7225,
+        "strict_buys_with_any_later_poll": 710,
+        "strict_filled_at_ask_seen": 0.4423,
+        "strict_filled_at_ask_plus_1c": 0.7239
+       }
+      },
+      "check_favourite_ask_88_97c": {
+       "buys": 260,
+       "windows": 33,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 260,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.4538,
+         0.3924,
+         0.5286
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7846,
+         0.7331,
+         0.8327
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.45,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7846,
+        "strict_buys_with_any_later_poll": 260,
+        "strict_filled_at_ask_seen": 0.4538,
+        "strict_filled_at_ask_plus_1c": 0.7846
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 260,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.4192,
+         0.3307,
+         0.505
+        ],
+        "filled_at_ask_plus_1c": [
+         0.6462,
+         0.5676,
+         0.7222
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.4192,
+        "filled_at_ask_plus_1c_size_ge_1": 0.6423,
+        "strict_buys_with_any_later_poll": 260,
+        "strict_filled_at_ask_seen": 0.4192,
+        "strict_filled_at_ask_plus_1c": 0.6462
+       }
+      },
+      "check_cheap_ask_05_30c": {
+       "buys": 313,
+       "windows": 40,
+       "h2000": {
+        "buys_with_later_two_sided_poll": 313,
+        "median_lag_s": 5.0,
+        "filled_at_ask_seen": [
+         0.6773,
+         0.6298,
+         0.7254
+        ],
+        "filled_at_ask_plus_1c": [
+         0.8179,
+         0.7778,
+         0.8596
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6773,
+        "filled_at_ask_plus_1c_size_ge_1": 0.8179,
+        "strict_buys_with_any_later_poll": 313,
+        "strict_filled_at_ask_seen": 0.6773,
+        "strict_filled_at_ask_plus_1c": 0.8179
+       },
+       "h6000": {
+        "buys_with_later_two_sided_poll": 313,
+        "median_lag_s": 10.0,
+        "filled_at_ask_seen": [
+         0.6901,
+         0.624,
+         0.7637
+        ],
+        "filled_at_ask_plus_1c": [
+         0.7732,
+         0.7174,
+         0.83
+        ],
+        "filled_at_ask_seen_size_ge_1": 0.6901,
+        "filled_at_ask_plus_1c_size_ge_1": 0.7732,
+        "strict_buys_with_any_later_poll": 313,
+        "strict_filled_at_ask_seen": 0.6901,
+        "strict_filled_at_ask_plus_1c": 0.7732
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

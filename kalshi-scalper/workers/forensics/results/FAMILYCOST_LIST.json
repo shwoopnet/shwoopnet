@@ -1,0 +1,3861 @@
+{
+ "note": "dollars (0.01 = 1 cent); list quotes are a copy up to about 11 s old; result values never used",
+ "politics": {
+  "quote_rows": 734,
+  "markets": 131,
+  "share_rows_two_sided": 0.8338,
+  "markets_ever_two_sided": 109,
+  "spread_median_p75_p90": [
+   0.01,
+   0.04,
+   0.09
+  ],
+  "mid_median": 0.165,
+  "cheap_side_price_median": 0.125,
+  "fee_at_mid_median": 0.0077,
+  "hold_cost_median_p75": [
+   0.0172,
+   0.0327
+  ],
+  "round_trip_median_p75": [
+   0.0344,
+   0.0653
+  ],
+  "round_trip_over_cheap_side_price_median": 0.3558,
+  "mid_20_80c": {
+   "rows": 199,
+   "markets": 40,
+   "spread_median_p75_p90": [
+    0.03,
+    0.06,
+    0.152
+   ],
+   "hold_cost_median_p75": [
+    0.0316,
+    0.0466
+   ],
+   "round_trip_median_p75": [
+    0.0632,
+    0.0932
+   ]
+  },
+  "touch_yes_bid_size_median_p25": [
+   1871.285,
+   66.25
+  ],
+  "touch_yes_ask_size_median_p25": [
+   1570.36,
+   100.0
+  ],
+  "volume_per_market_median_p75": [
+   6029.75,
+   13534.71
+  ],
+  "markets_with_zero_volume_share": 0.0076,
+  "snapshots": 3,
+  "files": [
+   "pol-data/polrec/2026-11-11/1932/quotes.csv.gz",
+   "pol-data/polrec/2026-11-12/0151/quotes.csv.gz",
+   "pol-data/polrec/2026-11-12/0935/quotes.csv.gz"
+  ],
+  "series": 20,
+  "events_open": 22,
+  "days_to_close_median_p25_p75": [
+   5.7685,
+   3.8094,
+   5.7689
+  ],
+  "open_interest_per_market_median": 2752.18,
+  "per_series": {
+   "KXAPRPOTUS": {
+    "markets": 8,
+    "share_rows_two_sided": 0.75,
+    "spread_median_p75_p90": [
+     0.01,
+     0.0125,
+     0.05
+    ],
+    "round_trip_median_p75": [
+     0.0311,
+     0.0412
+    ],
+    "volume_per_market_median_p75": [
+     6597.6,
+     8736.7375
+    ],
+    "mid_20_80c": {
+     "rows": 11,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.01,
+      0.025,
+      0.06
+     ],
+     "hold_cost_median_p75": [
+      0.0206,
+      0.0284
+     ],
+     "round_trip_median_p75": [
+      0.0412,
+      0.0567
+     ]
+    },
+    "events_open": 1
+   },
+   "KXBABELMANDEBWEEKLY": {
+    "markets": 11,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.09
+    ],
+    "round_trip_median_p75": [
+     0.0341,
+     0.055
+    ],
+    "volume_per_market_median_p75": [
+     5087.42,
+     8023.455
+    ],
+    "mid_20_80c": {
+     "rows": 30,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.02,
+      0.0575,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0267,
+      0.0436
+     ],
+     "round_trip_median_p75": [
+      0.0533,
+      0.087
+     ]
+    },
+    "events_open": 1
+   },
+   "KXCABLEAVE": {
+    "markets": 1,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.03,
+     0.085,
+     0.184
+    ],
+    "round_trip_median_p75": [
+     0.0585,
+     0.1109
+    ],
+    "volume_per_market_median_p75": [
+     400.0,
+     400.0
+    ],
+    "mid_20_80c": {
+     "rows": 3,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.03,
+      0.03,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0293,
+      0.0293
+     ],
+     "round_trip_median_p75": [
+      0.0585,
+      0.0585
+     ]
+    },
+    "events_open": 1
+   },
+   "KXEOWEEK": {
+    "markets": 15,
+    "share_rows_two_sided": 0.3333,
+    "spread_median_p75_p90": [
+     0.05,
+     0.07,
+     0.111
+    ],
+    "round_trip_median_p75": [
+     0.0636,
+     0.0834
+    ],
+    "volume_per_market_median_p75": [
+     13708.43,
+     22698.34
+    ],
+    "mid_20_80c": {
+     "rows": 5,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.05,
+      0.06,
+      0.42
+     ],
+     "hold_cost_median_p75": [
+      0.039,
+      0.0424
+     ],
+     "round_trip_median_p75": [
+      0.0778,
+      0.0847
+     ]
+    },
+    "events_open": 3
+   },
+   "KXEPSTEIN": {
+    "markets": 1,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.04,
+     0.05,
+     0.05
+    ],
+    "round_trip_median_p75": [
+     0.0472,
+     0.0572
+    ],
+    "volume_per_market_median_p75": [
+     1433.71,
+     1433.71
+    ],
+    "mid_20_80c": null,
+    "events_open": 1
+   },
+   "KXHORMUZMAX": {
+    "markets": 7,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.01,
+     0.01
+    ],
+    "round_trip_median_p75": [
+     0.0283,
+     0.0293
+    ],
+    "volume_per_market_median_p75": [
+     913.02,
+     6986.92
+    ],
+    "mid_20_80c": {
+     "rows": 4,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.01,
+      0.01,
+      0.01
+     ],
+     "hold_cost_median_p75": [
+      0.0168,
+      0.0168
+     ],
+     "round_trip_median_p75": [
+      0.0336,
+      0.0336
+     ]
+    },
+    "events_open": 1
+   },
+   "KXHORMUZPEAK": {
+    "markets": 8,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.03,
+     0.04
+    ],
+    "round_trip_median_p75": [
+     0.0248,
+     0.0488
+    ],
+    "volume_per_market_median_p75": [
+     8601.85,
+     14098.935
+    ],
+    "mid_20_80c": {
+     "rows": 18,
+     "markets": 3,
+     "spread_median_p75_p90": [
+      0.035,
+      0.04,
+      0.05
+     ],
+     "hold_cost_median_p75": [
+      0.0292,
+      0.0363
+     ],
+     "round_trip_median_p75": [
+      0.0584,
+      0.0725
+     ]
+    },
+    "events_open": 1
+   },
+   "KXHORMUZWEEKLY": {
+    "markets": 9,
+    "share_rows_two_sided": 0.8519,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.04
+    ],
+    "round_trip_median_p75": [
+     0.0342,
+     0.045
+    ],
+    "volume_per_market_median_p75": [
+     14466.2,
+     41817.41
+    ],
+    "mid_20_80c": {
+     "rows": 20,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.01,
+      0.0325,
+      0.05
+     ],
+     "hold_cost_median_p75": [
+      0.0225,
+      0.0337
+     ],
+     "round_trip_median_p75": [
+      0.045,
+      0.0673
+     ]
+    },
+    "events_open": 1
+   },
+   "KXMAMDANIEO": {
+    "markets": 1,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.01,
+     0.015
+    ],
+    "round_trip_median_p75": [
+     0.0293,
+     0.0302
+    ],
+    "volume_per_market_median_p75": [
+     2790.17,
+     2790.17
+    ],
+    "mid_20_80c": null,
+    "events_open": 1
+   },
+   "KXNEWTARIFFS": {
+    "markets": 1,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.125,
+     0.295,
+     0.484
+    ],
+    "round_trip_median_p75": [
+     0.1465,
+     0.3145
+    ],
+    "volume_per_market_median_p75": [
+     5362.34,
+     5362.34
+    ],
+    "mid_20_80c": {
+     "rows": 3,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.06,
+      0.335,
+      0.5
+     ],
+     "hold_cost_median_p75": [
+      0.0416,
+      0.1812
+     ],
+     "round_trip_median_p75": [
+      0.0831,
+      0.3559
+     ]
+    },
+    "events_open": 1
+   },
+   "KXPANAMAWEEKLY": {
+    "markets": 9,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.01,
+     0.037
+    ],
+    "round_trip_median_p75": [
+     0.0263,
+     0.0407
+    ],
+    "volume_per_market_median_p75": [
+     5981.27,
+     18171.0
+    ],
+    "mid_20_80c": {
+     "rows": 18,
+     "markets": 3,
+     "spread_median_p75_p90": [
+      0.01,
+      0.01,
+      0.106
+     ],
+     "hold_cost_median_p75": [
+      0.0204,
+      0.0225
+     ],
+     "round_trip_median_p75": [
+      0.0407,
+      0.045
+     ]
+    },
+    "events_open": 1
+   },
+   "KXSUEZWEEKLY": {
+    "markets": 8,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.1,
+     0.19,
+     0.353
+    ],
+    "round_trip_median_p75": [
+     0.1169,
+     0.2102
+    ],
+    "volume_per_market_median_p75": [
+     490.01,
+     1531.7175
+    ],
+    "mid_20_80c": {
+     "rows": 18,
+     "markets": 3,
+     "spread_median_p75_p90": [
+      0.19,
+      0.3575,
+      0.451
+     ],
+     "hold_cost_median_p75": [
+      0.1125,
+      0.1943
+     ],
+     "round_trip_median_p75": [
+      0.2236,
+      0.3841
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPACT": {
+    "markets": 10,
+    "share_rows_two_sided": 0.7,
+    "spread_median_p75_p90": [
+     0.03,
+     0.04,
+     0.088
+    ],
+    "round_trip_median_p75": [
+     0.0565,
+     0.0689
+    ],
+    "volume_per_market_median_p75": [
+     8884.32,
+     17796.61
+    ],
+    "mid_20_80c": {
+     "rows": 23,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.03,
+      0.06,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0319,
+      0.0447
+     ],
+     "round_trip_median_p75": [
+      0.0637,
+      0.0893
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPAPPROVE": {
+    "markets": 9,
+    "share_rows_two_sided": 0.7037,
+    "spread_median_p75_p90": [
+     0.03,
+     0.0475,
+     0.07
+    ],
+    "round_trip_median_p75": [
+     0.0434,
+     0.0744
+    ],
+    "volume_per_market_median_p75": [
+     821.26,
+     1057.21
+    ],
+    "mid_20_80c": {
+     "rows": 14,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.055,
+      0.07,
+      0.496
+     ],
+     "hold_cost_median_p75": [
+      0.0445,
+      0.0476
+     ],
+     "round_trip_median_p75": [
+      0.0889,
+      0.095
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPENDORSEMENTS": {
+    "markets": 6,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.03
+    ],
+    "round_trip_median_p75": [
+     0.0134,
+     0.0227
+    ],
+    "volume_per_market_median_p75": [
+     1243.0,
+     2632.0225
+    ],
+    "mid_20_80c": {
+     "rows": 2,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.03,
+      0.03,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0264,
+      0.0264
+     ],
+     "round_trip_median_p75": [
+      0.0528,
+      0.0528
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPNOMNUM": {
+    "markets": 5,
+    "share_rows_two_sided": 0.2,
+    "spread_median_p75_p90": [
+     0.04,
+     0.0575,
+     0.07
+    ],
+    "round_trip_median_p75": [
+     0.0531,
+     0.0718
+    ],
+    "volume_per_market_median_p75": [
+     12759.81,
+     16131.03
+    ],
+    "mid_20_80c": null,
+    "events_open": 1
+   },
+   "KXTRUMPNUMSTATES": {
+    "markets": 7,
+    "share_rows_two_sided": 0.8571,
+    "spread_median_p75_p90": [
+     0.05,
+     0.06,
+     0.132
+    ],
+    "round_trip_median_p75": [
+     0.0631,
+     0.0859
+    ],
+    "volume_per_market_median_p75": [
+     1947.27,
+     2804.865
+    ],
+    "mid_20_80c": {
+     "rows": 4,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.055,
+      0.15,
+      0.312
+     ],
+     "hold_cost_median_p75": [
+      0.0443,
+      0.0906
+     ],
+     "round_trip_median_p75": [
+      0.0884,
+      0.1796
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPPHOTO": {
+    "markets": 4,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.035,
+     0.05,
+     0.101
+    ],
+    "round_trip_median_p75": [
+     0.0669,
+     0.081
+    ],
+    "volume_per_market_median_p75": [
+     2049.36,
+     6774.335
+    ],
+    "mid_20_80c": {
+     "rows": 12,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.035,
+      0.05,
+      0.077
+     ],
+     "hold_cost_median_p75": [
+      0.0343,
+      0.0415
+     ],
+     "round_trip_median_p75": [
+      0.0686,
+      0.083
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUMPVH": {
+    "markets": 1,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.04,
+     0.0725,
+     0.077
+    ],
+    "round_trip_median_p75": [
+     0.0643,
+     0.096
+    ],
+    "volume_per_market_median_p75": [
+     8671.73,
+     8671.73
+    ],
+    "mid_20_80c": {
+     "rows": 4,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.04,
+      0.0725,
+      0.077
+     ],
+     "hold_cost_median_p75": [
+      0.0322,
+      0.0481
+     ],
+     "round_trip_median_p75": [
+      0.0643,
+      0.096
+     ]
+    },
+    "events_open": 1
+   },
+   "KXTRUTHSOCIAL": {
+    "markets": 10,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.01,
+     0.011
+    ],
+    "round_trip_median_p75": [
+     0.0215,
+     0.0311
+    ],
+    "volume_per_market_median_p75": [
+     10832.41,
+     15435.65
+    ],
+    "mid_20_80c": {
+     "rows": 10,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.01,
+      0.01,
+      0.082
+     ],
+     "hold_cost_median_p75": [
+      0.0174,
+      0.0186
+     ],
+     "round_trip_median_p75": [
+      0.0348,
+      0.0372
+     ]
+    },
+    "events_open": 1
+   }
+  },
+  "settled_in_results_files": {
+   "markets": 70,
+   "events": 8,
+   "events_by_series": {
+    "KXTRUMPAPPROVE": 2,
+    "KXHORMUZMAX": 1,
+    "KXBABELMANDEBWEEKLY": 1,
+    "KXHORMUZPEAK": 1,
+    "KXHORMUZWEEKLY": 1,
+    "KXPANAMAWEEKLY": 1,
+    "KXSUEZWEEKLY": 1
+   },
+   "close_span": [
+    "2026-11-10 14:00:00+00:00",
+    "2026-11-11 17:59:00+00:00"
+   ]
+  }
+ },
+ "combos": {
+  "quote_rows": 400,
+  "markets": 400,
+  "share_rows_two_sided": 0.045,
+  "markets_ever_two_sided": 18,
+  "spread_median_p75_p90": [
+   0.0335,
+   0.0582,
+   0.0901
+  ],
+  "mid_median": 0.1327,
+  "cheap_side_price_median": 0.1327,
+  "fee_at_mid_median": 0.008,
+  "hold_cost_median_p75": [
+   0.0215,
+   0.0395
+  ],
+  "round_trip_median_p75": [
+   0.0429,
+   0.0788
+  ],
+  "round_trip_over_cheap_side_price_median": 0.3469,
+  "mid_20_80c": {
+   "rows": 6,
+   "markets": 6,
+   "spread_median_p75_p90": [
+    0.0655,
+    0.1022,
+    0.186
+   ],
+   "hold_cost_median_p75": [
+    0.0502,
+    0.0654
+   ],
+   "round_trip_median_p75": [
+    0.1002,
+    0.1303
+   ]
+  },
+  "touch_yes_bid_size_median_p25": [
+   50.13,
+   0.0225
+  ],
+  "touch_yes_ask_size_median_p25": [
+   245.0,
+   45.5
+  ],
+  "volume_per_market_median_p75": [
+   0.0,
+   130.9475
+  ],
+  "markets_with_zero_volume_share": 0.575,
+  "snapshots": 1,
+  "files": [
+   "combo-data/combo/2026-11-12/1435/quotes.csv.gz"
+  ],
+  "legs_median_p25_p75": [
+   10.0,
+   6.0,
+   15.0
+  ],
+  "share_with_a_yes_ask_under_1": 0.5725,
+  "share_with_a_yes_bid_above_0": 0.0925,
+  "yes_ask_median_when_posted": 0.0,
+  "coverage_rows": [
+   {
+    "t_recv_ms": 1794494170112,
+    "listed": 5000,
+    "pages": 5,
+    "list_complete": 0,
+    "selected": 3998,
+    "quote_rows": 400,
+    "books": 40,
+    "trades_read": 15,
+    "requests": 60,
+    "n429": 0,
+    "stopped_early": 0
+   }
+  ],
+  "trades_rows": 38,
+  "trade_price_median": 0.0034
+ },
+ "sports_in_game": {
+  "files": 21,
+  "days": [
+   "2026-11-08",
+   "2026-11-09",
+   "2026-11-10",
+   "2026-11-11",
+   "2026-11-12"
+  ],
+  "by_sport_and_kind": {
+   "NBA ml": {
+    "quote_rows": 135838,
+    "markets": 120,
+    "share_rows_two_sided": 0.9822,
+    "markets_ever_two_sided": 120,
+    "spread_median_p75_p90": [
+     0.02,
+     0.03,
+     0.09
+    ],
+    "mid_median": 0.495,
+    "cheap_side_price_median": 0.315,
+    "fee_at_mid_median": 0.0151,
+    "hold_cost_median_p75": [
+     0.0242,
+     0.0316
+    ],
+    "round_trip_median_p75": [
+     0.0483,
+     0.0632
+    ],
+    "round_trip_over_cheap_side_price_median": 0.1646,
+    "mid_20_80c": {
+     "rows": 110004,
+     "markets": 112,
+     "spread_median_p75_p90": [
+      0.02,
+      0.03,
+      0.11
+     ],
+     "hold_cost_median_p75": [
+      0.0252,
+      0.0324
+     ],
+     "round_trip_median_p75": [
+      0.0505,
+      0.0648
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     251.0,
+     15.47
+    ],
+    "touch_ask_size_median_p25": [
+     663.89,
+     100.0
+    ],
+    "volume_per_market_median_p75": [
+     81272.295,
+     3062902.2825
+    ],
+    "markets_with_zero_volume_share": 0.0,
+    "games": 60
+   },
+   "NBA spread": {
+    "quote_rows": 36566,
+    "markets": 143,
+    "share_rows_two_sided": 0.9395,
+    "markets_ever_two_sided": 143,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.03
+    ],
+    "mid_median": 0.495,
+    "cheap_side_price_median": 0.475,
+    "fee_at_mid_median": 0.0175,
+    "hold_cost_median_p75": [
+     0.0225,
+     0.0275
+    ],
+    "round_trip_median_p75": [
+     0.045,
+     0.0549
+    ],
+    "round_trip_over_cheap_side_price_median": 0.0964,
+    "mid_20_80c": {
+     "rows": 33584,
+     "markets": 141,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0225,
+      0.0275
+     ],
+     "round_trip_median_p75": [
+      0.045,
+      0.0549
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     3822.49,
+     382.0
+    ],
+    "touch_ask_size_median_p25": [
+     7914.28,
+     864.0
+    ],
+    "volume_per_market_median_p75": [
+     35721.95,
+     137232.005
+    ],
+    "markets_with_zero_volume_share": 0.0909,
+    "games": 34
+   },
+   "NBA total": {
+    "quote_rows": 36578,
+    "markets": 146,
+    "share_rows_two_sided": 0.9391,
+    "markets_ever_two_sided": 146,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.03
+    ],
+    "mid_median": 0.5,
+    "cheap_side_price_median": 0.47,
+    "fee_at_mid_median": 0.0174,
+    "hold_cost_median_p75": [
+     0.0225,
+     0.0274
+    ],
+    "round_trip_median_p75": [
+     0.045,
+     0.0549
+    ],
+    "round_trip_over_cheap_side_price_median": 0.1002,
+    "mid_20_80c": {
+     "rows": 33153,
+     "markets": 146,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0225,
+      0.0274
+     ],
+     "round_trip_median_p75": [
+      0.045,
+      0.0549
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     4202.0,
+     500.0
+    ],
+    "touch_ask_size_median_p25": [
+     4750.915,
+     512.6
+    ],
+    "volume_per_market_median_p75": [
+     26039.615,
+     88743.085
+    ],
+    "markets_with_zero_volume_share": 0.1644,
+    "games": 34
+   },
+   "NFL ml": {
+    "quote_rows": 91138,
+    "markets": 66,
+    "share_rows_two_sided": 0.9978,
+    "markets_ever_two_sided": 60,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.04
+    ],
+    "mid_median": 0.495,
+    "cheap_side_price_median": 0.335,
+    "fee_at_mid_median": 0.0156,
+    "hold_cost_median_p75": [
+     0.0212,
+     0.0252
+    ],
+    "round_trip_median_p75": [
+     0.0424,
+     0.0505
+    ],
+    "round_trip_over_cheap_side_price_median": 0.1379,
+    "mid_20_80c": {
+     "rows": 74225,
+     "markets": 56,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.05
+     ],
+     "hold_cost_median_p75": [
+      0.0217,
+      0.0261
+     ],
+     "round_trip_median_p75": [
+      0.0435,
+      0.0522
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     1176.68,
+     76.72
+    ],
+    "touch_ask_size_median_p25": [
+     5900.0,
+     315.62
+    ],
+    "volume_per_market_median_p75": [
+     57935.465,
+     440044.25
+    ],
+    "markets_with_zero_volume_share": 0.0,
+    "games": 33
+   },
+   "NFL spread": {
+    "quote_rows": 55320,
+    "markets": 59,
+    "share_rows_two_sided": 0.9971,
+    "markets_ever_two_sided": 59,
+    "spread_median_p75_p90": [
+     0.01,
+     0.01,
+     0.02
+    ],
+    "mid_median": 0.495,
+    "cheap_side_price_median": 0.475,
+    "fee_at_mid_median": 0.0175,
+    "hold_cost_median_p75": [
+     0.0225,
+     0.0225
+    ],
+    "round_trip_median_p75": [
+     0.045,
+     0.045
+    ],
+    "round_trip_over_cheap_side_price_median": 0.0945,
+    "mid_20_80c": {
+     "rows": 55142,
+     "markets": 59,
+     "spread_median_p75_p90": [
+      0.01,
+      0.01,
+      0.02
+     ],
+     "hold_cost_median_p75": [
+      0.0225,
+      0.0225
+     ],
+     "round_trip_median_p75": [
+      0.045,
+      0.045
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     1710.87,
+     120.0
+    ],
+    "touch_ask_size_median_p25": [
+     6622.34,
+     254.15
+    ],
+    "volume_per_market_median_p75": [
+     30446.34,
+     128140.9
+    ],
+    "markets_with_zero_volume_share": 0.0169,
+    "games": 20
+   },
+   "NFL total": {
+    "quote_rows": 55320,
+    "markets": 76,
+    "share_rows_two_sided": 0.9959,
+    "markets_ever_two_sided": 67,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.03
+    ],
+    "mid_median": 0.495,
+    "cheap_side_price_median": 0.48,
+    "fee_at_mid_median": 0.0175,
+    "hold_cost_median_p75": [
+     0.0225,
+     0.0275
+    ],
+    "round_trip_median_p75": [
+     0.045,
+     0.055
+    ],
+    "round_trip_over_cheap_side_price_median": 0.0983,
+    "mid_20_80c": {
+     "rows": 54949,
+     "markets": 67,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0225,
+      0.0275
+     ],
+     "round_trip_median_p75": [
+      0.045,
+      0.055
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     1120.0,
+     86.19
+    ],
+    "touch_ask_size_median_p25": [
+     244.0,
+     100.01
+    ],
+    "volume_per_market_median_p75": [
+     3861.105,
+     12873.925
+    ],
+    "markets_with_zero_volume_share": 0.1579,
+    "games": 20
+   },
+   "NHL ml": {
+    "quote_rows": 180750,
+    "markets": 136,
+    "share_rows_two_sided": 0.9926,
+    "markets_ever_two_sided": 136,
+    "spread_median_p75_p90": [
+     0.02,
+     0.04,
+     0.06
+    ],
+    "mid_median": 0.49,
+    "cheap_side_price_median": 0.43,
+    "fee_at_mid_median": 0.0172,
+    "hold_cost_median_p75": [
+     0.0273,
+     0.0368
+    ],
+    "round_trip_median_p75": [
+     0.0546,
+     0.0735
+    ],
+    "round_trip_over_cheap_side_price_median": 0.1352,
+    "mid_20_80c": {
+     "rows": 178267,
+     "markets": 136,
+     "spread_median_p75_p90": [
+      0.02,
+      0.04,
+      0.06
+     ],
+     "hold_cost_median_p75": [
+      0.0273,
+      0.0368
+     ],
+     "round_trip_median_p75": [
+      0.0546,
+      0.0735
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     118.44,
+     2.0
+    ],
+    "touch_ask_size_median_p25": [
+     363.0,
+     9.0
+    ],
+    "volume_per_market_median_p75": [
+     807.965,
+     102656.1
+    ],
+    "markets_with_zero_volume_share": 0.0882,
+    "games": 68
+   },
+   "NHL spread": {
+    "quote_rows": 82202,
+    "markets": 106,
+    "share_rows_two_sided": 0.9824,
+    "markets_ever_two_sided": 106,
+    "spread_median_p75_p90": [
+     0.04,
+     0.08,
+     0.1
+    ],
+    "mid_median": 0.31,
+    "cheap_side_price_median": 0.31,
+    "fee_at_mid_median": 0.015,
+    "hold_cost_median_p75": [
+     0.0347,
+     0.0535
+    ],
+    "round_trip_median_p75": [
+     0.0693,
+     0.1067
+    ],
+    "round_trip_over_cheap_side_price_median": 0.2255,
+    "mid_20_80c": {
+     "rows": 80126,
+     "markets": 106,
+     "spread_median_p75_p90": [
+      0.04,
+      0.08,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0352,
+      0.0535
+     ],
+     "round_trip_median_p75": [
+      0.0704,
+      0.1067
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     1056.51,
+     61.0
+    ],
+    "touch_ask_size_median_p25": [
+     687.75,
+     124.0
+    ],
+    "volume_per_market_median_p75": [
+     953.005,
+     19978.525
+    ],
+    "markets_with_zero_volume_share": 0.2264,
+    "games": 47
+   },
+   "NHL total": {
+    "quote_rows": 82198,
+    "markets": 148,
+    "share_rows_two_sided": 0.9642,
+    "markets_ever_two_sided": 148,
+    "spread_median_p75_p90": [
+     0.03,
+     0.09,
+     0.79
+    ],
+    "mid_median": 0.525,
+    "cheap_side_price_median": 0.45,
+    "fee_at_mid_median": 0.0173,
+    "hold_cost_median_p75": [
+     0.032,
+     0.0625
+    ],
+    "round_trip_median_p75": [
+     0.064,
+     0.1247
+    ],
+    "round_trip_over_cheap_side_price_median": 0.1422,
+    "mid_20_80c": {
+     "rows": 77689,
+     "markets": 142,
+     "spread_median_p75_p90": [
+      0.03,
+      0.09,
+      0.79
+     ],
+     "hold_cost_median_p75": [
+      0.032,
+      0.0625
+     ],
+     "round_trip_median_p75": [
+      0.064,
+      0.1247
+     ]
+    },
+    "touch_bid_size_median_p25": [
+     372.0,
+     24.32
+    ],
+    "touch_ask_size_median_p25": [
+     290.66,
+     11.0
+    ],
+    "volume_per_market_median_p75": [
+     6.0,
+     18212.99
+    ],
+    "markets_with_zero_volume_share": 0.4527,
+    "games": 47
+   }
+  },
+  "games_by_sport": {
+   "NBA": 60,
+   "NFL": 33,
+   "NHL": 68
+  },
+  "seconds_between_polls_median_p25_p75": [
+   132.814,
+   118.2403,
+   147.597
+  ]
+ },
+ "weather_high": {
+  "quote_rows": 624,
+  "markets": 444,
+  "share_rows_two_sided": 0.8125,
+  "markets_ever_two_sided": 374,
+  "spread_median_p75_p90": [
+   0.01,
+   0.02,
+   0.04
+  ],
+  "mid_median": 0.1,
+  "cheap_side_price_median": 0.1,
+  "fee_at_mid_median": 0.0063,
+  "hold_cost_median_p75": [
+   0.0163,
+   0.0234
+  ],
+  "round_trip_median_p75": [
+   0.0326,
+   0.0469
+  ],
+  "round_trip_over_cheap_side_price_median": 0.3116,
+  "mid_20_80c": {
+   "rows": 201,
+   "markets": 150,
+   "spread_median_p75_p90": [
+    0.02,
+    0.03,
+    0.05
+   ],
+   "hold_cost_median_p75": [
+    0.0225,
+    0.0319
+   ],
+   "round_trip_median_p75": [
+    0.045,
+    0.0637
+   ]
+  },
+  "volume_per_market_median_p75": [
+   195.895,
+   1453.5825
+  ],
+  "markets_with_zero_volume_share": 0.1126,
+  "files": 18,
+  "cities": 14,
+  "events": 74,
+  "target_dates": 9,
+  "brackets_per_event_median": 6.0,
+  "sizes": "not recorded"
+ },
+ "weather_low": {
+  "quote_rows": 624,
+  "markets": 444,
+  "share_rows_two_sided": 0.7564,
+  "markets_ever_two_sided": 375,
+  "spread_median_p75_p90": [
+   0.1,
+   0.17,
+   0.2
+  ],
+  "mid_median": 0.1275,
+  "cheap_side_price_median": 0.11,
+  "fee_at_mid_median": 0.0069,
+  "hold_cost_median_p75": [
+   0.0577,
+   0.0968
+  ],
+  "round_trip_median_p75": [
+   0.1151,
+   0.1926
+  ],
+  "round_trip_over_cheap_side_price_median": 0.8043,
+  "mid_20_80c": {
+   "rows": 165,
+   "markets": 143,
+   "spread_median_p75_p90": [
+    0.17,
+    0.2,
+    0.2
+   ],
+   "hold_cost_median_p75": [
+    0.1017,
+    0.1135
+   ],
+   "round_trip_median_p75": [
+    0.2024,
+    0.2255
+   ]
+  },
+  "volume_per_market_median_p75": [
+   35.045,
+   179.035
+  ],
+  "markets_with_zero_volume_share": 0.2432,
+  "files": 18,
+  "cities": 14,
+  "events": 74,
+  "target_dates": 9,
+  "brackets_per_event_median": 6.0,
+  "sizes": "not recorded"
+ },
+ "weather_high_settle": {
+  "markets": 840,
+  "hours_from_close_to_first_seen_settled_median_p25_p75": [
+   22.4361,
+   12.6403,
+   30.3258
+  ],
+  "note": "an upper bound: the result is looked for only a few times a day"
+ },
+ "weather_low_settle": {
+  "markets": 840,
+  "hours_from_close_to_first_seen_settled_median_p25_p75": [
+   22.4361,
+   12.6403,
+   30.3258
+  ],
+  "note": "an upper bound: the result is looked for only a few times a day"
+ },
+ "daily_watchlist": {
+  "files": 35,
+  "per_series": {
+   "KXAUDUSDAD": {
+    "quote_rows": 60,
+    "markets": 60,
+    "share_rows_two_sided": 0.1167,
+    "spread_median_p75_p90": [
+     0.13,
+     0.17,
+     0.188
+    ],
+    "cheap_side_price_median": 0.09,
+    "hold_cost_median_p75": [
+     0.0699,
+     0.0935
+    ],
+    "round_trip_median_p75": [
+     0.1391,
+     0.1859
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 2,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.15,
+      0.175,
+      0.19
+     ],
+     "hold_cost_median_p75": [
+      0.0897,
+      0.1009
+     ],
+     "round_trip_median_p75": [
+      0.1786,
+      0.2006
+     ]
+    },
+    "events": 3,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 140.6
+   },
+   "KXAUDUSDAW": {
+    "quote_rows": 360,
+    "markets": 40,
+    "share_rows_two_sided": 0.6556,
+    "spread_median_p75_p90": [
+     0.09,
+     0.1,
+     0.165
+    ],
+    "cheap_side_price_median": 0.125,
+    "hold_cost_median_p75": [
+     0.0552,
+     0.0646
+    ],
+    "round_trip_median_p75": [
+     0.11,
+     0.1287
+    ],
+    "volume_per_market_median_p75": [
+     2.5,
+     199.38
+    ],
+    "mid_20_80c": {
+     "rows": 84,
+     "markets": 20,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.187
+     ],
+     "hold_cost_median_p75": [
+      0.065,
+      0.0673
+     ],
+     "round_trip_median_p75": [
+      0.1296,
+      0.1342
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2745.45
+   },
+   "KXBNBMAXMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.9714,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.22,
+    "hold_cost_median_p75": [
+     0.0616,
+     0.0652
+    ],
+    "round_trip_median_p75": [
+     0.1229,
+     0.1301
+    ],
+    "volume_per_market_median_p75": [
+     15.57,
+     200.66
+    ],
+    "mid_20_80c": {
+     "rows": 154,
+     "markets": 8,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0644,
+      0.0665
+     ],
+     "round_trip_median_p75": [
+      0.1285,
+      0.1326
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.7
+   },
+   "KXBNBMINMON": {
+    "quote_rows": 194,
+    "markets": 7,
+    "share_rows_two_sided": 0.8454,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.39,
+    "hold_cost_median_p75": [
+     0.0665,
+     0.0673
+    ],
+    "round_trip_median_p75": [
+     0.1326,
+     0.1342
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 154,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0667,
+      0.0673
+     ],
+     "round_trip_median_p75": [
+      0.133,
+      0.1343
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33730.9
+   },
+   "KXBRENTD": {
+    "quote_rows": 450,
+    "markets": 120,
+    "share_rows_two_sided": 0.6933,
+    "spread_median_p75_p90": [
+     0.03,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.125,
+    "hold_cost_median_p75": [
+     0.0205,
+     0.0289
+    ],
+    "round_trip_median_p75": [
+     0.041,
+     0.0578
+    ],
+    "volume_per_market_median_p75": [
+     998.975,
+     2009.195
+    ],
+    "mid_20_80c": {
+     "rows": 114,
+     "markets": 50,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0321,
+      0.0365
+     ],
+     "round_trip_median_p75": [
+      0.0642,
+      0.0729
+     ]
+    },
+    "events": 4,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 731.2
+   },
+   "KXBRENTW": {
+    "quote_rows": 620,
+    "markets": 40,
+    "share_rows_two_sided": 0.7355,
+    "spread_median_p75_p90": [
+     0.02,
+     0.03,
+     0.04
+    ],
+    "cheap_side_price_median": 0.075,
+    "hold_cost_median_p75": [
+     0.0174,
+     0.0252
+    ],
+    "round_trip_median_p75": [
+     0.0347,
+     0.0504
+    ],
+    "volume_per_market_median_p75": [
+     2235.84,
+     7591.3475
+    ],
+    "mid_20_80c": {
+     "rows": 125,
+     "markets": 16,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.029,
+      0.0331
+     ],
+     "round_trip_median_p75": [
+      0.0579,
+      0.0662
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 4938.1
+   },
+   "KXBTCMAXMON": {
+    "quote_rows": 248,
+    "markets": 8,
+    "share_rows_two_sided": 1.0,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.02
+    ],
+    "cheap_side_price_median": 0.1025,
+    "hold_cost_median_p75": [
+     0.0127,
+     0.0179
+    ],
+    "round_trip_median_p75": [
+     0.0253,
+     0.0359
+    ],
+    "volume_per_market_median_p75": [
+     130982.05,
+     210650.98
+    ],
+    "mid_20_80c": {
+     "rows": 65,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.02
+     ],
+     "hold_cost_median_p75": [
+      0.0212,
+      0.0224
+     ],
+     "round_trip_median_p75": [
+      0.0424,
+      0.0447
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.9
+   },
+   "KXBTCMINMON": {
+    "quote_rows": 256,
+    "markets": 8,
+    "share_rows_two_sided": 0.9961,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.03
+    ],
+    "cheap_side_price_median": 0.145,
+    "hold_cost_median_p75": [
+     0.018,
+     0.0219
+    ],
+    "round_trip_median_p75": [
+     0.036,
+     0.0439
+    ],
+    "volume_per_market_median_p75": [
+     112276.35,
+     123330.4
+    ],
+    "mid_20_80c": {
+     "rows": 103,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.01,
+      0.02,
+      0.02
+     ],
+     "hold_cost_median_p75": [
+      0.0219,
+      0.0241
+     ],
+     "round_trip_median_p75": [
+      0.0437,
+      0.0482
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33611.9
+   },
+   "KXCOPPERD": {
+    "quote_rows": 1020,
+    "markets": 250,
+    "share_rows_two_sided": 0.2775,
+    "spread_median_p75_p90": [
+     0.04,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.1,
+    "hold_cost_median_p75": [
+     0.0246,
+     0.0323
+    ],
+    "round_trip_median_p75": [
+     0.0491,
+     0.0646
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     208.485
+    ],
+    "mid_20_80c": {
+     "rows": 96,
+     "markets": 45,
+     "spread_median_p75_p90": [
+      0.04,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.035,
+      0.0371
+     ],
+     "round_trip_median_p75": [
+      0.0699,
+      0.074
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 898.7
+   },
+   "KXCOPPERW": {
+    "quote_rows": 1320,
+    "markets": 90,
+    "share_rows_two_sided": 0.4939,
+    "spread_median_p75_p90": [
+     0.03,
+     0.03,
+     0.04
+    ],
+    "cheap_side_price_median": 0.125,
+    "hold_cost_median_p75": [
+     0.0232,
+     0.0287
+    ],
+    "round_trip_median_p75": [
+     0.0463,
+     0.0574
+    ],
+    "volume_per_market_median_p75": [
+     6.0,
+     56.705
+    ],
+    "mid_20_80c": {
+     "rows": 243,
+     "markets": 25,
+     "spread_median_p75_p90": [
+      0.03,
+      0.03,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0304,
+      0.0325
+     ],
+     "round_trip_median_p75": [
+      0.0607,
+      0.0649
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 4460.2
+   },
+   "KXCPI": {
+    "quote_rows": 60,
+    "markets": 12,
+    "share_rows_two_sided": 0.3333,
+    "spread_median_p75_p90": [
+     0.015,
+     0.03,
+     0.041
+    ],
+    "cheap_side_price_median": 0.08,
+    "hold_cost_median_p75": [
+     0.0132,
+     0.0284
+    ],
+    "round_trip_median_p75": [
+     0.0265,
+     0.0567
+    ],
+    "volume_per_market_median_p75": [
+     48880.37,
+     199572.685
+    ],
+    "mid_20_80c": {
+     "rows": 5,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.046
+     ],
+     "hold_cost_median_p75": [
+      0.0324,
+      0.0361
+     ],
+     "round_trip_median_p75": [
+      0.0647,
+      0.0722
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "NOWCAST1"
+    ],
+    "mins_to_close_median": 987.9
+   },
+   "KXCPICORE": {
+    "quote_rows": 55,
+    "markets": 11,
+    "share_rows_two_sided": 0.3636,
+    "spread_median_p75_p90": [
+     0.01,
+     0.0125,
+     0.02
+    ],
+    "cheap_side_price_median": 0.1025,
+    "hold_cost_median_p75": [
+     0.0134,
+     0.0213
+    ],
+    "round_trip_median_p75": [
+     0.0268,
+     0.0427
+    ],
+    "volume_per_market_median_p75": [
+     76527.94,
+     155028.055
+    ],
+    "mid_20_80c": {
+     "rows": 6,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.015,
+      0.02,
+      0.035
+     ],
+     "hold_cost_median_p75": [
+      0.0219,
+      0.0245
+     ],
+     "round_trip_median_p75": [
+      0.0438,
+      0.0489
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "NOWCAST1"
+    ],
+    "mins_to_close_median": 983.9
+   },
+   "KXDJI": {
+    "quote_rows": 1651,
+    "markets": 462,
+    "share_rows_two_sided": 0.6214,
+    "spread_median_p75_p90": [
+     0.04,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.21,
+    "hold_cost_median_p75": [
+     0.032,
+     0.0365
+    ],
+    "round_trip_median_p75": [
+     0.064,
+     0.0729
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 548,
+     "markets": 276,
+     "spread_median_p75_p90": [
+      0.04,
+      0.04,
+      0.333
+     ],
+     "hold_cost_median_p75": [
+      0.0361,
+      0.0373
+     ],
+     "round_trip_median_p75": [
+      0.0722,
+      0.0746
+     ]
+    },
+    "events": 6,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 669.4
+   },
+   "KXDOGEMAXMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.475,
+    "spread_median_p75_p90": [
+     0.07,
+     0.08,
+     0.098
+    ],
+    "cheap_side_price_median": 0.105,
+    "hold_cost_median_p75": [
+     0.0433,
+     0.0516
+    ],
+    "round_trip_median_p75": [
+     0.0864,
+     0.1029
+    ],
+    "volume_per_market_median_p75": [
+     165.41,
+     959.7025
+    ],
+    "mid_20_80c": {
+     "rows": 41,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.08,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.052,
+      0.0616
+     ],
+     "round_trip_median_p75": [
+      0.1038,
+      0.1229
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.8
+   },
+   "KXDOGEMINMON": {
+    "quote_rows": 235,
+    "markets": 7,
+    "share_rows_two_sided": 0.3702,
+    "spread_median_p75_p90": [
+     0.09,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.15,
+    "hold_cost_median_p75": [
+     0.0552,
+     0.0629
+    ],
+    "round_trip_median_p75": [
+     0.1102,
+     0.1255
+    ],
+    "volume_per_market_median_p75": [
+     156.28,
+     344.32
+    ],
+    "mid_20_80c": {
+     "rows": 34,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0635,
+      0.065
+     ],
+     "round_trip_median_p75": [
+      0.1266,
+      0.1296
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33611.7
+   },
+   "KXETHMAXMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.6821,
+    "spread_median_p75_p90": [
+     0.02,
+     0.02,
+     0.03
+    ],
+    "cheap_side_price_median": 0.05,
+    "hold_cost_median_p75": [
+     0.012,
+     0.021
+    ],
+    "round_trip_median_p75": [
+     0.0241,
+     0.0421
+    ],
+    "volume_per_market_median_p75": [
+     19435.615,
+     45691.5575
+    ],
+    "mid_20_80c": {
+     "rows": 31,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.02,
+      0.03,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.022,
+      0.0272
+     ],
+     "round_trip_median_p75": [
+      0.044,
+      0.0544
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.9
+   },
+   "KXETHMINMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.375,
+    "spread_median_p75_p90": [
+     0.02,
+     0.03,
+     0.04
+    ],
+    "cheap_side_price_median": 0.15,
+    "hold_cost_median_p75": [
+     0.0199,
+     0.0251
+    ],
+    "round_trip_median_p75": [
+     0.0397,
+     0.0502
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     937.66
+    ],
+    "mid_20_80c": {
+     "rows": 38,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.02,
+      0.0275,
+      0.03
+     ],
+     "hold_cost_median_p75": [
+      0.0224,
+      0.0272
+     ],
+     "round_trip_median_p75": [
+      0.0449,
+      0.0543
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.8
+   },
+   "KXEURUSD": {
+    "quote_rows": 300,
+    "markets": 75,
+    "share_rows_two_sided": 0.4533,
+    "spread_median_p75_p90": [
+     0.12,
+     0.16,
+     0.18
+    ],
+    "cheap_side_price_median": 0.1275,
+    "hold_cost_median_p75": [
+     0.0654,
+     0.0884
+    ],
+    "round_trip_median_p75": [
+     0.1304,
+     0.176
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     2.835
+    ],
+    "mid_20_80c": {
+     "rows": 34,
+     "markets": 19,
+     "spread_median_p75_p90": [
+      0.155,
+      0.18,
+      0.19
+     ],
+     "hold_cost_median_p75": [
+      0.089,
+      0.1044
+     ],
+     "round_trip_median_p75": [
+      0.1772,
+      0.2077
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 751.95
+   },
+   "KXEURUSDAW": {
+    "quote_rows": 360,
+    "markets": 40,
+    "share_rows_two_sided": 0.65,
+    "spread_median_p75_p90": [
+     0.09,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.1425,
+    "hold_cost_median_p75": [
+     0.0557,
+     0.0614
+    ],
+    "round_trip_median_p75": [
+     0.1111,
+     0.1224
+    ],
+    "volume_per_market_median_p75": [
+     32.0,
+     127.4825
+    ],
+    "mid_20_80c": {
+     "rows": 90,
+     "markets": 22,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0624,
+      0.0657
+     ],
+     "round_trip_median_p75": [
+      0.1244,
+      0.1311
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2745.4
+   },
+   "KXGBPUSDAD": {
+    "quote_rows": 60,
+    "markets": 60,
+    "share_rows_two_sided": 0.15,
+    "spread_median_p75_p90": [
+     0.16,
+     0.17,
+     0.196
+    ],
+    "cheap_side_price_median": 0.1,
+    "hold_cost_median_p75": [
+     0.0863,
+     0.1006
+    ],
+    "round_trip_median_p75": [
+     0.1717,
+     0.2002
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     1.0
+    ],
+    "mid_20_80c": {
+     "rows": 3,
+     "markets": 3,
+     "spread_median_p75_p90": [
+      0.19,
+      0.205,
+      0.214
+     ],
+     "hold_cost_median_p75": [
+      0.1064,
+      0.1158
+     ],
+     "round_trip_median_p75": [
+      0.2116,
+      0.2302
+     ]
+    },
+    "events": 3,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 140.5
+   },
+   "KXGBPUSDAW": {
+    "quote_rows": 360,
+    "markets": 40,
+    "share_rows_two_sided": 0.7083,
+    "spread_median_p75_p90": [
+     0.1,
+     0.12,
+     0.18
+    ],
+    "cheap_side_price_median": 0.165,
+    "hold_cost_median_p75": [
+     0.0616,
+     0.0675
+    ],
+    "round_trip_median_p75": [
+     0.1229,
+     0.1346
+    ],
+    "volume_per_market_median_p75": [
+     2.0,
+     62.185
+    ],
+    "mid_20_80c": {
+     "rows": 110,
+     "markets": 28,
+     "spread_median_p75_p90": [
+      0.1,
+      0.13,
+      0.2
+     ],
+     "hold_cost_median_p75": [
+      0.0666,
+      0.0821
+     ],
+     "round_trip_median_p75": [
+      0.1328,
+      0.1636
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2745.35
+   },
+   "KXGOLDD": {
+    "quote_rows": 930,
+    "markets": 210,
+    "share_rows_two_sided": 0.4957,
+    "spread_median_p75_p90": [
+     0.02,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.1,
+    "hold_cost_median_p75": [
+     0.0201,
+     0.0252
+    ],
+    "round_trip_median_p75": [
+     0.0402,
+     0.0502
+    ],
+    "volume_per_market_median_p75": [
+     628.72,
+     3484.8975
+    ],
+    "mid_20_80c": {
+     "rows": 150,
+     "markets": 70,
+     "spread_median_p75_p90": [
+      0.02,
+      0.0375,
+      0.462
+     ],
+     "hold_cost_median_p75": [
+      0.0243,
+      0.0319
+     ],
+     "round_trip_median_p75": [
+      0.0485,
+      0.0638
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 898.7
+   },
+   "KXGOLDW": {
+    "quote_rows": 1240,
+    "markets": 80,
+    "share_rows_two_sided": 0.5944,
+    "spread_median_p75_p90": [
+     0.03,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.09,
+    "hold_cost_median_p75": [
+     0.0214,
+     0.0289
+    ],
+    "round_trip_median_p75": [
+     0.0428,
+     0.0578
+    ],
+    "volume_per_market_median_p75": [
+     269.115,
+     1709.945
+    ],
+    "mid_20_80c": {
+     "rows": 228,
+     "markets": 28,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0319,
+      0.0339
+     ],
+     "round_trip_median_p75": [
+      0.0637,
+      0.0677
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 4937.9
+   },
+   "KXHYPEMAXMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.7929,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.218
+    ],
+    "cheap_side_price_median": 0.21,
+    "hold_cost_median_p75": [
+     0.0614,
+     0.0661
+    ],
+    "round_trip_median_p75": [
+     0.1225,
+     0.1319
+    ],
+    "volume_per_market_median_p75": [
+     667.37,
+     844.125
+    ],
+    "mid_20_80c": {
+     "rows": 116,
+     "markets": 8,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0641,
+      0.0667
+     ],
+     "round_trip_median_p75": [
+      0.1279,
+      0.133
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.7
+   },
+   "KXHYPEMINMON": {
+    "quote_rows": 406,
+    "markets": 17,
+    "share_rows_two_sided": 0.8251,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.22,
+    "hold_cost_median_p75": [
+     0.0598,
+     0.0638
+    ],
+    "round_trip_median_p75": [
+     0.1194,
+     0.1272
+    ],
+    "volume_per_market_median_p75": [
+     57.36,
+     210.05
+    ],
+    "mid_20_80c": {
+     "rows": 183,
+     "markets": 11,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0635,
+      0.0658
+     ],
+     "round_trip_median_p75": [
+      0.1266,
+      0.1313
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 32589.4
+   },
+   "KXINX": {
+    "quote_rows": 510,
+    "markets": 180,
+    "share_rows_two_sided": 0.2353,
+    "spread_median_p75_p90": [
+     0.09,
+     0.15,
+     0.18
+    ],
+    "cheap_side_price_median": 0.105,
+    "hold_cost_median_p75": [
+     0.0529,
+     0.0817
+    ],
+    "round_trip_median_p75": [
+     0.1055,
+     0.1626
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     98.705
+    ],
+    "mid_20_80c": {
+     "rows": 10,
+     "markets": 7,
+     "spread_median_p75_p90": [
+      0.045,
+      0.155,
+      0.316
+     ],
+     "hold_cost_median_p75": [
+      0.0371,
+      0.0924
+     ],
+     "round_trip_median_p75": [
+      0.0742,
+      0.1838
+     ]
+    },
+    "events": 6,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 644.1
+   },
+   "KXNASDAQ100": {
+    "quote_rows": 510,
+    "markets": 180,
+    "share_rows_two_sided": 0.2314,
+    "spread_median_p75_p90": [
+     0.15,
+     0.18,
+     0.19
+    ],
+    "cheap_side_price_median": 0.1075,
+    "hold_cost_median_p75": [
+     0.0827,
+     0.0969
+    ],
+    "round_trip_median_p75": [
+     0.1645,
+     0.1926
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 5,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.05,
+      0.45,
+      0.636
+     ],
+     "hold_cost_median_p75": [
+      0.0422,
+      0.2376
+     ],
+     "round_trip_median_p75": [
+      0.0843,
+      0.4681
+     ]
+    },
+    "events": 6,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 644.1
+   },
+   "KXNATGASD": {
+    "quote_rows": 1430,
+    "markets": 410,
+    "share_rows_two_sided": 0.5154,
+    "spread_median_p75_p90": [
+     0.04,
+     0.04,
+     0.24
+    ],
+    "cheap_side_price_median": 0.18,
+    "hold_cost_median_p75": [
+     0.0289,
+     0.0365
+    ],
+    "round_trip_median_p75": [
+     0.0578,
+     0.0729
+    ],
+    "volume_per_market_median_p75": [
+     41.75,
+     242.625
+    ],
+    "mid_20_80c": {
+     "rows": 349,
+     "markets": 157,
+     "spread_median_p75_p90": [
+      0.04,
+      0.04,
+      0.066
+     ],
+     "hold_cost_median_p75": [
+      0.0347,
+      0.0371
+     ],
+     "round_trip_median_p75": [
+      0.0693,
+      0.074
+     ]
+    },
+    "events": 4,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 731.1
+   },
+   "KXNATGASW": {
+    "quote_rows": 1240,
+    "markets": 80,
+    "share_rows_two_sided": 0.3331,
+    "spread_median_p75_p90": [
+     0.03,
+     0.03,
+     0.04
+    ],
+    "cheap_side_price_median": 0.075,
+    "hold_cost_median_p75": [
+     0.018,
+     0.0256
+    ],
+    "round_trip_median_p75": [
+     0.036,
+     0.0511
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     167.33
+    ],
+    "mid_20_80c": {
+     "rows": 108,
+     "markets": 10,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0314,
+      0.0344
+     ],
+     "round_trip_median_p75": [
+      0.0628,
+      0.0688
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 4937.9
+   },
+   "KXNZDUSDAD": {
+    "quote_rows": 60,
+    "markets": 60,
+    "share_rows_two_sided": 0.1,
+    "spread_median_p75_p90": [
+     0.15,
+     0.185,
+     0.2
+    ],
+    "cheap_side_price_median": 0.1,
+    "hold_cost_median_p75": [
+     0.0863,
+     0.0989
+    ],
+    "round_trip_median_p75": [
+     0.1718,
+     0.1967
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 2,
+     "markets": 2,
+     "spread_median_p75_p90": [
+      0.17,
+      0.19,
+      0.202
+     ],
+     "hold_cost_median_p75": [
+      0.0998,
+      0.1089
+     ],
+     "round_trip_median_p75": [
+      0.1985,
+      0.2164
+     ]
+    },
+    "events": 3,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 140.4
+   },
+   "KXSILVERD": {
+    "quote_rows": 880,
+    "markets": 200,
+    "share_rows_two_sided": 0.5023,
+    "spread_median_p75_p90": [
+     0.02,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.085,
+    "hold_cost_median_p75": [
+     0.022,
+     0.0269
+    ],
+    "round_trip_median_p75": [
+     0.0439,
+     0.0538
+    ],
+    "volume_per_market_median_p75": [
+     6.0,
+     527.5225
+    ],
+    "mid_20_80c": {
+     "rows": 137,
+     "markets": 63,
+     "spread_median_p75_p90": [
+      0.03,
+      0.04,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0286,
+      0.0328
+     ],
+     "round_trip_median_p75": [
+      0.0572,
+      0.0655
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1006.4
+   },
+   "KXSOFRD": {
+    "quote_rows": 16,
+    "markets": 16,
+    "share_rows_two_sided": 0.3125,
+    "spread_median_p75_p90": [
+     0.01,
+     0.02,
+     0.02
+    ],
+    "cheap_side_price_median": 0.025,
+    "hold_cost_median_p75": [
+     0.0104,
+     0.0114
+    ],
+    "round_trip_median_p75": [
+     0.0209,
+     0.0227
+    ],
+    "volume_per_market_median_p75": [
+     1565.405,
+     4838.505
+    ],
+    "mid_20_80c": null,
+    "events": 2,
+    "tests": [
+     "SOFR1"
+    ],
+    "mins_to_close_median": 119.65
+   },
+   "KXSOLMAXMON": {
+    "quote_rows": 280,
+    "markets": 8,
+    "share_rows_two_sided": 0.9607,
+    "spread_median_p75_p90": [
+     0.05,
+     0.06,
+     0.07
+    ],
+    "cheap_side_price_median": 0.085,
+    "hold_cost_median_p75": [
+     0.0327,
+     0.0399
+    ],
+    "round_trip_median_p75": [
+     0.0653,
+     0.0795
+    ],
+    "volume_per_market_median_p75": [
+     1816.725,
+     2035.5475
+    ],
+    "mid_20_80c": {
+     "rows": 63,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.05,
+      0.06,
+      0.07
+     ],
+     "hold_cost_median_p75": [
+      0.0425,
+      0.0473
+     ],
+     "round_trip_median_p75": [
+      0.0848,
+      0.0944
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.8
+   },
+   "KXSOLMINMON": {
+    "quote_rows": 245,
+    "markets": 8,
+    "share_rows_two_sided": 0.9306,
+    "spread_median_p75_p90": [
+     0.05,
+     0.06,
+     0.063
+    ],
+    "cheap_side_price_median": 0.1425,
+    "hold_cost_median_p75": [
+     0.0327,
+     0.0398
+    ],
+    "round_trip_median_p75": [
+     0.0652,
+     0.0794
+    ],
+    "volume_per_market_median_p75": [
+     357.455,
+     764.41
+    ],
+    "mid_20_80c": {
+     "rows": 99,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.05,
+      0.06,
+      0.07
+     ],
+     "hold_cost_median_p75": [
+      0.0386,
+      0.0438
+     ],
+     "round_trip_median_p75": [
+      0.0772,
+      0.0875
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33611.8
+   },
+   "KXUSDBRLAW": {
+    "quote_rows": 590,
+    "markets": 70,
+    "share_rows_two_sided": 0.7119,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.23,
+    "hold_cost_median_p75": [
+     0.0624,
+     0.0674
+    ],
+    "round_trip_median_p75": [
+     0.1244,
+     0.1344
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     2.0
+    ],
+    "mid_20_80c": {
+     "rows": 227,
+     "markets": 70,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0674,
+      0.0675
+     ],
+     "round_trip_median_p75": [
+      0.1344,
+      0.1346
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2871.9
+   },
+   "KXUSDCADAW": {
+    "quote_rows": 380,
+    "markets": 50,
+    "share_rows_two_sided": 0.7053,
+    "spread_median_p75_p90": [
+     0.08,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.1,
+    "hold_cost_median_p75": [
+     0.0531,
+     0.0609
+    ],
+    "round_trip_median_p75": [
+     0.106,
+     0.1214
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     5.5
+    ],
+    "mid_20_80c": {
+     "rows": 91,
+     "markets": 23,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0625,
+      0.0659
+     ],
+     "round_trip_median_p75": [
+      0.1247,
+      0.1315
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2618.7
+   },
+   "KXUSDJPY": {
+    "quote_rows": 300,
+    "markets": 75,
+    "share_rows_two_sided": 0.5467,
+    "spread_median_p75_p90": [
+     0.11,
+     0.13,
+     0.16
+    ],
+    "cheap_side_price_median": 0.1125,
+    "hold_cost_median_p75": [
+     0.0607,
+     0.0722
+    ],
+    "round_trip_median_p75": [
+     0.121,
+     0.1438
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     0.0
+    ],
+    "mid_20_80c": {
+     "rows": 25,
+     "markets": 14,
+     "spread_median_p75_p90": [
+      0.12,
+      0.17,
+      0.19
+     ],
+     "hold_cost_median_p75": [
+      0.0716,
+      0.1006
+     ],
+     "round_trip_median_p75": [
+      0.1427,
+      0.2002
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 751.9
+   },
+   "KXUSDJPYAW": {
+    "quote_rows": 550,
+    "markets": 90,
+    "share_rows_two_sided": 0.9764,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.19,
+    "hold_cost_median_p75": [
+     0.0608,
+     0.0672
+    ],
+    "round_trip_median_p75": [
+     0.1212,
+     0.134
+    ],
+    "volume_per_market_median_p75": [
+     1.0,
+     15.8525
+    ],
+    "mid_20_80c": {
+     "rows": 258,
+     "markets": 79,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0672,
+      0.0674
+     ],
+     "round_trip_median_p75": [
+      0.134,
+      0.1344
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2588.8
+   },
+   "KXUSDMXNAW": {
+    "quote_rows": 726,
+    "markets": 94,
+    "share_rows_two_sided": 0.9132,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.4,
+    "hold_cost_median_p75": [
+     0.0668,
+     0.0674
+    ],
+    "round_trip_median_p75": [
+     0.1333,
+     0.1344
+    ],
+    "volume_per_market_median_p75": [
+     2.0,
+     27.75
+    ],
+    "mid_20_80c": {
+     "rows": 631,
+     "markets": 94,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0669,
+      0.0674
+     ],
+     "round_trip_median_p75": [
+      0.1335,
+      0.1344
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2170.5
+   },
+   "KXUSDSEKAW": {
+    "quote_rows": 550,
+    "markets": 70,
+    "share_rows_two_sided": 0.7982,
+    "spread_median_p75_p90": [
+     0.1,
+     0.1,
+     0.1
+    ],
+    "cheap_side_price_median": 0.22,
+    "hold_cost_median_p75": [
+     0.062,
+     0.0661
+    ],
+    "round_trip_median_p75": [
+     0.1237,
+     0.1319
+    ],
+    "volume_per_market_median_p75": [
+     0.0,
+     1.0
+    ],
+    "mid_20_80c": {
+     "rows": 228,
+     "markets": 70,
+     "spread_median_p75_p90": [
+      0.1,
+      0.1,
+      0.1
+     ],
+     "hold_cost_median_p75": [
+      0.0661,
+      0.0669
+     ],
+     "round_trip_median_p75": [
+      0.1319,
+      0.1335
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 2588.7
+   },
+   "KXUST10A": {
+    "quote_rows": 115,
+    "markets": 25,
+    "share_rows_two_sided": 0.4522,
+    "spread_median_p75_p90": [
+     0.11,
+     0.16,
+     0.198
+    ],
+    "cheap_side_price_median": 0.1275,
+    "hold_cost_median_p75": [
+     0.065,
+     0.0911
+    ],
+    "round_trip_median_p75": [
+     0.1297,
+     0.1813
+    ],
+    "volume_per_market_median_p75": [
+     401.0,
+     693.43
+    ],
+    "mid_20_80c": {
+     "rows": 18,
+     "markets": 6,
+     "spread_median_p75_p90": [
+      0.135,
+      0.1575,
+      0.234
+     ],
+     "hold_cost_median_p75": [
+      0.0826,
+      0.0938
+     ],
+     "round_trip_median_p75": [
+      0.1645,
+      0.1868
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1012.5
+   },
+   "KXUST2A": {
+    "quote_rows": 75,
+    "markets": 15,
+    "share_rows_two_sided": 0.48,
+    "spread_median_p75_p90": [
+     0.17,
+     0.2,
+     0.23
+    ],
+    "cheap_side_price_median": 0.245,
+    "hold_cost_median_p75": [
+     0.096,
+     0.1118
+    ],
+    "round_trip_median_p75": [
+     0.191,
+     0.2223
+    ],
+    "volume_per_market_median_p75": [
+     513.0,
+     552.0
+    ],
+    "mid_20_80c": {
+     "rows": 21,
+     "markets": 6,
+     "spread_median_p75_p90": [
+      0.17,
+      0.19,
+      0.22
+     ],
+     "hold_cost_median_p75": [
+      0.1014,
+      0.1116
+     ],
+     "round_trip_median_p75": [
+      0.2018,
+      0.2218
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1012.5
+   },
+   "KXUST30A": {
+    "quote_rows": 75,
+    "markets": 15,
+    "share_rows_two_sided": 0.4533,
+    "spread_median_p75_p90": [
+     0.18,
+     0.22,
+     0.267
+    ],
+    "cheap_side_price_median": 0.235,
+    "hold_cost_median_p75": [
+     0.101,
+     0.1239
+    ],
+    "round_trip_median_p75": [
+     0.2008,
+     0.2462
+    ],
+    "volume_per_market_median_p75": [
+     100.0,
+     236.0
+    ],
+    "mid_20_80c": {
+     "rows": 19,
+     "markets": 6,
+     "spread_median_p75_p90": [
+      0.18,
+      0.245,
+      0.272
+     ],
+     "hold_cost_median_p75": [
+      0.1074,
+      0.1365
+     ],
+     "round_trip_median_p75": [
+      0.2137,
+      0.2709
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1012.5
+   },
+   "KXUST5A": {
+    "quote_rows": 125,
+    "markets": 25,
+    "share_rows_two_sided": 0.512,
+    "spread_median_p75_p90": [
+     0.145,
+     0.2,
+     0.23
+    ],
+    "cheap_side_price_median": 0.1525,
+    "hold_cost_median_p75": [
+     0.0829,
+     0.1134
+    ],
+    "round_trip_median_p75": [
+     0.1652,
+     0.2253
+    ],
+    "volume_per_market_median_p75": [
+     400.0,
+     435.01
+    ],
+    "mid_20_80c": {
+     "rows": 27,
+     "markets": 8,
+     "spread_median_p75_p90": [
+      0.2,
+      0.225,
+      0.24
+     ],
+     "hold_cost_median_p75": [
+      0.1152,
+      0.1273
+     ],
+     "round_trip_median_p75": [
+      0.2291,
+      0.253
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1012.5
+   },
+   "KXUST7A": {
+    "quote_rows": 115,
+    "markets": 25,
+    "share_rows_two_sided": 0.5478,
+    "spread_median_p75_p90": [
+     0.08,
+     0.12,
+     0.158
+    ],
+    "cheap_side_price_median": 0.085,
+    "hold_cost_median_p75": [
+     0.0486,
+     0.0676
+    ],
+    "round_trip_median_p75": [
+     0.097,
+     0.1347
+    ],
+    "volume_per_market_median_p75": [
+     501.0,
+     818.0
+    ],
+    "mid_20_80c": {
+     "rows": 18,
+     "markets": 5,
+     "spread_median_p75_p90": [
+      0.12,
+      0.1675,
+      0.183
+     ],
+     "hold_cost_median_p75": [
+      0.0758,
+      0.1002
+     ],
+     "round_trip_median_p75": [
+      0.1511,
+      0.1994
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1012.5
+   },
+   "KXWTI": {
+    "quote_rows": 700,
+    "markets": 160,
+    "share_rows_two_sided": 0.6929,
+    "spread_median_p75_p90": [
+     0.01,
+     0.03,
+     0.04
+    ],
+    "cheap_side_price_median": 0.115,
+    "hold_cost_median_p75": [
+     0.0167,
+     0.0225
+    ],
+    "round_trip_median_p75": [
+     0.0334,
+     0.0449
+    ],
+    "volume_per_market_median_p75": [
+     2737.81,
+     5392.24
+    ],
+    "mid_20_80c": {
+     "rows": 173,
+     "markets": 63,
+     "spread_median_p75_p90": [
+      0.01,
+      0.03,
+      0.04
+     ],
+     "hold_cost_median_p75": [
+      0.0222,
+      0.0298
+     ],
+     "round_trip_median_p75": [
+      0.0444,
+      0.0596
+     ]
+    },
+    "events": 5,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 1006.85
+   },
+   "KXWTIW": {
+    "quote_rows": 810,
+    "markets": 54,
+    "share_rows_two_sided": 0.6049,
+    "spread_median_p75_p90": [
+     0.03,
+     0.04,
+     0.04
+    ],
+    "cheap_side_price_median": 0.045,
+    "hold_cost_median_p75": [
+     0.0199,
+     0.0227
+    ],
+    "round_trip_median_p75": [
+     0.0397,
+     0.0453
+    ],
+    "volume_per_market_median_p75": [
+     1283.25,
+     2838.18
+    ],
+    "mid_20_80c": {
+     "rows": 6,
+     "markets": 1,
+     "spread_median_p75_p90": [
+      0.025,
+      0.03,
+      0.29
+     ],
+     "hold_cost_median_p75": [
+      0.0274,
+      0.0314
+     ],
+     "round_trip_median_p75": [
+      0.0547,
+      0.0629
+     ]
+    },
+    "events": 2,
+    "tests": [
+     "STRESSDAY1"
+    ],
+    "mins_to_close_median": 4548.85
+   },
+   "KXXRPMAXMON": {
+    "quote_rows": 248,
+    "markets": 8,
+    "share_rows_two_sided": 0.9758,
+    "spread_median_p75_p90": [
+     0.04,
+     0.06,
+     0.06
+    ],
+    "cheap_side_price_median": 0.08,
+    "hold_cost_median_p75": [
+     0.0253,
+     0.0352
+    ],
+    "round_trip_median_p75": [
+     0.0506,
+     0.0702
+    ],
+    "volume_per_market_median_p75": [
+     3934.695,
+     7286.3
+    ],
+    "mid_20_80c": {
+     "rows": 27,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.05,
+      0.06,
+      0.07
+     ],
+     "hold_cost_median_p75": [
+      0.0412,
+      0.0449
+     ],
+     "round_trip_median_p75": [
+      0.0823,
+      0.0896
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33394.8
+   },
+   "KXXRPMINMON": {
+    "quote_rows": 246,
+    "markets": 8,
+    "share_rows_two_sided": 0.6138,
+    "spread_median_p75_p90": [
+     0.04,
+     0.06,
+     0.06
+    ],
+    "cheap_side_price_median": 0.13,
+    "hold_cost_median_p75": [
+     0.0308,
+     0.0379
+    ],
+    "round_trip_median_p75": [
+     0.0615,
+     0.0757
+    ],
+    "volume_per_market_median_p75": [
+     2066.41,
+     3941.8625
+    ],
+    "mid_20_80c": {
+     "rows": 66,
+     "markets": 4,
+     "spread_median_p75_p90": [
+      0.04,
+      0.06,
+      0.07
+     ],
+     "hold_cost_median_p75": [
+      0.0361,
+      0.0446
+     ],
+     "round_trip_median_p75": [
+      0.0722,
+      0.089
+     ]
+    },
+    "events": 1,
+    "tests": [
+     "BARRIER1"
+    ],
+    "mins_to_close_median": 33731.0
+   }
+  }
+ },
+ "daily_watchlist_settle": {
+  "markets": 4390,
+  "minutes_close_to_settlement_median_p25_p75": [
+   80.7844,
+   61.4376,
+   181.9509
+  ],
+  "per_series_median_minutes": {
+   "KXAUDUSDAD": 48.4,
+   "KXAUDUSDAW": 1365.9,
+   "KXBNBMAXMON": 2620.9,
+   "KXBNBMINMON": 2621.1,
+   "KXBRENTD": 80.7,
+   "KXBRENTW": 71.2,
+   "KXBTCMAXMON": 2620.7,
+   "KXBTCMINMON": 2621.0,
+   "KXCOPPERD": 80.8,
+   "KXCOPPERW": 1401.0,
+   "KXCPI": 10.5,
+   "KXCPICORE": 73.4,
+   "KXDJI": 66.4,
+   "KXDOGEMAXMON": 2620.9,
+   "KXDOGEMINMON": 2621.1,
+   "KXETHMAXMON": 2620.7,
+   "KXETHMINMON": 2621.0,
+   "KXEURUSD": 1.9,
+   "KXEURUSDAW": 1365.8,
+   "KXGBPUSDAD": 48.5,
+   "KXGBPUSDAW": 1365.8,
+   "KXGOLDD": 61.4,
+   "KXGOLDW": 1400.9,
+   "KXHYPEMAXMON": 2620.9,
+   "KXHYPEMINMON": 2621.1,
+   "KXINX": 182.0,
+   "KXNASDAQ100": 181.9,
+   "KXNATGASD": 80.8,
+   "KXNATGASW": 60.8,
+   "KXNZDUSDAD": 48.5,
+   "KXSILVERD": 70.9,
+   "KXSOFRD": 110.0,
+   "KXSOLMAXMON": 2620.7,
+   "KXSOLMINMON": 2621.0,
+   "KXUSDBRLAW": 1366.0,
+   "KXUSDCADAW": 1366.0,
+   "KXUSDJPY": 2.0,
+   "KXUSDJPYAW": 1335.8,
+   "KXUSDMXNAW": 1366.0,
+   "KXUSDSEKAW": 1365.9,
+   "KXUST10A": 153.0,
+   "KXUST2A": 152.9,
+   "KXUST30A": 153.0,
+   "KXUST5A": 153.0,
+   "KXUST7A": 153.0,
+   "KXWTI": 495.6,
+   "KXWTIW": 3510.5,
+   "KXXRPMAXMON": 2620.9,
+   "KXXRPMINMON": 2621.1
+  },
+  "events_per_series": {
+   "KXAUDUSDAD": 6,
+   "KXAUDUSDAW": 1,
+   "KXBNBMAXMON": 1,
+   "KXBNBMINMON": 2,
+   "KXBRENTD": 6,
+   "KXBRENTW": 1,
+   "KXBTCMAXMON": 2,
+   "KXBTCMINMON": 2,
+   "KXCOPPERD": 7,
+   "KXCOPPERW": 1,
+   "KXCPI": 1,
+   "KXCPICORE": 1,
+   "KXDJI": 8,
+   "KXDOGEMAXMON": 1,
+   "KXDOGEMINMON": 2,
+   "KXETHMAXMON": 1,
+   "KXETHMINMON": 1,
+   "KXEURUSD": 7,
+   "KXEURUSDAW": 1,
+   "KXGBPUSDAD": 6,
+   "KXGBPUSDAW": 1,
+   "KXGOLDD": 7,
+   "KXGOLDW": 1,
+   "KXHYPEMAXMON": 1,
+   "KXHYPEMINMON": 2,
+   "KXINX": 8,
+   "KXNASDAQ100": 8,
+   "KXNATGASD": 6,
+   "KXNATGASW": 1,
+   "KXNZDUSDAD": 6,
+   "KXSILVERD": 7,
+   "KXSOFRD": 3,
+   "KXSOLMAXMON": 1,
+   "KXSOLMINMON": 2,
+   "KXUSDBRLAW": 1,
+   "KXUSDCADAW": 1,
+   "KXUSDJPY": 7,
+   "KXUSDJPYAW": 1,
+   "KXUSDMXNAW": 1,
+   "KXUSDSEKAW": 1,
+   "KXUST10A": 1,
+   "KXUST2A": 1,
+   "KXUST30A": 1,
+   "KXUST5A": 1,
+   "KXUST7A": 1,
+   "KXWTI": 8,
+   "KXWTIW": 1,
+   "KXXRPMAXMON": 2,
+   "KXXRPMINMON": 2
+  }
+ },
+ "perps_30s_close_window": {
+  "files": 1,
+  "rows": 13024,
+  "markets": 88,
+  "share_rows_active_two_sided": 0.9773,
+  "by_asset_class": {
+   "Crypto": {
+    "markets": 19,
+    "spread_bps_median_of_market_medians": 7.3532,
+    "spread_bps_p25_p75_across_markets": [
+     5.0305,
+     11.3132
+    ],
+    "volume_24h_median_across_markets": 644396.0
+   },
+   "Energy": {
+    "markets": 1,
+    "spread_bps_median_of_market_medians": 2.228,
+    "spread_bps_p25_p75_across_markets": [
+     2.228,
+     2.228
+    ],
+    "volume_24h_median_across_markets": 18349840.0
+   },
+   "Equities": {
+    "markets": 58,
+    "spread_bps_median_of_market_medians": 15.6045,
+    "spread_bps_p25_p75_across_markets": [
+     9.0165,
+     27.4802
+    ],
+    "volume_24h_median_across_markets": 65790.0
+   },
+   "Indices": {
+    "markets": 2,
+    "spread_bps_median_of_market_medians": 1.0514,
+    "spread_bps_p25_p75_across_markets": [
+     0.9872,
+     1.1155
+    ],
+    "volume_24h_median_across_markets": 51903243.25
+   },
+   "Metals": {
+    "markets": 6,
+    "spread_bps_median_of_market_medians": 3.2428,
+    "spread_bps_p25_p75_across_markets": [
+     1.6591,
+     4.7925
+    ],
+    "volume_24h_median_across_markets": 2393447.5
+   }
+  }
+ },
+ "perps_hourly": {
+  "files": 3,
+  "rows": 1143,
+  "markets": 127,
+  "share_rows_active_two_sided": 0.6772,
+  "by_asset_class": {
+   "Crypto": {
+    "markets": 19,
+    "spread_bps_median_of_market_medians": 7.9043,
+    "spread_bps_p25_p75_across_markets": [
+     5.1917,
+     10.1716
+    ],
+    "volume_24h_median_across_markets": 625719.0
+   },
+   "Energy": {
+    "markets": 1,
+    "spread_bps_median_of_market_medians": 2.3375,
+    "spread_bps_p25_p75_across_markets": [
+     2.3375,
+     2.3375
+    ],
+    "volume_24h_median_across_markets": 14612665.0
+   },
+   "Equities": {
+    "markets": 58,
+    "spread_bps_median_of_market_medians": 13.4665,
+    "spread_bps_p25_p75_across_markets": [
+     6.4413,
+     20.1006
+    ],
+    "volume_24h_median_across_markets": 41213.0
+   },
+   "Indices": {
+    "markets": 2,
+    "spread_bps_median_of_market_medians": 0.9179,
+    "spread_bps_p25_p75_across_markets": [
+     0.8909,
+     0.9448
+    ],
+    "volume_24h_median_across_markets": 23715811.5
+   },
+   "Metals": {
+    "markets": 6,
+    "spread_bps_median_of_market_medians": 3.5485,
+    "spread_bps_p25_p75_across_markets": [
+     1.7885,
+     4.7366
+    ],
+    "volume_24h_median_across_markets": 2322748.5
+   }
+  }
+ }
+}

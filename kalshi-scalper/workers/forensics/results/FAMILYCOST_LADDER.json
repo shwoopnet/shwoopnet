@@ -1,0 +1,506 @@
+{
+ "label": "hourly Bitcoin ladder KXBTCD",
+ "dates": [
+  "2026-11-08",
+  "2026-11-10",
+  "2026-11-11"
+ ],
+ "run_dirs": [
+  "book/2026-11-08/0000",
+  "book/2026-11-08/0400",
+  "book/2026-11-08/0800",
+  "book/2026-11-08/1200",
+  "book/2026-11-08/1600",
+  "book/2026-11-08/2000",
+  "book/2026-11-10/0401",
+  "book/2026-11-10/1005",
+  "book/2026-11-10/1201",
+  "book/2026-11-10/1758",
+  "book/2026-11-10/2001",
+  "book/2026-11-11/0000",
+  "book/2026-11-11/0400",
+  "book/2026-11-11/0801",
+  "book/2026-11-11/1200",
+  "book/2026-11-11/1600",
+  "book/2026-11-11/2000"
+ ],
+ "note": "dollars (0.01 = 1 cent); no result column exists in this recorder; volume is the tape of the 7 recorded strikes over the recorded 55 minutes only",
+ "events": {
+  "hourly_closes_in_coverage": 65,
+  "closes_per_date": {
+   "2026-11-08 Sun": 23,
+   "2026-11-09 Mon": 1,
+   "2026-11-10 Tue": 16,
+   "2026-11-11 Wed": 24,
+   "2026-11-12 Thu": 1
+  },
+  "strikes_recorded_per_close_median": 7.0,
+  "settlement_delay": "not recorded",
+  "tape_contracts_per_strike_55min_median_p25_p75": [
+   99577.83,
+   42743.9375,
+   187153.89
+  ],
+  "tape_strikes_n": 426,
+  "tape_contracts_per_event_7_strikes_55min_median_p25_p75": [
+   771378.81,
+   609309.3,
+   1055678.64
+  ],
+  "tape_events_n": 65
+ },
+ "looks": {
+  "look_30min_1830_1770s": {
+   "instants_all": 8960,
+   "instants_two_sided": 7394,
+   "share_two_sided": 0.8252,
+   "instants_yes_bids_only": 1312,
+   "instants_no_bids_only": 254,
+   "instants_empty_book": 0,
+   "instants_crossed_or_locked": 0,
+   "strike_markets_with_any_poll": 448,
+   "strike_markets_two_sided": 373,
+   "hourly_events_two_sided": 64,
+   "all_recorded_strikes": {
+    "instants": 7394,
+    "strike_markets": 373,
+    "events": 64,
+    "spread_median_p75": [
+     0.01,
+     0.01
+    ],
+    "spread_mean": 0.01036,
+    "mid_median": 0.535,
+    "favourite_price_median_p25_p75": [
+     0.875,
+     0.715,
+     0.955
+    ],
+    "touch_size_both_asks_median": 1149.09,
+    "touch_size_both_asks_p25": 422.9475,
+    "fee_at_mid_median": 0.00766,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.01266,
+     0.01926
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.02531,
+     0.03853
+    ],
+    "round_trip_over_cheap_side_price_median": 0.20247
+   },
+   "near_money_mid_30_70c": {
+    "instants": 1561,
+    "strike_markets": 102,
+    "events": 56,
+    "spread_median_p75": [
+     0.01,
+     0.01
+    ],
+    "spread_mean": 0.01067,
+    "mid_median": 0.495,
+    "favourite_price_median_p25_p75": [
+     0.595,
+     0.555,
+     0.655
+    ],
+    "touch_size_both_asks_median": 672.02,
+    "touch_size_both_asks_p25": 168.2425,
+    "fee_at_mid_median": 0.01687,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.02187,
+     0.02236
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.04373,
+     0.04471
+    ],
+    "round_trip_over_cheap_side_price_median": 0.11001
+   },
+   "wings_mid_outside_30_70c": {
+    "instants": 5833,
+    "strike_markets": 314,
+    "events": 64,
+    "spread_median_p75": [
+     0.01,
+     0.01
+    ],
+    "spread_mean": 0.01028,
+    "mid_median": 0.725,
+    "favourite_price_median_p25_p75": [
+     0.915,
+     0.825,
+     0.965
+    ],
+    "touch_size_both_asks_median": 1314.62,
+    "touch_size_both_asks_p25": 571.85,
+    "fee_at_mid_median": 0.00544,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.01044,
+     0.01555
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.02088,
+     0.0311
+    ],
+    "round_trip_over_cheap_side_price_median": 0.24571
+   },
+   "haircut": {
+    "both_sides_all_strikes": {
+     "buys": 14788,
+     "events": 64,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 14770,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.8643,
+       0.8491,
+       0.8789
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9462,
+       0.9361,
+       0.9551
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 14746,
+      "median_lag_s": 6.05,
+      "filled_at_ask_seen": [
+       0.7927,
+       0.7748,
+       0.8102
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8973,
+       0.882,
+       0.9115
+      ]
+     }
+    },
+    "both_sides_near_money_mid_30_70c": {
+     "buys": 3122,
+     "events": 56,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 3122,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.7297,
+       0.7125,
+       0.7484
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8632,
+       0.8456,
+       0.8821
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 3122,
+      "median_lag_s": 6.02,
+      "filled_at_ask_seen": [
+       0.6387,
+       0.6225,
+       0.6539
+      ],
+      "filled_at_ask_plus_1c": [
+       0.7681,
+       0.7451,
+       0.7904
+      ]
+     }
+    },
+    "cheap_side_ask_le_50c": {
+     "buys": 7392,
+     "events": 64,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 7383,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.8751,
+       0.8602,
+       0.8897
+      ],
+      "filled_at_ask_plus_1c": [
+       0.946,
+       0.9365,
+       0.9562
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 7371,
+      "median_lag_s": 6.05,
+      "filled_at_ask_seen": [
+       0.814,
+       0.7939,
+       0.836
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9023,
+       0.8871,
+       0.9182
+      ]
+     }
+    },
+    "favourite_side_ask_gt_50c": {
+     "buys": 7396,
+     "events": 64,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 7387,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.8534,
+       0.8369,
+       0.8697
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9464,
+       0.9346,
+       0.9559
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 7375,
+      "median_lag_s": 6.05,
+      "filled_at_ask_seen": [
+       0.7714,
+       0.7507,
+       0.7913
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8923,
+       0.8734,
+       0.9087
+      ]
+     }
+    }
+   }
+  },
+  "look_6min_400_330s": {
+   "instants_all": 10351,
+   "instants_two_sided": 4056,
+   "share_two_sided": 0.3918,
+   "instants_yes_bids_only": 3897,
+   "instants_no_bids_only": 2398,
+   "instants_empty_book": 0,
+   "instants_crossed_or_locked": 0,
+   "strike_markets_with_any_poll": 448,
+   "strike_markets_two_sided": 189,
+   "hourly_events_two_sided": 63,
+   "all_recorded_strikes": {
+    "instants": 4056,
+    "strike_markets": 189,
+    "events": 63,
+    "spread_median_p75": [
+     0.01,
+     0.01
+    ],
+    "spread_mean": 0.01125,
+    "mid_median": 0.5475,
+    "favourite_price_median_p25_p75": [
+     0.935,
+     0.775,
+     0.975
+    ],
+    "touch_size_both_asks_median": 1031.55,
+    "touch_size_both_asks_p25": 364.965,
+    "fee_at_mid_median": 0.00425,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.00925,
+     0.01792
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.0185,
+     0.03582
+    ],
+    "round_trip_over_cheap_side_price_median": 0.28469
+   },
+   "near_money_mid_30_70c": {
+    "instants": 663,
+    "strike_markets": 45,
+    "events": 39,
+    "spread_median_p75": [
+     0.01,
+     0.02
+    ],
+    "spread_mean": 0.01386,
+    "mid_median": 0.515,
+    "favourite_price_median_p25_p75": [
+     0.585,
+     0.55,
+     0.635
+    ],
+    "touch_size_both_asks_median": 638.555,
+    "touch_size_both_asks_p25": 145.0,
+    "fee_at_mid_median": 0.01699,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.0222,
+     0.02559
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.04441,
+     0.05117
+    ],
+    "round_trip_over_cheap_side_price_median": 0.11416
+   },
+   "wings_mid_outside_30_70c": {
+    "instants": 3393,
+    "strike_markets": 177,
+    "events": 62,
+    "spread_median_p75": [
+     0.01,
+     0.01
+    ],
+    "spread_mean": 0.01074,
+    "mid_median": 0.725,
+    "favourite_price_median_p25_p75": [
+     0.955,
+     0.865,
+     0.975
+    ],
+    "touch_size_both_asks_median": 1164.505,
+    "touch_size_both_asks_p25": 458.9625,
+    "fee_at_mid_median": 0.00301,
+    "hold_cost_half_spread_plus_fee_median_p75": [
+     0.00801,
+     0.01317
+    ],
+    "round_trip_spread_plus_two_fees_median_p75": [
+     0.01601,
+     0.02635
+    ],
+    "round_trip_over_cheap_side_price_median": 0.35584
+   },
+   "haircut": {
+    "both_sides_all_strikes": {
+     "buys": 8112,
+     "events": 63,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 8046,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.7927,
+       0.7759,
+       0.8109
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9059,
+       0.894,
+       0.9208
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 7970,
+      "median_lag_s": 6.03,
+      "filled_at_ask_seen": [
+       0.726,
+       0.7086,
+       0.7471
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8469,
+       0.8295,
+       0.8659
+      ]
+     }
+    },
+    "both_sides_near_money_mid_30_70c": {
+     "buys": 1326,
+     "events": 39,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 1326,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.6101,
+       0.5885,
+       0.6326
+      ],
+      "filled_at_ask_plus_1c": [
+       0.7632,
+       0.7327,
+       0.7925
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 1326,
+      "median_lag_s": 6.03,
+      "filled_at_ask_seen": [
+       0.5603,
+       0.5439,
+       0.5776
+      ],
+      "filled_at_ask_plus_1c": [
+       0.6727,
+       0.6454,
+       0.6992
+      ]
+     }
+    },
+    "cheap_side_ask_le_50c": {
+     "buys": 4053,
+     "events": 63,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 4020,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.8209,
+       0.8026,
+       0.8383
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9095,
+       0.8968,
+       0.9228
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 3982,
+      "median_lag_s": 6.03,
+      "filled_at_ask_seen": [
+       0.7695,
+       0.7488,
+       0.7926
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8616,
+       0.8437,
+       0.8803
+      ]
+     }
+    },
+    "favourite_side_ask_gt_50c": {
+     "buys": 4059,
+     "events": 63,
+     "h2000": {
+      "buys_with_later_two_sided_poll": 4026,
+      "median_lag_s": 3.0,
+      "filled_at_ask_seen": [
+       0.7645,
+       0.7469,
+       0.7844
+      ],
+      "filled_at_ask_plus_1c": [
+       0.9024,
+       0.8877,
+       0.9182
+      ]
+     },
+     "h6000": {
+      "buys_with_later_two_sided_poll": 3988,
+      "median_lag_s": 6.03,
+      "filled_at_ask_seen": [
+       0.6825,
+       0.6635,
+       0.7025
+      ],
+      "filled_at_ask_plus_1c": [
+       0.8322,
+       0.8145,
+       0.8533
+      ]
+     }
+    }
+   }
+  }
+ }
+}
