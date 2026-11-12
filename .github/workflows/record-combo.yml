@@ -1,0 +1,56 @@
+# Nov 12, 2026 (the owner approved). Combo book recorder: Kalshi combo (multivariate) markets, exchange_index 1. Every 30 minutes one poll lists open combos, keeps the high priced ones and records their
+# quotes, the order book (best 5 YES and 5 NO bids with sizes) of up to 40 and the public trades of up to 15; once a day it also reads settled combos that traded. Research data only: public Kalshi market data, no key, no secret, no order, no Firestore.
+# The built-in GITHUB_TOKEN pushes gzipped files to its OWN `combo-data` branch (under combo/), never to main. The first run creates `combo-data` as an orphan branch.
+# Rate: at most 90 requests a run, 6 seconds apart (at most 10 a minute), 48 runs a day: at most 4,320 requests a day, about 3 a minute on average. A trial run measured 61 requests and about 7 KB gzipped, so about 0.35 MB a day, under 1 MB at the caps. A run took 6 minutes in the trial and at most 9 at the budget, so about 310 to 430 runner minutes a day (9,400 to 13,000 a month), free on a public repo.
+# One concurrency group that never cancels: jobs never overlap, and a dropped start costs one poll.
+# It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+name: record-combo
+on:
+  schedule:
+    - cron: "11,41 * * * *"
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-combo
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin combo-data; then git checkout -q -b combo-data FETCH_HEAD; else git checkout -q --orphan combo-data; fi
+      - name: One poll
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/combo/$STAMP"
+          python3 code/scripts/record_combo.py "data/combo/$STAMP"
+          gzip -9 -f data/combo/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        run: |
+          cd data
+          git config user.name "combo-recorder"
+          git config user.email "combo-recorder@users.noreply.github.com"
+          gzip -9 -f combo/*/*/*.csv 2>/dev/null || true
+          git add combo
+          git commit -q -m "combo $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin combo-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin combo-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1
