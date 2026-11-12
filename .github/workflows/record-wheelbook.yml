@@ -1,0 +1,66 @@
+# Nov 12, 2026 (the owner approved: "Yes, build it"; spec WHEEL_BOOK_RECORDER_SPEC.md on claude/idea-desk-b). Order books of the sports and esports markets the wheel's cards read (CS2, Dota 2, e-soccer,
+# table tennis, e-basketball; tennis is phase 2 and OFF in the script): book rows only when a ticker's top 5 changed, a poll row for every poll, results and one-minute candles as raw answer bodies with a
+# manifest, the trade tape once after each close, a coverage row per ticker and an hourly clock check. Research data only: public Kalshi data, no key, no order, no Firestore.
+# The built-in GITHUB_TOKEN pushes gzipped files to its OWN weekly orphan branch wheelbook-<ISO year>w<week> (under wheelbook/), never to main, quote-data or nc-data.
+# Triggered every 15 minutes (two cron pairs) under one concurrency group that never cancels a running job; each job records up to the next 4 hour boundary and stops.
+# A continuous recorder like R6 and NC15 (about 43,000 runner minutes a month, free on a public repo; the owner's approval accepts that, see CLAUDE.md).
+# It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+name: record-wheelbook
+on:
+  schedule:
+    - cron: "5,35 * * * *"
+    - cron: "20,50 * * * *"   # a second pair 15 minutes after the first (as R6 after Oct 31): GitHub sometimes drops scheduled starts for hours. Extra triggers queue behind a running job (one pending at most) and never overlap it.
+  workflow_dispatch: {}
+permissions:
+  contents: write
+concurrency:
+  group: record-wheelbook
+  cancel-in-progress: false
+jobs:
+  record:
+    runs-on: ubuntu-latest
+    timeout-minutes: 330
+    steps:
+      - name: Stop for good after the end date (2027-01-31 23:59 UTC)
+        id: gate
+        run: |
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2027-01-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+      - name: Get the recorder script from main
+        if: steps.gate.outputs.go == 'true'
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: main
+          path: code
+      - name: Name this week's data branch
+        id: br
+        if: steps.gate.outputs.go == 'true'
+        run: echo "name=wheelbook-$(date -u +%G)w$(date -u +%V)" >> "$GITHUB_OUTPUT"
+      - name: Open the data branch (created empty the first time)
+        if: steps.gate.outputs.go == 'true'
+        env:
+          BRANCH: ${{ steps.br.outputs.name }}
+        run: |
+          mkdir data && cd data
+          git init -q
+          git remote add origin "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git"
+          if git fetch -q --depth 1 origin "$BRANCH"; then git checkout -q -b "$BRANCH" FETCH_HEAD; else git checkout -q --orphan "$BRANCH"; fi
+      - name: Record every market up to the next 4 hour boundary
+        if: steps.gate.outputs.go == 'true'
+        run: |
+          STAMP="$(date -u +%Y-%m-%d/%H%M)"
+          mkdir -p "data/wheelbook/$STAMP"
+          python3 code/scripts/record_wheelbook.py "data/wheelbook/$STAMP" --cycle-hours 4
+          gzip -9 -f data/wheelbook/$STAMP/*.csv
+      - name: Commit and push the data branch
+        if: always() && steps.gate.outputs.go == 'true'
+        env:
+          BRANCH: ${{ steps.br.outputs.name }}
+        run: |
+          cd data
+          git config user.name "wheelbook-recorder"
+          git config user.email "wheelbook-recorder@users.noreply.github.com"
+          gzip -9 -f wheelbook/*/*/*.csv 2>/dev/null || true
+          git add wheelbook
+          git commit -q -m "wheelbook $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
+          for i in 1 2 3 4 5 6; do git push -q origin "$BRANCH" && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin "$BRANCH" || true; done  # up to 6 tries, waits 2,4,8,16,32 s: a GitHub 500 needs more than a second
+          exit 1

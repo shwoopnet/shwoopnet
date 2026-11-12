@@ -1,6 +1,6 @@
 'use strict';
 // Recorder R6 (Oct 29, 2026, research only): the whole-window book and trade tape of the five 15 minute markets the bot trades. It reads public data, holds no secret, places no
-// order, writes only to a data branch, is not published with the site and stops by itself on 2026-12-15 (Ethereum on 2026-11-20).
+// order, writes only to a data branch, is not published with the site and stops by itself on 2026-12-31 (Ethereum on 2026-11-20).
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
@@ -204,19 +204,19 @@ gates.FB13 = () => {
   assert.deepStrictEqual(out[1], ext, 'a window opening at the cut records only Bitcoin, Ethereum and gold');
   assert.deepStrictEqual(out[2], ext);
   assert.deepStrictEqual(out[3], ext, 'the extension adds no series beyond Bitcoin, Ethereum and gold');
-  // Nov 12, 2026: Ethereum still stops on Nov 20; Bitcoin and gold continue to Dec 15.
-  assert.deepStrictEqual(out[4], ext, 'the last window opening before Nov 20 23:59 still records Ethereum');
-  assert.deepStrictEqual(out[5], ['KXBTC15M', 'KXGOLD15M'], 'a window opening at or after Nov 20 23:59 records Bitcoin and gold only (no Ethereum)');
-  assert.deepStrictEqual(out[6], ['KXBTC15M', 'KXGOLD15M'], 'gold is still recorded in the last window before Dec 15');
-  assert.deepStrictEqual(out[7], ['KXBTC15M', 'KXGOLD15M']);
+  // Nov 12, 2026 (later): Ethereum, Bitcoin and gold all continue to Dec 31 (Ethereum no longer stops on Nov 20).
+  assert.deepStrictEqual(out[4], ext, 'the last window opening before the Ethereum end still records Ethereum');
+  assert.deepStrictEqual(out[5], ['KXBTC15M', 'KXGOLD15M'], 'only at the Ethereum end (now the final end, so never reached in a recorded window) does Ethereum drop');
+  assert.deepStrictEqual(out[6], ext, 'Bitcoin, Ethereum and gold are all recorded in the last window before Dec 31');
+  assert.ok(py('print(json.dumps(m.ETH_END_UTC == m.END_UTC))') === true, 'Ethereum ends with the recorder, not before it');
   const stop = py(`print(json.dumps([m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH)]))`);
-  assert.deepStrictEqual(stop, [false, true], 'gold stops at Dec 15 23:59 UTC with the rest: the end check is unchanged and fails closed');
+  assert.deepStrictEqual(stop, [false, true], 'all stop at Dec 31 23:59 UTC with the rest: the end check is unchanged and fails closed');
 };
 
 gates.FB10 = () => {
   const out = py(`print(json.dumps([m.END_UTC, m.past_end(m.END_EPOCH - 1), m.past_end(m.END_EPOCH), len(m.owned_closes(m.END_EPOCH - 1800, m.END_EPOCH + 7200))]))`);
-  assert.deepStrictEqual(out, ['2026-12-15T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
-  assert.ok(/date -u -d '2026-12-15T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
+  assert.deepStrictEqual(out, ['2026-12-31T23:59:00Z', false, true, 3], 'no window opening at or after the end is recorded (the last one opens at 23:45 and closes at midnight)');
+  assert.ok(/date -u -d '2026-12-31T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf), 'the workflow checks the end date first');
   const steps = wf.split(/\n      - name: /).slice(2);
   assert.ok(steps.length === 4 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(now\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code), 'the script exits at once after the end date');

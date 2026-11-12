@@ -12,7 +12,7 @@ For the five 15 minute series the bot trades (KXGOLD15M, KXBTC15M, KXETH15M, KXD
 It reads PUBLIC endpoints only: no key, no signing, no auth header, no account path, no order. At most 2 request streams (the book, and the tape plus housekeeping), each with
 at least 0.5 seconds between calls; a 429 waits 2 seconds, doubling up to 30, and is never asked again at once.
 
-It stops by itself: no window opening at or after END_UTC (2026-12-15 23:59 UTC, Bitcoin and gold only from 2026-11-20 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
+It stops by itself: no window opening at or after END_UTC (2026-12-31 23:59 UTC; Bitcoin, Ethereum and gold from 2026-11-13 23:59 UTC) is recorded, and a run started after it exits at once. Stop it sooner by deleting the workflow.
 It replaces R2 (record_book15.py, Bitcoin, Ethereum and gold only), as the spec says.
 
 Rows are written exactly as the exchange returns them (levels re-ordered best first, prices and sizes as numbers, nothing computed). A missing level is empty, never zero."""
@@ -48,9 +48,9 @@ DISCOVER_FOR_S = 30.0
 TAPE_PAGES_PER_WINDOW_EST = 75   # the spec's measured 50 to 75 pages a window over the five markets
 FULL_END_UTC = "2026-11-13T23:59:00Z"  # the first 14 days: all five series. Windows opening at or after this record only EXT_SERIES.
 EXT_SERIES = ("KXBTC15M", "KXETH15M", "KXGOLD15M")  # Nov 11, 2026 (the owner): spot-lead needs more Bitcoin and Ethereum windows, so only those continue, to ETH_END_UTC. Gold added Nov 12, 2026 (Head of R&D)
-ETH_END_UTC = "2026-11-20T23:59:00Z"  # Ethereum stops here (Nov 11 decision, unchanged). Windows opening at or after this record only BTC_SERIES.
+ETH_END_UTC = "2026-12-31T23:59:00Z"  # Nov 12, 2026 (the owner): Ethereum now continues to the same date as Bitcoin (was 2026-11-20). Windows opening at or after this record only BTC_SERIES, which cannot happen before END_UTC.
 BTC_SERIES = ("KXBTC15M", "KXGOLD15M")  # Nov 12, 2026 (the owner): Bitcoin continues to END_UTC; gold added the same day so its return evidence outlives the bot's kill latch; no host is added
-END_UTC = "2026-12-15T23:59:00Z"  # nothing is recorded from here on
+END_UTC = "2026-12-31T23:59:00Z"  # nothing is recorded from here on
 UA = {"User-Agent": "shwoopnet-research-recorder"}
 
 BOOK_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "series", "close_time"] \
