@@ -21,6 +21,8 @@ const PATTERNS = [
   ['net with a signed dollar amount', /\bnet\s+[-+]\$\d/i],
   ['market followed by a signed dollar amount', /\b(gold|bitcoin|ethereum|xrp|dogecoin|oicore|event830)\s+[-+]\$\d/i],
   ['N fills, N losses', /\b\d+\s+(fills|orders|trades),\s+\d+\s+(losses|wins|won|lost)\b/i],
+  ['live win rate figure', /\b(live|right|was)\b[^.\n]{0,40}\babout\s+9\d%\s*(won|wins)?/i],
+  ['N% of the sizing base tied to a dollar line', /\$\d[\d,.]*[^.\n]{0,40}\d+%\s+of\s+(the\s+)?sizing\s+base/i],
   ['N of N lost', /\b\d+\s+of\s+\d+\s+(fills|settled|orders)\s+(lost|won)/i],
 ];
 const OPT_OUT = /\[(design|research)\]/;

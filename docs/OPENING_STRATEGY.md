@@ -44,7 +44,7 @@ What to take from it:
 
 ## Where the average win can and cannot come from
 
-Your numbers (early live sample): about 100 settled with a handful of losses, a profit factor just under 1.0 and a net near zero. [live figures removed, ask Main]
+Your numbers (early live sample): [live figures removed, ask Main] [live figures removed, ask Main]
 
 - **The break-even win rate is close to 95.6%** at that sample's average win and loss. The gap to the actual win rate was about one loss, which sits well inside the noise for a strategy that should be near 1.0 to 1.1.
 - **The losses were mostly Bitcoin; gold had none in that early sample.** A run of wins with no loss is what a 95% win rate does often. It is not evidence that gold is safer. [live counts removed, ask Main]

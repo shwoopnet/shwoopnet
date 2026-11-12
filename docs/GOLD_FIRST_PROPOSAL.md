@@ -17,7 +17,7 @@ Written 2026-10-21 for the owner to review. **Nothing here is built.** Plain wor
 
 - Gold's losses never landed in the same window as Bitcoin's. Ethereum's losses mostly did, so Ethereum adds the same bet twice.
 - The earlier 68-day backtest agrees on gold and on nothing else: gold was the only series that cleared the bar on its own (+1.54c a contract, z 2.94).
-- **Counterfactual, in the same data (so it flatters itself):** gold as traded and everything else at 1 contract would have made clearly positive instead of slightly negative. The number is not a forecast. Gold's live result was about three times its backtest, so expect some of it to come back.
+- **Counterfactual, in the same data (so it flatters itself):** gold as traded and everything else at 1 contract would have made clearly positive instead of slightly negative. The number is not a forecast. Gold's live result beat its backtest, so expect some of it to come back.
 - Overall the record is indistinguishable from break-even. Size scales the same coin flip; it does not add edge.
 
 ## The proposal: size is earned by a market's own live record
@@ -43,7 +43,7 @@ Written 2026-10-21 for the owner to review. **Nothing here is built.** Plain wor
 
 ## What could go wrong
 
-- **Gold's luck runs out.** A live loss rate of about 2% against a backtest of about 4.5% means some regression is likely. Gold is still the best-supported market, but the record shows it is not safe: one gold loss at 4 contracts costs a few dollars.
+- **Gold's luck runs out.** A live loss rate below the backtest's means some regression is likely. Gold is still the best-supported market, but the record shows it is not safe: a gold loss at ladder size costs many wins.
 - **Concentration.** Most of the size ends up in one market. The window limit and 12% stop already bound a bad window.
 - **Bitcoin might simply be negative.** At 1 contract it costs little to find out, which is why it is demoted, not removed.
 - **Selection.** I picked gold after looking at this record. The reason it is not just fitting noise is that the backtest, done on different days, picked it first.

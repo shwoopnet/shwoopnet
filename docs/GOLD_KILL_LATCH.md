@@ -6,7 +6,7 @@ The owner's decision (Nov 10, 2026): gold L1 gets a coded KILL and RETURN. This 
 
 **KILL (hard latch, cash basis, fees included).** Gold L1 stops placing new orders, with no automatic restart, when either rule fires, measured on gold's own settled orders since the re-arm date (`GOLD_KILL.rearmAt`, first value 2026-11-10 00:00 UTC):
 
-1. drawdown from gold's own cash peak of **$58.75, a fixed dollar line** (6% of the sizing base when written; re-set only by a reviewed code edit when the base grows; the peak starts at 0), or
+1. drawdown from gold's own cash peak of **$58.75, a fixed dollar line** (re-set only by a reviewed code edit when the base grows; the peak starts at 0), or
 2. cash net under **-$20** once **40 trades** have settled since the re-arm.
 
 **ALERT ONLY (no latch, no order change).** Each writes a `gold alert` event (the Bot page notification center shows it as a warning): rolling-60 cash profit factor under 0.7, rolling-100 under 1.0, 3 early sells in the last 40 trades. An alert that stays on is written once, not every minute.

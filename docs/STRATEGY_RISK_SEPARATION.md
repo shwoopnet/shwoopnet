@@ -36,12 +36,12 @@ The account backstop stays and covers both: a combined stop (one number above ea
 | Size rule | as now: one contract per $43 of base, add-on capped at a quarter of base | stays 10 until 100 settled fills AND the Nov 13 read; ceiling 15 (20 only by a reviewed edit at 250 fills) |
 | Step up | keep +1 per 3 day review (the owner kept +1 on Nov 1; +2 only if insisted, never +3) | at most +2 per 3 days, and only after 60 settled fills net at least +1c a contract AND at least 20% wins |
 | Step down | within 2 hours of a lower balance | back to 10 if the last 60 fills net under -$1 a contract |
-| Own stop | 12% of base, L1 orders only | 4% of base (a proposal; live is 12%), OICORE orders only; at 15 contracts and a small base a normal 10 loss run can end it, so the kill rules and this stop are close together |
-| Own window cap | 5.5% of base | 2% of base, plus a per-order dollar cap of 1% of base (it would cut the 39c to 50c entries, where the wins came from, at 25 or more contracts) |
+| Own stop | 12% of base, L1 orders only | a smaller share of base (a proposal; live is 12%), OICORE orders only; at 15 contracts and a small base a normal 10 loss run can end it, so the kill rules and this stop are close together |
+| Own window cap | 5.5% of base | 2% of base, plus a per-order dollar cap of 1% of base (it would cut the larger entries at high contract counts) |
 | Kill rules | none (loss stop only) | 24 losses in a row (18 until Nov 7, 2026), or net under -$6 after 40 fills (keep both) |
 | Account backstop | combined stop 15% of base, combined window cap 6.5% | same two numbers, shared (14% would lose nothing) |
 
-Reviewed facts behind these numbers (live record to Nov 1): [live figures removed, ask Main]. In outline: L1's largest loss and worst 24 hours were each a small share of the base (1.5% to 2.1% for the day) and the worst streak was short; OICORE's losses were small, its order spend a few dollars at most, and it shared a window with an L1 fill in only one of its windows, so today the coupling costs nothing in dollars and the separation matters for later scaling. A step gate of "30 fills net at or above zero" was too weak (a no-edge probe passes it 43% of the time in simulation, a real +5 point edge only 71%), hence 60 fills at +1c and 20% wins.
+Reviewed facts behind these numbers (live record to Nov 1): [live figures removed, ask Main]. In outline: L1's largest loss and worst 24 hours were each a small share of the base  and the worst streak was short; OICORE's losses were small, its order spend a few dollars at most, and it shared a window with an L1 fill in only one of its windows, so today the coupling costs nothing in dollars and the separation matters for later scaling. A step gate of "30 fills net at or above zero" was too weak (a no-edge probe passes it 43% of the time in simulation, a real +5 point edge only 71%), hence 60 fills at +1c and 20% wins.
 
 Cost of a 10 loss streak (review): at the median 9c entry, $9.6 / $19.1 / $28.7 at 10 / 20 / 30 contracts; at a mean 16c entry $16.9 / $33.9 / $50.8; at a 50c entry $51.7 / $103.5 / $155.2.
 

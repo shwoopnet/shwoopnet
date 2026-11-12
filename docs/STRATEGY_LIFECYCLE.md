@@ -38,7 +38,7 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | Strategy or stage | Metric | Threshold | Window | Action |
 |---|---|---|---|---|
 | Gold L1 (long run PF above 1.3) | next 100 settled cash PF | under 1.0 | next 100 trades from Nov 9 | size step down PROPOSAL to the owner (the tripwire) |
-| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed (6% of the sizing base when written) | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
+| Gold L1 | drawdown from gold's own cash peak (since the re-arm, 2026-11-10) | $58.75 fixed | any time, checked every minute | **latch gold off, no auto restart** [coded Nov 10, DRAFT until merged and deployed: `docs/GOLD_KILL_LATCH.md`] |
 | Gold L1 | cash net since the re-arm | under -$20 after 40 trades | | **latch gold off** (same code) |
 | Gold L1 | rolling 100 cash PF; 3 early sells in 40 trades | under 1.0; 3 or more | | ALERT only (event in the notification center), same code |
 | Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades recovered strongly: a false kill as a latch) |
