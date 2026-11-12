@@ -34,6 +34,9 @@ e1, c1 = build(flip=lambda i, ev: ev["close"] >= tS); r1 = sig(E.walk(e1, c1)[0]
 check("ESOCTIE: results of events closing at or after a bet's start flipped -> that bet's base rate unchanged", r1[target["event"]] == base[target["event"]], "base n %d" % target["n_base"])
 # 2. results of events that closed after the target's DECISION minute but before its start
 late = [o for o in rows if o["k"] == target["k"] and tts < o["close"] < tS]
+gap = getattr(E, "SETTLE_GAP_S", 0)
+e2b, c2b = build(flip=lambda i, ev: tts - gap < ev["close"] <= tts); r2b = sig(E.walk(e2b, c2b)[0])
+check("ESOCTIE: results of games that closed BEFORE the decision minute but inside the settlement allowance flipped -> base rate unchanged", r2b[target["event"]] == base[target["event"]], "allowance %d s" % gap)
 e2, c2 = build(flip=lambda i, ev: tts < ev["close"] < tS); r2 = sig(E.walk(e2, c2)[0])
 check("ESOCTIE: results of events closing AFTER the decision minute (but before the start) flipped -> base rate unchanged", r2[target["event"]] == base[target["event"]],
       "%d such event(s) in its bucket; decision at S-%d s; b %.4f -> %.4f" % (len(late), tS - tts, base[target["event"]][3], r2[target["event"]][3]))
@@ -46,7 +49,7 @@ def listed(shift):
     out = {}
     for i in range(3):
         S = T0 + 3600 * i; e = key_event(i, S); close = S + 720 + (shift if i == 1 else 0)
-        for suf in ("TIE", "AAA", "BBB"): out[e + "-" + suf] = {"ticker": e + "-" + suf, "event": e, "series": "KXESOCCERGAME", "close": close, "result": "no"}
+        for suf in ("TIE", "AAA", "BBB"): out[e + "-" + suf] = {"ticker": e + "-" + suf, "event": e, "series": "KXESOCCERGAME", "close": close, "open": S - 1800, "result": "no"}
     return out
 k0, d0 = E.events(listed(0)); k1, d1 = E.events(listed(1500))
 check("ESOCTIE: ONE event's close moved to 37 minutes after its start (a time after the bet) -> the event is still in the universe", len(k1) == len(k0), "events %d -> %d, 'start not derivable' %d" % (len(k0), len(k1), d1["start not derivable"]))

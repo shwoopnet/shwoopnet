@@ -20,7 +20,7 @@ def run_folder(bodies):
 # ---------------- MAPBREAK: the match records
 spec = m.load_cells(); ser = [t for t in spec["titles"] if t["cell"] == "DOTA2"][0]
 def mk(t, close, result="yes", **kw): return dict({"ticker": t, "event_ticker": t.rsplit("-", 1)[0], "close_time": F(close), "open_time": F(close - 90000), "result": result, "volume_fp": "5", "title": "x"}, **kw)
-def lists(n=40, map2_delay=40, end_gap=50, flip_match=False, flip_map23=False, one=None):
+def lists(n=40, map2_delay=40, end_gap=50, flip_match=False, flip_map3=False, flip_map2_of=None, one=None):
     L = {"live_" + s: {"markets": []} for s in m.series_all(spec)}
     for i in range(n):
         day, hh = 1 + i % 20, 10 + i % 8; key = "26OCT%02d%02d00AAABBB%d" % (day, hh, i); S = calendar.timegm((2026, 10, day, hh + 4, 0, 0))
@@ -30,18 +30,24 @@ def lists(n=40, map2_delay=40, end_gap=50, flip_match=False, flip_map23=False, o
             mres = "yes" if ((team == up) != flip_match) else "no"
             L["live_" + ser["match_series"]]["markets"].append(mk("%s-%s-%s" % (ser["match_series"], key, team), cm, mres))
             L["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-1-%s" % (ser["map_series"], key, team), c1, "yes" if team == up else "no"))
-            L["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, "yes" if ((team == up) != flip_map23) else "no"))
+            m2w = (team != up) if (i % 2 == 0) else (team == up)          # even matches go one map each (a second look), odd ones 2-0
+            if flip_map2_of == i: m2w = not m2w
+            L["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, "yes" if m2w else "no"))
+            L["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-3-%s" % (ser["map_series"], key, team), cm, "yes" if ((team == up) != flip_map3) else "no"))
         L["live_" + ser["total_maps_series"]]["markets"].append(mk("%s-%s-2" % (ser["total_maps_series"], key), cm, floor_strike=2.5))
     return L
 sig = lambda recs: sorted((r["key"], r["up"], r["state_close"], r.get("state_close2")) for r in recs)
 base, _ = m.matches(spec, [run_folder(lists())])
 check("MAPBREAK records: match results flipped -> same records", sig(m.matches(spec, [run_folder(lists(flip_match=True))])[0]) == sig(base), "n %d" % len(base))
-check("MAPBREAK records: map 2 results flipped -> same records", sig(m.matches(spec, [run_folder(lists(flip_map23=True))])[0]) == sig(base))
-v, c = m.matches(spec, [run_folder(lists(one=(3, 10, 50)))])
-check("MAPBREAK records: ONE match's map-2 close moved to 10 min after map 1 (a time AFTER the first look) -> its first-look record is unchanged", sig([r for r in v if r["key"].endswith("3")]) == sig([r for r in base if r["key"].endswith("3")]) and len(v) == len(base), "records %d -> %d, map2_too_soon %d" % (len(base), len(v), c["map2_too_soon"]))
-v2, c2 = m.matches(spec, [run_folder(lists(one=(3, 40, 12)))])
-r0 = [r for r in base if r["key"].endswith("BBB3")][0]; r1 = [r for r in v2 if r["key"].endswith("BBB3")][0]
-check("MAPBREAK records: the MATCH close moved (a time after the second look) -> the second look of that match is unchanged", r0.get("state_close2") == r1.get("state_close2"), "second look %s -> %s (dropped 10 to 15 min: %d)" % (bool(r0.get("state_close2")), bool(r1.get("state_close2")), c2["second_look_dropped_10_to_15_min"]))
+check("MAPBREAK records: map 3 results flipped -> same records", sig(m.matches(spec, [run_folder(lists(flip_map3=True))])[0]) == sig(base))
+vv, _ = m.matches(spec, [run_folder(lists(flip_map2_of=4))])
+check("MAPBREAK records: ONE match's map-2 RESULT flipped (the registered state of the second look, public at map 2's close) -> only that match's second look changes (control)",
+      [a for a, b in zip(sig(vv), sig(base)) if a != b and a[0].endswith("AAABBB4")] != [] and sum(1 for a, b in zip(sig(vv), sig(base)) if a != b) == 1)
+v, c = m.matches(spec, [run_folder(lists(one=(4, 10, 50)))])
+check("MAPBREAK records: ONE match's map-2 close moved to 10 min after map 1 (a time AFTER the first look) -> its first-look record is unchanged", [(r["key"], r["up"], r["state_close"]) for r in v if r["key"].endswith("AAABBB4")] == [(r["key"], r["up"], r["state_close"]) for r in base if r["key"].endswith("AAABBB4")] and len(v) == len(base), "records %d -> %d" % (len(base), len(v)))
+v2, c2 = m.matches(spec, [run_folder(lists(one=(4, 40, 12)))]); v3, _ = m.matches(spec, [run_folder(lists(end_gap=5))]); v4, _ = m.matches(spec, [run_folder(lists(end_gap=300))])
+r0 = [r for r in base if r["key"].endswith("BBB4")][0]; r1 = [r for r in v2 if r["key"].endswith("BBB4")][0]
+check("MAPBREAK records: the MATCH close moved (a time after the second look) -> the second look of that match is unchanged", r0.get("state_close2") == r1.get("state_close2") and sig(v3) == sig(base) and sig(v4) == sig(base), "second look %s -> %s; every match close moved to 5 min and to 5 h after map 2: records identical" % (bool(r0.get("state_close2")), bool(r1.get("state_close2"))))
 
 # ---------------- breakplay engine: what reaches a bet
 def candle(ts, bid, ask): return {"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % bid}, "yes_ask": {"close_dollars": "%.4f" % ask}, "volume_fp": "1"}
