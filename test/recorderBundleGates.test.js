@@ -160,6 +160,11 @@ print(json.dumps([inw, late, sat, stop, early_other, os.path.exists(os.path.join
   assert.strictEqual(r[5], true, 'the NY Fed row is saved');
 };
 
+// RAINGONE: the rain recorder (RAINCAL) was deleted on Nov 12, 2026 at the owner's request. Its data branch stays; nothing here may bring the job back.
+gates.RAINGONE = () => {
+  assert.ok(!fs.existsSync(path.join(root, '.github', 'workflows', 'record-rain.yml')), 'the rain recorder workflow is gone');
+  assert.ok(!fs.existsSync(path.join(root, 'scripts', 'record_rain.py')), 'and so is its script');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
