@@ -4,12 +4,11 @@
   python3 -I build_cfrti_k_candles.py <stage 1 run folder> all             > CFRTI_K_CANDLES.json        (batched for EVERY market: only if CFRTI_K_PROBE shows the batch endpoint answers before the cutover)
   python3 -I build_cfrti_k_candles.py <stage 1 run folder> hist <offset>   > CFRTI_K_CANDLES_H<offset>.json  (one request per older market, 1,000 a file)
 Rules: settled markets with result yes/no that close before the cutoff 2026-11-05T00:00:00Z (a later market is dropped, never requested), 1 minute candles,
-window = 3,600 s before the close to the close. live: up to 55 tickers a request on /markets/candlesticks, tickers in close-time order, the window of a batch is
-(first close - 3,600) to (last close). hist: /historical/markets/{ticker}/candlesticks, one request each (so the old half of the history costs about one request a market)."""
+window = 900 s before the first close to the last close, batches packed so (window minutes x tickers) <= 9,000 (about 24 consecutive markets). live: /markets/candlesticks, tickers in close-time order. hist: /historical/markets/{ticker}/candlesticks, one request each (so the old half of the history costs about one request a market)."""
 import gzip, json, os, sys, calendar, time, re
 CUTOFF = calendar.timegm(time.strptime("2026-11-05", "%Y-%m-%d"))
 CUTOVER = calendar.timegm(time.strptime("2026-09-12", "%Y-%m-%d"))
-BATCH, HIST_FILE = 55, 1000
+HIST_FILE, LIMIT = 1000, 9000    # the batched candle endpoint counts (window minutes x tickers) against 10,000 and answers 400 above it (V2 backfill.py); packed to 9,000
 def iso_ts(s):
     try: return calendar.timegm(time.strptime(re.sub(r"\.\d+Z$", "Z", s), "%Y-%m-%dT%H:%M:%SZ"))
     except Exception: return None
@@ -33,10 +32,16 @@ def main(folder, part, offset=0):
     mk = read_markets(folder)
     if part in ("live", "all"):
         mk = [x for x in mk if x[1] > CUTOVER] if part == "live" else mk
-        reqs = []
-        for i in range(0, len(mk), BATCH):
-            b = mk[i:i + BATCH]
-            reqs.append({"id": "b%04d" % (i // BATCH), "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for t, _ in b), "start_ts": b[0][1] - 3600, "end_ts": b[-1][1], "period_interval": 1}})
+        reqs, cur, n = [], [], 0
+        def flush():
+            global n
+            reqs.append({"id": "b%04d" % len(reqs), "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for t, _ in cur), "start_ts": cur[0][1] - 900, "end_ts": cur[-1][1], "period_interval": 1}})
+        for t, c in mk:
+            trial = cur + [(t, c)]
+            if cur and (trial[-1][1] - (trial[0][1] - 900)) / 60 * len(trial) > LIMIT:
+                flush(); cur = [(t, c)]
+            else: cur = trial
+        if cur: flush()
         j = job(reqs, [t for t, _ in mk], [{"name": "markets_candlesticks_batch", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}], "CFRTI_K_CANDLES")
     else:
         mk = [x for x in mk if x[1] <= CUTOVER][int(offset):int(offset) + HIST_FILE]

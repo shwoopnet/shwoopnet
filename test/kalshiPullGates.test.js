@@ -267,7 +267,7 @@ gates.KP14 = () => {
   assert.strictEqual(j.COMBO1_OPENBOOK.max_requests, 3);
   assert.strictEqual(j.COMBO1_OPENBOOK.status, 'retired');
   // jobs v3 (Nov 12): the counts each job was registered with
-  const v3 = { CFRTI_K_LISTS: [2, 30], CFRTI_K_PROBE: [1, 1], CFRTI_K_R6SLICE: [8, 8], ECONLAG_CALENDAR: [10, 10], NHLOT_LISTS: [4, 10], INGAMELAG_M1: [215, 235] };
+  const v3 = { CFRTI_K_LISTS: [2, 30], CFRTI_K_PROBE: [1, 1], CFRTI_K_R6SLICE: [20, 20], ECONLAG_CALENDAR: [10, 10], NHLOT_LISTS: [4, 10], INGAMELAG_M1: [215, 235] };
   for (const [id, [n, cap]] of Object.entries(v3)) { assert.strictEqual(j[id].status, 'active', id); assert.strictEqual(j[id].requests.length, n, id + ': requests'); assert.strictEqual(j[id].max_requests, cap, id + ': cap'); }
   // development dates only: the CFRTI-K lists stop before the 2026-11-05 held-out cutoff (max_close_ts 1793836800)
   assert.ok(j.CFRTI_K_LISTS.requests.some((r) => r.params && r.params.max_close_ts === 1793836800), 'CFRTI_K_LISTS live list bounded at the cutoff');
@@ -311,6 +311,43 @@ gates.KP14b = () => {
       if (m) assert.ok(tk.has(m[1]), job.job_id + ': ticker allowlisted ' + m[1]);
     }
   }
+};
+
+// KP14c: the batched candle endpoint counts (window minutes x tickers) against a limit of 10,000 and answers HTTP 400 above it, so no batched request may exceed 9,000 minutes x tickers. The probe is 24 consecutive tickers in 1 request, the R6 slice is 20 requests covering all 407 windows once.
+gates.KP14c = () => {
+  for (const id of ['CFRTI_K_PROBE', 'CFRTI_K_R6SLICE']) {
+    const job = JSON.parse(fs.readFileSync(path.join(jobDir, id + '.json'), 'utf8'));
+    const seen = [];
+    for (const r of job.requests) {
+      const p = r.params, n = p.market_tickers.split(',').length, minutes = (p.end_ts - p.start_ts) / 60;
+      assert.ok(minutes * n <= 9000, id + ' ' + r.id + ': minutes x tickers ' + minutes * n + ' is at most 9,000 (the endpoint refuses above 10,000)');
+      seen.push(...p.market_tickers.split(','));
+    }
+    assert.strictEqual(new Set(seen).size, seen.length, id + ': no ticker requested twice');
+    assert.strictEqual(seen.length, job.ticker_allowlist.length, id + ': every allowlisted ticker is requested once');
+  }
+  const probe = JSON.parse(fs.readFileSync(path.join(jobDir, 'CFRTI_K_PROBE.json'), 'utf8'));
+  assert.strictEqual(probe.ticker_allowlist.length, 24);
+  assert.strictEqual(probe.requests.length, 1);
+  const slice = JSON.parse(fs.readFileSync(path.join(jobDir, 'CFRTI_K_R6SLICE.json'), 'utf8'));
+  assert.strictEqual(slice.ticker_allowlist.length, 407);
+  assert.strictEqual(slice.requests.length, 20);
+  // the offline builder packs the same way: here 700 consecutive quarter hours, every batch within 9,000 (about 24 tickers a request, so the real lists come to about 216 requests in live mode and about 624 in all mode, each under the 1,200 cap)
+  const out = JSON.parse(execFileSync('python3', ['-I', '-c', `
+import importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('b', ${JSON.stringify(path.join(jobDir, 'build_cfrti_k_candles.py'))}); b = importlib.util.module_from_spec(spec); spec.loader.exec_module(b)
+import calendar, time
+t0 = calendar.timegm(time.strptime("2026-10-01", "%Y-%m-%d"))
+mk = [("KXBTC15M-%d" % i, t0 + 900 * i) for i in range(700)]
+b.read_markets = lambda f: mk
+import io, contextlib
+buf = io.StringIO()
+with contextlib.redirect_stdout(buf): b.main("x", "all")
+j = json.loads(buf.getvalue())
+print(json.dumps([[len(r["params"]["market_tickers"].split(",")) * (r["params"]["end_ts"] - r["params"]["start_ts"]) / 60 for r in j["requests"]], j["max_requests"], len(j["ticker_allowlist"])]))`], { encoding: 'utf8' }));
+  assert.ok(out[0].every((x) => x <= 9000), 'the builder never packs a batch above 9,000 minutes x tickers');
+  assert.strictEqual(out[2], 700);
+  assert.ok(out[1] >= 700 / 25 && out[1] <= 1200, 'about 24 tickers a request, far under the 1,200 cap');
 };
 
 // KP15: the stage 2 builder takes development events only, round robin, never the held-out third, and never passes the registered total.
