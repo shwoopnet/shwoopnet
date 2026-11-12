@@ -52,4 +52,4 @@ Registered prediction: 0.5 trades per city-day over 8 cities, about 4 a day, so 
 
 ## Nov 11, 2026: Open-Meteo stopped
 
-The Open-Meteo ensemble read above was removed (its hosted API is non-commercial only; the account holder is an LLC). The recorder now writes NWS tables only (`nwsgrid`, `nwsobs`, `nws`) beside the quotes, results and IEM observations. No new `ens` rows are written; those already on the branch stay. How to turn it off is unchanged: delete the workflow.
+The Open-Meteo ensemble read above was removed (its hosted API is non-commercial only; the terms are read as for business use). The recorder now writes NWS tables only (`nwsgrid`, `nwsobs`, `nws`) beside the quotes, results and IEM observations. No new `ens` rows are written; those already on the branch stay. How to turn it off is unchanged: delete the workflow.

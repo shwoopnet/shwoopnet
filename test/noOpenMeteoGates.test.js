@@ -1,5 +1,5 @@
 'use strict';
-// Nov 11, 2026 (owner direction): no Open-Meteo reads. Open-Meteo's hosted API is free for NON-COMMERCIAL use only, and the account holder is an LLC trading real money. Weather research data
+// Nov 11, 2026 (owner direction): no Open-Meteo reads. Open-Meteo's hosted API is free for NON-COMMERCIAL use only, and the terms are read as for business use. Weather research data
 // now comes from the NWS API (api.weather.gov, US government, public domain). This gate keeps an Open-Meteo host from coming back unnoticed, in a workflow, a script, a function or the signal logger allowlist.
 // Comments are scanned too on purpose: a host named in a comment next to code is how it started. This file and the notes are the only places the name may appear.
 const assert = require('assert');
