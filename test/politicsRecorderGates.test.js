@@ -78,7 +78,7 @@ gates.PR4 = () => {
   assert.deepStrictEqual(out, ['2027-02-28T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
   const steps = wf.split(/\n      - name: /).slice(2);
-  assert.ok(steps.length === 6 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
+  assert.ok(steps.length === 6 && steps.every((s) => /if: "?(always\(\) && |!cancelled\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(time\.time\(\)\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code) && /if past_end\(now\):\s*\n\s*break/.test(code), 'the script exits at once, and no poll starts after it');
 };
 
@@ -205,7 +205,7 @@ gates.PR10 = () => {
 gates.PR11 = () => {
   const chain = wf.split(/\n      - name: /).pop();
   assert.ok(/^Chain the next run/.test(chain));
-  assert.ok(/if: always\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'/.test(chain), 'chains after a failed poll, never from a skipped or past-end run');
+  assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'"/.test(chain), 'chains after a failed poll (but a manual cancel stops the chain), never from a skipped or past-end run');
   assert.ok(/2027-02-28T23:59:00Z/.test(chain) && (chain.match(/not chaining/g) || []).length >= 2, 'the end date is checked before and after the sleep');
   assert.ok(chain.indexOf('sleep $((') > -1 && chain.indexOf('sleep $((') < chain.indexOf('gh workflow run'), 'it sleeps before it dispatches');
   assert.ok(/START \+ 1200/.test(chain) && /1800/.test(chain), 'at least 20 minutes after the start, on a half hour');

@@ -43,7 +43,8 @@ gates.RG2 = () => {
       assert.strictEqual(x.label, 'UNPROVEN', x.id + ' is labelled UNPROVEN');
       for (const k of ['rule', 'nextReadText', 'kill', 'return', 'nBasis']) assert.ok(nonEmpty(x[k]), x.id + ' states ' + k);
       for (const k of ['kill', 'return']) if (/to confirm/i.test(x[k])) assert.ok(x.notes.some((t) => /to confirm/i.test(t)), x.id + ': an unwritten ' + k + ' rule is listed in notes');
-    } else assert.strictEqual(x.label, null, x.id + ' only shadow and paper rows carry the label');
+    } else if (x.stage === 'Probe' && !(x.code && x.code.live)) assert.strictEqual(x.label, 'UNPROVEN', x.id + ' is approved but not built, and still unproven');
+    else assert.strictEqual(x.label, null, x.id + ' only shadow and paper rows carry the label');
     if ((x.stage === 'Live' || x.stage === 'Probe')) for (const k of ['rule', 'kill', 'return']) assert.ok(nonEmpty(x[k]), x.id + ' states ' + k);
     if (x.stage === 'Retired') assert.ok(nonEmpty(x.reason) && nonEmpty(x['return']), x.id + ' states why it ended and the return rule');
   }
@@ -91,17 +92,18 @@ gates.RG5 = () => {
   assert.ok(/id = 'spPop'/.test(html) && /pop\.hidden = true/.test(html) && /e\.key === 'Escape'/.test(html), 'the popup closes by Close, outside tap and Escape, and lives outside #stratBody so a redraw never closes it');
   // Behaviour: lift the pure helpers and render the seeded registry.
   const fn = (name) => { const i = html.indexOf('function ' + name + '('); let d = 0, j = html.indexOf('{', i); for (let k = j; k < html.length; k++) { if (html[k] === '{') d++; else if (html[k] === '}' && --d === 0) return html.slice(i, k + 1); } };
-  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegistryCardHtml', 'kalshiRegistrySheetHtml', 'kalshiRegistryRetiredRow', 'kalshiStratSpark', 'kalshiStratOneLine'].map(fn).join('\n');
+  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegistryCardHtml', 'kalshiRegBuilding', 'kalshiRegistrySheetHtml', 'kalshiRegistryRetiredRow', 'kalshiStratSpark', 'kalshiStratOneLine'].map(fn).join('\n');
   const P = new Function("var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];\n" + code + '; return { kalshiRegistryNorm, kalshiRegistrySplit, kalshiRegistryCardHtml, kalshiRegistrySheetHtml, kalshiRegistryRetiredRow };')();
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const list = P.kalshiRegistryNorm(reg);
   assert.strictEqual(list.length, reg.strategies.length);
   assert.strictEqual(P.kalshiRegistryNorm({ nope: 1 }), null, 'a wrong shape is refused');
   const split = P.kalshiRegistrySplit(list, ['OICORE', 'EVENT830'], ['XRP', 'Bitcoin', 'Ethereum', 'Dogecoin', 'AUD/USD', 'USD/CAD', 'Natural gas']);
-  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['CFRTI-K', 'GOLDOFF', 'NC15DEPTH1', 'S3', 'W-NO-ARM1', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL, CFRTI-B and the spot-version lead are folded into CFRTI-K)');
+  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['CFRTI-K', 'GOLDOFF', 'NC15DEPTH1', 'S3', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL, CFRTI-B and the spot-version lead are folded into CFRTI-K)');
   assert.ok(split.retired.some((x) => x.id === 'MMSIM1') && split.retired.some((x) => x.id === 'W-SPREAD-CELL1') && !split.retired.some((x) => x.name === 'XRP'), 'only retired rows not already listed are added');
   const out = split.pipeline.map((x) => P.kalshiRegistryCardHtml(x, esc)).join('');
-  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 6, 'every unproven card says UNPROVEN');
+  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 5, 'every unproven card says UNPROVEN');
+  assert.ok(/APPROVED, BUILDING/.test(P.kalshiRegistryCardHtml(list.find((x) => x.id === 'CFRTI-K'), esc)) && !/APPROVED, BUILDING/.test(P.kalshiRegistryCardHtml(list.find((x) => x.id === 'GOLDOFF'), esc)), 'CFRTI-K is approved and building, nothing else is');
   assert.ok(!/Kill|Return|Room left/.test(out), 'the card itself is condensed: the rules are in Details');
   // The Details sheet shows ONLY: what it does, kill, return, room left, one chart.
   const g = list.find((x) => x.id === 'GOLDOFF');
@@ -141,12 +143,12 @@ gates.RG6 = () => {
   const fb = P.kalshiStratSheetRow('OICORE', [], P.KAL_BOARD_LIVE);
   assert.ok(fb && /drawdown/.test(fb.kill) && /re-arms/.test(fb['return']) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
   // the content: five things only
-  const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { room: 10.67, drawdown: 39.33, count: 18, streak: 3, lines: [] } };
+  const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { streak: 3, net: -1, floorOn: true, floorRoom: 5, count: 18, lines: [] } };
   const row = P.kalshiStratSheetRow('OICORE', list, P.KAL_BOARD_LIVE);
   const shown = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, money), esc);
   for (const w of ['Does', 'Kill', 'Return', 'Room left']) assert.ok(shown.includes(w), 'popup has ' + w);
   assert.strictEqual((shown.match(/<svg/g) || []).length, 1, 'one small chart');
-  assert.ok(/Rolling 30 trade cash PF/.test(shown) && /drawdown room of \$50\.00/.test(shown) && /\$10\.67/.test(shown), 'the live read fills room left and the chart');
+  assert.ok(/Rolling 30 trade cash PF/.test(shown) && /of room before the net floor/.test(shown) && /\$5\.00/.test(shown), 'the live read fills room left and the chart');
   assert.ok(!/Started|Next read|To confirm|Sizing|Implement|Last 8|Best day|Fees/.test(shown), 'and nothing else (no ladder, no trade list, no extras)');
   // Privacy view
   const masked = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, mask), esc);
