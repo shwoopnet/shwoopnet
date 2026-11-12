@@ -36,3 +36,12 @@ Output tokens lifetime: main 11.25M, V2 11.59M (+0.17M), Refinement 4.88M (+0.83
 Biggest habit: V2 context grew 330k to 675k in a day and is near the 784k compaction; HLAD2 is held on the warning with a 16:28Z wake. Recommend (not done): its head writes a short handoff before it compacts.
 Idle chat check: no redirect (warning step: no new directions). V2 holds HLAD2 and the Nov 15 list; Refinement has the weather pull, OKX logger, family map and rotation role.
 Calls: none (0 of 5). Nothing for the owner from this run beyond the warning already reported.
+
+## 2026-11-12 morning US Central (COO run in main, 7:40 AM)
+Rate limit: five hour window status allowed, not on overage (V2 and Refinement; main reports none rejected). Normal step.
+Lifetime cost, change since Nov 11 morning: main $1,317.66 (+$100.09, context 382k of 1M); V2 $1,061.68 (+$72.51, context 770k of the 784k threshold, was 675k); Refinement $617.82 (+$96.59, context 500k).
+Output tokens lifetime: main 12.37M (+1.12M), V2 12.73M (+1.14M), Refinement 5.99M (+1.11M). Flat plan per the Nov 7 directive: logged, not a reason to slow.
+What it bought since Nov 11: V2 POWER2 (9 of 16 queue rows retired by power), MENTPERSIST1 closed, MMSIM1 outcome labels committed, 24 hour shortlist (2 candidates, probe-ready 0); Refinement relabelled W-SWEEP-EXT1 and the sweeps, froze the weather/finance/indices calibration, ran the OICORE offline read, balance snapshot confirmed; Desks A and B power files, BALLOTNO read finished. Main merged 789 to 792 and built the combo book recorder (793, waits for the owner).
+Biggest habit: V2 context is 770k of 784k and about to compact; its handoff should be written first (guidance sent, not a command). The binding constraint is not Claude spend but the shared 25 Kalshi reads an hour.
+Idle chat check: V2 and Desk A, B, Refinement have no workers; all candidates are blocked on reads or dates (Nov 14, 22, 24). No brief passes the checklist to approve; nothing to redirect.
+Calls: none (0 of 5). Nothing for the owner from this run beyond the open items main already holds.
