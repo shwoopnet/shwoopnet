@@ -82,3 +82,7 @@ A separate registration, before any result of the price block is read: the rule 
 3. The ask at one instant is not a fill. Forensics measured a 59% to 73% fill at the price seen on the 15 minute series; nothing is measured for sports.
 4. Forensics flags NHL spreads and totals as too costly (3c to 4c wide). The NHL cells may fail on the spread line alone; that is a result, not a fault.
 5. My probability that any cell survives: about 20%. That a surviving cell then reaches the bar: about 1 in 5.
+
+## Note, Nov 12, 2026, 19:05Z, before any data (after the Forensics audit of another registration)
+
+The start check in "The instant", step 2, uses the close of the game's first-period market, a time AFTER the entry instant. At this stage no result of a priced game is read, so it cannot bias a result: it only removes games whose start cannot be trusted (a postponement, a market left open). **If a cell survives and a rule is registered, that check becomes a family-level check** (the share of games passing it is printed and a cell under 80% is "start not derivable"), so that no later time decides which bets exist.

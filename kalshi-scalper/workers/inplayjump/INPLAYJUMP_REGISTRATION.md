@@ -100,3 +100,13 @@ One decision a match, and a 10c one-minute move happens in most tennis matches (
 4. The Eastern reading of the ticker clock was checked on three families, one market each. The guard drops matches where it fails.
 5. E-soccer and e-basketball are people playing video games for a few minutes; table tennis and ITF tennis are low-tier sport. Whoever moves these prices may know more than a score.
 6. **My odds: about 2% that any one family meets the development bar (with over a thousand bets, luck alone will not produce a profit factor of 1.5); about 1% a family that it passes the research bar; about 4% that any of the five does. The likely result is FALSIFIED in most families, near the cost.**
+
+## AMENDMENT 1, Nov 12, 2026, 19:05Z, before any list or candle has landed: the clock guard no longer drops single matches
+
+The Forensics desk's audit of another registration of mine (MAPBREAK) found conditions where a time known only after the bet decided which bets exist. The same kind of condition was in this file: "Guard: the market closed 4 to 90 minutes after S, else the match is dropped and counted." A game that ends early or late could be tied to who wins. It is replaced:
+
+- **No match is dropped because of when its market closed.** In the clock families every match is in play from S + 60 seconds, as read from its ticker.
+- **The Eastern reading of the ticker clock is checked once for the whole family, not match by match:** the share of the family's development matches whose market closed 4 to 90 minutes after S is printed. If that share is under 80%, the reading is wrong for that family, the family is reported as "start not derivable" and no result of it is read. A family-level check cannot select bets by their outcome.
+- The file `INPLAYJUMP_SERIES.json` carries the old wording in its `in_play_rules` text; this amendment overrides it.
+
+Also confirmed for the builder (Desk A's questions of 18:56Z), none of it new: the bought contract is the JUMPER's own contract, bought as YES at its own ask (never a NO of the other contract); the jump is 10c on the two-sided minute-end mid with volume above zero in that minute; there is no cooldown because there is one decision a match (the first qualifying jump, no second chance); the direction is FOLLOW; the placebo is the one registered above (the first quiet in-play minute, the contract with the higher mid, re-weighted to the rule's price mix), NOT a matched minute of the same contract in the same match, because the nearest minute at the same price is usually just after the jump and would be the same bet a few minutes later.
