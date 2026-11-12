@@ -101,3 +101,11 @@ ITF and challenger markets are open about 18 hours and carry no start clock, so 
 4. **Putting polls on exchange time:** candle ends are exchange time, so the replay shifts each poll by R6's rule (offset = median of the Date header plus 0.5 seconds minus the receive time); that is why every poll row carries the Date header. A poll maps to the last stored book row for that ticker at or before it.
 5. For tennis in phase 2 the results rows also need `open_time` (already in section 4's list).
 
+## Added 20:11Z (Head of R&D, 20:10Z, on the owner's reminder that limit orders, targets and stops may be used): the public trade tape
+
+1. **After each recorded market closes, its public trade tape is read once** (`GET /markets/trades?ticker=...`, cursor followed to the end), about 60 seconds after the close, as R6 does. Trades are de-duplicated by trade id and the id is NOT stored. Kept per trade: ticker, trade time, YES price, count, taker side. Stored as raw answer bodies with the manifest, like the candles and results.
+2. **Why:** a resting limit entry or a resting target can be scored only where a book AND a tape exist (standing rule (i): a resting bid fills when a taker prints strictly through its price, or at its price only after the size ahead of it has traded). Without the tape no resting order on these markets can ever be scored.
+3. **Extra requests:** one or more a market. Markets recorded a day on Nov 10 (lower bound): e-soccer 1,350, table tennis 294, e-basketball 168, CS2 and Dota 2 match 122, map markets about 158: about 2,100 a day, plus extra pages for the busiest esports match markets. **About 1.5 requests a minute on average,** at least 1.5 seconds apart, on a second request stream as in R6. The total becomes about 29 a minute.
+4. The coverage row per market gains: tape pages, trades, duplicates dropped, and the summed size next to Kalshi's own volume figure, so a short tape shows.
+5. Rule (h) as for every recorder file: the tape shows what happened after any entry; it is read only by frozen engines in replay mode.
+
