@@ -39,18 +39,18 @@ At 10 contracts (fee rounded per order at C = 10) every PF is higher by about 0.
 
 ## Live: the 50 exits in the last 30 days of the nightly report (2026-09-29 to 2026-10-29 18:16 UTC)
 
-Market result from `data/fresh.sqlite` (all 50 found). Price paid estimated as the bought side's ask on the candle ending at the order's minute; 9 had no candle in `fresh.sqlite` (the two forex probes, one Bitcoin and one Ethereum order), and their hold figure uses 92c, so it is approximate. Realised = the report's `settledPnl` (dollars at the real sizes, after fees). Hold = what the same contracts would have paid at settlement. Rows stay in the scratchpad (`struct1_live_exits.json`).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-| Market | Exits | Contracts | Would have won if held | Realised exit P/L | Estimated hold P/L | Hold minus exit |
-|---|---|---|---|---|---|---|
-| gold | 7 | 60.65 | 1 | -$41.64 | -$45.83 | -$4.19 |
-| Bitcoin | 8 | 60 | 1 | -$46.67 | -$48.64 | -$1.97 |
-| Ethereum | 9 | 45 | 3 | -$30.29 | -$26.88 | +$3.41 |
-| Dogecoin | 6 | 17 | 1 | -$12.23 | -$12.61 | -$0.38 |
-| XRP | 9 | 18 | 1 | -$13.90 | -$12.93 | +$0.97 |
-| AUD/USD (probe) | 4 | 4 | 0 | -$3.06 | -$3.72 | -$0.66 |
-| USD/CAD (probe) | 3 | 3 | 2 | -$2.30 | -$0.79 | +$1.51 |
-| natural gas (probe) | 4 | 8 | 0 | -$5.77 | -$7.10 | -$1.33 |
-| **all** | **50** | **215.65** | **9** | **-$155.85** | **-$158.49** | **-$2.63** |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-**What the numbers say.** Over the last 30 days the 50 live exits lost $155.85; holding the same contracts to settlement would have lost about $158.49, so the exits saved about $2.63 in all. 9 of the 50 (18%) would have settled a win. By market the sign differs: holding would have been worse on gold, Bitcoin, Dogecoin and two of the probes, and better on Ethereum (3 of 9 recovered) and XRP. These are 50 orders, so each market's figure rests on 3 to 9 exits.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]

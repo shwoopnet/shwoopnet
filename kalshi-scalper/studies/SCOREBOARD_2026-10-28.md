@@ -6,7 +6,7 @@ One page: what has been tried, how big the samples were, and what the verdict wa
 
 - Result sections in `README.md`: 83. Verdict words in them: FALSIFIED 169, NOT_ENOUGH_DATA 29, NOT_YET_FALSIFIED 19 (the last includes forward claims that are still open, not passes).
 - **Passed and survived a forward read: none.** Open forward claims: P6F (allocator, reads 2026-11-12), P6R, FLOOR1 and THIN1 (XRP, 2026-11-12), HOURS1 (12 to 18 UTC), REV1 (Bitcoin late cheap NO, 2026-11-05), ABSORB-F (2026-12-01), GAS1-F (2026-11-22), FLIP1 and E3F/FWD1/VOL1 (mid-November).
-- Live profit factor (owner's orders, 2026-10-07 to 10-26): 1.22 over 620 fills; history of the live rule (L1) pooled 1.02 over 31,581 entries.
+- Live profit factor: [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]; history of the live rule (L1) pooled 1.02 over 31,581 entries.
 
 ## Families, what is tested and what is not
 

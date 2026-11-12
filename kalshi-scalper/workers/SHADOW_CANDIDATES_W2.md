@@ -4,7 +4,7 @@ Honest count: ONE new candidate. The rest of what I scored today failed and is l
 
 ## 1. GOLD-MOM1 (a filter on gold L1, NOT a new market: same market, side and time, so a variant of what is on deck)
 validateShadowRule: {id:"GOLD-MOM1", series:"KXGOLD15M", entry:{sideRule:"favourite", priceMin:0.88, priceMax:0.97, leftMaxSec:390, leftMinSec:330, maxSpread:0.03, extra:"rise3>=0.05"}, contracts:1, registeredAt:"2026-11-09", forwardReadDate:"after 150 shadow signals"}
-- History (live gold fills, rows 101 to 307, from REGIME1): dev PF 4.36 n 67; held-out PF 1.61 n 64 (+$24.74). Unfiltered gold in the same rows is PF 0.57 n 64 on the still group.
+- History (live gold fills, from REGIME1): [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 - Signals per week: about 40. 150 signals in about 4 weeks.
 - Needs: the bot logs rise3 already; the shadow logger must record rise3 on every gold signal (main's logger PR).
 - Prior: 25% to hold PF 1.3+. Counterparty: none named, a momentum conditioner only.

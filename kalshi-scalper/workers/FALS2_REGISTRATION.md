@@ -34,7 +34,7 @@ Vectorised day-block bootstrap: whole Central days with replacement, 10,000 path
 ## Check 3: stress, each fixed now, each one try (same paths, STOP_DAY, both starts, 30 and 90 days)
 
 - **(a) one candle later:** the decision (band, side, smooth, quiet hour) on the close - 360 candle, but the fill at the NEXT candle's (close - 300) ask of the same side, plus the same per-market slippage (conservative: the live send still lags whatever quote it sees); no entry if that candle is missing or its quote is not valid; the exit watch looks only after that candle.
-- **(b1) gold slippage +1.0c on top of the live 0.60c (1.60c total); (b2) +1.5c on top (2.10c total).** (RISK1's own sensitivity row was 1.5c total.)
+- **(b1) gold slippage +1.0c on top of the live [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]; (b2) +1.5c on top (2.10c total).** (RISK1's own sensitivity row was 1.5c total.)
 - **(c) 3-day blocks:** resample blocks of 3 consecutive history days (start uniform over every valid start), 30 blocks for 90 days, so runs of bad days are kept.
 - **(d) best 5 days dropped:** the 5 history days with the highest 1 contract net across the three markets under the live rules (Check 1 records) are removed from the pool before resampling.
 - **(e) look-ahead audit:** list every candle my code reads to decide an entry and assert none ends after close - 360; then read `risk1.py` and do the same, and check its smooth gate, band and exit use only candles at or before the decision (exit: only after).

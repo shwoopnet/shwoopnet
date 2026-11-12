@@ -13,7 +13,7 @@ rates and prices in each worker's own registration or result (source per row in 
 3. **What a test CAN do inside a quarter is kill, and kill weakly.** At the floor n the edge you need for 80% power at 5.27 is 15c to 32c per trade on cheap-side prices of 6c to 40c.
    That is an edge bigger than the price paid on the 6c to 12c tests (a win rate 2.5 to 4 times the ask). A real +2c edge survives the registered kill rules only 4% to 28% of the time
    (a zero edge survives 2% to 17%), so "NOT_YET_FALSIFIED" is worth a likelihood ratio of roughly 2 to 3, not a green light.
-4. **Reference: the bar was only ever reachable by edges as large as L1's and OICORE's.** Live L1 gold at its published +4.3c a contract (sd 19c, win rate 96%) needs about 543 trades
+4. **Reference: the bar was only ever reachable by edges as large as L1's and OICORE's.** Live L1 gold at its published [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] needs about 543 trades
    (70 days at 7.8 fills a day, 94 days to 80% power) to reach z 5.27; OICORE's history edge (+13.9c, sd 45c) needs 443 trades (74 days at 6 a day, 99 days to 80% power). A +2c edge on a
    sd 30c to 50c cheap-side trade needs 7,500 to 45,000 trades (80% power).
 5. **Implication for the goal "profitable and ready to deploy":** waiting on forward readings of thin cheap-side edges is not a path to a deployable strategy inside a quarter. Only
@@ -115,8 +115,8 @@ rate is not the issue; the issue is that the rare 97c loss makes 40 fills mostly
 
 | Row | Edge used | sd per trade | Trades per day | Trades to z 5.27 (median / 80% power) | Days |
 |---|---|---|---|---|---|
-| L1 gold live (README: 155 fills, 149 wins, +$44.06 at 6.7 contracts) | +4.3c per contract (assumed rho 0.1) | 19c | 7.8 | 543 / 731 | 70 / 94 |
-| OICORE Bitcoin history (358 trades, PF 2.33, win 29.1%; live CSV: 24 orders on 5 dates, 18 settled, 5 wins, +$25.03) | +13.9c | 45c | 6.0 | 443 / 595 | 74 / 99 |
+| L1 gold live ([live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]) | [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] (assumed rho 0.1) | 19c | 7.8 | 543 / 731 | 70 / 94 |
+| OICORE Bitcoin history (358 trades, PF 2.33, win 29.1%; live CSV: [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]) | +13.9c | 45c | 6.0 | 443 / 595 | 74 / 99 |
 
 If either live edge is half its published size, the days roughly quadruple (for L1 gold 280 to 375; for OICORE 295 to 400). At +2c L1 gold needs 908 days and OICORE 2,200 days.
 

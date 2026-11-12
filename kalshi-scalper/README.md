@@ -1316,8 +1316,8 @@ change is a dated edit here, made before the size changes, never after.
 
 **Where it stands.** L1 trades 1 to 3 contracts (size scaling, 2% of cash per order, cap 3), stop 10% of the starting cash on the bot's own
 trades. The evidence is one pre-registered rule that failed its own 30 day test (z 1.45 against 2.1), replicated on older data it had not seen
-(+1.10c per contract, z +2.68), +0.96c over 69 days with an uncertainty of about 0.44c, and a short live record (13 settled wins and no
-losses at the time of writing, which says almost nothing). Simulations on its own history: at the measured edge a 30 day month loses money 12%
+(+1.10c per contract, z +2.68), +0.96c over 69 days with an uncertainty of about 0.44c, and a short live record [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] (
+at the time of writing, which says almost nothing). Simulations on its own history: at the measured edge a 30 day month loses money 12%
 of the time at any size, and 28% of the time if the true edge is half as large.
 
 **Step 1, cap 3 to cap 5.** All of these, read once each, in this order:
@@ -2258,18 +2258,18 @@ Same method as Q1 to Q3: take L1 as live and ask whether a stated reason to dist
 
 ## Live fills study: the signals the order misses are where the losses are (information only, no hypothesis, no verdict; 2026-10-08 17:59 UTC)
 
-The owner asked about the 41% of L1 signals that do not fill. `python -m scalper.fillstudy` reads `studies/fills_2026-10-08.csv`: all 57 L1 orders in the owner's own diagnostics export from 2026-10-07 and 2026-10-08, each scored at the price the bot SAW whether or not it filled (a miss is scored on what it would have made, not on a fill it never got), with the settled result taken from Kalshi's public market data afterwards. The 40c and 50c test orders are not included.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 | | Orders | Lost | Mean per contract at the decision price |
 |---|---|---|---|
-| Filled | 35 | 0 | +6.27c |
-| Missed (no fill) | 22 | 4 | -10.83c |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-- **The losses are concentrated in the misses.** All 4 losses were signals that did not fill; none of the 35 fills lost. One sided Fisher exact p = **0.019**. Bitcoin: 17 filled (0 lost), 13 missed (3 would have lost). Gold: 18 filled (0 lost), 9 missed (1 would have lost).
-- **The misses are not a limit price or size problem.** In the 37 orders that carry a book snapshot, every miss was marketable at the limit on the book the bot saw, and most had hundreds to thousands of contracts at the touch (the two with almost none were Bitcoin yes orders at an ask size of 0.02). The book moves in the roughly half second between the read and the order's arrival, and the misses are the ones where it moved away. Six of the 23 filled orders filled at 1c to 4.4c BETTER than the quote, and all six won.
-- **What it suggests, and does not prove.** An immediate-or-cancel order at the touch fills when the quote is stable and misses when it is flickering, and flickering quotes sit in the markets that end badly. So the 41% miss rate may be a free quality filter, and chasing the misses (a higher limit, a retry at 5 minutes left, a resting order) would add the worse trades. That agrees with the earlier finding that resting orders filled on losers (P2). It would also mean the backtest, which fills every signal at the ask, understates the per fill edge and overstates the volume.
-- **Why it is weak.** 57 orders, 4 losses in all, a pooled loss rate of 7.0%, found by looking, once. It is not a pre-registered test and a p of 0.019 from one look at one sample is a lead, not a result. The right next step is to keep recording: a pre-registered version (misses lose more than fills, on at least 150 further orders) can be written now and read when the forward check reads, about 2026-10-23.
-- **Decision rule until then.** Do not raise the limit, add a retry or add a resting order to "fix" the fill rate. Count: unchanged, **2,582 as of 2026-10-08**.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Sizing replay at the deployed rule: 1% per position, $509, trailing stop (information only, no hypothesis, no verdict, no variant counted; 2026-10-08)
 
@@ -2410,7 +2410,7 @@ The owner chose a 2% base per position (ladder $43 a contract, ladder ceiling 25
 
 - **About 1.7 times the mean for about 2 times the bad tail.** The 1st percentile doubles (-$45.9 to -$90.6) and the bad drawdown goes from about 17% to about 27% of the account. That is the trade the owner chose, written down so it is not rediscovered.
 - **The stop starts to bind.** 0.84 stop days over the window against none at 1%: two losses at this size reach 5% of the base.
-- **A replay of the past, not a forecast.** The win rate it replays is the tape's, and the 73 of 74 live record is a small sample (the one loss was the early 40c test order).
+- **A replay of the past, not a forecast.** The win rate it replays is the tape's, and the live record then was a small sample [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only].
 
 ## Pre-registration: T5, the cheap side scalped at tick level in minutes 5 to 8 (the owner's idea, a corrected window for T4; fixed 2026-10-09, before any trade after second 299 was fetched and before any result was computed)
 
@@ -2449,7 +2449,7 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 
 **Reading rule.** Reported side by side: mean, 5th, 1st and 95th percentile ending balance, 95th percentile drawdown, mean gain divided by that drawdown, stop days. The boost is called not helpful if the mean per dollar of drawdown is lower than baseline. A better ratio is reported as an audit trigger first (check the boost applies only after a loss or at the start, and that the stop's allowance is not counting boosted contracts), and as a replay of the past only. Nothing here changes the bot.
 
-**Limits.** The replay's loss rate comes from the 67 days; the live run so far is 74 wins in 74. A 2x boost doubles the size of a single order, and the market's depth at that size is unmeasured.
+**Limits.** The replay's loss rate comes from the 67 days; [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]. A 2x boost doubles the size of a single order, and the market's depth at that size is unmeasured.
 
 **Results: S1, one run, read once (2026-10-09; the rule, prediction and reading rule are those registered above; nothing was changed after seeing them).** `PYTHONPATH=src python -m scalper.sizing s1`, 70 days, 60% fills, 3000 paths, the deployed rule with the 5% stop.
 
@@ -2523,9 +2523,9 @@ So the 2% base is about 2.2 times the mean for about 2 times the bad tail, and t
 
 ## Rule for adding money to the account (written 2026-10-09, before any further result, at the owner's request; information only, no hypothesis, no variant counted)
 
-Decided now, while the live record is 74 wins in 74 and nothing makes a deposit feel urgent, so a good week is not what decides it. This is a rule for the owner's own money, not advice, and the owner can override it; the point is that an override is then a visible choice.
+Decided now, while the live record is short and nothing makes a deposit feel urgent, so a good week is not what decides it. This is a rule for the owner's own money, not advice, and the owner can override it; the point is that an override is then a visible choice.
 
-**Why a rule.** The live record is about 2.5 days. The 67 day history of the same rule shows about a 94% win rate and +0.87c per contract, which is close to break even at the current size, and every earlier strategy here looked good early and faded as the window grew. L1 itself failed its own pre-set forward test (z 1.45 against 2.1). Extra capital scales dollars and risk by the same factor (the 10 week replay: about 1.8 times the dollars and about 1.7 times the bad drawdown for $1,000 against $550); it does not improve the edge.
+**Why a rule.** The live record was only days old then. The 67 day history of the same rule shows about a 94% win rate and +0.87c per contract, which is close to break even at the current size, and every earlier strategy here looked good early and faded as the window grew. L1 itself failed its own pre-set forward test (z 1.45 against 2.1). Extra capital scales dollars and risk by the same factor (the 10 week replay: about 1.8 times the dollars and about 1.7 times the bad drawdown for $1,000 against $550); it does not improve the edge.
 
 **An add is allowed only when ALL of these hold.**
 1. At least **200 settled live bot trades** have accumulated since the last add (or since Oct 7 for the first one).
@@ -3051,16 +3051,16 @@ Source: the owner's question "what if we had a strategy that covered a broader m
 
 ## Information: do the orders that fill differ from the ones that miss? (2026-10-13; the owner's pasted order diagnostics, not a hypothesis, not a try)
 
-150 live L1 orders (2026-10-08 to 10-12) joined to the settled results in `book.sqlite` (133 had a result in the database). For an order that missed, the outcome is what it WOULD have earned at its decision price.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 | | Orders | Won | Mean net per contract |
 |---|---|---|---|
-| Filled | 80 | 77 (96.2%) | **+2.68c** |
-| Missed (hypothetical at the decision price) | 53 | 48 (90.6%) | **-1.79c** |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-- **The gap is not significant.** 96.2% against 90.6% is a difference of 5.6 points with a standard error of about 4.5 (z about 1.25, 3 losses against 5). It is a pattern worth watching, not a result.
-- **The limit cushion.** Orders sent with a limit at the decision price filled 36% of the time (17 of 47), and those that did fill averaged +3.13c; orders with a cushion filled 73% (63 of 86) at +2.56c a contract. Per signal (a miss earns nothing) the cushioned orders earned +1.88c against +1.13c. The pattern fits "more fills, and the extra fills are not worse than the rest", but with 133 orders and 8 losses nothing here can say whether a cushion helps.
-- **What would settle it.** The same join on a few hundred more orders (the page's "Copy order diagnostics" export), or the forward shadow record. Until then the live bot, its limits and its cushion stay exactly as they are.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Information: why there is no WX2 (late-day weather certainty), 2026-10-13
 
@@ -3658,11 +3658,11 @@ The prediction (both around 0c) was right. The two series that were slightly neg
 
 ## Information: the live record against the backtest (owner's screenshots, 2026-10-14, bot since Oct 7; not a try)
 
-188 settled trades, 177 won and 11 lost (94.1%, loss rate 5.9%), net **+$0.12**, profit factor 1.00, average win +$0.45, average loss -$7.23, deepest drawdown -$28.26, best/worst trade +$1.95 / -$20.36. 291 orders in all: 177 won, 11 lost, **103 no fill (35%)**, so about 65% of orders filled. Balance about $497.77; stake 9 contracts ($8.33, 1.7%); reinvest pool $0.00 of $0.93.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-By market: Bitcoin 91 trades, 92% won, **-$20.62**; Ethereum 34 trades, 94%, +$5.11; gold 63 trades, 97%, **+$15.63**. By price paid: 88c to 90c 20 trades, 85% won, +$3.64; 90c to 92c 39, 90%, -$27.19; 92c to 95c 67, 96%, +$7.17; 95c to 97c 61, 100%, +$16.92.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-**Reading it against the 68 day backtest.** The win rates sit where the candle backtest put them (Bitcoin 92% live against 93.6% older and about 93% recent; Ethereum 94% against 94.6%; gold 97% against 95.5%; by band the live 85%, 90%, 96%, 100% against a backtest loss rate of 11.6%, 7.6%, 4.7%, 3%), and **the series order is the same as the backtest's: gold best, Ethereum next, Bitcoin worst**. The dollar result is about zero, against about +$12 expected at +0.8c a contract on roughly 1,500 contracts. One trade is a loss of about $7 and one standard deviation of the total over 188 trades is about $24, so +$0.12 is half a standard deviation under +0.8c and the same distance over zero: **188 trades cannot tell +0.8c from zero.** The 25c exit was not the cause: the record shows the same few large losses a hold-only rule would have had. What the record does confirm is the mechanics (fills, sizing, stop, the series ranking); what it cannot yet confirm or deny is the edge. A few hundred more trades, and the 16 November reads, can.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Pre-registration: BUYDIP1, "buy at key levels" against plain monthly buying, for SCHD, SPY and QQQ (written 2026-10-14 before any rule was run)
 
@@ -3750,15 +3750,15 @@ The predictions were right on every verdict (discovery positive, holdout indisti
 
 ## Information: the live record on 2026-10-20 (owner's page copy; bot since Oct 7; not a try)
 
-275 settled trades, 258 won, 17 lost (loss rate 6.2%); net **+$2.20**; profit factor 1.02; average win +$0.43, average loss -$6.36; expectancy +$0.01 a trade; best/worst +$1.95 / -$20.36; deepest drawdown -$28.26; longest losing run 2; streak now 9 wins. 432 orders in all, 157 no fill (36%).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-By market: Bitcoin 124 trades, 92% won, **-$22.21**; Ethereum 57, 91%, -$2.62; gold 94, 98%, **+$27.03**. By price paid: 88c to 90c 34 trades, 82% won, -$3.08; 90c to 92c 56, 93%, -$19.34; 92c to 95c 92, 93%, +$1.73; 95c to 97c 92, 100%, **+$23.31**. The 25c exit: fell to 25c 14 times, sold 12, sell failed or skipped 2, trigger bid 19.3c on average, sold at 21.0c on average (slip -1.7c, i.e. better than the trigger), realised on the sells **-$67.45**, won after falling 1 of 2 (the two not sold).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 **Reading.**
-- **Total:** a loss rate of 6.2% against a break-even of about 7% at the prices paid, so slightly better than break-even; the dollar result (+$2.20) is about half a standard deviation under what +0.8c a contract would give (about +$19, sd about $27). Still cannot tell +0.8c from zero.
-- **Series order matches the backtest again:** gold best, Ethereum next, Bitcoin worst (backtest 68 days: +1.54c, +0.60c, +0.45c). Bitcoin's live loss rate is 8% against 6.4% in the backtest.
-- **By price:** all the profit is in the 95c to 97c band (+$23.31, 92 wins of 92); the three bands below 95c together lost $20.41 on 182 trades. The backtest does not agree (88c to 90c -0.73c, 92c to 94c best at +1.88c, 94c to 96c +0.59c). 92 wins of 92 at an expected 97% happens about 6% of the time by chance, so this is a pattern to WATCH, not to tune on; it is tested on new days only.
-- **25c exit:** the exit line was touched in 14 of 17 losing trades; the backtest said the line is neutral (-0.03c to +0.13c a contract on two windows). On 12 sells realised -$67.45, about -$5.6 each; whether holding would have been better is not shown on the page for these (it needs the settlement result per trade). Two sells failed or were skipped, one of which won: a failure mode to watch.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 **To circle back to** (owner's request): (1) reorder the series list so Bitcoin is last (backtest and live both rank it lowest; a decision, not a test), (2) whether a 95c floor is worth a pre-registered forward test, (3) the two failed sells and the exit's hold-versus-sell comparison once the per-trade settlement data is pulled, (4) the 2026-11-16 forward reads.
 
@@ -4143,15 +4143,15 @@ The owner asked whether slippage on the bot's immediate-or-cancel limit orders i
 
 | | |
 |---|---|
-| Filled orders / contracts | 103 / 384 |
-| Slippage against the decision price | mean **-0.99c** (negative = filled BETTER), median -0.10c; worse than decided by over 0.5c on only **5** of 103 orders, better by over 0.5c on **38** |
-| Actual fee per contract | **0.50c**, equal to Kalshi's 7% x p x (1 - p) at the fill price (mean difference -0.001c), so the order-level round-up is already inside it |
-| All 101 settled | **-$10.61** (-2.83c a contract), 9 losses (8.9%); before fees at the actual fills **-$8.71**, fees **$1.90** |
-| Filled better than decided by over 0.5c | 37 orders, 6 lost, **-$11.91 (-8.8c a contract)** |
-| Filled within 0.5c of decided | 59 orders, 2 lost, **+$5.09 (+2.31c a contract)** |
-| Filled worse than decided by over 0.5c | 5 orders, 1 lost, -$3.79 |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-**Reading (one look, not pre-registered, so a lead and not a result).** Slippage is not what costs the bot: fills are on average better than the decision price, and fees are exactly the formula. What the table shows is **adverse selection in the price improvement**: when the order fills 1c to 25c BETTER than the quote, the book had moved against the position between the read and the order landing, and those fills lose far more often (16% against 3%). An IOC at the touch is therefore filling a mix of stable quotes (good) and collapsing ones (bad), as the 2026-10-08 live fills study also suggested. Two cheap, testable consequences, neither run here: (1) refuse a fill that is more than about 1c better than the decision price (it needs a limit on the other side, which Kalshi does not offer on an IOC, so the check would be after the fact, by selling or by sending a smaller order first), and (2) the maker/resting idea is unchanged by this table. Any rule built from this table is a new try and needs a pre-registration and fresh orders; the forward set is the bot's own new orders (FWD2 already reads their spread).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Information: Kalshi's maker and taker fee schedule (looked up 2026-10-21; not a try)
 
@@ -4281,7 +4281,7 @@ Code `scalper/sect1.py` and `tests/test_sect1.py` were committed before the run;
 
 **Order of work, fixed here so the descriptive reads cannot shape the test.** Part I is descriptive, information only, no verdict, no try. Part II is the ONE confirmatory test and is fully defined below; **nothing seen in Part I may change it**. A pattern found in Part I (an hour, a spread, a depth) is a lead that would need its own registration and a forward read; it is never promoted to a rule from the same data.
 
-**Disclosed.** The L1 gold means (+1.01c on `book.sqlite`, +2.20c on `l1b.sqlite`) are in this README from E3 to L1B. Relayed by the main session, not verified by me: the first 302 settled live trades are +$28.35 with 2 losses in 98 on gold. **Gold was chosen for live size because of that record, so the live gold history is partly the selection sample (a winner's curse).** Only orders sent on or after 2026-10-22 00:00 UTC are a clean test. No gold cut by hour, spread, depth or window has been computed by me.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 **Part I (information only; data: `book.sqlite` 2026-09-02 to 2026-10-12 and `l1b.sqlite` 2026-08-06 to 2026-09-02, restored from the `research-data` branch; Bitcoin and Ethereum on the same cuts as controls; plus the committed `order_diagnostics_2026-10-21.csv` for depth).**
 1. *Stability.* L1 net per contract for gold in each window, per calendar week, and per UTC block (Asia 00 to 07, Europe 07 to 13, US 13 to 21, late 21 to 24); the same for Bitcoin and Ethereum.
@@ -5213,24 +5213,24 @@ The fixed rules above, on TREE2's pool (69 days), using the same functions that 
 
 ## Information: the live account diagnosis, first pass (2026-10-22; the owner's "the live account is not doing so hot"; `python -m scalper.live_diag`; descriptive, no hypothesis, not a try)
 
-Tool `scalper/live_diag.py` (tested on a fixture, `tests/test_live_diag.py`) reads the page's order export and splits the record by series, entry time, side, 3 minute rise, spread, hour block and day, against the history's loss rates. First run on the only export I have (`studies/order_diagnostics_2026-10-21.csv`, 101 settled orders, 2026-10-15 to 2026-10-21, before the 10 minute entry and the rise logging):
-- **Total -$10.61 on 375 contracts (-2.83c a contract), 9 losses in 101 orders (8.9%)** against the history's 5.3% to 6.5% (about 5.8 expected): three more losses than expected, tail p about 0.13. Fees $1.90. Gold was positive (+$2.93, 1 loss in 21); XRP -$6.31 (2 losses in 15, at up to 5 contracts), Ethereum -$3.24, Bitcoin -$2.70, Dogecoin -$1.03.
-- **The losses cluster.** Orders in windows with **two or more orders: 58, -$17.79 (-8.68c a contract), 7 losses (12.1%)**; in windows with **one order: 43, +$7.18 (+4.22c), 2 losses (4.7%)**. **72% of the loss dollars ($25.28 of $35.11) came from three windows in which two series flipped together** (ETH and BTC on Oct 15 for -$10.38; XRP and BTC on Oct 21 for -$7.48; ETH and DOGE on Oct 20/21 for -$7.41). Orders were 4 to 6 contracts on the crypto series then; the main session's caps since are lower (their numbers, not verified by me).
-- **NO favourites did worse than YES:** NO 40 orders, -$8.71 (-6.59c), 12.5% losses; YES 61 orders, -$1.90 (-0.78c), 6.6%.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 - **What the history says about both (information, TREE2's pool, 69 days, in-sample):**
   - *Crowding.* For the four crypto series (Bitcoin, Ethereum, XRP, Dogecoin) at 6 minutes there are 4,263 windows, 2,537 with two or more favourites. Taking **only one order per window** (fixed priority Bitcoin, Ethereum, XRP, Dogecoin) cuts entries from 121 a day to 62, the worst single window from **-371c to -97c**, the standard deviation of a window's P/L from 40.6c to 24.0c, and the expected total from +131c a day to +56c (choosing the cheapest price instead keeps +74c). The dropped entries had a positive history (+1.27c, 5.1% losses), so the rule **buys safety with expected profit**. Alone vs crowded: +2.02c vs +0.84c at 6 minutes, +1.67c vs +1.51c at 10.
   - *Side.* For the three series now entered at 10 minutes, YES beat NO in all three: Bitcoin +3.74c vs +1.02c, XRP +4.19c vs +1.28c, natural gas +3.47c vs +2.88c (NO is still positive). At 6 minutes YES is ahead in five of six series.
-- **Reading, said plainly.** The shortfall against the history is mostly three extra losses on large, correlated positions, which is variance plus concentration, not a failing entry rule: no part of this record is statistically separable from the history yet (tail p 0.13; the crowded-vs-alone split is a small sample). **What can be done now is reduce the damage of a bad window, not find a new edge.** Candidate rules for the owner (proposals only, nothing applied): (a) at most one crypto order per window across Bitcoin, Ethereum, XRP and Dogecoin; (b) at 10 minutes prefer YES (skip NO for Bitcoin, XRP, natural gas), which gives up NO's smaller positive history; (c) keep every crypto series at its one-contract cap and gold at or under its worst-case Kelly (about 3.5% of the account).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Information: the owner's full order record as summarised by the main session, and what the history says about the exits and the price band (2026-10-22; the main session's hand-condensed figures, accurate to about 1%; descriptive, not a try)
 
-**What was relayed (603 orders, 2026-10-07 to 10-22 01:54Z; 386 settled fills; net about -$11.75 in that file, the Data page said -$4.55 at 365):** gold 113 trades +$21.65 (+3.08c, 95.6% wins); Bitcoin 140 -$23.41 (-2.27c, 92.1%); Ethereum 84 -$1.71; XRP 20 -$6.26 (-11.8c); Dogecoin 20 -$1.61; natural gas 9 -$0.41. By era: to Oct 9 19:30Z 74 trades +$18.29; **Oct 9 to 10 at big sizes 24 trades -$15.11 (a 22 contract Bitcoin loss of -$20.36 and a 12 contract loss of -$11.11)**; Oct 11 to 15 174 trades -$1.20; Oct 20 on (1 to 5 contracts) 111 trades -$13.92 with 10 losses (91.0% wins). **The 25c exit: 21 sells, all losers, -$97.05 (-71.6c a contract); only 6 of the 27 losses were not exits (-$41.91, average -91c).** By price paid: 0.94 to 0.97 165 trades +$32.38 (98.8% wins, 2 losses); 0.91 to 0.94 123 trades -$38.35 (90.2%); 0.88 to 0.91 91 trades -$3.48 (87.9%). A gap with no orders from 10-17 00:24Z to 10-20 18:09Z. 10 minute entries since the deploy: 6 fills +$0.36, none lost.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 **The exits (history, information; TREE2's pool, six live series, candle closes, 69 days).** After the favourite's bid first closes at or below 25c, the position **won at settlement only 14% of the time (70 of 493 touched; Bitcoin 11%, gold 8%)**, and for the three 10 minute series 22%. A candle close at the first touch averaged a bid of only about 11c (the bid falls through the line fast), so the candle model sells near 10c; the relayed live exits averaged about 22c to 25c a contract (the live watch looks every ~10 seconds), so **the live exit sells higher than my candle model, and my earlier "the exit costs 0.5c to 0.7c a contract" (EX10 and the 25c tables) rests on candle closes and is probably too unkind to it.** Whether a held position would have paid more than the exit for the 21 real sells is a question about 21 public market results; **I have asked for the 21 tickers** and will compute hold against exit exactly. Expected, from the history: a position that has touched 25c is worth about 14c to 22c at settlement, so a sale at 22c to 25c is about fair to slightly favourable, and the exits mostly turn a -91c flip into about -70c. That means **the exits are not what is losing money; the flips are** (27 losses in 386 settled, 7.0%, against 5.3% to 6.5% in the history).
 
 **The price bands (history).** There is no price gradient in the history: win rate against price paid by bucket for gold (priced 89.3%, 92.4%, 95.6%; won 92.2%, 93.9%, 97.3%), Bitcoin (89.4%, 92.4%, 95.5%; won 89.6%, 94.1%, 96.5%) and Ethereum (89.3%, 92.5%, 95.6%; won 89.9%, 95.0%, 95.9%); the share of entries that touch 25c is 7.3%, 4.3% and 2.8% for the three buckets, so cheaper entries do get stopped out more, as the live record shows. **The live 0.91 to 0.94 bucket (90.2% wins against about 93.9% in the history, z about -1.7) and the 0.94 to 0.97 bucket (98.8% against about 96.5%, z about +1.6) are each within about 1.7 standard errors of the history, and the main session sliced the record several ways.** A price floor of 0.94 would remove 60% of the entries. I do not recommend a floor test on this evidence; it is not registered.
 
-**Reading, in one paragraph.** The live record is -$4.55 to -$11.75 over about 386 settled trades. Two thirds of the damage in the file is two sizing events (the Oct 9 to 10 big-size losses, about -$31, now capped) and the clustered flips of the last week; the rest is ordinary variance around a thin edge (gold +$21.65 on 113 trades is the only series clearly positive; Bitcoin -$23.41 on 140 trades, loss rate 7.9% against about 6.5% expected, is 1.5 standard errors below the history). **Nothing in this file shows a rule that is broken; it shows an edge of about one cent a contract being run at sizes where one bad window costs more than a week of it.**
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## The owner's decision: one crypto order per window (the main session's note, 2026-10-22 ~02:18 UTC, relayed, not verified by me)
 
@@ -5243,13 +5243,13 @@ The owner chose **proposal (a)**: at most one order per window across Bitcoin, E
 
 List in `studies/live_exits_21_2026-10-22.txt` (ticker, side, filled count, entry price, actual P/L, average exit price). Held-to-settlement P/L at the same entry price and the 7% fee formula; the actual P/L is as exported.
 
-- **Held to settlement they would have won 4 of the 21 (19%).** Actual total of the 21 exits **-$97.06**; the same 21 held to settlement **-$94.86**. **The exit cost $2.20 in total, about 2% of the loss it covered.** 17 exits were right (they sold a position that then lost, saving $15.6 in all against holding); 4 were wrong (Ethereum 10-10, gold 10-13, Ethereum and Bitcoin 10-15 at 16:45; each would have won, a cost of $4.0 to $4.9 apiece, $17.8 in all).
-- **So the exits are not the leak.** The relayed fills sold at an average of about 12c on the later ones (the bid gapped down through the line: Bitcoin 4.8c, 5.7c, 6.6c; XRP 3.1c), and a held position in those cases would have lost 90c-plus anyway. The history's finding (a position that touches 25c wins only 14% of the time, so selling near 22c to 25c is about fair) is borne out in the real orders: **19% won, the exit broke about even.**
-- **Where the account's damage came from, then:** 27 losses in 386 settled trades (7.0%, against 5.3% to 6.5% expected), 21 of them exited near 70c-plus losses, six held (Bitcoin 22 contracts -$20.36, Bitcoin 12 contracts -$11.11 with the exit skipped, XRP 5 contracts -$4.58, gold 5 contracts -$4.49 with no exit recorded, two small). **Two sizing events (22 and 12 contracts, about -$31) and a slightly higher flip rate at sizes of 4 to 9 contracts explain the record; the 25c line is not worth touching.** Two of the four wrong exits (Ethereum and gold) sold at 52c to 55c, which suggests they were under the 50c line used until 2026-10-12; those sales are not the current line.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## The owner's decision (2026-10-22): keep L1 running with the new rules, with review tripwires proposed
 
-The owner said L1 is not profitable at the moment and, asked whether to pause it while the public-candle tests finish, chose to **keep it running with the new rules** (the 10 minute entry for Bitcoin, XRP and natural gas, the one-order-per-window rule once PR #459 is merged, the 25c exit unchanged, the existing size caps). The honest state for the record: the live record is about -$4.55 to -$11.75 over roughly 386 settled trades, which cannot be separated statistically from the history's thin positive edge (+1c a contract for the crypto four at 6 minutes, +0.12c across 18 series), and at 1 to 5 contracts the expected profit of that edge is a few dollars a day against a single bad window costing $8 to $10.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 - **Tripwires proposed to the main session for the owner to accept or change (a review trigger, not an automatic switch; the bot's own 24 hour loss stop is separate and unchanged):** (1) net P/L since the deploy of PR #453, #458 and #459 at or below **-$15** (about 3% of a $500 account): stop and look; (2) any **two windows in a week** in which two filled orders both lost, once #459 is live (it should be zero for the crypto four); (3) at the owner's export around **2026-11-17**: decide to continue, pause or narrow to the series with a record, using the registered forward reads (FWD7 and its claims on public candles, GOLD1-F, FWD8) and the diagnosis tool `live_diag`.
 - **What is not changed:** no entry rule, exit line or size by this session.
 
@@ -5389,7 +5389,7 @@ Code `scalper/feat4.py` and `tests/test_feat4.py` were committed before the run;
 
 ## LIVE2: the full live order record, read for crowding (2026-10-22, information only)
 
-Source: the main session's condensed order table, saved as `studies/live_orders_condensed_2026-10-22.csv` (386 filled settled orders, Oct 7 to 22). Checksum: my copy sums to -$11.74 against the reported -$11.75. Not a pre-registered test; nothing here is a verdict and it adds no tries.
+Source: the main session's condensed order table, saved as `studies/live_orders_condensed_2026-10-22.csv` [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] Not a pre-registered test; nothing here is a verdict and it adds no tries.
 
 - **Crowding is the visible pattern.** Windows with one fill: 229, loss rate 4.4%, +$26.20. Windows with two fills: 56, loss rate 14.3%, -$44.49. Three or more fills: 14 windows, 1 loss, +$6.55. Six windows had two losses at once; they hold 39% of all loss dollars over the full record (the Oct 15 to 21 slice alone was 72%). PR #459 (one crypto order per window) targets exactly the two-fill case, and it is the only rule change with a clear signal behind it.
 - **Sizing events** are still the biggest single items: -$20.36 (22 contracts), -$11.11 (12). Both are capped now.
@@ -5453,11 +5453,11 @@ Owner's pick (Option 1). CONC1 found, against its own prediction, that crypto fa
 
 ## LIVE3: fills against no-fills in the full live export (2026-10-22, information only)
 
-The owner's full "Copy all orders" export (607 orders, Oct 7 to 22) arrived in three parts. I saved the 219 L1 orders that did not fill (`studies/live_nofills_2026-10-22.csv`; count matches 607 minus the 387 fills) and scored them next to the fills (`src/scalper/live_fill.py`), both held to settlement at the order's limit price with the fee, using public results. This removes the exit rule and the actual fill price from the comparison. No registered claim, no verdict; adds no tries.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-- Fills: 366 settled, loss rate **5.7%**, **+0.92c** a contract. No-fills: 209 settled, loss rate **8.1%**, **-0.82c** (30 orders on XRP, Dogecoin and natural gas cannot be settled from the candles I hold).
-- The no-fills are not hidden winners. The orders that did not fill would have done worse than the ones that did, so the live record is not adverse-selected by the IOC fill rule. Per-day paired difference is -0.87c with z -0.19 over only 13 days with both, so treat the sign as unresolved, not as an edge.
-- Held to settlement, the 366 fills lose 5.7%, under the roughly 6.8% break-even. The live net P/L (-$11.74) is therefore not the entry rule; it comes from size (the two large Bitcoin losses), the exits and the crowded windows (LIVE2).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Pre-registration: FLAT1 (2026-10-22), a firm and flat favourite in the 5 minutes before entry
 
@@ -5770,16 +5770,16 @@ The filled entries (8,057) lose 12.68%. A favourite whose price keeps falling af
 
 ### Live fills by price improvement (2026-10-23, information only; table computed by me because the main session only holds a reduced extract)
 
-`studies/live_fills_with_quotes_2026-10-22.csv`: the 373 filled orders that carry a seen quote (Oct 8 to Oct 22), copied from the owner's full "Copy all orders" export; checksum against the condensed table for the same period: 373 rows, P/L -$12.10 on both sides, identical order keys. Tool: `python -m scalper.live_improve` (+ test). The seen quote is taken about 0.8 s after the order is sent (the `seenAt` in the diagnostics export), so it is the book just after the fill. Improvement = how much cheaper the fill was than that book (YES: seenAsk - avgFill; NO: avgFill - seenBid).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-| Improvement | Fills | Losses | P/L | Exited | Tail p (vs 7.0% pooled) |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 |---|---|---|---|---|---|
-| 0 or worse | 171 | 9 (5.3%) | +$15.72 | 7 | 0.85 |
-| 0 to 1c | 119 | 7 (5.9%) | -$10.93 | 6 | 0.73 |
-| 1c to 3c | 58 | 5 (8.6%) | -$7.84 | 5 | 0.38 |
-| **over 3c** | **25** | **5 (20.0%)** | **-$9.06** | 3 | **0.027** |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-Orders of 6 contracts or fewer: 4.3%, 4.9%, 7.9%, **26.7%** (4 of 15, tail p 0.015). Same direction as FILLIMP1 on the history (loss rate 19.2% in the more than 3c bucket against 5.8% at equal). If every over-3c fill had been sold into the bid seen about 0.8 s later, after both fees: +4.54c a contract, positive in all 25, +$5.80 against the -$9.06 actually realised; the 1c to 3c bucket would net +0.4c (77% positive), the smaller buckets lose to fees. One 12-contract Bitcoin loss (-$11.11) is a large part of the difference. Not a claim; the sample is 25 fills and the selection is over four buckets and three splits.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ### Pre-registration: FLIP1 (2026-10-23, forward, live orders only; a protective rule, not an income source)
 - **Data:** filled orders with `seenBid`, `seenAsk`, `avgFill` from the owner's order export, placed from **2026-10-22T17:00Z** (the deploy of `rng5` and the read retry) onward, so none of the 373 above is reused.
@@ -5792,11 +5792,11 @@ Main session reply (2026-10-23): the owner chose to wait for FLIP1 (3 to 4 weeks
 
 ## New full order export (2026-10-23, 693 orders; analysed information only)
 
-Pasted by the owner in this chat. The 86 orders new since the previous export (607) are saved as `studies/live_new_orders_2026-10-23.csv` (count check: 693 - 607 = 86; Oct 22 03:24Z to Oct 23 02:39Z). The earlier rows are already in the two earlier study files.
-- **New window:** 86 orders, 61 filled (71% fill rate), **+$6.76**, 2 losses (both 1-contract exit-watch sales, -$0.90 and -$0.87). By series: gold 19 fills +$5.95, Bitcoin 10 +$0.70, natural gas 5 +$0.34, Dogecoin 5 +$0.26, Ethereum 15 -$0.01, XRP 7 -$0.48. Cumulative settled P/L is now about **-$4.98** on 446 fills (it was -$11.74 on 386). Ten wins in a row on the page screenshot is part of this stretch and is not evidence by itself.
-- **Fill improvement (updated, 434 fills with a seen quote):** improvement 0 or worse 207 fills, 4.3% losses; 0 to 1c cheaper 131, 6.9%; 1c to 3c cheaper 69, 7.2%; **over 3c cheaper 27, 5 losses (18.5%), tail p 0.027** (was 25 fills and 20%; both new over-3c fills, an Ethereum YES at 11c and an Ethereum NO at 8c cheaper, won). The new 61 fills alone: 2 losses, none in the over-3c bucket. The gradient is smaller than before in the 1c to 3c bucket (7.2%, was 8.6%); the over-3c bucket is the only one still clearly above the rest.
-- **FLIP1 window (fills from 2026-10-22T17:00Z): 31 fills, 0 losses, +$5.05, zero fills over 3c cheaper** so far (needs 40 such fills); no evidence in either direction.
-- **FLAT live check:** `rng5` is present on orders from **2026-10-22T15:24Z** (earlier than the 17:00Z deploy time the main session gave; it is what the export shows). 46 orders carry both `rise3` and `rng5`: **7 are FLAT (15%)**, the history's share; Ethereum 4 of 12, gold 3 of 15, none of the 19 others. The 4 FLAT fills are all wins (+$1.08), the 30 other fills with both fields also won (+$4.42), so nothing to separate yet. The live FLAT rate being 15% confirms the live `rng5` and `rise3` match my definitions.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ### Calibration across every price (2026-10-23, information only, no claim, no try)
 
@@ -5875,14 +5875,14 @@ Looked at the scout table for unregistered leads. The economics category's +2.11
 
 ## Live account once-over (2026-10-23, information only, no try; owner asked for anywhere to earn more or lose less)
 
-Live orders 2026-10-07 to 10-23 (condensed export plus the new export): 447 filled orders, 2,491 contracts, **-$4.98**. Since the current rule set (2026-10-22 03:00Z): 61 orders, 139 contracts, **+$6.76**, 2 losses.
-- **By series (all time):** gold +$27.60 (+3.4c per contract, 801 contracts, 96% wins); Bitcoin -$22.71 (-2.2c, 1,041 contracts); Ethereum -$1.71 (-0.3c, 530); XRP -$6.75 (60); Dogecoin -$1.35 (45); natural gas -$0.07 (14). Everything except gold is -$32.6. Bitcoin's loss is two sizing events (10-10 -$20.36 at 22 contracts, 10-10 -$11.11 at 12) plus size 9 orders at -2.1c; sizes are capped now.
-- **Exits:** the 25c stop sells (23 orders, 'S') total -$98.82; held positions total +$103.72. Winners total +$135.75, losers -$140.73. The exit does what it was built for (cuts a 90c loss to about 70c); selling at 25c is fair value, so it changes variance, not expectancy.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 - **Gold sizing:** bootstrap of gold history (73 days, 22 entries a day, day resampled): fixed size 5 → +$53 per 30 days, 0% stop hits; 9 → +$94, 0.1% stop hits; 15 → +$90 with the 12% day stop hit in 47% of paths; 20 → +$62 (78%); 30 → +$46 (92%). Past size 9 the stop binds and profit stops growing, so gold's ladder cap near 9 is already about the efficient point under the 12% stop. Assumes the history edge (+1.6c) holds; its 2nd half was +1.2c.
 - **History per series at 360 s (69 days, day-clustered z):** XRP +1.52c z 3.66 (halves +1.55c/+1.49c; since 10-13 +1.92c), DOGE +1.58c z 3.79 (halves +1.72c/+1.43c; since 10-13 +0.63c), gold +1.59c z 3.28 (halves +1.95c/+1.22c; since 10-13 +1.96c), BTC +0.35c z 0.68 (halves +0.67c/+0.04c; since 10-13 -0.39c), ETH +0.52c z 1.17 (halves +1.12c/-0.14c; since 10-13 -0.07c), natural gas +0.64c z 0.85, EUR/USD -0.27c, USD/JPY -3.64c z -2.79. At 10 minutes: BTC +2.13c z 2.21, XRP +2.64c z 3.16, natural gas +2.58c z 2.45 (the live 10-minute choice; fresh-day read FWD7 on 2026-11-12).
 - **Reading:** the edge is in XRP, DOGE and gold; Bitcoin and Ethereum at 6 minutes are about zero and weakening, yet Bitcoin carried the largest live size. Selected after the fact from 8 series, so a lead, not a claim; XRP is the most consistent (both halves and the fresh days).
 
-Correction (2026-10-23, from the main session): the cap I proposed already exists. `CAPPED_SERIES` (functions/kalshiLiveLib.js) holds Bitcoin, Ethereum, XRP and Dogecoin at one contract per order with no add-on since the Oct 21 gold-first change, plus one crypto order per window. The all-time Bitcoin and Ethereum figures above (1,041 and 530 contracts) mostly predate Oct 21. The current rule set's Bitcoin and Ethereum results (since Oct 22 03:00Z: +$0.70 on 10 orders and -$0.01 on 15) are at size 1, so the proposal changes nothing live; dropping them entirely is the only step left and needs the owner.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Pre-registration: BTC1 (2026-10-23, before any outcome was split by the prior window), a new mindset for Bitcoin: the window is not independent of the one before it
 
@@ -6170,10 +6170,10 @@ Owner said "go" (2026-10-24): the two-stage log-only request is written (`studie
 Owner said "also go option 1" (2026-10-24): the guardrails proposal (weekly stop at -6% of balance over 7 days, drawdown de-risking at 90% of the 30 day high; plus report-only weekly per-series health, concentration and live-against-backtest checks run by the research session) is written (`studies/GUARDRAILS_PROPOSAL_2026-10-24.md`) and was NOT sent: the send to the build session was denied by the owner on 2026-10-24, so it is only a written proposal in `studies/`; items 3 to 5 (report-only checks) are added to the export review. Nothing is live.
 
 ## Orders export check (2026-10-24 about 13:30Z, 797 orders; transcribed by hand from the owner's paste for the period after 2026-10-23T15:15Z; information, no try)
-**Markers confirmed in the export:** XRP and Dogecoin at 3 contracts from 15:50Z on 10-23 (first XRP 3-contract fill 15:50, first Dogecoin 16:54); natural gas orders at 2 contracts (no fill yet at 2: 17:20 and 20:20 no fill); Bitcoin: no order after 15:05Z on 10-23 (its last 10 minute order), none at 6 minutes; Ethereum: one order since 18:30Z (11:24Z on 10-24, 1 contract, +$0.02), down from about 20 a day, consistent with the smooth-only gate being live. **The export columns end at rise3 and rng5: `flips`, `flips0`, `minStep`, `climb`, `smooth` and `askAtDecision` are not in the export, so the gate cannot be verified from the export; the build session should add them to the Copy all orders output.** Gold's ladder is at 14 to 15 contracts (orders of 15 at 14:09, 17:09 and 17:24 on 10-23, all winners), 10 contracts at 20:39 (11 at 20:54, no fill).
-**XRP at 3 contracts since 15:15Z on 10-23: 17 fills, 14 wins, 4 losses (23.5%), net -$6.29** (losses: 18:05 -$2.75 held to settlement with the exit watch's sale not filled; 20:20 -$2.31 sold; 06:05 -$1.82 sold; 07:05 -$2.17 sold). History loss rate 5.2% (5.7% at 10 minutes); 4 or more in 17 by luck is about 1%. All-time live XRP: about 47 fills, 7 losses (14.9%), net about -$12.80; at 10 minutes 5 losses in 31 fills (16%, p about 0.02 to 0.03). The losses are concentrated at the bottom of the band: entries at 0.88 to 0.903: 7 orders, 4 losses; entries at 0.915 or higher: 10 orders, 0 losses. All three sold losses were filled 1c to 2c better than the ask seen (the FILLIMP adverse-selection pattern). Pre-stated trigger (my 2026-10-24 reply: "if more than 2 of the next 20 XRP orders lose, step back to 1") is met.
-**Dogecoin at 3 contracts since 16:54Z on 10-23: 8 fills, 7 wins, 1 loss, net -$0.72.** The loss (19:24Z on 10-23, `no` at limit 0.89, seen yes 0.11 / 0.12): avgFill 0.46 against a seen price near 0.88 for the no side: the order filled about 35c better than the book it saw (the book collapsed between the read and the order) and was sold at 0.21, -$2.05. Largest single price-improvement case in the exports; this is the situation the FLIP1 read (2026-11-14) is about.
-**Net since 15:15Z on 10-23 (by hand):** XRP -$6.29, Dogecoin -$0.72, gold about +$3.55, Ethereum +$0.12, USD/CAD +$0.27, AUD/USD +$0.16, natural gas 0, Bitcoin 0: about -$2.9.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 Recorder information look (2026-10-24 14:00Z, decides nothing): 7 runs, 325 windows, 73,050 polls, 429 share 0.0%, clock ok; coverage is much better than yesterday (commits every 4 hours: 20:25Z, 00:08Z, 04:28Z, 12:24Z, so the 08:00Z slot was late or missing again); qualifying trades 32 on 3 dates (needs 300 on 10); the 32 are Bitcoin 13, Ethereum 10, SOL 5, XRP 4, mean +1.65c, z 0.28: no read. The first full day of recording is today (2026-10-24).
 
@@ -6188,18 +6188,18 @@ Information (2026-10-24; owner: how many losses if we sell at 1 or 2 minutes lef
 
 ### Live export check, 2026-10-25 (information, decides nothing)
 
-Hand-tallied from the 821-order export pasted 2026-10-25 (orders since 15:15Z on 10-23, when XRP/Dogecoin went to 3 contracts):
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 | Series | Fills | Losses | Net | Note |
 |---|---|---|---|---|
-| XRP | 24 | 4 (16.7%) | -$4.87 | all 4 losses at a price of 0.903 or lower; 15 fills above 0.905 had 0 losses |
-| Dogecoin | 25 | 1 (4.0%) | +$2.13 | |
-| Natural gas | 0 | 0 | $0 | 2 orders, no fill |
-| Gold | 4 | 0 | +$3.55 | sizes 10 to 15 |
-| Bitcoin | 0 | | | no order at all after 15:05Z on 10-23 (so none with a 10m lead after 18:30Z: pass) |
-| Ethereum | 1 | 0 | +$0.02 | 6m lead, 10-24 11:24Z; only one order since the smooth-only change |
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
-Dogecoin lost no window to a Bitcoin order (Bitcoin placed none). Not checkable from this export: minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision are not among its columns (it stops at rise3, rng5), so the smooth gate cannot be verified; the build session should add them to "Copy all orders". Smooth-only kill-rule count: 0 smooth Bitcoin fills, 1 Ethereum fill, 0 losses (rules need 40 and 100). Also seen, unrequested: 1-contract orders on KXUSDCAD15M and KXAUDUSD15M on 10-23 from 18:24Z to 20:09Z (5 fills, 5 wins, +$0.43), none since. XRP's 0.88 to 0.905 band (9 fills, 4 losses) is a post hoc cut on a small sample; not a claim until registered forward.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ### Order scan, 2026-10-25 (post hoc, about 45 slices counted; running Kalshi tries about 5,180)
 
@@ -6369,10 +6369,10 @@ Gold's ask shows about 2,000 to 2,500 contracts and the live size is 10 to 15; t
 
 ## Information: live export check, 2026-10-25 18:10Z (829 orders; counts only, no dollar figures)
 
-- **Owner's observation checked:** since 2026-10-25 00:00Z, 26 fills (XRP 7, Dogecoin 19), **0 losses**. Since 2026-10-23 15:15Z: XRP 25 fills, 4 losses (none since 2026-10-24 07:05Z); Dogecoin 30 fills, 1 loss; gold 4 fills, 0 losses (gold has placed no order since 2026-10-23 20:54Z; Saturday and Sunday are closed for commodities, so this is the weekend, not a fault).
-- **Smooth-only gate (checklist from 2026-10-23):** passed. No Bitcoin order at all after 18:30Z on 10-23; one Ethereum order since (2026-10-24 11:24Z, 6m lead, smooth true, climb 0.6725, minStep -0.001, earlierCandles 9), filled, won. Smooth fills so far against the kill rules: Bitcoin 0, Ethereum 1, 0 losses (rules need 40 and 100).
-- **New fields:** minStep, climb, smooth, flips, flips0, earlierCandles, askAtDecision populate on every order since 2026-10-23 17:09Z; the two-stage fields (twoStageLeft, ask10/side10/inBand10, ask8, ask6) appear from 2026-10-25 14:39Z (6 orders so far, 5 filled, 5 won, 0 lost).
-- **XRP at 1 contract:** not yet visible. The last XRP order (2026-10-25 15:35Z) is still 3 contracts and predates the owner's deploy message (16:12Z); no XRP order since.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 - Not done: dollar P&L (the export has no realised-P&L column; the owner's account line is the dollar truth).
 
 ## Information: how many of the SEARCH5K rules look "profitable", against what shuffled data gives (2026-10-25; a look at the same rows, not a new try)
@@ -6654,7 +6654,7 @@ No survivor on either asset or mode. Every spot strategy is negative in discover
 
 ## Pre-registration: HOURS1, trade the L1 rule only in 12 to 18 UTC (forward claim; written 2026-10-27 after seeing the numbers below, so the numbers are NOT evidence; 1 try, running count about 14,631)
 
-**Where it came from (post hoc, stated).** Three looks at the same bucket: SEARCH5K (7 of the top 10 discovery rules contained 12 to 18 UTC; none cleared the family-wise null), the 2026-10-25 order scan (gold, XRP, Dogecoin: no losses in 33 fills), and the owner's export ending 2026-10-26T17:39Z. In that export, all series, fills settled since 2026-10-20 (est. net, my arithmetic, not the account line): **12 to 18 UTC 89 fills, 3 losses, profit factor 5.0, +$15.15; all other hours 256 fills, 22 losses, profit factor 0.94, -$3.18.** The chance of 3 or fewer losses in 89 at the 6.8% break-even loss rate is about 14%, so this is not significant by itself and the three looks overlap in data.
+**Where it came from (post hoc, stated).** Three looks at the same bucket: SEARCH5K (7 of the top 10 discovery rules contained 12 to 18 UTC; none cleared the family-wise null), the 2026-10-25 order scan ([live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]), and the owner's export ending 2026-10-26T17:39Z. [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 **Claim (forward only).** Live L1 fills opened from 2026-10-28T00:00Z with fill time 12:00 to 17:59 UTC, all live series pooled, scored against the same period's fills in other hours. Bar: at least 150 in-window fills, profit factor at least 2.0 (computed from account-line P&L per order), loss rate under 5%, in-window profit factor above the other-hours profit factor, both halves of the period profit factor above 1.5. `FALSIFIED` if the in-window profit factor is under 1.3 with at least 150 fills. `NOT_ENOUGH_DATA` below 150 fills. Verdict words only.
 
@@ -6830,7 +6830,7 @@ Question: does any series earn on a particular weekday (UTC) at the 6 minute L1 
 
 ## Gold in the live record (owner's question, 2026-10-27; my arithmetic on the export of orders from 2026-10-07 to 2026-10-26, not the account line)
 
-Estimated net by series over the whole export: **gold +$43.49 (155 fills, 6 losses, worst trade -$9.47), Dogecoin +$6.47, ETH +$5.15, natural gas +$0.89, USDCAD +$0.28, AUDUSD +$0.06, XRP -$9.51, Bitcoin -$11.92 (153 fills, 11 losses, worst trade -$20.15)**. Total +$34.92; without gold -$8.57. Capping the gold ladder at 10 contracts would have cost about $1.11 and cut the worst trade from -$9.47 to -$7.28; at 8 contracts -$4.53 and -$5.83; at 5 contracts -$16.15 and -$4.48. Pulling gold would remove all of the profit. The worst single losses in the export are Bitcoin and XRP.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Pre-registration: PERP3, fast (5 to 60 minute) Bitcoin and Ethereum perpetual strategies with a stop and a target (written 2026-10-27 before any signal was computed on these bars; 336 rules + 100 null draws, running count about 21,350)
 
@@ -6850,9 +6850,9 @@ Estimated net by series over the whole export: **gold +$43.49 (155 fills, 6 loss
 
 336 rules (7 signals x follow or fade x 12 exits x Bitcoin and Ethereum), 78 days of Deribit 1 minute bars, cost 0.14% a round trip. **0 candidates, 0 confirmed; the random-entry null also gave 0.** The best rule is still negative: Bitcoin 60 minute momentum faded, T1.0% S1.0%, hold 30 minutes: **-0.114% per trade** (n 460, z -7.6, halves -0.108% / -0.119%); the best ten are all between -0.11% and -0.12%, i.e. about minus the 0.14% cost plus a hair. Following and fading, breakouts and volume spikes all do the same. Fast BTC and ETH perp strategies of this kind do not clear their cost, so no capital figure is computed. Gold perps remain untested (no data on file). Tries: 336 + 100 draws, about 21,350. Code `src/scalper/perp3.py`, result `data/perp3_result.txt`.
 
-## Gold, corrected for the recent ladder sizes (owner's challenge, 2026-10-27, my arithmetic on the export plus the owner's -$9.53 trade of 2026-10-27 5:45 PM CT, which is not in the export)
+## Gold, corrected for the recent ladder sizes (owner's challenge, 2026-10-27, my arithmetic on the export plus [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only], which is not in the export)
 
-Gold fills: since 2026-10-07 155 fills, 149 wins (average +$0.49), 6 losses (average -$4.71), net +$44.06, **+$34.53 with the new loss**, average size 6.7 contracts. **Since 2026-10-20: +$11.63, +$2.10 with the new loss. Since 2026-10-23 (average size 9.9, the larger ladder): 27 fills, 26 wins averaging +$0.79, one loss -$9.47, net +$10.99; with the new loss +$1.46 over 28 fills and 2 losses.** At about 10 contracts a gold loss (about -$9.5) takes about 12 wins to repay, so the break-even loss rate is about 7.7% and the observed rate since the larger ladder is 2 of 28 (7.1%): break-even. The profit in gold came from the Oct 7 to 16 period at small size; the ladder grew faster than the evidence for its loss rate (the 95% upper bound on 6 losses in 155 is about 8%).
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## Literature note (web search, 2026-10-27): what the published evidence says about Kalshi
 
@@ -6880,7 +6880,7 @@ Same entries, data and fee as MAKER2. Place a buy at the favourite side's bid at
 
 28,873 L1 opportunities, 83 days. TAKE +0.101c per opportunity. Hybrid (rest a bid, cross at the later ask if not filled): **W = 60 s -0.458c per opportunity (difference -0.559c, z -10.95), W = 120 s -0.675c (difference -0.776c, z -14.43)**, both halves negative. The chase leg buys the entries that went up, at the higher price, which more than cancels the cheaper fills; every maker-style entry variant for L1 tested here (MAKER2, MAKER3) loses to simply buying at the ask. Tries: 2, about 21,354. Code `src/scalper/maker3.py`, result `data/maker3_result.txt`.
 
-## Pre-registration: THROTTLE1, does sizing down when the recent record is bad help? (written 2026-10-27 after the owner showed the account chart (-$26.25, -5.0% over 1 month) and the bot status (win rate of the last 100 orders 89.0% against 92.0% to break even; edge -3.2c a contract; best market over 7 days Dogecoin +$6.60, worst XRP -$13.97); 3 variants + 200 shuffles, running count about 21,557)
+## Pre-registration: THROTTLE1, does sizing down when the recent record is bad help? (written 2026-10-27 after the owner showed the account chart and bot status [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]; 3 variants + 200 shuffles, running count about 21,557)
 
 **Question.** The dashboard already shows a trailing edge. Would a hard-coded throttle on that number (half size, or pause, when the trailing edge of the last 100 trades of a series is below a line) have improved the L1 record over the 79 days on file? Per series, in time order, shadow net per contract of every L1 entry (the 6 minute favourite at 0.88 to 0.97, hold); the trailing mean of the previous 100 entries of that series decides the size of the next one. Variants: HALF if trailing mean < 0c; HALF if < -2c; PAUSE if < -3c. Outcomes: total net (size x net per contract summed over all series), the maximum drawdown of the running total in the same units, and net divided by drawdown, against always-on. Null: order of the entries shuffled within each series (200 draws), which keeps the same trades and removes serial dependence; the throttle's change in total and in drawdown is compared with the null's. `NOT_YET_FALSIFIED` only if a variant raises net divided by drawdown by at least 20% and the change in total is above the null's 95th percentile. Otherwise `FALSIFIED`. Run once. **Prediction:** FALSIFIED on the total (a rule on past outcomes cannot predict iid-like next outcomes), with the drawdown falling about in proportion to the size removed; no improvement in net per drawdown beyond the null. Prior of a pass 10%.
 
@@ -6906,7 +6906,7 @@ Same entries, data and fee as MAKER2. Place a buy at the favourite side's bid at
 
 ## Reporting convention (owner, 2026-10-27): every result is stated as profit factor
 
-From now on each result gives profit factor (gross wins divided by gross losses, fees included) first, then the loss rate and the number of trades; cents per contract is secondary. Profit factors of what is on file, computed 2026-10-27: **L1 history, all series pooled: 1.02 (31,581 entries)**; by series (800 or more entries): Dogecoin 1.35, gold 1.33, XRP 1.32, silver 1.15, natural gas 1.12, WTI 1.07, Bitcoin 1.06, Ethereum 1.06, Solana 1.04, copper 0.98, HYPE 0.96, NEAR 0.93, BNB 0.91, ZEC 0.82. **Live (owner's order export, my estimate): all series 2026-10-07 to 10-26 1.22 (620 fills, +$35.49); since 10-20 1.21 (345 fills); gold 2.56 (155 fills), 1.91 with the 2026-10-27 loss of -$9.53; gold since 10-23 (the larger ladder) 2.16 before and 1.08 after that loss (28 fills); Dogecoin 1.93, Ethereum 1.17, Bitcoin 0.84, XRP 0.49 (65 fills).** Earlier results in this file keep their original cents figures; BOUNCE1 hold was PF 0.68 and its bounce exits 0.18 to 0.46, the walk-forward allocator P6 PF 1.13. A request for the throttle, an XRP pause and a gold cap was sent to the build session for the owner's confirmation there.
+From now on each result gives profit factor (gross wins divided by gross losses, fees included) first, then the loss rate and the number of trades; cents per contract is secondary. Profit factors of what is on file, computed 2026-10-27: **L1 history, all series pooled: 1.02 (31,581 entries)**; by series (800 or more entries): Dogecoin 1.35, gold 1.33, XRP 1.32, silver 1.15, natural gas 1.12, WTI 1.07, Bitcoin 1.06, Ethereum 1.06, Solana 1.04, copper 0.98, HYPE 0.96, NEAR 0.93, BNB 0.91, ZEC 0.82. [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] Earlier results in this file keep their original cents figures; BOUNCE1 hold was PF 0.68 and its bounce exits 0.18 to 0.46, the walk-forward allocator P6 PF 1.13. A request for the throttle, an XRP pause and a gold cap was sent to the build session for the owner's confirmation there.
 
 ## Pre-registration: GROW1, which sizing rule lets a $500 account grow instead of bleed, on the L1 history (written 2026-10-28 after the owner asked for sizing that grows the account naturally; 8 rules + 200 bootstrap resamples, running count about 21,800)
 
@@ -7234,7 +7234,7 @@ Set aside as outcome or direction prediction, not candidates for the "no need to
 
 ### Result: DAYCUT1 (run once, 2026-10-28): all six rules FALSIFIED by the registered test
 
-LIVE (620 entries, 16 US Central days, Oct 7 to 26; before PF 1.00, net +$0.59, worst day -$10.98): every rule looks better on all three measures, best +1% target PF 1.58 net +$36.37 and 12:00 CT cutoff PF 1.74 net +$35.83 worst day -$2.62. Only 16 days: a handful of late, losing days drive it. Not enough to read anything.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 HISTORY (32,499 entries, 84 days, 11 contracts, all 14 series; before PF 1.01, net +$321.20, worst day -$242.19): profit targets lift PF a little (+0.5%: 1.10; +1%: 1.07; +2%: 1.05) and cut the worst day (+0.5%: -$68.59) but lower total net (+$226 to +$265) because they stop trading on 74 to 81 of 84 days and remove 73% to 89% of entries, wins and losses alike. Time cutoffs do nothing (PF 0.99 to 1.01, net lower). Prediction (PF within 0.10, net lower) held for targets in HISTORY; LIVE disagrees on 16 days. Caveat: HISTORY trades all 14 series at a fixed 11 contracts, not the live bot's 3 series and window cap, so a day's +$2.50 is reached within minutes. Tries: 6. Code `src/scalper/daycut1.py`.
 
 ### Result: MAKER4 (run once, 2026-10-28): FALSIFIED
@@ -7262,10 +7262,10 @@ HISTORY (32,499 entries, 84 days, 11 contracts, all 14 series; before PF 1.01, n
 ### Result: SIZE2 (2026-10-28)
 
 Per-contract profit factor is size-invariant apart from fee rounding, and rounding matters only at 1 contract (a 92c fee of about 0.5c rounds to 1c). Profit factor at 1 / 3 / 5 / 10 contracts, with net dollars at 10:
-- **Gold.** LIVE (14 days, Oct 7 to 26, median size 6; excludes the Oct 27 -$9.53 loss): 1.99 / 2.14 / 2.17 / 2.19, net +$50.17 at 10; today's actual +$33.83, PF 2.17. HISTORY (72 days): 1.20 / 1.27 / 1.28 / 1.29, net +$242.21 at 10, worst day -$19.20 at 10.
-- **Bitcoin.** LIVE (13 days): 0.89 / 0.96 / 0.97 / 0.98; today's actual -$22.46, PF 0.71 (the losses came on the larger orders). HISTORY (84 days): 0.96 / 1.02 / 1.03 / 1.04.
-- **Ethereum.** LIVE (11 days): 0.85 / 0.92 / 0.93 / 0.94; today's actual -$2.44. HISTORY (84 days): 0.96 / 1.02 / 1.03 / 1.04.
-- **Dogecoin.** LIVE (7 days): 1.34 / 1.45 / 1.46 / 1.48; today's actual +$2.62. HISTORY (84 days): 1.24 / 1.32 / 1.33 / 1.34, worst day -$41.67 at 10.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 One 90c position lost: to zero $0.91 / $2.72 / $4.54 / $9.07; sold at the 25c exit $0.68 / $2.01 / $3.36 / $6.71. Depth at entry (top level only): gold and Bitcoin about 1,500 to 1,800 contracts, Ethereum about 64 to 88, Dogecoin about 32 to 37 (depthAtLimit 118; live orders were 2.5% of it).
 **By the registered test** (PF above 1.05 and net positive in BOTH windows): gold and Dogecoin clear it at 3, 5 and 10 (Dogecoin on only 7 live days); Bitcoin and Ethereum do not at any size. Prediction held: going from 1 to 3 contracts lifts PF about 0.06 (rounding); beyond 3 under 0.02. A larger size scales each market's existing result and its worst day; it does not create an edge. The history is held to settlement without the 25c exit, so its worst days differ from live. Code `src/scalper/size2.py`.
 
@@ -7482,7 +7482,7 @@ Checked against the ledger first: B4 tested one lower band (84c to 88c), P6 pick
 **LOOK1** (look time chosen per series on discovery; PF discovery / validation / holdout at 1 contract): Bitcoin 10 min 1.70 / 1.34 / 1.15; Ethereum 10 min 1.44 / 0.82 / 0.85; gold 6 min 1.43 / 1.02 / 1.18; Dogecoin 8 min 1.54 / 1.18 / 1.18; XRP 8 min 1.54 / 1.17 / 0.92. The discovery pick falls back every time, as predicted.
 **BAND1** (sub-band chosen per series at 6 min): Bitcoin 91c to 94c 1.56 / 1.10 / 0.82; Ethereum 91c to 94c 1.39 / 1.27 / 0.67; gold 91c to 94c 1.53 / 0.91 / 0.84; Dogecoin 88c to 91c 2.14 / 1.19 / 0.79; XRP 88c to 91c 1.66 / 1.26 / 1.30. No sub-band holds.
 **ROUND1** (size chosen per entry to minimise rounding, against a fixed 6, 6 min look, these 5 series): PF 1.293 to 1.304, 1.187 to 1.197, 1.058 to 1.067; about +0.05c a contract in every window. A real, tiny saving (upkeep note), not a strategy. Note: these 5 series at 6 minutes and 6 contracts make PF 1.29 / 1.19 / 1.06, better than the 18-series pool, and declining across the thirds.
-**LIVELOSS** (the owner's export, information, small n): by series Bitcoin -$22.46 (PF 0.71), XRP -$11.31 (0.40), Ethereum -$2.44 (0.92), Dogecoin +$2.62 (1.32), gold +$33.83 (2.17); by lead 10 min PF 0.64 (n 63) against 6 min 1.34 (n 145); by price 88c to 91c 0.99, **91c to 94c -$36.80 (PF 0.61)**, 94c to 97c +$37.95 (6.11); spread 2c+ PF 0.50 on only 8 orders; depth above the median 0.81, below 1.11 (18 each). The history does not support the live price pattern (BAND1: 94c to 97c is the weakest history band, PF 0.59 to 1.12), so it is more likely chance on few orders than a rule. N tried about 438,666.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ### Result: CORR1 (run once, 2026-10-29): G3H1 and G3H2 FALSIFIED on the look-ahead-free file; the whole GEN3 family was the look-ahead
 
@@ -9176,10 +9176,10 @@ Calendar-month seasonality in WTI crude (26 development years, 1985 to 2010) and
 Hourly Bitcoin ladder, quote 45 minutes before close, C=10, 220 potential cells (6-hour close block or weekday x side x band), 69 readable. Zero shortlisted. Highest z: Saturday NO at 90c to 97c +3.6c (z 3.28, a favourite-side cell, which the standing ban excludes as a trade anyway), Eastern-hours block 12 to 18 YES at 80c to 90c +5.1c (z 2.15), block 18 to 24 NO at 70c to 80c +7.1c (102 events, z 1.91). All below the bar of 4.26. Verdict: FALSIFIED on development; holdout unread.
 
 ### OICORE x L1 filter result (Nov 9, 2026; registered 7545af8, amendments 1ec0559 and 9fd5519 before any split; live per-order data NOT committed, aggregates only)
-Profit factor first, cash basis after fees, one clock (15-minute window key). OICORE (77 settled, 11 days): PF 1.11, net +$9.93. Cut A, OICORE by whether L1 had a filled gold order in the same window: gold active PF 0.00 (7 orders, 5 days, -$6.76); gold quiet PF 1.19 (70 orders, 11 days, +$16.69). Cut B, L1 gold (since the OICORE start, 96 settled, PF 0.84, -$15.96) by whether OICORE had a filled order in the window: OICORE active 7 orders, all winners (+$5.61, no losses, PF undefined); OICORE quiet PF 0.78 (89 orders, 8 days, -$21.57). Verdict by the registered words: NOT_ENOUGH_DATA on both cuts (one side has 7 orders, under the 30 floor, over 5 days). Reading: in the 7 shared windows OICORE (a cheap tail bet) lost while gold L1 (a favourite) won, which is the offset you would expect if the two bets are opposite sides of a common move, not evidence of a filter; 7 orders cannot support one.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ### REGIME1 result (Nov 9, 2026; registered f6a7486 before any cut; 10 cuts on gold L1; live data not committed, aggregates only; cash basis)
-Gold L1 settled orders 101 to 307 (Oct 21 to Nov 9; the first 100 fixed the thresholds). Development rows 101 to 204 (PF 1.54, n 104, +$25.18): cuts passing PF >= 1.5, n >= 50, net >= $5: spread wide (PF 3.10, n 59, +$31.51), weekday (1.85, n 100, essentially all rows), momentum "moving" |rise3| >= 0.05 (PF 4.36, n 67, +$41.25), depth deep askSize > 1,500 (1.79, n 61, +$19.52); fails: tight 0.80, still 0.55, weekend n 4, US-day/other (3.74 / 0.99; US-day n 43 below the 50 floor). Held out rows 205 to 307, read ONCE for the four passes (all rows PF 1.01, n 103, +$1.36): wide PF 1.11 (n 56, +$5.94, FAILS 1.3), weekday 0.90 (FAILS), deep 0.70 (n 60, -$23.06, FAILS), moving PF 1.61 (n 64, +$24.74) PASSES the registered held-out bar (PF >= 1.3, n >= 30, net > 0). So one regime cut survives: gold L1 orders placed when the bought side's mid moved at least 5c in the previous 3 minutes (rise3). Lead time: it is read from the quote at order time (about 6 minutes before close), so it can switch an order in or out; as a state it does not persist (58% of consecutive orders in the same state); calendar states R2/R3 persist (87%, 97%) but carry no edge. Caveats: rise3 exists for 195 of 307 gold rows (missing rows skipped), 10 cuts counted (N 4,930), one split, and the gold edge as a whole faded (PF 1.54 in development, 1.01 held out). OICORE (77 orders) cannot reach 50 per state: NOT_ENOUGH_DATA. Verdict: an honest regime-conditional lead, not a finding; a forward shadow of the filter (log rise3 on every gold signal, ordered or not) is the next test.
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## NEWSER1 result (Nov 9, 2026): NO SHORTLIST, thin data
 Fetched 2,723 chosen markets across 10 macro/index series; only 684 had a usable decision quote (30 hours before close, both sides quoted, spread <= 5c; payrolls 196, Nasdaq100 97, GDP 73, S&P 72, CPI 65, WTI 62, gas 46, Fed decision 32, Fed 28, top song 13). Scored with the registered rule (N 4,700, z bar 4.25): no cell reached 100 development markets, shortlist 0, holdout unread. Verdict: nothing to trade; most macro markets are too thinly quoted at this lead for a spread-5c rule. No candidate passes a stage. N counted: 200 cells.
@@ -9192,7 +9192,7 @@ Rules from PR 753. Decision quote = last candle in the lead window, favourite si
 - XRPFAV6 (alts2, Sep 3 to Oct 13, 41 days): PF 1.56 n 481 (halves 1.67 / 1.45), +$15.06 per contract-sum. XRPFAV10: PF 1.91 n 358 (1.81 / 2.02), +$15.54. Every regime cut is above 1.2 except XRPFAV6 weekend (PF 1.26, halves 2.62 / 0.81) and XRPFAV6 moving (1.39, halves 1.69 / 1.17). No regime flips either rule below 1.0. Spread wide (>0.01) is the best state for both (1.87 and 3.03), the opposite of the tight-spread story gold showed.
 - BTCHI10 (hist15, 63 days): PF 0.90 n 289, halves 0.90 / 0.90, net -$1.75. NOT supported on history; Refinement's 1.37/1.82 does not reproduce here. Only weekend (n 72, 1.35, halves 99 / 0.67) and still (n 25) are above 1, both too thin.
 - GOLDHI6S: my gold history is 3 days (n 29, all wins, PF undefined). NOT_ENOUGH_DATA; the live gold record is the only evidence.
-Caveats stated plainly: the XRP history is the same candle data Refinement selected these cells from (alts2), so it is NOT an independent check, only a regime split of the same sample. The live XRP record since Oct 7 is PF 0.49 over 65 fills and XRP is paused in code (Oct 28), and my history ends Oct 13, so it overlaps live by 6 days and says nothing of Oct 14 onward. Verdict: no regime rescues BTCHI10; the XRP rules are regime-robust on history but are the best cells of a search and the live record has already disagreed. Script: `src/scalper/regime_b2.py`.
+Caveats stated plainly: the XRP history is the same candle data Refinement selected these cells from (alts2), so it is NOT an independent check, only a regime split of the same sample. [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] XRP is paused in code (Oct 28), and my history ends Oct 13, so it overlaps live by 6 days and says nothing of Oct 14 onward. Verdict: no regime rescues BTCHI10; the XRP rules are regime-robust on history but are the best cells of a search and the live record has already disagreed. Script: `src/scalper/regime_b2.py`.
 
 ## CHEAPEXIT1 result (Nov 10, 2026, 1:30 AM CT, run once, dev only, holdout unread): FALSIFIED
 Cheap side (4c to 12c) at 10 minutes left, sell to the bid at entry +3c or +6c before 120 s left, else hold; cash PF, unrounded fee on both legs. N 5,156, z bar 4.27, 8 cells plus the hold baseline.

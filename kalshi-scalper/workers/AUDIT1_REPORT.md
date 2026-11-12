@@ -16,7 +16,7 @@ runs no strategy, adds no try. The deflated bar the owner set is z about 5.27 at
    look-ahead, FALSIFIED on a clean file by CORR1), USWEEP1's zero-variance cells (the ledger calls them a statistic artefact) and
    IV1's comparator (its first read was discarded for a look-ahead). The best live candidate, OICORE, is at 4.53 (FALS4 4.42).
 4. The one pre-registered holdout that a development pass survived and kept (E3B, XRP and Dogecoin, z +3.97) was followed by a
-   live miss (XRP paused 2026-10-28, PF 0.49 over 65 fills). The other holdout "survivor" (GEN3-H1) was a data bug.
+   live miss (XRP paused 2026-10-28; [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]). The other holdout "survivor" (GEN3-H1) was a data bug.
 
 ## Coverage (what was parsed, honestly)
 
@@ -109,7 +109,7 @@ flag is too noisy to count survivors automatically, so survival is hand-read fro
 |---|---|---|---|
 | L1 | z 1.45 on 30 days (halves +0.71c, +1.22c), below its bar | no frozen holdout; backward windows: z 2.68, 3.20, 68 days 2.52 | persisting, thin, live |
 | OVERNIGHT 4 survivors | pooled z 3.46 over 311 rules | forward check 2026-10-08 | NOT_ENOUGH_DATA, later outcome not located |
-| E3 XRP, Dogecoin | z 2.37, 2.97 | **E3B holdout z +3.97 (kept)** | survived; live XRP then PF 0.49 over 65 fills, paused |
+| E3 XRP, Dogecoin | z 2.37, 2.97 | **E3B holdout z +3.97 (kept)** | survived; live XRP then [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only], paused |
 | L1B Ethereum, gold | z 2.24, 2.73 on older days | none frozen | live; gold kept, Ethereum capped |
 | PERP1 | z 2.76 over 17 years | none | decayed: 2022 on is 0.00% |
 | FEAT2 | kept set z 3.85 | FEAT2-F, dated | unresolved; monthly gain shrinking |

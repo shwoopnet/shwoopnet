@@ -52,10 +52,10 @@ The result rests almost entirely on gold's edge of about +1.5c a contract at siz
 
 | Gold slippage | Start | 30d median (p5) | 30d below start | 90d median (p5) | 90d below start | 90d stop at least once |
 |---|---|---|---|---|---|---|
-| +0.60c (live) | $528 | +99 (-16) | 7.9% | +330 (+103) | 0.5% | 5.5% |
+| [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] | $528 | +99 (-16) | 7.9% | +330 (+103) | 0.5% | 5.5% |
 | +1.5c | $528 | +38 (-66) | 27.6% | +120 (-65) | 15.6% | 10.8% |
 | +2.5c | $528 | -19 (-113) | 62.7% | -58 (-196) | 71.7% | 22.0% |
-| +0.60c (live) | $1,028 | +200 (-9) | 5.9% | +670 (+246) | 0.3% | 2.6% |
+| [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] | $1,028 | +200 (-9) | 5.9% | +670 (+246) | 0.3% | 2.6% |
 | +1.5c | $1,028 | +79 (-108) | 24.6% | +246 (-91) | 12.8% | 5.4% |
 | +2.5c | $1,028 | -38 (-203) | 63.9% | -116 (-359) | 73.7% | 8.1% |
 
@@ -65,7 +65,7 @@ About 2c a contract of extra cost on gold turns the expected result negative.
 
 - The $1,028 rows are close to twice the $528 rows in dollars, with the same percentage drawdowns (median about 8% to 11%, 95th percentile about 15% to 19%) and a lower stop rate, because gold's size is the only thing that scales and the window cap and stop scale with it.
 - The 12% stop rarely fires (1% to 6% of paths over 30 to 90 days on all days) and costs almost nothing when the bot restarts the next day (-$0.2 to -$0.7 of mean). Left off for the rest of the path it costs $1 to $10 of mean over 90 days. It is not what bounds the typical bad month: the typical worst fall ($52 to $146) happens slowly, under the stop.
-- Dogecoin at 5 contracts adds roughly nothing in this history (+0.04c a contract at size, PF 0.91 at C = 1 after slippage and the 25c exit), against +2.66c a contract in its live record so far. Ethereum is about 1 order every 4 days.
+- Dogecoin at 5 contracts adds roughly nothing in this history (+0.04c a contract at size, PF 0.91 at C = 1 after slippage and the 25c exit), against [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] in its live record so far. Ethereum is about 1 order every 4 days.
 
 ## Assumptions, plainly
 

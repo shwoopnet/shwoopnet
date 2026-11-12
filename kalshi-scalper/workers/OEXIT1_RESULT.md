@@ -1,6 +1,6 @@
 # OEXIT1 result: selling half at 3x on OICORE (2026-11-03, run once, registration `workers/OEXIT1_REGISTRATION.md` commit 4d64d15)
 
-**Verdict: DOES NOT SUPPORT (3x, and also 2x and 4x).** The exit changes almost nothing, as predicted: profit factor is slightly LOWER with it in both history halves and the longest losing run is the same. No change after registration. Code `src/scalper/oexit1.py`, tests `tests/test_oexit1.py` (pass), raw numbers `workers/OEXIT1_result.json`. Parity first: the no-exit rule reproduces OICORE exactly (discovery n 222 PF 2.28, validation n 333 PF 1.85; the live-list model reproduces the recorded PnL to the cent, net +$25.03).
+**Verdict: DOES NOT SUPPORT (3x, and also 2x and 4x).** The exit changes almost nothing, as predicted: profit factor is slightly LOWER with it in both history halves and the longest losing run is the same. No change after registration. Code `src/scalper/oexit1.py`, tests `tests/test_oexit1.py` (pass), raw numbers `workers/OEXIT1_result.json`. Parity first: the no-exit rule reproduces OICORE exactly (discovery n 222 PF 2.28, validation n 333 PF 1.85; the live-list model reproduces the recorded PnL: [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]).
 
 ## History (Bitcoin 15 minute, OICORE fires, C = 10, fee 7% x C x p x (1-p) rounded up on each leg incl. the sale)
 86 fire-dates 2026-08-06 to 2026-11-03: H1 08-06 to 09-04, H2 09-05 to 10-05 (history, 358 trades), HOLD 10-06 to 11-03 (236 trades, read once).

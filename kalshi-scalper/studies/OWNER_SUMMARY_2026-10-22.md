@@ -7,12 +7,12 @@ Written by the strategy-research session. Plain numbers; nothing here changes a 
 - **One strong lead (FLAT)**, two live changes still collecting evidence, and a long list of ideas that failed.
 - **Money, honestly:** the entry rule earns about +0.9c per contract held to settlement. At about 26 fills a day and 1 contract each that is roughly **$0.25 a day (about $7 a month)**. Bigger size is leverage, not a better edge (SIZE1). The account cannot pay its costs on this edge alone; that needs a larger edge, which is what the hunt is for.
 
-## 2. The live account, Oct 7 to 22 (386 settled fills, net -$11.74)
-- Held to settlement, the 366 settled fills lose **5.7%** (break-even about 6.8%) and make **+0.92c** a contract. The entry rule is not the problem.
-- Two sizing events (22 and 12 contract Bitcoin losses, -$20.36 and -$11.11) were two thirds of the damage; both are capped now.
-- Two-fill windows lose 14.3% against 4.4% for single-fill windows (-$44.49 against +$26.20). #459 (one crypto order per window) targets this.
-- The 21 exits at 25c cost about $2.20 against holding; they are not the leak.
-- Orders that did not fill would have done worse than the ones that did (8.1% against 5.7% losses): the fill rule is not selecting against you.
+## 2. The live account, Oct 7 to 22 [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
+[live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only]
 
 ## 3. Live changes still collecting evidence (all deployed by owner decisions)
 | Change | Live since | What decides it |

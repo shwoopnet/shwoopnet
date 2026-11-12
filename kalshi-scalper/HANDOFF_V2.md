@@ -30,7 +30,7 @@ About **438,666 things tried** (every pre-registered variant, generator strategy
 | CONF1 | confluence filters on L1 | TWIN, TAPE FALSIFIED; LADDER NOT_ENOUGH_DATA | LADDER holdout kept PF 1.79 on 116 closes (one window, information) |
 | MM1 | gold market making | NOT_ENOUGH_DATA / NOT_RUNNABLE | 48 gold windows recorded vs 300 needed; mid-window needs recorder R2 |
 | LOOK1 / BAND1 / ROUND1 | per-market look time, sub-band, fee-minimising size | FALSIFIED | discovery picks fall back; ROUND1 +0.05c a contract (upkeep note) |
-| LIVELOSS | where live L1 loses | information | BTC -$22.46, XRP -$11.31, gold +$33.83; 10 min lead PF 0.64 |
+| LIVELOSS | where live L1 loses | information | [live account figure removed Nov 12, 2026 under the no-live-figures rule; sent to main by message only] |
 | LADL1 | L1's rule on gold daily/weekly and BTC/ETH hourly ladders | PENDING (download running) | gold: only 38 daily and 9 weekly closes on record |
 
 ## 2. Where the ledger is
