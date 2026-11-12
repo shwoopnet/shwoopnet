@@ -1,0 +1,254 @@
+{
+ "job_id": "V2READS_LISTS",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/DESK_A_V2_READS_INVENTORY.md",
+ "purpose": "Stage 1 of the candle refresh for V2's registered forward reads (fresh.sqlite): the settled market lists of the 18 pooled 15 minute series, closes from 2026-10-12T00:00Z to now, so stage 2 can name every market. No price is read.",
+ "heldout": "none: these are registered forward reads read once each on the days they were registered for; no market is held out from the pull",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXBNB15M",
+  "KXBTC15M",
+  "KXCOPPER15M",
+  "KXDOGE15M",
+  "KXETH15M",
+  "KXEURUSD15M",
+  "KXGBPUSD15M",
+  "KXGOLD15M",
+  "KXHYPE15M",
+  "KXNATGAS15M",
+  "KXNEAR15M",
+  "KXPALLADIUM15M",
+  "KXPLATINUM15M",
+  "KXSILVER15M",
+  "KXUSDJPY15M",
+  "KXWTI15M",
+  "KXXRP15M",
+  "KXZEC15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 80,
+ "notes": "One request a series, up to 4 pages of 1,000 (a series lists about 2,700 settled markets in 31 days at 96 a day). Request count: 18 requests, at most 72 pages (pages count toward the cap), cap 80. Fields the reader keeps: ticker, event_ticker, open_time, close_time, result, floor_strike.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXBNB15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBNB15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXBTC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBTC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXCOPPER15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCOPPER15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXDOGE15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOGE15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXETH15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXETH15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXEURUSD15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXEURUSD15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXGBPUSD15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGBPUSD15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXGOLD15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGOLD15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXHYPE15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXHYPE15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXNATGAS15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNATGAS15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXNEAR15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNEAR15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXPALLADIUM15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPALLADIUM15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXPLATINUM15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPLATINUM15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXSILVER15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXSILVER15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXUSDJPY15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUSDJPY15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXWTI15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTI15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXXRP15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXXRP15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXZEC15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXZEC15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1760227200
+   },
+   "max_pages": 4
+  }
+ ]
+}
