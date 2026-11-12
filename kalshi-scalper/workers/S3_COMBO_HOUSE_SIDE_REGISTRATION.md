@@ -85,3 +85,16 @@ Each paper fill is held to settlement. This rule only takes combos that close wi
 6. **Asked of Main (engineering), not assumed:** store the leg tickers, and store results for every quoted ticker, not only those that traded.
 
 Nothing in this file authorizes a live order.
+
+## Note for the Nov 26 read: what COMBOPRICE1 needs (added Nov 12; inventory only, nothing scored)
+
+COMBOPRICE1 is V2's design for pricing a combo against its own legs (`workers/COMBOPRICE1_DESIGN.md` and `src/scalper/combo_price.py` on branch `claude/epic-ptolemy-0amjd9`; design only, never run). V2 has retired, so it has no owner. It is not part of S3 and not a try of S3. It can be picked up beside the Nov 26 description if these exist by then:
+
+1. **Leg tickers AND leg sides for every recorded combo.** The combo market object lists them (`mve_selected_legs`). The recorder stores only how many there are. Main is adding them.
+2. **A quote of each leg within 5 minutes of the combo's quote** (the design's staleness rule). The combo recorder does not read the legs. Two ways, neither built: the recorder reads each distinct leg once a run (more requests on the recorder), or the legs' one-minute candles at the combo's read time are pulled afterwards through kalshi-pull (no recorder change; the request count depends on how many distinct legs there are, which is not known until item 1 exists).
+3. **Results for every quoted combo,** not only those that traded (the same gap S3 has).
+4. **The fee field of the combo series.** The design treats the standard fee as unverified for combos until a market object or the fee schedule shows it. Neither has been read.
+
+With item 1 alone, one thing becomes possible at zero reads: grouping S3's paper fills by shared legs in place of close dates (an amendment, made before the read it governs). COMBOPRICE1 itself needs items 1 and 2.
+
+Also for Nov 26, description only and not a try: the recorder's printed trades where the taker bought YES show what the house side actually earned where the volume is. It is read only on or after Nov 26, with the recorder's own stop rule.
