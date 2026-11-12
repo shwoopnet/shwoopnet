@@ -1,0 +1,39 @@
+{
+ "job_id": "POLI2_SERIES",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/testing/POLI2_COUNT_REGISTRATION.md",
+ "purpose": "POL-i2 count step, stage 0: the list of series tagged Politics (one request, no price).",
+ "heldout": "none read; nothing closing on or after 2026-11-05T00:00Z is listed or requested (kept for the scoring step); no outcome is used by the count",
+ "allowed_endpoints": [
+  {
+   "name": "series_list",
+   "method": "GET",
+   "path_pattern": "/series",
+   "params_allowed": [
+    "category"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 1,
+ "notes": "POL-i2 count step",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "series_politics",
+   "path": "/series",
+   "params": {
+    "category": "Politics"
+   }
+  }
+ ]
+}

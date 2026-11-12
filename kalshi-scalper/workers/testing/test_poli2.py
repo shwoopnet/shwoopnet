@@ -1,0 +1,68 @@
+"""Synthetic test for poli2_count.py (made-up data, no Kalshi). Run: python3 test_poli2.py"""
+import gzip, json, os, sys, tempfile, calendar
+from datetime import datetime, timedelta
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "..", "scripts"))
+import poli2_count as p
+import kalshi_pull as kp
+
+def mkrun(d, job, bodies):
+    rows = []
+    for i, r in enumerate(job["requests"]):
+        if r["id"] in bodies:
+            f = "%04d.json.gz" % (i + 1); gzip.open(os.path.join(d, f), "wt").write(json.dumps(bodies[r["id"]]))
+            rows.append({"id": r["id"], "status": 200, "file": f})
+    json.dump({"job": job, "rows": rows, "status": "complete"}, open(os.path.join(d, "manifest.json"), "w"))
+
+kp.check_job(p.build_s0())
+s0 = {"series": [{"ticker": "KXAAA", "category": "Politics"}, {"ticker": "KXBBB", "category": "Politics"}, {"ticker": "KXWX", "category": "Climate"}]}
+def mk(t, close, open_, vol, res="yes"):
+    f = lambda x: datetime.utcfromtimestamp(x).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {"ticker": t, "result": res, "close_time": f(close), "open_time": f(open_), "volume_fp": str(vol)}
+live_close = calendar.timegm((2026, 10, 1, 0, 0, 0)); old_close = calendar.timegm((2026, 3, 1, 0, 0, 0))
+with tempfile.TemporaryDirectory() as d0, tempfile.TemporaryDirectory() as d1, tempfile.TemporaryDirectory() as d2:
+    mkrun(d0, p.build_s0(), {"series_politics": s0})
+    assert p.politics_series(d0) == ["KXAAA", "KXBBB"]
+    j1 = p.build_s1(d0); kp.check_job(j1); assert len(j1["requests"]) == 4 and "KXWX" not in j1["series_allowlist"]
+    lists = {"live_KXAAA": {"markets": [mk("KXAAA-1", live_close, live_close - 86400 * 30, 5000), mk("KXAAA-LOW", live_close, live_close - 86400, 50),
+                                         mk("KXAAA-HELD", calendar.timegm((2026, 11, 6, 0, 0, 0)), live_close, 9000), mk("KXAAA-VOID", live_close, live_close - 86400, 900, "")]},
+             "hist_KXAAA": {"markets": [mk("KXAAA-OLD", old_close, old_close - 86400 * 20, 3000)]}, "live_KXBBB": {"markets": []}, "hist_KXBBB": {"markets": []}}
+    mkrun(d1, j1, lists)
+    mk_ = p.markets_from(d1); assert sorted(mk_) == ["KXAAA-1", "KXAAA-OLD"], sorted(mk_)    # low volume, held out, unsettled all dropped
+    j2 = p.build_s2(d1); kp.check_job(j2)
+    assert j2["ticker_allowlist"] == ["KXAAA-1", "KXAAA-OLD"] and any(r["path"].startswith("/historical") for r in j2["requests"]) and any(r["path"] == "/markets/candlesticks" for r in j2["requests"])
+    assert all(r["params"]["end_ts"] < p.HELD_OUT_FROM for r in j2["requests"])
+    # candles: hourly from 2026-09-01 on; 22:00 ET quiet at 0.50; next 06:00 ET 0.60/0.62, 07:00 ET 0.60/0.62 (moved up 10c, stale proxy holds)
+    from zoneinfo import ZoneInfo; NY = ZoneInfo("America/New_York")
+    def candles(days, move_day_idx, stale_ok=True):
+        out = []
+        start = datetime(2026, 9, 1, 0, 0, tzinfo=NY)
+        for h in range(days * 24):
+            t = start + timedelta(hours=h); dd = t.date(); day_i = (dd - start.date()).days
+            lvl = 0.50
+            nxt_morning = (day_i - 1) in move_day_idx and (t.hour < 22 or True) and t.hour in (6, 7) or ((day_i - 1) in move_day_idx and t.hour >= 8) or (day_i in move_day_idx and t.hour == 22)
+            if (day_i - 1) in move_day_idx and t.hour >= 0 and t.hour <= 21 and t.hour >= 7: lvl = 0.60
+            if (day_i - 1) in move_day_idx and t.hour == 6: lvl = 0.60 if stale_ok else 0.55
+            if (day_i - 1) in move_day_idx and t.hour == 7: lvl = 0.60
+            out.append({"end_period_ts": int(t.timestamp()), "yes_bid": {"close_dollars": "%.4f" % (lvl - 0.01)}, "yes_ask": {"close_dollars": "%.4f" % (lvl + 0.01)}, "volume_fp": "300"})
+        return out
+    moves = set(range(10, 70, 1))       # a gap the morning after every one of these evenings
+    cs = candles(80, moves)
+    gaps = p.count_market("KXAAA-1", cs, None)
+    assert len(gaps) > 0 and all(g["strict"] for g in gaps), len(gaps)
+    # price band: a NO buy needs 0.10 to 0.90 -> a YES gap up to 0.60 buys YES at the 0.61 ask: in band
+    assert all(g["date"] >= "2026-09-11" for g in gaps)
+    loose = p.count_market("KXAAA-1", candles(80, moves, stale_ok=False), None)
+    assert all(not g["strict"] for g in loose) and len(loose) == len(gaps)           # not-yet-followed proxy fails when 06:00 differs by 5c
+    # liquidity: 7-day volume under 200 -> none
+    thin = [dict(c, volume_fp="1") for c in cs]; assert p.count_market("KXAAA-1", thin, None) == []
+    mkrun(d2, j2, {r["id"]: ({"markets": [{"market_ticker": "KXAAA-1", "candlesticks": cs}]} if r["path"] == "/markets/candlesticks" else {"candlesticks": cs}) for r in j2["requests"]})
+    out = p.count([d2]); assert out["strict"]["gaps"] > 0 and out["markets_read"] >= 2, out
+    t = p.tally([dict(date="2026-0%d-01" % (1 + i // 30), series="S", ticker="T%d" % i, strict=True, loose=True, within_24h_of_close=False) for i in range(100)])
+    assert t["verdict"].startswith("COUNT CLEARS"), t["verdict"]
+    t = p.tally(gaps[:10]); assert t["verdict"].startswith("NOT_ENOUGH_DATA") and "no evidence at n = 10" in t["label"]
+    # the request cap drops the lowest-volume markets and says so
+    big = {"live_KXAAA": {"markets": [mk("KXAAA-%d" % i, live_close + i, live_close - 86400 * 400 + i, 1000 + i) for i in range(10)]}}
+    p.STAGE2_CAP = 4; p.PACK = 1  # each live market alone in a batch
+    with tempfile.TemporaryDirectory() as d3:
+        mkrun(d3, j1, big); j3 = p.build_s2(d3); assert len(j3["requests"]) <= 4 and "dropped by the request cap: 6" in j3["notes"], j3["notes"]
+print("poli2 synthetic tests passed")
