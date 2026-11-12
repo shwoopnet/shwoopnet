@@ -29,7 +29,7 @@ Two tiers. **SLOW:** one read a minute. **FAST:** one read every 3 seconds.
 
 Every match of the listed series is recorded, whatever its format; the engines choose best-of-three afterwards from the list. An event whose ticker has no readable clock is recorded SLOW from its open and counted.
 
-**How the recorder finds events:** one list read of open markets per series every 5 minutes (`GET /markets?series_ticker=X&status=open`, cursor followed). Markets open at least 2 hours before S in all of these series, so a 5 minute discovery loses nothing.
+**How the recorder finds events:** one list read of open markets per series every 5 minutes (`GET /markets?series_ticker=X&status=open`, cursor followed). On Nov 10 these markets opened a median of about 150 minutes before S (e-soccer, e-basketball) to many hours before it (table tennis, esports), so a 5 minute discovery should lose nothing; the coverage row counts any event first seen after its window began.
 
 ## 3. Polling, load and size
 
