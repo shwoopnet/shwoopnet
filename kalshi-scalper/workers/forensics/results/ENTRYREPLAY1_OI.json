@@ -1,0 +1,281 @@
+{
+ "test": "ENTRYREPLAY1-OI",
+ "note": "dollars per contract (0.01 = 1 cent); [value, 2.5%, 97.5%] by resampling windows",
+ "counts": {
+  "windows_in_band": 435,
+  "trigger": 56,
+  "other": 379,
+  "dev_windows_in_band": 178
+ },
+ "part_a_no_outcome": {
+  "trigger": {
+   "windows": 56,
+   "mean_ask": 0.203,
+   "mean_spread": 0.0082,
+   "ioc_ask_seen_2s": {
+    "filled_in_full": [
+     0.66071,
+     0.53571,
+     0.7683
+    ],
+    "paid_minus_a0": [
+     -0.01489,
+     -0.01889,
+     -0.011
+    ]
+   },
+   "ioc_plus_1c_2s": {
+    "filled_in_full": [
+     0.80357,
+     0.69643,
+     0.91071
+    ],
+    "paid_minus_a0": [
+     -0.01076,
+     -0.01491,
+     -0.00673
+    ]
+   },
+   "ioc_ask_seen_6s": {
+    "filled_in_full": [
+     0.67857,
+     0.55357,
+     0.80357
+    ],
+    "paid_minus_a0": [
+     -0.02813,
+     -0.03595,
+     -0.02118
+    ]
+   },
+   "ioc_plus_1c_6s": {
+    "filled_in_full": [
+     0.76786,
+     0.66071,
+     0.875
+    ],
+    "paid_minus_a0": [
+     -0.02379,
+     -0.0314,
+     -0.01679
+    ]
+   },
+   "ioc_ask_seen_10s": {
+    "filled_in_full": [
+     0.64286,
+     0.51786,
+     0.76786
+    ],
+    "paid_minus_a0": [
+     -0.03625,
+     -0.04831,
+     -0.02478
+    ]
+   },
+   "ioc_plus_1c_10s": {
+    "filled_in_full": [
+     0.69643,
+     0.57143,
+     0.80357
+    ],
+    "paid_minus_a0": [
+     -0.03272,
+     -0.04477,
+     -0.02113
+    ]
+   },
+   "resting": {
+    "orders": 56,
+    "share_with_any_fill": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "share_filled_in_full": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "traded_through_share": [
+     1.0,
+     1.0,
+     1.0
+    ],
+    "price_and_fee_saved_on_filled": [
+     0.01717,
+     0.00891,
+     0.02484
+    ]
+   },
+   "mid_move_30s": [
+    -0.0079,
+    -0.03917,
+    0.02273
+   ]
+  },
+  "other": {
+   "windows": 379,
+   "mean_ask": 0.2675,
+   "mean_spread": 0.0092,
+   "ioc_ask_seen_2s": {
+    "filled_in_full": [
+     0.62533,
+     0.57784,
+     0.67546
+    ],
+    "paid_minus_a0": [
+     -0.01894,
+     -0.02176,
+     -0.01625
+    ]
+   },
+   "ioc_plus_1c_2s": {
+    "filled_in_full": [
+     0.75462,
+     0.7124,
+     0.79947
+    ],
+    "paid_minus_a0": [
+     -0.01417,
+     -0.01687,
+     -0.01165
+    ]
+   },
+   "ioc_ask_seen_6s": {
+    "filled_in_full": [
+     0.63588,
+     0.58575,
+     0.68338
+    ],
+    "paid_minus_a0": [
+     -0.03237,
+     -0.03684,
+     -0.02835
+    ]
+   },
+   "ioc_plus_1c_6s": {
+    "filled_in_full": [
+     0.7124,
+     0.66491,
+     0.75726
+    ],
+    "paid_minus_a0": [
+     -0.02794,
+     -0.03226,
+     -0.02424
+    ]
+   },
+   "ioc_ask_seen_10s": {
+    "filled_in_full": [
+     0.64908,
+     0.59631,
+     0.69657
+    ],
+    "paid_minus_a0": [
+     -0.04357,
+     -0.04885,
+     -0.03854
+    ]
+   },
+   "ioc_plus_1c_10s": {
+    "filled_in_full": [
+     0.70185,
+     0.65693,
+     0.74406
+    ],
+    "paid_minus_a0": [
+     -0.03966,
+     -0.04498,
+     -0.03476
+    ]
+   },
+   "resting": {
+    "orders": 379,
+    "share_with_any_fill": [
+     0.98153,
+     0.96834,
+     0.99472
+    ],
+    "share_filled_in_full": [
+     0.98153,
+     0.9657,
+     0.99472
+    ],
+    "traded_through_share": [
+     0.97361,
+     0.95515,
+     0.98945
+    ],
+    "price_and_fee_saved_on_filled": [
+     0.02246,
+     0.01909,
+     0.02558
+    ]
+   },
+   "mid_move_30s": [
+    -0.00585,
+    -0.02027,
+    0.00831
+   ]
+  }
+ },
+ "part_b_outcome_closes_before_nov5": {
+  "trigger": {
+   "windows": 14,
+   "mean_ask": 0.1851,
+   "win_rate": 0.3571,
+   "taker_T0_pf": [
+    2.306,
+    0.561,
+    7.619
+   ],
+   "taker_T0_mean": [
+    0.16215,
+    -0.08567,
+    0.43948
+   ],
+   "resting_pf": [
+    2.705,
+    0.647,
+    8.794
+   ],
+   "resting_orders_filled": 14,
+   "paired_resting_minus_T0": [
+    0.02514,
+    0.01909,
+    0.03098
+   ]
+  },
+  "other": {
+   "windows": 164,
+   "mean_ask": 0.2607,
+   "win_rate": 0.3293,
+   "taker_T0_pf": [
+    1.336,
+    0.937,
+    1.873
+   ],
+   "taker_T0_mean": [
+    0.05614,
+    -0.01371,
+    0.1293
+   ],
+   "resting_pf": [
+    1.476,
+    1.04,
+    2.131
+   ],
+   "resting_orders_filled": 161,
+   "paired_resting_minus_T0": [
+    0.01517,
+    0.0008,
+    0.02572
+   ]
+  },
+  "trigger_minus_other_T0_mean": [
+   0.106,
+   -0.1443,
+   0.37133
+  ]
+ }
+}
