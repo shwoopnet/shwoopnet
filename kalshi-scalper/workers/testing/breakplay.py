@@ -86,13 +86,14 @@ def look_minute(idx, rec, cfg, state_close=None):
     return None
 
 
-def state_known(idx, rec):
+def state_known(idx, rec, look_no=1):
     """Forensics' check (Nov 12): was the state public by the state market's close_time? True if the up team's own state-market contract (placebo[up]) had a bid of 0.90 or more in its LAST two-sided candle at or before state_close. None if no such candle. Uses data known at the look only."""
-    series = idx.get(rec["placebo"][rec["up"]], {})
+    tk, sc = (rec["placebo"][rec["up"]], rec["state_close"]) if look_no == 1 else (rec.get("state_ticker2"), rec["state_close2"])
+    series = idx.get(tk, {})
     last = None
     for ts in sorted(series):
-        if ts > rec["state_close"]: break
-        if two(idx, rec["placebo"][rec["up"]], ts): last = series[ts]
+        if ts > sc: break
+        if two(idx, tk, ts): last = series[ts]
     return None if last is None else last["bid"] >= 0.90
 
 
@@ -151,6 +152,8 @@ def measure(records, candle_folders, cfg):
             P["look"].append(r["cand"][r["best"]])
         if rec.get("state_close2"):
             P2 = per.setdefault(rec["cell"] + SECOND, new()); P2["sampled"] += 1; P2["pre"] += 1
+            kn2 = state_known(idx, rec, 2)
+            if kn2 is not None: P2["state_known_n"] = P2.get("state_known_n", 0) + 1; P2["state_known_hi"] = P2.get("state_known_hi", 0) + (1 if kn2 else 0)
             r2 = prepare(idx, rec, cfg, 2)
             if r2["look"] is not None:
                 P2["look_filled"] += 1; P2["minutes"].append((r2["look"] - rec["state_close2"]) / 60)
@@ -293,7 +296,7 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
 def candle_job(records, cfg, series, job_id, registration, window_start_back=2400, window_end_after=300):
     """Pack records by scheduled start: per record the match and placebo contracts from S - window_start_back to state_close + window_end_after; matches in one request share its window; minutes x tickers <= pack_limit, tickers <= max_tickers."""
     ms = sorted(records, key=lambda m: (m["S"], m["key"])); packs, cur = [], []
-    tk = lambda m: list(m["match"].values()) + list(m["placebo"].values())
+    tk = lambda m: list(m["match"].values()) + list(m["placebo"].values()) + ([m["state_ticker2"]] if m.get("state_ticker2") else [])
     def win(g): return (max(max(m["state_close"], m.get("state_close2") or 0) for m in g) + window_end_after) - (min(m["S"] for m in g) - window_start_back)
     for m in ms:
         trial = cur + [m]

@@ -44,19 +44,20 @@ def build():
     return job
 
 
-def split(folder, out):
+def split(folder, out, order=None):
     """Turn one landed bundle run folder into five answer sets in the layout the readers expect. Returns a report per sub-job; one sub-job's failure never blocks reading the others."""
+    ORDER_ = order or ORDER
     man = json.load(open(os.path.join(folder, "manifest.json")))
-    expected = {p: [r["id"][len(p) + 1:] for r in man["job"]["requests"] if r["id"].startswith(p + "_")] for p, _ in ORDER}
+    expected = {p: [r["id"][len(p) + 1:] for r in man["job"]["requests"] if r["id"].startswith(p + "_")] for p, _ in ORDER_}
     known = {r["id"] for r in man["job"]["requests"]}
     report = {"bundle_status": man.get("status"), "requests_sent": man.get("requests_sent"), "bytes_stored": man.get("bytes_stored"), "sub_jobs": {}, "mixed_or_unknown_rows": []}
-    by_prefix = {p: [] for p, _ in ORDER}
+    by_prefix = {p: [] for p, _ in ORDER_}
     for row in man["rows"]:
         if row["id"] not in known:
             report["mixed_or_unknown_rows"].append(row["id"]); continue
         by_prefix[row["id"].split("_", 1)[0]].append(row)
     seen_ids = set()
-    for p, name in ORDER:
+    for p, name in ORDER_:
         sub = [r for r in man["job"]["requests"] if r["id"].startswith(p + "_")]
         d = os.path.join(out, name); os.makedirs(d, exist_ok=True)
         rows, ok, failed = [], set(), {}
@@ -77,8 +78,24 @@ def split(folder, out):
     return report
 
 
+CORDER = [("t3c", "TIE3_CANDLES"), ("wxb", "WXDAYEND_B")]
+
+
+def build_candles(t3_job_path, wxb_job_path):
+    """Head's ruling 18:58Z: WXDAYEND_B (4 candle windows) rides in the TIE3_CANDLES run so it costs no extra run. Ids: t3c_<id> and wxb_<id>; split with `split-candles`."""
+    a, b = json.load(open(t3_job_path)), json.load(open(wxb_job_path))
+    reqs = [dict(r, id="t3c_" + r["id"]) for r in a["requests"]] + [dict(r, id="wxb_" + r["id"]) for r in b["requests"]]
+    j = dict(a); j["requests"] = reqs; j["job_id"] = "TIE3_CANDLES"
+    j["series_allowlist"] = sorted(set(a["series_allowlist"]) | set(b["series_allowlist"])); j["ticker_allowlist"] = sorted(set(a["ticker_allowlist"]) | set(b["ticker_allowlist"]))
+    j["max_requests"] = len(reqs)
+    j["purpose"] = a["purpose"] + " Rides along: WXDAYEND_B, the 4 Nov 10 winning brackets of card 74 (ids wxb_)."
+    return j
+
+
 if __name__ == "__main__":
     a = sys.argv[1:]
     if a and a[0] == "build": print(json.dumps(build(), indent=1))
     elif a and a[0] == "split" and len(a) == 3: print(json.dumps(split(a[1], a[2]), indent=1))
+    elif a and a[0] == "build-candles" and len(a) == 3: print(json.dumps(build_candles(a[1], a[2]), indent=1))
+    elif a and a[0] == "split-candles" and len(a) == 3: print(json.dumps(split(a[1], a[2], CORDER), indent=1))
     else: print(__doc__)

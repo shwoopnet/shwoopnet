@@ -2,7 +2,7 @@
 """MAPBREAK (Desk B) MEASUREMENT reader, job builders and scorer on scorekit. Testing Desk, Nov 12, 2026.
 Built to Desk B's REGISTRATION (kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md, commit 50a1729b on claude/idea-desk-b; the registration wins) and its frozen titles file (mapbreak_series_frozen.json here, byte for byte, sha256 below).
 Research only: reads files, sends nothing. Desk B's AMENDMENTS 1 to 3 (Nov 12): the card is the registered RULE (2 tries, one per look), the first pull is both the measurement and the development read. Same family as NHLOT: ONE candidate for the owner's count, a second venue.
-Enforced in code: records carry only the map-1 winner (the state) and the map-2 CLOSE time (second look); no map 2 or 3 result is ever read. The match market's result is read ONLY for a bet the rule fires (result_fn), and NOT AT ALL if every title/look is out on its kill lines (step 1 first, no result);
+Enforced in code: records carry only the map-1 winner (the state) and the map-2 CLOSE time (second look); no map 3 result is ever read; map 1 and map 2 results are the STATES (Amendment 4). The match market's result is read ONLY for a bet the rule fires (result_fn), and NOT AT ALL if every title/look is out on its kill lines (step 1 first, no result);
 development sample = EVERY best-of-three match closing 2026-09-12 to before 2026-10-23T00:00Z (the 1,500 cap is REMOVED); the held-out (from 2026-10-23T00:00Z) is never listed or requested and score refuses it without the Head's go;
 the titles file must match CELLS_SHA256; prices only from minute-end candles, two-sided only (0 < bid < ask < 1), thin minutes counted not filled.
 Instants: scheduled start S = the date and four-digit time at the front of the ticker key, read as America/New_York; GUARD map 1 ended 15 to 150 minutes after S, else 'start not derivable'; GUARD map 2 closes at least 15 minutes after map 1.
@@ -26,7 +26,6 @@ CELLS_SHA256 = "bc9140cbe8934cb242664558d3bf79071ba9491473a8360d893a6d89e480b6fe
 WIN_FROM = calendar.timegm((2026, 9, 12, 0, 0, 0)); HELD_OUT_FROM = calendar.timegm((2026, 10, 23, 0, 0, 0))
 SAMPLE, MIN_FILLED, EDGE, SPREAD_MAX, COST_MAX, EDGE_SHARE = None, 150, 0.08, 0.04, 0.05, 0.10
 G_LO, G_HI, MAP2_MIN = 15 * 60, 150 * 60, 15 * 60
-THIRD_MIN, THIRD_DROP_MAX = 15 * 60, 10 * 60            # Amendment 2: the match market closes under 10 minutes after map 2 = the match ended 2-0 (no second look); 10 to 15 = dropped from the second look and counted; 15 or more = a third map
 PRE_BACK, PRE_MAX_BACK, LOOK_AFTER, LOOK_MAX = 10 * 60, 40 * 60, 120, 5 * 60
 PACK_LIMIT, MAX_TICKERS = 9000, 100
 HIST_PAGES = 10                                  # history lists: at most 10 pages of 1,000 markets a match series (counts only)
@@ -73,7 +72,7 @@ def start_ts(key):
 
 
 def matches(spec, list_folders):
-    """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 2 or 3 result: only the map-1 winner (the state) and, for the second look, the map-2 close time (state_close2) when a third map was played."""
+    """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 3 result: the map-1 winner (state of look 1) and, when the map-2 result names the team that lost map 1 (Amendment 4), state_close2 and state_ticker2 (state of look 2). The match market's close time is never used."""
     raw = k.markets(list_folders)
     trunc = set()
     for f in ([list_folders] if isinstance(list_folders, str) else list_folders):
@@ -85,7 +84,7 @@ def matches(spec, list_folders):
     for t, m in raw.items():
         parts = t.split("-")
         by.setdefault((parts[0], parts[1] if len(parts) > 1 else ""), []).append((parts, m))
-    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "start_not_derivable": 0, "map2_too_soon": 0, "no_map1_result": 0, "sampled": 0, "second_look_matches": 0, "second_look_dropped_10_to_15_min": 0, "ended_two_nil_no_second_look": 0}
+    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "start_not_derivable": 0, "no_map1_result": 0, "sampled": 0, "second_look_matches": 0, "map2_closed_under_15_min_after_map1_count_only": 0, "map2_won_by_map1_winner_no_second_look": 0, "no_map2_result_no_second_look": 0}
     cand = []
     for ti in spec["titles"]:
         keys = {key for (s, key) in by if s == ti["match_series"]}
@@ -98,7 +97,7 @@ def matches(spec, list_folders):
             floors = [m["floor"] for _, m in tot if m["floor"] is not None]
             maps = by.get((ti["map_series"], key), [])
             ns = {p[2] for p, _ in maps if len(p) >= 4}
-            if len(mm) != 2 or not floors or max(floors) != 2.5 or "1" not in ns or "2" not in ns:
+            if len(mm) != 2 or not floors or max(floors) != 2.5 or "1" not in ns:
                 counts["not_best_of_three"] += 1; continue
             cand.append((close, ti["cell"], key, mm, maps))
     out = []
@@ -110,18 +109,21 @@ def matches(spec, list_folders):
         if S is None or len(m1) != 2 or not m1[0][1]["close"]: counts["start_not_derivable"] += 1; continue
         c1 = max(m["close"] for _, m in m1)
         if not (G_LO <= c1 - S <= G_HI): counts["start_not_derivable"] += 1; continue
-        if not m2 or min(m["close"] for m in m2) < c1 + MAP2_MIN: counts["map2_too_soon"] += 1; continue
         win = [p[3] for p, m in m1 if m["result"] == "yes"]                    # THE state: the map-1 market's own result. No other result is read.
         if len(win) != 1: counts["no_map1_result"] += 1; continue
         teams = sorted(p[-1] for p, _ in mm)
         if win[0] not in teams or len(set(teams)) != 2: counts["no_map1_result"] += 1; continue
         match_t = {p[-1]: m["ticker"] for p, m in mm}; map1_t = {p[3]: m["ticker"] for p, m in m1}
         rec = {"cell": cell, "key": key, "S": S, "state_close": c1, "up": win[0], "down": [x for x in teams if x != win[0]][0], "match": match_t, "placebo": map1_t}
-        c2 = max(m["close"] for m in m2); mclose = max(m["close"] for _, m in mm)             # Amendment 2: the state of the second look comes from the CLOSE TIMES alone (no map-2 result)
-        gap2 = mclose - c2
-        if gap2 >= THIRD_MIN: rec["state_close2"] = c2; counts["second_look_matches"] += 1
-        elif gap2 >= THIRD_DROP_MAX: counts["second_look_dropped_10_to_15_min"] += 1
-        else: counts["ended_two_nil_no_second_look"] += 1
+        if m2 and min(p_m["close"] for p_m in m2) < c1 + MAP2_MIN: counts["map2_closed_under_15_min_after_map1_count_only"] += 1          # Amendment 4: a COUNT, it decides nothing
+        # Amendment 4: the second look exists when the map-2 market's own RESULT names the team that lost map 1 (one map each); the match market's close is never used
+        m2p = [(p, m) for p, m in maps if p[2] == "2"]
+        w2 = [(p[3], m["ticker"]) for p, m in m2p if m["result"] == "yes"]
+        if len(m2p) == 2 and len(w2) == 1 and all(m["close"] for _, m in m2p):
+            if w2[0][0] == rec["down"]:
+                rec["state_close2"] = max(m["close"] for _, m in m2p); rec["state_ticker2"] = w2[0][1]; counts["second_look_matches"] += 1
+            else: counts["map2_won_by_map1_winner_no_second_look"] += 1
+        else: counts["no_map2_result_no_second_look"] += 1
         out.append(rec)
     return out, counts
 

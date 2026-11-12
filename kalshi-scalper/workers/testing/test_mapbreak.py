@@ -29,33 +29,34 @@ def mk(t, close, result="yes", **kw): return dict({"ticker": t, "event_ticker": 
 random.seed(5)
 lists = {"live_" + s: {"markets": []} for s in m.series_all(spec)}
 sampled = []
-def add_match(title, i, day, hh, garbage_seed, bo3=True, map2_delay=40, start_ok=True, end_gap=50):
+def add_match(title, i, day, hh, garbage_seed, bo3=True, map2_delay=40, start_ok=True, end_gap=50, two_nil=False):
     ser = [t for t in spec["titles"] if t["cell"] == title][0]; key = "26OCT%02d%02d00AAABBB%d" % (day, hh, i); S = tz_start(day, hh, 0)
     c1 = S + (3600 if start_ok else 15000); c2 = c1 + map2_delay * 60; cm = c2 + end_gap * 60
     rnd = random.Random(garbage_seed); up = "AAA" if i % 2 == 0 else "BBB"; dn = "BBB" if up == "AAA" else "AAA"
     for team in ("AAA", "BBB"):
         lists["live_" + ser["match_series"]]["markets"].append(mk("%s-%s-%s" % (ser["match_series"], key, team), cm, rnd.choice(["yes", "no"])))        # GARBAGE results: must never be read
         lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-1-%s" % (ser["map_series"], key, team), c1, "yes" if team == up else "no"))     # the state
-        lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, rnd.choice(["yes", "no"])))
+        lists["live_" + ser["map_series"]]["markets"].append(mk("%s-%s-2-%s" % (ser["map_series"], key, team), c2, "yes" if (team == (up if two_nil else dn)) else "no"))     # the map-2 result IS the state of the second look
     lists["live_" + ser["total_maps_series"]]["markets"].append(mk("%s-%s-2" % (ser["total_maps_series"], key), cm, floor_strike=2.5))
     if not bo3: lists["live_" + ser["total_maps_series"]]["markets"].append(mk("%s-%s-3" % (ser["total_maps_series"], key), cm, floor_strike=3.5))
     return dict(title=title, key=key, S=S, c1=c1, up=up, dn=dn, ser=ser)
 NM = 170
 for i in range(NM): sampled.append(add_match("DOTA2", i, 1 + i % 20, 10 + i % 8, i))
-add_match("DOTA2", 900, 5, 10, 1, bo3=False); add_match("DOTA2", 901, 5, 11, 1, start_ok=False); add_match("DOTA2", 902, 5, 12, 1, map2_delay=5); add_match("DOTA2", 910, 6, 12, 2, end_gap=12); add_match("DOTA2", 911, 6, 13, 3, end_gap=5)
+add_match("DOTA2", 900, 5, 10, 1, bo3=False); add_match("DOTA2", 901, 5, 11, 1, start_ok=False); add_match("DOTA2", 902, 5, 12, 1, map2_delay=5); add_match("DOTA2", 903, 5, 13, 1, two_nil=True); add_match("DOTA2", 910, 6, 12, 2, end_gap=12); add_match("DOTA2", 911, 6, 13, 3, end_gap=5)
 for i in range(20): add_match("CS2", i, 3, 9 + i % 5, 100 + i)                                        # only 20 CS2 matches: under 150 filled
 ms, counts = m.matches(spec, [])  if False else (None, None)
 with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     mt, counts = m.matches(spec, [dl])
     assert counts["lists_truncated_at_the_page_cap"] == []
-    assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_too_soon"] == 1 and counts["sampled"] == NM + 20 + 5 - 1 and len(mt) == NM + 22, counts
-    assert counts["second_look_matches"] == NM + 20 and counts["second_look_dropped_10_to_15_min"] == 1 and counts["ended_two_nil_no_second_look"] == 1, counts
-    assert all(set(x) - {"state_close2"} == {"cell", "key", "S", "state_close", "up", "down", "match", "placebo"} for x in mt)           # no result field of any market in a match record
+    assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_closed_under_15_min_after_map1_count_only"] == 1 and counts["sampled"] == NM + 20 + 5, counts
+    assert len(mt) == NM + 24, counts
+    assert counts["second_look_matches"] == NM + 23 and counts["map2_won_by_map1_winner_no_second_look"] == 1, counts
+    assert all(set(x) - {"state_close2", "state_ticker2"} == {"cell", "key", "S", "state_close", "up", "down", "match", "placebo"} for x in mt)           # no result field of any market in a match record
     g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["up"] == "AAA" and g["S"] == sampled[0]["S"] and g["state_close"] == sampled[0]["c1"]
     lists["live_KXDOTA2MAP"]["cursor"] = "abc123"; dlt = os.path.join(dc, "lt"); os.mkdir(dlt); mkrun(dlt, jl, lists); assert m.matches(spec, [dlt])[1]["lists_truncated_at_the_page_cap"] == ["live_KXDOTA2MAP"]; del lists["live_KXDOTA2MAP"]["cursor"]
     jc, _ = m.build_candles(spec, [dl]); kp.check_job(jc); assert 1 <= len(jc["requests"]) <= 250 and all(r["params"]["end_ts"] < m.HELD_OUT_FROM + 86400 * 400 for r in jc["requests"])
-    assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt)
+    assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt) + sum(1 for x in mt if x.get("state_ticker2"))
     assert max(r["params"]["end_ts"] for r in jc["requests"]) >= max(x.get("state_close2", 0) for x in mt) + 300      # the window of a third-map match runs to map-2 close + 5 minutes
     def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55):
         cm = {}
@@ -77,7 +78,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     surv = run("s", look_edge=0.12, half=0.005)
     D = surv["titles"]["DOTA2"]
     assert surv["tries_added"] == 0 and surv["rule_scored"] is False and surv["match_result_read"] is False and "Bitcoin 15 minute only, not on esports" in surv["freshness"]
-    assert D["filled_at_the_look"] == NM + 2 and D["filled_pre_match"] == NM + 2 and D["median_minutes_state_close_to_look"] == 2.0
+    assert D["filled_at_the_look"] == NM + 4 and D["filled_pre_match"] == NM + 4 and D["median_minutes_state_close_to_look"] == 2.0
     assert D["look"]["share_gap_ge_8c_spread_le_4c"] == 1.0 and D["look"]["share_when_team_up"] == 1.0 and D["placebo"]["share_gap_ge_8c_spread_le_4c"] == 0.0 and D["verdict"].startswith("SURVIVES"), D
     assert surv["titles"]["CS2"]["verdict"].startswith("no evidence at n = 20") and abs(D["median_spread_at_look"] - 0.01) < 1e-9
     assert D["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == 0
@@ -89,7 +90,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
                 if "MAP-" in mk_["market_ticker"] or "MAP" in mk_["market_ticker"].split("-")[0]: mk_["candlesticks"] = []
         return body
     dn = os.path.join(dc, "nm"); os.mkdir(dn); mkrun(dn, jc, nomap1(look_edge=0.12, half=0.005)); nm = m.measure(spec, [dl], [dn])["titles"]["DOTA2"]
-    assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == NM + 2, nm
+    assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == NM + 4, nm
     # efficient: ask at the value (gap 0 on the cheaper side but the other team 1c under)
     eff = run("e", look_edge=0.0, half=0.005); assert eff["titles"]["DOTA2"]["verdict"].startswith("CLOSED: efficient"), eff["titles"]["DOTA2"]["verdict"]
     # cost: spread 12c
@@ -100,7 +101,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     # the match results are never read: change every garbage result and the output is identical
     for s_ in lists:
         for mk_ in lists[s_]["markets"]:
-            if "MAP-1-" not in mk_["ticker"] and "-1-" not in mk_["ticker"]: mk_["result"] = "no" if mk_["result"] == "yes" else "yes"
+            if "-1-" not in mk_["ticker"] and "-2-" not in mk_["ticker"]: mk_["result"] = "no" if mk_["result"] == "yes" else "yes"
     dl2 = os.path.join(dc, "lists2"); os.mkdir(dl2); mkrun(dl2, jl, lists)
     d2 = os.path.join(dc, "s2"); os.mkdir(d2); mkrun(d2, jc, candles(look_edge=0.12, half=0.005)); again = m.measure(spec, [dl2], [d2])
     assert json.dumps(again["titles"]["DOTA2"], sort_keys=True) == json.dumps(surv["titles"]["DOTA2"], sort_keys=True)
@@ -119,13 +120,13 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert st1["DOTA2|second_look"]["verdict"].startswith("SURVIVES") and st1["CS2|second_look"]["verdict"].startswith("no evidence")
     set_results(True); dlw = os.path.join(dc, "lw"); os.mkdir(dlw); mkrun(dlw, jl, lists)
     rw = sc(dlw, dsr)
-    assert rw["in"] == ["DOTA2", "DOTA2|second_look"], rw["in"]
-    assert rw["bets"] == rw["result_fn_calls"] and rw["bets"] == NM + 2 + NM, (rw["bets"], rw["counts"])           # first look on all 172 DOTA2 matches, second look on the 170 third-map ones
+    assert rw["in"] == ["DOTA2", "DOTA2|second_look"], (rw["in"], {k: (v["filled_at_the_look"], v["verdict"], v["look"], v["placebo"]) for k, v in rw["step1"].items()})
+    assert rw["bets"] == rw["result_fn_calls"] and rw["bets"] == NM + 4 + NM + 3, (rw["bets"], rw["counts"])           # first look on all 172 DOTA2 matches, second look on the 170 third-map ones
     assert rw["all"]["wins"] == rw["bets"] and rw["all"]["cash_pf"] in ("inf", None) or rw["all"]["cash_pf"] > 5
     assert set(rw["by_look"]) == {"1", "2"} and set(rw["by_title"]) == {"DOTA2"} and len(rw["halves_by_date"]) == 2
-    assert rw["z_match_cluster"]["clusters"] == NM + 2 and rw["z_day_cluster"]["clusters"] < rw["z_match_cluster"]["clusters"]
+    assert rw["z_match_cluster"]["clusters"] == NM + 4 and rw["z_day_cluster"]["clusters"] < rw["z_match_cluster"]["clusters"]
     # price = ask + 1c; the fee rounds UP to the cent
-    p1 = (1 - (1 - 0.55) ** 2) - 0.12 + 0.005 + 0.01; p2 = 0.55 - 0.12 + 0.005 + 0.01; assert abs(rw["all"]["mean_price_paid"] - ((NM + 2) * p1 + NM * p2) / (2 * NM + 2)) < 2e-3, rw["all"]["mean_price_paid"]
+    p1 = (1 - (1 - 0.55) ** 2) - 0.12 + 0.005 + 0.01; p2 = 0.55 - 0.12 + 0.005 + 0.01; assert abs(rw["all"]["mean_price_paid"] - ((NM + 4) * p1 + (NM + 3) * p2) / (2 * NM + 7)) < 2e-3, rw["all"]["mean_price_paid"]
     assert bp.fee_up(0.50) == 0.02 and bp.fee_up(0.10) == 0.01 and bp.fee_up(0.90) == 0.01
     assert bp.verdict_amended(99, 3.0, [3.0, 3.0]) == "NOT_ENOUGH_DATA at n = 99" and bp.verdict_amended(100, 0.99, [2, 2]) == "FALSIFIED" and bp.verdict_amended(100, 1.6, [2, 0.9]) == "FALSIFIED"
     assert bp.verdict_amended(100, 1.6, [2, 1.2]) == "development bar met" and bp.verdict_amended(100, 1.3, [2, 1.2]) == "bar not met"
@@ -145,4 +146,18 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     # history count: matches before 2026-09-12 by match series; two markets a match
     hl = {"hist_" + t["match_series"]: {"markets": [mk("%s-26AUG%02d1000AAABBB%d-%s" % (t["match_series"], 1 + i % 28, i, tm), calendar.timegm((2026, 8, 1 + i % 28, 12, 0, 0))) for i in range(5) for tm in ("AAA", "BBB")]} for t in spec["titles"]}
     dh = os.path.join(dc, "hh"); os.mkdir(dh); mkrun(dh, jlst, hl); hc = m.history_count(spec, [dh]); assert hc["total"] == 20 and hc["candle_requests_if_one_market_a_request"] == 80, hc
+    # AMENDMENT 4: no time after the look may change which bets exist. Move every MATCH market close (and the total-maps close) to 5 minutes, 12 minutes and 5 hours after map 2: records and bets identical
+    srt = lambda L: json.dumps(sorted(L, key=lambda r: r["key"]), sort_keys=True); base_recs = srt(m.matches(spec, [dl])[0]); base_bets = sc(dll, dsr)["bets"]
+    for shift in (5 * 60, 12 * 60, 300 * 60):
+        for s_ in lists:
+            for mk_ in lists[s_]["markets"]:
+                parts = mk_["ticker"].split("-")
+                if parts[0] in [t["match_series"] for t in spec["titles"]] + [t["total_maps_series"] for t in spec["titles"]]:
+                    x = [r for r in mt if r["key"] == parts[1]]
+                    if x and x[0].get("state_close2"): mk_["close_time"] = F(x[0]["state_close2"] + shift)
+        dsh = os.path.join(dc, "sh%d" % shift); os.mkdir(dsh); mkrun(dsh, jl, lists)
+        assert srt(m.matches(spec, [dsh])[0]) == base_recs, shift
+        assert sc(dsh, dsr)["bets"] == base_bets, shift
+    # the state-known count is printed per title and look
+    sk = m.measure(spec, [dl], [dsr])["titles"]; assert "state_known_at_close" in sk["DOTA2"] and "state_known_at_close" in sk["DOTA2|second_look"]
 print("mapbreak synthetic tests passed")
