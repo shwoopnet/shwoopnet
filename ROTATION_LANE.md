@@ -1,10 +1,12 @@
-# Rotation lane, "the wheel" (DRAFT v0.4, Nov 12, 2026)
+# Rotation lane, "the wheel" (v1.0, approved by the owner Nov 12, 2026)
 
-**Status: a draft by the Head of R&D for the owner's OK. It binds nobody and nothing goes live under it until the owner approves the written rules.** Intended home: `docs/ROTATION_LANE.md` on main, as a docs-only pull request opened by the Chief of Staff, with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It does not edit `docs/CHARTER.md`, which only the owner changes.
+**Status: APPROVED by the owner on Nov 12, 2026 (popup, through the EA: "Approve as written", with the decisions listed in section 0). These are the rules of the rotation lane from that date.** Written by the Head of R&D; home `docs/ROTATION_LANE.md` on main (docs only, opened by the Chief of Staff), with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It does not edit `docs/CHARTER.md`, which only the owner changes.
+
+**Approval of the rules is not an order to trade.** No rule takes a live seat until all four of these are true: the premise test (section 9.5) has been read; the rotation controller and its logging are built and have passed the Chief of Staff's security review; the Chief of Staff has checked the second slot's caps and the account stop against the wheel's sizes (sections 5 and 8); and the rule has been admitted by the owner's own popup with its exact spec.
 
 Every number in this file is a rule, a threshold or arithmetic on made-up coin flips (scripts in `lane_arith/` on the `rnd-queue` branch). No live account figure is in it. [design]
 
-v0.4 carries all eight of the owner's popup decisions of Nov 12 (section 0). Earlier drafts: v0.1 (3 live, 8 shadows, written before his target arrived), v0.2 and v0.2.1 (the wheel at 3 contracts with a lane-wide cap; the Refinement desk's review of the kill lines; the Chief of Staff's security condition on automatic returns), v0.3 (his first five decisions).
+v1.0 is draft v0.4 as approved, plus the owner's ninth decision (gold's return rule) and the Chief of Staff's facts about the second slot's caps. Drafts v0.1 to v0.4 are in this branch's history.
 
 ## 0. Decided by the owner (popups, Nov 12, 2026, through the EA)
 
@@ -17,8 +19,9 @@ v0.4 carries all eight of the owner's popup decisions of Nov 12 (section 0). Ear
 6. **Seats per market.** Each market a rule runs on is its own shadow and its own seat, with its own record and its own kill. This overrides the Nov 11 copy rule (lifecycle 7g) **for the wheel only**.
 7. **The premise test comes first.** "Does a hot 60 predict the next 60" is run on recorded data before any seat (section 9.5; registered as WHEEL0).
 8. **Favourites at 88c or above are allowed only with 150 signals and at least 10 losses in the record.**
+9. **Gold's own return rule gets the same guard** ("Yes, add the 10-loss guard"): the record that brings gold back must hold at least 10 losses, not only 60 trades at 1.3. Gold stays outside the wheel under its own latch (`docs/GOLD_KILL_LATCH.md`, which the Chief of Staff updates).
 
-Not yet answered, and flagged in section 12: whether gold's own return rule takes the 10 loss guard; the account stop as the wheel's only total limit; and whether the favourite-late copies he retired on Nov 11 may come back as wheel shadows under decisions 6 and 8, or stay on the declined list (this draft assumes they stay until he says otherwise).
+Not yet answered, and flagged in section 12: the account stop as the wheel's only total limit (the Chief of Staff sets the real figure against the wheel's worst-case numbers before any admission); and whether the favourite-late copies he retired by name on Nov 11 may come back as wheel shadows under decisions 6 and 8, or stay on the declined list (these rules assume they stay until he says otherwise).
 
 ## Why
 
@@ -73,7 +76,7 @@ A rule that truly has 1.3 clears its first block about 42 percent of the time (a
 
 ## 5. A seat
 
-1. **10 contracts, fixed, at most $10 of cost an order (the owner, section 0).** No ladder, no profit add-on, no reinvestment. The registered exit cannot be changed while live. The second slot's existing caps still apply to each rule and scale with the sizing base; where a cap is smaller than a 10 contract order the cap wins, and the Chief of Staff checks that against the real figures before admission (no figure is written here).
+1. **10 contracts, fixed, at most $10 of cost an order (the owner, section 0).** No ladder, no profit add-on, no reinvestment. The registered exit cannot be changed while live. The second slot's existing caps still apply to each rule and scale with the sizing base; the smaller cap always wins. In code today (the Chief of Staff, Nov 12) those caps are fractions of the sizing base with fixed ceilings: 1 percent an order (ceiling $20), 2 percent a window ($40), 3 percent open in total ($60), 2 percent a day ($20), 6 percent in a rule's lifetime ($60). So an order that costs more than 1 percent of the base is refused, which means a full $10 order needs a base of $1,000 or more; the daily ceiling is two full $10 losses; and the lifetime ceiling equals the $60 kill, so at a smaller base the lifetime cap stops a rule before its kill line can be reached. The Chief of Staff checks all of this against the real figures before any admission (no account figure is written here).
 2. **Live against shadow, first 20 live orders:** fewer than 60 percent filled, or an average fill more than 1c worse than the shadow's price for the same windows, and the rule leaves its seat with its shadow record marked overstated.
 3. Label everywhere it is shown: "rotating (unproven)".
 
@@ -100,7 +103,7 @@ What lines 1 to 3 do on coin flips at 10 contracts: a rule with no edge leaves a
 
 1. **There is no lane-wide pause (the owner, section 0).** Each strategy stands on its own $60 kill.
 2. Wheel orders run in the second slot under its existing per-strategy caps, count in the shared 12 percent account stop and the 5.5 percent window cap, and obey the direction lock.
-3. **The plain consequence, which the owner should see before he OKs this:** with no seat maximum and no lane cap, the thing that limits the wheel's total loss on a bad day is the shared 12 percent account stop, and when that stop trips it ends the whole bot's session, the non-wheel strategies included, until it is started again. On the coin flips (30 shadows, 10 contracts, section 10) the wheel's worst single day in six months is typically about minus $35 to minus $45 and its worst week about minus $70, with worse seen in one run in forty (a day near minus $80, a week near minus $190). The Chief of Staff compares those with the real stop figure privately. If they are too close, the two fixes that keep his decisions intact are a smaller size until the account grows, or letting the 5.5 percent window cap do more of the work; a lane cap is the third, and he has declined it. [design]
+3. **The plain consequence (told to the owner before his approval; the real stop figure is set against it by the Chief of Staff before any admission):** with no seat maximum and no lane cap, the thing that limits the wheel's total loss on a bad day is the shared 12 percent account stop, and when that stop trips it ends the whole bot's session, the non-wheel strategies included, until it is started again. On the coin flips (30 shadows, 10 contracts, section 10) the wheel's worst single day in six months is typically about minus $35 to minus $45 and its worst week about minus $70, with worse seen in one run in forty (a day near minus $80, a week near minus $190). The Chief of Staff compares those with the real stop figure privately. If they are too close, the two fixes that keep his decisions intact are a smaller size until the account grows, or letting the 5.5 percent window cap do more of the work; a lane cap is the third, and he has declined it. [design]
 
 ## 9. Not just picking lucky shadows
 
@@ -149,12 +152,11 @@ Shadowing a rule costs no money, only logger reads (free for the four markets th
 
 **Closed rules that the full bar alone stopped: none.** Each had negative evidence, a development record under 1.3, or is on the declined list. The wheel brings none of them back.
 
-## 12. Still open for the owner (defaults in force in this draft until he answers)
+## 12. Still open for the owner (defaults in force until he answers)
 
-1. **The account stop as the wheel's only total limit** (section 8.3): he should see the worst-day figures against the real stop before the first seat.
-2. **The favourite-late copies retired on Nov 11** (the XRP, AUD/USD and gold shadow variants on the declined list): decisions 6 and 8 would let favourites and market versions ride the wheel in general, but those rows were declined by name. Default: they stay declined; only he removes a row.
-3. **Gold's own return rule and the 10 loss guard.** Default: unchanged; flagged because "60 trades at 1.3" is cleared by a no-edge favourite about one time in four.
-4. **A third exit.** Default: his popup, as he decided; research recommends retiring a rule with three exits inside 90 days.
+1. **The account stop as the wheel's only total limit** (section 8.3): the Chief of Staff sets the real stop figure against the wheel's worst-day numbers and the slot caps before any admission.
+2. **The favourite-late copies retired on Nov 11** (the XRP, AUD/USD and gold shadow variants on the declined list): decisions 6 and 8 let favourites and market versions ride the wheel in general, but those rows were declined by name. Default: they stay declined; only he removes a row.
+3. **A third exit.** His popup, as he decided; research recommends retiring a rule with three exits inside 90 days.
 
 ## 13. Build (the Chief of Staff's plan, for reference)
 
