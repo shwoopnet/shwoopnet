@@ -1,0 +1,17 @@
+card,gate,n_needed,accrual,reads_cost,earliest_verdict,power_at_expected_n,recommendation
+MMSIM1 held-out,PF>=1.3 bound; n>=300 events; thirds>0; daily corr with gold<0.3,300 events (corr: 32 days),~18 events/day (172 by Nov 17; 300 by Nov 20-24),0,Nov 24 (PF); Nov 29 (corr),0.46 unshrunk; 0.19 shrunk 50%,KEEP
+MMHOUR1 block 12-18 CT,PF>=1.5 (mean>0 with day z better),75 block events (k 0.5),~1/4 of events (75-98 by Nov 24),0,Nov 24,~0.8 at k 0.5; ~0.55 at k_sel,KEEP
+MMHOUR1 high depth,same,50-75 events,142 dev; most held-out events,0,Nov 17-24,0.8 at k 0.5 but PF is the wrong test (mean/event below base),KEEP
+MMMAP1,qualification rule (r60>=0.5c; CI>0; 500 trades; 3 dates; touch<2000),500 trades 3 dates,NC15 ~200k trades/day class; 3 UTC dates by Nov 15,0,Nov 15,>0.9 if true r60 0.5c (assumption: window-level sd<=1.5c); measurement not a try,KEEP
+NC15DEPTH1 pooled one cell,PF1.5 and z4.39,13.7k-21k cell windows at 1.5c effect (3.4k-5.4k at 3c),~570 windows/day all series (816 evening-based x0.7),0,Dec 15-27 at 3c; Feb 20+ at 1.5c,0.27 at 90d (1.5c); 1.00 at 90d (3c),KEEP AS FORWARD-ONLY
+NC15DEPTH1 per-series 2x2,same,100 per cell min; z needs 13k+,80 windows/day/series -> ~20 per cell per day,0,never,z 0.33 at 7 days,RETIRE
+MENTPERSIST1 fetch,PF1.5; z5.34 cluster; n>=100 incl 30 held-out,~7.2k trades at 3c net (4.9k at z4.39),0.09 trades per read,52k reads = 2108 hours (1000-1300 reads = 40-52 h only reaches ~100 trades),never (2160 reads in 90d -> ~200 trades),~0.00,RETIRE (score held 500 offline for free)
+CFRTI1-BTC held-out,PF>=1.3 mean>0 n>=50 one try,50 rows,~2.6-3 rows/day,0,Nov 22-24 (first allowed Nov 20),0.75 shrunk 50%; 0.97 unshrunk; 0.37 if pooled-5 PF 1.14; false pass 0.24,KEEP
+AVG1,PF1.5 z5.34 n>=100 dev rows,100 dev rows,dev cut pinned at Nov 7 14:00Z -> best cell frozen at n 28,0 (but outcome is a proxy; real results absent),never as registered,power 0 (circular proxy),RETIRE
+STALE1,PF1.5 z4.39-5.34 n>=100,1000-4000 gap events (1.0k unshrunk; 4.0k shrunk),~8.5 gap events/day on 11 series if re-fetched,~60-300 candle reads (2.4-12 h),dev cuts pinned -> dev frozen at n<=74; otherwise 471 days,<0.05,RETIRE
+EARLYCLOSE1,PF1.5 z4.39,1219 markets in the one positive bin; H2 cells need minute candles never fetched,no accrual (history only),~150+ reads for H2 minute candles; 1200+ for the bin,never,<0.05 (testable cells negative: PF .77 and .86),RETIRE
+CLINICAL2,gate: 100 events with a quote at L=30d,100 events,1 per month (17 held; 83 months),0 more,Oct 2033,0,RETIRE (already CLOSED Nov 11)
+COMBO1,needs a resting ask,n/a (0 of 34 combos have an ask),n/a,0,never (structural),0,RETIRE (reopen only on a live combo-quote recorder)
+POLCOMBO1B,needs a live two-sided combo quote,n/a (1 of 75 nonzero ask; not a quote),n/a,0,never,0,RETIRE (already RETIRED Nov 11)
+TIECOND1 arm B,Wilson lower tie rate >=6% with n>=300,300-600 windows,counts exist already (336-590 windows per group),0,now (held data),0.00 at true tie rate 2.6-5%; 0.30-0.52 only if true rate 8%,RETIRE
+RETAILFRAC1 stage B,two-crowds rule failed in stage A,n/a,n/a,0,not justified,n/a,RETIRE (already closed; +1 try not spent)
