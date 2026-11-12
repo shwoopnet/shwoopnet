@@ -10,7 +10,7 @@ Pre-match: the minute candle ending at S minus 10 minutes, stepping back a minut
 The look: the candle ending at the first whole minute at or after map-1 close + 120 s, stepping FORWARD to map-1 close + 5 minutes until BOTH match contracts are two-sided.
 Model: p = pre-match mid of the match contract of the team that went on to win map 1; q solves p = q*q*(3 - 2q); V = 1 - (1 - q)^2 for the team up, 1 - V for the other. Gap = value minus that team's own match-contract ask at the look; the cheaper side has the larger gap.
 Placebo (pre-match instant): q against the ask of that team's MAP-1 contract, and 1 - q against the other team's.
-Commands: build-lists | matches <lists folders...> | build-candles <lists folders...> | measure <lists folders...> --candles <candle folders...>
+Commands: build-lists | matches <lists folders...> | build-candles <lists folders...> | measure <lists folders...> --candles <candle folders...> | score <lists folders...> --candles <candle folders...>   (score = the registered RULE, development read only)
 """
 import calendar, hashlib, json, math, os, re, statistics as st, sys
 from datetime import datetime
@@ -18,6 +18,7 @@ from zoneinfo import ZoneInfo
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import scorekit as k
 import tie3
+import breakplay as bp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CELLS_FILE = os.path.join(HERE, "mapbreak_series_frozen.json")
@@ -64,8 +65,9 @@ def start_ts(key):
     return int(datetime(2000 + int(m.group(1)), MONTHS[m.group(2)], int(m.group(3)), int(m.group(4)), int(m.group(5)), tzinfo=NY).timestamp())
 
 
-def matches(spec, list_folders):
-    """-> (matches, counts). A match record holds NO match result and no map 2 or 3 result: only the map-1 winner (the state)."""
+def matches(spec, list_folders, with_results=False):
+    """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 2 or 3 result: only the map-1 winner (the state).
+    with_results=True (the SCORING path only, never the measurement path) adds result_up: whether the team up after map 1 won the match, read from the match market's own result."""
     raw = k.markets(list_folders)
     by = {}
     for t, m in raw.items():
@@ -101,106 +103,38 @@ def matches(spec, list_folders):
         if len(win) != 1: counts["no_map1_result"] += 1; continue
         teams = sorted(p[-1] for p, _ in mm)
         if win[0] not in teams or len(set(teams)) != 2: counts["no_map1_result"] += 1; continue
-        base = {"cell": cell, "key": key, "S": S, "map1_close": c1}
         match_t = {p[-1]: m["ticker"] for p, m in mm}; map1_t = {p[3]: m["ticker"] for p, m in m1}
-        out.append(dict(base, up=win[0], down=[x for x in teams if x != win[0]][0], match=match_t, map1=map1_t))
+        rec = {"cell": cell, "key": key, "S": S, "state_close": c1, "up": win[0], "down": [x for x in teams if x != win[0]][0], "match": match_t, "placebo": map1_t}
+        if with_results:
+            res = {p[-1]: m["result"] for p, m in mm}
+            if sorted(res.values()) != ["no", "yes"]: counts["no_match_result"] = counts.get("no_match_result", 0) + 1; continue
+            rec["result_up"] = res[win[0]] == "yes"
+        out.append(rec)
     return out, counts
 
 
+CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH)
+
+
 def build_candles(spec, list_folders):
-    """Per match four tickers (two match, two map-1) from S minus 40 minutes to map-1 close plus 5; matches sharing a start share a request (sorted by S; window minutes x tickers at most 9,000, at most 100 tickers)."""
+    """Per match four tickers (two match, two map-1) from S minus 40 minutes to map-1 close plus 5 (the engine packs by scheduled start)."""
     ms, counts = matches(spec, list_folders)
-    ms = sorted(ms, key=lambda m: (m["S"], m["key"])); packs, cur = [], []
-    def win(g): return (max(m["map1_close"] for m in g) + LOOK_MAX) - (min(m["S"] for m in g) - PRE_MAX_BACK)
-    for m in ms:
-        trial = cur + [m]
-        if cur and (win(trial) / 60 * 4 * len(trial) > PACK_LIMIT or 4 * len(trial) > MAX_TICKERS):
-            packs.append(cur); cur = [m]
-        else: cur = trial
-    if cur: packs.append(cur)
-    reqs = [{"id": "c%04d" % i, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(t for m in g for t in list(m["match"].values()) + list(m["map1"].values())),
-             "start_ts": min(m["S"] for m in g) - PRE_MAX_BACK - 60, "end_ts": max(m["map1_close"] for m in g) + LOOK_MAX, "period_interval": 1}} for i, g in enumerate(packs)]
-    tickers = [t for m in ms for t in list(m["match"].values()) + list(m["map1"].values())]
-    eps = [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks", "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}]
-    j = tie3.job("MAPBREAK_CANDLES", "MAPBREAK measurement stage 2: one minute candles of the two match and two map-1 contracts of each sampled match, from S minus 40 minutes to map-1 close plus 5.", eps, reqs, series_all(spec), tickers)
-    j["registration"] = REG; j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; return j, counts
-
-
-def solve_q(p):
-    lo, hi = 0.0, 1.0
-    for _ in range(60):
-        mid = (lo + hi) / 2
-        if mid * mid * (3 - 2 * mid) < p: lo = mid
-        else: hi = mid
-    return (lo + hi) / 2
-
-
-def two(idx, t, ts):
-    c = idx.get(t, {}).get(ts)
-    if not c or c["bid"] is None or c["ask"] is None or not (0 < c["bid"] < c["ask"] < 1): return None
-    return c["bid"], c["ask"]
-
-
-def rt(b, a):
-    mid = (a + b) / 2
-    return (a - b) + 2 * 0.07 * mid * (1 - mid)
-
-
-def stat(rows):
-    if not rows: return None
-    g = [r["gap"] for r in rows]; q = st.quantiles(g, n=4, method="inclusive") if len(g) > 2 else None; d = st.quantiles(g, n=10, method="inclusive") if len(g) > 2 else None
-    fire = [r for r in rows if r["gap"] >= EDGE and r["spread"] <= SPREAD_MAX]
-    return {"n": len(rows), "gap_median": round(st.median(g), 4), "gap_quartiles": None if not q else [round(q[0], 4), round(q[2], 4)], "gap_p90": None if not d else round(d[8], 4),
-            "share_gap_ge_8c_spread_le_4c": round(len(fire) / len(rows), 3), "share_when_team_up": round(sum(1 for r in fire if r.get("side") == "up") / len(rows), 3), "share_when_team_down": round(sum(1 for r in fire if r.get("side") == "down") / len(rows), 3)}
+    j = bp.candle_job(ms, CFG, series_all(spec), "MAPBREAK_CANDLES", REG)
+    j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; return j, counts
 
 
 def measure(spec, list_folders, candle_folders):
     ms, counts = matches(spec, list_folders)
-    idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
-    per = {}
-    for m in ms:
-        P = per.setdefault(m["cell"], {"sampled": 0, "pre": [], "look": [], "placebo": [], "minutes": [], "contract_rt": [], "contract_spread": [], "pre_filled": 0, "look_filled": 0, "pre_dropped_match_ok_but_map1_not_same_minute": 0})
-        P["sampled"] += 1
-        need = [m["match"][m["up"]], m["map1"][m["up"]], m["map1"][m["down"]]]
-        pre = None
-        for back in range(PRE_BACK, PRE_MAX_BACK + 1, 60):
-            ts = m["S"] - back
-            if all(two(idx, t, ts) for t in need): pre = ts; break
-        if pre is None:
-            # Desk B's added COUNT: dropped at the pre-match step although the match contract itself was two-sided at some minute of S-40..S-10 (what the placebo requirement cost)
-            if any(two(idx, m["match"][m["up"]], m["S"] - b) for b in range(PRE_BACK, PRE_MAX_BACK + 1, 60)): P["pre_dropped_match_ok_but_map1_not_same_minute"] += 1
-            continue
-        P["pre_filled"] += 1
-        pm = sum(two(idx, m["match"][m["up"]], pre)) / 2; q = solve_q(pm)
-        for team, val in ((m["up"], q), (m["down"], 1 - q)):
-            b, a = two(idx, m["map1"][team], pre); P["placebo"].append({"gap": val - a, "spread": a - b, "team": team})
-        pb = {"up": P["placebo"][-2], "down": P["placebo"][-1]}
-        best = max(pb, key=lambda s: pb[s]["gap"]); P["placebo"][-2:] = [dict(pb[best], side=best)]
-        t0 = -(-(m["map1_close"] + LOOK_AFTER) // 60) * 60; look = None
-        for ts in range(t0, m["map1_close"] + LOOK_MAX + 1, 60):
-            if all(two(idx, m["match"][x], ts) for x in (m["up"], m["down"])): look = ts; break
-        if look is None: continue
-        P["look_filled"] += 1; P["minutes"].append((look - m["map1_close"]) / 60)
-        V = 1 - (1 - q) ** 2
-        cand = {}
-        for side, team, val in (("up", m["up"], V), ("down", m["down"], 1 - V)):
-            b, a = two(idx, m["match"][team], look); cand[side] = {"gap": val - a, "spread": a - b, "side": side}
-            P["contract_rt"].append(rt(b, a)); P["contract_spread"].append(a - b)
-        bs = max(cand, key=lambda s: cand[s]["gap"]); P["look"].append(cand[bs])
-    out = {"counts_first": counts, "titles": {}, "tries_added": 0, "rule_scored": False, "match_result_read": False, "freshness": FRESH, "family_note": "same family as NHLOT: ONE candidate for the owner's count; the Head's probability that it reaches the research bar is 2 percent"}
-    verdicts = []
-    for cell, P in sorted(per.items()):
-        s_l, s_p = stat(P["look"]), stat(P["placebo"]); n = P["look_filled"]
-        medrt = None if not P["contract_rt"] else round(st.median(P["contract_rt"]), 4)
-        if n < MIN_FILLED: v = "no evidence at n = %d filled at the look" % n
-        elif medrt > COST_MAX: v = "CLOSED on cost: median round trip %.1fc at the look is above 5c" % (100 * medrt)
-        elif s_l["share_gap_ge_8c_spread_le_4c"] >= EDGE_SHARE and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
-        else: v = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % s_l["gap_p90"]
-        verdicts.append(v)
-        out["titles"][cell] = {"sampled_matches": P["sampled"], "filled_pre_match": P["pre_filled"], "dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute": P["pre_dropped_match_ok_but_map1_not_same_minute"], "filled_at_the_look": n, "median_minutes_map1_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2),
-                               "median_spread_at_look": None if not P["contract_spread"] else round(st.median(P["contract_spread"]), 4), "median_round_trip_at_look": medrt, "look": s_l, "placebo": s_p, "verdict": v}
-    out["card"] = "CLOSED: every title is closed or has no evidence" if verdicts and all(not v.startswith("SURVIVES") for v in verdicts) else ("a title survives the measurement" if verdicts else "no title measured")
+    out = bp.measure(ms, candle_folders, CFG); out["counts_first"] = counts; out["match_result_read"] = False
+    out["family_note"] = "same family as NHLOT: ONE candidate for the owner's count; the Head's probability that it reaches the research bar is 2 percent"
     return out
+
+
+def score(spec, list_folders, candle_folders, heldout_go=False):
+    """The REGISTERED RULE (Desk B's amendment: 1 try; the first pull is both the measurement and the development read): the match results ARE read here, for the development sample only."""
+    ms, counts = matches(spec, list_folders, with_results=True)
+    out = bp.score_rule(ms, candle_folders, CFG, heldout_go=heldout_go, name="MAPBREAK rule")
+    out["counts_first"] = counts; return out
 
 
 if __name__ == "__main__":
@@ -212,3 +146,4 @@ if __name__ == "__main__":
         elif a[0] == "matches": print(json.dumps(matches(spec, a[1:])[1], indent=1))
         elif a[0] == "build-candles": j, c = build_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
         elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))
+        elif a[0] == "score": i = a.index("--candles"); print(json.dumps(score(spec, a[1:i], a[i + 1:]), indent=1, default=str))

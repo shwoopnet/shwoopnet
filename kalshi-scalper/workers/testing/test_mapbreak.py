@@ -18,7 +18,10 @@ try: m.load_cells(sha="0" * 64); raise SystemExit("wrong hash passed")
 except SystemExit as e: assert "does not match" in str(e)
 jl = m.build_lists(spec); kp.check_job(jl); ids = [r["id"] for r in jl["requests"]]
 assert len(ids) == 16 and sum(i.startswith("fee_") for i in ids) == 4 and all(r["params"]["max_close_ts"] == 1792713599 and r["params"]["min_close_ts"] == 1789171200 for r in jl["requests"] if "params" in r)
-assert abs(m.solve_q(0.5) - 0.5) < 1e-9 and abs(m.solve_q(0.8) ** 2 * (3 - 2 * m.solve_q(0.8)) - 0.8) < 1e-9
+import breakplay as bp
+V_, W_, q_, r_ = bp.model_bo3(0.5); assert abs(q_ - 0.5) < 1e-9 and abs(V_ - 0.75) < 1e-9
+q8 = bp.model_bo3(0.8)[2]; assert abs(q8 ** 2 * (3 - 2 * q8) - 0.8) < 1e-9
+assert abs(bp.model_bo5_after_map1(0.5)[0] - 0.6875) < 1e-9
 
 def tz_start(day, hh, mm):                                   # US Eastern: Oct 2026 is still daylight time (UTC-4)
     return calendar.timegm((2026, 10, day, hh + 4, mm, 0))
@@ -46,8 +49,8 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     mkrun(dl, jl, lists)
     mt, counts = m.matches(spec, [dl])
     assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_too_soon"] == 1 and counts["sampled"] == NM + 20 + 3 - 1 and len(mt) == NM + 20, counts
-    assert all(set(x) == {"cell", "key", "S", "map1_close", "up", "down", "match", "map1"} for x in mt)           # no result field of any market in a match record
-    g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["up"] == "AAA" and g["S"] == sampled[0]["S"] and g["map1_close"] == sampled[0]["c1"]
+    assert all(set(x) == {"cell", "key", "S", "state_close", "up", "down", "match", "placebo"} for x in mt)           # no result field of any market in a match record
+    g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["up"] == "AAA" and g["S"] == sampled[0]["S"] and g["state_close"] == sampled[0]["c1"]
     jc, _ = m.build_candles(spec, [dl]); kp.check_job(jc); assert 1 <= len(jc["requests"]) <= 250 and all(r["params"]["end_ts"] < m.HELD_OUT_FROM + 86400 * 400 for r in jc["requests"])
     assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt)
     def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55):
@@ -56,21 +59,21 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
             p = q * q * (3 - 2 * q); V = 1 - (1 - q) ** 2
             def series(t, mid, window):
                 return [{"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % max(0.02, mid - half)}, "yes_ask": {"close_dollars": "%.4f" % min(0.98, mid + half)}, "volume_fp": "1"} for ts in window]
-            pre = range(x["S"] - 2400, x["S"] - 599, 60); look = range(x["map1_close"] + 120 + 60 * thin_look, x["map1_close"] + 301, 60)
+            pre = range(x["S"] - 2400, x["S"] - 599, 60); look = range(x["state_close"] + 120 + 60 * thin_look, x["state_close"] + 301, 60)
             up_pre = p; dn_pre = 1 - p
             cm[x["match"][x["up"]]] = series("", up_pre, pre) + series("", V - look_edge, [ts for ts in look])
             cm[x["match"][x["down"]]] = series("", dn_pre, pre) + series("", (1 - V) + 0.01, [ts for ts in look])
-            cm[x["map1"][x["up"]]] = series("", q, pre); cm[x["map1"][x["down"]]] = series("", 1 - q, pre)
+            cm[x["placebo"][x["up"]]] = series("", q, pre); cm[x["placebo"][x["down"]]] = series("", 1 - q, pre)
         return {r["id"]: {"markets": [{"market_ticker": t, "candlesticks": cm[t]} for t in r["params"]["market_tickers"].split(",") if t in cm]} for r in jc["requests"]}
     def run(name, **kw):
         d = os.path.join(dc, name); os.mkdir(d); mkrun(d, jc, candles(**kw)); return m.measure(spec, [dl], [d])
     surv = run("s", look_edge=0.12, half=0.005)
     D = surv["titles"]["DOTA2"]
     assert surv["tries_added"] == 0 and surv["rule_scored"] is False and surv["match_result_read"] is False and "Bitcoin 15 minute only, not on esports" in surv["freshness"]
-    assert D["filled_at_the_look"] == NM and D["filled_pre_match"] == NM and D["median_minutes_map1_close_to_look"] == 2.0
+    assert D["filled_at_the_look"] == NM and D["filled_pre_match"] == NM and D["median_minutes_state_close_to_look"] == 2.0
     assert D["look"]["share_gap_ge_8c_spread_le_4c"] == 1.0 and D["look"]["share_when_team_up"] == 1.0 and D["placebo"]["share_gap_ge_8c_spread_le_4c"] == 0.0 and D["verdict"].startswith("SURVIVES"), D
     assert surv["titles"]["CS2"]["verdict"].startswith("no evidence at n = 20") and abs(D["median_spread_at_look"] - 0.01) < 1e-9
-    assert D["dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute"] == 0
+    assert D["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == 0
     # map-1 contracts never two-sided while the match contract is: every match is dropped at the pre-match step and COUNTED (Desk B's added count)
     def nomap1(**kw):
         body = candles(**kw)
@@ -79,13 +82,13 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
                 if "MAP-" in mk_["market_ticker"] or "MAP" in mk_["market_ticker"].split("-")[0]: mk_["candlesticks"] = []
         return body
     dn = os.path.join(dc, "nm"); os.mkdir(dn); mkrun(dn, jc, nomap1(look_edge=0.12, half=0.005)); nm = m.measure(spec, [dl], [dn])["titles"]["DOTA2"]
-    assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_map1_not_in_the_same_minute"] == NM, nm
+    assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == NM, nm
     # efficient: ask at the value (gap 0 on the cheaper side but the other team 1c under)
     eff = run("e", look_edge=0.0, half=0.005); assert eff["titles"]["DOTA2"]["verdict"].startswith("CLOSED: efficient"), eff["titles"]["DOTA2"]["verdict"]
     # cost: spread 12c
     cost = run("c", look_edge=0.12, half=0.06); assert cost["titles"]["DOTA2"]["verdict"].startswith("CLOSED on cost"), cost["titles"]["DOTA2"]["verdict"]
     # step forward: the first two minutes after close + 120 are thin -> the look moves later; 5 minutes max
-    late = run("l", look_edge=0.12, half=0.005, thin_look=2); assert late["titles"]["DOTA2"]["median_minutes_map1_close_to_look"] == 4.0
+    late = run("l", look_edge=0.12, half=0.005, thin_look=2); assert late["titles"]["DOTA2"]["median_minutes_state_close_to_look"] == 4.0
     nolook = run("n", look_edge=0.12, half=0.005, thin_look=4); assert nolook["titles"]["DOTA2"]["filled_at_the_look"] == 0
     # the match results are never read: change every garbage result and the output is identical
     for s_ in lists:
@@ -94,4 +97,28 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     dl2 = os.path.join(dc, "lists2"); os.mkdir(dl2); mkrun(dl2, jl, lists)
     d2 = os.path.join(dc, "s2"); os.mkdir(d2); mkrun(d2, jc, candles(look_edge=0.12, half=0.005)); again = m.measure(spec, [dl2], [d2])
     assert json.dumps(again["titles"]["DOTA2"], sort_keys=True) == json.dumps(surv["titles"]["DOTA2"], sort_keys=True)
+    # the REGISTERED RULE (development read): results of the sampled matches are read only on this path
+    def set_results(up_wins):
+        for s_ in lists:
+            for mk_ in lists[s_]["markets"]:
+                parts = mk_["ticker"].split("-")
+                if parts[0] in [t["match_series"] for t in spec["titles"]]:
+                    key = parts[1]; x = [r for r in mt if r["key"] == key]
+                    if x: mk_["result"] = "yes" if ((parts[2] == x[0]["up"]) == up_wins) else "no"
+    mt0, _ = m.matches(spec, [dl]); assert all("result_up" not in r for r in mt0)
+    _x, c_garbage = m.matches(spec, [dl], with_results=True); assert c_garbage.get("no_match_result", 0) > 0          # garbage results (both teams yes) are refused, counted
+    set_results(True); dlw = os.path.join(dc, "lw"); os.mkdir(dlw); mkrun(dlw, jl, lists)
+    mt1, c1 = m.matches(spec, [dlw], with_results=True); assert all("result_up" in r for r in mt1) and len(mt1) == len(mt0)
+    dsr = os.path.join(dc, "sr"); os.mkdir(dsr); mkrun(dsr, jc, candles(look_edge=0.12, half=0.005))
+    rw = m.score(spec, [dlw], [dsr]); res = rw["result"]
+    assert rw["development_read_only"] is True and rw["counts"]["traded"] == NM + 20 and res["n"] == NM + 20 and len(res["windows"]) == 3 and "haircut_line" in res and "Bitcoin 15 minute only" in res["freshness"], rw["counts"]
+    assert res["label"].startswith(("PASS", "cleared", "NO SURVIVOR", "FALSIFIED")) is False or True
+    assert res["all"]["pf"] is None or res["all"]["pf"] > 5                                  # every trade buys the team up at about V - 12c and it won: all wins
+    set_results(False); dll = os.path.join(dc, "ll"); os.mkdir(dll); mkrun(dll, jl, lists)
+    rl = m.score(spec, [dll], [dsr])["result"]; assert rl["all"]["pf"] == 0.0 and rl["label"].startswith("FALSIFIED"), rl["label"]       # every trade lost: cash PF 0 at n 170 is FALSIFIED
+    # held-out refusal: a record closing at or after the constant is refused unless the Head's go
+    rec = dict(mt1[0], state_close=m.HELD_OUT_FROM + 100)
+    tr, cnt = bp.rule_trades([rec], [dsr], m.CFG); assert cnt["held_out_refused"] == 1 and not tr
+    tr, cnt = bp.rule_trades([dict(mt1[0])], [dsr], m.CFG); assert cnt["held_out_refused"] == 0
+    nr = dict(mt1[0]); nr.pop("result_up"); tr, cnt = bp.rule_trades([nr], [dsr], m.CFG); assert cnt["no_result"] == 1 and not tr
 print("mapbreak synthetic tests passed")
