@@ -2,6 +2,22 @@
 
 Desk angle: market structure and cross-market mechanisms (pricing relationships between related Kalshi markets, order book and queue effects, fee and rounding structure, settlement mechanics, timing and calendar, liquidity provision). Research and simulation only. Nothing here places, changes or cancels an order, spends money, or touches trading code. Zero Kalshi API calls were made to write this file. All cards are stage **Idea**: registered as ideas, NOT scored. Each needs its own protocol committed before any outcome is read. The Verification Analyst scores the four uniqueness checks (lifecycle 7d), not this desk; the notes under "self-check" are my own reading and can be overruled.
 
+## Status after the first day (updated Nov 12, 2026, 00:20 UTC; verdicts are as reported to this desk by Main, the Chief of Staff, and were not re-derived here)
+
+| Card | Status | Why |
+|---|---|---|
+| 1 CRONCLUSTER1 | CLOSED by V2, 0 tries | No clustering: peak 0.87 to 1.11 against the 1.3 gate |
+| 2 TIECOND1 | CLOSED by V2, 0 tries | 13 cells; best tie rate lower bound 1.96% against the 6% gate |
+| 3 EXDIV1 | CLOSED by V2 at gate 0, 0 tries | Dividends pass through to perp holders as cash |
+| 7 RETAILFRAC1 | CLOSED at stage A | No two crowds; stage B not run (Main's ruling). Descriptive only: dollar-typed takers pay 12c to 14c less per contract than whole-number takers, probably the longshot lean of small orders |
+| 8 BASEFX1, 10 TWINLOCK1 | OUT, not run | Main ruled the lock and parity family CLOSED under the 3-falsified rule (ARB2 to ARB5, LADBFLY1, XSER1). Draft declined-list rows are in `IDEA_DESK_A_PROTOCOLS.md`, section P7 |
+| 4 ORHARVEST1 | Protocol written (P5) | Main's ruling: MMSIM1 family for the one-test-per-family rule, so its scored stage queues behind MMSIM1's Nov 24 read; the counts-only stage can run now |
+| 5 RACEMAKE1 | Protocol written (P6) | Same family; queues behind MMSIM1 |
+| 6 RESIL1 | Held | Order-flow family is at 2 FALSIFIED; with RETAILFRAC1 closed at stage A (no try), a FALSIFIED here would close the family for good. Not recommended |
+| 9 PERPBIN1, 11 AUCTION1 | Open, untested | Low priors (2%, 3%); AUCTION1 is slow |
+
+Desk worker count: 0 subagents (one session).
+
 ## 0. Honest count first
 
 **11 cards, not 12.** The brief asked for at least 12 and also said never pad. This angle was mined heavily before today (about 730,000 rules tried; V2's batches B and C today carded or closed monotonicity, butterfly, cross-series dominance, calendar consistency, pinning, round numbers, new listings, stale reopen quotes, early close, fee rounding, rebates, settlement lag, averaging). I read those results before writing. A 12th card would have been a variant of something closed; section 4 lists what I considered and dropped, with the prior test that covers each, so nobody repeats it.

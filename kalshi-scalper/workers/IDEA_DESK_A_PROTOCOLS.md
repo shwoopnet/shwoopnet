@@ -103,3 +103,66 @@ Thresholds for stage B come from stage A and are fixed before stage B loads a re
 2. From the book: for every minute boundary inside a window, the size resting at each side's best ask and the spread at the last snapshot in seconds 52 to 59, against the first snapshot in seconds 8 to 15.
 3. Report `peak` and the before-and-after depth ratio for gold at 6 to 7 minutes to close (where L1 buys) and for Bitcoin at 2 to 3 minutes (where OICORE buys), next to the all-window figures.
 **Reading it:** `peak` at or above 1.3 with an interval clear of 1, AND touch depth lower after the boundary than before it, is a finding worth handing to Refinement as a candidate version of each strategy's send time (tested beside the parent on fill rate and net dollars, lifecycle 7g). Anything less: "no cluster", closed, and say so.
+
+---
+
+## P5. ORHARVEST1: collecting the over-round on mutually exclusive daily brackets (added Nov 12, 2026)
+
+Written before any outcome or P&L of this test was read. I opened only the recorder's column list in `scripts/record_wxens.py`. **Main's ruling (Nov 12): this counts as the market-making family (MMSIM1) for the one-test-per-family rule unless the Verification Analyst says otherwise, so the scored stage 2 queues behind MMSIM1's held-out read (about Nov 24). Stage 1 reads no outcome and can run now.**
+
+**Correction to the card.** The card described a "locked set". With the price band below, the tail brackets are never quoted, so there is no lock: the position is a set of YES contracts SOLD one tick inside the ask on the mid-priced brackets, and at most one of them can lose. The P&L per event is (sum of the prices received) minus $1 if the outcome lands in a sold bracket. The edge, if any, is each leg's share of the over-round. Nothing has to be flattened, because an unfilled leg is simply absent.
+
+**Claim to falsify.** A resting offer one cent inside the best YES ask on every mid-priced bracket of a city's daily temperature event earns more than it loses to the brackets that hit, under a fill model in which every fill is adverse.
+
+**Data.** `quote-data:wxens/quotes/` and `quotes_low/` (columns `slot_ts, poll_ts, city, look, target_date, series, ticker, event_ticker, close_time, strike_type, floor_strike, cap_strike, yes_bid, yes_ask, last, volume, status`; two snapshots an hour, 14 cities, highs and lows, since Nov 4), `results/` and `results_low/` (`ticker, event_ticker, result, expiration_value`). There are NO sizes and no tape, so every fill below is inferred, and the write-up must say so in its first line.
+
+**Stage 1 (counts only, no result file opened, no try).**
+0. Fee: from COST1's held fee table, the `fee_type` and maker multiplier of each weather series. If makers pay, every later number uses 0.0175 x p x (1-p) a fill.
+1. A snapshot of an event is COMPLETE when its brackets tile the line with no gap (`floor_strike` and `cap_strike` contiguous, one open-ended bracket at each end) and every bracket has a bid and an ask. Report the complete share.
+2. Per complete snapshot: `over = sum(yes_ask) - 1`, `under = 1 - sum(yes_bid)`, the number of IN-BAND legs (YES ask 0.13 to 0.88 and ask minus bid at least 0.02) and the sum of their asks.
+3. Tables of the median and 10th to 90th percentile of `over`, `under` and in-band leg count by hours to close (24+, 12 to 24, 6 to 12, 2 to 6, under 2), by city, highs and lows apart.
+4. Snapshots per event, to show how coarse the fill inference will be.
+**Kill:** CLOSED if the median `over` is under 4c in every hours-to-close bucket holding at least 100 complete snapshots, or if the median in-band leg count is under 2.
+
+**Stage 2 (scored once; waits for the family slot).**
+- Look: the first complete snapshot of each event at or after 12 hours before the close (one entry per event, fixed here).
+- For each in-band leg post an offer to sell YES at `p = yes_ask - 0.01`. Offers stand, unchanged, until the close (the simulation gives the quotes no updates, which is the honest version of a slow bot).
+- Fill models, both reported, never mixed: **STRICT**, filled only if a later snapshot of that market shows `yes_bid >= p` (the market traded through the offer, so every fill is adverse); **LOOSE**, filled if between two later snapshots `volume` rose and the later `last >= p`.
+- Hold every filled leg to settlement. Per-leg cash result = `p - 1` if that market's result is yes, else `p`, less the maker fee if any. Per-event result = the sum over its filled legs.
+- One try: all cities pooled, highs and lows pooled, STRICT. LOOSE, per-city lines and a control that offers AT the ask are descriptive and cannot rescue it.
+- Cuts: events by target date, first two thirds development, last third held out and read once for a survivor. With about 28 events a day the recorder reaches about 400 development events by Nov 24.
+- Bars: at least 150 events with a STRICT fill on at least 10 dates, per-event cash PF 1.5 or better, positive mean in each half, date-clustered z reported against both deflation bars. FALSIFIED if STRICT PF is under 1.0 at 150 events. If STRICT fails and LOOSE passes, the verdict is NOT_ENOUGH_DATA with the reason "needs a tape", and the cost of a tape recorder is stated for the owner; it is not a lead.
+
+**The declined-list question, for the Verification Analyst and the owner (I do not score my own card).** Selling YES at 13c to 88c is the same position as buying NO at 12c to 87c and holding it for up to a day. Lifecycle 7e bans "any buy-the-favourite-and-hold rule without a written exception". For this card: (a) no leg is ever in the 88c to 97c band; (b) roughly half the legs are NO at under 65c, which nobody would call a favourite; (c) the legs priced as NO at 65c to 87c are favourite-shaped singly but belong to a mutually exclusive set in which at most one can lose; (d) the entry is a resting order, not a taker buy. Question: does 7e apply to (c), and if so is the card acceptable with legs limited to YES 0.35 to 0.88 (NO at 12c to 65c only)? If the answer is that 7e applies and no limit fixes it, the card is OUT and should be listed as declined.
+
+**What would make the result a lie.** (1) Using a snapshot's own later quotes to choose which legs to post. (2) Counting a LOOSE fill as evidence. (3) Reporting per-leg PF instead of per-event (legs of one event are not independent). (4) Forgetting that 30 minute snapshots miss most of the path: a STRICT fill is certain, a STRICT miss is not.
+
+---
+
+## P6. RACEMAKE1 stage A: resting offers on the five-way Coin Race (added Nov 12, 2026)
+
+Written before any outcome or P&L of this test was read. Same family ruling as P5: it is a scored test from its first stage, so it queues behind MMSIM1.
+
+**Claim to falsify.** Offers to sell YES one cent inside the ask on the mid-priced legs of a `KXCRYPTOLEAD15M` event, left untouched for three minutes, earn more than they lose to the leg that wins, when only traded-through fills are counted.
+
+**Data.** V2's `data/newh15/candles.sqlite` (31,715 markets, 1 minute candles with closing YES bid and ask and volume; no sizes). No fetch.
+
+**Rule (fixed).** Look = the candle ending 540 s before the close (RACELOCK's look, where the five asks summed to about 1.24). For each leg with YES ask 0.13 to 0.88 and ask minus bid at least 0.02, post `p = ask - 0.01`. The offer stands for the next three candles and is then cancelled. **STRICT** fill: any of those three candles closes with YES bid at or above `p`. **LOOSE** fill: any of the three has volume above zero and a closing ask at or above `p`. Filled legs are held to settlement; per-leg result = `p - 1` if the leg wins, else `p`; per-event result = the sum. Maker fee 0 if COST1 lists the series as plain `quadratic`; check before scoring.
+
+**Why three static minutes.** The bot can place or cancel only on its minute tick, so a quote that cannot be moved for one to three minutes is what a live version would really be. This is where I expect the card to die: a five-way race reprices on spot within seconds and a stale offer on the leg that just jumped is what a fast taker lifts. STRICT measures exactly that.
+
+**Cuts and bars.** Rows closing on or after 2026-10-05 are frozen (inventory key F1) and RACELOCK already read part of October, so development is closes before 2026-10-05, split in two halves by date; the frozen part is the held-out read, once, for a survivor. One try (STRICT, pooled). Survivor: at least 300 events with a STRICT fill on at least 20 dates, per-event cash PF 1.5 or better, positive mean in both halves. FALSIFIED if STRICT PF is under 1.0 at 300 events. STRICT fails and LOOSE passes: NOT_ENOUGH_DATA, "needs the tape", and the request to Main is the public trade tape for 150 events (about 750 reads from the shared budget), not a second scoring of the candles.
+
+**Declined-list question.** The same as P5's, with one difference: the hold is at most nine minutes, not a day. Legs are again never in the 88c to 97c band.
+
+---
+
+## P7. Draft rows for the declined list (for Main to carry into `docs/STRATEGY_LIFECYCLE.md` 7e; this desk does not edit main)
+
+| Idea | Date | Source | Status | Names it must not return under |
+|---|---|---|---|---|
+| Lock and parity scans (riskless or implication-bound sets across Kalshi markets) | Nov 12, 2026 | Main's ruling under the 3-falsified rule: ARB2 to ARB5 FALSIFIED (Oct 29), LADBFLY1(a) 0 violations in 266,302 snapshots and XSER1 (Nov 11) | Closed by evidence (not an owner NO) | BASEFX1 (YoY against MoM inflation identity), TWINLOCK1 (in-play twin-book lock), any monotonicity, full-set, deadline, bracket or cross-series dominance scan |
+| Ex-dividend short on Kalshi stock perps | Nov 12, 2026 | EXDIV1 gate 0, V2: dividends pass through as cash | Closed by the contract terms | EXDIV1, any dividend-capture rule on the perps |
+| Conditional tie premium on the non-crypto 15 minute markets | Nov 12, 2026 | TIECOND1 stage 1, V2: best cell's lower bound 1.96% against 6% | Closed by census | TIECOND1, tie or frozen-source YES rules. The holiday existence check (Nov 26) was an arm of this card and closes with it unless Main keeps it as a watch item |
+| Second-of-minute taker clustering | Nov 12, 2026 | CRONCLUSTER1 stage A, V2: peak 0.87 to 1.11 against 1.3 | Closed by measurement | CRONCLUSTER1, send-second timing rules based on market-wide clustering (our own send-latency work is Refinement's and is separate) |
+| Fractional-size (dollar-typed) flow against whole-number flow | Nov 12, 2026 | RETAILFRAC1 stage A, V2: not two crowds | Closed at stage A, no try | RETAILFRAC1, trade-size-type classifiers |
