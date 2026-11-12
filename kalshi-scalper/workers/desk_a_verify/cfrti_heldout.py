@@ -68,8 +68,17 @@ def build(venues, keep_day, need3=False):
             m = sum(lr) / len(lr); sd = math.sqrt(sum((x - m) ** 2 for x in lr) / (len(lr) - 1)) * math.sqrt(8)
             if sd <= 0: continue
             py = Phi(math.log(p0 / k) / sd); yes_win = r["result"] == "yes"
-            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d))
-            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d))
+            def replay(side, limit, delay):
+                # first recorded quote at least `delay` ms after the decision (within 30 s), status active; limit = the ask seen, no slip
+                for tt, x in L:
+                    if tt >= t0 + delay:
+                        if tt - t0 - delay > 30000 or x["status"] != "active": return None
+                        try: a = float(x["yes_ask"]) if side == "yes" else 1 - float(x["yes_bid"])
+                        except Exception: return None
+                        return a if a <= limit + 1e-9 else None
+                return None
+            if 0.03 <= ya <= 0.30: rows.append((day, tk, "yes", ya, py, yes_win, d, t0, replay("yes", ya, 2000), replay("yes", ya, 6000)))
+            elif 0.03 <= 1 - yb <= 0.30: rows.append((day, tk, "no", 1 - yb, 1 - py, not yes_win, d, t0, replay("no", 1 - yb, 2000), replay("no", 1 - yb, 6000)))
     return rows, lost, folders
 
 def rep(name, rs):
@@ -80,8 +89,14 @@ def rep(name, rs):
     def pf(v):
         a = sum(x for x in v if x > 0); b = -sum(x for x in v if x < 0); return a / b if b else float("inf")
     print("%-34s n %4d days %2d | cash PF %.2f | mean %+.2fc | win %.1f%% | mean ask %.3f | halves PF %.2f / %.2f | wins %d" % (name, len(rs), len(days), gw / gl if gl else 9, 100 * sum(pnl) / len(pnl), 100 * sum(1 for r in rs if r[5]) / len(rs), sum(r[3] for r in rs) / len(rs), pf(pnl[:h]), pf(pnl[h:]), sum(1 for r in rs if r[5])))
-if MODE not in ("dev", "heldout", "selftest"): sys.exit(__doc__)
-keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY,
+def rep_replay(name, rs, k):
+    got = [r for r in rs if r[k] is not None]
+    if not got: print("%-34s n 0 of %d" % (name, len(rs))); return
+    pnl = [((1 if r[5] else 0) - r[k] - fee(r[k])) for r in got]
+    gw = sum(x for x in pnl if x > 0); gl = -sum(x for x in pnl if x < 0)
+    print("%-34s filled %d of %d | cash PF %.2f | mean %+.2fc | wins %d" % (name, len(got), len(rs), gw / gl if gl else 9, 100 * sum(pnl) / len(pnl), sum(1 for r in got if r[5])))
+if MODE not in ("dev", "heldout", "selftest", "export"): sys.exit(__doc__)
+keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,
         "selftest": lambda d: SELFTEST_FROM <= d < HELDOUT_FIRST_DAY}[MODE]
 if MODE == "heldout":
@@ -95,13 +110,22 @@ if MODE == "heldout" and len(sel3) < NEEDED:
     sys.exit("Refusing: %d three-venue Bitcoin edge rows, %d needed (nothing scored)." % (len(sel3), NEEDED))
 rowsK, lostK, fK = build({"kraken"}, keep)
 selK = [r for r in rowsK if r[4] - r[3] >= 0.05]
-tag = {"dev": "DEVELOPMENT", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
+tag = {"dev": "DEVELOPMENT", "export": "DEVELOPMENT EXPORT", "heldout": "HELD-OUT (read once)", "selftest": "SELFTEST on development days, not a result"}[MODE]
 print("###", tag, "| run folders", f3)
 print("== three venues (as registered) | cheap rows with a model", len(rows3), "| lost:", dict(lost3)); rep("  baseline cheap side", rows3); rep("  model edge >= 0.05", sel3)
 print("== kraken only | cheap rows with a model", len(rowsK), "| lost:", dict(lostK)); rep("  baseline cheap side", rowsK); rep("  model edge >= 0.05", selK)
 A = {(r[6], r[1]): r for r in sel3}; K = {(r[6], r[1]): r for r in selK}
 print("three-venue trades", len(A), "| kraken-only trades", len(K), "| in both", len(set(A) & set(K)), "| three-venue only", len(set(A) - set(K)), "| kraken-only extra", len(set(K) - set(A)))
 rep("  kept (in both), kraken stats", [K[k] for k in sorted(set(A) & set(K))])
+for nm, rs in (("three venues", sel3), ("kraken only", selK)):
+    rep_replay("BOOK-REPLAY +2 s, " + nm, rs, 8); rep_replay("BOOK-REPLAY +6 s, " + nm + " (judges live use)", rs, 9)
+if MODE == "export":
+    import io
+    out = ["form,t0_utc,ticker,side,ask_seen"]
+    for nm, rs in (("three", sel3), ("kraken", selK)):
+        for r in sorted(rs, key=lambda r: (r[7], r[1])):
+            out.append("%s,%s,%s,%s,%.4f" % (nm, datetime.datetime.fromtimestamp(r[7] / 1000, datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), r[1], r[2], r[3]))
+    open(sys.argv[3], "w").write("\n".join(out) + "\n"); print("wrote", len(out) - 1, "rows (no outcome column)")
 print("CFRTI-K line: not computed here (perp candles not supplied).")
 if MODE == "heldout":
     line = "READ ON %s, three-venue n %d, kraken-only n %d" % (datetime.date.today(), len(sel3), len(selK))

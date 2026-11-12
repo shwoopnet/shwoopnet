@@ -39,3 +39,12 @@ READ-ONCE MARKER: not yet read. Development not yet scored (waits for Main's can
 On development days only (before 2026-11-05), the write-up prints the lead or lag between KXBTCPERP's 1 minute `reference_price` (or close, by the section 1 fallback) and the Kraken last trade: the correlation of one-minute log changes at lags of -2, -1, 0, +1 and +2 minutes (Kraken trades taken at receive time, last trade at each whole minute), beside the basis already planned (median and 5th to 95th percentile of perp reference minus Kraken last). If the perp lags Kraken by a minute or more (the peak correlation sits at a lag of one minute or more), the write-up says so plainly next to the development figure: a lagging perp tells the model nothing the 15 minute market does not already show.
 
 **Live note.** A live version would take its volatility from the same ten 1 minute candle changes as research, at the cost of one extra public read at decision time, so research and a live reader use the same numbers.
+
+## Amendment (Nov 12, 2026, committed BEFORE the held-out read; at the Head of R&D's request after Forensics' FILLHAIRCUT1, `claude/forensics-desk`, 7ca3aeb)
+
+Forensics measured real taker fills on the recorded Bitcoin books at the same look: an immediate-or-cancel buy at the ask seen fills about 67% of the time at 2 to 10 seconds; the misses are the rows where the price then ran. For a rule whose edge is the quote lagging a model, the misses are likely its best rows, so the registered figure (every signal filled at the ask seen) is an upper bound.
+- **Applies to all three versions** (three-venue, Kraken-only, CFRTI-K). Read date (2026-11-20), cutoff (2026-11-05) and marker do not change.
+- **Added in the same single sitting, beside each registered figure: a BOOK-REPLAY line.** The same signals priced at the first recorded quote at least 2 seconds after the decision, and again at 6 seconds, with the registered limit (the ask seen, no slip): a signal whose ask is gone (above the limit, no active quote within 30 s) is no trade; a lower ask fills at that lower ask. Implemented in `desk_a_verify/cfrti_heldout.py` (`BOOK-REPLAY +2 s` / `+6 s`).
+- **Labels are taken from the registered line as registered. Any LIVE use, and any probe gate, is judged on the 6 second replay line** (the bot sends several seconds after the minute).
+- **Adds no try:** same rule, an execution model.
+- **Disclosure:** Forensics' ENTRYREPLAY1 read the no-model cheap-side baseline outcomes for closes Nov 5 to 8, which is public; no CFRTI row was formed from it.
