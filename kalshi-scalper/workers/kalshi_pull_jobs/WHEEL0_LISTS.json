@@ -1,0 +1,90 @@
+{
+ "job_id": "WHEEL0_LISTS",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md",
+ "purpose": "WHEEL0 stage 1 (the owner's ordered premise test of the rotation lane, Head of R&D 2026-11-12): settled market lists of four 15 minute series (ticker, close_time, result) so stage 2 can name every market and the scorer can settle each paper order. No price is read here.",
+ "heldout": "WHEEL0 has no held-out block of its own (one read of everything, 1 try). Rule (h): Ethereum is bounded IN THIS FILE at closes before 2026-10-29T00:00Z (max_close_ts 1793231999), because CFRTI and DEPTH1 hold Ethereum and Bitcoin out on recorded dates; Bitcoin is not requested at all (its candles before Oct 29 already landed in CFRTI_K_CANDLES). Gold, XRP and Dogecoin are held out by no card (Head of R&D, 19:53Z).",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXDOGE15M",
+  "KXETH15M",
+  "KXGOLD15M",
+  "KXXRP15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 36,
+ "notes": "Written by the Forensics desk for the Head of R&D's order; owner is MAIN because the runner's owner list has no Forensics entry. Four requests, newest first, 1,000 markets a page: XRP and Dogecoin about 5,950 markets each (6 pages), gold about 4,100 (5 pages), Ethereum to Oct 28 about 4,500 (5 pages); 8 pages allowed each, cap 36. Closes from 2026-09-12T00:00Z (the live endpoint's cutover). Fields the reader keeps: ticker, close_time, result.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "live_KXDOGE15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOGE15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "live_KXETH15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXETH15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1793231999
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "live_KXGOLD15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGOLD15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 8
+  },
+  {
+   "id": "live_KXXRP15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXXRP15M",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1794527999
+   },
+   "max_pages": 8
+  }
+ ]
+}
