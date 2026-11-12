@@ -4,7 +4,7 @@
 
 Every number in this file is a rule, a threshold or arithmetic on made-up coin flips (scripts in `lane_arith/` on the `rnd-queue` branch). No live account figure is in it. [design]
 
-v0.2 replaces v0.1 (3 live, 8 shadows), which was written before the owner's target arrived. It also takes in the Refinement desk's review of the kill lines.
+v0.2 replaces v0.1 (3 live, 8 shadows), which was written before the owner's target arrived. It also takes in the Refinement desk's review of the kill lines and the Chief of Staff's security condition on automatic returns (v0.2.1, sections 6 and 7).
 
 ## Why
 
@@ -67,10 +67,10 @@ A rule that truly has 1.3 clears its first block about 42 percent of the time (a
 
 Automatic, replayed from the rule's own settled orders on the cash basis. An open position is finished by the rule's own exit; the exit watch is not touched.
 
-1. A cash drawdown of $10 from the rule's own peak.
-2. Net under minus 1c a contract at the 50th fill.
-3. At every 60th fill, the last 60 fills under 1.0.
-4. The live-against-shadow check, or the lane cap in section 8.
+1. A cash drawdown of $10 from the rule's own peak (a KILL: latched).
+2. Net under minus 1c a contract at the 50th fill (a performance exit).
+3. At every 60th fill, the last 60 fills under 1.0 (a performance exit).
+4. The live-against-shadow check, or the lane cap in section 8 (a KILL: latched).
 
 Alerts only, never an exit by themselves (the Refinement desk's review: on gold these fired mostly on a strategy that then kept earning, and saved nothing): a rolling 60 fill profit factor under 0.7; for a rule that exits early, 3 early sells in the last 40.
 
@@ -79,7 +79,7 @@ What lines 1 to 3 do on coin flips: a rule with no edge leaves after about 25 to
 ## 7. Cooling and return
 
 1. 14 days out, then a new block made only of signals after the exit date, plus the confirmation, both on fill-checked rows. Then the rule may take a seat again, automatically.
-2. After a $10 drawdown exit: 30 days instead of 14.
+2. **Never automatic after a kill.** A rule that left on its $10 drawdown, on the live-against-shadow check or with the lane cap returns only by a reviewed re-arm: at least 30 days, a fresh block and confirmation, the owner's popup and the Chief of Staff's merge. The automatic return of line 1 is for a performance exit only (lines 2 and 3 of section 6). This is the Chief of Staff's security condition: an automatic return is acceptable only where the rule's registry entry already exists from admission, the state is replayed from rows, and size, lane cap, shared stop and kill latches are unchanged.
 3. A third exit within 90 days retires the rule and adds a row to the declined list. Only the owner removes a row.
 
 ## 8. The total at risk
