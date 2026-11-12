@@ -83,6 +83,8 @@ function context(o) {
     depthAtLimit: num(o.depthAtLimit), shareOfDepth: num(o.shareOfDepth), depthLevels: typeof o.depthLevels === "string" ? o.depthLevels.slice(0, 12) : null,
     // Decision-time book (Nov 11, 2026, "P2"): the best 5 YES and 5 NO bids as [price, size] pairs, numbers only, best first; null when the order carries none.
     bookYes5: bookPairs(o.bookYes5), bookNo5: bookPairs(o.bookNo5), bookReadMs: o.bookReadMs === undefined || o.bookReadMs === null ? null : num(o.bookReadMs),
+    // Nov 12, 2026: the book read is always made AFTER the send; bookReadAfterSendMs is how long after (null when unknown).
+    bookReadWhen: o.bookReadWhen === "after_send" ? "after_send" : null, bookReadAfterSendMs: o.bookReadAfterSendMs === undefined || o.bookReadAfterSendMs === null ? null : num(o.bookReadAfterSendMs),
     addon: num(o.addon), rise3: num(o.rise3), smooth: typeof o.smooth === "boolean" ? o.smooth : null,
     // Kalshi's own status for the order (Nov 4, 2026, the refinement chat's no-fill table; logged on the order since #712): a short word such as "canceled" or "executed", letters and underscores only, null when not logged.
     // The early sell the exit watch stored on the order (Nov 6, 2026, the refinement chat: it could not tell when a gold early sell happened or what it sold for): exitAt is when, exitAvg is the price it sold at (0 to 1, null for no fill), exitBid the bid that triggered it. Numbers only; no exit order id.
