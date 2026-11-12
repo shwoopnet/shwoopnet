@@ -1,0 +1,4772 @@
+{
+ "job": {
+  "job_id": "PERPBTC1M",
+  "status": "active",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/README.md",
+  "purpose": "Kalshi's own Bitcoin perpetual KXBTCPERP: public 1 minute candles (bid, ask, price, open interest, volume), one UTC day per request, 2026-06-03 to 2026-11-12. Data pull only.",
+  "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this)",
+  "route": "perps",
+  "allowed_endpoints": [
+   {
+    "name": "perp_candlesticks",
+    "method": "GET",
+    "path_pattern": "/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks",
+    "params_allowed": [
+     "period_interval",
+     "start_ts",
+     "end_ts"
+    ]
+   }
+  ],
+  "series_allowlist": [],
+  "ticker_allowlist": [
+   "KXBTCPERP"
+  ],
+  "pacing_seconds": 1.0,
+  "max_requests": 163,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "KXBTCPERP_2026-06-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780444800,
+     "end_ts": 1780531200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780531200,
+     "end_ts": 1780617600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780617600,
+     "end_ts": 1780704000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780704000,
+     "end_ts": 1780790400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780790400,
+     "end_ts": 1780876800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780876800,
+     "end_ts": 1780963200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1780963200,
+     "end_ts": 1781049600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781049600,
+     "end_ts": 1781136000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781136000,
+     "end_ts": 1781222400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781222400,
+     "end_ts": 1781308800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-13",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781308800,
+     "end_ts": 1781395200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-14",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781395200,
+     "end_ts": 1781481600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-15",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781481600,
+     "end_ts": 1781568000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-16",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781568000,
+     "end_ts": 1781654400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-17",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781654400,
+     "end_ts": 1781740800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-18",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781740800,
+     "end_ts": 1781827200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-19",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781827200,
+     "end_ts": 1781913600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-20",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1781913600,
+     "end_ts": 1782000000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-21",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782000000,
+     "end_ts": 1782086400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-22",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782086400,
+     "end_ts": 1782172800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-23",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782172800,
+     "end_ts": 1782259200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-24",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782259200,
+     "end_ts": 1782345600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-25",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782345600,
+     "end_ts": 1782432000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-26",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782432000,
+     "end_ts": 1782518400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-27",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782518400,
+     "end_ts": 1782604800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-28",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782604800,
+     "end_ts": 1782691200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-29",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782691200,
+     "end_ts": 1782777600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-06-30",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782777600,
+     "end_ts": 1782864000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-01",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782864000,
+     "end_ts": 1782950400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-02",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1782950400,
+     "end_ts": 1783036800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783036800,
+     "end_ts": 1783123200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783123200,
+     "end_ts": 1783209600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783209600,
+     "end_ts": 1783296000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783296000,
+     "end_ts": 1783382400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783382400,
+     "end_ts": 1783468800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783468800,
+     "end_ts": 1783555200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783555200,
+     "end_ts": 1783641600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783641600,
+     "end_ts": 1783728000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783728000,
+     "end_ts": 1783814400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783814400,
+     "end_ts": 1783900800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-13",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783900800,
+     "end_ts": 1783987200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-14",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1783987200,
+     "end_ts": 1784073600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-15",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784073600,
+     "end_ts": 1784160000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-16",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784160000,
+     "end_ts": 1784246400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-17",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784246400,
+     "end_ts": 1784332800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-18",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784332800,
+     "end_ts": 1784419200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-19",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784419200,
+     "end_ts": 1784505600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-20",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784505600,
+     "end_ts": 1784592000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-21",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784592000,
+     "end_ts": 1784678400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-22",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784678400,
+     "end_ts": 1784764800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-23",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784764800,
+     "end_ts": 1784851200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-24",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784851200,
+     "end_ts": 1784937600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-25",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1784937600,
+     "end_ts": 1785024000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-26",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785024000,
+     "end_ts": 1785110400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-27",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785110400,
+     "end_ts": 1785196800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-28",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785196800,
+     "end_ts": 1785283200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-29",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785283200,
+     "end_ts": 1785369600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-30",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785369600,
+     "end_ts": 1785456000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-07-31",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785456000,
+     "end_ts": 1785542400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-01",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785542400,
+     "end_ts": 1785628800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-02",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785628800,
+     "end_ts": 1785715200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785715200,
+     "end_ts": 1785801600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785801600,
+     "end_ts": 1785888000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785888000,
+     "end_ts": 1785974400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1785974400,
+     "end_ts": 1786060800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786060800,
+     "end_ts": 1786147200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786147200,
+     "end_ts": 1786233600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786233600,
+     "end_ts": 1786320000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786320000,
+     "end_ts": 1786406400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786406400,
+     "end_ts": 1786492800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786492800,
+     "end_ts": 1786579200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-13",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786579200,
+     "end_ts": 1786665600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-14",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786665600,
+     "end_ts": 1786752000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-15",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786752000,
+     "end_ts": 1786838400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-16",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786838400,
+     "end_ts": 1786924800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-17",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1786924800,
+     "end_ts": 1787011200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-18",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787011200,
+     "end_ts": 1787097600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-19",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787097600,
+     "end_ts": 1787184000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-20",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787184000,
+     "end_ts": 1787270400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-21",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787270400,
+     "end_ts": 1787356800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-22",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787356800,
+     "end_ts": 1787443200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-23",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787443200,
+     "end_ts": 1787529600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-24",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787529600,
+     "end_ts": 1787616000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-25",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787616000,
+     "end_ts": 1787702400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-26",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787702400,
+     "end_ts": 1787788800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-27",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787788800,
+     "end_ts": 1787875200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-28",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787875200,
+     "end_ts": 1787961600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-29",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1787961600,
+     "end_ts": 1788048000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-30",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788048000,
+     "end_ts": 1788134400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-08-31",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788134400,
+     "end_ts": 1788220800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-01",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788220800,
+     "end_ts": 1788307200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-02",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788307200,
+     "end_ts": 1788393600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788393600,
+     "end_ts": 1788480000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788480000,
+     "end_ts": 1788566400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788566400,
+     "end_ts": 1788652800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788652800,
+     "end_ts": 1788739200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788739200,
+     "end_ts": 1788825600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788825600,
+     "end_ts": 1788912000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788912000,
+     "end_ts": 1788998400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1788998400,
+     "end_ts": 1789084800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789084800,
+     "end_ts": 1789171200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789171200,
+     "end_ts": 1789257600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-13",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789257600,
+     "end_ts": 1789344000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-14",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789344000,
+     "end_ts": 1789430400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-15",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789430400,
+     "end_ts": 1789516800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-16",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789516800,
+     "end_ts": 1789603200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-17",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789603200,
+     "end_ts": 1789689600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-18",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789689600,
+     "end_ts": 1789776000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-19",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789776000,
+     "end_ts": 1789862400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-20",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789862400,
+     "end_ts": 1789948800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-21",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1789948800,
+     "end_ts": 1790035200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-22",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790035200,
+     "end_ts": 1790121600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-23",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790121600,
+     "end_ts": 1790208000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-24",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790208000,
+     "end_ts": 1790294400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-25",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790294400,
+     "end_ts": 1790380800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-26",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790380800,
+     "end_ts": 1790467200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-27",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790467200,
+     "end_ts": 1790553600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-28",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790553600,
+     "end_ts": 1790640000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-29",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790640000,
+     "end_ts": 1790726400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-09-30",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790726400,
+     "end_ts": 1790812800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-01",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790812800,
+     "end_ts": 1790899200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-02",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790899200,
+     "end_ts": 1790985600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1790985600,
+     "end_ts": 1791072000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791072000,
+     "end_ts": 1791158400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791158400,
+     "end_ts": 1791244800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791244800,
+     "end_ts": 1791331200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791331200,
+     "end_ts": 1791417600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791417600,
+     "end_ts": 1791504000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791504000,
+     "end_ts": 1791590400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791590400,
+     "end_ts": 1791676800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791676800,
+     "end_ts": 1791763200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791763200,
+     "end_ts": 1791849600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-13",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791849600,
+     "end_ts": 1791936000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-14",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1791936000,
+     "end_ts": 1792022400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-15",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792022400,
+     "end_ts": 1792108800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-16",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792108800,
+     "end_ts": 1792195200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-17",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792195200,
+     "end_ts": 1792281600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-18",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792281600,
+     "end_ts": 1792368000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-19",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792368000,
+     "end_ts": 1792454400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-20",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792454400,
+     "end_ts": 1792540800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-21",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792540800,
+     "end_ts": 1792627200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-22",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792627200,
+     "end_ts": 1792713600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-23",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792713600,
+     "end_ts": 1792800000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-24",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792800000,
+     "end_ts": 1792886400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-25",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792886400,
+     "end_ts": 1792972800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-26",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1792972800,
+     "end_ts": 1793059200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-27",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793059200,
+     "end_ts": 1793145600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-28",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793145600,
+     "end_ts": 1793232000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-29",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793232000,
+     "end_ts": 1793318400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-30",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793318400,
+     "end_ts": 1793404800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-10-31",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793404800,
+     "end_ts": 1793491200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-01",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793491200,
+     "end_ts": 1793577600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-02",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793577600,
+     "end_ts": 1793664000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-03",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793664000,
+     "end_ts": 1793750400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-04",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793750400,
+     "end_ts": 1793836800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-05",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793836800,
+     "end_ts": 1793923200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-06",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1793923200,
+     "end_ts": 1794009600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-07",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794009600,
+     "end_ts": 1794096000
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-08",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794096000,
+     "end_ts": 1794182400
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-09",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794182400,
+     "end_ts": 1794268800
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-10",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794268800,
+     "end_ts": 1794355200
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-11",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794355200,
+     "end_ts": 1794441600
+    }
+   },
+   {
+    "id": "KXBTCPERP_2026-11-12",
+    "path": "/markets/KXBTCPERP/candlesticks",
+    "params": {
+     "period_interval": 1,
+     "start_ts": 1794441600,
+     "end_ts": 1794528000
+    }
+   }
+  ],
+  "notes": "163 requests, one per UTC day, each asking for up to 1,440 one minute candles (86,400 seconds, the window scripts/record_perps_candles.py already uses). The last day (2026-11-12) is partial. Adjacent windows may share their boundary candle: de-duplicate on end_period_ts when reading. The route is the perps pair in the ROUTES table of scripts/kalshi_pull.py; this file names it by key and carries no host."
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1550Z",
+ "finished": "2026-11-12T1553Z",
+ "status": "complete",
+ "requests_sent": 163,
+ "bytes_stored": 100275844,
+ "rows": [
+  {
+   "index": 1,
+   "id": "KXBTCPERP_2026-06-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780444800,
+    "end_ts": 1780531200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 249358,
+   "t_send_ms": 1794498639094,
+   "t_recv_ms": 1794498639542,
+   "server_date": "Thu, 12 Nov 2026 15:50:39 GMT",
+   "file": "0001.json.gz",
+   "sha256": "aa14ca50245a49fd90907de0ca893066e13c36b9aac3e133578b04b2391b665c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "KXBTCPERP_2026-06-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780531200,
+    "end_ts": 1780617600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 563545,
+   "t_send_ms": 1794498640094,
+   "t_recv_ms": 1794498640583,
+   "server_date": "Thu, 12 Nov 2026 15:50:40 GMT",
+   "file": "0002.json.gz",
+   "sha256": "1155f60d6ad91581309ef0b128aba0fcc9c5a55b94bed4044e6b8eac2779a685",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "KXBTCPERP_2026-06-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780617600,
+    "end_ts": 1780704000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 621839,
+   "t_send_ms": 1794498641094,
+   "t_recv_ms": 1794498641589,
+   "server_date": "Thu, 12 Nov 2026 15:50:41 GMT",
+   "file": "0003.json.gz",
+   "sha256": "e7ea27fde318524f07c3d40bc20784f4ce686ce886379ce8edc1eea98465913c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "KXBTCPERP_2026-06-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780704000,
+    "end_ts": 1780790400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 612579,
+   "t_send_ms": 1794498642094,
+   "t_recv_ms": 1794498642577,
+   "server_date": "Thu, 12 Nov 2026 15:50:42 GMT",
+   "file": "0004.json.gz",
+   "sha256": "cfac6d0ed08746df90e7693d69672a856733dbafd70766a03a4d8a054027c0cc",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "KXBTCPERP_2026-06-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780790400,
+    "end_ts": 1780876800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623050,
+   "t_send_ms": 1794498643094,
+   "t_recv_ms": 1794498643591,
+   "server_date": "Thu, 12 Nov 2026 15:50:43 GMT",
+   "file": "0005.json.gz",
+   "sha256": "4100cdc331994cff40cdfd23ac318337c2b3b4187d6608070ad8fd13e44cb976",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "KXBTCPERP_2026-06-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780876800,
+    "end_ts": 1780963200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622721,
+   "t_send_ms": 1794498644095,
+   "t_recv_ms": 1794498644579,
+   "server_date": "Thu, 12 Nov 2026 15:50:44 GMT",
+   "file": "0006.json.gz",
+   "sha256": "3463bc9b16e8c1a66b44f356fece9588566cc5d15c32db39163a778228b52ba6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "KXBTCPERP_2026-06-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780963200,
+    "end_ts": 1781049600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624832,
+   "t_send_ms": 1794498645095,
+   "t_recv_ms": 1794498645587,
+   "server_date": "Thu, 12 Nov 2026 15:50:45 GMT",
+   "file": "0007.json.gz",
+   "sha256": "b40ca9f8ea89b76e4a5426204cb35b6df48fc9e2db67613a49917ba4aac350ed",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "KXBTCPERP_2026-06-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781049600,
+    "end_ts": 1781136000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624480,
+   "t_send_ms": 1794498646095,
+   "t_recv_ms": 1794498646582,
+   "server_date": "Thu, 12 Nov 2026 15:50:46 GMT",
+   "file": "0008.json.gz",
+   "sha256": "c63c9e9ec7c4a28e5318dca78f775682d78f6c5c70212503a3a8a53c7afce764",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "KXBTCPERP_2026-06-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781136000,
+    "end_ts": 1781222400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 573580,
+   "t_send_ms": 1794498647095,
+   "t_recv_ms": 1794498647562,
+   "server_date": "Thu, 12 Nov 2026 15:50:47 GMT",
+   "file": "0009.json.gz",
+   "sha256": "04bc70cf1ef5aa84c248e848d6bf1e200ebf807258a91845198a08d5a98f3653",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "KXBTCPERP_2026-06-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781222400,
+    "end_ts": 1781308800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624859,
+   "t_send_ms": 1794498648095,
+   "t_recv_ms": 1794498648579,
+   "server_date": "Thu, 12 Nov 2026 15:50:48 GMT",
+   "file": "0010.json.gz",
+   "sha256": "650765da475da4e9e419a5145ed534d7526f228c4655536984b34e7098988f36",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "KXBTCPERP_2026-06-13",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781308800,
+    "end_ts": 1781395200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624520,
+   "t_send_ms": 1794498649095,
+   "t_recv_ms": 1794498649579,
+   "server_date": "Thu, 12 Nov 2026 15:50:49 GMT",
+   "file": "0011.json.gz",
+   "sha256": "2e4d8822cda3cf7b4f0301728440cad835c6ee6d33ce6a8ee004a877328c9e9f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "KXBTCPERP_2026-06-14",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781395200,
+    "end_ts": 1781481600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624670,
+   "t_send_ms": 1794498650095,
+   "t_recv_ms": 1794498650573,
+   "server_date": "Thu, 12 Nov 2026 15:50:50 GMT",
+   "file": "0012.json.gz",
+   "sha256": "decb5ee642cda2aa51d8642cfbae27dc40ee6601f471f142f38fdacebdb5ea38",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "KXBTCPERP_2026-06-15",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781481600,
+    "end_ts": 1781568000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625607,
+   "t_send_ms": 1794498651095,
+   "t_recv_ms": 1794498651590,
+   "server_date": "Thu, 12 Nov 2026 15:50:51 GMT",
+   "file": "0013.json.gz",
+   "sha256": "edcef4f62a0a8617a292db112ea08c1081f3b5de63016dfd8b5bf6d538191906",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "KXBTCPERP_2026-06-16",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781568000,
+    "end_ts": 1781654400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626109,
+   "t_send_ms": 1794498652095,
+   "t_recv_ms": 1794498652572,
+   "server_date": "Thu, 12 Nov 2026 15:50:52 GMT",
+   "file": "0014.json.gz",
+   "sha256": "cf995f716fbc5032a001ffab4d231742e73318cca584c9184f89c67003d293e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "KXBTCPERP_2026-06-17",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781654400,
+    "end_ts": 1781740800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625491,
+   "t_send_ms": 1794498653095,
+   "t_recv_ms": 1794498653582,
+   "server_date": "Thu, 12 Nov 2026 15:50:53 GMT",
+   "file": "0015.json.gz",
+   "sha256": "fe590ca366b0311ac80e25f6f53b48f662ca8c1471118438e098848df5728ddc",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "KXBTCPERP_2026-06-18",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781740800,
+    "end_ts": 1781827200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 574843,
+   "t_send_ms": 1794498654096,
+   "t_recv_ms": 1794498654578,
+   "server_date": "Thu, 12 Nov 2026 15:50:54 GMT",
+   "file": "0016.json.gz",
+   "sha256": "6681b5835b53c80e35bd3752d1eb5655d0bae9a03846a7256eea8bfc07ecb620",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "KXBTCPERP_2026-06-19",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781827200,
+    "end_ts": 1781913600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625558,
+   "t_send_ms": 1794498655096,
+   "t_recv_ms": 1794498655586,
+   "server_date": "Thu, 12 Nov 2026 15:50:55 GMT",
+   "file": "0017.json.gz",
+   "sha256": "ce430fac64855705fb03eefa7c99b578f65ec4f53e8aa7f3dee9858928428d47",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "KXBTCPERP_2026-06-20",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781913600,
+    "end_ts": 1782000000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624498,
+   "t_send_ms": 1794498656096,
+   "t_recv_ms": 1794498656572,
+   "server_date": "Thu, 12 Nov 2026 15:50:56 GMT",
+   "file": "0018.json.gz",
+   "sha256": "02176ae728ef173c2a005df440d900239964f308307658e6433bcc3159735486",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "KXBTCPERP_2026-06-21",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782000000,
+    "end_ts": 1782086400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624149,
+   "t_send_ms": 1794498657096,
+   "t_recv_ms": 1794498657564,
+   "server_date": "Thu, 12 Nov 2026 15:50:57 GMT",
+   "file": "0019.json.gz",
+   "sha256": "30aa4b684860b60664225e3f55451e0f3ba860f611cd8f2991c031fd8c8cb9b8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "KXBTCPERP_2026-06-22",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782086400,
+    "end_ts": 1782172800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624659,
+   "t_send_ms": 1794498658096,
+   "t_recv_ms": 1794498658570,
+   "server_date": "Thu, 12 Nov 2026 15:50:58 GMT",
+   "file": "0020.json.gz",
+   "sha256": "3b16331494d2b412983f38168551028109a53ea4dc7ea56863a9e6c5a81e1de2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "KXBTCPERP_2026-06-23",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782172800,
+    "end_ts": 1782259200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625205,
+   "t_send_ms": 1794498659096,
+   "t_recv_ms": 1794498659581,
+   "server_date": "Thu, 12 Nov 2026 15:50:59 GMT",
+   "file": "0021.json.gz",
+   "sha256": "9149a9f0d8e916c406f24b324d7ea15ac5c8c04637bfb6e896fc25e8915769a3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "KXBTCPERP_2026-06-24",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782259200,
+    "end_ts": 1782345600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624361,
+   "t_send_ms": 1794498660096,
+   "t_recv_ms": 1794498660593,
+   "server_date": "Thu, 12 Nov 2026 15:51:00 GMT",
+   "file": "0022.json.gz",
+   "sha256": "59ef4f8940214f9514aa6fc47c6442f5555f056f87e4e380501c22f35551af57",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "KXBTCPERP_2026-06-25",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782345600,
+    "end_ts": 1782432000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 569734,
+   "t_send_ms": 1794498661096,
+   "t_recv_ms": 1794498661583,
+   "server_date": "Thu, 12 Nov 2026 15:51:01 GMT",
+   "file": "0023.json.gz",
+   "sha256": "727829f47c466eab2e98f79b05bbc678ecbee29b78f8a0a4315b5bd1401c7a29",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "KXBTCPERP_2026-06-26",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782432000,
+    "end_ts": 1782518400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623505,
+   "t_send_ms": 1794498662096,
+   "t_recv_ms": 1794498662587,
+   "server_date": "Thu, 12 Nov 2026 15:51:02 GMT",
+   "file": "0024.json.gz",
+   "sha256": "3204533787530196de0898434197b6da438d5dc14ceb9bc28345a0d014d86bb7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "KXBTCPERP_2026-06-27",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782518400,
+    "end_ts": 1782604800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624764,
+   "t_send_ms": 1794498663096,
+   "t_recv_ms": 1794498663581,
+   "server_date": "Thu, 12 Nov 2026 15:51:03 GMT",
+   "file": "0025.json.gz",
+   "sha256": "e3f87c8fcf39ae4fb9f5154ac6e8a0466204325c46c18daf6e69c7e7bf1c7f47",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "KXBTCPERP_2026-06-28",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782604800,
+    "end_ts": 1782691200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624653,
+   "t_send_ms": 1794498664097,
+   "t_recv_ms": 1794498664580,
+   "server_date": "Thu, 12 Nov 2026 15:51:04 GMT",
+   "file": "0026.json.gz",
+   "sha256": "d6ebf0b5334002eb11f4f959aab544a23efa680f3b3f6b84437331171549feac",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "KXBTCPERP_2026-06-29",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782691200,
+    "end_ts": 1782777600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 619366,
+   "t_send_ms": 1794498665097,
+   "t_recv_ms": 1794498665589,
+   "server_date": "Thu, 12 Nov 2026 15:51:05 GMT",
+   "file": "0027.json.gz",
+   "sha256": "1ee72133885407ea655e4d1de6da276e954e261e95e59c1e27de5d7e3c50a24c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "KXBTCPERP_2026-06-30",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782777600,
+    "end_ts": 1782864000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624571,
+   "t_send_ms": 1794498666097,
+   "t_recv_ms": 1794498666576,
+   "server_date": "Thu, 12 Nov 2026 15:51:06 GMT",
+   "file": "0028.json.gz",
+   "sha256": "c50f60eaac28ae9f88dad920f81a6a69fe14fbb53bc204e12232ad4228bdda2f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "KXBTCPERP_2026-07-01",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782864000,
+    "end_ts": 1782950400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624848,
+   "t_send_ms": 1794498667097,
+   "t_recv_ms": 1794498667580,
+   "server_date": "Thu, 12 Nov 2026 15:51:07 GMT",
+   "file": "0029.json.gz",
+   "sha256": "347965c94d8cf97563543c27ec76d8f6eae7b482b68bb244462b68ec922f23e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "KXBTCPERP_2026-07-02",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782950400,
+    "end_ts": 1783036800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 572784,
+   "t_send_ms": 1794498668097,
+   "t_recv_ms": 1794498668590,
+   "server_date": "Thu, 12 Nov 2026 15:51:08 GMT",
+   "file": "0030.json.gz",
+   "sha256": "9fb223da219dccd939a7f257bedf4c8ad61bb46260dd9fa6dcf5439a8af10084",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "KXBTCPERP_2026-07-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783036800,
+    "end_ts": 1783123200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623915,
+   "t_send_ms": 1794498669097,
+   "t_recv_ms": 1794498669574,
+   "server_date": "Thu, 12 Nov 2026 15:51:09 GMT",
+   "file": "0031.json.gz",
+   "sha256": "8974289e71e60a97ebb926c49a18d9efc73ff29cbdc954c551abc619f7d8e956",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "KXBTCPERP_2026-07-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783123200,
+    "end_ts": 1783209600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622798,
+   "t_send_ms": 1794498670097,
+   "t_recv_ms": 1794498670595,
+   "server_date": "Thu, 12 Nov 2026 15:51:10 GMT",
+   "file": "0032.json.gz",
+   "sha256": "70d789373aa64bbb68c6523cf101e9303482aa86f3a5101e10d5ef77511ee6e8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "KXBTCPERP_2026-07-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783209600,
+    "end_ts": 1783296000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622364,
+   "t_send_ms": 1794498671097,
+   "t_recv_ms": 1794498671567,
+   "server_date": "Thu, 12 Nov 2026 15:51:11 GMT",
+   "file": "0033.json.gz",
+   "sha256": "6e4bec50500fac8e345a62880e6ede3aadd517230d3007b15eea1328223ee6a6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "KXBTCPERP_2026-07-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783296000,
+    "end_ts": 1783382400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623230,
+   "t_send_ms": 1794498672097,
+   "t_recv_ms": 1794498672604,
+   "server_date": "Thu, 12 Nov 2026 15:51:12 GMT",
+   "file": "0034.json.gz",
+   "sha256": "11685f2237d2699c726141b46a1768ed6066325664a09302911aa4ced4b5fbc9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "KXBTCPERP_2026-07-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783382400,
+    "end_ts": 1783468800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623065,
+   "t_send_ms": 1794498673098,
+   "t_recv_ms": 1794498673594,
+   "server_date": "Thu, 12 Nov 2026 15:51:13 GMT",
+   "file": "0035.json.gz",
+   "sha256": "127eb95aa31aa543c4a80faa8cf7777c827c50b20768b865f73b00b12b2664ce",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "KXBTCPERP_2026-07-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783468800,
+    "end_ts": 1783555200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623359,
+   "t_send_ms": 1794498674098,
+   "t_recv_ms": 1794498674580,
+   "server_date": "Thu, 12 Nov 2026 15:51:14 GMT",
+   "file": "0036.json.gz",
+   "sha256": "1ef9509aed82c8bd71ef1e1e91d270ca055dba6e844848b1e0947f0e0b3811d6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "KXBTCPERP_2026-07-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783555200,
+    "end_ts": 1783641600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 571465,
+   "t_send_ms": 1794498675098,
+   "t_recv_ms": 1794498675590,
+   "server_date": "Thu, 12 Nov 2026 15:51:15 GMT",
+   "file": "0037.json.gz",
+   "sha256": "5bf1218c4dc64639297694dd893f1bfaa495be41bb0ec40dd5bc8f1c7e397226",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "KXBTCPERP_2026-07-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783641600,
+    "end_ts": 1783728000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623595,
+   "t_send_ms": 1794498676098,
+   "t_recv_ms": 1794498676581,
+   "server_date": "Thu, 12 Nov 2026 15:51:16 GMT",
+   "file": "0038.json.gz",
+   "sha256": "b6cdc595af665f95125dad02d5cfc90fca7b3a4a096f9b81d739558099bf0d9e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "KXBTCPERP_2026-07-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783728000,
+    "end_ts": 1783814400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622121,
+   "t_send_ms": 1794498677098,
+   "t_recv_ms": 1794498677582,
+   "server_date": "Thu, 12 Nov 2026 15:51:17 GMT",
+   "file": "0039.json.gz",
+   "sha256": "111708d0f364ebeac18505733c9f8d6bf6ea18ac378d35f9083c98a15fbaf65f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "KXBTCPERP_2026-07-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783814400,
+    "end_ts": 1783900800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622398,
+   "t_send_ms": 1794498678098,
+   "t_recv_ms": 1794498678621,
+   "server_date": "Thu, 12 Nov 2026 15:51:18 GMT",
+   "file": "0040.json.gz",
+   "sha256": "c2b974b7904e3451f929c70bd21f119e192eda5ccd5e71d240a1e2562549a407",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "KXBTCPERP_2026-07-13",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783900800,
+    "end_ts": 1783987200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625851,
+   "t_send_ms": 1794498679098,
+   "t_recv_ms": 1794498679639,
+   "server_date": "Thu, 12 Nov 2026 15:51:19 GMT",
+   "file": "0041.json.gz",
+   "sha256": "4236a6718b155e941bf9d6f59eb09b542086e27a617783eb53eeea24be14c3c5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "KXBTCPERP_2026-07-14",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783987200,
+    "end_ts": 1784073600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625579,
+   "t_send_ms": 1794498680098,
+   "t_recv_ms": 1794498680641,
+   "server_date": "Thu, 12 Nov 2026 15:51:20 GMT",
+   "file": "0042.json.gz",
+   "sha256": "6efa4474be70f6c1b5fde3b52f84c69a6ec2d1108023f8752fbbb9039451e27f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "KXBTCPERP_2026-07-15",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784073600,
+    "end_ts": 1784160000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625254,
+   "t_send_ms": 1794498681099,
+   "t_recv_ms": 1794498681577,
+   "server_date": "Thu, 12 Nov 2026 15:51:21 GMT",
+   "file": "0043.json.gz",
+   "sha256": "6277fb64bba0dc89e34112b8a0f15f445ad23bbd7c80d6f396c26202c4ed2dc2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "KXBTCPERP_2026-07-16",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784160000,
+    "end_ts": 1784246400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 571840,
+   "t_send_ms": 1794498682099,
+   "t_recv_ms": 1794498682592,
+   "server_date": "Thu, 12 Nov 2026 15:51:22 GMT",
+   "file": "0044.json.gz",
+   "sha256": "5c03b66f39cf29620c51469b93d9f6a67a1e1b2873c2831e63670282b53c6e3d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "KXBTCPERP_2026-07-17",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784246400,
+    "end_ts": 1784332800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623500,
+   "t_send_ms": 1794498683099,
+   "t_recv_ms": 1794498683575,
+   "server_date": "Thu, 12 Nov 2026 15:51:23 GMT",
+   "file": "0045.json.gz",
+   "sha256": "6d1899107d7c8e4ca9de79c089a81a1301ac533645dc5b82f5ec15bdeb0f11a7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "KXBTCPERP_2026-07-18",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784332800,
+    "end_ts": 1784419200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 621488,
+   "t_send_ms": 1794498684099,
+   "t_recv_ms": 1794498684604,
+   "server_date": "Thu, 12 Nov 2026 15:51:24 GMT",
+   "file": "0046.json.gz",
+   "sha256": "7c29a3655ae5bc04c22e5795f8336647b5f518c0cf3d7b5f10dad3519d7407ce",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "KXBTCPERP_2026-07-19",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784419200,
+    "end_ts": 1784505600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622281,
+   "t_send_ms": 1794498685099,
+   "t_recv_ms": 1794498685584,
+   "server_date": "Thu, 12 Nov 2026 15:51:25 GMT",
+   "file": "0047.json.gz",
+   "sha256": "cd01c432aaa4b446886cdcc9aa5f7428ebffa40e722a35a3cdd5c2794cae82ba",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "KXBTCPERP_2026-07-20",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784505600,
+    "end_ts": 1784592000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624662,
+   "t_send_ms": 1794498686099,
+   "t_recv_ms": 1794498686592,
+   "server_date": "Thu, 12 Nov 2026 15:51:26 GMT",
+   "file": "0048.json.gz",
+   "sha256": "5a853b55a2ffb4a6e50652165a7c4746a22832d49e32f5ead9b58a4cd01ee52f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "KXBTCPERP_2026-07-21",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784592000,
+    "end_ts": 1784678400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623844,
+   "t_send_ms": 1794498687099,
+   "t_recv_ms": 1794498687568,
+   "server_date": "Thu, 12 Nov 2026 15:51:27 GMT",
+   "file": "0049.json.gz",
+   "sha256": "e40af23c01194f9a187026a0a231a2c47af0a276df9d132105ce2be2c1fbbe79",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "KXBTCPERP_2026-07-22",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784678400,
+    "end_ts": 1784764800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622638,
+   "t_send_ms": 1794498688099,
+   "t_recv_ms": 1794498688605,
+   "server_date": "Thu, 12 Nov 2026 15:51:28 GMT",
+   "file": "0050.json.gz",
+   "sha256": "bd3c4ef38fb7c798d15e79a4dd5f711319b088b29db790edc94520679dfbf471",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 51,
+   "id": "KXBTCPERP_2026-07-23",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784764800,
+    "end_ts": 1784851200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 572421,
+   "t_send_ms": 1794498689099,
+   "t_recv_ms": 1794498689585,
+   "server_date": "Thu, 12 Nov 2026 15:51:29 GMT",
+   "file": "0051.json.gz",
+   "sha256": "677357c12a37db916820089105836a3bc06883ea3453b76e399b5c581ae1c180",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 52,
+   "id": "KXBTCPERP_2026-07-24",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784851200,
+    "end_ts": 1784937600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623944,
+   "t_send_ms": 1794498690100,
+   "t_recv_ms": 1794498690576,
+   "server_date": "Thu, 12 Nov 2026 15:51:30 GMT",
+   "file": "0052.json.gz",
+   "sha256": "942034fa4d43890deaad8d727a74962d07a912d0b19f9d3bf87c309db0b1ac20",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 53,
+   "id": "KXBTCPERP_2026-07-25",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784937600,
+    "end_ts": 1785024000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622537,
+   "t_send_ms": 1794498691100,
+   "t_recv_ms": 1794498691601,
+   "server_date": "Thu, 12 Nov 2026 15:51:31 GMT",
+   "file": "0053.json.gz",
+   "sha256": "8abcf0b5957fd32fa8801de423712ef7fae315bc1b4409507061a7a0970fda99",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 54,
+   "id": "KXBTCPERP_2026-07-26",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785024000,
+    "end_ts": 1785110400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622369,
+   "t_send_ms": 1794498692100,
+   "t_recv_ms": 1794498692578,
+   "server_date": "Thu, 12 Nov 2026 15:51:32 GMT",
+   "file": "0054.json.gz",
+   "sha256": "7c549cad5269c52ed833ac6491190dd2467326a81d6ed949f653621fdc3c4b1a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 55,
+   "id": "KXBTCPERP_2026-07-27",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785110400,
+    "end_ts": 1785196800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623769,
+   "t_send_ms": 1794498693100,
+   "t_recv_ms": 1794498693623,
+   "server_date": "Thu, 12 Nov 2026 15:51:33 GMT",
+   "file": "0055.json.gz",
+   "sha256": "f677ef268bb06406e77685921d0571978a39e61b12cac5e599afa71a7fb0e821",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 56,
+   "id": "KXBTCPERP_2026-07-28",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785196800,
+    "end_ts": 1785283200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624230,
+   "t_send_ms": 1794498694100,
+   "t_recv_ms": 1794498694584,
+   "server_date": "Thu, 12 Nov 2026 15:51:34 GMT",
+   "file": "0056.json.gz",
+   "sha256": "7923e761a0f16ce9bc3c350f0aad1b9c8755f88aa9e17039e772698cade04ea4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 57,
+   "id": "KXBTCPERP_2026-07-29",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785283200,
+    "end_ts": 1785369600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625077,
+   "t_send_ms": 1794498695100,
+   "t_recv_ms": 1794498695584,
+   "server_date": "Thu, 12 Nov 2026 15:51:35 GMT",
+   "file": "0057.json.gz",
+   "sha256": "63ee57f37be498b29c650158cbc999850bbb2fbf4b68e63227cfa4fa321274dd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 58,
+   "id": "KXBTCPERP_2026-07-30",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785369600,
+    "end_ts": 1785456000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 571977,
+   "t_send_ms": 1794498696100,
+   "t_recv_ms": 1794498696585,
+   "server_date": "Thu, 12 Nov 2026 15:51:36 GMT",
+   "file": "0058.json.gz",
+   "sha256": "beca4b34dc5ccef5fa32b04f9d655e18c7ba6c8f858eedc36330e54dc60af568",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 59,
+   "id": "KXBTCPERP_2026-07-31",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785456000,
+    "end_ts": 1785542400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624398,
+   "t_send_ms": 1794498697100,
+   "t_recv_ms": 1794498697593,
+   "server_date": "Thu, 12 Nov 2026 15:51:37 GMT",
+   "file": "0059.json.gz",
+   "sha256": "76a48eba1331172d7af0e2343a16cef396eeee3caa10009b4755a465aaf0c0ea",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 60,
+   "id": "KXBTCPERP_2026-08-01",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785542400,
+    "end_ts": 1785628800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622640,
+   "t_send_ms": 1794498698100,
+   "t_recv_ms": 1794498698594,
+   "server_date": "Thu, 12 Nov 2026 15:51:38 GMT",
+   "file": "0060.json.gz",
+   "sha256": "a20ae62b6ce6b0c3f5241309837f579a625f2db49c1116edaf4b43044e378688",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 61,
+   "id": "KXBTCPERP_2026-08-02",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785628800,
+    "end_ts": 1785715200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624114,
+   "t_send_ms": 1794498699101,
+   "t_recv_ms": 1794498699572,
+   "server_date": "Thu, 12 Nov 2026 15:51:39 GMT",
+   "file": "0061.json.gz",
+   "sha256": "352f1618007c7289385660aa142f0fd4e69fe4e27cde136acc0e58a20b56feb9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 62,
+   "id": "KXBTCPERP_2026-08-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785715200,
+    "end_ts": 1785801600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624871,
+   "t_send_ms": 1794498700101,
+   "t_recv_ms": 1794498700598,
+   "server_date": "Thu, 12 Nov 2026 15:51:40 GMT",
+   "file": "0062.json.gz",
+   "sha256": "a04c1a8dc67b444baec8fc841af75532c0c6a8100c468a4166de5879f36bed74",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 63,
+   "id": "KXBTCPERP_2026-08-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785801600,
+    "end_ts": 1785888000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625014,
+   "t_send_ms": 1794498701101,
+   "t_recv_ms": 1794498701598,
+   "server_date": "Thu, 12 Nov 2026 15:51:41 GMT",
+   "file": "0063.json.gz",
+   "sha256": "e9259aa91ebc755ba81f7e7e3e26b896c008bb3bc5351b08cba04572eb6648a6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 64,
+   "id": "KXBTCPERP_2026-08-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785888000,
+    "end_ts": 1785974400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625683,
+   "t_send_ms": 1794498702101,
+   "t_recv_ms": 1794498702577,
+   "server_date": "Thu, 12 Nov 2026 15:51:42 GMT",
+   "file": "0064.json.gz",
+   "sha256": "f97b5dc76bf2b777e6ca493027eae0b71fc439363bfab2cf57d6081137ec7fb7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 65,
+   "id": "KXBTCPERP_2026-08-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785974400,
+    "end_ts": 1786060800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 573093,
+   "t_send_ms": 1794498703101,
+   "t_recv_ms": 1794498703570,
+   "server_date": "Thu, 12 Nov 2026 15:51:43 GMT",
+   "file": "0065.json.gz",
+   "sha256": "87417545a242d77bb87e7ce8ef53d991f0f5df5fa92bf8e04ba073c55bcd1b02",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 66,
+   "id": "KXBTCPERP_2026-08-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786060800,
+    "end_ts": 1786147200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624646,
+   "t_send_ms": 1794498704101,
+   "t_recv_ms": 1794498704578,
+   "server_date": "Thu, 12 Nov 2026 15:51:44 GMT",
+   "file": "0066.json.gz",
+   "sha256": "9bf588aa3306ae078154e9a50aa1f334e980b73e3931a650ddc77b6a2c0b21a8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 67,
+   "id": "KXBTCPERP_2026-08-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786147200,
+    "end_ts": 1786233600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 622449,
+   "t_send_ms": 1794498705101,
+   "t_recv_ms": 1794498705592,
+   "server_date": "Thu, 12 Nov 2026 15:51:45 GMT",
+   "file": "0067.json.gz",
+   "sha256": "158c3facacb2403f7d4b42f9a9e5a63d477e83c1fb7eba4e253942420cadf693",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 68,
+   "id": "KXBTCPERP_2026-08-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786233600,
+    "end_ts": 1786320000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 623684,
+   "t_send_ms": 1794498706101,
+   "t_recv_ms": 1794498706568,
+   "server_date": "Thu, 12 Nov 2026 15:51:46 GMT",
+   "file": "0068.json.gz",
+   "sha256": "665ec2df050f04216c1a4eca492db711dedb30dae84b70e6fee5c9baccc9811b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 69,
+   "id": "KXBTCPERP_2026-08-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786320000,
+    "end_ts": 1786406400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626507,
+   "t_send_ms": 1794498707101,
+   "t_recv_ms": 1794498707586,
+   "server_date": "Thu, 12 Nov 2026 15:51:47 GMT",
+   "file": "0069.json.gz",
+   "sha256": "32911e32a1209c1ff7d4ff4ac050211bd81bb1b03f837561bb92847ddd0f5bd3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 70,
+   "id": "KXBTCPERP_2026-08-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786406400,
+    "end_ts": 1786492800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627831,
+   "t_send_ms": 1794498708102,
+   "t_recv_ms": 1794498708593,
+   "server_date": "Thu, 12 Nov 2026 15:51:48 GMT",
+   "file": "0070.json.gz",
+   "sha256": "e12db6d3edecb3142335ab00de58231372989fc0745fa47485c8bdd221cefd14",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 71,
+   "id": "KXBTCPERP_2026-08-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786492800,
+    "end_ts": 1786579200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627929,
+   "t_send_ms": 1794498709102,
+   "t_recv_ms": 1794498709587,
+   "server_date": "Thu, 12 Nov 2026 15:51:49 GMT",
+   "file": "0071.json.gz",
+   "sha256": "d0076ddc7be505b0a40ee8c330651a39872dbd628b3a8cc3e3d6b61b08f1285a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 72,
+   "id": "KXBTCPERP_2026-08-13",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786579200,
+    "end_ts": 1786665600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 576183,
+   "t_send_ms": 1794498710102,
+   "t_recv_ms": 1794498710575,
+   "server_date": "Thu, 12 Nov 2026 15:51:50 GMT",
+   "file": "0072.json.gz",
+   "sha256": "1eb7664b0188100441b34cb8959a5a402655ff0e534a6cdc6dc72deca669a1d5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 73,
+   "id": "KXBTCPERP_2026-08-14",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786665600,
+    "end_ts": 1786752000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627802,
+   "t_send_ms": 1794498711102,
+   "t_recv_ms": 1794498711581,
+   "server_date": "Thu, 12 Nov 2026 15:51:51 GMT",
+   "file": "0073.json.gz",
+   "sha256": "75b679d5530529bd5ac15392f7367371e806c35edfab6b5783b22a7b2ccb0e50",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 74,
+   "id": "KXBTCPERP_2026-08-15",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786752000,
+    "end_ts": 1786838400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624732,
+   "t_send_ms": 1794498712102,
+   "t_recv_ms": 1794498712586,
+   "server_date": "Thu, 12 Nov 2026 15:51:52 GMT",
+   "file": "0074.json.gz",
+   "sha256": "e7e308f14285618b547c946eeb6e82ad55346f5642906dfdc7beba7320de3b8c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 75,
+   "id": "KXBTCPERP_2026-08-16",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786838400,
+    "end_ts": 1786924800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 624145,
+   "t_send_ms": 1794498713102,
+   "t_recv_ms": 1794498713597,
+   "server_date": "Thu, 12 Nov 2026 15:51:53 GMT",
+   "file": "0075.json.gz",
+   "sha256": "5282f6c5861fcb258e517b0c390e13152f0ec35e3811289c0ed93a384aa47727",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 76,
+   "id": "KXBTCPERP_2026-08-17",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786924800,
+    "end_ts": 1787011200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627434,
+   "t_send_ms": 1794498714102,
+   "t_recv_ms": 1794498714580,
+   "server_date": "Thu, 12 Nov 2026 15:51:54 GMT",
+   "file": "0076.json.gz",
+   "sha256": "8886177b8b4e297c2be215244ab966d8bdfc089428903c2747a15a8f63592e5e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 77,
+   "id": "KXBTCPERP_2026-08-18",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787011200,
+    "end_ts": 1787097600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626888,
+   "t_send_ms": 1794498715102,
+   "t_recv_ms": 1794498715597,
+   "server_date": "Thu, 12 Nov 2026 15:51:55 GMT",
+   "file": "0077.json.gz",
+   "sha256": "c361880779af66cd865c66805a84e0a17e598cb5ca66aeca4a38dab0070bd6a6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 78,
+   "id": "KXBTCPERP_2026-08-19",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787097600,
+    "end_ts": 1787184000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626500,
+   "t_send_ms": 1794498716102,
+   "t_recv_ms": 1794498716569,
+   "server_date": "Thu, 12 Nov 2026 15:51:56 GMT",
+   "file": "0078.json.gz",
+   "sha256": "99c636a55b4ec78ea74f3f229b0e1b2f531e6d8080f853b1290265abf93f7357",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 79,
+   "id": "KXBTCPERP_2026-08-20",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787184000,
+    "end_ts": 1787270400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 576757,
+   "t_send_ms": 1794498717103,
+   "t_recv_ms": 1794498717595,
+   "server_date": "Thu, 12 Nov 2026 15:51:57 GMT",
+   "file": "0079.json.gz",
+   "sha256": "927be5fe9cb317aaa18981db4ccc4f11849dbb682f6b77823ee23af5d7e62ad4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 80,
+   "id": "KXBTCPERP_2026-08-21",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787270400,
+    "end_ts": 1787356800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628197,
+   "t_send_ms": 1794498718103,
+   "t_recv_ms": 1794498718586,
+   "server_date": "Thu, 12 Nov 2026 15:51:58 GMT",
+   "file": "0080.json.gz",
+   "sha256": "3890b1cb5278ee9b9fdceb61101abecd4edeacd006d6c6f4861867a2a4f617f0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 81,
+   "id": "KXBTCPERP_2026-08-22",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787356800,
+    "end_ts": 1787443200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 621375,
+   "t_send_ms": 1794498719103,
+   "t_recv_ms": 1794498719581,
+   "server_date": "Thu, 12 Nov 2026 15:51:59 GMT",
+   "file": "0081.json.gz",
+   "sha256": "a64aadcdcbc0630a1bd0a33adc10c78b5253ff5d5c30feb7176e70ddaa3e28d1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 82,
+   "id": "KXBTCPERP_2026-08-23",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787443200,
+    "end_ts": 1787529600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626894,
+   "t_send_ms": 1794498720103,
+   "t_recv_ms": 1794498720589,
+   "server_date": "Thu, 12 Nov 2026 15:52:00 GMT",
+   "file": "0082.json.gz",
+   "sha256": "423a533243b55b0598d820e9212f0a3f8119e8e3244bd664b17dbc66533cc629",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 83,
+   "id": "KXBTCPERP_2026-08-24",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787529600,
+    "end_ts": 1787616000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627645,
+   "t_send_ms": 1794498721103,
+   "t_recv_ms": 1794498721586,
+   "server_date": "Thu, 12 Nov 2026 15:52:01 GMT",
+   "file": "0083.json.gz",
+   "sha256": "ed0d97c4c04989be438b9482bb5ccff8dd6e94ce869afcd932836c7e7176970f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 84,
+   "id": "KXBTCPERP_2026-08-25",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787616000,
+    "end_ts": 1787702400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628439,
+   "t_send_ms": 1794498722103,
+   "t_recv_ms": 1794498722580,
+   "server_date": "Thu, 12 Nov 2026 15:52:02 GMT",
+   "file": "0084.json.gz",
+   "sha256": "dadf5a46fd00ba19bbf8e9c568dd40e0cac76d1d1461530024bb1f6b400ee637",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 85,
+   "id": "KXBTCPERP_2026-08-26",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787702400,
+    "end_ts": 1787788800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628046,
+   "t_send_ms": 1794498723103,
+   "t_recv_ms": 1794498723582,
+   "server_date": "Thu, 12 Nov 2026 15:52:03 GMT",
+   "file": "0085.json.gz",
+   "sha256": "5f1ec552e4f90d34eeb2918c9776600e9deeeefebe50fc29ff388eafc309527c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 86,
+   "id": "KXBTCPERP_2026-08-27",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787788800,
+    "end_ts": 1787875200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 575737,
+   "t_send_ms": 1794498724103,
+   "t_recv_ms": 1794498724597,
+   "server_date": "Thu, 12 Nov 2026 15:52:04 GMT",
+   "file": "0086.json.gz",
+   "sha256": "4af11ef099a2898634b6995f7ca6a862771bc6ae697901ce568ae1db0e73c945",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 87,
+   "id": "KXBTCPERP_2026-08-28",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787875200,
+    "end_ts": 1787961600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628721,
+   "t_send_ms": 1794498725103,
+   "t_recv_ms": 1794498725588,
+   "server_date": "Thu, 12 Nov 2026 15:52:05 GMT",
+   "file": "0087.json.gz",
+   "sha256": "3be684be1ef746a49c25318585da32c5c40330164fefab1db5d695d72d95d0e2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 88,
+   "id": "KXBTCPERP_2026-08-29",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787961600,
+    "end_ts": 1788048000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625933,
+   "t_send_ms": 1794498726104,
+   "t_recv_ms": 1794498726571,
+   "server_date": "Thu, 12 Nov 2026 15:52:06 GMT",
+   "file": "0088.json.gz",
+   "sha256": "2460c19c38ab1442e004d41cd58f9b9c2f09d8933a89ff2910ec17e49a38e186",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 89,
+   "id": "KXBTCPERP_2026-08-30",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788048000,
+    "end_ts": 1788134400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626975,
+   "t_send_ms": 1794498727104,
+   "t_recv_ms": 1794498727607,
+   "server_date": "Thu, 12 Nov 2026 15:52:07 GMT",
+   "file": "0089.json.gz",
+   "sha256": "1a199ad5d78d6239c9e7213efd88d22a1e6536612819d24a076ae86e13747f4a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 90,
+   "id": "KXBTCPERP_2026-08-31",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788134400,
+    "end_ts": 1788220800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629107,
+   "t_send_ms": 1794498728104,
+   "t_recv_ms": 1794498728597,
+   "server_date": "Thu, 12 Nov 2026 15:52:08 GMT",
+   "file": "0090.json.gz",
+   "sha256": "5a933d7f2a9ea1e38092f0b6bf28ec9bf3eac9cba4b6524901667bd32ae9da19",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 91,
+   "id": "KXBTCPERP_2026-09-01",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788220800,
+    "end_ts": 1788307200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629353,
+   "t_send_ms": 1794498729104,
+   "t_recv_ms": 1794498729587,
+   "server_date": "Thu, 12 Nov 2026 15:52:09 GMT",
+   "file": "0091.json.gz",
+   "sha256": "a76ec0a34be5b2e95cd0d7e0dfd3c6ac7aacc3b2cdf3ac8cfe36e300e96507fd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 92,
+   "id": "KXBTCPERP_2026-09-02",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788307200,
+    "end_ts": 1788393600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628399,
+   "t_send_ms": 1794498730104,
+   "t_recv_ms": 1794498730582,
+   "server_date": "Thu, 12 Nov 2026 15:52:10 GMT",
+   "file": "0092.json.gz",
+   "sha256": "f7eb0ce4c80755013a098ec65117f403f7c5ad5fc42b4fa019e07d7aac373708",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 93,
+   "id": "KXBTCPERP_2026-09-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788393600,
+    "end_ts": 1788480000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 576849,
+   "t_send_ms": 1794498731104,
+   "t_recv_ms": 1794498731591,
+   "server_date": "Thu, 12 Nov 2026 15:52:11 GMT",
+   "file": "0093.json.gz",
+   "sha256": "d1a65cc8061fab6b90291d89344dff4ac82476f6313cfbbc7e29066ffa25e96a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 94,
+   "id": "KXBTCPERP_2026-09-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788480000,
+    "end_ts": 1788566400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627904,
+   "t_send_ms": 1794498732104,
+   "t_recv_ms": 1794498732582,
+   "server_date": "Thu, 12 Nov 2026 15:52:12 GMT",
+   "file": "0094.json.gz",
+   "sha256": "5f279603e4cc407cdbcaffc7b50bcb59023a3ac78b2afb3664971ac1568835b8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 95,
+   "id": "KXBTCPERP_2026-09-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788566400,
+    "end_ts": 1788652800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625111,
+   "t_send_ms": 1794498733104,
+   "t_recv_ms": 1794498733581,
+   "server_date": "Thu, 12 Nov 2026 15:52:13 GMT",
+   "file": "0095.json.gz",
+   "sha256": "bc59b9a8620b93b76486b8aa71603124266fc1e4a18037af774d27d4997f1fe2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 96,
+   "id": "KXBTCPERP_2026-09-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788652800,
+    "end_ts": 1788739200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 625797,
+   "t_send_ms": 1794498734104,
+   "t_recv_ms": 1794498734596,
+   "server_date": "Thu, 12 Nov 2026 15:52:14 GMT",
+   "file": "0096.json.gz",
+   "sha256": "2cbc77ecb9257ca68a16198a6f6e441fbae3352278e6396767c442e1a8a7a3f7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 97,
+   "id": "KXBTCPERP_2026-09-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788739200,
+    "end_ts": 1788825600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628150,
+   "t_send_ms": 1794498735105,
+   "t_recv_ms": 1794498735609,
+   "server_date": "Thu, 12 Nov 2026 15:52:15 GMT",
+   "file": "0097.json.gz",
+   "sha256": "47d4b06579482bca9deaa9c2cf52ea7f6bf78d5e4c67ed2cb5dfcd96eb6ce093",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 98,
+   "id": "KXBTCPERP_2026-09-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788825600,
+    "end_ts": 1788912000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629299,
+   "t_send_ms": 1794498736105,
+   "t_recv_ms": 1794498736589,
+   "server_date": "Thu, 12 Nov 2026 15:52:16 GMT",
+   "file": "0098.json.gz",
+   "sha256": "9601fa59699af15e6df39b86870e0481648747159c8fa73a719506b3cdec753c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 99,
+   "id": "KXBTCPERP_2026-09-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788912000,
+    "end_ts": 1788998400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629431,
+   "t_send_ms": 1794498737105,
+   "t_recv_ms": 1794498737603,
+   "server_date": "Thu, 12 Nov 2026 15:52:17 GMT",
+   "file": "0099.json.gz",
+   "sha256": "7716b72f4991e586a0d007b312816a98dc3697646aa4cd9c48f53444d1f573cf",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 100,
+   "id": "KXBTCPERP_2026-09-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788998400,
+    "end_ts": 1789084800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577675,
+   "t_send_ms": 1794498738105,
+   "t_recv_ms": 1794498738597,
+   "server_date": "Thu, 12 Nov 2026 15:52:18 GMT",
+   "file": "0100.json.gz",
+   "sha256": "8d2692941e85f25d348f61fa494a345b17e1104fcfe8fb0272f32f290a211f57",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 101,
+   "id": "KXBTCPERP_2026-09-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789084800,
+    "end_ts": 1789171200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629974,
+   "t_send_ms": 1794498739105,
+   "t_recv_ms": 1794498739582,
+   "server_date": "Thu, 12 Nov 2026 15:52:19 GMT",
+   "file": "0101.json.gz",
+   "sha256": "427c072d34f4d11d44b03c2f2866dbfd833293ba52d81395a6c60214d735fb07",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 102,
+   "id": "KXBTCPERP_2026-09-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789171200,
+    "end_ts": 1789257600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627585,
+   "t_send_ms": 1794498740105,
+   "t_recv_ms": 1794498740588,
+   "server_date": "Thu, 12 Nov 2026 15:52:20 GMT",
+   "file": "0102.json.gz",
+   "sha256": "b99996a0f9691626fab34f0e2dd4b8cc7f1d9add2d9855ef82051e4e7cbe4aaa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 103,
+   "id": "KXBTCPERP_2026-09-13",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789257600,
+    "end_ts": 1789344000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627054,
+   "t_send_ms": 1794498741105,
+   "t_recv_ms": 1794498741583,
+   "server_date": "Thu, 12 Nov 2026 15:52:21 GMT",
+   "file": "0103.json.gz",
+   "sha256": "0a6bf21056b091969c4c7d7160db71326092392db54075ad6d5cb6e944d7180e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 104,
+   "id": "KXBTCPERP_2026-09-14",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789344000,
+    "end_ts": 1789430400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629453,
+   "t_send_ms": 1794498742105,
+   "t_recv_ms": 1794498742594,
+   "server_date": "Thu, 12 Nov 2026 15:52:22 GMT",
+   "file": "0104.json.gz",
+   "sha256": "f79e40c857b83227e8ca21c8d184ee4043170d506c7a30c330dade415447c68b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 105,
+   "id": "KXBTCPERP_2026-09-15",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789430400,
+    "end_ts": 1789516800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629790,
+   "t_send_ms": 1794498743105,
+   "t_recv_ms": 1794498743584,
+   "server_date": "Thu, 12 Nov 2026 15:52:23 GMT",
+   "file": "0105.json.gz",
+   "sha256": "cbe452077e083c4ef399c73b2862197888317b91aa40f338db48c0275effabc0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 106,
+   "id": "KXBTCPERP_2026-09-16",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789516800,
+    "end_ts": 1789603200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629830,
+   "t_send_ms": 1794498744105,
+   "t_recv_ms": 1794498744634,
+   "server_date": "Thu, 12 Nov 2026 15:52:24 GMT",
+   "file": "0106.json.gz",
+   "sha256": "a4cfce991f56d823c6eb5f21a0a745b53c83a8d99bae7d184b3f68dd16e1d090",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 107,
+   "id": "KXBTCPERP_2026-09-17",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789603200,
+    "end_ts": 1789689600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577815,
+   "t_send_ms": 1794498745106,
+   "t_recv_ms": 1794498745601,
+   "server_date": "Thu, 12 Nov 2026 15:52:25 GMT",
+   "file": "0107.json.gz",
+   "sha256": "7dddf73320330984a5497f7d90c48a1524f1ad13742cbc270144ceb15be074b6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 108,
+   "id": "KXBTCPERP_2026-09-18",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789689600,
+    "end_ts": 1789776000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629444,
+   "t_send_ms": 1794498746106,
+   "t_recv_ms": 1794498746605,
+   "server_date": "Thu, 12 Nov 2026 15:52:26 GMT",
+   "file": "0108.json.gz",
+   "sha256": "486f9ad9a2f2f116dbdfdf5c37ef084c3a759cb9fcd921d084c2c28962b370d9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 109,
+   "id": "KXBTCPERP_2026-09-19",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789776000,
+    "end_ts": 1789862400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626778,
+   "t_send_ms": 1794498747106,
+   "t_recv_ms": 1794498747612,
+   "server_date": "Thu, 12 Nov 2026 15:52:27 GMT",
+   "file": "0109.json.gz",
+   "sha256": "5eb78c656b4656f0b4e7417c2653d8fc7c1401a19727602ba6f198fa89532a44",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 110,
+   "id": "KXBTCPERP_2026-09-20",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789862400,
+    "end_ts": 1789948800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627464,
+   "t_send_ms": 1794498748106,
+   "t_recv_ms": 1794498748586,
+   "server_date": "Thu, 12 Nov 2026 15:52:28 GMT",
+   "file": "0110.json.gz",
+   "sha256": "b6540668b3de962f72e11303e81d7d98c1e8cb9f8dfe838d4e4790f3552cefb6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 111,
+   "id": "KXBTCPERP_2026-09-21",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789948800,
+    "end_ts": 1790035200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628913,
+   "t_send_ms": 1794498749106,
+   "t_recv_ms": 1794498749597,
+   "server_date": "Thu, 12 Nov 2026 15:52:29 GMT",
+   "file": "0111.json.gz",
+   "sha256": "d5a0c2cd496405608388e0365d9795e8139ec9df4ea76055bd8df16225766c15",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 112,
+   "id": "KXBTCPERP_2026-09-22",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790035200,
+    "end_ts": 1790121600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629620,
+   "t_send_ms": 1794498750106,
+   "t_recv_ms": 1794498750594,
+   "server_date": "Thu, 12 Nov 2026 15:52:30 GMT",
+   "file": "0112.json.gz",
+   "sha256": "ef93b9decdc1fe168035a2000c631b1321094c2521fe53791f72beafd3372418",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 113,
+   "id": "KXBTCPERP_2026-09-23",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790121600,
+    "end_ts": 1790208000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629470,
+   "t_send_ms": 1794498751106,
+   "t_recv_ms": 1794498751588,
+   "server_date": "Thu, 12 Nov 2026 15:52:31 GMT",
+   "file": "0113.json.gz",
+   "sha256": "4a89f5f0ee0023c9c41ac97f0b967098f8f2d9d70d2bbd7653618f3ecbf99bed",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 114,
+   "id": "KXBTCPERP_2026-09-24",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790208000,
+    "end_ts": 1790294400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577651,
+   "t_send_ms": 1794498752106,
+   "t_recv_ms": 1794498752608,
+   "server_date": "Thu, 12 Nov 2026 15:52:32 GMT",
+   "file": "0114.json.gz",
+   "sha256": "bf609a0cb47a56342bacd5b5c1bfc25dda40ab6232937b7889dca8dab9dcb630",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 115,
+   "id": "KXBTCPERP_2026-09-25",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790294400,
+    "end_ts": 1790380800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629120,
+   "t_send_ms": 1794498753106,
+   "t_recv_ms": 1794498753585,
+   "server_date": "Thu, 12 Nov 2026 15:52:33 GMT",
+   "file": "0115.json.gz",
+   "sha256": "35651925091cfac1fc74b2adcac911c7d64d956c0f775aaca083d1e97e1e2136",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 116,
+   "id": "KXBTCPERP_2026-09-26",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790380800,
+    "end_ts": 1790467200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626063,
+   "t_send_ms": 1794498754106,
+   "t_recv_ms": 1794498754598,
+   "server_date": "Thu, 12 Nov 2026 15:52:34 GMT",
+   "file": "0116.json.gz",
+   "sha256": "a27099a11c45c50c00a314ff2010946499d9ae5c80fe9585c5b3cf9e11245170",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 117,
+   "id": "KXBTCPERP_2026-09-27",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790467200,
+    "end_ts": 1790553600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628045,
+   "t_send_ms": 1794498755107,
+   "t_recv_ms": 1794498755600,
+   "server_date": "Thu, 12 Nov 2026 15:52:35 GMT",
+   "file": "0117.json.gz",
+   "sha256": "2bf93e0ff725902c531d363bab5b4d7808730924b2c243483aef3a495630e955",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 118,
+   "id": "KXBTCPERP_2026-09-28",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790553600,
+    "end_ts": 1790640000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629590,
+   "t_send_ms": 1794498756107,
+   "t_recv_ms": 1794498756593,
+   "server_date": "Thu, 12 Nov 2026 15:52:36 GMT",
+   "file": "0118.json.gz",
+   "sha256": "2f260deb2c47c5e53723e6b47939f8617ac9925a686b6c21a1a1cf0c0438285a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 119,
+   "id": "KXBTCPERP_2026-09-29",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790640000,
+    "end_ts": 1790726400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629401,
+   "t_send_ms": 1794498757107,
+   "t_recv_ms": 1794498757596,
+   "server_date": "Thu, 12 Nov 2026 15:52:37 GMT",
+   "file": "0119.json.gz",
+   "sha256": "ed267ace7b110fe390531aa3f3f10849a24c460c21b2687aeed493c4b89e724e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 120,
+   "id": "KXBTCPERP_2026-09-30",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790726400,
+    "end_ts": 1790812800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629419,
+   "t_send_ms": 1794498758107,
+   "t_recv_ms": 1794498758593,
+   "server_date": "Thu, 12 Nov 2026 15:52:38 GMT",
+   "file": "0120.json.gz",
+   "sha256": "642c9b48f4664b453083c230e2c1c0270b9ebc19a3edb6779916c4852a6d3f76",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 121,
+   "id": "KXBTCPERP_2026-10-01",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790812800,
+    "end_ts": 1790899200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 578353,
+   "t_send_ms": 1794498759107,
+   "t_recv_ms": 1794498759586,
+   "server_date": "Thu, 12 Nov 2026 15:52:39 GMT",
+   "file": "0121.json.gz",
+   "sha256": "06c06e8edd674e8220cfd17a1ce9345c9e2a77910b239d29052b112ae4919c9c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 122,
+   "id": "KXBTCPERP_2026-10-02",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790899200,
+    "end_ts": 1790985600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629494,
+   "t_send_ms": 1794498760107,
+   "t_recv_ms": 1794498760601,
+   "server_date": "Thu, 12 Nov 2026 15:52:40 GMT",
+   "file": "0122.json.gz",
+   "sha256": "610253f24f342721e6b759da2443361e646b759ce9f4ccca3bae7d10e573ea7f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 123,
+   "id": "KXBTCPERP_2026-10-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790985600,
+    "end_ts": 1791072000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627104,
+   "t_send_ms": 1794498761107,
+   "t_recv_ms": 1794498761603,
+   "server_date": "Thu, 12 Nov 2026 15:52:41 GMT",
+   "file": "0123.json.gz",
+   "sha256": "09f1bf3087bb3d7fba1bf938ffaec1cd5d18e0958b37641b38ef18ae47f6ef60",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 124,
+   "id": "KXBTCPERP_2026-10-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791072000,
+    "end_ts": 1791158400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627568,
+   "t_send_ms": 1794498762107,
+   "t_recv_ms": 1794498762615,
+   "server_date": "Thu, 12 Nov 2026 15:52:42 GMT",
+   "file": "0124.json.gz",
+   "sha256": "939bb0fe218a6e60bb0fe7dca773325e434155f8901752d677df09f13a94d45c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 125,
+   "id": "KXBTCPERP_2026-10-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791158400,
+    "end_ts": 1791244800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629434,
+   "t_send_ms": 1794498763107,
+   "t_recv_ms": 1794498763611,
+   "server_date": "Thu, 12 Nov 2026 15:52:43 GMT",
+   "file": "0125.json.gz",
+   "sha256": "6b710fcfb965f873647bd3031ab6308d504fa91bccec20c0c447dd19c124a1c3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 126,
+   "id": "KXBTCPERP_2026-10-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791244800,
+    "end_ts": 1791331200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629128,
+   "t_send_ms": 1794498764108,
+   "t_recv_ms": 1794498764577,
+   "server_date": "Thu, 12 Nov 2026 15:52:44 GMT",
+   "file": "0126.json.gz",
+   "sha256": "b0c9819ceeff08617b09b142079f32f62f3335c4e73efc5fd3725d2507094efd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 127,
+   "id": "KXBTCPERP_2026-10-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791331200,
+    "end_ts": 1791417600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629241,
+   "t_send_ms": 1794498765108,
+   "t_recv_ms": 1794498765581,
+   "server_date": "Thu, 12 Nov 2026 15:52:45 GMT",
+   "file": "0127.json.gz",
+   "sha256": "de3b727ee1613fb38011eba3abd9fa8bfc85257b81d0ec5bd44a28ed8c728667",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 128,
+   "id": "KXBTCPERP_2026-10-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791417600,
+    "end_ts": 1791504000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577418,
+   "t_send_ms": 1794498766108,
+   "t_recv_ms": 1794498766670,
+   "server_date": "Thu, 12 Nov 2026 15:52:46 GMT",
+   "file": "0128.json.gz",
+   "sha256": "dfadd170066a377af28a7368796ec5b77b037fef71cd87a503b911fef97f7f01",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 129,
+   "id": "KXBTCPERP_2026-10-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791504000,
+    "end_ts": 1791590400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629526,
+   "t_send_ms": 1794498767108,
+   "t_recv_ms": 1794498767599,
+   "server_date": "Thu, 12 Nov 2026 15:52:47 GMT",
+   "file": "0129.json.gz",
+   "sha256": "6bcb0f9a116781d3a5681816360116c1a625dc7a3d63ac76e09deefd90052bed",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 130,
+   "id": "KXBTCPERP_2026-10-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791590400,
+    "end_ts": 1791676800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627196,
+   "t_send_ms": 1794498768108,
+   "t_recv_ms": 1794498768585,
+   "server_date": "Thu, 12 Nov 2026 15:52:48 GMT",
+   "file": "0130.json.gz",
+   "sha256": "f146ef67db932dcd073c7382d7d5d7cbc727154b7e5df1b05e1e51196c375661",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 131,
+   "id": "KXBTCPERP_2026-10-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791676800,
+    "end_ts": 1791763200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626638,
+   "t_send_ms": 1794498769108,
+   "t_recv_ms": 1794498769587,
+   "server_date": "Thu, 12 Nov 2026 15:52:49 GMT",
+   "file": "0131.json.gz",
+   "sha256": "314a8de22da637973709c5562bb731fae8c11ee2acb00c12c2ffc8239ef7d89c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 132,
+   "id": "KXBTCPERP_2026-10-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791763200,
+    "end_ts": 1791849600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629424,
+   "t_send_ms": 1794498770108,
+   "t_recv_ms": 1794498770583,
+   "server_date": "Thu, 12 Nov 2026 15:52:50 GMT",
+   "file": "0132.json.gz",
+   "sha256": "90c4d7680982ede033896924aeeee5578b0d22cc26f96c0cdd256d2b4e7c73ce",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 133,
+   "id": "KXBTCPERP_2026-10-13",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791849600,
+    "end_ts": 1791936000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629309,
+   "t_send_ms": 1794498771108,
+   "t_recv_ms": 1794498771600,
+   "server_date": "Thu, 12 Nov 2026 15:52:51 GMT",
+   "file": "0133.json.gz",
+   "sha256": "8182e8d77c1721322a703ef61f3e25ab5270a2b4d8fd72f4e5124a3434b360c4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 134,
+   "id": "KXBTCPERP_2026-10-14",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791936000,
+    "end_ts": 1792022400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629581,
+   "t_send_ms": 1794498772108,
+   "t_recv_ms": 1794498772601,
+   "server_date": "Thu, 12 Nov 2026 15:52:52 GMT",
+   "file": "0134.json.gz",
+   "sha256": "488fe66c59da1151899351e31647884779ca84febc3be696c3d8777596706286",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 135,
+   "id": "KXBTCPERP_2026-10-15",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792022400,
+    "end_ts": 1792108800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577494,
+   "t_send_ms": 1794498773109,
+   "t_recv_ms": 1794498773603,
+   "server_date": "Thu, 12 Nov 2026 15:52:53 GMT",
+   "file": "0135.json.gz",
+   "sha256": "cce40ce60ecf294905bb65a2cb86b6d2e8acb5e009ebf67621e158c1032b390f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 136,
+   "id": "KXBTCPERP_2026-10-16",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792108800,
+    "end_ts": 1792195200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629468,
+   "t_send_ms": 1794498774109,
+   "t_recv_ms": 1794498774602,
+   "server_date": "Thu, 12 Nov 2026 15:52:54 GMT",
+   "file": "0136.json.gz",
+   "sha256": "dd7c9ab725c5fb8320356aec5f805b467a8fe88cf412588e3778320031c4317d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 137,
+   "id": "KXBTCPERP_2026-10-17",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792195200,
+    "end_ts": 1792281600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626929,
+   "t_send_ms": 1794498775109,
+   "t_recv_ms": 1794498775576,
+   "server_date": "Thu, 12 Nov 2026 15:52:55 GMT",
+   "file": "0137.json.gz",
+   "sha256": "d5311c754d98bf8fe77109e0b82b75ac725c2b5dd4ced197abc06e6baa7f526e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 138,
+   "id": "KXBTCPERP_2026-10-18",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792281600,
+    "end_ts": 1792368000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628002,
+   "t_send_ms": 1794498776109,
+   "t_recv_ms": 1794498776588,
+   "server_date": "Thu, 12 Nov 2026 15:52:56 GMT",
+   "file": "0138.json.gz",
+   "sha256": "16c559105d734b8dc2233b6ac34852f4f595d2334bea831163f283f335aa3dd6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 139,
+   "id": "KXBTCPERP_2026-10-19",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792368000,
+    "end_ts": 1792454400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629317,
+   "t_send_ms": 1794498777109,
+   "t_recv_ms": 1794498777581,
+   "server_date": "Thu, 12 Nov 2026 15:52:57 GMT",
+   "file": "0139.json.gz",
+   "sha256": "cedf93652ea4ad71ed5aacde4d36f641fd8e2febafe3e21e88dbda34b7edcbbe",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 140,
+   "id": "KXBTCPERP_2026-10-20",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792454400,
+    "end_ts": 1792540800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629526,
+   "t_send_ms": 1794498778109,
+   "t_recv_ms": 1794498778602,
+   "server_date": "Thu, 12 Nov 2026 15:52:58 GMT",
+   "file": "0140.json.gz",
+   "sha256": "9258bcd2430d353be7bc96e4d68990b631fa874075b22d719c37e64971e1b7bd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 141,
+   "id": "KXBTCPERP_2026-10-21",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792540800,
+    "end_ts": 1792627200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629553,
+   "t_send_ms": 1794498779109,
+   "t_recv_ms": 1794498779588,
+   "server_date": "Thu, 12 Nov 2026 15:52:59 GMT",
+   "file": "0141.json.gz",
+   "sha256": "f35b19e81f73f88ce1aad2345d34a0ea7e3c0f06fde2b43dc86c9b2d2c78da0f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 142,
+   "id": "KXBTCPERP_2026-10-22",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792627200,
+    "end_ts": 1792713600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 577035,
+   "t_send_ms": 1794498780109,
+   "t_recv_ms": 1794498780600,
+   "server_date": "Thu, 12 Nov 2026 15:53:00 GMT",
+   "file": "0142.json.gz",
+   "sha256": "f2e764d0a0c084eabc236d6149141b9908ede51f5ca60770e4b9bcbd619372b4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 143,
+   "id": "KXBTCPERP_2026-10-23",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792713600,
+    "end_ts": 1792800000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628941,
+   "t_send_ms": 1794498781110,
+   "t_recv_ms": 1794498781579,
+   "server_date": "Thu, 12 Nov 2026 15:53:01 GMT",
+   "file": "0143.json.gz",
+   "sha256": "fd4ac5b1dbf84fe7b44ac621814a94d58020af734d185d1ffb561830df7d63d5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 144,
+   "id": "KXBTCPERP_2026-10-24",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792800000,
+    "end_ts": 1792886400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628257,
+   "t_send_ms": 1794498782110,
+   "t_recv_ms": 1794498782601,
+   "server_date": "Thu, 12 Nov 2026 15:53:02 GMT",
+   "file": "0144.json.gz",
+   "sha256": "721193f1cccaed74bb02f3756c63c5bb7bb57adb9e9598103daaa1e0f2228180",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 145,
+   "id": "KXBTCPERP_2026-10-25",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792886400,
+    "end_ts": 1792972800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628072,
+   "t_send_ms": 1794498783110,
+   "t_recv_ms": 1794498783653,
+   "server_date": "Thu, 12 Nov 2026 15:53:03 GMT",
+   "file": "0145.json.gz",
+   "sha256": "874a391bb08c4076092d33991531ee230b4becb77adbf0cc524f8685ecaa99f4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 146,
+   "id": "KXBTCPERP_2026-10-26",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792972800,
+    "end_ts": 1793059200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629430,
+   "t_send_ms": 1794498784110,
+   "t_recv_ms": 1794498784586,
+   "server_date": "Thu, 12 Nov 2026 15:53:04 GMT",
+   "file": "0146.json.gz",
+   "sha256": "46daf57d80ab05ab7e3e1767dacf228e789f5f2f0b1b5147d72dd53e531fe6c2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 147,
+   "id": "KXBTCPERP_2026-10-27",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793059200,
+    "end_ts": 1793145600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629324,
+   "t_send_ms": 1794498785110,
+   "t_recv_ms": 1794498785578,
+   "server_date": "Thu, 12 Nov 2026 15:53:05 GMT",
+   "file": "0147.json.gz",
+   "sha256": "db6562c63da255b00e11ce7ce2b2b83635c9d07f043e0a0ac0a8b17817dabbfd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 148,
+   "id": "KXBTCPERP_2026-10-28",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793145600,
+    "end_ts": 1793232000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 628952,
+   "t_send_ms": 1794498786110,
+   "t_recv_ms": 1794498786603,
+   "server_date": "Thu, 12 Nov 2026 15:53:06 GMT",
+   "file": "0148.json.gz",
+   "sha256": "4a06142cf8520603d7de7f82c343aed42eb96f095d85901d13d3c38de66424f6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 149,
+   "id": "KXBTCPERP_2026-10-29",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793232000,
+    "end_ts": 1793318400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 578980,
+   "t_send_ms": 1794498787110,
+   "t_recv_ms": 1794498787585,
+   "server_date": "Thu, 12 Nov 2026 15:53:07 GMT",
+   "file": "0149.json.gz",
+   "sha256": "33c5cb690790a77aad3511fdd4d4fee874d64389e97ebdbbc19d4246d5909563",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 150,
+   "id": "KXBTCPERP_2026-10-30",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793318400,
+    "end_ts": 1793404800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629597,
+   "t_send_ms": 1794498788110,
+   "t_recv_ms": 1794498788607,
+   "server_date": "Thu, 12 Nov 2026 15:53:08 GMT",
+   "file": "0150.json.gz",
+   "sha256": "001d57de656601f00a2a34c95605b56e8e7e6954665583f06674564e00c460eb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 151,
+   "id": "KXBTCPERP_2026-10-31",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793404800,
+    "end_ts": 1793491200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627631,
+   "t_send_ms": 1794498789110,
+   "t_recv_ms": 1794498789580,
+   "server_date": "Thu, 12 Nov 2026 15:53:09 GMT",
+   "file": "0151.json.gz",
+   "sha256": "0036c0f0a5716ba99b4090a30464bcb8b5444df62f0cfd69b2dbfee8f3128ba6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 152,
+   "id": "KXBTCPERP_2026-11-01",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793491200,
+    "end_ts": 1793577600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627197,
+   "t_send_ms": 1794498790111,
+   "t_recv_ms": 1794498790609,
+   "server_date": "Thu, 12 Nov 2026 15:53:10 GMT",
+   "file": "0152.json.gz",
+   "sha256": "e4aec43a4c75a83009a7b4041dd76f214d62358fdc2c742be51c46d1a23158b0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 153,
+   "id": "KXBTCPERP_2026-11-02",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793577600,
+    "end_ts": 1793664000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629241,
+   "t_send_ms": 1794498791111,
+   "t_recv_ms": 1794498791577,
+   "server_date": "Thu, 12 Nov 2026 15:53:11 GMT",
+   "file": "0153.json.gz",
+   "sha256": "932e1fdb65950372ef396ec0ca771cabab97789cdc9fd545bae6221c61dced28",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 154,
+   "id": "KXBTCPERP_2026-11-03",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793664000,
+    "end_ts": 1793750400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629160,
+   "t_send_ms": 1794498792111,
+   "t_recv_ms": 1794498792603,
+   "server_date": "Thu, 12 Nov 2026 15:53:12 GMT",
+   "file": "0154.json.gz",
+   "sha256": "423d4cf66e4302df547fde9e7d042ec91c8d88e777d234a950df8b84dcce9063",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 155,
+   "id": "KXBTCPERP_2026-11-04",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793750400,
+    "end_ts": 1793836800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629585,
+   "t_send_ms": 1794498793111,
+   "t_recv_ms": 1794498793587,
+   "server_date": "Thu, 12 Nov 2026 15:53:13 GMT",
+   "file": "0155.json.gz",
+   "sha256": "d098433b4a153d7a30b8ff5d76573fe70aa11eb008af450d3ddae3b357ec63e2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 156,
+   "id": "KXBTCPERP_2026-11-05",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793836800,
+    "end_ts": 1793923200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 580094,
+   "t_send_ms": 1794498794111,
+   "t_recv_ms": 1794498794588,
+   "server_date": "Thu, 12 Nov 2026 15:53:14 GMT",
+   "file": "0156.json.gz",
+   "sha256": "ed164e06d84cb3dc7d62200d9f79a1b22ad043acca8021c01d2c0aa7905fa804",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 157,
+   "id": "KXBTCPERP_2026-11-06",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793923200,
+    "end_ts": 1794009600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629512,
+   "t_send_ms": 1794498795111,
+   "t_recv_ms": 1794498795603,
+   "server_date": "Thu, 12 Nov 2026 15:53:15 GMT",
+   "file": "0157.json.gz",
+   "sha256": "2ca949359e7c09369296f30b6710a65146dc56f2cfc845ab09ffb2a83c43e983",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 158,
+   "id": "KXBTCPERP_2026-11-07",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794009600,
+    "end_ts": 1794096000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 626760,
+   "t_send_ms": 1794498796111,
+   "t_recv_ms": 1794498796603,
+   "server_date": "Thu, 12 Nov 2026 15:53:16 GMT",
+   "file": "0158.json.gz",
+   "sha256": "3ec25c580184d1f954b1cf4e7e5ffecb3dd5dfd5d33a627422b395760ef057cd",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 159,
+   "id": "KXBTCPERP_2026-11-08",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794096000,
+    "end_ts": 1794182400
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 627373,
+   "t_send_ms": 1794498797111,
+   "t_recv_ms": 1794498797603,
+   "server_date": "Thu, 12 Nov 2026 15:53:17 GMT",
+   "file": "0159.json.gz",
+   "sha256": "f114fa042ade183a59859c1b1475a110f8ce84f9b2c91f1e83366b41bfb9a8e5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 160,
+   "id": "KXBTCPERP_2026-11-09",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794182400,
+    "end_ts": 1794268800
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629862,
+   "t_send_ms": 1794498798111,
+   "t_recv_ms": 1794498798603,
+   "server_date": "Thu, 12 Nov 2026 15:53:18 GMT",
+   "file": "0160.json.gz",
+   "sha256": "2f054156dcdb27266330914efb7359007af50fdea248b2d30e0a07a774681993",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 161,
+   "id": "KXBTCPERP_2026-11-10",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794268800,
+    "end_ts": 1794355200
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629674,
+   "t_send_ms": 1794498799112,
+   "t_recv_ms": 1794498799643,
+   "server_date": "Thu, 12 Nov 2026 15:53:19 GMT",
+   "file": "0161.json.gz",
+   "sha256": "25fda1936bb27a65d6de4ec5bcbeeae57c2c225d370ad7e45ee27d0893b8382f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 162,
+   "id": "KXBTCPERP_2026-11-11",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794355200,
+    "end_ts": 1794441600
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 629290,
+   "t_send_ms": 1794498800112,
+   "t_recv_ms": 1794498800596,
+   "server_date": "Thu, 12 Nov 2026 15:53:20 GMT",
+   "file": "0162.json.gz",
+   "sha256": "a345f180cad23fb901f6dc56561fa257133482ae9e308b7a8d6fc974a7526f59",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 163,
+   "id": "KXBTCPERP_2026-11-12",
+   "path": "/markets/KXBTCPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794441600,
+    "end_ts": 1794528000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 365049,
+   "t_send_ms": 1794498801112,
+   "t_recv_ms": 1794498801545,
+   "server_date": "Thu, 12 Nov 2026 15:53:21 GMT",
+   "file": "0163.json.gz",
+   "sha256": "d734f9c66d4c65e9ce077426a1eabf110dbe2098c1e631c2b95784fe3d53b122",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
