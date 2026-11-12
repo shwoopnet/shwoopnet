@@ -1,0 +1,19 @@
+# W-SPREAD-CELL1 (registered Nov 12, 2026, before any new candle is pulled; NOT started until Main says so)
+
+Source of the idea: in W-CAT-SPORTS1 (SPORTS_CAL_REGISTRATION.md, SPORTS_CAL_RESULT.txt) the cell SPREAD, YES, price bucket 0.05 to 0.15, look more than 24 h before close, showed PF at +1c of 1.62 (train, n 56) and 1.45 (validate, n 57), with a negative lower 90 percent bound. It was the best of many cells, so it is a lead, not a finding. Desk A's caveat, stated here: a cell with zero true edge at 10c shows PF 1.45 in both thirds at n 56 about 2 percent of the time, and this one was chosen as the best of about 58 main-grid cells.
+
+## The one cell (frozen)
+- Series: the six sports SPREAD series of W-CAT-SPORTS1 (MLB, NBA, NCAAF, NCAAMB, NFL, NHL spreads).
+- Observation: one per event, the market whose YES mid is nearest 0.5 at the look (outcome blind, the same rule as the original scorer); the look is the same one hour candle more than 24 h before close; buy YES at the ask when the ask is 0.05 to 0.15; hold to settlement; 1 contract; fee 0.07*p*(1-p) unrounded; slippage +0c and +1c; +1c is the pass basis.
+- Data: ONLY events NOT already scored in W-CAT-SPORTS1 (the 360 events in candles_sp.jsonl are excluded entirely, including its unread newest third). That is the 1,041 live-range SPREAD events whose candles were never pulled. The lists of those events are already held (no market list read needed). Events are in the registration by ticker list fixed at the time of the pull (SPREAD_CELL1_EVENTS.json, committed before the first request); an event not in the file is in no sample.
+- Sample: these events are out of sample for the lead, so they are pooled in one block, read ONCE after the pull is complete (no running tally, no peeking: the scorer prints nothing until the pull is complete and the file is marked READ-ONCE-DONE).
+- Pass bar: n of 100 events or more in the cell, PF at +1c of 1.5 or more, and the event-clustered 90 percent lower bound of the mean at +1c above 0. Multiplicity: the lead was the best of about 58 cells, so the pass also needs a one-sided z of 3.1 or more (Bonferroni over 58 at 0.05); N for the shared deflation is 9,465 + 1 cell.
+- Kill: n of 100 reached and PF at +1c under 1.2, or lower bound below 0, is FAIL for this cell; below n 100 it is UNDERPOWERED and reported as 'no evidence at n = x', never FAIL.
+- Cutoffs: the old thirds stay as constants (cut1 1791195907, cut2 1793328799, from CUTS_W-CAT-SPORTS1.json). This test does not use them to score; it is one pooled out-of-sample block. HELD-OUT of W-CAT-SPORTS1 (the newest third of the 360) stays UNREAD.
+
+## Read count and time
+- 274 batched candle requests (55 tickers each, events within 2 days), no market-list reads. At the 25 reads an hour the shared address allows, 274 requests need about 11 hours if no other pull uses a read, longer if the NO-arm pull continues alongside.
+- Expected cell n: the old 360 events gave 56 + 57 observations in the cell (about 0.31 per event); 1,041 events would give about 320, comfortably above 100.
+- NOT STARTED. Waiting for Main's go.
+
+READ-ONCE MARKER: NEW HELD-OUT BLOCK NOT READ as of 2026-11-12.
