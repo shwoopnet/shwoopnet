@@ -74,4 +74,5 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert not nse["groups"]["A_big"]["btts"]["verdict"].startswith("SURVIVES"), nse["groups"]["A_big"]["btts"]
     cost = run("cost", edge_btts=0.0, half=0.04); assert cost["groups"]["A_big"]["btts"]["verdict"].startswith("CLOSED on cost"), cost["groups"]["A_big"]["btts"]["verdict"]
     thin = run("thin", edge_btts=0.0, half=0.005, thin=True); assert thin["groups"]["A_big"]["btts"]["filled"] == 0 and thin["groups"]["A_big"]["btts"]["verdict"].startswith("no evidence at n = 0")
+assert abs(s.one_way(0.5, 0.40, 0.45) - (0.025 + 0.02)) < 1e-9 and s.COST_MAX == 0.04
 print("socderiv synthetic tests passed")

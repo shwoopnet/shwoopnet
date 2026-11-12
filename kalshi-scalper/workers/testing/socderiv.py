@@ -24,7 +24,7 @@ CELLS_SHA256 = "01b7febcd1466f880aeac1d567a259e5803d42b0b72e16a72331fd11c6d031d2
 WIN_FROM = calendar.timegm((2026, 9, 12, 0, 0, 0)); HELD_OUT_FROM = calendar.timegm((2026, 11, 13, 0, 0, 0))
 SAMPLE, OFFSET_S, START_BACK, SCAN_BACK = 60, 180 * 60, 30 * 60, 90 * 60
 GUARD_LO, GUARD_HI = 100 * 60, 135 * 60
-GAP, SPREAD_MAX, MIN_FILLED, EDGE_SHARE, COST_MAX, PACK_LIMIT, PACK_SPAN_S = 0.08, 0.04, 150, 0.10, 0.05, 9000, 3 * 3600
+GAP, SPREAD_MAX, MIN_FILLED, EDGE_SHARE, COST_MAX, PACK_LIMIT, PACK_SPAN_S = 0.08, 0.04, 150, 0.10, 0.04, 9000, 3 * 3600
 SUFFIXES = {"winner": "GAME", "total": "TOTAL", "btts": "BTTS", "teamtotal": "TEAMTOTAL"}
 REG = "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md"
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
@@ -158,6 +158,15 @@ def two(idx, t, ts):
     return c["bid"], c["ask"]
 
 
+def fee_up(p): return math.ceil(round(0.07 * p * (1 - p) * 100, 6)) / 100
+
+
+def one_way(value, b, a):
+    """Desk B dated amendment (Nov 12): the cost line is ONE-WAY: (ask minus mid) of the side taken plus the entry fee at its price plus 1c, rounded up. The side taken is the cheaper one, as for the gap."""
+    price = a if value - a >= b - value else 1 - b
+    return (a - b) / 2 + fee_up(round(price + 0.01, 4))
+
+
 def gap(value, b, a): return max(value - a, b - value)          # YES at the ask, or NO at 1 - bid: the cheaper side
 
 
@@ -166,7 +175,7 @@ def stats(rows):
     gs = [r["gap"] for r in rows]; sp = [r["spread"] for r in rows]; fire = sum(1 for r in rows if r["gap"] >= GAP and r["spread"] <= SPREAD_MAX)
     qs = st.quantiles(gs, n=10, method="inclusive") if len(gs) > 2 else None
     q4 = st.quantiles(gs, n=4, method="inclusive") if len(gs) > 2 else None
-    return {"n": len(rows), "median_spread": round(st.median(sp), 4), "median_round_trip": round(st.median([r["round_trip"] for r in rows]), 4),
+    return {"n": len(rows), "median_spread": round(st.median(sp), 4), "median_round_trip_information_only": round(st.median([r["round_trip"] for r in rows]), 4), "median_one_way_entry_cost": round(st.median([r["one_way"] for r in rows]), 4),
             "gap_quartiles_p90": None if not q4 else [round(q4[0], 4), round(st.median(gs), 4), round(q4[2], 4), round(qs[8], 4)], "share_gap_ge_8c_spread_le_4c": round(fire / len(rows), 3)}
 
 
@@ -206,7 +215,7 @@ def measure(spec, list_folders, candle_folders):
             if typ == "btts": val = (1 - math.exp(-l1)) * (1 - math.exp(-l2))
             else: val = over(l1 if tt[0] == g["team1"] else l2, tt[1])
             mid = (a + b) / 2
-            row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid)}
+            row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid), "one_way": one_way(val, b, a)}
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
             near = min(totm, key=lambda kk: abs(totm[kk] - 0.5)); rest = {kk: v for kk, v in totm.items() if kk != near}
@@ -215,7 +224,7 @@ def measure(spec, list_folders, candle_folders):
                 if pk not in cache: cache[pk] = fit((wm[t1[0]], wm[tie[0]], wm[t2[0]]), rest)
                 p1, p2, _ = cache[pk]
                 tkk = [t for t, kk in g["totals"].items() if kk == near][0]; pb, pa = tot[near]
-                rows[(g["group"], typ)]["placebo"].append({"gap": gap(over(p1 + p2, near), pb, pa), "spread": pa - pb, "round_trip": (pa - pb) + 2 * 0.07 * ((pa + pb) / 2) * (1 - (pa + pb) / 2)})
+                rows[(g["group"], typ)]["placebo"].append({"gap": gap(over(p1 + p2, near), pb, pa), "spread": pa - pb, "one_way": one_way(over(p1 + p2, near), pb, pa), "round_trip": (pa - pb) + 2 * 0.07 * ((pa + pb) / 2) * (1 - (pa + pb) / 2)})
             got[typ] = True
         for typ in ("btts", "teamtotal"):
             if got[typ]: G[typ]["filled"] += 1
@@ -228,7 +237,7 @@ def measure(spec, list_folders, candle_folders):
             s_t, s_p = stats(R["targets"]), stats(R["placebo"])
             share_filled = None if not der else round(filled / der, 3)
             if filled < MIN_FILLED: verdict = "no evidence at n = %d filled games" % filled
-            elif s_t["median_round_trip"] > COST_MAX: verdict = "CLOSED on cost: median round trip %.1fc is above 5c" % (100 * s_t["median_round_trip"])
+            elif s_t["median_one_way_entry_cost"] > COST_MAX: verdict = "CLOSED on cost: median one-way entry cost %.1fc is above 4c (hold to settlement; Desk B dated amendment)" % (100 * s_t["median_one_way_entry_cost"])
             elif share_filled is not None and share_filled < 0.5: verdict = "CLOSED: not tradable (under half of the derivable-kickoff games are filled)"
             elif s_t["share_gap_ge_8c_spread_le_4c"] >= EDGE_SHARE and s_t["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
             else: verdict = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (s_t["gap_quartiles_p90"] and s_t["gap_quartiles_p90"][3])
