@@ -1,5 +1,7 @@
 # CMD1 registration: perp versus futures at one minute, who leads and does the basis revert (2026-11-06, before any score)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: rests on barred Yahoo 1 minute futures bars (see the NOTE in CMD_COMMON.md). No held-out read will be made; the held-out sessions stay unread forever on this data. Not pinned, because it must not be run again.**
+
 Shared rules, data, convention, cut, costs and bars: `workers/CMD_COMMON.md`. 6 tries (N +6).
 
 **Mechanism.** The perp copies the CME futures through a few makers. If the perp lags the futures by one or more minutes, a one minute futures move not yet in the perp mid is information and a basis spike should revert. Counterparty: the slower perp maker or resting perp liquidity.

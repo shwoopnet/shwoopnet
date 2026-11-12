@@ -1,5 +1,7 @@
 # CMD4 registration: break-even fee map per metal, energy and index perp (2026-11-06, before any score)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: its triggers are CMD1's, computed from barred Yahoo futures bars (CMD_COMMON.md says CMD1 rules, `workers/cmd/cmd.py` reads the Yahoo cash file). Not pinned; no held-out read will be made.**
+
 Shared rules: `workers/CMD_COMMON.md`. Development part only (sessions 2026-10-30, 11-02, 11-03; held-out sessions never read). 12 cells (N +12): 6 pairs times the two primary rules, CMD1 R1 at H = 15 and CMD1 R2 at H = 5, with the CMD1 trigger definitions unchanged.
 
 **What it computes.** Per pair and rule: trades, gross after the recorded spread and before fee (bp), break-even fee per side = that mean divided by 2, hit rate, net at 5, 12 and 24 bp a side. A cell with under 10 trades is printed as n only and carries no break-even.

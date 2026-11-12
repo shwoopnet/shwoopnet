@@ -1,5 +1,7 @@
 # CMD1 result (2026-11-06): NOT_ENOUGH_DATA (development only; held-out sessions 2026-11-04 and 11-05 never loaded)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: rests on barred Yahoo 1 minute futures bars (see the NOTE in CMD_COMMON.md). No held-out read will be made; the held-out sessions stay unread forever on this data. Not pinned, because it must not be run again.**
+
 Registration `workers/CMD1_REGISTRATION.md`, shared rules `workers/CMD_COMMON.md` (commit 7bc9f8c). Code `workers/cmd/cmd.py`, full print `workers/cmd/cmd_output.txt`. Six pairs, development sessions Fri 2026-10-30, Mon 11-02, Tue 11-03 (three clusters; D1 = 10-30, D2 = 11-02 and 11-03). Times in the output are ET (CT is one hour earlier).
 
 **Verdict word: NOT_ENOUGH_DATA.** Minimums are 60 trades on 15 session clusters; there are 3 clusters. R1 primary has 48 trades, R2 primary 146. Enough on a development cut at about **2026-12-04** (15 sessions, then the then-last third held out).

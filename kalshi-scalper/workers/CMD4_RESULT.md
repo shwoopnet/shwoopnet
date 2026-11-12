@@ -1,5 +1,7 @@
 # CMD4 result (2026-11-06): NOT_ENOUGH_DATA per cell; map printed (development only)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: its triggers are CMD1's, computed from barred Yahoo futures bars (CMD_COMMON.md says CMD1 rules, `workers/cmd/cmd.py` reads the Yahoo cash file). Not pinned; no held-out read will be made.**
+
 Registration `workers/CMD4_REGISTRATION.md`. Cells with at least 10 trades (gross after the recorded spread, before fee; break-even fee per side = gross / 2):
 | pair | rule | n | gross bp | break-even fee bp/side | net 5 | net 12 | net 24 | hit |
 |---|---|---|---|---|---|---|---|---|

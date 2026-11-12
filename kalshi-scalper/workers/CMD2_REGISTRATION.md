@@ -1,5 +1,7 @@
 # CMD2 registration: CME daily break and weekend gap (2026-11-06, before any score)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: rests on barred Yahoo 1 minute futures bars (see the NOTE in CMD_COMMON.md). No held-out read will be made. Not pinned, because it must not be run again.**
+
 Shared rules: `workers/CMD_COMMON.md`. 2 tries (N +2). Times US Central in results (ET in the rules: the break is 17:00 to 18:00 ET).
 
 **Mechanism.** While the futures are shut the perp trades on its own (thin, no reference). Its drift is part information, part noise; the reopen reconciles it. Counterparty: perp takers who chase a drift with no reference price. Honest alternative: the drift is information and the reopen confirms it.

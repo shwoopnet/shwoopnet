@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """CMD0 to CMD4 scorer (registered in workers/CMD_COMMON.md and CMD1..4_REGISTRATION.md before it was run).
 Usage: python3 -I cmd.py KALSHI_DIR CASH_CSV_GZ   (KALSHI_DIR holds <TICKER>_1m.csv.gz from fetchk.py; sessions 11-04 and later are never used)"""
+import sys
+raise SystemExit("CMD0 to CMD4 are RETIRED (Nov 12, 2026): they rest on barred Yahoo data (workers/CMD_COMMON.md). Do not rerun.")
 import sys, gzip, csv, math, statistics as st, collections, datetime as D
 KD, CASH = sys.argv[1], sys.argv[2]
 PAIRS = [("gold", "KXGOLDPERP", "GC=F"), ("silver", "KXSILVERPERP", "SI=F"), ("copper", "KXCOPPERPERP", "HG=F"),

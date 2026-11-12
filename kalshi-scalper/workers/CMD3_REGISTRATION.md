@@ -1,5 +1,7 @@
 # CMD3 registration: futures roll windows (2026-11-06, before any score)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: rests on barred Yahoo continuous-futures bars; its event definition cannot be rebuilt from a permitted source (see the NOTE in CMD_COMMON.md). Not pinned.**
+
 Shared rules: `workers/CMD_COMMON.md`. 1 try (N +1).
 
 **Mechanism.** Yahoo's GC=F, SI=F, HG=F, CL=F, ES=F and NQ=F are continuous front-month series, so a roll shows as a one minute gap that is not a price move. If the perp is built on the same contract it either jumps with it (basis unchanged) or does not (the basis jumps by the roll spread and the perp is the cheap or rich side until it re-bases). Counterparty: a perp holder across the contract change.

@@ -1,5 +1,7 @@
 # CMD2 result (2026-11-06): NOT_ENOUGH_DATA (B1 daily break, B2 weekend; development only)
 
+**RETIRED (Nov 12, 2026), DO NOT RERUN: rests on barred Yahoo 1 minute futures bars (see the NOTE in CMD_COMMON.md). No held-out read will be made. Not pinned, because it must not be run again.**
+
 Registration `workers/CMD2_REGISTRATION.md`; code and print `workers/cmd/cmd.py`, `cmd_output.txt`. Times ET (CT one hour earlier).
 
 **Verdict word: NOT_ENOUGH_DATA.** B1 needs 40 events on 15 break dates, B2 20 weekends.
