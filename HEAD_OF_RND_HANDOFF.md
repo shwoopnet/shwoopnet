@@ -19,7 +19,7 @@ Created by the owner on Nov 12, 2026. The Head of R&D runs research; the Chief o
 - Verification Analyst (under Main, not research): session_01PSWvZqX5pfCnCJfvqJpDCL
 - Retired or stopped Nov 12: V2 (session_01PSWvZpN1MLodfM5W2dqtii; handoff kalshi-scalper/V2_HANDOFF_NOV12.md on claude/epic-ptolemy-0amjd9), Probe Engineering (session_01PSWvZnv28Wm8fCqua9FMzq; handoff docs/probes/HANDOFF_PROBE_DESK_NOV12.md on claude/probe-desk).
 - Testing Desk (created Nov 12 16:44Z by Main): session_01PSWvZoWZGK1VYgdMTA25vo (branch claude/testing-desk). First task WXDAYEND's remaining count.
-- Stocks Desk (created Nov 12 16:44Z by Main): session_01PSWvZkxSgedtJBD4vHPwcs (branch claude/stocks-desk). Data plan first, Databento under the owner's $25 cap.
+- Stocks Desk: session_01PSWvZm6Fiw2pwNzcbUhudN (branch claude/stocks-desk), created by Main at about 17:04Z Nov 12 to replace session_01PSWvZkxSgedtJBD4vHPwcs, which could not push and has stopped. Databento under the owner's $25 cap.
 
 ## Standing rules I set or enforce
 
@@ -46,7 +46,7 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 - DATED READS (Desk A runs them): DEPTH1 on or after Nov 14 00:00Z; MMMAP1 Nov 15; the CFRTI sitting from Nov 20 (all versions, one sitting); MMSIM1 and QUOTE2B held-outs Nov 24 (record only, the family is closed); S3 Nov 26 (Desk B). Refinement: OICORE forward read Nov 13 with the within-price-bucket comparison; FLIP1, FLOOR1, THIN1 from the owner's export on or after Nov 14; Monday rotation report Nov 16.
 - DEFECT BEING FIXED: the Nov 20 script's "book replay" lines replayed the stale quote file; Desk A is replacing them with a true R6 replay using Forensics' code. Check the commit before Nov 20.
 
-- STOCKS (17:00Z): ten cards written, first wave S1, S2, S7 plus four screens, costed about $12.75; the owner ruled at 17:04Z "Treat it as personal use" (personal Databento account, owner-accepted terms risk; named lists only, NO all-symbols requests, $25 cap); named-list pulls may start (pilot, S1, 8 ETF minute bars); the 500-stock universe waits on the owner's answer about one $0.59 ranking pull; nothing scored until registrations are in shwoopnet/shwoopnet-private. Nothing derived from Databento goes in the repo.
+- STOCKS (17:00Z): ten cards written, first wave S1, S2, S7 plus four screens, costed about $12.75; the owner ruled at 17:04Z "Treat it as personal use" (personal Databento account, owner-accepted terms risk; named lists only, NO all-symbols requests, $25 cap); named-list pulls may start (pilot, S1, 8 ETF minute bars); the one bounded ranking pull ($0.59, May 2018 only, hard stop above $1) is allowed (the EA confirmed "no all symbols" was its wording, not the owner's); nothing scored until registrations are in shwoopnet/shwoopnet-private. Nothing derived from Databento goes in the repo.
 
 ## Owed to me at the time of writing
 
