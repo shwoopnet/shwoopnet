@@ -2,7 +2,7 @@
 
 Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing scored, no Kalshi request made; job files go to Main. Screen of every published effect read: `OUTSIDE_SCREEN_NOV12.md` (same folder). [research]
 
-**Counts: cards 1 (PROPUNDER); dropped on arithmetic 13; pending 2 (tennis and table tennis model edges, waiting on a literature read).**
+**Counts: cards 1 (PROPUNDER); published effects dropped 22; pending 0.** The tennis, table tennis and esports read found no published model edge that reaches the bar (best: weighted Elo +3.6% ROI on ATP at the best of 11 books, negative at one book's price); see the screen rows 14 to 22.
 
 ## Card C1. PROPUNDER: NO on NBA player props at the strike priced nearest 50c
 

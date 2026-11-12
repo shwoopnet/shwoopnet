@@ -2,7 +2,7 @@
 
 Idea Desk C (outside research), reporting to the Head of R&D. Nothing here was scored and no Kalshi request was made. Every figure is a published or practitioner figure on public data, quoted with its source. [research]
 
-**Counts: 16 published effects read; 13 dropped on arithmetic, duplication or the owner's bans; 1 card written (PROPUNDER); 2 pending a third literature read (tennis, table tennis and esports model edges).**
+**Counts: 23 published effects read; 22 dropped on arithmetic, duplication, missing evidence or the owner's bans; 1 card written (PROPUNDER); 0 pending.**
 
 ## The arithmetic used for every line
 
@@ -34,6 +34,15 @@ So a published effect smaller than about 11 points in win probability cannot rea
 | 11 | Kalshi macro high tails overpriced | Diercks, Katz and Wright (2026), FEDS 2026-010 | "a little too frequently", no return figure | not computed | No size; macro is a slow family (about 44 a year) |
 | 12 | Losing side priced too high late in games ("Yogi Berra") | Page (2012), cited in Burgi et al. | not seen | not computed | Buys the late leader: favourite-late ban; in-game lag closed |
 | 13 | Cross-venue gaps and Polymarket leading Kalshi | Ng, Peng, Tao and Zhou, SSRN 5331995; QuantPedia | Seconds to minutes | not computed | Polymarket reads parked by the owner; FAMXV found a 0.5c median gap on games |
+| 14 | Weighted Elo against tennis odds | Angelini, Candila and De Angelis (2022), EJOR 297(1), 33,976 ATP matches (https://cris.unibo.it/bitstream/11585/821483/3/Weighted%20ELO%20rating%20predictions%20in%20tennis.pdf) | +3.6% ROI on about 3,190 bets, only at the BEST of 11 books' prices and only with longshots excluded; negative at average or Bet365 odds (authors' footnote 6); ATP main tour only | about 1.07 at the best price, under 1.0 at one price | Far below 1.5; no ITF or Challenger result exists; a Kalshi-only rating (ESPORT1's shape) failed on esports |
+| 15 | Tennis Elo against the bookmaker consensus | Kovalchik (2016), JQAS 12(3) | the consensus beat all 11 models | under 1.0 | The market is the better forecaster |
+| 16 | 40 tennis betting rules | Applied Economics (2017), doi 10.1080/00036846.2017.1394973 | "much more efficient than suggested by previous studies" | not computed | No edge reported |
+| 17 | Fatigue: length of the previous match | Grand Slam study, doi 10.1080/24748668.2015.11868847; Tennis Abstract blog | a win-probability effect; no test against odds found | not computed | No published mispricing to start from |
+| 18 | Tennis retirement rules | book help pages only | none | not computed | No study; settlement quirk with no measured price effect |
+| 19 | Table tennis and e-soccer leagues (Liga Pro, Setka Cup, Esoccer Battle) | integrity reporting only (ESPN 2020, Sports Integrity Initiative 2021) | none | not computed | No efficiency or model study exists; VIRT1 negative here |
+| 20 | Esports favourite-longshot bias | Sweeney, Tuttle and Berg (2021), Games and Culture | favourite side | not computed | Favourite: the owner's ban; ESPORT1 FALSIFIED |
+| 21 | CS map momentum (map 1 winner beats odds on map 2) | SBC News summary, paper not seen | p = 0.05, no size | not computed | Already registered as MAPBREAK; unverified |
+| 22 | Liquipedia as an esports data source | https://liquipedia.net/api-terms-of-use | API allowed at 1 request per 2 s, but a User-Agent with contact information is REQUIRED | n/a | Needs the owner's word on contact details before any use; no card needs it now |
 
 Also read, not usable as written: PredictIt calendar effects (Physica A 523, 2019, 3,385 markets: none in price); the 80 minute Polymarket repricing claim (no verifiable source).
 
