@@ -1,0 +1,303 @@
+{
+ "test": "PERPSLIST1",
+ "candle_dates": [
+  "2026-11-06",
+  "2026-11-08",
+  "2026-11-09",
+  "2026-11-10",
+  "2026-11-11"
+ ],
+ "candle_rows_two_sided": 291519,
+ "candle_tickers": 60,
+ "list_rows_usable": 9853,
+ "list_rows_by_source": {
+  "30s": 8880,
+  "hourly": 973
+ },
+ "list_timestamps_by_source": {
+  "30s": 148,
+  "hourly": 18
+ },
+ "pairs": 14546,
+ "pairs_by_source": {
+  "30s": 13240,
+  "hourly": 1306
+ },
+ "pair_timestamps_by_source": {
+  "30s": 148,
+  "hourly": 14
+ },
+ "note": "d = list time minus candle end time, seconds; r = |list mid - candle mid close| / the ticker's local median 1 minute move; A = median r for d in (0,12] over median r for d in [-12,0)",
+ "primary_all": {
+  "rows_after": 195,
+  "rows_before": 3379,
+  "timestamps_after": 4,
+  "timestamps_before": 76,
+  "median_r_after": 0.1538,
+  "median_r_before": 0.0455,
+  "mean_d_after": 9.45,
+  "mean_d_before": -5.04,
+  "A": 3.3846,
+  "A_interval": [
+   0.7561,
+   14.0119
+  ]
+ },
+ "by_source": {
+  "30s": {
+   "rows_after": 0,
+   "rows_before": 3292,
+   "timestamps_after": 0,
+   "timestamps_before": 74,
+   "median_r_after": null,
+   "median_r_before": 0.05,
+   "mean_d_after": null,
+   "mean_d_before": -5.0
+  },
+  "hourly": {
+   "rows_after": 195,
+   "rows_before": 87,
+   "timestamps_after": 4,
+   "timestamps_before": 2,
+   "median_r_after": 0.1538,
+   "median_r_before": 0.0,
+   "mean_d_after": 9.45,
+   "mean_d_before": -6.44
+  }
+ },
+ "by_class": {
+  "Equities": {
+   "rows_after": 187,
+   "rows_before": 3227,
+   "timestamps_after": 4,
+   "timestamps_before": 76,
+   "median_r_after": 0.1538,
+   "median_r_before": 0.0357,
+   "mean_d_after": 9.43,
+   "mean_d_before": -5.04,
+   "A": 4.3077,
+   "A_interval": [
+    0.4961,
+    23.989
+   ]
+  },
+  "Indices": {
+   "rows_after": 8,
+   "rows_before": 152,
+   "timestamps_after": 4,
+   "timestamps_before": 76,
+   "median_r_after": 0.2049,
+   "median_r_before": 0.2527,
+   "mean_d_after": 9.75,
+   "mean_d_before": -5.04,
+   "A": 0.811,
+   "A_interval": [
+    0.3043,
+    2.0246
+   ]
+  }
+ },
+ "curve_10s_bins": {
+  "-60_to_-50": {
+   "rows": 54,
+   "timestamps": 1,
+   "median_r": 0.4311,
+   "median_bps": 2.433
+  },
+  "-50_to_-40": {
+   "rows": 143,
+   "timestamps": 3,
+   "median_r": 0.6746,
+   "median_bps": 1.564
+  },
+  "-40_to_-30": {
+   "rows": 3443,
+   "timestamps": 77,
+   "median_r": 0.6216,
+   "median_bps": 1.61
+  },
+  "-30_to_-20": {
+   "rows": 96,
+   "timestamps": 2,
+   "median_r": 0.3009,
+   "median_bps": 2.622
+  },
+  "-20_to_-10": {
+   "rows": 168,
+   "timestamps": 4,
+   "median_r": 0.245,
+   "median_bps": 0.701
+  },
+  "-10_to_0": {
+   "rows": 3336,
+   "timestamps": 75,
+   "median_r": 0.0467,
+   "median_bps": 0.141
+  },
+  "0_to_10": {
+   "rows": 54,
+   "timestamps": 1,
+   "median_r": 0.1667,
+   "median_bps": 0.889
+  },
+  "10_to_20": {
+   "rows": 141,
+   "timestamps": 3,
+   "median_r": 0.1508,
+   "median_bps": 0.443
+  },
+  "20_to_30": {
+   "rows": 3482,
+   "timestamps": 77,
+   "median_r": 0.4906,
+   "median_bps": 1.306
+  },
+  "30_to_40": {
+   "rows": 95,
+   "timestamps": 2,
+   "median_r": 0.6977,
+   "median_bps": 4.309
+  },
+  "40_to_50": {
+   "rows": 164,
+   "timestamps": 4,
+   "median_r": 0.7051,
+   "median_bps": 1.92
+  },
+  "50_to_60": {
+   "rows": 3370,
+   "timestamps": 75,
+   "median_r": 0.9144,
+   "median_bps": 2.284
+  }
+ },
+ "curve_by_source": {
+  "30s": {
+   "-40_to_-30": {
+    "rows": 3292,
+    "timestamps": 74,
+    "median_r": 0.6234
+   },
+   "-10_to_0": {
+    "rows": 3292,
+    "timestamps": 74,
+    "median_r": 0.05
+   },
+   "20_to_30": {
+    "rows": 3328,
+    "timestamps": 74,
+    "median_r": 0.4935
+   },
+   "50_to_60": {
+    "rows": 3328,
+    "timestamps": 74,
+    "median_r": 0.9055
+   }
+  },
+  "hourly": {
+   "-60_to_-50": {
+    "rows": 54,
+    "timestamps": 1,
+    "median_r": 0.4311
+   },
+   "-50_to_-40": {
+    "rows": 143,
+    "timestamps": 3,
+    "median_r": 0.6746
+   },
+   "-40_to_-30": {
+    "rows": 151,
+    "timestamps": 3,
+    "median_r": 0.5882
+   },
+   "-30_to_-20": {
+    "rows": 96,
+    "timestamps": 2,
+    "median_r": 0.3009
+   },
+   "-20_to_-10": {
+    "rows": 168,
+    "timestamps": 4,
+    "median_r": 0.245
+   },
+   "-10_to_0": {
+    "rows": 44,
+    "timestamps": 1,
+    "median_r": 0.0
+   },
+   "0_to_10": {
+    "rows": 54,
+    "timestamps": 1,
+    "median_r": 0.1667
+   },
+   "10_to_20": {
+    "rows": 141,
+    "timestamps": 3,
+    "median_r": 0.1508
+   },
+   "20_to_30": {
+    "rows": 154,
+    "timestamps": 3,
+    "median_r": 0.4599
+   },
+   "30_to_40": {
+    "rows": 95,
+    "timestamps": 2,
+    "median_r": 0.6977
+   },
+   "40_to_50": {
+    "rows": 164,
+    "timestamps": 4,
+    "median_r": 0.7051
+   },
+   "50_to_60": {
+    "rows": 42,
+    "timestamps": 1,
+    "median_r": 1.2694
+   }
+  }
+ },
+ "within_5s_of_a_boundary": {
+  "rows": 3390,
+  "timestamps": 76,
+  "share_candle_mid_inside_list_bid_ask_plus_2bps": 0.9549,
+  "mean_abs_diff_bps": 1.008,
+  "d_values": [
+   -5,
+   -1,
+   5
+  ]
+ },
+ "d_values_by_source": {
+  "30s": {
+   "-35": 74,
+   "-5": 74,
+   "25": 74,
+   "55": 74
+  },
+  "hourly": {
+   "-55": 1,
+   "-50": 1,
+   "-48": 2,
+   "-39": 2,
+   "-33": 1,
+   "-29": 1,
+   "-21": 1,
+   "-19": 2,
+   "-17": 1,
+   "-12": 1,
+   "-1": 1,
+   "5": 1,
+   "10": 1,
+   "12": 2,
+   "21": 2,
+   "27": 1,
+   "31": 1,
+   "39": 1,
+   "41": 2,
+   "43": 1,
+   "48": 1,
+   "59": 1
+  }
+ }
+}
