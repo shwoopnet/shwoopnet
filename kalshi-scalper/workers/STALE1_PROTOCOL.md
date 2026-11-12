@@ -17,3 +17,5 @@ Script: src/scalper/stale1.py. Research only; no live code.
 ## Amendment 1 (Nov 12, 2026): per-series cuts pinned as constants
 CUTOFF CONSTANTS (`CUTS` in `src/scalper/stale1.py`; close_ts of the first held-out market, development = strictly before, held-out = on or after), the values the Nov 11 development run used (39,126 markets): KXAUDUSD15M 2026-10-19T02:15Z, KXUSDCAD15M 2026-10-19T02:15Z, KXCOPPER15M 2026-10-13T04:30Z, KXNATGAS15M 2026-10-13T21:00Z, KXPALLADIUM15M 2026-10-21T00:00Z, KXPLATINUM15M 2026-10-21T00:00Z, KXSILVER15M 2026-10-05T10:45Z, KXWTI15M 2026-10-06T16:45Z, KXEURUSD15M 2026-10-22T09:45Z, KXGBPUSD15M 2026-10-22T09:45Z, KXUSDJPY15M 2026-10-22T09:45Z. The old rule took two thirds of whatever markets existed when the script ran, so adding data would have moved the cuts.
 READ-ONCE MARKER: not yet read; STALE1 held-out first read allowed on or after 2026-11-12, only for a development survivor (none exists); after the read: READ ON <date>, commit <hash>
+
+OVERLAP CAVEAT: development includes rows from 2026-10-05 on, which the data inventory marks as the frozen third (F1) for the 15 minute files.
