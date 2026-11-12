@@ -67,3 +67,6 @@ Running N about 728,722 before this card (README, after XMET1). This card adds *
 ## Code
 
 `src/scalper/bookch1.py` (`look_stats`, `trailing_cut`, `decide`, `forward_eval`, evaluator `scalper.bookch1:forward_eval`) and `tests/test_bookch1.py` (synthetic data only). Candidates (written after this push): `workers/candidates/BOOKCH1_BTC.json`, `BOOKCH1_XRP.json` (primary), `BOOKCH1B_BTC.json`, `BOOKCH1B_XRP.json` (alternative). No R6 outcome was computed to write any of this.
+
+## Amendment 1 (Nov 12, 2026): FORWARD-ONLY
+BOOKCH1 (and BOOKCH1B, the "BOOKCH1F" forward verdict in `src/scalper/bookch1_fwd.py`) is a FORWARD-ONLY test. The forward ledger prints these candidates' running results hourly, so the "last third" holdout is NOT blind; it is a late-period slice of a test already being watched, and is labelled `pf_holdout` for that reason only. No held-out claim is made for it. The only thing that counts is the pre-registered forward verdict (trade count, halves, fees x1.2) at its date. READ-ONCE MARKER: not applicable (no held-out read exists; the forward verdict is read at its registered date and every running number is already public).

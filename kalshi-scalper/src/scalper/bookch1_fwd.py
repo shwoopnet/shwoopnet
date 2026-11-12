@@ -1,4 +1,6 @@
 """BOOKCH1 pooled forward verdict (workers/BOOKCH1_REGISTRATION.md). Research only; nothing here means trade; no promote verb.
+FORWARD-ONLY (Nov 12, 2026): the forward ledger prints these candidates' running results, so the last third computed below (`pf_holdout`) is
+NOT a blind held-out set. The verdict is a forward test with a fixed trade count; there is no held-out read and no read-once marker.
 
     python -m scalper.bookch1_fwd forward [--force-info] [--trades PATH]     (also: python -m scalper.bookch1 forward)
 
