@@ -42,3 +42,11 @@ Prior: a pass about 5%. Prediction written now: the price already carries the wo
 
 ## Read budget at 4 a minute
 Zero reads for the table and the held-500 development score. New candle reads: expected 1,000 to 1,300, cap 1,600 (about 250 to 325 minutes expected, cap 400). Each block of 200 reads is 50 minutes.
+
+## Amendment A1 (Nov 12, 2026, committed BEFORE any new candle read and before any outcome of a target market is read for this test)
+1. Run mechanics only, no rule change. Code: `src/scalper/mentpersist1.py` (plan, fetch, score). Pool order is ascending md5(ticker) over new markets (not among the 500) with a PREV and a usable b; the 300-pair cell rule and the expanding window drop the earliest markets, so the pool is 15,708 (protocol estimate 16,368) and the held 500 give 274 with a PREV (estimate 276). Counts only, no outcome: the 274 held markets give 79 usable decision quotes and 48 R1 and 20 R2 trades by the rule.
+2. Rate: 1 request every 15 seconds (4 a minute) sequential. On a 429 the run PAUSES 300 seconds and retries that one request once; a second 429 in a row stops the run, the cursor (`cursor_index` into the md5 pool) is saved in `workers/MENTPERSIST1_READLOG.json` and another worker can resume with `python3 -I src/scalper/mentpersist1.py fetch`. This replaces "first 429 stops the run" at the owner/lead's instruction; there is no retry loop. Cursor and `workers/MENTPERSIST1_QUOTES.csv` (decision-look quotes, b, which rule fired, NO outcome column) are committed every 200 reads.
+3. Fee: the protocol says the rounded fee is used for the gates and the unrounded is reported; the lead's instruction says unrounded. Both are computed for every rule; a PASS needs every gate on BOTH fee bases (stricter). Both are printed.
+4. Stop rule unchanged: reads stop at the first block of 200 where a rule has total >= 130 trades by the rule, or at 1,600 reads.
+5. Decision-look quote as MENT1 does it: the last candle ending at or before close minus 6 hours with both bid and ask non-null, bid > 0, ask < 1, ask > bid, spread <= 0.05.
+6. Split of the new markets: the earliest two thirds (by close time) of all new markets READ (quoted or not) are development, the last third is held-out.
