@@ -933,7 +933,7 @@ exports.kalshiBalanceSnapshot = onSchedule(
 // (functions/kalshiFastReadLib.js, test/kalshiFastReadGates.test.js). Refuses to run in the bot's buying and exit-watch minutes. No POST to Kalshi, no order path. Deploy: bash functions/deploy-fastread.sh.
 const fastRead = require("./kalshiFastReadLib");
 exports.kalshiFastRead = onRequest(
-  { secrets: [KALSHI_FASTREAD_TOKEN, KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], cors: false, maxInstances: 1, timeoutSeconds: 300, memory: "256MiB" },
+  { secrets: [KALSHI_FASTREAD_TOKEN, KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], cors: false, maxInstances: 1, concurrency: 1, timeoutSeconds: 300, memory: "256MiB" },
   fastRead.makeFastReadHandler({
     getToken: () => KALSHI_FASTREAD_TOKEN.value(), getKeyId: () => KALSHI_LIVE_KEY_ID.value(), getPem: () => KALSHI_LIVE_PRIVATE_KEY.value(),
     fetchFn: fetch, now: () => Date.now(),

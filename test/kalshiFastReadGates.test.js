@@ -113,7 +113,7 @@ gates.FR6 = async () => {   // three 429s in a row stop the job; a refused read 
 gates.FR7 = async () => {   // token: constant time, closed with none, GET refused, wrong token refused, nothing is run without it
   const idx = code(src('functions/index.js'));
   const fn = idx.slice(idx.indexOf('exports.kalshiFastRead = onRequest('), idx.indexOf('exports.kalshiBookRecorder'));
-  assert.ok(/secrets: \[KALSHI_FASTREAD_TOKEN, KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(fn) && /cors: false/.test(fn) && /maxInstances: 1/.test(fn), 'its own token, the two existing key secrets, no CORS, one instance');
+  assert.ok(/secrets: \[KALSHI_FASTREAD_TOKEN, KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY\]/.test(fn) && /cors: false/.test(fn) && /maxInstances: 1/.test(fn) && /concurrency: 1/.test(fn), 'its own token, the two existing key secrets, no CORS, one instance, one request at a time so two calls cannot double the rate on the trading key');
   assert.ok(!/KALSHI_REPORT_TOKEN|VAPID/.test(fn) && !/kalshiLiveOrders|kalshiLiveControl|getFirestore|runL1Tick|runExitWatch/.test(fn), 'it touches no order, session, control or storage');
   assert.ok(/timingSafeEqual/.test(code(src('functions/kalshiFastReadLib.js'))));
   const call = async (token, req) => {
