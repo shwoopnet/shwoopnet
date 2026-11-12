@@ -113,3 +113,7 @@ Owner decision, Nov 11, 2026: the Brief and the header strip move to the permitt
 **Adding a source later.** One reader in `READERS` plus its host in `ALLOWED_HOSTS` (and the exact list in `test/noYahooMarketTapeGates.test.js`), then the symbol's `source` in `SYMBOLS`. Bitcoin and Ethereum wait for the owner's reading of the exchange's market data terms.
 
 Not changed: the research recorders under `scripts/` and `.github/workflows/` still name Yahoo hosts (the perps cash price saver and the reference recorder). They are outside the site's functions and were not part of this switch; the owner should decide them separately.
+
+## Note (Nov 12, 2026): the quote recorder's Coinbase and Bitstamp reads
+
+`scripts/record_quotes.py` reads Coinbase and Bitstamp public trades for research. Coinbase's market data terms are unread (403 when fetched); Bitstamp's API page says companies need a signed commercial Data License Agreement; the account is in the owner's own name. This is not a finding that the reads are allowed. The owner accepted the risk on Nov 12, 2026 and the reads continue, for research only. A live probe that reads either venue still needs the owner's own popup naming that source. See CLAUDE.md.
