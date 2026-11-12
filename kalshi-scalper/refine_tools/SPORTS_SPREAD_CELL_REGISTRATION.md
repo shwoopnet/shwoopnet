@@ -27,3 +27,8 @@ READ-ONCE MARKER: NEW HELD-OUT BLOCK NOT READ as of 2026-11-12.
 
 ## Clarification of the look and bucket (Nov 12, 2026, before dispatch)
 - The scorer reproduces the original W-CAT-SPORTS1 definition exactly: the 'more than 24 h before close' look is the last hourly candle at or before close minus 48 hours, no more than 2 hours old (the original scorer's gt24h bucket is 48 hours); the YES ask bucket is 0.05 up to but not including 0.15; the bucket filter is applied before choosing the market nearest 0.5 mid. Under n 100 the scorer prints only the label ('no evidence at n = x'), no PF, mean, bound or z.
+
+## Partial pull rule and marker (committed Nov 12, 2026, before dispatch; Head of R&D request)
+- Output layout: kalshi-pull writes raw answers (one gzipped file per request, 0001.json.gz onward), manifest.json (one row per request: status, bytes, sha256) and STATUS under pull/SPREADCELL1/<run>/ on branch kalshi-pull-data. A converter (spread_cell1_convert.py, tested on a synthetic answer) turns them into the candles jsonl.
+- DERIVED marker: SPREADCELL1_PULL_COMPLETE is written only by the converter, and only when every one of the 274 requests (across all runs of this job) has a manifest row with an answered status (or 404 meaning no candles, which counts as answered) and the STATUS of the latest run says complete. It is never written by hand.
+- PARTIAL PULL RULE: if a run stops early (three 429s end a run), the remaining unanswered requests are re-dispatched as further runs of the same job (the explicit request list is not changed); the read WAITS for all 274. If all 274 are not answered by 2026-11-20T00:00Z, the read is VOID: no candle is scored, and a new registration is needed. No candle is looked at before the marker exists.
