@@ -238,8 +238,7 @@ function makeReportHandler(deps) {
       if (typeof deps.readSkips === "function") { try { skips = skipSection(await deps.readSkips(now - SKIP_DAYS * 86400000), now, resultsFromRows(shadowRows)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The shadow rules' score (lifecycle spec (c)): per rule, signals, cash PF per contract and the verdict against the written pass and kill rules. Optional, read only; a failure leaves the field out.
       let shadow;
-      if (typeof deps.readShadowRows === "function" && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), await deps.readShadowRows(now - SHADOW_DAYS * 86400000), now).map((x) => (x.rule === "GOLDOFF" ? Object.assign({}, x, { returnRule: shadowLib.returnRule(x) }) : x)) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
-      if (shadowRows !== null && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), shadowRows, now) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
+      if (shadowRows !== null && typeof deps.shadowRules === "function") { try { shadow = { days: SHADOW_DAYS, rules: shadowLib.shadowReport(deps.shadowRules(), shadowRows, now).map((x) => (x.rule === "GOLDOFF" ? Object.assign({}, x, { returnRule: shadowLib.returnRule(x) }) : x)) }; } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
       // The hourly balance history over the asked window. Optional, read only; a failure leaves the field out, an empty history is an empty list.
       let balanceHistory;
       if (typeof deps.readBalances === "function") { try { balanceHistory = balanceSection(await deps.readBalances(now - hours * 3600000)); } catch (e) { if (typeof deps.logError === "function") deps.logError(e); } }
