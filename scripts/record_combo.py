@@ -2,9 +2,10 @@
 """Combo book recorder (Nov 12, 2026, the owner approved). Research data only: nothing here trades.
 
 Kalshi's combo (multivariate) markets live on exchange_index 1 and number in the tens of thousands, so they are sampled, not recorded in full. Each run does ONE poll:
-list the open combos (mve_filter=only, at most MAX_LIST_PAGES pages), keep the HIGH PRICED ones (a yes bid or ask of at least HIGH_PRICE, or any traded volume), write their quotes
-(capped at MAX_QUOTE_ROWS), then read the order book (best DEPTH YES and NO bids with sizes) of the MAX_BOOKS highest priced and the public trades of the MAX_TRADES that have traded.
-Once a day (the 00 UTC hour) it also reads settled combos with volume, so a paper test of buying NO on high priced combos has the outcomes next to the depth.
+list the open combos (mve_filter=only, at most MAX_LIST_PAGES pages), keep every combo with a posted bid or ask at ANY price on the yes or the no side, or any traded volume (widened Nov 12, 2026 so the cheap side and the house side are both testable),
+rank them tightest yes spread first (then volume, then ticker), write the quotes of the first MAX_QUOTE_ROWS, then read the order book (best DEPTH YES and NO bids with sizes) of the first MAX_BOOKS
+and the public trades of the MAX_TRADES most traded.
+Once a day (the 00 UTC hour) it also reads settled combos with volume, so a paper test of buying either side of a combo has the outcomes next to the depth.
 
 PUBLIC Kalshi market data only: no key, no signing, no auth header, no account path, no order, no Firestore. One request stream, at least GAP_S seconds between calls (at most 10 a
 minute); a 429 waits 5 seconds doubling up to 60, and after MAX_CONSEC_429 refusals in a row the run stops early and says so. A hard request budget per run. A body that is not an
@@ -31,7 +32,6 @@ MAX_CONSEC_429 = 3                 # this many refusals in a row end the run ear
 BUDGET = 90                        # hard request budget per run
 PAGE_LIMIT = 1000
 MAX_LIST_PAGES = 5                 # at most 5,000 open combos listed per run
-HIGH_PRICE = 0.30                  # "high priced": a yes bid or yes ask at or above this, in dollars
 MAX_QUOTE_ROWS = 400
 MAX_BOOKS = 40
 MAX_TRADES = 15
@@ -46,7 +46,7 @@ BOOK_COLS = ["t_recv_ms", "server_date_header", "ticker", "close_time"] + ["yes_
     + ["no_bid_px_%d" % i for i in range(1, 6)] + ["no_bid_sz_%d" % i for i in range(1, 6)]
 TRADE_COLS = ["t_recv_ms", "ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side", "trade_id"]
 RESULT_COLS = ["t_recv_ms", "ticker", "event_ticker", "close_time", "result", "last_price", "volume"]
-COVER_COLS = ["t_recv_ms", "listed", "pages", "list_complete", "high_priced", "quote_rows", "books", "trades_read", "requests", "n429", "stopped_early"]
+COVER_COLS = ["t_recv_ms", "listed", "pages", "list_complete", "selected", "quote_rows", "books", "trades_read", "requests", "n429", "stopped_early"]
 
 
 def epoch_of(iso_s):
@@ -151,26 +151,32 @@ def list_combos(stream, status, pages, min_close_ts=None):
     return out, date, tr, n, False
 
 
-def is_high_priced(m):
-    """A yes bid or ask at or above HIGH_PRICE, or any traded volume. The NO side of such a combo is what a paper test would buy, so this is the set whose depth matters."""
+def posted(m):
+    """The posted prices of a combo as (yes bid, yes ask, no bid, no ask) in dollars, None for an empty side. A bid of 0 and an ask of exactly 1.0000 are the empty side, not prices."""
+    out = []
+    for k, empty in (("yes_bid_dollars", 0.0), ("yes_ask_dollars", 1.0), ("no_bid_dollars", 0.0), ("no_ask_dollars", 1.0)):
+        v = num(m.get(k))
+        out.append(None if v is None or v == empty else v)
+    return out
+
+
+def is_selected(m):
+    """Any posted bid or ask at ANY price on the yes or the no side, or any traded volume (widened Nov 12, 2026: the cheap side and the house side must both be testable)."""
     if not isinstance(m, dict) or not m.get("ticker"):
         return False
-    px = [num(m.get("yes_bid_dollars")), num(m.get("yes_ask_dollars"))]
-    # a yes ask of exactly 1.0000 is the empty side, not a price
-    if num(m.get("yes_ask_dollars")) == 1.0:
-        px[1] = None
-    if any(p is not None and p >= HIGH_PRICE for p in px):
-        return True
-    return (num(m.get("volume_fp")) or 0) > 0
+    return any(p is not None for p in posted(m)) or (num(m.get("volume_fp")) or 0) > 0
 
 
 def rank_key(m):
-    return (-(max([p for p in (num(m.get("yes_bid_dollars")), num(m.get("yes_ask_dollars"))) if p is not None and p < 1.0] or [0.0])), m.get("ticker", ""))
+    """Tightest yes spread first (a combo with both a yes bid and a yes ask), then the most volume, then the ticker. A one-sided or unquoted combo has no spread and ranks after every two-sided one."""
+    yb, ya = posted(m)[0], posted(m)[1]
+    spread = (ya - yb) if (yb is not None and ya is not None) else float("inf")
+    return (spread, -(num(m.get("volume_fp")) or 0), m.get("ticker", ""))
 
 
 def pick(markets):
-    """(the high priced markets, best priced first). Deterministic: ties break on the ticker."""
-    return sorted([m for m in markets if is_high_priced(m)], key=rank_key)
+    """(the selected markets, tightest spread first). Deterministic: ties break on volume, then the ticker. The books and the quote cap take from the front of this order."""
+    return sorted([m for m in markets if is_selected(m)], key=rank_key)
 
 
 def quote_row(t_recv, date, m):
@@ -245,7 +251,8 @@ def poll(stream, now, out_dir):
         if row:
             brows.append(row)
     write_csv(os.path.join(out_dir, "books.csv"), BOOK_COLS, brows)
-    traded = [m for m in chosen if (num(m.get("volume_fp")) or 0) > 0][:MAX_TRADES]
+    # trades go to the MOST traded combos (volume, then ticker), not to the tightest spreads: a trade read is the scarce one
+    traded = sorted([m for m in chosen if (num(m.get("volume_fp")) or 0) > 0], key=lambda m: (-(num(m.get("volume_fp")) or 0), m["ticker"]))[:MAX_TRADES]
     for m in traded:
         st, body, d, r = stream.get("%s/markets/trades?ticker=%s&limit=100" % (BASE, m["ticker"]))
         if st in (-1, -2):

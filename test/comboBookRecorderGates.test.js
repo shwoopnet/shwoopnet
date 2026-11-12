@@ -1,5 +1,5 @@
 'use strict';
-// Combo book recorder (Nov 12, 2026, research only): quotes, order book depth and trades of high priced Kalshi combo markets, so a paper test of buying NO on them can be priced with real depth.
+// Combo book recorder (Nov 12, 2026, research only): quotes, order book depth and trades of Kalshi combo markets with any posted price, so a paper test of buying NO on them can be priced with real depth.
 // It reads public data, holds no secret, places no order, writes no Firestore, writes only to its own combo-data branch, is not published with the site and stops by itself on 2027-01-31.
 const assert = require('assert');
 const fs = require('fs');
@@ -142,13 +142,46 @@ print(json.dumps({"calls": s.calls, "cov": cov, "books": sum("/orderbook" in u f
   assert.deepStrictEqual(out.files, ['books.csv', 'quotes.csv', 'trades.csv']);
 };
 
-// CB7: only high priced or traded combos are kept, best priced first; an empty side (ask 1.0000) is not a price.
+// CB7: any combo with a posted bid or ask at any price on the yes or the no side, or any volume, is kept (widened Nov 12, 2026); an empty side (bid 0, ask 1.0000) is not a price; the order is
+// tightest yes spread first, then volume, then ticker.
 gates.CB7 = () => {
   const out = py(`
-mk = lambda t, b, a, v="0.00": {"ticker": t, "yes_bid_dollars": b, "yes_ask_dollars": a, "volume_fp": v}
-ms = [mk("LOW", "0.0000", "0.1300"), mk("EMPTY", "0.0000", "1.0000"), mk("HIGH", "0.5000", "0.5500"), mk("EDGE", "0.3000", "0.3500"), mk("TRADED", "0.0100", "0.0200", "3.00"), mk("TOP", "0.8000", "0.8500"), {"yes_bid_dollars": "0.9"}, "junk"]
+mk = lambda t, b, a, v="0.00", nb=None, na=None: dict({"ticker": t, "yes_bid_dollars": b, "yes_ask_dollars": a, "volume_fp": v}, **({"no_bid_dollars": nb} if nb is not None else {}), **({"no_ask_dollars": na} if na is not None else {}))
+ms = [mk("CHEAP5", "0.0000", "0.0500"), mk("ONLYNOBID", "0.0000", "1.0000", "0.00", "0.6000", "1.0000"), mk("EMPTY", "0.0000", "1.0000", "0.00", "0.0000", "1.0000"), mk("TIGHT", "0.5000", "0.5100"),
+      mk("WIDE", "0.1000", "0.9000"), mk("TRADED", "0.0000", "1.0000", "3.00"), mk("TIGHTVOL", "0.2000", "0.2100", "9.00"), mk("NOASK", "0.0000", "1.0000", "0.00", "0.0000", "0.4000"), {"yes_bid_dollars": "0.9"}, "junk"]
 print(json.dumps([x["ticker"] for x in m.pick([x for x in ms if isinstance(x, dict)])]))`);
-  assert.deepStrictEqual(out, ['TOP', 'HIGH', 'EDGE', 'TRADED']);
+  assert.deepStrictEqual(out, ['TIGHTVOL', 'TIGHT', 'WIDE', 'TRADED', 'CHEAP5', 'NOASK', 'ONLYNOBID']);
+};
+
+// CB11: the widened filter admits a combo whose only price is a 5c yes ask, and a combo whose only price is a NO bid; it still drops a combo with nothing posted and no volume.
+gates.CB11 = () => {
+  const out = py(`
+a = {"ticker": "A5C", "yes_bid_dollars": "0.0000", "yes_ask_dollars": "0.0500", "volume_fp": "0.00"}
+b = {"ticker": "BNO", "yes_bid_dollars": "0.0000", "yes_ask_dollars": "1.0000", "no_bid_dollars": "0.7000", "no_ask_dollars": "1.0000", "volume_fp": "0.00"}
+c = {"ticker": "CNONE", "yes_bid_dollars": "0.0000", "yes_ask_dollars": "1.0000", "no_bid_dollars": "0.0000", "no_ask_dollars": "1.0000", "volume_fp": "0.00"}
+print(json.dumps([m.is_selected(a), m.is_selected(b), m.is_selected(c)]))`);
+  assert.deepStrictEqual(out, [true, true, false]);
+  assert.ok(!/HIGH_PRICE/.test(code), 'no price floor is left in the code');
+};
+
+// CB12: the book cap takes the tightest spreads first and is deterministic; the trade cap takes the most traded; no request count rises with the wider filter.
+gates.CB12 = () => {
+  const out = py(`
+import tempfile
+ms = [{"ticker": "T%03d" % i, "yes_bid_dollars": "0.1000", "yes_ask_dollars": "%.4f" % (0.11 + i * 0.001), "volume_fp": "%d.00" % (i % 7)} for i in range(200)]
+urls = []
+def fake(u):
+    urls.append(u)
+    if "/orderbook" in u: return 200, {"orderbook_fp": {"yes_dollars": [["0.1000", "5.00"]], "no_dollars": []}}, "D"
+    if "/trades" in u: return 200, {"trades": []}, "D"
+    return 200, {"markets": ms}, "D"
+s = m.Stream(m.BUDGET, fetch=fake, clock=lambda: 0.0, sleep=lambda d: None)
+m.poll(s, 1.0e9 + 3600, tempfile.mkdtemp())
+books = [u.split("/markets/")[1].split("/")[0] for u in urls if "/orderbook" in u]
+print(json.dumps({"books": books, "calls": s.calls, "trades": [u.split("ticker=")[1].split("&")[0] for u in urls if "/trades" in u]}))`);
+  assert.deepStrictEqual(out.books, Array.from({ length: 40 }, (_, i) => 'T' + String(i).padStart(3, '0')), 'tightest spreads first');
+  assert.strictEqual(out.trades.length, 15);
+  assert.ok(out.calls <= 90);
 };
 
 // CB8: rows are as the exchange returns them; a missing field is empty, never zero; an empty book is no row; levels run best first.
