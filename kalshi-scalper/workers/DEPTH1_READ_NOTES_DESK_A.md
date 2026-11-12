@@ -2,3 +2,9 @@
 Read ONCE as registered (V2's `depth1.py`, frozen features, block C as holdout, on or after 2026-11-14 00:00Z), nothing changed. Report against the registered z 5.27 with z 5.46 beside it.
 **Printed beside the result, a description with no label (Head of R&D, from the Verification Analyst's check that every R6 level's size changes every 2 seconds even at level 5):** how much each size-based feature moves between consecutive 2 second polls at the look, for example the share of looks where the five-level imbalance changes sign within 4 seconds, and for each of the other size-based features the share of looks where its sign differs between the decision poll and the next two polls. It scores nothing and changes no label.
 READ-ONCE MARKER: not yet read.
+
+## Ruling and condition (Nov 12, 2026, Head of R&D, on `DEPTH1_FAMILY_NOTE_NOV12.md`; dated note written before the read, no change to rule, cutoff or script)
+- DEPTH1 is ruled a **book-state rule**; the read on or after 2026-11-14 00:00Z runs exactly as registered.
+- **One condition, written into the result before the read:** the two features that sit in the closed taker order-flow family, **f7 (net tape sweeps) and f6 (thin-side depletion over 60 s, if it is a flow measure)**, are reported as their own lines, and **nothing that rests on either alone can become a lead.** The headline is judged on the registered whole (the 20 tries and the registered bar).
+- **NC15DEPTH1** is ruled OUTSIDE the closed family (resting book state only, no tape) and keeps its normal labels.
+- For the owner's count: CFRTI-B and the Kraken-only version are versions of the same mechanism as CFRTI-K and count as ONE candidate with it. From this lane the Friday candidates are CFRTI-K and PERPBIN1, with NC15DEPTH1 as a registered spare whose data starts Nov 19.
