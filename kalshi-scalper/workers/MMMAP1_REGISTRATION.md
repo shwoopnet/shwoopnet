@@ -48,3 +48,6 @@ A realized spread assumes the maker is filled on every taker trade at the touch;
 
 ## When
 Earliest run: **2026-11-15** (NC15 needs 3 full UTC dates: Nov 12, 13, 14, since Nov 11 started at 19:32Z and is partial; the script runs earlier but every NC15 series then reads "no (dates)"). Offline, about 2 hours. Results go in `workers/MMMAP1_RESULT.md`.
+
+CUTOFF CONSTANT: 2026-11-07T15:00:00Z (`HOURLY_CUTOFF_MS` in `src/scalper/mmmap1.py`; matches MMSIM1's `PINNED_CUTOFF`). Hourly events closing at or after it are dropped before anything is computed.
+READ-ONCE MARKER: not yet read; MMMAP1 reads no hourly held-out event and no outcome, so it has no held-out read of its own; the held-out hourly set is MMSIM1's (marker in workers/MMSIM1_PROTOCOL.md, first read allowed on or after 2026-11-24); after the read: READ ON <date>, commit <hash>

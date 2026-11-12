@@ -2,16 +2,16 @@
 import sys, collections, math, datetime as dt, re
 import numpy as np
 sys.path.insert(0, "/home/user/shwoopnet/kalshi-scalper/src/scalper")
-from mmsim1 import git, pf, parse_ms
+from mmsim1 import git, pf, parse_ms, PINNED_CUTOFF
 from mmsim2 import rd, sim
 from mmhour1 import strikes
-NDEV = 171
+NDEV = 171   # expected development count, used only in the coverage print; the cut is the timestamp constant
 rng = np.random.default_rng(20261111)
 def load():
     names = [f for f in git("ls-tree", "-r", "--name-only", "origin/quote-data").decode().split("\n") if f.startswith("book/") and f.endswith("book.csv.gz")]
     files = [f for f in names if f.split("/")[1] <= "2026-11-07"]
     raw = {f: list(rd(f)) for f in files}
-    ev = sorted({r["close_time"] for rows in raw.values() for r in rows}); cutoff = ev[NDEV]; dev = set(ev[:NDEV])
+    ev = sorted({r["close_time"] for rows in raw.values() for r in rows}); cutoff = PINNED_CUTOFF; dev = {c for c in ev if c < cutoff}   # timestamp constant (Nov 12, 2026)
     books = collections.defaultdict(list); trades = collections.defaultdict(dict)
     for f, rows in raw.items():
         keep = [r for r in rows if r["close_time"] in dev]

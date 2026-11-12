@@ -1,5 +1,5 @@
 """MMSIM1 simulation (workers/MMSIM1_PROTOCOL.md). Reads the `quote-data` branch book and trade files via git; no network. Development = first two thirds of events by close time."""
-import csv, gzip, io, subprocess, sys, collections, math, datetime as dt
+import csv, gzip, io, subprocess, sys, os, collections, math, datetime as dt
 REPO = "/home/user/shwoopnet"
 def git(*a): return subprocess.run(["git", "-C", REPO] + list(a), capture_output=True, check=True).stdout
 PINNED_CUTOFF = "2026-11-07T15:00:00Z"   # close_time strings compare lexically; events closing at or after this are the held-out set
@@ -69,6 +69,12 @@ if __name__ == "__main__":
     HELD = len(sys.argv) > 1 and sys.argv[1] == "heldout"
     if HELD and dt.datetime.now(dt.timezone.utc) < dt.datetime(2026, 11, 24, tzinfo=dt.timezone.utc):
         raise SystemExit("held-out read refused before 2026-11-24 (single read; see MMSIM1_PROTOCOL.md Amendment 1)")
+    if HELD:
+        # read-once: the COMMITTED marker line in the protocol must still say "not yet read" (and carry an allowed date that has come)
+        sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+        from readonce import require_unread
+        require_unread("workers/MMSIM1_PROTOCOL.md", "MMSIM1")
+        print("After this read, replace the marker line in workers/MMSIM1_PROTOCOL.md with 'READ-ONCE MARKER: MMSIM1 READ ON <date>, commit <hash>' and commit it.")
     print("events", len(ev), "dev events", len([c for c in ev if c < cut]), "(held-out third unread)", "tickers", len(books), "trade tickers", len(trades))
     for coef in (0.0, 0.0175):
         res = [r for r in simulate(books, trades, coef) if (r[0] >= cut if HELD else r[0] < cut)]

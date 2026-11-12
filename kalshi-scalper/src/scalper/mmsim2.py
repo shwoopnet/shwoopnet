@@ -1,8 +1,8 @@
-"""MMSIM2 (workers/MMSIM2_PROTOCOL.md). Development events only: the script drops every event closing at or after the cutoff (first 171 events by close time) before simulating. No network."""
+"""MMSIM2 (workers/MMSIM2_PROTOCOL.md). Development events only: the script drops every event closing at or after the cutoff (events closing before PINNED_CUTOFF 2026-11-07T15:00:00Z) before simulating. No network."""
 import csv, gzip, io, subprocess, collections, math, json, sys
 sys.path.insert(0, "/home/user/shwoopnet/kalshi-scalper/src/scalper")
-from mmsim1 import git, pf, parse_ms, fnum, REPO
-NDEV = 171
+from mmsim1 import git, pf, parse_ms, fnum, REPO, PINNED_CUTOFF
+NDEV = 171   # expected development count, a check only; the cut is the timestamp constant
 def rd(name):
     try: return csv.DictReader(io.StringIO(gzip.decompress(git("show", "origin/quote-data:" + name)).decode()))
     except Exception: return []
@@ -13,7 +13,7 @@ def load():
     for f in files:
         rows = list(rd(f)); rawb[f] = rows
         cts |= {r["close_time"] for r in rows}
-    ev = sorted(cts); cutoff = ev[NDEV]; dev = set(ev[:NDEV])
+    cutoff = PINNED_CUTOFF; dev = {c for c in cts if c < cutoff}   # timestamp constant, not an event index (Nov 12, 2026)
     books = collections.defaultdict(list); trades = collections.defaultdict(dict)
     for f, rows in rawb.items():
         keep = [r for r in rows if r["close_time"] in dev]
