@@ -13,7 +13,7 @@ T0 = C.ts("2026-10-16T12:00:00Z")
 iso = lambda t: datetime.fromtimestamp(t, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 def key(S): return datetime.fromtimestamp(S, C.ET).strftime("%y%b%d%H%M").upper()
 
-def build(root, flip_b=False, flip_a=False, after_px=None, a_close_late=None, drop_ref=False, heldout=False, seed=5, n_pairs=120):
+def build(root, flip_b=False, flip_a=False, after_px=None, a_close_late=None, drop_ref=False, drop_entry=False, heldout=False, seed=5, n_pairs=120):
     """n_pairs pairs of players; each pair meets twice, B 40 minutes after A. Returns (lists run, candles run)."""
     rng = random.Random(seed); mk, cd = [], {}
     for i in range(n_pairs):
@@ -39,6 +39,7 @@ def build(root, flip_b=False, flip_a=False, after_px=None, a_close_late=None, dr
                         mid = 0.50
                         if c == lose and fell and t > SA + 600: mid = 0.42
                         if drop_ref and t == SA - C.BEFORE_S: continue
+                        if drop_entry and t == SB - C.ENTRY_S: continue
                         cs.append({"end_period_ts": t, "yes_bid": {"close_dollars": "%.4f" % (mid - 0.01)}, "yes_ask": {"close_dollars": "%.4f" % (mid + 0.01)}})
                     if after_px is not None:
                         for t in range(SB - 240, SB + 900, 60):          # everything AFTER the entry candle (S_B minus 5 minutes)
@@ -79,5 +80,15 @@ over = sum(1 for r in j["requests"] for p in base["pairs"] if p["tickers"][0] in
 check("NOTE (not a leak in the reader): how many pairs sit in a request whose time range runs past their own match's start plus 10 minutes", True, "%d of %d pairs: the landed candle file shows those matches' prices during play" % (over, len(base["pairs"])))
 miss = run(drop_ref=True)
 ms = [l for l in miss["measure"].splitlines() if l.startswith("loser's contract two-sided")]
-check("NOTE: a MISSING candle at the reference minute (Kalshi omits dead minutes) drops the pair; it is counted as 'not two-sided', not separately", True, ms[0] if ms else "")
+check("NOTE: with the candle at the reference minute MISSING for every pair, the count of pairs two-sided there (120 = all carried, 0 = all dropped)", True, ms[0] if ms else "")
+# the carried-candle path (Desk B's Amendment 4, quote_at): only ever a candle at or before the instant, at most CARRY_S earlier
+if hasattr(C, "quote_at"):
+    t = 1_000_000 * 60; X = (0.40, 0.42); cs = getattr(C, "CARRY_S", 300)
+    check("quote_at: a candle exactly CARRY_S earlier is carried; one minute older is not; a LATER candle is never used",
+          C.quote_at({t - cs: X}, t) == (X, "carried") and C.quote_at({t - cs - 60: X}, t)[0] is None and C.quote_at({t + 60: X}, t)[0] is None and C.quote_at({t + 60: (0.9, 0.92), t - 60: X}, t) == (X, "carried"))
+    d0 = run(drop_entry=True); d1 = run(drop_entry=True, after_px=0.97)
+    se = [l for l in d0["measure"].splitlines() if l.strip().startswith("entries that pass")]
+    check("entry candle MISSING for every pair, and the next candles run to 0.97 or 0.03 -> identical counts and cost (the carry looks back, never forward)", counts(d0["measure"]) == counts(d1["measure"]) and d0["rc"] == 0, se[0].strip() if se else "")
+    car = [l for l in d0["measure"].splitlines() if "from an earlier candle" in l]
+    check("the reader prints how many instants were exact and how many carried", bool(car), car[0][:150] if car else "no such line")
 print("\n%d checks, %d FAIL" % (len(res), sum(1 for x in res if not x)))
