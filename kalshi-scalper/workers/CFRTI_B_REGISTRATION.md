@@ -15,3 +15,15 @@ Ruled by the Head of R&D (Nov 12, 2026) after QUOTEVSBOOK1: the quote recorder's
 - **Labels per line (B3, BK):** cash PF 1.3 or better with a positive mean on 50 or more filled rows = RE-TEST lead (forward shadow, lifecycle gate); cash PF under 1.0 on 30 or more filled rows = FALSIFIED; anything else = "no evidence at n = x". A line under 50 filled rows at the sitting is not read again later without a new registration.
 - **Try count: N +2** (B3 and BK), per the Head of R&D; the ledger holds the shared strict N of about 2,113,000 and z 5.46. These are labels for a lead, never a research-bar pass.
 - Script: `desk_a_verify/cfrti_b.py` (development path first; the held-out path joins `cfrti_heldout.py`'s sitting).
+
+## Development figures (Nov 12, 2026; script `desk_a_verify/cfrti_b.py`, run once, nothing tuned)
+    == B3 (three-venue spot) | cheap rows with an R6 book and a model 88 | lost: {'no valid book or spread over 3c': 38, 'no R6 book': 82, 'under 30 changes': 2, 'no trade in 10 s': 3} | edge rows 19
+       fill +6 s (judges)     filled 16 of 19 | cash PF 1.39 | mean +4.64c | wins 3 | no evidence at n = 16
+       fill +2 s              filled 11 of 19 | cash PF 2.18 | mean +12.97c | wins 3 | no evidence at n = 11
+       (for scale: the same edge rows at the book ask seen, no delay: n 19, cash PF 0.84)
+    == BK (Kraken-only spot) | cheap rows with an R6 book and a model 85 | lost: {'no valid book or spread over 3c': 38, 'no R6 book': 82, 'under 30 changes': 4, 'no trade in 10 s': 4} | edge rows 16
+       fill +6 s (judges)     filled 11 of 16 | cash PF 1.16 | mean +2.27c | wins 2 | no evidence at n = 11
+       fill +2 s              filled 10 of 16 | cash PF 2.20 | mean +13.72c | wins 3 | no evidence at n = 10
+       (for scale: the same edge rows at the book ask seen, no delay: n 16, cash PF 1.28)
+
+No evidence at n = 16 (B3) and n = 11 (BK) filled; both are far under the 30 and 50 rows the labels need. Windows without an R6 book (82, before Oct 29 22:15Z or in recorder gaps) and 38 with no valid book or a spread over 3c are not in the sample. The 6 second line fills when the ask is at or below the ask seen after 6 s, so it keeps the rows whose price did not run away; the no-delay line (B3 PF 0.84, BK 1.28) is for scale only. Nothing here is a lead.
