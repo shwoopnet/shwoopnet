@@ -128,6 +128,10 @@ Each stop is applied by the COO (`.claude/agents/ops-coo.md`) or the head of the
 
 Section 4's limits (2 concurrent tests, one per family) are the default. The owner has authorised extra workers for the Friday sweep (Nov 11, 2026); that is recorded here, not a change to section 4.
 
+## Standing permission: Main may merge docs-only pull requests (owner, Nov 12, 2026)
+
+The owner gave Main a standing permission to merge, WITHOUT a typed "merge N", any pull request that changes ONLY documentation: markdown under `docs/`, `CLAUDE.md`, changelog text, and rulebook or charter text other than the owner-only `docs/CHARTER.md`. The owner confirmed it directly in their own words ("Main may merge docs-only PRs without my typed merge. Anything touching code, workflows, recorders, job files, the site or the bot still needs my typed merge N"). Conditions: Main first runs its usual checks (the full test suite, the frontend check, the no-live-figures gate); every such merge is listed in the next 6 hour report with its number and one line of what it recorded. The owner's typed "merge N" is STILL REQUIRED for anything that touches code, tests that gate behaviour, workflows, recorders, job files, the site pages, `functions/`, firestore rules, or any config a recorder or the bot reads. A docs pull request that records a NEW decision the owner has not made is not docs-only for this purpose: Main asks first. This replaces "merges only on the owner's typed word" in section 9 for docs-only pull requests.
+
 ## Numbers the owner may change
 
 2 concurrent tests (was 3); the version takeover test in lifecycle 7g (0.10 profit factor margin, 60 signals); at most 1 test per family; 3 favourite-late shadow rules (1 per underlying); 8 shadow rules in total for other mechanisms; 3 falsified tests to decline a family for good, and 2 NOT_ENOUGH_DATA from one source to close it; 20 overlapping days and Pearson under 0.3 for the correlation check; 5 unique candidates a week on the shadow list; 250 runner minutes a month (the Charter's).
