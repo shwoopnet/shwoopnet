@@ -258,7 +258,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'ESOCTIE_LISTS', 'HOURLYTEMP_LISTS', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_LISTS', 'MAPBREAK_LISTS', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SOCDERIV_LISTS', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'TESTING_LISTS_BUNDLE', 'TIE3_CANDLES']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'ESOCTIE_LISTS', 'HOURLYTEMP_LISTS', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_LISTS', 'MAPBREAK_CANDLES', 'MAPBREAK_LISTS', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SOCDERIV_LISTS', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'TESTING_LISTS_BUNDLE', 'TIE3_CANDLES']);
   assert.ok(!jobs.some((f) => /BALLOTNO|ECONLAG_CANDLES|NHLOT_CANDLES/i.test(f)), 'BALLOTNO and the not-yet-built candle stages are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -293,12 +293,12 @@ gates.KP14 = () => {
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "NOSIDE1_CANDLES_P1", "NOSIDE1_CANDLES_P2", "NOSIDE1_CANDLES_P3", "SPREADCELL1", "SPREADCELL1_REST", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "CFRTI_K_LISTS", "CFRTI_K_PROBE", "CFRTI_K_R6SLICE", "ECONLAG_CALENDAR", "NHLOT_LISTS", "INGAMELAG_M1", "INGAMELAG_M1A", "INGAMELAG_M1B", "INPLAYJUMP_LISTS", "CENSUS_LISTING", "POLAPPR1_CANDLES", "POLAPPR1_CANDLES_P2", "POLAPPR1_CANDLES_P3", "CFRTI_K_CANDLES", "HOURLYTEMP_LISTS", "TESTING_LISTS_BUNDLE", "SOCDERIV_LISTS", "MAPBREAK_LISTS", "ESOCTIE_LISTS", "TIE3_CANDLES"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "NOSIDE1_CANDLES_P1", "NOSIDE1_CANDLES_P2", "NOSIDE1_CANDLES_P3", "SPREADCELL1", "SPREADCELL1_REST", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "CFRTI_K_LISTS", "CFRTI_K_PROBE", "CFRTI_K_R6SLICE", "ECONLAG_CALENDAR", "NHLOT_LISTS", "INGAMELAG_M1", "INGAMELAG_M1A", "INGAMELAG_M1B", "INPLAYJUMP_LISTS", "CENSUS_LISTING", "POLAPPR1_CANDLES", "POLAPPR1_CANDLES_P2", "POLAPPR1_CANDLES_P3", "CFRTI_K_CANDLES", "HOURLYTEMP_LISTS", "TESTING_LISTS_BUNDLE", "SOCDERIV_LISTS", "MAPBREAK_CANDLES", "MAPBREAK_LISTS", "ESOCTIE_LISTS", "TIE3_CANDLES"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', NOSIDE1_CANDLES_P1: 'ok', NOSIDE1_CANDLES_P2: 'ok', NOSIDE1_CANDLES_P3: 'ok', SPREADCELL1: 'ok', SPREADCELL1_REST: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', CFRTI_K_LISTS: 'ok', CFRTI_K_PROBE: 'ok', CFRTI_K_R6SLICE: 'ok', ECONLAG_CALENDAR: 'ok', NHLOT_LISTS: 'ok', INGAMELAG_M1: 'refused', INGAMELAG_M1A: 'ok', INGAMELAG_M1B: 'ok', INPLAYJUMP_LISTS: 'ok', CENSUS_LISTING: 'ok', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok', CFRTI_K_CANDLES: 'ok', HOURLYTEMP_LISTS: 'ok', TESTING_LISTS_BUNDLE: 'ok', SOCDERIV_LISTS: 'ok', MAPBREAK_LISTS: 'ok', ESOCTIE_LISTS: 'ok', TIE3_CANDLES: 'ok' });
-  for (const id of ['NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'ECONLAG_CALENDAR', 'NHLOT_LISTS', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_LISTS', 'CENSUS_LISTING', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'CFRTI_K_CANDLES', 'HOURLYTEMP_LISTS', 'TESTING_LISTS_BUNDLE', 'SOCDERIV_LISTS', 'MAPBREAK_LISTS', 'ESOCTIE_LISTS', 'TIE3_CANDLES']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', NOSIDE1_CANDLES_P1: 'ok', NOSIDE1_CANDLES_P2: 'ok', NOSIDE1_CANDLES_P3: 'ok', SPREADCELL1: 'ok', SPREADCELL1_REST: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', CFRTI_K_LISTS: 'ok', CFRTI_K_PROBE: 'ok', CFRTI_K_R6SLICE: 'ok', ECONLAG_CALENDAR: 'ok', NHLOT_LISTS: 'ok', INGAMELAG_M1: 'refused', INGAMELAG_M1A: 'ok', INGAMELAG_M1B: 'ok', INPLAYJUMP_LISTS: 'ok', CENSUS_LISTING: 'ok', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok', CFRTI_K_CANDLES: 'ok', HOURLYTEMP_LISTS: 'ok', TESTING_LISTS_BUNDLE: 'ok', SOCDERIV_LISTS: 'ok', MAPBREAK_CANDLES: 'ok', MAPBREAK_LISTS: 'ok', ESOCTIE_LISTS: 'ok', TIE3_CANDLES: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'ECONLAG_CALENDAR', 'NHLOT_LISTS', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'INPLAYJUMP_LISTS', 'CENSUS_LISTING', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'CFRTI_K_CANDLES', 'HOURLYTEMP_LISTS', 'TESTING_LISTS_BUNDLE', 'SOCDERIV_LISTS', 'MAPBREAK_CANDLES', 'MAPBREAK_LISTS', 'ESOCTIE_LISTS', 'TIE3_CANDLES']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -378,6 +378,22 @@ gates.KP31 = () => {
     assert.ok(t.every((x) => allow.has(x) && /^[A-Z0-9][A-Z0-9._-]{0,63}$/.test(x)), r.id + ': tickers inside the allowlist');
     assert.ok(t.length * ((r.params.end_ts - r.params.start_ts) / 60) <= 9000, r.id + ': under the 10,000 limit with margin');
     assert.ok(r.params.end_ts < 1794528000, r.id + ': nothing from 2026-11-13T00:00Z on');
+    assert.strictEqual(r.params.period_interval, 1);
+  }
+};
+
+// KP32: MAPBREAK_CANDLES (Testing Desk, owner MAIN) is single-page batched candle requests on one endpoint, cap equals the request count, every request under the endpoint's 10,000 minutes x tickers limit, every ticker in the allowlist, and every end_ts before the 2026-10-23 held-out cut.
+gates.KP32 = () => {
+  const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'MAPBREAK_CANDLES.json'), 'utf8'));
+  assert.strictEqual(c.status, 'active');
+  assert.strictEqual(c.max_requests, c.requests.length);
+  const allow = new Set(c.ticker_allowlist);
+  for (const r of c.requests) {
+    assert.strictEqual(r.path, '/markets/candlesticks');
+    const t = r.params.market_tickers.split(',');
+    assert.ok(t.every((x) => allow.has(x)), 'ticker in allowlist');
+    assert.ok(t.length * ((r.params.end_ts - r.params.start_ts) / 60) <= 10000, 'under the batch limit');
+    assert.ok(r.params.end_ts < 1792713600, 'before the held-out cut');
     assert.strictEqual(r.params.period_interval, 1);
   }
 };

@@ -1257,3 +1257,6 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `INPLAYJUMP_LISTS` (Desk A, registration `kalshi-scalper/workers/inplayjump/INPLAYJUMP_REGISTRATION.md`; file from `claude/idea-desk-a`): 14 requests, at most 71 pages, cap 73: series reads and settled `/markets` lists of the in-play families (tennis challenger and ITF matches, e-basketball, e-soccer, Liga Pro and similar), every list call carrying a `max_close_ts` at the end of its family's development window (nothing at or after 2026-10-23), so no held-out market is listed. Public market lists only, no candles, no decision data. Runner unchanged. Gate KP30. Dispatch order from the Head: after the lists in line.
 
+## kalshi-pull jobs v14: MAPBREAK_CANDLES (Nov 12, 2026, the Testing Desk, the Head of R&D)
+
+`MAPBREAK_CANDLES` (owner MAIN, registration `kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md`): 282 single-page batched one minute candle requests for 7,373 sampled esports contracts, cap 282, every request under the endpoint's 10,000 minutes x tickers limit, every end_ts before 2026-10-23 (development only, nothing held out is read). Public candles, GET only, same limits as every job; the runner and workflow are unchanged. Gate KP32. Dispatch one run after review and send the folder to the Testing Desk.
