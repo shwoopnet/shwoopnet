@@ -166,6 +166,16 @@ kalshi-scalper/workers/forensics/STALE_QUOTE_AUDIT_NOV12.md on claude/forensics-
 - **BLOCKER:** the Stocks Desk session cannot push (repo attach refused; 403 on claude/stocks-desk). Its plan is a local commit only. Nobody pushes for it; reported to Main and the EA. Every paid pull is held until it is fixed.
 - **With the owner (through the EA):** derived results in the public repo (recommended no); keep or raise $25 (recommended keep); an Alpaca data key (recommended no); account type; automated EDGAR reads (only if the owner accepts the contact header EDGAR asks for). No automated read of S&P or Russell sites (terms unread).
 
+### Stock cards, first wave ruled (Nov 12, 17:15Z; spend $0; nothing scored)
+
+The Stocks Desk wrote ten pre-registered mechanisms (local commit 993187ec, not on a remote: the push blocker stands) and dropped six with a one-line reason (turn of month, January tax-loss, pre-FOMC, MAX short, ETF-constituent arbitrage, dividend capture). Bar arithmetic it uses: PF 1.5 is about 0.162 standard deviations an event, so about 1,141 independent events at z 5.46. [research]
+
+- **First wave (the only cards that get data):** S1 overnight against intraday in index ETFs; S2 the same split in single names; S7 the first 30 minutes predicting the last 30. These three can reach the event count; the desk expects them to fail on size of effect. Screens on the same pulls, which cannot pass whatever they show: S3 one-week reversal in illiquid names, S4 opening gap fade in large caps, S5 post-gap drift, S6 leveraged-ETF rebalance in the last 30 minutes.
+- **Deferred, no data bought:** S8 closing imbalance, S9 opening cross, S10 index additions and deletions.
+- **Costed by free estimates:** ranking pull $0.59, pilot $0.30, S1 $0.03, daily bars for 500 names about $5, 1 minute bars for 8 ETFs $6.83: about $12.75 of the $25.
+- **Rulings:** ALL_SYMBOLS is allowed only for daily bars, one calendar month, one dataset at a time, with a recorded estimate under $0.50 (the universe is the top 500 by median daily dollar volume in May 2018, fixed, delisted names kept); development and held-out use one price source and one definition of open and close (no switch to the consolidated file at the 2024-07-01 cutoff); stock tries join the one shared ledger; costs come from data or are marked "assumed".
+- **Two gates before any pull:** (1) registrations and scripts readable on a remote; (2) the owner's answer on the account type: Nasdaq licenses Non-Professional data "only for personal use", so a personal account used for the LLC may not be licensed. Both are with the EA.
+
 ### Measured costs by family, first cut (Forensics, Nov 12 17:00Z)
 
 kalshi-scalper/workers/forensics/FAMILY_COSTS_NOV12.md on claude/forensics-desk (af5fd4d). Recorded data only, no rule scored, zero tries. [research]

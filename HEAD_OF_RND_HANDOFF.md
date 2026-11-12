@@ -46,6 +46,8 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 - DATED READS (Desk A runs them): DEPTH1 on or after Nov 14 00:00Z; MMMAP1 Nov 15; the CFRTI sitting from Nov 20 (all versions, one sitting); MMSIM1 and QUOTE2B held-outs Nov 24 (record only, the family is closed); S3 Nov 26 (Desk B). Refinement: OICORE forward read Nov 13 with the within-price-bucket comparison; FLIP1, FLOOR1, THIN1 from the owner's export on or after Nov 14; Monday rotation report Nov 16.
 - DEFECT BEING FIXED: the Nov 20 script's "book replay" lines replayed the stale quote file; Desk A is replacing them with a true R6 replay using Forensics' code. Check the commit before Nov 20.
 
+- STOCKS (17:15Z): ten cards written, first wave S1, S2, S7 plus four screens, costed about $12.75; NO pull until (1) the Stocks Desk can push (repo attach refused; with Main and the EA) and (2) the owner answers whether the Databento account is personal or business (Nasdaq Non-Professional data is "only for personal use"). Nothing derived from Databento goes in the repo.
+
 ## Owed to me at the time of writing
 
 - Desk B: the RE-OPEN RANKING (18:30Z); top 3 registered (21:30Z); the untouched-family census first cut (about 22:00Z, slipped by the usage limit) and ten new cards this week, the first three by Nov 13 16:00Z.
