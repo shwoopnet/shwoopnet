@@ -10,7 +10,7 @@ What I read before writing this: `CLAUDE.md`, `docs/RND_CHARTER.md`, `docs/STRAT
 - Block H (second read, read ONCE, after D's output is committed, with no rule changed in between): `close_time` from 2026-11-05T00:00:00Z up to and including 2026-11-08T23:59:59Z.
 - Nothing closing on or after 2026-11-09T00:00:00Z is used (that block is frozen for V2's DEPTH1; a row for a later close found in a run file is dropped on its `close_time` before anything is computed).
 - No rule below has a tunable parameter chosen on D. D and H are two periods of one pre-specified measurement; results are reported for D, H and pooled. If any rule is changed after D is seen, H is void for that rule and the report says so.
-- READ-ONCE MARKER (replaced by a committed line after each read): `EXITREPLAY1 D: NOT RUN`, `EXITREPLAY1 H: NOT RUN`, `ENTRYREPLAY1 D: NOT RUN`, `ENTRYREPLAY1 H: NOT RUN`.
+- READ-ONCE MARKER (replaced by a committed line after each read): `EXITREPLAY1 D: READ ON 2026-11-12 (results/EXITREPLAY1_D.json)`, `EXITREPLAY1 H: NOT RUN`, `ENTRYREPLAY1 D: READ ON 2026-11-12 (results/ENTRYREPLAY1_D.json; one run died on a data-type bug before printing anything, fixed, no rule changed)`, `ENTRYREPLAY1 H: NOT RUN`.
 
 ## Common data rules
 
