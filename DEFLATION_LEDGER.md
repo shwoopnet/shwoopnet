@@ -26,6 +26,10 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | S3 combo house side (NO at 60c to 90c, one band) | Desk B | 1 | registered Nov 12 (ed6c0bb); paper; development read on or after Nov 26 |
 | ECONLAG (4 hour exit after a release, one arm; paper screen only) | Desk B | 1 | cutoff pinned; count-only stages first; not read |
 | CFRTI-K lead/lag measurement | Desk A | 0 | registered before the candles are opened |
+| CFRTI-B: signal and price from the R6 order book; B3 (three-venue spot) and BK (Kraken-only spot) | Desk A | 2 | approved Nov 12, to be registered before Nov 20; read once in the CFRTI sitting |
+| FILLHAIRCUT1, GOLDHAIRCUT1, QUOTEVSBOOK1 (measurements on recorded books and quotes; no outcome loaded) | Live-Data Forensics | 0 | done Nov 12; QUOTEVSBOOK1: the quote recorder's market list is a copy refreshed about every 11 seconds |
+| DEPTH1 (R6 order-book features, gold and Bitcoin; V2, registered Oct 30) | Desk A (was V2) | 20, counted at registration | unread; one read on or after 2026-11-14 |
+| RAINCAL (V2, registered Oct 31) | none | 2, counted at registration | RETIRED unread Nov 12 (closed family; recorder coverage about 42 percent) |
 
 ---
 
