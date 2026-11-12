@@ -32,21 +32,34 @@ def alive_in_play(by_ts, t):
     return n >= 3
 def in_play(kind, by_ts, t, S):
     return (t >= S + 60) if kind == "clock" else alive_in_play(by_ts, t)
+def _all_ts(cs): return sorted({t for d in cs.values() for t in d})
+def qualifying(cs, tickers, kind, K, S, t):
+    """contracts of the match with a qualifying jump at minute t (jump on the two-sided minute-end mid, volume > 0, mid at t-1 in the band, in play). Uses minutes t-1 and t and the past only."""
+    q = []
+    for tk in tickers:
+        a, b = cs[tk].get(t - 60), cs[tk].get(t)
+        if not (two_sided(a) and two_sided(b)) or (b.get("volume") or 0) <= 0: continue
+        if not in_play(kind, cs[tk], t, S): continue
+        if mid(b) - mid(a) >= K["jump"] - 1e-9 and K["pre_jump_mid_band"][0] - 1e-9 <= mid(a) <= K["pre_jump_mid_band"][1] + 1e-9: q.append(tk)
+    return q
+def elapsed_base(cs, tickers, kind, S):
+    """the origin of "elapsed minute": clock families the ticker clock S; tennis the match's first in-play minute"""
+    return S if kind == "clock" else first_in_play(cs, tickers, kind, S)
+def first_in_play(cs, tickers, kind, S):
+    """the match's first in-play minute: clock families S + 60 s; tennis the first minute at which the alive rule holds for either contract (backward looking only)."""
+    if kind == "clock": return S + 60 if S is not None else None
+    for t in _all_ts(cs):
+        if any(alive_in_play(cs[tk], t) for tk in tickers): return t
+    return None
 def match_decision(ev_close, tickers, candles, kind, K, drops, costs=None):
-    """-> dict(kind of outcome..) for ONE match: the first qualifying jump and its entry, or None. candles: {ticker: {ts: candle}}. Uses nothing after the entry minute."""
+    """-> dict for ONE match: the first qualifying jump and its entry, or None. candles: {ticker: {ts: candle}}. Uses nothing after the entry minute; the close is not used."""
     S = None
     if kind == "clock":
         S = clock_start(tickers[0])
-        if S is None: drops["start not derivable from the ticker"] += 1; return None      # Amendment 1: no per-match close guard; the family-level share is printed in run_family
+        if S is None: drops["start not derivable from the ticker"] += 1; return None
     cs = {tk: candles.get(tk, {}) for tk in tickers}
-    all_ts = sorted({t for d in cs.values() for t in d})
-    for t in all_ts:
-        q = []
-        for tk in tickers:
-            a, b = cs[tk].get(t - 60), cs[tk].get(t)
-            if not (two_sided(a) and two_sided(b)) or (b.get("volume") or 0) <= 0: continue
-            if not in_play(kind, cs[tk], t, S): continue
-            if mid(b) - mid(a) >= K["jump"] - 1e-9 and K["pre_jump_mid_band"][0] - 1e-9 <= mid(a) <= K["pre_jump_mid_band"][1] + 1e-9: q.append(tk)
+    for t in _all_ts(cs):
+        q = qualifying(cs, tickers, kind, K, S, t)
         if not q: continue
         if len(q) > 1: drops["two contracts qualified in the same minute"] += 1; return None
         tk = q[0]; e = cs[tk].get(t + 60)
@@ -55,25 +68,30 @@ def match_decision(ev_close, tickers, candles, kind, K, drops, costs=None):
         lo, hi = K["entry_ask_band"]
         if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: drops["entry ask or spread outside the band"] += 1; return None
         price = round(e["ask"] + K["slip"], 6)
+        fip = elapsed_base(cs, tickers, kind, S)
         ow = (e["ask"] - mid(e)) + fee_up(price)                          # one-way entry cost (Head's ruling, hold to settlement): ask minus mid plus the fee as charged
-        return dict(ticker=tk, t=t, price=price, one_way=ow, mid=mid(e), early=(ev_close - t) > 6 * 3600, into_play=(t - S) / 60.0 if S else None)
+        return dict(ticker=tk, t=t, price=price, one_way=ow, mid=mid(e), early=(ev_close - t) > 6 * 3600, elapsed=(t - fip) / 60.0 if fip is not None else None, fip=fip)
     return None
-def placebo_decision(ev_close, tickers, candles, kind, K, drops):
+def placebo_try(tickers, candles, kind, K, e_min):
+    """Amendment 2, point 3: in this (placebo) match, at its own elapsed minute e: the minute exists and is in play, no contract has made a qualifying jump at or before it, neither mid moved 5c or more over the previous 5 minutes;
+    then buy the higher-mid contract at the close of minute e + 1 at ask + 1c if the ask is in the entry band and the spread within the cap. -> dict or None. Uses nothing later than its own minute e + 1."""
     S = None
     if kind == "clock":
         S = clock_start(tickers[0])
         if S is None: return None
     cs = {tk: candles.get(tk, {}) for tk in tickers}
-    for t in sorted({t for d in cs.values() for t in d}):
-        if not all(two_sided(cs[tk].get(t)) and two_sided(cs[tk].get(t - 300)) for tk in tickers): continue
-        if not all(in_play(kind, cs[tk], t, S) for tk in tickers): continue
-        if any(abs(mid(cs[tk][t]) - mid(cs[tk][t - 300])) >= 0.05 - 1e-9 for tk in tickers): continue
-        tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)    # Head's ruling (a): the SAME instant and price rule as the real bet: t+1, ask plus 1c, same band and spread
-        if not two_sided(e): return None
-        lo, hi = K["entry_ask_band"]
-        if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: return None
-        return dict(ticker=tk, t=t, price=round(e["ask"] + K["slip"], 6), into_play=(t - S) / 60.0 if S else None)
-    return None
+    fip = elapsed_base(cs, tickers, kind, S)
+    if fip is None: return None
+    t = int(round(fip + e_min * 60))
+    if not all(two_sided(cs[tk].get(t)) and two_sided(cs[tk].get(t - 300)) for tk in tickers): return None
+    if not any(in_play(kind, cs[tk], t, S) for tk in tickers) or (kind == "clock" and t < S + 60): return None
+    if any(qualifying(cs, tickers, kind, K, S, u) for u in _all_ts(cs) if u <= t): return None
+    if any(abs(mid(cs[tk][t]) - mid(cs[tk][t - 300])) >= 0.05 - 1e-9 for tk in tickers): return None
+    tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)
+    if not two_sided(e): return None
+    lo, hi = K["entry_ask_band"]
+    if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: return None
+    return dict(ticker=tk, t=t, price=round(e["ask"] + K["slip"], 6), elapsed=e_min)
 def net_of(price, win):
     f = fee_up(price); return (1 - price - f) if win else (-price - f)
 def pf(v):
@@ -100,7 +118,7 @@ def run_family(fam, K, markets, candles, bounds):
     L.append("matches with a qualifying jump and an entry that passes: %d | not a bet and why: %s" % (len(dec), dict(drops)))
     if not costs: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
     ow = st.median(costs)
-    L.append("COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over %d qualifying decisions = %.3f (kill above %.2f); bets made more than 6 hours before the close: %d; median minutes into play of the bet: %s" % (len(costs), ow, ONE_WAY_KILL, sum(d["early"] for _, _, d in dec), "%.1f" % st.median(d["into_play"] for _, _, d in dec) if (kind == "clock" and dec) else "n/a"))
+    L.append("COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over %d qualifying decisions = %.3f (kill above %.2f); bets made more than 6 hours before the close: %d; median elapsed minute of the bet: %s; (cost line and family clock check: selected on development, frozen for the held-out)" % (len(costs), ow, ONE_WAY_KILL, sum(d["early"] for _, _, d in dec), "%.1f" % st.median(d["elapsed"] for _, _, d in dec if d["elapsed"] is not None) if dec else "n/a"))
     if ow > ONE_WAY_KILL + 1e-9: L.append("FAMILY CLOSED ON COST; no result of it is read"); return L, None
     if not dec: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
     bets = []; voids = 0
@@ -118,10 +136,23 @@ def run_family(fam, K, markets, candles, bounds):
     zm = (st.mean(nets) / (st.stdev(nets) / math.sqrt(n))) if n > 2 and st.stdev(nets) > 0 else None
     zmin = min(x for x in (z, zm) if x is not None) if (z is not None or zm is not None) else None
     topshare = max(byday.values()) / sum(nets) if sum(nets) > 0 else None
-    plb = []
-    for e, tks, c in matches:
-        d = placebo_decision(c, tks, cand, kind, K, drops)
-        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] == "void", nores=markets[d["ticker"]]["result"] not in ("yes", "no", "void"), into_play=d["into_play"], day=day(c)))
+    plb = []; nplb_none = 0; used = set()                     # Amendment 2, point 3: matched one for one, the NEXT unused match of the family, up to 20, in (scheduled start or market open, ticker) order
+    def okey(m):
+        e, tks, c = m
+        return (clock_start(tks[0]) if kind == "clock" else min((markets[t].get("open") or 0) for t in tks), tks[0])
+    order = sorted(range(len(matches)), key=lambda i: okey(matches[i])); pos = {i: p for p, i in enumerate(order)}
+    mindex = {m[0]: i for i, m in enumerate(matches)}
+    for e, c, d in sorted(dec, key=lambda x: okey(matches[mindex[x[0]]])):
+        if d["elapsed"] is None: nplb_none += 1; continue
+        got = None
+        for p in range(pos[mindex[e]] + 1, min(pos[mindex[e]] + 1 + 20, len(order))):
+            j = order[p]
+            if j in used: continue
+            ge, gtks, gc = matches[j]; r = placebo_try(gtks, cand, kind, K, d["elapsed"])
+            if r: used.add(j); got = dict(price=r["price"], ticker=r["ticker"], elapsed=r["elapsed"], close=gc); break
+        if got is None: nplb_none += 1; continue
+        res = markets[got["ticker"]]["result"]
+        plb.append(dict(price=got["price"], win=res == "yes", void=res == "void", nores=res not in ("yes", "no", "void"), into_play=got["elapsed"], day=day(got["close"])))
     bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
     pb = collections.defaultdict(list)
     for p in plb:
@@ -138,7 +169,7 @@ def run_family(fam, K, markets, candles, bounds):
     h1, h2 = pf(nets[:0] or [b["net"] for b in bets[:h]]), pf([b["net"] for b in bets[h:]])
     L.append("bets %d | wins %d | mean price paid %.3f | cash PF %s | net %+.2fc a contract | halves by date PF %s / %s | share paid 70c to 85c %.1f%% | largest day share of net %s | z (days) %s | z (matches, one bet each) %s | the smaller is used: %s" %
              (n, sum(b["win"] for b in bets), st.mean(b["price"] for b in bets), "%.2f" % pf(nets), 100 * rule_mean, h1 and "%.2f" % h1, h2 and "%.2f" % h2, 100 * sum(1 for b in bets if b["price"] >= 0.70) / n, topshare and "%.0f%%" % (100 * topshare), z and "%.2f" % z, zm and "%.2f" % zm, zmin and "%.2f" % zmin))
-    L.append("PLACEBO (registered: first quiet in-play minute, the higher-mid contract): %d placebo bets; median minutes into play %s (rule %s); net at the rule's price mix %s; difference %s (se %s)" % (len(plb), ("%.1f" % st.median(p["into_play"] for p in plb)) if plb and kind == "clock" else "n/a", ("%.1f" % st.median(d["into_play"] for _, _, d in dec)) if kind == "clock" else "n/a", "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
+    L.append("PLACEBO (Amendment 2, matched one for one): %d placebo bets, %d bets with no placebo (counted); median elapsed minute %s (rule %s); net at the rule's price mix %s; difference %s (se %s)" % (len(plb), nplb_none, ("%.1f" % st.median(p["into_play"] for p in plb)) if plb else "n/a", ("%.1f" % st.median(d["elapsed"] for _, _, d in dec if d["elapsed"] is not None)) if dec else "n/a", "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
     p = pf(nets)
     if n < K["min_development_bets"]: lab = "NOT_ENOUGH_DATA at n = %d" % n
     elif p < 1.0 or (h1 is not None and h1 < 1.0) or (h2 is not None and h2 < 1.0): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
@@ -252,6 +283,15 @@ def selftest():
     pm = [{"price": 0.54, "win": False, "void": False, "nores": True}]
     assert -fee_up(0.54) == (-fee_up(pm[0]["price"]) if (pm[0]["void"] or pm[0]["nores"]) else net_of(0.54, False))
     # the pilot never reads a result: strip them and it still runs
+    def fam2(n, seed):
+        mk_, cd_ = fam(n, 0.8, seed=seed)
+        for i, ev in enumerate(sorted({m["event"] for m in mk_.values()})):
+            if i % 2:                                                                  # odd matches stay flat: they can serve as placebo matches
+                for tk in [t for t, m in mk_.items() if m["event"] == ev]:
+                    for c in cd_[tk]: c["bid"] = 0.39 if tk.endswith("AAA") else 0.59; c["ask"] = 0.41 if tk.endswith("AAA") else 0.61
+        return mk_, cd_
+    mk, cd = fam2(100, 9); L9, b9 = run_family(FAMILY, K, mk, cd, far)
+    assert len(b9) == 50 and any("PLACEBO (Amendment 2, matched one for one): 50 placebo bets, 0 bets with no placebo" in x for x in L9), L9
     mk, cd = fam(60, 0.8, seed=7)
     for m in mk.values(): m.pop("result")
     P = pilot(FAMILY, K, mk, cd, far); assert "NO result read" in P[0] and "median one-way cost 0.0" in P[0], P
@@ -260,7 +300,21 @@ def selftest():
     for k in range(0, 12):
         t = _S + 60 * k
         for tk, m in ((_A, 0.60), (_B, 0.40)): pc[tk][t] = dict(ts=t, bid=round(m - .01, 4), ask=round(m + .01, 4), volume=3.0)
-    pd = placebo_decision(_S + 1800, [_A, _B], pc, "clock", K, collections.Counter()); assert pd and pd["ticker"] == _A and pd["t"] == _S + 300 and abs(pd["price"] - 0.62) < 1e-9, pd
+    cpc = {tk: dict(d_) for tk, d_ in pc.items()}
+    pd = placebo_try([_A, _B], cpc, "clock", K, 5); assert pd and pd["ticker"] == _A and pd["t"] == _S + 300 and abs(pd["price"] - 0.62) < 1e-9, pd      # elapsed 5 minutes from S, bought at the close of the next minute
+    assert placebo_try([_A, _B], cpc, "clock", K, 0) is None                                  # t-300 candle does not exist at elapsed 0
+    # a qualifying jump at or before the placebo minute disqualifies the match
+    jc = {tk: dict(d_) for tk, d_ in pc.items()}
+    for k in range(3, 12):
+        t = _S + 60 * k
+        jc[_A][t] = dict(ts=t, bid=0.70, ask=0.72, volume=9.0); jc[_B][t] = dict(ts=t, bid=0.28, ask=0.30, volume=3.0)
+    assert placebo_try([_A, _B], jc, "clock", K, 6) is None
+    # a 5c move over the previous 5 minutes disqualifies it too
+    mc = {tk: dict(d_) for tk, d_ in pc.items()}
+    for k in range(5, 12):
+        t = _S + 60 * k
+        mc[_A][t] = dict(ts=t, bid=0.64, ask=0.66, volume=0.0); mc[_B][t] = dict(ts=t, bid=0.34, ask=0.36, volume=0.0)
+    assert placebo_try([_A, _B], mc, "clock", K, 6) is None
     DEV_BOUNDS = None
     try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("default is not closed")
     except SystemExit: pass
