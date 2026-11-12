@@ -1,0 +1,186 @@
+{
+ "job_id": "NOSIDE1_LISTS",
+ "owner": "REFINEMENT",
+ "registration": "kalshi-scalper/refine_tools/NO_ARM_APPROVAL_REGISTRATION.md",
+ "purpose": "Rank 1, stage 1 of the approval NO-side pull (W-NO-ARM1): the settled market lists of the 7 approval and generic ballot series, so stage 2 can name every market. No price is scored.",
+ "heldout": "W-NO-ARM1: the newest third of each series is listed here but is not requested in stage 2 and is not scored (NOSIDE1_CUTS.json)",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXAPRPOTUS",
+  "KXAPRPOTUSD",
+  "KXGENERICBALLOT",
+  "KXGENERICBALLOTVOTEHUB",
+  "KXTRUMPAPPROVE",
+  "KXVHGCB",
+  "KXVOTEHUBTRUMPUPDOWN"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 56,
+ "requests": [
+  {
+   "id": "live_KXAPRPOTUS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXAPRPOTUS",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUS",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXAPRPOTUSD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUSD",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXAPRPOTUSD",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXAPRPOTUSD",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXGENERICBALLOT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGENERICBALLOT",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXGENERICBALLOT",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXGENERICBALLOT",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXGENERICBALLOTVOTEHUB",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGENERICBALLOTVOTEHUB",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXGENERICBALLOTVOTEHUB",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXGENERICBALLOTVOTEHUB",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXTRUMPAPPROVE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXTRUMPAPPROVE",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXTRUMPAPPROVE",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXVHGCB",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVHGCB",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXVHGCB",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVHGCB",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "live_KXVOTEHUBTRUMPUPDOWN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVOTEHUBTRUMPUPDOWN",
+    "status": "settled",
+    "limit": 1000
+   },
+   "max_pages": 4
+  },
+  {
+   "id": "hist_KXVOTEHUBTRUMPUPDOWN",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVOTEHUBTRUMPUPDOWN",
+    "limit": 1000
+   },
+   "max_pages": 4
+  }
+ ],
+ "notes": "At most 56 requests (7 series x 2 lists x 4 pages). Stage 2 (NOSIDE1_CANDLES) has the rest of the registered 1,200 total, so lists plus candles never pass 1,200.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

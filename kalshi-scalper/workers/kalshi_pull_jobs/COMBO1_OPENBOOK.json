@@ -1,0 +1,66 @@
+{
+ "job_id": "COMBO1_OPENBOOK",
+ "owner": "V2",
+ "registration": "kalshi-scalper/workers/COMBO1_PROTOCOL.md",
+ "purpose": "Rank 4, COMBO1 open book: one page of 100 OPEN combos in each of 3 collections. Does any open combo show a real two-sided quote now? Zero quoted combos closes COMBO1.",
+ "heldout": "none",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXMVENBASINGLEGAME",
+  "KXMVENFLSINGLEGAME",
+  "KXMVESPORTSMULTIGAMEEXTENDED"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 3,
+ "requests": [
+  {
+   "id": "open_KXMVENBASINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENBASINGLEGAME",
+    "status": "open",
+    "limit": 100
+   }
+  },
+  {
+   "id": "open_KXMVENFLSINGLEGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVENFLSINGLEGAME",
+    "status": "open",
+    "limit": 100
+   }
+  },
+  {
+   "id": "open_KXMVESPORTSMULTIGAMEEXTENDED",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMVESPORTSMULTIGAMEEXTENDED",
+    "status": "open",
+    "limit": 100
+   }
+  }
+ ],
+ "notes": "Three requests, the cursor is not followed (no max_pages).",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

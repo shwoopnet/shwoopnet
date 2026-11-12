@@ -1,0 +1,57 @@
+# kalshi-pull: a manual pull of Kalshi's public market data (Nov 12, 2026)
+
+**OWNER-ACCEPTED TERMS RISK.** The owner waived reading Kalshi's Developer Agreement and Terms of Use on Nov 12, 2026 ("just go on this already -- ignore the terms"). The two pages were NOT read (HTTP 429 to every fetch, archive copy also unreachable). This is NOT a finding that automated reads are allowed. It is the same treatment as the Yahoo market strip: a known, unresolved terms question that the owner chose to carry. If Kalshi objects, delete `.github/workflows/kalshi-pull.yml` and the `kalshi-pull-data` branch.
+
+## What it is
+
+A workflow a person starts by hand from the Actions tab. It reads one job file from `kalshi-scalper/workers/kalshi_pull_jobs/` on main, checks every request in it, sends them one at a time to Kalshi's public API, and pushes the raw answers (gzipped) to its own branch, `kalshi-pull-data`. It exists because research pulls from the shared sandbox are throttled and three teams queue behind one budget. Nothing triggers it: no schedule, no push, no pull request. Jobs ship in this change and DO NOT RUN until a person dispatches one.
+
+## The rate, stated plainly
+
+| Limit | Value |
+|---|---|
+| Requests a second | at most 1 request a second (one stream, no parallel requests; a job file can only slow this down) |
+| Requests a run | at most 1,200 (a hard constant); each job file sets its own lower cap, pages and 429 retries count |
+| After a 429 | wait 5 seconds, then 10, doubling to a 60 second ceiling, ask the same request again; THREE 429s in a row end the run |
+| Other failures | three in a row (5xx, a redirect, no answer) end the run; a 404 is an answer |
+| Answer size | 5 MB an answer, 200 MB a run |
+| Run time | 40 minutes in the script, 50 in the workflow |
+| Runs a day | 6 real runs per UTC day (counted from the folders already on the data branch); a dry run does not count |
+| Runner minutes | about 2 for 60 requests, about 6 for 300, about 25 to 30 for the full 1,200 (checkout and push add under a minute); free on a public repository |
+| Stop date | 2027-02-28 23:59 UTC, checked in the workflow and in the script |
+
+It never rotates addresses, never uses a proxy and never retries around a refusal. The pace is deliberately conservative: if the first runs see 429s, lower the pace by a reviewed edit, do not add retries.
+
+## What it can and cannot ask
+
+- One host, pinned in code: `api.elections.kalshi.com`, base path `/trade-api/v2`, https only.
+- GET only. No key, no auth header, no cookie, no body. The only secret in the workflow is the built-in token, used to push the data branch.
+- Redirects are refused (a 3xx is a failed read). The User-Agent is `shwoopnet-research-pull` (honest, generic, no personal details).
+- Every request in a job file must match one of the job's `allowed_endpoints` patterns, may use only the parameters that endpoint lists, and every ticker or series in a path or parameter must be in the job's allowlists. Account, portfolio, order, key and exchange paths are refused whatever the job says. Values with `/ \ ? & # % = @ :`, `..`, a space or a control character are refused. The paging cursor is the only thing taken from an answer into a later request, and only if it is a plain token.
+- A body that is not a JSON object is stored and never read for anything. An answer over 5 MB is cut and marked `truncated`.
+
+## Where the answers go
+
+Branch `kalshi-pull-data` (an orphan branch created by the first real run), never main, never published with the site (`_config.yml` excludes the code; the branch is not the Pages source). Layout: `pull/<JOB_ID>/<UTC time>_<run id>/` with `0001.json.gz` ... (the raw body of request N), `manifest.json` (the job as run, one row per request with status, bytes, sha256, the server Date header) and `STATUS` (complete, stopped_at_cap, stopped_429, stopped_failures, stopped_time or stopped_size). The branch is public, so everything on it is public; it can only hold public market data because the script holds no key.
+
+## How to run a job
+
+1. Actions tab, `kalshi-pull`, Run workflow, choose the job. The default is a DRY RUN: it checks the job file, prints the URLs to the run summary and sends nothing.
+2. Read the dry run. Run again with `dry_run` set to `false` to send the requests. Dispatch is for the owner or Main, one pull at a time (the concurrency group never overlaps two).
+
+## The first jobs, in rank order
+
+| Rank | Job | Requests (cap) | State |
+|---|---|---|---|
+| 1 | `NOSIDE1_LISTS` then `NOSIDE1_CANDLES` (the approval NO-side pull, W-NO-ARM1) | stage 1 at most 56; stage 2 gets the rest of the registered 1,200 total | stage 1 ready; stage 2 is built from stage 1's answers by `build_noside1_candles.py` and reviewed before it can run |
+| 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, 55 tickers each | NOT RUNNABLE yet: the registration needs its fixed event list committed first, and it is not in the repository |
+| 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
+| 4 | `COMBO1_OPENBOOK` | 3 | ready |
+
+Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two waiting jobs are kept from running.
+
+Stage 1 of the NO-side pull asks for market lists, not events, because the cuts file holds event tickers only. Stage 2 uses the registered rules: development events only (the oldest two thirds of each series, the held-out third is never requested), round robin over the series, hourly candles from two days before the close.
+
+## Files
+
+`scripts/kalshi_pull.py`, `.github/workflows/kalshi-pull.yml`, `kalshi-scalper/workers/kalshi_pull_jobs/` (the job files, `NOSIDE1_CUTS.json` and `build_noside1_candles.py`), `test/kalshiPullGates.test.js`. The request checks follow V2's `pullrunner.py` (host rule, path patterns, allowlists, 429 stop); the pace, 429 limit and output differ on purpose.
