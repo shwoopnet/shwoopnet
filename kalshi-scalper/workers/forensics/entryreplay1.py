@@ -153,6 +153,15 @@ def summarize(G):
     o["maker_pessimistic_fee_25pct_of_taker"] = {k: v for k, v in maker(B, "m_fill_pess", 0.25).items() if k in ("pf", "mean_c_per_filled_contract")}
     M = B[B["m_placed"]]
     o["maker_through_share"] = round(float(M["m_through"].mean()), 4) if len(M) else None
+    # Added AFTER both blocks were read (descriptive, no try): the paired cost figure. Per window, per contract ordered:
+    # the resting order's cash result minus the taker's at the look ask (T0), same windows, same outcome.
+    if len(M):
+        f = M["m_fill_pess"].to_numpy() / QTY
+        mk = f * (M["win"] - M["m_px"]).to_numpy(); tk0 = M["t0_pnl"].to_numpy()
+        d = mk - tk0; lo, hi = R.boot(d, M["close_ms"].to_numpy(), np.mean)
+        o["paired_maker_pess_minus_T0_c"] = [cents(d.mean()), cents(lo), cents(hi)]
+        o["paired_parts_c"] = {"price_and_fee_saved_on_filled": cents((f * (M["ask0"] + R.fee(M["ask0"]) - M["m_px"])).mean()),
+                               "given_up_on_unfilled": cents(((1 - f) * (M["win"] - M["ask0"] - R.fee(M["ask0"]))).mean())}
     return o
 
 

@@ -1,0 +1,462 @@
+{
+ "test": "ENTRYREPLAY1",
+ "block": "POOLED",
+ "counts": {
+  "windows_listed": 737,
+  "dropped_no_result_or_gap": 0,
+  "dropped_no_look_poll": 17
+ },
+ "note": "cents per contract; PF cash; intervals 95% by resampling windows",
+ "KXBTC15M": {
+  "windows_with_look": 720,
+  "in_band": 349,
+  "mean_ask_at_look_c": 26.402,
+  "mean_spread_at_look_c": 0.921,
+  "cheap_side_win_rate": 0.2665,
+  "median_queue_at_bid": 2020.0,
+  "taker_T0_at_look_ask": {
+   "n": 349,
+   "fill_rate": 1.0,
+   "mean_px_c": 26.402,
+   "win_rate": 0.2665,
+   "pf": 0.948,
+   "pf_ci": [
+    0.7309,
+    1.2061
+   ],
+   "mean_c": -1.004
+  },
+  "taker_T1_limit_plus_1c_after_1s": {
+   "n": 273,
+   "fill_rate": 0.7822,
+   "mean_px_c": 24.256,
+   "win_rate": 0.2381,
+   "pf": 0.913,
+   "pf_ci": [
+    0.6735,
+    1.2071
+   ],
+   "mean_c": -1.628,
+   "pf_fee_rounded_10lot": 0.91,
+   "unfilled": {
+    "n": 76,
+    "win_rate": 0.3684,
+    "mean_ask0_c": 29.934,
+    "t0_pf_if_filled_at_look_ask": 1.291
+   }
+  },
+  "taker_T5_limit_plus_1c_after_5s": {
+   "n": 254,
+   "fill_rate": 0.7278,
+   "mean_px_c": 22.934,
+   "win_rate": 0.2598,
+   "pf": 1.114,
+   "pf_ci": [
+    0.8117,
+    1.4744
+   ],
+   "mean_c": 1.917,
+   "pf_fee_rounded_10lot": 1.111,
+   "unfilled": {
+    "n": 95,
+    "win_rate": 0.2842,
+    "mean_ask0_c": 29.417,
+    "t0_pf_if_filled_at_look_ask": 0.89
+   }
+  },
+  "maker_pessimistic": {
+   "orders": 349,
+   "orders_with_fill": 344,
+   "fill_rate_orders": 0.9857,
+   "contracts_filled_share": 0.9857,
+   "mean_px_c": 25.344,
+   "win_rate_contracts": 0.2587,
+   "pf": 1.03,
+   "pf_ci": [
+    0.7925,
+    1.3204
+   ],
+   "mean_c_per_filled_contract": 0.528,
+   "mean_c_per_resting_order_per_contract": 0.52,
+   "unfilled_orders": {
+    "n": 5,
+    "win_rate": 0.8,
+    "mean_bid_c": 30.8
+   },
+   "t1_taker_same_windows": {
+    "n": 270,
+    "fill_rate": 0.7849,
+    "mean_px_c": 24.23,
+    "win_rate": 0.2333,
+    "pf": 0.889,
+    "pf_ci": [
+     0.6622,
+     1.1785
+    ],
+    "mean_c": -2.076,
+    "pf_fee_rounded_10lot": 0.887,
+    "unfilled": {
+     "n": 74,
+     "win_rate": 0.3514,
+     "mean_ask0_c": 30.031,
+     "t0_pf_if_filled_at_look_ask": 1.191
+    }
+   }
+  },
+  "maker_optimistic": {
+   "orders": 349,
+   "orders_with_fill": 347,
+   "fill_rate_orders": 0.9943,
+   "contracts_filled_share": 0.9943,
+   "mean_px_c": 25.408,
+   "win_rate_contracts": 0.2622,
+   "pf": 1.046,
+   "pf_ci": [
+    0.8033,
+    1.3359
+   ],
+   "mean_c_per_filled_contract": 0.817,
+   "mean_c_per_resting_order_per_contract": 0.812,
+   "unfilled_orders": {
+    "n": 2,
+    "win_rate": 1.0,
+    "mean_bid_c": 28.0
+   },
+   "t1_taker_same_windows": {
+    "n": 271,
+    "fill_rate": 0.781,
+    "mean_px_c": 24.221,
+    "win_rate": 0.2325,
+    "pf": 0.885,
+    "pf_ci": [
+     0.6462,
+     1.1645
+    ],
+    "mean_c": -2.154,
+    "pf_fee_rounded_10lot": 0.883,
+    "unfilled": {
+     "n": 76,
+     "win_rate": 0.3684,
+     "mean_ask0_c": 29.934,
+     "t0_pf_if_filled_at_look_ask": 1.291
+    }
+   }
+  },
+  "maker_pessimistic_fee_25pct_of_taker": {
+   "pf": 1.012,
+   "mean_c_per_filled_contract": 0.225
+  },
+  "maker_through_share": 0.9799,
+  "paired_maker_pess_minus_T0_c": [
+   1.524,
+   0.58,
+   2.3
+  ],
+  "paired_parts_c": {
+   "price_and_fee_saved_on_filled": 2.254,
+   "given_up_on_unfilled": 0.73
+  }
+ },
+ "by_block": {
+  "D": {
+   "windows_with_look": 405,
+   "in_band": 178,
+   "mean_ask_at_look_c": 25.475,
+   "mean_spread_at_look_c": 0.914,
+   "cheap_side_win_rate": 0.3315,
+   "median_queue_at_bid": 1838.6,
+   "taker_T0_at_look_ask": {
+    "n": 178,
+    "fill_rate": 1.0,
+    "mean_px_c": 25.475,
+    "win_rate": 0.3315,
+    "pf": 1.394,
+    "pf_ci": [
+     0.9919,
+     1.899
+    ],
+    "mean_c": 6.448
+   },
+   "taker_T1_limit_plus_1c_after_1s": {
+    "n": 144,
+    "fill_rate": 0.809,
+    "mean_px_c": 22.902,
+    "win_rate": 0.3056,
+    "pf": 1.427,
+    "pf_ci": [
+     0.9417,
+     2.0412
+    ],
+    "mean_c": 6.517,
+    "pf_fee_rounded_10lot": 1.424,
+    "unfilled": {
+     "n": 34,
+     "win_rate": 0.4412,
+     "mean_ask0_c": 32.185,
+     "t0_pf_if_filled_at_look_ask": 1.576
+    }
+   },
+   "taker_T5_limit_plus_1c_after_5s": {
+    "n": 133,
+    "fill_rate": 0.7472,
+    "mean_px_c": 22.597,
+    "win_rate": 0.3158,
+    "pf": 1.529,
+    "pf_ci": [
+     1.0439,
+     2.2412
+    ],
+    "mean_c": 7.858,
+    "pf_fee_rounded_10lot": 1.525,
+    "unfilled": {
+     "n": 45,
+     "win_rate": 0.3778,
+     "mean_ask0_c": 27.553,
+     "t0_pf_if_filled_at_look_ask": 1.548
+    }
+   },
+   "maker_pessimistic": {
+    "orders": 178,
+    "orders_with_fill": 175,
+    "fill_rate_orders": 0.9831,
+    "contracts_filled_share": 0.9831,
+    "mean_px_c": 24.39,
+    "win_rate_contracts": 0.3257,
+    "pf": 1.549,
+    "pf_ci": [
+     1.0862,
+     2.128
+    ],
+    "mean_c_per_filled_contract": 8.182,
+    "mean_c_per_resting_order_per_contract": 8.044,
+    "unfilled_orders": {
+     "n": 3,
+     "win_rate": 0.6667,
+     "mean_bid_c": 25.667
+    },
+    "t1_taker_same_windows": {
+     "n": 141,
+     "fill_rate": 0.8057,
+     "mean_px_c": 22.822,
+     "win_rate": 0.2979,
+     "pf": 1.378,
+     "pf_ci": [
+      0.933,
+      1.9663
+     ],
+     "mean_c": 5.833,
+     "pf_fee_rounded_10lot": 1.375,
+     "unfilled": {
+      "n": 34,
+      "win_rate": 0.4412,
+      "mean_ask0_c": 32.185,
+      "t0_pf_if_filled_at_look_ask": 1.576
+     }
+    }
+   },
+   "maker_optimistic": {
+    "orders": 178,
+    "orders_with_fill": 176,
+    "fill_rate_orders": 0.9888,
+    "contracts_filled_share": 0.9888,
+    "mean_px_c": 24.37,
+    "win_rate_contracts": 0.3239,
+    "pf": 1.536,
+    "pf_ci": [
+     1.0823,
+     2.1015
+    ],
+    "mean_c_per_filled_contract": 8.016,
+    "mean_c_per_resting_order_per_contract": 7.926,
+    "unfilled_orders": {
+     "n": 2,
+     "win_rate": 1.0,
+     "mean_bid_c": 28.0
+    },
+    "t1_taker_same_windows": {
+     "n": 142,
+     "fill_rate": 0.8068,
+     "mean_px_c": 22.816,
+     "win_rate": 0.2958,
+     "pf": 1.364,
+     "pf_ci": [
+      0.9247,
+      1.9317
+     ],
+     "mean_c": 5.628,
+     "pf_fee_rounded_10lot": 1.36,
+     "unfilled": {
+      "n": 34,
+      "win_rate": 0.4412,
+      "mean_ask0_c": 32.185,
+      "t0_pf_if_filled_at_look_ask": 1.576
+     }
+    }
+   },
+   "maker_pessimistic_fee_25pct_of_taker": {
+    "pf": 1.522,
+    "mean_c_per_filled_contract": 7.887
+   },
+   "maker_through_share": 0.9775,
+   "paired_maker_pess_minus_T0_c": [
+    1.596,
+    0.35,
+    2.58
+   ],
+   "paired_parts_c": {
+    "price_and_fee_saved_on_filled": 2.213,
+    "given_up_on_unfilled": 0.617
+   }
+  },
+  "H": {
+   "windows_with_look": 315,
+   "in_band": 171,
+   "mean_ask_at_look_c": 27.367,
+   "mean_spread_at_look_c": 0.928,
+   "cheap_side_win_rate": 0.1988,
+   "median_queue_at_bid": 2164.6,
+   "taker_T0_at_look_ask": {
+    "n": 171,
+    "fill_rate": 1.0,
+    "mean_px_c": 27.367,
+    "win_rate": 0.1988,
+    "pf": 0.611,
+    "pf_ci": [
+     0.4017,
+     0.8683
+    ],
+    "mean_c": -8.761
+   },
+   "taker_T1_limit_plus_1c_after_1s": {
+    "n": 129,
+    "fill_rate": 0.7544,
+    "mean_px_c": 25.768,
+    "win_rate": 0.1628,
+    "pf": 0.522,
+    "pf_ci": [
+     0.2825,
+     0.7938
+    ],
+    "mean_c": -10.72,
+    "pf_fee_rounded_10lot": 0.521,
+    "unfilled": {
+     "n": 42,
+     "win_rate": 0.3095,
+     "mean_ask0_c": 28.112,
+     "t0_pf_if_filled_at_look_ask": 1.078
+    }
+   },
+   "taker_T5_limit_plus_1c_after_5s": {
+    "n": 121,
+    "fill_rate": 0.7076,
+    "mean_px_c": 23.304,
+    "win_rate": 0.1983,
+    "pf": 0.758,
+    "pf_ci": [
+     0.4488,
+     1.1572
+    ],
+    "mean_c": -4.612,
+    "pf_fee_rounded_10lot": 0.756,
+    "unfilled": {
+     "n": 50,
+     "win_rate": 0.2,
+     "mean_ask0_c": 31.094,
+     "t0_pf_if_filled_at_look_ask": 0.517
+    }
+   },
+   "maker_pessimistic": {
+    "orders": 171,
+    "orders_with_fill": 169,
+    "fill_rate_orders": 0.9883,
+    "contracts_filled_share": 0.9883,
+    "mean_px_c": 26.333,
+    "win_rate_contracts": 0.1893,
+    "pf": 0.646,
+    "pf_ci": [
+     0.4201,
+     0.9198
+    ],
+    "mean_c_per_filled_contract": -7.398,
+    "mean_c_per_resting_order_per_contract": -7.312,
+    "unfilled_orders": {
+     "n": 2,
+     "win_rate": 1.0,
+     "mean_bid_c": 38.5
+    },
+    "t1_taker_same_windows": {
+     "n": 129,
+     "fill_rate": 0.7633,
+     "mean_px_c": 25.768,
+     "win_rate": 0.1628,
+     "pf": 0.522,
+     "pf_ci": [
+      0.2825,
+      0.7938
+     ],
+     "mean_c": -10.72,
+     "pf_fee_rounded_10lot": 0.521,
+     "unfilled": {
+      "n": 40,
+      "win_rate": 0.275,
+      "mean_ask0_c": 28.2,
+      "t0_pf_if_filled_at_look_ask": 0.903
+     }
+    }
+   },
+   "maker_optimistic": {
+    "orders": 171,
+    "orders_with_fill": 171,
+    "fill_rate_orders": 1.0,
+    "contracts_filled_share": 1.0,
+    "mean_px_c": 26.475,
+    "win_rate_contracts": 0.1988,
+    "pf": 0.681,
+    "pf_ci": [
+     0.4484,
+     0.9683
+    ],
+    "mean_c_per_filled_contract": -6.592,
+    "mean_c_per_resting_order_per_contract": -6.592,
+    "unfilled_orders": {
+     "n": 0,
+     "win_rate": null,
+     "mean_bid_c": null
+    },
+    "t1_taker_same_windows": {
+     "n": 129,
+     "fill_rate": 0.7544,
+     "mean_px_c": 25.768,
+     "win_rate": 0.1628,
+     "pf": 0.522,
+     "pf_ci": [
+      0.2825,
+      0.7938
+     ],
+     "mean_c": -10.72,
+     "pf_fee_rounded_10lot": 0.521,
+     "unfilled": {
+      "n": 42,
+      "win_rate": 0.3095,
+      "mean_ask0_c": 28.112,
+      "t0_pf_if_filled_at_look_ask": 1.078
+     }
+    }
+   },
+   "maker_pessimistic_fee_25pct_of_taker": {
+    "pf": 0.635,
+    "mean_c_per_filled_contract": -7.709
+   },
+   "maker_through_share": 0.9825,
+   "paired_maker_pess_minus_T0_c": [
+    1.449,
+    -0.09,
+    2.62
+   ],
+   "paired_parts_c": {
+    "price_and_fee_saved_on_filled": 2.297,
+    "given_up_on_unfilled": 0.848
+   }
+  }
+ }
+}
