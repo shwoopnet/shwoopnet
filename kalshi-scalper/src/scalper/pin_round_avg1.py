@@ -39,14 +39,19 @@ def sig1m(a, t_end, n=60):
     lr = [math.log(xs[j] / xs[j + 1]) for j in range(n) if xs[j] and xs[j + 1]]
     if len(lr) < 30: return None
     m = sum(lr) / len(lr); return math.sqrt(sum((x - m) ** 2 for x in lr) / (len(lr) - 1))
-def split(evs):
-    u = sorted(set(evs)); cut = u[2 * len(u) // 3]; return cut
+# PINNED CUTS (Nov 12, 2026): the values the Nov 11 development run used, as constants. The old split() took two thirds of whatever
+# events existed at run time, which moves as data grows. Development = strictly before the cut; held-out = on or after it.
+PIN1_CUT = 1789434000        # 2026-09-15T01:00:00Z, hourly close, epoch seconds (2,544 of 3,816 events then held)
+ROUND1_CUT = 1792422000      # 2026-10-19T15:00:00Z, hourly close, epoch seconds
+AVG1_CUT_MS = 1794060000000  # 2026-11-07T14:00:00Z, hourly close, epoch milliseconds (161 development events then)
+def split(evs, cut):
+    return cut
 print("== PIN1 census")
 cen = {}
 for a, M in (("BTC", 500), ("ETH", 50)):
     ts = sorted(t for t in BIN[a] if t % 3600 == 3540 and t >= 1780272000)  # open_time of the last minute bar of each hour, from 2026-06-01
     ev = [(t + 60, BIN[a][t]) for t in ts]
-    cut = split([e for e, _ in ev]); dev = [(e, A) for e, A in ev if e < cut]
+    cut = split([e for e, _ in ev], PIN1_CUT); dev = [(e, A) for e, A in ev if e < cut]
     hit = sum(1 for e, A in dev if abs(A / M - round(A / M)) <= 0.05)
     n = len(dev); p0 = 0.10; z = (hit - n * p0) / math.sqrt(n * p0 * (1 - p0))
     cen[a] = z
@@ -75,7 +80,7 @@ for (tk, L), (b, a) in qd.items():
     yes = res == "yes"
     rr.append((A, L, ct, K, "yes", a, yes, py))
     rr.append((A, L, ct, K, "no", 1 - b, not yes, 1 - py))
-cut = split([r[2] for r in rr]); print("\n== ROUND1 rows", len(rr), "events", len({r[2] for r in rr}), "cut", datetime.datetime.fromtimestamp(cut, UTC))
+cut = split([r[2] for r in rr], ROUND1_CUT); print("\n== ROUND1 rows", len(rr), "events", len({r[2] for r in rr}), "cut", datetime.datetime.fromtimestamp(cut, UTC))
 def pick(rs):  # one side per market: YES if both in band
     seen = {}
     for r in rs:
@@ -163,7 +168,7 @@ for tk, qs in lad.items():
             rows.append((ct, A, k, side, ask, p - ask, w, tk))
 print("ladder markets", len(lad), "ambiguous outcome dropped", amb, "rows", len(rows), "events", len({r[0] for r in rows}))
 if rows:
-    cut = split([r[0] for r in rows]); print("cut", datetime.datetime.fromtimestamp(cut / 1000, UTC), "dev events", len({r[0] for r in rows if r[0] < cut}), "dev rows", len([r for r in rows if r[0] < cut]))
+    cut = split([r[0] for r in rows], AVG1_CUT_MS); print("cut", datetime.datetime.fromtimestamp(cut / 1000, UTC), "dev events", len({r[0] for r in rows if r[0] < cut}), "dev rows", len([r for r in rows if r[0] < cut]))
     devA = [r for r in rows if r[0] < cut]
     for k in (0, 20, 40):
         for band in ("cheap", "mid"):
