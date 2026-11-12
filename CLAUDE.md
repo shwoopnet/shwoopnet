@@ -1275,3 +1275,7 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 ## Rotation lane draft v0.2.1 (Nov 12, 2026, the Head of R&D, DRAFT)
 
 `docs/ROTATION_LANE.md` is updated to v0.2.1: the $10 drawdown, the live-against-shadow check and the lane cap are KILLS (latched); the other exit lines are performance exits; an automatic return is for a performance exit only, and a return after a kill needs at least 30 days, a fresh record, the owner's popup and a reviewed merge. Still a DRAFT, binds nobody. Docs only.
+
+## Rotation lane draft v0.4 (Nov 12, 2026, the Head of R&D)
+
+`docs/ROTATION_LANE.md` is now v0.4 with the owner's decisions (no seat cap, 10 contracts and at most $10 an order, a separate seat per market for each rule, favourites at 88c or above only with 150 signals and 10 losses, automatic return after performance exits only). The lifecycle pointer says 7g is unchanged outside the wheel. The document is a proposal text; the code that would use it (controller, registry entries, the second slot caps for a $10 order) is not built or approved to run. Docs only; `docs/CHARTER.md` untouched.

@@ -304,4 +304,4 @@ V2 and Refinement each hand the chief of staff, **every Sunday at 6:41 PM Centra
 - **Fast markets judge fast and also lie fast.** Gold's profit factor fell across three periods as its loss rate rose past break-even (about 7.5%), mostly luck. [live figures removed, ask Main]
 - **The limit is the edge, not the machinery.** A faster rotation system finds out sooner that a candidate fails; it does not create a strategy that works.
 
-**Rotation lane (Nov 12, 2026, DRAFT, not in force):** small-size live seats that enter and leave by a replayed shadow record are described in `docs/ROTATION_LANE.md`. It binds nobody until the owner approves it.
+**Rotation lane (Nov 12, 2026, DRAFT, not in force):** small-size live seats that enter and leave by a replayed shadow record are described in `docs/ROTATION_LANE.md`. Section 7g is unchanged outside the wheel: only there, each market a rule runs on is its own shadow place, record, seat and kill (owner, Nov 12, 2026).
