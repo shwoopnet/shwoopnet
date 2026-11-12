@@ -1,6 +1,6 @@
 # Nov 12, 2026 (the owner waived reading Kalshi's terms; see CLAUDE.md, "kalshi-pull"). A MANUAL pull of Kalshi's PUBLIC market data for the research sessions. Nothing triggers it: no schedule, no push,
 # no pull request. A person starts it from the Actions tab with a job id, and it defaults to a DRY RUN (checks the job file, prints the URLs, sends nothing, pushes nothing).
-# It reads one job file from main (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json), sends GET requests to api.elections.kalshi.com ONLY, at most ONE a second, no key, no auth header, no redirects, no other
+# It reads one job file from main (kalshi-scalper/workers/kalshi_pull_jobs/<job>.json), sends GET requests to ONE of two hard-coded hosts (api.elections.kalshi.com, or external-api.kalshi.com/trade-api/v2/margin for the KXBTCPERP and KXETHPERP candlesticks only; the job names the pair by key, scripts/kalshi_pull.py holds the table), at most ONE a second, no key, no auth header, no redirects, no other
 # address; three 429s in a row end the run. The built-in token pushes gzipped answers to its OWN `kalshi-pull-data` branch (under pull/), never to main; the first real run creates it as an orphan branch.
 # Rate and size: at most 1 request a second, at most 1,200 requests a run (each job file sets its own lower cap), 5 MB an answer, 200 MB a run, 6 real runs a UTC day, about 25 to 30 runner minutes for a full 1,200.
 # One concurrency group that never cancels: two pulls never overlap, so the pace is one a second for the whole repository. It stops by itself from 2027-02-28 23:59 UTC. Stop it sooner by deleting this file.
@@ -18,6 +18,8 @@ on:
           - SPREADCELL1
           - ROLLOFF_PROXY
           - COMBO1_OPENBOOK
+          - PERPBTC1M
+          - PERPETH1M
       dry_run:
         description: "true = check the job and print the URLs only; false = send the requests"
         required: true
@@ -42,7 +44,7 @@ jobs:
       - name: Check the inputs and the end date (2027-02-28 23:59 UTC)
         id: gate
         run: |
-          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|SPREADCELL1|ROLLOFF_PROXY|COMBO1_OPENBOOK) ;; *) echo "bad job id"; exit 1 ;; esac
+          case "$JOB" in SPREADLISTS|NOSIDE1_CANDLES|SPREADCELL1|ROLLOFF_PROXY|COMBO1_OPENBOOK|PERPBTC1M|PERPETH1M) ;; *) echo "bad job id"; exit 1 ;; esac
           case "$DRY_RUN" in true|false) ;; *) echo "bad dry_run"; exit 1 ;; esac
           if [ "$(date -u +%s)" -ge "$(date -u -d '2027-02-28T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to pull"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the pull script and the job file from main
