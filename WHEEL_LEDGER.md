@@ -2,7 +2,7 @@
 
 Rules: `ROTATION_LANE.md` section 9.2. Every place ever admitted, every block read, cleared or failed. No live account figure is in this file; a place's own live fills are reported by message only. [design]
 
-Expected lucky clears with no edge anywhere: blocks read times about 0.035 (0.05 for a favourite at 88c or above).
+Expected lucky clears with no edge anywhere (a fairly priced market, one fee lost an order): blocks read times about 0.04 (0.05 for a favourite at 88c or above). Checked by the Verification Analyst on Nov 12.
 
 | Date | Places on the shadow list | Places with a working log source | Blocks read | Blocks cleared | Lucky clears expected | Seats taken |
 |---|---|---|---|---|---|---|
