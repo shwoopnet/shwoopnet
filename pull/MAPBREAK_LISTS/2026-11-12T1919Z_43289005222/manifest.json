@@ -1,0 +1,1327 @@
+{
+ "job": {
+  "job_id": "MAPBREAK_LISTS",
+  "owner": "MAIN",
+  "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
+  "purpose": "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 history match-series lists (counts of older matches) and 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only; a match result is read at scoring only for a bet the rule fires.",
+  "heldout": "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); the registered rule, development read only",
+  "allowed_endpoints": [
+   {
+    "name": "markets_list",
+    "method": "GET",
+    "path_pattern": "/markets",
+    "params_allowed": [
+     "series_ticker",
+     "status",
+     "limit",
+     "cursor",
+     "min_close_ts",
+     "max_close_ts"
+    ]
+   },
+   {
+    "name": "hist_markets_list",
+    "method": "GET",
+    "path_pattern": "/historical/markets",
+    "params_allowed": [
+     "series_ticker",
+     "limit",
+     "cursor"
+    ]
+   },
+   {
+    "name": "series",
+    "method": "GET",
+    "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+    "params_allowed": []
+   }
+  ],
+  "series_allowlist": [
+   "KXCS2GAME",
+   "KXCS2GAME",
+   "KXCS2MAP",
+   "KXCS2TOTALMAPS",
+   "KXDOTA2GAME",
+   "KXDOTA2GAME",
+   "KXDOTA2MAP",
+   "KXDOTA2TOTALMAPS",
+   "KXLOLGAME",
+   "KXLOLGAME",
+   "KXLOLMAP",
+   "KXLOLTOTALMAPS",
+   "KXVALORANTGAME",
+   "KXVALORANTGAME",
+   "KXVALORANTMAP",
+   "KXVALORANTTOTALMAPS"
+  ],
+  "ticker_allowlist": [],
+  "max_requests": 154,
+  "notes": "MAPBREAK registered rule (Amendments 1 to 3); 20 requests: 12 live lists (6 pages for each match and total-maps series, 12 for each map series), 4 history match-series lists (10 pages each, counts only) and 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently.",
+  "status": "active",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "requests": [
+   {
+    "id": "live_KXCS2GAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCS2GAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXCS2MAP",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCS2MAP",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 12
+   },
+   {
+    "id": "live_KXCS2TOTALMAPS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXCS2TOTALMAPS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXDOTA2GAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXDOTA2GAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXDOTA2MAP",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXDOTA2MAP",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 12
+   },
+   {
+    "id": "live_KXDOTA2TOTALMAPS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXDOTA2TOTALMAPS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXVALORANTGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXVALORANTGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXVALORANTMAP",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXVALORANTMAP",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 12
+   },
+   {
+    "id": "live_KXVALORANTTOTALMAPS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXVALORANTTOTALMAPS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXLOLGAME",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLOLGAME",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "live_KXLOLMAP",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLOLMAP",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 12
+   },
+   {
+    "id": "live_KXLOLTOTALMAPS",
+    "path": "/markets",
+    "params": {
+     "series_ticker": "KXLOLTOTALMAPS",
+     "status": "settled",
+     "limit": 1000,
+     "min_close_ts": 1789171200,
+     "max_close_ts": 1792713599
+    },
+    "max_pages": 6
+   },
+   {
+    "id": "hist_KXCS2GAME",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXCS2GAME",
+     "limit": 1000
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "hist_KXDOTA2GAME",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXDOTA2GAME",
+     "limit": 1000
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "hist_KXVALORANTGAME",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXVALORANTGAME",
+     "limit": 1000
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "hist_KXLOLGAME",
+    "path": "/historical/markets",
+    "params": {
+     "series_ticker": "KXLOLGAME",
+     "limit": 1000
+    },
+    "max_pages": 10
+   },
+   {
+    "id": "fee_KXCS2GAME",
+    "path": "/series/KXCS2GAME"
+   },
+   {
+    "id": "fee_KXDOTA2GAME",
+    "path": "/series/KXDOTA2GAME"
+   },
+   {
+    "id": "fee_KXVALORANTGAME",
+    "path": "/series/KXVALORANTGAME"
+   },
+   {
+    "id": "fee_KXLOLGAME",
+    "path": "/series/KXLOLGAME"
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-12T1919Z",
+ "finished": "2026-11-12T1920Z",
+ "status": "complete",
+ "requests_sent": 52,
+ "bytes_stored": 93160796,
+ "rows": [
+  {
+   "index": 1,
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2640320,
+   "t_send_ms": 1794511193823,
+   "t_recv_ms": 1794511193913,
+   "server_date": "Thu, 12 Nov 2026 19:19:53 GMT",
+   "file": "0001.json.gz",
+   "sha256": "d0dd106388ab1f37c47c27c037206dc350acd101fb72f5f6bdab1e591637662d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2646929,
+   "t_send_ms": 1794511194823,
+   "t_recv_ms": 1794511194973,
+   "server_date": "Thu, 12 Nov 2026 19:19:54 GMT",
+   "file": "0002.json.gz",
+   "sha256": "751a5a7015cce4734c15c73f2f7c9dd490327a08a11703b8b5a27d079c13c544",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2641154,
+   "t_send_ms": 1794511195824,
+   "t_recv_ms": 1794511195916,
+   "server_date": "Thu, 12 Nov 2026 19:19:55 GMT",
+   "file": "0003.json.gz",
+   "sha256": "fa302edd106bef57f07768a4e917cedeb239fc82926c8ea13b19a4ac1c01ee66",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2645917,
+   "t_send_ms": 1794511196824,
+   "t_recv_ms": 1794511196920,
+   "server_date": "Thu, 12 Nov 2026 19:19:56 GMT",
+   "file": "0004.json.gz",
+   "sha256": "d71cf5d315b3199f2d6ffc69a39e0c6f77145cd3da77781fd306dc37ff34e06a",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "live_KXCS2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 31970,
+   "t_send_ms": 1794511197824,
+   "t_recv_ms": 1794511197860,
+   "server_date": "Thu, 12 Nov 2026 19:19:57 GMT",
+   "file": "0005.json.gz",
+   "sha256": "aee0470e3c9347e13510eed5d6ac4aa9f0446d3ca2c4a708c9d93ffe8038e5c8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2844996,
+   "t_send_ms": 1794511198824,
+   "t_recv_ms": 1794511198929,
+   "server_date": "Thu, 12 Nov 2026 19:19:58 GMT",
+   "file": "0006.json.gz",
+   "sha256": "fcc75352ada8653fa2683705fa648ef6fa68cc4c02f6968c144992e7affe7bd5",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2854729,
+   "t_send_ms": 1794511199824,
+   "t_recv_ms": 1794511199919,
+   "server_date": "Thu, 12 Nov 2026 19:19:59 GMT",
+   "file": "0007.json.gz",
+   "sha256": "6a6c54db28ceb848941d53ffc2b482bc7f6388152a0d409981b1c40ddcd2a864",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2847595,
+   "t_send_ms": 1794511200824,
+   "t_recv_ms": 1794511200937,
+   "server_date": "Thu, 12 Nov 2026 19:20:00 GMT",
+   "file": "0008.json.gz",
+   "sha256": "a39403faed35576577874aaf88751f84e7ce6f892d6e474ef89b57d35d0bef49",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2849094,
+   "t_send_ms": 1794511201824,
+   "t_recv_ms": 1794511202015,
+   "server_date": "Thu, 12 Nov 2026 19:20:01 GMT",
+   "file": "0009.json.gz",
+   "sha256": "f0ea40e1d6efed882d76957550e6dd134373c12f8b3df61199a2ce3d0e79f011",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2861872,
+   "t_send_ms": 1794511202824,
+   "t_recv_ms": 1794511202938,
+   "server_date": "Thu, 12 Nov 2026 19:20:02 GMT",
+   "file": "0010.json.gz",
+   "sha256": "74fef166aec190a030d154b6e8455988b9cc1bbd952f1fb5b64986c73b084957",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2843156,
+   "t_send_ms": 1794511203824,
+   "t_recv_ms": 1794511203928,
+   "server_date": "Thu, 12 Nov 2026 19:20:03 GMT",
+   "file": "0011.json.gz",
+   "sha256": "c074ac165ffd2b0f1a126f104e93cab5179355523e2cd2e8b6332bc51e993f5e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "live_KXCS2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 602794,
+   "t_send_ms": 1794511204825,
+   "t_recv_ms": 1794511204874,
+   "server_date": "Thu, 12 Nov 2026 19:20:04 GMT",
+   "file": "0012.json.gz",
+   "sha256": "b06fde4d29213042c1e6d682ad68418994ab162a782d1daeec960940d5ad638c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "live_KXCS2TOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2TOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1918888,
+   "t_send_ms": 1794511205825,
+   "t_recv_ms": 1794511205946,
+   "server_date": "Thu, 12 Nov 2026 19:20:05 GMT",
+   "file": "0013.json.gz",
+   "sha256": "c687c3679a309903fd1cf6e3c7d8472ed06ae96370e4e7a0cbbbed097a780ef2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "live_KXCS2TOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXCS2TOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1062877,
+   "t_send_ms": 1794511206825,
+   "t_recv_ms": 1794511206889,
+   "server_date": "Thu, 12 Nov 2026 19:20:06 GMT",
+   "file": "0014.json.gz",
+   "sha256": "45406acf51ff9eebcdc1b34b9303923b134e9f3ea3134e67bf86b0414283e002",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "live_KXDOTA2GAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2208630,
+   "t_send_ms": 1794511207825,
+   "t_recv_ms": 1794511208018,
+   "server_date": "Thu, 12 Nov 2026 19:20:07 GMT",
+   "file": "0015.json.gz",
+   "sha256": "9119cc09cb55ed3cd5a6913d879ec6081bfcb71f05c62934dae42b19caec8696",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "live_KXDOTA2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2874577,
+   "t_send_ms": 1794511208825,
+   "t_recv_ms": 1794511208923,
+   "server_date": "Thu, 12 Nov 2026 19:20:08 GMT",
+   "file": "0016.json.gz",
+   "sha256": "548947da5cbeff2e4a3de6b3391b154acbdbb4bffc4b41b517c03657527d3085",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "live_KXDOTA2MAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2MAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1703799,
+   "t_send_ms": 1794511209825,
+   "t_recv_ms": 1794511209899,
+   "server_date": "Thu, 12 Nov 2026 19:20:09 GMT",
+   "file": "0017.json.gz",
+   "sha256": "dfd03881ccc0a58e55f46881a179f17bd25e8880e43efdd384e04b65adfd00e7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "live_KXDOTA2TOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDOTA2TOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 771110,
+   "t_send_ms": 1794511210825,
+   "t_recv_ms": 1794511210877,
+   "server_date": "Thu, 12 Nov 2026 19:20:10 GMT",
+   "file": "0018.json.gz",
+   "sha256": "b052aacef4459bd06742dc52c5bfad482394d105d4bcc720480509d9ef7d6a45",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "live_KXVALORANTGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 558140,
+   "t_send_ms": 1794511211826,
+   "t_recv_ms": 1794511211872,
+   "server_date": "Thu, 12 Nov 2026 19:20:11 GMT",
+   "file": "0019.json.gz",
+   "sha256": "753a02bf24a5640d96d7195800f4e7c391df91acc5d231a1436cea92aaa3e197",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "live_KXVALORANTMAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTMAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1339774,
+   "t_send_ms": 1794511212826,
+   "t_recv_ms": 1794511212947,
+   "server_date": "Thu, 12 Nov 2026 19:20:12 GMT",
+   "file": "0020.json.gz",
+   "sha256": "be73515db8079a049acccdb68b78e2951de6c0f4d1be86e9592d9438856bab4c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "live_KXVALORANTTOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXVALORANTTOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 229935,
+   "t_send_ms": 1794511213826,
+   "t_recv_ms": 1794511213903,
+   "server_date": "Thu, 12 Nov 2026 19:20:13 GMT",
+   "file": "0021.json.gz",
+   "sha256": "96aac850cd425f5698809facac76811ec9cb03caad0f7be518eb10c850fe1298",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "live_KXLOLGAME",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 1819728,
+   "t_send_ms": 1794511214826,
+   "t_recv_ms": 1794511214900,
+   "server_date": "Thu, 12 Nov 2026 19:20:14 GMT",
+   "file": "0022.json.gz",
+   "sha256": "54d5453f97f4ee03049ce7bcc668300752e3b2d4451afe5a1f9e86c74cc48a3e",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "live_KXLOLMAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLMAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2880888,
+   "t_send_ms": 1794511215826,
+   "t_recv_ms": 1794511215920,
+   "server_date": "Thu, 12 Nov 2026 19:20:15 GMT",
+   "file": "0023.json.gz",
+   "sha256": "ff37132428a30f0ee5835fde0fcc551eba6c3de72922d40553d22a8b987ff5ad",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "live_KXLOLMAP",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLMAP",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 663972,
+   "t_send_ms": 1794511216826,
+   "t_recv_ms": 1794511216881,
+   "server_date": "Thu, 12 Nov 2026 19:20:16 GMT",
+   "file": "0024.json.gz",
+   "sha256": "02eb329dc04d3ed536ecb385db82fbf1074131545413100bbc8f446e1ae5954f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "live_KXLOLTOTALMAPS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLOLTOTALMAPS",
+    "status": "settled",
+    "limit": 1000,
+    "min_close_ts": 1789171200,
+    "max_close_ts": 1792713599
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 654295,
+   "t_send_ms": 1794511217826,
+   "t_recv_ms": 1794511217888,
+   "server_date": "Thu, 12 Nov 2026 19:20:17 GMT",
+   "file": "0025.json.gz",
+   "sha256": "e6c3fa2fc88c098e42124292628aa1792432393b156378d9ac2fb46420fe78af",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2645527,
+   "t_send_ms": 1794511218826,
+   "t_recv_ms": 1794511218981,
+   "server_date": "Thu, 12 Nov 2026 19:20:18 GMT",
+   "file": "0026.json.gz",
+   "sha256": "04188e88953098b95506236cc681840afb6716d686bd47b96cba092c75d1358d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2649904,
+   "t_send_ms": 1794511219827,
+   "t_recv_ms": 1794511219931,
+   "server_date": "Thu, 12 Nov 2026 19:20:19 GMT",
+   "file": "0027.json.gz",
+   "sha256": "44e31fb1a0d1cfd7728a95be2ee22f6da9abadad47c73f5594223aaf07680eff",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2673194,
+   "t_send_ms": 1794511220827,
+   "t_recv_ms": 1794511220935,
+   "server_date": "Thu, 12 Nov 2026 19:20:20 GMT",
+   "file": "0028.json.gz",
+   "sha256": "155c8bc254e155767163b1084b8eb66f3ef2bdc63e39db356c2eb497bfc7b4b8",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 2685895,
+   "t_send_ms": 1794511221827,
+   "t_recv_ms": 1794511221934,
+   "server_date": "Thu, 12 Nov 2026 19:20:21 GMT",
+   "file": "0029.json.gz",
+   "sha256": "cb4b009296ee4a2c9920c3b4b8cd7685a5d4da420f1ebce44b0ae84b177d7c48",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 2691150,
+   "t_send_ms": 1794511222827,
+   "t_recv_ms": 1794511223024,
+   "server_date": "Thu, 12 Nov 2026 19:20:22 GMT",
+   "file": "0030.json.gz",
+   "sha256": "cf5627f7ea304b5cc44ff09185b488179f5315e47aca3ebf41bc96dc37e4cc37",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 2044244,
+   "t_send_ms": 1794511223827,
+   "t_recv_ms": 1794511223928,
+   "server_date": "Thu, 12 Nov 2026 19:20:23 GMT",
+   "file": "0031.json.gz",
+   "sha256": "f0abfedbb447dba9431545605769738f59035650971d3e3c9b007d11a07a474d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 1950438,
+   "t_send_ms": 1794511224827,
+   "t_recv_ms": 1794511224906,
+   "server_date": "Thu, 12 Nov 2026 19:20:24 GMT",
+   "file": "0032.json.gz",
+   "sha256": "7713b393a10fcc3dda7817e9af7ce8cd2fd7a0d7e81933d7a42e171c1daab577",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 8,
+   "status": 200,
+   "bytes": 1830013,
+   "t_send_ms": 1794511225827,
+   "t_recv_ms": 1794511225926,
+   "server_date": "Thu, 12 Nov 2026 19:20:25 GMT",
+   "file": "0033.json.gz",
+   "sha256": "32b440e4e634a7d053a761a248c901f953e10c0b39127817f1fc69f135e861ab",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 9,
+   "status": 200,
+   "bytes": 1717127,
+   "t_send_ms": 1794511226827,
+   "t_recv_ms": 1794511226901,
+   "server_date": "Thu, 12 Nov 2026 19:20:26 GMT",
+   "file": "0034.json.gz",
+   "sha256": "4bd386b9851beb3c920f5b7e386798bb7ad83695f298493fa106af416cd1aef9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "page": 10,
+   "status": 200,
+   "bytes": 1683183,
+   "t_send_ms": 1794511227827,
+   "t_recv_ms": 1794511227893,
+   "server_date": "Thu, 12 Nov 2026 19:20:27 GMT",
+   "file": "0035.json.gz",
+   "sha256": "2c1a0aadb33d8ac8d1c492751832d40d0d6086cacbb3c0912ef8a65cec7727cb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2513001,
+   "t_send_ms": 1794511228828,
+   "t_recv_ms": 1794511228910,
+   "server_date": "Thu, 12 Nov 2026 19:20:28 GMT",
+   "file": "0036.json.gz",
+   "sha256": "966b06c5228dca5c005baaa4ac5911b6d09ed4d6ca50e03986d49371c400c802",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1855836,
+   "t_send_ms": 1794511229828,
+   "t_recv_ms": 1794511229916,
+   "server_date": "Thu, 12 Nov 2026 19:20:29 GMT",
+   "file": "0037.json.gz",
+   "sha256": "8501e3dc6530c7e42655982ddfd2a4f88ed7c687fb7d7c23723bec14e6d9acd1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1548108,
+   "t_send_ms": 1794511230828,
+   "t_recv_ms": 1794511230886,
+   "server_date": "Thu, 12 Nov 2026 19:20:30 GMT",
+   "file": "0038.json.gz",
+   "sha256": "99aa09c5d52c1d1cddc5607f3d4119182f8c85e7ec1b8774d379e46f9a87fcab",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2606044,
+   "t_send_ms": 1794511231828,
+   "t_recv_ms": 1794511231902,
+   "server_date": "Thu, 12 Nov 2026 19:20:31 GMT",
+   "file": "0039.json.gz",
+   "sha256": "3c504dbe1dda7f9e69aebad1b5e9b50ff8a96abe2d96913a0814f31fa3c74ad9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 1920261,
+   "t_send_ms": 1794511232828,
+   "t_recv_ms": 1794511232890,
+   "server_date": "Thu, 12 Nov 2026 19:20:32 GMT",
+   "file": "0040.json.gz",
+   "sha256": "e502276262defd4db16c9e900bdd76660cc969b50d34a1adde2cff6a83f06e84",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 1727115,
+   "t_send_ms": 1794511233828,
+   "t_recv_ms": 1794511233893,
+   "server_date": "Thu, 12 Nov 2026 19:20:33 GMT",
+   "file": "0041.json.gz",
+   "sha256": "ec21ff38ec98dbdc689c21e9a07a5fc65693fca77a06eadb8867ddc69a4d1e95",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 124758,
+   "t_send_ms": 1794511234828,
+   "t_recv_ms": 1794511234866,
+   "server_date": "Thu, 12 Nov 2026 19:20:34 GMT",
+   "file": "0042.json.gz",
+   "sha256": "4cfcc638f1e692ead6865bcc046c6bb6fa6a04afaed26e7c1a6ae627f20d4990",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 2701754,
+   "t_send_ms": 1794511235828,
+   "t_recv_ms": 1794511235929,
+   "server_date": "Thu, 12 Nov 2026 19:20:35 GMT",
+   "file": "0043.json.gz",
+   "sha256": "5c863d04d71a04987be126708a805cd434237c7aac4eedb8d978a33102c1d92c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 2737082,
+   "t_send_ms": 1794511236829,
+   "t_recv_ms": 1794511236955,
+   "server_date": "Thu, 12 Nov 2026 19:20:36 GMT",
+   "file": "0044.json.gz",
+   "sha256": "3b33fb73624c213b5067f9f3372774e8970583871eaeff5b0e121e6a5e144602",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 2034188,
+   "t_send_ms": 1794511237829,
+   "t_recv_ms": 1794511237893,
+   "server_date": "Thu, 12 Nov 2026 19:20:37 GMT",
+   "file": "0045.json.gz",
+   "sha256": "e6514f467f67debaa967bb1ce95df82cb2db5d8008da417fe923af320d06c829",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 1787427,
+   "t_send_ms": 1794511238829,
+   "t_recv_ms": 1794511238912,
+   "server_date": "Thu, 12 Nov 2026 19:20:38 GMT",
+   "file": "0046.json.gz",
+   "sha256": "b180fdc1f1d680f4cc69f33ac57f5cf1820db3396740d233bfd8746f16e21204",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 1733518,
+   "t_send_ms": 1794511239829,
+   "t_recv_ms": 1794511239978,
+   "server_date": "Thu, 12 Nov 2026 19:20:39 GMT",
+   "file": "0047.json.gz",
+   "sha256": "4bbe4309eeac20a691ffe01c6ad39cbb61902ab673bf3bae5c3981e3aa082813",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 295543,
+   "t_send_ms": 1794511240829,
+   "t_recv_ms": 1794511240868,
+   "server_date": "Thu, 12 Nov 2026 19:20:40 GMT",
+   "file": "0048.json.gz",
+   "sha256": "08a89afdd4339277a1ed5946690facacbf4a308f3711884336ce81cccf453a1c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "fee_KXCS2GAME",
+   "path": "/series/KXCS2GAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2063,
+   "t_send_ms": 1794511241829,
+   "t_recv_ms": 1794511241862,
+   "server_date": "Thu, 12 Nov 2026 19:20:41 GMT",
+   "file": "0049.json.gz",
+   "sha256": "9e4dff99ebb8dd52d1d8f6cc4dd450245cbedfa81f4cd494d8e5a8e7e3f5a66b",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "fee_KXDOTA2GAME",
+   "path": "/series/KXDOTA2GAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2113,
+   "t_send_ms": 1794511242829,
+   "t_recv_ms": 1794511242856,
+   "server_date": "Thu, 12 Nov 2026 19:20:42 GMT",
+   "file": "0050.json.gz",
+   "sha256": "c43ca0815487a24187bd64b73076359abc1c34fca5dd7393f2a898d7faa6c0f0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 51,
+   "id": "fee_KXVALORANTGAME",
+   "path": "/series/KXVALORANTGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2089,
+   "t_send_ms": 1794511243829,
+   "t_recv_ms": 1794511243856,
+   "server_date": "Thu, 12 Nov 2026 19:20:43 GMT",
+   "file": "0051.json.gz",
+   "sha256": "381b371d6d689db2f33585b5be5fa12d9d77b752ef0302b67afd0acb35e4c091",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 52,
+   "id": "fee_KXLOLGAME",
+   "path": "/series/KXLOLGAME",
+   "params": {},
+   "page": 1,
+   "status": 200,
+   "bytes": 2082,
+   "t_send_ms": 1794511244830,
+   "t_recv_ms": 1794511244859,
+   "server_date": "Thu, 12 Nov 2026 19:20:44 GMT",
+   "file": "0052.json.gz",
+   "sha256": "f6f202fccc02fc7294de4bb2fc875988326b1a674eebb0b5c9c441dab1508bc0",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
