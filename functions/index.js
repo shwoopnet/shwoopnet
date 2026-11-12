@@ -18,6 +18,8 @@ const KALSHI_LIVE_ENABLED = defineString("KALSHI_LIVE_ENABLED", { default: "off"
 // Phone alerts (Web Push, kalshiPushLib.js): ONE secret, the VAPID private key; the public key is derived from it. Set it with functions/deploy-push.sh, never by pasting it anywhere.
 const KALSHI_PUSH_VAPID_PRIVATE = defineSecret("KALSHI_PUSH_VAPID_PRIVATE");
 const KALSHI_REPORT_TOKEN = defineSecret("KALSHI_REPORT_TOKEN");
+// A SEPARATE token for the fast research reads (Nov 12, 2026): the report token cannot be used to spend the trading key's request budget, and either can be revoked alone.
+const KALSHI_FASTREAD_TOKEN = defineSecret("KALSHI_FASTREAD_TOKEN");
 
 // Any signed-in caller passes this first wall; the Kalshi functions then
 // require the owner's email AND the isAdmin flag (assertKalshiAdmin below).
@@ -925,6 +927,18 @@ exports.kalshiBalanceSnapshot = onSchedule(
       console.log("kalshiBalanceSnapshot: " + out);
     } catch (e) { console.error("kalshiBalanceSnapshot: " + String((e && e.message) || e).slice(0, 160)); }
   }
+);
+
+// Fast research reads (Nov 12, 2026, the owner): a job of PUBLIC market-data reads run as authenticated GETs through the owner's own key, answers returned in the response only, nothing stored
+// (functions/kalshiFastReadLib.js, test/kalshiFastReadGates.test.js). Refuses to run in the bot's buying and exit-watch minutes. No POST to Kalshi, no order path. Deploy: bash functions/deploy-fastread.sh.
+const fastRead = require("./kalshiFastReadLib");
+exports.kalshiFastRead = onRequest(
+  { secrets: [KALSHI_FASTREAD_TOKEN, KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], cors: false, maxInstances: 1, timeoutSeconds: 300, memory: "256MiB" },
+  fastRead.makeFastReadHandler({
+    getToken: () => KALSHI_FASTREAD_TOKEN.value(), getKeyId: () => KALSHI_LIVE_KEY_ID.value(), getPem: () => KALSHI_LIVE_PRIVATE_KEY.value(),
+    fetchFn: fetch, now: () => Date.now(),
+    logError: (e) => console.error("kalshiFastRead: " + String((e && e.name) || "Error")),
+  })
 );
 
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
