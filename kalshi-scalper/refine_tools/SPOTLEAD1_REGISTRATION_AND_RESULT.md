@@ -25,3 +25,9 @@ Kraken tick pulls ran at about 12 requests a minute (2.6 hours for all windows),
 ## Re-read date and n, committed Nov 12, 2026 (restored file: the privacy scrub had removed the bar and execution rows; they are public R6 research rules, restored from 22d61267)
 - REGISTERED BAR = item 9 above (pooled BTC and ETH PF 1.3 or more at +1c with the +2 s delay on n of 80 or more, both halves PF above 1.0, PF above 1.0 with the +10 s delay). V2's draft bar, if different, is not the registered one.
 - RE-READ: once, when n of 80 firings is reached or when the R6 recorder (extended to Dec 15) has ended and its last day is in (2026-12-16), whichever comes first. The first read (Nov 4) stays DATA_LIMITED. Held-out: none; this is a shadow candidate only.
+
+## Seen block and unseen block, committed Nov 12, 2026 (Head of R&D amendment, before the re-read)
+- SEEN BLOCK constant: every window closing at or before 2026-11-11T16:00:00Z (epoch 1794412800) was in the first read's data (its 58 firings at +1c slip, +2 s delay; the last firing closed 2026-11-11T15:00:00Z, epoch 1794409200). Windows closing after the constant are UNSEEN.
+- The re-read prints TWO lines: (a) the registered pooled figure on all firings; (b) the unseen block only (windows closing after 2026-11-11T16:00:00Z), with its own n.
+- VERDICT is judged on (b) when (b) has 80 firings or more by itself. If (b) has fewer than 80 at the re-read the label is 'no evidence at n = x' for the unseen block, whatever (a) shows.
+- What it trades: it buys the 50c to 87c side (ask in [0.50, 0.87]) and holds to settlement. That is a favourite-side hold: any live probe on this rule needs the owner's written exception to the favourite-and-hold ban, in addition to the owner's popup.
