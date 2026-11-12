@@ -13,11 +13,17 @@ for db in FILES:
         if t in new: cand.setdefault(t, {})[ts] = (bo, bc, ao, ac, v or 0)
     for t, m in new.items():
         if t in cand: mk[t] = m
+# PINNED per-series cuts (Nov 12, 2026): close_ts (epoch s) of the first held-out market per series, the values the Nov 11 development run
+# used (two thirds of each series' 39,126-market list then). The old rule recomputed two thirds of whatever markets existed at run time.
+# Held-out = ct >= cut. A series not listed has no cut and is refused.
+CUTS = {"KXAUDUSD15M": 1792376100, "KXCOPPER15M": 1791865800, "KXEURUSD15M": 1792662300, "KXGBPUSD15M": 1792662300,
+        "KXNATGAS15M": 1791925200, "KXPALLADIUM15M": 1792540800, "KXPLATINUM15M": 1792540800, "KXSILVER15M": 1791197100,
+        "KXUSDCAD15M": 1792376100, "KXUSDJPY15M": 1792662300, "KXWTI15M": 1791305100}
 bys = collections.defaultdict(list)
 for t, (s, o, ct, r) in mk.items(): bys[s].append((ct, o, t))
 rows = []  # one per market: (series, ct, ticker, gapclass or None)
 for s, v in bys.items():
-    v.sort(); cut = v[2 * len(v) // 3][0]
+    v.sort(); cut = CUTS[s]
     for i, (ct, o, t) in enumerate(v):
         g = None
         if i > 0:
