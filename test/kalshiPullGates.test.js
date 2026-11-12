@@ -53,7 +53,7 @@ gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
   // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS' && n !== 'INGAMELAG_M1').sort(), 'the choices are the job files except the two retired jobs with no choice');
-  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|NOSIDE1_CANDLES_P1\|NOSIDE1_CANDLES_P2\|NOSIDE1_CANDLES_P3\|SPREADCELL1\|SPREADCELL1_REST\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|CFRTI_K_LISTS\|CFRTI_K_PROBE\|CFRTI_K_R6SLICE\|ECONLAG_CALENDAR\|NHLOT_LISTS\|INGAMELAG_M1A\|INGAMELAG_M1B\|CENSUS_LISTING\|POLAPPR1_CANDLES\|POLAPPR1_CANDLES_P2\|POLAPPR1_CANDLES_P3\|CFRTI_K_CANDLES\|HOURLYTEMP_LISTS\|TESTING_LISTS_BUNDLE\)/.test(wf));
+  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|NOSIDE1_CANDLES_P1\|NOSIDE1_CANDLES_P2\|NOSIDE1_CANDLES_P3\|SPREADCELL1\|SPREADCELL1_REST\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\|CFRTI_K_LISTS\|CFRTI_K_PROBE\|CFRTI_K_R6SLICE\|ECONLAG_CALENDAR\|NHLOT_LISTS\|INGAMELAG_M1A\|INGAMELAG_M1B\|CENSUS_LISTING\|POLAPPR1_CANDLES\|POLAPPR1_CANDLES_P2\|POLAPPR1_CANDLES_P3\|CFRTI_K_CANDLES\|HOURLYTEMP_LISTS\|TESTING_LISTS_BUNDLE\|SOCDERIV_LISTS\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -245,7 +245,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'HOURLYTEMP_LISTS', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'TESTING_LISTS_BUNDLE']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_CANDLES', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'HOURLYTEMP_LISTS', 'INGAMELAG_M1', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'ROLLOFF_PROXY', 'SOCDERIV_LISTS', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'TESTING_LISTS_BUNDLE']);
   assert.ok(!jobs.some((f) => /BALLOTNO|ECONLAG_CANDLES|NHLOT_CANDLES/i.test(f)), 'BALLOTNO and the not-yet-built candle stages are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -280,12 +280,12 @@ gates.KP14 = () => {
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "NOSIDE1_CANDLES_P1", "NOSIDE1_CANDLES_P2", "NOSIDE1_CANDLES_P3", "SPREADCELL1", "SPREADCELL1_REST", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "CFRTI_K_LISTS", "CFRTI_K_PROBE", "CFRTI_K_R6SLICE", "ECONLAG_CALENDAR", "NHLOT_LISTS", "INGAMELAG_M1", "INGAMELAG_M1A", "INGAMELAG_M1B", "CENSUS_LISTING", "POLAPPR1_CANDLES", "POLAPPR1_CANDLES_P2", "POLAPPR1_CANDLES_P3", "CFRTI_K_CANDLES", "HOURLYTEMP_LISTS", "TESTING_LISTS_BUNDLE"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "NOSIDE1_CANDLES_P1", "NOSIDE1_CANDLES_P2", "NOSIDE1_CANDLES_P3", "SPREADCELL1", "SPREADCELL1_REST", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M", "CFRTI_K_LISTS", "CFRTI_K_PROBE", "CFRTI_K_R6SLICE", "ECONLAG_CALENDAR", "NHLOT_LISTS", "INGAMELAG_M1", "INGAMELAG_M1A", "INGAMELAG_M1B", "CENSUS_LISTING", "POLAPPR1_CANDLES", "POLAPPR1_CANDLES_P2", "POLAPPR1_CANDLES_P3", "CFRTI_K_CANDLES", "HOURLYTEMP_LISTS", "TESTING_LISTS_BUNDLE", "SOCDERIV_LISTS"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', NOSIDE1_CANDLES_P1: 'ok', NOSIDE1_CANDLES_P2: 'ok', NOSIDE1_CANDLES_P3: 'ok', SPREADCELL1: 'ok', SPREADCELL1_REST: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', CFRTI_K_LISTS: 'ok', CFRTI_K_PROBE: 'ok', CFRTI_K_R6SLICE: 'ok', ECONLAG_CALENDAR: 'ok', NHLOT_LISTS: 'ok', INGAMELAG_M1: 'refused', INGAMELAG_M1A: 'ok', INGAMELAG_M1B: 'ok', CENSUS_LISTING: 'ok', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok', CFRTI_K_CANDLES: 'ok', HOURLYTEMP_LISTS: 'ok', TESTING_LISTS_BUNDLE: 'ok' });
-  for (const id of ['NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'ECONLAG_CALENDAR', 'NHLOT_LISTS', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'CENSUS_LISTING', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'CFRTI_K_CANDLES', 'HOURLYTEMP_LISTS', 'TESTING_LISTS_BUNDLE']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', NOSIDE1_CANDLES_P1: 'ok', NOSIDE1_CANDLES_P2: 'ok', NOSIDE1_CANDLES_P3: 'ok', SPREADCELL1: 'ok', SPREADCELL1_REST: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused', CFRTI_K_LISTS: 'ok', CFRTI_K_PROBE: 'ok', CFRTI_K_R6SLICE: 'ok', ECONLAG_CALENDAR: 'ok', NHLOT_LISTS: 'ok', INGAMELAG_M1: 'refused', INGAMELAG_M1A: 'ok', INGAMELAG_M1B: 'ok', CENSUS_LISTING: 'ok', POLAPPR1_CANDLES: 'ok', POLAPPR1_CANDLES_P2: 'ok', POLAPPR1_CANDLES_P3: 'ok', CFRTI_K_CANDLES: 'ok', HOURLYTEMP_LISTS: 'ok', TESTING_LISTS_BUNDLE: 'ok', SOCDERIV_LISTS: 'ok' });
+  for (const id of ['NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'ECONLAG_CALENDAR', 'NHLOT_LISTS', 'INGAMELAG_M1A', 'INGAMELAG_M1B', 'CENSUS_LISTING', 'POLAPPR1_CANDLES', 'POLAPPR1_CANDLES_P2', 'POLAPPR1_CANDLES_P3', 'CFRTI_K_CANDLES', 'HOURLYTEMP_LISTS', 'TESTING_LISTS_BUNDLE', 'SOCDERIV_LISTS']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -343,9 +343,9 @@ gates.KP29 = () => {
   }
 };
 
-// KP30: the Testing Desk and Desk B list jobs (HOURLYTEMP) is a LISTING: only /markets, /historical/markets and /series/<ticker> reads, no candles, and each cap covers its page budget (the runner stops at the cap, so a cap under the budget would end a run early).
+// KP30: the Testing Desk and Desk B list jobs (SOCDERIV, HOURLYTEMP) are LISTINGS: only /markets, /historical/markets and /series/<ticker> reads, no candles, and each cap covers its page budget (the runner stops at the cap, so a cap under the budget would end a run early).
 gates.KP30 = () => {
-  for (const n of ['HOURLYTEMP_LISTS']) {
+  for (const n of ['HOURLYTEMP_LISTS', 'SOCDERIV_LISTS']) {
     const c = JSON.parse(fs.readFileSync(path.join(jobDir, n + '.json'), 'utf8'));
     assert.strictEqual(c.status, 'active', n);
     assert.ok(c.requests.every((r) => r.path === '/markets' || r.path === '/historical/markets' || /^\/series\/[A-Z0-9]{2,32}$/.test(r.path)), n + ': listing paths only');
@@ -362,14 +362,14 @@ gates.KP27 = () => {
   assert.ok(c.requests.filter((r) => r.path === '/markets').every((r) => r.params.status === 'settled' && r.params.mve_filter === 'exclude' && (r.max_pages || 1) <= 3), 'markets: settled, no combos, at most 3 pages an hour');
 };
 
-// KP28: TESTING_LISTS_BUNDLE (Testing Desk, owner MAIN) carries the five small jobs WXDAYEND_A, UNRATE_LISTS, TIE3_LISTS, POLI2_LISTS and SOCDERIV_LISTS unchanged in ONE file (204 requests, 486 pages at most, cap 500 = the page budget plus 14 for 429 retries). The only candle requests are WXDAYEND_A's own 18 one-market windows; everything else is a listing. Ids carry a prefix (t3_ wx_ ur_ p2_ sd_) so each manifest row says its sub-job. A run that hits the 200 MB size cap stops with SOCDERIV last, and the splitter lists the missing ids.
+// KP28: TESTING_LISTS_BUNDLE (Testing Desk, owner MAIN) carries four small jobs, TIE3_LISTS (32), WXDAYEND_A (22), UNRATE_LISTS (4) and POLI2_LISTS (79), unchanged in ONE file: 137 requests, 355 pages at most, cap 369 (the page budget plus 14 for 429 retries). SOCDERIV_LISTS stays its own job (the soccer lists are the heavy part and a size stop would cost a second run). The only candle requests are WXDAYEND_A's own 18 one-market windows; everything else is a listing. Ids carry a prefix (t3_ wx_ ur_ p2_) so each manifest row says its sub-job.
 gates.KP28 = () => {
   const c = JSON.parse(fs.readFileSync(path.join(jobDir, 'TESTING_LISTS_BUNDLE.json'), 'utf8'));
-  assert.strictEqual(c.requests.length, 204); assert.strictEqual(c.owner, 'MAIN'); assert.strictEqual(c.status, 'active');
+  assert.strictEqual(c.requests.length, 137); assert.strictEqual(c.owner, 'MAIN'); assert.strictEqual(c.status, 'active');
   const budget = c.requests.reduce((a, r) => a + (r.max_pages || 1), 0);
-  assert.strictEqual(budget, 486); assert.strictEqual(c.max_requests, 500); assert.ok(c.max_requests >= budget && c.max_requests <= 1200);
-  assert.strictEqual(new Set(c.requests.map((r) => r.id)).size, 204, 'request ids are unique');
-  assert.ok(c.requests.every((r) => /^(t3|wx|ur|p2|sd)_/.test(r.id)), 'every id carries its sub-job prefix');
+  assert.strictEqual(budget, 355); assert.strictEqual(c.max_requests, 369); assert.ok(c.max_requests >= budget && c.max_requests <= 1200);
+  assert.strictEqual(new Set(c.requests.map((r) => r.id)).size, 137, 'request ids are unique');
+  assert.ok(c.requests.every((r) => /^(t3|wx|ur|p2)_/.test(r.id)), 'every id carries its sub-job prefix, none is a soccer list');
   const candles = c.requests.filter((r) => /candlesticks/.test(r.path));
   assert.strictEqual(candles.length, 18); assert.ok(candles.every((r) => r.id.startsWith('wx_') && !r.params.market_tickers.includes(',')), 'only WXDAYEND_A one-market candle windows');
   assert.ok(c.requests.filter((r) => !/candlesticks/.test(r.path)).every((r) => r.path === '/markets' || r.path === '/historical/markets' || /^\/series\/[A-Z0-9]{2,32}$/.test(r.path)), 'everything else is a listing');

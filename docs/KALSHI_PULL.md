@@ -82,7 +82,8 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
 | `CFRTI_K_CANDLES` | Desk A | 215 (215) | about 55 (estimate) | `CFRTI_K_REGISTRATION.md`; live mode (the probe answered empty for pre-cutover markets), built from the `CFRTI_K_LISTS` answer; closes 2026-09-12 to 2026-11-04 only |
 | `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |
-| `TESTING_LISTS_BUNDLE` | Testing Desk (MAIN) | 204, up to 486 pages (500) | about 120 to 150 (uncertain by 2x; a stopped_size run cuts SOCDERIV first) | WXDAYEND_A, UNRATE_LISTS, TIE3_LISTS, POLI2_LISTS and SOCDERIV_LISTS in one file, ids prefixed wx_ ur_ t3_ p2_ sd_; split with `workers/testing/bundle.py split` |
+| `TESTING_LISTS_BUNDLE` | Testing Desk (MAIN) | 137, up to 355 pages (369) | 30 to 50 (estimate) | TIE3_LISTS, WXDAYEND_A (with its 18 one-market candle windows), UNRATE_LISTS and POLI2_LISTS in one file, ids prefixed t3_ wx_ ur_ p2_; split with `workers/testing/bundle.py split` |
+| `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists, its own job (the heavy part) |
 | `CENSUS_LISTING` | Desk B | 40, up to 88 pages (100) | about 120 (estimate) | `FAMILY_CENSUS_NOV12.md` |
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
