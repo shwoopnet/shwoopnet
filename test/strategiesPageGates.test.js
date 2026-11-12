@@ -78,8 +78,11 @@ gates.SP3 = () => {
   assert.strictEqual(R('0.00').frac, 0); assert.strictEqual(R('n/a').frac, 0); assert.strictEqual(R('1.00').frac, 0.5, 'a profit factor of 1.0 is half the ring on the 0 to 2 scale');
   assert.strictEqual(R('2.40').frac, 1, 'clamped to a full ring'); assert.strictEqual(R('no losses').frac, 1);
   assert.deepStrictEqual(R('1.30').tick, { x1: 50, y1: 84, x2: 50, y2: 96 }, 'the 1.0 tick is at the bottom of the ring, where half way ends');
-  const oi = P.kalshiStratGauge('OICORE', { drawdown: 39.33, room: 10.67 }, money);
-  assert.ok(Math.abs(oi.frac - 39.33 / 50) < 1e-9 && oi.big === '$10.67' && oi.cap === 'drawdown room of $50.00', 'OICORE: room of the $50 stop, as the bot counts it: ' + JSON.stringify(oi));
+  const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, money);
+  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$1.50' && oi.cap === 'of room before the net floor', 'OICORE: the net floor binds, 4.5 of 6 used: ' + JSON.stringify(oi));
+  const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, money);
+  assert.ok(oi2.frac === 0.5 && oi2.big === 'Streak 12 of 24' && /net floor: \$9\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
+  assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -5, floorOn: false, floorRoom: 1 }, money).frac, 0, 'the net floor is not counted before 40 fills');
   const l1 = P.kalshiStratGauge('L1', { count: 18 }, money);
   assert.ok(l1.frac === 0.18 && l1.big === '18 of 100', 'the gold tripwire is n of 100 trades');
   assert.strictEqual(P.kalshiStratGauge('L1', { count: 250 }, money).frac, 1, 'never past full');
@@ -89,8 +92,10 @@ gates.SP3 = () => {
   assert.strictEqual(P.kalshiStratGauge('GOLDALL', { streak: 1 }, money), null, 'a shadow rule has no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('XRPYES10', { streak: 1 }, money), null, 'XRPYES10 and KESTREL were retired Nov 11, 2026: no live card, so no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('KESTREL', { streak: 1 }, money), null);
-  const m = P.kalshiStratGauge('OICORE', { drawdown: 39.33, room: 10.67 }, mask);
-  assert.ok(!/\d/.test(m.big) && !/\d/.test(m.cap.replace(/[^\d]/g, '') ) && m.big === '****' && m.cap === 'drawdown room of ****', 'Privacy view masks both dollar figures of the gauge');
+  const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, mask);
+  assert.ok(m.big === '****' && !/\d/.test(m.cap), 'Privacy view masks the dollar figure of the gauge');
+  const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, mask);
+  assert.ok(m2.cap === 'losses in a row; net floor: **** of room', 'and the dollar figure in the caption');
 };
 gates.RT1 = () => {
   // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): gold L1 is the single favourite-late strategy. Consequence: the board lists no shadow rule and only
@@ -124,7 +129,7 @@ const now = Date.UTC(2026, 10, 10, 18, 0);
 // the first sharing its id with a live strategy (OICORE) to cover the twin chips. These ids are fixtures, not registered rules.
 const SHADOW_FIX = [{ id: 'OICORE', rule: 'fixture: a shadow rule that is also live' }, { id: 'SHA', rule: 'fixture shadow rule A' }, { id: 'SHB', rule: 'fixture shadow rule B' }, { id: 'SHC', rule: 'fixture shadow rule C' }];
 const liveModel = (kmoney) => P.KAL_BOARD_LIVE.map((s, i) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: { d7: { n: 1 }, d30: { n: 24, pf: 1.34 + i / 10 }, all: { n: 30 } },
-  kill: { count: 18, drawdown: 39.33, room: 10.67, streak: 2, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
+  kill: { count: 18, streak: 2, net: -1, floorOn: true, floorRoom: 5, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
 const deckModel = (state) => ({ state, rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, spark: [1, 1.2, 1.1],
   rep: { fillable: 41, pfFillable: 1.25, netFillableDollars: 1, days: 6.4, status: 'collecting' } })) });
 gates.SP5 = () => {
@@ -132,7 +137,7 @@ gates.SP5 = () => {
   // The Rules text holds fixed policy numbers (a $50 stop, a $5 slot), not account figures; every figure that comes from the account is masked.
   assert.ok(!/\$\d/.test(h.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '')) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.ok(/\$10\.67/.test(plain) && /drawdown room of \$50\.00/.test(plain), 'and with it off the room is shown');
+  assert.ok(/\$5\.00/.test(plain) && /of room before the net floor/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
   assert.strictEqual((plain.match(/class="kal-card sp-tile(?: sp-compact)?"/g) || []).length, P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'one tile per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, SHADOW_FIX.length, 'every shadow tile has the Sizing ladder row (a Live card keeps it out of the card: Details is the popup, five things only)');
   const L = P.KAL_BOARD_LADDER;
@@ -469,6 +474,18 @@ gates.GK8 = () => {
   assert.strictEqual(no.stage, 'Retired'); assert.strictEqual(no.cause, 'failed the bar'); assert.ok(/failed the bar/i.test(no.reason));
   assert.strictEqual(k.stage, 'Probe'); assert.strictEqual(k.label, 'UNPROVEN'); assert.ok(!/read from Nov 20/.test(k.name)); assert.ok(P.kalshiRegBuilding(k) && !P.kalshiRegBuilding(list.find((x) => x.id === 'OICORE')));
   assert.ok(/APPROVED, BUILDING/.test(Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [k], retired: [] }, registryList: list, registryState: 'ok' }, esc, money)));
+};
+gates.OK1 = () => {
+  // OICORE's badge is room left against the kill that binds first (Nov 12, 2026, the owner); the fixed $50 drawdown is no longer a badge or gauge figure.
+  const g = (kill) => P.kalshiStratGauge('OICORE', kill, money);
+  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).big, 'Streak 20 of 24', 'the streak is closer');
+  assert.strictEqual(g({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).big, '$1.00', 'the net floor is closer');
+  const b = (kill) => P.kalshiStratBadge('live', { n: 40, pf: 1.4, frac: g(kill).frac, useFrac: true, killState: undefined });
+  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).text, 'NEAR KILL', '20 of 24 is over 80% of the streak kill');
+  assert.strictEqual(b({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).text, 'NEAR KILL', '5 of 6 of the net floor used');
+  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR KILL');
+  const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
+  assert.ok(!/ddStop|drawdown room/i.test(src.replace(/<li>[\s\S]*?<\/li>/g, '')), 'no fixed drawdown gauge code is left on the page');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }

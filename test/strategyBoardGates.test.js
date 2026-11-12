@@ -91,8 +91,8 @@ gates.SB5 = () => {
   const o = exits([1, -1, -1], from).concat(exits([5], Date.UTC(2026, 9, 1)));
   let seen = 0; const m = (x) => { seen++; return money(x); };
   const k = P.kalshiBoardKill('OICORE', o, 0, m);
-  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.drawdown, 2, 'peak +1 down to -1 is a drawdown of 2'); assert.strictEqual(k.room, 48);
-  assert.ok(/^Drawdown room \$48\.00 of \$50\.00 · streak 2 of 24$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 2, 'money used for the room and the stop'); assert.strictEqual(k.lines.length, 1);
+  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.net, -1, 'net since the review date: 1 - 1 - 1'); assert.strictEqual(k.floorRoom, 5, 'room before the -6 net floor'); assert.strictEqual(k.floorOn, false, 'the floor applies only from 40 fills');
+  assert.ok(/^Loss streak 2 of 24 · Net floor: \$5\.00 of room \(applies from 40 fills, 3 so far\)$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 1, 'money used for the room'); assert.ok(!/50|[Dd]rawdown/.test(k.lines[0]), 'the fixed $50 drawdown is not shown'); assert.strictEqual(k.lines.length, 1);
   const e = P.kalshiBoardKill('EVENT830', exits([-0.5, -0.5, -0.5, -0.5, -0.5]), 0, money);
   assert.ok(/^5 trades, 0 won · losing streak 5 of 20$/.test(e.lines[0]), e.lines[0]); assert.strictEqual(e.wins, 0);
 };
@@ -105,7 +105,7 @@ gates.SB6 = () => {
   assert.strictEqual(P.KAL_BOARD_KILL.OICORE.from, Date.parse(reg.OICORE.reviewedAt + 'T00:00:00Z'));
   assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1'].concat(slot.SLOT_STRATEGIES.map((s) => s.id)), 'the live strategies are L1 and every registered slot strategy');
   assert.strictEqual(P.KAL_BOARD_KILL.EVENT830.streak, reg.EVENT830.killRules.maxConsecutiveLosses, 'the EVENT830 streak kill is the bot\'s');
-  const L = slot.SLOT_LADDERS.OICORE; assert.strictEqual(P.KAL_BOARD_KILL.OICORE.ddStop, L.stopPerContract * L.steps[0], 'the drawdown stop is the bot\'s at the bottom step (5 x 10 contracts)');
+  const L = slot.SLOT_LADDERS.OICORE; assert.strictEqual(P.KAL_BOARD_KILL.OICORE.ddStop, undefined, 'the fixed drawdown stop is not a badge figure any more (Nov 12, 2026)'); assert.ok(L.stopPerContract > 0);
 };
 // The board still draws shadow cards for the next rule a reviewed edit registers; these four are fixtures (the real list is empty), not registered rules.
 const SHADOW_FIX = [{ id: 'SHA', rule: 'fixture shadow rule A' }, { id: 'SHB', rule: 'fixture shadow rule B' }, { id: 'SHC', rule: 'fixture shadow rule C' }, { id: 'SHD', rule: 'fixture shadow rule D' }];
