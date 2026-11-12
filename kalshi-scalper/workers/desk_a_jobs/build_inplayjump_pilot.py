@@ -2,7 +2,7 @@
 """INPLAYJUMP PILOT job (Head-approved Nov 12, 2026): ONE candle batch per family on its first development days, for the cost and tradeability line only. Offline: sends nothing.
   python3 -I build_inplayjump_pilot.py <INPLAYJUMP_SERIES.json> <stage 1 (lists) run folder> <outdir>
 The lists run folder is the ONLY placeholder: substitute it once the lists answer lands. Clock families: window = S - 70 minutes (S = the ticker's US Eastern start) to the batch's last close, so one pull also serves PREMOVE;
-tennis: first close minus the family's candle lead to the last close. Per family the first matches by close time (development window only, Tie never) up to tickers <= 100 and minutes x tickers <= 9,000. No result is read by the pilot."""
+tennis: the market's open time to the last close (Amendment 2). Per family the first matches by close time (development window only, Tie never) up to tickers <= 100 and minutes x tickers <= 9,000. No result is read by the pilot."""
 import gzip, json, os, sys, calendar, time, re, collections
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "desk_a_verify"))
 from inplayjump import clock_start
@@ -16,12 +16,12 @@ def main(series_path, folder, outdir):
         b = json.load(gzip.open(os.path.join(folder, row["file"])))
         for m in (b.get("markets", []) if isinstance(b, dict) else []):
             c = iso_ts(m.get("close_time") or "")
-            if m.get("ticker") and c: mk[m["ticker"]] = (m["ticker"].split("-")[0], c)       # the result field is NOT read here
+            if m.get("ticker") and c: mk[m["ticker"]] = (m["ticker"].split("-")[0], c, iso_ts(m.get("open_time") or ""))       # the result field is NOT read here
     reqs = []; info = {}
     for f in S["families_ranked_by_events"]:
         lo, hi = iso_ts(f["development"]["closes_from"]), iso_ts(f["development"]["closes_before"]); clock = f["in_play"] == "clock"
-        items = sorted(((t, c) for t, (s, c) in mk.items() if s in f["series"] and lo <= c < hi and not t.endswith("-TIE")), key=lambda x: (x[1], x[0]))
-        def start(t, c): return (clock_start(t) - 70 * 60) if clock and clock_start(t) else c - f["candle_minutes_before_close"] * 60
+        items = sorted(((t, c) for t, (s, c, o) in mk.items() if s in f["series"] and lo <= c < hi and not t.endswith("-TIE")), key=lambda x: (x[1], x[0]))
+        def start(t, c): return (clock_start(t) - 70 * 60) if clock and clock_start(t) else (mk[t][2] or c - 20 * 3600)       # Amendment 2: no window anchored on the close; tennis from the market open
         cur = []
         for it in items:
             trial = cur + [it]; s0 = min(start(t, c) for t, c in trial); span = (trial[-1][1] - s0) / 60
