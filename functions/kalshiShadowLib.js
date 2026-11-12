@@ -278,6 +278,43 @@ function shadowReport(rules, docs, nowMs) {
   });
 }
 
+// A replayed rolling record per rule (Nov 12, 2026), computed purely from the rows passed in and never stored. Last ROLL_N fillable settled signals up to the latest CHECKPOINT (the 60th, 70th, ... signal), so reading
+// the report more often cannot change it. The in/out flag is a PROPOSED rule, not a rule: IN when PF >= 1.3 on the window and its second half >= 1.2, OUT when PF < 1.0, between the two it keeps its last state.
+const ROLL_N = 60, ROLL_STEP = 10;
+function rollPf(rows) {
+  let w = 0, l = 0;
+  for (const r of rows) { if (r.pnl > 0) w += r.pnl; else if (r.pnl < 0) l += -r.pnl; }
+  return l > 0 ? w / l : (w > 0 ? Infinity : null);
+}
+function shadowRolling(rule, docs) {
+  const id = rule && rule.id;
+  const fill = (Array.isArray(docs) ? docs : []).filter((d) => d && d.rule === id && d.settled === true && d.wouldFill === true && Number.isFinite(Number(d.atMs)) && Number.isFinite(Number(d.pnl)))
+    .map((d) => ({ atMs: Number(d.atMs), pnl: Number(d.pnl) })).sort((a, b) => a.atMs - b.atMs || a.pnl - b.pnl);
+  const label = "proposed, not a rule";
+  const base = { rule: id, label, windowSize: ROLL_N, fillable: fill.length, liveVersusShadow: null, liveVersusShadowNote: "not joined: the report's shadow rows carry no live order link" };
+  if (fill.length < ROLL_N) return Object.assign(base, { status: "collecting", flag: null });
+  const lastCp = Math.floor(fill.length / ROLL_STEP) * ROLL_STEP;
+  let flag = "undecided", win = null;
+  for (let cp = ROLL_N; cp <= lastCp; cp += ROLL_STEP) {
+    win = fill.slice(cp - ROLL_N, cp);
+    const pf = rollPf(win), h2 = rollPf(win.slice(ROLL_N / 2));
+    if (pf !== null && pf >= 1.3 && h2 !== null && h2 >= 1.2) flag = "in";
+    else if (pf !== null && pf < 1.0) flag = "out";
+  }
+  const cap = (x) => (x === null ? null : (x === Infinity ? null : Math.round(x * 100) / 100));
+  const net = win.reduce((a, r) => a + r.pnl, 0);
+  const byDay = {};
+  for (const r of win) { const k = new Date(r.atMs).toISOString().slice(0, 10); byDay[k] = (byDay[k] || 0) + r.pnl; }
+  const wins = win.filter((r) => r.pnl > 0).length, losses = win.filter((r) => r.pnl < 0).length;
+  return Object.assign(base, {
+    status: "evaluated", checkpoint: lastCp, flag,
+    pf: cap(rollPf(win)), pfNoLosses: rollPf(win) === Infinity, firstHalfPf: cap(rollPf(win.slice(0, ROLL_N / 2))), secondHalfPf: cap(rollPf(win.slice(ROLL_N / 2))),
+    daysSpanned: Math.round(((win[win.length - 1].atMs - win[0].atMs) / DAY) * 10) / 10,
+    topDayShareOfNet: net > 0 ? Math.round((Math.max(...Object.values(byDay)) / net) * 100) / 100 : null,
+    rarerOutcomeCount: Math.min(wins, losses),
+  });
+}
+
 // The gold RETURN rule (GOLDOFF, kalshi-scalper/README.md#SHADOW-GOLDOFF), read from a shadowReport row WITHOUT touching the lifecycle thresholds above (150 signals, 14 days, second half 1.2):
 // 60 settled fillable rows, 7 days, profit factor 1.3 or better, second half 1.3 or better. It only says whether the written bar is met; the re-arm is still a reviewed edit and the owner's call.
 function returnRule(row) {
@@ -286,4 +323,4 @@ function returnRule(row) {
   return { met, fillable: Number(r.fillable) || 0, need: 60, days: Number(r.days) || 0, needDays: 7, pf: r.pfFillable === undefined ? null : r.pfFillable, secondHalfPf: r.secondHalfPf === undefined ? null : r.secondHalfPf, needPf: 1.3 };
 }
 
-module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, COLLECTION };
+module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, shadowRolling, COLLECTION };
