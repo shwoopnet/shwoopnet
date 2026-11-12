@@ -1,3 +1,5 @@
+**RETIRED UNREAD by the owner's decision of Nov 12, 2026; no pull was made and nothing was read; the job files and loader are kept as a record only and must not be dispatched.**
+
 # V2's orphaned read day: inventory, pull plan, loader, recommendation (Idea Desk A, Nov 12, 2026; ordered by the Head of R&D, due 20:00Z)
 
 **READ NOTHING was done:** no read was run, no candle file was opened, no result file was looked for. Sources: V2's `studies/RUNBOOK_2026-11-12.md`, `HANDOFF_V2.md` section 7, the registrations in V2's `README.md`, and the scripts under `src/scalper/` (`fwd_reads.py`, `hour3.py`, `entry2.py`, `flips0x.py`, `prog1.py`, `gas1.py`, `ideas20c.py`, `fresh_update.py`, `backfill.py`), all on `claude/epic-ptolemy-0amjd9`.
