@@ -28,3 +28,7 @@ S1 1, S2 2, S3 2, S4 2, S5 2, S6 2, S7 1 (first wave, scripts and synthetic test
 | S5 post-gap drift | screen only, cannot pass |
 | S7 first 30 predicts last 30 | net d about 0.04 to 0.05, PF about 1.05 to 1.1 |
 Registered tries counted: still 16 registered, 0 scored. Left: S6, S8, S9 (blocked on price definition and the Head's ruling), S10 deferred.
+
+| S6 leveraged-ETF rebalance | retired unread Nov 12 (Amendment 5): net PF about 1.0 to 1.15, about 300 events |
+| S9 opening cross imbalance | retired unread Nov 12 (Amendment 5): PF about 1.0 to 1.2 |
+Held: S2 long leg (after the pilot), S8 (after the cutoff ruling). Deferred: S10. Tries scored 0.
