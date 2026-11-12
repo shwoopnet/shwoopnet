@@ -5,8 +5,9 @@
 # Scheduled starts run hours late or are dropped, so it is triggered every 30 minutes under one concurrency group that never cancels a running job: a run that finds a job running
 # waits, so jobs never overlap, and a dropped trigger costs at most 30 minutes instead of 4 hours (15 since Oct 31, 2026: the triggers run at :05, :20, :35 and :50, because GitHub dropped a whole run of them for about 5 hours). Each job records up to the next 4 hour boundary (about 4 hours) and stops.
 # Nov 11, 2026 (the owner): from 2026-11-13 23:59 UTC only the Bitcoin, Ethereum and gold markets are recorded, until 2026-11-20 23:59 UTC (research session's spot-lead needs more windows).
-# Nov 12, 2026 (the owner): Bitcoin continues from 2026-11-20 23:59 UTC until 2026-12-15 23:59 UTC, and gold (KXGOLD15M) with it, added at the Head of R&D's request. Ethereum still stops on Nov 20; no host is added.
-# It stops by itself after that: from 2026-12-15 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+# Nov 12, 2026 (the owner): Bitcoin continues from 2026-11-20 23:59 UTC until 2026-12-31 23:59 UTC, and gold (KXGOLD15M) with it, added at the Head of R&D's request. Ethereum still stops on Nov 20; no host is added.
+# Nov 12, 2026 (the owner, later): Bitcoin and Ethereum (and gold with them) continue to 2026-12-31 23:59 UTC; Ethereum no longer stops on Nov 20. No host is added.
+# It stops by itself after that: from 2026-12-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
 name: record-15m-book
 on:
   schedule:
@@ -23,10 +24,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 330
     steps:
-      - name: Stop for good after the end date (2026-12-15 23:59 UTC)
+      - name: Stop for good after the end date (2026-12-31 23:59 UTC)
         id: gate
         run: |
-          if [ "$(date -u +%s)" -ge "$(date -u -d '2026-12-15T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
+          if [ "$(date -u +%s)" -ge "$(date -u -d '2026-12-31T23:59:00Z' +%s)" ]; then echo "past the end date: nothing to record"; echo "go=false" >> "$GITHUB_OUTPUT"; else echo "go=true" >> "$GITHUB_OUTPUT"; fi
       - name: Get the recorder script from main
         if: steps.gate.outputs.go == 'true'
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
