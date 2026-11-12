@@ -109,24 +109,22 @@
   {
    "id": "W-SPREAD-CELL1",
    "name": "Sports spread cheap side",
-   "stage": "Idea",
-   "rule": "Sports SPREAD markets: 1 contract, YES ask 5c to under 15c, look at expected_expiration_time (else occurrence_datetime) minus 48 hours, hold",
-   "label": "UNPROVEN",
+   "stage": "Retired",
+   "rule": "",
+   "label": null,
    "startDate": null,
    "nextRead": null,
-   "nextReadText": "One out-of-sample read, not yet read. A forward shadow (S2) starts only if the read is not FAIL, after the Verification Analyst's uniqueness score and the owner's entry approval; no start date",
+   "nextReadText": null,
    "n": null,
-   "nBasis": "Public Kalshi market data only (about 320 observations expected)",
-   "kill": "At 100 shadow fills with profit factor under 1.2",
-   "return": "A 14 day cool-off, then a paper record of 100 fills at cash PF 1.3+, then the owner's approval",
-   "retiredOn": null,
-   "reason": null,
-   "notes": [
-    "Registration: SPORTS_SPREAD_CELL_REGISTRATION.md on the refine-live branch. Odds in the spec: 3 to 5 percent that it clears its first line. A clear is not a pass of the research bar"
-   ],
+   "nBasis": null,
+   "kill": null,
+   "return": "Never as written (a new, differently registered cell would start from zero)",
+   "retiredOn": "2026-11-12",
+   "reason": "Read once on Nov 12: FAIL on both lines (n 172 and 173, profit factor about 0.55 to 0.60 at +1c), reproduced by the Verification Analyst. Not probe-eligible; the forward shadow was never started",
+   "notes": [],
    "code": {},
-   "roomTarget": 100,
-   "roomWhat": "shadow fills toward the 100 kill read"
+   "roomTarget": null,
+   "roomWhat": null
   },
   {
    "id": "W-NO-ARM1",
@@ -170,7 +168,7 @@
   },
   {
    "id": "CFRTI-K",
-   "name": "Bitcoin model on Kalshi candles",
+   "name": "CFRTI-K rebuild, read from Nov 20",
    "stage": "Idea",
    "rule": "Two minutes before a Bitcoin 15 minute market closes, the cheap side (5c to 30c) when a model fed by Kalshi's own Bitcoin perpetual says it is underpriced by 5c or more",
    "label": "UNPROVEN",
@@ -184,7 +182,8 @@
    "retiredOn": null,
    "reason": null,
    "notes": [
-    "Honest odds in the spec: low single digits that it reaches a popup"
+    "Honest odds in the spec: low single digits that it reaches a popup",
+    "The earlier Bitcoin lead and lag variants (spot version, book version) are folded in here: they stay only as lines in the Nov 20 sitting"
    ],
    "code": {},
    "roomTarget": null,
@@ -211,46 +210,6 @@
    "code": {},
    "roomTarget": 100,
    "roomWhat": "settled combos toward the first 100"
-  },
-  {
-   "id": "CFRTI-B",
-   "name": "Bitcoin model, book version",
-   "stage": "Idea",
-   "rule": "Clean version of the Bitcoin model: signal and price both from the order book, judged on the fill 6 seconds later; cannot go live",
-   "label": "UNPROVEN",
-   "startDate": null,
-   "nextRead": "2026-11-20",
-   "nextReadText": "Registered; held-out read in the Nov 20 sitting",
-   "n": null,
-   "nBasis": "Public data; no evidence at n=16 and n=11 (the two lines)",
-   "kill": "Read once; anything but its registered bar closes it",
-   "retiredOn": null,
-   "reason": null,
-   "notes": [],
-   "code": {},
-   "return": "Cannot go live; a 14 day cool-off and owner approval would be needed",
-   "roomTarget": null,
-   "roomWhat": null
-  },
-  {
-   "id": "CFRTI1-BTC",
-   "name": "Bitcoin model, spot version (and Kraken-only form)",
-   "stage": "Idea",
-   "rule": "Priced at a stale copy of the quote, not tradable",
-   "label": "UNPROVEN",
-   "startDate": null,
-   "nextRead": "2026-11-20",
-   "nextReadText": "Nov 20 sitting, lines that carry the 6 second book replay only",
-   "n": null,
-   "nBasis": "Public data",
-   "kill": "Read once; a clear is a re-test lead, not a pass",
-   "retiredOn": null,
-   "reason": null,
-   "notes": [],
-   "code": {},
-   "return": "Not a strategy to return: read lines only",
-   "roomTarget": null,
-   "roomWhat": null
   },
   {
    "id": "NC15DEPTH1",

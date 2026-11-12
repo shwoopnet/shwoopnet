@@ -94,10 +94,10 @@ gates.RG5 = () => {
   assert.strictEqual(list.length, reg.strategies.length);
   assert.strictEqual(P.kalshiRegistryNorm({ nope: 1 }), null, 'a wrong shape is refused');
   const split = P.kalshiRegistrySplit(list, ['OICORE', 'EVENT830'], ['XRP', 'Bitcoin', 'Ethereum', 'Dogecoin', 'AUD/USD', 'USD/CAD', 'Natural gas']);
-  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['CFRTI-B', 'CFRTI-K', 'CFRTI1-BTC', 'GOLDOFF', 'NC15DEPTH1', 'S3', 'W-NO-ARM1', 'W-SPOTLEAD1', 'W-SPREAD-CELL1'], 'the research rows and the shadow rule, not Shadow 0');
-  assert.ok(split.retired.some((x) => x.id === 'MMSIM1') && !split.retired.some((x) => x.name === 'XRP'), 'only retired rows not already listed are added');
+  assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['CFRTI-K', 'GOLDOFF', 'NC15DEPTH1', 'S3', 'W-NO-ARM1', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL, CFRTI-B and the spot-version lead are folded into CFRTI-K)');
+  assert.ok(split.retired.some((x) => x.id === 'MMSIM1') && split.retired.some((x) => x.id === 'W-SPREAD-CELL1') && !split.retired.some((x) => x.name === 'XRP'), 'only retired rows not already listed are added');
   const out = split.pipeline.map((x) => P.kalshiRegistryCardHtml(x, esc)).join('');
-  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 9, 'every unproven card says UNPROVEN');
+  assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 6, 'every unproven card says UNPROVEN');
   assert.ok(!/Kill|Return|Room left/.test(out), 'the card itself is condensed: the rules are in Details');
   // The Details sheet shows ONLY: what it does, kill, return, room left, one chart.
   const g = list.find((x) => x.id === 'GOLDOFF');
