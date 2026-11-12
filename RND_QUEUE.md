@@ -174,6 +174,15 @@ Desk B's CENSUS_LISTING.json (claude/idea-desk-b 02be8d3; plan kalshi-scalper/wo
 
 T2-1 PERPS-ORPHANS (19:30Z): the Testing Desk now owns V2's 11 perps forward reads dated Dec 1 and Dec 22; one row each (registration, rule, cutoff constant or not, scorer, source still recording or not, tries, events expected against needed) with KEEP, RETIRE UNREADABLE or RETIRE UNDERPOWERED; the Head of R&D rules; default is retire unless a row can reach a verdict. T2-2 POL-i2 count step (21:00Z): registration confirmed, scorer and job file first, request count to the Head of R&D. T2-3 UNRATEROUND against the paper screen (22:00Z): same. WXDAYEND_A (22 requests) waits on Main's dispatch.
 
+### V2's perps forward reads: RULED (Nov 12, 17:00Z)
+
+kalshi-scalper/workers/testing/PERPS_ORPHANS_NOV12.md on claude/testing-desk (4d11b4aa). The set is 20 reads, not 11 (the "11" quoted above and to the EA had no source file and is corrected): 7 dated Dec 1, 10 dated Dec 22, 3 dated June 1, 2027; 44 tries, all still counted.
+
+- **RETIRED UNREAD, source closed (10):** CASHCLOSE1, CASHGAP1, CASHOPEN1, CASHCLOSE2, CASHGAP2, CASHOPEN2, SPLAG1, SPAUCT1, SPLIQ1, SPHALT1 (each needs the Yahoo cash tape past Nov 11).
+- **RETIRED UNREAD, cannot reach its bar by its read date (8):** PERPEQ2, PERPEQ3, PERPEQ4, SPFUND1, SPW1, EARNPERP1, EARNPERP2, EARNPERP3.
+- **KEPT (2), owner: Testing Desk.** PERPEQ1 (overnight gap fade on 19 stock perps, perp candles only; about 240 trades expected against 100 needed; read once on or after 2026-12-22; scorer committed by Nov 14 without opening a candle; a dated amendment corrects the stale marker line and moves no cutoff; perp candle freshness labelled as assumed). CASHSPREAD1 part B (a cost fact, no trade; Dec 1, only if 12 development days of the 30 second files exist by Nov 30, else retired unread).
+- ABSORB-F (Dec 1; its scheduled task was switched off by the EA) is being added as a 21st row for a ruling.
+
 ## Desk tasks, Nov 12 16:00Z to 22:00Z (set after the owner said the first four hours were not enough)
 
 Standing order: every test's registration and scoring script are committed BEFORE its data lands; every pull is scored within the hour it finishes; Main dispatches the next job the moment one ends. Desks may use workers (the owner's standing permission); the desk checks their output. Reports lead with counts.
