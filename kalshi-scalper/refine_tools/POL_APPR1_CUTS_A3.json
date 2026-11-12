@@ -1,0 +1,736 @@
+{
+ "test": "W-POL-APPR1 Amendment 3 (Nov 12, 2026)",
+ "rule": "APPR_538 cuts, constants. Computed from the close dates of the 143 KX538APPROVE events in the market list only (no price, no result): sorted close timestamps, cut1 = element n//3, cut2 = element 2n//3, the rule that reproduces the cuts in POL_APPR1_CUTS.json. TRAIN ct<cut1; VALIDATE cut1<=ct<cut2; HELD-OUT ct>=cut2. An event of any family that is in neither file is assigned by its close time against that family's cuts; POL_APPR1_CUTS.json is not changed.",
+ "cuts": {
+  "APPR_538": [
+   1679543940,
+   1708577940
+  ]
+ },
+ "events": {
+  "APPR_538": [
+   {
+    "event": "538APPROVE-22MAY04",
+    "close_ts": 1651723140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22MAY11",
+    "close_ts": 1652327940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22MAY18",
+    "close_ts": 1652932740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22MAY25",
+    "close_ts": 1653537540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUN01",
+    "close_ts": 1654142340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUN08",
+    "close_ts": 1654747140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUN15",
+    "close_ts": 1655351940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUN22",
+    "close_ts": 1655956740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUN29",
+    "close_ts": 1656561540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUL06",
+    "close_ts": 1657166340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUL13",
+    "close_ts": 1657771140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUL20",
+    "close_ts": 1658375940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22JUL27",
+    "close_ts": 1658980740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22AUG03",
+    "close_ts": 1659585540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22AUG10",
+    "close_ts": 1660190340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22AUG17",
+    "close_ts": 1660795140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22AUG24",
+    "close_ts": 1661399940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22AUG31",
+    "close_ts": 1662004740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22SEP07",
+    "close_ts": 1662609540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22SEP14",
+    "close_ts": 1663214340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22SEP14H",
+    "close_ts": 1663214340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22SEP21",
+    "close_ts": 1663819140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22SEP28",
+    "close_ts": 1664423940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22OCT05",
+    "close_ts": 1665028740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22OCT12",
+    "close_ts": 1665633540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22OCT19",
+    "close_ts": 1666238340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22OCT26",
+    "close_ts": 1666843140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22NOV02",
+    "close_ts": 1667447940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22NOV09",
+    "close_ts": 1668056340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22NOV16",
+    "close_ts": 1668661140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22NOV23",
+    "close_ts": 1669265940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22NOV30",
+    "close_ts": 1669870740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22DEC07",
+    "close_ts": 1670475540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22DEC14",
+    "close_ts": 1671080340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22DEC21",
+    "close_ts": 1671685140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-22DEC28",
+    "close_ts": 1672289940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23JAN04",
+    "close_ts": 1672894740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23JAN11",
+    "close_ts": 1673499540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23JAN18",
+    "close_ts": 1674104340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23JAN25",
+    "close_ts": 1674709140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23FEB01",
+    "close_ts": 1675313940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23FEB08",
+    "close_ts": 1675918740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23FEB15",
+    "close_ts": 1676523540,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23FEB22",
+    "close_ts": 1677128340,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23MAR01",
+    "close_ts": 1677733140,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23MAR08",
+    "close_ts": 1678337940,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23MAR15",
+    "close_ts": 1678942740,
+    "third": "TRAIN"
+   },
+   {
+    "event": "538APPROVE-23MAR22",
+    "close_ts": 1679543940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAR29",
+    "close_ts": 1680148740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23APR05",
+    "close_ts": 1680753540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23APR12",
+    "close_ts": 1681358340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23APR19",
+    "close_ts": 1681963140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23APR26",
+    "close_ts": 1682567940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAY03",
+    "close_ts": 1683172740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAY10",
+    "close_ts": 1683777540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAY17",
+    "close_ts": 1684382340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAY24",
+    "close_ts": 1684987140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23MAY31",
+    "close_ts": 1685591940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUN07",
+    "close_ts": 1686196740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUN14",
+    "close_ts": 1686801540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUN21",
+    "close_ts": 1687406340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUN28",
+    "close_ts": 1688011140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUL05",
+    "close_ts": 1688615940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUL12",
+    "close_ts": 1689220740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUL19",
+    "close_ts": 1689825540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23JUL26",
+    "close_ts": 1690430340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23AUG02",
+    "close_ts": 1691035140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23AUG09",
+    "close_ts": 1691639940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23AUG16",
+    "close_ts": 1692244740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23AUG23",
+    "close_ts": 1692849540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23AUG30",
+    "close_ts": 1693454340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23SEP06",
+    "close_ts": 1694059140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23SEP13",
+    "close_ts": 1694663940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23SEP20",
+    "close_ts": 1695268740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23SEP27",
+    "close_ts": 1695873540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23OCT04",
+    "close_ts": 1696478340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23OCT11",
+    "close_ts": 1697083140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23OCT18",
+    "close_ts": 1697687940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23OCT25",
+    "close_ts": 1698292740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23NOV01",
+    "close_ts": 1698897540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23NOV08",
+    "close_ts": 1699505940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23NOV15",
+    "close_ts": 1700110740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23NOV22",
+    "close_ts": 1700715540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23NOV29",
+    "close_ts": 1701320340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23DEC06",
+    "close_ts": 1701925140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23DEC13",
+    "close_ts": 1702529940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23DEC20",
+    "close_ts": 1703134740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-23DEC27",
+    "close_ts": 1703739540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24JAN03",
+    "close_ts": 1704344340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24JAN10",
+    "close_ts": 1704949140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24JAN17",
+    "close_ts": 1705553940,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24JAN24",
+    "close_ts": 1706158740,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24JAN31",
+    "close_ts": 1706763540,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24FEB07",
+    "close_ts": 1707368340,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24FEB14",
+    "close_ts": 1707973140,
+    "third": "VALIDATE"
+   },
+   {
+    "event": "538APPROVE-24FEB21",
+    "close_ts": 1708577940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24FEB28",
+    "close_ts": 1709182740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAR06",
+    "close_ts": 1709787540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAR13",
+    "close_ts": 1710388740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAR20",
+    "close_ts": 1710993540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAR27",
+    "close_ts": 1711598340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24APR03",
+    "close_ts": 1712203140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24APR10",
+    "close_ts": 1712807940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24APR17",
+    "close_ts": 1713412740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24APR24",
+    "close_ts": 1714017540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAY01",
+    "close_ts": 1714622340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAY08",
+    "close_ts": 1715227140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAY15",
+    "close_ts": 1715831940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAY22",
+    "close_ts": 1716436740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24MAY29",
+    "close_ts": 1717041540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUN05",
+    "close_ts": 1717646340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUN12",
+    "close_ts": 1718251140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUN19",
+    "close_ts": 1718855940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUN26",
+    "close_ts": 1719460740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUL03",
+    "close_ts": 1720065540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUL10",
+    "close_ts": 1720670340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUL17",
+    "close_ts": 1721275140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUL24",
+    "close_ts": 1721879940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24JUL31",
+    "close_ts": 1722484740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24AUG07",
+    "close_ts": 1723089540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24AUG14",
+    "close_ts": 1723694340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24AUG21",
+    "close_ts": 1724299140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24AUG28",
+    "close_ts": 1724903940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24SEP04",
+    "close_ts": 1725508740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24SEP11",
+    "close_ts": 1726113540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24SEP18",
+    "close_ts": 1726718340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24SEP25",
+    "close_ts": 1727323140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24OCT02",
+    "close_ts": 1727927940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24OCT09",
+    "close_ts": 1728532740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24OCT16",
+    "close_ts": 1729137540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "538APPROVE-24OCT23",
+    "close_ts": 1729742340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24OCT30",
+    "close_ts": 1730347140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24NOV06",
+    "close_ts": 1730955540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24NOV20",
+    "close_ts": 1732165140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24NOV27",
+    "close_ts": 1732769940,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24DEC04",
+    "close_ts": 1733374740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24DEC11",
+    "close_ts": 1733979540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24DEC18",
+    "close_ts": 1734584340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-24DEC25",
+    "close_ts": 1735189140,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-25JAN15",
+    "close_ts": 1737003540,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-25FEB12",
+    "close_ts": 1739422740,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-25FEB26",
+    "close_ts": 1740632340,
+    "third": "HELD-OUT"
+   },
+   {
+    "event": "KX538APPROVE-25MAR05",
+    "close_ts": 1741237140,
+    "third": "HELD-OUT"
+   }
+  ]
+ },
+ "event_counts": {
+  "APPR_538": {
+   "TRAIN": 47,
+   "VALIDATE": 48,
+   "HELD-OUT": 48
+  }
+ }
+}
