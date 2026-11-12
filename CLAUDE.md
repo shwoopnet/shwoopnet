@@ -1305,3 +1305,7 @@ Page only (plus `strategies-registry.json`); no trading code. **(1) Gold's kill 
 
 `WHEEL0_LISTS` (owner MAIN, registration `kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md`): 4 requests, at most 32 pages, cap 36: the settled market lists (ticker, close time, result) of KXXRP15M, KXDOGE15M, KXGOLD15M and KXETH15M from 2026-09-12, for the owner's ordered premise test of the rotation lane. Rule (h): the Ethereum request is bounded before 2026-10-29 in the file itself; Bitcoin is not requested. Public lists, GET only, same limits as every job; runner and workflow unchanged. Gate KP33. Step 2 (four candle jobs built from these lists) follows after the lists land.
 
+## Rotation lane v1.2 (Nov 12, 2026, the Head of R&D)
+
+`docs/ROTATION_LANE.md` v1.2 corrects section 4's arithmetic after the Verification Analyst reproduced it with its own code: the single-block luck table is now at 10 contracts (with the 3 contract figures for probation seats in a sentence), the "no edge" definition is stated (a rule in a fairly priced market loses about one fee an order; a rule that exactly breaks even is its own line), and the cost of a fake rule is stated as fees paid. No rule changed. The block conditions and the worst-day and worst-week figures are labelled as not independently checked. Docs only.
+
