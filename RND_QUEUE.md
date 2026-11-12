@@ -292,6 +292,14 @@ kalshi-scalper/workers/testing/V2_ESTATE_NOV12.md on claude/testing-desk (5997eb
 - **The closing-buy forward reads** (FWD7, FWD10, FLAT2-F, CONC2-F, SQ1, TS1, CW10, HOUR3-F, ENTRY2, FLIPS0X, E3F and the rest): retired unread by the owner on Nov 12. The Testing Desk checks seven doubtful ids (JUMP1, FEAT2-F, FEAT4-F, GOLD1-F, ML1, TIB1, DIP1) against their registered entry definition by 19:00Z.
 - **Recorders with no research reader left** (told to Main): record-daily, record-oklq, record-ref, record-wxens, record-rain, record-signals, record-ingame, the Deribit recorder, and the quote recorder's Kalshi quote and ladder files. Stopping them is Main's and the owner's call; record-politics is the owner's order.
 
+### Recorder health: three FAILING, sent to Main (Testing Desk, Nov 12 17:15Z, e1534180, RECORDER_HEALTH_NOV12.md)
+
+- **FAILING (GitHub is not starting most scheduled runs; these never got R6's extra triggers):** record-politics, 3 runs in 22 hours against about 88, about 9 percent of hours with a quote (the owner ordered this history; it is not accruing); record-combo, 1 run against about 5 expected, so the S3 read on Nov 26 and the recorder's 14 day stop rule cannot be met at this rate; the 30 second perps windows, 1 file since Nov 6 against 9 expected. The hourly perps recorder lands about 7 percent of its starts (no surviving read needs it).
+- **GAPS:** R6 holds 76 percent of Bitcoin windows; the hourly ladder book 83 percent; NC15 about 75 percent in its first 20 hours; perp candles and funding miss Nov 7 (backfillable); the in-game recorder has one 9 hour gap.
+- **Reads that still have their data:** DEPTH1 (Nov 14), the Nov 20 CFRTI sitting, NC15DEPTH1 (about 750 pooled windows a day against 3,400 needed), PERPEQ1 (candles pulled at the read date; job to Main by Dec 15). The Nov 24 record reads will have about 340 hourly events, 15 percent under the 400 cited.
+- **Ruled:** CASHSPREAD1 part B is RETIRED UNDERPOWERED on Dec 1 without a read if fewer than 12 development days of files exist on Nov 30.
+- **Asked of Main:** offset or extra triggers for record-combo and record-politics; a daily landing count for every recorder.
+
 ### Testing Desk T6: recorder health (due 19:30Z)
 
 Prompted by Forensics finding one 30 second perps file after a week. For each data branch a surviving read depends on: expected against found, first and last file, largest gap, HEALTHY, GAPS or FAILING, and whether each dated read will have its data on its date. FAILING rows go to Main the same hour. The L1 group in V2's estate was checked item by item against the registration text: all inside the closing-buy family (853153d3).
