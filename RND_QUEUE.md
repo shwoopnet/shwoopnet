@@ -214,7 +214,7 @@ kalshi-scalper/workers/testing/PERPS_ORPHANS_NOV12.md on claude/testing-desk (4d
 - **RETIRED UNREAD, source closed (10):** CASHCLOSE1, CASHGAP1, CASHOPEN1, CASHCLOSE2, CASHGAP2, CASHOPEN2, SPLAG1, SPAUCT1, SPLIQ1, SPHALT1 (each needs the Yahoo cash tape past Nov 11).
 - **RETIRED UNREAD, cannot reach its bar by its read date (8):** PERPEQ2, PERPEQ3, PERPEQ4, SPFUND1, SPW1, EARNPERP1, EARNPERP2, EARNPERP3.
 - **KEPT (2), owner: Testing Desk.** PERPEQ1 (overnight gap fade on 19 stock perps, perp candles only; about 240 trades expected against 100 needed; read once on or after 2026-12-22; scorer committed by Nov 14 without opening a candle; a dated amendment corrects the stale marker line and moves no cutoff; perp candle freshness labelled as assumed). CASHSPREAD1 part B (a cost fact, no trade; Dec 1, only if 12 development days of the 30 second files exist by Nov 30, else retired unread).
-- ABSORB-F (Dec 1; its scheduled task was switched off by the EA) is being added as a 21st row for a ruling.
+- **ABSORB-F (Dec 1): RETIRED UNREAD** (Nov 12, 17:30Z). It buys the closing favourite and holds, which the owner closed on Oct 28 and is on the declined list; its scheduled task was switched off by the EA; its tries stay counted. V2's REV1 and P6F were retired unread by the owner's Nov 12 popup; FLOOR1, THIN1 and FLIP1 are reads of the owner's own live-fill export and stay with Refinement.
 
 ### Testing Desk, Task 2 prepared early (Nov 12, 17:20Z)
 
