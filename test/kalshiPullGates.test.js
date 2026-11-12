@@ -245,7 +245,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'WXDAYEND_A', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'INGAMELAG_M1', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['CENSUS_LISTING', 'CFRTI_K_LISTS', 'CFRTI_K_PROBE', 'CFRTI_K_R6SLICE', 'COMBO1_OPENBOOK', 'ECONLAG_CALENDAR', 'INGAMELAG_M1', 'NHLOT_LISTS', 'NOSIDE1_CANDLES', 'NOSIDE1_CANDLES_P1', 'NOSIDE1_CANDLES_P2', 'NOSIDE1_CANDLES_P3', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADCELL1_REST', 'SPREADLISTS']);
   assert.ok(!jobs.some((f) => /BALLOTNO|ECONLAG_CANDLES|NHLOT_CANDLES|CFRTI_K_CANDLES/i.test(f)), 'BALLOTNO and the not-yet-built candle stages are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
