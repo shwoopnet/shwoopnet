@@ -106,7 +106,7 @@ Expected on candles, scaled from the book signal rates: about 1,150 block pairs 
 
 ## 13. Files and hashes
 
-`wheel0.py` (the scorer; `selftest`: 28 checks on made-up data after Amendment 1), `wheel0_null_sim.py`, `WHEEL0_NULL_SIM.json`, `WHEEL0_DROP_TABLE.json`, `WHEEL0_PRECONDITION.md`, `WHEEL0_LISTS.json`, `build_wheel0_candles.py`, `../wheel0_count.py`. The sha256 of the scorer, the drop table and the luck table are sent to the Head of R&D for the queue at commit time and printed in the result.
+`wheel0.py` (the scorer; `selftest`: 29 checks on made-up data after Amendments 1 and 2), `wheel0_null_sim.py`, `WHEEL0_NULL_SIM.json`, `WHEEL0_DROP_TABLE.json`, `WHEEL0_PRECONDITION.md`, `WHEEL0_LISTS.json`, `build_wheel0_candles.py`, `../wheel0_count.py`. The sha256 of the scorer, the drop table and the luck table are sent to the Head of R&D for the queue at commit time and printed in the result.
 
 ## 14. Read-once marker
 
@@ -143,7 +143,7 @@ Cause: the Testing Desk built a second scorer from this registration alone and f
 
 11. **Secondary rule and the block grid.** The secondary's 30 and 60 are counted on the template's own order list, starting at the order after the HOT block's last order, and do not use the block grid: the 30 confirmation orders are not part of the 60 seat orders, and both may lie inside what the primary numbers call the next block. A HOT block with fewer than 90 later orders (so also one with fewer than 30) is left out of the secondary line and is not counted as confirmed or not confirmed.
 12. **Sisters, against the Head's wording.** The Head's intent was "blocks of two templates in the same market whose date ranges overlap, both HOT". Point 8 is the exact form used: of all sister blocks that overlap a HOT block, the one that spans the HOT block's midpoint is the one tallied, so each HOT block and sister template gives at most one comparison.
-13. **A ticker with no chance value.** The null calibration leaves out an order whose market has no two-sided candle at any look. On a candle read that cannot happen (an order needs a two-sided candle at its own look), so the observed read and the null runs use the same orders.
+13. **An order with no chance value (the Head's ruling of 20:34Z, on Auditor B's note; this point changes the scorer, new sha256 sent with it).** The simulated p must be computed on exactly the orders the observed D uses. So an order whose market has no two-sided candle at any look is dropped from BOTH the observed read and the no-effect runs, before blocks are built, and the number dropped is printed (`orders_dropped_from_both_reads_for_no_chance_value`). On a candle read that number is zero by construction, since an order needs a two-sided candle at its own look; the rule is there so that the two can never differ.
 14. **Code against text.** One place where the committed code and the registration's own words disagreed: section 3 said "the side" for the drop and section 2 used "side" for cheap or favourite; the code uses the contract word. Point 1 settles it by stating the code. No other disagreement was found by this desk, Auditor B (CLEAN at 2f0cc1e2, the same scorer file) or the second build so far.
 
 A made-up-data comparison file is in `fixture_check/` (the Testing Desk's fixture, seed 11: invented markets, candles and results; nothing real).

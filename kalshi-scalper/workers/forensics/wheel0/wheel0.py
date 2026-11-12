@@ -415,6 +415,11 @@ def counts(orders):
 
 
 def report(orders, label, fair=None):
+    no_fair = 0
+    if fair is not None:
+        # Amendment 2, point 13 (the Head's ruling of 20:34Z): the observed D and the no-effect runs must use exactly the same orders, so an order whose market has no
+        # chance value is dropped from BOTH, counted and printed. On a candle read the count is zero by construction (an order needs a two-sided candle at its own look).
+        kept = [o for o in orders if o["ticker"] in fair]; no_fair = len(orders) - len(kept); orders = kept
     void = sum(1 for o in orders if o["win"] is None)
     for o in orders:
         if o["win"] is None: o["win"] = False                      # a void is a fee-only loss and counts as a loss, never as a win
@@ -422,7 +427,7 @@ def report(orders, label, fair=None):
     cal = null_calibration(orders, fair, pooled["D_dollars_per_order_of_10"]) if fair is not None else None
     if cal is not None: pooled["null_calibration"] = cal
     npv = None if cal is None else cal.get("D_null_calibrated_p")
-    out = {"source": label, "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.",
+    out = {"source": label, "orders_dropped_from_both_reads_for_no_chance_value": no_fair, "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.",
            "p_note": "Two p values are printed for D. The day bootstrap was found by Auditor B to be mildly generous on made-up no-effect data (p at or under 0.05 in 7.5 percent of runs). The null-calibrated p is the rank of the observed D among D from made-up no-effect results at the real orders and prices.", "orders": len(orders), "void_orders_booked_as_fee_only_loss": void, "primary_pooled": pooled, "verdict": verdict(pooled, npv), "verdict_rule_needs_both_p": VERDICT_NEEDS_BOTH_P,
            "primary_by_market": {s: dict(primary(g, s), verdict_shaped_label=verdict(primary(g, s)), label_note="per market, descriptive; the verdict is the pooled line") for s in sorted({k[0] for k in g})},
            "sister_templates_hot_together": sisters(g), "secondary_wheel_rule": secondary(g), "third_line_favourites_88_97": favourites(g),
@@ -581,6 +586,11 @@ def selftest():
         with contextlib.redirect_stdout(io.StringIO()): main(["run", "--lists", Lf, "--candles", Cf, "--out", outf, "--go", "selftest"], _selftest_made_up_data=True)
     except SystemExit: again = 1
     chk("a second read into the same result file is refused (read once)", again == 1)
+    fz = fair_yes(mk, cd); gone = sorted(fz)[:25]
+    for t_ in gone: del fz[t_]
+    od_c = [dict(o) for o in od]; rp = report(od_c, "selftest", fz); n_gone = sum(1 for o in od if o["ticker"] in set(gone))
+    chk("an order whose market has no chance value is dropped from BOTH the observed read and the no-effect runs, and counted", n_gone > 0 and rp["orders_dropped_from_both_reads_for_no_chance_value"] == n_gone and rp["orders"] == len(od) - n_gone,
+        "dropped %d of %d" % (n_gone, len(od)))
     good = "x\nDEPTH1 READ MADE: 2026-11-14, recorded by the Head of R&D\n"
     chk("precondition: refused before 2026-11-14T00:00Z even with the marker; refused after it without the marker; allowed only with both",
         precondition(NOT_BEFORE - 1, good) is not None and precondition(NOT_BEFORE + 1, "") is not None and precondition(NOT_BEFORE + 1, "DEPTH1 READ MADE:") is not None and precondition(NOT_BEFORE + 1, good) is None)

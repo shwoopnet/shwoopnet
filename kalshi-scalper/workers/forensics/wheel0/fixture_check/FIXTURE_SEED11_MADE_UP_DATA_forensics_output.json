@@ -3,7 +3,7 @@
  "tries": 1,
  "go": "made-up fixture seed 11 from the Testing Desk",
  "drop_table_sha256": "f5f629704c29e8d0c98a78db2f784cefc63556a87f8d739accc1bfec4839bb74",
- "scorer_sha256": "42b314506f7ef7378e0586f1748b4bb7058389b4af4ed3c20c0485922c12ad41",
+ "scorer_sha256": "10a7b3630be5807aaf31cdd18f50537e547ffc6e9d1732b72322b4d049a10cf4",
  "markets": 8326,
  "market_counts": {
   "rule_h_dropped_KXETH15M": 1337,
@@ -17,6 +17,7 @@
  },
  "MAIN_candle_read": {
   "source": "CANDLE READ: 1 minute candles, random drop at the measured fill share, price = the ask seen; candle freshness measured on Bitcoin 15 minute only; real misses lean toward winners, so this read is generous",
+  "orders_dropped_from_both_reads_for_no_chance_value": 0,
   "caveat_first": "Real misses lean toward winners, so a candle read overstates the LEVEL of every profit factor; the comparison D between HOT and not-HOT carries the verdict.",
   "p_note": "Two p values are printed for D. The day bootstrap was found by Auditor B to be mildly generous on made-up no-effect data (p at or under 0.05 in 7.5 percent of runs). The null-calibrated p is the rank of the observed D among D from made-up no-effect results at the real orders and prices.",
   "orders": 30835,
