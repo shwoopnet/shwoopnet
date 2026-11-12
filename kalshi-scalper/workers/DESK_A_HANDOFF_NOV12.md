@@ -92,3 +92,35 @@ Environment: python3 with pandas 3 and numpy; run analysis scripts with `python3
 - The Verification Analyst's independent re-run of the fill-model finding (through Main).
 - The Head of R&D: whether QUOTE2B stays unread until Nov 24 and whether its quoting rule becomes one of the four variants; whether the family's falsified count restarts at the owner's Nov 11 approval.
 - Main (engineering): a coverage row on the hourly book recorder; a results branch and schedule for shadow rows; a person to read Kalshi's fee schedule for the maker fee on KXBTCD; the R6 Bitcoin extension past Nov 20 (to the owner).
+
+## 9. Commands (tested from a clean copy on Nov 12, 2026)
+
+**The fill-model result (development events only; also what the Verification Analyst re-runs).** Inputs: every `book.csv.gz` and `trades.csv.gz` under `quote-data:book/` in run folders dated 2026-10-29 to 2026-11-07 (106 files, about 97 MB). The scripts drop every row with `close_time` at or after `2026-11-07T15:00:00Z` at load.
+
+```bash
+W=$(mktemp -d); mkdir -p $W/scripts $W/data
+git fetch origin claude/idea-desk-a quote-data
+for f in mm_probe_diag.py mm_probe_prio.py mm_probe_prio2.py; do
+  git show origin/claude/idea-desk-a:kalshi-scalper/workers/desk_a_fillmodel/$f > $W/scripts/$f; done
+git ls-tree -r --name-only origin/quote-data book/ \
+  | grep -E '^book/2026-(10-(29|30|31)|11-0[1-7])/[0-9]+/(book|trades)\.csv\.gz$' > $W/files.txt
+while read p; do mkdir -p "$W/data/$(dirname "$p")"; git show "origin/quote-data:$p" > "$W/data/$p"; done < $W/files.txt
+cd $W && python3 -I scripts/mm_probe_prio2.py data     # the five fill rules side by side
+python3 -I scripts/mm_probe_diag.py data               # queue, wait, one-sided share, per-event spread
+```
+
+Expected first lines of `mm_probe_prio2.py` (about 2 minutes): `queue  leg fill 0.355 pairs 174 singles 443 none 496 | PF 1.41`, `tape   leg fill 0.890 pairs 889 singles 203 none 21 | PF 0.17`, `tape5  ... 0.850 ... PF 0.29`, `book   leg fill 0.906 pairs 903 singles 210 none 0 | PF 0.18`, `both   ... 0.888 ... PF 0.16`. An independent check should NOT start from these scripts: write the fill loop from section 2 of `MMSIM1_AMENDMENT_3.md` and compare.
+
+**The dated reads.**
+
+| Read | First allowed | Command (V2's script, from a checkout of `claude/epic-ptolemy-0amjd9`, inside `kalshi-scalper/`) | Your own version beside it |
+|---|---|---|---|
+| MMMAP1, NC15 part | Nov 15 (3 full days on `nc-data`) | V2 has only a registration note (`workers/MMMAP1_REGISTRATION.md`), no script | `python3 -I desk_a_held/mmmap1_r6.py <data root> <out.json>` with `MM_DATES=<three dates>`, the `SERIES` list set to the eleven NC15 series and the root pointed at a copy of `nc-data:nc15/` |
+| CFRTI1-BTC | Nov 20, and only at 50 Bitcoin edge rows | V2's `src/scalper/cfrti1.py`: READ ITS USAGE AND THE MARKER LINE IN `workers/WATCH_CFRTI1_BTC.md` FIRST; its held-out mode is guarded by `readonce.py` and runs ONCE. I did not run it and do not know its exact arguments | `python3 -I desk_a_verify/cfrti_rederive.py <folder holding quotes/>` re-derives DEVELOPMENT only; it needs a held-out mode added before Nov 20, with `HELDOUT_FIRST_DAY = "2026-11-05"` as the one constant |
+| MMSIM1 with MMHOUR1's two cells | Nov 24 | `python3 -I src/scalper/mmsim1.py heldout` (refuses before the date and refuses a second run) | a copy of `mmsim1.py` with Rule P ported, proven on development first (`MMSIM1_AMENDMENT_3.md` section 2); both printed side by side in ONE sitting |
+
+For every read: count the events or rows first without computing a result; if the count is short of the registered minimum, do not run. Results go to the Verification Analyst through Main before any figure reaches the owner.
+
+## 10. State of the repaired-rule registration (task 3) at handoff
+
+NOT registered. Nothing scored. No variant has been tried on any data, development included: the only numbers that exist are for the ONE registered MMSIM1 rule under five ways of counting its fills. Two rulings are awaited from the Head of R&D before the registration is written: (1) whether the family's falsified count restarts at the owner's Nov 11 approval of MMSIM1 (section 5), and (2) whether QUOTE2B stays unread until Nov 24 and whether its quoting rule becomes one of the four variants.
