@@ -50,3 +50,7 @@ Events a year and the Nov 10 count are Desk B's (`FAMILY_TABLE.md` on `claude/id
 ## Rules not registered, and why
 
 No own rule is registered from this table. Every family with enough fetchable events either sits in a closed family or would need a rating or calibration rule that has already failed or cannot reach a 9 to 12 point error. Padding the count with such a rule would spend a try for nothing. Deflation ledger: 0 tries added.
+
+## Withdrawn, Nov 12, 19:05Z (Head of R&D's rulings)
+
+`HISTDEPTH_A` duplicated history lists the Testing Desk's TIE3 lists job had already pulled (season dates to be read from what landed, zero requests). `HISTDEPTH_B` served soccer half time (dropped: half time is not derivable from Kalshi's own markets and about 700 development games give 70 to 140 bets) and esports (MAPBREAK's lists already ask for those). Both job files are deleted from this branch; neither was sent to a run.

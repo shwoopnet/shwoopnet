@@ -76,3 +76,12 @@ Median gap (b minus ask) within plus or minus 3c; the 10c share under 3% (the ca
 
 - **Lists (`ESOCTIE_LISTS`, written):** 4 requests, at most 81 pages (expected about 55, about 120 MB), development closes only, three date slices, plus the series fee fields.
 - **Candles (built from the lists, a reviewed job before it runs):** per event the three contracts from S minus 10 minutes to S, packed by S (window minutes x tickers at most 9,000): estimate 1,000 to 2,000 requests, one or two runs. The exact count comes from the lists.
+
+## NOTE 1, Nov 12, 2026, 19:05Z, before any price or result of these markets is read (Head of R&D's rulings of 18:59Z)
+
+1. **Accepted as registered, 1 try.** For the owner's count it is ONE candidate with TIE3; it sits outside the declined tie row for the same reason TIE3 does.
+2. **The Tie's typical price is NOT stated from the listing, on purpose.** The only listing held (Nov 10 census) carries settled markets, whose price fields (last price, bid, ask) are taken after the game ended and so carry the result. They were not printed and will not be read for this. The price is first seen at the measurement.
+3. **Cheap-tail close, added as a kill line before scoring:** if the median Tie ask at the pre-match minute, over the filled eligible events, is under 15c, the card is CLOSED there as a cheap-tail contract (pooled calibration loses in every cheap bucket) and no bet is scored.
+4. **Constants, not fitted:** the strength bucket edges (0, 0.45, 0.55, 0.65, 0.75, 1.0) and the 300-event minimum are fixed in `ESOCTIE_SERIES.json` and were set before any data. The base rate is walk-forward: only events whose markets closed before the bet's scheduled start count.
+5. **Events in the cheap window:** all of them. Development (closes 2026-09-12 to before 2026-10-23) and held-out (to before 2026-11-13) are both after about 2026-09-07, so every candle is on the batched endpoint; no older candle is requested.
+6. **Build:** the Testing Desk builds the venue on its `tie3.py`; this desk's `esoctie.py` stays as the reference scorer, and the two must agree on the same input before any read.

@@ -185,6 +185,10 @@ def measure(lists, cands):
     s, pl = rep["share_gap10_spread4"] or 0, rep["placebo_share_mirror"] or 0
     if not (s >= 0.03 and s >= 2 * pl):
         kill.append("efficient, move on (90th percentile gap %s)" % rep["gap"][.9])
+    med_ask = q([r["ask"] for r in elig], .5)
+    rep["median_tie_ask"] = med_ask
+    if med_ask is not None and med_ask < 0.15:
+        kill.append("closed as a cheap-tail contract (median Tie ask %.3f under 0.15; registration note 1)" % med_ask)
     rep["kill"] = kill
     rep["rule_may_be_scored"] = not kill
     return rep, rows
