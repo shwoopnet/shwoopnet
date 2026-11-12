@@ -1305,3 +1305,7 @@ Page only (plus `strategies-registry.json`); no trading code. **(1) Gold's kill 
 
 `WHEEL0_LISTS` (owner MAIN, registration `kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md`): 4 requests, at most 32 pages, cap 36: the settled market lists (ticker, close time, result) of KXXRP15M, KXDOGE15M, KXGOLD15M and KXETH15M from 2026-09-12, for the owner's ordered premise test of the rotation lane. Rule (h): the Ethereum request is bounded before 2026-10-29 in the file itself; Bitcoin is not requested. Public lists, GET only, same limits as every job; runner and workflow unchanged. Gate KP33. Step 2 (four candle jobs built from these lists) follows after the lists land.
 
+## kalshi-pull jobs v16: ESOCTIE candles, REMATCH stage 1, NHLOT candles (Nov 12, 2026, the Head of R&D's go)
+
+Six candle job files, job files and gates only (runner and workflow unchanged): `ESOCTIE_CANDLES_P1` to `P4` (History Miner, 60 requests each, development windows ending before 2026-10-23, four files only for the 200 MB cap, run in order, one measurement read once after all four land), `REMATCH_STAGE1_CANDLES` (Desk B, 120 requests, cap 150, every request ends before 2026-10-23) and `NHLOT_CANDLES` (Desk B, 86 requests, cap 150, a price measurement with no outcome read). Public batched one minute candles, GET only, each request under the endpoint's 10,000 minutes x tickers limit. KP14 no longer lists NHLOT_CANDLES as absent; KP14b registers the two caps above the request count. Nothing has run.
+
