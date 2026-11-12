@@ -68,7 +68,7 @@ def placebo_decision(ev_close, tickers, candles, kind, K, drops):
         if not all(two_sided(cs[tk].get(t)) and two_sided(cs[tk].get(t - 300)) for tk in tickers): continue
         if not all(in_play(kind, cs[tk], t, S) for tk in tickers): continue
         if any(abs(mid(cs[tk][t]) - mid(cs[tk][t - 300])) >= 0.05 - 1e-9 for tk in tickers): continue
-        tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t)       # registration: "at that minute", the ask at the quiet minute's own close (Desk B to confirm; the rule enters one minute after its decision because the jump is only seen at its close)
+        tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)    # Head's ruling (a): the SAME instant and price rule as the real bet: t+1, ask plus 1c, same band and spread
         if not two_sided(e): return None
         lo, hi = K["entry_ask_band"]
         if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: return None
@@ -106,9 +106,11 @@ def run_family(fam, K, markets, candles, bounds):
     bets = []; voids = 0
     for e, c, d in dec:                                                  # results are read here, for matches with a bet only
         r = markets[d["ticker"]]["result"]
-        if r not in ("yes", "no"): voids += 1; bets.append(dict(event=e, close=c, price=d["price"], win=False, net=0.0, day=day(c), void=True)); continue   # fixed rule, same for the placebo: no yes or no result = refund, net 0, counted and printed
+        if r == "void": voids += 1; continue                       # Head's ruling (b): refund, net 0, NOT in n, PF or z, both arms; the count is printed beside n
+        if r not in ("yes", "no"): bets.append(dict(event=e, close=c, price=d["price"], win=False, net=-fee_up(d["price"]), day=day(c), nores=True)); continue   # fired bet with no result that is not a void: fee-only loss, counted
         win = r == "yes"; bets.append(dict(event=e, close=c, price=d["price"], win=win, net=net_of(d["price"], win), day=day(c)))
-    if voids: L.append("bets with no yes or no result (booked as a refund, net 0): %d" % voids)
+    L.append("voided bets (refunded, excluded from n, PF and z): %d | bets with no result that are not voids (fee-only loss, counted): %d" % (voids, sum(1 for b in bets if b.get("nores"))))
+    if not bets: L.append("NOT_ENOUGH_DATA at n = 0"); return L, None
     n = len(bets); nets = [b["net"] for b in bets]; bets.sort(key=lambda b: b["close"]); h = n // 2
     byday = collections.defaultdict(float)
     for b in bets: byday[b["day"]] += b["net"]
@@ -119,10 +121,11 @@ def run_family(fam, K, markets, candles, bounds):
     plb = []
     for e, tks, c in matches:
         d = placebo_decision(c, tks, cand, kind, K, drops)
-        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] not in ("yes", "no"), into_play=d["into_play"], day=day(c)))
+        if d: plb.append(dict(price=d["price"], win=markets[d["ticker"]]["result"] == "yes", void=markets[d["ticker"]]["result"] == "void", into_play=d["into_play"], day=day(c)))
     bucket = lambda p: min(int((p - 0.20) / 0.10), 6)
     pb = collections.defaultdict(list)
-    for p in plb: pb[bucket(p["price"])].append(0.0 if p["void"] else net_of(p["price"], p["win"]))
+    for p in plb:
+        if not p["void"]: pb[bucket(p["price"])].append(net_of(p["price"], p["win"]))
     mix = collections.Counter(bucket(b["price"]) for b in bets); wsum = 0.0; pnet = 0.0; var = 0.0
     for bkt, cnt in mix.items():
         v = pb.get(bkt)
@@ -233,7 +236,7 @@ def selftest():
     mk, cd = fam(400, 0.80, spread=0.06, seed=4); L4, b4 = run_family(FAMILY, K, mk, cd, far); assert b4 is None and "CLOSED ON COST" in L4[-1], L4     # entry spread 6c: one-way 5c > 4c, killed before any result
     mk, cd = fam(200, 0.80, seed=5)
     for tk in list(mk)[:40]: mk[tk]["result"] = "void"
-    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("refund" in x for x in L5) and any(b.get("void") for b in b5), L5
+    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("voided bets (refunded, excluded from n, PF and z): 20" in x for x in L5) and len(b5) == 180, L5
     mk, cd = fam(100, 0.80, seed=6)
     for tk, m in mk.items(): m["close"] += 3 * 3600                                      # every close 3 h after its start: start not derivable
     L6, b6 = run_family(FAMILY, K, mk, cd, far); assert b6 is None and "START NOT DERIVABLE" in L6[-1], L6
