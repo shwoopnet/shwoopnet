@@ -53,10 +53,11 @@ def build(d, wins, losses, extra=False):
             f.write(json.dumps(m) + "\n")
 
 
-def run(d):
-    r = subprocess.run([sys.executable, "-I", SCRIPT, os.path.join(d, "candles.jsonl"),
-                        os.path.join(d, "ev.json"), os.path.join(d, "markets.jsonl")],
-                       capture_output=True, text=True)
+def run(d, expected=None):
+    args = [os.path.join(d, "candles.jsonl"), os.path.join(d, "ev.json"), os.path.join(d, "markets.jsonl")]
+    if expected:
+        args.append(expected)
+    r = subprocess.run([sys.executable, "-I", SCRIPT] + args, capture_output=True, text=True)
     return r.stdout.strip()
 
 
@@ -130,6 +131,69 @@ for name, wins, losses, want in [
         check(name, want in out and ("n = %d" % n) in out and ("PF %.3f" % pf) in out, out)
     print("     " + out.replace("\n", "\n     "))
     shutil.rmtree(d)
+
+# (e) LINE 2. 300 events, the first 60 win. Per-event expected time chosen by index.
+def expected_file(d, n, kind):
+    exp = {}
+    for i in range(n):
+        e = "KXMLBSPREAD-E%d" % i
+        k = kind(i)
+        if k == "same":
+            exp[e] = {"close_time": iso(CT), "expected_expiration_time": iso(CT), "occurrence_datetime": None}
+        elif k == "occ":   # expected absent, occurrence used
+            exp[e] = {"close_time": iso(CT), "expected_expiration_time": None, "occurrence_datetime": iso(CT)}
+        elif k == "later":  # look lands on the 0.90 candle: observed but out of bucket
+            exp[e] = {"expected_expiration_time": iso(CT + 3 * 3600), "occurrence_datetime": None}
+        elif k == "null":
+            exp[e] = {"close_time": iso(CT), "expected_expiration_time": None, "occurrence_datetime": None}
+        elif k == "far":    # look before every pulled candle
+            exp[e] = {"expected_expiration_time": iso(CT - 10 * 86400), "occurrence_datetime": None}
+    p = os.path.join(d, "EXPECTED.json")
+    json.dump(exp, open(p, "w"))
+    return p
+
+
+# e1 line 2 differs from line 1; probe eligible yes (line 1 PASS, line 2 n 150 with PF high)
+d = scenario(60, 240)
+mark(d)
+def kind1(i):
+    return "same" if i < 100 else "occ" if i < 150 else "later" if i < 200 else "null" if i < 250 else "far"
+out = run(d, expected_file(d, 300, kind1))
+l1, l2 = out.split("\nLINE 2 (")[0], out.split("\nLINE 2 (")[1]
+check("e1 line 1 unchanged (n = 300, PASS)", "n = 300 events in the cell" in l1 and "LABEL: PASS" in l1, out)
+check("e2 line 2 differs (n = 150)", "n = 150 events in the cell" in l2, out)
+check("e3 missing count 100 (50 null + 50 far)", "Line 2 observation (no time, or look outside the pulled candles): 100" in l2, out)
+check("e4 probe-eligible YES", "with n 100 or more: YES" in l2, out)
+print("     " + out.replace("\n", "\n     "))
+shutil.rmtree(d)
+
+# e5 probe NO: line 2 n under 100 (only the label, no PF), even though line 1 is PASS
+d = scenario(60, 240)
+mark(d)
+out = run(d, expected_file(d, 300, lambda i: "same" if i < 70 else "null"))
+l2 = out.split("\nLINE 2 (")[1]
+check("e5 line 2 n 70 prints only the label", "n = 70 events" in l2 and "UNDERPOWERED: no evidence at n = 70" in l2 and "PF" not in l2.split("probe-eligible")[0], out)
+check("e6 probe-eligible NO when line 2 n under 100", "with n 100 or more: NO" in l2, out)
+shutil.rmtree(d)
+
+# e7 probe NO: line 2 n 200 but all losses (PF under 1.3) while line 1 is PASS
+d = scenario(60, 240)
+mark(d)
+out = run(d, expected_file(d, 300, lambda i: "same" if i >= 60 and i < 260 else "null"))
+l2 = out.split("\nLINE 2 (")[1]
+check("e7 line 2 n 200 and PF below 1.3", "n = 200 events" in l2 and "PF 0.000" in l2, out)
+check("e8 probe-eligible NO when line 2 PF under 1.3", "with n 100 or more: NO" in l2, out)
+shutil.rmtree(d)
+
+# e9 missing times file: line 2 not available and nothing else for line 2
+d = scenario(60, 240)
+mark(d)
+out = run(d, os.path.join(d, "NOPE.json"))
+check("e9 missing file prints 'line 2 not available' only", out.endswith("line 2 not available") and "LINE 2 (" not in out and "probe-eligible" not in out, out)
+d2 = scenario(60, 240)
+mark(d2)
+check("e10 no 4th argument same", run(d2).endswith("line 2 not available"))
+shutil.rmtree(d); shutil.rmtree(d2)
 
 print("ALL PASS" if ok else "SOME FAILED")
 sys.exit(0 if ok else 1)
