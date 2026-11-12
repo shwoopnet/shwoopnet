@@ -17,6 +17,7 @@
 const bot = require("./kalshiSignalLib");
 const slotLib = require("./kalshiSlotLib");
 const live = require("./kalshiLiveLib");
+const cfrtiK = require("./kalshiCfrtiKLib");
 
 const EXIT_LOOKBACK_MS = 25 * 60 * 1000;
 const EXIT_SLIPPAGE = 0.15;       // how far past the bid the immediate-or-cancel sell may go; it still fills at the book's own prices (the same figure the L1 watch uses)
@@ -31,6 +32,9 @@ const isAmbiguous = (status) => status === 0 || status === 429 || status >= 500;
 const short = (b) => (typeof b === "string" ? b : JSON.stringify(b)).slice(0, 160);
 const OPEN_SHORT = ["active", "open"];
 const FLOW_MIN_TRADES = 5;   // S-FLOW1 dropped windows with fewer trades than this, so FLOW1 sends nothing on them
+// CFRTIK waits for the perp candle that ends at the decision instant (close minus 120 s), which is published a few seconds after that minute ends. The wait is bounded two ways: PERP_WAIT_MS from when the seat starts
+// and PERP_WAIT_LIMIT_MS from when the minute began (MAX_STALE_MS is 20 s, so at least 7 s are left for the market read, the position read and the order record). Polled every PERP_POLL_MS; each read has its own short abort.
+const PERP_WAIT_MS = 10 * 1000, PERP_WAIT_LIMIT_MS = 10 * 1000, PERP_POLL_MS = 1500, PERP_READ_TIMEOUT_MS = 3000;
 const FLOW_PAGES = 5;   // FLOW1's trade-tape read: at most this many pages of 1,000 trades for 3 minutes of one market; more means a partial read, so no order
 
 // Open interest rise to the signal candle (the one ending 180 s before the close) over the 3 minutes before it. The research read it from the candle that ENDS at those two instants; a
@@ -75,6 +79,7 @@ function checkReasonCode(text) {
   if (/size resting at the touch/.test(t)) return "depth_unknown";
   if (/entry time window/.test(t)) return "outside_window";
   if (/entry band/.test(t)) return "price_out_of_band";
+  if (/model edge/.test(t)) return "cfrti_no_edge";
   if (/open interest/.test(t)) return "oi_below";
   if (/spread/.test(t)) return "spread_wide";
   if (/release window/.test(t)) return "not_listed";
@@ -121,18 +126,23 @@ function makeRunners(flags) {
       }
     }
     if (!jobs.length) return { skipped: early.length ? early.join("; ") : "no market in a slot entry window" };
+    // A seat that WAITS for an input (CFRTIK, the perp candle) is evaluated last, so its wait can never hold up another strategy's order in the same minute (Array.prototype.sort is stable).
+    jobs.sort((a, b) => (a.s.entry.refModel !== undefined ? 1 : 0) - (b.s.entry.refModel !== undefined ? 1 : 0));
 
     // From here on every market in `jobs` is inside its strategy's entry span, so a market that ends this tick without an order gets a skip record (the latest reason wins).
     const skips = new Map();
     // Qualified signals (Nov 11, 2026, the owner: "P3"; LOG ONLY). Once a market's open interest condition has passed, the facts a later filter would need (the open interest rise, the side and the price it would
     // have bought) are kept here, and any skip that follows carries them with qualified: true, so every trigger can be scored whether or not an order went out. A market that never triggered gets no such fields.
     const qualified = new Map();
+    // Reference-model log (CFRTIK, Nov 12, 2026; LOG ONLY): on every evaluation, how old the newest perp candle was at the decision, whether the needed candle was there, how long the seat waited and how many reads it made.
+    // These numbers ride on every skip record of that market (merged into `detail`) and on the order record; nothing that decides an order reads them back.
+    const refInfo = new Map();
     const skip = (job, reason, detail, note) => {
       try {
         const closeMs = Date.parse(job.closeTime);
         let at = Number(typeof args.clock === "function" ? args.clock() : now); if (!Number.isFinite(at)) at = now;
         const d = {};
-        for (const [k, v] of Object.entries(detail || {})) if (typeof v === "number" && Number.isFinite(v)) d[k] = v;
+        for (const [k, v] of Object.entries(Object.assign({}, refInfo.get(job.s.id + "|" + job.ticker) || {}, detail || {}))) if (typeof v === "number" && Number.isFinite(v)) d[k] = v;
         skips.set(job.s.id + "|" + job.ticker, { strategy: job.s.id, ticker: job.ticker, reason, detail: Object.keys(d).length ? d : null,
           note: note ? String(note).slice(0, SKIP_NOTE_MAX) : null, atMs: at, secondsLeft: Number.isFinite(closeMs) ? Math.round((closeMs - at) / 1000) : null });
         const q = qualified.get(job.s.id + "|" + job.ticker);
@@ -175,6 +185,30 @@ function makeRunners(flags) {
       const { s, ticker, series } = job;
       let verdict = null;                          // the last refusal decide() gave inside the transaction, for the skip code (log only)
       const latch = latches && !latches.unreadable && Object.prototype.hasOwnProperty.call(latches, s.id) ? latches[s.id] : (latches && latches.unreadable ? latches : null);
+      // The reference model's input (CFRTIK): the perp candles, waited for BEFORE the market is read, so the quote the decision uses is as fresh as the candle. Any missing piece is no order, never an older candle in its place.
+      let perp = null;
+      if (s.entry.refModel !== undefined) {
+        const closeSec0 = Math.round(Date.parse(job.closeTime) / 1000);
+        if (typeof args.readPerpCandles !== "function" || !Number.isFinite(closeSec0)) { skip(job, "cfrti_no_reader"); results.push(ticker + ": no perp candle reader, nothing sent"); continue; }
+        const startedAt = Number(clock()), key = s.id + "|" + ticker;
+        let tries = 0, got = null, last = null;
+        for (;;) {
+          tries += 1;
+          let r = null;
+          try { r = await args.readPerpCandles({ startTs: closeSec0 - 960, endTs: closeSec0 - 60, timeoutMs: PERP_READ_TIMEOUT_MS }); } catch (e) { r = null; }
+          last = r && Array.isArray(r.candles) ? cfrtiK.perpMarks(r.candles, closeSec0) : last;
+          if (last && last.decisionPresent) { got = last; break; }
+          const t = Number(clock());
+          if (!Number.isFinite(t) || t - startedAt >= PERP_WAIT_MS || t - now >= PERP_WAIT_LIMIT_MS || typeof args.sleep !== "function") break;
+          await args.sleep(PERP_POLL_MS);
+        }
+        const doneAt = Number(clock());
+        const info = { perpPresent: got ? 1 : 0, perpWaitMs: Math.max(0, Math.round(doneAt - startedAt)), perpTries: tries };
+        if (last && Number.isFinite(last.newestEndSec) && Number.isFinite(doneAt)) info.perpAgeMs = Math.round(doneAt - last.newestEndSec * 1000);
+        refInfo.set(key, info);
+        if (!got) { skip(job, "cfrti_no_perp_candle"); results.push(ticker + ": the perp candle for the decision minute did not arrive, nothing sent"); continue; }
+        perp = got;
+      }
       const mk = await live.liveRequest({ fetchFn, method: "GET", path: "/markets/" + encodeURIComponent(ticker) });
       const m = mk.status === 200 && mk.body && mk.body.market;
       if (!m) { skip(job, "market_unreadable", { http: mk.status }); results.push(ticker + ": could not read the market (HTTP " + mk.status + ")"); continue; }
@@ -185,12 +219,20 @@ function makeRunners(flags) {
       const spread = r4(ask - bid), closeMs = Date.parse(m.close_time);
       // The fresh market read must still be a listed release window (the gate checks it again at commit time) and, for a spread rule, no wider than the strategy allows.
       if (s.entry.calendar !== undefined && !slotLib.slotCalendarRow(s, ticker, closeMs)) { skip(job, "not_listed"); results.push(ticker + ": not a listed release window"); continue; }
-      if (Number.isFinite(s.entry.maxSpread) && !(spread <= s.entry.maxSpread + 1e-9)) { skip(job, "spread_wide", { spread, max: s.entry.maxSpread }); results.push(ticker + ": the spread is " + spread.toFixed(2) + ", wider than " + s.entry.maxSpread.toFixed(2)); continue; }
+      if (s.entry.refModel === undefined && Number.isFinite(s.entry.maxSpread) && !(spread <= s.entry.maxSpread + 1e-9)) { skip(job, "spread_wide", { spread, max: s.entry.maxSpread }); results.push(ticker + ": the spread is " + spread.toFixed(2) + ", wider than " + s.entry.maxSpread.toFixed(2)); continue; }
       // Which side, and the price of that side at the touch (cents).
       const yesPrice = Math.ceil(r4(ask) * 100 - 1e-9) / 100, noPrice = Math.round((1 - Math.floor(r4(bid) * 100 + 1e-9) / 100) * 100) / 100;
-      const side = s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
+      // The reference model decides side, spread, band and edge itself (the pure function pinned by the desk's parity vectors); the generic spread and band tests below are skipped for it and slotOrderCheck
+      // re-checks the band, the window and the edge at commit time. Its limit is the ask seen, rounded up to the cent, with no slip.
+      let refDec = null;
+      if (s.entry.refModel !== undefined) {
+        refDec = cfrtiK.cfrtiKDecide({ floorStrike: num(m.floor_strike), yesBid: Number.isFinite(bid) ? bid : null, yesAsk: Number.isFinite(ask) ? ask : null, marks: perp.marks, openMark: perp.openMark });
+        const dn = (x) => (typeof x === "number" && Number.isFinite(x) ? Number(x.toFixed(4)) : undefined);
+        if (!refDec.trade) { skip(job, "cfrti_" + refDec.reason.replace(/[^a-z0-9]+/g, "_").replace(/^_|_$/g, ""), { edge: dn(refDec.edge), price: dn(refDec.sidePrice), nChanges: dn(refDec.nChanges) }, refDec.side); results.push(ticker + ": CFRTI-K no order (" + refDec.reason + ")"); continue; }
+      }
+      const side = refDec ? refDec.side : s.entry.sideRule === "favourite" ? (yesPrice >= noPrice ? "yes" : "no") : s.entry.sideRule === "cheap" ? (yesPrice < noPrice ? "yes" : "no") : s.entry.sideRule;
       const sidePrice = side === "yes" ? yesPrice : noPrice;
-      if (sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { skip(job, "price_out_of_band", { price: sidePrice, min: s.entry.priceMin, max: s.entry.priceMax }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
+      if (!refDec && sidePrice < s.entry.priceMin - 1e-9 || sidePrice > s.entry.priceMax + 1e-9) { skip(job, "price_out_of_band", { price: sidePrice, min: s.entry.priceMin, max: s.entry.priceMax }, side); results.push(ticker + ": the " + side + " side is priced " + sidePrice.toFixed(2) + ", outside the band"); continue; }
       // The limit may sit a reviewed amount above the side's touch (SLOT_LIMIT_SLIP, OICORE 1c), never past the band; the band test above is on the quoted price.
       const limitSide = slotLib.slotLimitFor(s, sidePrice);
       const touch = side === "yes" ? limitSide : Math.round((1 - limitSide) * 100) / 100;     // the YES price the order goes to, which is what Kalshi's body carries
@@ -253,7 +295,7 @@ function makeRunners(flags) {
         for (const t of l1Docs || []) l1Merged.set(t.id || t.clientOrderId, t);   // the transaction's own read of this ticker wins
         const l1All = [...l1Merged.values()];
         const c = check({ strategyId: s.id, ticker, side, limit: limitSide, step, depthAtTouch: depth, slotOrders: slotNow, l1Orders: l1All, slotOrdersComplete: true,
-          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
+          lockTxn: true, lock: lockDoc === undefined ? null : lockDoc, refEdge: refDec ? refDec.edge : undefined, oiRise, flow, position, spread, closeTime: closeMs, sizingBase: sh.sizeBase, windowCapFraction: live.L1_WINDOW_CAP_FRACTION, killLatch: latch, secondsLeft: leftD, now });
         if (!c.allowed) return { allowed: false, code: checkReasonCode(c.reasons[0]), reason: c.reasons.join("; ") };
         // The shared loss stop: the new order is treated as lost the moment it exists. L1's figure was read earlier this minute, so what has changed since is added: slot orders
         // that now exist (this tick's earlier ones) and L1 orders that were created after it was read, both counted as lost.
@@ -279,6 +321,8 @@ function makeRunners(flags) {
           ...(s.entry.calendar !== undefined ? { spread, release: (slotLib.slotCalendarRow(s, ticker, closeMs) || {}).kind || null } : {}),
           seen: { bid: Number.isFinite(bid) ? bid : null, ask: Number.isFinite(ask) ? ask : null, bidSize: Number.isFinite(num(m.yes_bid_size_fp)) ? num(m.yes_bid_size_fp) : null, askSize: Number.isFinite(num(m.yes_ask_size_fp)) ? num(m.yes_ask_size_fp) : null } });
         if (flow !== null) record.flow = Number(flow.toFixed(4));
+        // Log only (CFRTIK): the model's edge and chance for the side bought, and the perp candle freshness numbers of this evaluation.
+        if (refDec) Object.assign(record, { refModel: s.entry.refModel, refEdge: Number(refDec.edge.toFixed(4)), refChance: Number(refDec.sideChance.toFixed(4)), refAsk: Number(refDec.sidePrice.toFixed(4)), ...(refInfo.get(s.id + "|" + ticker) || {}) });
         return { allowed: true, record, lock: { side, by: "SLOT:" + s.id, ts: now } };
       };
       // The same decision, with the refusal kept for the skip log. It changes nothing decide returns: the store sees exactly decideNow's verdict.

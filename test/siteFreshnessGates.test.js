@@ -38,9 +38,11 @@ gates.SF3 = () => {
   // The one deliberate exception: the sentence about the second strategy, which trades Bitcoin through the slot (not through L1, where Bitcoin stays paused). It must name only the registered strategy's market.
   const slotSpan = (menu.match(/<span id="kalRulesSlot">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(/Bitcoin only/.test(slotSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(slotSpan), 'the slot sentence names Bitcoin and nothing else');
+  const cfrtiSpan = (menu.match(/<span id="kalRulesSlotCfrti">[\s\S]*?<\/span>/) || [''])[0];
+  assert.ok(/CFRTIK, .*Bitcoin only/.test(cfrtiSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(cfrtiSpan), 'the CFRTIK sentence names Bitcoin and nothing else (Nov 12, 2026)');
   const flowSpan = (menu.match(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/) || [''])[0];
   assert.ok(!flowSpan || (/Bitcoin only/.test(flowSpan) && !/Ethereum|gold|Dogecoin|XRP|AUD|CAD|natural gas/i.test(flowSpan)), 'the FLOW1 sentence names Bitcoin and nothing else (Nov 4, 2026)');
-  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotAud">[\s\S]*?<\/span>/, ''));
+  const rest = text(menu.replace(/<span id="kalRulesPaused">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlot">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotFlow">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotCfrti">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotXrp">[\s\S]*?<\/span>/, '').replace(/<span id="kalRulesSlotAud">[\s\S]*?<\/span>/, ''));
   // XRPYES10 and KESTREL were retired Nov 11, 2026: their sentences are gone from the rules and the Start confirmation, so neither name nor 'XRP' or 'AUD/USD' appears outside the paused list.
   assert.ok(!/kalRulesSlotXrp|kalRulesSlotAud/.test(menu) && !/XRPYES10|KESTREL/.test(menu), 'the rules text no longer describes the retired probes');
   pausedNames.forEach((n) => assert.ok(!new RegExp(n.replace('/', '\\/'), 'i').test(rest), 'the Account card and its rules never name ' + n + ' as anything but paused'));

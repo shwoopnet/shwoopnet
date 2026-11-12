@@ -698,6 +698,10 @@ exports.kalshiLiveArmed = onSchedule(
               sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
               // Log only (Nov 5, 2026): why a strategy inside its entry span sent nothing. Called after the minute's orders, every error swallowed in runSlotTick; nothing that decides an order reads it.
               recordSkip: slotStoreLib.slotSkipWriter(db),
+              // CFRTIK (Nov 12, 2026): the Bitcoin perpetual's public one minute candles (keyless GET, no signing, 3 s abort, no retry), and a short sleep for the bounded wait for the decision minute's candle.
+              // The ticker is fixed here: nothing the engine or a caller passes can read another market.
+              readPerpCandles: require("./kalshiCfrtiKReadLib").perpCandleReader(live.liveRequest, fetch),
+              sleep: (ms) => new Promise((r) => setTimeout(r, ms)),
             });
             console.log("kalshiLiveArmed: slot " + JSON.stringify(slotResult).slice(0, 300));
           } catch (e) { console.error("kalshiLiveArmed: slot tick failed: " + String((e && e.message) || e).slice(0, 160)); }

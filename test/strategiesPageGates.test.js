@@ -101,7 +101,7 @@ gates.RT1 = () => {
   // Nov 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"): gold L1 is the single favourite-late strategy. Consequence: the board lists no shadow rule and only
   // L1, OICORE and EVENT830 live; the five retired duplicates sit under Retired, each with its written return rule and no invented figure; the empty Shadow lane says so instead of drawing nothing.
   assert.deepStrictEqual(P.KAL_BOARD_SHADOW, [], 'no shadow rule is running');
-  assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1', 'OICORE', 'EVENT830']);
+  assert.deepStrictEqual(P.KAL_BOARD_LIVE.map((s) => s.id), ['L1', 'OICORE', 'EVENT830', 'CFRTIK']);   // CFRTIK added Nov 12, 2026 (probation seat)
   for (const id of ['XRPYES10', 'KESTREL', 'GOLDALL', 'XRPFAV6', 'LANTERN']) {
     const r = P.KAL_BOARD_RETIRED.rows.find((x) => x.name === id);
     assert.ok(r, id + ' is under Retired');
@@ -141,7 +141,7 @@ gates.SP5 = () => {
   assert.strictEqual((plain.match(/class="kal-card sp-tile(?: sp-compact)?"/g) || []).length, P.KAL_BOARD_LIVE.length + SHADOW_FIX.length, 'one tile per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/Sizing ladder<\/b>/g) || []).length, SHADOW_FIX.length, 'every shadow tile has the Sizing ladder row (a Live card keeps it out of the card: Details is the popup, five things only)');
   const L = P.KAL_BOARD_LADDER;
-  assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026 (the XRPYES10 and KESTREL rows left with their retirement, Nov 11)');
+  assert.deepStrictEqual(L, { L1: 'Balance ladder, held at 15', OICORE: 'Own ladder, step 10 (10, 12, 15, 20, 30)', EVENT830: '1 contract', CFRTIK: '3 contracts, fixed', shadow: 'Next: 3 contracts as a probe' }, 'the owner\'s labels, Nov 10, 2026 (the XRPYES10 and KESTREL rows left with their retirement, Nov 11)');
   assert.strictEqual((plain.match(/<span>Next: 3 contracts as a probe<\/span>/g) || []).length, 4, 'all four fixture shadow rules say next 3 contracts');
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="sp-lane sp-lane-(?:shadow|live|retired)"/g) || []).length === 3 && (plain.match(/class="sp-down"/g) || []).length === 0 && /id="spBoard"/.test(plain), 'a board of three lanes (Live, Shadow, Retired) and no arrows or lines between them');
@@ -443,16 +443,16 @@ gates.GK5 = () => {
 gates.GK6 = () => {
   // Consequence: the header and the Live lane agree. One definition: Live plus Probe is what is running with real money; a killed card is Off, an approved but unbuilt row is Building.
   const list = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies;
-  const c = Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830'], [], ['L1']);
-  assert.strictEqual(c.Live, 0); assert.strictEqual(c.Probe, 2); assert.strictEqual(c.Off, 1); assert.strictEqual(c.Building, 1, 'CFRTI-K is approved, not built');
-  const open = Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830'], []);
-  assert.strictEqual(open.Live, 1); assert.strictEqual(open.Probe, 2); assert.ok(!('Off' in open), 'nothing off, no Off cell');
-  const live = ['L1', 'OICORE', 'EVENT830'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; test' : '' }));
+  const c = Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830', 'CFRTIK'], [], ['L1']);
+  assert.strictEqual(c.Live, 0); assert.strictEqual(c.Probe, 3); assert.strictEqual(c.Off, 1); assert.ok(!('Building' in c), 'CFRTIK is built (Nov 12, 2026), nothing is only approved');
+  const open = Q.kalshiStratCounts(list, ['L1', 'OICORE', 'EVENT830', 'CFRTIK'], []);
+  assert.strictEqual(open.Live, 1); assert.strictEqual(open.Probe, 3); assert.ok(!('Off' in open), 'nothing off, no Off cell');
+  const live = ['L1', 'OICORE', 'EVENT830', 'CFRTIK'].map((id) => ({ id, name: id, rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 5, pf: 1.4, noLoss: false, net: 1 }, all: { n: 5 } }, kill: { lines: ['x'], off: id === 'L1', count: 5 }, lane: id === 'L1' ? 'off' : 'probation', spark: [], detail: null, killState: id === 'L1' ? 'killed' : undefined, note: id === 'L1' ? 'Gold is off: the kill rule tripped; test' : '' }));
   const html = Q.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [], retired: [] }, offIds: ['L1'], registryList: list, registryState: 'ok' }, esc, money);
   const cell = (k) => Number(new RegExp('<b>(\\d+)</b><span>' + k + '</span>').exec(html)[1]);
   const laneN = Number(/sp-lane-t">Live<\/span><span class="sp-lane-n">(\d+)</.exec(html)[1]);
   assert.strictEqual(laneN, cell('Probe') + cell('Live'), 'the Live lane count equals Live plus Probe in the header');
-  assert.strictEqual(laneN, 2); assert.strictEqual(cell('Off'), 1); assert.ok(/real money, 1 off/.test(html));
+  assert.strictEqual(laneN, 3); assert.strictEqual(cell('Off'), 1); assert.ok(/real money, 1 off/.test(html));
   assert.ok(/>KILLED</.test(html) && !/>HEALTHY</.test(html.slice(html.indexOf('data-fk="live:L1"'), html.indexOf('data-fk="live:L1"') + 1500)), 'the gold card says KILLED');
   assert.ok(/sp-note">Gold is off: the kill rule tripped/.test(html), 'the plain line is on the card, not hidden in Details');
 };
@@ -468,12 +468,12 @@ gates.GK7 = () => {
   assert.ok(/kalshiGoldEnsure\(\)/.test(render) && /kalshiGoldCardState\(/.test(render) && /kalshiGoldCardState\(kalshiGoldCache/.test(render), 'the card state comes from the pure state function, which times out to unknown');
 };
 gates.GK8 = () => {
-  // The registry: the approval NO side is retired as failed the bar, CFRTI-K is an approved probation seat that is building.
+  // The registry: the approval NO side is retired as failed the bar, CFRTIK is the built probation seat (Nov 12, 2026): a Probe with live code, no longer "approved, building".
   const list = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies;
-  const no = list.find((x) => x.id === 'W-NO-ARM1'), k = list.find((x) => x.id === 'CFRTI-K');
+  const no = list.find((x) => x.id === 'W-NO-ARM1'), k = list.find((x) => x.id === 'CFRTIK');
   assert.strictEqual(no.stage, 'Retired'); assert.strictEqual(no.cause, 'failed the bar'); assert.ok(/failed the bar/i.test(no.reason));
-  assert.strictEqual(k.stage, 'Probe'); assert.strictEqual(k.label, 'UNPROVEN'); assert.ok(!/read from Nov 20/.test(k.name)); assert.ok(P.kalshiRegBuilding(k) && !P.kalshiRegBuilding(list.find((x) => x.id === 'OICORE')));
-  assert.ok(/APPROVED, BUILDING/.test(Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [k], retired: [] }, registryList: list, registryState: 'ok' }, esc, money)));
+  assert.strictEqual(k.stage, 'Probe'); assert.ok(!/read from Nov 20/.test(k.name)); assert.ok(!P.kalshiRegBuilding(k) && !P.kalshiRegBuilding(list.find((x) => x.id === 'OICORE')), 'built, not building');
+  assert.ok(!/APPROVED, BUILDING/.test(Q.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: [] }, retired: { rows: [], back: 'b', asOf: 'a' }, registry: { pipeline: [k], retired: [] }, registryList: list, registryState: 'ok' }, esc, money)));
 };
 gates.OK1 = () => {
   // OICORE's badge is room left against the kill that binds first (Nov 12, 2026, the owner); the fixed $50 drawdown is no longer a badge or gauge figure.
