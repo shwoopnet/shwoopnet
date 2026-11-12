@@ -67,3 +67,5 @@ Gate: events with a usable quote at L = 30 days cannot exceed the 17 distinct se
 Amendment 1 (written before any candle read; no candle was read): the protocol said to run the candle step if the census shows at least 30 settled markets (126 do). It is skipped because the gate is on distinct EVENTS and the census already bounds that at 17 (an event with no usable quote only lowers the count), so candle reads could not change the verdict and would spend about 126 reads of the shared bucket. Candles would be run only if the card is re-opened by a registered RETURN condition (a new source or series family, or 100 events).
 
 Owner rulebook context only (health markets up to 90 days, 1 contract, at most 3 open, $200 budget): not exercised; nothing placed, nothing live. Note for context: 75 of 126 settled markets took over 90 days from open to close, so most of this family does not fit the 90 day hold at all.
+
+## RETIRED (Nov 12, 2026, POWER2 + main): CLINICAL2 retired: 17 events against a gate of 100, new events about 1 a month, earliest verdict about 2033, power 0. The remainder job is retired too (workers/pulljobs/).
