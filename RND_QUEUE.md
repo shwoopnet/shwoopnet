@@ -22,6 +22,19 @@ Run once each as frozen on the landed candles (5,127 development windows, closes
 - **Forensics' scorer audit (after those reads):** cfrti_k.py CLEAN by synthetic leak test; perpbin1.py has the defect its registration discloses (a whole-sample tercile cut, so later windows decide earlier entries). Ruled: the falsification stands; the cut must be a frozen constant in any later use.
 - **Friday count:** of the original five, FOUR are read and closed (CFRTI-K, PERPBIN1, the approval NO side, the stock test). Remaining on the Friday path: TIE3 (measurement), MAPBREAK, the History Miner's soccer half-time and e-soccer Tie rules, INPLAYJUMP (being registered). Nothing has cleared the bar.
 
+## When more becomes readable: the season calendar (History Miner, Nov 12 19:02Z, 444014b9, SEASON_CALENDAR.md) [research]
+
+Independent events (games; periods clustered by game), estimates from the Nov 10 census, V2's counts and schedules. These are events, not bets: a rule firing on 10 percent needs ten times as many.
+
+- **Already over 1,200 in the cheap window:** ITF and challenger tennis, virtual sports, esports, small-league soccer, T20 cricket, foreign basketball (no mechanism found for the last two).
+- **About four weeks:** NHL period-events (about 21 a day, about 630 now, 1,200 about Dec 9; this is TIE3's venue) and men's college basketball (about 35 games a day, 1,200 about Dec 6 to 18).
+- **Five to seven weeks:** women's college basketball (about Dec 15), big-league soccer (about Dec 31).
+- **Eight weeks or more:** NHL games (early March), NBA games and props (late March), the tennis tour (late January).
+- **Not this season:** NFL quarters and college football.
+- **Two weeks: nothing new.**
+
+**Pre-data fixes confirmed at 19:02Z:** TIE3's guard raised to 30 minutes (the candle job is unchanged: 821 tickers; with WXDAYEND_B folded in it is 54 requests and is with Main); MAPBREAK Amendment 4 coded (0844c37f on claude/testing-desk), with a test that moving every later close leaves the bets identical, awaiting Forensics' re-check before any candle; ESOCTIE's universe guard now uses the ticker clock and the Tie market's open time (5aad5e3f), and its base rate admits a result only 300 seconds after that game's close (Auditor B's finding).
+
 ## Cost kill corrected for hold-to-settlement rules, before any price was read (Nov 12, 19:02Z) [research]
 
 Desk A's flag: the template cost kill "median round trip above 5c" (written by the Head of R&D) is right for a rule that exits before settlement (it closed POL-i2 correctly at 9.4c) and wrong for a rule that buys and holds: there is no second spread and no second fee, and with a 1-contract fee rounded up to 2c a side it would close every family whose spread is above 1c before one bet was scored. **Ruled, by dated amendment before any price is read, for INPLAYJUMP, MAPBREAK, ESOCTIE and SOCDERIV:** the cost kill is on the ONE-WAY entry cost at qualifying decision minutes, the median of (ask minus mid) plus the entry fee as charged; closed on cost if that median is above 4c, which equals each rule's own spread filter. It is a request-saving screen, not the bar: the scored PF pays the real ask, the 1c slip and the fee. The engine prints which cost line was used. INPLAYJUMP gets a five-request cost and tradeability pilot (no result read) before its full candle pull (about 610 requests); its lists job is 14 requests.
