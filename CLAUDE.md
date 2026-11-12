@@ -1207,3 +1207,7 @@ Three job files for W-POL-APPR1's full pull were copied from Refinement's branch
 
 Four list jobs ride in the same pull request (Nov 12, 2026): `POLI2_LISTS`, `TIE3_LISTS` and `SOCDERIV_LISTS` (Testing Desk, owner field MAIN) and `HOURLYTEMP_LISTS` (Desk B). They are listings only (markets, historical markets, series and fee reads), no candles. The Testing Desk's three files were registered with caps below their page budgets (100 for 237 pages, 60 for 88, 100 for 131); the runner stops at the cap, so the caps were raised to the page budgets (237, 88, 131), all far under the 1,200 limit. Gate KP30. Dispatch order from the Head of R&D: WXDAYEND_A and UNRATE_LISTS, TIE3_LISTS, POLI2_LISTS, SOCDERIV_LISTS, then HOURLYTEMP_LISTS last.
 
+## Declined list: taker order-flow family closed (Nov 12, 2026, Head of R&D)
+
+The family of taker order-flow signals on the 15 minute tape (FLOW1, TAPEFLOW1, RESIL1 and their variants) is closed by evidence under the owner's three-falsified rule and added to the declined list (`docs/STRATEGY_LIFECYCLE.md` 7e). RESIL1's development read (n 1,061, cash PF 0.90) was reproduced by the Verification Analyst independently. OICORE's open-interest trigger is a different field and is not covered. Docs only, no change to the bot.
+
