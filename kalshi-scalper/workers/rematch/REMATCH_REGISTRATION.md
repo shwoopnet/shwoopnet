@@ -24,7 +24,7 @@ An e-soccer game lasts about 12 minutes and one result says little about who is 
 
 **The named other side:** bettors who chase the last result between the same two players, and a maker's quoting program that moves the next match's price with the last score.
 
-**Why it may well fail, said first:** the market has been the better forecaster every time this desk's company tested a results-based view against it (ESPORT1 twice, VIRT1's signs). The fall may simply be right: a player having a bad session, or the result may have been a rout that says more than a coin flip does. And one earlier fade of a price fall held to settlement (SWING1, in-play, cheap side, American sports) found the fallen side fairly priced.
+**Why it may well fail, said first:** the market has been the better forecaster every time the research team tested a results-based view against it (ESPORT1 twice, VIRT1's signs). The fall may simply be right: a player having a bad session, or the result may have been a rout that says more than a coin flip does. And one earlier fade of a price fall held to settlement (SWING1, in-play, cheap side, American sports) found the fallen side fairly priced.
 
 ## The rule, every number pinned
 
