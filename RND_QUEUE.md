@@ -149,6 +149,10 @@ kalshi-scalper/workers/forensics/STALE_QUOTE_AUDIT_NOV12.md on claude/forensics-
 - **Pull status, Nov 12 16:44Z:** the owner merged 815, 816, 818, 819 and 821; the daily run limit is now 12. **SPREADCELL1 is whole (274 of 274)**; Refinement reads it once and the output goes to the Verification Analyst before any figure travels. CFRTI_K_R6SLICE is dispatched, then CFRTI_K_LISTS and CFRTI_K_PROBE. PRs 822 (in-game) and 823 (approval calibration) are security-passed and wait for the owner's merge. The gold shadow row stays priced from the list read; Main's rule: any gold return figure must say so and be checked against the R6 gold book.
 - **Verification Analyst:** a live session now exists under Main (independent of research). Its queue: the sports spread read, RESIL1, the two fill haircut tables, the ledger total, uniqueness.
 
+### Census listing job and dispatch order (ruled Nov 12, 16:50Z)
+
+Desk B's CENSUS_LISTING.json (claude/idea-desk-b 02be8d3; plan kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md): 40 requests, one run, about 120 MB. It lists every series (category, frequency, fee type) and every non-combo market settled on Tuesday Nov 10 UTC, each hour cut at 3,000 (cut hours are lower bounds). Limits accepted: one Tuesday misses weekly, monthly and weekend families in the settled crawl (their count comes from the stated frequency, labelled as not observed); no open-market spreads in this job. Order for jobs not yet dispatched: (1) CENSUS_LISTING, (2) INGAMELAG_M1A then M1B (PR 822), (3) POLAPPR1 (PR 823). Desk B reports that V2's universe sweeps stopped at the rate limit with most in-scope series never given a registered test; the exact count is not quoted until the Verification Analyst has checked its source.
+
 ## Desk tasks, Nov 12 16:00Z to 22:00Z (set after the owner said the first four hours were not enough)
 
 Standing order: every test's registration and scoring script are committed BEFORE its data lands; every pull is scored within the hour it finishes; Main dispatches the next job the moment one ends. Desks may use workers (the owner's standing permission); the desk checks their output. Reports lead with counts.
