@@ -128,7 +128,7 @@ def matches(spec, list_folders):
     return out, counts
 
 
-CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH)
+CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH, cost_mode="one_way")          # Head, Nov 12 19:02Z: hold-to-settlement rule, one-way entry cost, kill above 4c
 
 
 def build_candles(spec, list_folders):

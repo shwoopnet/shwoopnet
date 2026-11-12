@@ -1,3 +1,5 @@
+**CLOSED ON COST, Nov 12, 2026 (Head of R&D accepted): POLCOST overall median round trip 9.4c against the 5c line fixed beforehand (73 two-sided quotes, 29 series, evening snapshot at about 00:00Z). Settled lists and candles are never pulled. 0 tries added. Table: POLCOST_TABLE_NOV12.csv.**
+
 # POL-i2 overnight staleness: count step (T2-2). Registration confirmed, pins declared, scorer and job committed before any data (Testing Desk, Nov 12, 2026)
 
 No Kalshi request was made to write this. No outcome, settlement result or exit price is used by anything below. No live account figure.

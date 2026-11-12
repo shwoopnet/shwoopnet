@@ -160,4 +160,9 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
         assert sc(dsh, dsr)["bets"] == base_bets, shift
     # the state-known count is printed per title and look
     sk = m.measure(spec, [dl], [dsr])["titles"]; assert "state_known_at_close" in sk["DOTA2"] and "state_known_at_close" in sk["DOTA2|second_look"]
+    # cost line: hold-to-settlement venues use the one-way entry cost (kill above 4c), a rule with an exit can keep the round trip (kill above 5c); the result says which
+    cand = {"rt": 0.07, "half_spread": 0.02, "ask": 0.40}
+    c_ow, c_rt = bp.VenueConfig("x", "bo3", cost_mode="one_way"), bp.VenueConfig("y", "bo3", cost_mode="round_trip")
+    assert abs(bp.cost_of(cand, c_ow) - (0.02 + bp.fee_up(0.41))) < 1e-9 and bp.cost_of(cand, c_rt) == 0.07 and c_ow.cost_max == 0.04 and c_rt.cost_max == 0.05
+    assert m.CFG.cost_mode == "one_way" and "one-way" in m.measure(spec, [dl], [dsr])["titles"]["DOTA2"]["cost_line_used"]
 print("mapbreak synthetic tests passed")

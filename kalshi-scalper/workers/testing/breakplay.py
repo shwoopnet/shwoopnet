@@ -23,7 +23,10 @@ EDGE, SPREAD_MAX, COST_MAX, EDGE_SHARE, MIN_FILLED = 0.08, 0.04, 0.05, 0.10, 150
 
 class VenueConfig:
     def __init__(self, name, model, pre_back=600, pre_max_back=2400, look_after=120, look_max=300, heldout_from=None, freshness="candle freshness measured on Bitcoin 15 minute only, not on this venue",
-                 edge=EDGE, spread_max=SPREAD_MAX, cost_max=COST_MAX, edge_share=EDGE_SHARE, min_filled=MIN_FILLED, pack_limit=9000, max_tickers=100):
+                 edge=EDGE, spread_max=SPREAD_MAX, cost_max=None, edge_share=EDGE_SHARE, min_filled=MIN_FILLED, pack_limit=9000, max_tickers=100, cost_mode="round_trip"):
+        """cost_mode (Head's ruling, Nov 12 19:02Z): "round_trip" (a rule that EXITS before settlement: spread plus two fees, kill above 5c) or "one_way" (a rule that buys and HOLDS to settlement: median of (ask minus mid) plus the entry fee as charged at ask+1c, rounded up, kill above 4c). The venue chooses; the result prints which was used."""
+        assert cost_mode in ("round_trip", "one_way")
+        cost_max = (COST_MAX if cost_mode == "round_trip" else 0.04) if cost_max is None else cost_max
         self.__dict__.update(locals()); del self.__dict__["self"]
 
 
@@ -62,6 +65,12 @@ def two(idx, t, ts):
 def rt(b, a):
     mid = (a + b) / 2
     return (a - b) + 2 * 0.07 * mid * (1 - mid)
+
+
+def cost_of(cand, cfg):
+    """The cost used by the kill line for one candidate at a look: round trip (spread plus two unrounded fees at the mid) or one-way (ask minus mid plus the entry fee as charged: rounded up at ask + 1c)."""
+    if cfg.cost_mode == "round_trip": return cand["rt"]
+    return cand["half_spread"] + fee_up(round(cand["ask"] + PRICE_THROUGH, 4))
 
 
 def pre_match_minute(idx, rec, cfg):
@@ -115,7 +124,7 @@ def prepare(idx, rec, cfg, look_no=1):
     v1, v2 = (Vu, Vd) if look_no == 1 else (qu, qd)
     for side, team, val in (("up", rec["up"], v1), ("down", rec["down"], v2)):
         b, a = two(idx, rec["match"][team], look)
-        cand[side] = {"gap": val - a, "spread": a - b, "side": side, "ask": a, "team": team, "rt": rt(b, a)}
+        cand[side] = {"gap": val - a, "spread": a - b, "side": side, "ask": a, "team": team, "rt": rt(b, a), "half_spread": (a - b) / 2}
     return dict(out, look=look, cand=cand, best=max(cand, key=lambda s: cand[s]["gap"]))
 
 
@@ -148,7 +157,8 @@ def measure(records, candle_folders, cfg):
         if kn is not None: P["state_known_n"] = P.get("state_known_n", 0) + 1; P["state_known_hi"] = P.get("state_known_hi", 0) + (1 if kn else 0)
         if r["look"] is not None:
             P["look_filled"] += 1; P["minutes"].append((r["look"] - rec["state_close"]) / 60)
-            for s in ("up", "down"): P["rts"].append(r["cand"][s]["rt"]); P["spreads"].append(r["cand"][s]["spread"])
+            for s in ("up", "down"): P["spreads"].append(r["cand"][s]["spread"])
+            P["rts"].append(cost_of(r["cand"][r["best"]], cfg)) if cfg.cost_mode == "one_way" else [P["rts"].append(cost_of(r["cand"][s], cfg)) for s in ("up", "down")]
             P["look"].append(r["cand"][r["best"]])
         if rec.get("state_close2"):
             P2 = per.setdefault(rec["cell"] + SECOND, new()); P2["sampled"] += 1; P2["pre"] += 1
@@ -157,7 +167,8 @@ def measure(records, candle_folders, cfg):
             r2 = prepare(idx, rec, cfg, 2)
             if r2["look"] is not None:
                 P2["look_filled"] += 1; P2["minutes"].append((r2["look"] - rec["state_close2"]) / 60)
-                for s in ("up", "down"): P2["rts"].append(r2["cand"][s]["rt"]); P2["spreads"].append(r2["cand"][s]["spread"])
+                for s in ("up", "down"): P2["spreads"].append(r2["cand"][s]["spread"])
+                P2["rts"].append(cost_of(r2["cand"][r2["best"]], cfg)) if cfg.cost_mode == "one_way" else [P2["rts"].append(cost_of(r2["cand"][s], cfg)) for s in ("up", "down")]
                 P2["look"].append(r2["cand"][r2["best"]])
     for cell in list(per):
         if cell.endswith(SECOND): per[cell]["placebo"] = plc_all.get(cell[:-len(SECOND)], [])
@@ -165,13 +176,13 @@ def measure(records, candle_folders, cfg):
     for cell, P in sorted(per.items()):
         s_l, s_p = stat(P["look"]), stat(P["placebo"]); n = P["look_filled"]; medrt = None if not P["rts"] else round(st.median(P["rts"]), 4)
         if n < cfg.min_filled: v = "no evidence at n = %d filled at the look" % n
-        elif medrt > cfg.cost_max: v = "CLOSED on cost: median round trip %.1fc at the look is above 5c" % (100 * medrt)
+        elif medrt > cfg.cost_max: v = "CLOSED on cost: median %s %.1fc at the look is above %.0fc" % ("round trip" if cfg.cost_mode == "round_trip" else "one-way entry cost", 100 * medrt, 100 * cfg.cost_max)
         elif s_l["share_gap_ge_8c_spread_le_4c"] >= cfg.edge_share and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
         else: v = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % s_l["gap_p90"]
         verdicts.append(v)
         titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
                         "median_minutes_state_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2), "median_spread_at_look": None if not P["spreads"] else round(st.median(P["spreads"]), 4),
-                        "median_round_trip_at_look": medrt, "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
+                        "median_round_trip_at_look": medrt, "cost_line_used": ("round trip (spread plus two fees), kill above %.0fc" if cfg.cost_mode == "round_trip" else "one-way entry cost (ask minus mid plus the entry fee as charged), kill above %.0fc") % (100 * cfg.cost_max), "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
                         "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (DIFFERENT SETS: the second look covers third-map matches only, the placebo all the title's matches)" if cell.endswith(SECOND) else ""), "verdict": v}
     return {"titles": titles, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": cfg.freshness,
             "card": "CLOSED: every cell is closed or has no evidence" if verdicts and all(not v.startswith("SURVIVES") for v in verdicts) else ("a cell survives the measurement" if verdicts else "no cell measured")}
