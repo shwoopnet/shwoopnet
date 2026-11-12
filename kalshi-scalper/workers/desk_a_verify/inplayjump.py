@@ -318,8 +318,12 @@ def selftest():
     DEV_BOUNDS = None
     try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("default is not closed")
     except SystemExit: pass
+    try: dev("x.json", "ESOCCER", ["/tmp/HELDOUT_ESOCCER"], [], "/tmp"); raise AssertionError("HELDOUT_ folder not refused")
+    except SystemExit as ex: assert "REFUSED" in str(ex)
     print("SELFTEST OK (fee rounded up, Eastern clock with DST, in-play start, jump rules, entry band and spread, tie never, no look-ahead, alive rule, round trip)")
 def dev(series_path, family, lists, candles_dirs, scorekit_dir):
+    for d_ in list(lists) + list(candles_dirs):                                # standing rule (h): a HELDOUT_ folder is refused by default
+        if os.path.basename(os.path.normpath(d_)).startswith("HELDOUT_"): raise SystemExit("REFUSED: %s is a held-out folder; each card reads it once on the Head's own go (standing rule h)" % d_)
     sys.path.insert(0, scorekit_dir); import scorekit
     S = json.load(open(series_path)); K = S["constants"]; fam = next(f for f in S["families_ranked_by_events"] if f["family"] == family)
     iso = scorekit.iso; b = (iso(fam["development"]["closes_from"].replace("T00:00:00Z", "T00:00:00Z")), iso(fam["development"]["closes_before"]))
