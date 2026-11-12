@@ -27,6 +27,6 @@ gates.OV4 = () => {
 gates.OV3 = () => {
   const a = lib.buildReport([ord({})], NOW, 24, true), b = lib.buildReport([ord({})], NOW, 24, false);
   for (const k of Object.keys(b)) if (k !== 'oversize') assert.ok(k in a, k + ' unchanged');
-  assert.deepStrictEqual(Object.keys(a.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'bookNo5', 'bookReadMs', 'bookYes5', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'exitAt', 'exitAvg', 'exitBid', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort(), 'per-order rows unchanged');
+  assert.deepStrictEqual(Object.keys(a.orders[0]).sort(), ['addon', 'answerMs', 'answeredAtMs', 'askSize', 'avgFee', 'avgFill', 'bidSize', 'bookNo5', 'bookReadAfterSendMs', 'bookReadMs', 'bookReadWhen', 'bookYes5', 'count', 'depthAtLimit', 'depthLevels', 'entryLead', 'exitAt', 'exitAvg', 'exitBid', 'kalshiStatus', 'limit', 'orderedCount', 'price', 'result', 'rise3', 'seenAsk', 'seenBid', 'sentAtMs', 'settledPnl', 'shareOfDepth', 'side', 'smooth', 'startLateMs', 'startToSendMs', 'status', 'tickStartMs', 'ticker', 'ts'].sort(), 'per-order rows unchanged');
 };
 for (const [n, f] of Object.entries(gates)) { f(); console.log('ok   ' + n); }

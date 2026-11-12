@@ -16,7 +16,7 @@ A workflow a person starts by hand from the Actions tab. It reads one job file f
 | Other failures | three in a row (5xx, a redirect, no answer) end the run; a 404 is an answer |
 | Answer size | 5 MB an answer, 200 MB a run |
 | Run time | 40 minutes in the script, 50 in the workflow |
-| Runs a day | 6 real runs per UTC day (counted from the folders already on the data branch); a dry run does not count |
+| Runs a day | 12 real runs per UTC day (it was 6 until Nov 12, 2026; counted from the folders already on the data branch); a dry run does not count |
 | Runner minutes | about 2 for 60 requests, about 6 for 300, about 25 to 30 for the full 1,200 (checkout and push add under a minute); free on a public repository |
 | Stop date | 2027-02-28 23:59 UTC, checked in the workflow and in the script |
 
@@ -46,6 +46,8 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | 1 | `NOSIDE1_CANDLES` (the approval NO-side pull, W-NO-ARM1, development events only) | 1,034 requests, about 18 minutes at 1 a second | active; the lists stage `NOSIDE1_LISTS` is retired because the universe is frozen in `NO_ARM_CUTS.json` |
 | 2a | `SPREADLISTS` (W-SPREAD-CELL1, time fields only) | 11 requests, `GET /markets?tickers=` of up to 100 tickers each; run first. Whether Kalshi accepts 100 tickers a request is unverified; the runner cannot batch smaller, so a short answer leaves those events without a time | active |
 | 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, up to 55 tickers each, about 5 minutes | active; runs first in rank |
+| 2b | `SPREADCELL1_REST` (completes `SPREADCELL1`, which stopped at the 200 MB cap after 238 of 274) | the 36 requests b119_0 to b136_1, about 30 MB, about 1 minute; the converter merges by request id | active; the cap is not raised |
+| 1b | `NOSIDE1_CANDLES_P1`, `_P2`, `_P3` (the 1,034 requests of rank 1 in three fixed parts) | 345, 345, 344 requests, about 6 minutes each; estimated about 9 MB in all, so the split is for run length, not the size cap | active; run the parts in order and not `NOSIDE1_CANDLES` as well |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
 | 4 | `COMBO1_OPENBOOK` | 3 | retired: its reads were made and COMBO1 is closed |
 | 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | `PERPBTC1M` ready, not run; `PERPETH1M` paused for later (no registered test uses it; the runner refuses it) |
@@ -80,5 +82,11 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
 
 Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two other reads; (2) `CFRTI_K_LISTS` and `CFRTI_K_PROBE`; (3) the CFRTI-K candle job, built later from the lists answer; (4) `INGAMELAG_M1A`, `INGAMELAG_M1B` and `NHLOT_LISTS`; (5) `NOSIDE1_CANDLES` (already here); (6) `ECONLAG_CALENDAR`.
+
+| `INGAMELAG_M1` | Desk B | 215 (235) | about 4 | `IDEA_DESK_B_INGAME_CARD.md`; the rebuilt 215 game list |
+| `NHLOT_LISTS` | Desk B | 4, up to 9 pages (10) | under 1 | `IDEA_DESK_B_WAVE3.md` |
+| `ECONLAG_CALENDAR` | Desk B | 10 (10) | under 1 | `IDEA_DESK_B_PROTOCOLS.md` (amendment 2) |
+
+Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two other reads; (2) `CFRTI_K_LISTS` and `CFRTI_K_PROBE`; (3) the CFRTI-K candle job, built later from the lists answer; (4) `INGAMELAG_M1` and `NHLOT_LISTS`; (5) `NOSIDE1_CANDLES` (already here); (6) `ECONLAG_CALENDAR`.
 
 `build_cfrti_k_candles.py` is an OFFLINE script (it sends nothing): it builds the CFRTI-K candle job from the `CFRTI_K_LISTS` answer (modes `all`, `live`, `hist`). It packs batches to at most 9,000 minutes x tickers (the endpoint answers HTTP 400 above 10,000), about 216 requests in live mode and about 624 in all mode. Its output is a new job file and needs its own reviewed pull request before it can run. Not included: `ECONLAG_CANDLES`, `NHLOT_CANDLES` (built later) and the candle stage itself.
