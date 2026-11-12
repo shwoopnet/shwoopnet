@@ -51,11 +51,9 @@ gates.KP3 = () => {
 // KP4: the job id is a fixed choice, double checked in the first step, and every choice has a job file.
 gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
-  assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).sort(), 'the choices are exactly the job files');
-  assert.ok(/case "\$JOB" in NOSIDE1_LISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\)/.test(wf));
   // NOSIDE1_LISTS is retired (the universe is frozen) and has no choice; every other job file, retired COMBO1_OPENBOOK included, keeps one.
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).filter((n) => n !== 'NOSIDE1_LISTS').sort(), 'the choices are the job files except the retired lists job');
-  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
+  assert.ok(/case "\$JOB" in SPREADLISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -247,8 +245,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1']);
-  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1', 'SPREADLISTS']);
   assert.ok(!jobs.some((f) => /ECONLAG|BALLOTNO/i.test(f)), 'ECONLAG and BALLOTNO are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -272,18 +269,12 @@ gates.KP14 = () => {
   // the runner refuses a retired job (a job that is not active never runs) and passes the rest
   const verdicts = py(`
 out = {}
-for n in ("NOSIDE1_CANDLES", "SPREADCELL1", "PERPETH1M"):
+for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "SPREADLISTS", "ROLLOFF_PROXY", "PERPBTC1M", "PERPETH1M"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(refused, { NOSIDE1_CANDLES: 'refused', SPREADCELL1: 'refused', PERPETH1M: 'refused' });
-  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK', 'PERPBTC1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
-for n in ("NOSIDE1_LISTS", "COMBO1_OPENBOOK", "NOSIDE1_CANDLES", "SPREADCELL1", "SPREADLISTS", "ROLLOFF_PROXY"):
-    try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
-    except m.Refused as e: out[n] = "refused"
-print(json.dumps(out))`);
-  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok' });
-  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(verdicts, { NOSIDE1_LISTS: 'refused', COMBO1_OPENBOOK: 'refused', NOSIDE1_CANDLES: 'ok', SPREADCELL1: 'ok', SPREADLISTS: 'ok', ROLLOFF_PROXY: 'ok', PERPBTC1M: 'ok', PERPETH1M: 'refused' });
+  for (const id of ['NOSIDE1_CANDLES', 'SPREADCELL1', 'SPREADLISTS', 'ROLLOFF_PROXY', 'PERPBTC1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -504,6 +495,9 @@ print(json.dumps({"ok": go([]), "stop": go([200, 429, 429, 429])}))`);
   assert.deepStrictEqual(out.ok.st, ['complete', 0]); assert.strictEqual(out.ok.n, 5); assert.ok(out.ok.mingap >= 1.0);
   assert.deepStrictEqual(out.ok.hosts, ['https://external-api.kalshi.com']);
   assert.deepStrictEqual(out.stop.st, ['stopped_429', 2]); assert.strictEqual(out.stop.n, 4);
+};
+
+
 // KP14c: the runner holds a "tickers" list to the ticker allowlist the same as "market_tickers", so a job file cannot ask the markets list for a ticker it did not name up front.
 gates.KP14c = () => {
   const out = py(`

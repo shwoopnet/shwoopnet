@@ -47,10 +47,8 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | 2a | `SPREADLISTS` (W-SPREAD-CELL1, time fields only) | 11 requests, `GET /markets?tickers=` of up to 100 tickers each; run first. Whether Kalshi accepts 100 tickers a request is unverified; the runner cannot batch smaller, so a short answer leaves those events without a time | active |
 | 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, up to 55 tickers each, about 5 minutes | active; runs first in rank |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
-| 4 | `COMBO1_OPENBOOK` | 3 | ready |
-| 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | `PERPBTC1M` ready, not run; `PERPETH1M` paused for later (no registered test uses it; the runner refuses it) |
-
 | 4 | `COMBO1_OPENBOOK` | 3 | retired: its reads were made and COMBO1 is closed |
+| 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | `PERPBTC1M` ready, not run; `PERPETH1M` paused for later (no registered test uses it; the runner refuses it) |
 
 Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two retired jobs are kept from running. Every change to a job file is security-relevant (it names the exact URLs the runner may send) and needs a security look.
 
@@ -64,4 +62,4 @@ Stage 1 of the NO-side pull asks for market lists, not events, because the cuts 
 
 `PERPBTC1M` and `PERPETH1M` use `"route": "perps"`. 163 UTC days from 2026-06-03 to 2026-11-12 inclusive, one request per day per ticker, so 163 requests each. The windows are midnight to midnight (86,400 seconds, the size `scripts/record_perps_candles.py` already asks for); the last day is partial and adjacent windows may share a boundary candle, so de-duplicate on `end_period_ts`. The per-request candle limit is not written down in this repository and is not assumed to be higher. The runner stays one reviewed file; a changed route table or perps rule is security-relevant. Same terms position as above: the owner waived the terms read, which is accepted risk and not a finding that automated reads are allowed.
 
-`PERPETH1M` is paused for later: its status is `paused`, which the runner refuses, so it cannot run until a reviewed edit sets it to `active`. Size watch: 1,440 candles a day x 163 days may reach the 200 MB per-run cap (a clean `stopped_size`, what was fetched is kept); read the first real run's manifest before any further ticker. The terms waiver covers the second host (`external-api.kalshi.com`) only if the owner confirms it does.
+`PERPETH1M` is paused for later: its status is `paused`, which the runner refuses, so it cannot run until a reviewed edit sets it to `active`. Size watch: 1,440 candles a day x 163 days may reach the 200 MB per-run cap (a clean `stopped_size`, what was fetched is kept); read the first real run's manifest before any further ticker. The owner confirmed on Nov 12, 2026 that the terms waiver covers BOTH Kalshi hosts (`api.elections.kalshi.com` and `external-api.kalshi.com`).
