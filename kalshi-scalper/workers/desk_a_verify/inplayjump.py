@@ -144,6 +144,10 @@ def run_family(fam, K, markets, candles, bounds):
     elif p < 1.0 or (h1 is not None and h1 < 1.0) or (h2 is not None and h2 < 1.0): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
     elif p >= 1.5 and h1 > 1.0 and h2 > 1.0 and diff is not None and diff >= 2 * dse: lab = "development bar met (held-out asked for the same hour; NOT the research bar)"
     else: lab = "bar not met"
+    fired = n + voids
+    if fired and voids / fired > 0.01 and voids:                      # Head's line: both bookings side by side; the registered one (void excluded) is the verdict
+        alt = nets + [-fee_up(d["price"]) for _, _, d in dec if markets[d["ticker"]]["result"] == "void"]
+        L.append("VOIDS %d of %d fired bets (%.1f%%): registered booking (refund, excluded) n %d PF %s net %+.2fc | ESOCTIE booking (price refunded, fee kept, counted) n %d PF %s net %+.2fc | the registered one is the verdict" % (voids, fired, 100 * voids / fired, n, "%.2f" % pf(nets), 100 * st.mean(nets), len(alt), "%.2f" % pf(alt), 100 * st.mean(alt)))
     L.append("LABEL: " + lab); return L, bets
 def pilot(fam, K, markets, candles, bounds):
     """Head-approved pilot: cost and tradeability only. markets' results are NEVER touched (a market with a 'result' key is read for event and close only)."""
@@ -238,7 +242,7 @@ def selftest():
     mk, cd = fam(400, 0.80, spread=0.06, seed=4); L4, b4 = run_family(FAMILY, K, mk, cd, far); assert b4 is None and "CLOSED ON COST" in L4[-1], L4     # entry spread 6c: one-way 5c > 4c, killed before any result
     mk, cd = fam(200, 0.80, seed=5)
     for tk in list(mk)[:40]: mk[tk]["result"] = "void"
-    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("voided bets (refunded, excluded from n, PF and z): 20" in x for x in L5) and len(b5) == 180, L5
+    L5, b5 = run_family(FAMILY, K, mk, cd, far); assert any("voided bets (refunded, excluded from n, PF and z): 20" in x for x in L5) and any(x.startswith("VOIDS 20 of 200") for x in L5) and len(b5) == 180, L5
     mk, cd = fam(100, 0.80, seed=6)
     for tk, m in mk.items(): m["close"] += 3 * 3600                                      # every close 3 h after its start: start not derivable
     L6, b6 = run_family(FAMILY, K, mk, cd, far); assert b6 is None and "START NOT DERIVABLE" in L6[-1], L6
