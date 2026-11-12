@@ -104,3 +104,7 @@ The guard in "The instants and prices" point 1 used the event's own close time, 
 2. **Label:** the development figure is reported as "selected on development": it can falsify, it cannot support; only the frozen held-out read can.
 3. **Settlement allowance:** the 300 seconds of NOTE 3 is the Head's ruled constant (Forensics suggested 10 minutes as an example; 300 s is above the measured settle delay of about 4 minutes on the e-soccer events seen in the census listing).
 4. Haircut: no "ran away" haircut from a later candle is used; the scorer prints the random-drop table of `HOW_TO_PRICE_A_PAPER_TRADE.md` with its caveat that real misses lean toward winners.
+
+## NOTE 5, Nov 12, 2026, 19:30Z, wording only, before any data (Auditor B)
+
+"Price refunded, fee kept" for a void is an ASSUMPTION about how Kalshi settles a voided market, not a measurement; if the fee is also refunded, NOTE 4's booking is slightly conservative. The result page says so beside the void count.
