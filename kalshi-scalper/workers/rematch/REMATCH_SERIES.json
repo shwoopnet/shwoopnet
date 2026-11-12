@@ -48,7 +48,8 @@
       "UTC day (verdict)",
       "player-pair and day (printed)"
     ],
-    "earlier_match_time_field": "close_time (latest over the earlier match's markets); settlement_ts and expiration fields are never used; missing close_time drops the pair"
+    "earlier_match_time_field": "close_time (latest over the earlier match's markets); settlement_ts and expiration fields are never used; missing close_time drops the pair",
+    "missing_candle": "the last present candle ending at or before the instant, at most 5 minutes earlier; never a later candle; else the pair is dropped"
   },
   "amendments": "the registration file's dated amendments override this file where they differ"
 }

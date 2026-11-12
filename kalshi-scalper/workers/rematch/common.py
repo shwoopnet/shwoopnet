@@ -40,8 +40,34 @@ def start_from_ticker(event_ticker):
         return None
 
 
+CARRY_S = 5 * 60                              # a missing candle: the last present candle at or before the instant, no more than this much earlier
+DROPS = {"not_two_team_codes": 0, "no_ticker_clock": 0, "market_without_close_time": 0}   # filled by read_events, printed by the reader
+
+
+def refuse_heldout(path):
+    """Standing rule (h): a folder whose real path has a part starting HELDOUT_ is refused unless REMATCH_HELDOUT=READ-ONCE is set
+    for the one approved read. The real path is tested, so a link with an innocent name does not get past."""
+    real = os.path.realpath(path)
+    if any(part.upper().startswith("HELDOUT_") for part in real.split(os.sep)) and os.environ.get("REMATCH_HELDOUT") != "READ-ONCE":
+        raise SystemExit("REFUSED: %s resolves into a HELDOUT_ folder (standing rule (h))" % path)
+
+
+def quote_at(q, t):
+    """The quote standing at instant t: the candle ending exactly at t, else the last present candle ending at or before t and
+    no more than CARRY_S earlier. Never a later candle. Returns (quote or None, 'exact' | 'carried' | 'none')."""
+    if t in q:
+        return q[t], "exact"
+    for back in range(60, CARRY_S + 1, 60):
+        if t - back in q:
+            return q[t - back], "carried"
+    return None, "none"
+
+
 def read_events(run):
     """Events of the series from a lists run: tickers, close times and the raw market rows (results are NOT looked at here)."""
+    refuse_heldout(run)
+    for k in DROPS:
+        DROPS[k] = 0
     man = json.load(open(os.path.join(run, "manifest.json")))
     events = {}
     for row in man.get("rows", []):
@@ -64,7 +90,14 @@ def read_events(run):
                 closes.append(ts(m["close_time"]))
             except (KeyError, ValueError, TypeError, AttributeError):
                 pass
-        if len(codes) != 2 or s is None or len(closes) != len(e["markets"]):
+        if len(codes) != 2:
+            DROPS["not_two_team_codes"] += 1
+            continue
+        if s is None:
+            DROPS["no_ticker_clock"] += 1
+            continue
+        if len(closes) != len(e["markets"]):
+            DROPS["market_without_close_time"] += 1
             continue
         out.append({"event": e["event"], "codes": codes, "S": s, "close": max(closes), "markets": e["markets"]})
     return out

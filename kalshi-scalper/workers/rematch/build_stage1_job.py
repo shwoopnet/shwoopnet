@@ -4,7 +4,8 @@ Committed Nov 12, 2026, before any e-soccer list or candle was pulled.
 
 Reads ONLY tickers, scheduled starts (from the ticker) and close times. It never reads a result or a price.
 For every pair that qualifies by schedule it asks for the two team contracts of the LATER match, from the
-earlier match's scheduled start minus 4 minutes to the later match's scheduled start minus 3 minutes.
+earlier match's scheduled start minus 8 minutes (the reference minute less the 5 minute carry window) to the later match's
+scheduled start minus 3 minutes.
 The sample is never cut to save requests: if the job would need more than MAX_REQUESTS, nothing is written
 and the count is printed for the Head of R&D.
 
@@ -16,11 +17,11 @@ import os
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import SERIES, STAGE1_FROM, STAGE1_BEFORE, read_events, pairs_by_schedule, ts  # noqa: E402
+from common import BEFORE_S, CARRY_S, DROPS, SERIES, STAGE1_FROM, STAGE1_BEFORE, read_events, pairs_by_schedule, ts  # noqa: E402
 
 MAX_REQUESTS = 150            # the Head approved "about 110"
 GROUP_TICKERS, MAX_CANDLES = 100, 8500
-LEAD_S, TAIL_S = 4 * 60, 3 * 60
+LEAD_S, TAIL_S = BEFORE_S + CARRY_S + 60, 3 * 60     # from the reference minute less the carry window, to two minutes after the entry candle
 
 
 def main():
@@ -42,6 +43,7 @@ def main():
                 continue
         groups.append({"rows": [r], "start": r["start_ts"], "end": r["end_ts"], "n": 2})
     print(f"e-soccer events in the lists {len(events)} | pairs qualifying by schedule inside the stage 1 slice {len(rows)} | requests needed {len(groups)} (cap {MAX_REQUESTS})")
+    print("events left out of the lists read, counted: " + ", ".join("%s %d" % kv for kv in DROPS.items()))
     if any(g["end"] >= hi for g in groups):
         sys.exit("REFUSED: a request would end at or after the held-out cut (standing rule (h): development pulls are bounded by date in the job)")
     if len(groups) > MAX_REQUESTS:

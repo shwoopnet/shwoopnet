@@ -16,8 +16,8 @@ import statistics
 import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from common import (A_CLOSE_PLUS_S, ASK_BAND, BEFORE_S, COST_KILL_ONE_WAY, DECISION_S, DEV_DAYS, ENTRY_S, FALL, HELDOUT_FROM, LABEL, QUIET,  # noqa: E402
-                    SLIP, SPREAD_MAX, STAGE1_BEFORE, STAGE1_FROM, fee, read_events, ts)
+from common import (A_CLOSE_PLUS_S, ASK_BAND, BEFORE_S, COST_KILL_ONE_WAY, DECISION_S, DEV_DAYS, DROPS, ENTRY_S, FALL, HELDOUT_FROM, LABEL, QUIET,  # noqa: E402
+                    SLIP, SPREAD_MAX, STAGE1_BEFORE, STAGE1_FROM, fee, quote_at, read_events, refuse_heldout, ts)
 
 
 def price(side):
@@ -64,7 +64,10 @@ def loser_of(a):
 
 def main():
     lists_run, candles_run, pairs_path = sys.argv[1:4]
+    refuse_heldout(candles_run)
+    refuse_heldout(pairs_path)
     events = {e["event"]: e for e in read_events(lists_run)}
+    drops = dict(DROPS)
     if any(e["close"] >= ts(HELDOUT_FROM) for e in events.values()):
         sys.exit("REFUSED: the lists hold a market closing on or after the held-out date")
     pairs = json.load(open(pairs_path))
@@ -73,7 +76,8 @@ def main():
         walk(json.load(gzip.open(f, "rt")), found)
     quotes = {tk: {int(c["end_period_ts"]): (price(c.get("yes_bid")), price(c.get("yes_ask"))) for c in cs} for tk, cs in found.items()}
 
-    n = dict(pairs=len(pairs), a_winner=0, a_closed_in_time=0, before_two_sided=0, tradeable_before=0, after_two_sided=0, state=0, quiet=0, state_entry=0, quiet_entry=0)
+    n = dict(pairs=len(pairs), a_winner=0, a_closed_in_time=0, before_two_sided=0, tradeable_before=0, after_two_sided=0, state=0, quiet=0, state_entry=0, quiet_entry=0,
+             no_candle_before=0, one_sided_before=0, no_candle_decision=0, one_sided_decision=0, no_candle_entry=0, carried=0, exact=0)
     costs, days, late = [], set(), []
     in_span = [e for e in events.values() if ts(STAGE1_FROM) <= e["close"] < ts(STAGE1_BEFORE)]
     start_ok = sum(1 for e in in_span if 4 * 60 <= e["close"] - e["S"] <= 90 * 60)
@@ -90,15 +94,22 @@ def main():
             continue
         n["a_closed_in_time"] += 1
         q = quotes.get("%s-%s" % (b["event"], lose), {})
-        q0, q1, q2 = q.get(a["S"] - BEFORE_S), q.get(b["S"] - DECISION_S), q.get(b["S"] - ENTRY_S)
+        (q0, k0), (q1, k1), (q2, k2) = quote_at(q, a["S"] - BEFORE_S), quote_at(q, b["S"] - DECISION_S), quote_at(q, b["S"] - ENTRY_S)
+        for k in (k0, k1, k2):
+            if k != "none":
+                n[k] += 1
         if not two_sided(q0):
+            n["no_candle_before" if k0 == "none" else "one_sided_before"] += 1
             continue
         n["before_two_sided"] += 1
         if q0[1] - q0[0] <= SPREAD_MAX + 1e-9:
             n["tradeable_before"] += 1
         if not two_sided(q1):
+            n["no_candle_decision" if k1 == "none" else "one_sided_decision"] += 1
             continue
         n["after_two_sided"] += 1
+        if k2 == "none":
+            n["no_candle_entry"] += 1
         move = (q1[0] + q1[1]) / 2 - (q0[0] + q0[1]) / 2
         kind = "state" if move <= -FALL + 1e-9 else ("quiet" if abs(move) < QUIET - 1e-9 else None)
         if kind is None:
@@ -112,10 +123,16 @@ def main():
 
     print("REMATCH stage 1: counts and cost only. No bet is scored. " + LABEL + ".")
     print("Every line below is 'selected on development': it can close the card, it cannot support it.")
+    print("What the candle file holds: one request has one time range for all its tickers, so the landed file also carries minutes AFTER some matches' starts. "
+          "This reader takes only three instants a pair (reference, decision, entry) and never a later candle. Nobody is to look at the file itself before the stage 2 score.")
+    print("events left out of the lists read, counted: " + ", ".join("%s %d" % kv for kv in drops.items()))
     print(f"e-soccer matches in the slice {len(in_span)} | start check (market closed 4 to 90 minutes after the ticker clock) {start_ok} = {100.0 * start_ok / max(1, len(in_span)):.1f}% (under 80%: start not derivable)")
     for k, label in (("pairs", "pairs qualifying by schedule"), ("a_winner", "earlier match had a winner"), ("a_closed_in_time", "earlier match closed 300 s or more before the decision minute"),
+                     ("no_candle_before", "  dropped: no candle at the reference minute or in the 5 minutes before it"), ("one_sided_before", "  dropped: one-sided at the reference minute"),
                      ("before_two_sided", "loser's contract two-sided at the reference minute"), ("tradeable_before", "  of those, spread 4c or less (tradeability count)"),
-                     ("after_two_sided", "two-sided at the decision minute"), ("state", "STATE: fell 5c or more"), ("state_entry", "  entries that pass the band and spread"),
+                     ("no_candle_decision", "  dropped: no candle at the decision minute or in the 5 minutes before it"), ("one_sided_decision", "  dropped: one-sided at the decision minute"),
+                     ("after_two_sided", "two-sided at the decision minute"), ("no_candle_entry", "  of those, no candle at the entry minute or in the 5 minutes before it"),
+                     ("exact", "instants read from a candle at the exact minute"), ("carried", "instants read from an earlier candle (at most 5 minutes back)"), ("state", "STATE: fell 5c or more"), ("state_entry", "  entries that pass the band and spread"),
                      ("quiet", "PLACEBO pool: moved under 2c"), ("quiet_entry", "  placebo entries that pass")):
         print(f"{label}: {n[k]}")
     nd = max(1, len(days))
