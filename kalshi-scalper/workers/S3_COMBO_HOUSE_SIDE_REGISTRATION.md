@@ -65,6 +65,16 @@ If Main adds the leg tickers to the recorder, a later amendment (made before the
 
 Each paper fill is held to settlement. This rule only takes combos that close within 14 days, so the paper money is tied up for at most 14 days plus the time Kalshi takes to settle. Combos in the same collection can close as late as November 2027; this rule does not take them. A live probe on this rule would lock $2 a combo for up to 14 days, with up to the whole $2 lost on a miss.
 
+## Rulings by the Head of R&D, added Nov 12, 2026 before any read
+
+- **One band only, as registered: a NO price paid of 60c to 90c.** The band is not to be stretched, whatever the supply turns out to be.
+- **Volume above zero at entry is known at entry.** It is read from the same snapshot row as the price, so it uses nothing from the future. It does narrow the sample to combos somebody already traded; results describe those combos and no others.
+- **"Cannot be priced" closes the card.** S3 is closed with the words "cannot be priced", and no other band or rule is tried, if either of these holds:
+  1. the recorder's own stop rule fires at its Nov 26 read (`docs/COMBO_RECORDER.md`: fewer than 20 distinct combos ever showed a two-sided quote with a bid on the side the paper test would buy, or fewer than 100 combo trades printed in total); or
+  2. at the Nov 26 read the rate of paper fills is too low to reach 100 settled fills before the recorder ends on 2027-01-31. The test is fixed now: settled fills so far, divided by the days recorded, times the days left to 2027-01-17 (two weeks before the end, to leave time to settle), plus the settled fills so far, is under 100.
+- **Try count: 1** (the owner's paper bar for the combos exception; the held-out read is the same try). It is not a try against the research bar, and no result here is reported as a pass of it.
+- **The research bar, for reference (corrected Nov 12):** the shared count is about 2,113,000 tries and the bar is a one-sided z of 5.46 (`DEFLATION_LEDGER.md` on branch `rnd-queue`).
+
 ## Honest limits, stated before any read
 
 1. **Thin supply.** In the one design snapshot, 37 of 400 recorded combos had a NO ask, and 1 met every condition above. At one or two a snapshot the first 100 settled fills may not exist by Nov 26; then the label is "no evidence at n = x".
