@@ -98,3 +98,17 @@ C1 confirmed makes "dollar-typed flow is the uninformed flow" a fact about these
 So the price cells of section 2 were the three day sample, as suspected, and are dropped. The overall line holds in both periods: **no R6 series qualifies** (best: gold +0.25c to +0.28c a trade; Bitcoin +0.18c to +0.21c behind a touch of about 6,800 contracts).
 
 **What C1 is good for, and what it is not.** A maker cannot choose who hits its quote, and the fractional share of contracts moves only between about 45% and 75% across the window, so conditioning a quote on "when dollar-typed flow is high" is worth a few hundredths of a cent: no card. Its use is as a diagnostic for the market-making family: any maker simulation (MMSIM1 and its versions) should report the fractional share of the contracts that filled it. A simulated edge that comes from whole-number fills is suspect; one that comes from fractional fills is the believable kind. This costs nothing and reads no held-out data if it is added to the development run only.
+
+## 4. The diagnostic applied to MMSIM1 (development events only; the held-out block is not opened)
+
+`desk_a_held/mmsim_frac.py` is my MMSIM1 re-derivation (`DESK_A_VERIFY_NOV12.md`; 168 quotable hourly events closing before the pinned cutoff 2026-11-07T15:00Z, PF 1.41 at maker fee 0) with one addition: the class of the taker trade that completed each simulated fill. Same total as before ($8.51 over 1,113 strikes), so nothing else changed.
+
+| Simulated outcome | Completed by | n | Mean per strike |
+|---|---|---|---|
+| One side filled, flattened 15 minutes before the close | a whole-number taker | 225 | +1.27c |
+| One side filled, flattened | a fractional taker | 218 | +1.77c |
+| Both sides filled | 0, 1 or 2 fractional takers | 51, 83, 40 | +1.04c, +1.01c, +1.02c |
+
+Fractional share of the taker contracts that traded at the quoted levels: 53%.
+
+**Reading.** The development result does not lean on one class of counterparty: one-sided fills are positive on average against both, a little better against fractional takers, in the direction section 3 predicts and well inside the noise at this n (per-event standard deviation 41.6c). So this check finds no sign that MMSIM1's development figure is an artefact of who filled it. It says nothing about the held-out read. One thing worth knowing before Nov 24: one-sided fills, the case where a maker is normally picked off, are where most of the simulated profit comes from ($6.74 of $8.51). That is the part of the result most exposed to the fill model (a real order at the back of the queue fills later and less often than the simulation's), so it is the first place to look if the held-out read disappoints.
