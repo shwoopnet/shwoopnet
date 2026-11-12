@@ -1288,3 +1288,7 @@ The owner: "you didnt apply it to the LIVE side". PR 817 gave the registry cards
 
 `docs/ROTATION_LANE.md` is v1.1 (and `docs/WHEEL_ADMIT_LIST.md` refreshed): the owner chose probation seats, up to 5 candidates live at 3 contracts (at most $3 an order) with an $18 net floor each, stepping to 10 contracts only on the 60 plus 30 record, target Monday morning. Engineering view: a probation seat is an ordinary second-slot strategy (registry entry, hold-list entry, allowed series, kill rules), the slot loss caps must count per strategy before more than one non-laddered seat fits, and a seat that needs a new field (reference price, book state, base-rate state) is extra code. Nothing is armed by this text; every seat still needs the owner's popup with its exact spec. Docs only.
 
+## Wheel documents refreshed (Nov 12, 2026, the Head of R&D)
+
+`docs/WHEEL_ADMIT_LIST.md` (21 places on 6 mechanisms, 12 with a log source; the two DEPTH1 places withdrawn), the new `docs/WHEEL_LEDGER.md` (probation seat 1, CFRTI-K, approved and not live) and `docs/ROTATION_LANE.md` section 5a ("as built for Monday": a net floor of minus $18 per seat; the performance exits wait for the replay controller). The owner also said exits and limit entries are allowed in any rule provided both fees and the real spread on both legs are counted, so future specs may carry a time exit or a stop; today's seat holds to settlement. Docs only.
+
