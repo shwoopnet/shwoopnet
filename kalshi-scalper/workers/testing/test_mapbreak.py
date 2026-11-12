@@ -170,4 +170,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     ov = bp.score_rule2(calls_ms, [dsr], m.CFG, lambda rec: None if rec["key"] in void_keys else True)
     assert ov["counts"]["void_booked_as_fee_loss"] >= 5 and ov["bets"] == ov["counts"]["fired"] and ov["all"]["wins"] < ov["bets"], ov["counts"]
     vt = [x for x in ov["by_look"].values()]
+    # both candle windows: own (S-40) and widened (S-70); the widened job never has fewer requests, same tickers
+    jo, _ = m.build_candles(spec, [dl]); jw, _ = m.build_candles(spec, [dl], True)
+    assert len(jw["requests"]) >= len(jo["requests"]) and jw["ticker_allowlist"] == jo["ticker_allowlist"] and min(r["params"]["start_ts"] for r in jw["requests"]) < min(r["params"]["start_ts"] for r in jo["requests"])
 print("mapbreak synthetic tests passed")

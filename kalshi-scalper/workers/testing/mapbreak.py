@@ -10,7 +10,7 @@ Pre-match: the minute candle ending at S minus 10 minutes, stepping back a minut
 The look: the candle ending at the first whole minute at or after map-1 close + 120 s, stepping FORWARD to map-1 close + 5 minutes until BOTH match contracts are two-sided.
 Model: p = pre-match mid of the match contract of the team that went on to win map 1; q solves p = q*q*(3 - 2q); V = 1 - (1 - q)^2 for the team up, 1 - V for the other. Gap = value minus that team's own match-contract ask at the look; the cheaper side has the larger gap.
 Placebo (pre-match instant): q against the ask of that team's MAP-1 contract, and 1 - q against the other team's.
-Commands: build-lists | history-count <lists folders...> | matches <lists folders...> | build-candles <lists folders...> | measure <lists folders...> --candles <candle folders...> | score <lists folders...> --candles <candle folders...>   (score = the registered RULE, development read only)
+Commands: build-lists | history-count <lists folders...> | matches <lists folders...> | build-candles <lists folders...> [--widen70] | count-candles <lists folders...> | measure <lists folders...> --candles <candle folders...> | score <lists folders...> --candles <candle folders...>   (score = the registered RULE, development read only)
 """
 import calendar, hashlib, json, math, os, re, statistics as st, sys
 from datetime import datetime
@@ -28,7 +28,7 @@ SAMPLE, MIN_FILLED, EDGE, SPREAD_MAX, COST_MAX, EDGE_SHARE = None, 150, 0.08, 0.
 G_LO, G_HI, MAP2_MIN = 15 * 60, 150 * 60, 15 * 60
 PRE_BACK, PRE_MAX_BACK, LOOK_AFTER, LOOK_MAX = 10 * 60, 40 * 60, 120, 5 * 60
 PACK_LIMIT, MAX_TICKERS = 9000, 100
-PRE_WINDOW_BACK = 70 * 60                        # Head, Nov 12 19:07Z: candle windows start at S minus 70 minutes so PREMOVE rides the same pull (the pre-match search itself still stops at S minus 40)
+PRE_WINDOW_WIDE, PRE_WINDOW_OWN = 70 * 60, 40 * 60                        # Head, Nov 12 19:13Z: MAPBREAK's own window starts at S minus 40; the S minus 70 widening is for PREMOVE's esports leg and is NOT free (one batched request has one time range): count both, PREMOVE must never delay MAPBREAK
 HIST_PAGES = 10                                  # history lists: at most 10 pages of 1,000 markets a match series (counts only)
 MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}
 NY = ZoneInfo("America/New_York")
@@ -132,10 +132,10 @@ def matches(spec, list_folders):
 CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH, cost_mode="one_way")          # Head, Nov 12 19:02Z: hold-to-settlement rule, one-way entry cost, kill above 4c
 
 
-def build_candles(spec, list_folders):
+def build_candles(spec, list_folders, widen=False):
     """Per match four tickers (two match, two map-1) from S minus 40 minutes to map-1 close plus 5 (the engine packs by scheduled start)."""
     ms, counts = matches(spec, list_folders)
-    j = bp.candle_job(ms, CFG, series_all(spec), "MAPBREAK_CANDLES", REG, window_start_back=PRE_WINDOW_BACK)
+    j = bp.candle_job(ms, CFG, series_all(spec), "MAPBREAK_CANDLES", REG, window_start_back=PRE_WINDOW_WIDE if widen else PRE_WINDOW_OWN)
     j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; j["notes"] = "MAPBREAK zero-try gap measurement stage 2: candles of the two match and two map-1 contracts of each sampled match"; return j, counts
 
 
@@ -194,7 +194,10 @@ if __name__ == "__main__":
         spec = load_cells()
         if a[0] == "build-lists": print(json.dumps(build_lists(spec), indent=1))
         elif a[0] == "matches": print(json.dumps(matches(spec, a[1:])[1], indent=1))
-        elif a[0] == "build-candles": j, c = build_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "build-candles": wide = "--widen70" in a; j, c = build_candles(spec, [x for x in a[1:] if x != "--widen70"], wide); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "count-candles":
+            own, c = build_candles(spec, a[1:], False); wide, _ = build_candles(spec, a[1:], True)
+            print(json.dumps({"matches_sampled": c["sampled"], "second_look_matches": c["second_look_matches"], "requests_own_window_S_minus_40": len(own["requests"]), "requests_widened_S_minus_70": len(wide["requests"]), "tickers": len(own["ticker_allowlist"]), "one_run_limit": 1200}, indent=1))
         elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))
         elif a[0] == "history-count": print(json.dumps(history_count(spec, a[1:]), indent=1))
         elif a[0] == "score": i = a.index("--candles"); print(json.dumps(score(spec, a[1:i], a[i + 1:]), indent=1, default=str))
