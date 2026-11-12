@@ -22,6 +22,7 @@ from datetime import datetime
 
 MAX_GAMES, MAX_REQUESTS, GROUP_GAMES, GROUP_TICKERS, GROUP_SPAN_S = 150, 150, 5, 100, 1800
 BEFORE_S, AFTER_S = 50 * 60, 120
+MAX_CANDLES = 8500        # tickers times minutes in one batched request; the exchange's limit is 10,000 candles (V2's usweep2.py)
 
 
 def ts(iso):
@@ -61,7 +62,9 @@ def main():
     for r in rows:                                        # newest first; a group spans at most 30 minutes of close times
         n = len(r["ml"]) + len(r["total"])
         g = groups[-1] if groups else None
-        if g and len(g["games"]) < GROUP_GAMES and g["tickers"] + n <= GROUP_TICKERS and g["hi"] - r["close_ts"] <= GROUP_SPAN_S:
+        minutes = lambda lo, hi: (hi + AFTER_S - (lo - BEFORE_S)) // 60 + 1
+        if (g and len(g["games"]) < GROUP_GAMES and g["tickers"] + n <= GROUP_TICKERS and g["hi"] - r["close_ts"] <= GROUP_SPAN_S
+                and (g["tickers"] + n) * minutes(r["close_ts"], g["hi"]) <= MAX_CANDLES):
             g["games"].append(r)
             g["tickers"] += n
             g["lo"] = r["close_ts"]

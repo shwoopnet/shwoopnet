@@ -1,0 +1,446 @@
+{
+ "job_id": "CENSUS_LISTING",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/FAMILY_CENSUS_NOV12.md",
+ "purpose": "Untouched-family census, the fresh listing: Kalshi's full series list (category, frequency, fee type) and every non-combo market that settled on one full day, Nov 10, 2026 UTC, for counts and volume by family. No candle, no test, no rule scored.",
+ "heldout": "none (a listing: counts, volume and descriptive fields only; no test is scored from it)",
+ "allowed_endpoints": [
+  {
+   "name": "series_list",
+   "method": "GET",
+   "path_pattern": "/series",
+   "params_allowed": [
+    "limit",
+    "category"
+   ]
+  },
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "mve_filter",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "max_requests": 100,
+ "requests": [
+  {
+   "id": "series_all",
+   "path": "/series",
+   "params": {
+    "limit": 20000
+   }
+  },
+  {
+   "id": "settled_1110_h00",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794268800,
+    "max_close_ts": 1794272399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h01",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794272400,
+    "max_close_ts": 1794275999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h02",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794276000,
+    "max_close_ts": 1794279599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h03",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794279600,
+    "max_close_ts": 1794283199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h04",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794283200,
+    "max_close_ts": 1794286799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h05",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794286800,
+    "max_close_ts": 1794290399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h06",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794290400,
+    "max_close_ts": 1794293999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h07",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794294000,
+    "max_close_ts": 1794297599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h08",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794297600,
+    "max_close_ts": 1794301199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h09",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794301200,
+    "max_close_ts": 1794304799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h10",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794304800,
+    "max_close_ts": 1794308399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h11",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794308400,
+    "max_close_ts": 1794311999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h12",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794312000,
+    "max_close_ts": 1794315599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h13",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794315600,
+    "max_close_ts": 1794319199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h14",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794319200,
+    "max_close_ts": 1794322799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h15",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794322800,
+    "max_close_ts": 1794326399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h16",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794326400,
+    "max_close_ts": 1794329999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h17",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794330000,
+    "max_close_ts": 1794333599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h18",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794333600,
+    "max_close_ts": 1794337199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h19",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794337200,
+    "max_close_ts": 1794340799,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h20",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794340800,
+    "max_close_ts": 1794344399,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h21",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794344400,
+    "max_close_ts": 1794347999,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h22",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794348000,
+    "max_close_ts": 1794351599,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_1110_h23",
+   "path": "/markets",
+   "params": {
+    "status": "settled",
+    "min_close_ts": 1794351600,
+    "max_close_ts": 1794355199,
+    "limit": 1000,
+    "mve_filter": "exclude"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "series_Politics",
+   "path": "/series",
+   "params": {
+    "category": "Politics"
+   }
+  },
+  {
+   "id": "series_Economics",
+   "path": "/series",
+   "params": {
+    "category": "Economics"
+   }
+  },
+  {
+   "id": "series_Sports",
+   "path": "/series",
+   "params": {
+    "category": "Sports"
+   }
+  },
+  {
+   "id": "series_Crypto",
+   "path": "/series",
+   "params": {
+    "category": "Crypto"
+   }
+  },
+  {
+   "id": "series_Financials",
+   "path": "/series",
+   "params": {
+    "category": "Financials"
+   }
+  },
+  {
+   "id": "series_Entertainment",
+   "path": "/series",
+   "params": {
+    "category": "Entertainment"
+   }
+  },
+  {
+   "id": "series_Elections",
+   "path": "/series",
+   "params": {
+    "category": "Elections"
+   }
+  },
+  {
+   "id": "series_World",
+   "path": "/series",
+   "params": {
+    "category": "World"
+   }
+  },
+  {
+   "id": "series_Health",
+   "path": "/series",
+   "params": {
+    "category": "Health"
+   }
+  },
+  {
+   "id": "series_Companies",
+   "path": "/series",
+   "params": {
+    "category": "Companies"
+   }
+  },
+  {
+   "id": "series_Transportation",
+   "path": "/series",
+   "params": {
+    "category": "Transportation"
+   }
+  },
+  {
+   "id": "series_Mentions",
+   "path": "/series",
+   "params": {
+    "category": "Mentions"
+   }
+  },
+  {
+   "id": "series_Commodities",
+   "path": "/series",
+   "params": {
+    "category": "Commodities"
+   }
+  },
+  {
+   "id": "series_Culture",
+   "path": "/series",
+   "params": {
+    "category": "Culture"
+   }
+  },
+  {
+   "id": "series_Social",
+   "path": "/series",
+   "params": {
+    "category": "Social"
+   }
+  }
+ ],
+ "notes": "Order matters: the whole series list first, then 24 hourly windows of settled markets (combos left out, at most 3 pages of 1,000 an hour, so about 120 MB at 1.7 KB a market, under the 200 MB run cap), then the series list again by single-word category as a fallback in case the whole list is cut at the 5 MB answer cap. The /series call with limit 20000 and the /markets call with mve_filter=exclude and close-time bounds are the calls V2's sweep used (src/scalper/usweep2.py). The category parameter on /series is the one call not seen in that code: it is placed LAST so that a refusal cannot stop anything before it. An hour with more than 3,000 settled markets is cut and shows a cursor on its last page: the reader reports it as a lower bound.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
