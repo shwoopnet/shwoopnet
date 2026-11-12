@@ -2,8 +2,8 @@
  "job_id": "MAPBREAK_LISTS",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/mapbreak/MAPBREAK_REGISTRATION.md",
- "purpose": "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only.",
- "heldout": "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); a measurement: no rule scored, no try",
+ "purpose": "MAPBREAK stage 1: settled market lists of the match, map-winner and total-maps series for CS2, Dota 2, Valorant and League of Legends, closes 2026-09-12 to before 2026-10-23, plus 4 history match-series lists (counts of older matches) and 4 fee-field reads. Used: tickers, close times, strikes and the map-1 result only; a match result is read at scoring only for a bet the rule fires.",
+ "heldout": "none read; nothing closing on or after 2026-10-23T00:00Z is listed or requested (max_close_ts 1792713599); the registered rule, development read only",
  "allowed_endpoints": [
   {
    "name": "markets_list",
@@ -16,6 +16,16 @@
     "cursor",
     "min_close_ts",
     "max_close_ts"
+   ]
+  },
+  {
+   "name": "hist_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
    ]
   },
   {
@@ -44,8 +54,8 @@
   "KXVALORANTTOTALMAPS"
  ],
  "ticker_allowlist": [],
- "max_requests": 114,
- "notes": "MAPBREAK zero-try gap measurement; 16 requests, 96 list pages at most (6 for each match and total-maps series, 12 for each map series) plus 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently.",
+ "max_requests": 154,
+ "notes": "MAPBREAK registered rule (Amendments 1 to 3); 20 requests: 12 live lists (6 pages for each match and total-maps series, 12 for each map series), 4 history match-series lists (10 pages each, counts only) and 4 fee reads. A list that is still paging at its page cap shows a pending cursor in the manifest; the reader reports it as truncated (its own verdict), never silently.",
  "status": "active",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
@@ -199,6 +209,42 @@
     "max_close_ts": 1792713599
    },
    "max_pages": 6
+  },
+  {
+   "id": "hist_KXCS2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXCS2GAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXDOTA2GAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXDOTA2GAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXVALORANTGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXVALORANTGAME",
+    "limit": 1000
+   },
+   "max_pages": 10
+  },
+  {
+   "id": "hist_KXLOLGAME",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXLOLGAME",
+    "limit": 1000
+   },
+   "max_pages": 10
   },
   {
    "id": "fee_KXCS2GAME",
