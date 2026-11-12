@@ -1,0 +1,115 @@
+{
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/history_miner/HISTDEPTH_PLAN.md",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "allowed_endpoints": [
+  {
+   "name": "historical_markets_list",
+   "method": "GET",
+   "path_pattern": "/historical/markets",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "ticker_allowlist": [],
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "job_id": "HISTDEPTH_A",
+ "purpose": "History Miner depth count, part A: settled-market lists from the historical endpoint for TIE3's NHL period, NHL overtime and NFL quarter series, to count how many settled events exist before the live endpoint's range (about 2026-09-07). Listing only.",
+ "heldout": "none: the historical endpoint holds only markets that closed before about 2026-09-07, which is before every registered held-out date of TIE3 (2026-11-13), MAPBREAK (2026-10-23) and NHLOT; a listing, no candle, no rule scored, zero tries",
+ "series_allowlist": [
+  "KXNHL1P",
+  "KXNHL2P",
+  "KXNHL3P",
+  "KXNHLOT",
+  "KXNFL1Q",
+  "KXNFL2Q",
+  "KXNFL3Q",
+  "KXNFL4Q"
+ ],
+ "requests": [
+  {
+   "id": "hist_KXNHL1P",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNHL1P",
+    "limit": 1000
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "hist_KXNHL2P",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNHL2P",
+    "limit": 1000
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "hist_KXNHL3P",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNHL3P",
+    "limit": 1000
+   },
+   "max_pages": 6
+  },
+  {
+   "id": "hist_KXNHLOT",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNHLOT",
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "hist_KXNFL1Q",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNFL1Q",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXNFL2Q",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNFL2Q",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXNFL3Q",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNFL3Q",
+    "limit": 1000
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "hist_KXNFL4Q",
+   "path": "/historical/markets",
+   "params": {
+    "series_ticker": "KXNFL4Q",
+    "limit": 1000
+   },
+   "max_pages": 2
+  }
+ ],
+ "max_requests": 29,
+ "notes": "Pages are newest first, 1,000 markets a page. A short last page means the series' start was reached and the count is exact; a full last page means the count is a floor. About 2.2 KB a market (measured on KXBTC15M), so at most 28 pages is about 62 to 90 MB. Part B is a separate run only to stay well under the 200 MB a run cap."
+}
