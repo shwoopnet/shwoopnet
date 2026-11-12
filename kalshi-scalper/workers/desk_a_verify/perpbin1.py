@@ -67,5 +67,7 @@ def selftest():
     print("SELFTEST OK (tercile cut, entry rule, arms A and B)")
 if __name__ == "__main__":
     if sys.argv[1] == "selftest": selftest()
-    elif sys.argv[1] == "dev": print("\n".join(report(K.load_markets(sys.argv[2]), K.load_binary(sys.argv[3]), load_oi(sys.argv[4]))))
+    elif sys.argv[1] == "dev":
+        mk_ = {tk: m for tk, m in K.load_markets(sys.argv[2]).items() if m["close"] > K.DEV_FROM}      # post-cutover development sample (CFRTI_K_REGISTRATION section 13)
+        print("\n".join(report(mk_, K.load_binary(sys.argv[3]), load_oi(sys.argv[4]))))
     else: sys.exit(__doc__)

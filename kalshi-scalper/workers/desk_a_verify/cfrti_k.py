@@ -11,6 +11,7 @@ from statistics import NormalDist
 Phi = NormalDist().cdf
 CUTOFF = calendar.timegm(time.strptime("2026-11-05", "%Y-%m-%d"))
 Z_BAR, EDGE, SPREAD, LO, HI = 5.46, 0.05, 0.03, 0.05, 0.30
+DEV_FROM = calendar.timegm(time.strptime("2026-09-12", "%Y-%m-%d"))   # development = post-cutover only (CFRTI_K_REGISTRATION section 13): closes after this and before CUTOFF
 PERP_UNIT = 10000.0   # KXBTCPERP is quoted at one ten-thousandth of Bitcoin's price (CFRTI_K_REGISTRATION section 10 item 6)
 def fee(p): return 0.07 * p * (1 - p)
 def pf(v):
@@ -205,5 +206,6 @@ if __name__ == "__main__":
     elif sys.argv[1] == "dev":
         kr = None
         if len(sys.argv) > 5: kr = {int(r["ts"]): float(r["price"]) for r in csv.DictReader(open(sys.argv[5]))}
-        print("\n".join(report(load_markets(sys.argv[2]), load_binary(sys.argv[3]), load_perp(sys.argv[4]), kr)[0]))
+        mk_ = {tk: m for tk, m in load_markets(sys.argv[2]).items() if m["close"] > DEV_FROM}
+        print("\n".join(report(mk_, load_binary(sys.argv[3]), load_perp(sys.argv[4]), kr)[0]))
     else: sys.exit(__doc__)
