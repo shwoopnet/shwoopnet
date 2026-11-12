@@ -81,7 +81,7 @@ def pf(v):
 def day(ts): return time.strftime("%Y-%m-%d", time.gmtime(ts))
 def run_family(fam, K, markets, candles, bounds):
     """markets: scorekit.markets() dict; candles: {ticker: [candle]}; bounds: (closes_from, closes_before) epoch. Returns the report lines. The result of a match is read ONLY for matches with a bet."""
-    if DEV_BOUNDS is not None and not (DEV_BOUNDS[0] <= bounds[0] and bounds[1] <= DEV_BOUNDS[1]): raise SystemExit("REFUSED: the window is not inside the development window; the held-out is read only on the Head's go (no code path reads it)")
+    if DEV_BOUNDS is None or not (DEV_BOUNDS[0] <= bounds[0] and bounds[1] <= DEV_BOUNDS[1]): raise SystemExit("REFUSED: the window is not inside the development window; the held-out is read only on the Head's go (no code path reads it)")
     cand = {tk: {c["ts"]: c for c in cs} for tk, cs in candles.items()}
     kind = {"clock": "clock", "alive": "alive"}[fam["in_play"]]
     ev = collections.OrderedDict()
@@ -227,6 +227,8 @@ def selftest():
                 t = S0 + 60 * k; a = 0.40 + (0.12 if k >= 10 else 0.0)
                 cd[A].append(dict(ts=t, bid=round(a - spread / 2, 4), ask=round(a + spread / 2, 4), volume=20.0 if k == 10 else 3.0)); cd[B].append(dict(ts=t, bid=round(1 - a - spread / 2, 4), ask=round(1 - a + spread / 2, 4), volume=3.0))
         return mk, cd
+    global DEV_BOUNDS
+    DEV_BOUNDS = (0, 10 ** 12)
     FAMILY = dict(family="ESOCCER", series=["KXESOCCERGAME"], in_play="clock")
     far = (0, 10 ** 12)
     mk, cd = fam(400, 0.80); L, bets = run_family(FAMILY, K, mk, cd, far); assert bets and len(bets) == 400
@@ -240,11 +242,10 @@ def selftest():
     mk, cd = fam(100, 0.80, seed=6)
     for tk, m in mk.items(): m["close"] += 3 * 3600                                      # every close 3 h after its start: start not derivable
     L6, b6 = run_family(FAMILY, K, mk, cd, far); assert b6 is None and "START NOT DERIVABLE" in L6[-1], L6
-    global DEV_BOUNDS
     DEV_BOUNDS = (0, 100)
     try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("held-out window not refused")
     except SystemExit as ex: assert "REFUSED" in str(ex)
-    DEV_BOUNDS = None
+    DEV_BOUNDS = (0, 10 ** 12)
     # the pilot never reads a result: strip them and it still runs
     mk, cd = fam(60, 0.8, seed=7)
     for m in mk.values(): m.pop("result")
@@ -255,6 +256,9 @@ def selftest():
         t = _S + 60 * k
         for tk, m in ((_A, 0.60), (_B, 0.40)): pc[tk][t] = dict(ts=t, bid=round(m - .01, 4), ask=round(m + .01, 4), volume=3.0)
     pd = placebo_decision(_S + 1800, [_A, _B], pc, "clock", K, collections.Counter()); assert pd and pd["ticker"] == _A and pd["t"] == _S + 300 and abs(pd["price"] - 0.62) < 1e-9, pd
+    DEV_BOUNDS = None
+    try: run_family(FAMILY, K, *fam(10, 0.5), (0, 200)); raise AssertionError("default is not closed")
+    except SystemExit: pass
     print("SELFTEST OK (fee rounded up, Eastern clock with DST, in-play start, jump rules, entry band and spread, tie never, no look-ahead, alive rule, round trip)")
 def dev(series_path, family, lists, candles_dirs, scorekit_dir):
     sys.path.insert(0, scorekit_dir); import scorekit
