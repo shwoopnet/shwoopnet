@@ -12,7 +12,7 @@
 // Every one is a SHADOW candidate, never a pass (N about 670 on top of about 540; no counterparty named for any). Shadow rows assume a fill at the touch (an upper bound): read `wouldFill`.
 const RULE = (id, series, entry, anchor = "SHADOW-WEEK1") => Object.freeze({ id, readme: "kalshi-scalper/README.md#" + anchor, series: Object.freeze([series]), entry: Object.freeze(entry), contracts: 1, registeredAt: "2026-11-09", forwardReadDate: "2026-12-14" });
 const SHADOW_RULES = Object.freeze([
-  // ETHNO6 was retired before its first row (Nov 10, 2026): on 4.3 weeks of Ethereum candles (2,609 windows) it fails, PF 1.04 / 0.72 at +0c; its live PF 2.59 (n 53) was its only support. See kalshi-scalper/README.md#SHADOW-WEEK2.
+  // ETHNO6 was retired before its first row (Nov 10, 2026): on 4.3 weeks of Ethereum candles (2,609 windows) it fails, PF 1.04 / 0.72 at +0c; its live result was its only support [figure removed]. See kalshi-scalper/README.md#SHADOW-WEEK2.
   // BTCHI6 was retired before its first row (Nov 10, 2026): on an independent window (Jun to Sep, 1,206 windows) it is PF 1.13 at +0c and 0.91 at +1c, under the 1.3 bar. See kalshi-scalper/README.md#SHADOW-WEEK2.
   // ALL FOUR SHADOW RULES WERE RETIRED ON NOV 11, 2026 (the owner: "existing duplicates should be killed. Why are we running multiple of the same strategies?"). XRPYES10 (shadow twin of the live probe), GOLDALL, XRPFAV6 and LANTERN
   // were all the favourite-late mechanism gold L1 already runs live (the same 88c to 97c favourite at a 6 or 10 minute look, on gold, XRP or Ethereum), so each was a duplicate of L1 rather than a different bet. Gold L1 is the single

@@ -32,11 +32,11 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 - It is blocked from trading the opposite side of a contract another strategy holds (the direction lock).
 
 **Record (sources in brackets).**
-- Last week, all L1: 337 settled, win rate 92.0%, +$23.08 (Strategies table, Nov 1).
-- Last 7 days to Oct 31, by market: Dogecoin 119 settled, +$18.14, PF 1.96; gold 69 settled, +$6.37, PF 1.14 (nightly report; the 7 day figures also include paused markets until they age out).
-- Live record of gold and Dogecoin fills: 391 fills, 18 losses (4.6%); 16 of the 18 losses are early sells at the 25c line, -$75.34 in total (refinement chat, Nov 1).
-- By price: fills at 90c to 92c, 93 fills, 9 losses, -$1.01; every other fill, 298 fills, 9 losses, +$66.43. The gap is p 0.012 raw, about 0.12 after counting the cells searched (refinement chat). It is a lead being tested forward, not a finding.
-- Dogecoin at ladder size (11 to 13 contracts, since Oct 30): 51 orders, 33 fills, 1 loss (-$8.70), net +$14.34 (refinement chat). Dogecoin's no-fill share is about 35%.
+- Last week, all L1: positive but small [live figures removed, ask Main].
+- Last 7 days to Oct 31, by market: Dogecoin and gold were both positive, Dogecoin the larger [live figures removed, ask Main] (nightly report; the 7 day figures also include paused markets until they age out).
+- Live record of gold and Dogecoin fills: a loss rate under 5%; most of the losses were early sells at the 25c line, and they outweighed the wins' dollar share heavily [live figures removed, ask Main] (refinement chat, Nov 1).
+- By price: fills at 90c to 92c had more losses than the rest; the gap is p 0.012 raw, about 0.12 after counting the cells searched (refinement chat). It is a lead being tested forward, not a finding. [live counts removed, ask Main]
+- Dogecoin at ladder size (11 to 13 contracts, since Oct 30): few fills, one loss, net positive (refinement chat) [live figures removed, ask Main]. Dogecoin's no-fill share is about 35%.
 - History (backtest, in-sample, upper bounds): gold profit factor 1.44 / 1.03 / 1.17 by third; Dogecoin 1.29 / 1.26 / 1.15 (research session). Holding to settlement beat every exit shape in history (EXIT1: hold 0.961 / 0.928 / 0.898, 25c line 0.921 / 0.897 / 0.869 per contract).
 
 **Not known.** The research bar (profit factor 1.5 in each of three windows after fees and after deflating for how many things were tried) has never been met by L1. The live edge comes from a 5% loss rate against a break-even rate of roughly 8% at these prices, which is thin: a few more early sells move it. Review rule (written Oct 30): Dogecoin goes back to a fixed size of 5 if its last 100 settled orders at ladder size lose more than 8% or net under +0.5c a contract. Since Nov 2 the Bot page warns when this line is crossed; it changes nothing by itself.
@@ -64,9 +64,9 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 - Kill rules (latch off, only a reviewed edit re-arms): 24 losses in a row (was 18 until Nov 7, 2026), or net below -$6 after 40 fills.
 
 **Record.**
-- Live (Oct 30 to Nov 1): 10 filled, 3 won, 7 lost, net about +$13.0 to +$13.4, profit factor about 4.1 (refinement chat and Strategies table). The wins were at 39c to 50c, the losses at 6c to 16c.
+- Live (Oct 30 to Nov 1): a small sample, net positive, profit factor well above 1 [live figures removed, ask Main] (refinement chat and Strategies table). The wins were at 39c to 50c, the losses at 6c to 16c.
 - Research validation: held profit factor 1.85; selling at 60 seconds kept about 1.52. Day z 4.42 against a bar of about 5.2, so it did not reach the research bar (V2).
-- V2's forward reference ledger: 6 trades, 0 wins, -16.4c (0 of 6 at a 28% hit rate happens about 14% of the time). Needs 30 or more trades over 10 or more days before it means anything.
+- V2's forward reference ledger: a handful of trades, none won [counts removed] (a run like that at a 28% hit rate happens about 14% of the time). Needs 30 or more trades over 10 or more days before it means anything.
 
 **Not known.** No counterparty is named (the first guess did not hold). Ten live fills cannot separate a real edge from luck. Forward read: Nov 13. The live record is better than V2's reference ledger, which is a reason for caution as much as for hope.
 
@@ -100,8 +100,8 @@ Each strategy below has: what it is, the exact rules as the code runs them today
 ## Retired or paused (for completeness)
 | Strategy | Status | Why |
 |---|---|---|
-| XRP (L1) | paused in code Oct 28 | live profit factor 0.49 over 65 fills; forward reads Nov 12 |
-| Bitcoin (L1) | paused Oct 29 | live profit factor 0.72 over 155 orders |
+| XRP (L1) | paused in code Oct 28 | live profit factor below 1 [live figures removed]; forward reads Nov 12 |
+| Bitcoin (L1) | paused Oct 29 | live profit factor below 1 [live figures removed] |
 | Ethereum (L1) | paused Oct 30 | the smooth-climb rule left it almost no entries |
 | AUD/USD, USD/CAD, natural gas probes | paused Oct 28, off the list Oct 30 | no edge shown; 97c entries won 3c |
 

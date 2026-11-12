@@ -1,17 +1,17 @@
 # Why costs "kill" the bot when a manual scalper does not pay much (written 2026-10-21, for the owner)
 
-**Short version.** The fee is small in dollars. What is tiny is the edge it is taken from. The bot risks 93c to win 7c, so it has to be right about 94 times in 100 just to break even, and it is right about 93.
+**Short version.** The fee is small in dollars. What is tiny is the edge it is taken from. The bot risks 93c to win 7c, so it has to be right about 94 times in 100 just to break even, and it was right about 93.
 
-## The numbers (the bot's own 303 settled, filled orders, Oct 7 to Oct 21)
+## The numbers (the bot's own early settled, filled orders; exact live counts removed, ask Main)
 
 | | |
 |---|---|
-| Contracts bought | 2,147 |
+| Contracts bought | [live figure removed] |
 | Entry fees (Kalshi's 7% x price x (1 - price), about 0.44c a contract) | about 0.47% of the money staked |
 | Result before fees | **slightly positive** |
 | Result after fees | **slightly negative** |
-| Win rate | 93.4% |
-| Average win / average loss | +$0.41 / -$5.95 (one loss cancels about 14 wins) |
+| Win rate | about 93% |
+| Average win / average loss | a few cents a contract against many times that (one loss cancels about 14 wins) |
 | Win rate needed to break even at the average price paid (about 93.4c plus 0.44c fee) | about **93.9%** |
 
 So fees did not create the problem, they decided the sign: a +0.29c a contract edge before fees became -0.15c after. Any change that saves half a cent a contract moves the bot from losing to roughly even; no change in fees makes it rich, because the gross edge is 0.29c on a 93c stake.

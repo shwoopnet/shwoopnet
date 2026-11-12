@@ -2,21 +2,23 @@
 
 Written 2026-10-21 for the owner to review. **Nothing here is built.** Plain words on purpose.
 
-## What the live record says (303 settled trades, 2026-10-07 to 2026-10-21, bot only)
+## What the live record says (first few hundred settled trades, 2026-10-07 to 2026-10-21, bot only)
 
-| Market | Trades | Losses | Net as traded | Net if every trade had been 1 contract |
-|---|---|---|---|---|
-| Gold | 98 | 2 | positive | positive |
-| Bitcoin | 127 | 9 | negative | negative |
-| Ethereum | 65 | 6 | negative | negative |
-| XRP | 8 | 1 | negative | negative |
-| Dogecoin | 4 | 1 | negative | negative |
-| **All** | 302 | 20 | **slightly negative** | positive |
+[live figures removed, ask Main] In outline, by market:
 
-- Gold's losses never landed in the same window as Bitcoin's. Ethereum's losses mostly did (4 of its 6 came with a Bitcoin loss), so Ethereum adds the same bet twice.
+| Market | Net as traded | Net if every trade had been 1 contract |
+|---|---|---|
+| Gold | positive | positive |
+| Bitcoin | negative | negative |
+| Ethereum | negative | negative |
+| XRP | negative | negative |
+| Dogecoin | negative | negative |
+| **All** | **slightly negative** | positive |
+
+- Gold's losses never landed in the same window as Bitcoin's. Ethereum's losses mostly did, so Ethereum adds the same bet twice.
 - The earlier 68-day backtest agrees on gold and on nothing else: gold was the only series that cleared the bar on its own (+1.54c a contract, z 2.94).
-- **Counterfactual, in the same data (so it flatters itself):** gold as traded and everything else at 1 contract would have made clearly positive instead of slightly negative. The number is not a forecast. Gold's live result (+4.5c a contract) is about three times its backtest, so expect some of it to come back.
-- Overall the record is indistinguishable from break-even (+0.6c a contract, give or take 1.2c). Size scales the same coin flip; it does not add edge.
+- **Counterfactual, in the same data (so it flatters itself):** gold as traded and everything else at 1 contract would have made clearly positive instead of slightly negative. The number is not a forecast. Gold's live result was about three times its backtest, so expect some of it to come back.
+- Overall the record is indistinguishable from break-even. Size scales the same coin flip; it does not add edge.
 
 ## The proposal: size is earned by a market's own live record
 
@@ -41,7 +43,7 @@ Written 2026-10-21 for the owner to review. **Nothing here is built.** Plain wor
 
 ## What could go wrong
 
-- **Gold's luck runs out.** Two losses in 98 trades (2%) against a backtest of about 4.5% means some regression is likely. Gold is still the best-supported market, but the record shows it is not safe: one gold loss at 4 contracts costs about $3.70.
+- **Gold's luck runs out.** A live loss rate of about 2% against a backtest of about 4.5% means some regression is likely. Gold is still the best-supported market, but the record shows it is not safe: one gold loss at 4 contracts costs a few dollars.
 - **Concentration.** Most of the size ends up in one market. The window limit and 12% stop already bound a bad window.
 - **Bitcoin might simply be negative.** At 1 contract it costs little to find out, which is why it is demoted, not removed.
 - **Selection.** I picked gold after looking at this record. The reason it is not just fitting noise is that the backtest, done on different days, picked it first.
