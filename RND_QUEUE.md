@@ -1,4 +1,4 @@
-# R&D queue (the Head of R&D keeps this from Nov 12, 2026, 15:00Z; Main kept it before; last update Nov 12, 18:00Z)
+# R&D queue (the Head of R&D keeps this from Nov 12, 2026, 15:00Z; Main kept it before; last update Nov 12, 19:30Z)
 
 Branch `rnd-queue`, not main. Read it with `git fetch origin rnd-queue && git show origin/rnd-queue:RND_QUEUE.md`. Rules: docs/RND_CHARTER.md and docs/POLITICS_RULES.md on main. No live account figure goes in this file or on any branch; live numbers travel by message only. Every figure below is a research result on public data, a rule or a cap. [research]
 
@@ -23,7 +23,7 @@ Research reports to the Head of R&D. Engineering, merges, deploys, recorders, ka
 |---|---|---|---|---|
 | done | ROLLOFF_PROXY | 7 used | VERDICT Nov 12: proxy KILLED, card CLOSED. The Wikipedia window average was within 0.3 points of the settled value on 0 of 33 check days (bar 80 percent), mean error -2.29 points; the table is not the source's poll list. Registered before the read (d16ce2d), result ef45fb2 on claude/idea-desk-b. POL-b2 (slope on the same table) is retired with it | closed |
 | 2 | SPREADLISTS (about 11, the two time fields for line 2) then SPREADCELL1 (W-SPREAD-CELL1) | about 285 | A one-shot out-of-sample read of one frozen cell on 1,041 never-scored events | job ready on claude/refine-live; to be ported in Main's jobs-v2 PR; labels committed before dispatch (6fdedf25): PASS, FAIL, LEAD (the middle: no probe, no popup, forward shadow continues), UNDERPOWERED |
-| 3 | PERPBTC1M (KXBTCPERP 1 minute candles, Jun 3 to Nov 12; PR 810) | 163 | The only data CFRTI-K needs (registered, one specification, not scored) | waits on the owner's merge of 810 |
+| 3 | PERPBTC1M (KXBTCPERP 1 minute candles, Jun 3 to Nov 12; PR 810), then Desk A's KXBTC15M candle job (lists, then batched candles) | 163 + about 320 | The data CFRTI-K needs once re-specified on candles only (one specification, not scored) | waits on the owner's merge of 810; the second job file is being written |
 | 4 | NOSIDE1_CANDLES (W-NO-ARM1) | 1,034 | A first readable development verdict on the approval NO side; what is held leans against | ready on claude/refine-live; runs only after 1 and 2 are on the data branch |
 | retired | COMBO1_OPENBOOK | 0 | Answered for free: the combo recorder's first snapshot on combo-data (2026-11-12 14:35Z) has 400 quote rows, 229 with a NO bid, 37 with a YES bid, 18 two-sided | closed, no read spent |
 
@@ -84,9 +84,16 @@ Measured on recorded Bitcoin 15 minute books, closes Oct 29 to Nov 11, 180 to 12
 
 **Convention:** every taker rule on the 15 minute markets is also reported as a replay on the recorded books at +2 and +6 seconds with its real limit; a miss is no trade; live use and probe gates are judged on the 6 second line. Where only the decision quote exists, apply the haircut above and show the stress that drops the best-outcome signals first. The CFRTI held-out plan carries the replay line (Desk A, 19c2751b and 541e83da on claude/idea-desk-a; no new try).
 
-## A data-quality question on the Bitcoin lead (Nov 12)
+## The quote recorder is a delayed copy; the Bitcoin lead is probably an artifact (Nov 12)
 
-Only 28 of the 68 development signal rows of CFRTI1-BTC have a recorded R6 book. On those (no evidence at n = 16 three-venue and n = 12 Kraken-only) the replay figures mean nothing yet. But in 4 of the 16 three-venue rows the R6 book, under 2 seconds before the decision, already showed an ask 4c to 25c above the ask the rule saw. If the quote recorder's ask is stale or skewed against the book, a rule that hunts for underpriced asks selects those rows, and part of the registered edge is a price that was not there. Forensics is measuring it (QUOTEVSBOOK1: quote ask against book ask on all development cheap-side rows, edge rows against non-edge rows, with a clock-offset search; no outcome, zero tries). The held-out script will print, for each version, how many signal rows show an ask that is not on the book. The 6 second book-replay line, which refuses to fill such rows, is the line that judges live use.
+Forensics' QUOTEVSBOOK1 (claude/forensics-desk, workers/forensics/QUOTEVSBOOK1_RESULT.md, registered 1539121, result 836d9fa; no outcome loaded, zero tries; Verification Analyst check requested first): the research quote recorder reads Kalshi's market LIST endpoint, which returns a copy refreshed about every 11 seconds (4,360 distinct quote states in 72,012 polls at 0.6 second spacing; median 10.96 seconds between changes), while the order book read by R6 never repeats between 2 second polls. Both clocks are right; the quote is 0 to 11 seconds old. As stamped, the quote is within 1c of the book on 57 percent of rows; it is below the book by 2c or more on 12.8 percent. Among the rows CFRTI picked, about a third show an ask that is not on the book (Desk A: 5 of 16 three-venue, 4 of 12 Kraken-only).
+
+**Consequences.**
+- **CFRTI1-BTC and its Kraken-only form:** the registered figures (PF 2.54 on n 36; PF 1.33 on n 32) are priced at a stale copy and are NOT tradable figures. The Nov 20 read still happens once; only its 6 second book-replay line and stale-ask count can support anything.
+- **Every test priced from the quotes/ files or ladder.csv** is priced at the same delayed copy, including any earlier "Kalshi's quote lags spot" reading. R6, NC15, the hourly book recorder and the candle endpoints are not affected. Forensics is listing which files are which.
+- **CFRTI-K is re-specified before any scoring** to use only Kalshi's 1 minute candles: the perpetual's reference price and the Bitcoin 15 minute market's own candle for the decision price. Development becomes every window from the first day both series exist to before 2026-11-05 (on the order of ten thousand), judged on the research bar (cash PF 1.5 in each third, z 5.46), with the fill haircut as a second line. It needs one more staged pull (settled KXBTC15M market lists, then batched candles, about 320 requests). Forensics checks first that the candle ask close matches the book.
+- **The live bot:** it decides on the single-market read, not the list. Whether that read is a delayed copy too is unknown. Refinement answers it from the order rows since Nov 11 (the ask seen against the book snapshot a second later, by filled and not filled), by message to Main and the Head of R&D only. Any change is Main's and the owner's.
+- **DEPTH1** (V2, registered Oct 30, 20 tries, R6 order-book features on gold and Bitcoin, holdout closes Nov 9 to 13) was missing from V2's handoff; Desk A reads it once on or after Nov 14 as registered.
 
 ## Gold's look: what a paper record can be trusted for (Nov 12, Forensics' GOLDHAIRCUT1)
 
