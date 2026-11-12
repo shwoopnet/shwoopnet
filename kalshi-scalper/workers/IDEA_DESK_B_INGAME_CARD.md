@@ -70,3 +70,35 @@ The recorder data already held could give a first look at no cost, but at 2 minu
 - **Who is on the other side, and why they might lose.** The maker of the spread market, if they update it more slowly than the moneyline. The honest counter: on Kalshi the same few makers quote all three markets of a game from one model, and V2 put 96% on "re-quoted within seconds". The SERIESLAG1 profile is the only evidence of a lag of minutes, and it is on series markets, which are quoted less closely.
 - **What the bot would need (engineering, not research).** Quotes for the day's games every minute during games: about 3 public reads a game a minute, up to roughly 45 a minute on a busy night. Which exchange shard sports markets sit on, and the fee schedule of the sports series, have not been read.
 - **Honest probability:** 3% that it reaches the bar; about 60% that step 1 closes it in a week at a cost of about 60 requests and no try.
+
+## 7. The earlier in-play and sports-lag tests, for the family ruling (added Nov 12 at the Head's request)
+
+Under lifecycle 7f a family is the entry mechanism plus the exit style. What each earlier test was, from V2's own registrations and results (branch `claude/epic-ptolemy-0amjd9`, `kalshi-scalper/`):
+
+| Test | Entry mechanism | Exit style | Verdict and n | Source |
+|---|---|---|---|---|
+| SC1 (Oct 26 to 27) | In play, tennis match winner. A 5c jump in the market's OWN one-minute mid; four rules: follow it or fade it. Kalshi prices only, entry at the next minute's quote | Time exit: sell at the bid 2 or 5 minutes later | FALSIFIED, all four. 62,747 jump events; net -4.2c to -4.5c a contract, the same for follow and fade, so the loss is cost (two fees and two spread crossings), not direction | `README.md` "Pre-registration: SC1" and "Result: SC1" |
+| ESPN1 (Oct 29 to 30) | In play, game winner (NFL, college football, NBA, MLB). Buy the side an OUTSIDE win-probability feed rates 8c or 15c above its ask, 180 seconds after the play | Hold to settlement | FALSIFIED, 4 of 4 variants. 1,613 games; PF 0.76 to 1.20, under 1.0 in the last two windows; Kalshi's mid was the better forecast | `workers/ESPN1_REGISTRATION.md`, `ESPN1_RESULT.md` |
+| SWING1 (Nov 3) | In play, game winner (college football, MLB). Buy the faller after its own mid fell 25c in 5 minutes, ask 5c to 30c. Kalshi prices only | Hold to settlement | FALSIFIED. 302 trades; PF 0.99 and 1.06 | `workers/SWING1_REGISTRATION.md`, `SWING1_RESULT.md` |
+| INPLAY1 (Nov 3) | In play, cheap side when the outside feed's probability is 3 times the ask, at fixed looks | Hold to settlement | NOT_ENOUGH_DATA. 30 trades, 0 wins | `workers/INPLAY1_REGISTRATION.md`, `INPLAY1_RESULT.md` |
+| SERIESLAG1, the rule (Nov 8 to 9) | AFTER a game ends: buy the cheap side of the playoff SERIES market when a fixed coin-flip series model beats the ask by 5c, three minutes after the game market closed. Kalshi prices and a fixed model | Hold to the series settlement | NOT_ENOUGH_DATA. 44 trades, mean -12.97c, PF 0.21 | `workers/SERIESLAG1_PROTOCOL.md`, `README.md` "SERIESLAG1 result" |
+| INGAMELAG1 as V2 registered it (Nov 8) | In play, NBA. After the moneyline moved 8c in 3 minutes, buy the moving team's spread YES if it moved under half the fitted amount, ask 3c to 30c. The signal is a DIFFERENT market of the same game | Time exit: sell at the bid 10 minutes later | Never read. n 0 | `workers/INGAMELAG1_PROTOCOL.md` |
+
+What that says, without ruling:
+
+- **Same entry mechanism and exit style as this card (a sibling market's move, a time exit): none before.** INGAMELAG1 is this card's parent and was never read.
+- **In play, Kalshi prices, time exit: SC1 only**, one falsified test (four rules). Its signal was the market's own jump, not a sibling's. Its finding matters here all the same: a one-minute round trip at mid prices cost about 4.3c in tennis, measured. This card's estimate of about 4c for NBA spreads agrees with it, so the lag must be worth more than that.
+- **In play, Kalshi prices, held to settlement: SWING1**, one falsified test.
+- **In play, an outside probability feed, held: ESPN1** (falsified) and INPLAY1 (not enough data). A different signal source; that source is no longer permitted in any case.
+- **After the game, series markets, held: SERIESLAG1**, not enough data and negative.
+
+If the family is drawn as "in play on Kalshi prices" whatever the exit, it has two falsified tests (SC1, SWING1) and this card would be the third and last. If it is drawn by entry mechanism plus exit style, as 7f words it, this card's cell is empty. The Head rules after step 1.
+
+## 8. Step 1 as approved and committed (Nov 12, before the pull was dispatched)
+
+- **Approved by the Head of R&D:** the measurement only, zero tries. Step 2 is not approved.
+- **Job:** `workers/desk_b_jobs/INGAMELAG_M1.json`, built by `workers/ingame_m1/build_job.py` from the recorder files as they stood at Nov 12, 12:00Z: 35 requests, one batched one-minute candle request per finished game (NBA 22, NHL 11, NFL 2), cap 60. It passes the pull script's own check. The game list is `workers/ingame_m1/games.json`.
+- **Script:** `workers/ingame_m1/measure.py`, committed with this section. Constants: a trigger is a moneyline mid move of 8c or more against three minutes earlier, from a mid of 10c to 90c, at most one a game per ten minutes; the spread's full move is its move to ten minutes after the trigger minute, in the direction the moneyline implies; an event counts only if that move is 3c or more ("a clean move"); where both followed spread markets qualify, the one that moved more is used.
+- **Kill rule, unchanged:** the card is CLOSED if 75% or more of the move is in by the end of the first full minute on 80% or more of the events. Under 40 events with a clean move: NOT_ENOUGH_DATA, and one more measurement a week later on the larger list (two such results close the source).
+- **Expected count, said now:** the recorder saw 25 trigger events in these 35 games at two-minute spacing. One-minute candles may show somewhat more, but fewer than 40 with a clean move is likely on this first list. If so the answer is NOT_ENOUGH_DATA and the job is rebuilt once from a longer list.
+- **Not known:** whether the batched candle endpoint answers for sports markets. If the first three requests fail, the run stops by the script's own rule; the fallback is single-market requests for the moneyline and spread tickers only, as a new reviewed job.
