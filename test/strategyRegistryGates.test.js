@@ -9,7 +9,7 @@ const root = path.join(__dirname, '..');
 const reg = JSON.parse(fs.readFileSync(path.join(root, 'strategies-registry.json'), 'utf8'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const gates = {};
-const KEYS = ['id', 'name', 'stage', 'rule', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return', 'retiredOn', 'reason', 'notes', 'code', 'roomTarget', 'roomWhat'];
+const KEYS = ['id', 'name', 'stage', 'rule', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return', 'retiredOn', 'reason', 'notes', 'code', 'roomTarget', 'roomWhat', 'cause', 'figures'];
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s + 'T00:00:00Z'));
 const nonEmpty = (s) => typeof s === 'string' && s.trim().length > 0;
 
@@ -27,6 +27,10 @@ gates.RG1 = () => {
     for (const k of ['startDate', 'nextRead', 'retiredOn']) assert.ok(x[k] === null || isDate(x[k]), x.id + '.' + k + ' is a date or null');
     assert.ok(x.roomTarget === null || (Number.isInteger(x.roomTarget) && x.roomTarget > 0 && nonEmpty(x.roomWhat)), x.id + ': room left needs a target count and words for it');
     assert.ok(x.n === null || Number.isInteger(x.n), x.id + '.n is a whole number or null');
+    // A retired row files under exactly one cause; any other stage has none; figures are public research text only and only on a retired row.
+    if (x.stage === 'Retired') assert.ok(['failed the bar', 'killed while live', 'family closed', 'superseded'].includes(x.cause), x.id + ' has a known cause');
+    else assert.strictEqual(x.cause, null, x.id + ' has no cause unless retired');
+    assert.ok(x.figures === null || (x.stage === 'Retired' && nonEmpty(x.figures) && /\bn \d/.test(x.figures) && !/\$/.test(x.figures)), x.id + ': figures are a public n and PF, never dollars');
     if (x.n !== null) assert.ok(nonEmpty(x.nBasis), x.id + ': an n must say what it counts (public data only)');
   }
 };
@@ -109,6 +113,56 @@ gates.RG5 = () => {
   assert.ok(/not measured yet/.test(empty) && /no trades to draw yet/.test(empty) && !/<svg/.test(empty), 'no data draws no made-up figure');
   const evil = P.kalshiRegistryCardHtml({ id: 'X', name: '<img onerror=1>', stage: 'Shadow', label: 'UNPROVEN', rule: '"><script>', notes: [], n: null }, esc);
   assert.ok(!/<img|<script/.test(evil), 'registry text is escaped');
+};
+
+gates.RG6 = () => {
+  // Consequence (the owner, Nov 12, 2026: "you didnt apply it to the LIVE side"): every Live and Probe card has the Details button and the same popup, with the same five things and nothing else; the popup is masked when Privacy is on, escapes registry text, and a strategy with no private read says so and draws no chart.
+  const fn = (name) => { const i = html.indexOf('function ' + name + '('); let d = 0, j = html.indexOf('{', i); for (let k = j; k < html.length; k++) { if (html[k] === '{') d++; else if (html[k] === '}' && --d === 0) return html.slice(i, k + 1); } };
+  const varLine = (n) => new RegExp('  var ' + n + ' = .*\\n').exec(html)[0];
+  const varBlock = (n) => new RegExp('  var ' + n + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html)[0];
+  const names = ['kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiStratGauge', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiStratOneLine'];
+  const P = new Function(varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + names.map(fn).join('\n') + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE };')();
+  const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const mask = (x) => (x < 0 ? '-' : '') + '****', money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
+  // the card side: the computed Live tile renders the button, and the click handler finds a row for every live id
+  const tile = html.slice(html.indexOf('var tile = function(o){'), html.indexOf('var ids = model.live.map'));
+  assert.ok(/o\.sheet \? '<button type="button" class="sp-detbtn" data-reg-details="'/.test(tile), 'a sheet tile draws the Details button');
+  assert.ok(/return tile\(\{ sheet: true, id: s\.id, name: s\.name, stage: 'Live'/.test(html), 'every computed Live or Probe card is a sheet tile (L1, OICORE, EVENT830 and any added to the list)');
+  assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiRegistrySheetHtml\(x, kalshiStratSheetData\(/.test(html), 'the popup reuses the one sheet builder, with its data built when it opens');
+  assert.ok(/kalshiStratPop\.refresh\(\)/.test(fn('renderStrategiesPage')), 'a redraw or the Privacy switch re-masks an open popup');
+  const list = reg.strategies;
+  for (const id of ['L1', 'OICORE', 'EVENT830']) {
+    assert.ok(P.KAL_BOARD_LIVE.some((x) => x.id === id), id + ' is a live card');
+    const row = P.kalshiStratSheetRow(id, list, P.KAL_BOARD_LIVE);
+    assert.ok(row && row.kill && row['return'] && row.rule, id + ' has a row with rule, kill and return');
+    assert.strictEqual(row.stage, list.find((x) => x.id === id).stage, id + ' takes its stage from the registry');
+  }
+  assert.ok(P.kalshiStratSheetRow('NOPE', list, P.KAL_BOARD_LIVE) === null);
+  const fb = P.kalshiStratSheetRow('OICORE', [], P.KAL_BOARD_LIVE);
+  assert.ok(fb && /drawdown/.test(fb.kill) && /re-arms/.test(fb['return']) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
+  // the content: five things only
+  const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { room: 10.67, drawdown: 39.33, count: 18, streak: 3, lines: [] } };
+  const row = P.kalshiStratSheetRow('OICORE', list, P.KAL_BOARD_LIVE);
+  const shown = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, money), esc);
+  for (const w of ['Does', 'Kill', 'Return', 'Room left']) assert.ok(shown.includes(w), 'popup has ' + w);
+  assert.strictEqual((shown.match(/<svg/g) || []).length, 1, 'one small chart');
+  assert.ok(/Rolling 30 trade cash PF/.test(shown) && /drawdown room of \$50\.00/.test(shown) && /\$10\.67/.test(shown), 'the live read fills room left and the chart');
+  assert.ok(!/Started|Next read|To confirm|Sizing|Implement|Last 8|Best day|Fees/.test(shown), 'and nothing else (no ladder, no trade list, no extras)');
+  // Privacy view
+  const masked = P.kalshiRegistrySheetHtml(row, P.kalshiStratSheetData('OICORE', live, mask), esc);
+  assert.ok(/\*\*\*\*/.test(masked) && !/\$10\.67|\$39/.test(masked), 'with Privacy on the popup shows no live dollar figure of the account');
+  // no private data: say so, draw nothing
+  for (const id of ['L1', 'OICORE', 'EVENT830']) {
+    const r = P.kalshiStratSheetRow(id, list, P.KAL_BOARD_LIVE);
+    for (const d of [{ live: true }, { live: true, kill: null, spark: [] }, { live: true, spark: [1] }]) {
+      const h = P.kalshiRegistrySheetHtml(r, P.kalshiStratSheetData(id, d, money), esc);
+      assert.ok(/not measured yet/.test(h) && !/<svg/.test(h), id + ': no private read means "not measured yet" and no chart');
+    }
+  }
+  assert.ok(/KAL_BOARD_LIVE\.some\(function\(r\)\{ return r\.id === openId; \}\) \? \{ live: true \} : null/.test(html), 'a live id the page has no read for yet opens as not measured, never as a made-up chart');
+  // escaping
+  const evil = P.kalshiRegistrySheetHtml({ id: 'X', name: '<img onerror=1>', stage: 'Probe', label: '<b>', rule: '"><script>', kill: '<i>k', 'return': '<u>r', roomTarget: null }, P.kalshiStratSheetData('X', { live: true, spark: [1, 2] }, money), esc);
+  assert.ok(!/<img|<script|<i>k|<u>r|<b><\/|<b>Q/.test(evil) && evil.includes('&lt;b&gt;') && evil.includes('&lt;i&gt;k'), 'registry text is escaped in the popup');
 };
 
 let failed = 0;
