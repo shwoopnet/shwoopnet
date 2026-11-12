@@ -15,7 +15,7 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 
 | Test | Desk | N | State |
 |---|---|---|---|
-| UNRATEROUND version 2 (one trade on every non-January release, paper screen; replaces Desk B's registration, whose 8c rule is reported as a subset) | Testing Desk | 1 (try 2 of the card) | REGISTERED Nov 12 (1af3415e on claude/testing-desk), unscored; slow family, paper list at best |
+| UNRATEROUND version 2 (one trade on every non-January release, paper screen; replaces Desk B's registration, whose 8c rule is reported as a subset) | Testing Desk | 1 (try 2 of the card) | REGISTERED Nov 12 (1af3415e on claude/testing-desk); RETIRED UNREAD the same day (at most 8 admissible events against a floor of 30: January revisions of the seasonal factors); 0 scored |
 | V2 perps forward reads: 20 reads, 44 tries already in the compiled count | Testing Desk (owner from Nov 12) | 0 new | 18 RETIRED UNREAD Nov 12 (10 source closed, 8 cannot reach their bar); PERPEQ1 and CASHSPREAD1 part B kept |
 | POL-i2 count step (count only; restricted to closes after 2026-09-12) | Testing Desk | 0 | prepared Nov 12 (bd8640a2), not dispatched; dispatched only at 400 requests or fewer |
 | Stocks Desk: ten cards (16 tries if all run); prior-tries floor of 8 scored variants from the withdrawn equities and crypto work | Stocks Desk | 0 so far | registered Nov 12 (claude/stocks-desk 65ed5e97), nothing scored; S1, S3, S4, S5, S7 and S2's long-short line RETIRED UNREAD by arithmetic Nov 12 (0 tries spent); S6, S8 and S9 RETIRED UNREAD; S2 long leg ruled GO (gated) after the pilot, 1 try when scored; S10 deferred; tries are added here as each is scored |
