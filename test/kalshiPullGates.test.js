@@ -436,7 +436,7 @@ gates.KP24 = () => {
       assert.strictEqual(r.params.end_ts - r.params.start_ts, 86400);
       assert.deepStrictEqual(Object.keys(r.params).sort(), ['end_ts', 'period_interval', 'start_ts']);
     });
-    if (id === 'PERPETH1M') { assert.ok(/paused/.test(j.notes) && /NOT be dispatched/.test(j.notes)); let r = ''; try { execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }); } catch (e) { r = String(e.stdout); } assert.ok(/REFUSED/.test(r), 'the paused job is refused by the runner'); continue; }
+    if (id === 'PERPETH1M') { assert.ok(/paused/i.test(j.notes) && /NOT be dispatched/.test(j.notes)); let r = ''; try { execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }); } catch (e) { r = String(e.stdout); } assert.ok(/REFUSED/.test(r), 'the paused job is refused by the runner'); continue; }
     const dry = execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' });
     assert.ok(/plan: 163 requests/.test(dry) && dry.includes("https://external-api.kalshi.com/trade-api/v2/margin/markets/" + tk + "/candlesticks?") && /no request was sent/.test(dry));
   }
