@@ -96,10 +96,10 @@ Nothing here authorizes a live order.
 
 Both of these, stated in the registration before the first read:
 
-1. **Fewer than about 26 independent events a year.** The unit is an independent event (a monthly release, a court term, an election night, a trial readout), not a market and not a contract. Many markets on one event are one event.
+1. **Fewer than about 52 independent events a year** (owner, Nov 12, 2026: the line was first drawn at about 26 and moved to about 52 the same day, so weekly families may use the screen). The unit is an independent event (a monthly release, a court term, an election night, a trial readout), not a market and not a contract. Many markets on one event are one event.
 2. **It cannot reach the main bar within 26 weeks** at the rate it produces events (the arithmetic in the Desk B and Refinement power files; the main bar is the z score that clears the deflation count, or PF 1.5 in three windows).
 
-Monthly, seasonal and calendar-bound families (economics releases, court terms, elections, clinical readouts, storms and quakes) are the intended cases. A weekly family (about 52 events a year) is NOT slow by this rule; it stays on the main bar (see the gap noted under the table).
+Monthly, weekly, seasonal and calendar-bound families (economics releases, court terms, elections, clinical readouts, storms and quakes) are the intended cases. A daily family (ROLLOFF, about 365 a year) is NOT slow; it stays on the main bar.
 
 ### The screen
 
@@ -142,23 +142,24 @@ What follows from it:
 1. **A listing means "survived a weak filter", not "has an edge".** About 1 in 7 listings from a pile of no-edge ideas would be there by luck.
 2. **Tries add up.** With 15% per try, the chance that at least one of k zero-edge rules is listed is 1 - 0.85^k: 5 tries give about 56%, 10 tries about 80%. Every idea read against this screen counts as a try, passing or not, and the running count is stated beside any listing.
 3. **Correlated events inflate it.** The numbers assume independent events; if the registration's events share a driver, the true false-positive share is higher.
-4. This is the reason the screen leads only to paper trades, and why a live probe stays tiny, unproven and a separate owner decision.
+4. **More cards are eligible since the line moved to about 52, so the tries pile up faster.** Three cards (UNRATEROUND, POL-b3, ECONLAG) can be read now: if all three had no edge, the chance that at least one is listed is 1 - 0.85^3, about 39%. At least 25 named slow cards are eligible in the table above as their events accrue: if all 25 were read and none had an edge, the chance that at least one is listed is 1 - 0.85^25, about 98%. Plainly: a listing from a long run of cards is expected even if none has an edge, so the count of cards read is stated next to every listing and a single listing is weak evidence.
+5. This is the reason the screen leads only to paper trades, and why a live probe stays tiny, unproven and a separate owner decision.
 
 ### Re-screen of the slow-family cards (Nov 12, 2026; nothing was run)
 
-Sources: Desk B's `IDEA_DESK_B_POWER.md` (branch `claude/idea-desk-b`), Refinement's `POWER_TABLE_NOV12.md` (branch `claude/refine-live`), V2's `POWER2_QUEUE.md` (branch `claude/epic-ptolemy-0amjd9`). "n" is the independent events held now, as those files state it. "Qualifies" means: it is a slow family under the definition AND holds at least 30 independent events, so it could be read against the screen at a pinned cutoff once its registration is complete. Any other slow card gets the label "no evidence at n = x" and a rough date to 30 events at its stated rate. Only two cards qualify.
+Sources: Desk B's `IDEA_DESK_B_POWER.md` (branch `claude/idea-desk-b`), Refinement's `POWER_TABLE_NOV12.md` (branch `claude/refine-live`), V2's `POWER2_QUEUE.md` (branch `claude/epic-ptolemy-0amjd9`). "n" is the independent events held now, as those files state it. "Qualifies" means: it is a slow family under the definition AND holds at least 30 independent events, so it could be read against the screen at a pinned cutoff once its registration is complete. Any other slow card gets the label "no evidence at n = x" and a rough date to 30 events at its stated rate. Only three cards qualify.
 
 | Card | Slow family? | n held now | Events a year | Qualifies? | Why / next |
 |---|---|---|---|---|---|
 | Desk B UNRATEROUND (unemployment rate rounding) | yes | about 33 (months) | 11 | **Yes, marginal** | n of about 33 is just over 30, so it could be read once with a pinned cutoff; its source terms are not recorded in the power file and must be read first; retired on the main bar, so a Main/owner call to re-enter |
 | Refinement POL-b3 (elections against polls) | yes (seasonal, even-year autumn) | about 60 to 90 usable nights (history holds 152; Refinement's estimate, not verified) | none open before 2027 | **Yes, on history only** | the unit is an election night, not a market; needs the registration and a pinned cutoff; no forward events until 2027 |
-| Desk B ECONLAG (economics release lag) | no, about 36 a year | about 70 print days | 36 | No (outside the definition) | not slow by the 26 a year rule; it has the events for a plain read, so it stays on Desk B's demotion to one falsification run; flagged below |
+| Desk B ECONLAG (economics release lag) | yes (about 36 a year, under 52) | about 70 print days | 36 | **Yes** | enough events for a read with a pinned cutoff; Desk B demoted it on the main bar, so re-entering is a Main/owner call, and its source terms must be on record |
 | Desk B CPIARITH | yes | about 28 (months) | 12 | No: "no evidence at n = 28" | 30 is about two releases away |
 | Desk B SCOTUSAUTH | yes | 15 to 30 cases | 12 | No: "no evidence at n = 15 to 30" | at most about 15 months to 30; retired on the main bar |
 | Desk B PRESENTQ | yes | about 11 (months) | 12 | No: "no evidence at n = 11" | about 19 months to 30 |
 | Desk B WIKIEDIT | yes | 20 to 30 | about 10 | No: "no evidence at n = 20 to 30" | up to about 12 months to 30 |
 | Desk B BALLOTNO | yes | 1 election date | under 20 measures in 2027, about 150 in Nov 2028 | No: "no evidence at n = 1" | parked until 2028 (the one-night description was done) |
-| Desk B FAANOTICE | no, about 36 a year | 0 | 36 | No | no history and the source terms are unread (blocked) |
+| Desk B FAANOTICE | yes (about 36 a year) | 0 | 36 | No: "no evidence at n = 0" | forward only (about 10 months to 30) and the source terms are unread (blocked) |
 | Desk B TARIFFDTS | yes | 0 to 12 | 12 | No: "no evidence at n = 0 to 12" | also blocked: the Treasury source terms are ambiguous |
 | Desk B MOVPARITY arm B | yes (races) | 10 to 40 nights | few until 2028 | No: "no evidence at n = 10 to 40" | the count is too loose to rely on; arm A is a lock scan with its own count bar, not this screen |
 | Desk B SWEEPSIM | yes | 2 to 3 nights | under 1 | No: "no evidence at n = 2 to 3" | no instrument exists |
@@ -172,10 +173,14 @@ Sources: Desk B's `IDEA_DESK_B_POWER.md` (branch `claude/idea-desk-b`), Refineme
 | Refinement LMARENA-HIGH (row 93) | unknown rate | 2 settled | unknown | No: "no evidence at n = 2" | parked on terms |
 | Refinement SNOWRUN (row 76) | yes (seasonal, about Dec to Mar) | 0 (forward log) | independent storms unknown, at most about 100 correlated brackets a winter | No: "no evidence at n = 0" | one winter will not reach 30 independent storms; count storms, not brackets |
 | Refinement POL-c2 (deadline markets) | yes | a handful per decade | about 0.5 | No: "no evidence", n tiny | near certain to stay below 30 for years |
-| Refinement NO-arm approval | no (weekly approval series) | no cell reached 30 in both thirds | weekly | No: "no evidence at n under 30 per cell" | limit is the candle pull, not the calendar; main bar applies |
+| Refinement NO-arm approval | yes (weekly approval series, about 52 a year) | no cell reached 30 in both thirds (8 of 263 events had candles for one series, 0 of 143 for the other) | about 52 | No: "no evidence at n under 30 per cell" | the limit is the candle pull, not the calendar; a larger pull is needed first |
+| Refinement MORT30-FRED (row 78) | yes (weekly) | 11 settled | about 52 | No: "no evidence at n = 11" | about 19 weeks to 30 |
+| Refinement TGA-DTS (row 79) | yes (weekly) | 5 settled | about 52 | No: "no evidence at n = 5" | about 25 weeks to 30; the Treasury source terms need a person to read them first |
+| Refinement OPENROUTER-SHARE (row 92) | yes (weekly) | 3 settled | about 52 | No: "no evidence at n = 3" | about 27 weeks to 30 |
+| Refinement POL-b2 (approval up or down) | yes (weekly) | settled count unverified | about 52 | No: "no evidence", count unverified | count it before any screen |
 | Refinement POL-c1 votes, POL-n1, POL-n2, POL-i2, DEBTPENNY | probably | counts unverified | unknown | No: "no evidence", count unknown | count them before any screen |
 | V2 queue (`POWER2_QUEUE.md`) | none slow | n/a | n/a | No | every queued card runs on 15 minute, hourly or daily series; its one monthly card, CLINICAL2 (17 held, 12 a year, about 13 months to 30), was CLOSED Nov 11 and the screen does not reopen it |
 
-**Gap to flag to the owner (not decided here).** Weekly families (Refinement MORT30-FRED, TGA-DTS, OPENROUTER-SHARE, POL-b2; about 52 events a year, 3 to 11 settled today) are not slow by the 26 a year rule, yet they also cannot reach the main bar (about 254 weeks at a 10c edge). They would reach n = 30 in roughly 19 to 27 weeks. Whether the 26 a year line should move up to about 52 is the owner's call; until it does, they are not eligible for this screen. ECONLAG (about 36 a year) is the same case.
+**The line moved (owner popup, Nov 12, 2026).** It was first drawn at about 26 events a year; the owner moved it to about 52 so weekly families (MORT30-FRED, TGA-DTS, OPENROUTER-SHARE, POL-b2, ECONLAG and similar) may use the screen. ROLLOFF (about 365 a year) stays on the main bar.
 
 Nothing in this section authorizes a live order.
