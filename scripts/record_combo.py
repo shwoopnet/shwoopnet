@@ -35,13 +35,16 @@ MAX_LIST_PAGES = 5                 # at most 5,000 open combos listed per run
 MAX_QUOTE_ROWS = 400
 MAX_BOOKS = 40
 MAX_TRADES = 15
+MAX_LEG_ROWS = 100                 # leg_tickers is filled for the first 100 quote rows only (the tightest spreads, which also get the books); later rows leave it empty so a day stays under 1 MB gzipped
+LEGS_MAX_CHARS = 600               # cap on the leg_tickers string of one quote row; the true leg count stays in `legs`
+LEGS_MARKER = "|..."               # ends a truncated leg_tickers string
 DEPTH = 5
 SETTLED_PAGES = 3
 SETTLED_LOOKBACK_S = 36 * 3600
 UA = {"User-Agent": "shwoopnet-research-recorder"}
 
 QUOTE_COLS = ["t_send_ms", "t_recv_ms", "server_date_header", "ticker", "event_ticker", "exchange_index", "open_time", "close_time", "yes_bid", "yes_ask", "no_bid", "no_ask",
-              "yes_bid_size", "yes_ask_size", "last_price", "volume", "open_interest", "legs"]
+              "yes_bid_size", "yes_ask_size", "last_price", "volume", "open_interest", "legs", "leg_tickers"]
 BOOK_COLS = ["t_recv_ms", "server_date_header", "ticker", "close_time"] + ["yes_bid_px_%d" % i for i in range(1, 6)] + ["yes_bid_sz_%d" % i for i in range(1, 6)] \
     + ["no_bid_px_%d" % i for i in range(1, 6)] + ["no_bid_sz_%d" % i for i in range(1, 6)]
 TRADE_COLS = ["t_recv_ms", "ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side", "trade_id"]
@@ -179,13 +182,35 @@ def pick(markets):
     return sorted([m for m in markets if is_selected(m)], key=rank_key)
 
 
-def quote_row(t_recv, date, m):
+def leg_tickers(legs):
+    """The legs of a combo as `ticker:side` joined by `|`, read from the market object already in hand (no request). A leg that is a plain string is its own ticker; a leg with no readable ticker is skipped.
+    Longer than LEGS_MAX_CHARS: cut at the last whole leg that fits and end with LEGS_MARKER (the total stays within the cap; `legs` keeps the true count). Not a list: empty."""
+    if not isinstance(legs, list):
+        return ""
+    parts = []
+    for lg in legs:
+        t, side = (lg, "") if isinstance(lg, str) else ((lg.get("market_ticker") or lg.get("ticker") or "", lg.get("side") or "") if isinstance(lg, dict) else ("", ""))
+        if isinstance(t, str) and t:
+            parts.append(t + (":" + side if isinstance(side, str) and side else ""))
+    full = "|".join(parts)
+    if len(full) <= LEGS_MAX_CHARS:
+        return full
+    out = ""
+    for x in parts:
+        nxt = (out + "|" if out else "") + x
+        if len(nxt) + len(LEGS_MARKER) > LEGS_MAX_CHARS:
+            break
+        out = nxt
+    return out + LEGS_MARKER
+
+
+def quote_row(t_recv, date, m, with_legs=True):
     if not isinstance(m, dict) or not m.get("ticker"):
         return None
     g = lambda k: m.get(k, "") if m.get(k) is not None else ""
     legs = m.get("mve_selected_legs")
     return [t_recv, t_recv, date, m["ticker"], g("event_ticker"), g("exchange_index"), g("open_time"), g("close_time"), g("yes_bid_dollars"), g("yes_ask_dollars"), g("no_bid_dollars"),
-            g("no_ask_dollars"), g("yes_bid_size_fp"), g("yes_ask_size_fp"), g("last_price_dollars"), g("volume_fp"), g("open_interest_fp"), len(legs) if isinstance(legs, list) else ""]
+            g("no_ask_dollars"), g("yes_bid_size_fp"), g("yes_ask_size_fp"), g("last_price_dollars"), g("volume_fp"), g("open_interest_fp"), len(legs) if isinstance(legs, list) else "", leg_tickers(legs) if with_legs else ""]
 
 
 def parse_levels(levels):
@@ -239,7 +264,7 @@ def poll(stream, now, out_dir):
     """One poll. Returns the coverage row."""
     markets, date, tr, pages, complete = list_combos(stream, "open", MAX_LIST_PAGES)
     chosen = pick(markets)
-    qrows = [r for r in (quote_row(tr, date, m) for m in chosen[:MAX_QUOTE_ROWS]) if r]
+    qrows = [r for r in (quote_row(tr, date, m, i < MAX_LEG_ROWS) for i, m in enumerate(chosen[:MAX_QUOTE_ROWS])) if r]
     write_csv(os.path.join(out_dir, "quotes.csv"), QUOTE_COLS, qrows)
     brows, trows, nbooks, ntrades = [], [], 0, 0
     for m in chosen[:MAX_BOOKS]:

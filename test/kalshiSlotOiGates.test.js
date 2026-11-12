@@ -39,7 +39,7 @@ gates.OI4 = () => {
   const fs = require('fs'), path = require('path');
   const src = fs.readFileSync(path.join(__dirname, '..', 'functions', 'kalshiSlotRunLib.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.ok(/sideRule === "cheap" \? \(yesPrice < noPrice \? "yes" : "no"\)/.test(src), 'cheap means the side with the lower price');
-  assert.ok(/oiRiseMin/.test(src) && /oiRise,\s*(flow,\s*)?position/.test(src) && /exchangeIndex[^;]*oiRise,/.test(src), 'the rise is passed to the gate and stored on the order');
+  assert.ok(/oiRiseMin/.test(src) && /oiRise,\s*(flow,\s*)?position/.test(src) && /exchangeIndex[^;]*oiRise(?:,|: typeof oiRise)/.test(src), 'the rise is passed to the gate and stored on the order');
 };
 gates.OI5 = () => {
   const hold = (id, ex) => Object.assign(strat({ oiRiseMin: 86300 }), { id, exit: ex });

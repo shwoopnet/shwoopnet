@@ -66,6 +66,8 @@ gates.PR3 = () => {
   assert.ok(uses.length && uses.every((u) => /@[0-9a-f]{40}$/.test(u)), 'every action pinned by commit SHA');
   assert.ok(!/pip install|npm install|curl |wget /.test(wf) && !/pull_request_target|github\.event\.(issue|pull_request|comment|head_commit)/.test(wf));
   assert.ok(/ref: main/.test(wf) && /record_politics\.py "data\/polrec\/\$STAMP"/.test(wf));
+  assert.ok(/STAMP="\$\(date -u \+%Y-%m-%d\/%H%M\)-\$\{GITHUB_RUN_ID\}-\$\{GITHUB_RUN_ATTEMPT\}"/.test(wf), 'folder names carry the run id and attempt: two runs never write the same file');
+  assert.ok(/for i in 1 2 3 4 5 6; do git push -q origin pol-data/.test(wf) && /git pull -q --rebase origin pol-data/.test(wf), 'the six-try push loop');
   const cfg = fs.readFileSync(path.join(root, '_config.yml'), 'utf8');
   assert.ok(/- \.github/.test(cfg) && /- scripts/.test(cfg) && /- kalshi-scalper/.test(cfg), 'workflow, script and series list are not published with the site');
 };
@@ -76,7 +78,7 @@ gates.PR4 = () => {
   assert.deepStrictEqual(out, ['2027-02-28T23:59:00Z', false, true]);
   assert.ok(/date -u -d '2027-02-28T23:59:00Z' \+%s/.test(wf) && /go=false/.test(wf));
   const steps = wf.split(/\n      - name: /).slice(2);
-  assert.ok(steps.length === 4 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
+  assert.ok(steps.length === 5 && steps.every((s) => /if: (always\(\) && )?steps\.gate\.outputs\.go == 'true'/.test(s)), 'every later step is skipped after the end date');
   assert.ok(/if past_end\(time\.time\(\)\):\s*\n\s*print\([^\n]*\)\s*\n\s*return 0/.test(code) && /if past_end\(now\):\s*\n\s*break/.test(code), 'the script exits at once, and no poll starts after it');
 };
 
@@ -180,14 +182,21 @@ print(json.dumps({"failed": failed, "t": [r[4] for r in rows], "daily": daily, "
   assert.ok(/if time\.gmtime\(now\)\.tm_hour == 0:\s*\n\s*write_csv\([^\n]*daily\.csv/.test(code), 'the skipped list is written once a day');
 };
 
-// PR10: cadence and request estimate: a quote every 30 minutes, results once an hour, well under 12 requests a minute.
+// PR10: cadence and request estimate (Nov 12, 2026): GitHub dropped most hourly starts, so starts come at minutes 7, 22, 37 and 52, each run does ONE poll, and a freshness step keeps it to about one poll per 30 minutes.
 gates.PR10 = () => {
   const out = py('print(json.dumps([m.POLL_EVERY_S, m.GAP_S, len(m.load_series()[0]), m.load_series()[1]]))');
   assert.strictEqual(out[0], 1800);
   const [, gap, n, budget] = out;
-  const perJob = 2 * n + n; // two quote polls and one result read, one request a series (paging adds a few)
-  assert.ok(perJob * 2 < budget, 'the per-run budget covers a job with room for paging and retries');
-  assert.ok(perJob * 2 / 60 < 12 && 60 / gap <= 12, 'under about 12 requests a minute');
+  const perRun = 2 * n; // one quote poll and at most one result read, one request a series (paging adds a few)
+  assert.ok(perRun * 2 < budget, 'the per-run budget covers a run with room for paging and retries');
+  assert.ok(60 / gap <= 12, 'never more than 12 requests a minute');
+  const cron = [...wf.matchAll(/cron:\s*"([^"]+)"/g)].map((x) => x[1]);
+  assert.deepStrictEqual(cron, ['7,22,37,52 * * * *'], 'four staggered starts an hour, under the one never-cancelling group');
+  assert.ok(/--minutes 0/.test(wf), 'a run is one poll, not two');
+  assert.ok(/-lt 1500/.test(wf) && /steps\.fresh\.outputs\.poll == 'true'/.test(wf), 'a poll under 25 minutes after the last one is skipped, so the rate stays near one poll per 30 minutes');
+  const polls = 24 * 60 / 30; // at most about this many polls a day
+  assert.ok(polls * perRun / 1440 <= 4, 'about 4 requests a minute on average at the very most');
+  assert.ok(/tm_min < 20/.test(code), 'the results read is hourly, not every run');
 };
 
 let failed = 0;
