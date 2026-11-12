@@ -50,7 +50,7 @@ The owner's decision (Nov 10, 2026): gold L1 gets a coded KILL and RETURN. This 
 
 ## After the trip (Nov 12, 2026, the owner's decisions)
 
-**Decision 1.** When the latch trips, gold STAYS OFF until a shadow record proves it. It returns only by the written rule: a shadow profit factor of 1.3 or better (at least 60 trades over at least 7 days, and 1.3 or better in the second half), then the owner re-arms by a reviewed edit (`GOLD_KILL.rearmAt` later, `rearmIsReturn: true`) at half size for the first 30 trades. No date is promised and nothing restarts automatically.
+**Decision 1.** When the latch trips, gold STAYS OFF until a shadow record proves it. It returns only by the written rule: a shadow profit factor of 1.3 or better (at least 60 trades over at least 7 days, at least 10 losses in that record, and 1.3 or better in the second half; the 10-loss guard is the owner's, Nov 12, 2026), then the owner re-arms by a reviewed edit (`GOLD_KILL.rearmAt` later, `rearmIsReturn: true`) at half size for the first 30 trades. No date is promised and nothing restarts automatically.
 
 **Decision 2.** While gold is off, OICORE and EVENT830 are left to their own kill rules, small. Nothing new goes live until it earns it.
 
