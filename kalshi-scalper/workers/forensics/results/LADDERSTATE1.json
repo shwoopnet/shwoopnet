@@ -1,0 +1,47 @@
+{
+ "test": "LADDERSTATE1",
+ "note": "a 'state' is a run of consecutive polls of one ticker with the same bid, ask and sizes; gaps are seconds between state changes inside one run folder",
+ "files": 10,
+ "KXBTCD": {
+  "polls": 2093,
+  "state_changes": 621,
+  "polls_per_state": 3.37,
+  "poll_spacing_s_median": 3.22,
+  "seconds_between_changes_p25_p50_p75": [
+   9.62,
+   10.18,
+   12.63
+  ],
+  "share_of_gaps_9_to_14s": 1.0
+ },
+ "KXETHD": {
+  "polls": 4161,
+  "state_changes": 574,
+  "polls_per_state": 7.25,
+  "poll_spacing_s_median": 3.19,
+  "seconds_between_changes_p25_p50_p75": [
+   9.76,
+   10.3,
+   12.79
+  ],
+  "share_of_gaps_9_to_14s": 0.877
+ },
+ "KXGOLDD": {
+  "polls": 130,
+  "state_changes": 27,
+  "polls_per_state": 4.81,
+  "poll_spacing_s_median": 3.43,
+  "seconds_between_changes_p25_p50_p75": [
+   10.31,
+   10.34,
+   21.18
+  ],
+  "share_of_gaps_9_to_14s": 0.6667
+ },
+ "within_one_poll_cycle": {
+  "cycles_with_5_or_more_strikes": 90,
+  "none_changed": 0.3,
+  "all_changed": 0.0,
+  "some_changed": 0.7
+ }
+}
