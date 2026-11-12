@@ -1,0 +1,110 @@
+{
+ "job_id": "TENNISBREAK_PEEK",
+ "owner": "DESK_A",
+ "registration": "kalshi-scalper/workers/TENNISBREAK_REGISTRATION.md",
+ "purpose": "Tennis set-break structure peek: one page of 200 settled tennis markets in each of six series, closes before 2026-10-23, tickers and times only.",
+ "heldout": "none: closes are before 2026-10-23T00:00Z (max_close_ts); the held-out block (closes from that instant) is not requested",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "cursor",
+    "min_close_ts",
+    "max_close_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXATPSETWINNER",
+  "KXWTASETWINNER",
+  "KXATPMATCH",
+  "KXWTAMATCH",
+  "KXATPCHALLENGERMATCH",
+  "KXWTACHALLENGERMATCH"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 6,
+ "notes": "Zero tries. Only tickers, event tickers and open, close and settlement times are read; no result, price or volume. Six requests, one page of 200 each, newest first below the cutoff. A series that does not exist answers empty or 404, which is an answer.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "peek_KXATPSETWINNER",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPSETWINNER",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "peek_KXWTASETWINNER",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTASETWINNER",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "peek_KXATPMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPMATCH",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "peek_KXWTAMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTAMATCH",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "peek_KXATPCHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERMATCH",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  },
+  {
+   "id": "peek_KXWTACHALLENGERMATCH",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXWTACHALLENGERMATCH",
+    "status": "settled",
+    "limit": 200,
+    "max_close_ts": 1792713599
+   },
+   "max_pages": 1
+  }
+ ]
+}
