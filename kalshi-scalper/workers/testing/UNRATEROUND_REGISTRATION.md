@@ -1,4 +1,12 @@
-# UNRATEROUND version 2 against the slow-family paper screen (T3-2): REGISTERED Nov 12, 2026, scorer and job committed before any data (Testing Desk)
+# UNRATEROUND: RETIRED UNREAD (Head of R&D, Nov 12, 2026, 18:03Z)
+
+**Label: "cannot reach its screen: at most 8 admissible events against a floor of 30, because the household survey's seasonal factors are revised every January and levels pulled today are not what the market saw."**
+
+**The arithmetic (no data used):** the unrounded starting rate u0 must be the rate as first published. BLS revises the household survey's seasonal factors every January for the previous five years, so levels pulled now for months before 2026-01 are not what the market saw. Months from 2026-01 have not been revised since release. Admissible events are therefore those whose u0 month is 2026-01 or later: reference months February to September 2026 (January reference months are excluded; the October release is after the 2026-11-05 cutoff). That is **at most 8 events**, against the slow-family paper screen's floor of **30**. The card cannot reach its screen. **Tries scored: 0** (the card's first try stays counted as it was). Nothing was pulled; `UNRATE_LISTS` is out of the bundle.
+
+**Reopening** would need a first-published (real-time vintage) source for the unemployment and labour-force levels whose terms have been read and allow automated reads, and a new registration. The Head is not asking for that: about 12 events a year can reach the paper list at best, and the desk time is better spent on TIE3. Amendment 1 below stays as the record. The credit for the vintage point is Idea Desk B's note of 18:00Z.
+
+# (Record) UNRATEROUND version 2 against the slow-family paper screen (T3-2): REGISTERED Nov 12, 2026, scorer and job committed before any data (Testing Desk)
 
 **REGISTERED Nov 12, 2026 on the Head of R&D's ruling (about 17:20Z: version 2, try 2 of UNRATEROUND against the paper screen, ledger row on `rnd-queue` c33f536c). It replaces Desk B's registration as its version 2; the 8c rule is reported only as a subset.** The card as Desk B registered it did not qualify for the screen (below). Nothing was pulled, no Kalshi request was made, no outcome was read. No live account figure.
 

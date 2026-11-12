@@ -5,7 +5,7 @@ import bundle as b, kalshi_pull as kp, wxdayend as w, tie3 as t, poli2_count as 
 
 job = b.build(); kp.check_job(job)
 ids = [r["id"] for r in job["requests"]]
-assert len(ids) == len(set(ids)) == 137 and job["job_id"] == "TESTING_LISTS_BUNDLE" and job["owner"] == "MAIN" and job["max_requests"] == 355 + b.SLACK
+assert len(ids) == len(set(ids)) == 133 and job["job_id"] == "TESTING_LISTS_BUNDLE" and job["owner"] == "MAIN" and job["max_requests"] == 347 + b.SLACK
 assert [i.split("_", 1)[0] for i in ids][:32] == ["t3"] * 32 and ids[32].startswith("wx_") and not any(i.startswith("sd_") for i in ids) and ids[-1].startswith("pc_")          # Head's scoring order, so a size stop falls on the last sub-job
 for p, name in b.ORDER:                                                    # every sub-job's own requests are inside, unchanged apart from the prefix
     orig = b.load(name)["requests"]; got = [r for r in job["requests"] if r["id"].startswith(p + "_")]
@@ -21,17 +21,18 @@ with tempfile.TemporaryDirectory() as run, tempfile.TemporaryDirectory() as out:
     sent = job["requests"][:-20]                                   # the last 20 (POL-i2) never sent
     for r in sent:
         n += 1; f = "%04d.json.gz" % n
-        if r["id"].startswith("ur_") and r["id"].endswith("hist_KXU3"):
+        if r["id"] == "wx_l01_KXHIGHTDAL-26NOV10":
             rows.append({"id": r["id"], "status": 429, "page": 1}); continue
-        if r["id"].startswith("ur_live_KXUE"): continue                    # missing row
+        if r["id"] == "t3_live_KXNHL1P": continue                    # missing row
         body = {"markets": [{"ticker": "KXNHL1P-26OCT19ANANYR-TIE", "event_ticker": "KXNHL1P-26OCT19ANANYR", "close_time": "2026-10-20T00:00:00Z", "result": "yes"}]} if r["path"] == "/markets" else {"series": []}
         gzip.open(os.path.join(run, f), "wt").write(json.dumps(body)); rows.append({"id": r["id"], "status": 200, "file": f, "page": 1, "path": r["path"], "params": r.get("params", {}), "bytes": 10})
     rows.append({"id": "zz_mystery", "status": 200, "file": "9999.json.gz"})              # an id that is not in the job: reported, never merged
     json.dump({"job": job, "rows": rows, "status": "stopped_size", "requests_sent": len(sent), "bytes_stored": 12345}, open(os.path.join(run, "manifest.json"), "w"))
     rep = b.split(run, out)
     S = rep["sub_jobs"]
-    assert S["TIE3_LISTS"]["state"] == "COMPLETE" and S["WXDAYEND_A"]["state"] == "COMPLETE" and set(S) == {"TIE3_LISTS", "WXDAYEND_A", "UNRATE_LISTS", "POLCOST"}, S
-    assert S["UNRATE_LISTS"]["state"] == "PARTIAL" and S["UNRATE_LISTS"]["failed"] == {"hist_KXU3": 429} and S["UNRATE_LISTS"]["missing_ids"] == ["live_KXUE"], S["UNRATE_LISTS"]
+    assert set(S) == {"TIE3_LISTS", "WXDAYEND_A", "POLCOST"}, S
+    assert not any(r["id"].startswith("ur_") for r in job["requests"])      # UNRATE is out of the bundle
+    assert S["WXDAYEND_A"]["state"] == "PARTIAL" and S["WXDAYEND_A"]["failed"] == {"l01_KXHIGHTDAL-26NOV10": 429} and S["TIE3_LISTS"]["state"] == "PARTIAL" and S["TIE3_LISTS"]["missing_ids"] == ["live_KXNHL1P"], (S["WXDAYEND_A"], S["TIE3_LISTS"])
     assert S["POLCOST"]["state"] == "PARTIAL" and len(S["POLCOST"]["missing_ids"]) == 20 and rep["bundle_status"] == "stopped_size"
     assert rep["mixed_or_unknown_rows"] == ["zz_mystery"]
     # the readers' own layout: manifest.json with ORIGINAL ids, answer files beside it, the sub-job's own job definition
@@ -40,5 +41,4 @@ with tempfile.TemporaryDirectory() as run, tempfile.TemporaryDirectory() as out:
     assert len(list(w.answers(os.path.join(out, "WXDAYEND_A")))[1]) == 22 if False else True
     ev, cnt = t.events(t.load_cells(), [os.path.join(out, "TIE3_LISTS")]); assert cnt["events_listed"] >= 1                         # tie3 reader reads the split folder unchanged
     assert len(list(pcst.rows_from(os.path.join(out, "POLCOST")))) >= 0
-    assert len(ur.events_from(os.path.join(out, "UNRATE_LISTS"))) == 0                                                              # readable (no unemployment titles in the made-up body), not mixed with other sub-jobs
 print("bundle synthetic tests passed")

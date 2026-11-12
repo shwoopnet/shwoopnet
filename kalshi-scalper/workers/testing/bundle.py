@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """TESTING_LISTS_BUNDLE: one kalshi-pull job holding the Testing Desk's five small jobs, and the splitter that turns the landed run folder back into five answer sets (Testing Desk, Nov 12, 2026).
 Why: the runner allows 12 real runs a UTC day and fourteen jobs wait, so runs are scarcer than requests. Research only; the builder reads the five committed job files and writes one file, the splitter reads a landed run folder.
-Sub-jobs, in the Head's scoring order (and request order, so that a 200 MB cut falls on the LAST sub-job):  t3 TIE3_LISTS | wx WXDAYEND_A | ur UNRATE_LISTS | pc POLCOST   (SOCDERIV_LISTS is a separate job; POL-i2's settled lists are not pulled)
+Sub-jobs, in the Head's scoring order (and request order, so that a 200 MB cut falls on the LAST sub-job):  t3 TIE3_LISTS | wx WXDAYEND_A | pc POLCOST   (SOCDERIV_LISTS is a separate job; POL-i2's settled lists are not pulled)
 Every request id is the sub-job prefix + '_' + its original id, so a manifest row says which sub-job it belongs to. NOTE ON CANDLES: WXDAYEND_A carries its own 18 one-market candle windows (the registered finishing count of card 74, already approved);
 the bundle holds no other candle request; nothing closing on or after any held-out constant (TIE3 2026-11-13T00:00Z; POLCOST lists open markets only) is requested (each sub-job keeps its own bound, copied unchanged).
 Commands:  build > TESTING_LISTS_BUNDLE.json  |  split <landed bundle run folder> <out dir>   (writes <out>/<sub-job>/ with manifest.json + the answer files, original ids, and prints the check report)
@@ -10,7 +10,7 @@ import gzip, json, os, shutil, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 JOBS = os.path.join(HERE, "..", "kalshi_pull_jobs")
-ORDER = [("t3", "TIE3_LISTS"), ("wx", "WXDAYEND_A"), ("ur", "UNRATE_LISTS"), ("pc", "POLCOST")]       # SOCDERIV_LISTS is its own job again (Head, 17:44Z); POL-i2's settled lists are replaced by the open-markets cost snapshot POLCOST (Head, 18:01Z, POL-i2 Amendment 4)
+ORDER = [("t3", "TIE3_LISTS"), ("wx", "WXDAYEND_A"), ("pc", "POLCOST")]       # SOCDERIV_LISTS is its own job again (Head, 17:44Z); POL-i2's settled lists are replaced by the open-markets cost snapshot POLCOST (Head, 18:01Z, POL-i2 Amendment 4)
 BUNDLE_ID = "TESTING_LISTS_BUNDLE"
 SLACK = 14                       # 429 retries count against the cap
 
@@ -36,7 +36,7 @@ def build():
         if names[e["name"]] > 1: e["name"] += "_%d" % names[e["name"]]
     base = subs[0][1]
     job = {"job_id": BUNDLE_ID, "owner": "MAIN", "registration": "kalshi-scalper/workers/testing/TESTING_LISTS_BUNDLE.md",
-           "purpose": "Testing Desk bundle of four small jobs (TIE3 lists, WXDAYEND_A, UNRATE lists, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, ur_, pc_.",
+           "purpose": "Testing Desk bundle of three small jobs (TIE3 lists, WXDAYEND_A, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, pc_. UNRATE_LISTS was dropped (Head, 18:03Z: UNRATEROUND retired unread).",
            "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3); POLCOST lists open markets, which have no result is requested; measurements and counts only, no rule scored, no try",
            "allowed_endpoints": list(eps.values()), "series_allowlist": sorted(series), "ticker_allowlist": sorted(tickers), "max_requests": pages + SLACK,
            "notes": "%d requests, %d pages at most (the runner counts pages against the cap); worst-case size is far above the 200 MB run cap if every page were full (see TESTING_LISTS_BUNDLE.md); sub-jobs are ordered so a size stop falls on the last one" % (len(reqs), pages),
