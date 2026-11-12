@@ -151,7 +151,7 @@ def score(spec, list_folders, candle_folders):
     for t in tr: byday[t["cluster"]] = byday.get(t["cluster"], 0) + t["net"]
     tot = sum(byday.values())
     out.update({"bets": len(tr), "wins": wins, "mean_price_paid": round(sum(t["price"] for t in tr) / len(tr), 4), "halves": halves, "by_bucket": {i: k.stats([t for t in tr if t["bk"] == i]) for i in sorted({t["bk"] for t in tr})},
-                "largest_day_share_of_net": None if tot <= 0 else round(max(byday.values()) / tot, 3), "void_bets_booked_as_fee_loss": sum(1 for t in tr if t["void"]),
+                "largest_day_share_of_net": None if tot <= 0 else round(max(byday.values()) / tot, 3), "void_bets_booked_as_fee_loss": sum(1 for t in tr if t["void"]), "void_note": "NOTE 5: price refunded, fee kept is an ASSUMPTION about how Kalshi settles a voided market, not a measurement; if the fee is also refunded this booking is slightly conservative",
                 "registered_verdict": verdict(len(tr), out["all"]["pf"], [h["pf"] for h in halves if h["n"]]) + " (selected on development: can falsify, cannot support)"})
     return {"measurement": rep, "rule": out}
 
