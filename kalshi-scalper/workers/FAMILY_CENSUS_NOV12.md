@@ -1,5 +1,7 @@
 # Untouched-family census (Idea Desk B with the Forensics desk; started Nov 12, 2026)
 
+**The full table is now `FAMILY_TABLE.md` (generated from `census/families.csv`): 62 families, 36 touched, 8 sweep only, 18 never read. The tables further down this file are the first cut and the working notes; where they differ from `FAMILY_TABLE.md`, that file is right.**
+
 **Status (16:55Z, Nov 12, corrected 17:00Z): FIRST CUT of the family list is below, built from V2's Nov 3 sweep files with no new read.** It covers the 337 series those sweeps counted. The fresh listing (`CENSUS_LISTING`, dispatched first by Main, not landed yet) adds the series the sweeps never reached, the fee class and one day of volume. Full table due 16:00Z on Nov 13. Asked for by the owner through the Head of R&D: "find more", breadth and not depth.
 
 ## What the census is

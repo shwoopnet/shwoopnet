@@ -2,7 +2,7 @@
 
 Asked for by the Head of R&D: ten new cards this week from untouched families with 300 or more independent events a year and enough volume to fill one contract, the first three by 16:00Z on Nov 13, and where a family is simply efficient, "efficient, move on" with the one number that shows it. Fewer than ten is fine; no padding.
 
-**Count so far: pool families examined 12, plus the two rates groups the Head named, plus 8 families the Nov 10 listing added = 22; cards written 2 (both start with a zero-try cost and price measurement); families closed or folded into a card with a reason 20; one question for the Head (hourly temperature). Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
+**Count so far: pool families examined 12, plus the two rates groups the Head named, plus 12 families the Nov 10 listing added = 26, which is every family in the master table that is not TOUCHED (`FAMILY_TABLE.md`: 62 families, 36 touched, 8 sweep only, 18 never read); cards written 2 (both start with a zero-try cost and price measurement); families closed or folded into a card with a reason 24; one question for the Head (hourly temperature). Nothing was scored and no Kalshi request was made for this file.** The pool and its sources are in `FAMILY_CENSUS_NOV12.md`.
 
 ## The filter every candidate went through first
 
@@ -113,6 +113,10 @@ What is left after the filter is narrow: a contract that the market may price ba
 | Overtime markets (NBA, NHL, college basketball) | 12 | The NHL one joins card 18 as a cell. The others are cheap-tail contracts |
 | Hourly city temperature (4 cities) | 87 | The only large never-run family outside sports (about 32,000 events a year, 800 contracts a market). Any rule I can write is a public forecast or the latest reading against a bracket: the first is the closed weather mechanism on a new clock, the second is the already-decided-fact mechanism (WXDEAD1 and RAINFACT1 FALSIFIED) and a race against everyone polling the same government feed. The declined row names daily highs, lows and rain, not hourly readings, so this is my reading of the rule, not the rule's words: **the Head may want to rule on whether hourly temperature is inside the closed family** |
 | Index intraday up or down | 24 | A price ladder; the grammar is closed without a new data source |
+| NBA race to a score, winning margin, team total | 37 | Derived from the game's spread and total; a venue of card 19 at most. No card |
+| Darts, chess, bowling | 18 | 360 contracts a market; two-way winners with no permitted outside fact. No card |
+| Hourly commodity ladders | 92 | 59 contracts a market: too thin whatever the mechanism, and a price ladder |
+| Hourly Treasury rate ladders | 83 | 8 contracts a market: dead |
 | NHL period totals and spreads | 25 | A venue of card 19 if NHL spreads are not too wide; Forensics already flags NHL game spreads and totals as too costly |
 
 ## What I would not claim
