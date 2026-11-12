@@ -27,7 +27,7 @@ const SLOT_MAX_OPEN_CONTRACTS_PER_MARKET = 10;        // the slot's own unsold c
 const SLOT_MAX_SCALE_STEPS = 3;
 // Dollar caps SCALE WITH THE SIZING BASE, like L1's own window cap and loss stop (the owner, Oct 29, 2026: the gold ladder makes L1 positions bigger as the account grows, so fixed dollars would be too small
 // for a bigger account and too big for a smaller one). Each cap is a share of the sizing base, never above a hard dollar ceiling, so a wrong base can never lift a cap past the ceiling. Per order is below the daily cap.
-// Nov 12, 2026 (the owner: "Raise limits to the max", "Yes, per-seat caps"): per order, daily and lifetime fractions raised to 2.5%, 2.5% and 7.5% so the dollar ceilings are reachable at about an $800 base; the daily and lifetime loss caps are now counted PER STRATEGY (see slotOrderCheckWith), so a seat's own kill binds before another seat's losses can use up its room.
+// Nov 12, 2026 (the owner: "Raise limits to the max", "Yes, per-seat caps"): per order, daily and lifetime fractions raised to 2.5%, 2.5% and 7.5% so the dollar ceilings are reachable at a base of a few hundred dollars and up; the daily and lifetime loss caps are now counted PER STRATEGY (see slotOrderCheckWith), so a seat's own kill binds before another seat's losses can use up its room.
 const SLOT_CAP_FRACTIONS = Object.freeze({ perOrder: 0.025, perWindow: 0.02, openTotal: 0.03, daily: 0.025, lifetime: 0.075 });
 const SLOT_CAP_CEILINGS = Object.freeze({ perOrder: 20, perWindow: 40, openTotal: 60, daily: 20, lifetime: 60 });
 function slotCaps(sizingBase) {
@@ -558,7 +558,9 @@ function slotOrderCheckWith(flags, input) {
   if (!isNum(i.now)) return no("no clock");
   const risk = slotRiskContract(i.slotOrders, i.now);
   // The daily and lifetime loss caps are per STRATEGY (Nov 12, 2026): this strategy's own orders only. The open dollars, windows and open contracts above stay slot-wide.
-  const own = slotRiskContract(i.slotOrders.filter((t) => isSlotOrder(t) && t.slotId === strategy.id), i.now);
+  // Fail closed (security review, Nov 12, 2026): a slot order whose slotId is missing or names no strategy in the registry (a retired id) counts against EVERY seat's daily and lifetime figures, so it can never drop out of the loss caps.
+  const regIds = new Set(activeSlotStrategiesWith(flags).map((x) => x.id));
+  const own = slotRiskContract(i.slotOrders.filter((t) => isSlotOrder(t) && (t.slotId === strategy.id || !regIds.has(t.slotId))), i.now);
   const caps = slotCaps(i.sizingBase);
   // A laddered strategy (SLOT_LADDERS) has caps that grow with its contract count: a daily loss cap and a drawdown stop from its own peak, in place of the base-scaled daily and lifetime caps.
   const lad = slotLadderState(strategy, i.slotOrders, i.sizingBase);

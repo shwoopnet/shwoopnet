@@ -514,6 +514,12 @@ gates['loss caps are counted per strategy: one strategy losses never use up anot
   assert.strictEqual(W(F, input({ strategyId: 'SEATA', sizingBase: 800, slotOrders: lossesOfA })).allowed, false, 'seat A has lost its own $60 and is stopped by its own lifetime cap');
   assert.strictEqual(W(F, input({ strategyId: 'SEATB', sizingBase: 800, slotOrders: lossesOfA })).allowed, true, 'seat B has lost nothing, so seat A\'s losses do not stop it');
 };
+gates['a retired or missing slotId still counts against every seat (fail closed, Nov 12, 2026)'] = () => {
+  const A = Object.assign(GOOD(), { id: 'SEATA', killRules: { maxConsecutiveLosses: 20, minNet: { afterFills: 100, net: -18 } } });
+  const F = { enabled: true, registry: [A] };
+  const gone = [0, 1, 2, 3, 4, 5].map((k) => slotOrder({ slotId: 'RETIRED', ticker: 'KXETH15M-26NOV02' + (1000 + k) + '-15', settled: true, result: 'no', settledPnl: -10, ts: NOW - 5 * 86400000 - k * 1000 }));
+  assert.strictEqual(W(F, input({ strategyId: 'SEATA', sizingBase: 800, slotOrders: gone })).allowed, false, 'losses of a retired id use up the seat lifetime room');
+};
 
 (async () => {
   let failed = 0;
