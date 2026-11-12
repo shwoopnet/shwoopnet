@@ -1,4 +1,4 @@
-**TOP LINE (Nov 12, 2026): development read DONE, BOTH TRIES FALSIFIED: A n 963 cash PF 0.91, B n 971 cash PF 0.93 (about 50% wins each). See `PERPBIN1_DEV_RESULT_NOV12.md`.**
+**TOP LINE (Nov 12, 2026): PERPBIN1 is FALSIFIED on development, both tries. Window: 5,127 Bitcoin 15 minute windows closing 2026-09-12 to 2026-11-04. Try A (buy YES) n 963, cash PF 0.91; try B (buy NO) n 971, cash PF 0.93; about 50% wins each. Neither is near the PF 1.5 bar and neither is a candidate for a shadow slot; this packet is kept only as the record. See `PERPBIN1_DEV_RESULT_NOV12.md`.**
 
 # Shadow packet: PERPBIN1 (Idea Desk A, Nov 12, 2026; no live account figure)
 - **Name:** PERPBIN1 (open-interest arm, Bitcoin only, two tries A and B).

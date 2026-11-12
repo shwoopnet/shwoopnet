@@ -1,4 +1,4 @@
-**TOP LINE (Nov 12, 2026): development read DONE, n 601, registered line cash PF 1.07 (not falsified), z 0.60; line (b) "ran rows dropped" PF 0.16 on 435 rows, so NO live use; Block P NOT MET. See `CFRTI_K_DEV_RESULT_NOV12.md`.**
+**TOP LINE (Nov 12, 2026): CFRTI-K showed NO EDGE near the bar. Development read (5,127 windows closing 2026-09-12 to 2026-11-04), cent-inclusive set: n 610 trades, cash PF 1.09, mean +1.12c a contract, win rate 17.4%, z 0.71 against the bar of 5.46 (thirds 0.95 / 1.20 / 1.10, so it misses PF 1.5 in every third). The Block P condition is NOT MET. Line (b) "ran rows dropped" (PF 0.19) is a diagnostic, not a fill test (Forensics): it is not evidence for or against live use; the live-use judge is the book replay at the Nov 20 sitting (53 of 65 rows have a book: paper PF 1.06, book replay at 6 s 38 filled PF 1.23, "no evidence at n = 38"). Nothing here supports a shadow slot on its own. See `CFRTI_K_DEV_RESULT_NOV12.md`.**
 
 # Shadow packet: CFRTI-K (Idea Desk A, Nov 12, 2026; no live account figure)
 - **Name:** CFRTI-K.
