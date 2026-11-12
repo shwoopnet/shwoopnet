@@ -59,3 +59,14 @@ The split in point 6 ("earliest two thirds of all new markets READ") is now take
 READ-ONCE MARKER (placeholder until commit-cut writes the real one): not yet committed; no held-out read allowed before `commit-cut` has run.
 
 ## RETIRED (Nov 12, 2026, POWER2 + main): MENTPERSIST1 FETCHING STOPPED (main, Nov 12): the 1,600 read cap reaches about 150 trades (about 26 hours of the whole read budget), power near 0. The held 500 are scored OFFLINE as DEVELOPMENT ONLY (no outcome beyond what the protocol allows; held-out from new markets is not pursued). The pull jobs MENTPERSIST1_A_300 and MENTPERSIST1_B_1300 in workers/pulljobs/ are INACTIVE.
+
+## RESULT (Nov 12, 2026): held 500 scored OFFLINE, DEVELOPMENT ONLY, zero Kalshi calls, no held-out read
+Scope: only the 274 held-500 markets with a PREV (79 usable decision quotes); the 5 new markets already in the read log were excluded (cursor forced to 0 for this score). Fee both bases, bars z 5.34 (N 1.1M) and 4.39 (N 9,009).
+| rule | n trades | calls | wins | cash PF rounded fee | cash PF unrounded fee | mean rounded | mean unrounded | cluster z (rounded / unrounded) | halves PF (rounded) |
+|---|---|---|---|---|---|---|---|---|---|
+| R1 | 48 | 39 | 12 | 1.00 | 1.03 | +0.0002 | +0.0050 | 0.003 / 0.084 | 1.65, 0.53 |
+| R2 | 20 | 19 | 4 | 0.69 | 0.70 | -0.0605 | -0.0567 | -0.68 / -0.64 | 1.12, 0.21 |
+Splits (R1 / R2): cheap side 38 / 15, mid side 10 / 5.
+KILL test (development PF under 1.0 on 60 or more trades): NOT REACHABLE. The held 500 give 48 R1 and 20 R2 trades, under the 60 minimum; R2 PF is under 1.0 but on 20 trades, R1 is 1.00 to 1.03.
+Gates: n >= 100 fails (48, 20), mean >= 3c fails (R1 0.0 to 0.5c), both halves >= 1.2 fails (R1 second half 0.53, R2 0.21), z fails against both bars (0.08 vs 4.39 and 5.34), cash PF >= 1.5 fails.
+VERDICT: NOT_ENOUGH_DATA (development only; no held-out third exists and none is pursued). Not a result, not a lead: R1 is flat at zero edge after fee, R2 is negative, as the registered prediction said.
