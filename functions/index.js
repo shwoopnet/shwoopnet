@@ -908,6 +908,25 @@ exports.kalshiPushSession = onDocumentWritten({ document: "kalshiLiveControl/ses
   } catch (e) { console.error("kalshiPushSession: " + String((e && e.message) || e).slice(0, 200)); }
 });
 
+// Hourly balance snapshot (Nov 12, 2026, the owner): total cash and cash per shard once an hour, for the bank-side check of booked results (functions/kalshiBalanceSnapshotLib.js,
+// test/kalshiBalanceSnapshotGates.test.js). One GET of the balance, no order, no POST; its own function, so the tick and the exit watch are untouched. Deploy: bash functions/deploy-sizing.sh.
+const balanceSnap = require("./kalshiBalanceSnapshotLib");
+exports.kalshiBalanceSnapshot = onSchedule(
+  { schedule: "every 60 minutes", secrets: [KALSHI_LIVE_KEY_ID, KALSHI_LIVE_PRIVATE_KEY], timeoutSeconds: 30, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const col = getFirestore().collection(balanceSnap.COLLECTION);
+      const out = await balanceSnap.runBalanceSnapshot({
+        now: Date.now(), fetchFn: fetch, keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(),
+        write: (id, doc) => col.doc(id).set(doc, { merge: true }),
+        prune: async (beforeMs, limit) => { const old = await col.where("ts", "<", beforeMs).limit(limit).get(); await Promise.all(old.docs.map((d) => d.ref.delete())); },
+      });
+      console.log("kalshiBalanceSnapshot: " + out);
+    } catch (e) { console.error("kalshiBalanceSnapshot: " + String((e && e.message) || e).slice(0, 160)); }
+  }
+);
+
 // Records the real order book of the open Bitcoin and gold 15 minute markets about every 10 seconds
 // (see kalshiBookLib.js). READ ONLY and keyless. It is the LAST export on purpose: the tests slice the file from
 // here to prove nothing after this point can see the live key or place an order.
@@ -960,6 +979,8 @@ exports.kalshiNightlyReport = onRequest(
     // The shadow rules' rows (log only) and the registry, so the report can score them (lifecycle spec (c)); read only.
     readShadowRows: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(shadowLib.COLLECTION).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     shadowRules: () => shadowLib.SHADOW_RULES,
+    // The hourly balance snapshots (Nov 12, 2026): documents of balance data only, read only.
+    readBalances: async (sinceMs) => { ensureDefaultAdminApp(); return (await getFirestore().collection(balanceSnap.COLLECTION).where("ts", ">=", sinceMs).orderBy("ts").limit(kalshiReport.MAX_BALANCE_ROWS).get()).docs.map((d) => d.data()); },
     readSlotOrders: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SLOT).where("ts", ">=", sinceMs).get()).docs.map((d) => d.data()); },
     // The second slot's skip reasons (Nov 5, 2026), read the same way: documents only, never their ids.
     readSkips: async (sinceMs) => { if (!SLOT_ON) return []; ensureDefaultAdminApp(); return (await getFirestore().collection(slotStoreLib.COLLECTIONS.SKIPS).where("atMs", ">=", sinceMs).get()).docs.map((d) => d.data()); },
