@@ -263,12 +263,12 @@ gates.KP14 = () => {
   // the two that wait for a list are refused by the script, not run
   const refused = py(`
 out = {}
-for n in ("NOSIDE1_CANDLES", "SPREADCELL1"):
+for n in ("NOSIDE1_CANDLES", "SPREADCELL1", "PERPETH1M"):
     try: m.check_job(json.load(open(os.path.join(m.JOB_DIR, n + ".json")))); out[n] = "ok"
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
-  assert.deepStrictEqual(refused, { NOSIDE1_CANDLES: 'refused', SPREADCELL1: 'refused' });
-  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK', 'PERPBTC1M', 'PERPETH1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  assert.deepStrictEqual(refused, { NOSIDE1_CANDLES: 'refused', SPREADCELL1: 'refused', PERPETH1M: 'refused' });
+  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK', 'PERPBTC1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -388,7 +388,7 @@ print(json.dumps({"routes": m.ROUTES, "perps_url": m.build_url(json.load(open(os
 def t(j):
     try: m.check_job(j); return "ok"
     except m.Refused: return "refused"
-j = json.load(open(os.path.join(m.JOB_DIR, "PERPETH1M.json")))
+j = json.load(open(os.path.join(m.JOB_DIR, "PERPBTC1M.json")))
 print(json.dumps([t(j), t(dict(j, host="example.com")), t(dict(j, base_path="/trade-api/v2/margin")), t(dict(j, host="external-api.kalshi.com", base_path="/trade-api/v2/margin")), t(dict(j, route="evil")), t(dict(j, route=["perps"]))]))`);
   assert.deepStrictEqual(bad, ['ok', 'refused', 'refused', 'refused', 'refused', 'refused'], 'a job cannot supply a host or base path of its own, and an unknown route key is refused');
 };
@@ -426,7 +426,7 @@ print(json.dumps({"base": t(), "one": t(c()),
 gates.KP24 = () => {
   for (const [id, tk] of [['PERPBTC1M', 'KXBTCPERP'], ['PERPETH1M', 'KXETHPERP']]) {
     const j = JSON.parse(fs.readFileSync(path.join(jobDir, id + '.json'), 'utf8'));
-    assert.strictEqual(j.status, 'active'); assert.strictEqual(j.route, 'perps'); assert.deepStrictEqual(j.ticker_allowlist, [tk]);
+    assert.strictEqual(j.status, id === 'PERPETH1M' ? 'paused' : 'active'); assert.strictEqual(j.route, 'perps'); assert.deepStrictEqual(j.ticker_allowlist, [tk]);
     assert.strictEqual(j.requests.length, 163); assert.strictEqual(j.max_requests, 163);
     assert.strictEqual(j.requests[0].params.start_ts, Date.UTC(2026, 5, 3) / 1000);
     assert.strictEqual(j.requests[162].params.start_ts, Date.UTC(2026, 10, 12) / 1000);
@@ -436,6 +436,7 @@ gates.KP24 = () => {
       assert.strictEqual(r.params.end_ts - r.params.start_ts, 86400);
       assert.deepStrictEqual(Object.keys(r.params).sort(), ['end_ts', 'period_interval', 'start_ts']);
     });
+    if (id === 'PERPETH1M') { assert.ok(/paused/.test(j.notes) && /NOT be dispatched/.test(j.notes)); let r = ''; try { execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }); } catch (e) { r = String(e.stdout); } assert.ok(/REFUSED/.test(r), 'the paused job is refused by the runner'); continue; }
     const dry = execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' });
     assert.ok(/plan: 163 requests/.test(dry) && dry.includes("https://external-api.kalshi.com/trade-api/v2/margin/markets/" + tk + "/candlesticks?") && /no request was sent/.test(dry));
   }
@@ -444,7 +445,7 @@ gates.KP24 = () => {
 // KP25: a mocked perps run keeps the unchanged limits: a second between requests, three 429s end it with what was fetched kept, and only perps URLs are asked.
 gates.KP25 = () => {
   const out = py(`
-j = json.load(open(os.path.join(m.JOB_DIR, "PERPETH1M.json")))
+j = json.load(open(os.path.join(m.JOB_DIR, "PERPBTC1M.json")))
 def go(script):
     clock = [1000.0]; urls = []; starts = []
     def sl(d): clock[0] += d

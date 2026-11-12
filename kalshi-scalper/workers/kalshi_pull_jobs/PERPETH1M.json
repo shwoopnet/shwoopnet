@@ -1,6 +1,6 @@
 {
  "job_id": "PERPETH1M",
- "status": "active",
+ "status": "paused",
  "owner": "MAIN",
  "registration": "kalshi-scalper/README.md",
  "purpose": "Kalshi's own Ethereum perpetual KXETHPERP: public 1 minute candles (bid, ask, price, open interest, volume), one UTC day per request, 2026-06-03 to 2026-11-12. Data pull only.",
@@ -1498,5 +1498,5 @@
    }
   }
  ],
- "notes": "163 requests, one per UTC day, each asking for up to 1,440 one minute candles (86,400 seconds, the window scripts/record_perps_candles.py already uses). The last day (2026-11-12) is partial. Adjacent windows may share their boundary candle: de-duplicate on end_period_ts when reading. The route is the perps pair in the ROUTES table of scripts/kalshi_pull.py; this file names it by key and carries no host."
+ "notes": "PAUSED FOR LATER (Head of R&D, Nov 12): no registered test uses Ethereum perp candles yet, so this job must NOT be dispatched. The runner refuses any status other than 'active', so it cannot run until a reviewed edit sets it to 'active' after a registration exists. 163 requests, one per UTC day, each asking for up to 1,440 one minute candles (86,400 seconds, the window scripts/record_perps_candles.py already uses). The last day (2026-11-12) is partial. Adjacent windows may share their boundary candle: de-duplicate on end_period_ts when reading. The route is the perps pair in the ROUTES table of scripts/kalshi_pull.py; this file names it by key and carries no host."
 }

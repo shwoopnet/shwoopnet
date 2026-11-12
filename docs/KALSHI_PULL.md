@@ -47,7 +47,7 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, 55 tickers each | NOT RUNNABLE yet: the registration needs its fixed event list committed first, and it is not in the repository |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
 | 4 | `COMBO1_OPENBOOK` | 3 | ready |
-| 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | ready, not run |
+| 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | `PERPBTC1M` ready, not run; `PERPETH1M` paused for later (no registered test uses it; the runner refuses it) |
 
 Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two waiting jobs are kept from running.
 
@@ -60,3 +60,5 @@ Stage 1 of the NO-side pull asks for market lists, not events, because the cuts 
 ## The perps route (Nov 12, 2026)
 
 `PERPBTC1M` and `PERPETH1M` use `"route": "perps"`. 163 UTC days from 2026-06-03 to 2026-11-12 inclusive, one request per day per ticker, so 163 requests each. The windows are midnight to midnight (86,400 seconds, the size `scripts/record_perps_candles.py` already asks for); the last day is partial and adjacent windows may share a boundary candle, so de-duplicate on `end_period_ts`. The per-request candle limit is not written down in this repository and is not assumed to be higher. The runner stays one reviewed file; a changed route table or perps rule is security-relevant. Same terms position as above: the owner waived the terms read, which is accepted risk and not a finding that automated reads are allowed.
+
+`PERPETH1M` is paused for later: its status is `paused`, which the runner refuses, so it cannot run until a reviewed edit sets it to `active`. Size watch: 1,440 candles a day x 163 days may reach the 200 MB per-run cap (a clean `stopped_size`, what was fetched is kept); read the first real run's manifest before any further ticker. The terms waiver covers the second host (`external-api.kalshi.com`) only if the owner confirms it does.
