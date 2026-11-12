@@ -20,3 +20,6 @@ All are stage Idea: registered as ideas, NOT yet scored; each needs its own prot
 Already tested, so NOT new: parlay/combo price vs the product of legs (PARLAY1: 254 combos, none clears the fee; mention markets MENT1; gas daily vs weekly AAASPREAD1). Refinement owns items 6 to 9, 12 and 15 of the order's seed list (settlement timing, nowcast, weather observation lag, mentions, post-news overreaction, cross-venue).
 Top 5 by speed to a verdict: (1) REBATE1, 1 hour (docs read); (2) FEEROUND1, 1 hour (arithmetic, a cost note); (3) LADBFLY1, 4 hours (data held); (4) MMHOUR1, 4 hours (data held, development events only); (5) RULES1, 4 hours (terms PDFs plus settled results). Then XSER1, PIN1, STALE1.
 Expected outcome, stated now: most close by census or violation count, as the last 20 ideas did. The two with real upside if true are REBATE1 (a maker rebate would lift MMSIM1) and XSER1/LADBFLY1 (a structural lock that no cheap-side rule could give).
+
+## Status note (Nov 12, 2026; POWER2): NC15DEPTH1 is FORWARD-ONLY
+Pooled cell: 13.7k to 21k windows at a 1.5c effect, about 570 a day, earliest verdict Dec 15 to 27 at a 3c effect and after Feb 20 at 1.5c; power 0.27 at 90 days (1.5c), 1.0 (3c). The 3c EFFECT IS AN ASSUMPTION (the card has no development estimate). The per-series 2 x 2 split is RETIRED (13k+ per cell, about 20 windows a day per cell, z 0.33).

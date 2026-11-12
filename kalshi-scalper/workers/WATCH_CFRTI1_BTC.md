@@ -10,3 +10,6 @@ Desk A reproduced the development figure from raw held data (BTC n 36, PF 2.54; 
 CUTOFF CONSTANT: first held-out day 2026-11-05 (`HELDOUT_FIRST_DAY` in `src/scalper/cfrti1.py`). Development = run folders dated before it; held-out = on or after it. The old cut was two thirds of whatever days existed when the script ran, which moves as data grows.
 `python3 -I src/scalper/cfrti1.py heldout-btc` (with `QROOT` set): Bitcoin only; refuses until 50 held-out BTC edge rows (edge >= 0.05) exist; uses `t_recv_ms` for every venue; stops if any run folder has fewer than 3 Bitcoin venues contributing; refuses a second run by reading the COMMITTED marker line below (`src/scalper/readonce.py`). Nothing is scored on a refusal.
 READ-ONCE MARKER: not yet read; CFRTI1-BTC first read allowed on or after 2026-11-20; after the read: READ ON <date>, commit <hash>
+
+## NOTE (Nov 12, 2026; POWER2): a pass means RE-TEST, not a result
+Power at 50 held-out rows is about 0.75 for the shrunk effect, but a rule with NO edge still passes this bar about 24% of the time. A pass at the single read is therefore a prompt to re-test on a fresh forward sample, never a result or a candidate for any live use; a fail closes the card.
