@@ -2,14 +2,16 @@
 on the same run folders. Bitcoin only, receive-time stamps for every venue. CFRTI-K (perp index) is added in this same sitting when PERPBTC1M lands
 (see workers/CFRTI_K_REGISTRATION.md); it is NOT in this file yet.
   python3 -I cfrti_heldout.py dev <folder holding quotes/>       development: run folders before HELDOUT_FIRST_DAY (reproduces n 36 / n 32)
-  python3 -I cfrti_heldout.py heldout <folder holding quotes/>   ONE read, on or after 2026-11-20, at 50 three-venue edge rows; refuses a second run
+  python3 -I cfrti_heldout.py heldout <folder holding quotes/>   ONE read, run folders from 2026-11-09 (Nov 5 to 8 printed separately as NOT BLIND), on or after 2026-11-20, at 50 three-venue edge rows; refuses a second run
   python3 -I cfrti_heldout.py selftest <folder holding quotes/>  runs the held-out code path on DEVELOPMENT days (2026-10-28 to 2026-11-04) with the gates off; writes nothing
 After a held-out read, commit the marker line it prints into workers/CFRTI1_BTC_HELDOUT_MARKER.md (the script refuses if that file holds a READ ON line)."""
 import gzip, csv, glob, math, os, sys, bisect, collections, datetime
 from statistics import NormalDist
 Phi = NormalDist().cdf
 MODE, Q = sys.argv[1], sys.argv[2]
-HELDOUT_FIRST_DAY = "2026-11-05"
+DEV_END = "2026-11-05"                      # development = run folders before this day (unchanged: reproduces n 36 / n 32)
+NOTBLIND = ("2026-11-05", "2026-11-09")      # Nov 5 to Nov 8: a baseline for this side and band was printed by Forensics on Nov 12 (Head's ruling, option b): NOT blind, printed SEPARATELY, never in the verdict lines
+HELDOUT_FIRST_DAY = "2026-11-09"             # the held-out window starts here (Head, Nov 12, after Forensics' disclosure); set by this constant, before any held-out row was opened by Desk A
 READ_NOT_BEFORE = datetime.datetime(2026, 11, 20, tzinfo=datetime.timezone.utc)
 NEEDED = 50
 SELFTEST_FROM = "2026-10-28"
@@ -169,10 +171,21 @@ if MODE == "replaytest":      # synthetic book: IOC walk of up to 5 levels, firs
     assert res[6][0][1] is None, res[6]                                       # the poll at +6.1 s has asks above the limit
     assert cfrti_b.fill_ioc(polls, "yes", 0.24, t0, 6.5) is None             # first poll after t0 + 6.5 s is at +11 s: 4.5 s late, so no trade
     print("REPLAYTEST OK (IOC walk across levels, 4 s poll rule, no-book rows counted)"); sys.exit(0)
+def print_notblind():
+        print("\n### NOT BLIND (a baseline for this side and band was printed by Forensics on Nov 12): closes %s to %s, printed SEPARATELY, NOT in the verdict lines above, never pooled" % (NOTBLIND[0], NOTBLIND[1]))
+        nb = lambda d: NOTBLIND[0] <= d < NOTBLIND[1]
+        nrows3, nlost3, nf3 = build(None, nb, need3=True); nsel3 = [r for r in nrows3 if r[4] - r[3] >= 0.05]
+        nrowsK, nlostK, nfK = build({"kraken"}, nb); nselK = [r for r in nrowsK if r[4] - r[3] >= 0.05]
+        print("== not blind, three venues | folders %d | cheap rows with a model %d" % (nf3, len(nrows3))); rep("  baseline cheap side (not blind)", nrows3); rep("  model edge >= 0.05 (not blind)", nsel3)
+        print("== not blind, kraken only | folders %d | cheap rows with a model %d" % (nfK, len(nrowsK))); rep("  baseline cheap side (not blind)", nrowsK); rep("  model edge >= 0.05 (not blind)", nselK)
+
+if MODE == "notblind_selftest":                                     # tests the NOT BLIND block on a folder whose path contains SYNTHETIC; refuses any other folder (so it cannot open Nov 5 to 8 outcomes)
+    if "SYNTHETIC" not in Q: sys.exit("Refusing: notblind_selftest runs only on a folder whose path contains SYNTHETIC")
+    print_notblind(); sys.exit(0)
 if MODE not in ("dev", "heldout", "selftest", "export", "exportall"): sys.exit(__doc__)
-keep = {"dev": lambda d: d < HELDOUT_FIRST_DAY, "export": lambda d: d < HELDOUT_FIRST_DAY, "exportall": lambda d: d < HELDOUT_FIRST_DAY,
+keep = {"dev": lambda d: d < DEV_END, "export": lambda d: d < DEV_END, "exportall": lambda d: d < DEV_END,
         "heldout": lambda d: d >= HELDOUT_FIRST_DAY,
-        "selftest": lambda d: SELFTEST_FROM <= d < HELDOUT_FIRST_DAY}[MODE]
+        "selftest": lambda d: SELFTEST_FROM <= d < DEV_END}[MODE]
 if MODE == "heldout":
     now = datetime.datetime.now(datetime.timezone.utc)
     if now < READ_NOT_BEFORE: sys.exit("Refusing: first allowed %s" % READ_NOT_BEFORE.date())
@@ -221,10 +234,12 @@ else:
     print("STALE-ASK COUNT: not computed (no --r6 <root holding book15r6/>).")
 if "--r6" in sys.argv:
     sys.path.insert(0, HERE); import cfrti_b
-    lo, hi = (cfrti_b.CUTOFF, 1e12) if MODE == "heldout" else (cfrti_b.FIRST_CLOSE, cfrti_b.CUTOFF)
-    kd = (lambda d: d >= HELDOUT_FIRST_DAY) if MODE == "heldout" else (lambda d: d < HELDOUT_FIRST_DAY)
+    HELD_LO = datetime.datetime(2026, 11, 9, tzinfo=datetime.timezone.utc).timestamp()
+    lo, hi = (HELD_LO, 1e12) if MODE == "heldout" else (cfrti_b.FIRST_CLOSE, cfrti_b.CUTOFF)
+    kd = (lambda d: d >= HELDOUT_FIRST_DAY) if MODE == "heldout" else (lambda d: d < DEV_END)
     print("\n### CFRTI-B (workers/CFRTI_B_REGISTRATION.md): signal and price from the R6 book; the registered lines above are PRICED AT A STALE COPY, NOT TRADABLE")
     print("\n".join(cfrti_b.lines(Q, sys.argv[sys.argv.index("--r6") + 1], kd, lo, hi, final=(MODE == "heldout"))))
+if MODE == "heldout": print_notblind()
 print("CFRTI-K line: not computed here (perp candles not supplied).")
 if MODE == "heldout":
     line = "READ ON %s, three-venue n %d, kraken-only n %d" % (datetime.date.today(), len(sel3), len(selK))
