@@ -1,0 +1,125 @@
+ticker,type,how_tagged,kalshi_result,label
+KXSTATEBALLOTMEASURE-AK-BM3,CIT,every Nov 3 row of the state is a citizen initiative,yes,Will Ballot Measure 3 pass? Ballot Measure 3
+KXSTATEBALLOTMEASURE-AL-A1,LEG,wikipedia row,yes,Will Amendment 1 pass? Amendment 1
+KXSTATEBALLOTMEASURE-AL-A2,LEG,wikipedia row,yes,Will Amendment 2 pass? Amendment 2
+KXSTATEBALLOTMEASURE-AL-A3,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 3 pass? Amendment 3
+KXSTATEBALLOTMEASURE-AL-A4,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 4 pass? Amendment 4
+KXSTATEBALLOTMEASURE-AR-A578,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Act 578 pass? Water Infrastructure Bond Question
+KXSTATEBALLOTMEASURE-AR-HJR1018,LEG,every Nov 3 row of the state is a legislative referral,yes,Will HJR 1018 pass? Citizens Only Voting Amendment
+KXSTATEBALLOTMEASURE-AR-SJR11,LEG,wikipedia row,yes,Will SJR 11 pass? Right to Keep and Bear Arms Amendment
+KXSTATEBALLOTMEASURE-AR-SJR15,LEG,wikipedia row,no,Will SJR 15 pass? Economic Development Districts Amendment
+KXSTATEBALLOTMEASURE-AZ-P141,LEG,wikipedia row,yes,Will Proposition 141 pass? Proposition 141
+KXSTATEBALLOTMEASURE-AZ-P142,LEG,wikipedia row,no,Will Proposition 142 pass? Proposition 142
+KXSTATEBALLOTMEASURE-AZ-P144,LEG,wikipedia row,no,Will Proposition 144 pass? Proposition 144
+KXSTATEBALLOTMEASURE-AZ-P316,LEG,wikipedia row,yes,Will Proposition 316 pass? Proposition 316
+KXSTATEBALLOTMEASURE-AZ-P317,LEG,wikipedia row,yes,Will Proposition 317 pass? Proposition 317
+KXSTATEBALLOTMEASURE-AZ-P318,LEG,wikipedia row,yes,Will Proposition 318 pass? Proposition 318
+KXSTATEBALLOTMEASURE-AZ-P319,LEG,wikipedia row,yes,Will Proposition 319 pass? Proposition 319
+KXSTATEBALLOTMEASURE-AZ-P320,LEG,wikipedia row,no,Will Proposition 320 pass? Proposition 320
+KXSTATEBALLOTMEASURE-CO-A83,CIT,wikipedia row,no,Will Amendment 83 pass? Amendment 83
+KXSTATEBALLOTMEASURE-CO-A84,CIT,wikipedia row,no,Will Amendment 84 pass? Amendment 84
+KXSTATEBALLOTMEASURE-CO-A85,CIT,wikipedia row,no,Will Amendment 85 pass? Amendment 85
+KXSTATEBALLOTMEASURE-CO-A86,CIT,wikipedia row,no,Will Amendment 86 pass? Amendment 86
+KXSTATEBALLOTMEASURE-CO-A87,CIT,Colorado rule: numbered amendments are citizen initiated; no page row,yes,Will Amendment 87 pass? Amendment 87
+KXSTATEBALLOTMEASURE-CO-I108,CIT,wikipedia row,yes,Will Initiative #108 pass? Proposition 133
+KXSTATEBALLOTMEASURE-CO-I109,CIT,wikipedia row,yes,Will Initiative #109 pass? Proposition 134
+KXSTATEBALLOTMEASURE-CO-I110,CIT,wikipedia row,yes,Will Initiative #110 pass? Proposition 135
+KXSTATEBALLOTMEASURE-CO-I175,"EXCLUDED:did not qualify (closed Sept 22, no vote)",close date,no,Will Initiative #175 pass? Initiative #175
+KXSTATEBALLOTMEASURE-CO-I177,CIT,wikipedia row,no,Will Initiative #177 pass? Amendment 82
+KXSTATEBALLOTMEASURE-CO-I85,CIT,wikipedia row,yes,Will Initiative #85 pass? Proposition 132
+KXSTATEBALLOTMEASURE-CO-I95,CIT,wikipedia row,no,Will Initiative #95 pass? Amendment 81
+KXSTATEBALLOTMEASURE-CO-P136,CIT,wikipedia row,no,Will Proposition 136 pass? Proposition 136
+KXSTATEBALLOTMEASURE-CO-P137,CIT,wikipedia row,yes,Will Proposition 137 pass? Proposition 137
+KXSTATEBALLOTMEASURE-CO-PNN,LEG,wikipedia row,yes,Will Proposition NN pass? Proposition NN
+KXSTATEBALLOTMEASURE-FL-A1,LEG,every Nov 3 row of the state is a legislative referral,no,Will Amendment 1 pass? Amendment 1
+KXSTATEBALLOTMEASURE-FL-A2,LEG,every Nov 3 row of the state is a legislative referral,no,Will Amendment 2 pass? Amendment 2
+KXSTATEBALLOTMEASURE-GA-A1,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 1 pass? Acre Limit Amendment
+KXSTATEBALLOTMEASURE-GA-A2,LEG,wikipedia row,yes,Will Amendment 2 pass? 9-1-1 Fund Amendment
+KXSTATEBALLOTMEASURE-GA-A3,LEG,wikipedia row,yes,Will Amendment 3 pass? Nonpartisan Elections for Probate Judges Amendm
+KXSTATEBALLOTMEASURE-HI-A1,LEG,wikipedia row,yes,Will Amendment 1 pass? Increase Time for Senate to Act on Judicial App
+KXSTATEBALLOTMEASURE-HI-A2,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 2 pass? Authorize RISE Bonds Amendment
+KXSTATEBALLOTMEASURE-IA-A1,LEG,wikipedia row,yes,Will Amendment 1 pass? Yes
+KXSTATEBALLOTMEASURE-ID-HJR4,LEG,wikipedia row,no,Will HJR 4 pass? Drug Legalization Authority Amendment
+KXSTATEBALLOTMEASURE-ID-HJR6,LEG,wikipedia row,yes,Will HJR 6 pass? English as Official State Language Amendment
+KXSTATEBALLOTMEASURE-ID-OSGQ,OTHER:Advisory Question,wikipedia row,no,Will Official State Gun Question pass? Official State Gun Question
+KXSTATEBALLOTMEASURE-ID-P1,CIT,wikipedia row,no,Will Proposition 1 pass? Reproductive Freedom and Privacy Act
+KXSTATEBALLOTMEASURE-IN-PQ1,LEG,wikipedia row,yes,Will Public Question 1 pass? Public Question 1
+KXSTATEBALLOTMEASURE-IN-PQ2,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Public Question 2 pass? Public Question 2
+KXSTATEBALLOTMEASURE-KS-HCR5004,LEG,every Nov 3 row of the state is a legislative referral,yes,Will HCR 5004 pass? Yes
+KXSTATEBALLOTMEASURE-KY-A1,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 1 pass? Yes
+KXSTATEBALLOTMEASURE-LA-A220,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 220 (2025) pass? Senior Tax Freeze Income-Limit
+KXSTATEBALLOTMEASURE-LA-A271,LEG,wikipedia row,yes,Will Act 271 pass? Post-Conviction Bail
+KXSTATEBALLOTMEASURE-LA-A272,LEG,every Nov 3 row of the state is a legislative referral,no,Will Act 272 pass? Rehabilitated Blighted Property Tax Exemption Amend
+KXSTATEBALLOTMEASURE-LA-A273,LEG,every Nov 3 row of the state is a legislative referral,no,Will Act 273 pass? Property Tax Millage
+KXSTATEBALLOTMEASURE-LA-A274,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 274 pass? Senior Property Tax Exemption Amendment
+KXSTATEBALLOTMEASURE-LA-A277,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 277 pass? Foreign Adversary Expropriation
+KXSTATEBALLOTMEASURE-LA-A39,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 39 pass? Disabled Veteran Spouse Tax Exemption
+KXSTATEBALLOTMEASURE-LA-A414,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 414 pass? Gubernatorial Term Limits
+KXSTATEBALLOTMEASURE-LA-A606,LEG,every Nov 3 row of the state is a legislative referral,no,Will Act 606 pass? Retirement Debt Funding
+KXSTATEBALLOTMEASURE-LA-A607,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Act 607 pass? Private Water Line Funding
+KXSTATEBALLOTMEASURE-MA-Q1,CIT,wikipedia row,yes,Will Question 1 pass? Question 1
+KXSTATEBALLOTMEASURE-MA-Q2,CIT,wikipedia row,yes,Will Question 2 pass? Question 2
+KXSTATEBALLOTMEASURE-MA-Q3,CIT,wikipedia row,no,Will Question 3 pass? Question 3
+KXSTATEBALLOTMEASURE-MA-Q4,CIT,wikipedia row,yes,Will Question 4 pass? Question 4
+KXSTATEBALLOTMEASURE-MA-Q5,CIT,wikipedia row,no,Will Question 5 pass? Question 5
+KXSTATEBALLOTMEASURE-MA-Q6,CIT,wikipedia row,yes,Will Question 6 pass? Question 6
+KXSTATEBALLOTMEASURE-MA-Q7,CIT,wikipedia row,no,Will Question 7 pass? Question 7
+KXSTATEBALLOTMEASURE-MA-Q8,CIT,wikipedia row,no,Will Question 8 pass? Question 8
+KXSTATEBALLOTMEASURE-MA-Q9,OTHER:Veto Referendum,wikipedia row,yes,Will Question 9 pass? Question 9
+KXSTATEBALLOTMEASURE-MD-Q1,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Question 1 pass? Question 1
+KXSTATEBALLOTMEASURE-MD-Q2,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Question 2 pass? Question 2
+KXSTATEBALLOTMEASURE-MD-Q3,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Question 3 pass? Question 3
+KXSTATEBALLOTMEASURE-MI-P2,CIT,page row Michigan Proposal 2,yes,Will Proposal 2026-2 pass? Yes
+KXSTATEBALLOTMEASURE-MN-CA,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Constitutional Amendment pass? Constitutional Amendment
+KXSTATEBALLOTMEASURE-MO-A6,CIT,wikipedia row,yes,Will Amendment 6 pass? Amendment 6
+KXSTATEBALLOTMEASURE-MO-A7,LEG,wikipedia row,no,Will Amendment 7 pass? Amendment 7
+KXSTATEBALLOTMEASURE-MO-A8,LEG,wikipedia row,yes,Will Amendment 8 pass? Amendment 8
+KXSTATEBALLOTMEASURE-MT-CI132,CIT,wikipedia row,yes,Will CI-132 pass? CI-132
+KXSTATEBALLOTMEASURE-MT-CI133,CIT,wikipedia row,yes,Will CI-133 pass? CI-133
+KXSTATEBALLOTMEASURE-MT-I194,CIT,wikipedia row,yes,Will I-194 pass? I-194
+KXSTATEBALLOTMEASURE-NC-A1,LEG,wikipedia row,yes,Will Amendment 1 pass? Voter Identification Amendment
+KXSTATEBALLOTMEASURE-NC-A2,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 2 pass? Income Tax Rate Cap Amendment
+KXSTATEBALLOTMEASURE-NC-A3,LEG,wikipedia row,yes,Will Amendment 3 pass? Property Tax Levy Limit Amendment
+KXSTATEBALLOTMEASURE-ND-CM1,LEG,every Nov 3 row of the state is a legislative referral,no,Will Constitutional Measure 1 pass? Constitutional Measure 1
+KXSTATEBALLOTMEASURE-ND-CM2,LEG,every Nov 3 row of the state is a legislative referral,no,Will Constitutional Measure 2 pass? Constitutional Measure 2
+KXSTATEBALLOTMEASURE-NE-LR19CA,LEG,legislative resolution code,no,Will LR19CA pass? Yes
+KXSTATEBALLOTMEASURE-NE26-FFG,CIT,page rows for Nebraska (three citizen measures),yes,Will Fairness for Girls Constitutional Amendment pass? Fairness for Gi
+KXSTATEBALLOTMEASURE-NE26-OSWA,CIT,page rows for Nebraska (three citizen measures),no,Will Online Sports Wagering Authorization Constitutional Amendment pas
+KXSTATEBALLOTMEASURE-NE26-OSWR,CIT,page rows for Nebraska (three citizen measures),no,Will Online Sports Wagering Regulation Initiative pass? Online Sports 
+KXSTATEBALLOTMEASURE-NH-CACR13,LEG,wikipedia row,no,Will CACR 13 pass? Register of Probate Amendment
+KXSTATEBALLOTMEASURE-NM-A1,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 1 pass? Pocket Veto Amendment
+KXSTATEBALLOTMEASURE-NM-A2,LEG,wikipedia row,yes,Will Amendment 2 pass? School Election Dates Amendment
+KXSTATEBALLOTMEASURE-NM-A3,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 3 pass? Regents Selection Amendment
+KXSTATEBALLOTMEASURE-NM-A4,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 4 pass? Legislative Salaries Amendment
+KXSTATEBALLOTMEASURE-NM-BQ1,OTHER:Bond Issue,wikipedia row,yes,Will Bond Question 1 pass? Senior Citizen Facilities Bond
+KXSTATEBALLOTMEASURE-NM-BQ2,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Bond Question 2 pass? Library Bond
+KXSTATEBALLOTMEASURE-NM-BQ3,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Bond Question 3 pass? Higher Education Bond
+KXSTATEBALLOTMEASURE-NV-Q7,CIT,wikipedia row,yes,Will Question 7 pass? Yes
+KXSTATEBALLOTMEASURE-OH-IS3,LEG,wikipedia row,yes,Will Issue 3 pass? Yes
+KXSTATEBALLOTMEASURE-OK-SQ845,LEG,wikipedia row,no,Will State Question 845 pass? State Question 845
+KXSTATEBALLOTMEASURE-OK-SQ847,LEG,wikipedia row,no,Will State Question 847 pass? State Question 847
+KXSTATEBALLOTMEASURE-RI-Q1,BOND,every Nov 3 row of the state is a legislative referral,no,Will Economic & Infrastructure Bond pass? Economic & Infrastructure Bo
+KXSTATEBALLOTMEASURE-RI-Q2,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Environment & Water Bond pass? Environment & Water Bond
+KXSTATEBALLOTMEASURE-RI-Q3,BOND,wikipedia row,yes,Will Higher Education Bond pass? Higher Education Bond
+KXSTATEBALLOTMEASURE-RI-Q5,BOND,every Nov 3 row of the state is a legislative referral,yes,Will Housing & Homeownership Bond pass? Housing & Homeownership Bond
+KXSTATEBALLOTMEASURE-SD-AI,LEG,wikipedia row,no,Will Amendment I pass? Amendment I
+KXSTATEBALLOTMEASURE-SD-AJ,LEG,wikipedia row,yes,Will Amendment J pass? Amendment J
+KXSTATEBALLOTMEASURE-SD-AK,LEG,wikipedia row,yes,Will Amendment K pass? Amendment K
+KXSTATEBALLOTMEASURE-SD-AL,LEG,wikipedia row,no,Will Amendment L pass? Amendment L
+KXSTATEBALLOTMEASURE-TN-A1,LEG,wikipedia row,yes,Will Amendment 1 pass? Amendment 1
+KXSTATEBALLOTMEASURE-TN-A2,LEG,wikipedia row,yes,Will Amendment 2 pass? Amendment 2
+KXSTATEBALLOTMEASURE-TN-A3,LEG,wikipedia row,yes,Will Amendment 3 pass? Amendment 3
+KXSTATEBALLOTMEASURE-UT-HJR10,LEG,every Nov 3 row of the state is a legislative referral,yes,Will H.J.R. 10 pass? Constitutional Amendment Publication
+KXSTATEBALLOTMEASURE-UT-SJR2,LEG,every Nov 3 row of the state is a legislative referral,no,Will S.J.R. 2 pass? 60% Vote for Tax-Raising Initiatives
+KXSTATEBALLOTMEASURE-VA-Q2,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Question 2 pass? Question 2
+KXSTATEBALLOTMEASURE-VA-Q3,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Question 3 pass? Question 3
+KXSTATEBALLOTMEASURE-VT-PR3,LEG,wikipedia row,yes,Will Proposal 3 pass? Proposal 3
+KXSTATEBALLOTMEASURE-VT-PR4,LEG,wikipedia row,yes,Will Proposal 4 pass? Proposal 4
+KXSTATEBALLOTMEASURE-WA-IL26001,CIT,every Nov 3 row of the state is a citizen initiative,no,Will Initiative No. IL26-001 pass? Initiative No. IL26-001
+KXSTATEBALLOTMEASURE-WA-IL26638,CIT,every Nov 3 row of the state is a citizen initiative,yes,Will Initiative No. IL26-638 pass? Initiative No. IL26-638
+KXSTATEBALLOTMEASURE-WA-IP26645,CIT,every Nov 3 row of the state is a citizen initiative,no,Will Initiative No. IP26-645 pass? Initiative No. IP26-645
+KXSTATEBALLOTMEASURE-WI-Q1,LEG,wikipedia row,no,Will Prohibit Government Closure of Places of Worship During Emergenci
+KXSTATEBALLOTMEASURE-WI-Q2,LEG,wikipedia row,yes,Will Prohibit Government Discrimination or Preferential Treatment Amen
+KXSTATEBALLOTMEASURE-WI-Q3,LEG,wikipedia row,yes,Will Prohibit Partial Veto to Increase Tax or Fee Amendment pass? Proh
+KXSTATEBALLOTMEASURE-WV-A1,LEG,every Nov 3 row of the state is a legislative referral,yes,Will Amendment 1 pass? Yes
+KXSTATEBALLOTMEASURE-WY-I1,CIT,every Nov 3 row of the state is a citizen initiative,no,Will Initiative 1 pass? Yes
