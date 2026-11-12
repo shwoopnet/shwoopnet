@@ -70,7 +70,7 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 
 | Job | Owner | Requests (cap) | Minutes | Registration |
 |---|---|---|---|---|
-| `CFRTI_K_R6SLICE` | Desk A | 2 (2) | under 1 | `CFRTI_K_REGISTRATION.md`; for Forensics' CANDLEVSBOOK1 |
+| `CFRTI_K_R6SLICE` | Desk A | 8 (8), the 407 windows with a full R6 book | under 1 | `CFRTI_K_REGISTRATION.md`; for Forensics' CANDLEVSBOOK1 |
 | `CFRTI_K_PROBE` | Desk A | 1 (1) | under 1 | `CFRTI_K_REGISTRATION.md`; one pre-cutover batch, decides builder mode `all` or `live` |
 | `CFRTI_K_LISTS` | Desk A | 2, up to 28 pages (30) | up to 1 | `CFRTI_K_REGISTRATION.md`; development markets only, closes before 2026-11-05 |
 | `INGAMELAG_M1` | Desk B | 215 (235) | about 4 | `IDEA_DESK_B_INGAME_CARD.md`; the rebuilt 215 game list |
