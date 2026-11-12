@@ -59,6 +59,8 @@ The account hit its 5 hour usage limit for desk workers at 16:30Z (reset 18:20Z)
 
 ## Owed by me
 
+- A ruling by Nov 13 on which of V2's tests on the daily recorder (NOWCAST1, FEDIMPL1, BARRIER1, SOFR) survive, so Main knows whether record-daily can be cut.
+
 - The six-hour line to the EA at about 21:00Z (3 PM CT): desks, cards added, the stocks data plan, first stock test dates, counts, Databento spend.
 - Rulings on: Desk B's ranking; Desk A's ladder card; any SPREADCELL1 result (wording: "cleared its registered bar, probe-eligible by the owner's popup", and only if line 2 also holds).
 - Scheduled wake-ups I set for this session: 17:27Z (desk outputs), 18:40Z (the two audits), 20:50Z (the six-hour line).
