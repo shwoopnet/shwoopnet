@@ -4,8 +4,8 @@
 The logic of the request checks (host pin, path patterns, ticker and series allowlists, denied paths, a 429 stop) follows the research runner src/scalper/pullrunner.py; this
 copy is the one that runs on a GitHub runner, with a slower pace and a stricter 429 rule.
 
-What it can do: read ONE job file from kalshi-scalper/workers/kalshi_pull_jobs/, check every request in it, then send them one at a time, GET only, to api.elections.kalshi.com,
-at most ONE request a second, and write the raw answers (gzipped) plus a manifest to an output folder that the workflow pushes to its own data branch (never main).
+What it can do: read ONE job file from kalshi-scalper/workers/kalshi_pull_jobs/, check every request in it, then send them one at a time, GET only, to ONE of exactly two hard-coded
+(host, base path) pairs in the ROUTES table (the elections API, or Kalshi's public perpetuals "margin" API for the candlesticks of KXBTCPERP and KXETHPERP only), at most ONE request a second, and write the raw answers (gzipped) plus a manifest to an output folder that the workflow pushes to its own data branch (never main).
 
 What it cannot do: it holds no key and sends no Authorization header, cookie or body; it follows no redirect; it never changes address, never uses a proxy and never retries around a
 refusal. A 429 is waited out with a doubling pause and three 429s in a row END the run (what was fetched so far is still written). It reads only the standard library.
@@ -26,6 +26,15 @@ import urllib.request
 
 HOST = "api.elections.kalshi.com"
 BASE_PATH = "/trade-api/v2"
+PERPS_HOST = "external-api.kalshi.com"            # the same pair scripts/record_perps_candles.py has used since Nov 6, 2026
+PERPS_BASE_PATH = "/trade-api/v2/margin"
+# The ONLY two places a request can go. A job names one by KEY ("route"); it can never supply a host or a base path of its own (a job that carries a "route" key may not carry "host" or "base_path" at all).
+ROUTES = {"elections": (HOST, BASE_PATH), "perps": (PERPS_HOST, PERPS_BASE_PATH)}
+DEFAULT_ROUTE = "elections"                       # the five older jobs have no "route" key and still pin host and base_path by value
+PERPS_TICKERS = frozenset({"KXBTCPERP", "KXETHPERP"})
+PERPS_PATH = re.compile(r"/markets/(?P<ticker>[A-Z0-9]{2,32})/candlesticks")
+PERPS_PARAMS = frozenset({"period_interval", "start_ts", "end_ts"})
+PERPS_MAX_WINDOW_S = 86400                        # one UTC day of 1 minute candles (1,440), the size the existing recorder asks for
 HERE = os.path.dirname(os.path.abspath(__file__))
 JOB_DIR = os.path.join(HERE, "..", "kalshi-scalper", "workers", "kalshi_pull_jobs")
 END_UTC = "2027-02-28T23:59:00Z"      # nothing is pulled from here on
@@ -43,7 +52,7 @@ MAX_RUNS_PER_DAY = 6                  # real runs per UTC day, counted from the 
 MAX_PAGES = 50
 UA = {"User-Agent": "shwoopnet-research-pull", "Accept": "application/json"}
 
-TOP_KEYS = {"job_id", "status", "owner", "registration", "purpose", "heldout", "host", "base_path", "allowed_endpoints", "ticker_allowlist", "series_allowlist", "pacing_seconds",
+TOP_KEYS = {"job_id", "status", "owner", "registration", "purpose", "heldout", "route", "host", "base_path", "allowed_endpoints", "ticker_allowlist", "series_allowlist", "pacing_seconds",
             "max_requests", "stop_rules", "requests", "notes"}
 OWNERS = {"V2", "REFINEMENT", "DESK_A", "DESK_B", "MAIN"}
 DENY_PATH = re.compile(r"portfolio|account|/orders|order_group|/fills|/positions|api_key|api-key|subaccount|communications|login|logout|/rfq|/quotes|/margin|/exchange", re.I)
@@ -94,7 +103,7 @@ def check_job(job):
     unknown = set(job) - TOP_KEYS
     if unknown:
         raise Refused("unknown keys %s" % sorted(unknown))
-    for k in ("job_id", "status", "owner", "registration", "purpose", "heldout", "host", "base_path", "allowed_endpoints", "pacing_seconds", "max_requests", "stop_rules", "requests"):
+    for k in ("job_id", "status", "owner", "registration", "purpose", "heldout", "allowed_endpoints", "pacing_seconds", "max_requests", "stop_rules", "requests"):
         if k not in job:
             raise Refused("job file lacks '%s'" % k)
     if not isinstance(job["job_id"], str) or not ID_RE.fullmatch(job["job_id"]):
@@ -109,10 +118,7 @@ def check_job(job):
         raise Refused("purpose must be one short line")
     if not isinstance(job["heldout"], str) or not job["heldout"].strip():
         raise Refused("heldout must say 'none' or name the registration whose one read this is")
-    if job["host"] != HOST:
-        raise Refused("host %r is not %s" % (job["host"], HOST))
-    if job["base_path"] != BASE_PATH:
-        raise Refused("base_path must be %s" % BASE_PATH)
+    route = route_of(job)
     if not isinstance(job["pacing_seconds"], (int, float)) or job["pacing_seconds"] < GAP_S:
         raise Refused("pacing_seconds can only be slower than %s" % GAP_S)
     cap = job["max_requests"]
@@ -145,7 +151,47 @@ def check_job(job):
             raise Refused("bad or repeated request id")
         seen.add(r["id"])
         check_request(r, eps, tk, sr_)
+        if route == "perps":
+            check_perps_request(r, tk)
+    if route == "perps":
+        check_perps_job(job, tk, sr_)
     return eps
+
+
+def route_of(job):
+    """The route KEY of a job, after checking how it names its destination. A job with a "route" key carries no host or base_path (it names a pair, never supplies one); an older job has no
+    "route" key and must carry the elections host and base path by value. Anything else is refused."""
+    if "route" in job:
+        if "host" in job or "base_path" in job:
+            raise Refused("a job that names a route may not carry host or base_path")
+        if not isinstance(job["route"], str) or job["route"] not in ROUTES:
+            raise Refused("route must be one of %s" % sorted(ROUTES))
+        return job["route"]
+    if job.get("host") != HOST:
+        raise Refused("host %r is not %s" % (job.get("host"), HOST))
+    if job.get("base_path") != BASE_PATH:
+        raise Refused("base_path must be %s" % BASE_PATH)
+    return DEFAULT_ROUTE
+
+
+def check_perps_job(job, tk, sr):
+    """The perps route reads ONE kind of thing: the 1 minute candles of two named perpetuals. No list, no funding, no cursor, no series."""
+    if not tk or not tk <= PERPS_TICKERS or sr:
+        raise Refused("a perps job may name only KXBTCPERP and KXETHPERP, and no series")
+    for e in job["allowed_endpoints"]:
+        if e["path_pattern"] != r"/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks" or not set(e.get("params_allowed", [])) <= PERPS_PARAMS:
+            raise Refused("a perps job may allow only the candlesticks endpoint of KXBTCPERP and KXETHPERP")
+
+
+def check_perps_request(r, tk):
+    m = PERPS_PATH.fullmatch(r["path"])
+    if not m or m.group("ticker") not in PERPS_TICKERS or m.group("ticker") not in tk:
+        raise Refused("a perps request may only read /markets/<KXBTCPERP or KXETHPERP>/candlesticks")
+    p = r.get("params", {})
+    if set(p) != PERPS_PARAMS or p["period_interval"] != 1 or r.get("max_pages", 1) != 1:
+        raise Refused("a perps request is one page of 1 minute candles with period_interval, start_ts and end_ts")
+    if not 0 < p["end_ts"] - p["start_ts"] <= PERPS_MAX_WINDOW_S:
+        raise Refused("a perps request covers at most %d seconds" % PERPS_MAX_WINDOW_S)
 
 
 def check_request(r, eps, tk, sr):
@@ -204,9 +250,10 @@ def build_url(job, path, params, cursor=None):
             raise Refused("bad cursor")
         q["cursor"] = cursor
     qs = urllib.parse.urlencode(q, safe=",") if q else ""
-    url = "https://%s%s%s%s" % (HOST, BASE_PATH, path, ("?" + qs) if qs else "")
+    host, base = ROUTES[route_of(job)] if job else ROUTES[DEFAULT_ROUTE]
+    url = "https://%s%s%s%s" % (host, base, path, ("?" + qs) if qs else "")
     u = urllib.parse.urlparse(url)
-    if u.scheme != "https" or u.hostname != HOST or u.username or u.password or u.port not in (None, 443) or u.fragment or not u.path.startswith(BASE_PATH + "/"):
+    if u.scheme != "https" or u.hostname != host or u.username or u.password or u.port not in (None, 443) or u.fragment or not u.path.startswith(base + "/"):
         raise Refused("url failed the host check")
     return url
 

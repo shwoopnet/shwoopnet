@@ -52,7 +52,7 @@ gates.KP3 = () => {
 gates.KP4 = () => {
   const options = [...wf.match(/job:[\s\S]*?options:\n((?:\s+- \w+\n)+)/)[1].matchAll(/- (\w+)/g)].map((x) => x[1]);
   assert.deepStrictEqual(options.sort(), jobs.map((f) => f.replace('.json', '')).sort(), 'the choices are exactly the job files');
-  assert.ok(/case "\$JOB" in NOSIDE1_LISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\)/.test(wf));
+  assert.ok(/case "\$JOB" in NOSIDE1_LISTS\|NOSIDE1_CANDLES\|SPREADCELL1\|ROLLOFF_PROXY\|COMBO1_OPENBOOK\|PERPBTC1M\|PERPETH1M\)/.test(wf));
   assert.ok(/JOB: \$\{\{ inputs\.job \}\}/.test(wf) && /DRY_RUN: \$\{\{ inputs\.dry_run \}\}/.test(wf));
 };
 
@@ -60,10 +60,11 @@ gates.KP4 = () => {
 gates.KP5 = () => {
   assert.ok(!/https?:\/\/[A-Za-z0-9]/.test(code), 'no host is written out anywhere but the HOST constant');
   assert.ok(/HOST = "api\.elections\.kalshi\.com"/.test(code) && /BASE_PATH = "\/trade-api\/v2"/.test(code));
+  assert.ok(/PERPS_HOST = "external-api\.kalshi\.com"/.test(code) && /PERPS_BASE_PATH = "\/trade-api\/v2\/margin"/.test(code));
   assert.ok(!/http:\/\//.test(code));
   const hosts = py('print(json.dumps([m.build_url({}, "/markets", {"series_ticker": "KXA"}), m.build_url({}, "/markets", {}, "abc=")]))');
   assert.deepStrictEqual(hosts, ['https://api.elections.kalshi.com/trade-api/v2/markets?series_ticker=KXA', 'https://api.elections.kalshi.com/trade-api/v2/markets?cursor=abc%3D']);
-  for (const f of jobs) assert.strictEqual(JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8')).host, 'api.elections.kalshi.com', f);
+  for (const f of jobs) { const jj = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8')); if (jj.route) assert.ok(!('host' in jj) && !('base_path' in jj), f + ': a routed job carries no host'); else assert.strictEqual(jj.host, 'api.elections.kalshi.com', f); }
   const bad = py(`
 def t(j):
     try: m.check_job(j); return "ok"
@@ -239,7 +240,7 @@ print(json.dumps({
 gates.KP14 = () => {
   const j = {};
   for (const f of jobs) j[f.replace('.json', '')] = JSON.parse(fs.readFileSync(path.join(jobDir, f), 'utf8'));
-  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'SPREADCELL1']);
+  assert.deepStrictEqual(Object.keys(j).sort(), ['COMBO1_OPENBOOK', 'NOSIDE1_CANDLES', 'NOSIDE1_LISTS', 'PERPBTC1M', 'PERPETH1M', 'ROLLOFF_PROXY', 'SPREADCELL1']);
   assert.ok(!jobs.some((f) => /ECONLAG|BALLOTNO/i.test(f)), 'ECONLAG and BALLOTNO are not included');
   for (const [id, job] of Object.entries(j)) {
     assert.strictEqual(job.job_id, id);
@@ -267,7 +268,7 @@ for n in ("NOSIDE1_CANDLES", "SPREADCELL1"):
     except m.Refused as e: out[n] = "refused"
 print(json.dumps(out))`);
   assert.deepStrictEqual(refused, { NOSIDE1_CANDLES: 'refused', SPREADCELL1: 'refused' });
-  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
+  for (const id of ['NOSIDE1_LISTS', 'ROLLOFF_PROXY', 'COMBO1_OPENBOOK', 'PERPBTC1M', 'PERPETH1M']) assert.doesNotThrow(() => execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' }), id + ' passes its own check');
   // the held-out third is not in the stage 2 universe: the builder only takes thirds 0 and 1
 };
 
@@ -372,6 +373,93 @@ sys.path.insert(0, ${JSON.stringify(path.join(root, 'scripts'))})
 import kalshi_pull as m
 print(json.dumps([type(h).__name__ for h in m._OPENER.handlers]))`], { encoding: 'utf8' });
   assert.ok(!/Proxy/.test(out), 'no proxy handler in the opener: ' + out);
+};
+
+// KP22: the destination is chosen from the constant ROUTES table by KEY only: exactly two pairs, a job that names a route cannot also carry a host or base path, an unknown key is refused, and the
+// URL is built from the table (perps jobs reach external-api.kalshi.com/trade-api/v2/margin, older jobs still reach the elections pair).
+gates.KP22 = () => {
+  const r = py(`
+print(json.dumps({"routes": m.ROUTES, "perps_url": m.build_url(json.load(open(os.path.join(m.JOB_DIR, "PERPBTC1M.json"))), "/markets/KXBTCPERP/candlesticks", {"period_interval": 1, "start_ts": 1780444800, "end_ts": 1780531200}),
+ "old_url": m.build_url(json.load(open(os.path.join(m.JOB_DIR, "COMBO1_OPENBOOK.json"))), "/markets", {})}))`);
+  assert.deepStrictEqual(r.routes, { elections: ['api.elections.kalshi.com', '/trade-api/v2'], perps: ['external-api.kalshi.com', '/trade-api/v2/margin'] });
+  assert.strictEqual(r.perps_url, 'https://external-api.kalshi.com/trade-api/v2/margin/markets/KXBTCPERP/candlesticks?period_interval=1&start_ts=1780444800&end_ts=1780531200');
+  assert.strictEqual(r.old_url, 'https://api.elections.kalshi.com/trade-api/v2/markets');
+  const bad = py(`
+def t(j):
+    try: m.check_job(j); return "ok"
+    except m.Refused: return "refused"
+j = json.load(open(os.path.join(m.JOB_DIR, "PERPETH1M.json")))
+print(json.dumps([t(j), t(dict(j, host="example.com")), t(dict(j, base_path="/trade-api/v2/margin")), t(dict(j, host="external-api.kalshi.com", base_path="/trade-api/v2/margin")), t(dict(j, route="evil")), t(dict(j, route=["perps"]))]))`);
+  assert.deepStrictEqual(bad, ['ok', 'refused', 'refused', 'refused', 'refused', 'refused'], 'a job cannot supply a host or base path of its own, and an unknown route key is refused');
+};
+
+// KP23: a perps job can read ONE thing: the 1 minute candlesticks of KXBTCPERP and KXETHPERP, one page, one UTC day at most. Lists, funding, other tickers, other series, cursors, wider windows and other intervals are refused.
+gates.KP23 = () => {
+  const out = py(`
+base = json.load(open(os.path.join(m.JOB_DIR, "PERPBTC1M.json")))
+def t(req=None, **top):
+    j = json.loads(json.dumps(base)); j.update(top)
+    if req is not None: j["requests"] = [req]
+    try: m.check_job(j); return "ok"
+    except m.Refused: return "refused"
+c = lambda **p: {"id": "A", "path": "/markets/KXBTCPERP/candlesticks", "params": dict({"period_interval": 1, "start_ts": 1780444800, "end_ts": 1780531200}, **p)}
+ep = lambda pat, pa=("period_interval", "start_ts", "end_ts"): [{"name": "x", "method": "GET", "path_pattern": pat, "params_allowed": list(pa)}]
+print(json.dumps({"base": t(), "one": t(c()),
+ "list": t({"id": "A", "path": "/markets", "params": {}}, allowed_endpoints=ep("/markets", ("limit",))),
+ "funding": t({"id": "A", "path": "/funding_rates/historical", "params": {"ticker": "KXBTCPERP"}}, allowed_endpoints=ep("/funding_rates/historical", ("ticker",))),
+ "othertk": t({"id": "A", "path": "/markets/KXSOLPERP/candlesticks", "params": c()["params"]}, ticker_allowlist=["KXBTCPERP", "KXSOLPERP"]),
+ "unlisted": t({"id": "A", "path": "/markets/KXETHPERP/candlesticks", "params": c()["params"]}),
+ "series": t(series_allowlist=["KXBTC"]), "wide": t(c(end_ts=1780531201)), "backwards": t(c(start_ts=1780531200, end_ts=1780444800)), "interval": t(c(period_interval=60)),
+ "extra": t(c(limit=5)), "missing": t({"id": "A", "path": "/markets/KXBTCPERP/candlesticks", "params": {"start_ts": 1780444800, "end_ts": 1780531200}}),
+ "pages": t(dict(c(), max_pages=2), allowed_endpoints=ep("/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks", ("period_interval", "start_ts", "end_ts", "cursor"))),
+ "loosepattern": t(allowed_endpoints=ep("/markets/(?P<ticker>[A-Z]+)/candlesticks")),
+ "denied": t({"id": "A", "path": "/portfolio/balance", "params": {}}), "marginpath": t({"id": "A", "path": "/margin/markets/KXBTCPERP/candlesticks", "params": c()["params"]}),
+ "orders": t({"id": "A", "path": "/orders", "params": {}}, allowed_endpoints=ep("/orders", ()))}))`);
+  assert.strictEqual(out.base, 'ok');
+  assert.strictEqual(out.one, 'ok');
+  for (const k of ['list', 'funding', 'othertk', 'unlisted', 'series', 'wide', 'backwards', 'interval', 'extra', 'missing', 'pages', 'loosepattern', 'denied', 'marginpath', 'orders']) assert.strictEqual(out[k], 'refused', k);
+  const checks = py('print(json.dumps([sorted(m.PERPS_TICKERS), sorted(m.PERPS_PARAMS), m.PERPS_MAX_WINDOW_S]))');
+  assert.deepStrictEqual(checks, [['KXBTCPERP', 'KXETHPERP'], ['end_ts', 'period_interval', 'start_ts'], 86400]);
+};
+
+// KP24: the two perps job files are exactly the explicit list the desk asked for: 163 UTC days, 2026-06-03 to 2026-11-12, one request per day per ticker, midnight to midnight, under the 1,200 cap, and pass their own dry run.
+gates.KP24 = () => {
+  for (const [id, tk] of [['PERPBTC1M', 'KXBTCPERP'], ['PERPETH1M', 'KXETHPERP']]) {
+    const j = JSON.parse(fs.readFileSync(path.join(jobDir, id + '.json'), 'utf8'));
+    assert.strictEqual(j.status, 'active'); assert.strictEqual(j.route, 'perps'); assert.deepStrictEqual(j.ticker_allowlist, [tk]);
+    assert.strictEqual(j.requests.length, 163); assert.strictEqual(j.max_requests, 163);
+    assert.strictEqual(j.requests[0].params.start_ts, Date.UTC(2026, 5, 3) / 1000);
+    assert.strictEqual(j.requests[162].params.start_ts, Date.UTC(2026, 10, 12) / 1000);
+    j.requests.forEach((r, i) => {
+      assert.strictEqual(r.path, '/markets/' + tk + '/candlesticks');
+      assert.strictEqual(r.params.start_ts, Date.UTC(2026, 5, 3) / 1000 + i * 86400);
+      assert.strictEqual(r.params.end_ts - r.params.start_ts, 86400);
+      assert.deepStrictEqual(Object.keys(r.params).sort(), ['end_ts', 'period_interval', 'start_ts']);
+    });
+    const dry = execFileSync('python3', ['-I', scriptPath, id, '--dry-run'], { encoding: 'utf8' });
+    assert.ok(/plan: 163 requests/.test(dry) && dry.includes("https://external-api.kalshi.com/trade-api/v2/margin/markets/" + tk + "/candlesticks?") && /no request was sent/.test(dry));
+  }
+};
+
+// KP25: a mocked perps run keeps the unchanged limits: a second between requests, three 429s end it with what was fetched kept, and only perps URLs are asked.
+gates.KP25 = () => {
+  const out = py(`
+j = json.load(open(os.path.join(m.JOB_DIR, "PERPETH1M.json")))
+def go(script):
+    clock = [1000.0]; urls = []; starts = []
+    def sl(d): clock[0] += d
+    def fetch(u):
+        urls.append(u); starts.append(clock[0]); clock[0] += 0.05
+        c = script.pop(0) if script else 200
+        return c, (b'{"candlesticks": []}' if c == 200 else b""), "D", False
+    d = tempfile.mkdtemp()
+    st = m.run(dict(j, requests=j["requests"][:5]), os.path.join(d, "o"), fetch=fetch, clock=lambda: clock[0], sleep=sl, out=lambda *a: None)
+    gaps = [b - a for a, b in zip(starts, starts[1:])]
+    return {"st": st, "n": len(urls), "hosts": sorted(set(u.split("/trade-api")[0] for u in urls)), "mingap": min(gaps) if gaps else 9}
+print(json.dumps({"ok": go([]), "stop": go([200, 429, 429, 429])}))`);
+  assert.deepStrictEqual(out.ok.st, ['complete', 0]); assert.strictEqual(out.ok.n, 5); assert.ok(out.ok.mingap >= 1.0);
+  assert.deepStrictEqual(out.ok.hosts, ['https://external-api.kalshi.com']);
+  assert.deepStrictEqual(out.stop.st, ['stopped_429', 2]); assert.strictEqual(out.stop.n, 4);
 };
 
 let failed = 0;

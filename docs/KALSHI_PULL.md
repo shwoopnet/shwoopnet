@@ -24,7 +24,7 @@ It never rotates addresses, never uses a proxy and never retries around a refusa
 
 ## What it can and cannot ask
 
-- One host, pinned in code: `api.elections.kalshi.com`, base path `/trade-api/v2`, https only.
+- Two (host, base path) pairs, pinned in code in the `ROUTES` table and nowhere else: `elections` (`api.elections.kalshi.com`, `/trade-api/v2`) and `perps` (`external-api.kalshi.com`, `/trade-api/v2/margin`), https only. A job names its pair by key (`"route"`) and can never supply a host or base path of its own. A `perps` job can read only `/markets/{KXBTCPERP|KXETHPERP}/candlesticks` (1 minute candles, one page, at most 86,400 seconds a request).
 - GET only. No key, no auth header, no cookie, no body. The only secret in the workflow is the built-in token, used to push the data branch.
 - Redirects are refused (a 3xx is a failed read). The User-Agent is `shwoopnet-research-pull` (honest, generic, no personal details).
 - Every request in a job file must match one of the job's `allowed_endpoints` patterns, may use only the parameters that endpoint lists, and every ticker or series in a path or parameter must be in the job's allowlists. Account, portfolio, order, key and exchange paths are refused whatever the job says. Values with `/ \ ? & # % = @ :`, `..`, a space or a control character are refused. The paging cursor is the only thing taken from an answer into a later request, and only if it is a plain token.
@@ -47,6 +47,7 @@ Branch `kalshi-pull-data` (an orphan branch created by the first real run), neve
 | 2 | `SPREADCELL1` (W-SPREAD-CELL1) | 274 batched candle requests, 55 tickers each | NOT RUNNABLE yet: the registration needs its fixed event list committed first, and it is not in the repository |
 | 3 | `ROLLOFF_PROXY` (ROLLOFF proxy check) | 6 requests, at most 9 pages, cap 12 | ready |
 | 4 | `COMBO1_OPENBOOK` | 3 | ready |
+| 5 | `PERPBTC1M`, `PERPETH1M` (Kalshi's own Bitcoin and Ethereum perpetual, 1 minute candles, 2026-06-03 to 2026-11-12) | 163 each (one UTC day per request, 1,440 candles at most), 326 in all, about 3 runner minutes each | ready, not run |
 
 Not included: `ECONLAG` (demoted by its own power analysis) and `BALLOTNO`. A job that is not `active` is refused by the script before any request, which is how the two waiting jobs are kept from running.
 
@@ -55,3 +56,7 @@ Stage 1 of the NO-side pull asks for market lists, not events, because the cuts 
 ## Files
 
 `scripts/kalshi_pull.py`, `.github/workflows/kalshi-pull.yml`, `kalshi-scalper/workers/kalshi_pull_jobs/` (the job files, `NOSIDE1_CUTS.json` and `build_noside1_candles.py`), `test/kalshiPullGates.test.js`. The request checks follow V2's `pullrunner.py` (host rule, path patterns, allowlists, 429 stop); the pace, 429 limit and output differ on purpose.
+
+## The perps route (Nov 12, 2026)
+
+`PERPBTC1M` and `PERPETH1M` use `"route": "perps"`. 163 UTC days from 2026-06-03 to 2026-11-12 inclusive, one request per day per ticker, so 163 requests each. The windows are midnight to midnight (86,400 seconds, the size `scripts/record_perps_candles.py` already asks for); the last day is partial and adjacent windows may share a boundary candle, so de-duplicate on `end_period_ts`. The per-request candle limit is not written down in this repository and is not assumed to be higher. The runner stays one reviewed file; a changed route table or perps rule is security-relevant. Same terms position as above: the owner waived the terms read, which is accepted risk and not a finding that automated reads are allowed.

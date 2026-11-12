@@ -1,0 +1,1502 @@
+{
+ "job_id": "PERPETH1M",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/README.md",
+ "purpose": "Kalshi's own Ethereum perpetual KXETHPERP: public 1 minute candles (bid, ask, price, open interest, volume), one UTC day per request, 2026-06-03 to 2026-11-12. Data pull only.",
+ "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this)",
+ "route": "perps",
+ "allowed_endpoints": [
+  {
+   "name": "perp_candlesticks",
+   "method": "GET",
+   "path_pattern": "/markets/(?P<ticker>KXBTCPERP|KXETHPERP)/candlesticks",
+   "params_allowed": [
+    "period_interval",
+    "start_ts",
+    "end_ts"
+   ]
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [
+  "KXETHPERP"
+ ],
+ "pacing_seconds": 1.0,
+ "max_requests": 163,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "KXETHPERP_2026-06-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780444800,
+    "end_ts": 1780531200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780531200,
+    "end_ts": 1780617600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780617600,
+    "end_ts": 1780704000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780704000,
+    "end_ts": 1780790400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780790400,
+    "end_ts": 1780876800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780876800,
+    "end_ts": 1780963200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1780963200,
+    "end_ts": 1781049600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781049600,
+    "end_ts": 1781136000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781136000,
+    "end_ts": 1781222400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781222400,
+    "end_ts": 1781308800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781308800,
+    "end_ts": 1781395200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781395200,
+    "end_ts": 1781481600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781481600,
+    "end_ts": 1781568000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781568000,
+    "end_ts": 1781654400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781654400,
+    "end_ts": 1781740800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781740800,
+    "end_ts": 1781827200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-19",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781827200,
+    "end_ts": 1781913600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-20",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1781913600,
+    "end_ts": 1782000000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-21",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782000000,
+    "end_ts": 1782086400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-22",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782086400,
+    "end_ts": 1782172800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-23",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782172800,
+    "end_ts": 1782259200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-24",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782259200,
+    "end_ts": 1782345600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-25",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782345600,
+    "end_ts": 1782432000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-26",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782432000,
+    "end_ts": 1782518400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-27",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782518400,
+    "end_ts": 1782604800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-28",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782604800,
+    "end_ts": 1782691200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-29",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782691200,
+    "end_ts": 1782777600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-06-30",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782777600,
+    "end_ts": 1782864000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-01",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782864000,
+    "end_ts": 1782950400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-02",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1782950400,
+    "end_ts": 1783036800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783036800,
+    "end_ts": 1783123200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783123200,
+    "end_ts": 1783209600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783209600,
+    "end_ts": 1783296000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783296000,
+    "end_ts": 1783382400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783382400,
+    "end_ts": 1783468800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783468800,
+    "end_ts": 1783555200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783555200,
+    "end_ts": 1783641600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783641600,
+    "end_ts": 1783728000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783728000,
+    "end_ts": 1783814400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783814400,
+    "end_ts": 1783900800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783900800,
+    "end_ts": 1783987200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1783987200,
+    "end_ts": 1784073600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784073600,
+    "end_ts": 1784160000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784160000,
+    "end_ts": 1784246400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784246400,
+    "end_ts": 1784332800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784332800,
+    "end_ts": 1784419200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-19",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784419200,
+    "end_ts": 1784505600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-20",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784505600,
+    "end_ts": 1784592000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-21",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784592000,
+    "end_ts": 1784678400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-22",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784678400,
+    "end_ts": 1784764800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-23",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784764800,
+    "end_ts": 1784851200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-24",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784851200,
+    "end_ts": 1784937600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-25",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1784937600,
+    "end_ts": 1785024000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-26",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785024000,
+    "end_ts": 1785110400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-27",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785110400,
+    "end_ts": 1785196800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-28",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785196800,
+    "end_ts": 1785283200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-29",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785283200,
+    "end_ts": 1785369600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-30",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785369600,
+    "end_ts": 1785456000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-07-31",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785456000,
+    "end_ts": 1785542400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-01",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785542400,
+    "end_ts": 1785628800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-02",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785628800,
+    "end_ts": 1785715200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785715200,
+    "end_ts": 1785801600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785801600,
+    "end_ts": 1785888000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785888000,
+    "end_ts": 1785974400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1785974400,
+    "end_ts": 1786060800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786060800,
+    "end_ts": 1786147200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786147200,
+    "end_ts": 1786233600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786233600,
+    "end_ts": 1786320000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786320000,
+    "end_ts": 1786406400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786406400,
+    "end_ts": 1786492800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786492800,
+    "end_ts": 1786579200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786579200,
+    "end_ts": 1786665600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786665600,
+    "end_ts": 1786752000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786752000,
+    "end_ts": 1786838400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786838400,
+    "end_ts": 1786924800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1786924800,
+    "end_ts": 1787011200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787011200,
+    "end_ts": 1787097600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-19",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787097600,
+    "end_ts": 1787184000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-20",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787184000,
+    "end_ts": 1787270400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-21",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787270400,
+    "end_ts": 1787356800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-22",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787356800,
+    "end_ts": 1787443200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-23",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787443200,
+    "end_ts": 1787529600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-24",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787529600,
+    "end_ts": 1787616000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-25",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787616000,
+    "end_ts": 1787702400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-26",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787702400,
+    "end_ts": 1787788800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-27",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787788800,
+    "end_ts": 1787875200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-28",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787875200,
+    "end_ts": 1787961600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-29",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1787961600,
+    "end_ts": 1788048000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-30",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788048000,
+    "end_ts": 1788134400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-08-31",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788134400,
+    "end_ts": 1788220800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-01",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788220800,
+    "end_ts": 1788307200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-02",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788307200,
+    "end_ts": 1788393600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788393600,
+    "end_ts": 1788480000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788480000,
+    "end_ts": 1788566400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788566400,
+    "end_ts": 1788652800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788652800,
+    "end_ts": 1788739200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788739200,
+    "end_ts": 1788825600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788825600,
+    "end_ts": 1788912000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788912000,
+    "end_ts": 1788998400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1788998400,
+    "end_ts": 1789084800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789084800,
+    "end_ts": 1789171200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789171200,
+    "end_ts": 1789257600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789257600,
+    "end_ts": 1789344000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789344000,
+    "end_ts": 1789430400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789430400,
+    "end_ts": 1789516800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789516800,
+    "end_ts": 1789603200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789603200,
+    "end_ts": 1789689600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789689600,
+    "end_ts": 1789776000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-19",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789776000,
+    "end_ts": 1789862400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-20",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789862400,
+    "end_ts": 1789948800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-21",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1789948800,
+    "end_ts": 1790035200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-22",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790035200,
+    "end_ts": 1790121600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-23",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790121600,
+    "end_ts": 1790208000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-24",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790208000,
+    "end_ts": 1790294400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-25",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790294400,
+    "end_ts": 1790380800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-26",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790380800,
+    "end_ts": 1790467200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-27",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790467200,
+    "end_ts": 1790553600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-28",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790553600,
+    "end_ts": 1790640000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-29",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790640000,
+    "end_ts": 1790726400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-09-30",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790726400,
+    "end_ts": 1790812800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-01",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790812800,
+    "end_ts": 1790899200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-02",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790899200,
+    "end_ts": 1790985600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1790985600,
+    "end_ts": 1791072000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791072000,
+    "end_ts": 1791158400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791158400,
+    "end_ts": 1791244800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791244800,
+    "end_ts": 1791331200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791331200,
+    "end_ts": 1791417600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791417600,
+    "end_ts": 1791504000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791504000,
+    "end_ts": 1791590400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791590400,
+    "end_ts": 1791676800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791676800,
+    "end_ts": 1791763200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791763200,
+    "end_ts": 1791849600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-13",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791849600,
+    "end_ts": 1791936000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-14",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1791936000,
+    "end_ts": 1792022400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-15",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792022400,
+    "end_ts": 1792108800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-16",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792108800,
+    "end_ts": 1792195200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-17",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792195200,
+    "end_ts": 1792281600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-18",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792281600,
+    "end_ts": 1792368000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-19",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792368000,
+    "end_ts": 1792454400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-20",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792454400,
+    "end_ts": 1792540800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-21",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792540800,
+    "end_ts": 1792627200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-22",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792627200,
+    "end_ts": 1792713600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-23",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792713600,
+    "end_ts": 1792800000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-24",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792800000,
+    "end_ts": 1792886400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-25",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792886400,
+    "end_ts": 1792972800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-26",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1792972800,
+    "end_ts": 1793059200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-27",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793059200,
+    "end_ts": 1793145600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-28",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793145600,
+    "end_ts": 1793232000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-29",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793232000,
+    "end_ts": 1793318400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-30",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793318400,
+    "end_ts": 1793404800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-10-31",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793404800,
+    "end_ts": 1793491200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-01",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793491200,
+    "end_ts": 1793577600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-02",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793577600,
+    "end_ts": 1793664000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-03",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793664000,
+    "end_ts": 1793750400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-04",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793750400,
+    "end_ts": 1793836800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-05",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793836800,
+    "end_ts": 1793923200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-06",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1793923200,
+    "end_ts": 1794009600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-07",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794009600,
+    "end_ts": 1794096000
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-08",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794096000,
+    "end_ts": 1794182400
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-09",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794182400,
+    "end_ts": 1794268800
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-10",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794268800,
+    "end_ts": 1794355200
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-11",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794355200,
+    "end_ts": 1794441600
+   }
+  },
+  {
+   "id": "KXETHPERP_2026-11-12",
+   "path": "/markets/KXETHPERP/candlesticks",
+   "params": {
+    "period_interval": 1,
+    "start_ts": 1794441600,
+    "end_ts": 1794528000
+   }
+  }
+ ],
+ "notes": "163 requests, one per UTC day, each asking for up to 1,440 one minute candles (86,400 seconds, the window scripts/record_perps_candles.py already uses). The last day (2026-11-12) is partial. Adjacent windows may share their boundary candle: de-duplicate on end_period_ts when reading. The route is the perps pair in the ROUTES table of scripts/kalshi_pull.py; this file names it by key and carries no host."
+}
