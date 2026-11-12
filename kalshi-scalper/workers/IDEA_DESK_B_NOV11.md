@@ -2,17 +2,17 @@
 
 Stage of every card: **Idea**. Nothing here was scored. No Kalshi API call was made by this desk (0 requests). No order, no spend, no account, no key. Each card needs its own protocol committed before any outcome is read, the Verification Analyst's score on the four uniqueness checks, and the owner's approval before it can count as "on the shadow list" (`docs/RND_CHARTER.md` section 3).
 
-## Status after the power analysis (Nov 12): 12 of 16 closed or retired
+## Status after the power analysis and the ROLLOFF proxy check (Nov 12): 13 of 16 closed or retired
 
 Full reasoning: `workers/IDEA_DESK_B_POWER.md`. The research bar needs about 300 or more independent events even at a true profit factor of 2, so a family with about 12 events a year cannot reach a verdict of PASS in any useful time; and combos carry no posted asks, so no combo card can be priced from public data.
 
 | Card | Status |
 |---|---|
-| 13 ROLLOFF | KEPT (daily events; next step is a 12 read proxy check) |
+| 13 ROLLOFF | CLOSED Nov 12: the proxy check was read once and KILLED the card (0 of 33 check days within 0.3 points of the settled value; see the protocols file) |
 | 3 BALLOTNO | description of one election night being finished (113 reads, approved), then PARKED until 2028 |
 | 2 ECONLAG | DEMOTED to one falsification run, only through the separate pull route |
 | 9 MOVPARITY | arm A PARKED, arm B RETIRED |
-| 1 NESTCOMBO, 7 WXCOMBO-XCITY, 8 WXCOMBO-PERSIST | CLOSED: untestable, combos have no posted asks |
+| 1 NESTCOMBO, 7 WXCOMBO-XCITY, 8 WXCOMBO-PERSIST | CLOSED. Corrected Nov 12: the first reason given, that combos have no posted asks, was too strong. The combo recorder shows newly created combos do carry quotes. They stay closed because the recorder stores the number of legs, not which legs, so nesting and leg correlation cannot be checked until the leg tickers are recorded |
 | 4 UNRATEROUND, 5 FAANOTICE, 6 SCOTUSAUTH, 10 PRESENTQ, 11 TARIFFDTS, 12 CPIARITH, 15 WIKIEDIT, 16 SWEEPSIM | RETIRED: cannot reach a verdict (too few events a year; two also blocked on unread terms) |
 | 14 IMPLY1 | RETIRED after a zero-read look: the nearest pair is 25c from a lock |
 
