@@ -1,6 +1,8 @@
 # kalshi-pull: design for an on-demand public data pull on GitHub Actions (design only, nothing built)
 
-Written by Idea Desk A on Nov 12, 2026 at Main's request. Status: DESIGN. No workflow, script or test exists. The owner's popup on the workflow is pending; nothing here runs until the owner approves it and a reviewed pull request lands on main.
+Written by Idea Desk A on Nov 12, 2026 at Main's request. Status: DESIGN, approved in principle by Main the same day with three changes (now made below: `/historical/trades` added, a dry-run input added, the `heldout` field kept as required). No workflow, script or test exists.
+
+**HOLD (the owner's condition, relayed by Main, Nov 12): nothing is built until a person has read Kalshi's Developer Agreement and Terms of Use and written down the clauses on automated access, requests from additional network addresses, publishing the data, and use by an LLC.** Both pages refused the team's fetch, so nobody on the team has read them. Running public reads from a GitHub address and storing the answers on a public branch are exactly the two things those clauses would govern, so this design assumes nothing about them.
 
 ## 1. What it is for, in one paragraph
 
@@ -28,6 +30,7 @@ Inputs (all checked by a first step before anything else runs; they reach the sh
 |---|---|
 | `job` | `^[A-Z0-9_]{2,24}$` (the job id; the file is `jobs/<job>.json`) |
 | `job_sha` | `^[0-9a-f]{40}$` (the exact commit on `pull-jobs` that was reviewed; the workflow fetches that commit, so the file that runs is the file that was read) |
+| `dry_run` | `true` or `false` (a choice input, default `true`). With `true` the script checks the job file, builds every first-page URL and prints the list to the run log and the step summary, sends NO request and pushes nothing. A real run is a deliberate second dispatch with `false` |
 
 Who dispatches: Main (the Chief of Staff), who holds the request budget, after reading the job file at that commit. Each dispatch is logged in `RND_QUEUE.md` (job id, commit, request count, who asked). The owner can dispatch too. Desks and testers commit job files and ask Main; they do not dispatch.
 
@@ -80,12 +83,13 @@ Host, pinned as a constant: `external-api.kalshi.com`, base path `/trade-api/v2`
 | `hist_markets_list` | `/historical/markets` | as `markets_list` |
 | `hist_market` | `/historical/markets/{ticker}` | `ticker` |
 | `hist_candles` | `/historical/markets/{ticker}/candlesticks` | `ticker`, `start_ts`, `end_ts`, `period` |
+| `hist_trades` | `/historical/trades` | `ticker`, optional `min_ts`, `max_ts`, `limit` (1 to 1000), `max_pages` |
 | `mve_list` | `/multivariate_event_collections` | optional `status`, `limit`, `max_pages` |
 | `mve` | `/multivariate_event_collections/{collection}` | `collection` |
 
 Notes for the builder:
 - The exact query parameter names for `candles_batch` and the two multivariate paths must be copied from the V2 scripts that already call them (`src/scalper/` on the research branch) and pinned by a test, not taken from this table. I did not call Kalshi to check them.
-- V2's scripts also use `/historical/trades` in seven places. Main's list said "historical markets", so it is NOT on the list above. Adding it is one more row and one more test, Main's call.
+- `/historical/trades` was added at Main's word (Nov 12): V2's scripts use it in seven places. Its parameter names are to be copied from those scripts too.
 - Deliberately absent: the order book (the recorders cover it), everything under `/portfolio`, `/margin`, `/exchange`, anything that needs a key, and every other path.
 
 Value rules (applied to every field before a URL is built):
@@ -186,6 +190,8 @@ A job file is a request, not a permission. Main checks at dispatch: the registra
 | KP15 | The stop date is checked in the workflow's first step and in the script, and the two dates are equal |
 | KP16 | File names on the data branch are counters and the checked job id only; a hostile job id or a hostile answer cannot create a path outside `pull/<id>/<run>/` |
 | KP17 | The script imports nothing outside the standard library, and the workflow has no install step |
+| KP19 | Dry run: with `dry_run` true and a mocked fetch that fails the test if called, a valid job prints its URL list, sends nothing and the workflow's push step is skipped; an invalid job fails with the reason |
+| KP20 | The `heldout` field is required: a job file without it, or with an empty value, is refused before any request |
 | KP18 | The security scan (`.claude/skills/security-audit/scripts/scan.js`) still passes with the new workflow, and `test/recorderPushRetryGates.test.js` knows the `pull-data` loop |
 
 The security agent reviews the pull request before the owner sees it, as for any workflow change.
@@ -211,4 +217,5 @@ For comparison, 600 requests from the research sandbox at the shared 12 a minute
 - Kalshi's own terms for automated reads of the public API are on Main's permitted list; this document relies on that and did not re-read them.
 - The built-in token's reach (item 6 in section 9) depends on branch protection for main, which only the owner can confirm.
 - Two names need the builder's check against existing code: the query parameter names of the batch candle call and of the multivariate collection calls.
-- Optional, not in this version: `/historical/trades`; the perps list under `/margin`; a dry-run input that validates a job file and writes only the list of URLs it would send (cheap to add and useful for review, recommended).
+- Not in this version: the perps list under `/margin`, the order book.
+- Before building (in this order): the terms read above; the owner's answer on branch protection for main; then the pull request with the script, the workflow and the gates, reviewed by the security agent.
