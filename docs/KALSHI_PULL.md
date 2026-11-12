@@ -70,8 +70,8 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 
 | Job | Owner | Requests (cap) | Minutes | Registration |
 |---|---|---|---|---|
-| `CFRTI_K_R6SLICE` | Desk A | 8 (8), the 407 windows with a full R6 book | under 1 | `CFRTI_K_REGISTRATION.md`; for Forensics' CANDLEVSBOOK1 |
-| `CFRTI_K_PROBE` | Desk A | 1 (1) | under 1 | `CFRTI_K_REGISTRATION.md`; one pre-cutover batch, decides builder mode `all` or `live` |
+| `CFRTI_K_R6SLICE` | Desk A | 20 (20), the 407 windows with a full R6 book, batches of at most 9,000 minutes x tickers | under 1 | `CFRTI_K_REGISTRATION.md`; for Forensics' CANDLEVSBOOK1 |
+| `CFRTI_K_PROBE` | Desk A | 1 (1), 24 consecutive tickers | under 1 | `CFRTI_K_REGISTRATION.md`; one pre-cutover batch, decides builder mode `all` or `live` |
 | `CFRTI_K_LISTS` | Desk A | 2, up to 28 pages (30) | up to 1 | `CFRTI_K_REGISTRATION.md`; development markets only, closes before 2026-11-05 |
 | `INGAMELAG_M1A` | Desk B | 108 (123) | about 2 | `IDEA_DESK_B_INGAME_CARD.md`; first half of the rebuilt 215 game list |
 | `INGAMELAG_M1B` | Desk B | 107 (122) | about 2 | the second half; M1A and M1B are one measurement, read once |
@@ -81,4 +81,4 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 
 Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two other reads; (2) `CFRTI_K_LISTS` and `CFRTI_K_PROBE`; (3) the CFRTI-K candle job, built later from the lists answer; (4) `INGAMELAG_M1A`, `INGAMELAG_M1B` and `NHLOT_LISTS`; (5) `NOSIDE1_CANDLES` (already here); (6) `ECONLAG_CALENDAR`.
 
-`build_cfrti_k_candles.py` is an OFFLINE script (it sends nothing): it builds the CFRTI-K candle job from the `CFRTI_K_LISTS` answer (modes `all`, `live`, `hist`). Its output is a new job file and needs its own reviewed pull request before it can run. Not included: `ECONLAG_CANDLES`, `NHLOT_CANDLES` (built later) and the candle stage itself.
+`build_cfrti_k_candles.py` is an OFFLINE script (it sends nothing): it builds the CFRTI-K candle job from the `CFRTI_K_LISTS` answer (modes `all`, `live`, `hist`). It packs batches to at most 9,000 minutes x tickers (the endpoint answers HTTP 400 above 10,000), about 216 requests in live mode and about 624 in all mode. Its output is a new job file and needs its own reviewed pull request before it can run. Not included: `ECONLAG_CANDLES`, `NHLOT_CANDLES` (built later) and the candle stage itself.
