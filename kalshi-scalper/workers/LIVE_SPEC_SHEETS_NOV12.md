@@ -1,4 +1,4 @@
-# Live spec sheets for the probation pool: REMATCH, MAPBREAK, INPLAYJUMP (Idea Desk B, Nov 12, 2026, 20:10Z)
+# Live spec sheets for the probation pool: REMATCH, MAPBREAK, INPLAYJUMP (Idea Desk B, Nov 12, 2026, 20:02Z)
 
 Asked for by the Head of R&D at 19:59Z for the owner's "probation seats" decision. **This desk does research only: it places nothing and builds nothing live. These sheets describe the registered rules exactly; they change no registration.** A simplified version of any rule would be a NEW rule; none is proposed here.
 
