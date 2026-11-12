@@ -1,3 +1,5 @@
 cell 2362 gb5 XRP look 600 top fade band [0.3, 0.6] | HELD-OUT n 104 PF+0c 0.88 PF+1c 0.84 mean+1c -4.07c [-12.24, 3.94] z -0.87 -> not advanced
 cell 330 ret5 GOLD look 180 bottom follow band [0.1, 0.3] | HELD-OUT n 51 PF+0c 0.93 PF+1c 0.87 mean+1c -2.11c [-10.23, 6.14] z -0.43 -> not advanced
 cell 2277 gb5 GOLD look 180 bottom fade band [0.1, 0.3] | HELD-OUT n 68 PF+0c 0.80 PF+1c 0.75 mean+1c -4.19c [-11.89, 3.66] z -0.90 -> not advanced
+
+RELABEL (Nov 12, 2026, rule: under n 100 the label is 'no evidence at n = x', not FAIL): cell 2362 (held-out n 104) stays FALSIFIED; cell 330 (n 51) and cell 2277 (n 68) are 'no evidence at n = 51' and 'no evidence at n = 68'. All three negative (PF at +1c 0.84, 0.87, 0.75). Held-out read once; no further read.
