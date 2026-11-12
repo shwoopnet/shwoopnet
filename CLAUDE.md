@@ -1064,3 +1064,7 @@ The owner opened the politics hold window from 14 to **30 days** to settlement (
 ## Declined list: six rows added (Nov 12, 2026, closed by evidence)
 
 `docs/STRATEGY_LIFECYCLE.md` 7e gains six rows closed by evidence (not owner NOs): lock and parity scans, the ex-dividend short on stock perps, the conditional tie premium, second-of-minute taker clustering, fractional-size flow, and cheap-side price, regime and grammar sweeps on the 15 minute series. Each cites the test that closed it. Only the owner removes an entry. Nothing live changed.
+
+## Held-out cutoffs must be constants (Nov 12, 2026, Desk A's audit)
+
+Idea Desk A audited every registered held-out in the research branches (read only, no data opened). Nine open tests computed their cutoff as the last third of whatever data existed when the script ran (MMSIM1, CFRTI1-BTC, AVG1, STALE1, MENTPERSIST1, BOOKCH1F, SOFR1, the NO arm, P4), and one printed a running tally before its read; five could not be checked because no scorer is committed. MMSIM1's cutoff was already moved once (a rerun scored five held-out events; now pinned at 2026-11-07T15:00Z with a refusal before Nov 24). The rule is now `docs/RND_CHARTER.md` section 6 item 7: the cutoff is a date or timestamp constant in the registration and the script, and the read-once marker is a committed line. Each owner of an affected test pins its cut before any further run. No live figures are in any file. Nothing live changed.
