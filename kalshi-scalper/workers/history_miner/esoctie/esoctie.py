@@ -234,12 +234,13 @@ def score(lists, cands):
     # NOTE 11: the bars compare the UNROUNDED profit factor (scorekit's stats rounds to 3 decimals, so 1.4996 would read as 1.5)
     pf_all = sk.pf([t["net"] for t in trades]) if trades else None
     pf_halves = [(len(hs), sk.pf([t["net"] for t in hs]) if hs else None) for hs in ([t for t in trades if t["ts"] < HALF], [t for t in trades if t["ts"] >= HALF])]
-    halves_ok = all(hp is not None and hp > 1.0 for hn, hp in pf_halves if hn)
+    TOL = 1e-9   # NOTE 11: an on-the-line figure sits on the registered side; rounding is for print only
+    halves_ok = all(hp is not None and hp > 1.0 + TOL for hn, hp in pf_halves if hn)
     if n < 100:
         verdict = "no evidence at n = %d" % n
-    elif (pf_all is not None and pf_all < 1.0) or any(hn and hp is not None and hp < 1.0 for hn, hp in pf_halves):
+    elif (pf_all is not None and pf_all < 1.0 - TOL) or any(hn and hp is not None and hp < 1.0 - TOL for hn, hp in pf_halves):
         verdict = "FALSIFIED"
-    elif pf_all is not None and pf_all >= 1.5 and halves_ok:
+    elif pf_all is not None and pf_all >= 1.5 - TOL and halves_ok:
         verdict = "development bar met (ask the Head for the held-out pull)"
     else:
         verdict = "below the bar at n = %d, PF %s" % (n, None if pf_all is None else round(pf_all, 3))

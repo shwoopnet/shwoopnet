@@ -1,13 +1,12 @@
-# NOTE 11 (Nov 13, 2026, 00:30Z): esoctie.py and test_esoctie.py changed by the float clarifications; supersedes the lines below for those two files.
-ce1e9030a8a253f5cafb3d88e0d4d10d16ed2687c3e80b1fb9fad4e081a54c5e  esoctie.py
+# NOTE 11 (Nov 13, 2026): esoctie.py and test_esoctie.py changed by the float clarifications (bucket on f rounded to 6 decimals; bars on the unrounded PF with a 1e-9 tolerance).
+1646f54274f3a370ae8cf39e969d8c958da1b3fa9177ed854372fc7207baf8e8  esoctie.py
 eec02040d257ba8088126a56035b8c12259e5444d63cdefce5e98fccacaeab2f  test_esoctie.py
-89d834624043a84edca52af093b3ff20b45f8bab23944248f4c599318e2f2421  ESOCTIE_REGISTRATION.md
-7d427a4d7866fbee1702d45ee7e1d4f2573c37dad95fdf6829e517557d673c2c  report_esoctie.py
-76578a15d27ffbe5876a2fa8a144ccf7065b997e10823bfc628c73a062dbbbdb  esoctie.py
-1213982b24bb792ad7ccb8a23fa53bbd421a045b6dcf85ee12711ba23b83151a  test_esoctie.py
-c80cd418844a92c7df693a546baa3c230f800f9f908118cb1cea901c5920728b  ESOCTIE_SERIES.json
-04bf371f02762d8a9bc52f846568488a146af833c7427a7f27cf09cca4544493  scorekit.py
-e82f0bb1f5d43aff38c318e6f74d4aadaa1713f7a1b55bbef5fe620f8efee0c7  ESOCTIE_REGISTRATION.md
+ec48ef9a95f090d8fab93181b3f4dea2085309b6a08f9d23b49ae542b5d59ca4  ESOCTIE_REGISTRATION.md
+f411da58ea36657ae475201eacb58fe5ee369d16f9a4bbc0af2c5926cc6f0a31  report_esoctie.py
+be0cc0b46089db792d4d942f2f5cedfd1c88df069e6a0a830ce8cdbb95b953c8  xbuild_boundary.py
+ESOCTIE_SERIES.json 5c766fdd7e30a2fac038247798b1f81ed4d36e87b9c90ec2ea50b6bda4e10612 (unchanged)
+scorekit.py 04bf371f02762d8a9bc52f846568488a146af833c7427a7f27cf09cca4544493 (unchanged)
 # Independent build (Testing Desk, claude/testing-desk 742bc255, kalshi-scalper/workers/testing), as reported by the Testing Desk Nov 12 19:32Z:
 # esoctie.py ff608094...c798, test_esoctie.py 5880f572...00c2, esoctie_series_frozen.json c80cd418...920728b, scorekit.py 04bf371f...4493
 # Cross-check: AGREE on the shared synthetic fixture. This pair is the candidate to freeze; it is frozen on rnd-queue by the Head of R&D, not here.
+
