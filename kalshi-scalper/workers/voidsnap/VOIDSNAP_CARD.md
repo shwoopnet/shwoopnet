@@ -140,3 +140,22 @@ The Forensics desk built stage 1 from this text alone (`voidsnap_second.py`, com
 1. **No quote after the window ends.** Rule 7's carry runs inside the event's window only. A minute after the window has ended (the market has closed, or S plus 480 minutes has passed) has no quote. So a reference at S minus 60 or at S exists only when that minute is inside the window; for a void that closed before it, the reference is missing and counts as a miss in line 3. (The second build carried the last candle past the close, which raised line 3's share by 2 to 5 points on the fixtures.)
 2. **Question 2 and line 1 count minutes from S minus 180 to the window's end.** The five minutes from S minus 185 exist only to feed the carry into S minus 180. (The second build counted them, a difference of at most 5 side-minutes a fixture.)
 3. **Agreed as the second builder read them, recorded so they are in the text:** a candle ending exactly at the window's first or last minute is inside it; a quote needs a bid above 0.00 and an ask under 1.00, bid under ask; a quote exactly 60 minutes old counts under the 60 minute carry; an event's close is the later of its two contracts' close times; in line 1 the void must be flagged under the same carry as the run; the band count needs each of the five minutes buyable with the ask at 15c to 64c; with no flagged event the implied share is taken as zero and line 2 fails; D2 counts the volume of candles ending after S and at or before S plus 60, and no candle is no volume. On a tie between references in line 3 the share is the same whichever is named.
+
+## CLOSED AT STAGE 1, Nov 13, 2026, 05:35Z (recorded by the Head of R&D, seq 10; two builds; no try spent)
+
+Stage 1 was read once, on the audited scorer (`voidsnap.py` c176146b), on the landed candle run `pull/VOIDSNAP_CANDLES/2026-11-13T0244Z_43354200129/`, after Auditor B's structure check of that run passed. Forensics' second build printed the same on the same files (157 figures compared, 0 differ). A hindsight measurement, zero tries, no bet, no profit figure.
+
+**The reading: CLOSED, no try spent. No detector meets its three lines under any of the three readings of a missing minute**, so the result does not depend on the carry.
+
+- Sample: 195 voided esports events and 195 matched played ones (16 voids had no window; 179 had a candle).
+- **Could the settlement value be known beforehand?** The best allowed reference was within 3c of it in 35.9% of voids (35.4% with a 60 minute carry, 23.1% with none). The line was 70%.
+- **Was there anything to buy?** 24 of the 195 voids stayed 10c or more under their settlement value, at a spread of 4c or less, for five minutes in a row (14 with no carry). Where buyable, the median shortfall was 13c at a median one-way cost of 3.5c.
+- **Could a void be spotted in time?** Flagged voids with a buyable run (the line was 40) and the share of voids among the flagged (the line was 30%): frozen after the start, 0 and 25.3%; no trade after the start, 0 and 28.4%; ran before the start, 7 and 14.4%.
+
+**What it means.** Esports voids are sometimes cheap against what they later settle at, in about one void in eight, but the fair price cannot be read ahead and none of the three registered detectors finds those matches in time. A rule could not have known which matches they were.
+
+**What it does not say.** It is hindsight on one window of one family (esports "fair price" voids). A carried ask is a quote last seen, not a quote that could have been paid. The fixed-price void families were not measured here; Idea Desk C's census found their voids barely trade away from the fixed price.
+
+**Stage 2:** `VOIDSNAP_STAGE2_RULE.md` was written before this read and was never registered. It is now marked "not registered, stage 1 closed". No try was spent on this card at any stage.
+
+Printed lines and the read note: `voidsnap/stage1_read/`. Forensics' output: `claude/forensics-desk` b10f83da.

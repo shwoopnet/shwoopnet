@@ -1,5 +1,7 @@
 # VOIDSNAP stage 2: the rule, written BEFORE stage 1 is read (Idea Desk B)
 
+**NOT REGISTERED, STAGE 1 CLOSED (Nov 13, 2026).** Stage 1 read CLOSED on two builds with no try spent (see the CLOSED section of `VOIDSNAP_CARD.md`). This text was written before that read, was never registered, and is kept only as a record. Nothing below is a rule.
+
 **Written Nov 13, 2026, 01:51Z, on the Head of R&D's order of 01:49Z. No candle of any CS2 match market has been requested or read by this desk; stage 1's job (79 requests) is not dispatched yet.** So nothing here can be shaped by stage 1's numbers. Text only.
 
 **This is not a registration yet and it spends no try.** It becomes the registered rule, with its one try, only if stage 1 reads "worth a rule" (`VOIDSNAP_CARD.md`, Amendments 1 to 3) AND the owner has been sent the settlement clause and stage 1's lines by the Head. Research and paper only; nothing here places an order.
