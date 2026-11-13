@@ -33,3 +33,7 @@ Run A without W14: n = 10, rank = ceil(9.0) = 9, so **T = 1200** (the integer ra
 3. a window closing 2026-12-02T16:15:00Z
 4. run status partial
 5. a HELDOUT_ path
+
+## Ruled (Head of R&D, 2026-11-13 18:51Z)
+- The open reading is ruled as built: a present candle with no readable OI drops the window, counted as dropped_no_oi, which matches build 1. No code change.
+- For the comparison: build 1 takes windows from the lists run (ticker and close_time in [Nov 5, Nov 14)), build 2 from the job requests. Both should give 143. If n differs, Auditor B reconciles it before T is used.
