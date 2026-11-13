@@ -78,7 +78,7 @@ def main():
 
     n = dict(pairs=len(pairs), a_winner=0, a_closed_in_time=0, before_two_sided=0, tradeable_before=0, after_two_sided=0, state=0, quiet=0, state_entry=0, quiet_entry=0,
              no_candle_before=0, one_sided_before=0, no_candle_decision=0, one_sided_decision=0, no_candle_entry=0, carried=0, exact=0)
-    costs, days, late, exact_entries = [], set(), [], 0
+    costs, costs_exact, days, late, exact_entries = [], [], set(), [], 0
     in_span = [e for e in events.values() if ts(STAGE1_FROM) <= e["close"] < ts(STAGE1_BEFORE)]
     start_ok = sum(1 for e in in_span if 4 * 60 <= e["close"] - e["S"] <= 90 * 60)
     for p in pairs:
@@ -119,6 +119,8 @@ def main():
             n[kind + "_entry"] += 1
             if kind == "state":
                 costs.append(q2[1] - (q2[0] + q2[1]) / 2 + fee(q2[1] + SLIP))
+                if k0 == "exact" and k1 == "exact" and k2 == "exact":
+                    costs_exact.append(costs[-1])
                 exact_entries += 1 if k2 == "exact" else 0
                 late.append((b["close"] - b["S"]) / 60.0)   # diagnostic only, never a filter (Amendment 3, point 5)
 
@@ -139,9 +141,18 @@ def main():
     nd = max(1, len(days))
     proj_bets, proj_trade = n["state_entry"] / nd * DEV_DAYS, n["tradeable_before"] / nd * DEV_DAYS
     print(f"days in the slice with a later match: {len(days)} | projected development bets over {DEV_DAYS} days: {proj_bets:.0f} (under {STAGE1_BETS_FLOOR} closes the card) | projected tradeable pairs: {proj_trade:.0f} (under 300 closes on tradeability)")
+    worse = None
     if costs:
         med = statistics.median(costs)
-        print(f"one-way entry cost at qualifying entries: median {100 * med:.1f}c over {len(costs)} (above {100 * COST_KILL_ONE_WAY:.0f}c closes on cost)")
+        print(f"one-way entry cost at qualifying entries, ALL quotes: median {100 * med:.1f}c over {len(costs)} (above {100 * COST_KILL_ONE_WAY:.0f}c closes on cost)")
+        worse = med
+        if costs_exact:
+            mex = statistics.median(costs_exact)
+            print(f"one-way entry cost, EXACT-MINUTE quotes only (all three instants read from their own minute): median {100 * mex:.1f}c over {len(costs_exact)}")
+            worse = max(med, mex)
+        else:
+            print("one-way entry cost, EXACT-MINUTE quotes only: no entry had all three instants at their own minute")
+        print(f"the worse of the two decides the cost line (Amendment 6): {100 * worse:.1f}c")
     else:
         print("one-way entry cost: no qualifying entry")
     print(f"entries whose price came from the exact entry minute: {exact_entries} of {n['state_entry']} (a carried price is payable only if a missing candle means an unchanged quote; not measured on these markets)")
@@ -149,7 +160,7 @@ def main():
         late.sort()
         print(f"diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 {late[len(late) // 10]:.0f} median {late[len(late) // 2]:.0f} p90 {late[(9 * len(late)) // 10]:.0f} | "
               f"closed under 9 minutes after the clock (14 after the entry): {sum(1 for x in late if x < 9)} of {len(late)}")
-    closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < STAGE1_BETS_FLOOR or (costs and statistics.median(costs) > COST_KILL_ONE_WAY + 1e-9) or not costs
+    closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < STAGE1_BETS_FLOOR or (worse is not None and worse > COST_KILL_ONE_WAY + 1e-9) or not costs
     print("STAGE 1 LINE: " + ("CLOSED at stage 1, no try spent" if closed else "open: stage 2 may be asked for"))
 
 

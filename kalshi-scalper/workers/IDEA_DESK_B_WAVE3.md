@@ -84,3 +84,10 @@ So a mid-priced bet needs about 9 to 12 points of error in the market's price, e
 | NHLOT price measurement | about 60 | 0 |
 | NHLOT test (only if the measurement survives) | not known until the historical endpoint is probed; at worst about 3,000 | 1 |
 | ECONLAG (already registered) | 10, then at most 380 with stop rules | 1 against the paper screen |
+
+## NHLOT: dated amendment, Nov 13, 2026, 00:09Z, before any NHL candle was read (Auditor B's three findings on the reader)
+
+1. **Hindsight in the search window, labelled, not hidden.** The reader looks for the overtime state only in the last 45 minutes before the game market closed, and the close is known only afterwards. Inside that window it scans forward and takes the first qualifying minute. The candles already pulled are anchored on the close, so this cannot be changed for this measurement; the reader now prints the label and the number of detections that fall in the window's first 5 minutes (where the state may have begun earlier). This stays a zero-try price measurement with no bet and no outcome. **A rule registration would need candles anchored on the scheduled start, and that is written here as a condition.**
+2. **"Buyable" is no longer the best of two minutes.** The registered verdict now reads: the cheaper side's ask is 43c or lower with a spread of 3c or less at the detection minute, AND a limit one cent above that ask is filled the next minute (the SAME contract's ask one minute later is at or under the limit). The earlier "at the detection minute or the next" figure is printed beside it, labelled optimistic. The 30% line and every other number are unchanged.
+3. **The reader refuses a HELDOUT_ folder** (the shared guard of this desk, added the same night).
+

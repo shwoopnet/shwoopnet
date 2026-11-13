@@ -106,7 +106,10 @@ def detect(g, cand):
             else:
                 open_ += 1
         if known >= MIN_STRIKES and open_ == 0 and hi >= 1 and lo >= 1:
-            cheap = min(sides, key=lambda s: s[1])            # the cheaper side at the detection minute
+            k = min(range(2), key=lambda i: sides[i][1])       # the cheaper side at the detection minute
+            cheap = sides[k]
+            b, a = ml[k].get(m + 1, (None, None))             # the SAME contract one minute later (amendment of Nov 13)
+            same_next = (b, a) if (b is not None and a is not None and b > 0 and a <= 1 and a >= b) else None
             nxt = []
             for q in ml:
                 b, a = q.get(m + 1, (None, None))
@@ -114,6 +117,7 @@ def detect(g, cand):
                     nxt.append((b, a))
             cheap_next = min(nxt, key=lambda s: s[1]) if len(nxt) == 2 else None
             return {"game": g["game"], "minute": m, "minutes_before_close": last - m, "ask": cheap[1], "spread": cheap[1] - cheap[0],
+                    "same_ask_next": same_next[1] if same_next else None, "window_edge": (m - (last - LAST_MIN)) < 5,
                     "ask_next": cheap_next[1] if cheap_next else None, "spread_next": (cheap_next[1] - cheap_next[0]) if cheap_next else None}, True
     return None, True
 
@@ -164,6 +168,10 @@ def main():
             print(f"  at {cut:.2f} or lower: {sum(1 for a in asks if a <= cut + 1e-9)} of {n}")
         mins = sorted(h["minutes_before_close"] for h in hits)
         print(f"detection minute, minutes before the game market closed: median {mins[n // 2]} | range {mins[0]} to {mins[-1]}")
+    print("HINDSIGHT LABEL: the search is bounded to the last 45 minutes before the game market closed, a time known only afterwards. "
+          "Inside that window the scan runs forward and takes the FIRST qualifying minute. This is a price measurement with no bet and no outcome; "
+          "a rule would need candles anchored on the scheduled start.")
+    print(f"detections in the first 5 minutes of the window (the state may have begun before the window): {sum(1 for h in hits if h['window_edge'])} of {n}")
     if n < MIN_DETECTIONS:
         print(f"VERDICT: NOT_ENOUGH_DATA ({n} detections, need {MIN_DETECTIONS})")
         return
@@ -171,12 +179,18 @@ def main():
     if not (FIRE_RANGE[0] <= fire <= FIRE_RANGE[1]):
         print(f"VERDICT: CARD CLOSED (the rule fires in {fire:.0%} of games; overtime is about 20% to 23%, so it is not detecting overtime)")
         return
-    def buyable(h):
+    def optimistic(h):
         now = h["ask"] <= ASK_BAR + 1e-9 and h["spread"] <= SPREAD_BAR + 1e-9
         nxt = h["ask_next"] is not None and h["ask_next"] <= ASK_BAR + 1e-9 and h["spread_next"] <= SPREAD_BAR + 1e-9
         return now or nxt
+    def buyable(h):
+        """Amendment of Nov 13 (Auditor B): decide on the detection minute (ask at the bar or lower, spread at the bar or less);
+        a limit at that ask plus 1c is filled only if the SAME contract's ask one minute later is at or under the limit."""
+        decided = h["ask"] <= ASK_BAR + 1e-9 and h["spread"] <= SPREAD_BAR + 1e-9
+        return decided and h["same_ask_next"] is not None and h["same_ask_next"] <= h["ask"] + 0.01 + 1e-9
     share = sum(1 for h in hits if buyable(h)) / n
-    print(f"detections where the cheaper side could be bought at {ASK_BAR:.2f} or lower, spread {SPREAD_BAR:.2f} or less, at the detection minute or the next: {share:.0%}")
+    print(f"detections where the cheaper side was at {ASK_BAR:.2f} or lower (spread {SPREAD_BAR:.2f} or less) at the detection minute AND a limit one cent higher was filled the next minute: {share:.0%}  [the registered verdict]")
+    print(f"  optimistic, best of the detection minute or the next, as first written: {sum(1 for h in hits if optimistic(h)) / n:.0%}  [information only]")
     print("VERDICT: " + ("CARD CLOSED (the market already prices overtime as close to even)" if share < SHARE_BAR else "SURVIVES the price measurement (nothing beyond it is approved)"))
 
 

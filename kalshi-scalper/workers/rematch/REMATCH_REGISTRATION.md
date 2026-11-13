@@ -142,3 +142,9 @@ What that changes, all of it before data:
 7. **The honest label, to be printed on the result page:** on about 5,200 qualifying pairs this read can falsify the rule or show a lead; it cannot reach the research bar alone.
 
 8. **Added 20:38Z (Head of R&D, 20:37Z, accepting the floor): the stage 1 floor of 300 will not move again.** It was changed once, on a fact of the schedule (the series began Oct 8), before any price or result, to the card's own registered verdict minimum. Under 300 projected development bets REMATCH closes at stage 1 as registered; there is no third number. The result page leads with n and the label of point 7, and a development read on fewer than 300 bets is reported as "no evidence at n = x", which does not qualify the rule for anything.
+
+## Amendment 6 (Nov 13, 2026, 00:09Z; before the stage 1 candles landed; Head of R&D's ruling of 00:07Z on Auditor B's audit, which found no leak in the stage 1 logic)
+
+1. **The held-out guard is hardened and has no bypass.** `refuse_heldout` tests every part of the path as typed (made absolute) and of its real path; the environment switch is removed. A held-out read is opened by a committed read-once line on the Head's go, never by an environment variable.
+2. **The cost line is printed twice:** over all qualifying entries, and over entries whose three instants (reference, decision, entry) were all read from their own minute, with no carried quote. A carried quote is up to 5 minutes old and may not be payable. **If the two fall on different sides of the 4c line, the worse one decides.** The stage 1 verdict uses the worse of the two.
+
