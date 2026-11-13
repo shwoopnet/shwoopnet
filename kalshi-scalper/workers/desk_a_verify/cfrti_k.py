@@ -25,7 +25,7 @@ def num(d, k):
     return None
 # ---------------------------------------------------------------- loaders (kalshi-pull run folders)
 def bodies(folder):
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard; heldout_guard.refuse_heldout(folder, "cfrti_k.bodies")      # standing rule (h)
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "cfrti_k.bodies")      # standing rule (h)
     man = json.load(open(os.path.join(folder, "manifest.json")))
     for row in man["rows"]:
         if row.get("status") == 200 and "file" in row:
