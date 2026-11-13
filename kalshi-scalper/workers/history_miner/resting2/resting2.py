@@ -1,12 +1,15 @@
 """V1 (OICORE resting bid) and V2 (EVENT830 resting entry) SECOND BUILD (History Miner, Nov 13, 2026), written from the two registrations alone:
 kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md (fc528cd3) and V2_EVENT830_RESTING_ENTRY_REGISTRATION.md (4221ab37) on claude/refine-live
-(at 243dd748: V1 64539074, V2 5e156f3e, with the dated amendments of Nov 13), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
+(at 9f576a29: V1 863eb2fa, V2 f266cf68, with the dated amendments and lines of Nov 13, including G1 to G3, D1 and D2), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
 Invented rows only. Every reading below is now RULED by the registrations' dated amendments (R1 to R14, C1 to C4, the NOT_ENOUGH_DATA order).
 
 Input:
   signals CSV: ticker, close_ts (epoch s) - one candidate window per line (V1: OICORE trigger windows; V2: listed release windows), built elsewhere
   one or more run folders, each with book.csv, trades.csv and coverage.csv in the recorders' columns (plain or .gz)
-Usage: python3 -I resting2.py --version V1|V2 --block dev|fwd <signals.csv> <out.json> <run folder>... [--depth1-marker <file>] [--nc15depth1-record <file>]
+Usage: python3 -I resting2.py --version V1|V2 --block dev|fwd <signals.csv> <out.json> <run folder>...
+The record files are read from FIXED paths in this folder (G1 to G3): records/DEPTH1_READ_MARKER.txt (a byte copy of the Head's marker, first line
+"DEPTH1 READ MADE:") and records/NC15DEPTH1_SCORER_HASH.txt (a byte copy of the Head's file on rnd-queue, whose first line must contain NC15_HASH);
+the held-out list is kalshi-scalper/workers/HELDOUT_PULL_RUNS.md through hm_guard.
 (The clock is the real one; tests pass a clock to run() directly, never through the command line.)"""
 import csv, gzip, json, math, os, sys
 from datetime import datetime, timezone
@@ -27,8 +30,11 @@ T0_LATE_S = 10                       # C1: a t0 row more than 10 s after the tar
 LABELS = {"V1": "not blind on Bitcoin windows to Nov 13: DEPTH1, CFRTI-B and CFRTI1-BTC read them (DEPTH1 on 2026-11-14)",
           "V2": "not blind on EVENT830's forward windows"}
 MARKER_DIR = os.path.dirname(os.path.abspath(__file__))     # the read-once markers live at a fixed path
+DEPTH1_RECORD = os.path.join(MARKER_DIR, "records", "DEPTH1_READ_MARKER.txt")
+NC15_RECORD = os.path.join(MARKER_DIR, "records", "NC15DEPTH1_SCORER_HASH.txt")
+NC15_HASH = "0a6c1f519ca66820ed4a10951dcd20a54febf7dadb2457d5c4f95aed25af57a3"
 MIN_FILLS = 60
-AMBIG = ["All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only."]
+AMBIG = ["All readings ruled (V1 64539074 and V2 5e156f3e dated amendments): R1 best bids at level 1; R2/C2 a tie of the asks takes YES; R3 V2 spread on YES ask minus YES bid, 10c inclusive; R4 band inclusive; R5 rest open at both ends; C1 t0 row more than 10 s late is no_t0_row; R6 taker side from taker_outcome_side; R7 book ask at or below our price; R8 parent +1c fee at p + 0.01, version fee at our bid unrounded; R9 no result: counted, out of every PF; R10 blocks inclusive; R11/C4 halves by count, n // 2 first; R12 ceil weeks; C3 bar (2) against the parent at +0c and +1c, the stricter governs; R13 FALSIFIED = bar (2) fails OR missed windows' parent PF exceeds the VERSION PF by 0.10 or more; R14 a set with no bet fails; under 60 fills NOT_ENOUGH_DATA comes first and FALSIFIED is information only; D1 bar (3) with infinite PFs decided on the second half alone (see bar3_basis); D2 fill rate = fills / signals; G1 to G3 fixed record paths, no clock option."]
 
 
 def iso(s):
@@ -158,16 +164,33 @@ def block_report(sigs, start, end):
     P0 = [s["parent_p0"] for s in sigs]
     V = [s["version"]["25"] for s in fills]
     vpf, ppf = pf(V), pf(P1)
-    half = n // 2                                                                      # R11
-    def diff(ss):
-        v = pf([s["version"]["25"] for s in ss if s.get("filled")]); p = pf([s["parent_p1"] for s in ss])
-        return None if v is None or p is None else (v - p if not (math.isinf(v) or math.isinf(p)) else (math.inf if math.isinf(v) and not math.isinf(p) else (-math.inf if math.isinf(p) and not math.isinf(v) else 0.0)))
-    d1, d2 = diff(sigs[:half]), diff(sigs[half:])
+    half = n // 2                                                                      # R11, C4
+    halves = (sigs[:half], sigs[half:])
+    def hstats(ss):
+        f = [s for s in ss if s.get("filled")]
+        return {"fills": len(f), "vpf": pf([s["version"]["25"] for s in f]), "ppf": pf([s["parent_p1"] for s in ss]),
+                "vnet": sum(s["version"]["25"] for s in f), "pnet0": sum(s["parent_p0"] for s in ss)}
+    H = [hstats(h) for h in halves]
+    if any(h["fills"] == 0 for h in H):                                                 # D1 (c): an empty half fails
+        bar3, basis = False, "an empty half (no version fills): fails"
+    elif not any(math.isinf(h["vpf"]) or math.isinf(h["ppf"]) for h in H):            # D1 (a): as registered
+        d1, d2 = H[0]["vpf"] - H[0]["ppf"], H[1]["vpf"] - H[1]["ppf"]
+        bar3, basis = d2 >= d1 - EPS, "finite: (version minus parent PF at +1c) second half %.6f against first %.6f" % (d2, d1)
+    else:                                                                               # D1 (b): the second half alone
+        h = H[1]
+        if math.isinf(h["vpf"]) and math.isinf(h["ppf"]):
+            bar3, basis = h["vnet"] >= h["pnet0"] - EPS, "second half alone, both PFs infinite: version net per contract-week against the parent's at +0c"
+        elif math.isinf(h["vpf"]):
+            bar3, basis = True, "second half alone: only the version PF infinite, passes"
+        elif math.isinf(h["ppf"]):
+            bar3, basis = False, "second half alone: only the parent PF infinite, fails"
+        else:
+            bar3, basis = h["vpf"] >= h["ppf"] - EPS, "second half alone, finite: version PF against the parent PF at +1c"
     filled_parent = pf([s["parent_p1"] for s in fills]); missed_parent = pf([s["parent_p1"] for s in missed])
     bar = {
         "pf_beats_parent_by_0_10": vpf is not None and ppf is not None and (vpf - ppf >= 0.10 - EPS if not (math.isinf(vpf) or math.isinf(ppf)) else math.isinf(vpf) and not math.isinf(ppf)),
         "net_per_week_not_lower": sum(V) / weeks >= sum(P0) / weeks - EPS and sum(V) / weeks >= sum(P1) / weeks - EPS,   # C3: +0c and +1c
-        "second_half_not_worse": d1 is not None and d2 is not None and d2 >= d1 - EPS,
+        "second_half_not_worse": bar3,
         "at_least_60_fills": len(fills) >= MIN_FILLS,
     }
     # R13: the missed windows' PARENT PF against the VERSION PF on its fills; inf on either side is compared as the larger
@@ -179,13 +202,13 @@ def block_report(sigs, start, end):
     else:
         verdict = "FALSIFIED" if falsified else ("PASSES the 7g bar" if all(bar.values()) else "does not pass the 7g bar")
     return {"signals": n, "orders": sum(1 for s in sigs if s.get("order")), "fills": len(fills),
-            "fill_rate": shown(len(fills) / sum(1 for s in sigs if s.get("order"))) if any(s.get("order") for s in sigs) else None,
+            "fill_rate": shown(len(fills) / n) if n else None,                        # D2: fills / signals
             "version_pf_25": shown(vpf), "version_pf_0": shown(pf([s["version"]["0"] for s in fills])), "version_pf_100": shown(pf([s["version"]["100"] for s in fills])),
             "parent_pf_p0": shown(pf([s["parent_p0"] for s in sigs])), "parent_pf_p1": shown(ppf),
             "parent_pf_p1_on_filled": shown(filled_parent), "parent_pf_p1_on_missed": shown(missed_parent),
             "weeks": weeks, "version_net_per_week": round(sum(V) / weeks, 6), "parent_net_per_week": round(sum(P1) / weeks, 6),
             "parent_net_per_week_p0": round(sum(P0) / weeks, 6), "missed_parent_minus_version_pf_ge_0_10": gap_missed,
-            "half_diff_first": shown(d1), "half_diff_second": shown(d2), "bar": bar, "falsified": falsified, "verdict": verdict}
+            "bar3_basis": basis, "bar": bar, "falsified": falsified, "verdict": verdict}
 
 
 def first_line(path):
@@ -196,7 +219,7 @@ def first_line(path):
         return ""
 
 
-def run(version, block, signals_path, folders, depth1_marker=None, marker_dir=None, now=None, nc15_record=None, out_path=None):
+def run(version, block, signals_path, folders, depth1_marker=DEPTH1_RECORD, marker_dir=None, now=None, nc15_record=NC15_RECORD, out_path=None):
     hm_guard.refuse_all([signals_path] + list(folders) + ([out_path] if out_path else []))   # book roots, signals and out
     cfg = CFG[version]
     now = datetime.now(timezone.utc).timestamp() if now is None else now
@@ -205,11 +228,14 @@ def run(version, block, signals_path, folders, depth1_marker=None, marker_dir=No
     if version == "V2" and block == "dev":
         if now < iso(cfg["dev_read"]):
             raise SystemExit("REFUSED: V2 development is read on or after %s" % cfg["dev_read"])
-        if not first_line(nc15_record).startswith("NC15DEPTH1 SCORER HASH: "):
+        line = first_line(nc15_record)
+        if not (line.startswith("NC15DEPTH1 SCORER HASH: ") and NC15_HASH in line):
             raise SystemExit("REFUSED: V2 development needs the NC15DEPTH1 scorer hash record")
     if block == "fwd" and now < iso(cfg["fwd_read"]):
         raise SystemExit("REFUSED: the forward block is read on or after %s" % cfg["fwd_read"])
-    marker = os.path.join(marker_dir or MARKER_DIR, "%s_%s_READ_DONE" % (version, block))
+    md = marker_dir or MARKER_DIR
+    os.makedirs(md, exist_ok=True)
+    marker = os.path.join(md, "%s_%s_READ_DONE" % (version, block))
     if os.path.exists(marker):
         raise SystemExit("REFUSED: %s %s already read (%s)" % (version, block, marker))
     start, end = iso(cfg[block][0]), iso(cfg[block][1])
@@ -246,8 +272,7 @@ if __name__ == "__main__":
             i = a.index(name); v = a[i + 1]; del a[i:i + 2]; return v
         return None
     version, block = opt("--version"), opt("--block")
-    dm, nc = opt("--depth1-marker"), opt("--nc15depth1-record")
-    res = run(version, block, a[0], a[2:], dm, None, None, nc, a[1])
+    res = run(version, block, a[0], a[2:], out_path=a[1])
     with open(a[1], "w") as f:
         json.dump(res, f, indent=1, sort_keys=True); f.write("\n")
     print(json.dumps(res["counts"], sort_keys=True)); print(res["report"]["verdict"])
