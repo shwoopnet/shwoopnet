@@ -208,7 +208,8 @@ gates.PR11 = () => {
   assert.ok(/if: "!cancelled\(\) && steps\.gate\.outputs\.go == 'true' && steps\.fresh\.outputs\.poll == 'true'"/.test(chain), 'chains after a failed poll (but a manual cancel stops the chain), never from a skipped or past-end run');
   assert.ok(/2027-02-28T23:59:00Z/.test(chain) && (chain.match(/not chaining/g) || []).length >= 2, 'the end date is checked before and after the sleep');
   assert.ok(chain.indexOf('sleep $((') > -1 && chain.indexOf('sleep $((') < chain.indexOf('gh workflow run'), 'it sleeps before it dispatches');
-  assert.ok(/START \+ 1200/.test(chain) && /1800/.test(chain), 'at least 20 minutes after the start, on a half hour');
+  assert.ok(/START \+ 1560/.test(chain) && /1800/.test(chain), 'at least 26 minutes after the start (past the 25 minute freshness line), on a half hour');
+  assert.ok(/RUN_START: \$\{\{ steps\.gate\.outputs\.start \}\}/.test(chain) && !/github\.run_started_at/.test(chain), 'the start time is recorded by the first step, never read from a context value that does not exist');
   const disp = [...wf.matchAll(/gh workflow run ([^\n]+)/g)].map((x) => x[1].trim());
   assert.deepStrictEqual(disp, ['record-politics.yml --ref main'], 'only this workflow, only on main');
   assert.ok(!/secrets\.(?!GITHUB_TOKEN)/.test(wf));
