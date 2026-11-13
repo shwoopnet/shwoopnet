@@ -150,3 +150,14 @@ What that changes, all of it before data:
 3. **Added 00:13Z, before the stage 1 candles were read (Head of R&D's rule 16b and its order to check for raw float comparisons):** every comparison against a registered line is made without a float trap: the spread, band, fall and cost lines already carried a tolerance of 1e-9; the 80% start check is now made in whole numbers and the two stage 1 floors with the same tolerance. No line and no number changed. **Rule 16b:** an audit CLEAN lets this desk READ; the stage 1 figures are "provisional, one build" until the Testing Desk's independent second build prints the same figures on the same landed file, and only then is a verdict recorded and stage 2 asked for.
 
 4. **Added 00:25Z, AFTER stage 1 was read; it describes what the frozen builder did and changes no figure (asked by the Forensics desk, whose second build printed the same 28 lines):** in stage 1 a pair is kept only if BOTH matches' markets close inside the slice (2026-10-15 to before 2026-10-23). A pair whose later match closes in the slice and whose earlier match closed on Oct 14 is not in the stage 1 pair list (16 such pairs exist in the lists).
+
+## CLOSED, Nov 13, 2026 (recorded by the Head of R&D at 00:26Z; written here 00:26Z)
+
+**REMATCH is CLOSED at stage 1 on tradeability and on count. No try was spent and no bet was scored.** The registered try is back to 0 on the ledger, the resting-entry variant falls with it, and its wheel place is withdrawn. Output page: `rematch/STAGE1_OUTPUT_NOV13.txt`. Under rule 16b the figures were recorded only after the Forensics desk's independent second build printed the same 28 lines on the same files (75b42a36 on `claude/forensics-desk`).
+
+- **What closed it:** of 2,404 eligible pairs only 85 had the previous loser's contract two-sided at the reference minute (within the registered 5 minute carry), and none of the 85 had a spread of 4c or less. Three entries in eight days; a projected 6 development bets against the fixed floor of 300.
+- **Quiet, not dead:** 2,265 of the 2,276 "no candle" pairs do have a candle somewhere in the pulled window (Forensics' count, presence only). The markets were open and mostly unchanged for long stretches. The closure rests on the 85 two-sided pairs, none tradeable at the registered spread.
+- **A known gap in a closed card:** the text never said whether the EARLIER match must close inside the stage 1 slice. The frozen builder required it; a wider reading forms 16 more schedule pairs, all without candles.
+- **Not to be written:** a version with a longer carry. That would be a new rule chosen after seeing this count.
+- **The author's error, for the next card:** "open" in a market listing was taken to mean "trading". A market's open time says nothing about whether it is quoted.
+- **If anything reopens this ground:** only a count from the wheel book recorder's slow tier showing tight early quotes on e-soccer, brought to the Head before any card.
