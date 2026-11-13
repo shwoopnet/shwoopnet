@@ -690,3 +690,8 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - SPXFV1, and futures fair value on the S&P: "No, keep it closed."
   - CFRTI-K: "Run it, close if test fails." It goes live with today's deploy at trial size (3 contracts, -$18 floor) as the owner's named exception in a declined family. Its frozen held-out read runs once on Nov 14; if it fails, it is closed for good by a reviewed edit. Desk A writes the exit line into the card. Main and the Risk Analyst are told.
 - Forensics: the SPXFV1 rows builder was written before the cancellation arrived (0c5c3764, marked CANCELLED). There was no pull and no spend, only the free cost query. SPXCLOSE1 is marked closed (Desk A c3bbec4c).
+- 17:04Z, CFRTI-K corrections (Desk A's facts, the Head's rulings).
+  - The read that counts is the REGISTERED held-out read: closes from 2026-11-14T00:00Z, read 2026-11-20 at 50 or more rows; under 50 means NOT_ENOUGH_DATA, read once at the first 50. Nov 14 is the window start, not a read.
+  - No held-out reader exists yet. Desk A writes and commits it, ideally before 00:00Z Nov 14; Auditor B audits; the Testing Desk writes the second build.
+  - functions/ has no CFRTI-K model, so live running needs a new reviewed build by Main and the owner's merge. Told to Main and the EA.
+  - The owner's exit line is in the card (Desk A 57e2b153; registration f42574fb).
