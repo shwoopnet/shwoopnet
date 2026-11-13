@@ -52,15 +52,17 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert counts["not_best_of_three"] == 1 and counts["start_not_derivable"] == 1 and counts["map2_closed_under_15_min_after_map1_count_only"] == 1 and counts["sampled"] == NM + 20 + 5, counts
     assert len(mt) == NM + 24, counts
     assert counts["second_look_matches"] == NM + 23 and counts["map2_won_by_map1_winner_no_second_look"] == 1, counts
-    assert all(set(x) - {"state_close2", "state_ticker2"} == {"cell", "key", "S", "state_close", "up", "down", "match", "placebo"} for x in mt)           # no result field of any market in a match record
-    g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["up"] == "AAA" and g["S"] == sampled[0]["S"] and g["state_close"] == sampled[0]["c1"]
+    assert all(set(x) - {"state_close2", "map2"} == {"cell", "key", "S", "state_close", "posted_up", "match", "placebo"} for x in mt)           # no result field of any market in a match record
+    g = [x for x in mt if x["key"] == sampled[0]["key"]][0]; assert g["posted_up"] == "AAA" and g["S"] == sampled[0]["S"] and g["state_close"] == sampled[0]["c1"]
     lists["live_KXDOTA2MAP"]["cursor"] = "abc123"; dlt = os.path.join(dc, "lt"); os.mkdir(dlt); mkrun(dlt, jl, lists); assert m.matches(spec, [dlt])[1]["lists_truncated_at_the_page_cap"] == ["live_KXDOTA2MAP"]; del lists["live_KXDOTA2MAP"]["cursor"]
     jc, _ = m.build_candles(spec, [dl]); kp.check_job(jc); assert 1 <= len(jc["requests"]) <= 250 and all(r["params"]["end_ts"] < m.HELD_OUT_FROM + 86400 * 400 for r in jc["requests"])
-    assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt) + sum(1 for x in mt if x.get("state_ticker2"))
+    assert all(len(r["params"]["market_tickers"].split(",")) <= 100 for r in jc["requests"]) and len(jc["ticker_allowlist"]) == 4 * len(mt) + 2 * sum(1 for x in mt if x.get("state_close2"))
     assert max(r["params"]["end_ts"] for r in jc["requests"]) >= max(x.get("state_close2", 0) for x in mt) + 300      # the window of a third-map match runs to map-2 close + 5 minutes
+    def state_candle(ts, mid): return {"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % (mid - 0.01)}, "yes_ask": {"close_dollars": "%.4f" % (mid + 0.01)}, "volume_fp": "1"}
     def candles(look_edge, half, thin_pre=False, thin_look=0, q=0.55):
         cm = {}
         for x in mt:
+            x = dict(x, up=x["posted_up"], down=[tm for tm in x["match"] if tm != x["posted_up"]][0])
             p = q * q * (3 - 2 * q); V = 1 - (1 - q) ** 2
             def series(t, mid, window):
                 return [{"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % max(0.02, mid - half)}, "yes_ask": {"close_dollars": "%.4f" % min(0.98, mid + half)}, "volume_fp": "1"} for ts in window]
@@ -71,7 +73,9 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
             if x.get("state_close2"):
                 look2 = range(x["state_close2"] + 120 + 60 * thin_look, x["state_close2"] + 301, 60)
                 cm[x["match"][x["up"]]] += series("", q - look_edge, list(look2)); cm[x["match"][x["down"]]] += series("", (1 - q) + 0.01, list(look2))
-            cm[x["placebo"][x["up"]]] = series("", q, pre); cm[x["placebo"][x["down"]]] = series("", 1 - q, pre)
+            cm[x["placebo"][x["up"]]] = series("", q, pre) + [state_candle(x["state_close"] - 60, 0.95)]; cm[x["placebo"][x["down"]]] = series("", 1 - q, pre) + [state_candle(x["state_close"] - 60, 0.04)]      # the map-1 contracts show the state (Amendment 7)
+            if x.get("state_close2"):
+                cm[x["map2"][x["down"]]] = [state_candle(x["state_close2"] - 60, 0.95)]; cm[x["map2"][x["up"]]] = [state_candle(x["state_close2"] - 60, 0.04)]          # map 2 won by the map-1 loser
         return {r["id"]: {"markets": [{"market_ticker": t, "candlesticks": cm[t]} for t in r["params"]["market_tickers"].split(",") if t in cm]} for r in jc["requests"]}
     def run(name, **kw):
         d = os.path.join(dc, name); os.mkdir(d); mkrun(d, jc, candles(**kw)); return m.measure(spec, [dl], [d])
@@ -87,7 +91,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
         body = candles(**kw)
         for b in body.values():
             for mk_ in b["markets"]:
-                if "MAP-" in mk_["market_ticker"] or "MAP" in mk_["market_ticker"].split("-")[0]: mk_["candlesticks"] = []
+                if "MAP" in mk_["market_ticker"].split("-")[0]: mk_["candlesticks"] = mk_["candlesticks"][-1:]          # keep only the state candle: no pre-match map-1 minutes
         return body
     dn = os.path.join(dc, "nm"); os.mkdir(dn); mkrun(dn, jc, nomap1(look_edge=0.12, half=0.005)); nm = m.measure(spec, [dl], [dn])["titles"]["DOTA2"]
     assert nm["filled_pre_match"] == 0 and nm["dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute"] == NM + 4, nm
@@ -112,7 +116,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
                 parts = mk_["ticker"].split("-")
                 if parts[0] in [t["match_series"] for t in spec["titles"]]:
                     key = parts[1]; x = [r for r in mt if r["key"] == key]
-                    if x: mk_["result"] = "yes" if ((parts[2] == x[0]["up"]) == up_wins) else "no"
+                    if x: mk_["result"] = "yes" if ((parts[2] == x[0]["posted_up"]) == up_wins) else "no"
     def sc(folder_l, folder_c): return m.score(spec, [folder_l], [folder_c])
     dsr = os.path.join(dc, "sr"); os.mkdir(dsr); mkrun(dsr, jc, candles(look_edge=0.12, half=0.005))
     # step 1 shows both looks per title with their own kill lines; CS2 is out at both (20 matches)
@@ -173,4 +177,18 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     # both candle windows: own (S-40) and widened (S-70); the widened job never has fewer requests, same tickers
     jo, _ = m.build_candles(spec, [dl]); jw, _ = m.build_candles(spec, [dl], True)
     assert len(jw["requests"]) >= len(jo["requests"]) and jw["ticker_allowlist"] == jo["ticker_allowlist"] and min(r["params"]["start_ts"] for r in jw["requests"]) < min(r["params"]["start_ts"] for r in jo["requests"])
+    # AMENDMENT 7: the observed winner (best YES bid >= 0.90, or the other team's YES ask <= 0.10; last candle at or before the look; one-sided allowed)
+    cdl = lambda b, a: {"bid": b, "ask": a}
+    ix7 = {"MA": {100: cdl(0.93, 0.97), 160: cdl(0.20, None)}, "MB": {100: cdl(0.05, 0.08)}, "MC": {100: cdl(None, 0.12)}, "MD": {100: cdl(0.91, None)}, "ME": {100: cdl(0.5, 0.6)}}
+    ow = bp.observe_winner
+    assert ow(ix7, {"A": "MA", "B": "MB"}, 100) == "A"                                   # A's bid .93, B's ask .08
+    assert ow(ix7, {"A": "MB", "B": "MC"}, 100) == "B"                                    # A's ask .08 <= .10 says B won; B's ask .12 says nothing about A: exactly one
+    assert ow(ix7, {"A": "MD", "B": "ME"}, 100) == "A" and ow(ix7, {"A": "ME", "B": "ME"}, 100) is None            # a one-sided bid counts; neither: none
+    assert ow(ix7, {"A": "MD", "B": "MD"}, 100) is None                                   # both teams observed: not observable
+    assert ow(ix7, {"A": "MA", "B": "NOCANDLES"}, 100) is None and ow(ix7, {"A": "MA", "B": "MB"}, 99) is None          # a contract with no candle at or before the look
+    assert ow(ix7, {"A": "MA", "B": "ME"}, 130) == "A" and ow(ix7, {"A": "MA", "B": "ME"}, 170) is None                  # the LAST candle at or before the look decides (MA at 160 has bid .20)
+    # the bet's state ignores the posted result: flip posted_up on every record, nothing changes in the engine's resolved up
+    ms_f, _c = m.matches(spec, [dl]); flipped = [dict(r, posted_up=[tm for tm in r["match"] if tm != r["posted_up"]][0]) for r in ms_f]
+    a_ = bp.measure(ms_f, [dsr], m.CFG)["titles"]; b_ = bp.measure(flipped, [dsr], m.CFG)["titles"]
+    assert a_["DOTA2"]["filled_at_the_look"] == b_["DOTA2"]["filled_at_the_look"] and b_["DOTA2"]["observed_winner_differs_from_posted_result"] == a_["DOTA2"]["sampled"] and a_["DOTA2"]["observed_winner_differs_from_posted_result"] == 0
 print("mapbreak synthetic tests passed")

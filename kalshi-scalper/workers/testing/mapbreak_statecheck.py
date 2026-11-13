@@ -13,8 +13,8 @@ def run(list_folders, candle_folders):
     ser = {t: sorted(v, key=lambda c: c["ts"]) for t, v in k.candles(candle_folders).items()}
     out = {}
     for r in recs:
-        for look, tk, sc in ((1, r["placebo"][r["up"]], r["state_close"]), (2, r.get("state_ticker2"), r.get("state_close2"))):
-            if not tk: continue
+        for look, tk, sc in ((1, r["placebo"].get(r["posted_up"]), r["state_close"]), (2, (r.get("map2") or {}).get([t for t in r["match"] if t != r["posted_up"]][0]) if r.get("posted_up") else None, r.get("state_close2"))):
+            if not tk or not r.get("posted_up"): continue
             P = out.setdefault((r["cell"], look), {"records": 0, "no_candle_pulled_or_before_close": 0, "bid_ge_90": 0, "trade_ge_90": 0, "either": 0, "both_none": 0, "last_candle_minutes_before_close": []})
             cs = [c for c in ser.get(tk, []) if c["ts"] <= sc]
             if tk not in ser: continue                                           # that request was not pulled: not counted as a record

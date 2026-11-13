@@ -74,7 +74,7 @@ def events(spec, list_folders):
     by = {}
     for t, m in ms.items():
         by.setdefault((m["series"], game_key(m["event"])), []).append(m)
-    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0}
+    counts = {"events_listed": 0, "held_out_dropped": 0, "dropped_not_all_settled": 0, "dropped_no_tie_market": 0, "start_not_derivable": 0, "no_such_series": 0, "note_not_all_settled": "dropped_not_all_settled tests only whether each market has a yes or no result field (presence), for base-block AND price-block games; the VALUE of a price-block result is never read (Auditor B minor note, Nov 13)"}
     listed = {m["series"] for m in ms.values()}
     counts["no_such_series"] = sum(1 for s in all_series(spec) if s not in listed)
     out = {}

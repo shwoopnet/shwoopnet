@@ -23,7 +23,7 @@ EDGE, SPREAD_MAX, COST_MAX, EDGE_SHARE, MIN_FILLED = 0.08, 0.04, 0.05, 0.10, 150
 
 class VenueConfig:
     def __init__(self, name, model, pre_back=600, pre_max_back=2400, look_after=120, look_max=300, heldout_from=None, freshness="candle freshness measured on Bitcoin 15 minute only, not on this venue",
-                 edge=EDGE, spread_max=SPREAD_MAX, cost_max=None, edge_share=EDGE_SHARE, min_filled=MIN_FILLED, pack_limit=9000, max_tickers=100, cost_mode="round_trip"):
+                 edge=EDGE, spread_max=SPREAD_MAX, cost_max=None, edge_share=EDGE_SHARE, min_filled=MIN_FILLED, pack_limit=9000, max_tickers=100, cost_mode="round_trip", observe_state=False):
         """cost_mode (Head's ruling, Nov 12 19:02Z): "round_trip" (a rule that EXITS before settlement: spread plus two fees, kill above 5c) or "one_way" (a rule that buys and HOLDS to settlement: median of (ask minus mid) plus the entry fee as charged at ask+1c, rounded up, kill above 4c). The venue chooses; the result prints which was used."""
         assert cost_mode in ("round_trip", "one_way")
         cost_max = (COST_MAX if cost_mode == "round_trip" else 0.04) if cost_max is None else cost_max
@@ -91,7 +91,7 @@ def look_minute(idx, rec, cfg, state_close=None):
     sc = rec["state_close"] if state_close is None else state_close
     t0 = -(-(sc + cfg.look_after) // 60) * 60
     for ts in range(t0, sc + cfg.look_max + 1, 60):
-        if all(two(idx, rec["match"][x], ts) for x in (rec["up"], rec["down"])): return ts
+        if all(two(idx, t, ts) for t in rec["match"].values()): return ts
     return None
 
 
@@ -104,6 +104,49 @@ def state_known(idx, rec, look_no=1):
         if ts > sc: break
         if two(idx, tk, ts): last = series[ts]
     return None if last is None else last["bid"] >= 0.90
+
+
+# ---------- AMENDMENT 7 (Desk B, Nov 13, 17bf7247): the state is OBSERVED from candles at the look, never read from a result field ----------
+OBS_BID, OBS_ASK = 0.90, 0.10
+
+
+def last_candle(idx, t, ts):
+    d = idx.get(t)
+    if not d: return None
+    m = max((x for x in d if x <= ts), default=None)
+    return None if m is None else d[m]
+
+
+def observe_winner(idx, contracts, ts):
+    """contracts {team: map ticker} (exactly two). For each contract its LAST candle ending at or before ts, two-sided or one-sided. Team X is the OBSERVED winner if X's YES bid >= 0.90 or the other team's YES ask <= 0.10. Exactly one team observed -> that team; neither, both, or a contract with no candle -> None."""
+    teams = list(contracts)
+    if len(teams) != 2: return None
+    cs = {t: last_candle(idx, contracts[t], ts) for t in teams}
+    if any(c is None for c in cs.values()): return None
+    won = []
+    for x in teams:
+        o = teams[1] if x == teams[0] else teams[0]
+        if (cs[x]["bid"] is not None and cs[x]["bid"] >= OBS_BID - 1e-9) or (cs[o]["ask"] is not None and cs[o]["ask"] <= OBS_ASK + 1e-9): won.append(x)
+    return won[0] if len(won) == 1 else None
+
+
+def resolve(idx, rec, cfg, look_no, obs1=None):
+    """-> (status, rec2). status 'ok' (rec2 has up/down = the OBSERVED map-1 winner and the other team), 'no_look' (no two-sided minute for both match contracts), 'state_not_observable', 'map2_won_by_map1_winner' (second look: no 'one map each'). Without cfg.observe_state it returns the record unchanged."""
+    if not cfg.observe_state: return "ok", rec
+    sc = rec["state_close"] if look_no == 1 else rec["state_close2"]
+    look = look_minute(idx, rec, cfg, sc)
+    if look is None: return "no_look", None
+    if look_no == 1:
+        w = observe_winner(idx, rec["placebo"], look)
+        if w is None: return "state_not_observable", None
+    else:
+        w2 = observe_winner(idx, rec["map2"], look)
+        w = obs1 or observe_winner(idx, rec["placebo"], look)                 # map 1 again at the second look if it was not observable at the first
+        if w is None or w2 is None: return "state_not_observable", None
+        if w2 == w: return "map2_won_by_map1_winner", None
+    teams = list(rec["match"]); other = teams[1] if w == teams[0] else teams[0]
+    return "ok", dict(rec, up=w, down=other)
+
 
 
 def prepare(idx, rec, cfg, look_no=1):
@@ -147,24 +190,34 @@ def measure(records, candle_folders, cfg):
     for rec in records:
         assert "result_up" not in rec, "the measurement path must not carry a result"
         P = per.setdefault(rec["cell"], new()); P["sampled"] += 1
-        r = prepare(idx, rec, cfg)
-        if r == "no_pre":
-            if pre_match_dropped_match_ok(idx, rec, cfg): P["pre_dropped_match_ok"] += 1
-            if rec.get("state_close2"): per.setdefault(rec["cell"] + SECOND, new())["sampled"] += 1
-            continue
-        P["pre"] += 1; P["placebo"].append(r["placebo"]); plc_all.setdefault(rec["cell"], []).append(r["placebo"])
-        kn = state_known(idx, rec)
-        if kn is not None: P["state_known_n"] = P.get("state_known_n", 0) + 1; P["state_known_hi"] = P.get("state_known_hi", 0) + (1 if kn else 0)
-        if r["look"] is not None:
-            P["look_filled"] += 1; P["minutes"].append((r["look"] - rec["state_close"]) / 60)
-            for s in ("up", "down"): P["spreads"].append(r["cand"][s]["spread"])
-            P["rts"].append(cost_of(r["cand"][r["best"]], cfg)) if cfg.cost_mode == "one_way" else [P["rts"].append(cost_of(r["cand"][s], cfg)) for s in ("up", "down")]
-            P["look"].append(r["cand"][r["best"]])
+        st1, rec1 = resolve(idx, rec, cfg, 1); o1 = None
+        if rec1 is None: P[st1] = P.get(st1, 0) + 1
+        else:
+            o1 = rec1["up"]
+            if cfg.observe_state and rec.get("posted_up") and o1 != rec["posted_up"]: P["observed_differs_from_posted"] = P.get("observed_differs_from_posted", 0) + 1       # the ONLY use of a result field: this printed count
+            r = prepare(idx, rec1, cfg)
+            if r == "no_pre":
+                if pre_match_dropped_match_ok(idx, rec1, cfg): P["pre_dropped_match_ok"] += 1
+            else:
+                P["pre"] += 1; P["placebo"].append(r["placebo"]); plc_all.setdefault(rec["cell"], []).append(r["placebo"])
+                if not cfg.observe_state:
+                    kn = state_known(idx, rec1)
+                    if kn is not None: P["state_known_n"] = P.get("state_known_n", 0) + 1; P["state_known_hi"] = P.get("state_known_hi", 0) + (1 if kn else 0)
+                if r["look"] is not None:
+                    P["look_filled"] += 1; P["minutes"].append((r["look"] - rec["state_close"]) / 60)
+                    for s in ("up", "down"): P["spreads"].append(r["cand"][s]["spread"])
+                    P["rts"].append(cost_of(r["cand"][r["best"]], cfg)) if cfg.cost_mode == "one_way" else [P["rts"].append(cost_of(r["cand"][s], cfg)) for s in ("up", "down")]
+                    P["look"].append(r["cand"][r["best"]])
         if rec.get("state_close2"):
-            P2 = per.setdefault(rec["cell"] + SECOND, new()); P2["sampled"] += 1; P2["pre"] += 1
-            kn2 = state_known(idx, rec, 2)
-            if kn2 is not None: P2["state_known_n"] = P2.get("state_known_n", 0) + 1; P2["state_known_hi"] = P2.get("state_known_hi", 0) + (1 if kn2 else 0)
-            r2 = prepare(idx, rec, cfg, 2)
+            P2 = per.setdefault(rec["cell"] + SECOND, new()); P2["sampled"] += 1
+            st2, rec2 = resolve(idx, rec, cfg, 2, o1)
+            if rec2 is None: P2[st2] = P2.get(st2, 0) + 1; continue
+            r2 = prepare(idx, rec2, cfg, 2)
+            if r2 == "no_pre": continue
+            P2["pre"] += 1
+            if not cfg.observe_state:
+                kn2 = state_known(idx, rec2, 2)
+                if kn2 is not None: P2["state_known_n"] = P2.get("state_known_n", 0) + 1; P2["state_known_hi"] = P2.get("state_known_hi", 0) + (1 if kn2 else 0)
             if r2["look"] is not None:
                 P2["look_filled"] += 1; P2["minutes"].append((r2["look"] - rec["state_close2"]) / 60)
                 for s in ("up", "down"): P2["spreads"].append(r2["cand"][s]["spread"])
@@ -180,7 +233,7 @@ def measure(records, candle_folders, cfg):
         elif s_l["share_gap_ge_8c_spread_le_4c"] >= cfg.edge_share and s_l["share_gap_ge_8c_spread_le_4c"] >= 2 * (s_p["share_gap_ge_8c_spread_le_4c"] if s_p else 0): v = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration and the Head's go"
         else: v = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % s_l["gap_p90"]
         verdicts.append(v)
-        titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
+        titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "state_not_observable_at_the_look": P.get("state_not_observable", 0), "no_look_before_state": P.get("no_look", 0), "map2_won_by_map1_winner_no_second_look": P.get("map2_won_by_map1_winner", 0), "observed_winner_differs_from_posted_result": P.get("observed_differs_from_posted", 0), "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
                         "median_minutes_state_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2), "median_spread_at_look": None if not P["spreads"] else round(st.median(P["spreads"]), 4),
                         "median_round_trip_at_look": medrt, "cost_line_used": ("round trip (spread plus two fees), kill above %.0fc" if cfg.cost_mode == "round_trip" else "one-way entry cost (ask minus mid plus the entry fee as charged), kill above %.0fc") % (100 * cfg.cost_max), "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
                         "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (DIFFERENT SETS: the second look covers third-map matches only, the placebo all the title's matches)" if cell.endswith(SECOND) else ""), "verdict": v}
@@ -270,20 +323,31 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
     if not inn:
         out["verdict"] = "CLOSED: every title and look is out on its kill lines; no match result was read"; out["bets"] = 0; return out
     idx = {t: {c["ts"]: c for c in v} for t, v in k.candles(candle_folders).items()}
-    trades, cnt = [], {"fired": 0, "void_booked_as_fee_loss": 0, "no_pre": 0, "no_look": 0, "no_signal": 0}
+    trades, cnt = [], {"fired": 0, "void_booked_as_fee_loss": 0, "no_pre": 0, "no_second_look": 0, "no_look": 0, "no_signal": 0}
+    cnt.update({"state_not_observable": 0})
     for rec in recs:
-        r = prepare(idx, rec, cfg)
-        if r == "no_pre": cnt["no_pre"] += 1; continue
-        looks = [(1, rec["cell"], r)] + ([(2, rec["cell"] + SECOND, prepare(idx, rec, cfg, 2))] if rec.get("state_close2") else [])
-        for no, key, rr in looks:
+        looks = []; o1 = None
+        st1, rec1 = resolve(idx, rec, cfg, 1)
+        if rec1 is None: cnt["no_look" if st1 == "no_look" else "state_not_observable"] += 1
+        else:
+            o1 = rec1["up"]; r = prepare(idx, rec1, cfg)
+            if r == "no_pre": cnt["no_pre"] += 1
+            else: looks.append((1, rec["cell"], r, rec1))
+        if rec.get("state_close2"):
+            st2, rec2 = resolve(idx, rec, cfg, 2, o1)
+            if rec2 is None: cnt["state_not_observable" if st2 == "state_not_observable" else ("no_look" if st2 == "no_look" else "no_second_look")] += 1
+            else:
+                r2 = prepare(idx, rec2, cfg, 2)
+                if r2 != "no_pre": looks.append((2, rec["cell"] + SECOND, r2, rec2))
+        for no, key, rr, recx in looks:
             if key not in inn: continue
             if rr["look"] is None: cnt["no_look"] += 1; continue
             c = rr["cand"][rr["best"]]
             if not (c["gap"] >= cfg.edge and c["spread"] <= cfg.spread_max): cnt["no_signal"] += 1; continue
-            res = result_fn(rec); out["result_fn_calls"] += 1; cnt["fired"] += 1
+            res = result_fn(recx); out["result_fn_calls"] += 1; cnt["fired"] += 1
             if res is None:                    # Head's standing rule (Nov 12): a void is booked as price refunded, fee kept, a fee-only loss, counted in n, PF and z, with the count printed
-                t = amend_trade(rec, rr, no, False); t["net"] = -t["fee"]; t["void"] = True; trades.append(t); cnt["void_booked_as_fee_loss"] = cnt.get("void_booked_as_fee_loss", 0) + 1; continue
-            trades.append(amend_trade(rec, rr, no, res if rr["best"] == "up" else (not res)))
+                t = amend_trade(recx, rr, no, False); t["net"] = -t["fee"]; t["void"] = True; trades.append(t); cnt["void_booked_as_fee_loss"] = cnt.get("void_booked_as_fee_loss", 0) + 1; continue
+            trades.append(amend_trade(recx, rr, no, res if rr["best"] == "up" else (not res)))
     trades.sort(key=lambda t: (t["ts"], t["event"]))
     out["void_note"] = "price refunded, fee kept is an ASSUMPTION about how Kalshi settles a voided market, not a measurement"
     out["counts"] = cnt; out["bets"] = len(trades); out["distinct_matches_in_n"] = len({t["match"] for t in trades})
@@ -309,7 +373,7 @@ def score_rule2(records, candle_folders, cfg, result_fn, heldout_go=False, name=
 def candle_job(records, cfg, series, job_id, registration, window_start_back=2400, window_end_after=300):
     """Pack records by scheduled start: per record the match and placebo contracts from S - window_start_back to state_close + window_end_after; matches in one request share its window; minutes x tickers <= pack_limit, tickers <= max_tickers."""
     ms = sorted(records, key=lambda m: (m["S"], m["key"])); packs, cur = [], []
-    tk = lambda m: list(m["match"].values()) + list(m["placebo"].values()) + ([m["state_ticker2"]] if m.get("state_ticker2") else [])
+    tk = lambda m: list(m["match"].values()) + list(m["placebo"].values()) + (list(m["map2"].values()) if m.get("state_close2") and m.get("map2") else [])
     def win(g): return (max(max(m["state_close"], m.get("state_close2") or 0) for m in g) + window_end_after) - (min(m["S"] for m in g) - window_start_back)
     for m in ms:
         trial = cur + [m]

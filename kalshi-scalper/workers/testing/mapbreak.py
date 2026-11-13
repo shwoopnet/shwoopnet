@@ -73,7 +73,7 @@ def start_ts(key):
 
 
 def matches(spec, list_folders):
-    """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 3 result: the map-1 winner (state of look 1) and, when the map-2 result names the team that lost map 1 (Amendment 4), state_close2 and state_ticker2 (state of look 2). The match market's close time is never used."""
+    """-> (records, counts) in the breakplay engine shape. A record holds NO match result and no map 3 result: the POSTED map-1 winner (posted_up: pull planning and one printed count only), both map-1 contracts, both map-2 contracts (map2) and, for matches planned as one map each, state_close2. The bet's state is OBSERVED from candles at the look (Amendment 7), never read here. The match market's close time is never used."""
     raw = k.markets(list_folders)
     trunc = set()
     for f in ([list_folders] if isinstance(list_folders, str) else list_folders):
@@ -85,7 +85,7 @@ def matches(spec, list_folders):
     for t, m in raw.items():
         parts = t.split("-")
         by.setdefault((parts[0], parts[1] if len(parts) > 1 else ""), []).append((parts, m))
-    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "before_development_history_rows_not_used": 0, "start_not_derivable": 0, "no_map1_result": 0, "sampled": 0, "second_look_matches": 0, "map2_closed_under_15_min_after_map1_count_only": 0, "map2_won_by_map1_winner_no_second_look": 0, "no_map2_result_no_second_look": 0}
+    counts = {"lists_truncated_at_the_page_cap": sorted(trunc), "matches_listed": 0, "not_best_of_three": 0, "held_out_dropped": 0, "before_development_history_rows_not_used": 0, "start_not_derivable": 0, "no_map1_result": 0, "no_posted_map1_result_kept_anyway": 0, "map1_contracts_not_the_two_teams": 0, "sampled": 0, "second_look_matches": 0, "map2_closed_under_15_min_after_map1_count_only": 0, "map2_won_by_map1_winner_no_second_look": 0, "no_map2_result_no_second_look": 0}
     cand = []
     for ti in spec["titles"]:
         keys = {key for (s, key) in by if s == ti["match_series"]}
@@ -111,26 +111,30 @@ def matches(spec, list_folders):
         if S is None or len(m1) != 2 or not m1[0][1]["close"]: counts["start_not_derivable"] += 1; continue
         c1 = max(m["close"] for _, m in m1)
         if not (G_LO <= c1 - S <= G_HI): counts["start_not_derivable"] += 1; continue
-        win = [p[3] for p, m in m1 if m["result"] == "yes"]                    # THE state: the map-1 market's own result. No other result is read.
-        if len(win) != 1: counts["no_map1_result"] += 1; continue
+        win = [p[3] for p, m in m1 if m["result"] == "yes"]                    # POSTED map-1 winner: used ONLY for pull planning and for the printed count 'observed winner differs from the posted result' (Amendment 7); never for a bet
         teams = sorted(p[-1] for p, _ in mm)
-        if win[0] not in teams or len(set(teams)) != 2: counts["no_map1_result"] += 1; continue
+        if len(set(teams)) != 2: counts["no_map1_result"] += 1; continue
+        posted = win[0] if (len(win) == 1 and win[0] in teams) else None
+        if posted is None: counts["no_posted_map1_result_kept_anyway"] += 1
         match_t = {p[-1]: m["ticker"] for p, m in mm}; map1_t = {p[3]: m["ticker"] for p, m in m1}
-        rec = {"cell": cell, "key": key, "S": S, "state_close": c1, "up": win[0], "down": [x for x in teams if x != win[0]][0], "match": match_t, "placebo": map1_t}
+        if set(map1_t) != set(teams): counts["map1_contracts_not_the_two_teams"] += 1; continue
+        rec = {"cell": cell, "key": key, "S": S, "state_close": c1, "posted_up": posted, "match": match_t, "placebo": map1_t}
         if m2 and min(p_m["close"] for p_m in m2) < c1 + MAP2_MIN: counts["map2_closed_under_15_min_after_map1_count_only"] += 1          # Amendment 4: a COUNT, it decides nothing
-        # Amendment 4: the second look exists when the map-2 market's own RESULT names the team that lost map 1 (one map each); the match market's close is never used
         m2p = [(p, m) for p, m in maps if p[2] == "2"]
         w2 = [(p[3], m["ticker"]) for p, m in m2p if m["result"] == "yes"]
-        if len(m2p) == 2 and len(w2) == 1 and all(m["close"] for _, m in m2p):
-            if w2[0][0] == rec["down"]:
-                rec["state_close2"] = max(m["close"] for _, m in m2p); rec["state_ticker2"] = w2[0][1]; counts["second_look_matches"] += 1
-            else: counts["map2_won_by_map1_winner_no_second_look"] += 1
+        if len(m2p) == 2 and all(m["close"] for _, m in m2p):
+            rec["map2"] = {p[3]: m["ticker"] for p, m in m2p}
+            # PLANNING only (which matches get second-look candle windows): the posted map-2 result names the team that lost map 1. The BET uses the observed state (resolve); a match this planning misses cannot be observed (no candles), a limit disclosed on the result page.
+            if len(w2) == 1 and posted is not None and w2[0][0] != posted:
+                rec["state_close2"] = max(m["close"] for _, m in m2p); counts["second_look_matches"] += 1
+            elif len(w2) == 1 and posted is not None: counts["map2_won_by_map1_winner_no_second_look"] += 1
+            else: counts["no_map2_result_no_second_look"] += 1
         else: counts["no_map2_result_no_second_look"] += 1
         out.append(rec)
     return out, counts
 
 
-CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH, cost_mode="one_way")          # Head, Nov 12 19:02Z: hold-to-settlement rule, one-way entry cost, kill above 4c
+CFG = bp.VenueConfig("mapbreak", "bo3", heldout_from=HELD_OUT_FROM, freshness=FRESH, cost_mode="one_way", observe_state=True)          # Head, Nov 12 19:02Z: hold-to-settlement rule, one-way entry cost, kill above 4c
 
 
 def build_candles(spec, list_folders, widen=False):
@@ -138,6 +142,18 @@ def build_candles(spec, list_folders, widen=False):
     ms, counts = matches(spec, list_folders)
     j = bp.candle_job(ms, CFG, series_all(spec), "MAPBREAK_CANDLES", REG, window_start_back=PRE_WINDOW_WIDE if widen else PRE_WINDOW_OWN)
     j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; j["notes"] = "MAPBREAK zero-try gap measurement stage 2: candles of the two match and two map-1 contracts of each sampled match"; return j, counts
+
+
+def build_m2_candles(spec, list_folders):
+    """AMENDMENT 7 needs the OTHER map-2 contract (the posted map-2 loser's, i.e. the contract of the team that won map 1) for every planned one-map-each match: the first pull carried only the map-2 winner's contract. One extra contract per planned second look, window map-1 close minus 5 minutes to map-2 close plus 5 minutes, development only."""
+    ms, counts = matches(spec, list_folders); rows = []
+    for r in ms:
+        if not (r.get("state_close2") and r.get("map2") and r.get("posted_up")): continue
+        rows.append(dict(r, S=r["state_close"], match={}, placebo={}, map2={r["posted_up"]: r["map2"][r["posted_up"]]}))
+    j = bp.candle_job(rows, CFG, series_all(spec), "MAPBREAK_CANDLES_M2", REG, window_start_back=300)
+    j["heldout"] = "none read; the sample closes before 2026-10-23T00:00Z"; j["notes"] = "MAPBREAK Amendment 7: the other map-2 contract of each planned one-map-each match, for the observed-state rule"
+    return j, counts
+
 
 
 def measure(spec, list_folders, candle_folders):
@@ -196,6 +212,7 @@ if __name__ == "__main__":
         if a[0] == "build-lists": print(json.dumps(build_lists(spec), indent=1))
         elif a[0] == "matches": print(json.dumps(matches(spec, a[1:])[1], indent=1))
         elif a[0] == "build-candles": wide = "--widen70" in a; j, c = build_candles(spec, [x for x in a[1:] if x != "--widen70"], wide); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "build-m2-candles": j, c = build_m2_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
         elif a[0] == "count-candles":
             own, c = build_candles(spec, a[1:], False); wide, _ = build_candles(spec, a[1:], True)
             print(json.dumps({"matches_sampled": c["sampled"], "second_look_matches": c["second_look_matches"], "requests_own_window_S_minus_40": len(own["requests"]), "requests_widened_S_minus_70": len(wide["requests"]), "tickers": len(own["ticker_allowlist"]), "one_run_limit": 1200}, indent=1))
