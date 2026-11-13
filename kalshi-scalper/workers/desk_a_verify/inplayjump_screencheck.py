@@ -79,7 +79,7 @@ def selftest():
     badf = check_match_set(mm, K, flatm, quiet_hours); assert any("2c step" in b for b in badf), badf
     print("SCREENCHECK SELFTEST OK (identical bets, in-play set and placebo on 10 synthetic tennis matches; a planted 2c step in a skipped hour voids the screen)")
 def run(series_path, lists, minute_dirs, hourly_dirs, scorekit_dir):
-    import heldout_guard
+    import heldout_guard_v2 as heldout_guard
     for d_ in [lists] + minute_dirs.split(",") + hourly_dirs.split(","): heldout_guard.refuse_heldout(d_, "screencheck")
     sys.path.insert(0, scorekit_dir); import scorekit
     S = json.load(open(series_path)); K = S["constants"]; mk = B.read_lists(lists)
