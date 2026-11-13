@@ -1,6 +1,6 @@
 """V1 (OICORE resting bid) and V2 (EVENT830 resting entry) SECOND BUILD (History Miner, Nov 13, 2026), written from the two registrations alone:
 kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md (fc528cd3) and V2_EVENT830_RESTING_ENTRY_REGISTRATION.md (4221ab37) on claude/refine-live
-(at e3cba56a, with the dated amendments and lines of Nov 13, including G1 to G3, D1, D2 and H1 to H4), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
+(at 96ab50c7: V1 abd8430f, V2 b33b1962, with the dated amendments and lines of Nov 13, including G1 to G3, D1, D2, H1 to H4 and standing rule 18), and the recorder column lists in scripts/record_15m_book.py and scripts/record_nc_book.py on main. v1_resting_score.py was NOT read.
 Invented rows only. Every reading below is now RULED by the registrations' dated amendments (R1 to R14, C1 to C4, the NOT_ENOUGH_DATA order).
 
 Input:
@@ -108,6 +108,8 @@ def window(sig, book, trades, result, cfg):
     if t0 > (close - cfg["t0_before"] + T0_LATE_S) * 1000 or t0 >= (close - CANCEL_BEFORE) * 1000:   # C1
         return {"status": "no t0 row"}
     q = quotes(t0r)
+    if q["yes"]["bid"] is not None and q["no"]["bid"] is not None and q["yes"]["bid"] + q["no"]["bid"] >= 1 - EPS:   # rule 18: crossed or locked, before band and spread
+        return {"status": "crossed_quote"}
     cands = [s for s in ("yes", "no") if q[s]["ask"] is not None]
     if not cands:
         return {"status": "no ask on either side"}

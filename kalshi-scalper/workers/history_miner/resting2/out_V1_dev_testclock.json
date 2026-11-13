@@ -5,6 +5,7 @@
  "block": "dev",
  "counts": {
   "band test fails": 1,
+  "crossed_quote": 2,
   "filled": 2,
   "no order (no bid)": 1,
   "no t0 row": 1,
