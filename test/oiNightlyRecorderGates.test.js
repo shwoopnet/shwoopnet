@@ -143,6 +143,26 @@ print(json.dumps({"rc": [rc, rc2, rc3, rc4], "cand": cand, "cov": cov, "bcand": 
   assert.strictEqual(o.c4, null, 'a missing hours table writes nothing');
 };
 
+// OI8: Main's security review (L1, L2): a wrong-shape hours table fails closed with exit 0, writes no folder, sends no request; the workflow makes its two folders before git add so a day with no table is not red.
+gates.OI8 = () => {
+  const o = py(`
+import tempfile, os, io, contextlib
+m.time.sleep = lambda s: None
+calls = []
+m.http_get = lambda url: (calls.append(url), (200, {"markets": []}))[1]
+bad = [[], "text", {"KXXRP15M": []}, {"KXXRP15M": {"0": 5}}, {"KXXRP15M": {"2": "13:30"}}, {"KXXRP15M": {"2": [13]}}, {"KXXRP15M": {"2": ["13:30"], "x": ["13:30"]}}]
+out = []
+for t in bad:
+    d = tempfile.mkdtemp(); hp = os.path.join(d, "h.json"); json.dump(t, open(hp, "w"))
+    with contextlib.redirect_stdout(io.StringIO()):
+        rc = m.main([os.path.join(d, "o"), "--hours", hp, "--btc-dir", os.path.join(d, "b"), "--day", "2026-11-17"])
+    out.append([rc, os.path.exists(os.path.join(d, "o")), os.path.exists(os.path.join(d, "b"))])
+print(json.dumps({"out": out, "calls": len(calls)}))`);
+  assert.ok(o.out.every((r) => r[0] === 0 && r[1] === false && r[2] === false), 'every wrong shape: exit 0, no folder written');
+  assert.strictEqual(o.calls, 0, 'no request sent for a wrong-shape table');
+  assert.ok(/mkdir -p oinightly oinightly-btc/.test(wf) && wf.indexOf('mkdir -p oinightly oinightly-btc') < wf.indexOf('git add oinightly oinightly-btc'), 'the folders are made before git add, so a day with no table is not red');
+};
+
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }

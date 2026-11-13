@@ -50,6 +50,7 @@ jobs:
           cd data
           git config user.name "oi-nightly-recorder"
           git config user.email "oi-nightly-recorder@users.noreply.github.com"
+          mkdir -p oinightly oinightly-btc      # a day with no table writes nothing: add must not fail on a missing folder
           git add oinightly oinightly-btc
           git commit -q -m "oinightly $(date -u +%Y-%m-%dT%H:%MZ)" || { echo "nothing new"; exit 0; }
           for i in 1 2 3 4 5 6; do git push -q origin oi-data && exit 0; [ "$i" -lt 6 ] || break; sleep $((2 ** i)); git pull -q --rebase origin oi-data || true; done  # up to 6 tries, waits 2,4,8,16,32 s

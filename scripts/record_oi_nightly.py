@@ -57,6 +57,18 @@ def ticker(series, close):
     return "%s-%02d%s%02d%02d%02d-%02d" % (series, et.year % 100, MON[et.month - 1], et.day, et.hour, et.minute, et.minute)
 
 
+def check_shape(hours):
+    """The table must be an object of series, each an object of weekday strings '0' to '6' holding a list of 'HH:MM' strings; anything else raises (and the run records nothing)."""
+    if not isinstance(hours, dict):
+        raise ValueError("table is not an object")
+    for ser, days in hours.items():
+        if not isinstance(days, dict):
+            raise ValueError("series entry is not an object")
+        for wd, hm in days.items():
+            if wd not in ("0", "1", "2", "3", "4", "5", "6") or not isinstance(hm, list) or not all(isinstance(x, str) and len(x) == 5 and x[2] == ":" for x in hm):
+                raise ValueError("bad weekday entry")
+
+
 def build_requests(day, hours):
     """The requests for one UTC day, or None when the day is outside the forward window (the Head's rule: nothing before 2026-11-14; EST only to 2027-03-13)."""
     if day < FIRST_DAY or day > LAST_EST_DAY:
@@ -154,9 +166,10 @@ def main(argv=None):
     day = a.day or (datetime.now(UTC) - timedelta(days=1)).strftime("%Y-%m-%d")
     try:
         hours = json.load(open(a.hours))
+        check_shape(hours)
+        reqs = build_requests(day, hours)
     except Exception:
-        print("no hours table: nothing recorded"); return 0
-    reqs = build_requests(day, hours)
+        print("no usable hours table: nothing recorded"); return 0         # fails closed, exit 0, whatever the table looks like
     if reqs is None:
         print("day %s is outside the forward window %s to %s: nothing recorded" % (day, FIRST_DAY, LAST_EST_DAY)); return 0
     os.makedirs(a.out_dir, exist_ok=True)
