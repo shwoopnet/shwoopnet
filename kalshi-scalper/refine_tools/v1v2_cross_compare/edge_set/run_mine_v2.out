@@ -1,0 +1,26 @@
+V1 dev block (2026-10-29T22:15:00Z to 2026-11-13T23:59:59Z, constants of the registration); candidate windows by status: {"crossed_quote": 2, "signal": 8}
+LABEL: not blind on Bitcoin windows to Nov 13: DEPTH1, CFRTI-B and CFRTI1-BTC read them (DEPTH1 on 2026-11-14)
+signals 8, orders placed 8, filled 6 (fill rate 75.0%), no order (no bid) 0
+PRIMARY (parent +1c, maker fee 25%): version PF 1.34 (n 6, mean +5.50c) | parent PF all signals 1.24 (n 8, mean +4.69c) | parent PF on unfilled 1.44 (n 2) | net per contract-week version +0.110 parent +0.125
+sens parent +0c maker fee 0%: version PF 1.37 (n 6, mean +5.83c) | parent PF all signals 1.31 (n 8, mean +5.72c) | parent PF on unfilled 1.50 (n 2) | net per contract-week version +0.117 parent +0.152
+sens parent +0c maker fee 25%: version PF 1.34 (n 6, mean +5.50c) | parent PF all signals 1.31 (n 8, mean +5.72c) | parent PF on unfilled 1.50 (n 2) | net per contract-week version +0.110 parent +0.152
+sens parent +0c maker fee 100%: version PF 1.27 (n 6, mean +4.50c) | parent PF all signals 1.31 (n 8, mean +5.72c) | parent PF on unfilled 1.50 (n 2) | net per contract-week version +0.090 parent +0.152
+sens parent +1c maker fee 0%: version PF 1.37 (n 6, mean +5.83c) | parent PF all signals 1.24 (n 8, mean +4.69c) | parent PF on unfilled 1.44 (n 2) | net per contract-week version +0.117 parent +0.125
+sens parent +1c maker fee 100%: version PF 1.27 (n 6, mean +4.50c) | parent PF all signals 1.24 (n 8, mean +4.69c) | parent PF on unfilled 1.44 (n 2) | net per contract-week version +0.090 parent +0.125
+first half: version PF 0.00 parent PF 0.74 (filled 2) | second half: version PF 2.32 parent PF 1.97 (filled 4)
+bar (3) basis: finite differences: second half not below first
+7g BAR: (1) PF beats parent by 0.10: met | (2) net per contract-week not lower (vs parent +0c: not met, vs +1c: not met; +0c governs): not met | (3) second half not worse (version minus parent, second half vs first): met | (4) at least 60 filled: not met (NOT_ENOUGH_DATA)
+adverse selection check (parent PF on missed windows, no-bid windows included, exceeds the version's PF on its fills by 0.10 or more): YES
+FALSIFIED on development if (2) fails OR the missed windows' parent PF exceeds the version PF by 0.10 or more: (2) fails: yes | adverse selection: yes => FALSIFIED
+VERDICT (this block): NOT_ENOUGH_DATA (the FALSIFIED test above is information only on a thin sample)
+KXBTC15M-U0W {'status': 'signal', 'side': 'yes', 'p_ask': 0.30000000000000004, 'p_bid': 0.1, 'win': True, 'filled': False, 'tk': 'KXBTC15M-U0W'}
+KXBTC15M-U0L {'status': 'signal', 'side': 'yes', 'p_ask': 0.44045604988527576, 'p_bid': 0.1, 'win': False, 'filled': False, 'tk': 'KXBTC15M-U0L'}
+KXBTC15M-A1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.10199999999999998, 'p_bid': 0.1, 'win': False, 'filled': True, 'tk': 'KXBTC15M-A1'}
+KXBTC15M-B2 {'status': 'signal', 'side': 'yes', 'p_ask': 0.352, 'p_bid': 0.35, 'win': True, 'filled': True, 'tk': 'KXBTC15M-B2'}
+KXBTC15M-B1 {'status': 'signal', 'side': 'yes', 'p_ask': 0.30200000000000005, 'p_bid': 0.3, 'win': False, 'filled': True, 'tk': 'KXBTC15M-B1'}
+KXBTC15M-C4 {'status': 'signal', 'side': 'yes', 'p_ask': 0.352, 'p_bid': 0.35, 'win': True, 'filled': True, 'tk': 'KXBTC15M-C4'}
+KXBTC15M-D5 {'status': 'signal', 'side': 'yes', 'p_ask': 0.20199999999999996, 'p_bid': 0.2, 'win': False, 'filled': True, 'tk': 'KXBTC15M-D5'}
+KXBTC15M-E6 {'status': 'signal', 'side': 'yes', 'p_ask': 0.379450063798786, 'p_bid': 0.35, 'win': False, 'filled': True, 'tk': 'KXBTC15M-E6'}
+KXBTC15M-CRX {'status': 'crossed_quote'}
+KXBTC15M-LCK {'status': 'crossed_quote'}
+AGG {"fills": 6, "h1": [6.360017228648781, 2.210257511084055], "h2": [0.750786283439745, 0.6498993651789627], "parent_net_sum_p0": 0.45727473015387493, "parent_net_sum_p1": 0.37513259871303267, "parent_pf_p0": 1.3064655411999893, "parent_pf_p1": 1.2430306967679066, "parent_pf_p1_on_missed": 1.4430306967679059, "signals": 8, "version_net_sum_25": 0.33000625, "version_pf_0": 1.368421052631579, "version_pf_100": 1.2705322479649344, "version_pf_25": 1.3430306967679064}
