@@ -1,0 +1,15 @@
+development events 171 | held-out events dropped at load (counted, never simulated) 10 | strikes in the books 1197 [development only, no held-out mode]
+strikes whose first row at or after T-50 is later than T-15 (not posted under item 3 as corrected): 21
+== Rule Q: quotable events 168 | strikes with an order 1113 | orders 2226 | fills 791 (yes 400, no 391; trade fills 791, fractional filling trades 380, book fills 0) | pairs 174 | singles 443
+   item 7: sales with a blank or zero bid (sold at 0) 33 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 0, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net +8.513293 (full 8.513292999999997) | mean per event +0.050674 | PF 1.41 (full 1.4071866228516479) | days 10, positive days 8
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net +6.238708 (full 6.238707749999998) | mean per event +0.037135 | PF 1.28 (full 1.2844988549228307) | days 10, positive days 8
+  1 contract, fee rounded per order, maker 0: net +5.840000 (full 5.839999999999996) | mean per event +0.034762 | PF 1.26 (full 1.2636568848758463) | days 10, positive days 8
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net -2.070000 (full -2.070000000000006) | mean per event -0.012321 | PF 0.92 (full 0.9207200306396014) | days 10, positive days 4
+== Rule P: quotable events 168 | strikes with an order 1113 | orders 2226 | fills 2020 (yes 988, no 1032; trade fills 679, fractional filling trades 348, book fills 1341) | pairs 907 | singles 206
+   item 7: sales with a blank or zero bid (sold at 0) 124 | item 8 (Rule P book condition, cells examined until each order's first qualifying row): blank 35, zero 0
+  1 contract, fee unrounded (verdict figures), maker 0: net -29.464062 (full -29.464062000000002) | mean per event -0.175381 | PF 0.18 (full 0.18336766448743289) | days 10, positive days 1
+  1 contract, fee unrounded (verdict figures), maker 0.0175 x p x (1 - p): net -34.925191 (full -34.92519075) | mean per event -0.207888 | PF 0.07 (full 0.07177666039876814) | days 10, positive days 1
+  1 contract, fee rounded per order, maker 0: net -30.020000 (full -30.020000000000003) | mean per event -0.178690 | PF 0.18 (full 0.18000546298825454) | days 10, positive days 1
+  1 contract, fee rounded per order, maker 0.0175 x p x (1 - p): net -50.220000 (full -50.22) | mean per event -0.298929 | PF 0.00 (full 0.0) | days 10, positive days 0
+10 contract report: not produced (G10, information only)

@@ -65,7 +65,7 @@ def tfee(s, rounded):
 
 def simulate(polls, tr, T, rule, cnt):
     post_ms, flat_ms = T * 1000 - POST_MS, T * 1000 - FLAT_MS
-    first = next((r for r in polls if r[0] >= post_ms), None)
+    first = next((r for r in polls if post_ms <= r[0] <= flat_ms), None)   # item 3 as corrected (20:10Z): the first row in [T-50, T-15], both ends inclusive
     if first is None or not (first[1] and first[1] > 0 and first[2] is not None and first[3] and first[3] > 0 and first[4] is not None):
         return None, {}, {}                                     # item 3: both sides above 0 with a readable size, else never posted
     orders = {"yes": (first[1], first[2]), "no": (first[3], first[4])}
@@ -120,7 +120,7 @@ def pnl(legs, sale, bound, rounded):
 
 def pf(v):
     pos = sum(x for x in v if x > 0); neg = -sum(x for x in v if x < 0)
-    return "n/a" if not v else ("99.0" if neg == 0 else "%.2f" % (pos / neg))
+    return "n/a" if not v else ("99.0" if neg == 0 else "%.2f (full %r)" % (pos / neg, pos / neg))
 
 def main():
     book, trades, dropped = load(sys.argv[1])
@@ -128,6 +128,8 @@ def main():
     for (ct, tk) in book:
         events[ct].append(tk)
     print("development events %d | held-out events dropped at load (counted, never simulated) %d | strikes in the books %d [development only, no held-out mode]" % (len(events), len(dropped), len(book)))
+    late = sum(1 for (ct, tk), pl in book.items() if next((r for r in pl if r[0] >= iso_epoch(ct) * 1000 - POST_MS), None) is not None and next((r for r in pl if r[0] >= iso_epoch(ct) * 1000 - POST_MS), None)[0] > iso_epoch(ct) * 1000 - FLAT_MS)
+    print("strikes whose first row at or after T-50 is later than T-15 (not posted under item 3 as corrected): %d" % late)
     for rule in ("Q", "P"):
         cnt = defaultdict(int)
         sims = {ct: [simulate(book[(ct, tk)], trades.get(tk, []), iso_epoch(ct), rule, cnt) for tk in sorted(tks)] for ct, tks in events.items()}
@@ -147,8 +149,8 @@ def main():
                 days = defaultdict(float)
                 for c, x in ev.items():
                     days[c[:10]] += x
-                print("  1 contract, %s, maker %s: net %+.6f | mean per event %+.6f | PF %s | days %d, positive days %d" % (
-                    "fee rounded per order" if rounded else "fee unrounded (verdict figures)", "0.0175 x p x (1 - p)" if bound else "0", sum(v), (sum(v) / len(v)) if v else 0.0, pf(v), len(days), sum(1 for d in days.values() if d > 0)))
+                print("  1 contract, %s, maker %s: net %+.6f (full %r) | mean per event %+.6f | PF %s | days %d, positive days %d" % (
+                    "fee rounded per order" if rounded else "fee unrounded (verdict figures)", "0.0175 x p x (1 - p)" if bound else "0", sum(v), sum(v), (sum(v) / len(v)) if v else 0.0, pf(v), len(days), sum(1 for d in days.values() if d > 0)))
     print("10 contract report: not produced (G10, information only)")
 
 if __name__ == "__main__":
