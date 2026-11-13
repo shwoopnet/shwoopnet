@@ -2,7 +2,7 @@
 Source: S/w_earlysell_sep/REGISTRATION.md and out.txt (run3.py, report generated 2026-11-07). That read passed nothing (survivors []); two features were the only ones whose high-risk group was the lowest tercile in BOTH split directions. Those two are carried forward. Nothing else.
 
 ## The two leads (fixed)
-1. Paid price in the lowest tercile (T1, price of the side bought, avgFill if yes else 1 - avgFill). Cutoff from the TRAIN (early) half, by market: gold T1 is paid <= 0.911, Dogecoin T1 is paid <= 0.903 (T2 upper edges unused). Earlier read: train 9.1% (10/110) vs rest +7.6 points, test 12.9% (8/62) +5.3 points; reverse direction also T1 (+9.6 train, +3.0 test).
+1. Paid price in the lowest tercile (T1, price of the side bought, avgFill if yes else 1 - avgFill). Cutoff from the TRAIN (early) half, by market: gold T1 is paid <= 0.911, Dogecoin T1 is paid <= 0.903 (T2 upper edges unused). Earlier read: train figure (figure/figure) vs rest figure points, test figure (figure/figure) figure points; reverse direction also T1 (figure train, figure test).
 2. rise3 in the lowest tercile (T1). Cutoff from the same early train half, by market: gold T1 is rise3 <= 0.05, Dogecoin T1 is rise3 <= 0.04 (the T2 edges are unused). Rows with no rise3 are left out of lead 2 only.
 
 ## Forward window and outcome
@@ -25,3 +25,5 @@ Any dollar figure is fill-booked: count * (exitAvg for an early sell, 1 or 0 for
 
 
 Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^; nothing re-decided. 8 markers: 1 verbatim (source), 3 rewritten (cutoffs kept, the row counts and the earlier read removed: lines for the two leads and the forward window), 4 verbatim (statistic, read point shortened to the rule, pass bar, dollar formula). Rewritten sentences: 3 (leads 1 and 2 cutoffs, forward window dropped its trading-status remarks).
+
+Live figures removed on Nov 13, 10 numbers, no rule word changed (lead 1, the earlier read rates).
