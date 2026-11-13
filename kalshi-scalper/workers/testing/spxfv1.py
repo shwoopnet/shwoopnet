@@ -51,6 +51,9 @@ def load_bars(path):
     out = {}
     with open(path, newline="") as f:
         for r in csv.DictReader(f):
+            sym = (r.get("symbol") or "").strip().upper()
+            if sym and not (sym.startswith("ES") and not sym.startswith("MES")):
+                raise SystemExit("STOP: row symbol %r is not ES (D7: ES only, MES is not registered)" % sym)
             ts = k.iso(r["ts_event"])
             try:
                 c, iid = float(r["close"]), int(r["instrument_id"])
@@ -181,6 +184,40 @@ CONSTANTS = {"fee_governing": "0.07 x C x p x (1 - p), C = 1, rounded UP to the 
              "HELDOUT_FIRST": "2026-12-01T00:00:00Z", "READ_DATE": "2027-02-26T00:00:00Z", "min_traded": MIN_TRADED, "series": SERIES}
 
 
+def upf(rows):
+    """UNROUNDED profit factor of the governing nets (None when no loss and no win; inf when no loss)."""
+    return k.pf([k.net_of(t) for t in rows])
+
+
+def card_label(rnd, thirds, wr, mp, mean_net):
+    """The card's own verdict (never a research-bar pass). Every bar and kill reads the UNROUNDED profit factor of the governing (rounded-fee) nets."""
+    n = len(rnd)
+    p = upf(rnd)
+    kills = {"cash_pf_under_1_at_n_100_plus": bool(n >= 100 and p is not None and p < 1.0 - TOL),
+             "win_rate_within_3_points_of_price_implied_at_n_150_plus": bool(n >= MIN_TRADED and wr is not None and abs(wr - mp) <= 0.03 + TOL)}
+    if n < 100:
+        label = "no evidence at n = %d (under 100 traded)" % n
+    elif n < MIN_TRADED:
+        label = "NOT_ENOUGH_DATA (%d traded windows, need %d)" % (n, MIN_TRADED) + (" and KILLED: cash PF under 1.0" if kills["cash_pf_under_1_at_n_100_plus"] else "")
+    elif any(kills.values()):
+        label = "KILLED (" + ", ".join(x for x, v in kills.items() if v) + ")"
+    else:
+        tp = [upf(x) for x in thirds]
+        ok = p is not None and p >= 1.5 - TOL and all(x is not None and x >= 1.5 - TOL for x in tp) and all(len(x) > 0 for x in thirds)
+        label = "BAR MET (not a research-bar pass): pooled PF and each third PF at 1.5 or better, n %d" % n if ok else "BAR NOT MET (pooled PF %s, thirds PF %s)" % (None if p is None else round(p, 4), [None if x is None else round(x, 4) for x in tp])
+    return label, kills, {"pooled_pf_unrounded": p, "thirds_pf_unrounded": [upf(x) for x in thirds]}
+
+
+CONSTANTS = {"fee_governing": "0.07 x C x p x (1 - p), C = 1, rounded UP to the cent per order (every bar, label, z and kill reads this); unrounded printed as INFORMATION ONLY",
+             "sd": "sample (n - 1) sd of consecutive one-minute log changes, both bars present on F_now's instrument id, at least 6 of 10, times sqrt(119/60)",
+             "H_seconds": H_SECONDS, "edge_min": EDGE_MIN, "spread_max": SPREAD_MAX, "band": [BAND_LO, BAND_HI], "tolerance": TOL,
+             "quote": "decision candle yes_bid and yes_ask closes; crossed or locked (yes_bid + no_bid >= 1 - 1e-9) is no quote",
+             "tie": "equal asks go to YES; ties counted", "void": "fee-only loss", "empty_result": "stops the run", "duplicate_ts_event": "stops the run, naming the window",
+             "bars_and_kills": "read the UNROUNDED profit factor of the governing nets; the rounded PF is printed for reading only",
+             "thirds": "equal time spans of traded closes: HELDOUT_FIRST to the last traded close at or before READ_DATE (held-out); first to last traded close (development)",
+             "HELDOUT_FIRST": "2026-12-01T00:00:00Z", "READ_DATE": "2027-02-26T00:00:00Z", "min_traded": MIN_TRADED, "series": SERIES}
+
+
 def report(trades, g, label_cfg, lo=None):
     raw, rnd = with_net(trades, False), with_net(trades, True)
     n = len(trades)
@@ -188,14 +225,16 @@ def report(trades, g, label_cfg, lo=None):
     day = k.cluster_z([dict(t, cluster=t["day"]) for t in rnd]) if rnd else None
     wr = (sum(1 for t in trades if t["win"]) / n) if n else None
     mp = (sum(t["price"] for t in trades) / n) if n else None
-    thirds = [k.stats(x) for x in date_thirds(rnd, lo)]
-    kills = {"fewer_than_150_traded": n < MIN_TRADED,
-             "cash_pf_under_1_at_n_100_plus": bool(n >= 100 and sc["all"]["pf"] is not None and sc["all"]["pf"] < 1.0),
-             "win_rate_within_3_points_of_price_implied_at_n_150_plus": bool(n >= MIN_TRADED and wr is not None and abs(wr - mp) < 0.03 + TOL)}
-    return {"constants": CONSTANTS, "gate0_counts": g, "traded": n, "win_rate": None if wr is None else round(wr, 4), "mean_price_paid": None if mp is None else round(mp, 4),
+    th = date_thirds(rnd, lo)
+    gov = k.stats(rnd)
+    label, kills, exact = card_label(rnd, th, wr, mp, (gov["mean"] if n else None))
+    return {"constants": CONSTANTS, "gate0_counts": g, "traded": n, "CARD_LABEL": label, "kill_flags": kills, "unrounded_pf": exact,
+            "win_rate": None if wr is None else round(wr, 4), "mean_price_paid": None if mp is None else round(mp, 4),
             "win_rate_minus_price_points": None if wr is None else round(100 * (wr - mp), 2),
-            "GOVERNING_fee_rounded_up_per_order": k.stats(rnd), "date_thirds_governing": thirds, "cluster_z_by_UTC_day_INFORMATION_ONLY": day,
-            "kill_flags_read_governing_figure": kills, "scorekit_governing": sc,
+            "GOVERNING_fee_rounded_up_per_order": gov, "date_thirds_governing": [k.stats(x) for x in th],
+            "COMPARED_z_by_event_ticker": sc["cluster_z"],
+            "cluster_z_by_UTC_day_INFORMATION_ONLY": day,
+            "INFORMATION_scorekit_generic_label_and_equal_count_windows": {"label": sc["label"], "windows": sc["windows"], "haircut_line": sc["haircut_line"], "price_source": sc["price_source"], "freshness": sc["freshness"]},
             "INFORMATION_ONLY_unrounded_fee": k.stats(raw), "ambiguities": AMBIGUITIES}
 
 
@@ -211,15 +250,23 @@ def dev_read(lists, candles, es):
     return report(trades, g, {"name": "SPXFV1 DEVELOPMENT (closes before 2026-12-01), small sample: under 100 traded is 'no evidence at n = x'"})
 
 
-def heldout_read(marker, lists, candles, es, now=None):
+LOCAL_MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SPXFV1_HELDOUT_READ.local")
+
+
+def heldout_read(marker, lists, candles, es, now=None, local_marker=None):
     now = time.time() if now is None else now
     if now < READ_DATE:          # before anything is loaded
         raise SystemExit("refused: before READ_DATE 2027-02-26T00:00Z")
     cut = k.Cutoff(HELDOUT_FIRST, marker, "READ-ONCE MARKER", not_before=READ_DATE, held_out=True)
     cut.marker_line()
+    local_marker = local_marker or LOCAL_MARKER
+    if os.path.exists(local_marker):          # read-once by a local file written BEFORE anything is printed (a second run refuses even before the committed marker line changes)
+        raise SystemExit("refused: %s exists; the held-out read was already made: %s" % (local_marker, open(local_marker).read().strip()))
     mk, cs, bars = _load(lists, candles, es)
     trades, g = build(mk, cs, bars, cutoff_lo=HELDOUT_FIRST, cutoff_hi=READ_DATE + 1)          # closes at or before READ_DATE
     cut.check(trades, now)
+    with open(local_marker, "w") as fh:
+        fh.write("HELD-OUT READ MADE at %s UTC; folders %s; ES file sha256 %s\n" % (time.strftime("%Y-%m-%dT%H:%MZ", time.gmtime(now)), [os.path.basename(x.rstrip("/")) for x in list(lists) + list(candles)], __import__("hashlib").sha256(open(es, "rb").read()).hexdigest()))
     if len(trades) < MIN_TRADED:
         return {"NOT_ENOUGH_DATA": "%d traded windows, need %d; count only, no figure" % (len(trades), MIN_TRADED), "gate0_counts": g}
     return report(trades, g, {"name": "SPXFV1 HELD-OUT (closes from 2026-12-01 to READ_DATE), read once"}, lo=HELDOUT_FIRST)

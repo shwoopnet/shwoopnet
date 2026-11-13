@@ -93,23 +93,55 @@ with tempfile.TemporaryDirectory() as t:
     gov = o["GOVERNING_fee_rounded_up_per_order"]
     assert o["traded"] == 3 and gov["net"] == round(0.89 - 0.11 - 0.01, 4) == 0.77 and gov["pf"] == round(0.89 / 0.12, 3) == 7.417 and gov["mean"] == round(0.77 / 3, 5), gov
     inf = o["INFORMATION_ONLY_unrounded_fee"]; assert abs(inf["net"] - round(sum(unr), 4)) < 1e-9 and inf["pf"] == round(unr[0] / (-unr[1] - unr[2]), 3) == 7.937, inf
-    assert o["scorekit_governing"]["all"] == gov and o["constants"]["tolerance"] == 1e-9 and "rounded UP" in o["constants"]["fee_governing"] and list(o)[0] == "constants"
+    assert o["constants"]["tolerance"] == 1e-9 and o["COMPARED_z_by_event_ticker"]["clusters"] == 3 and "cluster_z_by_UTC_day_INFORMATION_ONLY" in o and "rounded UP" in o["constants"]["fee_governing"] and list(o)[0] == "constants"
     assert abs(o["win_rate"] - 0.3333) < 1e-9 and abs(o["mean_price_paid"] - 0.1) < 1e-9
     th = o["date_thirds_governing"]; assert [x["n"] for x in th] == [1, 1, 1] and [x["net"] for x in th] == [0.89, -0.11, -0.01], th          # closes 15:00, 15:15, 15:30
-    assert o["kill_flags_read_governing_figure"]["fewer_than_150_traded"] and not o["kill_flags_read_governing_figure"]["cash_pf_under_1_at_n_100_plus"]
-    assert o["scorekit_governing"]["label"] == "no evidence at n = 3", o["scorekit_governing"]["label"]
+    assert not o["kill_flags"]["cash_pf_under_1_at_n_100_plus"] and o["traded"] < s.MIN_TRADED
+    assert o["CARD_LABEL"].startswith("no evidence at n = 3"), o["CARD_LABEL"]
     assert "bar" not in json.dumps(o["gate0_counts"]).lower().replace("no f_open bar", "").replace("no f_now bar", "")
     # held-out: refused before READ_DATE, whatever the files hold
-    try: s.heldout_read("nomarker", [lists], [cands], es, now=s.READ_DATE - 1); assert 0
+    lm = os.path.join(t, "local1.marker")
+    try: s.heldout_read("nomarker", [lists], [cands], es, now=s.READ_DATE - 1, local_marker=lm); assert 0
     except SystemExit as e: assert "READ_DATE" in str(e)
     mk = os.path.join(t, "REG.md"); open(mk, "w").write("x\nREAD-ONCE MARKER: NOT READ\n")
-    ho = s.heldout_read(mk, [lists], [cands], es, now=s.READ_DATE + 1)
+    assert not os.path.exists(lm)
+    ho = s.heldout_read(mk, [lists], [cands], es, now=s.READ_DATE + 1, local_marker=lm)
+    assert os.path.exists(lm) and "HELD-OUT READ MADE" in open(lm).read()          # written before anything is printed
+    try: s.heldout_read(mk, [lists], [cands], es, now=s.READ_DATE + 2, local_marker=lm); assert 0          # a second run refuses on the local marker, though the committed line is not yet changed
+    except SystemExit as e: assert "already made" in str(e)
     assert ho["NOT_ENOUGH_DATA"].startswith("1 traded") and "figure" in ho["NOT_ENOUGH_DATA"] and ho["gate0_counts"]["traded"] == 1, ho
     open(mk, "w").write("READ-ONCE MARKER: READ ON 2027-02-27, commit abc\n")
-    try: s.heldout_read(mk, [lists], [cands], es, now=s.READ_DATE + 1); assert 0
+    try: s.heldout_read(mk, [lists], [cands], es, now=s.READ_DATE + 1, local_marker=os.path.join(t, "local2.marker")); assert 0
     except RuntimeError as e: assert "already read" in str(e)
     # a HELDOUT_ folder is refused by the guard
     hl = os.path.join(t, "HELDOUT_x"); os.makedirs(hl)
     try: s.dev_read([hl], [cands], es); assert 0
     except SystemExit as e: assert "HELDOUT_" in str(e)
+# --- the label and the kills read the UNROUNDED profit factor (Auditor B F1) ---
+def synth(spec, price):
+    rows = []
+    for i, nets in enumerate(spec):
+        rows.append({"net": nets, "win": nets > 0, "price": price, "close": 60 * i, "ts": 60 * i - 120, "event": "e%d" % i, "cluster": "e%d" % i, "day": "d"})
+    return rows
+def lab(rows):
+    wr = sum(1 for r in rows if r["win"]) / len(rows); mp = sum(r["price"] for r in rows) / len(rows)
+    return s.card_label(rows, s.date_thirds(rows), wr, mp, None)
+r = synth([0.1] * 100 + [-0.10004] * 100, 0.30); r.sort(key=lambda x: x["close"])          # PF 0.9996: prints 1.0 when rounded, but is under 1.0
+assert round(s.upf(r), 3) == 1.0 and s.upf(r) < 1.0
+assert lab(r)[0].startswith("KILLED") and lab(r)[1]["cash_pf_under_1_at_n_100_plus"]
+rr = synth(([0.07498, -0.025, -0.025] * 50), 0.50)
+assert round(s.upf(rr), 3) == 1.5 and s.upf(rr) < 1.5 and lab(rr)[0].startswith("BAR NOT MET"), lab(rr)[0]
+good = synth(([0.3, 0.3, -0.1, -0.1, -0.1] * 30), 0.30)          # PF 2.0 pooled and in each third, n 150, win rate .4 vs price .3 (10 points)
+assert lab(good)[0].startswith("BAR MET (not a research-bar pass)"), lab(good)[0]
+small = synth([0.3, -0.1] * 60, 0.30)          # n 120: not enough data; PF 1.5
+assert lab(small)[0].startswith("NOT_ENOUGH_DATA"), lab(small)[0]
+nill = synth([0.3, 0.3, -0.1, -0.1, -0.1] * 30, 0.37)          # win rate .4 within 3 points of price .37 (inclusive edge .03)
+assert lab(nill)[0].startswith("KILLED") and lab(nill)[1]["win_rate_within_3_points_of_price_implied_at_n_150_plus"]
+# symbol column: MES rows stop the run
+import tempfile as _t
+d = _t.mkdtemp(); f = os.path.join(d, "e.csv")
+open(f, "w").write("ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume,symbol\n2026-11-05T14:44:00.000000000Z,33,1,1,1,1,1,1,1,MESZ6\n")
+try: s.load_bars(f); assert 0
+except SystemExit as e: assert "MES" in str(e)
+open(f, "w").write("ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume,symbol\n2026-11-05T14:44:00.000000000Z,33,1,1,1,1,1,1,1,ESZ6\n"); assert len(s.load_bars(f)) == 1
 print("test_spxfv1: all checks passed")
