@@ -61,3 +61,30 @@
 
 - **Stage 1:** `jobs/FOMCTEXT_LISTS.json`, 20 pages at most, cap 25. Lists only; tickers and times.
 - **Stage 2:** one-minute candles from 13:55 to 14:45 ET on each decision day for the named strikes. About 15 meetings times 20 to 40 strikes, one historical request per market before the live boundary, batched after it. Estimate 300 to 600 requests, one run.
+
+## Clarification 1 (Nov 13, 2026, 02:25Z, before any list, candle or result is read; answers the History Miner's nine points)
+
+1. **Which events belong to a meeting.** An event of KXFEDMENTION, KXPOWELLMENTION, KXJPOWMENTION or KXWARSHMENTION belongs to a decision date when BOTH hold:
+   - its event ticker's date equals the decision date;
+   - its title or rules text (known in advance) names the FOMC press conference, not a speech, testimony or interview.
+
+   This desk lists the qualifying event tickers in the statement-word table (point 2). If two series list the same press conference, both count, as separate strikes.
+2. **Statement-word table.** Agreed. It is a committed CSV of (decision_date, event_ticker, market_ticker, strike_word, statement_word yes/no) covering EVERY strike of every development meeting.
+   - It is built by this desk by hand from the lists answer's tickers and strike words alone, read before any candle and without reading any result field.
+   - It is matched against the statement word inventories committed in `FOMCTEXT_STATEMENT_WORDS.md`, under the counted forms of MENTION.pdf: the word itself, its plural and its possessive. No other inflection counts.
+   - The reader refuses to run if any development strike is missing.
+3. **The 2:05 pm candle.** Agreed: the 1 minute candle whose `end_period_ts` is 14:05:00 US Eastern (daylight saving applied); YES ask = `yes_ask.close`, YES bid = `yes_bid.close`. A missing candle is NOT carried forward: that strike has no ask and is not two-sided.
+4. **Two-sided.** Agreed: 0 < bid < ask < 1 at that close; a 0.00 or 1.00 placeholder is not two-sided. The denominator of (c) is ALL statement-word strikes of the development meetings, including those with no candle.
+5. **The gap.** Agreed, and yes, that is the meaning: settlement 1 for yes and 0 for no.
+   - The counted strikes are statement-word strikes that settled YES with a 2:05 pm ask at or under 0.87 (which clears the 10c line).
+   - Void and other results are excluded and counted.
+   - **Added: print the same count for NON-statement-word strikes of the same meetings, as a placebo.** It is not part of the kill line. It shows whether statement words differ from the rest.
+6. **(b)** Agreed: distinct decision dates among the qualifying strikes.
+7. **Held-out guard.** Agreed in full:
+   - decision dates on or after 2026-06-17 00:00 UTC are refused by a date constant;
+   - held-out rows are dropped before any field other than ticker and date is read;
+   - events not matched to a development decision date are dropped and counted, not read.
+8. **The candle job.** Agreed: 13:55 to 14:45 ET, development meetings only; historical endpoint per market before the live boundary, batched after it; count and bytes sent to the Head by hash before any run.
+9. **Aug 22 notation vote.** Agreed: excluded. A development date with no matching press-conference event is reported as "no market" and counted.
+
+**Not blind to outcomes.** The reader reads settlements by design, because the gap is measured against settlement. It is blind to nothing in development, and it never touches the held-out meetings.
