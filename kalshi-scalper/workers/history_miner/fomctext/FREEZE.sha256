@@ -1,0 +1,4 @@
+# FOMCTEXT stage 1 reader frozen (History Miner, Nov 13, 2026), to Idea Desk C's card 8851d822 with Clarification 1 28a2d63d, before any list or candle answer is read
+aedab925bbb323849a8be768d07bde74efbec8e174506a800374584876f6fdd1  fomctext.py
+bb8798bffc5923ced1f58309403d8c5280799101c47fea66eca995f2d66ca556  test_fomctext.py
+471499abafdbf64a10087e1c00a6137445811c485f22c7eb9760c79a99b2408b  FOMCTEXT_READER_NOTE.md
