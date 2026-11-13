@@ -6,8 +6,8 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 
 **What it records.** Every minute, one cycle:
 1. reads `GET /markets/trades?min_ts=&max_ts=&limit=1000` (no ticker, cursor followed and percent-encoded) from the start of the last good cycle, minus 15 seconds of overlap, to now, at most 10 pages;
-2. keeps only combo rows (a ticker of the safe shape `^KXMVE[A-Z0-9._-]{1,120}$`, matched end to end), each `trade_id` once a job, in `trades.csv` (`t_recv_ms, ticker, created_time, yes_price_dollars, count_fp, taker_outcome_side, trade_id`, as the exchange returns them);
-3. looks up the legs of combos it sees for the first time in this job with `/markets?tickers=` (40 a request, at most 2 requests a cycle, never more than 10 requests in the cycle in all) into `legs.csv` (`t_recv_ms, ticker, event_ticker, legs, leg_tickers`, legs as `market_ticker:side` joined by `|`, capped at 600 characters); a combo the answer does not return is missing, never guessed; combos not yet asked wait for the next cycle;
+2. keeps only combo rows (a ticker of the safe shape `^KXMVE[A-Z0-9._-]{1,120}$`, matched end to end), each `trade_id` once an hourly chunk (each chunk is a fresh process, so readers de-duplicate trades by `trade_id` and legs by ticker across chunks), in `trades.csv` (`t_recv_ms, ticker, created_time, yes_price_dollars, count_fp, taker_outcome_side, trade_id`, as the exchange returns them);
+3. looks up the legs of combos it sees for the first time in this hourly chunk with `/markets?tickers=` (40 a request, at most 2 requests a cycle, never more than 10 requests in the cycle in all) into `legs.csv` (`t_recv_ms, ticker, event_ticker, legs, leg_tickers`, legs as `market_ticker:side` joined by `|`, capped at 600 characters); a combo the answer does not return is missing, never guessed; combos not yet asked wait for the next cycle;
 4. writes a coverage row: `cycle, min_ts, max_ts, pages, complete, capped, n429, tape_rows, combo_rows, dup_dropped, new_combos, lookups, legs_found, legs_missing, queue_len, requests, t_start_ms, t_end_ms`.
 
 **How to read it.**

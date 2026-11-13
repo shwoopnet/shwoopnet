@@ -1,6 +1,6 @@
 # Nov 13, 2026 (the owner: "Yes, nonstop recorder"). Combo trade-tape recorder for Idea Desk C's CROWDLEG and NOTAKER cards (paper only). Research data only: public Kalshi market data, no key,
-# no secret, no order, no Firestore. Every minute it reads the public trade tape since its last good read (newest first, at most 10 pages a minute), keeps combo trades only (each once a
-# job) and looks up the legs of combos it sees for the first time (at most 2 requests a minute). A trial read (Nov 13) found at least 50,000 trades in one Sunday half hour, about a fifth
+# no secret, no order, no Firestore. Every minute it reads the public trade tape since its last good read (newest first, at most 10 pages a minute), keeps combo trades only (each once an
+# hourly chunk; readers de-duplicate across chunks) and looks up the legs of combos it sees for the first time (at most 2 requests a minute). A trial read (Nov 13) found at least 50,000 trades in one Sunday half hour, about a fifth
 # of them combos, so a 30 minute poll could not read the tape whole; record-combo.yml keeps the quotes, books and leg tickers.
 # The built-in GITHUB_TOKEN pushes gzipped files to its OWN `combotape-data` branch (under tape/), never to main and never to the other data branches. The first run creates it as an orphan branch.
 # Rate: at least 6 seconds between requests, so at most 10 a minute (14,400 a day); about 3 to 5 a minute expected at the trial's rate (3 tape pages and up to 2 legs look-ups).
@@ -11,6 +11,7 @@
 # Size stop and hourly pushes (the Head of R&D, Nov 13, 2026): a job that finds 1.2 GB or more of committed tape data on the branch records nothing and says why (about 800 MB is expected by the end date);
 # each job records in hourly chunks and pushes after each, so a lost runner loses at most about an hour.
 # It stops by itself: from 2027-01-31 23:59 UTC every run exits at once (checked in the first step and again in the script). Stop it sooner by deleting this file.
+# Shell: the run: steps rely on the default (bash -e, no pipefail). Do not add `shell: bash` (which adds -o pipefail) without making the size step's `du ... | cut` safe for a missing data/tape (Auditor B, Nov 13).
 name: record-combo-tape
 on:
   schedule:

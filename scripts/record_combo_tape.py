@@ -5,7 +5,7 @@ Why it exists: a trial read of Kalshi's public trade tape for one half hour on a
 trades a half hour, about a fifth of them combos. The tape comes newest first and has no combo filter, so a 30 minute poll cannot read it whole. This job reads it every minute instead.
 
 Every CYCLE_S seconds, until the 4 hour boundary: one cycle reads GET /markets/trades?min_ts=&max_ts=&limit=1000 (no ticker, cursor followed, percent-encoded) from the last good cycle's
-start (minus OVERLAP_S) to now, at most MAX_PAGES_CYCLE pages, and keeps only combo rows (a ticker of the safe shape COMBO_TICKER_RE), each trade_id once a job. A cycle that ran out of
+start (minus OVERLAP_S) to now, at most MAX_PAGES_CYCLE pages, and keeps only combo rows (a ticker of the safe shape COMBO_TICKER_RE), each trade_id once a process (the workflow runs one process per hourly chunk, so readers de-duplicate across chunks). A cycle that ran out of
 cursor is complete; one that read MAX_PAGES_CYCLE pages with a cursor left is capped (the oldest trades of its window are lost, and the coverage row says so); one cut by a failed read or
 three refusals in a row moves nothing, so the next cycle reads that window again. Then, if the cycle was not cut, the legs of combos seen for the first time this job are looked up with
 /markets?tickers= (LEG_BATCH a request, at most LEG_LOOKUPS_CYCLE requests, never past MAX_REQ_CYCLE requests in the cycle); a combo the answer does not return is missing, never guessed.
