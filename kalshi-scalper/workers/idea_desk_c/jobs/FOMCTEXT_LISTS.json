@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
  "purpose": "FOMCTEXT stage 1 (Idea Desk C): settled lists of the four Fed mention series, live and historical, to name the strike tickers of each FOMC press conference; tickers and times only. Owner MAIN: the runner lists no Desk C.",
- "heldout": "FOMCTEXT_CARD.md: meetings with a decision date on or after 2026-06-17 are held out; this lists job reads no price and no result is scored from it",
+ "heldout": "FOMCTEXT_CARD.md: meetings with a decision date on or after 2026-06-17 are held out; this job's date bounds end before that cut, so no held-out market is pulled",
  "allowed_endpoints": [
   {
    "name": "markets_list",
@@ -18,16 +18,6 @@
     "limit",
     "cursor"
    ]
-  },
-  {
-   "name": "hist_markets_list",
-   "method": "GET",
-   "path_pattern": "/historical/markets",
-   "params_allowed": [
-    "series_ticker",
-    "limit",
-    "cursor"
-   ]
   }
  ],
  "series_allowlist": [
@@ -37,7 +27,7 @@
   "KXWARSHMENTION"
  ],
  "ticker_allowlist": [],
- "max_requests": 25,
+ "max_requests": 10,
  "requests": [
   {
    "id": "live_KXFEDMENTION",
@@ -46,19 +36,10 @@
     "series_ticker": "KXFEDMENTION",
     "status": "settled",
     "min_close_ts": 1735689600,
-    "max_close_ts": 1794527999,
+    "max_close_ts": 1781654399,
     "limit": 1000
    },
    "max_pages": 2
-  },
-  {
-   "id": "hist_KXFEDMENTION",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXFEDMENTION",
-    "limit": 1000
-   },
-   "max_pages": 3
   },
   {
    "id": "live_KXPOWELLMENTION",
@@ -67,19 +48,10 @@
     "series_ticker": "KXPOWELLMENTION",
     "status": "settled",
     "min_close_ts": 1735689600,
-    "max_close_ts": 1794527999,
+    "max_close_ts": 1781654399,
     "limit": 1000
    },
    "max_pages": 2
-  },
-  {
-   "id": "hist_KXPOWELLMENTION",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXPOWELLMENTION",
-    "limit": 1000
-   },
-   "max_pages": 3
   },
   {
    "id": "live_KXJPOWMENTION",
@@ -88,19 +60,10 @@
     "series_ticker": "KXJPOWMENTION",
     "status": "settled",
     "min_close_ts": 1735689600,
-    "max_close_ts": 1794527999,
+    "max_close_ts": 1781654399,
     "limit": 1000
    },
    "max_pages": 2
-  },
-  {
-   "id": "hist_KXJPOWMENTION",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXJPOWMENTION",
-    "limit": 1000
-   },
-   "max_pages": 3
   },
   {
    "id": "live_KXWARSHMENTION",
@@ -109,22 +72,13 @@
     "series_ticker": "KXWARSHMENTION",
     "status": "settled",
     "min_close_ts": 1735689600,
-    "max_close_ts": 1794527999,
+    "max_close_ts": 1781654399,
     "limit": 1000
    },
    "max_pages": 2
-  },
-  {
-   "id": "hist_KXWARSHMENTION",
-   "path": "/historical/markets",
-   "params": {
-    "series_ticker": "KXWARSHMENTION",
-    "limit": 1000
-   },
-   "max_pages": 3
   }
  ],
- "notes": "20 pages at most (4 series, 2 live and 3 historical pages each), cap 25 with headroom for 429 retries; a few MB at most. Stage 2, the one-minute candles from 13:55 to 14:45 ET on each FOMC decision day for the strikes named here, is built from this answer by a tester: about 15 press-conference meetings (2025-01-29 to 2026-10-28) times about 20 to 40 strikes, one historical candle request per market before the live boundary, batched after it; estimate 300 to 600 requests in one run. Slow family: 8 events a year, paper list at most.",
+ "notes": "RULE (h) BOUND: every request is a live /markets list with max_close_ts 1781654399 (2026-06-16T23:59:59Z, one second before the held-out cut) and min_close_ts 1735689600 (2025-01-01T00:00:00Z); the development pull ends before the held-out cut by the job's own date bounds, and there are no /historical/markets requests (they cannot be date bounded). 8 pages at most (4 series, 2 pages each), cap 10. If these live lists do not hold all eleven development meetings, the older ones come from a separate HELDOUT_ pull on the Head of R&D's go with an audited splitter; that job is not written. Stage 2 candles are built from this answer for development meetings only. Slow family: 8 events a year, paper list at most.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,

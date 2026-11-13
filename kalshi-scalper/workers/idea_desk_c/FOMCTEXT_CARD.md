@@ -88,3 +88,13 @@
 9. **Aug 22 notation vote.** Agreed: excluded. A development date with no matching press-conference event is reported as "no market" and counted.
 
 **Not blind to outcomes.** The reader reads settlements by design, because the gap is measured against settlement. It is blind to nothing in development, and it never touches the held-out meetings.
+
+## Clarification 2 (Nov 13, 2026, 02:30Z, Auditor B's finding, Head of R&D's ruling)
+
+**The first lists job broke standing rule (h).** It reached past the held-out cut by date, and it asked the undatable /historical/markets lists. `jobs/FOMCTEXT_LISTS.json` is replaced:
+- live `/markets` lists only, for the four series;
+- `min_close_ts` 1735689600 (2025-01-01T00:00:00Z) and `max_close_ts` 1781654399 (2026-06-16T23:59:59Z, one second before the held-out cut);
+- no historical requests;
+- 8 pages at most, cap 10.
+
+The development pull now ends before the held-out cut by the job's own bounds, not by a reader dropping rows. If these lists do not hold all eleven development meetings, the older ones come only from a separate HELDOUT_ pull on the Head's go with an audited splitter; that job is not written.
