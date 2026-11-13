@@ -1,0 +1,15 @@
+NOTE (Nov 13, 2026): the placebo tie rule (at equal mids the placebo takes the ticker that sorts first ascending) was fixed AFTER one build's read of table tennis, by the Head of R&D, without knowing which way it moves; it touches the placebo only. The registered kill (cash PF under 1.0 overall or in either half at 300 or more bets) does not depend on the placebo. FIRST PRINT (engine c39b1e9b, run 43372950984):
+PLACEBO (Amendment 2, matched one for one): 195 placebo bets, 448 bets with no placebo (counted); median elapsed minute 7.0 (rule 12.0); net at the rule's price mix -3.74c; difference +0.05c (se 4.43c)
+LABEL: FALSIFIED (cash PF 0.85 overall, halves 0.88 / 0.81)
+UNDER THE TIE RULE (engine 870a453e):
+PROVISIONAL, ONE BUILD (engine 870a453e, series file 34f70868, candle folders /tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/C_TTEBB)
+series file sha256 34f708687df24f5a | development window {'closes_from': '2026-10-01T00:00:00Z', 'closes_before': '2026-10-23T00:00:00Z'}
+== TABLE_TENNIS | candle freshness measured on Bitcoin 15 minute only, not on these markets
+matches listed in the window: 1183
+start check: 91.7% of matches closed 4 to 90 minutes after the ticker's start (1085 of 1183)
+matches with a qualifying jump and an entry that passes: 643 | not a bet and why: {'entry ask or spread outside the band': 131, 'entry minute not two-sided': 17, 'two contracts qualified in the same minute': 1}
+COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over 774 qualifying decisions = 0.030 (kill above 0.04); bets made more than 6 hours before the close: 10; median elapsed minute of the bet: 12.0; (cost line and family clock check: selected on development, frozen for the held-out)
+voided bets (price refunded, fee kept, counted in n, PF and z): 0 | bets with no result that are not voids (fee-only loss, counted): 0
+bets 643 | wins 371 | mean price paid 0.594 | cash PF 0.85 | net -3.70c a contract | halves by date PF 0.88 / 0.81 | share paid 70c to 85c 31.4% | largest day share of net None | z (days) -3.20 | z (matches, one bet each) -1.95 | the smaller is used: -3.20
+PLACEBO (Amendment 2, matched one for one): 195 placebo bets, 448 bets with no placebo (counted); median elapsed minute 7.0 (rule 12.0); net at the rule's price mix -3.74c; difference +0.05c (se 4.43c)
+LABEL: FALSIFIED (cash PF 0.85 overall, halves 0.88 / 0.81)

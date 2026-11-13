@@ -90,7 +90,7 @@ def placebo_try(tickers, candles, kind, K, e_min):
     for tk in tickers:                                                          # Amendment 5, point 4: highest mid minus lowest mid over the PRESENT two-sided minutes from e-5 to e, under 5c, each contract; nothing carried forward
         ms = [mid(cs[tk][u]) for u in range(t - 300, t + 1, 60) if two_sided(cs[tk].get(u))]
         if max(ms) - min(ms) >= 0.05 - 1e-9: return None
-    tk = max(tickers, key=lambda x: mid(cs[x][t])); e = cs[tk].get(t + 60)
+    top = max(mid(cs[x][t]) for x in tickers); tk = sorted(x for x in tickers if mid(cs[x][t]) >= top - 1e-9)[0]; e = cs[tk].get(t + 60)      # Nov 13 tie rule (the Head): at equal mids (1e-9) the placebo takes the ticker that sorts first ascending
     if not two_sided(e): return None
     lo, hi = K["entry_ask_band"]
     if not (lo - 1e-9 <= e["ask"] <= hi + 1e-9) or e["ask"] - e["bid"] > K["entry_spread_max"] + 1e-9: return None
