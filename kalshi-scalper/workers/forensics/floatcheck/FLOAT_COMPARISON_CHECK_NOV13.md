@@ -76,6 +76,12 @@ it. The two builds agree on every figure printed so far, so no read has been nea
 exactly) catches most of this window but not all of it: the window here is 0.0015c. Suggested, with no hash change: at any read where the printed difference is within
 0.002c of twice the printed standard error, both builds decide that bar on the unrounded figures. It is the Head's call.
 
+**The Head's ruling (08:23Z), general, no hash change:** a bar is decided on the unrounded figures; rounding is for printing only. Where a build tests a bar on rounded
+figures (line 238 here), any read in which the printed difference is within 0.002c of twice the printed standard error is decided by both builds on the unrounded
+figures, and the result says so. It goes into standing rule 16b beside the 0.001 recompute rule; the over-1,000 z rule applies to the cluster z here as everywhere.
+One correction to my own wording above: "the two builds agree on every figure printed so far" is what the Testing Desk told me (08:15Z); I did not compare the two
+builds' printed figures myself, and this scan opened no output of either.
+
 **Notes, none on a verdict line:**
 
 1. **Bucket off the whole-cent grid.** For a price on tenths of a cent, x9.5c to x9.9c (29.5c to 29.9c, 39.5c to 39.9c and so on, 30 prices between 21c and 86c) goes
