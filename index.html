@@ -1872,6 +1872,7 @@
                 <ul class="changelog-list">
                   <li>Trading: the second slot's window and open-money limits were loosened for trial seats (window 4% of the account, open total 5%, and the slot may use three quarters of the shared window limit instead of half); the account stops and the 5.5% window limit are unchanged.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
+                  <li>Strategies page: one pop-up for every strategy at every stage (the owner: "all of these look so different"). Paper, wheel, approved and retired strategies now open the same sheet as a live one: the same header (ring, name, stage badge, status word), the same four tiles (labelled paper, n/a only when there is no data), the same charts with 7D, 30D and YTD, a "Progress to qualify" bar where a live strategy has its stop bar, the three rule lines and a Settings panel. The Perp-model longshot is deployed, so with no trade yet it reads Trial 0 of 90 in Live instead of waiting in Shadow. Page only.</li>
                   <li>Strategies page: YTD now reaches back to the first trade on Oct 7 (the owner: "the ytd strategies thing should go back to oct 7th right?"). The page only held the newest 1,000 gold orders, so a long range could start later without saying so; it now reads the older ones once, like the Account result line does, and says so on the chart while reading or if they cannot be read. The chart's right edge reads Today. Page only.</li>
                   <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
@@ -4873,14 +4874,32 @@ kalshiStatusTick();
     var chip = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
     var line = function(k, v){ return v ? '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>' : ''; };
     return '<div class="sc">' + (c.rule ? '<div class="sc-rule">' + esc(c.rule) + '</div>' : '') + (c.warn ? '<div class="sc-warn">' + esc(c.warn) + '</div>' : '') +
-      '<div class="sc-stats">' + chip('Total made', mo(c.net)) + chip('Win rate', pc(c.winRate)) + chip('Average win', mo(c.avgWin)) + chip('Average loss', mo(c.avgLoss)) + '</div>' +
-      '<div class="sc-p"><div class="sc-ph"><h5>Money made over time<em>' + esc((cum.length - 1) + ' trades · ' + (rg ? rg.word : 'all time') + ' · dashed: zero') + '</em></h5>' + (rg ? kalshiStratRangeHtml(rg.key, esc) : '') + '</div>' + cash + '</div>' +
+      '<div class="sc-stats">' + chip(c.paper ? 'Paper net' : 'Total made', mo(c.net)) + chip(c.paper ? 'Paper win rate' : 'Win rate', pc(c.winRate)) + chip(c.paper ? 'Paper average win' : 'Average win', mo(c.avgWin)) + chip(c.paper ? 'Paper average loss' : 'Average loss', mo(c.avgLoss)) + '</div>' +
+      '<div class="sc-p"><div class="sc-ph"><h5>' + (c.paper ? 'Paper money over time' : 'Money made over time') + '<em>' + esc((cum.length - 1) + ' trades · ' + (rg ? rg.word : 'all time') + ' · dashed: zero') + '</em></h5>' + (rg ? kalshiStratRangeHtml(rg.key, esc) : '') + '</div>' + cash + '</div>' +
       '<div class="sc-two">' + panel('Last 14 days', '', days) + panel('Win/loss ratio, last 30 trades', 'dashed: break even (1.0) · dotted: target (1.3)', pf) + '</div>' +
-      (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') +
+      (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') + (c.qualify ? bar('Progress to qualify', c.qualify.frac, c.qualify.text) : '') +
       (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? (c.trialNote || 'Record done') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
       (c.goes || c.kill || c.ret ? '<dl class="sc-rules">' + line('Goes live when', c.goes) + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' + (typeof KAL_RULES_BUILDING === 'string' ? '<div class="sc-note">' + esc(KAL_RULES_BUILDING) + '</div>' : '') : '') +
       // The strategy's settings, copied from the bot's code (a gate compares them), so every pop-up shows what the strategy actually does (Nov 13, 2026, the owner: "displays the rules and parameters")
       (Array.isArray(c.params) && c.params.length ? '<div class="sc-p"><h5>Settings</h5><dl class="sc-rules sc-params">' + line('Stage', c.stage) + c.params.map(function(kv){ return line(kv[0], kv[1]); }).join('') + '</dl></div>' : '') + '</div>';
+  }
+  // One pop-up for every stage (Nov 13, 2026, the owner: "all of these look so different"): a registry row (a paper or wheel place, an approved seat, a retired idea) is drawn by the SAME template as a live strategy, with
+  // paper figures labelled "paper" where the page has them (d.rows: settled fillable shadow rows as { ts, p }), n/a only where there is truly no data, a "Progress to qualify" bar in place of the stop bar, and its three rule lines and settings.
+  function kalshiStratPaperCharts(x, d, now, range, dayOf, esc, money){
+    d = d || {};
+    var rows = Array.isArray(d.rows) ? d.rows : [], run = 0, cum = [0].concat(rows.map(function(r){ run += r.p; return kalshiStratR(run); }));
+    var wins = rows.filter(function(r){ return r.p > 0; }), losses = rows.filter(function(r){ return r.p < 0; }), sum = function(a){ return a.reduce(function(t, r){ return t + r.p; }, 0); };
+    var retired = x.stage === 'Retired', tgt = Number(x.roomTarget) > 0 ? Number(x.roomTarget) : 60;
+    var have = rows.length ? rows.length : (typeof d.n === 'number' ? d.n : null);
+    var what = x.roomWhat || 'checked paper trades toward the ' + tgt + ' needed';
+    var qualify = retired ? null : { frac: have === null ? 0 : Math.min(1, have / tgt), text: have === null ? 'Count read from the research log · ' + tgt + ' needed' : have + ' of ' + tgt + ' · ' + what };
+    var params = [['What it does', x.rule || ''], ['Started', x.startDate || ''], ['Next read', x.nextReadText || ''], ['What is counted', x.nBasis || ''], ['Size if it goes live', retired ? '' : (typeof KAL_BOARD_LADDER === 'object' ? KAL_BOARD_LADDER.shadow : '3 contracts')]].filter(function(kv){ return kv[1]; });
+    var said = retired ? (x.kill || x.reason || '') : '';
+    if(retired && x.rule && x.rule === said){ params = params.filter(function(kv){ return kv[0] !== 'What it does'; }); }
+    return kalshiStratChartsHtml({ paper: true, range: range || '30D', now: now, rule: retired && x.rule === said ? '' : x.rule, net: rows.length ? kalshiStratR(sum(rows)) : null, n: rows.length, winRate: rows.length ? wins.length / rows.length : null,
+      avgWin: wins.length ? kalshiStratR(sum(wins) / wins.length) : null, avgLoss: losses.length ? kalshiStratR(sum(losses) / losses.length) : null,
+      cum: cum, times: [null].concat(rows.map(function(r){ return r.ts; })), roll: kalshiStratRolling(rows.map(function(r){ return r.p; }), 30), daily: kalshiStratDaily(rows, now, dayOf, 14),
+      qualify: qualify, goes: retired ? '' : (x.goesLive || ''), kill: x.kill || (retired ? x.reason || '' : ''), ret: x['return'] || '', stage: x.stage + (x.label ? ' · ' + x.label.toLowerCase() : ''), params: params }, esc, money);
   }
   function kalshiBoardHtml(model, esc, money){
     var openSet = model.open || {}, now = model.now || 0, tt = model.timeText || String;
@@ -4928,7 +4947,7 @@ kalshiStatusTick();
     (model.live || []).forEach(function(s){
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
       // An approved seat that has placed no order yet (CFRTIK before its deploy) is not trading real money, so it waits in Shadow, never in Live (Nov 13, 2026). orders is the count of every order the page holds for it, filled or not; undefined (an older caller) changes nothing.
-      var waiting = lane === 'probation' && s.orders === 0; if(waiting){ bk = 'shadow'; }
+      var waiting = false;   // an approved seat with no order yet used to wait in Shadow; the seats are deployed now (Nov 13, 2026: CFRTIK live), so a seat with no order reads Trial 0 of 90 in Live from live state
       var bd = kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState });
       var pf = kalshiBoardPfText(s.w.d30), unreadable = s.killState === 'unknown', loading = s.killState === 'loading';
       var word = lane === 'off' && bd.text === 'STOPPED' ? 'COOLING' : bd.text;
@@ -4982,8 +5001,10 @@ kalshiStatusTick();
       var d = regData[x.id] || {}, have = typeof d.n === 'number' ? d.n : null, tgt = x.roomTarget, bkey = regLane(x) === 'probation' ? 'live' : (x.stage === 'Paper' || x.stage === 'Idea' ? 'quiet' : 'shadow');
       if(bkey === 'quiet'){ quiet.push(x); return; }
       var building = kalshiRegBuilding(x);
-      box[bkey].push({ key: 'R:' + x.id, name: x.name, stage: building ? 'Building' : x.stage, stCls: bkey === 'live' ? 'prob' : 'deck', pf: 'n/a', word: building ? 'BUILDING' : bkey === 'live' ? 'ON TRIAL' : 'COLLECTING', frac: tgt && have !== null ? Math.min(1, have / tgt) : 0,
-        detail: '<div class="rw-c1 rw-reg">' + kalshiRegistrySheetHtml(x, d, esc) + '</div><div class="rw-c2"></div>', more: '' });
+      var pr = Array.isArray(d.rows) ? d.rows : [], gw = pr.reduce(function(t, r){ return t + (r.p > 0 ? r.p : 0); }, 0), gl = pr.reduce(function(t, r){ return t + (r.p < 0 ? -r.p : 0); }, 0);
+      var paperPf = !pr.length ? 'n/a' : gl > 0 ? (gw / gl).toFixed(2) : (gw > 0 ? 'no losses' : 'n/a');   // the paper win/loss ratio on the ring, like a live row's
+      box[bkey].push({ key: 'R:' + x.id, name: x.name, stage: building ? 'Building' : x.stage, stCls: bkey === 'live' ? 'prob' : 'deck', pf: paperPf, word: building ? 'BUILDING' : bkey === 'live' ? 'ON TRIAL' : 'COLLECTING', frac: tgt && have !== null ? Math.min(1, have / tgt) : 0,
+        detail: '', more: '', charts: typeof kalshiStratPaperCharts !== 'function' ? '' : kalshiStratPaperCharts(x, d, now, model.range, model.dayOf || function(ms){ return new Date(ms).toISOString().slice(0, 10); }, esc, money) });
     });
     // ---- The nearest kill: one strategy, marked with a pulse ----
     var allKills = kills.live, nearest = kalshiClosestKill(allKills);
@@ -5178,7 +5199,7 @@ kalshiStatusTick();
     // Say so on the chart when part of the range is missing, never start silently later (the owner, Nov 13, 2026)
     var hDay = function(ms){ return kalshiStratDayText(new Date(ms).toISOString().slice(0, 10)); };
     summary.note = hist.loading ? 'Reading older trades...' : hist.failed ? 'Older trades could not be read, so this starts at ' + hDay(hist.from) + '.' : hist.slotShort ? 'Second-slot trades before ' + hDay(hist.slotShort) + ' are not loaded.' : '';
-    kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
+    kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser), rows: rows.filter(function(r){ return r && r.rule === x.code.shadow && r.settled === true && r.wouldFill === true && isFinite(Number(r.pnl)) && isFinite(Number(r.atMs)); }).sort(function(a, b){ return Number(a.atMs) - Number(b.atMs); }).map(function(r){ return { ts: Number(r.atMs), p: Number(r.pnl) }; }) }; } });
     var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
     live.forEach(function(s){ kalshiRegData[s.id] = kalshiOrdersLoaded ? { live: true, kill: s.kill, spark: s.spark } : { live: true }; });
@@ -5187,7 +5208,7 @@ kalshiStatusTick();
     var focusKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-f') : null;
     // The loop's moving dots, the grid drift and the pulses are infinite CSS animations; a redraw replaces their elements, which restarted every one of them from zero on each data update (the owner, Nov 13, 2026: "a very obvious restart animation ... almost as if the page refreshes"). A negative delay of the time since the page loaded puts each new element at the phase the old one had, so a redraw is seamless.
     page.style.setProperty('--lp-sync', -Math.round(typeof performance !== 'undefined' && performance.now ? performance.now() : 0) + 'ms');
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData, range: kalshiStratRange }, escapeHtml, kalshiMoney);
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData, range: kalshiStratRange, dayOf: kalDayKey }, escapeHtml, kalshiMoney);
     if(focusKey){ var fs = el.querySelectorAll('[data-f]'); for(var fi = 0; fi < fs.length; fi++){ if(fs[fi].getAttribute('data-f') === focusKey){ fs[fi].focus(); break; } } }
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     // A play that would start late looks like the page restarting (the owner, Nov 13, 2026: "it'll wait a few seconds, load then restart"): the shadow log answering seconds after the page opened replayed the whole entrance. So it plays only when the data is there within KAL_STRAT_LATE_MS of the page opening; later, the values simply appear.
@@ -5199,14 +5220,23 @@ kalshiStatusTick();
   (function(){
     var body = document.getElementById('stratBody'), last = null;
     if(!body){ return; }
-    var pop = document.createElement('div'); pop.id = 'spPop'; pop.className = 'sp-pop'; pop.hidden = true;
-    pop.innerHTML = '<div class="sp-pop-sheet" role="dialog" aria-modal="true" aria-label="Strategy details"><div id="spPopBody"></div><button type="button" class="sp-detbtn" id="spPopClose">Close</button></div>';
+    var pop = document.createElement('div'); pop.id = 'spPop'; pop.className = 'sp-pop sp-cpop'; pop.hidden = true;   // the same sheet as a strategy row's (Nov 13, 2026, the owner: "all of these look so different")
+    pop.innerHTML = '<div class="sp-pop-sheet sp-csheet" role="dialog" aria-modal="true" aria-label="Strategy details"><div id="spPopBody"></div><button type="button" class="sp-detbtn" id="spPopClose">Close</button></div>';
     document.body.appendChild(pop);
     var openId = null;
-    var draw = function(){ var x = kalshiStratSheets[openId] || kalshiStratSheetRow(openId, kalshiRegistry.list, KAL_BOARD_LIVE); if(!x){ return false; } document.getElementById('spPopBody').innerHTML = kalshiRegistrySheetHtml(x, kalshiStratSheetData(openId, kalshiRegData[openId] || (KAL_BOARD_LIVE.some(function(r){ return r.id === openId; }) ? { live: true } : null), kalshiMoney), escapeHtml); return true; };
+    var draw = function(){
+      var x = kalshiStratSheets[openId] || kalshiStratSheetRow(openId, kalshiRegistry.list, KAL_BOARD_LIVE); if(!x){ return false; }
+      var reg = kalshiRegistry.list.filter(function(r){ return r.id === openId; })[0] || {};
+      var row = { name: x.name, stage: x.stage, label: x.label, rule: x.rule, goesLive: x.goes || reg.goesLive, kill: x.kill, reason: reg.reason, 'return': x['return'], roomTarget: x.roomTarget, roomWhat: x.roomWhat, startDate: reg.startDate, nextReadText: x.nextReadText, nBasis: reg.nBasis };
+      var retired = x.stage === 'Retired', word = retired ? (reg.cause || 'retired') : 'collecting';
+      var rr = kalshiStratRing('n/a'), ring = '<span class="rw-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (rr.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - rr.frac).toFixed(3) + '"/>' : '') + '</svg><span class="rw-pf">n/a</span></span>';
+      document.getElementById('spPopBody').innerHTML = '<div class="sp-ch-top"><div class="sp-ch-h">' + ring + '<b class="rw-n">' + escapeHtml(x.name) + '</b><span class="sp-badge sp-b-' + (retired ? 'off' : 'deck') + '">' + escapeHtml(x.stage) + '</span><span class="rw-w">' + escapeHtml(word.toUpperCase()) + '</span></div><button type="button" class="sp-cx" id="spPopX" aria-label="Close">&times;</button></div>' +
+        kalshiStratPaperCharts(row, kalshiRegData[openId] || null, Date.now(), kalshiStratRange, kalDayKey, escapeHtml, kalshiMoney);
+      return true;
+    };
     kalshiStratPop.refresh = function(){ if(!pop.hidden && openId){ draw(); } };   // a redraw or the Privacy switch re-masks an open sheet
     var close = function(){ pop.hidden = true; openId = null; if(last && last.focus){ last.focus(); } };
-    pop.addEventListener('click', function(e){ if(e.target === pop || e.target.id === 'spPopClose'){ close(); } });
+    pop.addEventListener('click', function(e){ if(e.target === pop || e.target.id === 'spPopClose' || (e.target.closest && e.target.closest('#spPopX'))){ close(); return; } var g = e.target && e.target.closest ? e.target.closest('[data-strng]') : null; if(g){ kalshiStratRange = g.getAttribute('data-strng'); renderStrategiesPage(); } });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !pop.hidden){ close(); } });
     body.addEventListener('click', function(e){
       var b = e.target && e.target.closest ? e.target.closest('[data-reg-details]') : null; if(!b){ return; }
