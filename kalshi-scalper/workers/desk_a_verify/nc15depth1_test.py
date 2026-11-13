@@ -73,7 +73,7 @@ b = by["B"]; assert b["side"] == "no" and abs(b["p"] - 0.70) < 1e-12 and b["win"
 f_ = by["F"]; assert f_["result"] == "void" and abs(f_["cash"] + f_["fee"]) < 1e-12, f_
 i_ = by["I"]; assert i_["side"] == "yes" and abs(i_["p"] - 0.50) < 1e-12 and i_["win"] == 0, i_                                     # the +1.0 s poll (ask 0.50), result no -> yes loses
 assert why["not in the cell"] == 1 and why["ask outside 0.10 to 0.90 or under 1 contract displayed"] == 2 and why["no look poll"] == 1 and why["no entry poll in 1 s to 20 s"] == 2 and why["closes before 2026-11-19 (never scored)"] == 1, dict(why)
-L = S.report(recs, why); assert "BELOW THE REGISTERED MINIMUM" in L[1] and "only this count prints" in L[1] and len(L) == 2 and "UNRESOLVED" in L[0], L           # four trades: no figure is read
+L = S.report(recs, why); assert "no evidence at n = 4" in L[1] and "BELOW THE REGISTERED MINIMUM" in L[1] and len(L) == 2 and "UNRESOLVED" in L[0], L           # four trades: no figure is read
 S.MIN_N = 3; L2 = S.report(recs, why); assert any(x.startswith("LABEL: SURVIVES") or x.startswith("LABEL: FALSIFIED") for x in L2), L2
 # F1: an empty group fails every bar test; inf only for wins and no loss
 assert S.pf([]) is None and S.pf([0.5, 0.2]) == float("inf") and not S.ge(S.pf([]), 1.5) and not S.gt(S.pf([]), 1.0) and S.ge(float("inf"), 1.5)
@@ -90,7 +90,7 @@ assert S.fee_up(0.5) == 0.02 and S.fee_up(0.1) == 0.01 and S.fee_up(0.4) == 0.02
 mk_ = os.path.join(tempfile.mkdtemp(), "m.txt"); S.read_once(mk_)
 try: S.read_once(mk_); raise AssertionError("second read not refused")
 except SystemExit: pass
-# a void only when the result says void; any other non-yes/no value is unresolved
+# a void: a present result that is neither yes nor no (window F above); an empty result is unresolved (window P above)
 # default-closed and the guard
 import subprocess
 r = subprocess.run([sys.executable, "-I", os.path.join(here, "nc15depth1.py"), tempfile.mkdtemp()], capture_output=True, text=True); assert r.returncode != 0 and "REFUSED" in (r.stderr + r.stdout)
