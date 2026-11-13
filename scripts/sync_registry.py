@@ -13,14 +13,17 @@ from zoneinfo import ZoneInfo
 from datetime import datetime, timezone
 
 MANAGED = ('WH-', 'CL-')
-KEYS = ['id', 'name', 'stage', 'rule', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return',
+KEYS = ['id', 'name', 'stage', 'rule', 'goesLive', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return',
         'retiredOn', 'reason', 'notes', 'code', 'roomTarget', 'roomWhat', 'cause', 'figures']
 SRC = {'admit': 'WHEEL_ADMIT_LIST.md', 'queue': 'RND_QUEUE.md'}
 
 SHADOW_KILL = ("Shadow only: no order, nothing to lose. The place is dropped if its registered research read is falsified "
                "(all its places at once) or it cannot reach 60 fill-checked signals in 21 days")
-SHADOW_RETURN = ("Takes a live seat only after one block of 60 fillable signals in 21 days on 7 or more days, cash PF 1.3+ and 1.0+ in each half, "
-                 "then the owner's popup with the exact spec and the Chief of Staff's review (docs/ROTATION_LANE.md)")
+# The three plain lines every shadow place shows (Nov 13, 2026, the owner: "nothing should be dependent on me with rotating strategies"; the Risk Analyst's wording via Main).
+SHADOW_LIVE = ("Its paper record wins at least 1.3 times what it loses over 60 checked trades on at least 7 days (150 trades and 10 losses for favourites at 88c or more), "
+               "holds up for 30 more, and its worst-case loss still fits the account's risk budget. It starts at 3 contracts")
+SHADOW_RETURN = ("14 days after a slow-down stop, or 30 days after a hard stop, a fresh paper record clears the same bar. It returns at 3 contracts."
+                 " It can come back by itself at most twice; a third stop retires it for good")
 NC15_RULE = "Top-5 size skew between the two sides of 0.50 or more at the last poll at or before 600 seconds to the close; buy at the ask between 10c and 90c, hold to settlement"
 NC15_BASIS = "Public NC15 book recorder; the count is read from the private log, not stored here"
 
@@ -103,7 +106,7 @@ def build(spec, text, batch, start=None):
         row.update(stage='Retired', retiredOn=spec['date'], reason=spec['reason'], cause=spec['cause'], **{'return': spec.get('ret')})
         row['notes'] = list(spec.get('notes', []))
         return row
-    row.update(stage='Shadow', label='UNPROVEN', kill=SHADOW_KILL, nBasis=spec['basis'], **{'return': SHADOW_RETURN})
+    row.update(stage='Shadow', label='UNPROVEN', goesLive=SHADOW_LIVE, kill=SHADOW_KILL, nBasis=spec['basis'], **{'return': SHADOW_RETURN})
     row['notes'] = [spec['extra']] if spec.get('extra') else []
     c = spec['counting']
     if c in ('batch2', 'cfrti') and batch:

@@ -78,11 +78,11 @@ gates.SP3 = () => {
   assert.strictEqual(R('0.00').frac, 0); assert.strictEqual(R('n/a').frac, 0); assert.strictEqual(R('1.00').frac, 0.5, 'a profit factor of 1.0 is half the ring on the 0 to 2 scale');
   assert.strictEqual(R('2.40').frac, 1, 'clamped to a full ring'); assert.strictEqual(R('no losses').frac, 1);
   assert.deepStrictEqual(R('1.30').tick, { x1: 50, y1: 84, x2: 50, y2: 96 }, 'the 1.0 tick is at the bottom of the ring, where half way ends');
-  const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, money);
-  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$1.50' && oi.cap === 'left before its loss limit', 'OICORE: the net floor binds, 4.5 of 6 used: ' + JSON.stringify(oi));
-  const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, money);
-  assert.ok(oi2.frac === 0.5 && oi2.big === '12 losses of 24' && /loss limit: \$9\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
-  assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -5, floorOn: false, floorRoom: 1 }, money).frac, 0, 'the net floor is not counted before 40 fills');
+  const oi = P.kalshiStratGauge('OICORE', { streak: 2, net: -37.5, floorOn: true, floorRoom: 12.5 }, money);
+  assert.ok(Math.abs(oi.frac - 0.75) < 1e-9 && oi.big === '$12.50' && oi.cap === 'left before its loss limit', 'OICORE: the net floor binds, 37.5 of 50 used: ' + JSON.stringify(oi));
+  const oi2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 75 }, money);
+  assert.ok(oi2.frac === 0.5 && oi2.big === '12 losses of 24' && /loss limit: \$75\.00 of room/.test(oi2.cap), 'the streak binds: ' + JSON.stringify(oi2));
+  assert.strictEqual(P.kalshiStratGauge('OICORE', { streak: 0, net: -45, floorOn: false, floorRoom: 5 }, money).frac, 0, 'the net floor is not counted before 40 fills');
   const l1 = P.kalshiStratGauge('L1', { count: 18 }, money);
   assert.ok(l1.frac === 0.18 && l1.big === '18 of 100', 'the gold tripwire is n of 100 trades');
   assert.strictEqual(P.kalshiStratGauge('L1', { count: 250 }, money).frac, 1, 'never past full');
@@ -92,9 +92,9 @@ gates.SP3 = () => {
   assert.strictEqual(P.kalshiStratGauge('GOLDALL', { streak: 1 }, money), null, 'a shadow rule has no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('XRPYES10', { streak: 1 }, money), null, 'XRPYES10 and KESTREL were retired Nov 11, 2026: no live card, so no kill gauge');
   assert.strictEqual(P.kalshiStratGauge('KESTREL', { streak: 1 }, money), null);
-  const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -4.5, floorOn: true, floorRoom: 1.5 }, mask);
+  const m = P.kalshiStratGauge('OICORE', { streak: 2, net: -37.5, floorOn: true, floorRoom: 12.5 }, mask);
   assert.ok(m.big === '****' && !/\d/.test(m.cap), 'Privacy view masks the dollar figure of the gauge');
-  const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 9 }, mask);
+  const m2 = P.kalshiStratGauge('OICORE', { streak: 12, net: 3, floorOn: true, floorRoom: 75 }, mask);
   assert.ok(m2.cap === 'losses in a row; loss limit: **** of room', 'and the dollar figure in the caption');
 };
 const panel = (h, k) => new RegExp('<section class="lp-p" id="lp-p-' + k + '"[\\s\\S]*?</section>').exec(h)[0];
@@ -107,7 +107,7 @@ gates.RT1 = () => {
   for (const id of ['XRPYES10', 'KESTREL', 'GOLDALL', 'XRPFAV6', 'LANTERN']) {
     const r = P.KAL_BOARD_RETIRED.rows.find((x) => x.name === id);
     assert.ok(r, id + ' is under Retired');
-    assert.ok(/Return rule: /.test(r.note) && /retired Nov 11/.test(r.note) && /copy of gold L1/.test(r.note), id + ' states its written return rule');
+    assert.ok(/Comes back when: 14 days after a slow-down stop/.test(r.note) && !/owner/.test(r.note) && /retired Nov 11/.test(r.note) && /copy of gold L1/.test(r.note), id + ' states its written return rule');
     assert.ok(!('pf' in r) && !('n' in r), id + ' carries no invented figure');
   }
   assert.strictEqual(P.KAL_BOARD_RETIRED.asOf, 'Nov 11');
@@ -142,7 +142,7 @@ const now = Date.UTC(2026, 10, 10, 18, 0);
 // the first sharing its id with a live strategy (OICORE) to cover the twin chips. These ids are fixtures, not registered rules.
 const SHADOW_FIX = [{ id: 'OICORE', rule: 'fixture: a shadow rule that is also live' }, { id: 'SHA', rule: 'fixture shadow rule A' }, { id: 'SHB', rule: 'fixture shadow rule B' }, { id: 'SHC', rule: 'fixture shadow rule C' }];
 const liveModel = (kmoney) => P.KAL_BOARD_LIVE.map((s, i) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: { d7: { n: 1 }, d30: { n: 24, pf: 1.34 + i / 10 }, all: { n: 30 } },
-  kill: { count: 18, streak: 2, net: -1, floorOn: true, floorRoom: 5, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
+  kill: { count: 18, streak: 2, net: -8, floorOn: true, floorRoom: 42, lines: ['status for ' + s.id + ' ' + kmoney(10.67)] }, spark: [1, 1.1, 1.3, 1.2, 1.4] }));
 const deckModel = (state) => ({ state, rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, spark: [1, 1.2, 1.1],
   rep: { fillable: 41, pfFillable: 1.25, netFillableDollars: 1, days: 6.4, status: 'collecting' } })) });
 gates.SP5 = () => {
@@ -151,7 +151,7 @@ gates.SP5 = () => {
   const noRules = (x) => x.replace(/<ul class="kal-bd-rules">[\s\S]*?<\/ul>/g, '').replace(/<span class="bd-w"[^>]*>[^<]*<\/span>/g, '').replace(/<dd>[^<]*<\/dd>/g, '').replace(/ title="[^"]*"/g, '');
   assert.ok(!/\$\d/.test(noRules(h)) && /\*\*\*\*/.test(h), 'with the mask on no dollar figure is in the markup');
   const plain = P.kalshiBoardHtml({ live: liveModel(money), deck: deckModel('ok'), retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.ok(/\$5\.00/.test(plain) && /left before its loss limit/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
+  assert.ok(/\$42\.00/.test(plain) && /left before its loss limit/.test(plain) && !/drawdown room/.test(plain), 'and with it off the room is shown, with no fixed drawdown badge');
   const n = P.KAL_BOARD_LIVE.length + SHADOW_FIX.length;
   assert.strictEqual((plain.match(/class="rw(?: open)?(?: near)?"/g) || []).length, n, 'one row per live strategy and per shadow rule');
   assert.strictEqual((plain.match(/<dt>Sizing<\/dt>/g) || []).length, n, 'every row keeps the Sizing line in More');
@@ -160,7 +160,7 @@ gates.SP5 = () => {
   assert.ok(!/Not set yet/.test(plain), 'no placeholder is left');
   assert.ok((plain.match(/class="lp-t[ "]/g) || []).length === 3 && (plain.match(/class="lp-p"/g) || []).length === 3 && /id="lp"/.test(plain), 'three boxes and three panels in one loop');
   assert.ok((plain.match(/class="bd-b near"/g) || []).length === P.KAL_BOARD_LIVE.length, 'a kill line with the closest limit hatched on each live row');
-  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring"/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
+  assert.ok((plain.match(/<circle class="sp-ring-bg"/g) || []).length === 2 * n && (plain.match(/class="rw-ring">/g) || []).length === n, 'a small ring on every row head and a ring dial in every row\'s detail (Nov 13, 2026)');
   assert.ok((plain.match(/class="kal-bd-rules"/g) || []).length === n, 'every row keeps Implement, Kill and Return in More');
   assert.ok(/41 of 150 signals/.test(plain), 'a signals of 150 bar on each shadow rule');
   assert.ok(!/#[0-9a-f]{3,6}|green|\bred\b|rgb\(/i.test(plain.replace(/aria-label="[^"]*"/g, '')), 'black and white only: no colour in the markup');
@@ -310,12 +310,12 @@ gates.SP12c = () => {
   assert.ok(Q.KAL_BOARD_RETIRED.rows.every((r) => Q.KAL_RETIRED_CAUSES.includes(r.cause)), 'every old row has a cause');
   const h = Q.kalshiRetiredGroupsHtml(en, {}, esc);
   assert.ok(!/<details[^>]* open/.test(h), 'closed by default');
-  assert.deepStrictEqual([...h.matchAll(/<summary><i class="chev"><\/i><span class="sp-rgt">([^<]+)<\/span>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
+  assert.deepStrictEqual([...h.matchAll(/<summary class="rw-h"><i class="chev"><\/i><span class="rw-ring" aria-hidden="true"><\/span><b class="rw-n sp-rgt">([^<]+)<\/b>/g)].map((m) => m[1]), Q.KAL_RETIRED_CAUSES, 'groups by cause, in a fixed order');
   assert.ok(/sp-rnote">n 172 and 173, PF about 0.55 to 0.60 \u00b7 Nov 12</.test(h), 'one line: key numbers and date (the group header names the cause, Nov 13, 2026)');
   assert.ok(/<span class="sp-rnote">Nov 12<\/span>/.test(h), 'no figures: only the date');
   assert.strictEqual((h.match(/data-reg-details=/g) || []).length, en.length, 'every line has Details');
   assert.ok(!/<img|bogus/.test(h) && /&#60;img/.test(h), 'escaped');
-  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');
+  assert.ok(/<details class="sp-rgrp rw" data-k="ret:superseded" open>/.test(Q.kalshiRetiredGroupsHtml(en, { 'ret:superseded': true }, esc)), 'an opened group stays open across a redraw');
   const sh = by('XRP').sheet; assert.strictEqual(sh.stage, 'Retired');
 };
 gates.SP13 = () => {
@@ -333,7 +333,7 @@ gates.SP14 = () => {
   const evil = Q.kalshiStratDetailHtml(Q.kalshiStratDetail([W(NOW)], () => '<b onmouseover=1>', CT, 8), esc, money, () => '<i>');
   assert.ok(!/<b onmouseover|<i>/.test(evil), 'market name and time are escaped');
   const open = Q.kalshiBoardHtml({ live: [{ id: 'L1', name: 'n', rule: 'r', rules: null, w: { d7: { n: 0 }, d30: { n: 0, pf: null }, all: { n: 0 } }, kill: { lines: [] }, spark: [], detail: Q.kalshiStratDetail(orders, () => 'Gold', CT, 8) }], deck: { state: 'ok', rows: [] }, retired: { rows: [{ name: 'Q', cause: 'superseded', note: 'n' }], back: 'b', asOf: 'a' }, open: { 'ret:superseded': true } }, esc, money);
-  assert.ok(/<details class="sp-rgrp" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
+  assert.ok(/<details class="sp-rgrp rw" data-k="ret:superseded" open>/.test(open), 'an open Retired group stays open across a redraw');
   assert.ok(/data-row="L1"/.test(open) && !/data-reg-details="L1"/.test(open), 'a Live strategy is a row that opens its chart sheet (option A, Nov 13, 2026), not the registry popup');
   const body = html.slice(html.indexOf('// ---- Summary bar, detail panels'), html.indexOf('  // ---- Stage board')) + fn('kalshiBoardHtml') + fn('renderStrategiesPage');
   assert.ok(!/setInterval|setTimeout|fetch\(|XMLHttpRequest|https?:\/\/|\.set\(|setDoc|addDoc/.test(body), 'no timer, write or host');
@@ -441,7 +441,7 @@ gates.GK4 = () => {
   const ret = Q.kalshiGoldReturnProgress([{ rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 0), settled: true, wouldFill: true, pnl: 1 }, { rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 15), settled: true, wouldFill: true, pnl: -1 }, { rule: 'GOLDOFF', atMs: Date.UTC(2026, 10, 12, 20, 30), settled: false, wouldFill: true }, { rule: 'OTHER', atMs: 1, settled: true, wouldFill: true, pnl: 5 }], Date.UTC(2026, 10, 14, 20, 0));
   assert.strictEqual(ret, 'Return record (GOLDOFF shadow): 2 of 60 trades, 1 of 10 losses, day 2 of 7, cash PF 1.00.');
   const note = P.kalshiGoldKillNote(P.kalshiGoldKillState(TRIPPED), ret, (t) => 'Nov 12, 1:12 PM');
-  assert.ok(note.startsWith('Gold is off: the kill rule tripped; it returns only by the written return rule (shadow profit factor 1.3 or better, at least 60 trades, at least 10 losses, at least 7 days, second half 1.3, then the owner re-arms)'), note);
+  assert.ok(note.startsWith('Gold is off: the kill rule tripped; it returns only by the written return rule (shadow profit factor 1.3 or better, at least 60 trades, at least 10 losses, at least 7 days, second half 1.3, then half size for 30 trades)'), note);
   assert.ok(/Return record \(GOLDOFF shadow\)/.test(note) && /tripped Nov 12/.test(note), 'progress and time are shown');
   assert.ok(!/\$/.test(note), 'no dollar figure typed into the line');
   assert.ok(/not readable/.test(P.kalshiGoldKillNote({ state: 'unknown' }, '', String)) && !/healthy\b(?! )/i.test(P.kalshiGoldKillNote({ state: 'unknown' }, '', String).replace('as healthy', '')), 'unknown says not readable');
@@ -485,12 +485,12 @@ gates.GK8 = () => {
 gates.OK1 = () => {
   // OICORE's badge is room left against the kill that binds first (Nov 12, 2026, the owner); the fixed $50 drawdown is no longer a badge or gauge figure.
   const g = (kill) => P.kalshiStratGauge('OICORE', kill, money);
-  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).big, '20 losses of 24', 'the streak is closer');
-  assert.strictEqual(g({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).big, '$1.00', 'the net floor is closer');
+  assert.strictEqual(g({ streak: 20, net: 1, floorOn: true, floorRoom: 51 }).big, '20 losses of 24', 'the streak is closer');
+  assert.strictEqual(g({ streak: 1, net: -42, floorOn: true, floorRoom: 8 }).big, '$8.00', 'the net floor is closer');
   const b = (kill) => P.kalshiStratBadge('live', { n: 40, pf: 1.4, frac: g(kill).frac, useFrac: true, killState: undefined });
-  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 7 }).text, 'NEAR STOP', '20 of 24 is over 80% of the streak kill');
-  assert.strictEqual(b({ streak: 1, net: -5, floorOn: true, floorRoom: 1 }).text, 'NEAR STOP', '5 of 6 of the net floor used');
-  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 6 }).text, 'NEAR STOP');
+  assert.strictEqual(b({ streak: 20, net: 1, floorOn: true, floorRoom: 51 }).text, 'NEAR STOP', '20 of 24 is over 80% of the streak kill');
+  assert.strictEqual(b({ streak: 1, net: -42, floorOn: true, floorRoom: 8 }).text, 'NEAR STOP', '42 of 50 of the net floor used');
+  assert.notStrictEqual(b({ streak: 3, net: 0, floorOn: true, floorRoom: 50 }).text, 'NEAR STOP');
   const src = fs.readFileSync(path.join(__dirname, '..', 'index.html'), 'utf8');
   assert.ok(!/ddStop|drawdown room/i.test(src.replace(/<li>[\s\S]*?<\/li>/g, '')), 'no fixed drawdown gauge code is left on the page');
 };
@@ -532,14 +532,14 @@ gates.AL3 = () => {
   assert.ok(/<b data-count="1">1<\/b><span class="lp-tt">Live/.test(out), 'the Live count is what trades');
 };
 gates.SP15 = () => {
-  // timeframes (Nov 13, 2026, the owner: "i cant select timeframes on it"): 1D, 7D, 30D and All change the curve, the profit factor and the trade count together; 30D is the default
+  // timeframes (Nov 13, 2026, the owner: "i cant select timeframes on it"): 7D, 30D and YTD change the curve, the profit factor and the trade count together; 30D is the default
   const orders = [W(NOW - 2 * HR), W(NOW - 30 * HR), L(NOW - 3 * 86400000), W(NOW - 40 * 86400000)];
   const n = (k) => Q.kalshiStratSummary(orders, NOW, 0, CT, k).w30.n;
-  assert.deepStrictEqual([n('1D'), n('7D'), n('30D'), n('All'), n(undefined)], [1, 3, 3, 4, 3], 'each range counts its own trades; no range means 30 days');
-  assert.strictEqual(Q.kalshiStratSummary(orders, NOW, 0, CT, 'All').curve.length, 5, 'All draws every settled trade from zero');
+  assert.deepStrictEqual([n('7D'), n('30D'), n('YTD'), n(undefined), n('All')], [3, 3, 4, 3, 3], 'each range counts its own trades; no range, or an old key, means 30 days (the owner: "it should go 7D, 30D, YTD")');
+  assert.strictEqual(Q.kalshiStratSummary(orders, NOW, 0, CT, 'YTD').curve.length, 5, 'YTD draws every settled trade since Jan 1 (US Central) from zero');
   const h = Q.kalshiStratSummaryHtml(Q.kalshiStratSummary(orders, NOW, 0, CT, '7D'), esc, money);
   assert.ok(/All strategies &middot; last 7 days &middot; 3 trades/.test(h), 'the header names the range and its count');
-  assert.deepStrictEqual([...h.matchAll(/data-strng="([^"]+)"/g)].map((m) => m[1]), ['1D', '7D', '30D', 'All'], 'four buttons, in order');
+  assert.deepStrictEqual([...h.matchAll(/data-strng="([^"]+)"/g)].map((m) => m[1]), ['7D', '30D', 'YTD'], 'three buttons, in order');
   assert.ok(/aria-pressed="true">7D</.test(h) && (h.match(/aria-pressed="true"/g) || []).length === 1, 'exactly the chosen one is pressed');
   const rp = fn('renderStrategiesPage');
   assert.ok(/kalshiStratSummary\([^;]*kalshiStratRange\)/.test(rp) && /range: kalshiStratRange/.test(rp), 'the page passes its one choice to the summary and the sheets');
@@ -550,13 +550,13 @@ gates.SP16 = () => {
   const R = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratRangeHtml') + fn('kalshiStratR') + fn('kalshiHoverAttr') + fn('kalshiHoverWhen') + fn('kalshiStratCumLine') + varLine('kalshiStratDayText') + fn('kalshiStratChartsHtml') + '; return kalshiStratChartsHtml;')(Math, Number, Array, isFinite, Intl, Date);
   const base = { now: NOW, cum: [0, 5, 3, 4], times: [null, NOW - 10 * 86400000, NOW - 3 * 86400000, NOW - 2 * HR], n: 3 };
   const pts = (h) => JSON.parse(/class="hv" data-hv="([^"]+)"/.exec(h)[1].replace(/&#34;|&quot;/g, '"'));
-  const all = R(Object.assign({ range: 'All' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), day = R(Object.assign({ range: '1D' }, base), esc, money);
-  assert.strictEqual(pts(all).length, 4, 'All: every point');
+  const all = R(Object.assign({ range: 'YTD' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), whole = R(Object.assign({}, base), esc, money);
+  assert.strictEqual(pts(all).length, 4, 'YTD: every point this year'); assert.strictEqual(pts(whole).length, 4, 'no range (an old call): the whole record');
   assert.strictEqual(pts(wk).length, 3, '7D: a zero start and the two trades inside the week');
   assert.ok(/3 trades/.test(all) && /2 trades &middot; last 7 days|2 trades · last 7 days/.test(wk), 'the note counts the trades in the range');
-  assert.strictEqual(pts(day).length, 2, '1D: the zero start and the one trade in the last 24 hours');
-  const none = R(Object.assign({ range: '1D' }, base, { times: [null, NOW - 10 * 86400000, NOW - 9 * 86400000, NOW - 8 * 86400000] }), esc, money);
-  assert.ok(/No settled trades in the last 24 hours/.test(none), 'an empty range says so instead of drawing a line');
+  
+  const none = R(Object.assign({ range: '7D' }, base, { times: [null, NOW - 10 * 86400000, NOW - 9 * 86400000, NOW - 8 * 86400000] }), esc, money);
+  assert.ok(/No settled trades in the last 7 days/.test(none), 'an empty range says so instead of drawing a line');
   assert.ok(/data-strng="7D"[^>]*aria-pressed="true"/.test(wk), 'the sheet shows the same buttons, the chosen one pressed');
 };
 let failed = 0;
