@@ -2,7 +2,7 @@
 """OICORE proven-bar read (Head of R&D rules, Nov 13, 2026). Local file only, no network, no token.
 Usage: python3 -I oicore_proven.py <nightly report json>   (the report's slotOrders list)
 Rules: rows = OICORE orders with status filled and result yes or no; rows with result exit, or an unreadable avgFill or avgFee, are EXCLUDED and COUNTED.
-n >= 100 rows (rows, not contracts), sorted by ts (fill order), split rows[i*n//3:(i+1)*n//3] into 3 windows.
+n >= 100 rows (rows, not contracts), sorted by ts (fill order); the read point uses EXACTLY the first 100 (or first 150) rows and splits them rows[i*m//3:(i+1)*m//3] with m = 100 or 150.
 Cash PF per window, unrounded, fill-booked basis: paid = avgFill for YES, 1 - avgFill for NO; win = count*(1 - paid) - avgFee*count, loss = -(count*paid) - avgFee*count.
 PROVEN if at least 2 of 3 windows have PF >= 1.3 (1e-9 tolerance), else NOT YET. Read points: 100 rows, then 150 rows only if the 100 read said NOT YET; each read once (a marker per read point), no other read in between.
 Open (filled, unsettled) orders are counted and printed. Under 100 rows: counts only, no read."""
@@ -58,9 +58,11 @@ def run(report, marker_dir=MARKER_DIR):
             out["verdict"] = "NO READ (the 100 read is done; the 150 read needs 150 rows, have %d)" % n; return out
         point, marker = 150, m150
     out["read_point"] = point
+    used = rows[:point]   # EXACTLY the first 100 (or 150) counted rows by ts, never "all rows present": no choice about when to look
+    out["rows_used"] = len(used); m = len(used)
     wins = []
     for i in range(3):
-        w = [p for _, p in rows[i * n // 3:(i + 1) * n // 3]]
+        w = [p for _, p in used[i * m // 3:(i + 1) * m // 3]]
         wins.append({"rows": len(w), "net": sum(w), "pf": pf(w), "met": pf(w) >= BAR - TOL})
     out["windows"] = wins
     out["verdict"] = "PROVEN" if sum(w["met"] for w in wins) >= NEED_WIN else "NOT YET"

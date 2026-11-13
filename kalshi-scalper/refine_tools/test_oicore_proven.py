@@ -47,6 +47,18 @@ class T(unittest.TestCase):
         good = [row(i) for i in range(100)]
         self.assertEqual(P.run({"slotOrders": good}, self.m)["verdict"], "PROVEN")
         self.assertTrue(P.run({"slotOrders": good + [row(i) for i in range(100, 160)]}, self.m)["verdict"].startswith("REFUSED"))
+    def test_each_read_point_uses_exactly_the_first_n_rows(self):
+        # 130 rows: the first 100 (by ts) are all losses, the last 30 are wins; the 100 read must use only the first 100 (windows 33/33/34, all PF 0)
+        rows = [row(i, result="no") for i in range(100)] + [row(i, result="yes") for i in range(100, 130)]
+        r = P.run({"slotOrders": rows}, self.m)
+        self.assertEqual((r["read_point"], r["n"], r["rows_used"]), (100, 130, 100))
+        self.assertEqual([w["rows"] for w in r["windows"]], [33, 33, 34])
+        self.assertEqual([w["pf"] for w in r["windows"]], [0.0, 0.0, 0.0]); self.assertEqual(r["verdict"], "NOT YET")
+        # 170 rows later: the 150 read uses exactly the first 150 (windows 50/50/50), the last 20 never enter
+        rows2 = rows + [row(i, result="no") for i in range(130, 150)] + [row(i, result="yes") for i in range(150, 170)]
+        r = P.run({"slotOrders": rows2}, self.m)
+        self.assertEqual((r["read_point"], r["rows_used"]), (150, 150))
+        self.assertEqual([w["rows"] for w in r["windows"]], [50, 50, 50])
     def test_fill_order_by_ts(self):
         rows = [row(i, result="no") for i in range(34)] + [row(i) for i in range(34, 100)]   # losses first, then wins, given out of order
         rows.reverse()
