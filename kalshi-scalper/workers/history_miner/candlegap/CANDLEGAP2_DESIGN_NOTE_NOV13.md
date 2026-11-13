@@ -1,0 +1,3 @@
+# CANDLEGAP-2, dated note beside the design (Nov 13, 2026, about 02:15Z, the Head's ruling)
+
+The frozen design text is not edited. One correction to a reason: REMATCH is CLOSED (stage 1, its try unspent), not open. E-soccer stays out all the same: the Nov 12 e-soccer days are the only clean recent block and stay unread for a later card. Cards that ever held out the two series pulled (KXLIGAPROMATCH, KXEBASKETBALLGAME) on Nov 12 to 13: none covers those dates (INPLAYJUMP's held-out ends before Nov 3 for table tennis and before Nov 11 for e-basketball; PREMOVE's table tennis held-out ends before Nov 3 and PREMOVE was withdrawn unread at 2026-11-12T19:26Z).
