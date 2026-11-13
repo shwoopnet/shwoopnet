@@ -1,0 +1,78 @@
+{
+ "descriptive": {
+  "dev_calib_day0_1": {
+   "days": 0,
+   "n": 0,
+   "net": 0,
+   "pf": null,
+   "void": 0,
+   "won": 0,
+   "z": null
+  },
+  "dev_calib_day2_on": {
+   "days": 4,
+   "n": 4,
+   "net": 0.07,
+   "pf": 1.0814,
+   "void": 0,
+   "won": 2,
+   "z": 0.0662
+  },
+  "dev_member": {
+   "days": 3,
+   "n": 3,
+   "net": 0.39,
+   "pf": 1.7222,
+   "void": 0,
+   "won": 2,
+   "z": 0.384
+  },
+  "dev_nonmember": {
+   "days": 1,
+   "n": 1,
+   "net": -0.32,
+   "pf": 0.0,
+   "void": 0,
+   "won": 0,
+   "z": null
+  }
+ },
+ "dev": {
+  "days": 4,
+  "n": 4,
+  "net": 0.07,
+  "pf": 1.0814,
+  "void": 0,
+  "won": 2,
+  "z": 0.0662
+ },
+ "dev1": {
+  "days": 2,
+  "n": 2,
+  "net": 0.01,
+  "pf": 1.0185,
+  "void": 0,
+  "won": 1,
+  "z": 0.0092
+ },
+ "dev2": {
+  "days": 2,
+  "n": 2,
+  "net": 0.06,
+  "pf": 1.1875,
+  "void": 0,
+  "won": 1,
+  "z": 0.0857
+ },
+ "dev_verdict": "CLOSED",
+ "mode": "dev",
+ "skips": {
+  "gap_small": 1,
+  "held_window_ignored": 2,
+  "member_not_ok": 1,
+  "no_strike": 1,
+  "no_watched_station": 1,
+  "outside_windows": 1,
+  "stale_reading": 1
+ }
+}

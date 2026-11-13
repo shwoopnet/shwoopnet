@@ -1,6 +1,7 @@
 {
  "descriptive": {
   "dev_calib_day0_1": {
+   "days": 0,
    "n": 0,
    "net": 0,
    "pf": null,
@@ -9,6 +10,7 @@
    "z": null
   },
   "dev_calib_day2_on": {
+   "days": 4,
    "n": 4,
    "net": 0.07,
    "pf": 1.0814,
@@ -17,6 +19,7 @@
    "z": 0.0662
   },
   "dev_member": {
+   "days": 3,
    "n": 3,
    "net": 0.39,
    "pf": 1.7222,
@@ -25,6 +28,7 @@
    "z": 0.384
   },
   "dev_nonmember": {
+   "days": 1,
    "n": 1,
    "net": -0.32,
    "pf": 0.0,
@@ -33,6 +37,7 @@
    "z": null
   },
   "held_member": {
+   "days": 2,
    "n": 2,
    "net": 1.04,
    "pf": "inf",
@@ -41,6 +46,7 @@
    "z": 13.0
   },
   "held_nonmember": {
+   "days": 0,
    "n": 0,
    "net": 0,
    "pf": null,
@@ -50,6 +56,7 @@
   }
  },
  "dev": {
+  "days": 4,
   "n": 4,
   "net": 0.07,
   "pf": 1.0814,
@@ -58,6 +65,7 @@
   "z": 0.0662
  },
  "dev1": {
+  "days": 2,
   "n": 2,
   "net": 0.01,
   "pf": 1.0185,
@@ -66,6 +74,7 @@
   "z": 0.0092
  },
  "dev2": {
+  "days": 2,
   "n": 2,
   "net": 0.06,
   "pf": 1.1875,
@@ -75,6 +84,7 @@
  },
  "dev_verdict": "CLOSED",
  "held": {
+  "days": 2,
   "n": 2,
   "net": 1.04,
   "pf": "inf",
@@ -83,6 +93,7 @@
   "z": 13.0
  },
  "held_calib_day0_1": {
+  "days": 1,
   "n": 1,
   "net": 0.48,
   "pf": "inf",
@@ -91,6 +102,7 @@
   "z": null
  },
  "held_calib_day2_on": {
+  "days": 1,
   "n": 1,
   "net": 0.56,
   "pf": "inf",
@@ -99,6 +111,7 @@
   "z": null
  },
  "held_verdict": "NO_EVIDENCE at n = 1",
+ "mode": "held",
  "skips": {
   "gap_small": 1,
   "member_not_ok": 1,

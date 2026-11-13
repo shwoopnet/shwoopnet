@@ -107,3 +107,17 @@ The History Miner built a second scorer from this card alone (claude/history-min
 - **A16, member skip:** for a member station, a code other than "ok" skips, and so does a missing code. Rows from Source B carry no code and are never skipped on it.
 - **A17, no index point:** no canonical point within 10 minutes before the decision time means a skip, counted as "no index point". The index `status` field is NOT filtered (a degraded point still settles contracts).
 - **A18, membership:** decided per row, from the `stations[]` of point t at the decision, so it can change with a calibration. The member and non-member rows are descriptive only; the verdict is pooled.
+
+## Amendment 2 (Nov 13, 2026, before any data): Auditor B's fixes and the Head of R&D's rulings
+
+Auditor B read the scorer (`tempblend/tempblend_score.py` at 644770d9) line by line against this card. The rule logic matched, with six fixes. The Head of R&D ruled the three questions. Rule text, binding on every build:
+
+- **F1, unrounded bar tests:** every line (PF 1.0, 1.2 and 1.5, z 5.46, the 30 bet count) is tested on unrounded values. Values are rounded only when printed; a true PF of 1.49996 does not pass 1.5.
+- **F2, PASS needs the development read:** a held-out PASS also requires the development verdict to be CONTINUE.
+- **F3, separate modes:** the development read ignores (and counts) every held-out row. The held-out read is refused before 2026-12-10T00:00:00Z and runs once: it writes a read-once marker file and refuses if one exists.
+- **F4, the tie test is explicit:** d0 is the smallest |K minus the midpoint| among the eligible strikes. The bet takes the lowest K among strikes with |K minus the midpoint| at or under d0 + 1e-9 (A7).
+- **F5, one row per city-hour:** a second row for the same city and S is refused, and the run stops. At most one bet per city-hour.
+- **F6, results:** only "yes", "no" or "void" are accepted. Anything else (including an empty value or none) is refused, and the run stops. A void is booked as in A12.
+- **Q1, z is clustered by day:** the z on the bar is the day-clustered z, like the other cards. The unit is the US Central calendar date of S. z = (mean of the daily net) / (standard deviation of the daily net / square root of the number of days).
+- **Q2, look-ahead on Source A:** a Source A reading whose obs_time is after t is a look-ahead and is skipped, named "obs_after_point". Otherwise A3 stands.
+- **Q3, the row builder is separate:** the file that makes the scorer's rows (the latest eligible index point, the calibration effective time at the decision, finalized results, the city-to-station map) is written only after probe A4 shows the real layout. It gets its own audit and a second build before any read.

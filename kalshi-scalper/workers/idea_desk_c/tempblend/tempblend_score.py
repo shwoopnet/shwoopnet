@@ -4,34 +4,47 @@
 Written before any data was read, and tested only on invented rows. It makes no
 network request: it reads a JSON file of decision rows and a JSON map of the
 watched station per city, and prints a JSON verdict. The rule is
-TEMPBLEND_CARD.md (same branch); where the two differ, the card is right.
+TEMPBLEND_CARD.md (same branch) with Amendments 1 and 2; where the two differ,
+the card is right.
 
-Usage: python3 -I tempblend_score.py ROWS.json WATCHED.json
+Usage:
+  python3 -I tempblend_score.py dev  ROWS.json WATCHED.json
+  python3 -I tempblend_score.py held ROWS.json WATCHED.json MARKER_PATH
+
+dev mode ignores (and counts) every held-out row. held mode refuses before
+2026-12-10T00:00:00Z and refuses a second run: it writes MARKER_PATH after the
+read and refuses if that file already exists (Amendment 2, F3).
 
 WATCHED.json maps city -> station_id. It stays a parameter until probe A4 says
-which station each city's daily high market names.
+which station each city's daily high market names. The ROWS file is made by a
+separate row builder (Amendment 2, Q3), written after probe A4.
 
-One row is one city-hour decision (the minute t that the rule reads):
-  city, S (ISO UTC settlement time), t_ms (latest canonical index minute),
+One row is one city-hour decision:
+  city, S (ISO UTC settlement time), t_ms (canonical index minute used),
   v (index value, F), calib_effective_ms (effective_at_ms of the city's
-  config_version at t), stations (index stations[] at t: station_id, temp_f,
-  code, obs_time_ms), external (optional, source B: station_id -> {temp_f,
-  obs_time_ms}), strikes (each: K, yes_bid, yes_ask in dollars from the candle
-  ending at S minus 900 s, result "yes", "no" or anything else for a void, for
-  "K or above").
+  config_version at the decision), stations (index stations[] at t:
+  station_id, temp_f, code, obs_time_ms), external (optional, source B:
+  station_id -> {temp_f, obs_time_ms}), strikes (each: K, yes_bid, yes_ask in
+  dollars from the candle ending at S minus 900 s, result "yes", "no" or
+  "void", for "K or above").
 
-Readings A1 to A18 are the card's Amendment 1 (ruled by the Head of R&D on
-Nov 13, 2026); this file follows them. In short: band and spread first, then
-the strike nearest (v + s) / 2, ties to the lower K (A6, A7); NO ask is
+Readings A1 to A18 are the card's Amendment 1 and the rulings F1 to F6, Q1 and
+Q2 are its Amendment 2. In short: band and spread first, then the strike
+nearest (v + s) / 2, a tie within 1e-9 to the lower K (A6, A7, F4); NO ask is
 1 - yes_bid and the spread is yes_ask - yes_bid (A8); the fill is at the ask
 seen with no +1c, plus the fee 0.07 x p x (1 - p) rounded up to the cent
-(A10, an upper bound: live taker fills land 60% to 73% of the time); a void is
-a fee-only loss counted as a bet (A12); the calibration split is measured at
-the decision time (A15); no index point within 10 minutes of the decision is a
-skip (A17).
+(A10, an upper bound: live taker fills land 60% to 73% of the time); a void
+is a fee-only loss counted as a bet (A12); results other than yes, no or void
+are refused (F6); a second row for the same city and S is refused (F5); the
+calibration split is measured at the decision time (A15); no index point
+within 10 minutes of the decision is a skip (A17); a Source A reading taken
+after t is a skip (Q2); every bar test uses unrounded values (F1); z is
+clustered by US Central settlement day (Q1); PASS needs the development read
+to CONTINUE (F2).
 """
-import json, math, sys
+import json, math, os, sys
 from datetime import datetime, timezone
+from zoneinfo import ZoneInfo
 
 def ms(iso):
     return int(datetime.strptime(iso, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc).timestamp() * 1000)
@@ -53,6 +66,8 @@ DEV_MIN_BETS = 200
 HELD_DAY2_MIN = 30
 BAR_PF, BAR_Z = 1.5, 5.46
 EPS = 1e-9
+RESULTS = ("yes", "no", "void")
+CENTRAL = ZoneInfo("America/Chicago")
 
 def fee(p):
     return math.ceil(0.07 * p * (1 - p) * 100 - EPS) / 100
@@ -69,8 +84,10 @@ def watched_reading(row, sid):
         if st.get("station_id") == sid:
             if st.get("code") != "ok":
                 return True, None, "member_not_ok"
-            r = st
-            member = True
+            obs = st.get("obs_time_ms")
+            if obs is not None and obs > t:
+                return True, None, "obs_after_point"            # Q2
+            r, member = st, True
             break
     else:
         member = False
@@ -90,7 +107,7 @@ def decide(row, watched):
     decision = S - DECISION_LEAD_MS
     t = row.get("t_ms")
     if t is None or t > decision - PUBLISH_LAG_MS or decision - t > READ_MAX_AGE_MS:
-        return None, "no_index_point"                       # A1, A17
+        return None, "no_index_point"                           # A1, A17
     sid = watched.get(row["city"])
     if sid is None:
         return None, "no_watched_station"
@@ -115,77 +132,125 @@ def decide(row, watched):
         ask = ya if side == "yes" else round(1 - yb, 6)
         if not (ASK_LO - EPS <= ask <= ASK_HI + EPS) or ya - yb > SPREAD_MAX + EPS:
             continue
-        cands.append((round(abs(K - mid), 9), K, ask, k["result"]))   # A7: equal within 1e-9 goes to the lower K
+        cands.append((K, ask, k["result"]))
     if not cands:
         return None, "no_strike"
-    cands.sort()
-    _, K, ask, result = cands[0]
+    d0 = min(abs(K - mid) for K, _, _ in cands)                 # F4: explicit 1e-9 tie test
+    K, ask, result = min((c for c in cands if abs(c[0] - mid) <= d0 + EPS), key=lambda c: c[0])
     f = fee(ask)
-    void = result not in ("yes", "no")                      # A12
+    void = result == "void"                                     # A12
     pnl = round(-f if void else ((1 - ask - f) if result == side else -(ask + f)), 4)
     calib = "day0_1" if decision - row["calib_effective_ms"] < CALIB_SPLIT_MS else "day2_on"   # A15
+    day = datetime.fromtimestamp(S / 1000, timezone.utc).astimezone(CENTRAL).date().isoformat()
     return {"city": row["city"], "S": row["S"], "window": w, "side": side, "K": K,
             "ask": ask, "fee": f, "won": (not void) and result == side, "void": void, "pnl": pnl,
-            "member": member, "calib": calib}, None
+            "member": member, "calib": calib, "day": day}, None
 
-def stats(bets):
+def check_rows(rows):
+    """F5 and F6: refuse a second row for one city and S, and any unknown result."""
+    seen = set()
+    for row in rows:
+        key = (row.get("city"), row.get("S"))
+        if key in seen:
+            raise ValueError("duplicate row for city %r and S %r (at most one bet per city-hour)" % key)
+        seen.add(key)
+        for k in row.get("strikes", []):
+            if k.get("result") not in RESULTS:
+                raise ValueError("result %r for %r at %r is not yes, no or void" % (k.get("result"), key, k.get("K")))
+
+def raw_stats(bets):
     n = len(bets)
     wins = sum(b["pnl"] for b in bets if b["pnl"] > 0)
     losses = -sum(b["pnl"] for b in bets if b["pnl"] < 0)
-    pf = None if n == 0 else ("inf" if losses == 0 else round(wins / losses, 4))
-    net = round(sum(b["pnl"] for b in bets), 4)
-    z = None
-    if n >= 2:
-        m = net / n
-        sd = math.sqrt(sum((b["pnl"] - m) ** 2 for b in bets) / (n - 1))
-        z = None if sd == 0 else round(m / (sd / math.sqrt(n)), 4)
+    pf = None if n == 0 else (math.inf if losses == 0 else wins / losses)
+    net = sum(b["pnl"] for b in bets)
+    days = {}
+    for b in bets:                                              # Q1: clustered by US Central day
+        days[b["day"]] = days.get(b["day"], 0.0) + b["pnl"]
+    D, z = len(days), None
+    if D >= 2:
+        m = sum(days.values()) / D
+        sd = math.sqrt(sum((x - m) ** 2 for x in days.values()) / (D - 1))
+        z = None if sd == 0 else m / (sd / math.sqrt(D))
     return {"n": n, "won": sum(1 for b in bets if b["won"]), "void": sum(1 for b in bets if b["void"]),
-            "pf": pf, "net": net, "z": z}
+            "days": D, "pf": pf, "net": net, "z": z}
 
-def pf_num(st):
-    return math.inf if st["pf"] == "inf" else (st["pf"] if st["pf"] is not None else 0.0)
+def shown(st):
+    """Rounded copy for printing only (F1)."""
+    out = dict(st)
+    pf = st["pf"]
+    out["pf"] = None if pf is None else ("inf" if pf == math.inf else round(pf, 4))
+    out["net"] = round(st["net"], 4)
+    out["z"] = None if st["z"] is None else round(st["z"], 4)
+    return out
 
-def score(rows, watched):
+def pf_val(st):
+    return 0.0 if st["pf"] is None else st["pf"]
+
+def dev_verdict(d, d1, d2):
+    if d["n"] < DEV_MIN_BETS or pf_val(d) < 1.0 or pf_val(d1) < 1.2 or pf_val(d2) < 1.2:
+        return "CLOSED"
+    return "CONTINUE"
+
+def held_verdict(dev_v, d1, d2, h, h2):
+    if h2["n"] < HELD_DAY2_MIN:
+        return "NO_EVIDENCE at n = %d" % h2["n"]
+    if pf_val(h2) < 1.0:
+        return "FAIL (calibration kill)"
+    if dev_v == "CONTINUE" and all(pf_val(x) >= BAR_PF for x in (d1, d2, h)) and (h["z"] or 0) >= BAR_Z:
+        return "PASS"
+    return "FAIL"
+
+def score(rows, watched, mode="dev"):
+    if mode not in ("dev", "held"):
+        raise ValueError("mode must be dev or held")
+    check_rows(rows)
     bets, skips = [], {}
     for row in rows:
         b, why = decide(row, watched)
+        if b and mode == "dev" and b["window"] == "held":
+            b, why = None, "held_window_ignored"                # F3
         if b: bets.append(b)
         else: skips[why] = skips.get(why, 0) + 1
-    by = lambda f: [b for b in bets if f(b)]
-    dev = by(lambda b: b["window"] in ("dev1", "dev2"))
-    held = by(lambda b: b["window"] == "held")
-    out = {
-        "skips": dict(sorted(skips.items())),
-        "dev": stats(dev), "dev1": stats(by(lambda b: b["window"] == "dev1")),
-        "dev2": stats(by(lambda b: b["window"] == "dev2")), "held": stats(held),
-        "descriptive": {
-            "dev_member": stats([b for b in dev if b["member"]]),
-            "dev_nonmember": stats([b for b in dev if not b["member"]]),
-            "dev_calib_day0_1": stats([b for b in dev if b["calib"] == "day0_1"]),
-            "dev_calib_day2_on": stats([b for b in dev if b["calib"] == "day2_on"]),
-            "held_member": stats([b for b in held if b["member"]]),
-            "held_nonmember": stats([b for b in held if not b["member"]]),
-        },
-        "held_calib_day0_1": stats([b for b in held if b["calib"] == "day0_1"]),
-        "held_calib_day2_on": stats([b for b in held if b["calib"] == "day2_on"]),
-    }
-    d, d1, d2 = out["dev"], out["dev1"], out["dev2"]
-    if d["n"] < DEV_MIN_BETS or pf_num(d) < 1.0 or pf_num(d1) < 1.2 or pf_num(d2) < 1.2:
-        out["dev_verdict"] = "CLOSED"
-    else:
-        out["dev_verdict"] = "CONTINUE"
-    h2 = out["held_calib_day2_on"]
-    if h2["n"] < HELD_DAY2_MIN:
-        out["held_verdict"] = "NO_EVIDENCE at n = %d" % h2["n"]
-    elif pf_num(h2) < 1.0:
-        out["held_verdict"] = "FAIL (calibration kill)"
-    elif all(pf_num(out[k]) >= BAR_PF for k in ("dev1", "dev2", "held")) and (out["held"]["z"] or 0) >= BAR_Z:
-        out["held_verdict"] = "PASS"
-    else:
-        out["held_verdict"] = "FAIL"
+    sel = lambda f: raw_stats([b for b in bets if f(b)])
+    dev_bets = [b for b in bets if b["window"] in ("dev1", "dev2")]
+    d, d1, d2 = sel(lambda b: b["window"] in ("dev1", "dev2")), sel(lambda b: b["window"] == "dev1"), sel(lambda b: b["window"] == "dev2")
+    out = {"mode": mode, "skips": dict(sorted(skips.items())),
+           "dev": shown(d), "dev1": shown(d1), "dev2": shown(d2),
+           "descriptive": {
+               "dev_member": shown(raw_stats([b for b in dev_bets if b["member"]])),
+               "dev_nonmember": shown(raw_stats([b for b in dev_bets if not b["member"]])),
+               "dev_calib_day0_1": shown(raw_stats([b for b in dev_bets if b["calib"] == "day0_1"])),
+               "dev_calib_day2_on": shown(raw_stats([b for b in dev_bets if b["calib"] == "day2_on"])),
+           }}
+    out["dev_verdict"] = dev_verdict(d, d1, d2)
+    if mode == "held":
+        held = [b for b in bets if b["window"] == "held"]
+        h, h1 = raw_stats(held), raw_stats([b for b in held if b["calib"] == "day0_1"])
+        h2 = raw_stats([b for b in held if b["calib"] == "day2_on"])
+        out["held"], out["held_calib_day0_1"], out["held_calib_day2_on"] = shown(h), shown(h1), shown(h2)
+        out["descriptive"]["held_member"] = shown(raw_stats([b for b in held if b["member"]]))
+        out["descriptive"]["held_nonmember"] = shown(raw_stats([b for b in held if not b["member"]]))
+        out["held_verdict"] = held_verdict(out["dev_verdict"], d1, d2, h, h2)
     return out
 
+def held_guard(now_ms, marker):
+    """F3: the held-out read is refused before 2026-12-10T00:00:00Z and after it has run once."""
+    if now_ms < HELD_END:
+        raise SystemExit("refused: the held-out read opens at 2026-12-10T00:00:00Z")
+    if os.path.exists(marker):
+        raise SystemExit("refused: the held-out read already ran (marker %s exists)" % marker)
+
 if __name__ == "__main__":
-    rows = json.load(open(sys.argv[1]))
-    watched = json.load(open(sys.argv[2]))
-    print(json.dumps(score(rows, watched), indent=1, sort_keys=True))
+    mode = sys.argv[1]
+    rows = json.load(open(sys.argv[2]))
+    watched = json.load(open(sys.argv[3]))
+    if mode == "held":
+        marker = sys.argv[4]
+        held_guard(int(datetime.now(timezone.utc).timestamp() * 1000), marker)
+        out = score(rows, watched, "held")
+        with open(marker, "x") as f:
+            f.write("TEMPBLEND held-out read at %s\n" % datetime.now(timezone.utc).isoformat())
+    else:
+        out = score(rows, watched, "dev")
+    print(json.dumps(out, indent=1, sort_keys=True))
