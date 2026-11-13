@@ -31,4 +31,23 @@ assert run([post, row(16, "0.40", "100", "0.55", "100")], [tr(30, 0.40, 1, "no")
 # E: Rule Q is unchanged: the original queue fill (cum >= ahead + 1 at our price) still fills under both rules
 rowsE = [post, row(16, "0.40", "100", "0.55", "100")]; trE = [tr(40, 0.40, 101, "no")]
 assert run(rowsE, trE, "Q")[0][3] == 1 and run(rowsE, trE, "P")[0][3] == 1
+# F5: blank or unparseable values never crash a run (a blank trade price, count or time, a blank poll time): those rows are skipped
+rowsF = [post, {"poll_ts_local_ms": "", "yes_bid_px_1": "0.40", "yes_bid_sz_1": "100", "no_bid_px_1": "0.55", "no_bid_sz_1": "100"}, row(16, "0.40", "100", "0.55", "100")]
+trF = [dict(tr(40, 0.39, 5, "no"), yes_price_dollars=""), dict(tr(39, 0.39, 5, "no"), count_fp=""), dict(tr(38, 0.39, 5, "no"), created_time=""), tr(37, 0.39, 5, "no")]
+rf = run(rowsF, trF, "P"); assert rf[0][3] == 1, rf           # only the last, well-formed through print fills the YES leg; nothing crashed
+# sizes: fee per order, unrounded or rounded UP to the cent, on 1 or 10 contracts (per-contract pnl). A pair at 0.40 + 0.55 with maker 0.0175: unrounded fee per leg 0.0175 x p x (1 - p)
+def run2(rows, trades_, rule, coef, size, rounded):
+    b = {(ct, "KXA"): rows}; t = {"KXA": {x["trade_id"]: x for x in trades_}}
+    return M.simulate(b, t, coef, rule, size, rounded)
+pa2 = run2(rowsA, trA, "P", 0.0175, 1, False)[0][1]; assert abs(pa2 - (0.05 - 0.0175 * 0.40 * 0.60 - 0.0175 * 0.55 * 0.45)) < 1e-12, pa2
+pr1 = run2(rowsA, trA, "P", 0.0175, 1, True)[0][1]; assert abs(pr1 - (0.05 - 0.01 - 0.01)) < 1e-12, pr1          # 1 contract: each leg's fee 0.0042 and 0.0043 rounds UP to 0.01
+pr10 = run2(rowsA, trA, "P", 0.0175, 10, True)[0][1]
+import math
+f10 = lambda p: math.ceil(0.0175 * 10 * p * (1 - p) * 100 - 1e-9) / 100 / 10
+assert abs(pr10 - (0.05 - f10(0.40) - f10(0.55))) < 1e-12, pr10
+# fractional-size share: stats rows say, per filled leg, how it was filled (q = queue, x = through print, b = book poll) and whether the triggering trade was fractional (None for a book fill)
+st = []; M.simulate({(ct, "KXA"): rowsA}, {"KXA": {x["trade_id"]: x for x in trA}}, 0.0, "P", 1, False, st)
+assert sorted((s["kind"], s["frac"]) for s in st) == [("b", None), ("x", False)], st
+trFr = [tr(40, 0.39, 5.5, "no")]; st2 = []; M.simulate({(ct, "KXA"): rowsA}, {"KXA": {x["trade_id"]: x for x in trFr}}, 0.0, "P", 1, False, st2)
+assert ("x", True) in [(s["kind"], s["frac"]) for s in st2], st2
 print("MMSIM1 RULE P HAND CASES OK (through print, book poll, quote moving away, T-15 edge, absent bid, same-price print, Rule Q unchanged)")
