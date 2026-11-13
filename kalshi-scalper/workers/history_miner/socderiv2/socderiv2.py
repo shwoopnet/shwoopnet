@@ -20,6 +20,7 @@ MIN_FILLED = 150
 GAP_LINE, SPREAD_LINE = 0.08, 0.04
 COST_KILL = 0.04
 READINGS = [
+    "R16 (Nov 13, after the lists landed and before any candle): the BTTS leg is the ONE market whose event_ticker is KX<LG>BTTS-<GAMEKEY> (series file: one market an event), whatever its last segment (the real tickers end in -BTTS, the made-up layout used -YES); more than one such market = unreadable",
     "R1 lists proof: every live_<SERIES> request answered 200 on pages 1..k with no cursor left; the three fee-field reads are not used (the fee is the registered formula) and may be unanswered",
     "R2 a game = one GAME event with all three winner markets (two team codes and -TIE); a game missing one is counted 'winner legs incomplete' and is not derivable",
     "R3 sample: GAME events whose latest winner close is inside [2026-09-12, 2026-11-13) UTC, the 60 with the latest such close per league, ties by event ticker; never extended",
@@ -203,9 +204,11 @@ def run(series_path, lists_dir, candles_dir):
             totals = sorted(((float(m["floor_strike"]), t) for t, m in markets.items()
                              if t.startswith("KX%sTOTAL-%s-" % (lg, key)) and isinstance(m.get("floor_strike"), (int, float))))
             targets = []
-            bt = "KX%sBTTS-%s-YES" % (lg, key)
-            if bt in markets:
-                targets.append(("BTTS", bt, None, None))
+            bts = sorted(t for t, m in markets.items() if m.get("event_ticker") == "KX%sBTTS-%s" % (lg, key))
+            if len(bts) == 1:                  # R16: the series file says one market an event; found by its event ticker, whatever its last segment
+                targets.append(("BTTS", bts[0], None, None))
+            elif bts:
+                targets.append(("BTTS", bts[0], "unreadable", None))
             for t, m in sorted(markets.items()):
                 if not t.startswith("KX%sTEAMTOTAL-%s-" % (lg, key)):
                     continue
