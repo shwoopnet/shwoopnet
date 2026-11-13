@@ -4,7 +4,7 @@ For the Head of R&D, under the 15:19Z instruction. No Kalshi request; no price, 
 
 **Counts:**
 - 12 places checked; 0 cards; 3 "what it would need" lines.
-- Earlier today, ONRRPCAL was ruled a version of SOFR1, and the overtime idea was a SOFR1-like version of SOCDERIV, not written.
+- Earlier today, ONRRPCAL was ruled a version of SOFR1, and the overtime idea, a version of SOCDERIV, was not written.
 
 ## (a) Kalshi's own non-price fields
 
