@@ -6,12 +6,12 @@ import oiver_depth2 as S
 D = os.path.dirname(os.path.abspath(__file__)); W = os.path.join(D, "inv", "windows.csv")
 o = S.run("dev", W)
 bad = []
-exp = {"removed_share": 0.4,
-       "counts": {"oi_below": 1, "cheap_skipped": 1, "no_quote": 2, "held_out_ignored": 1, "depth_thin": 1, "no_size": 1},
-       "parent": {"n": 5, "pf": 1.429194, "net": 0.4925, "mean": 0.0985, "half1_pf": 2.436508, "half2_pf": 1.048048, "net_per_contract_week": 41.37},
-       "version": {"n": 3, "pf": 0.921922, "net": -0.065, "mean": -0.021667, "half1_pf": "inf", "half2_pf": 0.0, "net_per_contract_week": -5.46},
-       "takeover_info": {"pf_lift_ge_0.10": False, "net_week_not_lower": False, "half2_not_worse": False, "signals_ge_60": False},
-       "kills_info": {"removed_more_than_half": False, "pf_below_parent": True},
+exp = {"removed_share": 0.25,
+       "counts": {"oi_below": 1, "cheap_skipped": 1, "not_two_sided": 2, "held_out_ignored": 1, "no_poll": 1, "depth_thin": 1},
+       "parent": {"n": 4, "pf": 0.668845, "net": -0.38, "mean": -0.095, "half1_pf": 2.436508, "half2_pf": 0.0, "net_per_contract_week": -0.38},
+       "version": {"n": 3, "pf": 0.921922, "net": -0.065, "mean": -0.021667, "half1_pf": "inf", "half2_pf": 0.0, "net_per_contract_week": -0.065},
+       "takeover_info": {"pf_lift_ge_0.10": True, "net_week_not_lower": True, "half2_not_worse": True, "signals_ge_60": False},
+       "kills_info": {"removed_more_than_half": False, "pf_below_parent": False},
        "label": "no evidence at n = 3"}
 for k, v in exp.items():
     if o.get(k) != v:
@@ -32,5 +32,9 @@ refused(lambda: S.run("dev", os.path.join(hd, "w.csv")), "HELDOUT_ path")
 odd = os.path.join(tempfile.mkdtemp(), "w.csv")
 open(odd, "w").write(open(W).read().replace(",yes,", ",YES,", 1))
 refused(lambda: S.run("dev", odd), "odd result text")
+for bad_close, what in ((1793231999, "a row just before the range"), (1794182400, "a row at 2026-11-09T00:00Z")):
+    rr = os.path.join(tempfile.mkdtemp(), "w.csv")
+    open(rr, "w").write(open(W).read().replace(",1794000900,", ",%d," % bad_close, 1))
+    refused(lambda: S.run("dev", rr), what)
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)

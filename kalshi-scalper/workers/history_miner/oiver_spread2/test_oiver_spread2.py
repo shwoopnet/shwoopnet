@@ -7,9 +7,9 @@ D = os.path.dirname(os.path.abspath(__file__)); W = os.path.join(D, "inv", "wind
 o = S.run("dev", W)
 bad = []
 exp = {"removed_share": 0.4,
-       "counts": {"oi_below": 1, "cheap_skipped": 1, "no_quote": 2, "held_out_ignored": 1, "spread_wide": 2},
-       "parent": {"n": 5, "pf": 1.429194, "net": 0.4925, "mean": 0.0985, "half1_pf": 2.436508, "half2_pf": 1.048048, "net_per_contract_week": 41.37},
-       "version": {"n": 3, "pf": 5.046154, "net": 1.315, "mean": 0.438333, "half1_pf": "inf", "half2_pf": 2.684615, "net_per_contract_week": 110.46},
+       "counts": {"oi_below": 1, "cheap_skipped": 1, "not_two_sided": 2, "held_out_ignored": 1, "spread_wide": 2},
+       "parent": {"n": 5, "pf": 1.429194, "net": 0.4925, "mean": 0.0985, "half1_pf": 2.436508, "half2_pf": 1.048048, "net_per_contract_week": 0.4925},
+       "version": {"n": 3, "pf": 5.046154, "net": 1.315, "mean": 0.438333, "half1_pf": "inf", "half2_pf": 2.684615, "net_per_contract_week": 1.315},
        "takeover_info": {"pf_lift_ge_0.10": True, "net_week_not_lower": True, "half2_not_worse": True, "signals_ge_60": False},
        "kills_info": {"removed_more_than_half": False, "pf_below_parent": False},
        "label": "no evidence at n = 3"}
@@ -32,5 +32,9 @@ refused(lambda: S.run("dev", os.path.join(hd, "w.csv")), "HELDOUT_ path")
 odd = os.path.join(tempfile.mkdtemp(), "w.csv")
 open(odd, "w").write(open(W).read().replace(",yes\n", ",YES\n", 1))
 refused(lambda: S.run("dev", odd), "odd result text")
+for bad_close, what in ((1789171199, "a row just before the range"), (1794182400, "a row at 2026-11-09T00:00Z")):
+    rr = os.path.join(tempfile.mkdtemp(), "w.csv")
+    open(rr, "w").write(open(W).read().replace(",1794000900,", ",%d," % bad_close, 1))
+    refused(lambda: S.run("dev", rr), what)
 print("MISMATCHES", bad)
 sys.exit(1 if bad else 0)

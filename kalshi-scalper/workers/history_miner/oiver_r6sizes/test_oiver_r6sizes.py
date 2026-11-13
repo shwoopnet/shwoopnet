@@ -1,5 +1,6 @@
 """Made-up data of EXPECTED_BY_HAND.md; prints MISMATCHES [] when oiver_r6sizes.py agrees with the hand figures."""
 import csv, gzip, os, sys, tempfile
+from email.utils import formatdate
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import oiver_r6sizes as S
 
@@ -20,17 +21,19 @@ def rows_csv(path, extra=None):
             w.writerow([tk(k), tk(k), S.iso(c), "590000.0", "500000.0", "0.2", "0.22", "0.78", "0.8", "yes"])
 
 
-def brow(k, close_iso, secs_before, ybs, nbs):
-    t = S.iso(close_iso) * 1000 - secs_before * 1000
+def brow(k, close_iso, secs_before, ybs, nbs, recv_ms=None):
+    te = S.iso(close_iso) - secs_before                                         # the exchange Date (whole seconds)
+    t = te * 1000 + 300 if recv_ms is None else recv_ms                         # t_recv 300 ms after the Date unless given
     r = {c: "" for c in BOOK}
-    r.update({"t_send_ms": t - 50, "t_recv_ms": t, "ticker": tk(k), "series": "KXBTC15M", "close_time": close_iso,
+    r.update({"t_send_ms": t - 50, "t_recv_ms": t, "server_date_header": formatdate(te, usegmt=True), "ticker": tk(k), "series": "KXBTC15M", "close_time": close_iso,
               "yes_bid_px_1": "0.2", "no_bid_px_1": "0.78", "yes_bid_sz_1": ybs, "no_bid_sz_1": nbs})
     return r
 
 
 def book(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
-    rs = [brow("B", W["B"], s, a, b) for s, a, b in ((195, 11, 12), (188, 21, 22), (181, 31, 32), (180, 41, 42), (179, 51, 52))]
+    rs = [brow("B", W["B"], s, a, b) for s, a, b in ((195, 11, 12), (188, 21, 22), (181, 31, 32), (180, 41, 42))]
+    rs.append(brow("B", W["B"], 179, 51, 52, recv_ms=S.iso(W["B"]) * 1000 - 180700))   # Date close-179 (outside), t_recv close-180.7 s (inside): not chosen
     rs.append(brow("B", "2026-11-02T12:15:00Z", 180 + 900, 99, 99))      # decoy: B's ticker, another close_time, at exactly B's close - 180 s, after
                                                                           # the real row, so it would win the tie if close_time were not matched
     rs += [brow("C", W["C"], 200, 5, 5), brow("C", W["C"], 170, 6, 6), brow("D", W["D"], 185, "", 7)]
@@ -45,7 +48,8 @@ bp = os.path.join(d, "book15r6", "2026-11-02", "1200", "book.csv.gz"); book(bp)
 out = os.path.join(d, "out.csv")
 counts = S.build(os.path.join(d, "rows.csv"), out, [bp])
 got = {r["ticker"]: (r["yes_bid_size"], r["yes_ask_size"]) for r in csv.DictReader(open(out))}
-if got != {tk("B"): ("41.0", "42.0"), tk("C"): ("", ""), tk("D"): ("", "7.0")}:
+got = {r["ticker"]: (r["yes_bid_size"], r["yes_ask_size"], r["r6_poll"]) for r in csv.DictReader(open(out))}
+if got != {tk("B"): ("41.0", "42.0", "1"), tk("C"): ("", "", "0"), tk("D"): ("", "7.0", "1")}:
     bad.append(("sizes", got))
 if counts != {"rows_in": 4, "before_r6": 1, "written": 3, "no_poll": 1, "missing_size": 1}:
     bad.append(("counts", counts))
