@@ -22,10 +22,10 @@ READ_NOT_BEFORE = DEV_TO
 BAND_LO, BAND_HI, SPREAD_MAX = 0.20, 0.80, 0.04
 FIRST_BEFORE_CLOSE_S, LAST_BEFORE_CLOSE_S, STEP_S, WINDOW_S = 720, 180, 60, 180
 QUOTE_SPAN_S = 10
-MIN_TRIGGERED, MIN_BETS, PF_MIN, HALF_PF_MIN, EVIDENCE_N = 60, 60, 1.0, 1.2, 30
+MIN_TRIGGERED, MIN_BETS, PF_MIN, HALF_PF_MIN, EVIDENCE_N = 60, 60, 1.0, 1.2, 100          # EVIDENCE_N 100: the Head's ruling of 21:15Z (the card's R14 text says 30)
 USDT_CONTRACT_BTC, USD_CONTRACT_USD = 0.01, 100.0
 AMBIGUITIES = [
-    "R14 text: 'development closed if fewer than 60 bets' and 'with fewer than 30 bets: no evidence at n = x' overlap for n under 60. Printed side by side: development_verdict (CLOSED or CONTINUE on the kill lines) and evidence_label ('no evidence at n = x' under 30 bets); the Head to say which is the headline.",
+    "R14 text vs the Head's ruling (21:15Z): the HEADLINE is development_verdict (closed if fewer than 60 bets, PF under 1.0, a half under 1.2, or the zero-try count under 60); evidence_label always prints beside it and below 100 bets reads 'no evidence at n = x' (the card says 30; the Head ruled 100). Neither replaces the other.",
     "R11 z: clustered by US Central date with scorekit.cluster_z (mean of per-day mean nets over its standard error across days with a bet); a per-day sum reading would differ (the Head ruled cluster_z for SPXFV1).",
     "R15 coverage interval [a, b) holds [close - 900, close - 180) = a <= close - 900 and close - 180 <= b.",
     "R6 unusable first poll (not 0 < yes bid < YES ask < 1) is counted as one_sided_quote, not a triggered window with a two-sided quote; the first poll only.",
@@ -138,6 +138,10 @@ def markets_from_lists(folders):
     return out
 
 
+def evidence_label(n, threshold):
+    return ("no evidence at n = %d" % n) if n < threshold else "n = %d bets" % n
+
+
 def central_day(t):
     import datetime, zoneinfo
     return datetime.datetime.fromtimestamp(t, zoneinfo.ZoneInfo("America/Chicago")).date().isoformat()
@@ -221,7 +225,7 @@ def dev_read(markets, liq_rows, r6, coverage, H, now):
         elif h["pf"] is None and allb["n"] >= MIN_BETS:
             reasons.append("%s has no bets" % name)
     return {"counts": c, "triggered_with_two_sided_quote": triggered, "development_verdict": ("CLOSED (" + "; ".join(reasons) + ")") if reasons else "CONTINUE",
-            "evidence_label": ("no evidence at n = %d" % allb["n"]) if allb["n"] < EVIDENCE_N else "n = %d bets" % allb["n"],
+            "evidence_label": evidence_label(allb["n"], EVIDENCE_N),
             "all": allb, "half1": h1, "half2": h2, "z_by_central_day_cluster_z": z, "H_btc": H, "ambiguities": AMBIGUITIES}
 
 
