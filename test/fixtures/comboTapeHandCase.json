@@ -1,0 +1,58 @@
+{
+  "about": "Hand case for scripts/record_combo_tape.py (Idea Desk C, Nov 13, 2026). Written and committed BEFORE the recorder code, with every expected value worked out by hand from the spec below, so the code is checked against the spec and not the other way round. T0 = 1800000000 (2027-01-15T08:00:00Z). Five cycles, 60 s apart. t_recv_ms is not compared (it depends on the fake clock).",
+  "spec": [
+    "Cycle k starts at T0 + 60*(k-1). Its tape window is min_ts = mark - OVERLAP_S, max_ts = the cycle start. mark starts at --since clamped to [start-7200, start-60] (default start-300) and moves to the cycle start only when the cycle read at least one page and ended complete (cursor ran out) or capped (MAX_PAGES_CYCLE pages read with a cursor left). A cycle that failed or was cut by refusals leaves mark where it was.",
+    "Pages are GET /markets/trades?min_ts=&max_ts=&limit=1000 with the cursor percent-encoded. At most MAX_PAGES_CYCLE pages and at most MAX_REQ_CYCLE requests a cycle; one 429 waits and asks again; 3 refusals in a row end the cycle (aborted: no legs look-up that cycle).",
+    "Only rows whose ticker fully matches ^KXMVE[A-Z0-9._-]{1,120}$ are combo rows. A combo row whose trade_id was already written in this job is dropped and counted as dup_dropped; every other combo row is written once. tape_rows counts every row of every page read, combo or not.",
+    "A combo ticker written for the first time in this job is queued for its legs (first appearance order). After the tape, if the cycle was not aborted, up to LEG_LOOKUPS_CYCLE requests of /markets?tickers= (at most LEG_BATCH tickers each) are sent, never past MAX_REQ_CYCLE requests in the cycle. A ticker in the batch that the answer returns is a legs row; one it does not return is missing (asked once, never guessed). Tickers not yet asked stay queued to the next cycle; at the job end any still queued count as missing.",
+    "Coverage columns: cycle, min_ts, max_ts, pages, complete, capped, n429, tape_rows, combo_rows, dup_dropped, new_combos, lookups, legs_found, legs_missing, queue_len, requests."
+  ],
+  "constants": {"OVERLAP_S": 15, "MAX_PAGES_CYCLE": 10, "MAX_REQ_CYCLE": 10, "LEG_BATCH": 40, "LEG_LOOKUPS_CYCLE": 2, "CYCLE_S": 60, "MAX_CONSEC_429": 3},
+  "T0": 1800000000,
+  "since": 1799999880,
+  "cycles": [
+    {"cycle": 1, "tape": [
+      {"status": 200, "body": {"trades": [
+        {"trade_id": "a", "ticker": "KXMVE-A", "created_time": "2027-01-15T07:59:10Z", "yes_price_dollars": "0.3000", "count_fp": "2.00", "taker_outcome_side": "yes"},
+        {"trade_id": "b", "ticker": "KXBTC15M-X", "created_time": "2027-01-15T07:59:11Z", "yes_price_dollars": "0.5000", "count_fp": "1.00", "taker_outcome_side": "no"},
+        {"trade_id": "c", "ticker": "KXMVE-B", "created_time": "2027-01-15T07:59:12Z", "yes_price_dollars": "0.2000", "count_fp": "1.00", "taker_outcome_side": "no"}], "cursor": "p 2"}},
+      {"status": 200, "body": {"trades": [
+        {"trade_id": "d", "ticker": "KXMVE-A", "created_time": "2027-01-15T07:58:59Z", "yes_price_dollars": "0.3100", "count_fp": "1.00", "taker_outcome_side": "yes"},
+        {"trade_id": "c", "ticker": "KXMVE-B", "created_time": "2027-01-15T07:59:12Z", "yes_price_dollars": "0.2000", "count_fp": "1.00", "taker_outcome_side": "no"}], "cursor": ""}}],
+      "legs": [{"status": 200, "body": {"markets": [{"ticker": "KXMVE-A", "event_ticker": "KXMVE-EA", "mve_selected_legs": [{"market_ticker": "KXNFL-1", "side": "yes"}, {"market_ticker": "KXNBA-2", "side": "no"}]}]}}]},
+    {"cycle": 2, "tape": [
+      {"status": 200, "body": {"trades": [
+        {"trade_id": "a", "ticker": "KXMVE-A", "created_time": "2027-01-15T07:59:10Z", "yes_price_dollars": "0.3000", "count_fp": "2.00", "taker_outcome_side": "yes"},
+        {"trade_id": "e", "ticker": "KXMVE-C", "created_time": "2027-01-15T08:00:30Z", "yes_price_dollars": "0.4000", "count_fp": "3.00", "taker_outcome_side": "yes"},
+        {"trade_id": "f", "ticker": "KXMVE-BAD\n", "created_time": "2027-01-15T08:00:31Z", "yes_price_dollars": "0.4000", "count_fp": "1.00", "taker_outcome_side": "yes"}], "cursor": ""}}],
+      "legs": [{"status": 200, "body": {"markets": []}}]},
+    {"cycle": 3, "tape": [{"status": 429, "body": null}, {"status": 429, "body": null}, {"status": 429, "body": null}], "legs": []},
+    {"cycle": 4, "tape": "ten pages, each {trades: [one row trade_id gN (N = 1..10), ticker KXMVE-D, created_time 2027-01-15T08:02:5N or similar, yes 0.6000, count 1.00, taker yes], cursor: 'more'}", "legs": []},
+    {"cycle": 5, "tape": [{"status": 200, "body": {"trades": [], "cursor": ""}}],
+      "legs": [{"status": 200, "body": {"markets": [{"ticker": "KXMVE-D", "event_ticker": "KXMVE-ED", "mve_selected_legs": [{"market_ticker": "KXNHL-3", "side": "yes"}]}]}}]}
+  ],
+  "expected": {
+    "tape_urls_cycle1": ["min_ts=1799999865&max_ts=1800000000&limit=1000", "min_ts=1799999865&max_ts=1800000000&limit=1000&cursor=p%202"],
+    "legs_urls": ["tickers=KXMVE-A,KXMVE-B", "tickers=KXMVE-C", "tickers=KXMVE-D"],
+    "trades": [
+      ["KXMVE-A", "2027-01-15T07:59:10Z", "0.3000", "2.00", "yes", "a"],
+      ["KXMVE-B", "2027-01-15T07:59:12Z", "0.2000", "1.00", "no", "c"],
+      ["KXMVE-A", "2027-01-15T07:58:59Z", "0.3100", "1.00", "yes", "d"],
+      ["KXMVE-C", "2027-01-15T08:00:30Z", "0.4000", "3.00", "yes", "e"],
+      "then g1 to g10, ticker KXMVE-D, yes 0.6000, count 1.00, taker yes"
+    ],
+    "legs": [
+      ["KXMVE-A", "KXMVE-EA", 2, "KXNFL-1:yes|KXNBA-2:no"],
+      ["KXMVE-D", "KXMVE-ED", 1, "KXNHL-3:yes"]
+    ],
+    "coverage": [
+      [1, 1799999865, 1800000000, 2, 1, 0, 0, 5, 3, 1, 2, 1, 1, 1, 0, 3],
+      [2, 1799999985, 1800000060, 1, 1, 0, 0, 3, 1, 1, 1, 1, 0, 1, 0, 2],
+      [3, 1800000045, 1800000120, 0, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+      [4, 1800000045, 1800000180, 10, 0, 1, 0, 10, 10, 0, 1, 0, 0, 0, 1, 10],
+      [5, 1800000165, 1800000240, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 2]
+    ],
+    "last_mark": 1800000240,
+    "legs_missing_at_end": 0
+  }
+}
