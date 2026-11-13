@@ -762,3 +762,8 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - Auditor B audits Rule Q and the marker, then both Rule P builds, then the 16b diff, ahead of LIQREV and OICORE, all before Nov 24.
   - The lifecycle table's Nov 17 is stale; Main fixes it in a text PR.
 - OIVER-SPREAD: build 1 (Desk A 30d45c00 at b2a3144b) and build 2 (History Miner f59664b1 at 40d4dc34) on one convention: decision at close - 180, the ask seen, no slip, C = 20, halves by floor, 86,300 inclusive, 0.08 to 0.50. The rows builder is not yet assigned.
+- 20:00Z, MMSIM1 Rule P port (Desk A 11bd4654, mmsim1_rulep.py b8bd0213) [research].
+  - It reproduces Rule Q exactly on development (all registered counts and both PFs).
+  - Its Rule P development read is far below PF 1.0, inside the amendment note's predicted range. If it stands, MMSIM1 is FALSIFIED on development under RND_CHARTER section 4, and the Nov 24 held-out read is moot.
+  - PROVISIONAL: the build is unaudited. Waiting for Auditor B's audit of the original and of the port diff, Desk B's independent build 2 on development, and a check that the protocol does not make the held-out the only verdict.
+  - If falsified, it is the liquidity-provision family's first falsified test (1 of 3).
