@@ -19,31 +19,69 @@ LAGS = tuple(range(-3, 4))
 AMBIGUITIES = [
     "T is the set of timestamps present in both series within the window, computed once; a pair needs t and t - 60 k both in T and both changes defined; dA needs mid(t - 60 s) in the whole A series, dB needs ES(t - 60 s) in the whole ES series (the window's first minute uses the close at the window start).",
     "An instrument_id change between the two ES bars of a change drops it (counted as 'roll'); the card is silent.",
+    "Rule 18 (Auditor B F1): a candle has a mid only if 0 < bid < ask < 1 (1e-9 slack); an empty, locked or crossed book has none, is never carried, and is counted as not_two_sided. The card line stating it is pending (Head or Desk B).",
+    "ES loader (F2): rows read, kept and skipped (timestamp or value) are counted and returned; STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice, not in the card).",
     "Prediction over the defined lags only; n/a lags are named; a tie at lag 0 passes (1e-9).",
     "The printed line's exact text in CFRTI-K is not known to this desk: the numbers are what compare.",
 ]
 
 
-def load_es(path):
-    """{end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s); a duplicate ts_event stops the run naming the minute."""
+MAX_SKIP_SHARE = 0.05          # the ES loader STOPS if more than this share of rows is skipped, or if no row is kept
+
+
+def load_es_counted(path):
+    """-> ({end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s), counts). A duplicate ts_event stops the run naming the minute.
+    counts: rows_read, rows_kept, skipped_ts (ts_event missing or not an ISO string), skipped_value (instrument_id or close does not parse)."""
     out, seen = {}, set()
+    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0}
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
-            ts = k.iso(r["ts_event"])
+            st["rows_read"] += 1
+            ts = k.iso(r.get("ts_event") or "")
             if ts is None:
-                continue
+                st["skipped_ts"] += 1; continue
             if ts in seen:
                 raise SystemExit("STOP: duplicate ES ts_event %s (two rows for one minute)" % r["ts_event"])
             seen.add(ts)
             try:
                 out[ts + 60] = (int(r["instrument_id"]), float(r["close"]))
             except (KeyError, TypeError, ValueError):
-                continue
+                st["skipped_value"] += 1; continue
+            st["rows_kept"] += 1
+    return out, st
+
+
+def check_es_rows(st):
+    """STOP if no ES row was kept or the skipped share is above MAX_SKIP_SHARE; the message carries the counts."""
+    skipped = st["skipped_ts"] + st["skipped_value"]
+    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"])
+    if st["rows_kept"] == 0:
+        raise SystemExit("STOP: no ES row kept (%s): the file is not in the expected format" % desc)
+    if skipped > MAX_SKIP_SHARE * st["rows_read"]:
+        raise SystemExit("STOP: more than %.0f%% of ES rows skipped (%s)" % (MAX_SKIP_SHARE * 100, desc))
+
+
+def load_es(path):
+    return load_es_counted(path)[0]
+
+
+def two_sided(c):
+    """Standing rule 18: 0 < bid < ask < 1 with 1e-9 slack. An empty side (0.00 / 1.00), a locked or a crossed book has no mid."""
+    b, a = c.get("bid"), c.get("ask")
+    return b is not None and a is not None and b > TOL and a < 1.0 - TOL and a - b > TOL
+
+
+def mids_of(candles, counts=None):
+    out = {}
+    for c in candles:
+        if c.get("bid") is None or c.get("ask") is None:
+            continue
+        if not two_sided(c):
+            if counts is not None:
+                counts["not_two_sided"] += 1
+            continue
+        out[c["ts"]] = (c["bid"] + c["ask"]) / 2.0
     return out
-
-
-def mids_of(candles):
-    return {c["ts"]: (c["bid"] + c["ask"]) / 2.0 for c in candles if c.get("bid") is not None and c.get("ask") is not None}
 
 
 def pearson(xs, ys, min_pairs):
@@ -65,9 +103,9 @@ def prediction(defined):
     return all(v <= defined[0] + TOL for kk, v in defined.items() if kk != 0)
 
 
-def measure(markets, cs, es, min_pairs):
+def measure(markets, cs, es, min_pairs, es_stats=None):
     """markets: scorekit.markets dict; cs: scorekit.candles; es: load_es. -> the result dict (aggregates only)."""
-    cnt = {"windows_listed": 0, "outside_dates_not_touched": 0, "windows_used": 0, "windows_without_candles": 0, "dA_missing_lookback": 0, "dB_missing_bar": 0, "dB_roll": 0}
+    cnt = {"windows_listed": 0, "outside_dates_not_touched": 0, "windows_used": 0, "windows_without_candles": 0, "dA_missing_lookback": 0, "dB_missing_bar": 0, "dB_roll": 0, "not_two_sided": 0}
     pairs = {k_: ([], []) for k_ in LAGS}
     drops = {k_: 0 for k_ in LAGS}
     for tk in sorted(markets):
@@ -78,7 +116,7 @@ def measure(markets, cs, es, min_pairs):
         c = m["close"]
         if c is None or not (CLOSE_FROM <= c < CLOSE_TO):
             cnt["outside_dates_not_touched"] += 1; continue
-        A = mids_of(cs.get(tk, []))
+        A = mids_of(cs.get(tk, []), cnt)
         if not A:
             cnt["windows_without_candles"] += 1; continue
         cnt["windows_used"] += 1
@@ -115,14 +153,16 @@ def measure(markets, cs, es, min_pairs):
     defined = {kk: v["corr"] for kk, v in res.items() if v["corr"] is not None}
     pred = prediction(defined)
     line = "lead_lag (positive lag = Kalshi lags ES): " + " ".join("%+d:%s" % (kk, ("%.3f" % res[kk]["corr"]) if res[kk]["corr"] is not None else "n/a") for kk in LAGS)
-    return {"line": line, "lags": res, "prediction_peak_at_lag_0_passed": pred, "na_lags": [kk for kk in LAGS if res[kk]["corr"] is None], "counts": cnt, "min_pairs": min_pairs,
+    return {"line": line, "lags": res, "prediction_peak_at_lag_0_passed": pred, "na_lags": [kk for kk in LAGS if res[kk]["corr"] is None], "counts": cnt, "es_rows": es_stats, "min_pairs": min_pairs,
             "defined_peak_lag": (max(defined, key=lambda kk: defined[kk]) if defined else None), "ambiguities": AMBIGUITIES}
 
 
 def run(lists, candle_runs, es_path, min_pairs):
     for f in list(lists) + list(candle_runs):
         k.guard(f)
-    return measure(k.markets(lists), k.candles(candle_runs), load_es(es_path), min_pairs)
+    es, st = load_es_counted(es_path)
+    check_es_rows(st)
+    return measure(k.markets(lists), k.candles(candle_runs), es, min_pairs, st)
 
 
 if __name__ == "__main__":

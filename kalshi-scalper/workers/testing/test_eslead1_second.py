@@ -114,6 +114,55 @@ with tempfile.TemporaryDirectory() as d:
     open(f, "a").write("2026-11-05T14:45:00.000000000Z,33,1,7,1,1,1,1002.5,10\n")
     try: e.load_es(f); assert 0
     except SystemExit as ex: assert "duplicate ES ts_event 2026-11-05T14:45:00" in str(ex)
+# F1 (rule 18): a candle with an empty side, a locked or a crossed book has no mid (never carried); counted as not_two_sided
+def with_candle(w, m_, bid, ask):
+    mk_, cs_, es_ = assemble(w)
+    for c_ in cs_["KXINX15M-F"]:
+        if c_["ts"] == (D(5) - 900) + 60 * m_: c_["bid"], c_["ask"] = bid, ask
+    return mk_, cs_, es_
+for bid_, ask_ in ((0.0, 1.0), (0.5, 0.5), (0.6, 0.4), (0.0, 0.6), (0.4, 1.0)):
+    rf = e.measure(*with_candle(window("KXINX15M-F", D(5), M1), 3, bid_, ask_), 3)
+    assert rf["counts"]["not_two_sided"] == 1 and rf["counts"]["dA_missing_lookback"] == 2 and rf["lags"][1]["n_pairs"] == 3 and abs(rf["lags"][1]["corr"] - 1.0) < 1e-9, (bid_, ask_, rf["counts"], rf["lags"][1])
+rf = e.measure(*with_candle(window("KXINX15M-F", D(5), M1), 3, 0.01, 0.99), 3)          # wide but two-sided: mid .50, the result is W1's
+assert rf["counts"]["not_two_sided"] == 0 and rf["lags"][1]["n_pairs"] == 5 and abs(rf["lags"][1]["corr"] - 1.0) < 1e-9 and rf["counts"]["dA_missing_lookback"] == 1
+rf = e.measure(*with_candle(window("KXINX15M-F", D(5), M1), 3, 0.5 - 4e-10, 0.5 + 4e-10), 3); assert rf["counts"]["not_two_sided"] == 1          # inside the 1e-9 slack: locked
+# F2: counted ES rows; STOP if none kept or more than 5 percent skipped
+HDR = "ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume\n"
+good = lambda i: "2026-11-05T14:%02d:00.000000000Z,33,1,7,1,1,1,1000.5,10\n" % (i % 60) if i < 60 else "2026-11-05T15:%02d:00.000000000Z,33,1,7,1,1,1,1000.5,10\n" % (i - 60)
+bad = ["1762354800000000000,33,1,7,1,1,1,1000.5,10\n", "2026-11-06T14:00:00.000000000Z,33,1,abc,1,1,1,1000.5,10\n", "2026-11-06T14:01:00.000000000Z,33,1,7,1,1,1,,10\n"]
+def es_file(rows):
+    f = os.path.join(tmpd, "x.csv"); open(f, "w").write(HDR + "".join(rows)); return f
+with tempfile.TemporaryDirectory() as tmpd:
+    out, st = e.load_es_counted(es_file([good(0), good(1)] + bad))
+    assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2} and len(out) == 2, st
+    for f_, why in ((es_file([good(0), good(1)] + bad), "5 rows"),):
+        try: e.check_es_rows(st); assert 0
+        except SystemExit as ex: assert "rows_read 5" in str(ex) and "skipped_ts 1" in str(ex) and "skipped_value 2" in str(ex), str(ex)
+    ok = [good(i) for i in range(100)]
+    _, st1 = e.load_es_counted(es_file(ok + bad[:1])); assert st1["rows_read"] == 101 and e.check_es_rows(st1) is None
+    _, st5 = e.load_es_counted(es_file(ok + [bad[0]] * 5)); assert e.check_es_rows(st5) is None          # 5 of 105 = 4.76%
+    _, st6 = e.load_es_counted(es_file(ok + [bad[0]] * 6))
+    try: e.check_es_rows(st6); assert 0          # 6 of 106 = 5.66%
+    except SystemExit: pass
+    _, st0 = e.load_es_counted(es_file([]))
+    try: e.check_es_rows(st0); assert 0
+    except SystemExit as ex: assert "no ES row" in str(ex)
+    _, sta = e.load_es_counted(es_file(bad))
+    try: e.check_es_rows(sta); assert 0
+    except SystemExit: pass
+    _, stb = e.load_es_counted(es_file([good(i) for i in range(95)] + [bad[0]] * 5)); assert stb["rows_read"] == 100 and e.check_es_rows(stb) is None          # exactly 5%: passes
+    # run() wires the check and returns the counts: stub the scorekit readers (invented fixtures only)
+    mkw, csw, esw = assemble(window("KXINX15M-F", D(5), M1))
+    saved = (e.k.guard, e.k.markets, e.k.candles); e.k.guard = lambda f: None; e.k.markets = lambda l: mkw; e.k.candles = lambda c: csw
+    try:
+        fgood = es_file([good(i) for i in range(10)])
+        ro = e.run(["l"], ["c"], fgood, 3); assert ro["es_rows"] == {"rows_read": 10, "rows_kept": 10, "skipped_ts": 0, "skipped_value": 0}
+        try: e.run(["l"], ["c"], es_file(bad), 3); assert 0
+        except SystemExit as ex: assert "skipped" in str(ex)
+    finally:
+        e.k.guard, e.k.markets, e.k.candles = saved
+assert e.MAX_SKIP_SHARE == 0.05
+
 # nothing is written and the floor has no default
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "eslead1_second.py")).read()
 assert '"w"' not in src and "'w'" not in src and "write(" not in src.replace("sys.stdout.write", "")
