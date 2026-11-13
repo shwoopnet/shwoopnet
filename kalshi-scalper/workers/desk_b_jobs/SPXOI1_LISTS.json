@@ -1,0 +1,51 @@
+{
+ "job_id": "SPXOI1_LISTS",
+ "registration": "kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md",
+ "purpose": "S&P 500 15 minute series (KXINX15M), development list for the SPXOI1 threshold: the settled markets of Nov 5 to Nov 13, 2026 only (closes 10:00 to 16:00 ET on the trading days, and Nov 13 up to 11:30 ET), as a CHECK of the tickers the candle job builds from close times.",
+ "heldout": "Development dates only, Nov 5 to Nov 13, 2026 (nothing after Nov 13; the Head of R&D: held-out starts 2026-12-01). Held-out registry (Desk A, on its branch) lists only INX1 against KXINX15M, with no held-out or frozen text found (status UNKNOWN); EVM4 held out Nov 6 onward on KXINX (the hourly index ladder), not this series. Auditor B to confirm before dispatch; the run folder goes on HELDOUT_PULL_RUNS.md if a held-out block turns out to reach these dates.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXINX15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 3,
+ "requests": [
+  {
+   "id": "settled_KXINX15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXINX15M",
+    "status": "settled",
+    "min_close_ts": 1793890800,
+    "max_close_ts": 1794587400,
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ],
+ "notes": "Close window 2026-11-05T15:00Z to 2026-11-13T16:30Z UTC. About 25 settled markets a trading day, 7 trading days, so under 200 markets: one page of 1000 should hold them; 3 pages is the budget. Nothing after Nov 13 is asked.",
+ "owner": "DESK_B",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
