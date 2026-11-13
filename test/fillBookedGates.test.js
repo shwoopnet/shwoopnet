@@ -70,7 +70,7 @@ gates.FB4 = () => {
 gates.FB5 = () => {
   const oi = slot.SLOT_STRATEGIES.find((s) => s.id === 'OICORE');
   assert.strictEqual(oi.killRules.maxConsecutiveLosses, 24);
-  assert.deepStrictEqual(oi.killRules.minNet, { afterFills: 40, net: -15 }, 'the net kill is -$15 since Nov 13, 2026 (it scales with the 15 to 20 contract size)');
+  assert.deepStrictEqual(oi.killRules.minNet, { afterFills: 40, net: -50 }, 'the net kill is -$50 since Nov 13, 2026 (it scales with the 20 contract size)');
   const mk = (k) => ({ strategy: 'SLOT', slotId: 'OICORE', ticker: 'KXBTC15M-26NOV071000-00-' + k, side: 'yes', count: 10, fillCount: '10', maxCost: 1, settled: true, result: 'no', settledPnl: -0.5, ts: 1e12 + k, settledAt: 1e12 + k });
   const run = (n) => slot.killCheck(Object.assign({}, oi, { reviewedAt: '2000-01-01', killRules: { maxConsecutiveLosses: 24, minNet: { afterFills: 1000, net: -1e9 } } }), Array.from({ length: n }, (_, k) => mk(k)), null);
   assert.strictEqual(run(23).killed, false, '23 losses in a row is not a kill');

@@ -43,7 +43,7 @@ Deflation still applies to the research stage: every hypothesis ever scored stay
 | Gold L1 | rolling 100 cash PF; 3 early sells in 40 trades | under 1.0; 3 or more | | ALERT only (event in the notification center), same code |
 | Gold L1 | rolling 60 cash PF | under 0.7 | any window ending after Nov 9 | ALERT only, coded Nov 10 (it fired once, Nov 6, and the next 50 trades recovered strongly: a false kill as a latch) |
 | Account (all strategies) | shared 12% stop (of the sizing base) and 5.5% window limit | breached | rolling 24 h | latch off [existing] |
-| OICORE | streak 24 or net under -$15 after 40 fills (was -$6 until Nov 13, 2026) | trips | settled order history | latch off [existing] |
+| OICORE | streak 24 or net under -$50 after 40 fills (was -$6 until Nov 13, 2026) | trips | settled order history | latch off [existing] |
 | OICORE | net under -1c per contract | after 50 fills | | ALERT |
 | EVENT830 (a handful of trades, none won) | its [existing] rules need 40 fills, unreachable at 1 trade a week | add: cumulative -$5 | any time | latch off |
 | Probe (1 contract or $5 an order) | net | under -$5 | any time | latch off |

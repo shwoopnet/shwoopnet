@@ -91,8 +91,8 @@ gates.SB5 = () => {
   const o = exits([1, -1, -1], from).concat(exits([5], Date.UTC(2026, 9, 1)));
   let seen = 0; const m = (x) => { seen++; return money(x); };
   const k = P.kalshiBoardKill('OICORE', o, 0, m);
-  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.net, -1, 'net since the review date: 1 - 1 - 1'); assert.strictEqual(k.floorRoom, 5, 'room before the -6 net floor'); assert.strictEqual(k.floorOn, false, 'the floor applies only from 40 fills');
-  assert.ok(/^Loss streak 2 of 24 · Net floor: \$5\.00 of room \(applies from 40 fills, 3 so far\)$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 1, 'money used for the room'); assert.ok(!/50|[Dd]rawdown/.test(k.lines[0]), 'the fixed $50 drawdown is not shown'); assert.strictEqual(k.lines.length, 1);
+  assert.strictEqual(k.streak, 2); assert.strictEqual(k.fills, 3, 'orders before the review date do not count'); assert.strictEqual(k.net, -1, 'net since the review date: 1 - 1 - 1'); assert.strictEqual(k.floorRoom, 49, 'room before the -50 net floor'); assert.strictEqual(k.floorOn, false, 'the floor applies only from 40 fills');
+  assert.ok(/^Loss streak 2 of 24 · Net floor: \$49.00 of room \(applies from 40 fills, 3 so far\)$/.test(k.lines[0]), k.lines[0]); assert.ok(seen >= 1, 'money used for the room'); assert.ok(!/50|[Dd]rawdown/.test(k.lines[0]), 'the fixed $50 drawdown is not shown'); assert.strictEqual(k.lines.length, 1);
   const e = P.kalshiBoardKill('EVENT830', exits([-0.5, -0.5, -0.5, -0.5, -0.5]), 0, money);
   assert.ok(/^5 trades, 0 won · losing streak 5 of 20$/.test(e.lines[0]), e.lines[0]); assert.strictEqual(e.wins, 0);
 };

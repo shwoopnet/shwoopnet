@@ -45,7 +45,7 @@
    "nextReadText": "Forward read on or after 2026-11-13; the result comes by message, and the next read date follows it",
    "n": null,
    "nBasis": null,
-   "kill": "It stops itself after 24 losses in a row, or if it is down more than $6 after 40 trades. It also stops if it falls too far below its best point; that limit grows with its size",
+   "kill": "It stops itself after 24 losses in a row, or if it is down more than $50 after 40 trades. It also stops if it falls too far below its best point; that limit grows with its size",
    "return": "It never restarts by itself. Only a reviewed code change by the owner turns it back on",
    "retiredOn": null,
    "reason": null,
