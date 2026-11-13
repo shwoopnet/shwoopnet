@@ -4,7 +4,7 @@ import calendar, gzip, json, math, os, sys, tempfile, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import cfrti_k_heldout_second as r
 import scorekit as k
-assert r.FAIL_EARLY_N == 30 and r.MIN_ROWS == 50
+assert r.MIN_ROWS == 50 and not hasattr(r, "FAIL_EARLY_N")          # Auditor B / Head 17:10Z: every label needs n >= 50
 
 A = 0.0005; SD = A * math.sqrt(10 / 9) * math.sqrt(4 / 3)
 T = lambda d, h, m: calendar.timegm((2026, 11, d, h, m, 0))
@@ -110,20 +110,26 @@ with tempfile.TemporaryDirectory() as t:
     except SystemExit as e: assert "READ_DATE" in str(e)
     assert not os.path.exists(lm)
     rl = os.path.join(t, "runs.log")
-    r.MIN_ROWS, r.FAIL_EARLY_N = 50, 30
+    r.MIN_ROWS = 50
     ne = r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm, run_log=rl)
-    assert ne == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm)          # n under 30: only the count; the read is not spent
+    assert ne == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm)          # n under 50: only the count; the read is not spent
     assert open(rl).read().count("\n") == 1 and "n = 3" in open(rl).read() and "NOT_ENOUGH_DATA" in open(rl).read() and "no marker" in open(rl).read() and "2026-11-20" in open(rl).read()          # logged with date and n
-    r.MIN_ROWS, r.FAIL_EARLY_N = 10, 3
+    r.MIN_ROWS = 10
     ne2 = r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm, run_log=rl)
-    assert ne2 == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm) and open(rl).read().count("\n") == 2          # n 3 of the lowered 3 to 9 range, PF above 1.0: not enough, no marker, logged again
-    # a world where every held-out row loses (H1 'yes' against NO, H2 'no' against YES, H3 void): PF 0 < 1.0 at n inside the lowered 3 to 9 range: FAIL, marker written (final)
+    assert ne2 == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm) and open(rl).read().count("\n") == 2          # n 3 under the lowered 10, PF above 1.0: not enough, no marker, logged again
+    # a world where every held-out row loses (H1 'yes' against NO, H2 'no' against YES, H3 void): PF 0 < 1.0 at n of the lowered minimum 3: FAIL, marker written (final)
     lost = [dict(m, result={"KXBTC15M-H1": "yes", "KXBTC15M-H2": "no", "KXBTC15M-H3": "void"}.get(m["ticker"], m["result"])) for m in mrows]
     lost_lists = os.path.join(t, "lost_lists"); mkrun(lost_lists, [("L1", {"markets": lost})])
     lm_fail = os.path.join(t, "fail.marker")
+    r.MIN_ROWS = 3
+    lostlow = r.heldout_read(mkf, [lost_lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=os.path.join(t, "lostlow.marker"), run_log=os.path.join(t, "lostlow.log"))
+    r.MIN_ROWS = 4          # n 3 under the lowered 4: the same losing world is only NOT_ENOUGH_DATA, never an early FAIL
+    early = r.heldout_read(mkf, [lost_lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm_fail, run_log=rl)
+    assert early == {"NOT_ENOUGH_DATA": "n = 3"} and not os.path.exists(lm_fail)
+    r.MIN_ROWS = 3
     fl = r.heldout_read(mkf, [lost_lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm_fail, run_log=rl)
-    assert fl["HELDOUT"]["LABEL"].startswith("FAIL") and os.path.exists(lm_fail) and open(rl).read().count("\n") == 3 and "FAIL" in open(rl).read().splitlines()[-1] and "marker written" in open(rl).read().splitlines()[-1], fl["HELDOUT"]["LABEL"]
-    r.MIN_ROWS, r.FAIL_EARLY_N = 3, 3
+    assert fl["HELDOUT"]["LABEL"].startswith("FAIL") and os.path.exists(lm_fail) and open(rl).read().count("\n") == 4 and "FAIL" in open(rl).read().splitlines()[-1] and "marker written" in open(rl).read().splitlines()[-1], fl["HELDOUT"]["LABEL"]
+    r.MIN_ROWS = 3
     full = r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 1, local_marker=lm, run_log=rl)
     assert os.path.exists(lm) and "HELD-OUT READ MADE" in open(lm).read() and full["HELDOUT"]["LABEL"].startswith("PASS") and "NOT_BLIND" not in " ".join(full)
     try: r.heldout_read(mkf, [lists], [cands], [prun], now=r.READ_DATE + 2, local_marker=lm); assert 0
@@ -142,18 +148,18 @@ with tempfile.TemporaryDirectory() as t:
     bad = os.path.join(t, "badlists"); mrows[0]["rules_primary"] = "The strike is something else entirely."; mkrun(bad, [("L1", {"markets": mrows})])
     try: r.check_rules_text([bad]); assert 0
     except SystemExit as e: assert "STOP" in str(e)
-r.MIN_ROWS, r.FAIL_EARLY_N = 50, 30
-# label ladder on UNROUNDED figures (Head 17:09Z, registration section 4): n < 30 NOT_ENOUGH_DATA; n 30 to 49 FAIL if PF < 1.0 else NOT_ENOUGH_DATA; n >= 50 PASS / NO CALL / FAIL
+r.MIN_ROWS = 50
+# label ladder on UNROUNDED figures (the card's dated lines, Auditor B's ruling, Head 17:10Z FINAL): every label needs n >= 50; under 50 is NOT_ENOUGH_DATA whatever the PF
 mk_f = lambda n, pf, mean: {"n": n, "pf": pf, "mean": mean}
 assert r.label(mk_f(50, 1.3, 0.01)).startswith("PASS") and r.label(mk_f(50, 1.2999999999, 0.01)).startswith("PASS") and r.label(mk_f(50, float("inf"), 0.2)).startswith("PASS")          # inside 1e-9
 assert r.label(mk_f(50, 1.2999, 0.01)).startswith("NO CALL") and r.label(mk_f(50, 1.0, 0.0)).startswith("NO CALL") and r.label(mk_f(50, 1.0 - 1e-10, 0.0)).startswith("NO CALL") and r.label(mk_f(50, None, None)).startswith("NO CALL")
 assert r.label(mk_f(50, 1.5, 0.0)).startswith("NO CALL")
 assert r.label(mk_f(50, 0.9999, -0.01)).startswith("FAIL") and "CLOSED FOR GOOD" in r.label(mk_f(50, 0.5, -0.1))
-assert r.label(mk_f(49, 0.9999, -0.01)).startswith("FAIL") and r.label(mk_f(30, 0.5, -0.1)).startswith("FAIL")          # n 30 to 49 with PF under 1.0: FAIL (marker, final)
-assert r.label(mk_f(49, 1.0, 0.0)) == "NOT_ENOUGH_DATA, n = 49" and r.label(mk_f(49, 2.0, 0.1)) == "NOT_ENOUGH_DATA, n = 49" and r.label(mk_f(30, 1.0 - 1e-10, 0.0)) == "NOT_ENOUGH_DATA, n = 30"          # n 30 to 49, PF at or above 1.0 (within 1e-9): not enough, no marker
+assert r.label(mk_f(49, 0.9999, -0.01)) == "NOT_ENOUGH_DATA, n = 49" and r.label(mk_f(30, 0.5, -0.1)) == "NOT_ENOUGH_DATA, n = 30"          # n 30 to 49 is NOT a FAIL even with PF under 1.0
+assert r.label(mk_f(49, 1.0, 0.0)) == "NOT_ENOUGH_DATA, n = 49" and r.label(mk_f(49, 2.0, 0.1)) == "NOT_ENOUGH_DATA, n = 49"
 assert r.label(mk_f(29, 0.5, -0.1)) == "NOT_ENOUGH_DATA, n = 29" and r.label(mk_f(0, None, None)) == "NOT_ENOUGH_DATA, n = 0"
-assert r.FAIL_EARLY_N == 30 and r.MIN_ROWS == 50
+assert r.MIN_ROWS == 50 and not hasattr(r, "FAIL_EARLY_N")          # Auditor B / Head 17:10Z: every label needs n >= 50
 # the read decision: which outcomes write the marker (final) and which only log
-assert r.read_outcome(mk_f(29, 0.1, -1)) == "not_enough" and r.read_outcome(mk_f(30, 1.0, 0.0)) == "not_enough" and r.read_outcome(mk_f(49, 3.0, 1)) == "not_enough"
-assert r.read_outcome(mk_f(30, 0.99, -0.1)) == "read" and r.read_outcome(mk_f(49, 0.5, -0.1)) == "read" and r.read_outcome(mk_f(50, 3.0, 1)) == "read" and r.read_outcome(mk_f(50, 0.5, -1)) == "read"
+assert r.read_outcome(mk_f(29, 0.1, -1)) == "not_enough" and r.read_outcome(mk_f(30, 0.5, 0.0)) == "not_enough" and r.read_outcome(mk_f(49, 0.5, -1)) == "not_enough" and r.read_outcome(mk_f(49, 3.0, 1)) == "not_enough"
+assert r.read_outcome(mk_f(50, 3.0, 1)) == "read" and r.read_outcome(mk_f(50, 0.5, -1)) == "read" and r.read_outcome(mk_f(50, 1.1, 0.1)) == "read"
 print("test_cfrti_k_heldout_second: all checks passed")
