@@ -1,0 +1,273 @@
+{
+ "build": "History Miner second build, from the registration text only",
+ "cells": [
+  {
+   "filled_share": 1.0,
+   "fit_residual_median": 0.002806,
+   "flags": {
+    "closed_on_cost": false,
+    "not_tradable": false,
+    "survives_share_test": false,
+    "under_minimum": true
+   },
+   "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+   "games_filled": 90,
+   "games_kickoff_derivable": 90,
+   "games_with_target": 90,
+   "gap": {
+    "count_gap8_spread4": 0,
+    "median": -0.010044,
+    "n": 90,
+    "p90": -0.006803,
+    "q1": -0.010672,
+    "q3": -0.006918,
+    "share_gap8_spread4": 0.0
+   },
+   "group": "A_big",
+   "median_spread": 0.02,
+   "one_way_cost_median": 0.03,
+   "placebo": {
+    "count_gap8_spread4": 0,
+    "median": -0.011881,
+    "n": 90,
+    "p90": -0.00797,
+    "q1": -0.015468,
+    "q3": -0.008597,
+    "share_gap8_spread4": 0.0
+   },
+   "round_trip_median_info_only": 0.054776,
+   "target": "BTTS",
+   "targets": 90,
+   "targets_filled": 90,
+   "targets_unreadable": 0,
+   "verdict": "no evidence at n = 90"
+  },
+  {
+   "filled_share": 1.0,
+   "fit_residual_median": 0.002806,
+   "flags": {
+    "closed_on_cost": false,
+    "not_tradable": false,
+    "survives_share_test": false,
+    "under_minimum": true
+   },
+   "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+   "games_filled": 90,
+   "games_kickoff_derivable": 90,
+   "games_with_target": 90,
+   "gap": {
+    "count_gap8_spread4": 0,
+    "median": -0.01002,
+    "n": 180,
+    "p90": -0.004794,
+    "q1": -0.012503,
+    "q3": -0.005681,
+    "share_gap8_spread4": 0.0
+   },
+   "group": "A_big",
+   "median_spread": 0.02,
+   "one_way_cost_median": 0.03,
+   "placebo": {
+    "count_gap8_spread4": 0,
+    "median": -0.011881,
+    "n": 90,
+    "p90": -0.00797,
+    "q1": -0.015468,
+    "q3": -0.008597,
+    "share_gap8_spread4": 0.0
+   },
+   "round_trip_median_info_only": 0.05325,
+   "target": "TEAMTOTAL",
+   "targets": 180,
+   "targets_filled": 180,
+   "targets_unreadable": 0,
+   "verdict": "no evidence at n = 90"
+  }
+ ],
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "leagues": {
+  "APFDDH": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "BRASILEIRO": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "A_big",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "BUNDESLIGA": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "A_big",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "COPADELREY": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EERSTEDIV": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EFLTROPHY": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "EPL": {
+   "games_in_sample": 60,
+   "games_listed_in_window": 60,
+   "group": "A_big",
+   "kickoff_derivable": 30,
+   "winner_legs_incomplete": 0
+  },
+  "LALIGA": {
+   "games_in_sample": 60,
+   "games_listed_in_window": 60,
+   "group": "A_big",
+   "kickoff_derivable": 30,
+   "winner_legs_incomplete": 0
+  },
+  "LIGAMX": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "A_big",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LIGAPORTUGAL": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LIGUE1": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "A_big",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "LVAVIR": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "MLS": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "A_big",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "SERIEA": {
+   "games_in_sample": 60,
+   "games_listed_in_window": 60,
+   "group": "A_big",
+   "kickoff_derivable": 30,
+   "winner_legs_incomplete": 0
+  },
+  "SERIEC": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  },
+  "UCLW": {
+   "games_in_sample": 0,
+   "games_listed_in_window": 0,
+   "group": "B_small",
+   "kickoff_derivable": 0,
+   "winner_legs_incomplete": 0
+  }
+ },
+ "no_such_series": [
+  "KXAPFDDHBTTS",
+  "KXAPFDDHGAME",
+  "KXAPFDDHTEAMTOTAL",
+  "KXAPFDDHTOTAL",
+  "KXBRASILEIROBTTS",
+  "KXBRASILEIROGAME",
+  "KXBRASILEIROTEAMTOTAL",
+  "KXBRASILEIROTOTAL",
+  "KXBUNDESLIGABTTS",
+  "KXBUNDESLIGAGAME",
+  "KXBUNDESLIGATEAMTOTAL",
+  "KXBUNDESLIGATOTAL",
+  "KXCOPADELREYBTTS",
+  "KXCOPADELREYGAME",
+  "KXCOPADELREYTEAMTOTAL",
+  "KXCOPADELREYTOTAL",
+  "KXEERSTEDIVBTTS",
+  "KXEERSTEDIVGAME",
+  "KXEERSTEDIVTEAMTOTAL",
+  "KXEERSTEDIVTOTAL",
+  "KXEFLTROPHYBTTS",
+  "KXEFLTROPHYGAME",
+  "KXEFLTROPHYTEAMTOTAL",
+  "KXEFLTROPHYTOTAL",
+  "KXLIGAMXBTTS",
+  "KXLIGAMXGAME",
+  "KXLIGAMXTEAMTOTAL",
+  "KXLIGAMXTOTAL",
+  "KXLIGAPORTUGALBTTS",
+  "KXLIGAPORTUGALGAME",
+  "KXLIGAPORTUGALTEAMTOTAL",
+  "KXLIGAPORTUGALTOTAL",
+  "KXLIGUE1BTTS",
+  "KXLIGUE1GAME",
+  "KXLIGUE1TEAMTOTAL",
+  "KXLIGUE1TOTAL",
+  "KXLVAVIRBTTS",
+  "KXLVAVIRGAME",
+  "KXLVAVIRTEAMTOTAL",
+  "KXLVAVIRTOTAL",
+  "KXMLSBTTS",
+  "KXMLSGAME",
+  "KXMLSTEAMTOTAL",
+  "KXMLSTOTAL",
+  "KXSERIECBTTS",
+  "KXSERIECGAME",
+  "KXSERIECTEAMTOTAL",
+  "KXSERIECTOTAL",
+  "KXUCLWBTTS",
+  "KXUCLWGAME",
+  "KXUCLWTEAMTOTAL",
+  "KXUCLWTOTAL"
+ ],
+ "readings": [
+  "R1 lists proof: every live_<SERIES> request answered 200 on pages 1..k with no cursor left; the three fee-field reads are not used (the fee is the registered formula) and may be unanswered",
+  "R2 a game = one GAME event with all three winner markets (two team codes and -TIE); a game missing one is counted 'winner legs incomplete' and is not derivable",
+  "R3 sample: GAME events whose latest winner close is inside [2026-09-12, 2026-11-13) UTC, the 60 with the latest such close per league, ties by event ticker; never extended",
+  "R4 kickoff: the three winner markets must carry one occurrence_datetime; each of the three must close 100 to 135 minutes (inclusive) after kickoff",
+  "R5 the minute at 'kickoff minus m' is the candle whose end_period_ts equals kickoff minus m minutes; m from 30 up to 90",
+  "R6 two-sided: 0 < yes bid < yes ask < 1 from close_dollars; 0.00 bid or 1.00 ask is no side; a candle with no close_dollars stops the reader",
+  "R7 rate 1 belongs to the lower team code; winner mids are (P(team1 > team2), P(level), P(team2 > team1)); a total strike is used only with a numeric floor_strike and means over floor_strike",
+  "R8 targets: the BTTS market and every team-total market with a numeric floor_strike whose last ticker segment starts with exactly one of the two team codes; else 'unreadable'. Each target gets its own instant",
+  "R9 cheaper side: the side with the lower ask, YES ask vs NO ask = 1 - YES bid; a tie takes YES. gap = model value of that side minus its ask",
+  "R10 placebo: at each (game, instant) of a filled target, the two-sided total strike whose mid is nearest 0.50 (tie: lower line) is left out, the rates refit, its cheaper-side gap taken; one placebo per (game, instant)",
+  "R11 residual: per fit, sqrt(SSE / number of fitted legs); the median over fits is reported",
+  "R12 one-way cost per target: (ask - mid) + entry fee, fee = ceil to the cent of 0.07 x p x (1 - p) with p = cheaper-side ask + 0.01; the cell's cost is the median; CLOSED on cost above 0.04",
+  "R13 n for the minimum = filled games (games with at least one filled target of that type); targets filled are also printed",
+  "R14 verdict order: not tradable, then closed on cost, then no evidence at n = x, then efficient or survives; every flag is printed beside the verdict",
+  "R15 quantiles: median by statistics.median; quartiles and 90th percentile by linear interpolation between order statistics at (n - 1) x q"
+ ]
+}
