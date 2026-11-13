@@ -110,3 +110,23 @@ The web reader this desk may use will not reproduce a statement's full text or a
 2. When FOMCTEXT_LISTS has landed, this desk reads ONLY the ticker, event ticker and strike word (title or subtitle) fields of the development markets. No price and no result field is read.
 3. For each (decision date, strike word) pair, a reader opens that one statement and answers yes or no: does the word, its plural or its possessive appear in the statement body (voters list included, implementation note excluded)? A yes or no is not a quote.
 4. The answers fill the statement-word table of Clarification 1, point 2. That table is committed, with the Board cited as the source, BEFORE the candle job is built. Held-out statements (2026-06-17 on) are never opened.
+
+## Clarification 4 (Nov 13, 2026, 02:35Z, the Head of R&D's three conditions on Clarification 3)
+
+1. **This desk never opens a lists answer.** A list answer carries result fields. The History Miner's reader gets a `words` command, audited by Auditor B, that prints only event ticker, meeting date and strike word for development markets. This desk matches from that print alone.
+2. **The yes or no table is made TWICE,** by two workers who do not see each other's answers.
+   - Every disagreement is settled by quoting the context (at most 125 characters of the statement).
+   - The committed table keeps both passes and the settled answer.
+   - **The matching rule, fixed before the first pass:**
+     - A strike word matches if the word itself, its plural (adding s or es, or a dictionary plural) or its possessive ('s or s') appears in the statement body.
+     - Case does not matter.
+     - A hyphenated compound in the statement counts if the strike word is one of its parts ("mortgage-backed" matches "mortgage"); a hyphenated strike matches only the same hyphenated form.
+     - A strike word inside a longer CLOSED word does not count ("employment" does not match "unemployment").
+     - Other inflections (tense, conjugation, derivation) do not count.
+     - A multi-word strike matches only the exact phrase, case-free.
+     - The body runs from the first sentence through the voters and dissents sentence. The "For release" line, the implementation note and the page navigation are excluded.
+   - These follow MENTION.pdf's counting rules.
+3. **Reading eleven public pages through the reader is reading, not collection.**
+   - No recorder, loop or script touches the Board's site.
+   - No statement dated 2026-06-17 or later is opened.
+   - The table is committed, citing the Board of Governors of the Federal Reserve System as the source, before the candle job is built.
