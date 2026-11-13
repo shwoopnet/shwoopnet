@@ -108,3 +108,5 @@ After Auditor B's CLEAN on the Amendment 4 diff (08:19Z) and the Testing Desk's 
 - Printed with it: 140 late strikes with the table of lives; 658 series-hours, 43 of which gained strikes, listed; clock hours present 166 of 168 for Chicago, Los Angeles and Miami and 160 for New York, the missing ones named. All equal to the times-only breakdown and to Auditor B's count.
 
 It goes to the Head of R&D with the count, bounds and held-out line, and to Auditor B for a diff against the lists run, before any dispatch. A job file needs the owner's typed merge.
+
+**08:23Z:** the clarifying line to Amendment 4 is written (text only: missing hours are counted against the 168 clock hours of the fixed seven days; a series-hour is one event). The note's sha256 is now 3ff1de2d600352148aa02ac5c48f6ba8ada67fe02136e66817f842de675dd9f7 (it was 079e1371). The reader (bc76e8fc) and the candle job (3b96fa34) are unchanged.
