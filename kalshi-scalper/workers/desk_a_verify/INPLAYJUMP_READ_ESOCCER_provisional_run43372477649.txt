@@ -1,0 +1,8 @@
+PROVISIONAL, ONE BUILD (engine c39b1e9b, series file 34f70868, candle folders /tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/C_ESOCCER)
+series file sha256 34f708687df24f5a | development window {'closes_from': '2026-10-15T00:00:00Z', 'closes_before': '2026-10-23T00:00:00Z'}
+== ESOCCER | candle freshness measured on Bitcoin 15 minute only, not on these markets
+matches listed in the window: 3823
+start check: 96.3% of matches closed 4 to 90 minutes after the ticker's start (3680 of 3823)
+matches with a qualifying jump and an entry that passes: 511 | not a bet and why: {'entry ask or spread outside the band': 1461, 'entry minute not two-sided': 283, 'two contracts qualified in the same minute': 14}
+COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over 1972 qualifying decisions = 0.050 (kill above 0.04); bets made more than 6 hours before the close: 0; median elapsed minute of the bet: 3.0; (cost line and family clock check: selected on development, frozen for the held-out)
+FAMILY CLOSED ON COST; no result of it is read
