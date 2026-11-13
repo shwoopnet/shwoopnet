@@ -55,3 +55,5 @@ Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from 
 
 
 Dated clarification Nov 13, 2026, second pass (Head of R&D ruling): from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided; all remaining markers restored verbatim (lines 15, 29, 42: the universe count, the per-cell scoring line, the pull ordering and the queued sports SPREAD pull note); earlier first pass stands.
+
+Reservation released by the Head of R&D, 2026-11-13 06:50Z: the held-out thirds in NO_ARM_CUTS.json will never be scored under this card; a return of the approval NO side needs a new registration on events closing after 2026-11-10 only. (Written Nov 13, 2026. The Nov 12 development read stands: arm A FAIL, arm B and generic ballot no evidence, held-out never read.)
