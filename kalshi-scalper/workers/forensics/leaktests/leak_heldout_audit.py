@@ -51,6 +51,11 @@ tmp = tempfile.mkdtemp(prefix="ha_"); held = os.path.join(tmp, "HELDOUT_X"); mak
 ordinary = os.path.join(tmp, "DEV_X"); make(ordinary); outdir = os.path.join(tmp, "out"); os.makedirs(outdir)
 runner = os.path.join(tmp, "_runner.py"); open(runner, "w").write(RUNNER)
 SHAPES = [("typed", held, None), ("sub-folder", os.path.join(held, "part1"), None), ("symlink", os.path.join(tmp, "innocent"), None), ("relative", ".", held)]
+# a fifth shape, added 2026-11-13, on request only (argv ends with --parent): the PARENT of the held-out folder is typed. A reader that walks or globs below the folder it is given
+# would then reach the held-out files although no typed path names them. A reader that opens only <folder>/manifest.json and the files it lists cannot.
+if sys.argv[-1] == "--parent":
+    sys.argv.pop(); par = os.path.join(tmp, "PARENT"); os.makedirs(par); shutil.copytree(held, os.path.join(par, "HELDOUT_X")); held_parent = os.path.join(par, "HELDOUT_X")
+    SHAPES = [("parent", par, None)]
 
 
 def run_script(script, argv, cwd=None, target=held):
@@ -71,7 +76,7 @@ def script_target(label, script, template):
     for i in pos:
         for shape, path, cwd in SHAPES:
             argv = [(path if j == i else ordinary) if a == "H" else a for j, a in enumerate(template)]
-            oo, ll, hw = run_script(script, argv, cwd=cwd)
+            oo, ll, hw = run_script(script, argv, cwd=cwd, target=(held_parent if shape == "parent" else held))
             if oo is None: notes.append("%s arg %d: %s" % (shape, i + 1, hw)); continue
             if oo: leaks.append("%s arg %d: %d file(s) opened (%s)" % (shape, i + 1, oo, hw))
             elif ll: notes.append("%s arg %d: folder listed, no file opened" % (shape, i + 1))
@@ -113,7 +118,7 @@ def probe(fn, path, target, cwd=None):
 def func_target(label, fn):
     o, l, how = probe(fn, ordinary, ordinary); leaks, notes = [], []
     for shape, path, cwd in SHAPES:
-        oo, ll, hw = probe(fn, path, held, cwd)
+        oo, ll, hw = probe(fn, path, (held_parent if shape == "parent" else held), cwd)
         if oo: leaks.append("%s: %d file(s) opened (%s)" % (shape, oo, hw))
         elif ll: notes.append("%s: folder listed, no file opened" % shape)
     if leaks: line(label, "HOLE", "; ".join(leaks)[:400])
@@ -187,11 +192,27 @@ elif kind == "deskb":
     script_target("MAPBREAK (Desk B counting) mapbreak/count_lists.py <lists>", os.path.join(root, "mapbreak", "count_lists.py"), ["H"])
     script_target("NHLOT nhlot/build_candles_job.py <lists> <out>", os.path.join(root, "nhlot", "build_candles_job.py"), ["H", outdir])
     script_target("NHLOT nhlot/measure_prices.py <candles> <games.json>", os.path.join(root, "nhlot", "measure_prices.py"), ["H", os.path.join(root, "nhlot", "games.json")])
-    for sub in ("hourlytemp", "pol_i2", "census", "econlag"):
+    for sub in ("hourlytemp", "pol_i2", "census"):
         d = os.path.join(root, sub)
         for f in sorted(os.listdir(d)) if os.path.isdir(d) else []:
-            if f.endswith(".py") and not f.startswith("test_") and "manifest.json" in open(os.path.join(d, f), errors="replace").read():
+            if f.endswith(".py") and not f.startswith("test_") and f != "count_gaps.py" and "manifest.json" in open(os.path.join(d, f), errors="replace").read():
                 script_target("Desk B other %s/%s <folder> <out>" % (sub, f), os.path.join(d, f), ["H", outdir])
+    # added 2026-11-13 (the Head's order: make econlag reachable): each stage of econlag.py by its own command line, and Desk B's remaining readers
+    EC = os.path.join(root, "econlag", "econlag.py"); plan = os.path.join(tmp, "plan.json"); json.dump({}, open(plan, "w")); empty = os.path.join(tmp, "empty.json"); json.dump([], open(empty, "w"))
+    script_target("ECONLAG econlag.py calendar <run> <out>", EC, ["calendar", "H", outdir])
+    script_target("ECONLAG econlag.py build-b <out> <run>", EC, ["build-b", outdir, "H"])
+    script_target("ECONLAG econlag.py scan <out> <run>", EC, ["scan", outdir, "H"])
+    script_target("ECONLAG econlag.py fade-count <out> <run>", EC, ["fade-count", outdir, "H"])
+    script_target("ECONLAG econlag.py score <out> <plan> <run>", EC, ["score", outdir, plan, "H"])
+    script_target("Desk B other breaksweep/sweep_listing.py <run> <out>", os.path.join(root, "breaksweep", "sweep_listing.py"), ["H", outdir])
+    script_target("Desk B other census/settle_speed.py <run> <out>", os.path.join(root, "census", "settle_speed.py"), ["H", outdir])
+    script_target("Desk B other census/first_cut.py <dir> <out>", os.path.join(root, "census", "first_cut.py"), ["H", outdir])
+    script_target("Desk B other ingame_m1/measure.py <games> <run>", os.path.join(root, "ingame_m1", "measure.py"), [empty, "H"])
+    script_target("Desk B other ingame_m1/drift_addition.py <games> <run>", os.path.join(root, "ingame_m1", "drift_addition.py"), [empty, "H"])
+    script_target("Desk B other pol_i2/count_gaps.py <markets> <run>", os.path.join(root, "pol_i2", "count_gaps.py"), [empty, "H"])
+    script_target("Desk B other polcount/count_families.py <folder>", os.path.join(root, "polcount", "count_families.py"), ["H"])
+    script_target("Desk B other polcount/count_polrec.py <folder>", os.path.join(root, "polcount", "count_polrec.py"), ["H"])
+    script_target("Desk B other combo_s3/s3_score.py <checkout> <time>", os.path.join(root, "combo_s3", "s3_score.py"), ["H", "2026-11-13T00:00:00Z"])
 elif kind == "deska":
     V, J = os.path.join(root, "desk_a_verify"), os.path.join(root, "desk_a_jobs")
     ser = None
@@ -203,8 +224,10 @@ elif kind == "deska":
     script_target("INPLAYJUMP pilot desk_a_jobs/build_inplayjump_pilotval.py <series> <lists> <out>", os.path.join(J, "build_inplayjump_pilotval.py"), [ser, "H", outdir])
     script_target("INPLAYJUMP desk_a_jobs/build_inplayjump_candles.py clock <series> <lists> <out>", os.path.join(J, "build_inplayjump_candles.py"), ["clock", ser, "H", outdir])
     script_target("INPLAYJUMP engine desk_a_verify/inplayjump.py dev <series> ESOCCER <lists> -- <candles> <scorekit>", os.path.join(V, "inplayjump.py"), ["dev", ser, "ESOCCER", "H", "--", "H", (sys.argv[4] if len(sys.argv) > 4 else ordinary)])      # the last argument is the Testing Desk's scorekit folder
+    script_target("CFRTI-K desk_a_verify/cfrti_k.py dev <lists> <binary candles> <perp candles>", os.path.join(V, "cfrti_k.py"), ["dev", "H", "H", "H"])      # added 2026-11-13: its own command line
+    script_target("CFRTI-K desk_a_verify/cfrti_k.py rows <lists> <binary candles> <perp candles> <out.csv>", os.path.join(V, "cfrti_k.py"), ["rows", "H", "H", "H", os.path.join(outdir, "rows.csv")])
     for f in sorted(os.listdir(V)):
-        if f.endswith(".py") and f not in ("inplayjump.py", "heldout_guard.py") and "manifest.json" in open(os.path.join(V, f), errors="replace").read():
+        if f.endswith(".py") and f not in ("inplayjump.py", "heldout_guard.py", "cfrti_k.py") and "manifest.json" in open(os.path.join(V, f), errors="replace").read():
             script_target("Desk A other desk_a_verify/%s <folder> <folder>" % f, os.path.join(V, f), ["H", "H"])
     for f in sorted(os.listdir(J)):
         if f.endswith(".py") and not f.startswith("build_inplayjump") and "manifest.json" in open(os.path.join(J, f), errors="replace").read():
