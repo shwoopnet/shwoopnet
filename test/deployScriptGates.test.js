@@ -29,6 +29,12 @@ gates.D2 = () => {
   assert.strictEqual(fs.readFileSync(path.join(dir, 'functions', '.env'), 'utf8'), 'KALSHI_LIVE_ENABLED=on\n', 'a fresh clone gets the order switch line, so the deploy cannot turn the bot off');
   assert.ok(/\[dry run\] .*deploy --only functions:kalshiLiveArmed,functions:kalshiBooks,functions:kalshiLiveAccount,functions:kalshiGoldKillCheck,functions:kalshiBalanceSnapshot --project shwoopnet/.test(out), 'it deploys exactly the bot, the read-only relay and the switch reader to the shwoopnet project');
   assert.ok(!/--only functions(\s|$)/.test(out), 'never a whole-codebase deploy (that asks to delete functions)');
+  // The hard account stop's checker goes out first, in its own command, and a failure of it stops the script before the bot is deployed (Nov 13, 2026).
+  const lines = out.split('\n').filter((l) => /\[dry run\] .*deploy --only/.test(l));
+  assert.strictEqual(lines.length, 2, 'two deploy commands');
+  assert.ok(/--only functions:kalshiHardStopCheck --project shwoopnet/.test(lines[0]) && !/kalshiLiveArmed/.test(lines[0]), 'the checker alone, first');
+  assert.ok(/kalshiLiveArmed/.test(lines[1]) && !/kalshiHardStopCheck/.test(lines[1]), 'then the bot without it');
+  assert.ok(/kalshiHardStopCheck --project "?\$?[^|]*\|\| \{ echo "STOP/.test(fs.readFileSync(path.join(root, 'functions', 'deploy-sizing.sh'), 'utf8').replace(/\$\{FB\[@\]\}/g, 'x')) || /\|\| \{ echo "STOP: the hard stop checker did not deploy/.test(fs.readFileSync(path.join(root, 'functions', 'deploy-sizing.sh'), 'utf8')), 'and a failure of it stops the script');
 };
 
 gates.D3 = () => {

@@ -219,7 +219,7 @@ gates.K11 = () => {
   const lib = fs.readFileSync(path.join(root, 'functions', 'kalshiGoldKillLib.js'), 'utf8').replace(/\/\/.*$/gm, '');
   assert.ok(!/fetch|keyId|pem|\/portfolio|method: "POST"|runL1Tick/.test(lib));
   const idx = fs.readFileSync(path.join(root, 'functions', 'index.js'), 'utf8');
-  const fn = idx.slice(idx.indexOf('exports.kalshiGoldKillCheck'), idx.indexOf('exports.kalshiPaperTick'));
+  const fn = idx.slice(idx.indexOf('exports.kalshiGoldKillCheck'), idx.indexOf('exports.kalshiHardStopCheck'));
   assert.ok(!/KALSHI_LIVE_KEY_ID|KALSHI_LIVE_PRIVATE_KEY|secrets/.test(fn), 'no secret on the checker');
   assert.ok(/deploy-sizing|kalshiGoldKillCheck/.test(fs.readFileSync(path.join(root, 'functions', 'deploy-sizing.sh'), 'utf8')));
 };

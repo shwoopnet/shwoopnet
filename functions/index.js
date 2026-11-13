@@ -49,6 +49,7 @@ const watchdog = require("./kalshiWatchdogLib");
 const live = require("./kalshiLiveLib");
 const exitAlarm = require("./kalshiExitAlarmLib");
 const goldKillLib = require("./kalshiGoldKillLib");
+const hardStopLib = require("./kalshiHardStopLib");
 const shardAlertLib = require("./kalshiShardAlertLib");
 // The second strategy slot (docs/SECOND_SLOT_WIRING.md). SLOT_ON comes from the slot library's own constants and nothing else: no stored document, request or page can feed it. It is "watching" (entries are
 // allowed, or a slot order has ever existed), which is wider than "entering", so switching entries off never orphans a live slot position. While it is false
@@ -473,6 +474,11 @@ exports.kalshiL1Session = onCall(async (request) => {
   if (KALSHI_LIVE_ENABLED.value() !== "on") {
     throw new HttpsError("failed-precondition", "Live trading is switched off on the server (KALSHI_LIVE_ENABLED), so there is nothing to start.");
   }
+  // The hard account stop (docs/HARD_ACCOUNT_STOP.md): while its latch holds the bot cannot be started again. Read from the checker's own authoritative record; an unreadable record throws, which refuses the start.
+  const hardState = await db.collection("kalshiLiveControl").doc("hardStopState").get();
+  if (hardState.exists && hardState.data().tripped === true && Number(hardState.data().rearmAt) >= hardStopLib.HARD_STOP.rearmAt) {
+    throw new HttpsError("failed-precondition", "The hard account stop has stopped all new buys (the account fell 40% from its best on trading results). It stays off until a reviewed code change re-arms it.");
+  }
   const arm = await db.collection("kalshiLiveControl").doc("arm").get();
   if (arm.exists && arm.data().armed === true && arm.data().until > Date.now()) {
     throw new HttpsError("failed-precondition", "A single test order is armed. Disarm it before starting the bot.");
@@ -693,6 +699,7 @@ exports.kalshiLiveArmed = onSchedule(
           try {
             const slotResult = await slotRun.runSlotTick({
               session, now, enabled: !CODE_KILL_SWITCH && KALSHI_LIVE_ENABLED.value() === "on", active: market.active, store: slotStoreLib.slotStore(db, firestoreLiveStore(db)),
+              hardStopBlocked: hardStopLib.hardStopBlocks(sizingSnap.exists ? sizingSnap.data() : null, now).blocked,   // the hard account stop, from the sizing document read at the top of the tick
               keyId: KALSHI_LIVE_KEY_ID.value(), pem: KALSHI_LIVE_PRIVATE_KEY.value(), fetchFn: fetch, quotes: slotQuotes, clock: Date.now,
               setSession: (patch) => sessRef.set(patch, { merge: true }), logEvent: args.logEvent, shared: shareOut, l1Result,
               sessionNow: async () => { const x = await sessRef.get(); return x.exists ? x.data() : null; },
@@ -842,6 +849,54 @@ exports.kalshiGoldKillCheck = onSchedule(
       if (r && (r.tripped || (r.alerts && r.alerts.length))) console.log("kalshiGoldKillCheck: " + JSON.stringify({ tripped: r.tripped || null, alerts: r.alerts || [] }));
     } catch (e) {
       console.error("kalshiGoldKillCheck failed: " + String((e && e.message) || e).slice(0, 160));
+    }
+  }
+);
+
+// Hard account stop (the owner, Nov 13, 2026; docs/HARD_ACCOUNT_STOP.md). The same shape as the gold latch above and a separate process from the tick for the same reason: it REPLAYS every settled L1 and second
+// slot order since the code's rearmAt on the cash basis and caches the verdict on the sizing document (`hardStop`), which the tick already reads. It holds no Kalshi key, sends nothing to Kalshi and places no order;
+// its writes are that field, one claim document (once per generation), a field on the session document for the phone alert and an event. Every failure marks the record unreadable (which BLOCKS buys) or leaves it as it was.
+const hardL1Reader = live.makeRecentOrderReader(async (ts) => (await getFirestore().collection("kalshiLiveOrders").where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })));
+const hardSlotReader = live.makeRecentOrderReader(async (ts) => (SLOT_ON ? slotStoreLib.ordersSince(getFirestore(), ts) : []));   // with no second strategy ever used there are no such orders
+exports.kalshiHardStopCheck = onSchedule(
+  { schedule: "every 5 minutes", timeoutSeconds: 55, retryCount: 0, memory: "256MiB" },
+  async () => {
+    try {
+      ensureDefaultAdminApp();
+      const db = getFirestore();
+      const sizingRef = db.collection("kalshiLiveControl").doc("sizing");
+      const claimRef = db.collection("kalshiLiveControl").doc("hardStopAlert");
+      const stateRef = db.collection("kalshiLiveControl").doc("hardStopState");   // the authoritative record: only this function writes it, so the tick's full write of the sizing document cannot erase the latch or the peak base
+      const sessRef = db.collection("kalshiLiveControl").doc("session");
+      const now = Date.now();
+      const r = await hardStopLib.runHardStopCheck({
+        now,
+        readL1Orders: (since) => hardL1Reader(since, now),
+        readSlotOrders: (since) => hardSlotReader(since, now),
+        readSizing: async () => { const s = await sizingRef.get(); return s.exists ? s.data() : null; },
+        readState: async () => { const s = await stateRef.get(); return s.exists ? s.data() : null; },
+        writeState: (patch) => stateRef.set(patch, { merge: true }),
+        writeHardStop: (patch) => sizingRef.set({ hardStop: patch }, { merge: true }),
+        claimAlert: (rearmAt) => db.runTransaction(async (tx) => {
+          const cur = await tx.get(claimRef);
+          if (cur.exists && Number(cur.data().rearmAt) === rearmAt) return false;
+          tx.set(claimRef, { rearmAt, at: now });
+          return true;
+        }),
+        releaseAlert: (rearmAt) => claimRef.set({ rearmAt: null }, { merge: true }),
+        // Ends a RUNNING session the way the loss stop does (same fields); false when none was running (an owner stop is left as it is).
+        endSession: (why) => db.runTransaction(async (tx) => {
+          const cur = await tx.get(sessRef);
+          if (!cur.exists || cur.data().active !== true) return false;
+          tx.set(sessRef, { active: false, endedAt: now, endedBecause: why }, { merge: true });
+          return true;
+        }),
+        raiseAlert: (a) => sessRef.set({ hardStopAlert: a }, { merge: true }),
+        logEvent: (e) => db.collection("kalshiLiveEvents").add({ accountId: live.DEFAULT_ACCOUNT_ID, ...e }),
+      });
+      if (r && (r.tripped || r.skipped)) console.log("kalshiHardStopCheck: " + JSON.stringify({ tripped: r.tripped || null, skipped: r.skipped || null }));
+    } catch (e) {
+      console.error("kalshiHardStopCheck failed: " + String((e && e.message) || e).slice(0, 160));
     }
   }
 );

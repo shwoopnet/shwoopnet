@@ -166,4 +166,7 @@ function slotSkipWriter(db) {
   return (d) => db.collection(SKIPS).doc(String(d.strategy) + "_" + String(d.ticker)).set(d);
 }
 
-module.exports = { slotStore, slotHooks, createLocked, slotIgnoreSet, releaseCloseLease, slotSkipWriter, COLLECTIONS: Object.freeze({ SLOT, LOCK, CONTROL, SKIPS }) };
+module.exports = { ordersSince, slotStore, slotHooks, createLocked, slotIgnoreSet, releaseCloseLease, slotSkipWriter, COLLECTIONS: Object.freeze({ SLOT, LOCK, CONTROL, SKIPS }) };
+
+// The second slot's orders placed at or after ts, plain objects with their ids. Read only; used by the hard account stop's checker (functions/kalshiHardStopLib.js), which replays them.
+async function ordersSince(db, ts) { return (await db.collection(SLOT).where("ts", ">=", ts).get()).docs.map((d) => ({ id: d.id, ...d.data() })); }

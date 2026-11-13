@@ -697,7 +697,7 @@ function slotOrderRecord({ strategyId, ticker, side, step, count, limit, maxCost
 }
 
 module.exports = {
-  validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord,
+  validateStrategy, slotOrderCheck, slotRiskForL1, slotKillStatus, slotOrderRecord, accountOrder,
   SLOT_ENABLED, SLOT_STRATEGIES, SLOT_HOLD_ALLOWED, SLOT_SERIES_ALLOWED, SLOT_MAX_CONTRACTS_PER_ORDER, SLOT_MAX_OPEN_CONTRACTS_PER_MARKET, SLOT_MAX_SCALE_STEPS, SLOT_CAP_FRACTIONS, SLOT_CAP_CEILINGS, slotCaps,
   SLOT_LIMIT_SLIP, SLOT_LIMIT_SLIP_MAX, slotLimitFor, SLOT_SKIP_BELOW, SLOT_SKIP_BELOW_MAX, slotSkipsPrice,
   EVENT830_SERIES, SLOT_SERIES_RESERVED, SLOT_CALENDARS, slotCalendarRow, slotCalendarSeriesDue, SLOT_CALENDAR_LEAD_MS,
