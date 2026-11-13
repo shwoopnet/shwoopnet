@@ -686,3 +686,7 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - SPXCLOSE1 is CLOSED as a source: Main read the terms (NOII is subscription only; NYSE imbalances are paid; storage or commercial use needs written consent; no free route).
   - SPXEVENT1 (2d426ec8, 88f7e93c) is an EVENT830 VERSION, wheel spec only. Two frozen windows: Dec 1 15:00Z (ISM manufacturing) and Dec 9 19:00Z (FOMC). It cannot give a verdict in useful time; it only starts a shadow record. Auditor B checks the text.
   - The owner's S&P push so far: no new unique strategy. SPXOI1 (a version, PR 907) and the recorder PR 903 wait for the owner's merge.
+- 17:02Z, the owner (popups via the EA):
+  - SPXFV1, and futures fair value on the S&P: "No, keep it closed."
+  - CFRTI-K: "Run it, close if test fails." It goes live with today's deploy at trial size (3 contracts, -$18 floor) as the owner's named exception in a declined family. Its frozen held-out read runs once on Nov 14; if it fails, it is closed for good by a reviewed edit. Desk A writes the exit line into the card. Main and the Risk Analyst are told.
+- Forensics: the SPXFV1 rows builder was written before the cancellation arrived (0c5c3764, marked CANCELLED). There was no pull and no spend, only the free cost query. SPXCLOSE1 is marked closed (Desk A c3bbec4c).
