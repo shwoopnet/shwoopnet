@@ -722,3 +722,7 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - #6 LIQREV (Desk C 822f9ce1, 04c6680a): OKX liquidation reversal on KXBTC15M, forward only, prior about 2%. With the VA for uniqueness and the R6 end date. H is not computed before CLEAN.
   - #10 STEAMLIVE: zero-try count first.
   - SPXOI1 T: build 2 is CLEAN (History Miner 0c13f5c0 at 899b4a2c). Build 1 (Desk A) is fixing F1 to F3.
+- 19:01Z: both SPXOI1 T builds are CLEAN: Desk A spxoi1_threshold.py 4b5ec189 (66ed9c27) and the History Miner spxoi1t2.py 0c13f5c0 (899b4a2c).
+  - Next: Auditor B's structure check of SPXOI1_LISTS and SPXOI1_CANDLES after they land (00:00Z or later). Both must print the same n (143 expected) and T; then the Head sends T to Main. T is never guessed.
+  - LIQREV amended (Desk C a16c8e3c, 507a7326): the family's third test, paper and shadow only, held-out from 2026-11-30 to before 2027-01-01. With the VA and Auditor B.
+  - STEAMLIVE is not written (at most about 16 events before the recorder stops).
