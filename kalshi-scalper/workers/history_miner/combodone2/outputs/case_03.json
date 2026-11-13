@@ -1,0 +1,87 @@
+{
+ "completed_runs_per_day": {
+  "2026-11-13": 3,
+  "2026-11-14": 40,
+  "2026-11-15": 40,
+  "2026-11-16": 40,
+  "2026-11-17": 40,
+  "2026-11-18": 40,
+  "2026-11-19": 40,
+  "2026-11-20": 29,
+  "2026-11-21": 1
+ },
+ "week": {
+  "first_day": "2026-11-14",
+  "last_day": "2026-11-20",
+  "completed_runs": 269,
+  "of": 336,
+  "pct": 80.06,
+  "run_folders_not_completed": 0,
+  "completed_with_list_complete": 269
+ },
+ "quote_rows": {
+  "in_week": 20,
+  "unreadable_left_out": 0,
+  "whole_leg_string": 18,
+  "whole_share": 0.9,
+  "empty": 1,
+  "cut": 1
+ },
+ "not_eligible_by_reason": {
+  "leg_unknown": 4,
+  "leg_other_result": 1,
+  "leg_against": 1,
+  "no_leg_for_60s": 2,
+  "all_legs_settled": 1,
+  "combo_closed": 1
+ },
+ "eligible_snapshots": {
+  "all": 8,
+  "with_resting_ask": 6,
+  "none": 2
+ },
+ "independent_combos": {
+  "all": 5,
+  "with_resting_ask": 4,
+  "none": 1,
+  "distinct_sets_week": 4,
+  "distinct_sets_with_ask": 3
+ },
+ "per_day": {
+  "2026-11-14": {
+   "independent": 0,
+   "with_ask": 0
+  },
+  "2026-11-15": {
+   "independent": 4,
+   "with_ask": 3
+  },
+  "2026-11-16": {
+   "independent": 1,
+   "with_ask": 1
+  },
+  "2026-11-17": {
+   "independent": 0,
+   "with_ask": 0
+  },
+  "2026-11-18": {
+   "independent": 0,
+   "with_ask": 0
+  },
+  "2026-11-19": {
+   "independent": 0,
+   "with_ask": 0
+  },
+  "2026-11-20": {
+   "independent": 0,
+   "with_ask": 0
+  }
+ },
+ "median_ask_cents": 70.0,
+ "book_figure": {
+  "eligible_in_books": 3,
+  "passing_book_test": 2,
+  "independent_by_book": 2
+ },
+ "verdict": "CLOSED: nothing to buy (4 independent combos with a resting ask, fewer than 30)"
+}

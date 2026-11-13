@@ -1,0 +1,31 @@
+{
+ "completed_runs_per_day": {
+  "2026-11-13": 3,
+  "2026-11-14": 40,
+  "2026-11-15": 40,
+  "2026-11-16": 40,
+  "2026-11-17": 40,
+  "2026-11-18": 40,
+  "2026-11-19": 40,
+  "2026-11-20": 29,
+  "2026-11-21": 1
+ },
+ "week": {
+  "first_day": "2026-11-14",
+  "last_day": "2026-11-20",
+  "completed_runs": 269,
+  "of": 336,
+  "pct": 80.06,
+  "run_folders_not_completed": 0,
+  "completed_with_list_complete": 269
+ },
+ "quote_rows": {
+  "in_week": 46,
+  "unreadable_left_out": 0,
+  "whole_leg_string": 44,
+  "whole_share": 0.9565,
+  "empty": 1,
+  "cut": 1
+ },
+ "verdict": "refused: the leg run did not ask for every leg the week names (1 missing)"
+}
