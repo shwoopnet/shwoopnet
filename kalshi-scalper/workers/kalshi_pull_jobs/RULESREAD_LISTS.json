@@ -1,0 +1,397 @@
+{
+ "job_id": "RULESREAD_LISTS",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/RULES_CLAUSE_CENSUS_NOV13.md",
+ "purpose": "Settlement-rules read (Idea Desk C): settled markets of 26 golf, motorsport and combat-sport series closing Aug 1 to Nov 12, 2026, for their rules text and counts of non-0/1 settlements, plus 3 fee-field reads. Owner MAIN: the runner lists no Desk C.",
+ "heldout": "none (a rules-text and count listing: no candle, no price path, no rule scored; results are read only as a count of non-0/1 settlements)",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  },
+  {
+   "name": "series",
+   "method": "GET",
+   "path_pattern": "/series/(?P<series>[A-Z0-9]{2,32})",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXPGATOP10",
+  "KXPGATOP40",
+  "KXPGAMAKECUT",
+  "KXPGAH2H",
+  "KXGOLFH2H",
+  "KXPGA3BALL",
+  "KXDPWTTOP10",
+  "KXDPWTTOP20",
+  "KXDPWORLDTOURMAKECUT",
+  "KXLIVTOP10",
+  "KXPGATOUR",
+  "KXGOLFTOURN",
+  "KXF1RACE",
+  "KXF1RACETOP10",
+  "KXF1H2H",
+  "KXNASCARRACEOLD",
+  "KXNASCARTOP5",
+  "KXNASCARTOP20",
+  "KXINDYCARTOP10",
+  "KXMOTOGPRACE",
+  "KXUFCFIGHT",
+  "KXUFCMOV",
+  "KXUFCDISTANCE",
+  "KXUFCROUNDS",
+  "KXBOXINGFIGHT",
+  "KXMMAFIGHT"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 90,
+ "requests": [
+  {
+   "id": "settled_KXPGATOP10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGATOP10",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXPGATOP40",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGATOP40",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXPGAMAKECUT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGAMAKECUT",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXPGAH2H",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGAH2H",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXGOLFH2H",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGOLFH2H",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXPGA3BALL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGA3BALL",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXDPWTTOP10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDPWTTOP10",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXDPWTTOP20",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDPWTTOP20",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXDPWORLDTOURMAKECUT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXDPWORLDTOURMAKECUT",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXLIVTOP10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXLIVTOP10",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXPGATOUR",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXPGATOUR",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXGOLFTOURN",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXGOLFTOURN",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXF1RACE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXF1RACE",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXF1RACETOP10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXF1RACETOP10",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXF1H2H",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXF1H2H",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNASCARRACEOLD",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNASCARRACEOLD",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNASCARTOP5",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNASCARTOP5",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXNASCARTOP20",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNASCARTOP20",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXINDYCARTOP10",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXINDYCARTOP10",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXMOTOGPRACE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMOTOGPRACE",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXUFCFIGHT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUFCFIGHT",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXUFCMOV",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUFCMOV",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXUFCDISTANCE",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUFCDISTANCE",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXUFCROUNDS",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXUFCROUNDS",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXBOXINGFIGHT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXBOXINGFIGHT",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "settled_KXMMAFIGHT",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXMMAFIGHT",
+    "status": "settled",
+    "min_close_ts": 1785542400,
+    "max_close_ts": 1794527999,
+    "limit": 1000
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "series_KXPGATOP10",
+   "path": "/series/KXPGATOP10",
+   "params": {}
+  },
+  {
+   "id": "series_KXF1RACETOP10",
+   "path": "/series/KXF1RACETOP10",
+   "params": {}
+  },
+  {
+   "id": "series_KXUFCFIGHT",
+   "path": "/series/KXUFCFIGHT",
+   "params": {}
+  }
+ ],
+ "notes": "DISPATCH (Head of R&D, Nov 13 01:58Z): behind POLGAPH's lists job. Pages: 26 lists at most 3 pages of 1,000 (78 pages) plus 3 series reads = 81 at most; cap 90 leaves headroom for 429 retries. Size estimate about 1.7 KB a market: golf head-to-head and 3-ball series may fill their 3 pages (about 5 MB each), the rest are small; expected 20 to 60 MB, worst case about 135 MB, under the 200 MB run cap. Window Aug 1 to Nov 12, 2026 is fixed and never extended. GOLF IS A SLOW FAMILY (about 45 tournaments a year) WITH NO FORWARD LOG: the most any golf clause can reach is the slow-family paper list, never the research bar; the same holds for UFC, boxing and motorsport events. Awards series are left out (no settlement inside the window).",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
