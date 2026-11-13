@@ -1,0 +1,2 @@
+SAMPLE OK: 48 markets; candle job would need 1 requests (cap 110) -> job written
+REFUSED: candle run manifest carries no job

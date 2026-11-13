@@ -1,0 +1,1 @@
+REFUSED: market KXTEMPNYCHS-26NOV0615-T42 lacks floor_strike
