@@ -16,3 +16,6 @@ Decision poll = the last poll at or before the look time, no more than 10 s earl
 
 ## Send list
 Cards file `DESK_A_SPX_CARDS_NOV13.md` (5ed61f6b, 35f590c0...) and this addendum, hashes in the message. Auditor B checks next. No scorer is written.
+
+## Dated line (Nov 13, 2026, the Head of R&D, 19:58Z): SPXOI1's limit
+The limit in SPXOI1's wheel spec line is the ask SEEN (+0.00), not ask + 0.01. OICORE's limit slip was switched off on main in PR 895, and SPXOI1 ports OICORE as it trades now. This replaces the "limit ask + 0.01 (OICORE's 1c)" wording above for SPXOI1; every other part of its spec line is unchanged.
