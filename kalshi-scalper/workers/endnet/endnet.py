@@ -21,13 +21,15 @@ The rule, as the card words it, with the readings this file PINS (to be written 
   - Quote: the candle whose end_ts equals the entry minute's end_ts, two-sided (0 < bid < ask < 100), nothing carried from another minute.
   - Buy YES at ask + 1 cent (at most 99) if the ask is 15 to 45 cents inclusive and ask - bid is at most 4 cents. One contract. Held to settlement.
   - Fee per contract: 7% x p x (1 - p) on 10 contracts, rounded UP to the cent on the order, divided by 10 (the standing convention).
-Standard library only. Exact arithmetic (integers and fractions); no float comparison against a registered line.
+Amended Nov 13, 2026 on the Head of R&D's rulings of the 14 ambiguities (items 2, 7, 11, 13 and the z line). Standard library only. Exact arithmetic (integers and fractions); no float comparison against a registered line.
 """
 import json
+import math
 import os
 import sys
 from datetime import datetime, timezone
 from fractions import Fraction
+from zoneinfo import ZoneInfo
 
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 from deskb_guard import refuse_all, refuse_heldout  # noqa: E402
@@ -42,6 +44,8 @@ ASK_LO, ASK_HI, SPREAD_MAX, SLIP, MAX_PAY = 15, 45, 4, 1, 99
 C = 10
 MIN_ENTRIES, PF_LINE, HALF_LINE = 150, Fraction(3, 2), Fraction(1)
 MEDIAN_ASK_LINE, MIN_PER_WEEK = 45, 6
+Z_BAR = 5.46                               # the research ledger's line at registration (N about 2.11 million), ENDNET adding 1; one-sided, day-clustered
+CT = ZoneInfo("America/Chicago")
 TAG = " [invented rows only, not a result]"
 
 
@@ -50,15 +54,20 @@ def ts(iso):
 
 
 def load(path, drop_result):
+    """Returns (games in the development window, the number of games that closed BEFORE it). A game closing on or after the held-out date stops the
+    whole run before any state is read; a game closing before the development window is counted and not used (Nov 13 ruling, item 13)."""
     refuse_heldout(path)
     games = json.load(open(path))
     for g in games:
-        if not ts(DEV_FROM) <= g["close_ts"] <= ts(DEV_TO):
-            sys.exit("REFUSED: game %s closes outside the development window (held-out starts %s)" % (g.get("game"), HELD_FROM))
-        if drop_result:
+        if g["close_ts"] > ts(DEV_TO):
+            sys.exit("REFUSED: game %s closes on or after the held-out date %s" % (g.get("game"), HELD_FROM))
+    early = [g for g in games if g["close_ts"] < ts(DEV_FROM)]
+    games = [g for g in games if g["close_ts"] >= ts(DEV_FROM)]
+    if drop_result:
+        for g in games:
             for s in g["strikes"]:
                 s.pop("result", None)          # stage 1 never holds a result
-    return games
+    return games, len(early)
 
 
 def fee_per_contract(pay):
@@ -77,29 +86,34 @@ def entry(g):
     cand = [s for s in g["strikes"] if 0 <= Fraction(str(s["floor_strike"])) - total < 1]
     if not cand:
         return "no strike one goal away", None
-    s = min(cand, key=lambda s: Fraction(str(s["floor_strike"])))
+    if len(cand) > 1:
+        return "ambiguous strike", None                 # item 7: the rule cannot choose, so it takes none
+    s = cand[0]
     c = next((c for c in s["candles"] if c["end_ts"] == st["end_ts"]), None)
     if c is None:
         return "no candle at the entry minute", None
     if not (0 < c["bid"] < c["ask"] < 100):
         return "not two-sided", None
+    seen = {"seen_ask": c["ask"]}                       # item 2: a state with a strike and a two-sided quote, before the band and spread
     if not ASK_LO <= c["ask"] <= ASK_HI:
-        return "ask out of band", None
+        return "ask out of band", seen
     if c["ask"] - c["bid"] > SPREAD_MAX:
-        return "spread too wide", None
+        return "spread too wide", seen
     pay = min(MAX_PAY, c["ask"] + SLIP)
-    return None, {"game": g["game"], "close_ts": g["close_ts"], "ask": c["ask"], "pay": pay, "ticker": s["ticker"], "result": s.get("result")}
+    return None, {"game": g["game"], "close_ts": g["close_ts"], "ask": c["ask"], "pay": pay, "ticker": s["ticker"], "result": s.get("result"), "seen_ask": c["ask"]}
 
 
 def run(games):
-    rows, skips = [], {}
+    rows, skips, seen = [], {}, []
     for g in games:
         why, r = entry(g)
         if why:
             skips[why] = skips.get(why, 0) + 1
         else:
             rows.append(r)
-    return rows, skips
+        if r and "seen_ask" in r:
+            seen.append(r["seen_ask"])
+    return rows, skips, seen
 
 
 def pct(x):
@@ -110,28 +124,41 @@ def money(x):
     return "%+.4f" % (float(x) + (1e-9 if x >= 0 else -1e-9))
 
 
+def median(v):
+    v = sorted(v)
+    n = len(v)
+    return None if not n else (Fraction(v[n // 2]) if n % 2 else Fraction(v[n // 2 - 1] + v[n // 2], 2))
+
+
 def cmd_measure(path):
-    games = load(path, True)
-    rows, skips = run(games)
+    games, early = load(path, True)
+    rows, skips, seen = run(games)
     print("ENDNET stage 1: how often the trigger fires and at what price; NO result read%s" % TAG)
-    print("games %d | entries %d | skipped %s%s" % (len(games), len(rows), ", ".join("%s %d" % kv for kv in sorted(skips.items())) or "none", TAG))
-    asks = sorted(r["ask"] for r in rows)
-    if asks:
-        n = len(asks)
-        med = Fraction(asks[n // 2]) if n % 2 else Fraction(asks[n // 2 - 1] + asks[n // 2], 2)
-        print("ask at entry: median %s cents | lowest %d | highest %d%s" % (("%.1f" % (float(med) + 1e-9)), asks[0], asks[-1], TAG))
+    print("games %d (and %d closed before the development window, not used) | entries %d | skipped %s%s" % (len(games), early, len(rows), ", ".join("%s %d" % kv for kv in sorted(skips.items())) or "none", TAG))
+    ms, me = median(seen), median([r["ask"] for r in rows])
+    if seen:
+        print("ask over every state with a strike and a two-sided quote (before the band and spread; THE KILL LINE READS THIS): median %s cents over %d states | lowest %d | highest %d%s" % ("%.1f" % (float(ms) + 1e-9), len(seen), min(seen), max(seen), TAG))
+    if rows:
+        print("ask over the entries made (information only): median %s cents | lowest %d | highest %d%s" % ("%.1f" % (float(me) + 1e-9), min(r["ask"] for r in rows), max(r["ask"] for r in rows), TAG))
     per_week = Fraction(len(rows), WEEKS)
     print("entries a week over the %d week development window: %s%s" % (WEEKS, ("%.2f" % (float(per_week) + 1e-9)), TAG))
-    if not rows:
-        print("STAGE 1: NOT_ENOUGH_DATA (no entry)%s" % TAG)
-    elif med > MEDIAN_ASK_LINE or per_week < MIN_PER_WEEK:
-        print("STAGE 1: CLOSED (median ask above %d cents: %s | fewer than %d entries a week: %s)%s" % (MEDIAN_ASK_LINE, med > MEDIAN_ASK_LINE, MIN_PER_WEEK, per_week < MIN_PER_WEEK, TAG))
+    if not seen:
+        print("STAGE 1: NOT_ENOUGH_DATA (no state with a quote)%s" % TAG)
+    elif ms > MEDIAN_ASK_LINE or per_week < MIN_PER_WEEK:
+        print("STAGE 1: CLOSED (median ask over every quoted state above %d cents: %s | fewer than %d entries a week: %s)%s" % (MEDIAN_ASK_LINE, ms > MEDIAN_ASK_LINE, MIN_PER_WEEK, per_week < MIN_PER_WEEK, TAG))
     else:
         print("STAGE 1: NOT CLOSED (a stage 2 registration may be written)%s" % TAG)
 
 
+def one_pnl(r):
+    fee = fee_per_contract(r["pay"])
+    if r["result"] == "void":
+        return -fee                                      # item 11: the price is refunded and the fee kept
+    return (Fraction(1) if r["result"] == "yes" else Fraction(0)) - Fraction(r["pay"], 100) - fee
+
+
 def stats(rs):
-    pnl = [(Fraction(1) if r["result"] == "yes" else Fraction(0)) - Fraction(r["pay"], 100) - fee_per_contract(r["pay"]) for r in rs]
+    pnl = [one_pnl(r) for r in rs]
     win = sum(p for p in pnl if p > 0)
     loss = -sum(p for p in pnl if p < 0)
     pf = None if loss == 0 else win / loss
@@ -145,12 +172,32 @@ def fmt(name, rs):
     return "%s: n %d | wins %d | net %s | mean %s | cash PF %s" % (name, n, w, money(net), money(net / n), "no losses" if pf is None else "%.2f" % (float(pf) + 1e-9))
 
 
+def day_z(rs):
+    """Day-clustered z of the mean net per entry, one-sided; the cluster is the US Central calendar date of the close. Information beside the bar."""
+    pnl = [float(one_pnl(r)) for r in rs]
+    n = len(pnl)
+    if n < 2:
+        return None
+    mean = sum(pnl) / n
+    clusters = {}
+    for r, p in zip(rs, pnl):
+        d = datetime.fromtimestamp(r["close_ts"], CT).date()
+        c = clusters.setdefault(d, [0, 0.0])
+        c[0] += 1
+        c[1] += p - mean
+    se = math.sqrt(sum(v * v for _, v in clusters.values())) / n
+    return None if se == 0 else mean / se
+
+
 def cmd_score(path):
-    games = load(path, False)
-    rows, skips = run(games)
-    settled = [r for r in rows if r["result"] in ("yes", "no")]
+    games, early = load(path, False)
+    rows, skips, _ = run(games)
+    settled = [r for r in rows if r["result"] in ("yes", "no", "void")]
+    unsettled = len(rows) - len(settled)
     print("ENDNET stage 2 on DEVELOPMENT rows only%s" % TAG)
-    print("games %d | entries %d | settled %d | skipped %s%s" % (len(games), len(rows), len(settled), ", ".join("%s %d" % kv for kv in sorted(skips.items())) or "none", TAG))
+    print("games %d (and %d closed before the development window, not used) | entries %d | settled %d (a void counts: fee-only loss) | unsettled %d | skipped %s%s" % (len(games), early, len(rows), len(settled), unsettled, ", ".join("%s %d" % kv for kv in sorted(skips.items())) or "none", TAG))
+    if unsettled:
+        print("FLAG: %d entries have no result and every one closed before the end of the development window%s" % (unsettled, TAG))
     h1 = [r for r in settled if r["close_ts"] < ts(HALF_FROM)]
     h2 = [r for r in settled if r["close_ts"] >= ts(HALF_FROM)]
     for name, rs in (("development", settled), ("first half", h1), ("second half", h2)):
@@ -164,6 +211,8 @@ def cmd_score(path):
         v = "FALSIFIED (cash PF line %.1f, both halves at %.1f, net above 0)" % (float(PF_LINE), float(HALF_LINE))
     else:
         v = "SURVIVES DEVELOPMENT (the held-out is a later, reviewed read; nothing here is approved)"
+    z = day_z(settled)
+    print("day-clustered z (US Central game day, one-sided, mean net per entry): %s against the ledger bar %.2f%s" % ("n/a" if z is None else "%.2f" % (z + 1e-9 if z >= 0 else z - 1e-9), Z_BAR, TAG))
     print("VERDICT: %s%s" % (v, TAG))
 
 

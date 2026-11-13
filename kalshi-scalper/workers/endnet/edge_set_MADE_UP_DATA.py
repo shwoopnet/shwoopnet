@@ -55,5 +55,18 @@ def build():
     return out
 
 
+def build2():
+    """EDGE2: the 18 games above plus an ambiguous-strike game and an early-closing game (Nov 13 rulings, items 7 and 13)."""
+    out = build()
+    close = D0 + 19 * 86400; e = close - 600
+    out.append(g(19, "a19_ambiguous", [m(e - 60, 3, 240, 3, 2), m(e, 3, 170, 3, 2)],
+                 [{"ticker": "a19-A", "floor_strike": 5.0, "result": "yes", "candles": [cd(e, 28, 30)]},
+                  {"ticker": "a19-B", "floor_strike": 5.5, "result": "yes", "candles": [cd(e, 28, 30)]}]))
+    close = int(datetime(2026, 11, 10, 2, 0, tzinfo=timezone.utc).timestamp()); e = close - 600
+    out.append({"game": "a20_early_close", "close_ts": close, "minutes": [m(e, 3, 170, 3, 2)],
+                "strikes": [{"ticker": "a20-T", "floor_strike": 5.5, "result": "yes", "candles": [cd(e, 28, 30)]}]})
+    return out
+
+
 if __name__ == "__main__":
-    json.dump(build(), open(sys.argv[1], "w"))
+    json.dump(build2() if len(sys.argv) > 2 and sys.argv[2] == "edge2" else build(), open(sys.argv[1], "w"))
