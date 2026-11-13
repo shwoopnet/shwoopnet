@@ -675,3 +675,10 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - Build 2's rows builder: Forensics, with its own identical ES query. Both sides print a canonical-extract sha256, which must match.
   - Development go waits on the KXINX15M runs landing (the jobs PR, the owner's merge), Auditor B's structure check and the builder audit.
 - 16:56Z: 11 AM CT count line sent to the EA, plus an addendum (4 unique against the floor of 5: TEMPBLEND, ENDNET, GASCYCLE, plus SPXFV1 awaiting its uniqueness score). The Verification Analyst is asked to score SPXFV1.
+- 16:59Z, SPXFV1 CLOSED UNREAD (the Head's ruling on the VA's check 4).
+  - The family (Kalshi quote against an outside fair value, held to settlement) already has four FALSIFIED pre-registered tests: GOLDFV1, INX1, H7, CMD1. So it is DECLINED for good under the owner's Nov 11 effort stop, and SPXFV1 is a same-family variant rejected at intake. No KXINX15M or futures value was opened; the try is counted; about $0.01 of Databento was spent.
+  - The Head's miss: the family check should have come before the builds were assigned.
+  - Builds stopped, and the Forensics rows builder cancelled.
+  - Raised to the EA for the owner: an S&P-only exception (Head advises no), and whether CFRTI-K (same family, held-out read frozen from Nov 14) finishes or closes (Head advises close).
+  - The count is corrected to 3 unique against the floor of 5.
+  - SPXOI1 and PR 903 stand. Desk A is hunting different KXINX15M fields.
