@@ -1,6 +1,6 @@
 # NC15 depth-cell wheel replay: independent second scorer (Forensics desk)
 
-**Written Nov 13, 2026, about 02:05Z, on the Head of R&D's order of 01:49Z.** Built from Desk A's frozen definition sheet v4 alone (`claude/idea-desk-a` at `8679f760`,
+**Written Nov 13, 2026, about 02:02Z, on the Head of R&D's order of 01:49Z.** Built from Desk A's frozen definition sheet v4 alone (`claude/idea-desk-a` at `8679f760`,
 `DESK_A_FROZEN_WHEEL_DEFINITIONS_NOV13.md`, sha256 `c53d2b9f...`, sections 0, 2 and 3) and, for the block, `ROTATION_LANE.md` v1.2 section 4 on `rnd-queue`.
 Desk A's `nc15_wheel_replay.py` (sha256 `b44c1d8f...` at `fc53341c`) was not read. No real NC15 row was opened: the scorer is default closed and ran on invented rows only.
 Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has been looked at.
@@ -39,7 +39,7 @@ so the two builds can be compared signal by signal and not only on the block lin
 
 Invented rows; the figures mean nothing about any market. The comparison with Desk A's scorer on the same rows is the next step.
 
-## Compared with Desk A's scorer, record by record (Nov 13, about 02:15Z)
+## Compared with Desk A's scorer, record by record (Nov 13, about 02:07Z)
 
 Desk A's scorer (`nc15_wheel_replay.py`, sha256 `b44c1d8f...`) was run by me, unread, from a checkout of `claude/idea-desk-a` at `fc53341c`, through its record printer:
 `python3 -I desk_a_verify/nc15_wheel_replay_records.py <dir> 2026-12-23T00:00:00Z`. `nc15_wheel_compare.py` reads its printed lines and my records file.
