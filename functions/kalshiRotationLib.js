@@ -59,7 +59,7 @@ const ALERT_PF60 = 0.7, ALERT_EARLY_SELLS = 3, ALERT_EARLY_WINDOW = 40; // 6 ale
 const LUCKY_RATE = 0.04, LUCKY_RATE_FAV = 0.05; // 9.2
 // Slot caps today (5.1): fractions of the sizing base with fixed ceilings, in cents.
 // COPIED from the slot library file (SLOT_CAP_FRACTIONS and SLOT_CAP_CEILINGS in dollars, here in cents). This module requires nothing, so a drift gate in the TEST compares them (RR_CAPS).
-const SLOT_CAPS = Object.freeze({ order: [0.025, 2000], window: [0.02, 4000], open: [0.03, 6000], day: [0.025, 2000], lifetime: [0.075, 6000] });
+const SLOT_CAPS = Object.freeze({ order: [0.025, 2000], window: [0.04, 4000], open: [0.05, 6000], day: [0.025, 2000], lifetime: [0.075, 6000] });
 const ACCOUNT_STOP_FRACTION = 0.12;       // 8.2 the shared 12 percent account stop
 
 // ---- small pure helpers -----------------------------------------------------------------------------------------------------------------------------------------------

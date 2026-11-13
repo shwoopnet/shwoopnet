@@ -178,7 +178,7 @@ gates['slot and L1 share one window limit: L1 spend in a window shrinks what the
 gates['hard caps hold: contracts per order, open per market, depth share, dollars per order, window and total'] = () => {
   const big = Object.assign(GOOD(), { contractsPerOrder: 10, scaleIn: { maxSteps: 1, minGapSec: 60, sameSideOnly: true, requirePriorFilled: true } });
   const F = { enabled: true, registry: [big] };
-  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 250 })).count, 7, 'cut by the $5 window cap (base 250, 2%): 7 contracts at about $0.65');
+  assert.strictEqual(W(F, input({ limit: 0.62, wanted: 50, depthAtTouch: 1000, sizingBase: 250 })).count, 9, 'cut by the $6.25 per order cap (base 250, 2.5%): 9 contracts at about $0.65; the window cap (4%, $10) is now looser than the per order cap, so it no longer binds a single order');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 20, sizingBase: 500 })).count, 5, 'depth share 25% of 20');
   assert.strictEqual(W(F, input({ limit: 0.62, depthAtTouch: 3, sizingBase: 500 })).allowed, false, '25% of 3 is under one contract');
   assert.strictEqual(W(F, input({ depthAtTouch: null })).allowed, false, 'unknown depth refuses');
@@ -187,8 +187,8 @@ gates['hard caps hold: contracts per order, open per market, depth share, dollar
   const two = Object.assign(GOOD(), { contractsPerOrder: 5 });
   const r = W({ enabled: true, registry: [two] }, input({ step: 2, limit: 0.62, depthAtTouch: 1000, sizingBase: 500, slotOrders: [slotOrder({ count: 6, fillCount: '6', maxCost: 1.0 })] }));
   assert.strictEqual(r.allowed, true); assert.strictEqual(r.count, 4, 'open per market is 10: six held leaves four');
-  const tot = [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', series: 'KXETH15M', maxCost: 11.5, count: 1, fillCount: '1', side: 'yes' })];
-  assert.strictEqual(W(ON(), input({ slotOrders: tot, sizingBase: 400 })).allowed, false, 'total open cap $12 (base 400) leaves $0.50, under one contract at 75c');
+  const tot = [slotOrder({ ticker: 'KXETH15M-26NOV031030-30', series: 'KXETH15M', maxCost: 19.5, count: 1, fillCount: '1', side: 'yes' })];
+  assert.strictEqual(W(ON(), input({ slotOrders: tot, sizingBase: 400 })).allowed, false, 'total open cap $20 (base 400) leaves $0.50, under one contract at 75c');
 };
 gates['the slot has its own daily and lifetime loss caps on top of the shared stop'] = () => {
   // A list of settled pnls in time order, each on its own market, ending `endAgo` ms ago. Wins are interleaved so the consecutive-loss kill rule is not what stops the order.
@@ -206,7 +206,7 @@ gates['caps scale with the sizing base, never pass their ceilings, and an unusab
   const a = slot.slotCaps(250), d = slot.slotCaps(500);
   for (const k of keys) assert.ok(Math.abs(d[k] - 2 * a[k]) < 1e-9, k + ' doubles when the base doubles (below its ceiling)');
   assert.deepStrictEqual([a.daily, a.lifetime, a.perOrder], [6.25, 18.75, 6.25], 'base 250');
-  assert.deepStrictEqual([slot.slotCaps(400).perWindow, slot.slotCaps(400).openTotal], [8, 12], 'base 400');
+  assert.deepStrictEqual([slot.slotCaps(400).perWindow, slot.slotCaps(400).openTotal], [16, 20], 'base 400 (window 4%, open total 5%)');
   for (const b of [1e3, 1e4, 1e6, 1e12, Number.MAX_VALUE]) for (const k of keys) assert.ok(slot.slotCaps(b)[k] <= slot.SLOT_CAP_CEILINGS[k] + 1e-9, k + ' stays under its ceiling at base ' + b);
   for (const k of keys) assert.strictEqual(slot.slotCaps(1e9)[k], slot.SLOT_CAP_CEILINGS[k], k + ' sits at its ceiling for a huge base');
   for (const bad of [0, -500, NaN, Infinity, '500', null, undefined, {}]) {
@@ -446,7 +446,7 @@ gates['H10 any order with fills counts as money whatever its status, and an exit
   const lossNull = slotOrder({ settled: true, result: 'no', settledPnl: null, maxCost: 5, count: 4, fillCount: '4' });
   assert.ok(Math.abs(slot.slotRiskForBotRisk([lossNull], 0).net + 5) < 1e-9, 'a settled loss with a null pnl is derived from its result, not zero');
   assert.strictEqual(slot.directionDecision({ ticker: T, side: 'no', l1Orders: [], slotOrders: [odd], lock: null, position: 0 }).allow, false, 'an errored order with fills still holds its side');
-  assert.strictEqual(W(ON(), input({ sizingBase: 250, slotOrders: [slotOrder({ status: 'error', fillCount: '4', maxCost: 5.0, step: 7 })], limit: 0.75 })).allowed, false, 'and its dollars are in the caps');
+  assert.strictEqual(W(ON(), input({ sizingBase: 250, slotOrders: [slotOrder({ status: 'error', fillCount: '8', maxCost: 10.0, step: 7 })], limit: 0.75 })).allowed, false, 'and its dollars are in the caps');
 };
 
 gates['H11 parity: the same fixture orders give the same net, open cost, worst and trades through botRisk and slotRiskForBotRisk'] = async () => {
@@ -476,15 +476,22 @@ gates['H12 direction normalises ticker and status case and treats any fills as h
   for (const bad of ['YES', ' yes', 'bid', 'ask', undefined, null]) assert.strictEqual(d({ l1Orders: [l1Order({ side: bad })] }).allow, false, 'side ' + bad);
 };
 
-gates['H13 the slot cannot take the whole window: half the shared cap at most, and one L1 contract of room always stays'] = () => {
+gates['H13 the slot cannot take the whole window: three quarters of the shared cap at most, and one L1 contract of room always stays'] = () => {
   const fav = Object.assign(GOOD(), { entry: { sideRule: 'favourite', priceMin: 0.5, priceMax: 0.9, leftMaxSec: 700, leftMinSec: 300 }, contractsPerOrder: 5 });
   const r = W({ enabled: true, registry: [fav] }, input({ sizingBase: 100, limit: 0.8 }));
   assert.ok(r.allowed, r.reasons.join());
-  assert.ok(r.cost <= 0.055 * 100 * slot.SLOT_WINDOW_SHARE + 1e-9, 'at most half the window: ' + r.cost);
+  assert.ok(r.cost <= 0.055 * 100 * slot.SLOT_WINDOW_SHARE + 1e-9, 'at most three quarters of the window: ' + r.cost);
   assert.ok(0.055 * 100 - r.cost >= slot.SLOT_L1_RESERVE, 'a gold contract of room is left for L1');
   assert.ok(slot.SLOT_L1_RESERVE >= 0.97, 'the reserve covers a 97c contract');
   const tiny = W({ enabled: true, registry: [fav] }, input({ sizingBase: 20, limit: 0.8 }));
   assert.strictEqual(tiny.allowed, false, 'a small base leaves no room for the slot at all');
+};
+
+gates['two trial seats of 3 contracts (about $2.3 each) both fit in one shared window at base 250 (window 4%, open total 5%)'] = () => {
+  const seat = Object.assign(GOOD(), { contractsPerOrder: 3 });
+  const first = slotOrder({ ticker: 'KXETH15M-26NOV031030-30', series: 'KXETH15M', count: 3, fillCount: '3', maxCost: 2.3, side: 'yes', slotId: 'TESTB' });
+  const r = W({ enabled: true, registry: [seat] }, input({ sizingBase: 250, limit: 0.75, slotOrders: [first] }));
+  assert.ok(r.allowed && r.count === 3, 'second seat sends all 3: ' + JSON.stringify(r));
 };
 
 gates['H14 the inertness gate itself catches env reads, randomness, timers and nested imports'] = () => {
