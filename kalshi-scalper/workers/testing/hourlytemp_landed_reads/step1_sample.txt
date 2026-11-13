@@ -1,0 +1,1 @@
+SAMPLE OK: 6720 markets; candle job would need 129 requests (cap 140) -> job written
