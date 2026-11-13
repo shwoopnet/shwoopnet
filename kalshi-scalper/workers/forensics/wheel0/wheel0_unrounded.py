@@ -2,9 +2,9 @@
 """WHEEL0: the unrounded companion to the frozen scorer (Forensics desk, Nov 13, 2026; the Head of R&D's ruling of 15:36Z, standing rule 16b: a bar is decided on UNROUNDED figures).
 `wheel0.py` (sha256 10a7b363...) is frozen and prints PF to 3 decimals and D and both p to 4. This file imports it, changes nothing in it, and recomputes the three verdict figures
 (profit factor after HOT, D, the bootstrap p, the null-calibrated p) from the SAME orders with the SAME functions and seeds, unrounded, printing them beside the rounded ones, with a flag when a figure lies
-within rounding of its bar (PF within 0.0005 of 1.0 or 1.15; D within 0.00005 of 0; either p within 0.00005 of 0.05) and the verdict taken on the UNROUNDED figures. It reads no result before the same
+within 0.001 of its bar (the same window for every bar figure: PF against 1.0 and 1.15, D against 0, each p against 0.05; AUDIT_PREP step 8) and the verdict taken on the UNROUNDED figures. Where a figure is flagged, 'exact' means exact to the frozen scorer's own 1e-9 EPS (wheel0.py line 30): both builds decide that bar in exact arithmetic with that tolerance. It reads no result before the same
 precondition as the scorer's own run (not before 2026-11-14T00:00Z and the DEPTH1 marker line), refuses any run listed in HELDOUT_PULL_RUNS.md (listed_runs_guard) and prints its own and the scorer's sha256.
-usage: python3 -I wheel0_unrounded.py run --lists <run...> --candles <run...> --out <new json file>       (same inputs as the scorer's run; not run before the Head's go)
+usage: python3 -I wheel0_unrounded.py run --lists <run...> --candles <run...> --out <new json file> --go <the Head's go line>       (same inputs and the same go line as the scorer's run; not run before the Head's go)
        python3 -I wheel0_unrounded.py selftest                                                           (made-up data only: the unrounded figures must round to the scorer's own printed figures)"""
 import sys, os, json, hashlib, collections, random, time, math, importlib.util
 
@@ -55,6 +55,9 @@ def null_unrounded(W, orders, fair, d_rounded, d_unrounded, reps=None):
     return pr, pu, len(ds)
 
 
+NEAR = 0.001                                                                  # one window for every bar figure (AUDIT_PREP step 8; the Head, Nov 13)
+
+
 def near(v, bar, tol): return v is not None and abs(v - bar) <= tol
 
 
@@ -69,17 +72,17 @@ def unrounded_report(W, orders, fair, reps=None):
     pvp = {"hot_pairs": u["hot_pairs"], "pf_after_hot": printed["pf_after_hot"], "D_dollars_per_order_of_10": printed["D"], "D_one_sided_p_day_bootstrap": printed["p_boot"]}
     verdict_printed = W.verdict(pvp, printed["p_null"])
     flags = []
-    if near(u["pf_after_hot"], 1.0, 0.0005) or near(u["pf_after_hot"], W.VERDICT_PF, 0.0005): flags.append("pf_after_hot within 0.0005 of 1.0 or 1.15")
-    if near(u["D"], 0.0, 0.00005): flags.append("D within 0.00005 of 0")
+    if near(u["pf_after_hot"], 1.0, NEAR) or near(u["pf_after_hot"], W.VERDICT_PF, NEAR): flags.append("pf_after_hot within 0.001 of 1.0 or 1.15")
+    if near(u["D"], 0.0, NEAR): flags.append("D within 0.001 of 0")
     for nm, v in (("p_boot", u["p_boot"]), ("p_null", p_null_unr)):
-        if near(v, W.VERDICT_P, 0.00005): flags.append("%s within 0.00005 of 0.05" % nm)
+        if near(v, W.VERDICT_P, NEAR): flags.append("%s within 0.001 of 0.05" % nm)
     return {"hot_pairs": u["hot_pairs"], "orders": u["orders"],
             "pf_after_hot": {"unrounded": u["pf_after_hot"], "printed_by_scorer": printed["pf_after_hot"]}, "D": {"unrounded": u["D"], "printed_by_scorer": printed["D"]},
             "p_bootstrap": {"unrounded": u["p_boot"], "printed_by_scorer": printed["p_boot"]},
             "p_null": {"unrounded_against_unrounded_D": p_null_unr, "against_the_rounded_D_as_the_scorer_does_unrounded": p_null_as_scorer, "printed_by_scorer": printed["p_null"], "reps": nrep},
             "interval_95_unrounded": u["interval"], "near_a_bar": flags, "verdict_on_unrounded_figures": verdict_unrounded, "verdict_the_scorer_prints": verdict_printed,
             "verdicts_agree": verdict_unrounded == verdict_printed,
-            "note": "Standing rule 16b: the recorded verdict is the one on the unrounded figures. If a figure is near a bar the flag says so and both builds decide in exact arithmetic."}
+            "near_a_bar_window": NEAR, "note": "Standing rule 16b: the recorded verdict is the one on the unrounded figures. If a figure is within 0.001 of a bar the flag says so and both builds decide that bar in exact arithmetic, where exact means exact to the frozen scorer's 1e-9 EPS."}
 
 
 def selftest():
@@ -100,13 +103,18 @@ def selftest():
     # the flag and the decision on a planted near-bar case: a figure that rounds onto the bar but sits just past it
     pv = {"hot_pairs": 40, "pf_after_hot": 1.14996, "D_dollars_per_order_of_10": 0.3, "D_one_sided_p_day_bootstrap": 0.03}
     chk("a PF of 1.14996 prints as 1.150 and passes the 1.15 bar rounded, but fails it unrounded (the case 16b exists for)", round(1.14996, 3) >= 1.15 - W.EPS and W.verdict(pv, 0.04).startswith("no evidence") and W.verdict(dict(pv, pf_after_hot=round(1.14996, 3)), 0.04) == "PREMISE SUPPORTED")
-    chk("near-bar flags fire inside the rounding window and not outside it", near(1.14996, 1.15, 0.0005) and not near(1.152, 1.15, 0.0005) and near(0.050004, 0.05, 0.00005) and not near(0.0502, 0.05, 0.00005) and near(0.00003, 0.0, 0.00005))
+    chk("near-bar flags use one window, 0.001, for PF, D and p: inside it they fire, outside they do not", near(1.1496, 1.15, NEAR) and not near(1.152, 1.15, NEAR) and near(0.0505, 0.05, NEAR) and not near(0.0512, 0.05, NEAR) and near(0.0009, 0.0, NEAR) and not near(0.0011, 0.0, NEAR))
+    def _try(argv):
+        try: run(argv); return "ran"
+        except SystemExit as e: return str(e)
+    r1_, r2_ = _try(["--out", "/tmp/_unr_never_written.json"]), _try(["--go", "x"])
+    chk("the run is refused without --go and without --out, before anything is read or written", "--go" in r1_ and "--out" in r2_ and not os.path.exists("/tmp/_unr_never_written.json"), (r1_[:50] + " | " + r2_[:50]))
     print("\n%d checks, %d FAIL; wheel0.py sha256 %s" % (len(ok), sum(1 for x in ok if not x), h[:16])); return 0 if all(ok) else 1
 
 
 def run(argv):
     W, h = load_scorer(); a = W._args(argv)
-    if not a["out"]: raise SystemExit("refused: --out <new file> is required; the read is made once")
+    if not a["go"] or not a["out"]: raise SystemExit("refused: the run needs --go <the Head of R&D's go line> and --out <new file>; the read is made once")
     if os.path.exists(a["out"][0]): raise SystemExit("refused: %s exists" % a["out"][0])
     why = W.precondition(time.time(), open(W.MARKER_FILE).read() if os.path.exists(W.MARKER_FILE) else "")
     if why: raise SystemExit(why)
@@ -114,7 +122,7 @@ def run(argv):
     for f in a["lists"] + a["candles"]: refuse_listed(f)
     src, lh = listed_source()
     drop, dsha = W.load_drop_table(); mk, c1 = W.read_markets(a["lists"], with_result=True); cd = W.read_candles(a["candles"], mk); od, c2 = W.orders_from_candles(mk, cd, drop); fair = W.fair_yes(mk, cd)
-    res = {"companion_of": "wheel0.py", "scorer_sha256": h, "this_file_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(), "drop_table_sha256": dsha, "list_copy": os.path.relpath(src), "list_copy_sha256": lh,
+    res = {"companion_of": "wheel0.py", "go": " ".join(a["go"]), "scorer_sha256": h, "this_file_sha256": hashlib.sha256(open(os.path.abspath(__file__), "rb").read()).hexdigest(), "drop_table_sha256": dsha, "list_copy": os.path.relpath(src), "list_copy_sha256": lh,
            "markets": len(mk), "market_counts": c1, "candle_signal_counts": c2, "pooled": unrounded_report(W, od, fair)}
     json.dump(res, open(a["out"][0], "w"), indent=1, default=str); print(json.dumps(res["pooled"], indent=1, default=str)); return 0
 
