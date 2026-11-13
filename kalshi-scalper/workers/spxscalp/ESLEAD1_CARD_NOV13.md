@@ -13,3 +13,12 @@ The correlation peak is at lag 0, so no lead. The test passes the prediction onl
 
 ## Data and handling
 KXINX15M candles (landing, SPXOI1_CANDLES) and the ES 1 minute bars for Nov 5 to 12 held in the Testing Desk's scratch. The ES bars are Databento-derived: no ES value, figure or derived row is ever written to this repo or any branch; the card only names the source. The scorer takes the ES path as an argument, writes no ES-derived file, and results go by message only (a correlation table is a derived figure and is sent by message, not committed). The scorer must be frozen (commit and sha256) and audited CLEAN by Auditor B, with hand-computed expected figures on a made-up fixture written first, before any landed file is opened.
+
+## Amendment 1 (Nov 13, 2026, before any data is opened): align with CFRTI-K's table format
+Desk A sent the exact format (text only, from `lead_lag` in `desk_a_verify/cfrti_k.py`). ESLEAD1 follows it, with these fixed choices:
+- Series A = KXINX15M YES mid (mean of yes bid close and yes ask close), series B = ES 1 minute close. Timestamps are whole minutes; the intersection of timestamps present in both is computed once, per window, not per lag.
+- Changes: A's change is the plain difference mid(t) - mid(t-60 s) (a probability, not a price level, so no log); B's is the log change ln(ES(t)/ES(t-60 s)). The 60 s lookback is taken from the whole series, not from the intersection.
+- Lag k pairs (dA[t], dB[t - 60k]). Positive lag = A (Kalshi) LAGS ES; negative = Kalshi leads. This is the same sign as the first version of this card (a positive peak lag means ES leads) and is stated beside the figure.
+- Lags stay -3 to +3 (as registered; CFRTI-K printed -2 to +2). A lag with fewer than 30 pooled pairs is "n/a", a zero variance is "n/a". The fixture is run with the floor lowered to 3 by an argument, and the real run uses 30.
+- Printed: CFRTI-K's one line with %+d lags and %.3f values, then (the card's own addition, since CFRTI-K did not print it) the pair count per lag. Pooled over windows before correlating.
+- The prediction (peak at lag 0, no lead) is unchanged. EXPECTED_ESLEAD1_fixture.md is rewritten for log changes in the same commit.
