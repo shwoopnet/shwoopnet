@@ -1,0 +1,120 @@
+{
+ "ambiguities": [
+  "R1 levels: yes_bid_px_1 and no_bid_px_1 are read as each side's BEST bid (the recorder's parse order is not stated in the registrations). YES ask = 1 - no_bid_px_1; NO ask = 1 - yes_bid_px_1; a side's own bid is yes_bid_px_1 or no_bid_px_1. An empty or 0 bid means no bid; a side whose ask needs a missing opposite bid has no ask and is not a candidate.",
+  "R2 cheaper side: the side with the lower own ask at t0; a tie (within 1e-9) is not stated: provisional YES.",
+  "R3 V2 spread test: YES spread = YES ask - YES bid at t0, both needed; 10c or less inclusive (1e-9). V1 has no spread test.",
+  "R4 band: the cheaper side's ask at t0 in [0.05, 0.50] inclusive (1e-9).",
+  "R5 t0 and cancel: t0 = the first book row of that ticker with t_recv_ms at or after close minus 178 s (V1) or 180 s (V2); the cancel row = the first with t_recv_ms at or after close minus 120 s; the rest is the open interval (t0 recv, cancel recv). No cancel row: the rest runs to close minus 120 s.",
+  "R6 fill (a), trades: created_time strictly after t0's recv and strictly before the cancel time. Buying YES at P fills on a trade with taker_outcome_side 'no' (a taker selling YES) at yes_price < P; buying NO at cost Q fills on taker_outcome_side 'yes' at yes_price > 1 - Q; strict, 1e-9. The registration says 'a taker sold YES' and 'a taker bought YES'; reading the taker side from taker_outcome_side is provisional.",
+  "R7 fill (b), book: a book row of the ticker strictly after t0 and strictly before the cancel row whose ask for our side is at or below our price (1e-9).",
+  "R8 parent price and fees: taker fill at the ask at t0; per contract pnl = (1 - p - fee) or (-p - fee), fee 0.07 p (1 - p) unrounded at p = the ask; +1c adds 0.01 to the cost (the fee stays at the ask). Version: fill at our bid, fee at 25% (primary), 0% and 100% of 0.07 p (1 - p) at our bid, unrounded.",
+  "R9 results: the coverage.csv 'result' of the ticker (yes or no); a window with no such result is counted and left out of every PF (no void rule is stated in these registrations).",
+  "R10 blocks: by close_ts, the registration's constants, both ends inclusive as written (through ...T23:59:59Z).",
+  "R11 halves: the block's scored windows in close order, split by count, the first half floor(n/2) windows; the comparison in bar (3) is (version PF minus parent PF at +1c) in each half, second not below first.",
+  "R12 net per contract-week: block net divided by the number of 7 day blocks from the block start to its end, rounded up; the same denominator for version and parent.",
+  "R13 FALSIFIED's 'filled windows' PF' is read as the PARENT's PF on the windows the version filled (+1c), against the parent's PF on the missed windows (+1c).",
+  "R14 PF: gross gain over gross loss; inf with no loss; tested unrounded; a set with no bet has no PF and fails any PF line.",
+  "R15 guards: V1 dev refuses without the DEPTH1 marker file; each (version, block) runs once (a marker); forward refused before its read date; hm_guard on every path."
+ ],
+ "block": "dev",
+ "counts": {
+  "band test fails": 1,
+  "filled": 2,
+  "no order (no bid)": 1,
+  "not filled": 2,
+  "outside_block": 1
+ },
+ "registrations": "V1 fc528cd3, V2 4221ab37",
+ "report": {
+  "bar": {
+   "at_least_60_fills": false,
+   "net_per_week_not_lower": false,
+   "pf_beats_parent_by_0_10": true,
+   "second_half_not_worse": true
+  },
+  "falsified": true,
+  "fill_rate": 0.5,
+  "fills": 2,
+  "half_diff_first": 0.0,
+  "half_diff_second": 0.0,
+  "orders": 4,
+  "parent_net_per_week": 0.187539,
+  "parent_pf_p0": 1.71141,
+  "parent_pf_p1": 1.631352,
+  "parent_pf_p1_on_filled": 2.105468,
+  "parent_pf_p1_on_missed": 1.331517,
+  "signals": 5,
+  "verdict": "FALSIFIED",
+  "version_net_per_week": 0.171224,
+  "version_pf_0": 2.857143,
+  "version_pf_100": 2.681971,
+  "version_pf_25": 2.811715,
+  "weeks": 3
+ },
+ "version": "V1",
+ "windows": [
+  {
+   "ask": 0.25,
+   "close_ts": 1793534400,
+   "filled": true,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": 0.736875,
+   "parent_p1": 0.726875,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-W1",
+   "won": true
+  },
+  {
+   "ask": 0.25,
+   "close_ts": 1793620800,
+   "filled": false,
+   "limit": 0.2,
+   "order": true,
+   "parent_p0": 0.736875,
+   "parent_p1": 0.726875,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-W2",
+   "won": true
+  },
+  {
+   "ask": 0.32,
+   "close_ts": 1793707200,
+   "filled": true,
+   "limit": 0.28,
+   "order": true,
+   "parent_p0": -0.335232,
+   "parent_p1": -0.345232,
+   "side": "no",
+   "status": "signal",
+   "ticker": "KXBTC15M-W3",
+   "won": false
+  },
+  {
+   "ask": 0.2,
+   "close_ts": 1793880000,
+   "order": false,
+   "parent_p0": -0.2112,
+   "parent_p1": -0.2212,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-W5",
+   "won": false
+  },
+  {
+   "ask": 0.3,
+   "close_ts": 1794052800,
+   "filled": false,
+   "limit": 0.25,
+   "order": true,
+   "parent_p0": -0.3147,
+   "parent_p1": -0.3247,
+   "side": "yes",
+   "status": "signal",
+   "ticker": "KXBTC15M-W7",
+   "won": false
+  }
+ ]
+}
