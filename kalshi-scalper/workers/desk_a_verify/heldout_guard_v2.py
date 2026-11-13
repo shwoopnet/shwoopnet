@@ -1,12 +1,12 @@
 """Standing rule (h), version 2 (Desk A, Nov 13, 2026, on the Head of R&D's ask after Auditor B's finding): heldout_guard.py checks only HELDOUT_ folder names; a pull run folder never has one. This file ALSO refuses any run listed in HELDOUT_PULL_RUNS.md (the copy beside the workers folder; re-copy it from main when main's list changes), matched by the run folder name as typed AND after links resolve, and refuses EVERYTHING if the list cannot be read or holds no run.
 NOT imported by anything yet: the DEPTH1 chain files import heldout_guard.py and are byte-frozen until the read, so the swap (import this file's refuse_heldout in place of the old one) waits for the Head and Auditor B.
   python3 -I heldout_guard_v2.py selftest"""
-import os, re, sys, tempfile
+import hashlib, os, re, sys, tempfile
 LIST = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "HELDOUT_PULL_RUNS.md")
 def listed_runs(list_path=None):
     try:
-        text = open(list_path or LIST, encoding="utf-8").read()
-    except OSError:
+        raw = open(list_path or LIST, "rb").read(); text = raw.decode("utf-8")
+    except (OSError, UnicodeDecodeError):
         raise SystemExit("REFUSED: HELDOUT_PULL_RUNS.md cannot be read, so every folder is refused (standing rule h)")
     runs = set()
     for m in re.finditer(r"^\|\s*`([^`|]+)`", text, re.M):
@@ -14,7 +14,13 @@ def listed_runs(list_path=None):
         if "/" in name: runs.add(name)
     if not runs:
         raise SystemExit("REFUSED: HELDOUT_PULL_RUNS.md lists no run (unreadable shape), so every folder is refused (standing rule h)")
+    global LIST_SHA256
+    LIST_SHA256 = hashlib.sha256(raw).hexdigest()
     return runs
+LIST_SHA256 = None
+def list_line():
+    """The line every reader prints in its output, so a reader that ran on a stale copy of the list is visible."""
+    listed_runs(); return "HELDOUT_PULL_RUNS.md copy read by the guard: sha256 " + LIST_SHA256
 def refuse_heldout(path, who="this reader", list_path=None):
     runs = listed_runs(list_path)
     for p in (os.path.abspath(path), os.path.realpath(path)):
@@ -50,7 +56,7 @@ def selftest():
     h = os.path.join(d, "HELDOUT_X"); os.makedirs(h)
     try: refuse_heldout(h, list_path=lst); raise AssertionError("HELDOUT_ folder not refused")
     except SystemExit: pass
-    real = listed_runs(); assert real, "real list empty"
+    real = listed_runs(); assert real, "real list empty"; assert list_line().endswith(hashlib.sha256(open(LIST,"rb").read()).hexdigest())
     print("HELDOUT GUARD V2 SELFTEST OK (plain, nested, relative, symlink, nested symlink, missing list, empty list, HELDOUT_ folder); real list holds %d run(s)" % len(real))
 if __name__ == "__main__":
     if sys.argv[1:] == ["selftest"]: selftest()
