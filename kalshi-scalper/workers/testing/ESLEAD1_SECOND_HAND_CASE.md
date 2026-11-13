@@ -1,0 +1,22 @@
+# ESLEAD1 scorer, BUILD 2: hand case (Testing Desk, Nov 13, 2026), committed BEFORE the code
+Built from Desk B's ESLEAD1_CARD_NOV13.md at 786dc3b2 (sha256 66747c1e...) with its Amendment 1 ONLY, blind to Desk B's build 1, its expected-figures file and its fixture (not read). Nothing ES-derived is written anywhere: the scorer takes the ES csv path as an argument, writes no file, and results go by message only. INVENTED rows only; the real ES file is not opened by any test, and the real run waits for Auditor B's CLEAN on both scorers, SPXOI1_CANDLES's structure check and the Head's go.
+
+## The measurement as I read the card and Amendment 1
+- Windows: KXINX15M settled markets with close in [2026-11-05T00:00Z, 2026-11-13T00:00Z); any other window is not touched (counted). Series A = the window's candles' YES mid = (yes bid close + yes ask close) / 2 at each end_period_ts present with both sides (never carried); series B = the ES 1 minute close at the same whole minute (the bar with ts_event = t - 60 s, Databento's start stamp). T = the timestamps present in BOTH series within the window, computed once per window.
+- Changes: dA[t] = mid(t) - mid(t - 60 s), plain difference, defined only if both mids exist in the WHOLE A series (the 60 s lookback is taken from the whole series, not from T); dB[t] = ln(ES(t) / ES(t - 60 s)), the lookback from the whole ES series (so the window's first minute uses the close at the window start); a change across an instrument_id change is dropped (counted).
+- Lag k pairs (dA[t], dB[t - 60 k]) with t in T and t - 60 k in T and both changes defined. POSITIVE lag = Kalshi (A) lags ES; negative = Kalshi leads. Lags -3 to +3. Pearson correlation POOLED over all windows' pairs (not an average of per-window correlations). A lag with fewer than min_pairs pooled pairs (a required argument; the fixture uses 3, the real run 30) is n/a; zero variance on either side is n/a.
+- Prediction (card): peak at lag 0: PASSES only if the lag 0 correlation is the largest of the seven and no lag +1 to +3 exceeds it (1e-9). With an n/a lag the prediction is reported over the defined lags and the n/a lags are named.
+- Printed: one line of lags with %+d and values %.3f (CFRTI-K's line: I do not know its exact text; the NUMBERS are what compare), then the pair count per lag, then the drop counts.
+
+## Invented window W1 (hand-computed)
+Minutes m = 0 to 6 (end times open + 60 m). ES closes 1000, 1001, 1000, 1001, 1002.001, 1001, 1000: log changes dB[m] for m = 1..6 are +a, -a, +a, +a, -a, -a with a = ln(1.001): signs s = [+, -, +, +, -, -]. Kalshi mids (bid = mid - .01, ask = mid + .01) at m = 1..6: .50, .52, .50, .52, .54, .52: dA[m] for m = 2..6 = +.02, -.02, +.02, +.02, -.02 = .02 x s(m - 1): Kalshi follows ES one minute later.
+- Correlations are scale-free so only signs matter: lag 0 pairs t = 2..6 (n 5): r = -0.8 / 4.8 = -0.167; lag +1 (n 5): +1.000; lag +2 (n 4): -2 / sqrt(12) = -0.577; lag +3 (n 3): -(4/3) / (8/3) = -0.500; lag -1 (n 4): -0.577; lag -2 (n 3): +(4/3) / (8/3) = +0.500; lag -3 (n 2): under the floor of 3: n/a.
+- Peak at lag +1, so the prediction FAILS (lag +1 exceeds lag 0); lag -3 is n/a.
+## W1 plus W2 (the same data again, other ticker): pooled counts double (lag -3: 4 pairs, lag +3: 6 ...): correlations unchanged except lag -3: its y values are all -a: zero variance: n/a (not under the floor).
+## W3 (pooling): W1's sign pattern with every dA shifted by +0.1: its own correlations equal W1's, but the POOLED correlation of W1 + W3 differs from W1's; the test compares the pooled value with an independent direct computation, and shows it differs from the mean of the per-window correlations.
+## Other cases
+- Missing candle: a minute with only a yes bid (no ask) has no mid: dA at that minute and the next minute are missing (the lookback needs both mids), dropped and counted; the mid is never carried.
+- Missing ES bar: the same for dB.
+- A window closing 2026-11-04T23:59:59Z or 2026-11-13T00:00:00Z is not touched (counted); 2026-11-05T00:00:00Z is in.
+- A duplicate ES ts_event stops the run naming the minute.
+- A lag-0-peak fixture (dA[t] = .02 s(t)): lag 0 = +1.000: the prediction passes over the defined lags.
