@@ -45,3 +45,6 @@ Book file `book15r6/2026-11-02/1200/book.csv.gz` (all rows for the window's tick
 - a book file under book15r6/2026-11-09/
 - an input row closing 2026-11-09T00:00Z
 - a HELDOUT_ path
+
+## Test fix found before the first commit (no expected figure changed)
+The first decoy row sat outside B's poll interval, so it tested nothing. It now sits at exactly B's close - 180 s, after the real row, so it would win the tie if close_time were not matched. A one-off mutant (match by ticker only, run in a temporary folder and deleted) gives B 99.0 / 99.0 and fails the test, so the decoy discriminates.
