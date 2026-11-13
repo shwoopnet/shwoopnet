@@ -1,4 +1,4 @@
-"""Checks spxfv1b.py against expected_by_hand.json (committed first, 4335655c) on the invented rows in inv/, plus the refusals. Exit 1 on any mismatch."""
+"""Checks spxfv1b.py against expected_by_hand.json (committed first, 4335655c; re-worked for S1 to S6 before the change) on the invented rows in inv/, plus the refusals. Exit 1 on any mismatch."""
 import json, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
@@ -11,7 +11,7 @@ o = S.run("dev", W, F)
 for k, v in E["dev"]["counts"].items():
     if o["counts"].get(k, 0) != v: bad.append(("count", k, o["counts"].get(k), v))
 a = o["aggregate"]
-for k in ("pf", "mean_net", "label"):
+for k in ("pf", "mean_net", "label", "ties"):
     want = E["dev"][k]; got = a[k]
     if (isinstance(want, float) and abs(got - want) > 1e-6) or (not isinstance(want, float) and got != want): bad.append((k, got, want))
 if a["n"] != E["dev"]["traded_n"]: bad.append(("n", a["n"]))
@@ -21,7 +21,7 @@ bars = S.load_futures(F)
 w = [r for r in csv.DictReader(open(W)) if r["ticker"] == "KXINX15M-A"][0]
 st, t = S.decide({"ticker": w["ticker"], "close_ts": int(w["close_ts"]), "yes_bid": float(w["yes_bid"]), "yes_ask": float(w["yes_ask"]), "result": w["result"]}, bars)
 x = E["dev"]["windows_A"]
-if st != "traded" or t["side"] != x["side"] or abs(t["ask"] - x["ask"]) > 1e-9 or abs(t["net"] - x["net"]) > 1e-9 or abs(t["stress"] - x["net_stress"]) > 1e-9:
+if st != "traded" or t["side"] != x["side"] or abs(t["ask"] - x["ask"]) > 1e-9 or abs(t["net"] - x["net"]) > 1e-9 or abs(t["net_unrounded"] - x["net_unrounded_info"]) > 1e-9:
     bad.append(("window A", st, t))
 def refused(fn, tag):
     try:

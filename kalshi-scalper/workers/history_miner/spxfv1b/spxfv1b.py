@@ -20,16 +20,14 @@ MIN_READ = 150
 H_FACTOR = math.sqrt(119 / 60)               # D1
 EDGE, SPREAD_MAX, BAND = 0.05, 0.03, (0.05, 0.30)
 MARKER = os.path.join(os.path.dirname(os.path.abspath(__file__)), "SPXFV1_HELD_READ_DONE")
-READINGS = [
-    "S1 fee: the card says 'Kalshi's quadratic schedule' and the Head's facts 'quadratic fee, multiplier 1'; the coefficient is not stated. Provisional: 0.07 x p x (1 - p) per contract (multiplier 1), unrounded for scoring, up-rounded to the cent per order for the stress line.",
-    "S2 sd: the 10 one-minute log changes ending at the F_now bar are between consecutive bars ts_event close-780 ... close-180 (11 bars); a change counts only if both its bars exist and carry F_now's instrument id; at least 6 changes; sample standard deviation (n - 1); sd_1m of 0 gives no model (skipped, counted).",
-    "S3 quotes: the decision candle's YES bid and ask closes; NO ask = 1 - YES bid; usable only if 0 < bid < ask < 1; a crossed or locked quote is no quote (standing rule 18).",
-    "S4 cheaper side: the lower ask; a tie takes YES. Band 0.05 to 0.30 and spread 0.03 inclusive, edge (model chance of that side minus its ask) >= 0.05, all with 1e-9.",
-    "S5 thirds: 'three equal date thirds of the held-out': the held-out span from 2026-12-01 to the latest traded close, cut into three equal time spans; PF 1.5 or better in each.",
-    "S6 traded windows = windows where the rule buys; void results are fee-only losses and counted (the one void rule); an empty result stops the run.",
-    "S7 kills printed in the held read: PF under 1.0 pooled at n >= 100; win rate within 3 points of the mean traded price at n >= 150; fewer than 150 traded: count only (NOT_ENOUGH_DATA).",
-    "S8 development: closes before 2026-12-01; under 100 traded 'no evidence at n = x'; nothing is tuned on it. Held-out closes are ignored and counted in dev mode.",
-]
+RULINGS = {   # the Head of R&D's rulings of Nov 13, 2026 (16:47Z), printed as constants in every run header
+    "S1_fee": "0.07 x C x p x (1 - p), rounded UP to the cent per order, C = 1 (quadratic, multiplier 1, standard schedule); the unrounded figure is information only",
+    "S2_sd": "consecutive bar pairs both present on F_now's instrument id, at least 6 of the 10, sample (n - 1) sd, times sqrt(119/60)",
+    "S3_quote": "the decision candle's YES bid and ask closes; YES bid + NO bid >= 1 - 1e-9 (crossed or locked) is no quote (rule 18)",
+    "S4_tie": "a tie of the two asks goes to YES; the tie count is printed",
+    "S5_thirds": "three equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE",
+    "S6_void": "a void is a fee-only loss; an empty result stops the run",
+}
 
 
 class Stop(Exception):
@@ -45,6 +43,11 @@ def phi(z):
 
 
 def fee(p):
+    """S1: per order, C = 1, rounded up to the cent."""
+    return math.ceil(100 * 0.07 * p * (1 - p) - 1e-9) / 100
+
+
+def fee_raw(p):
     return 0.07 * p * (1 - p)
 
 
@@ -83,20 +86,20 @@ def decide(w, bars):
     if a - b > SPREAD_MAX + EPS:
         return "no_trade", None
     asks = {"yes": a, "no": 1 - b}
-    side = "yes" if asks["yes"] <= asks["no"] + EPS else "no"
+    tie = abs(asks["yes"] - asks["no"]) <= EPS
+    side = "yes" if asks["yes"] <= asks["no"] + EPS else "no"                  # S4
     ask = asks[side]
     p_side = p_yes if side == "yes" else 1 - p_yes
     if not (BAND[0] - EPS <= ask <= BAND[1] + EPS) or p_side - ask < EDGE - EPS:
         return "no_trade", None
     res = w["result"]
-    if res == "void":
-        net, stress = -fee(ask), -math.ceil(100 * fee(ask) - 1e-9) / 100
+    if res == "void":                                                           # S6
+        net, raw = -fee(ask), -fee_raw(ask)
     else:
         won = res == side
         net = (1 - ask - fee(ask)) if won else (-ask - fee(ask))
-        rf = math.ceil(100 * fee(ask) - 1e-9) / 100
-        stress = (1 - ask - rf) if won else (-ask - rf)
-    return "traded", {"close": close, "side": side, "ask": ask, "won": res == side, "net": net, "stress": stress}
+        raw = (1 - ask - fee_raw(ask)) if won else (-ask - fee_raw(ask))
+    return "traded", {"close": close, "side": side, "ask": ask, "won": res == side, "net": net, "net_unrounded": raw, "tie": tie}
 
 
 def pf(xs):
@@ -113,7 +116,8 @@ def shown(x):
 def agg(trades):
     xs = [t["net"] for t in trades]
     n = len(xs)
-    return {"n": n, "pf": shown(pf(xs)), "pf_stress": shown(pf([t["stress"] for t in trades])), "mean_net": round(sum(xs) / n, 6) if n else None,
+    return {"n": n, "pf": shown(pf(xs)), "pf_unrounded_info": shown(pf([t["net_unrounded"] for t in trades])), "ties": sum(t["tie"] for t in trades),
+            "mean_net": round(sum(xs) / n, 6) if n else None,
             "win_rate": round(sum(t["won"] for t in trades) / n, 6) if n else None, "mean_price": round(sum(t["ask"] for t in trades) / n, 6) if n else None}
 
 
@@ -136,8 +140,12 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
             W.append({"ticker": r["ticker"], "close_ts": int(r["close_ts"]), "yes_bid": float(r["yes_bid"]), "yes_ask": float(r["yes_ask"]), "result": r["result"]})
     bars = load_futures(futures_path)
     counts, trades = {}, []
+    rd = iso(READ_DATE)
     for w in sorted(W, key=lambda w: (w["close_ts"], w["ticker"])):
         held = w["close_ts"] >= cut
+        if mode == "held" and w["close_ts"] > rd:                               # S5
+            counts["after_read_date_ignored"] = counts.get("after_read_date_ignored", 0) + 1
+            continue
         if (mode == "dev" and held) or (mode == "held" and not held):
             counts["held_out_ignored" if mode == "dev" else "development_ignored"] = counts.get("held_out_ignored" if mode == "dev" else "development_ignored", 0) + 1
             continue
@@ -146,7 +154,7 @@ def run(mode, windows_path, futures_path, now=None, marker=MARKER, out_path=None
         if t:
             trades.append(t)
     A = agg(trades)
-    out = {"mode": mode, "card": "DESK_A_SPX_CARDS_NOV13.md 94c4dfbc", "counts": counts, "readings": READINGS}
+    out = {"mode": mode, "card": "DESK_A_SPX_CARDS_NOV13.md 94c4dfbc", "rulings": RULINGS, "counts": counts}
     if mode == "dev":
         A["label"] = "no evidence at n = %d" % A["n"] if A["n"] < 100 else "development (not a verdict)"
         out["aggregate"] = A
