@@ -44,3 +44,10 @@ The same gap as CROWDLEG: legs for every traded combo, all combo trades (not the
    - 15 minute taker flow is another tape;
    - the band is within the combo exception;
    - no Polymarket or Yahoo read.
+
+## Amendment (Nov 13, 2026, before any data): exit variant, the owner's standing rule (rnd-queue 370169d1)
+
+**No exit variant possible: hold only.**
+- **Why:** an exit from a combo means selling it back through Kalshi's request-for-quote system. Kalshi's public Combos help article (help.kalshi.com/en/articles/13823820-combos, read Nov 13) says: "Once a combo is placed and filled, it cannot be canceled or reversed by the user." Neither it nor the RFQ docs (docs.kalshi.com/getting_started/rfqs.md) describe any way to request a quote to SELL a combo already held.
+- **So:** no profit target, stop, time exit or in-and-out can be priced from public evidence, and the card stays hold to settlement.
+- **If Kalshi confirms** (an owner or Main question, not research) that a held combo can be quoted for sale, an exit variant is registered then, as its own try, before any data.

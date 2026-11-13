@@ -63,3 +63,12 @@
 - **One family with CONGCAL,** counted once.
 - **The universe is narrowed to answer the VA's risk.** V2's GOVCOUNT1 found that Federal Register publication lags SIGNING by 3 to 7 days, so for a market that settles on signing, the news has already carried the fact before the public inspection list shows it. So the universe is ONLY markets whose settling fact is the document's Federal Register publication or its EFFECTIVE date (for example tariffs taking effect on a date, or a rule in effect). Markets that settle on a signing or an announcement, or on a news outlet's report, are left out.
 - **No key is needed;** the content is public domain. Main reads the site's terms. It is a slow family: the paper list only.
+
+## Amendment 2 (Nov 13, 2026, before any data): one exit variant, the owner's standing rule (rnd-queue 370169d1)
+
+**FEDREGPI-X, a time exit, counted as its own try.**
+- **Entry:** the same YES entry at the public inspection look (17:00 ET).
+- **Exit:** sell the YES at the bid at the next business day's 17:00 ET look, after the document's official publication that morning. If the market has already closed or settled, it settles as held.
+- **Why:** the card's whole claim is a one-day information lead from the public inspection list to publication. If the lead is real, the market reprices on publication day, and the time exit captures exactly that move without the settlement risk of a later effective date.
+- **Costs:** a taker sale at the bid seen, paying the exit fee (rounded up to the cent). The round-trip cost kill above 5c applies.
+- **Paper only.**

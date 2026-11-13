@@ -73,3 +73,12 @@
   - (i) congress.gov needs an API key. Under the Charter, any key needs the owner's popup; until then only senate.gov and clerk.house.gov can be used, and only after Main has read their terms. A source with unread or ambiguous terms is out.
   - (ii) History is tiny (V2's COUNT1, COUNT2 and GOVCOUNT1 found 1 to 15 settled events in such series), so only the slow-family paper screen (30 independent events, both halves positive, pinned cutoff) is reachable, after a long wait.
   - (iii) No live strategy overlaps, so the correlation check does not apply.
+
+## Amendment 2 (Nov 13, 2026, before any data): one exit variant, the owner's standing rule (rnd-queue 370169d1)
+
+**CONGCAL-X, a profit target with a time exit, counted as its own try.**
+- **Entry:** the same Stage A entry.
+- **Exit:** sell the YES at the bid at the first daily look (14:00 ET) where the YES bid is at least 0.90, OR at the 14:00 ET look one session day before the deadline, whichever comes first. If neither happens before the market closes, hold to settlement.
+- **Why:** Stage A's information is the procedural stage, which the market should absorb once the vote is held. The exit takes that repricing without waiting out the settlement timer and the residual risk of a pulled vote.
+- **Costs:** the exit is a taker sale at the bid seen, paying the exit fee (0.07 x p x (1 - p) rounded up to the cent). The round-trip cost kill above 5c applies (standing rule (i)).
+- **Paper only,** like the card.
