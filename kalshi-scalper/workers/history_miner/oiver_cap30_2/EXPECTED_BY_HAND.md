@@ -55,3 +55,10 @@ The parent is unchanged from OIVER-SPREAD's reworked figures:
 - held mode
 - a HELDOUT_ path
 - an odd result text
+
+## Dated line, 2026-11-13 21:17Z: the governing card is Desk A's 23b5bd9b (sha256 ae1f1ee6...); reworked by hand before the code
+The same three changes as OIVER-SPREAD build 2's dated line:
+- no_quote is renamed not_two_sided;
+- weeks run over the parent's trades, at least one week, so the divisor is 1 here: parent 0.4925 per contract-week, version 1.325;
+- a development row outside [2026-09-12, 2026-11-09) stops the run.
+Everything else is unchanged (version PF 5.206349, the 0.30 ceiling inclusive, as the card's 21:13Z amendment confirms).

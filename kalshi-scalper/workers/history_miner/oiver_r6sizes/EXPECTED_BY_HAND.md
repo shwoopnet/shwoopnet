@@ -48,3 +48,10 @@ Book file `book15r6/2026-11-02/1200/book.csv.gz` (all rows for the window's tick
 
 ## Test fix found before the first commit (no expected figure changed)
 The first decoy row sat outside B's poll interval, so it tested nothing. It now sits at exactly B's close - 180 s, after the real row, so it would win the tie if close_time were not matched. A one-off mutant (match by ticker only, run in a temporary folder and deleted) gives B 99.0 / 99.0 and fails the test, so the decoy discriminates.
+
+## Dated line, 2026-11-13 21:17Z: card 23b5bd9b (sha256 ae1f1ee6...), the 21:13Z amendment; reworked by hand before the code
+- **Exchange time:** the poll time is the book row's server_date_header (the exchange's HTTP Date, whole seconds), not t_recv_ms. The decision poll is the last row with Date in [close - 190 s, close - 180 s], both ends inclusive. Among rows with the same Date second, the latest t_recv_ms wins, then the later row in the file. A row with an unreadable Date is skipped.
+- **New column r6_poll:** 1 when a decision poll was found, 0 when not (both sizes are then blank). DEPTH's scorer uses it to form the replay set.
+- **Made-up data:** each book row's Date is its intended second (close - 195, -188, -181, -180, -179 and so on). Its t_recv_ms sits 300 ms after that Date, and the decoy and the C and D rows likewise.
+- **Expected values:** unchanged, with r6_poll B 1, C 0, D 1. B's close-180 s row has Date exactly close - 180 and is the last in the interval.
+- **New check:** a row whose t_recv_ms is inside the interval but whose Date is outside it (B at Date close - 179, t_recv close - 180.7) must NOT be chosen. The existing close-179 row is shifted to t_recv close - 180.7 s to test exactly this, and B's sizes stay 41.0 / 42.0.

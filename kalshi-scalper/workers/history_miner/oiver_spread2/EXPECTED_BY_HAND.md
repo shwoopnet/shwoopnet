@@ -82,3 +82,9 @@ Reworked figures (same windows; spreads, sides and skips unchanged). Fee = ceil(
 - Per contract-week: 110.46.
 
 **Unchanged:** the removed share 0.4, the counts, the takeover and kill information, and the label "no evidence at n = 3".
+
+## Dated line, 2026-11-13 21:17Z: the governing card is Desk A's 23b5bd9b (DESK_A_OICORE_VERSIONS_NOV13.md, sha256 ae1f1ee6...); reworked by hand before the code
+- Rule 18 is named "not two-sided" as on the card (0 < bid, ask < 1, bid < ask with 1e-9): the counter no_quote is renamed not_two_sided; the logic is unchanged.
+- **Weeks** = (last close - first close) / 7 days over the PARENT's trades, at least one week, and the same divisor for both. Here the parent runs W1 to W9 = 7,200 s, under a week, so the divisor is 1 week: per contract-week parent 0.4925, version 1.315 (was 41.37 and 110.46 on the file span).
+- **Range:** a development row (close before 2026-12-01) outside [2026-09-12T00:00Z, 2026-11-09T00:00Z) STOPS the run. Held-out rows (on or after Dec 1) are still ignored and counted. Every made-up development row is inside.
+- Every other figure is unchanged: parent PF 1.429194, version PF 5.046154, the halves, removed 0.4, the takeover and kill information (net per week still not lower), and the label.
