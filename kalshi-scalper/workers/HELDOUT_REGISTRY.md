@@ -699,3 +699,10 @@ The date is the first ISO date text on or after 2026-11-01 in that row's STATE a
 - MM1, MAKER5, L1Q1, GF1, GF2, MKTTIME1-F, MUT1, GEN1, GEN1S, GEN2: CLOSED UNREAD.
 - COUNT2: holds out tornado counts only; its three politics series are listed as not runnable.
 - GEN6 to GEN11: the 2026-10-30 date is a freeze/run date. NEWH9, NEWH12, NEWH13: it is a data cut (holdout closes to 2026-10-30 00:00 UTC, exclusive).
+
+
+## KXINX15M cards (Nov 13, 2026, Desk A; registered by the Head when Auditor B is CLEAN; nothing read)
+| card | owner desk | branch:file | series | held-out rule (its own words) | date(s) | STATE | basis | notes | ruling date |
+|---|---|---|---|---|---|---|---|---|---|
+| SPXFV1 | Idea Desk A | idea-desk-a:kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md (5ed61f6b) | KXINX15M | closes on or after 2026-12-01T00:00:00Z, read once; development before it | HELDOUT_FIRST 2026-12-01T00:00:00Z | WRITTEN, not registered (no scorer; Auditor B first) | ES.c.0 / MES.c.0 ohlcv-1m via Main's job, nothing Databento-derived in the repo | wheel seat: replayed after the day; SPXFV1-V2 held | 2026-11-13 (Head) |
+| SPXOI1 | Idea Desk A | idea-desk-a:kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md (5ed61f6b) and the addendum | KXINX15M | closes on or after 2026-12-01T00:00:00Z, read once; threshold = 90th percentile of the market's own 3-minute OI rises on windows closing before 2026-12-01 (OI changes only) | HELDOUT_FIRST 2026-12-01T00:00:00Z | WRITTEN, not registered; a VERSION of OICORE (7g); own wheel seat (0.6), not seated until 20 trading days of OI exist | KXINX15M one-minute candles with open interest, Main's after-the-day pull | threshold printed once Auditor B is CLEAN | 2026-11-13 (Head) |
