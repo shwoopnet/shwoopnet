@@ -2,7 +2,7 @@
 """Recorder NC15 (Nov 11, 2026, the owner approved, popup: "QUOTE READ on the bot's non-crypto markets"). Research data only: nothing here trades. It is R6 (record_15m_book.py)
 pointed at the bot's NON-crypto 15 minute series, for the research chats' mass backtest sweep and their spread, depth and timing tests.
 
-For these eleven 15 minute series (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M, fixed in
+For these twelve 15 minute series (KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M, KXINX15M, fixed in
 code; gold and the five R6 crypto series are already recorded by R6 and are NOT here) it records, for the WHOLE window of every market:
   - the order book every 5 seconds: one batched public read for all open markets, the best 5 YES and 5 NO bids with sizes, the server's Date header, the send and receive
     time (book.csv). If the batched read fails 3 polls in a row, that window falls back to one public read per market (logged in coverage);
@@ -30,7 +30,7 @@ import urllib.error
 import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2"
-SERIES = ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M")
+SERIES = ("KXSILVER15M", "KXCOPPER15M", "KXWTI15M", "KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXHYPE15M", "KXBNB15M", "KXAUDUSD15M", "KXUSDCAD15M", "KXNATGAS15M", "KXINX15M")
 WINDOW_S = 15 * 60
 BOOK_EVERY_S = 5.0
 DEPTH = 5

@@ -1,5 +1,5 @@
 'use strict';
-// Recorder NC15 (Nov 11, 2026, research only): the whole-window book and trade tape of the eleven non-crypto 15 minute markets the bot trades. It reads public data, holds no secret, places no
+// Recorder NC15 (Nov 11, 2026, research only): the whole-window book and trade tape of the twelve non-crypto 15 minute markets the bot trades. It reads public data, holds no secret, places no
 // order, writes no Firestore, changes nothing under functions/, writes only to a data branch, is not published with the site and stops by itself on 2026-12-31.
 const assert = require('assert');
 const fs = require('fs');
@@ -24,8 +24,8 @@ gates.FB1 = () => {
   assert.ok(!/PRIVATE|SECRET|Authorization|ACCESS[-_]?KEY|SIGNATURE|method\s*=\s*["'](POST|PUT|DELETE)|data\s*=\s*b?["']/i.test(code), 'no key, no auth header, no signing, no write call');
   assert.ok(!/\/portfolio|\/orders\b|order_id|create_order/.test(code.replace(/\/orderbooks?/g, '')), 'no account or order endpoint (the public order book is not an order)');
   const series = [...new Set([...code.matchAll(/KX[A-Z0-9]+/g)].map((x) => x[0]))].sort();
-  const want = ['KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M'];
-  assert.deepStrictEqual(series, [...want].sort(), 'exactly the eleven non-crypto 15 minute series, nothing else (gold and the crypto five belong to R6)');
+  const want = ['KXSILVER15M', 'KXCOPPER15M', 'KXWTI15M', 'KXEURUSD15M', 'KXGBPUSD15M', 'KXUSDJPY15M', 'KXHYPE15M', 'KXBNB15M', 'KXAUDUSD15M', 'KXUSDCAD15M', 'KXNATGAS15M', 'KXINX15M'];
+  assert.deepStrictEqual(series, [...want].sort(), 'exactly the twelve non-crypto 15 minute series, nothing else (gold and the crypto five belong to R6)');
   assert.deepStrictEqual(py('print(json.dumps(list(m.SERIES)))'), want);
   assert.ok(!want.some((s) => /GOLD|BTC|ETH|DOGE|XRP|SOL/.test(s)), 'no series R6 already records');
   assert.ok(!/firebase|firestore|admin\.initializeApp/i.test(code), 'no Firestore, no Firebase');
@@ -194,7 +194,7 @@ w = m.Window(1793318400)
 w.tally["KXSILVER15M"].notes.append("no open market")
 rows = [m.coverage_row(w.close_time, w.tally[s], w.batching.fallback) for s in m.SERIES]
 print(json.dumps({"n": len(rows), "w": len(m.COVER_COLS), "g": dict(zip(m.COVER_COLS, rows[0]))}))`);
-  assert.strictEqual(out.n, 11, 'one row per series per window, whatever happened');
+  assert.strictEqual(out.n, 12, 'one row per series per window, whatever happened');
   assert.strictEqual(out.w, 18);
   assert.deepStrictEqual([out.g.series, out.g.polls, out.g.ok_polls, out.g.note], ['KXSILVER15M', 0, 0, 'no open market']);
   assert.ok(/out\.write\("coverage", \[coverage_row\(win\.close_time, win\.tally\[s\], win\.batching\.fallback\) for s in SERIES\]\)/.test(code), 'every series is written, found or not');
