@@ -58,3 +58,9 @@ The same gap as CROWDLEG: legs for every traded combo, all combo trades (not the
 - Successive polls read overlapping tape windows on purpose, so trades are de-duplicated by `trade_id` across polls before any count.
 - A poll whose coverage row has `tape_complete` 0 (tape cut at the page cap, a failed read or a stopped run) is counted and reported; its window is a lower bound, never a quiet hour.
 - Every result states the share of traded combos dropped for want of legs (`legs_missing` over `combos_traded`, summed over the polls read) and the share of polls with `tape_complete` 0 (Auditor B, Nov 13).
+
+## Amendment (Nov 13, 2026, before any data): the nonstop tape recorder, and rule 17
+
+- The trades and legs now come from the nonstop recorder `record-combo-tape.yml` (`combotape-data`, `tape/`), which replaces the widened-poll plan above; quotes with leg tickers on every row still come from `record-combo.yml`. Its coverage marks each cycle complete, capped (oldest trades of the window lost: a lower bound) or cut (window read again next cycle); a reader de-duplicates by `trade_id` across all files.
+- This card reads ONLY rows inside its own development and held-out windows, which are fixed by a dated amendment the day the recorder's first rows land, before any row is read.
+- Rule 17: KXMVE markets are also named by MVE1, NEWLIST1, USWEEP1 and USWEEP3 in the held-out registry. Reading this card's rows opens no window of those four cards, and any window of theirs still unread stays unread.
