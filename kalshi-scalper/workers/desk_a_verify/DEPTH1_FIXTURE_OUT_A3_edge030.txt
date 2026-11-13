@@ -1,0 +1,106 @@
+verdict: FALSIFIED
+AMENDMENT 1 COUNT: windows where a feature fires 797; of them with no yes/no result (booked fee-only, counted) 3 (0.38%); raw results {'(empty)': 2, 'void': 1}
+NO-LABEL NOISE DESCRIPTION (registered by V2; reads no outcome, scores nothing, changes no label): share of looks where a single-poll size feature's sign differs between the decision poll and either of the next two 2 s polls (f1 = the five-level imbalance changing sign within 4 s)
+  KXGOLD15M: f10_imb_3c 39.1% of 504; f1_imb5 34.7% of 504; f2_imb1 12.0% of 440; f3_dwmid_minus_mid 41.6% of 428; f8_hole_asymmetry 15.5% of 296; f9_book_slope 35.0% of 417 | median fill delay (fill poll minus decision poll) 2.1 s over 539 windows
+  KXGOLD15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 49, 'bad tape note': 3, 'max gap too long': 4, 'tape pages 0': 3, 'window opened at or after the recorder end': 16}
+  KXBTC15M: f10_imb_3c 41.9% of 499; f1_imb5 38.2% of 498; f2_imb1 11.4% of 440; f3_dwmid_minus_mid 40.0% of 425; f8_hole_asymmetry 17.6% of 318; f9_book_slope 37.5% of 416 | median fill delay (fill poll minus decision poll) 2.1 s over 520 windows
+  KXBTC15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 48, 'max gap too long': 5, 'bad tape note': 4, 'tape pages 0': 5, 'window opened at or after the recorder end': 16}
+DEPTH1 VERDICT FALSIFIED (20 tries; running count about 728,648; feature hash 8eb6aa3842fa4bb50cebbe2f1b2f87df726296e0d0b16964cc7e9b45a8deeb69)
+usable windows {'KXGOLD15M': 654, 'KXBTC15M': 655} of 300 per market (dated 2026-10-30 to 2026-11-13 US Central); scored (with a decision poll) {'KXGOLD15M': 539, 'KXBTC15M': 520}, no decision poll 206, no clock 44; windows held by L1 (gold) or OICORE (Bitcoin): {'KXGOLD15M': 90, 'KXBTC15M': 0}, unknown 0
+AMENDMENT 1 COUNT: windows where a feature fires 797; of them with no yes/no result (booked fee-only, counted) 3 (0.38%); raw results {'(empty)': 2, 'void': 1}
+NO-LABEL NOISE DESCRIPTION (registered by V2; reads no outcome, scores nothing, changes no label): share of looks where a single-poll size feature's sign differs between the decision poll and either of the next two 2 s polls (f1 = the five-level imbalance changing sign within 4 s)
+  KXGOLD15M: f10_imb_3c 39.1% of 504; f1_imb5 34.7% of 504; f2_imb1 12.0% of 440; f3_dwmid_minus_mid 41.6% of 428; f8_hole_asymmetry 15.5% of 296; f9_book_slope 35.0% of 417 | median fill delay (fill poll minus decision poll) 2.1 s over 539 windows
+  KXGOLD15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 49, 'bad tape note': 3, 'max gap too long': 4, 'tape pages 0': 3, 'window opened at or after the recorder end': 16}
+  KXBTC15M: f10_imb_3c 41.9% of 499; f1_imb5 38.2% of 498; f2_imb1 11.4% of 440; f3_dwmid_minus_mid 40.0% of 425; f8_hole_asymmetry 17.6% of 318; f9_book_slope 37.5% of 416 | median fill delay (fill poll minus decision poll) 2.1 s over 520 windows
+  KXBTC15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 48, 'max gap too long': 5, 'bad tape note': 4, 'tape pages 0': 5, 'window opened at or after the recorder end': 16}
+
+z bar 5.27 (N 728648); shuffled-book control: 1000 rounds, best-of-20 mean net 99th percentile +7.03c, median +2.48c
+-- KXGOLD15M: 539 scored windows
+f1_imb5                n  309 PF 0.96 blocks 1.24 (n 107) / 1.11 (n 111) / 0.62 (n 91) halves 1.29 / 0.73 net -0.81c stress PF 0.95 acc 0.524 vs mean ask 0.516 z -0.23 control p(best of 20) 0.998 fail; without windows L1 / OICORE holds: n 297 PF 0.97 net -0.64c
+f2_imb1                n  239 PF 0.92 blocks 0.81 (n 87) / 1.44 (n 76) / 0.70 (n 76) halves 0.85 / 0.99 net -1.81c stress PF 0.90 acc 0.510 vs mean ask 0.513 z -0.47 control p(best of 20) 0.999 fail; without windows L1 / OICORE holds: n 230 PF 0.92 net -1.78c
+f3_dwmid_minus_mid     n  269 PF 0.91 blocks 0.82 (n 94) / 1.20 (n 96) / 0.76 (n 79) halves 0.85 / 0.98 net -2.00c stress PF 0.90 acc 0.494 vs mean ask 0.498 z -0.73 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 261 PF 0.92 net -1.96c
+f4_d_imb30             n  261 PF 1.00 blocks 1.81 (n 86) / 1.04 (n 98) / 0.54 (n 77) halves 1.40 / 0.74 net +0.05c stress PF 0.99 acc 0.525 vs mean ask 0.508 z +0.01 control p(best of 20) 0.968 fail; without windows L1 / OICORE holds: n 253 PF 1.01 net +0.32c
+f5_d_imb60             n  262 PF 1.08 blocks 1.28 (n 90) / 1.19 (n 93) / 0.81 (n 79) halves 1.37 / 0.87 net +1.63c stress PF 1.06 acc 0.550 vs mean ask 0.516 z +0.47 control p(best of 20) 0.700 fail; without windows L1 / OICORE holds: n 251 PF 1.08 net +1.65c
+f6_thin_depletion      n  254 PF 1.11 blocks 1.23 (n 91) / 1.02 (n 86) / 1.08 (n 77) halves 1.21 / 1.02 net +2.20c stress PF 1.09 acc 0.563 vs mean ask 0.524 z +0.61 control p(best of 20) 0.563 fail; without windows L1 / OICORE holds: n 242 PF 1.11 net +2.39c
+f7_sweep_net           n  190 PF 0.81 blocks 1.28 (n 61) / 0.69 (n 73) / 0.63 (n 56) halves 0.88 / 0.75 net -4.64c stress PF 0.80 acc 0.479 vs mean ask 0.508 z -1.20 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 181 PF 0.82 net -4.48c
+f8_hole_asymmetry      n  202 PF 1.15 blocks 1.14 (n 71) / 1.53 (n 70) / 0.86 (n 61) halves 1.19 / 1.12 net +3.06c stress PF 1.13 acc 0.490 vs mean ask 0.443 z +0.85 control p(best of 20) 0.350 fail; without windows L1 / OICORE holds: n 194 PF 1.18 net +3.74c
+f9_book_slope          n  263 PF 0.88 blocks 1.09 (n 90) / 0.97 (n 96) / 0.62 (n 77) halves 1.20 / 0.66 net -2.91c stress PF 0.86 acc 0.494 vs mean ask 0.505 z -0.68 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 254 PF 0.89 net -2.61c
+f10_imb_3c             n  316 PF 0.86 blocks 0.94 (n 107) / 1.09 (n 116) / 0.58 (n 93) halves 0.97 / 0.77 net -3.36c stress PF 0.84 acc 0.491 vs mean ask 0.508 z -0.91 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 304 PF 0.87 net -3.30c
+-- KXBTC15M: 520 scored windows
+f1_imb5                n  311 PF 1.53 blocks 1.27 (n 112) / 1.43 (n 112) / 2.15 (n 87) halves 1.09 / 2.21 net +9.14c stress PF 1.50 acc 0.611 vs mean ask 0.502 z +3.18 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 311 PF 1.53 net +9.14c
+f2_imb1                n  235 PF 3.43 blocks 3.59 (n 80) / 3.46 (n 88) / 3.19 (n 67) halves 2.78 / 4.37 net +24.05c stress PF 3.37 acc 0.762 vs mean ask 0.504 z +7.62 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 235 PF 3.43 net +24.05c
+f3_dwmid_minus_mid     n  263 PF 1.11 blocks 1.08 (n 99) / 1.32 (n 92) / 0.94 (n 72) halves 1.18 / 1.04 net +2.32c stress PF 1.09 acc 0.525 vs mean ask 0.483 z +0.64 control p(best of 20) 0.534 fail; without windows L1 / OICORE holds: n 263 PF 1.11 net +2.32c
+f4_d_imb30             n  270 PF 1.23 blocks 1.19 (n 98) / 1.32 (n 91) / 1.18 (n 81) halves 1.20 / 1.26 net +4.54c stress PF 1.21 acc 0.544 vs mean ask 0.481 z +1.61 control p(best of 20) 0.128 fail; without windows L1 / OICORE holds: n 270 PF 1.23 net +4.54c
+f5_d_imb60             n  247 PF 1.27 blocks 1.56 (n 83) / 1.06 (n 87) / 1.24 (n 77) halves 1.43 / 1.12 net +5.33c stress PF 1.25 acc 0.571 vs mean ask 0.500 z +1.59 control p(best of 20) 0.061 fail; without windows L1 / OICORE holds: n 247 PF 1.27 net +5.33c
+f6_thin_depletion      n  246 PF 0.93 blocks 1.32 (n 83) / 0.70 (n 83) / 0.86 (n 80) halves 1.18 / 0.72 net -1.70c stress PF 0.91 acc 0.492 vs mean ask 0.492 z -0.54 control p(best of 20) 0.999 fail; without windows L1 / OICORE holds: n 246 PF 0.93 net -1.70c
+f7_sweep_net           n  173 PF 0.61 blocks 0.52 (n 66) / 0.91 (n 56) / 0.47 (n 51) halves 0.55 / 0.69 net -10.65c stress PF 0.60 acc 0.393 vs mean ask 0.480 z -3.22 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 173 PF 0.61 net -10.65c
+f8_hole_asymmetry      n  211 PF 0.80 blocks 0.69 (n 83) / 0.93 (n 64) / 0.81 (n 64) halves 0.77 / 0.82 net -5.04c stress PF 0.78 acc 0.408 vs mean ask 0.441 z -1.69 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 211 PF 0.80 net -5.04c
+f9_book_slope          n  270 PF 1.30 blocks 0.98 (n 97) / 1.41 (n 95) / 1.74 (n 78) halves 0.94 / 1.88 net +5.81c stress PF 1.28 acc 0.567 vs mean ask 0.490 z +2.25 control p(best of 20) 0.045 fail; without windows L1 / OICORE holds: n 270 PF 1.30 net +5.81c
+f10_imb_3c             n  308 PF 1.75 blocks 1.49 (n 107) / 1.66 (n 112) / 2.33 (n 89) halves 1.36 / 2.33 net +11.93c stress PF 1.72 acc 0.627 vs mean ask 0.489 z +5.13 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 308 PF 1.75 net +11.93c
+second look flags (accuracy >= 55% with n >= 300; not a verdict): KXBTC15M f1_imb5 accuracy 0.611 n 311; KXBTC15M f10_imb_3c accuracy 0.627 n 308
+
+CLOSED-FAMILY FEATURES, REPORTED SEPARATELY (Head's ruling): nothing that rests on either alone can become a lead; the headline above is judged on the registered whole (20 tries, the registered bar)
+  KXGOLD15M f6_thin_depletion: n 254 PF 1.11 net +2.20c stress PF 1.09 blocks 1.23 (n 91) / 1.02 (n 86) / 1.08 (n 77) halves 1.21 / 1.02 z +0.61
+  KXGOLD15M f7_sweep_net: n 190 PF 0.81 net -4.64c stress PF 0.80 blocks 1.28 (n 61) / 0.69 (n 73) / 0.63 (n 56) halves 0.88 / 0.75 z -1.20
+  KXBTC15M f6_thin_depletion: n 246 PF 0.93 net -1.70c stress PF 0.91 blocks 1.32 (n 83) / 0.70 (n 83) / 0.86 (n 80) halves 1.18 / 0.72 z -0.54
+  KXBTC15M f7_sweep_net: n 173 PF 0.61 net -10.65c stress PF 0.60 blocks 0.52 (n 66) / 0.91 (n 56) / 0.47 (n 51) halves 0.55 / 0.69 z -3.22
+
+Z BESIDE (information; the verdict above reads the corrected z, variance x D/(D-1), against 5.27): per try corrected z / uncorrected z
+  KXGOLD15M: f1 -0.23 / -0.24; f2 -0.47 / -0.48; f3 -0.73 / -0.76; f4 +0.01 / +0.02; f5 +0.47 / +0.49; f6 +0.61 / +0.63; f7 -1.20 / -1.24; f8 +0.85 / +0.87; f9 -0.68 / -0.71; f10 -0.91 / -0.94
+  KXBTC15M: f1 +3.18 / +3.29; f2 +7.62 / +7.89; f3 +0.64 / +0.67; f4 +1.61 / +1.66; f5 +1.59 / +1.65; f6 -0.54 / -0.56; f7 -3.22 / -3.33; f8 -1.69 / -1.75; f9 +2.25 / +2.32; f10 +5.13 / +5.31
+
+ZERO RULE (information): scored windows per try whose raw feature was within 1e-12 of zero but not exactly zero (set to zero, no trade; before this rule each could have traded on floating point residue)
+  KXGOLD15M: f1 0; f2 0; f3 46; f4 0; f5 0; f6 0; f7 0; f8 89; f9 4; f10 0
+  KXBTC15M: f1 0; f2 0; f3 40; f4 0; f5 0; f6 0; f7 0; f8 90; f9 2; f10 0
+HISTORY CHECK NOT_RUNNABLE: RuntimeError: history check skipped (no candle file in the fixture)
+
+
+DEPTH1 VERDICT FALSIFIED (20 tries; running count about 728,648; feature hash 8eb6aa3842fa4bb50cebbe2f1b2f87df726296e0d0b16964cc7e9b45a8deeb69)
+usable windows {'KXGOLD15M': 654, 'KXBTC15M': 655} of 300 per market (dated 2026-10-30 to 2026-11-13 US Central); scored (with a decision poll) {'KXGOLD15M': 539, 'KXBTC15M': 520}, no decision poll 206, no clock 44; windows held by L1 (gold) or OICORE (Bitcoin): {'KXGOLD15M': 90, 'KXBTC15M': 0}, unknown 0
+AMENDMENT 1 COUNT: windows where a feature fires 797; of them with no yes/no result (booked fee-only, counted) 3 (0.38%); raw results {'(empty)': 2, 'void': 1}
+NO-LABEL NOISE DESCRIPTION (registered by V2; reads no outcome, scores nothing, changes no label): share of looks where a single-poll size feature's sign differs between the decision poll and either of the next two 2 s polls (f1 = the five-level imbalance changing sign within 4 s)
+  KXGOLD15M: f10_imb_3c 39.1% of 504; f1_imb5 34.7% of 504; f2_imb1 12.0% of 440; f3_dwmid_minus_mid 41.6% of 428; f8_hole_asymmetry 15.5% of 296; f9_book_slope 35.0% of 417 | median fill delay (fill poll minus decision poll) 2.1 s over 539 windows
+  KXGOLD15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 49, 'bad tape note': 3, 'max gap too long': 4, 'tape pages 0': 3, 'window opened at or after the recorder end': 16}
+  KXBTC15M: f10_imb_3c 41.9% of 499; f1_imb5 38.2% of 498; f2_imb1 11.4% of 440; f3_dwmid_minus_mid 40.0% of 425; f8_hole_asymmetry 17.6% of 318; f9_book_slope 37.5% of 416 | median fill delay (fill poll minus decision poll) 2.1 s over 520 windows
+  KXBTC15M: otherwise-eligible windows removed by each usable() condition (report only): {'ok_polls/polls below minimum': 48, 'max gap too long': 5, 'bad tape note': 4, 'tape pages 0': 5, 'window opened at or after the recorder end': 16}
+
+z bar 5.27 (N 728648); shuffled-book control: 1000 rounds, best-of-20 mean net 99th percentile +7.03c, median +2.48c
+-- KXGOLD15M: 539 scored windows
+f1_imb5                n  309 PF 0.96 blocks 1.24 (n 107) / 1.11 (n 111) / 0.62 (n 91) halves 1.29 / 0.73 net -0.81c stress PF 0.95 acc 0.524 vs mean ask 0.516 z -0.23 control p(best of 20) 0.998 fail; without windows L1 / OICORE holds: n 297 PF 0.97 net -0.64c
+f2_imb1                n  239 PF 0.92 blocks 0.81 (n 87) / 1.44 (n 76) / 0.70 (n 76) halves 0.85 / 0.99 net -1.81c stress PF 0.90 acc 0.510 vs mean ask 0.513 z -0.47 control p(best of 20) 0.999 fail; without windows L1 / OICORE holds: n 230 PF 0.92 net -1.78c
+f3_dwmid_minus_mid     n  269 PF 0.91 blocks 0.82 (n 94) / 1.20 (n 96) / 0.76 (n 79) halves 0.85 / 0.98 net -2.00c stress PF 0.90 acc 0.494 vs mean ask 0.498 z -0.73 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 261 PF 0.92 net -1.96c
+f4_d_imb30             n  261 PF 1.00 blocks 1.81 (n 86) / 1.04 (n 98) / 0.54 (n 77) halves 1.40 / 0.74 net +0.05c stress PF 0.99 acc 0.525 vs mean ask 0.508 z +0.01 control p(best of 20) 0.968 fail; without windows L1 / OICORE holds: n 253 PF 1.01 net +0.32c
+f5_d_imb60             n  262 PF 1.08 blocks 1.28 (n 90) / 1.19 (n 93) / 0.81 (n 79) halves 1.37 / 0.87 net +1.63c stress PF 1.06 acc 0.550 vs mean ask 0.516 z +0.47 control p(best of 20) 0.700 fail; without windows L1 / OICORE holds: n 251 PF 1.08 net +1.65c
+f6_thin_depletion      n  254 PF 1.11 blocks 1.23 (n 91) / 1.02 (n 86) / 1.08 (n 77) halves 1.21 / 1.02 net +2.20c stress PF 1.09 acc 0.563 vs mean ask 0.524 z +0.61 control p(best of 20) 0.563 fail; without windows L1 / OICORE holds: n 242 PF 1.11 net +2.39c
+f7_sweep_net           n  190 PF 0.81 blocks 1.28 (n 61) / 0.69 (n 73) / 0.63 (n 56) halves 0.88 / 0.75 net -4.64c stress PF 0.80 acc 0.479 vs mean ask 0.508 z -1.20 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 181 PF 0.82 net -4.48c
+f8_hole_asymmetry      n  202 PF 1.15 blocks 1.14 (n 71) / 1.53 (n 70) / 0.86 (n 61) halves 1.19 / 1.12 net +3.06c stress PF 1.13 acc 0.490 vs mean ask 0.443 z +0.85 control p(best of 20) 0.350 fail; without windows L1 / OICORE holds: n 194 PF 1.18 net +3.74c
+f9_book_slope          n  263 PF 0.88 blocks 1.09 (n 90) / 0.97 (n 96) / 0.62 (n 77) halves 1.20 / 0.66 net -2.91c stress PF 0.86 acc 0.494 vs mean ask 0.505 z -0.68 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 254 PF 0.89 net -2.61c
+f10_imb_3c             n  316 PF 0.86 blocks 0.94 (n 107) / 1.09 (n 116) / 0.58 (n 93) halves 0.97 / 0.77 net -3.36c stress PF 0.84 acc 0.491 vs mean ask 0.508 z -0.91 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 304 PF 0.87 net -3.30c
+-- KXBTC15M: 520 scored windows
+f1_imb5                n  311 PF 1.53 blocks 1.27 (n 112) / 1.43 (n 112) / 2.15 (n 87) halves 1.09 / 2.21 net +9.14c stress PF 1.50 acc 0.611 vs mean ask 0.502 z +3.18 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 311 PF 1.53 net +9.14c
+f2_imb1                n  235 PF 3.43 blocks 3.59 (n 80) / 3.46 (n 88) / 3.19 (n 67) halves 2.78 / 4.37 net +24.05c stress PF 3.37 acc 0.762 vs mean ask 0.504 z +7.62 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 235 PF 3.43 net +24.05c
+f3_dwmid_minus_mid     n  263 PF 1.11 blocks 1.08 (n 99) / 1.32 (n 92) / 0.94 (n 72) halves 1.18 / 1.04 net +2.32c stress PF 1.09 acc 0.525 vs mean ask 0.483 z +0.64 control p(best of 20) 0.534 fail; without windows L1 / OICORE holds: n 263 PF 1.11 net +2.32c
+f4_d_imb30             n  270 PF 1.23 blocks 1.19 (n 98) / 1.32 (n 91) / 1.18 (n 81) halves 1.20 / 1.26 net +4.54c stress PF 1.21 acc 0.544 vs mean ask 0.481 z +1.61 control p(best of 20) 0.128 fail; without windows L1 / OICORE holds: n 270 PF 1.23 net +4.54c
+f5_d_imb60             n  247 PF 1.27 blocks 1.56 (n 83) / 1.06 (n 87) / 1.24 (n 77) halves 1.43 / 1.12 net +5.33c stress PF 1.25 acc 0.571 vs mean ask 0.500 z +1.59 control p(best of 20) 0.061 fail; without windows L1 / OICORE holds: n 247 PF 1.27 net +5.33c
+f6_thin_depletion      n  246 PF 0.93 blocks 1.32 (n 83) / 0.70 (n 83) / 0.86 (n 80) halves 1.18 / 0.72 net -1.70c stress PF 0.91 acc 0.492 vs mean ask 0.492 z -0.54 control p(best of 20) 0.999 fail; without windows L1 / OICORE holds: n 246 PF 0.93 net -1.70c
+f7_sweep_net           n  173 PF 0.61 blocks 0.52 (n 66) / 0.91 (n 56) / 0.47 (n 51) halves 0.55 / 0.69 net -10.65c stress PF 0.60 acc 0.393 vs mean ask 0.480 z -3.22 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 173 PF 0.61 net -10.65c
+f8_hole_asymmetry      n  211 PF 0.80 blocks 0.69 (n 83) / 0.93 (n 64) / 0.81 (n 64) halves 0.77 / 0.82 net -5.04c stress PF 0.78 acc 0.408 vs mean ask 0.441 z -1.69 control p(best of 20) 1.000 fail; without windows L1 / OICORE holds: n 211 PF 0.80 net -5.04c
+f9_book_slope          n  270 PF 1.30 blocks 0.98 (n 97) / 1.41 (n 95) / 1.74 (n 78) halves 0.94 / 1.88 net +5.81c stress PF 1.28 acc 0.567 vs mean ask 0.490 z +2.25 control p(best of 20) 0.045 fail; without windows L1 / OICORE holds: n 270 PF 1.30 net +5.81c
+f10_imb_3c             n  308 PF 1.75 blocks 1.49 (n 107) / 1.66 (n 112) / 2.33 (n 89) halves 1.36 / 2.33 net +11.93c stress PF 1.72 acc 0.627 vs mean ask 0.489 z +5.13 control p(best of 20) 0.001 PASS; without windows L1 / OICORE holds: n 308 PF 1.75 net +11.93c
+second look flags (accuracy >= 55% with n >= 300; not a verdict): KXBTC15M f1_imb5 accuracy 0.611 n 311; KXBTC15M f10_imb_3c accuracy 0.627 n 308
+
+CLOSED-FAMILY FEATURES, REPORTED SEPARATELY (Head's ruling): nothing that rests on either alone can become a lead; the headline above is judged on the registered whole (20 tries, the registered bar)
+  KXGOLD15M f6_thin_depletion: n 254 PF 1.11 net +2.20c stress PF 1.09 blocks 1.23 (n 91) / 1.02 (n 86) / 1.08 (n 77) halves 1.21 / 1.02 z +0.61
+  KXGOLD15M f7_sweep_net: n 190 PF 0.81 net -4.64c stress PF 0.80 blocks 1.28 (n 61) / 0.69 (n 73) / 0.63 (n 56) halves 0.88 / 0.75 z -1.20
+  KXBTC15M f6_thin_depletion: n 246 PF 0.93 net -1.70c stress PF 0.91 blocks 1.32 (n 83) / 0.70 (n 83) / 0.86 (n 80) halves 1.18 / 0.72 z -0.54
+  KXBTC15M f7_sweep_net: n 173 PF 0.61 net -10.65c stress PF 0.60 blocks 0.52 (n 66) / 0.91 (n 56) / 0.47 (n 51) halves 0.55 / 0.69 z -3.22
+
+Z BESIDE (information; the verdict above reads the corrected z, variance x D/(D-1), against 5.27): per try corrected z / uncorrected z
+  KXGOLD15M: f1 -0.23 / -0.24; f2 -0.47 / -0.48; f3 -0.73 / -0.76; f4 +0.01 / +0.02; f5 +0.47 / +0.49; f6 +0.61 / +0.63; f7 -1.20 / -1.24; f8 +0.85 / +0.87; f9 -0.68 / -0.71; f10 -0.91 / -0.94
+  KXBTC15M: f1 +3.18 / +3.29; f2 +7.62 / +7.89; f3 +0.64 / +0.67; f4 +1.61 / +1.66; f5 +1.59 / +1.65; f6 -0.54 / -0.56; f7 -3.22 / -3.33; f8 -1.69 / -1.75; f9 +2.25 / +2.32; f10 +5.13 / +5.31
+
+ZERO RULE (information): scored windows per try whose raw feature was within 1e-12 of zero but not exactly zero (set to zero, no trade; before this rule each could have traded on floating point residue)
+  KXGOLD15M: f1 0; f2 0; f3 46; f4 0; f5 0; f6 0; f7 0; f8 89; f9 4; f10 0
+  KXBTC15M: f1 0; f2 0; f3 40; f4 0; f5 0; f6 0; f7 0; f8 90; f9 2; f10 0
+HISTORY CHECK NOT_RUNNABLE: RuntimeError: history check skipped (no candle file in the fixture)
+
