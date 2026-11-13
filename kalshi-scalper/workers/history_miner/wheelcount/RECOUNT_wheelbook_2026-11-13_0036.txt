@@ -1,0 +1,7 @@
+run wheelbook/2026-11-13/0036 coverage rows 416 markets with no book row by series {}
+KXDOTA2GAME        fast  markets   2  market-minutes   410  two-sided 100.0%  strict(<=60s)  38.3%  median spread 0.09  p90 0.09  spread<=4c   0.0%
+KXDOTA2MAP         slow  markets   4  market-minutes   820  two-sided 100.0%  strict(<=60s)  25.1%  median spread 0.13  p90 0.13  spread<=4c   0.0%
+KXEBASKETBALLGAME  fast  markets  24  market-minutes   448  two-sided  83.0%  strict(<=60s)  83.0%  median spread 0.04  p90 0.04  spread<=4c  79.0%
+KXESOCCERGAME      fast  markets 219  market-minutes  4368  two-sided  83.7%  strict(<=60s)  71.1%  median spread 0.03  p90 0.06  spread<=4c  74.3%
+KXESOCCERGAME      slow  markets 336  market-minutes 28293  two-sided 100.0%  strict(<=60s)   7.9%  median spread 0.93  p90 0.98  spread<=4c  13.1%
+KXLIGAPROMATCH     fast  markets  20  market-minutes   388  two-sided  72.9%  strict(<=60s)  71.9%  median spread 0.02  p90 0.14  spread<=4c  49.7%
