@@ -1,0 +1,10 @@
+PROVISIONAL, ONE BUILD (engine 870a453e, series file 34f70868, candle folders /tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/T_CH1,/tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/T_CH2,/tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/T_CH3,/tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/T_CH4,/tmp/claude-0/-home-user-shwoopnet/a8996206-4897-57fa-99d1-43a2ddf289e4/scratchpad/ij2/T_CH5)
+series file sha256 34f708687df24f5a | development window {'closes_from': '2026-09-12T00:00:00Z', 'closes_before': '2026-10-23T00:00:00Z'}
+== CHALLENGER_TENNIS | candle freshness measured on Bitcoin 15 minute only, not on these markets
+matches listed in the window: 2183
+matches with a qualifying jump and an entry that passes: 1140 | not a bet and why: {'entry ask or spread outside the band': 131, 'entry minute not two-sided': 7}
+COST LINE (no result read): median ONE-WAY entry cost (ask minus mid plus the fee as charged) over 1271 qualifying decisions = 0.025 (kill above 0.04); bets made more than 6 hours before the close: 15; median elapsed minute of the bet: 708.0; (cost line and family clock check: selected on development, frozen for the held-out)
+voided bets (price refunded, fee kept, counted in n, PF and z): 0 | bets with no result that are not voids (fee-only loss, counted): 0
+bets 1140 | wins 649 | mean price paid 0.588 | cash PF 0.84 | net -3.82c a contract | halves by date PF 0.79 / 0.89 | share paid 70c to 85c 27.3% | largest day share of net None | z (days) -2.40 | z (matches, one bet each) -2.73 | the smaller is used: -2.73
+PLACEBO (Amendment 2, matched one for one): 358 placebo bets, 782 bets with no placebo (counted); median elapsed minute 45.0 (rule 708.0); net at the rule's price mix +8.32c; difference -12.15c (se 2.80c)
+LABEL: FALSIFIED (cash PF 0.84 overall, halves 0.79 / 0.89)
