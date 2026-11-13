@@ -85,15 +85,15 @@ gates.RG5 = () => {
   // Consequence: the page reads the one list with one same-origin GET, merges it without replacing a computed card, and escapes every field.
   assert.ok(/fetch\('strategies-registry\.json', \{ cache: 'no-cache' \}\)/.test(html), 'one GET of the committed list');
   assert.strictEqual((html.match(/strategies-registry\.json/g) || []).length >= 1, true);
-  const card = html.slice(html.indexOf('function kalshiRegistryCardHtml'), html.indexOf('function kalshiRegistryRetiredRow'));
+  const card = html.slice(html.indexOf('regSplit.pipeline.forEach'), html.indexOf('// ---- The nearest kill'));
   assert.ok(!/innerHTML/.test(card));
-  for (const f of ['x.name', 'x.stage', 'x.label', 'x.id', 'x.kill', "x['return']", 'x.roomWhat']) assert.ok(card.includes('esc(' + f) || card.includes('esc(kalshiStratOneLine(' + f) || card.includes(f), f + ' is drawn and escaped');
-  assert.ok(/data-reg-details=/.test(card) && /Details<\/button>/.test(card), 'the card has a Details button (option A, the owner: "i like. A")');
+  assert.ok(/name: x\.name/.test(card) && /<b class="rw-n">' \+ esc\(o\.name\)/.test(html) && /kalshiRegistrySheetHtml\(x, d, esc\)/.test(card), 'a registry row draws its escaped name and the escaped sheet (rule, kill, return, room left, chart)');
+  assert.ok(/data-reg-details=/.test(html.slice(html.indexOf('var quietHtml'), html.indexOf('var shadowEmpty'))) && /Details<\/button>/.test(html.slice(html.indexOf('var quietHtml'), html.indexOf('var shadowEmpty'))), 'Paper and idea rows keep the Details button (option A, the owner: "i like. A")');
   assert.ok(/id = 'spPop'/.test(html) && /pop\.hidden = true/.test(html) && /e\.key === 'Escape'/.test(html), 'the popup closes by Close, outside tap and Escape, and lives outside #stratBody so a redraw never closes it');
   // Behaviour: lift the pure helpers and render the seeded registry.
   const fn = (name) => { const i = html.indexOf('function ' + name + '('); let d = 0, j = html.indexOf('{', i); for (let k = j; k < html.length; k++) { if (html[k] === '{') d++; else if (html[k] === '}' && --d === 0) return html.slice(i, k + 1); } };
-  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegistryCardHtml', 'kalshiRegBuilding', 'kalshiRegistrySheetHtml', 'kalshiRegistryRetiredRow', 'kalshiStratSpark', 'kalshiStratOneLine'].map(fn).join('\n');
-  const P = new Function("var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];\n" + code + '; return { kalshiRegistryNorm, kalshiRegistrySplit, kalshiRegistryCardHtml, kalshiRegistrySheetHtml, kalshiRegistryRetiredRow };')();
+  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegBuilding', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiStratOneLine'].map(fn).join('\n');
+  const P = new Function("var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];\n" + code + '; return { kalshiRegistryNorm, kalshiRegistrySplit, kalshiRegistrySheetHtml };')();
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const list = P.kalshiRegistryNorm(reg);
   assert.strictEqual(list.length, reg.strategies.length);
@@ -101,9 +101,8 @@ gates.RG5 = () => {
   const split = P.kalshiRegistrySplit(list, ['OICORE', 'EVENT830', 'CFRTIK'], ['XRP', 'Bitcoin', 'Ethereum', 'Dogecoin', 'AUD/USD', 'USD/CAD', 'Natural gas']);
   assert.deepStrictEqual(split.pipeline.map((x) => x.id).sort(), ['GOLDOFF', 'NC15DEPTH1', 'S3', 'W-SPOTLEAD1'], 'the Head of R&D list: the research rows still standing and the shadow rule, not Shadow 0 (the spread cell is Retired after its FAIL; CFRTI-K became the live probation seat CFRTIK on Nov 12, 2026, so it is a Live-lane card now, not a pipeline row)');
   assert.ok(split.retired.some((x) => x.id === 'MMSIM1') && split.retired.some((x) => x.id === 'W-SPREAD-CELL1') && !split.retired.some((x) => x.name === 'XRP'), 'only retired rows not already listed are added');
-  const out = split.pipeline.map((x) => P.kalshiRegistryCardHtml(x, esc)).join('');
+  const out = split.pipeline.map((x) => P.kalshiRegistrySheetHtml(x, null, esc)).join('');
   assert.strictEqual((out.match(/>UNPROVEN</g) || []).length, 4, 'every unproven card says UNPROVEN');
-  assert.ok(!/Kill|Return|Room left/.test(out), 'the card itself is condensed: the rules are in Details');
   // The Details sheet shows ONLY: what it does, kill, return, room left, one chart.
   const g = list.find((x) => x.id === 'GOLDOFF');
   const sheet = P.kalshiRegistrySheetHtml(g, { n: 14, spark: [0.5, 0.8, 1.1, 1.2] }, esc);
@@ -112,7 +111,7 @@ gates.RG5 = () => {
   assert.ok(/46 to go/.test(sheet), 'room left counts toward the target in the file');
   const empty = P.kalshiRegistrySheetHtml(g, null, esc);
   assert.ok(/not measured yet/.test(empty) && /no trades to draw yet/.test(empty) && !/<svg/.test(empty), 'no data draws no made-up figure');
-  const evil = P.kalshiRegistryCardHtml({ id: 'X', name: '<img onerror=1>', stage: 'Shadow', label: 'UNPROVEN', rule: '"><script>', notes: [], n: null }, esc);
+  const evil = P.kalshiRegistrySheetHtml({ id: 'X', name: '<img onerror=1>', stage: 'Shadow', label: 'UNPROVEN', rule: '"><script>', notes: [], n: null }, null, esc);
   assert.ok(!/<img|<script/.test(evil), 'registry text is escaped');
 };
 
@@ -126,9 +125,7 @@ gates.RG6 = () => {
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mask = (x) => (x < 0 ? '-' : '') + '****', money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // the card side: the computed Live tile renders the button, and the click handler finds a row for every live id
-  const tile = html.slice(html.indexOf('var tile = function(o){'), html.indexOf('var ids = model.live.map'));
-  assert.ok(/o\.sheet \? '<button type="button" class="sp-detbtn" data-reg-details="'/.test(tile), 'a sheet tile draws the Details button');
-  assert.ok(/return tile\(\{ sheet: true, id: s\.id, name: s\.name, stage: 'Live'/.test(html), 'every computed Live or Probe card is a sheet tile (L1, OICORE, EVENT830 and any added to the list)');
+  assert.ok(/data-row="' \+ esc\(o\.key\)/.test(html) && /key: s\.id, name: s\.name, stage: bk === 'off'/.test(html), 'every computed Live or Probe strategy is a row that opens in place (L1, OICORE, EVENT830 and any added to the list); the popup now serves the Retired list and the Paper and Ideas rows');
   assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiRegistrySheetHtml\(x, kalshiStratSheetData\(/.test(html), 'the popup reuses the one sheet builder, with its data built when it opens');
   assert.ok(/kalshiStratPop\.refresh\(\)/.test(fn('renderStrategiesPage')), 'a redraw or the Privacy switch re-masks an open popup');
   const list = reg.strategies;

@@ -948,62 +948,30 @@
   /* The result chart takes the height the Bot status card beside it gives the row (the owner, Nov 1, 2026: "big gap below account results"). The box keeps the chart's own shape as its minimum (aspect-ratio set in the markup) and grows past it; the drawing stretches with it, which is safe because every line in it keeps a fixed width on screen and the labels are HTML placed by percent. */
   .kal-console [data-card="pnl"] #kalPnlBody{ flex:1 1 auto; display:flex; flex-direction:column; }
   .kal-console [data-card="pnl"] .kal-plot{ flex:1 1 auto; } .kal-console [data-card="pnl"] .kal-plot > svg{ position:absolute; left:0; top:0; width:100%; height:100%; }
-  /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). All of it lives in these few rules (prefix sp-), so the look is easy to change later: .sp-flow (the lifecycle), .sp-tile (one strategy), .sp-pf (the big profit factor), .sp-gauge (the kill distance), .sp-spark (the trend line), .sp-bar (the shadow progress), .sp-ladder (the sizing placeholder). */
+  /* Strategies page (Nov 10, 2026, the owner: an entirely new page for strategies, same theme, new visuals). Black and white only, plain text with signs (no green or red, calm view). Prefix sp- for the shared pieces (badge, ring, bar, spark, summary, popup) and lp- / rw- for the stage board (Nov 12, 2026, the owner: "build it into the live page"): .lp the loop of four boxes, .lp-t one box, .lp-p the open box's panel, .rw one strategy row, .rw-d its detail, .rw-more the deepest layer. */
   #page-strategies .sp-lede{ font-size:12px; color:var(--muted); margin:0 0 16px; overflow-wrap:anywhere; }
-  /* Flow board (Nov 10, 2026, the owner: cards on a Shadow, Live, Retired board with connecting lines and status badges). Same black and white tokens and .kal-card windows; lines are strokes in var(--border) and var(--muted), badges are outlines (hot is the one inverted fill). Phone first: the lanes stack with a short arrow between them; at 900px and up they sit side by side and the board's svg draws the curves. */
-  .sp-wrap{ container-type:inline-size; container-name:sp; max-width:1500px; margin:0 auto; }
-  .sp-board{ position:relative; display:grid; grid-template-columns:minmax(0,1fr); gap:22px; align-items:start; }
-  .sp-lane{ display:flex; flex-direction:column; gap:12px; min-width:0; position:relative; z-index:1; }
-  .sp-cards{ display:grid; grid-template-columns:minmax(0,1fr); gap:12px; min-width:0; }
-  .sp-lane-h{ display:flex; align-items:baseline; gap:8px; padding:2px 2px 0; min-height:40px; align-items:center; }
-  .sp-lane-t{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; } .sp-lane-n{ font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; } .sp-lane-note{ font-size:11px; color:var(--muted); }
+  .sp-wrap{ container-type:inline-size; container-name:sp; max-width:1280px; margin:0 auto; }
   .sp-detbtn{ align-self:flex-start; margin-top:10px; background:none; border:1px solid var(--border); color:var(--paper); border-radius:999px; padding:8px 16px; min-height:40px; font:inherit; font-size:12.5px; cursor:pointer; } .sp-detbtn:hover{ border-color:var(--paper); }
   .sp-pop{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; padding:16px; } .sp-pop[hidden]{ display:none; }
   .sp-pop-sheet{ width:min(420px,100%); max-height:90vh; overflow:auto; background:var(--panel-raised, #141414); border:1px solid var(--border); border-radius:16px; padding:20px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
   .sp-pop-h{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:6px; } .sp-pop-f{ display:grid; grid-template-columns:60px minmax(0,1fr); gap:8px; font-size:12px; margin:8px 0; } .sp-pop-f b, .sp-pop-room b{ color:var(--muted); font-weight:600; } .sp-pop-room{ margin-top:12px; font-size:12px; display:grid; gap:6px; }
-  .sp-reg{ gap:8px; } .sp-reg .sp-th{ flex-wrap:wrap; }
-  .sp-grp{ grid-column:1/-1; display:flex; align-items:baseline; gap:8px; padding:6px 2px 0; border-bottom:1px solid var(--border); }
-  .sp-grp-t{ font-weight:700; font-size:13px; } .sp-grp-n{ color:var(--muted); font-size:12px; }
-  .sp-lane-live .sp-lane-h{ border-bottom:2px solid var(--paper); }
-  .sp-lane-shadow .sp-lane-h, .sp-lane-retired .sp-lane-h{ border-bottom:1px solid var(--border); }
-  /* Two columns of cards from a 640px board, Live and Shadow side by side from 1100px (container queries on .sp-wrap, so the side navigation never matters); the retired list is a collapsed row under both. These breakpoints are kalshiBoardCols, tested against this text. */
-  @container sp (min-width:640px){ .sp-cards{ grid-template-columns:repeat(2,minmax(0,1fr)); } }
-  @container sp (min-width:1100px){ .sp-board{ grid-template-columns:repeat(2,minmax(0,1fr)); column-gap:24px; } .sp-lane-retired{ grid-column:1 / -1; } }
   .sp-badge{ flex:none; font-size:10.5px; font-weight:700; letter-spacing:.06em; border:1px solid var(--border); border-radius:999px; padding:2px 9px; white-space:nowrap; }
-  .sp-b-ok{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); }
-  .sp-chip{ display:inline-block; margin-left:8px; font-size:10px; font-weight:700; letter-spacing:.04em; border:1px solid var(--border); border-radius:999px; padding:0 7px; color:var(--paper); white-space:nowrap; }
-  .sp-counts{ display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:8px; margin:0 0 14px; } .sp-count{ border:1px solid var(--border); border-radius:12px; padding:10px 8px; text-align:center; min-width:0; } .sp-count b{ display:block; font-size:22px; font-variant-numeric:tabular-nums; } .sp-count span{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); }
-  .sp-rgrp{ margin:0 0 10px; } .sp-rgrp > summary{ display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:12px; cursor:pointer; font-weight:700; text-transform:capitalize; list-style:none; } .sp-rgrp > summary::-webkit-details-marker{ display:none; } .sp-rgn{ color:var(--muted); font-variant-numeric:tabular-nums; } .sp-rgrp[open] > summary{ border-bottom-left-radius:0; border-bottom-right-radius:0; } .sp-rgrp > .sp-rlist{ border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
+  .sp-b-ok, .sp-b-live{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle, .sp-b-deck{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); } .sp-b-prob{ border-color:var(--muted); } .sp-b-off{ border-style:dashed; color:var(--muted); }
+  .sp-rgrp{ margin:10px 0 0; } .sp-rgrp > summary{ display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:12px; cursor:pointer; font-weight:700; text-transform:capitalize; list-style:none; } .sp-rgrp > summary::-webkit-details-marker{ display:none; } .sp-rgn{ color:var(--muted); font-variant-numeric:tabular-nums; } .sp-rgrp[open] > summary{ border-bottom-left-radius:0; border-bottom-right-radius:0; } .sp-rgrp > .sp-rlist{ border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
   .sp-detsm{ margin-top:0; align-self:center; padding:4px 12px; min-height:40px; }
   .sp-rlist{ list-style:none; margin:0; padding:0; border:1px solid var(--border); border-radius:12px; }
   .sp-rrow{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 12px; align-items:center; padding:11px 14px; border-top:1px solid var(--border); font-size:14px; line-height:1.3; min-width:0; } .sp-rrow:first-child{ border-top:0; }
-  .sp-rhead{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); padding-top:9px; padding-bottom:9px; } .sp-rhead span:nth-child(n+2), .sp-rpfv, .sp-rn{ text-align:right; }
   .sp-rwho{ display:flex; flex-direction:column; gap:2px; min-width:0; } .sp-rname{ font-weight:700; font-size:15px; } .sp-rnote{ color:var(--muted); font-size:12px; overflow-wrap:anywhere; }
-  .sp-rpfv{ font-weight:700; font-size:16px; font-variant-numeric:tabular-nums; } .sp-rn{ color:var(--muted); font-variant-numeric:tabular-nums; }
-  .sp-ret-t{ position:absolute; opacity:0; pointer-events:none; width:1px; height:1px; }
-  .sp-lane-retired > label.sp-lane-h{ cursor:pointer; min-height:44px; } .sp-lane-retired > label.sp-lane-h::after{ content:'\25BE'; margin-left:auto; color:var(--muted); } .sp-ret-t:checked + label.sp-lane-h::after{ content:'\25B4'; }
-  .sp-ret-t:focus-visible + label.sp-lane-h{ outline:2px solid var(--paper); outline-offset:2px; }
-  .sp-lane-b{ display:flex; flex-direction:column; gap:14px; min-width:0; max-width:760px; } .sp-ret-t:not(:checked) ~ .sp-lane-b{ display:none; } .sp-back{ margin-top:2px; }
+  .sp-back{ margin-top:8px; } .sp-none{ padding:6px 4px 10px; }
   /* Ring dial (Nov 10, 2026, polish round 1): the profit factor inside a circle, arc on a 0 to 2 scale, tick at 1.0. Grey and white only. */
-  .sp-top{ display:flex; align-items:center; gap:14px; min-width:0; } .sp-who{ display:flex; flex-direction:column; gap:4px; min-width:0; flex:1; }
   .sp-ringw{ --rd:84px; flex:none; display:flex; flex-direction:column; align-items:center; gap:3px; width:var(--rd); }
   .sp-ring{ position:relative; width:var(--rd); height:var(--rd); flex:none; } .sp-ring svg{ width:100%; height:100%; display:block; overflow:visible; }
   .sp-ring-bg{ fill:none; stroke:var(--border); stroke-width:8; } .sp-ring-fg{ fill:none; stroke:var(--paper); stroke-width:8; stroke-linecap:round; } .sp-ring-tick{ stroke:var(--muted); stroke-width:2.5; }
   .sp-ring b{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:calc(var(--rd) * var(--k, .3)); line-height:1; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .sp-ring-cap{ font-size:10.5px; color:var(--muted); line-height:1.1; text-align:center; white-space:nowrap; }
-  .sp-pfl{ font-size:11px; color:var(--muted); }
-  .sp-compact.kal-card{ padding:14px 16px; gap:10px; background:var(--panel); } .sp-compact .sp-top{ gap:14px; align-items:flex-start; }
-  .sp-rule1{ font-size:12px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .sp-pfl{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-  .sp-thin{ min-width:0; } .sp-full{ display:flex; flex-direction:column; gap:2px; font-size:12px; color:var(--muted); overflow-wrap:anywhere; } .sp-full b{ color:var(--paper); font-size:10.5px; letter-spacing:.06em; }
-  .sp-kill{ min-width:0; } .sp-kill-h{ display:flex; justify-content:space-between; align-items:baseline; gap:8px; margin-bottom:4px; } .sp-kill-h b{ font-size:15px; font-variant-numeric:tabular-nums; } .sp-kill-h b{ flex:none; } .sp-kill-h span{ font-size:11px; color:var(--muted); text-align:right; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; } .sp-killbar{ height:6px; border-radius:3px; }
-  .sp-det-pre{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .kal-bd-rules{ list-style:none; margin:0; padding:0; font-size:12px; color:var(--muted); } .kal-bd-rules li{ margin-top:4px; overflow-wrap:anywhere; } .kal-bd-rules b{ color:inherit; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; margin-right:4px; }
   .sp-h{ font-size:11px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); display:flex; justify-content:space-between; gap:8px; flex-wrap:wrap; margin:22px 0 10px; } .sp-h span{ font-weight:500; letter-spacing:0; text-transform:none; }
-  .sp-tile.kal-card{ margin-bottom:0; padding:16px 16px 14px; min-width:0; display:flex; flex-direction:column; gap:10px; }
-  .sp-th{ display:flex; justify-content:space-between; align-items:flex-start; gap:8px; flex-wrap:wrap; }
   .sp-name{ font-size:15px; font-weight:700; overflow-wrap:anywhere; min-width:0; flex:1 1 90px; }
-  .sp-id{ display:inline-block; margin-left:6px; font-size:10.5px; font-weight:700; letter-spacing:.04em; border:1px solid var(--border); border-radius:999px; padding:1px 7px; vertical-align:2px; }
-  .sp-rule{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; margin-top:-4px; }
   .sp-spark{ min-width:0; } .sp-spark svg{ width:100%; height:48px; display:block; overflow:visible; }
   .sp-spark-cap{ display:flex; justify-content:space-between; gap:8px; font-size:10.5px; color:var(--muted); margin-top:3px; }
   .sp-bar{ height:6px; border-radius:3px; background:var(--border); overflow:hidden; } .sp-bar i{ display:block; height:100%; background:var(--paper); }
@@ -1011,21 +979,78 @@
   .sp-sub{ font-size:12px; color:var(--muted); overflow-wrap:anywhere; min-width:0; }
   .sp-ladder{ display:flex; align-items:center; gap:8px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:10px; flex-wrap:wrap; }
   .sp-ladder b{ font-weight:700; letter-spacing:.06em; text-transform:uppercase; font-size:10.5px; }
-  .sp-sum.kal-card{ padding:16px; display:flex; flex-direction:column; gap:12px; }
+  .sp-sum.kal-card{ padding:16px; display:flex; flex-direction:column; gap:12px; margin-bottom:10px; }
   .sp-sum-pf{ display:flex; flex-direction:column; min-width:0; } .sp-sum-pf b{ font-size:52px; line-height:1; font-weight:700; font-variant-numeric:tabular-nums; } .sp-sum-pf span{ font-size:11px; color:var(--muted); margin-top:4px; }
   .sp-sum-grid{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px 12px; }
   .sp-sum-c{ display:flex; flex-direction:column; min-width:0; border-top:1px solid var(--border); padding-top:8px; } .sp-sum-c span{ font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .sp-sum-c b{ font-size:16px; font-weight:700; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; margin-top:2px; }
-  .sp-det{ border-top:1px solid var(--border); padding-top:10px; } .sp-det > summary{ cursor:pointer; list-style:none; display:inline-flex; align-items:center; min-height:40px; padding:0 16px; border:1px solid var(--border); border-radius:999px; font-size:12px; font-weight:700; } .sp-det > summary::-webkit-details-marker{ display:none; } .sp-det[open] > summary{ border-color:var(--paper); }
   .sp-det-body{ display:flex; flex-direction:column; gap:12px; margin-top:12px; min-width:0; }
   .sp-plot{ min-width:0; } .sp-plot svg{ width:100%; height:64px; display:block; overflow:visible; }
   .sp-rt-h{ margin-bottom:-6px; } .sp-rt, .sp-act{ list-style:none; margin:0; padding:0; }
   .sp-rt li{ display:grid; grid-template-columns:minmax(0,1fr) auto; gap:0 10px; padding:7px 0; border-top:1px solid var(--border); font-size:12px; min-width:0; } .sp-rt li:first-child{ border-top:0; }
   .sp-rt-t{ grid-column:1 / -1; font-size:11px; color:var(--muted); } .sp-rt-m{ min-width:0; overflow-wrap:anywhere; } .sp-rt b{ font-variant-numeric:tabular-nums; white-space:nowrap; }
   .sp-act li{ padding:9px 0; border-top:1px solid var(--border); min-width:0; } .sp-act li:first-child{ border-top:0; padding-top:0; } .sp-act-t{ font-size:13px; font-weight:700; overflow-wrap:anywhere; } .sp-act li.sp-act-critical .sp-act-t::before{ content:'! '; }
+  /* The stage board: the loop. A 2 by 2 loop on a phone (Shadow, then Probation across the top; Off / Retired, then Live below, so the return arrow goes up the left), one row of four on a wider screen with the return arrow underneath. The grid drifts slowly behind it; the dots flow along the arrows; both stop under reduced motion. */
+  .lp{ position:relative; margin:6px 0 14px; padding:10px 12px 12px; border:1px solid var(--border); border-radius:16px; background:var(--panel); }
+  .lp::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px); background-size:26px 26px; -webkit-mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); mask-image:radial-gradient(ellipse at 50% 20%,#000 25%,transparent 85%); animation:lpGrid 26s linear infinite; }
+  .lp > *{ position:relative; } .lp > .lp-hd{ min-height:20px; margin:0 2px 8px; font-size:12px; color:var(--muted); } .lp-sum b{ color:var(--paper); font-weight:600; }
+  .lp-row{ display:flex; align-items:center; gap:6px; }
+  .lp-t{ all:unset; box-sizing:border-box; position:relative; display:grid; grid-template-columns:auto auto auto; grid-template-rows:auto auto; column-gap:8px; align-items:center; padding:6px 12px 6px 14px; min-height:46px; cursor:pointer; border:1px solid var(--border); border-radius:12px; background:var(--ink,#0b0b0b); color:var(--paper); flex:none; transition:border-color .25s,box-shadow .25s,background .25s; }
+  .lp-t b{ grid-row:1/3; font-size:22px; font-variant-numeric:tabular-nums; } .lp-tt{ font-size:13px; font-weight:700; } .lp-t em{ font-style:normal; font-size:10.5px; color:var(--muted); } .lp-then{ display:none; grid-column:1/-1; font-size:10px; color:var(--muted); line-height:1.2; } .lp-t .chev{ grid-column:4; grid-row:1/3; margin:0 0 0 6px; }
+  .chev{ flex:none; width:8px; height:8px; border-right:2px solid var(--muted); border-bottom:2px solid var(--muted); transform:rotate(-45deg); transition:transform .3s; margin:0 4px; }
+  [aria-expanded="true"] > .chev{ transform:rotate(45deg); border-color:var(--paper); }
+  .lp-t:hover, .lp-t:focus-visible{ border-color:var(--paper); box-shadow:0 0 0 1px var(--paper); } .lp-t:focus-visible{ outline:none; }
+  .lp-t[aria-expanded="true"]{ border-color:var(--paper); background:var(--panel-raised,#151515); box-shadow:0 0 0 3px rgba(255,255,255,.12); }
+  .lp-t.latest{ border-color:#8a8a8a; } .lp-tag{ position:absolute; top:-8px; left:12px; font-size:9px; font-weight:700; background:var(--paper); color:var(--ink,#000); border-radius:999px; padding:0 7px; text-decoration:none; white-space:nowrap; }
+  .lp-c{ flex:1; min-width:56px; display:flex; flex-direction:column; align-items:center; gap:3px; }
+  .lp-ln{ position:relative; display:block; width:100%; height:2px; background:var(--border); } .lp-ln::after{ content:''; position:absolute; right:-1px; top:-4px; border:5px solid transparent; border-left:7px solid var(--muted); border-right:0; }
+  .lp-ln u{ position:absolute; top:-2px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 0 0 / 6px 6px; animation:lpDot 2.6s linear infinite; } .lp-ln u:nth-child(2){ animation-delay:.87s; } .lp-ln u:nth-child(3){ animation-delay:1.73s; }
+  .lp-lab{ font-size:10.5px; color:var(--muted); text-align:center; line-height:1.2; }
+  .lp-ret{ position:relative; height:20px; margin:4px 40px 0; border:1px solid var(--border); border-top:0; border-radius:0 0 12px 12px; display:flex; align-items:flex-end; justify-content:center; } .lp-ret .lp-lab{ background:var(--panel); padding:0 8px; transform:translateY(7px); }
+  .lp-ret::before{ content:''; position:absolute; left:-6px; top:-1px; border:5px solid transparent; border-bottom:7px solid var(--muted); border-top:0; }
+  .lp-ret u{ position:absolute; bottom:-4px; left:0; right:0; height:6px; background:radial-gradient(circle,var(--paper) 0 3px,transparent 3.5px) no-repeat 100% 0 / 6px 6px; animation:lpRet 5s linear infinite; } .lp-ret u:nth-child(2){ animation-delay:2.5s; }
+  .lp.is-open .lp-t{ min-height:34px; padding:3px 10px; grid-template-rows:auto; } .lp.is-open .lp-t b{ grid-row:auto; font-size:15px; } .lp.is-open .lp-t em, .lp.is-open .lp-lab{ display:none; } .lp.is-open .lp-t .chev{ grid-row:auto; } .lp.is-open .lp-c{ min-width:30px; flex:0 0 36px; } .lp.is-open .lp-ret{ height:12px; } .lp.is-open .lp-ret .lp-lab{ display:none; }
+  .lp-panels{ margin-top:12px; } .lp-p{ border:1px solid var(--paper); border-radius:14px; background:rgba(10,10,10,.85); overflow:hidden; } .lp-p[hidden]{ display:none; }
+  .lp-prog{ position:relative; height:3px; background:var(--border); } .lp-prog i{ display:block; height:100%; width:var(--w); background:var(--paper); transform-origin:left center; } .lp-prog i::after{ content:''; position:absolute; top:-2px; left:calc(var(--w) - 6px); width:7px; height:7px; border-radius:50%; background:var(--paper); box-shadow:0 0 8px #fff; }
+  .lp-prog span{ position:absolute; right:10px; top:6px; font-size:10px; color:var(--muted); white-space:nowrap; max-width:calc(100% - 20px); overflow:hidden; text-overflow:ellipsis; }
+  .lp-ph{ display:flex; align-items:baseline; gap:10px; padding:18px 14px 6px; } .lp-ph b{ font-size:15px; } .lp-ph span{ font-size:11.5px; color:var(--muted); }
+  .lp-rows{ padding:2px 10px 10px; display:flex; flex-direction:column; gap:5px; }
+  /* A strategy row: compact (name, stage, cash PF, one status word, a thin bar) and open in place to its detail. */
+  .rw{ border:1px solid var(--border); border-radius:10px; background:var(--ink,#0b0b0b); } .rw.open{ border-color:#666; } .rw:hover{ border-color:#8a8a8a; }
+  .rw-h{ all:unset; box-sizing:border-box; display:grid; grid-template-columns:20px minmax(90px,190px) auto 56px 110px minmax(50px,1fr); gap:10px; align-items:center; width:100%; min-height:44px; padding:0 12px 0 8px; cursor:pointer; font-size:12.5px; }
+  .rw-h:focus-visible, .mo-b:focus-visible, .lp-t:focus-visible{ outline:2px solid var(--paper); outline-offset:2px; }
+  .rw-n{ font-size:13.5px; overflow-wrap:anywhere; } .rw-pf{ font-variant-numeric:tabular-nums; font-weight:700; font-size:14px; } .rw-w{ font-size:10.5px; letter-spacing:.06em; color:var(--muted); font-weight:700; }
+  .rw-bar{ height:5px; } .rw.near .rw-w::before{ content:''; display:inline-block; width:6px; height:6px; border-radius:50%; background:var(--paper); margin-right:6px; vertical-align:middle; animation:lpPulse 1.7s ease-out infinite; }
+  .sx{ display:grid; grid-template-rows:0fr; transition:grid-template-rows .38s cubic-bezier(.3,.7,.2,1); } .sx-in{ min-height:0; overflow:hidden; visibility:hidden; transition:visibility 0s .38s; }
+  .rw.open > .sx, .rw-more.open > .sx{ grid-template-rows:1fr; } .rw.open > .sx > .sx-in, .rw-more.open > .sx > .sx-in{ visibility:visible; transition-delay:0s; }
+  .rw-d{ display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; padding:4px 12px 8px; } .rw-c1, .rw-c2{ display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .rw-hd{ display:flex; gap:12px; align-items:center; } .rw-hd .sp-ringw{ --rd:60px; } .rw-hm{ display:flex; flex-direction:column; gap:2px; min-width:0; } .rw-hm b{ font-size:14px; } .rw-hm span{ font-size:11.5px; color:var(--muted); }
+  .bd-l{ display:grid; grid-template-columns:52px minmax(0,1fr) 150px; gap:8px; align-items:start; font-size:12px; border-top:1px solid var(--border); padding-top:5px; } .bd-l.one{ grid-template-columns:52px minmax(0,1fr); }
+  .bd-lab{ font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--muted); } .bd-w{ min-width:0; line-height:1.3; font-size:12px; overflow-wrap:anywhere; }
+  .bd-b{ display:flex; flex-direction:column; gap:2px; min-width:0; } .bd-b em{ font-style:normal; font-size:10px; line-height:1.2; color:var(--muted); font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+  .bd-b.near .sp-bar i{ background:repeating-linear-gradient(45deg,var(--paper) 0 5px,var(--muted) 5px 10px); } .bd-b.ret .sp-bar i{ background:var(--muted); }
+  .bd-res{ display:flex; flex-wrap:wrap; gap:4px 10px; font-size:11px; color:var(--muted); border-top:1px solid var(--border); padding-top:5px; } .bd-res b{ color:var(--paper); font-variant-numeric:tabular-nums; } .bd-last{ margin-left:auto; min-width:0; }
+  .rw-reg .sp-pop-f{ grid-template-columns:60px minmax(0,1fr); }
+  .rw-more{ padding:0 12px 10px; } .mo-b{ all:unset; box-sizing:border-box; display:inline-flex; align-items:center; gap:6px; cursor:pointer; min-height:40px; font-size:12px; font-weight:600; color:var(--muted); } .mo-b[aria-expanded="true"]{ color:var(--paper); }
+  .mo-body{ display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); gap:14px; padding:6px 0 2px; border-top:1px solid var(--border); margin-top:4px; } .mo-body .sp-det-body, .mo-body .kal-bd-rules{ grid-column:1/-1; }
+  .mo-body dl{ margin:0; display:grid; grid-template-columns:78px 1fr; gap:4px 10px; font-size:12px; } .mo-body dt{ color:var(--muted); font-size:10px; letter-spacing:.06em; text-transform:uppercase; padding-top:2px; } .mo-body dd{ margin:0; line-height:1.35; overflow-wrap:anywhere; }
+  .bd-fold{ border:1px solid var(--border); border-radius:12px; margin:6px 0 0; background:var(--panel); } .bd-fold summary{ display:flex; gap:10px; min-height:44px; align-items:center; padding:0 14px; cursor:pointer; font-weight:600; font-size:13px; list-style:none; } .bd-fold summary::-webkit-details-marker{ display:none; } .bd-fold summary span{ color:var(--muted); font-weight:500; } .bd-fold .sp-rlist{ border:0; border-top:1px solid var(--border); border-radius:0 0 12px 12px; }
+  @keyframes lpGrid{ to{ background-position:26px 26px,26px 26px; } }
+  @keyframes lpDot{ from{ background-position:0 0; opacity:0; } 15%{ opacity:1; } 85%{ opacity:1; } to{ background-position:100% 0; opacity:0; } } @keyframes lpRet{ from{ background-position:100% 0; opacity:0; } 10%{ opacity:1; } 90%{ opacity:1; } to{ background-position:0 0; opacity:0; } }
+  @keyframes lpRow{ from{ opacity:0; transform:translateX(-16px); } } @keyframes lpFill{ from{ transform:scaleX(0); } } @keyframes lpTip{ 0%,80%{ opacity:0; } 100%{ opacity:1; } } @keyframes lpPulse{ 0%{ box-shadow:0 0 0 0 rgba(255,255,255,.6); } 100%{ box-shadow:0 0 0 8px rgba(255,255,255,0); } }
+  @keyframes rwBar{ from{ transform:scaleX(0); } } @keyframes rwRing{ from{ stroke-dashoffset:1; } } @keyframes lpTileIn{ from{ opacity:0; transform:translateY(10px); } }
+  .rw.open .sp-bar i{ transform-origin:left center; animation:rwBar 1s cubic-bezier(.2,.7,.2,1) both .15s; } .rw.open .sp-ring-fg{ animation:rwRing 1s cubic-bezier(.2,.7,.2,1) both .1s; } .rw:not(.open) .sp-ring-fg, .rw:not(.open) .sp-bar i{ animation:none; }
+  .lp-p.play .rw{ animation:lpRow .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(var(--i,0) * 80ms + 160ms); } .lp-p.play .lp-prog i{ animation:lpFill 1.2s cubic-bezier(.2,.7,.2,1) both .25s; } .lp-p.play .lp-prog i::after{ animation:lpTip 1.2s cubic-bezier(.2,.7,.2,1) both .25s; }
+  @media (max-width:760px){ .rw-h{ grid-template-columns:20px minmax(0,1fr) 46px 96px; padding:6px 10px 6px 6px; } .rw-h .chev{ grid-column:1; grid-row:1; } .rw-n{ grid-column:2; grid-row:1; } .rw-h .sp-badge{ grid-column:2; grid-row:2; justify-self:start; } .rw-pf{ grid-column:3; grid-row:1; } .rw-w{ grid-column:4; grid-row:1; } .rw-bar{ grid-column:3 / 5; grid-row:2; } .rw-d, .mo-body{ grid-template-columns:1fr; } .bd-l{ grid-template-columns:52px minmax(0,1fr); } .bd-b{ grid-column:2; } }
+  @media (max-width:700px){ .lp{ padding:10px 8px; } .lp-row{ display:grid; grid-template-columns:1fr 1fr; gap:18px 26px; } .lp-c, .lp-ret{ display:none; }
+    .lp-t{ display:block; padding:6px 10px; } .lp-t b{ display:inline; margin-right:6px; } .lp-t em{ display:block; } .lp-then{ display:block; margin-top:2px; } .lp-t .chev{ position:absolute; right:8px; top:14px; margin:0; }
+    .lp-t[data-i="0"]{ order:1; } .lp-t[data-i="1"]{ order:2; } .lp-t[data-i="3"]{ order:3; } .lp-t[data-i="2"]{ order:4; }
+    .lp-t::after{ position:absolute; color:var(--muted); font-size:13px; } .lp-t[data-i="0"]::after{ content:'\25B6'; right:-21px; top:40%; } .lp-t[data-i="1"]::after{ content:'\25BC'; bottom:-17px; right:46%; } .lp-t[data-i="2"]::after{ content:'\25C0'; left:-21px; top:40%; } .lp-t[data-i="3"]::after{ content:'\25B2'; top:-17px; left:46%; }
+    .lp.is-open .lp-row{ display:flex; justify-content:center; gap:10px; } .lp.is-open .lp-t{ min-height:36px; padding:4px 12px; display:flex; align-items:center; gap:6px; } .lp.is-open .lp-t::after, .lp.is-open .lp-t .chev, .lp.is-open .lp-then{ display:none; } .lp.is-open .lp-t .lp-tt{ display:none; } .lp.is-open .lp-t[aria-expanded="true"] .lp-tt{ display:inline; } .lp.is-open .lp-t b{ margin:0; } .lp.is-open .lp-t.latest .lp-tag{ display:none; } }
   @media (min-width:700px){ .sp-sum.kal-card{ flex-direction:row; align-items:center; gap:28px; } .sp-sum .sp-sum-grid{ grid-template-columns:repeat(5,minmax(0,1fr)); flex:1; } .sp-sum-grid2{ grid-template-columns:repeat(3,minmax(0,1fr)); } .sp-sum-pf b{ font-size:60px; } }
   @media (max-width:420px){ .sp-ringw{ --rd:72px; } }
   /* Strategies page animation (Nov 10, 2026, the owner: animated visuals). One shot, only while #page-strategies carries sp-play (JS adds it for about 1.9 s when the page is shown, never under reduced motion): the gauges and lines draw by stroke-dashoffset, the bars and chips move by transform and opacity. No layout property is animated. */
   @keyframes spBar{ from{ transform:scaleX(0); } to{ transform:none; } }
+  #page-strategies.sp-play .lp-t{ animation: lpTileIn 600ms cubic-bezier(.2,.8,.3,1) backwards; animation-delay: calc(var(--i, 0) * 70ms); }
   #page-strategies.sp-play .sp-ring-fg{ animation: spRing 900ms cubic-bezier(.2,.7,.3,1) 150ms backwards; }
   #page-strategies.sp-play .sp-spk{ stroke-dasharray:1; animation: lineDraw 900ms ease-out 250ms backwards; }
   @keyframes spRing{ from{ stroke-dashoffset:1; } }
@@ -1090,6 +1115,10 @@
   @media (prefers-reduced-motion: reduce){
     #page-strategies.sp-play .sp-ring-fg{ animation: none; }
     #page-strategies.sp-play .sp-spk, #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
+    #page-strategies.sp-play .lp-t{ animation: none; }
+    #page-strategies .lp::before, #page-strategies .lp-ln u, #page-strategies .lp-ret u, #page-strategies .lp-p.play .rw, #page-strategies .lp-p.play .lp-prog i, #page-strategies .lp-p.play .lp-prog i::after, #page-strategies .rw.near .rw-w::before, #page-strategies .rw.open .sp-bar i, #page-strategies .rw.open .sp-ring-fg{ animation: none; }
+    #page-strategies .lp-ln u, #page-strategies .lp-ret u{ opacity:0; }
+    #page-strategies .sx, #page-strategies .chev, #page-strategies .lp-t{ transition: none; }
     .front-eyebrow, .front-h1, .front-line, .front-win, .front-win-a .win{ animation: none; }
     .brand-name span{ transition: none; }
     .brand:hover .brand-name span{ transform: none; }
@@ -1132,6 +1161,10 @@
   [data-reduce-motion="true"] .page.enter .kal-chart svg rect[data-mark]{ animation: none; }
   [data-reduce-motion="true"] .tape-track{ animation: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-ring-fg{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies.sp-play .lp-t{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies .lp::before, [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u, [data-reduce-motion="true"] #page-strategies .lp-p.play .rw, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i, [data-reduce-motion="true"] #page-strategies .lp-p.play .lp-prog i::after, [data-reduce-motion="true"] #page-strategies .rw.near .rw-w::before, [data-reduce-motion="true"] #page-strategies .rw.open .sp-bar i, [data-reduce-motion="true"] #page-strategies .rw.open .sp-ring-fg{ animation: none; }
+  [data-reduce-motion="true"] #page-strategies .lp-ln u, [data-reduce-motion="true"] #page-strategies .lp-ret u{ opacity:0; }
+  [data-reduce-motion="true"] #page-strategies .sx, [data-reduce-motion="true"] #page-strategies .chev, [data-reduce-motion="true"] #page-strategies .lp-t{ transition: none; }
   [data-reduce-motion="true"] #page-strategies.sp-play .sp-spk, [data-reduce-motion="true"] #page-strategies.sp-play .sp-bar i{ animation: none; stroke-dasharray:none; }
   [data-reduce-motion="true"] .kal-ecg-wrap.flash{ animation: none; }
   [data-reduce-motion="true"] .kal-foldbtn > i{ transition: none; }
@@ -1771,6 +1804,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Strategies page stage board (Nov 12): the page is now a loop of four boxes, Shadow, Probation, Live and Off / Retired, each with a count and the rule for leaving it. Tap a box to open it, a row to see its kill and return rules with the room left, and More for the deepest layer. Every lane and status word comes from the same state the Bot page reads, so a killed strategy sits in Off / Retired and an unreadable kill state never says healthy.</li>
                   <li>Bot status (Nov 12): one shared strategy state now feeds the Bot status, the Strategies table and the Strategies page. The next look counts only strategies that are armed (gold, the open interest jump, the release day longshot and the Bitcoin perpetual-model probe each at their own time), a switched-off strategy is shown as off and cooling down, and the Needs a look alert no longer says a switched-off or unreadable strategy has sent no order.</li>
                   <li>Strategies page lanes (Nov 12): a strategy now sits in its lane by the bot's own state, with no hand edit: Live trades, Probation holds the small second-slot seats, a strategy whose kill tripped moves itself to Off / cooling down (gold shows its return progress there), On deck is the shadow rules, and only a research verdict retires one. Gold's card no longer sticks on CHECKING: if the kill state is not read within a few seconds it says STATE UNKNOWN.</li>
                   <li>Wheel book recorder fix (Nov 12): a market that is no longer open now stops being polled (it was polled to its far expiry), its tape and one minute candles are then read, which polls each ticker was asked for is recorded, and results are re-read over 48 hours. Research data only, nothing trades.</li>
@@ -4388,12 +4422,6 @@ kalshiStatusTick();
     var pf = l > 0 ? (w / l).toFixed(2) : (w > 0 ? 'no losses' : 'n/a');
     return 'Return record (GOLDOFF shadow): ' + done.length + ' of 60 trades, ' + losses + ' of 10 losses, day ' + Math.max(0, Math.floor((now - first) / KAL_BOARD_DAY)) + ' of 7, cash PF ' + pf + '.';
   }
-  // The lifecycle: three stages with a count and the strategies on each (the retired ones show at most four names and a count of the rest).
-  function kalshiStratLifecycle(liveIds, shadowIds, retiredNames){
-    var take = function(a){ return { chips: a.slice(0, 4), more: Math.max(0, a.length - 4) }; };
-    var one = function(key, label, note, a){ var t = take(a); return { key: key, label: label, note: note, count: a.length, chips: t.chips, more: t.more }; };
-    return [one('shadow', 'Shadow', 'no money', shadowIds), one('live', 'Live', 'real money', liveIds), one('retired', 'Retired', 'off', retiredNames)];
-  }
   // ---- Summary bar and detail panels of the Strategies page (Nov 10, 2026, the owner: more informational, no odds panel). Pure: orders, rows and the day function come in, numbers and markup go out; none reads the page, the clock or storage. ----
   function kalshiStratR(x){ return Math.round(x * 10000) / 10000; }
   // The cash results grouped by day (dayOf maps a time to a Central day key); the best and the worst day, or nulls when there is no result.
@@ -4537,18 +4565,6 @@ kalshiStatusTick();
     if(sp >= m * 0.5){ cut = cut.slice(0, sp); }
     return cut.replace(/[\s,;:.\-]+$/, '') + '…';
   }
-  // Stable order for a lane: cards whose id is in firstIds (the ones with a twin in the other lane) go to the top, so the twins are the first card of each lane.
-  function kalshiStratTwinFirst(items, idOf, firstIds){
-    var f = [], r = [];
-    (items || []).forEach(function(x){ ((firstIds || []).indexOf(idOf(x)) >= 0 ? f : r).push(x); });
-    return f.concat(r);
-  }
-  // How many card columns a lane gets at a board width in px (the same breakpoints as the CSS container queries, kept here so they are tested): one column under 640, two from 640, and from 1100 Live and Shadow sit side by side, two columns each. Pure.
-  function kalshiBoardCols(w){
-    w = Number(w) || 0;
-    return { cols: w >= 640 ? 2 : 1, sideBySide: w >= 1100 };
-  }
-  // The three groups as markup. model: { live: [{ id, name, rule, rules, w, kill, spark }], deck: { state: 'ok' | 'loading' | 'unreadable', rows: [{ id, rule, rep, spark }] }, retired }. Every value is escaped or numeric; money masks dollars.
   // ---- Strategy registry (Nov 12, 2026, the owner: the page should be "a constant rotating thing whenever we add or remove strategies"). ONE committed list, strategies-registry.json at the site root, fetched once per page load (same origin, one GET, no figures in it): every strategy and its stage (Idea, Shadow, Paper, Probe, Live, Retired). Adding a shadow rule or a slot strategy in the bot's code without a row there fails test/strategyRegistryGates.test.js. The page merges it with what it computes from the private data: it never replaces a computed card, it adds the rows the code cannot know about. ----
   var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];
   var kalshiRegistry = { state: 'loading', list: [] }, kalshiRegData = {};   // state: loading, ok, unreadable
@@ -4564,11 +4580,6 @@ kalshiStatusTick();
       pipeline: (list || []).filter(function(x){ return ['Idea', 'Shadow', 'Paper', 'Probe'].indexOf(x.stage) >= 0 && shadowIds.indexOf(x.id) < 0; }),
       retired: (list || []).filter(function(x){ return x.stage === 'Retired' && have.indexOf(low(x.name)) < 0 && have.indexOf(low(x.id)) < 0; })
     };
-  }
-  // One registry card (the owner picked option A, Nov 12, 2026: "i like. A"): the name, the stage, the UNPROVEN label, one line of what it does, and a Details button that opens a small popup (kalshiRegistrySheetHtml). The popup shows only five things: what it does in one line, the kill rule, the return rule, room left and one small chart. No ring, no gauge, no figure from the file.
-  function kalshiRegistryCardHtml(x, esc){
-    return '<article class="kal-card sp-tile sp-compact sp-reg" data-fk="reg:' + esc(x.id) + '"><div class="sp-who"><div class="sp-th"><span class="sp-name">' + esc(x.name) + '</span><span class="sp-badge sp-b-idle">' + esc(kalshiRegBuilding(x) ? 'APPROVED, BUILDING' : x.stage.toUpperCase()) + '</span>' + (x.label ? '<span class="sp-badge sp-b-hot">' + esc(x.label) + '</span>' : '') + '</div><div class="sp-rule1" title="' + esc(x.id) + '">' + esc(x.id) + (x.rule ? ': ' + esc(kalshiStratOneLine(x.rule, 90)) : '') + '</div></div>' +
-      '<button type="button" class="sp-detbtn" data-reg-details="' + esc(x.id) + '">Details</button></article>';
   }
   // The popup body. data comes from the page's own private reads when it has any ({ n, spark }); the file holds no figure, so a row with no data says so instead of drawing one. Room left is a count toward a target written in the file (roomTarget, in words in roomWhat).
   function kalshiRegistrySheetHtml(x, data, esc){
@@ -4596,28 +4607,10 @@ kalshiStatusTick();
     if(!d || !d.live){ return d; }
     return { live: true, n: d.n, spark: d.spark || null, sparkLabel: 'Rolling 30 trade cash PF', gauge: d.kill ? kalshiStratGauge(id, d.kill, money) : null };
   }
-  // ---- Pipeline counts and the grouped Retired list (Nov 12, 2026, the owner) ----
+  // ---- The grouped Retired list (Nov 12, 2026, the owner) ----
   var KAL_RETIRED_CAUSES = ['failed the bar', 'killed while live', 'family closed', 'superseded'];
-  // The count per stage for the header row. The registry supplies every stage; a strategy the page already draws as a computed card (live or shadow) is counted ONCE, at the stage the registry gives it (a drawn live card with no registry row counts as Live, a drawn shadow tile as Shadow), so the Live and Probe numbers match the cards on the page. Plain counts, no figure. Pure.
-  // ONE definition (Nov 12, 2026, the header said 1 live and 2 probe while the lane said LIVE 3): Live and Probe count what is RUNNING with real money, by the stage the registry gives it, and the Live lane's count is exactly Live plus Probe. A drawn live card whose kill rule has tripped (offIds) is not running, so it is counted under Off, not Live. A registry Live or Probe row with no code.live is approved but not built (Building), not running. Building and Off appear in the result only when above zero.
-  function kalshiStratCounts(list, liveIds, shadowIds, offIds){
-    var c = { Idea: 0, Shadow: 0, Paper: 0, Probe: 0, Live: 0 }, drawn = {}, off = offIds || [];
-    var add = function(st){ if(Object.prototype.hasOwnProperty.call(c, st)){ c[st] += 1; } else if(st === 'Building' || st === 'Off'){ c[st] = (c[st] || 0) + 1; } };
-    (liveIds || []).forEach(function(id){ drawn[id] = 1; var r = (list || []).filter(function(x){ return x.id === id; })[0]; if(off.indexOf(id) >= 0){ add('Off'); } else { add(r && (r.stage === 'Probe' || r.stage === 'Live') ? r.stage : 'Live'); } });
-    (shadowIds || []).forEach(function(id){ drawn[id] = 1; add('Shadow'); });
-    (list || []).forEach(function(x){ if(!drawn[x.id]){ add((x.stage === 'Probe' || x.stage === 'Live') && !(x.code && x.code.live) ? 'Building' : x.stage); } });
-    return c;
-  }
   // A registry Live or Probe row with no live code behind it: approved, not built, not trading.
   function kalshiRegBuilding(x){ return Boolean(x && (x.stage === 'Probe' || x.stage === 'Live') && !(x.code && x.code.live)); }
-  // Idea and Paper come only from the registry, so until it has been read they show a dash, never a made-up 0.
-  function kalshiStratCountsHtml(c, registryOk, esc){
-    var cells = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live'].concat(c.Building > 0 ? ['Building'] : [], c.Off > 0 ? ['Off'] : []);
-    return '<div class="sp-counts" role="group" aria-label="Strategies at each stage"' + (cells.length > 5 ? ' style="grid-template-columns:repeat(' + cells.length + ',minmax(0,1fr))"' : '') + '>' + cells.map(function(k){
-      var v = registryOk || k === 'Live' || k === 'Probe' ? String(c[k]) : '-';
-      return '<div class="sp-count"><b>' + esc(v) + '</b><span>' + esc(k) + '</span></div>';
-    }).join('') + '</div>';
-  }
   // Every retired strategy as one entry: the page's older hard-coded rows (they keep their own cash PF and trade count) merged with the registry's Retired rows by name or id, then the registry rows alone. cause is one of KAL_RETIRED_CAUSES (an unknown cause is filed under superseded, never dropped); date is a calendar day or null; figures is text only a row's own record gives (never invented). sheet is the row the Details popup draws. Pure.
   function kalshiRetiredEntries(hard, regRetired){
     var low = function(t){ return String(t == null ? '' : t).toLowerCase(); }, used = {}, out = [];
@@ -4650,95 +4643,181 @@ kalshiStatusTick();
       }).join('') + '</ul></details>';
     }).join('');
   }
-  function kalshiRegistryRetiredRow(x){
-    return { name: x.name, note: [x.reason, x['return'] ? 'Return: ' + x['return'] : ''].filter(Boolean).join('. ') };
+  // ---- Stage board (Nov 12, 2026, the owner: "build it into the live page"; the approved mockup, not a redesign). A loop of four boxes, Shadow (on deck), Probation, Live and Off / Retired, each with a count and the rule for leaving it; tapping a box opens it in place and its strategies list beneath as compact rows (name, stage, cash PF, one status word, a thin bar), a row opens to its detail and More holds the deepest layer. Every lane, count and status word comes from the SAME shared state the Bot page reads (kalshiStrategyState via the card's lane and kill state), so the two pages cannot disagree. Pure builders; none reads the page, the clock or storage. ----
+  var KAL_STAGES = [
+    { key: 'shadow', label: 'Shadow', sub: 'on deck', head: 'shadow rules, no money at risk', then: 'passes the shadow bar (150 signals, PF 1.3), then the owner' },
+    { key: 'prob', label: 'Probation', sub: 'small size', head: 'small size, earning a seat', then: 'passes the 60 + 30 record, then the owner' },
+    { key: 'live', label: 'Live', sub: 'running', head: 'running now', then: 'a kill rule trips' },
+    { key: 'off', label: 'Off / Retired', sub: 'cooling down', head: 'cooling down, retired', then: 'a cool off, then a fresh shadow record' }
+  ];
+  // The box a live card belongs in, from its lane (kalshiStratLaneOf): a killed strategy is in Off / Retired, never in Live.
+  function kalshiStageBoxOf(lane){ return lane === 'probation' ? 'prob' : lane === 'off' ? 'off' : 'live'; }
+  // The card nearest its kill: the largest used fraction above zero among cards { id, frac }; null when none has a distance to show. Pure.
+  function kalshiClosestKill(cards){
+    var best = null;
+    (cards || []).forEach(function(c){ if(c && isFinite(c.frac) && c.frac > 0 && (!best || c.frac > best.frac)){ best = c; } });
+    return best;
+  }
+  // Gold's return record as numbers for a progress bar (the GOLDOFF shadow rows the page already reads): trades of 60, losses of 10, days of 7, cash PF. frac is the least advanced of the three counts. null when the log is not readable. Pure.
+  function kalshiGoldReturnStats(rows, now){
+    if(!Array.isArray(rows)){ return null; }
+    var mine = rows.filter(function(r){ return r && r.rule === 'GOLDOFF' && isFinite(Number(r.atMs)); });
+    if(!mine.length){ return { trades: 0, losses: 0, days: 0, pf: null, frac: 0 }; }
+    var first = Math.min.apply(null, mine.map(function(r){ return Number(r.atMs); }));
+    var done = mine.filter(function(r){ return r.settled === true && r.wouldFill === true && isFinite(Number(r.pnl)); });
+    var w = 0, l = 0, losses = 0;
+    done.forEach(function(r){ var p = Number(r.pnl); if(p > 0){ w += p; } else if(p < 0){ l -= p; losses++; } });
+    var days = Math.max(0, Math.floor((now - first) / KAL_BOARD_DAY));
+    return { trades: done.length, losses: losses, days: days, pf: l > 0 ? Math.round(w / l * 100) / 100 : null, frac: Math.max(0, Math.min(1, done.length / 60, days / 7, losses / 10)) };
+  }
+  // A promotion date written in the registry (promotedOn, a calendar day): the id and whole days ago of the most recent one in the last 30 days, or null. Nothing is invented: no date, no label.
+  function kalshiPromotedAgo(list, now){
+    var best = null;
+    (list || []).forEach(function(x){
+      if(!x || !/^\d{4}-\d{2}-\d{2}$/.test(String(x.promotedOn))){ return; }
+      var t = Date.parse(x.promotedOn + 'T00:00:00Z'), d = Math.floor((now - t) / KAL_BOARD_DAY);
+      if(isFinite(t) && d >= 0 && d <= 30 && (!best || t > best.t)){ best = { id: x.id, name: x.name, t: t, days: d }; }
+    });
+    return best;
   }
   function kalshiBoardHtml(model, esc, money){
-    var rulesHtml = function(rules){
-      return !Array.isArray(rules) || rules.length !== 3 ? '' : '<ul class="kal-bd-rules"><li><b>Implement</b> ' + esc(rules[0]) + '</li><li><b>Kill</b> ' + esc(rules[1]) + '</li><li><b>Return</b> ' + esc(rules[2]) + '</li></ul>';
-    };
+    var openSet = model.open || {}, now = model.now || 0, tt = model.timeText || String;
+    var sg = function(x){ return (x > 0 ? '+' : '') + money(x); };
     var sparkHtml = function(vals, label){
       var sp = kalshiStratSpark(vals, 300, 48);
       if(!sp){ return '<div class="sp-spark"><div class="sp-spark-cap"><span>' + esc(label) + '</span><span>not enough trades yet</span></div></div>'; }
       return '<div class="sp-spark"><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc(label + ', ' + sp.n + ' points, last ' + vals[vals.length - 1].toFixed(2)) + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path class="sp-spk" pathLength="1" d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="sp-spark-cap"><span>' + esc(label) + '</span><span>dashed line is 1.0</span></div></div>';
     };
-    // The kill gauge: a bar of how much of the strategy's own kill line is used (the figure and what it is of are text, so the bar never carries the meaning alone).
-    var killHtml = function(g){
-      if(!g){ return ''; }
-      return '<div class="sp-kill" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><div class="sp-kill-h"><b>' + esc(g.big) + '</b><span>' + esc(g.cap) + '</span></div><div class="sp-bar sp-killbar"><i style="width:' + Math.max(0, Math.min(100, (isFinite(g.frac) ? g.frac : 0) * 100)).toFixed(1) + '%"></i></div></div>';
-    };
     // The ring dial: the cash profit factor in the middle, fitted to the ring (kalshiStratRingText), a filled arc on a 0 to 2 scale and a tick at 1.0; "no losses" and "n/a" put a glyph in the ring and their words under it.
-    var ringHtml = function(pf, label, esc2){
+    var ringHtml = function(pf, esc2){
       var r = kalshiStratRing(pf), tx = kalshiStratRingText(pf);
       return '<div class="sp-ringw"><div class="sp-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="40"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="40" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '<line class="sp-ring-tick" x1="' + r.tick.x1 + '" y1="' + r.tick.y1 + '" x2="' + r.tick.x2 + '" y2="' + r.tick.y2 + '"/></svg><b style="--k:' + tx.k + '"' + (tx.num ? kalshiStratPfAttr(pf, esc2) : ' role="img" aria-label="' + esc2('Cash profit factor ' + (tx.cap || pf)) + '"') + '>' + esc2(tx.glyph) + '</b></div>' + (tx.cap ? '<div class="sp-ring-cap">' + esc2(tx.cap) + '</div>' : '') + '</div>';
     };
-    var ladderOf = function(id, shadow){ return '<div class="sp-ladder"><b>Sizing ladder</b><span>' + esc(shadow ? KAL_BOARD_LADDER.shadow : (KAL_BOARD_LADDER[id] || KAL_BOARD_LADDER.shadow)) + '</span></div>'; };
-    var openSet = model.open || {};
-    // One compact card (the owner, Nov 10, 2026: cards were tall and text heavy). Always visible: the ring dial, the name once, the badge, a one line rule (cut with an ellipsis, the full text is in Details), a connector chip when a shadow rule and a live strategy are the same one, and the kill gauge (live) or the signals bar (shadow) as a thin bar with its one line caption. Details holds the rest: the id, the full rule, the status, the trend line, the sizing ladder, Implement, Kill, Return and the evidence panel.
-    var tile = function(o){
-      var bd = o.badge || { text: o.stage.toUpperCase(), tone: 'idle' }, compact = o.stage === 'Shadow';
-      var barHtml = o.bar === undefined ? '' : '<div class="sp-thin"><div class="sp-bar" role="img" aria-label="' + esc(o.bar.label) + '"><i style="width:' + Math.max(0, Math.min(100, o.bar.pct)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(o.bar.label) + '</span><span>' + esc(o.bar.right) + '</span></div></div>';
-      var chip = o.chip ? '<span class="sp-chip" title="' + esc(o.chip.tip) + '">' + esc(o.chip.text) + '</span>' : '';
-      var inner = '<div class="sp-full"><b>' + esc(o.id) + '</b><span>' + esc(o.rule) + '</span></div>' + (o.chip ? '<div class="sp-sub">' + esc(o.chip.tip) + '</div>' : '') + '<div class="sp-sub">' + esc(o.status) + '</div>' + (o.spark === undefined ? '' : sparkHtml(o.spark, o.sparkLabel)) + ladderOf(o.id, compact) + rulesHtml(o.rules) + (o.detail || '');
-      return '<article class="kal-card sp-tile sp-compact" data-fk="' + esc(o.stage.toLowerCase() + ':' + o.id) + '" title="' + esc(o.id) + '"><div class="sp-top">' + ringHtml(o.pf, o.pfLabel, esc) + '<div class="sp-who"><div class="sp-th"><span class="sp-name">' + esc(o.name) + '</span><span class="sp-badge sp-b-' + esc(bd.tone) + '">' + esc(bd.text) + '</span></div><div class="sp-rule1" title="' + esc(o.rule) + '">' + esc(kalshiStratOneLine(o.rule, 64)) + '</div><div class="sp-pfl">' + esc(o.pfLabel) + chip + '</div></div></div>' +
-        killHtml(o.gauge) + barHtml + (o.note ? '<div class="sp-sub sp-note">' + esc(o.note) + '</div>' : '') +
-        (o.sheet ? '<button type="button" class="sp-detbtn" data-reg-details="' + esc(o.id) + '">Details</button>' : '<details class="sp-det" data-k="' + esc(o.stage + o.id) + '"' + (openSet[o.stage + o.id] ? ' open' : '') + '><summary>Details</summary><div class="sp-det-pre">' + inner + '</div></details>') + '</article>';
+    var pct = function(x){ return Math.max(0, Math.min(100, (isFinite(x) ? x : 0) * 100)); };
+    // One labelled line with an optional bar: the label, the words (cut to one line, full text in the tooltip), and a figure with a thin bar under it. hatch marks the closest limit.
+    var line = function(label, words, val, frac, cls){
+      return '<div class="bd-l"><span class="bd-lab">' + esc(label) + '</span><span class="bd-w" title="' + esc(words) + '">' + esc(kalshiStratOneLine(words, 110)) + '</span>' + (val === null ? '' : '<div class="bd-b' + (cls ? ' ' + cls : '') + '"><em>' + esc(val) + '</em><div class="sp-bar"><i style="width:' + pct(frac).toFixed(1) + '%"></i></div></div>') + '</div>';
     };
-    var ids = model.live.map(function(s){ return s.id; }), sids = model.deck.rows.map(function(r){ return r.id; });
-    var twinOf = function(id){ return ids.indexOf(id) >= 0 && sids.indexOf(id) >= 0; };
-    var pfOfRep = function(p){ var pf = p.pfFillable; return p.fillable === 0 ? 'n/a' : (pf === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : pf.toFixed(2)); };
-    var shadowPf = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowPf[r.id] = r.rep; }); }
-    var liveCard = function(s){
-      var g = kalshiStratGauge(s.id, s.kill, money), twin = twinOf(s.id) && shadowPf[s.id];
-      return tile({ sheet: true, id: s.id, name: s.name, stage: 'Live', rule: s.rule, pf: kalshiBoardPfText(s.w.d30), pfLabel: '30 day cash PF, n ' + s.w.d30.n, gauge: g, spark: s.spark || [], sparkLabel: 'Rolling 30 trade cash PF', status: s.kill.lines.join(' '), rules: s.rules, detail: s.detail ? kalshiStratDetailHtml(s.detail, esc, money, model.timeText || String) : '',
-        note: s.note || '', badge: kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState }), chip: twin ? { text: 'from shadow', tip: 'Promoted from its shadow rule, which read cash PF ' + pfOfRep(twin) + ' over ' + twin.fillable + ' signals' } : null });
+    var oneRule = function(label, words){ return '<div class="bd-l one"><span class="bd-lab">' + esc(label) + '</span><span class="bd-w">' + esc(words) + '</span></div>'; };
+    var more = function(id, inner){
+      var o = Boolean(openSet['more:' + id]);
+      return '<div class="rw-more' + (o ? ' open' : '') + '"><button type="button" class="mo-b" data-f="m:' + esc(id) + '" data-more="' + esc(id) + '" aria-expanded="' + o + '"><i class="chev"></i><span>More</span></button><div class="sx"><div class="sx-in"><div class="mo-body">' + inner + '</div></div></div></div>';
     };
-    // Lanes come from the bot's own state (kalshiStratLaneOf, set on each card by the page): Live and Probation are trading, Off / cooling down is a tripped kill, a retired verdict leaves the card to the Retired list.
-    var laneOfCard = function(s){ return s.lane || 'live'; };
-    var ordered = kalshiStratTwinFirst(model.live, function(s){ return s.id; }, sids);
-    var liveHtml = ordered.filter(function(s){ return laneOfCard(s) === 'live'; }).map(liveCard).join('');
-    var probHtml = ordered.filter(function(s){ return laneOfCard(s) === 'probation'; }).map(liveCard).join('');
-    var offHtml = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).map(liveCard).join('');
-    var probCount = ordered.filter(function(s){ return laneOfCard(s) === 'probation'; }).length;
-    var offCount = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).length;
-    var deck = '';
-    var regSplit = model.registry || { pipeline: [], retired: [] };
-    if(!model.deck.rows.length){
-      deck = regSplit.pipeline.length ? '' : '<div class="sp-sub">' + (model.registryState === 'loading' ? 'Reading the strategy list...' : model.registryState === 'ok' ? 'None on the list. A new shadow rule must be a different mechanism.' : 'None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.' + (model.registryState === 'unreadable' ? ' The strategy list could not be read.' : '')) + '</div>';
-    } else if(model.deck.state !== 'ok'){
-      deck = kalshiStratTwinFirst(model.deck.rows, function(r){ return r.id; }, ids).map(function(r){ return tile({ id: r.id, name: r.id, stage: 'Shadow', rule: r.rule, pf: 'n/a', pfLabel: 'no data yet', status: model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet', badge: { text: 'WAITING', tone: 'idle' } }); }).join('');
-    } else {
-      deck = kalshiStratTwinFirst(model.deck.rows, function(r){ return r.id; }, ids).map(function(r){
-        var p = r.rep, pfText = pfOfRep(p);
-        return tile({ id: r.id, name: r.id, stage: 'Shadow', rule: r.rule, pf: pfText, pfLabel: 'cash PF, n ' + p.fillable, spark: r.spark || [], sparkLabel: 'Cumulative cash PF by signal',
-          bar: { pct: p.fillable / 150 * 100, label: p.fillable + ' of 150 signals', right: 'day ' + Math.floor(p.days) + ' of 14' }, status: p.status.split(':')[0], rules: KAL_BOARD_SHADOW_RULES, detail: r.detail ? kalshiStratShadowDetailHtml(r.detail, esc) : '',
-          badge: kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract }), chip: twinOf(r.id) ? { text: 'feeds live', tip: 'Feeds the live strategy of the same name' } : null });
-      }).join('');
+    var rowHtml = function(o, boxKey, i){
+      var open = Boolean(openSet['row:' + o.key]), did = 'rwd-' + boxKey + '-' + i;
+      return '<div class="rw' + (open ? ' open' : '') + (o.near ? ' near' : '') + '" style="--i:' + i + '" data-fk="row:' + esc(o.key) + '"><button type="button" class="rw-h" data-f="r:' + esc(o.key) + '" data-row="' + esc(o.key) + '" aria-expanded="' + open + '" aria-controls="' + did + '"><i class="chev"></i><b class="rw-n">' + esc(o.name) + '</b><span class="sp-badge sp-b-' + esc(o.stCls) + '">' + esc(o.stage) + '</span><span class="rw-pf">' + esc(o.pf) + '</span><span class="rw-w">' + esc(o.word) + '</span><span class="sp-bar rw-bar" aria-hidden="true"><i style="width:' + pct(o.frac).toFixed(1) + '%"></i></span></button><div class="sx" id="' + did + '"><div class="sx-in"><div class="rw-d">' + o.detail + '</div>' + o.more + '</div></div></div>';
+    };
+    var ladderDl = function(label, text, extra){ return '<dl><dt>' + esc(label) + '</dt><dd>' + esc(text) + '</dd>' + (extra || '') + '</dl>'; };
+    var rulesHtml = function(rules){
+      return !Array.isArray(rules) || rules.length !== 3 ? '' : '<ul class="kal-bd-rules"><li><b>Implement</b> ' + esc(rules[0]) + '</li><li><b>Kill</b> ' + esc(rules[1]) + '</li><li><b>Return</b> ' + esc(rules[2]) + '</li></ul>';
+    };
+    var regOf = function(id){ return (model.registryList || []).filter(function(x){ return x.id === id; })[0] || null; };
+    var shadowRep = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowRep[r.id] = r.rep; }); }
+    var box = { shadow: [], prob: [], live: [], off: [] }, kills = { prob: [], live: [] };
+    // ---- Live, Probation and Off rows: the cards the page computes from the bot's own orders and kill state ----
+    (model.live || []).forEach(function(s){
+      var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
+      var bd = kalshiStratBadge('live', { n: s.w.d30.n, pf: s.w.d30.pf, frac: g ? g.frac : NaN, useFrac: s.id !== 'L1', killState: s.killState });
+      var pf = kalshiBoardPfText(s.w.d30), unreadable = s.killState === 'unknown', loading = s.killState === 'loading';
+      var word = lane === 'off' && bd.text === 'KILLED' ? 'COOLING' : bd.text;
+      var reg = regOf(s.id), ret = s.ret || null;
+      if(bk !== 'off' && g && !unreadable && !loading){ kills[bk].push({ id: s.id, name: s.name, frac: g.frac }); }
+      var frac = bk === 'off' ? (ret ? ret.frac : 0) : (g && !unreadable && !loading ? g.frac : 0);
+      var last = s.detail && s.detail.recent && s.detail.recent[0] ? s.detail.recent[0] : null;
+      var killWords = (s.rules && s.rules[1]) || (reg && reg.kill) || 'Not written yet', retWords = (s.rules && s.rules[2]) || (reg && reg['return']) || 'Not written yet';
+      var killLine = unreadable ? oneRule('Kill', 'Kill state not readable. Do not read this card as healthy.') : loading ? oneRule('Kill', 'Reading the kill state...') :
+        bk === 'off' ? oneRule('Kill', killWords) : line('Kill', killWords, g ? g.big + ' · ' + g.cap : s.kill.lines.join(' '), g ? g.frac : 0, 'near');
+      var retLine = bk === 'off' ? (ret ? line('Return', retWords, ret.trades + ' of 60 trades · ' + ret.days + ' of 7 days · ' + ret.losses + ' of 10 losses · PF ' + (ret.pf === null ? 'n/a' : ret.pf.toFixed(2)) + ' of 1.30', ret.frac, 'ret') : oneRule('Return', retWords + ' Return record not readable yet.')) : oneRule(bk === 'prob' ? 'Promote' : 'Review', retWords);
+      var detail = '<div class="rw-c1"><div class="rw-hd">' + ringHtml(pf, esc) + '<div class="rw-hm"><b>' + esc(s.id) + '</b><span>' + esc((s.id === 'L1' ? 'Gold · ' : '') + (n30(s) ? '30 day cash PF, n ' + s.w.d30.n : 'no settled trades in 30 days')) + '</span></div></div>' + oneRule('Rule', s.rule) +
+        '<div class="bd-res"><span>Today <b>' + esc(sg(s.today || 0)) + '</b></span><span>7d <b>' + esc(sg(s.w.d7.net || 0)) + '</b></span><span class="bd-last">' + (last ? 'Last ' + esc(sg(last.p)) + ', ' + esc(tt(last.ts)) : 'No settled trades yet') + '</span></div>' + (s.note ? '<div class="sp-sub">' + esc(s.note) + '</div>' : '') + '</div>' +
+        '<div class="rw-c2">' + killLine + retLine + '</div>';
+      var rd = reg && reg.nextReadText ? reg.nextReadText : 'Not written yet', shadowTwin = shadowRep[s.id];
+      var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
+        ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(killWords) + '</dd><dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
+      box[bk].push({ key: s.id, name: s.name, stage: bk === 'off' ? 'Off' : bk === 'prob' ? 'Probation' : 'Live', stCls: bk === 'off' ? 'off' : bk === 'prob' ? 'prob' : 'live', pf: pf, word: word, frac: frac, detail: detail, more: mo, g: g });
+    });
+    function n30(s){ return s.w.d30.n > 0; }
+    // ---- Shadow rows: the rules the bot logs without money ----
+    var shadowBest = null;
+    if(model.deck.rows.length){
+      model.deck.rows.forEach(function(r){
+        if(model.deck.state !== 'ok'){
+          box.shadow.push({ key: 'S:' + r.id, name: r.id, stage: 'Shadow', stCls: 'deck', pf: 'n/a', word: model.deck.state === 'loading' ? 'READING' : 'NOT READABLE', frac: 0,
+            detail: '<div class="rw-c1">' + oneRule('Rule', r.rule) + '<div class="sp-sub">' + esc(model.deck.state === 'loading' ? 'Reading the shadow log' : 'Shadow log not readable yet') + '</div></div><div class="rw-c2"></div>', more: '' });
+          return;
+        }
+        var p = r.rep, pfText = (p.fillable === 0 ? 'n/a' : (p.pfFillable === null ? (p.netFillableDollars > 0 ? 'no losses' : 'n/a') : p.pfFillable.toFixed(2))), fr = p.fillable / 150;
+        if(!shadowBest || p.fillable > shadowBest.n){ shadowBest = { id: r.id, n: p.fillable }; }
+        var bd = kalshiStratBadge('shadow', { state: 'ok', status: p.status, fillable: p.fillable, netCents: p.netCentsPerContract });
+        var det = '<div class="rw-c1"><div class="rw-hd">' + ringHtml(pfText, esc) + '<div class="rw-hm"><b>' + esc(r.id) + '</b><span>cash PF, n ' + p.fillable + '</span></div></div>' + oneRule('Rule', r.rule + '. Shadow only, no money') +
+          '<div class="bd-res"><span>Day <b>' + Math.min(14, Math.floor(p.days)) + ' of 14</b></span><span>Signals <b>' + p.signals + '</b></span><span class="bd-last">' + esc(p.status.split(':')[0]) + '</span></div></div>' +
+          '<div class="rw-c2">' + oneRule('Kill', KAL_BOARD_SHADOW_RULES[1]) + line('Promote', KAL_BOARD_SHADOW_RULES[0], p.fillable + ' of 150 signals · PF ' + pfText + ' of 1.30', fr, 'ret') + '</div>';
+        box.shadow.push({ key: 'S:' + r.id, name: r.id, stage: 'Shadow', stCls: 'deck', pf: pfText, word: bd.text, frac: fr, detail: det,
+          more: more('S:' + r.id, '<div class="mo-sp"><span class="bd-lab">Cumulative cash PF by signal</span>' + sparkHtml(r.spark || [], 'Cumulative cash PF by signal') + '</div>' + ladderDl('Sizing', KAL_BOARD_LADDER.shadow, '<dt>Thresholds</dt><dd>' + esc(KAL_BOARD_SHADOW_RULES.join(' ')) + '</dd><dt>Record</dt><dd>' + esc('Shadow record: ' + p.fillable + ' of 150 signals. Live record: none.') + '</dd><dt>Read date</dt><dd>' + esc(p.etaMs ? 'Earliest next stage ' + kalshiBoardDate(p.etaMs) : 'Not set until 10 signals') + '</dd>') + rulesHtml(KAL_BOARD_SHADOW_RULES) + (r.detail ? kalshiStratShadowDetailHtml(r.detail, esc) : '')) });
+      });
     }
-    // A registry row that is built and running as a small seat (stage Probe with live code) is Probation, not On deck; the rest of the pipeline stays On deck.
+    // ---- Registry rows (the committed strategy list): a built probation seat is Probation; shadow and approved-but-not-built rows join Shadow; Paper and Ideas are a quiet fold ----
+    var regSplit = model.registry || { pipeline: [], retired: [] }, regData = model.regData || {}, quiet = [];
     var regLane = function(x){ return kalshiStratLaneOf({ stage: x.stage, codeLive: Boolean(x.code && x.code.live), slot: Boolean(x.code && x.code.slot) }); };
-    var regProb = regSplit.pipeline.filter(function(x){ return regLane(x) === 'probation'; }), regDeck = regSplit.pipeline.filter(function(x){ return regLane(x) !== 'probation'; });
-    probHtml += regProb.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join(''); probCount += regProb.length;
-    deck += regDeck.map(function(x){ return kalshiRegistryCardHtml(x, esc); }).join('');
-    // Retired (the owner, Nov 12, 2026): closed by default, grouped by cause, one line each, the same Details popup.
+    regSplit.pipeline.forEach(function(x){
+      var d = regData[x.id] || {}, have = typeof d.n === 'number' ? d.n : null, tgt = x.roomTarget, bkey = regLane(x) === 'probation' ? 'prob' : (x.stage === 'Paper' || x.stage === 'Idea' ? 'quiet' : 'shadow');
+      if(bkey === 'quiet'){ quiet.push(x); return; }
+      var building = kalshiRegBuilding(x);
+      box[bkey].push({ key: 'R:' + x.id, name: x.name, stage: building ? 'Building' : x.stage, stCls: bkey === 'prob' ? 'prob' : 'deck', pf: 'n/a', word: building ? 'BUILDING' : bkey === 'prob' ? 'ON TRIAL' : 'COLLECTING', frac: tgt && have !== null ? Math.min(1, have / tgt) : 0,
+        detail: '<div class="rw-c1 rw-reg">' + kalshiRegistrySheetHtml(x, d, esc) + '</div><div class="rw-c2"></div>', more: '' });
+    });
+    // ---- The nearest kill: one strategy, marked with a pulse ----
+    var allKills = kills.prob.concat(kills.live), nearest = kalshiClosestKill(allKills);
+    ['prob', 'live'].forEach(function(k){ box[k].forEach(function(o){ if(nearest && o.key === nearest.id){ o.near = true; } }); });
+    // ---- Off / Retired: the killed cards first, then the retired list grouped by cause (closed by default) ----
     var retEntries = kalshiRetiredEntries(model.retired.rows, model.regRetired || []);
-    var ret = kalshiRetiredGroupsHtml(retEntries, model.open, esc);
-    var offIds = ordered.filter(function(s){ return laneOfCard(s) === 'off'; }).map(function(s){ return s.id; }), runIds = ordered.filter(function(s){ var l = laneOfCard(s); return l === 'live' || l === 'probation'; }).map(function(s){ return s.id; }).concat(regProb.map(function(x){ return x.id; }));
-    var stages = kalshiStratLifecycle(runIds, sids.concat(regDeck.map(function(x){ return x.id; })), retEntries.map(function(r){ return r.name; }));
-    stages[1].note = 'real money' + (offCount ? ', ' + offCount + ' off' : '');
-    var grp = function(key, title, note, body){ return body ? '<div class="sp-grp" data-fk="grp:' + key + '"><span class="sp-grp-t">' + esc(title) + '</span><span class="sp-grp-n">' + esc(note) + '</span></div>' + body : ''; };
-    var liveBody = liveHtml + grp('probation', 'Probation', 'small, trading', probHtml) + grp('off', 'Off / cooling down', 'not trading, kill tripped', offHtml);
-    var lane = function(key, st, body, extra){
-      return '<section class="sp-lane sp-lane-' + key + '" data-fk="lane:' + key + '" aria-label="' + esc(st.label) + '"><div class="sp-lane-h" data-fk="head:' + key + '"><span class="sp-lane-t">' + esc(st.label) + '</span><span class="sp-lane-n">' + st.count + '</span><span class="sp-lane-note">' + esc(st.note) + '</span></div>' + (extra || '') + '<div class="sp-cards">' + body + '</div></section>';
+    var counts = { shadow: box.shadow.length, prob: box.prob.length, live: box.live.length, off: box.off.length + retEntries.length };
+    var goldRet = null; (model.live || []).forEach(function(s){ if(s.ret){ goldRet = s.ret; } });
+    var unreadableGold = (model.live || []).some(function(s){ return s.killState === 'unknown'; });
+    // ---- The header line and each box's progress line ----
+    var killTxt = nearest ? 'Closest to a kill: ' + nearest.name + ', ' + Math.round(nearest.frac * 100) + '% used.' : (unreadableGold ? 'Gold\'s kill state is not readable.' : 'No kill distance to show yet.');
+    var info = {
+      shadow: counts.shadow + ' collecting.' + (shadowBest ? ' Closest to promotion: ' + shadowBest.id + ', ' + shadowBest.n + ' of 150 signals.' : ''),
+      prob: counts.prob + ' on trial. ' + killTxt,
+      live: counts.live + ' running. ' + killTxt,
+      off: box.off.length + ' off, ' + retEntries.length + ' retired.' + (goldRet ? ' Gold return record: ' + goldRet.trades + ' of 60 trades.' : '')
     };
-    var retOpen = model.open && model.open.retired;
-    var retired = '<section class="sp-lane sp-lane-retired" data-fk="lane:retired" aria-label="Retired"><input type="checkbox" class="sp-ret-t" id="spRetT"' + (retOpen ? ' checked' : '') + '><label class="sp-lane-h" for="spRetT" data-fk="head:retired"><span class="sp-lane-t">Retired</span><span class="sp-lane-n">' + stages[2].count + '</span><span class="sp-lane-note">off</span></label><div class="sp-lane-b">' + ret + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div></div></section>';
+    var prog = {
+      shadow: shadowBest ? [shadowBest.n / 150, 'closest: ' + shadowBest.n + ' of 150 signals'] : [0, 'no shadow rule counting yet'],
+      prob: nearest && kills.prob.indexOf(nearest) >= 0 ? [nearest.frac, 'closest kill: ' + Math.round(nearest.frac * 100) + '% used'] : [0, 'no kill distance to show'],
+      live: nearest && kills.live.indexOf(nearest) >= 0 ? [nearest.frac, 'closest kill: ' + Math.round(nearest.frac * 100) + '% used'] : [0, unreadableGold ? 'kill state not readable' : 'no kill distance to show'],
+      off: goldRet ? [goldRet.frac, 'return: ' + goldRet.trades + ' of 60 trades'] : [0, 'nothing to return yet']
+    };
+    var openKey = model.open && KAL_STAGES.some(function(s){ return s.key === model.open.stage; }) ? model.open.stage : null;
+    var defSum = '<b>' + counts.shadow + '</b> shadow &middot; <b>' + counts.prob + '</b> probation &middot; <b>' + counts.live + '</b> live &middot; <b>' + counts.off + '</b> off or retired. ' + esc(killTxt) + ' Tap a box to open it.';
+    var sumHtml = openKey ? '<b>' + esc(KAL_STAGES.filter(function(s){ return s.key === openKey; })[0].label) + ' open.</b> ' + esc(info[openKey]) : defSum;
+    var promo = kalshiPromotedAgo(model.registryList, now);
+    var tiles = KAL_STAGES.map(function(s, i){
+      var tag = s.key === 'prob' && promo ? '<u class="lp-tag">Promoted ' + (promo.days === 0 ? 'today' : promo.days === 1 ? '1 day ago' : promo.days + ' days ago') + ': ' + esc(promo.name) + '</u>' : '';
+      return '<button type="button" class="lp-t' + (tag ? ' latest' : '') + '" data-f="t:' + s.key + '" data-stage="' + s.key + '" data-fk="tile:' + s.key + '" data-i="' + i + '" style="--i:' + i + '" aria-expanded="' + (openKey === s.key) + '" aria-controls="lp-p-' + s.key + '">' + tag + '<b data-count="' + counts[s.key] + '">' + counts[s.key] + '</b><span class="lp-tt">' + esc(s.label) + '</span><em>' + esc(s.sub) + '</em><small class="lp-then">then: ' + esc(s.then) + '</small><i class="chev"></i></button>' +
+        (i < 3 ? '<div class="lp-c" data-c="' + i + '"><span class="lp-ln"><u></u><u></u><u></u></span><span class="lp-lab">' + esc(s.then) + '</span></div>' : '');
+    }).join('');
+    var empty = function(t){ return '<div class="sp-sub sp-none">' + esc(t) + '</div>'; };
+    var rowsOf = function(k){ return box[k].map(function(o, i){ return rowHtml(o, k, i); }).join(''); };
+    var quietHtml = quiet.length ? '<details class="bd-fold" data-k="fold:quiet"' + (openSet['fold:quiet'] ? ' open' : '') + '><summary>Paper and ideas <span>' + quiet.length + '</span></summary><ul class="sp-rlist">' + quiet.map(function(x){
+      return '<li class="sp-rrow"><span class="sp-rwho"><span class="sp-rname">' + esc(x.name) + '</span><span class="sp-rnote">' + esc(x.stage + ' · unproven') + '</span></span><button type="button" class="sp-detbtn sp-detsm" data-reg-details="' + esc(x.id) + '">Details</button></li>'; }).join('') + '</ul></details>' : '';
+    var shadowEmpty = !box.shadow.length ? empty(model.registryState === 'loading' ? 'Reading the strategy list...' : 'None running. The owner retired every shadow rule on Nov 11, 2026 (each repeated gold L1). A new shadow rule must be a different mechanism.' + (model.registryState === 'unreadable' ? ' The strategy list could not be read.' : '')) : '';
+    var bodies = {
+      shadow: rowsOf('shadow') + shadowEmpty + quietHtml,
+      prob: box.prob.length ? rowsOf('prob') : empty('No strategy on probation.'),
+      live: box.live.length ? rowsOf('live') : empty('No strategy is live.'),
+      off: rowsOf('off') + kalshiRetiredGroupsHtml(retEntries, model.open, esc) + '<div class="sp-sub sp-back">Comes back when: ' + esc(model.retired.back) + '. As of ' + esc(model.retired.asOf) + '.</div>'
+    };
+    var panels = KAL_STAGES.map(function(s){
+      var isOpen = openKey === s.key;
+      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '><div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div><div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
+    }).join('');
+    var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[3].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
     var act = !model.activity ? '' : model.activity.state === 'loading' ? '<div class="sp-sub">Reading the bot\'s events...</div>' : model.activity.items.length ? '<ul class="sp-act">' + model.activity.items.map(function(x){
-      return '<li class="sp-act-' + esc(x.level) + '"><div class="sp-act-t">' + esc(x.title) + '</div>' + (x.body ? '<div class="sp-sub">' + esc(x.body) + '</div>' : '') + '<div class="sp-sub">' + esc((model.timeText || String)(x.ts)) + '</div></li>'; }).join('') + '</ul>' : '<div class="sp-sub">No kills or promotions recorded.</div>';
+      return '<li class="sp-act-' + esc(x.level) + '"><div class="sp-act-t">' + esc(x.title) + '</div>' + (x.body ? '<div class="sp-sub">' + esc(x.body) + '</div>' : '') + '<div class="sp-sub">' + esc(tt(x.ts)) + '</div></li>'; }).join('') + '</ul>' : '<div class="sp-sub">No kills or promotions recorded.</div>';
     var tail = !model.activity ? '' : '<div class="sp-h">Recent activity <span>warnings, stops and session starts, last 7 days</span></div><div class="kal-card">' + act + '</div>';
-    var board = '<div class="sp-board" id="spBoard" role="group" aria-label="Live, then shadow, then retired">' + lane('live', stages[1], liveBody) + lane('shadow', stages[0], deck) + retired + '</div>';
-    return '<div class="sp-wrap">' + kalshiStratCountsHtml(kalshiStratCounts(model.registryList || [], ordered.map(function(s){ return s.id; }), sids, offIds), model.registryState === 'ok', esc) + summary + '<div class="sp-h">Strategy flow <span>live first, then the shadow rules on deck, then retired</span></div>' + board + tail + '</div>';
+    return '<div class="sp-wrap">' + summary + pipe + tail + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
@@ -4789,8 +4868,8 @@ kalshiStatusTick();
   }
   /* STRAT-ANIM-BEGIN
      Strategies page animation (Nov 10, 2026, the owner's explicit exception to "no count-up on a figure", limited to this page's profit factor figures).
-     Everything that animates a figure lives between these two markers, and test/strategiesAnimationGates.test.js SA1 to SA12 pins the scope: only #stratBody, only
-     elements marked data-pf. The text of such a figure is the TRUE value before the animation, after it and in the markup; aria-label carries it too. Nothing starts
+     Everything that animates a figure lives between these two markers, and test/strategiesAnimationGates.test.js SA1 to SA13 pins the scope: only #stratBody, only
+     elements marked data-pf (the profit factors) or data-count (the whole-number counts on the four stage boxes, added with the stage board, Nov 12, 2026, the owner approved the mockup that counts them). The text of such a figure is the TRUE value before the animation, after it and in the markup; aria-label carries it too. Nothing starts
      under reduced motion. One requestAnimationFrame loop for 700 ms and one timeout; no interval, no storage, no network. */
   var KAL_STRAT_COUNT_MS = 700, KAL_STRAT_PLAY_MS = 1900;
   var kalshiStratAnim = { pending: false, raf: 0, timer: 0 };
@@ -4803,29 +4882,33 @@ kalshiStatusTick();
   }
   // The text shown t of the way through the count: the figure's own digits, never a value past the true one.
   function kalshiStratCountText(trueText, t){ var v = parseFloat(trueText); return t >= 1 || !isFinite(v) ? String(trueText) : (v * kalshiStratEase(t)).toFixed(2); }
+  // The box counts (data-count, a whole number) count up the same way; the true count is in the markup at rest. Owner-approved with the stage board (Nov 12, 2026, the mockup counted them).
+  function kalshiStratCountInt(trueText, t){ var v = parseInt(trueText, 10); return t >= 1 || !isFinite(v) ? String(trueText) : String(Math.round(v * kalshiStratEase(t))); }
+  function kalshiStratFigAttr(el){ var v = el.getAttribute('data-pf'); return v === null || v === undefined ? el.getAttribute('data-count') : v; }
+  function kalshiStratFigText(el, t){ var v = el.getAttribute('data-pf'); return v === null || v === undefined ? kalshiStratCountInt(el.getAttribute('data-count'), t) : kalshiStratCountText(v, t); }
   function kalshiStratAnimStop(page){
     if(kalshiStratAnim.raf){ cancelAnimationFrame(kalshiStratAnim.raf); kalshiStratAnim.raf = 0; }
     if(kalshiStratAnim.timer){ clearTimeout(kalshiStratAnim.timer); kalshiStratAnim.timer = 0; }
     if(page){
       page.classList.remove('sp-play');
-      var b = page.querySelectorAll('#stratBody [data-pf]');
-      for(var i = 0; i < b.length; i++){ b[i].textContent = b[i].getAttribute('data-pf'); }
+      var b = page.querySelectorAll('#stratBody [data-pf], #stratBody [data-count]');
+      for(var i = 0; i < b.length; i++){ b[i].textContent = kalshiStratFigAttr(b[i]); }
     }
   }
   // Start the one-shot play: gauges, bars and lines draw by CSS, the figures count up by one animation frame loop, then everything is cleared.
   function kalshiStratAnimStart(page){
     kalshiStratAnimStop(page);
     if(!page || motionReduced()){ return; }
-    var figs = page.querySelectorAll('#stratBody [data-pf]'), t0 = 0;
+    var figs = page.querySelectorAll('#stratBody [data-pf], #stratBody [data-count]'), t0 = 0;
     page.classList.remove('sp-play'); void page.offsetWidth; page.classList.add('sp-play');
     kalshiStratAnim.timer = setTimeout(function(){ kalshiStratAnim.timer = 0; page.classList.remove('sp-play'); }, KAL_STRAT_PLAY_MS);
     var step = function(now){
       if(!t0){ t0 = now; }
       var f = Math.min(1, (now - t0) / KAL_STRAT_COUNT_MS);
-      for(var i = 0; i < figs.length; i++){ figs[i].textContent = kalshiStratCountText(figs[i].getAttribute('data-pf'), f); }
+      for(var i = 0; i < figs.length; i++){ figs[i].textContent = kalshiStratFigText(figs[i], f); }
       kalshiStratAnim.raf = f < 1 ? requestAnimationFrame(step) : 0;
     };
-    for(var j = 0; j < figs.length; j++){ figs[j].textContent = kalshiStratCountText(figs[j].getAttribute('data-pf'), 0); }
+    for(var j = 0; j < figs.length; j++){ figs[j].textContent = kalshiStratFigText(figs[j], 0); }
     kalshiStratAnim.raf = requestAnimationFrame(step);
   }
   /* STRAT-ANIM-END */
@@ -4847,6 +4930,8 @@ kalshiStatusTick();
       var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: liveState[s.id] === 'off', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
       return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kill,
         killState: goldCard ? gold.state : undefined, note: goldCard ? kalshiGoldKillNote(gold, gold.state === 'killed' ? kalshiGoldReturnProgress(kalshiShadowCache.rows, now) : '', kalDateTime) : '',
+        today: kalshiBoardPf(kalshiBoardRows(mine).filter(function(r){ return kalDayKey(r.ts) === kalDayKey(now); })).net,
+        ret: goldCard ? kalshiGoldReturnStats(kalshiShadowCache.rows, now) : null,
         spark: kalshiStratRolling(kalshiBoardRows(mine).map(function(r){ return r.p; }), 30), detail: kalshiStratDetail(mine, kalshiMarketName, kalDayKey, 8) };
     });
     var rows = kalshiShadowCache.rows;
@@ -4863,7 +4948,10 @@ kalshiStatusTick();
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
     live.forEach(function(s){ kalshiRegData[s.id] = kalshiOrdersLoaded ? { live: true, kill: s.kill, spark: s.spark } : { live: true }; });
     var regSplit = kalshiRegistrySplit(kalshiRegistry.list, KAL_BOARD_SHADOW.map(function(r){ return r.id; }).concat(KAL_BOARD_LIVE.map(function(r){ return r.id; })), KAL_BOARD_RETIRED.rows.map(function(r){ return r.name; }));
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, activity: activity, open: kalshiStratOpen, timeText: kalDateTime }, escapeHtml, kalshiMoney);
+    // A redraw keeps keyboard focus on the same control (the markup is replaced as a whole), found by its data-f key.
+    var focusKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-f') : null;
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, activity: activity, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData }, escapeHtml, kalshiMoney);
+    if(focusKey){ var fs = el.querySelectorAll('[data-f]'); for(var fi = 0; fi < fs.length; fi++){ if(fs[fi].getAttribute('data-f') === focusKey){ fs[fi].focus(); break; } } }
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     kalshiStratAnimStop(page);
     if(kalshiStratAnim.pending && (kalshiShadowCache.rows || kalshiShadowCache.error)){ kalshiStratAnim.pending = false; kalshiStratAnimStart(page); }
@@ -4888,7 +4976,37 @@ kalshiStatusTick();
       last = b; pop.hidden = false; document.getElementById('spPopClose').focus();
     });
   })();
-  (function(){ var body = document.getElementById('stratBody'); if(body){ body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && (d.classList.contains('sp-det') || d.classList.contains('sp-rgrp')) && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; } }, true); body.addEventListener('change', function(e){ var c = e.target; if(c && c.id === 'spRetT'){ kalshiStratOpen.retired = c.checked; } }); } })();
+  // The board's controls (Nov 12, 2026): a row and its More open in place (a class and aria-expanded, the open state kept in kalshiStratOpen so the minute's redraw keeps it); a box opens by redrawing from the kept state, and the boxes glide to their new places (a FLIP slide of 620 ms, skipped under reduced motion). No network, no storage, no timer except the one that ends the entrance play.
+  function kalshiStratStage(key){
+    var body = document.getElementById('stratBody'); if(!body){ return; }
+    var first = {}, old = body.querySelectorAll('[data-fk^="tile:"]'), i;
+    for(i = 0; i < old.length; i++){ first[old[i].getAttribute('data-fk')] = old[i].getBoundingClientRect(); }
+    kalshiStratOpen.stage = kalshiStratOpen.stage === key ? null : key;
+    renderStrategiesPage();
+    var now = body.querySelectorAll('[data-fk^="tile:"]'), panel = kalshiStratOpen.stage ? document.getElementById('lp-p-' + kalshiStratOpen.stage) : null;
+    if(panel && !motionReduced()){ panel.classList.add('play'); setTimeout(function(){ panel.classList.remove('play'); }, 1600); }
+    if(motionReduced()){ return; }
+    for(i = 0; i < now.length; i++){
+      var t = now[i], f = first[t.getAttribute('data-fk')], l = t.getBoundingClientRect();
+      if(!f || !l.width || !l.height || typeof t.animate !== 'function'){ continue; }
+      var dx = f.left - l.left, dy = f.top - l.top, sx = f.width / l.width, sy = f.height / l.height;
+      if(Math.abs(dx) < 1 && Math.abs(dy) < 1 && Math.abs(sx - 1) < 0.02 && Math.abs(sy - 1) < 0.02){ continue; }
+      t.animate([{ transformOrigin: '0 0', transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sx + ',' + sy + ')' }, { transformOrigin: '0 0', transform: 'none' }], { duration: 620, easing: 'cubic-bezier(.34,1.4,.5,1)' });
+    }
+    if(panel && typeof panel.animate === 'function'){ panel.animate([{ opacity: 0, transform: 'translateY(-14px) scale(.94,.8)' }, { opacity: 1, transform: 'none' }], { duration: 620, easing: 'cubic-bezier(.34,1.35,.5,1)' }); }
+  }
+  (function(){
+    var body = document.getElementById('stratBody');
+    if(!body){ return; }
+    body.addEventListener('toggle', function(e){ var d = e.target; if(d && d.classList && (d.classList.contains('sp-rgrp') || d.classList.contains('bd-fold')) && d.getAttribute('data-k')){ kalshiStratOpen[d.getAttribute('data-k')] = d.open; } }, true);
+    body.addEventListener('click', function(e){
+      var t = e.target && e.target.closest ? e.target : null; if(!t){ return; }
+      var r = t.closest('[data-row]'), m = t.closest('[data-more]'), s = t.closest('[data-stage]'), o;
+      if(r){ o = r.getAttribute('aria-expanded') !== 'true'; r.setAttribute('aria-expanded', String(o)); r.parentNode.classList.toggle('open', o); kalshiStratOpen['row:' + r.getAttribute('data-row')] = o; return; }
+      if(m){ o = m.getAttribute('aria-expanded') !== 'true'; m.setAttribute('aria-expanded', String(o)); m.parentNode.classList.toggle('open', o); kalshiStratOpen['more:' + m.getAttribute('data-more')] = o; return; }
+      if(s){ kalshiStratStage(s.getAttribute('data-stage')); }
+    });
+  })();
   var kalshiLiveOrders = [];
   var kalshiLiveUnsub = null;
   var kalshiSlotUnsub = null;
