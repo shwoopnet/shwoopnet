@@ -10,14 +10,14 @@ usage: python3 -I nc15_wheel_second.py <NC15 root> --now <ISO time of the read> 
   <NC15 root> is the recorder's shape: <root>/<date>/<HHMM>/{book,coverage}.csv.gz (scripts/record_nc_book.py on main).
 
 Places where the sheet or the lane leaves a choice (READINGS, printed with the output):
- a. A poll is one book row of a ticker. Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 rows of its own run folder with a readable Date header and t_recv_ms at or before the poll's (rows of the same instant all count); the median of an even number is the mean of the two middle values. No such row: the poll has no exchange time and cannot be a signal poll ("no clock").
- b. A ticker's polls are pooled over every run folder that holds it, each with its own run's offset. The signal poll is the one with the greatest exchange time at or before D and at most 10 s before it (1e-9 tolerance on both edges); on an exact tie, the later by receive time.
- c. A level is present if its price and its size both parse as numbers and the size is above zero. A side with no level is "a missing side": no signal. The best bid of a side is its highest recorded price.
+ a. A poll is one book row of a ticker. A row with no readable Date header can still be a poll if earlier header-readable rows of its run give it an offset (the sheet's text, and what the first build does; Desk A's note 3 says "never a poll"; set NC15_HEADERLESS_POLL=no for that reading). Rows of a run are ordered by t_recv_ms, then file order. The offset of a poll uses the last 120 header-readable rows of its own run folder with t_recv_ms at or before the poll's (rows of the same instant all count); the median of an even number is the mean of the two middle values. No such row: "no clock", no signal.
+ b. A ticker's polls are pooled over every run folder that holds it, each with its own run's offset. The signal poll is the one with the greatest exchange time at or before D and at most 10 s before it (1e-9 tolerance on both edges); on an exact tie, the later by receive time (Desk A's choice 1 says "ties by run path"). The close time is the close_time of the ticker's first row that has a readable one (choice 2).
+ c. A level is present if its price and its size both parse as numbers and the size is above zero. A side with no readable top-level price (yes_bid_px_1, no_bid_px_1), or with no level at all, is "a missing side": no signal. The band test's ask is 1 minus the met side's top-level price (Desk A's choices 4 and 5).
  d. "In the cell" is |imb5| at or above 0.50 with the 1e-9 tolerance; imb5 above zero buys YES, below zero buys NO.
- e. The second poll is the ticker's next poll by receive time (over all run folders). Its distance from the signal poll is measured on the recorder's clock (t_recv_ms), at most 6 s with the 1e-9 tolerance; later, or no later poll at all: "not fill-checked".
+ e. The second poll is the ticker's next poll by receive time IN THE SAME RUN FOLDER as the signal poll (Desk A's choice 1; this build first took the next poll over all run folders). Its distance from the signal poll is measured on EXCHANGE time, each poll with its own offset (what the first build does; this build first used the recorder's clock, t_recv_ms; set NC15_SECOND_CLOCK=recorder for that reading), at most 6 s with the 1e-9 tolerance; later, or no later poll in that run: "not fill-checked".
  f. The ladder is the met side's present levels as asks (1 minus the bid price), cheapest first. "Offers 10" is the sizes at or under limit + 1e-9 summing to 10 - 1e-9 or more. The walked price takes the first 10 contracts of the levels at or under the limit.
  g. A decision instant before the sheet's commit time (2026-11-13T00:23:49Z) does not count; a close after 2026-12-31T23:59:59Z is past the log's stop. Both are counted and left out.
- h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop the run). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.
+ h. Result: a coverage row's result of yes or no, from any run folder that holds the ticker (two runs that disagree stop this build's run; Desk A's choice 6 takes the first found). Any other non-empty value is a void. An empty result is OPEN until 7 days after the close (by --now), then a void. A void is a fee-only loss, counted.
  i. A day is the US Central calendar date of the decision instant.
  j. Blocks, per place, over its fillable signals in order of decision instant: a block is the next 60; while it holds fewer than 10 wins or fewer than 10 losses it grows one signal at a time (a void is neither). It is READ only when every signal in it has a final value; a block holding an open signal WAITS, and so does everything after it.
  k. A block FAILS if its first and last decision are more than 21 days apart, if it has fewer than 7 different days, if one day holds more than 30 percent of a positive block net, if its cash profit factor is under 1.3, or if either half (the first n // 2 signals and the rest) is under 1.0. Otherwise it CLEARS. No sliding and no re-read: the next block starts at the first signal after it.
@@ -35,6 +35,8 @@ def iso(s): return datetime.fromisoformat(str(s).replace("Z", "+00:00")).timesta
 PLACES = ["KXCOPPER15M", "KXWTI15M", "KXNATGAS15M", "KXHYPE15M", "KXBNB15M", "KXSILVER15M", "KXUSDCAD15M"]
 WITHDRAWN = ["KXEURUSD15M", "KXGBPUSD15M", "KXUSDJPY15M", "KXAUDUSD15M"]
 COUNT_FROM = iso("2026-11-13T00:23:49Z"); STOP = iso("2026-12-31T23:59:59Z")
+SECOND_CLOCK = os.environ.get("NC15_SECOND_CLOCK", "exchange")      # "exchange": the 6 s to the second poll are measured on exchange time (each poll's own offset); "recorder": on t_recv_ms
+HEADERLESS_POLL = os.environ.get("NC15_HEADERLESS_POLL", "yes") == "yes"   # "yes": a row with no readable Date header can be a poll if earlier rows of its run give an offset (the sheet's text); "no": it is never a poll
 SIZE = 10; SLIP = 0.01; CELL = 0.50; BAND = (0.10, 0.90); LOOK = 600.0; EARLY = 10.0; SECOND_MAX = 6.0; OFFSET_ROWS = 120; VOID_DAYS = 7
 BLOCK = 60; RARE = 10; SPAN_DAYS = 21; MIN_DAYS = 7; DAY_SHARE = 0.30; PF_BLOCK = 1.3; PF_HALF = 1.0; CONFIRM = 30; PF_CONFIRM = 1.0
 EPS = 1e-9
@@ -97,13 +99,13 @@ def read_root(root):
                     for k, r in enumerate(csv.DictReader(f)):
                         try: r["_recv"] = int(r["t_recv_ms"])
                         except (TypeError, ValueError, KeyError): continue
-                        r["_k"] = k; rows.append(r)
+                        r["_k"] = k; r["_hdr"] = False; rows.append(r)
             rows.sort(key=lambda r: (r["_recv"], r["_k"]))
             hr, hv = [], []
             for r in rows:
                 try: h = parsedate_to_datetime(r.get("server_date_header") or "").timestamp()
                 except (TypeError, ValueError, IndexError): continue
-                hr.append(r["_recv"]); hv.append(h + 0.5 - r["_recv"] / 1000.0)
+                r["_hdr"] = True; hr.append(r["_recv"]); hv.append(h + 0.5 - r["_recv"] / 1000.0)
             runs.append({"path": run, "rows": rows, "hr": hr, "hv": hv})
             if os.path.exists(cp):
                 with gzip.open(cp, "rt", newline="") as f:
@@ -130,12 +132,14 @@ def measure(root, now, made_up=False, block_read=False):
     polls = collections.defaultdict(list)                                      # ticker -> [(recv, run index, row)]
     for i, run in enumerate(runs):
         for r in run["rows"]:
-            if r.get("series") in PLACES or r.get("series") in WITHDRAWN: polls[r["ticker"]].append((r["_recv"], i, r))
+            if (r.get("series") in PLACES or r.get("series") in WITHDRAWN) and (r["_hdr"] or HEADERLESS_POLL): polls[r["ticker"]].append((r["_recv"], i, r))
     recs = []; C = {s: collections.Counter() for s in PLACES + WITHDRAWN}
     for tk in sorted(polls):
-        ps = sorted(polls[tk], key=lambda x: (x[0], x[1], x[2]["_k"])); row0 = ps[0][2]; series = row0["series"]; c = C[series]
-        try: T = iso(row0["close_time"])
-        except ValueError: c["no readable close time"] += 1; continue
+        ps = sorted(polls[tk], key=lambda x: (x[0], x[1], x[2]["_k"])); series = ps[0][2]["series"]; c = C[series]; T = None
+        for _, _, r0 in ps:
+            try: T = iso(r0["close_time"]); break
+            except (ValueError, TypeError): continue
+        if T is None: c["no readable close time"] += 1; continue
         D = T - LOOK; c["windows"] += 1
         rec = {"series": series, "ticker": tk, "close": T, "D": D, "status": None}
         if series in WITHDRAWN: c["withdrawn series, not scored"] += 1; continue
@@ -151,16 +155,22 @@ def measure(root, now, made_up=False, block_read=False):
         if best is None:
             rec["status"] = "no signal: no clock" if no_clock else "no signal: no poll in the window"; c[rec["status"]] += 1; recs.append(rec); continue
         ex, recv, j, off = best; r = ps[j][2]; rec.update(signal_recv_ms=recv, signal_exchange=ex, offset=off)
-        y, n = levels(r, "yes"), levels(r, "no")
-        if not y or not n: rec["status"] = "no signal: a missing side of the book"; c[rec["status"]] += 1; recs.append(rec); continue
+        y, n = levels(r, "yes"), levels(r, "no"); top = {"yes": num(r.get("yes_bid_px_1")), "no": num(r.get("no_bid_px_1"))}
+        if not y or not n or top["yes"] is None or top["no"] is None: rec["status"] = "no signal: a missing side of the book"; c[rec["status"]] += 1; recs.append(rec); continue
         sy, sn = sum(s for _, s in y), sum(s for _, s in n); imb = (sy - sn) / (sy + sn); rec["imb5"] = imb
         if abs(imb) < CELL - EPS: rec["status"] = "not in the cell"; c[rec["status"]] += 1; recs.append(rec); continue
-        c["in the cell"] += 1; side = "yes" if imb > 0 else "no"; ask = 1 - max(p for p, _ in (n if side == "yes" else y)); rec.update(side=side, ask=ask)
+        c["in the cell"] += 1; side = "yes" if imb > 0 else "no"; ask = 1 - top["no" if side == "yes" else "yes"]; rec.update(side=side, ask=ask)
         if not (BAND[0] - EPS <= ask <= BAND[1] + EPS): rec["status"] = "in the cell, ask outside 0.10 to 0.90"; c[rec["status"]] += 1; recs.append(rec); continue
         c["entering"] += 1; limit = ask + SLIP; rec["limit"] = limit
-        if j + 1 >= len(ps) or (ps[j + 1][0] - recv) / 1000.0 > SECOND_MAX + EPS:
-            rec["status"] = "not fill-checked"; rec["second_gap_s"] = None if j + 1 >= len(ps) else (ps[j + 1][0] - recv) / 1000.0; c[rec["status"]] += 1; recs.append(rec); continue
-        r2 = ps[j + 1][2]; rec.update(second_recv_ms=ps[j + 1][0], second_gap_s=(ps[j + 1][0] - recv) / 1000.0)
+        j2 = next((k for k in range(j + 1, len(ps)) if ps[k][1] == ps[j][1]), None)       # the next poll of the ticker in the SAME run folder
+        gap = None
+        if j2 is not None:
+            gap = (ps[j2][0] - recv) / 1000.0
+            if SECOND_CLOCK == "exchange":
+                off2 = offset_of(runs[ps[j2][1]], ps[j2][0]); gap = None if off2 is None else gap + off2 - off
+        if gap is None or gap > SECOND_MAX + EPS:
+            rec["status"] = "not fill-checked"; rec["second_gap_s"] = gap; c[rec["status"]] += 1; recs.append(rec); continue
+        r2 = ps[j2][2]; rec.update(second_recv_ms=ps[j2][0], second_gap_s=gap)
         l1, l2 = ladder(r, side), ladder(r2, side); o1, o2 = offered(l1, limit), offered(l2, limit); rec.update(offered_signal=o1, offered_second=o2)
         if o1 < SIZE - EPS or o2 < SIZE - EPS:
             rec["status"] = "miss"; rec["miss_at"] = "both" if (o1 < SIZE - EPS and o2 < SIZE - EPS) else ("signal poll" if o1 < SIZE - EPS else "second poll"); c["miss"] += 1; recs.append(rec); continue
