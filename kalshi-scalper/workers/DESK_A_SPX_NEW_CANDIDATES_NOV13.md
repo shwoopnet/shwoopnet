@@ -27,3 +27,6 @@ Brief (the Head, 16:58Z): each card needs a NEW field or source that is not an o
 
 ## Plain statement
 I find **no genuinely different KXINX15M card today**. The one open lead (closing-imbalance publications, last window only) needs a terms read and a source before it can be called a card. If the Head can name a new field the project is allowed to read (a published, terms-cleared index-level or flow dataset that is neither a price-derived fair value nor Kalshi's own price, time, flow or open interest), I will write it the same day. Until then I would rather list nothing than pad.
+
+## Dated line (Nov 13, 2026, the Head's ruling at 17:01Z): SPXCLOSE1 CLOSED as a source
+Main read the terms: Nasdaq's NOII is subscription only, NYSE's imbalance data is paid, and storage or commercial use needs written consent, so there is no free route to the closing-imbalance publications. Candidate 9 (SPXCLOSE1) is **CLOSED as a source** for that reason; it is no longer an open lead. Reopening it would need a paid vendor quote and the owner's popup. No card exists or is owed for it.
