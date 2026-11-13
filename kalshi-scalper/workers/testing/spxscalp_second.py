@@ -26,27 +26,57 @@ AMBIGUITIES = [
     "An exit price at or below 0 (bid - s) is clamped to 0 for the fee only; the net uses the unclamped price.",
     "The hold arm's primary slip is 1c (entry slip only); every figure is also printed at 2c.",
     "A look whose candle lacks a bid or an ask has no price: no entry at that look. A look with a missing ES bar, or an instrument change from the start bar, is skipped (counted).",
+    "Rule 18 (Auditor B F1, F2): every candle price used must be two-sided (0 < bid < ask < 1, 1e-9); at entry a candle that is not is no price (look_not_two_sided); an exit, target or 80c candle that is not has no bid, and a missing time-exit bid drops the entry (never an exit at 0 - s). A target or 80c hit on a candle with an empty ask is not a hit. The card line is pending (Desk B or the Head).",
+    "Drops for a no-bid exit are printed (share, fill sum at 1c, hold net of the same entries) and biased upward; the hold arm is the unbiased comparison. The Head decides whether a zero bid should instead exit at 0 (then the card needs that line).",
+    "ES loader (F3): rows read, kept and skipped counted; STOP if none kept or more than 5% skipped (MAX_SKIP_SHARE, my choice).",
     "Rule label order: fewer than 100 entries -> FALSIFIED; a half under 1.0 at 1c or PF under 1.0 at 2c -> FALSIFIED; counts -> 'counts the bar'; else 'no evidence'. An empty half is reported 'undefined' and does not by itself falsify.",
     "'Window-close order' for the halves = ascending close time, ties by ticker.",
 ]
 
 
-def load_es(path):
-    """{end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s); a duplicate ts_event stops the run naming the minute."""
+MAX_SKIP_SHARE = 0.05          # the ES loader STOPS if more than this share of rows is skipped, or if no row is kept
+
+
+def load_es_counted(path):
+    """-> ({end_ts: (instrument_id, close)} keyed by the minute END (ts_event + 60 s), counts). A duplicate ts_event stops the run naming the minute.
+    counts: rows_read, rows_kept, skipped_ts (ts_event missing or not an ISO string), skipped_value (instrument_id or close does not parse)."""
     out, seen = {}, set()
+    st = {"rows_read": 0, "rows_kept": 0, "skipped_ts": 0, "skipped_value": 0}
     with open(path, newline="") as fh:
         for r in csv.DictReader(fh):
-            ts = k.iso(r["ts_event"])
+            st["rows_read"] += 1
+            ts = k.iso(r.get("ts_event") or "")
             if ts is None:
-                continue
+                st["skipped_ts"] += 1; continue
             if ts in seen:
                 raise SystemExit("STOP: duplicate ES ts_event %s (two rows for one minute)" % r["ts_event"])
             seen.add(ts)
             try:
                 out[ts + 60] = (int(r["instrument_id"]), float(r["close"]))
             except (KeyError, TypeError, ValueError):
-                continue
-    return out
+                st["skipped_value"] += 1; continue
+            st["rows_kept"] += 1
+    return out, st
+
+
+def check_es_rows(st):
+    """STOP if no ES row was kept or the skipped share is above MAX_SKIP_SHARE; the message carries the counts."""
+    skipped = st["skipped_ts"] + st["skipped_value"]
+    desc = "rows_read %d, rows_kept %d, skipped_ts %d, skipped_value %d" % (st["rows_read"], st["rows_kept"], st["skipped_ts"], st["skipped_value"])
+    if st["rows_kept"] == 0:
+        raise SystemExit("STOP: no ES row kept (%s): the file is not in the expected format" % desc)
+    if skipped > MAX_SKIP_SHARE * st["rows_read"]:
+        raise SystemExit("STOP: more than %.0f%% of ES rows skipped (%s)" % (MAX_SKIP_SHARE * 100, desc))
+
+
+def load_es(path):
+    return load_es_counted(path)[0]
+
+
+def two_sided(c):
+    """Standing rule 18: 0 < bid < ask < 1 with 1e-9 slack. An empty side (0.00 / 1.00), a locked or a crossed book is no price."""
+    b, a = c.get("bid"), c.get("ask")
+    return b is not None and a is not None and b > TOL and a < 1.0 - TOL and a - b > TOL
 
 
 def fee(p, contracts=1):
@@ -75,6 +105,8 @@ def find_entries(close, es, candles, counts):
         c = by.get(t)
         if c is None or c.get("bid") is None or c.get("ask") is None:
             counts["look_no_price"] += 1; continue
+        if not two_sided(c):
+            counts["look_not_two_sided"] += 1; continue
         ask = c["ask"] if side == "yes" else 1.0 - c["bid"]
         for hi in BANDS:
             if hi not in found and BAND_LO - TOL <= ask <= hi + TOL:
@@ -85,12 +117,12 @@ def find_entries(close, es, candles, counts):
 def after_entry(candles, t_entry, close):
     """Candles after the entry candle through the minute ending close - 300 s, in time order, as (t, bid)."""
     last = close - TIME_EXIT_BEFORE_CLOSE_S
-    return [(c["ts"], c.get("bid")) for c in sorted(candles, key=lambda c: c["ts"]) if t_entry < c["ts"] <= last]
+    return [(c["ts"], c.get("bid")) for c in sorted(candles, key=lambda c: c["ts"]) if t_entry < c["ts"] <= last and two_sided(c)]
 
 
 def time_exit_bid(candles, close):
     c = {x["ts"]: x for x in candles}.get(close - TIME_EXIT_BEFORE_CLOSE_S)
-    return None if c is None else c.get("bid")
+    return c["bid"] if c is not None and two_sided(c) else None
 
 
 def headline(fill, s, path, tbid):
@@ -156,11 +188,16 @@ def arm_report(rows_by_slip):
     return out
 
 
-def run_windows(markets, cs, es):
-    c = {"windows_listed": 0, "not_touched_on_or_after_2026-12-01": 0, "no_es_start_bar": 0, "look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0}
-    spreads, two_sided, looks_total = [], 0, 0
+DROP_NOTE = "Entries dropped because the exit candle has no bid (rule 18) are mostly the losers: this figure is biased UPWARD; read it with the printed drop share and the hold arm (never dropped)."
+
+
+def run_windows(markets, cs, es, es_stats=None):
+    c = {"windows_listed": 0, "not_touched_on_or_after_2026-12-01": 0, "no_es_start_bar": 0, "look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}
+    spreads, n_two_sided, looks_total = [], 0, 0
     arms = {(hi, ex, s): [] for hi in BANDS for ex in EXITS for s in SLIPS}
     drops = {(hi, ex): 0 for hi in BANDS for ex in EXITS}
+    drop_fill = {(hi, ex): 0.0 for hi in BANDS for ex in EXITS}
+    drop_hold = {(hi, ex): 0.0 for hi in BANDS for ex in EXITS}
     entered = {hi: 0 for hi in BANDS}
     no_entry = {hi: 0 for hi in BANDS}
     voids = {hi: 0 for hi in BANDS}
@@ -181,8 +218,8 @@ def run_windows(markets, cs, es):
             cd = {x["ts"]: x for x in candles}.get(O + 60 * mm)
             if cd is not None:
                 looks_total += 1
-                if cd.get("bid") is not None and cd.get("ask") is not None:
-                    two_sided += 1; spreads.append(round((cd["ask"] - cd["bid"]) * 100.0, 6))
+                if two_sided(cd):
+                    n_two_sided += 1; spreads.append(round((cd["ask"] - cd["bid"]) * 100.0, 6))
         for hi in BANDS:
             if hi not in found:
                 no_entry[hi] += 1; continue
@@ -198,12 +235,14 @@ def run_windows(markets, cs, es):
                 key = (close, tk)
                 nh = headline(fill, s, path, tbid)
                 if nh is None:
-                    if s == SLIPS[0]: drops[(hi, "headline")] += 1
+                    if s == SLIPS[0]:
+                        drops[(hi, "headline")] += 1; drop_fill[(hi, "headline")] += fill; drop_hold[(hi, "headline")] += hold(fill, side, res)
                 else:
                     arms[(hi, "headline", s)].append((key, nh))
                 nv = variant(fill, s, path, tbid)
                 if nv is None:
-                    if s == SLIPS[0]: drops[(hi, "variant")] += 1
+                    if s == SLIPS[0]:
+                        drops[(hi, "variant")] += 1; drop_fill[(hi, "variant")] += fill; drop_hold[(hi, "variant")] += hold(fill, side, res)
                 else:
                     arms[(hi, "variant", s)].append((key, nv))
                 arms[(hi, "hold", s)].append((key, hold(fill, side, res)))
@@ -213,18 +252,23 @@ def run_windows(markets, cs, es):
             rows = {s: sorted(arms[(hi, ex, s)]) for s in SLIPS}
             r = arm_report(rows)
             r["entries_found"] = entered[hi]; r["dropped_no_time_exit_candle"] = drops[(hi, ex)]; r["windows_without_entry"] = no_entry[hi]
+            r["dropped_share"] = (drops[(hi, ex)] / entered[hi]) if entered[hi] else None
+            r["dropped_entry_fill_sum_1c"] = drop_fill[(hi, ex)]; r["dropped_hold_net_sum_1c"] = drop_hold[(hi, ex)]
+            r["drop_note"] = DROP_NOTE
             if ex == "hold": r["voids"] = voids[hi]
             rep["band_%02d_%s" % (round(hi * 100), ex)] = r
     spreads.sort()
     nr = lambda q: (spreads[max(0, int(math.ceil(q * len(spreads))) - 1)] if spreads else None)
-    c1 = {"look_candles": looks_total, "two_sided": two_sided, "two_sided_share": (two_sided / looks_total if looks_total else None), "spread_cents_median": nr(0.5), "spread_cents_p90": nr(0.9)}
-    return {"C1_candles_two_sided_and_spread": c1, "counts": c, "arms": rep, "headline_arm": "band_25_headline at 1c", "upper_bound_note": UPPER_BOUND, "ambiguities": AMBIGUITIES}
+    c1 = {"look_candles": looks_total, "two_sided": n_two_sided, "two_sided_share": (n_two_sided / looks_total if looks_total else None), "spread_cents_median": nr(0.5), "spread_cents_p90": nr(0.9)}
+    return {"C1_candles_two_sided_and_spread": c1, "counts": c, "arms": rep, "headline_arm": "band_25_headline at 1c", "upper_bound_note": UPPER_BOUND, "es_rows": es_stats, "ambiguities": AMBIGUITIES}
 
 
 def run(lists, candle_runs, es_path):
     for f in list(lists) + list(candle_runs):
         k.guard(f)
-    return run_windows(k.markets(lists), k.candles(candle_runs), load_es(es_path))
+    es, st = load_es_counted(es_path)
+    check_es_rows(st)
+    return run_windows(k.markets(lists), k.candles(candle_runs), es, st)
 
 
 if __name__ == "__main__":

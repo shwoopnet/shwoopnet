@@ -35,6 +35,7 @@ c = rep["counts"]
 assert c["windows_listed"] == 8 and c["not_touched_on_or_after_2026-12-01"] == 1 and c["no_es_start_bar"] == 1, c
 h = A["band_25_headline"]
 assert h["entries_found"] == 4 and h["windows_without_entry"] == 2 and h["dropped_no_time_exit_candle"] == 1, h
+assert h["dropped_share"] == 0.25 and near(h["dropped_entry_fill_sum_1c"], 0.23) and near(h["dropped_hold_net_sum_1c"], 0.75) and A["band_25_hold"]["dropped_share"] == 0.0 and "mostly the losers" in h["drop_note"]
 assert h["1c"]["n"] == 3 and near(h["1c"]["net"], 0.19 - 0.14 + 0.03) and near(h["1c"]["pf"], 0.22 / 0.14) and near(h["1c"]["pf"], 1.5714285714)
 assert h["1c"]["n_half1"] == 1 and h["1c"]["n_half2"] == 2 and h["1c"]["half1_pf"] == float("inf") and near(h["1c"]["half2_pf"], 0.03 / 0.14)
 assert near(h["2c"]["pf"], 0.21 / 0.16) and near(h["2c"]["net"], 0.20 - 0.16 + 0.01) and h["counts_the_bar"] is False and h["label"].startswith("FALSIFIED (fewer than 100 entries, n = 3)") and h["label"].endswith("(upper bound, not fill-checked)")
@@ -58,7 +59,7 @@ assert near(q.fee(0.23), 0.02) and near(q.fee(0.23, 2), 0.03) and near(q.fee(0.2
 # --- looks, thresholds, bands, sides ---
 def one(es_list, cmap, close=D(5)):
     mkx, csx, esx = assemble(window("KXINX15M-T", close, es_list, cmap))
-    cnt = {"look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0}
+    cnt = {"look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}
     return q.find_entries(close, esx, csx["KXINX15M-T"], cnt), cnt
 flat = [1000.0] * 16
 for m_ok, expect in ((5, 5), (6, None)):          # only m = 5 qualifies (inclusive: end at close - 600 s); m = 6 is past the looks
@@ -77,12 +78,12 @@ assert f[0.25][:2] == (2, "no")
 f, cnt = one([1000.0, None, 1001.0] + [1001.0] * 13, {2: (.20, .22)}); assert f[0.25][0] == 2 and cnt["look_no_es_bar"] == 1
 f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (None, .22)}); assert f == {} and cnt["look_no_price"] == 1
 mkr, csr, esr = assemble(window("KXINX15M-T", D(5), [1000.0, 1001.0] + [1001.0] * 14, {1: (.20, .22)})); esr[D(5) - 900 + 60] = (2, 1001.0)
-cnt = {"look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0}; assert q.find_entries(D(5), esr, csr["KXINX15M-T"], cnt) == {} and cnt["look_es_roll"] == 1
+cnt = {"look_no_es_bar": 0, "look_es_roll": 0, "look_no_price": 0, "look_not_two_sided": 0}; assert q.find_entries(D(5), esr, csr["KXINX15M-T"], cnt) == {} and cnt["look_es_roll"] == 1
 # the first look wins even if a later look is also in band; one entry per band
 f, _ = one([1000.0, 1001.0, 1001.0] + [1001.0] * 13, {1: (.20, .22), 2: (.22, .24)}); assert f[0.25][0] == 1
 # --- exits: target range, tolerance, time exit, drops ---
 Cl = D(5); O = Cl - 900
-cands = lambda m2b: [{"ts": O + 60 * m, "bid": b, "ask": 1} for m, b in sorted(m2b.items())]
+cands = lambda m2b: [{"ts": O + 60 * m, "bid": b, "ask": b + 0.02} for m, b in sorted(m2b.items())]
 p = q.after_entry(cands({m: .15 for m in range(1, 16)}), O + 120, Cl); assert [t for t, _ in p] == [O + 60 * m for m in range(3, 11)]          # after the entry candle, through the minute ending close - 300 s (m = 10)
 fill = 0.23
 hit10 = [(O + 60 * m, .15) for m in range(3, 10)] + [(O + 600, 0.46)]; assert near(q.headline(fill, 0.01, hit10, 0.46), 0.45 - 0.23 - q.fee(fill) - q.fee(0.45))          # the m = 10 candle can be the target (inclusive)
@@ -108,4 +109,57 @@ two_c = q.arm_report({0.01: rows([0.3, -0.1] * 50), 0.02: rows([-0.3, 0.1] * 50)
 noev = q.arm_report({0.01: rows([0.12, -0.1] * 50), 0.02: rows([0.12, -0.1] * 50)}); assert noev["label"].startswith("no evidence") and near(noev["1c"]["pf"], 1.2) and noev["counts_the_bar"] is False          # PF 1.2: both halves above 1.0 but under the 1.3 bar
 exact13 = q.arm_report({0.01: rows([0.13, -0.1] * 50), 0.02: rows([0.13, -0.1] * 50)}); assert exact13["counts_the_bar"] is True          # PF 1.3 counts (inside 1e-9)
 empty = q.arm_report({0.01: [], 0.02: []}); assert empty["label"].startswith("FALSIFIED (fewer than 100") and empty["1c"]["pf"] is None
+# --- ADDENDUM: F1 rule 18 at entry ---
+f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (0.0, .22), 2: (.20, .22)}); assert f[0.25][:3] == (2, "yes", 0.22) and cnt["look_not_two_sided"] == 1          # Z1
+for cm in ({1: (0.0, .30)}, {1: (.78, 1.0)}, {1: (.22, .22)}, {1: (.23, .21)}):
+    f, cnt = one([1000.0, 999.0] + [999.0] * 14, cm); assert f == {} and cnt["look_not_two_sided"] == 1, (cm, f, cnt)          # Z1b down moves: no NO entry at 1 - .78 = .22
+f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.23, .21)}); assert f == {} and cnt["look_not_two_sided"] == 1
+f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.22, .22)}); assert f == {} and cnt["look_not_two_sided"] == 1
+f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.01, .22)}); assert f[0.25][2] == 0.22 and cnt["look_not_two_sided"] == 0          # wide but two-sided
+f, cnt = one([1000.0, 1001.0] + [1001.0] * 14, {1: (.22 - 4e-10, .22)}); assert cnt["look_not_two_sided"] == 1          # a 0.5e-9 spread is locked
+# a candle that is not two-sided is no price even where the ES move does not qualify: not counted
+f, cnt = one([1000.0, 1000.1] + [1000.1] * 14, {1: (0.0, .22)}); assert f == {} and cnt["look_not_two_sided"] == 0
+# --- F2: a no-bid or one-sided candle is no exit price ---
+cd = lambda t, b, a: {"ts": t, "bid": b, "ask": a}
+assert q.time_exit_bid([cd(Cl - 300, 0.0, 0.02)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, 1.0)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, .30)], Cl) is None and q.time_exit_bid([cd(Cl - 300, .30, .32)], Cl) == .30
+pp = q.after_entry([cd(O + 180, .50, 1.0), cd(O + 240, 0.0, .02), cd(O + 300, .50, .52)], O + 120, Cl); assert pp == [(O + 300, .50)]
+def zrun(cmap_extra, result="yes"):
+    cm = {1: (.20, .22), **{m: (.30, .32) for m in range(2, 10)}, 10: (0.0, .02), **cmap_extra}
+    return q.run_windows(*assemble(window("KXINX15M-Z", D(5), [1000, 1001] + [1001.0] * 14, cm, result)))[ "arms"]
+Za = zrun({})          # Z2a
+assert Za["band_25_headline"]["entries_found"] == 1 and Za["band_25_headline"]["dropped_no_time_exit_candle"] == 1 and Za["band_25_headline"]["1c"]["n"] == 0 and Za["band_25_variant"]["dropped_no_time_exit_candle"] == 1
+assert Za["band_25_headline"]["dropped_share"] == 1.0 and near(Za["band_25_headline"]["dropped_entry_fill_sum_1c"], 0.23) and near(Za["band_25_headline"]["dropped_hold_net_sum_1c"], 0.75) and near(Za["band_25_hold"]["1c"]["net"], 0.75) and Za["band_25_hold"]["dropped_share"] == 0.0
+assert Za["band_25_variant"]["dropped_share"] == 1.0 and near(Za["band_25_variant"]["dropped_entry_fill_sum_1c"], 0.23) and near(Za["band_25_variant"]["dropped_hold_net_sum_1c"], 0.75)
+Zb = zrun({4: (.50, .52)})          # Z2b: a target hit at m = 4 keeps the headline although the time exit has no bid; the variant is dropped
+assert Zb["band_25_headline"]["dropped_no_time_exit_candle"] == 0 and Zb["band_25_headline"]["1c"]["n"] == 1 and near(Zb["band_25_headline"]["1c"]["net"], 0.22) and Zb["band_25_variant"]["dropped_no_time_exit_candle"] == 1
+Zc = zrun({4: (.50, 1.0)}); assert Zc["band_25_headline"]["dropped_no_time_exit_candle"] == 1          # a hit candle with an empty ask is not a hit
+# --- C1 on two-sided candles only (Z3) ---
+Z3 = {1: (0.0, .22), 2: (.20, .22), 3: (.30, 1.0)}
+rz = q.run_windows(*assemble(window("KXINX15M-Q", D(5), [1000, 1001] + [1001.0] * 14, Z3, omit=(4, 5))))["C1_candles_two_sided_and_spread"]
+assert rz["look_candles"] == 3 and rz["two_sided"] == 1 and abs(rz["two_sided_share"] - 1 / 3) < 1e-12 and rz["spread_cents_median"] == 2.0, rz
+# --- F3: counted ES rows ---
+HDR = "ts_event,rtype,publisher_id,instrument_id,open,high,low,close,volume\n"
+good = lambda i: "2026-11-05T%02d:%02d:00.000000000Z,33,1,7,1,1,1,1000.5,10\n" % (14 + i // 60, i % 60)
+bad = ["1762354800000000000,33,1,7,1,1,1,1000.5,10\n", "2026-11-06T14:00:00.000000000Z,33,1,abc,1,1,1,1000.5,10\n", "2026-11-06T14:01:00.000000000Z,33,1,7,1,1,1,,10\n"]
+with tempfile.TemporaryDirectory() as tmpd:
+    def es_file(rows):
+        f = os.path.join(tmpd, "x.csv"); open(f, "w").write(HDR + "".join(rows)); return f
+    out, st = q.load_es_counted(es_file([good(0), good(1)] + bad)); assert st == {"rows_read": 5, "rows_kept": 2, "skipped_ts": 1, "skipped_value": 2} and len(out) == 2
+    try: q.check_es_rows(st); assert 0
+    except SystemExit as ex: assert "rows_read 5" in str(ex) and "skipped_ts 1" in str(ex) and "skipped_value 2" in str(ex)
+    ok = [good(i) for i in range(100)]
+    assert q.check_es_rows(q.load_es_counted(es_file(ok + bad[:1]))[1]) is None
+    assert q.check_es_rows(q.load_es_counted(es_file([good(i) for i in range(95)] + [bad[0]] * 5))[1]) is None          # exactly 5%
+    for rows in (ok + [bad[0]] * 6, [], bad):
+        try: q.check_es_rows(q.load_es_counted(es_file(rows))[1]); assert 0
+        except SystemExit: pass
+    mkw, csw, esw = assemble(window("KXINX15M-F", D(5), [1000, 1001] + [1001.0] * 14, {1: (.20, .22)}))
+    saved = (q.k.guard, q.k.markets, q.k.candles); q.k.guard = lambda f: None; q.k.markets = lambda l: mkw; q.k.candles = lambda c: csw
+    try:
+        ro = q.run(["l"], ["c"], es_file([good(i) for i in range(10)])); assert ro["es_rows"]["rows_read"] == 10 and ro["es_rows"]["rows_kept"] == 10
+        try: q.run(["l"], ["c"], es_file(bad)); assert 0
+        except SystemExit as ex: assert "skipped" in str(ex)
+    finally:
+        q.k.guard, q.k.markets, q.k.candles = saved
+assert q.MAX_SKIP_SHARE == 0.05
 print("test_spxscalp_second: all checks passed")
