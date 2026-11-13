@@ -20,7 +20,7 @@ MIN_FILLED = 150
 GAP_LINE, SPREAD_LINE = 0.08, 0.04
 COST_KILL = 0.04
 READINGS = [
-    "R16 (Nov 13, after the lists landed and before any candle): the BTTS leg is the ONE market whose event_ticker is KX<LG>BTTS-<GAMEKEY> (series file: one market an event), whatever its last segment (the real tickers end in -BTTS, the made-up layout used -YES); more than one such market = unreadable",
+    "R16 (Nov 13, after the lists landed and before any candle): the BTTS leg is the ONE market whose event_ticker is KX<LG>BTTS-<GAMEKEY> (series file: one market an event), whatever its last segment (the real tickers end in -BTTS, the made-up layout used -YES); more than one such market = no BTTS leg, counted (third amendment 707fad73, item 1)",
     "R1 lists proof: every live_<SERIES> request answered 200 on pages 1..k with no cursor left; the three fee-field reads are not used (the fee is the registered formula) and may be unanswered",
     "R2 a game = one GAME event with all three winner markets (two team codes and -TIE); a game missing one is counted 'winner legs incomplete' and is not derivable",
     "R3 sample: GAME events whose latest winner close is inside [2026-09-12, 2026-11-13) UTC, the 60 with the latest such close per league, ties by event ticker; never extended",
@@ -167,6 +167,7 @@ def run(series_path, lists_dir, candles_dir):
                     d[ts] = c
 
     cells = {}
+    no_btts = {}
     league_rows = {}
     for lg in sorted(group_of):
         grp = group_of[lg]
@@ -205,10 +206,10 @@ def run(series_path, lists_dir, candles_dir):
                              if t.startswith("KX%sTOTAL-%s-" % (lg, key)) and isinstance(m.get("floor_strike"), (int, float))))
             targets = []
             bts = sorted(t for t, m in markets.items() if m.get("event_ticker") == "KX%sBTTS-%s" % (lg, key))
-            if len(bts) == 1:                  # R16: the series file says one market an event; found by its event ticker, whatever its last segment
+            if len(bts) == 1:                  # R16 = third amendment item 1: the ONE market of the BTTS event, whatever its last segment
                 targets.append(("BTTS", bts[0], None, None))
-            elif bts:
-                targets.append(("BTTS", bts[0], "unreadable", None))
+            else:                              # none, or more than one: no BTTS leg, counted (third amendment item 1)
+                no_btts[grp] = no_btts.get(grp, 0) + 1
             for t, m in sorted(markets.items()):
                 if not t.startswith("KX%sTEAMTOTAL-%s-" % (lg, key)):
                     continue
@@ -306,7 +307,7 @@ def run(series_path, lists_dir, candles_dir):
             "fit_residual_median": round(statistics.median(c["resid"]), 6) if c["resid"] else None,
             "flags": flags, "verdict": v, "freshness": FRESH})
     return {"build": "History Miner second build, from the registration text only", "freshness": FRESH,
-            "no_such_series": sorted(no_such), "leagues": league_rows, "cells": out_cells, "readings": READINGS}
+            "no_such_series": sorted(no_such), "no_btts_leg_by_group": no_btts, "leagues": league_rows, "cells": out_cells, "readings": READINGS}
 
 
 def main(argv):

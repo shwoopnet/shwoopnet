@@ -25,7 +25,7 @@ for rid, (q, pages) in lists.items():
         markets[mk["ticker"]] = {k: v for k, v in mk.items() if k != "result"}
 out = {"freshness": D.FRESH, "no_such_series": sorted(no_such), "leagues": {}, "totals": {}}
 tot = {"games_in_window": 0, "sampled": 0, "kickoff_not_derivable": 0, "kickoff_derivable": 0, "no_btts_leg": 0,
-       "teamtotal_markets": 0, "teamtotal_unreadable": 0, "winner_legs_incomplete": 0, "btts_unreadable": 0}
+       "teamtotal_markets": 0, "teamtotal_unreadable": 0, "winner_legs_incomplete": 0, "btts_more_than_one": 0}
 for lg in sorted(group_of):
     gs = "KX%sGAME" % lg
     events = {}
@@ -46,7 +46,7 @@ for lg in sorted(group_of):
     sample = games[:D.SAMPLE_N]
     r = {"group": group_of[lg], "series_with_no_market": [s for s in ("GAME", "TOTAL", "BTTS", "TEAMTOTAL") if "KX%s%s" % (lg, s) in no_such],
          "winner_legs_incomplete": incomplete, "games_in_window": len(games), "sampled": len(sample),
-         "kickoff_not_derivable": 0, "kickoff_derivable": 0, "no_btts_leg": 0, "btts_unreadable": 0, "teamtotal_markets": 0, "teamtotal_unreadable": 0}
+         "kickoff_not_derivable": 0, "kickoff_derivable": 0, "no_btts_leg": 0, "btts_more_than_one": 0, "teamtotal_markets": 0, "teamtotal_unreadable": 0}
     for cl, ev, mks, codes in sample:
         occ = {m.get("occurrence_datetime") for m in mks}
         if len(occ) != 1 or None in occ:
@@ -57,10 +57,10 @@ for lg in sorted(group_of):
         r["kickoff_derivable"] += 1
         key = ev.split("-", 1)[1]
         nb = sum(1 for m in markets.values() if m.get("event_ticker") == "KX%sBTTS-%s" % (lg, key))
-        if nb == 0:
+        if nb != 1:                    # none or more than one: no BTTS leg (third amendment item 1)
             r["no_btts_leg"] += 1
-        elif nb > 1:
-            r["btts_unreadable"] = r.get("btts_unreadable", 0) + 1
+            if nb > 1:
+                r["btts_more_than_one"] += 1
         for t, m in markets.items():
             if t.startswith("KX%sTEAMTOTAL-%s-" % (lg, key)):
                 r["teamtotal_markets"] += 1
