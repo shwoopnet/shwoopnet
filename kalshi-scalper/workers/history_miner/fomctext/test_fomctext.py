@@ -114,4 +114,17 @@ W = F.words([run(LJ, {"hist": [{"markets": mkw}], "live": [{"markets": []}]})], 
 assert W and all(set(x) <= {"market_ticker", "event_ticker", "decision_date"} | set(F.WORD_FIELDS) for x in W), W[0]
 assert not any("result" in x or "price" in json.dumps(x) or "volume" in json.dumps(x) for x in W), W[0]
 assert all(not F.held_out(x["decision_date"]) and x["decision_date"] in F.DEV_DATES for x in W) and len(W) == 25, len(W)
+# --- Amendment 3: month-only event tickers
+assert set(F.MONTH_ONLY.values()) == set(F.DEV_DATES) and len(F.MONTH_ONLY) == 11
+assert F.date_of_event("KXFEDMENTION-26MAR") == "2026-03-18" and F.date_of_event("KXFEDMENTION-25JAN") == "2025-01-29"
+assert F.date_of_event("KXFEDMENTION-26JUN") is None and F.date_of_event("KXFEDMENTION-25AUG") is None and F.date_of_event("KXFEDMENTION-26JUL") is None
+assert F.date_of_event("KXFEDMENTION-26MAR18") == "2026-03-18" and F.date_of_event("KXPOWELLMENTION-25JAN29") == "2025-01-29"
+mm = [{"ticker": "KXFEDMENTION-26MAR-INFL", "event_ticker": "KXFEDMENTION-26MAR", "result": "yes"},       # mapped month: kept
+      {"ticker": "KXFEDMENTION-25AUG-INFL", "event_ticker": "KXFEDMENTION-25AUG", "result": "yes"},       # unmapped month: dropped as held out
+      {"ticker": "KXFEDMENTION-26JUN-INFL", "event_ticker": "KXFEDMENTION-26JUN", "result": "yes"}]       # held-out month: dropped as held out
+keep, drop = F.load_lists([run(LJ, {"hist": [{"markets": mm}], "live": [{"markets": []}]})], LJ)
+assert list(keep) == ["KXFEDMENTION-26MAR-INFL"] and keep["KXFEDMENTION-26MAR-INFL"]["date"] == "2026-03-18" and drop["held_out"] == 2, (keep, drop)
+tm = table([["2026-03-18", "KXFEDMENTION-26MAR", "KXFEDMENTION-26MAR-INFL", "inflation", "yes"]])
+rm = F.count(tm, [run(LJ, {"hist": [{"markets": mm}], "live": [{"markets": []}]})], [run(CJ, {"c1": [{"markets": [cndl("KXFEDMENTION-26MAR-INFL", F.et_epoch("2026-03-18", 14, 5), 0.60, 0.62)]}]})], LJ, CJ)
+assert rm["qualifying"] == 1 and rm["statement_word_strikes"] == 1, rm
 print("ok", r["qualifying"], r2["qualifying"], len(jb["requests"]))

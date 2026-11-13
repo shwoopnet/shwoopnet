@@ -1,4 +1,4 @@
-# FOMCTEXT stage 1 reader, Amendment 2 (404 only on per-market candle requests; words command), frozen before any FOMCTEXT answer exists; supersedes 72a6a5ed
-88f404d6d3678a4e16039a12fcdd78e5cf28feae805273011a047f366038d86c  fomctext.py
-20f10c42db0d15da2f9a63e9a1341d787be5e6e94d0a868f96f9bbd5bde049fb  test_fomctext.py
-7ade9536e69ebca9e60a06af41302c528567ba17623c82d98bbb4a07cf75d2e2  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT stage 1 reader, Amendment 3 (month-only event tickers mapped to the eleven development dates), frozen before any FOMCTEXT answer exists; supersedes 1b041db0
+3b7fb809b0015fca8e62c8f46b249368b6b4bac0c48b50ed371397b7bb35f917  fomctext.py
+0e40c8b3f1c591c6bf8993850ab7cbc5aa4dfd2946ae501eb01410fb93f20a96  test_fomctext.py
+f8be4c7970db9003c333b4864e1e20af6465f25bed88e3776e4c917a1ebfaf95  FOMCTEXT_READER_NOTE.md

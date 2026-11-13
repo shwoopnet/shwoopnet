@@ -38,12 +38,20 @@ def et_epoch(date, h, mi):
     return calendar.timegm((y, mo, d, h, mi, 0)) - eastern_offset(y, mo, d, h)
 
 
+MONTH_ONLY = {"25JAN": "2025-01-29", "25MAR": "2025-03-19", "25MAY": "2025-05-07", "25JUN": "2025-06-18", "25JUL": "2025-07-30", "25SEP": "2025-09-17",
+              "25OCT": "2025-10-29", "25DEC": "2025-12-10", "26JAN": "2026-01-28", "26MAR": "2026-03-18", "26APR": "2026-04-29"}   # Amendment 3: the eleven development months only
+
+
 def date_of_event(event):
-    """The decision date read from the event ticker's date part (YYMMMDD), e.g. KXFEDMENTION-25JAN29 -> 2025-01-29; None if absent."""
+    """The decision date of an event ticker. YYMONDD form (KXFEDMENTION-25JAN29) -> 2025-01-29. Month-only form (KXFEDMENTION-26MAR, Amendment 3) -> the date in MONTH_ONLY;
+    a month-only ticker NOT in that map returns None, which the reader treats as held out (so 26JUN and later can never be read through it). Anything else: None."""
     m = re.match(r"^[A-Z0-9]+-(\d\d)([A-Z]{3})(\d\d)", event or "")
-    if not m or m.group(2) not in MON:
-        return None
-    return "%04d-%02d-%02d" % (2000 + int(m.group(1)), MON[m.group(2)], int(m.group(3)))
+    if m and m.group(2) in MON:
+        return "%04d-%02d-%02d" % (2000 + int(m.group(1)), MON[m.group(2)], int(m.group(3)))
+    m = re.fullmatch(r"[A-Z0-9]+-(\d\d[A-Z]{3})", event or "")
+    if m:
+        return MONTH_ONLY.get(m.group(1))
+    return None
 
 
 def held_out(date):
