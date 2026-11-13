@@ -171,3 +171,7 @@ Adopted as proposed. Desk B numbered these "Amendment 3"; they are Amendment 4 h
 - **A symbolic link anywhere in that tree makes the count REFUSE to run.** It is never skipped.
 
 The first line of the count prints this fingerprint, and both builds must name the same one. Everything else in Amendment 4 stands.
+
+**Clarification to Amendment 5 (Nov 13, 2026, 02:55Z, Auditor B via the History Miner):**
+- (1) The fingerprint covers EVERY top-level YYYY-MM-DD folder present in the frozen copy of the combo folder when the count runs, not only the seven days the count reads. Both builds run on one frozen copy.
+- (2) Files not under a dated folder (a README or any other root file) are not in the fingerprint.
