@@ -87,3 +87,14 @@ Every "or more", "or less", "within" and band edge is compared with a tolerance 
    - "Unsettled" in step 7 means the earlier FILLED bet's market has a close time later than the look. An order that did not fill blocks nothing.
    - A fill can be judged only where the minute request for that market and morning was answered. A decision whose minute request is missing or failed is "no fill data": counted, not a bet, never treated as filled.
    - A market that settles at a set price (result neither yes nor no) is a void under the money rule. The count is printed, and beside it, information only, the figure with the settlement value paid instead.
+
+## AMENDMENT 2, Nov 13, 2026, 01:10Z: clarifying pins for a second builder, no rule changed, written before any list, candle, price path or result of this card was requested or read
+
+1. **A market's mornings.** Every Eastern date whose 07:00 look is strictly after the market's open time and strictly before its close time. The three candles are the hourly candles whose END times are exactly 22:00 the evening before, 06:00 and 07:00.
+2. **The 7 day volume (step 6).** The sum of the volume of the market's hourly candles with end times later than (22:00 the evening before, minus 7 days) and at or before that 22:00. Hourly candles are requested for at most the last 35 days of a market's life, which covers this window for every look.
+3. **A gap of exactly 5c counts.** A gap of zero has no side and is no signal.
+4. **The fill (step 8), in full.** Only the 1-minute candle ending 07:01 is read. No such candle, in an answered request: filled, paying the limit. A candle whose ask for the bought side is at or under the limit: filled, paying the limit. A candle with that ask above the limit, with no ask for the bought side, or showing an empty book (0.00 and 1.00): not filled.
+5. **Order of the counts.** Decisions are walked in time order (look, then ticker). A decision on an event that already holds a filled, unsettled bet is "blocked" and is counted before any fill test.
+6. **The baseline (information only).** For a market-morning with a gap under 2c in size, each side is put through steps 3 to 6; of the sides that pass, the one with the ask nearest 50c is taken (YES on an exact tie); then one per event and morning, nearest 50c, then ticker order. It is booked at its ask plus 1c with the same fee and money rule, with no fill test and no block, so it is compared with the "optimistic, same-candle fill" figure.
+7. **The z printed** is the sum of cash results divided by the square root of the sum of squared per-event sums.
+8. **"Open at once"** counts filled bets whose look is at or before a moment and whose market close is after it.
