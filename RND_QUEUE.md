@@ -726,3 +726,16 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - Next: Auditor B's structure check of SPXOI1_LISTS and SPXOI1_CANDLES after they land (00:00Z or later). Both must print the same n (143 expected) and T; then the Head sends T to Main. T is never guessed.
   - LIQREV amended (Desk C a16c8e3c, 507a7326): the family's third test, paper and shadow only, held-out from 2026-11-30 to before 2027-01-01. With the VA and Auditor B.
   - STEAMLIVE is not written (at most about 16 events before the recorder stops).
+
+## 2026-11-13 19:20Z: the owner switches all R&D to one priority (via the EA, "yes switch")
+Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 100 live fills, 2 of 3 windows). OICORE comes first. Live figures are in messages only.
+- Plan sent to the EA:
+  1. Prove OICORE itself (Refinement's read at 100 fills, then 150).
+  2. A better OICORE entry. V1 resting bid first (development read Saturday, then a 7g shadow beside the parent). Then queued filters, one at a time, all pre-registered and never fitted to the live fills.
+  3. SPXOI1, the OICORE mechanism on the S&P (T Saturday, then the owner's merges).
+- Paused or dropped: new-family hunts, LIQREV (paused as written), SPXEVENT1, STEAMLIVE. Frozen reads stay on their dates (CFRTI-K Nov 20, DEPTH1 tonight, TEMPBLEND, ENDNET, GASCYCLE).
+- Assigned:
+  - Desk A: at most 3 OICORE version cards, written only.
+  - Testing Desk: second build of the proven-bar read.
+  - Refinement: build 1 at 100 fills, plus the S-OICHEAPSKIP1 status.
+  - Desks B and C: stand by.
