@@ -1,15 +1,15 @@
 # W-NO-ARM1 PLAN (Nov 11, 2026, written BEFORE any candle was pulled for it and before anything was scored)
 
-[live figure removed, ask Main] No other source. Nothing here touches trading code.
+Question: does the NO arm P4 flagged ("buy NO at 75 to 90c", the one lead in W-POL-APPR1, ALL_APPR 1d 0.75-0.90 N: validate +7.7c, train -11.3c, n 23/24, underpowered) have an edge on a larger, outcome-blind sample? Kalshi public API only (https://api.elections.kalshi.com/trade-api/v2, no key). No other source. Nothing here touches trading code.
 
 ## EXACT ARM DEFINITION
-- Side: buy NO only. [live figure removed, ask Main] Needs 0 < yes_bid < 1.
+- Side: buy NO only. Entry price = the NO ask = 1 minus the YES bid close of the quote candle (cash at the ask, spread paid). Needs 0 < yes_bid < 1.
 - Arm A (the P4 arm, the one under test): NO price paid in [0.75, 0.90]  (i.e. YES bid about 10c to 25c: the cheap-YES longshot bracket is sold). This is what P4 labelled "0.75-0.90 N", where the bucket is the price of the side bought.
 - Arm B (mirror, registered because the brief's wording "yes-price 75 to 90c, NO cost 10 to 25c" reads the other way): NO price paid in [0.10, 0.25]  (i.e. YES bid about 75c to 90c). Reported separately, never merged into A. If the brief meant B, B is the answer; if A, A is. Both are counted in the deflation either way.
 - Look: ENTRY ONE DAY BEFORE CLOSE: quote = the last hourly candle whose end_period_ts is <= close_time minus 86400 s and no more than 3 h older. A market with no such candle has no observation.
 - One observation per event per arm: among the event's markets whose NO price lands in the arm's range, the one whose YES mid at that quote is nearest 0.5 (the P4 rule; ties by ticker). Not chosen by result.
-- Hold to settlement; every universe market settles within about a week of its entry, so the 30 day cap never binds. [live figure removed, ask Main] Price band 10c to 90c is on the bought side (NO), so Arm A uses the 0.75-0.90 part and Arm B the 0.10-0.25 part. YES is allowed by the rulebook but is NOT part of this test.
-- Fee: unrounded 0.07*p*(1-p) per contract (p = price paid), shown at +0c slip and at +1c harsher (1c added to the cost per contract). +1c is the basis for every pass test. [live figure removed, ask Main]
+- Hold to settlement; every universe market settles within about a week of its entry, so the 30 day cap never binds. 3 contracts live-sizing; 1 contract for PF and mean figures. Price band 10c to 90c is on the bought side (NO), so Arm A uses the 0.75-0.90 part and Arm B the 0.10-0.25 part. YES is allowed by the rulebook but is NOT part of this test.
+- Fee: unrounded 0.07*p*(1-p) per contract (p = price paid), shown at +0c slip and at +1c harsher (1c added to the cost per contract). +1c is the basis for every pass test. As-if-live uses the per-order fee 0.07*3*p*(1-p) rounded UP to the cent plus 1c per contract.
 
 ## UNIVERSE (fixed from the merged market lists, live /markets plus /historical/markets, settled yes/no; counts known before any pull)
 Series: KXAPRPOTUS, KXAPRPOTUSD, KXTRUMPAPPROVE (approval), KXGENERICBALLOTVOTEHUB, KXVOTEHUBTRUMPUPDOWN, KXGENERICBALLOT, KXVHGCB (generic ballot / Votehub). [live figure removed, ask Main] Families: APPR (the approval series plus KXVOTEHUBTRUMPUPDOWN), GCB (generic ballot series), ALL (both pooled; not independent of its parts).
@@ -17,7 +17,7 @@ Series: KXAPRPOTUS, KXAPRPOTUSD, KXTRUMPAPPROVE (approval), KXGENERICBALLOTVOTEH
 ## SPLITS (by event close date, event-count thirds over ALL 454 events, cut dates saved in cuts.json before any pull)
 - TRAIN = earliest third (close before 2024-08-30), VALIDATE = middle third (2024-08-30 to 2026-07-23), HELD-OUT = last third (close on or after 2026-07-24, epoch 1784905200).
 - The HELD-OUT third (151 events; it contains all of KXTRUMPAPPROVE, KXVHGCB, KXAPRPOTUSD and part of Votehub) is NOT pulled and NOT scored. Candles for it that exist in w_pol_appr/cand.jsonl from the earlier P4 pull are not used. No held-out script is written or run.
-- [live figure removed, ask Main] The daily approval and VHGCB series that P4 saw sit in the held-out third. So this test cannot confirm P4's daily-series lead; it tests whether the NO arm exists on the older weekly series.
+- Consequence stated in advance: the development third contains no live-endpoint events at all (all close before the 2026-09-12 historical cutoff), so every candle is one request per market from /historical/markets, and the development sample is mostly the weekly RCP approval series (247 events) plus Votehub updown (38) and Votehub generic ballot (17). The daily approval and VHGCB series that P4 saw sit in the held-out third. So this test cannot confirm P4's daily-series lead; it tests whether the NO arm exists on the older weekly series.
 
 ## CANDLE PULL (cap, rule, outcome-blind)
 - AT MOST 1,200 historical candle requests in total (one request per market, 60 minute candles, window close minus 2 days to close). Counted in a ledger file (pulls.log); the puller refuses to go past 1,200.
@@ -49,3 +49,6 @@ NOSIDE1_CANDLES run 43279218928 (1,034 of 1,034 answered, complete) converted wi
 Dated note Nov 12, 2026: the scorer header printed the retired ledger (N 9,465, z 4.553). Header text corrected to name the research bar (z 5.46, shared N about 2.1 million); no re-run, no number changed. Head of R&D ruling Nov 12: approval NO side CLOSED as a candidate. Inputs for reproduction: NOSIDE1_MARKETS.jsonl (3,182 markets: ticker, event, series, close, result), NOSIDE1_CAND_EARLIER302.jsonl (the 302 earlier markets with candles, the --existing file), NO_ARM_CUTS.json, run pull/NOSIDE1_CANDLES/2026-11-12T1823Z_43279218928; use a fresh OUT_DIR.
 
 Forensics audit note Nov 12, 2026 (look-ahead and price source of noside1_convert.py and noside1_score.py): CLEAN, no leak found. Result-page caveats to carry: (1) the quote is the last hourly candle at or before the look, so the real decision instant is that candle's end and the quote can be up to 3 hours older than "one day before the close"; candle freshness is measured on the Bitcoin 15 minute series only. (2) The scorer's interval and t block by EVENT; neighbouring weeks and consecutive days share a poll, so the interval and t are too tight. This cannot change the Nov 12 read (arm A FAIL on the PF rule, arm B no evidence). Any later read or shadow of this rule must block by week. (3) Before any later read, print how many markets closed off the series' usual clock and how many bids were dropped for lying outside 0 to 1. No re-run now (read-once).
+
+
+Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided. lines 3, 6, 11, 12, 20 restored verbatim from 44dda69f^ (sentences naming the source, the NO entry price, the 3 contract sizing rule and the as-if-live fee, the consequence statement); lines 15, 29, 42 still carry a marker, to be done by hand.

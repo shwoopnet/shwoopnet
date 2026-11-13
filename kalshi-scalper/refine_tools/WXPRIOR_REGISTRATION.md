@@ -16,7 +16,10 @@ PRIMARY (A): wxens forward data (V2 recorder, since 2026-11-04). The probability
 - N tried: this is 1 rule, 1 sd, 1 threshold, 1 look rule (no grid). Added to the family count: 5 variants counted for the family this session (W-ROW49 5 cities, this one).
 
 ## Pass bar (shadow candidate)
-PF >= 1.3 at +0c AND +1c, n >= 80 city-days, first and second chronological half both PF > 1.0. Fewer than 80 city-days = DATA_LIMITED (no verdict on the edge). PF < 1.0 with n >= 30 city-days = FAIL for this rule. Also report: win rate vs mean price, p-hat calibration (mean model p vs result) to see if a threshold or sd is the problem, as a description only, no retuning. [live figure removed, ask Main]
+PF >= 1.3 at +0c AND +1c, n >= 80 city-days, first and second chronological half both PF > 1.0. Fewer than 80 city-days = DATA_LIMITED (no verdict on the edge). PF < 1.0 with n >= 30 city-days = FAIL for this rule. Also report: win rate vs mean price, p-hat calibration (mean model p vs result) to see if a threshold or sd is the problem, as a description only, no retuning.
 
 ## Counterparty
 Not established. Candidate: casual bettors on thin books pricing round numbers; the ensemble could also be no better than the market's own forecast source. Not claimed.
+
+
+Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided. line 19 restored verbatim; lines 12 and 15 still carry a marker, to be done by hand.

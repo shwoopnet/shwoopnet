@@ -20,7 +20,7 @@ Who loses: the fast reactors who traded the headline at the jump (FADE) or the s
 3. MANAGEMENT: none. EXIT: a time exit 24 hours after entry at the bid, or settlement if sooner (never later than 14 days from entry, the politics cap). No hold-to-settlement as the plan, so it is not the declined favourite-and-hold family.
 4. CLOSEST EXISTING: POL-i1 (politics jump fade, daily candles, 3 day exit, no headline) and row 45 (gold spot leads after a jump). DIFFERS: minute-scale jump, headline-gated, three delays, both directions, multi-category, 24 hour exit.
 5. [live figure removed, ask Main]
-6. CORRELATION under 0.3 with every live strategy on daily cash P&L, Pearson r, at least 20 overlapping days. [live figure removed, ask Main]
+6. CORRELATION under 0.3 with every live strategy on daily cash P&L, Pearson r, at least 20 overlapping days. This cannot be computed before any trade exists; it is checked at the first read and a value of 0.3 or more is a FAIL and a declined-list entry with the number. Prior expectation: low, because the universe excludes the 15 minute series that L1 and OICORE trade, but that is a judgment, not a measurement.
 
 ## 3. Data feasibility verdict: FORWARD ONLY
 
@@ -92,3 +92,6 @@ Fields to store per headline: `source`, `headline` (title text only, or a keywor
 2. Terms check on the RSS hosts, then owner popup for option A.
 3. Record for at least 8 weeks; development reads at 40 matched events per third; the held-out third is read once by the lead.
 4. [live figure removed, ask Main]
+
+
+Dated clarification Nov 13, 2026 (Head of R&D ruling): rule words restored from commit 44dda69f^ (the version before the privacy scrub); nothing re-decided. line 23 restored verbatim; lines 22 and 94 still carry a marker, to be done by hand.
