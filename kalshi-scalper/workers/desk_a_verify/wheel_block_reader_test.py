@@ -43,4 +43,19 @@ s = seq(60) + [sig(60 + i, (60 + i) * 6 * H, 1 if i % 2 else 0, c=(100 if i % 2 
 s = seq(60) + [sig(60 + i, (60 + i) * 30 * H, 1, c=100) for i in range(30)]; b, st = rp(s); assert b[0]["confirmation"].startswith("CONFIRMATION EXPIRED"), b[0]
 s = seq(60) + seq(30)[:0]; s[75 - 20] = s[55]; s = seq(90); s[70] = dict(s[70], result="pending", cents=None); b, st = rp(s, now=T0 + 25 * DAY); assert st["waiting"] and b[0]["status"] == "CLEARED" and "confirmation" not in b[0]
 s = seq(40); s[20] = dict(s[20], result="pending", cents=None); b, st = rp(s, now=T0 + 15 * DAY); assert st["waiting"] and not b
-print("T8 confirmation: failed, qualified at W = L, expired past 21 days, pending waits OK"); print("ALL OK")
+print("T8 confirmation: failed, qualified at W = L, expired past 21 days, pending waits OK"); # T9 (Auditor B items 1, 2, 7): 40 wins + 0 true losses + 20 voids: a void is NOT a loss for the outcome count, so a band crossing 50c keeps growing; cash not in whole cents is refused; a scored record with no win field is refused
+s = [sig(i, i * 6 * H, 1) for i in range(60)]; s = [dict(x, result="void", win=0, cents=-18) if i % 3 == 0 else x for i, x in enumerate(s)]
+b, st = rp(s, now=T0 + 16 * DAY); assert not b and st["block_in_progress"] == 60 and st["losses"] == 0, (b, st)
+import tempfile, csv
+def rows_csv(rows):
+    f = tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, newline=""); w = csv.writer(f); w.writerow(["ticker", "series", "signal_t", "limit", "status", "result", "win", "cash"]); [w.writerow(r) for r in rows]; f.close(); return f.name
+try: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "", "3.00"]])); raise AssertionError("not refused")
+except SystemExit: pass
+assert W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "6.754"]]))[0]["cents"] == 675 and W.ROUNDED == ["A-1"]       # default: nearest cent, counted
+W.STRICT_CENTS = True
+try: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "6.754"]])); raise AssertionError("not refused")
+except SystemExit: pass
+W.STRICT_CENTS = False
+assert W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "3.00"]]))[0]["cents"] == 300
+print("T9 void is neither win nor loss; non-cent cash and a blank win are refused OK")
+print("ALL OK")
