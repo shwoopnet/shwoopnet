@@ -5,7 +5,7 @@ Usage: python3 -I report_esoctie.py --lists <folder>... --candles <folder>..."""
 import hashlib, json, os, sys, time
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import esoctie as E
-FROZEN = {"esoctie.py": "76578a15d27ffbe5876a2fa8a144ccf7065b997e10823bfc628c73a062dbbbdb", "ESOCTIE_SERIES.json": "5c766fdd7e30a2fac038247798b1f81ed4d36e87b9c90ec2ea50b6bda4e10612"}
+FROZEN = {"esoctie.py": "ce1e9030a8a253f5cafb3d88e0d4d10d16ed2687c3e80b1fb9fad4e081a54c5e", "ESOCTIE_SERIES.json": "5c766fdd7e30a2fac038247798b1f81ed4d36e87b9c90ec2ea50b6bda4e10612"}
 for f, h in FROZEN.items():
     if hashlib.sha256(open(os.path.join(HERE, f), "rb").read()).hexdigest() != h:
         sys.exit("refused: %s is not the frozen file" % f)

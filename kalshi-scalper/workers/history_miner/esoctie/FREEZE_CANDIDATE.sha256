@@ -1,3 +1,8 @@
+# NOTE 11 (Nov 13, 2026, 00:30Z): esoctie.py and test_esoctie.py changed by the float clarifications; supersedes the lines below for those two files.
+ce1e9030a8a253f5cafb3d88e0d4d10d16ed2687c3e80b1fb9fad4e081a54c5e  esoctie.py
+eec02040d257ba8088126a56035b8c12259e5444d63cdefce5e98fccacaeab2f  test_esoctie.py
+89d834624043a84edca52af093b3ff20b45f8bab23944248f4c599318e2f2421  ESOCTIE_REGISTRATION.md
+7d427a4d7866fbee1702d45ee7e1d4f2573c37dad95fdf6829e517557d673c2c  report_esoctie.py
 76578a15d27ffbe5876a2fa8a144ccf7065b997e10823bfc628c73a062dbbbdb  esoctie.py
 1213982b24bb792ad7ccb8a23fa53bbd421a045b6dcf85ee12711ba23b83151a  test_esoctie.py
 c80cd418844a92c7df693a546baa3c230f800f9f908118cb1cea901c5920728b  ESOCTIE_SERIES.json

@@ -95,4 +95,14 @@ try:
     E.measure([lnk], [C]); raise AssertionError("symlink to HELDOUT_ was read")
 except SystemExit as e:
     assert "HELDOUT_" in str(e)
+# 9. NOTE 11 (Forensics' float check, Nov 13): a team mid of exactly a bucket edge lands IN that bucket, and the bars read the unrounded PF
+for bid, ask, edge in ((0.43, 0.47, 0.45), (0.42, 0.48, 0.45), (0.41, 0.49, 0.45), (0.61, 0.69, 0.65), (0.60, 0.70, 0.65)):
+    assert E.bucket(round(max([(bid + ask) / 2]), 6)) == E.EDGES.index(edge), (bid, ask)
+src = open(os.path.join(HERE, "esoctie.py")).read()
+assert 'f = round(max((cs[t]["bid"] + cs[t]["ask"]) / 2 for t in e["teams"]), 6)' in src
+assert 'pf_all = sk.pf([t["net"] for t in trades])' in src and 'out["all"]["pf"]' not in src.split("def score")[1].split("verdict")[0]
+import scorekit as sk
+nets = [1.4996, -1.0]
+assert sk.pf(nets) < 1.5 and round(sk.pf(nets), 3) == 1.5   # the case NOTE 11 guards: rounded reads 1.5, unrounded is under it
 print("ok", rep["filled_eligible"], n, res["rule"]["registered_verdict"])
+

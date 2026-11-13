@@ -140,7 +140,7 @@ def walk(evs, cd):
             nf += 1
             continue
         ts, cs = p
-        f = max((cs[t]["bid"] + cs[t]["ask"]) / 2 for t in e["teams"])
+        f = round(max((cs[t]["bid"] + cs[t]["ask"]) / 2 for t in e["teams"]), 6)   # NOTE 11: a mid of exactly an edge (0.45 from 0.43/0.47) must not fall to the bucket below on float error
         tc = cs[e["tie"]]
         mid = (tc["bid"] + tc["ask"]) / 2
         filled.append(dict(event=e["event"], S=e["S"], close=e["close"], ts=ts, f=f, k=bucket(f), ask=tc["ask"], bid=tc["bid"], spread=round(tc["ask"] - tc["bid"], 4),
@@ -231,16 +231,18 @@ def score(lists, cands):
     out["halves"] = [sk.stats([t for t in trades if t["ts"] < HALF]), sk.stats([t for t in trades if t["ts"] >= HALF])]
     out["by_bucket"] = {k: sk.stats([t for t in trades if t["k"] == k]) for k in range(len(EDGES) - 1)}
     n = len(trades)
-    pf_all = out["all"]["pf"]
-    halves_ok = all(h["pf"] is not None and h["pf"] > 1.0 for h in out["halves"] if h["n"])
+    # NOTE 11: the bars compare the UNROUNDED profit factor (scorekit's stats rounds to 3 decimals, so 1.4996 would read as 1.5)
+    pf_all = sk.pf([t["net"] for t in trades]) if trades else None
+    pf_halves = [(len(hs), sk.pf([t["net"] for t in hs]) if hs else None) for hs in ([t for t in trades if t["ts"] < HALF], [t for t in trades if t["ts"] >= HALF])]
+    halves_ok = all(hp is not None and hp > 1.0 for hn, hp in pf_halves if hn)
     if n < 100:
         verdict = "no evidence at n = %d" % n
-    elif (pf_all is not None and pf_all < 1.0) or any(h["n"] and h["pf"] is not None and h["pf"] < 1.0 for h in out["halves"]):
+    elif (pf_all is not None and pf_all < 1.0) or any(hn and hp is not None and hp < 1.0 for hn, hp in pf_halves):
         verdict = "FALSIFIED"
     elif pf_all is not None and pf_all >= 1.5 and halves_ok:
         verdict = "development bar met (ask the Head for the held-out pull)"
     else:
-        verdict = "below the bar at n = %d, PF %s" % (n, pf_all)
+        verdict = "below the bar at n = %d, PF %s" % (n, None if pf_all is None else round(pf_all, 3))
     out["registered_verdict"] = verdict + " (selected on development: this figure can falsify, it cannot support; only the frozen held-out read can)"
     out["void_bets_booked_as_fee_loss"] = sum(1 for t in trades if t.get("void"))
     return {"measurement": rep, "rule": out}
