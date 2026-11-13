@@ -24,6 +24,9 @@ class T(unittest.TestCase):
         S.MARKER_DIR = os.path.join(self.d, "markers")
         self.hl = os.path.join(self.d, "heldout.md"); open(self.hl, "w").write("| Run folder | why |\n|---|---|\n| `kalshi-pull-data/2026-11-01T0000Z_1` | x |\n")
         S.HELDOUT_LIST = self.hl
+        S.DEPTH1_RECORD = os.path.join(self.d, "DEPTH1_READ_MARKER.txt"); S.NC15DEPTH1_RECORD = os.path.join(self.d, "NC15.txt")
+    def put_depth1(self, text="DEPTH1 READ MADE: 2026-11-14\n"): open(S.DEPTH1_RECORD, "w").write(text)
+    def put_nc15(self, text=None): open(S.NC15DEPTH1_RECORD, "w").write(text if text is not None else "NC15DEPTH1 SCORER HASH: %s 2e595c54 CLEAN by Auditor B x\n" % S.NC15DEPTH1_FINAL_SHA256)
     def mk(self, books, trades, result="no"):
         write_gz(os.path.join(self.root, "book.csv.gz"), BOOK_COLS, books)
         write_gz(os.path.join(self.root, "trades.csv.gz"), ["ticker", "created_time", "yes_price_dollars", "count_fp", "taker_outcome_side"], trades)
@@ -73,35 +76,44 @@ class T(unittest.TestCase):
         t0, b = self.base(); sig = self.mk(b, [])
         args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
         self.assertEqual(S.main(args), 2)
-        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: 2026-11-14\n")
-        self.assertEqual(S.main(args + ["--depth1-recorded", m]), 0)
-        self.assertEqual(S.main(args + ["--depth1-recorded", m]), 2)
+        self.put_depth1()
+        self.assertEqual(S.main(args), 0)
+        self.assertEqual(S.main(args), 2)
     def test_depth1_marker_content_checked(self):
         t0, b = self.base(); sig = self.mk(b, [])
         args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
-        m = os.path.join(self.d, "marker"); open(m, "w").write("anything\n")
-        self.assertEqual(S.main(args + ["--depth1-recorded", m]), 2)
+        self.put_depth1("anything\n")
+        self.assertEqual(S.main(args), 2)
     def test_second_run_with_new_out_refused(self):
         t0, b = self.base(); sig = self.mk(b, [])
-        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: x\n")
-        args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--depth1-recorded", m]
+        self.put_depth1()
+        args = ["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig]
         self.assertEqual(S.main(args + ["--out", self.out]), 0)
         self.assertEqual(S.main(args + ["--out", os.path.join(self.d, "out2")]), 2)
-    def test_v2_early_read_and_hash_required(self):
+    def test_no_command_line_override_of_the_clock_or_records(self):
+        for opt in ("--now", "--heldout-list", "--depth1-recorded", "--nc15depth1-hash"):
+            with self.assertRaises(SystemExit):
+                S.main(["--version", "V1", "--block", "forward", "--book-root", "x", "--signals", "y", "--out", "z", opt, "q"])
+    def test_v2_early_read_and_record_required(self):
         t0, b = self.base(); sig = self.mk(b, [])
-        h = os.path.join(self.d, "h"); open(h, "w").write("NC15DEPTH1 SCORER HASH: abc\n")
         args = ["--version", "V2", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
-        self.assertEqual(S.main(args + ["--nc15depth1-hash", h, "--now", "2026-12-04T12:00:00Z"]), 2)   # block not closed
-        self.assertEqual(S.main(args + ["--now", "2026-12-06T00:00:00Z"]), 2)                           # no hash file
-        bad = os.path.join(self.d, "bad"); open(bad, "w").write("x\n")
-        self.assertEqual(S.main(args + ["--nc15depth1-hash", bad, "--now", "2026-12-06T00:00:00Z"]), 2)
+        self.put_nc15()
+        self.assertEqual(S.main(args, now="2026-12-04T12:00:00Z"), 2)   # block not closed
+        os.remove(S.NC15DEPTH1_RECORD)
+        self.assertEqual(S.main(args, now="2026-12-06T00:00:00Z"), 2)   # no record
+        self.put_nc15("x\n")
+        self.assertEqual(S.main(args, now="2026-12-06T00:00:00Z"), 2)   # wrong content
+        self.put_nc15("NC15DEPTH1 SCORER HASH: " + "0" * 64 + " c CLEAN\n")
+        self.assertEqual(S.main(args, now="2026-12-06T00:00:00Z"), 2)   # not the final hash
+        self.put_nc15()
+        self.assertEqual(S.main(args, now="2026-12-06T00:00:00Z"), 0)
     def test_heldout_run_refused(self):
         t0, b = self.base(); sig = self.mk(b, [])
         bad = os.path.join(self.d, "kalshi-pull-data", "2026-11-01T0000Z_1"); os.makedirs(bad)
-        m = os.path.join(self.d, "marker"); open(m, "w").write("DEPTH1 READ MADE: x\n")
-        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", bad, "--signals", sig, "--out", self.out, "--depth1-recorded", m]), 2)
+        self.put_depth1()
+        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", bad, "--signals", sig, "--out", self.out]), 2)
         os.remove(self.hl)   # unreadable list refuses everything
-        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out, "--depth1-recorded", m]), 2)
+        self.assertEqual(S.main(["--version", "V1", "--block", "dev", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]), 2)
     def test_fraction_parsed(self):
         self.assertEqual(S.created_ms("2026-11-03T11:57:02.5Z") - S.created_ms("2026-11-03T11:57:02Z"), 500)
         self.assertEqual(S.created_ms("2026-11-03T11:57:02.123456Z") - S.created_ms("2026-11-03T11:57:02Z"), 123)
@@ -133,8 +145,8 @@ class T(unittest.TestCase):
         self.assertEqual(S.LABELS["V2"], "not blind on EVENT830's forward windows")
     def test_forward_refused_before_date(self):
         t0, b = self.base(); sig = self.mk(b, [])
-        args = ["--version", "V1", "--block", "forward", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out, "--now", "2026-12-20T00:00:00Z"]
-        self.assertEqual(S.main(args), 2)
+        args = ["--version", "V1", "--block", "forward", "--book-root", os.path.join(self.d, "r"), "--signals", sig, "--out", self.out]
+        self.assertEqual(S.main(args, now="2026-12-20T00:00:00Z"), 2)
     def test_net_arithmetic(self):
         self.assertAlmostEqual(S.net(0.10, True, 0.0, 0.0), 0.90)
         self.assertAlmostEqual(S.net(0.10, False, 0.0, 0.0), -0.10)

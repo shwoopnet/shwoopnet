@@ -3,7 +3,7 @@
 Local files only: no network, no key. One read per block, a marker refuses a second run.
 
 Usage:
-  python3 -I v1_resting_score.py --version V1 --block dev|forward --book-root ROOT --signals SIGNALS.csv --out OUT_DIR [--depth1-recorded MARKER_FILE]
+  python3 -I v1_resting_score.py --version V1 --block dev|forward --book-root ROOT --signals SIGNALS.csv --out OUT_DIR
 ROOT holds run folders each with book.csv.gz, trades.csv.gz and coverage.csv.gz (the recorder's layout: book15r6/<date>/<HHMM>/ for V1, nc15/... for V2).
 SIGNALS.csv (one row per candidate window, built outside this scorer from public data): ticker,close_ts[,oi_rise]. V1: the OICORE trigger windows (OI rise of 86,300 or more); V2: the listed release windows' markets.
 The scorer applies everything else of the registration: t0, side, band, parent taker replay, resting bid, fill rule, fees, measures, the 7g bar.
@@ -35,7 +35,10 @@ CANCEL_S = 120
 BAR_PF = 0.10
 BAR_N = 60
 DEPTH1_MARKER_PREFIX = "DEPTH1 READ MADE:"
-NC15DEPTH1_HASH_PREFIX = "NC15DEPTH1 SCORER HASH:"  # first line of the file the Head names for V2 (to be confirmed by the Head)
+NC15DEPTH1_HASH_PREFIX = "NC15DEPTH1 SCORER HASH:"
+NC15DEPTH1_FINAL_SHA256 = "0a6c1f519ca66820ed4a10951dcd20a54febf7dadb2457d5c4f95aed25af57a3"   # the FINAL NC15DEPTH1 scorer hash (Head, 2026-11-13)
+NC15DEPTH1_RECORD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "NC15DEPTH1_SCORER_HASH.txt")   # fixed path: a byte copy of the Head's file on rnd-queue
+DEPTH1_RECORD = os.path.join(os.path.dirname(os.path.abspath(__file__)), "DEPTH1_READ_MARKER.txt")          # fixed path: a byte copy of the marker the Head publishes after DEPTH1's read
 V2_DEV_READ_AFTER = "2026-12-05T00:00:00Z"        # the V2 development block closes 2026-12-04T23:59:59Z
 HERE = os.path.dirname(os.path.abspath(__file__))
 MARKER_DIR = os.path.join(HERE, "read_markers")    # FIXED path: a new --out cannot reopen a block that was read
@@ -76,12 +79,12 @@ def created_ms(s):
     return ms
 
 
-def check_marker_line(path, prefix):
+def check_marker_line(path, prefix, contains=None):
     """The marker must exist and its first non-empty line must start with the prefix (as WHEEL0 does)."""
     try:
         for ln in open(path, encoding="utf-8").read().splitlines():
             if ln.strip():
-                return ln.strip().startswith(prefix)
+                return ln.strip().startswith(prefix) and (contains is None or contains in ln)
     except OSError:
         return False
     return False
@@ -282,39 +285,35 @@ def evaluate(sig, days, block="dev"):
     return out
 
 
-def main(argv=None):
+def main(argv=None, now=None):   # now: tests only, never a command line option
     ap = argparse.ArgumentParser()
     ap.add_argument("--version", required=True, choices=["V1", "V2"])
     ap.add_argument("--block", required=True, choices=["dev", "forward"])
     ap.add_argument("--book-root", required=True)
     ap.add_argument("--signals", required=True)
     ap.add_argument("--out", required=True)
-    ap.add_argument("--depth1-recorded", default=None)
-    ap.add_argument("--nc15depth1-hash", default=None, help="V2: file whose first line starts 'NC15DEPTH1 SCORER HASH:'")
-    ap.add_argument("--heldout-list", default=None, help="the standing HELDOUT_PULL_RUNS.md (default: kalshi-scalper/workers/ beside this folder; an unreadable list refuses everything)")
-    ap.add_argument("--now", default=None, help="test only: ISO time used in place of the clock for the read-after guard")
     a = ap.parse_args(argv)
     lo, hi = (epoch(x) for x in BLOCKS[(a.version, a.block)])
     marker = os.path.join(MARKER_DIR, "%s_%s_READ_DONE" % (a.version, a.block))   # fixed path, not under --out
     if os.path.exists(marker):
         print("already read: %s exists; refusing a second run" % marker)
         return 2
-    msg = refuse_heldout([a.book_root, a.signals, a.out], a.heldout_list or HELDOUT_LIST)
+    msg = refuse_heldout([a.book_root, a.signals, a.out], HELDOUT_LIST)
     if msg:
         print(msg)
         return 2
-    if a.version == "V1" and a.block == "dev" and not (a.depth1_recorded and check_marker_line(a.depth1_recorded, DEPTH1_MARKER_PREFIX)):
-        print("refused: V1 development is not scored before DEPTH1's read is recorded (pass --depth1-recorded with the marker file the Head names; its first line must start %r)" % DEPTH1_MARKER_PREFIX)
+    if a.version == "V1" and a.block == "dev" and not check_marker_line(DEPTH1_RECORD, DEPTH1_MARKER_PREFIX):
+        print("refused: V1 development is not scored before DEPTH1's read is recorded (the fixed file %s, a byte copy of the Head\'s marker, must exist and its first line start %r)" % (DEPTH1_RECORD, DEPTH1_MARKER_PREFIX))
         return 2
     ra = READ_AFTER.get((a.version, a.block))
     if a.version == "V2" and a.block == "dev":
         ra = V2_DEV_READ_AFTER
-    now = epoch(a.now) if a.now else time.time()
+    now = epoch(now) if now else time.time()
     if ra and now < epoch(ra):
         print("refused: the %s %s block is read on or after %s" % (a.version, a.block, ra))
         return 2
-    if a.version == "V2" and not (a.nc15depth1_hash and check_marker_line(a.nc15depth1_hash, NC15DEPTH1_HASH_PREFIX)):
-        print("refused: V2 is not scored before NC15DEPTH1's scorer hash is on record (pass --nc15depth1-hash with the file the Head names; its first line must start %r)" % NC15DEPTH1_HASH_PREFIX)
+    if a.version == "V2" and not check_marker_line(NC15DEPTH1_RECORD, NC15DEPTH1_HASH_PREFIX, NC15DEPTH1_FINAL_SHA256):
+        print("refused: V2 is not scored before NC15DEPTH1's scorer hash is on record (the fixed file %s must exist, its first line start %r and contain %s)" % (NC15DEPTH1_RECORD, NC15DEPTH1_HASH_PREFIX, NC15DEPTH1_FINAL_SHA256))
         return 2
     book, trades, cover = load_run_folders(a.book_root)
     sigs, counts = [], {}
