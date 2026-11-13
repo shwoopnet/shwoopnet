@@ -767,3 +767,9 @@ Find and prove a strategy that clears the proven bar (cash PF 1.3 or more over 1
   - Its Rule P development read is far below PF 1.0, inside the amendment note's predicted range. If it stands, MMSIM1 is FALSIFIED on development under RND_CHARTER section 4, and the Nov 24 held-out read is moot.
   - PROVISIONAL: the build is unaudited. Waiting for Auditor B's audit of the original and of the port diff, Desk B's independent build 2 on development, and a check that the protocol does not make the held-out the only verdict.
   - If falsified, it is the liquidity-provision family's first falsified test (1 of 3).
+- 20:01Z, MMSIM1 ruling (the Head's, recorded as a reading, not a stated rule).
+  - The texts: the protocol and Amendments 1 to 3 attach outcome labels to the Nov 24 held-out read only, and say nothing to make it the ONLY verdict. RND_CHARTER section 4 (line 65) counts a cash PF under 1.0 on the development read after fees as FALSIFIED.
+  - The Head's reading: Amendment 3 made Rule P the rule MMSIM1 is judged by, so the charter's development line attaches to Rule P's development read.
+  - FALSIFIED is recorded ONLY after both independent builds (Desk A's port and Desk B's build 2) print the same unrounded development figures, under 1.0 after fees, and Auditor B is CLEAN on both. If so, the Nov 24 held-out read is not run and stays unread.
+  - The EA is told plainly that the protocol's own stated verdict was the held-out read, so the owner can ask for it.
+  - Auditor B: the original reader is NOT CLEAN as a held-out reader (F1 marker filter, F2 load order, F3 outputs, F4 date conflict, F5 crash). The port's diff is accepted for development.
