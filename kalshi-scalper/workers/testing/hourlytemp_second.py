@@ -231,10 +231,11 @@ def measure(smp, cdata, complete, whole, nreq, novol, markets, lists):
     print("table of lives (series, seconds, markets): %s" % sorted(lives.items()))
     g = gained_hours(smp)
     print("series-hours that gained strikes: %d: %s" % (len(g), [(sr, F(c), n) for (sr, c, ev), n in sorted(g.items())]))
+    exp = list(range(ep(LO), ep("2026-11-12T00:00:00Z"), 3600))          # the 168 clock hours of the fixed seven days (Amendment 4 (d), clarified): a series-hour is one event, a series and a close hour
     for S in SERIES:
-        hrs = sorted({x["close"] for x in smp if x["series"] == S})
-        miss = [F(h) for h in range(hrs[0], hrs[-1], 3600) if h not in set(hrs)] if hrs else []
-        print("missing clock hours %s (printed as they are, not filled): %d %s" % (S, len(miss), miss))
+        have_h = {x["close"] for x in smp if x["series"] == S}
+        miss = [F(h) for h in exp if h not in have_h]
+        print("missing clock hours %s against the %d expected (printed as they are, not filled): %d %s" % (S, len(exp), len(miss), miss))
     print("candle requests answered whole: %d of %d asked; candles with no volume field: %d (each a minute with no trade)" % (whole, nreq, novol))
     excl = [x for x in smp if (x["series"], x["close"], x["event"]) not in g]
     allm = figure_lines("ALL", smp, cdata)

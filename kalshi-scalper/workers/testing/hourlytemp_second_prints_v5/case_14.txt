@@ -1,0 +1,1 @@
+REFUSED: market KXTEMPCHIHS-26NOV1203-T40 closes outside the sample dates: 2026-11-12T03:00:00Z

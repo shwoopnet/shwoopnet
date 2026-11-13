@@ -1,0 +1,1 @@
+REFUSED: strike types are not one ladder of above thresholds: {'between': 1, 'greater': 47}
