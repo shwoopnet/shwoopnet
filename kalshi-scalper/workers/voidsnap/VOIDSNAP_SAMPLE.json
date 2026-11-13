@@ -1,0 +1,3919 @@
+{
+ "window": [
+  "2026-09-12T00:00:00Z",
+  "2026-10-22T23:59:59Z"
+ ],
+ "base": {
+  "void": 195,
+  "played": 1811
+ },
+ "drops": {
+  "not_two_contracts": 0,
+  "no_close_time": 0,
+  "no_ticker_clock": 0,
+  "outside_window": 0,
+  "neither_void_nor_played": 0
+ },
+ "pairs": [
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP120400DRAMALAV",
+    "tickers": [
+     "KXCS2GAME-26SEP120400DRAMALAV-DRAMA",
+     "KXCS2GAME-26SEP120400DRAMALAV-LAV"
+    ],
+    "S": 1789200000,
+    "close": 1789239716
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP120400FOREXZ",
+    "tickers": [
+     "KXCS2GAME-26SEP120400FOREXZ-EXZ",
+     "KXCS2GAME-26SEP120400FOREXZ-FOR"
+    ],
+    "S": 1789200000,
+    "close": 1789205395
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP120400PSNAPHAC",
+    "tickers": [
+     "KXCS2GAME-26SEP120400PSNAPHAC-PHAC",
+     "KXCS2GAME-26SEP120400PSNAPHAC-PSNA"
+    ],
+    "S": 1789200000,
+    "close": 1789322347
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP120400MISRT",
+    "tickers": [
+     "KXCS2GAME-26SEP120400MISRT-MIS",
+     "KXCS2GAME-26SEP120400MISRT-RT"
+    ],
+    "S": 1789200000,
+    "close": 1789205395
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP120630MISEACE",
+    "tickers": [
+     "KXCS2GAME-26SEP120630MISEACE-EACE",
+     "KXCS2GAME-26SEP120630MISEACE-MIS"
+    ],
+    "S": 1789209000,
+    "close": 1789239500
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP120630MELSSINS",
+    "tickers": [
+     "KXCS2GAME-26SEP120630MELSSINS-MEL",
+     "KXCS2GAME-26SEP120630MELSSINS-SSINS"
+    ],
+    "S": 1789209000,
+    "close": 1789222797
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP120700ENTPG",
+    "tickers": [
+     "KXCS2GAME-26SEP120700ENTPG-ENT",
+     "KXCS2GAME-26SEP120700ENTPG-PG"
+    ],
+    "S": 1789210800,
+    "close": 1789239392
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP120700MISBW",
+    "tickers": [
+     "KXCS2GAME-26SEP120700MISBW-BW",
+     "KXCS2GAME-26SEP120700MISBW-MIS"
+    ],
+    "S": 1789210800,
+    "close": 1789216785
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP121000MORBBP",
+    "tickers": [
+     "KXCS2GAME-26SEP121000MORBBP-BBP",
+     "KXCS2GAME-26SEP121000MORBBP-MOR"
+    ],
+    "S": 1789221600,
+    "close": 1789239304
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP121000100THOTU",
+    "tickers": [
+     "KXCS2GAME-26SEP121000100THOTU-100T",
+     "KXCS2GAME-26SEP121000100THOTU-HOTU"
+    ],
+    "S": 1789221600,
+    "close": 1789229385
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP121415BOJTHE",
+    "tickers": [
+     "KXCS2GAME-26SEP121415BOJTHE-BOJ",
+     "KXCS2GAME-26SEP121415BOJTHE-THE"
+    ],
+    "S": 1789236900,
+    "close": 1789246086
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP121330SAWUNK",
+    "tickers": [
+     "KXCS2GAME-26SEP121330SAWUNK-SAW",
+     "KXCS2GAME-26SEP121330SAWUNK-UNK"
+    ],
+    "S": 1789234200,
+    "close": 1789249175
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP131100DOOCS",
+    "tickers": [
+     "KXCS2GAME-26SEP131100DOOCS-CS",
+     "KXCS2GAME-26SEP131100DOOCS-DOO"
+    ],
+    "S": 1789311600,
+    "close": 1789321691
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP131100UPGNTR",
+    "tickers": [
+     "KXCS2GAME-26SEP131100UPGNTR-NTR",
+     "KXCS2GAME-26SEP131100UPGNTR-UPG"
+    ],
+    "S": 1789311600,
+    "close": 1789333778
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP141200REVBIGA",
+    "tickers": [
+     "KXCS2GAME-26SEP141200REVBIGA-BIGA",
+     "KXCS2GAME-26SEP141200REVBIGA-REV"
+    ],
+    "S": 1789401600,
+    "close": 1789337200
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP141200MASQEACE",
+    "tickers": [
+     "KXCS2GAME-26SEP141200MASQEACE-EACE",
+     "KXCS2GAME-26SEP141200MASQEACE-MASQ"
+    ],
+    "S": 1789401600,
+    "close": 1789405184
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP141300FORENCE",
+    "tickers": [
+     "KXCS2GAME-26SEP141300FORENCE-ENCE",
+     "KXCS2GAME-26SEP141300FORENCE-FOR"
+    ],
+    "S": 1789405200,
+    "close": 1789337524
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP141300BBPPERM",
+    "tickers": [
+     "KXCS2GAME-26SEP141300BBPPERM-BBP",
+     "KXCS2GAME-26SEP141300BBPPERM-PERM"
+    ],
+    "S": 1789405200,
+    "close": 1789414184
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP141700SUYT",
+    "tickers": [
+     "KXCS2GAME-26SEP141700SUYT-SU",
+     "KXCS2GAME-26SEP141700SUYT-YT"
+    ],
+    "S": 1789419600,
+    "close": 1789426717
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP141500ECSSTR",
+    "tickers": [
+     "KXCS2GAME-26SEP141500ECSSTR-ECS",
+     "KXCS2GAME-26SEP141500ECSSTR-STR"
+    ],
+    "S": 1789412400,
+    "close": 1789415988
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP150400NXSDC",
+    "tickers": [
+     "KXCS2GAME-26SEP150400NXSDC-DC",
+     "KXCS2GAME-26SEP150400NXSDC-NXS"
+    ],
+    "S": 1789459200,
+    "close": 1789485861
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP150400G2ABRUTE",
+    "tickers": [
+     "KXCS2GAME-26SEP150400G2ABRUTE-BRUTE",
+     "KXCS2GAME-26SEP150400G2ABRUTE-G2A"
+    ],
+    "S": 1789459200,
+    "close": 1789471185
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP150400PHACEACE",
+    "tickers": [
+     "KXCS2GAME-26SEP150400PHACEACE-EACE",
+     "KXCS2GAME-26SEP150400PHACEACE-PHAC"
+    ],
+    "S": 1789459200,
+    "close": 1789485577
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP150400PERMQUA",
+    "tickers": [
+     "KXCS2GAME-26SEP150400PERMQUA-PERM",
+     "KXCS2GAME-26SEP150400PERMQUA-QUA"
+    ],
+    "S": 1789459200,
+    "close": 1789471185
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP160700HONCOL",
+    "tickers": [
+     "KXCS2GAME-26SEP160700HONCOL-COL",
+     "KXCS2GAME-26SEP160700HONCOL-HON"
+    ],
+    "S": 1789556400,
+    "close": 1789571041
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP160700ILLVEX",
+    "tickers": [
+     "KXCS2GAME-26SEP160700ILLVEX-ILL",
+     "KXCS2GAME-26SEP160700ILLVEX-VEX"
+    ],
+    "S": 1789556400,
+    "close": 1789565987
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP170630BBPHON",
+    "tickers": [
+     "KXCS2GAME-26SEP170630BBPHON-BBP",
+     "KXCS2GAME-26SEP170630BBPHON-HON"
+    ],
+    "S": 1789641000,
+    "close": 1789660017
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP170630ENCEPTTBS",
+    "tickers": [
+     "KXCS2GAME-26SEP170630ENCEPTTBS-ENCEP",
+     "KXCS2GAME-26SEP170630ENCEPTTBS-TTBS"
+    ],
+    "S": 1789641000,
+    "close": 1789657794
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP180400G2ALEO",
+    "tickers": [
+     "KXCS2GAME-26SEP180400G2ALEO-G2A",
+     "KXCS2GAME-26SEP180400G2ALEO-LEO"
+    ],
+    "S": 1789718400,
+    "close": 1789753104
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP180400BBLICE",
+    "tickers": [
+     "KXCS2GAME-26SEP180400BBLICE-BBL",
+     "KXCS2GAME-26SEP180400BBLICE-ICE"
+    ],
+    "S": 1789718400,
+    "close": 1789724401
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP180400HONDRAMA",
+    "tickers": [
+     "KXCS2GAME-26SEP180400HONDRAMA-DRAMA",
+     "KXCS2GAME-26SEP180400HONDRAMA-HON"
+    ],
+    "S": 1789718400,
+    "close": 1789739419
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP180400BWAZU",
+    "tickers": [
+     "KXCS2GAME-26SEP180400BWAZU-AZU",
+     "KXCS2GAME-26SEP180400BWAZU-BW"
+    ],
+    "S": 1789718400,
+    "close": 1789725627
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP181000VPFJUS",
+    "tickers": [
+     "KXCS2GAME-26SEP181000VPFJUS-JUS",
+     "KXCS2GAME-26SEP181000VPFJUS-VPF"
+    ],
+    "S": 1789740000,
+    "close": 1789739355
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP181000EYEINF",
+    "tickers": [
+     "KXCS2GAME-26SEP181000EYEINF-EYE",
+     "KXCS2GAME-26SEP181000EYEINF-INF"
+    ],
+    "S": 1789740000,
+    "close": 1789754273
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP181000YOUEXR",
+    "tickers": [
+     "KXCS2GAME-26SEP181000YOUEXR-EXR",
+     "KXCS2GAME-26SEP181000YOUEXR-YOU"
+    ],
+    "S": 1789740000,
+    "close": 1789739144
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP181000FCFBERG",
+    "tickers": [
+     "KXCS2GAME-26SEP181000FCFBERG-BERG",
+     "KXCS2GAME-26SEP181000FCFBERG-FCF"
+    ],
+    "S": 1789740000,
+    "close": 1789755633
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP181300DEGAURYB",
+    "tickers": [
+     "KXCS2GAME-26SEP181300DEGAURYB-AURYB",
+     "KXCS2GAME-26SEP181300DEGAURYB-DEG"
+    ],
+    "S": 1789750800,
+    "close": 1789739085
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP181300EXRBAKS",
+    "tickers": [
+     "KXCS2GAME-26SEP181300EXRBAKS-BAKS",
+     "KXCS2GAME-26SEP181300EXRBAKS-EXR"
+    ],
+    "S": 1789750800,
+    "close": 1789763384
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP181300HONFAL",
+    "tickers": [
+     "KXCS2GAME-26SEP181300HONFAL-FAL",
+     "KXCS2GAME-26SEP181300HONFAL-HON"
+    ],
+    "S": 1789750800,
+    "close": 1789754822
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP181300PRTZNXCI",
+    "tickers": [
+     "KXCS2GAME-26SEP181300PRTZNXCI-PRTZN",
+     "KXCS2GAME-26SEP181300PRTZNXCI-XCI"
+    ],
+    "S": 1789750800,
+    "close": 1789757992
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP181700UNDQUIN",
+    "tickers": [
+     "KXCS2GAME-26SEP181700UNDQUIN-QUIN",
+     "KXCS2GAME-26SEP181700UNDQUIN-UND"
+    ],
+    "S": 1789765200,
+    "close": 1789754774
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP181700SEMCHAMA",
+    "tickers": [
+     "KXCS2GAME-26SEP181700SEMCHAMA-CHAMA",
+     "KXCS2GAME-26SEP181700SEMCHAMA-SEM"
+    ],
+    "S": 1789765200,
+    "close": 1789769377
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP190400VEXDC",
+    "tickers": [
+     "KXCS2GAME-26SEP190400VEXDC-DC",
+     "KXCS2GAME-26SEP190400VEXDC-VEX"
+    ],
+    "S": 1789804800,
+    "close": 1789826972
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP190400EACEINN",
+    "tickers": [
+     "KXCS2GAME-26SEP190400EACEINN-EACE",
+     "KXCS2GAME-26SEP190400EACEINN-INN"
+    ],
+    "S": 1789804800,
+    "close": 1789809610
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP191000LEOJUS",
+    "tickers": [
+     "KXCS2GAME-26SEP191000LEOJUS-JUS",
+     "KXCS2GAME-26SEP191000LEOJUS-LEO"
+    ],
+    "S": 1789826400,
+    "close": 1789827426
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP191000DEGYOU",
+    "tickers": [
+     "KXCS2GAME-26SEP191000DEGYOU-DEG",
+     "KXCS2GAME-26SEP191000DEGYOU-YOU"
+    ],
+    "S": 1789826400,
+    "close": 1789832985
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP191300AURYBEXR",
+    "tickers": [
+     "KXCS2GAME-26SEP191300AURYBEXR-AURYB",
+     "KXCS2GAME-26SEP191300AURYBEXR-EXR"
+    ],
+    "S": 1789837200,
+    "close": 1789861701
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP191300BAKSBLA",
+    "tickers": [
+     "KXCS2GAME-26SEP191300BAKSBLA-BAKS",
+     "KXCS2GAME-26SEP191300BAKSBLA-BLA"
+    ],
+    "S": 1789837200,
+    "close": 1789848576
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP191300PRTZNJUS",
+    "tickers": [
+     "KXCS2GAME-26SEP191300PRTZNJUS-JUS",
+     "KXCS2GAME-26SEP191300PRTZNJUS-PRTZN"
+    ],
+    "S": 1789837200,
+    "close": 1789827076
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP191300TTBSFAL",
+    "tickers": [
+     "KXCS2GAME-26SEP191300TTBSFAL-FAL",
+     "KXCS2GAME-26SEP191300TTBSFAL-TTBS"
+    ],
+    "S": 1789837200,
+    "close": 1789843788
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP200400NAVIJBW",
+    "tickers": [
+     "KXCS2GAME-26SEP200400NAVIJBW-BW",
+     "KXCS2GAME-26SEP200400NAVIJBW-NAVIJ"
+    ],
+    "S": 1789891200,
+    "close": 1789914317
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP200400AZUEXR",
+    "tickers": [
+     "KXCS2GAME-26SEP200400AZUEXR-AZU",
+     "KXCS2GAME-26SEP200400AZUEXR-EXR"
+    ],
+    "S": 1789891200,
+    "close": 1789903193
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP210400DRAMASSINS",
+    "tickers": [
+     "KXCS2GAME-26SEP210400DRAMASSINS-DRAMA",
+     "KXCS2GAME-26SEP210400DRAMASSINS-SSINS"
+    ],
+    "S": 1789977600,
+    "close": 1789999461
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP210400SPARTABRUTE",
+    "tickers": [
+     "KXCS2GAME-26SEP210400SPARTABRUTE-BRUTE",
+     "KXCS2GAME-26SEP210400SPARTABRUTE-SPARTA"
+    ],
+    "S": 1789977600,
+    "close": 1789985982
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP220900URLVG",
+    "tickers": [
+     "KXCS2GAME-26SEP220900URLVG-LVG",
+     "KXCS2GAME-26SEP220900URLVG-UR"
+    ],
+    "S": 1790082000,
+    "close": 1790098724
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP220900BBLHERO",
+    "tickers": [
+     "KXCS2GAME-26SEP220900BBLHERO-BBL",
+     "KXCS2GAME-26SEP220900BBLHERO-HERO"
+    ],
+    "S": 1790082000,
+    "close": 1790089214
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP220900VAHAU",
+    "tickers": [
+     "KXCS2GAME-26SEP220900VAHAU-HAU",
+     "KXCS2GAME-26SEP220900VAHAU-VA"
+    ],
+    "S": 1790082000,
+    "close": 1790119888
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP220900ESBENT",
+    "tickers": [
+     "KXCS2GAME-26SEP220900ESBENT-ENT",
+     "KXCS2GAME-26SEP220900ESBENT-ESB"
+    ],
+    "S": 1790082000,
+    "close": 1790087986
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP221000MELBW",
+    "tickers": [
+     "KXCS2GAME-26SEP221000MELBW-BW",
+     "KXCS2GAME-26SEP221000MELBW-MEL"
+    ],
+    "S": 1790085600,
+    "close": 1790119768
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP221000G2ABLA",
+    "tickers": [
+     "KXCS2GAME-26SEP221000G2ABLA-BLA",
+     "KXCS2GAME-26SEP221000G2ABLA-G2A"
+    ],
+    "S": 1790085600,
+    "close": 1790092816
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP221300MEGPERM",
+    "tickers": [
+     "KXCS2GAME-26SEP221300MEGPERM-MEG",
+     "KXCS2GAME-26SEP221300MEGPERM-PERM"
+    ],
+    "S": 1790096400,
+    "close": 1790113093
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP221300EXRLEO",
+    "tickers": [
+     "KXCS2GAME-26SEP221300EXRLEO-EXR",
+     "KXCS2GAME-26SEP221300EXRLEO-LEO"
+    ],
+    "S": 1790096400,
+    "close": 1790105393
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP221700SEMODK",
+    "tickers": [
+     "KXCS2GAME-26SEP221700SEMODK-ODK",
+     "KXCS2GAME-26SEP221700SEMODK-SEM"
+    ],
+    "S": 1790110800,
+    "close": 1790128018
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP221700ALKAAPRO",
+    "tickers": [
+     "KXCS2GAME-26SEP221700ALKAAPRO-ALKAA",
+     "KXCS2GAME-26SEP221700ALKAAPRO-PRO"
+    ],
+    "S": 1790110800,
+    "close": 1790121632
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP222100MRREGAIN",
+    "tickers": [
+     "KXCS2GAME-26SEP222100MRREGAIN-MR",
+     "KXCS2GAME-26SEP222100MRREGAIN-REGAIN"
+    ],
+    "S": 1790125200,
+    "close": 1790133294
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP222100DTNCLU",
+    "tickers": [
+     "KXCS2GAME-26SEP222100DTNCLU-CLU",
+     "KXCS2GAME-26SEP222100DTNCLU-DTN"
+    ],
+    "S": 1790125200,
+    "close": 1790136582
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP230900HAUUR",
+    "tickers": [
+     "KXCS2GAME-26SEP230900HAUUR-HAU",
+     "KXCS2GAME-26SEP230900HAUUR-UR"
+    ],
+    "S": 1790168400,
+    "close": 1790173779
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP230900BLIQUBE",
+    "tickers": [
+     "KXCS2GAME-26SEP230900BLIQUBE-BLI",
+     "KXCS2GAME-26SEP230900BLIQUBE-QUBE"
+    ],
+    "S": 1790168400,
+    "close": 1790180391
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP230935PERMMEL",
+    "tickers": [
+     "KXCS2GAME-26SEP230935PERMMEL-MEL",
+     "KXCS2GAME-26SEP230935PERMMEL-PERM"
+    ],
+    "S": 1790170500,
+    "close": 1790174897
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP231000BWJUS",
+    "tickers": [
+     "KXCS2GAME-26SEP231000BWJUS-BW",
+     "KXCS2GAME-26SEP231000BWJUS-JUS"
+    ],
+    "S": 1790172000,
+    "close": 1790180392
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP231500YOUPLD",
+    "tickers": [
+     "KXCS2GAME-26SEP231500YOUPLD-PLD",
+     "KXCS2GAME-26SEP231500YOUPLD-YOU"
+    ],
+    "S": 1790190000,
+    "close": 1790180186
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP231400ENTLEI",
+    "tickers": [
+     "KXCS2GAME-26SEP231400ENTLEI-ENT",
+     "KXCS2GAME-26SEP231400ENTLEI-LEI"
+    ],
+    "S": 1790186400,
+    "close": 1790194186
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP231700MEIDAM",
+    "tickers": [
+     "KXCS2GAME-26SEP231700MEIDAM-DAM",
+     "KXCS2GAME-26SEP231700MEIDAM-MEI"
+    ],
+    "S": 1790197200,
+    "close": 1790207780
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP231700ISGGRE",
+    "tickers": [
+     "KXCS2GAME-26SEP231700ISGGRE-GRE",
+     "KXCS2GAME-26SEP231700ISGGRE-ISG"
+    ],
+    "S": 1790197200,
+    "close": 1790209787
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP231800SEMPAINA",
+    "tickers": [
+     "KXCS2GAME-26SEP231800SEMPAINA-PAINA",
+     "KXCS2GAME-26SEP231800SEMPAINA-SEM"
+    ],
+    "S": 1790200800,
+    "close": 1790209357
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP231700LOWGLS",
+    "tickers": [
+     "KXCS2GAME-26SEP231700LOWGLS-GLS",
+     "KXCS2GAME-26SEP231700LOWGLS-LOW"
+    ],
+    "S": 1790197200,
+    "close": 1790204386
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP240500ABYARC",
+    "tickers": [
+     "KXCS2GAME-26SEP240500ABYARC-ABY",
+     "KXCS2GAME-26SEP240500ABYARC-ARC"
+    ],
+    "S": 1790240400,
+    "close": 1790183044
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP240500ARCMANDL",
+    "tickers": [
+     "KXCS2GAME-26SEP240500ARCMANDL-ARC",
+     "KXCS2GAME-26SEP240500ARCMANDL-MANDL"
+    ],
+    "S": 1790240400,
+    "close": 1790247610
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP240900TKXKAL",
+    "tickers": [
+     "KXCS2GAME-26SEP240900TKXKAL-KAL",
+     "KXCS2GAME-26SEP240900TKXKAL-TKX"
+    ],
+    "S": 1790254800,
+    "close": 1790261208
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP240900BHEPAIN",
+    "tickers": [
+     "KXCS2GAME-26SEP240900BHEPAIN-BHE",
+     "KXCS2GAME-26SEP240900BHEPAIN-PAIN"
+    ],
+    "S": 1790254800,
+    "close": 1790261391
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP241100GBCBMB",
+    "tickers": [
+     "KXCS2GAME-26SEP241100GBCBMB-BMB",
+     "KXCS2GAME-26SEP241100GBCBMB-GBC"
+    ],
+    "S": 1790262000,
+    "close": 1790269482
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP241100K27CS",
+    "tickers": [
+     "KXCS2GAME-26SEP241100K27CS-CS",
+     "KXCS2GAME-26SEP241100K27CS-K27"
+    ],
+    "S": 1790262000,
+    "close": 1790269785
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP241200ZETMEI",
+    "tickers": [
+     "KXCS2GAME-26SEP241200ZETMEI-MEI",
+     "KXCS2GAME-26SEP241200ZETMEI-ZET"
+    ],
+    "S": 1790265600,
+    "close": 1790269962
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP241230KEYDTDP",
+    "tickers": [
+     "KXCS2GAME-26SEP241230KEYDTDP-KEYD",
+     "KXCS2GAME-26SEP241230KEYDTDP-TDP"
+    ],
+    "S": 1790267400,
+    "close": 1790276979
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP242100FRZFAR",
+    "tickers": [
+     "KXCS2GAME-26SEP242100FRZFAR-FAR",
+     "KXCS2GAME-26SEP242100FRZFAR-FRZ"
+    ],
+    "S": 1790298000,
+    "close": 1790262649
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP242100CLUIOW",
+    "tickers": [
+     "KXCS2GAME-26SEP242100CLUIOW-CLU",
+     "KXCS2GAME-26SEP242100CLUIOW-IOW"
+    ],
+    "S": 1790298000,
+    "close": 1790304574
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP250400ENCEWAL",
+    "tickers": [
+     "KXCS2GAME-26SEP250400ENCEWAL-ENCE",
+     "KXCS2GAME-26SEP250400ENCEWAL-WAL"
+    ],
+    "S": 1790323200,
+    "close": 1790350274
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP250400BBPWRA",
+    "tickers": [
+     "KXCS2GAME-26SEP250400BBPWRA-BBP",
+     "KXCS2GAME-26SEP250400BBPWRA-WRA"
+    ],
+    "S": 1790323200,
+    "close": 1790331598
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP250400GPNG1",
+    "tickers": [
+     "KXCS2GAME-26SEP250400GPNG1-G1",
+     "KXCS2GAME-26SEP250400GPNG1-GPN"
+    ],
+    "S": 1790323200,
+    "close": 1790351209
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP250400FAZEUNMOUZN",
+    "tickers": [
+     "KXCS2GAME-26SEP250400FAZEUNMOUZN-FAZEUN",
+     "KXCS2GAME-26SEP250400FAZEUNMOUZN-MOUZN"
+    ],
+    "S": 1790323200,
+    "close": 1790327390
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP250400PHACENT",
+    "tickers": [
+     "KXCS2GAME-26SEP250400PHACENT-ENT",
+     "KXCS2GAME-26SEP250400PHACENT-PHAC"
+    ],
+    "S": 1790323200,
+    "close": 1790350385
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP250400FNCHERO",
+    "tickers": [
+     "KXCS2GAME-26SEP250400FNCHERO-FNC",
+     "KXCS2GAME-26SEP250400FNCHERO-HERO"
+    ],
+    "S": 1790323200,
+    "close": 1790334017
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP251300BRUTEBBL",
+    "tickers": [
+     "KXCS2GAME-26SEP251300BRUTEBBL-BBL",
+     "KXCS2GAME-26SEP251300BRUTEBBL-BRUTE"
+    ],
+    "S": 1790355600,
+    "close": 1790373436
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP251300BAKSSTA",
+    "tickers": [
+     "KXCS2GAME-26SEP251300BAKSSTA-BAKS",
+     "KXCS2GAME-26SEP251300BAKSSTA-STA"
+    ],
+    "S": 1790355600,
+    "close": 1790366572
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP251500PLDMIRA",
+    "tickers": [
+     "KXCS2GAME-26SEP251500PLDMIRA-MIRA",
+     "KXCS2GAME-26SEP251500PLDMIRA-PLD"
+    ],
+    "S": 1790362800,
+    "close": 1790353402
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP251400K27GL",
+    "tickers": [
+     "KXCS2GAME-26SEP251400K27GL-GL",
+     "KXCS2GAME-26SEP251400K27GL-K27"
+    ],
+    "S": 1790359200,
+    "close": 1790378989
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP252100REGAINMAR",
+    "tickers": [
+     "KXCS2GAME-26SEP252100REGAINMAR-MAR",
+     "KXCS2GAME-26SEP252100REGAINMAR-REGAIN"
+    ],
+    "S": 1790384400,
+    "close": 1790386217
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP252100DTNVIL",
+    "tickers": [
+     "KXCS2GAME-26SEP252100DTNVIL-DTN",
+     "KXCS2GAME-26SEP252100DTNVIL-VIL"
+    ],
+    "S": 1790384400,
+    "close": 1790395207
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP260400MAISSINS",
+    "tickers": [
+     "KXCS2GAME-26SEP260400MAISSINS-MAI",
+     "KXCS2GAME-26SEP260400MAISSINS-SSINS"
+    ],
+    "S": 1790409600,
+    "close": 1790435830
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP260400BWVEX",
+    "tickers": [
+     "KXCS2GAME-26SEP260400BWVEX-BW",
+     "KXCS2GAME-26SEP260400BWVEX-VEX"
+    ],
+    "S": 1790409600,
+    "close": 1790422799
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP260500ABYRSTR",
+    "tickers": [
+     "KXCS2GAME-26SEP260500ABYRSTR-ABY",
+     "KXCS2GAME-26SEP260500ABYRSTR-RSTR"
+    ],
+    "S": 1790413200,
+    "close": 1790436107
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP2605003DMAXALL",
+    "tickers": [
+     "KXCS2GAME-26SEP2605003DMAXALL-3DMAX",
+     "KXCS2GAME-26SEP2605003DMAXALL-ALL"
+    ],
+    "S": 1790413200,
+    "close": 1790422800
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP260500ORGGRO",
+    "tickers": [
+     "KXCS2GAME-26SEP260500ORGGRO-GRO",
+     "KXCS2GAME-26SEP260500ORGGRO-ORG"
+    ],
+    "S": 1790413200,
+    "close": 1790436000
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP260500ISFNC",
+    "tickers": [
+     "KXCS2GAME-26SEP260500ISFNC-FNC",
+     "KXCS2GAME-26SEP260500ISFNC-IS"
+    ],
+    "S": 1790413200,
+    "close": 1790420991
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP261000UNKWAL",
+    "tickers": [
+     "KXCS2GAME-26SEP261000UNKWAL-UNK",
+     "KXCS2GAME-26SEP261000UNKWAL-WAL"
+    ],
+    "S": 1790431200,
+    "close": 1790436179
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP261000BAKSLEO",
+    "tickers": [
+     "KXCS2GAME-26SEP261000BAKSLEO-BAKS",
+     "KXCS2GAME-26SEP261000BAKSLEO-LEO"
+    ],
+    "S": 1790431200,
+    "close": 1790451583
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP261330FSFIRE",
+    "tickers": [
+     "KXCS2GAME-26SEP261330FSFIRE-FIRE",
+     "KXCS2GAME-26SEP261330FSFIRE-FS"
+    ],
+    "S": 1790443800,
+    "close": 1790460482
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP261330EXRK27",
+    "tickers": [
+     "KXCS2GAME-26SEP261330EXRK27-EXR",
+     "KXCS2GAME-26SEP261330EXRK27-K27"
+    ],
+    "S": 1790443800,
+    "close": 1790454592
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP261800PLDGRE",
+    "tickers": [
+     "KXCS2GAME-26SEP261800PLDGRE-GRE",
+     "KXCS2GAME-26SEP261800PLDGRE-PLD"
+    ],
+    "S": 1790460000,
+    "close": 1790460360
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP261700ALKAATDP",
+    "tickers": [
+     "KXCS2GAME-26SEP261700ALKAATDP-ALKAA",
+     "KXCS2GAME-26SEP261700ALKAATDP-TDP"
+    ],
+    "S": 1790456400,
+    "close": 1790468400
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP270700TRAMEG",
+    "tickers": [
+     "KXCS2GAME-26SEP270700TRAMEG-MEG",
+     "KXCS2GAME-26SEP270700TRAMEG-TRA"
+    ],
+    "S": 1790506800,
+    "close": 1790523275
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP270700EPMOR",
+    "tickers": [
+     "KXCS2GAME-26SEP270700EPMOR-EP",
+     "KXCS2GAME-26SEP270700EPMOR-MOR"
+    ],
+    "S": 1790506800,
+    "close": 1790513996
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP280945MEGFORZER",
+    "tickers": [
+     "KXCS2GAME-26SEP280945MEGFORZER-FORZER",
+     "KXCS2GAME-26SEP280945MEGFORZER-MEG"
+    ],
+    "S": 1790603100,
+    "close": 1790606233
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP280945BIGAFIRE",
+    "tickers": [
+     "KXCS2GAME-26SEP280945BIGAFIRE-BIGA",
+     "KXCS2GAME-26SEP280945BIGAFIRE-FIRE"
+    ],
+    "S": 1790603100,
+    "close": 1790612439
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP281300SEMALKAA",
+    "tickers": [
+     "KXCS2GAME-26SEP281300SEMALKAA-ALKAA",
+     "KXCS2GAME-26SEP281300SEMALKAA-SEM"
+    ],
+    "S": 1790614800,
+    "close": 1790630093
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP281300EACEXI",
+    "tickers": [
+     "KXCS2GAME-26SEP281300EACEXI-EACE",
+     "KXCS2GAME-26SEP281300EACEXI-XI"
+    ],
+    "S": 1790614800,
+    "close": 1790619584
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP281500LLSTA",
+    "tickers": [
+     "KXCS2GAME-26SEP281500LLSTA-LL",
+     "KXCS2GAME-26SEP281500LLSTA-STA"
+    ],
+    "S": 1790622000,
+    "close": 1790460749
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP281500MASQECS",
+    "tickers": [
+     "KXCS2GAME-26SEP281500MASQECS-ECS",
+     "KXCS2GAME-26SEP281500MASQECS-MASQ"
+    ],
+    "S": 1790622000,
+    "close": 1790624401
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP290400NXSBW",
+    "tickers": [
+     "KXCS2GAME-26SEP290400NXSBW-BW",
+     "KXCS2GAME-26SEP290400NXSBW-NXS"
+    ],
+    "S": 1790668800,
+    "close": 1790701684
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP290400AZULAV",
+    "tickers": [
+     "KXCS2GAME-26SEP290400AZULAV-AZU",
+     "KXCS2GAME-26SEP290400AZULAV-LAV"
+    ],
+    "S": 1790668800,
+    "close": 1790674786
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP290700EPPG",
+    "tickers": [
+     "KXCS2GAME-26SEP290700EPPG-EP",
+     "KXCS2GAME-26SEP290700EPPG-PG"
+    ],
+    "S": 1790679600,
+    "close": 1790701305
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP290700ENJOYMSC",
+    "tickers": [
+     "KXCS2GAME-26SEP290700ENJOYMSC-ENJOY",
+     "KXCS2GAME-26SEP290700ENJOYMSC-MSC"
+    ],
+    "S": 1790679600,
+    "close": 1790698188
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26SEP300630SINTHE",
+    "tickers": [
+     "KXCS2GAME-26SEP300630SINTHE-SIN",
+     "KXCS2GAME-26SEP300630SINTHE-THE"
+    ],
+    "S": 1790764200,
+    "close": 1790781330
+   },
+   "played": {
+    "event": "KXCS2GAME-26SEP300600HSINF",
+    "tickers": [
+     "KXCS2GAME-26SEP300600HSINF-HS",
+     "KXCS2GAME-26SEP300600HSINF-INF"
+    ],
+    "S": 1790762400,
+    "close": 1790770185
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT010700MORPHAC",
+    "tickers": [
+     "KXCS2GAME-26OCT010700MORPHAC-MOR",
+     "KXCS2GAME-26OCT010700MORPHAC-PHAC"
+    ],
+    "S": 1790852400,
+    "close": 1790866788
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT010700EPMAY",
+    "tickers": [
+     "KXCS2GAME-26OCT010700EPMAY-EP",
+     "KXCS2GAME-26OCT010700EPMAY-MAY"
+    ],
+    "S": 1790852400,
+    "close": 1790865585
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT011500RUSQUIN",
+    "tickers": [
+     "KXCS2GAME-26OCT011500RUSQUIN-QUIN",
+     "KXCS2GAME-26OCT011500RUSQUIN-RUS"
+    ],
+    "S": 1790881200,
+    "close": 1790814133
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT011500ALKAAEXK",
+    "tickers": [
+     "KXCS2GAME-26OCT011500ALKAAEXK-ALKAA",
+     "KXCS2GAME-26OCT011500ALKAAEXK-EXK"
+    ],
+    "S": 1790881200,
+    "close": 1790891441
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT020400MEGBERG",
+    "tickers": [
+     "KXCS2GAME-26OCT020400MEGBERG-BERG",
+     "KXCS2GAME-26OCT020400MEGBERG-MEG"
+    ],
+    "S": 1790928000,
+    "close": 1790950813
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT020400XITTBS",
+    "tickers": [
+     "KXCS2GAME-26OCT020400XITTBS-TTBS",
+     "KXCS2GAME-26OCT020400XITTBS-XI"
+    ],
+    "S": 1790928000,
+    "close": 1790937615
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT020630OLDEFA",
+    "tickers": [
+     "KXCS2GAME-26OCT020630OLDEFA-EFA",
+     "KXCS2GAME-26OCT020630OLDEFA-OLD"
+    ],
+    "S": 1790937000,
+    "close": 1790874873
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT020630OLDBRE",
+    "tickers": [
+     "KXCS2GAME-26OCT020630OLDBRE-BRE",
+     "KXCS2GAME-26OCT020630OLDBRE-OLD"
+    ],
+    "S": 1790937000,
+    "close": 1790948402
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT021200MEIBHE",
+    "tickers": [
+     "KXCS2GAME-26OCT021200MEIBHE-BHE",
+     "KXCS2GAME-26OCT021200MEIBHE-MEI"
+    ],
+    "S": 1790956800,
+    "close": 1790969973
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT021200ANTEF",
+    "tickers": [
+     "KXCS2GAME-26OCT021200ANTEF-ANT",
+     "KXCS2GAME-26OCT021200ANTEF-EF"
+    ],
+    "S": 1790956800,
+    "close": 1790961591
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT030400NOIEAC",
+    "tickers": [
+     "KXCS2GAME-26OCT030400NOIEAC-EAC",
+     "KXCS2GAME-26OCT030400NOIEAC-NOI"
+    ],
+    "S": 1791014400,
+    "close": 1790997581
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT030400VITAWRA",
+    "tickers": [
+     "KXCS2GAME-26OCT030400VITAWRA-VITA",
+     "KXCS2GAME-26OCT030400VITAWRA-WRA"
+    ],
+    "S": 1791014400,
+    "close": 1791020394
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT050630G1VITA",
+    "tickers": [
+     "KXCS2GAME-26OCT050630G1VITA-G1",
+     "KXCS2GAME-26OCT050630G1VITA-VITA"
+    ],
+    "S": 1791196200,
+    "close": 1791295423
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT050630STAVITA",
+    "tickers": [
+     "KXCS2GAME-26OCT050630STAVITA-STA",
+     "KXCS2GAME-26OCT050630STAVITA-VITA"
+    ],
+    "S": 1791196200,
+    "close": 1791213759
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT051200LEISSP",
+    "tickers": [
+     "KXCS2GAME-26OCT051200LEISSP-LEI",
+     "KXCS2GAME-26OCT051200LEISSP-SSP"
+    ],
+    "S": 1791216000,
+    "close": 1791148024
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT051200ECSSTA",
+    "tickers": [
+     "KXCS2GAME-26OCT051200ECSSTA-ECS",
+     "KXCS2GAME-26OCT051200ECSSTA-STA"
+    ],
+    "S": 1791216000,
+    "close": 1791218981
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT051300MASQSTR",
+    "tickers": [
+     "KXCS2GAME-26OCT051300MASQSTR-MASQ",
+     "KXCS2GAME-26OCT051300MASQSTR-STR"
+    ],
+    "S": 1791219600,
+    "close": 1791132528
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT051300LLXI",
+    "tickers": [
+     "KXCS2GAME-26OCT051300LLXI-LL",
+     "KXCS2GAME-26OCT051300LLXI-XI"
+    ],
+    "S": 1791219600,
+    "close": 1791223194
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT051500LLEACE",
+    "tickers": [
+     "KXCS2GAME-26OCT051500LLEACE-EACE",
+     "KXCS2GAME-26OCT051500LLEACE-LL"
+    ],
+    "S": 1791226800,
+    "close": 1791245677
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT051500XISTR",
+    "tickers": [
+     "KXCS2GAME-26OCT051500XISTR-STR",
+     "KXCS2GAME-26OCT051500XISTR-XI"
+    ],
+    "S": 1791226800,
+    "close": 1791399600
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430KSMTTG",
+    "tickers": [
+     "KXCS2GAME-26OCT061430KSMTTG-KSM",
+     "KXCS2GAME-26OCT061430KSMTTG-TTG"
+    ],
+    "S": 1791311400,
+    "close": 1791316370
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430AIMFRT",
+    "tickers": [
+     "KXCS2GAME-26OCT061430AIMFRT-AIM",
+     "KXCS2GAME-26OCT061430AIMFRT-FRT"
+    ],
+    "S": 1791311400,
+    "close": 1791317384
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430OLDBAKS",
+    "tickers": [
+     "KXCS2GAME-26OCT061430OLDBAKS-BAKS",
+     "KXCS2GAME-26OCT061430OLDBAKS-OLD"
+    ],
+    "S": 1791311400,
+    "close": 1791316369
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430ALAGAM",
+    "tickers": [
+     "KXCS2GAME-26OCT061430ALAGAM-ALA",
+     "KXCS2GAME-26OCT061430ALAGAM-GAM"
+    ],
+    "S": 1791311400,
+    "close": 1791314396
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430PHACGLI",
+    "tickers": [
+     "KXCS2GAME-26OCT061430PHACGLI-GLI",
+     "KXCS2GAME-26OCT061430PHACGLI-PHAC"
+    ],
+    "S": 1791311400,
+    "close": 1791316676
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430FORMAY",
+    "tickers": [
+     "KXCS2GAME-26OCT061430FORMAY-FOR",
+     "KXCS2GAME-26OCT061430FORMAY-MAY"
+    ],
+    "S": 1791311400,
+    "close": 1791316367
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430RYVDM",
+    "tickers": [
+     "KXCS2GAME-26OCT061430RYVDM-DM",
+     "KXCS2GAME-26OCT061430RYVDM-RYV"
+    ],
+    "S": 1791311400,
+    "close": 1791316448
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430PENR4G",
+    "tickers": [
+     "KXCS2GAME-26OCT061430PENR4G-PEN",
+     "KXCS2GAME-26OCT061430PENR4G-R4G"
+    ],
+    "S": 1791311400,
+    "close": 1791315593
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430TAXTG",
+    "tickers": [
+     "KXCS2GAME-26OCT061430TAXTG-TAX",
+     "KXCS2GAME-26OCT061430TAXTG-TG"
+    ],
+    "S": 1791311400,
+    "close": 1791316368
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430YTIGERESINN",
+    "tickers": [
+     "KXCS2GAME-26OCT061430YTIGERESINN-INN",
+     "KXCS2GAME-26OCT061430YTIGERESINN-YTIGERES"
+    ],
+    "S": 1791311400,
+    "close": 1791314397
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430WNTDIA",
+    "tickers": [
+     "KXCS2GAME-26OCT061430WNTDIA-DIA",
+     "KXCS2GAME-26OCT061430WNTDIA-WNT"
+    ],
+    "S": 1791311400,
+    "close": 1791316473
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061430ZOTIXMEN",
+    "tickers": [
+     "KXCS2GAME-26OCT061430ZOTIXMEN-MEN",
+     "KXCS2GAME-26OCT061430ZOTIXMEN-ZOTIX"
+    ],
+    "S": 1791311400,
+    "close": 1791401399
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT061430XIUNK",
+    "tickers": [
+     "KXCS2GAME-26OCT061430XIUNK-UNK",
+     "KXCS2GAME-26OCT061430XIUNK-XI"
+    ],
+    "S": 1791311400,
+    "close": 1791316368
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT061400FIRPRTZN",
+    "tickers": [
+     "KXCS2GAME-26OCT061400FIRPRTZN-FIR",
+     "KXCS2GAME-26OCT061400FIRPRTZN-PRTZN"
+    ],
+    "S": 1791309600,
+    "close": 1791315003
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT070400LEOWAL",
+    "tickers": [
+     "KXCS2GAME-26OCT070400LEOWAL-LEO",
+     "KXCS2GAME-26OCT070400LEOWAL-WAL"
+    ],
+    "S": 1791360000,
+    "close": 1791404795
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT070400MAYMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT070400MAYMOR-MAY",
+     "KXCS2GAME-26OCT070400MAYMOR-MOR"
+    ],
+    "S": 1791360000,
+    "close": 1791376212
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT070400LKMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT070400LKMOR-LK",
+     "KXCS2GAME-26OCT070400LKMOR-MOR"
+    ],
+    "S": 1791360000,
+    "close": 1791405227
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT070400OWG2A",
+    "tickers": [
+     "KXCS2GAME-26OCT070400OWG2A-G2A",
+     "KXCS2GAME-26OCT070400OWG2A-OW"
+    ],
+    "S": 1791360000,
+    "close": 1791363000
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT070400PSNAENCEP",
+    "tickers": [
+     "KXCS2GAME-26OCT070400PSNAENCEP-ENCEP",
+     "KXCS2GAME-26OCT070400PSNAENCEP-PSNA"
+    ],
+    "S": 1791360000,
+    "close": 1791295255
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT070400PSNAXI",
+    "tickers": [
+     "KXCS2GAME-26OCT070400PSNAXI-PSNA",
+     "KXCS2GAME-26OCT070400PSNAXI-XI"
+    ],
+    "S": 1791360000,
+    "close": 1791366003
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT070800SASHIACE",
+    "tickers": [
+     "KXCS2GAME-26OCT070800SASHIACE-ACE",
+     "KXCS2GAME-26OCT070800SASHIACE-SASHI"
+    ],
+    "S": 1791374400,
+    "close": 1791403795
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT070800M80TS",
+    "tickers": [
+     "KXCS2GAME-26OCT070800M80TS-M80",
+     "KXCS2GAME-26OCT070800M80TS-TS"
+    ],
+    "S": 1791374400,
+    "close": 1791404392
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT070900XDMTU",
+    "tickers": [
+     "KXCS2GAME-26OCT070900XDMTU-TU",
+     "KXCS2GAME-26OCT070900XDMTU-XDM"
+    ],
+    "S": 1791378000,
+    "close": 1791395400
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT070900BERGMEL",
+    "tickers": [
+     "KXCS2GAME-26OCT070900BERGMEL-BERG",
+     "KXCS2GAME-26OCT070900BERGMEL-MEL"
+    ],
+    "S": 1791378000,
+    "close": 1791387602
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT071700MEIISG",
+    "tickers": [
+     "KXCS2GAME-26OCT071700MEIISG-ISG",
+     "KXCS2GAME-26OCT071700MEIISG-MEI"
+    ],
+    "S": 1791406800,
+    "close": 1791409183
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT071700ALKAABSTA",
+    "tickers": [
+     "KXCS2GAME-26OCT071700ALKAABSTA-ALKAA",
+     "KXCS2GAME-26OCT071700ALKAABSTA-BSTA"
+    ],
+    "S": 1791406800,
+    "close": 1791413996
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT071700YAWLOW",
+    "tickers": [
+     "KXCS2GAME-26OCT071700YAWLOW-LOW",
+     "KXCS2GAME-26OCT071700YAWLOW-YAW"
+    ],
+    "S": 1791406800,
+    "close": 1791408763
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT071700CHAMATDP",
+    "tickers": [
+     "KXCS2GAME-26OCT071700CHAMATDP-CHAMA",
+     "KXCS2GAME-26OCT071700CHAMATDP-TDP"
+    ],
+    "S": 1791406800,
+    "close": 1791418175
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT072100OTEXR",
+    "tickers": [
+     "KXCS2GAME-26OCT072100OTEXR-EXR",
+     "KXCS2GAME-26OCT072100OTEXR-OT"
+    ],
+    "S": 1791421200,
+    "close": 1791310434
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT072100CLUZOMB",
+    "tickers": [
+     "KXCS2GAME-26OCT072100CLUZOMB-CLU",
+     "KXCS2GAME-26OCT072100CLUZOMB-ZOMB"
+    ],
+    "S": 1791421200,
+    "close": 1791430188
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT080400SINSKR",
+    "tickers": [
+     "KXCS2GAME-26OCT080400SINSKR-SIN",
+     "KXCS2GAME-26OCT080400SINSKR-SKR"
+    ],
+    "S": 1791446400,
+    "close": 1791466799
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT080400EXZACE",
+    "tickers": [
+     "KXCS2GAME-26OCT080400EXZACE-ACE",
+     "KXCS2GAME-26OCT080400EXZACE-EXZ"
+    ],
+    "S": 1791446400,
+    "close": 1791458384
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT080900THEXDM",
+    "tickers": [
+     "KXCS2GAME-26OCT080900THEXDM-THE",
+     "KXCS2GAME-26OCT080900THEXDM-XDM"
+    ],
+    "S": 1791464400,
+    "close": 1791469822
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT080900BPBLI",
+    "tickers": [
+     "KXCS2GAME-26OCT080900BPBLI-BLI",
+     "KXCS2GAME-26OCT080900BPBLI-BP"
+    ],
+    "S": 1791464400,
+    "close": 1791472802
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081000NXSCS",
+    "tickers": [
+     "KXCS2GAME-26OCT081000NXSCS-CS",
+     "KXCS2GAME-26OCT081000NXSCS-NXS"
+    ],
+    "S": 1791468000,
+    "close": 1791472212
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081000FIREMEG",
+    "tickers": [
+     "KXCS2GAME-26OCT081000FIREMEG-FIRE",
+     "KXCS2GAME-26OCT081000FIREMEG-MEG"
+    ],
+    "S": 1791468000,
+    "close": 1791473416
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081400COLNTR",
+    "tickers": [
+     "KXCS2GAME-26OCT081400COLNTR-COL",
+     "KXCS2GAME-26OCT081400COLNTR-NTR"
+    ],
+    "S": 1791482400,
+    "close": 1791466798
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430DNKPRTZN",
+    "tickers": [
+     "KXCS2GAME-26OCT081430DNKPRTZN-DNK",
+     "KXCS2GAME-26OCT081430DNKPRTZN-PRTZN"
+    ],
+    "S": 1791484200,
+    "close": 1791487789
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430AGRPG",
+    "tickers": [
+     "KXCS2GAME-26OCT081430AGRPG-AGR",
+     "KXCS2GAME-26OCT081430AGRPG-PG"
+    ],
+    "S": 1791484200,
+    "close": 1791508205
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430DXEFAL",
+    "tickers": [
+     "KXCS2GAME-26OCT081430DXEFAL-DXE",
+     "KXCS2GAME-26OCT081430DXEFAL-FAL"
+    ],
+    "S": 1791484200,
+    "close": 1791487790
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430BAKSLK",
+    "tickers": [
+     "KXCS2GAME-26OCT081430BAKSLK-BAKS",
+     "KXCS2GAME-26OCT081430BAKSLK-LK"
+    ],
+    "S": 1791484200,
+    "close": 1791517144
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430ESBALA",
+    "tickers": [
+     "KXCS2GAME-26OCT081430ESBALA-ALA",
+     "KXCS2GAME-26OCT081430ESBALA-ESB"
+    ],
+    "S": 1791484200,
+    "close": 1791487791
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430BGAIM",
+    "tickers": [
+     "KXCS2GAME-26OCT081430BGAIM-AIM",
+     "KXCS2GAME-26OCT081430BGAIM-BG"
+    ],
+    "S": 1791484200,
+    "close": 1791574525
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430FORIMA",
+    "tickers": [
+     "KXCS2GAME-26OCT081430FORIMA-FOR",
+     "KXCS2GAME-26OCT081430FORIMA-IMA"
+    ],
+    "S": 1791484200,
+    "close": 1791487212
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430DMMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT081430DMMOR-DM",
+     "KXCS2GAME-26OCT081430DMMOR-MOR"
+    ],
+    "S": 1791484200,
+    "close": 1791517096
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430HONINN",
+    "tickers": [
+     "KXCS2GAME-26OCT081430HONINN-HON",
+     "KXCS2GAME-26OCT081430HONINN-INN"
+    ],
+    "S": 1791484200,
+    "close": 1791487212
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430KSMBAN",
+    "tickers": [
+     "KXCS2GAME-26OCT081430KSMBAN-BAN",
+     "KXCS2GAME-26OCT081430KSMBAN-KSM"
+    ],
+    "S": 1791484200,
+    "close": 1791493038
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430MENGLI",
+    "tickers": [
+     "KXCS2GAME-26OCT081430MENGLI-GLI",
+     "KXCS2GAME-26OCT081430MENGLI-MEN"
+    ],
+    "S": 1791484200,
+    "close": 1791487792
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430OTTAX",
+    "tickers": [
+     "KXCS2GAME-26OCT081430OTTAX-OT",
+     "KXCS2GAME-26OCT081430OTTAX-TAX"
+    ],
+    "S": 1791484200,
+    "close": 1791493107
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430NEXYL",
+    "tickers": [
+     "KXCS2GAME-26OCT081430NEXYL-NEX",
+     "KXCS2GAME-26OCT081430NEXYL-YL"
+    ],
+    "S": 1791484200,
+    "close": 1791487793
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430REVUNK",
+    "tickers": [
+     "KXCS2GAME-26OCT081430REVUNK-REV",
+     "KXCS2GAME-26OCT081430REVUNK-UNK"
+    ],
+    "S": 1791484200,
+    "close": 1791508204
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430TGSHU",
+    "tickers": [
+     "KXCS2GAME-26OCT081430TGSHU-SHU",
+     "KXCS2GAME-26OCT081430TGSHU-TG"
+    ],
+    "S": 1791484200,
+    "close": 1791487213
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081430ZOTIXPHAC",
+    "tickers": [
+     "KXCS2GAME-26OCT081430ZOTIXPHAC-PHAC",
+     "KXCS2GAME-26OCT081430ZOTIXPHAC-ZOTIX"
+    ],
+    "S": 1791484200,
+    "close": 1791578772
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081430XIEP",
+    "tickers": [
+     "KXCS2GAME-26OCT081430XIEP-EP",
+     "KXCS2GAME-26OCT081430XIEP-XI"
+    ],
+    "S": 1791484200,
+    "close": 1791488979
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT081700GLSLOW",
+    "tickers": [
+     "KXCS2GAME-26OCT081700GLSLOW-GLS",
+     "KXCS2GAME-26OCT081700GLSLOW-LOW"
+    ],
+    "S": 1791493200,
+    "close": 1791494397
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT081700BHEALKAA",
+    "tickers": [
+     "KXCS2GAME-26OCT081700BHEALKAA-ALKAA",
+     "KXCS2GAME-26OCT081700BHEALKAA-BHE"
+    ],
+    "S": 1791493200,
+    "close": 1791501599
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT082100OTFAR",
+    "tickers": [
+     "KXCS2GAME-26OCT082100OTFAR-FAR",
+     "KXCS2GAME-26OCT082100OTFAR-OT"
+    ],
+    "S": 1791507600,
+    "close": 1791508793
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT082100DBZOMB",
+    "tickers": [
+     "KXCS2GAME-26OCT082100DBZOMB-DB",
+     "KXCS2GAME-26OCT082100DBZOMB-ZOMB"
+    ],
+    "S": 1791507600,
+    "close": 1791514164
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT090400RFEEK",
+    "tickers": [
+     "KXCS2GAME-26OCT090400RFEEK-EK",
+     "KXCS2GAME-26OCT090400RFEEK-RFE"
+    ],
+    "S": 1791532800,
+    "close": 1791589185
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT090400BBPMEL",
+    "tickers": [
+     "KXCS2GAME-26OCT090400BBPMEL-BBP",
+     "KXCS2GAME-26OCT090400BBPMEL-MEL"
+    ],
+    "S": 1791532800,
+    "close": 1791544193
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT091300ANTSSINS",
+    "tickers": [
+     "KXCS2GAME-26OCT091300ANTSSINS-ANT",
+     "KXCS2GAME-26OCT091300ANTSSINS-SSINS"
+    ],
+    "S": 1791565200,
+    "close": 1791569390
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT091300AZUENJOY",
+    "tickers": [
+     "KXCS2GAME-26OCT091300AZUENJOY-AZU",
+     "KXCS2GAME-26OCT091300AZUENJOY-ENJOY"
+    ],
+    "S": 1791565200,
+    "close": 1791546012
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT091300NEMIGOT",
+    "tickers": [
+     "KXCS2GAME-26OCT091300NEMIGOT-GOT",
+     "KXCS2GAME-26OCT091300NEMIGOT-NEMI"
+    ],
+    "S": 1791565200,
+    "close": 1791554429
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT091330G2ASNG",
+    "tickers": [
+     "KXCS2GAME-26OCT091330G2ASNG-G2A",
+     "KXCS2GAME-26OCT091330G2ASNG-SNG"
+    ],
+    "S": 1791567000,
+    "close": 1791578996
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT091930BGNTHU",
+    "tickers": [
+     "KXCS2GAME-26OCT091930BGNTHU-BGN",
+     "KXCS2GAME-26OCT091930BGNTHU-THU"
+    ],
+    "S": 1791588600,
+    "close": 1791591585
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT091930CELIMP",
+    "tickers": [
+     "KXCS2GAME-26OCT091930CELIMP-CEL",
+     "KXCS2GAME-26OCT091930CELIMP-IMP"
+    ],
+    "S": 1791588600,
+    "close": 1791606576
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT100500IBRSTR",
+    "tickers": [
+     "KXCS2GAME-26OCT100500IBRSTR-IB",
+     "KXCS2GAME-26OCT100500IBRSTR-RSTR"
+    ],
+    "S": 1791622800,
+    "close": 1791660137
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT100500MANDLORG",
+    "tickers": [
+     "KXCS2GAME-26OCT100500MANDLORG-MANDL",
+     "KXCS2GAME-26OCT100500MANDLORG-ORG"
+    ],
+    "S": 1791622800,
+    "close": 1791630591
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT100900LVGTKX",
+    "tickers": [
+     "KXCS2GAME-26OCT100900LVGTKX-LVG",
+     "KXCS2GAME-26OCT100900LVGTKX-TKX"
+    ],
+    "S": 1791637200,
+    "close": 1791640802
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT100900ISNEMI",
+    "tickers": [
+     "KXCS2GAME-26OCT100900ISNEMI-IS",
+     "KXCS2GAME-26OCT100900ISNEMI-NEMI"
+    ],
+    "S": 1791637200,
+    "close": 1791639005
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT120400TUSTA",
+    "tickers": [
+     "KXCS2GAME-26OCT120400TUSTA-STA",
+     "KXCS2GAME-26OCT120400TUSTA-TU"
+    ],
+    "S": 1791792000,
+    "close": 1791830227
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT120400PSNABRE",
+    "tickers": [
+     "KXCS2GAME-26OCT120400PSNABRE-BRE",
+     "KXCS2GAME-26OCT120400PSNABRE-PSNA"
+    ],
+    "S": 1791792000,
+    "close": 1791805176
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT120630MOUZNSKR",
+    "tickers": [
+     "KXCS2GAME-26OCT120630MOUZNSKR-MOUZN",
+     "KXCS2GAME-26OCT120630MOUZNSKR-SKR"
+    ],
+    "S": 1791801000,
+    "close": 1791824877
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT120600APOGEENIP",
+    "tickers": [
+     "KXCS2GAME-26OCT120600APOGEENIP-APOGEE",
+     "KXCS2GAME-26OCT120600APOGEENIP-NIP"
+    ],
+    "S": 1791799200,
+    "close": 1791811166
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT121000ACIG1",
+    "tickers": [
+     "KXCS2GAME-26OCT121000ACIG1-ACI",
+     "KXCS2GAME-26OCT121000ACIG1-G1"
+    ],
+    "S": 1791813600,
+    "close": 1791867556
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT121000EXRNPG",
+    "tickers": [
+     "KXCS2GAME-26OCT121000EXRNPG-EXR",
+     "KXCS2GAME-26OCT121000EXRNPG-NPG"
+    ],
+    "S": 1791813600,
+    "close": 1791823797
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT121400REVBLU",
+    "tickers": [
+     "KXCS2GAME-26OCT121400REVBLU-BLU",
+     "KXCS2GAME-26OCT121400REVBLU-REV"
+    ],
+    "S": 1791828000,
+    "close": 1791868109
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT121400ENTHUSK",
+    "tickers": [
+     "KXCS2GAME-26OCT121400ENTHUSK-ENT",
+     "KXCS2GAME-26OCT121400ENTHUSK-HUSK"
+    ],
+    "S": 1791828000,
+    "close": 1791837592
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131000SSINSWAL",
+    "tickers": [
+     "KXCS2GAME-26OCT131000SSINSWAL-SSINS",
+     "KXCS2GAME-26OCT131000SSINSWAL-WAL"
+    ],
+    "S": 1791900000,
+    "close": 1791904648
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT130900JSAE",
+    "tickers": [
+     "KXCS2GAME-26OCT130900JSAE-AE",
+     "KXCS2GAME-26OCT130900JSAE-JS"
+    ],
+    "S": 1791896400,
+    "close": 1791907807
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131300LKLPH",
+    "tickers": [
+     "KXCS2GAME-26OCT131300LKLPH-LK",
+     "KXCS2GAME-26OCT131300LKLPH-LPH"
+    ],
+    "S": 1791910800,
+    "close": 1791909869
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131300FRTSPI",
+    "tickers": [
+     "KXCS2GAME-26OCT131300FRTSPI-FRT",
+     "KXCS2GAME-26OCT131300FRTSPI-SPI"
+    ],
+    "S": 1791910800,
+    "close": 1791913789
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430ANTB8A",
+    "tickers": [
+     "KXCS2GAME-26OCT131430ANTB8A-ANT",
+     "KXCS2GAME-26OCT131430ANTB8A-B8A"
+    ],
+    "S": 1791916200,
+    "close": 1791938160
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430AGRREV",
+    "tickers": [
+     "KXCS2GAME-26OCT131430AGRREV-AGR",
+     "KXCS2GAME-26OCT131430AGRREV-REV"
+    ],
+    "S": 1791916200,
+    "close": 1791919187
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430BAKSGLI",
+    "tickers": [
+     "KXCS2GAME-26OCT131430BAKSGLI-BAKS",
+     "KXCS2GAME-26OCT131430BAKSGLI-GLI"
+    ],
+    "S": 1791916200,
+    "close": 1791940021
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430ESBMTX",
+    "tickers": [
+     "KXCS2GAME-26OCT131430ESBMTX-ESB",
+     "KXCS2GAME-26OCT131430ESBMTX-MTX"
+    ],
+    "S": 1791916200,
+    "close": 1791920999
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430DMYTIGERES",
+    "tickers": [
+     "KXCS2GAME-26OCT131430DMYTIGERES-DM",
+     "KXCS2GAME-26OCT131430DMYTIGERES-YTIGERES"
+    ],
+    "S": 1791916200,
+    "close": 1791938193
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430INNMEN",
+    "tickers": [
+     "KXCS2GAME-26OCT131430INNMEN-INN",
+     "KXCS2GAME-26OCT131430INNMEN-MEN"
+    ],
+    "S": 1791916200,
+    "close": 1791919187
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430DNKDIN",
+    "tickers": [
+     "KXCS2GAME-26OCT131430DNKDIN-DIN",
+     "KXCS2GAME-26OCT131430DNKDIN-DNK"
+    ],
+    "S": 1791916200,
+    "close": 1791910714
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430PRTZNAIM",
+    "tickers": [
+     "KXCS2GAME-26OCT131430PRTZNAIM-AIM",
+     "KXCS2GAME-26OCT131430PRTZNAIM-PRTZN"
+    ],
+    "S": 1791916200,
+    "close": 1791919188
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430ENRSIN",
+    "tickers": [
+     "KXCS2GAME-26OCT131430ENRSIN-ENR",
+     "KXCS2GAME-26OCT131430ENRSIN-SIN"
+    ],
+    "S": 1791916200,
+    "close": 1791938131
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430R4GBAN",
+    "tickers": [
+     "KXCS2GAME-26OCT131430R4GBAN-BAN",
+     "KXCS2GAME-26OCT131430R4GBAN-R4G"
+    ],
+    "S": 1791916200,
+    "close": 1791919770
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430FIREOLD",
+    "tickers": [
+     "KXCS2GAME-26OCT131430FIREOLD-FIRE",
+     "KXCS2GAME-26OCT131430FIREOLD-OLD"
+    ],
+    "S": 1791916200,
+    "close": 1791910734
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131430ZOTIXLPH",
+    "tickers": [
+     "KXCS2GAME-26OCT131430ZOTIXLPH-LPH",
+     "KXCS2GAME-26OCT131430ZOTIXLPH-ZOTIX"
+    ],
+    "S": 1791916200,
+    "close": 1791920376
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430HONPHAC",
+    "tickers": [
+     "KXCS2GAME-26OCT131430HONPHAC-HON",
+     "KXCS2GAME-26OCT131430HONPHAC-PHAC"
+    ],
+    "S": 1791916200,
+    "close": 1791910805
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131400IMAFIR",
+    "tickers": [
+     "KXCS2GAME-26OCT131400IMAFIR-FIR",
+     "KXCS2GAME-26OCT131400IMAFIR-IMA"
+    ],
+    "S": 1791914400,
+    "close": 1791919770
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430RCAOT",
+    "tickers": [
+     "KXCS2GAME-26OCT131430RCAOT-OT",
+     "KXCS2GAME-26OCT131430RCAOT-RCA"
+    ],
+    "S": 1791916200,
+    "close": 1791938114
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131500LNGRE",
+    "tickers": [
+     "KXCS2GAME-26OCT131500LNGRE-GRE",
+     "KXCS2GAME-26OCT131500LNGRE-LN"
+    ],
+    "S": 1791918000,
+    "close": 1791929369
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430TAXGAM",
+    "tickers": [
+     "KXCS2GAME-26OCT131430TAXGAM-GAM",
+     "KXCS2GAME-26OCT131430TAXGAM-TAX"
+    ],
+    "S": 1791916200,
+    "close": 1791919772
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131300UNKBLA",
+    "tickers": [
+     "KXCS2GAME-26OCT131300UNKBLA-BLA",
+     "KXCS2GAME-26OCT131300UNKBLA-UNK"
+    ],
+    "S": 1791910800,
+    "close": 1791917408
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430TEAXI",
+    "tickers": [
+     "KXCS2GAME-26OCT131430TEAXI-TEA",
+     "KXCS2GAME-26OCT131430TEAXI-XI"
+    ],
+    "S": 1791916200,
+    "close": 1791919772
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131200EPREV",
+    "tickers": [
+     "KXCS2GAME-26OCT131200EPREV-EP",
+     "KXCS2GAME-26OCT131200EPREV-REV"
+    ],
+    "S": 1791907200,
+    "close": 1791911385
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131430UNKKSM",
+    "tickers": [
+     "KXCS2GAME-26OCT131430UNKKSM-KSM",
+     "KXCS2GAME-26OCT131430UNKKSM-UNK"
+    ],
+    "S": 1791916200,
+    "close": 1791927004
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131200HACPRO",
+    "tickers": [
+     "KXCS2GAME-26OCT131200HACPRO-HAC",
+     "KXCS2GAME-26OCT131200HACPRO-PRO"
+    ],
+    "S": 1791907200,
+    "close": 1791913789
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT131800SUKEYOU",
+    "tickers": [
+     "KXCS2GAME-26OCT131800SUKEYOU-SUKE",
+     "KXCS2GAME-26OCT131800SUKEYOU-YOU"
+    ],
+    "S": 1791928800,
+    "close": 1791931183
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT131700GLSEXK",
+    "tickers": [
+     "KXCS2GAME-26OCT131700GLSEXK-EXK",
+     "KXCS2GAME-26OCT131700GLSEXK-GLS"
+    ],
+    "S": 1791925200,
+    "close": 1791936000
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT140400LAVGOT",
+    "tickers": [
+     "KXCS2GAME-26OCT140400LAVGOT-GOT",
+     "KXCS2GAME-26OCT140400LAVGOT-LAV"
+    ],
+    "S": 1791964800,
+    "close": 1791986993
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT140400B8AENJOY",
+    "tickers": [
+     "KXCS2GAME-26OCT140400B8AENJOY-B8A",
+     "KXCS2GAME-26OCT140400B8AENJOY-ENJOY"
+    ],
+    "S": 1791964800,
+    "close": 1791974983
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT140400SKRCTR",
+    "tickers": [
+     "KXCS2GAME-26OCT140400SKRCTR-CTR",
+     "KXCS2GAME-26OCT140400SKRCTR-SKR"
+    ],
+    "S": 1791964800,
+    "close": 1792033761
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT140400UNKG1",
+    "tickers": [
+     "KXCS2GAME-26OCT140400UNKG1-G1",
+     "KXCS2GAME-26OCT140400UNKG1-UNK"
+    ],
+    "S": 1791964800,
+    "close": 1791976784
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT140900REABK",
+    "tickers": [
+     "KXCS2GAME-26OCT140900REABK-BK",
+     "KXCS2GAME-26OCT140900REABK-REA"
+    ],
+    "S": 1791982800,
+    "close": 1791989980
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT140900AELVG",
+    "tickers": [
+     "KXCS2GAME-26OCT140900AELVG-AE",
+     "KXCS2GAME-26OCT140900AELVG-LVG"
+    ],
+    "S": 1791982800,
+    "close": 1791994790
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT141300VITAHON",
+    "tickers": [
+     "KXCS2GAME-26OCT141300VITAHON-HON",
+     "KXCS2GAME-26OCT141300VITAHON-VITA"
+    ],
+    "S": 1791997200,
+    "close": 1792037162
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT141300EXRBLA",
+    "tickers": [
+     "KXCS2GAME-26OCT141300EXRBLA-BLA",
+     "KXCS2GAME-26OCT141300EXRBLA-EXR"
+    ],
+    "S": 1791997200,
+    "close": 1792007382
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT141330OLDMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT141330OLDMOR-MOR",
+     "KXCS2GAME-26OCT141330OLDMOR-OLD"
+    ],
+    "S": 1791999000,
+    "close": 1792033299
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT141315BTFNTR",
+    "tickers": [
+     "KXCS2GAME-26OCT141315BTFNTR-BTF",
+     "KXCS2GAME-26OCT141315BTFNTR-NTR"
+    ],
+    "S": 1791998100,
+    "close": 1792005602
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT150400VITAVPF3",
+    "tickers": [
+     "KXCS2GAME-26OCT150400VITAVPF3-VITA",
+     "KXCS2GAME-26OCT150400VITAVPF3-VPF3"
+    ],
+    "S": 1792051200,
+    "close": 1792077599
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT150400EACWBTACADEMY",
+    "tickers": [
+     "KXCS2GAME-26OCT150400EACWBTACADEMY-EAC",
+     "KXCS2GAME-26OCT150400EACWBTACADEMY-WBTACADEMY"
+    ],
+    "S": 1792051200,
+    "close": 1792057181
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT150600WALBLA",
+    "tickers": [
+     "KXCS2GAME-26OCT150600WALBLA-BLA",
+     "KXCS2GAME-26OCT150600WALBLA-WAL"
+    ],
+    "S": 1792058400,
+    "close": 1792088076
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT150600BCGMIBR",
+    "tickers": [
+     "KXCS2GAME-26OCT150600BCGMIBR-BCG",
+     "KXCS2GAME-26OCT150600BCGMIBR-MIBR"
+    ],
+    "S": 1792058400,
+    "close": 1792071585
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT150700MELWAL",
+    "tickers": [
+     "KXCS2GAME-26OCT150700MELWAL-MEL",
+     "KXCS2GAME-26OCT150700MELWAL-WAL"
+    ],
+    "S": 1792062000,
+    "close": 1792088192
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT150700FAL9Z",
+    "tickers": [
+     "KXCS2GAME-26OCT150700FAL9Z-9Z",
+     "KXCS2GAME-26OCT150700FAL9Z-FAL"
+    ],
+    "S": 1792062000,
+    "close": 1792075196
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT150900BKGRE",
+    "tickers": [
+     "KXCS2GAME-26OCT150900BKGRE-BK",
+     "KXCS2GAME-26OCT150900BKGRE-GRE"
+    ],
+    "S": 1792069200,
+    "close": 1792088245
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT150930BBPRV",
+    "tickers": [
+     "KXCS2GAME-26OCT150930BBPRV-BB",
+     "KXCS2GAME-26OCT150930BBPRV-PRV"
+    ],
+    "S": 1792071000,
+    "close": 1792089000
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT150900JSBW",
+    "tickers": [
+     "KXCS2GAME-26OCT150900JSBW-BW",
+     "KXCS2GAME-26OCT150900JSBW-JS"
+    ],
+    "S": 1792069200,
+    "close": 1792077599
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT150800ENCEWBTACADEMY",
+    "tickers": [
+     "KXCS2GAME-26OCT150800ENCEWBTACADEMY-ENCE",
+     "KXCS2GAME-26OCT150800ENCEWBTACADEMY-WBTACADEMY"
+    ],
+    "S": 1792065600,
+    "close": 1792071585
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151300SKRGOT",
+    "tickers": [
+     "KXCS2GAME-26OCT151300SKRGOT-GOT",
+     "KXCS2GAME-26OCT151300SKRGOT-SKR"
+    ],
+    "S": 1792083600,
+    "close": 1792086600
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151300FIRFRT",
+    "tickers": [
+     "KXCS2GAME-26OCT151300FIRFRT-FIR",
+     "KXCS2GAME-26OCT151300FIRFRT-FRT"
+    ],
+    "S": 1792083600,
+    "close": 1792087214
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151300WALUNITY",
+    "tickers": [
+     "KXCS2GAME-26OCT151300WALUNITY-UNITY",
+     "KXCS2GAME-26OCT151300WALUNITY-WAL"
+    ],
+    "S": 1792083600,
+    "close": 1792086599
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151300SSINSWRA",
+    "tickers": [
+     "KXCS2GAME-26OCT151300SSINSWRA-SSINS",
+     "KXCS2GAME-26OCT151300SSINSWRA-WRA"
+    ],
+    "S": 1792083600,
+    "close": 1792090822
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430AGRAIM",
+    "tickers": [
+     "KXCS2GAME-26OCT151430AGRAIM-AGR",
+     "KXCS2GAME-26OCT151430AGRAIM-AIM"
+    ],
+    "S": 1792089000,
+    "close": 1792100247
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151430EPZOTIX",
+    "tickers": [
+     "KXCS2GAME-26OCT151430EPZOTIX-EP",
+     "KXCS2GAME-26OCT151430EPZOTIX-ZOTIX"
+    ],
+    "S": 1792089000,
+    "close": 1792094990
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430ANTDON",
+    "tickers": [
+     "KXCS2GAME-26OCT151430ANTDON-ANT",
+     "KXCS2GAME-26OCT151430ANTDON-DON"
+    ],
+    "S": 1792089000,
+    "close": 1792098600
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151430FALREV",
+    "tickers": [
+     "KXCS2GAME-26OCT151430FALREV-FAL",
+     "KXCS2GAME-26OCT151430FALREV-REV"
+    ],
+    "S": 1792089000,
+    "close": 1792091380
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430EXGLI",
+    "tickers": [
+     "KXCS2GAME-26OCT151430EXGLI-EX",
+     "KXCS2GAME-26OCT151430EXGLI-GLI"
+    ],
+    "S": 1792089000,
+    "close": 1792098599
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151430PHACRYV",
+    "tickers": [
+     "KXCS2GAME-26OCT151430PHACRYV-PHAC",
+     "KXCS2GAME-26OCT151430PHACRYV-RYV"
+    ],
+    "S": 1792089000,
+    "close": 1792092598
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430LKFIRE",
+    "tickers": [
+     "KXCS2GAME-26OCT151430LKFIRE-FIRE",
+     "KXCS2GAME-26OCT151430LKFIRE-LK"
+    ],
+    "S": 1792089000,
+    "close": 1792092022
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151400ENCEEAC",
+    "tickers": [
+     "KXCS2GAME-26OCT151400ENCEEAC-EAC",
+     "KXCS2GAME-26OCT151400ENCEEAC-ENCE"
+    ],
+    "S": 1792087200,
+    "close": 1792089582
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430NEWNOT",
+    "tickers": [
+     "KXCS2GAME-26OCT151430NEWNOT-NEW",
+     "KXCS2GAME-26OCT151430NEWNOT-NOT"
+    ],
+    "S": 1792089000,
+    "close": 1792099623
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151400IMAINN",
+    "tickers": [
+     "KXCS2GAME-26OCT151400IMAINN-IMA",
+     "KXCS2GAME-26OCT151400IMAINN-INN"
+    ],
+    "S": 1792087200,
+    "close": 1792090822
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430TAXHON",
+    "tickers": [
+     "KXCS2GAME-26OCT151430TAXHON-HON",
+     "KXCS2GAME-26OCT151430TAXHON-TAX"
+    ],
+    "S": 1792089000,
+    "close": 1792099548
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151500DXEPG",
+    "tickers": [
+     "KXCS2GAME-26OCT151500DXEPG-DXE",
+     "KXCS2GAME-26OCT151500DXEPG-PG"
+    ],
+    "S": 1792090800,
+    "close": 1792096183
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT151430WNTGAM",
+    "tickers": [
+     "KXCS2GAME-26OCT151430WNTGAM-GAM",
+     "KXCS2GAME-26OCT151430WNTGAM-WNT"
+    ],
+    "S": 1792089000,
+    "close": 1792112885
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT151500HACMAR",
+    "tickers": [
+     "KXCS2GAME-26OCT151500HACMAR-HAC",
+     "KXCS2GAME-26OCT151500HACMAR-MAR"
+    ],
+    "S": 1792090800,
+    "close": 1792099187
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT160400RGGCW",
+    "tickers": [
+     "KXCS2GAME-26OCT160400RGGCW-CW",
+     "KXCS2GAME-26OCT160400RGGCW-RGG"
+    ],
+    "S": 1792137600,
+    "close": 1792162187
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT160400APOGEEEF",
+    "tickers": [
+     "KXCS2GAME-26OCT160400APOGEEEF-APOGEE",
+     "KXCS2GAME-26OCT160400APOGEEEF-EF"
+    ],
+    "S": 1792137600,
+    "close": 1792150808
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT160400WALBRUTE",
+    "tickers": [
+     "KXCS2GAME-26OCT160400WALBRUTE-BRUTE",
+     "KXCS2GAME-26OCT160400WALBRUTE-WAL"
+    ],
+    "S": 1792137600,
+    "close": 1792166790
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT160400BLAILL",
+    "tickers": [
+     "KXCS2GAME-26OCT160400BLAILL-BLA",
+     "KXCS2GAME-26OCT160400BLAILL-ILL"
+    ],
+    "S": 1792137600,
+    "close": 1792147788
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT160630THESTA",
+    "tickers": [
+     "KXCS2GAME-26OCT160630THESTA-STA",
+     "KXCS2GAME-26OCT160630THESTA-THE"
+    ],
+    "S": 1792146600,
+    "close": 1792174928
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT160630BRESKR",
+    "tickers": [
+     "KXCS2GAME-26OCT160630BRESKR-BRE",
+     "KXCS2GAME-26OCT160630BRESKR-SKR"
+    ],
+    "S": 1792146600,
+    "close": 1792151982
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT160700EXRBW",
+    "tickers": [
+     "KXCS2GAME-26OCT160700EXRBW-BW",
+     "KXCS2GAME-26OCT160700EXRBW-EXR"
+    ],
+    "S": 1792148400,
+    "close": 1792161594
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT160700HEROFNC",
+    "tickers": [
+     "KXCS2GAME-26OCT160700HEROFNC-FNC",
+     "KXCS2GAME-26OCT160700HEROFNC-HERO"
+    ],
+    "S": 1792148400,
+    "close": 1792156177
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT161430LPHDNK",
+    "tickers": [
+     "KXCS2GAME-26OCT161430LPHDNK-DNK",
+     "KXCS2GAME-26OCT161430LPHDNK-LPH"
+    ],
+    "S": 1792175400,
+    "close": 1792174464
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT161400HAVUPHA",
+    "tickers": [
+     "KXCS2GAME-26OCT161400HAVUPHA-HAVU",
+     "KXCS2GAME-26OCT161400HAVUPHA-PHA"
+    ],
+    "S": 1792173600,
+    "close": 1792168790
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT161800REAREDA",
+    "tickers": [
+     "KXCS2GAME-26OCT161800REAREDA-REA",
+     "KXCS2GAME-26OCT161800REAREDA-REDA"
+    ],
+    "S": 1792188000,
+    "close": 1792203548
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT161700XCIQUA",
+    "tickers": [
+     "KXCS2GAME-26OCT161700XCIQUA-QUA",
+     "KXCS2GAME-26OCT161700XCIQUA-XCI"
+    ],
+    "S": 1792184400,
+    "close": 1792189777
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT170730BLANTR",
+    "tickers": [
+     "KXCS2GAME-26OCT170730BLANTR-BLA",
+     "KXCS2GAME-26OCT170730BLANTR-NTR"
+    ],
+    "S": 1792236600,
+    "close": 1792253269
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT170700100TMIBR",
+    "tickers": [
+     "KXCS2GAME-26OCT170700100TMIBR-100T",
+     "KXCS2GAME-26OCT170700100TMIBR-MIBR"
+    ],
+    "S": 1792234800,
+    "close": 1792249721
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT171000GOTBW",
+    "tickers": [
+     "KXCS2GAME-26OCT171000GOTBW-BW",
+     "KXCS2GAME-26OCT171000GOTBW-GOT"
+    ],
+    "S": 1792245600,
+    "close": 1792248550
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT171000100THERO",
+    "tickers": [
+     "KXCS2GAME-26OCT171000100THERO-100T",
+     "KXCS2GAME-26OCT171000100THERO-HERO"
+    ],
+    "S": 1792245600,
+    "close": 1792256403
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT171300WALTLR",
+    "tickers": [
+     "KXCS2GAME-26OCT171300WALTLR-TLR",
+     "KXCS2GAME-26OCT171300WALTLR-WAL"
+    ],
+    "S": 1792256400,
+    "close": 1792272678
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT171300ANTMEL",
+    "tickers": [
+     "KXCS2GAME-26OCT171300ANTMEL-ANT",
+     "KXCS2GAME-26OCT171300ANTMEL-MEL"
+    ],
+    "S": 1792256400,
+    "close": 1792262991
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT171500SUKEGRE",
+    "tickers": [
+     "KXCS2GAME-26OCT171500SUKEGRE-GRE",
+     "KXCS2GAME-26OCT171500SUKEGRE-SUKE"
+    ],
+    "S": 1792263600,
+    "close": 1792276507
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT171300BBFAL",
+    "tickers": [
+     "KXCS2GAME-26OCT171300BBFAL-BB",
+     "KXCS2GAME-26OCT171300BBFAL-FAL"
+    ],
+    "S": 1792256400,
+    "close": 1792269585
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT171500WRAYUB",
+    "tickers": [
+     "KXCS2GAME-26OCT171500WRAYUB-WRA",
+     "KXCS2GAME-26OCT171500WRAYUB-YUB"
+    ],
+    "S": 1792263600,
+    "close": 1792265456
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT171300EXRBBL",
+    "tickers": [
+     "KXCS2GAME-26OCT171300EXRBBL-BBL",
+     "KXCS2GAME-26OCT171300EXRBBL-EXR"
+    ],
+    "S": 1792256400,
+    "close": 1792267185
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT171800LNHAC",
+    "tickers": [
+     "KXCS2GAME-26OCT171800LNHAC-HAC",
+     "KXCS2GAME-26OCT171800LNHAC-LN"
+    ],
+    "S": 1792274400,
+    "close": 1792269586
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT171300FIREBAKS",
+    "tickers": [
+     "KXCS2GAME-26OCT171300FIREBAKS-BAKS",
+     "KXCS2GAME-26OCT171300FIREBAKS-FIRE"
+    ],
+    "S": 1792256400,
+    "close": 1792264451
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT180400PSNAEK",
+    "tickers": [
+     "KXCS2GAME-26OCT180400PSNAEK-EK",
+     "KXCS2GAME-26OCT180400PSNAEK-PSNA"
+    ],
+    "S": 1792310400,
+    "close": 1792344574
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT180400EACEVPF3",
+    "tickers": [
+     "KXCS2GAME-26OCT180400EACEVPF3-EACE",
+     "KXCS2GAME-26OCT180400EACEVPF3-VPF3"
+    ],
+    "S": 1792310400,
+    "close": 1792320590
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT180630SKRCW",
+    "tickers": [
+     "KXCS2GAME-26OCT180630SKRCW-CW",
+     "KXCS2GAME-26OCT180630SKRCW-SKR"
+    ],
+    "S": 1792319400,
+    "close": 1792344573
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT180630REVWON",
+    "tickers": [
+     "KXCS2GAME-26OCT180630REVWON-REV",
+     "KXCS2GAME-26OCT180630REVWON-WON"
+    ],
+    "S": 1792319400,
+    "close": 1792331397
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT180700JUSWAL",
+    "tickers": [
+     "KXCS2GAME-26OCT180700JUSWAL-JUS",
+     "KXCS2GAME-26OCT180700JUSWAL-WAL"
+    ],
+    "S": 1792321200,
+    "close": 1792342808
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT180700ILLEXR",
+    "tickers": [
+     "KXCS2GAME-26OCT180700ILLEXR-EXR",
+     "KXCS2GAME-26OCT180700ILLEXR-ILL"
+    ],
+    "S": 1792321200,
+    "close": 1792328396
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT180900EXEFACTR",
+    "tickers": [
+     "KXCS2GAME-26OCT180900EXEFACTR-CTR",
+     "KXCS2GAME-26OCT180900EXEFACTR-EXEFA"
+    ],
+    "S": 1792328400,
+    "close": 1792329473
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT180945PGEX",
+    "tickers": [
+     "KXCS2GAME-26OCT180945PGEX-EX",
+     "KXCS2GAME-26OCT180945PGEX-PG"
+    ],
+    "S": 1792331100,
+    "close": 1792338589
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT180900REAJDT",
+    "tickers": [
+     "KXCS2GAME-26OCT180900REAJDT-JDT",
+     "KXCS2GAME-26OCT180900REAJDT-REA"
+    ],
+    "S": 1792328400,
+    "close": 1792344572
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT180945PHACANT",
+    "tickers": [
+     "KXCS2GAME-26OCT180945PHACANT-ANT",
+     "KXCS2GAME-26OCT180945PHACANT-PHAC"
+    ],
+    "S": 1792331100,
+    "close": 1792338589
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT181000BRECTR",
+    "tickers": [
+     "KXCS2GAME-26OCT181000BRECTR-BRE",
+     "KXCS2GAME-26OCT181000BRECTR-CTR"
+    ],
+    "S": 1792332000,
+    "close": 1792419460
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT181000LAVUPG",
+    "tickers": [
+     "KXCS2GAME-26OCT181000LAVUPG-LAV",
+     "KXCS2GAME-26OCT181000LAVUPG-UPG"
+    ],
+    "S": 1792332000,
+    "close": 1792339778
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT190700NOIREV",
+    "tickers": [
+     "KXCS2GAME-26OCT190700NOIREV-NOI",
+     "KXCS2GAME-26OCT190700NOIREV-REV"
+    ],
+    "S": 1792407600,
+    "close": 1792424409
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT190700BAKSBLA",
+    "tickers": [
+     "KXCS2GAME-26OCT190700BAKSBLA-BAKS",
+     "KXCS2GAME-26OCT190700BAKSBLA-BLA"
+    ],
+    "S": 1792407600,
+    "close": 1792424576
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT190700PGEX",
+    "tickers": [
+     "KXCS2GAME-26OCT190700PGEX-EX",
+     "KXCS2GAME-26OCT190700PGEX-PG"
+    ],
+    "S": 1792407600,
+    "close": 1792414806
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT190700HONBBP",
+    "tickers": [
+     "KXCS2GAME-26OCT190700HONBBP-BBP",
+     "KXCS2GAME-26OCT190700HONBBP-HON"
+    ],
+    "S": 1792407600,
+    "close": 1792415989
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT190945RYVLK",
+    "tickers": [
+     "KXCS2GAME-26OCT190945RYVLK-LK",
+     "KXCS2GAME-26OCT190945RYVLK-RYV"
+    ],
+    "S": 1792417500,
+    "close": 1792434678
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT190945INSAIM",
+    "tickers": [
+     "KXCS2GAME-26OCT190945INSAIM-AIM",
+     "KXCS2GAME-26OCT190945INSAIM-INS"
+    ],
+    "S": 1792417500,
+    "close": 1792429226
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT191200SSPREV",
+    "tickers": [
+     "KXCS2GAME-26OCT191200SSPREV-REV",
+     "KXCS2GAME-26OCT191200SSPREV-SSP"
+    ],
+    "S": 1792425600,
+    "close": 1792446263
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT191200MSCLL",
+    "tickers": [
+     "KXCS2GAME-26OCT191200MSCLL-LL",
+     "KXCS2GAME-26OCT191200MSCLL-MSC"
+    ],
+    "S": 1792425600,
+    "close": 1792435786
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT191400NEWTCF",
+    "tickers": [
+     "KXCS2GAME-26OCT191400NEWTCF-NEW",
+     "KXCS2GAME-26OCT191400NEWTCF-TCF"
+    ],
+    "S": 1792432800,
+    "close": 1792436315
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT191400BLUENT",
+    "tickers": [
+     "KXCS2GAME-26OCT191400BLUENT-BLU",
+     "KXCS2GAME-26OCT191400BLUENT-ENT"
+    ],
+    "S": 1792432800,
+    "close": 1792609197
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT191500ALEREA",
+    "tickers": [
+     "KXCS2GAME-26OCT191500ALEREA-ALE",
+     "KXCS2GAME-26OCT191500ALEREA-REA"
+    ],
+    "S": 1792436400,
+    "close": 1792436343
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT191500EACELL",
+    "tickers": [
+     "KXCS2GAME-26OCT191500EACELL-EACE",
+     "KXCS2GAME-26OCT191500EACELL-LL"
+    ],
+    "S": 1792436400,
+    "close": 1792440018
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT191500BSTAMEI",
+    "tickers": [
+     "KXCS2GAME-26OCT191500BSTAMEI-BSTA",
+     "KXCS2GAME-26OCT191500BSTAMEI-MEI"
+    ],
+    "S": 1792436400,
+    "close": 1792436085
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT191500HACRUS",
+    "tickers": [
+     "KXCS2GAME-26OCT191500HACRUS-HAC",
+     "KXCS2GAME-26OCT191500HACRUS-RUS"
+    ],
+    "S": 1792436400,
+    "close": 1792439391
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT200100RAAE",
+    "tickers": [
+     "KXCS2GAME-26OCT200100RAAE-AE",
+     "KXCS2GAME-26OCT200100RAAE-RA"
+    ],
+    "S": 1792472400,
+    "close": 1792474179
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT192300MORLVG",
+    "tickers": [
+     "KXCS2GAME-26OCT192300MORLVG-LVG",
+     "KXCS2GAME-26OCT192300MORLVG-MOR"
+    ],
+    "S": 1792465200,
+    "close": 1792474788
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT200630THEENCEP",
+    "tickers": [
+     "KXCS2GAME-26OCT200630THEENCEP-ENCEP",
+     "KXCS2GAME-26OCT200630THEENCEP-THE"
+    ],
+    "S": 1792492200,
+    "close": 1792446183
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT200700BCGBBL",
+    "tickers": [
+     "KXCS2GAME-26OCT200700BCGBBL-BBL",
+     "KXCS2GAME-26OCT200700BCGBBL-BCG"
+    ],
+    "S": 1792494000,
+    "close": 1792499994
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT200700BMBFAZE",
+    "tickers": [
+     "KXCS2GAME-26OCT200700BMBFAZE-BMB",
+     "KXCS2GAME-26OCT200700BMBFAZE-FAZE"
+    ],
+    "S": 1792494000,
+    "close": 1792521227
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT200700CWRGG",
+    "tickers": [
+     "KXCS2GAME-26OCT200700CWRGG-CW",
+     "KXCS2GAME-26OCT200700CWRGG-RGG"
+    ],
+    "S": 1792494000,
+    "close": 1792504212
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT200700NXSENVY",
+    "tickers": [
+     "KXCS2GAME-26OCT200700NXSENVY-ENVY",
+     "KXCS2GAME-26OCT200700NXSENVY-NXS"
+    ],
+    "S": 1792494000,
+    "close": 1792521318
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT200700FORZEREXZ",
+    "tickers": [
+     "KXCS2GAME-26OCT200700FORZEREXZ-EXZ",
+     "KXCS2GAME-26OCT200700FORZEREXZ-FORZER"
+    ],
+    "S": 1792494000,
+    "close": 1792509619
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201000ASTLG",
+    "tickers": [
+     "KXCS2GAME-26OCT201000ASTLG-AST",
+     "KXCS2GAME-26OCT201000ASTLG-LG"
+    ],
+    "S": 1792504800,
+    "close": 1792520680
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201000HSHERO",
+    "tickers": [
+     "KXCS2GAME-26OCT201000HSHERO-HERO",
+     "KXCS2GAME-26OCT201000HSHERO-HS"
+    ],
+    "S": 1792504800,
+    "close": 1792512028
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201000BAKSMEL",
+    "tickers": [
+     "KXCS2GAME-26OCT201000BAKSMEL-BAKS",
+     "KXCS2GAME-26OCT201000BAKSMEL-MEL"
+    ],
+    "S": 1792504800,
+    "close": 1792519504
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201000ISJJH",
+    "tickers": [
+     "KXCS2GAME-26OCT201000ISJJH-IS",
+     "KXCS2GAME-26OCT201000ISJJH-JJH"
+    ],
+    "S": 1792504800,
+    "close": 1792520424
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201300DMDUC",
+    "tickers": [
+     "KXCS2GAME-26OCT201300DMDUC-DM",
+     "KXCS2GAME-26OCT201300DMDUC-DUC"
+    ],
+    "S": 1792515600,
+    "close": 1792616054
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201300DNKDIN",
+    "tickers": [
+     "KXCS2GAME-26OCT201300DNKDIN-DIN",
+     "KXCS2GAME-26OCT201300DNKDIN-DNK"
+    ],
+    "S": 1792515600,
+    "close": 1792520425
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201300XCITYNEW",
+    "tickers": [
+     "KXCS2GAME-26OCT201300XCITYNEW-NEW",
+     "KXCS2GAME-26OCT201300XCITYNEW-XCITY"
+    ],
+    "S": 1792515600,
+    "close": 1792519217
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201300EXLAV",
+    "tickers": [
+     "KXCS2GAME-26OCT201300EXLAV-EX",
+     "KXCS2GAME-26OCT201300EXLAV-LAV"
+    ],
+    "S": 1792515600,
+    "close": 1792526991
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430DONNEW",
+    "tickers": [
+     "KXCS2GAME-26OCT201430DONNEW-DON",
+     "KXCS2GAME-26OCT201430DONNEW-NEW"
+    ],
+    "S": 1792521000,
+    "close": 1792528138
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430ESBLK",
+    "tickers": [
+     "KXCS2GAME-26OCT201430ESBLK-ESB",
+     "KXCS2GAME-26OCT201430ESBLK-LK"
+    ],
+    "S": 1792521000,
+    "close": 1792522201
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430FIREOLD",
+    "tickers": [
+     "KXCS2GAME-26OCT201430FIREOLD-FIRE",
+     "KXCS2GAME-26OCT201430FIREOLD-OLD"
+    ],
+    "S": 1792521000,
+    "close": 1792519577
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430FRTALA",
+    "tickers": [
+     "KXCS2GAME-26OCT201430FRTALA-ALA",
+     "KXCS2GAME-26OCT201430FRTALA-FRT"
+    ],
+    "S": 1792521000,
+    "close": 1792524002
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430HECOLD",
+    "tickers": [
+     "KXCS2GAME-26OCT201430HECOLD-HEC",
+     "KXCS2GAME-26OCT201430HECOLD-OLD"
+    ],
+    "S": 1792521000,
+    "close": 1792519614
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430GAMMAY",
+    "tickers": [
+     "KXCS2GAME-26OCT201430GAMMAY-GAM",
+     "KXCS2GAME-26OCT201430GAMMAY-MAY"
+    ],
+    "S": 1792521000,
+    "close": 1792524599
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430OTAIM",
+    "tickers": [
+     "KXCS2GAME-26OCT201430OTAIM-AIM",
+     "KXCS2GAME-26OCT201430OTAIM-OT"
+    ],
+    "S": 1792521000,
+    "close": 1792528184
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430INNAGR",
+    "tickers": [
+     "KXCS2GAME-26OCT201430INNAGR-AGR",
+     "KXCS2GAME-26OCT201430INNAGR-INN"
+    ],
+    "S": 1792521000,
+    "close": 1792524002
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430PENMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT201430PENMOR-MOR",
+     "KXCS2GAME-26OCT201430PENMOR-PEN"
+    ],
+    "S": 1792521000,
+    "close": 1792528262
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430MENMTX",
+    "tickers": [
+     "KXCS2GAME-26OCT201430MENMTX-MEN",
+     "KXCS2GAME-26OCT201430MENMTX-MTX"
+    ],
+    "S": 1792521000,
+    "close": 1792524599
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430PHACLPH",
+    "tickers": [
+     "KXCS2GAME-26OCT201430PHACLPH-LPH",
+     "KXCS2GAME-26OCT201430PHACLPH-PHAC"
+    ],
+    "S": 1792521000,
+    "close": 1792519653
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201430PGREV",
+    "tickers": [
+     "KXCS2GAME-26OCT201430PGREV-PG",
+     "KXCS2GAME-26OCT201430PGREV-REV"
+    ],
+    "S": 1792521000,
+    "close": 1792523400
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430RYVSHU",
+    "tickers": [
+     "KXCS2GAME-26OCT201430RYVSHU-RYV",
+     "KXCS2GAME-26OCT201430RYVSHU-SHU"
+    ],
+    "S": 1792521000,
+    "close": 1792524005
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201440ISAST",
+    "tickers": [
+     "KXCS2GAME-26OCT201440ISAST-AST",
+     "KXCS2GAME-26OCT201440ISAST-IS"
+    ],
+    "S": 1792521600,
+    "close": 1792530586
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430TGBOJ",
+    "tickers": [
+     "KXCS2GAME-26OCT201430TGBOJ-BOJ",
+     "KXCS2GAME-26OCT201430TGBOJ-TG"
+    ],
+    "S": 1792521000,
+    "close": 1792524004
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201455LGBBL",
+    "tickers": [
+     "KXCS2GAME-26OCT201455LGBBL-BBL",
+     "KXCS2GAME-26OCT201455LGBBL-LG"
+    ],
+    "S": 1792522500,
+    "close": 1792528788
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430TTGTCF",
+    "tickers": [
+     "KXCS2GAME-26OCT201430TTGTCF-TCF",
+     "KXCS2GAME-26OCT201430TTGTCF-TTG"
+    ],
+    "S": 1792521000,
+    "close": 1792519669
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201400FIRB8A",
+    "tickers": [
+     "KXCS2GAME-26OCT201400FIRB8A-B8A",
+     "KXCS2GAME-26OCT201400FIRB8A-FIR"
+    ],
+    "S": 1792519200,
+    "close": 1792522812
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT201430ZOTIXANT",
+    "tickers": [
+     "KXCS2GAME-26OCT201430ZOTIXANT-ANT",
+     "KXCS2GAME-26OCT201430ZOTIXANT-ZOTIX"
+    ],
+    "S": 1792521000,
+    "close": 1792524004
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT201400PRVFNC",
+    "tickers": [
+     "KXCS2GAME-26OCT201400PRVFNC-FNC",
+     "KXCS2GAME-26OCT201400PRVFNC-PRV"
+    ],
+    "S": 1792519200,
+    "close": 1792528787
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT202300MORAE",
+    "tickers": [
+     "KXCS2GAME-26OCT202300MORAE-AE",
+     "KXCS2GAME-26OCT202300MORAE-MOR"
+    ],
+    "S": 1792551600,
+    "close": 1792553388
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT210100VAWXM",
+    "tickers": [
+     "KXCS2GAME-26OCT210100VAWXM-VA",
+     "KXCS2GAME-26OCT210100VAWXM-WXM"
+    ],
+    "S": 1792558800,
+    "close": 1792565392
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT210900DMG1",
+    "tickers": [
+     "KXCS2GAME-26OCT210900DMG1-DM",
+     "KXCS2GAME-26OCT210900DMG1-G1"
+    ],
+    "S": 1792587600,
+    "close": 1792608400
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT2109004MMEL",
+    "tickers": [
+     "KXCS2GAME-26OCT2109004MMEL-4M",
+     "KXCS2GAME-26OCT2109004MMEL-MEL"
+    ],
+    "S": 1792587600,
+    "close": 1792598409
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT210945EXMOR",
+    "tickers": [
+     "KXCS2GAME-26OCT210945EXMOR-EX",
+     "KXCS2GAME-26OCT210945EXMOR-MOR"
+    ],
+    "S": 1792590300,
+    "close": 1792599965
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT210945TITNOI",
+    "tickers": [
+     "KXCS2GAME-26OCT210945TITNOI-NOI",
+     "KXCS2GAME-26OCT210945TITNOI-TIT"
+    ],
+    "S": 1792590300,
+    "close": 1792587005
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT211200HUSKLEI",
+    "tickers": [
+     "KXCS2GAME-26OCT211200HUSKLEI-HUSK",
+     "KXCS2GAME-26OCT211200HUSKLEI-LEI"
+    ],
+    "S": 1792598400,
+    "close": 1792445968
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT211200MARJDT",
+    "tickers": [
+     "KXCS2GAME-26OCT211200MARJDT-JDT",
+     "KXCS2GAME-26OCT211200MARJDT-MAR"
+    ],
+    "S": 1792598400,
+    "close": 1792607985
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT211300SSINSWAL",
+    "tickers": [
+     "KXCS2GAME-26OCT211300SSINSWAL-SSINS",
+     "KXCS2GAME-26OCT211300SSINSWAL-WAL"
+    ],
+    "S": 1792602000,
+    "close": 1792607391
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT211300ACESTLR",
+    "tickers": [
+     "KXCS2GAME-26OCT211300ACESTLR-ACES",
+     "KXCS2GAME-26OCT211300ACESTLR-TLR"
+    ],
+    "S": 1792602000,
+    "close": 1792608597
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT211300TCFDON",
+    "tickers": [
+     "KXCS2GAME-26OCT211300TCFDON-DON",
+     "KXCS2GAME-26OCT211300TCFDON-TCF"
+    ],
+    "S": 1792602000,
+    "close": 1792611080
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT211300AGRDNK",
+    "tickers": [
+     "KXCS2GAME-26OCT211300AGRDNK-AGR",
+     "KXCS2GAME-26OCT211300AGRDNK-DNK"
+    ],
+    "S": 1792602000,
+    "close": 1792611586
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT220900LKSKR",
+    "tickers": [
+     "KXCS2GAME-26OCT220900LKSKR-LK",
+     "KXCS2GAME-26OCT220900LKSKR-SKR"
+    ],
+    "S": 1792674000,
+    "close": 1792690897
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT220900ACESCS",
+    "tickers": [
+     "KXCS2GAME-26OCT220900ACESCS-ACES",
+     "KXCS2GAME-26OCT220900ACESCS-CS"
+    ],
+    "S": 1792674000,
+    "close": 1792685993
+   }
+  },
+  {
+   "void": {
+    "event": "KXCS2GAME-26OCT221430DNKDON",
+    "tickers": [
+     "KXCS2GAME-26OCT221430DNKDON-DNK",
+     "KXCS2GAME-26OCT221430DNKDON-DON"
+    ],
+    "S": 1792693800,
+    "close": 1792697972
+   },
+   "played": {
+    "event": "KXCS2GAME-26OCT221430INNPG",
+    "tickers": [
+     "KXCS2GAME-26OCT221430INNPG-INN",
+     "KXCS2GAME-26OCT221430INNPG-PG"
+    ],
+    "S": 1792693800,
+    "close": 1792697979
+   }
+  }
+ ]
+}
