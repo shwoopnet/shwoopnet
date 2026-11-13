@@ -130,3 +130,15 @@ The web reader this desk may use will not reproduce a statement's full text or a
    - No recorder, loop or script touches the Board's site.
    - No statement dated 2026-06-17 or later is opened.
    - The table is committed, citing the Board of Governors of the Federal Reserve System as the source, before the candle job is built.
+
+## Clarification 5 (Nov 13, 2026, 05:40Z, after the Chief of Staff's probe)
+
+The probe answered two questions:
+- The exchange's historical cutoff for settled markets is 2026-09-13T00:00:00Z, so every development meeting is only on `/historical/markets`.
+- The `event_ticker` filter IS honoured there: KXFEDMENTION-26MAR returned a market of that event.
+
+The route is therefore per-event, and no held-out row is ever pulled. `jobs/FOMCTEXT_LISTS.json` is retired. It is replaced by:
+- **`jobs/FOMCTEXT_HIST_A.json`:** one `/historical/markets` request per development KXFEDMENTION event, with `event_ticker` and `limit` only. The tickers are derived from the confirmed pattern KXFEDMENTION-YYMON, for the 11 development months: 2025 JAN, MAR, MAY, JUN, JUL, SEP, OCT, DEC; 2026 JAN, MAR, APR. It uses limit 1000 with 2 pages, so no list ends on a cursor: 22 pages at most, cap 25. **An empty answer means a wrong guess, not an empty meeting.**
+- **`jobs/FOMCTEXT_EVENTS.json` (stage 0):** `/events` lists of the four series with `with_nested_markets=false`, returning event tickers, titles and dates only. An event object carries no market result. It exists to name the development press-conference events of KXPOWELLMENTION, KXJPOWMENTION and KXWARSHMENTION. A per-event job for those is written from its answer. 12 pages at most, cap 15.
+
+No event dated 2026-06-17 or later is requested by any FOMCTEXT job.

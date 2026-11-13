@@ -1,6 +1,6 @@
 {
  "job_id": "FOMCTEXT_LISTS",
- "status": "active",
+ "status": "retired",
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
  "purpose": "FOMCTEXT stage 1 (Idea Desk C): settled lists of the four Fed mention series, live and historical, to name the strike tickers of each FOMC press conference; tickers and times only. Owner MAIN: the runner lists no Desk C.",
@@ -78,7 +78,7 @@
    "max_pages": 2
   }
  ],
- "notes": "RULE (h) BOUND: every request is a live /markets list with max_close_ts 1781654399 (2026-06-16T23:59:59Z, one second before the held-out cut) and min_close_ts 1735689600 (2025-01-01T00:00:00Z); the development pull ends before the held-out cut by the job's own date bounds, and there are no /historical/markets requests (they cannot be date bounded). 8 pages at most (4 series, 2 pages each), cap 10. If these live lists do not hold all eleven development meetings, the older ones come from a separate HELDOUT_ pull on the Head of R&D's go with an audited splitter; that job is not written. Stage 2 candles are built from this answer for development meetings only. Slow family: 8 events a year, paper list at most.",
+ "notes": "WITHDRAWN Nov 13, 2026 (Head of R&D, 02:29Z): the live list holds only markets closed after the exchange cutoff (2026-09-13), so it would return no development meeting. Replaced by FOMCTEXT_HIST_A and FOMCTEXT_EVENTS. RULE (h) BOUND: every request is a live /markets list with max_close_ts 1781654399 (2026-06-16T23:59:59Z, one second before the held-out cut) and min_close_ts 1735689600 (2025-01-01T00:00:00Z); the development pull ends before the held-out cut by the job's own date bounds, and there are no /historical/markets requests (they cannot be date bounded). 8 pages at most (4 series, 2 pages each), cap 10. If these live lists do not hold all eleven development meetings, the older ones come from a separate HELDOUT_ pull on the Head of R&D's go with an audited splitter; that job is not written. Stage 2 candles are built from this answer for development meetings only. Slow family: 8 events a year, paper list at most.",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "pacing_seconds": 1.0,

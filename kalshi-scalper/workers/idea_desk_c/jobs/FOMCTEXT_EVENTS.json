@@ -1,0 +1,80 @@
+{
+ "job_id": "FOMCTEXT_EVENTS",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/idea_desk_c/FOMCTEXT_CARD.md",
+ "purpose": "FOMCTEXT stage 0 (Idea Desk C): /events lists of four Fed mention series WITHOUT nested markets, for event tickers, titles and dates only, to name the development press-conference events. Owner MAIN.",
+ "heldout": "FOMCTEXT_CARD.md: an event object carries no market result; held-out events may appear by ticker, title and date only, and no market of theirs is requested by any FOMCTEXT job",
+ "allowed_endpoints": [
+  {
+   "name": "events_list",
+   "method": "GET",
+   "path_pattern": "/events",
+   "params_allowed": [
+    "series_ticker",
+    "limit",
+    "cursor",
+    "with_nested_markets"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXFEDMENTION",
+  "KXPOWELLMENTION",
+  "KXJPOWMENTION",
+  "KXWARSHMENTION"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 15,
+ "requests": [
+  {
+   "id": "events_KXFEDMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXFEDMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "events_KXPOWELLMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXPOWELLMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "events_KXJPOWMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXJPOWMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "max_pages": 3
+  },
+  {
+   "id": "events_KXWARSHMENTION",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXWARSHMENTION",
+    "limit": 200,
+    "with_nested_markets": "false"
+   },
+   "max_pages": 3
+  }
+ ],
+ "notes": "Event lists only, with_nested_markets=false, so no market price or result is returned. 4 series, at most 3 pages of 200 each (12 pages), cap 15. Used only to write a per-event /historical/markets job for development events of KXPOWELLMENTION, KXJPOWMENTION and KXWARSHMENTION (the KXFEDMENTION development events are in FOMCTEXT_HIST_A by pattern). If the runner does not allow /events, the Chief of Staff adds it; nothing here is denied by DENY_PATH.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
