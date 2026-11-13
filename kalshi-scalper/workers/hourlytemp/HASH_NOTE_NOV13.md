@@ -5,7 +5,7 @@ A cost and timing MEASUREMENT, zero tries. No list or candle of these series has
 | File | sha256 |
 |---|---|
 | `hourlytemp/hourlytemp.py` (commands `job`, `measure`) | `f443ae6016209dffd2113c552d67fa3dd3750d9ec0e5a7abb39ca224a24c9970` |
-| `HOURLYTEMP_MEASUREMENT_NOTE.md` (amendments 1 and 2) | `f5cf6af9e4c5c004c0028238e665e42560d06d60a5421032d9ba9d47ec59deb5` |
+| `HOURLYTEMP_MEASUREMENT_NOTE.md` (amendments 1, 2 and 3; amendment 3 is text only, after the second build) | `3e496e1266d41551afe3710eb98a927bd0c5b45eadd5e771d81297518dca2091` |
 | `hourlytemp/fixture_outputs/make_fixtures_MADE_UP_DATA.py` | `2dc43128f4a5a810b475800a37dfaa79ad5d92ebd39d2a409451c7e9344b7264` |
 | `hourlytemp/INPUT_LAYOUT.md` (for the second builder; no figures) | `5eb4fdb8c74ddd9391eb94d7622a6150e2814144054a5775b1c1a802e3b54768` |
 
@@ -40,3 +40,7 @@ My printed lines on each are in `hourlytemp/fixture_outputs/`; the inputs, under
 3. The size line is a single list copy of markets open at the pull, not of the sampled week.
 4. If an hour has more than 100 strikes across the four cities, or two hours do not fit one request and the count passes 110, the builder writes nothing and the count goes to the Head of R&D; nothing is dropped to fit.
 5. The lists job allows three pages of 1,000 a series. A series with more than 3,000 settled markets in the seven days ends on a cursor and the builder writes nothing.
+
+## Second build (Testing Desk), Nov 13
+
+Built from the note only (commit a7b2a5fc on `claude/testing-desk`, `testing/hourlytemp_second.py`), printed before comparing. On the fifteen made-up cases: 1,848 figures compared across the seven measured cases, 2 differences (one point: whether a candle showing an empty book counts as a strike "with a quote"); all twelve-median lines, trade shares, pooled sizes and verdicts the same; the seven refusal and stop cases the same; the builder's request count differed on one case (the packing rule was not written down). Amendment 3 fixes the three wordings to the audited reader, by the Head's ruling; the reader's hash did not change. Note before amendment 3: f5cf6af9...; Auditor B's CLEAN was given on that note and this reader, with the structure-check gate on every landed run.
