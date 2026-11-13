@@ -194,9 +194,9 @@ def stats(rows):
 def check_candle_runs(spec, list_folders, candle_folders):
     """Auditor B F4: refuse unless every candle folder is a COMPLETE run whose embedded job requests equal the ones built from these lists, the folders together cover every request, and every request was answered whole (status 200, not truncated, a file).
     -> (answered, asked)."""
+    for f in candle_folders: k.refuse_heldout(f)          # standing rule (h): the guard before any file of any folder is opened
     jc, _ = build_candles(spec, list_folders); want = {r["id"]: (r["path"], r["params"]) for r in jc["requests"]}; seen = {}
     for f in candle_folders:
-        k.refuse_heldout(f)          # standing rule (h): the guard before any file of the folder is opened
         m = json.load(open(os.path.join(f, "manifest.json")))
         if m.get("status") != "complete" or not isinstance(m.get("job"), dict): raise SystemExit("refused: %s is not a complete candle run with its job" % f)
         for r in m["job"].get("requests", []):
