@@ -41,11 +41,25 @@ class Refuse(Exception):
     pass
 
 
+CANCELLED = ("2026-11-13T0641Z_43380391762", "43380391762")  # Main's cancelled run, a partial folder: never used, by name
+NUMBERED = re.compile(r"\d{4}\.json(\.gz)?")
+
+
+def is_cancelled(path):
+    return any(c in path for c in CANCELLED)
+
+
 def find_runs(root):
+    """Run folders = folders holding manifest.json. G4 (Amendment 6 era): the cancelled run is excluded by name wherever
+    it sits; any other folder that holds numbered answer files or a STATUS file but no manifest.json is REFUSED."""
     out = []
     for d, _, files in os.walk(root):
+        if is_cancelled(d):
+            continue
         if "manifest.json" in files:
             out.append(d)
+        elif "STATUS" in files or any(NUMBERED.fullmatch(f) for f in files):
+            raise Refuse("run folder without a manifest: %s" % d)
     return sorted(out, key=lambda p: (os.path.basename(p), p))
 
 
@@ -67,6 +81,9 @@ def row_of(c):
     return [c["end_period_ts"], g("yes_ask"), g("yes_bid"), g("price"), c.get("volume_fp") or c.get("volume")]
 
 
+USED = []
+
+
 def collect(runs, parts):
     """answers {id: (run, row)}; last_ok {part: latest run's STATUS is complete}."""
     answers = {}
@@ -77,6 +94,7 @@ def collect(runs, parts):
         part = base_job((man.get("job") or {}).get("job_id"))
         if part not in parts:
             continue
+        USED.append(run)
         try:
             with open(os.path.join(run, "STATUS")) as f:
                 last_status[part] = f.read().strip()
@@ -128,7 +146,15 @@ def convert(runs_dir, out_dir, job_paths, meta_path, held_path):
             reqs[r["id"]] = r
     n = len(reqs)
     runs = find_runs(runs_dir)
+    del USED[:]
     answers, last = collect(runs, parts)
+    inputs = []
+    for run in USED:
+        with open(os.path.join(run, "manifest.json"), "rb") as f:
+            inputs.append({"run": os.path.relpath(run, runs_dir), "manifest_sha256": hashlib.sha256(f.read()).hexdigest()})
+    print("INPUT RUN FOLDERS USED (%d), each with its manifest sha256 (the cancelled run %s is excluded by name):" % (len(inputs), CANCELLED[0]))
+    for i in inputs:
+        print("  %s  %s" % (i["manifest_sha256"], i["run"]))
     verify(answers)
     ok_status = all(last.get(p) == "complete" for p in parts)
     if len(answers) < n or not ok_status:
@@ -163,7 +189,7 @@ def convert(runs_dir, out_dir, job_paths, meta_path, held_path):
         f.write("\n".join(json.dumps(j) for j in keep) + ("\n" if keep else ""))
     with open(os.path.join(out_dir, "POLAPPR1_INPUTS.json"), "w") as f:
         json.dump({"requests": n, "parts": sorted(parts), "held_sha256": held_sha, "held_rows": held_n, "new_rows": len(new), "rows_kept": len(keep),
-                   "rows_dropped_heldout": len(rows) - len(keep)}, f)
+                   "rows_dropped_heldout": len(rows) - len(keep), "run_folders_used": inputs}, f)
     with open(os.path.join(out_dir, MARKER), "w") as f:
         f.write(str(n))
     print("pull complete: %d of %d answered; marker %s written" % (n, n, MARKER))

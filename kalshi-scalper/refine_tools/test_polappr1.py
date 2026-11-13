@@ -152,6 +152,24 @@ class T(unittest.TestCase):
         self.assertEqual(rows[0]["c"][0], [rows[0]["ct"] - 86400 - 3600, "0.3000", "0.2800", None, "1.00"])
         self.assertEqual(json.load(open(os.path.join(self.out, "POLAPPR1_INPUTS.json")))["rows_dropped_heldout"], 2)
 
+    def test_cancelled_run_is_excluded_by_name(self):
+        self.full()
+        ids = {r["id"] for r in self.p1["requests"]}
+        mkrun(self.runs, "POLAPPR1_CANDLES", self.p1, ids, "stopped_429", folder="2026-11-13T0641Z_43380391762")
+        self.assertTrue(self.conv())
+        used = json.load(open(os.path.join(self.out, "POLAPPR1_INPUTS.json")))["run_folders_used"]
+        self.assertTrue(used)
+        self.assertFalse(any("43380391762" in u["run"] for u in used))
+        self.assertTrue(all(len(u["manifest_sha256"]) == 64 for u in used))
+
+    def test_folder_without_manifest_is_refused(self):
+        self.full()
+        d = os.path.join(self.runs, "POLAPPR1_CANDLES", "2026-11-13T0900Z_1")
+        os.makedirs(d)
+        open(os.path.join(d, "0001.json.gz"), "wb").write(b"x")
+        with self.assertRaises(C.Refuse):
+            self.conv()
+
     def test_second_part_of_other_job_is_ignored(self):
         mkrun(self.runs, "POLAPPR1_CANDLES", self.p1, {r["id"] for r in self.p1["requests"]}, "complete")
         mkrun(self.runs, "SOMETHING_ELSE", self.p2, {r["id"] for r in self.p2["requests"]}, "complete")
