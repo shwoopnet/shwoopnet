@@ -31,3 +31,13 @@ Every "or less" and "or more" on a registered line uses a tolerance of 1e-9 (as 
 | Testing Desk `breakplay.py`, `mapbreak.py`, `polcost.py`, `poli2_count.py` (c7fa2934) | No raw comparison on a registered price, spread, gap, cost or share line. `breakplay.py` line 106 compares a parsed bid with 0.90 directly (safe: no arithmetic). Lines 335 to 337, the profit factor bars of the rule step, are raw; the Head's standing rule covers them (a verdict figure within 0.001 of its bar is recomputed in exact whole cents by both builds). |
 | History Miner `esoctie.py` (sha256 `ce1e9030...`, NOTE 11) | Reported fixed by its author and audited CLEAN by Auditor B; not re-scanned here. |
 | Forensics `wheel0.py` | Left frozen by the Head's ruling; the exact-cents rule is a dated line in `wheel0/WHEEL0_PRECONDITION.md`. |
+
+## Three scorers frozen on the night of Nov 12 to 13 (scan at about 01:55Z, on the Head's order)
+
+`cmpscan.py` lists every comparison; each listed line was then read by eye.
+
+| File (sha256) | Finding |
+|---|---|
+| Desk B `voidsnap/voidsnap.py` (`c176146b...`) | CLEAN. Every registered comparison carries 1e-9: frozen within 2c (line 272), under 10 contracts (274), 10c under (278, 293), spread 4c (293), the 15c to 64c band (294), within 1c and 3c (354, 355), the 70% and 30% lines (380). Raw comparisons left are on parsed quotes (`0 < bid < ask < 1`, line 231), whole counts and times. |
+| Desk B `polgap/polgaph.py` (`9186c8b5...`) | CLEAN on every registered line: steady 1c (231), band (233), spread (235), 200 contracts (238), the 2c and 5c gaps (269, 281), nearest 50c and its tie (274, 279, 297), the fill test (444, 445), the cost kill (419), the profit factor lines (393), the half-of-net test (489). TWO NOTES, neither on a verdict line: (1) lines 360 and 365 count a win or a loss as a cash result above or below zero with no tolerance; this is the known information-only difference on the "voids paid at settlement value" line (the Head's ruling of 01:48Z: a sentence, no hash change); no registered booking can produce a zero result. (2) line 352 counts a minute request as holding the 07:01 minute when `start <= 07:01:00 <= end`; my build needs `start < 07:01:00`. They differ only for a request that STARTS exactly at 07:01:00, which neither Desk B's job shape (start 07:00:00) nor any fixture has. |
+| History Miner `candlegap/candlegap.py` (`a7178688...`) | CLEAN. The candle-against-book test is `abs(difference) <= 0.0101`, a tolerance by design (lines 139). The YES ask is `round(1 - NO bid, 4)`, so the "top of book changed" test (119) and "bid under ask" (122) compare rounded values. The rest are times and counts. |

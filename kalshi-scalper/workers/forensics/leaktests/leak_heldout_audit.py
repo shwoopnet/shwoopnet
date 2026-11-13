@@ -7,6 +7,7 @@ CONTROL: each target is first run on the ordinary folder; if it opens nothing th
 The folders hold one made-up market; no real data.
 usage: python3 -I leak_heldout_audit.py <testing|miner|deska|deskb> <path to that desk's workers folder (testing: workers/testing; miner: workers/history_miner; deska and deskb: workers)>
        deska takes two more: <INPLAYJUMP_SERIES.json> <the Testing Desk's workers/testing folder (for scorekit)>
+       python3 -I leak_heldout_audit.py frozen <Desk B's workers folder> <the History Miner's workers/history_miner folder>      (added 2026-11-13: voidsnap.py, polgaph.py, candlegap.py)
 """
 import sys, os, json, gzip, tempfile, subprocess, importlib, importlib.util, shutil
 
@@ -38,13 +39,43 @@ def line(name, verdict, detail=""):
     res.append(verdict); print("%-78s %-9s %s" % (name, verdict, detail))
 
 
+def extra_rows(d):
+    """added 2026-11-13 for the scorers frozen that night, so their control runs open real answer files and not only the manifest: made-up CS2 match rows (one void event,
+    one played), a made-up politics market, one-minute and hourly candle answers, and the wheel book recorder's run-folder files. Nothing real."""
+    import csv
+    def cs2(ev, a, b, res):
+        return [{"ticker": "%s-%s" % (ev, t), "event_ticker": ev, "close_time": "2026-10-20T18:00:00Z", "open_time": "2026-10-19T12:00:00Z", "result": r, "settlement_value_dollars": v, "status": "finalized"}
+                for t, r, v in ((a, res[0], res[2]), (b, res[1], res[3]))]
+    live = cs2("KXCS2GAME-26OCT201200AAABBB", "AAA", "BBB", ("scalar", "scalar", "0.5500", "0.4500")) + cs2("KXCS2GAME-26OCT201200CCCDDD", "CCC", "DDD", ("yes", "no", "1.0000", "0.0000"))
+    hist = cs2("KXCS2GAME-26SEP011200EEEFFF", "EEE", "FFF", ("scalar", "scalar", "0.5000", "0.5000"))
+    pol = [{"ticker": "KXEPSTEIN-26OCT20-Q1", "event_ticker": "KXEPSTEIN-26OCT20", "close_time": "2026-10-20T18:00:00Z", "open_time": "2026-10-10T12:00:00Z", "result": "no", "settlement_value_dollars": "0.0000", "status": "finalized"}]
+    S = 1792512000; cd = lambda ts: {"end_period_ts": ts, "volume_fp": "5.00", "yes_bid": {"close_dollars": "0.4000"}, "yes_ask": {"close_dollars": "0.4200"}}
+    tks = [m["ticker"] for m in live]
+    files = [("live_KXCS2GAME", "/markets", {"series_ticker": "KXCS2GAME", "status": "settled"}, {"markets": live}), ("hist_KXCS2GAME", "/markets", {"series_ticker": "KXCS2GAME"}, {"markets": hist}),
+             ("set_KXEPSTEIN", "/markets", {"series_ticker": "KXEPSTEIN", "status": "settled"}, {"markets": pol}),
+             ("v001", "/markets/candlesticks", {"market_tickers": ",".join(tks), "start_ts": S - 11100, "end_ts": S + 28800, "period_interval": 1}, {"markets": [{"market_ticker": t, "candlesticks": [cd(S - 600), cd(S + 3660)]} for t in tks]}),
+             ("h001", "/markets/candlesticks", {"market_tickers": pol[0]["ticker"], "start_ts": S - 864000, "end_ts": S, "period_interval": 60}, {"markets": [{"market_ticker": pol[0]["ticker"], "candlesticks": [cd(S - 7200), cd(S - 3600)]}]})]
+    rows = []
+    for n, (rid, path, params, body) in enumerate(files, 2):
+        name = "%04d.json.gz" % n; gzip.open(os.path.join(d, name), "wt").write(json.dumps(body))
+        rows.append({"id": rid, "status": 200, "file": name, "path": path, "params": params, "truncated": False})
+    def w(name, cols, data):
+        with gzip.open(os.path.join(d, name), "wt", newline="") as f: c = csv.writer(f); c.writerow(cols); c.writerows(data)
+    w("coverage.csv.gz", ["series", "ticker", "first_seen_ms"], [["KXCS2GAME", tks[0], str(S * 1000)]])
+    bc = ["t_recv_ms", "ticker", "yes_bid_px_1", "no_bid_px_1"]
+    w("book_fast.csv.gz", bc, [[str(S * 1000 + 3000), tks[0], "0.4000", "0.5800"]]); w("book_slow.csv.gz", bc, []); w("polls.csv.gz", ["t_recv_ms", "tier"], [[str(S * 1000 + 3000), "fast"]])
+    os.makedirs(os.path.join(d, "answers"), exist_ok=True); gzip.open(os.path.join(d, "answers", "0001.json.gz"), "wt").write(json.dumps({"markets": live}))
+    json.dump({"files": [{"path": "/markets", "file": "0001.json.gz"}]}, open(os.path.join(d, "answers", "manifest.json"), "w"))
+    return rows
+
+
 def make(d):
     os.makedirs(d, exist_ok=True)
     mk = {"ticker": "KXESOCCERGAME-26OCT251200ZZZ-TIE", "event_ticker": "KXESOCCERGAME-26OCT251200ZZZ", "close_time": "2026-10-20T16:20:00Z", "open_time": "2026-10-20T15:00:00Z", "result": "yes",
           "market_ticker": "KXESOCCERGAME-26OCT251200ZZZ-TIE", "candlesticks": [{"end_period_ts": 1792943940, "yes_bid": {"close_dollars": "0.2000"}, "yes_ask": {"close_dollars": "0.2200"}}]}
     gzip.open(os.path.join(d, "0001.json.gz"), "wt").write(json.dumps({"markets": [mk]}))
     json.dump({"job": {"job_id": "X", "requests": [{"id": "r1", "path": "/markets", "params": {"series_ticker": "KXESOCCERGAME"}}]},
-               "rows": [{"id": "r1", "status": 200, "file": "0001.json.gz", "path": "/markets", "params": {"series_ticker": "KXESOCCERGAME"}}], "requests_sent": 1}, open(os.path.join(d, "manifest.json"), "w"))
+               "rows": [{"id": "r1", "status": 200, "file": "0001.json.gz", "path": "/markets", "params": {"series_ticker": "KXESOCCERGAME"}}] + extra_rows(d), "requests_sent": 1}, open(os.path.join(d, "manifest.json"), "w"))
 
 
 tmp = tempfile.mkdtemp(prefix="ha_"); held = os.path.join(tmp, "HELDOUT_X"); make(held); make(os.path.join(held, "part1")); os.symlink(held, os.path.join(tmp, "innocent"))
@@ -184,6 +215,22 @@ elif kind == "miner":
         for f in sorted(fs):
             if f.endswith(".py") and f not in ("esoctie.py", "scorekit.py") and not f.startswith("test_") and "manifest.json" in open(os.path.join(dp, f), errors="replace").read():
                 script_target("History Miner script %s" % os.path.relpath(os.path.join(dp, f), root), os.path.join(dp, f), ["H"])
+elif kind == "frozen":
+    # the three scorers frozen on the night of Nov 12 to 13 that had no leak test: Desk B's voidsnap.py and polgaph.py, the History Miner's candlegap.py. Every folder argument of
+    # every command that takes one. The files a command needs beside its folders (a sample file, a decisions file) are made first by the scorer's own command on the ordinary folder.
+    miner = os.path.abspath(sys.argv[3]); VS = os.path.join(root, "voidsnap", "voidsnap.py"); PG = os.path.join(root, "polgap", "polgaph.py"); CG = os.path.join(miner, "candlegap", "candlegap.py")
+    import hashlib
+    for f in (VS, PG, CG): print("target %s sha256 %s" % (os.path.relpath(f, os.path.dirname(root)) if f != CG else os.path.relpath(f, os.path.dirname(miner)), hashlib.sha256(open(f, "rb").read()).hexdigest()[:16]))
+    smp = os.path.join(tmp, "sample.json"); dec = os.path.join(tmp, "dec.json")
+    r1 = subprocess.run([sys.executable, "-I", VS, "sample", ordinary, smp], capture_output=True, text=True, cwd=tmp)
+    r2 = subprocess.run([sys.executable, "-I", PG, "decide", ordinary, ordinary, dec], capture_output=True, text=True, cwd=tmp)
+    print("helper files made by the scorers' own commands on the ordinary folder: sample.json %s, dec.json %s" % ("yes" if os.path.exists(smp) else "NO (" + r1.stderr[-90:].replace("\n", " ") + ")", "yes" if os.path.exists(dec) else "NO (" + r2.stderr[-90:].replace("\n", " ") + ")"))
+    script_target("VOIDSNAP voidsnap.py sample <lists> <out>", VS, ["sample", "H", os.path.join(outdir, "s.json")])
+    script_target("VOIDSNAP voidsnap.py measure <lists> <candles> <sample>", VS, ["measure", "H", "H", smp])
+    script_target("POLGAPH polgaph.py hourly-job <lists> <out>", PG, ["hourly-job", "H", os.path.join(outdir, "hj.json")])
+    script_target("POLGAPH polgaph.py decide <lists> <hourly> <out>", PG, ["decide", "H", "H", os.path.join(outdir, "d.json")])
+    script_target("POLGAPH polgaph.py score <lists> <hourly> <minute> <decisions>", PG, ["score", "H", "H", "H", dec])
+    script_target("CANDLEGAP candlegap.py <recorder run> <pull>", CG, ["H", "H"])
 elif kind == "deskb":
     R = os.path.join(root, "rematch"); pairs = os.path.join(tmp, "pairs.json"); json.dump([], open(pairs, "w"))
     script_target("REMATCH stage 1 rematch/build_stage1_job.py <lists> <out>", os.path.join(R, "build_stage1_job.py"), ["H", outdir])
