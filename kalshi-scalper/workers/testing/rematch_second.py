@@ -15,6 +15,7 @@ MONTHS = {m.upper(): i for i, m in enumerate(calendar.month_abbr) if m}
 SLICE_FROM, SLICE_TO = calendar.timegm((2026, 10, 15, 0, 0, 0)), calendar.timegm((2026, 10, 23, 0, 0, 0))
 DEV_FROM = calendar.timegm((2026, 10, 8, 0, 0, 0))            # Amendment 5: the series began 2026-10-08 (the registered constant is 2026-09-12; nothing earlier exists)
 TOL = 1e-9
+SLICE_A_IN_SLICE = True          # variant under test: both matches of a pair close inside the stage 1 slice
 FLOOR = 300
 AMBIGUITIES = [
     "1. Slice membership: a PAIR is in the stage 1 slice when the LATER match B's market closes in [2026-10-15, 2026-10-23); the earlier match A may be earlier (Oct 8 on).",
@@ -82,14 +83,15 @@ def stage1(list_folders, candle_folders):
     # pairs by schedule
     pairs = {}
     for m in ms.values(): pairs.setdefault(frozenset(m["codes"]), []).append(m)
-    F = {k_: 0 for k_ in ("pairs_by_schedule_B_in_slice", "earlier_has_a_winner", "earlier_closed_300s_before_decision", "earlier_close_missing", "loser_two_sided_at_reference", "loser_ref_spread_le_4c", "two_sided_at_decision",
-                          "state_true_fall_5c_or_more", "entries", "placebo_pool_move_under_2c", "placebo_entries", "dropped_no_candle", "one_sided_at_reference", "one_sided_at_decision", "one_sided_at_entry", "earlier_winner_missing_or_tie")}
+    F = {k_: 0 for k_ in ("pairs_by_schedule_B_in_slice", "earlier_has_a_winner", "earlier_closed_300s_before_decision", "earlier_close_missing", "reference_no_candle", "reference_one_sided", "reference_two_sided", "reference_two_sided_spread_le_4c", "decision_no_candle", "decision_one_sided", "two_sided_at_decision",
+                          "state_true_fall_5c_or_more", "entries", "placebo_pool_move_under_2c", "placebo_entries", "entry_no_candle", "one_sided_at_entry", "earlier_winner_missing_or_tie")}
     instants = {"exact": 0, "carried": 0}; costs_all, costs_exact = [], []; tradeable = 0
     for key, lst in pairs.items():
         if len(key) != 2: continue
         lst.sort(key=lambda m: (m["S"], m["event"]))
         for A, B in zip(lst, lst[1:]):
             if not (B["close"] is not None and SLICE_FROM <= B["close"] < SLICE_TO): continue
+            if SLICE_A_IN_SLICE and not (A["close"] is not None and SLICE_FROM <= A["close"] < SLICE_TO): F["pairs_dropped_A_outside_slice"] = F.get("pairs_dropped_A_outside_slice", 0) + 1; continue
             if not (20 * 60 - TOL <= B["S"] - A["S"] <= 120 * 60 + TOL): continue
             F["pairs_by_schedule_B_in_slice"] += 1
             dec = B["S"] - 6 * 60
@@ -104,18 +106,22 @@ def stage1(list_folders, candle_folders):
             lt = B["codes"].get(loser)
             if lt is None: continue
             q_ref = quote(idx, lt, A["S"] - 2 * 60); q_dec = quote(idx, lt, dec); q_ent = quote(idx, lt, B["S"] - 5 * 60)
-            if q_ref[0] == "no_candle" or q_dec[0] == "no_candle": F["dropped_no_candle"] += 1; continue
-            if q_ref[0] == "one_sided": F["one_sided_at_reference"] += 1; continue
-            F["loser_two_sided_at_reference"] += 1
-            if q_ref[2] - q_ref[1] <= 0.04 + TOL: F["loser_ref_spread_le_4c"] += 1; tradeable += 1
-            if q_dec[0] == "one_sided": F["one_sided_at_decision"] += 1; continue
+            if q_ref[0] == "no_candle":
+                F["reference_no_candle"] += 1
+                if idx.get(lt): F["of_which_reference_no_candle_but_a_candle_anywhere_in_the_pulled_window"] = F.get("of_which_reference_no_candle_but_a_candle_anywhere_in_the_pulled_window", 0) + 1
+                continue
+            if q_ref[0] == "one_sided": F["reference_one_sided"] += 1; continue
+            F["reference_two_sided"] += 1
+            if q_ref[2] - q_ref[1] <= 0.04 + TOL: F["reference_two_sided_spread_le_4c"] += 1; tradeable += 1
+            if q_dec[0] == "no_candle": F["decision_no_candle"] += 1; continue
+            if q_dec[0] == "one_sided": F["decision_one_sided"] += 1; continue
             F["two_sided_at_decision"] += 1
             fall = (q_ref[1] + q_ref[2]) / 2 - (q_dec[1] + q_dec[2]) / 2
             state = fall >= 0.05 - TOL; placebo = abs(fall) < 0.02 - TOL
             if state: F["state_true_fall_5c_or_more"] += 1
             if placebo: F["placebo_pool_move_under_2c"] += 1
             if not (state or placebo): continue
-            if q_ent[0] == "no_candle": F["dropped_no_candle"] += 1; continue
+            if q_ent[0] == "no_candle": F["entry_no_candle"] += 1; continue
             if q_ent[0] == "one_sided": F["one_sided_at_entry"] += 1; continue
             _, b, a, ex = q_ent
             if not (0.20 - TOL <= a <= 0.80 + TOL and a - b <= 0.04 + TOL): continue

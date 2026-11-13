@@ -39,7 +39,7 @@ def build(n_pairs=12, fall=0.07, ent_ask=0.45, ent_bid=0.43, a_close_gap=720, a_
 
 L, C = build(); r = R.stage1([L], [C]); F = r["funnel"]
 assert r["counts_first"]["start_check_passes_80_percent"] and r["counts_first"]["matches_in_the_slice"] == 24, r["counts_first"]
-assert F["pairs_by_schedule_B_in_slice"] == 12 and F["earlier_has_a_winner"] == 12 and F["earlier_closed_300s_before_decision"] == 12 and F["loser_two_sided_at_reference"] == 12 and F["state_true_fall_5c_or_more"] == 12 and F["entries"] == 12, F
+assert F["pairs_by_schedule_B_in_slice"] == 12 and F["earlier_has_a_winner"] == 12 and F["earlier_closed_300s_before_decision"] == 12 and F["reference_two_sided"] == 12 and F["state_true_fall_5c_or_more"] == 12 and F["entries"] == 12, F
 assert r["instants_read"] == {"exact": 36, "carried": 0}, r["instants_read"]
 cost = 0.01 + R.fee_up(0.46); assert abs(r["one_way_cost_median_all_quotes"] - round(cost, 4)) < 1e-9 and r["cost_over_4c"] is False and r["bets_floor_300_passes"] is False        # 12 entries x 15/8 is far under 300
 # a fall of exactly 5c counts; 4.99c does not; a move under 2c is the placebo pool
