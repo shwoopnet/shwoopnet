@@ -16,6 +16,8 @@ assert s.decide(0.18, 0.21, 0.9)[0] is not None and s.decide(0.18, 0.22, 0.9)[0]
 assert s.decide(0.29, 0.30, 0.9)[0] is not None and s.decide(0.30, 0.31, 0.9)[0] is None
 assert s.decide(0.04, 0.05, 0.9)[0] is not None and s.decide(0.03, 0.04, 0.9)[0] is None
 assert s.decide(None, 0.2, 0.9)[0] is None
+assert s.decide(0.91, 0.90, 0.9)[1] == "crossed or locked quote" and s.decide(0.90, 0.90, 0.9)[1] == "crossed or locked quote"          # crossed and locked
+assert s.decide(0.89, 0.91, 0.9)[0] is None and s.decide(0.89, 0.91, 0.9)[1] != "crossed or locked quote"
 # --- futures_signal: alternating changes +a / -a: sd_1m = a*sqrt(10/9), sd = sd_1m*sqrt(119/60) ---
 A = 0.0005; SD = A * math.sqrt(10 / 9) * math.sqrt(119 / 60)
 def mk_bars(C, z, iid=1, open_iid=None, drop_open=False, drop=()):
@@ -36,6 +38,12 @@ b = mk_bars(C0, 1.0, drop=(7, 8, 9, 10)); assert s.futures_signal(C0, b)[0] is N
 b = mk_bars(C0, 1.0, drop=(6, 7, 8, 9, 10)); assert s.futures_signal(C0, b)[0].startswith("fewer than 6")          # 5 changes
 flat = {C0 - 180 - 60 * j: (1, 100.0) for j in range(11)}; flat[C0 - 960] = (1, 100.0)
 assert s.futures_signal(C0, flat)[0] == "sd zero"
+mixed = mk_bars(C0, 1.0)
+for j in (1, 2, 3, 4, 5): mixed[C0 - 180 - 60 * j] = (2, mixed[C0 - 180 - 60 * j][1])          # five bars on another instrument id: only 4 pairs left on F_now's id
+assert s.futures_signal(C0, mixed)[0].startswith("fewer than 6")
+mixed = mk_bars(C0, 1.0); mixed[C0 - 180 - 60 * 3] = (2, mixed[C0 - 180 - 60 * 3][1]); assert s.futures_signal(C0, mixed)[0] is None          # one bar: 8 pairs left
+try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "", "event": "e"}}, {}, {}); assert 0
+except SystemExit as e: assert "empty result" in str(e)
 amb = mk_bars(C0, 1.0); amb[C0 - 180] = s.AMBIG; assert s.futures_signal(C0, amb)[0] == "ambiguous bar"
 
 # --- end to end on an invented run layout ---
@@ -56,7 +64,9 @@ W = [("W1", T(15, 0), 1.0, .90, .91, "no", {}),          # NO ask .10, chance(NO
      ("W6", T(16, 15), 1.0, .90, .91, "no", {"open_iid": 2}),         # roll
      ("W7", T(16, 30), 1.0, .90, .91, "no", {"nocandle": True}),      # no decision candle
      ("W8", T(16, 45), 1.0, .90, .94, "no", {}),         # YES spread 4c
-     ("W9", T(15, 0, (2026, 12, 1)), 1.0, .90, .91, "no", {}),         # closes on the held-out start: never read in dev
+     ("W9", T(17, 0), 1.0, .49, .51, "yes", {}),         # tie (YES ask .51 = NO ask .51), counted, ask outside the band: no trade
+     ("W10", T(17, 15), 1.0, .91, .90, "no", {}),        # crossed quote: no quote, counted
+     ("W11", T(15, 0, (2026, 12, 1)), 1.0, .90, .91, "no", {}),         # closes on the held-out start: never read in dev
      ("X1", T(15, 0, (2026, 11, 6)), 1.0, .90, .91, "no", {"series": "KXBTC15M"})]       # another series: ignored entirely
 with tempfile.TemporaryDirectory() as t:
     mrows, crows, bars = [], [], {}
@@ -74,16 +84,18 @@ with tempfile.TemporaryDirectory() as t:
             iid, c = bars[ts]; w.writerow([iso(ts).replace("Z", ".000000000Z"), 33, 1, iid, c, c, c, c, 10])
     o = s.dev_read([lists], [cands], es)
     g = o["gate0_counts"]
-    assert g["windows_listed"] == 9 and g["not_in_range_not_read"] == 1 and g["traded"] == 3 and g["void"] == 1, g
-    assert g["edge under 5c"] == 1 and g["spread above 3c"] == 1 and g["no F_open bar"] == 1 and g["roll (instrument id differs)"] == 1 and g["no_decision_candle"] == 1 and g["no_trade_signal"] == 2, g
+    assert g["windows_listed"] == 11 and g["ties_yes_ask_equals_no_ask"] == 1 and g["crossed or locked quote"] == 1 and g["cheap side outside 0.05 to 0.30"] == 1 and g["not_in_range_not_read"] == 1 and g["traded"] == 3 and g["void"] == 1, g
+    assert g["edge under 5c"] == 1 and g["spread above 3c"] == 1 and g["no F_open bar"] == 1 and g["roll (instrument id differs)"] == 1 and g["no_decision_candle"] == 1 and g["no_trade_signal"] == 4, g
     f = lambda p: 0.07 * p * (1 - p)
-    nets = [0.9 - f(0.1), -0.1 - f(0.1), -f(0.1)]          # 0.8937, -0.1063, -0.0063
-    assert o["traded"] == 3 and abs(o["unrounded_fee"]["net"] - round(sum(nets), 4)) < 1e-9
-    assert o["unrounded_fee"]["pf"] == round(nets[0] / (-nets[1] - nets[2]), 3), o["unrounded_fee"]          # 7.937
-    assert o["fee_rounded_up_per_order"]["net"] == round(0.89 - 0.11 - 0.01, 4) and o["fee_rounded_up_per_order"]["pf"] == round(0.89 / 0.12, 3), o["fee_rounded_up_per_order"]
+    unr = [0.9 - f(0.1), -0.1 - f(0.1), -f(0.1)]          # information only: 0.8937, -0.1063, -0.0063
+    gov = o["GOVERNING_fee_rounded_up_per_order"]
+    assert o["traded"] == 3 and gov["net"] == round(0.89 - 0.11 - 0.01, 4) == 0.77 and gov["pf"] == round(0.89 / 0.12, 3) == 7.417 and gov["mean"] == round(0.77 / 3, 5), gov
+    inf = o["INFORMATION_ONLY_unrounded_fee"]; assert abs(inf["net"] - round(sum(unr), 4)) < 1e-9 and inf["pf"] == round(unr[0] / (-unr[1] - unr[2]), 3) == 7.937, inf
+    assert o["scorekit_governing"]["all"] == gov and o["constants"]["tolerance"] == 1e-9 and "rounded UP" in o["constants"]["fee_governing"] and list(o)[0] == "constants"
     assert abs(o["win_rate"] - 0.3333) < 1e-9 and abs(o["mean_price_paid"] - 0.1) < 1e-9
-    assert o["kill_flags"]["fewer_than_150_traded"] and not o["kill_flags"]["cash_pf_under_1_at_n_100_plus"]
-    assert o["scorekit"]["label"] == "no evidence at n = 3", o["scorekit"]["label"]
+    th = o["date_thirds_governing"]; assert [x["n"] for x in th] == [1, 1, 1] and [x["net"] for x in th] == [0.89, -0.11, -0.01], th          # closes 15:00, 15:15, 15:30
+    assert o["kill_flags_read_governing_figure"]["fewer_than_150_traded"] and not o["kill_flags_read_governing_figure"]["cash_pf_under_1_at_n_100_plus"]
+    assert o["scorekit_governing"]["label"] == "no evidence at n = 3", o["scorekit_governing"]["label"]
     assert "bar" not in json.dumps(o["gate0_counts"]).lower().replace("no f_open bar", "").replace("no f_now bar", "")
     # held-out: refused before READ_DATE, whatever the files hold
     try: s.heldout_read("nomarker", [lists], [cands], es, now=s.READ_DATE - 1); assert 0
