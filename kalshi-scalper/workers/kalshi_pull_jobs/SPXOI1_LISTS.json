@@ -1,0 +1,51 @@
+{
+ "job_id": "SPXOI1_LISTS",
+ "registration": "kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md",
+ "purpose": "S&P 500 15 minute series (KXINX15M), development list for the SPXOI1 threshold: the settled markets of Nov 5 to Nov 13, 2026 only (closes 18:00Z to 21:00Z on Nov 5, 15:30Z to 21:00Z on Nov 6, 15:00Z to 21:00Z on Nov 9 to 12, and Nov 13 up to 16:30Z), as a CHECK of the tickers the candle job builds from close times.",
+ "heldout": "Development dates only, Nov 5 to Nov 13, 2026, nothing after Nov 13. The Head of R&D (2026-11-13 16:45Z): SPXFV1 and SPXOI1 HELDOUT_FIRST 2026-12-01T00:00:00Z (registry 8323d0b7); INX1 now reads 'no KXINX15M window read'. Every date in this job is before the held-out.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXINX15M"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 3,
+ "requests": [
+  {
+   "id": "settled_KXINX15M",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXINX15M",
+    "status": "settled",
+    "min_close_ts": 1793901600,
+    "max_close_ts": 1794587400,
+    "limit": 1000
+   },
+   "max_pages": 3
+  }
+ ],
+ "notes": "Close window 2026-11-05T18:00Z to 2026-11-13T16:30Z UTC. 143 markets expected (13, 23, 25, 25, 25, 25, 7 by day), so one page of 1000 holds them; 3 pages is the budget. Nothing after Nov 13 is asked. Registration: Desk A commit 94c4dfbc, cards file kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md sha256 bb7e1e4a01ef21b12b98b8ba414873eb19fbc7fb45aede7458ba3cd22669b807 (CLEAN by Auditor B).",
+ "owner": "DESK_B",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}

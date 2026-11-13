@@ -1,0 +1,1611 @@
+{
+ "job_id": "SPXOI1_CANDLES",
+ "registration": "kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md",
+ "purpose": "S&P 500 15 minute series (KXINX15M), one minute candles (period_interval 1) of each development market from 30 minutes before its close to 120 seconds before its close, keeping every price field and open_interest, for the SPXOI1 threshold. Tickers are built from the close time (KXINX15M-26NOV131145-45 closes 11:45 AM ET).",
+ "heldout": "Development dates only, Nov 5 to Nov 13, 2026, nothing after Nov 13. The Head of R&D (2026-11-13 16:45Z): SPXFV1 and SPXOI1 HELDOUT_FIRST 2026-12-01T00:00:00Z (registry 8323d0b7); INX1 now reads 'no KXINX15M window read'. Every date in this job is before the held-out.",
+ "allowed_endpoints": [
+  {
+   "name": "batch_candles",
+   "method": "GET",
+   "path_pattern": "/markets/candlesticks",
+   "params_allowed": [
+    "market_tickers",
+    "start_ts",
+    "end_ts",
+    "period_interval"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXINX15M"
+ ],
+ "ticker_allowlist": [
+  "KXINX15M-26NOV051300-00",
+  "KXINX15M-26NOV051315-15",
+  "KXINX15M-26NOV051330-30",
+  "KXINX15M-26NOV051345-45",
+  "KXINX15M-26NOV051400-00",
+  "KXINX15M-26NOV051415-15",
+  "KXINX15M-26NOV051430-30",
+  "KXINX15M-26NOV051445-45",
+  "KXINX15M-26NOV051500-00",
+  "KXINX15M-26NOV051515-15",
+  "KXINX15M-26NOV051530-30",
+  "KXINX15M-26NOV051545-45",
+  "KXINX15M-26NOV051600-00",
+  "KXINX15M-26NOV061030-30",
+  "KXINX15M-26NOV061045-45",
+  "KXINX15M-26NOV061100-00",
+  "KXINX15M-26NOV061115-15",
+  "KXINX15M-26NOV061130-30",
+  "KXINX15M-26NOV061145-45",
+  "KXINX15M-26NOV061200-00",
+  "KXINX15M-26NOV061215-15",
+  "KXINX15M-26NOV061230-30",
+  "KXINX15M-26NOV061245-45",
+  "KXINX15M-26NOV061300-00",
+  "KXINX15M-26NOV061315-15",
+  "KXINX15M-26NOV061330-30",
+  "KXINX15M-26NOV061345-45",
+  "KXINX15M-26NOV061400-00",
+  "KXINX15M-26NOV061415-15",
+  "KXINX15M-26NOV061430-30",
+  "KXINX15M-26NOV061445-45",
+  "KXINX15M-26NOV061500-00",
+  "KXINX15M-26NOV061515-15",
+  "KXINX15M-26NOV061530-30",
+  "KXINX15M-26NOV061545-45",
+  "KXINX15M-26NOV061600-00",
+  "KXINX15M-26NOV091000-00",
+  "KXINX15M-26NOV091015-15",
+  "KXINX15M-26NOV091030-30",
+  "KXINX15M-26NOV091045-45",
+  "KXINX15M-26NOV091100-00",
+  "KXINX15M-26NOV091115-15",
+  "KXINX15M-26NOV091130-30",
+  "KXINX15M-26NOV091145-45",
+  "KXINX15M-26NOV091200-00",
+  "KXINX15M-26NOV091215-15",
+  "KXINX15M-26NOV091230-30",
+  "KXINX15M-26NOV091245-45",
+  "KXINX15M-26NOV091300-00",
+  "KXINX15M-26NOV091315-15",
+  "KXINX15M-26NOV091330-30",
+  "KXINX15M-26NOV091345-45",
+  "KXINX15M-26NOV091400-00",
+  "KXINX15M-26NOV091415-15",
+  "KXINX15M-26NOV091430-30",
+  "KXINX15M-26NOV091445-45",
+  "KXINX15M-26NOV091500-00",
+  "KXINX15M-26NOV091515-15",
+  "KXINX15M-26NOV091530-30",
+  "KXINX15M-26NOV091545-45",
+  "KXINX15M-26NOV091600-00",
+  "KXINX15M-26NOV101000-00",
+  "KXINX15M-26NOV101015-15",
+  "KXINX15M-26NOV101030-30",
+  "KXINX15M-26NOV101045-45",
+  "KXINX15M-26NOV101100-00",
+  "KXINX15M-26NOV101115-15",
+  "KXINX15M-26NOV101130-30",
+  "KXINX15M-26NOV101145-45",
+  "KXINX15M-26NOV101200-00",
+  "KXINX15M-26NOV101215-15",
+  "KXINX15M-26NOV101230-30",
+  "KXINX15M-26NOV101245-45",
+  "KXINX15M-26NOV101300-00",
+  "KXINX15M-26NOV101315-15",
+  "KXINX15M-26NOV101330-30",
+  "KXINX15M-26NOV101345-45",
+  "KXINX15M-26NOV101400-00",
+  "KXINX15M-26NOV101415-15",
+  "KXINX15M-26NOV101430-30",
+  "KXINX15M-26NOV101445-45",
+  "KXINX15M-26NOV101500-00",
+  "KXINX15M-26NOV101515-15",
+  "KXINX15M-26NOV101530-30",
+  "KXINX15M-26NOV101545-45",
+  "KXINX15M-26NOV101600-00",
+  "KXINX15M-26NOV111000-00",
+  "KXINX15M-26NOV111015-15",
+  "KXINX15M-26NOV111030-30",
+  "KXINX15M-26NOV111045-45",
+  "KXINX15M-26NOV111100-00",
+  "KXINX15M-26NOV111115-15",
+  "KXINX15M-26NOV111130-30",
+  "KXINX15M-26NOV111145-45",
+  "KXINX15M-26NOV111200-00",
+  "KXINX15M-26NOV111215-15",
+  "KXINX15M-26NOV111230-30",
+  "KXINX15M-26NOV111245-45",
+  "KXINX15M-26NOV111300-00",
+  "KXINX15M-26NOV111315-15",
+  "KXINX15M-26NOV111330-30",
+  "KXINX15M-26NOV111345-45",
+  "KXINX15M-26NOV111400-00",
+  "KXINX15M-26NOV111415-15",
+  "KXINX15M-26NOV111430-30",
+  "KXINX15M-26NOV111445-45",
+  "KXINX15M-26NOV111500-00",
+  "KXINX15M-26NOV111515-15",
+  "KXINX15M-26NOV111530-30",
+  "KXINX15M-26NOV111545-45",
+  "KXINX15M-26NOV111600-00",
+  "KXINX15M-26NOV121000-00",
+  "KXINX15M-26NOV121015-15",
+  "KXINX15M-26NOV121030-30",
+  "KXINX15M-26NOV121045-45",
+  "KXINX15M-26NOV121100-00",
+  "KXINX15M-26NOV121115-15",
+  "KXINX15M-26NOV121130-30",
+  "KXINX15M-26NOV121145-45",
+  "KXINX15M-26NOV121200-00",
+  "KXINX15M-26NOV121215-15",
+  "KXINX15M-26NOV121230-30",
+  "KXINX15M-26NOV121245-45",
+  "KXINX15M-26NOV121300-00",
+  "KXINX15M-26NOV121315-15",
+  "KXINX15M-26NOV121330-30",
+  "KXINX15M-26NOV121345-45",
+  "KXINX15M-26NOV121400-00",
+  "KXINX15M-26NOV121415-15",
+  "KXINX15M-26NOV121430-30",
+  "KXINX15M-26NOV121445-45",
+  "KXINX15M-26NOV121500-00",
+  "KXINX15M-26NOV121515-15",
+  "KXINX15M-26NOV121530-30",
+  "KXINX15M-26NOV121545-45",
+  "KXINX15M-26NOV121600-00",
+  "KXINX15M-26NOV131000-00",
+  "KXINX15M-26NOV131015-15",
+  "KXINX15M-26NOV131030-30",
+  "KXINX15M-26NOV131045-45",
+  "KXINX15M-26NOV131100-00",
+  "KXINX15M-26NOV131115-15",
+  "KXINX15M-26NOV131130-30"
+ ],
+ "max_requests": 143,
+ "requests": [
+  {
+   "id": "c001",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051300-00",
+    "start_ts": 1793899800,
+    "end_ts": 1793901480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c002",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051315-15",
+    "start_ts": 1793900700,
+    "end_ts": 1793902380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c003",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051330-30",
+    "start_ts": 1793901600,
+    "end_ts": 1793903280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c004",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051345-45",
+    "start_ts": 1793902500,
+    "end_ts": 1793904180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c005",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051400-00",
+    "start_ts": 1793903400,
+    "end_ts": 1793905080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c006",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051415-15",
+    "start_ts": 1793904300,
+    "end_ts": 1793905980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c007",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051430-30",
+    "start_ts": 1793905200,
+    "end_ts": 1793906880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c008",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051445-45",
+    "start_ts": 1793906100,
+    "end_ts": 1793907780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c009",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051500-00",
+    "start_ts": 1793907000,
+    "end_ts": 1793908680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c010",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051515-15",
+    "start_ts": 1793907900,
+    "end_ts": 1793909580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c011",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051530-30",
+    "start_ts": 1793908800,
+    "end_ts": 1793910480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c012",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051545-45",
+    "start_ts": 1793909700,
+    "end_ts": 1793911380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c013",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV051600-00",
+    "start_ts": 1793910600,
+    "end_ts": 1793912280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c014",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061030-30",
+    "start_ts": 1793977200,
+    "end_ts": 1793978880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c015",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061045-45",
+    "start_ts": 1793978100,
+    "end_ts": 1793979780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c016",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061100-00",
+    "start_ts": 1793979000,
+    "end_ts": 1793980680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c017",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061115-15",
+    "start_ts": 1793979900,
+    "end_ts": 1793981580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c018",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061130-30",
+    "start_ts": 1793980800,
+    "end_ts": 1793982480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c019",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061145-45",
+    "start_ts": 1793981700,
+    "end_ts": 1793983380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c020",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061200-00",
+    "start_ts": 1793982600,
+    "end_ts": 1793984280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c021",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061215-15",
+    "start_ts": 1793983500,
+    "end_ts": 1793985180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c022",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061230-30",
+    "start_ts": 1793984400,
+    "end_ts": 1793986080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c023",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061245-45",
+    "start_ts": 1793985300,
+    "end_ts": 1793986980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c024",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061300-00",
+    "start_ts": 1793986200,
+    "end_ts": 1793987880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c025",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061315-15",
+    "start_ts": 1793987100,
+    "end_ts": 1793988780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c026",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061330-30",
+    "start_ts": 1793988000,
+    "end_ts": 1793989680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c027",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061345-45",
+    "start_ts": 1793988900,
+    "end_ts": 1793990580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c028",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061400-00",
+    "start_ts": 1793989800,
+    "end_ts": 1793991480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c029",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061415-15",
+    "start_ts": 1793990700,
+    "end_ts": 1793992380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c030",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061430-30",
+    "start_ts": 1793991600,
+    "end_ts": 1793993280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c031",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061445-45",
+    "start_ts": 1793992500,
+    "end_ts": 1793994180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c032",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061500-00",
+    "start_ts": 1793993400,
+    "end_ts": 1793995080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c033",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061515-15",
+    "start_ts": 1793994300,
+    "end_ts": 1793995980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c034",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061530-30",
+    "start_ts": 1793995200,
+    "end_ts": 1793996880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c035",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061545-45",
+    "start_ts": 1793996100,
+    "end_ts": 1793997780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c036",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV061600-00",
+    "start_ts": 1793997000,
+    "end_ts": 1793998680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c037",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091000-00",
+    "start_ts": 1794234600,
+    "end_ts": 1794236280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c038",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091015-15",
+    "start_ts": 1794235500,
+    "end_ts": 1794237180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c039",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091030-30",
+    "start_ts": 1794236400,
+    "end_ts": 1794238080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c040",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091045-45",
+    "start_ts": 1794237300,
+    "end_ts": 1794238980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c041",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091100-00",
+    "start_ts": 1794238200,
+    "end_ts": 1794239880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c042",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091115-15",
+    "start_ts": 1794239100,
+    "end_ts": 1794240780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c043",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091130-30",
+    "start_ts": 1794240000,
+    "end_ts": 1794241680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c044",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091145-45",
+    "start_ts": 1794240900,
+    "end_ts": 1794242580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c045",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091200-00",
+    "start_ts": 1794241800,
+    "end_ts": 1794243480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c046",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091215-15",
+    "start_ts": 1794242700,
+    "end_ts": 1794244380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c047",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091230-30",
+    "start_ts": 1794243600,
+    "end_ts": 1794245280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c048",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091245-45",
+    "start_ts": 1794244500,
+    "end_ts": 1794246180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c049",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091300-00",
+    "start_ts": 1794245400,
+    "end_ts": 1794247080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c050",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091315-15",
+    "start_ts": 1794246300,
+    "end_ts": 1794247980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c051",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091330-30",
+    "start_ts": 1794247200,
+    "end_ts": 1794248880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c052",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091345-45",
+    "start_ts": 1794248100,
+    "end_ts": 1794249780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c053",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091400-00",
+    "start_ts": 1794249000,
+    "end_ts": 1794250680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c054",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091415-15",
+    "start_ts": 1794249900,
+    "end_ts": 1794251580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c055",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091430-30",
+    "start_ts": 1794250800,
+    "end_ts": 1794252480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c056",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091445-45",
+    "start_ts": 1794251700,
+    "end_ts": 1794253380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c057",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091500-00",
+    "start_ts": 1794252600,
+    "end_ts": 1794254280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c058",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091515-15",
+    "start_ts": 1794253500,
+    "end_ts": 1794255180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c059",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091530-30",
+    "start_ts": 1794254400,
+    "end_ts": 1794256080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c060",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091545-45",
+    "start_ts": 1794255300,
+    "end_ts": 1794256980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c061",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV091600-00",
+    "start_ts": 1794256200,
+    "end_ts": 1794257880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c062",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101000-00",
+    "start_ts": 1794321000,
+    "end_ts": 1794322680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c063",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101015-15",
+    "start_ts": 1794321900,
+    "end_ts": 1794323580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c064",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101030-30",
+    "start_ts": 1794322800,
+    "end_ts": 1794324480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c065",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101045-45",
+    "start_ts": 1794323700,
+    "end_ts": 1794325380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c066",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101100-00",
+    "start_ts": 1794324600,
+    "end_ts": 1794326280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c067",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101115-15",
+    "start_ts": 1794325500,
+    "end_ts": 1794327180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c068",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101130-30",
+    "start_ts": 1794326400,
+    "end_ts": 1794328080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c069",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101145-45",
+    "start_ts": 1794327300,
+    "end_ts": 1794328980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c070",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101200-00",
+    "start_ts": 1794328200,
+    "end_ts": 1794329880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c071",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101215-15",
+    "start_ts": 1794329100,
+    "end_ts": 1794330780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c072",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101230-30",
+    "start_ts": 1794330000,
+    "end_ts": 1794331680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c073",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101245-45",
+    "start_ts": 1794330900,
+    "end_ts": 1794332580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c074",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101300-00",
+    "start_ts": 1794331800,
+    "end_ts": 1794333480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c075",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101315-15",
+    "start_ts": 1794332700,
+    "end_ts": 1794334380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c076",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101330-30",
+    "start_ts": 1794333600,
+    "end_ts": 1794335280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c077",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101345-45",
+    "start_ts": 1794334500,
+    "end_ts": 1794336180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c078",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101400-00",
+    "start_ts": 1794335400,
+    "end_ts": 1794337080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c079",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101415-15",
+    "start_ts": 1794336300,
+    "end_ts": 1794337980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c080",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101430-30",
+    "start_ts": 1794337200,
+    "end_ts": 1794338880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c081",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101445-45",
+    "start_ts": 1794338100,
+    "end_ts": 1794339780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c082",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101500-00",
+    "start_ts": 1794339000,
+    "end_ts": 1794340680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c083",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101515-15",
+    "start_ts": 1794339900,
+    "end_ts": 1794341580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c084",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101530-30",
+    "start_ts": 1794340800,
+    "end_ts": 1794342480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c085",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101545-45",
+    "start_ts": 1794341700,
+    "end_ts": 1794343380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c086",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV101600-00",
+    "start_ts": 1794342600,
+    "end_ts": 1794344280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c087",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111000-00",
+    "start_ts": 1794407400,
+    "end_ts": 1794409080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c088",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111015-15",
+    "start_ts": 1794408300,
+    "end_ts": 1794409980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c089",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111030-30",
+    "start_ts": 1794409200,
+    "end_ts": 1794410880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c090",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111045-45",
+    "start_ts": 1794410100,
+    "end_ts": 1794411780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c091",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111100-00",
+    "start_ts": 1794411000,
+    "end_ts": 1794412680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c092",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111115-15",
+    "start_ts": 1794411900,
+    "end_ts": 1794413580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c093",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111130-30",
+    "start_ts": 1794412800,
+    "end_ts": 1794414480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c094",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111145-45",
+    "start_ts": 1794413700,
+    "end_ts": 1794415380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c095",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111200-00",
+    "start_ts": 1794414600,
+    "end_ts": 1794416280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c096",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111215-15",
+    "start_ts": 1794415500,
+    "end_ts": 1794417180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c097",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111230-30",
+    "start_ts": 1794416400,
+    "end_ts": 1794418080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c098",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111245-45",
+    "start_ts": 1794417300,
+    "end_ts": 1794418980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c099",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111300-00",
+    "start_ts": 1794418200,
+    "end_ts": 1794419880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c100",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111315-15",
+    "start_ts": 1794419100,
+    "end_ts": 1794420780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c101",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111330-30",
+    "start_ts": 1794420000,
+    "end_ts": 1794421680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c102",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111345-45",
+    "start_ts": 1794420900,
+    "end_ts": 1794422580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c103",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111400-00",
+    "start_ts": 1794421800,
+    "end_ts": 1794423480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c104",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111415-15",
+    "start_ts": 1794422700,
+    "end_ts": 1794424380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c105",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111430-30",
+    "start_ts": 1794423600,
+    "end_ts": 1794425280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c106",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111445-45",
+    "start_ts": 1794424500,
+    "end_ts": 1794426180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c107",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111500-00",
+    "start_ts": 1794425400,
+    "end_ts": 1794427080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c108",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111515-15",
+    "start_ts": 1794426300,
+    "end_ts": 1794427980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c109",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111530-30",
+    "start_ts": 1794427200,
+    "end_ts": 1794428880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c110",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111545-45",
+    "start_ts": 1794428100,
+    "end_ts": 1794429780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c111",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV111600-00",
+    "start_ts": 1794429000,
+    "end_ts": 1794430680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c112",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121000-00",
+    "start_ts": 1794493800,
+    "end_ts": 1794495480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c113",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121015-15",
+    "start_ts": 1794494700,
+    "end_ts": 1794496380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c114",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121030-30",
+    "start_ts": 1794495600,
+    "end_ts": 1794497280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c115",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121045-45",
+    "start_ts": 1794496500,
+    "end_ts": 1794498180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c116",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121100-00",
+    "start_ts": 1794497400,
+    "end_ts": 1794499080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c117",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121115-15",
+    "start_ts": 1794498300,
+    "end_ts": 1794499980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c118",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121130-30",
+    "start_ts": 1794499200,
+    "end_ts": 1794500880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c119",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121145-45",
+    "start_ts": 1794500100,
+    "end_ts": 1794501780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c120",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121200-00",
+    "start_ts": 1794501000,
+    "end_ts": 1794502680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c121",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121215-15",
+    "start_ts": 1794501900,
+    "end_ts": 1794503580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c122",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121230-30",
+    "start_ts": 1794502800,
+    "end_ts": 1794504480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c123",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121245-45",
+    "start_ts": 1794503700,
+    "end_ts": 1794505380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c124",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121300-00",
+    "start_ts": 1794504600,
+    "end_ts": 1794506280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c125",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121315-15",
+    "start_ts": 1794505500,
+    "end_ts": 1794507180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c126",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121330-30",
+    "start_ts": 1794506400,
+    "end_ts": 1794508080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c127",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121345-45",
+    "start_ts": 1794507300,
+    "end_ts": 1794508980,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c128",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121400-00",
+    "start_ts": 1794508200,
+    "end_ts": 1794509880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c129",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121415-15",
+    "start_ts": 1794509100,
+    "end_ts": 1794510780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c130",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121430-30",
+    "start_ts": 1794510000,
+    "end_ts": 1794511680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c131",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121445-45",
+    "start_ts": 1794510900,
+    "end_ts": 1794512580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c132",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121500-00",
+    "start_ts": 1794511800,
+    "end_ts": 1794513480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c133",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121515-15",
+    "start_ts": 1794512700,
+    "end_ts": 1794514380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c134",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121530-30",
+    "start_ts": 1794513600,
+    "end_ts": 1794515280,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c135",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121545-45",
+    "start_ts": 1794514500,
+    "end_ts": 1794516180,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c136",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV121600-00",
+    "start_ts": 1794515400,
+    "end_ts": 1794517080,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c137",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131000-00",
+    "start_ts": 1794580200,
+    "end_ts": 1794581880,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c138",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131015-15",
+    "start_ts": 1794581100,
+    "end_ts": 1794582780,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c139",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131030-30",
+    "start_ts": 1794582000,
+    "end_ts": 1794583680,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c140",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131045-45",
+    "start_ts": 1794582900,
+    "end_ts": 1794584580,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c141",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131100-00",
+    "start_ts": 1794583800,
+    "end_ts": 1794585480,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c142",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131115-15",
+    "start_ts": 1794584700,
+    "end_ts": 1794586380,
+    "period_interval": 1
+   }
+  },
+  {
+   "id": "c143",
+   "path": "/markets/candlesticks",
+   "params": {
+    "market_tickers": "KXINX15M-26NOV131130-30",
+    "start_ts": 1794585600,
+    "end_ts": 1794587280,
+    "period_interval": 1
+   }
+  }
+ ],
+ "notes": "One ticker a request, 143 requests (13, 23, 25, 25, 25, 25 and 7 by day for Nov 5, 6, 9, 10, 11, 12, 13), about 3 minutes at 1 s pacing. Schedule from the Head's public list read of 2026-11-13 16:40Z: Nov 5 closes 18:00Z to 21:00Z, Nov 6 15:30Z to 21:00Z, Nov 9 to 12 15:00Z to 21:00Z (15:00Z = 10:00 ET, EST is UTC-5); tickers that do not exist are not asked. Nov 13 stops at 16:30Z (11:30 ET) so no window still open is read. The 30 minute start leaves slack for a market that opened later. Registration: Desk A commit 94c4dfbc, cards file kalshi-scalper/workers/DESK_A_SPX_CARDS_NOV13.md sha256 bb7e1e4a01ef21b12b98b8ba414873eb19fbc7fb45aede7458ba3cd22669b807 (CLEAN by Auditor B). End of each read is the close minus 120 s (Auditor B's recommendation, as the V1 job): it still covers the open interest candles ending 360 s and 180 s before the close and the 180 to 120 s entry minutes, and leaves the final two minutes, which show the outcome, unread.",
+ "owner": "DESK_B",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "status": "active",
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
