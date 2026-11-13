@@ -21,7 +21,8 @@ def check(folder):
     by_status = collections.Counter(r.get("status") for r in rows); trunc = sum(1 for r in rows if r.get("truncated"))
     named = [r.get("file") for r in rows if r.get("file")]; nofile = sum(1 for r in rows if not r.get("file")); missing = [f for f in named if not os.path.isfile(os.path.join(folder, f))]
     dup = [f for f, n in collections.Counter(named).items() if n > 1]
-    on_disk = sorted(f for f in os.listdir(folder) if f not in ("manifest.json", "STATUS"))   # STATUS is the pull runner's own marker file; stray = [f for f in on_disk if f not in set(named)]
+    on_disk = sorted(f for f in os.listdir(folder) if f not in ("manifest.json", "STATUS"))   # STATUS is the pull runner's own marker file
+    stray = [f for f in on_disk if f not in set(named)]
     pages = collections.Counter(r.get("id") for r in rows); multi = {i: n for i, n in pages.items() if n > 1}
     size = sum(os.path.getsize(os.path.join(folder, f)) for f in named if os.path.isfile(os.path.join(folder, f))); row_bytes = sum(int(r.get("bytes") or 0) for r in rows)
     complete = (man.get("status") == "complete" and set(by_status) <= {200} and trunc == 0 and not missing and not dup and not stray and nofile == 0 and man.get("requests_sent") == len(rows) and (man.get("bytes_stored") is None or int(man.get("bytes_stored")) == row_bytes))
