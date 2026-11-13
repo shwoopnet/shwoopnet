@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/history_miner/candlegap/CANDLEGAP_DESIGN.md",
  "purpose": "Zero-try measurement, Head approved: 1 minute candles of the 36 KXCS2GAME markets the wheel book recorder polled 2026-11-12 20:31Z to 2026-11-13 00:04Z, to learn what a missing candle means.",
- "heldout": "none: a measurement, no rule scored, no try. No card holds out KXCS2GAME closes on Nov 12 to 13 (MAPBREAK is closed; VOIDSNAP's sample ends Oct 22 and its held-out set is before Sep 12). CS2 only: no e-soccer, e-basketball, Liga Pro or Dota ticker (ESOCTIE and INPLAYJUMP hold those out, rule (h)).",
+ "heldout": "none: a measurement, no rule scored, no try. MAPBREAK (held-out closes 2026-10-23 to before 2026-11-13, closed unread) and PREMOVE (esports, same block, closed unread) hold KXCS2GAME closes of Nov 12; nothing is scored and no result is read; VOIDSNAP's held-out set is before 2026-09-12. CS2 only: no e-soccer, e-basketball, Liga Pro or Dota ticker (ESOCTIE and INPLAYJUMP hold those out, rule (h)).",
  "host": "api.elections.kalshi.com",
  "base_path": "/trade-api/v2",
  "allowed_endpoints": [

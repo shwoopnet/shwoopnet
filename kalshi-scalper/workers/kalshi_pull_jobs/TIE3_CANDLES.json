@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/testing/TIE3_MEASUREMENT.md",
  "purpose": "TIE3 measurement stage 2: the one minute candles of each Tie contract for the 31 minutes ending at T, price block only. Rides along: WXDAYEND_B, the 4 Nov 10 winning brackets of card 74 (ids wxb_).",
- "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try",
+ "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try Cards on KXHIGHNY: USWEEP3 (OPEN) and WXENS1 (forward read 2027-02-28).",
  "allowed_endpoints": [
   {
    "name": "batch_candles",

@@ -1,5 +1,7 @@
 # Rotation lane, "the wheel" (v1.3; v1.2 approved by the owner Nov 12, 2026; v1.3 drops the single-day limit on his decision of Nov 13)
 
+> Stage word (Nov 13, 2026): a live second-slot seat is a **Trial** until it is **Proven**. "Probation" in this file means a Trial seat; the text below keeps its original word.
+
 **Status: APPROVED by the owner on Nov 12, 2026 (popup, through the EA: "Approve as written", with the decisions listed in section 0). These are the rules of the rotation lane from that date.** Written by the Head of R&D; home `docs/ROTATION_LANE.md` on main (docs only, opened by the Chief of Staff), with a pointer line in `docs/STRATEGY_LIFECYCLE.md`. It does not edit `docs/CHARTER.md`, which only the owner changes.
 
 **Approval of the rules is not an order to trade.** A full seat (10 contracts) is taken only when all four of these are true: the premise test (section 9.5) has been read; the rotation controller and its logging are built and have passed the Chief of Staff's security review; the Chief of Staff has checked the second slot's caps and the account stop against the wheel's sizes (sections 5 and 8); and the rule has been admitted by the owner's own popup with its exact spec. A probation seat (section 5a) needs the last three of those, not the first.

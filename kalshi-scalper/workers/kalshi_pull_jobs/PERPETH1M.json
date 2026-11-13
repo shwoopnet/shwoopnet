@@ -4,7 +4,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/README.md",
  "purpose": "Kalshi's own Ethereum perpetual KXETHPERP: public 1 minute candles (bid, ask, price, open interest, volume), one UTC day per request, 2026-06-03 to 2026-11-12. Data pull only.",
- "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this)",
+ "heldout": "none (a raw history pull; any test that uses it registers its own held-out block before it reads this) Cards on KXETHPERP: SNAPBACK1 (OPEN). This job is paused and must not be dispatched.",
  "route": "perps",
  "allowed_endpoints": [
   {

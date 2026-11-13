@@ -84,6 +84,10 @@ Six more `active` jobs from Desk A and Desk B, plus the CFRTI-K stage 2 builder.
 | `HOURLYTEMP_LISTS` | Desk B | 9, up to 17 pages (20) | under 1 | cost measurement of the hourly city temperature series, Nov 5 to 11 |
 | `TESTING_LISTS_BUNDLE` | Testing Desk (MAIN) | 133, up to 347 pages (361) | 20 to 40 (estimate) | TIE3_LISTS, WXDAYEND_A (with its 18 one-market candle windows) and POLCOST (the open-markets lists of 79 Politics series) in one file, ids prefixed t3_ wx_ pc_; split with `workers/testing/bundle.py split` |
 | `SOCDERIV_LISTS` | Testing Desk (MAIN) | 67, up to 131 pages (131) | about 4 | soccer derivative market lists, its own job (the heavy part) |
+| `SOCDERIV_CANDLES_A` | Testing Desk (MAIN) | 107 (127) | under 100 (estimate) | `testing/SOCDERIV_MEASUREMENT.md`; batched 1 minute candles for 5,040 soccer derivative tickers (Nov 13); A and B are one measurement, read once; held-out: nothing closing on or after 2026-11-13 |
+| `SOCDERIV_CANDLES_B` | Testing Desk (MAIN) | 107 (127) | under 100 (estimate) | the second half, 6,437 tickers, no overlap with A |
+| `LIVEDATA_PROBE_A4` | Desk B | 7 (9) | under 1 | zero-try field probe (`dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md`): open temperature events and Kalshi's Miami temperature index on two development windows and its calibrations; no price, no result, field names and counts only; the owner accepted the terms risk for the live-data endpoints on Nov 13; /markets is not an allowed endpoint. Probes A, A2 and A3 are not jobs here |
+| `LIVEDATA_PROBE_B` | Desk B | 3 (8) | under 1 | zero-try field probe of the milestone list (since 2026-11-13T00:00Z) and two open event lists (tennis doubles); no price, no result; Auditor B cleared its close-bound check Nov 13; same registration as A4 |
 | `MAPBREAK_LISTS` | Testing Desk (MAIN) | 20, up to 140 pages (154) | about 65 (estimate, uncertain by 2x; its own run; a size stop cuts the last requests) | `MAPBREAK_REGISTRATION.md` (Amendments 1 to 3); 12 series settled lists before the held-out date, 4 history lists of the match series (counts only, all before the live/history boundary) and 4 fee reads |
 | `ESOCTIE_LISTS` | History Miner (MAIN) | 4, up to 81 pages (90) | about 120 (estimate; its own run) | `ESOCTIE_REGISTRATION.md`; KXESOCCERGAME series read and settled lists, closes 2026-09-12 to 2026-10-22 |
 | `TIE3_CANDLES` | Testing Desk (MAIN) | 54 (54) | about 10 to 25 (estimate) | `TIE3_MEASUREMENT.md`; 50 one-minute candle windows of TIE3 markets (t3c_) and 4 WXDAYEND_B windows (wxb_); split with `workers/testing/bundle.py split-candles` |
@@ -95,3 +99,13 @@ Dispatch order (Head of R&D): (1) `CFRTI_K_R6SLICE`, whose answer gates two othe
 
 `build_cfrti_k_candles.py` is an OFFLINE script (it sends nothing): it builds the CFRTI-K candle job from the `CFRTI_K_LISTS` answer (modes `all`, `live`, `hist`). It packs batches to at most 9,000 minutes x tickers (the endpoint answers HTTP 400 above 10,000), about 216 requests in live mode and about 624 in all mode. Its output is a new job file and needs its own reviewed pull request before it can run. Not included: `ECONLAG_CANDLES`, `NHLOT_CANDLES` (built later) and the candle stage itself.
 | `MAPBREAK_CANDLES` | Testing Desk | 282 (282) | under 150 MB (estimate) | `MAPBREAK_REGISTRATION.md`; one minute candles of the sampled match and placebo contracts, development window only |
+
+## Live-data probes: temperature index and relayed sports scores (Nov 13, 2026, the owner: "Both, ignore the terms")
+
+**OWNER-ACCEPTED TERMS RISK, decided by the owner Nov 13, 2026 and relayed by the EA.** Research may read Kalshi's temperature index and the sports scores Kalshi relays through Kalshi's own API (both Kalshi hosts, already covered by the Nov 12, 2026 waiver above). This is NOT a finding that the reads are allowed; it is the same treatment as the Kalshi, Yahoo, Coinbase and Bitstamp reads. They are NOT third party sites: no ESPN or other score site host is allowed (`test/noSportsScoreSitesGates.test.js` still bans them).
+
+Rules for these two sources, on top of every limit in this file:
+- Research only. Any live use needs the owner's own popup.
+- ZERO-TRY PROBES FIRST: a probe reports field names, types and counts only. No result is opened beyond that and no rule is scored from a probe.
+- A probe job is added only by a reviewed jobs pull request, carries a held-out line like every job, and is dispatched only on the Head of R&D's or the owner's go. Nothing was added or dispatched by this note.
+

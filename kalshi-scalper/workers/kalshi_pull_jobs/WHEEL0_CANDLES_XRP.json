@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/forensics/wheel0/WHEEL0_REGISTRATION.md",
  "purpose": "WHEEL0 stage 2 (the owner's ordered premise test of the rotation lane): 1 minute candles of the settled KXXRP15M markets closing 2026-09-12 to before 2026-11-13, from 15 minutes before each batch's first close to 2 minutes before its last.",
- "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): no card known to the Head of R&D or to Forensics on 2026-11-12 holds this series' recorded dates; closes to before 2026-11-13.",
+ "heldout": "WHEEL0 has no held-out block (one read, 1 try). Rule (h): no card known to the Head of R&D or to Forensics on 2026-11-12 holds this series' recorded dates; closes to before 2026-11-13. Unread cards on XRP: BOOKCH1, QSTALE1, R6T, MAKER5, L1Q1, RESIL1 and the Nov 10 shadow rules.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",
