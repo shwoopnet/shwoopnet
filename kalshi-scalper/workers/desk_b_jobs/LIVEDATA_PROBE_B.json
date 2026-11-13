@@ -12,7 +12,7 @@
  "status": "active",
  "job_id": "LIVEDATA_PROBE_B",
  "purpose": "Zero-try field probe of Kalshi's own sports live-data feed: current Sports milestones and the open ITF and challenger doubles events with their milestones. Field names, counts and time stamps only; no score, name, price or result is printed.",
- "heldout": "none in range: no request asks for a result, a price or a past game. The milestone list is bounded to milestones updated since 2026-11-13T00:00Z and the two event lists are OPEN events. Cards that hold out tennis series, none of them doubles (HELDOUT_REGISTRY.md on rnd-queue, Nov 13): INPLAYJUMP (KXITFMATCH, KXITFWMATCH, KXATPCHALLENGERMATCH, KXWTACHALLENGERMATCH, held-out block not pulled), TENNISBREAK (singles and set-winner series, held-out from 2026-10-23, never pulled), TENNIS1 (closed unread), W-CAT-SPORTS1 (released). No card holds KXITFDOUBLES or KXATPCHALLENGERDOUBLES. THE EXCEPTION: sports live data is a third party's data that Kalshi relays and its terms were not read; the owner accepted that risk on Nov 13 (popup, relayed by the Executive Assistant: 'Both, ignore the terms'). This job must NOT be dispatched until that acceptance is recorded in CLAUDE.md on main.",
+ "heldout": "none in range: no request asks for a result, a price or a past game. The milestone list is bounded to milestones updated since 2026-11-13T00:00Z and the two event lists are OPEN events. Cards that hold out tennis series, none of them doubles (HELDOUT_REGISTRY.md on rnd-queue, Nov 13): INPLAYJUMP (KXITFMATCH, KXITFWMATCH, KXATPCHALLENGERMATCH, KXWTACHALLENGERMATCH, held-out block not pulled), TENNISBREAK (singles and set-winner series, held-out from 2026-10-23, never pulled), TENNIS1 (closed unread), W-CAT-SPORTS1 (released). No card holds KXITFDOUBLES or KXATPCHALLENGERDOUBLES. EVERY SPORT (the milestone request covers all sports): no held-out block of any card reaches 2026-11-13T00:00Z (MAPBREAK, PREMOVE, ESOCTIE, REMATCH and INPLAYJUMP all end before it). THE EXCEPTION: sports live data is a third party's data that Kalshi relays and its terms were not read; the owner accepted that risk on Nov 13 (popup, relayed by the Executive Assistant: 'Both, ignore the terms'). This job must NOT be dispatched until that acceptance is recorded in CLAUDE.md on main. The landed answers may hold scores of games finished today; they are third-party live data under the owner's exception, and no reader or person opens them beyond field names.",
  "allowed_endpoints": [
   {
    "name": "milestones",
@@ -42,7 +42,7 @@
   "KXITFDOUBLES"
  ],
  "ticker_allowlist": [],
- "max_requests": 4,
+ "max_requests": 8,
  "requests": [
   {
    "id": "ms_sports",
