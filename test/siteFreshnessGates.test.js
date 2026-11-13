@@ -116,6 +116,26 @@ gates.SF8 = () => {
   const heads = [...html.matchAll(/<div class="changelog-day">(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{1,2})<\/div>/g)].map((m) => MON[m[1]] * 100 + Number(m[2]));
   for (let i = 1; i < heads.length; i++) assert.ok(heads[i] <= heads[i - 1], 'changelog days run newest first');
 };
+gates.SF10 = () => {
+  // Nov 13, 2026: the Rules text said gold's kill was 6% of the balance base while the code had a fixed dollar line. The page's numbers are read from GOLD_KILL, so a change to the constants fails here.
+  const { GOLD_KILL } = require('../functions/kalshiGoldKillLib.js');
+  const rules = text(menu);
+  const money = (n) => '$' + (Number.isInteger(n) ? String(n) : n.toFixed(2));
+  assert.ok(rules.includes('falls ' + money(GOLD_KILL.drawdownDollars) + ' (a fixed dollar line'), 'the Rules text names the drawdown line ' + money(GOLD_KILL.drawdownDollars));
+  assert.ok(rules.includes('net is under -' + money(Math.abs(GOLD_KILL.netFloor)) + ' after ' + GOLD_KILL.netAfterTrades + ' trades'), 'the Rules text names the net floor and trade count');
+  assert.ok(!/6% of the balance base/.test(rules), 'the old 6% line is gone');
+  // the registry row says the same line and carries the 10 losses guard in the return rule
+  const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies.find((x) => x.id === 'L1');
+  assert.ok(reg.kill.includes(money(GOLD_KILL.drawdownDollars)) && reg.kill.includes('-' + money(Math.abs(GOLD_KILL.netFloor))), 'the registry kill text carries the constants');
+  assert.ok(/at least 10 losses/.test(reg.return), 'the registry return rule carries the 10 losses guard');
+};
+
+gates.SF11 = () => {
+  // Consequence: while gold's latch is tripped the Rules line follows the shared state and says off, cooling down; the old label stays when the state is unknown.
+  assert.ok(/stNow\.L1 === 'off' \? 'Gold is off, cooling down/.test(html), 'the Rules line is driven by the shared L1 state');
+  assert.ok(/: 'Markets trading now: gold\.'/.test(html), 'the static line is the fallback');
+  assert.ok(!/probation probe/i.test(text(menu)), 'the Rules and Start text use Trial, not probation probe');
+};
 let failed = 0;
 for (const [name, fn] of Object.entries(gates)) {
   try { fn(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + e.message); }
