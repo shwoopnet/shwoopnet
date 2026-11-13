@@ -17,6 +17,7 @@ Expected lucky clears with no edge anywhere (a fairly priced market, one fee los
 | 2026-11-13 00:26Z (REMATCH's e-soccer place withdrawn: closed at stage 1 on tradeability, two builds agree) | 21 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:48Z (both MAPBREAK places withdrawn: out at step 1 at both looks on every title, two builds agree) | 19 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 | 2026-11-13T02:24:00Z (the 7 NC15 places RESTART their forward count here: the block rules of section 4 were closed and two builds agreed at this time; signals between 00:23:49Z and this time do not count; ESOCTIE's place withdrawn at 02:03Z) | 18 | 8 admitted, 7 counting from this time | 0 | 0 | 0 | 0 |
+| 2026-11-13T02:40:00Z (the 7 NC15 places' start moves once more: section 4 item (u) closed a choice about the signal clock, rows received at one instant; the single-day test was dropped by the owner at 02:36Z and does not move a start) | 18 | 8 admitted, 7 counting from this time | 0 | 0 | 0 | 0 |
 
 ## Probation seats (rules section 5a; live results by message only, never here)
 

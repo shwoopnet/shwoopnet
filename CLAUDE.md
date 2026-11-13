@@ -1412,3 +1412,8 @@ Three job files copied byte for byte from their desks' branches after checking e
 ## Wheel docs refreshed to lane v1.3 (Nov 13, 2026, the owner: "Drop the line")
 
 The owner dropped the wheel bar's single-day limit ("no single day more than 30 percent of the block's net"); `docs/ROTATION_LANE.md` is now v1.3 (section 0 item 13 records the decision, item (h) marked REMOVED, block-counting rulings (a) to (t) of section 4 read clean by Auditor B, the corrected worst-day wording from the Verification Analyst's re-run of the simulation). `docs/WHEEL_ADMIT_LIST.md` and `docs/WHEEL_LEDGER.md` are taken from the Head of R&D's branch `rnd-queue` (head 721ec12b, which contains 5225eff1). A block reader applies no day-concentration test; the NC15 places count from 2026-11-13T02:24:00Z. Docs only, nothing to deploy. The registry sync (`scripts/sync_registry.py`) reads `rnd-queue` directly, not these copies.
+
+
+## Wheel docs settled (Nov 13, 2026, the Head of R&D)
+
+`docs/ROTATION_LANE.md`, `docs/WHEEL_ADMIT_LIST.md` and `docs/WHEEL_LEDGER.md` now match the Head of R&D's branch `rnd-queue` at eedd28e3, which he called settled: section 4 item (u) (the offset window is read row by row, as the frozen scorer reads it) and the NC15 start time 2026-11-13T02:40:00Z. Auditor B read the text clean and two independent builds print the same on six invented fixture reads; no real NC15 row has been opened. Governing facts for the future logger and scorer: no day-concentration test, start 02:40:00Z, whole-cent money rounded down, blocks grow to 7 Central days and expire at 21. Docs only, nothing to deploy.
