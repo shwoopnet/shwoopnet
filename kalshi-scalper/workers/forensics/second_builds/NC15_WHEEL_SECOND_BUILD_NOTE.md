@@ -13,7 +13,8 @@ Nothing here is a read of the registered NC15DEPTH1 cell, and no block data has 
 | `nc15_wheel_compare.py` | compares Desk A's printed records and per-series lines with my records file; reads printed output only |
 | `nc15_wheel_block_compare.py` | compares Desk A's printed block lines with mine, block by block and state by state |
 | `make_nc15_wheel_fixture.py` | invented NC15 book and coverage rows for all 11 series over 40 days, with the awkward cases listed in its header |
-| `NC15_WHEEL_SECOND_OUTPUT_fixture_seed{6,7}_MADE_UP_DATA.{txt,json}` | my figures on two fixtures |
+| `NC15_WHEEL_SECOND_OUTPUT_fixture_{seed6,seed7,seed6_confexp}_MADE_UP_DATA.{txt,json}` | my figures on three fixtures |
+| `NC15_WHEEL_FIRST_BUILD_BLOCKS_fixture_*_reader_66e729c8_run_by_forensics.txt` | Desk A's block reader output on the same fixtures, as run by me |
 
 Commands:
 
@@ -97,6 +98,34 @@ I rewrote my block layer to the rulings and ran Desk A's three commands myself, 
 - **What the fixtures exercised:** cleared and QUALIFIED, cleared with a failed confirmation (one with a profit factor that prints 1.00 and is under 1.0 in both builds),
   blocks that grew to 191 and 206 signals to reach 7 days, an EXPIRED block, FAILED on the profit factor, on a half and on the 30 percent day rule, and places waiting on
   an open result.
+
+## Nov 13, 02:24Z: the second round of rulings (items g to o), and SAME again on three fixtures
+
+**The block comparison in the section above is superseded.** It was made against the lane text at `7c4c71d2` and Desk A's first reader. While it ran, the Head ruled ten
+more places (items (g) to (o), `ROTATION_LANE.md` section 4 at `rnd-queue` `bd7007cb`) and Desk A rebuilt its reader. I rebuilt my block layer from that text and compared again.
+
+Builds compared: mine `nc15_wheel_second.py` sha256 `1e8ac8fb...`; Desk A's signal scorer `nc15_wheel_replay.py` `8d1055df...`, records file writer
+`nc15_wheel_records_csv.py` `d3f89f57...` and block reader `wheel_block_reader.py` `66e729c8...` at `claude/idea-desk-a` `c36aa1e8`. I ran its commands unread
+(`... nc15_wheel_records_csv.py <dir> 2026-12-23T00:00:00Z <out.csv>`, then `wheel_block_reader.py <out.csv> --now=2026-12-23T00:00:00Z --start=2026-11-13T00:23:49Z`);
+on seeds 6 and 7 its block output reproduces its committed files byte for byte.
+
+| Fixture | Records the same | Differ | Record figures | Differ | Per-series figures | Differ | Blocks (both builds) | Block figures | Differ | Place states | Differ |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| seed 6 | 20,994 | 0 | 18,343 | 0 | 63 | 0 | 12 | 192 | 0 | 7 | 0 |
+| seed 7 | 20,994 | 0 | 18,390 | 0 | 63 | 0 | 10 | 158 | 0 | 7 | 0 |
+| seed 6, variant `confexp` | 20,994 | 0 | 17,731 | 0 | 63 | 0 | 11 | 175 | 0 | 7 | 0 |
+
+- **What changed in my block layer for items (g) to (o):** money in whole cents with 10 x W >= 13 x L and W >= L and no float; the 30 percent rule on whole cents; signals
+  with a limit of 88c or above skipped (about 200 a fixture); EXPIRED decided by the clock with the stated read time, and the next block starting at the first counted
+  signal after the expiry time; the confirmation's own 21 day limit; a void in n and in the losses' money but neither a win nor a loss for the 10 and 10 count.
+- **The new fixture variant** (`make_nc15_wheel_fixture.py <dir> 6 confexp`) makes one place's signals nearly stop after its first block clears: both builds print that
+  block CLEARED with its confirmation EXPIRED, unread, and a new block not yet begun. The half-cent net print difference of the earlier comparison is gone (whole cents).
+- **Where the text is silent and I took Desk A's choice** (each named in the scorer's printed readings): an open result inside a block makes it WAIT unless the clock is
+  already past the block's 21 days, when it is EXPIRED before any wait; cash that is not whole cents (a size-weighted fill price) goes to the nearest cent, half up
+  (361, 352 and 356 final fillable signals on the three fixtures, the same count in both builds); the 30 percent reason is listed only for a positive block net; once a
+  place is QUALIFIED no further block is read.
+- **Outcomes exercised across the three fixtures:** FAILED (18 blocks), CLEARED and QUALIFIED (7), CLEARED with a failed confirmation (2), CLEARED with the confirmation
+  in progress, waiting on an open result, and EXPIRED (1 each), EXPIRED blocks (3), blocks grown to more than 160 signals to reach 7 days.
 
 ## Places where the sheet or the lane leaves a choice
 

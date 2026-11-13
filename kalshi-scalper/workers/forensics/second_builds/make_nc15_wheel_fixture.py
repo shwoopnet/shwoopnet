@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """A MADE-UP fixture for the NC15 depth-cell wheel replay, in the NC15 recorder's folder and column shape (scripts/record_nc_book.py on main):
 <out>/<date>/<HHMM>/{book,coverage,clock}.csv.gz plus the marker file MADE_UP_DATA. Nothing here is real: books, clocks and results are invented so two independent
-scorers can be run on the same rows. usage: python3 -I make_nc15_wheel_fixture.py <out dir> [seed]      read it with --now 2026-12-23T00:00:00Z
+scorers can be run on the same rows. usage: python3 -I make_nc15_wheel_fixture.py <out dir> [seed] [confexp]      read it with --now 2026-12-23T00:00:00Z
+With the word confexp as third argument, USD/CAD's signals nearly stop on Dec 1, so a block that cleared just before then cannot collect its 30 confirmation signals within
+21 days: the confirmation EXPIRES, unread (the lane's section 4, items (j) and (k)). Signals with a limit of 88c or above (asks of 0.88 and 0.90) are in every variant, for item (i).
 Runs are 4 hours long from 2026-11-12T20:00Z to 2026-12-22T20:00Z, so some windows decide before the sheet's commit time (2026-11-13T00:23:49Z) and must not count.
 Each series has its own rate and its own made-up edge, so the places end differently: a block that clears and confirms, one that clears and fails its confirmation, blocks
 that fail on the profit factor, a dense place whose 60 signals fall on fewer than 7 days, a sparse place whose 60 signals span more than 21 days, a place still in progress.
@@ -24,7 +26,7 @@ PROFILE = {"KXCOPPER15M": (0.10, 0.22, False), "KXWTI15M": (0.10, 0.00, False), 
 NOW = datetime(2026, 12, 23, tzinfo=timezone.utc)
 
 
-def main(out, seed):
+def main(out, seed, confexp=False):
     rng = random.Random(seed); os.makedirs(out); open(os.path.join(out, "MADE_UP_DATA"), "w").write("invented rows for a build comparison; nothing here is real\n")
     run_start = datetime(2026, 11, 12, 20, 0, tzinfo=timezone.utc); end = datetime(2026, 12, 22, 20, 0, tzinfo=timezone.utc); nrun = 0; nwin = 0; special = 0; carry = []
     while run_start < end:
@@ -35,6 +37,7 @@ def main(out, seed):
             t += timedelta(minutes=15); T = int(t.timestamp() * 1000); iso = t.strftime("%Y-%m-%dT%H:%M:%SZ")
             for series, (pcell, edge, weekend) in PROFILE.items():
                 if not weekend and t.weekday() >= 5: continue
+                if confexp and series == "KXUSDCAD15M" and t >= datetime(2026, 12, 1, tzinfo=timezone.utc): pcell = 0.012
                 nwin += 1; tk = "%s-%s-00" % (series, t.strftime("%y%b%d%H%M").upper()); kind = rng.random(); in_cell = rng.random() < pcell
                 side = rng.choice(["yes", "no"]); ask = rng.choice([0.12, 0.2, 0.3, 0.4, 0.45, 0.5, 0.55, 0.6, 0.7, 0.8, 0.88]); sp = rng.choice([0.01, 0.02, 0.03])
                 heavy = [rng.choice([80, 150, 300, 500]) for _ in range(5)]; thin = [rng.choice([0.4, 3.5, 6, 12, 20, 40]) for _ in range(rng.choice([5, 4, 3, 2]))]
@@ -93,8 +96,8 @@ def main(out, seed):
             with gzip.open(os.path.join(d, name + ".csv.gz"), "wt", newline="") as f:
                 w = csv.writer(f); w.writerow(cols); w.writerows(data)
         run_start += timedelta(hours=4)
-    print("made-up NC15 wheel fixture written to %s: %d run folders, %d windows over 11 series, %d planted cases, seed %d; read it with --now 2026-12-23T00:00:00Z" % (out, nrun, nwin, special, seed))
+    print("made-up NC15 wheel fixture written to %s: %d run folders, %d windows over 11 series, %d planted cases, seed %d; read it with --now 2026-12-23T00:00:00Z" % (out, nrun, nwin, special, seed) + (" (variant confexp)" if confexp else ""))
 
 
 if __name__ == "__main__":
-    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5)
+    main(sys.argv[1], int(sys.argv[2]) if len(sys.argv) > 2 else 5, len(sys.argv) > 3 and sys.argv[3] == "confexp")
