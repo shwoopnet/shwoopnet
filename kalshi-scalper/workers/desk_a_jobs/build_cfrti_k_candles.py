@@ -13,7 +13,7 @@ def iso_ts(s):
     try: return calendar.timegm(time.strptime(re.sub(r"\.\d+Z$", "Z", s), "%Y-%m-%dT%H:%M:%SZ"))
     except Exception: return None
 def read_markets(folder):
-    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "desk_a_verify")); import heldout_guard; heldout_guard.refuse_heldout(folder, "build_cfrti_k_candles")      # standing rule (h)
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "desk_a_verify")); import heldout_guard_v2 as heldout_guard; heldout_guard.refuse_heldout(folder, "build_cfrti_k_candles")      # standing rule (h)
     man = json.load(open(os.path.join(folder, "manifest.json"))); out = {}
     for row in man["rows"]:
         if row.get("status") != 200 or "file" not in row: continue
