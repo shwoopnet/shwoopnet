@@ -1,0 +1,43 @@
+== measure hand
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 12 | entries 4 | skipped ask out of band 1, no candle at the entry minute 1, no state minute 3, no strike one goal away 1, not two-sided 1, spread too wide 1 [invented rows only, not a result]
+ask at entry: median 35.0 cents | lowest 15 | highest 45 [invented rows only, not a result]
+entries a week over the 4 week development window: 1.00 [invented rows only, not a result]
+STAGE 1: CLOSED (median ask above 45 cents: False | fewer than 6 entries a week: True) [invented rows only, not a result]
+== score hand
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 12 | entries 4 | settled 4 | skipped ask out of band 1, no candle at the entry minute 1, no state minute 3, no strike one goal away 1, not two-sided 1, spread too wide 1 [invented rows only, not a result]
+development: n 4 | wins 2 | net +0.6000 | mean +0.1500 | cash PF 1.66 [invented rows only, not a result]
+first half: n 3 | wins 2 | net +1.0780 | mean +0.3593 | cash PF 3.52 [invented rows only, not a result]
+second half: n 1 | wins 0 | net -0.4780 | mean -0.4780 | cash PF 0.00 [invented rows only, not a result]
+VERDICT: NOT_ENOUGH_DATA (4 settled entries, need 150) [invented rows only, not a result]
+== measure pass
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 160 | entries 160 | skipped none [invented rows only, not a result]
+ask at entry: median 30.0 cents | lowest 30 | highest 30 [invented rows only, not a result]
+entries a week over the 4 week development window: 40.00 [invented rows only, not a result]
+STAGE 1: NOT CLOSED (a stage 2 registration may be written) [invented rows only, not a result]
+== score pass
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 160 | entries 160 | settled 160 | skipped none [invented rows only, not a result]
+development: n 160 | wins 106 | net +54.0000 | mean +0.3375 | cash PF 4.08 [invented rows only, not a result]
+first half: n 73 | wins 48 | net +24.2750 | mean +0.3325 | cash PF 3.99 [invented rows only, not a result]
+second half: n 87 | wins 58 | net +29.7250 | mean +0.3417 | cash PF 4.15 [invented rows only, not a result]
+VERDICT: SURVIVES DEVELOPMENT (the held-out is a later, reviewed read; nothing here is approved) [invented rows only, not a result]
+== measure fail
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 160 | entries 160 | skipped none [invented rows only, not a result]
+ask at entry: median 30.0 cents | lowest 30 | highest 30 [invented rows only, not a result]
+entries a week over the 4 week development window: 40.00 [invented rows only, not a result]
+STAGE 1: NOT CLOSED (a stage 2 registration may be written) [invented rows only, not a result]
+== score fail
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 160 | entries 160 | settled 160 | skipped none [invented rows only, not a result]
+development: n 160 | wins 40 | net -12.0000 | mean -0.0750 | cash PF 0.69 [invented rows only, not a result]
+first half: n 73 | wins 19 | net -4.7250 | mean -0.0647 | cash PF 0.73 [invented rows only, not a result]
+second half: n 87 | wins 21 | net -7.2750 | mean -0.0836 | cash PF 0.66 [invented rows only, not a result]
+VERDICT: FALSIFIED (cash PF line 1.5, both halves at 1.0, net above 0) [invented rows only, not a result]
+== measure outside
+REFUSED: game o1 closes outside the development window (held-out starts 2026-12-15T00:00:00Z)
+== score outside
+REFUSED: game o1 closes outside the development window (held-out starts 2026-12-15T00:00:00Z)

@@ -1,0 +1,51 @@
+{
+ "owner": "DESK_B",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ },
+ "status": "active",
+ "job_id": "ENDNET_LISTS",
+ "registration": "kalshi-scalper/workers/livedata_cards/LIVEDATA_CARDS_NOV13.md",
+ "purpose": "ENDNET stage 1 (measurement, zero tries): settled total-goals markets (KXNHLTOTAL) closing 2026-11-17 to 2026-12-14, for tickers, strikes and close times. The candle job is built from this answer by a later builder; no result is read here.",
+ "heldout": "none read: the request is bounded by close time to the DEVELOPMENT window 2026-11-17T00:00:00Z to 2026-12-14T23:59:59Z; ENDNET's own held-out (closes from 2026-12-15T00:00Z to 2027-01-31) is not asked for. Cards that hold NHL series out (HELDOUT_REGISTRY.md on rnd-queue, Nov 13): NHLG1 (KXNHLGAME and KXNHLTOTAL, READ spent, frozen cut 2026-10-03), FAMSPORTS (KXNHLTOTAL, spent), W-CAT-SPORTS1 (released), W-SPREAD-CELL1 (spent), TIE3 (KXNHL1P, KXNHL2P, KXNHL3P, KXNHLOT: a different series from KXNHLTOTAL, held-out from 2026-11-13, closed unread), NHLOT (closed). No unread card holds KXNHLTOTAL inside the window. The answer holds result fields; only the frozen scorer's stage 2 reads them. CANNOT BE DISPATCHED before 2026-12-15 (the window must be complete) and not before probe B2 shows whether a finished game's play-by-play is retrievable (the state source); the Head of R&D and Auditor B check it first.",
+ "allowed_endpoints": [
+  {
+   "name": "markets_list",
+   "method": "GET",
+   "path_pattern": "/markets",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "min_close_ts",
+    "max_close_ts",
+    "limit",
+    "cursor"
+   ]
+  }
+ ],
+ "series_allowlist": [
+  "KXNHLTOTAL"
+ ],
+ "ticker_allowlist": [],
+ "max_requests": 6,
+ "requests": [
+  {
+   "id": "set_KXNHLTOTAL",
+   "path": "/markets",
+   "params": {
+    "series_ticker": "KXNHLTOTAL",
+    "status": "settled",
+    "min_close_ts": 1794873600,
+    "max_close_ts": 1797292799,
+    "limit": 1000
+   },
+   "max_pages": 4
+  }
+ ],
+ "notes": "DRAFT, not sent (the Head of R&D, 15:09Z Nov 13). Estimate: about 300 games and 2,000 markets in four weeks, so 2 to 3 pages. The candle job (about 150 requests, last 45 minutes before each close, 100 tickers a request) is built from this answer by a later builder and goes to the Head with its count. The state (period, clock, score) is NOT in this job: it comes from Kalshi's live data and waits for probe B2."
+}
