@@ -112,3 +112,16 @@ The Testing Desk built a second reader from this note alone (commit a7b2a5fc on 
 2. **Pin 7, the two-sided share** is the two-sided strikes over the strikes with a candle found. The number of sampled markets is printed, so the share over all sampled strikes can be worked by hand.
 3. **The candle job's requests (pin 1's builder).** One request holds one time range, at most 100 tickers and at most 9,800 candles (tickers times the minutes of the range, both ends counted). Clock hours are taken in time order; an hour shares a request with the next hour only if that hour closes at most 3,600 seconds later and both limits still hold; otherwise it has its own request. A request's range runs from 60 minutes before its first close to its last close. The cap is 110 requests; over the cap, or with an hour that breaks a limit by itself, no job is written and the count goes to the Head of R&D.
 4. **Pin 9, the size at the touch** is the one pooled median of the YES bid and YES ask sizes above zero per series (the second build printed the same pooled figure, with the two sides beside it).
+
+## Held-out line, Nov 13, 2026, 07:06Z, before any list or candle of these series was pulled (the Head of R&D's order of 06:53Z). No pin, figure or reading changes.
+
+The sample is unchanged: the four series KXTEMPNYCHS, KXTEMPMIAH, KXTEMPLAXHS and KXTEMPCHIHS, closes 2026-11-05T00:00:00Z to 2026-11-11T23:59:59Z. Every card found that ever held out these series, with its state:
+
+- **W-CAT-CAL1 weather (Refinement):** held-out closes at or after 2026-10-20T06:00:00Z, never read. **Released by the Head of R&D 2026-11-13 (dated line in its registration on `claude/refine-live`, 06:51Z): the held-out will never be scored under that card. Development here.**
+- **WXNEW1 (research chat, run once 2026-10-31):** frozen holdout 2026-10-19 to 2026-10-31, not read. Miami FALSIFIED; Chicago, New York and coastal Los Angeles not tested (NOT_ENOUGH_DATA), no forward plan. Its dates end before this sample starts: no overlap.
+- **WXOTHER1 (research chat, 2026-11-04):** declares the hourly family a DUPLICATE of WXNEW1 and does not score it. It holds nothing out on these series.
+- **This note's own later card, if one is ever written:** the seven sample days already carry result fields, so they could only be development for it (pin 5, as written).
+
+No OPEN card holds any of the four series inside the sample dates.
+
+**What was swept:** by whole-word series name, every text file of main, `rnd-queue`, the desk branches (testing, history miner, idea desks A and C, forensics, probe, stocks, research audit), `claude/refine-live` and the research chat's whole tree (`claude/epic-ptolemy-0amjd9` at 79724f00). Because the research chat and Refinement often write series as a pattern or a category, their weather registrations (WXNEW1, WXOTHER1, WXENS1, WXLOW1, FAMWX) and Refinement's category cards were also read by hand. Not swept: the website's feature branches, which hold no research card. A card that names these series only by a pattern in a file not read by hand could have been missed.
