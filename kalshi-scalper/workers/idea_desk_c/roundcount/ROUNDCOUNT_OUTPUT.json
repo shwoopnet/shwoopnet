@@ -1,0 +1,68 @@
+{
+ "nc15": {
+  "best_bid_at_round_ratio_vs_neighbours": {
+   "10": 1.539,
+   "25": 1.215,
+   "50": 1.129,
+   "75": 1.079,
+   "90": 0.808
+  },
+  "level_observations": 223257,
+  "round_presence_ratio_vs_neighbours": {
+   "10": 1.06,
+   "25": 1.149,
+   "50": 1.03,
+   "75": 1.008,
+   "90": 0.933
+  },
+  "round_size_ratio_vs_neighbours": {
+   "10": 1.091,
+   "25": 1.017,
+   "50": 0.985,
+   "75": 0.986,
+   "90": 0.896
+  },
+  "size_all_cents_median": 307662.3900000003
+ },
+ "r6": {
+  "best_bid_at_round_ratio_vs_neighbours": {
+   "10": 1.587,
+   "25": 1.036,
+   "50": 1.012,
+   "75": 0.942,
+   "90": 0.738
+  },
+  "level_observations": 4255300,
+  "round_presence_ratio_vs_neighbours": {
+   "10": 2.631,
+   "25": 1.005,
+   "50": 1.009,
+   "75": 0.997,
+   "90": 0.956
+  },
+  "round_size_ratio_vs_neighbours": {
+   "10": 2.35,
+   "25": 1.145,
+   "50": 1.059,
+   "75": 1.012,
+   "90": 0.595
+  },
+  "size_all_cents_median": 42846562.420001335
+ },
+ "skipped_unopened": {
+  "nc15_other_series_row": 225359,
+  "r6_row_outside_window": 2206
+ },
+ "staleness_ms_between_book_changes_r6": {
+  "weekday": {
+   "median": 2000,
+   "n": 204473,
+   "p90": 2047
+  },
+  "weekend": {
+   "median": 2000,
+   "n": 238520,
+   "p90": 2039
+  }
+ }
+}
