@@ -107,3 +107,49 @@
 | W-SPOTLEAD1, its unseen block | not found in HELDOUT_REGISTRY under that name; Auditor B to name the dates | To be checked by Auditor B | If frozen: frozen-read clause. If not: the overlapped dates are labelled "not blind" for W-SPOTLEAD1 |
 
 - **(d) The held-out end.** R6 runs to 2026-12-31 on main (the Verification Analyst; `END_UTC = "2026-12-31T23:59:00Z"` in `scripts/record_15m_book.py`), and so does the OKX recorder. The held-out is closes 2026-11-30T00:00:00Z to before 2027-01-01T00:00:00Z, a date constant. It is read once on or after 2027-01-02 on the Head's go. Every earlier mention of Dec 15 and Dec 16 in this card is corrected in place; Amendment 1's sentence on the end is marked superseded.
+
+## Amendment 3 (Nov 13, 2026, before any data): readings R1 to R15, ruled by the Head of R&D
+
+Scorer build 1 (`liqrev/liqrev_score.py`, 32a1d7fa) had to fix fifteen points this card left open. The Head of R&D ruled on Nov 13 (about 21:08Z):
+- R1, R2, R5, R7 and R15 are accepted as written;
+- R9 is option (c);
+- the others stand as written.
+Where this amendment and the text above differ, this amendment is right. The Testing Desk writes build 2 from this card alone.
+
+**R9 in plain words:** the conflict rule (no bet in a window where OICORE or CFRTI-K took the opposite side) is DROPPED for the PAPER read. No money is at risk, and the bot's live order log may not enter this public repo. It stays a HARD CONDITION for any future live seat: LIQREV gets no live seat without it, and without the new interference rule of Amendment 2 (b).
+
+**Readings that change the bet beyond the card's text, flagged:**
+- **R5b:** both sides at H in the same minute means no bet in that window.
+- **R6:** no R6 poll within 10 s after the trigger minute means no bet.
+- **R15:** a window without OKX coverage is skipped.
+All three only REMOVE bets; none adds or changes one.
+
+- **R1, side:** in OKX's liquidation feed, `side` is the side of the liquidation ORDER. `sell` means a long position was liquidated (forced selling, so bet YES); `buy` means a short was liquidated (forced buying, so bet NO). `pos_side` is not used, because net-mode rows carry `net`.
+- **R2, size in BTC:** BTC-USDT-SWAP is `sz` x 0.01 BTC. BTC-USD-SWAP is `sz` x 100 USD / `bk_px`. Contract values are from OKX's instrument spec, to be confirmed by the probe or the recorder's notes. Any other instrument is refused.
+- **R3, L(t):** the BTC of one side with `ts_ms` in [t - 180 s, t), where t is a whole-minute boundary.
+- **R4, trigger minutes:** the whole-minute boundaries t with close minus t from 720 s to 180 s inclusive, so 10 checks a window, in time order.
+- **R5, H:**
+  - the 99th percentile, nearest rank (ceil(0.99 x n)), over BOTH sides' L(t) pooled, two values a minute, for every whole minute from 2026-11-10T00:00Z to before 2026-11-17T00:00Z;
+  - minutes outside the OKX recorder's coverage are left out;
+  - H is a frozen input to the scorer and is not computed until Auditor B is CLEAN.
+- **R5b, both sides at once:** if both sides reach H at the same minute, there is no bet in that window (counted as "both_sides").
+- **R6, the quote:** the first R6 poll with `t_recv_ms` in (t, t + 10 s]; none means "no_quote". YES ask = 1 - `no_bid_px_1`; NO ask = 1 - `yes_bid_px_1`; spread = YES ask - `yes_bid_px_1` for both sides. It is usable only if 0 < yes bid < YES ask < 1.
+- **R7, band and spread:** ask 0.20 to 0.80 and spread 0.04 or less, inclusive, with a 1e-9 tolerance, on the ask seen. If the first trigger minute fails them, the window is USED: no later minute is tried.
+- **R8, fill and fee:** at the ask seen with no +1c, plus the fee 0.07 x p x (1 - p) rounded up to the cent. A void is a fee-only loss counted as a bet. Results other than yes, no or void are refused, and so is a duplicate window.
+- **R9, the conflict rule:** RULED option (c): dropped for the paper read; a hard condition for any live seat (above).
+- **R10, results:** from public settled results, joined by ticker.
+- **R11, statistics:**
+  - PF = gross gain / gross loss;
+  - z is clustered by the US Central date of the close, using the sample standard deviation over days with at least one bet;
+  - all bar tests are on unrounded values.
+- **R12, duplicates:** OKX rows are de-duplicated on the recorder's own key (inst_id, ts_ms, side, pos_side, bk_px, sz).
+- **R13, read guards:**
+  - development read refused before 2026-11-30T00:00Z;
+  - held-out read refused before 2027-01-02T00:00Z, and it runs once (a marker file);
+  - development mode ignores and counts held-out windows.
+- **R14, kills:**
+  - zero-try count: fewer than 60 triggered windows with a two-sided quote closes it, where triggered = bets plus band or spread failures;
+  - development: fewer than 60 bets, PF under 1.0, or a half under 1.2;
+  - with fewer than 30 bets: "no evidence at n = x";
+  - held-out: PASS only if development CONTINUEs, PF is 1.5 or better in development half 1, half 2 and the held-out, and the held-out z is 5.46 or more; otherwise FALSIFIED, which closes the liquidation-fade family.
+- **R15, coverage:** a window is scored only if one OKX recorder coverage interval contains [close - 720 s - 180 s, close - 180 s). Otherwise it is "no_liq_coverage", because a missing feed would read as no liquidations. Coverage intervals come from the recorder's coverage.csv. How they are built belongs to the row builder (a separate file, written later and audited).
