@@ -33,3 +33,18 @@ For the Head of R&D, under the 15:19Z instruction. No Kalshi request; no price, 
 1. **ERCOT:** its terms read by Main and a registered-key decision by the owner, AND real volume in the Texas power market (it is thin now).
 2. **Election night official returns:** a list of 2027 election nights with Kalshi markets, and the terms of each state's results site.
 3. **State gas:** a reason the state-level market behaves differently from the national one, which GAS1 and GAS2 closed. None is known.
+
+## Follow-up, six workers (Nov 13, 2026, 15:30Z to 15:50Z; public pages only, 0 Kalshi requests)
+
+**Counts:**
+- 6 places followed up; 1 card (GASCYCLE, `GASCYCLE_CARD.md`); 5 closed with reasons.
+- One saved ERCOT PDF that a fetch tool wrote by itself was deleted unread.
+
+| Opening | What the worker found | Verdict |
+|---|---|---|
+| ERCOT and Texas peak demand (KXTXERCOTPEAKD) | The Public API needs a free key, a human-registered account and at most 30 calls a minute. The website terms (clause 5) let raw public data be used and redistributed unmodified; clause 6 bars anything that degrades the site; there is no scraping clause. ERCOT publishes a 168 hour forecast; a vendor puts its day-ahead hourly error at about 1.9%. The settlement figure was not confirmed (Kalshi's rules page returned 429). | Closed for now. The market is thin (about 39 contracts a market). ERCOT's own forecast is public, so it is the market's anchor, not an edge. A forecast-against-market rule on a weather-driven load is very close to the closed weather family. Needs: real volume, the settlement report confirmed, and the owner's word on a registered key. |
+| 2027 election nights | About 10 nights: the Wisconsin court, the Chicago mayor, Kentucky, Mississippi and Louisiana governors, the New Jersey and Virginia legislatures, and the Philadelphia and Houston mayors. Only New Jersey's terms explicitly allow copying; Kentucky, Virginia and Louisiana are silent ("All rights reserved"); Chicago and Mississippi blocked the read; the rest were unread; the feed vendors' terms were unread. | Closed for now: a slow family (about 10 events a year) and forward only; terms are mostly silent, and silence is not permission. Needs: Kalshi listings for those nights, the vendor terms, and a per-state terms read before any recorder. |
+| State gas prices | Tax changes are 1c to 3c and public months ahead, so no edge. The Edgeworth price cycle in the upper Midwest (restorations of 10c or more after 1 to 2 weeks of decline; FTC WP303, Lewis and Noel, Noel 2010) is a real state-level mechanism. | **Card: GASCYCLE** (066159b6), zero-try count first |
+| AI and compute (Ramp AI Index, OpenRouter, H100 OCPI, LMArena) | The settlement source is the earliest public value. OpenRouter's terms bar automated reads. Ornn, arena.ai and Ramp terms were unread. What remains is a late "already shown" read (favourite-late) or "the leader stays leader" (favourite-and-hold). | Closed |
+| Company KPI markets | Four events a year per company. The free leads (Tesla registration trackers) are public and likely priced. App and web panels are paid. EDGAR bars crawlers outside its policy. | Closed |
+| Health and transport | Measles is V2's HEALTHCOUNT1 idea, with about 4 events. There is no live COVID market. Flight cancellations settle on FlightAware (banned), access is restricted, and airlines are the informed side. | Closed |
