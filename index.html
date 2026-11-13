@@ -994,6 +994,9 @@
   .sp-b-ok, .sp-b-live{ border-color:var(--paper); } .sp-b-warn{ border-color:var(--paper); border-style:dashed; } .sp-b-idle, .sp-b-deck{ color:var(--muted); } .sp-b-hot{ background:var(--paper); color:var(--ink,#000); border-color:var(--paper); } .sp-b-prob{ border-color:var(--muted); } .sp-b-off{ border-style:dashed; color:var(--muted); }
   /* Off / Retired groups look and fold like the Live rows (Nov 13, 2026, the owner): a row with a chevron, the group name and its count; opening it lists the strategies in it. */
   .lp-rows .sp-rgrp{ margin:8px 0 0; } .lp-rows .sp-rgrp > summary{ justify-content:flex-start; gap:10px; min-height:52px; padding:6px 14px 6px 8px; border-radius:10px; background:var(--ink,#0b0b0b); text-transform:none; font-size:13px; } .lp-rows .sp-rgrp > summary:hover{ border-color:#8a8a8a; } .lp-rows .sp-rgrp[open] > summary{ border-color:#666; } .sp-rgt::first-letter{ text-transform:uppercase; } .lp-rows .sp-rgrp .sp-rgn{ margin-left:auto; } .sp-rgrp[open] > summary > .chev{ transform:rotate(45deg); border-color:var(--paper); }
+  /* Timeframe buttons on the line charts (Nov 13, 2026): the Account result's pill buttons, small, beside the chart's title. */
+  .sp-sum-top, .sc-ph{ display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap; } .sc-ph h5{ margin:0; } .sp-rng{ display:flex; gap:4px; flex:none; } .sp-rng .kal-pill{ min-height:28px; min-width:36px; padding:2px 8px; font-size:11.5px; }
+  @media (max-width:560px){ .sp-rng .kal-pill{ min-height:36px; min-width:42px; } }
   .sp-rgrp{ margin:10px 0 0; } .sp-rgrp > summary{ display:flex; justify-content:space-between; align-items:center; gap:8px; min-height:44px; padding:0 14px; border:1px solid var(--border); border-radius:12px; cursor:pointer; font-weight:700; text-transform:capitalize; list-style:none; } .sp-rgrp > summary::-webkit-details-marker{ display:none; } .sp-rgn{ color:var(--muted); font-variant-numeric:tabular-nums; } .sp-rgrp[open] > summary{ border-bottom-left-radius:0; border-bottom-right-radius:0; } .sp-rgrp > .sp-rlist{ border-top:0; border-top-left-radius:0; border-top-right-radius:0; }
   .sp-detsm{ margin-top:0; align-self:center; padding:4px 12px; min-height:40px; }
   .sp-gloss{ margin:14px 0 0; border:1px solid var(--border); border-radius:16px; background:var(--panel); padding:12px 16px; }
@@ -1868,6 +1871,10 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Strategies page, Live box (the owner: "should this record complete just be moved to 'live'?"): a strategy that has finished its 90 trade record now shows plain "Live" instead of "Record complete"; its chart pop-up still says "Not proven yet · x.xx of 1.3" until it wins at least 1.3 times what it loses. The duplicate "closest kill" line in the box's top right is gone (each row shows its own), and the box's intro line is in plain words. Page only.</li>
+                  <li>Strategies page timeframes (the owner: "i love every part of it besides the part that i cant select timeframes on it"): the all strategies chart has 1D, 7D, 30D and All buttons (30D by default); the win/loss ring, the header and the trade count follow the choice. Each strategy's "Money made over time" chart has the same buttons and the same choice, counted from zero at the start of the range. Phone and desktop. Page only.</li>
+                  <li>Strategies page, Off / Retired box (the owner: "this looks a little weird"): each group (Failed the bar, Killed while live, Family closed, Superseded) is now a row like the Live rows, with a chevron and a count, closed until tapped; the strategy lines inside no longer repeat the group name; the duplicate return line in the top right is gone; the footer reads in plain words with no "as of" date. Page only.</li>
+                  <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
                   <li>Strategies page, Off / Retired box (the owner: "this looks a little weird"): each group (Failed the bar, Killed while live, Family closed, Superseded) is now a row like the Live rows, with a chevron and a count, closed until tapped; the strategy lines inside no longer repeat the group name; the duplicate return line in the top right is gone; the footer reads in plain words with no "as of" date. Page only.</li>
                   <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
                   <li>Phone layout matches the desktop site (the owner: "lets start building mobile out too"): the Bot page Account card shows the balance, Today, the loss stop and then the order switch, in the desktop order; on the Strategies page the stage boxes line up, the top box says "N trades" and the page opens with a plain line on what it shows; a tap on any chart shows its readout and a sideways drag moves it (the Account result line and the Brief charts now answer a tap too), while an up or down drag still scrolls. Page only.</li>
@@ -4549,14 +4556,20 @@ kalshiStatusTick();
     return (orders || []).filter(function(o){ return o && Number(o.fillCount) > 0 && o.settled !== true && !(Number(o.exitCount) >= Number(o.fillCount)); }).length;
   }
   // The summary bar: blended cash profit factor (30 days, every strategy), net cash since the start, today and the last 7 days, the money at risk now (openCost of the Stop Loss meter: open orders at their worst case) and the open positions.
-  function kalshiStratSummary(orders, now, openCost, dayOf){
-    var rows = kalshiBoardRows(orders), today = dayOf(now);
-    var w30 = kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; }));
+  // Timeframes for the line charts (Nov 13, 2026, the owner: "i love every part of it besides the part that i cant select timeframes on it"). One choice for the whole Strategies page (the all strategies chart and every strategy's money chart), kept for this visit only; 30D is the default.
+  var KAL_STRAT_RANGES = [{ key: '1D', days: 1, word: 'last 24 hours', from: '24 hours ago' }, { key: '7D', days: 7, word: 'last 7 days', from: '7 days ago' }, { key: '30D', days: 30, word: 'last 30 days', from: '30 days ago' }, { key: 'All', days: 0, word: 'all time', from: 'First trade' }];
+  var kalshiStratRange = '30D';
+  function kalshiStratRangeOf(k){ for(var i = 0; i < KAL_STRAT_RANGES.length; i++){ if(KAL_STRAT_RANGES[i].key === k){ return KAL_STRAT_RANGES[i]; } } return KAL_STRAT_RANGES[2]; }
+  function kalshiStratRangeHtml(k, esc){ return '<div class="sp-rng" role="group" aria-label="Timeframe">' + KAL_STRAT_RANGES.map(function(r){ return '<button type="button" class="kal-pill' + (r.key === k ? ' on' : '') + '" data-strng="' + esc(r.key) + '" data-f="rng:' + esc(r.key) + '" aria-pressed="' + (r.key === k) + '">' + esc(r.key) + '</button>'; }).join('') + '</div>'; }
+  function kalshiStratSummary(orders, now, openCost, dayOf, rangeKey){
+    var rows = kalshiBoardRows(orders), today = dayOf(now), rg = kalshiStratRangeOf(rangeKey || '30D');
+    var inR = function(r){ return !rg.days || r.ts >= now - rg.days * KAL_BOARD_DAY; };
+    var w30 = kalshiBoardPf(rows.filter(inR));   // named w30 for the gates written before the timeframes; it is the chosen range (30 days by default)
     var day = kalshiBoardPf(rows.filter(function(r){ return dayOf(r.ts) === today; })), d7 = kalshiBoardPf(rows.filter(function(r){ return r.ts >= now - 7 * KAL_BOARD_DAY; }));
     var cost = Number(openCost);
     // The 30 day cash curve (Nov 13, 2026, the owner chose the dial and curve): the running cash result of the last 30 days' settled trades, oldest first, starting at zero.
-    var r30 = rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; }), run = 0, curve = [0].concat(r30.map(function(r){ run += r.p; return kalshiStratR(run); }));
-    return { w30: w30, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders), curve: curve, curveFrom: r30.length ? r30[0].ts : null, curveT: r30.length ? [r30[0].ts].concat(r30.map(function(r){ return r.ts; })) : [] };
+    var r30 = rows.filter(inR), run = 0, curve = [0].concat(r30.map(function(r){ run += r.p; return kalshiStratR(run); }));
+    return { w30: w30, range: rg.key, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders), curve: curve, curveFrom: r30.length ? r30[0].ts : null, curveT: r30.length ? [r30[0].ts].concat(r30.map(function(r){ return r.ts; })) : [] };
   }
   // Everything the detail panel of one live strategy shows, from its orders: the cumulative cash line, win rate, average win and loss, fees (the stored fee a contract times the contracts filled, where it is stored), best and worst day and the last n settled trades.
   function kalshiStratDetail(orders, nameOf, dayOf, nRecent){
@@ -4613,10 +4626,13 @@ kalshiStatusTick();
     var pf = kalshiBoardPfText(s.w30), r = kalshiStratRing(pf), tx = kalshiStratRingText(pf);
     var ring = '<div class="sp-sum-pf"><div class="sp-sum-ring"><svg viewBox="0 0 100 100" aria-hidden="true"><circle class="sp-ring-bg" cx="50" cy="50" r="42"/>' + (r.frac > 0 ? '<circle class="sp-ring-fg" pathLength="1" cx="50" cy="50" r="42" transform="rotate(-90 50 50)" stroke-dasharray="1" stroke-dashoffset="' + (1 - r.frac).toFixed(3) + '"/>' : '') + '<line class="sp-ring-tick" x1="50" y1="86" x2="50" y2="97"/></svg>' +
       '<div class="sp-sum-in">' + (tx.num ? '<b' + kalshiStratPfAttr(pf, esc) + '>' + esc(pf) + '</b>' : '<b>' + esc(tx.glyph) + '</b>') + '<span>' + esc(tx.num ? 'win/loss' : tx.cap) + '</span></div></div></div>';
-    var line = kalshiStratCumLine(s.curve || [], 300, 70), from = s.curveFrom ? kalshiStratDayText(new Date(s.curveFrom).toISOString().slice(0, 10)) : '';
-    var chart = line ? '<svg class="sp-sum-curve" viewBox="0 0 300 70" preserveAspectRatio="none" role="img" aria-label="' + esc('30 day cash result over ' + (line.n - 1) + ' trades') + '"><line x1="0" x2="300" y1="' + line.zeroY + '" y2="' + line.zeroY + '" class="sp-sum-zero"/><path class="sp-sum-area" d="' + line.d + ' L' + line.lastX + ' 70 L0 70Z"/><path class="sp-sum-ln" d="' + line.d + '"/></svg><i class="sp-sum-dot" style="left:' + (line.lastX / 3).toFixed(2) + '%;top:' + (line.lastY / 0.7).toFixed(2) + '%"></i>' :
-      '<div class="sp-sum-none">No settled trades in the last 30 days.</div>';
+    var rg = kalshiStratRangeOf(s.range || '30D');
+    var line = kalshiStratCumLine(s.curve || [], 300, 70), from = s.curveFrom ? (rg.days === 1 ? kalshiHoverWhen(s.curveFrom) : kalshiStratDayText(new Date(s.curveFrom).toISOString().slice(0, 10))) : '';
+    var chart = line ? '<svg class="sp-sum-curve" viewBox="0 0 300 70" preserveAspectRatio="none" role="img" aria-label="' + esc('Cash result, ' + rg.word + ', over ' + (line.n - 1) + ' trades') + '"><line x1="0" x2="300" y1="' + line.zeroY + '" y2="' + line.zeroY + '" class="sp-sum-zero"/><path class="sp-sum-area" d="' + line.d + ' L' + line.lastX + ' 70 L0 70Z"/><path class="sp-sum-ln" d="' + line.d + '"/></svg><i class="sp-sum-dot" style="left:' + (line.lastX / 3).toFixed(2) + '%;top:' + (line.lastY / 0.7).toFixed(2) + '%"></i>' :
+      '<div class="sp-sum-none">' + esc(rg.days ? 'No settled trades in the ' + rg.word + '.' : 'No settled trades yet.') + '</div>';
     return '<div class="kal-card sp-sum">' + ring +
+      '<div class="sp-sum-mid"><div class="sp-sum-top"><div class="sp-sum-k">All strategies &middot; ' + esc(rg.word) + ' &middot; ' + s.w30.n + ' trades</div>' + kalshiStratRangeHtml(rg.key, esc) + '</div>' +
+      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>cash result, dashed line is zero</span><span>Now</span></div></div>' +
       '<div class="sp-sum-mid"><div class="sp-sum-k">All strategies &middot; last 30 days &middot; ' + s.w30.n + ' trades</div>' +
       '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? '30 days ago' : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || '30 days ago') + '</span><span>30 day cash result, dashed line is zero</span><span>Today</span></div></div>' +
       '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
@@ -4788,7 +4804,7 @@ kalshiStatusTick();
   var KAL_GLOSSARY_HTML = '<details class="sp-gloss"><summary>What the words on this page mean</summary><dl>' + KAL_GLOSSARY.map(function(g){ return '<dt>' + g[0].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</dt><dd>' + g[1].replace(/&/g, '&amp;').replace(/</g, '&lt;') + '</dd>'; }).join('') + '</dl></details>';
   var KAL_STAGES = [
     { key: 'shadow', label: 'Shadow', sub: 'on paper', head: 'tracked on paper: what a strategy would have bought, no money at risk', then: 'wins enough on paper (150 trades, winning at least 1.3 times what it loses), then the owner approves' },
-    { key: 'live', label: 'Live', sub: 'real money', head: 'real money. A Trial strategy trades small while it builds a 60 + 30 trade record; Under review trades at its normal size while its record is checked (none has passed yet)', then: 'one of its stop rules trips' },
+    { key: 'live', label: 'Live', sub: 'real money', head: 'These trade real money. A strategy on Trial trades small until it has 90 trades on record, then it shows as Live. Under review means it trades at its normal size while its record is checked. None has proven itself yet (winning at least 1.3 times what it loses).', then: 'one of its stop rules trips' },
     { key: 'off', label: 'Off / Retired', sub: 'cooling down', head: 'switched off for now, or retired for good', then: 'a pause, then a fresh paper record' }
   ];
   // The box a live card belongs in, from its lane (kalshiStratLaneOf): a killed strategy is in Off / Retired, never in Live.
@@ -4836,9 +4852,16 @@ kalshiStatusTick();
     var none = function(t){ return '<div class="sc-none">' + esc(t) + '</div>'; };
     var hl = function(y, cls){ return '<line class="' + cls + '" x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '"/>'; };
     var panel = function(label, note, body, cls){ return '<div class="sc-p' + (cls ? ' ' + cls : '') + '"><h5>' + esc(label) + (note ? '<em>' + esc(note) + '</em>' : '') + '</h5>' + body + '</div>'; };
-    var cl = kalshiStratCumLine(c.cum || [], W, 150);
+    // The money chart follows the page's timeframe: the trades in the range, counted from zero at the range's start (Nov 13, 2026). Anything without times (an old call) draws the whole record.
+    var rg = kalshiStratRangeOf(c.range || 'All'), cum = c.cum || [], times = c.times || [];
+    if(rg.days && isFinite(c.now) && times.length === cum.length){
+      var cut = c.now - rg.days * 86400000, first = -1;
+      for(var ix = 1; ix < times.length; ix++){ if(isFinite(times[ix]) && times[ix] >= cut){ first = ix; break; } }
+      if(first < 0){ cum = [0]; times = [null]; } else { var base = cum[first - 1]; cum = [0].concat(cum.slice(first).map(function(v){ return kalshiStratR(v - base); })); times = [null].concat(times.slice(first)); }
+    }
+    var cl = kalshiStratCumLine(cum, W, 150);
     var hvBox = function(h, pts, inner){ return '<div class="hv"' + kalshiHoverAttr(pts, esc) + '>' + inner + '</div>'; };
-    var cash = cl ? hvBox(150, cl.pts.map(function(p, i){ var t = (c.times || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? 'Start' : 'Trade ' + i + (t ? ', ' + kalshiHoverWhen(t) : '')) + ' · ' + sg(p.v) }; }), svg(150, hl(cl.zeroY, 'sc-ref') + '<path class="sc-area" d="' + cl.d + ' L' + cl.lastX + ' 150 L0 150Z"/><path class="sc-ln" d="' + cl.d + '"/><line class="sc-end" x1="' + cl.lastX + '" x2="' + cl.lastX + '" y1="' + cl.lastY + '" y2="' + cl.lastY + '"/>', 'Cash result over ' + (cl.n - 1) + ' settled trades')) : none('Not enough settled trades yet.');
+    var cash = cl ? hvBox(150, cl.pts.map(function(p, i){ var t = times[i]; return { x: p.x, y: p.y, t: (i === 0 ? (rg.days ? rg.from : 'Start') : 'Trade ' + i + (t ? ', ' + kalshiHoverWhen(t) : '')) + ' · ' + sg(p.v) }; }), svg(150, hl(cl.zeroY, 'sc-ref') + '<path class="sc-area" d="' + cl.d + ' L' + cl.lastX + ' 150 L0 150Z"/><path class="sc-ln" d="' + cl.d + '"/><line class="sc-end" x1="' + cl.lastX + '" x2="' + cl.lastX + '" y1="' + cl.lastY + '" y2="' + cl.lastY + '"/>', 'Cash result over ' + (cl.n - 1) + ' settled trades')) : none(rg.days && (c.cum || []).length > 1 ? 'No settled trades in the ' + rg.word + '.' : 'Not enough settled trades yet.');
     var rv = (c.roll || []).filter(function(x){ return typeof x === 'number' && isFinite(x); }), pf;
     if(rv.length >= 2){
       var Y = function(x){ return Math.round((6 + (1 - Math.min(3, Math.max(0, x)) / 3) * 98) * 100) / 100; };
@@ -4853,10 +4876,10 @@ kalshiStatusTick();
     var line = function(k, v){ return v ? '<dt>' + esc(k) + '</dt><dd>' + esc(v) + '</dd>' : ''; };
     return '<div class="sc">' + (c.rule ? '<div class="sc-rule">' + esc(c.rule) + '</div>' : '') + (c.warn ? '<div class="sc-warn">' + esc(c.warn) + '</div>' : '') +
       '<div class="sc-stats">' + chip('Total made', mo(c.net)) + chip('Win rate', pc(c.winRate)) + chip('Average win', mo(c.avgWin)) + chip('Average loss', mo(c.avgLoss)) + '</div>' +
-      panel('Money made over time', (c.n || 0) + ' trades · dashed: zero', cash) +
+      '<div class="sc-p"><div class="sc-ph"><h5>Money made over time<em>' + esc((cum.length - 1) + ' trades · ' + rg.word + ' · dashed: zero') + '</em></h5>' + kalshiStratRangeHtml(rg.key, esc) + '</div>' + cash + '</div>' +
       '<div class="sc-two">' + panel('Last 14 days', '', days) + panel('Win/loss ratio, last 30 trades', 'dashed: break even (1.0) · dotted: target (1.3)', pf) + '</div>' +
       (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') +
-      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? 'Record complete · ' + (c.trialNote || 'review due') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
+      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? (c.trialNote || 'Record done') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
       (c.kill || c.ret ? '<dl class="sc-rules">' + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' : '') + '</div>';
   }
   function kalshiBoardHtml(model, esc, money){
@@ -4900,7 +4923,7 @@ kalshiStatusTick();
     var box = { shadow: [], live: [], off: [] }, kills = { live: [] }, trials = 0;
     // The trial-to-proven step shown inside Live: a trial seat counts its settled fills toward the 60 + 30 record (docs/ROTATION_LANE.md section 5a: 60 fills at 1.3, then 30 more at 1.0); a strategy that is not a seat is Proven. The count is progress only, never a pass: the record's profit factor bars are judged by the review, not here.
     // At 90 fills the count is done but the record is judged by the review, never by the page. The owner (Nov 13, 2026) was confused by "Trial 90 of 90" on a seat whose PF was under the bar, so the tag now says plainly that the record is complete and what its cash PF still needs (the 1.3 the record asks for), or that the review is due once it is there.
-    var trialTag = function(lane, fills, pf){ if(lane !== 'probation'){ return { text: 'Under review', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); if(n < 90){ return { text: 'Trial ' + n + ' of 90', trial: true }; } return { text: 'Record complete', note: typeof pf === 'number' && isFinite(pf) && pf < 1.3 ? 'win/loss ' + pf.toFixed(2) + ', needs 1.3 to pass' : 'review due', trial: true }; };   // the row's badge stays short (a phone row had no room for the whole line); the sheet's Trial bar carries the note
+    var trialTag = function(lane, fills, pf){ if(lane !== 'probation'){ return { text: 'Under review', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); if(n < 90){ return { text: 'Trial ' + n + ' of 90', trial: true }; } return { text: 'Live', trial: false, done: true, note: typeof pf === 'number' && isFinite(pf) && pf < 1.3 ? 'Not proven yet · ' + pf.toFixed(2) + ' of 1.3' : 'Record done · meets 1.3' }; };   // a finished record reads plain Live (Nov 13, 2026, the owner: "should this record complete just be moved to 'live'?"); the sheet's Trial bar still says whether it is proven
     // ---- Live, Probation and Off rows: the cards the page computes from the bot's own orders and kill state ----
     (model.live || []).forEach(function(s){
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
@@ -4925,8 +4948,8 @@ kalshiStatusTick();
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
       var tg = trialTag(lane, s.w.all.n, s.w.all.pf); if(bk === 'live' && tg.trial){ trials++; }
       // The chart sheet's block (option A): only when the caller passed the strategy's settled rows (renderStrategiesPage does; an older caller draws the rows as before).
-      var dd = s.detail || {}, charts = Array.isArray(s.rows) ? kalshiStratChartsHtml({ rule: s.rule, net: s.w.all.net, cum: [0].concat(dd.cum || []), times: [null].concat(s.rows.map(function(r){ return r.ts; })), roll: s.spark, daily: s.daily || [], n: dd.n, winRate: dd.winRate, avgWin: dd.avgWin, avgLoss: dd.avgLoss, kill: killWords, ret: retWords,
-        gauge: bk !== 'off' && g && !unreadable && !loading ? g : null, trial: tg.trial && !waiting ? Math.max(0, Math.floor(Number(s.w.all.n) || 0)) : null, trialNote: tg.note || '',
+      var dd = s.detail || {}, charts = Array.isArray(s.rows) ? kalshiStratChartsHtml({ range: model.range || '30D', now: now, rule: s.rule, net: s.w.all.net, cum: [0].concat(dd.cum || []), times: [null].concat(s.rows.map(function(r){ return r.ts; })), roll: s.spark, daily: s.daily || [], n: dd.n, winRate: dd.winRate, avgWin: dd.avgWin, avgLoss: dd.avgLoss, kill: killWords, ret: retWords,
+        gauge: bk !== 'off' && g && !unreadable && !loading ? g : null, trial: (tg.trial || tg.done) && !waiting ? Math.max(0, Math.floor(Number(s.w.all.n) || 0)) : null, trialNote: tg.note || '',
         back: bk === 'off' && ret ? { frac: ret.frac, text: ret.trades + ' of 60 trades · ' + ret.days + ' of 7 days · ' + ret.losses + ' of 10 losses · PF ' + (ret.pf === null ? 'n/a' : ret.pf.toFixed(2)) + ' of 1.30' } : null,
         warn: unreadable ? 'Kill state not readable. Do not read this card as healthy.' : loading ? 'Reading the kill state...' : (s.note || '') }, esc, money) : '';
       if(waiting){ box.shadow.push({ key: s.id, name: s.name, stage: 'Approved', stCls: 'deck', pf: pf, word: 'WAITING', frac: 0, cap: 'approved seat, no order yet', detail: detail, more: mo, charts: charts, g: null }); return; }
@@ -4973,7 +4996,7 @@ kalshiStatusTick();
     // ---- The header line and each box's progress line ----
     var prog = {
       shadow: shadowBest ? [shadowBest.n / 150, 'closest: ' + shadowBest.n + ' of 150 signals'] : [0, 'no shadow rule counting yet'],
-      live: nearest && kills.live.indexOf(nearest) >= 0 ? [nearest.frac, 'closest kill: ' + nearest.name + ', ' + Math.round(nearest.frac * 100) + '% used'] : [0, unreadableGold ? 'kill state not readable' : 'no kill distance to show'],
+      live: [0, ''],   // no progress line on the Live box (Nov 13, 2026, the owner): each row already shows its own nearest stop rule
       off: goldRet ? [goldRet.frac, 'return: ' + goldRet.trades + ' of 60 trades'] : [0, 'nothing to return yet']
     };
     var openKey = model.open && KAL_STAGES.some(function(s){ return s.key === model.open.stage; }) ? model.open.stage : null;
@@ -4998,6 +5021,7 @@ kalshiStatusTick();
     };
     var panels = KAL_STAGES.map(function(s){
       var isOpen = openKey === s.key;
+      return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '>' + (s.key === 'off' || s.key === 'live' ? '' : '<div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div>') + '<div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
       return '<section class="lp-p" id="lp-p-' + s.key + '" aria-label="' + esc(s.label) + '"' + (isOpen ? '' : ' hidden') + '>' + (s.key === 'off' ? '' : '<div class="lp-prog" aria-hidden="true"><i style="--w:' + pct(prog[s.key][0]).toFixed(1) + '%"></i><span>' + esc(prog[s.key][1]) + ' &rarr; ' + esc(s.then) + '</span></div>') + '<div class="lp-ph"><b>' + esc(s.label) + '</b><span>' + esc(s.head) + '</span></div><div class="lp-rows">' + bodies[s.key] + '</div></section>';
     }).join('');
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
@@ -5126,7 +5150,7 @@ kalshiStatusTick();
     var deck = { state: state, rows: KAL_BOARD_SHADOW.map(function(r, i){ return { id: r.id, rule: r.rule, rep: rep[i], spark: rows ? kalshiStratCumulative(kalshiStratShadowSeries(rows, r.id)) : [], detail: rows ? kalshiStratShadowDetail(rows, r.id, kalDayKey) : null }; }) };
     var st = document.getElementById('stratStatus'); if(st){ st.textContent = kalshiOrdersLoaded ? '' : 'Reading the bot\'s orders...'; }
     // The summary reads the Stop Loss meter's open cost (the same worst case figure). Recent activity was removed on Nov 13, 2026 (the owner: the notifications and trade log already carry it).
-    var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey);
+    var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey, kalshiStratRange);
     kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
     var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
@@ -5136,7 +5160,7 @@ kalshiStatusTick();
     var focusKey = document.activeElement && document.activeElement.getAttribute ? document.activeElement.getAttribute('data-f') : null;
     // The loop's moving dots, the grid drift and the pulses are infinite CSS animations; a redraw replaces their elements, which restarted every one of them from zero on each data update (the owner, Nov 13, 2026: "a very obvious restart animation ... almost as if the page refreshes"). A negative delay of the time since the page loaded puts each new element at the phase the old one had, so a redraw is seamless.
     page.style.setProperty('--lp-sync', -Math.round(typeof performance !== 'undefined' && performance.now ? performance.now() : 0) + 'ms');
-    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData }, escapeHtml, kalshiMoney);
+    el.innerHTML = kalshiBoardHtml({ live: live, deck: deck, registry: regSplit, registryList: kalshiRegistry.list, regRetired: regRetired, registryState: kalshiRegistry.state, retired: KAL_BOARD_RETIRED, summary: summary, open: kalshiStratOpen, timeText: kalDateTime, now: now, regData: kalshiRegData, range: kalshiStratRange }, escapeHtml, kalshiMoney);
     if(focusKey){ var fs = el.querySelectorAll('[data-f]'); for(var fi = 0; fi < fs.length; fi++){ if(fs[fi].getAttribute('data-f') === focusKey){ fs[fi].focus(); break; } } }
     // A redraw never replays the animation: it stops any play in progress (the new markup is at rest, true values) and starts one only when showPage asked for it and the page has its data.
     // A play that would start late looks like the page restarting (the owner, Nov 13, 2026: "it'll wait a few seconds, load then restart"): the shadow log answering seconds after the page opened replayed the whole entrance. So it plays only when the data is there within KAL_STRAT_LATE_MS of the page opening; later, the values simply appear.
@@ -5191,6 +5215,7 @@ kalshiStatusTick();
     kalshiStratChart.refresh = function(){ if(!pop.hidden && openKey){ var b = rowOf(openKey); if(!b){ close(); return; } var sh = pop.querySelector('.sp-csheet'); sh.classList.remove('sc-play'); draw(); mark(openKey, true); } };
     pop.addEventListener('click', function(e){
       var t = e.target; if(t === pop || (t.closest && t.closest('#spChartClose'))){ close(); return; }
+      var g = t.closest ? t.closest('[data-strng]') : null; if(g){ kalshiStratRange = g.getAttribute('data-strng'); renderStrategiesPage(); }   // the same choice as the page's top chart
     });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !pop.hidden){ close(); } });
   })();
@@ -5245,6 +5270,7 @@ kalshiStatusTick();
     body.addEventListener('click', function(e){
       var t = e.target && e.target.closest ? e.target : null; if(!t){ return; }
       var r = t.closest('[data-row]'), m = t.closest('[data-more]'), s = t.closest('[data-stage]'), o;
+      var g = t.closest('[data-strng]'); if(g){ kalshiStratRange = g.getAttribute('data-strng'); renderStrategiesPage(); return; }
       if(r){ kalshiStratChart.open(r.getAttribute('data-row'), r); return; }
       if(m){ o = m.getAttribute('aria-expanded') !== 'true'; m.setAttribute('aria-expanded', String(o)); m.parentNode.classList.toggle('open', o); kalshiStratOpen['more:' + m.getAttribute('data-more')] = o; return; }
       if(s){ kalshiStratStage(s.getAttribute('data-stage')); }
