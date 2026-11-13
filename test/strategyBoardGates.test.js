@@ -161,7 +161,7 @@ gates.SB11 = () => {
   const masked = P.kalshiBoardHtml(model('unreadable'), esc, (x) => (x < 0 ? '-' : '') + '****');
   assert.ok(!/\$\d/.test(masked), 'no dollar figure appears when money masks them');
   assert.strictEqual((masked.match(/Shadow log not readable yet/g) || []).length, 4, 'every ON DECK rule says the log is not readable');
-  assert.ok(/can come back only after a 14 day break/.test(masked) && !/As of Nov/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
+  assert.ok(/Comes back when: 14 days after a slow-down stop/.test(masked) && !/owner/i.test(/class="sp-sub sp-back">[^<]*/.exec(masked)[0]) && !/As of Nov/.test(masked) && /class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(P.kalshiBoardHtml(model('ok'), esc, money))[0]) && !/class="sp-bar"/.test(/id="lp-p-shadow"[\s\S]*?<\/section>/.exec(masked)[0]), 'retired rows say when they come back; ON DECK rows with a log carry a progress bar');
   assert.ok(/XRP/.test(masked) && /Natural gas/.test(masked), 'the other groups still draw');
   assert.ok(/Reading the shadow log/.test(P.kalshiBoardHtml(model('loading'), esc, money)));
   const evil = P.kalshiBoardHtml({ live: [{ id: 'X', name: '<img src=x onerror=1>', rule: '"><script>', w: P.kalshiBoardWindows([], now), kill: { lines: ['<b>'] } }], deck: { state: 'unreadable', rows: [] }, retired: { asOf: '<i>', back: '<u>', rows: [{ name: 'n', pf: 1, n: 1 }] } }, esc, money);
@@ -173,16 +173,16 @@ gates.SB11 = () => {
 gates.SB13 = () => {
   // the owner's standing rule (Nov 10, 2026): every strategy shows IMPLEMENT, KILL and RETURN; a strategy without a written one says so instead of hiding the gap
   assert.ok(P.KAL_BOARD_LIVE.every((s) => Array.isArray(s.rules) && s.rules.length === 3), 'every live strategy carries three rules');
-  assert.ok(/never restarts by itself/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'OICORE').rules[2]), 'OICORE never restarts by itself (owner choice A, Nov 10)');
-  assert.ok(/no comeback rule of its own/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'EVENT830 shows its written return rule (the general lifecycle, as in the registry)');
+  assert.ok(/^30 days after a stop/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'OICORE').rules[2]), 'OICORE comes back by its own written rule (Nov 13, 2026, the owner: nothing should depend on me)');
+  assert.ok(/30 new release mornings on paper/.test(P.KAL_BOARD_LIVE.find((s) => s.id === 'EVENT830').rules[2]), 'EVENT830 shows its own written return rule');
   const now = Date.UTC(2026, 10, 10, 18, 0);
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
-  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, P.KAL_BOARD_LIVE.length, 'every live row keeps Implement, Kill and Return in its More layer (the stage board, Nov 12, 2026)');
+  assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, P.KAL_BOARD_LIVE.length, 'every live row keeps Goes live when, Stops when and Comes back when in its More layer (the stage board, Nov 12, 2026)');
   assert.strictEqual((h.match(/data-row=/g) || []).length >= 3, true, 'and each live strategy is a row that opens its chart sheet');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
-  assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
+  assert.ok(/<b>Goes live when<\/b>/.test(ok) && /<b>Stops when<\/b>/.test(ok) && /<b>Comes back when<\/b>/.test(ok));
 };
 gates.SB12 = () => {
   // no timer, no write, no storage: the board only reads, and the shadow read is cached for ten minutes without a retry loop

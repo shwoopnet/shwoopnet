@@ -9,7 +9,7 @@ const root = path.join(__dirname, '..');
 const reg = JSON.parse(fs.readFileSync(path.join(root, 'strategies-registry.json'), 'utf8'));
 const html = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 const gates = {};
-const KEYS = ['id', 'name', 'stage', 'rule', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return', 'retiredOn', 'reason', 'notes', 'code', 'roomTarget', 'roomWhat', 'cause', 'figures'];
+const KEYS = ['id', 'name', 'stage', 'rule', 'goesLive', 'label', 'startDate', 'nextRead', 'nextReadText', 'n', 'nBasis', 'kill', 'return', 'retiredOn', 'reason', 'notes', 'code', 'roomTarget', 'roomWhat', 'cause', 'figures'];
 const isDate = (s) => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s) && Number.isFinite(Date.parse(s + 'T00:00:00Z'));
 const nonEmpty = (s) => typeof s === 'string' && s.trim().length > 0;
 
@@ -137,7 +137,7 @@ gates.RG6 = () => {
   }
   assert.ok(P.kalshiStratSheetRow('NOPE', list, P.KAL_BOARD_LIVE) === null);
   const fb = P.kalshiStratSheetRow('OICORE', [], P.KAL_BOARD_LIVE);
-  assert.ok(fb && /24 losses in a row/.test(fb.kill) && /never restarts by itself/.test(fb['return']) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
+  assert.ok(fb && /24 losses in a row/.test(fb.kill) && /30 days after a stop/.test(fb['return']) && /Starts at \d+ contracts/.test(fb.goes) && fb.stage === 'Live', 'a registry that has not loaded still gives the page\'s own rules');
   // the content: five things only
   const live = { live: true, spark: [0.9, 1.1, 1.3, 1.2], kill: { streak: 3, net: -8, floorOn: true, floorRoom: 42, count: 18, lines: [] } };
   const row = P.kalshiStratSheetRow('OICORE', list, P.KAL_BOARD_LIVE);
