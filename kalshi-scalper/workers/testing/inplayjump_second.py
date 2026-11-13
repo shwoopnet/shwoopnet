@@ -276,6 +276,41 @@ def validation_counts(minute_idx, hourly_idx, codes):
     return {"minute_candles_in_an_hour_with_no_hourly_candle": a, "minute_closes_outside_their_hour_low_to_high": b}
 
 
+def hourly_candles(folders, ids=None):
+    """{ticker: {hour_end_ts: dict(bid_open, bid_high, bid_low, bid, ask_open, ask_high, ask_low, ask)}} from raw hourly candle answers (the open price is not in scorekit.candles, so the raw bodies are read here)."""
+    out = {}
+    f = lambda d, key: (None if not d or d.get(key) in (None, "") else float(d[key]))
+    for fo in ([folders] if isinstance(folders, str) else folders):
+        for row, body in k.iter_answers(fo):
+            if ids is not None and row["id"] not in ids: continue
+            for mk in (body.get("markets", []) if isinstance(body, dict) else []):
+                for c in mk.get("candlesticks", []):
+                    b, a = c.get("yes_bid") or {}, c.get("yes_ask") or {}
+                    out.setdefault(mk["market_ticker"], {})[c["end_period_ts"]] = {"bid_open": f(b, "open_dollars"), "bid_high": f(b, "high_dollars"), "bid_low": f(b, "low_dollars"), "bid": f(b, "close_dollars"),
+                                                                                   "ask_open": f(a, "open_dollars"), "ask_high": f(a, "high_dollars"), "ask_low": f(a, "low_dollars"), "ask": f(a, "close_dollars")}
+    return out
+
+
+def screened_vs_full(m, minute_idx, hourly_idx):
+    """The validation comparison for ONE tennis match (Amendment 6 point 2): the engine on the full minute pull from the open vs on the screened pull (minutes from 30 minutes before the first hour that is not skipped, forward). Compares the first in-play minute, the whole in-play set, the decision (bet), and counts any 2c step of the mid inside a skipped hour."""
+    ser_full = series_of(minute_idx, m); codes = m["codes"]
+    hourly = {c: hourly_idx.get(t, {}) for c, t in codes.items()}
+    if not any(hourly.values()): return {"skipped_hours": None, "note": "no hourly candles"}
+    skip = screen_skip_hours(hourly, list(codes)); hours = sorted({h for d in hourly.values() for h in d})
+    first_keep = next((h for h in hours if h not in skip), None)
+    scr = {t: {ts: c for ts, c in minute_idx.get(t, {}).items() if first_keep is not None and ts >= first_keep - 3600 - 30 * 60} for t in codes.values()}
+    ser_scr = series_of(scr, m)
+    in_full = {t for t in minutes_of(ser_full) if alive(ser_full, t)}; in_scr = {t for t in minutes_of(ser_scr) if alive(ser_scr, t)}
+    d_full, d_scr = decide(m, minute_idx), decide(m, scr)
+    steps_in_skipped = 0
+    for c, d in ser_full.items():
+        for ts, cd_ in d.items():
+            prev = d.get(ts - 60)
+            if two(cd_) and two(prev) and abs(mid(cd_) - mid(prev)) >= 0.02 - TOL and (-(-ts // 3600) * 3600) in skip: steps_in_skipped += 1
+    return {"hours": len(hours), "skipped_hours": len(skip & set(hours)), "first_in_play_same": first_in_play(m, ser_full) == first_in_play(m, ser_scr), "in_play_set_same": in_full == in_scr, "decision_same": d_full == d_scr,
+            "two_cent_steps_inside_skipped_hours": steps_in_skipped}
+
+
 def pilot(list_folders, candle_folders):
     """The PILOT REPORT (counts, start check, cost; NO result read): per family, over the matches that have any candle in the pulled files."""
     spec = load_series(); ms, counts = build_matches(spec, list_folders)
