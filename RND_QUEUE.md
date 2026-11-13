@@ -824,3 +824,9 @@ NEW, registered, PAPER list only, each labelled UNPROVEN:
 - CROWDLEG (Desk C, 788eefb6, combo-only): needs a combo recorder change; one counts-only trial pull approved by Main.
 NOT NEW: SETTLEMENT-WINDOW (version of CFRTI-K), SPOTVOL1 (SPOTFLOW1 source, displacement-fade family), combo vs legs (MVE1), settled or near-certain legs (COMBODONE), tie asymmetry (TIECOND1), serial dependence (S06 to S11, SWEEP1 F5), EA leads a, b, c (lock and parity, favourite-and-hold, Polymarket parked).
 Shadow versions (not research): 3 OIVER places on Bitcoin and 12 OICORE places (XRP withdrawn, no book after Nov 13); source the nightly OI recorder (Desk B c4d38d6e, needs the owner's merge).
+
+## 2026-11-13 21:36Z, standing rule from the owner: exits beside hold
+Owner: "youre utilizing scalps right, not everything has to be hold to settlement right".
+- Every NEW card registers at least ONE exit variant beside hold-to-settlement (profit target, stop, time exit, or in-and-out inside the window), fixed in the card before any data, priced with real fees and the book fill check (R6 next poll within 4 s, NC15 within 6 s; candle-only cards say so and are labelled upper bound).
+- Each exit variant is a separate try in the deflation ledger. No exit is chosen after seeing results; the card names which variant is its headline before the read.
+- Cards already registered tonight (OPENGAP1, CONGCAL, FEDREGPI, CROWDLEG, NOTAKER, DOGMOVE queued) add one dated exit-variant line before any read.
