@@ -46,9 +46,10 @@ assert "share of parent signals removed by the spread condition: 40.0%" in out a
 # a window with NO fill candle at all still trades now (the fill is the ask seen at the decision candle)
 c0 = base + 900 * 30; tk0 = "KXBTC15M-NF"; mk3 = [{"ticker": tk0, "close_time": iso(c0), "result": "yes"}]; cd3 = [{"market_ticker": tk0, "candlesticks": [C(c0 - 180, 0.08, 0.10, 1100000), C(c0 - 360, 0.5, 0.5, 1000000)]}]
 d3 = tempfile.mkdtemp(); w3, _ = O.load_windows(folder(d3, "l", {"markets": mk3})); t3, r3 = O.decide(w3[tk0], O.load_candles(folder(d3, "c", {"markets": cd3}))[tk0]); assert r3 == "trade" and abs(t3["p"] - 0.10) < 1e-12
-# halves by COUNT: 5 trades split 3 and 2 (the first half gets the extra one), in date order
-tr5 = [dict(close=i * 86400, cash=0.1, win=True) for i in range(5)]; h1, h2 = O.halves(tr5); assert (len(h1), len(h2)) == (3, 2) and h1[-1]["close"] == 2 * 86400 and h2[0]["close"] == 3 * 86400
+# halves by COUNT: the first half is FLOOR(n / 2) trades, in date order (the Head, 19:54Z): 5 trades split 2 and 3
+tr5 = [dict(close=i * 86400, cash=0.1, win=True) for i in range(5)]; h1, h2 = O.halves(tr5); assert (len(h1), len(h2)) == (2, 3) and h1[-1]["close"] == 1 * 86400 and h2[0]["close"] == 2 * 86400
 tr4 = [dict(close=i * 86400, cash=0.1, win=True) for i in range(4)]; h1, h2 = O.halves(tr4); assert (len(h1), len(h2)) == (2, 2)
+tr1 = [dict(close=0, cash=0.1, win=True)]; h1, h2 = O.halves(tr1); assert (len(h1), len(h2)) == (0, 1)
 # 86,300 is INCLUSIVE: a rise of exactly 86,300 fires, 86,299 does not
 for rise, fired in ((86300, True), (86299, False)):
     c1 = base + 900 * 31; wx = dict(close=c1, yes=True); csx = {c1 - 180: dict(bid=0.08, ask=0.10, oi=1000000.0 + rise), c1 - 360: dict(bid=0.5, ask=0.5, oi=1000000.0)}
