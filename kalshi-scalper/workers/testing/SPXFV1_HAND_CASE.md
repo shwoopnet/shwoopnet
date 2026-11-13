@@ -35,3 +35,5 @@ a = 0.0005 alternating log changes: sd_1m = a x sqrt(10/9) = 0.00052705; sd = sd
 - INFORMATION ONLY (unrounded fee): net +0.7811, PF 7.937.
 - Thirds in development: first traded close 15:00, last 15:30 (the 2 and 3 are on the 15:15 and 15:30 closes): equal spans of 10 minutes each: W1 in third 1, W2 in third 2, W3 in third 3.
 - Label: no evidence at n = 3.
+
+CLOSED UNREAD 2026-11-13, family declined; no value opened
