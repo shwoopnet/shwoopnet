@@ -847,3 +847,11 @@ A candle-based development read counts toward the 20 to 30 only if the VA rules 
 - C4 Fees: Kalshi's taker fee on every leg at the haircut price, rounded up to the cent per order at the card's stated contract count (scorekit.fee_rounded), divided back per contract.
 - C5 Fill assumed (no size data): every signal counts as filled. That is why the label is "upper bound".
 - C6 Unchanged: the card's halves rule (floor(n/2) by count), the deflation count, the fixed held-out date (unread), rule 16b (two builds agree), and Auditor B's CLEAN before any read.
+
+## 2026-11-13 21:49Z, candle haircut rule: VA confirmation and additions (adopted)
+The VA confirmed C1 to C6 (its re-run: Bitcoin cheaper-side ask, 95.9% within 1c at the 120 s look, 98.3% pooled; the tail is mean-zero and sits in the last 1 to 2 minutes). Adopted:
+- C7 Every candle read prints its result at 1c AND at 2c (sensitivity, not a new try). A rule counts toward the 20 to 30 only if cash PF >= 1.3 (both halves >= 1.0) at 1c AND cash PF >= 1.0 at 2c.
+- C8 A rule that enters or exits in the last 2 minutes before the close uses 2c as its primary haircut (the 1-minute-left candle matched the book only 80% of the time).
+- C9 Every line carries "upper bound, not fill-checked": fill share below 100% was measured (FILLHAIRCUT1, GOLDHAIRCUT1), and C5 ignores it.
+- C10 Each line states its fee mode ("per-order rounded", C4). A VOID refunds the price, keeps the fee, and is counted and printed.
+Limit: the 1c sizing was measured on Bitcoin's ask side only; other series and the exit side are assumed symmetric, untested.
