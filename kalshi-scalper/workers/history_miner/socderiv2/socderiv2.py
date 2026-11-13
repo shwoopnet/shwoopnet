@@ -33,7 +33,7 @@ READINGS = [
     "R11 residual: per fit, sqrt(SSE / number of fitted legs); the median over fits is reported",
     "R12 one-way cost per target: (ask - mid) + entry fee, fee = ceil to the cent of 0.07 x p x (1 - p) with p = cheaper-side ask + 0.01; the cell's cost is the median; CLOSED on cost above 0.04",
     "R13 n for the minimum = filled games (games with at least one filled target of that type); targets filled are also printed",
-    "R14 verdict order: not tradable, then closed on cost, then no evidence at n = x, then efficient or survives; every flag is printed beside the verdict",
+    "R14 verdict order (Desk B second dated amendment, e12b26cd, sha256 228e7860...): no evidence at n = x (under 150 filled games), then closed on cost, then not tradable, then efficient or survives; every flag is printed beside the verdict",
     "R15 quantiles: median by statistics.median; quartiles and 90th percentile by linear interpolation between order statistics at (n - 1) x q",
 ]
 
@@ -282,12 +282,12 @@ def run(series_path, lists_dir, candles_dir):
         share, pshare = st.get("share_gap8_spread4"), ps.get("share_gap8_spread4")
         flags["survives_share_test"] = (share is not None and pshare is not None and share >= 0.10 - EPS
                                         and share >= 2 * pshare - EPS)
-        if flags["not_tradable"]:
-            v = "closed: not tradable"
+        if flags["under_minimum"]:
+            v = "no evidence at n = %d" % nf
         elif flags["closed_on_cost"]:
             v = "closed on cost (selected on development)"
-        elif flags["under_minimum"]:
-            v = "no evidence at n = %d" % nf
+        elif flags["not_tradable"]:
+            v = "closed: not tradable"
         elif flags["survives_share_test"]:
             v = "survives the measurement"
         else:
