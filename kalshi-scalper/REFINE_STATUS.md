@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-13 05:00 PM CT (23:00Z): S-LIM1-LIVE end stamp: OICORE limit slip OFF from 2026-11-13T17:59:25Z
+
+Main (Nov 13): SLOT_LIMIT_SLIP is empty on main and in the deployed commit c6f54bed; kalshiLiveArmed stamped 2026-11-13T17:59:25Z running it (nightly report deploys block). Checked in the repo: git grep at c6f54bed shows SLOT_LIMIT_SLIP = Object.freeze({}). So the S-LIM1-LIVE tracker ends at that stamp (file SLIP_OFF_TS, no figures); OICORE orders placed at or after it are touch-priced, before it slip-on; there is no pending revert deploy. The before/after read keeps its plan (new touch-priced fills only, NOT_ENOUGH_DATA below 40 new fills) and the 100-fill read is taken on the whole record and on the touch-priced fills separately. The live OICORE net kill is -50 after 40 fills (PR 904), streak 24; my earlier -6 figure was the old line. Also: XRPYES10 was retired Nov 11, its orders in the top line are old; balance moves are bot net plus the owner's own manual trades. No figures here.
+
 ## 2026-11-13 09:57 AM CT (15:57Z): OICORE read extended to 100 fills; slip-on / touch-priced split
 
 Main (Nov 13): extension to 100 fills (about Nov 19) is the registered next step. Change: once PR 895 is live (owner's merge, then deploy-sizing), every fill is tagged slip-on (placed before the deploy time Main sends) or touch-priced (after), and the 100-fill verdict is read on the whole record AND on the touch-priced fills separately. The deploy time is not known yet; until it arrives all fills are slip-on. Registered before the data; no figures.
