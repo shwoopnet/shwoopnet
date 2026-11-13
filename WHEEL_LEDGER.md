@@ -16,6 +16,7 @@ Expected lucky clears with no edge anywhere (a fairly priced market, one fee los
 | 2026-11-13T00:23:49Z (batch 2 admitted on the auditor's "closed", definitions only: 7 NC15 depth-cell places count from this instant; CFRTI-K on Bitcoin is admitted but mute until the archive carries its perpetual) | 22 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:26Z (REMATCH's e-soccer place withdrawn: closed at stage 1 on tradeability, two builds agree) | 21 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
 | 2026-11-13 00:48Z (both MAPBREAK places withdrawn: out at step 1 at both looks on every title, two builds agree) | 19 | 8 admitted, 7 able to count | 0 | 0 | 0 | 0 |
+| 2026-11-13T02:24:00Z (the 7 NC15 places RESTART their forward count here: the block rules of section 4 were closed and two builds agreed at this time; signals between 00:23:49Z and this time do not count; ESOCTIE's place withdrawn at 02:03Z) | 18 | 8 admitted, 7 counting from this time | 0 | 0 | 0 | 0 |
 
 ## Probation seats (rules section 5a; live results by message only, never here)
 
