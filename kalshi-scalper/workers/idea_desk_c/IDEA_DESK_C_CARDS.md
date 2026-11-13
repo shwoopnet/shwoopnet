@@ -20,3 +20,5 @@ Reports to the Head of R&D. Ranked by (odds x events fetchable now). Nothing sco
 - **Uniqueness (7d) and declined list.** Signal: the mid strike of a prop ladder, a market type no live or shadow rule uses. Not favourite-and-hold (40c to 60c), not cheap-side, not a lock or parity scan, not taker flow, not market making, not in-game. Closest: PROPS1 (cheap side), FAMSPORTS (a totals model, falsified). Desk B's filter says a crowd bias is worth 1 to 3 points; this card exists only because the one published prop number is far larger, and it says so.
 - **Data and terms.** Kalshi public data only.
 - **Odds.** 1% to reach the bar (cut from 2% after the evidence check, registration Amendment 1); about 85% that it closes at the cost kill or in development.
+
+- **Closed for want of a source (Nov 13, 2026, Head of R&D):** the settling-average idea for KXGENERICBALLOTVOTEHUB (signal from the published polling average the market settles on). VoteHub refuses automated fetches (HTTP 403 on its terms page and homepage), so its terms are unread and it is not cleared. Not registered, no try counted. The only unblock is the owner reading VoteHub's terms in a browser.
