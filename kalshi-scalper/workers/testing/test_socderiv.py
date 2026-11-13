@@ -49,6 +49,10 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert all(len(g["winner"]) == 3 and len(g["totals"]) == 5 and len(g["teamtotals"]) == 2 for g in gs)
     assert "result" not in json.dumps(gs)                                                                 # no result field kept anywhere
     jc, _ = s.build_candles(spec, [dl]); kp.check_job(jc); assert 1 <= len(jc["requests"]) <= 500
+    # ---- the two job files (Head: A and B by kickoff date, cut at a pack boundary, union equals the whole, no ticker in both, each with slack and the held-out line)
+    A_, B_ = s.split_candles(jc); kp.check_job(A_); kp.check_job(B_)
+    assert len(A_["requests"]) + len(B_["requests"]) == len(jc["requests"]) and A_["max_requests"] == len(A_["requests"]) + 20 and "HELDOUT_REGISTRY" in A_["heldout"] and "SHARP1" in B_["heldout"]
+    assert not (set(A_["ticker_allowlist"]) & set(B_["ticker_allowlist"])) and A_["job_id"] == "SOCDERIV_CANDLES_A"
     def build(edge_btts, half, placebo_noise=0.0, thin=False):
         cm = {}
         for g in gs:
@@ -84,5 +88,5 @@ assert abs(s.one_way(0.7, 0.46, 0.54) - (0.04 + s.fee_up(0.55))) < 1e-9
 rows4 = [{"gap": 0.15, "spread": 0.54 - 0.50, "round_trip": 0.1, "one_way": 0.04} for _ in range(10)] + [{"gap": 0.0, "spread": 0.02, "round_trip": 0.1, "one_way": 0.04} for _ in range(90)]
 assert s.stats(rows4)["fires"] == 10 and abs(s.stats(rows4)["share_gap_ge_8c_spread_le_4c"] - 0.1) < 1e-9          # a 4c spread written 0.54 - 0.50 counts
 f1, f2, rr = s.fit((0.40, 0.30, 0.30), {1.5: 0.80, 10.5: 0.001}); assert f1 > 0 and f2 > 0                                  # a 10.5 strike does not crash the fit
-assert s.near_strike({3.5: 0.55, 2.5: 0.45}) == 2.5 and s.near_strike({2.5: 0.45, 3.5: 0.55}) == 2.5 and s.near_strike({1.5: 0.9, 2.5: 0.52, 3.5: 0.2}) == 2.5
+assert s.near_strike({3.5: (0.54, 0.56), 2.5: (0.44, 0.46)}) == 2.5 and s.near_strike({2.5: (0.44, 0.46), 3.5: (0.54, 0.56)}) == 2.5 and s.near_strike({1.5: (0.89, 0.91), 2.5: (0.51, 0.53), 3.5: (0.19, 0.21)}) == 2.5
 print("socderiv synthetic tests passed")

@@ -11,7 +11,7 @@ both-teams-to-score = (1 - e^-l1)(1 - e^-l2); team total over k.5 = P(count > k.
 Team-total markets are used only where floor_strike is given and the team is readable from the ticker's last segment (a prefix equal to a team code of the game); else counted 'unreadable'.
 Kill (registration): under 150 filled games in a group and target type = 'no evidence at n = x'; group CLOSED on cost if the median round trip of its targets is above 5c; 'not tradable' if under half of the games with a derivable kickoff are filled;
 'efficient, move on' (with the 90th percentile gap) unless the share of targets with a gap of 8c or more and spread 4c or less is at least 10 percent AND at least twice the placebo's share.
-Commands: build-lists | games <lists...> | build-candles <lists...> | measure <lists...> --candles <folders...>
+Commands: build-lists | games <lists...> | build-candles <lists...> | build-candles-split <out folder> <lists...> |  | measure <lists...> --candles <folders...>
 """
 import calendar, hashlib, json, math, os, statistics as st, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
@@ -27,8 +27,8 @@ GUARD_LO, GUARD_HI = 100 * 60, 135 * 60
 GAP, SPREAD_MAX, MIN_FILLED, EDGE_SHARE, COST_MAX, PACK_LIMIT, PACK_SPAN_S = 0.08, 0.04, 150, 0.10, 0.04, 9000, 3 * 3600
 SUFFIXES = {"winner": "GAME", "total": "TOTAL", "btts": "BTTS", "teamtotal": "TEAMTOTAL"}
 REG = "kalshi-scalper/workers/testing/SOCDERIV_MEASUREMENT.md"
-HELDOUT_LINE = ("none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested; a measurement: no rule scored, no try. Cards found that ever held out these series (Desk B dated line, registration 03c50460 and later): W-CAT-SPORTS1 (five series, released 06:51Z), "
-               "SOCCER1 and SOCCERELO1 (matches from 2026-10-03T16:00Z, eight leagues, 24 series; released 07:09Z), USWEEP2 (22 series; released 07:09Z), SHARP1 (open; kickoffs March to September 2026, before this window, untouched). To be checked against HELDOUT_REGISTRY.md on rnd-queue by the Head.")
+HELDOUT_LINE = ("none read; nothing closing on or after 2026-11-13T00:00Z is listed or requested (this card's own held-out); a measurement: no rule scored, no try. Per HELDOUT_REGISTRY.md (rnd-queue cf3f4c06 copy) and Desk B's dated line (registration 03c50460 onward), cards found that ever held out these series (Desk B dated line, registration 03c50460 and later): W-CAT-SPORTS1 (five series, released 06:51Z), "
+               "SOCCER1 and SOCCERELO1 (matches from 2026-10-03T16:00Z, eight leagues, 24 series; released 07:09Z), USWEEP2 (22 series; released 07:09Z), SHARP1 (open; kickoffs March to September 2026, before this window, untouched). The Head reads this line against the registry before dispatch.")
 FRESH = "candle freshness measured on Bitcoin 15 minute only, not on sports"
 
 
@@ -177,9 +177,9 @@ def gap(value, b, a):
     return (value - a) if a <= 1 - b + 1e-9 else ((1 - value) - (1 - b))          # whole cents: a + b = 1.00 is a tie (float residue) and takes YES
 
 
-def near_strike(totm):
-    """The total strike whose mid is nearest 50c; an exact tie (mids 0.45 and 0.55) takes the lower strike (Auditor B F5; a dated line is to be written)."""
-    return min(totm, key=lambda kk: (round(abs(totm[kk] - 0.5), 9), kk))
+def near_strike(tot):
+    """The total-goals strike whose mid is nearest 50c, measured exactly on whole-cent quotes (mid in half-cent units: round((bid + ask) * 100) against 100); an exact tie takes the LOWER strike (Head, Desk B dated line 26ae3495). tot = {strike: (bid, ask)}."""
+    return min(tot, key=lambda kk: (abs(round((tot[kk][0] + tot[kk][1]) * 100) - 100), kk))
 
 
 def stats(rows):
@@ -246,7 +246,7 @@ def measure(spec, list_folders, candle_folders):
             row = {"gap": gap(val, b, a), "spread": a - b, "round_trip": (a - b) + 2 * 0.07 * mid * (1 - mid), "one_way": one_way(val, b, a)}
             rows.setdefault((g["group"], typ), {"targets": [], "placebo": []})["targets"].append(row)
             # placebo: refit with the total strike nearest 50c left out, compare its model value with its own quote
-            near = near_strike(totm); rest = {kk: v for kk, v in totm.items() if kk != near}
+            near = near_strike(tot); rest = {kk: v for kk, v in totm.items() if kk != near}
             if len(rest) >= 2 and (g["league"], g["game"], ts, typ) not in seen_pl:
                 seen_pl.add((g["league"], g["game"], ts, typ))
                 pk = ck + (near,)
@@ -262,16 +262,31 @@ def measure(spec, list_folders, candle_folders):
     for grp, G in games_by_group.items():
         out["groups"][grp] = {"games_with_derivable_kickoff": G["derivable"]}
         for typ in ("btts", "teamtotal"):
-            R = rows.get((grp, typ), {"targets": [], "placebo": []}); filled = G[typ]["filled"]; der = G[typ]["derivable"]
+            R = rows.get((grp, typ), {"targets": [], "placebo": []}); filled = G[typ]["filled"]; with_target = G[typ]["derivable"]; der = G["derivable"]          # F6 (Head, literal text): the denominator is ALL the group's games with a derivable kickoff
             s_t, s_p = stats(R["targets"]), stats(R["placebo"])
-            share_filled = None if not der else round(filled / der, 3)
+            share_filled = None if not der else round(filled / der, 3)          # printed only; the test below is on the integers
             if filled < MIN_FILLED: verdict = "no evidence at n = %d filled games" % filled
             elif s_t["median_one_way_entry_cost"] > COST_MAX: verdict = "CLOSED on cost: median one-way entry cost %.1fc is above 4c (hold to settlement; Desk B dated amendment)" % (100 * s_t["median_one_way_entry_cost"])
-            elif der and filled * 2 < der: verdict = "CLOSED: not tradable (under half of the derivable-kickoff games are filled)"
+            elif der and filled * 2 < der: verdict = "CLOSED: not tradable (under half of the games with a derivable kickoff are filled: %d of %d)" % (filled, der)
             elif s_t["fires"] * 10 >= s_t["n"] and s_t["fires"] * (s_p["n"] if s_p else 1) >= 2 * (s_p["fires"] if s_p else 0) * s_t["n"]: verdict = "SURVIVES the measurement (share at least 10 percent and at least twice the placebo's): a separate registration, tries = surviving cells"
             else: verdict = "CLOSED: efficient, move on. The one number: the 90th percentile gap %s" % (s_t["gap_quartiles_p90"] and s_t["gap_quartiles_p90"][3])
-            out["groups"][grp][typ] = {"games_with_a_target": der, "filled": filled, "share_filled": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
+            out["groups"][grp][typ] = {"games_with_a_derivable_kickoff_in_the_group": der, "games_with_a_target_of_this_type": with_target, "no_such_market_in_this_group": (with_target == 0), "filled": filled, "share_filled_of_all_derivable_games": share_filled, "targets": s_t, "placebo": s_p, "verdict": verdict}
     return out
+
+
+def split_candles(j):
+    """Two job files, A and B, by kickoff date: the requests are packed by kickoff time, so the cut is made at a request (pack) boundary near the middle and never through a request; the union of the two equals the whole job and no ticker is in both.
+    max_requests = requests + 20 each; each carries the held-out line."""
+    reqs = j["requests"]; cut = len(reqs) // 2; out = []
+    for name, part in (("A", reqs[:cut]), ("B", reqs[cut:])):
+        tk = sorted({t for r in part for t in r["params"]["market_tickers"].split(",")})
+        jj = dict(j, job_id="SOCDERIV_CANDLES_" + name, requests=part, ticker_allowlist=tk, series_allowlist=sorted({t.split("-")[0] for t in tk}), max_requests=len(part) + 20)
+        jj["purpose"] = j["purpose"] + " Part %s of two runs (the registration's size cap), by kickoff date." % name
+        jj["notes"] = j["notes"] + "; part %s of two" % name
+        out.append(jj)
+    A, B = out
+    assert not (set(A["ticker_allowlist"]) & set(B["ticker_allowlist"])) and set(A["ticker_allowlist"]) | set(B["ticker_allowlist"]) == set(j["ticker_allowlist"]) and len(A["requests"]) + len(B["requests"]) == len(reqs)
+    return A, B
 
 
 if __name__ == "__main__":
@@ -282,4 +297,8 @@ if __name__ == "__main__":
         if a[0] == "build-lists": print(json.dumps(build_lists(spec), indent=1))
         elif a[0] == "games": print(json.dumps(games(spec, a[1:])[1], indent=1))
         elif a[0] == "build-candles": j, c = build_candles(spec, a[1:]); print(json.dumps(j, indent=1)); print(json.dumps(c), file=sys.stderr)
+        elif a[0] == "build-candles-split":
+            j, c = build_candles(spec, a[2:]); A, B = split_candles(j)
+            for nm, jj in (("A", A), ("B", B)): open(os.path.join(a[1], "SOCDERIV_CANDLES_%s.json" % nm), "w").write(json.dumps(jj, indent=1) + "\n")
+            print(json.dumps({"requests": [len(A["requests"]), len(B["requests"])], "tickers": [len(A["ticker_allowlist"]), len(B["ticker_allowlist"])]}))
         elif a[0] == "measure": i = a.index("--candles"); print(json.dumps(measure(spec, a[1:i], a[i + 1:]), indent=1))
