@@ -39,14 +39,31 @@ def ts(iso):
     return int(datetime.fromisoformat(iso.replace("Z", "+00:00")).timestamp())
 
 
-def read_lists(run, prefix):
+THRESHOLD_TYPES = ("greater", "greater_or_equal")     # YES above a strike: a lower strike is the likelier YES
+
+
+def inside(run, name):
+    """The path of a file of a run. Refused if it lies in or resolves into a HELDOUT_ folder, or outside the run."""
+    path = os.path.join(run, str(name))
+    refuse_heldout(path)
+    root = os.path.realpath(run)
+    if not os.path.realpath(path).startswith(root + os.sep):
+        sys.exit("REFUSED: %s is not a file of the run %s" % (path, run))
+    return path
+
+
+def manifest(run):
     refuse_heldout(run)
-    man = json.load(open(os.path.join(run, "manifest.json")))
+    return json.load(open(inside(run, "manifest.json")))
+
+
+def read_lists(run, prefix):
+    man = manifest(run)
     out = []
     for row in man.get("rows", []):
         if row.get("status") != 200 or not str(row.get("id", "")).startswith(prefix):
             continue
-        body = json.load(gzip.open(os.path.join(run, row["file"]), "rt"))
+        body = json.load(gzip.open(inside(run, row["file"]), "rt"))
         out += [m for m in (body.get("markets", []) if isinstance(body, dict) else []) if str(m.get("ticker", "")).split("-")[0] in SERIES]
     return out
 
@@ -54,7 +71,7 @@ def read_lists(run, prefix):
 def cut_lists(run):
     """Pin 1, 'never cut': the ids of settled_ lists whose answers are not whole. A list is whole when every page was
     answered (status 200, not truncated) and its last page carries no cursor."""
-    man = json.load(open(os.path.join(run, "manifest.json")))
+    man = manifest(run)
     last, bad = {}, set()
     for row in man.get("rows", []):
         rid = str(row.get("id", ""))
@@ -66,16 +83,18 @@ def cut_lists(run):
         if rid not in last or int(row.get("page") or 1) >= int(last[rid].get("page") or 1):
             last[rid] = row
     for rid, row in last.items():
-        body = json.load(gzip.open(os.path.join(run, row["file"]), "rt"))
+        body = json.load(gzip.open(inside(run, row["file"]), "rt"))
         if not isinstance(body, dict) or body.get("cursor"):
             bad.add(rid)
     return sorted(bad | {"settled_" + s for s in SERIES if "settled_" + s not in last})
 
 
 def sample(run):
-    """Pin 1: the settled markets of the four series inside the fixed seven days. No result or price field is read."""
-    mk, skipped = {}, 0
+    """Pin 1: the settled markets of the four series inside the fixed seven days. No result or price field is read.
+    Returns the markets and the reasons, if any, why this sample must not be used (pins 1, 4 and 5)."""
+    mk, skipped, types, odd_life = {}, 0, {}, 0
     for m in read_lists(run, "settled_"):
+        types[str(m.get("strike_type"))] = types.get(str(m.get("strike_type")), 0) + 1
         try:
             row = {"ticker": m["ticker"], "event": m["event_ticker"], "series": m["ticker"].split("-")[0],
                    "strike": float(m["floor_strike"]), "open_ts": ts(m["open_time"]), "close_ts": ts(m["close_time"])}
@@ -84,12 +103,23 @@ def sample(run):
             continue
         if not ts(FROM) <= row["close_ts"] <= ts(TO):
             sys.exit("REFUSED: %s closes outside the fixed seven days" % row["ticker"])
+        odd_life += row["close_ts"] - row["open_ts"] != LIFE_S
         mk[row["ticker"]] = row
-    return mk, skipped
+    why = []
+    cut = cut_lists(run)
+    if cut:
+        why.append("A LIST IS MISSING OR NOT WHOLE (%s)" % ", ".join(cut))
+    if skipped:
+        why.append("%d LISTED MARKETS LACK A STRIKE, AN EVENT OR A TIME" % skipped)
+    if odd_life:
+        why.append("%d MARKETS DID NOT LIVE EXACTLY 60 MINUTES" % odd_life)
+    if len(types) != 1 or next(iter(types)) not in THRESHOLD_TYPES:
+        why.append("THE STRIKES ARE NOT ONE LADDER OF 'ABOVE' THRESHOLDS (strike types listed: %s)" % ", ".join("%s x %d" % kv for kv in sorted(types.items())))
+    return mk, why
 
 
 def cmd_job(run, out):
-    mk, skipped = sample(run)
+    mk, why = sample(run)
     hours = {}
     for m in mk.values():
         hours.setdefault(m["close_ts"], []).append(m["ticker"])
@@ -104,10 +134,10 @@ def cmd_job(run, out):
         else:
             groups.append((a - LIFE_S, a, sorted(hours[a])))
             i += 1
-    print("settled markets in the sample %d | listed markets left out for a missing field %d | clock hours %d | requests %d (cap %d)" % (len(mk), skipped, len(keys), len(groups), MAX_REQUESTS))
-    cut = cut_lists(run)
-    if cut:
-        print("A LIST IS MISSING OR NOT WHOLE (%s): no job written. The sample is never cut; this goes to the Head of R&D." % ", ".join(cut))
+    print("settled markets in the sample %d | clock hours %d | requests %d (cap %d)" % (len(mk), len(keys), len(groups), MAX_REQUESTS))
+    if why:
+        for w in why:
+            print("%s: no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D." % w)
         return
     if not mk:
         print("NO MARKET IN THE SAMPLE: no job written.")
@@ -163,30 +193,37 @@ def walk(node, found, hint=None):
 
 
 def read_candles(run):
+    """Candles by ticker and end time, and the count of candles that carry no volume field at all."""
     refuse_heldout(run)
-    found = {}
+    found, no_volume = {}, 0
     for f in sorted(glob.glob(os.path.join(run, "[0-9]*.json.gz"))):
-        walk(json.load(gzip.open(f, "rt")), found)
+        walk(json.load(gzip.open(inside(run, os.path.basename(f)), "rt")), found)
     out = {}
     for tk, cs in found.items():
         d = out.setdefault(tk, {})
         for c in cs:
+            no_volume += "volume_fp" not in c and "volume" not in c
             try:
                 v = float(c.get("volume_fp", c.get("volume")))
             except (TypeError, ValueError):
                 v = 0.0
             d[int(c["end_period_ts"])] = (price(c.get("yes_bid")), price(c.get("yes_ask")), v)
-    return out
+    return out, no_volume
 
 
 def whole_run(run):
-    """True if the candle run finished and every request of its job was answered whole (pin 10)."""
-    man = json.load(open(os.path.join(run, "manifest.json")))
+    """(True if the candle run finished and every request of its job was answered whole (pin 10), answered, asked,
+    the tickers its job asked for). A run whose manifest does not carry its job is refused: it cannot be tied to the sample."""
+    man = manifest(run)
     rows = man.get("rows", [])
-    asked = {r.get("id") for r in (man.get("job") or {}).get("requests", [])} or {r.get("id") for r in rows}
+    reqs = (man.get("job") or {}).get("requests")
+    if not isinstance(reqs, list) or not reqs:
+        sys.exit("REFUSED: the candle run's manifest does not carry its job, so it cannot be tied to the sample")
+    asked = {r.get("id") for r in reqs}
+    tickers = {t for r in reqs for t in str((r.get("params") or {}).get("market_tickers", "")).split(",") if t}
     good = {r.get("id") for r in rows if r.get("status") == 200 and not r.get("truncated")}
     bad = {r.get("id") for r in rows if r.get("status") != 200 or r.get("truncated")}
-    return man.get("status") == "complete" and bool(rows) and not bad and asked <= good, len(good - bad), len(asked)
+    return man.get("status") == "complete" and not bad and asked <= good, len(good - bad), len(asked), tickers
 
 
 def two_sided(c):
@@ -281,8 +318,15 @@ def cmd_measure(markets_path, lists_run, candle_run):
     for m in markets:
         if m["series"] not in SERIES or not ts(FROM) <= m["close_ts"] <= ts(TO):
             sys.exit("REFUSED: %s is outside the fixed sample" % m["ticker"])
-    cand = read_candles(candle_run)
-    whole, answered, asked = whole_run(candle_run)
+    mk, why = sample(lists_run)
+    if why:
+        sys.exit("REFUSED: " + "; ".join(why))
+    if markets != [mk[t] for t in sorted(mk)]:
+        sys.exit("REFUSED: markets.json is not the sample this lists run gives (%d markets here, %d in the lists)" % (len(markets), len(mk)))
+    whole, answered, asked, job_tickers = whole_run(candle_run)
+    if job_tickers != set(mk):
+        sys.exit("REFUSED: the candle run's job asked for %d tickers, the sample has %d, and the two sets differ" % (len(job_tickers), len(mk)))
+    cand, no_volume = read_candles(candle_run)
     print("HOURLY TEMPERATURE cost and timing measurement, zero tries | %s%s" % (LABEL, TAG))
     seen = set()
     for m in sorted(read_lists(lists_run, "settled_"), key=lambda m: m["ticker"]):   # pin 2: the settlement source first; rules text only
@@ -297,6 +341,7 @@ def cmd_measure(markets_path, lists_run, candle_run):
     print("markets in the fixed sample %d | events (a city and an hour) %d | markets with any candle %d%s" % (len(markets), len(events), sum(1 for m in markets if cand.get(m["ticker"])), TAG))
     r1 = reading(events, cand, True, "CARRIED quote (the last candle inside the market's 60 minute life)")
     r2 = reading(events, cand, False, "EXACT quote (only a candle ending at the look)")
+    print("candles with no volume field at all: %d (each counts as a minute with no trade)%s" % (no_volume, TAG))
     for series in SERIES:
         ms = [m for m in markets if m["series"] == series]
         traded = sum(1 for m in ms for t, c in cand.get(m["ticker"], {}).items() if m["open_ts"] < t <= m["close_ts"] and c[2] > EPS)
@@ -312,7 +357,7 @@ def cmd_measure(markets_path, lists_run, candle_run):
                 sizes.setdefault(m["ticker"].split("-")[0], []).append(v)
     for s in SERIES:
         v = sizes.get(s, [])
-        print("%s: size at the touch on open markets (a list copy, one level only): median %s contracts over %d quoted sides%s" % (s, "n/a" if not v else "%.0f" % med(v), len(v), TAG))
+        print("%s: size at the touch on open markets (a list copy, one level only): median %s contracts over %d quoted sides%s" % (s, "n/a" if not v else "%.0f" % (med(v) + 1e-7), len(v), TAG))
     print("the line under the carried quote: %s | under the exact quote: %s | candle requests answered whole %d of %d%s" % (r1, r2, answered, asked, TAG))
     if not whole:
         verdict = "the candle pull is not whole: not decided"

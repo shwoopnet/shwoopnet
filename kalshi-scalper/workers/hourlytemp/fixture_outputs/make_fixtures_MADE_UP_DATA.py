@@ -14,6 +14,11 @@ Every price is a whole number of cents. Usage: make_fixtures_MADE_UP_DATA.py <ou
                  for nearest 50c: the lower strike is rank 0) and the top strike shows an empty book (0.00 and 1.00)
                  at the 10 minute look with a good quote one minute earlier (no quote: the search stops there).
   pull_not_whole as closed, but the candle run has a second request that was refused (429): not decided.
+  other_job      as closed, but the candle run's job asked for one ticker fewer than the sample: the reader must refuse.
+  no_job         as closed, but the candle run's manifest carries no job: the reader must refuse.
+  missing_field  one listed New York market has no strike: no job written.
+  odd_life       one listed Miami market opened 90 minutes before its close: no job written.
+  mixed_types    one listed Chicago market is a "between" range, the rest thresholds: no job written.
   list_cut       as closed, but the New York settled list ends on a page that still carries a cursor: no job written.
   outside        one market closing on Nov 12: the builder must refuse.
   over_cap       15 strikes a city-hour for 168 hours: two hours do not fit one request, so 168 requests, over the cap
@@ -36,13 +41,13 @@ def iso(t):
 
 def market(series, close, k, strike):
     ev = "%s-%s" % (series, close.strftime("%y%b%d%H").upper())
-    return {"ticker": "%s-T%s" % (ev, strike), "event_ticker": ev, "floor_strike": strike,
+    return {"ticker": "%s-T%s" % (ev, strike), "event_ticker": ev, "floor_strike": strike, "strike_type": "greater",
             "open_time": iso(datetime.fromtimestamp(close.timestamp() - 3600, timezone.utc)), "close_time": iso(close),
             "rules_primary": "MADE-UP rules text for %s: the invented station reading at the top of the hour." % series,
             "rules_secondary": "", "result": "MADE-UP, never read", "yes_bid_size_fp": "0.00", "yes_ask_size_fp": "0.00"}
 
 
-def write_run(folder, answers, refused=()):
+def write_run(folder, answers, refused=(), job=None):
     os.makedirs(folder, exist_ok=True)
     rows = []
     for n, (rid, body) in enumerate(answers, 1):
@@ -51,14 +56,17 @@ def write_run(folder, answers, refused=()):
             json.dump(body, f)
         rows.append({"index": n, "id": rid, "page": 1, "status": 200, "file": name})
     rows += [{"index": len(rows) + 1 + i, "id": rid, "page": 1, "status": 429, "file": None} for i, rid in enumerate(refused)]
-    json.dump({"status": "complete", "rows": rows}, open(os.path.join(folder, "manifest.json"), "w"))
+    man = {"status": "complete", "rows": rows}
+    if job is not None:
+        man["job"] = {"job_id": "MADE_UP", "requests": job}
+    json.dump(man, open(os.path.join(folder, "manifest.json"), "w"))
 
 
 def candle(t, bid, ask, vol=0):
     return {"end_period_ts": t, "yes_bid": {"close_dollars": "%.4f" % (bid / 100.0)}, "yes_ask": {"close_dollars": "%.4f" % (ask / 100.0)}, "volume_fp": "%.2f" % vol}
 
 
-def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hours=HOURS, per_hour=None, candles=True, cursor_on=None, refused=()):
+def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hours=HOURS, per_hour=None, candles=True, cursor_on=None, refused=(), spoil=None, job="whole"):
     """spread(series, minutes_left) -> cents. gap(series) -> minutes before the hour from which no candle exists.
     empty(series, k, minutes_left) -> True for an empty book. mids(series) -> cents by strike."""
     settled, per = [], {}
@@ -68,6 +76,8 @@ def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hou
             row = (mids(s) if mids else MIDS) if per_hour is None else tuple(range(per_hour))
             for k, mid in enumerate(row):
                 m = market(s, close, k, 40 + k)
+                if spoil:
+                    spoil(m, s, close, k)
                 ms.append(m)
                 per[m["ticker"]] = (s, k, mid, int(close.timestamp()))
         settled.append(("settled_" + s, {"markets": ms, "cursor": "MADE-UP-MORE" if s == cursor_on else ""}))
@@ -97,7 +107,9 @@ def build(out, name, spread, cities=SERIES, mids=None, gap=None, empty=None, hou
             lo, hi = max(1, lo), min(99, max(hi, 2))
             cs.append(candle(t, lo, hi, 5 if left == 40 else 0))
         body.append({"market_ticker": tk, "candlesticks": cs})
-    write_run(os.path.join(out, name, "candles"), [("h001", {"markets": body})], refused)
+    asked = sorted(per)[1:] if job == "other" else sorted(per)
+    reqs = [{"id": rid, "path": "/markets/candlesticks", "params": {"market_tickers": ",".join(asked)}} for rid in ("h001",) + tuple(refused)]
+    write_run(os.path.join(out, name, "candles"), [("h001", {"markets": body})], refused, None if job == "none" else reqs)
 
 
 def main():
@@ -111,6 +123,12 @@ def main():
     build(out, "odd_cases", wide, gap=lambda s: 60 if s == "KXTEMPCHIHS" else None, mids=lambda s: (90, 55, 45, 25, 10, 3) if s == "KXTEMPNYCHS" else MIDS,
           empty=lambda s, k, left: s == "KXTEMPNYCHS" and k == 0 and left == 10)
     build(out, "pull_not_whole", wide, refused=("h002",))
+    build(out, "other_job", wide, job="other")
+    build(out, "no_job", wide, job="none")
+    first = HOURS[0]
+    build(out, "missing_field", wide, candles=False, spoil=lambda m, s, c, k: m.pop("floor_strike") if (s, c, k) == ("KXTEMPNYCHS", first, 2) else None)
+    build(out, "odd_life", wide, candles=False, spoil=lambda m, s, c, k: m.update(open_time=iso(datetime.fromtimestamp(c.timestamp() - 5400, timezone.utc))) if (s, c, k) == ("KXTEMPMIAH", first, 1) else None)
+    build(out, "mixed_types", wide, candles=False, spoil=lambda m, s, c, k: m.update(strike_type="between", cap_strike=99) if (s, c, k) == ("KXTEMPCHIHS", first, 0) else None)
     build(out, "list_cut", wide, candles=False, cursor_on="KXTEMPNYCHS")
     build(out, "outside", wide, hours=(datetime(2026, 11, 12, 3, tzinfo=timezone.utc),), candles=False)
     week = tuple(datetime.fromtimestamp(datetime(2026, 11, 5, 0, tzinfo=timezone.utc).timestamp() + 3600 * h, timezone.utc) for h in range(168))

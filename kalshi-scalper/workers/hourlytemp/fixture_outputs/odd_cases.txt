@@ -34,6 +34,7 @@ KXTEMPMIAH 10 min before the hour: strikes with a quote candle 12 | two-sided 12
 KXTEMPNYCHS 55 min before the hour: strikes with a quote candle 12 | two-sided 12 (100.0%) | median spread 8.00c | median round trip 9.94c | near the money n 8: round trip 11.05c, ONE-WAY entry cost 6.00c | priced 95c or 5c and beyond 16.7% | ask of the nearer-certain side at rank 1, 2, 3+: 76.50c, 79.00c, 96.50c [measurement, not a rule]
 KXTEMPNYCHS 30 min before the hour: strikes with a quote candle 12 | two-sided 12 (100.0%) | median spread 8.00c | median round trip 9.94c | near the money n 8: round trip 11.05c, ONE-WAY entry cost 6.00c | priced 95c or 5c and beyond 16.7% | ask of the nearer-certain side at rank 1, 2, 3+: 76.50c, 79.00c, 96.50c [measurement, not a rule]
 KXTEMPNYCHS 10 min before the hour: strikes with a quote candle 12 | two-sided 10 (83.3%) | median spread 8.00c | median round trip 10.63c | near the money n 6: round trip 11.47c, ONE-WAY entry cost 6.00c | priced 95c or 5c and beyond 20.0% | ask of the nearer-certain side at rank 1, 2, 3+: 59.00c, 79.00c, 96.50c [measurement, not a rule]
+candles with no volume field at all: 0 (each counts as a minute with no trade) [measurement, not a rule]
 KXTEMPCHIHS: market-minutes with a trade 0.0% (0 of 720) [measurement, not a rule]
 KXTEMPLAXHS: market-minutes with a trade 1.7% (12 of 720) [measurement, not a rule]
 KXTEMPMIAH: market-minutes with a trade 1.7% (12 of 720) [measurement, not a rule]

@@ -1,29 +1,44 @@
 == closed
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/closed
 == not_closed
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/not_closed
 == boundary_4c
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/boundary_4c
 == just_above_4c
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/just_above_4c
 == carry_matters
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/carry_matters
 == odd_cases
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/odd_cases
 == pull_not_whole
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
 written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/pull_not_whole
+== other_job
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
+written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/other_job
+== no_job
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
+written: markets.json and HOURLYTEMP_CANDLES.json in ht_out/no_job
+== missing_field
+settled markets in the sample 47 | clock hours 2 | requests 2 (cap 110)
+1 LISTED MARKETS LACK A STRIKE, AN EVENT OR A TIME: no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D.
+== odd_life
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
+1 MARKETS DID NOT LIVE EXACTLY 60 MINUTES: no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D.
+== mixed_types
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
+THE STRIKES ARE NOT ONE LADDER OF 'ABOVE' THRESHOLDS (strike types listed: between x 1, greater x 47): no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D.
 == list_cut
-settled markets in the sample 48 | listed markets left out for a missing field 0 | clock hours 2 | requests 2 (cap 110)
-A LIST IS MISSING OR NOT WHOLE (settled_KXTEMPNYCHS): no job written. The sample is never cut; this goes to the Head of R&D.
+settled markets in the sample 48 | clock hours 2 | requests 2 (cap 110)
+A LIST IS MISSING OR NOT WHOLE (settled_KXTEMPNYCHS): no job written. The sample is never cut and no pin is bent; this goes to the Head of R&D.
 == outside
 REFUSED: KXTEMPCHIHS-26NOV1203-T40 closes outside the fixed seven days
 == over_cap
-settled markets in the sample 10080 | listed markets left out for a missing field 0 | clock hours 168 | requests 168 (cap 110)
+settled markets in the sample 10080 | clock hours 168 | requests 168 (cap 110)
 OVER THE CAP: no job written. The sample is never cut; the count goes to the Head of R&D.

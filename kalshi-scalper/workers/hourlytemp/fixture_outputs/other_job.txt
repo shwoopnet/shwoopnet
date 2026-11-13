@@ -1,0 +1,1 @@
+REFUSED: the candle run's job asked for 47 tickers, the sample has 48, and the two sets differ

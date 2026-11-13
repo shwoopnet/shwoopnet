@@ -1,0 +1,1 @@
+REFUSED: the candle run's manifest does not carry its job, so it cannot be tied to the sample
