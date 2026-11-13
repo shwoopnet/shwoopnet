@@ -1,0 +1,1055 @@
+{
+ "job": {
+  "job_id": "CROWDLEG_TAPE_TRIAL",
+  "owner": "MAIN",
+  "status": "active",
+  "registration": "kalshi-scalper/workers/idea_desk_c/CROWDLEG_CARD.md",
+  "purpose": "CROWDLEG recorder sizing trial (Idea Desk C, owner MAIN): page count of the public trade tape over one fixed past 30 minute window (2026-09-20 18:00 to 18:30Z, a Sunday), to size a combo trade read. The reader counts pages, rows, and rows whose ticker starts with KXMVE; no price, size or side is read.",
+  "heldout": "One fixed past window, 2026-09-20T18:00Z to 18:30Z, chosen before every held-out start found in HELDOUT_REGISTRY Table 2 (all on or after 2026-10-03). FOR AUDITOR B: the unfiltered tape holds trades of EVERY market traded in that half hour, which land on the public data branch; check that no card holds that half hour as held-out. The reader opens only the row count and the ticker prefix.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "stop_rules": {
+   "pause_seconds_on_429": "5, doubling to 60",
+   "stop_after_consecutive_429": 3,
+   "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "allowed_endpoints": [
+   {
+    "name": "trades_list",
+    "method": "GET",
+    "path_pattern": "/markets/trades",
+    "params_allowed": [
+     "limit",
+     "cursor",
+     "min_ts",
+     "max_ts"
+    ]
+   }
+  ],
+  "series_allowlist": [],
+  "ticker_allowlist": [],
+  "max_requests": 55,
+  "notes": "One request, the public trade list for min_ts 1789927200 to max_ts 1789929000, 1,000 a page, at most 50 pages. If it stops at 50 pages the count is a lower bound (at least 50,000 trades in 30 minutes) and is reported as truncated. Cap 55: 5 spare for 429 retries. The runner saves RAW answers: the unfiltered tape of that half hour (up to about 50,000 trades of every market) lands on the public kalshi-pull-data branch, not only the counts. It is public Kalshi data; size about 7 to 15 MB in all (Main's estimate), under the 5 MB answer cap per page and the 200 MB run cap. The cursor parameter is listed only because the runner's own paging requires it; no request sets it.",
+  "requests": [
+   {
+    "id": "tape_20260920_1800",
+    "path": "/markets/trades",
+    "params": {
+     "limit": 1000,
+     "min_ts": 1789927200,
+     "max_ts": 1789929000
+    },
+    "max_pages": 50
+   }
+  ]
+ },
+ "script": "scripts/kalshi_pull.py",
+ "started": "2026-11-13T2224Z",
+ "finished": "2026-11-13T2225Z",
+ "status": "complete",
+ "requests_sent": 50,
+ "bytes_stored": 15447392,
+ "rows": [
+  {
+   "index": 1,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 1,
+   "status": 200,
+   "bytes": 311463,
+   "t_send_ms": 1794608657409,
+   "t_recv_ms": 1794608657454,
+   "server_date": "Fri, 13 Nov 2026 22:24:17 GMT",
+   "file": "0001.json.gz",
+   "sha256": "fe20f4bdce8b8c4f20e55e2dba532e00595e8492596cfc4d8fd2307b9a351e1f",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 2,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 2,
+   "status": 200,
+   "bytes": 312479,
+   "t_send_ms": 1794608658409,
+   "t_recv_ms": 1794608658452,
+   "server_date": "Fri, 13 Nov 2026 22:24:18 GMT",
+   "file": "0002.json.gz",
+   "sha256": "059c4e6c78b907c46b2ee7a89ec7eb981e7196966f6a716e018586bb0403a713",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 3,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 3,
+   "status": 200,
+   "bytes": 312797,
+   "t_send_ms": 1794608659410,
+   "t_recv_ms": 1794608659451,
+   "server_date": "Fri, 13 Nov 2026 22:24:19 GMT",
+   "file": "0003.json.gz",
+   "sha256": "6bfcb63c1ba82fa5ee37fa138f5a3f2645494c8f3b7e4ddf523a81c7758b15cb",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 4,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 4,
+   "status": 200,
+   "bytes": 312232,
+   "t_send_ms": 1794608660410,
+   "t_recv_ms": 1794608660454,
+   "server_date": "Fri, 13 Nov 2026 22:24:20 GMT",
+   "file": "0004.json.gz",
+   "sha256": "45018af341c37449682c0b6a92a4622b50eff851cf403ac7aae471e725dd6925",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 5,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 5,
+   "status": 200,
+   "bytes": 312104,
+   "t_send_ms": 1794608661410,
+   "t_recv_ms": 1794608661452,
+   "server_date": "Fri, 13 Nov 2026 22:24:21 GMT",
+   "file": "0005.json.gz",
+   "sha256": "3f62044077ccbd6e723699f37cdb6443ca017f60e9314acd7b67599118f0ba69",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 6,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 6,
+   "status": 200,
+   "bytes": 311959,
+   "t_send_ms": 1794608662410,
+   "t_recv_ms": 1794608662456,
+   "server_date": "Fri, 13 Nov 2026 22:24:22 GMT",
+   "file": "0006.json.gz",
+   "sha256": "ecba4f32cbce4718abed51db1dbe4424348ea8e17e3e8c6bf5c0b1896e052b46",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 7,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 7,
+   "status": 200,
+   "bytes": 311387,
+   "t_send_ms": 1794608663410,
+   "t_recv_ms": 1794608663453,
+   "server_date": "Fri, 13 Nov 2026 22:24:23 GMT",
+   "file": "0007.json.gz",
+   "sha256": "8410e88f3ebe4f5646a00a79c01c5bd2ca2644f60463299a565c495f62e9f835",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 8,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 8,
+   "status": 200,
+   "bytes": 311454,
+   "t_send_ms": 1794608664410,
+   "t_recv_ms": 1794608664453,
+   "server_date": "Fri, 13 Nov 2026 22:24:24 GMT",
+   "file": "0008.json.gz",
+   "sha256": "d023f96859ada47f6dcde24be4f264cbbb09b6f945b4843037aefa77b91c3296",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 9,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 9,
+   "status": 200,
+   "bytes": 311444,
+   "t_send_ms": 1794608665410,
+   "t_recv_ms": 1794608665455,
+   "server_date": "Fri, 13 Nov 2026 22:24:25 GMT",
+   "file": "0009.json.gz",
+   "sha256": "ad6fa530edeafcf796e5fd5fda9de44e7ec06f07875537ed2e3dec53d094c0d4",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 10,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 10,
+   "status": 200,
+   "bytes": 311037,
+   "t_send_ms": 1794608666410,
+   "t_recv_ms": 1794608666458,
+   "server_date": "Fri, 13 Nov 2026 22:24:26 GMT",
+   "file": "0010.json.gz",
+   "sha256": "518e25115c95128cd20090f7d84a42eca621e848cb8670ab142ede1a12bfde86",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 11,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 11,
+   "status": 200,
+   "bytes": 310290,
+   "t_send_ms": 1794608667410,
+   "t_recv_ms": 1794608667461,
+   "server_date": "Fri, 13 Nov 2026 22:24:27 GMT",
+   "file": "0011.json.gz",
+   "sha256": "3ccdf56cea58428fb02433f16183898ee00b01f5c03e6fc1c70b974ce44d87a6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 12,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 12,
+   "status": 200,
+   "bytes": 310274,
+   "t_send_ms": 1794608668410,
+   "t_recv_ms": 1794608668455,
+   "server_date": "Fri, 13 Nov 2026 22:24:28 GMT",
+   "file": "0012.json.gz",
+   "sha256": "570450338b70e8bf79208804bfa86c3e8c5aede78492beeb5f3f5944472ca076",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 13,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 13,
+   "status": 200,
+   "bytes": 309507,
+   "t_send_ms": 1794608669411,
+   "t_recv_ms": 1794608669448,
+   "server_date": "Fri, 13 Nov 2026 22:24:29 GMT",
+   "file": "0013.json.gz",
+   "sha256": "1fdfc01422913019cc9d919d36937d3830cd5ee2e9404c9fdb7e910201c8deaa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 14,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 14,
+   "status": 200,
+   "bytes": 308606,
+   "t_send_ms": 1794608670411,
+   "t_recv_ms": 1794608670465,
+   "server_date": "Fri, 13 Nov 2026 22:24:30 GMT",
+   "file": "0014.json.gz",
+   "sha256": "01422f6a05b43da1e74ca00bee20015822e50e962a5228fc3fb022a0594977e9",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 15,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 15,
+   "status": 200,
+   "bytes": 310071,
+   "t_send_ms": 1794608671411,
+   "t_recv_ms": 1794608671458,
+   "server_date": "Fri, 13 Nov 2026 22:24:31 GMT",
+   "file": "0015.json.gz",
+   "sha256": "5c75a7f5c0dc2ed794289f2c52768a8abeade43e143e82bc619abb98a5e7e0aa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 16,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 16,
+   "status": 200,
+   "bytes": 309911,
+   "t_send_ms": 1794608672411,
+   "t_recv_ms": 1794608672455,
+   "server_date": "Fri, 13 Nov 2026 22:24:32 GMT",
+   "file": "0016.json.gz",
+   "sha256": "9d0e347c8f8fedb4e93838859bf2e41e966246f5e67451facb5fc3945a6b7a67",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 17,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 17,
+   "status": 200,
+   "bytes": 311083,
+   "t_send_ms": 1794608673411,
+   "t_recv_ms": 1794608673453,
+   "server_date": "Fri, 13 Nov 2026 22:24:33 GMT",
+   "file": "0017.json.gz",
+   "sha256": "6206dcd04039baf402f30ea8c553f677895cee1cdf4c635b57e8b599f216fd87",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 18,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 18,
+   "status": 200,
+   "bytes": 310605,
+   "t_send_ms": 1794608674411,
+   "t_recv_ms": 1794608674455,
+   "server_date": "Fri, 13 Nov 2026 22:24:34 GMT",
+   "file": "0018.json.gz",
+   "sha256": "166e56e1d3c7906fbaaa67dcc1bcb72f2a2e1ab75fb40d1712601a7115b29988",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 19,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 19,
+   "status": 200,
+   "bytes": 307915,
+   "t_send_ms": 1794608675411,
+   "t_recv_ms": 1794608675510,
+   "server_date": "Fri, 13 Nov 2026 22:24:35 GMT",
+   "file": "0019.json.gz",
+   "sha256": "c9eea3483718d2927ba621a3d6ffc09ed29c1e6e4302a6343056175dbb94f271",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 20,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 20,
+   "status": 200,
+   "bytes": 309149,
+   "t_send_ms": 1794608676411,
+   "t_recv_ms": 1794608676464,
+   "server_date": "Fri, 13 Nov 2026 22:24:36 GMT",
+   "file": "0020.json.gz",
+   "sha256": "dd298d15be3fd186fbb1e65555d867fdc1e21b12bfcf1b88eba39abae1399f93",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 21,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 21,
+   "status": 200,
+   "bytes": 308589,
+   "t_send_ms": 1794608677411,
+   "t_recv_ms": 1794608677460,
+   "server_date": "Fri, 13 Nov 2026 22:24:37 GMT",
+   "file": "0021.json.gz",
+   "sha256": "106480db87329a90c3b91f52aad7ed4878725e67cd086dade2315ebeb3b18077",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 22,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 22,
+   "status": 200,
+   "bytes": 308543,
+   "t_send_ms": 1794608678412,
+   "t_recv_ms": 1794608678454,
+   "server_date": "Fri, 13 Nov 2026 22:24:38 GMT",
+   "file": "0022.json.gz",
+   "sha256": "4dc30943bcb7f22d5315668fc77d0b9c2d633ab191ebab841cf91d2ea0e45904",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 23,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 23,
+   "status": 200,
+   "bytes": 307282,
+   "t_send_ms": 1794608679412,
+   "t_recv_ms": 1794608679460,
+   "server_date": "Fri, 13 Nov 2026 22:24:39 GMT",
+   "file": "0023.json.gz",
+   "sha256": "f27961aa37c5a902b363fbd4001475a2b17bc7aa5ba3ba052f04e9f9009e28e0",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 24,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 24,
+   "status": 200,
+   "bytes": 308289,
+   "t_send_ms": 1794608680412,
+   "t_recv_ms": 1794608680465,
+   "server_date": "Fri, 13 Nov 2026 22:24:40 GMT",
+   "file": "0024.json.gz",
+   "sha256": "144803bca69f257f821572e63daaff8d30304ea590bf2f3f427e2d8c4bdeba99",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 25,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 25,
+   "status": 200,
+   "bytes": 307405,
+   "t_send_ms": 1794608681412,
+   "t_recv_ms": 1794608681451,
+   "server_date": "Fri, 13 Nov 2026 22:24:41 GMT",
+   "file": "0025.json.gz",
+   "sha256": "41a9019e93cc8ad4f4e7ce428d928439c787b8120ad41fbe75e0220e06040c84",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 26,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 26,
+   "status": 200,
+   "bytes": 308291,
+   "t_send_ms": 1794608682412,
+   "t_recv_ms": 1794608682462,
+   "server_date": "Fri, 13 Nov 2026 22:24:42 GMT",
+   "file": "0026.json.gz",
+   "sha256": "950500e16c11d6f0e2ad2b6c820403577743fbdd81fb7dbcbba974cf6565acd1",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 27,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 27,
+   "status": 200,
+   "bytes": 307655,
+   "t_send_ms": 1794608683412,
+   "t_recv_ms": 1794608683457,
+   "server_date": "Fri, 13 Nov 2026 22:24:43 GMT",
+   "file": "0027.json.gz",
+   "sha256": "6454917fcc838947f4302c40e0ab22d4b23900bd01a9d601cb1f3b596783f95d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 28,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 28,
+   "status": 200,
+   "bytes": 308474,
+   "t_send_ms": 1794608684412,
+   "t_recv_ms": 1794608684454,
+   "server_date": "Fri, 13 Nov 2026 22:24:44 GMT",
+   "file": "0028.json.gz",
+   "sha256": "74adad1d26f18b62e5efdba080fcbd5483892fc93e5a58bb5f92de04a5b08c0d",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 29,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 29,
+   "status": 200,
+   "bytes": 309137,
+   "t_send_ms": 1794608685412,
+   "t_recv_ms": 1794608685454,
+   "server_date": "Fri, 13 Nov 2026 22:24:45 GMT",
+   "file": "0029.json.gz",
+   "sha256": "05165a38c8e1c37eb007482b9c6df4595026361b77d4a0c963c01a14669c8505",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 30,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 30,
+   "status": 200,
+   "bytes": 308832,
+   "t_send_ms": 1794608686412,
+   "t_recv_ms": 1794608686461,
+   "server_date": "Fri, 13 Nov 2026 22:24:46 GMT",
+   "file": "0030.json.gz",
+   "sha256": "7e08239d5f808ff9267317de38181e988708e7644fe84d5409dc94dd26e36ab3",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 31,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 31,
+   "status": 200,
+   "bytes": 307762,
+   "t_send_ms": 1794608687413,
+   "t_recv_ms": 1794608687458,
+   "server_date": "Fri, 13 Nov 2026 22:24:47 GMT",
+   "file": "0031.json.gz",
+   "sha256": "110d113214df0e8669b4071040edc512f793243fc320542b770a5826022b4d9c",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 32,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 32,
+   "status": 200,
+   "bytes": 308312,
+   "t_send_ms": 1794608688413,
+   "t_recv_ms": 1794608688455,
+   "server_date": "Fri, 13 Nov 2026 22:24:48 GMT",
+   "file": "0032.json.gz",
+   "sha256": "992d76b3e60f34013ef19003163fb26a3e7c7e9141397e79f37fb2547ebcb7ca",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 33,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 33,
+   "status": 200,
+   "bytes": 307899,
+   "t_send_ms": 1794608689413,
+   "t_recv_ms": 1794608689456,
+   "server_date": "Fri, 13 Nov 2026 22:24:49 GMT",
+   "file": "0033.json.gz",
+   "sha256": "b85b554ed4ccc8ae5091ce4f868f50bfe4c763df18a31cfcd6cbd99d1c8d3237",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 34,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 34,
+   "status": 200,
+   "bytes": 306963,
+   "t_send_ms": 1794608690413,
+   "t_recv_ms": 1794608690505,
+   "server_date": "Fri, 13 Nov 2026 22:24:50 GMT",
+   "file": "0034.json.gz",
+   "sha256": "635ad42e5c422902ccede59d5cebb03543adf79e56bf0e227d3ee6ecda99f7d2",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 35,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 35,
+   "status": 200,
+   "bytes": 306812,
+   "t_send_ms": 1794608691413,
+   "t_recv_ms": 1794608691459,
+   "server_date": "Fri, 13 Nov 2026 22:24:51 GMT",
+   "file": "0035.json.gz",
+   "sha256": "58bda4f6a42ab3bbdda269e2c591ec961d6cf6c55b3b2f382ba00804752cf863",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 36,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 36,
+   "status": 200,
+   "bytes": 307905,
+   "t_send_ms": 1794608692413,
+   "t_recv_ms": 1794608692456,
+   "server_date": "Fri, 13 Nov 2026 22:24:52 GMT",
+   "file": "0036.json.gz",
+   "sha256": "23c2c4bbe155dd19c6dcbf2e6988922364fb30deb1327ec0e96822554a1b6766",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 37,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 37,
+   "status": 200,
+   "bytes": 307456,
+   "t_send_ms": 1794608693413,
+   "t_recv_ms": 1794608693502,
+   "server_date": "Fri, 13 Nov 2026 22:24:53 GMT",
+   "file": "0037.json.gz",
+   "sha256": "30675d419962e6e64a324ab67b705d50fb6feb17bc5648e0d32400e35f05b686",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 38,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 38,
+   "status": 200,
+   "bytes": 307271,
+   "t_send_ms": 1794608694414,
+   "t_recv_ms": 1794608694457,
+   "server_date": "Fri, 13 Nov 2026 22:24:54 GMT",
+   "file": "0038.json.gz",
+   "sha256": "a54875245f58df7e445442937f168f3bb625b25849c1af69b2394738ab7c31ce",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 39,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 39,
+   "status": 200,
+   "bytes": 308343,
+   "t_send_ms": 1794608695414,
+   "t_recv_ms": 1794608695457,
+   "server_date": "Fri, 13 Nov 2026 22:24:55 GMT",
+   "file": "0039.json.gz",
+   "sha256": "8f3f56a0afb257cb5dd719e7f560f74ac42aec70f9b68f6db2d4065b0a260b23",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 40,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 40,
+   "status": 200,
+   "bytes": 307133,
+   "t_send_ms": 1794608696414,
+   "t_recv_ms": 1794608696453,
+   "server_date": "Fri, 13 Nov 2026 22:24:56 GMT",
+   "file": "0040.json.gz",
+   "sha256": "505821408e4357737767912b8d27017608d3cb282cd69cea9688a9699a237062",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 41,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 41,
+   "status": 200,
+   "bytes": 306394,
+   "t_send_ms": 1794608697414,
+   "t_recv_ms": 1794608697455,
+   "server_date": "Fri, 13 Nov 2026 22:24:57 GMT",
+   "file": "0041.json.gz",
+   "sha256": "a4eac59519668c514a7961dd7edc6657930ede71a179374b6a86fda1ff890661",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 42,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 42,
+   "status": 200,
+   "bytes": 306690,
+   "t_send_ms": 1794608698414,
+   "t_recv_ms": 1794608698455,
+   "server_date": "Fri, 13 Nov 2026 22:24:58 GMT",
+   "file": "0042.json.gz",
+   "sha256": "ff74583918790b9e465ae7e308fdcf31db95312bc8f1a075ff1bd499523fc1d6",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 43,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 43,
+   "status": 200,
+   "bytes": 307877,
+   "t_send_ms": 1794608699414,
+   "t_recv_ms": 1794608699457,
+   "server_date": "Fri, 13 Nov 2026 22:24:59 GMT",
+   "file": "0043.json.gz",
+   "sha256": "7b86a39f5322c445f231c3467df7c4c7452eb340b8dcee40467134e5f3b9bb37",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 44,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 44,
+   "status": 200,
+   "bytes": 308035,
+   "t_send_ms": 1794608700414,
+   "t_recv_ms": 1794608700459,
+   "server_date": "Fri, 13 Nov 2026 22:25:00 GMT",
+   "file": "0044.json.gz",
+   "sha256": "bd2087a292b523a3eb6f934a9c86ea51785ff6ca780ffb56a0b85e55cd428876",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 45,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 45,
+   "status": 200,
+   "bytes": 307477,
+   "t_send_ms": 1794608701414,
+   "t_recv_ms": 1794608701686,
+   "server_date": "Fri, 13 Nov 2026 22:25:01 GMT",
+   "file": "0045.json.gz",
+   "sha256": "b50de29dcbe85f6d285b99b3ff49e49ad4133e18008358dbfe14cd505057aca7",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 46,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 46,
+   "status": 200,
+   "bytes": 307793,
+   "t_send_ms": 1794608702414,
+   "t_recv_ms": 1794608702462,
+   "server_date": "Fri, 13 Nov 2026 22:25:02 GMT",
+   "file": "0046.json.gz",
+   "sha256": "ebcdb561c752f82fbcc0f0b7a616e3e8626efac45ec06d3bda515faf48ca6bfa",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 47,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 47,
+   "status": 200,
+   "bytes": 307622,
+   "t_send_ms": 1794608703415,
+   "t_recv_ms": 1794608703459,
+   "server_date": "Fri, 13 Nov 2026 22:25:03 GMT",
+   "file": "0047.json.gz",
+   "sha256": "bb27377be9204c0d09ad18fc769741a37916d3bc9f253d31c4ee57327923c778",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 48,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 48,
+   "status": 200,
+   "bytes": 306403,
+   "t_send_ms": 1794608704415,
+   "t_recv_ms": 1794608704470,
+   "server_date": "Fri, 13 Nov 2026 22:25:04 GMT",
+   "file": "0048.json.gz",
+   "sha256": "1f2ce3c10fa44adbfc52f7822990bc35497bf37c162b2a6931a556cf46d0fe73",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 49,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 49,
+   "status": 200,
+   "bytes": 307982,
+   "t_send_ms": 1794608705415,
+   "t_recv_ms": 1794608705461,
+   "server_date": "Fri, 13 Nov 2026 22:25:05 GMT",
+   "file": "0049.json.gz",
+   "sha256": "11cafc6e8bdacbd3848ea9d6c888597116ebfcc13ad8704469fb008a04b201ee",
+   "truncated": false,
+   "body_kind": "object"
+  },
+  {
+   "index": 50,
+   "id": "tape_20260920_1800",
+   "path": "/markets/trades",
+   "params": {
+    "limit": 1000,
+    "min_ts": 1789927200,
+    "max_ts": 1789929000
+   },
+   "page": 50,
+   "status": 200,
+   "bytes": 306999,
+   "t_send_ms": 1794608706415,
+   "t_recv_ms": 1794608706460,
+   "server_date": "Fri, 13 Nov 2026 22:25:06 GMT",
+   "file": "0050.json.gz",
+   "sha256": "34b43116de6c73858154ecfef5003387888266e06164c9f1565a237bcb85722d",
+   "truncated": false,
+   "body_kind": "object"
+  }
+ ]
+}
