@@ -713,3 +713,12 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - SPXOI1 T: build 1 is Desk A abaad267, build 2 is the History Miner 875bf8e6 (unreadable OI drops the window, counted, in both). Auditor B audits the code now and the landed runs after 00:00Z; both must print the same n and T.
   - Testing Desk live-against-shadow harness fc38c74d (liveshadow.py c5290079), tools only.
   - Stocks: both old sessions are archived; the "R&D: Stocks" session is Auditor B.
+- 18:58Z, inventory follow-ups (Forensics' unread-field list f42ea3cb).
+  - #1 (station max): no card; WXDAYEND's mechanism.
+  - #2 (SOFR table): a SOFR1 version, no card.
+  - #3, #7, #8, #9: versions or closed (Desk C).
+  - #4 SPOTFLOW1 (Desk B 3d3c830c): CLOSED at intake. Ruled inside the declined outside-reference family. The VA also found the dates cross CFRTI1-BTC, CFRTI-B and the Nov 5 freeze, and that it would collide with OICORE.
+  - #5 (perp marks): no card (Desk A b5217ac2).
+  - #6 LIQREV (Desk C 822f9ce1, 04c6680a): OKX liquidation reversal on KXBTC15M, forward only, prior about 2%. With the VA for uniqueness and the R6 end date. H is not computed before CLEAN.
+  - #10 STEAMLIVE: zero-try count first.
+  - SPXOI1 T: build 2 is CLEAN (History Miner 0c13f5c0 at 899b4a2c). Build 1 (Desk A) is fixing F1 to F3.
