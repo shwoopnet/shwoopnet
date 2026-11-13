@@ -43,9 +43,10 @@ byname = {r[0].split("-")[1]: r for r in rows[1:]}
 w11 = list(byname["W1"]); w11[0] = "KXBTC15M-W11"; w11[1] = "1794009000"; w11[hdr.index("result")] = "void"
 w12 = list(byname["W3"]); w12[0] = "KXBTC15M-W12"; w12[1] = "1794009900"; w12[hdr.index("result")] = ""
 with open(vv, "w", newline="") as f:
-    _csv.writer(f, lineterminator="\n").writerows(rows + [w11, w12])
+    w13 = list(byname["W4"]); w13[0] = "KXBTC15M-W13"; w13[1] = "1794010800"; w13[hdr.index("result")] = "void"
+    _csv.writer(f, lineterminator="\n").writerows(rows + [w11, w12, w13])
 ov = S.run("dev", vv)
-want = dict(o["counts"], void_dropped=2)
+want = dict(o["counts"], void_dropped=3)
 if ov["counts"] != want or {k: ov[k] for k in ("parent", "version", "removed_share", "label")} != {k: o[k] for k in ("parent", "version", "removed_share", "label")}:
     bad.append(("void variant", ov["counts"]))
 print("MISMATCHES", bad)
