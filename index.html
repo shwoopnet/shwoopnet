@@ -1771,6 +1771,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Bot status (Nov 12): one shared strategy state now feeds the Bot status, the Strategies table and the Strategies page. The next look counts only strategies that are armed (gold, the open interest jump, the release day longshot and the Bitcoin perpetual-model probe each at their own time), a switched-off strategy is shown as off and cooling down, and the Needs a look alert no longer says a switched-off or unreadable strategy has sent no order.</li>
                   <li>Strategies page lanes (Nov 12): a strategy now sits in its lane by the bot's own state, with no hand edit: Live trades, Probation holds the small second-slot seats, a strategy whose kill tripped moves itself to Off / cooling down (gold shows its return progress there), On deck is the shadow rules, and only a research verdict retires one. Gold's card no longer sticks on CHECKING: if the kill state is not read within a few seconds it says STATE UNKNOWN.</li>
                   <li>Politics recorder (Nov 12): the shadow recorder now starts its own next run after each poll, because GitHub dropped most of its scheduled starts; the old schedule stays as a restart. Same public data and request rate, nothing trades.</li>
                   <li>Strategies page accuracy (Nov 12): the gold card now shows the real state of its kill rule (read once from the bot, kept ten minutes; KILLED with the plain return rule and the return record when it has tripped, "not readable" and never HEALTHY when the state cannot be read), and its tripwire counter counts only trades since the rule's own start. The approval NO side moved to Retired (failed the bar), CFRTI-K shows as an approved probation seat that is building, and the counts header and the Live lane now use one definition (Live plus Probe is what is running; a killed card is counted Off).; OICORE's badge and gauge now show room left against the kill that binds first (its loss streak or its net floor, whichever is closer) instead of the fixed drawdown figure. Page only, no order or bot change</li>
@@ -3680,17 +3681,42 @@
   // Every strategy's next look, soonest first (the owner, Oct 31, 2026: the Bot status card "should cover all strategies"). The Closing buy looks 6 minutes before each 15 minute close (gold; Dogecoin is paused), the open interest jump 3 minutes before it
   // (Bitcoin, the second strategy). The ring fills from the previous look to the next one; `then` names the one after.
   var KAL_LOOKS = [
-    { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; } },
-    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; } },
+    { at: 540000, name: 'Closing buy', what: function(goldClosed){ return (goldClosed ? 'No market is open' : 'Gold') + ', 6 minutes before the close'; }, sid: 'L1', who: 'Gold' },
+    { at: 720000, name: 'Open interest jump', what: function(){ return 'Bitcoin, 3 minutes before the close'; }, sid: 'OICORE', who: 'Open interest jump' },
+    // CFRTIK (Nov 12, 2026, probation seat): once, 2 minutes before the close, Bitcoin only. Each look names the strategy it belongs to (sid), so the ring counts it only while the shared state (kalshiStrategyState) says that strategy is armed.
+    { at: 780000, name: 'Perp-model longshot', what: function(){ return 'Bitcoin, 2 minutes before the close'; }, sid: 'CFRTIK', who: 'Perp-model longshot' },
     // EVENT830 (Nov 3, 2026, the second slot): only in the listed windows that close at a US 8:30 AM Eastern release (7:30 AM Central), 3 minutes before that close. `closes` is a copy of SLOT_CALENDARS.EVENT830 in the bot's code (gate SF9 compares them); a later date is a reviewed edit of both.
-    { at: 720000, name: 'Release day longshot', what: function(){ return 'Silver, copper, oil, FX, HYPE and BNB, at the 7:30 AM release'; },
+    { at: 720000, name: 'Release day longshot', what: function(){ return 'Silver, copper, oil, FX, HYPE and BNB, at the 7:30 AM release'; }, sid: 'EVENT830', who: 'Release day longshot',
       closes: ['2026-11-05T13:30:00Z', '2026-11-06T13:30:00Z', '2026-11-10T13:30:00Z', '2026-11-12T13:30:00Z', '2026-11-13T13:30:00Z', '2026-11-17T13:30:00Z', '2026-11-19T13:30:00Z', '2026-11-25T13:30:00Z',
         '2026-12-03T13:30:00Z', '2026-12-04T13:30:00Z', '2026-12-10T13:30:00Z', '2026-12-15T13:30:00Z', '2026-12-16T13:30:00Z', '2026-12-17T13:30:00Z', '2026-12-23T13:30:00Z'],
       kinds: ['jobless claims', 'jobs report', 'CPI', 'jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE', 'jobless claims', 'jobs report', 'CPI and jobless claims', 'PPI', 'retail sales', 'jobless claims', 'GDP and PCE'] }
   ];
-  function kalshiNextEntry(now){
+  // ONE shared live-strategy state (Nov 12, 2026, the owner: the Bot status "isnt updated to reflect all strategies, and it should communicate with the other pages because itll display irrelevant information as we rotate").
+  // Every consumer reads this and nothing else to know whether a strategy is trading: the Bot status ring and its Needs a look alerts, the Strategies table, the Strategies page lanes. Facts in, a map of strategy id to
+  // 'armed' (trading now, live or probation), 'off' (its kill latch tripped: cooling down), 'shadow' (logging only), 'retired' or 'unknown' (the latch could not be read: claim nothing either way). Gold (L1) is the only strategy with a
+  // browser-readable latch; the second-slot seats in the bot's registry are armed (their kill latch is not readable, so the page does not guess one); a registry row with code.live and stage Live or Probe is armed, a registry Retired verdict wins
+  // over everything (the same rule as kalshiStratLaneOf). A rotation changes the registry or the bot's lists and every consumer follows with no edit here. Pure.
+  function kalshiStrategyState(f){
+    f = f || {};
+    var out = {}, reg = Array.isArray(f.registry) ? f.registry : [], g = f.gold && f.gold.state;
+    out.L1 = g === 'killed' ? 'off' : (g === 'armed' ? 'armed' : 'unknown');
+    (Array.isArray(f.slotIds) ? f.slotIds : []).forEach(function(id){ out[id] = 'armed'; });
+    reg.forEach(function(x){
+      if(!x || typeof x.id !== 'string'){ return; }
+      if(x.stage === 'Retired'){ out[x.id] = 'retired'; return; }
+      if(out[x.id]){ return; }
+      if(x.code && x.code.live === true && (x.stage === 'Live' || x.stage === 'Probe')){ out[x.id] = 'armed'; }
+      else if(x.stage === 'Shadow' || (x.code && x.code.shadow)){ out[x.id] = 'shadow'; }
+    });
+    (Array.isArray(f.shadowIds) ? f.shadowIds : []).forEach(function(id){ if(!out[id]){ out[id] = 'shadow'; } });
+    return out;
+  }
+  // `states` is the shared live-strategy state (kalshiStrategyState): only a look whose strategy is 'armed' counts; a strategy that is 'off' (kill latch tripped) is named in `off` instead, and an 'unknown' or shadow one claims nothing. Without `states` every look counts (the pure table, used by the older gates).
+  function kalshiNextEntry(now, states){
     var Q = 900000, base = Math.floor(now / Q) * Q, goldClosed = kalshiGoldClosed(now), events = [];
-    for(var q = -1; q <= 2; q++){ KAL_LOOKS.forEach(function(l){
+    var looks = KAL_LOOKS.filter(function(l){ return !states || states[l.sid] === 'armed'; });
+    var offNames = states ? KAL_LOOKS.filter(function(l){ return states[l.sid] === 'off'; }).map(function(l){ return l.who; }) : [];
+    for(var q = -1; q <= 2; q++){ looks.forEach(function(l){
       // a calendar look counts only in a listed window: the close of this quarter must be one of its dates
       if(l.closes && l.closes.map(Date.parse).indexOf(base + (q + 1) * Q) < 0){ return; }
       events.push({ at: base + q * Q + l.at, look: l });
@@ -3706,14 +3732,14 @@
     var next = events[i], prev = events[i - 1], after = events[i + 1];
     if(!next || !prev){ return null; }
     var thenText = after ? after.look.name + ' (' + after.look.what(goldClosed).split(',')[0] + ')' : '';
-    return { at: next.at, inMs: next.at - now, name: next.look.name, what: next.look.what(goldClosed), then: thenText ? 'then ' + thenText : '', frac: Math.max(0, Math.min(1, (now - prev.at) / (next.at - prev.at))) };
+    return { at: next.at, inMs: next.at - now, name: next.look.name, what: next.look.what(goldClosed), then: thenText ? 'then ' + thenText : '', off: offNames, frac: Math.max(0, Math.min(1, (now - prev.at) / (next.at - prev.at))) };
   }
   // Silent-market warning (Oct 24, 2026, the owner: "make a warning in case a strategy stops running for whatever reason"). The bot as a whole already says when it stops (the Running pill, the reason under it, the heartbeat). This is
   // the other failure: one market quietly stops sending orders while the rest carry on (a shard out of money, a market the bot dropped, a bug). A market is called silent when it has sent no order, filled or not, for far longer than its
   // own usual gap: 8 times the median gap of its last 3 days, and never under 3 hours. It needs 8 orders in those 3 days to know what usual is. Bitcoin and Ethereum are left out on purpose: the smooth climb rule removes most of their
   // orders by design, so their silence says nothing. Gold, the forex pairs and natural gas do not trade over the weekend, so for them the clock starts at Sunday 18:00 Central and nothing is said from Friday 17:00 to then; XRP and
   // Dogecoin trade all week. Pure: orders in, sentences out. It only reads; it can warn wrongly (a holiday), never act.
-  var KAL_WATCH = [{ name: 'Gold', weekdays: true }, { name: 'XRP', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
+  var KAL_WATCH = [{ name: 'Gold', weekdays: true, sid: 'L1' }, { name: 'XRP', weekdays: false, paused: true }, { name: 'AUD/USD', weekdays: true, paused: true }, { name: 'USD/CAD', weekdays: true, paused: true }, { name: 'Natural gas', weekdays: true, paused: true }];
   function kalshiCtWeekMinute(ms){
     var parts = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', weekday: 'short', hour: 'numeric', minute: 'numeric', hourCycle: 'h23' }).formatToParts(new Date(ms)), o = {};
     parts.forEach(function(x){ o[x.type] = x.value; });
@@ -3725,10 +3751,12 @@
     var m = Math.round(ms / 60000);
     return m < 90 ? m + ' minutes' : (m < 2880 ? Math.round(m / 60) + ' hours' : Math.round(m / 1440) + ' days');
   }
-  function kalshiSilentMarkets(orders, s, now){
+  // `states` (kalshiStrategyState): a market whose strategy is not 'armed' (killed and cooling down, or its state unknown) is never called silent; silence is only a claim about a strategy that is trying to trade. Without `states` every market is checked (older gates).
+  function kalshiSilentMarkets(orders, s, now, states){
     if(!s || s.active !== true){ return []; }
     var wm = kalshiCtWeekMinute(now), closed = wm >= 7200 + 1020 || wm < 1080, reopen = now - ((wm - 1080 + 10080) % 10080) * 60000, out = [];
     KAL_WATCH.forEach(function(w){
+      if(states && w.sid && states[w.sid] !== 'armed'){ return; }
       if(w.paused || (w.weekdays && closed)){ return; }   // a market paused in the bot's code (PAUSED_SERIES: XRP since Oct 28, 2026, Bitcoin and the probe markets since Oct 28 to 29) is silent on purpose
       var ts = (orders || []).filter(function(o){ return o && o.strategy === 'L1' && Number.isFinite(Number(o.ts)) && kalshiMarketName(o) === w.name; }).map(function(o){ return Number(o.ts); }).sort(function(a, b){ return a - b; });
       var recent = ts.filter(function(x){ return x >= now - 3 * 86400000; });
@@ -3929,7 +3957,7 @@
       '<div class="kal-st-tile kal-st-ringtile"><div class="kal-st-lbl">Next look</div>' +
       '<svg class="kal-st-ring" width="150" height="150" viewBox="0 0 150 150"><circle cx="75" cy="75" r="64" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/><circle id="kalRing" cx="75" cy="75" r="64" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="' + RING + '" stroke-dashoffset="' + RING + '" transform="rotate(-90 75 75)"/>' +
       '<text id="kalNextIn" x="75" y="84" text-anchor="middle" fill="#fff" font-weight="800" font-size="32">&mdash;</text></svg>' +
-      (running ? '<div class="kal-st-ringtext"><b id="kalNextName">&mdash;</b><div class="kal-st-sub" id="kalNextWhat"></div><div class="kal-st-sub" id="kalNextThen"></div></div>' : '<div class="kal-st-ringtext"><div class="kal-st-sub">Not running</div></div>') + '</div>' +
+      (running ? '<div class="kal-st-ringtext"><b id="kalNextName">&mdash;</b><div class="kal-st-sub" id="kalNextWhat"></div><div class="kal-st-sub" id="kalNextThen"></div><div class="kal-st-sub" id="kalNextOff"></div></div>' : '<div class="kal-st-ringtext"><div class="kal-st-sub">Not running</div></div>') + '</div>' +
       '<div class="kal-st-tile kal-st-healthtile"><div class="kal-st-head"><div class="kal-st-lbl">Health</div><div class="kal-hb ' + (halted || hb.state === 'off' ? '' : hb.state) + '" id="kalHb"><span class="kal-hb-dot"></span><span id="kalHbText">' + escapeHtml(hbText) + '</span></div></div><div id="kalEcg" class="kal-ecg-wrap"></div></div></div>' +
       '<div id="kalWork"></div>' +
       (note ? '<div class="kal-note" style="white-space:pre-line">' + escapeHtml(note) + '</div>' : '');
@@ -3941,7 +3969,9 @@
     if(ecgNow){ ecgNow.innerHTML = kalshiHeartbeatSvg(kalshiBeats, now, hb.state, kalshiReads, kalshiOrderTimes(now)); if(newBeat){ ecgNow.classList.add('flash'); setTimeout(function(){ ecgNow.classList.remove('flash'); }, 900); } }
     var a = kalshiLiveAcct;
     var orders = kalshiResolveOrders(kalshiLiveOrders, a && a.results, a && a.fills && a.fills.ok ? kalshiGroupFills(a.fills.fills) : []);
-    var silent = kalshiOrdersLoaded ? kalshiSilentMarkets(orders, s, now) : [];
+    var liveState = kalshiLiveStateNow(now);
+    kalshiGoldEnsure(); kalshiRegistryEnsure();   // the Bot page needs the same shared state as the Strategies page
+    var silent = kalshiOrdersLoaded ? kalshiSilentMarkets(orders, s, now, liveState) : [];
     if(silent.length){
       var silentEscaped = silent.map(function(x){ return escapeHtml(x); }).join('</div><div class="kal-note">');
       sEl.insertAdjacentHTML('beforeend', '<div class="kal-warn kal-silent"><b>Needs a look</b><div class="kal-note">' + silentEscaped + '</div><div class="kal-note">Check the bot note above and the money on each Kalshi shard.</div></div>');
@@ -3970,7 +4000,10 @@ kalshiStatusTick();
       if(hbEl){ hbEl.className = 'kal-hb ' + (halted ? '' : hb.state); }
     }
     if(nx){
-      var ne = kalshiNextEntry(now), ringEl = document.getElementById('kalRing'), nameEl = document.getElementById('kalNextName'), thenEl = document.getElementById('kalNextThen');
+      var stNow = kalshiLiveStateNow(now), ne = kalshiNextEntry(now, stNow), ringEl = document.getElementById('kalRing'), nameEl = document.getElementById('kalNextName'), thenEl = document.getElementById('kalNextThen'), offEl = document.getElementById('kalNextOff');
+      var offList = KAL_LOOKS.filter(function(l){ return stNow[l.sid] === 'off'; }).map(function(l){ return l.who; });
+      if(offEl){ offEl.textContent = offList.length ? offList.join(', ') + ': off, cooling down' : ''; }
+      if(!ne){ nx.textContent = '\u2014'; if(what){ what.textContent = ''; } if(nameEl){ nameEl.textContent = 'No strategy armed'; } if(thenEl){ thenEl.textContent = ''; } if(ringEl){ ringEl.setAttribute('stroke-dashoffset', '402'); } }
       if(ne){
         var sec = Math.ceil(ne.inMs / 1000); nx.textContent = Math.floor(sec / 60) + ':' + (sec % 60 < 10 ? '0' : '') + (sec % 60);
         if(what){ what.textContent = ne.what; } if(nameEl){ nameEl.textContent = ne.name; } if(thenEl){ thenEl.textContent = ne.then; }
@@ -4102,7 +4135,8 @@ kalshiStatusTick();
     var rangeLabel = (KAL_PNL_RANGES.filter(function(r){ return r.key === key; })[0] || { label: key }).label;
     var l1Orders = kalshiResolveOrders(l1src, acct && acct.results, fills);
     var l1 = kalshiOrdersSummary(l1Orders.filter(function(o){ return kalshiStrategyOf(o) === 'L1' && kalshiIsActive(o); }), now, since);   // only the markets L1 trades now (the owner, Nov 4, 2026: the row said Gold but carried Dogecoin's and other paused markets' old results); those stay in All strategies
-    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: on ? 'Running' : 'Stopped', ageText: age(l1) }];
+    var liveState = kalshiLiveStateNow(now);
+    var rows = [{ id: 'L1', info: KAL_STRATEGY_INFO.L1, sum: l1, status: !on ? 'Stopped' : (liveState.L1 === 'off' ? 'Off, cooling down' : 'Running'), ageText: age(l1) }];
     kalshiSlotIds(kalshiSlotOrders).forEach(function(id){
       var sum = kalshiOrdersSummary(kalshiResolveOrders(kalshiSlotOrders.filter(function(o){ return o && o.slotId === id; }), acct && acct.results, fills), now, since);
       // A strategy no longer in the bot's registry (FLOW1, removed Nov 4, 2026) is hidden once nothing of it is open (the owner, Nov 4, 2026: "Hide it"); its result still counts in All strategies.
@@ -4710,21 +4744,28 @@ kalshiStatusTick();
     fetch('strategies-registry.json', { cache: 'no-cache' }).then(function(r){ if(!r.ok){ throw new Error('http'); } return r.json(); }).then(function(j){
       var l = kalshiRegistryNorm(j); if(!l){ throw new Error('shape'); }
       kalshiRegistry = { state: 'ok', list: l };
-    }).catch(function(){ kalshiRegistry = { state: 'unreadable', list: [] }; }).then(function(){ kalshiRegistryLoading = false; renderStrategiesPage(); });
+    }).catch(function(){ kalshiRegistry = { state: 'unreadable', list: [] }; }).then(function(){ kalshiRegistryLoading = false; kalshiStateChanged(); });
   }
   // Gold's kill state: read once when the page is first drawn and again only after ten minutes and a redraw (no timer). A failed read is kept as the answer for the same ten minutes and the card says "not readable", never healthy.
   // The one-shot deadline redraw, in its own function: armed only while the card is loading, cleared when it fires.
   function kalshiGoldDeadline(state, now){
     if(state !== 'loading' || kalshiGoldTimer){ return; }
-    kalshiGoldTimer = setTimeout(function(){ kalshiGoldTimer = 0; renderStrategiesPage(); }, Math.max(100, KAL_GOLD_READ_TIMEOUT - (now - kalshiGoldCache.since) + 50));
+    kalshiGoldTimer = setTimeout(function(){ kalshiGoldTimer = 0; kalshiStateChanged(); }, Math.max(100, KAL_GOLD_READ_TIMEOUT - (now - kalshiGoldCache.since) + 50));
   }
   var kalshiGoldCache = { at: 0, since: 0, res: null, error: '' }, kalshiGoldLoading = false, kalshiGoldTimer = 0;
+  // The shared state for the page right now (kalshiStrategyState fed by what the page already reads: gold's kill latch, the registry file, the bot's slot list, the shadow rules). Every consumer calls this one function.
+  function kalshiLiveStateNow(now){
+    if(!kalshiGoldCache.since){ kalshiGoldCache.since = now; }
+    return kalshiStrategyState({ gold: kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT), registry: kalshiRegistry.list, slotIds: KAL_SLOT_REGISTERED, shadowIds: KAL_BOARD_SHADOW.map(function(r){ return r.id; }) });
+  }
+  // Both the Bot page and the Strategies page need the same two reads (the latch, the registry file); either page starts them, and when one answers both are redrawn.
+  function kalshiStateChanged(){ renderStrategiesPage(); if(typeof renderKalshiStatus === 'function'){ renderKalshiStatus(); } if(typeof renderKalshiStrategies === 'function'){ renderKalshiStrategies(); } }
   function kalshiGoldEnsure(){
     var api = window.__shwoopAPI;
     if(kalshiGoldLoading || !api || !api.readKalshiGoldKill || !currentUserIsAdmin){ return; }
     if(kalshiGoldCache.at && Date.now() - kalshiGoldCache.at < KAL_SHADOW_TTL){ return; }
     kalshiGoldLoading = true; kalshiGoldCache.at = Date.now();
-    var done = function(){ kalshiGoldLoading = false; renderStrategiesPage(); };
+    var done = function(){ kalshiGoldLoading = false; kalshiStateChanged(); };
     // A read that never settles (a phone that is offline or has not finished signing in) must not hold the card on CHECKING: the card falls back to unknown after KAL_GOLD_READ_TIMEOUT (kalshiGoldCardState) and a retry is allowed after a minute, not ten.
     var fail = function(){ kalshiGoldCache.res = null; kalshiGoldCache.error = 'read'; kalshiGoldCache.at = Date.now() - KAL_SHADOW_TTL + 60000; done(); };
     try { api.readKalshiGoldKill().then(function(res){ kalshiGoldCache.res = res; kalshiGoldCache.error = ''; done(); }, fail); }
@@ -4791,7 +4832,7 @@ kalshiStatusTick();
     var now = Date.now(), all = kalshiAllOrders();
     // Gold's kill state (the latch the bot's checker caches); loading until the one read answers, unknown when it cannot be read.
     if(!kalshiGoldCache.since){ kalshiGoldCache.since = now; }
-    var gold = kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT);
+    var gold = kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT), liveState = kalshiLiveStateNow(now);
     // One-shot redraw at the deadline so a card still loading then falls back to unknown on its own (the only timer this adds; it is cleared when it fires).
     kalshiGoldDeadline(gold.state, now);
     var live = KAL_BOARD_LIVE.map(function(s){
@@ -4799,7 +4840,7 @@ kalshiStatusTick();
       var kill = kalshiBoardKill(s.id, mine, now, kalshiMoney), goldCard = s.id === 'L1';
       if(goldCard){ kill.off = gold.state === 'killed'; kill.unknown = gold.state !== 'killed' && gold.state !== 'armed'; if(kill.off){ kill.lines = ['Gold is off: the kill rule tripped.'].concat(kill.lines); } }
       var reg = kalshiRegistry.list.filter(function(x){ return x.id === s.id; })[0] || null;
-      var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: goldCard && gold.state === 'killed', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
+      var lane = kalshiStratLaneOf({ stage: reg ? reg.stage : undefined, drawn: true, off: liveState[s.id] === 'off', slot: KAL_SLOT_REGISTERED.indexOf(s.id) >= 0 || Boolean(reg && reg.code && reg.code.slot) });
       return { id: s.id, lane: lane, name: s.name, rule: s.rule, rules: s.rules, w: kalshiBoardWindows(mine, now), kill: kill,
         killState: goldCard ? gold.state : undefined, note: goldCard ? kalshiGoldKillNote(gold, gold.state === 'killed' ? kalshiGoldReturnProgress(kalshiShadowCache.rows, now) : '', kalDateTime) : '',
         spark: kalshiStratRolling(kalshiBoardRows(mine).map(function(r){ return r.p; }), 30), detail: kalshiStratDetail(mine, kalshiMarketName, kalDayKey, 8) };
