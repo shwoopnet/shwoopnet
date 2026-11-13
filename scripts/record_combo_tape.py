@@ -280,17 +280,26 @@ def run(out_dir, stream, start, stop, since=None, clock=time.time, sleep=time.sl
 
 def main(argv):
     ap = argparse.ArgumentParser()
-    ap.add_argument("out_dir")
-    ap.add_argument("--since", type=int, default=0, help="unix seconds: the previous job's mark (from the workflow); 0 means 5 minutes back")
+    ap.add_argument("out_dir", nargs="?")
+    ap.add_argument("--since", type=int, default=0, help="unix seconds: the previous chunk's or job's mark (from the workflow); 0 means 5 minutes back")
     ap.add_argument("--cycle-hours", type=float, default=4, help="back to back jobs: run to the 4 hour boundary (see cycle_boundary)")
-    ap.add_argument("--max-minutes", type=float, default=0, help="for a test: stop after this many minutes")
+    ap.add_argument("--boundary", action="store_true", help="print this job's 4 hour boundary (unix seconds) and exit: the workflow runs hourly chunks up to it")
+    ap.add_argument("--until", type=int, default=0, help="unix seconds: never start a cycle at or after this (the job's boundary)")
+    ap.add_argument("--max-minutes", type=float, default=0, help="stop after this many minutes (the workflow's hourly chunk, so each hour is pushed)")
     a = ap.parse_args(argv)
     now = time.time()
+    if a.boundary:
+        print(int(cycle_boundary(now, a.cycle_hours * 3600)))
+        return 0
     if past_end(now):
         print("past the end date %s: nothing to record" % END_UTC)
         return 0
+    if not a.out_dir:
+        ap.error("out_dir is required")
     os.makedirs(a.out_dir, exist_ok=True)
     stop = now + a.max_minutes * 60 if a.max_minutes else cycle_boundary(now, a.cycle_hours * 3600)
+    if a.until > 0:
+        stop = min(stop, a.until)
     stream = Stream()
     rec = run(a.out_dir, stream, now, stop, a.since or None)
     print("done: %d cycles, %d requests, %d refused (429), %d legs missing at the end" % (rec.n, stream.calls, stream.n429, rec.end()))

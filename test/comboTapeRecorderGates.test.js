@@ -216,6 +216,77 @@ gates.CT10 = () => {
   assert.strictEqual(run([['2027-01-15/0800', '1800000240; rm -rf /\n']]), 'since=1800000240', 'anything but digits is stripped');
 };
 
+// CT11 (the Head of R&D, Nov 13: a hard size stop). Hand case: the size step, run as written, on sparse files (no real disk used): 1.3 GB stops (ok=false, says why), exactly 1.2 GB stops,
+// 1.0 GB and an empty or missing data/tape go on; the recording step needs ok == 'true'.
+gates.CT11 = () => {
+  const os = require('os');
+  const step = wf.split('- name: Size stop')[1].split('run: |')[1].split('\n      - name:')[0];
+  const body = step.split('\n').map((l) => l.replace(/^          /, '')).join('\n');
+  const run = (sizes) => {
+    const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ct11-'));
+    if (sizes !== null) {
+      fs.mkdirSync(path.join(d, 'data', 'tape', '2027-01-15', '0800'), { recursive: true });
+      sizes.forEach((n, i) => execFileSync('truncate', ['-s', String(n), path.join(d, 'data', 'tape', '2027-01-15', '0800', 'f' + i + '.csv.gz')]));
+    }
+    const outFile = path.join(d, 'out');
+    const log = execFileSync('bash', ['-c', body], { cwd: d, env: { PATH: process.env.PATH, GITHUB_OUTPUT: outFile }, encoding: 'utf8' });
+    return [fs.readFileSync(outFile, 'utf8').trim(), log];
+  };
+  const big = run([700000000, 600000000]);
+  assert.strictEqual(big[0], 'ok=false');
+  assert.ok(/size stop: data\/tape holds \d+ bytes, at or over 1200000000: nothing recorded/.test(big[1]), 'it logs why');
+  assert.strictEqual(run([1200000000 - 4096, 4096])[0], 'ok=false', 'at the limit it stops');
+  assert.strictEqual(run([1000000000])[0], 'ok=true');
+  assert.strictEqual(run([])[0], 'ok=true');
+  assert.strictEqual(run(null)[0], 'ok=true', 'a new branch goes on');
+  assert.ok(/if: steps\.gate\.outputs\.go == 'true' && steps\.size\.outputs\.ok == 'true'/.test(wf.split('- name: Record the combo tape')[1].split('\n      - name:')[0]), 'recording needs the size check');
+};
+
+// CT12 (the Head of R&D, Nov 13: push every 60 minutes inside a job). Hand case: the recording step, run as written, against a stub recorder (each chunk writes one csv and a mark one hour
+// later than the last) and a real local bare repository as origin: five hourly chunks, each pushed in its own commit (so a lost runner loses at most the chunk in progress), each chunk's
+// --since is the previous chunk's mark, every chunk gets --until (the boundary) and --max-minutes 60, and a chunk that fails is followed by the next.
+gates.CT12 = () => {
+  const os = require('os');
+  const step = wf.split('- name: Record the combo tape')[1].split('run: |')[1].split('\n      - name:')[0];
+  const body = step.split('\n').map((l) => l.replace(/^          /, '')).join('\n');
+  const d = fs.mkdtempSync(path.join(os.tmpdir(), 'ct12-'));
+  const git = (args, cwd) => execFileSync('git', args, { cwd, encoding: 'utf8', env: { PATH: process.env.PATH, HOME: d, GIT_CONFIG_NOSYSTEM: '1' } });
+  git(['init', '-q', '--bare', 'origin.git'], d);
+  fs.mkdirSync(path.join(d, 'data'));
+  git(['init', '-q'], path.join(d, 'data'));
+  git(['remote', 'add', 'origin', path.join(d, 'origin.git')], path.join(d, 'data'));
+  git(['checkout', '-q', '--orphan', 'combotape-data'], path.join(d, 'data'));
+  fs.mkdirSync(path.join(d, 'code', 'scripts'), { recursive: true });
+  const log = path.join(d, 'calls.log');
+  fs.writeFileSync(path.join(d, 'code', 'scripts', 'record_combo_tape.py'), `import sys, os, time
+a = sys.argv[1:]
+if "--boundary" in a:
+    print(int(time.time()) + 100000); sys.exit(0)
+out = a[0]; since = int(a[a.index("--since") + 1])
+open(${JSON.stringify(log)}, "a").write(" ".join(a[1:]) + "\\n")
+n = len(open(${JSON.stringify(log)}).read().splitlines())
+open(os.path.join(out, "trades.csv"), "a").write("chunk%d\\n" % n)
+if n == 3:
+    sys.exit(1)   # a chunk that fails: no mark; the step must go on
+open(os.path.join(out, "mark.txt"), "w").write("%d\\n" % (1800000000 + 3600 * n))
+`);
+  const env = { PATH: process.env.PATH, HOME: d, GIT_CONFIG_NOSYSTEM: '1', SINCE: '1799999000', GIT_AUTHOR_DATE: '2027-01-15T08:00:00Z', GIT_COMMITTER_DATE: '2027-01-15T08:00:00Z' };
+  // the step sleeps 30 s after a failed chunk; replace only that sleep so the test is quick (the push loop's own sleeps never run: every push succeeds)
+  execFileSync('bash', ['-c', body.replace('|| sleep 30', '|| true')], { cwd: d, env, encoding: 'utf8' });
+  const calls = fs.readFileSync(log, 'utf8').trim().split('\n');
+  const commits = git(['log', '--format=%s', 'combotape-data'], path.join(d, 'origin.git')).trim().split('\n');
+  const files = git(['ls-tree', '-r', '--name-only', 'combotape-data'], path.join(d, 'origin.git')).trim().split('\n');
+  assert.strictEqual(calls.length, 5, 'five hourly chunks at most');
+  assert.deepStrictEqual(calls.map((c) => c.match(/--since (\d+)/)[1]), ['1799999000', '1800003600', '1800007200', '1800007200', '1800014400'], 'each chunk starts at the previous chunk mark; a failed chunk leaves it');
+  assert.ok(calls.every((c) => /--until \d+ --max-minutes 60$/.test(c)), calls.join(' | '));
+  assert.ok(files.every((f) => /^tape\/\d{4}-\d{2}-\d{2}\/\d{4}-[1-5]\/(trades\.csv\.gz|mark\.txt)$/.test(f)), 'gzipped data and marks under tape/: ' + files.join(' '));
+  assert.strictEqual(files.filter((f) => f.endsWith('trades.csv.gz')).length, 5, 'every chunk keeps its own folder, even within one minute');
+  assert.strictEqual(commits.length, 5, 'one push per chunk');
+  assert.ok(/for i in 1 2 3 4 5 6; do git -C data push -q origin combotape-data && return 0; \[ "\$i" -lt 6 \] \|\| break; sleep \$\(\(2 \*\* i\)\); git -C data pull -q --rebase origin combotape-data \|\| true; done/.test(step), 'the six-try loop');
+  assert.ok(/push \|\| echo "hourly push failed: the last step tries again"/.test(step), 'a failed hourly push does not end the job');
+  assert.ok(/for k in 1 2 3 4 5; do/.test(step) && /\[ "\$NOW" -ge "\$STOPDATE" \]/.test(step), 'at most five chunks, and none after the end date');
+};
+
 // CT9: the docs state the figures; no em dash in the new files.
 gates.CT9 = () => {
   const doc = fs.readFileSync(path.join(root, 'docs', 'COMBO_TAPE_RECORDER.md'), 'utf8');

@@ -21,7 +21,7 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
   - the share of polls or cycles that were capped or cut;
   - the share of traded combos dropped for want of legs.
 
-**Where it goes.** Gzipped CSV on its own `combotape-data` branch under `tape/DATE/HHMM/`, pushed with the built-in token (six tries). Never main, never `combo-data` or any other data branch, never published with the site.
+**Where it goes.** Gzipped CSV on its own `combotape-data` branch under `tape/DATE/HHMM-k/` (k is the hour chunk, 1 to 5), pushed with the built-in token (six tries) after EVERY hour chunk, so a lost runner loses at most about an hour (the Head of R&D, Nov 13, 2026); a failed hourly push is tried again at the next chunk and at the job end. Each chunk starts its tape at the previous chunk's mark. Never main, never `combo-data` or any other data branch, never published with the site.
 
 **Safety.**
 - Public GET endpoints under `/markets` only, on one host. No key, no secret, no auth header, no POST, no order or account path, no Firestore.
@@ -37,7 +37,7 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 | Requests per day | at most 14,400; about 4,300 to 7,200 expected |
 | MB per day (gzipped) | an ESTIMATE: at least about 450,000 combo trades a day at the trial's lower bound, about 110 bytes a row raw, so about 50 MB raw and about 10 MB gzipped, plus a few MB of legs; about 800 MB over the whole run on its own branch (re-measure from the first files) |
 | Runner minutes | continuous: about 1,440 a day, about 43,000 a month, free on a public repo, far over the Charter's 250 a month guideline; the owner approved it ("Yes, nonstop recorder", Nov 13, 2026) |
-| Repo weight | its branch is fetched by every full clone of this repo, so about 800 MB by the end makes every full clone heavier (a single-branch clone of main is unaffected); the Head of R&D or the owner accepts that, or sets a size stop |
+| Size stop | at each job start the workflow measures the committed tape data on the branch; at or over 1.2 GB it records nothing and logs why (the Head of R&D, Nov 13, 2026, accepting about 800 MB expected). Every full clone of this repo fetches this branch, so it makes full clones heavier (a single-branch clone of main is unaffected) |
 | Ends | 2027-01-31 23:59 UTC by itself (workflow and script); sooner by deleting `.github/workflows/record-combo-tape.yml` |
 
 **Held-out line.** The CROWDLEG and NOTAKER forward windows are:
@@ -46,4 +46,4 @@ Research data only. Nothing here trades, signs or holds a key. It exists for Ide
 
 The exact dates are written as a dated amendment to both cards the day the first rows land, before any row is read. No one reads a held-out row for price, side, size or result before then; coverage counts may be checked.
 
-**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT10. CT1 checks the code against a hand case written and committed before the code (`test/fixtures/comboTapeHandCase.json`).
+**Gates.** `test/comboTapeRecorderGates.test.js` CT1 to CT12. CT1 checks the code against a hand case written and committed before the code (`test/fixtures/comboTapeHandCase.json`).
