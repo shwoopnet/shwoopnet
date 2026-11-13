@@ -1,0 +1,85 @@
+{
+ "counts_first": {
+  "leagues_no_such_series": 52,
+  "games_in_window": 149,
+  "sampled": 149,
+  "kickoff_not_derivable": 0,
+  "no_btts_leg": 0,
+  "teamtotal_unreadable_markets": 0
+ },
+ "fit_residual_rmse_median": 0.0023,
+ "groups": {
+  "A_big": {
+   "games_with_derivable_kickoff": 149,
+   "btts": {
+    "games_with_a_target": 149,
+    "filled": 149,
+    "share_filled": 1.0,
+    "targets": {
+     "n": 149,
+     "median_spread": 0.02,
+     "median_round_trip_information_only": 0.0548,
+     "median_one_way_entry_cost": 0.03,
+     "gap_quartiles_p90": [
+      -0.0094,
+      -0.0074,
+      -0.0068,
+      -0.0056
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0
+    },
+    "placebo": {
+     "n": 149,
+     "median_spread": 0.02,
+     "median_round_trip_information_only": 0.0549,
+     "median_one_way_entry_cost": 0.03,
+     "gap_quartiles_p90": [
+      -0.0088,
+      -0.0088,
+      -0.0037,
+      -0.0036
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0
+    },
+    "verdict": "no evidence at n = 149 filled games"
+   },
+   "teamtotal": {
+    "games_with_a_target": 149,
+    "filled": 149,
+    "share_filled": 1.0,
+    "targets": {
+     "n": 298,
+     "median_spread": 0.02,
+     "median_round_trip_information_only": 0.0532,
+     "median_one_way_entry_cost": 0.03,
+     "gap_quartiles_p90": [
+      -0.0088,
+      -0.0082,
+      -0.0051,
+      -0.0041
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0
+    },
+    "placebo": {
+     "n": 298,
+     "median_spread": 0.02,
+     "median_round_trip_information_only": 0.0549,
+     "median_one_way_entry_cost": 0.03,
+     "gap_quartiles_p90": [
+      -0.0088,
+      -0.0088,
+      -0.0037,
+      -0.0036
+     ],
+     "share_gap_ge_8c_spread_le_4c": 0.0
+    },
+    "verdict": "no evidence at n = 149 filled games"
+   }
+  }
+ },
+ "tries_added": 0,
+ "rule_scored": false,
+ "result_read": false,
+ "freshness": "candle freshness measured on Bitcoin 15 minute only, not on sports",
+ "model_note": "independent Poisson goals understate draws and low scores, moving both-teams-to-score by about one point; a gap of 2c to 3c means nothing; the placebo shows what model error alone produces"
+}
