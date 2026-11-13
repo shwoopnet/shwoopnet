@@ -29,6 +29,27 @@ def refuse_heldout(folder, allow=False):
     """Standing rule (h), Head Nov 12 19:22Z: a folder whose path has a component starting HELDOUT_ is a joint held-out pull; every scorer refuses it by default (default-closed). Reading one needs allow=True AND an approved read, passed by the caller on the Head's go."""
     if not allow and any(p.startswith("HELDOUT_") for path in (os.path.abspath(folder), os.path.realpath(folder)) for p in path.split(os.sep)):          # realpath too: a link with an innocent name to a HELDOUT_ folder is refused
         raise SystemExit("refused: %s is a HELDOUT_ folder; it is read once, on the Head's go, with allow_heldout=True" % folder)
+    refuse_listed_run(folder)          # a landed run listed in HELDOUT_PULL_RUNS.md is refused whatever `allow` says
+
+
+_LIST_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "HELDOUT_PULL_RUNS.md")          # the copy beside the readers' folder, kept equal to the one on main
+_ROW = __import__("re").compile(r"^\|\s*`([A-Za-z0-9_\-]+)/([A-Za-z0-9_\-]+)`\s*\|")
+
+
+def listed_heldout_runs():
+    """Run folder names (the last part, <UTC stamp>_<run id>) of every row of HELDOUT_PULL_RUNS.md. An unreadable list, or a file that is not that list, refuses everything (Head, Nov 13, 2026; logic copied from deskb_guard)."""
+    try: lines = open(_LIST_FILE, encoding="utf-8").read().splitlines()
+    except OSError: raise SystemExit("refused: %s cannot be read, so no run can be shown to be clean (standing rule (h))" % _LIST_FILE)
+    if not any(ln.startswith("| Run folder") for ln in lines): raise SystemExit("refused: %s has no table header; it is not the list this guard expects" % _LIST_FILE)
+    return {m.group(2) for m in map(_ROW.match, lines) if m}
+
+
+def refuse_listed_run(folder):
+    """Refuse a landed run listed as holding held-out material, BY THE RUN FOLDER NAME as typed and after links resolve (a part of the path equal to a listed folder name). A name filter, not a content filter: a copy under another name is not caught. No allow switch."""
+    runs = listed_heldout_runs()
+    for p in (os.path.abspath(folder), os.path.realpath(folder)):
+        hit = runs.intersection(p.split(os.sep))
+        if hit: raise SystemExit("refused: %s is, or lies inside, the landed run %s, which HELDOUT_PULL_RUNS.md lists as held-out material" % (folder, sorted(hit)[0]))
 
 
 def guard(folder):

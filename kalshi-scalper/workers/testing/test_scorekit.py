@@ -1,3 +1,4 @@
+import os
 """Synthetic tests for scorekit.py (made-up data only; no Kalshi, no real file opened). Run: python3 -W ignore test_scorekit.py"""
 import gzip, json, os, random, tempfile
 import scorekit as k
@@ -124,4 +125,21 @@ with tempfile.TemporaryDirectory() as d4:
     for fn in (lambda: list(k.iter_answers(ln)), lambda: k.manifest(ln), lambda: k.guard(ln)):
         try: fn(); raise AssertionError("a link to a HELDOUT_ folder must be refused")
         except SystemExit: pass
+
+# ---- HELDOUT_PULL_RUNS.md (Head, Nov 13): a landed run listed there is refused by folder name, as typed and after a link; an unreadable list refuses everything
+import tempfile as _tf
+_run = sorted(k.listed_heldout_runs())[0]
+with _tf.TemporaryDirectory() as _d:
+    _p = os.path.join(_d, _run); os.makedirs(_p)
+    for _call in (lambda: k.guard(_p), lambda: k.refuse_heldout(_p, allow=True), lambda: list(k.iter_answers(_p))):
+        try: _call(); raise AssertionError("listed run not refused")
+        except SystemExit as _e: assert "HELDOUT_PULL_RUNS" in str(_e), _e
+    _ok = os.path.join(_d, "2026-11-13T0001Z_1234567890"); os.makedirs(_ok); assert k.guard(_ok) == _ok          # an unlisted run is not refused
+    _link = os.path.join(_d, "innocent"); os.symlink(_p, _link)
+    try: k.guard(_link); raise AssertionError("link to a listed run not refused")
+    except SystemExit as _e: assert "HELDOUT_PULL_RUNS" in str(_e), _e
+    _save = k._LIST_FILE; k._LIST_FILE = os.path.join(_d, "missing.md")
+    try: k.guard(_ok); raise AssertionError("unreadable list did not refuse")
+    except SystemExit as _e: assert "cannot be read" in str(_e), _e
+    finally: k._LIST_FILE = _save
 print("scorekit synthetic tests passed")
