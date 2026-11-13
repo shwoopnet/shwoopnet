@@ -157,3 +157,17 @@ Adopted as proposed. Desk B numbered these "Amendment 3"; they are Amendment 4 h
 **Stated limits (not rules):**
 - The snapshot time is the recorder's receive time, and a list copy can be some seconds old. So the 60 second line in (b) is good to some seconds, not to the second.
 - **What could stop it:** the recorder's runs on the branch so far are far fewer than 48 a day. A week of 269 completed runs depends on the self-chain the Chief of Staff merged holding up.
+
+## Amendment 5 (Nov 13, 2026, 02:50Z, the History Miner's finding: the point-23 fingerprint did not tell files apart)
+
+**Point 23 is replaced.** Two of the made-up cases printed the same path-and-size fingerprint while 735 of their files differed in content (short gzipped files often share a size), and their verdicts differed.
+
+**The fingerprint is now** the sha256 (hex) of the UTF-8 text made of one line per regular file at any depth under a top-level YYYY-MM-DD folder of the combo folder. Each line is:
+
+`relative/path<TAB>size in bytes<TAB>sha256 hex of the file's bytes<NEWLINE>`
+
+- Paths use forward slashes, relative to the combo folder.
+- Lines are sorted by path as plain strings.
+- **A symbolic link anywhere in that tree makes the count REFUSE to run.** It is never skipped.
+
+The first line of the count prints this fingerprint, and both builds must name the same one. Everything else in Amendment 4 stands.
