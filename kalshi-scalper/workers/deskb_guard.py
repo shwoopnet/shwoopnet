@@ -1,14 +1,16 @@
 """Idea Desk B: one held-out folder guard for every script of this desk (standing rule (h)).
 A path whose REAL path has a part starting HELDOUT_ is refused, so a link with an innocent name does not get past.
-The current folder is tested too. The one approved read sets DESKB_HELDOUT=READ-ONCE by hand."""
+The current folder is tested too."""
 import os
 import sys
 
 
 def refuse_heldout(path):
-    real = os.path.realpath(path)
-    if any(part.upper().startswith("HELDOUT_") for part in real.split(os.sep)) and os.environ.get("DESKB_HELDOUT") != "READ-ONCE":
-        raise SystemExit("REFUSED: %s resolves into a HELDOUT_ folder (standing rule (h))" % path)
+    """Refuses if ANY part of the path as typed (made absolute) or of its real path starts HELDOUT_. There is no bypass:
+    a held-out read is a separate, reviewed change to the one scorer that makes it."""
+    for p in (os.path.abspath(path), os.path.realpath(path)):
+        if any(part.upper().startswith("HELDOUT_") for part in p.split(os.sep)):
+            raise SystemExit("REFUSED: %s lies in or resolves into a HELDOUT_ folder (standing rule (h))" % path)
 
 
 def refuse_all(args=None):

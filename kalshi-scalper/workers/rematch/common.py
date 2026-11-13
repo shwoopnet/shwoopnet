@@ -46,11 +46,12 @@ DROPS = {"not_two_team_codes": 0, "no_ticker_clock": 0, "market_without_close_ti
 
 
 def refuse_heldout(path):
-    """Standing rule (h): a folder whose real path has a part starting HELDOUT_ is refused unless REMATCH_HELDOUT=READ-ONCE is set
-    for the one approved read. The real path is tested, so a link with an innocent name does not get past."""
-    real = os.path.realpath(path)
-    if any(part.upper().startswith("HELDOUT_") for part in real.split(os.sep)) and os.environ.get("REMATCH_HELDOUT") != "READ-ONCE":
-        raise SystemExit("REFUSED: %s resolves into a HELDOUT_ folder (standing rule (h))" % path)
+    """Standing rule (h): refuses if ANY part of the path as typed (made absolute) or of its real path starts HELDOUT_.
+    A link with an innocent name into a HELDOUT_ folder is refused, and so is a HELDOUT_ folder holding a link out.
+    There is no bypass here: stage 1 never reads a held-out file; the one held-out read is a separate, reviewed change."""
+    for p in (os.path.abspath(path), os.path.realpath(path)):
+        if any(part.upper().startswith("HELDOUT_") for part in p.split(os.sep)):
+            raise SystemExit("REFUSED: %s lies in or resolves into a HELDOUT_ folder (standing rule (h))" % path)
 
 
 def quote_at(q, t):

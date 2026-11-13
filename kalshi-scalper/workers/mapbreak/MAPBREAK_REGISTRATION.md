@@ -224,3 +224,14 @@ Where this section and Amendment 7 differ, this section is right. It is the ONE 
 5. **Auditor B's F2, the price: the decision and the price are no longer the same candle.** The decision is taken on the look minute L exactly as registered (state observable, gap 8c or more against the ask at L, spread 4c or less at L). **The price paid is the NEXT minute's ask plus 1c:** at the candle ending one minute after L the bought contract must be two-sided with a spread of 4c or less AND its gap against that minute's ask must still be 8c or more; then the bet is made at that ask plus 1c. Otherwise it is "not filled", counted, and there is no bet. The fee is charged on the price paid. The one-way cost line is computed on those entry minutes.
 6. Nothing else changes: the look times, the model, the placebo, the samples, the tries (2), CS2's step 1 verdict.
 
+## AMENDMENT 9, Nov 13, 2026, 00:07Z: made after step 1 counts on 165 of 282 requests and after Auditor B's findings, BEFORE any match result was read (Head of R&D's mandatory fixes of 00:05Z)
+
+The Head's ruling reached me after Amendment 8 was written. It agrees with Amendment 8 on the state (F1) and sets a different, mandatory rule for the fill (F2). **Where Amendments 7 and 8 and this section differ, this section is right; with Amendment 8's points 1 to 4 it is the ONE definition.**
+
+1. **F1, the state (as Amendment 8, points 1 to 4, restated in the Head's words):** the team taken is named ONLY by Kalshi's own quote in a candle ending at or before the look: the map's winner is the team whose own map contract shows a best bid of 0.90 or more (one-sided books allowed) while the other team's does not. If neither shows it, the match is "state not observable at the look": counted, printed, not a bet. The result field never names the team.
+2. **F2, the fill (replaces Amendment 8, point 5):** the decision is taken on the look candle exactly as registered (state observable, gap 8c or more against that candle's ask, spread 4c or less). The order is **a limit at the look candle's ask plus 1c. It is FILLED only if the next minute's candle shows an ask at or under that limit, and it pays the limit.** Otherwise it is "not filled": counted, printed, not a bet. There is no second gap test on the next minute.
+3. **The old figure is printed beside the new one, labelled "optimistic, same-candle fill"** (every decision booked at the look candle's ask plus 1c as before). It is information only; the registered verdict is the filled figure.
+4. **The 150 minimum applies to FILLED bets,** per title and look. Under it the title reads "no evidence at n = x".
+5. CS2 stays OUT as registered. Step 1 is re-run on the whole set after the remaining requests land. Tries stay at 2. The one-way cost line is computed on the filled entries (ask at the look minus mid, plus the 1c, plus the fee on the limit).
+6. The live spec sheet takes the same two definitions.
+
