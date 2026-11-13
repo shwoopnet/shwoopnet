@@ -125,7 +125,7 @@ gates.RG6 = () => {
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mask = (x) => (x < 0 ? '-' : '') + '****', money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
   // the card side: the computed Live tile renders the button, and the click handler finds a row for every live id
-  assert.ok(/data-row="' \+ esc\(o\.key\)/.test(html) && /key: s\.id, name: s\.name, stage: bk === 'off'/.test(html), 'every computed Live or Probe strategy is a row that opens in place (L1, OICORE, EVENT830 and any added to the list); the popup now serves the Retired list and the Paper and Ideas rows');
+  assert.ok(/data-row="' \+ esc\(o\.key\)/.test(html) && /key: s\.id, name: s\.name, stage: bk === 'off'/.test(html), 'every computed Live or Probe strategy is a row that opens its chart sheet (L1, OICORE, EVENT830 and any added to the list); the popup now serves the Retired list and the Paper and Ideas rows');
   assert.ok(/kalshiStratSheets\[openId\] \|\| kalshiStratSheetRow\(openId, kalshiRegistry\.list, KAL_BOARD_LIVE\)/.test(html) && /kalshiRegistrySheetHtml\(x, kalshiStratSheetData\(/.test(html), 'the popup reuses the one sheet builder, with its data built when it opens');
   assert.ok(/kalshiStratPop\.refresh\(\)/.test(fn('renderStrategiesPage')), 'a redraw or the Privacy switch re-masks an open popup');
   const list = reg.strategies;

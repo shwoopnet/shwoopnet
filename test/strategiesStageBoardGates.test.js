@@ -14,7 +14,7 @@ const varLine = (name) => { const m = new RegExp('  var ' + name + ' = .*\\n').e
 const varBlock = (name) => { const m = new RegExp('  var ' + name + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html); assert.ok(m, name); return m[0]; };
 const pre = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varLine('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STAGES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + "var kalshiRegistry = { state: 'loading', list: [] }, kalshiRegData = {};\n";
 const pf = html.slice(html.indexOf('  function kalshiStratPfAttr('), html.indexOf('  // The text shown t of the way through the count'));
-const B = new Function('Intl', 'Date', 'Math', pre + section + pf + '; return { kalshiBoardHtml, KAL_BOARD_LIVE };')(Intl, Date, Math);
+const B = new Function('Intl', 'Date', 'Math', pre + section + pf + '; return { kalshiBoardHtml, KAL_BOARD_LIVE, kalshiStratDaily, kalshiStratChartsHtml };')(Intl, Date, Math);
 const money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2), esc = (s) => String(s).replace(/[&<>"']/g, (c) => '&#' + c.charCodeAt(0) + ';');
 const reg = JSON.parse(fs.readFileSync(path.join(__dirname, '..', 'strategies-registry.json'), 'utf8')).strategies;
 const card = (id, lane, extra) => Object.assign({ id, name: id, lane, rule: 'rule of ' + id, rules: ['impl', 'kill rule', 'return rule'], w: { d7: { n: 1, net: 1 }, d30: { n: 12, pf: 1.4, net: 2 }, all: { n: 12 } }, kill: { lines: ['x'], count: 5, streak: 3, net: -1, floorOn: true, floorRoom: 5 }, spark: [], detail: null, today: 0 }, extra || {});
@@ -71,7 +71,7 @@ gates.ST6 = () => {
 gates.ST7 = () => {
   const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(css)[1];
   const attr = css.split('\n').filter((l) => l.includes('[data-reduce-motion="true"]')).join('\n');
-  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '#page-strategies .rw.rw-opening .sp-bar i', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
+  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '.sp-csheet.sc-play', '.sp-csheet.sc-play .sc-ln', '.sp-csheet.sc-play .sc-g-ar', '.sp-csheet.sc-play .sc-b', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
     assert.ok(media.includes(s), 'prefers-reduced-motion stops ' + s);
     assert.ok(attr.includes(s), 'the Settings switch stops ' + s);
   }
@@ -122,6 +122,31 @@ gates.ST12 = () => {
 gates.ST13 = () => {
   const h = B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 120, w: { d7: { n: 1, net: 1 }, d30: { n: 94, pf: 1.2, net: 2 }, all: { n: 94 } } })]), esc, money);
   assert.ok(/>Trial, review due</.test(panel(h, 'live')) && !/90 of 90/.test(h));
+};
+// ST14: the chart sheet (Nov 13, 2026, the owner chose A, "Sheet"): a row carries its charts (Cash, Rolling PF, Daily, the closest kill and trial gauges, the last trades) only when it has its settled rows; a tap opens the pop-up outside #stratBody instead of a dropdown; every dollar goes through money(), so Privacy masks it; an empty record says so instead of drawing.
+gates.ST14 = () => {
+  const now = Date.UTC(2026, 10, 12, 18), dayOf = (t) => new Date(t).toISOString().slice(0, 10);
+  const rows = Array.from({ length: 40 }, (_, i) => ({ ts: now - (40 - i) * 6 * 3600e3, p: i % 4 === 0 ? 3 : -1 }));
+  const daily = B.kalshiStratDaily(rows, now, dayOf, 14);
+  assert.strictEqual(daily.length, 14); assert.strictEqual(daily[13].k, dayOf(now));
+  const day = (k) => rows.filter((r) => dayOf(r.ts) === k).reduce((a, r) => a + r.p, 0);
+  daily.forEach((d) => assert.ok(Math.abs(d.p - day(d.k)) < 1e-9, 'daily sum ' + d.k));
+  const withRows = card('OICORE', 'probation', { orders: 40, rows, daily, spark: [1, 1.1, 1.2], detail: { n: 40, winRate: 0.25, avgWin: 3, avgLoss: -1, cum: [3, 2, 1], recent: [] }, w: { d7: { n: 1, net: 1 }, d30: { n: 40, pf: 1.0, net: 0 }, all: { n: 40 } } });
+  const h = B.kalshiBoardHtml(model([withRows]), esc, money);
+  const r = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(h);
+  assert.ok(r && /class="sc"/.test(r[1]) && (r[1].match(/class="sc-sb" data-seg="(cash|pf|daily)"/g) || []).length === 3, 'the row carries the three charts');
+  assert.ok(/Trial: settled fills/.test(r[1]) && /Closest kill:/.test(r[1]) && /Last 40 trades/.test(r[1]), 'the gauges and the last trades');
+  const masked = B.kalshiBoardHtml(model([withRows]), esc, (x) => (x < 0 ? '-' : '') + '****');
+  const mr = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(masked)[1];
+  assert.ok(/\+\*\*\*\*/.test(mr) && !/\$\d/.test(mr), 'Privacy view masks the sheet\'s dollars');
+  assert.ok(!/class="sc"/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 3 })]), esc, money)), 'no rows passed, no chart block');
+  const empty = B.kalshiStratChartsHtml({ cum: [0], roll: [], daily: [], dots: [], n: 0 }, esc, money);
+  assert.ok(/Not enough settled trades yet/.test(empty) && /Needs 30 settled trades/.test(empty) && /No trades yet/.test(empty) && !/<path class="sc-ln"/.test(empty), 'an empty record draws no line');
+  assert.ok(/#stratBody \.rw > \.sx\{ display:none; \}/.test(css), 'no dropdown: the row never expands in place');
+  const click = html.slice(html.indexOf("var r = t.closest('[data-row]')"), html.indexOf("if(m){", html.indexOf("var r = t.closest('[data-row]')")));
+  assert.ok(/kalshiStratChart\.open\(/.test(click) && !/classList\.toggle\('open'/.test(click), 'a row tap opens the sheet');
+  assert.ok(/pop\.id = 'spChart'/.test(html) && /document\.body\.appendChild\(pop\)/.test(html) && /kalshiStratChart\.refresh\(\);/.test(html), 'the sheet lives outside #stratBody and is redrawn with the page');
+  assert.ok(/max-width:560px\)\{ \.sp-cpop\{ align-items:flex-end;/.test(css), 'a bottom sheet on a phone');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok   ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }

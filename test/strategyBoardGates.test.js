@@ -179,7 +179,7 @@ gates.SB13 = () => {
   const lv = P.KAL_BOARD_LIVE.map((s) => ({ id: s.id, name: s.name, rule: s.rule, rules: s.rules, w: P.kalshiBoardWindows([], now), kill: { lines: ['x'] } }));
   const h = P.kalshiBoardHtml({ live: lv, deck: { state: 'unreadable', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((h.match(/class="kal-bd-rules"/g) || []).length, P.KAL_BOARD_LIVE.length, 'every live row keeps Implement, Kill and Return in its More layer (the stage board, Nov 12, 2026)');
-  assert.strictEqual((h.match(/data-row=/g) || []).length >= 3, true, 'and each live strategy is a row that opens in place');
+  assert.strictEqual((h.match(/data-row=/g) || []).length >= 3, true, 'and each live strategy is a row that opens its chart sheet');
   const ok = P.kalshiBoardHtml({ live: [], deck: { state: 'ok', rows: SHADOW_FIX.map((r) => ({ id: r.id, rule: r.rule, rep: P.kalshiBoardShadow([r], [], now)[0] })) }, retired: P.KAL_BOARD_RETIRED }, esc, money);
   assert.strictEqual((ok.match(/class="kal-bd-rules"/g) || []).length, 4, 'every shadow rule has a Rules line');
   assert.ok(/<b>Implement<\/b>/.test(ok) && /<b>Kill<\/b>/.test(ok) && /<b>Return<\/b>/.test(ok));
