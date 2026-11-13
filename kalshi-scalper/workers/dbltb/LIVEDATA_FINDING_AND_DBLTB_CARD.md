@@ -117,7 +117,7 @@ It answers nothing about sports. Section 4's other unlocks (play-by-play, the re
 
 Seven made-up cases now (normal, refused, bad_sha, no_sha, no_job, other_job, not_json); no sentinel appears in any output.
 
-## 7. The owner's answer on sports live data, and the second probe (Nov 13, 2026, written 14:30Z by this desk's clock; relayed by the Head of R&D at 13:55Z)
+## 7. The owner's answer on sports live data, and the second probe (Nov 13, 2026, written 14:18Z by this desk's clock; relayed by the Head of R&D at 13:55Z)
 
 **The owner answered by popup, through the Executive Assistant: "Both, ignore the terms."** Research may read Kalshi's temperature index AND the sports scores Kalshi relays, as an owner-accepted terms risk; zero-try probes first; the Chief of Staff records it in CLAUDE.md as a docs-only change. This reverses the earlier NO on scores that section 6 (a) quotes. **Section 6 (a)'s reading ("every sports request ... REMOVED", "asking even once is a question for the owner first") is therefore answered, and its stated reason for narrowing the probe no longer holds.** The exception has to exist in writing on main before anything is dispatched.
 
