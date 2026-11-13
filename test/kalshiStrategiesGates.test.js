@@ -134,6 +134,7 @@ gates.ST13 = () => {
     /kalshiLiveOrders = o; kalshiOrdersLoaded/,                          // the listener
     /function kalshiAllOrders\(\)/,                                      // the union
     /var loaded = \(kalshiLiveOrders/, /var source = kalshiLiveOrders, partial/, /kalshiPnlSource\(kalshiLiveOrders, hit\)/, /l1src = kalshiLiveOrders/,   // the older-orders read pages L1's own collection
+    /var live = \(kalshiLiveOrders \|\| \[\]\)\.filter[^\n]*slot = \(kalshiSlotOrders/,   // the Strategies page's older-orders read (Nov 13, 2026): it sizes L1's own list and the slot's, then returns the union
     /KAL_ECG\.SPAN/,                                                     // the heartbeat strip is L1's
     /var orders = kalshiResolveOrders\(kalshiLiveOrders, a && a\.results/   // the silent market warning: L1's markets
   ];
