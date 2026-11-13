@@ -1,0 +1,351 @@
+{
+ "build": "Forensics second build of POLGAPH",
+ "label": "candle freshness measured on Bitcoin 15 minute only, not on these markets",
+ "counts": {
+  "series asked": 31,
+  "series with any settled market in the window": 31,
+  "markets": 3311,
+  "markets with any hourly candle": 3311,
+  "market-mornings": 8330,
+  "1. three two-sided candles": 6216,
+  "2. gap of 5c or more": 2493,
+  "left after 3. steady": 1308,
+  "failed 4. band": 729,
+  "no look (an hourly candle missing)": 1240,
+  "failed 3. steady": 1185,
+  "left after 4. band": 579,
+  "left after 5. spread": 462,
+  "left after 6. liquid": 307,
+  "not two-sided at one of the three candles": 874,
+  "failed 5. spread": 117,
+  "failed 6. liquid": 155,
+  "left after 7. one per event and morning (the event's pick)": 259,
+  "not the event's pick": 48,
+  "fired": 207,
+  "not filled": 14,
+  "filled on a present candle": 89,
+  "filled on an unchanged minute (no 07:01 candle)": 74,
+  "blocked: the event holds an earlier filled, unsettled bet": 52,
+  "no fill data (the minute request was not answered)": 30
+ },
+ "ambiguities": [
+  "1. Step 1's two failures are counted apart: \"no look\" (one of the three hourly candles is missing) and \"not two-sided\" (all three present, one is not 0 < bid < ask < 1).",
+  "2. The gap side's quotes: YES uses the YES bid and ask; NO uses ask = 1 minus YES bid and bid = 1 minus YES ask. The spread of either side is the YES spread.",
+  "3. A market's event is its event_ticker; its series is the ticker's first part. A market-morning is identified by the Eastern date of its 07:00 look.",
+  "4. Step 7's pick is made among the event's markets that pass steps 1 to 6 on that morning; the others are counted as \"not the event's pick\". The pick is then walked in time",
+  "order: blocked if the event holds an earlier FILLED bet whose market closes after this look; else the fill test.",
+  "5. \"The minute request was answered\" for a market and morning: some request of a minute run answered 200, names the ticker in market_tickers, and its start_ts to end_ts",
+  "span contains the minute ending 07:01. Otherwise \"no fill data\".",
+  "6. In the 07:01 candle the bought side's ask is the YES ask for YES and 1 minus the YES bid for NO; a missing or zero YES bid is \"no ask\" for NO, a missing ask or an ask of 1 is \"no ask\" for YES.",
+  "7. A void is any result that is neither yes nor no. The figure \"with the settlement value paid instead\" uses the list's settlement_value_dollars when it is a number (YES value; NO gets 1 minus it), and is left out otherwise.",
+  "8. SETTLED by Amendment 3, item 3: the optimistic, same-candle figure books EVERY decision (the event's pick) at its limit, with no block and no fill test. (This build first booked fired decisions only.)",
+  "9. The largest number open at once is taken at each filled bet's look (bets with look at or before it and close after it).",
+  "10. Profit factor with no losses is infinite and passes a \"1.5 or more\" line; with no wins it is 0. The lines are tested with a 1e-9 tolerance on the float figure.",
+  "11. Family rule, SETTLED by Amendment 4 (registration a13693f3...): the pooled verdict first; anything but a pooled pass is the verdict; on a pooled pass the family with the largest net (tie: alphabetical) is read alone if it supplies more than half of the pooled net.",
+  "12. The hourly volume of a candle is its volume_fp (or volume) field read as a number; a missing volume is 0."
+ ],
+ "filled_bets": {
+  "development": 163,
+  "first_half": 103,
+  "second_half": 60
+ },
+ "distinct_among_filled": {
+  "first half": {
+   "events": 103,
+   "series": 27,
+   "mornings": 30
+  },
+  "second half": {
+   "events": 60,
+   "series": 21,
+   "mornings": 21
+  }
+ },
+ "largest_number_open_at_once": 14,
+ "one_way_cost": {
+  "market_mornings": 2493,
+  "median_ask_minus_mid_plus_fee_at_the_limit": 0.03500000000000002,
+  "cost_as_paid_at_the_limit_information_only": 0.04499999999999997,
+  "by_family": {
+   "activity counts": {
+    "market_mornings": 1337,
+    "median": 0.03500000000000002
+   },
+   "shipping counts": {
+    "market_mornings": 945,
+    "median": 0.03500000000000002
+   },
+   "single questions": {
+    "market_mornings": 211,
+    "median": 0.03000000000000002
+   }
+  }
+ },
+ "decide_counts_by_family": {
+  "activity counts": {
+   "three two-sided candles": 3204,
+   "gap of 5c or more": 1337,
+   "qualifying market-mornings": 149,
+   "decisions": 120
+  },
+  "shipping counts": {
+   "three two-sided candles": 2333,
+   "gap of 5c or more": 945,
+   "qualifying market-mornings": 121,
+   "decisions": 104
+  },
+  "single questions": {
+   "three two-sided candles": 679,
+   "gap of 5c or more": 211,
+   "qualifying market-mornings": 37,
+   "decisions": 35
+  }
+ },
+ "filled": {
+  "development": {
+   "n": 163,
+   "wins": 102,
+   "voids": 4,
+   "pf": 1.9679080824088744,
+   "mean": 0.1498773006134969,
+   "net": 24.429999999999996,
+   "z_event_clustered": 3.9864427947836933
+  },
+  "first_half": {
+   "n": 103,
+   "wins": 68,
+   "voids": 3,
+   "pf": 2.2269021739130435,
+   "mean": 0.1753398058252427,
+   "net": 18.06,
+   "z_event_clustered": 3.68784989422356
+  },
+  "second_half": {
+   "n": 60,
+   "wins": 34,
+   "voids": 1,
+   "pf": 1.6055133079847907,
+   "mean": 0.10616666666666665,
+   "net": 6.369999999999998,
+   "z_event_clustered": 1.7289940896731621
+  }
+ },
+ "filled_on_a_present_candle_only": {
+  "development": {
+   "n": 89,
+   "wins": 53,
+   "voids": 4,
+   "pf": 1.7925718290119128,
+   "mean": 0.12707865168539326,
+   "net": 11.309999999999999,
+   "z_event_clustered": 2.5455611290968925
+  },
+  "first_half": {
+   "n": 50,
+   "wins": 30,
+   "voids": 3,
+   "pf": 1.8324808184143222,
+   "mean": 0.13019999999999998,
+   "net": 6.509999999999999,
+   "z_event_clustered": 1.9648135901174026
+  },
+  "second_half": {
+   "n": 39,
+   "wins": 23,
+   "voids": 1,
+   "pf": 1.744186046511628,
+   "mean": 0.12307692307692307,
+   "net": 4.8,
+   "z_event_clustered": 1.6215290881332916
+  }
+ },
+ "optimistic_same_candle_fill_information_only": {
+  "development": {
+   "n": 259,
+   "wins": 160,
+   "voids": 6,
+   "pf": 1.8037054409005628,
+   "mean": 0.1323166023166023,
+   "net": 34.269999999999996,
+   "z_event_clustered": 4.078227656165653
+  },
+  "first_half": {
+   "n": 163,
+   "wins": 103,
+   "voids": 4,
+   "pf": 1.8626933232742358,
+   "mean": 0.14030674846625765,
+   "net": 22.869999999999997,
+   "z_event_clustered": 3.359426857288288
+  },
+  "second_half": {
+   "n": 96,
+   "wins": 57,
+   "voids": 2,
+   "pf": 1.7067575945443274,
+   "mean": 0.11874999999999998,
+   "net": 11.399999999999999,
+   "z_event_clustered": 2.3140256773591017
+  }
+ },
+ "voids_among_filled": 4,
+ "filled_with_the_settlement_value_paid_for_voids_information_only": {
+  "n": 163,
+  "wins": 103,
+  "voids": 4,
+  "pf": 1.9644268774703555,
+  "mean": 0.14969325153374233,
+  "net": 24.4,
+  "z_event_clustered": 3.9812135376159197
+ },
+ "baseline_gap_under_2c_information_only": {
+  "development": {
+   "n": 539,
+   "wins": 227,
+   "voids": 18,
+   "pf": 1.2358432408630557,
+   "mean": 0.04968460111317253,
+   "net": 26.779999999999994,
+   "z_event_clustered": 1.713690572754344
+  },
+  "first_half": {
+   "n": 334,
+   "wins": 152,
+   "voids": 12,
+   "pf": 1.4167570078984046,
+   "mean": 0.08056886227544909,
+   "net": 26.909999999999997,
+   "z_event_clustered": 2.256392155941645
+  },
+  "second_half": {
+   "n": 205,
+   "wins": 75,
+   "voids": 6,
+   "pf": 0.9973458554512045,
+   "mean": -0.0006341463414634297,
+   "net": -0.13000000000000309,
+   "z_event_clustered": -0.013861252348432378
+  }
+ },
+ "by_family": {
+  "activity counts": {
+   "development": {
+    "n": 76,
+    "wins": 50,
+    "voids": 1,
+    "pf": 2.172884440400364,
+    "mean": 0.16960526315789473,
+    "net": 12.889999999999999,
+    "z_event_clustered": 3.1135356529329576
+   },
+   "first_half": {
+    "n": 46,
+    "wins": 33,
+    "voids": 1,
+    "pf": 3.019417475728155,
+    "mean": 0.2260869565217391,
+    "net": 10.399999999999999,
+    "z_event_clustered": 3.2799901406361704
+   },
+   "second_half": {
+    "n": 30,
+    "wins": 17,
+    "voids": 0,
+    "pf": 1.4263698630136987,
+    "mean": 0.08299999999999998,
+    "net": 2.4899999999999993,
+    "z_event_clustered": 0.9354096320151197
+   },
+   "fired": 97,
+   "optimistic": {
+    "n": 120,
+    "wins": 82,
+    "voids": 3,
+    "pf": 2.4463276836158188,
+    "mean": 0.192,
+    "net": 23.04,
+    "z_event_clustered": 4.152193940280313
+   }
+  },
+  "shipping counts": {
+   "development": {
+    "n": 71,
+    "wins": 50,
+    "voids": 3,
+    "pf": 3.2570659488559888,
+    "mean": 0.23619718309859156,
+    "net": 16.77,
+    "z_event_clustered": 4.238918628705348
+   },
+   "first_half": {
+    "n": 45,
+    "wins": 33,
+    "voids": 2,
+    "pf": 3.697399527186761,
+    "mean": 0.25355555555555553,
+    "net": 11.41,
+    "z_event_clustered": 3.6592886490861765
+   },
+   "second_half": {
+    "n": 26,
+    "wins": 17,
+    "voids": 1,
+    "pf": 2.6749999999999994,
+    "mean": 0.20615384615384613,
+    "net": 5.359999999999999,
+    "z_event_clustered": 2.201273799805521
+   },
+   "fired": 89,
+   "optimistic": {
+    "n": 104,
+    "wins": 73,
+    "voids": 3,
+    "pf": 2.975064488392089,
+    "mean": 0.2208653846153846,
+    "net": 22.97,
+    "z_event_clustered": 4.9629292431880385
+   }
+  },
+  "single questions": {
+   "development": {
+    "n": 16,
+    "wins": 2,
+    "voids": 0,
+    "pf": 0.23313782991202348,
+    "mean": -0.326875,
+    "net": -5.23,
+    "z_event_clustered": -2.395983970334059
+   },
+   "first_half": {
+    "n": 12,
+    "wins": 2,
+    "voids": 0,
+    "pf": 0.29775280898876405,
+    "mean": -0.3125,
+    "net": -3.75,
+    "z_event_clustered": -1.8284852899535244
+   },
+   "second_half": {
+    "n": 4,
+    "wins": 0,
+    "voids": 0,
+    "pf": 0.0,
+    "mean": -0.37,
+    "net": -1.48,
+    "z_event_clustered": -1.9802100016298672
+   },
+   "fired": 21,
+   "optimistic": {
+    "n": 35,
+    "wins": 5,
+    "voids": 0,
+    "pf": 0.22148541114058354,
+    "mean": -0.3354285714285714,
+    "net": -11.74,
+    "z_event_clustered": -2.7367677518189653
+   }
+  }
+ },
+ "pooled_verdict": "survives development (pooled): a candidate for a wheel shadow place, never a pass of the research bar",
+ "verdict": "the pooled pass does not count; no evidence at n = 71 (the family 'shipping counts' alone, which supplies more than half of the pooled net; halves 45 and 26) (two families each supply more than half; the one with the largest net is read)"
+}

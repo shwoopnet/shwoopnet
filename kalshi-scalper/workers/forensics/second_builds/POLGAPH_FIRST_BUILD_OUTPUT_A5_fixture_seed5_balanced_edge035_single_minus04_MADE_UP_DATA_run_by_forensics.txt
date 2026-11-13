@@ -1,0 +1,34 @@
+POLGAPH decide (no result read) | candle freshness measured on Bitcoin 15 minute only, not on these markets
+series answered 31 | markets 3362 | with any hourly candle 3362 | candles without a volume field 0
+market-mornings 8313 | no look (a candle missing) 1184 | a candle not two-sided 852 | three two-sided candles 6277 | gap of 5c or more 2551
+left after steady 1367 | after band 624 | after spread 511 | after liquid (qualifying market-mornings) 311 | decisions, one per event and morning 269
+   activity counts: three two-sided candles 3244 | gap of 5c or more 1331 | qualifying market-mornings 160 | decisions 136
+   shipping counts: three two-sided candles 2327 | gap of 5c or more 991 | qualifying market-mornings 118 | decisions 100
+   single questions: three two-sided candles 706 | gap of 5c or more 229 | qualifying market-mornings 33 | decisions 33
+note: the steps are applied in order, so each failing market-morning is counted at its first failing step
+POLGAPH score | candle freshness measured on Bitcoin 15 minute only, not on these markets
+counts from the decide step: {"fail_band": 743, "fail_liquid": 200, "fail_spread": 113, "fail_steady": 1184, "gap": 2551, "market_mornings": 8313, "markets": 3362, "no_look": 1184, "one_sided": 852, "qualify": 311, "three_two_sided": 6277, "with_candles": 3362}
+one-way cost, median over 2551 market-mornings with a gap and three two-sided candles: 0.0350 (the kill line reads this); cost as paid at the limit, information only: 0.0450
+   activity counts: 1331 market-mornings, 0.0350
+   shipping counts: 991 market-mornings, 0.0350
+   single questions: 229 market-mornings, 0.0350
+decisions, one per event and morning 269 | blocked by an open bet on the event 45 | fired 224 | no fill data 39 | not filled 22 | filled on a present candle 76 | filled on an unchanged minute 87 | voids among filled 2
+first half: filled 94 | distinct events 94 | series 28 | mornings 29
+second half: filled 69 | distinct events 69 | series 19 | mornings 22
+largest number of bets open at once: 14 (the rulebook allows 10)
+POOLED development: n 163, wins 105, cash PF 2.06, net +26.60, mean +0.1632, event-clustered z +4.25
+   first half: n 94, wins 60, cash PF 1.90, net +13.68, mean +0.1455, event-clustered z +2.91
+   second half: n 69, wins 45, cash PF 2.30, net +12.92, mean +0.1872, event-clustered z +3.14
+FAMILY activity counts: decisions 136 | n 83, wins 59, cash PF 2.76, net +18.04, mean +0.2173, event-clustered z +4.10
+   first half: n 46, wins 33, cash PF 2.80, net +9.96, mean +0.2165, event-clustered z +3.07 | second half: n 37, wins 26, cash PF 2.71, net +8.08, mean +0.2184, event-clustered z +2.71
+FAMILY shipping counts: decisions 100 | n 64, wins 45, cash PF 2.95, net +14.94, mean +0.2334, event-clustered z +3.81
+   first half: n 34, wins 26, cash PF 3.43, net +8.90, mean +0.2618, event-clustered z +3.14 | second half: n 30, wins 19, cash PF 2.51, net +6.04, mean +0.2013, event-clustered z +2.23
+FAMILY single questions: decisions 33 | n 16, wins 1, cash PF 0.11, net -6.38, mean -0.3988, event-clustered z -3.06
+   first half: n 14, wins 1, cash PF 0.14, net -5.18, mean -0.3700, event-clustered z -2.73 | second half: n 2, wins 0, cash PF 0.00, net -1.20, mean -0.6000, event-clustered z -1.40
+information only, fills on a present candle: n 76, wins 51, cash PF 2.43, net +14.99, mean +0.1972, event-clustered z +3.52
+information only, optimistic, same-candle fill (every decision booked at the limit, no block): n 269, wins 175, cash PF 2.10, net +44.18, mean +0.1642, event-clustered z +5.41
+information only, voids paid at their settlement value instead: n 163, wins 105, cash PF 2.05, net +26.54, mean +0.1628, event-clustered z +4.24
+information only, price-matched baseline (gap under 2c, same steps, same-candle basis): n 519, wins 182, cash PF 0.84, net -19.57, mean -0.0377, event-clustered z -1.54
+POOLING CONDITION: the pooled read passes, but activity counts supplies more than half of the pooled net (18.04 of 26.60) (and so does another family; the one with the largest net is read), so the pooled pass does not count; the card is read as that family's alone.
+VERDICT: activity counts: no evidence at n = 83 (halves 46 and 37; minimums 150 and 40)
+A survival is a candidate for a wheel shadow place only. The shared deflated bar (one-sided z 5.46) is not claimed.

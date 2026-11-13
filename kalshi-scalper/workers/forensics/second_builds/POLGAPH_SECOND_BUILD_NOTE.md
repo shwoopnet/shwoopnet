@@ -11,7 +11,7 @@ Desk B's `polgaph.py` was not read. Nothing of this card has been requested or r
 | `polgaph_second.py` | the second build: lists, hourly candles and minute candles in, counts first, the cost line, and results only after the cost line passes |
 | `polgaph_compare.py` | compares Desk B's printed lines with my output, figure by figure; reads printed output only |
 | `make_polgaph_fixture.py` | invented lists, hourly and minute candles in the pull-run shape for all 69 series names; an `edge` argument plants or removes an effect |
-| `POLGAPH_SECOND_OUTPUT_fixture_seed5_{no_edge,edge035,edge032_others_minus05}_MADE_UP_DATA.{txt,json}` | my build's figures on the three fixtures |
+| `POLGAPH_SECOND_OUTPUT_A5_fixture_<name>_MADE_UP_DATA.{txt,json}` | my build's figures on the six fixtures made after Amendment 5 (the earlier ones were removed, see the Amendment 5 section) |
 
 Commands:
 
@@ -85,6 +85,60 @@ The Head's last word (01:44Z): align to Desk B's `94ff7fa7` (scorer `9186c8b5...
 - **At the read:** if that count differs by more than the number of exactly-zero voids, it goes to the Head.
 - **Standing:** text closed, scorer frozen, auditor clean, second build matched. This desk's POLGAPH work is closed until the lists land; nothing has been requested.
 
+## Nov 13, about 07:35Z: re-match after Amendment 5 (development ends Nov 4, 63 series): SAME OUTPUT on six made-up fixtures
+
+Desk B asked for a re-match at 07:03Z. Amendment 5 (registration sha256 `7280653e...`, series file `c22f1aae...`, scorer `198d9bf0...`, `claude/idea-desk-b` at `4b3c8aaf`;
+the three hashes checked on the branch head `2e142312`) moves three things and no rule: development closes end 2026-11-04T23:59:59Z, six activity-count series leave
+(63 remain, 42 in that family), and the landed lists run `pull/POLGAPH_LISTS/2026-11-13T0627Z_43378777252` is held-out material. I read the amendment's text and the series
+file. I did not read `polgaph.py` and did not open the landed run. No price or result of this card has been read by this desk.
+
+**What changed here (from the text):**
+
+- `polgaph_second.py` (now sha256 `7ec18562...`): a listed market closing on or after 2026-11-05T00:00:00Z stops the whole run; the series come from the file given on
+  the command line as before (63 names). New refusals: a path that is, or lies inside, the listed run (by its folder name), and a copy under another folder name whose
+  manifest carries the same job and start minute.
+- `make_polgaph_fixture.py` (`01acdbed...`): invented closes end 2026-11-04; the `balanced` variant uses the first 10 activity-count series (it was 7), because the
+  shorter window left the 7-series variant under the 150-bet minimum and the two-families case would have gone untested.
+- `polgaph_compare.py` is unchanged (`f66f5185...`).
+
+**The earlier fixtures and their saved outputs are gone from this folder** (they held invented closes after Nov 4 and names of the six dropped series; git history keeps
+them). The new ones are named `..._A5_...`. I ran Desk B's scorer at `198d9bf0...` on each myself, with its two commands (`decide`, then `score`), from a checkout of its
+branch, without reading it; its printed lines are saved as `POLGAPH_FIRST_BUILD_OUTPUT_A5_fixture_<name>_MADE_UP_DATA_run_by_forensics.txt`.
+
+| Fixture (generator arguments after the series file) | Figures compared | Differ | Case it exercises | Verdict in both builds |
+|---|---|---|---|---|
+| `5 0.0` | 155 | 0 | no effect | FALSIFIED (pooled) |
+| `5 0.35` | 156 | 0 | pooled pass, one family over half, family under the minimum | activity counts alone: no evidence at n = 138 |
+| `5 0.32 -0.5` | 155 | 0 | pooled read fails while one family is strongly positive | FALSIFIED (pooled) |
+| `5 0.35 -0.4 balanced` | 156 | 0 | pooled pass, two families each over half, the alphabetically first has the largest net | activity counts alone: no evidence at n = 83 |
+| `6 0.35` | 156 | 0 | pooled pass, one family over half and over the minimums | activity counts alone: survives development |
+| `6 0.35 -0.4 balanced` | 156 | 0 | pooled pass, two families each over half, the largest net is NOT the alphabetically first | shipping counts alone: no evidence at n = 71 |
+
+Invented rows; the figures mean nothing about the market. The win count on the "voids paid at their settlement value" line is the same in both builds on all six
+(the Head's sentence of 01:48Z still covers a difference of at most the number of exactly-zero voids at the read).
+
+**Refusals, tested on copies of the first fixture (both builds, from their behaviour alone):**
+
+| Case | This build | Desk B's scorer (`decide`) |
+|---|---|---|
+| One market added closing 2026-11-04T23:59:59Z | runs, counts it (2,473 markets) | runs, counts it (2,473) |
+| One market added closing 2026-11-05T00:00:00Z | REFUSED, whole run stops | REFUSED, whole run stops |
+| One market of a dropped series (KXTRUTHSOCIAL) added, close inside the window | skipped, not counted | skipped, not counted |
+| The same with a close of 2026-11-10 | skipped, run does NOT stop | skipped, run does NOT stop |
+| Lists folder named `POLGAPH_LISTS/2026-11-13T0627Z_43378777252` | REFUSED | REFUSED |
+| The same folder copied under another name, manifest with that job and start minute | REFUSED | runs |
+| Lists inside a `HELDOUT_` folder | REFUSED | REFUSED |
+
+Two things for Desk B and the Head, neither a figure:
+
+1. **A copy of the listed run under another folder name is not refused by Desk B's guard** when only the name changes (its registration says "wherever it was copied").
+   On the real run this cannot reach a count: that run holds markets closing after Nov 4, so the close-date stop fires in both builds. It is a wording or guard point.
+2. **A held-out close on a series OUTSIDE the 63 does not stop either build**; both skip the market by its series and never read its result. The new lists job asks only
+   the 63 series, so none should arrive. If rule (h) is meant to stop a run on any held-out row, whatever its series, that is a ruling.
+
+**Standing:** second build re-matched on the amended text. Nothing of this card has been requested by this desk. The comparison is made again when the bounded lists
+and the candles land.
+
 ## Places where the registration leaves a choice
 
 The build prints its readings with the output (`ambiguities`). The ones most likely to move a figure:
@@ -94,10 +148,10 @@ The build prints its readings with the output (`ambiguities`). The ones most lik
 3. **The optimistic figure**: SETTLED by Amendment 3, item 3. Every decision is booked at its limit, no block, no fill test.
 4. **The family rule**: SETTLED by Amendment 4. Pooled verdict first; only a pooled pass can hand the card to the family with the largest net.
 5. **A void** is any result that is neither yes nor no; the "settlement value paid" figure uses the listed settlement value and is left as the fee-only loss when none is listed.
-6. **A market closing on or after 2026-11-13**: SETTLED by Amendment 3, item 4. It stops the whole run.
+6. **A market closing on or after 2026-11-05** (it was 2026-11-13 before Amendment 5): SETTLED by Amendment 3, item 4. It stops the whole run.
 7. **Largest number open at once** is taken at each filled bet's look.
 
 ## Limits
 
 - Agreement on invented rows shows the two builds read the text the same way on the planted cases. Nothing here is a verdict of any kind.
-- The fixtures do not hold a held-out market, a list page that failed, or an hourly request that failed; those shapes are untested.
+- The fixtures do not hold a list page that failed or an hourly request that failed; those shapes are untested. A held-out market and the listed run were tested on copies (Amendment 5 section).

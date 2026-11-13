@@ -2,9 +2,13 @@
 """POLGAPH, an INDEPENDENT SECOND BUILD (Forensics desk, 2026-11-13, on the Head of R&D's order: a second build from the text by another desk BEFORE the lists job is
 dispatched). Written from Desk B's registration with Amendments 1 and 2 (claude/idea-desk-b, kalshi-scalper/workers/polgap/POLGAPH_REGISTRATION.md at 0d043306, sha256
 69eec8d6...) and POLGAPH_SERIES.json ALONE, then aligned to Amendment 3 (registration sha256 b1ac127d...): the optimistic figure books every decision, and a listed market
-closing after 2026-11-12 23:59:59Z stops the whole run. Desk B's polgaph.py was not read. Nothing of this card has been requested or read by anyone: invented rows only.
+closing after the development window stops the whole run. Desk B's polgaph.py was not read. Invented rows only have been read by this build.
+AMENDMENT 5 (registration sha256 7280653e..., Nov 13 06:58Z, the Head's ruling): development closes end 2026-11-04T23:59:59Z (it was Nov 12), the series file holds 63 names
+(six activity-count series left), and the landed lists run pull/POLGAPH_LISTS/2026-11-13T0627Z_43378777252 is held-out material and is refused wherever it sits.
 
-Development only: a listed market closing on or after 2026-11-13T00:00:00Z STOPS THE RUN (Amendment 3, item 4), and any path in or resolving into a HELDOUT_ folder is refused.
+Development only: a listed market closing on or after 2026-11-05T00:00:00Z STOPS THE RUN (Amendment 3 item 4 with Amendment 5's date), any path in or resolving into a
+HELDOUT_ folder is refused, and so is any run named in LISTED_HELDOUT_RUNS (by its folder name in the path, or by the job_id and start minute in its manifest) or in a readable
+kalshi-scalper/workers/HELDOUT_PULL_RUNS.md two folders above this file.
 NO RESULT IS READ BEFORE THE COST LINE: the result fields are kept in a separate table that is opened only after the cost line has passed.
 
 usage: python3 -I polgaph_second.py <POLGAPH_SERIES.json> --lists <run ...> --hourly <run ...> --minute <run ...>
@@ -32,7 +36,8 @@ from zoneinfo import ZoneInfo
 
 ET = ZoneInfo("America/New_York")
 def iso(s): return int(datetime.fromisoformat(str(s).replace("Z", "+00:00")).timestamp())
-DEV_FROM, HELD_FROM = iso("2026-09-12T00:00:00Z"), iso("2026-11-13T00:00:00Z")
+DEV_FROM, HELD_FROM = iso("2026-09-12T00:00:00Z"), iso("2026-11-05T00:00:00Z")          # Amendment 5: development closes end 2026-11-04T23:59:59Z
+LISTED_HELDOUT_RUNS = ["POLGAPH_LISTS/2026-11-13T0627Z_43378777252"]                        # kalshi-scalper/workers/HELDOUT_PULL_RUNS.md on main, as of Nov 13
 HALF_DATE = "2026-10-13"
 GAP, QUIET, STEADY, BAND, SPREAD, LIQUID, SLIP = 0.05, 0.02, 0.01, (0.10, 0.64), 0.04, 200.0, 0.01
 MIN_FILLED, MIN_HALF, COST_LINE, PF_LINE, HALF_LINE = 150, 40, 0.04, 1.5, 1.0
@@ -41,10 +46,34 @@ FRESH = "candle freshness measured on Bitcoin 15 minute only, not on these marke
 AMBIGUITIES = [l.strip() for l in __doc__.split("AMBIGUITIES, printed with the output):")[1].strip().split("\n")]
 
 
+def listed_runs():
+    runs = list(LISTED_HELDOUT_RUNS)
+    try:
+        for line in open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "HELDOUT_PULL_RUNS.md")):
+            c = [x.strip().strip("`") for x in line.split("|")]
+            if len(c) > 2 and "/" in c[1] and c[1][:1].isalnum() and " " not in c[1]: runs.append(c[1].strip("/"))
+    except OSError: pass
+    return sorted(set(runs))
+
+
 def refuse_heldout(path):
     for p in (os.path.abspath(path), os.path.realpath(path)):
-        if any(part.upper().startswith("HELDOUT_") for part in p.split(os.sep)):
+        parts = p.split(os.sep)
+        if any(part.upper().startswith("HELDOUT_") for part in parts):
             raise SystemExit("REFUSED: %s is in or resolves into a HELDOUT_ folder (standing rule (h))" % path)
+        for run in listed_runs():
+            stamp = run.split("/")[-1]
+            if stamp in parts: raise SystemExit("REFUSED: %s is, or lies inside, the landed run %s, which is listed as held-out material (HELDOUT_PULL_RUNS.md)" % (path, run))
+    for run in listed_runs():                                       # a copy under another folder name: a pull manifest carries its job_id and its start minute, not its run number
+        job, stamp = run.split("/")[0], run.split("/")[-1].split("_")[0]; d = os.path.realpath(path)
+        for _ in range(3):
+            mf = os.path.join(d, "manifest.json")
+            if os.path.isfile(mf):
+                try: m = json.load(open(mf))
+                except Exception: raise SystemExit("REFUSED: the manifest beside %s cannot be read, so it cannot be told apart from a listed held-out run" % path)
+                if isinstance(m, dict) and str(m.get("started")) == stamp and isinstance(m.get("job"), dict) and str(m["job"].get("job_id")) == job:
+                    raise SystemExit("REFUSED: the manifest beside %s is that of the landed run %s (same job and start minute), which is listed as held-out material (HELDOUT_PULL_RUNS.md)" % (path, run))
+            d = os.path.dirname(d)
 
 
 def answers(folder):
@@ -81,7 +110,7 @@ def read_lists(folders, series):
                 if ser not in series: continue
                 try: op, cl = iso(m["open_time"]), iso(m["close_time"])
                 except Exception: C["markets with no open or close time, dropped"] += 1; continue
-                if cl >= HELD_FROM: raise SystemExit("REFUSED: the lists hold a market closing on or after 2026-11-13T00:00:00Z (%s); the whole run stops (standing rule (h), Amendment 3 item 4)" % t)
+                if cl >= HELD_FROM: raise SystemExit("REFUSED: the lists hold a market closing on or after 2026-11-05T00:00:00Z (%s); the whole run stops (standing rule (h), Amendment 3 item 4, Amendment 5 item 1)" % t)
                 if cl < DEV_FROM: C["markets closing before 2026-09-12, not in the window"] += 1; continue
                 mk[t] = {"ticker": t, "series": ser, "event": m.get("event_ticker") or t.rsplit("-", 1)[0], "open": op, "close": cl}
                 res[t] = (str(m.get("result") or "").lower(), num(m.get("settlement_value_dollars")))

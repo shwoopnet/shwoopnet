@@ -1,0 +1,33 @@
+POLGAPH decide (no result read) | candle freshness measured on Bitcoin 15 minute only, not on these markets
+series answered 63 | markets 2472 | with any hourly candle 2472 | candles without a volume field 0
+market-mornings 10195 | no look (a candle missing) 1503 | a candle not two-sided 1096 | three two-sided candles 7596 | gap of 5c or more 2884
+left after steady 1540 | after band 699 | after spread 557 | after liquid (qualifying market-mornings) 344 | decisions, one per event and morning 320
+   activity counts: three two-sided candles 5785 | gap of 5c or more 2252 | qualifying market-mornings 247 | decisions 232
+   shipping counts: three two-sided candles 1001 | gap of 5c or more 405 | qualifying market-mornings 70 | decisions 61
+   single questions: three two-sided candles 810 | gap of 5c or more 227 | qualifying market-mornings 27 | decisions 27
+note: the steps are applied in order, so each failing market-morning is counted at its first failing step
+POLGAPH score | candle freshness measured on Bitcoin 15 minute only, not on these markets
+counts from the decide step: {"fail_band": 841, "fail_liquid": 213, "fail_spread": 142, "fail_steady": 1344, "gap": 2884, "market_mornings": 10195, "markets": 2472, "no_look": 1503, "one_sided": 1096, "qualify": 344, "three_two_sided": 7596, "with_candles": 2472}
+one-way cost, median over 2884 market-mornings with a gap and three two-sided candles: 0.0350 (the kill line reads this); cost as paid at the limit, information only: 0.0450
+   activity counts: 2252 market-mornings, 0.0350
+   shipping counts: 405 market-mornings, 0.0350
+   single questions: 227 market-mornings, 0.0350
+decisions, one per event and morning 320 | blocked by an open bet on the event 56 | fired 264 | no fill data 55 | not filled 24 | filled on a present candle 95 | filled on an unchanged minute 90 | voids among filled 3
+first half: filled 115 | distinct events 115 | series 56 | mornings 28
+second half: filled 70 | distinct events 70 | series 37 | mornings 19
+largest number of bets open at once: 18 (the rulebook allows 10)
+POOLED development: n 185, wins 89, cash PF 1.06, net +2.43, mean +0.0131, event-clustered z +0.38
+   first half: n 115, wins 53, cash PF 0.99, net -0.36, mean -0.0031, event-clustered z -0.07
+   second half: n 70, wins 36, cash PF 1.19, net +2.79, mean +0.0399, event-clustered z +0.68
+FAMILY activity counts: decisions 232 | n 141, wins 89, cash PF 2.14, net +23.07, mean +0.1636, event-clustered z +4.11
+   first half: n 84, wins 53, cash PF 2.28, net +14.29, mean +0.1701, event-clustered z +3.39 | second half: n 57, wins 36, cash PF 1.98, net +8.78, mean +0.1540, event-clustered z +2.37
+FAMILY shipping counts: decisions 61 | n 32, wins 0, cash PF 0.00, net -14.39, mean -0.4497, event-clustered z -5.50
+   first half: n 21, wins 0, cash PF 0.00, net -9.43, mean -0.4490, event-clustered z -4.47 | second half: n 11, wins 0, cash PF 0.00, net -4.96, mean -0.4509, event-clustered z -3.21
+FAMILY single questions: decisions 27 | n 12, wins 0, cash PF 0.00, net -6.25, mean -0.5208, event-clustered z -3.43
+   first half: n 10, wins 0, cash PF 0.00, net -5.22, mean -0.5220, event-clustered z -3.13 | second half: n 2, wins 0, cash PF 0.00, net -1.03, mean -0.5150, event-clustered z -1.40
+information only, fills on a present candle: n 95, wins 44, cash PF 1.05, net +1.01, mean +0.0106, event-clustered z +0.22
+information only, optimistic, same-candle fill (every decision booked at the limit, no block): n 320, wins 147, cash PF 0.94, net -4.94, mean -0.0154, event-clustered z -0.52
+information only, voids paid at their settlement value instead: n 185, wins 90, cash PF 1.06, net +2.57, mean +0.0139, event-clustered z +0.40
+information only, price-matched baseline (gap under 2c, same steps, same-candle basis): n 815, wins 307, cash PF 1.12, net +19.70, mean +0.0242, event-clustered z +1.20
+VERDICT: pooled: FALSIFIED
+A survival is a candidate for a wheel shadow place only. The shared deflated bar (one-sided z 5.46) is not claimed.

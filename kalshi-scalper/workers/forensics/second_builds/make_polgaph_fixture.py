@@ -2,7 +2,7 @@
 """A MADE-UP fixture for POLGAPH in the pull-run folder shape (manifest.json + NNNN.json.gz): <out>/lists, <out>/hourly and <out>/minute, plus the marker file MADE_UP_DATA.
 Nothing here is real: only the series NAMES come from Desk B's POLGAPH_SERIES.json (so the family map applies); events, markets, quotes, volumes and results are invented.
 usage: python3 -I make_polgaph_fixture.py <out dir> <POLGAPH_SERIES.json> [seed] [edge] [other_edge] [balanced]
-  balanced (the word, optional sixth argument): only the first 7 activity-count series are used beside the 7 shipping and 14 single-question series, the count families'
+  balanced (the word, optional sixth argument): only the first 10 activity-count series (7 before Amendment 5 shortened the window) are used beside the 7 shipping and 14 single-question series, the count families'
   events last 2 to 3 days with 10 markets each (more events, more picks), `edge` is used for BOTH count families and `other_edge` for single questions only. With edge 0.45 and other_edge -0.3 the pooled
   read passes and BOTH count families supply more than half of the pooled net (possible because the third family is negative): the two-families case of Amendment 4.
   other_edge (optional): the edge used for the shipping and single-question families, while `edge` is used for activity counts only. With edge 0.25 and other_edge -0.45 the
@@ -19,13 +19,13 @@ from zoneinfo import ZoneInfo
 
 ET = ZoneInfo("America/New_York")
 F = lambda x: datetime.fromtimestamp(x, timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-W0 = int(datetime(2026, 9, 12, tzinfo=timezone.utc).timestamp()); W1 = int(datetime(2026, 11, 12, 23, 59, 59, tzinfo=timezone.utc).timestamp())
+W0 = int(datetime(2026, 9, 12, tzinfo=timezone.utc).timestamp()); W1 = int(datetime(2026, 11, 4, 23, 59, 59, tzinfo=timezone.utc).timestamp())      # Amendment 5: development closes end Nov 4
 
 
 def main(out, series_json, seed, edge, other_edge=None, balanced=False):
     rng = random.Random(seed); os.makedirs(out); open(os.path.join(out, "MADE_UP_DATA"), "w").write("invented rows for a build comparison; nothing here is real\n")
     fam = json.load(open(series_json))["families"]
-    use = (fam["activity counts"][:7] if balanced else fam["activity counts"]) + fam["shipping counts"] + fam["single questions"]                    # all 69 series, so the counts clear the 150 and 40 minimums
+    use = (fam["activity counts"][:10] if balanced else fam["activity counts"]) + fam["shipping counts"] + fam["single questions"]                    # every series of the file (63 since Amendment 5), so the counts clear the 150 and 40 minimums
     cent = lambda x: round(min(0.93, max(0.07, x)), 2)
     lists = {}; hourly = {}; looks = {}; q07 = {}; n_ev = 0
     for s in use:
