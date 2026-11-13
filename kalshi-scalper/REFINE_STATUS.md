@@ -4,6 +4,10 @@ HISTORY (Nov 13, 2026, owner ruling): this note predates the privacy scrub; line
 
 Scope: refine what is live (L1 on gold and Dogecoin, the OICORE second slot). New strategy families go to V2 via the main session. Read only: no trading code, no deploy, no merge.
 
+## 2026-11-13 09:56 AM CT (15:56Z): Correction: OICORE streak kill is 24, not 18
+
+The Nov 13 read script carried the old streak kill of 18; the live kill is 24 (raised Nov 7, README SLOT-OICORE update of Nov 10). Script constant fixed. Neither number was hit, so the verdict is unchanged. No figures here (privacy rule).
+
 ## 2026-11-13 09:52 AM CT (15:52Z): OICORE Nov 13 read done
 
 Registered read run on the fresh report. Verdict: net above 0 (minimum met), neither registered kill hit, FALSIFIED rule not yet reachable (under 100 fills). Figures were sent to Main by message only (privacy rule).
