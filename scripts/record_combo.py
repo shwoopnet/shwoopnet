@@ -23,6 +23,7 @@ import re
 import sys
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 
 BASE = "https://external-api.kalshi.com/trade-api/v2"
@@ -279,7 +280,8 @@ def tape_window(now, since):
 
 
 def tape_url(min_ts, max_ts, cursor=""):
-    return "%s/markets/trades?min_ts=%d&max_ts=%d&limit=1000%s" % (BASE, min_ts, max_ts, ("&cursor=" + cursor) if cursor else "")
+    # the cursor comes from the answer, so it is percent-encoded before it goes into the next URL (Main's review, Nov 13)
+    return "%s/markets/trades?min_ts=%d&max_ts=%d&limit=1000%s" % (BASE, min_ts, max_ts, ("&cursor=" + urllib.parse.quote(cursor, safe="")) if cursor else "")
 
 
 def read_tape(stream, now, since):
