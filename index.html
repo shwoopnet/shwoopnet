@@ -4845,6 +4845,7 @@ kalshiStatusTick();
       (c.gauge ? bar('Nearest stop rule', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') +
       (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? 'Record complete · ' + (c.trialNote || 'review due') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
       (c.kill || c.ret ? '<dl class="sc-rules">' + line('Stops when', c.kill) + line('Comes back when', c.ret) + '</dl>' : '') + '</div>';
+      (c.kill || c.ret ? '<dl class="sc-rules">' + line('Kill', c.kill) + line('Return', c.ret) + '</dl>' : '') + '</div>';
   }
   function kalshiBoardHtml(model, esc, money){
     var openSet = model.open || {}, now = model.now || 0, tt = model.timeText || String;
@@ -4990,6 +4991,7 @@ kalshiStatusTick();
     var pipe = '<nav class="lp' + (openKey ? ' is-open' : '') + '" id="lp" aria-label="Strategy rotation"><div class="lp-hd"><span class="lp-sum" id="lpSum" aria-live="polite">' + sumHtml + '</span></div><div class="lp-row">' + tiles + '</div><div class="lp-ret"><u></u><u></u><span class="lp-lab">' + esc(KAL_STAGES[KAL_STAGES.length - 1].then) + '</span></div><div class="lp-panels">' + panels + '</div></nav>';
     var summary = model.summary ? kalshiStratSummaryHtml(model.summary, esc, money) : '';
     return '<div class="sp-wrap">' + summary + pipe + (typeof KAL_GLOSSARY_HTML === 'string' ? KAL_GLOSSARY_HTML : '') + '</div>';
+    return '<div class="sp-wrap">' + summary + pipe + '</div>';
   }
   // One GET of the committed list per page load (it is a static file next to index.html, so it costs no Firestore read); a failure is kept as the answer, never retried in a loop.
   var kalshiRegistryLoading = false;
