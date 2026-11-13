@@ -1,0 +1,30 @@
+{
+ "aggregate": {
+  "label": "no evidence at n = 1",
+  "mean_net": 0.6853,
+  "mean_price": 0.3,
+  "n": 1,
+  "pf": "inf",
+  "pf_stress": "inf",
+  "win_rate": 1.0
+ },
+ "card": "DESK_A_SPX_CARDS_NOV13.md 94c4dfbc",
+ "counts": {
+  "held_out_ignored": 1,
+  "no_bar": 1,
+  "no_trade": 1,
+  "roll_skipped": 1,
+  "traded": 1
+ },
+ "mode": "dev",
+ "readings": [
+  "S1 fee: the card says 'Kalshi's quadratic schedule' and the Head's facts 'quadratic fee, multiplier 1'; the coefficient is not stated. Provisional: 0.07 x p x (1 - p) per contract (multiplier 1), unrounded for scoring, up-rounded to the cent per order for the stress line.",
+  "S2 sd: the 10 one-minute log changes ending at the F_now bar are between consecutive bars ts_event close-780 ... close-180 (11 bars); a change counts only if both its bars exist and carry F_now's instrument id; at least 6 changes; sample standard deviation (n - 1); sd_1m of 0 gives no model (skipped, counted).",
+  "S3 quotes: the decision candle's YES bid and ask closes; NO ask = 1 - YES bid; usable only if 0 < bid < ask < 1; a crossed or locked quote is no quote (standing rule 18).",
+  "S4 cheaper side: the lower ask; a tie takes YES. Band 0.05 to 0.30 and spread 0.03 inclusive, edge (model chance of that side minus its ask) >= 0.05, all with 1e-9.",
+  "S5 thirds: 'three equal date thirds of the held-out': the held-out span from 2026-12-01 to the latest traded close, cut into three equal time spans; PF 1.5 or better in each.",
+  "S6 traded windows = windows where the rule buys; void results are fee-only losses and counted (the one void rule); an empty result stops the run.",
+  "S7 kills printed in the held read: PF under 1.0 pooled at n >= 100; win rate within 3 points of the mean traded price at n >= 150; fewer than 150 traded: count only (NOT_ENOUGH_DATA).",
+  "S8 development: closes before 2026-12-01; under 100 traded 'no evidence at n = x'; nothing is tuned on it. Held-out closes are ignored and counted in dev mode."
+ ]
+}
