@@ -6,6 +6,9 @@ HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 FROZEN = "a7178688ae3a5da635e15e06e10d94f58b47e49bc77509c90eca07eebb9124bd"
 if hashlib.sha256(open(os.path.join(HERE, "candlegap.py"), "rb").read()).hexdigest() != FROZEN:
     sys.exit("refused: candlegap.py is not the frozen file")
+sys.path.insert(0, os.path.dirname(HERE))
+import hm_guard
+hm_guard.refuse_all()          # Nov 13: HELDOUT_ parts AND the runs listed in HELDOUT_PULL_RUNS.md; an unreadable list refuses everything
 import candlegap as G
 run, series, pull = sys.argv[1], sys.argv[2], sys.argv[3:]
 if series not in ("KXLIGAPROMATCH", "KXEBASKETBALLGAME"):
