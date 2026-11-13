@@ -45,6 +45,8 @@ mixed = mk_bars(C0, 1.0); mixed[C0 - 180 - 60 * 3] = (2, mixed[C0 - 180 - 60 * 3
 try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "", "event": "e"}}, {}, {}); assert 0
 except SystemExit as e: assert "empty result" in str(e)
 amb = mk_bars(C0, 1.0); amb[C0 - 180] = s.AMBIG; assert s.futures_signal(C0, amb)[0] == "ambiguous bar"
+try: s.build({"t": {"series": "KXINX15M", "close": C0, "result": "yes", "event": "e"}}, {"t": [{"ts": C0 - 120, "bid": .9, "ask": .91}]}, amb); assert 0
+except SystemExit as e: assert "STOP" in str(e) and "window t" in str(e) and "ts_event" in str(e)
 
 # --- end to end on an invented run layout ---
 def iso(ts): return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime(ts))

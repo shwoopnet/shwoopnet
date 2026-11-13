@@ -35,8 +35,8 @@ AMBIGUITIES = [
     "sd = 0 (all present changes equal) cannot give a probability: the window is dropped and counted, never traded.",
     "'Cheaper side' = lower ask; YES ask is the candle's yes_ask close, NO ask is 1 - yes_bid close; a tie goes to YES (the SOCDERIV convention).",
     "The 'YES spread' is yes_ask - yes_bid of the decision candle (closes). A missing bid or ask, or a crossed or locked quote, is no quote (counted).",
-    "Two ES rows for one ts_event (different ids) make that bar AMBIGUOUS and the window is dropped and counted.",
-    "Clusters for the z are the window's event ticker (scorekit default); a UTC-day clustered z is printed beside it. The card does not say which.",
+    "Two ES rows for one ts_event STOP the run, naming the window, when that bar is one the window reads (Head 16:51Z).",
+    "The COMPARED z is clustered by the window's event ticker (Head 16:51Z); the UTC-day clustered z is printed beside it as INFORMATION ONLY.",
     "Thirds (Head 16:49Z): equal time spans from 2026-12-01T00:00Z to the last traded close at or before READ_DATE in the held-out read; in development (nothing reaches Dec 1) from the first to the last traded close. scorekit's equal-count windows are printed too.",
     "A result of 'void' is a fee-only loss; an EMPTY result stops the run (Head); any other non-yes/no/void text drops the window (counted).",
 ]
@@ -133,6 +133,8 @@ def build(mk, cs, bars, cutoff_lo=None, cutoff_hi=None):
         if dec is None:
             g["no_decision_candle"] += 1; continue
         why, sd, z = futures_signal(c, bars)
+        if why == "ambiguous bar":
+            raise SystemExit("STOP: two ES rows share one ts_event inside the bars of window %s (Head ruling: a duplicate ts_event stops the run)" % tkr)
         if why:
             g[why] = g.get(why, 0) + 1; continue
         if dec["bid"] is not None and dec["ask"] is not None and dec["bid"] + (1.0 - dec["ask"]) < 1.0 - TOL and abs(dec["ask"] - (1.0 - dec["bid"])) <= TOL:
@@ -192,7 +194,7 @@ def report(trades, g, label_cfg, lo=None):
              "win_rate_within_3_points_of_price_implied_at_n_150_plus": bool(n >= MIN_TRADED and wr is not None and abs(wr - mp) < 0.03 + TOL)}
     return {"constants": CONSTANTS, "gate0_counts": g, "traded": n, "win_rate": None if wr is None else round(wr, 4), "mean_price_paid": None if mp is None else round(mp, 4),
             "win_rate_minus_price_points": None if wr is None else round(100 * (wr - mp), 2),
-            "GOVERNING_fee_rounded_up_per_order": k.stats(rnd), "date_thirds_governing": thirds, "cluster_z_by_UTC_day_governing": day,
+            "GOVERNING_fee_rounded_up_per_order": k.stats(rnd), "date_thirds_governing": thirds, "cluster_z_by_UTC_day_INFORMATION_ONLY": day,
             "kill_flags_read_governing_figure": kills, "scorekit_governing": sc,
             "INFORMATION_ONLY_unrounded_fee": k.stats(raw), "ambiguities": AMBIGUITIES}
 
