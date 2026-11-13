@@ -1828,6 +1828,7 @@
                 </ul>
                 <div class="changelog-day">Nov 12</div>
                 <ul class="changelog-list">
+                  <li>Research: a one request kalshi-pull job, CANDLEGAP_CS2, reads 1 minute candles of 36 CS2 markets the wheel recorder polled, to learn what a missing candle means (a measurement, no rule scored). Job file and tests only.</li>
                   <li>Combo and wheelbook recorders now start their own next run (Nov 12), because GitHub dropped most scheduled starts and the combo data branch held only 2 snapshots. Research recorders only; nothing in the bot or the page changes.</li>
                   <li>Strategies page stage board (Nov 12): the page is now a loop of four boxes, Shadow, Probation, Live and Off / Retired, each with a count and the rule for leaving it. Tap a box to open it, a row to see its kill and return rules with the room left, and More for the deepest layer. Every lane and status word comes from the same state the Bot page reads, so a killed strategy sits in Off / Retired and an unreadable kill state never says healthy.</li>
                   <li>Bot status (Nov 12): one shared strategy state now feeds the Bot status, the Strategies table and the Strategies page. The next look counts only strategies that are armed (gold, the open interest jump, the release day longshot and the Bitcoin perpetual-model probe each at their own time), a switched-off strategy is shown as off and cooling down, and the Needs a look alert no longer says a switched-off or unreadable strategy has sent no order.</li>
