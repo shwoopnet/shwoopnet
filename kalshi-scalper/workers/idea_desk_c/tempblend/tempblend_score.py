@@ -16,15 +16,19 @@ One row is one city-hour decision (the minute t that the rule reads):
   v (index value, F), calib_effective_ms (effective_at_ms of the city's
   config_version at t), stations (index stations[] at t: station_id, temp_f,
   code, obs_time_ms), external (optional, source B: station_id -> {temp_f,
-  obs_time_ms}), strikes (each: K, yes_bid, yes_ask, no_bid, no_ask in dollars,
-  result "yes" or "no" for "K or above").
+  obs_time_ms}), strikes (each: K, yes_bid, yes_ask in dollars from the candle
+  ending at S minus 900 s, result "yes", "no" or anything else for a void, for
+  "K or above").
 
-Reading of the card's strike sentence, fixed here before data: among strikes
-between s and v, keep those whose ask for the side bought is 0.20 to 0.80 and
-whose spread for that side is 0.04 or less, then take the one nearest
-(v + s) / 2 (a tie goes to the lower K). Fills are booked at the ask seen (an
-upper bound: the order limit is ask plus 1c and live taker fills land 60% to
-73% of the time), plus the fee 0.07 x p x (1 - p) rounded up to the cent.
+Readings A1 to A18 are the card's Amendment 1 (ruled by the Head of R&D on
+Nov 13, 2026); this file follows them. In short: band and spread first, then
+the strike nearest (v + s) / 2, ties to the lower K (A6, A7); NO ask is
+1 - yes_bid and the spread is yes_ask - yes_bid (A8); the fill is at the ask
+seen with no +1c, plus the fee 0.07 x p x (1 - p) rounded up to the cent
+(A10, an upper bound: live taker fills land 60% to 73% of the time); a void is
+a fee-only loss counted as a bet (A12); the calibration split is measured at
+the decision time (A15); no index point within 10 minutes of the decision is a
+skip (A17).
 """
 import json, math, sys
 from datetime import datetime, timezone
@@ -42,6 +46,8 @@ GAP_MIN = 0.5            # F
 ASK_LO, ASK_HI = 0.20, 0.80
 SPREAD_MAX = 0.04
 READ_MAX_AGE_MS = 10 * 60 * 1000
+DECISION_LEAD_MS = 15 * 60 * 1000   # decision at S minus 15 minutes
+PUBLISH_LAG_MS = 300 * 1000         # a canonical point is published at t + 300 s
 CALIB_SPLIT_MS = 2 * 24 * 3600 * 1000
 DEV_MIN_BETS = 200
 HELD_DAY2_MIN = 30
@@ -81,6 +87,10 @@ def decide(row, watched):
     w = window(S)
     if w is None:
         return None, "outside_windows"
+    decision = S - DECISION_LEAD_MS
+    t = row.get("t_ms")
+    if t is None or t > decision - PUBLISH_LAG_MS or decision - t > READ_MAX_AGE_MS:
+        return None, "no_index_point"                       # A1, A17
     sid = watched.get(row["city"])
     if sid is None:
         return None, "no_watched_station"
@@ -99,10 +109,11 @@ def decide(row, watched):
         K = float(k["K"])
         if not (lo < K <= hi):
             continue
-        ask, bid = (k["yes_ask"], k["yes_bid"]) if side == "yes" else (k["no_ask"], k["no_bid"])
-        if ask is None or bid is None:
+        yb, ya = k.get("yes_bid"), k.get("yes_ask")
+        if yb is None or ya is None or not (0 < yb < ya < 1):  # A2, A8
             continue
-        if not (ASK_LO - EPS <= ask <= ASK_HI + EPS) or ask - bid > SPREAD_MAX + EPS:
+        ask = ya if side == "yes" else round(1 - yb, 6)
+        if not (ASK_LO - EPS <= ask <= ASK_HI + EPS) or ya - yb > SPREAD_MAX + EPS:
             continue
         cands.append((abs(K - mid), K, ask, k["result"]))
     if not cands:
@@ -110,10 +121,11 @@ def decide(row, watched):
     cands.sort()
     _, K, ask, result = cands[0]
     f = fee(ask)
-    pnl = round((1 - ask - f) if result == side else -(ask + f), 4)
-    calib = "day0_1" if S - row["calib_effective_ms"] < CALIB_SPLIT_MS else "day2_on"
+    void = result not in ("yes", "no")                      # A12
+    pnl = round(-f if void else ((1 - ask - f) if result == side else -(ask + f)), 4)
+    calib = "day0_1" if decision - row["calib_effective_ms"] < CALIB_SPLIT_MS else "day2_on"   # A15
     return {"city": row["city"], "S": row["S"], "window": w, "side": side, "K": K,
-            "ask": ask, "fee": f, "won": result == side, "pnl": pnl,
+            "ask": ask, "fee": f, "won": (not void) and result == side, "void": void, "pnl": pnl,
             "member": member, "calib": calib}, None
 
 def stats(bets):
@@ -127,7 +139,8 @@ def stats(bets):
         m = net / n
         sd = math.sqrt(sum((b["pnl"] - m) ** 2 for b in bets) / (n - 1))
         z = None if sd == 0 else round(m / (sd / math.sqrt(n)), 4)
-    return {"n": n, "won": sum(1 for b in bets if b["won"]), "pf": pf, "net": net, "z": z}
+    return {"n": n, "won": sum(1 for b in bets if b["won"]), "void": sum(1 for b in bets if b["void"]),
+            "pf": pf, "net": net, "z": z}
 
 def pf_num(st):
     return math.inf if st["pf"] == "inf" else (st["pf"] if st["pf"] is not None else 0.0)

@@ -36,4 +36,19 @@ assert r["held_verdict"] == "FAIL (calibration kill)", r["held_verdict"]
 assert T.score(synth("2026-11-13T00:00:00Z", 29, 1, 5), W)["held_verdict"] == "NO_EVIDENCE at n = 29"
 # 5. Nov 5 to 11 rows are never scored.
 assert T.score(synth("2026-11-05T00:00:00Z", 100, 1, 5), W)["skips"] == {"outside_windows": 100}
-print("tempblend scorer checks: 5 scenarios and the fixture passed")
+# 6. A12: a void is a fee-only loss, counted as a bet (fee at 50c is 2c).
+v = synth("2026-09-14T00:00:00Z", 1, 1, 5); v[0]["strikes"][0]["result"] = "void"
+r = T.score(v, W)
+assert r["dev"]["n"] == 1 and r["dev"]["void"] == 1 and r["dev"]["net"] == -0.02, r["dev"]
+# 7. A17 and A1: an index point older than 10 minutes, or not yet published, is a skip.
+v = synth("2026-09-14T00:00:00Z", 2, 1, 5)
+v[0]["t_ms"] -= 6 * 60000          # 26 minutes before S: 11 minutes before the decision
+v[1]["t_ms"] += 6 * 60000          # 14 minutes before S: published after the decision
+assert T.score(v, W)["skips"] == {"no_index_point": 2}
+# 8. A8: a quote is usable only if 0 < yes_bid < yes_ask < 1.
+v = synth("2026-09-14T00:00:00Z", 1, 1, 5); v[0]["strikes"][0]["yes_bid"] = 0.0
+assert T.score(v, W)["skips"] == {"no_strike": 1}
+# 9. A15: a calibration exactly 2 days before S is under 2 days at the decision (S minus 15 min): day 0 to 1.
+v = synth("2026-11-13T00:00:00Z", 1, 1, 2)
+assert T.score(v, W)["held_calib_day0_1"]["n"] == 1
+print("tempblend scorer checks: 9 scenarios and the fixture passed")
