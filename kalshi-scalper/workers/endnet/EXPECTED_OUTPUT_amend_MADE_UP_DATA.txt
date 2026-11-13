@@ -1,0 +1,49 @@
+# amended scorer outputs (MADE-UP rows), Nov 13 15:35Z
+== measure edge2
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 19 (and 1 closed before the development window, not used) | entries 9 | skipped ambiguous strike 1, ask out of band 2, no candle at the entry minute 2, no state minute 2, no strike one goal away 2, spread too wide 1 [invented rows only, not a result]
+ask over every state with a strike and a two-sided quote (before the band and spread; THE KILL LINE READS THIS): median 30.0 cents over 12 states | lowest 14 | highest 46 [invented rows only, not a result]
+ask over the entries made (information only): median 30.0 cents | lowest 15 | highest 40 [invented rows only, not a result]
+entries a week over the 4 week development window: 2.25 [invented rows only, not a result]
+STAGE 1: CLOSED (median ask over every quoted state above 45 cents: False | fewer than 6 entries a week: True) [invented rows only, not a result]
+== score edge2
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 19 (and 1 closed before the development window, not used) | entries 9 | settled 8 (a void counts: fee-only loss) | unsettled 1 | skipped ambiguous strike 1, ask out of band 2, no candle at the entry minute 2, no state minute 2, no strike one goal away 2, spread too wide 1 [invented rows only, not a result]
+FLAG: 1 entries have no result and every one closed before the end of the development window [invented rows only, not a result]
+development: n 8 | wins 4 | net +1.7630 | mean +0.2204 | cash PF 2.88 [invented rows only, not a result]
+first half: n 4 | wins 3 | net +1.8550 | mean +0.4638 | cash PF 11.91 [invented rows only, not a result]
+second half: n 4 | wins 1 | net -0.0920 | mean -0.0230 | cash PF 0.88 [invented rows only, not a result]
+day-clustered z (US Central game day, one-sided, mean net per entry): 1.33 against the ledger bar 5.46 [invented rows only, not a result]
+VERDICT: NOT_ENOUGH_DATA (8 settled entries, need 150) [invented rows only, not a result]
+== measure hand
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 12 (and 0 closed before the development window, not used) | entries 4 | skipped ask out of band 1, no candle at the entry minute 1, no state minute 3, no strike one goal away 1, not two-sided 1, spread too wide 1 [invented rows only, not a result]
+ask over every state with a strike and a two-sided quote (before the band and spread; THE KILL LINE READS THIS): median 35.0 cents over 6 states | lowest 15 | highest 50 [invented rows only, not a result]
+ask over the entries made (information only): median 35.0 cents | lowest 15 | highest 45 [invented rows only, not a result]
+entries a week over the 4 week development window: 1.00 [invented rows only, not a result]
+STAGE 1: CLOSED (median ask over every quoted state above 45 cents: False | fewer than 6 entries a week: True) [invented rows only, not a result]
+== score hand
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 12 (and 0 closed before the development window, not used) | entries 4 | settled 4 (a void counts: fee-only loss) | unsettled 0 | skipped ask out of band 1, no candle at the entry minute 1, no state minute 3, no strike one goal away 1, not two-sided 1, spread too wide 1 [invented rows only, not a result]
+development: n 4 | wins 2 | net +0.6000 | mean +0.1500 | cash PF 1.66 [invented rows only, not a result]
+first half: n 3 | wins 2 | net +1.0780 | mean +0.3593 | cash PF 3.52 [invented rows only, not a result]
+second half: n 1 | wins 0 | net -0.4780 | mean -0.4780 | cash PF 0.00 [invented rows only, not a result]
+day-clustered z (US Central game day, one-sided, mean net per entry): 0.50 against the ledger bar 5.46 [invented rows only, not a result]
+VERDICT: NOT_ENOUGH_DATA (4 settled entries, need 150) [invented rows only, not a result]
+== measure early_only
+ENDNET stage 1: how often the trigger fires and at what price; NO result read [invented rows only, not a result]
+games 0 (and 1 closed before the development window, not used) | entries 0 | skipped none [invented rows only, not a result]
+entries a week over the 4 week development window: 0.00 [invented rows only, not a result]
+STAGE 1: NOT_ENOUGH_DATA (no state with a quote) [invented rows only, not a result]
+== score early_only
+ENDNET stage 2 on DEVELOPMENT rows only [invented rows only, not a result]
+games 0 (and 1 closed before the development window, not used) | entries 0 | settled 0 (a void counts: fee-only loss) | unsettled 0 | skipped none [invented rows only, not a result]
+development: no entry [invented rows only, not a result]
+first half: no entry [invented rows only, not a result]
+second half: no entry [invented rows only, not a result]
+day-clustered z (US Central game day, one-sided, mean net per entry): n/a against the ledger bar 5.46 [invented rows only, not a result]
+VERDICT: NOT_ENOUGH_DATA (0 settled entries, need 150) [invented rows only, not a result]
+== measure outside
+REFUSED: game o1 closes on or after the held-out date 2026-12-15T00:00:00Z
+== score outside
+REFUSED: game o1 closes on or after the held-out date 2026-12-15T00:00:00Z
