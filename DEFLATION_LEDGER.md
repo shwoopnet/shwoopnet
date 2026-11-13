@@ -54,6 +54,18 @@ One file for the count of tries. Branch `rnd-queue`. Research counts on public d
 | DEPTH1 (R6 order-book features, gold and Bitcoin; V2, registered Oct 30) | Desk A (was V2) | 20, counted at registration | unread; one read on or after 2026-11-14 |
 | RAINCAL (V2, registered Oct 31) | none | 2, counted at registration | RETIRED unread Nov 12 (closed family; recorder coverage about 42 percent) |
 | V2's scheduled closing-buy forward reads (the fwd_reads bundle, HOUR3-F, ENTRY2, FLIPS0-F, P6F, P6R, GAS1-F, ABSORB-F, REV1) | none | as counted at each registration | RETIRED UNREAD Nov 12 by the owner's decision (the Oct 28 rule on the closing-buy family stands) |
+| SPXFV1 (KXINX15M, S&P 500 futures-implied fair value, cheap side; a port of CFRTI-K) | Desk A | 1 | REGISTERED Nov 13 before any read; card `DESK_A_SPX_CARDS_NOV13.md` at 5ed61f6b (sha256 35f590c0), dated lines D1 to D8 at 94c4dfbc (sha256 bb7e1e4a); CLOSED UNREAD Nov 13 (family declined under the 3-falsified rule); 0 scored. The card states no N of its own; its toolkit variants (resting limit, target, stop, time exit) are tries "only if used" and none was used, so 1. |
+| SPXOI1 (OICORE's rule on KXINX15M; research threshold and wheel threshold) | Desk A | 2 | REGISTERED Nov 13 in the same card (D6: "TWO counted tries ... research threshold: the pre-2026-12-01 90th percentile; wheel threshold: the rolling previous 20 trading days"); same file hashes as above (35f590c0, bb7e1e4a); a VERSION of OICORE (7g), no research slot. |
+| SPXEVENT1 (EVENT830's rule on KXINX15M; two frozen windows) | Desk A | 1 | REGISTERED Nov 13, `DESK_A_SPXEVENT1_NOV13.md` at 2d426ec8 (sha256 88f7e93c); "N +1 per registered parameter set; this card has one set"; a VERSION of EVENT830, wheel spec only; paused. |
+| WITHDRAW1 (book levels 2 to 5 withdrawing with no print) | Desk B | 1 | REGISTERED Nov 13 before any read, `bookfield/BOOKFIELD_CARDS_NOV13.md` at 50b2d209 (sha256 115ff02e); CLOSED AT INTAKE as not unique (dated line at 14d9fac0, sha256 7ed7ac1a: DEPTH1 f6 and a second try of BOOKCH1); counts as a try for the book-shape family; no scorer, no read. |
+| AIRGAP1 (a hole between the favourite's best and second bids) | Desk B | 1 | Same file and hashes as WITHDRAW1 (115ff02e, 7ed7ac1a); closed at intake (DEPTH1 f8 and f9); counts as a try; no scorer, no read. |
+| SPOTFLOW1 (pooled spot trade flow against a Kalshi quote that has not moved) | Desk B | 1 | REGISTERED Nov 13, `bookfield/SPOTFLOW_CARD_NOV13.md` at a40ac58f (sha256 3d3c830c); CLOSED AT INTAKE (dated line at a00339e5, sha256 dbd6dea0): inside the declined outside-reference family, dates cross CFRTI1-BTC and CFRTI-B; "counts as a try"; no read. |
+| LIQREV, also named OKXLIQ1 (OKX liquidation reversal on KXBTC15M; forward only, paper and shadow) | Idea Desk C | 1 | REGISTERED Nov 13, `idea_desk_c/LIQREV_CARD.md` at 822f9ce1 (sha256 04c6680a); Amendment 2 at a16c8e3c (sha256 507a7326): family status, held-out to Dec 31; "OKXLIQ1 and LIQREV are one card, one try"; paused as written, later unpaused; no read. |
+| OIVER-SPREAD (OICORE plus a spread skip of over 3c) | Desk A | 1 | WRITTEN Nov 13, `DESK_A_OICORE_VERSIONS_NOV13.md` at 741092a7 (sha256 e7b918b0); "N +1 per version"; a 7g VERSION of OICORE; not scored. |
+| OIVER-CAP30 (OICORE plus a cap at 30c) | Desk A | 1 | Same file and hash (741092a7, e7b918b0); written, not scored. |
+| OIVER-DEPTH (OICORE plus a touch-depth floor of twice the order size) | Desk A | 1 | Same file and hash (741092a7, e7b918b0); written, not scored; a forward shadow is the real test. |
+| CFRTI-K three-label amendment (the held-out read prints PASS, FAIL and NO CALL; the EA's relay) | Desk A | 0 | Dated lines of Nov 13 (17:04Z and the EA's relay) in `CFRTI_K_REGISTRATION.md`; labels only, no new rule or cell scored. |
+
 
 ---
 
@@ -290,3 +302,5 @@ A few tries sit in the README but not in the harness sum (rows 64: 55 tries afte
 - The ledger line counts were made by reading the committed `.ids.gz` blobs with `git show` and counting lines.
 - z values marked "computed here" use the one-sided normal quantile at 1 minus 0.05 / N unless marked two-sided.
 - Verdict words are the sources' own. "No survivor" is used where a search closed with nothing frozen and the source gives no single verdict word.
+
+**Nov 13 additions (Forensics, DEFLATION_ADDITIONS_NOV13.md on claude/forensics-desk):** 11 tries (rows above, each checked against its card file). The one-sided bar stays 5.46: N 2,113,011 to 2,113,449 gives z 5.4611; it would move only past about 2,160,300.
