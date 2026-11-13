@@ -1,0 +1,34 @@
+{
+ "job_id": "HISTCUTOFF1",
+ "status": "active",
+ "owner": "MAIN",
+ "registration": "kalshi-scalper/workers/main/HISTCUTOFF1.md",
+ "purpose": "One public read of Kalshi's historical cutoff, to learn the date that separates /markets from /historical/markets, which every lists job needs. A measurement: no market, price or outcome is read and no rule is scored.",
+ "heldout": "none: the answer is three cutoff timestamps, no market data, no candle and no result.",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "allowed_endpoints": [
+  {
+   "name": "historical_cutoff",
+   "method": "GET",
+   "path_pattern": "/historical/cutoff",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [],
+ "ticker_allowlist": [],
+ "pacing_seconds": 1.0,
+ "max_requests": 1,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request asked again; three 429s in a row end the run; no retry around a refusal"
+ },
+ "requests": [
+  {
+   "id": "cutoff",
+   "path": "/historical/cutoff",
+   "params": {}
+  }
+ ]
+}

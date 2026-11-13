@@ -1408,3 +1408,8 @@ Three job files copied byte for byte from their desks' branches after checking e
 ## FOMCTEXT_LISTS added to the jobs bundle (Nov 13, 2026, Idea Desk C, Head approved)
 
 One more lists job, last in the bundle after POLGAPH_LISTS, CANDLEGAP2_TTEBB and RULESREAD_LISTS: `FOMCTEXT_LISTS` (Idea Desk C, commit 8bccfb67, sha256 de111152...4a2af, byte identical; it replaces an earlier version that the Head held, because its dates reached the held-out Fed meetings and its historical requests had no date bound): 4 live `/markets` list requests for four Fed mention series (settled markets, `min_close_ts` 1735689600, `max_close_ts` 1781654399, one second before the 2026-06-17 held-out cut, no `/historical` request), 8 pages at most, cap 10; a zero-try count for a slow family. Same host, pace and stop rules; runner unchanged. Needs the owner's typed merge of the bundle PR; dispatch order from the Head: POLGAPH, CANDLEGAP2, RULESREAD, FOMCTEXT.
+
+
+## Historical cutoff read (Nov 13, 2026, the Head of R&D approved, lowest priority)
+
+`HISTCUTOFF1` (`kalshi-scalper/workers/kalshi_pull_jobs/HISTCUTOFF1.json`, note in `kalshi-scalper/workers/main/HISTCUTOFF1.md`): one GET of `/historical/cutoff` on the elections host, to learn the date that separates `/markets` from `/historical/markets`, which every lists job needs. It reads no market, price, candle or outcome and scores nothing; the answer is cutoff timestamps. New `allowed_endpoints` entry `/historical/cutoff` (no params); the runner is unchanged and its deny list does not match the path. Rides the jobs bundle PR; runs after the lists jobs in it.

@@ -1,0 +1,3 @@
+# HISTCUTOFF1 (Nov 13, 2026, Chief of Staff, Head of R&D approved)
+
+One public GET of `/historical/cutoff` on the elections host. It returns the timestamps that separate Kalshi's live market list (`/markets`) from its historical list (`/historical/markets`), a date every lists job needs to choose between the two endpoints. A zero-try measurement: it reads no market, price, candle or outcome, scores no rule and holds no held-out data (the answer is cutoff timestamps only). Same host, pace and stop rules as every pull job; GET only, no key, no redirect, the runner is unchanged. Lowest priority; runs with the next jobs change.
