@@ -1870,6 +1870,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
                   <li>Trading, behind the scenes (not live, nothing wired): the risk core rules written as a pure library with tests, so a growing set of strategies has one set of account and seat limits to be checked against before anything uses them.</li>
                   <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
