@@ -101,4 +101,17 @@ refused(lambda: F.count(T, [L], [run(CJ, {"c1": [{"markets": [{"market_ticker": 
 # --- defect 5: build-candles writes a whole job that passes the pull runner's own check_job
 jb, drop = F.build_candles(T, [L], LJ)
 assert jb["max_requests"] == len(jb["requests"]) and all(q["path"].startswith("/historical/markets/") for q in jb["requests"]) and len(jb["requests"]) == len(tb), jb["max_requests"]
+# --- Amendment 2: a 404 only on a per-market historical candle request; the words command prints no price, volume or result
+def r404_list(rows): rows.insert(0, {"index": 0, "id": "live", "path": "/markets", "page": 1, "status": 404, "bytes": 0})
+LJ404 = job("FOMCTEXT_LISTS", [("hist", "/historical/markets"), ("live", "/markets")])
+refused(lambda: F.count(T, [run(LJ404, {"hist": [{"markets": mk}]}, tamper=r404_list)], [C], LJ404, CJ), "404")
+HJ = job("FOMCTEXT_CANDLES", [("h_X", "/historical/markets/X/candlesticks"), ("c1", "/markets/candlesticks")])
+def r404_hist(rows): rows.insert(0, {"index": 0, "id": "h_X", "path": "/historical/markets/X/candlesticks", "page": 1, "status": 404, "bytes": 0})
+rh = F.count(T, [L], [run(HJ, {"c1": [{"markets": cd}]}, tamper=r404_hist)], LJ, HJ)
+assert rh["candle_requests_answered_404"] == 1 and rh["qualifying"] == 18, rh
+mkw = [dict(m, title="Will the Chair say W?", yes_sub_title="W", last_price_dollars="0.5", volume_fp="10", yes_ask_dollars="0.6") for m in mk]
+W = F.words([run(LJ, {"hist": [{"markets": mkw}], "live": [{"markets": []}]})], LJ)
+assert W and all(set(x) <= {"market_ticker", "event_ticker", "decision_date"} | set(F.WORD_FIELDS) for x in W), W[0]
+assert not any("result" in x or "price" in json.dumps(x) or "volume" in json.dumps(x) for x in W), W[0]
+assert all(not F.held_out(x["decision_date"]) and x["decision_date"] in F.DEV_DATES for x in W) and len(W) == 25, len(W)
 print("ok", r["qualifying"], r2["qualifying"], len(jb["requests"]))

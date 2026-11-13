@@ -4,6 +4,7 @@ Zero tries: a count. Reads kalshi-pull run folders only; sends nothing. Developm
 development decision date is dropped BEFORE any field other than its ticker is read (its result is never read). A HELDOUT_ folder (any case) is refused.
 Commands:
   build-candles <table.csv> <lists job.json> <lists folder>...   -> the whole stage 2 candle job, checked by the pull runner's own check_job
+  words <lists job.json> <lists folder>...   -> development markets' event ticker, date and strike-word text only (no price, volume or result), for Idea Desk C
   count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...   -> the stage 1 count and the CLOSE lines
 Every run folder must be PROVEN whole against its committed job (manifest job equal, status complete, every request answered, no cursor left, sha256 and bytes) before it is read.
 The hand-matched statement-word table is Desk C's (decision_date,event_ticker,market_ticker,strike_word,statement_word; card Clarification 1, 28a2d63d); this reader never matches words."""
@@ -49,6 +50,9 @@ def held_out(date):
     return date is None or calendar.timegm(tuple(int(x) for x in date.split("-")) + (0, 0, 0)) >= HELDOUT_FROM
 
 
+N404 = [0]   # 404 answers accepted (per-market candle requests only), printed by count
+
+
 def inside(folder, name):
     """Auditor B defect 3: every opened file must lie inside its run folder (abspath and realpath) and no component may be a held-out name."""
     root = os.path.realpath(folder)
@@ -83,7 +87,11 @@ def answers(folder, job):
             good[(row["id"], row.get("page", 1))] = body
             bodies.append((row, body))
         elif st == 404:
+            # Amendment 2 (Auditor B): a 404 is a legitimate "no such market" ONLY on a /historical/markets/<ticker>/candlesticks request; on any other path it is a refusal
+            if not (row.get("path", "").startswith("/historical/markets/") and row.get("path", "").endswith("/candlesticks")):
+                raise SystemExit("refused: %s row %s is a 404 on %s, which is not a per-market candle request" % (folder, row.get("id"), row.get("path")))
             good[(row["id"], row.get("page", 1))] = None
+            N404[0] += 1
     for r in job["requests"]:
         pages = sorted(pg for (i, pg) in good if i == r["id"])
         if not pages or pages != list(range(1, pages[-1] + 1)):
@@ -212,7 +220,29 @@ def px(node):
     return None
 
 
+WORD_FIELDS = ("title", "subtitle", "yes_sub_title", "no_sub_title", "custom_strike", "rules_primary", "rules_secondary")   # text known in advance; never a price, volume or result field
+
+
+def words(list_folders, lists_job):
+    """Amendment 2 (the Head): for development markets only, the event ticker, the meeting date and the strike-word text fields. NO price, volume or result field is read into the print.
+    Idea Desk C matches statement words from this print and never opens the lists run itself. Held-out and non-development rows are dropped on the event ticker first, as in load_lists."""
+    out = []
+    for f in list_folders:
+        for row, body in answers(f, lists_job):
+            for mk in (body.get("markets") or []) if isinstance(body, dict) else []:
+                t = mk.get("ticker") if isinstance(mk, dict) else None
+                if not t or t.split("-")[0] not in SERIES:
+                    continue
+                ev = mk.get("event_ticker") or t.rsplit("-", 1)[0]
+                d = date_of_event(ev)
+                if held_out(d) or d not in DEV_DATES:
+                    continue
+                out.append(dict([("market_ticker", t), ("event_ticker", ev), ("decision_date", d)] + [(k, mk[k]) for k in WORD_FIELDS if k in mk]))
+    return sorted(out, key=lambda x: (x["decision_date"], x["event_ticker"], x["market_ticker"]))
+
+
 def count(table_path, list_folders, candle_folders, lists_job, candles_job):
+    N404[0] = 0
     table = load_table(table_path); lists, drop = load_lists(list_folders, lists_job); universe(table, lists); cd = candles(candle_folders, candles_job)
     unnamed = unnamed_events(table, lists)
     sw = tally({t: v for t, v in table.items() if v["sw"]}, lists, cd)
@@ -227,6 +257,7 @@ def count(table_path, list_folders, candle_folders, lists_job, candles_job):
             "statement_word_strikes": n_sw, "two_sided_at_1405": n_two, "qualifying": qual, "qualifying_meetings": sorted(meetings), "excluded": sw["excluded"],
             "placebo_non_statement_words": placebo, "list_rows_dropped_unread": drop,
             "development_events_in_lists_not_named_by_the_table": {"count": len(unnamed), "events": unnamed},
+            "candle_requests_answered_404": N404[0],
             "verdict": ("CLOSED, efficient, move on: " + "; ".join(close)) if close else "survives stage 1: register 1 try separately (slow-family paper screen)",
             "label": "zero tries; development only; reads settlements by design (see FOMCTEXT_READER_NOTE.md); the placebo is not part of the kill line"}
 
@@ -260,6 +291,8 @@ if __name__ == "__main__":
         job, drop = build_candles(a[1], a[3:], load(a[2]))
         print(json.dumps(job, indent=1))
         print(json.dumps({"requests": len(job["requests"]), "list_rows_dropped_unread": drop}), file=sys.stderr)
+    elif a[0] == "words":             # words <lists job.json> <lists folder>...
+        print(json.dumps(words(a[2:], load(a[1])), indent=1))
     elif a[0] == "count":             # count <table.csv> <lists job.json> <candles job.json> --lists <folder>... --candles <folder>...
         i, j = a.index("--lists"), a.index("--candles")
         print(json.dumps(count(a[1], a[i + 1:j], a[j + 1:], load(a[2]), load(a[3])), indent=1))
