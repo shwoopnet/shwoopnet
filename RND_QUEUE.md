@@ -699,3 +699,8 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - Main: it is ALREADY on main (kalshiCfrtiKLib.js, the CFRTIK slot entry: 3 contracts, -$18). The Head's "no live code" was wrong, from Desk A's stale fact, and is corrected with the EA. The parity gate PV1 already runs Desk A's 20 vectors. The VA checks that those vectors came from cfrti_k.py 79966ef8; this does not block the deploy.
   - Held-out reader committed before 00:00Z Nov 14 (Desk A 433001b8, cfrti_k_heldout.py 72c0a841). The three registered labels govern: PASS (PF 1.3 or more), NO CALL (1.0 to 1.3), FAIL (under 1.0); n of 50 or more; read on or after Nov 20. The Testing Desk writes the second build; Auditor B audits.
   - The EA on the owner's words: NO CALL keeps it running under its normal and rotation kills; only FAIL closes it for good. Written into the card.
+- 17:10Z, Monday trial seats (the owner via the EA: 5 live before Monday 8:30 AM CT; two capped trial seats below the bar accepted). The Head's ranking to Main:
+  1. Gold L1 return at 3 contracts. The existing seat. The GOLDOFF shadow is not evidence at n = 25, and the return rule (60 rows) is not met, so it needs the owner's written exception.
+  2. SPXOI1 (an OICORE version on its own S&P seat). n = 0. T is the 90th percentile of the Nov 5 to 13 OI rises; it needs the candle jobs merged by Saturday; T is never guessed.
+  3. The OICORE resting bid V1, conditional on its Saturday development read.
+  - A DEPTH1 try that clears tonight outranks #3. Refinement is asked to confirm the GOLDOFF count.
