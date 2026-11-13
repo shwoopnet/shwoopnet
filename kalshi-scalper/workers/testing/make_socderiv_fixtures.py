@@ -39,6 +39,10 @@ def game_specs(name):
     elif name == "case_10": S = {lg: [dict(edge=15) if i < 10 else {} for i in range(70)] for lg in A8[:3]}             # oldest 10 per league beyond the 60 cap carry a big edge
     elif name == "case_11": S = {lg: [dict(close_min=(99, 100, 135, 136)[i % 4]) for i in range(60)] for lg in A8[:3]}
     elif name == "case_12": S = {lg: [dict(empty=i % 4) for i in range(60)] for lg in A8[:3]}; [g.update(tie_empty=True) for lg in A8[:3] for g in S[lg][:7]]
+    elif name == "case_15": S = {lg: mk(50) for lg in A8[:3]}                                                                  # real ticker layout, efficient, 150 games
+    elif name == "case_16":                                                                                                     # real ticker layout and the leg-shape edge cases
+        S = {lg: mk(50) for lg in A8[:3]}
+        S[A8[0]][0].update(codes=("CR", "CRU")); S[A8[0]][1].update(two_btts=True); S[A8[0]][2].update(no_btts=True); S[A8[0]][3].update(bad_tie=True)
     elif name == "case_13": S = {lg: mk(40, btts=(2, 3)) for lg in A8[:3]}                                                    # under 150 filled and over the cost line
     elif name == "case_14": S = {lg: [dict(fill=(i < 20)) for i in range(60)] for lg in A8[:3]}                           # under 150 filled and under half filled
     return S
@@ -54,14 +58,16 @@ def build_case(name, out):
         for i, g in enumerate(gl):
             ko = BASE + i * 3 * 3600 + A8.index(lg) * 600
             close = ko + g.get("close_min", 120) * 60; occ = ko + 180 * 60
-            gk = "26OCT%03dAAABBB" % i
+            real = name in ("case_15", "case_16"); c1, c2 = g.get("codes", ("ARS", "LFC") if real else ("AAA", "BBB"))
+            gk = ("26%s%02d%s%s" % (("SEP", "OCT", "NOV")[i // 28], i % 28 + 1, c1, c2)) if real else "26OCT%03dAAABBB" % i
             def M(series, sfx, **kw):
                 return dict({"ticker": "%s-%s-%s" % (series, gk, sfx), "event_ticker": "%s-%s" % (series, gk), "open_time": F(close - 86400), "close_time": F(close), "occurrence_datetime": F(occ),
                              "expected_expiration_time": F(occ), "volume_fp": "10.00", "title": "MADE-UP", "strike_type": "greater", "result": "MADE-UP, never read"}, **kw)
-            for sfx in ("AAA", "BBB", "TIE"): lists["live_KX%sGAME" % lg]["markets"].append(M("KX%sGAME" % lg, sfx, strike_type="custom"))
-            for kk in (0.5, 1.5, 2.5, 3.5, 4.5): lists["live_KX%sTOTAL" % lg]["markets"].append(M("KX%sTOTAL" % lg, "T%s" % kk, floor_strike=kk))
-            lists["live_KX%sBTTS" % lg]["markets"].append(M("KX%sBTTS" % lg, "YES", strike_type="custom"))
-            for nm in ("AAA2", "BBB2"): lists["live_KX%sTEAMTOTAL" % lg]["markets"].append(M("KX%sTEAMTOTAL" % lg, nm, floor_strike=1.5))
+            for sfx in (c1, c2, "DRAW" if g.get("bad_tie") else "TIE"): lists["live_KX%sGAME" % lg]["markets"].append(M("KX%sGAME" % lg, sfx, strike_type="custom" if not real else "structured"))
+            for n_, kk in enumerate((0.5, 1.5, 2.5, 3.5, 4.5), 1): lists["live_KX%sTOTAL" % lg]["markets"].append(M("KX%sTOTAL" % lg, str(n_) if real else "T%s" % kk, floor_strike=kk))
+            if not g.get("no_btts"):
+                for sfx in (("BTTS", "BTTS2") if g.get("two_btts") else ("BTTS" if real else "YES",)): lists["live_KX%sBTTS" % lg]["markets"].append(M("KX%sBTTS" % lg, sfx, strike_type="custom"))
+            for nm in ((c1 + "2", c2 + "2") if real else ("AAA2", "BBB2")): lists["live_KX%sTEAMTOTAL" % lg]["markets"].append(M("KX%sTEAMTOTAL" % lg, nm, floor_strike=1.5))
             games.append(dict(lg=lg, gk=gk, ko=ko, g=g, lam=LAMS[(i + A8.index(lg)) % len(LAMS)]))
     held = s.HELD_OUT_FROM + 7200
     if name == "case_01":   # one held-out game (closes after the window) that must never be sampled
@@ -114,5 +120,5 @@ def build_case(name, out):
 
 if __name__ == "__main__":
     out = sys.argv[1]
-    for n in ["case_%02d" % i for i in range(1, 15)]:
+    for n in ["case_%02d" % i for i in range(1, 17)]:
         print(n, build_case(n, out))
