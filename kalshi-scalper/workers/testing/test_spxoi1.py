@@ -41,6 +41,22 @@ assert [round(p["t"] - p["recv"], 6) for p in s.load_rows(list(reversed(rows)))[
 # only the LAST 120 readable rows count: 65 rows at offset 0.0 then 65 at 1.0: the last row's median over the last 120 (55 zeros, 65 ones) is 1.0, over all 130 it would be 0.5
 win = [row(B + i + (0.5 if i < 65 else -0.5), B + i) for i in range(130)]
 lw = s.load_rows(win)["KXINX15M-A"]; assert round(lw[-1]["t"] - lw[-1]["recv"], 6) == 1.0
+# the REAL NC15 / R6 header (column names only, read from origin/nc-data nc15/2026-11-13/0846/book.csv.gz): an invented file with exactly these columns loads
+import gzip, tempfile
+HEADER = ("t_send_ms,t_recv_ms,server_date_header,ticker,series,close_time,yes_bid_px_1,yes_bid_px_2,yes_bid_px_3,yes_bid_px_4,yes_bid_px_5,yes_bid_sz_1,yes_bid_sz_2,yes_bid_sz_3,yes_bid_sz_4,yes_bid_sz_5,"
+          "no_bid_px_1,no_bid_px_2,no_bid_px_3,no_bid_px_4,no_bid_px_5,no_bid_sz_1,no_bid_sz_2,no_bid_sz_3,no_bid_sz_4,no_bid_sz_5")
+with tempfile.TemporaryDirectory() as d:
+    f = os.path.join(d, "book.csv.gz")
+    import csv as _csv
+    def line(recv, hdr, no1, nsz):          # real Date headers contain a comma, so the file is written with the csv module (quoted), as the recorder's is
+        return [int(recv * 1000 - 50), int(recv * 1000), formatdate(hdr, usegmt=True), "KXINX15M-INVENTED", "KXINX15M", "2026-11-13T15:00:00Z",
+                0.15, "", "", "", "", 20, "", "", "", "", no1, 0.79, "", "", "", nsz, 12, "", "", ""]
+    with gzip.open(f, "wt", newline="") as fh:
+        w = _csv.writer(fh); fh.write(HEADER + "\n"); w.writerow(line(B + 0.2, B, 0.80, 6)); w.writerow(line(B + 5.0, B + 5, 0.80, 6))
+    assert len(HEADER.split(",")) == 26 and len(line(B, B, 0.8, 6)) == 26
+    real = s.load_nc15(f)["KXINX15M-INVENTED"]
+    assert len(real) == 2 and real[0]["close"] == C and real[0]["no_bids"] == [(0.80, 6.0), (0.79, 12.0)] and real[0]["yes_bids"] == [(0.15, 20.0)], real
+    assert abs(real[0]["t"] - real[0]["recv"] - 0.3) < 1e-6 and abs(real[1]["t"] - real[1]["recv"] - 0.4) < 1e-6          # median of the offsets 0.3 and 0.5
 # --- book helpers ---
 yes_cheap = poll(C - 175, no=[(0.80, 6), (0.79, 6)], yes=[(0.18, 9)])          # YES ask .20 (6) and .21 (6); NO ask .82
 assert abs(s.ask_of(yes_cheap, "yes") - 0.20) < 1e-12 and abs(s.ask_of(yes_cheap, "no") - 0.82) < 1e-12 and s.cheaper(yes_cheap)[0] == "yes"
