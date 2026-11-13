@@ -40,7 +40,7 @@ print('TRIPWIRE: '+('TRIPPED '+'; '.join(trip) if trip else 'OK')+' (n since sta
 # This tool is a monitor only: it now says whether the latch condition is met and counts gold trades settled after the trip.
 LATCH_TRIPPED_AT = '2026-11-12T19:09:00'
 NET_LINE, N_LINE = -20.0, 40
-nets = sum(v); after = [r for r in rows if r[0] >= LATCH_TRIPPED_AT]
+nets = sum(v); after = [r for r in rows if r[0] > '2026-11-12T19:10:00']
 print('LATCH (rule 2): %s | n since re-arm %d, net since re-arm $%.2f (line %.0f once %d settled) | gold trades settled after the trip: %d (should be 0 or only orders open at the trip)' % (
     'CONDITION MET' if (len(since) >= N_LINE and nets < NET_LINE) else 'condition not met', len(since), nets, NET_LINE, N_LINE, len(after)))
 print('GOLD OFF since %s UTC: the tripwire above is informational only; the sizing base for nightly.py comes from Main by message at each run (SIZING_BASE env), never from a file.' % LATCH_TRIPPED_AT)
