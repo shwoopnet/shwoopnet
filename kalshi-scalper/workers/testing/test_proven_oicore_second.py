@@ -76,4 +76,36 @@ with tempfile.TemporaryDirectory() as t:
     h = os.path.join(t, "bad.json"); json.dump({"x": 1}, open(h, "w"))
     try: p.read_file(h); assert 0
     except SystemExit as e: assert "STOP" in str(e)
+# --- open orders and read points (Head 19:23Z) ---
+op = [mk(950, True, settledPnl=None, result=None), mk(951, True, settledPnl=None, result=None), mk(952, True, settledPnl=None, count=0), mk(953, True, settledPnl=None, strategy="L2X")]
+oo = p.read_rows(A + op)
+assert oo["open_filled_orders"] == 2 and oo["rows_used"] == 300 and oo["windows"] == o["windows"] and o["open_filled_orders"] == 0
+def hand(i): return mk(i, (i % 10 < 3) if i < 100 else False)
+H = [hand(i) for i in range(300)]
+with tempfile.TemporaryDirectory() as d:
+    r100 = p.read_point(H, 100, marker_dir=d)
+    assert r100["read_point"] == 100 and r100["rows_read"] == 100 and [w["n"] for w in r100["windows"]] == [33, 33, 34], r100["windows"]
+    for w, e in zip(r100["windows"], (93.6 / 46.2, 70.2 / 52.8, 70.2 / 55)): assert abs(w["cash_pf_unrounded"] - e) < 1e-9, (w, e)
+    assert [w["counts"] for w in r100["windows"]] == [True, True, False] and r100["VERDICT"] == "PROVEN"          # all 300 rows read would give NOT YET: truncation to the first 100 is what is tested
+    assert p.read_rows(H)["VERDICT"] == "NOT YET"
+    assert os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_100.local")) and "PROVEN" in open(os.path.join(d, "PROVEN_OICORE_READ_100.local")).read()
+    for bad, why in ((100, "already"), (150, "PROVEN")):
+        try: p.read_point(H, bad, marker_dir=d); assert 0
+        except SystemExit as e: assert why in str(e), (bad, str(e))
+    assert not os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_150.local"))
+with tempfile.TemporaryDirectory() as d:
+    lose100 = [mk(i, False) for i in range(100)] + [mk(100 + i, True) for i in range(50)]
+    try: p.read_point(lose100, 150, marker_dir=d); assert 0          # no point-100 marker yet
+    except SystemExit as e: assert "100" in str(e)
+    short = p.read_point(lose100[:99], 100, marker_dir=d)          # fewer than P fills: not enough data, no marker, not spent
+    assert short["VERDICT"] == "NOT_ENOUGH_DATA" and not os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_100.local"))
+    n1 = p.read_point(lose100, 100, marker_dir=d); assert n1["VERDICT"] == "NOT YET" and n1["rows_read"] == 100 and os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_100.local"))
+    short150 = p.read_point(lose100[:120], 150, marker_dir=d); assert short150["VERDICT"] == "NOT_ENOUGH_DATA" and not os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_150.local"))
+    r150 = p.read_point(lose100, 150, marker_dir=d)
+    assert r150["rows_read"] == 150 and [w["n"] for w in r150["windows"]] == [50, 50, 50] and [w["cash_pf_unrounded"] for w in r150["windows"]] == [0.0, 0.0, float("inf")] and r150["windows_counting"] == 1 and r150["VERDICT"] == "NOT YET"
+    assert os.path.exists(os.path.join(d, "PROVEN_OICORE_READ_150.local"))
+    try: p.read_point(lose100, 150, marker_dir=d); assert 0
+    except SystemExit as e: assert "already" in str(e)
+    try: p.read_point(lose100, 175, marker_dir=d); assert 0
+    except SystemExit as e: assert "read point" in str(e)
 print("test_proven_oicore_second: all checks passed")
