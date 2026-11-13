@@ -134,3 +134,10 @@ With these applied the three-fixture match is unchanged: 360 of 360 per-try figu
 - **New hash of my build:** `93212179...` (was `0092b363...`). The wrapper is untouched (`75385906...`).
 - **The Head's ruling on the one-date z (01:16Z):** a sentence, no guard. Any z that differs between the builds or is larger than 1,000 in size is recomputed exactly by both
   before anything is recorded.
+
+## Nov 13, about 01:38Z: the comparison tool for the read is committed
+
+`depth1_compare.py <my output .json> <the wrapper's printed lines .txt>` compares the 20 tries figure by figure (360 per-try figures, the 80 z-beside figures, the 20
+zero-rule counts), the control's two numbers, the noise lines and the counts. It opens no data file and reads printed text only. Checked on the two A4 fixtures against
+Desk A's committed prints: 360 of 360, 80 of 80 and 20 of 20 on each. At the read (not before 2026-11-14T00:00Z, on the Head's word) the order is:
+`python3 -I depth1_second.py read <R6 root> <out dir>`, then this tool on the saved output and Desk A's printed lines.
