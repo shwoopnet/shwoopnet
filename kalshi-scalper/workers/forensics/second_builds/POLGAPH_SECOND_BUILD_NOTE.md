@@ -140,6 +140,10 @@ Two things for Desk B and the Head, neither a figure:
 this build, and Desk B's scorer takes that check only if it changes for another reason before the read. (2) Skipping a market of a series outside the 63 by its series,
 without reading its result, is correct and enough: rule (h) stops a run on a held-out close of a series the card scores. The re-match is recorded by the Head.
 
+**Registration hash after the re-match (07:12Z):** Desk B added a dated clarifying line to Amendment 5 (its guard is a folder-name filter and does not catch a renamed
+copy; a loose registry row about COUNT2; the halves keep 2026-10-13). The registration is now sha256 `d0585800...` (`claude/idea-desk-b`, checked at `9c19735e`); I read
+the added lines: no rule, window, series or figure moved, the scorer is still `198d9bf0...` and the series file `c22f1aae...`, so the six comparisons above stand as made.
+
 **Standing:** second build re-matched on the amended text. Nothing of this card has been requested by this desk. The comparison is made again when the bounded lists
 and the candles land.
 
