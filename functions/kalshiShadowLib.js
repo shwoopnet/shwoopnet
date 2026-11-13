@@ -24,6 +24,9 @@ const SHADOW_RULES = Object.freeze([
   Object.freeze({ id: "GOLDOFF", readme: "kalshi-scalper/README.md#SHADOW-GOLDOFF", series: Object.freeze(["KXGOLD15M"]), entry: Object.freeze({ sideRule: "favourite", priceMin: 0.88, priceMax: 0.97, leftMaxSec: 400, leftMinSec: 330 }), contracts: 1, registeredAt: "2026-11-12", forwardReadDate: "2026-11-19" }),
 ]);
 
+// The markets a shadow rule may name (Nov 13, 2026, shadow scaling P2): a reviewed list in code, NOT "whatever L1 trades". Today it is the four L1 markets, so nothing changes; a new series is a reviewed edit
+// here (and, if L1 does not already read it, index.js reads it under the shared per-minute budget). Nothing stored or typed on the page can add one.
+const SHADOW_ALLOWED_SERIES = Object.freeze(["KXGOLD15M", "KXXRP15M", "KXBTC15M", "KXETH15M"]);
 const OPEN = ["open", "active"];
 const RULE_KEYS = ["id", "readme", "series", "entry", "contracts", "registeredAt", "forwardReadDate"];
 const ENTRY_KEYS = ["sideRule", "priceMin", "priceMax", "leftMaxSec", "leftMinSec"];
@@ -161,15 +164,28 @@ async function runShadowTick(args) {
     const seen = args.seen instanceof Set ? args.seen : new Set();
     const budget = args.budget && typeof args.budget.take === "function" ? args.budget : makeReadBudget(SHADOW_READS_PER_MINUTE);
     const fresh = [];
+    // Shared reads (P2): one candle read per ticker serves every rule that needs it. `candleCache` (optional, kept by the caller across minutes) holds only successful answers, so a missing candle is still retried
+    // later; `inflight` makes two rules in the same minute share one read.
+    // Plain objects (not Maps): this library may not contain a write call, and these are in-memory only.
+    const candleCache = isObj(args.candleCache) ? args.candleCache : {};
+    const candleReads = {};
     for (const d of rows) {
       const key = d.rule + "|" + d.ticker; if (seen.has(key)) continue;
       const rule = byId.get(d.rule);
       if (rule && Object.prototype.hasOwnProperty.call(rule.entry, "oiRiseMin")) {
         // Missing open interest means NO row (and no memory of the look, so a later minute of the window may try again if the budget allows). A rise under the line is no signal.
         try {
-          if (typeof args.candles !== "function" || !budget.take()) continue;
-          const cs = Math.round(d.closeMs / 1000);
-          const oi = oiRiseFromCandles(await args.candles(d.series, d.ticker, cs), cs);
+          if (typeof args.candles !== "function") continue;
+          const cs = Math.round(d.closeMs / 1000), ck = d.series + "|" + d.ticker + "|" + cs;
+          let oi = Object.prototype.hasOwnProperty.call(candleCache, ck) ? candleCache[ck] : undefined;
+          if (oi === undefined) {
+            if (!Object.prototype.hasOwnProperty.call(candleReads, ck)) {
+              if (!budget.take()) continue;
+              candleReads[ck] = Promise.resolve(args.candles(d.series, d.ticker, cs)).then((c) => oiRiseFromCandles(c, cs));
+            }
+            oi = await candleReads[ck];
+            if (oi !== null) { if (Object.keys(candleCache).length > 500) for (const k of Object.keys(candleCache)) delete candleCache[k]; candleCache[ck] = oi; }
+          }
           if (oi === null || oi < rule.entry.oiRiseMin) { if (oi !== null) seen.add(key); continue; }
           d.oiRiseSeen = oi;
         } catch (e) { continue; }
@@ -189,10 +205,12 @@ async function runShadowTick(args) {
       if (wanted.length && typeof args.market === "function" && typeof args.update === "function") {
         const t0 = typeof args.clock === "function" ? args.clock() : Date.now();
         if (typeof args.sleep === "function") await args.sleep(SECOND_LOOK_MS);
+        const looked = {};   // one second look per ticker serves every rule that logged a row on it
         for (const d of wanted) {
-          if ((typeof args.clock === "function" ? args.clock() : Date.now()) - t0 > 8000 || !budget.take()) break;
+          if (!Object.prototype.hasOwnProperty.call(looked, d.ticker) && ((typeof args.clock === "function" ? args.clock() : Date.now()) - t0 > 8000 || !budget.take())) break;
           try {
-            const m = await args.market(d.ticker);
+            if (!Object.prototype.hasOwnProperty.call(looked, d.ticker)) looked[d.ticker] = await args.market(d.ticker);
+            const m = looked[d.ticker];
             const p = sidePriceOf(m, d.side), limit = byId.get(d.rule).entry.priceMax;
             if (p === null) continue;
             await args.update(d.rule + "_" + d.ticker, { askAfter: p, wouldFillAfter: p <= limit + 1e-9, secondReadAtMs: typeof args.clock === "function" ? args.clock() : Date.now() });
@@ -226,19 +244,28 @@ async function settleShadowRows(args) {
   const out = { checked: 0, settled: 0 };
   try {
     const max = Number.isInteger(args.max) && args.max > 0 ? Math.min(args.max, 20) : 12;
-    const rows = (await args.readOpen()).filter((r) => r && r.settled === false && Number.isFinite(Number(r.closeMs)) && Number(r.closeMs) + 120000 <= args.now).sort((a, b) => Number(a.closeMs) - Number(b.closeMs)).slice(0, max);
+    const open = (await args.readOpen()).filter((r) => r && r.settled === false && Number.isFinite(Number(r.closeMs)) && Number(r.closeMs) + 120000 <= args.now)
+      .sort((a, b) => Number(a.closeMs) - Number(b.closeMs) || String(a.ticker).localeCompare(String(b.ticker)) || String(a.rule).localeCompare(String(b.rule)));
+    // One public read per distinct ticker serves every row of that ticker (P2); `max` counts reads, taken in close order so the oldest market is never starved by newer ones.
+    const index = {}, all = [];
+    for (const r of open) { const k = String(r.ticker); if (!Object.prototype.hasOwnProperty.call(index, k)) { index[k] = []; all.push(index[k]); } index[k].push(r); }
+    const groups = all.slice(0, max);
     const started = typeof args.clock === "function" ? args.clock() : Date.now(), budgetMs = Number.isFinite(args.budgetMs) ? args.budgetMs : 15000;
-    for (const r of rows) {
+    for (const g of groups) {
       // A time guard (security review note): the reads are one after another at the end of a minute function with a hard timeout, so stop after the budget and leave the rest for the next run.
       if ((typeof args.clock === "function" ? args.clock() : Date.now()) - started > budgetMs) break;
       out.checked += 1;
       try {
-        const m = await args.market(String(r.ticker));
+        const m = await args.market(String(g[0].ticker));
         const result = m && typeof m.result === "string" ? m.result.toLowerCase() : "";
-        const o = shadowOutcome(r, result);
-        if (!o) continue;
-        await args.update(String(r.rule) + "_" + String(r.ticker), { settled: true, result: o.result, won: o.won, fee: o.fee, pnl: o.pnl, settledAtMs: args.now });
-        out.settled += 1;
+        for (const r of g) {
+          try {
+            const o = shadowOutcome(r, result);
+            if (!o) continue;
+            await args.update(String(r.rule) + "_" + String(r.ticker), { settled: true, result: o.result, won: o.won, fee: o.fee, pnl: o.pnl, settledAtMs: args.now });
+            out.settled += 1;
+          } catch (e) { /* the next run tries again */ }
+        }
       } catch (e) { /* the next run tries again */ }
     }
   } catch (e) { /* log only */ }
@@ -323,4 +350,4 @@ function returnRule(row) {
   return { met, fillable: Number(r.fillable) || 0, need: 60, days: Number(r.days) || 0, needDays: 7, pf: r.pfFillable === undefined ? null : r.pfFillable, secondHalfPf: r.secondHalfPf === undefined ? null : r.secondHalfPf, needPf: 1.3 };
 }
 
-module.exports = { returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, shadowRolling, COLLECTION };
+module.exports = { SHADOW_ALLOWED_SERIES, returnRule, SHADOW_RULES, validateShadowRule, activeShadowRules, shadowSignals, shadowSeriesDue, makeReadBudget, planShadowReads, oiRiseFromCandles, SHADOW_READS_PER_MINUTE, SECOND_LOOK_MS, shadowWriter, runShadowTick, shadowFee, shadowOutcome, settleShadowRows, shadowReport, shadowRolling, COLLECTION };
