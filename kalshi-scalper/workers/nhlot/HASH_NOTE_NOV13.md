@@ -39,3 +39,7 @@ Two lines labelled information only differ, and the card's text does not settle 
 2. The optimistic best-of-two share: mine 6 of 34 (18%), re-choosing the cheaper side at the next minute as the first reader did; the second build 4 of 34 (12%), keeping the side chosen at the detection minute.
 
 Neither reaches a registered figure, a median or the verdict. The Head of R&D rules whether the text is pinned to the audited reader or the reader moves. **No verdict is recorded on the card until that ruling.**
+
+## CLOSED on two builds (Nov 13, 2026, 08:17Z)
+
+The Head of R&D ruled: both information-only lines are pinned by one dated line as my reader prints them, with the second build's values beside them; no code moves. The closing note with the dated line, both builds' hashes and the run is at the end of card 17's section in `IDEA_DESK_B_WAVE3.md`, whose sha256 is now d708844e7cb86d118e03687d16b96c793352e923a57bf6801dca84a985051185. Verdict recorded: NHLOT CLOSED at the price measurement, no bet, no outcome, no try spent. The Head asks for the Verification Analyst through the Chief of Staff.
