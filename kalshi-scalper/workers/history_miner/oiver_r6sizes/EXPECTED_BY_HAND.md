@@ -1,0 +1,47 @@
+# OIVER-DEPTH book-size builder (R6), expected by hand (History Miner, Nov 13, 2026)
+
+Written BEFORE the code, from the Head of R&D's rulings of 21:10Z to 21:14Z. The R6 guard is the Head's ruling; Desk A is adding it to card 3 as a dated amendment. Layout of the R6 book file taken from `scripts/record_15m_book.py` on main (code only; no data read).
+
+## What it does
+- **Inputs:** the OIVER rows CSV (`../oiver_rows/oiver_rows.py` output) and one or more R6 `book.csv.gz` files.
+- **Output:** the rows closing in [R6_START 2026-10-29T00:00Z, 2026-11-09T00:00Z), with two columns added, yes_bid_size and yes_ask_size. Rows closing before R6_START are dropped and counted before_r6.
+- **R6 guard:**
+  - R6_HELDOUT_FROM = 2026-11-09T00:00Z.
+  - A book file whose path has a date folder (YYYY-MM-DD) on or after 2026-11-09 STOPS the build, as does an input row closing on or after it.
+  - Book rows whose close_time is on or after Nov 9 are never looked up (they are not matched to any window).
+- **Decision poll:** among the book rows with the window's ticker AND close_time equal to the window's close, the last row with t_recv_ms in [close - 190 s, close - 180 s] in ms, both ends inclusive. No such row leaves both sizes blank, counted no_poll.
+- **Sizes:**
+  - yes_bid_size = yes_bid_sz_1, the best YES bid (the recorder writes level 1 as the best);
+  - yes_ask_size = no_bid_sz_1, since the best NO bid at p is the YES ask at 1 - p.
+  - A blank or non-numeric size is written blank, counted missing_size once a window.
+  - Written as repr(float).
+- **Checks:** hm_guard on every path. Counts go to stderr.
+
+## Open readings for the Head
+- (a) The poll time is t_recv_ms (when the book was seen), not t_send_ms or the Date header.
+- (b) No check that the R6 touch price equals the candle's quote. The size is the size at R6's best level at that poll.
+
+## Made-up data (test_oiver_r6sizes.py)
+Input rows (OIVER columns, made-up values):
+- A: close 2026-10-28T23:45Z
+- B: close 2026-11-02T12:00Z
+- C: close 2026-11-03T08:15Z
+- D: close 2026-11-06T20:30Z
+
+Book file `book15r6/2026-11-02/1200/book.csv.gz` (all rows for the window's ticker unless stated):
+- B: polls at close-195 s (bid sz 11, no sz 12), close-188 s (21, 22), close-181 s (31, 32), close-180 s exactly (41, 42), close-179 s (51, 52); and a decoy row for B's ticker with a DIFFERENT close_time at close-185 s (99, 99).
+- C: polls at close-200 s and close-170 s only.
+- D: one poll at close-185 s with yes_bid_sz_1 blank and no_bid_sz_1 7.
+
+## Expected
+- A: dropped (before_r6).
+- B: sizes 41.0 and 42.0 (the close-180 s poll is the last in the interval; the decoy is not matched).
+- C: both sizes blank (no_poll).
+- D: yes_bid_size blank, yes_ask_size 7.0 (missing_size 1).
+
+**Counts:** rows_in 4, before_r6 1, written 3, no_poll 1, missing_size 1.
+
+## Refusals expected
+- a book file under book15r6/2026-11-09/
+- an input row closing 2026-11-09T00:00Z
+- a HELDOUT_ path
