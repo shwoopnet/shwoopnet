@@ -1,1697 +1,1697 @@
 {
- "job_id": "V1_OI_CANDLES_NOV12_13",
- "status": "draft",
- "owner": "REFINEMENT",
- "registration": "kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md",
- "purpose": "V1 signals file: the open interest at the candles ending 360 s and 180 s before the close of every KXBTC15M window closing 2026-11-12T06:30:00Z to 2026-11-13T23:45:00Z (the OICORE trigger list OICORE_TRIGGER_WINDOW_TICKERS.csv covers closes to 2026-11-12T06:15Z). One request per market, 1 minute candles from close minus 660 s to the close, the same call the research used (series markets candlesticks).",
- "heldout": "None requested as held-out of any card; NOTE for the Head and Auditor B before dispatch: these windows overlap V1's development block (labelled not blind) and the DEPTH1 and CFRTI1 blocks of R6 closes Nov 9 to 13; the answers hold open interest and prices of PUBLIC candles, no outcome is read by V1's signal builder (it uses only open interest at c-360 and c-180), confirm that is allowed before dispatch.",
- "host": "api.elections.kalshi.com",
- "base_path": "/trade-api/v2",
- "pacing_seconds": 1.0,
- "max_requests": 166,
- "allowed_endpoints": [
-  {
-   "name": "series_market_candlesticks",
-   "method": "GET",
-   "path_pattern": "/series/KXBTC15M/markets/(?P<ticker>KXBTC15M-[0-9A-Z-]{1,40})/candlesticks",
-   "params_allowed": [
-    "start_ts",
-    "end_ts",
-    "period_interval"
-   ]
-  }
- ],
- "series_allowlist": [
-  "KXBTC15M"
- ],
- "ticker_allowlist": [
-  "KXBTC15M-26NOV120130-30",
-  "KXBTC15M-26NOV120145-45",
-  "KXBTC15M-26NOV120200-00",
-  "KXBTC15M-26NOV120215-15",
-  "KXBTC15M-26NOV120230-30",
-  "KXBTC15M-26NOV120245-45",
-  "KXBTC15M-26NOV120300-00",
-  "KXBTC15M-26NOV120315-15",
-  "KXBTC15M-26NOV120330-30",
-  "KXBTC15M-26NOV120345-45",
-  "KXBTC15M-26NOV120400-00",
-  "KXBTC15M-26NOV120415-15",
-  "KXBTC15M-26NOV120430-30",
-  "KXBTC15M-26NOV120445-45",
-  "KXBTC15M-26NOV120500-00",
-  "KXBTC15M-26NOV120515-15",
-  "KXBTC15M-26NOV120530-30",
-  "KXBTC15M-26NOV120545-45",
-  "KXBTC15M-26NOV120600-00",
-  "KXBTC15M-26NOV120615-15",
-  "KXBTC15M-26NOV120630-30",
-  "KXBTC15M-26NOV120645-45",
-  "KXBTC15M-26NOV120700-00",
-  "KXBTC15M-26NOV120715-15",
-  "KXBTC15M-26NOV120730-30",
-  "KXBTC15M-26NOV120745-45",
-  "KXBTC15M-26NOV120800-00",
-  "KXBTC15M-26NOV120815-15",
-  "KXBTC15M-26NOV120830-30",
-  "KXBTC15M-26NOV120845-45",
-  "KXBTC15M-26NOV120900-00",
-  "KXBTC15M-26NOV120915-15",
-  "KXBTC15M-26NOV120930-30",
-  "KXBTC15M-26NOV120945-45",
-  "KXBTC15M-26NOV121000-00",
-  "KXBTC15M-26NOV121015-15",
-  "KXBTC15M-26NOV121030-30",
-  "KXBTC15M-26NOV121045-45",
-  "KXBTC15M-26NOV121100-00",
-  "KXBTC15M-26NOV121115-15",
-  "KXBTC15M-26NOV121130-30",
-  "KXBTC15M-26NOV121145-45",
-  "KXBTC15M-26NOV121200-00",
-  "KXBTC15M-26NOV121215-15",
-  "KXBTC15M-26NOV121230-30",
-  "KXBTC15M-26NOV121245-45",
-  "KXBTC15M-26NOV121300-00",
-  "KXBTC15M-26NOV121315-15",
-  "KXBTC15M-26NOV121330-30",
-  "KXBTC15M-26NOV121345-45",
-  "KXBTC15M-26NOV121400-00",
-  "KXBTC15M-26NOV121415-15",
-  "KXBTC15M-26NOV121430-30",
-  "KXBTC15M-26NOV121445-45",
-  "KXBTC15M-26NOV121500-00",
-  "KXBTC15M-26NOV121515-15",
-  "KXBTC15M-26NOV121530-30",
-  "KXBTC15M-26NOV121545-45",
-  "KXBTC15M-26NOV121600-00",
-  "KXBTC15M-26NOV121615-15",
-  "KXBTC15M-26NOV121630-30",
-  "KXBTC15M-26NOV121645-45",
-  "KXBTC15M-26NOV121700-00",
-  "KXBTC15M-26NOV121715-15",
-  "KXBTC15M-26NOV121730-30",
-  "KXBTC15M-26NOV121745-45",
-  "KXBTC15M-26NOV121800-00",
-  "KXBTC15M-26NOV121815-15",
-  "KXBTC15M-26NOV121830-30",
-  "KXBTC15M-26NOV121845-45",
-  "KXBTC15M-26NOV121900-00",
-  "KXBTC15M-26NOV121915-15",
-  "KXBTC15M-26NOV121930-30",
-  "KXBTC15M-26NOV121945-45",
-  "KXBTC15M-26NOV122000-00",
-  "KXBTC15M-26NOV122015-15",
-  "KXBTC15M-26NOV122030-30",
-  "KXBTC15M-26NOV122045-45",
-  "KXBTC15M-26NOV122100-00",
-  "KXBTC15M-26NOV122115-15",
-  "KXBTC15M-26NOV122130-30",
-  "KXBTC15M-26NOV122145-45",
-  "KXBTC15M-26NOV122200-00",
-  "KXBTC15M-26NOV122215-15",
-  "KXBTC15M-26NOV122230-30",
-  "KXBTC15M-26NOV122245-45",
-  "KXBTC15M-26NOV122300-00",
-  "KXBTC15M-26NOV122315-15",
-  "KXBTC15M-26NOV122330-30",
-  "KXBTC15M-26NOV122345-45",
-  "KXBTC15M-26NOV130000-00",
-  "KXBTC15M-26NOV130015-15",
-  "KXBTC15M-26NOV130030-30",
-  "KXBTC15M-26NOV130045-45",
-  "KXBTC15M-26NOV130100-00",
-  "KXBTC15M-26NOV130115-15",
-  "KXBTC15M-26NOV130130-30",
-  "KXBTC15M-26NOV130145-45",
-  "KXBTC15M-26NOV130200-00",
-  "KXBTC15M-26NOV130215-15",
-  "KXBTC15M-26NOV130230-30",
-  "KXBTC15M-26NOV130245-45",
-  "KXBTC15M-26NOV130300-00",
-  "KXBTC15M-26NOV130315-15",
-  "KXBTC15M-26NOV130330-30",
-  "KXBTC15M-26NOV130345-45",
-  "KXBTC15M-26NOV130400-00",
-  "KXBTC15M-26NOV130415-15",
-  "KXBTC15M-26NOV130430-30",
-  "KXBTC15M-26NOV130445-45",
-  "KXBTC15M-26NOV130500-00",
-  "KXBTC15M-26NOV130515-15",
-  "KXBTC15M-26NOV130530-30",
-  "KXBTC15M-26NOV130545-45",
-  "KXBTC15M-26NOV130600-00",
-  "KXBTC15M-26NOV130615-15",
-  "KXBTC15M-26NOV130630-30",
-  "KXBTC15M-26NOV130645-45",
-  "KXBTC15M-26NOV130700-00",
-  "KXBTC15M-26NOV130715-15",
-  "KXBTC15M-26NOV130730-30",
-  "KXBTC15M-26NOV130745-45",
-  "KXBTC15M-26NOV130800-00",
-  "KXBTC15M-26NOV130815-15",
-  "KXBTC15M-26NOV130830-30",
-  "KXBTC15M-26NOV130845-45",
-  "KXBTC15M-26NOV130900-00",
-  "KXBTC15M-26NOV130915-15",
-  "KXBTC15M-26NOV130930-30",
-  "KXBTC15M-26NOV130945-45",
-  "KXBTC15M-26NOV131000-00",
-  "KXBTC15M-26NOV131015-15",
-  "KXBTC15M-26NOV131030-30",
-  "KXBTC15M-26NOV131045-45",
-  "KXBTC15M-26NOV131100-00",
-  "KXBTC15M-26NOV131115-15",
-  "KXBTC15M-26NOV131130-30",
-  "KXBTC15M-26NOV131145-45",
-  "KXBTC15M-26NOV131200-00",
-  "KXBTC15M-26NOV131215-15",
-  "KXBTC15M-26NOV131230-30",
-  "KXBTC15M-26NOV131245-45",
-  "KXBTC15M-26NOV131300-00",
-  "KXBTC15M-26NOV131315-15",
-  "KXBTC15M-26NOV131330-30",
-  "KXBTC15M-26NOV131345-45",
-  "KXBTC15M-26NOV131400-00",
-  "KXBTC15M-26NOV131415-15",
-  "KXBTC15M-26NOV131430-30",
-  "KXBTC15M-26NOV131445-45",
-  "KXBTC15M-26NOV131500-00",
-  "KXBTC15M-26NOV131515-15",
-  "KXBTC15M-26NOV131530-30",
-  "KXBTC15M-26NOV131545-45",
-  "KXBTC15M-26NOV131600-00",
-  "KXBTC15M-26NOV131615-15",
-  "KXBTC15M-26NOV131630-30",
-  "KXBTC15M-26NOV131645-45",
-  "KXBTC15M-26NOV131700-00",
-  "KXBTC15M-26NOV131715-15",
-  "KXBTC15M-26NOV131730-30",
-  "KXBTC15M-26NOV131745-45",
-  "KXBTC15M-26NOV131800-00",
-  "KXBTC15M-26NOV131815-15",
-  "KXBTC15M-26NOV131830-30",
-  "KXBTC15M-26NOV131845-45"
- ],
- "stop_rules": {
-  "pause_seconds_on_429": "5, doubling to 60",
-  "stop_after_consecutive_429": 3,
-  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
- },
- "notes": "Ticker names are built from the close time in US Eastern standard time (UTC minus 5 after 2026-11-01), the same pattern as the tickers in OICORE_TRIGGER_WINDOW_TICKERS.csv; a window with no market answers 404 and is counted, not scored. Status is draft until Auditor B has checked the spec; the allowed endpoint is a different path from the POLAPPR1 jobs, Main to confirm the runner accepts it.",
- "requests": [
-  {
-   "id": "oi_KXBTC15M-26NOV120130-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120130-30/candlesticks",
-   "params": {
-    "start_ts": 1794464340,
-    "end_ts": 1794465000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120145-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120145-45/candlesticks",
-   "params": {
-    "start_ts": 1794465240,
-    "end_ts": 1794465900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120200-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120200-00/candlesticks",
-   "params": {
-    "start_ts": 1794466140,
-    "end_ts": 1794466800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120215-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120215-15/candlesticks",
-   "params": {
-    "start_ts": 1794467040,
-    "end_ts": 1794467700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120230-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120230-30/candlesticks",
-   "params": {
-    "start_ts": 1794467940,
-    "end_ts": 1794468600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120245-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120245-45/candlesticks",
-   "params": {
-    "start_ts": 1794468840,
-    "end_ts": 1794469500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120300-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120300-00/candlesticks",
-   "params": {
-    "start_ts": 1794469740,
-    "end_ts": 1794470400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120315-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120315-15/candlesticks",
-   "params": {
-    "start_ts": 1794470640,
-    "end_ts": 1794471300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120330-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120330-30/candlesticks",
-   "params": {
-    "start_ts": 1794471540,
-    "end_ts": 1794472200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120345-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120345-45/candlesticks",
-   "params": {
-    "start_ts": 1794472440,
-    "end_ts": 1794473100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120400-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120400-00/candlesticks",
-   "params": {
-    "start_ts": 1794473340,
-    "end_ts": 1794474000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120415-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120415-15/candlesticks",
-   "params": {
-    "start_ts": 1794474240,
-    "end_ts": 1794474900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120430-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120430-30/candlesticks",
-   "params": {
-    "start_ts": 1794475140,
-    "end_ts": 1794475800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120445-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120445-45/candlesticks",
-   "params": {
-    "start_ts": 1794476040,
-    "end_ts": 1794476700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120500-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120500-00/candlesticks",
-   "params": {
-    "start_ts": 1794476940,
-    "end_ts": 1794477600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120515-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120515-15/candlesticks",
-   "params": {
-    "start_ts": 1794477840,
-    "end_ts": 1794478500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120530-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120530-30/candlesticks",
-   "params": {
-    "start_ts": 1794478740,
-    "end_ts": 1794479400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120545-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120545-45/candlesticks",
-   "params": {
-    "start_ts": 1794479640,
-    "end_ts": 1794480300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120600-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120600-00/candlesticks",
-   "params": {
-    "start_ts": 1794480540,
-    "end_ts": 1794481200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120615-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120615-15/candlesticks",
-   "params": {
-    "start_ts": 1794481440,
-    "end_ts": 1794482100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120630-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120630-30/candlesticks",
-   "params": {
-    "start_ts": 1794482340,
-    "end_ts": 1794483000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120645-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120645-45/candlesticks",
-   "params": {
-    "start_ts": 1794483240,
-    "end_ts": 1794483900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120700-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120700-00/candlesticks",
-   "params": {
-    "start_ts": 1794484140,
-    "end_ts": 1794484800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120715-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120715-15/candlesticks",
-   "params": {
-    "start_ts": 1794485040,
-    "end_ts": 1794485700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120730-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120730-30/candlesticks",
-   "params": {
-    "start_ts": 1794485940,
-    "end_ts": 1794486600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120745-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120745-45/candlesticks",
-   "params": {
-    "start_ts": 1794486840,
-    "end_ts": 1794487500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120800-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120800-00/candlesticks",
-   "params": {
-    "start_ts": 1794487740,
-    "end_ts": 1794488400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120815-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120815-15/candlesticks",
-   "params": {
-    "start_ts": 1794488640,
-    "end_ts": 1794489300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120830-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120830-30/candlesticks",
-   "params": {
-    "start_ts": 1794489540,
-    "end_ts": 1794490200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120845-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120845-45/candlesticks",
-   "params": {
-    "start_ts": 1794490440,
-    "end_ts": 1794491100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120900-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120900-00/candlesticks",
-   "params": {
-    "start_ts": 1794491340,
-    "end_ts": 1794492000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120915-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120915-15/candlesticks",
-   "params": {
-    "start_ts": 1794492240,
-    "end_ts": 1794492900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120930-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120930-30/candlesticks",
-   "params": {
-    "start_ts": 1794493140,
-    "end_ts": 1794493800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV120945-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120945-45/candlesticks",
-   "params": {
-    "start_ts": 1794494040,
-    "end_ts": 1794494700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121000-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121000-00/candlesticks",
-   "params": {
-    "start_ts": 1794494940,
-    "end_ts": 1794495600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121015-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121015-15/candlesticks",
-   "params": {
-    "start_ts": 1794495840,
-    "end_ts": 1794496500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121030-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121030-30/candlesticks",
-   "params": {
-    "start_ts": 1794496740,
-    "end_ts": 1794497400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121045-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121045-45/candlesticks",
-   "params": {
-    "start_ts": 1794497640,
-    "end_ts": 1794498300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121100-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121100-00/candlesticks",
-   "params": {
-    "start_ts": 1794498540,
-    "end_ts": 1794499200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121115-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121115-15/candlesticks",
-   "params": {
-    "start_ts": 1794499440,
-    "end_ts": 1794500100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121130-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121130-30/candlesticks",
-   "params": {
-    "start_ts": 1794500340,
-    "end_ts": 1794501000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121145-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121145-45/candlesticks",
-   "params": {
-    "start_ts": 1794501240,
-    "end_ts": 1794501900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121200-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121200-00/candlesticks",
-   "params": {
-    "start_ts": 1794502140,
-    "end_ts": 1794502800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121215-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121215-15/candlesticks",
-   "params": {
-    "start_ts": 1794503040,
-    "end_ts": 1794503700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121230-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121230-30/candlesticks",
-   "params": {
-    "start_ts": 1794503940,
-    "end_ts": 1794504600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121245-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121245-45/candlesticks",
-   "params": {
-    "start_ts": 1794504840,
-    "end_ts": 1794505500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121300-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121300-00/candlesticks",
-   "params": {
-    "start_ts": 1794505740,
-    "end_ts": 1794506400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121315-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121315-15/candlesticks",
-   "params": {
-    "start_ts": 1794506640,
-    "end_ts": 1794507300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121330-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121330-30/candlesticks",
-   "params": {
-    "start_ts": 1794507540,
-    "end_ts": 1794508200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121345-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121345-45/candlesticks",
-   "params": {
-    "start_ts": 1794508440,
-    "end_ts": 1794509100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121400-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121400-00/candlesticks",
-   "params": {
-    "start_ts": 1794509340,
-    "end_ts": 1794510000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121415-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121415-15/candlesticks",
-   "params": {
-    "start_ts": 1794510240,
-    "end_ts": 1794510900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121430-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121430-30/candlesticks",
-   "params": {
-    "start_ts": 1794511140,
-    "end_ts": 1794511800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121445-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121445-45/candlesticks",
-   "params": {
-    "start_ts": 1794512040,
-    "end_ts": 1794512700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121500-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121500-00/candlesticks",
-   "params": {
-    "start_ts": 1794512940,
-    "end_ts": 1794513600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121515-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121515-15/candlesticks",
-   "params": {
-    "start_ts": 1794513840,
-    "end_ts": 1794514500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121530-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121530-30/candlesticks",
-   "params": {
-    "start_ts": 1794514740,
-    "end_ts": 1794515400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121545-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121545-45/candlesticks",
-   "params": {
-    "start_ts": 1794515640,
-    "end_ts": 1794516300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121600-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121600-00/candlesticks",
-   "params": {
-    "start_ts": 1794516540,
-    "end_ts": 1794517200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121615-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121615-15/candlesticks",
-   "params": {
-    "start_ts": 1794517440,
-    "end_ts": 1794518100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121630-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121630-30/candlesticks",
-   "params": {
-    "start_ts": 1794518340,
-    "end_ts": 1794519000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121645-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121645-45/candlesticks",
-   "params": {
-    "start_ts": 1794519240,
-    "end_ts": 1794519900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121700-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121700-00/candlesticks",
-   "params": {
-    "start_ts": 1794520140,
-    "end_ts": 1794520800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121715-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121715-15/candlesticks",
-   "params": {
-    "start_ts": 1794521040,
-    "end_ts": 1794521700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121730-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121730-30/candlesticks",
-   "params": {
-    "start_ts": 1794521940,
-    "end_ts": 1794522600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121745-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121745-45/candlesticks",
-   "params": {
-    "start_ts": 1794522840,
-    "end_ts": 1794523500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121800-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121800-00/candlesticks",
-   "params": {
-    "start_ts": 1794523740,
-    "end_ts": 1794524400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121815-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121815-15/candlesticks",
-   "params": {
-    "start_ts": 1794524640,
-    "end_ts": 1794525300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121830-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121830-30/candlesticks",
-   "params": {
-    "start_ts": 1794525540,
-    "end_ts": 1794526200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121845-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121845-45/candlesticks",
-   "params": {
-    "start_ts": 1794526440,
-    "end_ts": 1794527100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121900-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121900-00/candlesticks",
-   "params": {
-    "start_ts": 1794527340,
-    "end_ts": 1794528000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121915-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121915-15/candlesticks",
-   "params": {
-    "start_ts": 1794528240,
-    "end_ts": 1794528900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121930-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121930-30/candlesticks",
-   "params": {
-    "start_ts": 1794529140,
-    "end_ts": 1794529800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV121945-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121945-45/candlesticks",
-   "params": {
-    "start_ts": 1794530040,
-    "end_ts": 1794530700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122000-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122000-00/candlesticks",
-   "params": {
-    "start_ts": 1794530940,
-    "end_ts": 1794531600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122015-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122015-15/candlesticks",
-   "params": {
-    "start_ts": 1794531840,
-    "end_ts": 1794532500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122030-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122030-30/candlesticks",
-   "params": {
-    "start_ts": 1794532740,
-    "end_ts": 1794533400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122045-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122045-45/candlesticks",
-   "params": {
-    "start_ts": 1794533640,
-    "end_ts": 1794534300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122100-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122100-00/candlesticks",
-   "params": {
-    "start_ts": 1794534540,
-    "end_ts": 1794535200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122115-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122115-15/candlesticks",
-   "params": {
-    "start_ts": 1794535440,
-    "end_ts": 1794536100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122130-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122130-30/candlesticks",
-   "params": {
-    "start_ts": 1794536340,
-    "end_ts": 1794537000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122145-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122145-45/candlesticks",
-   "params": {
-    "start_ts": 1794537240,
-    "end_ts": 1794537900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122200-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122200-00/candlesticks",
-   "params": {
-    "start_ts": 1794538140,
-    "end_ts": 1794538800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122215-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122215-15/candlesticks",
-   "params": {
-    "start_ts": 1794539040,
-    "end_ts": 1794539700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122230-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122230-30/candlesticks",
-   "params": {
-    "start_ts": 1794539940,
-    "end_ts": 1794540600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122245-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122245-45/candlesticks",
-   "params": {
-    "start_ts": 1794540840,
-    "end_ts": 1794541500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122300-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122300-00/candlesticks",
-   "params": {
-    "start_ts": 1794541740,
-    "end_ts": 1794542400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122315-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122315-15/candlesticks",
-   "params": {
-    "start_ts": 1794542640,
-    "end_ts": 1794543300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122330-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122330-30/candlesticks",
-   "params": {
-    "start_ts": 1794543540,
-    "end_ts": 1794544200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV122345-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122345-45/candlesticks",
-   "params": {
-    "start_ts": 1794544440,
-    "end_ts": 1794545100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130000-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130000-00/candlesticks",
-   "params": {
-    "start_ts": 1794545340,
-    "end_ts": 1794546000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130015-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130015-15/candlesticks",
-   "params": {
-    "start_ts": 1794546240,
-    "end_ts": 1794546900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130030-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130030-30/candlesticks",
-   "params": {
-    "start_ts": 1794547140,
-    "end_ts": 1794547800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130045-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130045-45/candlesticks",
-   "params": {
-    "start_ts": 1794548040,
-    "end_ts": 1794548700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130100-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130100-00/candlesticks",
-   "params": {
-    "start_ts": 1794548940,
-    "end_ts": 1794549600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130115-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130115-15/candlesticks",
-   "params": {
-    "start_ts": 1794549840,
-    "end_ts": 1794550500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130130-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130130-30/candlesticks",
-   "params": {
-    "start_ts": 1794550740,
-    "end_ts": 1794551400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130145-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130145-45/candlesticks",
-   "params": {
-    "start_ts": 1794551640,
-    "end_ts": 1794552300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130200-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130200-00/candlesticks",
-   "params": {
-    "start_ts": 1794552540,
-    "end_ts": 1794553200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130215-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130215-15/candlesticks",
-   "params": {
-    "start_ts": 1794553440,
-    "end_ts": 1794554100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130230-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130230-30/candlesticks",
-   "params": {
-    "start_ts": 1794554340,
-    "end_ts": 1794555000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130245-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130245-45/candlesticks",
-   "params": {
-    "start_ts": 1794555240,
-    "end_ts": 1794555900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130300-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130300-00/candlesticks",
-   "params": {
-    "start_ts": 1794556140,
-    "end_ts": 1794556800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130315-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130315-15/candlesticks",
-   "params": {
-    "start_ts": 1794557040,
-    "end_ts": 1794557700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130330-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130330-30/candlesticks",
-   "params": {
-    "start_ts": 1794557940,
-    "end_ts": 1794558600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130345-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130345-45/candlesticks",
-   "params": {
-    "start_ts": 1794558840,
-    "end_ts": 1794559500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130400-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130400-00/candlesticks",
-   "params": {
-    "start_ts": 1794559740,
-    "end_ts": 1794560400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130415-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130415-15/candlesticks",
-   "params": {
-    "start_ts": 1794560640,
-    "end_ts": 1794561300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130430-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130430-30/candlesticks",
-   "params": {
-    "start_ts": 1794561540,
-    "end_ts": 1794562200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130445-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130445-45/candlesticks",
-   "params": {
-    "start_ts": 1794562440,
-    "end_ts": 1794563100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130500-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130500-00/candlesticks",
-   "params": {
-    "start_ts": 1794563340,
-    "end_ts": 1794564000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130515-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130515-15/candlesticks",
-   "params": {
-    "start_ts": 1794564240,
-    "end_ts": 1794564900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130530-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130530-30/candlesticks",
-   "params": {
-    "start_ts": 1794565140,
-    "end_ts": 1794565800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130545-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130545-45/candlesticks",
-   "params": {
-    "start_ts": 1794566040,
-    "end_ts": 1794566700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130600-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130600-00/candlesticks",
-   "params": {
-    "start_ts": 1794566940,
-    "end_ts": 1794567600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130615-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130615-15/candlesticks",
-   "params": {
-    "start_ts": 1794567840,
-    "end_ts": 1794568500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130630-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130630-30/candlesticks",
-   "params": {
-    "start_ts": 1794568740,
-    "end_ts": 1794569400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130645-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130645-45/candlesticks",
-   "params": {
-    "start_ts": 1794569640,
-    "end_ts": 1794570300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130700-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130700-00/candlesticks",
-   "params": {
-    "start_ts": 1794570540,
-    "end_ts": 1794571200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130715-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130715-15/candlesticks",
-   "params": {
-    "start_ts": 1794571440,
-    "end_ts": 1794572100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130730-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130730-30/candlesticks",
-   "params": {
-    "start_ts": 1794572340,
-    "end_ts": 1794573000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130745-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130745-45/candlesticks",
-   "params": {
-    "start_ts": 1794573240,
-    "end_ts": 1794573900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130800-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130800-00/candlesticks",
-   "params": {
-    "start_ts": 1794574140,
-    "end_ts": 1794574800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130815-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130815-15/candlesticks",
-   "params": {
-    "start_ts": 1794575040,
-    "end_ts": 1794575700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130830-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130830-30/candlesticks",
-   "params": {
-    "start_ts": 1794575940,
-    "end_ts": 1794576600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130845-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130845-45/candlesticks",
-   "params": {
-    "start_ts": 1794576840,
-    "end_ts": 1794577500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130900-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130900-00/candlesticks",
-   "params": {
-    "start_ts": 1794577740,
-    "end_ts": 1794578400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130915-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130915-15/candlesticks",
-   "params": {
-    "start_ts": 1794578640,
-    "end_ts": 1794579300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130930-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130930-30/candlesticks",
-   "params": {
-    "start_ts": 1794579540,
-    "end_ts": 1794580200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV130945-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130945-45/candlesticks",
-   "params": {
-    "start_ts": 1794580440,
-    "end_ts": 1794581100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131000-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131000-00/candlesticks",
-   "params": {
-    "start_ts": 1794581340,
-    "end_ts": 1794582000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131015-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131015-15/candlesticks",
-   "params": {
-    "start_ts": 1794582240,
-    "end_ts": 1794582900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131030-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131030-30/candlesticks",
-   "params": {
-    "start_ts": 1794583140,
-    "end_ts": 1794583800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131045-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131045-45/candlesticks",
-   "params": {
-    "start_ts": 1794584040,
-    "end_ts": 1794584700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131100-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131100-00/candlesticks",
-   "params": {
-    "start_ts": 1794584940,
-    "end_ts": 1794585600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131115-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131115-15/candlesticks",
-   "params": {
-    "start_ts": 1794585840,
-    "end_ts": 1794586500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131130-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131130-30/candlesticks",
-   "params": {
-    "start_ts": 1794586740,
-    "end_ts": 1794587400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131145-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131145-45/candlesticks",
-   "params": {
-    "start_ts": 1794587640,
-    "end_ts": 1794588300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131200-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131200-00/candlesticks",
-   "params": {
-    "start_ts": 1794588540,
-    "end_ts": 1794589200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131215-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131215-15/candlesticks",
-   "params": {
-    "start_ts": 1794589440,
-    "end_ts": 1794590100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131230-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131230-30/candlesticks",
-   "params": {
-    "start_ts": 1794590340,
-    "end_ts": 1794591000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131245-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131245-45/candlesticks",
-   "params": {
-    "start_ts": 1794591240,
-    "end_ts": 1794591900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131300-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131300-00/candlesticks",
-   "params": {
-    "start_ts": 1794592140,
-    "end_ts": 1794592800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131315-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131315-15/candlesticks",
-   "params": {
-    "start_ts": 1794593040,
-    "end_ts": 1794593700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131330-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131330-30/candlesticks",
-   "params": {
-    "start_ts": 1794593940,
-    "end_ts": 1794594600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131345-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131345-45/candlesticks",
-   "params": {
-    "start_ts": 1794594840,
-    "end_ts": 1794595500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131400-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131400-00/candlesticks",
-   "params": {
-    "start_ts": 1794595740,
-    "end_ts": 1794596400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131415-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131415-15/candlesticks",
-   "params": {
-    "start_ts": 1794596640,
-    "end_ts": 1794597300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131430-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131430-30/candlesticks",
-   "params": {
-    "start_ts": 1794597540,
-    "end_ts": 1794598200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131445-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131445-45/candlesticks",
-   "params": {
-    "start_ts": 1794598440,
-    "end_ts": 1794599100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131500-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131500-00/candlesticks",
-   "params": {
-    "start_ts": 1794599340,
-    "end_ts": 1794600000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131515-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131515-15/candlesticks",
-   "params": {
-    "start_ts": 1794600240,
-    "end_ts": 1794600900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131530-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131530-30/candlesticks",
-   "params": {
-    "start_ts": 1794601140,
-    "end_ts": 1794601800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131545-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131545-45/candlesticks",
-   "params": {
-    "start_ts": 1794602040,
-    "end_ts": 1794602700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131600-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131600-00/candlesticks",
-   "params": {
-    "start_ts": 1794602940,
-    "end_ts": 1794603600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131615-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131615-15/candlesticks",
-   "params": {
-    "start_ts": 1794603840,
-    "end_ts": 1794604500,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131630-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131630-30/candlesticks",
-   "params": {
-    "start_ts": 1794604740,
-    "end_ts": 1794605400,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131645-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131645-45/candlesticks",
-   "params": {
-    "start_ts": 1794605640,
-    "end_ts": 1794606300,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131700-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131700-00/candlesticks",
-   "params": {
-    "start_ts": 1794606540,
-    "end_ts": 1794607200,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131715-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131715-15/candlesticks",
-   "params": {
-    "start_ts": 1794607440,
-    "end_ts": 1794608100,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131730-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131730-30/candlesticks",
-   "params": {
-    "start_ts": 1794608340,
-    "end_ts": 1794609000,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131745-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131745-45/candlesticks",
-   "params": {
-    "start_ts": 1794609240,
-    "end_ts": 1794609900,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131800-00",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131800-00/candlesticks",
-   "params": {
-    "start_ts": 1794610140,
-    "end_ts": 1794610800,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131815-15",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131815-15/candlesticks",
-   "params": {
-    "start_ts": 1794611040,
-    "end_ts": 1794611700,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131830-30",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131830-30/candlesticks",
-   "params": {
-    "start_ts": 1794611940,
-    "end_ts": 1794612600,
-    "period_interval": 1
-   }
-  },
-  {
-   "id": "oi_KXBTC15M-26NOV131845-45",
-   "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131845-45/candlesticks",
-   "params": {
-    "start_ts": 1794612840,
-    "end_ts": 1794613500,
-    "period_interval": 1
-   }
-  }
- ]
+  "job_id": "V1_OI_CANDLES_NOV12_13",
+  "status": "draft",
+  "owner": "REFINEMENT",
+  "registration": "kalshi-scalper/refine_tools/V1_OICORE_RESTING_BID_REGISTRATION.md",
+  "purpose": "V1 signals file: open interest at the candles ending 360 s and 180 s before the close of every KXBTC15M window closing 2026-11-12T06:30Z to 2026-11-13T23:45Z (OICORE_TRIGGER_WINDOW_TICKERS.csv covers closes to 06:15Z). One request per market, 1 minute candles, ending at close minus 180 s.",
+  "heldout": "None requested as held-out of any card; NOTE for the Head and Auditor B before dispatch: these windows overlap V1's development block (labelled not blind) and the DEPTH1 and CFRTI1 blocks of R6 closes Nov 9 to 13; the answers hold open interest and prices of PUBLIC candles, no outcome is read by V1's signal builder (it uses only open interest at c-360 and c-180), confirm that is allowed before dispatch.",
+  "host": "api.elections.kalshi.com",
+  "base_path": "/trade-api/v2",
+  "pacing_seconds": 1.0,
+  "max_requests": 166,
+  "allowed_endpoints": [
+    {
+      "name": "series_market_candlesticks",
+      "method": "GET",
+      "path_pattern": "/series/KXBTC15M/markets/(?P<ticker>KXBTC15M-[0-9A-Z-]{1,40})/candlesticks",
+      "params_allowed": [
+        "start_ts",
+        "end_ts",
+        "period_interval"
+      ]
+    }
+  ],
+  "series_allowlist": [
+    "KXBTC15M"
+  ],
+  "ticker_allowlist": [
+    "KXBTC15M-26NOV120130-30",
+    "KXBTC15M-26NOV120145-45",
+    "KXBTC15M-26NOV120200-00",
+    "KXBTC15M-26NOV120215-15",
+    "KXBTC15M-26NOV120230-30",
+    "KXBTC15M-26NOV120245-45",
+    "KXBTC15M-26NOV120300-00",
+    "KXBTC15M-26NOV120315-15",
+    "KXBTC15M-26NOV120330-30",
+    "KXBTC15M-26NOV120345-45",
+    "KXBTC15M-26NOV120400-00",
+    "KXBTC15M-26NOV120415-15",
+    "KXBTC15M-26NOV120430-30",
+    "KXBTC15M-26NOV120445-45",
+    "KXBTC15M-26NOV120500-00",
+    "KXBTC15M-26NOV120515-15",
+    "KXBTC15M-26NOV120530-30",
+    "KXBTC15M-26NOV120545-45",
+    "KXBTC15M-26NOV120600-00",
+    "KXBTC15M-26NOV120615-15",
+    "KXBTC15M-26NOV120630-30",
+    "KXBTC15M-26NOV120645-45",
+    "KXBTC15M-26NOV120700-00",
+    "KXBTC15M-26NOV120715-15",
+    "KXBTC15M-26NOV120730-30",
+    "KXBTC15M-26NOV120745-45",
+    "KXBTC15M-26NOV120800-00",
+    "KXBTC15M-26NOV120815-15",
+    "KXBTC15M-26NOV120830-30",
+    "KXBTC15M-26NOV120845-45",
+    "KXBTC15M-26NOV120900-00",
+    "KXBTC15M-26NOV120915-15",
+    "KXBTC15M-26NOV120930-30",
+    "KXBTC15M-26NOV120945-45",
+    "KXBTC15M-26NOV121000-00",
+    "KXBTC15M-26NOV121015-15",
+    "KXBTC15M-26NOV121030-30",
+    "KXBTC15M-26NOV121045-45",
+    "KXBTC15M-26NOV121100-00",
+    "KXBTC15M-26NOV121115-15",
+    "KXBTC15M-26NOV121130-30",
+    "KXBTC15M-26NOV121145-45",
+    "KXBTC15M-26NOV121200-00",
+    "KXBTC15M-26NOV121215-15",
+    "KXBTC15M-26NOV121230-30",
+    "KXBTC15M-26NOV121245-45",
+    "KXBTC15M-26NOV121300-00",
+    "KXBTC15M-26NOV121315-15",
+    "KXBTC15M-26NOV121330-30",
+    "KXBTC15M-26NOV121345-45",
+    "KXBTC15M-26NOV121400-00",
+    "KXBTC15M-26NOV121415-15",
+    "KXBTC15M-26NOV121430-30",
+    "KXBTC15M-26NOV121445-45",
+    "KXBTC15M-26NOV121500-00",
+    "KXBTC15M-26NOV121515-15",
+    "KXBTC15M-26NOV121530-30",
+    "KXBTC15M-26NOV121545-45",
+    "KXBTC15M-26NOV121600-00",
+    "KXBTC15M-26NOV121615-15",
+    "KXBTC15M-26NOV121630-30",
+    "KXBTC15M-26NOV121645-45",
+    "KXBTC15M-26NOV121700-00",
+    "KXBTC15M-26NOV121715-15",
+    "KXBTC15M-26NOV121730-30",
+    "KXBTC15M-26NOV121745-45",
+    "KXBTC15M-26NOV121800-00",
+    "KXBTC15M-26NOV121815-15",
+    "KXBTC15M-26NOV121830-30",
+    "KXBTC15M-26NOV121845-45",
+    "KXBTC15M-26NOV121900-00",
+    "KXBTC15M-26NOV121915-15",
+    "KXBTC15M-26NOV121930-30",
+    "KXBTC15M-26NOV121945-45",
+    "KXBTC15M-26NOV122000-00",
+    "KXBTC15M-26NOV122015-15",
+    "KXBTC15M-26NOV122030-30",
+    "KXBTC15M-26NOV122045-45",
+    "KXBTC15M-26NOV122100-00",
+    "KXBTC15M-26NOV122115-15",
+    "KXBTC15M-26NOV122130-30",
+    "KXBTC15M-26NOV122145-45",
+    "KXBTC15M-26NOV122200-00",
+    "KXBTC15M-26NOV122215-15",
+    "KXBTC15M-26NOV122230-30",
+    "KXBTC15M-26NOV122245-45",
+    "KXBTC15M-26NOV122300-00",
+    "KXBTC15M-26NOV122315-15",
+    "KXBTC15M-26NOV122330-30",
+    "KXBTC15M-26NOV122345-45",
+    "KXBTC15M-26NOV130000-00",
+    "KXBTC15M-26NOV130015-15",
+    "KXBTC15M-26NOV130030-30",
+    "KXBTC15M-26NOV130045-45",
+    "KXBTC15M-26NOV130100-00",
+    "KXBTC15M-26NOV130115-15",
+    "KXBTC15M-26NOV130130-30",
+    "KXBTC15M-26NOV130145-45",
+    "KXBTC15M-26NOV130200-00",
+    "KXBTC15M-26NOV130215-15",
+    "KXBTC15M-26NOV130230-30",
+    "KXBTC15M-26NOV130245-45",
+    "KXBTC15M-26NOV130300-00",
+    "KXBTC15M-26NOV130315-15",
+    "KXBTC15M-26NOV130330-30",
+    "KXBTC15M-26NOV130345-45",
+    "KXBTC15M-26NOV130400-00",
+    "KXBTC15M-26NOV130415-15",
+    "KXBTC15M-26NOV130430-30",
+    "KXBTC15M-26NOV130445-45",
+    "KXBTC15M-26NOV130500-00",
+    "KXBTC15M-26NOV130515-15",
+    "KXBTC15M-26NOV130530-30",
+    "KXBTC15M-26NOV130545-45",
+    "KXBTC15M-26NOV130600-00",
+    "KXBTC15M-26NOV130615-15",
+    "KXBTC15M-26NOV130630-30",
+    "KXBTC15M-26NOV130645-45",
+    "KXBTC15M-26NOV130700-00",
+    "KXBTC15M-26NOV130715-15",
+    "KXBTC15M-26NOV130730-30",
+    "KXBTC15M-26NOV130745-45",
+    "KXBTC15M-26NOV130800-00",
+    "KXBTC15M-26NOV130815-15",
+    "KXBTC15M-26NOV130830-30",
+    "KXBTC15M-26NOV130845-45",
+    "KXBTC15M-26NOV130900-00",
+    "KXBTC15M-26NOV130915-15",
+    "KXBTC15M-26NOV130930-30",
+    "KXBTC15M-26NOV130945-45",
+    "KXBTC15M-26NOV131000-00",
+    "KXBTC15M-26NOV131015-15",
+    "KXBTC15M-26NOV131030-30",
+    "KXBTC15M-26NOV131045-45",
+    "KXBTC15M-26NOV131100-00",
+    "KXBTC15M-26NOV131115-15",
+    "KXBTC15M-26NOV131130-30",
+    "KXBTC15M-26NOV131145-45",
+    "KXBTC15M-26NOV131200-00",
+    "KXBTC15M-26NOV131215-15",
+    "KXBTC15M-26NOV131230-30",
+    "KXBTC15M-26NOV131245-45",
+    "KXBTC15M-26NOV131300-00",
+    "KXBTC15M-26NOV131315-15",
+    "KXBTC15M-26NOV131330-30",
+    "KXBTC15M-26NOV131345-45",
+    "KXBTC15M-26NOV131400-00",
+    "KXBTC15M-26NOV131415-15",
+    "KXBTC15M-26NOV131430-30",
+    "KXBTC15M-26NOV131445-45",
+    "KXBTC15M-26NOV131500-00",
+    "KXBTC15M-26NOV131515-15",
+    "KXBTC15M-26NOV131530-30",
+    "KXBTC15M-26NOV131545-45",
+    "KXBTC15M-26NOV131600-00",
+    "KXBTC15M-26NOV131615-15",
+    "KXBTC15M-26NOV131630-30",
+    "KXBTC15M-26NOV131645-45",
+    "KXBTC15M-26NOV131700-00",
+    "KXBTC15M-26NOV131715-15",
+    "KXBTC15M-26NOV131730-30",
+    "KXBTC15M-26NOV131745-45",
+    "KXBTC15M-26NOV131800-00",
+    "KXBTC15M-26NOV131815-15",
+    "KXBTC15M-26NOV131830-30",
+    "KXBTC15M-26NOV131845-45"
+  ],
+  "stop_rules": {
+    "pause_seconds_on_429": "5, doubling to 60",
+    "stop_after_consecutive_429": 3,
+    "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+  },
+  "notes": "Ticker names are built from the close time in US Eastern standard time (UTC minus 5 after 2026-11-01), the same pattern as the tickers in OICORE_TRIGGER_WINDOW_TICKERS.csv; a window with no market answers 404 and is counted, not scored. Status is draft until Auditor B has checked the spec; the allowed endpoint is a different path from the POLAPPR1 jobs, Main to confirm the runner accepts it.",
+  "requests": [
+    {
+      "id": "oi_KXBTC15M-26NOV120130-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120130-30/candlesticks",
+      "params": {
+        "start_ts": 1794464340,
+        "end_ts": 1794464820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120145-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120145-45/candlesticks",
+      "params": {
+        "start_ts": 1794465240,
+        "end_ts": 1794465720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120200-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120200-00/candlesticks",
+      "params": {
+        "start_ts": 1794466140,
+        "end_ts": 1794466620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120215-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120215-15/candlesticks",
+      "params": {
+        "start_ts": 1794467040,
+        "end_ts": 1794467520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120230-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120230-30/candlesticks",
+      "params": {
+        "start_ts": 1794467940,
+        "end_ts": 1794468420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120245-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120245-45/candlesticks",
+      "params": {
+        "start_ts": 1794468840,
+        "end_ts": 1794469320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120300-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120300-00/candlesticks",
+      "params": {
+        "start_ts": 1794469740,
+        "end_ts": 1794470220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120315-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120315-15/candlesticks",
+      "params": {
+        "start_ts": 1794470640,
+        "end_ts": 1794471120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120330-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120330-30/candlesticks",
+      "params": {
+        "start_ts": 1794471540,
+        "end_ts": 1794472020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120345-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120345-45/candlesticks",
+      "params": {
+        "start_ts": 1794472440,
+        "end_ts": 1794472920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120400-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120400-00/candlesticks",
+      "params": {
+        "start_ts": 1794473340,
+        "end_ts": 1794473820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120415-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120415-15/candlesticks",
+      "params": {
+        "start_ts": 1794474240,
+        "end_ts": 1794474720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120430-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120430-30/candlesticks",
+      "params": {
+        "start_ts": 1794475140,
+        "end_ts": 1794475620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120445-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120445-45/candlesticks",
+      "params": {
+        "start_ts": 1794476040,
+        "end_ts": 1794476520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120500-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120500-00/candlesticks",
+      "params": {
+        "start_ts": 1794476940,
+        "end_ts": 1794477420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120515-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120515-15/candlesticks",
+      "params": {
+        "start_ts": 1794477840,
+        "end_ts": 1794478320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120530-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120530-30/candlesticks",
+      "params": {
+        "start_ts": 1794478740,
+        "end_ts": 1794479220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120545-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120545-45/candlesticks",
+      "params": {
+        "start_ts": 1794479640,
+        "end_ts": 1794480120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120600-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120600-00/candlesticks",
+      "params": {
+        "start_ts": 1794480540,
+        "end_ts": 1794481020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120615-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120615-15/candlesticks",
+      "params": {
+        "start_ts": 1794481440,
+        "end_ts": 1794481920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120630-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120630-30/candlesticks",
+      "params": {
+        "start_ts": 1794482340,
+        "end_ts": 1794482820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120645-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120645-45/candlesticks",
+      "params": {
+        "start_ts": 1794483240,
+        "end_ts": 1794483720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120700-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120700-00/candlesticks",
+      "params": {
+        "start_ts": 1794484140,
+        "end_ts": 1794484620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120715-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120715-15/candlesticks",
+      "params": {
+        "start_ts": 1794485040,
+        "end_ts": 1794485520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120730-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120730-30/candlesticks",
+      "params": {
+        "start_ts": 1794485940,
+        "end_ts": 1794486420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120745-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120745-45/candlesticks",
+      "params": {
+        "start_ts": 1794486840,
+        "end_ts": 1794487320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120800-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120800-00/candlesticks",
+      "params": {
+        "start_ts": 1794487740,
+        "end_ts": 1794488220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120815-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120815-15/candlesticks",
+      "params": {
+        "start_ts": 1794488640,
+        "end_ts": 1794489120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120830-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120830-30/candlesticks",
+      "params": {
+        "start_ts": 1794489540,
+        "end_ts": 1794490020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120845-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120845-45/candlesticks",
+      "params": {
+        "start_ts": 1794490440,
+        "end_ts": 1794490920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120900-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120900-00/candlesticks",
+      "params": {
+        "start_ts": 1794491340,
+        "end_ts": 1794491820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120915-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120915-15/candlesticks",
+      "params": {
+        "start_ts": 1794492240,
+        "end_ts": 1794492720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120930-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120930-30/candlesticks",
+      "params": {
+        "start_ts": 1794493140,
+        "end_ts": 1794493620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV120945-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV120945-45/candlesticks",
+      "params": {
+        "start_ts": 1794494040,
+        "end_ts": 1794494520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121000-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121000-00/candlesticks",
+      "params": {
+        "start_ts": 1794494940,
+        "end_ts": 1794495420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121015-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121015-15/candlesticks",
+      "params": {
+        "start_ts": 1794495840,
+        "end_ts": 1794496320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121030-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121030-30/candlesticks",
+      "params": {
+        "start_ts": 1794496740,
+        "end_ts": 1794497220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121045-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121045-45/candlesticks",
+      "params": {
+        "start_ts": 1794497640,
+        "end_ts": 1794498120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121100-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121100-00/candlesticks",
+      "params": {
+        "start_ts": 1794498540,
+        "end_ts": 1794499020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121115-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121115-15/candlesticks",
+      "params": {
+        "start_ts": 1794499440,
+        "end_ts": 1794499920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121130-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121130-30/candlesticks",
+      "params": {
+        "start_ts": 1794500340,
+        "end_ts": 1794500820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121145-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121145-45/candlesticks",
+      "params": {
+        "start_ts": 1794501240,
+        "end_ts": 1794501720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121200-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121200-00/candlesticks",
+      "params": {
+        "start_ts": 1794502140,
+        "end_ts": 1794502620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121215-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121215-15/candlesticks",
+      "params": {
+        "start_ts": 1794503040,
+        "end_ts": 1794503520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121230-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121230-30/candlesticks",
+      "params": {
+        "start_ts": 1794503940,
+        "end_ts": 1794504420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121245-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121245-45/candlesticks",
+      "params": {
+        "start_ts": 1794504840,
+        "end_ts": 1794505320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121300-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121300-00/candlesticks",
+      "params": {
+        "start_ts": 1794505740,
+        "end_ts": 1794506220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121315-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121315-15/candlesticks",
+      "params": {
+        "start_ts": 1794506640,
+        "end_ts": 1794507120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121330-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121330-30/candlesticks",
+      "params": {
+        "start_ts": 1794507540,
+        "end_ts": 1794508020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121345-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121345-45/candlesticks",
+      "params": {
+        "start_ts": 1794508440,
+        "end_ts": 1794508920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121400-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121400-00/candlesticks",
+      "params": {
+        "start_ts": 1794509340,
+        "end_ts": 1794509820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121415-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121415-15/candlesticks",
+      "params": {
+        "start_ts": 1794510240,
+        "end_ts": 1794510720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121430-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121430-30/candlesticks",
+      "params": {
+        "start_ts": 1794511140,
+        "end_ts": 1794511620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121445-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121445-45/candlesticks",
+      "params": {
+        "start_ts": 1794512040,
+        "end_ts": 1794512520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121500-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121500-00/candlesticks",
+      "params": {
+        "start_ts": 1794512940,
+        "end_ts": 1794513420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121515-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121515-15/candlesticks",
+      "params": {
+        "start_ts": 1794513840,
+        "end_ts": 1794514320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121530-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121530-30/candlesticks",
+      "params": {
+        "start_ts": 1794514740,
+        "end_ts": 1794515220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121545-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121545-45/candlesticks",
+      "params": {
+        "start_ts": 1794515640,
+        "end_ts": 1794516120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121600-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121600-00/candlesticks",
+      "params": {
+        "start_ts": 1794516540,
+        "end_ts": 1794517020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121615-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121615-15/candlesticks",
+      "params": {
+        "start_ts": 1794517440,
+        "end_ts": 1794517920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121630-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121630-30/candlesticks",
+      "params": {
+        "start_ts": 1794518340,
+        "end_ts": 1794518820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121645-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121645-45/candlesticks",
+      "params": {
+        "start_ts": 1794519240,
+        "end_ts": 1794519720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121700-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121700-00/candlesticks",
+      "params": {
+        "start_ts": 1794520140,
+        "end_ts": 1794520620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121715-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121715-15/candlesticks",
+      "params": {
+        "start_ts": 1794521040,
+        "end_ts": 1794521520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121730-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121730-30/candlesticks",
+      "params": {
+        "start_ts": 1794521940,
+        "end_ts": 1794522420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121745-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121745-45/candlesticks",
+      "params": {
+        "start_ts": 1794522840,
+        "end_ts": 1794523320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121800-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121800-00/candlesticks",
+      "params": {
+        "start_ts": 1794523740,
+        "end_ts": 1794524220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121815-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121815-15/candlesticks",
+      "params": {
+        "start_ts": 1794524640,
+        "end_ts": 1794525120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121830-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121830-30/candlesticks",
+      "params": {
+        "start_ts": 1794525540,
+        "end_ts": 1794526020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121845-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121845-45/candlesticks",
+      "params": {
+        "start_ts": 1794526440,
+        "end_ts": 1794526920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121900-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121900-00/candlesticks",
+      "params": {
+        "start_ts": 1794527340,
+        "end_ts": 1794527820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121915-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121915-15/candlesticks",
+      "params": {
+        "start_ts": 1794528240,
+        "end_ts": 1794528720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121930-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121930-30/candlesticks",
+      "params": {
+        "start_ts": 1794529140,
+        "end_ts": 1794529620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV121945-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV121945-45/candlesticks",
+      "params": {
+        "start_ts": 1794530040,
+        "end_ts": 1794530520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122000-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122000-00/candlesticks",
+      "params": {
+        "start_ts": 1794530940,
+        "end_ts": 1794531420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122015-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122015-15/candlesticks",
+      "params": {
+        "start_ts": 1794531840,
+        "end_ts": 1794532320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122030-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122030-30/candlesticks",
+      "params": {
+        "start_ts": 1794532740,
+        "end_ts": 1794533220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122045-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122045-45/candlesticks",
+      "params": {
+        "start_ts": 1794533640,
+        "end_ts": 1794534120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122100-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122100-00/candlesticks",
+      "params": {
+        "start_ts": 1794534540,
+        "end_ts": 1794535020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122115-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122115-15/candlesticks",
+      "params": {
+        "start_ts": 1794535440,
+        "end_ts": 1794535920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122130-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122130-30/candlesticks",
+      "params": {
+        "start_ts": 1794536340,
+        "end_ts": 1794536820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122145-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122145-45/candlesticks",
+      "params": {
+        "start_ts": 1794537240,
+        "end_ts": 1794537720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122200-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122200-00/candlesticks",
+      "params": {
+        "start_ts": 1794538140,
+        "end_ts": 1794538620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122215-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122215-15/candlesticks",
+      "params": {
+        "start_ts": 1794539040,
+        "end_ts": 1794539520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122230-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122230-30/candlesticks",
+      "params": {
+        "start_ts": 1794539940,
+        "end_ts": 1794540420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122245-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122245-45/candlesticks",
+      "params": {
+        "start_ts": 1794540840,
+        "end_ts": 1794541320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122300-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122300-00/candlesticks",
+      "params": {
+        "start_ts": 1794541740,
+        "end_ts": 1794542220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122315-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122315-15/candlesticks",
+      "params": {
+        "start_ts": 1794542640,
+        "end_ts": 1794543120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122330-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122330-30/candlesticks",
+      "params": {
+        "start_ts": 1794543540,
+        "end_ts": 1794544020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV122345-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV122345-45/candlesticks",
+      "params": {
+        "start_ts": 1794544440,
+        "end_ts": 1794544920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130000-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130000-00/candlesticks",
+      "params": {
+        "start_ts": 1794545340,
+        "end_ts": 1794545820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130015-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130015-15/candlesticks",
+      "params": {
+        "start_ts": 1794546240,
+        "end_ts": 1794546720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130030-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130030-30/candlesticks",
+      "params": {
+        "start_ts": 1794547140,
+        "end_ts": 1794547620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130045-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130045-45/candlesticks",
+      "params": {
+        "start_ts": 1794548040,
+        "end_ts": 1794548520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130100-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130100-00/candlesticks",
+      "params": {
+        "start_ts": 1794548940,
+        "end_ts": 1794549420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130115-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130115-15/candlesticks",
+      "params": {
+        "start_ts": 1794549840,
+        "end_ts": 1794550320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130130-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130130-30/candlesticks",
+      "params": {
+        "start_ts": 1794550740,
+        "end_ts": 1794551220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130145-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130145-45/candlesticks",
+      "params": {
+        "start_ts": 1794551640,
+        "end_ts": 1794552120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130200-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130200-00/candlesticks",
+      "params": {
+        "start_ts": 1794552540,
+        "end_ts": 1794553020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130215-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130215-15/candlesticks",
+      "params": {
+        "start_ts": 1794553440,
+        "end_ts": 1794553920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130230-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130230-30/candlesticks",
+      "params": {
+        "start_ts": 1794554340,
+        "end_ts": 1794554820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130245-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130245-45/candlesticks",
+      "params": {
+        "start_ts": 1794555240,
+        "end_ts": 1794555720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130300-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130300-00/candlesticks",
+      "params": {
+        "start_ts": 1794556140,
+        "end_ts": 1794556620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130315-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130315-15/candlesticks",
+      "params": {
+        "start_ts": 1794557040,
+        "end_ts": 1794557520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130330-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130330-30/candlesticks",
+      "params": {
+        "start_ts": 1794557940,
+        "end_ts": 1794558420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130345-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130345-45/candlesticks",
+      "params": {
+        "start_ts": 1794558840,
+        "end_ts": 1794559320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130400-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130400-00/candlesticks",
+      "params": {
+        "start_ts": 1794559740,
+        "end_ts": 1794560220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130415-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130415-15/candlesticks",
+      "params": {
+        "start_ts": 1794560640,
+        "end_ts": 1794561120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130430-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130430-30/candlesticks",
+      "params": {
+        "start_ts": 1794561540,
+        "end_ts": 1794562020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130445-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130445-45/candlesticks",
+      "params": {
+        "start_ts": 1794562440,
+        "end_ts": 1794562920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130500-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130500-00/candlesticks",
+      "params": {
+        "start_ts": 1794563340,
+        "end_ts": 1794563820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130515-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130515-15/candlesticks",
+      "params": {
+        "start_ts": 1794564240,
+        "end_ts": 1794564720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130530-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130530-30/candlesticks",
+      "params": {
+        "start_ts": 1794565140,
+        "end_ts": 1794565620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130545-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130545-45/candlesticks",
+      "params": {
+        "start_ts": 1794566040,
+        "end_ts": 1794566520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130600-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130600-00/candlesticks",
+      "params": {
+        "start_ts": 1794566940,
+        "end_ts": 1794567420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130615-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130615-15/candlesticks",
+      "params": {
+        "start_ts": 1794567840,
+        "end_ts": 1794568320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130630-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130630-30/candlesticks",
+      "params": {
+        "start_ts": 1794568740,
+        "end_ts": 1794569220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130645-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130645-45/candlesticks",
+      "params": {
+        "start_ts": 1794569640,
+        "end_ts": 1794570120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130700-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130700-00/candlesticks",
+      "params": {
+        "start_ts": 1794570540,
+        "end_ts": 1794571020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130715-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130715-15/candlesticks",
+      "params": {
+        "start_ts": 1794571440,
+        "end_ts": 1794571920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130730-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130730-30/candlesticks",
+      "params": {
+        "start_ts": 1794572340,
+        "end_ts": 1794572820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130745-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130745-45/candlesticks",
+      "params": {
+        "start_ts": 1794573240,
+        "end_ts": 1794573720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130800-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130800-00/candlesticks",
+      "params": {
+        "start_ts": 1794574140,
+        "end_ts": 1794574620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130815-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130815-15/candlesticks",
+      "params": {
+        "start_ts": 1794575040,
+        "end_ts": 1794575520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130830-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130830-30/candlesticks",
+      "params": {
+        "start_ts": 1794575940,
+        "end_ts": 1794576420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130845-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130845-45/candlesticks",
+      "params": {
+        "start_ts": 1794576840,
+        "end_ts": 1794577320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130900-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130900-00/candlesticks",
+      "params": {
+        "start_ts": 1794577740,
+        "end_ts": 1794578220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130915-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130915-15/candlesticks",
+      "params": {
+        "start_ts": 1794578640,
+        "end_ts": 1794579120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130930-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130930-30/candlesticks",
+      "params": {
+        "start_ts": 1794579540,
+        "end_ts": 1794580020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV130945-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV130945-45/candlesticks",
+      "params": {
+        "start_ts": 1794580440,
+        "end_ts": 1794580920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131000-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131000-00/candlesticks",
+      "params": {
+        "start_ts": 1794581340,
+        "end_ts": 1794581820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131015-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131015-15/candlesticks",
+      "params": {
+        "start_ts": 1794582240,
+        "end_ts": 1794582720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131030-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131030-30/candlesticks",
+      "params": {
+        "start_ts": 1794583140,
+        "end_ts": 1794583620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131045-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131045-45/candlesticks",
+      "params": {
+        "start_ts": 1794584040,
+        "end_ts": 1794584520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131100-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131100-00/candlesticks",
+      "params": {
+        "start_ts": 1794584940,
+        "end_ts": 1794585420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131115-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131115-15/candlesticks",
+      "params": {
+        "start_ts": 1794585840,
+        "end_ts": 1794586320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131130-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131130-30/candlesticks",
+      "params": {
+        "start_ts": 1794586740,
+        "end_ts": 1794587220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131145-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131145-45/candlesticks",
+      "params": {
+        "start_ts": 1794587640,
+        "end_ts": 1794588120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131200-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131200-00/candlesticks",
+      "params": {
+        "start_ts": 1794588540,
+        "end_ts": 1794589020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131215-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131215-15/candlesticks",
+      "params": {
+        "start_ts": 1794589440,
+        "end_ts": 1794589920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131230-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131230-30/candlesticks",
+      "params": {
+        "start_ts": 1794590340,
+        "end_ts": 1794590820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131245-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131245-45/candlesticks",
+      "params": {
+        "start_ts": 1794591240,
+        "end_ts": 1794591720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131300-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131300-00/candlesticks",
+      "params": {
+        "start_ts": 1794592140,
+        "end_ts": 1794592620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131315-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131315-15/candlesticks",
+      "params": {
+        "start_ts": 1794593040,
+        "end_ts": 1794593520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131330-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131330-30/candlesticks",
+      "params": {
+        "start_ts": 1794593940,
+        "end_ts": 1794594420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131345-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131345-45/candlesticks",
+      "params": {
+        "start_ts": 1794594840,
+        "end_ts": 1794595320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131400-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131400-00/candlesticks",
+      "params": {
+        "start_ts": 1794595740,
+        "end_ts": 1794596220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131415-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131415-15/candlesticks",
+      "params": {
+        "start_ts": 1794596640,
+        "end_ts": 1794597120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131430-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131430-30/candlesticks",
+      "params": {
+        "start_ts": 1794597540,
+        "end_ts": 1794598020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131445-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131445-45/candlesticks",
+      "params": {
+        "start_ts": 1794598440,
+        "end_ts": 1794598920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131500-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131500-00/candlesticks",
+      "params": {
+        "start_ts": 1794599340,
+        "end_ts": 1794599820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131515-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131515-15/candlesticks",
+      "params": {
+        "start_ts": 1794600240,
+        "end_ts": 1794600720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131530-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131530-30/candlesticks",
+      "params": {
+        "start_ts": 1794601140,
+        "end_ts": 1794601620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131545-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131545-45/candlesticks",
+      "params": {
+        "start_ts": 1794602040,
+        "end_ts": 1794602520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131600-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131600-00/candlesticks",
+      "params": {
+        "start_ts": 1794602940,
+        "end_ts": 1794603420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131615-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131615-15/candlesticks",
+      "params": {
+        "start_ts": 1794603840,
+        "end_ts": 1794604320,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131630-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131630-30/candlesticks",
+      "params": {
+        "start_ts": 1794604740,
+        "end_ts": 1794605220,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131645-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131645-45/candlesticks",
+      "params": {
+        "start_ts": 1794605640,
+        "end_ts": 1794606120,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131700-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131700-00/candlesticks",
+      "params": {
+        "start_ts": 1794606540,
+        "end_ts": 1794607020,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131715-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131715-15/candlesticks",
+      "params": {
+        "start_ts": 1794607440,
+        "end_ts": 1794607920,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131730-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131730-30/candlesticks",
+      "params": {
+        "start_ts": 1794608340,
+        "end_ts": 1794608820,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131745-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131745-45/candlesticks",
+      "params": {
+        "start_ts": 1794609240,
+        "end_ts": 1794609720,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131800-00",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131800-00/candlesticks",
+      "params": {
+        "start_ts": 1794610140,
+        "end_ts": 1794610620,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131815-15",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131815-15/candlesticks",
+      "params": {
+        "start_ts": 1794611040,
+        "end_ts": 1794611520,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131830-30",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131830-30/candlesticks",
+      "params": {
+        "start_ts": 1794611940,
+        "end_ts": 1794612420,
+        "period_interval": 1
+      }
+    },
+    {
+      "id": "oi_KXBTC15M-26NOV131845-45",
+      "path": "/series/KXBTC15M/markets/KXBTC15M-26NOV131845-45/candlesticks",
+      "params": {
+        "start_ts": 1794612840,
+        "end_ts": 1794613320,
+        "period_interval": 1
+      }
+    }
+  ]
 }
