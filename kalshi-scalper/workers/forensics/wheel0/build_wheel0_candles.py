@@ -7,6 +7,8 @@ Rules: closes from 2026-09-12T00:00Z to before 2026-11-13T00:00Z; Ethereum only 
 1 minute candles; window = 900 s before the batch's first close to 120 s before its last close (the latest look is 180 s before a close, so the final minutes are not pulled);
 batches packed so (window minutes x tickers) <= 9,000, the packing CFRTI_K_CANDLES proved. A folder under a HELDOUT_ name is refused."""
 import gzip, json, os, sys, calendar, time, re
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from listed_runs_guard import refuse_listed      # standing rule (h): runs named in HELDOUT_PULL_RUNS.md are refused (Nov 13)
 FROM = calendar.timegm(time.strptime("2026-09-12", "%Y-%m-%d"))
 BEFORE = calendar.timegm(time.strptime("2026-11-13", "%Y-%m-%d"))
 ETH_BEFORE = calendar.timegm(time.strptime("2026-10-29", "%Y-%m-%d"))
@@ -34,6 +36,7 @@ def iso_ts(s):
 def read_markets(folder):
     """-> {series: [(ticker, close)] in close order}, counts. Ticker and close time only."""
     refuse_heldout(folder)
+    refuse_listed(folder)
     man = json.load(open(os.path.join(folder, "manifest.json"))); out = {s: {} for s in SERIES}; cnt = {"no_close_time": 0, "outside_dates": 0, "other_series": 0}
     for row in man["rows"]:
         if row.get("status") != 200 or "file" not in row or row.get("truncated"): continue

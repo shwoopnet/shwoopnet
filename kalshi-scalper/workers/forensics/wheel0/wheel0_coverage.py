@@ -6,12 +6,16 @@ and at every minute from 600 to 180 s, the first and last close, and SPLIT if th
 import sys, os, json, time
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import wheel0 as Z
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
+from listed_runs_guard import refuse_listed      # standing rule (h): runs named in HELDOUT_PULL_RUNS.md are refused (Nov 13)
 
 GUIDE_MB_PER_REQUEST, SPLIT_FACTOR = 0.172, 1.5      # CFRTI_K_CANDLES: 37 MB for 215 requests; "much over" = half as much again
 
 
 def main(candle_run, list_runs):
     Z.refuse_heldout(candle_run)
+    refuse_listed(candle_run)
+    for _lr in list_runs: refuse_listed(_lr)
     man = json.load(open(os.path.join(candle_run, "manifest.json"))); rows = man["rows"]; job = man.get("job", {})
     ok = sum(1 for r in rows if r.get("status") == 200 and r.get("file") and not r.get("truncated")); trunc = sum(1 for r in rows if r.get("truncated"))
     mb = sum(r.get("bytes", 0) for r in rows) / 1e6; planned = len(job.get("requests", [])) or len(rows)
