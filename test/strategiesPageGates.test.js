@@ -135,7 +135,7 @@ gates.SP4 = () => {
   assert.ok(/>COOLING</.test(panel(h, 'off')) && !/>HEALTHY</.test(panel(h, 'off')), 'and reads cooling down');
   const open = P.kalshiBoardHtml({ live, deck: { state: 'ok', rows: [] }, retired: P.KAL_BOARD_RETIRED, open: { stage: 'live' } }, esc, money);
   assert.ok(!/id="lp-p-live"[^>]* hidden/.test(open) && /id="lp-p-off"[^>]* hidden/.test(open) && /aria-expanded="true" aria-controls="lp-p-live"/.test(open) && /<b>Live open\.<\/b>/.test(open), 'the open box is shown, the others are hidden, the header line says which is open');
-  assert.ok(!/Closest to a kill: /.test(h) && !/<b>0<\/b> shadow/.test(h) && /closest kill: /.test(open), 'each figure once (Nov 13, 2026, "limit redundancies"): the boxes carry the counts and the open box\'s progress line the closest kill, so the header line repeats neither');
+  assert.ok(!/Closest to a kill: /.test(h) && !/<b>0<\/b> shadow/.test(h) && !/closest kill: /.test(open) && !/id="lp-p-live"[^>]*><div class="lp-prog"/.test(open), 'each figure once: the boxes carry the counts, each Live row its own nearest stop rule, so neither the header line nor a top right line on the Live box repeats them (Nov 13, 2026, the owner)');
 };
 const now = Date.UTC(2026, 10, 10, 18, 0);
 // The shadow registry is EMPTY since Nov 11, 2026 (the owner retired all four rules), but the board still draws shadow cards for the next rule a reviewed edit adds, so the renderer is exercised on a fixture of four rules,
