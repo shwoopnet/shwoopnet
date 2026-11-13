@@ -49,3 +49,32 @@ KXBTC15M-26NOV040730-30,KXBTC15M-26NOV040730,1793795400,300000.0,,,0.3,0.7,,no
 4. A row without sha256.
 5. A list close_time of 2026-12-02 for a requested ticker.
 6. A HELDOUT_ path.
+
+## Dated line, 2026-11-13 21:10Z: Auditor B's F1 to F4 and the Head's ruling on F1's range (tests written before the code change)
+- **F1:** WINDOW_FROM = 2026-09-12T00:00:00Z, WINDOW_TO = 2026-11-09T00:00:00Z. A window (a requested ticker with a list row) whose close is outside [FROM, TO) STOPS the build, at both ends. This replaces the Dec 1 stop. Why: every unread or unfrozen KXBTC15M held-out starts on or after Nov 9 (DEPTH1, CFRTI1-BTC and CFRTI-B from Nov 9; W-SPOTLEAD1's block from Nov 11; CFRTI-K from Nov 14). The landed CFRTI_K runs end Nov 4, so no blinding issue.
+  Consequence: CFRTI_K_PROBE's 24 windows close on Aug 20, before FROM, so passing that run stops the build. It stays in the allowed jobs only so the Head can rule otherwise.
+- **F2:** per request id and page, the rows in manifest order. Earlier non-200 rows (429 retries or other repeated answers, which the runner writes without file or sha256) are ignored. The LAST row of each page must be the page's one 200 row, with file, sha256 and bytes present and truncated false. The build STOPS on: a page whose last row is not 200; two 200 rows for one page; pages not 1..k; a truncated row; a cursor on the last page.
+- **F3:** the embedded job must equal an audited job, compared by sha256(json.dumps(job, sort_keys=True, separators=(",", ":"))). The as-run hashes (each equals its job file as it stood before PR #888, which changed only the "heldout" note text afterwards) are:
+  - CFRTI_K_LISTS c8f9e739...;
+  - CFRTI_K_CANDLES 9ee22620...;
+  - CFRTI_K_PROBE af06ad9a...;
+  - CFRTI_K_R6SLICE 65217aba....
+- **F4:** list rows of one ticker from several requests or pages are merged.
+  - The row with a non-empty result is kept.
+  - The build STOPS if close_time or event_ticker differ, or if two non-empty results differ.
+  - Windows with a blank result are counted as blank_result (the base set has 0).
+
+### Expected, by hand
+- **Base set:** unchanged CSV and counts, plus blank_result 0.
+- **429 before the 200** on the candle request: the same CSV and counts.
+- **List request 2** repeats M1 with result "" (settled then unsettled), and request 1 gives M2 with result "" while request 2 gives "no" (unsettled then settled): the same CSV as the base (M1 yes, M2 no), blank_result 0.
+- **M2 blank in both requests:** M2's row has an empty result; blank_result 1; everything else unchanged.
+
+### New refusals expected
+- a window closing 2026-09-11T23:45Z (before FROM)
+- a window closing 2026-11-09T00:00Z (at TO)
+- a candle request whose last row is a 429
+- a candle request whose last row is a 404
+- an embedded job that differs from the audited one (an extra key)
+- list rows of one ticker that disagree on close_time
+- list rows of one ticker that disagree on yes against no
