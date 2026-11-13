@@ -60,3 +60,9 @@
 - **Why:** an exit from a combo means selling it back through Kalshi's request-for-quote system. Kalshi's public Combos help article (help.kalshi.com/en/articles/13823820-combos, read Nov 13) says: "Once a combo is placed and filled, it cannot be canceled or reversed by the user." Neither it nor the RFQ docs (docs.kalshi.com/getting_started/rfqs.md) describe any way to request a quote to SELL a combo already held.
 - **So:** no profit target, stop, time exit or in-and-out can be priced from public evidence, and the card stays hold to settlement.
 - **If Kalshi confirms** (an owner or Main question, not research) that a held combo can be quoted for sale, an exit variant is registered then, as its own try, before any data.
+
+## Amendment (Nov 13, 2026, before any data): reading the widened recorder
+
+- Trades are read from `trades.csv` and joined to `legs.csv` by combo ticker; a combo in `legs_missing` is dropped and counted, never guessed.
+- Successive polls read overlapping tape windows on purpose, so trades are de-duplicated by `trade_id` across polls before any count.
+- A poll whose coverage row has `tape_complete` 0 (tape cut at the page cap, a failed read or a stopped run) is counted and reported; its window is a lower bound, never a quiet hour.
