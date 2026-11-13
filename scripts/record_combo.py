@@ -37,7 +37,7 @@ PAGE_LIMIT = 1000
 MAX_LIST_PAGES = 5                 # at most 5,000 open combos listed per run
 MAX_QUOTE_ROWS = 400
 MAX_BOOKS = 40
-MAX_TAPE_PAGES = 30               # the public trade tape since the last poll, 1,000 trades a page; sized from the CROWDLEG_TAPE_TRIAL page count (see docs/COMBO_RECORDER.md)
+MAX_TAPE_PAGES = 30               # the public trade tape since the last poll, 1,000 trades a page; an estimate: set from the CROWDLEG_TAPE_TRIAL count if it lands, else from the first days' tape_complete rows
 TAPE_DEFAULT_S = 40 * 60           # the window when the previous poll's time is not known: 40 minutes (overlap is fine, trade_id de-duplicates)
 TAPE_MAX_S = 2 * 3600              # never read further back than 2 hours, whatever --since says (a long gap is a gap, not a bigger read)
 TAPE_MIN_S = 25 * 60               # and never less than the 25 minute freshness line
@@ -267,7 +267,7 @@ COMBO_TICKER_RE = re.compile(r"^KXMVE[A-Z0-9._-]{1,120}$")
 
 def is_combo(t):
     """A combo ticker of a safe shape: it is the only text from an answer that ever goes into a URL we build (the legs look-up), so anything else is dropped."""
-    return isinstance(t, str) and t.startswith(COMBO_PREFIX) and COMBO_TICKER_RE.match(t) is not None
+    return isinstance(t, str) and t.startswith(COMBO_PREFIX) and COMBO_TICKER_RE.fullmatch(t) is not None   # fullmatch: a trailing newline is not a safe shape (Auditor B, Nov 13)
 
 
 def tape_window(now, since):

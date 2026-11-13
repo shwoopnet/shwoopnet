@@ -280,12 +280,13 @@ _r2, cov2 = m.read_tape(s2, 100000, None)
 s3 = m.Stream(50, fetch=lambda u: (500, None, ""), clock=lambda: 0.0, sleep=lambda d: None)
 _r3, cov3 = m.read_tape(s3, 100000, None)
 print(json.dumps({"rows": [[r[1], r[-1], r[-2]] for r in rows], "cov": cov, "cov2": [cov2["pages"], cov2["complete"]], "cov3": [cov3["pages"], cov3["complete"]], "urls": urls,
-  "enc": m.tape_url(1, 2, "a&ticker=X/.."), "win": [m.tape_window(100000, x) for x in (None, 0, 100000 - 60, 100000 - 1800, 100000 - 99999, 100000 + 50, True)]}))`);
+  "safe": [m.is_combo(t) for t in ("KXMVE-A1", "KXMVE-A1\\n", "KXMVE-A B", "KXBTC-1")], "enc": m.tape_url(1, 2, "a&ticker=X/.."), "win": [m.tape_window(100000, x) for x in (None, 0, 100000 - 60, 100000 - 1800, 100000 - 99999, 100000 + 50, True)]}))`);
   assert.deepStrictEqual(out.rows, [['KXMVE-A1', 'a', 'yes'], ['KXMVE-B2', 'd', 'no']], 'combo rows only, a safe ticker only, each trade once');
   assert.deepStrictEqual([out.cov.pages, out.cov.complete, out.cov.rows], [2, true, 6], 'complete when the cursor ran out; tape_rows counts every row read');
   assert.deepStrictEqual(out.cov2, [30, false], 'an endless tape stops at the page cap and says it is not complete');
   assert.deepStrictEqual(out.cov3, [0, false], 'a failed read is not a quiet tape');
   assert.ok(out.urls.every((u) => /^https:\/\/external-api\.kalshi\.com\/trade-api\/v2\/markets\/trades\?min_ts=\d+&max_ts=\d+&limit=1000(&cursor=\w+)?$/.test(u)), out.urls.join(' '));
+  assert.deepStrictEqual(out.safe, [true, false, false, false], 'a combo ticker must be a safe shape end to end (no trailing newline)');
   assert.strictEqual(out.enc, 'https://external-api.kalshi.com/trade-api/v2/markets/trades?min_ts=1&max_ts=2&limit=1000&cursor=a%26ticker%3DX%2F..', 'a cursor from the answer is percent-encoded');
   assert.deepStrictEqual(out.win, [[97600, 100000], [97600, 100000], [98500, 100000], [98200, 100000], [92800, 100000], [97600, 100000], [97600, 100000]], 'default 40 minutes, clamped to 25 minutes to 2 hours, junk ignored');
 };
