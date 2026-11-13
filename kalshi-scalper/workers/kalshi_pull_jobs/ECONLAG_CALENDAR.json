@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/IDEA_DESK_B_PROTOCOLS.md",
  "purpose": "ECONLAG stage 1 (slow-family paper screen, try 1): settled market lists of the three release series and the Fed decision series, to verify the count of print days (about 70 expected) before any candle is asked for. No candle is read.",
- "heldout": "none at this stage (lists only; the screen's pinned cutoff is 2026-10-31, in ECONLAG amendment 2)",
+ "heldout": "none at this stage (lists only; the screen's pinned cutoff is 2026-10-31, in ECONLAG amendment 2) Other cards: FEDIMPL1 (forward read 2026-12-08), NOWCAST1 (forward read 2027-03-01), FORWARD_CALENDAR (KXCPI) and ECONNEW2 (read).",
  "allowed_endpoints": [
   {
    "name": "markets_list",

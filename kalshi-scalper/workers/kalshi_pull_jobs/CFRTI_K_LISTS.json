@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
  "purpose": "Stage 1 of CFRTI-K: the settled KXBTC15M market lists (ticker, close_time, floor_strike, result) for the development window, so stage 2 can name every market. No price is read. Bounded at the cutoff: nothing on or after 2026-11-05T00:00Z is requested.",
- "heldout": "CFRTI-K: closes on or after 2026-11-05T00:00:00Z are held-out and are not requested (max_close_ts = 1793836800 on the live list). The historical list has no date filter; the builder drops any market closing at or after the cutoff and the reader never opens it.",
+ "heldout": "CFRTI-K: closes on or after 2026-11-05T00:00:00Z are not requested (a pull bound; CFRTI-K's own held-out starts 2026-11-14T00:00Z) (max_close_ts = 1793836800 on the live list). The historical list has no date filter; the builder drops any market closing at or after the cutoff and the reader never opens it. BOOKCH1 (forward from 2026-11-04T00:00Z, frozen unread) and BOOKIMB1 (forward from 2026-11-03T16:00Z, frozen unread) are held out by their own dates; CFRTI-B and CFRTI1-BTC (from 2026-11-09) do not overlap these windows. CFRTI-K's own held-out is from 2026-11-14T00:00Z (rows before it are not blind), not 2026-11-05.",
  "allowed_endpoints": [
   {
    "name": "markets_list",

@@ -3,7 +3,7 @@
  "owner": "DESK_A",
  "registration": "kalshi-scalper/workers/CFRTI_K_REGISTRATION.md",
  "purpose": "Stage 2 of CFRTI-K: 1 minute candles of the settled KXBTC15M markets of the development window. Development markets only (close before 2026-11-05T00:00Z).",
- "heldout": "CFRTI-K: no market closing on or after 2026-11-05T00:00:00Z is in the allowlist",
+ "heldout": "CFRTI-K: no market closing on or after 2026-11-05T00:00:00Z is in the allowlist BOOKCH1 (forward from 2026-11-04T00:00Z, frozen unread) and BOOKIMB1 (forward from 2026-11-03T16:00Z, frozen unread) are held out by their own dates; CFRTI-B and CFRTI1-BTC (from 2026-11-09) do not overlap these windows. CFRTI-K's own held-out is from 2026-11-14T00:00Z (rows before it are not blind), not 2026-11-05.",
  "allowed_endpoints": [
   {
    "name": "markets_candlesticks_batch",

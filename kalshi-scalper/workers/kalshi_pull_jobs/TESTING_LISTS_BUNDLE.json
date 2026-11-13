@@ -3,7 +3,7 @@
  "owner": "MAIN",
  "registration": "kalshi-scalper/workers/testing/TESTING_LISTS_BUNDLE.md",
  "purpose": "Testing Desk bundle of three small jobs (TIE3 lists, WXDAYEND_A, POLCOST open-markets cost snapshot) so they cost one run; each request id is prefixed t3_, wx_, pc_. UNRATE_LISTS was dropped (Head, 18:03Z: UNRATEROUND retired unread).",
- "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3); POLCOST lists open markets, which have no result is requested; measurements and counts only, no rule scored, no try",
+ "heldout": "none read; nothing closing on or after 2026-11-13T00:00Z (TIE3); POLCOST lists open markets, which have no result is requested; measurements and counts only, no rule scored, no try Cards holding material of these series: W-POL-APPR1 (approval series, held-out thirds by POL_APPR1_CUTS.json, OPEN, never read); POLGAPH (KXTRUTHSOCIAL, KXTRUTHSOCIALD, held-out closes 2026-11-05 to 2026-12-17, OPEN); COUNT1 and COUNT1D (frozen last thirds, forward from 2026-11-04); W-CAT-POLENT1 (closed unread); USWEEP3 (KXHIGHNY, OPEN); WXENS1 (KXHIGHNY, forward read 2027-02-28); W-NO-ARM1 (released 2026-11-13T06:51Z); APPROVAL1 (not enough data).",
  "allowed_endpoints": [
   {
    "name": "markets_list",

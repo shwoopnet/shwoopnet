@@ -3,7 +3,7 @@
  "owner": "DESK_B",
  "registration": "kalshi-scalper/workers/IDEA_DESK_B_NOV11.md",
  "purpose": "Rank 3, ROLLOFF proxy check (card 13): settled daily approval markets and the series rules text, to test whether a poll table rebuilt from public polls reproduces the settled value. No price is read.",
- "heldout": "none (markets in the last third of event dates are listed but flagged by the reader and not used in the proxy fit)",
+ "heldout": "W-POL-APPR1 (OPEN, its held-out thirds are listed with results), APPROVAL1 and W-NO-ARM1 (released 2026-11-13T06:51Z) overlap these series. Markets in the last third of event dates are listed but flagged by the reader and not used in the proxy fit.",
  "allowed_endpoints": [
   {
    "name": "markets_list",
