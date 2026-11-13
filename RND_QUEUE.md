@@ -808,3 +808,11 @@ The reading: RND_CHARTER section 4 counts a cash PF under 1.0 on the development
 - OIVER-DEPTH and CAP30 amendment: Desk A 98eddee8, file sha256 172a55ca (last R6 poll in [close-190, close-180], 40 or more inclusive, R6 held out from Nov 9, CAP 0.30 inclusive). DEPTH span Oct 29 to before Nov 9. R6 rows builder next (Miner), hand case first.
 - OICORE 12 places registration: Desk A 29dd035e, sha256 2d6301c6. OICAND_LISTS 581174d3; candle job split into files of at most 1,000 requests; order after SPXOI1 and the 11-ticker OI check; Auditor B CLEAN first; Main approved in principle.
 - P06 fix lines (Desk B): a VERSION of EVENT830 under 7g, one family, VA scores before any shadow entry; silver is shadow only (reserved). Not evidence at n = 41.
+
+## 2026-11-13 21:21Z, owner standing order (via EA): new mechanisms only
+"we dont have time to repeat old retired ones. we have many research desks for this purpose to keep churning new developments".
+- Dropped: every queue item that revisits a closed, retired or declined card, including "closed cards that failed only on sample size".
+- Standing job of Desks A, B, C: produce NEW mechanisms continuously.
+- Gate: before any desk spends time on an idea, the Verification Analyst runs the uniqueness check (7d, declined list 7e, retired cards, and versions per 7g) and answers NEW, VERSION or CLOSED. Only NEW gets desk time as research.
+- Versions of live winners (OICORE places, OIVER, EVENT830 lines) stay allowed on the shadow or paper list, but are not counted as new research.
+- Builders (History Miner, Testing Desk, Forensics, Auditor B) keep finishing builds of OPEN cards; they do not reopen closed ones.
