@@ -1871,6 +1871,8 @@
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
                   <li>Trading: the second slot's window and open-money limits were loosened for trial seats (window 4% of the account, open total 5%, and the slot may use three quarters of the shared window limit instead of half); the account stops and the 5.5% window limit are unchanged.</li>
+                  <li>Trading: OICORE now starts at 15 contracts (it was 10), steps up to 20 and 30 only as its own record and the balance allow, and its step rules use win rates that fit a cheap-side strategy (14% to step up, 10% to step down); at 15 contracts it stops for the day after a $37.50 loss and for good after falling $75 below its best result. Set by the Risk Analyst under the owner's risk goals; needs a bot deploy</li>
+                  <li>Strategies page: YTD now reaches back to the first trade on Oct 7 (the owner: "the ytd strategies thing should go back to oct 7th right?"). The page only held the newest 1,000 gold orders, so a long range could start later without saying so; it now reads the older ones once, like the Account result line does, and says so on the chart while reading or if they cannot be read. The chart's right edge reads Today. Page only.</li>
                   <li>Research: two kalshi-pull jobs for the S&amp;P 500 15 minute market (KXINX15M) were added, one list request and 143 candle requests over Nov 5 to Nov 13. Nothing has been run and nothing in the bot changed.</li>
                   <li>Trading logs: the shadow logger (no orders) shares its reads (one candle read and one second look per market however many rules need it, one settle read per market), takes its allowed markets from a reviewed list, and logs exactly what it logged before with the one rule it has.</li>
                   <li>Trading, behind the scenes (not live, nothing wired): the risk core rules written as a pure library with tests, so a growing set of strategies has one set of account and seat limits to be checked against before anything uses them.</li>
@@ -4648,6 +4650,7 @@ kalshiStatusTick();
       '<div class="sp-sum-none">' + esc('No settled trades ' + (rg.key === 'YTD' ? 'this year' : 'in the ' + rg.word) + '.') + '</div>';
     return '<div class="kal-card sp-sum">' + ring +
       '<div class="sp-sum-mid"><div class="sp-sum-top"><div class="sp-sum-k">All strategies &middot; ' + esc(rg.word) + ' &middot; ' + s.w30.n + ' trades</div>' + kalshiStratRangeHtml(rg.key, esc) + '</div>' +
+      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>cash result, dashed line is zero</span><span>Today</span></div>' + (s.note ? '<div class="sp-sub sp-sum-note">' + esc(s.note) + '</div>' : '') + '</div>' +
       '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? rg.from : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || rg.from) + '</span><span>cash result, dashed line is zero</span><span>Now</span></div></div>' +
       '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
   }
@@ -5118,10 +5121,35 @@ kalshiStatusTick();
   }
   /* STRAT-ANIM-END */
   var kalshiStratPop = { refresh: function(){} }, kalshiStratSheets = {}, kalshiStratChart = { refresh: function(){} };
+  // The full history behind the chosen range (Nov 13, 2026, the owner: "the ytd strategies thing should go back to oct 7th right?"). The live listener holds only the newest 1,000 gold orders and 500 second-slot orders,
+  // so a range that starts before the oldest of them reads the older gold orders once, the same way the Account result line does (kalshiOrdersSince, kept six hours; a failed read is retried after a minute and the chart says so).
+  // Returns { orders } when it has a full set (or nothing older is needed), { loading } while the read is out, { failed, from } when it failed, and slotShort when the second-slot list may be cut short.
+  var kalshiStratOlder = {}, kalshiStratOlderOut = {};
+  function kalshiStratHistory(now){
+    var cut = kalshiStratRangeOf(kalshiStratRange).cut(now), key = kalshiStratRange;
+    var live = (kalshiLiveOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); }), slot = (kalshiSlotOrders || []).filter(function(o){ return o && Number.isFinite(o.ts); });
+    var oldest = live.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity), slotOldest = slot.reduce(function(m, o){ return Math.min(m, o.ts); }, Infinity);
+    var out = { slotShort: slot.length >= 500 && cut < slotOldest ? slotOldest : null };
+    if(!(live.length >= 1000 && cut < oldest)){ return out; }
+    var hit = kalshiStratOlder[key];
+    if(hit && now - hit.at < (hit.failed ? 60000 : 21600000)){
+      if(hit.failed){ out.failed = true; out.from = oldest; return out; }
+      out.orders = kalshiPnlSource(kalshiLiveOrders, hit).orders.concat(kalshiSlotOrders || []); return out;
+    }
+    var api = window.__shwoopAPI;
+    if(!api || !api.kalshiOrdersSince){ out.failed = true; out.from = oldest; return out; }
+    if(!kalshiStratOlderOut[key]){
+      kalshiStratOlderOut[key] = true;
+      api.kalshiOrdersSince(cut).then(function(o){ kalshiStratOlder[key] = { at: Date.now(), orders: o }; delete kalshiStratOlderOut[key]; renderStrategiesPage(); },
+        function(){ kalshiStratOlder[key] = { at: Date.now(), orders: [], failed: true }; delete kalshiStratOlderOut[key]; renderStrategiesPage(); });
+    }
+    out.loading = true; out.from = oldest; return out;
+  }
   function renderStrategiesPage(){
     var el = document.getElementById('stratBody'), page = document.getElementById('page-strategies');
     if(!el || !page || page.hidden){ return; }
-    var now = Date.now(), all = kalshiAllOrders();
+    var now = Date.now(), all = kalshiAllOrders(), hist = kalshiStratHistory(now);
+    if(hist.orders){ all = hist.orders; }
     // Gold's kill state (the latch the bot's checker caches); loading until the one read answers, unknown when it cannot be read.
     if(!kalshiGoldCache.since){ kalshiGoldCache.since = now; }
     var gold = kalshiGoldCardState(kalshiGoldCache, now, KAL_GOLD_READ_TIMEOUT), liveState = kalshiLiveStateNow(now);
@@ -5147,6 +5175,9 @@ kalshiStatusTick();
     var st = document.getElementById('stratStatus'); if(st){ st.textContent = kalshiOrdersLoaded ? '' : 'Reading the bot\'s orders...'; }
     // The summary reads the Stop Loss meter's open cost (the same worst case figure). Recent activity was removed on Nov 13, 2026 (the owner: the notifications and trade log already carry it).
     var summary = kalshiStratSummary(all, now, kalshiRiskMeter(all, kalshiLiveCtl && kalshiLiveCtl.session, now).openCost, kalDayKey, kalshiStratRange);
+    // Say so on the chart when part of the range is missing, never start silently later (the owner, Nov 13, 2026)
+    var hDay = function(ms){ return kalshiStratDayText(new Date(ms).toISOString().slice(0, 10)); };
+    summary.note = hist.loading ? 'Reading older trades...' : hist.failed ? 'Older trades could not be read, so this starts at ' + hDay(hist.from) + '.' : hist.slotShort ? 'Second-slot trades before ' + hDay(hist.slotShort) + ' are not loaded.' : '';
     kalshiRegData = {}; kalshiRegistry.list.forEach(function(x){ if(x.code && x.code.shadow && rows){ var ser = kalshiStratShadowSeries(rows, x.code.shadow); kalshiRegData[x.id] = { n: ser.length, spark: kalshiStratCumulative(ser) }; } });
     var regRetired = kalshiRegistry.list.filter(function(x){ return x.stage === 'Retired'; });
     kalshiStratSheets = {}; kalshiRetiredEntries(KAL_BOARD_RETIRED.rows, regRetired).forEach(function(e){ kalshiStratSheets[e.id] = e.sheet; kalshiRegData[e.id] = { live: true }; });
