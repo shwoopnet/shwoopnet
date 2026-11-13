@@ -682,3 +682,7 @@ Cheap-side grammar GEN12 and GEN13, REGIME1, SWEEP1, NONCRYPTO1, LEADLAG1, TAPEF
   - Raised to the EA for the owner: an S&P-only exception (Head advises no), and whether CFRTI-K (same family, held-out read frozen from Nov 14) finishes or closes (Head advises close).
   - The count is corrected to 3 unique against the floor of 5.
   - SPXOI1 and PR 903 stand. Desk A is hunting different KXINX15M fields.
+- 17:01Z: Desk A's sweep of KXINX15M fields (5057524f, DESK_A_SPX_NEW_CANDIDATES_NOV13.md 5d1add52) found NO unique card. Every field belongs to a declined, closed or live family.
+  - SPXCLOSE1 is CLOSED as a source: Main read the terms (NOII is subscription only; NYSE imbalances are paid; storage or commercial use needs written consent; no free route).
+  - SPXEVENT1 (2d426ec8, 88f7e93c) is an EVENT830 VERSION, wheel spec only. Two frozen windows: Dec 1 15:00Z (ISM manufacturing) and Dec 9 19:00Z (FOMC). It cannot give a verdict in useful time; it only starts a shadow record. Auditor B checks the text.
+  - The owner's S&P push so far: no new unique strategy. SPXOI1 (a version, PR 907) and the recorder PR 903 wait for the owner's merge.
