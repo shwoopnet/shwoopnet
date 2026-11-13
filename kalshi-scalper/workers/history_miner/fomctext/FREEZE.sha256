@@ -1,4 +1,4 @@
-# FOMCTEXT stage 1 reader frozen (History Miner, Nov 13, 2026), to Idea Desk C's card 8851d822 with Clarification 1 28a2d63d, before any list or candle answer is read
-aedab925bbb323849a8be768d07bde74efbec8e174506a800374584876f6fdd1  fomctext.py
-bb8798bffc5923ced1f58309403d8c5280799101c47fea66eca995f2d66ca556  test_fomctext.py
-471499abafdbf64a10087e1c00a6137445811c485f22c7eb9760c79a99b2408b  FOMCTEXT_READER_NOTE.md
+# FOMCTEXT stage 1 reader, Amendment 1 (Auditor B's five defects and gate 6), frozen before any FOMCTEXT answer exists; supersedes 13b73607
+7cab5b9e7fdec16a0d06ac2f7b6e7f69d299712573b6207508071ee21dcb8140  fomctext.py
+2e522c0791d1e2f29099b6bd13e8c013efdfb23672e891eb6f4d2f103d469e27  test_fomctext.py
+9cd4d58bf9235073fa286f4c7b9fd45883bd7eb17eefc5907c5cf4656498d858  FOMCTEXT_READER_NOTE.md

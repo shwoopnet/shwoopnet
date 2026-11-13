@@ -1,15 +1,22 @@
 """Invented fixtures for fomctext.py (no Kalshi data). Run: python3 -I test_fomctext.py"""
-import csv, gzip, json, os, shutil, sys, tempfile
+import csv, gzip, hashlib, json, os, sys, tempfile
 HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
 import fomctext as F
 
-def folder(bodies, paths=None, name=None):
+def job(jid, reqs):
+    return {"job_id": jid, "requests": [{"id": i, "path": p, "params": {}} for i, p in reqs]}
+
+def run(jb, answers, name=None, status="complete", tamper=None):
+    """answers: {request id: [body page 1, body page 2, ...]} in job order. Writes a kalshi-pull style run folder whose manifest embeds jb."""
     d = tempfile.mkdtemp() if name is None else os.path.join(tempfile.mkdtemp(), name)
-    os.makedirs(d, exist_ok=True); rows = []
-    for i, b in enumerate(bodies, 1):
-        fn = "%04d.json.gz" % i; gzip.open(os.path.join(d, fn), "wt").write(json.dumps(b))
-        rows.append({"id": "r%d" % i, "status": 200, "file": fn, "path": (paths or ["/markets"] * len(bodies))[i - 1]})
-    json.dump({"rows": rows}, open(os.path.join(d, "manifest.json"), "w")); return d
+    os.makedirs(d, exist_ok=True); rows = []; n = 0
+    for r in jb["requests"]:
+        for pg, body in enumerate(answers.get(r["id"], []), 1):
+            n += 1; raw = json.dumps(body).encode(); fn = "%04d.json.gz" % n
+            gzip.open(os.path.join(d, fn), "wb").write(raw)
+            rows.append({"index": n, "id": r["id"], "path": r["path"], "page": pg, "status": 200, "bytes": len(raw), "file": fn, "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False})
+    if tamper: tamper(rows)
+    json.dump({"job": jb, "status": status, "rows": rows}, open(os.path.join(d, "manifest.json"), "w")); return d
 
 def table(rows):
     p = os.path.join(tempfile.mkdtemp(), "t.csv")
@@ -20,15 +27,22 @@ def table(rows):
 def cndl(t, ts, bid, ask):
     return {"market_ticker": t, "candlesticks": [{"end_period_ts": ts, "yes_bid": {"close_dollars": "%.4f" % bid}, "yes_ask": {"close_dollars": "%.4f" % ask}}]}
 
+def refused(fn, word):
+    try:
+        fn(); raise AssertionError("not refused: " + word)
+    except SystemExit as e:
+        assert word in str(e), (word, str(e))
+
 ev_of = {d: "KXFEDMENTION-%s%s%s" % (d[2:4], ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"][int(d[5:7]) - 1], d[8:10]) for d in F.DEV_DATES}
+LJ = job("FOMCTEXT_LISTS", [("hist", "/historical/markets"), ("live", "/markets")])
+CJ = job("FOMCTEXT_CANDLES", [("c1", "/markets/candlesticks")])
 
 # --- 0. basics
 assert F.date_of_event("KXFEDMENTION-25JAN29") == "2025-01-29"
-assert F.et_epoch("2025-01-29", 14, 5) == 1738177500            # 19:05Z (EST)
-assert F.et_epoch("2025-06-18", 14, 5) == 1750269900            # 18:05Z (EDT)
+assert F.et_epoch("2025-01-29", 14, 5) == 1738177500 and F.et_epoch("2025-06-18", 14, 5) == 1750269900
 assert F.held_out("2026-06-17") and not F.held_out("2026-04-29")
 
-# --- FIXTURE 1: survives. 6 meetings x 3 statement-word strikes that settled yes at 0.80 ask (18 qualifying), all two-sided.
+# --- FIXTURE 1: survives. 6 meetings x 3 statement-word strikes settled yes at a 0.80 ask; one placebo strike that would qualify; a held-out and a non-decision event in the lists.
 mk, cd, tb = [], [], []
 for d in F.DEV_DATES[:6]:
     ev = ev_of[d]
@@ -36,58 +50,55 @@ for d in F.DEV_DATES[:6]:
         t = "%s-W%d" % (ev, k); mk.append({"ticker": t, "event_ticker": ev, "result": "yes"}); tb.append([d, ev, t, "w%d" % k, "yes"])
         cd.append(cndl(t, F.et_epoch(d, 14, 5), 0.78, 0.80))
     t = ev + "-NOTSW"; mk.append({"ticker": t, "event_ticker": ev, "result": "yes"}); tb.append([d, ev, t, "x", "no"])
-# a held-out meeting in the lists: dropped unread
+cd.append(cndl(ev_of[F.DEV_DATES[0]] + "-NOTSW", F.et_epoch(F.DEV_DATES[0], 14, 5), 0.78, 0.80))
 mk.append({"ticker": "KXFEDMENTION-26JUN17-W0", "event_ticker": "KXFEDMENTION-26JUN17", "result": "yes"})
 mk.append({"ticker": "KXFEDMENTION-25AUG22-W0", "event_ticker": "KXFEDMENTION-25AUG22", "result": "yes"})
-cd.append(cndl(ev_of[F.DEV_DATES[0]] + "-NOTSW", F.et_epoch(F.DEV_DATES[0], 14, 5), 0.78, 0.80))   # one placebo strike that would qualify
-L = folder([{"markets": mk}]); C = folder([{"markets": cd}]); T = table(tb)
-r = F.count(T, [L], [C])
+mk.append({"ticker": "KXPOWELLMENTION-25JAN29-W0", "event_ticker": "KXPOWELLMENTION-25JAN29", "result": "yes"})   # a development event the table does not name
+L = run(LJ, {"hist": [{"markets": mk[:10], "cursor": "abc"}, {"markets": mk[10:], "cursor": ""}], "live": [{"markets": [], "cursor": ""}]})
+C = run(CJ, {"c1": [{"markets": cd}]}); T = table(tb)
+r = F.count(T, [L], [C], LJ, CJ)
 assert r["qualifying"] == 18 and len(r["qualifying_meetings"]) == 6 and r["verdict"].startswith("survives"), r
-assert r["placebo_non_statement_words"]["strikes"] == 6 and r["placebo_non_statement_words"]["qualifying"] == 1 and r["placebo_non_statement_words"]["two_sided_at_1405"] == 1, r   # placebo counted apart, never in the kill line
+assert r["placebo_non_statement_words"]["qualifying"] == 1 and r["placebo_non_statement_words"]["strikes"] == 6, r
 assert r["no_market_dates"] == list(F.DEV_DATES[6:]), r
 assert r["list_rows_dropped_unread"]["held_out"] == 1 and r["list_rows_dropped_unread"]["not_a_development_decision_date"] == 1, r
+assert r["development_events_in_lists_not_named_by_the_table"] == {"count": 1, "events": ["KXPOWELLMENTION-25JAN29"]}, r   # Auditor B defect 2
 
-# --- FIXTURE 2 (BOUNDARY): ask exactly 0.87 counts, 0.88 does not; a NO settlement never counts; two-sided exactly half is NOT "fewer than half".
+# --- FIXTURE 2 (BOUNDARY): 0.87 counts, 0.88 does not; a NO settlement never counts; exactly half two-sided does not close (c); one fewer does.
 mk2, cd2, tb2 = [], [], []
 d = F.DEV_DATES[0]; ev = ev_of[d]; ts = F.et_epoch(d, 14, 5)
 for t, res, bid, ask in (("A87", "yes", 0.85, 0.87), ("A88", "yes", 0.86, 0.88), ("NOSETTLE", "no", 0.20, 0.22), ("ONESIDED", "yes", 0.00, 0.50)):
     tk = ev + "-" + t; mk2.append({"ticker": tk, "event_ticker": ev, "result": res}); tb2.append([d, ev, tk, t, "yes"]); cd2.append(cndl(tk, ts, bid, ask))
 for t in ("NOCANDLE1", "NOCANDLE2"):
     tk = ev + "-" + t; mk2.append({"ticker": tk, "event_ticker": ev, "result": "yes"}); tb2.append([d, ev, tk, t, "yes"])
-r2 = F.count(table(tb2), [folder([{"markets": mk2}])], [folder([{"markets": cd2}])])
-assert r2["qualifying"] == 1, r2                     # only A87
-assert r2["two_sided_at_1405"] == 3 and r2["statement_word_strikes"] == 6, r2   # 3 of 6 = exactly half: (c) does not fire
-assert not any(x.startswith("(c)") for x in r2["verdict"].split(": ", 1)[-1].split("; ")), r2
+L2 = run(LJ, {"hist": [{"markets": mk2, "cursor": ""}], "live": [{"markets": []}]})
+r2 = F.count(table(tb2), [L2], [run(CJ, {"c1": [{"markets": cd2}]})], LJ, CJ)
+assert r2["qualifying"] == 1 and r2["two_sided_at_1405"] == 3 and r2["statement_word_strikes"] == 6 and "(c)" not in r2["verdict"], r2
 assert r2["excluded"]["no_candle_at_1405"] == 2, r2
-# one fewer two-sided: (c) fires
-cd2b = [c for c in cd2 if not c["market_ticker"].endswith("A88")]
-r2b = F.count(table(tb2), [folder([{"markets": mk2}])], [folder([{"markets": cd2b}])])
+r2b = F.count(table(tb2), [L2], [run(CJ, {"c1": [{"markets": [c for c in cd2 if not c["market_ticker"].endswith("A88")]}]})], LJ, CJ)
 assert "(c)" in r2b["verdict"], r2b
-
-# --- FIXTURE 3: refusals. A HELDOUT folder (any case), a table naming a held-out date, a strike missing from the table, a non-200 row.
-for nm in ("HELDOUT_x", "heldout_x", "HeldOut_x"):
-    H = folder([{"markets": mk}], name=nm)
-    try:
-        F.count(T, [H], [C]); raise AssertionError("held-out folder read: " + nm)
-    except SystemExit as e:
-        assert "held-out" in str(e)
-try:
-    F.load_table(table([["2026-06-17", "KXFEDMENTION-26JUN17", "KXFEDMENTION-26JUN17-W0", "w", "yes"]])); raise AssertionError("held-out table row read")
-except SystemExit as e:
-    assert "held-out" in str(e)
-try:
-    F.count(table(tb[:-1]), [L], [C]); raise AssertionError("missing table strike accepted")
-except SystemExit as e:
-    assert "disagree" in str(e)
-bad = folder([{"markets": mk}]); m = json.load(open(os.path.join(bad, "manifest.json"))); m["rows"][0]["status"] = 429; json.dump(m, open(os.path.join(bad, "manifest.json"), "w"))
-try:
-    F.count(T, [bad], [C]); raise AssertionError("429 row accepted")
-except SystemExit as e:
-    assert "not a whole 200" in str(e)
-# fixture 1 under (a) and (b): drop to 4 meetings x 3 = 12
-r3 = F.count(table([x for x in tb if x[0] in F.DEV_DATES[:4]]), [folder([{"markets": [m_ for m_ in mk if F.date_of_event(m_["event_ticker"]) in F.DEV_DATES[:4] or not F.date_of_event(m_["event_ticker"]) in F.DEV_DATES]}])], [C])
+r3 = F.count(table([x for x in tb if x[0] in F.DEV_DATES[:4]]), [run(LJ, {"hist": [{"markets": [m for m in mk if F.date_of_event(m["event_ticker"]) in F.DEV_DATES[:4]]}], "live": [{"markets": []}]})], [C], LJ, CJ)
 assert "(a)" in r3["verdict"] and "(b)" in r3["verdict"], r3
-# candle job: historical rows go one per market, live rows batched
-reqs, drop = F.build_candles(T, [folder([{"markets": mk[:8]}, {"markets": mk[8:]}], paths=["/historical/markets", "/markets"])])
-assert sum(1 for q in reqs if q["path"].startswith("/historical/")) == 8 and all(q["params"]["period_interval"] == 1 for q in reqs), reqs[:2]
-print("ok", r["qualifying"], r2["qualifying"], len(reqs))
+
+# --- FIXTURE 3: refusals.
+for nm in ("HELDOUT_x", "heldout_x", "HeldOut_x"):
+    refused(lambda: F.count(T, [run(LJ, {"hist": [{"markets": mk}], "live": [{"markets": []}]}, name=nm)], [C], LJ, CJ), "held-out")
+refused(lambda: F.load_table(table([["2026-06-17", "KXFEDMENTION-26JUN17", "KXFEDMENTION-26JUN17-W0", "w", "yes"]])), "held-out")
+refused(lambda: F.count(table(tb[:-1]), [L], [C], LJ, CJ), "disagree")
+refused(lambda: F.load_table(table(tb + [tb[0][:4] + ["no"]])), "twice")                                                   # defect 1
+def esc(rows): rows[0]["file"] = "../HELDOUT_t/x.json.gz"
+refused(lambda: F.count(T, [run(LJ, {"hist": [{"markets": mk}], "live": [{"markets": []}]}, tamper=esc)], [C], LJ, CJ), "held-out")   # defect 3
+def esc2(rows): rows[0]["file"] = "../other/x.json.gz"
+refused(lambda: F.count(T, [run(LJ, {"hist": [{"markets": mk}], "live": [{"markets": []}]}, tamper=esc2)], [C], LJ, CJ), "outside")
+refused(lambda: F.count(T, [L], [run(CJ, {"c1": [{"markets": cd}]}, status="stopped_429")], LJ, CJ), "not complete")        # defect 4
+refused(lambda: F.count(T, [run(LJ, {"hist": [{"markets": mk}]})], [C], LJ, CJ), "no whole answer")                        # a request never answered
+refused(lambda: F.count(T, [run(LJ, {"hist": [{"markets": mk, "cursor": "more"}], "live": [{"markets": []}]})], [C], LJ, CJ), "cursor left")
+def bad_sha(rows): rows[0]["sha256"] = "0" * 64
+refused(lambda: F.count(T, [L], [run(CJ, {"c1": [{"markets": cd}]}, tamper=bad_sha)], LJ, CJ), "sha256")
+refused(lambda: F.count(T, [L], [C], LJ, job("OTHER", [("c1", "/markets/candlesticks")])), "committed job")
+def r429(rows): rows.insert(0, {"index": 0, "id": "c1", "path": "/markets/candlesticks", "page": 1, "status": 429, "bytes": 0})
+assert F.count(T, [L], [run(CJ, {"c1": [{"markets": cd}]}, tamper=r429)], LJ, CJ)["qualifying"] == 18                    # a 429 then a good retry is whole
+refused(lambda: F.count(T, [L], [run(CJ, {"c1": [{"markets": [{"market_ticker": cd[0]["market_ticker"], "candlesticks": [{"end_period_ts": F.et_epoch(F.DEV_DATES[0], 14, 5), "yes_bid": {"close": 78}, "yes_ask": {"close": 80}}]}]}]})], LJ, CJ), "plain 'close'")   # gate 6
+# --- defect 5: build-candles writes a whole job that passes the pull runner's own check_job
+jb, drop = F.build_candles(T, [L], LJ)
+assert jb["max_requests"] == len(jb["requests"]) and all(q["path"].startswith("/historical/markets/") for q in jb["requests"]) and len(jb["requests"]) == len(tb), jb["max_requests"]
+print("ok", r["qualifying"], r2["qualifying"], len(jb["requests"]))

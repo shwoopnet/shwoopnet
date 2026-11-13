@@ -23,3 +23,14 @@ The measurement is a gap against settlement, so the reader joins each developmen
 - Matching events to meetings: the event ticker's date equals the decision date AND the title or rules text names the FOMC press conference (Clarification 1, point 1); Desk C's table names those events, the reader checks the table against the lists.
 
 Files: `fomctext.py`, `test_fomctext.py` (three invented fixtures: a surviving set, a boundary set at 87c / 88c and exactly half two-sided, and the refusals).
+
+## Amendment 1 (Nov 13, 2026, about 02:40Z, before any FOMCTEXT list or candle answer exists; Auditor B's NOT CLEAN on 13b73607)
+
+All five defects fixed in the reader and the gate written down. No reading of the card changed.
+1. A duplicate market_ticker in the table is refused.
+2. Every development-date event in the lists that the table does NOT name is printed beside the count (count and tickers): the reader reads no title, so it cannot refuse, but a table that left an event out cannot hide.
+3. Every file the reader opens must lie inside its run folder (abspath and realpath), and no path component may be a held-out name (any case).
+4. A run folder is read only if PROVEN whole against its committed job file, passed on the command line: the manifest's embedded job equals it, the manifest status is "complete", every request has an answer for every page it took (a 429 followed by a good retry is fine; a final 404 is "no such market"), a list request's last page carries no cursor, and every stored file's sha256 and byte length match the manifest. Anything else stops the reader.
+5. `build-candles` writes the whole job (endpoints, allowlists, max_requests, held-out line) and runs the pull runner's own `check_job` (scripts/kalshi_pull.py on main) on it before printing; the job goes to the Head by hash with its count before any run.
+6. **Gate, written down:** a candle price's unit is decided by its FIELD NAME only. `close_dollars` is dollars; a plain `close` (the /historical shape, not yet seen on a landed answer) stops the reader. Once the first landed answer's shape is seen (shape only, no outcome read), the unit of a plain `close` is fixed by a dated amendment and a new hash for Auditor B, never by magnitude.
+Usage is now `build-candles <table.csv> <lists job.json> <lists folder>...` and `count <table.csv> <lists job.json> <candles job.json> --lists ... --candles ...`.
