@@ -1,0 +1,141 @@
+{
+ "job_id": "LIVEDATA_PROBE_A",
+ "owner": "DESK_B",
+ "registration": "kalshi-scalper/workers/dbltb/LIVEDATA_FINDING_AND_DBLTB_CARD.md",
+ "purpose": "Zero-try field probe of Kalshi's own public live data endpoints (milestones, events with milestones, the Miami temperature index and its calibrations): which fields exist and how far back the index goes. No price, no result, no rule.",
+ "heldout": "none (a field probe; nothing is scored)",
+ "allowed_endpoints": [
+  {
+   "name": "milestones",
+   "method": "GET",
+   "path_pattern": "/milestones",
+   "params_allowed": [
+    "limit",
+    "category",
+    "min_updated_ts",
+    "cursor"
+   ]
+  },
+  {
+   "name": "events",
+   "method": "GET",
+   "path_pattern": "/events",
+   "params_allowed": [
+    "series_ticker",
+    "status",
+    "limit",
+    "with_milestones"
+   ]
+  },
+  {
+   "name": "weather_index",
+   "method": "GET",
+   "path_pattern": "/live_data/weather/miami",
+   "params_allowed": [
+    "last_sec",
+    "detailed",
+    "from",
+    "to"
+   ]
+  },
+  {
+   "name": "weather_calibrations",
+   "method": "GET",
+   "path_pattern": "/live_data/weather/miami/calibrations",
+   "params_allowed": []
+  }
+ ],
+ "series_allowlist": [
+  "KXATPCHALLENGERDOUBLES",
+  "KXITFDOUBLES",
+  "KXTEMPMIAH"
+ ],
+ "max_requests": 10,
+ "requests": [
+  {
+   "id": "ms_sports",
+   "path": "/milestones",
+   "params": {
+    "limit": 100,
+    "category": "Sports",
+    "min_updated_ts": 1794530139
+   },
+   "max_pages": 2
+  },
+  {
+   "id": "ms_any",
+   "path": "/milestones",
+   "params": {
+    "limit": 100,
+    "min_updated_ts": 1794530139
+   }
+  },
+  {
+   "id": "ev_itf_doubles",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXITFDOUBLES",
+    "status": "open",
+    "limit": 5,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "ev_chall_doubles",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXATPCHALLENGERDOUBLES",
+    "status": "open",
+    "limit": 5,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "ev_temp_miami",
+   "path": "/events",
+   "params": {
+    "series_ticker": "KXTEMPMIAH",
+    "status": "open",
+    "limit": 5,
+    "with_milestones": "true"
+   }
+  },
+  {
+   "id": "wx_recent",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "last_sec": 7200
+   }
+  },
+  {
+   "id": "wx_detailed",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "last_sec": 1800,
+    "detailed": "true"
+   }
+  },
+  {
+   "id": "wx_old",
+   "path": "/live_data/weather/miami",
+   "params": {
+    "from": 1793836800000,
+    "to": 1793844000000
+   }
+  },
+  {
+   "id": "wx_calibrations",
+   "path": "/live_data/weather/miami/calibrations"
+  }
+ ],
+ "notes": "Step A of two. Step B (live data and play-by-play of a handful of milestone ids, one event's live data) can only be written after step A shows the ids; it is a second job. Not dispatched; waits on the Head of R&D and the Chief of Staff.",
+ "status": "active",
+ "host": "api.elections.kalshi.com",
+ "base_path": "/trade-api/v2",
+ "pacing_seconds": 1.0,
+ "stop_rules": {
+  "pause_seconds_on_429": "5, doubling to 60",
+  "stop_after_consecutive_429": 3,
+  "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"
+ }
+}
