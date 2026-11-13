@@ -55,7 +55,20 @@ games = [
 ]
 # the same game cut into a held-out date (closes 2026-12-16): a run on it must be refused
 outside = [game("H01", T(2026, 12, 16, 3, 30), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (30, 34)}, 6, quote_minutes=[7])]
+# ---- the amended set (Head's rulings of 15:32Z): unsettled result, two matching strikes, Central date and week against UTC, a game before the development window
+extra = [
+ # X01 standard entry 30/34 (pay 35) but the result is MISSING (null): counted entry, unsettled, excluded from n and PF; closes 2026-11-19 03:30Z = Nov 18 Central
+ game("X01", T(2026, 11, 19, 3, 30), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (30, 34)}, 6, result_override={"T55": None}, quote_minutes=[7]),
+ # X03 total 5, strikes 5.0 and 5.5 both within one goal (0 <= f - total < 1): AMBIGUOUS, none taken
+ game("X03", T(2026, 11, 21, 3, 30), L, flat(11, (3, 2)), {"T50": 5.0, "T55": 5.5}, {"T50": (28, 30), "T55": (28, 30)}, 6, quote_minutes=[7]),
+ # X04 closes Mon 2026-11-23 05:30Z = Sun Nov 22 23:30 Central (week of Nov 16 Central, week of Nov 23 UTC): bid 26 ask 30, final total 6 -> YES
+ game("X04", T(2026, 11, 23, 5, 30), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (26, 30)}, 6, quote_minutes=[7]),
+ # X05 closes Tue 2026-11-17 05:30Z = Mon Nov 16 23:30 Central; bid 20 ask 22, final total 5 -> NO
+ game("X05", T(2026, 11, 17, 5, 30), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (20, 22)}, 5, quote_minutes=[7]),
+ # X06 closes 2026-11-16T23:00Z, before the development window (2026-11-17T00:00Z): outside, not used
+ game("X06", T(2026, 11, 16, 23, 0), L, flat(11, (3, 2)), {"T55": 5.5}, {"T55": (30, 34)}, 6, quote_minutes=[7]),
+]
 if __name__ == "__main__":
     out = sys.argv[1]; os.makedirs(out, exist_ok=True)
-    json.dump({"games": games}, open(os.path.join(out, "dev.json"), "w")); json.dump({"games": outside}, open(os.path.join(out, "outside.json"), "w"))
+    json.dump({"games": games}, open(os.path.join(out, "dev.json"), "w")); json.dump({"games": outside}, open(os.path.join(out, "outside.json"), "w")); json.dump({"games": extra}, open(os.path.join(out, "amend_extra.json"), "w"))
     print(len(games), "development games,", len(outside), "outside")
