@@ -131,3 +131,13 @@ No OPEN card holds any of the 64 series inside the sample dates.
 5. **The team of a team-total market is read from the TICKER ONLY, never the title.** The last segment of the market's ticker must begin with exactly ONE of the two team codes of the same game's winner markets (item 2). A segment that begins with neither, or with BOTH, is unreadable: counted and printed, never guessed. **The example that showed the gap:** the four markets KXBRASILEIROTEAMTOTAL-26OCT23CRUCR-CRU1 to CRU4. The game's two codes are CR and CRU, so the last segment begins with both, and all four are unreadable. The first reader took the first match and guessed (0 unreadable); the second build's rule was "exactly one team code, else unreadable" (4 unreadable). Both builds now follow this item; the Testing Desk disclosed its change.
 
 **Order from here (the Head):** if the first reader also changes for item 1 (a both-teams-to-score event with more than one market has no leg), that goes into the same new hash; Auditor B diffs it once against this amended text; then both builds print stage 1 again, a single time.
+
+### Clarifying line, Nov 13, 2026, 08:34Z by this desk's clock, text only (the Head of R&D's rulings stamped 08:47Z by the Head's clock, on Auditor B's audit of the first reader's measuring step). Written before any candle was pulled and before any price or result of this card was read. No rule, sample or figure changes.
+
+(a) **"Not tradable" (the kill line and item 3: "under half of the games with a derivable kickoff are filled").** The denominator is the group's games with a derivable kickoff, ALL of them, not only the games that have a target of that type. The line prints both counts beside the share: the group's games with a derivable kickoff, and those of them that have a target of that type. Where a type's series has no market in the group it prints "no such market in this group" (the seven leagues whose team-total series returned no market are the known case).
+
+(b) **The placebo strike ("the total-goals strike nearest 50c").** On a tie the LOWER strike is taken. The registration did not say this anywhere before; Auditor B found a tie the text did not break.
+
+(c) **For the record: the candle stage goes as two job files,** as the Requests section says ("in two runs to stay under the size cap"), now 214 requests in all against the estimate of about 160 written there. The estimate assumed six games a request; the count is the builders'.
+
+Stage 1 is recorded by the Head on two builds, the same on every figure: 1,346 games in the window, 869 sampled, 723 with a derivable kickoff, 1 game with no both-teams-to-score leg, 4 team-total markets unreadable, 7 team-total series with no market. This desk has not opened the run.
