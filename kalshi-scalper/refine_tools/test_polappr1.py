@@ -300,5 +300,18 @@ class T(unittest.TestCase):
         self.assertEqual(total, len(meta))
 
 
+class Amendment6(unittest.TestCase):
+    def test_valid_mid(self):
+        self.assertIsNone(S.valid_mid(0.5, 0.0))
+        self.assertIsNone(S.valid_mid(1.0, 0.5))
+        self.assertIsNone(S.valid_mid(0.4, 0.4))
+        self.assertAlmostEqual(S.valid_mid(0.52, 0.48), 0.5)
+
+    def test_cap_of_ten(self):
+        os_ = [dict(t="T%02d" % i, p=0.5, win=True, qt=1000 + i, ct=100000 + i) for i in range(12)]
+        L = S.live(os_)
+        self.assertEqual((L[0], L[4], L[7]), (10, 10, 2))
+
+
 if __name__ == "__main__":
     unittest.main(verbosity=1)

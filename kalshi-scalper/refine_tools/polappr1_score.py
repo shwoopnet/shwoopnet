@@ -94,6 +94,34 @@ def is_heldout(cuts, series, ect):
     return any(third(cuts, f, ect) == "HELD" for f in fams_of(series))
 
 
+def valid_mid(ask, bid):
+    """Amendment 6 (G1): the YES mid exists only when 0 < bid < ask < 1."""
+    if ask is None or bid is None or not (0 < bid < ask < 1):
+        return None
+    return (ask + bid) / 2
+
+
+def no_mid_counts(rows, cuts):
+    """Events (listed family, not held-out) with no market holding a valid mid at a look, per look (printed)."""
+    ec = event_closes(rows)
+    seen = {}
+    for j in rows:
+        if grp(j["s"]) is None or is_heldout(cuts, j["s"], ec[j["e"]]):
+            continue
+        for ln, L, tol in LOOKS:
+            ok = False
+            if j["c"]:
+                q = look_quote(sorted(j["c"]), j["ct"], L, tol)
+                if q and valid_mid(fl(q[1]), fl(q[2])) is not None:
+                    ok = True
+            seen[(j["e"], ln)] = seen.get((j["e"], ln), False) or ok
+    out = collections.Counter()
+    for (e, ln), ok in seen.items():
+        if not ok:
+            out[ln] += 1
+    return out
+
+
 def fl(x):
     try:
         return float(x)
@@ -135,7 +163,10 @@ def load_obs(rows, cuts):
                 continue
             ask = fl(q[1])
             bid = fl(q[2])
-            mid = (ask + bid) / 2 if ask is not None and bid is not None and 0 < ask < 1 else None
+            # Amendment 6 (G1): a mid exists only when 0 < bid < ask < 1; a market without one is not a candidate.
+            mid = valid_mid(ask, bid)
+            if mid is None:
+                continue
             for side in ("Y", "N"):
                 if side == "Y":
                     if ask is None or not 0 < ask < 1:
@@ -150,7 +181,7 @@ def load_obs(rows, cuts):
                 b = pbk(round(p, 4))
                 if b is None:
                     continue
-                d = abs((mid if mid is not None else p) - 0.5)
+                d = abs(mid - 0.5)
                 o = dict(s=j["s"], e=j["e"], t=j["t"], ct=ct, ect=ect, look=ln, pb=b, side=side, p=p, win=win, qt=q[0], dist=d)
                 k = (j["e"], ln, b, side)
                 # Amendment 4 (Nov 13): exact ties (within 1e-9) go to the lower ticker, not to file order.
@@ -199,11 +230,25 @@ def boot(xs, B=2000, seed=1, blocks=None):
 
 
 def live(os_):
-    """As if live: 3 contracts, +1c slip, fee rounded up to the cent per order, fills in close order.
-    Amendment 5 (2): the net rule (net under -15 dollars after 20 fills) is tested at EVERY fill from the 20th on,
-    in fill order; the 5 loss streak at any fill. Returns n, net at fill 20 (net so far if under 20 fills), longest
-    streak, fired, max open, net over all fills, first fill at which a kill fires (None if none)."""
-    os_ = sorted(os_, key=lambda o: (o["ct"], o["t"]))
+    """As if live: 3 contracts, +1c slip, fee rounded up to the cent per order, fills ordered by close time.
+    Amendment 5 (2): the net rule (net under -15 dollars after 20 fills) is tested at EVERY fill from the 20th on, in
+    fill order; the 5 loss streak at any fill. Amendment 6 (G2): at most 10 positions open at once (entry quote time to
+    close); fills are offered in entry-quote-time order (ties by ticker) and a fill that would be the 11th open is skipped
+    and counted; the replay then runs over the accepted fills ordered by close time.
+    Returns n, net at fill 20 (net so far if under 20 fills), longest streak, fired, max open, net over all fills,
+    first fill at which a kill fires (None if none), fills skipped by the cap."""
+    offered = sorted(os_, key=lambda o: (o["qt"], o["t"]))
+    openct = []
+    acc = []
+    skipped = 0
+    for o in offered:
+        openct = [c for c in openct if c > o["qt"]]
+        if len(openct) >= 10:
+            skipped += 1
+            continue
+        openct.append(o["ct"])
+        acc.append(o)
+    os_ = sorted(acc, key=lambda o: (o["ct"], o["t"]))
     tot = 0
     streak = 0
     ml = 0
@@ -232,7 +277,7 @@ def live(os_):
     for _, d in ev:
         cur += d
         mx = max(mx, cur)
-    return n, net20, ml, first is not None, mx, tot, first
+    return n, net20, ml, first is not None, mx, tot, first, skipped
 
 
 def week(o):
@@ -252,6 +297,13 @@ def cells(obs, cuts):
     return out
 
 
+def p0txt(tr, va):
+    """Amendment 6 (G2): PF and mean at +0c slip, shown beside the +1c figures of every reported cell."""
+    a = stats([net(o, 0) for o in tr])
+    b = stats([net(o, 0) for o in va])
+    return "+0c: PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f" % (a[2], b[2], 100 * a[1], 100 * b[1])
+
+
 def calibration_rows(rows, cuts):
     """Amendment 5 (3): by look and the five registered price buckets of the YES ASK, per market, pooled over the approval
     families (ALL_APPR, TRAIN and VALID events only); realized YES frequency against the mean YES ask and mean mid; n always shown."""
@@ -260,7 +312,7 @@ def calibration_rows(rows, cuts):
     for j in rows:
         if not j["c"] or "ALL_APPR" not in fams_of(j["s"]):
             continue
-        if third(cuts, "ALL_APPR", ec[j["e"]]) not in ("TRAIN", "VALID"):
+        if is_heldout(cuts, j["s"], ec[j["e"]]) or third(cuts, "ALL_APPR", ec[j["e"]]) not in ("TRAIN", "VALID"):
             continue
         cs_ = sorted(j["c"])
         for ln, L, tol in LOOKS:
@@ -269,9 +321,10 @@ def calibration_rows(rows, cuts):
                 continue
             a = fl(q[1])
             b = fl(q[2])
-            if a is None or b is None or not 0 < a < 1:
+            mid = valid_mid(a, b)
+            if mid is None:
                 continue
-            pts.append((ln, a, (a + b) / 2, 1.0 if j["res"] == "yes" else 0.0))
+            pts.append((ln, a, mid, 1.0 if j["res"] == "yes" else 0.0))
     out = []
     for ln, _, _ in LOOKS:
         for lo, hi in PB:
@@ -322,6 +375,8 @@ def report(rows, cuts):
             unl[s] += 1
     for s, c in sorted(unl.items()):
         out.append("  %s: unlisted, not scored (%d events)" % (s, c))
+    nm = no_mid_counts(rows, cuts)
+    out.append("EVENTS WITH NO VALID MID (0 < bid < ask < 1) AT A LOOK, no observation there: " + (", ".join("%s %d" % (ln, nm[ln]) for ln, _, _ in LOOKS) if nm else "none"))
     out.append("OBS %d" % len(obs))
     out.append("")
     out.append("CALIBRATION (Amendment 5: YES ask buckets, per market, approval families pooled, TRAIN and VALID events only; descriptive only): look | bucket n meanAsk meanMid realizedYES")
@@ -359,16 +414,17 @@ def report(rows, cuts):
             wl, wh = boot([net(o) for o in va], blocks=[week(o) for o in va])
             wide = wl if wl < lo_ else lo_
             killed = L[3] or s2[1] <= 0 or wide <= 0
-            out.append("PASS %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] week-block[%+.1f,%+.1f] z%.2f %s | live3: n%d net@20 $%.2f net(all) $%.2f streak%d kill%s first-kill-fill %s maxopen%d | %s" % (
+            out.append("PASS %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] week-block[%+.1f,%+.1f] z%.2f %s | " % (
                 tag, len(tr), len(va), s1[2], s2[2], 100 * s1[1], 100 * s2[1], 100 * lo_, 100 * hi, 100 * wl, 100 * wh, sa[3],
-                ("PASSES the research bar z %.2f (4.55 info)" % RESEARCH_Z) if sa[3] >= RESEARCH_Z else "exploratory (below the research bar z %.2f; 4.55 of the retired ledger is information only)" % RESEARCH_Z, L[0], L[1], L[5], L[2], "Y" if L[3] else "N", L[6] if L[6] else "none", L[4],
+                ("PASSES the research bar z %.2f (4.55 info)" % RESEARCH_Z) if sa[3] >= RESEARCH_Z else "exploratory (below the research bar z %.2f; 4.55 of the retired ledger is information only)" % RESEARCH_Z) + p0txt(tr, va) + " | live3: n%d net@20 $%.2f net(all) $%.2f streak%d kill%s first-kill-fill %s maxopen%d cap-skipped%d | %s" % (
+                L[0], L[1], L[5], L[2], "Y" if L[3] else "N", L[6] if L[6] else "none", L[4], L[7],
                 "KILLED" if killed else "survives the kill bar") + ("" if n >= NO_EVIDENCE_N else " | no evidence at n = %d" % n))
         elif n < NO_EVIDENCE_N:
             out.append("     %s no evidence at n = %d (TRAIN %d, VALID %d)" % (tag, n, len(tr), len(va)))
         else:
             sa = stats([net(o) for o in tr + va])
-            out.append("     %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] z%.2f" % (
-                tag, len(tr), len(va), s1[2], s2[2], 100 * s1[1], 100 * s2[1], 100 * lo_, 100 * hi, sa[3]))
+            out.append("     %s n%d/%d PF %.2f/%.2f mean(tr)%+.1f mean(va)%+.1f va90[%+.1f,%+.1f] z%.2f | %s" % (
+                tag, len(tr), len(va), s1[2], s2[2], 100 * s1[1], 100 * s2[1], 100 * lo_, 100 * hi, sa[3], p0txt(tr, va)))
     out.append("")
     out.append("FAMILY READ (pooled TRAIN+VALID, +1c; a cell 'supports' only if pooled n >= %d, PF >= 1.3 and the event-clustered 90 percent lower bound of the mean is above 0; report only, never an advance)" % NO_EVIDENCE_N)
     for f in FAMILIES:
