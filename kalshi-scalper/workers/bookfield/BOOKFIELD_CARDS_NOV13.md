@@ -35,3 +35,6 @@ I looked for a third mechanism that is not a filter, flow, depth at the touch or
 1. Send DEPTH1's feature list so CARD 2 and CARD 1 can be checked against it by name.
 2. The recorders log the book at 2 s (R6) and 5 s (NC15), so a cancellation shorter than the poll is invisible: CARD 1's reconciliation is an estimate.
 3. Both cards sit in the sparse part of the book (levels 2 to 5), where the recorders keep only five levels per side.
+
+## Dated line, Nov 13, 2026, 18:52Z (the Head of R&D, on the Verification Analyst's scoring)
+Both cards are CLOSED AT INTAKE as NOT UNIQUE. WITHDRAW1's field is DEPTH1's f6 (thin side depletion) and a second try of BOOKCH1; AIRGAP1's field is DEPTH1's f8 and f9 (holes and slope) with a price zone gate. They count as tries for the book-shape family. No scorer, fixture or read is written for either. If tonight's DEPTH1 read shows the family alive, a version of either may be revisited then, as a DEPTH1 version and not a new card.
