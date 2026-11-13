@@ -62,4 +62,4 @@
    - not a lock or parity scan, not taker flow, not a cheap-side sweep, not market making, not time-of-day;
    - favourite-and-hold is excluded by the 20c to 80c band;
    - no Polymarket or Yahoo read.
-   - The 14-day politics hold cap is 30 days for politics singles (POLITICS_RULES); markets settling more than 30 days out are left out of any live probe, not of the research read.
+   - The politics hold cap (30 days for singles, POLITICS_RULES) applies to any live probe, not to the research read.
