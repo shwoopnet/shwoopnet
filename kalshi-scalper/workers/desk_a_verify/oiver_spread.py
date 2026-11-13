@@ -1,6 +1,6 @@
 """OIVER-SPREAD scorer, BUILD 1 (Desk A, Nov 13 2026; the Head's order of 19:50Z), built to DESK_A_OICORE_VERSIONS_NOV13.md card 1 (741092a7). History screen only: it is NOT a takeover (7g takeover is a forward read beside the parent). Offline, sends nothing. Written to be queued behind V1; NO real run.
   python3 -I oiver_spread.py dev <lists dir> <candles dir>
-DEVELOPMENT only: windows closing BEFORE HELDOUT_FIRST = 2026-12-01T00:00:00Z. (A held-out mode is NOT built here: the Head sets its read date and the marker rule first.)
+DEVELOPMENT only: windows closing from 2026-09-12T00:00:00Z (inclusive) to before 2026-11-09T00:00:00Z (exclusive) (the Head's ruling, 21:12Z). (A held-out mode is NOT built here: the Head sets its read date and the marker rule first.)
 INPUT (kalshi-pull run folders, both pass spxoi1_threshold.check_run and heldout_guard_v2): lists carry `ticker`, `close_time`, `result` (yes or no; anything else is dropped and counted); candles are KXBTC15M 1 minute candles with `end_period_ts`, yes bid and yes ask close, and `open_interest_fp` (string, read first) or `open_interest`.
 THE PARENT (OICORE as registered, README SLOT-OICORE, with the live 8c floor), on candles; MY READING of the registered text, the same convention for parent and version so the comparison is paired (absolute figures may differ from V2's): decision candle = the one ending at close - 180 s; fired if open interest at it minus open interest at the candle ending close - 360 s is at least T = 86,300 (a missing candle or unreadable open interest = not scored, counted); the cheaper side by price (YES price = yes ask, NO price = 1 - yes bid; a tie goes to YES; a crossed or locked book, bid >= ask, is skipped and counted); that side's decision price must be inside 0.08 to 0.50 inclusive (1e-9 slack); it is filled at that ASK SEEN, with no +0.01 slip (OICORE's slip was switched off in PR 895) and no next-candle fill check; held to settlement; C = 20 contracts, fee = 0.07 x p x (1 - p) per contract on 20 contracts rounded UP to the cent per order; cash per contract = (1 if the side wins else 0) - price - fee / 20. Halves (for the second-half comparison) are by COUNT: the trades in date order, the first floor(n / 2) and the rest.
 THE VERSION (OIVER-SPREAD): the parent's trade ONLY IF (yes ask - yes bid) at the decision candle is at most 0.03 (1e-9 slack). So every version trade is a parent trade (a subset on the same windows).
@@ -8,7 +8,8 @@ OUTPUT: parent and version n, win rate, cash PF, mean per contract; share of par
 import sys, os, gzip, json, math, calendar, time, re, collections
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import spxoi1_threshold as S
-HELDOUT_FIRST = calendar.timegm(time.strptime("2026-12-01", "%Y-%m-%d"))
+DEV_FROM = calendar.timegm(time.strptime("2026-09-12", "%Y-%m-%d"))      # the development range (the Head, 21:12Z): closes from here (inclusive) ...
+DEV_TO = calendar.timegm(time.strptime("2026-11-09", "%Y-%m-%d"))        # ... to before here (exclusive); R6 and the CFRTI cards hold the later windows
 T_OI, BAND, SPREAD_MAX, EPS, CONTRACTS = 86300.0, (0.08, 0.50), 0.03, 1e-9, 20      # no limit slip (OICORE's slip was switched off in PR 895); C = 20 contracts for the fee rounding
 def fee_up(p, n=CONTRACTS): return math.ceil(0.07 * n * p * (1 - p) * 100 - 1e-9) / 100
 def pf(v):
@@ -37,7 +38,7 @@ def load_windows(lists):
             tk, ct, res = m.get("ticker"), m.get("close_time"), m.get("result")
             if not (isinstance(tk, str) and tk.startswith("KXBTC15M-") and isinstance(ct, str)): continue
             c = S.iso(ct)
-            if c is None or c >= HELDOUT_FIRST: continue                      # development only
+            if c is None or c < DEV_FROM or c >= DEV_TO: continue                      # development range only
             if res in ("yes", "no"): out[tk] = dict(close=c, yes=res == "yes")
             else: bad += 1
     return out, bad
@@ -71,7 +72,7 @@ def report(windows, cands):
         t, r = decide(w, cands.get(tk, {})); why[r] += 1
         if t: parent.append(t)
     parent.sort(key=lambda t: t["close"]); ver = [t for t in parent if t["spread_ok"]]
-    L = ["OIVER-SPREAD HISTORY SCREEN (development, closes before 2026-12-01; NOT A TAKEOVER) | windows %d (result not yes or no, dropped before: counted elsewhere) | decisions: %s" % (len(windows), dict(why)), line("parent OICORE", parent), line("version SPREAD <= 3c", ver)]
+    L = ["OIVER-SPREAD HISTORY SCREEN (development, closes 2026-09-12 to before 2026-11-09; NOT A TAKEOVER) | windows %d (result not yes or no, dropped before: counted elsewhere) | decisions: %s" % (len(windows), dict(why)), line("parent OICORE", parent), line("version SPREAD <= 3c", ver)]
     if not parent: return L
     removed = 1 - len(ver) / len(parent); L.append("share of parent signals removed by the spread condition: %.1f%%" % (100 * removed))
     if not ver: return L

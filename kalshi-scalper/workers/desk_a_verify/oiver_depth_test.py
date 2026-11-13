@@ -52,7 +52,7 @@ polls("W8", 8, "", "100", "1", "1")            # YES buy, no_bid_sz_1 100: kept
 d4 = os.path.join(d, "r6", "2026-11-05", "1500"); os.makedirs(d4)
 with gzip.open(d4 + "/book.csv.gz", "wt", newline="") as f:
     w = csv.DictWriter(f, COLS); w.writeheader(); w.writerows(sorted(rows, key=lambda r: r["t_recv_ms"]))
-# the R6 held-out guard (the Head, 21:08Z): R6 closes on or after 2026-11-09T00:00:00Z are held out by unread cards. A parent trade closing then is NOT in the replay set, and a folder dated 2026-11-09 or later is never opened
+# the R6 held-out guard (the Head, 21:08Z): R6 closes on or after 2026-11-09T00:00:00Z are held out by unread cards; since the 21:12Z development range already stops before 2026-11-09 the window never loads, and a folder dated 2026-11-09 or later is never opened either way
 cH = calendar.timegm(time.strptime("2026-11-09", "%Y-%m-%d")) + 900; tkH = "KXBTC15M-H1"
 mk.append({"ticker": tkH, "close_time": iso(cH), "result": "yes"}); cd.append({"market_ticker": tkH, "candlesticks": [C(cH - 360, 0.5, 0.5, 1000000), C(cH - 180, 0.08, 0.10, 1100000), C(cH - 120, 0.08, 0.10, 1100000)]})
 dH = os.path.join(d, "r6", "2026-11-09", "0000"); os.makedirs(dH)
@@ -64,8 +64,8 @@ assert "KXBTC15M-H1" not in by, "a folder dated 2026-11-09 was opened"
 buf = io.StringIO()
 with contextlib.redirect_stdout(buf): OD.main(lists, cands, os.path.join(d, "r6"))
 out = buf.getvalue()
-assert "parent OICORE (all candle trades): n 6 |" in out, out                        # the Nov 9 window is a parent trade on candles (the candle files are not held out here) ...
-assert "parent trades with no R6 decision poll (left out of the replay set): 1" in out and "parent trades closing on or after 2026-11-09 (held out for R6, never looked up): 1" in out, out                      # W6 and the Nov 9 window
+assert "parent OICORE (all candle trades): n 5 | win 40.0% | cash PF 1.47 | mean +9.03c a contract" in out, out      # the Nov 9 window is outside the development range (21:12Z ruling) and never loads
+assert "parent trades with no R6 decision poll (left out of the replay set): 1" in out and "parent trades closing on or after 2026-11-09 (held out for R6, never looked up): 0" in out, out                      # W6 and the Nov 9 window
 assert "replay set (parent trades with an R6 decision poll): n 4 | win 25.0% | cash PF 0.94 | " in out, out         # W1 +0.8935, W2 -0.2735, W3 -0.315, W8 -0.366: PF 0.8935 / 0.9545 = 0.9361
 assert "version touch size >= 40: n 3 | win 33.3% | cash PF 1.31 | mean +7.08c a contract" in out, out            # W1, W3, W8: 0.8935 / (0.315 + 0.366) = 1.3121; mean (0.8935 - 0.315 - 0.366) / 3 = 0.07083
 assert "share of the replay set removed by the depth condition: 25.0%" in out and "no evidence at n = 3 version trades" in out and "n >= 60 version signals: NO" in out, out

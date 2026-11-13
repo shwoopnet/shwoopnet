@@ -8,7 +8,7 @@ def folder(d, name, body):
     p = os.path.join(d, name); os.makedirs(p); raw = json.dumps(body).encode()
     with gzip.open(p + "/0001.json.gz", "wb") as f: f.write(raw)
     json.dump({"status": "complete", "rows": [{"index": 1, "id": "r1", "page": 1, "status": 200, "bytes": len(raw), "file": "0001.json.gz", "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False, "body_kind": "object"}]}, open(p + "/manifest.json", "w")); return p
-base = calendar.timegm(time.strptime("2026-11-10", "%Y-%m-%d")) + 15 * 3600
+base = calendar.timegm(time.strptime("2026-11-05", "%Y-%m-%d")) + 15 * 3600
 mk, cd = [], []
 def C(end, bid, ask, oi): return {"end_period_ts": end, "yes_bid": {"close": bid}, "yes_ask": {"close": ask}, "open_interest_fp": str(oi)}
 def win(name, k, rise, dec, fill, result="yes", skip_prev=False):

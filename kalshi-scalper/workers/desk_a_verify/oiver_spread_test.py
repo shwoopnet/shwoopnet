@@ -7,7 +7,7 @@ def folder(d, name, body):
     p = os.path.join(d, name); os.makedirs(p); raw = json.dumps(body).encode()
     with gzip.open(p + "/0001.json.gz", "wb") as f: f.write(raw)
     json.dump({"status": "complete", "rows": [{"index": 1, "id": "r1", "page": 1, "status": 200, "bytes": len(raw), "file": "0001.json.gz", "sha256": hashlib.sha256(raw).hexdigest(), "truncated": False, "body_kind": "object"}]}, open(p + "/manifest.json", "w")); return p
-base = calendar.timegm(time.strptime("2026-11-10", "%Y-%m-%d")) + 15 * 3600
+base = calendar.timegm(time.strptime("2026-11-05", "%Y-%m-%d")) + 15 * 3600
 mk, cd = [], []
 def C(end, bid, ask, oi): return {"end_period_ts": end, "yes_bid": {"close": bid}, "yes_ask": {"close": ask}, "open_interest_fp": str(oi)}
 def win(name, k, rise, dec, fill, result="yes", skip_prev=False):
@@ -54,8 +54,10 @@ tr1 = [dict(close=0, cash=0.1, win=True)]; h1, h2 = O.halves(tr1); assert (len(h
 for rise, fired in ((86300, True), (86299, False)):
     c1 = base + 900 * 31; wx = dict(close=c1, yes=True); csx = {c1 - 180: dict(bid=0.08, ask=0.10, oi=1000000.0 + rise), c1 - 360: dict(bid=0.5, ask=0.5, oi=1000000.0)}
     assert (O.decide(wx, csx)[0] is not None) == fired, rise
-# the held-out windows never load: a window closing on 2026-12-01 is excluded
-mk2 = [{"ticker": "KXBTC15M-H", "close_time": "2026-12-01T15:00:00Z", "result": "yes"}]; l2 = folder(d, "l2", {"markets": mk2}); w2, _ = O.load_windows(l2); assert w2 == {}
+# the development range (the Head, 21:12Z): closes from 2026-09-12T00:00:00Z (inclusive) to before 2026-11-09T00:00:00Z (exclusive); everything else never loads
+edge = [("KXBTC15M-E1", "2026-09-11T23:45:00Z", False), ("KXBTC15M-E2", "2026-09-12T00:00:00Z", True), ("KXBTC15M-E3", "2026-11-08T23:45:00Z", True), ("KXBTC15M-E4", "2026-11-09T00:00:00Z", False), ("KXBTC15M-H", "2026-12-01T15:00:00Z", False)]
+mk2 = [{"ticker": tk, "close_time": ct, "result": "yes"} for tk, ct, _ in edge]; l2 = folder(d, "l2", {"markets": mk2}); w2, _ = O.load_windows(l2)
+assert sorted(w2) == sorted(tk for tk, _, keep in edge if keep), sorted(w2)
 # the source reads no field beyond the named ones
 src = open(os.path.join(here, "oiver_spread.py")).read().split("import sys, os, gzip", 1)[1]
 for bad in ("floor_strike", "volume", "yes_sub_title", "rules_primary"): assert bad not in src, bad

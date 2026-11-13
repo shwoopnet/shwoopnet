@@ -2,7 +2,7 @@
   python3 -I oiver_cap30.py dev <lists dir> <candles dir>
 THE PARENT is exactly the OIVER-SPREAD parent (decision at the candle ending close - 180 s; price = the ask seen on the cheaper side, ties to YES, no slip, no fill check; OI rise to the candle ending close - 360 s at least 86,300 inclusive; 0.08 <= price <= 0.50; C = 20 contracts for the fee rounding; held to settlement; halves by count, first floor(n/2)).
 THE VERSION (OIVER-CAP30): the parent's trade ONLY IF the price paid (the cheaper side's ask at the decision candle) is at most 0.30 (1e-9 slack); the 8c floor stays. Every version trade is a parent trade (a subset on the same windows).
-OUTPUT: as OIVER-SPREAD: parent and version n, win rate, cash PF, mean; the share removed; the paired comparison (PF difference, net per contract-week, second-half PF) and the four 7g bar parts as a HISTORY SCREEN, NOT A TAKEOVER; 'no evidence at n = x' under 100. Development only: closes before 2026-12-01T00:00:00Z."""
+OUTPUT: as OIVER-SPREAD: parent and version n, win rate, cash PF, mean; the share removed; the paired comparison (PF difference, net per contract-week, second-half PF) and the four 7g bar parts as a HISTORY SCREEN, NOT A TAKEOVER; 'no evidence at n = x' under 100. Development only: closes from 2026-09-12T00:00:00Z (inclusive) to before 2026-11-09T00:00:00Z (exclusive) (the Head, 21:12Z)."""
 import sys, os, math, collections
 here = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, here)
 import oiver_spread as O
@@ -13,7 +13,7 @@ def report(windows, cands):
         t, r = O.decide(w, cands.get(tk, {})); why[r] += 1
         if t: parent.append(t)
     parent.sort(key=lambda t: t["close"]); ver = [t for t in parent if t["p"] <= CAP + O.EPS]
-    L = ["OIVER-CAP30 HISTORY SCREEN (development, closes before 2026-12-01; NOT A TAKEOVER) | windows %d | decisions: %s" % (len(windows), dict(why)), O.line("parent OICORE", parent), O.line("version price <= 0.30", ver)]
+    L = ["OIVER-CAP30 HISTORY SCREEN (development, closes 2026-09-12 to before 2026-11-09; NOT A TAKEOVER) | windows %d | decisions: %s" % (len(windows), dict(why)), O.line("parent OICORE", parent), O.line("version price <= 0.30", ver)]
     if not parent: return L
     removed = 1 - len(ver) / len(parent); L.append("share of parent signals removed by the 0.30 ceiling: %.1f%%" % (100 * removed))
     if not ver: return L
