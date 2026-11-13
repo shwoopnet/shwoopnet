@@ -168,7 +168,7 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     # cost line: hold-to-settlement venues use the one-way entry cost (kill above 4c), a rule with an exit can keep the round trip (kill above 5c); the result says which
     cand = {"rt": 0.07, "half_spread": 0.02, "ask": 0.40}
     c_ow, c_rt = bp.VenueConfig("x", "bo3", cost_mode="one_way"), bp.VenueConfig("y", "bo3", cost_mode="round_trip")
-    assert abs(bp.cost_of(cand, c_ow) - (0.02 + 0.01 + bp.fee_up(0.41))) < 1e-9 and bp.cost_of(cand, c_rt) == 0.07 and c_ow.cost_max == 0.04 and c_rt.cost_max == 0.05
+    assert abs(bp.cost_of(cand, c_ow) - (0.02 + bp.fee_up(0.41))) < 1e-9 and bp.cost_of(cand, c_rt) == 0.07 and c_ow.cost_max == 0.04 and c_rt.cost_max == 0.05
     assert m.CFG.cost_mode == "one_way" and "one-way" in m.measure(spec, [dl], [dsr])["titles"]["DOTA2"]["cost_line_used"]
     # standing rule: a void (no yes/no result) is a fee-only loss, counted in n, PF and z, with the count printed
     calls_ms, _c = m.matches(spec, [dl]); void_keys = {r["key"] for r in calls_ms[:5]}
@@ -226,4 +226,5 @@ with tempfile.TemporaryDirectory() as dl, tempfile.TemporaryDirectory() as dc:
     assert bp.observe_winner(ixs, {"A": "MA", "B": "MB"}, 500, close=300) == "A"            # a candle ending exactly at the close is allowed
     # Head Nov 13: the second look's placebo is made of the second look's OWN looks (same matches, per title and per look)
     sk2 = m.measure(spec, [dl], [dsr])["titles"]; assert sk2["DOTA2|second_look"]["placebo"]["n"] <= sk2["DOTA2|second_look"]["filled_pre_match"] and sk2["DOTA2|second_look"]["placebo"]["n"] < sk2["DOTA2"]["placebo"]["n"]
+    cst = m.measure(spec, [dl], [dsr])["titles"]["DOTA2"]; assert abs(cst["cost_as_paid_at_the_limit_information_only"] - (cst["median_round_trip_at_look"] + 0.01)) < 1e-9          # printed beside the kill figure
 print("mapbreak synthetic tests passed")

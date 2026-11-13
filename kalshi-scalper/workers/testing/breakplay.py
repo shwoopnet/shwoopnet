@@ -70,7 +70,7 @@ def rt(b, a):
 def cost_of(cand, cfg):
     """The cost used by the kill line for one candidate at a look: round trip (spread plus two unrounded fees at the mid) or one-way (ask minus mid plus the entry fee as charged: rounded up at ask + 1c)."""
     if cfg.cost_mode == "round_trip": return cand["rt"]
-    return cand["half_spread"] + PRICE_THROUGH + fee_up(round(cand["ask"] + PRICE_THROUGH, 4))          # (the LIMIT = ask + 1c, minus the look candle's mid) plus the fee rounded up at the limit (Amendment 9 point b, Head Nov 13)
+    return cand["half_spread"] + fee_up(round(cand["ask"] + PRICE_THROUGH, 4))          # the KILL template of rule (d), the same for every hold rule (Head, final ruling Nov 13): (the look candle's ASK minus its mid) plus the fee as charged AT THE LIMIT (ask + 1c, rounded up). The cost as paid at the limit (+1c) is printed beside it, information only
 
 
 def pre_match_minute(idx, rec, cfg):
@@ -217,7 +217,7 @@ def _add_look(P, idx, rec, r, cfg, sc):
     for s in ("up", "down"): P["spreads"].append(r["cand"][s]["spread"])
     c = r["cand"][r["best"]]
     if cfg.fill_next_minute:
-        P["rts"].append(cost_of(c, cfg))                                           # Amendment 10 line 2: the one-way cost is over EVERY look with an observable state and both match contracts two-sided, on the cheaper side's contract
+        P["rts"].append(cost_of(c, cfg)); P["rts_limit"] = P.get("rts_limit", []) + [cost_of(c, cfg) + PRICE_THROUGH]          # Amendment 10 line 2: the one-way cost is over EVERY look with an observable state and both match contracts two-sided, on the cheaper side's contract
         if c.get("tie"): P["equal_gaps_no_bet"] = P.get("equal_gaps_no_bet", 0) + 1
         if fired(c, cfg):
             P["fired"] = P.get("fired", 0) + 1
@@ -273,10 +273,10 @@ def measure(records, candle_folders, cfg):
         verdicts.append(v)
         titles[cell] = {"sampled": P["sampled"], "filled_pre_match": P["pre"], "fired_signals_at_the_look": P.get("fired", 0), "fired_and_filled_next_minute": P.get("fired_filled", 0), "fired_not_filled": P.get("fired_not_filled", 0), "fired_not_filled_of_which_no_next_minute_candle_at_all": P.get("fired_not_filled_no_next_minute_candle", 0), "equal_gaps_no_bet": P.get("equal_gaps_no_bet", 0), "unobservable_look_not_reached_no_pre_match": P.get("unobservable_look_not_reached_no_pre_match", 0), "state_not_observable_at_the_look": P.get("state_not_observable", 0), "no_look_before_state": P.get("no_look", 0), "map2_won_by_map1_winner_no_second_look": P.get("map2_won_by_map1_winner", 0), "observed_winner_differs_from_posted_result": P.get("observed_differs_from_posted", 0), "dropped_pre_match_with_match_contract_ok_but_placebo_contracts_not_in_the_same_minute": P["pre_dropped_match_ok"], "filled_at_the_look": n,
                         "median_minutes_state_close_to_look": None if not P["minutes"] else round(st.median(P["minutes"]), 2), "median_spread_at_look": None if not P["spreads"] else round(st.median(P["spreads"]), 4),
-                        "median_round_trip_at_look": medrt, "cost_line_used": ("round trip (spread plus two fees), kill above %.0fc" if cfg.cost_mode == "round_trip" else "one-way entry cost (ask minus mid plus the entry fee as charged), kill above %.0fc") % (100 * cfg.cost_max), "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
+                        "median_round_trip_at_look": medrt, "cost_as_paid_at_the_limit_information_only": (None if not P.get("rts_limit") else round(st.median(P["rts_limit"]), 4)), "cost_line_used": ("round trip (spread plus two fees), kill above %.0fc" if cfg.cost_mode == "round_trip" else "one-way entry cost (ask minus mid plus the entry fee as charged), kill above %.0fc") % (100 * cfg.cost_max), "look": s_l, "placebo": s_p, "state_known_at_close": None if not P.get("state_known_n") else {"records_with_a_two_sided_candle_before_close": P["state_known_n"], "share_up_contract_bid_ge_0.90": round(P["state_known_hi"] / P["state_known_n"], 3), "note": "low share = close_time is a scheduled time, the state was read before it was public"},
                         "denominators": "look share over %d matches, placebo share over %d matches%s" % (0 if not s_l else s_l["n"], 0 if not s_p else s_p["n"], " (the same matches: this look's own pre-match placebo)"), "verdict": v}
     return {"titles": titles, "tries_added": 0, "rule_scored": False, "result_read": False, "freshness": cfg.freshness,
-            "disclosed_limit": "second looks exist only for matches whose POSTED map-2 result says one map each (how the candle windows were planned); per title the count of looks where the observed state differs from the posted one is printed (observed_winner_differs_from_posted_result, map2_won_by_map1_winner_no_second_look)",
+            "disclosed_limit": "second looks exist only for matches whose POSTED map-2 result says one map each (how the candle windows were planned); DIRECTION: it drops looks a live trader would have made on a wrong observation, so it can only FLATTER the second look; per title the count of looks where the observed state differs from the posted one is printed (observed_winner_differs_from_posted_result, map2_won_by_map1_winner_no_second_look)",
             "card": "CLOSED: every cell is closed or has no evidence" if verdicts and all(not v.startswith("SURVIVES") for v in verdicts) else ("a cell survives the measurement" if verdicts else "no cell measured")}
 
 
