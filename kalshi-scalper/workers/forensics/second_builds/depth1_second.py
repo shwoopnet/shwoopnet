@@ -337,6 +337,7 @@ def measure(root, made_up=False, now=None):
     for (m, f), trs in tries.items():
         s = score(trs); ctl = p99 is not None and real_mean[(m, f)] is not None and real_mean[(m, f)] > p99 + EPS
         s["control_passed"] = ctl; s["marginal_p"] = ((1 + ge[(m, f)]) / (1 + counted[(m, f)])) if counted[(m, f)] else None
+        s["control_p_best_of_20"] = ((1 + sum(1 for b in best_of_20 if real_mean[(m, f)] is not None and b >= real_mean[(m, f)] - EPS)) / (1 + len(best_of_20))) if (best_of_20 and real_mean[(m, f)] is not None) else None
         s["meets_the_whole_bar"] = meets_bar(s, ctl); s["z_against_5.46"] = s["z_date_clustered"] is not None and s["z_date_clustered"] >= BAR["z_shared"] - EPS
         s["second_look_flag_55pct_at_300"] = s["n"] >= 300 and s["direction_accuracy"] is not None and s["direction_accuracy"] >= 0.55 - EPS
         nh = [t for t in trs if t["held"] is False]
@@ -349,6 +350,26 @@ def measure(root, made_up=False, now=None):
     out["CLOSED-FAMILY FEATURES, REPORTED SEPARATELY"] = {k: v for k, v in res.items() if k.split(" ")[1] in CLOSED_FAMILY}
     out["verdict"] = ("NOT_YET_FALSIFIED: %s meet the whole bar (a forward-test registration only; a closed-family feature alone cannot become a lead)" % passed) if passed else "FALSIFIED: none of the 20 tries meets the whole bar"
     return out
+
+
+def lines(out):
+    """the figures as text lines, one a try, in the order Desk A's read prints them (for a line by line comparison)"""
+    f = lambda x, d=2: "n/a" if x is None else ("inf" if x == float("inf") else ("%." + str(d) + "f") % x)
+    c = out.get("shuffled_book_control") or {}; L = ["verdict: " + str(out.get("verdict"))]
+    if "tries" not in out: return L
+    L.append("z bar 5.27 (5.46 beside it); shuffled-book control: %s rounds, best-of-20 mean net 99th percentile %sc, median %sc" % (c.get("rounds_counted"), f(100 * c["p99_of_best_of_20_mean_net"]), f(100 * c["median_of_best_of_20"])))
+    allt = dict(out["tries"]); allt.update(out["CLOSED-FAMILY FEATURES, REPORTED SEPARATELY"])
+    for m in MARKETS:
+        L.append("-- %s: %s scored windows" % (m, out["windows_with_a_decision_poll"].get(m)))
+        for ft in FEATURES:
+            v = allt["%s %s" % (m, ft)]; b = v["pf_blocks"]; bn = v["block_n"]; nh = v["without_held_and_unknown_windows"]
+            L.append("%s%s n %d PF %s blocks %s (n %d) / %s (n %d) / %s (n %d) halves %s / %s net %sc stress PF %s acc %s vs mean ask %s z %s control p(best of 20) %s %s; no-result fee-only %d; without windows L1 / OICORE holds: n %d PF %s%s" % (
+                "[closed family] " if ft in CLOSED_FAMILY else "", ft, v["n"], f(v["pf"]), f(b["A"]), bn["A"], f(b["B"]), bn["B"], f(b["C"]), bn["C"], f(v["pf_halves"][0]), f(v["pf_halves"][1]),
+                f(None if v["net_per_trade"] is None else 100 * v["net_per_trade"]), f(v["pf_fee_x1.2"]), f(v["direction_accuracy"], 3), f(v["mean_ask"], 3), f(v["z_date_clustered"]), f(v["control_p_best_of_20"], 3),
+                "PASS" if v["control_passed"] else "fail", v["no_result_fee_only"], nh["n"], f(nh["pf"]), " <- BAR MET" if v["meets_the_whole_bar"] else ""))
+    flags = [k for k, v in allt.items() if v["second_look_flag_55pct_at_300"]]
+    L.append("second look flags (accuracy >= 55% with n >= 300; not a verdict): " + (", ".join(flags) if flags else "none"))
+    return L
 
 
 def read(root, outdir):
