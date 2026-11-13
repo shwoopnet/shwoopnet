@@ -79,7 +79,8 @@ def make(base, list_job="CFRTI_K_LISTS", cjob="CFRTI_K_CANDLES", conflict=False,
     run(os.path.join(d, "C1"), cjob, [(("b0", 1, {"market_tickers": ",".join(T)}), body)], drop_sha=drop_sha, pre=pre, extra_key=extra_key)
     if last:
         tail(os.path.join(d, "C1"), "b0", last)
-    run(os.path.join(d, "C2"), "CFRTI_K_R6SLICE", [(("s0", 1, {"market_tickers": T[0]}), {"markets": [{"market_ticker": T[0], "candlesticks": m1(conflict)}]})])
+    c2 = m1(conflict) if m1c == C1 else m1c_c                                  # the cross-check run carries the same M1 candles as run 1
+    run(os.path.join(d, "C2"), "CFRTI_K_R6SLICE", [(("s0", 1, {"market_tickers": T[0]}), {"markets": [{"market_ticker": T[0], "candlesticks": c2}]})])
     return os.path.join(d, "out.csv"), os.path.join(d, "L"), [os.path.join(d, "C1"), os.path.join(d, "C2")]
 
 
@@ -109,28 +110,31 @@ blank_csv = EXP.replace("400000.0,,,,,no\n", "400000.0,,,,,\n")
 same({"m2res": "", "list2": [lm(T[1], "2026-11-04T12:15:00Z", "")]}, "F4 blank", blank_csv, dict(BASE, blank_result=1))
 
 
-def refused(kw, what, base=root):
+def refused(kw, what, why, base=root):
     o, l, c = make(base, **kw)
     try:
         build(o, l, c)
     except (R.Stop, SystemExit) as e:
-        print("refused", what, "->", str(e)[:90]); return
+        print("refused", what, "->", str(e)[:90])
+        if why not in str(e):
+            bad.append(("refused for the wrong reason", what, str(e)[:90]))
+        return
     bad.append(("not refused", what))
 
 
-refused({"conflict": True}, "two runs disagree")
-refused({"list_job": "SPREADLISTS"}, "wrong list job")
-refused({"cjob": "NOSIDE1_CANDLES"}, "wrong candle job")
-refused({"drop_sha": True}, "row without sha256")
-refused({"m1close": "2026-09-11T23:45:00Z"}, "F1 close before WINDOW_FROM")
-refused({"m3close": "2026-11-09T00:00:00Z"}, "F1 close at WINDOW_TO")
-refused({"last": 429}, "F2 request ending on a 429")
-refused({"last": 404}, "F2 request ending on a 404")
-refused({"extra_key": True}, "F3 embedded job differs")
-refused({"list2": [lm(T[0], "2026-11-04T12:05:00Z", "yes")]}, "F4 close_time disagrees")
-refused({"list2": [lm(T[0], "2026-11-04T12:00:00Z", "no")]}, "F4 yes against no")
+refused({"conflict": True}, "two runs disagree", "two runs disagree")
+refused({"list_job": "SPREADLISTS"}, "wrong list job", "not one of")
+refused({"cjob": "NOSIDE1_CANDLES"}, "wrong candle job", "not one of")
+refused({"drop_sha": True}, "row without sha256", "not a whole answer")
+refused({"m1close": "2026-09-11T23:45:00Z"}, "F1 close before WINDOW_FROM", "closes outside")
+refused({"m3close": "2026-11-09T00:00:00Z"}, "F1 close at WINDOW_TO", "closes outside")
+refused({"last": 429}, "F2 request ending on a 429", "does not end on its one 200")
+refused({"last": 404}, "F2 request ending on a 404", "does not end on its one 200")
+refused({"extra_key": True}, "F3 embedded job differs", "not the audited")
+refused({"list2": [lm(T[0], "2026-11-04T12:05:00Z", "yes")]}, "F4 close_time disagrees", "disagree on close_time")
+refused({"list2": [lm(T[0], "2026-11-04T12:00:00Z", "no")]}, "F4 yes against no", "disagree on the result")
 hd = os.path.join(root, "HELDOUT_x"); os.makedirs(hd)
-refused({}, "HELDOUT_ path", base=hd)
+refused({}, "HELDOUT_ path", "HELDOUT", base=hd)
 o, l, c = make(root)
 try:
     R.build(o, l, c); bad.append(("not refused", "F3 made-up job against the real pinned hashes"))

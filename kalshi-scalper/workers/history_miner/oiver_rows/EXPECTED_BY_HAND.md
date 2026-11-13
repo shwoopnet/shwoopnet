@@ -78,3 +78,4 @@ KXBTC15M-26NOV040730-30,KXBTC15M-26NOV040730,1793795400,300000.0,,,0.3,0.7,,no
 - an embedded job that differs from the audited one (an extra key)
 - list rows of one ticker that disagree on close_time
 - list rows of one ticker that disagree on yes against no
+- **Test fix found on the first run (not a change to any expected figure):** the "close before WINDOW_FROM" case was refused for the wrong reason (two runs disagree), because the test moved M1's candles in run 1 only. The cross-check run now carries the same moved candles, and every refusal now checks its expected reason.
