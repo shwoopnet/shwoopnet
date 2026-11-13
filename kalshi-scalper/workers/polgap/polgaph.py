@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """POLGAPH: builders and scorer. Written Nov 13, 2026, before any list, candle, price path or result of this
-card was requested or read. The text it follows: polgap/POLGAPH_REGISTRATION.md with Amendment 1.
+card was requested or read. The text it follows: polgap/POLGAPH_REGISTRATION.md with Amendments 1 to 5
+(Amendment 5, Nov 13: development closes end 2026-11-04 23:59:59Z, 63 series; no price or result had been read).
 
 Four commands, in the order they are used:
   hourly-job <lists run> <out.json>                 builds the hourly candle job. Reads tickers, events, open and close times only.
@@ -27,7 +28,7 @@ from deskb_guard import refuse_all, refuse_heldout  # noqa: E402
 ET = ZoneInfo("America/New_York")
 EPS = 1e-9
 DEV_FROM = "2026-09-12T00:00:00Z"
-DEV_TO = "2026-11-12T23:59:59Z"            # closes after this are held out and must never appear
+DEV_TO = "2026-11-04T23:59:59Z"            # Amendment 5: closes after this are held out and must never appear
 HALF_FROM = "2026-10-13"                   # Eastern date of the gap morning: second half from this date
 GAP = 0.05
 STEADY = 0.01
@@ -42,11 +43,18 @@ MIN_BETS, MIN_HALF = 150, 40
 PF_LINE, HALF_LINE = 1.5, 1.0
 LIFE_CAP_S = 35 * 86400                    # hourly candles asked for at most this long before a market's close
 GROUP_TICKERS, MAX_CANDLES = 100, 8500
-HOURLY_CAP, MINUTE_CAP = 240, 61
+HOURLY_CAP, MINUTE_CAP = 177, 61             # Amendment 5: 69 spent + 63 lists + 177 + 71 = 380, the card's ceiling
 LABEL = "candle freshness measured on Bitcoin 15 minute only, not on these markets"
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERIES_FILE = os.path.join(HERE, "POLGAPH_SERIES.json")
 REG = "kalshi-scalper/workers/polgap/POLGAPH_REGISTRATION.md"
+HELDOUT_LINE = ("none in this job: every market asked for closes from 2026-09-12T00:00:00Z to 2026-11-04T23:59:59Z and no request ends after it. "
+                "Cards that ever held out any of these 63 series or dates, with their state on Nov 13, 2026: POLGAPH (this card; held-out closes "
+                "2026-11-05T00:00:00Z to 2026-12-17T23:59:59Z, unread, not pulled); POLI2 (Testing Desk; closed on cost Nov 12, zero tries; held-out "
+                "from 2026-11-05T00:00:00Z, never read, not pulled). No other card found on main, six desk branches or the research chat's branch. Six series are NOT asked "
+                "for because an open card holds them out before 2026-11-05: KXTRUTHSOCIAL and KXTRUTHSOCIALD (COUNT1, COUNT1B, COUNT1D of the research "
+                "chat; W-CAT-POLENT1 of Refinement), KXPOTUSTWEETS (COUNT1 forward freeze), KXEOWEEK, KXBILLSSIGNED and KXBILLSCOUNT (EXECSUM). The landed "
+                "run POLGAPH_LISTS/2026-11-13T0627Z_43378777252 is listed held-out material and is not an input.")
 STOP = {"pause_seconds_on_429": "5, doubling to 60", "stop_after_consecutive_429": 3,
         "note": "a 429 is waited out with a doubling pause and the same request is asked again; three in a row end the run; no other address, no proxy, no retry around a refusal"}
 
@@ -188,7 +196,7 @@ def group_requests(items, interval_s):
 def job(job_id, purpose, reqs, cap, tickers, notes):
     series, _ = families()
     return {"job_id": job_id, "owner": "DESK_B", "registration": REG, "purpose": purpose,
-            "heldout": "none: every market closes on or before 2026-11-12 23:59:59Z and no request ends after it; closes from 2026-11-13 are held out and not pulled",
+            "heldout": HELDOUT_LINE,
             "allowed_endpoints": [{"name": "batch_candles", "method": "GET", "path_pattern": "/markets/candlesticks",
                                    "params_allowed": ["market_tickers", "start_ts", "end_ts", "period_interval"]}],
             "series_allowlist": series, "ticker_allowlist": sorted(tickers), "max_requests": cap, "requests": reqs, "notes": notes,

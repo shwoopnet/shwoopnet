@@ -1,5 +1,5 @@
 {
- "comment": "POLGAPH universe, fixed Nov 13, 2026 before any price or result of a gap morning was read. It is the Testing Desk's POL-i2 universe (the 79 Politics series whose frequency in the public series list is daily, weekly or monthly; claude/testing-desk 60e0d2a5, asked as pc_ requests in pull/TESTING_LISTS_BUNDLE) minus the 10 approval, favourability and generic ballot series, which other cards hold out and which carry their own closed read. A change to this list is a new registration.",
+ "comment": "POLGAPH universe, fixed Nov 13, 2026 before any price or result of a gap morning was read. It is the Testing Desk's POL-i2 universe (the 79 Politics series whose frequency in the public series list is daily, weekly or monthly; claude/testing-desk 60e0d2a5, asked as pc_ requests in pull/TESTING_LISTS_BUNDLE) minus the 10 approval, favourability and generic ballot series, which other cards hold out and which carry their own closed read. A change to this list is a new registration. AMENDMENT 5 (Nov 13, 2026): six series dropped because an open card of another desk holds them out from a date before 2026-11-05 (see dropped_amendment_5); 63 series remain. Written before any price or result of this card was read.",
  "source_universe": 79,
  "excluded_approval_favourability_generic_ballot": [
   "538APPROVE",
@@ -22,11 +22,8 @@
   "KXACTBLUETOP",
   "KXASYLUMCASES",
   "KXBABELMANDEBWEEKLY",
-  "KXBILLSCOUNT",
   "KXBILLSCOUNTWEEKLY",
-  "KXBILLSSIGNED",
   "KXDCGOLFVISITCOUNT",
-  "KXEOWEEK",
   "KXEPSTEIN",
   "KXFRPROTEST",
   "KXFULLLID8PM",
@@ -56,7 +53,6 @@
   "KXPANAMAWEEKLY",
   "KXPARDONANYONE",
   "KXPARDONSTRUMP",
-  "KXPOTUSTWEETS",
   "KXPRESSBRIEFINGCOUNT",
   "KXSUEZWEEKLY",
   "KXSWENCOUNTERS",
@@ -77,8 +73,6 @@
   "KXTRUMPSTATESMON",
   "KXTRUMPVISITGREENLAND",
   "KXTRUMPVISITWEEK",
-  "KXTRUTHSOCIAL",
-  "KXTRUTHSOCIALD",
   "KXUKPOLLFIRST",
   "KXUSCANADATARIFFDOWN",
   "KXUSCANADATARIFFUP",
@@ -93,11 +87,8 @@
    "KXACTBLUETHIRD",
    "KXACTBLUETOP",
    "KXASYLUMCASES",
-   "KXBILLSCOUNT",
    "KXBILLSCOUNTWEEKLY",
-   "KXBILLSSIGNED",
    "KXDCGOLFVISITCOUNT",
-   "KXEOWEEK",
    "KXFULLLID8PM",
    "KXFULLLIDBEFORE630PM",
    "KXFULLLIDBEFORE8PM",
@@ -114,7 +105,6 @@
    "KXNYTHEAD",
    "KXPARDONANYONE",
    "KXPARDONSTRUMP",
-   "KXPOTUSTWEETS",
    "KXPRESSBRIEFINGCOUNT",
    "KXSWENCOUNTERS",
    "KXTRUMPACT",
@@ -131,9 +121,7 @@
    "KXTRUMPNUMSTATES",
    "KXTRUMPPHOTO",
    "KXTRUMPSTATESMON",
-   "KXTRUMPVISITWEEK",
-   "KXTRUTHSOCIAL",
-   "KXTRUTHSOCIALD"
+   "KXTRUMPVISITWEEK"
   ],
   "shipping counts": [
    "KXBABELMANDEBWEEKLY",
@@ -161,5 +149,13 @@
    "KXUSCANADATARIFFUP"
   ]
  },
- "families_note": "Fixed 01:06Z Nov 13, 2026 (Amendment 1), before any price path or result of a gap morning was read. Every series is in exactly one family."
+ "families_note": "Fixed 01:06Z Nov 13, 2026 (Amendment 1), before any price path or result of a gap morning was read. Every series is in exactly one family.",
+ "dropped_amendment_5": {
+  "KXTRUTHSOCIAL": "COUNT1 (research chat V2): frozen last third of weekly events, unread, and a forward freeze from the week of 2026-11-08; COUNT1B held out periods starting 2026-10-20 or later; W-CAT-POLENT1 (Refinement) names the series. State of each as found Nov 13: open, held-out unread.",
+  "KXTRUTHSOCIALD": "COUNT1 (V2): frozen last third of daily events, unread; COUNT1D (V2): forward periods from 2026-11-04, open; COUNT1B; W-CAT-POLENT1 (Refinement): event KXTRUTHSOCIALD-26NOV10 in its held-out third, unread.",
+  "KXPOTUSTWEETS": "COUNT1 (V2): registered as a forward freeze only, periods starting after 2026-11-03; frozen and dormant, nothing read.",
+  "KXEOWEEK": "EXECSUM (V2, registered Nov 11): held-out is the last third of settled markets by close time (development closes ended 2026-08-07). Variant D0's held-out was read once (spent); variant D3's held-out is not read. Series verdict NOT_ENOUGH_DATA, so the card is not closed.",
+  "KXBILLSSIGNED": "EXECSUM (V2): held-out last third by close time for BILLS-D0 and BILLS-D15, not read; verdict NOT_ENOUGH_DATA, open.",
+  "KXBILLSCOUNT": "EXECSUM (V2): held-out last third by close time for BILLS-D0 and BILLS-D15, not read; verdict NOT_ENOUGH_DATA, open."
+ }
 }

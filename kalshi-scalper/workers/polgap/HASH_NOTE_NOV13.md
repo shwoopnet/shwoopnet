@@ -37,3 +37,28 @@ No overlap: NO_ARM_APPROVAL, NOSIDE1, POLAPPR1 (approval and generic ballot seri
 **Dead:** `desk_b_jobs/POLGAPH_HOURLY.json` (dfc64533), which asks for held-out tickers. It was never sent.
 
 **Ruled (seq 16), to be written ONCE when the sweep of every branch is finished:** development becomes closes 2026-09-12 to 2026-11-04 23:59:59Z; held-out from 2026-11-05T00:00Z; a new lists job bounded there; the hourly job rebuilt; new hashes for the scorer and registration; Auditor B's diff; Forensics' re-match. Whether KXTRUTHSOCIAL and KXTRUTHSOCIALD drop (overlap 3) waits on the Head.
+
+## AMENDMENT 5 written once: the hashes that stand from here (Nov 13, 2026, 06:59Z)
+
+Written on the Head of R&D's ruling of 06:50Z, after the sweep, before any price or result of this card was read. The one try is unspent.
+
+| File | sha256 |
+|---|---|
+| `polgap/polgaph.py` | 198d9bf0ae7f0146bb1e8d8c116b4a7c45425c88b1c47ac743f4a72dc77b3bea |
+| `polgap/POLGAPH_REGISTRATION.md` (Amendments 1 to 5) | 7280653eb3ae2bf1b1ed04aad93a159b2d7760158f156f4f551cb7c654fa23d9 |
+| `polgap/POLGAPH_SERIES.json` (63 series) | c22f1aaee059db5ec9979990281b4d8918cfffa310d2e2f5190248644feb8853 |
+| `desk_b_jobs/POLGAPH_LISTS_NOV4.json` (63 requests, cap 63) | ce2fe54d8da3e4d01d908491c294b6245f1c1073b40921c3f1f9db2a2d5d2d6f |
+| `deskb_guard.py` (shared by every script of this desk) | 14f969bc8983bff2a0696b3dcab745d748119de28fc4c5692370933cad0b1df9 |
+| `HELDOUT_PULL_RUNS.md` (copy, byte-equal to main at f6bc7d6d) | 6d85f5f558df9cbb91974ef99cc6ba448ae26353e2b61bbccd9fe84c82a7c33d |
+
+**The scorer's change against the audited 9186c8b5 is four places and nothing else:** `DEV_TO` is 2026-11-04T23:59:59Z (was 2026-11-12T23:59:59Z); `HOURLY_CAP` is 177 (was 240); the job builder's held-out line is the new `HELDOUT_LINE` constant; the docstring names Amendment 5. No rule step, fill, cost, pooling or verdict line was touched.
+
+**The guard's change:** it still refuses any path in or resolving into a `HELDOUT_` folder, and now also any path with a part equal to the folder name of a run listed in `HELDOUT_PULL_RUNS.md` (as typed and after links are resolved), and it refuses everything if the list cannot be read or has no table header. Tested on made-up paths: the listed run under `pull/POLGAPH_LISTS/`, a copy of it under another folder, a link with an innocent name pointing at it (all refused), another run of the same job (passes), and a missing list (everything refused). Every script of this desk imports this guard, so its hash changed for all of them; none of their own files changed. Smoke test: the nine hourly temperature measure fixtures print byte-identical lines under the new guard.
+
+**Fixtures.** The three pooling fixtures used KXTRUTHSOCIAL as their made-up activity series, which is now dropped; the generator uses KXACTBLUETOP instead and the three printed files are byte-identical to the stored ones under the new scorer. New refusals shown on made-up rows: a market closing at 2026-11-05T00:00:00Z stops the run; a lists folder named as the listed run is refused. The two `forensics_fixture_seed5` printed files were made with the old scorer on the Forensics desk's own fixture and are NOT re-made here: that fixture has to be rebuilt inside the new window and on the 63 series before a re-match.
+
+**Request count for the Head:** spent 69 (the listed run). New lists job 63, one page each, cap 63. Then hourly at most 177 and minute at most 71, each built by the scorer from the new lists answer and sent to the Head with its exact count first. 69 + 63 + 177 + 71 = 380, the ceiling. For scale only: the dead hourly job on the wider window and 69 series was 65 requests.
+
+**Dead from here:** scorer 9186c8b5, registration a13693f3, series file 9f3886e7 (69 series), lists job e78a6037 (its run is the listed one), hourly job dfc64533. `desk_b_jobs/POLGAPH_LISTS.json` stays in place unchanged as the record of what ran.
+
+**One thing for the Head to rule if they wish, before dispatch:** the halves keep the registered date 2026-10-13, so the first half now covers about 31 days of gap mornings and the second about 23. Nothing was read, so either date is unbiased; I did not move a registered constant the ruling did not name.

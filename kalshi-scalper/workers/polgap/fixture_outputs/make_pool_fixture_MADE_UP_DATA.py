@@ -4,9 +4,9 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 out, case = sys.argv[1], sys.argv[2]
 SPEC = {  # family: (series, wins, losses)
- 'pooled_fails_dominant_family': {'activity counts': ('KXTRUTHSOCIAL', 130, 70), 'shipping counts': ('KXHORMUZWEEKLY', 100, 100), 'single questions': ('KXMAMDANIEO', 98, 102)},
- 'two_families_exceed_half': {'activity counts': ('KXTRUTHSOCIAL', 160, 40), 'shipping counts': ('KXHORMUZWEEKLY', 160, 40), 'single questions': ('KXMAMDANIEO', 25, 35)},
- 'no_family_over_half': {'activity counts': ('KXTRUTHSOCIAL', 110, 40), 'shipping counts': ('KXHORMUZWEEKLY', 110, 40), 'single questions': ('KXMAMDANIEO', 110, 40)},
+ 'pooled_fails_dominant_family': {'activity counts': ('KXACTBLUETOP', 130, 70), 'shipping counts': ('KXHORMUZWEEKLY', 100, 100), 'single questions': ('KXMAMDANIEO', 98, 102)},
+ 'two_families_exceed_half': {'activity counts': ('KXACTBLUETOP', 160, 40), 'shipping counts': ('KXHORMUZWEEKLY', 160, 40), 'single questions': ('KXMAMDANIEO', 25, 35)},
+ 'no_family_over_half': {'activity counts': ('KXACTBLUETOP', 110, 40), 'shipping counts': ('KXHORMUZWEEKLY', 110, 40), 'single questions': ('KXMAMDANIEO', 110, 40)},
 }[case]
 ET = ZoneInfo('America/New_York'); os.makedirs(os.path.join(out, 'lists'), exist_ok=True); os.makedirs(os.path.join(out, 'minute'), exist_ok=True)
 looks = [int(datetime(2026, 10, 1, 7, tzinfo=ET).timestamp()), int(datetime(2026, 10, 20, 7, tzinfo=ET).timestamp())]
