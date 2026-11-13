@@ -6,22 +6,22 @@ Question: are Kalshi's presidential-approval and generic-ballot brackets mispric
 - APPR_DAILY: KXTRUMPAPPROVE (70 events, 630 markets, 2026-09-02 to 2026-11-10; one event per day, open about 27 hours, so only the 1d and 6h looks exist)
 - APPR_RCP: KXAPRPOTUS (RCP approval, weekly, 263 events, 2025 markets, 2021 to 2026-11)
 - APPR_538: KX538APPROVE (143 events, 1278 markets, 2022-05 to 2025-03; the 538 approval of the then president)
-- [live figure removed, ask Main]
+- APPR_OTHER: KXVOTEHUBTRUMPUPDOWN (38), KXTRUMPVH (9), KXTRUMPAPPROVALBELOW (1), KXNYTTRUMPAPPROVAL (1), KXVOTEHUBVANCEAPPROVE, KXVHAPRPOTUS, KXTRUMPAPPROVALYEAR as far as they settled
 - GCB (generic ballot): KXVHGCB (41 events, 367 markets, 2026-09-25 to 2026-11-04), KXGENERICBALLOTVOTEHUB (9 events). KXGENERICBALLOT has 0 listed markets. KXMIDTERMMOV is a one-off (1 event) and cannot be calibrated, so it is out; KXTRUMPPOLLDAILY, KXAPRPOTUSD, KXTRUMPFAV, KXSILVERAPPROVE, KXTRUMPGALLUP50/30 list 0 markets.
-- [live figure removed, ask Main] The pull is stopped when the session must report; the events actually pulled define the universe, and the report states coverage per family. Which events were pulled is decided by date order only, never by price or result.
+- Candle coverage is a budget limit (4 requests a minute, shared): live batch pull per event for markets settled after 2026-09-12 (all of APPR_DAILY, GCB, KXTRUMPVH, recent RCP), then one request per market from the historical endpoint (VOTEHUB first, then RCP newest event first, then 538 newest first). The pull is stopped when the session must report; the events actually pulled define the universe, and the report states coverage per family. Which events were pulled is decided by date order only, never by price or result.
 - POOLED family ALL_APPR = the four approval families together (same observations, so not independent of its parts).
 
 ## LOOKS (time from the quote to the market's close_time)
 7d, 3d, 1d, 6h. Quote = the last hourly candle whose end time is at or before close minus the look, and at most 6 hours before that moment for 7d and 3d, at most 3 hours before it for 1d and 6h. A market not open at that moment has no observation for that look.
 
 ## PRICES AND SIDES
-[live figure removed, ask Main] Bought side price 0.10 to 0.90. Buckets of the price of the side bought: [0.10,0.25), [0.25,0.40), [0.40,0.60), [0.60,0.75), [0.75,0.90]. Sides YES and NO. A YES ask of 1.00 or 0, a NO with bid 0, is not a valid quote. Cell = (family, look, price bucket, side). One observation per event per cell: if several markets of an event land in the cell, the one whose yes mid at that quote is nearest 0.5.
+YES buy at the yes_ask close of that candle, NO buy at 1 minus the yes_bid close (cash at the ask, so the spread is paid). Bought side price 0.10 to 0.90. Buckets of the price of the side bought: [0.10,0.25), [0.25,0.40), [0.40,0.60), [0.60,0.75), [0.75,0.90]. Sides YES and NO. A YES ask of 1.00 or 0, a NO with bid 0, is not a valid quote. Cell = (family, look, price bucket, side). One observation per event per cell: if several markets of an event land in the cell, the one whose yes mid at that quote is nearest 0.5.
 
 ## GRID SIZE (counted in the shared deflation)
 6 families (APPR_DAILY, APPR_RCP, APPR_538, APPR_OTHER, GCB, ALL_APPR) x 4 looks x 5 buckets x 2 sides = 240 cells (many empty). Shared deflation ledger was about 7,950 tries; with these it is about 8,190. Bonferroni z bar about 4.5 as in the sibling registration; naive z 2 is reported as exploratory only.
 
 ## BASIS
-[live figure removed, ask Main] PF = gross gain over gross loss across observations; mean in cents per contract.
+1 contract, hold to settlement, unrounded fee 0.07*p*(1-p), slip +1c per contract added to the cost (PF and mean at +0c also shown). PF = gross gain over gross loss across observations; mean in cents per contract.
 
 ## SPLITS
 Chronological thirds of event close dates per family (over the events with usable candles): TRAIN, VALIDATE, HELD-OUT. HELD-OUT is NOT scored; heldout.py is written for the session lead for any frozen survivor and is not run. ALL_APPR thirds are by close date over its pooled events.
@@ -65,3 +65,5 @@ HELD-OUT NOT READ as of 2026-11-12T01:11Z.
 **Disclosures.** (1) The first report's CALIBRATION section (`report.py`) was computed over every event in the candle file, HELD-OUT included; the new scorer restricts it to TRAIN and VALIDATE events. Nothing in the first report's cell tables used HELD-OUT events. (2) While building this job the worker printed the first 700 characters of one pulled candle row (KXTRUMPAPPROVE-26NOV10, a HELD-OUT market, about 12 hourly rows) and 600 characters of one 2021 KXAPRPOTUS row; no analysis used them.
 **SEEN (read by the worker, so listed):** KXTRUMPAPPROVE-26NOV10-U38.8 (a HELD-OUT market of APPR_DAILY; first rows of its candles were printed). APRPOTUS-21OCT15-T44.6 (series KXAPRPOTUS, closed 2021-10-15, a development event in TRAIN; first rows of a 2-day pull were printed). The eventual held-out read reports with and without KXTRUMPAPPROVE-26NOV10-U38.8.
 HELD-OUT NOT READ as of Amendment 3 (apart from the SEEN rows above).
+
+Dated clarification Nov 13, 2026 (for the second build; no change of any rule, words restored that a privacy scrub over-redacted; these lines hold no account figure): APPR_OTHER series list is KXVOTEHUBTRUMPUPDOWN, KXTRUMPVH, KXTRUMPAPPROVALBELOW, KXNYTTRUMPAPPROVAL, KXVOTEHUBVANCEAPPROVE, KXVHAPRPOTUS, KXTRUMPAPPROVALYEAR as far as they settled. Quote and fill basis ("as above"): YES buy at the yes_ask close of the look candle, NO buy at 1 minus the yes_bid close (cash at the ask, spread paid). BASIS: 1 contract, hold to settlement, unrounded fee 0.07*p*(1-p), slip +1c per contract added to the cost, +0c also shown, PF = gross gain over gross loss, mean in cents per contract. Line 11 (pull order) also restored.
