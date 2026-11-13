@@ -795,3 +795,10 @@ The reading: RND_CHARTER section 4 counts a cash PF under 1.0 on the development
 - Tries: no new try for this reading (MMSIM1's tries are in the ledger from its registration).
 - Family: liquidity provision, 1 FALSIFIED of 3 (the effort-stop count).
 - The held-out reader work (F1 to F4) is cancelled.
+- 21:06Z, queues of three given to every desk (the EA watchdog; shadow list 15 against the owner's target of 20 to 30).
+  - Desk A: wheel places for OICORE's mechanism per market (separate places under lane 0.6; 7g versions in research; "no evidence"), then the CAP30 and DEPTH scorer build 1.
+  - History Miner: the OIVER rows builder, then the CAP30 and DEPTH build 2.
+  - Testing Desk: a general OICORE shadow adapter, a per-place signal-rate report, and a re-test against the lane on main.
+  - Forensics: per-place coverage and read budget, a pre-check of the SPXOI1 runs, and the inventory.
+  - Desk B: EVENT830-mechanism places on uncovered windows, and size-only NOT_ENOUGH_DATA cards.
+  - Desk C: the LIQREV scorer build 1, new-series stage 2, and bot-loggable cards.
