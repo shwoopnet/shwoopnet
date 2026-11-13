@@ -1,13 +1,13 @@
-"""WHEEL BLOCK READER v2 (Desk A, Nov 13 2026): applies ROTATION_LANE.md section 4 at rnd-queue bd7007cb (items (a) to (o), the Head's rulings of 02:05Z and 02:09Z) to the per-signal records of ONE place. Generic for any wheel place. A separate file from the frozen NC15 scorer (nc15_wheel_replay.py v2, 8d1055df); it reads records only (no book, no result of its own).
+"""WHEEL BLOCK READER v2 (Desk A, Nov 13 2026): applies ROTATION_LANE.md section 4 at rnd-queue 77eeb93b (items (a) to (t), the Head's rulings of 02:05Z, 02:09Z and 02:17Z) to the per-signal records of ONE place. Generic for any wheel place. A separate file from the frozen NC15 scorer (nc15_wheel_replay.py v2, 8d1055df); it reads records only (no book, no result of its own).
   python3 -I wheel_block_reader.py <records.csv> --now=<ISO> [--band=11,91] [--fav] [--start=<ISO>] [--place=SERIES]     (made-up folders only unless WHEEL_BLOCK_READ=1; HELDOUT_ paths refused)
 Records (canonical CSV): ticker,series,signal_t,limit,status,result,win,cash  (signal_t = the signal poll's estimated exchange time, epoch seconds; limit in dollars; status 'fillable' = a counted candidate, anything else is not a signal, (m); result scored | void | pending; win 1/0; cash dollars = 10 x (win - price) - fee). Forensics' CSV (signal_exchange, status 'fillable, scored|void|open') is read too.
-THE RULE AS BUILT. (l) a signal counts only if signal_t >= the place's start time (--start). (i) CLASS from the registered band, read as limits in whole cents (NC15 depth cell: 11 to 91): wholly at or under 50 needs 10 wins, wholly above 50 needs 10 losses, a band crossing 50 needs both; a signal whose limit is 88c or above is a favourite: with --fav (registered in the favourites class) blocks are at least 150 signals, otherwise such a signal is SKIPPED, (m). (g) money in whole cents: each signal's cash is rounded to the nearest whole cent, floor(100 x cash + 0.5 + 1e-9) (the fill price is a size-weighted average, so the gross can sit between cents: on the invented fixtures it does, e.g. 6.754; the number rounded is printed; --strict-cents refuses instead); W = gross wins, L = gross losses (a void's fee is in L); 1.3 or better is 10W >= 13L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails; no float tolerance. (h) a day (US Central, America/Chicago, from signal_t) fails the block if 100 x day net > 30 x block net; a day with a negative net never does. (n) n counts every signal; the rarer-outcome count uses wins (scored, win 1) and losses (scored, win 0); a void is neither. A block grows signal by signal and is READ ONCE at the first signal where n >= 60 (150 fav), >= 7 different days and the rarer outcome hold, and every result in the block is final (a pending result WAITS: nothing after it is read). (k) EXPIRED by the clock: a block not complete by first signal's time + 21 x 24 h is EXPIRED and unread, decided when a later signal falls past that time or when --now passes it; the next block starts at the first counted signal after the expiry time. (j) CONFIRMATION: the next 30 counted signals after the cleared block's last signal, no minimum days or outcome count; it must be complete within 21 x 24 h of that last signal's time, else EXPIRED (unread) and a new block starts after the expiry time; W >= L = QUALIFIED (reading stops), else FAILED; its signals never count toward any block; the next block starts at the first counted signal after it. (e) halves: the first floor(n/2) signals, then the rest."""
-import sys, os, csv, collections, time, calendar, re
+THE RULE AS BUILT. (l) a signal counts only if signal_t >= the place's start time (--start). (i) CLASS from the registered band, read as limits in whole cents (NC15 depth cell: 11 to 91): wholly at or under 50 needs 10 wins, wholly above 50 needs 10 losses, a band crossing 50 needs both; a signal whose limit is 88c or above is a favourite: with --fav (registered in the favourites class) blocks are at least 150 signals, otherwise such a signal is SKIPPED, (m). (g) money in whole cents: each signal's cash is rounded DOWN, cents = floor(100 x cash + 1e-6) (a win of 6.754 is 675, a loss of 6.754 is -676; the fill price is a size-weighted average, so the gross can sit between cents; the number rounded is printed; --strict-cents refuses instead); W = gross wins, L = gross losses (a void's fee is in L); 1.3 or better is 10W >= 13L, 1.0 or better is W >= L, L = 0 with W > 0 passes, W = 0 fails; no float tolerance. (h) a day (US Central, America/Chicago, from signal_t) fails the block if 100 x day net > 30 x block net; a day with a negative net never does. (n) n counts every signal; the rarer-outcome count uses wins (scored, win 1) and losses (scored, win 0); a void is neither. A block grows signal by signal and is READ ONCE at the first signal where n >= 60 (150 fav), >= 7 different days and the rarer outcome hold, and every result in the block is final (a pending result WAITS: nothing after it is read). (k) EXPIRED by the clock: a block not complete by first signal's time + 21 x 24 h is EXPIRED and unread, decided when a later signal falls past that time or when --now passes it; the next block starts at the first counted signal after the expiry time. (j) CONFIRMATION: the next 30 counted signals after the cleared block's last signal, no minimum days or outcome count; it must be complete within 21 x 24 h of that last signal's time, else EXPIRED (unread) and a new block starts after the expiry time; W >= L = QUALIFIED (reading stops), else FAILED; its signals never count toward any block; the next block starts at the first counted signal after it. (e) halves: the first floor(n/2) signals, then the rest. (p) order: signal_t, then ticker ascending, then yes before no (side). (q) EXPIRED is written only when every counted signal decided within the 21 x 24 h has a final result and the counts of (a) still do not hold; before that the state says waiting for results, expiry not yet decided (the same for a confirmation's own 21 x 24 h). (t) after QUALIFIED nothing more is read."""
+import sys, os, csv, math, collections, time, calendar, re
 from datetime import datetime, timezone
 from zoneinfo import ZoneInfo
 CT = ZoneInfo("America/Chicago"); SPAN_S = 21 * 86400; CONF_N = 30; EPS = 1e-9; STRICT_CENTS = False; ROUNDED = []
 def day_of(t): return datetime.fromtimestamp(t, timezone.utc).astimezone(CT).date().isoformat()
-def cents(x): return int((x * 100 + 0.5 + 1e-9) // 1)
+def cents(x): return int(math.floor(x * 100 + 1e-6))                                  # (g) at 77eeb93b: a cash that is not a whole cent is rounded DOWN (a win of 6.754 is 675, a loss of 6.754 is -676)
 def ge_pf(W, L, num, den):
     if W == 0: return False
     if L == 0: return True
@@ -32,7 +32,7 @@ def load(path):
             if abs(x - round(x)) > 1e-6 and STRICT_CENTS: raise SystemExit("REFUSED (--strict-cents): cash %s of %s is not whole cents" % (r["cash"], r["ticker"]))
             if abs(x - round(x)) > 1e-6: ROUNDED.append(r["ticker"])
             c = cents(float(r["cash"]))
-        out.append(dict(ticker=r["ticker"], series=r.get("series", ""), t=float(t), limit=limit_c(float(r["limit"])) if r.get("limit") not in ("", None) else None, result=res, win=int(float(r["win"])) if r.get("win") not in ("", None) else 0, cents=c))
+        out.append(dict(ticker=r["ticker"], series=r.get("series", ""), side=(r.get("side") or ""), t=float(t), limit=limit_c(float(r["limit"])) if r.get("limit") not in ("", None) else None, result=res, win=int(float(r["win"])) if r.get("win") not in ("", None) else 0, cents=c))
     return out
 def need_outcomes(band, fav):
     lo, hi = band
@@ -42,7 +42,7 @@ def read_place(sigs, band=(11, 91), fav=False, start_t=None, now=None):
     if now is not None and sigs and now < max(x["t"] for x in sigs) - EPS: raise SystemExit("REFUSED: --now is earlier than the latest signal in the file")
     need_n = 150 if fav else 60; needs = need_outcomes(band, fav); blocks = []; cur = []; conf = None
     counted = []
-    for s in sorted(sigs, key=lambda s: (s["t"], s["ticker"])):
+    for s in sorted(sigs, key=lambda s: (s["t"], s["ticker"], 0 if s.get("side") == "yes" else 1)):                    # (p)
         if start_t is not None and s["t"] < start_t - EPS: continue                                  # (l)
         if s["limit"] is not None and s["limit"] >= 88 and not fav: continue                         # (i), (m): a favourite signal of a rule not registered as one is skipped
         counted.append(s)
@@ -69,19 +69,19 @@ def read_place(sigs, band=(11, 91), fav=False, start_t=None, now=None):
         if exp_after is not None and s["t"] <= exp_after + EPS: i += 1; continue                    # (k): the next block starts at the first counted signal after the expiry time
         exp_after = None
         if cur and s["t"] - cur[0]["t"] > SPAN_S + EPS:                                              # (k) a later signal fell past the 21 days: EXPIRED, unread
+            if any(x["result"] == "pending" for x in cur): return blocks, dict(waiting=True, why="waiting for results, expiry not yet decided", block_n=len(cur))      # (q)
             blocks.append(dict(status="EXPIRED", n=len(cur), first=cur[0]["ticker"], last=cur[-1]["ticker"], span_days=(cur[-1]["t"] - cur[0]["t"]) / 86400)); exp_after = cur[0]["t"] + SPAN_S; cur = []; continue
         cur.append(s); i += 1
         if any(x["result"] == "pending" for x in cur):
-            if expired_by_now(cur[0]["t"]):
-                blocks.append(dict(status="EXPIRED", n=len(cur), first=cur[0]["ticker"], last=cur[-1]["ticker"], span_days=(cur[-1]["t"] - cur[0]["t"]) / 86400)); return blocks, dict(waiting=False, expired_by_clock=True)
-            return blocks, dict(waiting=True, why="a signal in the block has no final result yet", block_n=len(cur))
+            return blocks, dict(waiting=True, why=("waiting for results, expiry not yet decided" if expired_by_now(cur[0]["t"]) else "a signal in the block has no final result yet"), block_n=len(cur))      # (q), (r)
         if complete(cur):
             b = read(cur); blocks.append(b); last_t = cur[-1]["t"]; cur = []
             if b["status"] == "CLEARED":
                 cs = []
                 while i < N and len(cs) < CONF_N and counted[i]["t"] - last_t <= SPAN_S + EPS: cs.append(counted[i]); i += 1
                 if len(cs) < CONF_N:
-                    if (i < N) or expired_by_now(last_t):                                           # a later signal is past the 21 days, or the clock is: the confirmation is EXPIRED, unread
+                    if (i < N) or expired_by_now(last_t):                                           # a later signal is past the 21 days, or the clock is: the confirmation is EXPIRED, unread, once every signal in it is final (q)
+                        if any(x["result"] == "pending" for x in cs): return blocks, dict(waiting=True, why="waiting for results, expiry not yet decided", confirmation_n=len(cs))
                         b["confirmation"] = "CONFIRMATION EXPIRED (unread)"; exp_after = last_t + SPAN_S; continue
                     return blocks, dict(waiting=False, confirmation_in_progress=len(cs), of=CONF_N)
                 if any(x["result"] == "pending" for x in cs): return blocks, dict(waiting=True, why="a confirmation signal has no final result yet", confirmation_n=len(cs))

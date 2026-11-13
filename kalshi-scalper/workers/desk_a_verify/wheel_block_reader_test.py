@@ -51,7 +51,7 @@ def rows_csv(rows):
     f = tempfile.NamedTemporaryFile("w", suffix=".csv", delete=False, newline=""); w = csv.writer(f); w.writerow(["ticker", "series", "signal_t", "limit", "status", "result", "win", "cash"]); [w.writerow(r) for r in rows]; f.close(); return f.name
 try: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "", "3.00"]])); raise AssertionError("not refused")
 except SystemExit: pass
-assert W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "6.754"]]))[0]["cents"] == 675 and W.ROUNDED == ["A-1"]       # default: nearest cent, counted
+assert W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "6.754"]]))[0]["cents"] == 675 and W.ROUNDED == ["A-1"] and W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "0", "-6.754"]]))[0]["cents"] == -676       # default: nearest cent, counted
 W.STRICT_CENTS = True
 try: W.load(rows_csv([["A-1", "P", "1800000000", "0.5", "fillable", "scored", "1", "6.754"]])); raise AssertionError("not refused")
 except SystemExit: pass
@@ -70,4 +70,11 @@ assert W.read_place([dict(x, limit=None) for x in seq(70)], fav=True, now=NOW)  
 import heldout_guard as G
 assert refused(lambda: G.refuse_heldout("/tmp/heldout_x/y", "t")) and refused(lambda: G.refuse_heldout("/tmp/HeldOut_x", "t"))
 print("T10 blank limit, early --now, blank cash, duplicate, lower-case heldout refused OK")
+# T11 (77eeb93b): cents round DOWN; (q) a pending result keeps the expiry undecided; (p) order yes before no
+s = seq(30); s[5] = dict(s[5], result="pending", cents=None); b, st = rp(s, now=T0 + 22 * DAY)
+assert not b and st["waiting"] and "expiry not yet decided" in st["why"], (b, st)
+s = seq(30) + [sig(30, 30 * 24 * H, 1)]; s[5] = dict(s[5], result="pending", cents=None); b, st = rp(s, now=T0 + 40 * DAY); assert not b and "expiry not yet decided" in st["why"]
+s[5] = dict(s[5], result="scored", cents=300); b, st = rp(s, now=T0 + 40 * DAY); assert b[0]["status"] == "EXPIRED"
+a = dict(sig(1, 0, 1), side="no", ticker="P-0001"); c = dict(sig(2, 0, 1), side="yes", ticker="P-0001"); o = sorted([a, c], key=lambda x: (x["t"], x["ticker"], 0 if x.get("side") == "yes" else 1)); assert o[0]["side"] == "yes"
+print("T11 cents round down, expiry waits for results, yes before no OK")
 print("ALL OK")
