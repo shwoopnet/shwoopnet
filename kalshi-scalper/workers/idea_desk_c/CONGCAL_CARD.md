@@ -63,3 +63,13 @@
    - favourite-and-hold is excluded by the 20c to 80c band;
    - no Polymarket or Yahoo read.
    - The politics hold cap (30 days for singles, POLITICS_RULES) applies to any live probe, not to the research read.
+
+## Amendment 1 (Nov 13, 2026, before any data): the Verification Analyst's ruling
+
+- **Stage A is NEW** (an official procedural stage as the signal, a field no registered test read). **Stage A is the card.**
+- **Stage B is a VERSION of the "nothing happens" rule** (POLITICS_RULES section 5). It is removed from this card. It is not counted as research and goes to the paper list only as a version of that rule.
+- **Family:** CONGCAL and FEDREGPI are ONE family, "official primary-source status of a government action, traded on Kalshi's government-action markets", counted once under the three-falsified effort stop.
+- **Flags before any work:**
+  - (i) congress.gov needs an API key. Under the Charter, any key needs the owner's popup; until then only senate.gov and clerk.house.gov can be used, and only after Main has read their terms. A source with unread or ambiguous terms is out.
+  - (ii) History is tiny (V2's COUNT1, COUNT2 and GOVCOUNT1 found 1 to 15 settled events in such series), so only the slow-family paper screen (30 independent events, both halves positive, pinned cutoff) is reachable, after a long wait.
+  - (iii) No live strategy overlaps, so the correlation check does not apply.

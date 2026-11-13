@@ -55,3 +55,11 @@
    - not a lock or parity scan, taker flow, a cheap-side sweep, market making or time-of-day;
    - the 20c to 80c band excludes favourite-and-hold;
    - no Polymarket or Yahoo read.
+
+## Amendment 1 (Nov 13, 2026, before any data): the Verification Analyst's ruling
+
+- **The YES arm is NEW:** a decided-fact lag from an official list. **The YES arm is the card.**
+- **The NO arm is a VERSION of the "nothing happens" rule.** It is removed, and goes to the paper list only as that version.
+- **One family with CONGCAL,** counted once.
+- **The universe is narrowed to answer the VA's risk.** V2's GOVCOUNT1 found that Federal Register publication lags SIGNING by 3 to 7 days, so for a market that settles on signing, the news has already carried the fact before the public inspection list shows it. So the universe is ONLY markets whose settling fact is the document's Federal Register publication or its EFFECTIVE date (for example tariffs taking effect on a date, or a rule in effect). Markets that settle on a signing or an announcement, or on a news outlet's report, are left out.
+- **No key is needed;** the content is public domain. Main reads the site's terms. It is a slow family: the paper list only.
