@@ -5,10 +5,19 @@ under pull/), as typed and after links resolve, for the path itself and every pa
 content filter (a copy under another name is not caught by name; a manifest whose job_id and start minute are those of a listed run is refused too).
 Use as a library: `from listed_runs_guard import refuse_listed(path)`; or as a pre-run check that changes no scorer's hash: `python3 -I listed_runs_guard.py <path> [<path> ...] && python3 -I scorer.py ...`.
 The list is read from kalshi-scalper/workers/HELDOUT_PULL_RUNS.md in the repository root when it exists, else from the byte-equal copy beside this file. No network, no run is opened (only a manifest.json's job_id and start time)."""
-import os, sys, json, re
+import os, sys, json, re, hashlib
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 CANDIDATES = [os.path.join(HERE, "..", "HELDOUT_PULL_RUNS.md"), os.path.join(HERE, "HELDOUT_PULL_RUNS.md")]
+
+
+def listed_source():
+    """-> (path, sha256 of the exact bytes read) of the list copy the guard uses."""
+    for c in CANDIDATES:
+        try: raw = open(c, "rb").read()
+        except OSError: continue
+        return os.path.normpath(c), hashlib.sha256(raw).hexdigest()
+    raise SystemExit("REFUSED: kalshi-scalper/workers/HELDOUT_PULL_RUNS.md cannot be read, so every run is refused (standing rule (h))")
 
 
 def listed_runs():
@@ -45,4 +54,5 @@ def refuse_listed(path):
 if __name__ == "__main__":
     if len(sys.argv) < 2: raise SystemExit(__doc__)
     for a in sys.argv[1:]: refuse_listed(a)
-    print("listed_runs_guard: %d path(s) not in HELDOUT_PULL_RUNS.md (%d run(s) listed)" % (len(sys.argv) - 1, len(listed_runs())))
+    src, h = listed_source()
+    print("listed_runs_guard: %d path(s) not in HELDOUT_PULL_RUNS.md (%d run(s) listed); list read: %s sha256 %s" % (len(sys.argv) - 1, len(listed_runs()), os.path.relpath(src), h))
