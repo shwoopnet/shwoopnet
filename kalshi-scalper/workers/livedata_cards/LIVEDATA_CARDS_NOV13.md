@@ -1,4 +1,4 @@
-# Two cards that need Kalshi's relayed sports live data, written not registered (Idea Desk B, Nov 13, 2026, 14:30Z by this desk's clock)
+# Two cards that need Kalshi's relayed sports live data, written not registered (Idea Desk B, Nov 13, 2026, 14:21Z by this desk's clock)
 
 Written on the Head of R&D's order of 14:18Z (the owner: "max some out", the two feeds he accepted on Nov 13 as a recorded terms risk). **Nothing is registered, nothing is counted as a try, no Kalshi request was made, no data was opened.** PAPER ONLY. [research]
 
