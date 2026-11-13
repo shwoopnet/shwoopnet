@@ -1,0 +1,53 @@
+# Frozen definition sheet for the 12 wheel places with a log: CFRTI-K (Bitcoin) and the NC15 depth cell (eleven series). Idea Desk A, Nov 13, 2026.
+Written at the Head of R&D's order (Auditor B found the definitions still open to choice). Every item below is closed here; a place counts forward only from the COMMIT TIME of this file; a decision instant earlier than that commit does not count. No parameter differs by market. Nothing here reads an outcome; the counts in section 3 are from book columns only. Lane references: `ROTATION_LANE.md` v1.2 section 4 (the record) and its slower-log variant (Nov 13, 00:07Z).
+
+## 0. Common terms (both rules)
+- **Size and limit.** The wheel's size is 10 contracts. CFRTI-K: limit = the ask at the signal poll (touch plus 0). NC15 depth cell: limit = the ask at the signal poll plus 0.01 (touch plus 1c). The "ask of the implied side" is: for a YES buy, 1 minus the best NO bid price; for a NO buy, 1 minus the best YES bid price.
+- **Walk and fill price.** The ladder of a poll is its recorded levels (up to 5) on the side that the order meets (a YES buy meets the NO bids, a NO buy meets the YES bids), ask = 1 minus the bid price, sorted by ask. "Offers 10 at or under the limit" = the sizes of the levels with ask at or under limit plus 1e-9 sum to 10 or more. The walked price of a poll = the size-weighted average ask of the first 10 contracts of that ladder. The fill price = the HIGHER of the walked prices of the signal poll and the second poll (the wheel book recorder's "worse of the two").
+- **Fillable.** The signal poll AND the second poll must each offer 10 at or under the limit; otherwise it is a miss, counted, not scored. **Second poll.** CFRTI-K on R6 (2 s polls): the first poll after the signal poll, which must be at most 4 s after the DECISION instant D (a later one: no second look, a miss). NC15 (5 s polls, the lane's slower-log variant): the NEXT poll after the signal poll of the same ticker, which must be at most 6 s after the signal poll; later: "not fill-checked", not counted toward a block.
+- **Fee and cash.** Per order, 0.07 x 10 x p x (1 - p) dollars rounded UP to the cent (p = the fill price); cash result = 10 x (win - p) - fee, win = 1 or 0 for the side bought. Hold to settlement. No stop, no target, no time exit.
+- **Result.** The coverage file's `result` column ("yes" or "no") when present. When it is empty at read time, a LATER PUBLIC READ: `GET /markets/{ticker}` on the public host (the `result` field), done by the replay controller from 15 minutes after the close and repeated until a final value or 7 days. A signal with no yes or no result after 7 days is booked under the void rule (price refunded, fee kept = a fee-only loss), COUNTED, with the count printed. A final value that is neither yes nor no (a void, a scalar) is booked the same way.
+- **Any missing item is "no signal"** (never carried forward, never interpolated, counted by reason): no poll in the window, a missing side of the book, a missing perp mark, a missing floor_strike.
+- **One decision per window per place.** The decision instant D is fixed per rule below, in EXCHANGE time.
+- **Exchange-time offset, from polls up to the decision only (never the run median).** Each recorded row has `server_date_header` and `t_recv_ms`. For a candidate poll, the offset is the MEDIAN over the 120 most recent rows of the same run folder (any ticker, ordered by receive time, at or before that poll, rows with a readable header only) of (the header time in seconds + 0.5 - t_recv_ms / 1000). The exchange time of that poll = t_recv_ms / 1000 + the offset. The close time is the row's `close_time` column (exchange time).
+
+## 1. CFRTI-K on Bitcoin (R6 book + KXBTCPERP candles): the rule is this
+- **Market.** `KXBTC15M`. **Decision instant** D = close time minus 120 s EXACTLY.
+- **The binary's bid, ask and spread come from the R6 BOOK** (`book15r6/<date>/<HHMM>/book.csv.gz` on `quote-data`; never a candle, never a market-list copy): the signal poll = the last poll with exchange time at or before D and at most 10 s before it; YES bid = `yes_bid_px_1`, NO bid = `no_bid_px_1`, YES ask = 1 - NO bid, NO ask = 1 - YES bid, spread = YES ask - YES bid. No poll in that span, or a missing top level on either side: no signal.
+- **Gates (unchanged from the registration, cent-inclusive with a 1e-9 tolerance):** spread above 0 and at most 0.03; the cheap side = YES if the YES ask is 0.05 to 0.30, else NO if the NO ask is 0.05 to 0.30, else no signal.
+- **The model comes from the Bitcoin perpetual's 1 minute candles ending at or before D.** Mark(t) = (bid close + ask close) / 2 x 10,000 of the `KXBTCPERP` candle with `end_period_ts` = t (a side missing or 0 = the mark is missing; `reference_price` is NOT used as a fallback). Marks 0..10 at t = D - 60 k; the opening mark at t = close time - 900 s. Needed: mark 0, the opening mark and at least 6 log changes between neighbouring marks (a log change needs both marks); less: "no signal", never interpolated. sd = the sample standard deviation (n - 1) of those log changes x sqrt(4/3); sd of 0 or less: no signal. index = floor_strike x mark 0 / opening mark (`floor_strike` from the public market object); model chance of YES = Phi(ln(index / floor_strike) / sd); the cheap side's chance = that (YES) or 1 minus it (NO); edge = the chance minus the cheap side's ask; trade if edge >= 0.05 (1e-9 tolerance).
+- **Perp candles forward come from:** the nightly Kalshi 1 minute candle archive on `perp-data` (`kalshi1m/<date>.csv.gz`, stop 2027-02-26), which carries `KXBTCPERP` only once the Chief of Staff extends it (the Head has asked). Until a file with `KXBTCPERP` has landed, every window is "no signal: no mark"; the place counts from the first landed file forward. Public endpoint: `GET /trade-api/v2/margin/markets/KXBTCPERP/candlesticks?period_interval=1&start_ts=&end_ts=` on `external-api.kalshi.com`; candle fields `bid.close`, `ask.close`, `end_period_ts` (the END of the minute).
+- **Order and record.** 10 contracts, limit = the signal poll's ask, fill check and fill price as in section 0 (second poll at most 4 s after D). Log source and stop: R6 to 2026-12-31.
+- **Same market, side and minute as OICORE** (it buys the cheaper side 180 to 120 s before the close): lane rule 4.7 may keep it off a seat while OICORE is live.
+- **Written beside it (four caveats):** (1) the endpoint fields are verified for `KXBTCPERP` only; (2) the strike's source (the BRTI 60 second average) differs from the perp's reference: a constant basis cancels in index = strike x return, a changing one does not; (3) the perp quotes around the clock (the public hourly list, 96 snapshots over 23 days including weekends, all two-sided), so Bitcoin has no hours gap; (4) the Bitcoin development read found no edge near the bar: n 610, PF 1.09, z 0.71 against 5.46 (the unrounded fee); with the fee as charged (rounded up, 1 contract) PF 1.05, mean +0.61c.
+
+## 2. The NC15 depth cell, all eleven series (one place each; identical parameters)
+- **Series:** `KXSILVER15M, KXCOPPER15M, KXWTI15M, KXEURUSD15M, KXGBPUSD15M, KXUSDJPY15M, KXHYPE15M, KXBNB15M, KXAUDUSD15M, KXUSDCAD15M, KXNATGAS15M`. (Section 3 withdraws four of them.)
+- **Decision instant** D = close time minus 600 s EXACTLY (exchange time). **Signal poll** = the last poll with exchange time at or before D and at most 10 s before it, from `nc15/<date>/<HHMM>/book.csv.gz` on `nc-data`; none: no signal. The offset is computed from the rows up to that poll only (section 0).
+- **Signal.** imb5 = (the sum of the five YES bid sizes - the sum of the five NO bid sizes) / their total, over the recorded levels present at the signal poll. In the cell if |imb5| >= 0.50. imb5 > 0 buys YES; imb5 < 0 buys NO (the thin side is lifted).
+- **Band test on the signal poll:** the implied side's ask (section 0) between 0.10 and 0.90 inclusive (1e-9 tolerance). Outside: no signal. (The registered NC15DEPTH1 entry rule, first poll at or after look + 1 s, does NOT apply to the wheel place.)
+- **Order and record.** 10 contracts, limit = ask + 0.01, fill check as in section 0 (the next poll at most 6 s after the signal poll; later: not fill-checked). Hold to settlement. Log source and stop: NC15 to 2026-12-31. Result source and void rule as in section 0.
+- **Not a read of NC15DEPTH1:** these are lane shadows; the registered cell's pooled read (n 3,400, window from 2026-11-19) is untouched and no try is spent on it.
+- **Caveats written beside each:** the strike's source for each series differs and plays no part here (no model); the signal needs no reference price; thin series enter the cell rarely (section 3).
+
+## 3. Counts, no outcome (book columns only; `desk_a_held/nc15_wheel_counts.py`)
+NC15 has recorded about 1.18 days so far (run folders 2026-11-11 19:32Z to 2026-11-12 evening); the numbers are what that span holds. "Entering" = in the cell with the implied ask 0.10 to 0.90. "Fill-checked" = entering, and the signal poll and the next poll (at most 6 s later) each show 10 contracts at or under touch + 1c. Per 21 days = fill-checked per day x 21, scaled by 15/21 for series that do not trade on weekends (everything but HYPE and BNB).
+| Series | windows | in the cell | entering | fill-checked | per day | per 21 days (weekend-scaled) |
+|---|---|---|---|---|---|---|
+| KXSILVER15M | 66 | 10 | 8 | 5 | 4.25 | 64 |
+| KXCOPPER15M | 73 | 34 | 33 | 19 | 16.1 | 242 |
+| KXWTI15M | 84 | 24 | 22 | 16 | 13.6 | 204 |
+| KXEURUSD15M | 74 | 6 | 3 | 1 | 0.85 | 13 |
+| KXGBPUSD15M | 76 | 1 | 1 | 0 | 0.0 | 0 |
+| KXUSDJPY15M | 84 | 6 | 4 | 1 | 0.85 | 13 |
+| KXHYPE15M | 87 | 28 | 17 | 11 | 9.35 | 196 |
+| KXBNB15M | 89 | 24 | 19 | 8 | 6.80 | 143 |
+| KXAUDUSD15M | 87 | 6 | 5 | 0 | 0.0 | 0 |
+| KXUSDCAD15M | 86 | 17 | 15 | 5 | 4.25 | 64 |
+| KXNATGAS15M | 93 | 38 | 37 | 22 | 18.7 | 280 |
+**Withdrawn from the list (cannot reach 60 fill-checked signals in 21 days): EUR/USD, GBP/USD, USD/JPY and AUD/USD.** Seven stay: copper, WTI, natural gas, HYPE, BNB (comfortable) and silver and USD/CAD (64, marginal: 1.2 days of data, one weekend-scaled factor; re-count after 7 recorded days and withdraw them if the rate falls under 60). No next poll arrived later than 6 s in this span.
+
+## 4. What this sheet does not decide (named, for the Head)
+1. Who runs the later public result read (the replay controller; the Chief of Staff).
+2. Whether the lane wants the fill price as the worse of the two polls (I took the wheel book recorder's wording); a different choice changes the cash figures, not the signal set.
+3. The perp candle archive for `KXBTCPERP` (not yet carrying it).
