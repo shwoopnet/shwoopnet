@@ -57,9 +57,10 @@ def main(root):
             if t2 - t > NEXTMAX + 1e-9: st[ser]["next poll later than 6 s"] += 1; continue
             if depth_at(ladder(q, side), limit) >= SIZE: st[ser]["fill-checked"] += 1
     span = {s: ((max(c) - min(c)) / 86400.0 if len(c) > 1 else 0.0) for s, c in closes.items()}
-    print("series          days   windows signal  cell entering fill-chk | fill-checked per day | per 21 days")
+    print("series          days   windows signal  cell entering fill-chk | fill-checked per day | per 21 days unscaled | per 21 days SCALED (x 15/21 except HYPE and BNB; the scaled figure decides the 60 line)")
     for s in SC:
         c = st[s]; d = span[s] or float("nan"); fc = c["fill-checked"]
-        print("%-15s %5.2f %7d %6d %5d %8d %8d | %6.2f | %6.1f" % (s, d, c["windows"], c["signal poll"], c["cell"], c["entering"], fc, fc / d, 21 * fc / d))
+        sc = 1.0 if s in ("KXHYPE15M", "KXBNB15M") else 15 / 21
+        print("%-15s %5.2f %7d %6d %5d %8d %8d | %6.2f | %6.1f | %6.1f %s" % (s, d, c["windows"], c["signal poll"], c["cell"], c["entering"], fc, fc / d, 21 * fc / d, 21 * fc / d * sc, "" if 21 * fc / d * sc >= 60 else "UNDER 60: withdraw"))
     print("(next poll later than 6 s, not counted:", {s: st[s]["next poll later than 6 s"] for s in SC if st[s]["next poll later than 6 s"]}, ")")
 if __name__ == "__main__": main(sys.argv[1])
