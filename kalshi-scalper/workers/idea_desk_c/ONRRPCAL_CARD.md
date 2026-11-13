@@ -1,3 +1,5 @@
+**RULED A VERSION OF SOFR1 (Verification Analyst, borderline; Head of R&D agreed, Nov 13, 2026): bill settlement amounts sharpen one input of SOFR1's calendar model; not a different signal. Not unique, not counted, no probe job. On file as a possible SOFR1 version, tested only if SOFR1's forward read shows anything.**
+
 # ONRRPCAL: Kalshi's daily overnight reverse repo market against the scheduled Treasury and month-end calendar (Idea Desk C, Nov 13, 2026)
 
 **Written before any KXONRRP price, list, quote or result was read, and before any NY Fed or Treasury value was read.** Only the series metadata of KXONRRP was seen, from the census listing already on `kalshi-pull-data`: title "Overnight Reverse Repo", frequency daily, category World, exchange shard 0, quadratic fee, sources NY Fed and FRED series RRPONTTLD.
