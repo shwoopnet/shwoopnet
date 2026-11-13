@@ -30,4 +30,21 @@ The Head of R&D approved Desk B's clarifying Amendment 10 (final text at 6872b36
 
 `make_mapbreak_fixture.py` is version 2 (sha256 `650e513b...`): 4,820 invented matches at seed 7, with planted cases for the new rules: only quotes 12 to 15 minutes old, both teams at 0.90, the loser's contract with no quote, empty-book candles last, quotes that name the wrong team, a quote that usually stands for the next minute, and cheap map-1 contracts in one match of nine so the placebo share is not zero. My output on it is `MAPBREAK_SECOND_OUTPUT_fixture_v2_seed7_MADE_UP_DATA.json`. On it one title and look passes the 150 minimum and reads "IN", the rest read "no evidence at n = x", so the comparison exercises the counts, the shares, the cost line and both kinds of verdict line.
 
-To compare: `python3 -I make_mapbreak_fixture.py <dir> 7`, then both builds on `<dir>/lists` and `<dir>/candles`. Not yet compared: the Testing Desk's build for Amendments 8 to 10 had not been pushed when this was written.
+To compare: `python3 -I make_mapbreak_fixture.py <dir> 7`, then both builds on `<dir>/lists` and `<dir>/candles`.
+
+## Second comparison, Amendments 1 to 10 (2026-11-13): NOT the same output yet; four readings differ, no arithmetic differs
+
+Run against the Testing Desk's `mapbreak.py` at 8eab7e0e (sha256 `881988a5...`) on fixture version 2, seed 7. Invented rows only.
+
+| # | What differs | Testing Desk's build | The text, as I read it (this build) | Size on the made-up fixture |
+|---|---|---|---|---|
+| 1 | Which candle may name the map's winner | it must end at or before the map market's CLOSE (and no earlier than 10 minutes before it) | the last quote candle ending at or before the LOOK minute (Amendment 8 point 1), no earlier than 10 minutes before the close (Amendment 10 line 7). No upper limit at the close is written. | CS2 first look: 1,082 looks left against 1,866. The fixture plants many quotes after the close, so this is far larger here than it would be on real candles. On real candles the case that matters is the candle of the minute in which the map market closed: it ends AFTER the close and before the look. |
+| 2 | The one-way cost line | (ask minus mid) plus the fee | (limit minus mid) plus the fee at the limit, the limit being the ask plus 1c (Amendment 10 line 8) | exactly 1c: 3.0c against 4.0c on most cells. It decides the 4c kill line. |
+| 3 | The placebo share used at the second look | all of the title's first-look matches (their output flags "DIFFERENT SETS") | the same matches as the second look's looks left (Amendment 3: "measured on the same matches"; Amendment 7 point 3: "per title and per look") | CS2: 0.071 over 1,082 against 0.060 over 248. It feeds the "twice the placebo" line. |
+| 4 | Which matches can have a second look | only matches whose POSTED map results say one map each (used to plan the candle pull; their page discloses it as a limit) | any match whose OBSERVED winners are one map each (Amendment 7 point 2); the result field names nobody | 1 to 2 looks a title (a match with no posted map-1 result but quotes that show one map each). One fired bet differs in one title. |
+
+With readings 1 and 4 set equal (a switch in this build for 1, a scratch variant for 4), **every count, every gap figure, the shares, the spread and the minutes agree at both looks in all four titles**; what is then left is the 1c on the cost line and the placebo set. The shares are printed to three decimals there and four here.
+
+Reading 4 is not a look-ahead in the bet (the bet still needs the observed state), but it does select the second-look sample with a result that is posted after the look. On landed data both builds are limited by the candles that were pulled, which were planned the same way.
+
+Each of the four needs one sentence from Desk B (or the Head) before the recount, because under rule 16b the two builds must print the same figures.

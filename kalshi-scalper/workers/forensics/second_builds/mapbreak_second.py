@@ -147,9 +147,13 @@ def look_minute(cd, close, tickers):
     return None
 
 
-def quote_candle(cd, ticker, ts):
+STATE_CANDLE_NOT_AFTER_CLOSE = False     # the text: the last candle ending at or before the LOOK minute. True is offered ONLY to compare like for like with a build that also requires the candle to end at or before the map market's close
+
+
+def quote_candle(cd, ticker, ts, close=None):
     """the LAST candle ending at or before ts that carries a bid or an ask -> (end, bid or None, ask or None), else None"""
     d = cd.get(ticker) or {}; best = None
+    if STATE_CANDLE_NOT_AFTER_CLOSE and close is not None: ts = min(ts, close)
     for k, (b, a) in d.items():
         if k > ts: continue
         hb, ha = (b is not None and b > EPS), (a is not None and a < 1 - EPS)
@@ -161,7 +165,7 @@ def observed_winner(cd, mp, ts):
     """Amendments 8, 9 and 10. mp: {team: {ticker, close}} of one map. -> team, or None when the state is not observable at ts."""
     shows = {}
     for x, v in mp.items():
-        c = quote_candle(cd, v["ticker"], ts)
+        c = quote_candle(cd, v["ticker"], ts, v["close"])
         if c is None: return None
         shows[x] = c[1] is not None and c[1] >= OBS_BID - EPS and c[0] >= v["close"] - OBS_AGE
     won = [x for x in shows if shows[x]]
@@ -289,5 +293,6 @@ def measure(list_folders, candle_folders):
 if __name__ == "__main__":
     a = sys.argv[1:]
     if len(a) < 5 or a[0] != "measure" or "--lists" not in a or "--candles" not in a: print(__doc__); print("\n".join(AMBIGUITIES)); sys.exit(2)
+    if "--state-candle-not-after-close" in a: STATE_CANDLE_NOT_AFTER_CLOSE = True; a = [x for x in a if x != "--state-candle-not-after-close"]
     i, j = a.index("--lists"), a.index("--candles")
     print(json.dumps(measure(a[i + 1:j], a[j + 1:]), indent=1))
