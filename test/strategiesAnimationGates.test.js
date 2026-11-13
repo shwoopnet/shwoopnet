@@ -99,12 +99,12 @@ gates.SA9 = () => {
   h.api.stop(h.page);
   assert.ok(h.log.cancels >= 1 && h.log.cleared >= 1); assert.strictEqual(h.figs[0].textContent, '1.23'); assert.ok(!h.cls.has('sp-play'));
 };
-// SA10: one shot per show. showPage sets pending, a redraw consumes it once and never starts a play by itself; leaving cancels.
+// SA10: one shot per show. showPage sets pending, a redraw consumes it once and never starts a play by itself; leaving cancels; data that lands more than KAL_STRAT_LATE_MS after the page opened never starts a late play (Nov 13, 2026, it looked like a restart).
 gates.SA10 = () => {
   const showPage = fnSource('showPage'), render = fnSource('renderStrategiesPage');
-  assert.ok(/name === 'strategies'\)\{ kalshiStratAnim\.pending = true; renderStrategiesPage\(\); \} else \{ kalshiStratAnim\.pending = false; kalshiStratAnimStop/.test(showPage), 'showPage arms it on entry and clears it when leaving');
+  assert.ok(/name === 'strategies'\)\{ kalshiStratAnim\.pending = true; kalshiStratAnim\.at = Date\.now\(\); renderStrategiesPage\(\); \} else \{ kalshiStratAnim\.pending = false; kalshiStratAnimStop/.test(showPage), 'showPage arms it on entry and clears it when leaving');
   assert.strictEqual((html.match(/kalshiStratAnim\.pending = true/g) || []).length, 1, 'only showPage arms it');
-  assert.ok(/kalshiStratAnimStop\(page\);\s*if\(kalshiStratAnim\.pending && \(kalshiShadowCache\.rows \|\| kalshiShadowCache\.error\)\)\{ kalshiStratAnim\.pending = false; kalshiStratAnimStart\(page\); \}/.test(render), 'a redraw stops, then plays only if pending, and consumes the flag');
+  assert.ok(/kalshiStratAnimStop\(page\);\s*if\(kalshiStratAnim\.pending && \(kalshiShadowCache\.rows \|\| kalshiShadowCache\.error\)\)\{ kalshiStratAnim\.pending = false; if\(Date\.now\(\) - \(kalshiStratAnim\.at \|\| 0\) <= KAL_STRAT_LATE_MS\)\{ kalshiStratAnimStart\(page\); \} \}/.test(render), 'a redraw stops, then plays only if pending, and consumes the flag');
   assert.strictEqual((html.match(/kalshiStratAnimStart\(/g) || []).length, 2, 'start is defined once and called once');
 };
 // SA11: light on phones and nothing left running: no interval, only transform, opacity and stroke-dashoffset in the keyframes, no layout property.

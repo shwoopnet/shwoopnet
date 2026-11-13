@@ -71,7 +71,7 @@ gates.ST6 = () => {
 gates.ST7 = () => {
   const media = /@media \(prefers-reduced-motion: reduce\)\{([\s\S]*?)\n  \}/.exec(css)[1];
   const attr = css.split('\n').filter((l) => l.includes('[data-reduce-motion="true"]')).join('\n');
-  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '.sp-csheet.sc-play', '.sp-csheet.sc-play .sc-ln', '.sp-csheet.sc-play .sc-g-ar', '.sp-csheet.sc-play .sc-b', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
+  for (const s of ['#page-strategies .lp::before', '#page-strategies .lp-ln u', '#page-strategies .lp-ret u', '#page-strategies .lp-p.play .rw', '#page-strategies .rw.near .rw-w::before', '.sp-csheet.sc-play', '.sp-csheet.sc-play .sc-svg', '.sp-csheet.sc-play .sc-kb i', '.sp-csheet.sc-play .sc-b', '#page-strategies .sx', '#page-strategies .lp-t', '#page-strategies.sp-play .lp-t']) {
     assert.ok(media.includes(s), 'prefers-reduced-motion stops ' + s);
     assert.ok(attr.includes(s), 'the Settings switch stops ' + s);
   }
@@ -134,14 +134,16 @@ gates.ST14 = () => {
   const withRows = card('OICORE', 'probation', { orders: 40, rows, daily, spark: [1, 1.1, 1.2], detail: { n: 40, winRate: 0.25, avgWin: 3, avgLoss: -1, cum: [3, 2, 1], recent: [] }, w: { d7: { n: 1, net: 1 }, d30: { n: 40, pf: 1.0, net: 0 }, all: { n: 40 } } });
   const h = B.kalshiBoardHtml(model([withRows]), esc, money);
   const r = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(h);
-  assert.ok(r && /class="sc"/.test(r[1]) && (r[1].match(/class="sc-sb" data-seg="(cash|pf|daily)"/g) || []).length === 3, 'the row carries the three charts');
-  assert.ok(/Trial: settled fills/.test(r[1]) && /Closest kill:/.test(r[1]) && /Last 40 trades/.test(r[1]), 'the gauges and the last trades');
+  assert.ok(r && /class="sc"/.test(r[1]) && /Cumulative cash/.test(r[1]) && /Last 14 days/.test(r[1]) && /Rolling 30 trade PF/.test(r[1]) && !/data-seg=/.test(r[1]), 'B style (Nov 13, 2026): every chart stacked in labelled panels, no tabs');
+  assert.ok(/>Closest kill</.test(r[1]) && />Trial</.test(r[1]) && /class="sc-kb"/.test(r[1]) && !/sc-g\b/.test(r[1]), 'thin bars for the closest kill and the trial, no gauges');
+  assert.ok(/<dt>Kill<\/dt><dd>kill rule<\/dd><dt>Return<\/dt><dd>return rule<\/dd>/.test(r[1]) && /class="sc-rule">rule of OICORE</.test(r[1]), 'the rule, the kill and the return are in the sheet');
   const masked = B.kalshiBoardHtml(model([withRows]), esc, (x) => (x < 0 ? '-' : '') + '****');
   const mr = /data-fk="row:OICORE"[\s\S]*?<div class="sx-in">([\s\S]*?)<div class="rw-d">/.exec(masked)[1];
   assert.ok(/\+\*\*\*\*/.test(mr) && !/\$\d/.test(mr), 'Privacy view masks the sheet\'s dollars');
   assert.ok(!/class="sc"/.test(B.kalshiBoardHtml(model([card('OICORE', 'probation', { orders: 3 })]), esc, money)), 'no rows passed, no chart block');
-  const empty = B.kalshiStratChartsHtml({ cum: [0], roll: [], daily: [], dots: [], n: 0 }, esc, money);
-  assert.ok(/Not enough settled trades yet/.test(empty) && /Needs 30 settled trades/.test(empty) && /No trades yet/.test(empty) && !/<path class="sc-ln"/.test(empty), 'an empty record draws no line');
+  const empty = B.kalshiStratChartsHtml({ cum: [0], roll: [], daily: [], n: 0 }, esc, money);
+  assert.ok(/Not enough settled trades yet/.test(empty) && /Needs 30 settled trades/.test(empty) && !/<path class="sc-ln"/.test(empty), 'an empty record draws no line');
+  assert.ok(/#spChartBody \.sc ~ \.rw-d, #spChartBody \.sc ~ \.rw-more/.test(css), 'with charts, the sheet does not repeat the old dropdown detail');
   assert.ok(/#stratBody \.rw > \.sx\{ display:none; \}/.test(css), 'no dropdown: the row never expands in place');
   const click = html.slice(html.indexOf("var r = t.closest('[data-row]')"), html.indexOf("if(m){", html.indexOf("var r = t.closest('[data-row]')")));
   assert.ok(/kalshiStratChart\.open\(/.test(click) && !/classList\.toggle\('open'/.test(click), 'a row tap opens the sheet');
