@@ -1,6 +1,6 @@
 # SPXSCALP: cheap-side S&P scalp (DRAFT, NOT REGISTERED)
 
-Status: DRAFT written Nov 13, 2026 for the owner's S&P scalp. Nothing is registered, committed to a job or read. It is registered only after the owner names the market and before anyone reads the candles. VA ruling (Nov 13): VERSION of the closed mid-band scalp family, not NEW, so it does not count toward the 20 to 30. The Head freezes it as ONE try, counted.
+Status: REGISTERED Nov 13, 2026 (before any candle or ES value was read), on the owner's instruction, as ONE counted try labelled VERSION (the VA: the reference-lag family on a new market; earlier ruled a version of the closed mid-band scalp family). It does NOT count toward the 20 to 30. The 0.05% threshold is a guess from the owner's words, fixed, no other tried. Counterparty: none named. The scorer takes the ES path as an argument and writes no ES-derived file; results go by message only. Still to do before any read: frozen scorer, Auditor B CLEAN, then the Testing Desk runs it from its scratch after SPXOI1_CANDLES lands and passes the structure check.
 
 ## Rule (fixed before any data)
 - Market: KXINX15M (named by the owner, Nov 13). The owner's main case (about 25 minutes left) would need another series and is not part of this card.
