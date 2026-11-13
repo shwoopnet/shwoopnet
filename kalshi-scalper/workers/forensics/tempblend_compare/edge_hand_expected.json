@@ -283,6 +283,40 @@
   "I03_index_point_299s_before_decision_too_new": {
    "expect": "skip",
    "class": "no index point"
+  },
+  "E13_gap_exactly_0.5_on_paper_under_0.5_in_floating_point": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 64.1,
+   "ask": 0.5,
+   "fee": 0.02,
+   "pnl": 0.48,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "E14_spread_exactly_0.04_on_paper_over_0.04_in_floating_point": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 71,
+   "ask": 0.54,
+   "fee": 0.02,
+   "pnl": 0.44,
+   "void": false,
+   "member": true,
+   "day2": true
+  },
+  "T03_midpoint_tie_with_the_HIGHER_strike_nearer_in_floating_point": {
+   "expect": "bet",
+   "side": "yes",
+   "K": 69.5,
+   "ask": 0.45,
+   "fee": 0.02,
+   "pnl": 0.53,
+   "void": false,
+   "member": true,
+   "day2": true
   }
- }
+ },
+ "note2": "Rows E13, E14 and T03 were ADDED after the first run of the 34 original rows, because that run showed the original edges were not float-sensitive (a planted change of the tolerance to zero changed nothing). Their expectations were written by hand from the card BEFORE they were run; the first 34 rows were not changed."
 }
