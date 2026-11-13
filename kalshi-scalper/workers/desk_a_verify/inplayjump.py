@@ -113,7 +113,7 @@ def run_family(fam, K, markets, candles, bounds):
     if kind == "clock" and matches:                                                    # Amendment 1: the share is printed once per family; under 80% the start is not derivable and nothing of it is read
         ok = sum(1 for _, tks, c in matches if clock_start(tks[0]) is not None and 4 * 60 <= c - clock_start(tks[0]) <= 90 * 60); share = ok / len(matches)
         L.append("start check: %.1f%% of matches closed 4 to 90 minutes after the ticker's start (%d of %d)" % (100 * share, ok, len(matches)))
-        if share < 0.80: L.append("START NOT DERIVABLE for this family; no result of it is read"); return L, None
+        if share < 0.80 - 1e-9: L.append("START NOT DERIVABLE for this family; no result of it is read"); return L, None
     dec = []; costs = []
     for e, tks, c in matches:
         d = match_decision(c, tks, cand, kind, K, drops, costs)
@@ -175,8 +175,8 @@ def run_family(fam, K, markets, candles, bounds):
     L.append("PLACEBO (Amendment 2, matched one for one): %d placebo bets, %d bets with no placebo (counted); median elapsed minute %s (rule %s); net at the rule's price mix %s; difference %s (se %s)" % (len(plb), nplb_none, ("%.1f" % st.median(p["into_play"] for p in plb)) if plb else "n/a", ("%.1f" % st.median(d["elapsed"] for _, _, d in dec if d["elapsed"] is not None)) if dec else "n/a", "%+.2fc" % (100 * pnet) if pnet is not None else "n/a (no placebo in the rule's price buckets)", "%+.2fc" % (100 * diff) if diff is not None else "n/a", "%.2fc" % (100 * dse)))
     p = pf(nets)
     if n < K["min_development_bets"]: lab = "NOT_ENOUGH_DATA at n = %d" % n
-    elif p < 1.0 or (h1 is not None and h1 < 1.0) or (h2 is not None and h2 < 1.0): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
-    elif p >= 1.5 and h1 > 1.0 and h2 > 1.0 and diff is not None and diff >= 2 * dse: lab = "development bar met (held-out asked for the same hour; NOT the research bar)"
+    elif p < 1.0 - 1e-9 or (h1 is not None and h1 < 1.0 - 1e-9) or (h2 is not None and h2 < 1.0 - 1e-9): lab = "FALSIFIED (cash PF %.2f overall, halves %s / %s)" % (p, h1 and "%.2f" % h1, h2 and "%.2f" % h2)
+    elif p >= 1.5 - 1e-9 and h1 > 1.0 + 1e-9 and h2 > 1.0 + 1e-9 and diff is not None and diff >= 2 * dse - 1e-9: lab = "development bar met (held-out asked for the same hour; NOT the research bar)"
     else: lab = "bar not met"
     L.append("LABEL: " + lab); return L, bets
 def pilot(fam, K, markets, candles, bounds):
