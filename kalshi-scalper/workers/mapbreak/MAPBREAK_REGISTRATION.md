@@ -235,3 +235,14 @@ The Head's ruling reached me after Amendment 8 was written. It agrees with Amend
 5. CS2 stays OUT as registered. Step 1 is re-run on the whole set after the remaining requests land. Tries stay at 2. The one-way cost line is computed on the filled entries (ask at the look minus mid, plus the 1c, plus the fee on the limit).
 6. The live spec sheet takes the same two definitions.
 
+## AMENDMENT 10, Nov 13, 2026, 00:13Z: clarifying, no rule changed, made after Forensics' second build on invented rows, before any match result (approved line by line by the Head of R&D at 00:13Z; after this the text is closed again)
+
+The Forensics desk built a second scorer from this registration and found places where two builders could read the text differently. Each line below is the reading both builds already used unless it says otherwise.
+
+1. **A best-of-three needs map markets 1 AND 2 listed for its key,** as this registration has always said. A match with no map-2 market is not in the sample. (The Testing Desk's build gave such a match a first look; Amendment 4 never dropped the requirement.)
+2. **The one-way cost line is computed over every look where the state is observable and both match contracts are two-sided, on the cheaper side's contract.** This corrects the last sentence of Amendment 9, point 5, which said "on the filled entries": a cost screen describes the market, not the rule's own picks.
+3. **The observability count is per look reached:** a match with a pre-match minute and a look minute.
+4. **If the two teams' gaps are exactly equal there is no bet,** counted.
+5. **"Last candle, one-sided allowed"** means a candle that carries a bid or an ask; a candle with no bid shows no bid of 0.90. When map 1 was not observable at the first look it is taken again at the SECOND look's minute.
+6. **Every "or less" and "or more" comparison is made with a tolerance of 1e-9,** so that a spread of exactly 4c counts as 4c. (The first build read some exact 4c spreads as wider, which lowers the gap share the 10% line reads. So the step 1 shares recorded so far, CS2's included, are not yet the registered count: **CS2 is PENDING RECOUNT,** counts only, no match result, and its verdict is whatever the recount says under the registered rule.)
+

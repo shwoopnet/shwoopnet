@@ -160,7 +160,8 @@ def main():
         late.sort()
         print(f"diagnostic only, never a filter: for matches with an entry, market close minus ticker clock, minutes: p10 {late[len(late) // 10]:.0f} median {late[len(late) // 2]:.0f} p90 {late[(9 * len(late)) // 10]:.0f} | "
               f"closed under 9 minutes after the clock (14 after the entry): {sum(1 for x in late if x < 9)} of {len(late)}")
-    closed = (start_ok < 0.8 * len(in_span)) or proj_trade < 300 or proj_bets < STAGE1_BETS_FLOOR or (worse is not None and worse > COST_KILL_ONE_WAY + 1e-9) or not costs
+    # registered lines are compared without raw float traps: the 80% start check in whole numbers, the two floors with a tolerance
+    closed = (5 * start_ok < 4 * len(in_span)) or proj_trade + 1e-9 < 300 or proj_bets + 1e-9 < STAGE1_BETS_FLOOR or (worse is not None and worse > COST_KILL_ONE_WAY + 1e-9) or not costs
     print("STAGE 1 LINE: " + ("CLOSED at stage 1, no try spent" if closed else "open: stage 2 may be asked for"))
 
 
