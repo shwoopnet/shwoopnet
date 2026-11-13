@@ -64,3 +64,9 @@ KXBTC15M-W4,1795144800,1
 4. a liquidations.csv path given as OKX coverage
 5. an OKX row with uly ETH-USDT
 6. a HELDOUT_ path
+
+## First test run (no expected figure changed)
+The first run stopped "dev run refused before 2026-12-06": two block constants had been typed by hand and were wrong (2026-11-17 is 1794873600 and 2026-11-30 is 1795996800). They are now the computed values, and the printed block bounds were checked. Mutants run in a temporary folder and deleted:
+- with no merge, W2 is not covered;
+- with a union in place of the intersection, W3 and W8 are covered.
+Both fail the test.
