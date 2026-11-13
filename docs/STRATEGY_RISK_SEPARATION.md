@@ -55,7 +55,7 @@ The backstop numbers were my starting point, not a finding: today's 12% stop and
 ## Build order (each its own pull request, deployed by the owner with `deploy-sizing.sh`)
 1. This design, reviewed with the refinement chat (read only): loss sizes and window use from the live record, for both strategies.
 2. Per-strategy stop and window cap in code with the defaults set so today's behavior does not change (the off-equivalence fixtures must stay byte for byte, and any re-record happens only from main's own code).
-3. OICORE size ladder and step rule: BUILT in #699 (Nov 6, 2026): steps 10, 12, 15, 20, 30, each earned on its own record and balance.
+3. OICORE size ladder and step rule: BUILT in #699 (Nov 6, 2026): steps 10, 12, 15, 20, 30, each earned on its own record and balance. Nov 13, 2026: steps 15, 20, 30 (the Risk Analyst under the owner's grant; see CLAUDE.md).
 4. L1 step from 1 to 3 per review, after the refinement chat's review.
 5. Page: per-strategy risk meters.
 
