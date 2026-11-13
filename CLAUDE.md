@@ -1496,3 +1496,4 @@ Checked and found fine: the boxes open, close and switch, including a fast doubl
 
 Gates: `test/interactionSweepGates.test.js` IX1 to IX5 and PT1 to PT4, and `test/pageLoadGates.test.js`. Edited on purpose: ST14, SP16 (harness) and SR5.
 
+**All time stays All time (Nov 13, 2026, the owner: "all time bubble also changes with chart range selection on all strategies module", in the same pull request).** The older-order read on the Strategies page was keyed to the chosen range, so 7D held only the newest live orders and All time, Today and Last 7 days moved with the buttons. `kalshiStratHistory` now always reads from `KAL_STRAT_START` (Oct 7, 2026, the first trade) under one key, so the record is the same for every range; only the chart, its header and its ring follow 7D, 30D and YTD. Gate SP19 (clicking a range leaves the three tiles unchanged); SP17 edited on purpose.

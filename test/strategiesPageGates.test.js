@@ -576,7 +576,7 @@ gates.SP18 = () => {
 };
 gates.SP17 = () => {
   // YTD (and any range) reaches back past the live listener's newest 1,000 gold orders (Nov 13, 2026, the owner: "the ytd strategies thing should go back to oct 7th right?")
-  const src = varLine('KAL_STRAT_RANGES') + varLine('kalshiStratRange') + fn('kalshiStratRangeOf') + fn('kalshiPnlSource') + 'var kalshiStratOlder = {}, kalshiStratOlderOut = {};' + fn('kalshiStratHistory') +
+  const src = varLine('KAL_STRAT_RANGES') + varLine('kalshiStratRange') + fn('kalshiStratRangeOf') + fn('kalshiPnlSource') + 'var KAL_STRAT_START = Date.UTC(2026, 9, 7); var kalshiStratOlder = {}, kalshiStratOlderOut = {};' + fn('kalshiStratHistory') +
     '; return { run: kalshiStratHistory, set: function(r){ kalshiStratRange = r; } };';
   const NOWY = Date.UTC(2026, 10, 13, 18, 0), DAY = 86400000;
   let asked = null, resolve = null, redraws = 0;
@@ -584,15 +584,28 @@ gates.SP17 = () => {
   const win = { __shwoopAPI: { kalshiOrdersSince: (ms) => { asked = ms; return { then: (ok) => { resolve = ok; } }; } } };
   const H = new Function('Math', 'Number', 'Array', 'Intl', 'Date', 'Infinity', 'window', 'kalshiLiveOrders', 'kalshiSlotOrders', 'renderStrategiesPage', src)(Math, Number, Array, Intl, Date, Infinity, win, live, [], () => { redraws++; });
   H.set('7D');
-  assert.ok(!H.run(NOWY).loading && asked === null, '7D is inside the live list: no older read');
-  H.set('YTD');
   const first = H.run(NOWY);
-  assert.ok(first.loading && asked === Date.UTC(2026, 0, 1, 6, 0), 'YTD asks for every order since Jan 1 (Central) and says it is reading');
+  assert.ok(first.loading && asked === Date.UTC(2026, 9, 7), 'whatever the range (7D here), the page asks once for every order since the first trade on Oct 7 and says it is reading');
+  asked = null; H.set('YTD'); H.run(NOWY);
+  assert.ok(asked === null, 'switching the range does not start another read: the record is the same for every range');
   resolve([{ ts: Date.UTC(2026, 9, 7, 15, 0), clientOrderId: 'oct7' }].concat(live.slice(-3)));
   const after = H.run(NOWY);
   assert.ok(Array.isArray(after.orders) && after.orders.some((o) => o.clientOrderId === 'oct7') && after.orders.length === 1001 && redraws === 1, 'the Oct 7 order joins the live list once, and the page redraws');
   const rp = fn('renderStrategiesPage');
   assert.ok(/hist = kalshiStratHistory\(now\)/.test(rp) && /if\(hist\.orders\)\{ all = hist\.orders; \}/.test(rp) && /Older trades could not be read, so this starts at/.test(rp) && /Reading older trades/.test(rp), 'the page uses the full history and says so on the chart when part of it is missing');
+};
+
+gates.SP19 = () => {
+  // Clicking 7D, 30D or YTD changes only the chart, its header and its ring; Today, Last 7 days and All time stay fixed (the owner, Nov 13, 2026: "all time bubble also changes with chart range selection").
+  assert.ok(/function kalshiStratHistory\(now\)\{\n    var cut = KAL_STRAT_START, key = 'all';/.test(html) && /var KAL_STRAT_START = Date\.UTC\(2026, 9, 7\);/.test(html), 'the record the page holds does not depend on the range');
+  const S = new Function('KAL_BOARD_DAY', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratR') + fn('kalshiBoardFillCost') + fn('kalshiBoardCash') + fn('kalshiBoardRows') + fn('kalshiBoardPf') + fn('kalshiStratOpenCount') + fn('kalshiStratSummary') + '; return kalshiStratSummary;')(86400000);
+  const NOWY = Date.UTC(2026, 10, 13, 18, 0), DAY = 86400000;
+  const o = (ts, won) => ({ ts, side: 'yes', count: 1, fillCount: 1, price: 0.9, maxCost: 0.92, settled: true, result: won ? 'yes' : 'no', settledPnl: won ? 0.08 : -0.92, averageFillPrice: 0.9, averageFeePaid: 0.01 });
+  const orders = [o(Date.UTC(2026, 9, 7, 15), true), o(NOWY - 20 * DAY, false), o(NOWY - 3 * DAY, true), o(NOWY - 3600000, true)];
+  const day = (ms) => new Date(ms).toISOString().slice(0, 10);
+  const r = ['7D', '30D', 'YTD'].map((k) => S(orders, NOWY, 0, day, k));
+  for (const k of ['today', 'd7', 'net', 'atRisk', 'open']) assert.ok(r.every((x) => x[k] === r[0][k]), k + ' is the same for every range');
+  assert.ok(r[0].curve.length !== r[2].curve.length, 'while the chart follows the range');
 };
 
 let failed = 0;
