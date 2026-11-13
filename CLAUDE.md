@@ -1336,6 +1336,17 @@ Six candle job files, job files and gates only (runner and workflow unchanged): 
 
 The first run of `MAPBREAK_CANDLES` (2026-11-12T1954Z) answered 166 of its 282 requests (c0000 to c0165, about 199 MB, about 1.2 MB an answer) and stopped cleanly at the 200 MB cap (`stopped_size`, the Pull step exits red but the data is pushed). `MAPBREAK_CANDLES_REST` carries only the remaining 116 requests (c0166 to c0281) byte for byte, cap 116, with the ticker allowlist cut to the tickers it uses; the converter merges the two runs by request id and `MAPBREAK_CANDLES` must not be run again (same pattern as `SPREADCELL1_REST`). Job file and gate only; runner and workflow unchanged.
 
+## MAPBREAK_CANDLES_REST corrected to start at c0165 (Nov 12, 2026, the Testing Desk's check, found just after midnight UTC)
+
+The first `MAPBREAK_CANDLES` run stored 165 answers (c0000 to c0164, files 0001 to 0165); the 166th request, c0165, tripped the 200 MB cap and was not stored. The note above that says c0165 was answered is wrong. `MAPBREAK_CANDLES_REST` now carries c0165 to c0281 (117 requests, cap 117, ticker allowlist cut to what it uses), byte for byte from the original job. It must not be run before this correction is merged. Job file only.
+
+## MAPBREAK_CANDLES_M2 (Nov 12, 2026, the Testing Desk, for Desk B's Amendment 7)
+
+`MAPBREAK_CANDLES_M2` (owner MAIN): 65 batched one minute candle requests, cap 65, 685 tickers (the other map-2 contract of each one-map-each match), windows from the map-1 close minus 5 minutes to the map-2 close plus 5 minutes, development only (every request ends before 2026-10-23), about 1 MB a request. Job file only; it rides in the same pull request as the `MAPBREAK_CANDLES_REST` correction. Run it after the REST job. Nothing has run.
+
+## INPLAYJUMP_PILOTVAL (Nov 12, 2026, Desk A)
+
+`INPLAYJUMP_PILOTVAL` (owner DESK_A): 22 batched candle requests (5 pilot, 17 tennis validation; three hourly candles for the tennis screen), cap 22, 159 tickers, built from the `INPLAYJUMP_LISTS` answer (run 43333651862); every request ends before 2026-10-23 (development only), under the 10,000 minutes x tickers limit. Job file only; rides in the same pull request as the MAPBREAK corrections. Nothing has run.
 ## kalshi-pull: 40 real runs a UTC day (Nov 12, 2026, the owner: "yes 40")
 
 The day cap on real runs of `scripts/kalshi_pull.py` goes from 20 to 40 (`MAX_RUNS_PER_DAY`), and the workflow header comment says 40; nothing else changes. Why: the 20 run cap bound on Nov 12 ("REFUSED: 20 real runs already today") with the research queue oversubscribed for the next day. Every per-run limit is exactly as it was (1 request a second, 1,200 requests, three 429s end a run, 5 MB an answer, 200 MB a run, the host table, GET only, no key, no redirects, the end date 2027-02-28). If the first 429 ever appears, drop back to 20 at once (a one line edit). Gates KP18 and KP18b pin 40 and every other limit.
