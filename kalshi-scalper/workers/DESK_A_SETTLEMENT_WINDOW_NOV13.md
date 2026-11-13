@@ -26,3 +26,6 @@ No. The window opens at 60 s before the close. The second slot cannot enter unde
 
 ## 5. What survives, if anything (not registered, offered)
 One honest data question, a version of CFRTI-K, no new try until a pre-registration: whether CFRTI-K's model residual is better for decisions made at 60 s, 90 s and 120 s (the same signal, a later look). It cannot be traded by the current engines (120 s floor) and would be a research read on R6 books only, after CFRTI-K's own read of 2026-11-20. I do not register it tonight: it adds a try (and a look-time sweep, row 190) to an unread rule.
+
+## Dated line (Nov 13, 2026, Auditor B's cautions)
+(a) Table row 2's reading of KXBTC15M (a strike-free "close average against open average" market) is UNVERIFIED second-hand text and conflicts with CFRTI-K's registration, which uses the market's `floor_strike`; it is not to be relied on. (b) Section 5's question (decisions at 60, 90 and 120 s) is NOT registered, counts a try if it ever is, and must not be run before CFRTI-K's read, because it would read the same KXBTC15M windows (closes from 2026-11-14).
