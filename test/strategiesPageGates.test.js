@@ -201,8 +201,8 @@ gates.SP8 = () => {
 };
 
 // SP9 to SP14: the summary bar, the detail panels and the timeline (Nov 10, 2026, the owner: more informational, an evidence or odds panel explicitly not wanted).
-const names2 = ['kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiHoverAttr', 'kalshiHoverWhen', 'kalshiStratGauge', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStageBoxOf', 'kalshiClosestKill', 'kalshiGoldReturnStats', 'kalshiPromotedAgo', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
-const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STAGES') + varLine('KAL_RETIRED_CAUSES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + names2.map(fn).join('\n');
+const names2 = ['kalshiStratLaneOf', 'kalshiGoldKillState', 'kalshiGoldKillNote', 'kalshiGoldReturnProgress', 'kalshiRegBuilding', 'kalshiRetiredEntries', 'kalshiRetiredDate', 'kalshiRetiredGroupsHtml', 'kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiBoardFillCost', 'kalshiBoardCash', 'kalshiBoardRows', 'kalshiBoardPf', 'kalshiBoardPfText', 'kalshiStratR', 'kalshiStratPfAttr', 'kalshiStratBestWorst', 'kalshiStratOpenCount', 'kalshiStratRangeOf', 'kalshiStratRangeHtml', 'kalshiStratSummary', 'kalshiStratDetail', 'kalshiStratShadowDetail', 'kalshiStratCumLine', 'kalshiStratSummaryHtml', 'kalshiStratDetailHtml', 'kalshiStratShadowDetailHtml', 'kalshiStratPfOf', 'kalshiStratRolling', 'kalshiStratCumulative', 'kalshiStratShadowSeries', 'kalshiStratSpark', 'kalshiHoverAttr', 'kalshiHoverWhen', 'kalshiStratGauge', 'kalshiStratBadge', 'kalshiStratRing', 'kalshiStratRingText', 'kalshiStratOneLine', 'kalshiStageBoxOf', 'kalshiClosestKill', 'kalshiGoldReturnStats', 'kalshiPromotedAgo', 'kalshiRegistrySheetHtml', 'kalshiBoardHtml'];
+const src2 = varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + varLine('KAL_BOARD_SHADOW_RULES') + varBlock('KAL_BOARD_SHADOW') + varBlock('KAL_BOARD_RETIRED') + varLine('KAL_BOARD_LADDER') + varLine('KAL_BOARD_DAY') + varBlock('KAL_STAGES') + varLine('KAL_RETIRED_CAUSES') + varLine('kalshiStratOpen') + varLine('kalshiStratDayText') + varLine('KAL_STRAT_RANGES') + names2.map(fn).join('\n');
 const Q = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', 'Object', src2 + '; return { ' + names2.join(', ') + ', KAL_RETIRED_CAUSES, KAL_BOARD_RETIRED, kalshiStratOpen };')(Math, Number, Array, isFinite, Intl, Date, Object);
 const CT = (ms) => new Date(ms).toLocaleDateString('en-CA', { timeZone: 'America/Chicago' });
 const NOW = Date.UTC(2026, 10, 10, 18, 0), HR = 3600000;
@@ -530,6 +530,34 @@ gates.AL3 = () => {
   assert.ok(/>Trial 5 of 90</.test(live), 'with its Trial tag');
   assert.ok(/GOLDOFF shadow/.test(off) && /2 of 60 trades/.test(off) && /class="bd-b ret"/.test(off), 'the return progress is on the off row');
   assert.ok(/<b data-count="1">1<\/b><span class="lp-tt">Live/.test(out), 'the Live count is what trades');
+};
+gates.SP15 = () => {
+  // timeframes (Nov 13, 2026, the owner: "i cant select timeframes on it"): 1D, 7D, 30D and All change the curve, the profit factor and the trade count together; 30D is the default
+  const orders = [W(NOW - 2 * HR), W(NOW - 30 * HR), L(NOW - 3 * 86400000), W(NOW - 40 * 86400000)];
+  const n = (k) => Q.kalshiStratSummary(orders, NOW, 0, CT, k).w30.n;
+  assert.deepStrictEqual([n('1D'), n('7D'), n('30D'), n('All'), n(undefined)], [1, 3, 3, 4, 3], 'each range counts its own trades; no range means 30 days');
+  assert.strictEqual(Q.kalshiStratSummary(orders, NOW, 0, CT, 'All').curve.length, 5, 'All draws every settled trade from zero');
+  const h = Q.kalshiStratSummaryHtml(Q.kalshiStratSummary(orders, NOW, 0, CT, '7D'), esc, money);
+  assert.ok(/All strategies &middot; last 7 days &middot; 3 trades/.test(h), 'the header names the range and its count');
+  assert.deepStrictEqual([...h.matchAll(/data-strng="([^"]+)"/g)].map((m) => m[1]), ['1D', '7D', '30D', 'All'], 'four buttons, in order');
+  assert.ok(/aria-pressed="true">7D</.test(h) && (h.match(/aria-pressed="true"/g) || []).length === 1, 'exactly the chosen one is pressed');
+  const rp = fn('renderStrategiesPage');
+  assert.ok(/kalshiStratSummary\([^;]*kalshiStratRange\)/.test(rp) && /range: kalshiStratRange/.test(rp), 'the page passes its one choice to the summary and the sheets');
+  assert.ok((html.match(/closest\('\[data-strng\]'\)/g) || []).length >= 2 && /var kalshiStratRange = '30D';/.test(html), 'the page and the chart sheet both answer the buttons; 30D by default, kept for the visit only (no storage)');
+};
+gates.SP16 = () => {
+  // the strategy sheet's money chart follows the range and counts from zero at the range's start
+  const R = new Function('Math', 'Number', 'Array', 'isFinite', 'Intl', 'Date', varLine('KAL_STRAT_RANGES') + fn('kalshiStratRangeOf') + fn('kalshiStratRangeHtml') + fn('kalshiStratR') + fn('kalshiHoverAttr') + fn('kalshiHoverWhen') + fn('kalshiStratCumLine') + varLine('kalshiStratDayText') + fn('kalshiStratChartsHtml') + '; return kalshiStratChartsHtml;')(Math, Number, Array, isFinite, Intl, Date);
+  const base = { now: NOW, cum: [0, 5, 3, 4], times: [null, NOW - 10 * 86400000, NOW - 3 * 86400000, NOW - 2 * HR], n: 3 };
+  const pts = (h) => JSON.parse(/class="hv" data-hv="([^"]+)"/.exec(h)[1].replace(/&#34;|&quot;/g, '"'));
+  const all = R(Object.assign({ range: 'All' }, base), esc, money), wk = R(Object.assign({ range: '7D' }, base), esc, money), day = R(Object.assign({ range: '1D' }, base), esc, money);
+  assert.strictEqual(pts(all).length, 4, 'All: every point');
+  assert.strictEqual(pts(wk).length, 3, '7D: a zero start and the two trades inside the week');
+  assert.ok(/3 trades/.test(all) && /2 trades &middot; last 7 days|2 trades · last 7 days/.test(wk), 'the note counts the trades in the range');
+  assert.strictEqual(pts(day).length, 2, '1D: the zero start and the one trade in the last 24 hours');
+  const none = R(Object.assign({ range: '1D' }, base, { times: [null, NOW - 10 * 86400000, NOW - 9 * 86400000, NOW - 8 * 86400000] }), esc, money);
+  assert.ok(/No settled trades in the last 24 hours/.test(none), 'an empty range says so instead of drawing a line');
+  assert.ok(/data-strng="7D"[^>]*aria-pressed="true"/.test(wk), 'the sheet shows the same buttons, the chosen one pressed');
 };
 let failed = 0;
 for (const [name, g] of Object.entries(gates)) { try { g(); console.log('ok ' + name); } catch (e) { failed++; console.log('FAIL ' + name + ': ' + (e && e.message)); } }
