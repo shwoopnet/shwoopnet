@@ -71,7 +71,7 @@ def run(mode, path):
                 bump("held_out_ignored"); continue
             if not (RANGE_FROM <= close < RANGE_TO):
                 raise Stop("development row %s closes outside the development range" % r["ticker"])
-            if r["result"] not in ("yes", "no", "void"):
+            if r["result"] not in ("yes", "no", "void", ""):                  # G5: void and blank are dropped later; any other text stops
                 raise Stop("result %r refused (%s)" % (r["result"], r["ticker"]))
             rows.append((close, r))
     for close, r in sorted(rows, key=lambda x: (x[0], x[1]["ticker"])):
@@ -95,10 +95,12 @@ def run(mode, path):
             bump("out_of_band"); continue
         if str(r.get("r6_poll", "")).strip() != "1":                    # replay set: parent trades with an R6 decision poll only
             bump("no_poll"); continue
+        if r["result"] in ("void", ""):                                    # G5: not a bet, not in n or PF; counted
+            bump("void_dropped"); continue
         price = min(ask + SLIP, CEIL)
         fe = fee(price)
         res = r["result"]
-        net = -fe if res == "void" else ((1 - price - fe) if res == side else (-price - fe))
+        net = (1 - price - fe) if res == side else (-price - fe)
         net = round(net, 9)
         parent.append(net)
         closes.append(close)
