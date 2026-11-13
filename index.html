@@ -954,6 +954,17 @@
   .sp-detbtn{ align-self:flex-start; margin-top:10px; background:none; border:1px solid var(--border); color:var(--paper); border-radius:999px; padding:8px 16px; min-height:40px; font:inherit; font-size:12.5px; cursor:pointer; } .sp-detbtn:hover{ border-color:var(--paper); }
   .sp-pop{ position:fixed; inset:0; z-index:300; background:rgba(0,0,0,.7); display:flex; align-items:center; justify-content:center; padding:16px; } .sp-pop[hidden]{ display:none; }
   .sp-pop-sheet{ width:min(420px,100%); max-height:90vh; overflow:auto; background:var(--panel-raised, #141414); border:1px solid var(--border); border-radius:16px; padding:20px 22px; box-shadow:0 30px 80px rgba(0,0,0,.6); }
+  /* One type scale for the Strategies cards and the chart sheet (Nov 13, 2026, the owner: "the text and sizing here within the cards is so inconsistent"). Four steps, used everywhere a card shows text: TITLE (a strategy or panel name) 15px semibold; LABEL (a small caption over a figure) 10.5px bold capitals; VALUE (a figure in a tile) 17px bold, tabular digits; NOTE (any explaining line) 12px muted. The rings keep their own fitted sizes, and the sheet's own heading is one step up (18px). */
+  #page-strategies, #spChart, #spPop{ --t-title:15px; --t-label:10.5px; --t-value:17px; --t-note:12px; }
+  #page-strategies .rw-n, #page-strategies .lp-ph b, #spPop .sp-name{ font-size:var(--t-title); font-weight:600; }
+  #spChart .sp-ch-h .rw-n{ font-size:18px; font-weight:600; }
+  #page-strategies .sp-sum-k, #page-strategies .sp-sum-c span, #page-strategies .rw-w, #page-strategies .bd-lab, #spChart .bd-lab, #spChart .sc h5, #spChart .sc-stats span, #spChart .sc-rules dt, #spChart .rw-w, #spPop .sp-pop-f b, #spPop .sp-pop-room b{ font-size:var(--t-label); font-weight:700; letter-spacing:.08em; text-transform:uppercase; }
+  #page-strategies .rw-cap, #page-strategies .sp-sub, #page-strategies .lp-ph span, #page-strategies .sp-sum-sub, #page-strategies .bd-w, #page-strategies .sp-sum-cap, #spChart .sc-rule, #spChart .sc h5 em, #spChart .sc-rules dd, #spChart .sc-none, #spChart .bd-w, #spChart .sp-sub, #spPop .sp-pop-f span, #spPop .sp-sub{ font-size:var(--t-note); }
+  #spChart .sc h5 em{ font-weight:400; letter-spacing:0; text-transform:none; }
+  @media (min-width:561px){ #page-strategies .sp-sum-c b, #spChart .sc-stats b{ font-size:var(--t-value); } }
+  /* The hover readout on every chart (Nov 13, 2026): a guide line, a dot and the words at the nearest point, laid over the box in HTML so a stretched chart never distorts them. */
+  .hv{ position:relative; touch-action:pan-y; cursor:crosshair; } .hv-g{ position:absolute; top:0; bottom:0; width:1px; margin-left:-.5px; background:var(--muted); pointer-events:none; } .hv-d{ position:absolute; width:8px; height:8px; margin:-4px 0 0 -4px; border-radius:50%; background:var(--paper); box-shadow:0 0 0 3px rgba(0,0,0,.6); pointer-events:none; }
+  .hv-t{ position:absolute; top:-30px; z-index:2; padding:3px 8px; border:1px solid var(--border); border-radius:6px; background:var(--panel-raised, #141414); font-size:11.5px; font-weight:600; font-variant-numeric:tabular-nums; white-space:nowrap; pointer-events:none; }
   /* The chart sheet (Nov 13, 2026, option A): a strategy row opens this pop-up instead of a dropdown; the row's own detail block stays in the markup (hidden) and is copied in. Centered on a desktop, a bottom sheet on a phone. */
   #stratBody .rw > .sx{ display:none; }
   .sp-cpop{ z-index:310; } .sp-csheet{ width:min(880px,100%); max-height:88vh; padding:18px 22px 20px; }
@@ -1845,6 +1856,7 @@
               <details class="changelog-details"><summary>Show what changed</summary>
                 <div class="changelog-day">Nov 13</div>
                 <ul class="changelog-list">
+                  <li>Strategies page polish: every chart (the all strategies curve, a strategy's cash, daily and rolling profit factor charts, the position charts on the Bot page and the registry charts) shows a crosshair and a readout of the point under the pointer, or under a finger on a phone. All cards share one type scale (titles, labels, values, notes). A trial seat whose 90 fills are done reads "Record complete", and its chart pop-up says the profit factor and whether it meets the 1.3 needed for Proven. Page only.</li>
                   <li>Strategies page: the chart pop-up now uses the side-by-side style (labelled panels stacked, thin bars instead of gauges, no tabs) with the same figures, and drops the repeated detail under it. The page no longer replays its opening animation when its data arrives a few seconds after the page opens (that looked like a restart), and it keeps its scroll position on each refresh. Page only.</li>
                   <li>Each figure once (the owner: "limit redundancies"): the Bot page's Account result chart now has the same white line and soft white fill as the Strategies page chart; the Strategies page top box drops its big net cash number and its Open now tile for an All time tile (with what is open and at risk under it); the loop's header line no longer repeats the box counts or the closest kill; the chart sheet hides its copies of the PF, kill room, win rate, averages and lines. The All strategies figures stay on both the Bot page and the Strategies page on purpose, so either tab can be watched alone. Page only.</li>
                   <li>Strategies page, chart sheet: tapping a strategy row now opens a pop-up with charts instead of a dropdown: its cash result over every settled trade, the rolling 30 trade profit factor and the last 14 days, switched by Cash, Rolling PF and Daily, plus a gauge for its closest kill, its trial progress, its last 60 trades and everything the dropdown held. On a phone it slides up from the bottom. The top box and the loop are unchanged. Page only.</li>
@@ -3094,7 +3106,9 @@
     var tt = r && Array.isArray(r.pathT) ? r.pathT : [];
     function hm(ms){ return Number.isFinite(ms) ? new Date(ms).toLocaleTimeString('en-US', { timeZone: KAL_TZ, hour: 'numeric', minute: '2-digit' }) : ''; }
     var from = hm(tt.length ? tt[0] : NaN) || 'Earlier';
-    return '<div class="kal-hold-chart"><div class="kal-hc-col"><div class="kal-hc-plot">' +
+    // The hover readout (Nov 13, 2026; kalshiHover reads data-hv): chances and times only, no dollar, so nothing here needs masking; built inline so this function stays self-contained.
+    var hv = ' data-hv="' + JSON.stringify(p.map(function(v, i){ return [Math.round(i / (p.length - 1) * 10000) / 10000, Math.round((1 - clamp(v)) * 10000) / 10000, Math.round(clamp(v) * 100) + '% chance' + (hm(tt[i]) ? ' · ' + hm(tt[i]) : '')]; })).replace(/&/g, '&amp;').replace(/"/g, '&quot;') + '"';
+    return '<div class="kal-hold-chart"><div class="kal-hc-col"><div class="kal-hc-plot hv"' + hv + '>' +
       '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="Chance of the side you bought from 0 to 100 percent since this page was opened, with the target price line at 50 percent">' +
       '<rect class="kal-hc-below" x="0" y="' + (H / 2) + '" width="' + W + '" height="' + (H / 2) + '"/><line class="kal-hc-target-line" x1="0" y1="' + (H / 2) + '" x2="' + W + '" y2="' + (H / 2) + '"/>' +
       '<path class="kal-hc-line" d="' + d + '"/><circle class="kal-hc-dot" cx="' + X(p.length - 1) + '" cy="' + Y(p[p.length - 1]) + '" r="4"/></svg>' +
@@ -4502,7 +4516,7 @@ kalshiStatusTick();
     var cost = Number(openCost);
     // The 30 day cash curve (Nov 13, 2026, the owner chose the dial and curve): the running cash result of the last 30 days' settled trades, oldest first, starting at zero.
     var r30 = rows.filter(function(r){ return r.ts >= now - 30 * KAL_BOARD_DAY; }), run = 0, curve = [0].concat(r30.map(function(r){ run += r.p; return kalshiStratR(run); }));
-    return { w30: w30, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders), curve: curve, curveFrom: r30.length ? r30[0].ts : null };
+    return { w30: w30, net: kalshiBoardPf(rows).net, today: day.net, d7: d7.net, atRisk: isFinite(cost) && cost > 0 ? kalshiStratR(cost) : 0, open: kalshiStratOpenCount(orders), curve: curve, curveFrom: r30.length ? r30[0].ts : null, curveT: r30.length ? [r30[0].ts].concat(r30.map(function(r){ return r.ts; })) : [] };
   }
   // Everything the detail panel of one live strategy shows, from its orders: the cumulative cash line, win rate, average win and loss, fees (the stored fee a contract times the contracts filled, where it is stored), best and worst day and the last n settled trades.
   function kalshiStratDetail(orders, nameOf, dayOf, nRecent){
@@ -4534,6 +4548,12 @@ kalshiStatusTick();
     return { signals: mine.length, n: fill.length, winRate: fill.length ? wins.length / fill.length : null, avgWinC: avg(wins), avgLossC: avg(losses),
       best: bw.best ? { day: bw.best.day, c: Math.round(bw.best.p * 1000) / 10 } : null, worst: bw.worst ? { day: bw.worst.day, c: Math.round(bw.worst.p * 1000) / 10 } : null };
   }
+  // The hover readout every chart shares (Nov 13, 2026, the owner: "all charts should be interactive (hover over and it should show a line, similar to how our brief page charts interact)"). A chart's box carries its points as data: x and y as a share of the box, and the words to show. One listener (kalshiHover, below) draws a guide line, a dot and the words at the nearest point; a tap or a drag does the same on a phone. The words are built when the chart is drawn, so a dollar in them has been through money() and Privacy view masks it.
+  function kalshiHoverAttr(pts, esc){
+    var a = (pts || []).filter(function(p){ return p && isFinite(p.x) && isFinite(p.y); }).map(function(p){ return [Math.round(p.x * 10000) / 10000, Math.round(p.y * 10000) / 10000, String(p.t || '')]; });
+    return a.length ? ' data-hv="' + esc(JSON.stringify(a)) + '"' : '';
+  }
+  function kalshiHoverWhen(ms){ return isFinite(ms) && ms > 0 ? new Intl.DateTimeFormat('en-US', { timeZone: 'America/Chicago', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(ms)) : ''; }
   // The cumulative cash line in a w by h box: x spaced by trade, the dashed zero line always in view; null under two points.
   function kalshiStratCumLine(vals, w, h){
     var v = (Array.isArray(vals) ? vals : []).filter(function(x){ return typeof x === 'number' && isFinite(x); });
@@ -4542,7 +4562,8 @@ kalshiStatusTick();
     if(hi - lo < 0.01){ hi = lo + 0.01; }
     var X = function(i){ return Math.round((i / (v.length - 1)) * w * 100) / 100; };
     var Y = function(x){ return Math.round((pad + (1 - (x - lo) / (hi - lo)) * (h - 2 * pad)) * 100) / 100; };
-    return { d: v.map(function(x, i){ return (i === 0 ? 'M' : 'L') + X(i) + ' ' + Y(x); }).join(' '), zeroY: Y(0), lastX: X(v.length - 1), lastY: Y(v[v.length - 1]), n: v.length };
+    return { d: v.map(function(x, i){ return (i === 0 ? 'M' : 'L') + X(i) + ' ' + Y(x); }).join(' '), zeroY: Y(0), lastX: X(v.length - 1), lastY: Y(v[v.length - 1]), n: v.length,
+      pts: v.map(function(x, i){ return { x: X(i) / w, y: Y(x) / h, v: x }; }) };   // every point as a share of the box, for the hover readout
   }
   var kalshiStratOpen = {};   // which Details are open, kept across the page's redraws
   // The "All strategies" bar (Nov 13, 2026, the owner: "the top (all strategies) needs an updated visual", option A, dial and curve): the blended 30 day cash PF in a ring (0 to 2, a tick at 1.0, the figure counts up), net cash since the start over the 30 day cash curve (dashed zero line, a dot on today), and three chips: today, the last 7 days and what is open now with its worst case. Every dollar goes through money(), so Privacy view masks it.
@@ -4557,7 +4578,7 @@ kalshiStatusTick();
       '<div class="sp-sum-none">No settled trades in the last 30 days.</div>';
     return '<div class="kal-card sp-sum">' + ring +
       '<div class="sp-sum-mid"><div class="sp-sum-k">All strategies &middot; 30 days &middot; n ' + s.w30.n + '</div>' +
-      '<div class="sp-sum-plot">' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || '30 days ago') + '</span><span>30 day cash result, dashed line is zero</span><span>Today</span></div></div>' +
+      '<div class="sp-sum-plot' + (line ? ' hv' : '') + '"' + (line ? kalshiHoverAttr(line.pts.map(function(p, i){ var t = (s.curveT || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? '30 days ago' : (kalshiHoverWhen(t) || 'Trade ' + i)) + ' · ' + sg(p.v) }; }), esc) : '') + '>' + chart + '</div><div class="sp-sum-cap"><span>' + esc(from || '30 days ago') + '</span><span>30 day cash result, dashed line is zero</span><span>Today</span></div></div>' +
       '<div class="sp-sum-grid">' + chip('Today', sg(s.today)) + chip('Last 7 days', sg(s.d7)) + '<div class="sp-sum-c" style="--i:' + (ci++) + '"><span>All time</span><b>' + esc(sg(s.net)) + '</b><em class="sp-sum-sub">' + esc(s.open + ' open · ' + money(s.atRisk) + ' at risk') + '</em></div>' + '</div></div>';
   }
   var kalshiStratDayText = function(k){ var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(k)); return m ? new Intl.DateTimeFormat('en-US', { timeZone: 'UTC', month: 'short', day: 'numeric' }).format(new Date(Date.UTC(+m[1], +m[2] - 1, +m[3]))) : ''; };
@@ -4649,7 +4670,7 @@ kalshiStatusTick();
     var room = g ? '<div class="sp-bar" role="img" aria-label="' + esc(g.big + ' ' + g.cap) + '"><i style="width:' + Math.max(0, Math.min(100, (isFinite(g.frac) ? g.frac : 0) * 100)).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(g.cap) + '</span><span>' + esc(g.big) + '</span></div>' :
       d.live ? '<div class="sp-sub">not measured yet</div>' : !tgt ? '<div class="sp-sub">No count to wait for: ' + esc(x.nextReadText || 'no read date yet') + '</div>' :
       '<div class="sp-bar" role="img" aria-label="' + esc(have === null ? 'not measured yet' : Math.max(0, tgt - have) + ' of ' + tgt + ' to go') + '"><i style="width:' + (have === null ? 0 : Math.max(0, Math.min(100, have / tgt * 100))).toFixed(1) + '%"></i></div><div class="sp-bar-cap"><span>' + esc(x.roomWhat) + '</span><span>' + (have === null ? 'not measured yet' : esc(Math.max(0, tgt - have) + ' to go')) + '</span></div>';
-    var chart = sp ? '<div class="sp-spark"><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc(lbl + ', ' + sp.n + ' points') + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg><div class="sp-spark-cap"><span>' + esc(lbl) + '</span><span>dashed line is 1.0</span></div></div>' :
+    var chart = sp ? '<div class="sp-spark"><div class="hv"' + kalshiHoverAttr(d.spark.filter(function(v){ return typeof v === 'number' && isFinite(v); }).map(function(v, i, a){ return { x: a.length > 1 ? i / (a.length - 1) : 0.5, y: (3 + (1 - (v - sp.lo) / (sp.hi - sp.lo)) * 42) / 48, t: 'PF ' + v.toFixed(2) }; }), esc) + '><svg viewBox="0 0 300 48" preserveAspectRatio="none" role="img" aria-label="' + esc(lbl + ', ' + sp.n + ' points') + '"><line x1="0" x2="300" y1="' + sp.refY + '" y2="' + sp.refY + '" stroke="var(--border)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><path d="' + sp.d + '" fill="none" stroke="var(--paper)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg></div><div class="sp-spark-cap"><span>' + esc(lbl) + '</span><span>dashed line is 1.0</span></div></div>' :
       '<div class="sp-spark"><div class="sp-spark-cap"><span>Chart</span><span>' + (d.live ? 'not measured yet' : 'no trades to draw yet') + '</span></div></div>';
     var f = function(k, v){ return '<div class="sp-pop-f"><b>' + esc(k) + '</b><span>' + esc(v || 'Not written yet') + '</span></div>'; };
     return '<div class="sp-pop-h"><span class="sp-name">' + esc(x.name) + '</span><span class="sp-badge sp-b-idle">' + esc(x.stage.toUpperCase()) + '</span>' + (x.label ? '<span class="sp-badge sp-b-hot">' + esc(x.label) + '</span>' : '') + '</div>' +
@@ -4757,15 +4778,16 @@ kalshiStatusTick();
     var hl = function(y, cls){ return '<line class="' + cls + '" x1="0" x2="' + W + '" y1="' + y + '" y2="' + y + '"/>'; };
     var panel = function(label, note, body, cls){ return '<div class="sc-p' + (cls ? ' ' + cls : '') + '"><h5>' + esc(label) + (note ? '<em>' + esc(note) + '</em>' : '') + '</h5>' + body + '</div>'; };
     var cl = kalshiStratCumLine(c.cum || [], W, 150);
-    var cash = cl ? svg(150, hl(cl.zeroY, 'sc-ref') + '<path class="sc-area" d="' + cl.d + ' L' + cl.lastX + ' 150 L0 150Z"/><path class="sc-ln" d="' + cl.d + '"/><line class="sc-end" x1="' + cl.lastX + '" x2="' + cl.lastX + '" y1="' + cl.lastY + '" y2="' + cl.lastY + '"/>', 'Cash result over ' + (cl.n - 1) + ' settled trades') : none('Not enough settled trades yet.');
+    var hvBox = function(h, pts, inner){ return '<div class="hv"' + kalshiHoverAttr(pts, esc) + '>' + inner + '</div>'; };
+    var cash = cl ? hvBox(150, cl.pts.map(function(p, i){ var t = (c.times || [])[i]; return { x: p.x, y: p.y, t: (i === 0 ? 'Start' : 'Trade ' + i + (t ? ', ' + kalshiHoverWhen(t) : '')) + ' · ' + sg(p.v) }; }), svg(150, hl(cl.zeroY, 'sc-ref') + '<path class="sc-area" d="' + cl.d + ' L' + cl.lastX + ' 150 L0 150Z"/><path class="sc-ln" d="' + cl.d + '"/><line class="sc-end" x1="' + cl.lastX + '" x2="' + cl.lastX + '" y1="' + cl.lastY + '" y2="' + cl.lastY + '"/>', 'Cash result over ' + (cl.n - 1) + ' settled trades')) : none('Not enough settled trades yet.');
     var rv = (c.roll || []).filter(function(x){ return typeof x === 'number' && isFinite(x); }), pf;
     if(rv.length >= 2){
       var Y = function(x){ return Math.round((6 + (1 - Math.min(3, Math.max(0, x)) / 3) * 98) * 100) / 100; };
       var d = rv.map(function(x, i){ return (i ? 'L' : 'M') + Math.round(i / (rv.length - 1) * W * 100) / 100 + ' ' + Y(x); }).join(' ');
-      pf = svg(110, hl(Y(1), 'sc-ref') + hl(Y(1.3), 'sc-bar13') + '<path class="sc-ln" d="' + d + '"/>', 'Rolling 30 trade cash profit factor, last ' + rv[rv.length - 1].toFixed(2));
+      pf = hvBox(110, rv.map(function(x, i){ return { x: i / (rv.length - 1), y: Y(x) / 110, t: 'PF ' + x.toFixed(2) + ' over the 30 trades to this point' }; }), svg(110, hl(Y(1), 'sc-ref') + hl(Y(1.3), 'sc-bar13') + '<path class="sc-ln" d="' + d + '"/>', 'Rolling 30 trade cash profit factor, last ' + rv[rv.length - 1].toFixed(2)));
     } else { pf = none('Needs 30 settled trades.'); }
     var dv = c.daily || [], m = Math.max.apply(null, dv.map(function(x){ return Math.abs(x.p); }).concat([0])), bw = dv.length ? W / dv.length : W;
-    var days = m > 0 ? svg(110, hl(55, 'sc-ref') + dv.map(function(x, i){ var h = Math.max(1.5, Math.abs(x.p) / m * 50); return '<rect class="sc-b' + (x.p < 0 ? ' neg' : '') + '" style="--i:' + i + '" x="' + (i * bw + 4).toFixed(1) + '" width="' + Math.max(1, bw - 8).toFixed(1) + '" y="' + (x.p >= 0 ? 55 - h : 55).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"/>'; }).join(''), 'Cash result by day, last ' + dv.length + ' days') : none('No settled trades in the last ' + (dv.length || 14) + ' days.');
+    var days = m > 0 ? hvBox(110, dv.map(function(x, i){ var h = Math.max(1.5, Math.abs(x.p) / m * 50); return { x: (i + 0.5) / dv.length, y: (x.p >= 0 ? 55 - h : 55 + h) / 110, t: kalshiStratDayText(x.k) + ' · ' + sg(x.p) }; }), svg(110, hl(55, 'sc-ref') + dv.map(function(x, i){ var h = Math.max(1.5, Math.abs(x.p) / m * 50); return '<rect class="sc-b' + (x.p < 0 ? ' neg' : '') + '" style="--i:' + i + '" x="' + (i * bw + 4).toFixed(1) + '" width="' + Math.max(1, bw - 8).toFixed(1) + '" y="' + (x.p >= 0 ? 55 - h : 55).toFixed(1) + '" height="' + h.toFixed(1) + '" rx="2"/>'; }).join(''), 'Cash result by day, last ' + dv.length + ' days')) : none('No settled trades in the last ' + (dv.length || 14) + ' days.');
     var bar = function(label, u, val){ u = Math.max(0, Math.min(1, isFinite(u) ? u : 0)); return '<div class="sc-p sc-k"><h5>' + esc(label) + '<em>' + esc(val) + '</em></h5><div class="sc-kb"><i style="width:' + (u * 100).toFixed(1) + '%"></i></div></div>'; };
     var pc = function(x){ return x === null || x === undefined ? 'n/a' : Math.round(x * 100) + '%'; }, mo = function(x){ return x === null || x === undefined ? 'n/a' : sg(x); };
     var chip = function(k, v){ return '<div><span>' + esc(k) + '</span><b>' + esc(v) + '</b></div>'; };
@@ -4775,7 +4797,7 @@ kalshiStatusTick();
       panel('Cumulative cash', (c.n || 0) + ' trades · dashed: zero', cash) +
       '<div class="sc-two">' + panel('Last 14 days', '', days) + panel('Rolling 30 trade PF', 'dashed 1.0 · dotted 1.3', pf) + '</div>' +
       (c.gauge ? bar('Closest kill', c.gauge.frac, c.gauge.big + ' · ' + c.gauge.cap) : '') +
-      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? 'review due' : c.trial + ' of 90 fills toward the 60 + 30 record')) +
+      (c.back ? bar('Return record', c.back.frac, c.back.text) : '') + (c.trial === null || c.trial === undefined ? '' : bar('Trial', Math.min(1, c.trial / 90), c.trial >= 90 ? 'Record complete · ' + (c.trialNote || 'review due') : c.trial + ' of 90 fills toward the 60 + 30 record')) +
       (c.kill || c.ret ? '<dl class="sc-rules">' + line('Kill', c.kill) + line('Return', c.ret) + '</dl>' : '') + '</div>';
   }
   function kalshiBoardHtml(model, esc, money){
@@ -4818,7 +4840,8 @@ kalshiStatusTick();
     var shadowRep = {}; if(model.deck.state === 'ok'){ model.deck.rows.forEach(function(r){ shadowRep[r.id] = r.rep; }); }
     var box = { shadow: [], live: [], off: [] }, kills = { live: [] }, trials = 0;
     // The trial-to-proven step shown inside Live: a trial seat counts its settled fills toward the 60 + 30 record (docs/ROTATION_LANE.md section 5a: 60 fills at 1.3, then 30 more at 1.0); a strategy that is not a seat is Proven. The count is progress only, never a pass: the record's profit factor bars are judged by the review, not here.
-    var trialTag = function(lane, fills){ if(lane !== 'probation'){ return { text: 'Proven', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); return { text: n >= 90 ? 'Trial, review due' : 'Trial ' + n + ' of 90', trial: true }; };   // at 90 fills the count is done but the record is not judged here, so it says the review is due rather than a full 90 of 90 that reads like a pass (the owner's screenshot, Nov 13, 2026)
+    // At 90 fills the count is done but the record is judged by the review, never by the page. The owner (Nov 13, 2026) was confused by "Trial 90 of 90" on a seat whose PF was under the bar, so the tag now says plainly that the record is complete and what its cash PF still needs (the 1.3 the record asks for), or that the review is due once it is there.
+    var trialTag = function(lane, fills, pf){ if(lane !== 'probation'){ return { text: 'Proven', trial: false }; } var n = Math.max(0, Math.floor(Number(fills) || 0)); if(n < 90){ return { text: 'Trial ' + n + ' of 90', trial: true }; } return { text: 'Record complete', note: typeof pf === 'number' && isFinite(pf) && pf < 1.3 ? 'PF ' + pf.toFixed(2) + ', needs 1.3 for Proven' : 'review due', trial: true }; };   // the row's badge stays short (a phone row had no room for the whole line); the sheet's Trial bar carries the note
     // ---- Live, Probation and Off rows: the cards the page computes from the bot's own orders and kill state ----
     (model.live || []).forEach(function(s){
       var lane = s.lane || 'live', bk = kalshiStageBoxOf(lane), g = kalshiStratGauge(s.id, s.kill, money);
@@ -4841,10 +4864,10 @@ kalshiStatusTick();
       var rd = reg && reg.nextReadText ? reg.nextReadText : 'Not written yet', shadowTwin = shadowRep[s.id];
       var mo = more(s.id, '<div class="mo-sp"><span class="bd-lab">Recent results</span>' + sparkHtml(s.spark || [], 'Rolling 30 trade cash PF') + '</div>' +
         ladderDl('Sizing', KAL_BOARD_LADDER[s.id] || KAL_BOARD_LADDER.shadow, '<dt>Record</dt><dd>' + esc('Live record: ' + s.w.d30.n + ' settled trades in 30 days, ' + s.w.all.n + ' in all. Shadow record: ' + (shadowTwin ? 'cash PF ' + (shadowTwin.fillable === 0 ? 'n/a' : shadowTwin.pfFillable === null ? 'n/a' : shadowTwin.pfFillable.toFixed(2)) + ' over ' + shadowTwin.fillable + ' signals' : 'n/a')) + '</dd><dt>Read date</dt><dd>' + esc(rd) + '</dd>') + rulesHtml(s.rules) + (s.detail ? kalshiStratDetailHtml(s.detail, esc, money, tt) : ''));
-      var tg = trialTag(lane, s.w.all.n); if(bk === 'live' && tg.trial){ trials++; }
+      var tg = trialTag(lane, s.w.all.n, s.w.all.pf); if(bk === 'live' && tg.trial){ trials++; }
       // The chart sheet's block (option A): only when the caller passed the strategy's settled rows (renderStrategiesPage does; an older caller draws the rows as before).
-      var dd = s.detail || {}, charts = Array.isArray(s.rows) ? kalshiStratChartsHtml({ rule: s.rule, net: s.w.all.net, cum: [0].concat(dd.cum || []), roll: s.spark, daily: s.daily || [], n: dd.n, winRate: dd.winRate, avgWin: dd.avgWin, avgLoss: dd.avgLoss, kill: killWords, ret: retWords,
-        gauge: bk !== 'off' && g && !unreadable && !loading ? g : null, trial: tg.trial && !waiting ? Math.max(0, Math.floor(Number(s.w.all.n) || 0)) : null,
+      var dd = s.detail || {}, charts = Array.isArray(s.rows) ? kalshiStratChartsHtml({ rule: s.rule, net: s.w.all.net, cum: [0].concat(dd.cum || []), times: [null].concat(s.rows.map(function(r){ return r.ts; })), roll: s.spark, daily: s.daily || [], n: dd.n, winRate: dd.winRate, avgWin: dd.avgWin, avgLoss: dd.avgLoss, kill: killWords, ret: retWords,
+        gauge: bk !== 'off' && g && !unreadable && !loading ? g : null, trial: tg.trial && !waiting ? Math.max(0, Math.floor(Number(s.w.all.n) || 0)) : null, trialNote: tg.note || '',
         back: bk === 'off' && ret ? { frac: ret.frac, text: ret.trades + ' of 60 trades · ' + ret.days + ' of 7 days · ' + ret.losses + ' of 10 losses · PF ' + (ret.pf === null ? 'n/a' : ret.pf.toFixed(2)) + ' of 1.30' } : null,
         warn: unreadable ? 'Kill state not readable. Do not read this card as healthy.' : loading ? 'Reading the kill state...' : (s.note || '') }, esc, money) : '';
       if(waiting){ box.shadow.push({ key: s.id, name: s.name, stage: 'Approved', stCls: 'deck', pf: pf, word: 'WAITING', frac: 0, cap: 'approved seat, no order yet', detail: detail, more: mo, charts: charts, g: null }); return; }
@@ -5111,6 +5134,30 @@ kalshiStatusTick();
       var t = e.target; if(t === pop || (t.closest && t.closest('#spChartClose'))){ close(); return; }
     });
     document.addEventListener('keydown', function(e){ if(e.key === 'Escape' && !pop.hidden){ close(); } });
+  })();
+  // kalshiHover: the one listener behind every chart that carries data-hv (see kalshiHoverAttr). Mouse: follow the pointer. Phone: a tap shows the nearest point and a sideways drag scrubs (the box is touch-action:pan-y, so an up and down swipe still scrolls). It adds three small elements to the box and removes them when the pointer leaves; no timer, no storage, no network.
+  (function(){
+    var on = null;
+    function clear(){ if(!on){ return; } ['hv-g', 'hv-d', 'hv-t'].forEach(function(c){ var e = on.querySelector(':scope > .' + c); if(e){ e.parentNode.removeChild(e); } }); on = null; }
+    function show(box, clientX){
+      var pts = box._hv;
+      if(!pts){ try{ pts = JSON.parse(box.getAttribute('data-hv') || '[]'); }catch(e){ pts = []; } box._hv = pts; }
+      var r = box.getBoundingClientRect(); if(!pts.length || !(r.width > 0)){ clear(); return; }
+      if(on && on !== box){ clear(); }
+      on = box;
+      var f = Math.max(0, Math.min(1, (clientX - r.left) / r.width)), i = 0;
+      for(var k = 1; k < pts.length; k++){ if(Math.abs(pts[k][0] - f) < Math.abs(pts[i][0] - f)){ i = k; } }
+      var p = pts[i];
+      var mk = function(c){ var e = box.querySelector(':scope > .' + c); if(!e){ e = document.createElement('span'); e.className = c; e.setAttribute('aria-hidden', 'true'); box.appendChild(e); } return e; };
+      var g = mk('hv-g'), d = mk('hv-d'), t = mk('hv-t');
+      g.style.left = (p[0] * 100) + '%'; d.style.left = (p[0] * 100) + '%'; d.style.top = (p[1] * 100) + '%';
+      t.textContent = p[2];
+      var tw = t.offsetWidth, x = p[0] * r.width, left = Math.max(0, Math.min(r.width - tw, x - tw / 2));
+      t.style.left = left + 'px';
+    }
+    // Listened to on the few containers that hold charts (never the whole page): the Strategies board, its chart sheet and Details popup, and Open positions on the Bot page.
+    var at = function(e){ var box = e.target && e.target.closest ? e.target.closest('[data-hv]') : null; if(box){ show(box, e.clientX); } else { clear(); } };
+    ['stratBody', 'spChart', 'spPop', 'kalBotOpen'].forEach(function(id){ var root = document.getElementById(id); if(!root){ return; } root.addEventListener('pointermove', at); root.addEventListener('pointerdown', at); root.addEventListener('pointerleave', clear); root.addEventListener('pointercancel', function(e){ if(e.pointerType !== 'mouse'){ clear(); } }); });
   })();
   // The board's controls (Nov 12, 2026): a row and its More open in place (a class and aria-expanded, the open state kept in kalshiStratOpen so the minute's redraw keeps it); a box opens by redrawing from the kept state, and the boxes glide to their new places (a FLIP slide of 620 ms, skipped under reduced motion). No network, no storage, no timer except the one that ends the entrance play.
   function kalshiStratStage(key){

@@ -92,7 +92,7 @@ gates.RG5 = () => {
   assert.ok(/id = 'spPop'/.test(html) && /pop\.hidden = true/.test(html) && /e\.key === 'Escape'/.test(html), 'the popup closes by Close, outside tap and Escape, and lives outside #stratBody so a redraw never closes it');
   // Behaviour: lift the pure helpers and render the seeded registry.
   const fn = (name) => { const i = html.indexOf('function ' + name + '('); let d = 0, j = html.indexOf('{', i); for (let k = j; k < html.length; k++) { if (html[k] === '{') d++; else if (html[k] === '}' && --d === 0) return html.slice(i, k + 1); } };
-  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegBuilding', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiStratOneLine'].map(fn).join('\n');
+  const code = ['kalshiRegistryNorm', 'kalshiRegistrySplit', 'kalshiRegBuilding', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiHoverAttr', 'kalshiHoverWhen', 'kalshiStratOneLine'].map(fn).join('\n');
   const P = new Function("var KAL_REG_STAGES = ['Idea', 'Shadow', 'Paper', 'Probe', 'Live', 'Retired'];\n" + code + '; return { kalshiRegistryNorm, kalshiRegistrySplit, kalshiRegistrySheetHtml };')();
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const list = P.kalshiRegistryNorm(reg);
@@ -120,7 +120,7 @@ gates.RG6 = () => {
   const fn = (name) => { const i = html.indexOf('function ' + name + '('); let d = 0, j = html.indexOf('{', i); for (let k = j; k < html.length; k++) { if (html[k] === '{') d++; else if (html[k] === '}' && --d === 0) return html.slice(i, k + 1); } };
   const varLine = (n) => new RegExp('  var ' + n + ' = .*\\n').exec(html)[0];
   const varBlock = (n) => new RegExp('  var ' + n + ' = [\\[{][\\s\\S]*?\\n  [\\] }]+;\\n').exec(html)[0];
-  const names = ['kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiStratGauge', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiStratOneLine'];
+  const names = ['kalshiStratSheetRow', 'kalshiStratSheetData', 'kalshiStratGauge', 'kalshiRegistrySheetHtml', 'kalshiStratSpark', 'kalshiHoverAttr', 'kalshiHoverWhen', 'kalshiStratOneLine'];
   const P = new Function(varLine('KAL_BOARD_TRIPWIRE') + varLine('KAL_BOARD_KILL') + varBlock('KAL_BOARD_LIVE') + names.map(fn).join('\n') + '; return { ' + names.join(', ') + ', KAL_BOARD_LIVE };')();
   const esc = (t) => String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mask = (x) => (x < 0 ? '-' : '') + '****', money = (x) => (x < 0 ? '-' : '') + '$' + Math.abs(x).toFixed(2);
